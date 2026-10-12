@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "rom.h"
+#include "xvirus_dispatch.h"
 
 #define BUS     0x08000000u
 #define BN6_END (BUS + ROM_SIZE)
@@ -46,8 +47,13 @@ static bool no(char *why, size_t n, const char *fmt, ...) {
 
 static bool bn6_routine(uint32_t a) { return (a & 1) && a >= BUS && a < BN6_END; }
 
-/* a state or a hook: a routine of BN6's, or code of the family's own */
+/* a state or a hook: a routine of BN6's, or code of the family's own (in its blocks, or in one of its clones) */
 static bool ref_ok(const XVirusFamily *f, XvRef r) {
+	if (r.clone) {
+		if (!r.own || r.clone > f->nclones || !(r.addr & 1)) return false;
+		const XvClone *c = &f->clones[r.clone - 1];
+		return (r.addr & ~1u) >= c->start && (r.addr & ~1u) < c->end;
+	}
 	return r.own ? (r.addr & 1) && xvirus_is_code(f, r.addr & ~1u) : bn6_routine(r.addr);
 }
 
@@ -64,6 +70,46 @@ static bool blocks_ok(const XVirusFamily *f, char *why, size_t n) {
 			if (src || dst) return no(why, n, "blocks %d and %d overlap", k, i);
 		}
 	}
+	return true;
+}
+
+static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
+
+/* its clones: code of one block each, copied past its blocks' copies, a call aimed at a routine of BN6's */
+static bool clones_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nclones; ++i) {
+		const XvClone *c = &f->clones[i];
+		uint32_t len = c->end - c->start;
+		const XvBlock *b = xvirus_block_of(f, c->start);
+		if (c->start >= c->end || ((c->start | c->end) & 1) || !b || c->end > b->end) return no(why, n, "clone %d's range", i);
+		for (uint32_t a = c->start; a < c->end; a += 2)
+			if (!xvirus_is_code(f, a)) return no(why, n, "clone %d holds data at %08x", i, (unsigned)a);
+		if (c->at < XV_CODE || c->at + len > XV_ART || ((c->at ^ c->start) & 3)) return no(why, n, "clone %d placed at %08x", i, (unsigned)c->at);
+		for (int k = 0; k < f->nblocks; ++k)
+			if (spans_meet(c->at, len, f->blocks[k].at, f->blocks[k].end - f->blocks[k].start)) return no(why, n, "clone %d over block %d", i, k);
+		for (int k = 0; k < i; ++k)
+			if (spans_meet(c->at, len, f->clones[k].at, f->clones[k].end - f->clones[k].start)) return no(why, n, "clones %d and %d overlap", k, i);
+		if ((c->call & 1) || (c->to & 1) || !bn6_routine(c->to | 1)) return no(why, n, "clone %d's call %08x to %08x", i, (unsigned)c->call, (unsigned)c->to);
+		if (c->imm.at && (c->imm.at < c->start || c->imm.at >= c->end || (c->imm.at & 1))) return no(why, n, "clone %d's immediate", i);
+	}
+	return true;
+}
+
+/* its numbers in its pools and bytes in its raw data, each in such a range and named once */
+static bool fixes_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->nnumbers; ++i) {
+		const XvData *d = xvirus_data_at(f, f->numbers[i].at);
+		if ((f->numbers[i].at & 3) || !d || d->kind != XV_POOL) return no(why, n, "number at %08x, in no pool", (unsigned)f->numbers[i].at);
+		for (int k = 0; k < i; ++k)
+			if (f->numbers[k].at == f->numbers[i].at) return no(why, n, "number at %08x twice", (unsigned)f->numbers[i].at);
+	}
+	for (int i = 0; i < f->nbytes; ++i) {
+		const XvData *d = xvirus_data_at(f, f->bytes[i].at);
+		if (!d || d->kind != XV_RAW) return no(why, n, "byte at %08x, in no raw data", (unsigned)f->bytes[i].at);
+		for (int k = 0; k < i; ++k)
+			if (f->bytes[k].at == f->bytes[i].at) return no(why, n, "byte at %08x twice", (unsigned)f->bytes[i].at);
+	}
+	if (f->held && f->held_chips) return no(why, n, "held chips twice (a list of BN6's and its own)");
 	return true;
 }
 
@@ -88,7 +134,10 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		if (xvirus_block_of(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
-		if ((c->to & 1) || !bn6_routine(c->to | 1)) return no(why, n, "call %08x goes to %08x", (unsigned)c->from, (unsigned)c->to);
+		/* (one of BN6's routines, or the second-level dispatch's spawner where it calls one of its game's: never another) */
+		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
+		if ((c->to & 1) || (spawner ? c->to != spawner : !bn6_routine(c->to | 1)))
+			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
 			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);
 	}
@@ -132,9 +181,11 @@ static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
 			if (f->effects[k].to == f->effects[i].to) return no(why, n, "effect %#x twice", f->effects[i].to);
 	}
 	for (int i = 0; i < f->ntypes; ++i) {
-		if (f->types[i].to == XV_T3_DISPATCH) return no(why, n, "attack type %#x, kept for the dispatch", f->types[i].to);
+		const XvType *t = &f->types[i];
+		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
+		if (t->to == xvirus_dispatch_type(t->kind)) return no(why, n, "object type %#x as the dispatch's own", t->from);
 		for (int k = 0; k < i; ++k)
-			if (f->types[k].to == f->types[i].to) return no(why, n, "attack type %#x twice", f->types[i].to);
+			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}
 	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES))
 		return no(why, n, "its struct1 laid out with no battle sprite of list 1");
@@ -150,5 +201,6 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (f->home < XV_HOMES || f->home + XV_HOME_SIZE > XV_CODE || (f->home - XV_HOMES) % XV_HOME_SIZE) return no(why, n, "home %08x", (unsigned)f->home);
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");
 	if (f->ice != XV_ICE_OWN && (f->ice < 0 || f->ice > XV_ICE_MAX)) return no(why, n, "an ice block of size %d", f->ice);
-	return blocks_ok(f, why, n) && data_ok(f, why, n) && refs_ok(f, why, n) && art_ok(f, why, n);
+	return blocks_ok(f, why, n) && data_ok(f, why, n) && clones_ok(f, why, n) && fixes_ok(f, why, n) && refs_ok(f, why, n) &&
+		art_ok(f, why, n);
 }

@@ -26,6 +26,7 @@ SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (ob
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
 AI_INDEX = 0x01
 
 
@@ -83,6 +84,15 @@ DRAW, SPAWN, SOUND, EFFECT, ATTACK, RESERVE, BLINK, SPRITE_SET = range(1, 9)
 KEPT, REPLAYED, UNMATCHED, UNMAPPED = 1, 2, 4, 8
 
 
+def dispatched(rec, kind, side, game, version, seen):
+    """an object's record with its type as the second-level dispatch runs it: where BN6's is its kind's dispatch type, the
+    number the trace read from the kind's side table by its slot (version 3 on), counted into seen"""
+    if version < 3 or game != 6 or rec[NODE + OBJ_TYPE] != DISPATCH[kind]:
+        return rec
+    seen[0] += 1
+    return rec[:NODE + OBJ_TYPE] + bytes([side]) + rec[NODE + OBJ_TYPE + 1:]
+
+
 def read_trace(path):
     with open(path, 'rb') as f:
         b = f.read()
@@ -92,7 +102,7 @@ def read_trace(path):
     p = 24
     moved = [struct.unpack_from('<3I', b, p + 12 * i) for i in range(nm)]
     p += 12 * nm
-    g, frames = GAMES[game], []
+    g, frames, seen = GAMES[game], [], [0]
     while p < len(b):
         if b[p:p + 4] != b'FRAM':
             sys.exit(f'{path}: broken at {p}')
@@ -107,20 +117,20 @@ def read_trace(path):
         objs = []
         for i in range(n1):
             slot, has_ai, has_coll = b[p], b[p + 1], b[p + 2]
-            rec = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T1', b[p + 3], game, version, seen)
             ai = b[p + 4 + 0xD8:p + 4 + 0x1D8]
             co = b[p + 4 + 0x1D8:p + 4 + 0x1D8 + COLL_ROOM]
             objs.append(Obj('T1', slot, rec, ai if has_ai else None, co[:coll] if has_coll else None, g['t1'] + slot * 0xD8))
             p += 4 + 0x1D8 + COLL_ROOM
         for i in range(n3):
             slot, has_coll = b[p], b[p + 2]
-            rec = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T3', b[p + 3], game, version, seen)
             co = b[p + 4 + 0xD8:p + 4 + 0xD8 + COLL_ROOM]
             objs.append(Obj('T3', slot, rec, None, co[:coll] if has_coll else None, g['t3'] + slot * 0xD8))
             p += 4 + 0xD8 + COLL_ROOM
         for i in range(n4):
             slot = b[p]
-            objs.append(Obj('T4', slot, b[p + 4:p + 4 + 0xC8], None, None, g['t4'] + slot * 0xC8))
+            objs.append(Obj('T4', slot, dispatched(b[p + 4:p + 4 + 0xC8], 'T4', b[p + 3], game, version, seen), None, None, g['t4'] + slot * 0xC8))
             p += 4 + 0xC8
         panels = [b[p + PANEL_ROOM * i:p + PANEL_ROOM * i + psize] for i in range(PANELS)]
         p += PANEL_ROOM * PANELS
@@ -131,7 +141,7 @@ def read_trace(path):
         events = [Event(b, p + EVENT_SIZE * i, t) for i in range(nev)]
         p += EVENT_SIZE * nev
         frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events))
-    return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames)
+    return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames, dispatched=seen[0])
 
 
 # ---- each game's numbers as BN6's (legit.json's maps) ----

@@ -29,7 +29,9 @@ enum {
 typedef struct { uint32_t start, end, at, crc; } XvBlock;   /* [start, end) in its game, copied to `at`; the CRC32 of its bytes there */
 typedef struct { uint32_t start, end; int kind; } XvData;   /* [start, end) in its game, within a block */
 typedef struct { uint32_t from, to; } XvPair;               /* an address of its game's, and BN6's in its place */
-typedef struct { uint32_t addr; bool own; } XvRef;          /* a BN6 routine (its Thumb address), or the family's own (its address in its game) */
+/* a BN6 routine (its Thumb address), or the family's own (its address in its game: in its blocks, or in clone k - 1 where
+ * `clone` is k) */
+typedef struct { uint32_t addr; bool own; uint8_t clone; } XvRef;
 typedef struct {                                            /* an immediate changed in its instruction, checked first */
 	uint32_t at;
 	ThumbForm form;
@@ -43,7 +45,27 @@ typedef struct {                                            /* an immediate chan
  * XV_LISTS): a number that points at BN6's placeholder there
  * (BN6_SPRITE_PLACEHOLDER), one of BN6's own unused or one past its end */
 typedef struct { uint8_t list, index, to_list, to_index; uint32_t at, room; } XvSprite;
-typedef struct { uint8_t from, to; } XvId;                  /* an id of its game's (an effect, an attack's type) and BN6's in its place */
+typedef struct { uint8_t from, to; } XvId;                  /* an id of its game's (an effect) and BN6's in its place */
+/* An object type its code spawns through one of its game's spawners (the
+ * first, third or fourth kind's), its number in its game left in the code:
+ * the second-level dispatch (xvirus_dispatch.h) spawns it as BN6's twin
+ * `to`, or, where `to` is XV_TYPE_MOVED, as the kind's dispatch type, which
+ * runs its game's routine for `from` copied with the family's code */
+typedef struct { uint8_t kind, from, to; } XvType;
+#define XV_TYPE_MOVED 0xFF
+/* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
+ * game's `was`, BN6's `now` (the same where it is kept), each checked first */
+typedef struct { uint32_t at, was, now; } XvNumber;
+/* A byte of a block's raw data (a table of ids its code reads: effects, sprites) given BN6's number, checked first */
+typedef struct { uint32_t at; uint8_t was, now; } XvByte;
+/* A routine of its code (code alone, no literal load) copied once more to `at` (the same distance from a word boundary),
+ * its call to `call` (its game's) aimed at BN6's `to` instead of the recipe's twin, and an immediate otherwise
+ * (imm.at 0: none): a status wrapper of its own given for BN6's states BN5 has no twin of (frozen, bubbled) */
+typedef struct {
+	uint32_t start, end, at;
+	uint32_t call, to;
+	XvImm imm;
+} XvClone;
 /* Its struct1 laid out BN6's way where its game lays it out otherwise
  * (BN5 keeps the shadow at +5, where BN6 keeps an element): BN6's record
  * made of its game's palette step and these, its battle sprite the
@@ -90,17 +112,25 @@ typedef struct {
 	const XvId *effects;       /* its game's effects it draws, each given BN6's id past BN6_EFFECT_COUNT (the table grown), its sprite
 	                              one of `sprites` */
 	int neffects;
-	const XvId *types;         /* its attacks: its game's types of the third kind, whose routine is its own code, each given a type of
-	                              the grown table whose entry is empty (BN6's 0xD1, or one past BN6's 0xD4; never XV_T3_DISPATCH) */
+	const XvType *types;       /* the object types its code spawns by its game's spawners: moved (its game's routine for the type is
+	                              its own code) or BN6's twin, through the second-level dispatch; each spawner its code calls is
+	                              aimed at the dispatch's (calls: XV_SPAWN_*) */
 	int ntypes;
+	const XvNumber *numbers;   /* its pools' words that are numbers (kept, or BN6's) */
+	int nnumbers;
+	const XvByte *bytes;       /* its raw data's bytes that are ids BN6 numbers otherwise */
+	int nbytes;
+	const XvClone *clones;     /* its routines copied once more, a call aimed otherwise (its states and hooks may name them) */
+	int nclones;
+	const uint16_t *held_chips; /* its viruses' held chips as BN6's ids, six lists of 16 (0xFFFF ending one), written into its home
+	                              (`held` 0); a chip of its game's BN6 has none of left out (the generator's hold-outs) */
 } XVirusFamily;
 
 #define XV_ICE_OWN (-1)
 #define XV_ICE_MAX 2
-/* The types kept for the second-level dispatch that lifts the byte-wide
- * type limit (a later step of issue #82: a type per kind whose routine
- * reads the moved routine from a table by the object's slot), each dead in
- * BN6 (no spawn names it): never a family's */
+/* The second-level dispatch's types (xvirus_dispatch.h): a type per kind,
+ * dead in BN6 (no spawn names it), whose routine runs the moved routine its
+ * object was spawned as, from a side table by the object's slot */
 #define XV_T1_DISPATCH 0x5C
 #define XV_T3_DISPATCH 0xD2
 #define XV_T4_DISPATCH 0x91
@@ -125,6 +155,24 @@ typedef struct {
 #define XV_NAMES    (XV_AT + 0x11000u)     /* the names of ids from XV_FIRST_ID: a text archive of XV_IDS - XV_FIRST_ID entries (BN6_NAME_OF's
                                               third, by a hook) */
 #define XV_NAMES_ROOM 0x4000u
+/* the second-level dispatch (xvirus_dispatch.h), made with the tables */
+#define XV_DISPATCH (XV_AT + 0x15000u)
+#define XV_MOVED_TABLES XV_DISPATCH          /* MOVED: a routine (Thumb) by its game's type, 256 words a kind (1, 3, 4), XV_STEP apart */
+#define XV_TWIN_TABLES (XV_DISPATCH + 0xC00u) /* TWIN: BN6's twin by its game's type, or XV_TYPE_MOVED: 256 bytes a kind, 0x100 apart */
+#define XV_STUBS (XV_DISPATCH + 0xF00u)      /* the dispatch's code, the project's own Thumb: */
+#define XV_STUB_NONE (XV_STUBS + 0x000u)     /* ... a MOVED entry no family set: the object freed as it first runs */
+#define XV_STUB_DISPATCH (XV_STUBS + 0x010u) /* ... the dispatch types' routines, the first kind's, the third's, the fourth's, */
+#define XV_STUB_DISPATCH_STEP 0x20u          /* ... this far apart */
+#define XV_SPAWN_1 (XV_STUBS + 0x080u)       /* ... the spawners a moved family's code calls, each its game's type through TWIN to BN6's: the
+                                                first kind's, the object run after the one running (BN6's 0x08003320), */
+#define XV_SPAWN_1_LAST (XV_STUBS + 0x0C0u)  /* ... the first kind's at the list's end (0x0800333C), */
+#define XV_SPAWN_3 (XV_STUBS + 0x100u)       /* ... the third kind's after the one running (0x08003358), */
+#define XV_SPAWN_3_LAST (XV_STUBS + 0x140u)  /* ... at the end (0x08003374), */
+#define XV_SPAWN_3_FIRST (XV_STUBS + 0x180u) /* ... at the start (0x08003390), */
+#define XV_SPAWN_4 (XV_STUBS + 0x1C0u)       /* ... the fourth kind's after the one running (0x080033AC) */
+#define XV_SPAWN_STEP 0x40u
+#define XV_SPAWNERS 6
+#define XV_STUBS_END (XV_STUBS + 0x200u)
 /* then the families' own */
 #define XV_HOMES    (XV_AT + 0x18000u)     /* the families' homes, XV_HOME_SIZE each, XV_FAMILIES of them */
 #define XV_CODE     (XV_AT + 0x38000u)     /* their code, block by block */

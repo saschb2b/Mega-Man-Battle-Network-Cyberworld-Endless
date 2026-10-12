@@ -6,9 +6,11 @@
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
  * it, without, on a ROM that also sounds a tone, then with hooks of its own
  * as the differential gives it (issue #82); and the guest's made and
- * run on a thread of its own while BN6's frames run, as its boot is. Last,
+ * run on a thread of its own while BN6's frames run, as its boot is. Then
  * a block of Thumb code moved into BN6's copy, its calls out through
- * veneers (src/emu/thumb_reloc.c, issue #82).
+ * veneers (src/emu/thumb_reloc.c, issue #82). Last, the second-level
+ * dispatch's code (src/emu/xvirus_dispatch.c) run against spawners and
+ * routines of the test's own.
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -40,6 +42,7 @@
 #include "hook.h"
 #include "platform.h"
 #include "thumb_reloc.h"
+#include "xvirus_dispatch.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
 Platform P;
@@ -537,6 +540,151 @@ static void moved_block(void) {
 	emu_write32(0x080000C8, 0x080000D1);
 }
 
+/* ---- the second-level dispatch's code run (issue #82) ----
+ *
+ * Its code (xvirus_dispatch_code) at XV_STUBS, its tables as xvirus_grow.c
+ * leaves them, a family's entries set, and in their places routines of the
+ * test's own: BN6's spawner of the third kind (keeps the registers it met,
+ * the two words above its sp, and gives back an object or none, r0 and r1
+ * changed), object_freeMemory (keeps r5) and a moved routine (keeps r0, r1,
+ * r5 and lr). A driver near the stubs calls the dispatch's spawner as a
+ * moved family's code does (r0 its game's type, r1-r4 the object's words),
+ * keeps the registers it gets back, then runs the dispatch's type as BN6's
+ * runner does (mov lr,pc; bx r0, r5 the object). */
+#define DRV (XV_STUBS + 0x400u)           /* the driver, */
+#define DRV_BACK 0x1A                     /* ... where the spawner returns to (after its BL), */
+#define DRV_RAN 0x2A                      /* ... where the dispatch's run returns to, */
+#define DRV_LITS 0x34                     /* ... its words: the object, the slot's side byte, the type, the record, run or not, the
+                                             dispatch, the mark's place and the mark */
+#define MOVED_RT (DRV + 0x80u)            /* the moved routine */
+#define FAKE_SPAWN BN6_SPAWN_3_AT         /* BN6's spawner, the one XV_SPAWN_3 calls */
+#define BN6_SPAWN_3_AT 0x08003358u
+#define FAKE_FREE 0x08003458u             /* BN6's object_freeMemory, the one the stray's routine goes to */
+#define REC_SPAWN (IWRAM + 0x400)         /* what the spawner met: r0-r4, then the two words above its sp */
+#define REC_AFTER (IWRAM + 0x440)         /* r0-r5 as the driver got them back */
+#define REC_MOVED (IWRAM + 0x480)         /* r0, r1, r5 and lr the moved routine met */
+#define REC_FREE (IWRAM + 0x4A0)          /* r5 object_freeMemory met */
+#define RAN_MARK (IWRAM + 0x4B0)
+#define OBJ (IWRAM + 0x500)               /* the object, its slot at +3: */
+#define SLOT 5
+#define SIDE3 (0x0203FF20u + SLOT)        /* the third kind's side table's byte for it (BN6_DISPATCH_SIDE + 0x20) */
+
+/* ldr rd,[pc,#..] at `at` (an address) of the word at `lit` */
+static uint16_t ldr_lit(uint32_t at, int rd, uint32_t lit) { return (uint16_t)(0x4800 | rd << 8 | (lit - ((at + 4) & ~3u)) / 4); }
+
+static void code_at(uint32_t at, const uint16_t *ops, int n, const uint32_t *lits, int nlits, uint32_t lit_off) {
+	uint8_t b[0x80] = { 0 };
+	for (int i = 0; i < n; ++i) put16(b, 2u * (uint32_t)i, ops[i]);
+	for (int i = 0; i < nlits; ++i) put32(b, lit_off + 4u * (uint32_t)i, lits[i]);
+	emu_write(at, b, lit_off + 4u * (uint32_t)nlits);
+}
+
+/* the driver, for one run: its game's type, the object the spawner gives back, whether the dispatch's type runs, the mark */
+static void driver(uint32_t type, uint32_t obj, bool run, uint32_t mark) {
+	uint16_t ops[DRV_LITS / 2];
+	int n = 0;
+	uint32_t lit = DRV + DRV_LITS;
+	ops[n++] = ldr_lit(DRV + 0x00, 0, lit);            /* ldr r0,=OBJ */
+	ops[n++] = 0x2100 | SLOT;                          /* movs r1,#SLOT */
+	ops[n++] = 0x70C1;                                 /* strb r1,[r0,#3] */
+	ops[n++] = ldr_lit(DRV + 0x06, 0, lit + 4);        /* ldr r0,=SIDE3 */
+	ops[n++] = 0x21EE;                                 /* movs r1,#0xEE */
+	ops[n++] = 0x7001;                                 /* strb r1,[r0] */
+	ops[n++] = ldr_lit(DRV + 0x0C, 0, lit + 8);        /* ldr r0,=type */
+	ops[n++] = 0x2111;                                 /* movs r1..r4 */
+	ops[n++] = 0x2222;
+	ops[n++] = 0x2333;
+	ops[n++] = 0x2444;
+	n += 2;                                            /* bl XV_SPAWN_3 (0x16) */
+	ops[n++] = ldr_lit(DRV + 0x1A, 7, lit + 12);       /* ldr r7,=REC_AFTER */
+	ops[n++] = 0xC73F;                                 /* stmia r7!,{r0-r5} */
+	ops[n++] = ldr_lit(DRV + 0x1E, 0, lit + 16);       /* ldr r0,=run */
+	ops[n++] = 0x2800;                                 /* cmp r0,#0 */
+	ops[n++] = 0xD002;                                 /* beq 0x2A */
+	ops[n++] = ldr_lit(DRV + 0x24, 0, lit + 20);       /* ldr r0,=the dispatch's type's routine */
+	ops[n++] = 0x46FE;                                 /* mov lr,pc */
+	ops[n++] = 0x4700;                                 /* bx r0 */
+	ops[n++] = ldr_lit(DRV + 0x2A, 0, lit + 24);       /* ldr r0,=RAN_MARK */
+	ops[n++] = ldr_lit(DRV + 0x2C, 1, lit + 28);       /* ldr r1,=mark */
+	ops[n++] = 0x6001;                                 /* str r1,[r0] */
+	ops[n++] = 0xE7FE;                                 /* b . */
+	ops[n++] = 0x46C0;
+	const uint32_t lits[8] = { OBJ, SIDE3, type, REC_AFTER, run, xvirus_dispatch_routine(3) | 1, RAN_MARK, mark };
+	uint16_t hi, lo;
+	thumb_bl_encode(DRV + 0x16, XV_SPAWN_3, &hi, &lo);
+	ops[11] = hi;
+	ops[12] = lo;
+	code_at(DRV, ops, n, lits, 8, DRV_LITS);
+	/* BN6's spawner, giving back `obj`:
+	 *   ldr r5,=REC_SPAWN; stmia r5!,{r0-r4}; ldr r0,[sp]; str r0,[r5]; ldr r0,[sp,#4]; str r0,[r5,#4]
+	 *   ldr r5,=obj; movs r0,#0x77; movs r1,#0x66; mov pc,lr */
+	const uint16_t spawn[10] = { ldr_lit(FAKE_SPAWN, 5, FAKE_SPAWN + 0x14), 0xC51F, 0x9800, 0x6028, 0x9801, 0x6068,
+		ldr_lit(FAKE_SPAWN + 0x0C, 5, FAKE_SPAWN + 0x18), 0x2077, 0x2166, 0x46F7 };
+	const uint32_t spawn_lits[2] = { REC_SPAWN, obj };
+	code_at(FAKE_SPAWN, spawn, 10, spawn_lits, 2, 0x14);
+}
+
+static uint32_t rec(uint32_t at, int i) { return emu_read32(at + 4u * (uint32_t)i); }
+
+static void dispatch_run(void) {
+	static uint8_t code[XV_STUBS_SIZE];
+	xvirus_dispatch_code(code);
+	emu_write(XV_STUBS, code, sizeof code);
+	/* its tables blank, as xvirus_grow.c makes them, then a family's entries: the third kind's 0x25 moved, 0x30 BN6's 0x4B */
+	static uint8_t moved[3 * XV_STEP], twin[3 * 0x100];
+	for (uint32_t i = 0; i < sizeof moved; i += 4) put32(moved, i, XV_STUB_NONE | 1);
+	memset(twin, XV_TYPE_MOVED, sizeof twin);
+	emu_write(XV_MOVED_TABLES, moved, sizeof moved);
+	emu_write(XV_TWIN_TABLES, twin, sizeof twin);
+	emu_write32(xvirus_dispatch_moved_at(3, 0x25), MOVED_RT | 1);
+	uint8_t b = 0x4B;
+	emu_write(xvirus_dispatch_twin_at(3, 0x30), &b, 1);
+	/* the moved routine: ldr r6,=REC_MOVED; stmia r6!,{r0,r1,r5}; mov r0,lr; str r0,[r6]; mov pc,lr */
+	const uint16_t moved_rt[6] = { ldr_lit(MOVED_RT, 6, MOVED_RT + 0x0C), 0xC623, 0x4670, 0x6030, 0x46F7, 0x46C0 };
+	const uint32_t moved_lit = REC_MOVED;
+	code_at(MOVED_RT, moved_rt, 6, &moved_lit, 1, 0x0C);
+	/* object_freeMemory: ldr r6,=REC_FREE; str r5,[r6]; mov pc,lr */
+	const uint16_t free_rt[4] = { ldr_lit(FAKE_FREE, 6, FAKE_FREE + 0x08), 0x6035, 0x46F7, 0x46C0 };
+	const uint32_t free_lit = REC_FREE;
+	code_at(FAKE_FREE, free_rt, 4, &free_lit, 1, 0x08);
+	emu_write32(0x080000C8, DRV | 1);
+	static const struct { const char *what; uint32_t type, obj; bool run; uint32_t r0, side; } runs[4] = {
+		{ "moved", 0x1225, OBJ, true, XV_T3_DISPATCH, 0x25 },   /* (its low byte the type, as the spawn stores it) */
+		{ "BN6's twin", 0x30, OBJ, false, 0x4B, 0x30 },
+		{ "none spawned", 0x25, 0, false, XV_T3_DISPATCH, 0xEE },
+		{ "a stray", 0x26, OBJ, true, XV_T3_DISPATCH, 0x26 },
+	};
+	for (int k = 0; k < 4; ++k) {
+		driver(runs[k].type, runs[k].obj, runs[k].run, 0xD15A0000u + (uint32_t)k);
+		for (uint32_t a = REC_SPAWN; a < RAN_MARK + 4; a += 4) emu_write32(a, 0);
+		emu_reset();
+		emu_frame(0);
+		emu_sync();
+		const char *w = runs[k].what;
+		CHECK(rec(RAN_MARK, 0) == 0xD15A0000u + (uint32_t)k, "dispatch, %s: the driver did not run to its end (%08x)", w, rec(RAN_MARK, 0));
+		/* BN6's spawner met BN6's type, the object's words, and the frame above it: its game's type and the way back */
+		CHECK(rec(REC_SPAWN, 0) == runs[k].r0 && rec(REC_SPAWN, 1) == 0x11 && rec(REC_SPAWN, 2) == 0x22 && rec(REC_SPAWN, 3) == 0x33 &&
+			rec(REC_SPAWN, 4) == 0x44, "dispatch, %s: the spawner met r0 %#x, r1-r4 %#x %#x %#x %#x", w, rec(REC_SPAWN, 0),
+			rec(REC_SPAWN, 1), rec(REC_SPAWN, 2), rec(REC_SPAWN, 3), rec(REC_SPAWN, 4));
+		CHECK(rec(REC_SPAWN, 5) == runs[k].type && rec(REC_SPAWN, 6) == ((DRV + DRV_BACK) | 1), "dispatch, %s: the frame above the spawner: %#x, %08x",
+			w, rec(REC_SPAWN, 5), rec(REC_SPAWN, 6));
+		/* back: r0 and r1 as the spawner left them, r2-r4 kept, r5 the object; its side byte its game's type */
+		CHECK(rec(REC_AFTER, 0) == 0x77 && rec(REC_AFTER, 1) == 0x66 && rec(REC_AFTER, 2) == 0x22 && rec(REC_AFTER, 4) == 0x44 &&
+			rec(REC_AFTER, 5) == runs[k].obj, "dispatch, %s: back r0 %#x r1 %#x r5 %08x", w, rec(REC_AFTER, 0), rec(REC_AFTER, 1), rec(REC_AFTER, 5));
+		CHECK(emu_read8(SIDE3) == runs[k].side, "dispatch, %s: the side byte %#x, not %#x", w, emu_read8(SIDE3), runs[k].side);
+	}
+	/* the moved routine ran on the dispatch's type as BN5's runner runs it (the last run's: the stray's freed instead) */
+	CHECK(rec(REC_FREE, 0) == OBJ, "dispatch: the stray not let go (%08x)", rec(REC_FREE, 0));
+	CHECK(rec(REC_MOVED, 0) == 0, "dispatch: the stray ran the moved routine");
+	driver(0x25, OBJ, true, 0xD15A0010u);
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	CHECK(rec(REC_MOVED, 0) == (MOVED_RT | 1) && rec(REC_MOVED, 1) == 0x25 * 4 && rec(REC_MOVED, 2) == OBJ && rec(REC_MOVED, 3) == DRV + DRV_RAN,
+		"dispatch: the moved routine met r0 %08x, r1 %#x, r5 %08x, lr %08x", rec(REC_MOVED, 0), rec(REC_MOVED, 1), rec(REC_MOVED, 2), rec(REC_MOVED, 3));
+	emu_write32(0x080000C8, 0x080000D1);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -627,7 +775,9 @@ int main(void) {
 	two_cores();
 	two_threads();
 	moved_block();
+	dispatch_run();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers\n");
+	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
+		"the second-level dispatch's code\n");
 	return 0;
 }

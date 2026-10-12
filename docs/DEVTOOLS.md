@@ -607,9 +607,10 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   code led to it. Without the replay Handi parts at its first draw that
   BN5's buster or shake moved (`rng=follow`: t305, none: t35).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
-  2): a record each time the timer moves while the battle fights: the
+  3): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
-  node on, its AI's data and its collision data), the 40 panels, the order
+  node on, its AI's data and its collision data, and in BN6's the byte
+  the second-level dispatch's side table holds for its slot), the 40 panels, the order
   the objects ran in, the songs the music players began, both RNG words,
   and the hooks' events since the record before (the first record's from
   the battle's start).
@@ -640,8 +641,11 @@ the masks):
   family code spawns fails, whatever its +0x4C names.
 - **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
   the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
-  0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), the
-  attack's type (0x25 against 0xD1), the muzzle's effect (0x57 against
+  0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), an
+  object of a dispatch type by the number its side table names (BN6's
+  0xD2 with 0x25 beside it read as 0x25, CanGard's reticle: a
+  translation, not a mask; the spawn hook reads the dispatch's spawner's
+  frame the same way), the muzzle's effect (0x57 against
   0x6C), the AI index (14 against 32), a sound by its song (the player it
   plays on is each song table's own). The engine's own numbers too, the
   way an enemy id is read: a collision data's alliance words (+0x30 and
@@ -729,7 +733,9 @@ runs `tests/xdiff/mutations.json`, the breaks a transplant bug would make
 call aimed at nothing or at the wrong twin, a table's entry, a number in
 its data, an effect id left as BN5's alone and beside a native, a
 strike's effect id, a collision region; Handi's: an immediate, a call
-rebased to its neighbour, its draws shifted onto the other word), each of
+rebased to its neighbour, its draws shifted onto the other word; the
+dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
+number, a spawn aimed at BN6's spawner as before the dispatch), each of
 which must FAIL its spec. docs/MULTIROM.md, Transplanted families, has
 what they showed.
 
@@ -740,6 +746,38 @@ code at BN6's own place and as its moved copy alike), and
 `CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
 the two others replay each draw (none unmatched) and stay the same frame
 for frame.
+
+## The recipe generator
+
+```bash
+python3 tools/xrecipe.py              # write src/emu/xvirus_bn5.c: the installed families' recipes, from the two ROMs
+python3 tools/xrecipe.py --check      # write nothing: fail where the file differs from what it would write
+python3 tools/xrecipe.py --report     # every BN5 family derived, in install order: .build/xrecipe/report.md
+python3 tools/xrecipe.py --report --ai 25 26   # the report's families by BN5 AI index (the installed first)
+```
+
+`tools/xrecipe.py` (issue #82; docs/MULTIROM.md, Transplanted families)
+derives a BN5 family's recipe from BN5's and BN6's ROMs (found by their
+SHA-1 in `CYBERWORLD_ROM_DIR` or `~/.cache/mmbn-ref/roms`), numbers only.
+Its parts: `tools/xrecipe_thumb.py` decodes, walks and compares Thumb
+(a body normalized with its calls, branches out and literals masked:
+SAME, LAYOUT where only the offsets of loads and stores differ, DIFF);
+`tools/xrecipe_pairs.py` pairs a BN5 routine with its BN6 twin (the
+project's own in `tools/bn5_twins.py`, then the symbol map's in
+`.build/symbols/match` when `build.py symbols --bn6f` made it, then a
+BN6 routine of the same body, then where its neighbours put it; BN6's
+bodies indexed once in `.build/xrecipe`); `tools/xrecipe_family.py`
+reads a family (its blocks, data, calls, immediates, states, hooks,
+records and draws). `tools/bn5_twins.py` holds the pairs and each
+differing pair's audit with its conditions, which the generator checks
+on each family's code (docs/ROM_DATA.md, The engine's differing twins).
+Numbers are given in install order (`FAMILIES` first: an AI index from
+32, six ids from 0x200, the static layout's next home, code and art
+places, sprite numbers and effect ids where the grown tables hold their
+fill). A family is whole where no decision is left open; the report
+says what each derives and what is left, and `--check` runs in no build
+(it needs the ROMs): `build.py test` holds the generated CanGard and
+Handi to the installed recipes, field for field.
 
 ## Sprite gallery
 

@@ -21,6 +21,7 @@
 #include "guest.h"
 #include "hook.h"
 #include "xvirus.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
 #define EVENTS_MAX  8192    /* a log's events between two takes (a battle's opening, a frame of the fight) */
@@ -29,6 +30,8 @@
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
 #define FAMILY_MAX  16      /* the families' blocks of code */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
+#define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
+                               game's type, its own caller (xvirus_dispatch.c) */
 #define ROM_END     0x0A000000u
 #define IWRAM_END   0x03008000u   /* (the stack's top lies below it: a scan stops there, short of IWRAM's mirrors) */
 
@@ -223,8 +226,16 @@ static HookAct on_spawn(HookRegs *r, void *user) {
 	if (!log->on) return HOOK_CONTINUE;
 	XdEvent *e = &log->spawning;
 	*e = (XdEvent){ .kind = XD_SPAWN, .sub = (uint8_t)(r->r[0] & 0xF), .frame = log->frame, .t = log->t };
-	callers(log, e, hook_read32(r->r[1] + SPAWNER_LR), r->r[1] + SPAWNER_LR + 4);
+	uint32_t lr = hook_read32(r->r[1] + SPAWNER_LR), above = r->r[1] + SPAWNER_LR + 4;
 	e->a = hook_read8(r->r[1]);
+	/* (called by the second-level dispatch's spawner for a moved family's code: its caller that code, its type its game's where
+	 * the dispatch runs it, as BN5's spawn of it has them) */
+	if (log->game == 6 && (lr & ~1u) >= XV_STUBS && (lr & ~1u) < XV_STUBS_END) {
+		if ((int)e->a == xvirus_dispatch_type(e->sub)) e->a = hook_read8(r->r[1] + DISPATCH_FRAME);
+		lr = hook_read32(r->r[1] + DISPATCH_FRAME + 4);
+		above = r->r[1] + DISPATCH_FRAME + 8;
+	}
+	callers(log, e, lr, above);
 	e->b = running(log);
 	log->pending = true;
 	return HOOK_CONTINUE;

@@ -56,6 +56,10 @@
 #include "bytes.h"
 #include "thumb_reloc.h"
 #include "battle_rng.h"
+#include "bn5.h"
+#include "bn6.h"
+#include "xvirus_bn5.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
 static int failures;
@@ -3016,7 +3020,7 @@ static void test_xvirus_cangard(void) {
 	const XVirusFamily *c = &xvirus_cangard;
 	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: CanGard's recipe refused: %s", why);
 	CHECK(c->game == XROM_BN5_COLONEL_US && c->src_ai == 14 && c->ai == 32 && c->first_id == XV_FIRST_ID && c->nstates == 12 &&
-		c->ncalls == 39 && c->nimms == 6 && c->nsprites == 3 && c->traits.laid && c->traits.shadow && !c->traits.element,
+		c->ncalls == 39 && c->nimms == 5 && c->nsprites == 3 && c->traits.laid && c->traits.shadow && !c->traits.element,
 		"xvirus: CanGard is AI %d from id %#x, %d states, %d calls", c->ai, c->first_id, c->nstates, c->ncalls);
 	int code[2] = { 0, 0 };
 	for (int i = 0; i < c->nblocks; ++i)
@@ -3056,15 +3060,32 @@ static void test_xvirus_cangard(void) {
 	f = *c;
 	f.effects = &fx;
 	recipe_refused(&f, "an effect among BN6's own");
-	XvId types[2] = { { 0x25, 0xD1 }, { 0x26, 0xD1 } };
+	XvType types[2] = { { 3, 0x25, XV_TYPE_MOVED }, { 3, 0x25, 0x4B } };
 	f = *c;
 	f.types = types;
 	f.ntypes = 2;
-	recipe_refused(&f, "two attacks at one type");
-	types[1].to = XV_T3_DISPATCH;
-	recipe_refused(&f, "an attack at the type the dispatch keeps");
-	types[1].to = 0xD5;
-	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: an attack past BN6's types refused: %s", why);
+	recipe_refused(&f, "one type named twice");
+	types[1] = (XvType){ 3, 0x26, XV_T3_DISPATCH };
+	recipe_refused(&f, "a type made the dispatch's own");
+	types[1] = (XvType){ 2, 0x26, XV_TYPE_MOVED };
+	recipe_refused(&f, "a type of a kind the dispatch has none of");
+	types[1] = (XvType){ 1, 0x25, XV_TYPE_MOVED };
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: one number of two kinds refused: %s", why);
+	types[1] = (XvType){ 3, 0x26, 0x4B };
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a twin of BN6's refused: %s", why);
+	/* (its reticle's spawn: the dispatch's spawner, never BN6's own nor another of the dispatch's) */
+	XvPair calls[39];
+	memcpy(calls, c->calls, sizeof calls);
+	f = *c;
+	f.calls = calls;
+	for (int i = 0; i < c->ncalls; ++i)
+		if (calls[i].from == BN5_SPAWN_3) calls[i].to = BN6_SPAWN_3;
+	recipe_refused(&f, "its game's spawner aimed at BN6's");
+	for (int i = 0; i < c->ncalls; ++i)
+		if (calls[i].from == BN5_SPAWN_3) calls[i].to = XV_SPAWN_3_LAST;
+	recipe_refused(&f, "its game's spawner aimed at another of the dispatch's");
+	calls[0].to = XV_SPAWN_3;
+	recipe_refused(&f, "a call of no spawner aimed at the dispatch's");
 	/* (a mode past BN6's table is taken, BN6's record given XV_MODE_PAST: BN5's TestVirs and Tuby) */
 	f = *c;
 	f.traits.mode = 0x22;
@@ -3091,8 +3112,11 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 				(f->sprites[i].to_list == g->sprites[k].to_list && f->sprites[i].to_index == g->sprites[k].to_index);
 	for (int i = 0; i < f->neffects; ++i)
 		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+	/* (a type both move: two routines for one entry; or both name, with another twin) */
 	for (int i = 0; i < f->ntypes; ++i)
-		for (int k = 0; k < g->ntypes; ++k) bad += f->types[i].to == g->types[k].to;
+		for (int k = 0; k < g->ntypes; ++k)
+			bad += f->types[i].kind == g->types[k].kind && f->types[i].from == g->types[k].from &&
+				(f->types[i].to == XV_TYPE_MOVED || f->types[i].to != g->types[k].to);
 	return bad;
 }
 
@@ -3115,6 +3139,174 @@ static void test_xvirus_static(void) {
 	CHECK(!static_clashes(&twin, &xvirus_cangard), "xvirus: a family of other numbers and nothing to place taken for a clash");
 	twin.first_id = XV_FIRST_ID + 5;
 	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
+}
+
+/* The second-level dispatch's numbers and code (issue #82,
+ * xvirus_dispatch.h): BN5's seven spawners each to the dispatch's of its
+ * kind and place, BN6's own and any other routine to none; its tables and
+ * side tables by kind; and its code as the project encodes it, each
+ * literal load reaching the word it names (run on the CPU in
+ * tests/test_emu.c) */
+static uint32_t stub_literal(const uint8_t *code, uint32_t at) {
+	uint16_t op = get16(code + (at - XV_STUBS));
+	uint32_t lit = ((at + 4) & ~3u) + 4u * (op & 0xFFu);
+	return (op & 0xF800) == 0x4800 && lit + 4 <= XV_STUBS_END ? get32(code + (lit - XV_STUBS)) : 0;
+}
+
+static void test_xvirus_dispatch(void) {
+	static const struct { uint32_t bn5, to; int kind; uint32_t bn6; } spawners[7] = {
+		{ BN5_SPAWN_1, XV_SPAWN_1, 1, BN6_SPAWN_1 }, { BN5_SPAWN_1_LAST, XV_SPAWN_1_LAST, 1, BN6_SPAWN_1_LAST },
+		{ BN5_SPAWN_1_LAST2, XV_SPAWN_1_LAST, 1, BN6_SPAWN_1_LAST }, { BN5_SPAWN_3, XV_SPAWN_3, 3, BN6_SPAWN_3 },
+		{ BN5_SPAWN_3_LAST, XV_SPAWN_3_LAST, 3, BN6_SPAWN_3_LAST }, { BN5_SPAWN_3_FIRST, XV_SPAWN_3_FIRST, 3, BN6_SPAWN_3_FIRST },
+		{ BN5_SPAWN_4, XV_SPAWN_4, 4, BN6_SPAWN_4 },
+	};
+	for (int i = 0; i < 7; ++i) {
+		int kind = 0;
+		uint32_t bn6 = 0, to = xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, spawners[i].bn5);
+		CHECK(to == spawners[i].to && xvirus_dispatch_is_spawner(to, &kind, &bn6) && kind == spawners[i].kind && bn6 == spawners[i].bn6,
+			"dispatch: BN5's spawner %08x to %08x (kind %d, BN6's %08x)", (unsigned)spawners[i].bn5, (unsigned)to, kind, (unsigned)bn6);
+	}
+	CHECK(!xvirus_dispatch_spawner(XV_GAME_BN6, BN6_SPAWN_3) && !xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, BN6_SPAWN_3) &&
+		!xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, 0x08016C42), "dispatch: a spawner for BN6's own, or a routine of no spawn");
+	CHECK(!xvirus_dispatch_is_spawner(XV_SPAWN_1 + 2, NULL, NULL) && !xvirus_dispatch_is_spawner(XV_STUB_NONE, NULL, NULL) &&
+		!xvirus_dispatch_is_spawner(XV_SPAWN_1 + XV_SPAWNERS * XV_SPAWN_STEP, NULL, NULL), "dispatch: an address of no spawner taken for one");
+	CHECK(xvirus_dispatch_type(1) == XV_T1_DISPATCH && xvirus_dispatch_type(3) == XV_T3_DISPATCH && xvirus_dispatch_type(4) == XV_T4_DISPATCH &&
+		xvirus_dispatch_type(2) < 0, "dispatch: its types");
+	CHECK(xvirus_dispatch_side(3) == BN6_DISPATCH_SIDE + BN6_DISPATCH_SIDE_STEP && xvirus_dispatch_moved_at(4, 0x10) ==
+		XV_MOVED_TABLES + 2 * XV_STEP + 0x40 && xvirus_dispatch_twin_at(1, 0xFF) == XV_TWIN_TABLES + 0xFF && !xvirus_dispatch_twin_at(3, 0x100),
+		"dispatch: its tables' places");
+	/* (its places: the tables, then the code, short of the families' homes) */
+	CHECK(XV_TWIN_TABLES >= XV_MOVED_TABLES + 3 * XV_STEP && XV_STUBS >= XV_TWIN_TABLES + 0x300 && XV_STUBS_END <= XV_HOMES &&
+		XV_DISPATCH >= XV_NAMES + XV_NAMES_ROOM, "dispatch: its room");
+	static uint8_t code[XV_STUBS_SIZE];
+	xvirus_dispatch_code(code);
+	CHECK(stub_literal(code, XV_STUB_NONE) == (BN6_OBJECT_FREE | 1) && get16(code + 2) == 0x4700, "dispatch: the stray's routine");
+	for (int kind = 1; kind <= 4; ++kind) {
+		uint32_t r = xvirus_dispatch_routine(kind);
+		if (!r) continue;
+		CHECK(get16(code + (r - XV_STUBS)) == 0x78E8 && stub_literal(code, r + 2) == xvirus_dispatch_side(kind) &&
+			stub_literal(code, r + 8) == xvirus_dispatch_moved_at(kind, 0) && get16(code + (r + 0xC - XV_STUBS)) == 0x4700,
+			"dispatch: kind %d's routine", kind);
+	}
+	for (int i = 0; i < 7; ++i) {
+		uint32_t s = spawners[i].to;
+		CHECK(get16(code + (s - XV_STUBS)) == 0xB501 && stub_literal(code, s + 2) == xvirus_dispatch_twin_at(spawners[i].kind, 0) &&
+			get16(code + (s + 0xE - XV_STUBS)) == (0x2000 | (uint32_t)xvirus_dispatch_type(spawners[i].kind)) &&
+			stub_literal(code, s + 0x10) == (spawners[i].bn6 | 1) && get16(code + (s + 0x12 - XV_STUBS)) == 0x46FE &&
+			stub_literal(code, s + 0x1E) == xvirus_dispatch_side(spawners[i].kind) && get16(code + (s + 0x2A - XV_STUBS)) == 0xBD00,
+			"dispatch: the spawner at %08x", (unsigned)s);
+	}
+}
+
+/* The recipes tools/xrecipe.py writes (src/emu/xvirus_bn5.c, from the two
+ * ROMs) against the ones the build installs (xvirus_families.c's xvirus_bn5,
+ * made by hand and each compared frame by frame with BN5's own battle):
+ * every field the same, the arrays whose order the install does not depend on
+ * (data, calls, words, immediates, numbers, bytes, effects, types) as sets,
+ * the rest (blocks, states, hooks, sprites, clones) in their order */
+#define SAME_SET(A, NA, B, NB, EQ) same_set((A), (NA), (B), (NB), sizeof *(A), (EQ))
+static bool same_set(const void *a, int na, const void *b, int nb, size_t size, bool (*eq)(const void *, const void *)) {
+	if (na != nb) return false;
+	for (int i = 0; i < na; ++i) {
+		int in_a = 0, in_b = 0;
+		for (int k = 0; k < na; ++k) in_a += eq((const char *)a + (size_t)i * size, (const char *)a + (size_t)k * size);
+		for (int k = 0; k < nb; ++k) in_b += eq((const char *)a + (size_t)i * size, (const char *)b + (size_t)k * size);
+		if (in_a != in_b) return false;
+	}
+	return true;
+}
+static bool data_eq(const void *x, const void *y) {
+	const XvData *a = x, *b = y;
+	return a->start == b->start && a->end == b->end && a->kind == b->kind;
+}
+static bool pair_eq(const void *x, const void *y) {
+	const XvPair *a = x, *b = y;
+	return a->from == b->from && a->to == b->to;
+}
+static bool imm_eq(const void *x, const void *y) {
+	const XvImm *a = x, *b = y;
+	return a->at == b->at && a->form == b->form && a->rd == b->rd && a->rn == b->rn && a->was == b->was && a->now == b->now;
+}
+static bool number_eq(const void *x, const void *y) {
+	const XvNumber *a = x, *b = y;
+	return a->at == b->at && a->was == b->was && a->now == b->now;
+}
+static bool byte_eq(const void *x, const void *y) {
+	const XvByte *a = x, *b = y;
+	return a->at == b->at && a->was == b->was && a->now == b->now;
+}
+static bool id_eq(const void *x, const void *y) {
+	const XvId *a = x, *b = y;
+	return a->from == b->from && a->to == b->to;
+}
+static bool type_eq(const void *x, const void *y) {
+	const XvType *a = x, *b = y;
+	return a->kind == b->kind && a->from == b->from && a->to == b->to;
+}
+static bool ref_eq(XvRef a, XvRef b) { return a.addr == b.addr && a.own == b.own && a.clone == b.clone; }
+
+/* which field differs (NULL: none) */
+static const char *recipe_differs(const XVirusFamily *g, const XVirusFamily *h) {
+	if (strcmp(g->name, h->name) || g->game != h->game || g->src_ai != h->src_ai || g->ai != h->ai || g->first_id != h->first_id ||
+		g->home != h->home)
+		return "its numbers (name, game, AI indexes, ids, home)";
+	if (g->nblocks != h->nblocks) return "its blocks";
+	for (int i = 0; i < g->nblocks; ++i)
+		if (memcmp(&g->blocks[i], &h->blocks[i], sizeof *g->blocks)) return "its blocks";
+	if (!SAME_SET(g->data, g->ndata, h->data, h->ndata, data_eq)) return "its data";
+	if (!SAME_SET(g->calls, g->ncalls, h->calls, h->ncalls, pair_eq)) return "its calls";
+	if (!SAME_SET(g->words, g->nwords, h->words, h->nwords, pair_eq)) return "its words";
+	if (!SAME_SET(g->imms, g->nimms, h->imms, h->nimms, imm_eq)) return "its immediates";
+	if (!SAME_SET(g->numbers, g->nnumbers, h->numbers, h->nnumbers, number_eq)) return "its numbers";
+	if (!SAME_SET(g->bytes, g->nbytes, h->bytes, h->nbytes, byte_eq)) return "its bytes";
+	if (g->nstates != h->nstates) return "its states";
+	for (int i = 0; i < g->nstates; ++i)
+		if (!ref_eq(g->states[i], h->states[i])) return "its states";
+	for (int i = 0; i < XV_HOOKS; ++i)
+		if (!ref_eq(g->hooks[i], h->hooks[i])) return "its hooks";
+	if (g->struct1 != h->struct1 || g->struct2 != h->struct2 || memcmp(g->names, h->names, sizeof g->names) || g->held != h->held ||
+		g->ice != h->ice || g->traits.laid != h->traits.laid || g->traits.mode != h->traits.mode || g->traits.element != h->traits.element ||
+		g->traits.weakness != h->traits.weakness || g->traits.shadow != h->traits.shadow)
+		return "its records";
+	if (!g->held_chips != !h->held_chips || (g->held_chips && memcmp(g->held_chips, h->held_chips, XV_VERSIONS * 16 * sizeof *g->held_chips)))
+		return "its held chips";
+	if (g->nsprites != h->nsprites) return "its sprites";
+	for (int i = 0; i < g->nsprites; ++i)
+		if (memcmp(&g->sprites[i], &h->sprites[i], sizeof *g->sprites)) return "its sprites";
+	if (!SAME_SET(g->effects, g->neffects, h->effects, h->neffects, id_eq)) return "its effects";
+	if (!SAME_SET(g->types, g->ntypes, h->types, h->ntypes, type_eq)) return "its types";
+	if (g->nclones != h->nclones) return "its clones";
+	for (int i = 0; i < g->nclones; ++i)
+		if (memcmp(&g->clones[i], &h->clones[i], sizeof *g->clones)) return "its clones";
+	return NULL;
+}
+
+static void test_xvirus_generated(void) {
+	char why[160] = "";
+	CHECK(xvirus_bn5_generated_count >= 2, "xrecipe: %d recipes generated", xvirus_bn5_generated_count);
+	int compared = 0;
+	for (int i = 0; i < xvirus_bn5_generated_count; ++i) {
+		const XVirusFamily *g = xvirus_bn5_generated[i];
+		CHECK(xvirus_recipe_ok(g, why, sizeof why), "xrecipe: %s refused: %s", g->name, why);
+		for (int k = 0; k < xvirus_bn5_count; ++k) {
+			const XVirusFamily *h = xvirus_bn5[k];
+			if (h->src_ai != g->src_ai) continue;
+			const char *d = recipe_differs(g, h);
+			CHECK(!d, "xrecipe: the generated %s is not the one installed: %s", g->name, d ? d : "");
+			++compared;
+		}
+	}
+	CHECK(compared == xvirus_bn5_count, "xrecipe: %d of the %d families installed generated", compared, xvirus_bn5_count);
+	/* (the comparison sees a difference: CanGard's recipe with one call's twin otherwise) */
+	XVirusFamily other = xvirus_cangard;
+	XvPair calls[64];
+	memcpy(calls, other.calls, (size_t)other.ncalls * sizeof *calls);
+	calls[3].to += 2;
+	other.calls = calls;
+	CHECK(recipe_differs(&other, &xvirus_cangard) != NULL, "xrecipe: a call aimed otherwise not seen");
+	other = xvirus_cangard;
+	other.nimms -= 1;
+	CHECK(recipe_differs(&other, &xvirus_cangard) != NULL, "xrecipe: an immediate missing not seen");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not
@@ -4016,6 +4208,8 @@ int main(void) {
 	test_xvirus_recipe();
 	test_xvirus_cangard();
 	test_xvirus_static();
+	test_xvirus_dispatch();
+	test_xvirus_generated();
 	test_enemy_moved();
 	test_qr();
 	test_backup();

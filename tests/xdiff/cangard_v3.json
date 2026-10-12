@@ -7,7 +7,7 @@
  "frames": 1200,
  "seed": "12345678:9ABCDEF0",
  "expect": {
-  "reticle_type": "0xD1",
+  "reticle_type": "0x25",
   "reticle_damage": 150,
   "megaman_hit_damage": 150,
   "megaman_hit_at_least": 3

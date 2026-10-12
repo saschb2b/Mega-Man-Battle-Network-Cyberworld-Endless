@@ -30,10 +30,13 @@
       }
     },
     "t3_type": {
-      "why": "An attack's type (+1): CanGard's reticle is BN5's type 0x25, given BN6's empty 0xD1 (the immediate at BN5 0x080C975C; BN6_T3_FREE).",
-      "bn5_to_bn6": {
-        "0x25": "0xD1"
-      }
+      "why": "An attack's type (+1), by its number in BN5 where BN5's is moved: BN6 spawns a moved type of the family's (CanGard's reticle, BN5's third kind's type 0x25) as the second-level dispatch's type of its kind (the first's 0x5C, the third's 0xD2, the fourth's 0x91: xvirus_recipe.h, XV_T*_DISPATCH), its BN5 number in the kind's side table by the object's slot (BN6_DISPATCH_SIDE: the first kind's at 0x0203FF00, the third's at 0x0203FF20, the fourth's at 0x0203FF40), and the dispatch runs it as that number. The trace writes the side table's byte beside each object of a dispatch type (src/dev/xdiff.c, version 3) and the snapshot reads its type as that byte (tools/xdiff_snap.py): a translation, not a mask, so a moved type keeps its BN5 number in both and is the same. The spawn hook reads the dispatch's spawner's frame the same way (its BN5 type and its caller, src/dev/xdiff_events.c). A twin of BN6's is spawned as BN6's own number, and mapped here where the numbers differ (none so far).",
+      "evidence": [
+        "the dispatch's spawner (src/emu/xvirus_dispatch.c, the project's own Thumb): push {r0,lr}; TWIN by the type's low byte; XV_TYPE_MOVED spawns the kind's dispatch type; after BN6's spawner, the type into the side table at the object's slot (+3); its frame above BN6's spawner's five words: the type at +0x1C, its caller at +0x20",
+        "the dispatch type's routine: ldrb r0,[r5,#3]; the side table's byte; MOVED's routine for it, r1 the type times four as BN5's runner leaves it (BN5 0x08003014-0x0800301E / BN6 0x080031F4-0x080031FE)",
+        "BN6's runner reads +1 alone and its spawn writes it alone (BN6 0x080031F4, 0x080032BE); the moved code never reads it (the installer refuses ldrb rX,[r5,#1] in a moved block)"
+      ],
+      "bn5_to_bn6": {}
     },
     "effect": {
       "why": "An effect object's id (+4 of the fourth kind's type 0): CanGard's muzzle blast is BN5's 0x57, copied as BN6's 0x6C (the immediate at BN5 0x08108FB6).",

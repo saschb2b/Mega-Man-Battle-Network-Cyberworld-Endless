@@ -6,9 +6,11 @@
  * word that names each pointed at its copy; the names of the ids from
  * XV_FIRST_ID in an archive of their own, which a hook on the name lookup
  * (BN6_NAME_OF) hands out; the battle's sprite preload reading as many bits
- * of an id as its spawn does; and the delete counts, by AI index, kept to
- * BN6's 32. Made once a core, all or nothing, before any family's install
- * (xvirus.c), which then stages its entries into them. */
+ * of an id as its spawn does; the delete counts, by AI index, kept to BN6's
+ * 32; and the second-level dispatch (xvirus_dispatch.h), its code, its
+ * tables and its three types' entries in the grown type tables. Made once a
+ * core, all or nothing, before any family's install (xvirus.c), which then
+ * stages its entries into them. */
 #ifndef CW_XVIRUS_GROW_H
 #define CW_XVIRUS_GROW_H
 
@@ -49,6 +51,12 @@ bool xg_grow(void);
  * table's fill there, no other family's. */
 void xg_set(int t, uint32_t i, const uint8_t *entry);
 void xg_set_word(int t, uint32_t i, uint32_t v);
+/* A family's object type for the second-level dispatch (xvirus_dispatch.h),
+ * staged: its game's type `from` of the kind (1, 3, 4) spawned as BN6's twin
+ * `to`, or moved (to XV_TYPE_MOVED, its routine `routine` the moved copy's
+ * address). Each entry must be blank in the core's copy, or set to the same
+ * by a family before (a type two families' code spawns). */
+void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine);
 /* The names' archive's bytes in use in the core's copy: where a family's
  * names go on. */
 uint32_t xg_names_end(void);

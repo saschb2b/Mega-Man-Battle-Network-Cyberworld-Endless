@@ -17,7 +17,7 @@
  ],
  "natives_why": "Enemy 0x01, the Mettaur, in both games; its shockwave is the third kind's type 0x16 in both (each spawned by the Mettaur or the shockwave before it: their +0x4C); its step spawns effect 0x14 in both (BN5 0x0810514E-0x08105150 / BN6 0x0810B072-0x0810B074: movs r4,#0x14 and the effect spawner, BN5 0x080DFFD2 / BN6 0x080E1932), and no spec without the Mettaur shows that effect",
  "expect": {
-  "reticle_type": "0xD1",
+  "reticle_type": "0x25",
   "reticle_damage": 10
  }
 }

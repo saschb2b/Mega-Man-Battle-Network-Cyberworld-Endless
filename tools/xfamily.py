@@ -16,8 +16,10 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
 (2,2):
 
   fight    CanGard V1 at (5,2) beside a Mettaur at (4,3), MegaMan idle: its
-           own states (8 decide, 9 guard, 10 fire), its reticle (BN6's type
-           0xD1) walking to MegaMan's panel and striking there for 10, the
+           own states (8 decide, 9 guard, 10 fire), its reticle (the
+           second-level dispatch's type 0xD2, run as BN5's 0x25 by the third
+           kind's side table at 0x0203FF20) walking to MegaMan's panel and
+           striking there for 10, the
            muzzle's blast (BN6's effect 0x6C), its records as BN6 reads
            them (HP 60, element 0, a shadow); pictures of its first shot
   status   the same battle, the status step (director_dev_status) giving
@@ -58,7 +60,9 @@ WORK = os.path.join(ROOT, '.build', 'xfamily')
 SHA1 = {'bn6.gba': X.BN6_SHA1, 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
 SEED = 15
 FAMILY_AI, FIRST_ID = 32, 0x200
-RETICLE = 0xD1                 # its attack's type in BN6 (BN6_T3_FREE)
+DISPATCH_T3 = 0xD2             # its attack's type in BN6: the second-level dispatch's of the third kind (XV_T3_DISPATCH),
+SIDE_T3 = 0x0203FF20           # ... which runs it as the number its side table holds by the object's slot (BN6_DISPATCH_SIDE + 0x20),
+RETICLE = 0x25                 # ... BN5's own for it
 MUZZLE = 0x6C                  # its muzzle's effect in BN6
 MEGAMAN = 0x1A0                # MegaMan's NameID
 T3_TYPE, T4_TYPE, T4_EFFECT = 1, 1, 4   # an attack's type, an effect object's type (0) and its effect id
@@ -143,7 +147,7 @@ def reticles(img):
     out = []
     for k in range(X.OBJ_COUNT):
         o = X.T3_OBJECTS + k * X.OBJ_SIZE
-        if X.u8(img, o) & 1 and X.u8(img, o + T3_TYPE) == RETICLE:
+        if X.u8(img, o) & 1 and X.u8(img, o + T3_TYPE) == DISPATCH_T3 and X.u8(img, SIDE_T3 + X.u8(img, o + 3)) == RETICLE:
             out.append((X.u8(img, o + 9), (X.u8(img, o + 0x12), X.u8(img, o + 0x13))))
     return out
 
@@ -211,7 +215,7 @@ def fight(c, a):
     seen = sorted(set(acts))
     print(f'  CanGard\'s CurActions in turn: {" ".join(f"{x:02X}" for x in acts[:24])}{" ..." if len(acts) > 24 else ""}')
     c({8, 9, 10} <= set(seen) and set(seen) <= {0, 1, 2, 8, 9, 10}, f'its own states 8, 9 and 10, no other but the spawn\'s ({seen})')
-    c(spawned >= 3 and (2, 2) in walked, f'{spawned} reticles of type {RETICLE:#x}, over panels {sorted(walked)} to MegaMan\'s (2, 2)')
+    c(spawned >= 3 and (2, 2) in walked, f'{spawned} reticles of BN5\'s type {RETICLE:#x} (the dispatch\'s {DISPATCH_T3:#x}), over panels {sorted(walked)} to MegaMan\'s (2, 2)')
     struck = [h for h in hits if h[2]]
     print('  MegaMan\'s HP lost: ' + ', '.join(f'{d} at t{t}{" (the reticle\'s strike)" if r else ""}' for t, d, r in hits))
     c(struck and all(d == 10 for _, d, _ in struck), f'{len(struck)} strikes of the reticle, each 10 (V1\'s damage)')

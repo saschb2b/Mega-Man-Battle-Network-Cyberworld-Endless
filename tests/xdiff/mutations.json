@@ -112,6 +112,30 @@
     "08001532:08001562"
    ],
    "what": "its draws (GetPositiveSignedRNG, BN6 0x08001532) shifted onto the second word (GetPositiveSignedRNGSecondary, 0x08001562): the replay finds no draw of the reference's to give them, and they draw what they find"
+  },
+  {
+   "name": "a wrong MOVED entry",
+   "spec": "cangard_v1",
+   "poke": [
+    "08B45494:08B45F01:4"
+   ],
+   "what": "the dispatch's MOVED entry for the reticle (the third kind's BN5 type 0x25, at XV_MOVED_TABLES + 0x400 + 4 x 0x25) the stray's routine, as if no family had moved it: the reticle let go as it first runs"
+  },
+  {
+   "name": "a wrong TWIN",
+   "spec": "cangard_v1",
+   "poke": [
+    "08B45D25:25:1"
+   ],
+   "what": "the dispatch's TWIN entry for BN5's type 0x25 (XV_TWIN_TABLES + 0x100 + 0x25) made BN6's own 0x25 where it is moved (0xFF): the reticle spawned as BN6's attack of that number"
+  },
+  {
+   "name": "a spawn not retargeted",
+   "spec": "cangard_v1",
+   "call": [
+    "08B46000:08003358"
+   ],
+   "what": "the veneer to the dispatch's spawner of the third kind (XV_SPAWN_3) aimed at BN6's own spawner (0x08003358), as before the dispatch: BN5's 0x25 spawned as BN6's 0x25"
   }
  ]
 }

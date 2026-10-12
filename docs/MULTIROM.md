@@ -613,8 +613,8 @@ and its calls aimed again (`src/emu/xvirus.c`):
   copy: the eleven per-family tables, the ice blocks' sizes and the three
   35-word tables by AI index to 256 AI indexes; sprite lists 1, 2, 4 and
   5, the effects and the first, third and fourth kinds' types to 256
-  (three types kept for the dispatch that will lift the byte: the third
-  kind's 0xD2, the first's 0x5C, the fourth's 0x91); the enemy ids'
+  (three types taken by the second-level dispatch, below: the first
+  kind's 0x5C, the third's 0xD2, the fourth's 0x91); the enemy ids'
   triples and their reward rows to 0x400 ids, the ids past BN6's read as
   its filler 0xBB. A family takes an AI index from 32 and six ids from
   0x200, past every id BN6 has (its Navis end at 0x190, the player's
@@ -628,6 +628,30 @@ and its calls aimed again (`src/emu/xvirus.c`):
   (docs/EMULATION.md, `+0x400000` and `+0x500000`). The mode byte of a
   family's struct1 indexes BN6's 32 bytes for its families (read in one
   battle mode): kept, a family whose game's mode is past them given 0.
+- **The second-level dispatch** (`src/emu/xvirus_dispatch.c`;
+  docs/ROM_DATA.md, the second-level dispatch): BN6 runs an object by
+  its type, a byte, from its kind's table, and BN5's families spawn
+  objects of their own types (CanGard's reticle is BN5's third kind's
+  0x25, which BN6 runs as another attack). One type of each kind, dead in
+  BN6 (the first kind's 0x5C, the third's 0xD2, the fourth's 0x91), runs
+  whatever moved routine its object was spawned as: a moved family's
+  calls to its game's spawners go to the dispatch's (one for each of
+  BN5's spawners, the same kind and place in the run order), which look
+  the type up in the kind's TWIN table and spawn BN6's own number (where
+  the object is BN6's too) or else the kind's dispatch type, and write
+  the game's number into the kind's side table in RAM by the object's
+  slot (`0x0203FF00`, `0x0203FF20`, `0x0203FF40`, 32 bytes each, cleared
+  by every battle's setup; docs/EMULATION.md, BN6's RAM);
+  each frame the dispatch type's routine reads the number back and goes
+  on to the kind's MOVED table's routine for it, as BN5's runner calls
+  one. A recipe names its types (`XvType`: the kind, its game's number,
+  BN6's twin or moved) and its moved objects' routines are its own
+  blocks; MOVED's entries no family set let a stray object go as it first
+  runs. The code is the project's own Thumb, made field by field, past
+  `EMU_FREE` with the grown tables (docs/EMULATION.md, `+0x345000`); a
+  moved block that reads its object's type is refused, so the moved code
+  never sees the dispatch's. BN6's own battles are the same at every byte
+  with it made (`tools/xcontrol.py`, `tools/xfamily.py --spec native`).
 - **The control** (`--dev xcontrol`): BN6's own Mettaur, AI 1, moved
   through the same steps as AI 32 with ids 0x200-0x205. It must play frame
   for frame as BN6's: `tools/xcontrol.py` fights it and BN6's own under
@@ -659,13 +683,16 @@ and its calls aimed again (`src/emu/xvirus.c`):
   CanGard's own code (its decide, guard and fire states, its per-frame
   hook, its dying wrapper and its release hook) and its attack's, BN5's
   type 0x25, a reticle that walks to MegaMan's panel and strikes there.
-  Their 39 calls out go to 39 of BN6's routines, each paired by comparing
-  the two bodies, and through 39 veneers. Six immediates change, each
-  read first: its two states' CurActions (7 and 8 in BN5, 9 and 10 in
-  BN6, whose two status states come before a family's own), its muzzle's
-  effect (BN5's 0x57 copied as BN6's 0x6C), the reticle's type (0x25 as
-  BN6's empty 0xD1) and sprite (list 4's 0x24 as 0x5C), and the
-  collision data's flags it reads (BN5's +0x68, BN6's +0x70). Its state
+  Their 39 calls out go through 39 veneers to 38 of BN6's routines, each
+  paired by comparing the two bodies, and to the dispatch's spawner of
+  the third kind. Five immediates change, each read first: its two
+  states' CurActions (7 and 8 in BN5, 9 and 10 in BN6, whose two status
+  states come before a family's own), its muzzle's effect (BN5's 0x57
+  copied as BN6's 0x6C), the reticle's sprite (list 4's 0x24 as 0x5C),
+  and the collision data's flags it reads (BN5's +0x68, BN6's +0x70). The
+  reticle keeps BN5's type: spawned through the dispatch as its third
+  kind's type with 0x25 in the side table, and run as BN5's 0x25 (before
+  the dispatch its immediate was made BN6's empty 0xD1). Its state
   table is BN6's generic 0-7 but its own dying (2), its own from 8; its
   hooks BN5's per frame, and its release in BN6's tables 6 (paralysed), 7
   (frozen) and 8 (bubbled), which BN5 lacks, and 10 (dragged), as BN6's
@@ -743,7 +770,9 @@ and its calls aimed again (`src/emu/xvirus.c`):
   data, the muzzle's effect id left as BN5's, alone and beside the
   Mettaur, the strike's effect id, the reticle's collision region) each
   fail their spec, nine of them where every timeline check still holds (`build.py xdiff
-  --mutations`). What it did not reach then (12 October 2026), each
+  --mutations`); since the dispatch, three more fail `cangard_v1`: the
+  reticle's MOVED entry left the stray's, its TWIN entry made BN6's own
+  0x25, and its spawn aimed at BN6's spawner as before the dispatch. What it did not reach then (12 October 2026), each
   reached since by the tooling's milestone (below): an extra object the
   subject spawns whose owner names MegaMan's or a native's, a family that
   draws random numbers, and a family whose objects flash or step onto
@@ -790,7 +819,10 @@ and its calls aimed again (`src/emu/xvirus.c`):
   compared; BN5's teleport also sets the facing again at its end, to the
   0 an enemy spawns with on a plain field, where BN6's leaves it: not
   reached on a field of another column pattern). 14 calls to 11 routines, two
-  immediates (its wait's and its attack's CurAction). Its specs, all
+  immediates (its wait's and its attack's CurAction). Its bomb is spawned
+  by the bomb's own spawner, BN5's `0x080CF37E` paired with BN6's
+  `0x080CF4EC` (BN6's type 0x4B in both), so none of Handi's code calls a
+  spawner of the engine's: nothing of Handi's goes through the dispatch. Its specs, all
   with `rng=replay`: `handi_v1`, Handi alone against MegaMan idle: the
   same over 1200 frames, its three teleports (to 4,1, 4,2, 4,3) and its
   four bombs as BN5's battle has them, MegaMan 50 down at t306, t636 and
@@ -801,21 +833,56 @@ and its calls aimed again (`src/emu/xvirus.c`):
   its wait's CurAction left as BN5's (t2), its panel's pick rebased to
   the routine after it (t21: it teleports onto MegaMan's side), its draws
   shifted onto the other word (t2: no draw of BN5's to give them).
-- **Families after CanGard** (issue #82's survey of BN5's 30, static
-  only; Handi since moved, above): 17 more take CanGard's recipe as it is (Handi, Shakey, Trumpy,
-  NinJoy, WindBox, BomBoy, Catack, Drixol, Batty, Marina, Flashy, Eleogre,
-  BigBrute, TinHawk, Bladia, Tuby and AI 33's); ten pass a chip of BN5's
-  to their attack and need a chip map besides (Mettaur, Powie, Bugtank,
-  MetFire, Lark, Zomon, Skarab, Champy, Whirly, Draggin); Dominerd and
-  Appley need what BN5's dispatcher does for their ids, Cactikil and
-  WuNote their attacks' objects of the first kind. Every routine a new
-  family calls has its body compared with BN6's before it is paired.
+- **The recipe generator** (`tools/xrecipe.py`; docs/DEVTOOLS.md, The
+  recipe generator; docs/ROM_DATA.md, The recipe generator's reads of
+  BN5): every BN5 family's recipe derived from the two ROMs, numbers
+  only; the installed families' written into `src/emu/xvirus_bn5.c`,
+  which it writes and nothing else does, the rest reported
+  (`.build/xrecipe/report.md`). Per family, in install order (AI 32 on, six ids each from
+  0x200, code, homes and art at the static layout's next places): its
+  blocks (a walk from its states and hooks to the next family's struct1),
+  their data by how the code reads it, its calls with their twins (the
+  project's pairs in `tools/bn5_twins.py`, then the symbol map's, then a
+  BN6 routine of the same body, then where its neighbours put it), each
+  pair's two bodies compared (the same; the same but for the offsets of
+  loads and stores; or differing, served only once audited for what the
+  family's code asks of it: docs/ROM_DATA.md, The engine's differing
+  twins), the immediates and pool words that are numbers in each game's
+  own terms, its states, hooks, records, its held chips as BN6's chip ids
+  (a chip BN6 has none of held out), what it draws, and its types for the
+  dispatch. What the recipe format has gained for them, each checked by
+  the validator and the staged installer: pool words that are numbers
+  (`XvNumber`), bytes of its data that are ids (`XvByte`), a routine
+  copied once more with a call aimed otherwise (`XvClone`, a status
+  wrapper's), its types for the dispatch (`XvType`) and its held chips. A
+  family is whole where no decision is open, and only a whole one is
+  written; `build.py test` holds the generated CanGard and Handi to the
+  installed recipes field for field (they are the same). Of BN5's 35 AI
+  indexes, 15 are whole now: CanGard, Handi, Bugtank, MetFire, Shakey,
+  NinJoy, WindBox, BomBoy, Catack, Batty, Cactikil and WuNote (their
+  attacks' objects of the first kind through the dispatch), BigBrute,
+  TinHawk and Bladia. Open for the others (`.build/xrecipe/report.md`):
+  held chips BN6 has no chip of (Blinder, Geddon1, MetaGel, AntiElec,
+  AntiWatr: TestVirs, Mettaur, Powie, Lark, Skarab, Champy, Draggin,
+  Whirly, Tuby and the unnamed AI 31-33) until BN5's chips are BN6's too,
+  and with them the two chip routines that serve only a BN6 chip id; a
+  battle sprite another family already lists (Mettaur's and AI 31-33's,
+  Tuby's) or that BN6 has as its own (Trumpy's, Tuby's); a sound that is
+  another song in BN6 (Powie's 0xC0, Skarab's 0xB7, Flashy's and
+  Eleogre's 0xBA) or made otherwise (Trumpy, Tuby); NameID bounds in
+  instructions, not pools (Dominerd, Trumpy, Zomon, Drixol, Whirly); an
+  effect or a sprite number made otherwise (Zomon; Whirly, Marina); and
+  what BN5's virus dispatcher does for Dominerd's and Appley's ids before
+  their states each frame, which BN6's does for no family (a pre-step
+  table from a hook on BN6's dispatcher, the next step). None of them is
+  installed yet.
 - **Its rewards**: its reward rows are its game's own for its versions,
   each entry as BN6's (a chip as BN6's of its name, else 200 zenny until
   BN5's chips are BN6's too), written into the rows of its ids in the
   grown copy, which the battle's results then lean as BN6's
   (docs/ROM_DATA.md, BN5's records in BN6's engine).
-- **Not yet**: the families after CanGard and Handi and their place in
+- **Not yet**: the families after CanGard and Handi (the generator's
+  whole ones installed, the open ones decided) and their place in
   formations (a game-design pass). Handi is installed wherever BN5's ROM
   is read, as CanGard is, and BN5's records that name it are fought in
   BN6's engine as CanGard's are (`build.py xrecords`). The New 3DS keeps

@@ -675,6 +675,8 @@ CONFIDENCE = (
     ('neighbours', 'its bytes at the shift from Falzar the located functions before and after it in its file share'),
     ('calls', "named by the calls, branches and pointers of located functions, all agreeing; its own bytes differ from Falzar's"),
     ('shift', "estimated: at its neighbours' shift, where most of its known bits (the percentage) are Falzar's"),
+    ('twin', "BN5's twin of the routine where it is located in Gregar, as this project paired them (tools/bn5_twins.py): "
+             "the two bodies compared, the differing ones audited"),
 )
 
 
@@ -1136,8 +1138,10 @@ def coverage(located, by_file=False):
     named = [r for r in every if not AUTO_NAME.match(r['name'])]
     row('... named by bn6f (not sub_ and an address)', named)
     row('... of them with no address in the name', [r for r in named if not ADDRESS_END.search(r['name'])])
+    names = {r['name'] for r in every}   # (bn6f's functions: a twin inside one, named by it and the offset, is not one)
     for how, words in CONFIDENCE:
-        cells = [f'{sum(1 for r in found[g["key"]].values() if r["confidence"].split()[0] == how):,}' for g in games]
+        cells = [f'{sum(1 for n, r in found[g["key"]].items() if n in names and r["confidence"].split()[0] == how):,}'
+                 for g in games]
         out.append(f'| Located by `{how}` | ' + ' | '.join(cells) + ' |')
     for kind, title, ok in (('data', 'Data labels the located functions name', ('calls', 'bytes', 'neighbours', 'calls+bytes')),
                             ('ram', "RAM labels their literals hold at Falzar's address", ('calls',)),

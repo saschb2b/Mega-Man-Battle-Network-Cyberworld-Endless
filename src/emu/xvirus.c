@@ -16,6 +16,7 @@
 #include "xchips.h"
 #include "xfields.h"
 #include "xnavi.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 #include "xvirus_grow.h"
 #include "xvirus_tx.h"
@@ -36,7 +37,8 @@ typedef struct {
 	uint32_t ice, ice_count;        /* the sizes of the ice blocks its viruses are frozen in, a byte per AI index (0: none) */
 	uint32_t sprite_lists;          /* its sprite lists (a ROM offset, as RomLayout.sprite_lists) */
 	uint32_t effects, neffects;     /* its effects, 4 bytes each (as BN6_EFFECTS) */
-	uint32_t types;                 /* its attacks' routines by type (as BN6_T3_TYPES) */
+	uint32_t types[XV_DISPATCH_KINDS], ntypes[XV_DISPATCH_KINDS];   /* the first, third and fourth kinds' routines by type (as BN6_T1_TYPES,
+	                                                                   BN6_T3_TYPES, BN6_T4_TYPES), how many */
 	uint32_t drops;                 /* its enemies' reward rows (as BN6_DROP_ROWS) */
 	bool bn5;                       /* its reward rows' chips BN5's, given as BN6's (xchips.h) */
 } Game;
@@ -47,13 +49,15 @@ static bool game_of(int game, Game *g) {
 	if (game == XV_GAME_BN6) {
 		/* (the sizes as BN6 reads them for its 32 AI indexes: AI 30's and 31's past its viruses' 30, in the Navis') */
 		*g = (Game){ R.data, BN6_FAMILY_TABLES, BN6_FAMILIES, BN6_FAMILY_STEP, R.layout->enemy_names[0], BN6_ICE_SIZES, BN6_FAMILIES,
-			R.layout->sprite_lists, BN6_EFFECTS, BN6_EFFECT_COUNT, BN6_T3_TYPES, BN6_DROP_ROWS, false };
+			R.layout->sprite_lists, BN6_EFFECTS, BN6_EFFECT_COUNT, { BN6_T1_TYPES, BN6_T3_TYPES, BN6_T4_TYPES },
+			{ BN6_TYPES_T1_COUNT, BN6_TYPES_T3_COUNT, BN6_TYPES_T4_COUNT }, BN6_DROP_ROWS, false };
 		return true;
 	}
 	if (game == XROM_BN5_COLONEL_US && XR[game].data && XR[game].layout) {
 		/* (BN5 freezes no virus: no ice blocks' sizes) */
 		*g = (Game){ XR[game].data, BN5_FAMILY_TABLES, BN5_FAMILIES, BN5_FAMILY_STEP, BN5_ENEMY_NAMES - BUS, 0, 0,
-			XR[game].layout->sprite_lists, BN5_EFFECTS, BN5_EFFECT_COUNT, BN5_T3_TYPES, BN5_REWARD_ROWS, true };
+			XR[game].layout->sprite_lists, BN5_EFFECTS, BN5_EFFECT_COUNT, { BN5_T1_TYPES, BN5_T3_TYPES, BN5_T4_TYPES },
+			{ BN5_TYPES_T1_COUNT, BN5_TYPES_T3_COUNT, BN5_TYPES_T4_COUNT }, BN5_REWARD_ROWS, true };
 		return true;
 	}
 	return false;
@@ -70,6 +74,7 @@ typedef struct {
 	ThumbVeneers pool;
 	uint8_t veneers[XV_HOME_SIZE - XV_HOME_VENEERS];
 	uint32_t missing;   /* a call the recipe does not name */
+	const XvClone *clone;   /* the clone being moved: its call aimed otherwise */
 } Ctx;
 
 /* where an address of a copied block is in BN6 (its Thumb bit kept); 0 for none */
@@ -88,11 +93,13 @@ static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
 
 static uint32_t resolve(uint32_t target, void *user) {
 	Ctx *c = user;
+	if (c->clone && target == c->clone->call) return in_rom(c->clone->to, 2) ? thumb_veneer_get(&c->pool, c->clone->to) : 0;
 	if (xvirus_block_of(c->f, target)) return xvirus_is_code(c->f, target) ? moved_to(c->f, target) : 0;
 	for (int i = 0; i < c->f->ncalls; ++i)
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
-			if (!in_rom(to, 2)) break;
+			/* (one of BN6's routines, or one of the second-level dispatch's spawners) */
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -100,13 +107,17 @@ static uint32_t resolve(uint32_t target, void *user) {
 }
 
 /* One instruction of a block's code checked: a load from its literal pool
- * must find a word of the recipe's pools, and a branch stay in the block. */
+ * must find a word of the recipe's pools, a branch stay in the block, and
+ * no read of its object's type (ldrb rX,[r5,#1]: a moved object's is the
+ * dispatch's, its game's number in the side table, xvirus_dispatch.h). */
 static bool insn_ok(const XVirusFamily *f, const XvBlock *b, uint32_t a, uint16_t op) {
 	uint32_t pc4 = (a + 4) & ~3u;
-	if ((op & 0xF800) == 0x4800) {   /* ldr rd,[pc,#imm] */
+	if ((op & 0xFFF8) == 0x7868) return xv_fail("its object's type read at %08x (the dispatch's, its number in the side table)", (unsigned)a);
+	if ((op & 0xF800) == 0x4800) {   /* ldr rd,[pc,#imm]: a pool of its own block (a clone has none) */
 		uint32_t t = pc4 + (op & 0xFFu) * 4;
 		const XvData *d = xvirus_data_at(f, t);
-		return (d && d->kind == XV_POOL && t + 4 <= d->end) || xv_fail("the load at %08x reads %08x, in no pool", (unsigned)a, (unsigned)t);
+		return (d && d->kind == XV_POOL && t + 4 <= d->end && t >= b->start && t < b->end) ||
+			xv_fail("the load at %08x reads %08x, in no pool of its block", (unsigned)a, (unsigned)t);
 	}
 	if ((op & 0xF800) == 0xA000) {   /* add rd,pc,#imm */
 		uint32_t t = pc4 + (op & 0xFFu) * 4;
@@ -168,7 +179,20 @@ static bool word_fix(const XVirusFamily *f, int kind, uint32_t a, uint8_t *w) {
 	return xv_fail("the literal at %08x names %08x, which the recipe does not", (unsigned)a, (unsigned)v);
 }
 
-/* A block's data: pools' words and tables moved, raw bytes checked, dead ones zeroed */
+/* a word of its pools the recipe names a number (XvNumber): BN6's in its place, its game's checked first; false where
+ * the recipe names none there */
+static bool number_fix(const XVirusFamily *f, uint32_t a, uint8_t *w) {
+	for (int k = 0; k < f->nnumbers; ++k)
+		if (f->numbers[k].at == a) {
+			if (get32(w) != f->numbers[k].was) xv_fail("the number at %08x is %08x, not %08x", (unsigned)a, (unsigned)get32(w), (unsigned)f->numbers[k].was);
+			else put32(w, f->numbers[k].now);
+			return true;
+		}
+	return false;
+}
+
+/* A block's data: pools' words and tables moved (or the numbers the recipe names), raw bytes checked and the ids the
+ * recipe names given BN6's, dead ones zeroed */
 static void data_fix(const XVirusFamily *f, const XvBlock *b, uint8_t *code) {
 	for (int i = 0; i < f->ndata && !xv_failed(); ++i) {
 		const XvData *d = &f->data[i];
@@ -177,7 +201,15 @@ static void data_fix(const XVirusFamily *f, const XvBlock *b, uint8_t *code) {
 			memset(code + (d->start - b->start), 0, d->end - d->start);
 			continue;
 		}
-		for (uint32_t a = (d->start + 3) & ~3u; a + 4 <= d->end && word_fix(f, d->kind, a, code + (a - b->start)); a += 4) {}
+		for (uint32_t a = (d->start + 3) & ~3u; a + 4 <= d->end && !xv_failed(); a += 4)
+			if (d->kind != XV_POOL || !number_fix(f, a, code + (a - b->start))) word_fix(f, d->kind, a, code + (a - b->start));
+	}
+	for (int i = 0; i < f->nbytes && !xv_failed(); ++i) {
+		const XvByte *y = &f->bytes[i];
+		if (y->at < b->start || y->at >= b->end) continue;
+		uint8_t *p = code + (y->at - b->start);
+		if (*p != y->was) xv_fail("the byte at %08x is %02x, not %02x", (unsigned)y->at, *p, y->was);
+		else *p = y->now;
 	}
 }
 
@@ -220,9 +252,47 @@ static void block_move(Ctx *c, const XvBlock *b) {
 	}
 }
 
+/* A clone of a routine of its code (XvClone): copied once more, its call to `call` aimed at `to` and its immediate
+ * changed; the bytes are its block's, whose CRC32 was checked as it moved */
+static void clone_move(Ctx *c, const XvClone *k) {
+	const XVirusFamily *f = c->f;
+	uint32_t len = k->end - k->start;
+	const XvBlock b = { k->start, k->end, k->at, 0 };
+	uint8_t *code = in_rom(k->start, len) ? xv_put(k->at, len, true) : NULL;
+	if (!code) { xv_fail("its clone of %08x-%08x", (unsigned)k->start, (unsigned)k->end); return; }
+	memcpy(code, c->rom + (k->start - BUS), len);
+	static uint32_t offs[BLS_MAX];
+	int n = code_walk(f, &b, code, offs, BLS_MAX);
+	if (n < 0) return;
+	if (k->imm.at) {
+		uint8_t *p = code + (k->imm.at - k->start);
+		uint16_t insn = get16(p);
+		ThumbImm was = { k->imm.form, k->imm.rd, k->imm.rn, k->imm.was };
+		if (!thumb_imm_patch(&insn, &was, k->imm.now)) { xv_fail("the clone's immediate at %08x is not the one expected", (unsigned)k->imm.at); return; }
+		put16(p, insn);
+	}
+	ThumbBlock tb = { code, len, k->start, k->at };
+	bool called = false;
+	for (int i = 0; i < n && !called; ++i) {
+		uint32_t t;
+		called = thumb_bl_read(code, offs[i], k->start, &t) && t == k->call;
+	}
+	c->missing = 0;
+	c->clone = k;
+	if (!called) xv_fail("its clone of %08x-%08x calls no %08x", (unsigned)k->start, (unsigned)k->end, (unsigned)k->call);
+	else if (!thumb_block_rebase(&tb, offs, n, resolve, c))
+		xv_fail("a call out of its clone of %08x-%08x cannot be made (%08x)", (unsigned)k->start, (unsigned)k->end, (unsigned)c->missing);
+	c->clone = NULL;
+}
+
 /* ---- its records and its entries in BN6's grown tables ---- */
 
 static uint32_t ref_to(const XVirusFamily *f, XvRef r) {
+	if (r.clone) {
+		const XvClone *k = r.clone <= f->nclones ? &f->clones[r.clone - 1] : NULL;
+		if (!k || (r.addr & ~1u) < k->start || (r.addr & ~1u) >= k->end) { xv_fail("its clone's %08x", (unsigned)r.addr); return 0; }
+		return (k->at + ((r.addr & ~1u) - k->start)) | 1;
+	}
 	if (r.own) {
 		uint32_t to = (r.addr & 1) && xvirus_is_code(f, r.addr & ~1u) ? moved_to(f, r.addr) : 0;
 		if (!to) xv_fail("its own %08x is no code of its blocks", (unsigned)r.addr);
@@ -328,15 +398,20 @@ static void effects_set(const XVirusFamily *f, const Game *g) {
 	}
 }
 
-/* Its attacks: each type's routine its own code, at a type the grown
- * table leaves empty */
+/* The object types its code spawns, for the second-level dispatch
+ * (xvirus_dispatch.h): BN6's twin, or moved, its game's routine for the
+ * type its own code */
 static void types_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->ntypes && !xv_failed(); ++i) {
-		const XvId *t = &f->types[i];
-		uint32_t own = rom32(g->rom, g->types + 4u * t->from);
-		uint32_t to = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;
-		if (!to) xv_fail("its attack %#x (%08x) is none of its code", t->from, (unsigned)own);
-		else xg_set_word(XG_T3, t->to, to);
+		const XvType *t = &f->types[i];
+		int k = xvirus_dispatch_slot(t->kind);
+		uint32_t routine = 0;
+		if (k >= 0 && t->to == XV_TYPE_MOVED) {
+			uint32_t own = t->from < g->ntypes[k] ? rom32(g->rom, g->types[k] + 4u * t->from) : 0;
+			routine = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;
+			if (!routine) { xv_fail("its object %d:%#x (%08x) is none of its code", t->kind, t->from, (unsigned)own); return; }
+		}
+		xg_type(t->kind, t->from, t->to, routine);
 	}
 }
 
@@ -399,8 +474,10 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 	for (int k = 0; k < XV_HOOKS; ++k) entry[3 + k] = ref_to(f, f->hooks[k]);
 	uint32_t held = f->held;
 	if (!held) {
+		/* (its own lists, BN6's ids, or none) */
 		uint8_t *h = xv_put(f->home + XV_HOME_HELD, HELD_LISTS, true);
 		if (h) memset(h, 0xFF, HELD_LISTS);
+		for (uint32_t k = 0; h && f->held_chips && k < HELD_LISTS / 2; ++k) put16(h + 2 * k, f->held_chips[k]);
 		held = f->home + XV_HOME_HELD;
 	} else if (!in_rom(held, HELD_LISTS)) xv_fail("its held chips at %08x", (unsigned)held);
 	xg_set_word(XG_HELD, (uint32_t)f->ai, held);
@@ -445,6 +522,7 @@ static int ninstalled;
 static void family_stage(Ctx *c, const Game *g) {
 	const XVirusFamily *f = c->f;
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(c, &f->blocks[i]);
+	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(c, &f->clones[i]);
 	uint32_t entry[XV_TABLES] = { 0 };
 	if (!xv_failed()) records_set(f, g, entry);
 	uint8_t *v = c->pool.n ? xv_put(c->pool.base, (uint32_t)c->pool.n * THUMB_VENEER_SIZE, true) : NULL;
@@ -487,6 +565,7 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	xv_commit();
 	xv_tx_end();
 	for (int i = 0; i < f->nblocks; ++i) xv_moved_add(f->blocks[i].start, f->blocks[i].at, f->blocks[i].end - f->blocks[i].start);
+	for (int i = 0; i < f->nclones; ++i) xv_moved_add(f->clones[i].start, f->clones[i].at, f->clones[i].end - f->clones[i].start);
 	xv_moved_add(f->struct1, f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE);
 	xv_moved_add(f->struct2, f->home + XV_HOME_STRUCT2, XV_VERSIONS * BN6_STATS_SIZE);
 	xv_moved_add(rom32(g.rom, g.tables + 4u * (uint32_t)f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);

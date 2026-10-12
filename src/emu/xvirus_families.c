@@ -4,6 +4,7 @@
  * the core starts. */
 #include "xvirus_families.h"
 
+#include "bn5.h"
 #include "bn6.h"
 #include "rom.h"
 
@@ -90,7 +91,9 @@ const XVirusFamily xvirus_control = {
  * spawn and release CanGard calls. A BL scan of both finds 4 calls within
  * them (one from CanGard to the reticle's spawner, two to its release) and
  * 39 to 39 routines outside, each paired with BN6's own (docs/ROM_DATA.md,
- * Virus families moved into the battle engine: BN5's CanGard). */
+ * Virus families moved into the battle engine: BN5's CanGard), but the
+ * reticle's spawn, which goes to the second-level dispatch's spawner: the
+ * reticle runs as its type in BN5, 0x25, through the dispatch. */
 
 static const XvBlock cangard_blocks[] = {
 	{ 0x08108E14, 0x08109140, XV_CODE, 0x018F4F22u },
@@ -104,7 +107,7 @@ static const XvData cangard_data[] = {
 	{ 0x08109000, 0x08109028, XV_ZERO },   /* its state table, BN5's layout: BN6's in its home */
 	{ 0x0810909A, 0x0810909C, XV_RAW }, { 0x0810909C, 0x081090A0, XV_POOL }, { 0x081090A0, 0x081090AC, XV_TABLE },
 	{ 0x0810911C, 0x08109128, XV_POOL },
-	{ 0x08109128, 0x0810912E, XV_RAW }, { 0x0810912E, 0x08109134, XV_RAW }, { 0x08109134, 0x0810913A, XV_RAW }, { 0x0810913A, 0x0810913C, XV_RAW },
+	{ 0x08109128, 0x0810912E, XV_RAW }, { 0x0810912E, 0x08109134, XV_RAW }, { 0x08109134, 0x0810913C, XV_RAW },   /* (its tables, by version) */
 	{ 0x0810913C, 0x08109140, XV_POOL },   /* (a mask, 0xA000: blind and confused, the same bits in BN6) */
 	/* (the reticle's) */
 	{ 0x080C952A, 0x080C952C, XV_RAW }, { 0x080C952C, 0x080C9530, XV_POOL }, { 0x080C9530, 0x080C953C, XV_TABLE },
@@ -121,11 +124,12 @@ static const XvPair cangard_calls[] = {
 	{ 0x0800F200, 0x08011680 }, { 0x08002C56, 0x08002DEA }, { 0x0800CCD2, 0x0800E9DC }, { 0x0800C676, 0x0800E276 },
 	{ 0x080DFFD2, 0x080E1932 }, { 0x08008A1C, 0x0800A03C }, { 0x08008A78, 0x0800A098 }, { 0x0800E140, 0x080103BC },
 	{ 0x080133CE, 0x080165C2 }, { 0x08008B6E, 0x0800A18E },
-	/* the reticle's: an attack spawned, its sprite run, an object's end, its panel's check; a sprite's loading, shadow,
+	/* the reticle's: an attack spawned (through the second-level dispatch's spawner: its type BN5's), its sprite run, an
+	 * object's end, its panel's check; a sprite's loading, shadow,
 	 * animation, palette and flip; facing; coordinates and panels; memory freed; its collision data made, set up, given
 	 * its hit's effect, its region cleared and set, its panels and its presence updated, its hit placed, its strike's
 	 * effect; a sound */
-	{ 0x08003178, 0x08003358 }, { 0x080186A8, 0x0801BBAC }, { 0x080138EA, 0x08016C8A }, { 0x0800B328, 0x0800CC66 },
+	{ BN5_SPAWN_3, XV_SPAWN_3 }, { 0x080186A8, 0x0801BBAC }, { 0x080138EA, 0x08016C8A }, { 0x0800B328, 0x0800CC66 },
 	{ 0x08002650, 0x080026E4 }, { 0x08002DF4, 0x08002F90 }, { 0x08002C10, 0x08002DA4 }, { 0x08002610, 0x080026A4 },
 	{ 0x08002BEC, 0x08002D80 }, { 0x0800C88E, 0x0800E456 }, { 0x08002DC0, 0x08002F5C }, { 0x0800C6CA, 0x0800E2CA },
 	{ 0x0800C69C, 0x0800E29C }, { 0x0800C6AC, 0x0800E2AC }, { 0x0800325C, 0x08003458 }, { 0x08016126, 0x08019892 },
@@ -139,7 +143,6 @@ static const XvImm cangard_imms[] = {
 	{ 0x081090C6, THUMB_MOVS, 0, 0, 7, 9 },        /* its guard's CurAction: BN5's 7, BN6's two status states before it */
 	{ 0x08109110, THUMB_MOVS, 0, 0, 8, 10 },       /* its shot's: 8, 10 */
 	{ 0x08108FB6, THUMB_ADDS, 4, 0, 0x57, 0x6C },  /* its muzzle's blast: BN5's effect 0x57, BN6's 0x6C (cangard_effects) */
-	{ 0x080C975C, THUMB_MOVS, 0, 0, 0x25, 0xD1 },  /* the reticle's type: BN5's 0x25, BN6's empty 0xD1 (cangard_types) */
 	{ 0x080C955A, THUMB_MOVS, 2, 0, 0x24, 0x5C },  /* its sprite: list 4's 0x24 in BN5, 0x5C in BN6 (cangard_sprites) */
 	{ 0x080C9636, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* the flags a hit leaves in its collision data: BN5's +0x68, BN6's +0x70 */
 };
@@ -158,7 +161,8 @@ static const XvSprite cangard_sprites[] = {
 	{ 4, 0x3D, 4, 0x5D, XV_ART + 0x3800, 0xC00 },    /* the muzzle's blast */
 };
 static const XvId cangard_effects[] = { { 0x57, 0x6C } };
-static const XvId cangard_types[] = { { 0x25, BN6_T3_FREE } };
+/* the reticle, BN5's third kind's type 0x25, moved: spawned as the dispatch's type, its number BN5's in the code */
+static const XvType cangard_types[] = { { 3, 0x25, XV_TYPE_MOVED } };
 
 const XVirusFamily xvirus_cangard = {
 	.name = "CanGard (BN5's)",

@@ -1,5 +1,5 @@
 /* xdiff.h: the differential's two battles, each traced. A trace is
- * "XDF1", its version (2), the game (5 or 6), its collision data's and
+ * "XDF1", its version (3), the game (5 or 6), its collision data's and
  * panel's sizes, the ranges the install moved (xvirus.h's XvMoved: from,
  * to, len; BN6's alone) and then a record per fight frame (each new value
  * of the battle's timer while it fights): "FRAM", the core's frame, the
@@ -8,11 +8,15 @@
  * order, both RNG words, how many events its core's hooks logged since the
  * record before (xdiff_events.h; the first record's from the battle's
  * start); then each object of the first kind (its slot,
- * whether its AI's data and collision data are read, its 0xD8 bytes from
- * its list node on (BN6_OBJECT_NODE before it), its AI's 0x100 and its
- * collision data's BN6_COLL_SIZE, BN5's padded), each of the third (its
- * slot, its bytes, its collision data), each of the fourth (its slot, its
- * 0xC8 bytes from its node), the 40 panels (BN5_PANEL_SIZE each,
+ * whether its AI's data and collision data are read, its type as the
+ * second-level dispatch runs it where its type is its kind's dispatch type
+ * (its game's number in the side table by its slot, xvirus_dispatch.h;
+ * BN6's alone, else 0), its 0xD8 bytes from its list node on
+ * (BN6_OBJECT_NODE before it), its AI's 0x100 and its collision data's
+ * BN6_COLL_SIZE, BN5's padded), each of the third (its slot, its type as
+ * the dispatch runs it, its bytes, its collision data), each of the fourth
+ * (its slot, its type so, its 0xC8 bytes from its node), the 40 panels
+ * (BN5_PANEL_SIZE each,
  * BN6's padded), the run order (each object's address), the sounds
  * begun (a music player and the song's number), and the events
  * (XD_EVENT_WORDS words each: kind, sub and flags in the first). All u32
@@ -37,6 +41,7 @@
 #include "xdiff_events.h"
 #include "xfields.h"
 #include "xvirus.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
 #define MAX_KEYS  128
@@ -45,7 +50,7 @@
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
 #define MAX_TWINS 16
-#define TRACE_VERSION 2
+#define TRACE_VERSION 3
 
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v` */
@@ -144,7 +149,7 @@ static int breaks_parse(Spec *s, const char *name, const char *v) {
 	bool call = !strcmp(name, "call");
 	if (!call && strcmp(name, "poke")) return -1;
 	if (s->npokes >= MAX_POKES) return 0;
-	if (call ? sscanf(v, "%x:%x", &a, &b) != 2 : sscanf(v, "%x:%x:%d", &a, &b, &n) < 2 || (n != 2 && n != 4)) return 0;
+	if (call ? sscanf(v, "%x:%x", &a, &b) != 2 : sscanf(v, "%x:%x:%d", &a, &b, &n) < 2 || (n != 1 && n != 2 && n != 4)) return 0;
 	s->pokes[s->npokes++] = (Poke){ a, b, call ? 0 : n };
 	return 1;
 }
@@ -301,24 +306,33 @@ static int run_order(const View *v, uint32_t *order, int max) {
 	return n;
 }
 
+/* the type an object of BN6's runs as through the second-level dispatch:
+ * its game's number in its kind's side table, where its type is the
+ * kind's dispatch type; 0 else (and in BN5's battle, which has none) */
+static uint8_t dispatched(const View *v, int kind, uint32_t o) {
+	if (v->game != 6 || v->rd8(o + BN6_T1_TYPE) != xvirus_dispatch_type(kind)) return 0;
+	return v->rd8(xvirus_dispatch_side(kind) + v->rd8(o + BN6_T1_SLOT));
+}
+
 static void objects_out(Side *g, const uint8_t *s1, int n1, const uint8_t *s3, int n3, const uint8_t *s4, int n4) {
 	const View *v = &g->v;
 	for (int i = 0; i < n1; ++i) {
 		uint32_t o = v->t1 + s1[i] * BN6_T1_SIZE, ai = v->rd32(o + BN6_T1_AI_DATA), coll = v->rd32(o + BN6_T1_COLLISION);
-		w8s(g, s1[i], in_ewram(ai), in_ewram(coll), 0);
+		w8s(g, s1[i], in_ewram(ai), in_ewram(coll), dispatched(v, 1, o));
 		bytes_out(g, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
 		bytes_out(g, in_ewram(ai) ? ai : 0, BN6_AI_DATA_SIZE, BN6_AI_DATA_SIZE);
 		bytes_out(g, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
 	}
 	for (int i = 0; i < n3; ++i) {
 		uint32_t o = v->t3 + s3[i] * BN6_T1_SIZE, coll = v->rd32(o + BN6_T1_COLLISION);
-		w8s(g, s3[i], 0, in_ewram(coll), 0);
+		w8s(g, s3[i], 0, in_ewram(coll), dispatched(v, 3, o));
 		bytes_out(g, o - BN6_OBJECT_NODE, BN6_T1_SIZE, BN6_T1_SIZE);
 		bytes_out(g, in_ewram(coll) ? coll : 0, v->coll_size, BN6_COLL_SIZE);
 	}
 	for (int i = 0; i < n4; ++i) {
-		w8s(g, s4[i], 0, 0, 0);
-		bytes_out(g, v->t4 + s4[i] * BN6_T4_SIZE - BN6_OBJECT_NODE, BN6_T4_SIZE, BN6_T4_SIZE);
+		uint32_t o = v->t4 + s4[i] * BN6_T4_SIZE;
+		w8s(g, s4[i], 0, 0, dispatched(v, 4, o));
+		bytes_out(g, o - BN6_OBJECT_NODE, BN6_T4_SIZE, BN6_T4_SIZE);
 	}
 }
 

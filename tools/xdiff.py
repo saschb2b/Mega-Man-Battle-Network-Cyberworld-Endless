@@ -381,7 +381,8 @@ def compare(name, spec, ta, tb, legit, canon, show):
         verdict, at = 'FAIL', min(len(fa_all), len(fb_all))
     lines.insert(0, f'  {n} fight frames compared (t{fa_all[0]["t"]}-t{fa_all[-1]["t"]}), masks applied (none on the '
                  f'family\'s own records, where none may): ' + (', '.join(f'{k} x{v}' for k, v in sorted(used.items())) or 'none') +
-                 '; BN5\'s records read in BN6\'s terms: ' + (', '.join(f'{k} x{v}' for k, v in sorted(read.items()) if v) or 'none'))
+                 '; BN5\'s records read in BN6\'s terms: ' + (', '.join(f'{k} x{v}' for k, v in sorted(read.items()) if v) or 'none') +
+                 (f'; BN6\'s objects of the dispatch\'s types read as its side table names them: x{tb["dispatched"]}' if tb.get('dispatched') else ''))
     return verdict, at, lines
 
 

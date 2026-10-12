@@ -10,6 +10,21 @@
   net's battles though BN5 has them all, and its Roll DS was taken for
   Roll. Its text now reads in BN6's codes, checked glyph for glyph
   against both games' fonts.
+- **BN5's own attacks in BN6's battle engine, and its families' recipes
+  made from the ROMs (issue #82).** BN6 runs a battle object by its type,
+  a byte, and a family of BN5's spawns objects of BN5's types, which BN6
+  either runs as something else or has no room for. One type of each kind
+  of object that BN6 never spawns now runs whatever moved routine the
+  object was spawned as, by a byte beside it in RAM the battle clears:
+  CanGard's reticle is BN5's own attack 0x25 again, no longer given a
+  spare number of BN6's, and Cactikil's and WuNote's helpers can come in
+  the same way. A tool derives each BN5 family's recipe from the two
+  ROMs, numbers only: its code, its calls' twins in BN6 (each pair's
+  bodies compared, and where they differ an audit of what the family
+  asks of it), its numbers in BN6's terms, its records, chips and
+  drawings. It writes CanGard's and Handi's exactly as they are installed,
+  finds 15 of BN5's 35 families whole and names what the rest still need.
+  BN6's own battles are the same at every byte.
 - **Room for all of BN5's virus families in BN6's battle engine (issue
   #82).** The tables BN6's engine finds a virus family through (by its AI
   index, its enemy ids, its sprites, effects and attacks, its reward

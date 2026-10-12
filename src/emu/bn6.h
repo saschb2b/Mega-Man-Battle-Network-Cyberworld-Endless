@@ -126,6 +126,10 @@
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */
 #define BN6_T1_COUNT          0x20        /* 32 of them */
 #define BN6_T1_IN_PLAY        0x00        /* bit 0 in play */
+#define BN6_T1_TYPE           0x01        /* its type, the routine its kind's table runs it by (BN6_T1_TYPES, BN6_T3_TYPES, BN6_T4_TYPES): written by
+                                             the spawn alone (0x080032BE), read by the runner (0x080031F4) and by the third kind's type 0x10,
+                                             which looks for its own among the third kind's objects (0x080C802E) */
+#define BN6_T1_SLOT           0x03        /* its slot among its kind's 32, written once as the battle sets the slots up (0x080034BE) */
 #define BN6_T1_ACTION         0x09        /* CurAction: MegaMan's BN6_MEGAMAN_READY when he can act, 0x10 a step, 0x12-0x16 a chip */
 #define BN6_MEGAMAN_READY     0x08        /* BN6_T1_ACTION: MegaMan's when he can act */
 #define BN6_T1_PANEL_X        0x12        /* PanelX and PanelY: its column and row, 0 off the field */

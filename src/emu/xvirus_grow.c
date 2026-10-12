@@ -13,6 +13,7 @@
 #include "hook.h"
 #include "rom.h"
 #include "xvirus.h"
+#include "xvirus_dispatch.h"
 #include "xvirus_tx.h"
 
 #define BUS          0x08000000u
@@ -30,6 +31,7 @@ typedef struct {
 	uint32_t ref, count, size, to, cap;
 	int fill_of;
 	uint32_t fill;
+	int kind;   /* a kind's types (1, 3, 4): its dispatch type's entry is the dispatch's routine (xvirus_dispatch.h); 0 none */
 } Grow;
 
 static Grow G[XG_TABLES];
@@ -58,9 +60,9 @@ static void specs(void) {
 		G[XG_LIST + i] = (Grow){ "a sprite list", BUS + R.layout->sprite_lists + 4 * lists[i][0], lists[i][1], 4, XV_LISTS + i * XV_STEP,
 			XV_LIST_MAX, -1, BN6_SPRITE_PLACEHOLDER };
 	G[XG_EFFECTS] = (Grow){ "the effects", BN6_EFFECTS_REF, BN6_EFFECT_COUNT, 4, XV_EFFECTS, XV_EFFECTS_MAX, 0, 0 };
-	G[XG_T1] = (Grow){ "the first kind's types", BN6_T1_TYPES_REF, BN6_TYPES_T1_COUNT, 4, XV_TYPES, XV_TYPES_MAX, -1, 0 };
-	G[XG_T3] = (Grow){ "the third kind's types", BN6_T3_TYPES_REF, BN6_TYPES_T3_COUNT, 4, XV_TYPES + XV_STEP, XV_TYPES_MAX, -1, 0 };
-	G[XG_T4] = (Grow){ "the fourth kind's types", BN6_T4_TYPES_REF, BN6_TYPES_T4_COUNT, 4, XV_TYPES + 2 * XV_STEP, XV_TYPES_MAX, -1, 0 };
+	G[XG_T1] = (Grow){ "the first kind's types", BN6_T1_TYPES_REF, BN6_TYPES_T1_COUNT, 4, XV_TYPES, XV_TYPES_MAX, -1, 0, 1 };
+	G[XG_T3] = (Grow){ "the third kind's types", BN6_T3_TYPES_REF, BN6_TYPES_T3_COUNT, 4, XV_TYPES + XV_STEP, XV_TYPES_MAX, -1, 0, 3 };
+	G[XG_T4] = (Grow){ "the fourth kind's types", BN6_T4_TYPES_REF, BN6_TYPES_T4_COUNT, 4, XV_TYPES + 2 * XV_STEP, XV_TYPES_MAX, -1, 0, 4 };
 	G[XG_IDS] = (Grow){ "the enemy ids", BN6_ENEMY_IDS_REF, BN6_ENEMY_IDS_COUNT, 3, XV_IDS_AT, XV_IDS, BN6_FILLER_ID, 0 };
 	G[XG_ROWS] = (Grow){ "the reward rows", BN6_DROP_ROWS_REF, BN6_DROP_ROW_COUNT, ENTRY_MAX, XV_ROWS, XV_IDS, BN6_FILLER_ID, 0 };
 }
@@ -83,7 +85,25 @@ static void grow_one(const Grow *g) {
 		if (g->fill_of >= 0) memcpy(t + i * g->size, t + (uint32_t)g->fill_of * g->size, g->size);
 		else put32(t + i * g->size, g->fill);
 	}
+	if (g->kind) {
+		/* (the dispatch type's entry BN6's placeholder first: the kind's type 0 routine, the first's and the fourth's; 0, the third's) */
+		uint8_t *e = t + 4u * (uint32_t)xvirus_dispatch_type(g->kind);
+		uint32_t was = get32(e), placeholder = g->kind == 3 ? 0 : get32(t);
+		if (was != placeholder) { xv_fail("%s: the dispatch's type holds %08x, not BN6's placeholder %08x", g->name, (unsigned)was, (unsigned)placeholder); return; }
+		put32(e, xvirus_dispatch_routine(g->kind) | 1);
+	}
 	xv_word(g->ref, from, g->to);
+}
+
+/* The second-level dispatch's code, and its tables blank: every MOVED
+ * entry the stray's routine, every TWIN entry XV_TYPE_MOVED */
+static void dispatch_make(void) {
+	uint8_t *code = xv_put(XV_STUBS, XV_STUBS_SIZE, true);
+	if (code) xvirus_dispatch_code(code);
+	uint8_t *moved = xv_put(XV_MOVED_TABLES, XV_DISPATCH_KINDS * XV_STEP, true);
+	for (uint32_t i = 0; moved && i < XV_DISPATCH_KINDS * XV_STEP / 4; ++i) put32(moved + 4 * i, XV_STUB_NONE | 1);
+	uint8_t *twin = xv_put(XV_TWIN_TABLES, XV_DISPATCH_KINDS * 0x100u, true);
+	if (twin) memset(twin, XV_TYPE_MOVED, XV_DISPATCH_KINDS * 0x100u);
 }
 
 /* The names of the ids from XV_FIRST_ID: every entry the empty name after
@@ -136,6 +156,7 @@ bool xg_grow(void) {
 	xv_tx_begin();
 	for (int t = 0; t < XG_TABLES && !xv_failed(); ++t) grow_one(&G[t]);
 	if (!xv_failed()) names_make();
+	if (!xv_failed()) dispatch_make();
 	/* (the preload as the spawn reads an id: lsls #0x1C, lsrs #0x14) */
 	xv_insn(BN6_PRELOAD_ID_LSL, THUMB_LSLS, 2, 2, 0x1F, 32 - ID_HIGH_BITS);
 	xv_insn(BN6_PRELOAD_ID_LSR, THUMB_LSRS, 2, 2, 0x17, 32 - 8 - ID_HIGH_BITS);
@@ -182,6 +203,23 @@ void xg_set_word(int t, uint32_t i, uint32_t v) {
 	put32(w, v);
 	if (t >= 0 && t < XG_TABLES && G[t].size != 4) { xv_fail("grown table %d is no table of words", t); return; }
 	xg_set(t, i, w);
+}
+
+void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine) {
+	uint32_t twin = xvirus_dispatch_twin_at(kind, from), moved = xvirus_dispatch_moved_at(kind, from);
+	if (!grown || !twin || !moved || (to == XV_TYPE_MOVED) != (routine != 0)) { xv_fail("the type %d:%#x for the dispatch", kind, from); return; }
+	/* (each entry blank, or what another family set there already: the same) */
+	uint8_t was = emu_read8(twin);
+	if (was != XV_TYPE_MOVED && was != to) { xv_fail("the type %d:%#x is BN6's %#x already", kind, from, was); return; }
+	if (to == XV_TYPE_MOVED) {
+		uint32_t r = emu_read32(moved);
+		if (was != XV_TYPE_MOVED || (r != (XV_STUB_NONE | 1) && r != (routine | 1))) { xv_fail("the type %d:%#x is moved already (%08x)", kind, from, (unsigned)r); return; }
+		uint8_t *p = xv_put(moved, 4, false);
+		if (p) put32(p, routine | 1);
+		return;
+	}
+	uint8_t *p = xv_put(twin, 1, false);
+	if (p) *p = to;
 }
 
 uint32_t xg_names_end(void) {

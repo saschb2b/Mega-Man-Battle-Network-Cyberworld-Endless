@@ -45,9 +45,9 @@
 #define BN5_SPAWN_EFFECT  0x080DFFD2u /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT) */
 #define BN5_SPRITE_LOAD   0x08002650u /* sprite_load: r5 the object whose sprite state is set up anew (BN6_SPRITE_LOAD) */
 #define BN5_SET_ATTACK    0x0800F21Cu /* setAttack's common part (setAttack0-6 at 0x0800F200 + 4N): r0 the CurAction, r2 N, r5 the object */
-#define BN5_RESERVE_PANEL_DONE 0x0801866Eu /* object_reservePanel (0x08018654) once the panel is reserved: r5 the object (no bit set in it) */
+#define BN5_RESERVE_PANEL_DONE 0x0801866Eu /* object_reservePanel +0x1A (it is at 0x08018654), once the panel is reserved: r5 the object (no bit set in it) */
 #define BN5_BLINK_FLASHING 0x080137A8u /* the blink step of an object flashing: bit 1 of its flash timer (+0x26) clear hides it (BN6's opposite) */
-#define BN5_OBJECT_RUNNER_RET 0x08003020u /* RunBattleObjectLogic (0x08002FCC): the return address an object's call chain ends at */
+#define BN5_OBJECT_RUNNER_RET 0x08003020u /* RunBattleObjectLogic +0x54 (it is at 0x08002FCC): the return address an object's call chain ends at */
 #define BN5_OBJECT_RUNNING 0x0200BBF0u /* u32 the node of the object running, 0 outside the runner (0x08002FE2) */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
@@ -172,7 +172,22 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_FAMILIES      35          /* ... their entries */
 #define BN5_TRAITS_SHADOW 5           /* struct1 +5: a shadow drawn under it (BN6's at BN6_TRAITS_SHADOW, its +5 an element) */
 #define BN5_ENEMY_NAMES   0x0873C0B4u /* its viruses' names, a text archive by enemy id (BN6's RomLayout.enemy_names[0]) */
-#define BN5_T3_TYPES      0x08003B80u /* its attacks' routines by type (BN6_T3_TYPES) */
+#define BN5_T1_TYPES      0x08003958u /* the first kind's routines by type (BN6_T1_TYPES; its word in the kinds' table 0x08003044), */
+#define BN5_TYPES_T1_COUNT 95         /* ... its types */
+#define BN5_T3_TYPES      0x08003B80u /* its attacks' routines by type (BN6_T3_TYPES; 0x0800304C), */
+#define BN5_TYPES_T3_COUNT 204        /* ... its types */
+#define BN5_T4_TYPES      0x08003F60u /* the fourth kind's routines by type (BN6_T4_TYPES; 0x08003050), */
+#define BN5_TYPES_T4_COUNT 145        /* ... its types */
+/* Its spawners (each r0 the type, r1-r4 its words, r5 back the object or 0), whose calls in a moved family's code the
+ * second-level dispatch takes (src/emu/xvirus_dispatch.c, XV_SPAWN_*): each BN6's of the same kind and the same place
+ * in the run order (the routine its spawn ends with: after the object running, at the list's end, at its start) */
+#define BN5_SPAWN_1       0x08003140u /* the first kind's, run after the object running (0x08003204; BN6_SPAWN_1) */
+#define BN5_SPAWN_1_LAST  0x0800315Cu /* the first kind's, at the list's end (0x0800322C; BN6_SPAWN_1_LAST) */
+#define BN5_SPAWN_1_LAST2 0x080031E8u /* ... a second of the same code (BN6_SPAWN_1_LAST) */
+#define BN5_SPAWN_3       0x08003178u /* the third kind's, after the object running (BN6_SPAWN_3) */
+#define BN5_SPAWN_3_LAST  0x08003194u /* ... at the list's end (BN6_SPAWN_3_LAST) */
+#define BN5_SPAWN_3_FIRST 0x080031B0u /* ... at its start (0x08003244; BN6_SPAWN_3_FIRST) */
+#define BN5_SPAWN_4       0x080031CCu /* the fourth kind's, after the object running (BN6_SPAWN_4); BN5 has no other of the kind */
 #define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
 #define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
 

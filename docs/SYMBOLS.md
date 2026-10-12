@@ -79,29 +79,29 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| Code (routines, hooks, instructions) | 51 | 8 |
-| ROM data (tables, text, literals) | 123 | 42 |
-| ROM, code or data not told | 119 | 66 |
-| RAM (variables, structures) | 65 | 27 |
+| Code (routines, hooks, instructions) | 52 | 8 |
+| ROM data (tables, text, literals) | 131 | 55 |
+| ROM, code or data not told | 145 | 102 |
+| RAM (variables, structures) | 66 | 27 |
 | I/O registers | 3 | 0 |
-| Fields of structures | 113 | 30 |
+| Fields of structures | 115 | 30 |
 | Event flags | 24 | 3 |
 | Values of fields | 50 | 13 |
-| Constants, sizes and counts | 131 | 36 |
-| All | 679 | 225 |
+| Constants, sizes and counts | 132 | 39 |
+| All | 718 | 277 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 48 | 1 |
 | Shops and traders | 31 | 0 |
 | NaviCust | 17 | 0 |
-| Chips and folders | 83 | 13 |
-| Battle | 139 | 104 |
+| Chips and folders | 85 | 17 |
+| Battle | 150 | 117 |
 | Text and fonts | 28 | 2 |
 | Sound | 7 | 2 |
-| Maps and the overworld | 115 | 15 |
+| Maps and the overworld | 116 | 16 |
 | Events and progress | 26 | 8 |
-| Engine core | 185 | 80 |
+| Engine core | 210 | 114 |
 
 <!-- end of what tools/symbols.py writes -->
 
@@ -116,27 +116,28 @@ Made from bn6f at commit `d57c196`.
 
 | bn6f's functions | BN6 Gregar | BN5 Team Colonel (partial) |
 | --- | ---: | ---: |
-| All (thumb_func_start, thumb_local_start, arm_func_start, arm_local_start) | 13,386 of 13,646 (98.1%) | 4,329 of 13,646 (31.7%) |
-| ... global (thumb_func_start, arm_func_start) | 2,688 of 2,751 (97.7%) | 1,304 of 2,751 (47.4%) |
-| ... named by bn6f (not sub_ and an address) | 2,306 of 2,323 (99.3%) | 1,290 of 2,323 (55.5%) |
-| ... of them with no address in the name | 1,062 of 1,072 (99.1%) | 776 of 1,072 (72.4%) |
+| All (thumb_func_start, thumb_local_start, arm_func_start, arm_local_start) | 13,386 of 13,646 (98.1%) | 4,344 of 13,646 (31.8%) |
+| ... global (thumb_func_start, arm_func_start) | 2,688 of 2,751 (97.7%) | 1,316 of 2,751 (47.8%) |
+| ... named by bn6f (not sub_ and an address) | 2,306 of 2,323 (99.3%) | 1,295 of 2,323 (55.7%) |
+| ... of them with no address in the name | 1,062 of 1,072 (99.1%) | 779 of 1,072 (72.7%) |
 | Located by `bytes` | 9,837 | 3,009 |
 | Located by `calls+bytes` | 1,905 | 570 |
 | Located by `neighbours` | 1,525 | 0 |
-| Located by `calls` | 108 | 750 |
+| Located by `calls` | 108 | 745 |
 | Located by `shift` | 11 | 0 |
+| Located by `twin` | 0 | 20 |
 | Data labels the located functions name | 2,734 | 215 |
 | RAM labels their literals hold at Falzar's address | 895 | 10 |
 | RAM labels their literals hold elsewhere | 0 | 341 |
 
 | Part of the game (bn6f's files) | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| Battle | 9,096 of 9,210 (98.8%) | 2,486 of 9,210 (27.0%) |
+| Battle | 9,096 of 9,210 (98.8%) | 2,500 of 9,210 (27.1%) |
 | Menus and screens | 1,581 of 1,581 (100.0%) | 432 of 1,581 (27.3%) |
 | Maps and the overworld | 1,009 of 1,061 (95.1%) | 348 of 1,061 (32.8%) |
 | Sound and libraries (m4a, link cable, wireless) | 407 of 407 (100.0%) | 373 of 407 (91.6%) |
 | Shops and traders | 296 of 296 (100.0%) | 171 of 296 (57.8%) |
-| Engine core | 278 of 286 (97.2%) | 161 of 286 (56.3%) |
+| Engine core | 278 of 286 (97.2%) | 162 of 286 (56.6%) |
 | NaviCust | 204 of 204 (100.0%) | 111 of 204 (54.4%) |
 | Text and fonts | 202 of 202 (100.0%) | 127 of 202 (62.9%) |
 | Minigames and their maps | 66 of 152 (43.4%) | 3 of 152 (2.0%) |
@@ -144,10 +145,10 @@ Made from bn6f at commit `d57c196`.
 | Graphics | 83 of 83 (100.0%) | 74 of 83 (89.2%) |
 | Chips and folders | 18 of 18 (100.0%) | 17 of 18 (94.4%) |
 
-- BN6 Gregar: 39 times an address of ours names a bn6f function or label the matcher located: 30 at the same place, 7 inside the function or structure, 2 a field of the structure it is, 0 elsewhere.
+- BN6 Gregar: 51 times an address of ours names a bn6f function or label the matcher located: 38 at the same place, 10 inside the function or structure, 2 a field of the structure it is, 1 elsewhere.
 - BN6 Gregar: of the 895 RAM labels the located functions' literals hold, 895 read bn6f's (Falzar's) address.
 - BN6 Gregar: 13,162 located functions laid out as in Falzar, 0 lying over another; 0 that a located reference names elsewhere.
-- BN5 Team Colonel: 8 times an address of ours names a bn6f function or label the matcher located: 3 at the same place, 5 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
+- BN5 Team Colonel: 16 times an address of ours names a bn6f function or label the matcher located: 9 at the same place, 7 inside the function or structure, 0 a field of the structure it is, 0 elsewhere.
 - BN5 Team Colonel: 3,574 located functions laid out as in Falzar, 0 lying over another; 40 that a located reference names elsewhere.
 
 <!-- end of what tools/symbols.py writes -->
@@ -186,6 +187,7 @@ disagree. Then:
 | `neighbours` | its bytes are at the shift from Falzar that the located functions before and after it in its file share |
 | `calls` | named by the calls, branches and pointers of located functions, all agreeing; its own bytes differ from Falzar's (it changed between the versions) |
 | `shift NN%` | estimated: at its neighbours' shift, where NN% of its known bits are Falzar's |
+| `twin` | BN5 only: the twin of the routine where it is located in Gregar, as this project paired them ([below](#twins-of-the-projects)) |
 
 Only a function whose bytes were found (`bytes`, `calls+bytes`,
 `neighbours`) is laid out as in Falzar, so only its references are read:
@@ -211,6 +213,27 @@ code, and the code among the map data. The full map's report
 (`.build/symbols/located.md`) counts them by bn6f's file, and
 `python3 tools/bn6f_match.py --bn6f PATH --report NAME` shows how a
 function's bytes differ where its neighbours put it.
+
+### Twins of the project's
+
+BN5's search finds only what its code shares with BN6's byte for byte.
+Moving BN5's virus families into BN6's engine (issue #82,
+[MULTIROM.md](MULTIROM.md#transplanted-families)) pairs more: each BN5
+routine a family calls with its twin in Gregar, in `tools/bn5_twins.py`,
+the two bodies compared by `tools/xrecipe_thumb.py` (the same; the same
+but for the offsets of loads and stores; or differing, and then audited
+for what BN5's code asks of it: [ROM_DATA.md](ROM_DATA.md), The engine's differing twins),
+CanGard's and Handi's run frame by frame against BN5's own since
+(`tools/xdiff.py`). The matcher takes them in: where it located the
+twin's function in Gregar, BN5's routine is that function too, `twin`,
+where BN5's search placed the function nowhere and nothing else there.
+Five rows of the search were wrong, a function of another body placed by
+a single reference where a twin is (`WRONG_ROWS` in that file): the twin
+takes their place, and the matcher says when one no longer needs it. Two
+twins lie inside one of Gregar's functions, in BN6 code that bn6f left as
+data bytes at its end: they are named by that function and the offset,
+and counted as none of bn6f's functions. The full map has 20 functions
+located this way, 15 of them new to it.
 
 ### Why bn6f's names are not in these files
 

@@ -105,9 +105,28 @@
 #define BN6_T3_TYPES          0x08003EC4u /* the third kind's (attacks), */
 #define BN6_T3_TYPES_REF      0x0800322Cu /* ... its word */
 #define BN6_TYPES_T3_COUNT    213         /* ... its types */
-#define BN6_T3_FREE           0xD1        /* a type whose entry is 0 (0xD2 too), which none of BN6's spawns names: a moved family's attack's */
+#define BN6_T3_FREE           0xD1        /* a type whose entry is 0 (0xD2 too), which none of BN6's spawns names: free (CanGard's reticle took
+                                             it until the second-level dispatch, XV_T3_DISPATCH 0xD2, ran BN5's types) */
 #define BN6_T4_TYPES          0x080042C8u /* the fourth kind's (effects), */
 #define BN6_T4_TYPES_REF      0x08003230u /* ... its word */
 #define BN6_TYPES_T4_COUNT    146         /* ... its types */
+/* The spawners (r0 the type, r1-r4 the object's four words, r5 back the
+ * object or 0): their common part (0x08003278) takes a free slot of the
+ * kind's 32 and the routine each ends with links the object into the run
+ * order. The second-level dispatch (src/emu/xvirus_dispatch.c) calls them
+ * for a moved family's code (BN5_SPAWN_* the same in BN5) */
+#define BN6_SPAWN_1           0x08003320u /* the first kind's, run after the object running (0x08003400) */
+#define BN6_SPAWN_1_LAST      0x0800333Cu /* ... at the list's end (0x08003428) */
+#define BN6_SPAWN_3           0x08003358u /* the third kind's, after the object running */
+#define BN6_SPAWN_3_LAST      0x08003374u /* ... at the end */
+#define BN6_SPAWN_3_FIRST     0x08003390u /* ... at the start (0x08003440) */
+#define BN6_SPAWN_4           0x080033ACu /* the fourth kind's, after the object running (0x080033C8 and 0x080033E4 its two others) */
+#define BN6_OBJECT_FREE       0x08003458u /* object_freeMemory: r5 the object let go, its slot freed and its node out of the run order (as
+                                             an object ends itself) */
+#define BN6_DISPATCH_SIDE     0x0203FF00u /* the second-level dispatch's side tables, ours (docs/EMULATION.md, the RAM plan): a byte per
+                                             object slot, its game's type the dispatch runs it as, the first kind's 32 here, the third's at
+                                             +0x20, the fourth's at +0x40; the battle's setup clears them with the rest of 0x0203CDA8-
+                                             0x0203FFFF (0x080071F2), and nothing of BN6's reads or writes 0x0203FB50 on */
+#define BN6_DISPATCH_SIDE_STEP 0x20       /* ... from one kind's table to the next */
 
 #endif
