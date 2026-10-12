@@ -28,7 +28,7 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  16      /* the families' blocks of code */
+#define FAMILY_MAX  64      /* the families' blocks of code, and the chips' moved code's */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -330,10 +330,11 @@ static XdLog *log_make(int game, bool alone) {
 	log->game = game;
 	log->alone = alone;
 	log->g = &games[game == 6];
-	XvMoved m[64];
-	int n = xvirus_moved(m, 64);
+	static XvMoved m[XV_MOVED_MAX];
+	int n = xvirus_moved(m, XV_MOVED_MAX);
+	/* (the families' code, and the chips' moved code: its draws keyed by BN5's own places as a family's are) */
 	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if (m[i].to >= XV_CODE && m[i].to < XV_ART) log->fam[log->nfam++] = m[i];
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL)) log->fam[log->nfam++] = m[i];
 	/* (the control's code where BN6 has it: its own Mettaur's, which the moved copy's places are keyed as) */
 	for (int i = 0; alone && i < xvirus_control.nblocks && log->nfam < FAMILY_MAX; ++i) {
 		const XvBlock *b = &xvirus_control.blocks[i];

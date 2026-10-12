@@ -57,12 +57,15 @@ static bool ref_ok(const XVirusFamily *f, XvRef r) {
 	return r.own ? (r.addr & 1) && xvirus_is_code(f, r.addr & ~1u) : bn6_routine(r.addr);
 }
 
-static bool blocks_ok(const XVirusFamily *f, char *why, size_t n) {
+/* the families' region: their code from XV_CODE, their art from XV_ART */
+static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_END };
+
+static bool blocks_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (f->nblocks < 1) return no(why, n, "no blocks");
 	for (int i = 0; i < f->nblocks; ++i) {
 		const XvBlock *b = &f->blocks[i];
 		if (b->start >= b->end || b->start < BUS || (b->start & 1) || (b->end & 1)) return no(why, n, "block %d's range", i);
-		if (b->at < XV_CODE || b->at + (b->end - b->start) > XV_ART || ((b->at ^ b->start) & 3)) return no(why, n, "block %d placed at %08x", i, (unsigned)b->at);
+		if (b->at < r->code || b->at + (b->end - b->start) > r->code_end || ((b->at ^ b->start) & 3)) return no(why, n, "block %d placed at %08x", i, (unsigned)b->at);
 		for (int k = 0; k < i; ++k) {
 			const XvBlock *o = &f->blocks[k];
 			bool src = b->start < o->end && o->start < b->end;
@@ -76,7 +79,7 @@ static bool blocks_ok(const XVirusFamily *f, char *why, size_t n) {
 static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
 
 /* its clones: code of one block each, copied past its blocks' copies, a call aimed at a routine of BN6's */
-static bool clones_ok(const XVirusFamily *f, char *why, size_t n) {
+static bool clones_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	for (int i = 0; i < f->nclones; ++i) {
 		const XvClone *c = &f->clones[i];
 		uint32_t len = c->end - c->start;
@@ -84,7 +87,7 @@ static bool clones_ok(const XVirusFamily *f, char *why, size_t n) {
 		if (c->start >= c->end || ((c->start | c->end) & 1) || !b || c->end > b->end) return no(why, n, "clone %d's range", i);
 		for (uint32_t a = c->start; a < c->end; a += 2)
 			if (!xvirus_is_code(f, a)) return no(why, n, "clone %d holds data at %08x", i, (unsigned)a);
-		if (c->at < XV_CODE || c->at + len > XV_ART || ((c->at ^ c->start) & 3)) return no(why, n, "clone %d placed at %08x", i, (unsigned)c->at);
+		if (c->at < r->code || c->at + len > r->code_end || ((c->at ^ c->start) & 3)) return no(why, n, "clone %d placed at %08x", i, (unsigned)c->at);
 		for (int k = 0; k < f->nblocks; ++k)
 			if (spans_meet(c->at, len, f->blocks[k].at, f->blocks[k].end - f->blocks[k].start)) return no(why, n, "clone %d over block %d", i, k);
 		for (int k = 0; k < i; ++k)
@@ -131,6 +134,11 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 		if (!ref_ok(f, f->states[i])) return no(why, n, "state %d (%08x)", i, (unsigned)f->states[i].addr);
 	for (int i = 0; i < XV_HOOKS; ++i)
 		if (!ref_ok(f, f->hooks[i])) return no(why, n, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
+	return true;
+}
+
+/* its calls out (each to one of BN6's routines, or the dispatch's spawner for one of its game's) and its immediates */
+static bool calls_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		if (xvirus_block_of(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
@@ -158,11 +166,11 @@ int xvirus_list_slot(int list) {
 }
 
 /* its sprites each in its own room past XV_ART, at a number of its own in a grown list */
-static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
+static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
-		if (s->at < XV_ART || (s->at & 3) || !s->room || s->room > XV_END - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		if (s->at < r->art || (s->at & 3) || !s->room || s->at >= r->art_end || s->room > r->art_end - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
 			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
@@ -173,8 +181,8 @@ static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
 }
 
 /* what it draws (its sprites, its effects past BN6's), its attacks' types one each */
-static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
-	if (!sprites_ok(f, why, n)) return false;
+static bool art_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
+	if (!sprites_ok(f, r, why, n)) return false;
 	for (int i = 0; i < f->neffects; ++i) {
 		if (f->effects[i].to < BN6_EFFECT_COUNT) return no(why, n, "effect %#x, one of BN6's", f->effects[i].to);
 		for (int k = 0; k < i; ++k)
@@ -201,6 +209,13 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (f->home < XV_HOMES || f->home + XV_HOME_SIZE > XV_CODE || (f->home - XV_HOMES) % XV_HOME_SIZE) return no(why, n, "home %08x", (unsigned)f->home);
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");
 	if (f->ice != XV_ICE_OWN && (f->ice < 0 || f->ice > XV_ICE_MAX)) return no(why, n, "an ice block of size %d", f->ice);
-	return blocks_ok(f, why, n) && data_ok(f, why, n) && clones_ok(f, why, n) && fixes_ok(f, why, n) && refs_ok(f, why, n) &&
-		art_ok(f, why, n);
+	return blocks_ok(f, &families, why, n) && data_ok(f, why, n) && clones_ok(f, &families, why, n) && fixes_ok(f, why, n) && refs_ok(f, why, n) &&
+		calls_ok(f, why, n) && art_ok(f, &families, why, n);
+}
+
+bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
+	if (!f->name) return no(why, n, "no name");
+	if (f->nstates || f->held || f->held_chips || f->traits.laid) return no(why, n, "states, records or held chips: a family's, not code alone");
+	return blocks_ok(f, r, why, n) && data_ok(f, why, n) && clones_ok(f, r, why, n) && fixes_ok(f, why, n) && calls_ok(f, why, n) &&
+		art_ok(f, r, why, n);
 }

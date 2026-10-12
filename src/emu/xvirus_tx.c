@@ -93,6 +93,11 @@ void xv_commit(void) {
 	for (int i = 0; i < tx.n; ++i) emu_write(tx.w[i].at, tx.bytes + tx.w[i].off, tx.w[i].len);
 }
 
+void xv_commit_where(bool (*part)(uint32_t at)) {
+	for (int i = 0; i < tx.n; ++i)
+		if (part(tx.w[i].at)) emu_write(tx.w[i].at, tx.bytes + tx.w[i].off, tx.w[i].len);
+}
+
 /* ---- what was moved where ---- */
 
 static XvMoved moved[XV_MOVED_MAX];

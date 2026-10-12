@@ -1,0 +1,80 @@
+{
+ "about": "A chip of BN5's that BN6's code plays (issue #82's C1, judged by its C2): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (4,2), MegaMan with a folder of DrilArm3 I in both games, BN5's chip 74 by BN5's own code and the registry's 210 by BN6's (DrilArm's family 0x2E) under BN5's record, the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's is the chip's (docs/MULTIROM.md, The chip registry).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "104A"
+ ],
+ "folder6": [
+  "10D2"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 33,
+  "why": "BN6's DrilArm family (0x2E), which the registry's DrilArm plays, winds up 9 frames longer than BN5's (0x4F): the same drill objects, strikes, damage, pushes and sounds, each 9 frames later (BN5's first strike at t33, BN6's at t42); BN5's family moved waits for its panel-claim pool (0x0802E920-0x0802EA6E, its state in BN5's RAM), its flash's number and its sprite (docs/MULTIROM.md, The chips' code)"
+ },
+ "sprites": "bytes"
+}

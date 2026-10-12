@@ -47,6 +47,7 @@
 #include "soulproxy.h"
 #include "soulunite.h"
 #include "thumb_reloc.h"
+#include "xchips_install.h"
 #include "xdiff_events.h"
 #include "xfields.h"
 #include "xvirus.h"
@@ -68,7 +69,8 @@
 #define MAX_SCRIPT_STEPS 32
 
 typedef struct { uint32_t t, n, keys; } Key;
-typedef struct { uint32_t at, v; int size; bool both; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both: BN5's copy too */
+typedef struct { uint32_t at, v; int size; bool both, bn5; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both: BN5's copy too;
+                                                                    bn5: `at` BN5's, its copy's (a chip's moved code's too) */
 
 /* A Custom screen's keys (cust5=, cust6=): game 5 or 6's screen n (1 the
  * first), each step its keys for its frames from the frame its window first
@@ -91,6 +93,8 @@ typedef struct {
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
+	int hold;                                  /* (a chip's spec) the foes kept paralysed this many frames from each fight frame on, the chip's
+	                                              target holding still in both games; 0 none */
 	CustomScript scripts[MAX_SCRIPTS];
 	int nscripts;
 	Key keys[MAX_KEYS];
@@ -203,11 +207,12 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 	return -1;
 }
 
-/* the spec's numbers: MegaMan's panel and HP, the frames, the seed; -1 where `name` is none of them */
+/* the spec's numbers: MegaMan's panel and HP, the frames, the seed, the foes held; -1 where `name` is none of them */
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
+	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");
 	if (!mm && !seed) return -1;
 	if ((mm ? sscanf(v, "%1u%1u", &a, &b) : sscanf(v, "%x:%x", &a, &b)) != 2) return 0;
@@ -232,18 +237,19 @@ static bool twin_parse(Spec *s, const char *v) {
 	return true;
 }
 
-/* the comparator's own test's breaks: a poke, a call aimed elsewhere; and
- * a spec's change made in both games' copies alike (both=, an address of
+/* the comparator's own test's breaks: a poke (poke5=: at an address of
+ * BN5's moved code, written at its copy), a call aimed elsewhere; and a
+ * spec's change made in both games' copies alike (both=, an address of
  * BN5's: an element given, to put the engine's handling of it under
  * test); -1 where `name` is none of them */
 static int breaks_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	int n = 2;
-	bool call = !strcmp(name, "call"), both = !strcmp(name, "both");
-	if (!call && !both && strcmp(name, "poke")) return -1;
+	bool call = !strcmp(name, "call"), both = !strcmp(name, "both"), bn5 = !strcmp(name, "poke5");
+	if (!call && !both && !bn5 && strcmp(name, "poke")) return -1;
 	if (s->npokes >= MAX_POKES) return 0;
 	if (call ? sscanf(v, "%x:%x", &a, &b) != 2 : sscanf(v, "%x:%x:%d", &a, &b, &n) < 2 || (n != 1 && n != 2 && n != 4) || (both && n == 1)) return 0;
-	s->pokes[s->npokes++] = (Poke){ a, b, call ? 0 : n, both };
+	s->pokes[s->npokes++] = (Poke){ a, b, call ? 0 : n, both, bn5 };
 	return 1;
 }
 
@@ -299,6 +305,7 @@ typedef struct {
 	uint32_t panels, panel_size, list, list_end, coll_size, mplays;
 	uint32_t navi, navi_size, used, pending, side;   /* MegaMan's player block's places (BN6_BATTLE_NAVI's or BN5's) */
 	uint32_t souls, unite, deck;   /* ... BN6_SOULS (0: none, BN5's), the Custom screen's element 0xB, the battle's deck */
+	uint32_t paralysis;            /* a collision data's paralysis timer (BN6_COLL_PARALYSIS, BN5_COLL_PARALYSIS) */
 	const uint8_t *rom;
 	uint32_t songs;   /* (its song table, a ROM offset) */
 	uint8_t (*rd8)(uint32_t);
@@ -324,7 +331,7 @@ typedef struct {
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
-	bool seeded, fought, done, decked;
+	bool seeded, fought, done, decked, held;
 } Side;
 
 static void w32(Side *g, uint32_t v) {
@@ -519,6 +526,25 @@ static uint32_t custom_keys(const Spec *s, int game, int screen, int f) {
 	return f < 4 ? KEY_START : f >= 12 && f < 16 ? KEY_A : 0;
 }
 
+/* (hold=N) each foe paralysed as a hit leaves it (its struck word's BN6_STRUCK_PARALYSIS, the same bit in both games, and its
+ * timer), its timer N again before each fight frame: the chip's target holds still in both, each game's own status step
+ * running it (BN5 0x0800CB48 / BN6 0x0800E730, the same steps) */
+static void hold_foes(const View *v, int frames, bool first) {
+	for (int k = 1; k < v->nt1; ++k) {
+		uint32_t o = v->t1 + (uint32_t)k * BN6_T1_SIZE, coll = v->rd32(o + BN6_T1_COLLISION);
+		if (!(v->rd8(o + BN6_T1_IN_PLAY) & 1) || !v->rd8(o + BN6_T1_ALLIANCE) || !in_ewram(coll)) continue;
+		v->wr16(coll + v->paralysis, (uint16_t)frames);
+		if (first) v->wr32(coll + BN6_COLL_STRUCK, v->rd32(coll + BN6_COLL_STRUCK) | BN6_STRUCK_PARALYSIS);
+	}
+}
+
+/* (hold=N) the foes held from the fight's first seeded frame on, before each fight frame */
+static void hold_step(Side *g, const Spec *s) {
+	if (!s->hold || !g->seeded) return;
+	hold_foes(&g->v, s->hold, !g->held);
+	g->held = true;
+}
+
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
 static void keep_safe(const View *v) {
 	uint32_t coll = v->rd32(v->t1 + BN6_T1_COLLISION);
@@ -554,7 +580,10 @@ static bool step(Side *g, const Spec *s) {
 		if (g->custom < 0) ++g->screen;
 		keys = custom_keys(s, v->game, g->screen, ++g->custom);
 	}
-	if (battle && phase == BN6_PHASE_FIGHT) keys |= keys_at(s, t);
+	if (battle && phase == BN6_PHASE_FIGHT) {
+		keys |= keys_at(s, t);
+		hold_step(g, s);
+	}
 	if (battle && s->safe) keep_safe(v);
 	if (custom && !g->decked) deck_put(g, s);
 	if (g->log) xd_frame(g->log, g->frame, t, battle, g->seeded);
@@ -657,9 +686,17 @@ static void pokes_put(const Spec *s, bool ram) {
 			call_aim(p->at, p->v);
 			continue;
 		}
-		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too) */
+		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too; the chips' moved code
+		 * for a poke5 alone, its BN5 addresses lying among BN6's own attack families' code) */
 		for (int k = n - 1; k >= 0; --k)
-			if (at >= m[k].from && at < m[k].from + m[k].len) { at = at - m[k].from + m[k].to; break; }
+			if (at >= m[k].from && at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL))) {
+				at = at - m[k].from + m[k].to;
+				break;
+			}
+		if (p->bn5 && at == p->at) {
+			fprintf(stderr, "xdiff: poke5 %08x is in no moved range\n", (unsigned)p->at);
+			continue;
+		}
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
@@ -704,12 +741,29 @@ static void folder_put(const FolderPlaces *p, const uint16_t *folder) {
 
 static void bn6_wr16(uint32_t a, uint16_t v) { const uint8_t b[2] = { (uint8_t)v, (uint8_t)(v >> 8) }; emu_write(a, b, 2); }
 
+/* The folder's chips in BN6's pack too, one of each chip and code at least: the battle's deal takes a chip of the folder only
+ * where its code is one of its record's and the pack counts one so (0x08006EA4), and gives BN6's junk chip 389 for it else
+ * (the chips' specs use codes BN6's records have) */
+static void pack_own(const uint16_t *folder) {
+	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK), records = emu_read32(BN6_CHIP_TABLE_REF);
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && in_ewram(pack); ++i) {
+		uint32_t id = folder[i] & 0x1FFu, code = folder[i] >> 9, k = 0;
+		uint32_t at = id < BN6_PACK_IDS ? pack + BN6_PACK_ENTRY * id : BN6_PACK_EXT + BN6_PACK_ENTRY * (id - BN6_PACK_IDS);
+		while (k < 4 && emu_read8(records + BN6_CHIP_RECORD_SIZE * id + BN6_CHIP_CODES + k) != code) ++k;
+		if (k == 4) k = 0;
+		if (!emu_read8(at + k)) emu_write8(at + k, 1);
+	}
+}
+
 /* MegaMan in BN6 as the spec has him: its event flags, its folder, his buster */
 static void subject_setup(const Spec *s) {
 	for (int i = 0; i < s->nflags[1]; ++i) flag_set(s->flags[1][i]);
 	static const FolderPlaces places = { BN6_TOOLKIT, BN6_TOOLKIT_CHIPS, BN6_TOOLKIT_CHIP_MARKS, BN6_CHIP_KEYS, BN6_CHIP_KEY_XOR, BN6_NAVI_FOLDER1_REG,
 		BN6_NAVI_FOLDER1_TAG, emu_read8, emu_read32, emu_write8, bn6_wr16 };
-	if (s->nfolder[1]) folder_put(&places, s->folder[1]);
+	if (s->nfolder[1]) {
+		folder_put(&places, s->folder[1]);
+		pack_own(s->folder[1]);
+	}
 	static const uint32_t buster[3] = { BN6_NAVI_ATTACK, BN6_NAVI_SPEED, BN6_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)
 		if (s->buster[i] >= 0) emu_write8(buster[i], (uint8_t)s->buster[i]);
@@ -718,6 +772,9 @@ static void subject_setup(const Spec *s) {
 /* BN6's battle with the families installed, forced as the foes step forces one, the ids BN6's */
 static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
+	/* (BN6's chip tables with the registry's chips in them and BN5's chips' moved code, as the game's own start makes them:
+	 * game_hooks.c) */
+	xchips_install();
 	xvirus_install(XVIRUS_FAMILIES);
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
 	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak))) {
@@ -757,6 +814,7 @@ static bool subject(Side *g, const Spec *s) {
 		.panels = BN6_FIELD_PANELS, .panel_size = BN6_PANEL_SIZE, .list = BN6_OBJECT_LIST, .list_end = BN6_OBJECT_LIST_END,
 		.coll_size = BN6_COLL_SIZE, .mplays = BN6_MPLAYS, .navi = BN6_BATTLE_NAVI, .navi_size = BN6_BATTLE_NAVI_SIZE, .used = BN6_CROSSES_USED,
 		.pending = BN6_CROSS_PENDING, .side = BN6_BATTLE_SIDE, .souls = BN6_SOULS, .unite = BN6_CUSTOM_UNITE, .deck = BN6_BATTLE_DECK,
+		.paralysis = BN6_COLL_PARALYSIS,
 		.rom = R.data, .songs = R.layout->song_table, .rd8 = emu_read8, .rd32 = emu_read32, .wr32 = emu_write32, .wr16 = bn6_wr16,
 		.frame = bn6_frame };
 	return open_out(g, s, "bn6");
@@ -814,6 +872,7 @@ static bool reference(Side *g, const Spec *s) {
 		.panels = BN5_FIELD_PANELS, .panel_size = BN5_PANEL_SIZE, .list = BN5_OBJECT_LIST, .list_end = BN5_OBJECT_LIST_END,
 		.coll_size = BN5_COLL_SIZE, .mplays = BN5_MPLAYS, .navi = BN5_BATTLE_NAVI, .navi_size = BN5_BATTLE_NAVI_SIZE, .used = BN5_SOULS_USED,
 		.pending = BN5_SOUL_PENDING, .side = BN5_BATTLE_SIDE, .souls = 0, .unite = BN5_CUSTOM_UNITE, .deck = BN5_BATTLE_DECK,
+		.paralysis = BN5_COLL_PARALYSIS,
 		.rom = x->data, .songs = x->layout->song_table, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
 		.wr16 = guest_write16, .frame = bn5_frame };
 	return open_out(g, s, "bn5");
@@ -837,6 +896,9 @@ static void summary(const Side *a, const Side *b, const Spec *s) {
 	for (int k = 0; k < 2; ++k) {
 		const Side *g = k ? b : a;
 		int n[XD_COUNTS];
+		if (g->out && !g->fought)
+			printf("xdiff: BN%d's battle never reached its fight: its game state %02x, its battle's phase %02x, Custom screen %d, after %u frames\n",
+				5 + k, g->v.rd8(g->v.gamestate), g->v.rd8(g->v.state + 1), g->screen, (unsigned)g->frame);
 		if (!g->log) continue;
 		xd_counts(g->log, n);
 		printf("xdiff: BN%d's hooks: %d draws replayed, %d unmatched, %d unmapped; %d events lost\n", 5 + k, n[0], n[1], n[2], n[3]);

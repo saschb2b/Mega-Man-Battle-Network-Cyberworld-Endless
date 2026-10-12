@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **BN5's own code for its chips BN6 has none of (issue #82).** Eight of
+  Team Colonel's chips that sat out of BN6's battles now fight in them by
+  BN5's own code, moved from the player's BN5 ROM into BN6's engine as the
+  game starts: CrakOut, DublCrak, TripCrak, HotBody1-3, Jealousy and
+  NrthWind, each drawn with BN5's own pictures where BN6 keeps others at
+  their numbers (CrakOut's crack, HotBody's flame). Each was used in
+  BN5's own engine and in BN6's and compared frame by frame, every
+  object's picture by its bytes: the same. BN6's table of attacks is grown once for
+  every BN5 attack and the Souls' to come, and its support chips' and
+  Navi chips' tables beside it. The other chips that BN6's code plays
+  under BN5's names were judged the same way: AirHoc, WideSht1-3,
+  Spreader and Geddon1-3 play as BN5's do; DrilArm1-3 strike 9 frames
+  later than BN5's and Z Saver slashes a frame sooner, which their tests
+  now record. The 96 chips still sitting out wait for what each needs,
+  listed in docs/MULTIROM.md (their sprites, sounds and effects in BN6's
+  tables, BN5's panel bookkeeping, their Navis). Nothing in a run gives
+  one yet.
 - **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
   records are grown from 411 to 512 in the game's free space, its chips'
   names and descriptions to id 511, and the 257 of Team Colonel's chips a

@@ -23,6 +23,12 @@ static void art_put(uint8_t out[XREC_SIZE], const uint32_t art[3]) {
 /* the behaviour: the twin's family, lock-on and lock-on type (and its
  * subfamily but the row's), or inert where it sits out for want of code */
 static void behaviour(const XRecordFrom *in, uint8_t out[XREC_SIZE]) {
+	if (in->moved) {
+		out[BN6_CHIP_FAMILY] = in->moved->family;
+		out[BN6_CHIP_SUBFAMILY] = in->moved->sub;
+		out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
+		return;
+	}
 	if (!in->twin) {
 		out[BN6_CHIP_FAMILY] = XREC_INERT_FAMILY;
 		out[BN6_CHIP_SUBFAMILY] = XREC_INERT_SUB;

@@ -1,5 +1,5 @@
 {
- "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy; nothing of the ROMs here.",
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here.",
  "mutations": [
   {
    "name": "an immediate",
@@ -238,6 +238,86 @@
    "spec": "soul_cross",
    "unitebreak": 16,
    "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
+  },
+  {
+   "name": "a moved chip's family in its record",
+   "spec": "chip_crakout",
+   "poke": [
+    "08C03343:6C:1"
+   ],
+   "what": "CrakOut's record (the registry's 298 at CHIPS_RECORDS) naming family 0x6C, whose grown entry is the stub, where the install gives it 0x6B: MegaMan's attack ends at once"
+  },
+  {
+   "name": "a moved family's entry",
+   "spec": "chip_crakout",
+   "poke": [
+    "08E0016C:08E003C1:4"
+   ],
+   "what": "the grown attack families' entry 0x6B (FREE_ATTACK_FAMILIES + 0x16C) left at the stub (XATTACK_STUB) where the install points it at CrakOut's moved code"
+  },
+  {
+   "name": "a number in a moved family's code",
+   "spec": "chip_crakout",
+   "what": "CrakOut's wait (movs r0,#0xF at BN5's 0x080EC8BA, written at its copy) one frame shorter: the crack a frame early",
+   "poke5": [
+    "080EC8BA:200E"
+   ]
+  },
+  {
+   "name": "a moved object's type",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's aura spawned as BN5's fourth kind's 0x56 (movs r0,#0x57 at BN5's 0x080E6CF8, written at its copy), a type the dispatch was given none of",
+   "poke5": [
+    "080E6CF8:2056"
+   ]
+  },
+  {
+   "name": "a moved family's sound",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's sound 0xF7 (movs r0,#0xF7 at BN5's 0x080DA4B6, written at its copy) played as 0xF6",
+   "poke5": [
+    "080DA4B6:20F6"
+   ]
+  },
+  {
+   "name": "a moved chip's family, HotBody's",
+   "spec": "chip_hotbody1",
+   "poke": [
+    "08C04F73:A7:1"
+   ],
+   "what": "HotBody1's record (462) naming family 0xA7 (the stub) where the install gives it 0xA8"
+  },
+  {
+   "name": "a moved support routine's entry",
+   "spec": "chip_jealousy",
+   "poke": [
+    "08E004F4:08E00C01:4"
+   ],
+   "what": "the grown support routines' entry 0x3D (XC_SUPPORT + 0xF4) left at their stub (XC_STUBS) where the install points it at Jealousy's moved routine"
+  },
+  {
+   "name": "a moved support routine's object type",
+   "spec": "chip_jealousy",
+   "what": "Jealousy's object spawned as BN5's fourth kind's 0x35 (movs r0,#0x36 at BN5's 0x080E462C, written at its copy) where BN6's twin 0x36 runs",
+   "poke5": [
+    "080E462C:2035"
+   ]
+  },
+  {
+   "name": "a moved chip's subfamily in its record",
+   "spec": "chip_nrthwind",
+   "poke": [
+    "08C04E98:3E:1"
+   ],
+   "what": "NrthWind's record (457) naming support entry 0x3E (the stub) where the install gives it 0x3F"
+  },
+  {
+   "name": "a moved support routine's object type, NrthWind's",
+   "spec": "chip_nrthwind",
+   "what": "NrthWind's wind spawned as BN5's fourth kind's 0x38 (movs r0,#0x39 at BN5's 0x080E4940, written at its copy) where BN5's own 0x39 runs, moved",
+   "poke5": [
+    "080E4940:2038"
+   ]
   }
  ]
 }

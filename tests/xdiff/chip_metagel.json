@@ -1,0 +1,75 @@
+{
+ "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of MetaGel F in both games, BN5's chip 95 by BN5's own code and the registry's 450 by the same code moved (BN5's support routine 0x06 as BN6's support entry 0x30), the first Custom screen's chip picked and OK, used at t30: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its gel (BN5's third kind's 0x45) draws sprite list 3's 0x26, which BN6's list has not (BN6's own 0x45 draws its 0, an animation 14 frames longer: the spec's first run, t34), and its sound 0x105 is another in BN6.",
+ "kind": "reference",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0A5F"
+ ],
+ "folder6": [
+  "0BC2"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

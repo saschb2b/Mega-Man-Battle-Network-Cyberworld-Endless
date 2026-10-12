@@ -23,7 +23,8 @@ void game_hooks_install(void) {
 	/* (BN6's chip tables grown, BN5's chips in them or their placeholders,
 	 * and the hook on the deck's deal: before the boot, whose NEW GAME
 	 * counts its folder by the records; the same at every boot,
-	 * docs/MULTIROM.md, The chip registry) */
+	 * docs/MULTIROM.md, The chip registry), BN5's chips' moved code with
+	 * them where its ROM is read (xchips_code.h) */
 	xchips_install();
 	gamecall_install();
 	idle_install();

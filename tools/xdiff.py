@@ -77,9 +77,13 @@ begins. --poke and --call break BN6's copy after the install (an
 immediate, a call's veneer; a poke in RAM after the boot, over the code
 the game copied there): the comparator's own test, which --mutations
 runs from tests/xdiff/mutations.json, each break required to FAIL its
-spec. Needs both ROMs (local only), copied into .build/xdiff/rom; the
-traces go to .build/xdiff/runs. Exits 0 when every spec passes (a smoke
-spec may end inconclusive, a reference spec REFERENCE). The snapshot and
+spec. A spec may record the verdict the differential gave it ("verdict":
+{"is", "at", "why"}: the chips' differential's on a chip BN6's code plays
+otherwise than BN5's, docs/MULTIROM.md, The chips' code), which holds
+where the run ends the same at the same frame. Needs both ROMs (local
+only), copied into .build/xdiff/rom; the traces go to .build/xdiff/runs.
+Exits 0 when every spec passes (a smoke spec may end inconclusive, a
+reference spec REFERENCE, a spec its recorded verdict). The snapshot and
 its differences are tools/xdiff_snap.py, whose a difference is and the
 masks tools/xdiff_masks.py.
 """
@@ -167,6 +171,8 @@ def megaman_items(spec):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
         parts.append('safe=1')
+    if spec.get('hold'):
+        parts.append(f'hold={spec["hold"]}')
     if spec.get('kind') == 'reference':
         parts.append('game=bn5')
     if spec.get('kind') == 'engine':
@@ -188,7 +194,7 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
         parts.append(f'field={spec["field"]}')
     if 'mm_element' in spec:
         parts.append(f'mm_element={spec["mm_element"]}')
-    parts += [f'both={b}' for b in spec.get('both', [])]
+    parts += [f'both={b}' for b in spec.get('both', [])] + [f'poke5={p}' for p in spec.get('poke5', [])]
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -205,7 +211,7 @@ def run(name, spec, pokes, calls, quiet, twins=()):
            spec_text(spec, out, pokes, calls, twins)]
     env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'))
     r = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
-    lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus'))]
+    lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus', 'xchips', 'xattack'))]
     if not quiet:
         for l in lines:
             print(f'  {l}')
@@ -567,6 +573,8 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
+    canon.megaman_types = {f'{x.split(":")[0]}:{int(x.split(":")[1], 0):#04x}' for x in spec.get('megaman_types', [])}
+    canon.sprite_bytes = spec.get('sprites') == 'bytes'
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
     if spec.get('kind') == 'engine':
@@ -601,6 +609,14 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     if bad and verdict == 'PASS':
         verdict = 'FAIL'
     kind = spec.get('kind', 'differential')
+    rec = spec.get('verdict')
+    if rec and not pokes and not calls and not extra:
+        # (a verdict the spec records, the chips' differential's on BN6's code: held where the run ends the same, at
+        # the same frame; a change either way is the suite's to see)
+        held = verdict == rec['is'] and at == rec.get('at')
+        print(f'{run_name}: {verdict}{f" at t{at}" if at is not None and verdict != "PASS" else ""} ({kind}; its recorded verdict, '
+              f'{rec["is"]} at t{rec.get("at")}, {"held" if held else "NOT HELD"}: {rec["why"]})')
+        return verdict, 'recorded' if held else kind
     print(f'{run_name}: {verdict}{f" at t{at}" if at is not None and verdict != "PASS" else ""} ({kind})')
     return verdict, kind
 
@@ -630,7 +646,7 @@ def main():
         caught = 0
         for k, m in enumerate(muts):
             print(f'== mutation {k + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}')
-            extra = {'unitebreak': m['unitebreak']} if 'unitebreak' in m else None
+            extra = {k: m[k] for k in ('unitebreak', 'poke5') if k in m} or None
             verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}', extra)
             caught += verdict == 'FAIL'
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
@@ -646,7 +662,7 @@ def main():
     if a.expect_fail:
         sys.exit(0 if all(v == 'FAIL' for v, _ in results.values()) else 1)
     sys.exit(0 if all(v == 'PASS' or (v == 'INCONCLUSIVE' and kind == 'smoke') or (v == 'REFERENCE' and kind == 'reference')
-                      for v, kind in results.values()) else 1)
+                      or kind == 'recorded' for v, kind in results.values()) else 1)
 
 
 if __name__ == '__main__':

@@ -836,6 +836,34 @@ the masks):
   spawned as effect 7, the Cannon striking for 41) fail it, and the
   flash's break leaves `cangard_v1_keys`, a family's spec, INCONCLUSIVE
   at the same frame.
+- **A chip as the subject** (the chips' differential, issue #82's C2 and
+  C3; docs/MULTIROM.md, The chips' code): `chip_*.json` are MegaMan
+  specs that use one chip. `folder5` and `folder6` give each game's
+  folder (its entries chip | code << 9, repeated to 30; BN6's chips
+  owned in its pack too, as its deal asks: a chip it does not own is
+  dealt as its junk chip 389), `deck5` and `deck6` the battle's deck in
+  that order (a Giga chip's spec: a folder of one Giga and 29 Cannon A,
+  the Giga dealt first; a folder of Gigas alone never deals), and
+  `hold: N` keeps the foes still: before each fight frame each one's
+  paralysis timer is set to N (BN5's collision data +0x1E, BN6's +0x1C,
+  each game's own status step counting it down) and, the first time, its
+  struck word's paralysis bit (the same bit in both). The chip's objects
+  are MegaMan's; `megaman_types` names those a spawner no hook sees makes
+  (NrthWind's gusts, `T4:0x3A`). `"sprites": "bytes"` (every chip spec)
+  compares an object's sprite of no registry pair by its bytes where both
+  games' are in their ROMs (legit.json's `sprites` compares the pairs it
+  names; another sprite is otherwise compared by its frames' offsets
+  alone, which the same layout of another picture passes): BN6's code
+  drawing another picture at the number BN5's draws is a difference. An
+  effect object's (the fourth kind's 0) is its effect id's, compared as
+  the id: each game's art for an effect id is the engine's (BN6 redrew
+  some, effect 0x14's list 5 0xD among them). The
+  chip's id is read in each game's
+  numbers (legit.json's `chip_id`, from the registry's rows) and its
+  family through the registry: a C1 chip's BN6 twin's, a moved chip's
+  moved number (`src/core/xchips_moved.c`). A run that never reaches its
+  fight says where each game stood ("never reached its fight: its game
+  state, its battle's phase, Custom screen, frames").
 - **A Soul's life** (the Souls track's S2; docs/MULTIROM.md, Transplanted
   Souls): with the Souls installed in BN6's engine (`souls6=`), a Soul
   stands behind the proxy form, 8, where BN5's form byte names the Soul:
@@ -895,7 +923,12 @@ cooling leaves, the random number its spark draws, the element hit's
 test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
 damage; the Souls': a Soul's turns 4, its used bit not set, UNITE lit
 for a wrong kind, Beast Out lit while united, a Soul kept past a Cross,
-each by `unitebreak`), each of which must FAIL its spec.
+each by `unitebreak`; the chips' moved code: a moved chip's family or
+subfamily in its record, a grown family's or support routine's entry
+left at its stub, a number, an object's type and a sound in a unit's
+code, these by `poke5`, a unit's BN5 address written at its copy, as its
+BN5 addresses lie among BN6's own attack families' code and a plain
+`poke` there is BN6's), each of which must FAIL its spec.
 docs/MULTIROM.md, Transplanted families, has what they showed.
 
 The control (`tools/xcontrol.py`, BN6's own Mettaur moved) runs with the
@@ -937,6 +970,52 @@ fill). A family is whole where no decision is left open; the report
 says what each derives and what is left, and `--check` runs in no build
 (it needs the ROMs): `build.py test` holds the generated CanGard and
 Handi to the installed recipes, field for field.
+
+## The chip recipe generator
+
+```bash
+python3 tools/xchiprecipe.py           # write src/emu/xchips_bn5.c (the units) and src/core/xchips_moved.c (their chips)
+python3 tools/xchiprecipe.py --check   # write nothing: fail where the two files differ from what it would write
+python3 tools/xchiprecipe.py --report  # every unit and candidate derived: .build/xchiprecipe/report.md
+python3 tools/xchiprecipe.py --report --unit attack:0x4f:DrilArm support:0x31:Poltrgst   # more candidates
+```
+
+`tools/xchiprecipe.py` (issue #82's C3; docs/MULTIROM.md, The chips'
+code) derives the code of BN5's chips on the recipe generator's parts:
+a unit is one of BN5's attack families (by the family a chip's record
+names) or one of its support or Navi routines (by subfamily), walked
+from the routine its table names with every routine and object it
+reaches. It needs the symbol map (`build.py symbols --bn6f DIR`). On top
+of the family deriver's rules: a twin of an object's routine must be the
+same code to its depth (its states and substates too, a pair the project
+audited as serving counting as the same) and load sprites of the same
+bytes by its numbers (each game's sprite lists read), else BN5's is
+copied; a sprite moved code loads that BN6 keeps another of is copied to
+one of the chips' numbers of its grown list (lists 1, 2, 4 and 5, from
+`0xFF` down; the families' from the bottom up), the load set to it (an
+immediate, or the low byte of the packed word BN5's 0x0800F198 takes); a
+table's word aimed at a twin whose body differs is a decision unless
+audited (the symbol map's pair of BN5's 0x0800A2F0 was another routine);
+a raw table's words that point into the unit's blocks move as a pool's
+(CrakOut's crack patterns); an
+object type BN6's twin would spawn BN6's own of, where BN6 runs other
+code for it, is moved (MetaGel's thrower, whose gel's sprite is another
+in BN6); `TYPE_AUDITS` names BN6's own objects every attack of both
+games spawns (the hit area, the third kind's 3, and the effect, the
+fourth kind's 0), `FORCE_COPY` and `FORCE_MOVED` the routines and types
+the differential found reading BN6's data (the shockwave's kinds); a
+pool load whose pool lies past a routine no walk reaches walks that
+routine too (one block holds both); a dispatcher's state table counts
+its far entries (the engine's own end state). Numbers are fixed by
+BN5's: its attack family F is BN6's 0x50 + F, its support subfamily S
+the grown support routines' 0x2A + S, its Navi subfamily S the Navi
+routines' 0x1D + S; homes and code in `UNITS`' order, a new unit after
+the last. `UNITS` are the ones written, each whole and its chips' specs
+passing; `CANDIDATES` are derived for the report alone, each with what
+it still needs. `src/core/xchips_moved.c` takes the registry's
+`XREG_MOVED` rows of the written units: a unit's chips must be
+`XREG_MOVED` (the generator refuses to write otherwise), and a chip whose
+unit is not written stays `XREG_PENDING`, sitting out.
 
 ## The proxy form: where a Soul stands
 

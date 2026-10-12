@@ -1,0 +1,75 @@
+{
+ "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of BoyBomb1 C in both games, BN5's chip 85 by BN5's own code and the registry's 447 by the same code moved (BN5's support routine 0x3A as BN6's 0x64), the first Custom screen's chip picked and OK, used at t30: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its bomb (BN5's third kind's 0x3E) draws sprite list 4's 0x36, which BN6's list has not (BN6's own 0x3E another object), and calls a BN5 routine BN6 has no twin of (0x08017A70).",
+ "kind": "reference",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0455"
+ ],
+ "folder6": [
+  "05BF"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

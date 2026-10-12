@@ -1,0 +1,74 @@
+{
+ "about": "A chip as the subject, both games' own (issue #82's C2, the chips' differential): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (6,2), MegaMan with a folder of AreaGrab (A in BN5, * in BN6: each a code its record has) in both games, BN5's chip 117 and BN6's 163 (one chip by name, the support family's subfamily 0 in both), each game's own code, the first Custom screen's chip picked and OK, used at t30: his chip's CurAction, attack variables, objects, effects, sounds and the damage its target takes, every frame. Each game draws its own chip with its own pictures (BN6 redrew MegaMan's sword, list 3's 0, and his bomb's hand, list 3's 2: their bytes compared they differ), so a sprite here is compared by its frames' layout, not its bytes.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 240,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0075"
+ ],
+ "folder6": [
+  "34A3"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ]
+}

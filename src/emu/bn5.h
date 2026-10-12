@@ -112,6 +112,7 @@
 #define BN5_OBJECT_LIST_END 0x0200ABA0u /* ... to this node */
 #define BN5_COLL_SIZE     0xA0        /* a collision data's bytes (BN6_COLL_SIZE, 8 more): laid out otherwise from +0x14 (tests/xdiff/legit.json's layout) */
 #define BN5_COLL_FLASH    0x26        /* u16 frames left flashing after a hit (BN6_COLL_FLASH, at +0x24 there) */
+#define BN5_COLL_PARALYSIS 0x1E       /* u16 frames left paralysed (BN6_COLL_PARALYSIS, at +0x1C there): its status step 0x0800CB48 counts it down */
 #define BN5_COLL_MASKS    0x08016364u /* its collision data's mask words by alliance and region (BN6_COLL_MASKS), */
 #define BN5_COLL_MASK_WORDS 160        /* ... 80 regions, BN6's 89 */
 #define BN5_MPLAYS        0x08155A74u /* its music players (BN6_MPLAYS) */

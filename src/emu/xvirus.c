@@ -85,11 +85,12 @@ static uint32_t moved_to(const XVirusFamily *f, uint32_t a) {
 }
 
 /* a pointer into the blocks, moved: a Thumb one must name code, any
- * other the start of a range of data */
+ * other the start of a range of data or a place in raw data (a table of
+ * pointers to byte lists, odd places too: CrakOut's crack patterns) */
 static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
-	if (v & 1) return xvirus_is_code(f, v & ~1u);
+	if ((v & 1) && xvirus_is_code(f, v & ~1u)) return true;
 	const XvData *d = xvirus_data_at(f, v);
-	return d && d->start == v;
+	return d && (d->kind == XV_RAW || (!(v & 1) && d->start == v));
 }
 
 static uint32_t resolve(uint32_t target, void *user) {
@@ -577,6 +578,29 @@ bool xvirus_install_family(const XVirusFamily *f) {
 		f->first_id + XV_VERSIONS - 1, (unsigned)used, c.pool.n);
 	return true;
 }
+
+bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneers, int nveneers) {
+	char why[200];
+	Game g = { 0 };
+	if (!xvirus_code_ok(f, r, why, sizeof why)) return xv_fail("%s", why);
+	if (!emu_ready() || !game_of(f->game, &g)) return xv_fail("its game's ROM is not read");
+	static Ctx c;
+	memset(&c, 0, sizeof c);
+	c.f = f;
+	c.rom = g.rom;
+	int cap = (int)(sizeof c.veneers / THUMB_VENEER_SIZE);
+	c.pool = (ThumbVeneers){ c.veneers, veneers, nveneers < cap ? nveneers : cap, 0 };
+	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(&c, &f->blocks[i]);
+	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(&c, &f->clones[i]);
+	uint8_t *v = c.pool.n && !xv_failed() ? xv_put(c.pool.base, (uint32_t)c.pool.n * THUMB_VENEER_SIZE, true) : NULL;
+	if (v) memcpy(v, c.veneers, (size_t)c.pool.n * THUMB_VENEER_SIZE);
+	if (!xv_failed()) sprites_set(f, &g);
+	if (!xv_failed()) effects_set(f, &g);
+	if (!xv_failed()) types_set(f, &g);
+	return !xv_failed();
+}
+
+uint32_t xvirus_code_at(const XVirusFamily *f, uint32_t a) { return moved_to(f, a); }
 
 const XVirusFamily *xvirus_installed(int game, int src_ai) {
 	for (int i = 0; i < ninstalled; ++i)

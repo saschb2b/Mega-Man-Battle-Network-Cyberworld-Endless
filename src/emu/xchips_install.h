@@ -19,7 +19,8 @@
 #include <stdbool.h>
 
 /* Once a core as it starts, and again where the ROMs read changed since
- * (BN5's put in on the ROMs screen: its chips for their placeholders);
+ * (BN5's put in on the ROMs screen: its chips for their placeholders), BN5's
+ * chips' moved code installed first where its ROM is read (xchips_code.h);
  * true where the core's copy holds the chips' tables. */
 bool xchips_install(void);
 

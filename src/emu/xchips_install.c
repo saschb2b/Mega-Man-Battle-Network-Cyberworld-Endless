@@ -11,7 +11,9 @@
 #include "emu.h"
 #include "hook.h"
 #include "rom.h"
+#include "xchips_code.h"
 #include "xchips_record.h"
+#include "xvirus_tx.h"
 
 #define BUS 0x08000000u
 
@@ -198,6 +200,8 @@ static void write_all(const uint8_t *img, uint32_t len) {
 
 bool xchips_install(void) {
 	if (!emu_ready() || !R.data || !R.layout) return false;
+	/* (BN5's chips' moved code where its ROM is read: the families its moved chips' records name; again it does nothing) */
+	xchips_code_install();
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
 	if (installed_len && installed_rom5 == rom5) return true;
 	uint32_t len;
@@ -213,6 +217,9 @@ bool xchips_install(void) {
 	}
 	claims_begin("the chip registry (xchips_install.c)");
 	write_all(img, len);
+	/* (BN6's own records where the game reads them now, as a range moved: what reads BN6's record at its own place, a
+	 * trace or the differential's pokes, reads the copy) */
+	xv_moved_add(ref_value(0, true), CHIPS_RECORDS, CHIPS_BN6_RECORDS * BN6_CHIP_RECORD_SIZE);
 	memcpy(sits, chips_sit_bits(), sizeof sits);
 	if (!installed_len && !emu_hook(BN6_DECK_DEALT, deal, NULL)) fprintf(stderr, "chips: no hook on the deck's deal: BN5's chips play where they sit out\n");
 	claims_end();

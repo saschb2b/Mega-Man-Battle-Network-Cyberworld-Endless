@@ -40,6 +40,7 @@
 02034E10 BN5_SOULS_USED
 020356F2 BN5_CUSTOM_WINDOW
 02035700 BN5_CUSTOM_GAUGE
+02035760 pool_other_state
 02036B10 BN5_CUSTOM_SCREEN
 02036B16 BN5_CUSTOM_HAND
 02036B17 BN5_CUSTOM_CURSOR
@@ -56,6 +57,7 @@
 0203B1D0 BN5_SOUL_PENDING
 0203B200 BN5_T1_OBJECTS
 0203B224 BN5_FIGHT_HP
+0203C51C pool_state
 0203C830 BN5_BATTLE_DECK
 0203C880 BN5_BATTLE_NAVI
 0203C88E BN5_BATTLE_MOOD
@@ -97,6 +99,7 @@
 08008D82 folder_shuffle
 080098D8 primary_kept_as_battle_begins
 08009A0A put_back_after_opening
+0800A2F0 support_objects_generic_end_substate
 0800A7A4 BN5_PANEL_ANIMS
 0800A990 BN5_PANEL_UPDATE
 0800AF84 by_literal
@@ -111,11 +114,16 @@
 0800CF70 entries_0x4f_0x54_literal
 0800D010 chip_object_uses
 0800D17C BN5_ENEMY_STATS
+0800E190 plus_chip_used_alone
+0800F198 object_sprite_collision_set_up_from
 0800F200 attack_first_kind_set
 0800F21C BN5_SET_ATTACK
 0800F29E attack_end
 0800F2A6 attack_end_after_wait
 0800FE6A chip_numbers_written_for_attack
+0800FF40 chip_used
+080100E4 failed_use
+08010110 chip_usable_test
 08012464 BN5_TURN_END
 08012484 BN5_TURN_COUNT
 08012704 bn5_souls.emotion
@@ -130,7 +138,10 @@
 080138EA object_end
 08013944 generic_state_5
 08013B04 object_sprite_animated
+080145FC ai_chip_use_word_for_support
+08014600 ai_chip_use_word_for_navi
 08014C8C BN5_ENEMY_IDS
+08015140 arm_point_record
 08016126 collision_data_made
 0801629C panel_patterns_by_region
 08016364 BN5_COLL_MASKS
@@ -143,6 +154,7 @@
 08016D0C BN5_PANEL_HIT
 08016D78 BN5_LAVA_STEP
 08016E10 BN5_LAVA_STEP_MEGAMAN
+08018644 runaiattack_word_for_them
 08018654 panel_reserved
 0801866E BN5_RESERVE_PANEL_DONE
 0801A5BC object_put_four_slot_table
@@ -160,6 +172,7 @@
 08024BE4 BN5_SOUL_KINDS
 08024BF4 BN5_SOUL_FLAGS
 08024D48 BN5_UNITE_TAKE_BACK
+08024F12 hand_merge_plus_chips
 08024FFA BN5_UNITE_COMMIT
 080250EA BN5_COMPACT
 080252B2 BN5_PA_STAR_LIMIT
@@ -169,6 +182,10 @@
 08028C06 battle_results_summed_up
 08028E48 results_screen_end_giving_both
 08028E6C results_reward_given
+080297BC support_chips_routines
+080298C8 navi_chips_routines
+0802E920 panel_claim_pool
+0802EA6E pool_last_routine
 08031414 XRomLayout.map_enters
 08031468 XRomLayout.map_anims
 0803272C XRomLayout.sprite_lists
@@ -188,6 +205,9 @@
 0808C9DC XRomLayout.battle_bg_anims
 080AD930 map_object_table
 080AE2FC handler_3_records
+080B9A5C muzzle_flashes
+080B9CAE muzzle_flash_spawner
+080C02F0 word_for_navi_routines
 080C9518 reticle_code
 080C9519 type_0x25
 080CEFCC kinds_bn5
@@ -197,6 +217,11 @@
 080DFD7C BN5_EFFECTS
 080DFFD2 BN5_SPAWN_EFFECT
 080DFFE0 bn5_effects_literal
+080E1B44 navi_chip_object_word_for_them
+080EB514 attack_families_routines
+080EC400 support_family
+080EC450 support_family_word_for_them
+080EC818 misc_family_subfamilies
 080F2488 navis_stats
 08104550 virus_dispatcher
 0810455C recipe_generator_reads.nameid_check

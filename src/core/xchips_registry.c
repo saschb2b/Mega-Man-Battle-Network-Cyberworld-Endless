@@ -116,9 +116,9 @@ const XChipReg xreg_rows[] = {
 	{  88, 295, XREG_PENDING,   0, 0xFF, { 0x00, 0x03, 0x0A, 0x1A }, 0,  4 },   /* Guard1 */
 	{  89, 296, XREG_PENDING,   0, 0xFF, { 0x01, 0x0B, 0x10, 0x1A }, 0, 10 },   /* Guard2 */
 	{  90, 297, XREG_PENDING,   0, 0xFF, { 0x02, 0x0C, 0x12, 0x1A }, 0, 16 },   /* Guard3 */
-	{  91, 298, XREG_PENDING,   0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  4 },   /* CrakOut */
-	{  92, 299, XREG_PENDING,   0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  7 },   /* DublCrak */
-	{  93, 300, XREG_PENDING,   0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 10 },   /* TripCrak */
+	{  91, 298, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  4 },   /* CrakOut */
+	{  92, 299, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  7 },   /* DublCrak */
+	{  93, 300, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 10 },   /* TripCrak */
 	{  94, 141, XREG_SAME },   /* Magnum */
 	{  95, 450, XREG_PENDING,   0, 0xFF, { 0x05, 0x0D, 0x13, 0xFF }, 0, 52 },   /* MetaGel */
 	{  96, 134, XREG_SAME },   /* Snake */
@@ -163,7 +163,7 @@ const XChipReg xreg_rows[] = {
 	{ 135, 178, XREG_SAME },   /* Barrier */
 	{ 136, 179, XREG_SAME },   /* Barr100 */
 	{ 137, 180, XREG_SAME },   /* Barr200 */
-	{ 138, 457, XREG_PENDING,   0, 0xFF, { 0x03, 0x10, 0x15, 0x1A }, 0, 33 },   /* NrthWind */
+	{ 138, 457, XREG_MOVED,     0, 0xFF, { 0x03, 0x10, 0x15, 0x1A }, 0, 33 },   /* NrthWind */
 	{ 139, 168, XREG_SAME },   /* HolyPanl */
 	{ 140, 458, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x13, 0x1A }, 0, 58 },   /* AntiFire */
 	{ 141, 459, XREG_PENDING,   0, 0xFF, { 0x03, 0x06, 0x10, 0x1A }, 0, 54 },   /* AntiWatr */
@@ -179,9 +179,9 @@ const XChipReg xreg_rows[] = {
 	{ 151, 107, XREG_SAME },   /* FireHit1 */
 	{ 152, 108, XREG_SAME },   /* FireHit2 */
 	{ 153, 109, XREG_SAME },   /* FireHit3 */
-	{ 154, 462, XREG_PENDING,   0, 0xFF, { 0x00, 0x05, 0x0F, 0xFF }, 0, 28 },   /* HotBody1 */
-	{ 155, 463, XREG_PENDING,   0, 0xFF, { 0x02, 0x11, 0x16, 0xFF }, 0, 40 },   /* HotBody2 */
-	{ 156, 464, XREG_PENDING,   0, 0xFF, { 0x09, 0x0C, 0x12, 0xFF }, 0, 52 },   /* HotBody3 */
+	{ 154, 462, XREG_MOVED,     0, 0xFF, { 0x00, 0x05, 0x0F, 0xFF }, 0, 28 },   /* HotBody1 */
+	{ 155, 463, XREG_MOVED,     0, 0xFF, { 0x02, 0x11, 0x16, 0xFF }, 0, 40 },   /* HotBody2 */
+	{ 156, 464, XREG_MOVED,     0, 0xFF, { 0x09, 0x0C, 0x12, 0xFF }, 0, 52 },   /* HotBody3 */
 	{ 157, 465, XREG_PENDING,   0, 0xFF, { 0x01, 0x05, 0x0D, 0xFF }, 0, 30 },   /* AqWhirl1 */
 	{ 158, 466, XREG_PENDING,   0, 0xFF, { 0x00, 0x07, 0x0E, 0xFF }, 0, 42 },   /* AqWhirl2 */
 	{ 159, 467, XREG_PENDING,   0, 0xFF, { 0x03, 0x08, 0x11, 0xFF }, 0, 54 },   /* AqWhirl3 */
@@ -229,7 +229,7 @@ const XChipReg xreg_rows[] = {
 	{ 209, 174, XREG_SAME },   /* FullCust */
 	{ 210, 139, XREG_SAME },   /* Meteors */
 	{ 211, 138, XREG_SAME },   /* NumbrBl */
-	{ 212, 291, XREG_PENDING,   0, 0xFF, { 0x09, 0xFF, 0xFF, 0xFF }, 1, 35 },   /* Jealousy */
+	{ 212, 291, XREG_MOVED,     0, 0xFF, { 0x09, 0xFF, 0xFF, 0xFF }, 1, 35 },   /* Jealousy */
 	{ 213, 292, XREG_PENDING,   0, 0xFF, { 0x0F, 0xFF, 0xFF, 0xFF }, 1, 40 },   /* Poltrgst */
 	{ 214, 293, XREG_PENDING,   0, 0xFF, { 0x16, 0xFF, 0xFF, 0xFF }, 1, 58 },   /* BlakWing */
 	{ 216, 140, XREG_SAME },   /* JustcOne */
@@ -331,7 +331,7 @@ int xreg_check(const XChipReg *rows, int n, char *why, size_t len) {
 	for (int i = 0; i < n; ++i) {
 		const XChipReg *r = &rows[i];
 		if (!r->bn5 || r->bn5 >= BN5_IDS || bn5_seen[r->bn5]++) return bad(i, why, len, "BN5's id is none, past its records, or twice");
-		if (r->how > XREG_PA) return bad(i, why, len, "no such way in");
+		if (r->how > XREG_MOVED) return bad(i, why, len, "no such way in");
 		if (!xreg_own(r)) {
 			if (!r->bn6 || (r->bn6 > 313 && (r->bn6 < 320 || r->bn6 > 349))) return bad(i, why, len, "BN6's chip of its name is no folder chip");
 			continue;

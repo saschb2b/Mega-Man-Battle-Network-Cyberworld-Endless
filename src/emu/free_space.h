@@ -55,8 +55,13 @@
 #define FREE_SOULS          (EMU_FREE + 0x480000u)   /* kept for BN5's Souls (the Souls' track), to: */
 #define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
-#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* kept for BN5's Navis, to: */
-#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* kept for the code of BN5's chips, to: */
+#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis: first their battle sprites, */
+#define FREE_NAVI_SPRITES   FREE_NAVIS               /* ... six in list 2, a room each (the Navis' track's xnavi_sprites.c: the Navis', the Navi chips' and the Souls' one copy), */
+#define FREE_NAVI_SPRITES_END (FREE_NAVIS + 0x80000u) /* ... then kept for the Navis' track, to: */
+#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* the code of BN5's chips: first */
+#define FREE_ATTACK_FAMILIES FREE_CHIP_CODE          /* ... BN6's attack families grown to 240 (xattack_grow.c: the chips' and the Souls' one copy), */
+#define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x400u)
+#define FREE_CHIP_MOVED     FREE_ATTACK_FAMILIES_END /* ... then the chips' moved code, its tables and what it draws (xchips_code.c), to: */
 #define FREE_TAIL           (EMU_FREE + 0x700000u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */

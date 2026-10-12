@@ -59,8 +59,34 @@
 #define BN6_CHIP_DARK_CLASS   0x20
 #define BN6_CHIP_UNLISTED     0x20
 
+/* How a chip runs (docs/ROM_DATA.md, The attack families and chip
+ * routines grown): its record's family (BN6_CHIP_FAMILY) is the CurAction
+ * its user takes (object_setAttack2), which RunAIAttack (0x0801B9E6) runs
+ * from the attack families' table by CurAction - 0x10, unbounded (a byte:
+ * up to 0xFF), as the lock-on path does (0x080EC276); family 0x15 (support)
+ * runs a routine of the chip routines' table by its subfamily, and family
+ * 0x1B (the Navi chips) one of its Navi part's from the Navi object it
+ * spawns (0x080E2C6C, the fourth kind's type 0x10) */
+#define BN6_ATTACK_FAMILIES   0x080EBFA0u /* a Thumb routine per family 0x10-0x5E (BN6_ATTACK_FAMILY_COUNT), code from 0x080EC0DC */
+#define BN6_ATTACK_FAMILIES_REF 0x0801BB10u /* ... RunAIAttack's literal naming it, */
+#define BN6_ATTACK_FAMILIES_REF2 0x080EC384u /* ... and the lock-on path's (0x080EC280): the only two words of the ROM that do */
+#define BN6_ATTACK_FAMILY_FIRST 0x10      /* CurAction from here is a family's (below it a generic state of the object's) */
+#define BN6_ATTACK_FAMILY_COUNT 79        /* ... BN6's: 0x10-0x5E */
+#define BN6_EXIT_ATTACK       0x08011714u /* object_exitAttackState: the attack ended (AttackVars +0x1B, AIData +0x44's bits, CurAction 8) */
+#define BN6_CHIP_ROUTINES     0x0802CCB4u /* the support family's routines by subfamily (0x00-0x29, BN6_CHIP_ROUTINE_COUNT), the Navi chips' after them: */
+#define BN6_CHIP_ROUTINE_COUNT 0x2A
+#define BN6_NAVI_ROUTINES     0x0802CD5Cu /* ... from entry 0x2A, by the Navi chip's subfamily (BN6_NAVI_ROUTINE_COUNT) */
+#define BN6_NAVI_ROUTINE_COUNT 29
+#define BN6_CHIP_ROUTINES_REF 0x080ED138u /* the support family's literal naming BN6_CHIP_ROUTINES (0x080ED0EE: ldr r3, then by AttackVars +3) */
+#define BN6_CHIP_ROUTINES_REF2 0x08017BB8u /* ... a second (0x08017B0C: a chip a Navi or virus uses, its family 0x15 run so) */
+#define BN6_NAVI_ROUTINES_REF 0x080E2CF0u /* the Navi object's literal naming BN6_NAVI_ROUTINES (the fourth kind's type 0x10) */
+#define BN6_NAVI_ROUTINES_REF2 0x08017BBCu /* ... a second, beside BN6_CHIP_ROUTINES_REF2, which no instruction loads (pointed at the copy all the same) */
+#define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
+#define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
+
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
+#define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/EMULATION.md) */
 
 #endif

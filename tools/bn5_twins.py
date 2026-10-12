@@ -39,11 +39,14 @@ TWINS = (
     (0x080142DC, 0x080178B6, 'navis'), (0x0800F208, 0x08011688, 'navis'), (0x08013D1C, 0x080170C4, 'navis'),
     (0x08013E02, 0x080171A6, 'navis'), (0x08000BC6, 0x08000CA6, 'navis'), (0x08017666, 0x0801A9A4, 'navis'),
     (0x0801766C, 0x0801A9AA, 'navis'),
+    # the chips' (tools/xchiprecipe.py): the support objects' generic end substate, where the symbol map placed a routine of
+    # another body (BN6's 0x080EA56C); the same body at BN6's 0x0800BC88, the substate BN6's own support objects name
+    (0x0800A2F0, 0x0800BC88, 'chips'),
 )
 
 # The BN5 rows of tools/bn6f_match.py's search that a twin above corrects: its search placed a bn6f function of another
 # body there (by one reference each, 'calls'), where the routine is the twin's
-WRONG_ROWS = (0x080131A0, 0x080142D0, 0x0801412A, 0x080141EC, 0x080142DC)
+WRONG_ROWS = (0x080131A0, 0x080142D0, 0x0801412A, 0x080141EC, 0x080142DC, 0x0800A2F0)
 
 # Each DIFF pair's audit: (verdict, why, conditions). 'ok': BN6's routine does for BN5's code what BN5's did, where the
 # conditions hold (each a check tools/xrecipe.py makes on the family's code: 'no_flip' it writes no object's +0x17,
@@ -90,6 +93,11 @@ AUDITS = {
     (0x0800F2A6, 0x0801171C): ('ok', "the attack ended (the wait's form): as 0x0800F29E's twin", ('no_attack6',)),
     (0x0800B2A6, 0x0800CC0A): ('ok', "object_setPanelType: BN6's (in IWRAM) times its conveyors 9-12 where BN5 times its lava 8 and sea "
                                      "10; types 0-4, 6 and 7 are the same panels in both", ('panel_types',)),
+    # the chips' code's (tools/xchiprecipe.py; issue #82's C3)
+    (0x08015140, 0x08018810): ('ok', "an object's point (r1) by its NameID's arm-point record: BN6's records are 0x44 bytes (34 points) where "
+                                     "BN5's 0x3C (30), BN6's first 22 points of MegaMan's the same bytes as BN5's (his form 0's record: "
+                                     "0x08015C14 in BN5, 0x080191C8 in BN6), and BN6 answers (0, 7) for its filler ids 0xCD-0xFF, no "
+                                     "chip's user; Guard asks for point 6", ()),
 }
 
 # panel types both games number alike (docs/ROM_DATA.md, Battlefields and their panels' types)

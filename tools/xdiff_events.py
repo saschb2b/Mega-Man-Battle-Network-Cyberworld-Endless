@@ -165,10 +165,24 @@ def spawns_of(trace):
     return out
 
 
+def chip_code(trace, a):
+    """whether an address of moved code is a chip's (src/emu/xchips_code.c's units, their copies in the chips' region,
+    xdiff_snap.XC_CODE), not a virus family's: in BN6's trace the copy's, in BN5's its own (the subject's moved ranges)"""
+    from xdiff_snap import XC_CODE
+    a &= ~1
+    for frm, to, n in trace.get('moved', ()) or trace.get('code', ()):
+        if XC_CODE[0] <= to < XC_CODE[1]:
+            base = to if trace['game'] == 6 else frm
+            if base <= a < base + n:
+                return True
+    return False
+
+
 def spawned_by(trace, role):
     """whose code spawned an object: 'family' where the family's code led to its spawn, else the role of the object
-    that ran as it was spawned; None where neither is known (in play before the hooks, or spawned outside the runner)"""
+    that ran as it was spawned (also where the moved code is a chip's: its user's, MegaMan's chip's objects); None where
+    neither is known (in play before the hooks, or spawned outside the runner)"""
     e, running = trace.get('spawns', {}).get(role, (None, None))
     if e is None:
         return None
-    return 'family' if e.family else running
+    return 'family' if e.family and not chip_code(trace, e.family) else running

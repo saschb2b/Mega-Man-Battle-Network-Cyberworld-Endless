@@ -56,6 +56,18 @@ const XVirusFamily *xvirus_installed(int game, int src_ai);
  * as the core started, so a hook may ask (encounter.c, the reward pick). */
 uint32_t xvirus_drop_row(int id);
 
+/* Code alone of another game's moved into the core's copy (a chip's:
+ * xchips_code.c): its blocks and clones copied and fixed up as a family's
+ * are, their calls out through veneers from `veneers` (room for `nveneers`,
+ * word-aligned), its sprites, effects and object types for the dispatch set
+ * in BN6's grown tables, all within region `r` (xvirus_code_ok); staged into
+ * the step open (xvirus_tx.h), false (the step failed) where a check did not
+ * pass. */
+bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneers, int nveneers);
+/* Where an address of a recipe's blocks is moved to (its Thumb bit kept), 0
+ * for one outside them. */
+uint32_t xvirus_code_at(const XVirusFamily *f, uint32_t a);
+
 /* What was moved where, for a trace's reader (battle_trace.c, xdiff.c): an
  * address range of a family's game, or of one of BN6's tables, and its
  * copy */

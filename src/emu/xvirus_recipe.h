@@ -205,6 +205,14 @@ uint32_t xvirus_crc32(const uint8_t *p, uint32_t n);
 /* Whether the recipe holds together (AI index, ids, home, its blocks, their
  * data, states, hooks, calls and immediates); where not, why, into `why`. */
 bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n);
+/* Where a recipe's code and art may go: the families' (XV_CODE to XV_ART,
+ * XV_ART to XV_END), or another installer's region (a chip's code,
+ * xchips_code.h) */
+typedef struct { uint32_t code, code_end, art, art_end; } XvRegion;
+/* Whether a recipe of code alone holds together (no states, records or held
+ * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
+ * within `r`; where not, why. */
+bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n);
 /* The block an address of the family's game lies in (NULL: none), the data
  * range (NULL: code, or outside the blocks), and whether it is code. */
 const XvBlock *xvirus_block_of(const XVirusFamily *f, uint32_t a);
