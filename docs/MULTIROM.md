@@ -445,9 +445,8 @@ The calls:
    DarkChip's dark power ran in costs 20 max HP, in every battle (the
    owner's call B, unchanged). BN6's own burn a BugFrag a use and fall
    back to their base chip without one; BN5's come into the hand only
-   while MegaMan is down to a quarter of his HP (BN5's worry, which BN6's
-   engine has not, read from his HP as the guest battles already open
-   it). One of each kind, three in a folder (BN6's rule). The flames:
+   while MegaMan worries (BN5's mood, brought into BN6's battles: the
+   finer calls below). One of each kind, three in a folder (BN6's rule). The flames:
    BN5's on its acts, offering its kinds; BN6's on its own, offering its
    four.
 7. **Nothing reaches the meta loop:** variety, not power, as before.
@@ -488,12 +487,64 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   (NumberMan's Chaos Unison takes it); without it, it stays out as now.
 - **A territory's Servers and the duel's race** fight its own records.
 - **Repeats** are kept apart in BN5's pools as in BN6's.
+- **The chips a run can meet are registered**, no more: BN5's standard
+  chips, Megas and DarkChips, Team Colonel's Gigas, the Navi chips of the
+  six Navis who guard runs (V1, SP and DS each) and BN5's Program
+  Advances whose parts are registered. Team ProtoMan's version chips, the
+  Darkloids' and Django's Navi chips (nothing in a run gives them),
+  BugCharg (it reads BN5's NaviCust bugs) and BN5's unfinished Phoenix
+  and DethPhnx stay out. BN6's chip ids are nine bits, and this is what
+  fits.
+- **The Library:** BN6's own Library screen keeps its numbering (its
+  standard tab is a list of 200 and a byte); a BN5 chip shows there only
+  where a tab has room by its own numbers (Mega, Giga, PA), and the run's
+  collection counts every registered chip, the second screen's Library
+  listing BN5's under the older net. (This amends call 4's "numbered on"
+  where BN6's screen cannot.)
+- **UNITE and the Beast Out emblem share one place** on the Custom screen
+  (BN6's emblem is BN5's UNITE button, the same slot): it is UNITE while
+  the last chip picked lights a held Soul, and the Beast Out emblem
+  otherwise, where the run has Beast Out. A player who wants the beast
+  picks his Soul's chip earlier. The slot's art says which it is.
+- **Every Soul fights three turns** (BN5's rule for all six, not
+  NumberMan's alone), Chaos Unison one. A Chaos Unison released at the
+  wrong moment fails as in BN5: the Dark Soul rises on the enemy's side.
+- **BN5's mood comes into BN6's battles** for BN5's DarkChips and UNITE:
+  a hit lowers it, a landed hit lifts it, a counter calms him, a battle
+  opens as worried as his HP says (the guest battles' rule), and a BN5
+  DarkChip used makes him dark for the battle. BN5's DarkChips come into
+  the hand while he worries or is dark; UNITE stands only while he does
+  not. Dark is BN6's dark too: no Cross, no Beast Out, a weak buster. The
+  rise after falling dark, BN5's, does not come with it: BN6's engine has
+  its own dark, and that is enough of a price beside the max HP.
 
 What to watch, and measure (docs/META.md, Measuring it): a visitor whose
 pairing the band does not see (two that pin a row between them); the
 strongest Soul for a folder taken every battle now that it serves every
 battle (each still costs a chip and comes once); a Soul and a Cross read
 as one thing; DarkChips' uses and the max HP they took, per net.
+
+**Its groundwork (M0, in place; nothing a player meets changes yet):** a
+record of BN5's becomes an Encounter of BN6's (`src/core/xbattles.c`): its
+foes by BN6's ids (a family both games have by name BN6's, at the tier of
+its version; a family moved into the engine its installed ids), its field
+as BN6's (`src/emu/xfields.c`: BN5's layouts written over fields of BN6's
+no battle names, their panels' types as BN6's; docs/ROM_DATA.md,
+Battlefields and their panels' types), its green Mystery Data by BN5's
+rule with BN5's finds as BN6's, its rocks; a moved family's reward rows
+are BN5's own, as BN6's (`src/emu/xvirus.c`); and a territory's random
+battle can be rolled from its records as BN6's are from its areas'
+(`xterritory_encounter`: the act's band with BN6's easing, BN5's versions
+by tier, BN6's repeat rule, the run's random numbers), which
+`make_encounter` takes where `loot_territory` names the area, set by
+nothing yet (M3). BN5's text reads in BN6's codes (docs/ROM_DATA.md,
+BN5's text). `build.py xrecords` lists what each territory can fight so
+far: 44 of its 214 random records with CanGard alone (ACDC Area 21 of
+34, SciLab 19 of 36); the xrecord step fights one (docs/DEVTOOLS.md).
+Not translatable as BN6 has them: BN5's lava and sea panels (the
+Undernet's and Nebula Area's fields 0x73-0x76, End Area's 0x42-0x45:
+BN6's 8 is another panel and BN6 has no sea), a decision for M3; and
+its Navis (M2).
 
 ## Transplanted families
 
@@ -685,7 +736,12 @@ and its calls aimed again (`src/emu/xvirus.c`):
   Appley need what BN5's dispatcher does for their ids, Cactikil and
   WuNote their attacks' objects of the first kind. Every routine a new
   family calls has its body compared with BN6's before it is paired.
-- **Not yet**: the families after CanGard, their drop rows, their place in formations (a game-design
+- **Its rewards**: its reward rows are its game's own for its versions,
+  each entry as BN6's (a chip as BN6's of its name, else 200 zenny until
+  BN5's chips are BN6's too), written into BN6's rows of its ids, which
+  the battle's results then lean as BN6's (docs/ROM_DATA.md, BN5's
+  records in BN6's engine).
+- **Not yet**: the families after CanGard, their place in formations (a game-design
   pass), and BN6's three 35-word per-AI tables, which a fourth family
   would need moved. The New 3DS keeps no BN5 ROM: no family is installed
   there. A state saved while a moved family is in battle needs the same

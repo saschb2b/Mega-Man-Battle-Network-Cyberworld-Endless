@@ -10,6 +10,7 @@
 #include "run.h"
 #include "rom.h"
 #include "super_boss.h"
+#include "xbattles.h"
 #include "xguardian.h"
 
 #define NAVI_CHALLENGE 40   /* % of challenges from the fourth act on against one of the area's SP navis */
@@ -187,9 +188,9 @@ int counter_element(int depth, int biome, int navi) {
  * rolled again every few seconds, and those rolls had pushed a Server's
  * battle out of mind before the fight after it (loot_battle_fought) */
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
-static uint32_t last_families;                  /* the virus families of the last battle (a bit each) */
+static uint64_t last_families;                  /* the virus families of the last battle (a bit each) */
 static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
-static uint32_t before_families;                /* the battle's before it, its families */
+static uint64_t before_families;                /* the battle's before it, its families */
 
 void loot_battle_fought(const Encounter *e) {
 	if (e->from_pick < 0) return;
@@ -202,6 +203,34 @@ void loot_battle_fought(const Encounter *e) {
 
 void loot_memory(LootMemory *out) {
 	*out = (LootMemory){ last_biome, last_pick, last_families, last_viruses, before_families };
+}
+
+void loot_last_fought(int *biome, int *pick) {
+	*biome = last_biome;
+	*pick = last_pick;
+}
+
+int loot_repeat_weights(const LootCand *c, int n, int biome, int *weight) {
+	int total = 0;
+	for (int again = 0; again < 4 && !total; ++again)
+		for (int i = 0; i < n; ++i) {
+			bool shares = c[i].families & last_families, before = c[i].families & before_families;
+			bool same = biome == last_biome && c[i].viruses == last_viruses;
+			weight[i] = !c[i].weight || (again == 0 && (shares || before)) || (again == 1 && shares) || (again == 2 && same)
+				? 0 : c[i].weight * (shares ? 1 : 3);
+			total += weight[i];
+		}
+	return total;
+}
+
+int loot_weighted_pick(const int *weight, int n, int total) {
+	int roll = rng_range(0, total - 1);
+	for (int i = 0; i < n; ++i) {
+		if (!weight[i]) continue;
+		if (roll < weight[i]) return i;
+		roll -= weight[i];
+	}
+	return -1;
 }
 
 void loot_memory_set(const LootMemory *m) {
@@ -237,11 +266,11 @@ static int first_family(const Formation *f) {
 }
 
 /* The virus families formation `f` brings, a bit each. */
-static uint32_t families_of(const Formation *f) {
-	uint32_t in = 0;
+static uint64_t families_of(const Formation *f) {
+	uint64_t in = 0;
 	for (int k = 0; k < f->n; ++k) {
 		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
-		if (row[1] == 0 && row[2] > 0 && row[2] < 32) in |= 1u << row[2];
+		if (row[1] == 0 && row[2] > 0 && row[2] < 32) in |= (uint64_t)1 << row[2];
 	}
 	return in;
 }
@@ -332,8 +361,8 @@ static int fielded(int depth, int biome, int target, const Formation **list, int
 /* (at every version the act's battles can aim for, and no roll: a roll
  * here, as MegaMan's status named the area's viruses, moved the run's
  * next random numbers whenever L was pressed in acts 3 and 5) */
-uint32_t loot_families_here(int depth, int biome) {
-	uint32_t in = 0;
+uint64_t loot_families_here(int depth, int biome) {
+	uint64_t in = 0;
 	int lo, hi;
 	pacing_virus_versions(depth, false, &lo, &hi);
 	for (int v = lo; v <= hi; ++v) {
@@ -447,17 +476,10 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	 * brought a third as likely but never its very viruses (Piranha and
 	 * Puffy twice in a row, from two of the area's records), then anything:
 	 * the area's own viruses, not the same ones fight after fight */
-	int weight[MAX_FIT];
-	total = 0;
-	for (int again = 0; again < 4 && !total; ++again)
-		for (int i = 0; i < n && i < MAX_FIT; ++i) {
-			uint32_t fam = families_of(&list[i]);
-			bool shares = fam & last_families, before = fam & before_families;
-			bool same = biome == last_biome && viruses_of(&list[i]) == last_viruses;
-			weight[i] = fit[i] < 0 || (again == 0 && (shares || before)) || (again == 1 && shares) || (again == 2 && same)
-				? 0 : list[i].weight * (shares ? 1 : 3);
-			total += weight[i];
-		}
+	int weight[MAX_FIT], m = n < MAX_FIT ? n : MAX_FIT;
+	static LootCand cand[MAX_FIT];
+	for (int i = 0; i < m; ++i) cand[i] = (LootCand){ fit[i] < 0 ? 0 : list[i].weight, families_of(&list[i]), viruses_of(&list[i]) };
+	total = loot_repeat_weights(cand, m, biome, weight);
 	/* the run's first battle, the formation's first virus alone: not a
 	 * Piranha where another fits, which dives out of the starting folder's
 	 * reach and on ice freezes MegaMan (a playtester's first fight, 40 HP) */
@@ -469,12 +491,7 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 			total = kept;
 		}
 	}
-	int roll = rng_range(0, total - 1), pick = -1;
-	for (int i = 0; i < n && i < MAX_FIT; ++i) {
-		if (!weight[i]) continue;
-		if (roll < weight[i]) { pick = i; break; }
-		roll -= weight[i];
-	}
+	int pick = loot_weighted_pick(weight, m, total);
 	if (pick < 0) return false;
 	e->from_biome = biome;
 	e->from_pick = pick;
@@ -497,26 +514,32 @@ static bool from_formations(int depth, int biome, int kind, Encounter *e) {
 	return e->nfoes > 0;
 }
 
+/* The run's first battle: the formation's first virus alone (the areas'
+ * own battles all bring two or more) */
+static void first_alone(Encounter *e) {
+	int n = 0;
+	bool kept = false;
+	for (int i = 0; i < e->nfoes; ++i) {
+		if (e->foes[i].kind == FOE_VIRUS && kept) continue;
+		kept |= e->foes[i].kind == FOE_VIRUS;
+		e->foes[n++] = e->foes[i];
+	}
+	for (int i = n; i < e->nfoes; ++i) e->foes[i].id = -1;
+	e->nfoes = n;
+}
+
+int loot_territory = -1;
+
 Encounter make_encounter(int depth, int biome, int kind) {
 	bool challenge = kind == ENC_CHALLENGE;
 	Encounter e = { 0 };
 	e.biome = biome;
 	e.from_pick = -1;
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
-	if (original_encounter(depth, biome, kind, &e)) {
-		/* the run's first battle: the formation's first virus alone (the
-		 * areas' own battles all bring two or more) */
-		if (kind == ENC_FIRST) {
-			int n = 0;
-			bool kept = false;
-			for (int i = 0; i < e.nfoes; ++i) {
-				if (e.foes[i].kind == FOE_VIRUS && kept) continue;
-				kept |= e.foes[i].kind == FOE_VIRUS;
-				e.foes[n++] = e.foes[i];
-			}
-			for (int i = n; i < e.nfoes; ++i) e.foes[i].id = -1;
-			e.nfoes = n;
-		}
+	/* (an older net's area: its own game's records, fought in BN6's engine,
+	 * issue #82; else BN6's area's) */
+	if ((loot_territory >= 0 && xterritory_encounter(depth, loot_territory, kind, &e)) || original_encounter(depth, biome, kind, &e)) {
+		if (kind == ENC_FIRST) first_alone(&e);
 		return e;
 	}
 	e.nfoes = 0;

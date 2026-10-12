@@ -108,6 +108,8 @@ def spec_text(spec, out, pokes, calls=()):
         parts.append(f'keys={keys}')
     if spec.get('rng'):
         parts.append(f'rng={spec["rng"]}')
+    if spec.get('field'):
+        parts.append(f'field={spec["field"]}')
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 

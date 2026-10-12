@@ -25,7 +25,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -51,18 +51,19 @@ static void parse_buttons(const char *s, InputStep *step) {
 	}
 }
 
-/* a dev step that takes its words whole ("foes SPEC", "status SPEC"),
- * into its step; false where `tok` is none */
+/* a dev step that takes its words whole ("foes SPEC", "status SPEC",
+ * "xrecord ADDR"), into its step; false where `tok` is none */
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
 	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
+	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
 	else return false;
 	return true;
 }
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->sig || s->held;
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->sig || s->held;
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -74,10 +75,11 @@ static void parse_script(const char *spec) {
 		InputStep *s = &script[script_len];
 		s->frames = atoi(tok);
 		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
-		 * FROM TO 1|0", "0:battle", "0:foes BB@52/01@43", "0:status freeze
-		 * 90" and "0:sig": a scripted capture of a set piece puts MegaMan at
-		 * it, of a battle starts the layer's next or one of the given foes, of
-		 * a status gives the battle's enemies one, of a layer's signature puts
+		 * FROM TO 1|0", "0:battle", "0:foes BB@52/01@43", "0:xrecord
+		 * 811DD90", "0:status freeze 90" and "0:sig": a scripted capture of
+		 * a set piece puts MegaMan at it, of a battle starts the layer's next,
+		 * one of the given foes or one of BN5's records in BN6's engine, of a
+		 * status gives the battle's enemies one, of a layer's signature puts
 		 * him in it; "300:battle" waits its 300 frames first) */
 		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
@@ -155,12 +157,13 @@ static void write_state(const char *path) {
 	fclose(f);
 }
 
-/* A step's dev steps on the game: a battle, foes, a status, the
- * signature, the run saved with MegaMan held (a CONTINUE's recovery,
- * issue #23) */
+/* A step's dev steps on the game: a battle, foes, a record of BN5's, a
+ * status, the signature, the run saved with MegaMan held (a CONTINUE's
+ * recovery, issue #23) */
 static void emu_steps(const InputStep *s) {
 	if (s->battle) director_dev_battle();
 	if (s->foes[0]) director_dev_foes(s->foes);
+	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
 	if (s->status[0]) director_dev_status(s->status);
 	if (s->sig) director_dev_signature();
 	if (s->held) director_dev_hold(s->hold);
@@ -210,7 +213,8 @@ static bool remote_open(const char *dir) {
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
  * "battle" (the layer's next random battle, director_dev_battle), "foes
- * SPEC" (a battle of these foes, director_dev_foes), "status SPEC" (the
+ * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
+ * record of BN5's in BN6's engine, director_dev_xrecord), "status SPEC" (the
  * battle's enemies given a status, director_dev_status), "sig"
  * (MegaMan in the layer's signature, director_dev_signature), "stuck MASK"
  * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";

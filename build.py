@@ -2180,7 +2180,7 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'screenshots', 'clips', 'town', 'world', 'symbols'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -2263,6 +2263,9 @@ def main():
     if a.action == 'xdiff':
         # (local only: both ROMs; the tool builds the host binary and runs it once a spec)
         sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xdiff.py'), *a.rest]))
+    if a.action == 'xrecords':
+        # (local only: both ROMs; BN5's records in BN6's engine, each fightable or why not)
+        sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xrecords.py'), *a.rest]))
     if a.action == 'pacing':
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))

@@ -374,7 +374,7 @@ As built (issue #95):
 - **The price.** Each trip moves the Net's clock a notch (`run.clock`),
   and every guardian after it has a tenth more HP a notch
   (`RUN_CLOCK_PERCENT`, `pacing_clock_hp`): BN6's as they spawn (the hook
-  that caps the duel's, `emu_battle_clock`), BN5's in their stats row
+  that caps the duel's, `emu_battle_hp`), BN5's in their stats row
   (`guest.c`). The pacing report's last section shows the effect: act 1's
   median guardian (500 HP) stands at act 2's band floor after two notches
   (600), act 2's (700) at act 3's after two (840). Two trips cost about an

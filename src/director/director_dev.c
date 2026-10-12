@@ -200,11 +200,18 @@ static bool foe_of(unsigned id, int col, int row, Foe *f) {
 	return true;
 }
 
+void director_dev_due(const Encounter *e) {
+	dev_foes = *e;
+	foes_due = true;
+}
+
 bool director_dev_foes(const char *spec) {
 	Encounter e = D.next;
 	e.nfoes = e.nobj = 0;
 	e.field = e.player = e.song = 0;
-	e.boss = e.held = e.map_backdrop = false;
+	e.boss = e.held = e.map_backdrop = e.gem_own = false;
+	e.xrecord = 0;
+	e.visitor = 0;
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, " /,"); t; t = strtok(NULL, " /,")) {
@@ -215,8 +222,7 @@ bool director_dev_foes(const char *spec) {
 		else printf("foes: %s is no enemy at a panel (ID@CR, hex, column 1-6, row 1-3)\n", t);
 	}
 	if (!e.nfoes) return false;
-	dev_foes = e;
-	foes_due = true;
+	director_dev_due(&e);
 	return true;
 }
 
@@ -272,7 +278,7 @@ static void dev_battle(void) {
 		return;
 	if (foes_due) {
 		foes_due = false;
-		if (emu_debug_on()) fprintf(stderr, "foes: the step's battle, %d foes\n", dev_foes.nfoes);
+		if (emu_debug_on()) fprintf(stderr, "foes: the step's battle, %d foes%s\n", dev_foes.nfoes, dev_foes.xrecord ? " (an older net's record)" : "");
 		set_encounter(&dev_foes, true);
 		return;
 	}

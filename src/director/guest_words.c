@@ -16,6 +16,7 @@
 #include "guest.h"
 #include "save.h"
 #include "talk.h"
+#include "xchips.h"
 
 /* The folder's chips the older net never had (guest.c), named as MegaMan
  * says them: three or fewer by name (the Storm folder's "ElcPuls1,
@@ -25,7 +26,7 @@
 int out_names(char *s, size_t n) {
 	uint16_t folder[BN6_FOLDER_ENTRIES], out[3];
 	folder_now(folder);
-	int k = guest_sitting_out(folder, out, 3);
+	int k = xchips_sitting_out(folder, out, 3);
 	ChipInfo ci[3];
 	memset(ci, 0, sizeof ci);
 	for (int i = 0; i < k && i < 3; ++i) chip_info(out[i], &ci[i]);

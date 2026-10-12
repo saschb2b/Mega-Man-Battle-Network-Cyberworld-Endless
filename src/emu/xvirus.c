@@ -15,6 +15,8 @@
 #include "data.h"
 #include "debug.h"
 #include "rom.h"
+#include "xchips.h"
+#include "xfields.h"
 #include "xnavi.h"
 #include "xvirus_families.h"
 
@@ -33,6 +35,7 @@ typedef struct {
 	uint32_t sprite_lists;          /* its sprite lists (a ROM offset, as RomLayout.sprite_lists) */
 	uint32_t effects, neffects;     /* its effects, 4 bytes each (as BN6_EFFECTS) */
 	uint32_t types;                 /* its attacks' routines by type (as BN6_T3_TYPES) */
+	uint32_t drops;                 /* its enemies' reward rows (as BN6_DROP_ROWS), 0 where its family keeps BN6's */
 } Game;
 
 static bool game_of(int game, Game *g) {
@@ -41,13 +44,13 @@ static bool game_of(int game, Game *g) {
 	if (game == XV_GAME_BN6) {
 		/* (the sizes as BN6 reads them for its 32 AI indexes: AI 30's and 31's past its viruses' 30, in the Navis') */
 		*g = (Game){ R.data, BN6_FAMILY_TABLES, BN6_FAMILIES, BN6_FAMILY_STEP, R.layout->enemy_names[0], BN6_ICE_SIZES, BN6_FAMILIES,
-			R.layout->sprite_lists, BN6_EFFECTS, BN6_EFFECT_COUNT, BN6_T3_TYPES };
+			R.layout->sprite_lists, BN6_EFFECTS, BN6_EFFECT_COUNT, BN6_T3_TYPES, 0 };
 		return true;
 	}
 	if (game == XROM_BN5_COLONEL_US && XR[game].data && XR[game].layout) {
 		/* (BN5 freezes no virus: no ice blocks' sizes) */
 		*g = (Game){ XR[game].data, BN5_FAMILY_TABLES, BN5_FAMILIES, BN5_FAMILY_STEP, BN5_ENEMY_NAMES - BUS, 0, 0,
-			XR[game].layout->sprite_lists, BN5_EFFECTS, BN5_EFFECT_COUNT, BN5_T3_TYPES };
+			XR[game].layout->sprite_lists, BN5_EFFECTS, BN5_EFFECT_COUNT, BN5_T3_TYPES, BN5_REWARD_ROWS };
 		return true;
 	}
 	return false;
@@ -439,11 +442,15 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 	for (int v = 0; v < XV_VERSIONS; ++v) {
 		const uint8_t *s;
 		uint32_t n = entry_of(g->rom, g->names, f->names[v], &s), id = (uint32_t)(f->first_id + v);
-		if (!n || id >= names.entries || len + n > NAMES_MAX) { fail("no room for its name %d", v); return; }
+		if (!n || id >= names.entries || len + n + 1 > NAMES_MAX) { fail("no room for its name %d", v); return; }
 		put16(work + 2 * id, len);
-		memcpy(work + len, s, n);
-		names.moved[names.nmoved++] = (XvMoved){ BUS + (uint32_t)(s - g->rom), XV_NAMES + len, n };
-		len += n;
+		/* (another game's in BN6's text codes: rom.h, xrom_text_bn6) */
+		uint32_t to = n - 1;
+		if (f->game == XV_GAME_BN6) memcpy(work + len, s, to);
+		else to = (uint32_t)xrom_text_bn6(f->game, s, to, work + len, NAMES_MAX - 1 - len);
+		work[len + to] = TEXT_END;
+		names.moved[names.nmoved++] = (XvMoved){ BUS + (uint32_t)(s - g->rom), XV_NAMES + len, to + 1 };
+		len += to + 1;
 	}
 	uint8_t *p = tx_put(XV_NAMES, len, first);
 	if (!p) return;
@@ -643,10 +650,31 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 	tx_word(at, rom32(R.data, at), held);
 }
 
+/* ---- its rewards: its game's reward rows for its versions' ids, as BN6's
+ * (xchips.h), in BN6's rows of its ids, which BN6 gives others ---- */
+
+static struct { bool own; uint16_t row[XV_VERSIONS][ENEMY_DROPS]; } drops;
+
+static void drops_set(const XVirusFamily *f, const Game *g) {
+	drops.own = g->drops != 0;
+	for (int v = 0; drops.own && v < XV_VERSIONS && !tx.failed; ++v) {
+		uint32_t from = g->drops - BUS + 2u * ENEMY_DROPS * f->names[v], to = BN6_DROP_ROWS + 2u * ENEMY_DROPS * (uint32_t)(f->first_id + v);
+		uint8_t *p = from + 2u * ENEMY_DROPS <= ROM_SIZE ? tx_put(to, 2u * ENEMY_DROPS, false) : NULL;
+		if (!p) { fail("its reward row %d", v); return; }
+		for (uint32_t k = 0; k < ENEMY_DROPS; ++k) {
+			/* (BN6's own row there, as the player's ROM has it, still) */
+			if (emu_read16(to + 2 * k) != get16(R.data + (to - BUS) + 2 * k)) { fail("BN6's reward row of %#x was changed", f->first_id + v); return; }
+			drops.row[v][k] = xchips_reward_bn6(get16(g->rom + from + 2 * k));
+			put16(p + 2 * k, drops.row[v][k]);
+		}
+	}
+}
+
 /* data.c's readers told of its ids (EnemyMoved), as the engine reads them now */
 static void enemies_tell(const XVirusFamily *f) {
 	for (int v = 0; v < XV_VERSIONS; ++v) {
-		EnemyMoved e = { { (uint8_t)v, 0, (uint8_t)f->ai }, { 0 }, { 0 }, "" };
+		EnemyMoved e = { { (uint8_t)v, 0, (uint8_t)f->ai }, { 0 }, { 0 }, "", drops.own, { 0 } };
+		memcpy(e.drops, drops.row[v], sizeof e.drops);
 		memcpy(e.stats, rec.stats + BN6_STATS_SIZE * v, BN6_STATS_SIZE);
 		memcpy(e.traits, rec.traits, BN6_TRAITS_SIZE);
 		uint32_t at = get16(names.bytes + 2u * (uint32_t)(f->first_id + v));
@@ -682,6 +710,7 @@ bool xvirus_install_family(const XVirusFamily *f) {
 		if (!tx.failed) ids_set(f);
 		if (!tx.failed) names_set(f, &g);
 		if (!tx.failed) art_set(f, &g);
+		if (!tx.failed) drops_set(f, &g);
 	}
 	if (tx.failed) {
 		fprintf(stderr, "xvirus: %s not installed: %s\n", f->name, tx.why);
@@ -702,10 +731,23 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	return true;
 }
 
+const XVirusFamily *xvirus_installed(int game, int src_ai) {
+	for (int i = 0; i < ninstalled; ++i)
+		if (installed[i]->game == game && installed[i]->src_ai == src_ai) return installed[i];
+	return NULL;
+}
+
 void xvirus_install(int which) {
 	static bool done;
 	if (done || !emu_ready()) return;
+	/* (BN5's families and battlefields where its ROM is read: none latched
+	 * before it is, so a ROM put in on the ROMs screen within a session
+	 * comes in as the next run's core starts) */
+	if (which == XVIRUS_FAMILIES && !XR[XROM_BN5_COLONEL_US].data) return;
 	done = true;
 	if (which == XVIRUS_CONTROL) xvirus_install_family(&xvirus_control);
-	else if (which == XVIRUS_FAMILIES && XR[XROM_BN5_COLONEL_US].data) xvirus_install_family(&xvirus_cangard);
+	else if (which == XVIRUS_FAMILIES) {
+		xvirus_install_family(&xvirus_cangard);
+		xfields_install(XROM_BN5_COLONEL_US);
+	}
 }

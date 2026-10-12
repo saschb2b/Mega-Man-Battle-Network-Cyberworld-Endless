@@ -14,9 +14,13 @@
  * such battles (else as ENC_EASY) */
 enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE, ENC_FIRST };
 Encounter make_encounter(int depth, int biome, int kind);
-/* The virus families (a bit each) the area's plain random battles can hold
- * at `depth`; no random numbers drawn. */
-uint32_t loot_families_here(int depth, int biome);
+/* The area (NET_AREAS + k, rom.h) whose own game's battle records a
+ * layer's random battles are, fought in BN6's engine (xbattles.h, issue
+ * #82), as make_encounter rolls them; -1 none (BN6's area's own) */
+extern int loot_territory;
+/* The virus families (a bit each, by BN6's AI index) the area's plain
+ * random battles can hold at `depth`; no random numbers drawn. */
+uint64_t loot_families_here(int depth, int biome);
 enum { FAMILY_STARFISH = 15, FAMILY_SCARCROW = 17, FAMILY_DARKMECH = 25 };
 Encounter make_boss(int depth, int biome, int navi);
 /* The element that hits an act's guardian twice as hard (of either wheel),
@@ -55,10 +59,24 @@ int loot_folder_copies(int id);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */
-typedef struct { int32_t biome, pick; uint32_t families, viruses, families_before; } LootMemory;
+typedef struct { int32_t biome, pick; uint64_t families; uint32_t viruses; uint64_t families_before; } LootMemory;
 void loot_memory(LootMemory *out);
 /* The battle MegaMan fights: the next random battle keeps clear of it. */
 void loot_battle_fought(const Encounter *e);
 void loot_memory_set(const LootMemory *m);
+/* ... the last one's area and battle (Encounter.from_biome, from_pick) */
+void loot_last_fought(int *biome, int *pick);
+/* A battle a random roll may pick, as the repeats are weighed: its own
+ * weight (0: none it may pick), its virus families (a bit each) and its
+ * viruses (a hash of their ids, whatever their panels) */
+typedef struct { int weight; uint64_t families; uint32_t viruses; } LootCand;
+/* The weights of `n` such battles of area `biome` against the last two
+ * fought: none of either one's virus families where another fits, then
+ * none of the last one's, then not its very viruses again, then anything;
+ * a family the last battle brought a third as likely. Into weight[], their
+ * sum (0: none at all). No random numbers drawn. */
+int loot_repeat_weights(const LootCand *c, int n, int biome, int *weight);
+/* One of `n` by those weights (their sum `total`, over 0): its index */
+int loot_weighted_pick(const int *weight, int n, int total);
 
 #endif

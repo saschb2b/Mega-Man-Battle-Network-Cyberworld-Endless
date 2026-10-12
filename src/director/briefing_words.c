@@ -144,9 +144,9 @@ static int family_words(char *buf, int k, int size) {
 	/* (none where the area's battles are another game's: L warned of
 	 * StarFish in End Area, whose battle was BN5's Whirlies, session 65) */
 	if (encounter_guest) return k;
-	uint32_t fams = loot_families_here(run.depth, run.biome);
+	uint64_t fams = loot_families_here(run.depth, run.biome);
 	for (unsigned i = 0; i < sizeof warn / sizeof *warn; ++i)
-		if (fams & (1u << warn[i].family) && profile_family_fought(warn[i].family))
+		if (fams >> warn[i].family & 1 && profile_family_fought(warn[i].family))
 			k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "%s", warn[i].words);
 	return k;
 }

@@ -20,8 +20,9 @@
 #include "data.h"
 #include "debug.h"
 #include "emu.h"
-#include "guest_records.h"
 #include "rom.h"
+#include "xchips.h"
+#include "xrecords.h"
 
 /* (every build but the 3DS's, whose heap holds one ROM) */
 #if !defined(__3DS__)
@@ -52,34 +53,12 @@ const char *guest_dark_name(int k) {
 #include "game.h"
 #include "guest_reward.h"
 #include "platform.h"
-#include "xchips.h"
-
-/* ---- the run's chips as its game's: by name, from both ROMs ---- */
-
-#define BN6_CHIPS 314   /* BN6's standard, Mega and Giga chips, those a folder holds */
-#define BN6_STANDARD_CHIPS 203   /* ... its standard ones, 1-202 */
-static uint16_t to_bn5[BN6_CHIPS], from_bn5[BN5_CHIPS];
-
-/* Pairs BN6's chips with BN5's of the same name (xchips.c); how many
- * paired. */
-static int chips_pair(int xrom) {
-	static char names5[BN5_CHIPS][XCHIP_NAME], names6[BN6_CHIPS][XCHIP_NAME];
-	for (int i = 1; i < BN5_CHIPS; ++i)
-		xrom_text(xrom, i < 256 ? BN5_CHIP_NAMES_LOW : BN5_CHIP_NAMES_HIGH, i < 256 ? i : i - 256, names5[i], sizeof names5[i]);
-	for (int id = 1; id < BN6_CHIPS; ++id) {
-		ChipInfo ci;
-		chip_info(id, &ci);
-		snprintf(names6[id], sizeof names6[id], "%s", ci.name);
-	}
-	return xchips_pair((const char (*)[XCHIP_NAME])names6, BN6_CHIPS, (const char (*)[XCHIP_NAME])names5, BN5_CHIPS, to_bn5, from_bn5);
-}
 
 /* (the core is its boot's alone while that runs, on its thread where it
  * has one: the main thread touches it only once it is ready, or where the
  * boot runs in its own frames' slices) */
 static struct mCore *core;
 static bool ready, failed, active, result_due;
-static int paired;   /* BN6's chips paired by name with its game's (chips_pair), on the main thread */
 static uint32_t video[EMU_W * EMU_H];
 static GuestResult result;
 static int frames;
@@ -95,7 +74,7 @@ static int phase;
 /* (the battle that waits for the boot: its record, and MegaMan with his
  * folder as he went in) */
 static uint32_t pend_record;
-static GuestScale pend_sc;   /* ... its scaling to the act */
+static XScale pend_sc;   /* ... its scaling to the act */
 static GuestMegaMan pend_mm;
 static GuestBoss pend_boss;   /* ... a guardian's, his (ai 0: none) */
 static uint16_t pend_folder[30];
@@ -114,28 +93,11 @@ static void wr16(uint32_t a, uint16_t v) { core->rawWrite16(core, a, -1, v); }
 
 bool guest_possible(int xrom) { return xrom == XROM_BN5_COLONEL_US && XR[xrom].data && (ready || !failed); }
 
-/* The chips of both games paired by name, once, where both ROMs are read:
- * on the main thread, before any boot (the director's words read them) */
-static void pair(void) {
-	if (!paired && XR[XROM_BN5_COLONEL_US].data && R.data) paired = chips_pair(XROM_BN5_COLONEL_US);
-}
-
-int guest_kind_chips(int kind, uint16_t *out, int max) {
-	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
-	if (!d || !R.data || kind < 0) return 0;
-	pair();
-	int n = 0;
-	for (int id = 1; id < BN6_STANDARD_CHIPS && n < max; ++id)
-		if (to_bn5[id] && d[BN5_CHIP_RECORDS + 0x2Cu * to_bn5[id] + BN5_CHIP_KIND] == kind) out[n++] = (uint16_t)id;
-	return n;
-}
-
 /* (0 until it is ready: the autopilot reads its battle while one waits) */
 uint8_t guest_read8(uint32_t a) { return ready ? rd8(a) : 0; }
 uint16_t guest_read16(uint32_t a) { return ready ? rd16(a) : 0; }
 uint32_t guest_read32(uint32_t a) { return ready ? rd32(a) : 0; }
 void guest_write16(uint32_t a, uint16_t v) { if (ready) wr16(a, v); }
-int guest_chip_bn6(int id) { return id > 0 && id < BN5_CHIPS ? from_bn5[id] : 0; }
 
 /* The deck's compaction, replaced (BN5_COMPACT): as BN5's, the live chips
  * to the front, 0xFFFF after; but a DarkChip stays live only where BN5's
@@ -380,7 +342,7 @@ static void boss_uncap(void) {
 
 static void boss_cap(const GuestBoss *b) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
-	uint32_t at = guest_navi_stats(d, b->ai, b->version);
+	uint32_t at = xrecords_navi_stats(d, b->ai, b->version);
 	uint16_t w = at ? (uint16_t)(d[at] | d[at + 1] << 8) : 0;
 	if (!at || b->hp_cap <= 0 || (w & 0xFFF) == b->hp_cap) return;
 	capped_at = 0x08000000u + at;
@@ -413,7 +375,7 @@ static uint32_t gem_put(uint32_t at, uint32_t taken) {
 	return 0;
 }
 
-static uint32_t record_copy(uint32_t record, GuestScale sc) {
+static uint32_t record_copy(uint32_t record, XScale sc) {
 	for (uint32_t i = 0; i < 16; i += 2) {
 		uint16_t v = rd16(record + i);
 		if (i == 8) v = (uint16_t)(v & ~BN5_OPT_GAME_OVER);
@@ -431,7 +393,7 @@ static uint32_t record_copy(uint32_t record, GuestScale sc) {
 	bool gem = false;
 	for (; k < 16 && from - 0x08000000u + 4u * k + 4 <= ROM_SIZE && d[from - 0x08000000u + 4u * k] != 0xF0; ++k) {
 		const uint8_t *e = d + (from - 0x08000000u) + 4u * k;
-		int id = e[0] == 0x11 ? guest_version_up(d, e[2] | e[3] << 8, sc) : e[2] | e[3] << 8;
+		int id = e[0] == 0x11 ? xrecords_version_up(d, e[2] | e[3] << 8, sc) : e[2] | e[3] << 8;
 		if (guest_dev_gem && e[0] >> 4 == BN5_ENTITY_FIND) { id |= 0x0F; gem = true; }
 		taken |= 1u << ((e[1] >> 4 & 3) * 8 + (e[1] & 7));
 		const uint8_t to[4] = { e[0], e[1], (uint8_t)id, (uint8_t)(id >> 8) };
@@ -466,7 +428,7 @@ static int folder_in(const uint16_t *folder) {
 	unsigned dark = 0;
 	recoded = 0;
 	for (uint32_t i = 0; i < 30; ++i) {
-		int id = folder[i] & 0x1FF, x = id > 0 && id < BN6_CHIPS ? to_bn5[id] : 0, code = folder[i] >> 9;
+		int id = folder[i] & 0x1FF, x = xchips_to_bn5(id), code = folder[i] >> 9;
 		/* (a DarkChip of BN6's folder, one of BN6's own: the run's one of
 		 * its kind, which comes by BN5's own rule, first among the run's,
 		 * never as a folder chip beside it; docs/META.md) */
@@ -488,18 +450,13 @@ static int folder_in(const uint16_t *folder) {
 	return in;
 }
 
-int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) {
-	pair();
-	return paired ? xchips_out(folder, 30, to_bn5, BN6_CHIPS, out, max) : 0;
-}
-
 /* (debug: the folder's chips that sat out, slot by slot) */
 static void out_tell(const uint16_t *folder) {
 	char line[600];
 	int k = 0, n = 0;
 	for (int i = 0; folder && i < 30 && k < (int)sizeof line - 24; ++i) {
 		int id = folder[i] & 0x1FF, code = folder[i] >> 9;
-		if (!id || (id < BN6_CHIPS && to_bn5[id])) continue;
+		if (!id || xchips_to_bn5(id)) continue;
 		ChipInfo ci;
 		chip_info(id, &ci);
 		k += snprintf(line + k, sizeof line - (size_t)k, "%s%s %c", n++ ? ", " : "", ci.name, code == 26 ? '*' : code < 26 ? 'A' + code : '?');
@@ -586,14 +543,14 @@ static void rng_in(void) {
 	if (emu_debug_on()) fprintf(stderr, "guest: its random numbers from seed %08X: %08X and %08X\n", battle_seed, first, second);
 }
 
-static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
+static bool battle_begin(uint32_t record, XScale sc, const GuestMegaMan *mm, const GuestBoss *boss) {
 	memcpy(dark_in, mm->dark, sizeof dark_in);
 	emu_sync();   /* (BN6's frame done first, where its core has a thread) */
 	if (!on_map() && !load_boot()) return false;
 	if (!patched) boot_patch();
 	/* (a guardian's: his band, his rows' zenny, his options; none else) */
 	boss_uncap();
-	boss_id = boss ? guest_navi_id(XR[XROM_BN5_COLONEL_US].data, boss->ai, boss->version) : 0;
+	boss_id = boss ? xrecords_navi_id(XR[XROM_BN5_COLONEL_US].data, boss->ai, boss->version) : 0;
 	boss_zenny = boss ? boss->zenny : 0;
 	if (boss) boss_cap(boss);
 	souls_in(mm->souls);
@@ -616,7 +573,7 @@ static bool battle_begin(uint32_t record, GuestScale sc, const GuestMegaMan *mm,
 	dark_used = fell = false;
 	const uint16_t *folder = mm->folder;
 	int in = folder ? folder_in(folder) : 0;
-	int ids[16], n = guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, sc, ids, 16);
+	int ids[16], n = xrecords_foes_scaled(XROM_BN5_COLONEL_US, record, sc, ids, 16);
 	/* (its results screen's rows as the run gets them: guest_reward.c) */
 	GuestRowsFit how = { mm->star, { mm->codes[0], mm->codes[1], mm->codes[2] }, boss_id, boss_zenny };
 	guest_rows_fit(ids, n, &how);
@@ -645,7 +602,7 @@ static void boot_over(bool ok) {
 	ready = ok;
 	failed = !ok;
 	platform_persist();
-	if (ok) printf("guest: %s ready for battles, %d of BN6's chips by name\n", XR[XROM_BN5_COLONEL_US].layout->tag, paired);
+	if (ok) printf("guest: %s ready for battles, %d of BN6's chips by name\n", XR[XROM_BN5_COLONEL_US].layout->tag, xchips_paired());
 	else fprintf(stderr, "guest: %s did not reach its map\n", XR[XROM_BN5_COLONEL_US].layout->tag);
 	if (phase != PH_BOOT) return;
 	active = false;
@@ -675,7 +632,7 @@ static void boot_join(bool stop) {
 static bool boot_begin(int xrom) {
 	if (xrom != XROM_BN5_COLONEL_US || !XR[xrom].data) return false;
 	emu_log_quiet();   /* (the logger every core reads: set here, before any thread) */
-	pair();
+	xchips_paired();   /* (the chips of both games paired on this thread, before it: xchips.h) */
 	SDL_AtomicSet(&boot_seen, 0);
 	boot_ticks = 0;
 	boot_t0 = SDL_GetPerformanceCounter();
@@ -770,7 +727,7 @@ bool guest_boot_waiting(void) { return active && phase == PH_BOOT; }
 /* (begun at once, or, its boot still under way, waiting for it, BN6's core
  * with it: guest_tick; a headless run waits for a thread's then and there,
  * its frames the same from run to run, as tools/play.py's replays need) */
-static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, const GuestBoss *boss, uint32_t seed) {
+static bool battle_ask(uint32_t record, XScale sc, const GuestMegaMan *mm, const GuestBoss *boss, uint32_t seed) {
 	if (active || !record) return false;
 	battle_seed = seed;
 #ifndef __EMSCRIPTEN__
@@ -790,14 +747,14 @@ static bool battle_ask(uint32_t record, GuestScale sc, const GuestMegaMan *mm, c
 	return true;
 }
 
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm, uint32_t seed) { return battle_ask(record, sc, mm, NULL, seed); }
+bool guest_battle(uint32_t record, XScale sc, const GuestMegaMan *mm, uint32_t seed) { return battle_ask(record, sc, mm, NULL, seed); }
 
 bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed) {
-	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss->ai, boss->version);
+	uint32_t record = xrecords_navi_record(XROM_BN5_COLONEL_US, boss->ai, boss->version);
 	if (emu_debug_on())
 		fprintf(stderr, "guest: guardian %d at version %d, record %08X, his HP %d, at most %d, his rows %d zenny\n", boss->ai, boss->version, record,
-			guest_navi_hp(XROM_BN5_COLONEL_US, boss->ai, boss->version, NULL), boss->hp_cap, boss->zenny);
-	return battle_ask(record, (GuestScale){ 0, 0 }, mm, boss, seed);
+			xrecords_navi_hp(XROM_BN5_COLONEL_US, boss->ai, boss->version, NULL), boss->hp_cap, boss->zenny);
+	return battle_ask(record, (XScale){ 0, 0 }, mm, boss, seed);
 }
 
 /* (dev) its game's battle as its game has it: the record at DEV_RECORD,
@@ -945,7 +902,7 @@ bool guest_take_result(GuestResult *out) {
 #else   /* (one ROM: the 3DS) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
-bool guest_battle(uint32_t record, GuestScale sc, const GuestMegaMan *mm, uint32_t seed) {
+bool guest_battle(uint32_t record, XScale sc, const GuestMegaMan *mm, uint32_t seed) {
 	(void)record; (void)sc; (void)mm; (void)seed;
 	return false;
 }
@@ -957,8 +914,6 @@ int guest_boot_left_ms(void) { return -1; }
 bool guest_boot_waiting(void) { return false; }
 bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed) { (void)boss; (void)mm; (void)seed; return false; }
 bool guest_possible(int xrom) { (void)xrom; return false; }
-int guest_kind_chips(int kind, uint16_t *out, int max) { (void)kind; (void)out; (void)max; return 0; }
-int guest_sitting_out(const uint16_t *folder, uint16_t *out, int max) { (void)folder; (void)out; (void)max; return 0; }
 bool guest_active(void) { return false; }
 bool guest_on_screen(void) { return false; }
 bool guest_fight_hp(int *hp, int *max) { (void)hp; (void)max; return false; }
@@ -973,6 +928,5 @@ uint32_t guest_read32(uint32_t a) { (void)a; return 0; }
 void guest_write16(uint32_t a, uint16_t v) { (void)a; (void)v; }
 void guest_write32(uint32_t a, uint32_t v) { (void)a; (void)v; }
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed) { (void)record; (void)len; (void)hp; (void)seed; return false; }
-int guest_chip_bn6(int id) { (void)id; return 0; }
 
 #endif

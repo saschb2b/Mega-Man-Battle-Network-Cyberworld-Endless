@@ -76,7 +76,8 @@ typedef struct {
 	int nstates;
 	XvRef hooks[XV_HOOKS];     /* its entries of tables 3-10 */
 	uint32_t struct1, struct2; /* its records in its game (8 bytes: sprites, element; 36: HP and damage per version) */
-	uint16_t names[XV_VERSIONS];   /* its versions' names: indexes of its game's viruses' names */
+	uint16_t names[XV_VERSIONS];   /* its versions' enemy ids in its game: its names' indexes there, and its reward rows' (another
+	                                  game's: xvirus.c, drops_set) */
 	uint32_t held;             /* its viruses' held chips, lists in BN6's ROM (the control's: its own); 0 none */
 	int ice;                   /* the size of the ice block it is frozen in (BN6_ICE_SIZES: 0 to XV_ICE_MAX), or XV_ICE_OWN, its
 	                              game's own for its AI index there (BN6's for the control); 0 where a recipe says none */

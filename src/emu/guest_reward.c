@@ -17,7 +17,7 @@
 /* The zenny a reward's chip pays where BN6 has none of its name: the
  * results screen shows what the run gets (docs/MULTIROM.md, Guest
  * battles) */
-#define REWARD_ZENNY 200
+#define REWARD_ZENNY XCHIPS_STAND_IN
 
 static uint16_t zenny_word(int zenny) { return (uint16_t)(BN5_REWARD_ZENNY << 14 | (zenny > 0x3FFF ? 0x3FFF : zenny)); }
 
@@ -43,7 +43,7 @@ static uint16_t row_coded(uint16_t v, uint32_t i, const uint8_t codes[3]) {
 	uint32_t x = v & 0x1FF;
 	uint8_t other[4], bn6[4];
 	for (uint32_t k = 0; k < 4; ++k) other[k] = XR[XROM_BN5_COLONEL_US].data[BN5_CHIP_RECORDS + 0x2Cu * x + k];
-	bn6_codes(guest_chip_bn6((int)x), bn6);
+	bn6_codes(xchips_bn6_of((int)x), bn6);
 	return (uint16_t)(x | (uint32_t)xchips_fit(other, bn6, codes, v >> 9 & 0x1F, (int)i) << 9);
 }
 
@@ -56,13 +56,13 @@ static bool is_chip(uint16_t v) { return v && v != 0xFFFF && !(v >> 14) && (v & 
  * half the time in the folder's codes. Zenny, HP and BugFrags as they are. */
 static uint16_t entry_fit(uint16_t v, int i, const GuestRowsFit *how) {
 	if (!is_chip(v)) return v;
-	if (!guest_chip_bn6(v & 0x1FF)) return zenny_word(REWARD_ZENNY);
+	if (!xchips_bn6_of(v & 0x1FF)) return zenny_word(REWARD_ZENNY);
 	return how->star ? chip_entry_star(v) : i >= 0 ? row_coded(v, (uint32_t)i, how->codes) : v;
 }
 
 void guest_rows_fit(const int *ids, int n, const GuestRowsFit *how) {
 	for (int k = 0; k < n; ++k) {
-		/* (its enemies read a byte at a time, guest_record_foes: a list can
+		/* (its enemies read a byte at a time, xrecords_foes_scaled: a list can
 		 * start at an odd address, and a halfword read there takes the even
 		 * one below; CanGard's MrkCan1 S showed on a playtester's results
 		 * screen, came back as zenny, session 66; scaled as the battle is) */
@@ -98,7 +98,7 @@ GuestReward guest_reward_of(uint16_t word) {
 	else if (kind == BN5_REWARD_HP) r.heal = n;
 	else if (kind == BN5_REWARD_BUGFRAGS) r.bugfrags = n;
 	else if (x < BN5_CHIPS) {
-		r.chip = guest_chip_bn6(x);
+		r.chip = xchips_bn6_of(x);
 		if (!r.chip) { r.zenny = REWARD_ZENNY; return r; }
 		/* (in a code BN6's chip of its name has: the same letter, else its
 		 * *, else its first; MegaMan says so the first time,

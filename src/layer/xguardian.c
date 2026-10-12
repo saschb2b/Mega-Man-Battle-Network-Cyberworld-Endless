@@ -14,12 +14,13 @@
 #include "run.h"
 #include "save.h"
 #include "souls.h"
+#include "xchips.h"
 #include "xnavi.h"
 
 #define XROM XROM_BN5_COLONEL_US
 
 int xguardian_hp(int navi, int version) {
-	return guardian_older(navi) ? guest_navi_hp(XROM, guardian_older_ai(navi), version, NULL) : -1;
+	return guardian_older(navi) ? xrecords_navi_hp(XROM, guardian_older_ai(navi), version, NULL) : -1;
 }
 
 int xguardian_version(int navi, int depth) {
@@ -36,7 +37,7 @@ int xguardian_hp_fought(int navi, int version, int depth) {
 
 int guardian_element(int navi) {
 	int e = 0;
-	if (guardian_older(navi)) guest_navi_hp(XROM, guardian_older_ai(navi), 0, &e);
+	if (guardian_older(navi)) xrecords_navi_hp(XROM, guardian_older_ai(navi), 0, &e);
 	else e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
 	return e > 0 ? e : 0;
 }
@@ -49,12 +50,12 @@ int guardian_weakness(int navi) {
 }
 
 /* (the chip kind his Soul unites with in his game, BN5_CHIP_KIND; -1 none) */
-static int xguardian_kind(int navi) { return guardian_older(navi) ? guest_soul_kind(XROM, guardian_older_ai(navi)) : -1; }
+static int xguardian_kind(int navi) { return guardian_older(navi) ? xrecords_soul_kind(XROM, guardian_older_ai(navi)) : -1; }
 
 int xguardian_chip(int navi, uint32_t seed, int *code) {
 	*code = 26;
 	uint16_t ids[64];
-	int n = guest_kind_chips(xguardian_kind(navi), ids, 64), common = 0;
+	int n = xchips_kind(xguardian_kind(navi), ids, 64), common = 0;
 	if (!n) return 0;
 	/* (the rarest, BN6's rarity 4, only where there is nothing else: a
 	 * Guardian or an Anubis is a deep find, not an act's key) */
@@ -95,7 +96,7 @@ const char *xguardian_soul_words(int navi) {
 	/* (one of BN6's chips of his kind, as the Guardian Data's chip may be) */
 	uint16_t ids[64];
 	ChipInfo ci = { .name = "" };
-	if (guest_kind_chips(kind, ids, 64) > 0) chip_info(ids[0], &ci);
+	if (xchips_kind(kind, ids, 64) > 0) chip_info(ids[0], &ci);
 	return guardian_soul_words(navi, kind, false, ci.name, dark >= 0 ? guest_dark_name(dark) : NULL);
 }
 

@@ -69,9 +69,13 @@ int tl_style_at(const AreaSrc *a, int cx, int cy) {
 	return k > 11 ? 11 : k;
 }
 
-/* How many pixels of the top of the panel around map pixel (cx, cy) have
- * a hue in `buckets` (bit per bucket 0-11), strongly coloured. */
-static int hue_pixels(const AreaSrc *a, int cx, int cy, unsigned buckets) {
+/* A pixel of a panel's top as the counts below weigh it: its channels,
+ * its brightest and dimmest of them, and the count's own number */
+typedef struct { int r, g, b, mx, mn; unsigned arg; } PanelPixel;
+
+/* How many pixels of the top of the panel around map pixel (cx, cy)
+ * `take` counts (one walk for both counts: lint's duplicate) */
+static int panel_pixels(const AreaSrc *a, int cx, int cy, bool (*take)(const PanelPixel *), unsigned arg) {
 	int W = a->tw * 8, H = a->th * 8, n = 0;
 	for (int dy = -8; dy <= 8; ++dy)
 		for (int dx = -16; dx <= 16; ++dx) {
@@ -79,34 +83,34 @@ static int hue_pixels(const AreaSrc *a, int cx, int cy, unsigned buckets) {
 			if (2 * abs(dy) + abs(dx) > 16 || x < 0 || y < 0 || x >= W || y >= H) continue;
 			uint32_t c = area_src_floor_px(a, (size_t)y * W + x);
 			if (!(c >> 24)) continue;
-			int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
-			int mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
-			if (mx < 64 || (mx - mn) * 100 < 40 * mx) continue;
-			float d = (float)(mx - mn), hue = mx == r ? (g - b) / d : mx == g ? 2 + (b - r) / d : 4 + (r - g) / d;
-			hue /= 6;
-			if (hue < 0) hue += 1;
-			int k = (int)(hue * 12);
-			n += buckets >> (k > 11 ? 11 : k) & 1;
+			PanelPixel p = { (c >> 16) & 255, (c >> 8) & 255, c & 255, 0, 0, arg };
+			p.mx = p.r > p.g ? (p.r > p.b ? p.r : p.b) : (p.g > p.b ? p.g : p.b);
+			p.mn = p.r < p.g ? (p.r < p.b ? p.r : p.b) : (p.g < p.b ? p.g : p.b);
+			n += take(&p);
 		}
 	return n;
 }
 
+/* ... strongly coloured, of a hue in its arg's buckets (bit per bucket 0-11) */
+static bool hue_take(const PanelPixel *p) {
+	if (p->mx < 64 || (p->mx - p->mn) * 100 < 40 * p->mx) return false;
+	float d = (float)(p->mx - p->mn), hue = p->mx == p->r ? (p->g - p->b) / d : p->mx == p->g ? 2 + (p->b - p->r) / d : 4 + (p->r - p->g) / d;
+	hue /= 6;
+	if (hue < 0) hue += 1;
+	int k = (int)(hue * 12);
+	return p->arg >> (k > 11 ? 11 : k) & 1;
+}
+
+/* ... pale: bright and weakly coloured */
+static bool pale_take(const PanelPixel *p) { return p->mx >= 150 && (p->mx - p->mn) * 100 < 40 * p->mx; }
+
+/* How many pixels of the top of the panel around map pixel (cx, cy) have
+ * a hue in `buckets` (bit per bucket 0-11), strongly coloured. */
+static int hue_pixels(const AreaSrc *a, int cx, int cy, unsigned buckets) { return panel_pixels(a, cx, cy, hue_take, buckets); }
+
 /* How many pixels of the top of the panel around map pixel (cx, cy) are
  * pale: bright and weakly coloured. */
-static int pale_pixels(const AreaSrc *a, int cx, int cy) {
-	int W = a->tw * 8, H = a->th * 8, n = 0;
-	for (int dy = -8; dy <= 8; ++dy)
-		for (int dx = -16; dx <= 16; ++dx) {
-			int x = cx + dx, y = cy + dy;
-			if (2 * abs(dy) + abs(dx) > 16 || x < 0 || y < 0 || x >= W || y >= H) continue;
-			uint32_t c = area_src_floor_px(a, (size_t)y * W + x);
-			if (!(c >> 24)) continue;
-			int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
-			int mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
-			n += mx >= 150 && (mx - mn) * 100 < 40 * mx;
-		}
-	return n;
-}
+static int pale_pixels(const AreaSrc *a, int cx, int cy) { return panel_pixels(a, cx, cy, pale_take, 0); }
 
 #define PALE_PIXELS 40   /* SKIP_PALE: Mr. Weather Comp's fan belts 120 and more, its solar panels under 20 */
 #define JOINT_PIXELS 4   /* a walkway panel showing this many of its area's joint hues is a joint: the Undernet's gems */

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "rom.h"
 #include "run.h"
 
@@ -164,29 +165,45 @@ void chip_desc(int rom_id, char *out, size_t outlen) {
 }
 
 /* ---- enemy ids another game's family took (xvirus.c) ---- */
+#define ENEMY_IDS 0x200
 static struct {
 	int n;
 	struct { int id; EnemyMoved e; } at[ENEMIES_MOVED_MAX];
+	int16_t slot[ENEMY_IDS];   /* each id's place in at[] plus one, 0 none (the readers below are asked often) */
 } moved;
 
 static const EnemyMoved *moved_of(int id) {
-	for (int i = 0; i < moved.n; ++i)
-		if (moved.at[i].id == id) return &moved.at[i].e;
-	return NULL;
+	return id >= 0 && id < ENEMY_IDS && moved.slot[id] ? &moved.at[moved.slot[id] - 1].e : NULL;
 }
 
 bool enemy_moved_set(int id, const EnemyMoved *e) {
-	for (int i = 0; i < moved.n; ++i)
-		if (moved.at[i].id == id) {
-			if (e) moved.at[i].e = *e;
-			else moved.at[i] = moved.at[--moved.n];
-			return true;
+	if (id < 0 || id >= ENEMY_IDS) return false;
+	int i = moved.slot[id] - 1;
+	if (i >= 0) {
+		if (e) moved.at[i].e = *e;
+		else {
+			/* (the last one into its place) */
+			moved.slot[id] = 0;
+			if (i != --moved.n) {
+				moved.at[i] = moved.at[moved.n];
+				moved.slot[moved.at[i].id] = (int16_t)(i + 1);
+			}
 		}
+		return true;
+	}
 	if (!e) return true;
 	if (moved.n >= ENEMIES_MOVED_MAX) return false;
 	moved.at[moved.n].id = id;
-	moved.at[moved.n++].e = *e;
+	moved.at[moved.n].e = *e;
+	moved.slot[id] = (int16_t)++moved.n;
 	return true;
+}
+
+uint16_t enemy_drop(int id, int k) {
+	const EnemyMoved *m = moved_of(id);
+	if (k < 0 || k >= ENEMY_DROPS) return 0xFFFF;
+	if (m && m->drops_own) return m->drops[k];
+	return R.data && id > 0 && id < ENEMY_IDS ? rom_u16(rom_off(BN6_DROP_ROWS) + (uint32_t)id * 2u * ENEMY_DROPS + 2u * (uint32_t)k) : 0xFFFF;
 }
 
 void enemy_name(int name_id, char *out, size_t outlen) {

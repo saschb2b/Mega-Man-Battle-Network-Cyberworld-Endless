@@ -121,7 +121,24 @@ territory).
 A battle with a green Mystery Data on the field also rewrites the reward
 row its record names (rows 0 and 1, one per record, of the table at
 `0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
-battle.
+battle; one of BN5's records fought in BN6's engine (issue #82, the
+xrecord step, `src/core/xbattles.c`) with BN5's own row of finds, as
+BN6's (docs/ROM_DATA.md, BN5's records in BN6's engine).
+
+Where BN5's ROM is read, as the core starts (`xvirus_install`), two more
+of BN6's tables are written in place (issue #82, docs/MULTIROM.md): 18
+battlefields that no BattleSettings of BN6's names (12 bytes each at
+`0x0800D730` + n x 12: 0x09, 0x0D-0x0F, 0x11, 0x1D, 0x22-0x25, 0x28,
+0x2F-0x31, 0x46, 0x55, 0x63 and 0x64) with fields of BN5's that its
+areas' records name, their panels' types as BN6's (`src/emu/xfields.c`;
+docs/ROM_DATA.md, Battlefields and their panels' types), each first
+checked to hold BN6's own; and the reward rows of the ids a virus
+family moved into the engine takes (`0x080AC718` + id x 0x28, 0xBB-0xC0
+for CanGard) with its game's rows for its versions, each entry as
+BN6's (a chip as BN6's of its name, else 200 zenny), each first checked
+to hold BN6's own. Neither is in a state: every boot with the same ROMs
+writes them the same, and BN6's own battles name none of those fields
+or ids.
 
 As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
 0x28) are rewritten in the folder's codes, half the time, by a hook on the

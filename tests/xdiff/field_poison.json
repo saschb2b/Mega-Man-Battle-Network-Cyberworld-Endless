@@ -1,0 +1,10 @@
+{
+ "about": "BN5's field 0x5F (poison in columns 1 and 6, plain between) as BN6's, xfields.c (BN6's own 0xE7, its panels alike): MegaMan on poison at (1,2) loses 1 HP every 7 frames in both, CanGard V1 on a plain panel at (5,2); the panels' types and flags compared each frame",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "12",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "5F"
+}

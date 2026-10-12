@@ -93,6 +93,14 @@
 #define BN5_COLL_MASK_WORDS 160        /* ... 80 regions, BN6's 89 */
 #define BN5_MPLAYS        0x08155A74u /* its music players (BN6_MPLAYS) */
 #define BN5_MEGAMAN_READY 0x06        /* MegaMan's action (BN6_T1_ACTION) when he can act, BN6's 0x08 (0x10 a step, 0x14 a chip, 0x03 hit); his chip (BN6_T1_CHIP) is 0xFFFF as its use begins */
+#define BN5_FIELDS        0x0800BD64u /* its battlefields, laid out as BN6's (BN6_FIELDS: 12 bytes each, a nibble a panel), its own
+                                       * numbers (its records' byte 0), read through the literal at 0x0800AF84; its panel types numbered
+                                       * as BN6's but for 5, 9 and 0xA (BN5_PANEL_FLAGS_OF; docs/ROM_DATA.md, Battlefields) */
+#define BN5_PANEL_FLAGS_OF 0x0800BCE8u /* the flags each panel type gives (+0x18), a u32 a type, 11 of them (BN6_PANEL_FLAGS_OF's) */
+#define BN5_PANEL_HOLY    9           /* its panel type: holy (BN6_PANEL_HOLY's flag; damage halved, 0x0800C80C) */
+#define BN5_PANEL_LAVA    8           /* its panel type: lava (none in BN6: a non-Fire object on it takes 50 and it cools plain, 0x08016DA2;
+                                       * BN6's 8 another panel: the differential's MegaMan stepped onto it unhurt, an attack rose from it) */
+#define BN5_PANEL_SEA     0x0A        /* its panel type: sea (none in BN6: a Fire object on it hurt, 0x08016EC4; a Wood hit dries it) */
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
 #define BN5_PANEL_FLAGS   0x18        /* ... and its flags here, u32 (BN6's at +0x14), BN6_PANEL_STRUCK while an enemy's attack is on it */

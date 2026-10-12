@@ -28,6 +28,7 @@
 #include "lan_house.h"
 #include "lanhp.h"
 #include "town.h"
+#include "xchips.h"
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
 
@@ -61,7 +62,7 @@ static const Battle BN6_BATTLE = {
 	BN6_T1_OBJECTS, BN6_T1_COUNT, BN6_T3_OBJECTS, BN6_T3_COUNT, BN6_MEGAMAN_READY,
 };
 static const Battle BN5_BATTLE = {
-	guest_read8, guest_read16, guest_read32, guest_write16, guest_chip_bn6, BN5_GAMESTATE, BN5_BATTLE_PHASE, BN5_BATTLE_TIMER, BN5_CUSTOM_GAUGE,
+	guest_read8, guest_read16, guest_read32, guest_write16, xchips_bn6_of, BN5_GAMESTATE, BN5_BATTLE_PHASE, BN5_BATTLE_TIMER, BN5_CUSTOM_GAUGE,
 	BN5_CUSTOM_WINDOW, BN5_CUSTOM_HAND, BN5_CUSTOM_CURSOR, BN5_CUSTOM_PICKED, BN5_BATTLE_DECK, BN5_FIELD_PANELS, BN5_PANEL_SIZE, BN5_PANEL_FLAGS,
 	BN5_T1_OBJECTS, BN5_T1_COUNT, BN5_T3_OBJECTS, BN5_T3_COUNT, BN5_MEGAMAN_READY,
 };

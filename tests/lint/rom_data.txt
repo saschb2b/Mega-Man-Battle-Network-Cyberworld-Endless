@@ -1,13 +1,11 @@
 # ROM offsets docs/ROM_DATA.md does not name (AGENTS.md: a new one needs its note);
 # this list only shrinks: build.py lint --update after naming one
 RomLayout arrow_pal
-RomLayout battle_gem_rewards
 RomLayout bg_map
 RomLayout bg_pal
 RomLayout bg_tiles
 RomLayout copy_pal
 RomLayout copy_tiles
-RomLayout encounters
 RomLayout menu_pal
 RomLayout navicust_programs
 RomLayout song_table

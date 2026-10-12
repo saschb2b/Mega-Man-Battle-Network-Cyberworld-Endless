@@ -167,19 +167,63 @@ void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
 }
 
 /* Entry `index` of the text archive at offset `archive` of ROM `data`
- * (ROM_SIZE bytes), in ASCII: BN5 spells its text as BN6 does. */
-static void text_of(const uint8_t *data, uint32_t archive, int index, char *out, size_t outlen) {
+ * (ROM_SIZE bytes): where its bytes begin, `*n` of them to the ROM's end
+ * (64 at most) */
+static const uint8_t *entry_of(const uint8_t *data, uint32_t archive, int index, size_t *n) {
 	uint32_t at = archive + 2u * (uint32_t)index, p = ROM_SIZE;
 	if (at + 2 <= ROM_SIZE) p = archive + (uint32_t)(data[at] | data[at + 1] << 8);
-	size_t n = p < ROM_SIZE ? ROM_SIZE - p : 0;
-	rom_text_bytes(data + (p < ROM_SIZE ? p : 0), n < 64 ? n : 64, out, outlen);
+	*n = p < ROM_SIZE ? ROM_SIZE - p : 0;
+	if (*n > 64) *n = 64;
+	return data + (p < ROM_SIZE ? p : 0);
 }
 
-void rom_text(uint32_t archive, int index, char *out, size_t outlen) { text_of(R.data, archive, index, out, outlen); }
+void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
+	size_t n;
+	const uint8_t *s = entry_of(R.data, archive, index, &n);
+	rom_text_bytes(s, n, out, outlen);
+}
+
+/* A code of BN5 Team Colonel's text as BN6's code of the same glyph
+ * (docs/ROM_DATA.md, BN5's text: both fonts compared glyph for glyph):
+ * the same to 0x3F (space, digits, letters, *), then five on, as BN6 put
+ * its version marks at 0x40-0x44 before the rest, three on past BN5's own
+ * marks; XTEXT_DS for its DS mark, -1 for a glyph BN6's font lacks (its
+ * alpha, beta, omega and three more) */
+#define XTEXT_DS (-2)
+static int bn5_code(uint8_t c) {
+	if (c < 0x40) return c;
+	if (c <= 0x92 || (c >= 0x94 && c <= 0x9A)) return c + 5;
+	if (c >= 0xA0 && c <= 0xAD && c != 0xA5) return c + 3;
+	switch (c) {
+	case 0x93: case 0x9C: return 0x98;   /* a dash (BN6's names spell theirs 0x98; its 0xA1 is the same glyph) */
+	case 0x9D: return 0xA2;              /* ! */
+	case 0x9E: return 0x43;              /* the SP mark */
+	case 0x9F: return XTEXT_DS;          /* the DS mark: none in BN6 */
+	case 0x9B: case 0xA5: case 0xB1: case 0xB4: return 0xA0;   /* the empty box */
+	case 0xAE: case 0xAF: case 0xB0: case 0xB5: case 0xB6: case 0xB7: return -1;
+	default: return c;                   /* (0xB2, 0xB3, 0xB8 on: the same) */
+	}
+}
+
+size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
+	size_t k = 0;
+	for (size_t i = 0; i < n && src[i] < 0xE5; ++i) {
+		int c = xrom == XROM_BN5_COLONEL_US ? bn5_code(src[i]) : src[i];
+		/* (the DS mark spelt as BN6 can: D and S) */
+		const uint8_t ds[2] = { 0x0B + 'D' - 'A', 0x0B + 'S' - 'A' }, one[1] = { (uint8_t)c };
+		const uint8_t *put = c == XTEXT_DS ? ds : one;
+		size_t len = c == XTEXT_DS ? 2 : c >= 0 ? 1 : 0;
+		for (size_t j = 0; j < len && k < max; ++j) dst[k++] = put[j];
+	}
+	return k;
+}
 
 void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen) {
 	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { if (outlen) out[0] = 0; return; }
-	text_of(XR[xrom].data, archive, index, out, outlen);
+	size_t n;
+	const uint8_t *s = entry_of(XR[xrom].data, archive, index, &n);
+	uint8_t bn6[96];
+	rom_text_bytes(bn6, xrom_text_bn6(xrom, s, n, bn6, sizeof bn6), out, outlen);
 }
 
 void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {

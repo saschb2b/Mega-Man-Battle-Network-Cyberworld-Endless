@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **BN5's chips by their own names (issue #82).** BN5 numbers its text
+  otherwise than BN6 past letters and digits (BN6 put its version marks
+  first), and BN5's names were read with BN6's table: its M-Cannon read
+  as "MCannon", its Navi+20 as "Navix20", its SP mark as another sign, so
+  a run's M-Cannon, Navi+20, ProtoMan SP and Colonel SP sat out the older
+  net's battles though BN5 has them all, and its Roll DS was taken for
+  Roll. Its text now reads in BN6's codes, checked glyph for glyph
+  against both games' fonts.
+- **One net, its groundwork (issue #82).** BN5's battle records can be
+  fought in BN6's own engine: its viruses as BN6's where both games have
+  the family (BN5's V1 and V1EX as BN6's V1, and so on) or as the family
+  moved into the engine, its battlefields as BN6's (the same panels, its
+  holes, grass and ice; its lava and sea BN6 has none of), its green
+  Mystery Data by BN5's rule with BN5's finds, and a moved family's
+  rewards its own (CanGard's had been the filler rows BN6 leaves at the
+  ids it took: zenny and a Cannon *). Nothing in a run
+  uses it yet; `build.py xrecords` lists what each of BN5's areas can
+  fight so far (44 of its 214 records with CanGard alone), and a dev step
+  fights any one of them.
+
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the
   game as ロックマンエグゼ6. The ROM they need is said first (the North

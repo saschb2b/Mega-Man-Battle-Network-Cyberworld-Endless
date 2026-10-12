@@ -124,6 +124,16 @@ void director_dev_battle(void);
  * plain field with nothing else on it (the families moved into the engine,
  * xvirus.h, beside BN6's own); false, nothing due, where it names none. */
 bool director_dev_foes(const char *spec);
+/* Dev (the xrecord step, issue #82): a battle record of BN5's, "ADDR" its
+ * address in BN5's ROM in hex (its battle tables' BattleSettings: build.py
+ * xrecords lists them), fought at once in BN6's engine as a territory's
+ * random battle would be (xbattles.h: its foes by BN6's ids at its
+ * panels, its field as BN6's, its green Mystery Data by BN5's rule and
+ * rows, its rocks), at the first moment MegaMan is free on a layer's map,
+ * whatever the layer; "ADDR UP" with its viruses UP versions up (BN5's
+ * index: V1EX one up from V1). False, nothing due, where it cannot be
+ * fought (the log says why). */
+bool director_dev_xrecord(const char *spec);
 /* Dev (the status step, issue #82): the battle's enemies struck at once
  * with a status as a hit gives it, BN6's engine left to act on it as their
  * next frame starts (docs/MULTIROM.md, Transplanted families): "freeze

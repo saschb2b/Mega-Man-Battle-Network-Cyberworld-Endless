@@ -31,6 +31,7 @@
 #include "guest.h"
 #include "rom.h"
 #include "thumb_reloc.h"
+#include "xfields.h"
 #include "xvirus.h"
 #include "xvirus_families.h"
 
@@ -48,6 +49,7 @@ typedef struct {
 	int nfoes;
 	struct { int id, panel; } foes[MAX_FOES];
 	int mm, hp, frames;
+	int field, field6;   /* the battlefield, BN5's number, and BN6's (-1: as xfields.h installs it), 0 plain */
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];
@@ -137,6 +139,13 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
 	if (!strcmp(name, "out")) return snprintf(s->out, sizeof s->out, "%s", v) > 0;
 	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow"));
+	if (!strcmp(name, "field")) {
+		unsigned f, f6 = 0x100;
+		int got = sscanf(v, "%x:%x", &f, &f6);
+		s->field = got >= 1 && f < 0x100 ? (int)f : -1;
+		s->field6 = got == 2 && f6 < 0x100 ? (int)f6 : -1;
+		return s->field >= 0 && (got == 1 || s->field6 >= 0);
+	}
 	if (!strcmp(name, "game")) {
 		s->bn5 = !strcmp(v, "bn5");
 		s->bn6 = !strcmp(v, "bn6");
@@ -146,7 +155,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 }
 
 static bool spec_parse(const char *text, Spec *s) {
-	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true };
+	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .field6 = -1, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true };
 	snprintf(s->out, sizeof s->out, "xdiff");
 	char buf[2048];
 	snprintf(buf, sizeof buf, "%s", text);
@@ -453,6 +462,12 @@ static bool subject(Side *g, const Spec *s) {
 	Encounter e;
 	memset(&e, 0, sizeof e);
 	e.player = s->mm;
+	/* (BN5's field as BN6's: xfields.h, or the spec's own number for it) */
+	e.field = s->field6 >= 0 ? s->field6 : s->field ? xfield_bn6(XROM_BN5_COLONEL_US, s->field) : 0;
+	if (e.field < 0) {
+		fprintf(stderr, "xdiff: BN5's field %#x is none of BN6's\n", s->field);
+		return false;
+	}
 	for (int i = 0; i < s->nfoes; ++i) {
 		int id = bn6_id(s->foes[i].id), p = s->foes[i].panel;
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 0, 0, (p & 0xF) - 1, (p >> 4) - 1, id };
@@ -476,7 +491,7 @@ static bool reference(Side *g, const Spec *s) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data || !guest_start(XROM_BN5_COLONEL_US)) return false;
 	/* (BN5's random battles' record: its field, music, background the map's, side, options; MegaMan, then the foes) */
-	uint8_t rec[0x80] = { 0x00, 0x14, 0x15, 0x00, 0xFF, 0x00, 0x38, 0x00, 0xE2, 0x49, 0x00, 0x00 };
+	uint8_t rec[0x80] = { (uint8_t)s->field, 0x14, 0x15, 0x00, 0xFF, 0x00, 0x38, 0x00, 0xE2, 0x49, 0x00, 0x00 };
 	uint32_t len = 0x10;
 	const uint8_t mm[4] = { 0x00, (uint8_t)s->mm, 0, 0 };
 	memcpy(rec + len, mm, 4);

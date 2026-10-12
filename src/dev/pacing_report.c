@@ -21,6 +21,7 @@
 #include "run.h"
 #include "shop.h"
 #include "xguardian.h"
+#include "xrecords.h"
 
 #define ROLLS 300
 
@@ -44,15 +45,16 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	static int hps[ROLLS];
 	/* an opening battle aims low but may take the act's whole band */
 	PacingBand band = pacing_band(depth, kind == ENC_CHALLENGE, false);
-	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[32] = { 0 }, gems = 0, blocks = 0;
+	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[64] = { 0 }, gems = 0, blocks = 0;
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, kind);
 		loot_battle_fought(&e);   /* each roll as a battle fought */
-		/* (the virus families a battle brings, each counted once) */
-		unsigned in = 0;
+		/* (the virus families a battle brings, each counted once: BN6's AI
+		 * indexes, the families moved into its engine from 32) */
+		uint64_t in = 0;
 		for (int i = 0; i < e.nfoes; ++i)
-			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family > 0 && e.foes[i].family < 32) in |= 1u << e.foes[i].family;
-		for (int f = 1; f < 32; ++f) families[f] += (in >> f) & 1;
+			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family > 0 && e.foes[i].family < 64) in |= (uint64_t)1 << e.foes[i].family;
+		for (int f = 1; f < 64; ++f) families[f] += (int)(in >> f & 1);
 		/* (the field's objects: a Mystery Data, and rocks or cubes) */
 		bool gem = false, block = false;
 		for (int i = 0; i < e.nobj; ++i) {
@@ -79,14 +81,14 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	if (gems || blocks) fprintf(out, "  gem %d rocks %d", gems, blocks);
 	if (navis) fprintf(out, "  SP navi %d", navis);
 	fprintf(out, "  families");
-	for (int f = 1; f < 32; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
+	for (int f = 1; f < 64; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
 	fprintf(out, "%s\n", over ? "  OVER" : "");
 	return over;
 }
 
 /* The territories (docs/MULTIROM.md, Guest battles): where another game's
  * area dresses the BN6 area an act visits, its random battles are its own
- * game's records, from the pool the director picks from (guest_pool, each
+ * game's records, from the pool the director picks from (xrecords_pool, each
  * record as likely, its viruses taken up to the act's version): their HP
  * together (lowest / median / highest), the strongest hit, how many under
  * the band's floor, the versions they went up, the pool's size and where
@@ -96,18 +98,19 @@ static int guest_battles(FILE *out, int depth, const NetAreaDef *x, int xrom, bo
 	PacingBand b = pacing_band(depth, false, opening);
 	int vlo, vhi;
 	pacing_virus_versions(depth, false, &vlo, &vhi);
-	GuestBand band = { b.lo, b.hi, b.cap, vhi };
+	XBand band = { b.lo, b.hi, b.cap, vhi };
 	const uint8_t *xb = x->xbattles[layer_in_act(depth)];
 	if (!xb[0]) return 0;
 	static uint32_t pool[192];
 	static uint8_t ups[192];
 	static int hps[192];
-	bool fits = false;
-	int n = guest_pool(xrom, x, xb[0], xb[1], &band, pool, ups, 192, &fits), over = 0, under = 0, maxdmg = 0, own = 0, up = 0;
-	uint32_t first = guest_record(xrom, xb[0], xb[1], 0), end = first + 16u * (uint32_t)guest_records(xrom, xb[0], xb[1]);
+	XPool p = { xrom, x, xb[0], xb[1], &band, NULL, NULL, pool, ups, 192, false };
+	int n = xrecords_pool(&p), over = 0, under = 0, maxdmg = 0, own = 0, up = 0;
+	bool fits = p.fits;
+	uint32_t first = xrecords_at(xrom, xb[0], xb[1], 0), end = first + 16u * (uint32_t)xrecords_count(xrom, xb[0], xb[1]);
 	for (int i = 0; i < n; ++i) {
 		int hp, dmg;
-		guest_record_scaled(xrom, pool[i], (GuestScale){ ups[i], band.vcap }, &hp, &dmg);
+		xrecords_scaled(xrom, pool[i], (XScale){ ups[i], band.vcap }, &hp, &dmg);
 		hps[i] = hp;
 		if (dmg > maxdmg) maxdmg = dmg;
 		if (hp > band.hi || dmg > band.cap) ++over;

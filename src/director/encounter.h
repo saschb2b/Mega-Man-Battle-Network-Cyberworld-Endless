@@ -44,9 +44,10 @@ int encounter_boss_zenny(void);
  * to spawn given `hp_cap` HP at most (0: its own). */
 void emu_battle_watch(int hp_cap);
 void emu_battle_unwatch(void);
-/* The next enemy to spawn with `own` HP (a guardian's) given the Net's
- * clock's more (docs/HOME.md), until emu_battle_unwatch. */
-void emu_battle_clock(int own);
+/* The next enemy to spawn with `from` HP given `to` instead (a guardian's
+ * own, raised by the Net's clock, docs/HOME.md), until
+ * emu_battle_unwatch; nothing where they are the same. */
+void emu_battle_hp(int from, int to);
 /* Starts this battle at once (a boss); release it when the battle is on. */
 void emu_battle_force(const Encounter *e);
 void emu_battle_release(void);

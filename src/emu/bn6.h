@@ -112,6 +112,15 @@
 #define BN6_PANEL_PLAIN       2           /* BN6_PANEL_TYPE: a plain panel */
 #define BN6_PANEL_POISON      4           /* BN6_PANEL_TYPE: poison */
 #define BN6_PANEL_STRUCK      0x40000000u /* BN6_PANEL_FLAGS: an enemy's attack on the panel */
+#define BN6_PANEL_CRACKED     3           /* BN6_PANEL_TYPE: cracked (a step breaks it to a hole: object_crackPanel 0x0800C938 writes it) */
+#define BN6_PANEL_HOLY        5           /* BN6_PANEL_TYPE: holy (damage on it halved, 0x0800E3F0) */
+#define BN6_PANEL_GRASS       6           /* BN6_PANEL_TYPE: grass (heals a Wood object on it, 0x0801A1D2; a Fire hit burns it plain, 0x03007704) */
+#define BN6_PANEL_ICE         7           /* BN6_PANEL_TYPE: ice (an object not of Aqua slides on it, 0x08016754) */
+#define BN6_PANEL_FLAGS_OF    0x081D7E20u /* the flags each panel type gives (+0x14), a u32 a type, 13 of them (IWRAM 0x03007920, copied from here) */
+#define BN6_FIELDS            0x0800D730u /* the battlefields: 12 bytes each, three u32 rows (rows 1-3), a nibble a column (1-6), the panel's
+                                             type (BN6_PANEL_TYPE), read by bn6f sub_800C4BC through sub_800C6D6's literal 0x0800C8D4 */
+#define BN6_FIELD_COUNT       237         /* ... its fields: 0-236, up to the code at 0x0800E24C (a BattleSettings' byte 0 names one) */
+#define BN6_FIELD_SIZE        12          /* ... a field's bytes */
 #define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle (BattleObject), */
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */

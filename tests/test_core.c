@@ -3065,6 +3065,20 @@ static void test_enemy_moved(void) {
 	CHECK(enemy_element(0xBD) == ELEM_NULL && enemy_weakness(0xBD) == ELEM_SWORD, "data: the moved id's second wheel");
 	/* (with no ROM read, nothing then) */
 	CHECK(enemy_moved_set(0xBD, NULL) && (R.data || (!enemy_stats(0xBD, &hp, &dmg) && enemy_triple(0xBD) == NULL)), "data: the moved id let go");
+	/* (a moved id's own reward row, as its install wrote it: lean_row reads
+	 * it, not the player's ROM's, which gives the id another's; issue #82) */
+	EnemyMoved a = e, b = e;
+	a.drops_own = true;
+	for (int k = 0; k < ENEMY_DROPS; ++k) a.drops[k] = (uint16_t)(0x4000 | (100 + k));
+	b.triple[0] = 3;
+	CHECK(enemy_moved_set(0xBB, &a) && enemy_moved_set(0xBE, &b), "data: two ids moved");
+	CHECK(enemy_drop(0xBB, 0) == 0x4064 && enemy_drop(0xBB, 19) == 0x4077 && enemy_drop(0xBB, 20) == 0xFFFF, "data: a moved id's own reward row (%04X)",
+		enemy_drop(0xBB, 0));
+	CHECK(R.data || enemy_drop(0xBE, 0) == 0xFFFF, "data: a moved id without its own row reads the ROM's (none here)");
+	/* (the first let go: the last moved into its place, still found by its id) */
+	CHECK(enemy_moved_set(0xBB, NULL) && enemy_triple(0xBE) && enemy_triple(0xBE)[0] == 3 && enemy_drop(0xBB, 0) != 0x4064,
+		"data: an id let go, the other still read as moved");
+	enemy_moved_set(0xBE, NULL);
 }
 
 /* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
@@ -3250,6 +3264,55 @@ static void test_xchips(void) {
 	CHECK(xchips_fit(two, cannon6, sab, 3, 5) == 3, "xchips: no code of the folder in both: as it was (%d)", xchips_fit(two, cannon6, sab, 3, 5));
 	const uint8_t nofolder[3] = { 0, 0, 0 };
 	CHECK(xchips_fit(cannon, cannon6, nofolder, 2, 1) == 2, "xchips: a folder of no codes leaves it (%d)", xchips_fit(cannon, cannon6, nofolder, 2, 1));
+	/* (BN5's names in BN6's text codes first, rom.h's xrom_text_bn6: its
+	 * M-Cannon's dash is 0x93, which BN6's table reads as nothing, and its
+	 * Roll DS's mark 0x9F, which BN6 has no glyph for; issue #82) */
+	static const uint8_t mcannon5[] = { 0x17, 0x93, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33, 0xE6 }, rollds5[] = { 0x1C, 0x34, 0x31, 0x31, 0x9F, 0xE6 };
+	static char names5[3][XCHIP_NAME];
+	uint8_t bn6[32];
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN5_COLONEL_US, mcannon5, sizeof mcannon5, bn6, sizeof bn6), names5[1], XCHIP_NAME);
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN5_COLONEL_US, rollds5, sizeof rollds5, bn6, sizeof bn6), names5[2], XCHIP_NAME);
+	static const char names6b[3][XCHIP_NAME] = { "", "M-Cannon", "Roll" };
+	uint16_t to5[3], from5[3];
+	CHECK(xchips_pair(names6b, 3, (const char (*)[XCHIP_NAME])names5, 3, to5, from5) == 1 && to5[1] == 1 && !to5[2] && !from5[2],
+		"xchips: BN5's M-Cannon pairs with BN6's, its Roll DS (%s) not with Roll", names5[2]);
+	/* (a reward entry of BN5's as BN6's: no chip paired without the ROMs,
+	 * the stand-in's zenny; zenny, BugFrags and none as they are) */
+	CHECK(xchips_reward_bn6(0x0001) == (0x4000 | XCHIPS_STAND_IN) && xchips_reward_bn6(0x43E8) == 0x43E8 && xchips_reward_bn6(0xC003) == 0xC003 &&
+		xchips_reward_bn6(0xFFFF) == 0xFFFF, "xchips: BN5's rewards as BN6's without a pairing");
+}
+
+/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/ROM_DATA.md,
+ * BN5's text): BN6 put its five version marks at 0x40-0x44, so BN5's codes
+ * from 0x40 are five on, its marks and punctuation where BN6 has their
+ * glyphs, its DS mark as the letters D and S, a glyph BN6 lacks left out;
+ * letters and digits the same. Both fonts compared glyph for glyph. */
+static void test_xtext(void) {
+	static const struct { uint8_t in[8]; int n; const char *ascii; } cases[] = {
+		{ { 0x17, 0x93, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33 }, 8, "M-Cannon" },   /* (its dash) */
+		{ { 0x18, 0x26, 0x3B, 0x2E, 0x99, 0x03, 0x01 }, 7, "Navi+20" },          /* (its +, BN6's 0x9E; read as BN6's 0x99 it was an x) */
+		{ { 0x1C, 0x34, 0x31, 0x31, 0x9E }, 5, "Roll\x04" },                     /* (its SP mark, BN6's 0x43) */
+		{ { 0x1C, 0x34, 0x31, 0x31, 0x9F }, 5, "RollDS" },                        /* (its DS mark, which BN6 lacks) */
+		{ { 0x0B, 0xB0, 0x0C }, 3, "AB" },                                        /* (its omega, which BN6 lacks) */
+		{ { 0x0B, 0x98, 0x0C, 0xE6, 0x0D }, 5, "A?B" },                           /* (its ?, and the end at a command) */
+	};
+	for (size_t i = 0; i < sizeof cases / sizeof *cases; ++i) {
+		uint8_t bn6[16];
+		char ascii[24];
+		size_t n = xrom_text_bn6(XROM_BN5_COLONEL_US, cases[i].in, (size_t)cases[i].n, bn6, sizeof bn6);
+		rom_text_bytes(bn6, n, ascii, sizeof ascii);
+		CHECK(!strcmp(ascii, cases[i].ascii), "xtext: BN5's case %d reads %s, not %s", (int)i, ascii, cases[i].ascii);
+	}
+	const uint8_t kana[] = { 0x40, 0x92, 0x94, 0xA0, 0xAD };
+	uint8_t out[8];
+	CHECK(xrom_text_bn6(XROM_BN5_COLONEL_US, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x45 && out[1] == 0x97 && out[2] == 0x99 &&
+		out[3] == 0xA3 && out[4] == 0xB0, "xtext: BN5's codes past BN6's marks, five and three on (%02X %02X %02X %02X %02X)", out[0], out[1],
+		out[2], out[3], out[4]);
+	/* (its room kept: the DS mark's two letters at its end, one of them) */
+	const uint8_t ds[] = { 0x0B, 0x9F };
+	CHECK(xrom_text_bn6(XROM_BN5_COLONEL_US, ds, sizeof ds, out, 2) == 2 && out[1] == 0x0E, "xtext: the room for its text kept");
+	/* (BN6's own text, and another game's that spells as BN6's: as it is) */
+	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
 }
 
 /* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
@@ -3883,6 +3946,7 @@ int main(void) {
 	test_all_star();
 	test_beast();
 	test_xchips();
+	test_xtext();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();

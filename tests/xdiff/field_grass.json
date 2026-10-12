@@ -1,0 +1,10 @@
+{
+ "about": "BN5's field 0x20 (all grass) as BN6's, xfields.c (BN6's own 0xBD): MegaMan idle on grass, CanGard V1 at (6,2); the panels' types and flags compared each frame",
+ "kind": "differential",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "20"
+}

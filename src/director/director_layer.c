@@ -303,7 +303,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	D.guest_area = a;
 	D.guest_group = xb[0];
 	D.guest_number = xb[1];
-	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && guest_records(D.guest_xrom, D.guest_group, D.guest_number) > 0;
+	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && xrecords_count(D.guest_xrom, D.guest_group, D.guest_number) > 0;
 	dark_flame_setup();
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;

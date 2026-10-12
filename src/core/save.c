@@ -88,7 +88,7 @@ bool save_exists(void) {
 	return old;
 }
 
-#define BATTLE_MAGIC 0x43574232u   /* "CWB2": the last two battles, loot.h */
+#define BATTLE_MAGIC 0x43574233u   /* "CWB3": the last two battles, loot.h (their families 64 bits a battle, issue #82) */
 
 bool save_run(void) {
 	if (!run.active) return false;

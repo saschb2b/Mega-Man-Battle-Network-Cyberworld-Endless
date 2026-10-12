@@ -32,7 +32,10 @@ BB@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
 status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
 in hex, struck at once with paralysis, freeze, bubble, drag or slide as a
-hit gives it, for FRAMES frames, 60 where none: issue #82),
+hit gives it, for FRAMES frames, 60 where none: issue #82), xrecord ADDR
+[UP] (one of BN5's battle records, its address in BN5's ROM in hex, as
+build.py xrecords lists them, fought at once in BN6's engine, its viruses
+UP versions up: issue #82),
 stuck NAME (the run saved with BN6 holding MegaMan so: fade,
 chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
 its CONTINUE lets him go, issue #23), dump NAME (the video memory into
@@ -66,7 +69,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT'}
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'status', 'xrecord', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -114,6 +117,8 @@ def steps(commands):
                 out.append(('foes', '/'.join([args[0]] + args[1:])))
             elif op == 'status':
                 out.append(('status', ' '.join([args[0]] + args[1:3])))
+            elif op == 'xrecord':
+                out.append(('xrecord', ' '.join([args[0]] + args[1:2])))
             elif op == 'sig':
                 out.append(('sig',))
             elif op == 'stuck':
@@ -121,7 +126,7 @@ def steps(commands):
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, status, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, status, xrecord, sig, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -299,7 +304,7 @@ def cmd_do(name, rest):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'status'):
+        elif s[0] in ('foes', 'status', 'xrecord'):
             items.append(f'{s[0]} {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))

@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 
-#include "bn6.h"
 #include "bn6_fields.h"
 #include "boss_grand.h"
 #include "cinema.h"
@@ -24,6 +23,7 @@
 #include "loot.h"
 #include "net_arena.h"
 #include "netmap.h"
+#include "pacing.h"
 #include "platform.h"
 #include "powers.h"
 #include "rivals.h"
@@ -257,7 +257,8 @@ static void fight_begin(void) {
 	 * came back to a fresh fight) */
 	e.held = true;
 	/* (a tenth more HP each notch of the Net's clock, docs/HOME.md) */
-	emu_battle_clock(navi_hp(e.foes[0].family, e.foes[0].version));
+	int own = navi_hp(e.foes[0].family, e.foes[0].version);
+	emu_battle_hp(own, pacing_clock_hp(own, run.clock));
 	emu_battle_force(&e);
 }
 

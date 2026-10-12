@@ -149,24 +149,25 @@ void director_guest_done(const GuestResult *r) {
  * then under the band's floor, the same way; else the area's own weakest.
  * End Area dressing an opening act outclassed a run's first battle, a
  * playtester deleted there (session 65), and from act 2 ACDC Area's and
- * Oran Area's own fell far under the band (guest_pool, which build.py
+ * Oran Area's own fell far under the band (xrecords_pool, which build.py
  * pacing reads too). Its game's story battles (its roaming Navis at 2000
  * HP) never. */
-static GuestBand guest_band(void) {
+static XBand guest_band(void) {
 	PacingBand b = pacing_band(run.depth, false, D.battles == 0);
 	int vlo, vhi;
 	pacing_virus_versions(run.depth, false, &vlo, &vhi);
-	return (GuestBand){ b.lo, b.hi, b.cap, vhi };
+	return (XBand){ b.lo, b.hi, b.cap, vhi };
 }
 
-static uint32_t guest_pick(uint32_t h, GuestScale *sc) {
+static uint32_t guest_pick(uint32_t h, XScale *sc) {
 	static uint32_t pool[192];
 	static uint8_t ups[192];
-	GuestBand band = guest_band();
-	int n = guest_pool(D.guest_xrom, D.guest_area, D.guest_group, D.guest_number, &band, pool, ups, 192, NULL);
+	XBand band = guest_band();
+	XPool p = { D.guest_xrom, D.guest_area, D.guest_group, D.guest_number, &band, NULL, NULL, pool, ups, 192, false };
+	int n = xrecords_pool(&p);
 	if (!n) return 0;
 	uint32_t k = (h >> 16) % (uint32_t)n;
-	*sc = (GuestScale){ ups[k], band.vcap };
+	*sc = (XScale){ ups[k], band.vcap };
 	return pool[k];
 }
 
@@ -203,8 +204,8 @@ bool director_guest_guardian(int navi, int version) {
 	D.guest_guardian = navi;
 	/* (in the run log as a guest battle, "guardian", his id by his game's) */
 	int ids[1] = { 0 };
-	uint32_t record = guest_navi_record(XROM_BN5_COLONEL_US, boss.ai, version);
-	guest_record_foes_scaled(XROM_BN5_COLONEL_US, record, (GuestScale){ 0, 0 }, ids, 1);
+	uint32_t record = xrecords_navi_record(XROM_BN5_COLONEL_US, boss.ai, version);
+	xrecords_foes_scaled(XROM_BN5_COLONEL_US, record, (XScale){ 0, 0 }, ids, 1);
 	runlog_guest_guardian_start(record, navi, ids[0], boss.hp_cap);
 	return true;
 }
@@ -219,10 +220,10 @@ void guest_begin(void) {
 	uint32_t h = (run.layer_seed ^ (uint32_t)(D.battles + 1) * 2654435761u) * 2246822519u;
 	uint16_t folder[BN6_FOLDER_ENTRIES];
 	GuestMegaMan mm = guest_megaman(folder);
-	GuestScale sc = { 0, 0 };
+	XScale sc = { 0, 0 };
 	uint32_t record = guest_pick(h, &sc);
 	int hp = 0, dmg = 0;
-	D.guest_foes = guest_record_scaled(D.guest_xrom, record, sc, &hp, &dmg);
+	D.guest_foes = xrecords_scaled(D.guest_xrom, record, sc, &hp, &dmg);
 	D.map_shown = false;   /* (SELECT's map, held as it began, drawn under its opening's white) */
 	if (emu_debug_on()) {
 		PacingBand b = pacing_band(run.depth, false, D.battles == 0);
@@ -231,6 +232,6 @@ void guest_begin(void) {
 	}
 	/* (in the run log as BN6's battles are, its viruses by BN5's ids, as
 	 * scaled) */
-	int ids[16] = { 0 }, n = guest_record_foes_scaled(D.guest_xrom, record, sc, ids, 16);
+	int ids[16] = { 0 }, n = xrecords_foes_scaled(D.guest_xrom, record, sc, ids, 16);
 	if (record && guest_battle(record, sc, &mm, h)) { runlog_guest_start(record, ids, n, hp); home_jobs_battle_start(); }
 }

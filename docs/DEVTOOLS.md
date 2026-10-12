@@ -198,7 +198,7 @@ Where BN5's ROM is beside BN6's, each area one of its areas dresses
 (docs/MULTIROM.md) is followed by that area's battles in BN5's own engine:
 for every layer of the act, the records its first battle (`opening`, the
 band's lower half) and its others (`guest`) are picked from, as the
-director picks them (`guest_pool`, `src/emu/guest_records.c`: the
+director picks them (`xrecords_pool`, `src/core/xrecords.c`: the
 layer's map's records that fit the band, else the area's other maps',
 else those of BN5's other areas, else the map's weakest alone), each as
 likely: their viruses' HP together (lowest, median, highest), the
@@ -451,6 +451,28 @@ python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
 python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
 ```
 
+The `xrecord` step (`--input`'s `0:xrecord 811DE10`, play.py's `xrecord
+811DE10`; issue #82) starts one of BN5's battle records at the same first
+free moment, in BN6's engine whatever the layer, as BN5's territories
+will fight them (docs/MULTIROM.md, One net; `src/core/xbattles.c`): the
+record's address in BN5's ROM in hex (`build.py xrecords` lists them,
+below), then the versions up its viruses go (`0:xrecord 811DE10 1`: V1EX
+from V1, BN5's own index). Its foes by BN6's ids (a family both games
+have by name BN6's, at the tier of its version; a family moved into the
+engine its installed ids), its field as BN6's, its green Mystery Data by
+BN5's rule with BN5's finds, its rocks; it prints what it fights, or why
+the record cannot be fought yet (a family BN6 lacks, a field with panels
+BN6 has none of, a Navi) and starts nothing.
+
+```bash
+python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1500 \
+  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:xrecord 811DE10,260:,4:START,10:,4:A,400:" \
+  --shot 1378:/src/.build/a.bmp   # BN5's ACDC Area record: two CanGards and a Mettaur on BN5's field 0x15, holes and all
+CYBERWORLD_AUTOPILOT=weak python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1200 \
+  --input "300:,0:xrecord 8121898" --shot-range 300:1200:/src/.build/r_   # won, its results: 200 zenny, then the Mystery Data's 2000
+python3 build.py xrecords          # every territory record: fightable in BN6's engine, or why not
+```
+
 The `status` step (`--input`'s `0:status freeze 90`, play.py's `status
 freeze 90`) gives the battle's enemies a status at once, as a hit leaves
 it in their collision data for BN6's engine to act on as their next frame
@@ -479,6 +501,32 @@ Identity), on the free panel nearest its anchor; play.py's state (with
 `CYBERWORLD_STATE_POS`) names the signature and where it lies, in panels
 and in the world. The `identity-*` screenshots and the `identity` clip
 are made with it.
+
+## BN5's records in BN6's engine
+
+```bash
+python3 build.py xrecords          # the areas' lines: how many records fightable, the families and fields holding them back
+python3 build.py xrecords --all    # ... and every record's line
+```
+
+`tools/xrecords.py` (issue #82; docs/MULTIROM.md, One net) copies both
+ROMs into `.build/xrecords/rom`, builds the host binary and runs its
+`--xrecords PATH` (`src/dev/xrecords_report.c`, a tool run in the game's
+place), which starts a core with the families installed as a run's core
+starts, then lists every record of the three maps each of BN5's areas
+takes its battles from: as BN5 has it (its field, its enemies by name and
+id at their panels, row then column as its own bytes are, its Mystery
+Data, rocks and Navis), and as BN6's engine fights it (`xbattle_translate`:
+BN6's field, the foes by BN6's ids, the Mystery Data and its chance) or
+why it cannot yet; per area how many are fightable, whether all are
+(`xterritory_native`), the families still holding records back and the
+fields of panels BN6 lacks; and, for an area with any, its random battles
+as BN6's roll would pick them (`xterritory_encounter`, issue #82's M3):
+six a layer at every depth of the first cycle, each record's HP against
+the band, from one seed and again from it, `NOT THE SAME AGAIN` where the
+two differ and `OVER` where one lies past the band. The listing is in
+`.build/xrecords/list.txt`; it exits 1 where a roll was not the same
+again.
 
 ## The differential: a moved family against its own game
 
@@ -529,6 +577,11 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   first, third and fourth kinds in play (each from its list node on, its
   AI's data and its collision data), the 40 panels, the order the objects
   ran in, the songs the music players began, both RNG words.
+- **The field**: `field=XX` fights both on BN5's battlefield XX, BN6's as
+  `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
+  their panels' types), `field=XX:YY` BN6's own field YY against it; the
+  specs `field_poison`, `field_grass` and `field_ice` fight CanGard on
+  BN5's poison, grass and ice, every panel's type and flags compared.
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy) and `call=F:T` aims the family's veneer to BN6's routine F at T.
