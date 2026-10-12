@@ -5,9 +5,10 @@
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
  * it, without, on a ROM that also sounds a tone; and the guest's made and
- * run on a thread of its own while BN6's frames run, as its boot is. Last,
+ * run on a thread of its own while BN6's frames run, as its boot is. Then
  * a block of Thumb code moved into BN6's copy, its calls out through
- * veneers (src/emu/thumb_reloc.c, issue #82).
+ * veneers (src/emu/thumb_reloc.c, issue #82); last, RAM the engine keeps
+ * patched, the game's own bytes in the states it saves (emu.c, emu_keep).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -494,6 +495,48 @@ static void moved_block(void) {
 	emu_write32(0x080000C8, 0x080000D1);
 }
 
+/* ---- RAM kept patched (emu.c's emu_keep, issue #82) ---- */
+
+/* As the engine keeps IWRAM's copy of the game's code patched: the
+ * engine's bytes made where the game's own are, a state saved with the
+ * game's own there (another core reads them so), the engine's made again
+ * as one is loaded, and bytes that read neither left as they are */
+#define KEPT (IWRAM + 0x200)
+#define KEPT_STATE "build/host/test_emu.state"
+
+static uint32_t state_word(uint32_t addr) {
+	static uint8_t rom[ROM_SIZE];
+	static uint32_t video[240 * 160];
+	make_rom(rom);
+	struct mCore *g = guest_core(rom, video);
+	struct VFile *vf = VFileOpen(KEPT_STATE, O_RDONLY);
+	uint32_t v = g && vf && mCoreLoadStateNamed(g, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC) ? g->rawRead32(g, addr, -1) : 0xDEADBEEF;
+	if (vf) vf->close(vf);
+	if (g) {
+		mCoreConfigDeinit(&g->config);
+		g->deinit(g);
+	}
+	return v;
+}
+
+static void kept_ram(void) {
+	static const uint8_t own[4] = { 0x11, 0x11, 0x11, 0x11 }, ours[4] = { 0x22, 0x22, 0x22, 0x22 };
+	emu_write32(KEPT, 0x11111111);
+	CHECK(emu_keep(KEPT, own, ours, sizeof own), "a patch kept");
+	CHECK(emu_read32(KEPT) == 0x22222222, "the patch made: %08x", emu_read32(KEPT));
+	CHECK(emu_save_state(KEPT_STATE), "a state saved");
+	CHECK(emu_read32(KEPT) == 0x22222222, "the patch after the save: %08x", emu_read32(KEPT));
+	CHECK(state_word(KEPT) == 0x11111111, "the state holds %08x, not the game's own 11111111", state_word(KEPT));
+	emu_write32(KEPT, 0x33333333);
+	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x22222222, "the patch after the state loaded: %08x", emu_read32(KEPT));
+	/* (another's bytes there: neither the game's nor the patch's) */
+	emu_write32(KEPT, 0x44444444);
+	CHECK(emu_save_state(KEPT_STATE) && state_word(KEPT) == 0x44444444 && emu_read32(KEPT) == 0x44444444, "another's bytes saved as %08x, left %08x",
+		state_word(KEPT), emu_read32(KEPT));
+	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x44444444, "another's bytes loaded made %08x", emu_read32(KEPT));
+	remove(KEPT_STATE);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -583,7 +626,9 @@ int main(void) {
 	two_cores();
 	two_threads();
 	moved_block();
+	kept_ram();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, on one thread and on two, a moved block's calls through veneers\n");
+	printf("all hook checks passed, the two cores kept apart, on one thread and on two, a moved block's calls through veneers, RAM kept "
+	       "patched but in its states\n");
 	return 0;
 }

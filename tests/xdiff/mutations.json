@@ -88,6 +88,62 @@
     "080C95DE:2106"
    ],
    "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
+  },
+  {
+   "name": "lava's flags",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0034:00010010:4"
+   ],
+   "what": "lava's word in BN6's grown flags table (xpanels.c, EMU_FREE + 0x4C0000 + 13 x 4) a plain panel's 0x10010 where BN5's lava gives 0x11010"
+  },
+  {
+   "name": "lava underfoot not hooked",
+   "spec": "field_lava_76",
+   "poke": [
+    "0801A802:B550"
+   ],
+   "what": "BN6's own push {r4,r6,lr} back over the hook at the actors' status step (BN6_OBJECT_STATUS), where BN5 steps an object on lava first: CanGard unhurt on lava, the lava not cooled"
+  },
+  {
+   "name": "the sea underfoot not hooked",
+   "spec": "field_sea",
+   "poke": [
+    "0801A1AA:2804"
+   ],
+   "what": "BN6's own cmp r0,#4 back over the hook in what a panel does to an actor (BN6_PANEL_STEP_POISON): the Fire CanGard on sea unhurt"
+  },
+  {
+   "name": "lava's count not hooked",
+   "spec": "field_lava_firevirus",
+   "poke": [
+    "0800C3B8:2809"
+   ],
+   "what": "BN6's own cmp r0,#9 back over the hook in the per-panel update (BN6_PANEL_UPDATE_CONVEYOR): lava's timer written 0x708 each frame, never counted down, never running out"
+  },
+  {
+   "name": "the cooling's panel",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0048:2203"
+   ],
+   "what": "the stub's movs r2,#2 (the panel made plain as lava cools under MegaMan) made #3: a cracked panel"
+  },
+  {
+   "name": "the spark's place unmoved",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0090:0810A953:4"
+   ],
+   "what": "the stub's veneer to the routine that moves the spark's place by a random amount (BN6_PLACE_JITTER) aimed at the families' empty hook: no random number drawn as lava cools"
+  },
+  {
+   "name": "Aqua cools no lava",
+   "spec": "field_lava_aqua",
+   "poke": [
+    "03007768:280F"
+   ],
+   "what": "the element hit's lava test in IWRAM (xpanels.c, BN6_PANEL_HIT_COOL + 0x26, written after the boot over the routine the game copied) made cmp r0,#15: an Aqua hit on lava leaves it, where BN5's cools it plain"
   }
  ]
 }

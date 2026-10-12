@@ -10,6 +10,20 @@
   net's battles though BN5 has them all, and its Roll DS was taken for
   Roll. Its text now reads in BN6's codes, checked glyph for glyph
   against both games' fonts.
+- **BN5's lava and sea in BN6's own battles (issue #82).** BN6 has
+  neither: its volcano panel erupts and does not burn a step, and it has
+  no sea, so BN5's fields with them (the Undernet's and Nebula Area's
+  lava, End Area's sea) could not be fought in BN6's engine. Where BN5's
+  ROM is read they are now panels of BN6's engine that behave as BN5's:
+  lava burns whatever steps on it for 50 (100 where Fire beats it),
+  spares Fire, and cools plain under a spark; the sea hurts a Fire
+  object a point every 7 frames, as poison does; Aqua cools lava; both
+  run out after 16 seconds. They look as BN5's, its tiles and its
+  colours' animations, in BN6's panel frames. Each of the eight fields
+  is fought in BN5's own engine and in BN6's and compared frame by
+  frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
+  Aqua hit. Nothing in a run uses them yet; BN5's records on them now
+  wait only for their viruses (one of Nebula Area's is fightable).
 - **One net, its groundwork (issue #82).** BN5's battle records can be
   fought in BN6's own engine: its viruses as BN6's where both games have
   the family (BN5's V1 and V1EX as BN6's V1, and so on) or as the family

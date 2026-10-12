@@ -76,6 +76,15 @@ int emu_hook_events(HookEvent *out, int max);
 bool emu_save_state(const char *path);
 bool emu_load_state(const char *path);
 
+/* RAM the engine keeps patched, where the game copies code into it from a
+ * ROM image the engine patched the same way (IWRAM's routines, copied as
+ * the game powers on): `len` bytes (64 at most) at `addr`, the game's own
+ * `was` and the engine's `now`. Made the engine's now and after each state
+ * is loaded, where they read the game's own; a state is saved with the
+ * game's own there, so it holds the game's RAM and loads in any build,
+ * with the patch or without. False where there is no core or no room. */
+bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len);
+
 /* Stereo 16-bit samples at the given rate, pulled by the audio device.
  * Returns the frames written; silence fills the rest. */
 int emu_audio_read(int16_t *out, int frames);

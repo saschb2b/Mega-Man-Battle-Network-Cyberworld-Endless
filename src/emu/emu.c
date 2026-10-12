@@ -301,6 +301,36 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	for (size_t i = 0; i < len; ++i) emu_write8(a + (uint32_t)i, p[i]);
 }
 
+/* ---- RAM kept patched (emu_keep) ---- */
+
+#define KEEP_MAX 8
+#define KEEP_LEN 64
+static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
+static int nkept;
+
+/* each patch's bytes made the engine's (or, `own`, the game's again) where
+ * they read the other; bytes that read neither are left as they are */
+static void keep_put(bool own) {
+	for (int i = 0; i < nkept; ++i) {
+		const uint8_t *from = own ? kept[i].now : kept[i].was, *to = own ? kept[i].was : kept[i].now;
+		bool there = true;
+		for (uint32_t k = 0; there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == from[k];
+		for (uint32_t k = 0; there && k < kept[i].len; ++k) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
+	}
+}
+
+bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
+	wait_frame();
+	if (!core || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	kept[nkept].addr = addr;
+	kept[nkept].len = (uint32_t)len;
+	memcpy(kept[nkept].was, was, len);
+	memcpy(kept[nkept].now, now, len);
+	++nkept;
+	keep_put(false);
+	return true;
+}
+
 /* A path for mGBA's own files: on the 3DS they go to the SD card's file
  * system itself, which takes a path from its root, without the C
  * library's "sdmc:" (a state was never written there) */
@@ -319,7 +349,11 @@ bool emu_save_state(const char *path) {
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	struct VFile *vf = VFileOpen(vf_path(tmp), O_CREAT | O_TRUNC | O_RDWR);
 	if (!vf) return false;
+	/* (with the game's own bytes where the engine keeps RAM patched: a
+	 * state holds the game's RAM, whatever build loads it) */
+	keep_put(true);
 	bool ok = mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	keep_put(false);
 	vf->close(vf);
 	if (ok) ok = cw_rename(tmp, path);
 	else remove(tmp);
@@ -334,7 +368,11 @@ bool emu_load_state(const char *path) {
 	if (!vf) return false;
 	bool ok = mCoreLoadStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);
-	/* (a state holds RAM, not the ROM copy: hooks in RAM are written again) */
-	if (ok) hook_reapply();
+	/* (a state holds RAM, not the ROM copy: hooks in RAM are written again,
+	 * and the patches the engine keeps there) */
+	if (ok) {
+		hook_reapply();
+		keep_put(false);
+	}
 	return ok;
 }

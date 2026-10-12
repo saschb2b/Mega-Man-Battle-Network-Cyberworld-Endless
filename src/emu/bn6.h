@@ -374,4 +374,5 @@
 
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
+#include "bn6_panels.h"   /* the battlefield's panels as the engine updates, draws and acts on them (issue #82) */
 #endif
