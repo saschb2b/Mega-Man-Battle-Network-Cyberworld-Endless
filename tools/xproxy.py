@@ -172,12 +172,25 @@ def souls_pointer(off, ia, ib):
     return None
 
 
+@functools.lru_cache(maxsize=None)
+def souls_mood():
+    """--souls: the addresses of BN5's mood the Souls keep in their own block beside BN6's (src/emu/soulmood.c: each
+    side's opening mark, mood and dark latch in BN6_SOULS), which a battle with them installed writes whoever holds a
+    Soul and only their hooks read"""
+    import xdiff_snap
+    d = xdiff_snap.c_defines('src/emu/bn6_forms.h')
+    return frozenset(d['BN6_SOULS'] + side * d['BN6_SOULS_SIDE'] + d[f] for side in (0, 1)
+                     for f in ('BN6_SOUL_OPENED', 'BN6_SOUL_MOOD', 'BN6_SOUL_DARK'))
+
+
 def why(off, ia, ib, ma, mb, allowed):
     """Why the byte at `off` differs between two runs' images, or None: xcontrol's (a pointer into what each run moved,
     BN6's interrupt stack, dead between frames), with --souls a pointer into a table the Souls grew, read through its
-    copy, and with `allowed` the proxy's own: a place the form is kept, 1 against 8; MegaMan's NameID, 0x1AC against
+    copy, and BN5's mood in the Souls' own block, and with `allowed` the proxy's own: a place the form is kept, 1 against 8; MegaMan's NameID, 0x1AC against
     0x1B3; the used bits' word (its row's in both, so far)"""
     reason = X.why(off, ia, ib, ma, mb, False) or (SOULS and souls_pointer(off, ia, ib))
+    if not reason and SOULS and X.addr_of(off) in souls_mood():
+        reason = 'BN5\'s mood, kept in the Souls\' block beside BN6\'s (read by their hooks alone)'
     if reason or not allowed:
         return reason or None
     addr, a, b = X.addr_of(off), ia[off], ib[off]

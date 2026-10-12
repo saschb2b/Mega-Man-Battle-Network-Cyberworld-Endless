@@ -61,7 +61,9 @@
 #define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* the code of BN5's chips and Souls: first BN6's attack families grown (xattack_grow.c), */
 #define FREE_ATTACK_FAMILIES FREE_CHIP_CODE           /* ... 240 words and the stub of an empty one, */
 #define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x000400u) /* ... then kept for the chips' code, to: */
-#define FREE_TAIL           (EMU_FREE + 0x700000u)   /* free to FREE_END */
+#define FREE_SOULS_ART      (EMU_FREE + 0x700000u)   /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c), to: */
+#define FREE_SOULS_ART_END  (EMU_FREE + 0x710000u)
+#define FREE_TAIL           (EMU_FREE + 0x710000u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
 /* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */

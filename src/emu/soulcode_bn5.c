@@ -428,7 +428,7 @@ static const XvNumber calls[] = {
 	{ 0x080EE932, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
 	{ 0x080EE936, 0x0800F29Eu, 0x08011714u },   /* project:cangard, DIFF (audited) */
 	{ 0x080EEADE, 0x0800DD5Eu, 0x0800FFFEu },   /* map:calls+bytes, SAME */
-	{ 0x080EEAEE, 0x0800E338u, 0x080105F2u },   /* map:calls, DIFF (the Souls' audit) */
+	{ 0x080EEAEE, 0x0800E338u, SOUL_STUB_COUNTER },   /* answered by the Souls' C */
 	{ 0x080EEC06, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
 	{ 0x080EEC0A, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
 	{ 0x080EEC12, 0x08016C42u, 0x0801A152u },   /* project:cangard, SAME */
@@ -477,10 +477,13 @@ static const XvImm imms[] = {
 	{ 0x0800F87C, THUMB_MOVS, 0, 0, 0x45, 0xC5 },   /* its family: CurAction 0x45 in BN5, the Souls' 0xc5 in BN6 (xattack_grow.h) */
 	{ 0x0800FA10, THUMB_MOVS, 0, 0, 0x50, 0xC3 },   /* its family: CurAction 0x50 in BN5, the Souls' 0xc3 in BN6 (xattack_grow.h) */
 	{ 0x0800FC00, THUMB_MOVS, 0, 0, 0x3D, 0xC4 },   /* its family: CurAction 0x3d in BN5, the Souls' 0xc4 in BN6 (xattack_grow.h) */
+	{ 0x08012066, THUMB_MOVS, 4, 0, 0x3, 0xC5 },   /* its effect: 0x3 in BN5, 0xc5 in BN6 */
 	{ 0x080C504A, THUMB_MOVS, 1, 0, 0xC, 0x0 },   /* its sprite's list: 3 in BN5, 0 in BN6 */
 	{ 0x080C504C, THUMB_MOVS, 2, 0, 0xA, 0x51 },   /* its sprite: list 3 0xa in BN5, list 0 0x51 in BN6 */
 	{ 0x080C50EC, THUMB_LDR, 0, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C5114, THUMB_MOVS, 4, 0, 0x14, 0xC6 },   /* its effect: 0x14 in BN5, 0xc6 in BN6 */
 	{ 0x080C5130, THUMB_MOVS, 0, 0, 0x70, 0x5F },   /* its sound: song 0x70 in BN5, BN6's slot 0x5f (soulpower.c copies it) */
+	{ 0x080C51FA, THUMB_MOVS, 4, 0, 0x2, 0xC7 },   /* its effect: 0x2 in BN5, 0xc7 in BN6 */
 	{ 0x080C5252, THUMB_MOVS, 0, 0, 0x16, 0x5A },   /* its sound: song 0x115 in BN5 (movs, adds 0xFF), BN6's slot 0x5a */
 	{ 0x080C5254, THUMB_ADDS, 0, 0, 0xFF, 0x0 },   /* ... its adds made none (soulpower.c copies it) */
 	{ 0x080C7684, THUMB_MOVS, 1, 0, 0xC, 0x0 },   /* its sprite's list: 3 in BN5, 0 in BN6 */
@@ -501,7 +504,7 @@ static const SoulType types[] = {
 	{ 3, 0x81, XV_TYPE_MOVED, 0x080D6789u },
 	{ 4, 0x28, XV_TYPE_MOVED, 0x080E3619u },
 };
-/* BN5's sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART, listed at a number of a grown list */
+/* BN5's sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART (past it FREE_SOULS_ART), listed at a number of a grown list */
 static const XvSprite sprites[] = {
 	{ 4, 0x1F, 0, 0x4B, SOULS_ART + 0x0, 0x1400 },
 	{ 3, 0x03, 0, 0x4C, SOULS_ART + 0x1400, 0x2000 },
@@ -512,6 +515,9 @@ static const XvSprite sprites[] = {
 	{ 3, 0x0A, 0, 0x51, SOULS_ART + 0xB800, 0x1700 },
 	{ 3, 0x15, 0, 0x52, SOULS_ART + 0xCF00, 0x1300 },
 	{ 3, 0x05, 0, 0x53, SOULS_ART + 0xE200, 0x500 },
+	{ 5, 0x03, 0, 0x54, FREE_SOULS_ART + 0x0, 0x3000 },
+	{ 5, 0x0D, 0, 0x55, FREE_SOULS_ART + 0x3000, 0x1200 },
+	{ 5, 0x02, 0, 0x56, FREE_SOULS_ART + 0x4200, 0x1300 },
 };
 /* BN5's effects its code spawns that BN6 has none of: at an id of the grown table, BN5's entry with its sprite as listed above */
 static const SoulEffect effects[] = {
@@ -520,6 +526,9 @@ static const SoulEffect effects[] = {
 	{ 0x4A, 0xC2, 0, 0x4B, 0x02, 0x00 },
 	{ 0x17, 0xC3, 0, 0x4F, 0x01, 0x00 },
 	{ 0x45, 0xC4, 0, 0x52, 0x01, 0x00 },
+	{ 0x03, 0xC5, 0, 0x54, 0x00, 0x00 },
+	{ 0x14, 0xC6, 0, 0x55, 0x02, 0x00 },
+	{ 0x02, 0xC7, 0, 0x56, 0x01, 0x00 },
 };
 /* bytes of its raw tables BN6 numbers otherwise */
 static const XvByte bytes[] = {

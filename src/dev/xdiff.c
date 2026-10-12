@@ -47,6 +47,7 @@
 #include "soulproxy.h"
 #include "soulunite.h"
 #include "thumb_reloc.h"
+#include "xchips_install.h"
 #include "xdiff_events.h"
 #include "xfields.h"
 #include "xvirus.h"
@@ -728,6 +729,9 @@ static void subject_setup(const Spec *s) {
 /* BN6's battle with the families installed, forced as the foes step forces one, the ids BN6's */
 static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
+	/* (BN6's chip tables with the registry's chips in them, as the game's own start makes them: game_hooks.c; a BN5 chip
+	 * a spec's folder names is the registry's) */
+	xchips_install();
 	xvirus_install(XVIRUS_FAMILIES);
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
 	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak, s->soulbreak))) {

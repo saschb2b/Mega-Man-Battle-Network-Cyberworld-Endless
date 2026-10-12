@@ -52,6 +52,14 @@
         "0x4A": "0xC2",
         "0x17": "0xC3",
         "0x45": "0xC4"
+      },
+      "copies": {
+        "why": "BN5's effects 0x03, 0x14 and 0x02 the Souls' code spawns, which BN6's engine spawns of its own too (0x03 at the unison's phase 0, BN6's code; 0x02 by a counter's family 0x47, BN6's twin of BN5's 0x2C): BN6 has an effect of each one's record whose sprite it redrew, so the Souls' code spawns BN5's copied with BN5's sprite (the tracks' allocations: drawn as BN5's, in FREE_SOULS_ART) at BN6's 0xC5, 0xC6 and 0xC7, where BN6's own code spawns its own. A BN6 copy is read as the BN5 effect it copies, BN5's id as itself in both: which of the two a spawn is, the code that spawned it says.",
+        "bn6_to_bn5": {
+          "0xC5": "0x03",
+          "0xC6": "0x14",
+          "0xC7": "0x02"
+        }
       }
     },
     "panel_type": {
@@ -94,7 +102,7 @@
       ]
     },
     "action": {
-      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both. A Soul's charged shots run as the families the Souls track moved (S4: BN6's attack families grown, xattack_grow.c, the Souls' from 0xC0 in tools/xsoul.py's FAMILIES' order): BN5's 0x43 (ColonelSoul's) BN6's 0xC0, 0x3A (NumberSoul's) 0xC1, 0x40 (KnightSoul's) 0xC2, 0x50 (ToadSoul's) 0xC3, 0x3D (ShadowSoul's B+Left) 0xC4, 0x45 (TomahawkSoul's) 0xC5, and 0x13 by his attack (megaman_by_attack).",
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both. A Soul's charged shots run as the families the Souls track moved (S4: BN6's attack families grown, xattack_grow.c, the Souls' from 0xC0 in tools/xsoul.py's FAMILIES' order): BN5's 0x43 (ColonelSoul's) BN6's 0xC0, 0x3A (NumberSoul's) 0xC1, 0x40 (KnightSoul's) 0xC2, 0x50 (ToadSoul's) 0xC3, 0x3D (ShadowSoul's B+Left) 0xC4, 0x45 (TomahawkSoul's) 0xC5, and 0x13 by his attack (megaman_by_attack). A counter's two families (a hit taken in ShadowSoul's B+Left stance: BN5's 0x2C and 0x2D, twins of BN6's 0x47 and 0x48, started by BN5's 0x0800E338 and BN6's 0x080105F2, whose family's first frame the Souls' Thumb runs at once as BN5's: src/emu/soulcode.c's counter_code) are BN6's 0x47 and 0x48.",
       "megaman": {
         "6": "8",
         "0x1A": "0x1C",
@@ -104,7 +112,9 @@
         "0x40": "0xC2",
         "0x50": "0xC3",
         "0x3D": "0xC4",
-        "0x45": "0xC5"
+        "0x45": "0xC5",
+        "0x2C": "0x47",
+        "0x2D": "0x48"
       },
       "t3_types": [
         "0x4B"
@@ -116,6 +126,13 @@
           "is": "0x02",
           "bn6": "0xC6",
           "why": "BN5's sword family (0x13, 0x080EBDC6) runs ShadowSoul's charged shot as its sub-family 2 (his AttackVars +3, AI data +0xA3, set by its power attack 0x0800F818) and the sword chips as the others; BN6's 0x13 is its own sword family (0x080ECAB6, no twin of BN5's), which BN6's sword chips run, so the Souls' copy of BN5's runs as 0xC6 (xattack_grow.h's Souls' numbers, tools/xsoul.py's FAMILIES): BN5's 0x13 is BN6's 0xC6 where his sub-family is 2, BN6's 0x13 otherwise"
+        },
+        {
+          "bn5": "0x13",
+          "ai": "0xA4",
+          "is": "0x01",
+          "bn6": "0xC6",
+          "why": "A sword chip charged with ShadowSoul united (his AttackVars +4 1, the chip's use's first argument: BN5 0x0800D9E8, BN6 0x0800FBEC) runs BN5's sword family in both, which takes ShadowSoul's paths: BN6's chip use returns the Souls' copy of it, 0xC6, for that chip (src/emu/soulchips.c)"
         }
       ]
     },
@@ -265,10 +282,14 @@
       ]
     },
     "souls": {
-      "why": "A Soul's state: BN5 keeps it in MegaMan's AI data (its turns +0x0F, its chaos +0x12, the chaos charge's phase +0x1F, ColonelSoul's chip +0x32, 0xFFFF none, the chaos level +0x6C) and names the Soul by his form byte; BN6's engine keeps it in the Souls' block (BN6_SOULS, a side's 0x20 bytes: +0 the Soul, +1 chaos, +2 turns, +3 phase, +4 the chip, 0 none, +6 level, +0x10 the Souls used this battle), as BN6's AI data has its own fields at those places (+0x0F a turn guard, +0x12 the HP bug's level, +0x32 tired). So BN5's AI data reads 0 at those places (its Soul's state compared here instead), its used word (BN5_SOULS_USED) against the block's, and BN6's Crosses' used word must be 0 (BN5 has no Cross). The block's other bytes are BN6's engine's own bookkeeping (+7 the opening's mood set, +8-+0xA the Soul committed and not yet entered, +0xB element 0xB's role, +0xC what stands under OK): not compared. Element 0xB (UNITE, BN5_CUSTOM_UNITE and BN6_CUSTOM_UNITE) is compared byte for byte as each game's last Custom screen left it.",
+      "why": "A Soul's state: BN5 keeps it in MegaMan's AI data (its turns +0x0F, its chaos +0x12, the chaos charge's phase +0x1F, ColonelSoul's chip +0x32, 0xFFFF none, the chaos level +0x6C) and names the Soul by his form byte; BN6's engine keeps it in the Souls' block (BN6_SOULS, a side's 0x20 bytes: +0 the Soul, +1 chaos, +2 turns, +3 phase, +4 the chip, 0 none, +6 level, +0x10 the Souls used this battle), as BN6's AI data has its own fields at those places (+0x0F a turn guard, +0x12 the HP bug's level, +0x32 tired). So BN5's AI data reads 0 at those places (its Soul's state compared here instead), its used word (BN5_SOULS_USED) against the block's, and BN6's Crosses' used word must be 0 (BN5 has no Cross). BN5's battle mood (his battle NaviStats' +0x0E) is compared with the block's +0x0E, BN5's mood as BN6's engine keeps it by BN5's rules beside its own (the Souls track's S7, src/emu/soulmood.c), from the battle's first Custom screen; BN6's own mood is compared as before (maps, the mood less BN5's gains). The block's other bytes are BN6's engine's own bookkeeping (+7 the opening's mood set, +0x0F the dark latch, +8-+0xA the Soul committed and not yet entered, +0xB element 0xB's role, +0xC what stands under OK): not compared. Element 0xB (UNITE, BN5_CUSTOM_UNITE and BN6_CUSTOM_UNITE) is compared byte for byte as each game's last Custom screen left it.",
       "bn6_side": {
         "soul": [
           "0x00",
+          1
+        ],
+        "mood": [
+          "0x0E",
           1
         ],
         "chaos": [
@@ -590,6 +611,23 @@
     ]
   },
   "masks": [
+    {
+      "name": "BN6's second wheel in a chip's attack",
+      "part": "ai",
+      "whose": [
+        "megaman"
+      ],
+      "offsets": [
+        "0xA2"
+      ],
+      "bits": "0xF0",
+      "direction": "bn6",
+      "why": "As a chip is used BN6 writes his AttackVars +2 (AI data +0xA2) as the chip record's attack element ORed with its icon's second-wheel element's hit flag (Sword 0x80, Cursor 0x40, Wind 0x20, Break 0x10: BN6's table 0x080129E4 by the record's +6); BN5 has no second wheel and writes the attack element alone. Its hit's own flags, which BN6's engine reads for its second wheel's weaknesses: the bits BN6 has and BN5 not.",
+      "evidence": [
+        "BN6 0x0801271E-0x08012728 (0x080126E4, the chip's numbers for its attack): ldrb r1,[r6,#4]; ldrb r2,[r6,#6]; the table's byte ORed in; strb r1,[r7,#2]. BN5's twin 0x0800FE6A writes +4 alone (tools/bn5_twins.py's audit of the pair)",
+        "soul_shadow_sword: BN6's 0x80 (the Sword's) where BN5 holds 0 from t162"
+      ]
+    },
     {
       "name": "BN5's panel restore timers",
       "part": "panel bn5 only",

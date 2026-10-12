@@ -163,6 +163,8 @@
 #define BN5_OPT_RUN       0x20     /* BattleSettings +8 options: running allowed (its random battles), as BN6's */
 #define BN5_CHIP_KIND     6        /* a chip record's +6: its kind, 0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Recovery, 5 Plus, 6 Sword, 7 Invisible,
                                     * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
+#define BN5_CHIP_DARK_GATE 0x15    /* a chip record's +0x15: 0 none; 1 usable only while his dark meter is 470 or more (not dark: HolyDrem, a Navi's
+                                    * V1 and SP chips), else only below it (dark: BlakWing, the DS chips); his chip use's test 0x08010110 */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
 /* Its Souls (docs/META.md, Souls in BN5 territory; docs/ROM_DATA.md, BN5's
  * Souls): the Custom screen's UNITE command, its Double Soul */

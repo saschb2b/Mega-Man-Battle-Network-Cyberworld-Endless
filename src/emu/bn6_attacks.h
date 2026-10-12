@@ -16,6 +16,15 @@
 #define BN6_ATTACK_FAMILY_FIRST 0x10          /* the CurAction of its first entry (a CurAction under it is a state's) */
 #define BN6_ATTACK_FAMILY_COUNT 79            /* BN6's own, CurActions 0x10-0x5E */
 #define BN6_EXIT_ATTACK         0x08011714u   /* object_exitAttackState: an attack's end (every family's last phase calls it) */
+#define BN6_FAMILY_SWORD        0x13          /* the swords' family (the chips' and the Souls' charged shot's: BN5's the same number) */
+#define BN6_COUNTER_START       0x080105F2u   /* a counter's attack begun (r0 the hit's flags, r1-r3 its numbers): setAttack0 with family
+                                                 0x47 or 0x48, its first frame left to the next (BN5's twin 0x0800E338 runs it at once) */
+/* An attack's variables (AttackVars, AI data +0xA0) as a chip's use writes them (0x080127C0, BN5's twin 0x0800FF40) */
+#define BN6_ATTACK_CHARGED      0x04          /* u8 the chip charged (the use's first argument) */
+#define BN6_ATTACK_DAMAGE       0x08          /* u16 its damage */
+#define BN6_ATTACK_CHIP         0x14          /* u16 the chip used */
+#define BN6_ATTACK_SPAWNER      0x03          /* u8 the spawner a spawning family runs (family 0x1C, 0x080ED6EC: its table by this; BN5's 0x1A) */
+#define BN6_ATTACK_SPAWN_ARG    0x0C          /* u32 ... handed to the spawner in r4 */
 /* The power attacks: a routine each, by MegaMan's loadout's id (his AI data +4-+8, +0x11), which sets an attack's
  * numbers and returns its family (0x0801176C-0x080117C2 read it through one word) */
 #define BN6_POWER_ATTACKS       0x080117D4u

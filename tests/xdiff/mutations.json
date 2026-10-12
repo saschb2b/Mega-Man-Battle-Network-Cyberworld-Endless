@@ -205,9 +205,9 @@
    "name": "a chip's damage",
    "spec": "megaman_plain",
    "poke": [
-    "08021DEE:0029"
+    "08C00046:0029"
    ],
-   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A, 0x08021DA8 + 0x2C + 0x1A): CanGard's HP after the Cannon"
+   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A in the registry's records the game reads, EMU_FREE + 0x400000 + 0x2C + 0x1A, as the subject installs the registry): CanGard's HP after the Cannon"
   },
   {
    "name": "a Soul's turns four",
@@ -264,6 +264,44 @@
    "what": "MegaMan's arm flash in a Soul (BN5's kind 0x23, its frame the Soul) spawned by BN6's spawner as BN6's object (src/emu/soullook.c's redirect to BN5's moved spawner left out): BN6's own kind 0x23 of its own table, another sprite and object where BN5 runs its image object"
   },
   {
+   "name": "no chip charged in a Soul",
+   "spec": "soul_knight_charge",
+   "soulbreak": 65536,
+   "what": "the chip charge's test (BN6_CHARGE_TEST, src/emu/soulchips.c) answers no for a Soul where BN5's 0x08010902 charges a chip of its kind: KnightSoul's JustcOne used as A is pressed, uncharged"
+  },
+  {
+   "name": "a charged chip not doubled",
+   "spec": "soul_toad_charge",
+   "soulbreak": 131072,
+   "what": "the charged chip's bonus (BN6_CHARGE_BONUS) none for ToadSoul where BN5's 0x080103C8 doubles it: its damage the record's"
+  },
+  {
+   "name": "TomahawkSoul's Wood chip not doubled on grass",
+   "spec": "soul_tomahawk_wood",
+   "soulbreak": 262144,
+   "what": "the chip's modifier (BN6_CHIP_MODIFIED) leaves TomahawkSoul's Wood chip on grass alone where BN5's 0x08010322 doubles it and makes the panel plain"
+  },
+  {
+   "name": "KnightSoul's front column unguarded",
+   "spec": "soul_knight_front",
+   "soulbreak": 524288,
+   "what": "a chip used from KnightSoul's front column leaves him no unharmed frames where BN5's 0x0801038A gives 50"
+  },
+  {
+   "name": "a counter's first frame left to the next",
+   "spec": "soul_shadow_left",
+   "poke": [
+    "08C81A54:46C046C0:4"
+   ],
+   "what": "the Souls' Thumb for BN5's counter start (SOUL_STUB_COUNTER) calls BN6's twin and not the family's first frame (its second bl two nops), as BN6's twin alone does: the counter a frame later than BN5's"
+  },
+  {
+   "name": "TomahawkSoul of no element",
+   "spec": "soul_tomahawk_heal",
+   "soulbreak": 64,
+   "what": "the element's hook gives TomahawkSoul none where BN5's table gives Wood: no heal on grass (BN6's grass step heals a Wood actor)"
+  },
+  {
    "name": "a charged shot's charge",
    "spec": "soul_shadow",
    "soulbreak": 16,
@@ -306,6 +344,36 @@
     "0815A238:0815AE18:4"
    ],
    "what": "BN6's song slot 0x5E (the song table 0x08159F48 + 8 x 0x5E) its empty header again where src/emu/soulpower.c entered BN5's 0x117 (ToadSoul's waves): BN6 plays the empty song"
+  },
+  {
+   "name": "a landed hit's mood left out",
+   "spec": "soul_knight_front",
+   "soulbreak": 16777216,
+   "what": "the hit's mood step (src/emu/soulmood.c, BN6_MOOD_HIT) raises the attacker's mood by nothing where BN5's 0x080127FA adds the hit's gain: KnightSoul's JustcOne lands and his mood stays 0x80 where BN5's goes to 0x9E"
+  },
+  {
+   "name": "no DarkChip dealt into a worried hand",
+   "spec": "soul_mood_dark",
+   "soulbreak": 33554432,
+   "what": "BN5's worried rule (0x08025118) left out of the compaction's hook: DarkCirc stays shelved, the second hand all Cannon, the cursor on the first"
+  },
+  {
+   "name": "a BN5 DarkChip used leaves him as he was",
+   "spec": "soul_mood_dark",
+   "soulbreak": 67108864,
+   "what": "the chip's use (soulmood_chip_used) leaves the mood where BN5's 0x0801007C sets it 0: DarkCirc used, his mood still worried"
+  },
+  {
+   "name": "UNITE stands while worried",
+   "spec": "soul_mood_unite",
+   "soulbreak": 134217728,
+   "what": "UNITE's rule (src/emu/soulunite.c's calm_enough) reads no worry where BN5_UNITE_STAND refuses it: KnightSoul's Break chip lights UNITE and he unites while worried"
+  },
+  {
+   "name": "BN5's dark gate left out",
+   "spec": "soul_mood_gate",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets BlakWing through while MegaMan is not dark where BN5's 0x08010110 refuses it: the attack's chip BlakWing (0x125) where BN5's is the chip of nothing (0x185)"
   }
  ]
 }

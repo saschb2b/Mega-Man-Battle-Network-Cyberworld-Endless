@@ -24,6 +24,7 @@ import sys
 import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bn5_objects  # noqa: E402
 import bn5_twins  # noqa: E402
 import xrecipe  # noqa: E402
 import xrecipe_family  # noqa: E402
@@ -38,7 +39,8 @@ WORK = os.path.join(ROOT, '.build', 'xrecipe')
 # ---- the Souls' room (src/emu/soul_room.h) ----
 
 CODE_ROOM = 0x2000          # SOULS_CODE's bytes
-ART_ROOM = 0xF000           # SOULS_ART's bytes before the faces (soul_room.h's SOULS_FACE_TILES)
+ART_ROOM = 0xF000           # SOULS_ART's bytes before the faces (soul_room.h's SOULS_FACE_TILES); past them, the
+ART_ROOM2 = 0x10000         # ... granted region FREE_SOULS_ART (free_space.h), its bytes
 BLOCK_STEP = 0x10           # each block begins at the next multiple of this past the last, its distance from a word kept
 ART_STEP = 0x100            # each sprite at the next multiple of this
 
@@ -79,7 +81,11 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
 # fourth kind's 0x83 (0x080EA08C, 0x080EA0BA, over BN5's panel highlight tables 0x0203C51C-0x0203C59F and 0x02034B80,
 # which BN6's engine lacks: Gregar searched for their reader 0x0802EA60 and their set-up 0x0802E8F4, byte for byte but
 # for the literal, found none): no object, the panel left plain
-STUB_CALLS = {0x080123FA: 'SOUL_STUB_PENDING', 0x080EA08C: 'SOUL_STUB_NONE', 0x080EA0BA: 'SOUL_STUB_NONE'}
+STUB_CALLS = {0x080123FA: 'SOUL_STUB_PENDING', 0x080EA08C: 'SOUL_STUB_NONE', 0x080EA0BA: 'SOUL_STUB_NONE',
+              # (a counter's attack begun, ShadowSoul's B+Left stance hit: BN6's twin 0x080105F2 takes the same steps, its two
+              # families numbered 0x47 and 0x48 where BN5's 0x2C and 0x2D, but leaves the family's first frame to the next
+              # frame where BN5's runs it at once, 0x0800E39A: the Souls' Thumb calls the twin, then the family once)
+              0x0800E338: 'SOUL_STUB_COUNTER'}
 # BN5's battle NaviStats byte getters (0x08010DEE by object, 0x08010D64 by side), read with r1 0x2C, MegaMan's form: BN5's
 # answer is the Soul's number (7-12), BN6's the proxy's 8; where a moved routine reads it so the Souls' getter answers
 FORM_GETTERS = {0x08010DEE: 'SOUL_STUB_FORM', 0x08010D64: 'SOUL_STUB_FORM_SIDE'}
@@ -99,9 +105,6 @@ AUDITS = {
                               "effects have flag 8, else 0 in BN6; BN5 0 only for an object whose AI data +0 is 2 and +1 not 0x17 as "
                               "well, which MegaMan, the one object a Soul's passive runs on, always is (+0 2, +1 his AI index 0): the "
                               "same for him",
-    (0x0800E338, 0x080105F2): "a counter's attack begun (ShadowSoul's B+Left stance hit): the same steps, BN6 numbering its two families "
-                              "0x47 and 0x48 where BN5 0x2C and 0x2D (twins), and running its first frame on the next frame where BN5 "
-                              "calls it at once",
     (0x08015140, 0x08018810): "an owner's arm point, by its NameID's sprite (the arm flash's set-up, a kind whose +4 is set): BN6 answers "
                               "(0, 7) for its own NameIDs 0xCD-0xFF and else takes the same steps, its calls their twins; the owner of "
                               "every flash the Souls spawn is MegaMan (0x1A0, a form's 0x1AB on), his sprite's arm row read from the rows "
@@ -153,9 +156,9 @@ EFFECT_TABLES = {0x080EC112: 'ShadowSoul\'s charged shot (sub-family 2)'}
 # sword family's 0x03, 0x0A and 0x32, ToadSoul's 0x31) and MegaMan's buster names in a Soul (0x23, 0x33 in chaos: BN5's
 # 0x080EC9xx, soullook.c) keep BN5's numbers, their sprites given BN6's numbers; the other kinds are dead in this copy (no
 # code of the Souls' spawns them), the one copy every track shares fixing up each kind
-FLASH_KINDS5 = 0x080B9A5C
-FLASH_KIND_COUNT = 0x3A
-FLASH_KINDS = (0x23, 0x33, 0x03, 0x0A, 0x32, 0x31)
+FLASH_KINDS5 = bn5_objects.IMAGE['kinds']
+FLASH_KIND_COUNT = bn5_objects.IMAGE['count']
+FLASH_KINDS = (0x23, 0x33, 0x03, 0x0A, 0x32, 0x31)   # (each fixed in tools/bn5_objects.py's per-kind table, the Souls' entries)
 # Raw tables of the sprites a moved routine loads by a parameter: BN5's table (its entry's size; list x 4 and number first),
 # the parameters the moved code gives (NumberSoul's enter 0x0800F074 its companion 1; no moved code spawns it with 0), whose
 SPRITE_TABLES = {0x080C33A8: (2, (1,), 'NumberSoul\'s companion'),
@@ -220,8 +223,9 @@ class Deriv:
         self.next_art = ART_FIRST
         self.next_effect = EFFECT_FIRST
         self.runs, self.bytes_, self.fields, self.sprite_tables = set(), [], [], set()
+        self.deferred, self.late = [], False   # (the effect spawns of the effects BN6 redrew, numbered after the rest)
         self.songs = {}         # BN5's song -> BN6's slot (soulpower.c copies it there)
-        self.art = 0
+        self.art = self.art2 = 0
         self.six = {}
 
     def decide(self, what):
@@ -530,6 +534,16 @@ class Deriv:
         for tab in SPRITE_TABLES:
             if any(tab in w.lits.values() for w in self.walks.values()):
                 self.number_sprite_table(tab)
+        self.late = True
+        for w, site in self.deferred:
+            self.number_effect(w, site)
+        # (the flash kinds as the one per-kind table of the image object has them: tools/bn5_objects.py)
+        for kind in FLASH_KINDS:
+            e = self.b5.bytes(FLASH_KINDS5 + 5 * kind, 2)
+            got = self.number_of.get((e[0] // 4, e[1]))
+            fixed = bn5_objects.IMAGE_TWIN.get(kind) or bn5_objects.IMAGE_COPIED.get(kind, (None, None))[:2]
+            if got != tuple(fixed):
+                self.decide(f'the image object\'s kind {kind:#x}: {got} here, {fixed} in tools/bn5_objects.py')
         for site, (fam5, fam6) in families.items():
             self.imms.append(dict(at=site, form='THUMB_MOVS', rd=0, rn=0, was=fam5, now=fam6,
                                   why=f'its family: CurAction {fam5:#x} in BN5, the Souls\' {fam6:#x} in BN6 (xattack_grow.h)'))
@@ -604,9 +618,17 @@ class Deriv:
         if not b:
             self.decide(f'BN5\'s sprite {lst}:{idx:#x} cannot be read')
             return None
+        # (in SOULS_ART while it holds the sprite, else in FREE_SOULS_ART: each region filled in the recipe's order)
+        room = rounded(len(b), ART_STEP)
         at = rounded(self.art, ART_STEP)
-        self.art = at + len(b)
-        self.sprites.append(dict(list=lst, index=idx, to_list=to_list, to_index=num, at=at, room=rounded(len(b), ART_STEP)))
+        if at + room <= ART_ROOM:
+            self.art = at + len(b)
+            base = 'SOULS_ART'
+        else:
+            at = rounded(self.art2, ART_STEP)
+            self.art2 = at + len(b)
+            base = 'FREE_SOULS_ART'
+        self.sprites.append(dict(list=lst, index=idx, to_list=to_list, to_index=num, at=at, room=room, base=base))
         self.number_of[(lst, idx)] = (to_list, num)
         return (to_list, num)
 
@@ -658,16 +680,6 @@ class Deriv:
                 if q[0] == r5[0] and q[1] == tw and q[2] == r5[2] and q[3] == r5[3]:
                     self.effect_of[e5] = e6
                     return e6
-        # (BN6's effect of the same record, list, number, animation and palette: the engine's own of the same role, BN6's
-        # sprite the same picture redrawn, where its animation lasts as long, frame for frame: an effect ends with it)
-        _, s5 = xrecipe.sprite(self.b5, LISTS5, r5[0] // 4, r5[1])
-        _, s6 = xrecipe.sprite(self.b6, LISTS6, r5[0] // 4, r5[1])
-        lives = anim_life(s5, r5[2]) is not None and anim_life(s5, r5[2]) == anim_life(s6, r5[2])
-        for e6 in [e5] + list(range(NEFFECTS)):
-            if lives and e6 < NEFFECTS and self.b6.bytes(EFFECTS6 + 4 * e6, 4) == r5:
-                self.effect_of[e5] = e6
-                self.notes.append(f'BN5\'s effect {e5:#x} is BN6\'s {e6:#x} by its record ({r5.hex()}), its sprite redrawn')
-                return e6
         to = self.place_sprite(r5[0] // 4, r5[1])
         e6 = self.next_effect
         self.next_effect += 1
@@ -700,9 +712,25 @@ class Deriv:
                 self.decide(f'{site:08X}: an effect made otherwise ({chain})')
                 return
         e = v & 0xFF
+        if not self.late and self.redrawn(e):
+            self.deferred.append((w, site))
+            return
         e6 = self.bn6_effect(e)
         if e6 != e and not self.imm_for(chain, 4, e, e6, f'its effect: {e:#x} in BN5, {e6:#x} in BN6'):
             self.decide(f'{site:08X}: effect {e:#x} made by {chain}')
+
+    def redrawn(self, e5):
+        """whether BN6 has an effect of BN5's record (its list, number, animation, palette) whose sprite's bytes differ, its
+        animation as long: one BN6 redrew, copied with BN5's sprite all the same (the tracks' allocations: drawn as BN5's),
+        its id and sprite numbered after the others' (FREE_SOULS_ART takes what SOULS_ART cannot)"""
+        r5 = self.b5.bytes(EFFECTS5 + 4 * e5, 4)
+        if self.bn6_sprite_twin(r5[0] // 4, r5[1]) is not None or not any(self.b6.bytes(EFFECTS6 + 4 * e6, 4) == r5 for e6 in range(NEFFECTS)):
+            return False
+        # (one whose animation lasts as long in both, frame for frame: an effect BN6's engine spawns of its own too, the
+        # same role; one whose animation lasts otherwise was copied from the first, as the engine's own would end apart)
+        _, s5 = xrecipe.sprite(self.b5, LISTS5, r5[0] // 4, r5[1])
+        _, s6 = xrecipe.sprite(self.b6, LISTS6, r5[0] // 4, r5[1])
+        return anim_life(s5, r5[2]) is not None and anim_life(s5, r5[2]) == anim_life(s6, r5[2])
 
     def effect_run(self, at, base, n):
         """an effect id of a base and a number from 0 to n - 1: BN6's ids one after another, BN5's copied as a run"""
@@ -788,8 +816,9 @@ def derive(b5, b6, pairs):
     d.place_blocks()
     d.data_ranges()
     d.scan_numbers(families)
-    if d.art > ART_ROOM:
-        d.decide(f'the sprites take {d.art:#x} bytes, past SOULS_ART\'s {ART_ROOM:#x} before the faces')
+    if d.art > ART_ROOM or d.art2 > ART_ROOM2:
+        d.decide(f'the sprites take {d.art:#x} and {d.art2:#x} bytes, past SOULS_ART\'s {ART_ROOM:#x} before the faces or '
+                 f'FREE_SOULS_ART\'s {ART_ROOM2:#x}')
     return d
 
 
@@ -845,10 +874,10 @@ def write_c(d):
         else:
             L.append(f'\t{{ {kind}, 0x{v:02X}, 0x{to:02X}, 0 }},')
     L.append('};')
-    L.append('/* BN5\'s sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART, listed at a number of a grown list */')
+    L.append('/* BN5\'s sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART (past it FREE_SOULS_ART), listed at a number of a grown list */')
     L.append('static const XvSprite sprites[] = {')
     for s in d.sprites:
-        L.append(f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, SOULS_ART + 0x{s["at"]:X}, 0x{s["room"]:X} }},')
+        L.append(f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, {s["base"]} + 0x{s["at"]:X}, 0x{s["room"]:X} }},')
     L.append('};')
     L.append('/* BN5\'s effects its code spawns that BN6 has none of: at an id of the grown table, BN5\'s entry with its sprite as listed above */')
     L.append('static const SoulEffect effects[] = {')
@@ -915,7 +944,7 @@ def main():
             print(f'{d.unit_of[e]:9} {e:08X}-{max(w.insns) + 2:08X}')
         for n in d.notes:
             print('note:', n)
-        print(f'code {d.code_used:#x} bytes in {len(d.placed)} blocks, art {d.art:#x} bytes, {len(d.sprites)} sprites, {len(d.effects)} effects')
+        print(f'code {d.code_used:#x} bytes in {len(d.placed)} blocks, art {d.art:#x} + {d.art2:#x} bytes, {len(d.sprites)} sprites, {len(d.effects)} effects')
     for x in d.decisions:
         print('OPEN:', x)
     text = write_c(d)

@@ -1139,10 +1139,8 @@ the next.
   DarkChip of it for Chaos Unison; each once a battle), the emblem by
   BN6's own rule otherwise where Beast Out stands, a grey UNITE where only
   UNITE stands. UNITE stands while the run holds a Soul and MegaMan is
-  neither worried nor dark by BN5's mood (his battle mood with BN5's
-  thresholds, a battle opened as worried as his HP says: the part of
-  BN5's mood UNITE needs; the rest, the gains and the DarkChip rule, is
-  S7), nor beasted out. A on it runs BN5's own code for it, moved into
+  neither worried nor dark by BN5's mood (as BN6's battles keep it
+  beside their own since S7, below), nor beasted out. A on it runs BN5's own code for it, moved into
   BN6's copy, which enters BN6's still-present mode 0x24 for a UNITE
   chosen: the last pick given up, UNITE first among the picks, the Soul's
   picture from BN5's ROM; B gives the chip back, as BN5's does; the chip
@@ -1210,34 +1208,68 @@ the next.
   ball (its confusion) and ToadSoul's sound waves (their paralysis) each
   play as BN5's frame for frame (docs/DEVTOOLS.md, The differential).
 - **S5, a Soul's passives** (in part; docs/ROM_DATA.md, A Soul's
-  passives): the passives BN5 gives a Soul as it unites and as his
-  form's state is set again (its two tables by form, the Souls' routines
-  moved, the proxy's entries of BN6's twins routed to them): ShadowSoul's
-  FloatShoe, TomahawkSoul's grass under MegaMan, ToadSoul's flag (BN5's
-  sea, which ToadSoul stands on unharmed, harms in BN6's engine only a
-  Fire actor as poison does: the lava and sea's own port, xpanels.c);
-  NumberSoul's hand of ten and its +10 to an attack chip of no kind. Not
-  yet: the chip charge (A held: ShadowSoul's swords, KnightSoul's Break
-  chips doubled, ToadSoul's Aqua chips doubled; BN6's eligibility and
-  doubling, `0x08013236` and `0x08012C7C`, by BN5's rule for a Soul),
-  ShadowSoul's charged swords' paths and its B+Left counter (moved with
-  its power attack 0x45 and family 0x3D, not yet held to BN5's by a
-  spec), KnightSoul's 50 frames' invulnerability for an attack chip used
-  from the front column (BN5 `0x0801038A`), TomahawkSoul's Wood chip
-  doubled on grass, the grass taken (BN5 `0x08010150`, `0x08010322`) and
-  its freedom from a hit's status (BN5 `0x0801793C`, BN6's twin test at
-  `0x0801ACC6` skips BN6's own form 7), ColonelSoul's chip shot, its
-  Custom screen's elements and its obstacle strike (its ready routine
-  sets BattleState +0x5C's bit 0x10 or 0x20, which BN6's own code sets
-  and reads for its own).
-- **Next**: S5's rest (above), Chaos Unison's charge (S6) and BN5's
-  DarkChip rule (S7: the mood's gains, the worried hand). Each part's
-  masks in the differential (tests/xdiff/legit.json, "until the Souls
-  track's S6" and BN5's Soul record's chip slot, ColonelSoul's) go as it
-  comes. Their state in RAM is the engine's plan's (`0x0203FF70`-
-  `0x0203FFEF`, `BN6_SOULS`), their code and data in `EMU_FREE` +
-  `0x480000` to `+0x4C0000` (docs/EMULATION.md; laid out in
-  `src/emu/soul_room.h`).
+  passives, A Soul's chips): the passives BN5 gives a Soul as it unites
+  and as his form's state is set again (its two tables by form, the
+  Souls' routines moved, the proxy's entries of BN6's twins routed to
+  them): ShadowSoul's FloatShoe, TomahawkSoul's grass under MegaMan,
+  ToadSoul's flag (BN5's sea, which ToadSoul stands on unharmed, harms in
+  BN6's engine only a Fire actor as poison does: the lava and sea's own
+  port, xpanels.c; its sinking, an object of that flag on the sea, comes
+  with the Navi track's port of it); NumberSoul's hand of ten and its +10
+  to an attack chip of no kind. The chips (`src/emu/soulchips.c`): the
+  chip charge, A held with a chip of the Soul's kind (ShadowSoul's swords,
+  KnightSoul's Break chips, ToadSoul's Aqua chips), the chip used charged
+  where BN6 would run the power attack, KnightSoul's and ToadSoul's
+  doubled; TomahawkSoul's Wood chip doubled on grass and the panel plain
+  after, and his heal on grass (BN6's own for a Wood actor, his element
+  BN5's); KnightSoul's 50 frames unharmed after an attack chip used from
+  his front column; ShadowSoul's B+Left stance and its counter, the
+  counter's first frame run at once as BN5's (the Souls' own Thumb);
+  ShadowSoul's charged sword run by BN5's sword family; his shadow none.
+  Each held to BN5's battle frame by frame by a spec of its own but the
+  sword with no enemy in reach (it parts from BN5's two frames into the
+  slash; open) and the shadow (a capture to come). The effects BN6 draws
+  otherwise (0x02, 0x03, 0x14) are BN5's copies in the room issue #82
+  granted (`FREE_SOULS_ART`). Not yet: ColonelSoul's chip shot, his
+  Custom screen's button and his obstacle strike (researched: docs/
+  ROM_DATA.md, A Soul's passives). His button is BN6's DustCross's
+  elements 8 and 9 by set-up and A, with BN5's rule to light it, but its
+  mode's phases (the chip loaded into the button, its icon and look),
+  OK's keeping the chip and the turn's start giving it to the chip shot
+  are BN5's alone; his strike needs BN5's third kind's 0x30 moved, four
+  hooks in the obstacles' states and a side flag of the Souls' own (BN5's
+  bits of BattleState +0x5C are BN6's own), with BN5's Colonel's table at
+  `RAM_COLONEL`, laid out as the Navi track's Colonel has it.
+- **S7, BN5's mood and its DarkChip rule** (done but for BN5's DarkChips'
+  own attacks and after-effects; docs/ROM_DATA.md, BN5's mood in BN6's
+  battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
+  beside BN6's own, by BN5's rules (a hit taken lowers it, a hit landed
+  raises it, a counter calms him to Full Synchro, BN6's twins of BN5's
+  other writers mirrored, a Soul's unison and end calm him, the battle
+  opens as worried as his HP says), never through BN6's emotion values.
+  BN5's DarkChips (the registry's) come into the deck, shelved behind the
+  padding until BN5's worried rule deals one into the hand's end as a
+  Custom screen opens while he worries or is dark; used, he is dark for
+  the battle (his mood 0, held there; BN6's own mood 0 with it: no Cross,
+  no Beast Out, a weak buster). BN6's own DarkChips keep BN6's rule.
+  UNITE stands only while he neither worries nor is dark. BN5's dark gate
+  holds for the registry's chips that name it (BlakWing only while dark,
+  HolyDrem and a Navi's V1 and SP chips only while not, the DS chips only
+  while dark): refused, the chip is BN5's chip of nothing; the battle's
+  dark stands for BN5's dark meter, which no run has. Held to BN5's own
+  battle by `soul_mood_dark`, `soul_mood_unite` and `soul_mood_gate`, the
+  mood compared in every Soul's spec, five mutations failing. Open: the
+  DarkChips' attacks and each one's after-effect on his NaviStats
+  (`0x0802C938`), the chips track's; Chaos Unison (S6) after the next
+  merge.
+- **Next**: S5's rest (ColonelSoul's three, ShadowSoul's sword with no
+  enemy in reach) and Chaos Unison's charge (S6). Each part's masks in
+  the differential (tests/xdiff/legit.json, "until the Souls track's S6"
+  and BN5's Soul record's chip slot, ColonelSoul's) go as it comes. Their
+  state in RAM is the engine's plan's (`0x0203FF70`-`0x0203FFEF`,
+  `BN6_SOULS`), their code and data in `EMU_FREE` + `0x480000` to
+  `+0x4C0000` and the effects' art at `+0x700000` to `+0x710000`
+  (docs/EMULATION.md; laid out in `src/emu/soul_room.h`).
 
 ## Status
 

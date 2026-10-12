@@ -281,7 +281,7 @@ def story(trace, canon, upto=None):
 # ---- MegaMan's own timeline (a MegaMan spec's, a reference-only spec's) ----
 
 # what of MegaMan a frame shows (BN5's numbers in BN5's trace): each read from his object (o), its AI's data (ai), his
-# side's player block (p); a Soul's (soul, its turns, its chaos, the Souls used) as both games keep it (xdiff_snap.soul_view:
+# side's player block (p); a Soul's (soul, its turns, its chaos, the Souls used, BN5's mood) as both games keep it (xdiff_snap.soul_view:
 # the same numbers in both), the Custom screen's element 0xB as its last screen left it (unite: its +7, 0 lit, 1 grey, 2 chosen)
 MEGAMAN_READS = {
     'action': lambda o, ai, p: o.o8(OBJ_ACTION),
@@ -297,7 +297,7 @@ MEGAMAN_READS = {
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
     'unite stands': lambda o, ai, p: p[PLAYER_UNITE] if p and len(p) > PLAYER_UNITE else None,
 }
-SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used')   # (from soul_view, both games: its 'turns' and 'used' named apart)
+SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used', 'soul mood')   # (from soul_view, both games: its 'turns' and 'used' named apart)
 
 
 def megaman_frames(trace, canon):
@@ -308,13 +308,14 @@ def megaman_frames(trace, canon):
         if o is not None:
             v = {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}
             soul = soul_view(canon, trace['game'], fr, o.ai) or {}
-            v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used')})
+            v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used'),
+                      'soul mood': soul.get('mood')})
             out.append((fr['t'], v))
     return out
 
 
 def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'soul', 'chaos', 'soul turns', 'souls used', 'unite', 'loadout', 'sprite',
-                                        'palette', 'mood', 'hp')):
+                                        'palette', 'mood', 'soul mood', 'hp')):
     """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
     lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
     for t, v in megaman_frames(trace, canon):
@@ -510,7 +511,11 @@ def compare(name, spec, ta, tb, legit, canon, show):
     used, lines, read = {}, [], {}
     fa_all, fb_all = ta['frames'], tb['frames']
     verdict, at, n, after, natives_at = 'PASS', None, 0, None, None
+    upto = spec.get('compare_to')
     for fra, fa, fb, diffs in compared(spec, ta, tb, legit, canon, read):
+        if upto is not None and fra['t'] > upto:
+            lines.append(f'  compared to t{upto}, the spec\'s compare_to (its expectations hold both battles to the end)')
+            break
         by = {}
         for d in diffs:
             w = who(d, fb, canon, fa)
@@ -538,7 +543,7 @@ def compare(name, spec, ta, tb, legit, canon, show):
     if verdict == 'INCONCLUSIVE':
         lines.append(f'  after the stop (no verdict), the family\'s objects: ' +
                      (f'the same to t{after.t - 1}, then {after}' if after else f'the same to the end (t{fa_all[-1]["t"]})'))
-    if len(fa_all) != len(fb_all) and verdict == 'PASS':
+    if len(fa_all) != len(fb_all) and verdict == 'PASS' and upto is None:
         lines.append(f'  the traces are {len(fa_all)} and {len(fb_all)} fight frames long')
         verdict, at = 'FAIL', min(len(fa_all), len(fb_all))
     lines.insert(0, f'  {n} fight frames compared (t{fa_all[0]["t"]}-t{fa_all[-1]["t"]}), masks applied (none on the '
@@ -561,6 +566,17 @@ def survey(spec, ta, tb, legit, canon):
     return [f'  {n:5d}x {k[0]} {k[1]}+{k[2]:#04x}{f" [{k[3]}]" if k[3] else ""}: first {d}' for k, (n, d) in sorted(seen.items(), key=lambda x: x[1][1].t)]
 
 
+def folder_chips(spec):
+    """BN5's chip id -> BN6's, each pair the spec's folders name in the same place (folder5[i], folder6[i]: an entry its
+    code << 9 | its id), where they differ: MegaMan's held chip and the chip his attack uses, read in BN6's numbers"""
+    out = {}
+    for e5, e6 in zip(spec.get('folder5', []), spec.get('folder6', [])):
+        i5, i6 = int(e5, 16) & 0x1FF, int(e6, 16) & 0x1FF
+        if i5 != i6:
+            out[i5] = i6
+    return out
+
+
 def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     """one spec run and compared: its verdict and kind (extra: items put in its spec, a mutation's dev break)"""
     with open(os.path.join(SPECS, f'{name}.json')) as f:
@@ -569,6 +585,8 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
+    canon.chips = folder_chips(spec)
+    canon.souls_on = int(spec.get('souls6', '0'), 16) != 0   # (the Souls installed in BN6's engine, BN5's mood kept beside BN6's: soulmood.c)
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
     if spec.get('kind') == 'engine':

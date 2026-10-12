@@ -11,10 +11,12 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "soulchips.h"
 #include "soulcode.h"
 #include "soulkinds.h"
 #include "soullife.h"
 #include "soullook.h"
+#include "soulmood.h"
 #include "soulpassive.h"
 #include "soulpower.h"
 #include "soulproxy.h"
@@ -40,9 +42,6 @@
 #define STATE_LIT     0     /* BN6_ELEMENT_STATE */
 #define STATE_GREY    1
 #define STATE_CHOSEN  2
-#define WORRIED_HP    4     /* the opening's mood: worried at a quarter of his HP or less (the guest battles' rule, guest.c) */
-#define MOOD_CALM     0x80
-#define MOOD_SYNCHRO  0xFF
 #define TURNS_SOUL    3     /* a Soul's turns, before its NaviStats' +0x32 (BN5's OK, BN5_UNITE_COMMIT) */
 #define TURNS_MAX     9
 #define SOULS_USED    0x1000u   /* the Souls' place in use so far, from SOULS_AT: the rest the track's later milestones' */
@@ -67,25 +66,12 @@ static uint8_t slot_of(int side) { return hook_read8(soul_field(side, BN6_SOUL_S
 
 /* BN5's mood as its emotion getter reads it for UNITE (0x08012738): a form
  * (4) or anger (3) and he is neither worried (1: mood 1-BN5_MOOD_WORRIED)
- * nor dark (5: mood 0). BN5's mood in BN6's battles is his battle mood,
- * which BN6 lowers with each hit and calms with a counter as BN5 does. */
+ * nor dark (5: mood 0). BN5's mood in BN6's battles is BN5's own, kept by
+ * BN5's rules in the Souls' block (soulmood.c), opened as worried as his
+ * HP says. */
 static bool calm_enough(int side) {
 	uint32_t obj = player(side), ai = obj ? hook_read32(obj + BN6_T1_AI_DATA) : 0;
-	return navi8(side, BN6_NAVI_FORM) || (ai && hook_read16(ai + BN6_AI_ANGER)) || navi8(side, BN6_NAVI_MOOD) > BN5_MOOD_WORRIED;
-}
-
-/* The battle's opening, at its first Custom screen: his mood as worried as
- * his HP says (the guest battles' rule, guest.c's mood_of: a quarter of his
- * HP or less worried, else calmer as he is whole, MOOD_CALM whole), never
- * calmer than it is, Full Synchro kept */
-static void opening(int side) {
-	uint32_t opened = soul_field(side, BN6_SOUL_OPENED), obj = player(side), at = BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_MOOD;
-	if (hook_read8(opened) || !obj) return;
-	hook_write8(opened, 1);
-	int hp = hook_read16(obj + BN6_T1_HP), max = hook_read16(obj + BN6_T1_MAX_HP);
-	int mood = max <= 0 ? MOOD_CALM : hp * WORRIED_HP <= max ? 0x30 : 0x40 + 0x40 * hp / max;
-	uint8_t now = hook_read8(at);
-	if (now && now != MOOD_SYNCHRO && now > mood) hook_write8(at, (uint8_t)mood);
+	return navi8(side, BN6_NAVI_FORM) || (ai && hook_read16(ai + BN6_AI_ANGER)) || !soulmood_worried(side);
 }
 
 /* UNITE could stand (BN5_UNITE_STAND): a Soul held (Double Soul learned
@@ -139,7 +125,6 @@ static HookAct stand(HookRegs *r, void *user) {
 	if (!held) return HOOK_CONTINUE;
 	int side = side_now();
 	if (soul_united(side)) hook_write8(soul_field(side, BN6_SOUL_SCREEN), 1);   /* (its end may come as this turn starts: soullife.c) */
-	opening(side);
 	bool beast = r->r[0] != 0, unite = unite_stands(side);
 	hook_write8(soul_field(side, BN6_SOUL_STANDS), (uint8_t)((unite ? BN6_STANDS_UNITE : 0) | (beast ? BN6_STANDS_BEAST : 0)));
 	slot_be(side, unite && !beast ? BN6_SLOT_UNITE : BN6_SLOT_EMBLEM);
@@ -308,7 +293,8 @@ static bool expected(const uint8_t *b5) {
 /* each Soul's own: its code moved, its look, abilities and passives (the Souls track's S3-S5), all or none of each */
 static bool souls_own(int soulbreak) {
 	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
-		soulpassive_install(SOULBREAK_PASSIVE(soulbreak));
+		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
+		soulmood_install(SOULBREAK_MOOD(soulbreak));
 }
 
 bool soulunite_install(int brk, int soulbreak) {

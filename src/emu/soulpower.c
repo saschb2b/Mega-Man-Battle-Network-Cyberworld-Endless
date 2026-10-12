@@ -154,6 +154,10 @@ static bool expected(void) {
 		rom5(BN5_CHARGE_TIMES_REF) == BN5_CHARGE_TIMES && rom5(BN5_SOUL_LOADOUTS_REF) == BN5_SOUL_LOADOUTS;
 }
 
+bool soulpower_chip_charge(int id) {
+	return nmoved && id >= SOUL_POWER_FIRST + nmoved && id < SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers;
+}
+
 bool soulpower_install(int brk) {
 	static bool done;
 	if (done) return true;

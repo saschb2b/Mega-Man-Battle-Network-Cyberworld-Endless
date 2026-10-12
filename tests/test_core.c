@@ -3188,8 +3188,10 @@ static void test_free_space(void) {
 		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
 		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
-		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_TAIL },
+		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
+		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 	};
+	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
@@ -3227,6 +3229,7 @@ static void test_free_space(void) {
 	const Region souls[] = {
 		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_REAPPLY + 4 },
 		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
+		{ "the hooks' Thumb", SOULS_THUMB, SOULS_THUMB_END },
 		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
 		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
 		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },

@@ -702,7 +702,21 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   the buster's flash in a Soul BN6's object 8;
   the next the abilities', the charge 10 frames longer 0x10, the next
   Soul's family 0x20, no element 0x40; from bit 8 the passives', a hand
-  of nine 0x100, no +10 0x200, no passives as it unites 0x400).
+  of nine 0x100, no +10 0x200, no passives as it unites 0x400; from bit
+  16 the chips', `SOULCHIPS_BREAK_*` in soulchips.h: no chip charged
+  0x10000, a charged chip not doubled 0x20000, TomahawkSoul's Wood chip
+  not doubled on grass 0x40000, KnightSoul's front column unguarded
+  0x80000, ShadowSoul's charged sword BN6's family 0x100000, his shadow
+  kept 0x200000; from bit 24 BN5's mood's, `SOULMOOD_BREAK_*` in
+  soulmood.h: no gain from a landed hit 0x1000000, no DarkChip dealt
+  into a worried hand 0x2000000, a BN5 DarkChip used leaving him as he
+  was 0x4000000, UNITE standing while he worries 0x8000000, the dark gate
+  left out 0x10000000).
+- **Comparing to a frame**: `compare_to=T` compares the two battles frame
+  by frame to timer value T alone, the spec's `expect` holding both to
+  their end: for a battle whose last part BN6's engine cannot fight the
+  same yet (a BN5 DarkChip's own attack, the chips track's), what comes
+  after it held by expectations (BN5's mood 0 to the end).
 
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
@@ -886,7 +900,16 @@ the masks):
   the trace finds a song through the core's song table), the objects it
   spawns and their hits (a status's timers, the collision layout's BN5
   +0x1E-+0x2B as BN6's +0x1C-+0x29; the CurAction a status saved, +0x5D,
-  numbered as +0x09). TomahawkSoul's landing shakes the camera in both,
+  numbered as +0x09). The effects BN6 has of the same number but draws
+  otherwise (BN5's 0x03, 0x14 and 0x02) are BN5's copies, 0xC5-0xC7,
+  which `effect`'s `copies` reads back as BN5's numbers; a counter's two
+  families (BN5's 0x2C and 0x2D, BN6's 0x47 and 0x48, started by BN5's
+  `0x0800E338` and the Souls' Thumb in BN6) by `action`'s `megaman`; a
+  chip MegaMan uses that the two folders name differently (BN5's Sword,
+  BN6's of its name) as the folders pair them (`folder5[i]` with
+  `folder6[i]`), its damage read as a share of each record's power, so
+  BN5's and BN6's chips of one name compare by what each does.
+  TomahawkSoul's landing shakes the camera in both,
   which draws from each game's own word (`rng`'s `shake`: counted as the
   per-frame draws are, as many in both). `soul_colonel`, `soul_shadow`,
   `soul_number`, `soul_tomahawk`, `soul_knight_shot` and `soul_toad`
@@ -899,11 +922,34 @@ the masks):
   another Soul's sprite, palette 1, TomahawkSoul's landing still, the
   charge 10 frames longer, the next Soul's family, no element, a hand of
   nine, no bonus, no passives as it unites, the buster's flash in a Soul
-  BN6's object; a copied song's slot left empty) fail them. `soul_knight_shot` stops at t278: the next frame the
+  BN6's object; a copied song's slot left empty) fail them. The chips'
+  specs (the track's S5) pass the same way: `soul_knight_charge`
+  (KnightSoul's JustcOne charged with A held, doubled), `soul_toad_charge`
+  (ToadSoul's BblWrap), `soul_tomahawk_wood` (TomahawkSoul's Wood chip on
+  grass, doubled, the panel plain after), `soul_tomahawk_heal` (BN6's
+  grass healing him, a Wood actor), `soul_knight_front` (an attack chip
+  from his front column: 50 frames unharmed) and `soul_shadow_left`
+  (ShadowSoul's B+Left stance struck: the counter's first frame at once),
+  their breaks failing them. `soul_knight_shot` stops at t278: the next frame the
   deleted CanGard's deletion effect is let go a frame apart in the two
   engines, BN6's own end of a family's virus. An enemy's deletion leaves
   each game's battle state's address in the effect it spawns (`battle
   state`, named alike).
+- **BN5's mood and its DarkChip rule** (the Souls track's S7; docs/
+  MULTIROM.md, Transplanted Souls): BN5's mood as BN6's engine keeps it
+  (the Souls' block's +0x0E) is compared with BN5's own (his battle
+  NaviStats' +0x0E) wherever `souls6` installs the Souls (`soul`'s
+  `mood`; the expectations' `soul mood`). The subject's BN6 has the chip
+  registry installed as the game's own start has it (`xchips_install`), so
+  a folder may name the registry's chips by their BN6 ids (BN5's DarkCirc
+  R, 187, as 214). `soul_mood_dark` (KnightSoul held: CanGard's hits
+  lower his mood to worried, the second screen deals DarkCirc into the
+  hand's end in both games and both cursors stand on it, used: his mood 0
+  to the end; `compare_to` its use, as BN6 runs the registry's DarkCirc
+  by its twin's family), `soul_mood_unite` (worried, KnightSoul's Break
+  chip picked last: UNITE does not stand in either) and `soul_mood_gate`
+  (BlakWing used while he is not dark: the chip of nothing in both) pass;
+  their breaks fail them.
 - **Reference specs** (`"kind": "reference"`): a battle BN6's engine
   cannot fight yet, fought in BN5 alone (`game=bn5`), MegaMan's timeline
   printed and held to the spec's `expect.megaman` (his action, form,
@@ -939,7 +985,10 @@ for a wrong kind, Beast Out lit while united, a Soul kept past a Cross,
 each by `unitebreak`; another Soul's sprite, palette 1, TomahawkSoul's
 landing still, a charge 10 frames longer, the next Soul's family, no
 element, a hand of nine, no +10, no passives as it unites, the buster's
-flash BN6's object, each by `soulbreak`; a copied song's slot left empty, by `poke`), each of which
+flash BN6's object, no chip charged in a Soul, a charged chip not doubled, TomahawkSoul's Wood chip not doubled on
+grass, KnightSoul's front column unguarded, TomahawkSoul of no element, no gain from a landed hit, no DarkChip dealt
+into a worried hand, a BN5 DarkChip leaving him as he was, UNITE standing while worried, the dark gate left out, each
+by `soulbreak`; a copied song's slot left empty and a counter's first frame left to the next, by `poke`), each of which
 must FAIL its spec.
 docs/MULTIROM.md, Transplanted families, has what they showed.
 
@@ -1061,7 +1110,9 @@ beside BN6's in `.build/xproxy-souls/rom`, seed 15, whose layer BN5 does
 not dress) and no Soul held: native and installed the same every byte
 (the Souls' hooks leave BN6's battle alone while none is held; a pointer
 into a table the Souls grow, the emotion window's faces and their
-palettes, read through its copy, BN6's bytes at the same place), and the
+palettes, read through its copy, BN6's bytes at the same place; BN5's
+mood, which the Souls keep in their own block whoever holds one, its
+opening mark, mood and dark latch by side), and the
 proxy HeatCross frame for frame through a Soul's life's two stubs, which
 its overlay entries 8 then point at.
 

@@ -62,7 +62,7 @@
 #define BN6_SOUL_PHASE        0x03        /* u8 the Chaos Unison's charge phase (BN5's AIData +0x1F; the track's S6, 0 until then) */
 #define BN6_SOUL_CHIP         0x04        /* u16 ColonelSoul's chip (BN5's AIData +0x32; S5, 0 until then) */
 #define BN6_SOUL_LEVEL        0x06        /* u8 the chaos level (BN5's AIData +0x6C; S6, 0 until then) */
-#define BN6_SOUL_OPENED       0x07        /* u8 1 once the battle's opening set his mood (BN6_BATTLE_MOOD) as worried as his HP says */
+#define BN6_SOUL_OPENED       0x07        /* u8 1 once the battle's opening set his mood (BN6_SOUL_MOOD) as worried as his HP says */
 #define BN6_SOUL_NEXT         0x08        /* u8 the Soul the Custom screen committed (OK), taken as form BN6_FORM_PROXY is entered; 0 none */
 #define BN6_SOUL_NEXT_CHAOS   0x09        /* u8 ... 1 for its Chaos Unison */
 #define BN6_SOUL_NEXT_TURNS   0x0A        /* u8 ... its turns (3, 1 for Chaos Unison: BN5's OK, 0x08024FFA) */
@@ -70,6 +70,9 @@
 #define BN6_SOUL_STANDS       0x0C        /* u8 what stands under OK on this Custom screen: BN6_STANDS_UNITE, BN6_STANDS_BEAST */
 #define BN6_SOUL_SCREEN       0x0D        /* u8 1 once a Custom screen has opened with the Soul united: its end waits for the turn's start after it
                                              (BN6 checks a form's end before the screen too, 0x0800840C; BN5 alone after it, 0x08007D0C) */
+#define BN6_SOUL_MOOD         0x0E        /* u8 the side's mood as BN5 keeps it (BN5_BATTLE_MOOD's: 0 dark, 1-0x40 worried, 0xFF Full Synchro;
+                                             src/emu/soulmood.c), beside BN6's own (BN6_NAVI_MOOD) */
+#define BN6_SOUL_DARK         0x0F        /* u8 1 once a BN5 DarkChip made the side dark for the battle (BN5's use byte, never BN6's byte 2) */
 #define BN6_SOUL_USED         0x10        /* u32 the Souls united this battle: bit n Soul n, bit 16 + n its Chaos Unison (BN5_SOULS_USED's layout) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
@@ -100,6 +103,7 @@
 #define BN6_NAVI_FORM         0x2C        /* a battle NaviStats' +0x2C: its side's form (BN6_BATTLE_FORM's) */
 #define BN6_NAVI_SIDE_NAVI    0x29        /* a battle NaviStats' +0x29: the Navi it is, 0 MegaMan (the turns count down for him alone, 0x08015A16) */
 #define BN6_AI_ANGER          0x34        /* u16 a player's AI data +0x34: his anger's frames (both games' emotion getters: 3, which UNITE stands in) */
+#define BN6_AI_FLAGS          0x44        /* u32 a player's AI data +0x44: his requests (0x40 to leave his form: 0x08015994; 0x4000 to enter one) */
 #define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */
 /* The hooks (soulunite.c, soullife.c; docs/EMULATION.md, Hooks) */
 #define BN6_UNITE_STAND       0x08027EC6u /* tst r0,r0 after Beast Out's test (0x08029FB0, r0) in the Custom screen's set-up: element 0xB stands */
@@ -189,6 +193,35 @@
 #define BN6_ARM_FLASH_CALL    0x080EC956u /* ... byte), before its bl to BN6's spawner of the flash (0x080BA6A0, the first kind's type 5), */
 #define BN6_ARM_FLASH_CALL2   0x080EC958u /* ... the bl's second halfword, */
 #define BN6_ARM_FLASH_SPAWN_BACK 0x080EC95Au /* ... and past it, the routine's end */
+/* BN5's mood in BN6's battles (soulmood.c; S7) */
+#define BN6_MOOD_HIT          0x0801A24Cu /* movs r1,#0x8e in a hit's mood step (0x0801A200: r4 the struck's collision data, r5 the struck), past
+                                             BN6's own Full Synchro for a counter: BN5's twin 0x08016FE6 raises the attacker's mood there too */
+#define BN6_MOOD_SET          0x08015BECu /* a side's mood set (r0 the side, r1 the mood), BN5's 0x080127CE's twin of another body (no write
+                                             in Beast Out and its tiredness, where BN5's none at 0); its write */
+#define BN6_MOOD_SET_WRITE    0x08015C0Eu /* ... strb r4,[r0,#0xe] (r6 the side), */
+#define BN6_MOOD_SET_PAST     0x08015C10u /* ... past it */
+#define BN6_MOOD_CALM         0x080143A6u /* a mood calmed to 0x80 (r5 him: BN5's 0x08011A8C's twin, its anger's end with it); its write */
+#define BN6_MOOD_CALM_WRITE   0x080143B0u /* ... strb r1,[r0,#0xe], */
+#define BN6_MOOD_CALM_PAST    0x080143B2u /* ... past it */
+#define BN6_MOOD_FROM_CHIP    0x0801286Cu /* the set's callers twins of BN5's: the chip's Full Synchro (BN5 0x0800FFAE), */
+#define BN6_MOOD_FROM_ANGER   0x08014374u /* ... Anger's start (0x08011A5A), */
+#define BN6_MOOD_FROM_SCRIPT  0x08027310u /* ... a Custom screen's script (0x0802359C); */
+#define BN6_CALM_FROM_CHIP    0x08012876u /* the calm's: the chip's Anger (0x0800FFB8), */
+#define BN6_CALM_FROM_ANGER   0x0801438Eu /* ... Anger's end (0x08011A74) */
+#define BN6_COMPACT           0x0802945Au /* the deck's compaction (BN5's 0x080250EA, the same body), its call as a Custom screen opens */
+#define BN6_COMPACT_CALL      0x08026954u /* ... (BN5 calls its worried rule just before, 0x08022CFC) */
+/* A Soul's chips (soulchips.c; S5) */
+#define BN6_CHARGE_TEST       0x08013236u /* the chip charge's test by the form (r0 the chip, r5 MegaMan; from 0x0801336C): push {r4,r6,r7,lr} */
+#define BN6_CHARGED_RELEASE   0x0800FBA4u /* cmp r1,#0xd in the release of a charged A (0x0800FB74 on): r1 the A power attack (AI data +5), */
+#define BN6_CHARGED_CHIP_USE  0x0800FBECu /* ... the ids that use the chip charged (0x0D, 0x1F, 0x20, 0x29, 0x2D, 5) going on here (movs r0,#1, the chip's use); the rest run the power attack */
+#define BN6_CHARGE_BONUS      0x08012C7Cu /* a charged chip's bonus by the form (r0 whether charged): ElecCross's 0x4000, SlashCross's 40, else 0 */
+#define BN6_CHIP_MODIFIED     0x0801285Eu /* strh r0,[r7,#8] in the chip's use (0x080127C0): its damage as its modifier (0x08012A38) left it, */
+#define BN6_CHIP_MODIFIED_SOUND 0x0801287Au /* ... movs r0,#0x87: the modifier's sound where it did something, then on (0x08012880) */
+#define BN6_CHIP_USED_END     0x080128E8u /* ldrh r0,[r7,#0x14] before its last call (0x0800B79A, the DarkChip step) */
+#define BN6_CHIP_FAMILY_READ  0x080128EEu /* ldrb r0,[r4,#0xb]: the family it returns, the record's (r4) */
+#define BN6_CHIP_FAMILY_NEXT  0x080128F0u /* ... on past it */
+#define BN6_SHADOW_TYPE_SIDE  0x08010340u /* movs r1,#0x29 in the shadow type of an actor (0x08010332, BN5's 0x0800E0B6): past its battle mode's */
+#define BN6_SHADOW_TYPE_DONE  0x0801034Eu /* ... test, its NaviStats' Navi read next; its return, r0 the type (4 a battle's every actor) */
 /* A Soul's abilities (soulpower.c; S4) */
 #define BN6_FORM_LOADOUT_READ 0x0800FF3Eu /* ldrb r1,[r0]: the loadout's (0x0800FEEC) row by the form, r0 its address in BN6_FORM_LOADOUTS */
 #define BN6_FORM_ELEMENT_READ 0x08010884u /* ldrb r0,[r4,r0]: his element (0x0801086C) from BN6_FORM_ELEMENTS by the form, */

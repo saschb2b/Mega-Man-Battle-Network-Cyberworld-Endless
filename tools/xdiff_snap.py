@@ -31,9 +31,19 @@ TRACE_VERSION = 5   # (src/dev/xdiff.c's: the player block and the dispatch's ty
 # bytes, BN5's zero), the Custom screen's element 0xB (UNITE: BN5_CUSTOM_UNITE, BN6_CUSTOM_UNITE)
 PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING, NAVI_FORM = 0x00, 0x64, 0x68, 0x2C
 PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
+NAVI_MOOD = 0x0E                  # his battle NaviStats' mood (BN5's battle mood; BN6's own)
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+OBJ_CHIP = 0x2A   # the chip an actor uses next, u16 (BN6_T1_CHIP, BN5's the same place): MegaMan's by the spec's folders
+ATTACK_CHIP = 0xB4   # ... and the chip his attack uses, u16: his AI data's AttackVars (+0xA0) +0x14 (BN6_ATTACK_CHIP)
+# The numbers a chip's use writes into his AttackVars from its record (BN6 0x080126E4, BN5's twin 0x0800FE6A): AI data
+# offset -> the record's (its power +0x1A into the damage +8's low 15 bits, its lockout +0x14 into +5, its parameters
+# +0x10-+0x13 into +0xC-+0xF); a chip the spec's folders pair under two ids (another chip of the same name in each game,
+# its numbers each its own: tools/xdiff.py's folder_chips) is compared by what its use added to its own record's
+CHIP_RECORDS = {5: 0x0801E210, 6: 0x08021DA8}   # (BN5_CHIP_RECORDS, BN6's records: 0x2C each)
+CHIP_NUMBERS = {0xA3: 0x0C, 0xA5: 0x14, 0xA8: 0x1A, 0xA9: 0x1B, 0xAC: 0x10, 0xAD: 0x11, 0xAE: 0x12, 0xAF: 0x13}
+CHIP_FAMILY = 0x0B   # a chip record's attack family: his CurAction as he uses it (+3 its sub-family, AttackVars +3)
 FLASH_TYPE = 5   # the first kind's type 5: an arm's flash, its kind at +4 (OBJ_EFFECT)
 OBJ_SAVED_ACTION = 0x5D   # a battle object's state word saved as a status (paralysis, confusion) stops it (+0x5C): its CurAction
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
@@ -172,6 +182,7 @@ class Canon:
         self.name_id = num(m['name_id']['bn5_to_bn6'])
         self.t3_type = num(m['t3_type']['bn5_to_bn6'])
         self.effect = num(m['effect']['bn5_to_bn6'])
+        self.effect_copies = num(m['effect'].get('copies', {}).get('bn6_to_bn5', {}))   # (BN6's copies of BN5's effects its engine has too)
         self.panel_type = num(m['panel_type']['bn5_to_bn6'])
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
         self.megaman = num(m['name_id']['megaman'])
@@ -184,6 +195,8 @@ class Canon:
         self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
         self.tables = [dict(t, bn5=int(t['bn5'], 0), bn6=int(t['bn6'], 0)) for t in m.get('rom_tables', {}).get('tables', [])]
         self.natives = set()   # (a spec's: enemies both games have, by BN6's id; their attacks' types, their effects)
+        self.chips = {}        # (a spec's: BN5's chip id -> BN6's, by its folders, tools/xdiff.py's folder_chips)
+        self.souls_on = False  # (a spec's: the Souls installed in BN6's engine, souls6)
         self.native_attacks, self.native_effects = set(), set()
         self.family_effects = {int(x, 0) for x in m['family_effects']['bn6']}
         self.form = num(m['form']['bn5_to_bn6']) if 'form' in m else {}
@@ -254,7 +267,7 @@ class Canon:
         return self.t3_type.get(v, v) if game == 5 else v
 
     def fx(self, game, v):
-        return self.effect.get(v, v) if game == 5 else v
+        return self.effect.get(v, v) if game == 5 else self.effect_copies.get(v, v)
 
 
 # ---- roles ----
@@ -579,14 +592,19 @@ def obj_cells(fa, fb, oa, ob):
         for k in range(4):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
-            if off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+            if off == OBJ_ACTION and mm and paired_chip_family(canon, oa, ob, a, b):
+                a = b   # (a chip the spec's folders pair: each game's own record's family, BN5's 0x25 WideSht BN6's 0x30)
+            elif off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
                 a = canon.action(5, mm, a, oa.ai)
+            elif off in (OBJ_CHIP, OBJ_CHIP + 1) and kind == 'T1' and mm:
+                ca, cb = canon.chips.get(oa.o16(OBJ_CHIP), oa.o16(OBJ_CHIP)), ob.o16(OBJ_CHIP)
+                a, b = (ca, cb) if off == OBJ_CHIP else (0, 0)   # (the chip he holds, BN5's by the spec's folders: a halfword)
             elif off == OBJ_SAVED_ACTION and kind == 'T1' and not mm and a:
                 a = canon.action(5, mm, a)   # (the CurAction a status saved, to take up again as it ends: numbered alike)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)
             elif off == OBJ_EFFECT and kind == 'T4' and oa.o8(OBJ_TYPE) == 0:
-                a = canon.fx(5, a)
+                a, b = canon.fx(5, a), canon.fx(6, b)
             elif off == OBJ_EFFECT and kind == 'T1' and oa.o8(OBJ_TYPE) == FLASH_TYPE and b in canon.flash.values():
                 a = canon.flash.get(a, a)   # (a flash of the Souls' kinds: BN5's kind it copies, maps, flash)
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
@@ -623,9 +641,36 @@ def ai_cells(fa, fb, oa, ob):
                 a = fa.canon.ai_index.get(a, a)
             elif megaman and w + k in LOADOUT and a != 0xFF:
                 a = fa.canon.power_attack.get(a, a)
+            elif megaman and w + k in (ATTACK_CHIP, ATTACK_CHIP + 1):
+                ca = fa.canon.chips.get(u16(ai5, ATTACK_CHIP), u16(ai5, ATTACK_CHIP))   # (the chip his attack uses, by the spec's folders)
+                a, b = (ca, u16(ob.ai, ATTACK_CHIP)) if w + k == ATTACK_CHIP else (0, 0)
+            elif megaman and w + k in CHIP_NUMBERS and fa.canon.chips.get(u16(ai5, ATTACK_CHIP)) == u16(ob.ai, ATTACK_CHIP):
+                a, b = chip_number(5, ai5, w + k), chip_number(6, ob.ai, w + k)
             if a != b:
                 out.append(('ai', w + k, a, b))
     return out
+
+
+def paired_chip_family(canon, oa, ob, a, b):
+    """whether MegaMan's CurActions are each his chip's record's family, the chip one the spec's folders pair"""
+    if oa.ai is None or ob.ai is None:
+        return False
+    c5, c6 = u16(oa.ai, ATTACK_CHIP), u16(ob.ai, ATTACK_CHIP)
+    if canon.chips.get(c5) != c6:
+        return False
+    return all(rom(g)[CHIP_RECORDS[g] - ROM[0] + 0x2C * c + CHIP_FAMILY] == v for g, c, v in ((5, c5, a), (6, c6, b)))
+
+
+def chip_number(game, ai, off):
+    """a byte of his AttackVars a chip's use took from its record, read as what it adds to the record's: its damage as
+    hundredths of the record's power (a charged chip's double, 200), the double bit 0x8000 as it is (a Soul's or a field's
+    modifier, BN5's 0x0801045C), the rest as each byte less the record's"""
+    rec = CHIP_RECORDS[game] - ROM[0] + 0x2C * u16(ai, ATTACK_CHIP)
+    if off in (0xA8, 0xA9):
+        dmg, power = u16(ai, 0xA8), u16(rom(game), rec + 0x1A)
+        share = (dmg & 0x7FFF) * 100 // power if power else dmg & 0x7FFF
+        return ('the damage, % of the record\'s power', share, 'doubled' if dmg & 0x8000 else '') if off == 0xA8 else 0
+    return (ai[off] - rom(game)[rec + CHIP_NUMBERS[off]]) & 0xFF
 
 
 def bn5_rules(layout, ca):
@@ -770,6 +815,8 @@ def soul_view(canon, game, fr, ai):
             v = int.from_bytes(ai[off:off + size], 'little')
             view[k] = 0 if v == (1 << 8 * size) - 1 and size > 1 else v   # (ColonelSoul's chip: BN5's 0xFFFF none, BN6's 0)
     view['used'] = int.from_bytes(p[PLAYER_USED:PLAYER_USED + 4], 'little')
+    if 'mood' in view:
+        view['mood'] = p[PLAYER_NAVI + NAVI_MOOD] if canon.souls_on else 0   # (BN5's battle mood, which BN6's engine keeps beside its own: soulmood.c)
     return view
 
 

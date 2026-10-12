@@ -86,6 +86,7 @@
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
 #define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
+#define BN6_BATTLE_SCREENS    (BN6_BATTLE_STATE + 0x07) /* u8: the Custom screens opened this battle, one more as each opens (0x08026920) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
@@ -113,6 +114,7 @@
 #define BN6_PANEL_HOLE        1           /* BN6_PANEL_TYPE: a hole */
 #define BN6_PANEL_PLAIN       2           /* BN6_PANEL_TYPE: a plain panel */
 #define BN6_PANEL_POISON      4           /* BN6_PANEL_TYPE: poison */
+#define BN6_FIELD_COLUMNS     8           /* BN6_FIELD_PANELS' panels a row (the field's 6 and a border each side) */
 #define BN6_PANEL_STRUCK      0x40000000u /* BN6_PANEL_FLAGS: an enemy's attack on the panel */
 #define BN6_PANEL_CRACKED     3           /* BN6_PANEL_TYPE: cracked (a step breaks it to a hole: object_crackPanel 0x0800C938 writes it) */
 #define BN6_PANEL_HOLY        5           /* BN6_PANEL_TYPE: holy (damage on it halved, 0x0800E3F0) */
@@ -139,6 +141,7 @@
 #define BN6_T1_FUTURE_X       0x14        /* FuturePanelX and Y: the panel it is headed for (a thrown attack's landing), 0 none */
 #define BN6_T1_FUTURE_Y       0x15
 #define BN6_T1_ALLIANCE       0x16        /* Alliance: 0 MegaMan's side, 1 the enemies' */
+#define BN6_T1_FLIP           0x17        /* DirectionFlip: its facing turned (BN6's 0x0800E2CA: +1 or -1 a step by it and the alliance) */
 #define BN6_T1_HP             0x24        /* HP and MaxHP, u16 */
 #define BN6_T1_MAX_HP         0x26
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
@@ -159,6 +162,10 @@
 #define BN6_COLL_FLAGS        0x3C        /* u32 its object's flags, ORed in by 0x0801A152 (BN5's 0x08016C42), read by object_getFlag (0x0801A166):
                                              BN6_OBJ_INVULNERABLE among them; poison spares 0x08000028, lava 0x20 and 0x88000206 (bn6_panels.h) */
 #define BN6_OBJ_INVULNERABLE  0x08        /* BN6_COLL_FLAGS: no hit takes it (a hit's invulnerable frames set it, 0x0800EAFA; the same bit in BN5) */
+#define BN6_COLL_MOOD_LOSS    0x8E        /* u16 the mood a hit takes from the struck (BN5's +0x86: 0x0801A24C, 0x0801701C) */
+#define BN6_COLL_MOOD_GAIN    0x90        /* u16 the mood it gives the attacker (BN5's +0x88), BN6_HIT_COUNTER for a counter (BN6 reads it for that alone) */
+#define BN6_HIT_COUNTER       0x8000      /* BN6_COLL_MOOD_GAIN: a counter hit (both games' lit 0x8000 at 0x0801A524, 0x08017308) */
+#define BN6_COLL_INVULNERABLE 0x28        /* u16 frames left unharmed (0x0800EAFA writes it with BN6_OBJ_INVULNERABLE; BN5's +0x2A, 0x0800CD84) */
 #define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
 #define BN6_STRUCK_PARALYSIS  0x00000008u /* ... paralysed, BN6_COLL_PARALYSIS frames: CurAction 4 */
 #define BN6_STRUCK_SLIDE      0x00000010u /* ... pushed along a panel (it slides; CurAction kept) */

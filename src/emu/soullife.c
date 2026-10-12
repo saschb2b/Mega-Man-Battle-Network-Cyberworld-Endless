@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "emu.h"
+#include "soulmood.h"
 
 #define THUMB_BX_LR 0x4770u   /* a stub's instruction, which its hook stands on */
 #define FREE_HALF   0xFFFFu   /* the free space as emu_init pads it */
@@ -56,6 +57,7 @@ static HookAct entered(HookRegs *r, void *user) {
 		hook_write8(soul_field(side, BN6_SOUL_NEXT), 0);
 		hook_write8(soul_field(side, BN6_SOUL_NEXT_CHAOS), 0);
 		hook_write8(soul_field(side, BN6_SOUL_NEXT_TURNS), 0);
+		soulmood_unison(side);   /* (BN5's calm as he unites, 0x08012146) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 	}
@@ -68,6 +70,7 @@ static HookAct left(HookRegs *r, void *user) {
 	(void)user;
 	int side = soul_side_of(r->r[5]);
 	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
+	if (soul) soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
 	if (soul && !keep_soul) {
 		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN };
 		for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hook_write8(soul_field(side, fields[i]), 0);

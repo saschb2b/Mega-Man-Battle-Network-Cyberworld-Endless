@@ -25,7 +25,10 @@
 #define SOULS_PHASES       (FREE_SOULS + 0x001080u)   /* a Soul's unison, 4 words: BN6's crossing's phases with BN5's phase 1 (the Soul's image) */
 #define SOULS_STUBS_END    (FREE_SOULS + 0x001100u)
 #define SOULS_VENEERS      (FREE_SOULS + 0x001100u)   /* the moved code's veneers on to BN6's routines, 12 bytes each, to: */
-#define SOULS_VENEERS_END  (FREE_SOULS + 0x001C80u)
+#define SOULS_VENEERS_END  (FREE_SOULS + 0x001A00u)
+#define SOULS_THUMB        (FREE_SOULS + 0x001A00u)   /* the project's own Thumb the Souls' hooks jump to: soulchips.c's 0x40 bytes, */
+#define SOUL_STUB_COUNTER  (SOULS_THUMB + 0x40u)      /* ... BN5's counter's start (0x0800E338) as BN6's twin and the family's first frame (soulcode.c), */
+#define SOULS_THUMB_END    (FREE_SOULS + 0x001C80u)   /* ... to */
 #define SOULS_ARM_OF       (FREE_SOULS + 0x001C80u)   /* list 0's arm row by sprite number grown: BN6's bytes, then the Souls', to: */
 #define SOULS_ARM_OF_END   (FREE_SOULS + 0x001D80u)
 #define SOULS_ARM_ROWS     (FREE_SOULS + 0x001D80u)   /* list 0's arm rows grown: BN6's three, then the Souls' (BN5's points), to: */

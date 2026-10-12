@@ -77,5 +77,7 @@ bool soulcode_install(const SoulCode *c);
  * (SOUL_POWER_FIRST on, the recipe's order), -1 for none. */
 uint32_t soulcode_moved(uint32_t bn5);
 int soulcode_power(int bn5_id);
+/* BN6's CurAction of BN5's attack family `bn5` moved (xattack_grow.h's Souls' range), -1 where it is none of the moved */
+int soulcode_family(int bn5);
 
 #endif

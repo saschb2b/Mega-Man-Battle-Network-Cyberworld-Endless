@@ -21,6 +21,7 @@
 
 #define BUS 0x08000000u
 #define THUMB_BX_LR 0x4770u
+#define COUNTER_SIZE 36     /* counter_code's bytes */
 #define BLS_MAX 128
 
 static const SoulCode *code;   /* the recipe installed, NULL none */
@@ -31,6 +32,12 @@ uint32_t soulcode_moved(uint32_t bn5) {
 		if ((bn5 & ~1u) >= b->start && (bn5 & ~1u) < b->end) return b->at + (bn5 - b->start);
 	}
 	return 0;
+}
+
+int soulcode_family(int bn5) {
+	for (int i = 0; code && i < code->nfamilies; ++i)
+		if (code->families[i].from == bn5) return code->families[i].to;
+	return -1;
 }
 
 int soulcode_power(int bn5_id) {
@@ -198,17 +205,47 @@ static void block_move(Mover *m, const XvBlock *b, const uint8_t *rom5) {
 	block_numbers(c, b, p);
 }
 
-/* its sprites into SOULS_ART (the list words with the families' room's, below) */
+/* BN5's counter's start (0x0800E338) as the moved code calls it: BN6's twin (0x080105F2: the same steps, BN6's families
+ * 0x47 and 0x48 for BN5's 0x2C and 0x2D), then the family it set run once, r5 him, r7 his AttackVars, as BN5's runs it
+ * at once (0x0800E39A, 0x0800E3A6) where BN6's leaves it to the next frame */
+static void counter_code(uint8_t out[COUNTER_SIZE]) {
+	static const uint16_t thumb[] = {
+		0xB510,           /* push {r4,lr} */
+		0x4C06,           /* ldr r4,[pc,#24]: BN6's twin */
+		0, 0,             /* bl the bx r4 below */
+		0x7A68,           /* ldrb r0,[r5,#9]: the family it set (his CurAction) */
+		0x3810,           /* subs r0,#0x10 */
+		0x0080,           /* lsls r0,r0,#2 */
+		0x4904,           /* ldr r1,[pc,#16]: the word naming the attack families (grown) */
+		0x6809,           /* ldr r1,[r1] */
+		0x580C,           /* ldr r4,[r1,r0]: the family's routine */
+		0, 0,             /* bl the bx r4 below */
+		0xBD10,           /* pop {r4,pc} */
+		0x4720,           /* bx r4 */
+	};
+	for (size_t i = 0; i < sizeof thumb / sizeof *thumb; ++i) put16(out + 2 * i, thumb[i]);
+	put32(out + 28, BN6_COUNTER_START | 1);
+	put32(out + 32, BN6_ATTACK_FAMILIES_REF);
+	thumb_bl_write(out, 4, SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 26);
+	thumb_bl_write(out, 20, SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 26);
+}
+
+/* its sprites into SOULS_ART and FREE_SOULS_ART (the list words with the families' room's, below) */
 static void art_move(const SoulCode *c, const XRom *x) {
 	for (int i = 0; i < c->nsprites && !xv_failed(); ++i) {
 		const XvSprite *s = &c->sprites[i];
 		uint32_t len;
 		uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, s->list, s->index, &len);
-		if (!d || len > s->room || s->at < SOULS_ART || s->at + s->room > SOULS_ART_END) xv_fail("its sprite %d:%#x", s->list, s->index);
+		bool room = (s->at >= SOULS_ART && s->at + s->room <= SOULS_ART_END) ||
+			(s->at >= FREE_SOULS_ART && s->at + s->room <= FREE_SOULS_ART_END);
+		if (!d || len > s->room || !room) xv_fail("its sprite %d:%#x", s->list, s->index);
 		uint8_t *p = d ? xv_put(s->at, len, true) : NULL;
 		if (p) memcpy(p, d, len);
 		free(d);
 	}
+	/* (BN5's counter's start, the Thumb its moved call goes to: BN6's twin, then the family it set once, as BN5's runs it) */
+	uint8_t *k = xv_put(SOUL_STUB_COUNTER, COUNTER_SIZE, true);
+	if (k) counter_code(k);
 	/* (the stubs, each a bx lr its hook stands on) */
 	uint8_t *s = xv_put(SOULS_STUBS, 4 * SOUL_STUBS_COUNT, true);
 	for (int i = 0; s && i < SOUL_STUBS_COUNT; ++i) put16(s + 4 * i, THUMB_BX_LR);
