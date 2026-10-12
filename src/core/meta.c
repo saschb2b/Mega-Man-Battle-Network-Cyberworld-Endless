@@ -155,18 +155,37 @@ static void say(const char *fmt, ...) {
 	++nsaid;
 }
 
-bool meta_library_has(int id) { return id > 0 && id < 8 * (int)sizeof profile.library && (profile.library[id / 8] >> (id % 8) & 1); }
+/* (a chip id's byte in the profile: BN6's pack ids in `library`, the
+ * extension's past them in `library_x`) */
+static uint8_t *library_byte(int id) {
+	int low = 8 * (int)sizeof profile.library;
+	if (id <= 0 || id >= META_LIBRARY_IDS || (id >= low && id - low >= 8 * (int)sizeof profile.library_x)) return NULL;
+	return id < low ? &profile.library[id / 8] : &profile.library_x[(id - low) / 8];
+}
+
+bool meta_library_has(int id) {
+	const uint8_t *b = library_byte(id);
+	return b && (*b >> (id % 8) & 1);
+}
 
 bool meta_library_add(int id) {
-	if (id <= 0 || id >= 8 * (int)sizeof profile.library || meta_library_has(id)) return false;
-	profile.library[id / 8] |= (uint8_t)(1u << (id % 8));
+	uint8_t *b = library_byte(id);
+	if (!b || meta_library_has(id)) return false;
+	*b |= (uint8_t)(1u << (id % 8));
 	return true;
+}
+
+/* (a chip of class `cls` as meta_library_count counts it) */
+static bool of_class(int id, int cls) {
+	if (cls == META_OLDER) return chip_pool_older(id) && chip_pool_tier(id) >= 0;
+	if (cls < 0) return chip_pool_class(id) >= 0 || chip_pool_older(id);
+	return chip_pool_class(id) == cls;
 }
 
 int meta_library_count(int cls) {
 	int n = 0;
-	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
-		if (meta_library_has(id) && (cls < 0 ? chip_pool_class(id) >= 0 : chip_pool_class(id) == cls)) ++n;
+	for (int id = 1; id < META_LIBRARY_IDS; ++id)
+		if (meta_library_has(id) && of_class(id, cls)) ++n;
 	return n;
 }
 

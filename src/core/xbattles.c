@@ -55,6 +55,13 @@ static void shared_learn(int xrom) {
 	}
 }
 
+bool xbattle_shared(int xrom, int family) {
+	shared_learn(xrom);
+	for (int ai = 1; ai < XB_AIS; ++ai)
+		if (shared[ai] == family) return family > 0;
+	return false;
+}
+
 int xbattle_enemy_bn6(int xrom, int id, int *why, int *what) {
 	const uint8_t *t = xrecords_triple(xrom, id);
 	*what = t ? t[2] : 0;
@@ -202,37 +209,57 @@ bool xterritory_native(int area) {
 	return n > 0 && fightable == n;
 }
 
-/* The pool's records as the repeat rule weighs them, each one's viruses
- * counted (into nv) and whether it is the last battle again (into again) */
-static void candidates(int xrom, const XPool *p, int n, int area, LootCand *c, int *nv, bool *again) {
+int xterritory_like(int biome) {
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *a = net_area_def(NET_AREAS + k);
+		if (a && !a->held && a->xrom > 0 && a->like == biome && rom_of(a->xrom - 1) && xterritory_native(NET_AREAS + k)) return NET_AREAS + k;
+	}
+	return -1;
+}
+
+/* A territory's battle's pool: its records (xrecords_pool), each one's
+ * versions up, at the act's band; and each as the repeat rule weighs it,
+ * its viruses counted and whether it is the last battle again */
+typedef struct {
+	uint32_t rec[POOL_MAX];
+	uint8_t ups[POOL_MAX];
+	XBand band;
+	int n, xrom, area;
+	LootCand c[POOL_MAX];
+	int nv[POOL_MAX];
+	bool again[POOL_MAX];
+} TPool;
+
+/* (each record of it translated, as the repeat rule reads a formation) */
+static void candidates(TPool *t) {
 	int last_area, last_pick;
 	loot_last_fought(&last_area, &last_pick);
-	for (int i = 0; i < n; ++i) {
-		Encounter t;
+	for (int i = 0; i < t->n; ++i) {
+		Encounter e;
 		int what;
-		bool ok = xbattle_translate(xrom, p->out[i], (XScale){ p->ups[i], p->band->vcap }, &t, &what) == XB_FIGHTABLE;
-		c[i] = (LootCand){ ok, ok ? t.from_families : 0, ok ? t.from_viruses : 0 };
-		nv[i] = ok ? t.nfoes : MAX_FOES + 1;
-		again[i] = last_area == area && last_pick == (int)(p->out[i] - BUS);
+		bool ok = xbattle_translate(t->xrom, t->rec[i], (XScale){ t->ups[i], t->band.vcap }, &e, &what) == XB_FIGHTABLE;
+		t->c[i] = (LootCand){ ok, ok ? e.from_families : 0, ok ? e.from_viruses : 0 };
+		t->nv[i] = ok ? e.nfoes : MAX_FOES + 1;
+		t->again[i] = last_area == t->area && last_pick == (int)(t->rec[i] - BUS);
 	}
 }
 
 /* The pick among them: an opening battle two viruses at most where the
  * pool has such (the run's first one), each not the last battle again
  * where another fits, by the repeat rule's weights; -1 none */
-static int pick_of(LootCand *c, const int *nv, const bool *again, int n, int area, int kind, bool easy) {
+static int pick_of(TPool *t, int kind, bool easy) {
 	static const int8_t tries[3][3] = { { 9, 0, 0 }, { 2, 9, 0 }, { 1, 2, 9 } };
 	const int8_t *most = tries[kind == ENC_FIRST ? 2 : easy ? 1 : 0];
 	static int weight[POOL_MAX];
 	static bool fit[POOL_MAX];
-	for (int i = 0; i < n; ++i) fit[i] = c[i].weight > 0;
+	for (int i = 0; i < t->n; ++i) fit[i] = t->c[i].weight > 0;
 	int total = 0;
-	for (int t = 0; t < 3 && most[t] && !total; ++t)
+	for (int k = 0; k < 3 && most[k] && !total; ++k)
 		for (int allow = 0; allow < 2 && !total; ++allow) {
-			for (int i = 0; i < n; ++i) c[i].weight = fit[i] && nv[i] <= most[t] && (allow || !again[i]) ? 1 : 0;
-			total = loot_repeat_weights(c, n, area, weight);
+			for (int i = 0; i < t->n; ++i) t->c[i].weight = fit[i] && t->nv[i] <= most[k] && (allow || !t->again[i]) ? 1 : 0;
+			total = loot_repeat_weights(t->c, t->n, t->area, weight);
 		}
-	return total ? loot_weighted_pick(weight, n, total) : -1;
+	return total ? loot_weighted_pick(weight, t->n, total) : -1;
 }
 
 /* A record's strength as BN6's engine fights it (XPool.measure): its foes'
@@ -252,34 +279,56 @@ static int measure(int xrom, uint32_t record, XScale sc, int *hp, int *damage) {
 	return e.nfoes;
 }
 
-bool xterritory_encounter(int depth, int area, int kind, Encounter *out) {
+/* The records a battle of `kind` on a layer of territory `area` at
+ * `depth` is picked from (xrecords_pool) at the act's band, into *t; how
+ * many, 0 none */
+static int territory_pool(int depth, int area, int kind, TPool *t) {
 	const NetAreaDef *a = net_area_def(area);
-	if (!a || a->xrom <= 0 || !rom_of(a->xrom - 1)) return false;
-	int xrom = a->xrom - 1;
+	t->n = 0;
+	t->area = area;
+	t->xrom = a ? a->xrom - 1 : -1;
+	if (!a || a->xrom <= 0 || !rom_of(a->xrom - 1)) return 0;
 	const uint8_t *xb = a->xbattles[layer_in_act(depth)];
-	if (!xb[0]) return false;
+	if (!xb[0]) return 0;
 	bool challenge = kind == ENC_CHALLENGE, easy = kind == ENC_EASY || kind == ENC_FIRST || (kind == ENC_NORMAL && (run.helpers & HELP_GENTLE));
 	PacingBand b = pacing_band(depth, challenge, easy);
 	int vlo, vhi;
 	pacing_virus_versions(depth, challenge, &vlo, &vhi);
 	/* (the act's version by tier: BN6's V1 lets BN5's records go to V1EX,
 	 * its V2 to V2EX, its V3 to V3EX) */
-	XBand band = { b.lo, b.hi, b.cap, 2 * vhi + 1 };
-	static uint32_t pool[POOL_MAX];
-	static uint8_t ups[POOL_MAX];
-	XPool p = { xrom, a, xb[0], xb[1], &band, xbattle_fightable, measure, pool, ups, POOL_MAX, false };
-	int n = xrecords_pool(&p);
-	static LootCand c[POOL_MAX];
-	static int nv[POOL_MAX];
-	static bool again[POOL_MAX];
-	candidates(xrom, &p, n, area, c, nv, again);
-	int k = n ? pick_of(c, nv, again, n, area, kind, easy) : -1;
+	t->band = (XBand){ b.lo, b.hi, b.cap, 2 * vhi + 1 };
+	XPool p = { t->xrom, a, xb[0], xb[1], &t->band, xbattle_fightable, measure, t->rec, t->ups, POOL_MAX, false };
+	return t->n = xrecords_pool(&p);
+}
+
+uint64_t xterritory_families(int depth, int area, uint16_t weak[64]) {
+	static TPool t;
+	uint64_t in = 0;
+	for (int i = 0, n = territory_pool(depth, area, ENC_NORMAL, &t); i < n; ++i) {
+		Encounter e;
+		int what;
+		if (xbattle_translate(t.xrom, t.rec[i], (XScale){ t.ups[i], t.band.vcap }, &e, &what) != XB_FIGHTABLE) continue;
+		in |= e.from_families;
+		for (int k = 0; weak && k < e.nfoes; ++k) {
+			int w = e.foes[k].family > 0 && e.foes[k].family < 64 ? enemy_weakness(e.foes[k].id) : -1;
+			if (w >= 0 && w < ELEM_COUNT) weak[e.foes[k].family] |= (uint16_t)(1u << w);
+		}
+	}
+	return in;
+}
+
+bool xterritory_encounter(int depth, int area, int kind, Encounter *out) {
+	static TPool t;
+	int n = territory_pool(depth, area, kind, &t);
+	bool easy = kind == ENC_EASY || kind == ENC_FIRST || (kind == ENC_NORMAL && (run.helpers & HELP_GENTLE));
+	candidates(&t);
+	int k = n ? pick_of(&t, kind, easy) : -1;
 	Encounter e = { 0 };
 	int what;
 	e.biome = out->biome;
-	if (k < 0 || xbattle_encounter(xrom, pool[k], (XScale){ ups[k], band.vcap }, &e, &what) != XB_FIGHTABLE) return false;
+	if (k < 0 || xbattle_encounter(t.xrom, t.rec[k], (XScale){ t.ups[k], t.band.vcap }, &e, &what) != XB_FIGHTABLE) return false;
 	e.from_biome = area;
-	e.from_pick = (int)(pool[k] - BUS);
+	e.from_pick = (int)(t.rec[k] - BUS);
 	*out = e;
 	return true;
 }

@@ -66,6 +66,8 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "xpanels.h"
+#include "visitor_families.h"
+#include "visitors.h"
 #include "xpanels_look.h"
 #include "xsea.h"
 #include "xvirus_bn5.h"
@@ -123,7 +125,23 @@ void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
 void profile_save(void) {}
 int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
 int chip_pool_class_count(int cls) { (void)cls; return 0; }
+bool chip_pool_older(int rom_id) { (void)rom_id; return false; }
+int chip_pool_tier(int rom_id) { (void)rom_id; return -1; }
 bool town_after_abandon;
+/* (the nets' meeting, issue #82: no ROMs, so the families the visitors
+ * come from are the tests' own, test_visitors; the older net's chips'
+ * share, home's requests' rolls; BN6's stages by depth) */
+int loot_older_share;
+bool loot_visitors_always;
+int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
+static VisitorKin test_kin[2][4];
+static int test_nkin[2], test_role[2][64], test_id[2][64][6], test_panel = 2;
+int visitor_kin(int net, const VisitorKin **out) { *out = test_kin[net & 1]; return test_nkin[net & 1]; }
+int visitor_role_in(int net, int family) { return family > 0 && family < 64 ? test_role[net & 1][family] : VISITOR_FREE; }
+int visitor_id(int net, int family, int version) {
+	return family > 0 && family < 64 && version >= 0 && version < 6 && test_id[net & 1][family][version] ? test_id[net & 1][family][version] : -1;
+}
+int visitor_panel(const Encounter *e, int col, int row) { (void)e; (void)col; (void)row; return test_panel; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -1345,6 +1363,14 @@ static void test_talk(void) {
 		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older Net's way.|@M A strong Navi's signal waits at "
 			"the end...|@M We've got no battle data on it,Lan.|@M Watch the yellow panels! Attacks land there!", area);
 		check_talk(what, line);
+		/* (where the nets meet, issue #82: an older net's area's own
+		 * viruses, the deep's both nets', briefing_words.c) */
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Its viruses come from the older Net!|@M A strong Navi's signal waits at "
+			"the end...", area);
+		check_talk(what, line);
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Both Nets' viruses come down here!|@M A strong Navi's signal waits at "
+			"the end...", area);
+		check_talk(what, line);
 		for (int navi = 1; navi <= 18; ++navi) {
 			if (navi == 17) continue;
 			snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Word is,%s waits at the end!|@M We've got no battle data on him,"
@@ -1372,6 +1398,22 @@ static void test_talk(void) {
 static void test_home_words(void) {
 	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
 	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
+	/* (where the nets meet, issue #82, guest_words.c: the first arrival
+	 * at an older net's area whose viruses fight our way, for a profile
+	 * new to it and one told the old way; the deep's both nets; the first
+	 * visitor of either net, named by the longest of their families') */
+	check_talk("an older net's area, first", "@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
+		"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!|@M Its own Navis fight the old way,though.|"
+		"@L No Crosses against them? Got it!");
+	check_talk("an older net's area, told the old way", "@M Lan! The older Net's viruses...|@M We fight them our way now. Cross and all!|"
+		"@M Its own Navis still fight the old way.|@L Got it. No Crosses against them!");
+	check_talk("the deep's both nets", "@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
+		"@M Yeah. Anything could come at us!");
+	check_talk("a visitor of the older net's", "@M Lan,that Cactikil back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
+		"@M Where they meet,yeah. Stay sharp!");
+	check_talk("a visitor of ours", "@M Huh? That HntdCndl was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!");
+	check_talk("the older net's guardian's battle", "@M Lan,he fought on the older Net's system!|@M Its own Navis fight the old way.|"
+		"@M Our chips worked the way it knew them.");
 	check_talk("Lan's HP's first time", home_hp_words(false));
 	check_talk("Lan's HP, a profile told", home_hp_words(true));
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true, "to the lower left"));
@@ -3289,6 +3331,7 @@ static void test_free_space(void) {
 		{ "the PET's PLACE", FREE_PET_LABEL, FREE_PET_TEXT }, { "the key items' names", FREE_PET_TEXT, FREE_PET_DESCS },
 		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
 		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
+		{ "a Chip Trader's prizes of both nets", FREE_TRADER_LIST, FREE_TRADER_LIST_END },
 		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
 		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
 		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },
@@ -4626,6 +4669,158 @@ static void test_analytics(void) {
 	rmdir(base);
 }
 
+/* The nets' meeting (issue #82, docs/MULTIROM.md, One net): a family's
+ * role by its placements; the visitors' gate, one battle in each four, the
+ * same at every reroll; the rules that keep visitors out; a visitor's
+ * place, family and version against the band; the deep's coin between the
+ * nets, reproducible from the run's random numbers */
+static EnemyMoved test_enemy(int family, int version, int hp, int dmg) {
+	EnemyMoved e;
+	memset(&e, 0, sizeof e);
+	e.triple[0] = (uint8_t)version;
+	e.triple[2] = (uint8_t)family;
+	e.stats[0] = (uint8_t)hp; e.stats[1] = (uint8_t)(hp >> 8);
+	e.stats[4] = (uint8_t)dmg; e.stats[5] = (uint8_t)(dmg >> 8);
+	return e;
+}
+
+static Encounter test_battle(int n, int col) {
+	Encounter e;
+	memset(&e, 0, sizeof e);
+	for (int i = 0; i < n; ++i) e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 2, 0, col, i, 0x300 };
+	return e;
+}
+
+static void test_visitors(void) {
+	CHECK(visitor_role(0, 0, 4) == VISITOR_BACK && visitor_role(0, 1, 3) == VISITOR_BACK && visitor_role(1, 1, 2) == VISITOR_FREE &&
+		visitor_role(3, 0, 1) == VISITOR_FRONT && visitor_role(2, 1, 1) == VISITOR_FREE && visitor_role(0, 0, 0) == VISITOR_FREE,
+		"visitors: a family's role by its placements");
+	/* (one in each four, and the same again) */
+	int blocks = 0, odd = 0, at[4] = { 0 };
+	for (uint32_t seed = 1; seed <= 64; ++seed)
+		for (int b = 0; b < 25; ++b) {
+			int n = 0;
+			for (int i = 4 * b; i < 4 * b + 4; ++i)
+				if (visitor_gate(seed * 2654435761u, i)) { ++n; ++at[i & 3]; odd += visitor_gate(seed * 2654435761u, i) != true; }
+			blocks += n == 1;
+		}
+	CHECK(blocks == 64 * 25 && !odd, "visitors: the gate takes one battle in each four (%d of %d blocks)", blocks, 64 * 25);
+	CHECK(at[0] && at[1] && at[2] && at[3], "visitors: the gate's battle not always the same of the four");
+	CHECK(!visitor_gate(1, -1), "visitors: no gate before a battle");
+	/* (the rules: none without the older net's families, before act 2,
+	 * past an opening, with the Gentle helper, in the deep) */
+	memset(test_kin, 0, sizeof test_kin);
+	test_nkin[VISIT_BN6] = test_nkin[VISIT_BN5] = 0;
+	loot_visitors_always = true;
+	run.helpers = 0;
+	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none without the older net's families");
+	test_nkin[VISIT_BN5] = 1;
+	test_kin[VISIT_BN5][0] = (VisitorKin){ 40, VISITOR_FREE, 0, false, true, 10 };
+	CHECK(visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL) && !visitor_due(1, 0, 3, BIOME_CENTRAL, ENC_NORMAL) &&
+		!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_EASY) && !visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_CHALLENGE) &&
+		!visitor_due(1, 0, 14, BIOME_UNDERNET, ENC_NORMAL) && !visitor_due(1, 0, 17, BIOME_GRAVEYARD, ENC_NORMAL) &&
+		!visitor_due(1, 0, 19, BIOME_NEST, ENC_NORMAL), "visitors: the rules that keep them out");
+	run.helpers = HELP_GENTLE;
+	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none with the Gentle helper");
+	run.helpers = 0;
+	loot_visitors_always = false;
+	/* (a battle of BN6's three viruses, 60 HP each, at act 2: band 150-280,
+	 * cap 80, BN6's V1, so BN5's V1EX at most) */
+	memset(test_id, 0, sizeof test_id);
+	memset(test_role, 0, sizeof test_role);
+	EnemyMoved foe = test_enemy(2, 0, 60, 10);
+	enemy_moved_set(0x300, &foe);
+	static const int hp5[6] = { 40, 60, 80, 100, 120, 140 };
+	for (int v = 0; v < 6; ++v) {
+		EnemyMoved x = test_enemy(40, v, hp5[v], 10 + 10 * v);
+		enemy_moved_set(0x310 + v, &x);
+		test_id[VISIT_BN5][40][v] = 0x310 + v;
+	}
+	run.threat = 0;
+	rng_seed(7);
+	Encounter e = test_battle(3, 4);
+	CHECK(visitor_apply(&e, 5) && e.visitor >= 1 && e.foes[e.visitor - 1].family == 40 && e.foes[e.visitor - 1].id == 0x311 &&
+		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && (e.from_families >> 40 & 1),
+		"visitors: one of the older net's, at its highest version under the band, on the replaced one's panel");
+	CHECK(!visitor_apply(&e, 5), "visitors: one a battle");
+	/* (the band's top: three of 90 HP, 270, where V1EX's 60 for one of
+	 * them is 240 and fits, and five of them nothing fits) */
+	EnemyMoved heavy = test_enemy(2, 0, 90, 10);
+	enemy_moved_set(0x300, &heavy);
+	e = test_battle(3, 4);
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].id == 0x311, "visitors: the band kept with the replaced one's HP gone");
+	EnemyMoved huge = test_enemy(2, 0, 250, 10);
+	enemy_moved_set(0x300, &huge);
+	e = test_battle(2, 4);
+	Encounter was = e;
+	CHECK(!visitor_apply(&e, 5) && !memcmp(&e, &was, sizeof e), "visitors: none where no version keeps the band, the battle as it was");
+	enemy_moved_set(0x300, &foe);
+	/* (the role: a back family's place is the last column, and only a
+	 * back family takes it) */
+	test_role[VISIT_BN6][2] = VISITOR_BACK;
+	e = test_battle(2, 4);
+	CHECK(!visitor_apply(&e, 5), "visitors: none for a back family out of the back");
+	e = test_battle(2, 5);
+	CHECK(!visitor_apply(&e, 5), "visitors: a family of either role never takes a back family's place");
+	test_kin[VISIT_BN5][0].role = VISITOR_BACK;
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].col == 5, "visitors: a back family for a back family, at the back");
+	test_role[VISIT_BN6][2] = VISITOR_FREE;
+	test_kin[VISIT_BN5][0].role = VISITOR_FREE;
+	/* (a family the battle holds, a bound one, one not reached yet, a
+	 * panel neither plain nor cracked: none) */
+	e = test_battle(2, 4);
+	e.foes[1].family = 40;
+	e.foes[1].id = 0x310;
+	CHECK(!visitor_apply(&e, 5), "visitors: never a family the battle holds");
+	test_kin[VISIT_BN5][0].visits = false;
+	e = test_battle(2, 4);
+	CHECK(!visitor_apply(&e, 5), "visitors: none that may not visit");
+	test_kin[VISIT_BN5][0].visits = true;
+	test_kin[VISIT_BN5][0].stage = 2;
+	CHECK(!visitor_apply(&e, 5), "visitors: none its own net meets later");
+	test_kin[VISIT_BN5][0].stage = 0;
+	test_panel = 7;
+	CHECK(!visitor_apply(&e, 5), "visitors: none on a panel neither plain nor cracked");
+	test_panel = 2;
+	/* (the same seed, the same visitor) */
+	test_nkin[VISIT_BN5] = 2;
+	test_kin[VISIT_BN5][1] = (VisitorKin){ 41, VISITOR_FREE, 0, false, true, 10 };
+	for (int v = 0; v < 6; ++v) test_id[VISIT_BN5][41][v] = 0x310 + v;
+	Encounter a = test_battle(3, 4), b = test_battle(3, 4);
+	rng_seed(99);
+	visitor_apply(&a, 5);
+	rng_seed(99);
+	visitor_apply(&b, 5);
+	CHECK(!memcmp(&a, &b, sizeof a), "visitors: the same seed, the same visitor");
+	for (int v = 0; v < 6; ++v) enemy_moved_set(0x310 + v, NULL);
+	enemy_moved_set(0x300, NULL);
+	test_nkin[VISIT_BN5] = 0;
+	/* (the deep: a coin a battle between the nets, the Nest's older half
+	 * between its two areas; a territory's always its own; nothing drawn
+	 * outside the deep) */
+	int none[2] = { -1, -1 }, one[2] = { 24, -1 }, two[2] = { 24, 22 }, seen[3] = { 0 };
+	rng_seed(5);
+	uint32_t s0 = rng_state();
+	CHECK(nets_battle_area(none, 21) == 21 && nets_battle_area(none, -1) == -1 && rng_state() == s0, "the deep: outside it a territory's own, nothing drawn");
+	int bn6 = 0, first[64];
+	for (int i = 0; i < 1000; ++i) {
+		int x = nets_battle_area(one, 21);
+		bn6 += x == -1;
+		if (i < 64) first[i] = x;
+		CHECK(x == -1 || x == 24, "the deep: BN6's or the older net's area");
+	}
+	CHECK(bn6 > 400 && bn6 < 600, "the deep: a coin between the nets (%d of 1000 BN6's)", bn6);
+	rng_seed(5);
+	bool same = true;
+	for (int i = 0; i < 64; ++i) same &= nets_battle_area(one, 21) == first[i];
+	CHECK(same, "the deep: the same seed, the same battles");
+	for (int i = 0; i < 1000; ++i) {
+		int x = nets_battle_area(two, -1);
+		++seen[x == -1 ? 0 : x == 24 ? 1 : 2];
+	}
+	CHECK(seen[0] > 400 && seen[1] > 150 && seen[2] > 150, "the deep: the Nest's both areas (%d %d %d)", seen[0], seen[1], seen[2]);
+}
+
 int main(void) {
 	test_sha1();
 	test_jobs();
@@ -4684,6 +4879,7 @@ int main(void) {
 	test_rom_pages();
 	test_super_bosses();
 	test_analytics();
+	test_visitors();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

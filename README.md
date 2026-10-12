@@ -88,7 +88,8 @@ purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, an
 
 <p align="center">
 Put <i>Team Colonel (USA)</i> beside your BN6 ROM, and BN5's net areas turn up in runs
-in its own tiles, music and bystanders, their battles fought in BN5's own engine.
+in its own tiles, music and bystanders, their battles BN5's own, fought in BN6's engine,
+where its viruses and chips meet BN6's from the second act.
 </p>
 
 <h2 align="center">Runs leave options, not power</h2>

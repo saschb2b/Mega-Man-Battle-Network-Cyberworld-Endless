@@ -389,11 +389,13 @@ const char *guardian_soul_words(int navi, int kind, bool held, const char *chip,
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
 	/* (where it wakes, and the run's chips that unite with it: the run's
-	 * own; how a Soul Unison goes is BN5's, its players know it) */
+	 * own; how a Soul Unison goes is BN5's, its players know it. The older
+	 * net's areas fight their viruses in BN6's engine, its Navis in its
+	 * own on the guest core: there it wakes, docs/MULTIROM.md, One net) */
 	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It wakes in the older Net's battles.");
+		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It wakes against the old Net's Navis.");
 	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It wakes in the older Net's battles.|@M Our %s chips unite us there%s%s!", name,
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It wakes against the old Net's Navis.|@M Our %s chips unite us there%s%s!", name,
 			kinds[kind], chip[0] ? ",like " : "", chip);
 		if (dark && k < (int)sizeof s) snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...", dark);
 	}

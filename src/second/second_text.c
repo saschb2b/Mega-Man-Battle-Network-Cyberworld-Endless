@@ -13,6 +13,7 @@
 
 #include "bn6.h"
 #include "chip_pool.h"
+#include "data.h"
 #include "guardians.h"
 #include "jobs.h"
 #include "meta.h"
@@ -191,6 +192,12 @@ int second_library(SecondRow *out, int most) {
 		out[k].name = cls[c];
 		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", meta_library_count(c), chip_pool_class_count(c));
 	}
+	/* (the older net's own, where its ROM is read: those a run can find) */
+	int older = chip_pool_older_count();
+	if (older && k < most) {
+		out[k].name = "Older Net";
+		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", meta_library_count(META_OLDER), older);
+	}
 	if (k < most) {
 		out[k].name = "New this run";
 		snprintf(out[k++].value, sizeof out[0].value, "%d", meta_library_new());
@@ -199,6 +206,20 @@ int second_library(SecondRow *out, int most) {
 }
 
 const char *second_library_line(void) { return "Every chip MegaMan held in any run stays in the Library, and each run begins with it"; }
+
+void second_library_older(char *out, size_t n) {
+	size_t k = 0;
+	out[0] = 0;
+	for (int id = 1; id < META_LIBRARY_IDS && k + 2 < n; ++id) {
+		if (!chip_pool_older(id) || !meta_library_has(id)) continue;
+		ChipInfo ci;
+		chip_info(id, &ci);
+		if (!ci.name[0]) continue;
+		int w = snprintf(out + k, n - k, "%s%s", k ? ", " : "From the older Net: ", ci.name);
+		if (w < 0 || (size_t)w >= n - k) { out[k] = 0; break; }
+		k += (size_t)w;
+	}
+}
 
 int second_mail_rows(SecondRow *out, int most, const char *subject, int unread, int shown) {
 	int k = 0;

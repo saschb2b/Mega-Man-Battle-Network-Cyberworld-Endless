@@ -466,6 +466,7 @@ static void after_battle(void) {
 		} else fprintf(stderr, "battle reward %04x\n", r);
 	}
 	if (won && !boss_fighting()) run.viruses_deleted += D.foes;
+	if (!boss_fighting()) nets_battle_note(&D.next);   /* (a visitor of the other net: MegaMan's word, once a profile) */
 	if (!D.challenge && !boss_fighting()) roll_encounter();
 }
 

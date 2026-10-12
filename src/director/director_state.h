@@ -58,6 +58,12 @@ typedef struct {
 	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
 	bool beat_out;         /* ... or, to a profile told that, the chips that sit out, once a run */
 	bool beat_beast;       /* ... and that the Cybeast can't come in, the first time a profile arrives holding BeastOut */
+	bool beat_native;      /* ... that an older net's area fights its own viruses our way, the first time a profile comes to one (docs/MULTIROM.md, One net) */
+	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
+	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
+	bool deep;             /* ... or the deep's, of both nets (loot_deep) */
+	int visitor_due;       /* the first visitor a profile met: 1 one of BN5's in a battle of BN6's, 2 one of BN6's in the older net's; MegaMan's words due */
+	int visitor_family;    /* ... its family (BN6's AI index) */
 	int astray;            /* frames MegaMan has spent on another map */
 	bool warping;          /* the exit pad's warp is under way */
 	bool area_card;        /* show the area's title card once MegaMan is in */

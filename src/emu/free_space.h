@@ -40,6 +40,8 @@
 #define FREE_PET_BODIES     (EMU_FREE + 0x15A000u)   /* ... their bodies, to: */
 #define FREE_PORTRAITS      (EMU_FREE + 0x166000u)   /* portraits of Falzar's Navis (portrait.c), to: */
 #define FREE_PORTRAITS_END  (EMU_FREE + 0x167900u)
+#define FREE_TRADER_LIST    (EMU_FREE + 0x168000u)   /* a layer's Chip Trader's prizes of both nets (trader.c), to: */
+#define FREE_TRADER_LIST_END (EMU_FREE + 0x169000u)
 #define FREE_XAREA          (EMU_FREE + 0x170000u)   /* another game's net area (netmap.c), to: */
 #define FREE_SONGS          (EMU_FREE + 0x1A0000u)   /* other games' songs (xsong.c), to: */
 #define FREE_XNAVIS         (EMU_FREE + 0x260000u)   /* other games' Navis and map objects (xnavi.c), to: */

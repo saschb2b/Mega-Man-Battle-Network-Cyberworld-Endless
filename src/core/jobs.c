@@ -66,6 +66,10 @@ static void terms(Job *j, int a, int depth) {
 
 void jobs_offers(uint32_t seed, int depth, Job out[JOB_ASKERS]) {
 	uint32_t was = rng_state();
+	/* (home's requests pay in BN6's chips, whatever net the layer before
+	 * was: loot.h, loot_older_share) */
+	int older = loot_older_share;
+	loot_older_share = 0;
 	rng_seed(seed ^ 0x4A4F4253u ^ (uint32_t)depth * 0x9E3779B9u);
 	int a = jobs_act(depth);
 	memset(out, 0, sizeof *out * JOB_ASKERS);
@@ -84,6 +88,7 @@ void jobs_offers(uint32_t seed, int depth, Job out[JOB_ASKERS]) {
 		j->depth = (uint16_t)depth;
 		terms(j, a, depth);
 	}
+	loot_older_share = older;
 	rng_restore(was);
 }
 

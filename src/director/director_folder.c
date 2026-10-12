@@ -219,7 +219,7 @@ void star_folder_pack(void) {
  * shows every chip held in any run, and a Chip Trader's prize, new to the
  * Library first, is new across runs. */
 void library_to_game(void) {
-	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
+	for (int id = 1; id < META_LIBRARY_IDS; ++id)
 		if (meta_library_has(id)) flag_set(BN6_FLAG_LIBRARY + id);
 	own_library_chips();
 }
@@ -233,7 +233,7 @@ void library_to_game(void) {
 void own_library_chips(void) {
 	uint32_t marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
-	for (uint32_t id = 1; id < 8 * sizeof profile.library; ++id)
+	for (uint32_t id = 1; id < META_LIBRARY_IDS; ++id)
 		if (flag_get(BN6_FLAG_LIBRARY + (int)id)) emu_write8(marks + id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + id) ^ BN6_CHIP_KEY_XOR));
 }
 
@@ -247,8 +247,10 @@ void library_from_game(void) {
 		profile.library_run = run.seed;
 		added = true;
 	}
-	for (int id = 1; id < 8 * (int)sizeof profile.library; ++id)
-		if (chip_pool_class(id) >= 0 && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
+	/* (BN6's chips a run can hold, and the older net's own: issue #82, the
+	 * run's collection counts every registered chip) */
+	for (int id = 1; id < META_LIBRARY_IDS; ++id)
+		if ((chip_pool_class(id) >= 0 || chip_pool_older(id)) && flag_get(BN6_FLAG_LIBRARY + id)) added |= meta_library_add(id);
 	if (added) profile_save();
 }
 

@@ -20,6 +20,11 @@ int xchips_paired(void);
 int xchips_to_bn5(int id);
 /* BN6's chip of BN5's chip `x`'s name, 0 none (its DarkChips) */
 int xchips_bn6_of(int x);
+/* The run's chip for BN5's chip `x` (issue #82, docs/MULTIROM.md, One
+ * net): the registry's id for it where it registers it (BN6's own for a
+ * name both games have) and it plays in BN6's battles (chips.h,
+ * chips_sits_out), else BN6's of its name; 0 none (0 without BN5's ROM) */
+int xchips_run_chip(int x);
 /* BN6's standard chips whose namesake in BN5 is of kind `kind` (its chip
  * records' BN5_CHIP_KIND), their ids into `out`, in BN6's order; how many */
 int xchips_kind(int kind, uint16_t *out, int max);
@@ -29,10 +34,12 @@ int xchips_kind(int kind, uint16_t *out, int max);
 int xchips_sitting_out(const uint16_t *folder, uint16_t *out, int max);
 /* A reward entry of BN5's (its rows' and its Mystery Data's: BN6's
  * encoding, bits 14-15 0 a chip with its code << 9, 1 zenny, 2 HP, 3
- * BugFrags; 0xFFFF none) as BN6's: a chip as BN6's of its name, in its
- * code where BN6's has it, else its *, else its first (xchips_code);
- * XCHIPS_STAND_IN zenny where BN6 has none of its name (until BN5's chips
- * are registered in BN6, issue #82); the others as they are */
+ * BugFrags; 0xFFFF none) as BN6's: a chip as the registry's id for it
+ * (xchips_registry.h: BN6's own for a name both games have), else BN6's
+ * of its name, in its code where that record has it, else its *, else its
+ * first (xchips_code); XCHIPS_STAND_IN zenny where there is none, or where
+ * it sits out of BN6's battles (its code not moved yet, chips.h); the
+ * others as they are */
 #define XCHIPS_STAND_IN 200
 uint16_t xchips_reward_bn6(uint16_t v);
 

@@ -141,8 +141,10 @@ static int family_words(char *buf, int k, int size) {
 		{ FAMILY_STARFISH, "@M We might meet StarFish again!|@M Their bubbles soak up our shots.|@M Touch one,and it traps us!|"
 			"@M A chip that drops from above gets past them!|" },
 	};
-	/* (none where the area's battles are another game's: L warned of
-	 * StarFish in End Area, whose battle was BN5's Whirlies, session 65) */
+	/* (none where the area's battles are another game's on the guest
+	 * core: L warned of StarFish in End Area, whose battle was BN5's
+	 * Whirlies, session 65; a territory's own records and the deep's both
+	 * nets are loot_families_here's) */
 	if (encounter_guest) return k;
 	uint64_t fams = loot_families_here(run.depth, run.biome);
 	for (unsigned i = 0; i < sizeof warn / sizeof *warn; ++i)
@@ -418,6 +420,9 @@ static int first_words(char *buf, int k, int size) {
 	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.", area);
 	else ADD("@M Layer %d,Lan. We're in %s!", run.depth, area);
 	if (encounter_guest) ADD("|@M Battles here run the older Net's way.");
+	/* (where the nets meet: docs/MULTIROM.md, One net) */
+	else if (D.deep) ADD("|@M Both Nets' viruses come down here!");
+	else if (D.territory_native) ADD("|@M Its viruses come from the older Net!");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */

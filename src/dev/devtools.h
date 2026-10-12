@@ -15,6 +15,7 @@ typedef struct {
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
 	bool gem;       /* every random battle with a Mystery Data on the field */
+	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */

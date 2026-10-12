@@ -14,13 +14,48 @@
  * such battles (else as ENC_EASY) */
 enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE, ENC_FIRST };
 Encounter make_encounter(int depth, int biome, int kind);
+/* A layer's random battle (the step counter's): make_encounter's, with a
+ * visitor of the other net where one is due (visitors.h: the layer's
+ * seed, its battles fought so far `index`) */
+Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed, int index);
+/* (dev: every battle the visitors' rules allow takes one, --dev visitors) */
+extern bool loot_visitors_always;
 /* The area (NET_AREAS + k, rom.h) whose own game's battle records a
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */
 extern int loot_territory;
+/* The deep (docs/MULTIROM.md, One net: the deep converges): the older
+ * net's areas a deep act's random battles draw on beside BN6's own area's,
+ * a coin a battle between the nets (and between the two where both are
+ * named: the Nest's), as make_encounter rolls them; -1 none. Set by the
+ * director where BN5's ROM is read and its records fought in BN6's
+ * engine: the Undernet's with BN5's Undernet, the Graveyard's with Nebula
+ * Area, the Nest's with both. */
+extern int loot_deep[2];
+/* The share (percent) of the chips the run finds and buys that come from
+ * the older net's catalogue (roll_chip; chip_pool.h's CHIP_NET_BN5): half
+ * on its areas' layers and in the deep where its ROM is read, else 0 */
+extern int loot_older_share;
+#define LOOT_OLDER_SHARE 50
+/* The layer's nets, for a layer of BN6 area `biome` drawn in area `tiles`
+ * (another game's where it dresses it, run_dress; -1 none: home): sets
+ * loot_territory where every record of the area can be fought in BN6's
+ * engine, loot_deep in the deep (taking the place of a territory), and
+ * loot_older_share on the older net's areas and in the deep where BN5's
+ * ROM is read; true where the layer's battles take the older net's
+ * records so */
+bool loot_layer_nets(int biome, int tiles);
 /* The virus families (a bit each, by BN6's AI index) the area's plain
- * random battles can hold at `depth`; no random numbers drawn. */
+ * random battles can hold at `depth` (a territory's own records where
+ * loot_territory names one; the deep's both nets'); no random numbers
+ * drawn. */
 uint64_t loot_families_here(int depth, int biome);
+/* When BN6's virus family `family` first meets MegaMan on the net: 0 the
+ * surface areas, 1 the Undernet, 2 the Graveyard and the Underground (3
+ * never); and the highest a battle at `depth` may hold (BN6's rule:
+ * the comps and homepages keep to the families the run has reached) */
+int loot_family_stage(int family);
+int loot_stage_allowed(int depth);
 enum { FAMILY_STARFISH = 15, FAMILY_SCARCROW = 17, FAMILY_DARKMECH = 25 };
 Encounter make_boss(int depth, int biome, int navi);
 /* The element that hits an act's guardian twice as hard (of either wheel),
@@ -29,6 +64,9 @@ Encounter make_boss(int depth, int biome, int navi);
 int counter_element(int depth, int biome, int navi);
 /* Random chip for rewards/shops; code chosen from the chip's own codes. */
 int roll_chip(int depth, int bonus_tier, char *code);
+/* A chip of `tier` (chip_pool.h) from BN6's pool, or the older net's its
+ * share of the time (loot_older_share); -1 without a ROM */
+int loot_pool_pick(int tier);
 /* An in-battle Mystery Data's four rewards, the game's encoding (bits
  * 14-15: 0 chip, 1 zenny, 3 BugFrags; a chip's id in bits 0-8, its code
  * in 9-13), one of which the game gives where it survives the battle

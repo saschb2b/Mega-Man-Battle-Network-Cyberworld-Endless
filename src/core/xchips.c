@@ -107,6 +107,12 @@ int xchips_bn6_of(int x) {
 	return paired && x > 0 && x < BN5_CHIPS ? from_bn5[x] : 0;
 }
 
+int xchips_run_chip(int x) {
+	const XChipReg *r = xchips_paired() ? xreg_of_bn5(x) : NULL;
+	int id = r ? r->bn6 : xchips_bn6_of(x);
+	return id && !chips_sits_out(id) ? id : 0;
+}
+
 int xchips_kind(int kind, uint16_t *out, int max) {
 	const uint8_t *d = XR[XROM_BN5_COLONEL_US].data;
 	if (!xchips_paired() || !d || kind < 0) return 0;
@@ -130,7 +136,11 @@ static void codes_of(int id, uint8_t out[4]) {
 
 uint16_t xchips_reward_bn6(uint16_t v) {
 	if (v == 0xFFFF || v >> 14) return v;
-	int id = xchips_bn6_of(v & 0x1FF);
+	/* (the registry's id where it registers the chip, BN6's of its name
+	 * otherwise; none, or one that sits out of BN6's battles, the
+	 * stand-in's zenny: docs/MULTIROM.md, One net, BN5's viruses' own
+	 * rewards) */
+	int id = xchips_run_chip(v & 0x1FF);
 	if (!id) return (uint16_t)(1u << 14 | XCHIPS_STAND_IN);
 	uint8_t codes[4];
 	codes_of(id, codes);

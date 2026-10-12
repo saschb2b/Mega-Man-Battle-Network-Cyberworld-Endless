@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "data.h"
+#include "emu.h"
 #include "game.h"
 #include "guardians.h"
 #include "guest.h"
@@ -22,6 +23,10 @@
 #include "shop.h"
 #include "xguardian.h"
 #include "xrecords.h"
+#include "visitor_families.h"
+#include "visitors.h"
+#include "xbattles.h"
+#include "xnavi_install.h"
 
 #define ROLLS 300
 
@@ -45,10 +50,11 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 	static int hps[ROLLS];
 	/* an opening battle aims low but may take the act's whole band */
 	PacingBand band = pacing_band(depth, kind == ENC_CHALLENGE, false);
-	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[64] = { 0 }, gems = 0, blocks = 0;
+	int over = 0, navis = 0, maxdmg = 0, versions[6] = { 0 }, families[64] = { 0 }, gems = 0, blocks = 0, older = 0;
 	for (int r = 0; r < ROLLS; ++r) {
 		Encounter e = make_encounter(depth, biome, kind);
 		loot_battle_fought(&e);   /* each roll as a battle fought */
+		older += e.xrecord != 0;   /* (one of the older net's records, in BN6's engine) */
 		/* (the virus families a battle brings, each counted once: BN6's AI
 		 * indexes, the families moved into its engine from 32) */
 		uint64_t in = 0;
@@ -79,6 +85,7 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 		depth, label, band.lo, band.hi, band.cap, n ? h[0] : 0, n ? h[n / 2] : 0, n ? h[n - 1] : 0, maxdmg,
 		versions[0], versions[1], versions[2], versions[3], versions[4] + versions[5]);
 	if (gems || blocks) fprintf(out, "  gem %d rocks %d", gems, blocks);
+	if (older) fprintf(out, "  older net's %d", older);
 	if (navis) fprintf(out, "  SP navi %d", navis);
 	fprintf(out, "  families");
 	for (int f = 1; f < 64; ++f) if (families[f]) fprintf(out, " %d:%d", f, families[f]);
@@ -135,8 +142,21 @@ static int territories(FILE *out, int act, int loop, int biome) {
 	for (int k = 0; k < XAREAS_MAX; ++k) {
 		const NetAreaDef *x = net_area_def(NET_AREAS + k);
 		if (!x || x->held || x->like != biome || x->xrom <= 0) continue;
-		fprintf(out, "  %s's battles in its own engine where it dresses it:\n", x->name);
 		int first = loop * CYCLE_LAYERS + act * 3 + 1, last = act == 6 ? first : first + 2;
+		/* (its own records in BN6's engine, as the director rolls them,
+		 * where every one of them can be: issue #82's native territories;
+		 * the deep's acts mix both nets, above, whatever dresses them) */
+		if (loot_layer_nets(biome, NET_AREAS + k) && loot_territory >= 0) {
+			fprintf(out, "  %s's battles, its own records in BN6's engine where it dresses it (native):\n", x->name);
+			for (int d = first; d <= last; ++d) flagged += battles(out, d, biome, ENC_NORMAL, "native");
+			flagged += battles(out, first, biome, ENC_EASY, "opening");
+			if (act < 6) flagged += battles(out, first + 1, biome, ENC_CHALLENGE, "challenge");
+			loot_layer_nets(-1, -1);
+			continue;
+		}
+		loot_layer_nets(-1, -1);
+		if (biome == BIOME_UNDERNET || biome == BIOME_GRAVEYARD) continue;
+		fprintf(out, "  %s's battles in its own engine where it dresses it:\n", x->name);
 		for (int d = first; d <= last; ++d) {
 			flagged += guest_battles(out, d, x, x->xrom - 1, true);
 			flagged += guest_battles(out, d, x, x->xrom - 1, false);
@@ -150,13 +170,96 @@ static int territories(FILE *out, int act, int loop, int biome) {
  * past their band */
 static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
 	int flagged = 0, first = loop * CYCLE_LAYERS + act * 3 + 1, last = act == 6 ? first : first + 2;
-	fprintf(out, "\nact %d cycle %d  %s\n", act + 1, loop + 1, guardian_area_name(b));
+	/* (the deep's acts draw on both nets, a coin a battle, where BN5's
+	 * ROM is read: docs/MULTIROM.md, One net) */
+	bool deep = loot_layer_nets(b, b) && loot_deep[0] >= 0;
+	fprintf(out, "\nact %d cycle %d  %s%s\n", act + 1, loop + 1, guardian_area_name(b), deep ? " (the deep: both nets' battles, the older net's counted)" : "");
 	rng_seed(seed);
 	for (int d = first; d <= last; ++d) flagged += battles(out, d, b, ENC_NORMAL, "battle");
 	flagged += battles(out, first, b, ENC_EASY, "opening");
 	if (first == 1) flagged += battles(out, first, b, ENC_FIRST, "first");
 	if (act < 6) flagged += battles(out, first + 1, b, ENC_CHALLENGE, "challenge");
+	loot_layer_nets(-1, -1);
 	return flagged + territories(out, act, loop, b);
+}
+
+/* ---- visitors (visitors.h; docs/MULTIROM.md, One net): each net's
+ * families as their own records set them, then every act's random battles
+ * from the second on, each given a visitor where one fits, against the
+ * act's band ---- */
+
+static void kin_report(FILE *out) {
+	static const char *const roles[] = { "either", "back", "front" };
+	for (int net = 0; net < 2; ++net) {
+		const VisitorKin *k;
+		int n = visitor_kin(net, &k);
+		fprintf(out, "%s's families (role, stage, placements; * may visit, ! special panels alone):", net == VISIT_BN5 ? "BN5" : "BN6");
+		for (int i = 0; i < n; ++i) {
+			char name[24] = "?";
+			int id = visitor_id(net, k[i].family, 0);
+			if (id < 0) id = enemy_id(0, k[i].family, 0);
+			if (id >= 0) enemy_name(id, name, sizeof name);
+			fprintf(out, " %s%s%s %s s%d n%d", k[i].visits ? "*" : "", k[i].bound ? "!" : "", name, roles[k[i].role], k[i].stage, k[i].placed);
+		}
+		fprintf(out, "\n");
+	}
+}
+
+/* One area's battles at `depth` (its own, or a territory's where `tiles`
+ * names one), each with a visitor where one fits: how many took one, how
+ * many fit no visitor, the pairs (replaced -> visitor), HP against the
+ * band; returns those past it */
+static int visitor_rolls(FILE *out, int depth, int biome, int tiles, const char *label) {
+	loot_layer_nets(biome, tiles);
+	PacingBand b = pacing_band(depth, false, false);
+	int took = 0, over = 0, hps[ROLLS], pairs[64][64];
+	memset(pairs, 0, sizeof pairs);
+	for (int r = 0; r < ROLLS; ++r) {
+		Encounter e = make_encounter(depth, biome, ENC_NORMAL);
+		loot_battle_fought(&e);
+		int hp = 0, dmg = 0, top;
+		Encounter v = e;
+		bool ok = visitor_apply(&v, depth);
+		battle_stats(&v, &hp, &dmg, &top);
+		hps[r] = hp;
+		if (!ok) continue;
+		++took;
+		int from = e.foes[v.visitor - 1].family, to = v.foes[v.visitor - 1].family;
+		if (from > 0 && from < 64 && to > 0 && to < 64) ++pairs[from][to];
+		over += hp > b.hi || dmg > b.cap;
+	}
+	loot_layer_nets(-1, -1);
+	qsort(hps, ROLLS, sizeof *hps, cmp_int);
+	fprintf(out, "  depth %2d %-24s band %3d-%3d cap %3d | a visitor in %3d of %d, hp %3d / %3d / %3d%s\n    pairs:", depth, label, b.lo, b.hi, b.cap,
+		took, ROLLS, hps[0], hps[ROLLS / 2], hps[ROLLS - 1], over ? "  OVER" : "");
+	for (int f = 1; f < 64; ++f)
+		for (int t = 1; t < 64; ++t)
+			if (pairs[f][t]) fprintf(out, " %d>%d:%d", f, t, pairs[f][t]);
+	fprintf(out, "\n");
+	return over;
+}
+
+static int visitors_report(FILE *out) {
+	int flagged = 0;
+	fprintf(out, "\nVisitors (where BN5's ROM is read): each net's families as their own records set them, then each act's battles\n"
+		"(%d rolls a layer) each with a visitor where one fits, as one battle in four from act 2 takes one: how many fit,\n"
+		"the battles' HP with it, the pairs (replaced family > visitor family, BN6's AI indexes), OVER past the band.\n", ROLLS);
+	kin_report(out);
+	for (int act = 1; act < 4; ++act) {
+		uint8_t pool[PACING_AREA_POOL];
+		int n = pacing_area_pool(act, pool), depth = act * 3 + 2;
+		fprintf(out, "act %d:\n", act + 1);
+		rng_seed(0x56495349u + (uint32_t)act);
+		for (int i = 0; i < n; ++i) {
+			flagged += visitor_rolls(out, depth, pool[i], pool[i], guardian_area_name(pool[i]));
+			for (int k = 0; k < XAREAS_MAX; ++k) {
+				const NetAreaDef *x = net_area_def(NET_AREAS + k);
+				if (x && !x->held && x->xrom > 0 && x->like == pool[i] && xterritory_native(NET_AREAS + k))
+					flagged += visitor_rolls(out, depth, pool[i], NET_AREAS + k, x->name);
+			}
+		}
+	}
+	return flagged;
 }
 
 /* A variant of `program` in colour `color` (program * 4 + v), 0 for none. */
@@ -391,6 +494,14 @@ static int older_guardians(FILE *out) {
 }
 
 int pacing_report_run(const char *path) {
+	/* (the other games' families, fields and Navis a run's core has, the
+	 * engine's objects they run before them, installed as it starts, where
+	 * their ROM is read: the territories' records fought in BN6's engine,
+	 * issue #82) */
+	if (XR[XROM_BN5_COLONEL_US].data) {
+		if (!emu_init(R.data, ROM_SIZE)) return 1;
+		xnavi_install_core(XVIRUS_FAMILIES, XNAVI_BN5);
+	}
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
 	static const struct { int act; int biomes[8]; } acts[] = {
@@ -416,6 +527,7 @@ int pacing_report_run(const char *path) {
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
 	flagged += first_cycle_guardians(out) + older_guardians(out);
+	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
 	super_report(out);
 	clock_report(out);
 	jobs_report(out);

@@ -98,8 +98,12 @@ run's battles hold it yet.
 
 Where BN5 dresses an area and the build can run a second core (desktop,
 Android, iOS, PortMaster, the browser; not the 3DS, which keeps one ROM),
-the layer's random battles are BN5's own, fought in BN5's engine
-(`src/emu/guest.c`, epic #57):
+the layer's random battles were BN5's own, fought in BN5's engine
+(`src/emu/guest.c`, epic #57). Since issue #82's D1 they are fought in
+BN6's engine (One net, below) wherever every record of the area can be,
+which with BN5's ROM read is everywhere; the guest's battles below remain
+where a territory is not native (an install that failed) and for BN5's
+Navis as guardians, until they move into BN6's engine:
 
 - **When**: BN6's roll decides there is a battle, as on any layer; the
   hook gives BN6 none (`encounter_guest`), and the director begins a
@@ -518,6 +522,77 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   rise after falling dark, BN5's, does not come with it: BN6's engine has
   its own dark, and that is enough of a price beside the max HP.
 
+The calls D1 made where the design left a number or a rule open (12
+October 2026; reasoned with the game-design skill: the dialectic what you
+bring against what you find, the session loop's battles and finds, the
+patterns of an honest telegraph and the hand-made units of a procedural
+run, meta as variety):
+
+- **A family's role is measured over the records runs fight**: BN6's
+  areas' random battles (each formation once), BN5's records of the areas
+  it lends a run (NetAreaDef.xbattles: 214), not every map of BN5's (its
+  battle tables' groups past those maps are not mapped). So measured
+  (`build.py pacing` lists them): BN6's Armadill the front, Trumpy,
+  WindBox and Nightmare the back; BN5's WuNote the front, MetFire, Shakey,
+  Trumpy and WindBox the back; every other family either.
+- **A family bound to special panels** is one none of whose placements in
+  its game's records stands on a plain or cracked panel (BN5's Marina, all
+  on sea; BN6's Nightmare): it never visits. A visitor takes only a plain
+  or cracked panel, so none stands on lava or sea it was never set on.
+- **The visitor's place and kind**: the replaced foe is a virus on such a
+  panel, picked at random among those; the visitor is a family of the
+  same role (a back family only for one in the last column, a front one
+  only for one in the first enemy column), of the other net alone (a
+  family both games have is BN6's and visits neither), one the battle
+  does not hold, met in its own net no later than the act (BN6's stages:
+  the surface's families before the Undernet's, the Graveyard's last;
+  BN5's by the area holding it: its Undernet's at stage 1, Nebula Area's
+  at 2), at the highest version up to the act's (BN5's by tier) that
+  keeps the battle's HP to the band's top and its hit to the cap. None
+  fitting, no visitor: the act's battles are then their own net's.
+- **The gate**: from depth 4 (the run's second act) on, one battle of
+  each four on a layer (by its battles fought so far), which one of the
+  four by the layer's seed, so a reroll and a checkpoint's layer keep it;
+  plain random battles alone (an opening battle, a Server's, the duel's,
+  and every battle under the Gentle helper never). The deep's acts never
+  take a visitor (the Undernet's and the Graveyard's areas, the Nest, the
+  dark warp's Undernet layers and trips back to them).
+- **The deep takes the place of a territory**: where BN5's Undernet or
+  Nebula Area dresses the deep's area, its battles are still the coin's,
+  both nets'; without BN5's ROM, or where its area there could not be
+  fought in BN6's engine, BN6's alone.
+- **The older net's half of the finds is its catalogue**: every chip of
+  the registry that plays in BN6's battles (BN5's own ids, and those BN6
+  has by name at BN6's id: a chip both nets have comes in either half),
+  of the tier rolled, BN6's of that tier where BN5's has none; never a
+  DarkChip (flames bring them) nor a Program Advance. Half the time on the
+  older net's areas and in the deep, where BN5's ROM is read: the Net
+  Dealers' stock, the Mystery Data, the vaults', Servers' and the gift's
+  picks (all of roll_chip); a Chip or BugFrag Trader's list half each
+  rarity's, BN6's pool's records fitted as before and as many of BN5's
+  catalogue's of each rarity. Home's requests pay in BN6's chips. As
+  BN5's chips' code moves in (Not yet, The chip registry), its own come
+  more often: today a dozen of its own play.
+- **The Library**: the profile keeps ids to 511 (Profile.library_x past
+  BN6's 320); the classes' marks (STD, MEGA, GIGA COMP) stay BN6's, so no
+  mark needs BN5's ROM; the older net's own chips are counted apart
+  ("Older Net": those held of those a run can find now) and listed on the
+  second screen's Library, under its counts where it has room (a tab
+  with no card, a larger display); the collection (a vault's count, new
+  this run) counts every chip a run can hold of either net.
+- **BN5's viruses' rewards and green Mystery Data** come through the
+  registry: its id for the chip where it plays, the stand-in's 200 zenny
+  where it sits out (and in the guest's battles the same).
+- **Words**: the act's card says "Older Net" in a territory, "Both Nets"
+  in the deep, "Nets meet" in a BN6 area from act 2 where visitors can
+  come (none under the Gentle helper); MegaMan names the first native
+  territory, the first visitor and the first deep act once a profile
+  (Profile.native_taught, visitor_taught, deep_taught); L's briefing names
+  the older net's viruses or both nets'. Until BN5's Navis move into
+  BN6's engine (the Navi branch), a territory's guardian of BN5's still
+  fights on the guest core, and the words say so: its own Navis fight the
+  old way, no Crosses against them; a Soul wakes against them.
+
 What to watch, and measure (docs/META.md, Measuring it): a visitor whose
 pairing the band does not see (two that pin a row between them); the
 strongest Soul for a folder taken every battle now that it serves every
@@ -544,6 +619,29 @@ lava and sea as BN6's panels (ACDC Area 21 of 34, SciLab 26 of 36,
 Nebula Area 3, Oran Area 2, the Undernet 1, End Area none; 44 with
 CanGard alone, before Handi and the lava); the xrecord step fights one
 (docs/DEVTOOLS.md). Not fought yet: its Navis (M2).
+
+**Native territories, chips in runs, visitors and the deep (D1, in place,
+issue #82):** a territory's random battles are its own records fought in
+BN6's engine where every one of its records can be (all 214 can, with
+BN5's ROM read and its families moved in): `loot_layer_nets` sets the
+layer's territory, `make_encounter` rolls it (`xterritory_encounter`),
+BN6's step counter starts it, and its results, HP, GAME OVER, run log
+(`x` and the record's address before its foes) and second screen are
+BN6's. The guest core fights only where a territory is not native (an
+install that failed) and its guardians (the Navi branch brings them). A
+territory's Servers and the duel's race are its records too;
+`loot_families_here`, the act's viruses' weaknesses and the dealers'
+counter element read its records. Visitors (`src/core/visitors.c`, their
+families' roles from `src/core/visitor_families.c`) and the deep's coin
+(`nets_battle_area`) as the calls above; the run log marks a visitor `+`.
+The chip pools are per net (`src/core/chip_pool.c`), the older net's half
+of finds and stock comes through `loot_pool_pick`, a trader's list of
+both nets is written at `EMU_FREE + 0x168000` (docs/EMULATION.md). The
+profile's Library holds every id to 511. `build.py pacing` lists the
+native territories, the deep's share of the older net's battles and the
+visitors (none past the band); `--dev visitors` gives every battle the
+rules allow a visitor (docs/DEVTOOLS.md). LAYER_MAKE 92 (the stock rolls
+changed).
 
 **Lava and sea in BN6's engine (P1, in place):** BN5's lava and sea are
 panels BN6 lacks (its 8 is a volcano that erupts, which a step does not
@@ -1242,9 +1340,9 @@ Issue #82's C1, the ground call 4 stands on: Team Colonel's chips in
 BN6's own chip tables, so the pack, the folder, the Custom screen and
 BN6's battles take them by their ids as they take BN6's, the same ids at
 every boot, with BN5's ROM or without it. What is registered is the
-finer calls' subset (One net, above). Nothing in a run gives one of them
-yet: the run's finds, shops, traders and rewards come with the later
-milestones (Not yet, below); the chip step gives one (docs/DEVTOOLS.md).
+finer calls' subset (One net, above). Those that play in BN6's battles
+come into runs' finds, shops, traders and rewards since D1 (One net); the
+chip step gives any one (docs/DEVTOOLS.md).
 
 - **The registry** (`src/core/xchips_registry.c`, numbers only): 257 of
   BN5's chips, each with its id in BN6's tables and how it comes in. One
@@ -1370,10 +1468,8 @@ recipes in BN6's lists, and the battle's 32 Program Advance bits a side
 at `0x0203CA48`, which ids from 352 pass); its Navi chips (M7: AntiNavi's
 range, 221-280, and the battle's record of the last Navi chip at
 `0x0203C960`); the Library (M9: BN6's Mega, Giga and P.A. tabs by their
-own numbers, the profile's Library of 320 ids, the second screen's);
-the run's finds, shops, traders and rewards (the chip pool leaves BN5's
-chips out, and a reward of BN5's in BN5's own battles is still the
-stand-in's zenny); the folder editor's pack list, 0xA000 bytes, holds
+own numbers; the profile's Library of 512 ids and the second screen's
+came with D1, One net); the folder editor's pack list, 0xA000 bytes, holds
 1280 chip-codes where ids to 511 could make 2044 (no run comes near); the
 order stamps' clear at a NEW GAME covers BN6's 320 ids (the extension's
 start at 0 from the power-on clear); the link battle's copy of the pack
@@ -1618,7 +1714,15 @@ the next.
   buildings. Oran Isle, the harbour and the castle town would come as
   Seaside and Green Town do, copied whole.
 - [x] Its random battles in its own engine, on a second core, in the
-  areas it dresses (Guest battles, above).
+  areas it dresses (Guest battles, above); since D1 in BN6's engine
+  (One net: native territories), the second core only where a territory
+  is not native.
+- [x] Its viruses and BN6's meet: from act 2 one battle in four takes a
+  visitor of the other net, and the deep's acts draw on both nets' late
+  areas (One net: D1).
+- [x] Its chips in runs: half the finds and stock on its areas and in the
+  deep, its viruses' own rewards, the Library's count and the second
+  screen's list (One net: D1).
 - [x] Its guardians, in battles in its own engine: KnightMan, ShadowMan,
   TomahawkMan, NumberMan, ToadMan and Colonel guard the acts of the areas
   BN5 sets them in, in half the runs (Guest battles, above; docs/BOSSES.md).
@@ -1630,12 +1734,14 @@ the next.
   ids of their own and BN5's records, names, descriptions and art in
   BN6's tables grown to 512, placeholders where its ROM is not read.
   AirHoc, WideSht1-3, Spreader, DrilArm1-3, Geddon1-3 and Z Saver play
-  in BN6's battles; the rest sit out until their code is moved. Nothing
-  in a run gives one yet.
+  in BN6's battles; the rest sit out until their code is moved. Those
+  that play come into runs (One net: D1); a chip that sits out never
+  enters a pool.
 - [x] Its Navis in BN6's own engine (Transplanted Navis, above): Team
   Colonel's six and the Dark Soul moved, each proved against BN5's
   battle frame by frame (ToadMan's SP with BN5's sea's submerge, made
   again in BN6's engine; the Dark Soul with BN5's chip AI, its lists
   empty in BN6 for want of BN5's record of the chips MegaMan uses);
-  fought where a battle names their ids, not yet in a run.
+  fought where a battle names their ids, not yet in a run (BN5's
+  guardians are fought in BN5's engine for now).
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

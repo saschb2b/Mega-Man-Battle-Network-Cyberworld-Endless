@@ -96,6 +96,14 @@ typedef struct {
 	 * anonymous statistics' run's end (analytics.h) */
 	uint32_t played_run;
 	uint32_t played_frames;
+	/* where the nets meet (issue #82, docs/MULTIROM.md, One net): MegaMan
+	 * has said that an older net's area fights its own viruses our way,
+	 * named the first visitor of the other net, and said that both nets
+	 * meet in the deep */
+	uint8_t native_taught, visitor_taught, deep_taught;
+	/* the Library's ids 320-511 (the registry's chips of BN5's past BN6's
+	 * pack: xchips_registry.h), a bit each, beside `library` */
+	uint8_t library_x[24];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
