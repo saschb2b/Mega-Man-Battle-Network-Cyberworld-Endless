@@ -1,11 +1,12 @@
 """bn5_objects.py: BN5 Team Colonel's engine objects that BN6 Cybeast Gregar (USA) runs otherwise, each moved into BN6
-once, whole, for every track that spawns one (issue #82's plan for its tracks: the Navis, the virus families, the chips),
-and what each one's moved copy draws: the image object, and the sea's marker. Numbers only. tools/xnavirecipe.py builds the moved copies
-(src/emu/xnavi_bn5.c, xnavi_objects_bn5; installed by src/emu/xnavi_objects.c before any Navi, chip's code or family),
-checks this file against both ROMs, and refuses a recipe that spawns a kind this file leaves unfixed; the other tracks'
-generators read it for the kinds their code spawns and aim their calls into a module at its copy (tools/xrecipe.py for the
-families: WuNote's image; tools/xchiprecipe.py for the chips' code: the muzzle flashes; docs/MULTIROM.md, The engine's
-objects moved once; docs/ROM_DATA.md)."""
+once, whole, for every track that spawns one (issue #82's plan for its tracks: the Navis, the virus families, the chips,
+the Souls), and what each one's moved copy draws: the image object, and the sea's marker. Numbers only.
+tools/xnavirecipe.py builds the moved copies (src/emu/xnavi_bn5.c, xnavi_objects_bn5; installed by src/emu/xnavi_objects.c
+before any Navi, chip's code, family or Soul), checks this file against both ROMs, and refuses a recipe that spawns a kind
+this file leaves unfixed; the other tracks' generators read it for the kinds their code spawns and aim their calls into a
+module at its copy (tools/xrecipe.py for the families: WuNote's image; tools/xchiprecipe.py for the chips' code: the muzzle
+flashes; tools/xsoul.py for the Souls': the arm's flash in a Soul, ShadowSoul's sword, ToadSoul's charged shot;
+docs/MULTIROM.md, The engine's objects moved once; docs/ROM_DATA.md)."""
 
 # BN5's image object, the first kind's type 5 (an image an attack shows: a sprite by its kind, the object's +4). BN6's
 # type 5 is another object (its own kinds table at 0x080BA444, 52 kinds, other sprites and numbers), so BN5's type 5 is
@@ -125,4 +126,9 @@ IMAGE_COPIED = {
     0x34: (3, 0xEB, 'chips'),   # (3:0x33)
     0x35: (3, 0xEA, 'chips'),   # (3:0x38)
     0x36: (3, 0xE9, 'chips'),   # (3:0x39)
+    # the Souls' (tools/xsoul.py: ShadowSoul's sword family's 0x03, 0x0A and 0x32, MegaMan's buster's flash in a Soul and
+    # in Chaos Unison 0x23 and 0x33, at the places above), and ToadSoul's charged shot's 0x31 (BN5's sprite 3:0x1F, none of
+    # BN6's the same) at list 0's 0x4E, the Souls' own list: the kind's bytes fixed in the one copy, its sprite copied and
+    # listed by the Souls' install (src/emu/soulcode.c), list 0 grown by theirs alone (tools/xnavirecipe.py copies none for it)
+    0x31: (0, 0x4E, 'souls'),
 }

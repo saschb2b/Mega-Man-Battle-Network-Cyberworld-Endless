@@ -1329,6 +1329,15 @@ def objects_art(b5, alloc):
             alloc['effects'].setdefault(int(e5, 16), int(e6, 16))
 
 
+def shared_rows(units, b5):
+    """the rows of a type's own tables a later track spawns it with (tools/bn5_twins.py's SHARED_ROWS), fixed in each copy of
+    them the chips make: the one copy every track runs"""
+    for at, was, now, why in bn5_twins.shared_row_bytes(b5, 'chips'):
+        for u in units:
+            if any(lo <= at < hi for lo, hi, _, _ in u.blocks) and not any(x[0] == at for x in u.bytes):
+                u.bytes.append((at, was, now, why))
+
+
 def flash_kinds(helpers, units):
     """the image object's kinds the units spawn (its spawner's numbers, numbered_calls), each one tools/bn5_objects.py fixes
     in the moved objects' copy (its sprite BN6's twin or BN5's copied there, at a number of the chips' for the kinds only the
@@ -1933,6 +1942,7 @@ def main():
         units.append(derive(b5, b6, pairs, kind, n, label, alloc, number_of(kind, n), helper_at))
     flash_kinds(helpers, units[:len(UNITS)])
     units = helpers + units
+    shared_rows(units, b5)
     report(units, os.path.join(WORK, 'report.md'))
     print(f'xchiprecipe: {len(units)} units derived, {sum(1 for u in units if not u.f.decisions)} with no decision open; '
           f'{os.path.join(WORK, "report.md")}')

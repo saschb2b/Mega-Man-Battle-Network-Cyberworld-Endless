@@ -183,6 +183,8 @@
 #define BN5_OPT_RUN       0x20     /* BattleSettings +8 options: running allowed (its random battles), as BN6's */
 #define BN5_CHIP_KIND     6        /* a chip record's +6: its kind, 0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Recovery, 5 Plus, 6 Sword, 7 Invisible,
                                     * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
+#define BN5_CHIP_DARK_GATE 0x15    /* a chip record's +0x15: 0 none; 1 usable only while his dark meter is 470 or more (not dark: HolyDrem, a Navi's
+                                    * V1 and SP chips), else only below it (dark: BlakWing, the DS chips); his chip use's test 0x08010110 */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
 /* Its Souls (docs/META.md, Souls in BN5 territory; docs/ROM_DATA.md, BN5's
  * Souls): the Custom screen's UNITE command, its Double Soul */
@@ -223,6 +225,7 @@
 /* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan
  * unites with (BN5_SOUL_FLAGS) */
 enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN };
+#define BN5_COLONEL_ID    0x125       /* Colonel's enemy ids, V1, V2, V3 and SP, from here (the differential's colonel_v1: 0x125) */
 
 #define BN5_MODE_GAME      0x04   /* BN5_TOOLKIT: the game (the main mode, the index eToolkit +0 points at) */
 #define BN5_MODE_GAME_OVER 0x14   /* BN5_TOOLKIT: its GAME OVER */
@@ -346,4 +349,38 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
                                        * attacks' objects): BN6_COLONEL_TABLE in BN6 */
 #define BN5_CHAOS_FAIL_SPAWN 0x08006AAEu /* where a failed Chaos Unison spawns the Dark Soul (BN5_DARK_SOUL_ID) on the other side */
 
+/* The Souls' look and abilities in BN6's engine (src/emu/soullook.c, soulpower.c, soulcode.c; the Souls track's S3-S5) */
+#define BN5_SOUL_LOADOUTS 0x0801CA18u /* each form's loadout, 6 bytes (AI data +4-+8, +0x11; BN6_FORM_LOADOUTS'): the Souls' 7-12, */
+#define BN5_SOUL_LOADOUTS_REF 0x0800DCFCu /* ... the word naming it */
+#define BN5_CHARGE_TIMES  0x0801CA68u /* the power attacks' charge times, 5 halfwords an id by the buster's Charge (BN6_CHARGE_TIMES'), */
+#define BN5_CHARGE_TIMES_REF 0x080106E0u /* ... the word naming it */
+#define BN5_SOUL_ELEMENTS 0x0800E62Cu /* each form's element (0x0800E5F8): TomahawkSoul's 4 Wood, ToadSoul's 2 Aqua, the rest of Colonel's none */
+#define BN5_SOUL_ENTER    0x0800F030u /* each form's routine as he enters it (0x0800F01C, from the unison's phase 2): NumberSoul's 0x0800F075, */
+#define BN5_SOUL_LEAVE    0x0800F094u /* ... as he leaves it (0x0800F080): NumberSoul's 0x0800F0D7, */
+#define BN5_FORM_NULLSUB  0x0800F195u /* ... the other Souls' empty one */
+#define BN5_SOUL_READY    0x08011BA4u /* each form's passives as he unites (0x08011B8A, after his loadout): ShadowSoul's FloatShoe 0x08011C79, */
+#define BN5_SOUL_REAPPLY  0x08011CCCu /* ... and as a form's state is set again (0x08011CB4, from 0x08011144): ShadowSoul's 0x08011D2B; */
+#define BN5_THUMB_RETURN  0x46F7u     /* ... a form with none: its entry a routine of mov pc,lr alone */
+#define BN5_ARM_LISTS     0x080151B8u /* a word a list: its rows of an arm's points by sprite number, 0x3C bytes a row (0x080151A8, through its */
+#define BN5_ARM_ROW_SIZE  0x3C        /* ... literal 0x080151B4; BN6's rows 0x44, by a row byte for list 0): list 0's the Souls' at their numbers 7-12 */
+#define BN5_UNITE_IMAGE_PHASE 0x08012008u /* the unison's phase 1 (its table 0x08011F8C): the Soul's image (0x080C060C), sounds 0x8D/0x143 */
+#define BN5_SOUL_FACES_REF 0x080197F0u /* the word naming the Souls' faces in the emotion window (0x087417FC, 0x100 bytes by the Soul - 7), */
+#define BN5_FACE_PALS_REF 0x08019800u /* ... the faces' palettes (0x08742AFC, 0x20 bytes by the face: the Soul's at the Soul - 2), */
+#define BN5_FACE_DIGITS_REF 0x08019854u /* ... the count's digits under them (0x08741DFC, 0x80 bytes by 10 - the count) */
+#define BN5_FACE_SOUL     5           /* the face of the first Soul, 7 (BN5's 0x0801AF68: the Soul - 2) */
+#define BN5_FLASH_SOUL    0x23        /* the arm flash's kind of MegaMan's buster in a Soul (0x080EBBCA), its frame the Soul; */
+#define BN5_FLASH_CHAOS   0x33        /* ... in Chaos Unison (0x080EBC04) */
+#define BN5_FLASH_SPAWN   0x080B9CAEu /* the arm flash's spawner (r4 its word, r5 its owner, r7 where its object goes): the first kind's */
+                                      /* type 5, BN5's object (0x080B9B81) with BN5's kinds (0x080B9A5C), moved with the Souls' code */
+
+/* ColonelSoul's button and strike (src/emu/soulcolonel.c, moved by tools/xsoul.py) */
+#define BN5_COLONEL_PHASE0 0x080236BCu /* mode 0x38's phases (its table 0x080236B4): the last pick into the button, its icon to OBJ 0x06016EC0, */
+#define BN5_COLONEL_PHASE1 0x080236E8u /* ... its blink, 30 frames, and back to mode 4 (the lit rules again, 0x08024A2A) */
+#define BN5_COLONEL_DRAW  0x080254F8u /* the loaded chip drawn on the button (an OBJ, its tile 0x376, palette 10), modes 4 and 0x24 each frame */
+#define BN5_COLONEL_ART   0x08024180u /* the word naming ColonelSoul's button's tiles on the chips' screen (type 8's draw, 0x0802415E):
+                                         0x086FBA88, 0x180 bytes lit and chosen, then 0x180 grey */
+#define BN5_COLONEL_INFO_ART 0x080245C4u /* ... its picture in the chip's window (0x080245A4): 0x087508BC, 0x540 bytes, */
+#define BN5_COLONEL_INFO_PAL 0x080245C8u /* ... its palette: 0x08750E1C, 0x20 bytes, */
+#define BN5_COLONEL_NAME_PAL 0x08024650u /* ... and its name line's (0x0802460A): 0x086FC1E8, 0x20 bytes */
+#define BN5_COLONEL_STRIKE_SPAWN 0x080CABCAu /* the obstacle strike's spawn: the third kind's 0x30 at r0, r1, its side r3 (0x08018026) */
 #endif

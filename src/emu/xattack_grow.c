@@ -55,3 +55,16 @@ bool xattack_grow(void) {
 	claims_end();
 	return true;
 }
+
+bool xattack_set(int family, uint32_t routine) {
+	uint32_t at = xattack_entry(family);
+	if (family < XATTACK_BN6_END || !at || !(routine & 1) || emu_read32(BN6_ATTACK_FAMILIES_REF) != XATTACK_TABLE) return false;
+	uint32_t was = emu_read32(at);
+	if (was == routine) return true;
+	if (was != (XATTACK_STUB | 1u)) return false;
+	/* (the table's bytes stay its own, whoever fills an entry: claims.h) */
+	claims_begin(XATTACK_CLAIMS);
+	emu_write32(at, routine);
+	claims_end();
+	return true;
+}

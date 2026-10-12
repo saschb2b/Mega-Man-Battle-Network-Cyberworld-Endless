@@ -1,0 +1,252 @@
+{
+ "about": "BN5's KnightSoul's plain buster in both engines (the Souls track's S3): KnightSoul united as soul_knight_shot unites it (its flag 000C, souls6 0x10, a deck of JustcOne J, UNITE and OK on the first Custom screen), then B tapped four times (t100, t130, t160, t190): each shot's arm flash BN5's own object, the image object (the first kind's type 5, moved with its kinds table, the tracks' allocations: BN6's table grown by none), its kind BN5's 0x23 and its frame the Soul (0x0B) in both, BN6's buster routine's call of its spawner sent to BN5's spawner moved (src/emu/soullook.c), its sprite BN5's (list 3's 3, copied as list 0's 0x4C), at its kind's height; the shots strike CanGard V1 at (4,2), MegaMan at (3,2), his buster at Attack 3 (2:0:0) with 2000 HP, kept from harm. Every frame compared, MegaMan's own state a difference.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 260,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "2:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "12D8"
+ ],
+ "deck5": [
+  "12D8"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   2
+  ],
+  [
+   130,
+   "B",
+   2
+  ],
+  [
+   160,
+   "B",
+   2
+  ],
+  [
+   190,
+   "B",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     260,
+     "0x0B"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x800"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ],
+   "hp": [
+    [
+     260,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course (its trace, the reference): KnightSoul united from t1 (its AI index 11, its turns 3, its used bit 0x800 for the battle, UNITE chosen on the first screen) to the spec's end; MegaMan never hit (safe)."
+}

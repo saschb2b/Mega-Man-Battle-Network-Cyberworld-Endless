@@ -62,6 +62,10 @@ void xg_set_word(int t, uint32_t i, uint32_t v);
  * address). Each entry must be blank in the core's copy, or set to the same
  * by a family before (a type two families' code spawns). */
 void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine);
+/* Whether entry i of grown table t holds another install's entry in the
+ * core's copy (neither BN6's own nor the table's fill): a later install
+ * that shares it finds it so. */
+bool xg_taken(int t, uint32_t i);
 /* The names' archive's bytes in use in the core's copy: where a family's
  * names go on. */
 uint32_t xg_names_end(void);

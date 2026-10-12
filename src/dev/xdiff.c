@@ -30,6 +30,7 @@
  * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
 
+#include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -405,6 +406,20 @@ static void seed(Side *g, const Spec *s) {
 	g->nbegun = 0;   /* (the fight's sounds from here) */
 }
 
+/* (shot=) the pictures of this frame of a Custom screen: the core's picture, as the canvas shows it */
+static void shots_take(const Side *g, const Spec *s) {
+	for (int i = 0; i < s->nshots; ++i) {
+		const Shot *h = &s->shots[i];
+		if (h->game != g->v.game || h->screen != g->screen || h->frame != g->custom) continue;
+		static uint32_t px[EMU_W * EMU_H];
+		const uint32_t *v = g->v.game == 5 ? guest_video() : emu_video();
+		for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
+		SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+		if (!f || SDL_SaveBMP(f, h->path) != 0) fprintf(stderr, "xdiff: %s not saved\n", h->path);
+		SDL_FreeSurface(f);
+	}
+}
+
 /* One frame of a battle: each Custom screen passed by its keys (custom_keys)
  * from its window's opening; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -434,6 +449,7 @@ static bool step(Side *g, const Spec *s) {
 	}
 	v->frame(keys);
 	++g->frame;
+	if (custom && g->custom >= 0) shots_take(g, s);
 	sub = v->rd8(v->gamestate);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
@@ -617,7 +633,7 @@ static bool subject(Side *g, const Spec *s) {
 	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	xchips_install();
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
-	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak))) {
+	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak, s->soulbreak))) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}
@@ -723,6 +739,13 @@ static bool reference(Side *g, const Spec *s) {
 /* Each core's hooks, once both battles are made (BN5's code is the families' as xvirus_moved has it), and the
  * subject's draws replayed from the reference's where the spec says so; false where they cannot be */
 /* the spec's families: those its foes are versions of; their code alone is the families' in its traces */
+/* (a BN5 Colonel among the foes: his side arms the obstacle strike, whose soldier runs other tracks' copies, xstrike.h) */
+static bool colonel_foe(const Spec *s) {
+	for (int i = 0; i < s->nfoes; ++i)
+		if (s->foes[i].id >= BN5_COLONEL_ID && s->foes[i].id <= BN5_COLONEL_ID + 3) return true;
+	return false;
+}
+
 static int spec_families(const Spec *s, const XVirusFamily **fams) {
 	int n = 0;
 	for (int i = 0; i < s->nfoes; ++i)
@@ -780,6 +803,7 @@ int xdiff_run(const char *text) {
 	xd_log_units(s.folder[1], s.nfolder[1]);
 	const XVirusFamily *fams[MAX_FOES];
 	xd_log_shared(fams, spec_families(&s, fams));
+	if (s.souls6 || colonel_foe(&s)) xd_log_routes();
 	bool ra = s.bn5 && reference(&a, &s), rb = s.bn6 && subject(&b, &s);
 	if ((s.bn5 && !ra) || (s.bn6 && !rb)) {
 		fprintf(stderr, "xdiff: a battle could not be begun\n");

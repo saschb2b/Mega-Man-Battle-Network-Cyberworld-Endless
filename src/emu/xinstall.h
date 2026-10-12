@@ -8,7 +8,10 @@
  * `families` names (xvirus.h, XVIRUS_*: they spawn the chips' copies of
  * the types they share, as tools/bn5_twins.py's TYPES gives each moved
  * type one copy, the first track's in this order), then BN5's sea's
- * submerge (xsea.h) where its sea came in. A track whose copies another's
+ * submerge (xsea.h) where its sea came in, then where BN5's Navis came in
+ * the Souls' moved code and BN5's obstacle strike (xstrike.h: a Navi
+ * Colonel's side arms it as ColonelSoul's does; the Souls' code spawns the
+ * other tracks' copies of the types it shares). A track whose copies another's
  * needs left out (--dev nonavis) leaves that other's install failing, its
  * reason logged. */
 #ifndef CW_XINSTALL_H

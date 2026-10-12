@@ -41,7 +41,7 @@
 #define XC_UNITS     64                    /* ... this many units */
 #define XC_CODE      (XC_HOMES + XC_HOME_SIZE * XC_UNITS)   /* the units' code, block by block, to: */
 #define XC_ART       (FREE_CHIP_CODE + 0xA0000u)            /* what they draw, to XC_END */
-#define XC_END       FREE_TAIL
+#define XC_END       FREE_SOULS_ART
 #define XC_ROUTINES  256                   /* entries in each grown routines' table */
 #define XC_FIRST_SUPPORT BN6_CHIP_ROUTINE_COUNT    /* the units' support routines from here, */
 #define XC_FIRST_NAVI    BN6_NAVI_ROUTINE_COUNT    /* ... their Navi routines from here */

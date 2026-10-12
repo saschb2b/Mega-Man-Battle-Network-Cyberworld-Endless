@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **One copy of BN5's code for every track, and the obstacle strike for
+  either Colonel (issue #82).** The Souls' code runs the copies the Navis
+  and the chips made of what it shares (one copy of each moved object,
+  one number for each BN5 effect and sprite) and is installed with the
+  rest of BN5's code where its Navis are. An obstacle on the side
+  opposite an armed Colonel turns into BN5's soldier whether that
+  Colonel is BN5's Navi fought in BN6's engine or ColonelSoul, both
+  arming one field, and the soldier is drawn with BN5's own sprite (it
+  had been BN6's picture of the same number). BN5's DarkChips are
+  compared with the Souls held, BN5's dark rule in place.
+
 - **The older net's areas fight in BN6's engine, its chips come into
   runs, and the nets meet (issue #82, D1).** Where BN5's ROM is read, an
   area of its that dresses an act fights its own random battles, its own
@@ -154,6 +165,47 @@
   frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
   Aqua hit. Nothing in a run uses them yet; BN5's records on them now
   wait only for their viruses (one of Nebula Area's is fightable).
+- **BN5's Souls look and fight as BN5's in BN6's battles (issue #82).**
+  Still behind the developer switch, a Soul united is now BN5's own:
+  MegaMan drawn from BN5's sprite of the Soul in its colours, the Soul's
+  image and sounds as he unites (TomahawkSoul landing with a shake), its
+  face and turns in the emotion window, and each Soul's charged shot
+  BN5's own code, moved into BN6's engine: ColonelSoul's ScreenDivide,
+  ShadowSoul's slash, NumberSoul's bomb, TomahawkSoul's swing,
+  KnightSoul's wrecking ball (it confuses) and ToadSoul's sound waves
+  (they paralyse), with BN5's charge times, effects, sounds and arm
+  flashes, and the Soul's element. Its passives as it unites come too (ShadowSoul's
+  float shoes, TomahawkSoul's grass, ToadSoul's sea flag), and NumberSoul
+  deals a hand of ten and adds 10 to a plain attack chip. The
+  frame-by-frame comparison with BN5's own battle holds each Soul's shot
+  there, and a deliberate break of each part is caught. What a Soul
+  does to chips comes too: A held charges a chip of the Soul's kind
+  (ShadowSoul's swords, KnightSoul's Break chips and ToadSoul's Aqua
+  chips, the last two doubled), TomahawkSoul's Wood chip is doubled on
+  grass and grass heals him, KnightSoul is unharmed for a moment after a
+  chip used from his front column, and ShadowSoul's B+Left stance
+  counters as BN5's, the effects BN6 draws otherwise drawn as BN5's.
+  ShadowSoul's charged sword now matches BN5's with no enemy in reach as
+  well: a branch in its moved code had been split from the instruction
+  it jumps to. ColonelSoul's own come in full: his button on the Custom
+  screen, BN5's in look and rule, lights for a plain attack chip picked
+  last; A drops that chip into it, B gives it back, and OK keeps it for
+  his charged shot, which fires it (ScreenDivide without one). While he
+  is united, an obstacle on the enemy's area with an enemy before it
+  turns into BN5's soldier, which fires three shots. Still to come:
+  Chaos Unison's charge.
+- **BN5's mood and its DarkChips in BN6's battles (issue #82).** Behind
+  the same developer switch, BN6's battles keep BN5's mood beside their
+  own: hits taken worry MegaMan, hits landed and counters lift him, and a
+  battle opens as worried as his HP. While he worries, one of BN5's
+  DarkChips in his folder comes into his hand at the end, the cursor on
+  it, and none before; used, he is dark for the rest of the battle (no
+  Cross, no Beast Out, a weak buster). BN6's own DarkChips keep BN6's
+  rule. UNITE does not stand while he worries or is dark, and BN5's rule
+  that BlakWing and a Navi's DS chip work only while he is dark, HolyDrem
+  and a Navi's other chips only while he is not, is in place for when
+  their code comes. Each is compared with BN5's own battle frame by
+  frame.
 - **UNITE on BN6's Custom screen, and a Soul's life as BN5 runs it
   (issue #82).** Behind a developer switch until the Souls are whole,
   BN5's Souls unite in BN6's battles: the emblem under OK becomes BN5's

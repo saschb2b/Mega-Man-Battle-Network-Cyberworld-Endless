@@ -432,6 +432,12 @@ def image_kinds_fixed(r, src, b6, alloc):
                 f.decide('image', f'its kind {k:#x}: BN5\'s sprite {lst}:{i5:#x} is not BN6\'s {tl}:{ti:#x} ({same})')
             elif ti != i5:
                 r.bytes.append(dict(at=at + 1, was=i5, now=ti, why=f'its kind {k:#x}: BN5\'s sprite {lst}:{i5:#x}, BN6\'s {tl}:{ti:#x} the same bytes'))
+        elif k in OB.IMAGE_COPIED and OB.IMAGE_COPIED[k][2] == 'souls':
+            # (a kind of the Souls' alone, its sprite in their own list 0: its bytes fixed here, its sprite copied and listed by
+            # the Souls' install, src/emu/soulcode.c, as it grows list 0)
+            tl, ti, _ = OB.IMAGE_COPIED[k]
+            why = f'its kind {k:#x}: BN5\'s sprite {lst}:{i5:#x}, the Souls\' at {tl}:{ti:#x} (their install copies and lists it)'
+            r.bytes += [dict(at=at + n, was=w, now=v, why=why) for n, w, v in ((0, l5, 4 * tl), (1, i5, ti)) if w != v]
         elif k in OB.IMAGE_COPIED:
             tl, ti, track = OB.IMAGE_COPIED[k]
             to, x = alloc.shared(src, lst, i5, fixed=(tl, ti))
@@ -1433,6 +1439,15 @@ def pairs_with_navis(b5, b6):
     return pairs
 
 
+def shared_rows(recipes, b5):
+    """the rows of a type's own tables a later track spawns it with (tools/bn5_twins.py's SHARED_ROWS), fixed in each copy of
+    them the Navis make: the one copy every track runs"""
+    for at, was, now, why in bn5_twins.shared_row_bytes(b5, 'navis'):
+        for r in recipes:
+            if any(lo <= at < hi for lo, hi, _, _ in r.blocks) and not any(b['at'] == at for b in r.bytes):
+                r.bytes.append(dict(at=at, was=was, now=now, why=why))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--check', action='store_true', help='write nothing: fail where the C file is not what this writes')
@@ -1447,6 +1462,7 @@ def main():
     for ai, label in NAVIS:
         recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
     objects = derive_objects(b5, b6, pairs, alloc)
+    shared_rows([r for r, _ in recipes[1:]] + [objects], b5)
     if a.report:
         done = {r.ai5 for r, _ in recipes[1:]}
         more = [(derive(b5, b6, pairs, ai, slot_of(ai), alloc), f'AI {ai}') for ai in (a.ai or SIX + (DARK_SOUL,)) if ai not in done]

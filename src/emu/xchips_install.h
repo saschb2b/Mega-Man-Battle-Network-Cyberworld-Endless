@@ -23,5 +23,9 @@
  * chips' moved code installed first where its ROM is read (xchips_code.h);
  * true where the core's copy holds the chips' tables. */
 bool xchips_install(void);
+/* BN5's DarkChips of their own (the registry's XREG_DARK) dealt into the
+ * battle's deck (on) where BN5's mood and its DarkChip rule shelve them
+ * (soulmood.c), or sat out of it as before (off) */
+void xchips_dark_shelved(bool on);
 
 #endif

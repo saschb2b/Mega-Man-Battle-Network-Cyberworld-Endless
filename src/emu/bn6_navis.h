@@ -85,8 +85,10 @@
 /* BN5's Colonel's table moved (issue #82's RAM plan, RAM_COLONEL): BN5 keeps two 8-byte entries by alliance at 0x02034000 */
 #define BN6_BATTLE_BITS       0x5C        /* BattleState +0x5C (bits as BN5's but none a Colonel's: 1, 2, 4 and 8 the sides', 0x10 the field's
                                              slide as a battle ends, BN5's 0x40: set at 0x080E19CA, read at 0x08001A7E) */
-#define BN6_COLONEL_SIDES     0x0203FDA0u /* the moved Colonel's sides' bits, as BN5 keeps them in BN5_BATTLE_BITS (0x10 side 0, 0x20 side 1):
-                                             his write aimed here (XN_STUB_SIDES), BN6's own bits left alone; zeroed with the battle's RAM */
+#define BN6_COLONEL_SIDES     0x0203FDA0u /* a Colonel's sides' bits, as BN5 keeps them in BN5_BATTLE_BITS (0x10 side 0, 0x20 side 1): the moved
+                                             Navi's write aimed here (XN_STUB_SIDES), ColonelSoul's ready's too (xstrike.c), the obstacle strike
+                                             reading them; BN6's own bits left alone; zeroed with the battle's RAM */
+#define BN6_COLONEL_SIDE0     0x10u       /* ... side 0's bit, side 1's the next */
 #define BN6_COLONEL_TABLE     0x0203FF60u /* the moved Colonel's two entries, zeroed with the battle's RAM as each battle is set up (0x080071F2) */
 /* What BN5's engine does for the Dark Soul by its id (BN5_DARK_SOUL_ID) that BN6's twins do for no id: xnavi_dark.c makes it
  * for the moved one's */

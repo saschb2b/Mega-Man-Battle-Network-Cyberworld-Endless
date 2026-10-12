@@ -1,0 +1,148 @@
+{
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "safe": true,
+ "about": "BN5's dark gate in BN6's engine (the Souls track's S7): KnightSoul held (the Souls, and with them the mood, installed), BlakWing W first in the deck (BN5's 214, the registry's 293), picked and used at t100 while MegaMan is not dark: BN5's chip use refuses it (0x08010110: its record's +0x15 is 2, usable only while dark) and uses the chip of nothing (0x185, family 0x1A's spawner 3); BN6's engine refuses it as BN5 does (src/emu/soulmood.c's soulmood_chip_refused at the chip use's end): 0x185, family 0x1C's spawner 3, frame for frame. HolyDrem (+0x15 1) the other way round; a Navi's V1 and SP chips as HolyDrem, its DS chip as BlakWing.",
+ "frames": 400,
+ "folder5": [
+  "2CD6",
+  "3401"
+ ],
+ "folder6": [
+  "2D25",
+  "3401"
+ ],
+ "deck5": [
+  "2CD6",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "deck6": [
+  "2D25",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "expect": {},
+ "expect_why": "The gate's numbers: BN5's chip records' +0x15 (0x0801E210 + 0x2C x id): BlakWing 2, HolyDrem 1, the six Navis' V1 and SP 1, DS 2; BN5's test reads his dark meter (0 none, 1 usable at 470 and over, else under it), BN6's engine the battle's dark (a BN5 DarkChip used): no meter comes into a run. The dud: 0x080100E4-0x080100F0 (its spawner 3, its word 0, its chip 0x185, family 0x1A), BN6's 0x185 record's family 0x1C, its twin, spawner 3 at 0x08010488 (BN5's 0x0800E190)."
+}

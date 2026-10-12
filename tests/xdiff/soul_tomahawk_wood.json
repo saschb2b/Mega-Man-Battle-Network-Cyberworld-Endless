@@ -1,0 +1,216 @@
+{
+ "about": "BN5's TomahawkSoul's Wood chip on grass in both engines (the Souls track's S5): TomahawkSoul united (its flag 000B, souls6 0x08) with a deck of Boomer (BN5's A, 6; BN6's J, 116: Wood, its kind), two picked, the last given up for UNITE; its passive makes the field grass (BN5 0x08011C90, moved); A at t100: the Boomer used on grass doubled (BN5's modifier 0x08010322: his damage's 0x8000; BN6's 0x0801285E answered so for TomahawkSoul, src/emu/soulchips.c) and the panel under him made plain (BN5's case 4, 0x0800FFCA; the Souls' Thumb calls BN6's object_setPanelType 0x0800CC0A), the modifier's sound 0x87. The two Boomers are each game's own (60 and 100): the spec ends as it is used (t102), its numbers read by each game's own record.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 102,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000B",
+  "0236"
+ ],
+ "folder5": [
+  "0006"
+ ],
+ "deck5": [
+  "0006"
+ ],
+ "folder6": [
+  "1274"
+ ],
+ "deck6": [
+  "1274"
+ ],
+ "souls6": "08",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: TomahawkSoul united from t1, the field grass, the Boomer used at t102 doubled, the panel (2,2) plain."
+}

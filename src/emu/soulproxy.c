@@ -21,6 +21,8 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "soullook.h"
+#include "soulpassive.h"
 #include "xvirus_grow.h"
 
 #define BUS 0x08000000u
@@ -57,9 +59,30 @@ static bool rom_is(uint32_t at, const uint8_t *want, uint32_t n) {
 	return at >= BUS && at - BUS + n <= ROM_SIZE && !memcmp(R.data + (at - BUS), want, n);
 }
 
-/* (r0 MegaMan's form: the proxy's chip bonus, and his arm flash's look, are HeatCross's) */
-static HookAct heat_form(HookRegs *r, void *user) {
+/* (r0 MegaMan's form, r4 the chip, r5 him: the proxy's chip bonus is HeatCross's; a Soul's BN5's, soulpassive.c) */
+static HookAct heat_bonus(HookRegs *r, void *user) {
 	(void)user;
+	int bonus, look;
+	if (r->r[0] == BN6_FORM_PROXY && soulpassive_bonus(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, (int)r->r[4], &bonus, &look)) {
+		r->r[6] += (uint32_t)bonus;
+		r->r[7] = (uint32_t)look;
+		r->r[12] = BN6_CHIP_BONUS_DONE | 1;
+		return HOOK_JUMP;
+	}
+	if (r->r[0] == BN6_FORM_PROXY) r->r[0] = BN6_FORM_HEAT_CROSS;
+	return HOOK_CONTINUE;
+}
+
+/* (r0 MegaMan's form, r5 him: the proxy's arm flash is HeatCross's; a Soul's BN5's, its kind in r4 and its frame the
+ * Soul, soullook.c) */
+static HookAct heat_flash(HookRegs *r, void *user) {
+	(void)user;
+	int kind, frame;
+	if (r->r[0] == BN6_FORM_PROXY && soullook_flash(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, &kind, &frame)) {
+		r->r[0] = (uint32_t)frame;
+		r->r[4] = (uint32_t)kind;
+		return HOOK_CONTINUE;
+	}
 	if (r->r[0] == BN6_FORM_PROXY) r->r[0] = BN6_FORM_HEAT_CROSS;
 	return HOOK_CONTINUE;
 }
@@ -100,8 +123,8 @@ bool soulproxy_install(int breaks) {
 	claims_begin(SOULS_CLAIMS);
 	for (size_t i = 0; !(breaks & SOULPROXY_BREAK_TABLES) && i < sizeof tables / sizeof *tables; ++i)
 		emu_write(tables[i].at + tables[i].size * BN6_FORM_PROXY, tables[i].heat, tables[i].size);
-	bool hooked = ((breaks & SOULPROXY_BREAK_BONUS) || emu_hook(BN6_CHIP_BONUS_HEAT, heat_form, NULL)) &&
-		((breaks & SOULPROXY_BREAK_FLASH) || emu_hook(BN6_ARM_FLASH_FORM, heat_form, NULL)) &&
+	bool hooked = ((breaks & SOULPROXY_BREAK_BONUS) || emu_hook(BN6_CHIP_BONUS_HEAT, heat_bonus, NULL)) &&
+		((breaks & SOULPROXY_BREAK_FLASH) || emu_hook(BN6_ARM_FLASH_FORM, heat_flash, NULL)) &&
 		((breaks & SOULPROXY_BREAK_SUMMON) || emu_hook(BN6_CROSS_SUMMON, summon, NULL));
 	claims_end();
 	printf("soulproxy: form %d made HeatCross's copy: %d tables and its object id written%s%s\n", BN6_FORM_PROXY, (int)(sizeof tables / sizeof *tables),

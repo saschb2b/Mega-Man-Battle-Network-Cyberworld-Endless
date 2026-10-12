@@ -18,6 +18,7 @@
 #define BN6_FORM_SPRITES      0x0800FCBCu /* u8 a form: MegaMan's sprite, its number in his category (0x0800FC9E reads it; Crosses 0, his own) */
 #define BN6_FORM_OVERLAYS     0x0801127Cu /* u32 a form: the routine that spawns a Cross's overlay as he crosses (0x08011268 calls it) */
 #define BN6_FORM_OVERLAYS_END 0x08011398u /* u32 a form: the routine that takes it away as he leaves the form (0x08011384) */
+#define BN6_FORM_OVERLAY_NONE 0x08010F68u /* mov pc,lr: BN6_FORM_OVERLAYS' entry 0 (no form), no overlay */
 #define BN6_FORM_ELEMENTS     0x080108B8u /* u8 a form: his element (0x0801086C, into his object +0x0E and collision data +2) */
 #define BN6_FORM_WEAKNESSES   0x080108D1u /* u8 a form: the second wheel's elements he is weak to (0x0801086C, into collision data +0x18) */
 #define BN6_FORM_PASSIVES     0x08014550u /* u32 a form: the routine giving his AI data the form's passive (0x08014536: an Airshoe, a SuperArmor) */
@@ -61,7 +62,7 @@
 #define BN6_SOUL_PHASE        0x03        /* u8 the Chaos Unison's charge phase (BN5's AIData +0x1F; the track's S6, 0 until then) */
 #define BN6_SOUL_CHIP         0x04        /* u16 ColonelSoul's chip (BN5's AIData +0x32; S5, 0 until then) */
 #define BN6_SOUL_LEVEL        0x06        /* u8 the chaos level (BN5's AIData +0x6C; S6, 0 until then) */
-#define BN6_SOUL_OPENED       0x07        /* u8 1 once the battle's opening set his mood (BN6_BATTLE_MOOD) as worried as his HP says */
+#define BN6_SOUL_OPENED       0x07        /* u8 1 once the battle's opening set his mood (BN6_SOUL_MOOD) as worried as his HP says */
 #define BN6_SOUL_NEXT         0x08        /* u8 the Soul the Custom screen committed (OK), taken as form BN6_FORM_PROXY is entered; 0 none */
 #define BN6_SOUL_NEXT_CHAOS   0x09        /* u8 ... 1 for its Chaos Unison */
 #define BN6_SOUL_NEXT_TURNS   0x0A        /* u8 ... its turns (3, 1 for Chaos Unison: BN5's OK, 0x08024FFA) */
@@ -69,7 +70,11 @@
 #define BN6_SOUL_STANDS       0x0C        /* u8 what stands under OK on this Custom screen: BN6_STANDS_UNITE, BN6_STANDS_BEAST */
 #define BN6_SOUL_SCREEN       0x0D        /* u8 1 once a Custom screen has opened with the Soul united: its end waits for the turn's start after it
                                              (BN6 checks a form's end before the screen too, 0x0800840C; BN5 alone after it, 0x08007D0C) */
+#define BN6_SOUL_MOOD         0x0E        /* u8 the side's mood as BN5 keeps it (BN5_BATTLE_MOOD's: 0 dark, 1-0x40 worried, 0xFF Full Synchro;
+                                             src/emu/soulmood.c), beside BN6's own (BN6_NAVI_MOOD) */
+#define BN6_SOUL_DARK         0x0F        /* u8 1 once a BN5 DarkChip made the side dark for the battle (BN5's use byte, never BN6's byte 2) */
 #define BN6_SOUL_USED         0x10        /* u32 the Souls united this battle: bit n Soul n, bit 16 + n its Chaos Unison (BN5_SOULS_USED's layout) */
+#define BN6_SOUL_NEXT_CHIP    0x14        /* u16 the chip ColonelSoul's button took, committed at OK, 0 none (BN5's Custom record +6, 0xFFFF none) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
@@ -99,6 +104,7 @@
 #define BN6_NAVI_FORM         0x2C        /* a battle NaviStats' +0x2C: its side's form (BN6_BATTLE_FORM's) */
 #define BN6_NAVI_SIDE_NAVI    0x29        /* a battle NaviStats' +0x29: the Navi it is, 0 MegaMan (the turns count down for him alone, 0x08015A16) */
 #define BN6_AI_ANGER          0x34        /* u16 a player's AI data +0x34: his anger's frames (both games' emotion getters: 3, which UNITE stands in) */
+#define BN6_AI_FLAGS          0x44        /* u32 a player's AI data +0x44: his requests (0x40 to leave his form: 0x08015994; 0x4000 to enter one) */
 #define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */
 /* The hooks (soulunite.c, soullife.c; docs/EMULATION.md, Hooks) */
 #define BN6_UNITE_STAND       0x08027EC6u /* tst r0,r0 after Beast Out's test (0x08029FB0, r0) in the Custom screen's set-up: element 0xB stands */
@@ -129,5 +135,150 @@
                                              chips' icons, where BN5's are 0x0874B2BC (BN5_SOUL_PICTURES) */
 #define BN6_UNITE_PICTURES_2  0x08028200u /* ... the same word in its routine 0x080281E4, whose only caller is mode 0x24 (0x080271A2) */
 #define BN6_UNITE_PICTURE_PAL 0x080270C4u /* mode 0x24's word naming the picture's palette (0x0872AED0, 0x20 bytes) */
+
+/* A Soul's look (soullook.c; the Souls track's S3): where BN6's engine
+ * draws MegaMan by his form, hooked for the proxy form with a Soul */
+#define BN6_T1_PARAM          0x04        /* its spawn's parameters, r4's bytes (a Soul's image: the Soul; an arm's flash: its kind) */
+#define BN6_SPRITES_MEGAMAN   0           /* sprite list 0: MegaMan's (+0 him, 1-12 his Beast Outs), by RomLayout.sprite_lists' first word, */
+#define BN6_SPRITES_MEGAMAN_COUNT 14      /* ... its numbers (0x08031CEC on, list 1's after them; 13 the placeholder): code reads list 0 past them, */
+#define BN6_SPRITES_THROUGH   0x45        /* ... into lists 1 and 2's tables after it, the battle sprites (a Falzar Navi on the map: list 0's
+                                             0x34-0x38, list 2's 6-10), to this: list 3's table at 0x08031E00 */
+#define BN6_SPRITES_LIST3     3           /* ... list 3, whose word names list 0's table + 4 x BN6_SPRITES_THROUGH */
+#define BN6_ARM_LISTS         0x080188A0u /* a word a list (0-2): its rows of an arm's points, 0x44 bytes a row, two signed bytes a point by */
+#define BN6_ARM_ROW_SIZE      0x44        /* ... the animation (0x08018886, through its literal 0x0801889C; 0x08018842 reads a point) */
+#define BN6_ARM_ROWS0         0x080188C0u /* list 0's three rows (MegaMan's, two of his Beast Outs'), */
+#define BN6_ARM_ROWS0_COUNT   3           /* ... three of them */
+#define BN6_ARM_ROW_OF        0x080188B0u /* ... the row of each list-0 number, a byte each (14), named by the literal */
+#define BN6_ARM_ROW_OF_REF    0x080188ACu /* ... here, 0x08018886's other read */
+#define BN6_FORM_SPRITE_READ  0x0800FCA4u /* ldrb r2,[r0,r1]: the sprite selector's (0x0800FC9E) read of BN6_FORM_SPRITES by the form (r1), MegaMan's, */
+#define BN6_FORM_SPRITE_BACK  0x0800FCA6u /* ... on to its movs r1,#0 (list 0) and back */
+#define BN6_FORM_PALETTE_READ 0x08010066u /* ldrb r4,[r1,r0]: his palette (0x0801002C) from BN6_FORM_PALETTES by the form (r0), */
+#define BN6_FORM_PALETTE_BACK 0x08010068u /* ... on to its b to the palette's set */
+#define BN6_FORM_PALETTE_READ2 0x080BF518u /* ldrb r0,[r1,r0]: an object drawn as MegaMan in his form (0x080BF4FC), its palette by the form, */
+#define BN6_FORM_PALETTE2_BACK 0x080BF51Au /* ... on to its sprite_setPalette */
+#define BN6_CROSSING_PHASES   0x08014A82u /* ldr r1,[pc]: the crossing's phases for forms 1-10 (r0 the pending form; 0x08014A38), */
+#define BN6_CROSSING_PHASES_BACK 0x08014A84u /* ... on to their call by the phase (r7's +0) */
+#define BN6_CROSSING_PHASES_TABLE 0x08014AB4u /* ... the table: */
+#define BN6_CROSSING_PHASE0   0x08014B18u /* phase 0 (MegaMan back on his panel), */
+#define BN6_CROSSING_PHASE2   0x08014BEEu /* phase 2 (his sprite loaded by the form, the form written, the overlay spawned, sounds 0x8D, 0x77), */
+#define BN6_CROSSING_PHASE3   0x08014CC0u /* phase 3 (the crossing's end); phase 1 (0x08014B98) the Cross's summon (BN6_CROSS_SUMMON) */
+#define BN6_CROSSING_SOUND    0x08014C8Eu /* movs r0,#0x8D in phase 2: the sound BN5's unison plays in its phase 1 (0x08012054), */
+#define BN6_CROSSING_SOUND_NEXT 0x08014C94u /* ... on to its movs r0,#0x77 */
+#define BN6_TOOLKIT_CAMERA    0x0C        /* eToolkit +0x0C: the camera's state, +0x0C its shake's frames and +0x0E its strength, as BN6's */
+#define BN6_CAMERA_SHAKE      0x0C        /* ... camera_initShakeEffect sets them (0x080302A8; BN5's 0x08030E1C the same), the shake each */
+#define BN6_CAMERA_SHAKE_STRENGTH 0x0E    /* ... frame drawing two random numbers (BN6 0x080301E8 from the second word, BN5 0x08030D7C from the first) */
+#define BN6_BATTLE_FLAG_HOLD  0x20        /* BN6_BATTLE_FLAGS (bn6_panels.h): set through a unison's or crossing's last phase, which clears it (BN6
+                                           * 0x08014CEA, BN5 0x080121AE); the camera shakes on through it (0x080301F8) */
+#define BN6_SOUL_IMAGE_SPRITE 0x080C1D40u /* movs r2,#0xB in the set-up of BN6's first kind's type 0x2A, BN5's Soul's image (0x080C047C), which
+                                             Gregar keeps and never spawns (its spawner 0x080C1EAC no code calls): the number of list 2, */
+#define BN6_SOUL_IMAGE_SPRITE_NEXT 0x080C1D42u /* ... on past it */
+#define BN6_SOUL_IMAGE_DECO   0x080C1D88u /* bl 0x08010DF6 there: a decoration by BN6's Navi of its +4, */
+#define BN6_SOUL_IMAGE_DECO_NEXT 0x080C1D8Cu /* ... past it, */
+#define BN6_SOUL_IMAGE_UNDECO 0x080C1E66u /* ... and bl 0x08011044, its taking away, */
+#define BN6_SOUL_IMAGE_UNDECO_NEXT 0x080C1E6Au /* ... past it */
+#define BN6_FACE_OF_FORM      0x0801E6C2u /* ldrb r6,[r2,r4]: the emotion window's face by the form (r4; 0x0801E6A8) from BN6_FORM_MUGSHOTS, */
+#define BN6_FACE_OF_FORM_OUT  0x0801E6EAu /* ... on to its end (r0 the face, r1 the count under it: r6, r3) */
+#define BN6_FACE_OF_FORM2     0x0801E666u /* ... the Custom screen's (0x0801E660), */
+#define BN6_FACE_OF_FORM2_OUT 0x0801E696u /* ... its end */
+#define BN6_FACE_OWNER        0x48        /* the emotion window's +0x48: the object whose face it shows (its +0x16 the side) */
+#define BN6_FACES             0x0801CD08u /* the faces' tiles, a word a face (0x100 bytes each to 0x06017680), 23 faces: */
+#define BN6_FACES_REF         0x0801CD04u /* ... the one word naming it (0x0801CBC4) */
+#define BN6_FACE_PALS         0x0872D050u /* the faces' palettes, 0x20 bytes each by the face, */
+#define BN6_FACE_PALS_REF     0x0801CD74u /* ... the one word naming it (0x0801CC26) */
+#define BN6_FACE_COUNTER      0x0801D814u /* whether the window counts under the face (Beast Out's turns; HeatCross's flag 0xE0 and no link) */
+#define BN6_FACE_DIGITS       0x0801CBFEu /* ldr r1,[pc]: the count's digits (0x0872C8D0, 0x80 bytes by 10 - the count), r4 the face, */
+#define BN6_FACE_DIGITS_NEXT  0x0801CC00u /* ... on past it */
+#define BN6_FLASH_HEIGHT      0x080BA5A2u /* movs r0,#0xf8 in BN6's arm flash's set-up (the first kind's type 5, 0x080BA549): a Cross's flash */
+#define BN6_FLASH_HEIGHT_NEXT 0x080BA5A8u /* ... raised 8 pixels (its owner's NameID 0x1AC-0x1B5, his form not 0), on to its strb r0,[r5,#0xc]; */
+                                          /* ... else its kind's own height (r4 + 3) */
+#define BN6_ARM_FLASH_SPAWN   0x080EC954u /* mov r7,r8 in MegaMan's arm flash routine (0x080EC8B2), r4 the flash's word made (its kind the low */
+#define BN6_ARM_FLASH_CALL    0x080EC956u /* ... byte), before its bl to BN6's spawner of the flash (0x080BA6A0, the first kind's type 5), */
+#define BN6_ARM_FLASH_CALL2   0x080EC958u /* ... the bl's second halfword, */
+#define BN6_ARM_FLASH_SPAWN_BACK 0x080EC95Au /* ... and past it, the routine's end */
+/* BN5's mood in BN6's battles (soulmood.c; S7) */
+#define BN6_BATTLE_SCREENS    (BN6_BATTLE_STATE + 0x07) /* u8: the Custom screens opened this battle, one more as each opens (0x08026920) */
+#define BN6_COLL_MOOD_LOSS    0x8E        /* u16 the mood a hit takes from the struck (BN5's +0x86: 0x0801A24C, 0x0801701C) */
+#define BN6_COLL_MOOD_GAIN    0x90        /* u16 the mood it gives the attacker (BN5's +0x88), BN6_HIT_COUNTER for a counter (BN6 reads it for that alone) */
+#define BN6_HIT_COUNTER       0x8000      /* BN6_COLL_MOOD_GAIN: a counter hit (both games' lit 0x8000 at 0x0801A524, 0x08017308) */
+#define BN6_MOOD_HIT          0x0801A24Cu /* movs r1,#0x8e in a hit's mood step (0x0801A200: r4 the struck's collision data, r5 the struck), past
+                                             BN6's own Full Synchro for a counter: BN5's twin 0x08016FE6 raises the attacker's mood there too */
+#define BN6_MOOD_SET          0x08015BECu /* a side's mood set (r0 the side, r1 the mood), BN5's 0x080127CE's twin of another body (no write
+                                             in Beast Out and its tiredness, where BN5's none at 0); its write */
+#define BN6_MOOD_SET_WRITE    0x08015C0Eu /* ... strb r4,[r0,#0xe] (r6 the side), */
+#define BN6_MOOD_SET_PAST     0x08015C10u /* ... past it */
+#define BN6_MOOD_CALM         0x080143A6u /* a mood calmed to 0x80 (r5 him: BN5's 0x08011A8C's twin, its anger's end with it); its write */
+#define BN6_MOOD_CALM_WRITE   0x080143B0u /* ... strb r1,[r0,#0xe], */
+#define BN6_MOOD_CALM_PAST    0x080143B2u /* ... past it */
+#define BN6_MOOD_FROM_CHIP    0x0801286Cu /* the set's callers twins of BN5's: the chip's Full Synchro (BN5 0x0800FFAE), */
+#define BN6_MOOD_FROM_ANGER   0x08014374u /* ... Anger's start (0x08011A5A), */
+#define BN6_MOOD_FROM_SCRIPT  0x08027310u /* ... a Custom screen's script (0x0802359C); */
+#define BN6_CALM_FROM_CHIP    0x08012876u /* the calm's: the chip's Anger (0x0800FFB8), */
+#define BN6_CALM_FROM_ANGER   0x0801438Eu /* ... Anger's end (0x08011A74) */
+#define BN6_COMPACT           0x0802945Au /* the deck's compaction (BN5's 0x080250EA, the same body), its call as a Custom screen opens */
+#define BN6_COMPACT_CALL      0x08026954u /* ... (BN5 calls its worried rule just before, 0x08022CFC) */
+/* A Soul's chips (soulchips.c; S5) */
+#define BN6_COLL_INVULNERABLE 0x28        /* u16 frames left unharmed (0x0800EAFA writes it with BN6_OBJ_INVULNERABLE; BN5's +0x2A, 0x0800CD84) */
+#define BN6_CHARGE_TEST       0x08013236u /* the chip charge's test by the form (r0 the chip, r5 MegaMan; from 0x0801336C): push {r4,r6,r7,lr} */
+#define BN6_CHARGED_RELEASE   0x0800FBA4u /* cmp r1,#0xd in the release of a charged A (0x0800FB74 on): r1 the A power attack (AI data +5), */
+#define BN6_CHARGED_CHIP_USE  0x0800FBECu /* ... the ids that use the chip charged (0x0D, 0x1F, 0x20, 0x29, 0x2D, 5) going on here (movs r0,#1, the chip's use); the rest run the power attack */
+#define BN6_CHARGE_BONUS      0x08012C7Cu /* a charged chip's bonus by the form (r0 whether charged): ElecCross's 0x4000, SlashCross's 40, else 0 */
+#define BN6_CHIP_MODIFIED     0x0801285Eu /* strh r0,[r7,#8] in the chip's use (0x080127C0): its damage as its modifier (0x08012A38) left it, */
+#define BN6_CHIP_MODIFIED_SOUND 0x0801287Au /* ... movs r0,#0x87: the modifier's sound where it did something, then on (0x08012880) */
+#define BN6_CHIP_USED_END     0x080128E8u /* ldrh r0,[r7,#0x14] before its last call (0x0800B79A, the DarkChip step) */
+#define BN6_CHIP_FAMILY_READ  0x080128EEu /* ldrb r0,[r4,#0xb]: the family it returns, the record's (r4) */
+#define BN6_CHIP_FAMILY_NEXT  0x080128F0u /* ... on past it */
+#define BN6_SHADOW_TYPE_SIDE  0x08010340u /* movs r1,#0x29 in the shadow type of an actor (0x08010332, BN5's 0x0800E0B6): past its battle mode's */
+#define BN6_SHADOW_TYPE_DONE  0x0801034Eu /* ... test, its NaviStats' Navi read next; its return, r0 the type (4 a battle's every actor) */
+/* A Soul's abilities (soulpower.c; S4) */
+#define BN6_FORM_LOADOUT_READ 0x0800FF3Eu /* ldrb r1,[r0]: the loadout's (0x0800FEEC) row by the form, r0 its address in BN6_FORM_LOADOUTS */
+#define BN6_FORM_ELEMENT_READ 0x08010884u /* ldrb r0,[r4,r0]: his element (0x0801086C) from BN6_FORM_ELEMENTS by the form, */
+#define BN6_FORM_ELEMENT_NEXT 0x08010892u /* ... on to its bl 0x08019F8C (the element set) */
+#define BN6_FORM_WEAKNESS_READ 0x080108A8u /* ldrb r0,[r4,r0]: his weakness from BN6_FORM_WEAKNESSES by the form, */
+#define BN6_FORM_WEAKNESS_NEXT 0x080108AAu /* ... on to its bl 0x08019F9E */
+#define BN6_FORM_BONUS_READ   0x0801268Cu /* ldrb r1,[r1,r0]: his buster's Attack bonus (0x0801265A) from BN6_FORM_BUSTER_BONUS by the form, */
+#define BN6_FORM_BONUS_NEXT   0x0801268Eu /* ... on to its add */
+#define BN6_POWER_EMPTY       0x08011A24u /* mov pc,lr: the power attacks' empty routine (ids 5, 0x0D, 0x0E ... name it) */
+#define BN6_CHIP_BONUS_DONE   0x0800F090u /* the chips' bonuses by form (0x0800EF34): its end, r6 the bonus, r7 its mark */
+/* A Soul's passives (soulpassive.c; S5) */
+#define BN6_HAND_SIZE_SET     0x0802A494u /* strb r0,[r5,#6]: the Custom screen's hand size set (0x0802A408) */
+/* ColonelSoul's button and chip shot (soulcolonel.c; S5), and the obstacle strike either Colonel's side arms (xstrike.c) */
+#define BN6_DUST_ELEMENTS     0x08027F10u /* DustCross's elements 8 and 9 as a Custom screen opens (r4 the elements, r5 the screen, r7 the form;
+                                             BN5's 0x08023CF4 for its Souls): push {r4,r6,lr} */
+#define BN6_DUST_LIT          0x08028F84u /* DustCross's element 8 lit after a pick (BN5's ColonelSoul's 0x08024C04): push {r4,r6,r7,lr} */
+#define BN6_DUST_PHASES       0x08027410u /* ldr r1,[pc,#0x10] in mode 0x38 (0x08027406, r4 element 8): its phases' table, then */
+#define BN6_DUST_PHASES_NEXT  0x08027412u /* ... ldrb r0,[r5,#2]: the phase */
+#define BN6_OK_END            0x08029222u /* pop {r4,r6,r7,pc}: OK's (0x08029110) end, where BN5's goes on to element 8's commit (0x08024EC4) */
+#define BN6_TURN_FORMS        0x0801486Cu /* push {r4,lr}: the turn's form check (r6 and r7 the sides' pending records, +8 the player), BN5's
+                                             0x08011DD4, which first gives ColonelSoul his chip (0x080124A6) */
+#define BN6_DUST_ART          0x08028342u /* ldr r0,[pc,#0x1c] in element 8's draw on the chips' screen (its type 8's, 0x08028340): DustCross's
+                                             button's tiles, 0x180 bytes by its state (BN5's 0x0802415E: ColonelSoul's, lit or grey), then */
+#define BN6_DUST_ART_NEXT     0x08028344u /* ... ldr r2: their size */
+#define BN6_DUST_INFO_ART     0x08028782u /* ldr r0 in the chip's window's art for elements 8 and 9 (0x0802877C, BN5's 0x080245A4): the
+                                             picture, 0x540 bytes, */
+#define BN6_DUST_INFO_ART_NEXT 0x08028784u /* ... ldr r1: where it goes */
+#define BN6_DUST_INFO_PAL     0x0802878Cu /* ... its palette, */
+#define BN6_DUST_INFO_PAL_NEXT 0x0802878Eu /* ... ldr r1: where it goes */
+#define BN6_DUST_NAME_PAL     0x080287DEu /* ... and its name line's (0x080287D2, BN5's 0x0802460A) */
+#define BN6_DUST_NAME_PAL_NEXT 0x080287E0u /* ... ldr r1: where it goes */
+#define BN6_CUSTOM_B          0x08029032u /* push {r4,lr}: B on the chips (mode 4), the last pick given back (BN5's 0x08024CEA gives the
+                                             button's chip back first), its end BN6_EMBLEM_B_TAIL */
+#define BN6_PICK_ICON         0x080281D4u /* a pick's icon into the picks' column (r0 its chip, r1 its place; BN5's 0x08024004) */
+#define BN6_PICK_SLOT         0x08029CD4u /* a pick's slot drawn on the chips' BG (r0 its place; BN5's 0x080258E8) */
+#define BN6_OK_SPENT          0x08029458u /* pop {r4,r6,r7,pc}: OK's picks' deck entries spent (0x080293F8), where BN5's spends the button's
+                                             too (0x080250CC) */
+#define BN6_MODE4_LAST_DRAW   0x08026CFAu /* bl 0x08029D34 in mode 4 (the chips', 0x08026CCC): BN5 draws the loaded chip just before */
+#define BN6_MODE4_LAST        0x08029D34u /* ... the call, */
+#define BN6_MODE4_BACK        0x08026CFEu /* ... and past it */
+#define BN6_MODE24_END        0x08027058u /* pop {pc}: mode 0x24's (UNITE's chosen, 0x08027044) end, BN5's draws the loaded chip before */
+#define BN6_OBSTACLE_FLAGS_A  0x0801B3CAu /* bl 0x0801A180 (an object's collision flags) in an obstacle's states (0x0801B394, BN5's 0x08017FCC), */
+#define BN6_OBSTACLE_FLAGS_B  0x0801B506u /* ... (BN5's 0x08018138), */
+#define BN6_OBSTACLE_FLAGS_C  0x0801B646u /* ... (BN5's 0x080182A0), */
+#define BN6_OBSTACLE_FLAGS_D  0x0801B786u /* ... (BN5's 0x080183FC): BN5's block 0x08018002-0x0801802E stands before each */
+#define BN6_OBJ_FLAGS         0x0801A180u /* the collision flags of r5's object (BN5's 0x08016C70) */
+#define BN6_BATTLE_PAUSED     0x0800A098u /* the battle's pause, its flags' bit 4 (BN5's 0x08008A78), the Z flag clear while paused */
+#define BN6_PANEL_FIELD       0x10        /* BN6_PANEL_FLAGS: the field's panels' (every one of its 18, the border's none: the strike's test, BN5's
+                                             0x080CABF8, the same bit at BN5_PANEL_FLAGS' place) */
+#define BN6_PANEL_ENEMIES     0x04000000u /* BN6_PANEL_FLAGS: an object of side 1 on it (bn6f's "enemy alliance"; BN5's the same, its table 0x080CAC90 by side) */
+#define BN6_PANEL_ALLIES      0x08000000u /* ... of side 0 (bn6f's "ally alliance") */
 
 #endif

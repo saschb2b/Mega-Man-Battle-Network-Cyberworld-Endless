@@ -54,7 +54,7 @@
 #define FREE_VIRUS_ROOM     (EMU_FREE + 0x330000u)   /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c), to: */
 #define FREE_FAMILIES       (EMU_FREE + 0x348000u)   /* the families: their homes, code and art (xvirus.c), to: */
 #define FREE_CHIPS          (EMU_FREE + 0x400000u)   /* the chip registry: records, names, routines, art (chips.c, xchips_install.c), to: */
-#define FREE_SOULS          (EMU_FREE + 0x480000u)   /* kept for BN5's Souls (the Souls' track), to: */
+#define FREE_SOULS          (EMU_FREE + 0x480000u)   /* BN5's Souls in BN6's engine (soulunite.c, soullook.c, soulcode.c; soul_room.h lays it out), to: */
 #define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
 #define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
@@ -68,7 +68,9 @@
 #define FREE_ATTACK_FAMILIES FREE_CHIP_CODE          /* ... BN6's attack families grown to 240 (xattack_grow.c: the chips' and the Souls' one copy), */
 #define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x400u)
 #define FREE_CHIP_MOVED     FREE_ATTACK_FAMILIES_END /* ... then the chips' moved code, its tables and what it draws (xchips_code.c), to: */
-#define FREE_TAIL           (EMU_FREE + 0x700000u)   /* free to FREE_END */
+#define FREE_SOULS_ART      (EMU_FREE + 0x700000u)   /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c), to: */
+#define FREE_SOULS_ART_END  (EMU_FREE + 0x710000u)
+#define FREE_TAIL           (EMU_FREE + 0x710000u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
 /* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */

@@ -17,6 +17,7 @@
 #define MAX_FLAGS 16
 #define MAX_SCRIPTS 8
 #define MAX_SCRIPT_STEPS 32
+#define MAX_SHOTS 16
 
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; bool both, bn5; uint32_t at5; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`;
@@ -28,6 +29,8 @@ typedef struct { uint32_t at, v; int size; bool both, bn5; uint32_t at5; } Poke;
  * reads open */
 typedef struct { uint32_t keys; int n; } ScriptStep;
 typedef struct { int game, screen, nsteps; ScriptStep steps[MAX_SCRIPT_STEPS]; } CustomScript;
+/* A picture of a Custom screen (shot=): game 5 or 6's screen n, its frame f from the frame its window first reads open */
+typedef struct { int game, screen, frame; char path[160]; } Shot;
 
 typedef struct {
 	int nfoes;
@@ -42,6 +45,7 @@ typedef struct {
 	int ndeck[2];
 	unsigned souls6;                           /* the Souls BN6's MegaMan holds, the Souls installed in its engine (soulunite.h); 0 none */
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
+	int soulbreak;                             /* ... a Soul's look, abilities or passives broken (soulunite.h's SOULBREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	bool dslist;                               /* BN6's chip AI's lists written from BN5's as its fight begins (xnavi_dark.h) */
@@ -51,6 +55,8 @@ typedef struct {
 	                                              target holding still in both games; 0 none */
 	CustomScript scripts[MAX_SCRIPTS];
 	int nscripts;
+	Shot shots[MAX_SHOTS];
+	int nshots;
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];

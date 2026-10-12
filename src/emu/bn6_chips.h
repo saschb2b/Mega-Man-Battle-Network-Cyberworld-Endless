@@ -47,6 +47,8 @@
 #define BN6_CHIP_GATE         0x1E        /* ChipGateUsageLimit: the BattleChip Gate's (Japan's physical reader) */
 #define BN6_CHIP_IN_LIBRARY   0x40        /* BN6_CHIP_EFFECT_FLAGS: listed on the PET's Library screen, by its library number */
 #define BN6_CHIP_SHOWS_POWER  0x02        /* BN6_CHIP_EFFECT_FLAGS: its power shown (the pack's sort by power, the Custom screen) */
+#define BN6_CHIP_LEFT_ALONE   0x01        /* BN6_CHIP_EFFECT_FLAGS: a chip no charge and no field's double takes (BN6's tests 0x08013236, 0x08012B2A,
+                                             BN5's 0x08010916, 0x0801034E: the same bit in both) */
 #define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1000 and up: BN6_CHIP_POWERS) */
 #define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
 #define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
@@ -58,6 +60,9 @@
 #define BN6_CHIP_PALETTE_PTR  0x28
 #define BN6_CHIP_DARK_CLASS   0x20
 #define BN6_CHIP_UNLISTED     0x20
+#define BN6_CHIP_NOTHING      0x185       /* the chip of nothing: OK's in a hand for a chip not owned (0x0800B090), its family 0x1C's spawner
+                                             BN6_SPAWNER_NOTHING (0x08010488); BN5's 0x185 the same (family 0x1A, spawner 3 0x0800E190), its dud */
+#define BN6_SPAWNER_NOTHING   3
 
 /* How a chip runs (docs/ROM_DATA.md, The attack families and chip
  * routines grown): its record's family (BN6_CHIP_FAMILY) is the CurAction

@@ -27,5 +27,12 @@ bool soul_united(int side);
  * not Gregar's as expected. `keep` (the differential's own test, soulunite.h's
  * SOULUNITE_BREAK_LEAVE) keeps a Soul as he leaves the form. */
 bool soullife_install(uint32_t stubs, bool keep);
+/* A Soul's way into the proxy form and out of it (the Souls track's S3,
+ * soullook.c): `enter[n]` and `leave[n]` the routines BN5's Soul n runs
+ * there in place of the proxy's overlay (BN6 Thumb addresses, its moved
+ * code's; 0 none), BN5's 0-12. Before this, a Soul enters and leaves as
+ * the proxy does (HeatCross's overlay). */
+#define SOULS_BN5_FORMS 13
+void soullife_routes(const uint32_t enter[SOULS_BN5_FORMS], const uint32_t leave[SOULS_BN5_FORMS]);
 
 #endif

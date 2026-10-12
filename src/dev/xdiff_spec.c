@@ -97,13 +97,20 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->deck[k][i] = (uint16_t)got[i % n];
 		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;
 	}
-	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
-	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "cust5") || !strcmp(name, "cust6")) return script_parse(s, 5 + k, v);
 	if (!strcmp(name, "buster"))
 		return sscanf(v, "%d:%d:%d", &s->buster[0], &s->buster[1], &s->buster[2]) == 3 && s->buster[0] >= 0 && s->buster[0] <= BN5_BUSTER_MAX &&
 			s->buster[1] >= 0 && s->buster[1] <= BN5_BUSTER_MAX && s->buster[2] >= 0 && s->buster[2] <= BN5_BUSTER_MAX;
 	if (!strcmp(name, "safe")) return (s->safe = atoi(v) != 0), 1;
+	return -1;
+}
+
+/* the Souls BN6's MegaMan holds, and the rule or parts of them broken (the comparator's own test); -1 where `name` is
+ * none of them */
+static int souls_parse(Spec *s, const char *name, const char *v) {
+	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
+	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
+	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
 	return -1;
 }
 
@@ -118,12 +125,13 @@ static int dark_parse(Spec *s, const char *name, char *v) {
 	return (s->ndschips = n) > 0;
 }
 
-/* the spec's numbers: MegaMan's panel and HP, the frames, the seed, the foes held; -1 where `name` is none of them */
+/* the spec's numbers: MegaMan's panel, HP and element, the frames, the seed, the foes held; -1 where `name` is none of them */
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
+	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	bool mm = !strcmp(name, "mm"), seed = !strcmp(name, "seed");
 	if (!mm && !seed) return -1;
 	if ((mm ? sscanf(v, "%1u%1u", &a, &b) : sscanf(v, "%x:%x", &a, &b)) != 2) return 0;
@@ -175,13 +183,17 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (r < 0) r = breaks_parse(s, name, v);
 	if (r < 0) r = megaman_parse(s, name, v);
 	if (r < 0) r = dark_parse(s, name, v);
+	if (r < 0) r = souls_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
 	if (!strcmp(name, "out")) return snprintf(s->out, sizeof s->out, "%s", v) > 0;
 	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow")) || (s->replay = !strcmp(v, "replay"));
 	if (!strcmp(name, "twin")) return twin_parse(s, v);
-	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
+	if (!strcmp(name, "shot")) {
+		Shot *h = &s->shots[s->nshots];
+		return s->nshots < MAX_SHOTS && sscanf(v, "%d:%d:%d:%159s", &h->game, &h->screen, &h->frame, h->path) == 4 && ++s->nshots;
+	}
 	if (!strcmp(name, "field")) {
 		unsigned f, f6 = 0x100;
 		int got = sscanf(v, "%x:%x", &f, &f6);

@@ -1,5 +1,5 @@
 {
- "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here.",
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*, or a Soul's look, abilities and passives: soulbreak, SOULBREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here.",
  "mutations": [
   {
    "name": "an immediate",
@@ -928,6 +928,186 @@
     "080D33B4:01180003:4"
    ],
    "what": "MoonBld's hit words (its literal at BN5's 0x080D33B4, the stat effect 0x18's parameter given by BN6's rule, HIT_STATS) left as BN5's: BN6's rule bugs the foe's AI data"
+  },
+  {
+   "name": "a Soul's sprite another's",
+   "spec": "soul_colonel",
+   "soulbreak": 1,
+   "what": "the sprite selector's hook (src/emu/soullook.c, BN6_FORM_SPRITE_READ) gives each Soul the next Soul's sprite of the grown list 0: ColonelSoul drawn as ShadowSoul (BN5's list 0 8), its frames another sprite's"
+  },
+  {
+   "name": "a Soul's palette",
+   "spec": "soul_number",
+   "soulbreak": 2,
+   "what": "the palette hooks give a Soul its sprite's palette 1 where BN5's 0x0800DD8C gives 0 (2 in Chaos Unison): NumberSoul's sprite state's palette 1"
+  },
+  {
+   "name": "TomahawkSoul's landing still",
+   "spec": "soul_tomahawk",
+   "soulbreak": 4,
+   "what": "the crossing's phase 2 leaves the camera still for TomahawkSoul where BN5's phase 2 shakes it 30 frames (0x0801211E): its draws and the battle's flag 0x20 missing"
+  },
+  {
+   "name": "a Soul's buster flash BN6's object",
+   "spec": "soul_buster",
+   "soulbreak": 8,
+   "what": "MegaMan's arm flash in a Soul (BN5's kind 0x23, its frame the Soul) spawned by BN6's spawner as BN6's object (src/emu/soullook.c's redirect to BN5's moved spawner left out): BN6's own kind 0x23 of its own table, another sprite and object where BN5 runs its image object"
+  },
+  {
+   "name": "no chip charged in a Soul",
+   "spec": "soul_knight_charge",
+   "soulbreak": 65536,
+   "what": "the chip charge's test (BN6_CHARGE_TEST, src/emu/soulchips.c) answers no for a Soul where BN5's 0x08010902 charges a chip of its kind: KnightSoul's JustcOne used as A is pressed, uncharged"
+  },
+  {
+   "name": "a charged chip not doubled",
+   "spec": "soul_toad_charge",
+   "soulbreak": 131072,
+   "what": "the charged chip's bonus (BN6_CHARGE_BONUS) none for ToadSoul where BN5's 0x080103C8 doubles it: its damage the record's"
+  },
+  {
+   "name": "TomahawkSoul's Wood chip not doubled on grass",
+   "spec": "soul_tomahawk_wood",
+   "soulbreak": 262144,
+   "what": "the chip's modifier (BN6_CHIP_MODIFIED) leaves TomahawkSoul's Wood chip on grass alone where BN5's 0x08010322 doubles it and makes the panel plain"
+  },
+  {
+   "name": "KnightSoul's front column unguarded",
+   "spec": "soul_knight_front",
+   "soulbreak": 524288,
+   "what": "a chip used from KnightSoul's front column leaves him no unharmed frames where BN5's 0x0801038A gives 50"
+  },
+  {
+   "name": "a counter's first frame left to the next",
+   "spec": "soul_shadow_left",
+   "poke": [
+    "08C81A54:46C046C0:4"
+   ],
+   "what": "the Souls' Thumb for BN5's counter start (SOUL_STUB_COUNTER) calls BN6's twin and not the family's first frame (its second bl two nops), as BN6's twin alone does: the counter a frame later than BN5's"
+  },
+  {
+   "name": "TomahawkSoul of no element",
+   "spec": "soul_tomahawk_heal",
+   "soulbreak": 64,
+   "what": "the element's hook gives TomahawkSoul none where BN5's table gives Wood: no heal on grass (BN6's grass step heals a Wood actor)"
+  },
+  {
+   "name": "a charged shot's charge",
+   "spec": "soul_shadow",
+   "soulbreak": 16,
+   "what": "the grown charge times (SOULS_CHARGES) 10 frames longer than BN5's for each Soul's power attack: ShadowSoul's slash fires later"
+  },
+  {
+   "name": "a charged shot's family",
+   "spec": "soul_knight_shot",
+   "soulbreak": 32,
+   "what": "each Soul's loadout names the next Soul's power attack for its charged shot (SOULS_LOADOUTS' +7): KnightSoul fires ToadSoul's"
+  },
+  {
+   "name": "a Soul's element",
+   "spec": "soul_toad",
+   "soulbreak": 64,
+   "what": "the element's hook gives a Soul none where BN5's table 0x0800E62C gives ToadSoul Aqua: his object's +0x0E and collision data's +2 0"
+  },
+  {
+   "name": "NumberSoul's hand of nine",
+   "spec": "soul_number_plus",
+   "soulbreak": 256,
+   "what": "the hand size's hook (BN6_HAND_SIZE_SET) deals NumberSoul 9 where BN5's 0x08025C24 deals 10: the second screen's elements laid out for nine"
+  },
+  {
+   "name": "NumberSoul's bonus left out",
+   "spec": "soul_number_plus",
+   "soulbreak": 512,
+   "what": "the bonus by form (BN6's 0x0800EF34, soulproxy.c's hook) gives NumberSoul's Cannon no +10 (BN5's 0x0800D0CA): CanGard struck for 40 where BN5's for 50"
+  },
+  {
+   "name": "ShadowSoul's passives left out",
+   "spec": "soul_shadow",
+   "soulbreak": 1024,
+   "what": "the proxy's passives' entry (BN6_FORM_PASSIVES' 8, soulpassive.c) runs none for a Soul where BN5's ready table 0x08011BA4 runs ShadowSoul's FloatShoe (0x08011C78): his collision's flags without it"
+  },
+  {
+   "name": "a Soul's song not copied",
+   "spec": "soul_toad",
+   "poke": [
+    "0815A238:0815AE18:4"
+   ],
+   "what": "BN6's song slot 0x5E (the song table 0x08159F48 + 8 x 0x5E) its empty header again where src/emu/soulpower.c entered BN5's 0x117 (ToadSoul's waves): BN6 plays the empty song"
+  },
+  {
+   "name": "a landed hit's mood left out",
+   "spec": "soul_knight_front",
+   "soulbreak": 16777216,
+   "what": "the hit's mood step (src/emu/soulmood.c, BN6_MOOD_HIT) raises the attacker's mood by nothing where BN5's 0x080127FA adds the hit's gain: KnightSoul's JustcOne lands and his mood stays 0x80 where BN5's goes to 0x9E"
+  },
+  {
+   "name": "no DarkChip dealt into a worried hand",
+   "spec": "soul_mood_dark",
+   "soulbreak": 33554432,
+   "what": "BN5's worried rule (0x08025118) left out of the compaction's hook: DarkCirc stays shelved, the second hand all Cannon, the cursor on the first"
+  },
+  {
+   "name": "a BN5 DarkChip used leaves him as he was",
+   "spec": "soul_mood_dark",
+   "soulbreak": 67108864,
+   "what": "the chip's use (soulmood_chip_used) leaves the mood where BN5's 0x0801007C sets it 0: DarkCirc used, his mood still worried"
+  },
+  {
+   "name": "UNITE stands while worried",
+   "spec": "soul_mood_unite",
+   "soulbreak": 134217728,
+   "what": "UNITE's rule (src/emu/soulunite.c's calm_enough) reads no worry where BN5_UNITE_STAND refuses it: KnightSoul's Break chip lights UNITE and he unites while worried"
+  },
+  {
+   "name": "BN5's dark gate left out",
+   "spec": "soul_mood_gate",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets BlakWing through while MegaMan is not dark where BN5's 0x08010110 refuses it: the attack's chip BlakWing (0x125) where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "ShadowSoul's charged sword BN6's",
+   "spec": "soul_shadow_slash",
+   "soulbreak": 1048576,
+   "what": "the chip's family read (BN6_CHIP_FAMILY_READ) leaves ShadowSoul's charged sword to BN6's sword family where BN5's 0x080EBDEC takes his path before the enemy: he slashes where he stands, at (2,2), where BN5's is behind CanGard at (6,2)"
+  },
+  {
+   "name": "ColonelSoul's button lit for any pick",
+   "spec": "soul_colonel_grey",
+   "soulbreak": 2048,
+   "what": "the button's rule (src/emu/soulcolonel.c's lit) takes any chip where BN5's 0x08024C04 refuses a chip of a kind: the RockCube lights it, A loads it, and his charged shot is the chip shot (BN6's 0x95) where BN5's stays ScreenDivide"
+  },
+  {
+   "name": "no obstacle strike",
+   "spec": "soul_colonel_strike",
+   "soulbreak": 4096,
+   "what": "the strike's test (src/emu/xstrike.c's strike_test) finds no enemy where BN5's 0x080CABEA finds CanGard behind the RockCube: the cube stays a cube, no soldier, CanGard keeps his 60"
+  },
+  {
+   "name": "B leaves the button's chip in it",
+   "spec": "soul_colonel_undo",
+   "soulbreak": 8192,
+   "what": "B on the chips (src/emu/soulcolonel.c's undo) runs BN6's B alone where BN5's 0x08024CEA gives the button's chip back first: the Cannon stays in the button, OK commits it (the block's +0x14 1 where BN5's is none) and MegaMan holds no chip at t700"
+  },
+  {
+   "name": "the button's chip left in the deck",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 16384,
+   "what": "OK's picks spent (src/emu/soulcolonel.c's spent) leave the button's Cannon in the deck where BN5's 0x080250CC spends it: the third hand's first chip the Cannon again where BN5's is a RockCube"
+  },
+  {
+   "name": "his charged shot ScreenDivide with a chip",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 32768,
+   "what": "the turn's start (src/emu/soulcolonel.c's turn) keeps his charged shot ScreenDivide (BN6's 0x94) with the Cannon in the button where BN5's 0x080124A6 makes it the chip shot (0x13): ScreenDivide at t952 where BN5 fires the Cannon"
+  },
+  {
+   "name": "a Navi Colonel's side not arming the obstacle strike",
+   "spec": "colonel_strike",
+   "poke": [
+    "08D90044:46C0"
+   ],
+   "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in BN6_COLONEL_SIDES, the one field the obstacle strike reads (src/emu/xstrike.c): his side unarmed from t1 where BN5's bit 0x20 is set, the cube no soldier, MegaMan none of the three shots BN5's takes from t50"
   }
  ]
 }

@@ -172,6 +172,8 @@ def megaman_items(spec):
         parts.append(f'souls6={spec["souls6"]}')
     if spec.get('unitebreak'):
         parts.append(f'unitebreak={spec["unitebreak"]}')
+    if spec.get('soulbreak'):
+        parts.append(f'soulbreak={spec["soulbreak"]}')
     if spec.get('buster'):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
@@ -205,6 +207,7 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
         parts.append(f'mm_element={spec["mm_element"]}')
     parts += [f'both={b}' for b in spec.get('both', [])] + [f'poke5={p}' for p in spec.get('poke5', [])]
     parts += [f'each={b}' for b in spec.get('each', [])]
+    parts += [f'shot={g}:{n}:{f}:{path}' for g, n, f, path in spec.get('shots', [])]   # (pictures of a Custom screen: game, screen, frame)
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -213,6 +216,9 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     out = f'/src/.build/xdiff/runs/{name}'
+    for _, _, _, path in spec.get('shots', []):   # (a picture's folder, as the image sees /src)
+        if path.startswith('/src/'):
+            os.makedirs(os.path.dirname(os.path.join(ROOT, path[5:])), exist_ok=True)
     for g in ('bn5', 'bn6'):
         p = os.path.join(WORK, 'runs', f'{name}.{g}')
         if os.path.exists(p):
@@ -280,7 +286,7 @@ def story(trace, canon, upto=None):
         for o in fr['objs']:
             if o.kind == 'T1':
                 mm = canon.is_megaman(game, o.o16(OBJ_NAME_ID))
-                parts.append(f'{role_name(o.role)} act {canon.action(game, mm, o.o8(OBJ_ACTION)):02X}.{o.o8(0x0A):02X} '
+                parts.append(f'{role_name(o.role)} act {canon.action(game, mm, o.o8(OBJ_ACTION), o.ai):02X}.{o.o8(0x0A):02X} '
                              f'p{o.o8(0x12)}{o.o8(0x13)} hp{o.o16(0x24)}')
             elif o.kind == 'T3':
                 parts.append(f'{role_name(o.role)} {o.o8(OBJ_ACTION):02X} p{o.o8(0x12)}{o.o8(0x13)}')
@@ -295,7 +301,7 @@ def story(trace, canon, upto=None):
 # ---- MegaMan's own timeline (a MegaMan spec's, a reference-only spec's) ----
 
 # what of MegaMan a frame shows (BN5's numbers in BN5's trace): each read from his object (o), its AI's data (ai), his
-# side's player block (p); a Soul's (soul, its turns, its chaos, the Souls used) as both games keep it (xdiff_snap.soul_view:
+# side's player block (p); a Soul's (soul, its turns, its chaos, the Souls used, BN5's mood) as both games keep it (xdiff_snap.soul_view:
 # the same numbers in both), the Custom screen's element 0xB as its last screen left it (unite: its +7, 0 lit, 1 grey, 2 chosen)
 MEGAMAN_READS = {
     'action': lambda o, ai, p: o.o8(OBJ_ACTION),
@@ -311,7 +317,7 @@ MEGAMAN_READS = {
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
     'unite stands': lambda o, ai, p: p[PLAYER_UNITE] if p and len(p) > PLAYER_UNITE else None,
 }
-SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used')   # (from soul_view, both games: its 'turns' and 'used' named apart)
+SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used', 'soul mood', 'soul chip', 'soul next chip')   # (from soul_view, both games: its 'turns' and 'used' named apart)
 
 
 def megaman_frames(trace, canon):
@@ -322,13 +328,15 @@ def megaman_frames(trace, canon):
         if o is not None:
             v = {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}
             soul = soul_view(canon, trace['game'], fr, o.ai) or {}
-            v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used')})
+            v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used'),
+                      'soul mood': soul.get('mood'), 'soul chip': soul.get('chip'),
+                      'soul next chip': soul.get('next chip')})
             out.append((fr['t'], v))
     return out
 
 
 def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'soul', 'chaos', 'soul turns', 'souls used', 'unite', 'loadout', 'sprite',
-                                        'palette', 'mood', 'hp')):
+                                        'palette', 'mood', 'soul mood', 'soul chip', 'soul next chip', 'hp')):
     """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
     lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
     for t, v in megaman_frames(trace, canon):
@@ -363,8 +371,8 @@ def timeline(trace, canon):
         for o in fr['objs']:
             if o.kind == 'T1':
                 nid = canon.nid(game, o.o16(OBJ_NAME_ID))
-                mm = nid in canon.megaman.values()
-                rec = (canon.action(game, mm, o.o8(OBJ_ACTION)), o.o16(0x24), (o.o8(0x12), o.o8(0x13)))
+                mm = canon.is_megaman(6, nid)   # (in BN6's numbers: in a form, BN6's NameID of the form, a Soul's the proxy's)
+                rec = (canon.action(game, mm, o.o8(OBJ_ACTION), o.ai), o.o16(0x24), (o.o8(0x12), o.o8(0x13)))
                 if mm:
                     row['mm'] = rec
                 else:
@@ -527,7 +535,13 @@ def compare(name, spec, ta, tb, legit, canon, show):
     used, lines, read = {}, [], {}
     fa_all, fb_all = ta['frames'], tb['frames']
     verdict, at, n, after, natives_at = 'PASS', None, 0, None, None
+    upto, skips = spec.get('compare_to'), spec.get('compare_skip', [])
     for fra, fa, fb, diffs in compared(spec, ta, tb, legit, canon, read):
+        if upto is not None and fra['t'] > upto:
+            lines.append(f'  compared to t{upto}, the spec\'s compare_to (its expectations hold both battles to the end)')
+            break
+        if any(a <= fra['t'] <= b for a, b in skips):
+            continue
         by = {}
         for d in diffs:
             w = who(d, fb, canon, fa)
@@ -555,7 +569,9 @@ def compare(name, spec, ta, tb, legit, canon, show):
     if verdict == 'INCONCLUSIVE':
         lines.append(f'  after the stop (no verdict), the family\'s objects: ' +
                      (f'the same to t{after.t - 1}, then {after}' if after else f'the same to the end (t{fa_all[-1]["t"]})'))
-    if len(fa_all) != len(fb_all) and verdict == 'PASS':
+    if skips:
+        lines.insert(0, '  frames left out (the spec\'s compare_skip, its about says why): ' + ', '.join(f't{a}-t{b}' for a, b in skips))
+    if len(fa_all) != len(fb_all) and verdict == 'PASS' and upto is None:
         lines.append(f'  the traces are {len(fa_all)} and {len(fb_all)} fight frames long')
         verdict, at = 'FAIL', min(len(fa_all), len(fb_all))
     lines.insert(0, f'  {n} fight frames compared (t{fa_all[0]["t"]}-t{fa_all[-1]["t"]}), masks applied (none on the '
@@ -578,6 +594,17 @@ def survey(spec, ta, tb, legit, canon):
     return [f'  {n:5d}x {k[0]} {k[1]}+{k[2]:#04x}{f" [{k[3]}]" if k[3] else ""}: first {d}' for k, (n, d) in sorted(seen.items(), key=lambda x: x[1][1].t)]
 
 
+def folder_chips(spec):
+    """BN5's chip id -> BN6's, each pair the spec's folders name in the same place (folder5[i], folder6[i]: an entry its
+    code << 9 | its id), where they differ: MegaMan's held chip and the chip his attack uses, read in BN6's numbers"""
+    out = {}
+    for e5, e6 in zip(spec.get('folder5', []), spec.get('folder6', [])):
+        i5, i6 = int(e5, 16) & 0x1FF, int(e6, 16) & 0x1FF
+        if i5 != i6:
+            out[i5] = i6
+    return out
+
+
 def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     """one spec run and compared: its verdict and kind (extra: items put in its spec, a mutation's dev break)"""
     with open(os.path.join(SPECS, f'{name}.json')) as f:
@@ -592,6 +619,9 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
     canon.megaman_types = {f'{x.split(":")[0]}:{int(x.split(":")[1], 0):#04x}' for x in spec.get('megaman_types', [])}
     canon.sprite_bytes = spec.get('sprites') == 'bytes'
+    canon.chips = folder_chips(spec)
+    canon.souls_on = int(spec.get('souls6', '0'), 16) != 0   # (the Souls installed in BN6's engine, BN5's mood kept beside BN6's: soulmood.c)
+    canon.copies_on = canon.souls_on or bool(spec.get('effect_copies'))   # (legit.json, maps, effect, copies)
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
     if spec.get('kind') == 'engine':
@@ -663,7 +693,7 @@ def main():
         caught = 0
         for k, m in enumerate(muts):
             print(f'== mutation {k + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}')
-            extra = {k: m[k] for k in ('unitebreak', 'poke5') if k in m} or None
+            extra = {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None
             verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}', extra)
             caught += verdict == 'FAIL'
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')

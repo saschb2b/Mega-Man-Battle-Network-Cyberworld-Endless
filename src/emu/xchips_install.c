@@ -12,6 +12,7 @@
 #include "hook.h"
 #include "rom.h"
 #include "xchips_code.h"
+#include "xchips_registry.h"
 #include "xchips_record.h"
 #include "xvirus_tx.h"
 
@@ -157,6 +158,20 @@ static bool place_free(uint32_t from, uint32_t n) {
 /* ---- the deck as it is dealt ---- */
 
 static uint8_t sits[XREG_IDS / 8];   /* (the hook's copy, written between frames) */
+static bool dark_shelved;            /* (BN5's DarkChips of their own kept in the deck: soulmood.c's shelf has them) */
+
+/* the registry's own DarkChips taken out of the copy, where they are shelved */
+static void sits_shelved(void) {
+	for (int i = 0; dark_shelved && i < xreg_count; ++i)
+		if (xreg_rows[i].how == XREG_DARK) sits[xreg_rows[i].bn6 >> 3] &= (uint8_t)~(1u << (xreg_rows[i].bn6 & 7));
+}
+
+void xchips_dark_shelved(bool on) {
+	dark_shelved = on;
+	const uint8_t *bits = chips_sit_bits();
+	if (bits) memcpy(sits, bits, sizeof sits);
+	sits_shelved();
+}
 
 static HookAct deal(HookRegs *r, void *user) {
 	(void)r;
@@ -221,6 +236,7 @@ bool xchips_install(void) {
 	 * trace or the differential's pokes, reads the copy) */
 	xv_moved_add(ref_value(0, true), CHIPS_RECORDS, CHIPS_BN6_RECORDS * BN6_CHIP_RECORD_SIZE);
 	memcpy(sits, chips_sit_bits(), sizeof sits);
+	sits_shelved();
 	if (!installed_len && !emu_hook(BN6_DECK_DEALT, deal, NULL)) fprintf(stderr, "chips: no hook on the deck's deal: BN5's chips play where they sit out\n");
 	claims_end();
 	installed_len = len;

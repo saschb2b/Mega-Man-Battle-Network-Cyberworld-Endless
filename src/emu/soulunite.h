@@ -1,7 +1,9 @@
 /* UNITE on BN6's Custom screen (issue #82, the Souls track's S2; docs/
  * MULTIROM.md, Transplanted Souls): BN5's Souls unite in BN6's battles by
- * BN5's rule, each behind the proxy form (soulproxy.h), its look and its
- * abilities HeatCross's until the track's next milestones bring BN5's.
+ * BN5's rule, each behind the proxy form (soulproxy.h) with BN5's look,
+ * abilities and passives (soullook.h, soulpower.h, soulpassive.h; the
+ * track's S3-S5), its Chaos Unison's charge and BN5's DarkChip rule the
+ * track's next milestones.
  * Element 0xB under OK is BN6's Beast Out emblem and BN5's UNITE button
  * in one place (docs/ROM_DATA.md, UNITE on BN6's Custom screen): it is
  * UNITE while the last chip picked lights a held Soul (BN5's check: the
@@ -34,10 +36,23 @@ enum {
  * (soulproxy_install first, then this): the Custom screen's hooks, a
  * Soul's life (soullife_install), BN5's A on UNITE moved and its art and
  * the Souls' pictures copied from BN5's ROM into the Souls' free space,
- * mode 0x24's pictures pointed at them. Once a core; false (nothing
- * written) where BN5's ROM is not read or a byte it stands on is not as
- * expected. `breaks` SOULUNITE_BREAK_*, 0 none. */
-bool soulunite_install(int breaks);
+ * mode 0x24's pictures pointed at them; then each Soul's own code, look,
+ * abilities and passives (soulcode.h, soullook.h, soulpower.h,
+ * soulpassive.h). Once a core; false (nothing written) where BN5's ROM is
+ * not read or a byte it stands on is not as expected. `breaks`
+ * SOULUNITE_BREAK_*, 0 none. */
+bool soulunite_install(int breaks, int soulbreak);
+/* soulbreak (--dev soulbreak=N, a differential spec's): the Souls track's
+ * S3-S5 parts broken, each the differential's own test: the look's breaks
+ * (soullook.h) in its low nibble, the abilities' (soulpower.h) in the
+ * next, the passives' (soulpassive.h; ColonelSoul's from bit 11,
+ * soulcolonel.h) from bit 8, the chips' (soulchips.h) from bit 16, the
+ * mood's (soulmood.h) from bit 24 */
+#define SOULBREAK_LOOK(b)    ((b) & 0xF)
+#define SOULBREAK_POWER(b)   ((b) >> 4 & 0xF)
+#define SOULBREAK_PASSIVE(b) ((b) >> 8 & 0xFF)
+#define SOULBREAK_CHIPS(b)   ((b) >> 16 & 0xFF)
+#define SOULBREAK_MOOD(b)    ((b) >> 24 & 0xFF)
 /* The run's Souls, bit k BN5's Soul 7 + k (souls.h), for the battles from
  * the next Custom screen on: the director's as each battle begins, the
  * differential's from its spec. None (0) leaves BN6's Custom screen as it

@@ -85,6 +85,9 @@ void xd_log_units(const uint16_t *folder, int n);
 /* ... and those that moved a type one of the spec's families `fams` runs as theirs (XV_TYPE_SHARED: the chips' copy, run
  * for the family, its code the family's as a family's that moved a type another shares is) */
 void xd_log_shared(const XVirusFamily *const *fams, int n);
+/* ... and those holding another track's copy the Souls' code runs (soulcode.h's routes: the types it shares), where the
+ * spec runs it (the Souls installed, or a Colonel's side arming the obstacle strike's soldier, xstrike.h) */
+void xd_log_routes(void);
 /* Whether the trace names BN6's moved range at `to` (its header's, which the comparator reads pointers by): every
  * family's and helper's, a chip unit's where the spec plays it or a family of its shares its copy (xd_log_units,
  * xd_log_shared: another unit's copy of BN5's data, which BN6's own code has a twin of, read as BN5's own in BN5 and BN6's

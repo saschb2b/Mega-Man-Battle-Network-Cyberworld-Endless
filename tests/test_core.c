@@ -78,6 +78,9 @@
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 #include "xvirus_shim.h"
+#include "soul_room.h"
+#include "soulcode.h"
+#include "xnavi_sprites.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -3191,9 +3194,9 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 }
 
 /* The tracks' recipes in their install order (xinstall.h): BN5's moved engine objects, the Navis, BN5's chips' code, the
- * families. Whether a recipe of a track before track `track`'s recipe `at` (or one of that track's own before it) moves
+ * families, the Souls' code. Whether a recipe of a track before track `track`'s recipe `at` (or one of that track's own before it) moves
  * the type kind:from (XV_TYPE_MOVED): the copy a recipe that shares it (XV_TYPE_SHARED) spawns */
-enum { TRACK_OBJECTS, TRACK_NAVIS, TRACK_CHIPS, TRACK_FAMILIES };
+enum { TRACK_OBJECTS, TRACK_NAVIS, TRACK_CHIPS, TRACK_FAMILIES, TRACK_SOULS };
 
 static bool moves(const XVirusFamily *f, int kind, int from) {
 	for (int u = 0; u < f->ntypes; ++u)
@@ -3205,7 +3208,7 @@ static bool moved_before(int track, int at, int kind, int from) {
 	bool found = track > TRACK_OBJECTS && moves(&xnavi_objects_bn5, kind, from);
 	for (int k = 0; track >= TRACK_NAVIS && k < (track == TRACK_NAVIS ? at : xnavi_bn5_count) && !found; ++k) found = moves(&xnavi_bn5[k]->code, kind, from);
 	for (int k = 0; track >= TRACK_CHIPS && k < (track == TRACK_CHIPS ? at : xchips_bn5_count) && !found; ++k) found = moves(&xchips_bn5[k].code, kind, from);
-	for (int k = 0; track == TRACK_FAMILIES && k < at && !found; ++k) found = moves(xvirus_bn5[k], kind, from);
+	for (int k = 0; track >= TRACK_FAMILIES && k < (track == TRACK_FAMILIES ? at : xvirus_bn5_count) && !found; ++k) found = moves(xvirus_bn5[k], kind, from);
 	return found;
 }
 
@@ -3222,6 +3225,40 @@ static bool moved_once(const XVirusFamily *f, int track) {
 	for (int t = 0; t < f->ntypes; ++t)
 		if (f->types[t].to == XV_TYPE_MOVED && track > TRACK_OBJECTS && moved_before(track, 0, f->types[t].kind, f->types[t].from)) return false;
 	return true;
+}
+
+/* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
+ * chips' unit's */
+static bool copied_before(uint32_t bn5, uint32_t bn6) {
+	const XVirusFamily *fs[1 + XN_HOMES_MAX + XC_UNITS];
+	int n = 0;
+	fs[n++] = &xnavi_objects_bn5;
+	for (int k = 0; k < xnavi_bn5_count && k < XN_HOMES_MAX; ++k) fs[n++] = &xnavi_bn5[k]->code;
+	for (int k = 0; k < xchips_bn5_count && k < XC_UNITS; ++k) fs[n++] = &xchips_bn5[k].code;
+	for (int i = 0; i < n; ++i)
+		for (int b = 0; b < fs[i]->nblocks; ++b)
+			if (bn5 >= fs[i]->blocks[b].start && bn5 < fs[i]->blocks[b].end && bn6 == fs[i]->blocks[b].at + (bn5 - fs[i]->blocks[b].start))
+				return true;
+	return false;
+}
+
+/* the Souls' code, installed after every other track (xinstall.h): each type it moves one no track before it moved, each it
+ * shares one moved before it, each of its routes another track's copy of the same BN5 address, each effect it shares
+ * none of its own */
+static void test_soulcode_shared(void) {
+	const SoulCode *c = &soulcode_bn5;
+	for (int i = 0; i < c->ntypes; ++i) {
+		const SoulType *t = &c->types[i];
+		bool before = moved_before(TRACK_SOULS, 0, t->kind, t->type);
+		CHECK(t->to == XV_TYPE_SHARED ? before : (t->to != XV_TYPE_MOVED || !before), "souls' code: its type %d:%#x %s", t->kind, t->type,
+			t->to == XV_TYPE_SHARED ? "shared, moved by no track before it" : "moved, where a track before it moved it");
+	}
+	for (int i = 0; i < c->nroutes; ++i)
+		CHECK(copied_before(c->routes[i].bn5, c->routes[i].bn6), "souls' code: its route of BN5's %08x to %08x, no earlier track's copy",
+			(unsigned)c->routes[i].bn5, (unsigned)c->routes[i].bn6);
+	for (int i = 0; i < c->nshared_effects; ++i)
+		for (int k = 0; k < c->neffects; ++k)
+			CHECK(c->effects[k].to != c->shared_effects[i], "souls' code: effect %#x both shared and its own", c->shared_effects[i]);
 }
 
 static void test_xvirus_static(void) {
@@ -3359,8 +3396,10 @@ static void test_free_space(void) {
 		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
 		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
-		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_TAIL },
+		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
+		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
 	};
+	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
 	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
@@ -3408,7 +3447,7 @@ static void test_free_space(void) {
 		{ "the helpers' code", XC_HELPERS, XC_POWERS }, { "the computed powers", XC_POWERS, XC_POWERS + 4u * 256u },
 		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_ART }, { "what they draw", XC_ART, XC_END },
 	};
-	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_TAIL);
+	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_SOULS_ART);
 	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
 	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
 	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
@@ -3418,6 +3457,47 @@ static void test_free_space(void) {
 		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
 	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
 		"free space: the units' routines past BN6's own, its Navi chips' right after its support chips'");
+	/* (the Souls' room, soul_room.h: each part of the Souls' install, the tracks' S2-S5) */
+	const Region souls[] = {
+		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_STRIKE_CHECK + 4 },
+		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
+		{ "the hooks' Thumb", SOULS_THUMB, SOULS_THUMB_END },
+		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
+		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
+		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },
+		{ "the loadouts", SOULS_LOADOUTS, SOULS_LOADOUTS_END }, { "the faces", SOULS_FACES, SOULS_FACES_END },
+		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "the songs", SOULS_SONGS, SOULS_SONGS_END },
+		{ "the code", SOULS_CODE, SOULS_CODE_END }, { "the attacks' sprites", SOULS_ART, SOULS_FACE_TILES },
+		{ "the faces' tiles and digits", SOULS_FACE_TILES, SOULS_DIGITS_END }, { "list 0", SOULS_LIST0, SOULS_LIST0_END },
+		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
+	};
+	regions_apart("the Souls' room", souls, (int)(sizeof souls / sizeof *souls), FREE_SOULS, FREE_PANELS);
+	/* (the hooks' Thumb: soulchips.c's, the counter's, ColonelSoul's, each apart) */
+	const Region thumb[] = {
+		{ "the chips' Thumb", SOULS_THUMB, SOULS_THUMB + 0x24 }, { "the counter's", SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 0x24 },
+		{ "ColonelSoul's phases", SOULS_COLONEL, SOUL_COLONEL_DRAW }, { "his draw", SOUL_COLONEL_DRAW, SOUL_COLONEL_DRAW2 },
+		{ "his draw on UNITE's", SOUL_COLONEL_DRAW2, SOUL_COLONEL_STRIKE }, { "his strike's block", SOUL_COLONEL_STRIKE, SOUL_COLONEL_UNDO },
+		{ "his button's chip given back", SOUL_COLONEL_UNDO, SOULS_COLONEL_END },
+	};
+	regions_apart("the hooks' Thumb", thumb, (int)(sizeof thumb / sizeof *thumb), SOULS_THUMB, SOULS_THUMB_END);
+	/* (FREE_SOULS_ART: tools/xsoul.py's sprites, then ColonelSoul's button's art, BN5's: its tiles by state, picture, palettes) */
+	const Region art[] = {
+		{ "the sprites", FREE_SOULS_ART, SOULS_COLONEL_ART }, { "the button's tiles", SOULS_COLONEL_ART, SOULS_COLONEL_INFO },
+		{ "its picture", SOULS_COLONEL_INFO, SOULS_COLONEL_INFO_PAL }, { "its palettes", SOULS_COLONEL_INFO_PAL, SOULS_COLONEL_ART_END },
+	};
+	regions_apart("the Souls' art past their room", art, (int)(sizeof art / sizeof *art), FREE_SOULS_ART, FREE_SOULS_ART_END);
+	CHECK(SOULS_COLONEL_INFO - SOULS_COLONEL_ART == 3 * 0x180 && SOULS_COLONEL_INFO_PAL - SOULS_COLONEL_INFO == 0x540 &&
+		SOULS_COLONEL_NAME_PAL - SOULS_COLONEL_INFO_PAL == 0x20 && SOULS_COLONEL_ART_END - SOULS_COLONEL_NAME_PAL == 0x20 &&
+		(SOULS_COLONEL_ART & 0x1F) == 0, "the Souls' art: ColonelSoul's button's parts as BN5's sizes, word-aligned");
+	/* (each grown table's room for BN6's entries and the Souls': 14 sprites, 148 power attacks, 23 faces; six Souls, eleven
+	 * power attacks, BN5's eleven digits; the effects the tracks' allocations give the Souls) */
+	CHECK(SOULS_LIST0 + 4u * SOULS_LIST0_ENTRIES <= SOULS_LIST0_END && SOUL_LIST0_FIRST + 6 <= SOUL_LIST0_ART_FIRST &&
+		SOULS_ARM_ROWS + 0x44u * (3 + 6) <= SOULS_ARM_ROWS_END && SOULS_POWERS + 4u * (SOUL_POWER_FIRST + 11) <= SOULS_POWERS_END &&
+		SOULS_CHARGES + 10u * (SOUL_POWER_FIRST + 11) <= SOULS_CHARGES_END && SOULS_LOADOUTS + 6u * 6 <= SOULS_LOADOUTS_END &&
+		SOULS_FACES + 4u * (SOUL_FACE_FIRST + 6) <= SOULS_FACES_END && SOULS_FACE_PALS + 0x20u * (SOUL_FACE_FIRST + 6) <= SOULS_FACE_PALS_END &&
+		SOULS_FACE_TILES + 6u * 0x100 <= SOULS_DIGITS && SOULS_DIGITS + 11u * 0x80 <= SOULS_DIGITS_END && SOULS_DIGITS_END <= SOULS_ART_END &&
+		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
+		"the Souls' room: a grown table's entries past its room");
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },
@@ -4991,6 +5071,7 @@ int main(void) {
 	test_xvirus_recipe();
 	test_xvirus_cangard();
 	test_xvirus_static();
+	test_soulcode_shared();
 	test_xnavi_static();
 	test_free_space();
 	test_claims();

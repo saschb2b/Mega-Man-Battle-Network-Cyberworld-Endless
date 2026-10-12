@@ -6,6 +6,7 @@
 #include "xchips_code.h"
 #include "xnavi_objects.h"
 #include "xsea.h"
+#include "xstrike.h"
 
 void xinstall_core(int families, int navis) {
 	bool bn5 = emu_ready() && XR[XROM_BN5_COLONEL_US].data;
@@ -18,4 +19,7 @@ void xinstall_core(int families, int navis) {
 	if (bn5) xchips_code_install();
 	xvirus_install(families);
 	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
+	/* (BN5's obstacle strike, a Navi Colonel's side's as ColonelSoul's: the Souls' moved code first, its soldier among it, which
+	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */
+	if (bn5 && navis == XNAVI_BN5) xstrike_install();
 }

@@ -205,6 +205,10 @@ static bool entry_free(const Grow *g, uint32_t i) {
 	return true;
 }
 
+bool xg_taken(int t, uint32_t i) {
+	return t >= 0 && t < XG_TABLES && grown && i < G[t].cap && !entry_free(&G[t], i);
+}
+
 /* entry i of grown table t given n bytes, its entry's size */
 static void entry_set(int t, uint32_t i, const uint8_t *entry, uint32_t n) {
 	if (t < 0 || t >= XG_TABLES || !grown || i >= G[t].cap || G[t].size != n || n > ENTRY_MAX) {

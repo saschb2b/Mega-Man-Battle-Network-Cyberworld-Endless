@@ -303,9 +303,10 @@ AUDITS = {
                                      "(BN5_COLONEL_SIDE_SET; the moved Colonel's write kept in BN6_COLONEL_SIDES, XN_STUB_SIDES, the "
                                      "differential comparing it with BN5's bit), so BN6's twin lacks a rule BN5 runs in his battles: "
                                      "reached by an obstacle on MegaMan's side (a chip's, a family's) beside a panel Colonel's side "
-                                     "holds, which no spec of his makes (colonel_v1, colonel_v1_keys, colonel_sp: no third kind's 0x30 in "
-                                     "BN5's traces); open, with the obstacles a run's Colonel battle may hold",
-                               ("no obstacle on MegaMan's side in a Colonel battle",)),
+                                     "holds; BN5's block comes in at the four states' collision flags' reads for either Colonel's side "
+                                     "with the core where BN5's Navis are (src/emu/xstrike.c, its soldier the Souls' moved code), "
+                                     "colonel_strike holding a Navi Colonel's to BN5's (a RockCube before MegaMan, the soldier's three "
+                                     "shots at him)", ()),
     (0x080C3808, 0x080C5D18): ('ok', "the companion overlay spawned (the first kind's 0x56, its parameters from r4: its kind, 0 and "
                                      "the two bytes of the companion's r2, 0 from the triples' caller, BN5 0x0800ECFE / BN6 "
                                      "0x08010DEE): the same steps but BN6 copies its Navi's +0x16 as a halfword (its alliance "

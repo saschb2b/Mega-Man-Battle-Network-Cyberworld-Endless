@@ -2981,6 +2981,7 @@ static const XvByte vulcan_bytes[] = {
 	{ 0x080C6C70, 0x58, 0xEE },   /* 080C6C08's row 17: its effect 0x58 in BN5, 0xee in BN6 */
 	{ 0x080C6C76, 0x58, 0xEE },   /* 080C6C08's row 18: its effect 0x58 in BN5, 0xee in BN6 */
 	{ 0x080C6C7C, 0x58, 0xEE },   /* 080C6C08's row 19: its effect 0x58 in BN5, 0xee in BN6 */
+	{ 0x080C6C52, 0x20, 0xC1 },   /* the obstacle strike's shot's effect (the table 0x080C6C08's row 12, +2: the parameter the strike spawns the third kind's 0x12 with, BN5 0x080CAB40; the chips' Vulcan shots their own rows): BN5's 0x20, whose sprite BN6 has none of by its bytes, copied by the Souls at their 0xC1 (tools/xsoul.py's EFFECT_ORDER) */
 };
 static const XvType vulcan_types[] = { { 1, 0x05, XV_TYPE_SHARED }, { 3, 0x12, XV_TYPE_MOVED } };
 

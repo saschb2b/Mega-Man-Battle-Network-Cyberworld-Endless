@@ -21,6 +21,7 @@
 #include "guest.h"
 #include "hook.h"
 #include "rom.h"
+#include "soulcode.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
@@ -384,11 +385,20 @@ void xd_log_shared(const XVirusFamily *const *fams, int n) {
 		for (int i = 0; i < n && !unit_used[u]; ++i) unit_used[u] = moved_for(&xchips_bn5[u].code, fams[i]);
 }
 
+void xd_log_routes(void) {
+	for (int i = 0; i < soulcode_bn5.nroutes; ++i)
+		for (int u = 0; u < xchips_bn5_count && u < XC_UNITS; ++u)
+			for (int k = 0; !unit_used[u] && k < xchips_bn5[u].code.nblocks; ++k) {
+				const XvBlock *b = &xchips_bn5[u].code.blocks[k];
+				unit_used[u] = soulcode_bn5.routes[i].bn6 >= b->at && soulcode_bn5.routes[i].bn6 < b->at + (b->end - b->start);
+			}
+}
+
 /* whether BN6's copy at `to` is a used unit's */
 static bool chip_used(uint32_t to);
 
 bool xd_moved_kept(uint32_t to) {
-	return !(to >= FREE_CHIP_MOVED && to < FREE_TAIL) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
+	return !(to >= FREE_CHIP_MOVED && to < XC_END) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
 }
 
 static bool chip_used(uint32_t to) {

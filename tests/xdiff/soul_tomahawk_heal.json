@@ -1,0 +1,194 @@
+{
+ "about": "BN5's TomahawkSoul healing on grass in both engines (the Souls track's S5): TomahawkSoul united (souls6 0x08) with Lance * given up for UNITE (BN5's 81, BN6's 119), its passive making the field grass (BN5 0x08011C90, moved), its element Wood (BN5 0x0800E62C; src/emu/soulpower.c); MegaMan at (2,2) with 500 HP, not kept from harm: CanGard V1's shots strike him for 10 at t85 and t279, and he heals a point every 20 frames on grass in both (BN6's grass step for a Wood actor, BN6_PANEL_STEP, as BN5's), 490 to 499 by t261.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 500,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": false,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000B",
+  "0236"
+ ],
+ "folder5": [
+  "3451"
+ ],
+ "deck5": [
+  "3451"
+ ],
+ "folder6": [
+  "3477"
+ ],
+ "deck6": [
+  "3477"
+ ],
+ "souls6": "08",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [],
+ "expect": {},
+ "expect_why": "BN5's own course: TomahawkSoul united from t1, 500 HP, struck at t85 and t279, a point back each 20 frames between."
+}

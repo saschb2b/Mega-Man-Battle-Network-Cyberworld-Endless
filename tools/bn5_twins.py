@@ -272,6 +272,33 @@ KEPT = {
     0x06050A01: SPAWN_WORDS + " (BN6's own, 0x080BD392, 0x080DC8F8 among them)",
 }
 
+# Rows of a moved type's own tables that a later track's code spawns it with and its first copy's track does not: fixed in
+# the one copy (TYPES: its owner's generator writes the bytes, tools/xnavirecipe.py, tools/xchiprecipe.py) to the numbers the
+# later track gives what they name (its generator places it there and checks they agree, tools/xsoul.py): the row's place in
+# BN5, what it names ('sprite': its list x 4 and number, two bytes; 'effect': an effect id), BN6's (list, number) or id, the
+# track whose numbers they are, and why
+SHARED_ROWS = (
+    dict(at=0x080C6C52, kind='effect', to=0xC1, track='souls',
+         why="the obstacle strike's shot's effect (the table 0x080C6C08's row 12, +2: the parameter the strike spawns the third "
+             "kind's 0x12 with, BN5 0x080CAB40; the chips' Vulcan shots their own rows): BN5's 0x20, whose sprite BN6 has none "
+             "of by its bytes, copied by the Souls at their 0xC1 (tools/xsoul.py's EFFECT_ORDER)"),
+)
+
+
+def shared_row_bytes(b5, track):
+    """the bytes each of SHARED_ROWS the owner `track` of its type's copy writes: [(at, BN5's, BN6's, why)]"""
+    out = []
+    for r in SHARED_ROWS:
+        if r['kind'] == 'sprite':
+            l5, i5 = b5.u8(r['at']), b5.u8(r['at'] + 1)
+            out += [(r['at'] + n, w, v, r['why']) for n, w, v in ((0, l5, 4 * r['to'][0]), (1, i5, r['to'][1])) if w != v]
+        else:
+            e5 = b5.u8(r['at'])
+            if e5 != r['to']:
+                out.append((r['at'], e5, r['to'], r['why']))
+    return out
+
+
 # BN5's virus dispatcher's pre-step (BN5 0x08104550, BN6's twin 0x0810A29C: issue #82's A2b): before a virus's state each
 # frame BN5 acts for two families' NameIDs, which BN6's dispatcher does for its own ids alone. Each case by its first
 # instruction past the range test, as the installer ports it (src/emu/xvirus_shim.c: BN5's instructions, the collision
@@ -510,6 +537,14 @@ TYPES = {
                                         "type runs BN5's"),
     (4, 0x67): ('moved', None, 'chips', "BoyBomb's thrower: BN6's 0x67 would spawn BN6's own bomb, whose code differs"),
     (4, 0x75): ('moved', None, 'chips', "RainyDay's: no BN6 type runs its code"),
+    # (the Souls': tools/xsoul.py's, installed after every other track's, src/emu/xinstall.c; the rest of the types their
+    # code spawns are other tracks' copies above, run for them: the image object, NumberSoul's companion (1, 0x54) and bomb
+    # (3, 0x05), KnightSoul's ball (3, 0x17) and ToadSoul's hit (3, 0x81) the Navis', the obstacle strike's shot (3, 0x12)
+    # and ShadowSoul's afterimage (4, 0x28) the chips')
+    (3, 0x30): ('moved', None, 'souls', "the obstacle strike (BN5 0x080CA91D, spawned at 0x080CABD0 by 0x080CABCA as an obstacle "
+                                        "on the side opposite a Colonel's turns, its states' block 0x08018002-0x0801802E): BN6's "
+                                        "0x30 (0x080CB571) another body; a Navi Colonel's side and ColonelSoul's both arm it "
+                                        "(BN6_COLONEL_SIDES, src/emu/xstrike.c)"),
     # (unreachable: spawned only behind BattleState+0x32 bit 0x40, which BN5's 0x0802D594 alone sets and BN6's engine never
     # does: issue #82's shared allocations, BN5's panel claims stubbed everywhere)
     (4, 0x83): ('unreachable', None, 'families', "the panel claim the fire column's spark asks for (BN5 0x080EA08C, behind 0x080090E8's "

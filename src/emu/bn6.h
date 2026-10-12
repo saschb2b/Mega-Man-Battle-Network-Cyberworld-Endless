@@ -113,6 +113,7 @@
 #define BN6_PANEL_HOLE        1           /* BN6_PANEL_TYPE: a hole */
 #define BN6_PANEL_PLAIN       2           /* BN6_PANEL_TYPE: a plain panel */
 #define BN6_PANEL_POISON      4           /* BN6_PANEL_TYPE: poison */
+#define BN6_FIELD_COLUMNS     8           /* BN6_FIELD_PANELS' panels a row (the field's 6 and a border each side) */
 #define BN6_PANEL_STRUCK      0x40000000u /* BN6_PANEL_FLAGS: an enemy's attack on the panel */
 #define BN6_PANEL_CRACKED     3           /* BN6_PANEL_TYPE: cracked (a step breaks it to a hole: object_crackPanel 0x0800C938 writes it) */
 #define BN6_PANEL_HOLY        5           /* BN6_PANEL_TYPE: holy (damage on it halved, 0x0800E3F0) */
@@ -139,6 +140,7 @@
 #define BN6_T1_FUTURE_X       0x14        /* FuturePanelX and Y: the panel it is headed for (a thrown attack's landing), 0 none */
 #define BN6_T1_FUTURE_Y       0x15
 #define BN6_T1_ALLIANCE       0x16        /* Alliance: 0 MegaMan's side, 1 the enemies' */
+#define BN6_T1_FLIP           0x17        /* DirectionFlip: its facing turned (BN6's 0x0800E2CA: +1 or -1 a step by it and the alliance) */
 #define BN6_T1_HP             0x24        /* HP and MaxHP, u16 */
 #define BN6_T1_MAX_HP         0x26
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
@@ -388,6 +390,7 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_attacks.h"   /* the attack families, power attacks and charge times, as the engine grows them (issue #82) */
 #include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */

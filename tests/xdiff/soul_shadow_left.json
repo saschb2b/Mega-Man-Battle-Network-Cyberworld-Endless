@@ -1,0 +1,205 @@
+{
+ "about": "BN5's ShadowSoul's B+Left counter in both engines (the Souls track's S5): ShadowSoul united (its flag 0009, souls6 0x02) with Invisibl * given up for UNITE; B held from t270 for 40 frames, LEFT at t274: B+Left (BN5's power attack 0x45, BN6's 0x97, its family 0x3D, BN6's 0xC4) stands him in the stance 31 frames (BN5 0x080EEADC), and CanGard's shot striking him in it at t279 starts the counter (BN5 0x0800E338, family 0x2C; BN6's twin 0x080105F2, 0x47, whose first frame the Souls' Thumb runs at once as BN5's: src/emu/soulcode.c's counter_code), which strikes CanGard V1 at (6,2) for 50. MegaMan at (2,2), 2000 HP, not kept from harm (CanGard's shots strike him at t85 and t279 in both).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 380,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": false,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0009",
+  "0236"
+ ],
+ "folder5": [
+  "3485"
+ ],
+ "deck5": [
+  "3485"
+ ],
+ "folder6": [
+  "34B1"
+ ],
+ "deck6": [
+  "34B1"
+ ],
+ "souls6": "02",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   270,
+   "B",
+   40
+  ],
+  [
+   274,
+   "LEFT",
+   4
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: ShadowSoul united from t1, B+Left's stance from t276, the counter from t279, CanGard 60 to 10."
+}

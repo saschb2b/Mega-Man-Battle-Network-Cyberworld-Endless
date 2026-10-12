@@ -174,7 +174,7 @@ def rng_step(x):
 
 def megaman_action(f):
     o = next((x for x in f.fr['objs'] if x.kind == 'T1' and f.canon.is_megaman(f.game, x.o16(OBJ_NAME_ID))), None)
-    return f.canon.action(f.game, True, o.o8(OBJ_ACTION)) if o else None
+    return f.canon.action(f.game, True, o.o8(OBJ_ACTION), o.ai) if o else None
 
 
 def buster_draw(d, fa, fb, prev):
@@ -274,7 +274,6 @@ def renderer_ranks(fa, fb, last):
 
 
 PROXY = 8                    # BN6_FORM_PROXY: the form BN5's Souls stand behind in BN6's engine
-RELATED2 = 0x50              # a battle object's RelatedObject2Ptr: a Cross's overlay, MegaMan's
 
 
 def united(f):
@@ -287,48 +286,12 @@ def united(f):
     return form in f.canon.form if f.game == 5 else form == PROXY and p[PLAYER_SOULS] != 0
 
 
-def overlay(d, fa, fb):
-    """the difference is the object BN6's MegaMan names his overlay (his RelatedObject2Ptr: the proxy's, HeatCross's), both
-    games' MegaMan united"""
-    if not (united(fa) and united(fb)) or not isinstance(d.role, tuple):
-        return False
-    mm = next((o for o in fb.fr['objs'] if o.kind == 'T1' and fb.canon.is_megaman(6, o.o16(OBJ_NAME_ID))), None)
-    p = fb.ptr(mm.o32(RELATED2)) if mm else ('raw',)
-    return len(p) == 3 and p[0] == role_name(d.role)
-
-
 def his_panel(d, fa, fb):
     """the difference is the panel BN6's MegaMan stands on, both games' MegaMan united"""
     if not (united(fa) and united(fb)) or not isinstance(d.role, str) or not d.role.startswith('panel '):
         return False
     mm = next((o for o in fb.fr['objs'] if o.kind == 'T1' and fb.canon.is_megaman(6, o.o16(OBJ_NAME_ID))), None)
     return mm is not None and d.role == f'panel {mm.o8(0x12)},{mm.o8(0x13)}'
-
-
-def unites_now(fa, fb, chaos):
-    """this traced frame is the first of a unison in both games (a Chaos Unison's where chaos): both united now, BN5's form
-    not that Soul in the traced frame before (or none before it), BN6's Souls' block naming its chaos"""
-    if not (united(fa) and united(fb)):
-        return False
-    frames = fa.trace['frames']
-    k = next((i for i, fr in enumerate(frames) if fr is fa.fr), 0)
-    form = fa.fr['player'][PLAYER_NAVI + NAVI_FORM]
-    if k and frames[k - 1].get('player') and frames[k - 1]['player'][PLAYER_NAVI + NAVI_FORM] == form:
-        return False
-    return not chaos or fb.fr['player'][PLAYER_SOULS + 1] != 0
-
-
-def hand_of_ten(d, fa):
-    """the difference is of the Custom screen's element 0xB (unite) as BN5's last screen left it, that screen opened with
-    NumberSoul united in BN5 (its hand of ten, 0x08025C20: the elements' places for ten chips): BN5's form NumberSoul's in
-    the traced frame before the last hold of its clock (the screen's), at or before this frame"""
-    if d.part != 'unite':
-        return False
-    frames, number = fa.trace['frames'], int(fa.canon.souls.get('hand_of_ten', '0'), 0)
-    k = next((i for i, fr in enumerate(frames) if fr is fa.fr), 0)
-    while k > 0 and frames[k]['f'] - frames[k - 1]['f'] <= 1:
-        k -= 1
-    return k > 0 and frames[k - 1].get('player') is not None and frames[k - 1]['player'][PLAYER_NAVI + NAVI_FORM] == number
 
 
 def form_left(f):
@@ -345,10 +308,15 @@ def form_left(f):
     return f.fr['t'] in tr['form_left']
 
 
+def in_ranges(ranges, game, caller):
+    return any(int(r[f'bn{game}'], 0) <= caller & ~1 < int(r[f'bn{game}'], 0) + int(r['len'], 0) for r in ranges)
+
+
 def per_frame(legit, game, caller):
     """a draw's caller is one of the routines each game draws from once a frame whatever its battle does (legit.json, rng,
-    per_frame: the game state's and the main loop's)"""
-    return any(int(r[f'bn{game}'], 0) <= caller & ~1 < int(r[f'bn{game}'], 0) + int(r['len'], 0) for r in legit['rng'].get('per_frame', []))
+    per_frame: the game state's and the main loop's), or the camera's shake, which draws each frame it shakes from each
+    game's own word (rng, shake)"""
+    return in_ranges(legit['rng'].get('per_frame', []) + legit['rng'].get('shake', []), game, caller)
 
 
 def stepped(x, y, n):
@@ -367,13 +335,15 @@ def held_clock(d, fa, fb):
     made more than the other"""
     if d.part != 'rng' or not isinstance(d.a, tuple) or not isinstance(d.b, tuple):
         return False
-    legit, n = fa.canon.legit, {}
+    legit, n, shakes = fa.canon.legit, {}, {5: 0, 6: 0}
     for f in (fa, fb):
         for e in f.fr['events']:
             if e.kind == DRAW and e.flags:   # (since the words were seeded: a draw before it has no flag, src/dev/xdiff_events.c)
                 key = (f.game, e.sub >> 1, per_frame(legit, f.game, e.caller))
                 n[key] = n.get(key, 0) + 1
-    if any(n.get((5, w, False), 0) != n.get((6, w, False), 0) for w in (0, 1)):
+                shakes[f.game] += in_ranges(legit['rng'].get('shake', []), f.game, e.caller)
+    # (the camera shaken as long in both: as many of its draws, each game's from its own word)
+    if shakes[5] != shakes[6] or any(n.get((5, w, False), 0) != n.get((6, w, False), 0) for w in (0, 1)):
         return False
     return all(stepped(d.a[w], d.b[w], n.get((6, w, True), 0) - n.get((5, w, True), 0)) for w in (0, 1))
 
@@ -442,10 +412,9 @@ WHEN = {
     'icon flag': lambda d, fa, fb, prev: his_icon_flag(d, fb),
     'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
     'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),
-    'chaos unites': lambda d, fa, fb, prev: unites_now(fa, fb, True),
     'held clock': lambda d, fa, fb, prev: held_clock(d, fa, fb),
     'united': lambda d, fa, fb, prev: united(fa) and united(fb),
-    'overlay': lambda d, fa, fb, prev: overlay(d, fa, fb),
+    'not united': lambda d, fa, fb, prev: not (united(fa) and united(fb)),
     'form left': lambda d, fa, fb, prev: form_left(fb),
     'flashing': lambda d, fa, fb, prev: any(flashing(f, d.role) for f in (fa, fb) + prev),
     'buster draw': buster_draw,

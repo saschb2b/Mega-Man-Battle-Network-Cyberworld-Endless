@@ -39,5 +39,11 @@ bool xattack_grow(void);
 /* The bus address of family `family`'s entry in the grown table, 0 for one
  * outside 0x10-0xFF. */
 uint32_t xattack_entry(int family);
+/* Family `family` (past BN6's own, XATTACK_BN6_END on) run as `routine` (a
+ * Thumb address), outside a staged step (the Souls' install; the chips'
+ * stage theirs through xattack_entry): true where its entry held the stub
+ * or `routine` already; false, nothing written, where the table is not
+ * grown or the entry is another's. */
+bool xattack_set(int family, uint32_t routine);
 
 #endif

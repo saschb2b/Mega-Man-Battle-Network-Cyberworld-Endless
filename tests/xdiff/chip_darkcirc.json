@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkCirc R in both games, BN5's chip 187 by BN5's own code and the registry's 214 by the same code moved (BN5's support routine 0x2A as BN6's 0x54; a DarkChip of the registry's, dealt straight into the battle deck, as its rule (S7) is to come), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkCirc R in both games, BN5's chip 187 by BN5's own code and the registry's 214 by the same code moved (BN5's support routine 0x2A as BN6's 0x54; a DarkChip of the registry's, dealt straight into the battle deck; KnightSoul held in both (flags5, souls6), so BN6's engine has the Souls and with them BN5's mood and DarkChip rule (S7)), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
@@ -9,6 +9,12 @@
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
  "hold": 60,
  "folder5": [
   "22BB"
@@ -81,6 +87,6 @@
  "verdict": {
   "is": "FAIL",
   "at": 32,
-  "why": "BN5's dark rule, S7's to bring (docs/MULTIROM.md): the DarkChip used, BN5's battle drops MegaMan's mood to 0 (his NaviStats +0x0E, the player block's), takes its price (the player block's +0x54: 0x64), marks his object (+0x94: 3) and draws random numbers for it (BN5 0x080197B1), none of which BN6's battle does yet; DarkCirc's own code moved plays as BN5's (its support object, the fourth kind's 0x5E, its circle, the third kind's 0x89 and 0x8A, its sounds 0xBD and 0x10E from their slots 0x4F and 0x4E); --survey: nothing else differs, unmasked"
+  "why": "BN5's DarkChip rule as the Souls track's S7 brought it holds (KnightSoul held in both, souls6: the Souls installed and with them BN5's mood, src/emu/soulmood.c: his mood 0 in both as the chip is used); what differs from t32 is what BN5's DarkChip use does past it that no track ports yet (docs/MULTIROM.md, Transplanted Souls, S7's open): the chip's after-effect on his NaviStats (BN5 0x0802C938: the player block's +0x54 by 0x64), his object's +0x94 (3) and the random numbers it draws (BN5 0x080197B1); DarkCirc's own code moved plays as BN5's (its support object, the fourth kind's 0x5E, its circle, the third kind's 0x89 and 0x8A, its sounds 0xBD and 0x10E from their slots 0x4F and 0x4E); --survey: nothing else differs, unmasked"
  }
 }
