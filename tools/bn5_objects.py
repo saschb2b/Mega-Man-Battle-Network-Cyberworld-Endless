@@ -30,15 +30,18 @@ IMAGE = dict(
 # have none: the Navis' entries join this table at the merge.)
 IMAGE_TWIN = {}
 # COPIED: BN5's sprite copied into a track's art at a number of a list from the range of the track that spawns the kind:
-# (BN6's list, number, track). The Souls' (src/emu/soulcode_bn5.c's sprites, list 0 the Souls' alone): MegaMan's buster's
-# flash in a Soul (0x23, 0x33 in Chaos Unison: BN5's sprite 3:0x03), ShadowSoul's sword family's (0x03, 0x0A and 0x32:
-# 3:0x00, the bytes the Navis copy for kind 0x03 at list 4 0xB5 on their branch: one of the two numbers kept at the merge)
-# and ToadSoul's (0x31: 3:0x1F)
+# (BN6's list, number, track). Each sprite's bytes in one place (the coordinator's call, 2026-10-12): BN5's 3:0x00
+# (ShadowMan's and Colonel's image; the Souls' kinds 0x03, 0x0A and 0x32, ShadowSoul's sword family's) at the end of the
+# Navis' list 4 range, 0xB5; 3:0x03 (the Dark Soul's buster's arm; the Souls' 0x23 and 0x33, MegaMan's buster's flash in
+# a Soul and in Chaos Unison) at list 5's 0xA6; 3:0x06 (the Navis' buster's muzzle) at list 5's 0xA5; 3:0x1F (ToadSoul's,
+# 0x31) at list 0's 0x4E, the Souls' own. The Souls' branch copies the Navis' two as well until the merge (src/emu/
+# soulcode.c lists a copy only where no install listed the same bytes there first)
 IMAGE_COPIED = {
-    0x03: (0, 0x4D, 'souls'),
-    0x0A: (0, 0x4D, 'souls'),
-    0x23: (0, 0x4C, 'souls'),
+    0x03: (4, 0xB5, 'navis'),
+    0x0A: (4, 0xB5, 'navis'),
+    0x0D: (5, 0xA5, 'navis'),
+    0x23: (5, 0xA6, 'navis'),
     0x31: (0, 0x4E, 'souls'),
-    0x32: (0, 0x4D, 'souls'),
-    0x33: (0, 0x4C, 'souls'),
+    0x32: (4, 0xB5, 'navis'),
+    0x33: (5, 0xA6, 'navis'),
 }

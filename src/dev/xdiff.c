@@ -30,6 +30,7 @@
  * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
 
+#include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,6 +68,7 @@
 #define MAX_FLAGS 16
 #define MAX_SCRIPTS 8
 #define MAX_SCRIPT_STEPS 32
+#define MAX_SHOTS 16
 
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; bool both; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both: BN5's copy too */
@@ -76,6 +78,8 @@ typedef struct { uint32_t at, v; int size; bool both; } Poke;   /* size 0: a cal
  * reads open */
 typedef struct { uint32_t keys; int n; } ScriptStep;
 typedef struct { int game, screen, nsteps; ScriptStep steps[MAX_SCRIPT_STEPS]; } CustomScript;
+/* A picture of a Custom screen (shot=): game 5 or 6's screen n, its frame f from the frame its window first reads open */
+typedef struct { int game, screen, frame; char path[160]; } Shot;
 
 typedef struct {
 	int nfoes;
@@ -95,6 +99,8 @@ typedef struct {
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	CustomScript scripts[MAX_SCRIPTS];
 	int nscripts;
+	Shot shots[MAX_SHOTS];
+	int nshots;
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];
@@ -267,6 +273,10 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (!strcmp(name, "out")) return snprintf(s->out, sizeof s->out, "%s", v) > 0;
 	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow")) || (s->replay = !strcmp(v, "replay"));
 	if (!strcmp(name, "twin")) return twin_parse(s, v);
+	if (!strcmp(name, "shot")) {
+		Shot *h = &s->shots[s->nshots];
+		return s->nshots < MAX_SHOTS && sscanf(v, "%d:%d:%d:%159s", &h->game, &h->screen, &h->frame, h->path) == 4 && ++s->nshots;
+	}
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "field")) {
 		unsigned f, f6 = 0x100;
@@ -548,6 +558,20 @@ static void deck_put(Side *g, const Spec *s) {
 	for (int i = 0; i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
 }
 
+/* (shot=) the pictures of this frame of a Custom screen: the core's picture, as the canvas shows it */
+static void shots_take(const Side *g, const Spec *s) {
+	for (int i = 0; i < s->nshots; ++i) {
+		const Shot *h = &s->shots[i];
+		if (h->game != g->v.game || h->screen != g->screen || h->frame != g->custom) continue;
+		static uint32_t px[EMU_W * EMU_H];
+		const uint32_t *v = g->v.game == 5 ? guest_video() : emu_video();
+		for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
+		SDL_Surface *f = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+		if (!f || SDL_SaveBMP(f, h->path) != 0) fprintf(stderr, "xdiff: %s not saved\n", h->path);
+		SDL_FreeSurface(f);
+	}
+}
+
 /* One frame of a battle: each Custom screen passed by its keys (custom_keys)
  * from its window's opening; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -571,6 +595,7 @@ static bool step(Side *g, const Spec *s) {
 	if (g->log) xd_frame(g->log, g->frame, t, battle, g->seeded);
 	v->frame(keys);
 	++g->frame;
+	if (custom && g->custom >= 0) shots_take(g, s);
 	sub = v->rd8(v->gamestate);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;

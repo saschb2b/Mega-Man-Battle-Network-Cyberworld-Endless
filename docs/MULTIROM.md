@@ -1207,8 +1207,9 @@ the next.
   slash, NumberSoul's bomb, TomahawkSoul's swing, KnightSoul's wrecking
   ball (its confusion) and ToadSoul's sound waves (their paralysis) each
   play as BN5's frame for frame (docs/DEVTOOLS.md, The differential).
-- **S5, a Soul's passives** (in part; docs/ROM_DATA.md, A Soul's
-  passives, A Soul's chips): the passives BN5 gives a Soul as it unites
+- **S5, a Soul's passives** (done; docs/ROM_DATA.md, A Soul's
+  passives, A Soul's chips, ColonelSoul's button, chip shot and obstacle
+  strike): the passives BN5 gives a Soul as it unites
   and as his form's state is set again (its two tables by form, the
   Souls' routines moved, the proxy's entries of BN6's twins routed to
   them): ShadowSoul's FloatShoe, TomahawkSoul's grass under MegaMan,
@@ -1225,21 +1226,29 @@ the next.
   BN5's); KnightSoul's 50 frames unharmed after an attack chip used from
   his front column; ShadowSoul's B+Left stance and its counter, the
   counter's first frame run at once as BN5's (the Souls' own Thumb);
-  ShadowSoul's charged sword run by BN5's sword family; his shadow none.
-  Each held to BN5's battle frame by frame by a spec of its own but the
-  sword with no enemy in reach (it parts from BN5's two frames into the
-  slash; open) and the shadow (a capture to come). The effects BN6 draws
-  otherwise (0x02, 0x03, 0x14) are BN5's copies in the room issue #82
-  granted (`FREE_SOULS_ART`). Not yet: ColonelSoul's chip shot, his
-  Custom screen's button and his obstacle strike (researched: docs/
-  ROM_DATA.md, A Soul's passives). His button is BN6's DustCross's
-  elements 8 and 9 by set-up and A, with BN5's rule to light it, but its
-  mode's phases (the chip loaded into the button, its icon and look),
-  OK's keeping the chip and the turn's start giving it to the chip shot
-  are BN5's alone; his strike needs BN5's third kind's 0x30 moved, four
-  hooks in the obstacles' states and a side flag of the Souls' own (BN5's
-  bits of BattleState +0x5C are BN6's own), with BN5's Colonel's table at
-  `RAM_COLONEL`, laid out as the Navi track's Colonel has it.
+  ShadowSoul's charged sword run by BN5's sword family, with an enemy in
+  reach and without (its family's branch into the next routine's return
+  kept in one block; BN6's reserve routine kept, the differential's
+  evidence); his shadow none. ColonelSoul's three (`src/emu/
+  soulcolonel.c`): his Custom screen's button (BN6's DustCross's elements
+  8 and 9, BN5's set-up, rule, phases, draw and art: lit by a standard
+  chip of no kind picked last, A drops that chip into it, B gives it
+  back, OK keeps it and spends it), his chip shot (the turn's start makes
+  his charged shot fire the button's chip, ScreenDivide without one) and
+  his obstacle strike (while he is united, an obstacle on the enemy's
+  area with an enemy before it, or one of his side behind it, turns into
+  BN5's soldier, which fires three shots: BN5's third kind's 0x30 and
+  0x12 moved, BN5's block in the obstacles' four states, his side's flag
+  in the Souls' own block, never BN6's bits of BattleState +0x5C; BN5's
+  Colonel's table at `RAM_COLONEL`, laid out as the Navi track's Colonel
+  has it). Each held to BN5's battle frame by frame by a spec of its own
+  (the strike's spec leaving out the RockCube's own use, each game's
+  chip), a mutation of each part failing. The effects BN6 draws
+  otherwise (0x02, 0x03, 0x14) are BN5's copies; the flashes' sprites
+  BN5's 3:0x00 and 3:0x03 stand at the Navis' numbers (list 4's 0xB5,
+  list 5's 0xA6: one place for each sprite's bytes once the tracks
+  merge, tools/bn5_objects.py), and ColonelSoul's button's art in the
+  room issue #82 granted (`FREE_SOULS_ART`).
 - **S7, BN5's mood and its DarkChip rule** (done but for BN5's DarkChips'
   own attacks and after-effects; docs/ROM_DATA.md, BN5's mood in BN6's
   battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
@@ -1262,14 +1271,13 @@ the next.
   DarkChips' attacks and each one's after-effect on his NaviStats
   (`0x0802C938`), the chips track's; Chaos Unison (S6) after the next
   merge.
-- **Next**: S5's rest (ColonelSoul's three, ShadowSoul's sword with no
-  enemy in reach) and Chaos Unison's charge (S6). Each part's masks in
-  the differential (tests/xdiff/legit.json, "until the Souls track's S6"
-  and BN5's Soul record's chip slot, ColonelSoul's) go as it comes. Their
-  state in RAM is the engine's plan's (`0x0203FF70`-`0x0203FFEF`,
-  `BN6_SOULS`), their code and data in `EMU_FREE` + `0x480000` to
-  `+0x4C0000` and the effects' art at `+0x700000` to `+0x710000`
-  (docs/EMULATION.md; laid out in `src/emu/soul_room.h`).
+- **Next**: Chaos Unison's charge (S6), after the tracks' merge. Its
+  masks in the differential (tests/xdiff/legit.json, "until the Souls
+  track's S6") go as it comes. The Souls' state in RAM is the engine's
+  plan's (`0x0203FF70`-`0x0203FFEF`, `BN6_SOULS`), their code and data
+  in `EMU_FREE` + `0x480000` to `+0x4C0000` and their art past it at
+  `+0x700000` to `+0x710000` (docs/EMULATION.md; laid out in
+  `src/emu/soul_room.h`).
 
 ## Status
 

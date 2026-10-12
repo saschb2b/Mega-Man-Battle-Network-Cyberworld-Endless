@@ -38,9 +38,10 @@ WORK = os.path.join(ROOT, '.build', 'xrecipe')
 
 # ---- the Souls' room (src/emu/soul_room.h) ----
 
-CODE_ROOM = 0x2000          # SOULS_CODE's bytes
-ART_ROOM = 0xF000           # SOULS_ART's bytes before the faces (soul_room.h's SOULS_FACE_TILES); past them, the
-ART_ROOM2 = 0x10000         # ... granted region FREE_SOULS_ART (free_space.h), its bytes
+CODE_ROOM = 0x3000          # SOULS_CODE's bytes
+ART_ROOM = 0xE000           # SOULS_ART's bytes before the faces (soul_room.h's SOULS_FACE_TILES); past them, the
+ART_ROOM2 = 0xF000          # ... granted region FREE_SOULS_ART (free_space.h), its bytes before ColonelSoul's button's art
+                            # (soul_room.h's SOULS_COLONEL_ART, its last 0x1000)
 BLOCK_STEP = 0x10           # each block begins at the next multiple of this past the last, its distance from a word kept
 ART_STEP = 0x100            # each sprite at the next multiple of this
 
@@ -56,7 +57,7 @@ ART_STEP = 0x100            # each sprite at the next multiple of this
 # Soul's image)
 UNITS = (
     ('unite', 0, (0x08012008,)),
-    ('colonel', 7, (0x0800F7DC, 0x0800F7D0, 0x080EED92)),
+    ('colonel', 7, (0x0800F7DC, 0x0800F7D0, 0x080EED92, 0x080236BC, 0x080236E8, 0x08011C3C, 0x080CABCA)),
     ('shadow', 8, (0x0800F818, 0x0800FBE6, 0x080EBDC6, 0x080EEADC, 0x08011C78, 0x08011D2A)),
     ('number', 9, (0x0800F66A, 0x080EE864, 0x0800F074, 0x0800F0D6)),
     ('tomahawk', 10, (0x0800F864, 0x080EEF6C, 0x08011C90)),
@@ -85,7 +86,10 @@ STUB_CALLS = {0x080123FA: 'SOUL_STUB_PENDING', 0x080EA08C: 'SOUL_STUB_NONE', 0x0
               # (a counter's attack begun, ShadowSoul's B+Left stance hit: BN6's twin 0x080105F2 takes the same steps, its two
               # families numbered 0x47 and 0x48 where BN5's 0x2C and 0x2D, but leaves the family's first frame to the next
               # frame where BN5's runs it at once, 0x0800E39A: the Souls' Thumb calls the twin, then the family once)
-              0x0800E338: 'SOUL_STUB_COUNTER'}
+              0x0800E338: 'SOUL_STUB_COUNTER',
+              # (Colonel's side's flag of BattleState +0x5C, 0x10 or 0x20 by side through 0x0800131E: BN6's own code sets and
+              # reads those bits for its own, 0x080E0684, so ColonelSoul's is kept in the Souls' block: src/emu/soulcolonel.c)
+              0x080CAD06: 'SOUL_STUB_STRIKE'}
 # BN5's battle NaviStats byte getters (0x08010DEE by object, 0x08010D64 by side), read with r1 0x2C, MegaMan's form: BN5's
 # answer is the Soul's number (7-12), BN6's the proxy's 8; where a moved routine reads it so the Souls' getter answers
 FORM_GETTERS = {0x08010DEE: 'SOUL_STUB_FORM', 0x08010D64: 'SOUL_STUB_FORM_SIDE'}
@@ -93,7 +97,8 @@ FORM_FIELD = 0x2C
 
 # The Souls' own pairs, where the symbol map's is wrong or none (each body read in both games): BN5's chip writer's second
 # entry (push; movs r4,#0; b to their common part) and BN6's, beside the first's pair 0x0800FE6A -> 0x080126E4
-PAIRS = {0x0800FE70: (0x080126EA, 'the chip writer\'s second entry: push {r4,r6,r7,lr}; movs r4,#0; b to the common part, in both')}
+PAIRS = {0x0800FE70: (0x080126EA, 'the chip writer\'s second entry: push {r4,r6,r7,lr}; movs r4,#0; b to the common part, in both'),
+         0x080258E8: (0x08029CD4, 'a pick\'s slot drawn on the Custom screen: the same steps, each game\'s own tiles and map place')}
 # The Souls' audits of their calls' differing twins (as tools/bn5_twins.py's AUDITS for the families')
 AUDITS = {
     (0x0800FE56, 0x08012642): "a charged shot's damage, base + its step x (his buster's Attack + 1): BN6's adds his Navi's and his form's "
@@ -105,6 +110,15 @@ AUDITS = {
                               "effects have flag 8, else 0 in BN6; BN5 0 only for an object whose AI data +0 is 2 and +1 not 0x17 as "
                               "well, which MegaMan, the one object a Soul's passive runs on, always is (+0 2, +1 his AI index 0): the "
                               "same for him",
+    (0x080258E8, 0x08029CD4): "a pick's slot drawn on the Custom screen's BG (r0 its place, r1 0, r2 0: ColonelSoul's button's "
+                              "phase 1): the same steps, the tiles each game's own (BN5's from 0x47, BN6's from 0x89) at its BG map's "
+                              "place for the slot: BN6's layout of its own screen",
+    (0x08024004, 0x080281D4): "a chip's icon copied into the picks column's tiles (r0 its chip, -1 none; r1 its place: ColonelSoul's "
+                              "button's phase 1 blinking it): the same steps on each game's tiles for the column (BN5 0x06009C20, BN6 "
+                              "0x0600A4A0, BN6_CUSTOM_PICK_ICONS) and their icon table, BN6's own",
+    (0x08024A2A, 0x08028E32): "the lit rules run again as the button's phase ends: BN5's five (the chips', OK's, UNITE's, ColonelSoul's "
+                              "button, MeddySoul's), BN6's four (the same three, then DustCross's button, the place src/emu/"
+                              "soulcolonel.c answers with BN5's ColonelSoul rule; MeddySoul is Team ProtoMan's)",
     (0x08015140, 0x08018810): "an owner's arm point, by its NameID's sprite (the arm flash's set-up, a kind whose +4 is set): BN6 answers "
                               "(0, 7) for its own NameIDs 0xCD-0xFF and else takes the same steps, its calls their twins; the owner of "
                               "every flash the Souls spawn is MegaMan (0x1A0, a form's 0x1AB on), his sprite's arm row read from the rows "
@@ -134,6 +148,16 @@ SPRITE_LOAD = 0x08002650    # sprite_load: r1 the list's offset (list x 4), r2 t
 # their code draws from soul_room.h's SOUL_LIST0_ART_FIRST up), effects 0xC0-0xCF, and one BN6 song slot a BN5 sound
 ART_LIST = 0                # the list the Souls' sprites BN6 has none of are listed in, ...
 ART_FIRST, ART_LAST = 0x4B, 0x5F   # ... at these numbers (soul_room.h's SOUL_LIST0_ART_FIRST, SOULS_LIST0_ENTRIES - 1)
+# ... the sprites copied so far in the order they took their numbers (BN5's list and number), placed first so that a
+# number once given stays (tools/bn5_objects.py fixes the flash kinds' by them, and the tracks merge on them); a sprite a
+# later walk meets is numbered after them
+# (None: a number left empty, once BN5's 3:0x03 and 3:0x00, which the image object's kinds now draw at the Navis' numbers:
+# tools/bn5_objects.py's IMAGE_COPIED)
+ART_ORDER = ((4, 0x1F), None, None, (3, 0x1F), (3, 0x14), (4, 0x01), (3, 0x0A), (3, 0x15), (3, 0x05), (5, 0x03),
+             (5, 0x0D), (5, 0x02))
+# ... and the effects so (their ids from 0xC0 in this order: ColonelSoul's ScreenDivide's three, ShadowSoul's slash,
+# TomahawkSoul's swing, the three BN6 redrew), a later walk's numbered after them
+EFFECT_ORDER = (0x48, 0x49, 0x4A, 0x17, 0x45, 0x03, 0x14, 0x02)
 EFFECT_FIRST, EFFECT_LAST = 0xC0, 0xCF
 # BN5's songs a Soul plays that Gregar has otherwise (xrecipe.py's song_sig: BN6's own 0x70 and 0x117 are none of them, its
 # 0x115 another sound), each at the BN6 slot the allocations' amendment gives that sound whatever track copies it (the
@@ -148,7 +172,14 @@ EFFECT_BASES = {0x080EEE18: (0x48, 3)}
 # effect by sub-family, 0x080EC110: ShadowSoul's charged shot, sub-family 2, its slash 0x17; the others are the sword
 # chips' own, whose entries BN5 and BN6 number alike, each the same sprite, animation and palette by its record, and
 # which no Soul's power attack runs through this copy)
-EFFECT_TABLES = {0x080EC112: 'ShadowSoul\'s charged shot (sub-family 2)'}
+EFFECT_TABLES = {0x080EC112: 'ShadowSoul\'s charged shot (sub-family 2)',
+                 0x080C6C52: 'the obstacle strike\'s shot (its parameter 12, 0x080CAB40: the third kind\'s 0x12\'s table 0x080C6C08, 6 '
+                             'bytes an entry, +2 its effect)'}
+# ... the effect calls that read an entry of one far from them, by the call
+EFFECT_SITES = {0x080C6DD6: 0x080C6C52}
+# Raw tables of sounds a moved routine plays (a song number read from data, 0 none), by the call that plays it: each
+# entry the Souls' code reaches, its address (the strike's shot's table's +4 for the parameter it is spawned with)
+SOUND_TABLES = {0x080C6DE2: ((0x080C6C54, 'the obstacle strike\'s shot (its parameter 12)'),)}
 # The arm's flash, BN5's first kind's type 5 (the image object): moved, BN5's own object, as the allocations' amendment
 # has every track run it (tools/bn5_twins.py's MOVE_TYPES): its spawner and its kind's lookup walked (UNTWINNED) so that the
 # spawn goes through the second-level dispatch, its kinds table (5 bytes a kind: list x 4, number, animation, height,
@@ -170,10 +201,17 @@ UNTWINNED = {0x080C33CC: 'NumberSoul\'s companion\'s set-up (the object NumberSo
                          'parameter where BN5\'s 0x080C33A8 names list 4 0x01',
              0x080B9CAE: 'the arm flash\'s spawner (BN6\'s twin 0x080BA6A0 spawns BN6\'s type 5, whose kinds table is BN6\'s own: '
                          'moved, its spawn goes through the dispatch to BN5\'s object)',
-             0x080B9CE0: 'a flash kind\'s sprite, its list and number (BN6\'s twin 0x080BA6D2 reads BN6\'s kinds table)'}
+             0x080B9CE0: 'a flash kind\'s sprite, its list and number (BN6\'s twin 0x080BA6D2 reads BN6\'s kinds table)',
+             0x080C6E0E: 'the obstacle strike\'s shot\'s spawner (BN6\'s twin 0x080C834A spawns BN6\'s type 0x12, whose numbers by '
+                         'its parameter are its own table\'s: moved, its spawn goes through the dispatch to BN5\'s object)'}
 # Data a moved routine reads near it that the walk sees only through a pointer table: BN5's ranges, copied with the code
-DATA_RANGES = ((0x080EC05C, 0x080EC120), (0x080125B8, 0x080125D0), (0x080C33A8, 0x080C33AC),
+DATA_RANGES = ((0x080EC05C, 0x080EC120), (0x080125B8, 0x080125D0), (0x080C33A8, 0x080C33AC), (0x080C6C08, 0x080C6C80),
                (FLASH_KINDS5, FLASH_KINDS5 + 5 * FLASH_KIND_COUNT))
+# Tables a block holds as raw bytes between its code and its pool that no moved routine reads (another's, copied with the
+# bytes between): each never read through the copy
+DEAD_TABLES = {(0x08011CCC, 0x08011D00): "BN5's passives by form as a form's state is set again (BN5_SOUL_REAPPLY), read by "
+                                         "0x08011144 alone, which nothing moved runs: it lies between ColonelSoul's ready "
+                                         "(0x08011C48) and its pool (0x08011D48)"}
 # BN5's AI data fields a Soul keeps its state in, which BN6's AI data holds otherwise (docs/ROM_DATA.md, The Souls' code):
 # where a moved routine reads one through its AI data (ldr rX,[r5,#0x58]), the Souls' C answers from BN6_SOULS
 SOUL_FIELDS = {0x0F: 'BN6_SOUL_TURNS', 0x12: 'BN6_SOUL_CHAOS', 0x1F: 'BN6_SOUL_PHASE', 0x32: 'BN6_SOUL_CHIP', 0x6C: 'BN6_SOUL_LEVEL'}
@@ -219,6 +257,7 @@ class Deriv:
         self.blocks = []
         self.sprites, self.effects, self.sprite_at = [], [], {}
         self.number_of = {}     # (list, index) -> BN6's (list, number)
+        self.placed_by = {}     # (list, index) -> (BN6's list, number, track): a sprite another track lists (its copy here till the merge)
         self.effect_of = {}     # BN5 effect -> BN6 effect
         self.next_art = ART_FIRST
         self.next_effect = EFFECT_FIRST
@@ -432,8 +471,11 @@ class Deriv:
                 run = [x & ~1, x + 1]
         if run:
             out.append((run[0], (run[1] + 1) & ~1))
-        # (a pc-relative load or adr in the block of what it names, the bytes between kept as they are: the move keeps
-        # distances within a block alone, and a pool more than 0x20 bytes past its code would be another block's)
+        # (a pc-relative load or adr in the block of what it names, and a branch in the block of the instruction it
+        # reaches, the bytes between kept as they are, never run: the move keeps distances within a block alone, a pool
+        # more than 0x20 bytes past its code would be another block's, and a branch reaches no further than its own
+        # bits: ShadowSoul's sword family's phase 0x0C ends through the pop of its phase 0x10, 0x080EC232, 0x2A bytes
+        # past it across that phase, which is BN6's twin's)
         def run_of(a):
             return next((k for k, (lo, hi) in enumerate(out) if lo <= a < hi), None)
         joined = True
@@ -441,7 +483,8 @@ class Deriv:
             joined = False
             for w in self.walks.values():
                 for x, i in sorted(w.insns.items()):
-                    pair = [(run_of(x), run_of(t)) for t in (i.lit, i.adr) if t is not None]
+                    reach = i.target if i.form in ('b', 'bcc') else None
+                    pair = [(run_of(x), run_of(t)) for t in (i.lit, i.adr, reach) if t is not None]
                     pair = [(a, b) for a, b in pair if a is not None and b is not None and a != b]
                     if pair:
                         a, b = min(pair[0]), max(pair[0])
@@ -515,12 +558,25 @@ class Deriv:
                 continue
             for x in range((a + 3) & ~3, b - 3, 4):
                 v = self.b5.u32(x)
+                if any(lo <= x < hi for lo, hi in DEAD_TABLES):
+                    continue
                 if T.is_code_ptr(v, self.b5) and ((v & ~1) in self.walks or self.twin(v)):
                     self.decide(f'{x:08X}: raw data holds {v:08X}, a routine\'s address: a table the walk did not take whole')
 
     # ---- numbers BN6 has otherwise ----
 
     def scan_numbers(self, families):
+        for k, kind in sorted(bn5_objects.IMAGE_COPIED.items()):   # (another track's numbers for a sprite: its kinds' place)
+            if kind[2] != 'souls':
+                e = self.b5.bytes(FLASH_KINDS5 + 5 * k, 2)
+                self.placed_by[(e[0] // 4, e[1])] = kind
+        for e in ART_ORDER:
+            if e is None:
+                self.next_art += 1
+            else:
+                self.place_sprite(*e)
+        for e in EFFECT_ORDER:
+            self.bn6_effect(e)
         for a, w in self.walks.items():
             for site, t in w.bls.items():
                 if t == SOUND:
@@ -557,6 +613,12 @@ class Deriv:
 
     def number_sound(self, w, site):
         v, chain = T.back_value(w, site, 0)
+        if v is None and site in SOUND_TABLES:
+            for at, why in SOUND_TABLES[site]:
+                s = self.b5.u16(at)
+                if s and xrecipe.song_sig(self.b5, 0x08155BF4, s) != xrecipe.song_sig(self.b6, 0x08159F48, s):
+                    self.decide(f'{at:08X}: sound {s:#x} for {why} is another song in Gregar')
+            return
         if v is None:
             self.decide(f'{site:08X}: a sound made otherwise ({chain})')
             return
@@ -610,10 +672,13 @@ class Deriv:
         if tw is not None:
             self.number_of[(lst, idx)] = (lst, tw)
             return (lst, tw)
-        to_list, num = ART_LIST, self.next_art
-        if num > ART_LAST:
-            self.decide(f'BN5\'s sprite {lst}:{idx:#x}: list 0 past its Souls\' numbers ({ART_LAST:#x})')
-        self.next_art += 1
+        if (lst, idx) in self.placed_by:
+            to_list, num, _ = self.placed_by[(lst, idx)]
+        else:
+            to_list, num = ART_LIST, self.next_art
+            if num > ART_LAST:
+                self.decide(f'BN5\'s sprite {lst}:{idx:#x}: list 0 past its Souls\' numbers ({ART_LAST:#x})')
+            self.next_art += 1
         p, b = xrecipe.sprite(self.b5, LISTS5, lst, idx)
         if not b:
             self.decide(f'BN5\'s sprite {lst}:{idx:#x} cannot be read')
@@ -701,9 +766,9 @@ class Deriv:
                         self.effect_run(at, base, n)
                         return
                 for at, why in EFFECT_TABLES.items():
-                    if any(lo <= at < hi for lo, hi in DATA_RANGES) or True:
+                    if EFFECT_SITES.get(site, at) == at:
                         lo = min(w.insns)
-                        if lo - 0x100 <= at <= max(w.insns) + 0x200:
+                        if site in EFFECT_SITES or lo - 0x100 <= at <= max(w.insns) + 0x200:
                             e = self.b5.u8(at)
                             e6 = self.bn6_effect(e)
                             if e6 != e:
@@ -737,15 +802,20 @@ class Deriv:
         if at in self.runs:
             return
         self.runs.add(at)
-        first = self.next_effect
-        self.next_effect += n
-        if self.next_effect - 1 > EFFECT_LAST:
-            self.decide(f'BN5\'s effects {base:#x}-{base + n - 1:#x}: past the Souls\' effect ids ({EFFECT_LAST:#x})')
-        for k in range(n):
-            r5 = self.b5.bytes(EFFECTS5 + 4 * (base + k), 4)
-            to = self.place_sprite(r5[0] // 4, r5[1])
-            self.effects.append(dict(from_=base + k, to=first + k, list=to[0], index=to[1], anim=r5[2], pal=r5[3]))
-            self.effect_of[base + k] = first + k
+        # (a run EFFECT_ORDER numbered already, one after another: its ids kept)
+        given = [self.effect_of.get(base + k) for k in range(n)]
+        if None not in given and given == list(range(given[0], given[0] + n)):
+            first = given[0]
+        else:
+            first = self.next_effect
+            self.next_effect += n
+            if self.next_effect - 1 > EFFECT_LAST:
+                self.decide(f'BN5\'s effects {base:#x}-{base + n - 1:#x}: past the Souls\' effect ids ({EFFECT_LAST:#x})')
+            for k in range(n):
+                r5 = self.b5.bytes(EFFECTS5 + 4 * (base + k), 4)
+                to = self.place_sprite(r5[0] // 4, r5[1])
+                self.effects.append(dict(from_=base + k, to=first + k, list=to[0], index=to[1], anim=r5[2], pal=r5[3]))
+                self.effect_of[base + k] = first + k
         self.imms.append(dict(at=at, form='THUMB_ADDS', rd=self.b5.u16(at) >> 8 & 7, rn=0, was=base, now=first,
                               why=f'its effects {base:#x}-{base + n - 1:#x} in BN5, {first:#x}-{first + n - 1:#x} in BN6'))
 
@@ -874,7 +944,8 @@ def write_c(d):
         else:
             L.append(f'\t{{ {kind}, 0x{v:02X}, 0x{to:02X}, 0 }},')
     L.append('};')
-    L.append('/* BN5\'s sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART (past it FREE_SOULS_ART), listed at a number of a grown list */')
+    L.append('/* BN5\'s sprites its code draws that BN6 has none of by their bytes: copied into SOULS_ART (past it FREE_SOULS_ART), listed at a number of a grown list')
+    L.append(' * (list 0 the Souls\' own; another\'s list a number of the track tools/bn5_objects.py names, whose copy serves where it stands first) */')
     L.append('static const XvSprite sprites[] = {')
     for s in d.sprites:
         L.append(f'\t{{ {s["list"]}, 0x{s["index"]:02X}, {s["to_list"]}, 0x{s["to_index"]:02X}, {s["base"]} + 0x{s["at"]:X}, 0x{s["room"]:X} }},')

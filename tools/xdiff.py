@@ -191,6 +191,7 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
     if 'mm_element' in spec:
         parts.append(f'mm_element={spec["mm_element"]}')
     parts += [f'both={b}' for b in spec.get('both', [])]
+    parts += [f'shot={g}:{n}:{f}:{path}' for g, n, f, path in spec.get('shots', [])]   # (pictures of a Custom screen: game, screen, frame)
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -199,6 +200,9 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     out = f'/src/.build/xdiff/runs/{name}'
+    for _, _, _, path in spec.get('shots', []):   # (a picture's folder, as the image sees /src)
+        if path.startswith('/src/'):
+            os.makedirs(os.path.dirname(os.path.join(ROOT, path[5:])), exist_ok=True)
     for g in ('bn5', 'bn6'):
         p = os.path.join(WORK, 'runs', f'{name}.{g}')
         if os.path.exists(p):
@@ -297,7 +301,7 @@ MEGAMAN_READS = {
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
     'unite stands': lambda o, ai, p: p[PLAYER_UNITE] if p and len(p) > PLAYER_UNITE else None,
 }
-SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used', 'soul mood')   # (from soul_view, both games: its 'turns' and 'used' named apart)
+SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used', 'soul mood', 'soul chip', 'soul next chip')   # (from soul_view, both games: its 'turns' and 'used' named apart)
 
 
 def megaman_frames(trace, canon):
@@ -309,13 +313,14 @@ def megaman_frames(trace, canon):
             v = {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}
             soul = soul_view(canon, trace['game'], fr, o.ai) or {}
             v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used'),
-                      'soul mood': soul.get('mood')})
+                      'soul mood': soul.get('mood'), 'soul chip': soul.get('chip'),
+                      'soul next chip': soul.get('next chip')})
             out.append((fr['t'], v))
     return out
 
 
 def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'soul', 'chaos', 'soul turns', 'souls used', 'unite', 'loadout', 'sprite',
-                                        'palette', 'mood', 'soul mood', 'hp')):
+                                        'palette', 'mood', 'soul mood', 'soul chip', 'soul next chip', 'hp')):
     """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
     lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
     for t, v in megaman_frames(trace, canon):
@@ -511,11 +516,13 @@ def compare(name, spec, ta, tb, legit, canon, show):
     used, lines, read = {}, [], {}
     fa_all, fb_all = ta['frames'], tb['frames']
     verdict, at, n, after, natives_at = 'PASS', None, 0, None, None
-    upto = spec.get('compare_to')
+    upto, skips = spec.get('compare_to'), spec.get('compare_skip', [])
     for fra, fa, fb, diffs in compared(spec, ta, tb, legit, canon, read):
         if upto is not None and fra['t'] > upto:
             lines.append(f'  compared to t{upto}, the spec\'s compare_to (its expectations hold both battles to the end)')
             break
+        if any(a <= fra['t'] <= b for a, b in skips):
+            continue
         by = {}
         for d in diffs:
             w = who(d, fb, canon, fa)
@@ -543,6 +550,8 @@ def compare(name, spec, ta, tb, legit, canon, show):
     if verdict == 'INCONCLUSIVE':
         lines.append(f'  after the stop (no verdict), the family\'s objects: ' +
                      (f'the same to t{after.t - 1}, then {after}' if after else f'the same to the end (t{fa_all[-1]["t"]})'))
+    if skips:
+        lines.insert(0, '  frames left out (the spec\'s compare_skip, its about says why): ' + ', '.join(f't{a}-t{b}' for a, b in skips))
     if len(fa_all) != len(fb_all) and verdict == 'PASS' and upto is None:
         lines.append(f'  the traces are {len(fa_all)} and {len(fb_all)} fight frames long')
         verdict, at = 'FAIL', min(len(fa_all), len(fb_all))

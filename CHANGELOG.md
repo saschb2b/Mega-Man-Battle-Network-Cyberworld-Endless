@@ -60,9 +60,15 @@
   grass and grass heals him, KnightSoul is unharmed for a moment after a
   chip used from his front column, and ShadowSoul's B+Left stance
   counters as BN5's, the effects BN6 draws otherwise drawn as BN5's.
-  Still to come: ColonelSoul's chip shot, his Custom screen's button and
-  his obstacle strike, ShadowSoul's charged sword with no enemy in reach,
-  and Chaos Unison's charge.
+  ShadowSoul's charged sword now matches BN5's with no enemy in reach as
+  well: a branch in its moved code had been split from the instruction
+  it jumps to. ColonelSoul's own come in full: his button on the Custom
+  screen, BN5's in look and rule, lights for a plain attack chip picked
+  last; A drops that chip into it, B gives it back, and OK keeps it for
+  his charged shot, which fires it (ScreenDivide without one). While he
+  is united, an obstacle on the enemy's area with an enemy before it
+  turns into BN5's soldier, which fires three shots. Still to come:
+  Chaos Unison's charge.
 - **BN5's mood and its DarkChips in BN6's battles (issue #82).** Behind
   the same developer switch, BN6's battles keep BN5's mood beside their
   own: hits taken worry MegaMan, hits landed and counters lift him, and a

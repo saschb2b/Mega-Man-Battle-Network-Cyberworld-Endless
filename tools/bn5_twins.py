@@ -123,6 +123,12 @@ MOVE_TYPES = {
                "its bytes: copied); BN6's type 0x17 is 0x080C863D, another body",
     (3, 0x81): "ToadSoul's charged shot's hit (BN5 0x080D6789, spawned at 0x080D6894); BN6's type 0x81 is 0x080D6DF1, "
                "another body",
+    (3, 0x12): "the obstacle strike's shot (BN5 0x080C6C81, spawned at 0x080C6E14 by 0x080C6E0E for the strike, 0x080CAB44): its "
+               "numbers by its parameter from its own table (0x080C6CB4, 6 bytes each); BN6's type 0x12 is 0x080C81B7, the same "
+               "steps over its own table, other numbers (its hit's element among them)",
+    (3, 0x30): "ColonelSoul's obstacle strike (BN5 0x080CA91D, spawned at 0x080CABD0 by 0x080CABCA as an obstacle on the "
+               "enemy's area turns, its states' block 0x08018002-0x0801802E): it fires at the side's Colonel's table's first "
+               "word (0x080CAA56); BN6's type 0x30 is 0x080CB571, another body",
     (4, 0x28): "ShadowSoul's object of the fourth kind (BN5 0x080E3619, spawned at 0x080E36E2); BN6's type 0x28 is "
                "0x080E45F9, another body",
 }

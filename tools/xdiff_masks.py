@@ -275,6 +275,9 @@ def mask_applies(m, d, fa, fb, prev):
         return False
     if 'types' in m and (not isinstance(d.role, tuple) or d.role[1] not in [int(x, 0) for x in m['types']]):
         return False
+    if 'effects' in m and (not isinstance(d.role, tuple) or not isinstance(d.role[1], tuple) or
+                           d.role[1][1] not in [int(x, 0) for x in m['effects']]):
+        return False
     if 'whose' in m and who(d, fb, fa.canon, fa) not in m['whose']:
         return False
     if 'when' in m and not WHEN[m['when']](d, fa, fb, prev):

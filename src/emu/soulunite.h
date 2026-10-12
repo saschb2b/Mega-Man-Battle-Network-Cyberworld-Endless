@@ -45,8 +45,9 @@ bool soulunite_install(int breaks, int soulbreak);
 /* soulbreak (--dev soulbreak=N, a differential spec's): the Souls track's
  * S3-S5 parts broken, each the differential's own test: the look's breaks
  * (soullook.h) in its low nibble, the abilities' (soulpower.h) in the
- * next, the passives' (soulpassive.h) from bit 8, the chips' (soulchips.h)
- * from bit 16, the mood's (soulmood.h) from bit 24 */
+ * next, the passives' (soulpassive.h; ColonelSoul's from bit 11,
+ * soulcolonel.h) from bit 8, the chips' (soulchips.h) from bit 16, the
+ * mood's (soulmood.h) from bit 24 */
 #define SOULBREAK_LOOK(b)    ((b) & 0xF)
 #define SOULBREAK_POWER(b)   ((b) >> 4 & 0xF)
 #define SOULBREAK_PASSIVE(b) ((b) >> 8 & 0xFF)

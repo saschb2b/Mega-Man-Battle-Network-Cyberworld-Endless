@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "soulchips.h"
+#include "soulcolonel.h"
 #include "soulcode.h"
 #include "soulkinds.h"
 #include "soullife.h"
@@ -294,7 +295,7 @@ static bool expected(const uint8_t *b5) {
 static bool souls_own(int soulbreak) {
 	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
 		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
-		soulmood_install(SOULBREAK_MOOD(soulbreak));
+		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak));
 }
 
 bool soulunite_install(int brk, int soulbreak) {

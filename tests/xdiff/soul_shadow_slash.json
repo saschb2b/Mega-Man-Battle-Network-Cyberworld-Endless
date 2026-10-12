@@ -1,0 +1,246 @@
+{
+ "about": "ShadowSoul's charged sword with an enemy in reach (the Souls track's S5): as soul_shadow_sword, CanGard at (5,2): he steps behind it to (6,2) (BN5's path 0x08012530, moved), his afterimages BN5's fourth kind's 0x28 (moved), slashes and deletes it (t174), and is back at (2,2) at t187. Compared to t183 (compare_to): the next frame the deleted CanGard's deletion effect (0x18) is let go a frame apart in the two engines, BN6's own end of a family's virus (as soul_knight_shot's).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0009",
+  "0236"
+ ],
+ "folder5": [
+  "1630",
+  "3485"
+ ],
+ "deck5": [
+  "1630",
+  "3485"
+ ],
+ "folder6": [
+  "1647",
+  "34B1"
+ ],
+ "deck6": [
+  "1647",
+  "34B1"
+ ],
+ "souls6": "02",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   60
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x08"
+    ],
+    [
+     200,
+     "0x08"
+    ]
+   ],
+   "souls used": [
+    [
+     200,
+     "0x100"
+    ]
+   ],
+   "hp": [
+    [
+     200,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "ShadowSoul (BN5's Soul 8) united at t1 and still at t200, his used bit 0x100, unharmed (safe).",
+ "compare_to": 183
+}

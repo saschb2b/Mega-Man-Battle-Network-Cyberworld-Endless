@@ -18,6 +18,13 @@ GAMES = {   # (state: the battle's state, BN5_BATTLE_STATE and BN6_BATTLE_STATE)
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
+
+
+@functools.lru_cache(maxsize=None)
+def souls_code():
+    """where the Souls' install puts BN5's code and its data in BN6 (src/emu/soul_room.h's SOULS_CODE to SOULS_CODE_END)"""
+    d = c_defines('src/emu/free_space.h', 'src/emu/soul_room.h')
+    return d['SOULS_CODE'], d['SOULS_CODE_END']
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -386,7 +393,8 @@ class Frame:
         self.slots = [(kind, g[kind.lower()] - NODE, SIZE[kind], n) for kind, n in (('T1', g['n1']), ('T3', 32), ('T4', 32))]
         self.list, self.list_end = g['list'], g['list_end']
         self.by_role = {o.role: o for o in fr['objs']}
-        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1]]
+        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1] or
+                                                             souls_code()[0] <= m[1] < souls_code()[1]]
 
     def ptr(self, v):
         """a pointer as what it names"""
@@ -797,6 +805,18 @@ def soul_ai_read(canon, ai):
     return bytes(out)
 
 
+def soul_pending(canon):
+    """BN5's pending record's places of a Soul's state (ColonelSoul's chip committed at OK): {field: (offset, size)}"""
+    return {k: (int(v[0], 0), v[1]) for k, v in canon.souls.get('bn5_pending', {}).items()}
+
+
+def soul_bn5(canon, field, v, size):
+    """a field of BN5's read in BN6's terms: a u16's 0xFFFF none BN6's 0, a chip BN6's id (the spec's folders' pairs)"""
+    if size > 1 and v == (1 << 8 * size) - 1:
+        return 0
+    return canon.chips.get(v, v) if 'chip' in field else v
+
+
 def soul_view(canon, game, fr, ai):
     """the Soul MegaMan is united with, as BN6_SOULS' side lays it out: {field: value} (BN5's from its form byte and his AI
     data while it is a Soul, all 0 in none; BN6's from its block, side 0)"""
@@ -812,8 +832,9 @@ def soul_view(canon, game, fr, ai):
     if form and ai is not None:
         view['soul'] = form
         for k, (off, size) in soul_ai(canon).items():
-            v = int.from_bytes(ai[off:off + size], 'little')
-            view[k] = 0 if v == (1 << 8 * size) - 1 and size > 1 else v   # (ColonelSoul's chip: BN5's 0xFFFF none, BN6's 0)
+            view[k] = soul_bn5(canon, k, int.from_bytes(ai[off:off + size], 'little'), size)
+    for k, (off, size) in soul_pending(canon).items():   # (his pending record's: ColonelSoul's chip committed, whatever his form)
+        view[k] = soul_bn5(canon, k, int.from_bytes(p[PLAYER_PENDING + off:PLAYER_PENDING + off + size], 'little'), size)
     view['used'] = int.from_bytes(p[PLAYER_USED:PLAYER_USED + 4], 'little')
     if 'mood' in view:
         view['mood'] = p[PLAYER_NAVI + NAVI_MOOD] if canon.souls_on else 0   # (BN5's battle mood, which BN6's engine keeps beside its own: soulmood.c)
@@ -852,6 +873,8 @@ def player_cells(fa, fb):
     for off in range(0, min(len(pa), len(pb), PLAYER_SOULS)):
         if PLAYER_USED <= off < PLAYER_USED + 4:
             continue   # (BN5's Souls used, BN6's Crosses: soul_cells)
+        if any(PLAYER_PENDING + o <= off < PLAYER_PENDING + o + n for o, n in soul_pending(fa.canon).values()):
+            continue   # (BN5's pending record's Soul fields: soul_cells)
         if PENDING_OBJECT <= off < PENDING_OBJECT + 4:
             if off == PENDING_OBJECT:
                 va, vb = fa.ptr(u32(pa, off)), fb.ptr(u32(pb, off))

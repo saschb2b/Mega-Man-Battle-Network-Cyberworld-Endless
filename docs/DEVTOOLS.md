@@ -702,7 +702,11 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   the buster's flash in a Soul BN6's object 8;
   the next the abilities', the charge 10 frames longer 0x10, the next
   Soul's family 0x20, no element 0x40; from bit 8 the passives', a hand
-  of nine 0x100, no +10 0x200, no passives as it unites 0x400; from bit
+  of nine 0x100, no +10 0x200, no passives as it unites 0x400, and
+  ColonelSoul's, `SOULCOLONEL_BREAK_*` in soulcolonel.h: his button lit
+  for any pick 0x800, no obstacle strike 0x1000, B leaving the button's
+  chip in it 0x2000, the button's chip left in the deck 0x4000, his
+  charged shot ScreenDivide with a chip 0x8000; from bit
   16 the chips', `SOULCHIPS_BREAK_*` in soulchips.h: no chip charged
   0x10000, a charged chip not doubled 0x20000, TomahawkSoul's Wood chip
   not doubled on grass 0x40000, KnightSoul's front column unguarded
@@ -717,6 +721,16 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   their end: for a battle whose last part BN6's engine cannot fight the
   same yet (a BN5 DarkChip's own attack, the chips track's), what comes
   after it held by expectations (BN5's mood 0 to the end).
+  `compare_skip=[[A, B], ...]` leaves the frames A to B out (the run
+  prints them), for a part each game runs with its own code that the
+  spec does not test (`soul_colonel_strike`: the RockCube's own use,
+  each game's chip, ten frames), the frames before and after compared.
+- **Pictures**: `shots=[[G, N, F, PATH], ...]` (xdiff.c's `shot=`) saves
+  game G's (5 or 6) Custom screen N at its frame F (from the frame its
+  window first reads open) as a BMP, the canvas as the core draws it; a
+  path under `/src/` is the worktree's (its folder made), so both games'
+  screens can be laid side by side (ColonelSoul's button in BN5 and in
+  BN6's engine).
 
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
@@ -950,6 +964,21 @@ the masks):
   chip picked last: UNITE does not stand in either) and `soul_mood_gate`
   (BlakWing used while he is not dark: the chip of nothing in both) pass;
   their breaks fail them.
+- **ColonelSoul's button, chip shot and strike** (the track's S5): his
+  chip committed at OK (BN5's pending record's +6, 0xFFFF none; the
+  Souls' block's +0x14, 0 none) and his chip for the turn (BN5's AI
+  data +0x32; the block's +4) are compared as `soul`'s `next chip` and
+  `chip` (the expectations' `soul next chip`, `soul chip`, in BN6's chip
+  numbers by the folders' pairs). `soul_colonel_chip` (a Cannon picked
+  on the second screen and loaded into the button, OK, B held: the chip
+  shot fires the Cannon; the third screen's hand without it, spent),
+  `soul_colonel_grey` (a RockCube picked: the button grey, ScreenDivide),
+  `soul_colonel_undo` (the Cannon loaded, then B: back among the picks,
+  held and used) and `soul_colonel_strike` (a RockCube on CanGard's
+  area: BN5's soldier and its three shots) pass; their breaks fail them.
+  `soul_shadow_sword` (ShadowSoul's charged sword, no enemy in reach) and
+  `soul_shadow_slash` (CanGard in reach: his path to it, the slash, the
+  afterimages) pass as well.
 - **Reference specs** (`"kind": "reference"`): a battle BN6's engine
   cannot fight yet, fought in BN5 alone (`game=bn5`), MegaMan's timeline
   printed and held to the spec's `expect.megaman` (his action, form,
@@ -987,7 +1016,9 @@ landing still, a charge 10 frames longer, the next Soul's family, no
 element, a hand of nine, no +10, no passives as it unites, the buster's
 flash BN6's object, no chip charged in a Soul, a charged chip not doubled, TomahawkSoul's Wood chip not doubled on
 grass, KnightSoul's front column unguarded, TomahawkSoul of no element, no gain from a landed hit, no DarkChip dealt
-into a worried hand, a BN5 DarkChip leaving him as he was, UNITE standing while worried, the dark gate left out, each
+into a worried hand, a BN5 DarkChip leaving him as he was, UNITE standing while worried, the dark gate left out,
+ShadowSoul's charged sword BN6's, ColonelSoul's button lit for any pick, no obstacle strike, B leaving the button's chip
+in it, the button's chip left in the deck, his charged shot ScreenDivide with a chip, each
 by `soulbreak`; a copied song's slot left empty and a counter's first frame left to the next, by `poke`), each of which
 must FAIL its spec.
 docs/MULTIROM.md, Transplanted families, has what they showed.

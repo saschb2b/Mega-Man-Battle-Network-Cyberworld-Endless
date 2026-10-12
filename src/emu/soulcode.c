@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bn6_families.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
@@ -23,6 +24,7 @@
 #define THUMB_BX_LR 0x4770u
 #define COUNTER_SIZE 36     /* counter_code's bytes */
 #define BLS_MAX 128
+#define SOULS_SPRITES_MAX 32   /* the sprites a Souls' code copies at most */
 
 static const SoulCode *code;   /* the recipe installed, NULL none */
 
@@ -230,8 +232,22 @@ static void counter_code(uint8_t out[COUNTER_SIZE]) {
 	thumb_bl_write(out, 20, SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 26);
 }
 
+/* a sprite at another track's number of a grown list (tools/bn5_objects.py's IMAGE_COPIED: the Navis' 4:0xB5 and 5:0xA6) that
+ * an install listed there first, the same bytes: that copy serves, each sprite's bytes in one place */
+static bool served[SOULS_SPRITES_MAX];
+
+static bool listed_already(const XvSprite *s, const uint8_t *d, uint32_t len) {
+	int slot = s->to_list != BN6_SPRITES_MEGAMAN ? xvirus_list_slot(s->to_list) : -1;
+	uint32_t w = slot < 0 ? BN6_SPRITE_PLACEHOLDER : emu_read32(XV_LISTS + (uint32_t)slot * XV_STEP + 4u * s->to_index);
+	if (w == BN6_SPRITE_PLACEHOLDER || w < BUS) return false;
+	for (uint32_t i = 0; i < len; ++i)
+		if (emu_read8(w + i) != d[i]) return false;
+	return true;
+}
+
 /* its sprites into SOULS_ART and FREE_SOULS_ART (the list words with the families' room's, below) */
 static void art_move(const SoulCode *c, const XRom *x) {
+	if (c->nsprites > SOULS_SPRITES_MAX) xv_fail("its %d sprites", c->nsprites);
 	for (int i = 0; i < c->nsprites && !xv_failed(); ++i) {
 		const XvSprite *s = &c->sprites[i];
 		uint32_t len;
@@ -239,7 +255,8 @@ static void art_move(const SoulCode *c, const XRom *x) {
 		bool room = (s->at >= SOULS_ART && s->at + s->room <= SOULS_ART_END) ||
 			(s->at >= FREE_SOULS_ART && s->at + s->room <= FREE_SOULS_ART_END);
 		if (!d || len > s->room || !room) xv_fail("its sprite %d:%#x", s->list, s->index);
-		uint8_t *p = d ? xv_put(s->at, len, true) : NULL;
+		served[i] = d && listed_already(s, d, len);
+		uint8_t *p = d && !served[i] ? xv_put(s->at, len, true) : NULL;
 		if (p) memcpy(p, d, len);
 		free(d);
 	}
@@ -255,7 +272,7 @@ static void art_move(const SoulCode *c, const XRom *x) {
 static void room_set(const SoulCode *c) {
 	/* (list 0's the Souls' own: soullook.c lists them as it grows it) */
 	for (int i = 0; i < c->nsprites && !xv_failed(); ++i)
-		if (c->sprites[i].to_list != BN6_SPRITES_MEGAMAN)
+		if (c->sprites[i].to_list != BN6_SPRITES_MEGAMAN && !served[i])
 			xg_set_word(XG_LIST + xvirus_list_slot(c->sprites[i].to_list), c->sprites[i].to_index, c->sprites[i].at);
 	for (int i = 0; i < c->neffects && !xv_failed(); ++i) {
 		const SoulEffect *e = &c->effects[i];

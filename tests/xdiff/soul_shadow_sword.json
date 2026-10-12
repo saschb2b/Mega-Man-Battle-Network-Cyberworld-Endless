@@ -1,0 +1,245 @@
+{
+ "about": "ShadowSoul's charged sword with no enemy in reach (the Souls track's S5): ShadowSoul united (an Invisibl picked last, UNITE, OK) with a Sword L in the hand; A held 60 frames charges it (ShadowSoul's chip charge, a sword), its release runs BN5's sword family, moved (BN5's 0x13, BN6's 0xC6), on ShadowSoul's path: CanGard at (6,2) has no free panel before it, so he slashes where he stands (the family's phase 0x0C waits for his animation's end, then phase 0x10 ends the attack). Frame for frame to t400.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0009",
+  "0236"
+ ],
+ "folder5": [
+  "1630",
+  "3485"
+ ],
+ "deck5": [
+  "1630",
+  "3485"
+ ],
+ "folder6": [
+  "1647",
+  "34B1"
+ ],
+ "deck6": [
+  "1647",
+  "34B1"
+ ],
+ "souls6": "02",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   60
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x08"
+    ],
+    [
+     200,
+     "0x08"
+    ]
+   ],
+   "souls used": [
+    [
+     200,
+     "0x100"
+    ]
+   ],
+   "hp": [
+    [
+     200,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "ShadowSoul (BN5's Soul 8) united at t1 and still at t200, his used bit 0x100, unharmed (safe)."
+}

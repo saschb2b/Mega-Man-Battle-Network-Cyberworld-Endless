@@ -3227,7 +3227,7 @@ static void test_free_space(void) {
 	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
 	/* (the Souls' room, soul_room.h: each part of the Souls' install, the tracks' S2-S5) */
 	const Region souls[] = {
-		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_REAPPLY + 4 },
+		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_STRIKE_CHECK + 4 },
 		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
 		{ "the hooks' Thumb", SOULS_THUMB, SOULS_THUMB_END },
 		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
@@ -3240,6 +3240,23 @@ static void test_free_space(void) {
 		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
 	};
 	regions_apart("the Souls' room", souls, (int)(sizeof souls / sizeof *souls), FREE_SOULS, FREE_PANELS);
+	/* (the hooks' Thumb: soulchips.c's, the counter's, ColonelSoul's, each apart) */
+	const Region thumb[] = {
+		{ "the chips' Thumb", SOULS_THUMB, SOULS_THUMB + 0x24 }, { "the counter's", SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 0x24 },
+		{ "ColonelSoul's phases", SOULS_COLONEL, SOUL_COLONEL_DRAW }, { "his draw", SOUL_COLONEL_DRAW, SOUL_COLONEL_DRAW2 },
+		{ "his draw on UNITE's", SOUL_COLONEL_DRAW2, SOUL_COLONEL_STRIKE }, { "his strike's block", SOUL_COLONEL_STRIKE, SOUL_COLONEL_UNDO },
+		{ "his button's chip given back", SOUL_COLONEL_UNDO, SOULS_COLONEL_END },
+	};
+	regions_apart("the hooks' Thumb", thumb, (int)(sizeof thumb / sizeof *thumb), SOULS_THUMB, SOULS_THUMB_END);
+	/* (FREE_SOULS_ART: tools/xsoul.py's sprites, then ColonelSoul's button's art, BN5's: its tiles by state, picture, palettes) */
+	const Region art[] = {
+		{ "the sprites", FREE_SOULS_ART, SOULS_COLONEL_ART }, { "the button's tiles", SOULS_COLONEL_ART, SOULS_COLONEL_INFO },
+		{ "its picture", SOULS_COLONEL_INFO, SOULS_COLONEL_INFO_PAL }, { "its palettes", SOULS_COLONEL_INFO_PAL, SOULS_COLONEL_ART_END },
+	};
+	regions_apart("the Souls' art past their room", art, (int)(sizeof art / sizeof *art), FREE_SOULS_ART, FREE_SOULS_ART_END);
+	CHECK(SOULS_COLONEL_INFO - SOULS_COLONEL_ART == 3 * 0x180 && SOULS_COLONEL_INFO_PAL - SOULS_COLONEL_INFO == 0x540 &&
+		SOULS_COLONEL_NAME_PAL - SOULS_COLONEL_INFO_PAL == 0x20 && SOULS_COLONEL_ART_END - SOULS_COLONEL_NAME_PAL == 0x20 &&
+		(SOULS_COLONEL_ART & 0x1F) == 0, "the Souls' art: ColonelSoul's button's parts as BN5's sizes, word-aligned");
 	/* (each grown table's room for BN6's entries and the Souls': 14 sprites, 148 power attacks, 23 faces; six Souls, eleven
 	 * power attacks, BN5's eleven digits; the effects the tracks' allocations give the Souls) */
 	CHECK(SOULS_LIST0 + 4u * SOULS_LIST0_ENTRIES <= SOULS_LIST0_END && SOUL_LIST0_FIRST + 6 <= SOUL_LIST0_ART_FIRST &&

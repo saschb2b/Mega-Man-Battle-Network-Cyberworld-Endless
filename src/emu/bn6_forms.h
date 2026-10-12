@@ -74,6 +74,8 @@
                                              src/emu/soulmood.c), beside BN6's own (BN6_NAVI_MOOD) */
 #define BN6_SOUL_DARK         0x0F        /* u8 1 once a BN5 DarkChip made the side dark for the battle (BN5's use byte, never BN6's byte 2) */
 #define BN6_SOUL_USED         0x10        /* u32 the Souls united this battle: bit n Soul n, bit 16 + n its Chaos Unison (BN5_SOULS_USED's layout) */
+#define BN6_SOUL_NEXT_CHIP    0x14        /* u16 the chip ColonelSoul's button took, committed at OK, 0 none (BN5's Custom record +6, 0xFFFF none) */
+#define BN6_SOUL_STRIKE       0x16        /* u8 1 while ColonelSoul's ready keeps the side's obstacles striking (BN5's BattleState +0x5C 0x10 or 0x20) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
@@ -234,5 +236,44 @@
 #define BN6_CHIP_BONUS_DONE   0x0800F090u /* the chips' bonuses by form (0x0800EF34): its end, r6 the bonus, r7 its mark */
 /* A Soul's passives (soulpassive.c; S5) */
 #define BN6_HAND_SIZE_SET     0x0802A494u /* strb r0,[r5,#6]: the Custom screen's hand size set (0x0802A408) */
+/* ColonelSoul's button, chip shot and obstacle strike (soulcolonel.c; S5) */
+#define BN6_DUST_ELEMENTS     0x08027F10u /* DustCross's elements 8 and 9 as a Custom screen opens (r4 the elements, r5 the screen, r7 the form;
+                                             BN5's 0x08023CF4 for its Souls): push {r4,r6,lr} */
+#define BN6_DUST_LIT          0x08028F84u /* DustCross's element 8 lit after a pick (BN5's ColonelSoul's 0x08024C04): push {r4,r6,r7,lr} */
+#define BN6_DUST_PHASES       0x08027410u /* ldr r1,[pc,#0x10] in mode 0x38 (0x08027406, r4 element 8): its phases' table, then */
+#define BN6_DUST_PHASES_NEXT  0x08027412u /* ... ldrb r0,[r5,#2]: the phase */
+#define BN6_OK_END            0x08029222u /* pop {r4,r6,r7,pc}: OK's (0x08029110) end, where BN5's goes on to element 8's commit (0x08024EC4) */
+#define BN6_TURN_FORMS        0x0801486Cu /* push {r4,lr}: the turn's form check (r6 and r7 the sides' pending records, +8 the player), BN5's
+                                             0x08011DD4, which first gives ColonelSoul his chip (0x080124A6) */
+#define BN6_DUST_ART          0x08028342u /* ldr r0,[pc,#0x1c] in element 8's draw on the chips' screen (its type 8's, 0x08028340): DustCross's
+                                             button's tiles, 0x180 bytes by its state (BN5's 0x0802415E: ColonelSoul's, lit or grey), then */
+#define BN6_DUST_ART_NEXT     0x08028344u /* ... ldr r2: their size */
+#define BN6_DUST_INFO_ART     0x08028782u /* ldr r0 in the chip's window's art for elements 8 and 9 (0x0802877C, BN5's 0x080245A4): the
+                                             picture, 0x540 bytes, */
+#define BN6_DUST_INFO_ART_NEXT 0x08028784u /* ... ldr r1: where it goes */
+#define BN6_DUST_INFO_PAL     0x0802878Cu /* ... its palette, */
+#define BN6_DUST_INFO_PAL_NEXT 0x0802878Eu /* ... ldr r1: where it goes */
+#define BN6_DUST_NAME_PAL     0x080287DEu /* ... and its name line's (0x080287D2, BN5's 0x0802460A) */
+#define BN6_DUST_NAME_PAL_NEXT 0x080287E0u /* ... ldr r1: where it goes */
+#define BN6_CUSTOM_B          0x08029032u /* push {r4,lr}: B on the chips (mode 4), the last pick given back (BN5's 0x08024CEA gives the
+                                             button's chip back first), its end BN6_EMBLEM_B_TAIL */
+#define BN6_PICK_ICON         0x080281D4u /* a pick's icon into the picks' column (r0 its chip, r1 its place; BN5's 0x08024004) */
+#define BN6_PICK_SLOT         0x08029CD4u /* a pick's slot drawn on the chips' BG (r0 its place; BN5's 0x080258E8) */
+#define BN6_OK_SPENT          0x08029458u /* pop {r4,r6,r7,pc}: OK's picks' deck entries spent (0x080293F8), where BN5's spends the button's
+                                             too (0x080250CC) */
+#define BN6_MODE4_LAST_DRAW   0x08026CFAu /* bl 0x08029D34 in mode 4 (the chips', 0x08026CCC): BN5 draws the loaded chip just before */
+#define BN6_MODE4_LAST        0x08029D34u /* ... the call, */
+#define BN6_MODE4_BACK        0x08026CFEu /* ... and past it */
+#define BN6_MODE24_END        0x08027058u /* pop {pc}: mode 0x24's (UNITE's chosen, 0x08027044) end, BN5's draws the loaded chip before */
+#define BN6_OBSTACLE_FLAGS_A  0x0801B3CAu /* bl 0x0801A180 (an object's collision flags) in an obstacle's states (0x0801B394, BN5's 0x08017FCC), */
+#define BN6_OBSTACLE_FLAGS_B  0x0801B506u /* ... (BN5's 0x08018138), */
+#define BN6_OBSTACLE_FLAGS_C  0x0801B646u /* ... (BN5's 0x080182A0), */
+#define BN6_OBSTACLE_FLAGS_D  0x0801B786u /* ... (BN5's 0x080183FC): BN5's block 0x08018002-0x0801802E stands before each */
+#define BN6_OBJ_FLAGS         0x0801A180u /* the collision flags of r5's object (BN5's 0x08016C70) */
+#define BN6_BATTLE_PAUSED     0x0800A098u /* the battle's pause, its flags' bit 4 (BN5's 0x08008A78), the Z flag clear while paused */
+#define BN6_PANEL_FIELD       0x10        /* BN6_PANEL_FLAGS: the field's panels' (every one of its 18, the border's none: the strike's test, BN5's
+                                             0x080CABF8, the same bit at BN5_PANEL_FLAGS' place) */
+#define BN6_PANEL_ENEMIES     0x04000000u /* BN6_PANEL_FLAGS: an object of side 1 on it (bn6f's "enemy alliance"; BN5's the same, its table 0x080CAC90 by side) */
+#define BN6_PANEL_ALLIES      0x08000000u /* ... of side 0 (bn6f's "ally alliance") */
 
 #endif

@@ -374,6 +374,42 @@
    "spec": "soul_mood_gate",
    "soulbreak": 268435456,
    "what": "the chip use's end (soulmood_chip_refused) lets BlakWing through while MegaMan is not dark where BN5's 0x08010110 refuses it: the attack's chip BlakWing (0x125) where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "ShadowSoul's charged sword BN6's",
+   "spec": "soul_shadow_slash",
+   "soulbreak": 1048576,
+   "what": "the chip's family read (BN6_CHIP_FAMILY_READ) leaves ShadowSoul's charged sword to BN6's sword family where BN5's 0x080EBDEC takes his path before the enemy: he slashes where he stands, at (2,2), where BN5's is behind CanGard at (6,2)"
+  },
+  {
+   "name": "ColonelSoul's button lit for any pick",
+   "spec": "soul_colonel_grey",
+   "soulbreak": 2048,
+   "what": "the button's rule (src/emu/soulcolonel.c's lit) takes any chip where BN5's 0x08024C04 refuses a chip of a kind: the RockCube lights it, A loads it, and his charged shot is the chip shot (BN6's 0x95) where BN5's stays ScreenDivide"
+  },
+  {
+   "name": "no obstacle strike",
+   "spec": "soul_colonel_strike",
+   "soulbreak": 4096,
+   "what": "the strike's test (src/emu/soulcolonel.c's strike_test) finds no enemy where BN5's 0x080CABEA finds CanGard behind the RockCube: the cube stays a cube, no soldier, CanGard keeps his 60"
+  },
+  {
+   "name": "B leaves the button's chip in it",
+   "spec": "soul_colonel_undo",
+   "soulbreak": 8192,
+   "what": "B on the chips (src/emu/soulcolonel.c's undo) runs BN6's B alone where BN5's 0x08024CEA gives the button's chip back first: the Cannon stays in the button, OK commits it (the block's +0x14 1 where BN5's is none) and MegaMan holds no chip at t700"
+  },
+  {
+   "name": "the button's chip left in the deck",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 16384,
+   "what": "OK's picks spent (src/emu/soulcolonel.c's spent) leave the button's Cannon in the deck where BN5's 0x080250CC spends it: the third hand's first chip the Cannon again where BN5's is a RockCube"
+  },
+  {
+   "name": "his charged shot ScreenDivide with a chip",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 32768,
+   "what": "the turn's start (src/emu/soulcolonel.c's turn) keeps his charged shot ScreenDivide (BN6's 0x94) with the Cannon in the button where BN5's 0x080124A6 makes it the chip shot (0x13): ScreenDivide at t952 where BN5 fires the Cannon"
   }
  ]
 }

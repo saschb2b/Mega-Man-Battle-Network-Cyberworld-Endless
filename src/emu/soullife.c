@@ -10,6 +10,7 @@
 
 #define THUMB_BX_LR 0x4770u   /* a stub's instruction, which its hook stands on */
 #define FREE_HALF   0xFFFFu   /* the free space as emu_init pads it */
+#define SOUL_COLONEL 7         /* ColonelSoul, BN5's number */
 #define BL_HI(op)   (((op) & 0xF800u) == 0xF000u)
 
 uint32_t soul_field(int side, uint32_t field) { return BN6_SOULS + (uint32_t)side * BN6_SOULS_SIDE + field; }
@@ -57,6 +58,9 @@ static HookAct entered(HookRegs *r, void *user) {
 		hook_write8(soul_field(side, BN6_SOUL_NEXT), 0);
 		hook_write8(soul_field(side, BN6_SOUL_NEXT_CHAOS), 0);
 		hook_write8(soul_field(side, BN6_SOUL_NEXT_TURNS), 0);
+		/* (Colonel's flag of the side, which BN5 clears as a form's state is set up, 0x08011B34, ColonelSoul's ready setting
+		 * it again: soulcolonel.c) */
+		if (next != SOUL_COLONEL) hook_write8(soul_field(side, BN6_SOUL_STRIKE), 0);
 		soulmood_unison(side);   /* (BN5's calm as he unites, 0x08012146) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
@@ -72,7 +76,8 @@ static HookAct left(HookRegs *r, void *user) {
 	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
 	if (soul) soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
 	if (soul && !keep_soul) {
-		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN };
+		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN,
+			BN6_SOUL_STRIKE };
 		for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hook_write8(soul_field(side, fields[i]), 0);
 		hook_write16(soul_field(side, BN6_SOUL_CHIP), 0);
 	}

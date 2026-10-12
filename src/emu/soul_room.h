@@ -22,12 +22,20 @@
 #define SOUL_STUBS_COUNT   4              /* (those four soulcode.c's; the next soulpassive.c's:) */
 #define SOUL_STUB_READY    SOUL_STUB(4)   /* the proxy's passives as he unites (BN6_FORM_PASSIVES' 8): the Soul's */
 #define SOUL_STUB_REAPPLY  SOUL_STUB(5)   /* ... and as his form's state is set again (BN6_FORM_PASSIVES_COLL's 8) */
+#define SOUL_STUB_STRIKE   SOUL_STUB(6)   /* (soulcolonel.c's:) Colonel's side's flag set (BN5's 0x080CAD06), r5 the object: the Souls' block's */
+#define SOUL_STUB_STRIKE_CHECK SOUL_STUB(7) /* ... BN5's test of an obstacle at r0, r1 (0x080CABEA): r0 1 or 2 its strike, r1 the side, r2 as BN5 leaves it */
 #define SOULS_PHASES       (FREE_SOULS + 0x001080u)   /* a Soul's unison, 4 words: BN6's crossing's phases with BN5's phase 1 (the Soul's image) */
 #define SOULS_STUBS_END    (FREE_SOULS + 0x001100u)
 #define SOULS_VENEERS      (FREE_SOULS + 0x001100u)   /* the moved code's veneers on to BN6's routines, 12 bytes each, to: */
 #define SOULS_VENEERS_END  (FREE_SOULS + 0x001A00u)
 #define SOULS_THUMB        (FREE_SOULS + 0x001A00u)   /* the project's own Thumb the Souls' hooks jump to: soulchips.c's 0x40 bytes, */
 #define SOUL_STUB_COUNTER  (SOULS_THUMB + 0x40u)      /* ... BN5's counter's start (0x0800E338) as BN6's twin and the family's first frame (soulcode.c), */
+#define SOULS_COLONEL      (SOULS_THUMB + 0x80u)      /* ... ColonelSoul's (soulcolonel.c): his button's mode's two phases, BN5's moved (8 bytes), */
+#define SOUL_COLONEL_DRAW  (SOULS_THUMB + 0x90u)      /* ... his loaded chip drawn on the chips' screen (BN5's 0x080254F8, moved) before BN6's last draw, */
+#define SOUL_COLONEL_DRAW2 (SOULS_THUMB + 0xC0u)      /* ... the same at the end of UNITE's screen's mode, */
+#define SOUL_COLONEL_STRIKE (SOULS_THUMB + 0x100u)    /* ... BN5's obstacle states' block (0x08018002-0x0801802E) where BN6's lack it, */
+#define SOUL_COLONEL_UNDO  (SOULS_THUMB + 0x180u)     /* ... and B giving the button's chip back (BN5's 0x08024CEA-0x08024D28), */
+#define SOULS_COLONEL_END  (SOULS_THUMB + 0x1C0u)
 #define SOULS_THUMB_END    (FREE_SOULS + 0x001C80u)   /* ... to */
 #define SOULS_ARM_OF       (FREE_SOULS + 0x001C80u)   /* list 0's arm row by sprite number grown: BN6's bytes, then the Souls', to: */
 #define SOULS_ARM_OF_END   (FREE_SOULS + 0x001D80u)
@@ -46,8 +54,8 @@
 #define SOULS_SONGS        (FREE_SOULS + 0x003100u)   /* BN5's songs the moved code plays that Gregar has otherwise (xsong_put), to: */
 #define SOULS_SONGS_END    (FREE_SOULS + 0x004000u)
 #define SOULS_CODE         (FREE_SOULS + 0x004000u)   /* BN5's code the Souls run, moved (soulcode_bn5.c), to: */
-#define SOULS_CODE_END     (FREE_SOULS + 0x006000u)
-#define SOULS_ART          (FREE_SOULS + 0x006000u)   /* what they draw: the attacks' sprites BN6 has none of, their faces, */
+#define SOULS_CODE_END     (FREE_SOULS + 0x007000u)
+#define SOULS_ART          (FREE_SOULS + 0x007000u)   /* what they draw: the attacks' sprites BN6 has none of (the rest in FREE_SOULS_ART), their faces, */
 #define SOULS_ART_END      (FREE_SOULS + 0x016000u)
 #define SOULS_SPRITES      (FREE_SOULS + 0x016000u)   /* ... MegaMan in each Soul, BN5's sprite list 0, to: */
 #define SOULS_SPRITES_END  FREE_PANELS
@@ -60,10 +68,16 @@
 #define SOUL_EFFECT_LAST   0xCF
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
 #define SOUL_FACE_FIRST    0x17          /* BN6's emotion window face of the first Soul's, past BN6's 23 (0x0801CD08) */
-#define SOULS_FACE_TILES   (SOULS_ART + 0xF000u)   /* the Souls' faces, 0x100 bytes each (BN5's 0x087417FC on), past the attacks' sprites */
-#define SOULS_DIGITS       (SOULS_ART + 0xF600u)   /* ... and BN5's emotion window's digits, 0x80 bytes each (0x08741DFC on), to: */
-#define SOULS_DIGITS_END   (SOULS_ART + 0xFB80u)
-#define SOULS_LIST0        (SOULS_ART + 0xFC00u)   /* BN6's sprite list 0 grown, SOULS_LIST0_ENTRIES words: BN6's as its code reads */
+#define SOULS_FACE_TILES   (SOULS_ART + 0xE000u)   /* the Souls' faces, 0x100 bytes each (BN5's 0x087417FC on), past the attacks' sprites */
+#define SOULS_DIGITS       (SOULS_ART + 0xE600u)   /* ... and BN5's emotion window's digits, 0x80 bytes each (0x08741DFC on), to: */
+#define SOULS_DIGITS_END   (SOULS_ART + 0xEB80u)
+#define SOULS_LIST0        (SOULS_ART + 0xEC00u)   /* BN6's sprite list 0 grown, SOULS_LIST0_ENTRIES words: BN6's as its code reads */
 #define SOULS_LIST0_END    SOULS_ART_END           /* ... them through it to BN6_SPRITES_THROUGH, the Souls' full sprites, what they draw */
+/* FREE_SOULS_ART's last 0x1000 bytes: ColonelSoul's button's art, BN5's copied (soulcolonel.c; tools/xsoul.py's sprites stay before it) */
+#define SOULS_COLONEL_ART  (FREE_SOULS_ART_END - 0x1000u) /* its tiles on the chips' screen by state: lit, grey, chosen (BN5's lit), 0x180 each */
+#define SOULS_COLONEL_INFO (SOULS_COLONEL_ART + 0x480u)   /* ... its picture in the chip's window, 0x540 bytes, */
+#define SOULS_COLONEL_INFO_PAL (SOULS_COLONEL_ART + 0x9C0u) /* ... its palette, */
+#define SOULS_COLONEL_NAME_PAL (SOULS_COLONEL_ART + 0x9E0u) /* ... and the name line's, 0x20 bytes each, to */
+#define SOULS_COLONEL_ART_END (SOULS_COLONEL_ART + 0xA00u)
 
 #endif

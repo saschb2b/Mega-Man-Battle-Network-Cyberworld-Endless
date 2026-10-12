@@ -16,7 +16,7 @@
 /* Who the Souls' passives' bytes are (claims.h) */
 #define SOULPASSIVE_CLAIMS "the Souls' passives (soulpassive.c)"
 
-/* (soulbreak's passives, tests/xdiff/mutations.json) */
+/* (soulbreak's passives, tests/xdiff/mutations.json; from 0x08 ColonelSoul's, soulcolonel.h) */
 enum {
 	SOULPASSIVE_BREAK_HAND = 1,    /* NumberSoul's hand of 9 where BN5 deals 10 */
 	SOULPASSIVE_BREAK_PLUS = 2,    /* NumberSoul's +10 to plain attack chips left out */
