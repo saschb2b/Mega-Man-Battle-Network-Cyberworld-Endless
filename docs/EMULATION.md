@@ -119,8 +119,8 @@ another's"):
 | `+0x480000`-`+0x4C0000` | BN5's Souls in BN6's engine (issue #82; docs/MULTIROM.md, Transplanted Souls), written once a core as it starts where the Souls are installed (`--dev soulproxy` or `souls=MASK`, BN5's ROM read beside BN6's; the Souls track's S2): `+0x000` and `+0x004` the two stubs of a Soul's life (a `bx lr` each, hooked: the proxy's entries 8 of the overlay tables point at them, as MegaMan enters and leaves form 8); `+0x012` BN5's A on UNITE (`BN5_UNITE_A`, 0x24 bytes, the same distance from a word boundary as in BN5) and `+0x040` its one veneer, on to BN6's PlaySoundEffect; `+0x100` UNITE's art for the chip's window (`BN5_UNITE_ART_SIZE`, 0x540 bytes) and `+0x700` its two palettes, a Soul's and Chaos Unison's; `+0x800` the Souls' pictures (14 of 0x80 bytes by BN5's number: none, Souls 1-12, Chaos Unison) and `+0xF00` their palette, each copied from BN5's ROM. Mode 0x24's three words point at the pictures and their palette (`BN6_UNITE_PICTURES`, `BN6_UNITE_PICTURES_2`, `BN6_UNITE_PICTURE_PAL`: Gregar reads them in that mode alone, which it never enters), and the emblem art's two words (`BN6_EMBLEM_ART_TILES`, `BN6_EMBLEM_ART_PALS`) at UNITE's art while element 0xB is UNITE, Gregar's own back while it is the emblem. From `+0x1000` free, for the track's later milestones: the Souls' code, sprites and grown tables. The proxy form itself writes BN6's own tables in place (entry 8 of each table by form and its hooks' BKPTs: docs/ROM_DATA.md, MegaMan's forms) and form 8's object id in the enemy ids' table the engine reads (where the families' room has grown it, its copy at `+0x336000`, through the room's own writer, `xg_bn6_entry`) | `soulproxy.c`, `soulunite.c`, `soullife.c` |
 | `+0x4C0000`-`+0x4D0000` | BN5's lava and sea in BN6's battle engine (issue #82; docs/MULTIROM.md, One net; docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), written once a core as it starts where BN5's ROM is read, at fixed addresses (IWRAM's copy of the flags' literal names the first, and a state holds IWRAM): `+0x4C0000` BN6's panel flags table grown to 16 words (BN6's 13, BN5's lava's at 13, its sea's at 14, type 0's at 15), the literal of its IWRAM routine pointed at it; `+0x4C0040` the lava's cooling, a few instructions of the project's own Thumb (the panel set plain, the spark's place moved by a random number, the spark), and its four veneers on to BN6's routines after it; `+0x4C0100` BN6's panel tile table grown to 15 types, lava's and the sea's entries BN5's with their tiles at 0x295 on, its literal pointed at it; the rest free (the tiles themselves go to VRAM from C as a battle first shows them, the panels' draw hook below: a tile set grown with them, which the game decompresses as every battle begins, made BN6's own battles start later and their runs differ) | `xpanels.c`, `xpanels_look.c` |
 | `+0x4D0000`-`+0x500000` | Free | |
-| `+0x500000`-`+0x600000` | Kept for BN5's Navis in BN6's engine (issue #82, a later step; nothing written yet): their 13 per-AI tables and the four triples' Navi words grown, the arm points' records (`0x080191C8`), the companion overlay's kinds (`0x080C5B90`, `0x080C5B44`), their names archive rebuilt, their homes, code and sprites (their battle sprites in sprite list 2, grown at `+0x334000`) | |
-| `+0x600000`-`+0x700000` | Kept for the code of BN5's chips moved into BN6's engine (issue #82, a later step; nothing written yet): the attack families' and chip routines' tables grown, the chips' code and what it draws (their records, names and art are at `+0x400000`) | |
+| `+0x500000`-`+0x600000` | BN5's Navis in BN6's battle engine (issue #82; docs/MULTIROM.md, Transplanted Navis; docs/ROM_DATA.md, Navis moved into the battle engine), written once a core as it starts where BN5's ROM is read (`--dev xnavicontrol` the control instead, `nonavis` none), at fixed addresses, the same at every boot with the same ROMs: `+0x500000` their battle sprites, each at a place of its own (`xnavi_sprites.c`: Colonel's first, the Dark Soul's at `+0x544000`), listed at list 2's 0x20 + n - 7, and from `+0x57B000` the Navis' arm points' records grown to every number of list 2; `+0x580000` BN6's thirteen Navi tables grown to 256 AI indexes (`0x400` apart), the ice block's sizes (`+0x583400`), the held chips' words (`+0x583500`), the companion's start and end (`+0x583900`, `+0x583D00`), the overlay's masks and sprites grown to 64 kinds (`+0x584100`, `+0x584200`), the moved Navis' names (`+0x584400`); `+0x588000` their homes, 16 of `0x800` (the families' layout), the last the moved objects'; `+0x590000` the Navis' stubs (`0x60`: r0 0, the DS chip AI logged, the Navis' buster's setup, Colonel's sides' bits kept in his field, the Dark Soul's chip records by id), `+0x590060` BN5's sea's submerge's code (`0xA0`, `xsea.c`: the marker's spawn, the hit gate's two tests, the splash of an object the sea holds, their veneers), `+0x590100` BN5's engine objects moved once for every track (`xnavi_objects.c`: the image object's module and the sea's marker's, a block each), `+0x592000` the Navis' code, a room of `0x3C00` each (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan, the Dark Soul, the control); `+0x5B0000` a room of `0x400` each for its overlay's masks, then from `+0x5B2000` the shared art: every sprite their attacks draw once, at a place and number of its own whichever Navi draws it (lists 4 and 5 grown, `+0x334000`'s), copied by the first install that needs it, to `+0x5FA000`; `+0x5FA000` the Dark Soul's chip records (`XN_DARK_RECORDS`: BN6's 512 records with the four bytes its chip AI reads BN5's, `0x5800` bytes) | `xnavi_sprites.c`, `xnavi_room.c`, `xnavi_install.c`, `xnavi_objects.c`, `xsea.c`, `xnavi_dark.c` |
+| `+0x600000`-`+0x700000` | The code of BN5's chips moved into BN6's engine (issue #82): from `+0x600000` BN6's attack families' table grown to 240 (`FREE_ATTACK_FAMILIES`, `0x400`; the chips track's `xattack_grow.c`, here for the Navis' buster, BN5's family 0x16 at 0x66), then kept for the chip routines' tables grown, the chips' code and what it draws (their records, names and art are at `+0x400000`) | `xattack_grow.c` |
 | `+0x700000`-`+0x800000` | Free | |
 
 The guest core's ROM copy (BN5's, docs/MULTIROM.md, Guest battles) is
@@ -168,9 +168,16 @@ lava and sea, BN6's panel types 13 and 14 (`src/emu/xpanels.c`;
 docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), two of BN6's
 IWRAM routines are patched too: the literal that
 names the panels' flags table (`0x0300791C`, pointed at the grown table
-in the free space) and the element hit's volcano and conveyor tests
+in the free space), the element hit's volcano and conveyor tests
 (`0x03007742`-`0x03007771`, made again with lava cooled under Aqua as
-the volcano is), each in the routines' image in ROM (`0x081D6000` on),
+the volcano is) and the panel bonus's tests (`0x03007678`-`0x0300768D`,
+made again with an Elec hit on sea counted twice as BN5's are, after
+Fire on grass), and for BN5's sea's submerge (`src/emu/xsea.c`;
+docs/ROM_DATA.md, BN5's sea's submerge and hold in BN6's engine) the hit
+gate's two tests of an invisible target (`0x0300724A`-`0x03007257` and
+`0x0300728C`-`0x0300729B`, each made a call to the project's own test in
+ROM, which stops a hit on the submerged as BN6's stops one on the
+invisible but for Elec), each in the routines' image in ROM (`0x081D6000` on),
 which the game copies to IWRAM as it powers on, and kept so in RAM
 (`emu_keep`): a state is saved with BN6's own bytes there, so it loads
 in any build, and they are made the engine's again as one is loaded.
@@ -287,9 +294,13 @@ every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
 | --- | --- | --- |
 | `0x02010CE0`-`0x020115DF` | Persistent: the chip pack's extension, ids 320-511, 12 bytes an id (`BN6_PACK_EXT`; docs/MULTIROM.md, The chip registry) | `xchips_install.c` |
 | `0x020115E0`-`0x020117FF` | Persistent: spare | |
-| `0x0203FB50`-`0x0203FEFF` | Per battle: kept for the moved families' and Navis' own state | |
+| `0x0203FB50`-`0x0203FBDF` | Per battle: BN5's sea's submerge (`RAM_SEA`; `XSEA_MASK` the submerged, a bit each by its collision data's own, `BN6_COLL_INDEX_BIT`; `XSEA_MARKERS` each one's marker by that bit's index, 32 words; 0x84 bytes used), which BN5 keeps in the collision data where BN6 keeps its bubble | `xsea.c` |
+| `0x0203FBE0`-`0x0203FD9F` | Per battle: the Dark Soul's chip AI's lists (`RAM_DARK_LISTS`, `BN6_DARK_LISTS`: BN5's `0x02034C20` laid out as BN5's, 0xE0 a side, BN6's chip ids), empty (0) as each battle is set up | `xnavi_dark.c`, `xnavi_bn5.c` |
+| `0x0203FDA0`-`0x0203FDAF` | Per battle: the moved Navis' own state (`RAM_NAVIS`): Colonel's sides' bits (`BN6_COLONEL_SIDES`, which BN5 keeps in BattleState +0x5C), the object the Dark Soul's AI data is now and its own in the pool (`BN6_DARK_AI_OWNER`, `BN6_DARK_AI_POOL`) | `xnavi_room.c`, `xnavi_dark.c` |
+| `0x0203FDB0`-`0x0203FEEF` | Per battle: the Dark Soul's AI data (`RAM_DARK_AI`, `BN6_DARK_AI`: BN5's 0x140 bytes, its chip AI's state past BN6's 0x100), one Dark Soul's at a time | `xnavi_dark.c` |
+| `0x0203FEF0`-`0x0203FEFF` | Per battle: kept for the moved families' own state | |
 | `0x0203FF00`-`0x0203FF5F` | Per battle: the second-level dispatch's side tables (`BN6_DISPATCH_SIDE`: a byte an object slot, its game's type, 32 for each of the first, third and fourth kinds), written by the dispatch's spawners and read by its routines | `xvirus_dispatch.c` |
-| `0x0203FF60`-`0x0203FF6F` | Per battle: kept for BN5's Colonel's table | |
+| `0x0203FF60`-`0x0203FF6F` | Per battle: BN5's Colonel's table moved (`BN6_COLONEL_TABLE`, `RAM_COLONEL`: two 8-byte entries by side, which BN5 keeps at `0x02034000`), written by his moved code and read by his attacks' objects, zeroed with the battle's RAM as each battle is set up | `xnavi_bn5.c` |
 | `0x0203FF70`-`0x0203FFEF` | Per battle: the Souls' state in BN6's battles (`BN6_SOULS`: 0x20 bytes a side, and room for the track's later milestones and BN5's mood; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a Soul's life on the proxy form): so every battle begins with no Soul, read and written by the Souls' hooks alone | `soulunite.c`, `soullife.c` |
 | `0x0203FFF0`-`0x0203FFFF` | Per battle: spare (the game call's old mark, not used since issue #33) | |
 
@@ -754,7 +765,9 @@ VBlank handler's nested frames save what they interrupted (the BIOS's
 decompression of the battle's sprites) a few cycles apart where the
 lava's and the sea's install has the panels' flags read from ROM; and,
 with BN5's ROM read, the code in IWRAM that install keeps patched,
-`0x0300791C`-`0x0300791F` and `0x03007742`-`0x03007771`). The values of the enemy
+`0x0300791C`-`0x0300791F`, `0x03007742`-`0x03007771` and
+`0x03007678`-`0x0300768D`, and the sea's submerge's, `0x0300724A`-`0x03007257`
+and `0x0300728C`-`0x0300729B`). The values of the enemy
 id and AI index are allowed wherever they stand, not at fixed addresses;
 the tool prints each address they explained (the battle's three copies of
 the id, each a u16: `0x020348D4`, `0x0203AAB0`, `0x0203EB56`; the name

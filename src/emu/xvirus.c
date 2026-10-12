@@ -23,6 +23,7 @@
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 #include "xvirus_grow.h"
+#include "xvirus_move.h"
 #include "xvirus_shim.h"
 #include "xvirus_tx.h"
 
@@ -89,12 +90,12 @@ static uint32_t moved_to(const XVirusFamily *f, uint32_t a) {
 	return b ? a - b->start + b->at : 0;
 }
 
-/* a pointer into the blocks, moved: a Thumb one names code, any other
- * the start of a range of data or a byte of raw data (a byte table's
- * place, odd as well as even) */
+/* a pointer into the blocks, moved: a Thumb one names code, any other the start of a range of data or a byte of raw data
+ * (a byte table's place, odd as well as even: a raw range may start at an odd address) */
 static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
 	if ((v & 1) && xvirus_is_code(f, v & ~1u)) return true;
-	const XvData *d = xvirus_data_at(f, v & ~1u);
+	const XvData *d = xvirus_data_at(f, v);
+	if (!d && (v & 1)) d = xvirus_data_at(f, v & ~1u);
 	return d && (d->kind == XV_RAW || d->start == v);
 }
 
@@ -106,8 +107,9 @@ static uint32_t resolve(uint32_t target, void *user) {
 	for (int i = 0; i < c->f->ncalls; ++i)
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
-			/* (one of BN6's routines, or one of the second-level dispatch's spawners) */
-			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL)) break;
+			/* (one of BN6's routines, one of the second-level dispatch's spawners, or one of the Navis' stubs in their code's room,
+			 * xnavi_install.c) */
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -475,7 +477,9 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 /* Its sprites copied (a compressed one decompressed: BN6 draws a battle
  * sprite whose pointer has bit 31 only once its battle's start put it in
  * a cache) and listed in their grown lists, each number one that BN6's
- * placeholder holds there */
+ * placeholder holds there; a sprite an install before placed at its place
+ * and number (the Navis' shared art, xnavi_recipe.h) kept, its bytes
+ * checked */
 static void sprites_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->nsprites && !xv_failed(); ++i) {
 		const XvSprite *s = &f->sprites[i];
@@ -485,6 +489,12 @@ static void sprites_set(const XVirusFamily *f, const Game *g) {
 			xv_fail("its sprite %d:%#x (%u bytes, %u of room)", s->list, s->index, (unsigned)len, (unsigned)s->room);
 			free(d);
 			return;
+		}
+		if (xvirus_list_slot(s->to_list) >= 0 && emu_read32(XV_LISTS + (uint32_t)xvirus_list_slot(s->to_list) * XV_STEP + 4u * s->to_index) == s->at) {
+			for (uint32_t b = 0; b < len && !xv_failed(); ++b)
+				if (emu_read8(s->at + b) != d[b]) xv_fail("its sprite %d:%#x at %08x is another's", s->list, s->index, (unsigned)s->at);
+			free(d);
+			continue;
 		}
 		uint8_t *p = xv_put(s->at, len, true);
 		if (p) memcpy(p, d, len);
@@ -528,14 +538,19 @@ static const XvSprite *sprite_of(const XVirusFamily *f, uint8_t list, uint8_t in
 }
 
 /* Its effects in the grown effects' table: its game's entry with its
- * sprite as BN6 lists it (one of the recipe's, or of a family's before it) */
+ * sprite as BN6 lists it (one of the recipe's, or of a family's before it);
+ * an entry an install before wrote the same kept (the Navis share their
+ * effects' numbers) */
 static void effects_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->neffects && !xv_failed(); ++i) {
 		const XvId *e = &f->effects[i];
 		const uint8_t *src = e->from < g->neffects ? g->rom + (g->effects - BUS) + 4u * e->from : NULL;
 		const XvSprite *s = src && !(src[0] & 3) ? sprite_of(f, (uint8_t)(src[0] / 4), src[1]) : NULL;
 		if (!s) { xv_fail("its effect %#x draws none of its sprites", e->from); return; }
-		xg_set_word(XG_EFFECTS, e->to, (uint32_t)(4u * s->to_list) | (uint32_t)s->to_index << 8 | (uint32_t)src[2] << 16 | (uint32_t)src[3] << 24);
+		uint32_t word = (uint32_t)(4u * s->to_list) | (uint32_t)s->to_index << 8 | (uint32_t)src[2] << 16 | (uint32_t)src[3] << 24;
+		/* (one an install before wrote, the same: the Navis' effects one number whichever of them spawns it) */
+		if (emu_read32(XV_EFFECTS + 4u * e->to) == word) continue;
+		xg_set_word(XG_EFFECTS, e->to, word);
 	}
 }
 
@@ -632,7 +647,8 @@ static void records_set(const XVirusFamily *f, const Game *g, uint32_t entry[XV_
 }
 
 /* ---- its sounds BN6 has none of: each song copied whole (xsong.h) into the art's room the recipe gives it, and listed at
- * one of BN6's empty song slots, on the player BN6's own song of its number plays on ---- */
+ * its fixed one of BN6's empty song slots (every track's copy of the same sound the same slot, xsong.c's BN5_SOUNDS), on
+ * the players its own game's entry names (BN6's 32 are BN5's), as the Navis' copies are ---- */
 
 /* whether the song header at bus address `at` in the core's copy is BN5's song `song`'s (its tracks, blocks, priority and
  * reverb), as another install of the shared allocations' slot copied it */
@@ -645,14 +661,20 @@ static bool song_there(int game, int song, uint32_t at) {
 }
 
 static void songs_set(const XVirusFamily *f) {
+	const XRom *x = f->game >= 0 && f->game < XROM_COUNT ? &XR[f->game] : NULL;
 	for (int i = 0; i < f->nsongs && !xv_failed(); ++i) {
 		const XvSong *s = &f->songs[i];
-		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot, own = table + 8u * s->from;
+		uint32_t table = R.layout->song_table, slot = table + 8u * s->slot;
 		/* (the slot BN6's empty song, a header of no tracks, in the player's ROM: copied where the core's copy still
 		 * holds it; where another install of the shared slot (docs/MULTIROM.md) copied BN5's same song there first,
 		 * found there) */
-		uint32_t empty = table && own + 8 <= ROM_SIZE && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
+		uint32_t empty = table && slot + 8 <= ROM_SIZE ? get32(R.data + slot) : 0;
 		if (!in_rom(empty, 1) || R.data[empty - BUS] != 0) { xv_fail("its song's slot %#x", s->slot); return; }
+		if (s->slot != xsong_sound_slot(f->game, s->from) || !x || !x->data || !x->layout || !x->layout->song_table ||
+			(uint32_t)s->from * 8 + 8 > ROM_SIZE - x->layout->song_table) {
+			xv_fail("its sound %#x's slot %#x is not the one every track copies it to", s->from, s->slot);
+			return;
+		}
 		uint32_t now = emu_read32(BUS + slot);
 		if (now != empty) {
 			if (!song_there(f->game, s->from, now)) xv_fail("its song's slot %#x holds another song", s->slot);
@@ -662,8 +684,15 @@ static void songs_set(const XVirusFamily *f) {
 		uint32_t header = p ? xsong_pack(f->game, s->from, s->at, p, s->room) : 0;
 		if (!header) { xv_fail("its sound %#x (%u bytes of room)", s->from, (unsigned)s->room); return; }
 		xv_word(BUS + slot, empty, header);
-		xv_word(BUS + slot + 4, get32(R.data + slot + 4), get32(R.data + own + 4));
+		xv_word(BUS + slot + 4, get32(R.data + slot + 4), get32(x->data + x->layout->song_table + 8u * s->from + 4));
 	}
+}
+
+/* its sounds noted at their slots for the other tracks' installs and the differential (xsong.h), once installed */
+static void songs_noted(const XVirusFamily *f) {
+	for (int i = 0; i < f->nsongs; ++i)
+		if (!xsong_found(f->game, f->songs[i].from, f->songs[i].slot))
+			fprintf(stderr, "xvirus: %s's sound %#x at slot %#x not noted\n", f->name, f->songs[i].from, f->songs[i].slot);
 }
 
 /* ---- its rewards: its game's reward rows for its versions' ids, in the
@@ -781,6 +810,39 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	return true;
 }
 
+/* ---- the code mover, for the Navis' install too (xvirus_move.h) ---- */
+
+static Ctx move_ctx;
+static Game move_game;
+
+bool xv_move_begin(const XVirusFamily *f) {
+	memset(&move_ctx, 0, sizeof move_ctx);
+	move_ctx.f = f;
+	move_ctx.pool = (ThumbVeneers){ move_ctx.veneers, f->home + XV_HOME_VENEERS, (int)(sizeof move_ctx.veneers / THUMB_VENEER_SIZE), 0 };
+	if (!game_of(f->game, &move_game)) return xv_fail("%s: its game's ROM is not read", f->name);
+	move_ctx.rom = move_game.rom;
+	return true;
+}
+
+void xv_move_code(void) {
+	const XVirusFamily *f = move_ctx.f;
+	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(&move_ctx, &f->blocks[i]);
+	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(&move_ctx, &f->clones[i]);
+	uint8_t *v = move_ctx.pool.n ? xv_put(move_ctx.pool.base, (uint32_t)move_ctx.pool.n * THUMB_VENEER_SIZE, true) : NULL;
+	if (v) memcpy(v, move_ctx.veneers, (size_t)move_ctx.pool.n * THUMB_VENEER_SIZE);
+}
+
+uint32_t xv_move_ref(XvRef r) { return ref_to(move_ctx.f, r); }
+
+void xv_move_art(void) {
+	if (!xv_failed()) sprites_set(move_ctx.f, &move_game);
+	if (!xv_failed()) effects_set(move_ctx.f, &move_game);
+	if (!xv_failed()) types_set(move_ctx.f, &move_game);
+}
+
+const uint8_t *xv_move_rom(void) { return move_ctx.rom; }
+int xv_move_veneers(void) { return move_ctx.pool.n; }
+
 const XVirusFamily *xvirus_installed(int game, int src_ai) {
 	for (int i = 0; i < ninstalled; ++i)
 		if (installed[i]->game == game && installed[i]->src_ai == src_ai) return installed[i];
@@ -804,4 +866,6 @@ void xvirus_install(int which) {
 		xfields_install(XROM_BN5_COLONEL_US);
 	}
 	claims_end();
+	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */
+	for (int i = 0; i < ninstalled; ++i) songs_noted(installed[i]);
 }

@@ -9,6 +9,7 @@ import os
 import re
 import struct
 
+import bn5_objects as OB
 import bn5_twins
 import xrecipe_thumb as T
 
@@ -89,6 +90,7 @@ class Family:
         self.chip_stores = []   # (the movs's address, its register, BN5's chip id) of a chip id its code gives its object (+0x2A)
         self.effect_bytes = set()   # its AI data's bytes that hold an effect id (the shared teleport's)
         self.helper_types = {}      # (kind, type) -> the engine routine whose twin spawns it as BN6's own (its call aimed there)
+        self.needs = set()          # (kind, type) of the moved objects its code calls into (tools/bn5_objects.py)
         self.last = False
 
     def decide(self, kind, detail):
@@ -106,6 +108,9 @@ class Deriver:
         self._spawns = {}
         # (whether BN5's sprite (list offset, number) and BN6's draw the same: xrecipe.py's, by their bytes or what they draw)
         self.art_same = art_same
+        # (a number its code keeps must be one bn5_twins.KEPT reads in BN6: the families' rule; the Navis' generator keeps its
+        # numbers unaudited, its Navis proven frame for frame by tools/xdiff.py instead)
+        self.audit_numbers = True
 
     def table(self, ai, k):
         return self.b5.u32(BN5['fam'] + BN5['step'] * k + 4 * ai)
@@ -116,33 +121,43 @@ class Deriver:
         """a call's or pointer's target: ('own',), ('engine', twin), ('foreign', twin) (copied: no twin, in BN5's shared
         virus code, its attacks' or another family's), ('missing', twin). A pointer (a jump table's entry, a callback) to a
         routine whose twin's body differs and no audit takes is copied too, where it can be: what it names is run by the
-        engine as it stands, never checked against what the family's code asks of it as a call's twin is"""
+        engine as it stands, never checked against what the family's code asks of it as a call's twin is. One that would
+        be copied but is BN5's engine objects' moved once for every track (tools/bn5_objects.py) is reached at their copy,
+        installed before any family, which runs their type for this family's spawns too"""
         t &= ~1
         if f.region[0] <= t < f.region[1]:
             return 'own', None
+        kind, tw, note = self.target_of(f, t, pointer)
+        m = OB.module_of(t) if kind == 'foreign' else None
+        if m is not None:
+            f.needs.add((m['kind'], m['type']))
+            return 'engine', (OB.objects_at(t), 'the moved objects', 'SAME', None)
+        if note:
+            f.notes.append(note)
+        return kind, tw
+
+    def target_of(self, f, t, pointer):
+        """kind_of's classes but the moved objects': (class, twin, the note a copy leaves or None)"""
         tw = self.pairs.twin(t)
         copyable = any(lo <= t < hi for lo, hi in (BN5['shared'], BN5['objects'], BN5['families']))
         audit = self.pairs.audit(t, tw[0]) if tw[0] else None
         if audit and audit[0] == 'copy':
             # (a twin whose fix or change the family's code shows: BN5's own body served, copied with its code)
-            f.notes.append(f'copies {t:08X}: its audit serves BN5\'s own body ({audit[1]})')
-            return 'foreign', tw
+            return 'foreign', tw, f'copies {t:08X}: its audit serves BN5\'s own body ({audit[1]})'
         if tw[0] and pointer and tw[2] == 'DIFF' and self.pairs.audit(t, tw[0]) is None and copyable:
-            f.notes.append(f'copies {t:08X}, which a pointer of its code names: BN6\'s twin {tw[0]:08X} differs ({tw[3]}) and no audit takes it')
-            return 'foreign', tw
+            return 'foreign', tw, f'copies {t:08X}, which a pointer of its code names: BN6\'s twin {tw[0]:08X} differs ({tw[3]}) and no audit takes it'
         bad = self.spawns_other(t) if tw[0] else None
         if bad and copyable:
-            f.notes.append(f'copies {t:08X}: BN6\'s twin {tw[0]:08X} spawns the {kind_name(bad[0])} kind\'s {bad[1]:#x}, which BN6 runs otherwise '
-                           f'(its code or what it draws): BN5\'s spawns it through the dispatch')
-            return 'foreign', tw
+            return 'foreign', tw, (f'copies {t:08X}: BN6\'s twin {tw[0]:08X} spawns the {kind_name(bad[0])} kind\'s {bad[1]:#x}, which BN6 runs '
+                                   f'otherwise (its code or what it draws): BN5\'s spawns it through the dispatch')
         if tw[0]:
             # (the types its twin spawns as BN6's own, each a decision of bn5_twins.TYPES: twin)
             for key in self.spawned_types(t):
                 f.helper_types.setdefault(key, t)
-            return 'engine', tw
+            return 'engine', tw, None
         if copyable:
-            return 'foreign', tw
-        return 'missing', tw
+            return 'foreign', tw, None
+        return 'missing', tw, None
 
     # ---- the walk ----
 
@@ -296,9 +311,12 @@ class Deriver:
                                  f'recorded {rec[:2] if rec else "nowhere"} (bn5_twins.TYPES)')
 
     def kind_decisions(self, f):
-        """each kind of a table's type its code spawns (bn5_twins.ID_TABLES' `kinds_of`), named by the register of a call
-        to the type's spawner, is one the table fixes (its `live`): another keeps BN5's sprite bytes, and is refused"""
-        for t in bn5_twins.ID_TABLES:
+        """each kind of a table's type its code spawns (bn5_twins.ID_TABLES' `kinds_of`, and the moved image object's,
+        tools/bn5_objects.py), named by the register of a call to the type's spawner, is one the table fixes (its `live`):
+        another keeps BN5's sprite bytes, and is refused"""
+        image = dict(at=OB.IMAGE['kinds'], kinds_of=(OB.IMAGE['kind'], OB.IMAGE['type']), spawner=OB.IMAGE['spawner'], kind_reg=4,
+                     live=tuple(sorted(set(OB.IMAGE_TWIN) | set(OB.IMAGE_COPIED))), where='tools/bn5_objects.py')
+        for t in list(bn5_twins.ID_TABLES) + [image]:
             if 'kinds_of' not in t:
                 continue
             for w in f.walks.values():
@@ -314,7 +332,7 @@ class Deriver:
                     if k is None or (k & 0xFF) not in t['live']:
                         f.decide('kind', f'{site:08X}: the {kind_name(t["kinds_of"][0])} kind\'s {t["kinds_of"][1]:#x} of '
                                          f'kind {"made otherwise" if k is None else hex(k & 0xFF)} ({chain}), not one its '
-                                         f'table {t["at"]:08X} fixes (bn5_twins.ID_TABLES)')
+                                         f'table {t["at"]:08X} fixes ({t.get("where", "bn5_twins.ID_TABLES")})')
 
     def pointer_twin_ok(self, f, x, tw):
         """a pointer's twin of a body that differs serves only where an audit takes it (else it would have been copied)"""
@@ -632,7 +650,7 @@ class Deriver:
     def chip_store(self, f, w, a, reg):
         """a chip id its code gives its object (+0x2A, the chip it uses next: BN5's engine sets it from the held chips as
         the object spawns, and Zomon's set-up writes its AreaGrab there by hand, BN5 0x08108932-0x08108934): a constant's
-        movs, for BN6's id in its place (chip_ids); none (0xFFFF, movs #0 then subs #1: Appley's) kept"""
+        movs, for BN6's id in its place (chip_ids); none (0xFFFF, movs #0 then subs #1: Appley's; or a literal's) kept"""
         v, chain = T.back_value(w, a, reg)
         if v is not None and len(chain) == 1 and chain[0][1] == 'movs':
             f.chip_stores.append((chain[0][0], reg, v))
@@ -640,6 +658,8 @@ class Deriver:
         writes = [w.insns[x] for x in sorted((x for x in w.insns if x < a), reverse=True)[:6] if T.writes(w.insns[x], reg)][:2]
         if [(x.form, x.f) for x in writes] == [('subs8', (reg, 1)), ('movs', (reg, 0))]:
             return
+        if v == 0xFFFF and len(chain) == 1 and chain[0][1] == 'ldr_lit':
+            return   # (none from a literal: ShadowMan's, BN5 0x080F9406)
         f.decide('chip', f'{a:08X}: a chip id given its object from {chain}')
 
     def teleport_effects(self, f, w, addrs, k):
@@ -775,7 +795,7 @@ class Deriver:
                     continue
                 use = literal_use(w, lit)
                 if use == 'number':
-                    if v not in bn5_twins.KEPT:
+                    if v not in bn5_twins.KEPT and self.audit_numbers:
                         f.decide('number', f'{v:08X} at {lit:08X}: a number its code keeps (tested, masked, ORed or a spawn\'s '
                                            f'parameters) that no audit reads in BN6 (bn5_twins.KEPT)')
                     f.numbers[lit] = (v, v, 'a number (tested, masked, ORed or a spawn\'s parameters): kept, ' +

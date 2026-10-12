@@ -14,6 +14,7 @@
 #endif
 
 #include "debug.h"
+#include "devtools.h"
 #include "director.h"
 #include "director_hold.h"
 #include "flags.h"
@@ -26,7 +27,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -53,10 +54,11 @@ static void parse_buttons(const char *s, InputStep *step) {
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
- * "xrecord ADDR", "chip ID CODE [N]", "cross F"), into its step; false
- * where `tok` is none */
+ * "xrecord ADDR", "chip ID CODE [N]", "cross F", "onehit"), into its step;
+ * false where `tok` is none */
 static bool text_step(const char *tok, InputStep *s) {
-	if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
+	if (!strcmp(tok, "onehit")) s->onehit = true;
+	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
 	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
 	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
@@ -67,7 +69,8 @@ static bool text_step(const char *tok, InputStep *s) {
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->sig || s->held;
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->sig || s->held ||
+		s->onehit;
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -165,7 +168,7 @@ static void write_state(const char *path) {
 /* A step's dev steps on the game: a battle, foes, a record of BN5's, a
  * status, a chip, the form the next Cross chosen takes (soulproxy.h), the
  * signature, the run saved with MegaMan held (a CONTINUE's recovery, issue
- * #23) */
+ * #23), its enemies held at 1 HP */
 static void emu_steps(const InputStep *s) {
 	if (s->battle) director_dev_battle();
 	if (s->foes[0]) director_dev_foes(s->foes);
@@ -175,6 +178,8 @@ static void emu_steps(const InputStep *s) {
 	if (s->cross) soulproxy_cross(s->cross);
 	if (s->sig) director_dev_signature();
 	if (s->held) director_dev_hold(s->hold);
+	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
+	if (s->onehit) devtools_parse("onehit");
 }
 
 /* The steps of no frames at the script's position: pictures, states. */

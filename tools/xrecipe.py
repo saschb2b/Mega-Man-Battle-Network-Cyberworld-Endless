@@ -33,6 +33,7 @@ import sys
 import zlib
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import bn5_objects as OB  # noqa: E402
 import bn5_twins  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
 from xrecipe_family import BN5, BN6, GENERIC5, GENERIC6, HOOKS6, Deriver, Family, kind_name  # noqa: E402
@@ -233,8 +234,15 @@ class Alloc:
     def __init__(self):
         self.code, self.art, self.effect = XV_CODE, XV_ART, FIRST_EFFECT
         self.lists = {k: list(v) for k, v in LIST_NUMBERS.items()}
+        # (the numbers tools/bn5_objects.py gives the moved objects' copies of the families' kinds, from the families' range:
+        # placed by that install, before any family's)
+        for lst, num, track in OB.IMAGE_COPIED.values():
+            if track == 'families' and num in self.lists.get(lst, ()):
+                self.lists[lst].remove(num)
         self.memo = {}   # (what, BN5's number) -> BN6's, one BN5 thing one BN6 number across families
-        self.moved_types = {}   # (kind, BN5's type) -> the family that moved it first: those after spawn its copy
+        # (kind, BN5's type) -> the family that moved it first: those after spawn its copy; the moved objects' first of all
+        # (tools/bn5_objects.py, installed before any family)
+        self.moved_types = {(m['kind'], m['type']): 'the moved objects' for m in OB.MODULES}
 
     def number(self, kind, key):
         k = (kind, key)
@@ -339,6 +347,10 @@ def derive(b5, b6, pairs, ai, slot, alloc, reg):
     f.data = d.classify(f, blocks)
     d.scan(f)
     d.scan_words(f, blocks)
+    for key in sorted(f.needs):
+        # (a type of the moved objects its code reaches through their spawner: run as their copy, which the install checks is there)
+        f.types.setdefault(key, dict(bn6=None, routine=None, shared='the moved objects',
+                                     why='the moved objects\' (tools/bn5_objects.py), installed before any family: their copy run for this one'))
     d.type_decisions(f)
     d.kind_decisions(f)
     r = Recipe()
@@ -796,9 +808,9 @@ def imm_for(r, chain, reg, was, now, why):
     r.f.decide('immediate', f'{why}: made by {chain}, not one instruction')
 
 
-def types_of(r, alloc):
+def types_of(r, alloc=None):
     """the object types its code spawns: BN6's twin, moved through the dispatch, or moved by a family before it (its copy
-    run for this one too)"""
+    run for this one too); each one it moves told to `alloc` for the families after it (a family's: the Navis' keep none)"""
     r.types = []
     for (kind, t5), v in sorted(r.f.types.items()):
         if v['bn6'] is not None:
@@ -809,7 +821,8 @@ def types_of(r, alloc):
             r.f.decide('spawn', f'the {kind_name(kind)} kind\'s type {t5:#x}: {v["why"]}')
         else:
             r.types.append((kind, t5, None, v['why']))
-            alloc.moved_types.setdefault((kind, t5), r.name)
+            if alloc is not None:
+                alloc.moved_types.setdefault((kind, t5), r.name)
 
 
 def sounds_of(r, b5, b6, alloc):
@@ -897,9 +910,10 @@ def song_track(rom, a):
     return bytes(out)
 
 
-def song_sig(rom, table, i):
+def song_sig(rom, table, i, player=False):
     """a song as it sounds: its header's numbers, its tracks (their pointers relative) and the voices they select (a
-    sample's bytes by their hash)"""
+    sample's bytes by their hash); with `player`, the music player its entry names too (the Navis' sounds: one BN6 plays
+    on another player is copied, BN5's own)"""
     hp = rom.u32(table + 8 * i)
     if not rom.has(hp, 8):
         return None
@@ -927,7 +941,7 @@ def song_sig(rom, table, i):
                     smp = hashlib.sha1(rom.bytes(sp, 16 + n)).hexdigest()[:12]
         vs.append(e[:4].hex() + e[8:].hex() + smp)
     # (the music player it plays on is each song table's own: tests/xdiff/legit.json's sound)
-    return hashlib.sha1(repr((tracks, prio, rev, tr, vs)).encode()).hexdigest()
+    return hashlib.sha1(repr(((rom.u16(table + 8 * i + 4),) if player else ()) + (tracks, prio, rev, tr, vs)).encode()).hexdigest()
 
 
 def conditions_of(r, pairs):
@@ -988,6 +1002,14 @@ def ref_text(ref):
     return f'{k}(0x{a:08X})'
 
 
+def addr_text(a):
+    """an address the C file writes: one of the moved objects' copies by its place (XN_OBJECTS, tools/bn5_objects.py), else
+    the number"""
+    if OB.OBJECTS_AT <= (a & ~1) < OB.OBJECTS_END:
+        return f'XN_OBJECTS + 0x{a - OB.OBJECTS_AT:X}'
+    return f'0x{a:08X}'
+
+
 def c_recipe(r):
     n = c_name(r.label, r.ai5)
     L = [f'/* ---- BN5\'s {r.label} (AI {r.ai5} there, its enemy ids {", ".join(f"{x:#x}" for x in r.names)}), as AI {r.ai} with ids '
@@ -1004,12 +1026,12 @@ def c_recipe(r):
             L.append(f'\t{{ {BN5_SPAWN_NAME[c["bn5"]]}, {c["spawner"]} }},   /* the dispatch\'s spawner */')
         else:
             how = c['cls'] + (' (audited)' if c.get('audit') else '')
-            L.append(f'\t{{ 0x{c["bn5"]:08X}, 0x{c["bn6"] or 0:08X} }},   /* {c["source"]}, {how} */')
+            L.append(f'\t{{ 0x{c["bn5"]:08X}, {addr_text(c["bn6"] or 0)} }},   /* {c["source"]}, {how} */')
     L.append('};')
     if r.words:
         L.append(f'static const XvPair {n}_words[] = {{')
         for v, to in r.words:
-            L.append(f'\t{{ 0x{v:08X}, 0x{to:08X} }},')
+            L.append(f'\t{{ 0x{v:08X}, {addr_text(to)} }},')
         L.append('};')
     if r.imms:
         L.append(f'static const XvImm {n}_imms[] = {{')
@@ -1108,6 +1130,7 @@ HEADER = '''/* xvirus_bn5.c: BN5's virus families' recipes, written by tools/xre
 #include "bn5.h"
 #include "bn6.h"
 #include "rom.h"
+#include "xnavi_recipe.h"
 
 #define OWN(a) { (a), true, 0 }
 #define BN6(a) { (a), false, 0 }
@@ -1184,7 +1207,9 @@ def xdiff_json(recipes):
         fams.append(dict(
             name=r.label, ai5=r.ai5, ai6=r.ai, ids5=[f'{x:#x}' for x in r.names], ids6=[f'{r.first_id + v:#x}' for v in range(6)],
             effects={f'{e5:#x}': f'{e6:#x}' for e5, e6 in sorted(r.effect_ids.items())},
-            sounds={f'{v:#x}': f'{to:#x}' for v, to, _ in r.sounds if to != v},
+            # (a sound BN6 has under another number; one copied into its slot is told by its own number in BN6's trace too,
+            # src/audio/xsong.c's xsong_copy_of)
+            sounds={f'{v:#x}': f'{to:#x}' for v, to, _ in r.sounds if to != v and v not in SOUND_SLOTS},
             code_twins={f'{v:#x}': f'{to:#x}' for v, to in r.words if v & 1},
             effect_bytes=[f'{x:#x}' for x in sorted(r.f.effect_bytes)],
             t3_actions=[f'{t:#x}' for t in r.t3_states],

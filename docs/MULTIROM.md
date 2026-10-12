@@ -589,6 +589,34 @@ so no battle has made one; BN5's LavaSeed and SeaSeed (chips 43 and 47
 by its ROM's names) are assumed by their names to make them, and what
 else its chips and Souls do with lava and sea is not looked up yet.
 
+**The sea's submerge and hold (in place):** BN5's sea does two more
+things, which BN6's engine dropped with it (`src/emu/xsea.c`;
+docs/ROM_DATA.md, BN5's sea's submerge and hold in BN6's engine). An
+object whose AI's traits hold 0x20 (ToadMan's SP; ToadSoul sets the same
+bit) goes under on sea: hidden, a ripple following it (BN5's marker, the
+fourth kind's 0x3E, moved with the Navis' engine objects), and only an
+Elec attack or one of the flags 0x1008 reaches it. A non-Aqua object
+that comes to a sea panel, neither floating nor going under, is held 20
+frames under a splash (BN5's effect 0x63, which BN6 lacks, copied in as
+0xAC): MegaMan too. BN5 keeps the submerge in the collision data's flag
+0x80000000 and timer at +0x2C, which BN6 uses for its bubble, so it is
+kept apart, in 0x90 bytes of the per-battle RAM issue #82's plan gives
+it (`RAM_SEA`, docs/EMULATION.md, BN6's RAM): a mask of the submerged by
+each collision data's own bit, and each one's marker. BN6's code reaches
+it through hooks where BN5's steps stand in its twins (the status step of
+MegaMan and the Navis, a collision data made, the arrival on a panel,
+two tests of the invisible that BN5 makes of the hidden), and the hit
+gate's two tests of an invisible target in IWRAM, patched to call a test
+of the project's own and kept so (`emu_keep`). A moved family that goes
+under in its own code (one of BN5's sets the flag itself) sets its bit
+in the mask instead (`xsea.h`). The differential proves it: ToadMan's SP
+under the sea (`toadman_sp`), the buster's shots passing over ToadMan
+under (`toadman_sea`) and Elec ones reaching him (`toadman_sea_elec`),
+MegaMan and TomahawkMan held as they come to sea (`toadman_sea`,
+`tomahawkman_sea`); `--mutations` break the gate both ways, the marker
+and the splash. No other sea effect on movement: every test of a panel's
+type against the sea in BN5's code is listed in that row.
+
 ## Transplanted families
 
 Issue #82: BN5's virus families moved into BN6's own battle engine, so a
@@ -918,7 +946,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
   its calls to the engine (each through a veneer to BN6's twin), its
   immediates and pool words given BN6's numbers, the object types it
   moved through the second-level dispatch (`shared`: run by the copy of a
-  family before it), what it draws (its sprites copied and the effects
+  family before it, or of the engine's objects moved once), what it draws (its sprites copied and the effects
   given ids of their own, where BN6 has none of the same bytes), its
   sounds BN6 has no song of (each at its fixed slot), its held chips as
   BN6's ids, and what was made for it of the project's own Thumb:
@@ -945,7 +973,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
 | Flashy | 23 | 49, 0x266-0x26b | 4, 1628 | 45 | 13 | 3:0x6F | 2, 0 | 0xBA, slot 0x60 | - | 1 NameID range |
 | Eleogre | 24 | 50, 0x26c-0x271 | 3, 1300 | 25 | 7 | 3:0x6F shared | 1, 0 | - | - | 1 NameID range |
 | Cactikil | 25 | 51, 0x272-0x277 | 5, 1698 | 57 | 5 | 1:0x11 | 2, 0 | - | - | - |
-| WuNote | 26 | 52, 0x278-0x27d | 7, 3032 | 67 | 11 | 1:0x05, 1:0x16, 3:0x84 | 2, 0 | - | - | 1 id in its data |
+| WuNote | 26 | 52, 0x278-0x27d | 6, 2344 | 65 | 11 | 1:0x05 shared (the engine's objects'), 1:0x16, 3:0x84 | 1, 0 | - | - | - |
 | Appley | 27 | 53, 0x27e-0x283 | 6, 2218 | 59 | 10 | 1:0x2F, 3:0xAC, 4:0x90 | 3, 1 | - | - | the pre-step |
 | BigBrute | 28 | 54, 0x284-0x289 | 3, 1338 | 35 | 7 | 3:0x61 | 1, 2 | - | - | - |
 | TinHawk | 29 | 55, 0x28a-0x28f | 4, 2384 | 37 | 11 | - | 2, 1 | - | - | - |
@@ -980,10 +1008,12 @@ and its calls aimed again (`src/emu/xvirus.c`):
   each of BN6's two status states (frozen and bubbled), its call aimed at
   BN6's (`XvClone`). The ids in a table of a family's
   data are byte fix-ups (`ID_TABLES`: Zomon's effects, Whirly's sprites,
-  Marina's water's records, the fire column's kinds, the image object's
-  kinds). A sound BN6 has no song of is copied once, at the slot issue
-  #82's tracks share for it (Powie's 0xC0 at 0x62, Skarab's 0xB7 at 0x61,
-  Flashy's and Eleogre's 0xBA at 0x60). A sprite is BN6's own where BN6
+  Marina's water's records, the fire column's kinds). A sound BN6 has no
+  song of is copied once, at the slot issue #82's tracks share for it
+  (Powie's 0xC0 at 0x62, Skarab's 0xB7 at 0x61, Flashy's and Eleogre's
+  0xBA at 0x60), on the players BN5's own entry names, as the Navis'
+  copies are, and noted with `xsong.c` so that the other tracks' installs
+  find it there and the differential reads it by BN5's number. A sprite is BN6's own where BN6
   has the same bytes, else copied, decompressed, at the families' numbers
   (lists 1, 4 and 5 upward from BN6's end, list 1's placeholders 0x1E and
   0x00 first; list 2 from 0x30; a sprite of list 3, where it is not
@@ -994,11 +1024,13 @@ and its calls aimed again (`src/emu/xvirus.c`):
   fourth kind's 0x83 unreachable: BN5's panel claims, which BN6's engine
   never asks for, go to the dispatch's stray). Flashy's and Eleogre's
   flash is one type, Flashy's copy run for both. BN5's image object (the
-  first kind's 0x05, which WuNote spawns with kind 0x30) is moved whole
-  with its 58 kinds, the same module the Navis' track installs: only the
-  kinds a family spawns are fixed (WuNote's 0x30, its art copied into the
-  families' list 4), the others keep BN5's bytes, and a family spawning a
-  kind not fixed is refused. A family's numbers its code keeps as they
+  first kind's 0x05, which WuNote spawns with kind 0x30) is the engine's
+  objects' module, moved once for every track before any family (The
+  engine's objects moved once, below): WuNote's call to its spawner goes
+  to that copy and its type is run as that install's (`XV_TYPE_SHARED`);
+  its kind 0x30 is fixed in the one table (`tools/bn5_objects.py`, its art
+  BN5's 4:0x21 at the families' list 4 number 0x6C), and a family spawning
+  a kind not fixed there is refused. A family's numbers its code keeps as they
   are (an alliance's bits, a collision region's spawn words) are read by
   hand in BN6 first (`KEPT`). BN6 finds a virus's arm points (where a
   status's mark stands over it) by its battle sprite's number in list 1,
@@ -1066,6 +1098,143 @@ and its calls aimed again (`src/emu/xvirus.c`):
   after two of BN6's battles, docs/EMULATION.md, Testing): the install
   stands in the way of no run continued with BN5's ROM taken away or put
   in.
+
+## Transplanted Navis
+
+Issue #82's Navi track: BN5's Team Colonel Navis fight in BN6's own battle
+engine, each proved against BN5's own battle frame by frame before it is
+installed. A Navi is a family with more (`src/emu/xnavi_install.c`): its
+code and records are moved by the families' code mover (`xvirus_move.h`,
+the same blocks, pools, veneers and checks), and it is found through
+BN6's Navi tables instead of the families' (docs/ROM_DATA.md, Navis moved
+into the battle engine).
+
+- **The room** (`src/emu/xnavi_room.c`), made once a core after the
+  families' and before any Navi: BN6's thirteen per-AI Navi tables (the
+  state tables, the pre-step, hook A, struct1, struct2, the post hook,
+  spawn start and end, paralysed, frozen, bubbled, flinching, dragged)
+  and the four triples' Navi words (the ice block's size, the held chips,
+  the companion's start and end) copied to 256 AI indexes, the companion
+  overlay's kinds to 64, each word that names one pointed at the copy;
+  the arm points' records of list 2 grown (`xnavi_sprites.c`); and the
+  moved Navis' names, an archive of their own handed out by a hook on
+  BN6's name lookup for their ids (BN6's own Navis read BN6's archive as
+  before). BN5's Navi n of Team Colonel (7-12) is Navi AI 32 + n - 7 with
+  four ids from 0x1C4 + 4 (n - 7): V1, V2, V3 and SP (the Dark Soul's
+  AI 38, id 0x1DC); its battle sprite list 2's 0x20 + n - 7.
+- **The control** (`--dev xnavicontrol`, `tools/xcontrol.py --navi`):
+  BN6's own HeatMan derived by the same walk from BN6's ROM and moved as
+  Navi AI 25 with ids 0x1C4-0x1C9. Fought by the same keys as the native
+  HeatMan, his battle is the same byte for byte in EWRAM and IWRAM frame
+  for frame (fight, statuses, deletion), each difference the id, the AI
+  index or the copies' places.
+- **A Navi's recipe** (`src/emu/xnavi_bn5.c`, written by
+  `tools/xnavirecipe.py`; docs/DEVTOOLS.md, The Navis' recipe generator):
+  its code walked from its states, hooks and companion routines; the
+  objects it spawns that BN6 runs otherwise moved through the
+  second-level dispatch, one decision a type for every track
+  (`tools/bn5_twins.py`, TYPES: moved unless BN6 runs the same code and
+  draws the same art); its calls paired with BN6's twins (the families'
+  pairs and audits, `tools/bn5_navi_twins.py`'s beside them); its state
+  numbers from 6 made BN6's from 8; its pre-step and hooks as BN6's
+  tables take them (hook A the empty hook, its frozen and bubbled hooks
+  its paralysis hook: BN5 freezes and bubbles no Navi); its companion's
+  start and end, a routine of BN5's copied where BN6's twin spawns an
+  overlay kind BN6 lacks, the kind then one of its own past BN6's 19
+  (`XN_KIND_OF`) with its masks copied; its panel types BN6's (BN5's
+  lava 8 and sea 0xA as BN6's 13 and 14); KnightMan's chip by its name;
+  Colonel's table of two entries by side moved from BN5's `0x02034000` to
+  `BN6_COLONEL_TABLE` (`0x0203FF60`, zeroed with each battle's RAM) and
+  his slash's three effects in a row. What BN6's engine lacks goes to the
+  Navis' stubs (`XN_STUBS`): BN5's panel claims, which no battle in BN6's
+  engine reaches (their gate, BattleState +0x32 bit 0x40, is set only by
+  BN5's battle setup at `0x0802D594`, which BN6 has no twin of: r0 0, as
+  BN5 answers without it), and the DS version's chip AI, which no recipe
+  installs (logged).
+- **What it draws**, in issue #82's ranges for the Navis: its sprites
+  copied once into the shared art whichever Navi draws them, at list 4's
+  0xA0-0xB5 and list 5's 0xA0-0xA4 (a sprite of list 3 copied into list
+  4, its load's list offset made list 4's), BN6's own where BN6 lists the
+  same bytes; its effects BN6's of the same sprite, animation and palette,
+  else its own from 0xA0 (to 0xBF; 0xA0-0xAC taken, one number a BN5
+  effect whichever Navi or engine object spawns it); its sounds BN6 numbers otherwise copied in by `xsong.c` at
+  the slot issue #82's plan gives each BN5 sound whichever track plays it
+  (0xC0 at 0x62, 0xB7 at 0x61, 0x70 at 0x5F, 0x117 at 0x5E, 0xE1 at 0x5B,
+  0x115 at 0x5A, 0x105 at 0x59, 0x10C at 0x58, 0x10D at 0x57, 0xCF at
+  0x56), copied only where the slot still holds BN6's empty header.
+- **The engine's objects moved once** (`src/emu/xnavi_objects.c`,
+  `tools/bn5_objects.py`): BN5's image object, the first kind's type 5,
+  which ShadowMan and Colonel spawn through its spawner, is BN6's type 5
+  in name only (BN6 reads a kinds table of its own, its sprites at other
+  numbers). Its module whole, `0x080B9A5C`-`0x080B9D10` (the kinds table,
+  58 kinds of five bytes; the type's routine; the spawner every attack
+  calls; its helpers), is one block installed before any family or Navi
+  at `XN_OBJECTS` (`xnavi_install_core`), its type moved through the
+  dispatch for every track; a Navi's or a family's call to its spawner
+  goes to the copy (WuNote's, its image kind 0x30). Its kinds' sprites, one
+  table for every track (`tools/bn5_objects.py`): the twelve kinds whose
+  sprite BN6 lists with the same bytes name BN6's (two at another
+  number), kind 3 (ShadowMan's and Colonel's, BN5's 3:0x00) a copy at list
+  4's 0xB5, kinds 0x0D and 0x23 the Navis' at list 5's 0xA5 and 0xA6,
+  WuNote's 0x30 (BN5's 4:0x21) at list 4's 0x6C of the families' range,
+  the other 41 keep BN5's bytes, reached by no installed code
+  (the generator refuses a recipe that spawns one; a track that needs one
+  adds its art there from its own range). BN5's sea's marker, the
+  fourth kind's 0x3E (BN6's 0x3E is its invisibility's shadow, drawn
+  otherwise and spawned by nothing), is a second module of the same unit,
+  `0x080E4C4C`-`0x080E4D3C`, for the sea's submerge (below); the sea's
+  splash, BN5's effect 0x63, which BN6 lacks, comes with them as BN6's
+  0xAC.
+- **The proof**: `build.py xdiff`, BN5's own battle against BN6's with the
+  Navi moved, every draw of BN6's replayed from BN5's: each Navi's V1
+  alone with MegaMan kept from harm (`*_v1`), V1 against MegaMan's 62
+  inputs (`*_v1_keys`), SP alone (`*_sp`); its objects, its moved types'
+  objects, its effects and its overlay compared in BN6's numbers, and
+  what each draws compared by its sprite's bytes, never its number
+  (`src/dev/xdiff_sprite.c`). `--mutations` breaks each Navi's copy the
+  way a transplant bug would (a state number, an effect, an overlay's
+  kind, a sprite's number, a sprite table's entry, the image object's
+  kind and its twin's number, a copied sound): each FAILs its spec.
+- **Where they fight**: a battle the `foes` step starts names their ids
+  beside BN6's (`0:foes 1C8@52` ShadowMan V1; docs/DEVTOOLS.md, A battle
+  on demand). The run's guardians are BN5's Navis in BN5's own engine as
+  before (docs/BOSSES.md, BN5's Navis; `--guardian 24`-`29`).
+- **Status** (as built): the six pass all three specs, ToadMan's SP with
+  BN5's sea's submerge in BN6's engine (One net, The sea's submerge and
+  hold, above), which his own specs on the sea prove beside it
+  (`toadman_sea`, `toadman_sea_elec`; `tomahawkman_sea` the hold).
+  Colonel's write of BattleState +0x5C's bits (0x10 or 0x20, his side,
+  as his spawn ends), whose 0x10 BN6 reads as the field's slide at a
+  battle's end, goes to a field of the Navis' own instead (docs/ROM_DATA.md,
+  Colonel's sides' bits); BN5's one reader, the obstacles' dark hole
+  beside his panels, has no twin in BN6 (open, with the obstacles).
+- **The Dark Soul** (AI 0x16, id 0x18D; BN6's AI 38, id 0x1DC):
+  moved with BN5's chip AI, which BN6 dropped (docs/ROM_DATA.md, The
+  Dark Soul in BN6's engine): its machine (`0x0802BA18`), its 31
+  routines (`0x0802BD96`-`0x0802C0E0`) and its approach
+  (`0x08029B40`-`0x0802AE70`) copied with it, a dead call into
+  `0x081BC994` (data, behind a count nothing raises) answered 0, the
+  Navis' buster (BN5's attack setup 0x3E, family 0x16) made by a stub as
+  BN6's family 0x66 in the grown table, the chip it plays started as BN6
+  starts a chip (setAttack with BN6's record's family), BN6's twins of
+  BN5's two tests of its id (its collision's region 0x13; arriving in a
+  fight under way, as a failed Chaos Unison brings it, no entry in the
+  foes' list of four that shows their HP, BN6's `0x0801DC7C`, where at a
+  battle's start both games list it as any foe) made by hooks. What BN6's engine has no room
+  for is kept apart: its AI data's 0x140 bytes (BN6's are 0x100; BN5's
+  chip AI keeps its state from +0xF0) in the battle's RAM, its two
+  lists there too, and the chip records it reads, BN6's with the four
+  bytes BN5 gives a meaning of their own (the approach, the region it
+  aims from, two flags), by BN6's id. Its lists are BN5's battle's own
+  making, from the save's record of the chips MegaMan uses most, which
+  BN6 keeps none of: in BN6 they are empty, so it moves and fires its
+  buster; a list given in BN5 and written into BN6's by the chip
+  registry is proved too (`darksoul_cannon`, `darksoul_sword`: it takes
+  the chip, goes where it reaches MegaMan, uses it, turns its list). Its
+  DS versions of the six are left out (the design). Where a failed Chaos
+  Unison spawns it, BN5's `0x08006AAE`, BN6's twin is
+  `BN6_SPAWN_ENEMY_1` (`0x08007696`, the same body with its two entries
+  in the other order), for the Souls track.
 
 ## The chip registry
 
@@ -1463,4 +1632,10 @@ the next.
   AirHoc, WideSht1-3, Spreader, DrilArm1-3, Geddon1-3 and Z Saver play
   in BN6's battles; the rest sit out until their code is moved. Nothing
   in a run gives one yet.
+- [x] Its Navis in BN6's own engine (Transplanted Navis, above): Team
+  Colonel's six and the Dark Soul moved, each proved against BN5's
+  battle frame by frame (ToadMan's SP with BN5's sea's submerge, made
+  again in BN6's engine; the Dark Soul with BN5's chip AI, its lists
+  empty in BN6 for want of BN5's record of the chips MegaMan uses);
+  fought where a battle names their ids, not yet in a run.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

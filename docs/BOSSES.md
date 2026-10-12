@@ -226,6 +226,16 @@ ShadowMan's Invisibl, Mine or AntiDmg, of NumberMan's BusterUp, ColorPt or
 DblPoint, of TomahawkMan's Boomer, Lance or Snake, of Colonel's obstacle
 chips (RockCube, the TimeBoms, Fanfare and the rest).
 
+**In BN6's own engine** (issue #82; docs/MULTIROM.md, Transplanted
+Navis): the six are also moved into BN6's battle engine, each proved
+against BN5's own battle frame by frame (`build.py xdiff`'s `*_v1`,
+`*_v1_keys` and `*_sp`; ToadMan's SP open), as Navi AI 32-37 with ids
+0x1C4-0x1DB, four a Navi (V1, V2, V3, SP). A guardian is still the
+battle above, BN5's engine on the guest core (`--guardian 24`-`29`);
+the moved Navis are fought where a battle names their ids, the `foes`
+step's (`0:foes 1D4@52`, KnightMan V1; docs/DEVTOOLS.md, A battle on
+demand), until a game-design pass gives them a place in the run.
+
 ## Super bosses (6 October 2026, issue #100)
 
 A player missed super bosses, Bass and the Cybeasts above all. The owner:

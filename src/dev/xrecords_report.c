@@ -15,6 +15,7 @@
 #include "rom.h"
 #include "xbattles.h"
 #include "xfields.h"
+#include "xnavi_install.h"
 #include "xvirus.h"
 
 #define BUS 0x08000000u
@@ -195,9 +196,9 @@ int xrecords_report_run(const char *path) {
 		fprintf(stderr, "xrecords: BN5 Team Colonel's ROM is not beside BN6's\n");
 		return 2;
 	}
-	/* (the families and fields a run's core has: installed as it starts) */
+	/* (the families, fields and Navis a run's core has, the engine's objects they run before them: installed as it starts) */
 	if (!emu_init(R.data, ROM_SIZE)) return 1;
-	xvirus_install(XVIRUS_FAMILIES);
+	xnavi_install_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;
 	fprintf(out, "BN5's battle records in BN6's own engine (issue #82, docs/MULTIROM.md, One net): each random record of\n"

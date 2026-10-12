@@ -6,6 +6,7 @@ The differential)."""
 import functools
 import json
 import os
+import re
 import struct
 import sys
 
@@ -21,6 +22,8 @@ GAMES = {
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
+XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and art (src/emu/xnavi_recipe.h, XN_STUBS to XN_END)
+EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -29,7 +32,8 @@ SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (ob
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 DISPATCH_COPY = 0x3C                               # a virus's AI data's u16 BN6's dispatcher copies its object's +0x3E into
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
-TRACE_VERSION = 5   # (src/dev/xdiff.c's: the player block and the dispatch's types; version 2 traces, with neither, still read)
+TRACE_VERSION = 7   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block and the dispatch's types; version 2
+                    # traces, with none of them, still read)
 # MegaMan's side's player block (src/dev/xdiff.c, trace version 5): his battle NaviStats, the word of what was used this
 # battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes, the Souls' state in BN6's engine (BN6_SOULS' 0x80
 # bytes, BN5's zero), the Custom screen's element 0xB (UNITE: BN5_CUSTOM_UNITE, BN6_CUSTOM_UNITE)
@@ -39,7 +43,14 @@ SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
 OBJ_CHIP = 0x2A   # the chip a battle object uses next (BN6_T1_CHIP, u16; 0xFFFF none)
-SAVED_ACTION = 0x5D   # the first kind's +0x5C: its state word saved as a status takes it, its CurAction here (legit.json, maps, action)
+FAMILY_FIRST = 0x10   # CurAction from here an attack family's (BN6_ATTACK_FAMILY_FIRST)
+OBJ_OVERLAY_KIND = 0x04   # the companion overlay's kind (the first kind's type 0x56, BN6_OVERLAY_*): its first parameter
+T1_OVERLAY = 0x56
+OVERLAY_KINDS6 = 19   # BN6's own overlay kinds (BN6_OVERLAY_KINDS): the Navis' past them
+# an actor's CurActions kept as a status takes it (the status's, the one before it to go back to, the status's again: both
+# games' paralysis writes them alike, MegaMan's ready 6 in BN5 and 8 in BN6 at +0x5D; the first kind's +0x5C its state word
+# saved as the status takes it, legit.json, maps, action), read as CurAction is
+OBJ_ACTIONS_KEPT = (0x5C, 0x5D, 0x5E)
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
 AI_INDEX = 0x01
 
@@ -55,12 +66,14 @@ def u32(b, o):
 # ---- traces (src/dev/xdiff.c) ----
 
 class Obj:
-    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over', 'leftover')
+    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over', 'leftover', 'moved', 'sprite')
 
-    def __init__(self, kind, slot, rec, ai, coll, addr):
+    def __init__(self, kind, slot, rec, ai, coll, addr, moved=False):
         self.kind, self.slot, self.rec, self.ai, self.coll, self.addr, self.role = kind, slot, rec, ai, coll, addr, None
         self.over = {}   # (bytes of its record read otherwise: the renderer's places as the family's, xdiff_masks.py)
         self.leftover = False   # (its sprite state the slot's last occupant's: spawned and no sprite set up since, xdiff_events.py)
+        self.moved = moved      # (BN6's: run by the second-level dispatch as its game's moved type)
+        self.sprite = None      # (the CRC32 of the bytes of the sprite it last set up, xdiff_events.py; None unknown)
 
     def canonical(self):
         """its record as it is compared: its slot (+3) counted from its own (objects are matched by role, never by
@@ -79,6 +92,9 @@ class Obj:
 
     def o32(self, off):
         return u32(self.rec, NODE + off)
+
+
+SETUP = 0x10   # an event's flag: made while the battle was set up (src/dev/xdiff_events.h, XD_SETUP)
 
 
 class Event:
@@ -101,10 +117,14 @@ KEPT, REPLAYED, UNMATCHED, UNMAPPED = 1, 2, 4, 8
 def dispatched(rec, kind, side, game, version, seen):
     """an object's record with its type as the second-level dispatch runs it: where BN6's is its kind's dispatch type, the
     number the trace read from the kind's side table by its slot (TRACE_VERSION's), counted into seen"""
-    if version < TRACE_VERSION or game != 6 or rec[NODE + OBJ_TYPE] != DISPATCH[kind]:
+    if not is_dispatched(rec, kind, game, version):
         return rec
     seen[0] += 1
     return rec[:NODE + OBJ_TYPE] + bytes([side]) + rec[NODE + OBJ_TYPE + 1:]
+
+
+def is_dispatched(rec, kind, game, version):
+    return version >= TRACE_VERSION and game == 6 and rec[NODE + OBJ_TYPE] == DISPATCH[kind]
 
 
 def read_trace(path):
@@ -118,10 +138,10 @@ def read_trace(path):
     p += 12 * nm
     if version not in (2, TRACE_VERSION):
         sys.exit(f'{path}: a trace of version {version}, which this tool does not read (its {TRACE_VERSION}): run the differential again')
-    player_size = 0
+    player_size = apart_size = 0
     if version >= TRACE_VERSION:
-        player_size = struct.unpack_from('<I', b, p)[0]
-        p += 4
+        player_size, apart_size = struct.unpack_from('<2I', b, p)
+        p += 8
     g, frames, seen = GAMES[game], [], [0]
     while p < len(b):
         if b[p:p + 4] != b'FRAM':
@@ -136,23 +156,30 @@ def read_trace(path):
             p += 4
         player = b[p:p + player_size]   # (MegaMan's side's: his battle NaviStats, the used word, his pending form; src/dev/xdiff.c)
         p += player_size
+        apart = b[p:p + apart_size]     # (BN6's: the state its engine keeps apart, the sea's room, RAM_SEA; BN5's zeros)
+        p += apart_size
         objs = []
         for i in range(n1):
             slot, has_ai, has_coll = b[p], b[p + 1], b[p + 2]
-            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T1', b[p + 3], game, version, seen)
+            raw = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(raw, 'T1', b[p + 3], game, version, seen)
             ai = b[p + 4 + 0xD8:p + 4 + 0x1D8]
             co = b[p + 4 + 0x1D8:p + 4 + 0x1D8 + COLL_ROOM]
-            objs.append(Obj('T1', slot, rec, ai if has_ai else None, co[:coll] if has_coll else None, g['t1'] + slot * 0xD8))
+            objs.append(Obj('T1', slot, rec, ai if has_ai else None, co[:coll] if has_coll else None, g['t1'] + slot * 0xD8,
+                            is_dispatched(raw, 'T1', game, version)))
             p += 4 + 0x1D8 + COLL_ROOM
         for i in range(n3):
             slot, has_coll = b[p], b[p + 2]
-            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T3', b[p + 3], game, version, seen)
+            raw = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(raw, 'T3', b[p + 3], game, version, seen)
             co = b[p + 4 + 0xD8:p + 4 + 0xD8 + COLL_ROOM]
-            objs.append(Obj('T3', slot, rec, None, co[:coll] if has_coll else None, g['t3'] + slot * 0xD8))
+            objs.append(Obj('T3', slot, rec, None, co[:coll] if has_coll else None, g['t3'] + slot * 0xD8, is_dispatched(raw, 'T3', game, version)))
             p += 4 + 0xD8 + COLL_ROOM
         for i in range(n4):
             slot = b[p]
-            objs.append(Obj('T4', slot, dispatched(b[p + 4:p + 4 + 0xC8], 'T4', b[p + 3], game, version, seen), None, None, g['t4'] + slot * 0xC8))
+            raw = b[p + 4:p + 4 + 0xC8]
+            objs.append(Obj('T4', slot, dispatched(raw, 'T4', b[p + 3], game, version, seen), None, None, g['t4'] + slot * 0xC8,
+                            is_dispatched(raw, 'T4', game, version)))
             p += 4 + 0xC8
         panels = [b[p + PANEL_ROOM * i:p + PANEL_ROOM * i + psize] for i in range(PANELS)]
         p += PANEL_ROOM * PANELS
@@ -162,8 +189,12 @@ def read_trace(path):
         p += 8 * ns
         events = [Event(b, p + EVENT_SIZE * i, t) for i in range(nev)]
         p += EVENT_SIZE * nev
+        # (the spawns and sprites' set-ups made while the battle was set up, before its fight: told apart, for which objects set
+        # up no sprite since they spawned alone, src/dev/xdiff_events.h's XD_SETUP)
+        setup = [e for e in events if e.flags & SETUP]
+        events = [e for e in events if not e.flags & SETUP]
         frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events,
-                           player=player))
+                           player=player, setup=setup, apart=apart))
     return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames, dispatched=seen[0], version=version)
 
 
@@ -176,10 +207,28 @@ class Canon:
         self.name_id = num(m['name_id']['bn5_to_bn6'])
         self.t3_type = num(m['t3_type']['bn5_to_bn6'])
         self.effect = num(m['effect']['bn5_to_bn6'])
+        # (the effect ids a Navi's own code renumbers, each Navi its own numbers; BN5's engine's or another enemy's elsewhere:
+        # read as BN6's only where a spec's foes hold one of its ids)
+        self.navi_effects = [({int(x, 0) for x in n['ids']}, num(n['bn5_to_bn6'])) for n in m['effect'].get('navis', [])]
+        self.foes = set()   # (a spec's: its foes' BN5 ids)
         self.panel_type = num(m['panel_type']['bn5_to_bn6'])
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
+        self.navi_ai_index = num(m['navi_ai_index']['bn5_to_bn6']) if 'navi_ai_index' in m else {}
+        self.overlay_kind = num(m['overlay_kind']['bn5_to_bn6']) if 'overlay_kind' in m else {}
+        # (bytes of an enemy's AI data, or of an object of a moved type, its code writes from a pointer's low bytes: read as
+        # the pointer they came from, byte k of the word at `pointer` in the same record)
+        self.pointer_bytes, self.obj_pointer_bytes = {}, {}
+        for rule in legit['layouts'].get('pointer_bytes', {}).get('rules', []):
+            spans = {int(b, 0): (int(rule['pointer'], 0), k) for k, b in enumerate(rule['bytes'])}
+            if rule['part'] == 'ai':
+                for nid in rule['ids']:
+                    self.pointer_bytes.setdefault(int(nid, 0), {}).update(spans)
+            else:
+                self.obj_pointer_bytes.setdefault((rule['kind'], int(rule['type'], 0)), {}).update(spans)
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
+        self.attack_families = num(m['action'].get('families', {}))   # (BN5's attack families BN6 numbers otherwise)
+        self.players_apart = {int(x, 0) for x in m['sound'].get('players_apart', [])}
         self.layouts = legit['layouts']
         self.legit = legit
         self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
@@ -312,6 +361,11 @@ class Canon:
     def nid(self, game, v):
         return self.name_id.get(v, v) if game == 5 else v
 
+    def is_navi(self, game, nid):
+        """a Navi's NameID in its game (BN5's 0x100-0x17F and the Dark Soul's 0x18D), whose AI index counts apart from the
+        viruses'"""
+        return game == 5 and (0x100 <= nid < 0x180 or nid == 0x18D)
+
     def is_megaman(self, game, nid):
         return nid in (set(self.megaman.values()) | self.form_names if game == 6 else self.megaman.keys())
 
@@ -326,12 +380,15 @@ class Canon:
         return self.form_base + form if form and self.form_base else next(iter(self.megaman.values()))
 
     def action(self, game, megaman, v):
-        """CurAction as BN6 numbers it: a virus's 0-5 the same, BN5's 6 BN6's 8, 7 on two up; MegaMan's by his map"""
+        """CurAction as BN6 numbers it: a virus's 0-5 the same, BN5's 6 BN6's 8, 7 on two up, an attack family's (from
+        0x10) by the families' map (a family BN6 runs as its own number the same); MegaMan's by his map"""
         if game == 6:
             return v
         if megaman:
             return self.mm_action.get(v, v)
-        return v if v < 6 else 8 if v == 6 else v + 2
+        if v >= FAMILY_FIRST:
+            return self.attack_families.get(v, v)
+        return v if v < 6 else v + 2
 
     def form_of(self, game, v):
         """MegaMan's form as BN6 numbers it (a BN5 Soul by legit.json's map: none until the Souls are installed)"""
@@ -340,8 +397,17 @@ class Canon:
     def t3(self, game, v):
         return self.t3_type.get(v, v) if game == 5 else v
 
+    def foe_effects(self):
+        """the BN6 effect ids the spec's foes' own code draws (their maps' targets): art an install chose"""
+        return {v for ids, effects in self.navi_effects if ids & self.foes for v in effects.values()}
+
     def fx(self, game, v):
-        return self.effect.get(v, v) if game == 5 else v
+        if game != 5:
+            return v
+        for ids, effects in self.navi_effects:
+            if ids & self.foes and v in effects:
+                return effects[v]
+        return self.effect.get(v, v)
 
 
 CHIP_RECORDS = {5: 0x0801E210, 6: 0x08021DA8}   # each game's chip records, 0x2C bytes a chip (BN5_CHIP_RECORDS, RomLayout.chip_data)
@@ -390,6 +456,7 @@ def assign_roles(trace, canon):
     """Each object its role: (kind, what it is, the how-manyth of those to appear); one
     that stays in its slot as the same thing keeps it"""
     prev, counts = {}, {}
+    trace['first'] = {}   # (each role's first frame, its timer: a pointer to an object newer than its holder is a stale one's)
     for fr in trace['frames']:
         now = {}
         for o in fr['objs']:
@@ -401,6 +468,7 @@ def assign_roles(trace, canon):
                 key = (o.kind, ident)
                 o.role = (o.kind, ident, counts.get(key, 0))
                 counts[key] = counts.get(key, 0) + 1
+                trace['first'].setdefault(o.role, fr['t'])
             now[(o.kind, o.slot)] = (ident, o.role)
         prev = now
 
@@ -417,6 +485,7 @@ def role_name(r):
 # ---- pointers ----
 
 RAM = ((0x02000000, 0x02040000), (0x03000000, 0x03008000))
+BATTLE_STATE_SPAN = 0x100   # the battle state's bytes a pointer into it is read by
 ROM = (0x08000000, 0x0A000000)
 
 
@@ -440,12 +509,17 @@ class Frame:
                 if o.coll is not None:
                     self.spans.append((co, co + trace['coll'], o.role, 'coll', 0))
         self.spans.append((g['panels'], g['panels'] + PANELS * trace['psize'], 'panels', 'panel', 0))
+        # (the battle's state, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer into it by its offset, as its decoys' slots at
+        # +0x94 and +0x98 are named in both, BN5 0x0800CEE6 / BN6 0x0800EC66, the same code)
+        self.spans.append((g['battle'], g['battle'] + BATTLE_STATE_SPAN, 'battle', 'state', 0))
         # (an object let go this frame, its slot named: its pointers still point there)
         self.slots = [(kind, g[kind.lower()] - NODE, SIZE[kind], n) for kind, n in (('T1', g['n1']), ('T3', 32), ('T4', 32))]
         self.list, self.list_end = g['list'], g['list_end']
         self.battle = g['battle']   # (BattleState, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer to it as such)
         self.by_role = {o.role: o for o in fr['objs']}
-        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1]]
+        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ())
+                                                            if XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
+                                                            or m[1] < EMU_FREE]
 
     def ptr(self, v):
         """a pointer as what it names"""
@@ -465,6 +539,8 @@ class Frame:
                     off = coll_off(self.canon, self.game, off)
                 if part == 'panel':
                     return ('panel', off // self.trace['psize'], panel_off(self.canon, self.game, off % self.trace['psize']))
+                if part == 'state':
+                    return ('battle state', off)
                 return (role_name(role), part, off)
         for kind, base, size, n in self.slots:
             if base <= v < base + size * n:
@@ -631,6 +707,36 @@ def word_view(fa, fb, wa, wb, sprite_rel):
     return None
 
 
+def stale(f, holder, view):
+    """a pointer's view (Frame.ptr) as a stale one's where it is one: to a slot let go, or to an object newer than the
+    object holding it (the slot's occupant as the pointer was written gone, another there since): ('stale', its slot,
+    its part, its offset)"""
+    if not isinstance(view, tuple) or len(view) != 3 or not isinstance(view[0], str):
+        return view
+    if view[0].endswith('(let go)'):
+        return ('stale', view[0].split(' (')[0], view[1], view[2])
+    o = next((x for x in f.fr['objs'] if role_name(x.role) == view[0]), None)
+    first = f.trace.get('first', {})
+    if o is not None and holder.role in first and first.get(o.role, 0) > first[holder.role]:
+        return ('stale', f'{o.kind} slot {o.slot}', view[1], view[2])
+    return view
+
+
+def art_chosen(canon, oa, ob):
+    """whether an object draws art an install chose, compared by its sprite's bytes (xdiff_events.py, Obj.sprite): a moved
+    type's (BN6's run by the dispatch), a moved foe's own body, an effect of a family's or a foe's own ids, a companion overlay
+    of a Navi's own kind; the engine's and MegaMan's own draw each game's art, apart by design"""
+    t = ob.o8(OBJ_TYPE)
+    if ob.moved:
+        return True
+    if ob.kind == 'T1' and t == 0:
+        # (a foe both games have, a native, draws each game's own art: BN6's Mettaur is BN6's)
+        return oa.o16(OBJ_NAME_ID) in canon.foes and ob.o16(OBJ_NAME_ID) not in canon.natives
+    if ob.kind == 'T4' and t == 0:
+        return ob.o8(OBJ_EFFECT) in canon.family_effects | canon.foe_effects()
+    return ob.kind == 'T1' and t == T1_OVERLAY and ob.o8(OBJ_OVERLAY_KIND) >= OVERLAY_KINDS6
+
+
 def obj_cells(fa, fb, oa, ob):
     """(part, offset as BN6 has it, BN5's value, BN6's) for each place they differ, their numbers BN6's"""
     out = []
@@ -650,9 +756,10 @@ def obj_cells(fa, fb, oa, ob):
         rel = None
         if w - sp in SPRITE_DATA and base_a and base_b and is_ptr(wa) and is_ptr(wb):
             rel = ('sprite data', wa - base_a), ('sprite data', wb - base_b)
-            # (the sprite itself, its data pointer: by the registry where either game's is one of its pairs)
+            # (the sprite itself, its data pointer: by the registry where either game's is one of its pairs; art an install
+            # chose by its bytes below, whichever pair its game's numbers name: the Dark Soul's body BN5's MegaMan's copied)
             na, nb = canon.sprite_name(5, base_a - 4), canon.sprite_name(6, base_b - 4)
-            if w - sp == 0x18 and (na or nb):
+            if w - sp == 0x18 and (na or nb) and not art_chosen(canon, oa, ob):
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
             elif w - sp == 0x18 and canon.sprite_bytes and not (kind == 'T4' and oa.o8(OBJ_TYPE) == 0):
                 # (a sprite of no pair, both games' in their ROMs or a family's copy: the same picture where the same bytes;
@@ -660,7 +767,12 @@ def obj_cells(fa, fb, oa, ob):
                 ha, hb = canon.sprite_sha(5, base_a - 4), canon.sprite_sha(6, base_b - 4)
                 if ha and hb:
                     rel = ('sprite', f'bytes {ha}'), ('sprite', f'bytes {hb}')
+        if w - sp == 0x18 and oa.sprite and ob.sprite and oa.sprite != ob.sprite and art_chosen(canon, oa, ob):
+            # (the sprite itself, by its bytes: the art of what an install moved or chose, which no number of the two games' says)
+            out.append(('obj', w - NODE, ('sprite bytes', f'{oa.sprite:08x}'), ('sprite bytes', f'{ob.sprite:08x}')))
         view = word_view(fa, fb, wa, wb, rel)
+        if view is not None and view[0] != view[1] and rel is None:
+            view = (stale(fa, oa, view[0]), stale(fb, ob, view[1]))
         if view is not None:
             if view[0] != view[1]:
                 out.append(('obj', w - NODE, view[0], view[1]))
@@ -668,10 +780,14 @@ def obj_cells(fa, fb, oa, ob):
         for k in range(4):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
-            if off == OBJ_ACTION and kind == 'T1' and not mm and canon.chip_action(oa.ai, a) is not None:
+            # (CurAction numbered as the state tables number it: the first kind's type 0 alone, MegaMan and the enemies, whose
+            # states the tables hold; its other types run routines of their own, a moved one BN5's numbers as they are. A
+            # virus's chip's family, the chip writer's, as BN6's of its chip: chip_action)
+            if off == OBJ_ACTION and kind == 'T1' and oa.o8(OBJ_TYPE) == 0 and not mm and canon.chip_action(oa.ai, a) is not None:
                 a = canon.chip_action(oa.ai, a)
-            elif (off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions) or
-                    off == SAVED_ACTION and kind == 'T1'):
+            elif off == OBJ_ACTION and (kind == 'T1' and oa.o8(OBJ_TYPE) == 0 or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+                a = canon.action(5, mm, a)
+            elif off in OBJ_ACTIONS_KEPT and kind == 'T1' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.action(5, mm, a)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)
@@ -680,6 +796,12 @@ def obj_cells(fa, fb, oa, ob):
             elif off in (OBJ_CHIP, OBJ_CHIP + 1) and kind == 'T1':
                 ca, cb = canon.chip(5, oa.o16(OBJ_CHIP)), ob.o16(OBJ_CHIP)
                 a, b = (ca & 0xFF, cb & 0xFF) if off == OBJ_CHIP else (ca >> 8, cb >> 8)
+            elif off == OBJ_OVERLAY_KIND and kind == 'T1' and oa.o8(OBJ_TYPE) == T1_OVERLAY:
+                a = canon.overlay_kind.get(a, a)
+            elif off in canon.obj_pointer_bytes.get((kind, oa.o8(OBJ_TYPE)), {}):
+                p, n = canon.obj_pointer_bytes[(kind, oa.o8(OBJ_TYPE))][off]
+                if a == oa.o32(p) >> 8 * n & 0xFF and b == ob.o32(p) >> 8 * n & 0xFF:
+                    a = b
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
                 na, nb = canon.nid(5, oa.o16(OBJ_NAME_ID)), ob.o16(OBJ_NAME_ID)
                 if mm and fa.fr.get('player'):   # (his NameID by his form, BN5's read as BN6 writes it in that form)
@@ -701,24 +823,30 @@ def ai_cells(fa, fb, oa, ob):
         return out
     megaman = oa.kind == 'T1' and fa.canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
     ai5 = soul_ai_read(fa.canon, oa.ai) if megaman else oa.ai
-    if oa.kind == 'T1' and not megaman and u16(ai5, DISPATCH_COPY) == 0:
+    dark = oa.kind == 'T1' and oa.o16(OBJ_NAME_ID) == DARK_SOUL_5
+    if dark:
+        ai5 = dark_chips(ai5, DARK_CHIP_AT)
+    if oa.kind == 'T1' and not megaman and not fa.canon.is_navi(5, oa.o16(OBJ_NAME_ID)) and u16(ai5, DISPATCH_COPY) == 0:
         # (BN6's virus dispatcher writes the object's +0x3E into its AI's data +0x3C after its state each frame, but while it
         # is bubbled, BN6 0x0810A362-0x0810A36C; BN5's, 0x08104550-0x081045CA, writes none: BN5's record read as BN6's
-        # writes it, where BN5's own code wrote nothing there: legit.json, maps, dispatch_copy)
+        # writes it, where BN5's own code wrote nothing there: legit.json, maps, dispatch_copy. A Navi's dispatcher is
+        # another, which writes none)
         ai5 = bytes(ai5[:DISPATCH_COPY]) + bytes(oa.rec[NODE + 0x3E:NODE + 0x40]) + bytes(ai5[DISPATCH_COPY + 2:])
-    # (an effect id its code keeps for the engine's teleport, legit.json's maps, effect_bytes: read as BN6's, and its word
-    # compared as bytes, never as a pointer, which a pair of such bytes beside two others can look like)
-    if fa.canon.chip_places.get('ai'):
-        # (the chip ids its AttackVars keep, legit.json's maps, chip_id, places: BN5's read as BN6's)
+    if fa.canon.chip_places.get('ai') and not dark:
+        # (the chip ids its AttackVars keep, legit.json's maps, chip_id, places: BN5's read as BN6's; the Dark Soul's by its
+        # chip AI's own reading, dark_chips)
         ai5 = bytearray(ai5)
         for off in fa.canon.chip_places['ai']:
             struct.pack_into('<H', ai5, off, fa.canon.chip(5, u16(ai5, off)))
         ai5 = bytes(ai5)
+    # (an effect id its code keeps for the engine's teleport, legit.json's maps, effect_bytes: read as BN6's, and its word
+    # compared as bytes, never as a pointer, which a pair of such bytes beside two others can look like)
     fx_bytes = [k for k in fa.canon.effect_bytes if ai5[k] != ob.ai[k] and fa.canon.fx(5, ai5[k]) == ob.ai[k]]
     if fx_bytes:
         ai5 = bytearray(ai5)
         for k in fx_bytes:
             ai5[k] = ob.ai[k]
+    pointer_bytes = fa.canon.pointer_bytes.get(oa.o16(OBJ_NAME_ID), {}) if oa.kind == 'T1' and oa.o8(OBJ_TYPE) == 0 else {}
     for w in range(0, AI_SIZE, 4):
         wa, wb = u32(ai5, w), u32(ob.ai, w)
         view = None if any(w <= k < w + 4 for k in fa.canon.effect_bytes) else word_view(fa, fb, wa, wb, None)
@@ -729,9 +857,13 @@ def ai_cells(fa, fb, oa, ob):
         for k in range(4):
             a, b = ai5[w + k], ob.ai[w + k]
             if w + k == AI_INDEX:
-                a = fa.canon.ai_index.get(a, a)
+                a = (fa.canon.navi_ai_index if fa.canon.is_navi(5, oa.o16(OBJ_NAME_ID)) else fa.canon.ai_index).get(a, a)
             elif megaman and w + k in LOADOUT and a != 0xFF:
                 a = fa.canon.power_attack.get(a, a)
+            elif w + k in pointer_bytes:
+                p, n = pointer_bytes[w + k]
+                if a == u32(ai5, p) >> 8 * n & 0xFF and b == u32(ob.ai, p) >> 8 * n & 0xFF:
+                    a = b
             if a != b:
                 out.append(('ai', w + k, a, b))
     return out
@@ -753,16 +885,54 @@ def bn5_rules(layout, ca):
     return parts, out
 
 
+def sea_apart(canon, raw5):
+    """BN5's collision data with its sea's submerge read as BN6's engine keeps it (legit.json, layouts, sea): apart, its
+    timer, flag and marker out of the record; (the record so, whether under, the marker)"""
+    rule = canon.layouts.get('sea')
+    if not rule:
+        return raw5, False, 0
+    b = bytearray(raw5)
+    timer, flag, marker = (int(rule['bn5'][k], 0) for k in ('timer', 'flag', 'marker'))
+    under = bool(u32(b, int(rule['bn5']['flags'], 0)) & flag)
+    if u16(b, timer) == 0xFFFF:
+        b[timer:timer + 2] = b'\0\0'
+    off = int(rule['bn5']['flags'], 0)
+    b[off:off + 4] = (u32(b, off) & ~flag & 0xFFFFFFFF).to_bytes(4, 'little')
+    at = u32(b, marker)
+    b[marker:marker + 4] = b'\0\0\0\0'
+    return bytes(b), under, at
+
+
+def sea_cells(fa, fb, under5, marker5, cb):
+    """the submerge each game keeps of an object: BN5's in its collision data (sea_apart), BN6's apart (its frame's apart
+    bytes, RAM_SEA: the mask of collision data's bits, then each one's marker by its bit's index)"""
+    rule, apart = fa.canon.layouts.get('sea'), fb.fr.get('apart')
+    if not rule or not apart:
+        return []
+    bit = u32(cb, int(rule['bn6']['index_bit'], 0))
+    if not bit or bit & (bit - 1):
+        return []
+    under6 = bool(u32(apart, int(rule['bn6']['mask'], 0)) & bit)
+    marker6 = u32(apart, int(rule['bn6']['markers'], 0) + 4 * (bit.bit_length() - 1))
+    out = [('sea', 0, under5, under6)] if under5 != under6 else []
+    va, vb = (fa.ptr(marker5) if marker5 else None), (fb.ptr(marker6) if marker6 else None)
+    if va != vb:
+        out.append(('sea', 4, va, vb))
+    return out
+
+
 def coll_cells(fa, fb, oa, ob):
     """the collision data through each game's layout (legit.json): a byte BN5 places where BN6 has it (its
-    alliance words read as BN6's), BN5's own parts of a word by their rule, the rest of each zero in both or a
-    difference"""
+    alliance words read as BN6's), BN5's own parts of a word by their rule, its sea's submerge as BN6's engine keeps
+    it (apart: sea_cells), the rest of each zero in both or a difference"""
     out = []
     if (oa.coll is None) != (ob.coll is None):
         return [('coll', 0, oa.coll is not None, ob.coll is not None)]
     if oa.coll is None:
         return out
-    canon, raw5, cb = fa.canon, oa.coll, ob.coll
+    canon, cb = fa.canon, ob.coll
+    raw5, under5, marker5 = sea_apart(canon, oa.coll)
+    out += sea_cells(fa, fb, under5, marker5, cb)
     ca = alliance_words(canon, raw5)
     layout, seen6 = canon.layouts['collision'], set()
     flags = {int(x, 0) for x in layout['flag_words']}
@@ -928,6 +1098,98 @@ def player_cells(fa, fb):
     return out
 
 
+# What BN6's engine keeps apart beside the objects (src/dev/xdiff.c, the apart block): the sea's room (sea_cells), then the
+# chip AI's lists, BN5_DARK_LIST_SIZE a side, then the Navis' own state (Colonel's sides' bits, BN5's from BattleState +0x5C),
+# then the Dark Soul's AI data past BN6's 0x100 (its chip AI's state, BN6's in BN6_DARK_AI)
+APART_SEA, DARK_LIST, APART_NAVIS, APART_DARK = 0x90, 0xE0, 0x10, 0x40
+COLONEL_SIDES = 4   # (the Navis' own state's word both games hold: Colonel's sides' bits; the Dark Soul's AI data's holder BN6's alone)
+DARK_CHIPS, DARK_SEQUENCES, DARK_SEQ = 0x2A, 0x58, 16
+DARK_SOUL_5 = 0x18D   # (BN5_DARK_SOUL_ID: the chip AI's lists compared while it is in play, which alone reads them)
+# the Dark Soul's AI data's chip ids (u16, BN5's chips as BN6's ids): its attack's (AttackVars +0x14, 0x0802C0A0), its chip
+# AI's chip under way (+0xF0 +0x24) and its approach's (+0x130 +4)
+DARK_CHIP_AT = (0xB4,)
+DARK_CHIP_APART = (0x114 - AI_SIZE, 0x134 - AI_SIZE)
+REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src', 'core', 'xchips_registry.c')
+_registry = None
+
+
+def bn6_chip(v):
+    """a chip AI list's entry of BN5's as BN6's (src/emu/xnavi_dark.c): 0xFFFF and a sequence's number as they are, a chip
+    BN6's id for it by the chip registry (src/core/xchips_registry.c's rows), 0xFFFF where it holds none"""
+    global _registry
+    if _registry is None:
+        rows = re.findall(r'^\t\{\s*(\d+),\s*(\d+),', open(REGISTRY, encoding='utf-8').read(), re.M)
+        _registry = {int(a): int(b) for a, b in rows}
+    if v == 0xFFFF or v & 0x8000:
+        return v
+    return _registry.get(v, 0xFFFF)
+
+
+def dark_chip(v):
+    """a chip id the Dark Soul's AI data holds, BN5's as BN6's (0 none, as it is)"""
+    return v if v == 0 else bn6_chip(v)
+
+
+def dark_chips(raw5, spots):
+    """BN5's bytes with the chip ids at `spots` (u16 each) BN6's"""
+    b = bytearray(raw5)
+    for at in spots:
+        b[at:at + 2] = dark_chip(u16(b, at)).to_bytes(2, 'little')
+    return bytes(b)
+
+
+def dark_lists(raw5):
+    """BN5's chip AI lists with their chips as BN6's ids"""
+    b = bytearray(raw5)
+    for side in range(0, len(b) - DARK_LIST + 1, DARK_LIST):
+        spots = [side + 2 * k for k in range(DARK_CHIPS)]
+        spots += [side + DARK_SEQUENCES + DARK_SEQ * q + 2 + 2 * k for q in range(8) for k in range(7)]
+        for at in spots:
+            b[at:at + 2] = bn6_chip(u16(b, at)).to_bytes(2, 'little')
+    return bytes(b)
+
+
+def no_chips(lst):
+    """a side's list that names no chip: each entry none (BN5's 0xFFFF, BN6's zeroed 0), as the chip AI reads them"""
+    return all(u16(lst, 2 * k) in (0, 0xFFFF) for k in range(DARK_CHIPS))
+
+
+def apart_cells(fa, fb, t):
+    """the chip AI's lists while BN5's Dark Soul is in play (BN5's chips read as BN6's ids; a side naming no chip in both
+    alike, BN5's 0xFFFF and BN6's 0 the same none) and the Navis' own state (Colonel's sides' bits), each byte the same in
+    both, or a difference (role 'battle')"""
+    pa, pb = fa.fr.get('apart', b''), fb.fr.get('apart', b'')
+    end = APART_SEA + 2 * DARK_LIST + APART_NAVIS
+    if len(pa) < end + APART_DARK or len(pb) < end + APART_DARK:
+        return []
+    out = []
+    if any(o.kind == 'T1' and o.o16(OBJ_NAME_ID) == DARK_SOUL_5 for o in fa.fr['objs']):
+        # (word by word: one that points into EWRAM, its target object as each game names it, as the AI data's are read)
+        da, db = dark_chips(pa[end:end + APART_DARK], DARK_CHIP_APART), pb[end:end + APART_DARK]
+        for k in range(0, APART_DARK, 4):
+            wa, wb = u32(da, k), u32(db, k)
+            va, vb = (fa.ptr(wa), fb.ptr(wb)) if is_ptr(wa) and is_ptr(wb) else (wa, wb)
+            if va != vb:
+                out.append(Diff(t, 'battle', 'the Dark Soul\'s AI data past 0x100', k, va, vb))
+        la, lb = dark_lists(pa[APART_SEA:APART_SEA + 2 * DARK_LIST]), pb[APART_SEA:APART_SEA + 2 * DARK_LIST]
+        for side in range(0, 2 * DARK_LIST, DARK_LIST):
+            sa, sb = la[side:side + DARK_LIST], lb[side:side + DARK_LIST]
+            if no_chips(sa) and no_chips(sb):
+                continue
+            out += [Diff(t, 'battle', 'chip AI lists', side + k, sa[k], sb[k]) for k in range(DARK_LIST) if sa[k] != sb[k]]
+    na, nb = pa[APART_SEA + 2 * DARK_LIST:][:COLONEL_SIDES], pb[APART_SEA + 2 * DARK_LIST:][:COLONEL_SIDES]   # (the rest BN6's own)
+    out += [Diff(t, 'battle', 'the Navis\' state', k, na[k], nb[k]) for k in range(len(na)) if na[k] != nb[k]]
+    return out
+
+
+def requested(f):
+    """the songs asked for (its sound events, BN6's own or a copy's number as BN5's) in this record and the one before,
+    whose songs this record's begun ones may be"""
+    frames = f.trace['frames']
+    k = next((i for i, fr in enumerate(frames) if fr is f.fr), 0)
+    return {e.a & 0xFFFF for fr in frames[max(0, k - 1):k + 1] for e in fr['events'] if e.kind == SOUND}
+
+
 def frame_diffs(fa, fb):
     t, out = fa.fr['t'], []
     ra = {o.role: o for o in fa.fr['objs']}
@@ -945,8 +1207,12 @@ def frame_diffs(fa, fb):
         out += [Diff(t, role, part, off, a, b) for part, off, a, b in cells]
     if fa.fr['rng'] != fb.fr['rng']:
         out.append(Diff(t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']))
-    # (a song by its number: the music player it plays on is its song table entry's, each game's own: legit.json, maps)
-    sa, sb = sorted(fa.canon.snd(fa.game, s) for _, s in fa.fr['sounds']), sorted(fb.canon.snd(fb.game, s) for _, s in fb.fr['sounds'])
+    # (a song by its number: the music player it plays on is its song table entry's, each game's own: legit.json, maps; one
+    # each game plays on another player, asked for in both, begun or not as its own player there is free: maps, sound; a
+    # family's sound BN6 has under another number by that number, canon.snd)
+    apart = requested(fa) & requested(fb) & fa.canon.players_apart
+    sa = sorted(fa.canon.snd(fa.game, s) for _, s in fa.fr['sounds'] if s not in apart)
+    sb = sorted(fb.canon.snd(fb.game, s) for _, s in fb.fr['sounds'] if s not in apart)
     if sa != sb:
         out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
     # (the order the objects run in, of those in play in both: one in play in one alone is its own difference)
@@ -957,6 +1223,7 @@ def frame_diffs(fa, fb):
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
     out += panel_cells(fa, fb, t)
     out += player_cells(fa, fb)
+    out += apart_cells(fa, fb, t)
     mm = [next((o.ai for o in f.fr['objs'] if o.kind == 'T1' and f.canon.is_megaman(f.game, o.o16(OBJ_NAME_ID))), None) for f in (fa, fb)]
     if fb.fr.get('player') and len(fb.fr['player']) >= PLAYER_UNITE:
         out += soul_cells(fa, fb, mm[0], mm[1])

@@ -39,10 +39,12 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
            raising its count (0x02000071) and writing its AI index (1) to
            the rare path's byte, so that neither check holds by default
   native   BN6's own Mettaur fought by xcontrol.py's fight keys, CanGard
-           not installed (--dev nofamilies) and installed: the same frame
-           for frame, every byte, but a pointer into what the install moved
-           (BN6's tables grown among it) and the code in IWRAM the lava's
-           and the sea's install keeps patched (src/emu/xpanels.c)
+           and BN5's Navis not installed (--dev nofamilies,nonavis) and
+           installed: the same frame for frame, every byte, but a pointer
+           into what the install moved (BN6's tables grown among it) and
+           the code in IWRAM the lava's and the sea's install keeps patched
+           (src/emu/xpanels.c, and the hit gate's tests of a hidden target,
+           src/emu/xsea.c)
 
 Needs both ROMs (local only). Exits 0 when every check holds.
 """
@@ -315,9 +317,9 @@ def delete(c, a):
 def native(c, a):
     keys = X.fight()
     (ma, fa, la), (mb, fb, lb) = (run('native', name, '01@52', keys, 4800, dev) for name, dev in
-                                  (('alone', 'nofamilies,hp=1000'), ('installed', 'hp=1000')))
-    c(not any(l.startswith('xvirus') for l in la) and any(l.startswith('xvirus') for l in lb),
-      'CanGard installed in the second run alone')
+                                  (('alone', 'nofamilies,nonavis,hp=1000'), ('installed', 'hp=1000')))
+    c(not any(l.startswith(('xvirus', 'xnavi:')) for l in la) and any(l.startswith('xvirus') for l in lb),
+      'CanGard installed in the second run alone (and BN5\'s Navis, docs/MULTIROM.md, Transplanted Navis)')
     explained, bad = X.compare(fa, fb, ma, mb, False)
     for reason, where in sorted(explained.items()):
         print(f'  {reason}: {len(where)} bytes ({" ".join(f"{x:08x}" for x in sorted(where)[:8])})')

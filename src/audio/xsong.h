@@ -23,6 +23,21 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
  * order, so each has the same place in every session; again where the
  * core's ROM copy was made anew. */
 int xsong_install(int xrom, int song, int fallback);
+/* A sound of extra ROM `xrom` (a song its battles start, issue #82's tracks)
+ * in BN6, played by the players its game names for it (BN6's 32 are
+ * BN5's): the BN6 song id that plays it, its slot of its own (BN5's sounds
+ * that are no BN6 song, each at a fixed slot whichever track plays it),
+ * copied there by the first install that needs it, after the areas' songs
+ * and their games' themes; `fallback` where it has no slot or cannot be. */
+int xsong_install_sound(int xrom, int song, int fallback);
+/* The slot a sound of extra ROM `xrom` that is no BN6 song takes (BN6's
+ * song of its number another), -1 for any other: what the differential
+ * tells BN6's own song of that number from the copy by. */
+int xsong_sound_slot(int xrom, int song);
+/* The song a BN6 slot plays a copy of: its number in its own game (the
+ * game in *xrom where not NULL), -1 for a slot of BN6's own. For a reader
+ * comparing the two games' sounds (the differential). */
+int xsong_copy_of(int slot, int *xrom);
 
 /* Song `song` of extra ROM `xrom` laid out in `out` (`room` bytes, zeroed
  * first) as it would stand from bus address `at` (word-aligned): its
@@ -32,5 +47,10 @@ int xsong_install(int xrom, int song, int fallback);
  * is written into the core, and the songs xsong_install copies are left as
  * they are. */
 uint32_t xsong_pack(int xrom, int song, uint32_t at, uint8_t *out, uint32_t room);
+/* A sound of extra ROM `xrom` another installer copied into its fixed slot
+ * itself (a moved family's, packed with xsong_pack into its own room) noted
+ * there, as xsong_install_sound would have: the other tracks' installs find
+ * it, and xsong_copy_of names it. False where `slot` is not the sound's. */
+bool xsong_found(int xrom, int song, int slot);
 
 #endif

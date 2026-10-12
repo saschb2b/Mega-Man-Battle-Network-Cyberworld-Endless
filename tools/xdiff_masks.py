@@ -3,13 +3,17 @@ each role attributed from both traces (the family's, MegaMan's, a native's, the 
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
 from xdiff_snap import (NODE, SIZE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
-                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16)
+                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16, u32)
 from xdiff_events import engine_chose, engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+STEP_FAMILY = 0x10   # the step's attack family, the same in both: not a chip's
 # the engine's spark spawner in each game (BN5 0x080E09B4, BN6_SPAWN_SPARK: the same 24 bytes but the allocator's call),
 # which object_spawnCollisionEffect (BN5 0x08016C04, BN6 0x0801A0D4) calls where an attack struck: its spawn's caller
+# (the allocator's return, BN5 0x080E09BF, BN6 0x080E1C0B). A spark spawned there is the hit's, its kind and place the
+# attack's, its look each game's own (BN6's init runs its sprite a step on, 0x080E1BD0 bl 0x080026C4, which BN5's
+# 0x080E0988 does not)
 SPARK_SPAWNER = {5: (0x080E09B4, 0x18), 6: (0x080E1C00, 0x18)}
 
 
@@ -36,6 +40,17 @@ def spark_spawned(trace, role):
     return e is not None and at <= e.caller & ~1 < at + size
 
 
+def chip_running(f, role, canon):
+    """the object of this role (the family's: a moved Navi) runs a chip as it spawns (its CurAction a family of BN6's
+    numbers, not the step's and none moved: the chip's family from BN6's record, src/emu/xnavi_bn5.c's CURACTIONS), the
+    spawn made by that family's code, no family's on the stack (spawned_by)"""
+    o = f.by_role.get(role)
+    if o is None or o.kind != 'T1' or not o.o16(OBJ_NAME_ID):
+        return False
+    a = canon.action(f.game, False, o.o8(OBJ_ACTION))
+    return a > STEP_FAMILY and a not in canon.attack_families.values()
+
+
 def whose(f, role, canon, known, depth=0):
     """'megaman' (his object), "megaman's" (what he owns: an object whose +0x4C names his or one of his, or an
     attack of his side with no object over it: his buster's shots), 'native' (an enemy both games have, each
@@ -43,14 +58,15 @@ def whose(f, role, canon, known, depth=0):
     that no object owns), 'engine' (an attack or effect no object owns, of a type the family's code does not
     spawn), 'panels' (the engine's spark over an actor, which BN5's lava spawns as it cools under it, and BN6's as
     src/emu/xpanels.c brings lava in: the code under test as the family's is, its presentation each game's own),
-    'spark' (the engine's spark where the family's attack struck: spawned by the engine's spark spawner, which
-    object_spawnCollisionEffect calls with the attack's hit effect, run by the engine's own code, the fourth kind's
-    type 4 the install never moves, and drawn from each game's own sprite: its kind, place and owner the family's,
-    compared, its sprite each game's), 'effect' (an effect object, the fourth kind's type 0, the engine's code gave its
-    id where the family's attack acted: a routine of its game's BN6 runs as its twin, the same bytes, called the effect
-    spawner; its id, place and owner compared, its sprite each game's), or None (the family's: its enemy, what it owns,
-    its attacks and the effects its own code gives). An object owned by another is its owner's, as the owner's own first
-    frame had it (known)."""
+    'spark' (the engine's spark where an attack struck: spawned by the engine's spark spawner, which
+    object_spawnCollisionEffect calls with the attack's hit effect or element, run by the engine's own code, the fourth
+    kind's type 4 the install never moves, and drawn from each game's own sprite: its kind, place and owner the
+    attack's, compared, its look each game's), 'effect' (an effect object, the fourth kind's type 0, the engine's code
+    gave its id where the family's attack acted: a routine of its game's BN6 runs as its twin, the same bytes, called
+    the effect spawner; its id, place and owner compared, its sprite each game's), "chip's" (what a chip the family's
+    Navi uses spawns, BN6's chip family by BN6's record: its look each game's own, as MegaMan's chips', the rest
+    compared: chip_running), or None (the family's: its enemy, what it owns, its attacks and the effects its own code
+    gives). An object owned by another is its owner's, as the owner's own first frame had it (known)."""
     w, o = whose_of(f, role, canon, known, depth), f.by_role.get(role)
     if w is None and o is not None and o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spark_spawned(f.trace, role):
         return 'spark'
@@ -60,7 +76,7 @@ def whose(f, role, canon, known, depth=0):
 
 
 def whose_of(f, role, canon, known, depth):
-    """whose() but for the engine's spark the family's attack struck with"""
+    """whose() but for the engine's spark where an attack struck and the engine's effect for the family's attack"""
     if role_name(role).startswith(tuple(f'T1:{v:#x}#' for v in canon.megaman.values())):
         return 'megaman'
     if role[0] == 'T1' and role[1] in canon.natives:
@@ -79,12 +95,18 @@ def whose_of(f, role, canon, known, depth):
     # lava would make it his)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and len(p) == 3 and p[1] == 'obj' and p[0].startswith('T1:'):
         return 'panels'
+    # (the spark of a hit spawned by the engine's object_spawnCollisionEffect as any attack struck, an element's among them:
+    # its look each game's own, the rest of it the attack's: whose() names it the spark, legit.json's masks)
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spark_spawned(f.trace, role):
+        return None
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
     by = spawned_by(f.trace, role)
     if by == 'family':
         return None
     if by is not None and by != role:
         w = known[by] if by in known else whose(f, by, canon, known, depth + 1)
+        if w is None and chip_running(f, by, canon):
+            return "chip's"
         return {'megaman': "megaman's", 'native': "native's"}.get(w, w)
     if len(p) == 3 and p[1] in ('obj', 'ai'):
         up = next((x.role for x in f.fr['objs'] if role_name(x.role) == p[0]), None)
@@ -170,6 +192,8 @@ def places(o):
 
 NO_PALETTE = 15     # the palette slot the renderer leaves where it takes none
 NO_PLACE = 0x7FFF   # a family object's tile place before the renderer first draws it (none)
+CACHE = 0x24        # a sprite state's frame copied for its place (0: none, the renderer passed it over)
+SHARED = 0x4000     # a family object's tile place where BN5's renderer shares it with another's of the same sprite
 
 
 def renderer_ranks(fa, fb, last):
@@ -177,16 +201,25 @@ def renderer_ranks(fa, fb, last):
     object it draws its tile place and palette slot in the order it draws, from running counts over everything drawn
     before it, so a family object drawn this frame has each read as its rank among those the family's objects drawn
     take, in the order they ran (two sharing one, as a frame or palette already loaded, share its rank; slot 15, none
-    taken, stays). One not
-    drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one whose
-    place moved undrawn keeps its place as it is, marked (0x8000) so it never equals a rank; one never drawn has no place
-    the renderer gave it (what its sprite state holds is its slot's last occupant's or its set-up's): none in both
-    (NO_PLACE, NO_PALETTE). Drawn is the renderer's own test: the object shown (its +0x00 bit 0x02) and its sprite's state
-    shown (its +0x03 bit 0x02, BN5 0x081C7F9A-0x081C7FA6 / BN6 0x081D6532-0x081D653E), as an object can hide its sprite
-    alone."""
+    taken, stays). One not drawn keeps the place it was last drawn at, and the rank it had there (last: each game's
+    role's last); one whose place moved undrawn keeps its place as it is, marked (0x8000) so it never equals a rank; one
+    never drawn has no place the renderer gave it (what its sprite state holds is its slot's last occupant's or its
+    set-up's): none in both (NO_PLACE, NO_PALETTE). Drawn is the renderer's own test: the object shown (its +0x00 bit
+    0x02), its sprite's state shown (its +0x03 bit 0x02, BN5 0x081C7F9A-0x081C7FA6 / BN6 0x081D6532-0x081D653E), as an
+    object can hide its sprite alone, and its frame copied or kept this frame (its cache set: the renderer clears an
+    undrawn sprite's cache, BN6 0x081D653A-0x081D6544, an object visible yet passed over, NumberMan's companion, among
+    them). A family object whose place in BN5 is one an object not the family's draws this frame (the same frame or
+    palette, which the renderer keeps where it is: BN5's MegaMan's own art, the Dark Soul's buster's arm and muzzle,
+    3:0x03 and 3:0x06, which BN6's MegaMan draws from its own) shares it there: that place not ranked in either game,
+    read as SHARED (a palette slot as NO_PALETTE) in both."""
+    others = [o for o in fa.fr['objs'] if whose_role(o.role, fa, fb) != 'family' and o.o8(0) & 2]
+    shared = []
+    for k in (0, 1):
+        held = {places(o)[k] for o in others} - ({NO_PALETTE} if k else set())
+        shared.append({o.role for o in fa.fr['objs'] if whose_role(o.role, fa, fb) == 'family' and places(o)[k] in held})
     for f in (fa, fb):
         fam = [o for o in f.fr['objs'] if whose_role(o.role, fa, fb) == 'family']
-        drawn = [o for o in fam if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2]
+        drawn = [o for o in fam if o.o8(0) & 2 and o.rec[SPRITE[o.kind] + NODE + 3] & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
         # (in the order the objects ran, the same in both games: each place or slot ranked by the first of the family's to
         # take it, so one given again to a family object, as a frame or palette already loaded by another drawn before it,
         # shares that one's rank, whatever else of each game's own drew between them)
@@ -199,10 +232,18 @@ def renderer_ranks(fa, fb, last):
         for k in (0, 1):
             taken = []
             for o in drawn:
-                if places(o)[k] not in taken and not (k and places(o)[k] == NO_PALETTE):
+                if o.role not in shared[k] and places(o)[k] not in taken and not (k and places(o)[k] == NO_PALETTE):
                     taken.append(places(o)[k])
             for o in fam:
                 raw, key, rank = places(o)[k], (f.game, o.role, k), None
+                sp = SPRITE[o.kind] + NODE
+                if o.role in shared[k]:
+                    if k:
+                        o.over[sp + 0x15] = NO_PALETTE << 4 | o.rec[sp + 0x15] & 0xF
+                    else:
+                        o.over[sp + 8], o.over[sp + 9] = SHARED & 0xFF, SHARED >> 8
+                    last.pop(key, None)
+                    continue
                 if k and raw == NO_PALETTE:
                     continue
                 if o in drawn:
@@ -212,7 +253,6 @@ def renderer_ranks(fa, fb, last):
                     rank = last[key][1]
                 elif key not in last:
                     raw = NO_PALETTE if k else NO_PLACE
-                sp = SPRITE[o.kind] + NODE
                 if k:
                     o.over[sp + 0x15] = (rank if rank is not None else raw) << 4 | o.rec[sp + 0x15] & 0xF
                 else:
@@ -325,7 +365,14 @@ def held_clock(d, fa, fb):
     return all(stepped(d.a[w], d.b[w], n.get((6, w, True), 0) - n.get((5, w, True), 0)) for w in (0, 1))
 
 
+def in_both(d, fa, fb):
+    """the difference's object is one both games had in play at some frame (its role in both traces): an end a frame apart,
+    not an object one game alone spawned (an effect of another id: its role another)"""
+    return isinstance(d.role, tuple) and all(d.role in f.trace.get('whose', {}) for f in (fa, fb))
+
+
 WHEN = {
+    'in both': lambda d, fa, fb, prev: in_both(d, fa, fb),
     'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
     'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),
     'chaos unites': lambda d, fa, fb, prev: unites_now(fa, fb, True),

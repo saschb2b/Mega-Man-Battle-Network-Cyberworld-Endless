@@ -7,6 +7,7 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "rom.h"
+#include "xnavi_recipe.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_shim.h"
 
@@ -48,6 +49,8 @@ static bool no(char *why, size_t n, const char *fmt, ...) {
 }
 
 static bool bn6_routine(uint32_t a) { return (a & 1) && a >= BUS && a < BN6_END; }
+/* a routine of BN5's engine objects moved once for every track, at its copy (xnavi_objects.h, installed before any family) */
+static bool objects_routine(uint32_t a) { return (a & 1) && a >= XN_OBJECTS && a < XN_OBJECTS_END; }
 
 /* a state or a hook: a routine of BN6's, or code of the family's own (in its blocks, or in one of its clones) */
 static bool ref_ok(const XVirusFamily *f, XvRef r) {
@@ -136,9 +139,10 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		if (xvirus_is_code(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
-		/* (one of BN6's routines, or the second-level dispatch's spawner where it calls one of its game's: never another) */
+		/* (one of BN6's routines or of the moved objects', or the second-level dispatch's spawner where it calls one of its
+		 * game's: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
-		if ((c->to & 1) || (spawner ? c->to != spawner : !bn6_routine(c->to | 1)))
+		if ((c->to & 1) || (spawner ? c->to != spawner : !bn6_routine(c->to | 1) && !objects_routine(c->to | 1)))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
 			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);

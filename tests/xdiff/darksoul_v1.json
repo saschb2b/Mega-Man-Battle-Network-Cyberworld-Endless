@@ -1,0 +1,11 @@
+{
+ "about": "the Dark Soul (BN5's 0x18D, BN6's 0x1DC: BN5's chip AI, its approach and the Navis' buster moved with it) spawned at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): its chip AI with MegaMan's side's list as BN5's battle makes it from the save's record (none here: no chips), so it moves (the step, family 0x10) and fires the Navis' buster (BN5's family 0x16, BN6's 0x66: its arm, kind 0x23, its muzzle, kind 0xD, its shot, sound 0x6A) twice a turn, until its 720 frames run out and it leaves",
+ "kind": "differential",
+ "foes": "18D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "safe": 1,
+ "rng": "replay"
+}

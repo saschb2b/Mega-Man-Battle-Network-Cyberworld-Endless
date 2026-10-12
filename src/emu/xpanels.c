@@ -26,6 +26,7 @@
 
 /* BN5's rules (bn5.h's routines; docs/ROM_DATA.md) */
 #define ELEMENT_FIRE   1           /* BN6_COLL_ELEMENT: Fire */
+#define ELEMENT_ELEC   3           /* ... Elec */
 #define LAVA_DAMAGE    50u         /* BN5_LAVA_STEP: movs r1,#0x32, shifted by the weakness to Fire */
 #define LAVA_HIT_BITS  3           /* ... ORed into the hit's bits */
 #define FLAGS_SPARED_1 0x20u       /* ... the object's flags (BN6_COLL_FLAGS) that spare it: these before the panel is read, */
@@ -39,6 +40,8 @@
 #define FLAGS_IMAGE   (BN6_IWRAM_IMAGE + (BN6_PANEL_FLAGS_REF - BN6_IWRAM_CODE))
 #define COOL_IMAGE    (BN6_IWRAM_IMAGE + (BN6_PANEL_HIT_COOL - BN6_IWRAM_CODE))
 #define COOL_CRC      0xB21608DAu
+#define BONUS_IMAGE   (BN6_IWRAM_IMAGE + (BN6_PANEL_BONUS_TESTS - BN6_IWRAM_CODE))
+#define BONUS_CRC     0xA63E1015u
 
 static bool ready;
 bool xpanels_ready(void) { return ready; }
@@ -226,6 +229,31 @@ static bool cool_make(uint8_t out[BN6_HIT_COOL_SPAN]) {
 	return thumb_bl_write(out, 0x10, BN6_PANEL_HIT_COOL, BN6_SET_PANEL_TYPE_IW);
 }
 
+/* ---- an Elec hit on sea counts twice (BN5_PANEL_BONUS) ----
+ * BN6's tests in BN6_PANEL_BONUS made again in their bytes with BN5's
+ * second, the sea's: Fire falls to the grass test as BN6's did, Elec to
+ * the same test with the panel's type less the sea's distance from grass
+ * (a type below the sea's wraps past every type), the rest out. Fire
+ * takes a branch where BN6's did not (two cycles more), the rest one
+ * cycle less. */
+_Static_assert(XPANEL_SEA > BN6_PANEL_GRASS, "the sea's test reads its type as grass's");
+static void bonus_make(uint8_t out[BN6_PANEL_BONUS_SPAN]) {
+	const uint16_t code[BN6_PANEL_BONUS_SPAN / 2] = {
+		imm(THUMB_CMP, 1, 0, ELEMENT_FIRE),        /* +00 cmp r1,#1: r1 the attack's element */
+		0xD002,                                    /* +02 beq grass (+0A) */
+		imm(THUMB_CMP, 1, 0, ELEMENT_ELEC),        /* +04 cmp r1,#3 */
+		0xD104,                                    /* +06 bne out (+12) */
+		imm(THUMB_SUBS, 0, 0, XPANEL_SEA - BN6_PANEL_GRASS), /* +08 subs r0,#8: r0 the panel's type, the sea's as grass's */
+		imm(THUMB_CMP, 0, 0, BN6_PANEL_GRASS),     /* +0A grass: cmp r0,#6 */
+		0xD101,                                    /* +0C bne out (+12) */
+		imm(THUMB_LDRH, 0, 4, BN6_COLL_DAMAGE),    /* +0E ldrh r0,[r4,#0x2e]: the attack's damage, once more */
+		0xBD10,                                    /* +10 pop {r4,pc} */
+		imm(THUMB_MOVS, 0, 0, 0),                  /* +12 out: movs r0,#0 */
+		0xBD10,                                    /* +14 pop {r4,pc} */
+	};
+	for (int i = 0; i < BN6_PANEL_BONUS_SPAN / 2; ++i) put16(out + 2 * i, code[i]);
+}
+
 /* ---- the install ---- */
 
 typedef struct {
@@ -294,17 +322,27 @@ static bool hooks_set(void) {
 	return false;
 }
 
+/* an IWRAM routine's bytes in its image, BN6's own (their CRC32) in the ROM and the core's copy: into `was` */
+static bool image_own(uint32_t image, uint8_t *was, uint32_t len, uint32_t crc) {
+	memcpy(was, R.data + (image - BUS), len);
+	bool own = xvirus_crc32(was, len) == crc;
+	for (uint32_t k = 0; own && k < len; ++k) own = emu_read8(image + k) == was[k];
+	return own;
+}
+
 void xpanels_install(int xrom) {
 	static bool done;
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;
 	uint8_t flags[16 * 4], stub[STUB_SIZE], cool[BN6_HIT_COOL_SPAN], cool_was[BN6_HIT_COOL_SPAN], ref_was[4];
-	memcpy(cool_was, R.data + (COOL_IMAGE - BUS), sizeof cool_was);
+	uint8_t bonus[BN6_PANEL_BONUS_SPAN], bonus_was[BN6_PANEL_BONUS_SPAN];
 	put32(ref_was, BN6_PANEL_FLAGS_IW);
-	bool cool_own = xvirus_crc32(cool_was, sizeof cool_was) == COOL_CRC;
-	for (uint32_t k = 0; cool_own && k < sizeof cool_was; ++k) cool_own = emu_read8(COOL_IMAGE + k) == cool_was[k];
+	bool cool_own = image_own(COOL_IMAGE, cool_was, sizeof cool_was, COOL_CRC);
+	bool bonus_own = image_own(BONUS_IMAGE, bonus_was, sizeof bonus_was, BONUS_CRC);
+	bonus_make(bonus);
 	const char *why = !sites_ok() ? "a hook's site" : !flags_make(flags) ? "the flags' literal" : !cool_own ? "the element hit's tests"
-		: !free_at(XP_AT, XP_END) ? "its free space" : !stub_make(stub) || !cool_make(cool) ? "its code" : !xpanels_look_stage() ? "their look" : NULL;
+		: !bonus_own ? "the panel bonus's tests" : !free_at(XP_AT, XP_END) ? "its free space" : !stub_make(stub) || !cool_make(cool) ? "its code"
+		: !xpanels_look_stage() ? "their look" : NULL;
 	if (why) {
 		fprintf(stderr, "xpanels: BN5's lava and sea not in BN6's engine: %s is not as expected\n", why);
 		return;
@@ -316,6 +354,7 @@ void xpanels_install(int xrom) {
 	put32(ref_now, XP_FLAGS);
 	iwram_patch(BN6_PANEL_FLAGS_REF, ref_was, ref_now, sizeof ref_now);
 	iwram_patch(BN6_PANEL_HIT_COOL, cool_was, cool, sizeof cool);
+	iwram_patch(BN6_PANEL_BONUS_TESTS, bonus_was, bonus, sizeof bonus);
 	xpanels_look_write();
 	ready = hooks_set();
 	claims_end();

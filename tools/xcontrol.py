@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""xcontrol.py [--spec fight|status|all] [--seed S] [--story] [--quiet]:
-the control family's differential (issue #82; docs/MULTIROM.md,
-Transplanted families).
+"""xcontrol.py [--navi] [--spec fight|status|delete|all] [--seed S] [--story] [--quiet]:
+the control family's differential, or the control Navi's (issue #82;
+docs/MULTIROM.md, Transplanted families and Transplanted Navis).
 
 The installer that moves another game's virus families into BN6's battle
 engine (src/emu/xvirus.c) is proven first on BN6's own Mettaur: --dev
@@ -29,6 +29,19 @@ The specs:
              then the fight's keys until it is deleted: BN6's generic
              states 4-7 through its state table, the hooks of tables 6-10
              and the ice block's size by its AI index (BN6_ICE_SIZES)
+
+With --navi the control is the Navis' installer's (src/emu/xnavi_install.c):
+--dev xnavicontrol moves BN6's own HeatMan (Navi AI 1, ids 0x101-0x106)
+through the same steps as a Navi of BN5's, as Navi AI 25 with ids
+0x1C4-0x1C9, his code by tools/xnavirecipe.py's recipe; the three runs fight
+HeatMan V1 (0x101 native and installed, 0x1C4 moved). Its specs: fight
+(MegaMan's shots and steps while HeatMan attacks, 4000 frames of it: his
+own states 8-12, his attacks, BN6's generic states his state table names),
+status (the statuses, then the fight) and delete (every enemy held at 1 HP,
+--dev onehit: his deletion, his dying state, to the results). Between
+installed and moved the id (0x101 as 0x1C4), the Navi AI index (1 as 25,
+and x 4) and the names archive (BN6's Navis' for 0x101, the moved Navis'
+for 0x1C4, by the hook on the name lookup) are explained.
 
 With the replay on (the default; --no-replay leaves it off), the native
 run keeps its battle's draws and the other two replay each of them from
@@ -78,15 +91,31 @@ NAME_ID = 0x28
 CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID = 32, 0x200, 1, 0x01
 NAMES_BN6, NAMES_FAMILIES = 0x086EE400, 0x08B41000   # the archives an id's name is read from: BN6's viruses' (RomLayout.enemy_names[0]),
                                                      # the families' from id 0x200 (XV_NAMES, by the hook on BN6_NAME_OF)
+DEV, KIND = 'xcontrol', 'family'                     # (--navi: the control Navi's, set by navi_mode)
+VERSIONS = 6
+
+
+def navi_mode():
+    """the control Navi's numbers (src/emu/xnavi_recipe.h, xnavi_room.h): HeatMan, Navi AI 1, as AI 25 with ids from 0x1C4; his
+    names BN6's Navis' archive (RomLayout.enemy_names[1]) and the moved Navis' (XN_NAMES, by the hook at BN6_NAME_OF_NAVIS)"""
+    global CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID, NAMES_BN6, NAMES_FAMILIES, DEV, KIND, WORK
+    CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID = 25, 0x1C4, 1, 0x101
+    NAMES_BN6, NAMES_FAMILIES = 0x086EED00, 0x08D84400
+    DEV, KIND = 'xnavicontrol', 'navi'
+    WORK = os.path.join(ROOT, '.build', 'xcontrol', 'navi')
 IRQ_STACK = (0x03007F00, 0x03007F60)   # BN6's interrupt stack below its sp_irq (0x03007F60, set by its start code)
 MAIN_STACK = (0x03007C00, 0x03007DFC)  # BN6's main stack below the main loop's pointer as it waits for the next frame (0x03007DFC
                                         # at main_awaitFrame's DISPSTAT loop, BN6_AWAIT_FRAME_LOOP, read by a hook there): dead between
                                         # frames. Its VBlank handler runs nested on it (the sound driver's frames), saving the
                                         # registers of what it interrupted (the BIOS's LZ77 decompression of the battle's sprite
                                         # preload): a few cycles' difference leaves other words there (the panels' flags read from ROM)
-KEPT_CODE = ((0x0300791C, 0x03007920), (0x03007742, 0x03007772))   # IWRAM's code the engine keeps patched where BN5's ROM is read
-                                        # (src/emu/xpanels.c, emu_keep: the panels' flags' literal BN6_PANEL_FLAGS_REF, the element
-                                        # hit's tests from BN6_PANEL_HIT_COOL, BN6_HIT_COOL_SPAN bytes): code, the same every frame
+KEPT_CODE = ((0x0300791C, 0x03007920), (0x03007742, 0x03007772), (0x03007678, 0x0300768E),
+             (0x0300724A, 0x03007258), (0x0300728C, 0x0300729C))   # IWRAM's code the engine keeps
+                                        # patched where BN5's ROM is read (src/emu/xpanels.c, emu_keep: the panels' flags' literal
+                                        # BN6_PANEL_FLAGS_REF, the element hit's tests from BN6_PANEL_HIT_COOL, BN6_HIT_COOL_SPAN bytes,
+                                        # the panel bonus's tests from BN6_PANEL_BONUS_TESTS, BN6_PANEL_BONUS_SPAN; src/emu/xsea.c: the
+                                        # hit gate's tests of a hidden target, BN6_HIT_HIDDEN and BN6_HIT_HIDDEN2 with their spans): code,
+                                        # the same every frame
 PHASE_RESULTS = 0x10                    # BN6_BATTLE_PHASE: the results, the reward picked from the enemy's drop row
 BATTLE_REWARD = 0x0200A00C              # (BN6_BATTLE_REWARD)
 
@@ -102,24 +131,44 @@ def fight():
     return k
 
 
-def statuses():
+def statuses(navi=False):
     """Each status a hit gives, one after another (the status step, as
     durations: '0:status ...' at the frame its place in the keys reaches),
-    then the fight's keys."""
+    then the fight's keys. The control Navi's without drag and slide: the
+    step's bare drag bit, which no hit leaves alone, holds a Navi in his
+    state 5 with the battle's time stopped, BN6's own HeatMan alike."""
     k = ['90:']
     for kind in ('freeze 90', 'paralysis 90', 'bubble 90'):
         k += [f'0:status {kind}', '20:', '8:B', '10:', '8:B', '144:']
-    k += ['0:status drag', '90:', '0:status slide', '90:', '0:status freeze 200', '260:']
-    return k + fight()
+    k += ([] if navi else ['0:status drag', '90:', '0:status slide', '90:']) + ['0:status freeze 200', '260:']
+    return k + ([] if navi else fight())
 
 
-SPECS = {'fight': fight, 'status': statuses}
+def delete():
+    """Every enemy held at 1 HP (--dev onehit): the first shots delete him, on to the results."""
+    return ['90:', '8:B', '10:', '8:B', '10:', '125:B', '20:'] * 4
+
+
+def navi_fight():
+    """The control Navi's fight: MegaMan's shots and steps while HeatMan attacks (3000 frames of it), then every enemy held
+    at 1 HP (the onehit step) and shot: his deletion and the results, where the draws' tally is told"""
+    k = []
+    for i in range(14):
+        k += ['125:B', '20:', '6:UP' if i % 2 else '6:DOWN', '30:', '8:B', '10:', '8:B', '10:']
+    return k + ['0:onehit'] + delete()
+
+
+SPECS = {'fight': fight, 'status': statuses, 'delete': delete}
 
 
 def keys_of(spec, foe):
     """A spec's keys, as --input has them, and the frames its status steps
     fall on (counted as build.py shot counts them, from the run's start)."""
-    k = KEYS_BEFORE.split(',') + [f'0:foes {foe:02X}@52'] + CUSTOM_CLOSED + SPECS[spec]()
+    keys = SPECS[spec]()
+    if KIND == 'navi' and spec in ('fight', 'status'):
+        # (the control Navi's: the fight ends with every enemy held at 1 HP, HeatMan's 700 out of the buster's reach)
+        keys = (statuses(navi=True) if spec == 'status' else []) + navi_fight()
+    k = KEYS_BEFORE.split(',') + [f'0:foes {foe:02X}@52'] + CUSTOM_CLOSED + keys
     at, steps = 0, []
     for item in k:
         n, _, what = item.partition(':')
@@ -154,13 +203,14 @@ def run(spec, name, dev, foe, seed, frames, quiet, draws=''):
     keys, steps = keys_of(spec, foe)
     # (pictures through the fight, and each status a few frames in)
     at = sorted({1100, 1500, 2000, 2600, 3200, 3800} | {t + d for t in steps for d in (12, 40)})
-    shots = ','.join(f'{t}:/src/.build/xcontrol/{spec}/{name}/f{t}.bmp' for t in at)
-    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/.build/xcontrol/{spec}/{name}',
+    rel = os.path.relpath(data, ROOT)
+    shots = ','.join(f'{t}:/src/{rel}/f{t}.bmp' for t in at)
+    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/{rel}',
            '--scene', 'emu', '--net-biome', '0', '--seed', str(seed), '--dev', dev, '--frames', str(frames),
            '--input', keys, '--shot', shots]
-    env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'), CYBERWORLD_BTRACE='1', CYBERWORLD_XDRAWS=draws)
+    env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(ROOT, '.build', 'xcontrol', 'rom'), CYBERWORLD_BTRACE='1', CYBERWORLD_XDRAWS=draws)
     out = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
-    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('xvirus', 'foes', 'status', 'xdraws'))]
+    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('xvirus', 'xnavi', 'foes', 'status', 'xdraws'))]
     if not quiet:
         for l in lines:
             print(f'  {name}: {l}')
@@ -265,7 +315,7 @@ def why(off, ia, ib, ma, mb, ids):
         return None
     h = off & ~1   # (the id a halfword, its two bytes each read through it)
     na, nb = struct.unpack_from('<H', ia, h)[0], struct.unpack_from('<H', ib, h)[0]
-    if NATIVE_ID <= na < NATIVE_ID + 6 and nb == na - NATIVE_ID + CONTROL_ID:
+    if NATIVE_ID <= na < NATIVE_ID + VERSIONS and nb == na - NATIVE_ID + CONTROL_ID:
         return 'the enemy id'
     if (va, vb) == (NAMES_BN6, NAMES_FAMILIES):
         return 'the names archive of the id'
@@ -273,7 +323,7 @@ def why(off, ia, ib, ma, mb, ids):
         return 'the AI index'
     if (a, b) == (NATIVE_AI * 4, CONTROL_AI * 4):
         return 'the AI index as a table offset'
-    if addr == DELETE_COUNTS + NATIVE_AI:
+    if addr == DELETE_COUNTS + NATIVE_AI and KIND == 'family':
         return 'the delete count'
     return None
 
@@ -356,7 +406,7 @@ def story(frames):
     return lines
 
 
-FRAMES = {'fight': 4800, 'status': 7200}   # each spec's run, its Mettaur deleted and the results shown well before
+FRAMES = {'fight': 4800, 'status': 7200, 'delete': 2400}   # (the control Navi's the same: its fight ends at 1 HP)   # each spec's run, its Mettaur deleted and the results shown well before
 
 
 def replayed(line, kept):
@@ -371,10 +421,11 @@ def differential(spec, a):
     keyed as BN6's own (rng=replay's keys): the same frame for frame with it, every draw matched."""
     print(f'== {spec}')
     traces, draws, kept = {}, '', 0
-    for name, dev, foe in (('native', 'hp=1000', NATIVE_ID), ('installed', 'xcontrol,hp=1000', NATIVE_ID),
-                           ('moved', 'xcontrol,hp=1000', CONTROL_ID)):
+    extra = ',onehit' if spec == 'delete' else ''
+    for name, dev, foe in (('native', 'hp=1000' + extra, NATIVE_ID), ('installed', f'{DEV},hp=1000' + extra, NATIVE_ID),
+                           ('moved', f'{DEV},hp=1000' + extra, CONTROL_ID)):
         if not a.no_replay:
-            draws = 'keep' if name == 'native' else f'/src/.build/xcontrol/{spec}/native/xdraws.bin'
+            draws = 'keep' if name == 'native' else f'/src/{os.path.relpath(WORK, ROOT)}/{spec}/native/xdraws.bin'
         path, line = run(spec, name, dev, foe, a.seed, a.frames or FRAMES[spec], a.quiet, draws)
         traces[name] = read_trace(path)
         print(f'{name}: {len(traces[name][1])} frames of battle traced, {len(traces[name][0])} ranges moved' +
@@ -408,7 +459,7 @@ def differential(spec, a):
     acts = sorted({(o[2], o[3]) for _, _, img in f_m for o in objects(img) if o[0] == 'T1' and o[6] == CONTROL_ID})
     hp = sorted({o[5] for _, _, img in f_m for o in objects(img) if o[0] == 'T1' and o[6] == CONTROL_ID})
     t3 = sum(1 for i, (_, _, img) in enumerate(f_m) if any(o[0] == 'T3' for o in objects(img)))
-    print(f'the moved Mettaur: actions/phases {" ".join(f"{x:02X}/{y:02X}" for x, y in acts)}; HP seen {hp[:3]}..{hp[-3:]}; '
+    print(f'the moved {"HeatMan" if KIND == "navi" else "Mettaur"}: actions/phases {" ".join(f"{x:02X}/{y:02X}" for x, y in acts)}; HP seen {hp[:3]}..{hp[-3:]}; '
           f'{t3} frames with an attack (T3) in play')
     for label, frames in (('native', f_n), ('moved', f_m)):
         sizes = ice_blocks(frames)
@@ -417,9 +468,9 @@ def differential(spec, a):
     r = results_at(f_i)
     if r is not None and r < len(f_i) and r < len(f_m):
         last_i, last_m = f_i[-1][2], f_m[-1][2]
-        print(f'the results from frame {r}: the reward {u16(last_i, BATTLE_REWARD):04x} (id 0x01\'s drop row) against '
-              f'{u16(last_m, BATTLE_REWARD):04x} (id 0x200\'s), the delete counts {u8(last_i, DELETE_COUNTS + NATIVE_AI)} against '
-              f'{u8(last_m, DELETE_COUNTS + NATIVE_AI)} for AI 1 and {u8(last_m, DELETE_COUNTS + CONTROL_AI)} past them for AI 32')
+        print(f'the results from frame {r}: the reward {u16(last_i, BATTLE_REWARD):04x} (id {NATIVE_ID:#x}\'s drop row) against '
+              f'{u16(last_m, BATTLE_REWARD):04x} (id {CONTROL_ID:#x}\'s), the delete counts {u8(last_i, DELETE_COUNTS + NATIVE_AI)} against '
+              f'{u8(last_m, DELETE_COUNTS + NATIVE_AI)} for AI {NATIVE_AI} and {u8(last_m, DELETE_COUNTS + CONTROL_AI)} past them for AI {CONTROL_AI}')
     elif not any(o[0] == 'T1' and o[6] in (NATIVE_ID, CONTROL_ID) and o[2] == 2 for _, _, img in f_m for o in objects(img)):
         print('  (the Mettaur was not deleted: the run ends before the results)')
     print(f'{spec}: ' + ('SAME frame for frame' if ok else 'DIFFERENT'))
@@ -434,9 +485,12 @@ def main():
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--story', action='store_true', help='print the fight frame by frame')
     ap.add_argument('--no-replay', action='store_true', help="the draws left as each run makes them (no CYBERWORLD_XDRAWS)")
+    ap.add_argument('--navi', action='store_true', help='the control Navi (BN6\'s HeatMan moved as Navi AI 25), not the family')
     a = ap.parse_args()
-    os.makedirs(os.path.join(WORK, 'rom'), exist_ok=True)
-    rom = os.path.join(WORK, 'rom', 'bn6.gba')
+    if a.navi:
+        navi_mode()
+    os.makedirs(os.path.join(ROOT, '.build', 'xcontrol', 'rom'), exist_ok=True)
+    rom = os.path.join(ROOT, '.build', 'xcontrol', 'rom', 'bn6.gba')
     if not os.path.exists(rom):
         shutil.copy(find_rom(), rom)
     ok = [differential(spec, a) for spec in (sorted(SPECS) if a.spec == 'all' else [a.spec])]

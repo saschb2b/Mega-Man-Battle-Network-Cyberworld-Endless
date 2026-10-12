@@ -55,8 +55,16 @@
 #define FREE_SOULS          (EMU_FREE + 0x480000u)   /* kept for BN5's Souls (the Souls' track), to: */
 #define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
-#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* kept for BN5's Navis, to: */
-#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* kept for the code of BN5's chips, to: */
+#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
+#define FREE_NAVI_SPRITES   (EMU_FREE + 0x500000u)   /* ... their battle sprites, a fixed place each, and the arm points grown (xnavi_sprites.c), to: */
+#define FREE_NAVI_ROOM      (EMU_FREE + 0x580000u)   /* ... BN6's Navi tables grown for them (xnavi_room.c), to: */
+#define FREE_NAVI_HOMES     (EMU_FREE + 0x588000u)   /* ... their homes: state table, records, veneers (xnavi_install.c), to: */
+#define FREE_NAVI_CODE      (EMU_FREE + 0x590000u)   /* ... their code and their objects', block by block, to: */
+#define FREE_NAVI_ART       (EMU_FREE + 0x5B0000u)   /* ... what their attacks draw, to FREE_CHIP_CODE */
+#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* the code of BN5's chips: first */
+#define FREE_ATTACK_FAMILIES FREE_CHIP_CODE          /* ... BN6's attack families grown to 240 (xattack_grow.c: the chips' and the Souls' one copy), */
+#define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x400u)
+#define FREE_CHIP_MOVED     FREE_ATTACK_FAMILIES_END /* ... then the chips' moved code, its tables and what it draws (xchips_code.c), to: */
 #define FREE_TAIL           (EMU_FREE + 0x700000u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
@@ -66,9 +74,14 @@
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
 /* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
  * else of BN6's reads or writes 0x0203FB50 on */
-#define RAM_BATTLE          0x0203FB50u   /* kept for the moved families' and Navis' own state, to: */
+#define RAM_SEA             0x0203FB50u   /* BN5's sea's submerge (xsea.h: the submerged, their markers), to: */
+#define RAM_DARK_LISTS      0x0203FBE0u   /* the Dark Soul's chip AI's lists, 0xE0 a side (BN6_DARK_LISTS), to: */
+#define RAM_NAVIS           0x0203FDA0u   /* the moved Navis' own state: Colonel's sides' bits (BN6_COLONEL_SIDES), the Dark Soul's AI
+                                             data's holder (BN6_DARK_AI_OWNER, BN6_DARK_AI_POOL), to: */
+#define RAM_DARK_AI         0x0203FDB0u   /* the Dark Soul's AI data, BN5's 0x140 bytes (BN6_DARK_AI), to: */
+#define RAM_BATTLE          0x0203FEF0u   /* kept for the moved families' and Navis' own state, to: */
 #define RAM_DISPATCH_SIDE   0x0203FF00u   /* the second-level dispatch's side tables (BN6_DISPATCH_SIDE; xvirus_dispatch.c), to: */
-#define RAM_COLONEL         0x0203FF60u   /* kept for BN5's Colonel's table, to: */
+#define RAM_COLONEL         0x0203FF60u   /* BN5's Colonel's table moved (BN6_COLONEL_TABLE; xnavi_install.c), to: */
 #define RAM_SOULS           0x0203FF70u   /* kept for the Souls' state and BN5's mood (the Souls' track), to: */
 #define RAM_BATTLE_SPARE    0x0203FFF0u   /* spare (the game call's old mark, unused since issue #33), to: */
 #define RAM_BATTLE_END      0x02040000u

@@ -47,18 +47,22 @@ class Translations:
         self.reserved = set()   # BN5's roles that have reserved a panel
         self.spawned = {5: set(), 6: set()}   # each game's roles the hooks saw spawn
         self.drawn = {5: set(), 6: set()}     # ... and set up a sprite since
+        self.sprite = {5: {}, 6: {}}          # each game's roles' sprites by their bytes (the CRC32 of the last set up)
         self.gained = 0                       # what BN5's mood gains raised MegaMan's mood by so far (BN6 has none)
 
     def apply(self, fa, fb):
         """BN5's frame `fa` (its objects' over) read in BN6's terms, each game's leftover sprite states told; the counts of
         bytes read so, by translation"""
         for f in (fa, fb):
-            for e in f.fr['events']:
+            for e in f.fr.get('setup', []) + f.fr['events']:
                 role = object_role(f.fr, e.object)
                 if role is not None and e.kind in (SPAWN, SPRITE_SET):
                     (self.spawned if e.kind == SPAWN else self.drawn)[f.game].add(role)
+                if role is not None and e.kind == SPRITE_SET:
+                    self.sprite[f.game][role] = e.a or None
             for o in f.fr['objs']:
                 o.leftover = o.role in self.spawned[f.game] and o.role not in self.drawn[f.game]
+                o.sprite = self.sprite[f.game].get(o.role)
         n = {'reservation': 0, 'blink': 0, 'mood': 0}
         blinked = set()
         for e in fa.fr['events']:

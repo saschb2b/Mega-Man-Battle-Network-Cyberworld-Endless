@@ -35,6 +35,10 @@ void xv_insn(uint32_t at, ThumbForm form, uint8_t rd, uint8_t rn, uint16_t was, 
 uint32_t xv_used(void);
 /* The step's writes made, in the order they were staged. */
 void xv_commit(void);
+/* ... each claimed as its writer's (claims.h): `writer` names who for the
+ * address it is staged at (a Navi's install writes the families' grown
+ * tables as theirs, its own room as its own) */
+void xv_commit_by(const char *(*writer)(uint32_t at));
 
 /* What was moved where (xvirus.h's xvirus_moved): an address range of a
  * family's game, or of BN6's own table, and its copy. */

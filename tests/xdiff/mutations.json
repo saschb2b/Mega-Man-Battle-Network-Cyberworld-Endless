@@ -606,6 +606,176 @@
    "spec": "soul_cross",
    "unitebreak": 16,
    "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
+  },
+  {
+   "name": "a Navi's state number not moved",
+   "spec": "toadman_v1",
+   "poke": [
+    "08DA4CC8:200B"
+   ],
+   "what": "ToadMan's first decision's CurAction (BN5 0x080FC460, BN6's copy at XN_CODE + 0x12C00 + 0xC8) left at BN5's 11 (BN6's his third own state) where the recipe makes it 13"
+  },
+  {
+   "name": "a Navi's effect not renumbered",
+   "spec": "toadman_v1",
+   "poke": [
+    "08DA51E6:245D"
+   ],
+   "what": "ToadMan's teleport's effect (BN5 0x080FC97E: movs r4,#0x5D, its copy at XN_CODE + 0x12C00 + 0x5E6) left at BN5's 0x5D, which BN6 numbers another, where the recipe makes it BN6's 0xA1, the copy of BN5's"
+  },
+  {
+   "name": "a Navi's state number not moved (KnightMan)",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA121E:2009"
+   ],
+   "what": "KnightMan's decision's CurAction (BN5 0x080FB982, BN6's copy at XN_CODE + 0xF000 + 0x21E) left at BN5's 9 (BN6's his own first, his idle) where the recipe makes it 11"
+  },
+  {
+   "name": "a Navi's overlay of BN6's kind",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA1C04:2401"
+   ],
+   "what": "KnightMan's companion's overlay spawned as kind 1 (BN5 0x0800EE74, its copy at XN_CODE + 0xFC02 + 0x2): BN6's own kind 1, another Navi's masks and sprite, where the recipe makes it 23, BN5's kind 1 copied"
+  },
+  {
+   "name": "a Navi's state number not moved (ShadowMan)",
+   "spec": "shadowman_v1",
+   "poke": [
+    "08D95E8E:2007"
+   ],
+   "what": "ShadowMan's first decision's CurAction (BN5 0x080F94B6, BN6's copy at XN_CODE + 0x3C00 + 0x28E) left at BN5's 7 (BN6's bubbled state) where the recipe makes it 9"
+  },
+  {
+   "name": "a Navi's own battle sprite not renumbered",
+   "spec": "shadowman_v1",
+   "poke": [
+    "08D9682C:2208"
+   ],
+   "what": "ShadowMan's decoys' sprite (BN5 0x080B9498: movs r2,#8, list 2's ShadowMan in BN5, its copy at XN_CODE + 0x4800 + 0x2C) left at 8, BN6's list 2 number 8 another Navi, where the recipe makes it 0x21, his battle sprite's number in BN6's list 2 (xnavi_sprites.c)"
+  },
+  {
+   "name": "a Navi's state number not moved (NumberMan)",
+   "spec": "numberman_v1",
+   "poke": [
+    "08D9991A:2009"
+   ],
+   "what": "NumberMan's decision's CurAction (BN5 0x080F9F86, BN6's copy at XN_CODE + 0x7800 + 0x11A) left at BN5's 9 where the recipe makes it 11"
+  },
+  {
+   "name": "a sprite table's entry not renumbered",
+   "spec": "numberman_v1",
+   "poke": [
+    "08D9A801:06:1"
+   ],
+   "what": "NumberMan's companion's sprite table (BN5 0x080C33A8, its kind 0's number at +1, its copy at XN_CODE + 0x8800 + 0x1) left at BN5's list 4 number 6, BN6's another sprite, where the recipe makes it 0xAC, BN5's copied (XvByte)"
+  },
+  {
+   "name": "a Navi's state number not moved (TomahawkMan)",
+   "spec": "tomahawkman_v1",
+   "poke": [
+    "08D9D636:2009"
+   ],
+   "what": "TomahawkMan's decision's CurAction (BN5 0x080FADAA, BN6's copy at XN_CODE + 0xB400 + 0x236) left at BN5's 9 where the recipe makes it 11"
+  },
+  {
+   "name": "a sprite left at BN5's number where BN6 has it at another",
+   "spec": "tomahawkman_v1",
+   "poke": [
+    "08D9E570:2229"
+   ],
+   "what": "TomahawkMan's swing's sprite (BN5 0x080C8860: movs r2,#0x29, list 4, its copy at XN_CODE + 0xC100 + 0x470) left at 0x29, BN6's another sprite, where the recipe makes it 0x2B, BN6's of the same bytes"
+  },
+  {
+   "name": "the image object's kind left at BN5's sprite",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D90110:00:1"
+   ],
+   "what": "the moved image object's kind 3 (BN5's kinds table 0x080B9A5C + 0x10, its copy at XN_OBJECTS + 0x0 + 0x10) left naming list 4's number 0, BN6's another sprite, where tools/bn5_objects.py's copy makes it 0xB5 (BN5's sprite 3:0x00, Colonel's image at t254): the sprite's bytes compared, never its number"
+  },
+  {
+   "name": "the image object's twin kind at another sprite",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D901BA:09:1"
+   ],
+   "what": "the moved image object's kind 0x25 (its copy's entry at XN_OBJECTS + 0x0 + 0xBA) naming BN6's list 3 number 9 where tools/bn5_objects.py's twin is number 8, the same bytes as BN5's 3:0x08: the sprite's bytes compared"
+  },
+  {
+   "name": "a Navi's sound left at BN6's number",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA16A4:20C0"
+   ],
+   "what": "KnightMan's sound (BN5 0x080FBE08: movs r0,#0xC0, its copy at XN_CODE + 0xF000 + 0x6A4) left at 0xC0, BN6's another song, where the install makes it the slot BN5's 0xC0 is copied to (0x62, src/audio/xsong.c): BN6's own song of the number told from the copy (xsong_sound_slot)"
+  },
+  {
+   "name": "the submerged hit by any attack",
+   "spec": "toadman_sea",
+   "poke": [
+    "08D9008E:2400",
+    "08D900C2:2400"
+   ],
+   "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
+  },
+  {
+   "name": "Elec stopped by the submerged",
+   "spec": "toadman_sea_elec",
+   "poke": [
+    "08D90084:2C07",
+    "08D900B6:2C07"
+   ],
+   "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
+  },
+  {
+   "name": "the sea's marker not kept",
+   "spec": "toadman_sp",
+   "poke": [
+    "08D9006A:46C0"
+   ],
+   "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
+  },
+  {
+   "name": "the sea's splash another effect",
+   "spec": "tomahawkman_sea",
+   "poke": [
+    "08D900DA:2414"
+   ],
+   "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
+  },
+  {
+   "name": "Colonel's side's bit not kept",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D90044:46C0"
+   ],
+   "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in his field (BN6_COLONEL_SIDES): BN5's bit 0x20 set as he is spawned, at t1, where BN6's field stays 0"
+  },
+  {
+   "name": "the Dark Soul's record of a chip BN6's region",
+   "spec": "darksoul_sword",
+   "poke": [
+    "08DFAC4B:02:1"
+   ],
+   "what": "the Dark Soul's record of the Sword (XN_DARK_RECORDS + 71 * 0x2C + 0x17, src/emu/xnavi_dark.c) holding BN6's byte 2 (its lock-on type) where BN5's region 6 is kept: its approach goes elsewhere at t77"
+  },
+  {
+   "name": "the Dark Soul's record of a chip another approach",
+   "spec": "darksoul_cannon",
+   "poke": [
+    "08DFA039:01:1"
+   ],
+   "what": "the Dark Soul's record of the Cannon (XN_DARK_RECORDS + 1 * 0x2C + 0xD) naming approach 1 (Thunder's) where BN5's 0: its approach's state at t264"
+  },
+  {
+   "name": "the Navis' buster another family",
+   "spec": "darksoul_v1",
+   "poke": [
+    "08D90038:2010"
+   ],
+   "what": "the Navis' buster's setup (XN_STUB_BUSTER, its movs r0 at + 0x18) answering family 0x10 (the step) where BN5's 0x16 is BN6's 0x66 (XN_FAMILY_OF): the Dark Soul's first shot at t16"
   }
  ]
 }

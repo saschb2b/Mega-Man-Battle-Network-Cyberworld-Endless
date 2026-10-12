@@ -356,7 +356,11 @@ step below and `tools/xcontrol.py`; docs/MULTIROM.md, Transplanted
 families; it takes the place of BN5's CanGard, which is installed
 wherever BN5's ROM is read), and `nofamilies` (no family moved into the
 engine, BN5's ROM read or not: BN6's battles as the player's ROM has
-them, which `tools/xfamily.py` compares with CanGard installed). BN5's battles
+them, which `tools/xfamily.py` compares with CanGard installed), and
+`xnavicontrol` (the control Navi installed instead of BN5's Navis: BN6's
+own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
+`tools/xcontrol.py --navi`; docs/MULTIROM.md, Transplanted Navis), and
+`nonavis` (no Navi moved into the engine, BN5's ROM read or not). BN5's battles
 have four of their own (docs/MULTIROM.md, Guest battles, For tests):
 `darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
 Souls, bit k Team Colonel's Soul 7 + k; in BN6's battles too, through
@@ -441,7 +445,15 @@ BN5's ROM read, BN5's CanGard is AI 32 with ids 0x200-0x205 (its six
 versions, the families' ids from 0x200), and `0:foes 200@52/01@43`
 fights CanGard beside a Mettaur (four foes at most: of six named, BN6's
 battle spawned the first four); `--dev xcontrol` installs the control
-in its place, BN6's own Mettaur moved as AI 32 with the same ids. A
+in its place, BN6's own Mettaur moved as AI 32 with the same ids. BN5's
+Team Colonel Navis moved into the engine (docs/MULTIROM.md, Transplanted
+Navis) take ids 0x1C4-0x1DB, four a Navi (V1, V2, V3, SP): Colonel
+0x1C4, ShadowMan 0x1C8, NumberMan 0x1CC, TomahawkMan 0x1D0, KnightMan
+0x1D4, ToadMan 0x1D8, so `0:foes 1D4@52` fights KnightMan V1 in BN6's
+engine (`--dev xnavicontrol` puts the control HeatMan at 0x1C4-0x1C9).
+The `onehit` step (`0:onehit`) holds every enemy at 1 HP from there on,
+as `--dev onehit` does: a long fight's end, the control Navi's `delete`
+spec. A
 layer dressed as BN5's area has longer arrival words, and its random
 battles are BN5's: seed 15's first area is BN6's own.
 
@@ -494,7 +506,12 @@ through BN6's generic states, which the fight alone never reaches
 `tools/xcontrol.py` copies BN6's ROM alone into `.build/xcontrol/rom`
 (a layer of BN5's fights its battles in BN5's engine) and runs its
 specs, `fight` and `status` (`--spec` one of them), three battles each,
-with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing).
+with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing). With `--navi`
+it proves the Navis' installer on BN6's own HeatMan (`--dev
+xnavicontrol`): HeatMan V1 native (0x101), installed beside the control,
+and moved (0x1C4), each spec's three battles the same byte for byte
+(`fight`, 4000 frames of his attacks; `status`; `delete`, every enemy
+held at 1 HP by the `onehit` step to the results).
 `tools/xfamily.py` copies both ROMs into `.build/xfamily/rom` and runs
 its specs, `fight`, `status`, `delete`, `native` and `families` (`--spec`
 one of them), each battle traced and its checks printed, pictures of
@@ -665,10 +682,14 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   RNG draws, every spawn of the first, third and fourth kinds (their
   common routine, entered and left), PlaySoundEffect, an effect's
   spawner, setAttack, a panel reserved, the blink of an object flashing
-  and a sprite set up. Each logs an event with the core's frame, the
+  and a sprite set up (with the CRC32 of the sprite's bytes, decompressed
+  as BN6 draws it, read where the core lists it: `src/dev/xdiff_sprite.c`).
+  Each logs an event with the core's frame, the
   battle's timer before it, its caller (a spawn's: its spawner's), the
   family's own code that led to it (the innermost return address in a
-  family's moved code: BN6's copy, BN5's original) and the outermost
+  family's moved code: BN6's copy, BN5's original; the Navis' moved code
+  only where a foe is a moved Navi, as their copies hold engine routines
+  BN5 runs for MegaMan too, a Soul's companion) and the outermost
   caller (the stack read word by word up to the object runner's return,
   each word that is a return address: after a BL, or after `mov lr,pc;
   bx rN`), and the object running then (the runner's word) or the one
@@ -691,7 +712,7 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   code led to it. Without the replay Handi parts at its first draw that
   BN5's buster or shake moved (`rng=follow`: t305, none: t35).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
-  5): a record each time the timer moves while the battle fights: the
+  7): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
   node on, its AI's data and its collision data, and in BN6's the byte
   the second-level dispatch's side table holds for its slot), the 40 panels, the order
@@ -701,8 +722,18 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   pending form: docs/ROM_DATA.md, MegaMan as the differential's subject;
   the Souls' state in BN6's engine, `BN6_SOULS`' 0x80 bytes, zero in
   BN5's; the Custom screen's element 0xB, UNITE, as each game's last
-  screen left it), and the hooks' events since the record before (the
-  first record's from the battle's start).
+  screen left it), what BN6's engine keeps apart of the objects (the sea's
+  submerge's 0x90 bytes, `RAM_SEA`: the submerged by their collision
+  data's bit and their markers; zero in BN5's, which keeps it in the
+  collision data, read there as BN6 keeps it by legit.json's `layouts`
+  `sea`: under or not, its marker compared as an object; the Dark Soul's
+  chip AI's lists, BN5's from its own `0x02034C20`, compared while BN5's
+  Dark Soul is in play, its chips as BN6's ids by the chip registry and
+  a side of none alike in both; the Navis' own state, Colonel's sides'
+  bits, BN5's from BattleState +0x5C; the Dark Soul's AI data past
+  0x100, its chip ids BN6's), and the hooks' events since the record
+  before (the first record's from the battle's start; a battle's end
+  after its fight is no record's, its events counted lost).
 - **The field**: `field=XX` fights both on BN5's battlefield XX, BN6's as
   `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
   their panels' types), `field=XX:YY` BN6's own field YY against it; the
@@ -711,13 +742,25 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   `field_lava*` and `field_sea*` on BN5's lava and sea as BN6's engine
   runs them (`src/emu/xpanels.c`; docs/MULTIROM.md, One net): each of the
   eight fields, MegaMan stepping onto lava, a Fire CanGard on lava and on
-  sea, an Aqua hit on lava, their timers running out.
+  sea, an Aqua hit on lava, their timers running out; `toadman_sea`,
+  `toadman_sea_elec` and `tomahawkman_sea` the sea's submerge and hold
+  (`src/emu/xsea.c`: ToadMan under the sea, a buster's shot passing over
+  him and an Elec one reaching him, MegaMan and TomahawkMan held as they
+  come to sea under the splash).
 - **A change in both games**: `both=A:V[:N]` writes into both games'
   copies alike, BN5's at its own address and BN6's at the moved copy of
   it (a family's element given, to put the engine's handling of it under
-  test: CanGard made Fire, its reticle made Aqua), and `mm_element=N`
+  test: CanGard made Fire, its reticle made Aqua), `each=A5:A6:V:N` writes
+  V (N bytes) into a table of the engine's both games hold, each at its
+  own address (BN5's at A5, BN6's at A6: the buster's shot made Elec in
+  `toadman_sea_elec`), and `mm_element=N`
   gives MegaMan element N as the fight begins (his object's and his
-  collision data's).
+  collision data's). `dschips=C,...` gives MegaMan's side's chip AI list
+  in BN5 (BN5's chip ids, hex, as its battle makes one: in order, none
+  after them, their count, no sequences), and with it or `dslist=1`
+  BN6's lists are written from BN5's as BN6's fight begins, their chips
+  BN6's by the chip registry (`darksoul_cannon`, `darksoul_sword`: the
+  Dark Soul's chip AI takes them).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy; one in RAM once the game has booted, over what it copied there,
@@ -750,8 +793,11 @@ the masks):
   BN5's code another family copied (a helper of BN5's shared virus code, an
   object type's) is BN5's engine there, as BN6 runs its twin; and an event
   is the family's only where the object it ran for is the family's or
-  none's (BN5's temp attack object, which WuNote moves, is MegaMan's
-  buster's in BN5's own engine).
+  none's (BN5's temp attack object, which WuNote spawns, is MegaMan's
+  buster's in BN5's own engine). In a spec whose foe is a moved Navi the
+  Navis' code is the foe's and no family's is (the families' copies of
+  BN5's engine code are its engine there); the engine's objects moved
+  once (`XN_OBJECTS`) are the engine's in every spec.
 - **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
   the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
   0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), an
@@ -760,7 +806,9 @@ the masks):
   translation, not a mask; the spawn hook reads the dispatch's spawner's
   frame the same way), the muzzle's effect (0x57 against
   0x6C), the AI index (14 against 32), a sound by its song (the player it
-  plays on is each song table's own). The engine's own numbers too, the
+  plays on is each song table's own; a copy of BN5's in one of BN6's
+  empty slots by BN5's number, and in a Navi's spec BN6's own song of a
+  copied sound's number told apart, bit 16). The engine's own numbers too, the
   way an enemy id is read: a collision data's alliance words (+0x30 and
   +0x34, set from a table by alliance and region, each game its own) as
   the BN6 entry at the BN5 word's place in BN5's table, and a hit's or a
@@ -806,6 +854,14 @@ the masks):
   `"sprites": "bytes"`, by its bytes where both games' are in their ROMs
   or the one is a family's copy (`families.json`'s `art`): a type of
   BN6's drawing other art than BN5's is a difference.
+- **Art by its bytes**: what an install chose to draw (an object of a
+  moved type, a foe's own body, an effect of a family's or a foe's own
+  ids, a companion overlay of a Navi's kind) is compared by the bytes of
+  the sprite it last set up, never by its number: the two games number
+  their sprites otherwise (a copy in BN6's grown lists, a twin at another
+  number), and a twin that draws other art fails as `sprite bytes` at
+  its sprite's word (+0x18 of its sprite state). The engine's and
+  MegaMan's own draw each game's art and are not compared so.
 - **Read in BN6's terms** (`tools/xdiff_events.py`, from BN5's own
   events): an object that has reserved a panel reads BN6's bit `0x20` of
   its +0 (BN6 sets it at the first reservation and never clears it while
@@ -960,10 +1016,19 @@ rebased to its neighbour, its draws shifted onto the other word; the
 dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
 number, a spawn aimed at BN6's spawner as before the dispatch; each of
 the 23 other families': an immediate left as BN5's and a call rebased;
-the lava's
+the Navis': a state number left as BN5's (each Navi's), an effect left as
+BN5's, an overlay spawned of BN6's kind, a battle sprite's number, a
+sprite table's entry, a sprite left at BN5's number where BN6 lists the
+same bytes at another, the moved image object's kind left at BN5's
+sprite and its twin kind at another sprite, a sound left at BN6's
+number, Colonel's side's bit not kept, the Dark Soul's record of a chip
+holding BN6's byte for BN5's region or another approach, the Navis'
+buster another family; the lava's
 and the sea's: lava's flags, their hooks taken off, the panel lava's
 cooling leaves, the random number its spark draws, the element hit's
-test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
+test that lets Aqua cool it; the sea's submerge's: its hit gate letting
+every attack through and stopping Elec, its marker not kept, its splash
+another effect; MegaMan's: his buster's flash, a chip's
 damage; the Souls': a Soul's turns 4, its used bit not set, UNITE lit
 for a wrong kind, Beast Out lit while united, a Soul kept past a Cross,
 each by `unitebreak`), each of which must FAIL its spec.
@@ -1027,7 +1092,10 @@ voices, BN6's own number where one is the same); ids kept in tables of
 its data given BN6's numbers byte by byte (`ID_TABLES`, `XvByte`); an
 object type whose twin reads a table by the object's kind that BN6 laid
 out otherwise moved with its code (`MOVE_TYPES`), and a type a family
-before it moved run as that family's copy (`XV_TYPE_SHARED`); a number its
+before it moved, or BN5's engine objects moved once before every family
+(`tools/bn5_objects.py`: a call into their module that would be copied
+goes to their copy, WuNote's to the image's spawner, its kinds fixed
+there), run as that copy (`XV_TYPE_SHARED`); a number its
 code keeps as it is only where it was read in BN6 bit by bit (`KEPT`); an
 audit may serve BN5's own body (`copy`: object_updateCollisionData, whose
 BN6 twin writes the second word BN5's stores into the BIOS); each compare
@@ -1036,6 +1104,38 @@ grown placed in list 4; and a call into the dead bytes of its block (a
 routine of its game's BN6 has a twin of, zeroed in the copy) goes to the
 twin (`src/emu/xvirus.c`, dead_calls). Tuby and the unnamed AI 31-33 are
 left out: no battle record of BN5's names them.
+
+## The Navis' recipe generator
+
+```bash
+python3 tools/xnavirecipe.py              # write src/emu/xnavi_bn5.c: the control's, the moved objects' and BN5's Navis' recipes
+python3 tools/xnavirecipe.py --check      # write nothing: fail where the file differs from what it would write
+python3 tools/xnavirecipe.py --report     # every Navi of Team Colonel's and the Dark Soul: .build/xnavirecipe/report.md
+```
+
+`tools/xnavirecipe.py` (issue #82; docs/MULTIROM.md, Transplanted Navis)
+derives a Navi's recipe as `tools/xrecipe.py` derives a family's, with
+the families' walk, pairs and audits, from BN6's Navi tables instead of
+the families' (`tools/bn5_navi_twins.py`: the Navis' own pairs, audits,
+the routines copied with them, their stubs, the tables their code reads).
+Two of the families' rules are its own: a number a Navi's code keeps is
+kept without `bn5_twins.KEPT`'s audit (the Navis are proven frame by
+frame instead: ten such words in their code, none audited yet), and a
+sound is BN6's own only where BN6's song of its number plays on the same
+player too (else BN5's is copied to its fixed slot).
+In install order (`NAVIS`, after the control, BN6's own HeatMan derived
+from BN6's ROM): its code walked from its states, hooks and companion
+routines; each object type its code spawns decided as
+`tools/bn5_twins.py`'s TYPES decides it (one decision a type, every
+track's; a type the table decides otherwise, or not at all, is a
+decision); its sprites given one number and one place in the shared art
+whichever Navi draws them, its effects numbers of its own, both in issue
+#82's ranges for the Navis; the image object's kinds it spawns each one
+`tools/bn5_objects.py` fixes, and the moved objects' recipe itself
+(`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
+that table, each twin checked by its bytes). A recipe with a decision
+open is not written; `build.py test` holds every written one whole and
+apart from the others and the families' (`test_xnavi_static`).
 
 ## The proxy form: where a Soul stands
 

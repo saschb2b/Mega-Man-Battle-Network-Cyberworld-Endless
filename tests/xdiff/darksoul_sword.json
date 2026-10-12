@@ -1,0 +1,16 @@
+{
+ "about": "the Dark Soul as in darksoul_cannon with three Swords (BN5's chip 0x30, BN6's 71 by the chip registry): its chip record's region (BN5's +0x17, 6: the panel before its target, which BN6's record does not hold, the Dark Soul's records keeping it) takes it next to MegaMan, where it slashes (BN6's sword family from BN6's record)",
+ "kind": "differential",
+ "foes": "18D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "safe": 1,
+ "rng": "replay",
+ "dschips": [
+  "30",
+  "30",
+  "30"
+ ]
+}
