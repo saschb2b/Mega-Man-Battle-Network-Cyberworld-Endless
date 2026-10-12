@@ -238,6 +238,74 @@
    "spec": "soul_cross",
    "unitebreak": 16,
    "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
+  },
+  {
+   "name": "a Soul's sprite another's",
+   "spec": "soul_colonel",
+   "soulbreak": 1,
+   "what": "the sprite selector's hook (src/emu/soullook.c, BN6_FORM_SPRITE_READ) gives each Soul the next Soul's sprite of the grown list 0: ColonelSoul drawn as ShadowSoul (BN5's list 0 8), its frames another sprite's"
+  },
+  {
+   "name": "a Soul's palette",
+   "spec": "soul_number",
+   "soulbreak": 2,
+   "what": "the palette hooks give a Soul its sprite's palette 1 where BN5's 0x0800DD8C gives 0 (2 in Chaos Unison): NumberSoul's sprite state's palette 1"
+  },
+  {
+   "name": "TomahawkSoul's landing still",
+   "spec": "soul_tomahawk",
+   "soulbreak": 4,
+   "what": "the crossing's phase 2 leaves the camera still for TomahawkSoul where BN5's phase 2 shakes it 30 frames (0x0801211E): its draws and the battle's flag 0x20 missing"
+  },
+  {
+   "name": "a Soul's buster flash BN6's object",
+   "spec": "soul_buster",
+   "soulbreak": 8,
+   "what": "MegaMan's arm flash in a Soul (BN5's kind 0x23, its frame the Soul) spawned by BN6's spawner as BN6's object (src/emu/soullook.c's redirect to BN5's moved spawner left out): BN6's own kind 0x23 of its own table, another sprite and object where BN5 runs its image object"
+  },
+  {
+   "name": "a charged shot's charge",
+   "spec": "soul_shadow",
+   "soulbreak": 16,
+   "what": "the grown charge times (SOULS_CHARGES) 10 frames longer than BN5's for each Soul's power attack: ShadowSoul's slash fires later"
+  },
+  {
+   "name": "a charged shot's family",
+   "spec": "soul_knight_shot",
+   "soulbreak": 32,
+   "what": "each Soul's loadout names the next Soul's power attack for its charged shot (SOULS_LOADOUTS' +7): KnightSoul fires ToadSoul's"
+  },
+  {
+   "name": "a Soul's element",
+   "spec": "soul_toad",
+   "soulbreak": 64,
+   "what": "the element's hook gives a Soul none where BN5's table 0x0800E62C gives ToadSoul Aqua: his object's +0x0E and collision data's +2 0"
+  },
+  {
+   "name": "NumberSoul's hand of nine",
+   "spec": "soul_number_plus",
+   "soulbreak": 256,
+   "what": "the hand size's hook (BN6_HAND_SIZE_SET) deals NumberSoul 9 where BN5's 0x08025C24 deals 10: the second screen's elements laid out for nine"
+  },
+  {
+   "name": "NumberSoul's bonus left out",
+   "spec": "soul_number_plus",
+   "soulbreak": 512,
+   "what": "the bonus by form (BN6's 0x0800EF34, soulproxy.c's hook) gives NumberSoul's Cannon no +10 (BN5's 0x0800D0CA): CanGard struck for 40 where BN5's for 50"
+  },
+  {
+   "name": "ShadowSoul's passives left out",
+   "spec": "soul_shadow",
+   "soulbreak": 1024,
+   "what": "the proxy's passives' entry (BN6_FORM_PASSIVES' 8, soulpassive.c) runs none for a Soul where BN5's ready table 0x08011BA4 runs ShadowSoul's FloatShoe (0x08011C78): his collision's flags without it"
+  },
+  {
+   "name": "a Soul's song not copied",
+   "spec": "soul_toad",
+   "poke": [
+    "0815A238:0815AE18:4"
+   ],
+   "what": "BN6's song slot 0x5E (the song table 0x08159F48 + 8 x 0x5E) its empty header again where src/emu/soulpower.c entered BN5's 0x117 (ToadSoul's waves): BN6 plays the empty song"
   }
  ]
 }

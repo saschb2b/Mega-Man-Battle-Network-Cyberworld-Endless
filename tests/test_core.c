@@ -69,6 +69,9 @@
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
+#include "soul_room.h"
+#include "xattack_grow.h"
+#include "xnavi_sprites.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -3220,6 +3223,35 @@ static void test_free_space(void) {
 	};
 	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
 	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
+	/* (the Souls' room, soul_room.h: each part of the Souls' install, the tracks' S2-S5) */
+	const Region souls[] = {
+		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_REAPPLY + 4 },
+		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
+		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
+		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
+		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },
+		{ "the loadouts", SOULS_LOADOUTS, SOULS_LOADOUTS_END }, { "the faces", SOULS_FACES, SOULS_FACES_END },
+		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "the songs", SOULS_SONGS, SOULS_SONGS_END },
+		{ "the code", SOULS_CODE, SOULS_CODE_END }, { "the attacks' sprites", SOULS_ART, SOULS_FACE_TILES },
+		{ "the faces' tiles and digits", SOULS_FACE_TILES, SOULS_DIGITS_END }, { "list 0", SOULS_LIST0, SOULS_LIST0_END },
+		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
+	};
+	regions_apart("the Souls' room", souls, (int)(sizeof souls / sizeof *souls), FREE_SOULS, FREE_PANELS);
+	/* (each grown table's room for BN6's entries and the Souls': 14 sprites, 148 power attacks, 23 faces; six Souls, eleven
+	 * power attacks, BN5's eleven digits; the effects the tracks' allocations give the Souls) */
+	CHECK(SOULS_LIST0 + 4u * SOULS_LIST0_ENTRIES <= SOULS_LIST0_END && SOUL_LIST0_FIRST + 6 <= SOUL_LIST0_ART_FIRST &&
+		SOULS_ARM_ROWS + 0x44u * (3 + 6) <= SOULS_ARM_ROWS_END && SOULS_POWERS + 4u * (SOUL_POWER_FIRST + 11) <= SOULS_POWERS_END &&
+		SOULS_CHARGES + 10u * (SOUL_POWER_FIRST + 11) <= SOULS_CHARGES_END && SOULS_LOADOUTS + 6u * 6 <= SOULS_LOADOUTS_END &&
+		SOULS_FACES + 4u * (SOUL_FACE_FIRST + 6) <= SOULS_FACES_END && SOULS_FACE_PALS + 0x20u * (SOUL_FACE_FIRST + 6) <= SOULS_FACE_PALS_END &&
+		SOULS_FACE_TILES + 6u * 0x100 <= SOULS_DIGITS && SOULS_DIGITS + 11u * 0x80 <= SOULS_DIGITS_END && SOULS_DIGITS_END <= SOULS_ART_END &&
+		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
+		"the Souls' room: a grown table's entries past its room");
+	/* (the rooms other tracks share: BN5's Navis' battle sprites first in the Navis' room, the grown attack families first
+	 * in the chips' code's) */
+	CHECK(FREE_NAVI_SPRITES == FREE_NAVIS && FREE_NAVI_SPRITES + (XNAVI_SPRITE_LAST_AI - XNAVI_SPRITE_FIRST_AI + 1) * XNAVI_SPRITE_ROOM <=
+		FREE_NAVI_SPRITES_END && FREE_NAVI_SPRITES_END <= FREE_CHIP_CODE, "free space: BN5's Navis' battle sprites at %08x", (unsigned)FREE_NAVI_SPRITES);
+	CHECK(FREE_ATTACK_FAMILIES == FREE_CHIP_CODE && XATTACK_EMPTY + 6 <= FREE_ATTACK_FAMILIES_END && XATTACK_ENTRIES == 0xF0 &&
+		XATTACK_CHIPS < XATTACK_SOULS && XATTACK_SOULS < XATTACK_SPARE, "free space: the attack families at %08x", (unsigned)FREE_ATTACK_FAMILIES);
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },

@@ -40,6 +40,22 @@
   frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
   Aqua hit. Nothing in a run uses them yet; BN5's records on them now
   wait only for their viruses (one of Nebula Area's is fightable).
+- **BN5's Souls look and fight as BN5's in BN6's battles (issue #82).**
+  Still behind the developer switch, a Soul united is now BN5's own:
+  MegaMan drawn from BN5's sprite of the Soul in its colours, the Soul's
+  image and sounds as he unites (TomahawkSoul landing with a shake), its
+  face and turns in the emotion window, and each Soul's charged shot
+  BN5's own code, moved into BN6's engine: ColonelSoul's ScreenDivide,
+  ShadowSoul's slash, NumberSoul's bomb, TomahawkSoul's swing,
+  KnightSoul's wrecking ball (it confuses) and ToadSoul's sound waves
+  (they paralyse), with BN5's charge times, effects, sounds and arm
+  flashes, and the Soul's element. Its passives as it unites come too (ShadowSoul's
+  float shoes, TomahawkSoul's grass, ToadSoul's sea flag), and NumberSoul
+  deals a hand of ten and adds 10 to a plain attack chip. The
+  frame-by-frame comparison with BN5's own battle holds each Soul's shot
+  there, and a deliberate break of each part is caught. Still to come:
+  the chip charge (A held), KnightSoul's and TomahawkSoul's other
+  passives, ColonelSoul's chip shot, and Chaos Unison's charge.
 - **UNITE on BN6's Custom screen, and a Soul's life as BN5 runs it
   (issue #82).** Behind a developer switch until the Souls are whole,
   BN5's Souls unite in BN6's battles: the emblem under OK becomes BN5's

@@ -103,3 +103,26 @@ DATA_TWINS = (
     (0x08005CD0, 0x80, 0x080065E0, 'a sine table (its 0x80 bytes the same)'),
     (0x08005D50, 0x80, 0x08006660, 'a cosine table (its 0x80 bytes the same)'),
 )
+
+# Object types of BN5's a moved routine spawns through the second-level dispatch, each moved (BN5's routine, its art by its
+# bytes) and never aimed at BN6's type of the same number: one decision per type, global (issue #82's shared allocations: a
+# type is moved unless proven the same in BN6, its sprites by their bytes too; at a merge, moved wins). (kind, type): why.
+# The Souls' (tools/xsoul.py, which opens a decision for a type it spawns that is not here): BN6's routine at each number
+# another body (tools/xrecipe_pairs.py's deep comparison), so none could be a twin
+MOVE_TYPES = {
+    (1, 0x05): "the arm's flash, the image object (BN5 0x080B9B81): the allocations' amendment's, one object for every track, "
+               "BN5's kinds table (0x080B9A5C, 5 bytes a kind: its sprite's list and number first) moved with it: BN6's "
+               "0x080BA549 runs the same code on its own table 0x080BA444, laid out otherwise (the two agree on kinds 0-4 "
+               "alone). The Souls' spawns (their code's and MegaMan's buster's in a Soul, through the moved spawner 0x080B9CAE)",
+    (1, 0x54): "NumberSoul's companion (BN5 0x080C33AD, spawned by its helper at 0x080C34AC): its sprite by its own table "
+               "(0x080C33A8: list 4's 0x01, which BN6 has no sprite of the same bytes of: copied, list 0's); BN6's type 0x54 "
+               "is 0x080C5751, another body",
+    (3, 0x05): "NumberSoul's charged shot's bomb (BN5 0x080C5015, spawned at 0x080C534C): list 3's 0x0A (no BN6 sprite of "
+               "its bytes: copied), BN5's sounds 0x70 and 0x115; BN6's type 0x05 is 0x080C6E21, another body",
+    (3, 0x17): "KnightSoul's charged shot's ball (BN5 0x080C7651, spawned at 0x080C7778): list 3's 0x05 (no BN6 sprite of "
+               "its bytes: copied); BN6's type 0x17 is 0x080C863D, another body",
+    (3, 0x81): "ToadSoul's charged shot's hit (BN5 0x080D6789, spawned at 0x080D6894); BN6's type 0x81 is 0x080D6DF1, "
+               "another body",
+    (4, 0x28): "ShadowSoul's object of the fourth kind (BN5 0x080E3619, spawned at 0x080E36E2); BN6's type 0x28 is "
+               "0x080E45F9, another body",
+}

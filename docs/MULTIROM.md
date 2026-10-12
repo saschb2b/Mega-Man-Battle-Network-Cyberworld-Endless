@@ -1131,7 +1131,7 @@ the next.
   form, and The differential; docs/ROM_DATA.md, UNITE on BN6's Custom
   screen): UNITE on BN6's Custom screen by BN5's rule, and a Soul's life
   as BN5 runs it, each Soul behind the proxy (its look and abilities
-  HeatCross's until S3 and S4). Element 0xB under OK is BN6's Beast Out
+  BN5's from S3 and S4, below). Element 0xB under OK is BN6's Beast Out
   emblem and BN5's UNITE button in one place (One net: the design's finer
   calls): UNITE while the last chip picked lights a held Soul (BN5's check:
   the chip's kind as BN5 has it, which for BN6's chips is BN5's chip of the
@@ -1171,15 +1171,73 @@ the next.
   a turn's change takes BN6 four frames more than BN5 (its form check
   before the screen), and a Soul's crossing six fewer than BN5's unison
   (the proxy's summon), frames whose draws the differential explains.
-- **Next**: a Soul's look (BN5's sprites, its image in the summon's
-  place, its sound), its charged shots and abilities, its passives (a
-  ToadSoul's and a ShadowSoul's flags, NumberSoul's hand of ten),
-  Chaos Unison's charge, and BN5's DarkChip rule (the mood's gains, the
-  worried hand). Each part's masks in the differential (tests/xdiff/
-  legit.json, "until the Souls track's S3" to "S6") go as it comes.
-  Their state in RAM is the engine's plan's (`0x0203FF70`-`0x0203FFEF`,
-  `BN6_SOULS`), their code and data in `EMU_FREE` + `0x480000` to
-  `+0x4C0000` (docs/EMULATION.md).
+- **S3, a Soul's look** (done; docs/ROM_DATA.md, A Soul's look): united,
+  MegaMan is BN5's sprite of the Soul (BN5's sprite list 0, 7-12, copied
+  into the Souls' room and BN6's list 0 grown with them at 0x45-0x4A,
+  past the words BN6's code reads through list 0; list 0 the Souls'
+  alone by the tracks' allocations), its
+  palette 0 (2 in Chaos Unison); no Cross's overlay but what BN5's Soul
+  spawns as he enters it (NumberSoul's companion); the unison's phase 1
+  is BN5's, moved: the Soul's image (BN6's own dead copy of BN5's object,
+  drawn from the Soul's Navi's battle sprite, which BN5's Navis' track
+  copies into BN6's list 2, `xnavi_sprite_install`, 0x20-0x25), its
+  sounds BN5's (0x8D, 0x143 for Chaos Unison); TomahawkSoul's landing
+  shakes the camera as BN5's phase 2 does; his face in the emotion window
+  and on the Custom screen BN5's of the Soul, its turns counted under it
+  in BN5's digits; his arm's flash BN5's own object (the image object,
+  the first kind's type 5, moved with its kinds table: the tracks'
+  allocations have every track run BN5's, BN6's table grown by none),
+  at its own height, and the arm's points of his sprite BN5's.
+- **S4, a Soul's abilities** (done; docs/ROM_DATA.md, The Souls' code in
+  BN6's engine, A Soul's abilities, BN6's attack tables grown): the code
+  each Soul's charged shot runs is BN5's, moved by a recipe
+  (`tools/xsoul.py` writes `src/emu/soulcode_bn5.c`, numbers alone: 28
+  blocks, their calls aimed at BN6's twins, BN5's numbers BN6 has
+  otherwise renumbered, every block's CRC32 checked as it is copied from
+  the player's ROM): its power attack in BN6's power-attack table grown
+  (0x94 on) with BN5's charge times, its family in BN6's attack families
+  grown once for every track (`xattack_grow.c`: 0x10-0xFF, the Souls'
+  0xC0-0xC6), the objects it spawns through the families' second-level
+  dispatch (each BN5 type moved, its decision in `tools/bn5_twins.py`),
+  its effects (0xC0-0xCF) and sprites (list 0 from 0x4B) where BN6 has
+  none of the same bytes (or whose own animates otherwise), its sounds
+  copied into BN6's empty song slots at the slot the allocations give
+  each sound (0x70 at 0x5F, 0x117 at 0x5E, 0x115 at 0x5A, `xsong_put`,
+  found there where another track copied it first). His loadout is the Soul's row in BN6's
+  ids, his element the Soul's (TomahawkSoul's Wood, ToadSoul's Aqua),
+  no weakness, no buster bonus. ColonelSoul's ScreenDivide, ShadowSoul's
+  slash, NumberSoul's bomb, TomahawkSoul's swing, KnightSoul's wrecking
+  ball (its confusion) and ToadSoul's sound waves (their paralysis) each
+  play as BN5's frame for frame (docs/DEVTOOLS.md, The differential).
+- **S5, a Soul's passives** (in part; docs/ROM_DATA.md, A Soul's
+  passives): the passives BN5 gives a Soul as it unites and as his
+  form's state is set again (its two tables by form, the Souls' routines
+  moved, the proxy's entries of BN6's twins routed to them): ShadowSoul's
+  FloatShoe, TomahawkSoul's grass under MegaMan, ToadSoul's flag (BN5's
+  sea, which ToadSoul stands on unharmed, harms in BN6's engine only a
+  Fire actor as poison does: the lava and sea's own port, xpanels.c);
+  NumberSoul's hand of ten and its +10 to an attack chip of no kind. Not
+  yet: the chip charge (A held: ShadowSoul's swords, KnightSoul's Break
+  chips doubled, ToadSoul's Aqua chips doubled; BN6's eligibility and
+  doubling, `0x08013236` and `0x08012C7C`, by BN5's rule for a Soul),
+  ShadowSoul's charged swords' paths and its B+Left counter (moved with
+  its power attack 0x45 and family 0x3D, not yet held to BN5's by a
+  spec), KnightSoul's 50 frames' invulnerability for an attack chip used
+  from the front column (BN5 `0x0801038A`), TomahawkSoul's Wood chip
+  doubled on grass, the grass taken (BN5 `0x08010150`, `0x08010322`) and
+  its freedom from a hit's status (BN5 `0x0801793C`, BN6's twin test at
+  `0x0801ACC6` skips BN6's own form 7), ColonelSoul's chip shot, its
+  Custom screen's elements and its obstacle strike (its ready routine
+  sets BattleState +0x5C's bit 0x10 or 0x20, which BN6's own code sets
+  and reads for its own).
+- **Next**: S5's rest (above), Chaos Unison's charge (S6) and BN5's
+  DarkChip rule (S7: the mood's gains, the worried hand). Each part's
+  masks in the differential (tests/xdiff/legit.json, "until the Souls
+  track's S6" and BN5's Soul record's chip slot, ColonelSoul's) go as it
+  comes. Their state in RAM is the engine's plan's (`0x0203FF70`-
+  `0x0203FFEF`, `BN6_SOULS`), their code and data in `EMU_FREE` +
+  `0x480000` to `+0x4C0000` (docs/EMULATION.md; laid out in
+  `src/emu/soul_room.h`).
 
 ## Status
 

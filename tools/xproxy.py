@@ -58,9 +58,11 @@ part it from HeatCross with the Souls over it (where a break leaves its
 tables not HeatCross's, the Souls' install refuses to stand on it).
 """
 import argparse
+import functools
 import hashlib
 import os
 import shutil
+import struct
 import subprocess
 import sys
 
@@ -148,13 +150,36 @@ def run(name, dev, cross, seed, quiet):
     return os.path.join(data, 'btrace.bin')
 
 
+@functools.lru_cache(maxsize=None)
+def souls_copies():
+    """--souls: BN6's tables the Souls' install grows into copies a run with them reads instead (src/emu/soul_room.h), each
+    (BN6's table, its copy, BN6's bytes of it): the emotion window's faces' tiles' words and their palettes, BN6's 23
+    faces first in each (src/emu/soullook.c's faces_copy)"""
+    import xdiff_snap
+    d = xdiff_snap.c_defines('src/emu/free_space.h', 'src/emu/soul_room.h', 'src/emu/bn6_forms.h')
+    faces = d['SOUL_FACE_FIRST']
+    return ((d['BN6_FACES'], d['SOULS_FACES'], 4 * faces), (d['BN6_FACE_PALS'], d['SOULS_FACE_PALS'], 0x20 * faces))
+
+
+def souls_pointer(off, ia, ib):
+    """a word pointing into BN6's table in one run and the same place of the Souls' copy in the other (the same bytes)"""
+    w = off & ~3
+    va, vb = struct.unpack_from('<I', ia, w)[0], struct.unpack_from('<I', ib, w)[0]
+    for table, copy, n in souls_copies():
+        for x, y in ((va, vb), (vb, va)):
+            if table <= x < table + n and y == copy + (x - table):
+                return 'a pointer into a table the Souls\' install grew (BN6\'s bytes at the same place of its copy)'
+    return None
+
+
 def why(off, ia, ib, ma, mb, allowed):
     """Why the byte at `off` differs between two runs' images, or None: xcontrol's (a pointer into what each run moved,
-    BN6's interrupt stack, dead between frames), and with `allowed` the proxy's own: a place the form is kept, 1
-    against 8; MegaMan's NameID, 0x1AC against 0x1B3; the used bits' word (its row's in both, so far)"""
-    reason = X.why(off, ia, ib, ma, mb, False)
+    BN6's interrupt stack, dead between frames), with --souls a pointer into a table the Souls grew, read through its
+    copy, and with `allowed` the proxy's own: a place the form is kept, 1 against 8; MegaMan's NameID, 0x1AC against
+    0x1B3; the used bits' word (its row's in both, so far)"""
+    reason = X.why(off, ia, ib, ma, mb, False) or (SOULS and souls_pointer(off, ia, ib))
     if reason or not allowed:
-        return reason
+        return reason or None
     addr, a, b = X.addr_of(off), ia[off], ib[off]
     if addr in FORM_PLACES and (a, b) == (HEAT, PROXY):
         return 'the form byte: ' + FORM_PLACES[addr]

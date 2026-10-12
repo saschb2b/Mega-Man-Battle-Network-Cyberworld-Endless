@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -16,8 +17,9 @@
 
 #define XSONG_AT    FREE_SONGS              /* (docs/EMULATION.md) */
 #define XSONG_END   FREE_XNAVIS
-#define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md) */
-#define SLOT_LAST   0x62
+#define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md); the areas' */
+#define SLOT_LAST   0x4B    /* ... from the first up; past them to the last empty one, the sounds xsong_put enters (one BN5 */
+#define SLOT_TOP    0x62    /* ... sound one slot, whatever track copies it: issue #82's allocations, their amendment) */
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */
 #define TRACKS_MAX  8
 #define SEQ_MAX     0x8000  /* a song's sequence: its tracks and header */
@@ -70,7 +72,7 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
  * own ROM. */
 static struct {
 	bool ready;
-	uint32_t next;
+	uint32_t next, end;
 	int nsongs;
 	struct { int rom, song, slot; uint32_t header; } song[SLOT_LAST - SLOT_FIRST + 1];
 	int nmoved;
@@ -83,7 +85,7 @@ static int xr_id;
 /* `len` bytes into the free space, at a word; 0 where it is full. */
 static uint32_t put(const uint8_t *src, uint32_t len) {
 	uint32_t at = X.next;
-	if (!len || at + len > XSONG_END) return 0;
+	if (!len || at + len > X.end) return 0;
 	emu_write(at, src, len);
 	X.next = (at + len + 3) & ~3u;
 	return at;
@@ -251,6 +253,7 @@ int xsong_install(int xrom, int song, int fallback) {
 	if (!X.ready) {
 		X.ready = true;
 		X.next = XSONG_AT;
+		X.end = XSONG_END;
 		for (int k = 0; k < XAREAS_MAX; ++k) {
 			const NetAreaDef *x = net_area_def(NET_AREAS + k);
 			if (x && x->xrom > 0 && x->xsong && slot_of(x->xrom - 1, x->xsong) < 0) copy_in(x->xrom - 1, x->xsong);
@@ -265,4 +268,42 @@ int xsong_install(int xrom, int song, int fallback) {
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;
+}
+
+uint32_t xsong_put(int xrom, int song, int slot, uint32_t at, uint32_t end) {
+	if (!R.data || !R.layout || !R.layout->song_table || slot <= SLOT_LAST || slot > SLOT_TOP || xrom < 0 || xrom >= XROM_COUNT ||
+		!XR[xrom].data || !XR[xrom].layout->song_table || song < 0 || (uint32_t)song * 8 + 8 > ROM_SIZE - XR[xrom].layout->song_table)
+		return 0;
+	/* (BN6's slot still its own empty one, a header of no tracks; the song's player, the one its own table names, BN6's of
+	 * as many tracks at least: the sound effects' players are the same in both games, docs/ROM_DATA.md) */
+	uint32_t entry_at = BUS + R.layout->song_table + (uint32_t)slot * 8, empty = get32(R.data + (entry_at - BUS));
+	const uint8_t *src = XR[xrom].data + XR[xrom].layout->song_table + (uint32_t)song * 8;
+	uint32_t header = get32(src), player = get16(src + 4);
+	if (empty < BUS || empty - BUS >= ROM_SIZE || R.data[empty - BUS] != 0 || header < BUS || header - BUS >= ROM_SIZE ||
+		player >= BN6_MPLAY_COUNT || XR[xrom].data[header - BUS] > R.data[BN6_MPLAYS - BUS + 12 * player + 8])
+		return 0;
+	/* (a slot the sound is in already, another track's install having copied it first: its entry's player and its header's
+	 * tracks, blocks, priority and reverb the sound's, nothing written; another sound there, or a slot of BN6's, refused) */
+	uint32_t now = emu_read32(entry_at);
+	if (now != empty) {
+		bool same = now >= BUS && now - BUS < ROM_SIZE - 4 && emu_read32(entry_at + 4) == get32(src + 4) &&
+			emu_read32(now) == get32(XR[xrom].data + (header - BUS));
+		return same ? at : 0;
+	}
+	/* (copied apart from the areas' songs, which keep their places: nothing of theirs shared or kept) */
+	static __typeof__(X) areas;
+	areas = X;
+	X.next = at;
+	X.end = end;
+	X.nmoved = 0;
+	xr = XR[xrom].data;
+	xr_id = xrom;
+	uint32_t to = copy_song(header), next = X.next;
+	X = areas;
+	if (!to) return 0;
+	uint8_t entry[8];
+	put32(entry, to);
+	memcpy(entry + 4, src + 4, 4);
+	emu_write(entry_at, entry, sizeof entry);
+	return next;
 }

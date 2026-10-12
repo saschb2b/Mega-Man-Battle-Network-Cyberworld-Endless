@@ -89,6 +89,7 @@ typedef struct {
 	int ndeck[2];
 	unsigned souls6;                           /* the Souls BN6's MegaMan holds, the Souls installed in its engine (soulunite.h); 0 none */
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
+	int soulbreak;                             /* ... a Soul's look, abilities or passives broken (soulunite.h's SOULBREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	CustomScript scripts[MAX_SCRIPTS];
@@ -193,13 +194,20 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->deck[k][i] = (uint16_t)got[i % n];
 		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;
 	}
-	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
-	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "cust5") || !strcmp(name, "cust6")) return script_parse(s, 5 + k, v);
 	if (!strcmp(name, "buster"))
 		return sscanf(v, "%d:%d:%d", &s->buster[0], &s->buster[1], &s->buster[2]) == 3 && s->buster[0] >= 0 && s->buster[0] <= BN5_BUSTER_MAX &&
 			s->buster[1] >= 0 && s->buster[1] <= BN5_BUSTER_MAX && s->buster[2] >= 0 && s->buster[2] <= BN5_BUSTER_MAX;
 	if (!strcmp(name, "safe")) return (s->safe = atoi(v) != 0), 1;
+	return -1;
+}
+
+/* the Souls BN6's MegaMan holds, and the rule or parts of them broken (the comparator's own test); -1 where `name` is
+ * none of them */
+static int souls_parse(Spec *s, const char *name, const char *v) {
+	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
+	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
+	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
 	return -1;
 }
 
@@ -251,6 +259,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	int r = numbers_parse(s, name, v);
 	if (r < 0) r = breaks_parse(s, name, v);
 	if (r < 0) r = megaman_parse(s, name, v);
+	if (r < 0) r = souls_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
@@ -362,9 +371,10 @@ static void players_init(Side *g) {
 	g->nbegun = 0;
 }
 
+/* (the song table as the core has it: BN6's empty slots may hold another game's songs, xsong.h) */
 static int song_of(const View *v, uint32_t header) {
 	for (uint32_t n = 0; n < SONGS; ++n)
-		if (get32(v->rom + v->songs + 8 * n) == header) return (int)n;
+		if (v->rd32(0x08000000u + v->songs + 8 * n) == header) return (int)n;
 	return -1;
 }
 
@@ -720,7 +730,7 @@ static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
 	xvirus_install(XVIRUS_FAMILIES);
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
-	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak))) {
+	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak, s->soulbreak))) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}

@@ -12,9 +12,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(ROOT, '.build', 'xdiff')
 
 # Each game's battle as the trace was read (src/emu/bn5.h, bn6.h)
-GAMES = {
-    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16),
-    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32),
+GAMES = {   # (state: the battle's state, BN5_BATTLE_STATE and BN6_BATTLE_STATE)
+    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16, state=0x02034A90),
+    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32, state=0x02034880),
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
@@ -34,6 +34,8 @@ PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+FLASH_TYPE = 5   # the first kind's type 5: an arm's flash, its kind at +4 (OBJ_EFFECT)
+OBJ_SAVED_ACTION = 0x5D   # a battle object's state word saved as a status (paralysis, confusion) stops it (+0x5C): its CurAction
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
 AI_INDEX = 0x01
 
@@ -174,6 +176,9 @@ class Canon:
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
+        # (MegaMan's family by his attack: BN5's number BN6's another where his AttackVars' byte names whose it is)
+        self.mm_action_by = [(int(r['bn5'], 0), int(r['ai'], 0), int(r['is'], 0), int(r['bn6'], 0))
+                             for r in m['action'].get('megaman_by_attack', [])]
         self.layouts = legit['layouts']
         self.legit = legit
         self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
@@ -188,12 +193,15 @@ class Canon:
         self.form_names = {self.form_base + f for f in range(1, int(forms.get('forms', '0'), 0) + 1)}
         self.souls = m.get('souls', {})
         self.power_attack = num(m['power_attack']['bn5_to_bn6']) if 'power_attack' in m else {}
+        self.flash = num(m['flash']['bn5_to_bn6']) if 'flash' in m else {}
+        self.song = num(m['sound'].get('bn5_to_bn6', {}))
         self.sprite_pairs = m['sprites'] if 'sprites' in m else None
         self._sprites = None
 
     def sprite_name(self, game, base):
         """the registry's name of a sprite (its data's start) in this game, or None (maps, sprites: each pair a list and entry of
-        each game's sprite lists, resolved from its ROM)"""
+        each game's sprite lists, resolved from its ROM; a copy the install made of a BN5 sprite by its bytes, BN6's, named as
+        that BN5 sprite: sprites' copies)"""
         if self._sprites is None:
             self._sprites = {5: {}, 6: {}}
             for g, key, at in ((5, 'bn5_lists', 0), (6, 'bn6_lists', 2)):
@@ -204,6 +212,10 @@ class Canon:
                     lst, idx = pair[at], pair[at + 1]
                     entry = u32(rom(g), u32(rom(g), lists - ROM[0] + 4 * lst) - ROM[0] + 4 * idx) & 0x7FFFFFFF
                     self._sprites[g][entry] = pair[4]
+            names5 = {(p[0], p[1]): p[4] for p in (self.sprite_pairs or {}).get('pairs', [])}
+            for (lst, idx), at in sprite_copies((self.sprite_pairs or {}).get('copies', {}).get('recipes', [])).items():
+                if (lst, idx) in names5:
+                    self._sprites[6][at] = names5[(lst, idx)]
         return self._sprites[game].get(base)
 
     def nid(self, game, v):
@@ -222,11 +234,15 @@ class Canon:
         form = self.form_of(5, form5)
         return self.form_base + form if form and self.form_base else next(iter(self.megaman.values()))
 
-    def action(self, game, megaman, v):
-        """CurAction as BN6 numbers it: a virus's 0-5 the same, BN5's 6 BN6's 8, 7 on two up; MegaMan's by his map"""
+    def action(self, game, megaman, v, ai=None):
+        """CurAction as BN6 numbers it: a virus's 0-5 the same, BN5's 6 BN6's 8, 7 on two up; MegaMan's by his map, and by
+        his attack where his AI data `ai` names it (maps, action, megaman_by_attack)"""
         if game == 6:
             return v
         if megaman:
+            for a5, at, want, a6 in self.mm_action_by:
+                if v == a5 and ai is not None and len(ai) > at and ai[at] == want:
+                    return a6
             return self.mm_action.get(v, v)
         return v if v < 6 else 8 if v == 6 else v + 2
 
@@ -289,6 +305,50 @@ RAM = ((0x02000000, 0x02040000), (0x03000000, 0x03008000))
 ROM = (0x08000000, 0x0A000000)
 
 
+def c_defines(*paths):
+    """the plain defines of C headers: NAME 0xN, or (OTHER + 0xN), each resolved to a number (one whose OTHER is none of
+    them left out)"""
+    import re
+    raw = {}
+    for p in paths:
+        with open(os.path.join(ROOT, p), encoding='utf-8') as f:
+            for m in re.finditer(r'^#define\s+(\w+)\s+\(?\s*(?:(\w+)\s*\+\s*)?(0x[0-9A-Fa-f]+)u?\s*\)?', f.read(), re.M):
+                raw[m.group(1)] = (m.group(2), int(m.group(3), 16))
+    out = {}
+
+    def value(name):
+        if name not in out:
+            base, n = raw[name]
+            out[name] = (value(base) if base else 0) + n
+        return out[name]
+    for name in raw:
+        try:
+            value(name)
+        except KeyError:
+            out.pop(name, None)
+    return out
+
+
+@functools.lru_cache(maxsize=None)
+def sprite_copies_of(recipe):
+    """(BN5's list, number) -> BN6's address of its copy, from a recipe's XvSprite table (tools/xsoul.py's, the Souls' room)"""
+    import re
+    names = c_defines('src/emu/free_space.h', 'src/emu/soul_room.h')
+    with open(os.path.join(ROOT, recipe), encoding='utf-8') as f:
+        text = f.read()
+    out = {}
+    for m in re.finditer(r'\{ (\d+), 0x([0-9A-F]+), \d+, 0x[0-9A-F]+, (\w+) \+ 0x([0-9A-F]+), 0x[0-9A-F]+ \}', text):
+        out[(int(m.group(1)), int(m.group(2), 16))] = names[m.group(3)] + int(m.group(4), 16)
+    return out
+
+
+def sprite_copies(recipes):
+    out = {}
+    for r in recipes:
+        out.update(sprite_copies_of(r))
+    return out
+
+
 def is_ptr(v):
     return any(lo <= v < hi for lo, hi in RAM) or ROM[0] <= v < ROM[1]
 
@@ -321,6 +381,11 @@ class Frame:
             return ('list head',)
         if v == self.list_end:
             return ('list end',)
+        # (each game's battle state: an enemy's deletion leaves its address in the effect it spawns, its +0x34 and +0x3C, the
+        # registers the twins BN5 0x0801343A / BN6 0x0801664E hand the spawner, their 0x080095D4 / 0x0800AE44 leaving it in r1,
+        # where the effect's code never reads them)
+        if v == GAMES[self.game]['state']:
+            return ('battle state',)
         for lo, hi, role, part, base in self.spans:
             if lo <= v < hi:
                 off = v - lo + base
@@ -515,11 +580,15 @@ def obj_cells(fa, fb, oa, ob):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
             if off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
-                a = canon.action(5, mm, a)
+                a = canon.action(5, mm, a, oa.ai)
+            elif off == OBJ_SAVED_ACTION and kind == 'T1' and not mm and a:
+                a = canon.action(5, mm, a)   # (the CurAction a status saved, to take up again as it ends: numbered alike)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)
             elif off == OBJ_EFFECT and kind == 'T4' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.fx(5, a)
+            elif off == OBJ_EFFECT and kind == 'T1' and oa.o8(OBJ_TYPE) == FLASH_TYPE and b in canon.flash.values():
+                a = canon.flash.get(a, a)   # (a flash of the Souls' kinds: BN5's kind it copies, maps, flash)
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
                 na, nb = canon.nid(5, oa.o16(OBJ_NAME_ID)), ob.o16(OBJ_NAME_ID)
                 if mm and fa.fr.get('player'):   # (his NameID by his form, BN5's read as BN6 writes it in that form)
@@ -767,8 +836,11 @@ def frame_diffs(fa, fb):
         out += [Diff(t, role, part, off, a, b) for part, off, a, b in cells]
     if fa.fr['rng'] != fb.fr['rng']:
         out.append(Diff(t, 'battle', 'rng', 0, fa.fr['rng'], fb.fr['rng']))
-    # (a song by its number: the music player it plays on is its song table entry's, each game's own: legit.json, maps)
-    sa, sb = sorted(s for _, s in fa.fr['sounds']), sorted(s for _, s in fb.fr['sounds'])
+    # (a song by its number: the music player it plays on is its song table entry's, each game's own: legit.json, maps; BN5's
+    # song read as the slot BN6 copied it into where BN6 played that slot, maps, sound, bn5_to_bn6)
+    sb = sorted(s for _, s in fb.fr['sounds'])
+    song = fa.canon.song
+    sa = sorted(song[s] if song.get(s) in sb else s for _, s in fa.fr['sounds'])
     if sa != sb:
         out.append(Diff(t, 'battle', 'sounds', 0, sa, sb))
     # (the order the objects run in, of those in play in both: one in play in one alone is its own difference)

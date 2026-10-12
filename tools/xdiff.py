@@ -163,6 +163,8 @@ def megaman_items(spec):
         parts.append(f'souls6={spec["souls6"]}')
     if spec.get('unitebreak'):
         parts.append(f'unitebreak={spec["unitebreak"]}')
+    if spec.get('soulbreak'):
+        parts.append(f'soulbreak={spec["soulbreak"]}')
     if spec.get('buster'):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
@@ -264,7 +266,7 @@ def story(trace, canon, upto=None):
         for o in fr['objs']:
             if o.kind == 'T1':
                 mm = canon.is_megaman(game, o.o16(OBJ_NAME_ID))
-                parts.append(f'{role_name(o.role)} act {canon.action(game, mm, o.o8(OBJ_ACTION)):02X}.{o.o8(0x0A):02X} '
+                parts.append(f'{role_name(o.role)} act {canon.action(game, mm, o.o8(OBJ_ACTION), o.ai):02X}.{o.o8(0x0A):02X} '
                              f'p{o.o8(0x12)}{o.o8(0x13)} hp{o.o16(0x24)}')
             elif o.kind == 'T3':
                 parts.append(f'{role_name(o.role)} {o.o8(OBJ_ACTION):02X} p{o.o8(0x12)}{o.o8(0x13)}')
@@ -347,8 +349,8 @@ def timeline(trace, canon):
         for o in fr['objs']:
             if o.kind == 'T1':
                 nid = canon.nid(game, o.o16(OBJ_NAME_ID))
-                mm = nid in canon.megaman.values()
-                rec = (canon.action(game, mm, o.o8(OBJ_ACTION)), o.o16(0x24), (o.o8(0x12), o.o8(0x13)))
+                mm = canon.is_megaman(6, nid)   # (in BN6's numbers: in a form, BN6's NameID of the form, a Soul's the proxy's)
+                rec = (canon.action(game, mm, o.o8(OBJ_ACTION), o.ai), o.o16(0x24), (o.o8(0x12), o.o8(0x13)))
                 if mm:
                     row['mm'] = rec
                 else:
@@ -630,7 +632,7 @@ def main():
         caught = 0
         for k, m in enumerate(muts):
             print(f'== mutation {k + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}')
-            extra = {'unitebreak': m['unitebreak']} if 'unitebreak' in m else None
+            extra = {key: m[key] for key in ('unitebreak', 'soulbreak') if key in m} or None
             verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}', extra)
             caught += verdict == 'FAIL'
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')

@@ -24,4 +24,14 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
  * core's ROM copy was made anew. */
 int xsong_install(int xrom, int song, int fallback);
 
+/* Song `song` of extra ROM `xrom`, a sound effect, copied into [at, end)
+ * of the core's ROM copy and entered in BN6's empty slot `slot` (past the
+ * areas' slots: one BN5 sound one slot, issue #82's allocations), played by
+ * the music player its own table names; apart from the areas' songs, which
+ * keep their slots and places. The end of what it wrote; `at` where the
+ * slot holds the sound already (another install copied it first: its
+ * player and header the same); 0 where it could not be (the slot then left
+ * as it was). */
+uint32_t xsong_put(int xrom, int song, int slot, uint32_t at, uint32_t end);
+
 #endif

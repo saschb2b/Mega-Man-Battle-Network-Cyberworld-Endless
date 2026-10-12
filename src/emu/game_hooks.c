@@ -36,7 +36,7 @@ void game_hooks_install(void) {
 	 * reach it as each battle begins, souls.c) */
 	if (dev.soulproxy || souls_dev_mask) {
 		bool proxy = soulproxy_install(dev.proxybreak);
-		if (proxy) soulunite_install(dev.unitebreak);
+		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
 	}
 	if (emu_debug_on()) claims_report();
 }

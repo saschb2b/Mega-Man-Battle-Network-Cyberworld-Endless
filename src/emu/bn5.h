@@ -239,4 +239,28 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
 #define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
 
+/* The Souls' look and abilities in BN6's engine (src/emu/soullook.c, soulpower.c, soulcode.c; the Souls track's S3-S5) */
+#define BN5_SOUL_LOADOUTS 0x0801CA18u /* each form's loadout, 6 bytes (AI data +4-+8, +0x11; BN6_FORM_LOADOUTS'): the Souls' 7-12, */
+#define BN5_SOUL_LOADOUTS_REF 0x0800DCFCu /* ... the word naming it */
+#define BN5_CHARGE_TIMES  0x0801CA68u /* the power attacks' charge times, 5 halfwords an id by the buster's Charge (BN6_CHARGE_TIMES'), */
+#define BN5_CHARGE_TIMES_REF 0x080106E0u /* ... the word naming it */
+#define BN5_SOUL_ELEMENTS 0x0800E62Cu /* each form's element (0x0800E5F8): TomahawkSoul's 4 Wood, ToadSoul's 2 Aqua, the rest of Colonel's none */
+#define BN5_SOUL_ENTER    0x0800F030u /* each form's routine as he enters it (0x0800F01C, from the unison's phase 2): NumberSoul's 0x0800F075, */
+#define BN5_SOUL_LEAVE    0x0800F094u /* ... as he leaves it (0x0800F080): NumberSoul's 0x0800F0D7, */
+#define BN5_FORM_NULLSUB  0x0800F195u /* ... the other Souls' empty one */
+#define BN5_SOUL_READY    0x08011BA4u /* each form's passives as he unites (0x08011B8A, after his loadout): ShadowSoul's FloatShoe 0x08011C79, */
+#define BN5_SOUL_REAPPLY  0x08011CCCu /* ... and as a form's state is set again (0x08011CB4, from 0x08011144): ShadowSoul's 0x08011D2B; */
+#define BN5_THUMB_RETURN  0x46F7u     /* ... a form with none: its entry a routine of mov pc,lr alone */
+#define BN5_ARM_LISTS     0x080151B8u /* a word a list: its rows of an arm's points by sprite number, 0x3C bytes a row (0x080151A8, through its */
+#define BN5_ARM_ROW_SIZE  0x3C        /* ... literal 0x080151B4; BN6's rows 0x44, by a row byte for list 0): list 0's the Souls' at their numbers 7-12 */
+#define BN5_UNITE_IMAGE_PHASE 0x08012008u /* the unison's phase 1 (its table 0x08011F8C): the Soul's image (0x080C060C), sounds 0x8D/0x143 */
+#define BN5_SOUL_FACES_REF 0x080197F0u /* the word naming the Souls' faces in the emotion window (0x087417FC, 0x100 bytes by the Soul - 7), */
+#define BN5_FACE_PALS_REF 0x08019800u /* ... the faces' palettes (0x08742AFC, 0x20 bytes by the face: the Soul's at the Soul - 2), */
+#define BN5_FACE_DIGITS_REF 0x08019854u /* ... the count's digits under them (0x08741DFC, 0x80 bytes by 10 - the count) */
+#define BN5_FACE_SOUL     5           /* the face of the first Soul, 7 (BN5's 0x0801AF68: the Soul - 2) */
+#define BN5_FLASH_SOUL    0x23        /* the arm flash's kind of MegaMan's buster in a Soul (0x080EBBCA), its frame the Soul; */
+#define BN5_FLASH_CHAOS   0x33        /* ... in Chaos Unison (0x080EBC04) */
+#define BN5_FLASH_SPAWN   0x080B9CAEu /* the arm flash's spawner (r4 its word, r5 its owner, r7 where its object goes): the first kind's */
+                                      /* type 5, BN5's object (0x080B9B81) with BN5's kinds (0x080B9A5C), moved with the Souls' code */
+
 #endif

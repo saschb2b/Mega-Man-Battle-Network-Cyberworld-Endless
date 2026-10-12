@@ -1,0 +1,247 @@
+{
+ "about": "BN5's ColonelSoul and its charged shot in both engines (the Souls track's S3-S5): its flag (0008) with Double Soul's and Chaos Unison's in BN5, the Souls installed in BN6's engine holding it (souls6), a deck of RockCube * (BN5's chip 99, BN6's 143: Obstacle, ColonelSoul's kind), the first Custom screen's chip picked and given up, UNITE and OK; it unites as the first turn starts: its look (BN5's sprite list 0 by the Soul, its palette, its face and turns), its loadout in BN6's numbers. B held from t100 for 100 frames (its charge 70 at Charge 1, BN5 0x0801CA68 by its power attack): its charged shot, ScreenDivide (BN5's power attack 0x14, BN6's 0x94; its family 0x43, BN6's 0xC0; its three effects, BN5's 0x48-0x4A, BN6's 0xC0-0xC2; its arm's flash, BN5's kind 3 of BN5's object, moved (the first kind's type 5, BN5's kinds table), the same kind in both; its sound 0x70, BN6's slot 0x5F), strikes CanGard V1 at (4,2), MegaMan at (3,2) with 2000 HP, kept from harm. Every frame compared, MegaMan's own state a difference.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 500,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0008",
+  "0236"
+ ],
+ "folder5": [
+  "3463"
+ ],
+ "deck5": [
+  "3463"
+ ],
+ "folder6": [
+  "348F"
+ ],
+ "deck6": [
+  "348F"
+ ],
+ "souls6": "01",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   100
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x07"
+    ],
+    [
+     227,
+     "0x07"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x80"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ],
+   "hp": [
+    [
+     500,
+     "0x7D0"
+    ]
+   ]
+  },
+  "foe_hp": [
+   [
+    214,
+    60
+   ],
+   [
+    215,
+    10
+   ]
+  ]
+ },
+ "expect_why": "BN5's own course (its trace, the reference): ColonelSoul united from t1 (its AI index 7, its turns 3, its used bit 0x80 for the battle, UNITE chosen on the first screen), its charged shot's family from t202 to its ready state again at t228, the foe's HP 60 before its hit and 10 at t215; MegaMan never hit (safe)."
+}

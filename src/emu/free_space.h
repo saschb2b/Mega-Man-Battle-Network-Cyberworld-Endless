@@ -52,11 +52,15 @@
 #define FREE_VIRUS_ROOM     (EMU_FREE + 0x330000u)   /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c), to: */
 #define FREE_FAMILIES       (EMU_FREE + 0x348000u)   /* the families: their homes, code and art (xvirus.c), to: */
 #define FREE_CHIPS          (EMU_FREE + 0x400000u)   /* the chip registry: records, names, routines, art (chips.c, xchips_install.c), to: */
-#define FREE_SOULS          (EMU_FREE + 0x480000u)   /* kept for BN5's Souls (the Souls' track), to: */
+#define FREE_SOULS          (EMU_FREE + 0x480000u)   /* BN5's Souls in BN6's engine (soulunite.c, soullook.c, soulcode.c; soul_room.h lays it out), to: */
 #define FREE_PANELS         (EMU_FREE + 0x4C0000u)   /* BN5's lava and sea as BN6's panels (xpanels.c, xpanels_look.c), to: */
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
-#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* kept for BN5's Navis, to: */
-#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* kept for the code of BN5's chips, to: */
+#define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis: first their battle sprites in BN6's list 2 (xnavi_sprites.c), */
+#define FREE_NAVI_SPRITES   FREE_NAVIS                /* ... a fixed place each, */
+#define FREE_NAVI_SPRITES_END (FREE_NAVIS + 0x080000u) /* ... then kept for the Navis, to: */
+#define FREE_CHIP_CODE      (EMU_FREE + 0x600000u)   /* the code of BN5's chips and Souls: first BN6's attack families grown (xattack_grow.c), */
+#define FREE_ATTACK_FAMILIES FREE_CHIP_CODE           /* ... 240 words and the stub of an empty one, */
+#define FREE_ATTACK_FAMILIES_END (FREE_CHIP_CODE + 0x000400u) /* ... then kept for the chips' code, to: */
 #define FREE_TAIL           (EMU_FREE + 0x700000u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */

@@ -144,6 +144,7 @@
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
+#define BN6_T1_PARAM          0x04        /* its spawn's parameters, r4's bytes (a Soul's image: the Soul; an arm's flash: its kind) */
 #define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/ROM_DATA.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
 #define BN6_T1_AI_DATA        0x58        /* AIDataPtr: its AI's data in EWRAM, BN6_AI_DATA_SIZE bytes: +1 its AI index, +0x80 its state, +0xA0 its attack's variables */
 #define BN6_AI_DATA_SIZE      0x100       /* an AI's data (BN6_T1_AI_DATA), the same in BN5 */
@@ -383,6 +384,7 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_attacks.h"   /* the attack families, power attacks and charge times, as the engine grows them (issue #82) */
 #include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */

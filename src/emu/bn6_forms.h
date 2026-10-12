@@ -18,6 +18,7 @@
 #define BN6_FORM_SPRITES      0x0800FCBCu /* u8 a form: MegaMan's sprite, its number in his category (0x0800FC9E reads it; Crosses 0, his own) */
 #define BN6_FORM_OVERLAYS     0x0801127Cu /* u32 a form: the routine that spawns a Cross's overlay as he crosses (0x08011268 calls it) */
 #define BN6_FORM_OVERLAYS_END 0x08011398u /* u32 a form: the routine that takes it away as he leaves the form (0x08011384) */
+#define BN6_FORM_OVERLAY_NONE 0x08010F68u /* mov pc,lr: BN6_FORM_OVERLAYS' entry 0 (no form), no overlay */
 #define BN6_FORM_ELEMENTS     0x080108B8u /* u8 a form: his element (0x0801086C, into his object +0x0E and collision data +2) */
 #define BN6_FORM_WEAKNESSES   0x080108D1u /* u8 a form: the second wheel's elements he is weak to (0x0801086C, into collision data +0x18) */
 #define BN6_FORM_PASSIVES     0x08014550u /* u32 a form: the routine giving his AI data the form's passive (0x08014536: an Airshoe, a SuperArmor) */
@@ -129,5 +130,76 @@
                                              chips' icons, where BN5's are 0x0874B2BC (BN5_SOUL_PICTURES) */
 #define BN6_UNITE_PICTURES_2  0x08028200u /* ... the same word in its routine 0x080281E4, whose only caller is mode 0x24 (0x080271A2) */
 #define BN6_UNITE_PICTURE_PAL 0x080270C4u /* mode 0x24's word naming the picture's palette (0x0872AED0, 0x20 bytes) */
+
+/* A Soul's look (soullook.c; the Souls track's S3): where BN6's engine
+ * draws MegaMan by his form, hooked for the proxy form with a Soul */
+#define BN6_SPRITES_MEGAMAN   0           /* sprite list 0: MegaMan's (+0 him, 1-12 his Beast Outs), by RomLayout.sprite_lists' first word, */
+#define BN6_SPRITES_MEGAMAN_COUNT 14      /* ... its numbers (0x08031CEC on, list 1's after them; 13 the placeholder): code reads list 0 past them, */
+#define BN6_SPRITES_THROUGH   0x45        /* ... into lists 1 and 2's tables after it, the battle sprites (a Falzar Navi on the map: list 0's
+                                             0x34-0x38, list 2's 6-10), to this: list 3's table at 0x08031E00 */
+#define BN6_SPRITES_LIST3     3           /* ... list 3, whose word names list 0's table + 4 x BN6_SPRITES_THROUGH */
+#define BN6_ARM_LISTS         0x080188A0u /* a word a list (0-2): its rows of an arm's points, 0x44 bytes a row, two signed bytes a point by */
+#define BN6_ARM_ROW_SIZE      0x44        /* ... the animation (0x08018886, through its literal 0x0801889C; 0x08018842 reads a point) */
+#define BN6_ARM_ROWS0         0x080188C0u /* list 0's three rows (MegaMan's, two of his Beast Outs'), */
+#define BN6_ARM_ROWS0_COUNT   3           /* ... three of them */
+#define BN6_ARM_ROW_OF        0x080188B0u /* ... the row of each list-0 number, a byte each (14), named by the literal */
+#define BN6_ARM_ROW_OF_REF    0x080188ACu /* ... here, 0x08018886's other read */
+#define BN6_FORM_SPRITE_READ  0x0800FCA4u /* ldrb r2,[r0,r1]: the sprite selector's (0x0800FC9E) read of BN6_FORM_SPRITES by the form (r1), MegaMan's, */
+#define BN6_FORM_SPRITE_BACK  0x0800FCA6u /* ... on to its movs r1,#0 (list 0) and back */
+#define BN6_FORM_PALETTE_READ 0x08010066u /* ldrb r4,[r1,r0]: his palette (0x0801002C) from BN6_FORM_PALETTES by the form (r0), */
+#define BN6_FORM_PALETTE_BACK 0x08010068u /* ... on to its b to the palette's set */
+#define BN6_FORM_PALETTE_READ2 0x080BF518u /* ldrb r0,[r1,r0]: an object drawn as MegaMan in his form (0x080BF4FC), its palette by the form, */
+#define BN6_FORM_PALETTE2_BACK 0x080BF51Au /* ... on to its sprite_setPalette */
+#define BN6_CROSSING_PHASES   0x08014A82u /* ldr r1,[pc]: the crossing's phases for forms 1-10 (r0 the pending form; 0x08014A38), */
+#define BN6_CROSSING_PHASES_BACK 0x08014A84u /* ... on to their call by the phase (r7's +0) */
+#define BN6_CROSSING_PHASES_TABLE 0x08014AB4u /* ... the table: */
+#define BN6_CROSSING_PHASE0   0x08014B18u /* phase 0 (MegaMan back on his panel), */
+#define BN6_CROSSING_PHASE2   0x08014BEEu /* phase 2 (his sprite loaded by the form, the form written, the overlay spawned, sounds 0x8D, 0x77), */
+#define BN6_CROSSING_PHASE3   0x08014CC0u /* phase 3 (the crossing's end); phase 1 (0x08014B98) the Cross's summon (BN6_CROSS_SUMMON) */
+#define BN6_CROSSING_SOUND    0x08014C8Eu /* movs r0,#0x8D in phase 2: the sound BN5's unison plays in its phase 1 (0x08012054), */
+#define BN6_CROSSING_SOUND_NEXT 0x08014C94u /* ... on to its movs r0,#0x77 */
+#define BN6_TOOLKIT_CAMERA    0x0C        /* eToolkit +0x0C: the camera's state, +0x0C its shake's frames and +0x0E its strength, as BN6's */
+#define BN6_CAMERA_SHAKE      0x0C        /* ... camera_initShakeEffect sets them (0x080302A8; BN5's 0x08030E1C the same), the shake each */
+#define BN6_CAMERA_SHAKE_STRENGTH 0x0E    /* ... frame drawing two random numbers (BN6 0x080301E8 from the second word, BN5 0x08030D7C from the first) */
+#define BN6_BATTLE_FLAG_HOLD  0x20        /* BN6_BATTLE_FLAGS (bn6_panels.h): set through a unison's or crossing's last phase, which clears it (BN6
+                                           * 0x08014CEA, BN5 0x080121AE); the camera shakes on through it (0x080301F8) */
+#define BN6_SOUL_IMAGE_SPRITE 0x080C1D40u /* movs r2,#0xB in the set-up of BN6's first kind's type 0x2A, BN5's Soul's image (0x080C047C), which
+                                             Gregar keeps and never spawns (its spawner 0x080C1EAC no code calls): the number of list 2, */
+#define BN6_SOUL_IMAGE_SPRITE_NEXT 0x080C1D42u /* ... on past it */
+#define BN6_SOUL_IMAGE_DECO   0x080C1D88u /* bl 0x08010DF6 there: a decoration by BN6's Navi of its +4, */
+#define BN6_SOUL_IMAGE_DECO_NEXT 0x080C1D8Cu /* ... past it, */
+#define BN6_SOUL_IMAGE_UNDECO 0x080C1E66u /* ... and bl 0x08011044, its taking away, */
+#define BN6_SOUL_IMAGE_UNDECO_NEXT 0x080C1E6Au /* ... past it */
+#define BN6_FACE_OF_FORM      0x0801E6C2u /* ldrb r6,[r2,r4]: the emotion window's face by the form (r4; 0x0801E6A8) from BN6_FORM_MUGSHOTS, */
+#define BN6_FACE_OF_FORM_OUT  0x0801E6EAu /* ... on to its end (r0 the face, r1 the count under it: r6, r3) */
+#define BN6_FACE_OF_FORM2     0x0801E666u /* ... the Custom screen's (0x0801E660), */
+#define BN6_FACE_OF_FORM2_OUT 0x0801E696u /* ... its end */
+#define BN6_FACE_OWNER        0x48        /* the emotion window's +0x48: the object whose face it shows (its +0x16 the side) */
+#define BN6_FACES             0x0801CD08u /* the faces' tiles, a word a face (0x100 bytes each to 0x06017680), 23 faces: */
+#define BN6_FACES_REF         0x0801CD04u /* ... the one word naming it (0x0801CBC4) */
+#define BN6_FACE_PALS         0x0872D050u /* the faces' palettes, 0x20 bytes each by the face, */
+#define BN6_FACE_PALS_REF     0x0801CD74u /* ... the one word naming it (0x0801CC26) */
+#define BN6_FACE_COUNTER      0x0801D814u /* whether the window counts under the face (Beast Out's turns; HeatCross's flag 0xE0 and no link) */
+#define BN6_FACE_DIGITS       0x0801CBFEu /* ldr r1,[pc]: the count's digits (0x0872C8D0, 0x80 bytes by 10 - the count), r4 the face, */
+#define BN6_FACE_DIGITS_NEXT  0x0801CC00u /* ... on past it */
+#define BN6_FLASH_HEIGHT      0x080BA5A2u /* movs r0,#0xf8 in BN6's arm flash's set-up (the first kind's type 5, 0x080BA549): a Cross's flash */
+#define BN6_FLASH_HEIGHT_NEXT 0x080BA5A8u /* ... raised 8 pixels (its owner's NameID 0x1AC-0x1B5, his form not 0), on to its strb r0,[r5,#0xc]; */
+                                          /* ... else its kind's own height (r4 + 3) */
+#define BN6_ARM_FLASH_SPAWN   0x080EC954u /* mov r7,r8 in MegaMan's arm flash routine (0x080EC8B2), r4 the flash's word made (its kind the low */
+#define BN6_ARM_FLASH_CALL    0x080EC956u /* ... byte), before its bl to BN6's spawner of the flash (0x080BA6A0, the first kind's type 5), */
+#define BN6_ARM_FLASH_CALL2   0x080EC958u /* ... the bl's second halfword, */
+#define BN6_ARM_FLASH_SPAWN_BACK 0x080EC95Au /* ... and past it, the routine's end */
+/* A Soul's abilities (soulpower.c; S4) */
+#define BN6_FORM_LOADOUT_READ 0x0800FF3Eu /* ldrb r1,[r0]: the loadout's (0x0800FEEC) row by the form, r0 its address in BN6_FORM_LOADOUTS */
+#define BN6_FORM_ELEMENT_READ 0x08010884u /* ldrb r0,[r4,r0]: his element (0x0801086C) from BN6_FORM_ELEMENTS by the form, */
+#define BN6_FORM_ELEMENT_NEXT 0x08010892u /* ... on to its bl 0x08019F8C (the element set) */
+#define BN6_FORM_WEAKNESS_READ 0x080108A8u /* ldrb r0,[r4,r0]: his weakness from BN6_FORM_WEAKNESSES by the form, */
+#define BN6_FORM_WEAKNESS_NEXT 0x080108AAu /* ... on to its bl 0x08019F9E */
+#define BN6_FORM_BONUS_READ   0x0801268Cu /* ldrb r1,[r1,r0]: his buster's Attack bonus (0x0801265A) from BN6_FORM_BUSTER_BONUS by the form, */
+#define BN6_FORM_BONUS_NEXT   0x0801268Eu /* ... on to its add */
+#define BN6_POWER_EMPTY       0x08011A24u /* mov pc,lr: the power attacks' empty routine (ids 5, 0x0D, 0x0E ... name it) */
+#define BN6_CHIP_BONUS_DONE   0x0800F090u /* the chips' bonuses by form (0x0800EF34): its end, r6 the bonus, r7 its mark */
+/* A Soul's passives (soulpassive.c; S5) */
+#define BN6_HAND_SIZE_SET     0x0802A494u /* strb r0,[r5,#6]: the Custom screen's hand size set (0x0802A408) */
 
 #endif
