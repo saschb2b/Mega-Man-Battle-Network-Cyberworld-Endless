@@ -44,6 +44,19 @@
         "0x57": "0x6C"
       }
     },
+    "panel_type": {
+      "why": "A panel's type (+2), the type it is drawn as (+6, the one-frame override's at +8) and the low nibble of its flags (BN5's +0x18, BN6's +0x14, the type ORed into its table's word): BN5's lava (8) and sea (0xA) are BN6's free types 13 and 14 where src/emu/xpanels.c brings them in, BN5's holy (9) BN6's 5 (src/emu/xfields.c), the rest the same numbers.",
+      "evidence": [
+        "the flags: _object_updatePanelParameters ORs the type into its word, BN5 0x0800AFE0 / BN6 IWRAM 0x030078DC (ldrb r1,[r0,#2]; ... orrs r1,r3)",
+        "the drawn type: the same routines copy +2 to +6; BN5's per-panel update writes lava's 8 or 2 there as it blinks (0x0800AA68), BN6's its conveyors' own type or 2 (0x0800C478), the path lava and sea take in BN6 (xpanels.c, panel_ages)",
+        "the flags' words: lava's 0x11010 and the sea's 0x30010 are BN5's (BN5_PANEL_FLAGS_OF), copied into BN6's grown table (xpanels.c, flags_make)"
+      ],
+      "bn5_to_bn6": {
+        "0x8": "0xD",
+        "0xA": "0xE",
+        "0x9": "0x5"
+      }
+    },
     "alliance": {
       "why": "A collision data's +0x30 (what it is) and +0x34 (what it strikes) are words the engine's setup takes from a table by the object's alliance and a region its caller names, two words a region, and ORs the time stop's bit 0x10000 into +0x30 while time is stopped; each game has its own table (layouts, collision, alliance_masks), whose entries mostly differ by BN6's bit 0x80. So a BN5 word is read as the BN6 entry at its place in BN5's table (with the time stop's bit as it is): over the 160 entries each BN5 word gives one BN6 word (a word two entries would give otherwise would be left as it is; none does). A hit and a touch OR the other object's +0x30 into what hit or touched it (BN6's +0x70 and +0x6C, BN5's +0x68 and +0x64): such a word is read as the OR of the BN6 words of the table's words it is made of, where every way of making it gives the same (else it is compared as it is). Not the family's code: the setup and the hit pass are the engine's, and the family's region and alliance are compared through them (a family object set up with another region reads as another BN6 word).",
       "evidence": [
@@ -252,7 +265,34 @@
           28,
           4
         ]
-      ]
+      ],
+      "types": [
+        2,
+        6,
+        8
+      ],
+      "flags": [
+        24,
+        20
+      ],
+      "timers": {
+        "why": "BN5 keeps a timer for lava (+0x10) and one for the sea (+0x14), each 0x3C0 while its panel is another (written every frame, and as the field is made), counted down while it is lava or sea; BN6 keeps one (+0x12), 0x708 on most panels, counted down on a conveyor, and on lava and sea as BN6's engine runs them (src/emu/xpanels.c: from 0x3C0, BN5's, as each is made). So where one of BN5's two is not 0x3C0 it is that panel's timer, compared with BN6's +0x12 (on the frame lava cools under an object both still hold the count the update left); where neither is, the masks for their idle values hold. On the frame lava or the sea runs out BN5's reads 0 (its update ends the count, plain, and writes 0x3C0 the next frame) where BN6's reads 0x708 again (its conveyors' count writes it as it ends): the same.",
+        "evidence": [
+          "BN5: the field made, 0x0800AB66-0x0800AB70 writes 0x258 to +0x0E, 0x3C0 to +0x10 and +0x14; the update counts lava's +0x10 (0x0800AA4C) and the sea's +0x14 (0x0800AA78) down to plain, each other branch writing 0x3C0 to the other",
+          "BN6: the field made, 0x0800C564 writes 0x708 to +0x12; the update counts it down for 9-12 (0x0800C45C) and for 13 and 14 by xpanels.c's hook at 0x0800C3B8, which sets it to 0x3C0 where it still holds 0x708; object_setPanelType's hook (0x0800CC0A) gives a chip's lava or sea 0x3C0, as BN5's 0x0800B2A6 does",
+          "the count's end: BN5 0x0800AA56-0x0800AA64 (lava) and 0x0800AA82-0x0800AA90 (sea) set the type plain and +0x0E, the timer left at 0; BN6 0x0800C466-0x0800C474 sets it plain and writes 0x708 to +0x12"
+        ],
+        "bn5": [
+          "0x10",
+          "0x14"
+        ],
+        "bn6": "0x12",
+        "idle": "0x3C0",
+        "out": [
+          "0x0",
+          "0x708"
+        ]
+      }
     }
   },
   "rng": {
@@ -399,7 +439,7 @@
         "0x08-0x09",
         "0x24-0x27"
       ],
-      "why": "Each frame the sprite renderer gives each object drawn a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and keeps the frame it last copied there (+0x24), cleared when the place moves. The code is the same in both, but what each game draws (MegaMan's own sprite, the HUD, BN6's own effects) differs, so the places do. Drawing resources, not anyone's logic: an object's animation is compared by its sprite state's animation (+0x00) and the pointers to its current frame (+0x1C, +0x20, relative to its sprite's data). This mask is for what is not the family's (MegaMan's side, a native's, the engine's); the family's places are read as their rank among the family's own (maps, renderer) and its cache (+0x24) is compared.",
+      "why": "Each frame the sprite renderer gives each object drawn a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and keeps the frame it last copied there (+0x24), cleared when the place moves. The code is the same in both, but what each game draws (MegaMan's own sprite, the HUD, BN6's own effects) differs, so the places do. Drawing resources, not anyone's logic: an object's animation is compared by its sprite state's animation (+0x00) and the pointers to its current frame (+0x1C, +0x20, relative to its sprite's data). This mask is for what is not the family's (MegaMan's side, a native's, the engine's); the family's places are read as their rank among the family's own (maps, renderer) and its cache (+0x24) is compared. The lava's spark (whose panels: the code under test, as a family's) likewise: its place there is the count of what was drawn before it, MegaMan's own sprite among it.",
       "evidence": [
         "the tile place: BN5 0x081C7FF4-0x081C7FFC / BN6 0x081D658C-0x081D6594 (the IWRAM renderer's ROM copies), the frame copied to 0x06010000 + place x 32 (BN5 0x081C800E / BN6 0x081D65A6), its cache cleared where the place moved (BN5 0x081C7FD4 / BN6 0x081D656C)",
         "a sprite's data pointer +0x18 is its data's start + 4 (the sprite's set-up stores it so), so +0x1C-0x24 are compared from it"
@@ -409,7 +449,8 @@
         "megaman's",
         "native",
         "native's",
-        "engine"
+        "engine",
+        "panels"
       ]
     },
     {
@@ -419,7 +460,7 @@
         "0x15"
       ],
       "bits": "0xF0",
-      "why": "The same renderer gives each object drawn a palette slot, the high nibble of its sprite state's +0x15, from the slots taken before it this frame: the same code in both, other things drawn before it. For what is not the family's; the family's slots are read as their rank among the family's own (maps, renderer).",
+      "why": "The same renderer gives each object drawn a palette slot, the high nibble of its sprite state's +0x15, from the slots taken before it this frame: the same code in both, other things drawn before it. For what is not the family's; the family's slots are read as their rank among the family's own (maps, renderer). The lava's spark (whose panels: the code under test, as a family's) likewise: its place there is the count of what was drawn before it, MegaMan's own sprite among it.",
       "evidence": [
         "BN5 0x081C803A-0x081C8048 / BN6 0x081D65D2-0x081D65E0: the slot's number shifted into +0x15's high nibble"
       ],
@@ -428,7 +469,8 @@
         "megaman's",
         "native",
         "native's",
-        "engine"
+        "engine",
+        "panels"
       ]
     },
     {
@@ -468,6 +510,28 @@
       "evidence": [
         "its place from the arm's: BN5 0x080E0F22-0x080E0F3A calls 0x08015140 / BN6 0x080E2218-0x080E2230 calls 0x08018810, each by the object's +0x28 (MegaMan's 0x180, 0x1A0)",
         "its spawn: BN5 0x080E0F64 / BN6 0x080E2242 (type 8)"
+      ]
+    },
+    {
+      "name": "MegaMan's weakness effect's place",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "types": [
+        "0x6B"
+      ],
+      "offsets": [
+        "0x3C-0x3F",
+        "0x48-0x4B"
+      ],
+      "why": "A hit MegaMan is weak to (the hit's multiplier at his collision data's +0x74 / BN5's by his element) spawns the fourth kind's type 0x6B over him, which rises a pixel a frame from where it began: its height (+0x3C, kept at +0x48) is his place less an offset each game takes from its own table by his NameID, BN5's 2 pixels higher. His presentation, not the family's code: the family's own records stay compared.",
+      "evidence": [
+        "the spawn: BN6 0x0801A42E-0x0801A456 (its place from 0x08018810, by NameID) / BN5 0x0801724C-0x08017272 (from 0x08015140), each calling the effect's spawner (BN6 0x080E9464 / BN5 0x080E8640: movs r0,#0x6b and the kind's spawner)",
+        "its rise: BN6 0x080E943C-0x080E9440 / BN5 0x080E8618-0x080E861C, +0x3E one more each frame; field_lava_aqua: MegaMan made Fire, struck by CanGard's reticle made Aqua, BN5's +0x3E and +0x4A 0x33 and 0x32 where BN6's 0x31 and 0x30, every frame of its life"
       ]
     },
     {
@@ -540,6 +604,37 @@
       "evidence": [
         "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
         "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's"
+      ]
+    },
+    {
+      "name": "the lava's spark",
+      "part": [
+        "in play",
+        "obj"
+      ],
+      "whose": [
+        "panels"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "types": [
+        "0x04"
+      ],
+      "offsets": [
+        "0x00",
+        "0x08"
+      ],
+      "sprite_offsets": [
+        "0x01-0x07",
+        "0x0A-0x14",
+        "0x16-0x37"
+      ],
+      "why": "Where lava cools under an object, the engine puts a spark over it (the fourth kind's type 4, the object at its +0x4C), the spark MegaMan's shots strike with: drawn from each game's own sprite list 5's 5, whose frames and their durations differ, and BN5's lives a frame longer. tools/xdiff_masks.py reads a spark over an actor as the panels' (BN6's engine's port of the lava, src/emu/xpanels.c, under test as a family is: its other differences fail the spec); its place (moved by a random number, the RNG compared) and its first frame are compared, what its sprite makes of them is not.",
+      "evidence": [
+        "the cooling: BN5 0x08016DE6-0x08016E06 (BN5_LAVA_STEP's end: the panel plain, its place, 0x080188DA, the spark, 0x080E09B4) / BN6 xpanels.c's stub at EMU_FREE + 0x4C0040 (BN6_SET_PANEL_TYPE, BN6_PANEL_COORDS, BN6_PLACE_JITTER, BN6_SPAWN_SPARK: 0x080E1C00, the same bytes as BN5's)",
+        "field_lava_76: CanGard on lava as the battle opens, its spark's sprite state (+0x80 on) apart from t1 (its frames' pointers 18540 bytes into BN5's sprite, 17936 into BN6's) and gone from BN6's at t17, from BN5's at t18",
+        "the spark's sprite: BN5 0x0837D994, BN6 0x083A0320 (the hit spark's life, above)"
       ]
     },
     {

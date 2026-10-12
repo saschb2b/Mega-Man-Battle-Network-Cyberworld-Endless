@@ -49,26 +49,32 @@ Each difference must be explained: by a mask in tests/xdiff/legit.json
 (an engine difference that is not the family's code, each with why and
 the evidence, both games' routines by address; never on the family's own
 records, where any difference fails) or it fails the spec, at the first
-fight frame it shows. Whose a difference is comes from both traces: the reference's
-word that a role is the family's, or the two traces disagreeing, makes
-it the family's. The stop rule: where the first unexplained difference
-is MegaMan's own state (his object and what he owns: his shots, his
-buster's flash, their sparks) or an effect of the engine's, and nothing
-of the family's, the spec is inconclusive from there (the battle is no
-longer the same battle for the family), not failed; the family's objects
-are still compared after it, to say how far they stayed the same. An
-enemy each game runs its own code for (a spec's natives, their attacks
-and effects) does not stop it: the family is compared on while its world
-(MegaMan, the RNG, the songs, the run order, the panels) stays the same,
-and the first difference there stops it. A spec's "expect" checks both
-traces against what BN5's battle is known to do. --poke and --call break
-BN6's copy after the install (an immediate, a call's veneer): the
-comparator's own test, which --mutations runs from
-tests/xdiff/mutations.json, each break required to FAIL its spec. Needs
-both ROMs (local only), copied into .build/xdiff/rom; the traces go to
-.build/xdiff/runs. Exits 0 when every spec passes (a smoke spec may end
-inconclusive). The snapshot and its differences are tools/xdiff_snap.py,
-whose a difference is and the masks tools/xdiff_masks.py.
+fight frame it shows. Whose a difference is comes from both traces: the
+reference's word that a role is the family's, or the two traces
+disagreeing, makes it the family's; the engine's spark over an actor,
+lava's as it cools under it, is the panels' (BN6's engine's port of
+BN5's lava and sea, src/emu/xpanels.c, under test as the family is). The
+stop rule: where the first unexplained difference is MegaMan's own state
+(his object and what he owns: his shots, his buster's flash, their
+sparks) or an effect of the engine's, and nothing of the family's, the
+spec is inconclusive from there (the battle is no longer the same battle
+for the family), not failed; the family's objects are still compared
+after it, to say how far they stayed the same. An enemy each game runs
+its own code for (a spec's natives, their attacks and effects) does not
+stop it: the family is compared on while its world (MegaMan, the RNG,
+the songs, the run order, the panels) stays the same, and the first
+difference there stops it. A spec's "expect" checks both traces against
+what BN5's battle is known to do; its "both" writes into both games'
+copies alike (an element given), its "mm_element" gives MegaMan one as
+the fight begins. --poke and --call break BN6's copy after the install
+(an immediate, a call's veneer; a poke in RAM after the boot, over the
+code the game copied there): the comparator's own test, which
+--mutations runs from tests/xdiff/mutations.json, each break required to
+FAIL its spec. Needs both ROMs (local only), copied into
+.build/xdiff/rom; the traces go to .build/xdiff/runs. Exits 0 when every
+spec passes (a smoke spec may end inconclusive). The snapshot and its
+differences are tools/xdiff_snap.py, whose a difference is and the masks
+tools/xdiff_masks.py.
 """
 import argparse
 import hashlib
@@ -145,6 +151,9 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
         parts += list(twins)
     if spec.get('field'):
         parts.append(f'field={spec["field"]}')
+    if 'mm_element' in spec:
+        parts.append(f'mm_element={spec["mm_element"]}')
+    parts += [f'both={b}' for b in spec.get('both', [])]
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -282,6 +291,18 @@ def check_expect(name, game, trace, canon, expect):
         got = '%d%d' % foe(r)[2] if r and foe(r) else None
         if got != panel:
             bad.append(f'{game}: the virus at t{t} on {got}, not {panel}')
+    for t, where, want in expect.get('panels', []):
+        # (a panel's type at a fight frame, in BN6's numbers: BN5's lava 8 is 13, and so on)
+        fr = next((f for f in trace['frames'] if f['t'] == t), None)
+        got = fr['panels'][int(where[1]) * 8 + int(where[0])][2] if fr else None
+        got = canon.panel_type.get(got, got) if game == 'BN5' else got
+        if got != want:
+            bad.append(f'{game}: panel {where} at t{t} of type {got}, not {want}')
+    for t, want in expect.get('foe_hp', []):
+        r = by_t.get(t)
+        got = foe(r)[1] if r and foe(r) else None
+        if got != want:
+            bad.append(f'{game}: the virus\'s HP at t{t} {got}, not {want}')
     hits = sum(1 for i in range(1, len(tl)) for role, (_, hp, _) in tl[i]['foes'].items()
                if role in tl[i - 1]['foes'] and hp < tl[i - 1]['foes'][role][1])
     if 'virus_hits_at_least' in expect and hits < expect['virus_hits_at_least']:
@@ -295,10 +316,10 @@ SOFT = ('native', "native's")               # whose leave the family's world the
 
 def first_unexplained(t, open_, by, natives_at, show):
     """the verdict a frame's unexplained differences give (None: compare on), and the lines saying so"""
-    fam, bat = by.get('family', []), by.get('battle', [])
+    fam, bat = by.get('family', []) + by.get('panels', []), by.get('battle', [])
     hard = [d for w in HARD for d in by.get(w, [])]
     if fam:
-        verdict, why = 'FAIL', "the family's"
+        verdict, why = 'FAIL', "the family's" if by.get('family') else "the lava's, BN6's engine's port of it"
     elif hard or bat and natives_at is not None:
         verdict, why = 'INCONCLUSIVE', ("MegaMan's own state, what he owns or an effect of the engine's" if hard else
                                         "the battle's, after the natives' own code differed") + ': the stop rule'

@@ -6,6 +6,8 @@ from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFF
                         role_name, u16)
 from xdiff_events import engine_draw, spawned_by, spawns_of
 
+SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+
 
 # ---- masks: engine differences, each explained (legit.json) ----
 
@@ -28,8 +30,10 @@ def whose(f, role, canon, known, depth=0):
     attack of his side with no object over it: his buster's shots), 'native' (an enemy both games have, each
     running its own code: a spec's natives) and "native's" (what it owns, and a spec's native attacks and effects
     that no object owns), 'engine' (an attack or effect no object owns, of a type the family's code does not
-    spawn), or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another
-    is its owner's, as the owner's own first frame had it (known)."""
+    spawn), 'panels' (the engine's spark over an actor, which BN5's lava spawns as it cools under it, and BN6's as
+    src/emu/xpanels.c brings lava in: the code under test as the family's is, its presentation each game's own),
+    or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is its
+    owner's, as the owner's own first frame had it (known)."""
     if role_name(role).startswith(tuple(f'T1:{v:#x}#' for v in canon.megaman.values())):
         return 'megaman'
     if role[0] == 'T1' and role[1] in canon.natives:
@@ -39,6 +43,11 @@ def whose(f, role, canon, known, depth=0):
         return None
     if o.kind == 'T1' and o.o16(OBJ_NAME_ID):
         return None
+    p = f.ptr(o.o32(0x4C))
+    # (a spark over an actor, not where an attack struck: the lava's spark, legit.json's masks; before whose code
+    # spawned it, which is the actor's own step: MegaMan's on lava would make it his)
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and len(p) == 3 and p[1] == 'obj' and p[0].startswith('T1:'):
+        return 'panels'
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
     by = spawned_by(f.trace, role)
     if by == 'family':
@@ -46,7 +55,6 @@ def whose(f, role, canon, known, depth=0):
     if by is not None and by != role:
         w = known[by] if by in known else whose(f, by, canon, known, depth + 1)
         return {'megaman': "megaman's", 'native': "native's"}.get(w, w)
-    p = f.ptr(o.o32(0x4C))
     if len(p) == 3 and p[1] in ('obj', 'ai'):
         up = next((x.role for x in f.fr['objs'] if role_name(x.role) == p[0]), None)
         if up is not None and up != role:

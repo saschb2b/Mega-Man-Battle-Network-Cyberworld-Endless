@@ -539,13 +539,55 @@ by tier, BN6's repeat rule, the run's random numbers), which
 `make_encounter` takes where `loot_territory` names the area, set by
 nothing yet (M3). BN5's text reads in BN6's codes (docs/ROM_DATA.md,
 BN5's text). `build.py xrecords` lists what each territory can fight so
-far: 52 of its 214 random records with CanGard and Handi (ACDC Area 21
-of 34, SciLab 26 of 36; 44 with CanGard alone); the xrecord step fights
-one (docs/DEVTOOLS.md).
-Not translatable as BN6 has them: BN5's lava and sea panels (the
-Undernet's and Nebula Area's fields 0x73-0x76, End Area's 0x42-0x45:
-BN6's 8 is another panel and BN6 has no sea), a decision for M3; and
-its Navis (M2).
+far: 53 of its 214 random records with CanGard and Handi moved in and
+lava and sea as BN6's panels (ACDC Area 21 of 34, SciLab 26 of 36,
+Nebula Area 3, Oran Area 2, the Undernet 1, End Area none; 44 with
+CanGard alone, before Handi and the lava); the xrecord step fights one
+(docs/DEVTOOLS.md). Not fought yet: its Navis (M2).
+
+**Lava and sea in BN6's engine (P1, in place):** BN5's lava and sea are
+panels BN6 lacks (its 8 is a volcano that erupts, which a step does not
+hurt; it has no sea), so the fields with them (the Undernet's and Nebula
+Area's 0x73-0x76, End Area's 0x42-0x45) had no BN6 field. They come into
+BN6's engine at its free panel types 13 and 14 where BN5's ROM is read
+(`src/emu/xpanels.c`; docs/ROM_DATA.md, BN5's lava and sea in BN6's
+engine), behaving as BN5's: an object on lava, not of Fire nor spared by
+its flags, takes 50 (100 where Fire beats it) and the lava cools plain
+under a spark; a Fire object on sea takes 1 HP each 7 frames, as on
+poison; an Aqua hit cools lava; each runs out after 960 frames, blinking
+its last 60, from a field's start or a chip's making. BN5's code for
+them has a twin in BN6 that knows neither: hooks where BN5 tests or
+calls for them run BN5's rules in C, and the panel's cooling, which must
+call the game's own routines (the panel set, the spark and the random
+number its place draws), runs as a few instructions of the project's own
+Thumb; BN6's panel flags table grows to 16 words and its element hit's
+tests take lava beside the volcano, both in IWRAM's routines, patched in
+their image and kept so in RAM (`emu_keep`), out of the states saved.
+They look as BN5's: its tiles of them, put in VRAM after BN6's panels'
+on a battle's first frame with them (a tile set grown with them would
+make every battle, BN6's own too, start later), BN6's tile table grown
+to their types; every BG palette is in use, so their colours stand where
+BN5 pairs them, lava's in the volcano's place in the panel palettes it
+shares with poison, the sea's in the conveyors' beside ice, animated as
+BN5 animates them, in a battle that shows them and none of those; the
+frames round them are BN6's. BN6's own battles keep every byte of their
+state with them brought in (`tools/xfamily.py --spec native`: BN6's
+Mettaur with BN5's install and without), but for the IWRAM code the
+install patches and the dead stack, where the flags, now read from ROM,
+move an interrupt a few cycles. Their records now translate
+(`src/emu/xfields.c`: BN6's fields 0x56, 0x5F, 0x61, 0x65 for lava,
+0x66, 0x67, 0x69, 0x6A for the sea), held back by their families alone:
+Nebula Area's `811E33C` (two Champys and a Mettaur on lava) is
+fightable. The differential fights each field in both engines frame by
+frame, every panel's type, flags and timer compared (`build.py xdiff`,
+`field_lava*`, `field_sea*`), lava under MegaMan, under a Fire and a
+non-Fire CanGard, an Aqua hit on it, a Fire CanGard on sea: the same.
+What only BN5's chips bring is not compared yet: a panel a chip makes
+lava or sea gets BN5's 960 frames in BN6's engine (BN5_SET_PANEL_TYPE
+writes 0x3C0 where the panel is one), but no chip of BN6's makes them,
+so no battle has made one; BN5's LavaSeed and SeaSeed (chips 43 and 47
+by its ROM's names) are assumed by their names to make them, and what
+else its chips and Souls do with lava and sea is not looked up yet.
 
 ## Transplanted families
 

@@ -153,6 +153,7 @@ class Canon:
         self.name_id = num(m['name_id']['bn5_to_bn6'])
         self.t3_type = num(m['t3_type']['bn5_to_bn6'])
         self.effect = num(m['effect']['bn5_to_bn6'])
+        self.panel_type = num(m['panel_type']['bn5_to_bn6'])
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
@@ -548,14 +549,41 @@ def coll_cells(fa, fb, oa, ob):
     return out
 
 
+def panel_typed(canon, pa):
+    """BN5's panel with its types in BN6's numbers (legit.json, maps, panel_type): its type, the type it is drawn as
+    and the one-frame override's, and its flags' low nibble, where the type is ORed in"""
+    lay, b = canon.layouts['panel'], bytearray(pa)
+    for off in lay['types']:
+        b[off] = canon.panel_type.get(b[off], b[off])
+    f = lay['flags'][0]
+    b[f] = b[f] & 0xF0 | canon.panel_type.get(b[f] & 0xF, b[f] & 0xF)
+    return bytes(b)
+
+
+def panel_timer(canon, pa, pb, t, where):
+    """BN5's lava or sea timer, where one counts, against BN6's one (legit.json, layouts, panel, timers; the frame
+    one runs out, each game's own end, the same): the places it read, each game's, and a difference or None;
+    nothing where BN5's both are idle"""
+    rule = canon.layouts['panel']['timers']
+    idle, b6, out = int(rule['idle'], 0), int(rule['bn6'], 0), tuple(int(x, 0) for x in rule['out'])
+    for off in (int(x, 0) for x in rule['bn5']):
+        if u16(pa, off) != idle:
+            same = u16(pa, off) == u16(pb, b6) or (u16(pa, off), u16(pb, b6)) == out
+            diff = None if same else Diff(t, where, 'panel', b6, u16(pa, off), u16(pb, b6))
+            return {o + k for o in (int(x, 0) for x in rule['bn5']) for k in (0, 1)}, {b6, b6 + 1}, diff
+    return set(), set(), None
+
+
 def panel_cells(fa, fb, t):
     """the panels through each game's layout (legit.json): a byte outside it zero in both, or a difference"""
     out = []
     segs = fa.canon.layouts['panel']['segments']
-    seen5 = {a0 + k for a0, _, n in segs for k in range(n)}
-    seen6 = {b0 + k for _, b0, n in segs for k in range(n)}
     for i in range(PANELS):
-        pa, pb, where = fa.fr['panels'][i], fb.fr['panels'][i], f'panel {i % 8},{i // 8}'
+        pa, pb, where = panel_typed(fa.canon, fa.fr['panels'][i]), fb.fr['panels'][i], f'panel {i % 8},{i // 8}'
+        timed5, timed6, timed = panel_timer(fa.canon, pa, pb, t, where)
+        out += [timed] if timed else []
+        seen5 = {a0 + k for a0, _, n in segs for k in range(n)} | timed5
+        seen6 = {b0 + k for _, b0, n in segs for k in range(n)} | timed6
         for a0, b0, n in segs:
             for k in range(0, n, 4 if n % 4 == 0 else 1):
                 size = 4 if n % 4 == 0 else 1

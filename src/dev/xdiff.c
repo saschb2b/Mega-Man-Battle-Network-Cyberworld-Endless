@@ -53,13 +53,14 @@
 #define TRACE_VERSION 3
 
 typedef struct { uint32_t t, n, keys; } Key;
-typedef struct { uint32_t at, v; int size; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v` */
+typedef struct { uint32_t at, v; int size; bool both; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both: BN5's copy too */
 
 typedef struct {
 	int nfoes;
 	struct { int id, panel; } foes[MAX_FOES];
 	int mm, hp, frames;
 	int field, field6;   /* the battlefield, BN5's number, and BN6's (-1: as xfields.h installs it), 0 plain */
+	int mm_element;      /* MegaMan's element as the fight begins, in both (-1 his own) */
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];
@@ -142,15 +143,18 @@ static bool twin_parse(Spec *s, const char *v) {
 	return true;
 }
 
-/* the comparator's own test's breaks: a poke, a call aimed elsewhere; -1 where `name` is neither */
+/* the comparator's own test's breaks: a poke, a call aimed elsewhere; and
+ * a spec's change made in both games' copies alike (both=, an address of
+ * BN5's: an element given, to put the engine's handling of it under
+ * test); -1 where `name` is none of them */
 static int breaks_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	int n = 2;
-	bool call = !strcmp(name, "call");
-	if (!call && strcmp(name, "poke")) return -1;
+	bool call = !strcmp(name, "call"), both = !strcmp(name, "both");
+	if (!call && !both && strcmp(name, "poke")) return -1;
 	if (s->npokes >= MAX_POKES) return 0;
-	if (call ? sscanf(v, "%x:%x", &a, &b) != 2 : sscanf(v, "%x:%x:%d", &a, &b, &n) < 2 || (n != 1 && n != 2 && n != 4)) return 0;
-	s->pokes[s->npokes++] = (Poke){ a, b, call ? 0 : n };
+	if (call ? sscanf(v, "%x:%x", &a, &b) != 2 : sscanf(v, "%x:%x:%d", &a, &b, &n) < 2 || (n != 1 && n != 2 && n != 4) || (both && n == 1)) return 0;
+	s->pokes[s->npokes++] = (Poke){ a, b, call ? 0 : n, both };
 	return 1;
 }
 
@@ -163,6 +167,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (!strcmp(name, "out")) return snprintf(s->out, sizeof s->out, "%s", v) > 0;
 	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow")) || (s->replay = !strcmp(v, "replay"));
 	if (!strcmp(name, "twin")) return twin_parse(s, v);
+	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "field")) {
 		unsigned f, f6 = 0x100;
 		int got = sscanf(v, "%x:%x", &f, &f6);
@@ -179,7 +184,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 }
 
 static bool spec_parse(const char *text, Spec *s) {
-	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .field6 = -1, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true };
+	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .field6 = -1, .mm_element = -1, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true };
 	snprintf(s->out, sizeof s->out, "xdiff");
 	char buf[4096];
 	snprintf(buf, sizeof buf, "%s", text);
@@ -378,6 +383,21 @@ static uint32_t keys_at(const Spec *s, uint32_t t) {
 	return k;
 }
 
+/* a byte of the game's memory, through the view's words */
+static void wr8(const View *v, uint32_t a, uint8_t b) {
+	uint32_t at = a & ~3u, shift = (a & 3u) * 8, w = v->rd32(at);
+	v->wr32(at, (w & ~(0xFFu << shift)) | (uint32_t)b << shift);
+}
+
+/* MegaMan's element (the spec's mm_element), his object's and his collision
+ * data's, as the fight begins: the first battle object of the first kind in
+ * both games, the record's first entity */
+static void element_set(const View *v, int element) {
+	uint32_t coll = v->rd32(v->t1 + BN6_T1_COLLISION);
+	wr8(v, v->t1 + BN6_T1_ELEMENT, (uint8_t)element);
+	if (in_ewram(coll)) wr8(v, coll + BN6_COLL_ELEMENT, (uint8_t)element);
+}
+
 /* One frame of a battle: the Custom screen passed with START, then A (OK,
  * no chip), its window open; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -403,6 +423,7 @@ static bool step(Side *g, const Spec *s) {
 	if (fighting && !g->seeded) {
 		v->wr32(v->rng[0], s->seed[0]);
 		v->wr32(v->rng[1], s->seed[1]);
+		if (s->mm_element >= 0) element_set(v, s->mm_element);
 		g->seeded = true;
 		g->nbegun = 0;   /* (the fight's sounds from here) */
 	}
@@ -471,14 +492,16 @@ static void call_aim(uint32_t at, uint32_t v) {
 
 /* the comparator's own test: bytes written into BN6's copy after the
  * install (an address of BN5's moved, to its copy), or a call's veneer
- * aimed at another routine */
-static void pokes_put(const Spec *s) {
+ * aimed at another routine; those in RAM (`ram`) once the game has booted,
+ * over what it copied there (IWRAM's routines, from their image) */
+static void pokes_put(const Spec *s, bool ram) {
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
 	for (int i = 0; i < s->npokes; ++i) {
 		const Poke *p = &s->pokes[i];
 		uint32_t at = p->at;
 		uint8_t b[4];
+		if ((p->size && (at >> 24 == 2 || at >> 24 == 3)) != ram) continue;   /* (EWRAM, IWRAM) */
 		if (!p->size) {
 			call_aim(p->at, p->v);
 			continue;
@@ -509,9 +532,10 @@ static bool open_out(Side *g, const Spec *s, const char *game) {
 static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
 	xvirus_install(XVIRUS_FAMILIES);
-	pokes_put(s);
+	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();
+	pokes_put(s, true);
 	const uint8_t hp[4] = { (uint8_t)s->hp, (uint8_t)(s->hp >> 8), (uint8_t)s->hp, (uint8_t)(s->hp >> 8) };
 	emu_write(BN6_NAVI_BASE_MAX_HP, hp, 2);
 	emu_write(BN6_NAVI_HP, hp, 4);
@@ -558,6 +582,14 @@ static bool reference(Side *g, const Spec *s) {
 	}
 	rec[len++] = 0xF0;
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
+	/* (a spec's change in both games: BN5's copy at its own address) */
+	for (int i = 0; i < s->npokes; ++i) {
+		const Poke *p = &s->pokes[i];
+		if (!p->both) continue;
+		if (p->size == 4) guest_write32(p->at, p->v);
+		else guest_write16(p->at, (uint16_t)p->v);
+		printf("xdiff: both games' %08x = %0*x\n", (unsigned)p->at, 2 * p->size, (unsigned)p->v);
+	}
 	g->v = (View){ .game = 5, .gamestate = BN5_GAMESTATE, .state = BN5_BATTLE_STATE, .window = BN5_CUSTOM_WINDOW,
 		.rng = { BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, .t1 = BN5_T1_OBJECTS, .t3 = BN5_T3_OBJECTS, .t4 = BN5_T4_OBJECTS, .nt1 = BN5_T1_COUNT,
 		.panels = BN5_FIELD_PANELS, .panel_size = BN5_PANEL_SIZE, .list = BN5_OBJECT_LIST, .list_end = BN5_OBJECT_LIST_END,

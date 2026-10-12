@@ -1,0 +1,54 @@
+{
+ "about": "BN5's field 0x73 (lava at columns 2 and 5 of row 2) as BN6's, xpanels.c and xfields.c: MegaMan at (1,2) steps right onto lava: 50 HP down and the panel cooled plain under a spark in both, CanGard V1 at (6,2); the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "4F@62",
+ "mm": "12",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "73",
+ "keys": [
+  [
+   40,
+   "RIGHT",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman_hp_lost": [
+   [
+    46,
+    50
+   ],
+   [
+    194,
+    10
+   ],
+   [
+    388,
+    10
+   ],
+   [
+    582,
+    10
+   ]
+  ],
+  "panels": [
+   [
+    45,
+    "22",
+    13
+   ],
+   [
+    46,
+    "22",
+    2
+   ],
+   [
+    600,
+    "52",
+    13
+   ]
+  ]
+ }
+}

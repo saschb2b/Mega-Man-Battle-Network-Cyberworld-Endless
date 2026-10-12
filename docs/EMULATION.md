@@ -70,9 +70,9 @@ that every part and every track of issue #82 follows, in offset order (a
 span no row names is free). Issue #82's rows, from `+0x330000`, are fixed
 places, the same at every boot with the same ROMs (a state's pointers into
 them stay good): the virus families' room and the second-level dispatch,
-the families, the chips, then room kept for the Souls, the lava and sea,
-the Navis and the chips' moved code, each its own and none written by
-another:
+the families, the chips, room kept for the Souls, the lava and sea, then
+room kept for the Navis and the chips' moved code, each its own and none
+written by another:
 
 | Offset | Contents | Code |
 | --- | --- | --- |
@@ -108,7 +108,7 @@ another:
 | `+0x348000`-`+0x400000` | The families themselves (issue #82; docs/MULTIROM.md, Transplanted families): `+0x348000` their homes, 64 of `0x800`, one a family: the state table (BN6's layout, 16 entries at most), struct1 (`+0x40`), struct2 (`+0x48`), six empty held-chip lists (`+0x70`, where it holds none) and its veneers (`+0x200`, 12 bytes each: `push {r0,r1}; ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target); `+0x368000`-`+0x380000` their code, block by block, each the same distance from a word boundary as in its game; `+0x380000`-`+0x400000` what they draw, each sprite in a room of its own (an LZ77 one decompressed). A family takes an AI index from 32 and six enemy ids from `0x200`, at fixed numbers: its entries go into the grown tables above, each slot checked to hold the fill first. BN5's CanGard, installed wherever BN5's ROM is read, is AI 32 with ids `0x200`-`0x205`: the first home, its code at `+0x368000` and its reticle's at `+0x368400`, its sprite at `+0x380000` (listed at list 1's `0x1E`, a placeholder in the player's ROM), the reticle's at `+0x383000` (list 4's `0x5C`) and its muzzle's blast at `+0x383800` (list 4's `0x5D`, effect `0x6C`); its attack is BN5's third kind's type `0x25`, spawned through the second-level dispatch (its MOVED entry the reticle's code, its TWIN entry `0xFF`). BN5's Handi is AI 33 with ids `0x206`-`0x20B`: the second home (`+0x348800`), its code at `+0x368800`, its sprite at `+0x384800` (listed at list 1's `0x00`, a placeholder in the player's ROM); its bomb is BN6's own attack (type `0x4B`). The control (`--dev xcontrol`: BN6's own Mettaur moved as AI 32, ids `0x200`-`0x205`) takes the first home and the first block in CanGard's place; BN6-side only, the guest core's BN5 copy untouched | `xvirus.c`, `xvirus_families.c` |
 | `+0x400000`-`+0x480000` | BN6's chip tables, grown and moved (issue #82; docs/MULTIROM.md, The chip registry), written as the core starts, the same at every boot with the same ROMs (a state holds none of it; a saved folder, pack or Library names the same chip with BN5's ROM or without it): `+0x400000` the 512 chip records (0x2C each: BN6's 411, the registry's chips of BN5's at their ids, a blank record at each id past them), `getChip`'s one literal (`0x08021AB0`) pointed at them; `+0x406000` and `+0x407000` the names' text archives, ids 0-255 and 256-511 (0x1000 each), `+0x408000` and `+0x40C000` the descriptions' (0x4000 each), their 23 words pointed at them; `+0x410000` the engine's own Thumb routines (0x88 bytes: the pack's split, its totals' count, its clear, the pseudo-chips' test; below); from `+0x411000` BN5's icons (0x80 each, in BN6's icons' palette), pictures (0x540) and their palettes (0x20), a picture or palette two chips share once. Without BN5's ROM each of its chips is a placeholder (its codes, type and MB the registry's, BN6's blank art and an inert behaviour) and nothing past `+0x411000` is written | `chips.c`, `xchips_install.c` |
 | `+0x480000`-`+0x4C0000` | Kept for BN5's Souls moved into BN6's engine (issue #82, the Souls' track; docs/MULTIROM.md, One net): their code, sprites and grown tables. Nothing is written there yet | |
-| `+0x4C0000`-`+0x4D0000` | Kept for BN5's lava and sea in BN6's engine (issue #82, the panels' track): BN6's panel flags and tile table grown, the lava's own Thumb. Nothing is written there yet | |
+| `+0x4C0000`-`+0x4D0000` | BN5's lava and sea in BN6's battle engine (issue #82; docs/MULTIROM.md, One net; docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), written once a core as it starts where BN5's ROM is read, at fixed addresses (IWRAM's copy of the flags' literal names the first, and a state holds IWRAM): `+0x4C0000` BN6's panel flags table grown to 16 words (BN6's 13, BN5's lava's at 13, its sea's at 14, type 0's at 15), the literal of its IWRAM routine pointed at it; `+0x4C0040` the lava's cooling, a few instructions of the project's own Thumb (the panel set plain, the spark's place moved by a random number, the spark), and its four veneers on to BN6's routines after it; `+0x4C0100` BN6's panel tile table grown to 15 types, lava's and the sea's entries BN5's with their tiles at 0x295 on, its literal pointed at it; the rest free (the tiles themselves go to VRAM from C as a battle first shows them, the panels' draw hook below: a tile set grown with them, which the game decompresses as every battle begins, made BN6's own battles start later and their runs differ) | `xpanels.c`, `xpanels_look.c` |
 | `+0x4D0000`-`+0x500000` | Free | |
 | `+0x500000`-`+0x600000` | Kept for BN5's Navis in BN6's engine (issue #82, a later step; nothing written yet): their 13 per-AI tables and the four triples' Navi words grown, the arm points' records (`0x080191C8`), the companion overlay's kinds (`0x080C5B90`, `0x080C5B44`), their names archive rebuilt, their homes, code and sprites (their battle sprites in sprite list 2, grown at `+0x334000`) | |
 | `+0x600000`-`+0x700000` | Kept for the code of BN5's chips moved into BN6's engine (issue #82, a later step; nothing written yet): the attack families' and chip routines' tables grown, the chips' code and what it draws (their records, names and art are at `+0x400000`) | |
@@ -141,10 +141,11 @@ xrecord step, `src/core/xbattles.c`) with BN5's own row of finds, as
 BN6's (docs/ROM_DATA.md, BN5's records in BN6's engine).
 
 Where BN5's ROM is read, as the core starts (`xvirus_install`), one more
-of BN6's tables is written in place (issue #82, docs/MULTIROM.md): 18
+of BN6's tables is written in place (issue #82, docs/MULTIROM.md): 26
 battlefields that no BattleSettings of BN6's names (12 bytes each at
 `0x0800D730` + n x 12: 0x09, 0x0D-0x0F, 0x11, 0x1D, 0x22-0x25, 0x28,
-0x2F-0x31, 0x46, 0x55, 0x63 and 0x64) with fields of BN5's that its
+0x2F-0x31, 0x46, 0x55, 0x63 and 0x64, and for BN5's lava and sea 0x56,
+0x5F, 0x61, 0x65-0x67, 0x69 and 0x6A) with fields of BN5's that its
 areas' records name, their panels' types as BN6's (`src/emu/xfields.c`;
 docs/ROM_DATA.md, Battlefields and their panels' types), each first
 checked to hold BN6's own. It is not in a state: every boot with the
@@ -153,7 +154,24 @@ fields. The reward rows of the ids a virus family moved into the engine
 takes (from 0x200; CanGard's 0x200-0x205) are its game's rows for its
 versions, each entry as BN6's (a chip as BN6's of its name, else 200
 zenny), in the grown copy of the rows (`+0x337000` above), each first
-checked to hold the filler the copy gives the ids past BN6's.
+checked to hold the filler the copy gives the ids past BN6's. For BN5's
+lava and sea, BN6's panel types 13 and 14 (`src/emu/xpanels.c`;
+docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), two of BN6's
+IWRAM routines are patched too: the literal that
+names the panels' flags table (`0x0300791C`, pointed at the grown table
+in the free space) and the element hit's volcano and conveyor tests
+(`0x03007742`-`0x03007771`, made again with lava cooled under Aqua as
+the volcano is), each in the routines' image in ROM (`0x081D6000` on),
+which the game copies to IWRAM as it powers on, and kept so in RAM
+(`emu_keep`): a state is saved with BN6's own bytes there, so it loads
+in any build, and they are made the engine's again as one is loaded.
+BN6's own battles run as they did: its panels take the element hit's
+steps in the same cycles (but a Wood hit on a conveyor, three more),
+their flags are read from the ROM's table (a few wait states a read),
+and lava's and the sea's tiles go to VRAM from C, at no cost in the
+game's cycles, only where a battle shows them; the autopilot's runs over
+seeds 1-12 log the same battles as the build before, and draw the same
+picture every 250 frames.
 
 As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
 0x28, or their grown copy at `+0x337000` where a family is installed:
@@ -528,7 +546,10 @@ function replacement), while BN6's code stays the ROM's.
   browser build has no threads, and the same rules hold there.
 - **States and resets.** A state holds RAM, not the ROM copy, so a hook in
   the ROM stays; one in RAM is written again after a state is loaded or the
-  core reset (`hook_reapply`). A hook taken off restores the original; its
+  core reset (`hook_reapply`). A patch of RAM the game copies from a ROM
+  image patched alike (IWRAM's routines, as the game powers on) is kept
+  (`emu_keep`): saved with the game's own bytes, made the engine's again
+  as a state is loaded. A hook taken off restores the original; its
   slot stays only while the CPU may hold its BKPT in the prefetch.
 - **A table per core.** Each core attached keeps its own hooks and queue,
   found by the CPU that met the BKPT, and a hook reads and writes the core
@@ -561,6 +582,11 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
 | `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
 | `0x080003A6` | `main_awaitFrame`'s DISPSTAT loop (`src/emu/idle.c`) | answer: the CPU halted till the VBlank interrupt (The core's time) | about four times a frame (each interrupt wakes it) |
+| `0x0801A802`, `0x0801AD3C`, `0x0801AD94`, `0x0801ADC8`, `0x0801AE24`, `0x080DA5FA` | each actor's status step (its pre-steps' first call), four obstacles' pre-steps and one object's routine: where BN5 steps an object on its lava first (`src/emu/xpanels.c`) | answer: an object on lava hurt as BN5 hurts it, then the lava cooled under a spark by a few instructions of the project's own (`EMU_FREE` + `0x4C0040`), which come back to the hooked instruction, run then | where BN5's ROM is read: once per actor and obstacle a frame |
+| `0x0801A1AA` | what the panel under an actor does to it, its poison test (`xpanels.c`) | answer: a Fire object on sea taken as on poison | the same: once per actor a frame |
+| `0x0800C3B8` | the per-panel update, its conveyors' test (`xpanels.c`) | answer: lava and sea counted down to plain as a conveyor, from BN5's 0x3C0 | the same: once per panel a frame |
+| `0x0800CC0A` | object_setPanelType (`xpanels.c`) | answer: a chip's lava or sea made with BN5's 0x3C0 frames | the same: once a panel set |
+| `0x0800C5E6` | the panels' draw, past its palettes' step (`src/emu/xpanels_look.c`) | answer: where lava or sea is on the field, its tiles written into VRAM at tile 0x295 on if a word of each says they are not there (a battle's first frame with them), and its colours over the volcano's or the conveyors', by BN5's animations (where those are not on the field) | the same: once a battle frame |
 | `0x0802D644` | the delete count raised as a virus of version 0-3 is deleted (`src/emu/xvirus_grow.c`) | answer: returns at once for an AI index of 32 or more (a family moved into the engine, docs/MULTIROM.md), whose byte would lie past the 32 BN6 counts (`0x02000070`) | where a family is installed: once a virus deleted |
 | `0x0802D652` | the delete count's read (the rare versions' check) | answer: 0 for an AI index of 32 or more | the same: once a rare version is looked for |
 | `0x0802D65E` | a rare version's deletion (version 4-5: with event flag 0x1D8 set, the AI index put at `0x0203EAEA` for the chat of new virus data after the results) | answer: returns at once for an AI index of 32 or more | the same: once a rare version deleted |
@@ -612,7 +638,7 @@ into it goes to its own board, which skips it, never to BN6's hooks (the
 hook table is BN6's core's: the guest has none); each one's RAM is its
 own; the guest's tone reaches the ring BN6's silence fills, and a frame of
 it let go (`emu_audio_drop_from`) does not; its state saves and loads with
-BN6's RAM untouched. Last, a block of Thumb code of the test's own, made as
+BN6's RAM untouched. Then a block of Thumb code of the test's own, made as
 if it stood in another game, is moved into BN6's copy with `emu_write`
 (`src/emu/thumb_reloc.c`, issue #82): its call within itself left alone,
 its two calls out aimed at stubs of the ROM's own 11 MiB away, beyond a
@@ -620,14 +646,18 @@ BL's 4 MiB, through 12-byte veneers (`push {r0,r1}; ldr r0,[pc,#4];
 str r0,[sp,#4]; pop {r0,pc}` and the target). Each stub, ARM code, keeps
 what it met: r0-r12, sp and the flags as the block set them before its
 BL, and lr its way back into the block; and the copy's writes outlast the
-core's reset that starts it. And the second-level dispatch's code
+core's reset that starts it. Then the second-level dispatch's code
 (`xvirus_dispatch_code`) run on the core with a driver of the test's own
 that stands in for BN6's spawner, its free and its runner: a moved type
 spawned as its kind's dispatch type, its number in the side table by the
 object's slot and its MOVED routine run with r1 the number times four; a
 twin spawned as BN6's own number (its number in the side table too,
-where nothing reads it); a type no family named let go as it first runs. `build.py test` runs
-it with the address and undefined-behaviour sanitizers, as CI does.
+where nothing reads it); a type no family named let go as it first runs.
+Last, RAM kept patched (`emu_keep`): the patch made where the game's own
+bytes are, a state saved with the game's own there (another core loading
+it reads them), the patch made again as the state is loaded, and bytes
+that read neither left alone. `build.py test` runs it with the address
+and undefined-behaviour sanitizers, as CI does.
 
 ## Testing
 
@@ -673,7 +703,14 @@ plate reads its name from, BN6's viruses' for 0x01 and the families' for
 0x200; the delete count the
 installer's hook keeps AI 32 out of; the interrupt stack below its
 `sp_irq`, `0x03007F60`, dead between frames, where an interrupt's entry
-lands a few cycles apart as the moved code runs). The values of the enemy
+lands a few cycles apart as the moved code runs; the main stack below the
+main loop's pointer as it waits for the next frame, `0x03007DFC` (read
+by a hook at its DISPSTAT loop), also dead between frames, where the
+VBlank handler's nested frames save what they interrupted (the BIOS's
+decompression of the battle's sprites) a few cycles apart where the
+lava's and the sea's install has the panels' flags read from ROM; and,
+with BN5's ROM read, the code in IWRAM that install keeps patched,
+`0x0300791C`-`0x0300791F` and `0x03007742`-`0x03007771`). The values of the enemy
 id and AI index are allowed wherever they stand, not at fixed addresses;
 the tool prints each address they explained (the battle's three copies of
 the id, each a u16: `0x020348D4`, `0x0203AAB0`, `0x0203EB56`; the name

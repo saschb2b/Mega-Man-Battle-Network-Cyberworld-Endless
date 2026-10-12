@@ -215,11 +215,12 @@ bool director_dev_foes(const char *spec) {
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, " /,"); t; t = strtok(NULL, " /,")) {
-		unsigned id;
+		unsigned id, field;
 		int c, r;
 		if (sscanf(t, "mm@%1d%1d", &c, &r) == 2 && c >= 1 && c <= 3 && r >= 1 && r <= 3) e.player = r << 4 | c;
+		else if (sscanf(t, "field@%x", &field) == 1 && field < BN6_FIELD_COUNT) e.field = (int)field;
 		else if (sscanf(t, "%x@%1d%1d", &id, &c, &r) == 3 && e.nfoes < MAX_FOES && foe_of(id, c, r, &e.foes[e.nfoes])) ++e.nfoes;
-		else printf("foes: %s is no enemy at a panel (ID@CR, hex, column 1-6, row 1-3)\n", t);
+		else printf("foes: %s is no enemy at a panel (ID@CR, hex, column 1-6, row 1-3), nor mm@CR or field@HH\n", t);
 	}
 	if (!e.nfoes) return false;
 	director_dev_due(&e);

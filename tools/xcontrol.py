@@ -79,6 +79,14 @@ CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID = 32, 0x200, 1, 0x01
 NAMES_BN6, NAMES_FAMILIES = 0x086EE400, 0x08B41000   # the archives an id's name is read from: BN6's viruses' (RomLayout.enemy_names[0]),
                                                      # the families' from id 0x200 (XV_NAMES, by the hook on BN6_NAME_OF)
 IRQ_STACK = (0x03007F00, 0x03007F60)   # BN6's interrupt stack below its sp_irq (0x03007F60, set by its start code)
+MAIN_STACK = (0x03007C00, 0x03007DFC)  # BN6's main stack below the main loop's pointer as it waits for the next frame (0x03007DFC
+                                        # at main_awaitFrame's DISPSTAT loop, BN6_AWAIT_FRAME_LOOP, read by a hook there): dead between
+                                        # frames. Its VBlank handler runs nested on it (the sound driver's frames), saving the
+                                        # registers of what it interrupted (the BIOS's LZ77 decompression of the battle's sprite
+                                        # preload): a few cycles' difference leaves other words there (the panels' flags read from ROM)
+KEPT_CODE = ((0x0300791C, 0x03007920), (0x03007742, 0x03007772))   # IWRAM's code the engine keeps patched where BN5's ROM is read
+                                        # (src/emu/xpanels.c, emu_keep: the panels' flags' literal BN6_PANEL_FLAGS_REF, the element
+                                        # hit's tests from BN6_PANEL_HIT_COOL, BN6_HIT_COOL_SPAN bytes): code, the same every frame
 PHASE_RESULTS = 0x10                    # BN6_BATTLE_PHASE: the results, the reward picked from the enemy's drop row
 BATTLE_REWARD = 0x0200A00C              # (BN6_BATTLE_REWARD)
 
@@ -231,7 +239,12 @@ def why(off, ia, ib, ma, mb, ids):
     nothing explains it: a word pointing into what each run moved (the same
     once read through each map); BN6's interrupt stack below sp_irq, dead
     between frames, where an interrupt's entry lands a few cycles apart as the
-    moved code runs (DISPSTAT's HBlank bit as the handler read it); and with
+    moved code runs (DISPSTAT's HBlank bit as the handler read it), and the
+    main stack below the main loop's pointer, as dead between frames, where
+    the VBlank handler's nested frames save what it interrupted a few cycles
+    apart; the code in IWRAM the panels' install keeps patched (lava and
+    sea, where BN5's ROM is read: a run with no family has none of it); and
+    with
     `ids`, the moved Mettaur's enemy id (0x01 as 0x200, a halfword) and AI index (1 as 32,
     and as a table's offset, x 4) where the battle keeps them, the text archive
     its name is read from (BN6's viruses' names for id 0x01, the families' for
@@ -244,6 +257,10 @@ def why(off, ia, ib, ma, mb, ids):
     addr, a, b = addr_of(off), ia[off], ib[off]
     if IRQ_STACK[0] <= addr < IRQ_STACK[1]:
         return 'the interrupt stack (dead)'
+    if MAIN_STACK[0] <= addr < MAIN_STACK[1]:
+        return 'the main stack below its pointer (dead)'
+    if any(lo <= addr < hi for lo, hi in KEPT_CODE):
+        return "the engine's code in IWRAM (the panels', kept patched)"
     if not ids:
         return None
     h = off & ~1   # (the id a halfword, its two bytes each read through it)

@@ -26,6 +26,20 @@
   net's battles though BN5 has them all, and its Roll DS was taken for
   Roll. Its text now reads in BN6's codes, checked glyph for glyph
   against both games' fonts.
+- **BN5's lava and sea in BN6's own battles (issue #82).** BN6 has
+  neither: its volcano panel erupts and does not burn a step, and it has
+  no sea, so BN5's fields with them (the Undernet's and Nebula Area's
+  lava, End Area's sea) could not be fought in BN6's engine. Where BN5's
+  ROM is read they are now panels of BN6's engine that behave as BN5's:
+  lava burns whatever steps on it for 50 (100 where Fire beats it),
+  spares Fire, and cools plain under a spark; the sea hurts a Fire
+  object a point every 7 frames, as poison does; Aqua cools lava; both
+  run out after 16 seconds. They look as BN5's, its tiles and its
+  colours' animations, in BN6's panel frames. Each of the eight fields
+  is fought in BN5's own engine and in BN6's and compared frame by
+  frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
+  Aqua hit. Nothing in a run uses them yet; BN5's records on them now
+  wait only for their viruses (one of Nebula Area's is fightable).
 - **BN5's own attacks in BN6's battle engine, and its families' recipes
   made from the ROMs (issue #82).** BN6 runs a battle object by its type,
   a byte, and a family of BN5's spawns objects of BN5's types, which BN6
@@ -62,8 +76,8 @@
   rewards its own (CanGard's had been the filler rows BN6 leaves at the
   ids it took: zenny and a Cannon *). Nothing in a run
   uses it yet; `build.py xrecords` lists what each of BN5's areas can
-  fight so far (52 of its 214 records with CanGard and Handi), and a dev step
-  fights any one of them.
+  fight so far (53 of its 214 records with CanGard, Handi, lava and
+  sea), and a dev step fights any one of them.
 
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the

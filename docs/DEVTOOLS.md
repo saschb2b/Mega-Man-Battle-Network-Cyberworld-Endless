@@ -431,15 +431,17 @@ The `foes` step (`--input`'s `0:foes 200@52/01@43`, play.py's `foes
 200@52 01@43`) starts a battle of the foes it names, at the same first
 free moment: each an enemy id in hex at its panel, column 1-6 then row
 1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without),
-on a plain field with nothing else on it, in BN6's engine whatever the
-layer. It names the families moved into the engine (docs/MULTIROM.md,
-Transplanted families) beside BN6's own: with BN5's ROM read, BN5's
-CanGard is AI 32 with ids 0x200-0x205 (its six versions, the families'
-ids from 0x200), and `0:foes 200@52/01@43` fights CanGard beside a
-Mettaur (four foes at most: of six named, BN6's battle spawned the first four); `--dev xcontrol` installs
-the control in its place, BN6's own Mettaur moved as AI 32 with the same
-ids. A layer dressed as BN5's area has longer arrival words, and its
-random battles are BN5's: seed 15's first area is BN6's own.
+on a plain field with nothing else on it (`field@66` on BN6's field 0x66
+instead: BN5's sea field 0x42 as `src/emu/xfields.c` installs it), in
+BN6's engine whatever the layer. It names the families moved into the
+engine (docs/MULTIROM.md, Transplanted families) beside BN6's own: with
+BN5's ROM read, BN5's CanGard is AI 32 with ids 0x200-0x205 (its six
+versions, the families' ids from 0x200), and `0:foes 200@52/01@43`
+fights CanGard beside a Mettaur (four foes at most: of six named, BN6's
+battle spawned the first four); `--dev xcontrol` installs the control
+in its place, BN6's own Mettaur moved as AI 32 with the same ids. A
+layer dressed as BN5's area has longer arrival words, and its random
+battles are BN5's: seed 15's first area is BN6's own.
 
 ```bash
 CYBERWORLD_ROM_DIR=$PWD/.build/xcontrol/rom python3 build.py shot --scene emu --net-biome 0 --seed 1 --dev xcontrol \
@@ -636,10 +638,22 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
   their panels' types), `field=XX:YY` BN6's own field YY against it; the
   specs `field_poison`, `field_grass` and `field_ice` fight CanGard on
-  BN5's poison, grass and ice, every panel's type and flags compared.
+  BN5's poison, grass and ice, every panel's type and flags compared, and
+  `field_lava*` and `field_sea*` on BN5's lava and sea as BN6's engine
+  runs them (`src/emu/xpanels.c`; docs/MULTIROM.md, One net): each of the
+  eight fields, MegaMan stepping onto lava, a Fire CanGard on lava and on
+  sea, an Aqua hit on lava, their timers running out.
+- **A change in both games**: `both=A:V[:N]` writes into both games'
+  copies alike, BN5's at its own address and BN6's at the moved copy of
+  it (a family's element given, to put the engine's handling of it under
+  test: CanGard made Fire, its reticle made Aqua), and `mm_element=N`
+  gives MegaMan element N as the fight begins (his object's and his
+  collision data's).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
-  copy) and `call=F:T` aims each family's veneer to BN6's routine F at T.
+  copy; one in RAM once the game has booted, over what it copied there,
+  such as IWRAM's routines) and `call=F:T` aims each family's veneer to
+  BN6's routine F at T.
 
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
@@ -680,7 +694,9 @@ the masks):
   (`action`, `t3_types`: Handi's bomb) its CurAction as a virus's; a
   pointer into a table both games hold whose end the 32 bytes would run
   past (`rom_tables`: Handi's bomb's kinds) by its place there, the entry
-  the same. A difference prints BN5's value as read so.
+  the same; a panel's type, the type it is drawn as and its flags' low
+  nibble (`panel_type`: BN5's lava 8 and sea 0xA BN6's 13 and 14, its
+  holy 9 BN6's 5). A difference prints BN5's value as read so.
 - **Pointers by what they name**: an object by its role and part (its
   node, its AI's data, its collision data), a panel, ROM that was moved by
   where it came from (BN5's into a family's code where it is: a callback
@@ -712,7 +728,10 @@ the masks):
   +0x19, into +0x0F), the word itself compared with BN6's. Any other byte
   outside the segments must be 0 in both (BN6's own +0x74-0x7B, the
   multiplier and elements of a hit, among them). The flag words are
-  compared as bytes, never read as addresses.
+  compared as bytes, never read as addresses. A panel's timers
+  (`timers`): BN5 counts lava down at +0x10 and the sea at +0x14, BN6 one
+  timer at +0x12; where one of BN5's is not idle it is compared with
+  BN6's (the frame one runs out, BN5's 0 and BN6's 0x708, the same).
 - **Every difference explained** (legit.json, masks): an engine difference
   that is not the family's code, with why and the evidence (both games'
   routines by address), or it fails the spec at the first frame it shows.
@@ -726,7 +745,10 @@ the masks):
   reference (BN5) says the object is the family's, where the two traces
   disagree, or where only the subject has it and calls it the engine's
   (the subject's numbers are the transplant's own: a wrong id must not be
-  its alibi). An object owned by another (+0x4C) is its owner's.
+  its alibi). An object owned by another (+0x4C) is its owner's, but the
+  engine's spark over an actor, lava's as it cools under it, is the
+  panels' (BN6's engine's port of BN5's lava, under test as a family is:
+  its differences fail the spec, but for its sprite's, each game's own).
 - **The stop rule**: where the first unexplained difference is MegaMan's
   own state (his object, or one he owns: his shots, his buster's flash,
   their sparks) or an effect of the engine's, the spec is INCONCLUSIVE from
@@ -740,8 +762,9 @@ the masks):
 - **What BN5's battle is known to do** (a spec's `expect`): CanGard's
   CurActions at given frames, its reticle's appearances, path and damage,
   the sound as it fires, MegaMan's HP lost when, the virus hit only in its
-  firing state, holding its guard while MegaMan is out of its row;
-  checked on both traces.
+  firing state, holding its guard while MegaMan is out of its row, a
+  panel's type at a frame (`panels`, in BN6's numbers), the virus's HP at
+  a frame (`foe_hp`); checked on both traces.
 
 `--story` prints each game's battle, `--survey` every difference over
 every frame by whose and where, `--no-run` compares the last traces,
@@ -753,9 +776,11 @@ its data, an effect id left as BN5's alone and beside a native, a
 strike's effect id, a collision region; Handi's: an immediate, a call
 rebased to its neighbour, its draws shifted onto the other word; the
 dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
-number, a spawn aimed at BN6's spawner as before the dispatch), each of
-which must FAIL its spec. docs/MULTIROM.md, Transplanted families, has
-what they showed.
+number, a spawn aimed at BN6's spawner as before the dispatch; the lava's
+and the sea's: lava's flags, their hooks taken off, the panel lava's
+cooling leaves, the random number its spark draws, the element hit's
+test that lets Aqua cool it), each of which must FAIL its spec.
+docs/MULTIROM.md, Transplanted families, has what they showed.
 
 The control (`tools/xcontrol.py`, BN6's own Mettaur moved) runs with the
 replay too: `CYBERWORLD_XDRAWS=keep` keeps a run's battle draws in its

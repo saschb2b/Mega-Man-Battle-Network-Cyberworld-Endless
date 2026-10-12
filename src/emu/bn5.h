@@ -123,6 +123,23 @@
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
 #define BN5_PANEL_FLAGS   0x18        /* ... and its flags here, u32 (BN6's at +0x14), BN6_PANEL_STRUCK while an enemy's attack is on it */
+#define BN5_PANEL_LAVA_TIMER 0x10     /* ... lava's frames left, u16, counted down on lava, 0x3C0 written while the panel is another (BN6 keeps one timer, */
+#define BN5_PANEL_SEA_TIMER  0x14     /* ... BN6_PANEL_TIMER); and the sea's, the same */
+/* Its lava and sea, as src/emu/xpanels.c brings them into BN6's engine
+ * (docs/ROM_DATA.md, BN5's lava and sea in BN6's engine): what they do,
+ * BN6's routines' twins, and how they are drawn */
+#define BN5_PANEL_STEP    0x08016C76u /* what the panel under an actor does to it (BN6_PANEL_STEP): poison, and a Fire object on sea the same (0x08016C9E) */
+#define BN5_LAVA_STEP     0x08016D78u /* an object on lava, from the actors' pre-steps before their status step and four obstacles': 50 damage << the
+                                       * weakness unless Fire, floating or invulnerable, then the panel plain and a spark over it (0x08016DA2) */
+#define BN5_LAVA_STEP_MEGAMAN 0x08016E10u /* ... MegaMan's (his pre-step, 0x0801790E), its tests in another order */
+#define BN5_PANEL_HIT     0x08016D0Cu /* a panel hit by an element (BN6_PANEL_HIT): lava cooled plain by Aqua (0x08016D48) */
+#define BN5_PANEL_UPDATE  0x0800A990u /* the per-panel update (BN6_PANEL_UPDATE): lava and sea count their timers down to plain, blinking their last 60 frames */
+#define BN5_SET_PANEL_TYPE 0x0800B2A6u /* object_setPanelType (BN6_SET_PANEL_TYPE): lava and sea made with 0x3C0 frames */
+#define BN5_PANEL_TILESET 0x086F4E5Cu /* its panels' tiles (LZ77) to VRAM from tile 0xA3, 842 of them: lava's from 0x2F5, the sea's from 0x393 */
+#define BN5_PANEL_TILES   0x086F6F6Cu /* its tile table (BN6_PANEL_TILES'), 11 types: 8 lava (palettes 2 and 6), 0xA sea (3 and 7) */
+#define BN5_PANEL_PALETTES 0x086F7C2Cu /* its panels' palettes 1-8 (BN6_PANEL_PALETTES'): 2 lava (colours 6-10) and poison, 3 the sea (11-14) and ice */
+#define BN5_PANEL_ANIMS   0x0800A7A4u /* its panel palettes' animations (BN6_PANEL_ANIMS'): 2 and 6 lava's glow, 10 frames of 16; 3 and 7 the sea's, 8 */
+#define BN5_BG_PALETTE    0x03003960u /* IWRAM: its BG palette buffer (BN6_BG_PALETTE's), the panels' animations' destinations */
 #define BN5_CUSTOM_SCREEN 0x02036B10u /* the Custom screen's state, BN6_CUSTOM_SCREEN's: */
 #define BN5_CUSTOM_HAND   (BN5_CUSTOM_SCREEN + 0x06) /* the chips it offers, the first of BN5_BATTLE_DECK */
 #define BN5_CUSTOM_CURSOR (BN5_CUSTOM_SCREEN + 0x07) /* the slot under the cursor, 0-4 the top row, BN6_CUSTOM_OK on OK */
