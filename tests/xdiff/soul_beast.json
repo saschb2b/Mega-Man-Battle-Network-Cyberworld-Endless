@@ -1,0 +1,232 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "Beast Out greyed while a Soul is united, BN6's engine alone (BN5 has no Beast Out; the Souls track's S2): Beast Out's flag (E0) set and KnightSoul held; the first Custom screen's JustcOne lights UNITE in the emblem's place (the last pick lights a held Soul) and unites; on the second, no chip picked, the slot is the emblem again, greyed while KnightSoul is united: A on it refused (sound 0x69), OK, MegaMan still KnightSoul's proxy. From the proxy Beast Out would be TenguBeast's (form 0x14).",
+ "kind": "engine",
+ "frames": 900,
+ "flags6": [
+  "00E0"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "form": [
+    [
+     1,
+     "0x08"
+    ],
+    [
+     524,
+     "0x08"
+    ],
+    [
+     900,
+     "0x08"
+    ]
+   ],
+   "soul": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     524,
+     "0x0B"
+    ],
+    [
+     900,
+     "0x0B"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     524,
+     "0x01"
+    ]
+   ],
+   "unite stands": [
+    [
+     524,
+     "0x02"
+    ]
+   ]
+  },
+  "sounds": [
+   "0x69"
+  ]
+ },
+ "expect_why": "The design's call (docs/MULTIROM.md: no Beast Out while united): the emblem's lit test answers grey while a Soul is united (src/emu/soulunite.c at 0x0802A57A), so A on it is refused (0x08028DB2: sound 0x69) and no Beast Out is committed; the slot is the emblem with no pick (Beast Out stands), UNITE's only while the last pick lights a held Soul."
+}

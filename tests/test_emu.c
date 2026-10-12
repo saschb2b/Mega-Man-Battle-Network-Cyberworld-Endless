@@ -1,7 +1,8 @@
 /* Hooks (src/emu/hook.c) on mGBA, without the game's ROM: a ROM of our own
  * bytes that calls three routines and stores what they return, run for a
  * frame with hooks of every kind on them (issue #27), an event posted from
- * an answer hook and a halt from one (issues #30, #35). Then two cores side
+ * an answer hook and a halt from one (issues #30, #35), and the table full
+ * (HOOK_MAX), its hooks found as the code meets them. Then two cores side
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
  * it, without, on a ROM that also sounds a tone, then with hooks of its own
@@ -132,6 +133,35 @@ static HookAct counted(HookRegs *r, void *user) { (void)r; ++*(int *)user; retur
 static HookAct halting(HookRegs *r, void *user) { (void)r; ++*(int *)user; hook_halt(); return HOOK_CONTINUE; }
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
+
+/* The table full (HOOK_MAX): three hooks the code meets (its calls at 0xF8,
+ * 0xFC and 0x100, each r0 doubled) put in first, the rest on the ROM's
+ * zeros that never run, every halfword from 0x300 on (one of them in
+ * 0x100's bucket, which is found then by the table read through); one more
+ * refused; each of the three run as the code meets it; all taken off */
+#define FULL_AT 0x08000300u
+
+static void full_table(struct mCore *core) {
+	/* (0x08000100's bucket is FULL_AT + 2's, which takes it: that hit goes
+	 * through the table read through, hook.c's find) */
+	static const uint32_t met[3] = { 0x080000F8, 0x080000FC, 0x08000100 };
+	int added = 0;
+	for (int i = 0; i < 3; ++i) added += hook_add(met[i], doubled, NULL);
+	for (uint32_t i = 0; i < HOOK_MAX - 3; ++i) added += hook_add(FULL_AT + 2 * i, doubled, NULL);
+	CHECK(added == HOOK_MAX && !hook_add(FULL_AT - 0x100, doubled, NULL), "the table full: %d hooks put in of %d, one more refused", added,
+		HOOK_MAX);
+	uint32_t hits = hook_hits, strays = hook_strays;
+	core->reset(core);
+	core->runFrame(core);
+	/* (5 x 2 + 10, 7 x 2 + 20, the bkpt #1's 3, 9 x 2 + 30) */
+	CHECK(stored(core, 0) == 20 && stored(core, 1) == 34 && stored(core, 2) == 3 && stored(core, 3) == 48 && hook_hits - hits == 3 &&
+		hook_strays == strays, "the full table's hooks: %u %u %u %u, %u hits, %u strays", stored(core, 0), stored(core, 1), stored(core, 2),
+		stored(core, 3), hook_hits - hits, hook_strays - strays);
+	for (int i = 0; i < 3; ++i) hook_remove(met[i]);
+	for (uint32_t i = 0; i < HOOK_MAX - 3; ++i) hook_remove(FULL_AT + 2 * i);
+	CHECK(core->rawRead16(core, 0x080000F8, -1) == 0x300A && core->rawRead16(core, FULL_AT, -1) == 0 &&
+		core->rawRead16(core, FULL_AT + 2 * (HOOK_MAX - 4), -1) == 0, "the full table's originals back");
+}
 
 /* ... and the guest's own (the differential's, issue #82): one tripling r0
  * where BN6's doubles it, one reading what the core it runs on holds */
@@ -830,6 +860,8 @@ int main(void) {
 	CHECK(core->rawRead16(core, IWRAM + 0x100, -1) == 0xBECE, "written again after the reset");
 	hook_remove(IWRAM + 0x100);
 	CHECK(core->rawRead16(core, IWRAM + 0x100, -1) == 0x3014, "the reset's code back as it is taken off");
+
+	full_table(core);
 
 	/* a halt from a hook: the loop at 0xF0 met once, then the CPU idle for
 	 * the rest of the frame (no interrupt is on to end it) */

@@ -4,6 +4,7 @@
 
 #include "claims.h"
 #include "debug.h"
+#include "devtools.h"
 #include "encounter.h"
 #include "events.h"
 #include "gamecall.h"
@@ -13,6 +14,9 @@
 #include "pet_text.h"
 #include "protoman_cross.h"
 #include "scripts.h"
+#include "soulproxy.h"
+#include "souls.h"
+#include "soulunite.h"
 #include "xchips_install.h"
 
 void game_hooks_install(void) {
@@ -27,6 +31,13 @@ void game_hooks_install(void) {
 	chat_marks_install();
 	pet_install();
 	pet_text_install();
+	/* (a test's: the Souls' proxy form, --dev soulproxy, and the Souls on it
+	 * in BN6's battles, which --dev souls=MASK asks for too: the run's Souls
+	 * reach it as each battle begins, souls.c) */
+	if (dev.soulproxy || souls_dev_mask) {
+		bool proxy = soulproxy_install(dev.proxybreak);
+		if (proxy) soulunite_install(dev.unitebreak);
+	}
 	if (emu_debug_on()) claims_report();
 }
 

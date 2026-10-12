@@ -36,6 +36,9 @@ enum {
 	XG_TABLES
 };
 
+/* Who the families' room's and the families' bytes are (claims.h) */
+#define XV_CLAIMS "the families and their room (xvirus.c, xvirus_grow.c)"
+
 /* The names of the ids from XV_FIRST_ID (XV_NAMES): a text archive, entry
  * id - XV_FIRST_ID each, which holds this offset (an empty name) until a
  * family names it */
@@ -60,5 +63,13 @@ void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine);
 /* The names' archive's bytes in use in the core's copy: where a family's
  * names go on. */
 uint32_t xg_names_end(void);
+/* Entry i of one of BN6's own tables the room grows (XG_*, i one of BN6's
+ * entries) changed in the copy the engine reads: its grown copy where the
+ * tables are grown, else BN6's own table in place; it must hold `was`
+ * (the table's entry size) there first, then it holds `now`, written as
+ * the room's own bytes where they are (claims.h). The Souls' proxy form
+ * gives form 8's object id so. False, nothing written, where it is not
+ * `was` or is none of BN6's. */
+bool xg_bn6_entry(int t, uint32_t i, const uint8_t *was, const uint8_t *now);
 
 #endif

@@ -1,5 +1,5 @@
 {
- "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would, and the spec named must FAIL on it. BN5 addresses are written to their copy; nothing of the ROMs here.",
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy; nothing of the ROMs here.",
  "mutations": [
   {
    "name": "an immediate",
@@ -192,6 +192,52 @@
     "03007768:280F"
    ],
    "what": "the element hit's lava test in IWRAM (xpanels.c, BN6_PANEL_HIT_COOL + 0x26, written after the boot over the routine the game copied) made cmp r0,#15: an Aqua hit on lava leaves it, where BN5's cools it plain"
+  },
+  {
+   "name": "MegaMan's buster flash",
+   "spec": "megaman_plain",
+   "poke": [
+    "080EC8D6:2407"
+   ],
+   "what": "BN6's first flash of his buster spawned as its effect 7 where 6 (the arm flash's routine 0x080EC8B2: movs r4,#6 at 0x080EC8D6): MegaMan's own state, which a family spec reads as inconclusive (cangard_v1_keys stops there) and a MegaMan spec fails"
+  },
+  {
+   "name": "a chip's damage",
+   "spec": "megaman_plain",
+   "poke": [
+    "08021DEE:0029"
+   ],
+   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A, 0x08021DA8 + 0x2C + 0x1A): CanGard's HP after the Cannon"
+  },
+  {
+   "name": "a Soul's turns four",
+   "spec": "soul_knight",
+   "unitebreak": 1,
+   "what": "OK's commit of UNITE in BN6's engine gives a Soul 4 turns where BN5's gives 3 (0x08024FFA): KnightSoul's turns 4 at t1, its end a turn late"
+  },
+  {
+   "name": "its used bit not set",
+   "spec": "soul_knight",
+   "unitebreak": 2,
+   "what": "the commit leaves the Souls' used word alone (BN5 ORs bit 11 in at 0x08025042): the same Soul could unite again in the battle; the used word 0 against BN5's 0x800"
+  },
+  {
+   "name": "UNITE lit for a wrong kind",
+   "spec": "soul_grey",
+   "unitebreak": 4,
+   "what": "the check of the last pick lights a Soul for the kind after its own (BN5's table 0x08024BE4 read one off): KnightSoul (Break, 0xB) lit by a Cannon (no kind, 0xC), which BN5 leaves grey: BN6 unites"
+  },
+  {
+   "name": "Beast Out lit while united",
+   "spec": "soul_beast",
+   "unitebreak": 8,
+   "what": "the emblem's lit test (0x0802A57A) not answered grey while a Soul is united: A on it takes Beast Out from the proxy, form 0x14 (TenguBeast) where the spec holds form 8"
+  },
+  {
+   "name": "a Soul kept past a Cross",
+   "spec": "soul_cross",
+   "unitebreak": 16,
+   "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
   }
  ]
 }

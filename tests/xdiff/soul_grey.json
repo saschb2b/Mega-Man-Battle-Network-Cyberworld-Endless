@@ -1,0 +1,239 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "UNITE grey where no held Soul is lit, in both engines (the Souls track's S2): KnightSoul held (BN5's flags, BN6's souls6), a deck of Cannon * in both (no kind as BN5 has it, KnightSoul's Break not), the first Custom screen's Cannon picked, A on UNITE (grey: refused) and OK; MegaMan fights with the Cannon in his hand, never united. A second screen (L) leaves UNITE standing grey again. The Custom screen's element 0xB compared every frame as each game's last screen left it.",
+ "kind": "differential",
+ "frames": 700,
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "3401"
+ ],
+ "deck5": [
+  "3401"
+ ],
+ "folder6": [
+  "3401"
+ ],
+ "deck6": [
+  "3401"
+ ],
+ "souls6": "10",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   400,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x00"
+    ],
+    [
+     700,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     700,
+     "0x00"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x01"
+    ],
+    [
+     404,
+     "0x01"
+    ]
+   ],
+   "unite stands": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     404,
+     "0x02"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own check (0x08024B2C): the last chip picked of no Soul's kind (Cannon, kind none) leaves UNITE standing grey (+0 2, +7 1, its Soul and chaos 0), A on it refused (0x08024990: sound 0x69); BN6's engine reads the same rule (src/emu/soulunite.c)."
+}

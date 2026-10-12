@@ -359,7 +359,9 @@ engine, BN5's ROM read or not: BN6's battles as the player's ROM has
 them, which `tools/xfamily.py` compares with CanGard installed). BN5's battles
 have four of their own (docs/MULTIROM.md, Guest battles, For tests):
 `darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
-Souls, bit k Team Colonel's Soul 7 + k) and `slowboot=N` (BN5's first
+Souls, bit k Team Colonel's Soul 7 + k; in BN6's battles too, through
+UNITE on BN6's Custom screen with the proxy form installed: The proxy
+form, below) and `slowboot=N` (BN5's first
 boot at N of its frames a frame on the main thread, the same frames every
 run, so a fresh data dir's first BN5 battle waits behind the older net's
 screen: with `CYBERWORLD_AUTOPILOT=1` paging the arrival's words,
@@ -556,6 +558,8 @@ python3 build.py xdiff                       # every spec in tests/xdiff: PASS, 
 python3 build.py xdiff cangard_v1 --story    # one spec, the battle as each game fought it
 python3 build.py xdiff cangard_v1_keys --survey   # every difference of every frame, counted, masked or not
 python3 build.py xdiff --mutations           # the comparator's own test: each break must FAIL its spec
+python3 build.py xdiff megaman_plain --story # MegaMan the subject: his timeline in both games
+python3 tools/xproxy.py --mutations          # the Souls' proxy form against HeatCross (The proxy form, below)
 python3 build.py shot --data-dir /src/.build/xdiff/data \
   --xdiff "foes=4F@62;mm=22;hp=100;frames=1200;out=/src/.build/xdiff/runs/s1"   # the traces alone
 ```
@@ -584,16 +588,47 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
 - **Alignment**: each battle's timer (`BN5_BATTLE_TIMER`,
   `BN6_BATTLE_TIMER`), never the cores' frames (BN5's Custom screen
   opens about 56 frames later). Each core runs to its fight's first frame,
-  then a frame of each in turn. The Custom screen is passed the same way
-  in both: once its window reads open, START 4 frames, nothing 8, A 4 (OK,
-  no chip). The fight's keys go by the timer read before the frame
-  (`keys=T:BUTTONS:N`, held for timer values T to T+N-1).
+  then by the battle's clock: a frame of each in turn while their timers
+  read the same, the one whose timer has moved on waiting while the
+  other's still holds (a turn's change takes BN6 four frames more than
+  BN5, a Soul's crossing into the proxy six fewer than BN5's unison), so
+  each game traces a timer value with the other at it too and the
+  replay finds the reference's draws of it made. Each Custom screen is
+  passed by its keys in each game, from the frame its window first reads
+  open (a screen is counted there: the phase passes the Custom screen's
+  for a frame as a battle begins): the spec's for that screen of that game
+  (`cust5=N:KEYS.FRAMES/...`, `cust6=`; `-` no key), or else START 4
+  frames, nothing 8, A 4 (OK, no chip), the same in both. The fight's keys
+  go by the timer read before the frame (`keys=T:BUTTONS:N`, held for
+  timer values T to T+N-1).
+- **MegaMan's setup**, the same in both where a spec asks: event flags
+  set in each game before its battle (`flags5=`, BN5's through its
+  eToolkit +0x44: Double Soul's 0000, a Soul's 0008 + k, Chaos Unison's
+  0236; `flags6=` BN6's), each game's first folder (`folder5=`,
+  `folder6=`: chip | code << 9, the list repeated to 30, each chip marked
+  owned, no Regular chip, no TagChips), each game's battle deck in an
+  order (`deck5=`, `deck6=`, the list repeated to 30, written as the
+  battle's phase first reads the Custom screen's: each game makes and
+  shuffles its deck as the first turn begins, so without it each hand
+  is its own game's shuffle's), the Souls in BN6's engine with MegaMan
+  holding them (`souls6=MASK`, bit k BN5's Soul 7 + k: src/emu/soulunite.h
+  over the proxy form, The proxy form, below), his buster's Attack, Speed and
+  Charge (`buster=A:S:C`, levels less one), and `safe=1`, his collision
+  data's `BN6_OBJ_INVULNERABLE` set before every frame of the battle (the
+  same bit in BN5: no hit takes him, so a long spec keeps its course).
+  What a spec does not set stays each game's boot state's.
 - **Seeding**: both RNG words written in both cores after the fight's
   first frame (`seed=P:S`); seeding as the battle begins does not work
   (BN5's opening draws 84 more). With `rng=follow`, BN6's words are
   written from BN5's after each frame both traced: BN5's buster draws one
   more number a shot than BN6's, so without it everything that draws
-  later (a hit's spark) would part.
+  later (a hit's spark) would part. Where the clock holds a number of
+  frames each game's own (a turn's change, a Soul's crossing), each game
+  steps its words by the three draws a frame of its own (legit.json's
+  rng, per_frame), and the first frame traced after shows them apart:
+  a mask reads them as the engine's where every other draw since the
+  frame before is the same in number in both and each word is the
+  other's stepped by exactly the per-frame draws one game made more.
 - **The hooks** (`src/dev/xdiff_events.c`): each core carries hooks of
   its own (src/emu/hook.c keeps a table per core; the guest's are the
   differential's alone, `guest_hook`), on each game's own routines
@@ -627,13 +662,18 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   code led to it. Without the replay Handi parts at its first draw that
   BN5's buster or shake moved (`rng=follow`: t305, none: t35).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
-  3): a record each time the timer moves while the battle fights: the
+  5): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
   node on, its AI's data and its collision data, and in BN6's the byte
   the second-level dispatch's side table holds for its slot), the 40 panels, the order
   the objects ran in, the songs the music players began, both RNG words,
-  and the hooks' events since the record before (the first record's from
-  the battle's start).
+  MegaMan's side's player block (his battle NaviStats, the word of what
+  was used this battle, BN5's Souls or BN6's Crosses, and his side's
+  pending form: docs/ROM_DATA.md, MegaMan as the differential's subject;
+  the Souls' state in BN6's engine, `BN6_SOULS`' 0x80 bytes, zero in
+  BN5's; the Custom screen's element 0xB, UNITE, as each game's last
+  screen left it), and the hooks' events since the record before (the
+  first record's from the battle's start).
 - **The field**: `field=XX` fights both on BN5's battlefield XX, BN6's as
   `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
   their panels' types), `field=XX:YY` BN6's own field YY against it; the
@@ -652,8 +692,11 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy; one in RAM once the game has booted, over what it copied there,
-  such as IWRAM's routines) and `call=F:T` aims each family's veneer to
-  BN6's routine F at T.
+  such as IWRAM's routines), `call=F:T` aims each family's veneer to
+  BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
+  engine (`SOULUNITE_BREAK_*`: a Soul's turns 4, its used bit not set, a
+  Soul lit by the next kind, Beast Out not greyed while united, a Soul
+  kept past a Cross).
 
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
@@ -765,6 +808,76 @@ the masks):
   firing state, holding its guard while MegaMan is out of its row, a
   panel's type at a frame (`panels`, in BN6's numbers), the virus's HP at
   a frame (`foe_hp`); checked on both traces.
+- **MegaMan as the subject** (`"subject": "megaman"`, the Souls track's
+  S0): the spec proves MegaMan, not a family. His object, what he owns
+  (his shots, his buster's flashes, their sparks, his chips' attacks) and
+  the engine's effects are the subject: their first unexplained difference
+  FAILS the spec, where a family's spec stops there INCONCLUSIVE (the stop
+  rule flipped). He is compared in BN6's numbers: his CurAction (BN5's
+  ready 6 BN6's 8; BN5's 0x1A, a Soul's unison and its end, BN6's 0x1C, a
+  Cross's; the step 0x10, the buster 0x11 and a chip's 0x14 the same),
+  his NameID (0x180 against 0x1A0), his loadout (his AI data's +4 to +8
+  and +0x11, power attacks by each game's table: legit.json's
+  `power_attack`), his sprite by a registry (`sprites`: pairs of each
+  game's sprite lists' entries, MegaMan's own, his buster's flashes and
+  charge glow, the sparks; his frames are each game's own, the animation
+  his code picks, his palette and the sprite itself are compared), his
+  form and pending form (`form`), and his side's player block byte for
+  byte. BN5 raises the mood of the side that lands a hit (no counter),
+  BN6 has no such gain: BN5's mood is read less what its gains added (a
+  translation from BN5's own events, not a mask), until the Souls track
+  ports BN5's DarkChip rule. BN5's plain charged shot fires at once where
+  BN6's waits 5 frames (docs/ROM_DATA.md, MegaMan as the differential's
+  subject): an engine difference, so no spec fires one. `megaman_plain`
+  (CanGard V1 against MegaMan at 2000 HP, his buster 1-1-1, a folder of
+  Cannon in both, the first Custom screen's Cannon picked; buster shots,
+  the Cannon while CanGard's guard is down, steps between the rows and
+  columns) passes; its breaks (`--mutations`: his buster's first flash
+  spawned as effect 7, the Cannon striking for 41) fail it, and the
+  flash's break leaves `cangard_v1_keys`, a family's spec, INCONCLUSIVE
+  at the same frame.
+- **A Soul's life** (the Souls track's S2; docs/MULTIROM.md, Transplanted
+  Souls): with the Souls installed in BN6's engine (`souls6=`), a Soul
+  stands behind the proxy form, 8, where BN5's form byte names the Soul:
+  his form is read in BN6's numbers (legit.json's `form`: BN5's 7-12 as
+  8) and his NameID as BN6 writes it in that form (`name_id`'s
+  `megaman_forms`: 0x1AB + the form, his role MegaMan's in any form). The
+  Soul itself is compared every frame (`souls`): BN5's form byte and the
+  places of its AI data where it keeps a Soul's state (its turns +0x0F,
+  chaos +0x12, the chaos charge's phase +0x1F, ColonelSoul's chip +0x32,
+  the chaos level +0x6C: read 0 there as BN6's, whose AI data has its own
+  fields at those places) against `BN6_SOULS`; BN5's used word against
+  the Souls' block's, BN6's Crosses' used word none; the Custom screen's
+  UNITE byte for byte. His look and abilities are the proxy's while both
+  games' MegaMan is united, and only then masked, each mask named for the
+  milestone that brings BN5's (HeatCross's sprite, palette and overlay,
+  until S3; its element and loadout, until S4; ToadSoul's flag and
+  NumberSoul's hand of ten, until S5; Chaos Unison's charge glow, until
+  S6; Chaos Unison's sound as he unites, until S3). The expectations read
+  `soul`, `chaos`, `soul turns` and `souls used` the same way in both
+  games, and `unite` (UNITE's +7) and `unite stands` (its +0).
+  `soul_knight` (KnightSoul: a deck of JustcOne J in both, the first
+  Custom screen's chip given up, UNITE and OK; the Custom screens opened
+  with L count its turns down; its end as the turn after its last starts,
+  t1564 in both), `soul_replace` (KnightSoul, then ToadSoul over it on the
+  second screen), `soul_grey` (a Cannon picked: UNITE grey, A on it
+  refused) and `soul_chaos` (NumberSoul's Chaos Unison with DarkPlus: one
+  turn) pass.
+- **Reference specs** (`"kind": "reference"`): a battle BN6's engine
+  cannot fight yet, fought in BN5 alone (`game=bn5`), MegaMan's timeline
+  printed and held to the spec's `expect.megaman` (his action, form,
+  pending form, turns, the used word, loadout, sprite, palette, mood and
+  HP at given timer values, in BN5's numbers): REFERENCE, or FAIL where
+  one does not hold. (The first, `soul_knight_ref`, BN5's own KnightSoul
+  from UNITE to its end, became the two-game `soul_knight` with S2.)
+- **Engine specs** (`"kind": "engine"`): what BN6's engine does that
+  BN5's has no twin of, fought in BN6 alone (`game=bn6`), MegaMan's
+  timeline held to the spec's `expect` in BN6's numbers (and `sounds`, a
+  song each that must begin): PASS or FAIL. `soul_cross` (HeatCross chosen
+  on CROSSSELECT while KnightSoul is united: HeatCross from the next turn,
+  the Soul gone, its used bit kept) and `soul_beast` (Beast Out's flag
+  set, KnightSoul united: on the next screen the emblem stands grey, A on
+  it refused, MegaMan still in the proxy).
 
 `--story` prints each game's battle, `--survey` every difference over
 every frame by whose and where, `--no-run` compares the last traces,
@@ -779,7 +892,10 @@ dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
 number, a spawn aimed at BN6's spawner as before the dispatch; the lava's
 and the sea's: lava's flags, their hooks taken off, the panel lava's
 cooling leaves, the random number its spark draws, the element hit's
-test that lets Aqua cool it), each of which must FAIL its spec.
+test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
+damage; the Souls': a Soul's turns 4, its used bit not set, UNITE lit
+for a wrong kind, Beast Out lit while united, a Soul kept past a Cross,
+each by `unitebreak`), each of which must FAIL its spec.
 docs/MULTIROM.md, Transplanted families, has what they showed.
 
 The control (`tools/xcontrol.py`, BN6's own Mettaur moved) runs with the
@@ -821,6 +937,81 @@ fill). A family is whole where no decision is left open; the report
 says what each derives and what is left, and `--check` runs in no build
 (it needs the ROMs): `build.py test` holds the generated CanGard and
 Handi to the installed recipes, field for field.
+
+## The proxy form: where a Soul stands
+
+```bash
+python3 tools/xproxy.py               # four runs: the proxy is HeatCross frame for frame, Gregar's own form 8 is not
+python3 tools/xproxy.py --story       # the proxy run's battle, frame by frame
+python3 tools/xproxy.py --mutations   # also each part of the install left out: each the battle reaches must part them
+python3 tools/xproxy.py --souls       # the four with the Souls installed over the proxy, none held (BN5's ROM beside BN6's)
+python3 tools/play.py start NAME -- --scene emu --dev soulproxy   # then: flags 0xE2 0xE2 1, cross 8, and a battle
+python3 tools/play.py start NAME -- --scene emu --dev souls=0x3F,folder=140   # every Soul held, a hand of JustcOne: UNITE lights KnightSoul
+python3 tools/xdiff.py soul_knight   # a Soul's life in both engines (tests/xdiff/soul_*.json)
+```
+
+BN5's Souls stand behind one form of BN6's own (the Souls track's
+S1; docs/MULTIROM.md, Transplanted Souls): form 8, Falzar's TenguCross,
+which Gregar keeps in every table by form and never offers on
+CROSSSELECT. `--dev soulproxy` (`src/emu/soulproxy.c`) makes form 8 an
+exact copy of HeatCross in the core's ROM copy as the core starts: entry
+8 of each of the eleven tables by form written from entry 1, its NameID's
+object id made HeatCross's (in the enemy ids' table the engine reads: the
+families' room's grown copy where BN5's ROM grew it, through the room's
+own writer, `xg_bn6_entry`), and three hooks where Gregar's code reads the
+form itself (HeatCross's chip bonus, his arm flash's look, the summon as
+he crosses) answering 8 as 1; every byte is checked as Gregar's first,
+and nothing is written where one is not (docs/ROM_DATA.md, MegaMan's
+forms). `--dev proxybreak=N` leaves parts out (`SOULPROXY_BREAK_*`), for
+the comparator's own test. The dev step `cross F` (`--input "0:cross 8"`,
+play.py's `cross 8`) commits the next Cross chosen on CROSSSELECT as form
+F, through CROSSSELECT's own commit: its record, the turn that takes it,
+the chosen row's used bit. Without the switch nothing of it is in the
+game.
+
+`tools/xproxy.py` fights one battle four times from one boot with the
+same keys, each traced (`CYBERWORLD_BTRACE`: every byte of EWRAM and
+IWRAM after each frame of the battle, as `tools/xcontrol.py` does):
+native (no proxy, HeatCross chosen), installed (the proxy installed,
+HeatCross chosen), proxy (installed, HeatCross committed as form 8) and
+tengu (no proxy, form 8: Gregar's own TenguCross). The battle covers the
+crossing (CROSSSELECT, the summon, the overlay), a charged shot
+(HeatCross's flame), FireBrn1 (the Fire bonus, a hooked reader), a buster
+shot from the row above (the arm's flash, a hooked reader), a step into
+a StarFish's row whose bubble breaks the Cross (its weakness), the
+buster, and the results; each run is checked to have done all of it.
+native and installed must be the same, every byte; installed and proxy
+the same but for the places the form is kept (1 against 8: his battle
+NaviStats' form, the Custom screen's record, the link packets and both
+sides' pending forms it passes through) and his NameID (0x1AC against
+0x1B3); tengu must differ. `--mutations` leaves each part out in a run of
+its own, and each the battle reaches must part the proxy from HeatCross;
+the object id's the battle never reads for him in a Cross (his object is
+set up as a battle begins, and a battle of a run begins in no form): it
+is reported, not counted. From the proxy,
+Beast Out gives Falzar's TenguBeast (form 0x14: the Custom screen's
+emblem adds 12 to the form), not HeatCross's: the Souls grey Beast Out
+while one is united.
+
+The Souls stand on it from S2 (`src/emu/soulunite.c`, `soullife.c`,
+`soulkinds.c`; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a
+Soul's life on the proxy form): `--dev souls=MASK` installs the proxy as
+`soulproxy` does and UNITE over it as the core starts (where BN5's ROM
+is read beside BN6's: BN5's art and its A on UNITE are copied from it),
+and gives a new run those Souls, which reach BN6's engine as each battle
+begins. The emblem under OK is UNITE while the last chip picked lights
+a held Soul (`--dev folder=ID` deals a hand of one chip: 140, JustcOne,
+Break as BN5 has it, KnightSoul's kind); A on it gives the chip up and
+shows the Soul, OK unites: the proxy form with the Soul's turns, Beast
+Out grey until it ends. Without a held Soul or a lit one the emblem is
+BN6's. Its differential is `tests/xdiff/soul_*.json` (Differential, A
+Soul's life), each break of its rule `unitebreak=N`. `tools/xproxy.py
+--souls` runs the four runs above with the Souls installed (BN5's ROM
+beside BN6's in `.build/xproxy-souls/rom`, seed 15, whose layer BN5 does
+not dress) and no Soul held: native and installed the same every byte
+(the Souls' hooks leave BN6's battle alone while none is held), and the
+proxy HeatCross frame for frame through a Soul's life's two stubs, which
+its overlay entries 8 then point at.
 
 ## Sprite gallery
 

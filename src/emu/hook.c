@@ -22,8 +22,8 @@
 #define THUMB_BX_R12 0x4760u
 #define ARM_BX_LR    0xE12FFF1Eu
 #define ARM_BX_R12   0xE12FFF1Cu
-#define MAX_HOOKS    48
 #define QUEUE        256   /* a power of two */
+#define BUCKETS      256   /* a power of two: a hook's slot by its address's bits above the instruction's (find) */
 #define HOOK_CORES   3     /* cores attached at once: BN6's, the guest's (the differential's), a test's */
 
 typedef struct {
@@ -42,8 +42,9 @@ struct HookCore {
 	struct ARMCore *cpu;
 	void (*board16)(struct ARMCore *, int);
 	void (*board32)(struct ARMCore *, int);
-	Hook hooks[MAX_HOOKS];
+	Hook hooks[HOOK_MAX];
 	int nhooks;
+	uint8_t bucket[BUCKETS];   /* a slot + 1 by bucket_of(its address), 0 none: the last hook put in each bucket */
 	HookEvent queue[QUEUE];
 	uint32_t qhead, qtail;
 };
@@ -63,7 +64,22 @@ void hook_write8(uint32_t a, uint8_t v) { here()->rawWrite8(here(), a, -1, v); }
 void hook_write16(uint32_t a, uint16_t v) { here()->rawWrite16(here(), a, -1, v); }
 void hook_write32(uint32_t a, uint32_t v) { here()->rawWrite32(here(), a, -1, v); }
 
+_Static_assert(HOOK_MAX < 256, "a bucket holds a slot + 1 in a byte");
+
+static uint32_t bucket_of(uint32_t addr) { return (addr >> 1 ^ addr >> 9) & (BUCKETS - 1); }
+
+/* each bucket its last hook's slot, after the table changed (a hook put in or taken out: between frames) */
+static void buckets_make(HookCore *c) {
+	memset(c->bucket, 0, sizeof c->bucket);
+	for (int i = 0; i < c->nhooks; ++i) c->bucket[bucket_of(c->hooks[i].addr)] = (uint8_t)(i + 1);
+}
+
+/* the hook at addr: its bucket's, else the table read through (two in one
+ * bucket); none where its bucket is empty */
 static Hook *find(HookCore *c, uint32_t addr) {
+	int b = c->bucket[bucket_of(addr)];
+	if (!b) return NULL;
+	if (c->hooks[b - 1].addr == addr) return &c->hooks[b - 1];
 	for (int i = 0; i < c->nhooks; ++i)
 		if (c->hooks[i].addr == addr) return &c->hooks[i];
 	return NULL;
@@ -138,6 +154,7 @@ static HookCore *attach(struct mCore *core) {
 	c->core = core;
 	c->cpu = cpu;
 	c->nhooks = 0;
+	memset(c->bucket, 0, sizeof c->bucket);
 	c->qhead = c->qtail = 0;
 	return c;
 }
@@ -187,11 +204,12 @@ static bool add(HookCore *c, uint32_t addr, bool arm, EmuHook fn, void *user, in
 	if (h && h->live) return false;
 	/* (a removed hook's slot again: its original is back in memory) */
 	if (!h) {
-		if (c->nhooks == MAX_HOOKS) return false;
+		if (c->nhooks == HOOK_MAX) return false;
 		h = &c->hooks[c->nhooks++];
 	}
 	*h = (Hook){ .addr = addr, .arm = arm, .live = true, .fn = fn, .user = user, .kind = kind };
 	put_bkpt(c, h);
+	buckets_make(c);
 	return true;
 }
 
@@ -210,6 +228,7 @@ void hook_remove(uint32_t addr) {
 	uint32_t pc = (uint32_t)c->cpu->gprs[ARM_PC];
 	if (h->addr <= pc && pc - h->addr <= (h->arm ? 4u : 2u)) { h->live = false; return; }
 	*h = c->hooks[--c->nhooks];
+	buckets_make(c);
 }
 
 void hook_reapply(void) {

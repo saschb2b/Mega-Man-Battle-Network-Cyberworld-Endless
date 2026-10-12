@@ -8,6 +8,7 @@
 
 #include "bn6.h"
 #include "bytes.h"
+#include "claims.h"
 #include "data.h"
 #include "emu.h"
 #include "hook.h"
@@ -220,6 +221,20 @@ void xg_type(int kind, uint8_t from, uint8_t to, uint32_t routine) {
 	}
 	uint8_t *p = xv_put(twin, 1, false);
 	if (p) *p = to;
+}
+
+bool xg_bn6_entry(int t, uint32_t i, const uint8_t *was, const uint8_t *now) {
+	if (!R.data || !R.layout || !emu_ready() || t < 0 || t >= XG_TABLES) return false;
+	specs();
+	const Grow *g = &G[t];
+	if (i >= g->count || g->size > ENTRY_MAX) return false;
+	uint32_t at = (grown ? g->to : get32(R.data + (g->ref - BUS))) + i * g->size;
+	for (uint32_t b = 0; b < g->size; ++b)
+		if (emu_read8(at + b) != was[b]) return false;
+	if (grown) claims_begin(XV_CLAIMS);
+	emu_write(at, now, g->size);
+	if (grown) claims_end();
+	return true;
 }
 
 uint32_t xg_names_end(void) {

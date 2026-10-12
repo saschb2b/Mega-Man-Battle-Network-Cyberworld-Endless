@@ -594,7 +594,7 @@ void xvirus_install(int which) {
 	done = true;
 	/* (the families' room and the families claim what they write; the
 	 * battlefields theirs, within: claims.h) */
-	claims_begin("the families and their room (xvirus.c, xvirus_grow.c)");
+	claims_begin(XV_CLAIMS);
 	if (which == XVIRUS_CONTROL) xvirus_install_family(&xvirus_control);
 	else if (which == XVIRUS_FAMILIES) {
 		for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);

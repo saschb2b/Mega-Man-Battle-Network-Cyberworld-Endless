@@ -5,13 +5,14 @@ could not match, the objects each spawn made, and the engine's own bits of an ob
 records: a panel reserved (BN6 marks the object, BN5 does not) and the blink's phase (the two hide a flashing object on
 opposite frames). Each translation is the family's own record read as BN6 has it, never a mask (docs/DEVTOOLS.md, The
 differential)."""
-from xdiff_snap import (BLINK, DRAW, KEPT, NODE, REPLAYED, RESERVE, SPAWN, SPRITE_SET, SOUND, EFFECT, ATTACK, UNMAPPED, UNMATCHED,
-                        Diff)
+from xdiff_snap import (BLINK, DRAW, KEPT, MOOD, NODE, PLAYER_NAVI, REPLAYED, RESERVE, SPAWN, SPRITE_SET, SOUND, EFFECT, ATTACK, UNMAPPED,
+                        UNMATCHED, Diff)
 
 OBJ_RESERVED = 0x20   # an object's +0: BN6 sets it as the object first reserves a panel (BN6_OBJ_RESERVED)
 OBJ_VISIBLE = 0x02    # ... drawn this frame: the blink hides a flashing object (BN5_BLINK_FLASHING, BN6_BLINK_FLASHING)
 NAMES = {DRAW: 'draw', SPAWN: 'spawn', SOUND: 'sound', EFFECT: 'effect', ATTACK: 'setAttack', RESERVE: 'reserve', BLINK: 'blink',
-         SPRITE_SET: 'sprite'}
+         SPRITE_SET: 'sprite', MOOD: 'mood'}
+NAVI_MOOD = PLAYER_NAVI + 0x0E   # his battle NaviStats' mood in the player block
 
 
 def site(trace, a):
@@ -37,13 +38,16 @@ class Translations:
     """BN5's reservations and blinks, frame by frame: an object that has reserved a panel reads BN6's bit (BN6 sets it
     at its first reservation and never clears it while the object lives, 0x0801BB36); an object the blink ran on reads
     its visible bit in BN6's phase (BN5 hides it where its flash timer's bit 1 is clear, 0x080137AE; BN6 where it is
-    set, 0x0801695A). And in both games, an object spawned while the hooks watched that has set up no sprite since holds
+    set, 0x0801695A); MegaMan's mood less what BN5's gains raised it by (BN5 raises it as a hit he lands is no counter,
+    0x08017018 calling 0x080127FA; BN6's hit pass has no such call, 0x0801A228-0x0801A256, until the Souls track ports
+    BN5's DarkChip rule). And in both games, an object spawned while the hooks watched that has set up no sprite since holds
     the slot's last occupant's sprite state (Obj.leftover), compared from its sprite's set-up on (xdiff_snap.obj_cells)."""
 
     def __init__(self):
         self.reserved = set()   # BN5's roles that have reserved a panel
         self.spawned = {5: set(), 6: set()}   # each game's roles the hooks saw spawn
         self.drawn = {5: set(), 6: set()}     # ... and set up a sprite since
+        self.gained = 0                       # what BN5's mood gains raised MegaMan's mood by so far (BN6 has none)
 
     def apply(self, fa, fb):
         """BN5's frame `fa` (its objects' over) read in BN6's terms, each game's leftover sprite states told; the counts of
@@ -55,7 +59,7 @@ class Translations:
                     (self.spawned if e.kind == SPAWN else self.drawn)[f.game].add(role)
             for o in f.fr['objs']:
                 o.leftover = o.role in self.spawned[f.game] and o.role not in self.drawn[f.game]
-        n = {'reservation': 0, 'blink': 0}
+        n = {'reservation': 0, 'blink': 0, 'mood': 0}
         blinked = set()
         for e in fa.fr['events']:
             role = object_role(fa.fr, e.object)
@@ -63,6 +67,13 @@ class Translations:
                 self.reserved.add(role)
             elif e.kind == BLINK and role is not None:
                 blinked.add(role)
+            elif e.kind == MOOD and e.a == 0:
+                self.gained += e.b
+        # (BN5's mood as BN6's: less what its gains raised it by, where it is neither Full Synchro nor dark, whose rules both share)
+        player = fa.fr.get('player')
+        if player and self.gained and player[NAVI_MOOD] not in (0, 0xFF):
+            fa.fr['player_over'] = {NAVI_MOOD: max(player[NAVI_MOOD] - self.gained, 1)}
+            n['mood'] += 1
         for o in fa.fr['objs']:
             b = o.over.get(NODE, o.rec[NODE])
             if o.role in self.reserved:

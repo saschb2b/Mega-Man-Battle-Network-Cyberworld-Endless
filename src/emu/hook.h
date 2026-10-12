@@ -27,6 +27,14 @@
 struct mCore;
 typedef struct HookCore HookCore;   /* a core's hooks: its table and its queue */
 
+/* A core's hooks at most: the game's and every installer's on BN6's core
+ * (measured: 46 at most in a run with the families, the panels, the chips
+ * and the Souls, 49 in a differential's Soul run with its own) with room
+ * for the Navis' and the chips' moved code to come. A slot is 40 bytes
+ * (24 on a 32-bit build); a BKPT met finds its hook through a bucket of
+ * its address, the table read through only where two hooks share one. */
+#define HOOK_MAX 128
+
 /* What a hook reads, and may change: r0-r12 and lr go back into the CPU
  * (BN6's routines keep their object in r5); sp is read only; pc is the
  * hooked instruction's address. */

@@ -61,7 +61,8 @@
 #define BN6_COLL_PANEL_X      0x0A        /* the panel it stands on: its column, */
 #define BN6_COLL_PANEL_Y      0x0B        /* ... and its row */
 #define BN6_COLL_HIT          0x0F        /* the hit's bits (3: struck): BN5 ORs them into its +0x18 and +0x19 too, which it ORs here, BN6 here alone */
-#define BN6_COLL_FLAGS        0x3C        /* its object's flags, u32 (bn6f object_getFlag, 0x0801A166): poison spares 0x08000028, lava 0x20 and 0x88000206, its damage 9 */
+/* (BN6_COLL_FLAGS, bn6.h's, its object's flags as bn6f's object_getFlag reads them, 0x0801A166: poison spares 0x08000028,
+ * lava 0x20 and 0x88000206, its damage 9) */
 #define BN6_COLL_DAMAGE_ADD   0x84        /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */
 #define BN6_COLL_POISON       0x8C        /* u16, poison's damage, a point each 7 frames (the sea's on a Fire object, as xpanels.c brings it) */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */

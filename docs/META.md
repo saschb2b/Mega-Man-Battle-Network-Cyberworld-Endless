@@ -1242,8 +1242,10 @@ points first marked as proposals among them.
 - **When**, BN5's own: the UNITE button stands under OK only while
   MegaMan is neither worried nor dark as the Custom screen opens, and
   each Soul unites once a battle, for the turns BN5 gives it (three for
-  NumberMan's), its Chaos Unison once besides (BN5 keeps a bit for
-  each).
+  every Soul, one for a Chaos Unison: BN5's OK, `0x08024FFA`, writes 3
+  plus its battle NaviStats' +0x32, 0 in BN5's boot state, as the
+  differential's KnightSoul and the game's NumberMan's show), its Chaos
+  Unison once besides (BN5 keeps a bit for each).
 - **Chaos Unison**, BN5's own: a DarkChip of the Soul's kind given up in
   the chip's place, where BN5's chaos flag is set, which the run sets
   while it holds a Soul. A DarkChip comes into the hand only while

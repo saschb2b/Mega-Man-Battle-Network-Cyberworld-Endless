@@ -2,9 +2,10 @@
 each role attributed from both traces (the family's, MegaMan's, a native's, the engine's), the renderer's places
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
-from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, Frame,
-                        role_name, u16)
+from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
+                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16)
 from xdiff_events import engine_draw, spawned_by, spawns_of
+from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
 
@@ -97,6 +98,8 @@ def who(d, fb, canon, fa=None):
     order, a panel, the engine's draws) or its role's"""
     if d.role == 'family':
         return 'family'
+    if d.role == 'player':
+        return 'megaman'
     return whose_role(d.role, fa, fb) if isinstance(d.role, tuple) else 'battle'
 
 
@@ -167,7 +170,119 @@ def renderer_ranks(fa, fb, last):
                     o.over[sp + 8], o.over[sp + 9] = v & 0xFF, v >> 8
 
 
+PROXY = 8                    # BN6_FORM_PROXY: the form BN5's Souls stand behind in BN6's engine
+RELATED2 = 0x50              # a battle object's RelatedObject2Ptr: a Cross's overlay, MegaMan's
+
+
+def united(f):
+    """MegaMan united with a Soul in this game's frame: BN5's form byte one of the Souls (legit.json, maps, form), BN6's the
+    proxy with a Soul in the Souls' block (maps, souls)"""
+    p = f.fr.get('player', b'')
+    if len(p) < PLAYER_UNITE:
+        return False
+    form = p[PLAYER_NAVI + NAVI_FORM]
+    return form in f.canon.form if f.game == 5 else form == PROXY and p[PLAYER_SOULS] != 0
+
+
+def overlay(d, fa, fb):
+    """the difference is the object BN6's MegaMan names his overlay (his RelatedObject2Ptr: the proxy's, HeatCross's), both
+    games' MegaMan united"""
+    if not (united(fa) and united(fb)) or not isinstance(d.role, tuple):
+        return False
+    mm = next((o for o in fb.fr['objs'] if o.kind == 'T1' and fb.canon.is_megaman(6, o.o16(OBJ_NAME_ID))), None)
+    p = fb.ptr(mm.o32(RELATED2)) if mm else ('raw',)
+    return len(p) == 3 and p[0] == role_name(d.role)
+
+
+def his_panel(d, fa, fb):
+    """the difference is the panel BN6's MegaMan stands on, both games' MegaMan united"""
+    if not (united(fa) and united(fb)) or not isinstance(d.role, str) or not d.role.startswith('panel '):
+        return False
+    mm = next((o for o in fb.fr['objs'] if o.kind == 'T1' and fb.canon.is_megaman(6, o.o16(OBJ_NAME_ID))), None)
+    return mm is not None and d.role == f'panel {mm.o8(0x12)},{mm.o8(0x13)}'
+
+
+def unites_now(fa, fb, chaos):
+    """this traced frame is the first of a unison in both games (a Chaos Unison's where chaos): both united now, BN5's form
+    not that Soul in the traced frame before (or none before it), BN6's Souls' block naming its chaos"""
+    if not (united(fa) and united(fb)):
+        return False
+    frames = fa.trace['frames']
+    k = next((i for i, fr in enumerate(frames) if fr is fa.fr), 0)
+    form = fa.fr['player'][PLAYER_NAVI + NAVI_FORM]
+    if k and frames[k - 1].get('player') and frames[k - 1]['player'][PLAYER_NAVI + NAVI_FORM] == form:
+        return False
+    return not chaos or fb.fr['player'][PLAYER_SOULS + 1] != 0
+
+
+def hand_of_ten(d, fa):
+    """the difference is of the Custom screen's element 0xB (unite) as BN5's last screen left it, that screen opened with
+    NumberSoul united in BN5 (its hand of ten, 0x08025C20: the elements' places for ten chips): BN5's form NumberSoul's in
+    the traced frame before the last hold of its clock (the screen's), at or before this frame"""
+    if d.part != 'unite':
+        return False
+    frames, number = fa.trace['frames'], int(fa.canon.souls.get('hand_of_ten', '0'), 0)
+    k = next((i for i, fr in enumerate(frames) if fr is fa.fr), 0)
+    while k > 0 and frames[k]['f'] - frames[k - 1]['f'] <= 1:
+        k -= 1
+    return k > 0 and frames[k - 1].get('player') is not None and frames[k - 1]['player'][PLAYER_NAVI + NAVI_FORM] == number
+
+
+def form_left(f):
+    """BN6's MegaMan has left a form earlier in this battle (his form byte not 0 in a frame before, 0 in this one or after)"""
+    tr = f.trace
+    if 'form_left' not in tr:
+        seen, tr['form_left'] = False, set()
+        for fr in tr['frames']:
+            p = fr.get('player', b'')
+            if p and p[PLAYER_NAVI + NAVI_FORM]:
+                seen = True
+            elif seen:
+                tr['form_left'].add(fr['t'])
+    return f.fr['t'] in tr['form_left']
+
+
+def per_frame(legit, game, caller):
+    """a draw's caller is one of the routines each game draws from once a frame whatever its battle does (legit.json, rng,
+    per_frame: the game state's and the main loop's)"""
+    return any(int(r[f'bn{game}'], 0) <= caller & ~1 < int(r[f'bn{game}'], 0) + int(r['len'], 0) for r in legit['rng'].get('per_frame', []))
+
+
+def stepped(x, y, n):
+    """y is x stepped n times by the games' RNG step (x is y stepped -n times where n is negative)"""
+    if n < 0:
+        x, y, n = y, x, -n
+    for _ in range(n):
+        x = rng_step(x)
+    return x == y
+
+
+def held_clock(d, fa, fb):
+    """d is the RNG words' difference of the first traced frame after the battle's clock held for a number of frames each
+    game's own (a turn's change, a unison's crossing): of the draws since the last traced frame, all but the per-frame ones
+    (per_frame) the same in number on each word in both, and each word the other game's stepped by the per-frame draws one
+    made more than the other"""
+    if d.part != 'rng' or not isinstance(d.a, tuple) or not isinstance(d.b, tuple):
+        return False
+    legit, n = fa.canon.legit, {}
+    for f in (fa, fb):
+        for e in f.fr['events']:
+            if e.kind == DRAW and e.flags:   # (since the words were seeded: a draw before it has no flag, src/dev/xdiff_events.c)
+                key = (f.game, e.sub >> 1, per_frame(legit, f.game, e.caller))
+                n[key] = n.get(key, 0) + 1
+    if any(n.get((5, w, False), 0) != n.get((6, w, False), 0) for w in (0, 1)):
+        return False
+    return all(stepped(d.a[w], d.b[w], n.get((6, w, True), 0) - n.get((5, w, True), 0)) for w in (0, 1))
+
+
 WHEN = {
+    'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
+    'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),
+    'chaos unites': lambda d, fa, fb, prev: unites_now(fa, fb, True),
+    'held clock': lambda d, fa, fb, prev: held_clock(d, fa, fb),
+    'united': lambda d, fa, fb, prev: united(fa) and united(fb),
+    'overlay': lambda d, fa, fb, prev: overlay(d, fa, fb),
+    'form left': lambda d, fa, fb, prev: form_left(fb),
     'flashing': lambda d, fa, fb, prev: any(flashing(f, d.role) for f in (fa, fb) + prev),
     'buster draw': buster_draw,
     'engine draw': lambda d, fa, fb, prev: engine_draw(d, fa.canon.legit),
@@ -200,13 +315,17 @@ def mask_applies(m, d, fa, fb, prev):
         songs = {int(x, 0) for x in m['songs']}
         if not (set(d.a) - set(d.b) <= songs and not set(d.b) - set(d.a)):
             return False
+    if 'song_for' in m:   # (BN5's song in place of BN6's: [BN5's, BN6's], the rest the same)
+        a5, b6 = (int(x, 0) for x in m['song_for'])
+        if sorted(b6 if x == a5 else x for x in d.a) != sorted(d.b):
+            return False
     return True
 
 
 def mask_of(d, masks, fa, fb, prev):
     """the mask (or masks, where each explains some of a byte's bits) that explains d; None where none does, and
     always where d is on the family's own records (what the engine writes there is read as BN6's in the snapshot,
-    never masked). A mask's bits with "direction": "bn6" explain a bit only where BN6 has it and BN5 not."""
+    never masked). A mask's bits with "direction": "bn6" explain a bit only where BN6 has it and BN5 not ("bn5" the other way)."""
     if who(d, fb, fa.canon, fa) == 'family':
         return None
     bits, names = 0, []
@@ -217,6 +336,8 @@ def mask_of(d, masks, fa, fb, prev):
             return m['name']
         mb = int(m['bits'], 0)
         if m.get('direction') == 'bn6' and (not isinstance(d.b, int) or (d.a ^ d.b) & mb & ~d.b):
+            continue
+        if m.get('direction') == 'bn5' and (not isinstance(d.a, int) or (d.a ^ d.b) & mb & ~d.a):
             continue
         bits |= mb
         names.append(m['name'])

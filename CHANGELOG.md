@@ -40,6 +40,37 @@
   frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
   Aqua hit. Nothing in a run uses them yet; BN5's records on them now
   wait only for their viruses (one of Nebula Area's is fightable).
+- **UNITE on BN6's Custom screen, and a Soul's life as BN5 runs it
+  (issue #82).** Behind a developer switch until the Souls are whole,
+  BN5's Souls unite in BN6's battles: the emblem under OK becomes BN5's
+  UNITE while the last chip picked lights a Soul the run holds (by the
+  chip's kind as BN5 has it), shows BN5's art and the Soul's picture, and
+  OK takes MegaMan into the Soul for three turns (Chaos Unison's one),
+  counted down as each Custom screen opens and ended as the turn after
+  its last starts, as BN5 does; another Soul or a Cross replaces it, and
+  Beast Out stays grey while it lasts. The Soul still looks and fights as
+  HeatCross for now. The frame-by-frame comparison with BN5's own battle
+  holds it there: KnightSoul's whole life, a Soul replacing a Soul, UNITE
+  grey for a chip of no Soul's kind and NumberSoul's Chaos Unison behave
+  as in BN5, and five deliberate breaks of the rule are each caught.
+  Battles without the switch play as before.
+- **MegaMan checked against BN5's own, and a place for BN5's Souls in
+  BN6's engine (issue #82).** The frame-by-frame comparison with BN5's
+  own battle can now make MegaMan its subject: both games set up alike (a
+  Soul's flags, a folder, his buster, kept from harm), each Custom screen
+  picked by its own keys in each game, his NaviStats, his form and what
+  he used traced in both, and any difference of his fails the check.
+  His buster, a Cannon and his steps behave the same in both over 900
+  frames; BN5's own KnightSoul is traced from UNITE to its fourth turn,
+  ready for when BN6's engine can unite. Two differences turned out to be
+  the engines' own: BN5 raises MegaMan's mood when his hit lands and BN6
+  never does, and BN5's charged shot fires five frames sooner. The Souls
+  will stand behind Falzar's TenguCross, a form Gregar keeps and never
+  offers: a developer switch makes it an exact copy of HeatCross, and
+  HeatCross taken as that form plays as HeatCross itself, every byte of
+  memory every frame, through the crossing, a charged shot, a Fire chip,
+  a weakness hit that breaks it and the battle's end. Battles play as
+  before.
 - **BN5's own attacks in BN6's battle engine, and its families' recipes
   made from the ROMs (issue #82).** BN6 runs a battle object by its type,
   a byte, and a family of BN5's spawns objects of BN5's types, which BN6

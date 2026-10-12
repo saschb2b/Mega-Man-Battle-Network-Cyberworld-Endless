@@ -54,6 +54,7 @@
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
+#include "soulkinds.h"
 #include "xnavi.h"
 #include "xsong.h"
 #include "debug.h"
@@ -3231,6 +3232,8 @@ static void test_free_space(void) {
 		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
 		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
+	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_BATTLE_SPARE && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
+		"BN6's RAM: the Souls' state at %08x, %#x bytes", (unsigned)BN6_SOULS, (unsigned)BN6_SOULS_SIZE);
 }
 
 /* The installers' claims (claims.h): an installer's own bytes again, its
@@ -3848,6 +3851,19 @@ static void test_chips_image(void) {
 	char text[32];
 	rom_desc_bytes(want, sizeof want, text, sizeof text);
 	CHECK(!strcmp(text, "M-C A\x04"), "chips: the description read past its box's commands (%s)", text);
+}
+
+/* BN6's chips as BN5's UNITE reads them (src/emu/soulkinds.c; the Souls
+ * track's S2): BN6's eleven kinds as BN5 numbers the kind of their name
+ * (BN6 has neither Recovery nor Invisible; none is BN5's 12), and nothing
+ * before both ROMs are read. */
+static void test_soulkinds(void) {
+	static const int as5[11] = { 0, 1, 2, 3, 5, 6, 8, 9, 10, 11, SOULKIND_NONE };   /* (Fire .. Break, none) */
+	for (int k = 0; k < 11; ++k)
+		CHECK(soulkinds_bn5(k) == as5[k], "soulkinds: BN6's kind %d as BN5's %d (%d)", k, as5[k], soulkinds_bn5(k));
+	CHECK(soulkinds_bn5(11) == SOULKIND_NONE && soulkinds_bn5(12) == SOULKIND_NONE && soulkinds_bn5(-1) == SOULKIND_NONE,
+		"soulkinds: BN6's Program Advances and others (11, 12) as none");
+	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
 }
 
 /* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
@@ -4490,6 +4506,7 @@ int main(void) {
 	test_chip_registry();
 	test_chip_records();
 	test_chips_image();
+	test_soulkinds();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();

@@ -19,6 +19,8 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "souls.h"
+#include "soulunite.h"
 #include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
@@ -176,6 +178,7 @@ int emu_encounter_record(uint32_t settings) {
 void emu_encounter_started(uint32_t settings) {
 	int s = emu_encounter_record(settings);
 	boss_on = s >= 0 && boss_record[s];
+	soulunite_held(souls_held());   /* (the run's Souls for UNITE, where the Souls stand in BN6's engine: soulunite.h) */
 }
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
