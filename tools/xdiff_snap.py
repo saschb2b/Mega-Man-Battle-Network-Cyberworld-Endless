@@ -25,6 +25,10 @@ SIZE = {'T1': 0xD8, 'T3': 0xD8, 'T4': 0xC8}       # an object's record, from its
 SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (object offsets)
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
+# MegaMan's side's player block (src/dev/xdiff.c, trace version 3): his battle NaviStats, the word of what was used this
+# battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes
+PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING, NAVI_FORM = 0x00, 0x64, 0x68, 0x2C
+PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
 AI_INDEX = 0x01
 
@@ -79,7 +83,7 @@ class Event:
 
 
 EVENT_SIZE = 40
-DRAW, SPAWN, SOUND, EFFECT, ATTACK, RESERVE, BLINK, SPRITE_SET = range(1, 9)
+DRAW, SPAWN, SOUND, EFFECT, ATTACK, RESERVE, BLINK, SPRITE_SET, MOOD = range(1, 10)
 KEPT, REPLAYED, UNMATCHED, UNMAPPED = 1, 2, 4, 8
 
 
@@ -92,6 +96,10 @@ def read_trace(path):
     p = 24
     moved = [struct.unpack_from('<3I', b, p + 12 * i) for i in range(nm)]
     p += 12 * nm
+    player_size = 0
+    if version >= 3:
+        player_size = struct.unpack_from('<I', b, p)[0]
+        p += 4
     g, frames = GAMES[game], []
     while p < len(b):
         if b[p:p + 4] != b'FRAM':
@@ -104,6 +112,8 @@ def read_trace(path):
         if version >= 2:
             nev = struct.unpack_from('<I', b, p)[0]
             p += 4
+        player = b[p:p + player_size]   # (MegaMan's side's: his battle NaviStats, the used word, his pending form; src/dev/xdiff.c)
+        p += player_size
         objs = []
         for i in range(n1):
             slot, has_ai, has_coll = b[p], b[p + 1], b[p + 2]
@@ -130,8 +140,9 @@ def read_trace(path):
         p += 8 * ns
         events = [Event(b, p + EVENT_SIZE * i, t) for i in range(nev)]
         p += EVENT_SIZE * nev
-        frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events))
-    return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames)
+        frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events,
+                           player=player))
+    return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames, version=version)
 
 
 # ---- each game's numbers as BN6's (legit.json's maps) ----
@@ -153,6 +164,25 @@ class Canon:
         self.natives = set()   # (a spec's: enemies both games have, by BN6's id; their attacks' types, their effects)
         self.native_attacks, self.native_effects = set(), set()
         self.family_effects = {int(x, 0) for x in m['family_effects']['bn6']}
+        self.form = num(m['form']['bn5_to_bn6']) if 'form' in m else {}
+        self.power_attack = num(m['power_attack']['bn5_to_bn6']) if 'power_attack' in m else {}
+        self.sprite_pairs = m['sprites'] if 'sprites' in m else None
+        self._sprites = None
+
+    def sprite_name(self, game, base):
+        """the registry's name of a sprite (its data's start) in this game, or None (maps, sprites: each pair a list and entry of
+        each game's sprite lists, resolved from its ROM)"""
+        if self._sprites is None:
+            self._sprites = {5: {}, 6: {}}
+            for g, key, at in ((5, 'bn5_lists', 0), (6, 'bn6_lists', 2)):
+                if not self.sprite_pairs:
+                    break
+                lists = int(self.sprite_pairs[key], 0)
+                for pair in self.sprite_pairs['pairs']:
+                    lst, idx = pair[at], pair[at + 1]
+                    entry = u32(rom(g), u32(rom(g), lists - ROM[0] + 4 * lst) - ROM[0] + 4 * idx) & 0x7FFFFFFF
+                    self._sprites[g][entry] = pair[4]
+        return self._sprites[game].get(base)
 
     def nid(self, game, v):
         return self.name_id.get(v, v) if game == 5 else v
@@ -167,6 +197,10 @@ class Canon:
         if megaman:
             return self.mm_action.get(v, v)
         return v if v < 6 else 8 if v == 6 else v + 2
+
+    def form_of(self, game, v):
+        """MegaMan's form as BN6 numbers it (a BN5 Soul by legit.json's map: none until the Souls are installed)"""
+        return self.form.get(v, v) if game == 5 else v
 
     def t3(self, game, v):
         return self.t3_type.get(v, v) if game == 5 else v
@@ -436,6 +470,10 @@ def obj_cells(fa, fb, oa, ob):
         rel = None
         if w - sp in SPRITE_DATA and base_a and base_b and is_ptr(wa) and is_ptr(wb):
             rel = ('sprite data', wa - base_a), ('sprite data', wb - base_b)
+            # (the sprite itself, its data pointer: by the registry where either game's is one of its pairs)
+            na, nb = canon.sprite_name(5, base_a - 4), canon.sprite_name(6, base_b - 4)
+            if w - sp == 0x18 and (na or nb):
+                rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
         view = word_view(fa, fb, wa, wb, rel)
         if view is not None:
             if view[0] != view[1]:
@@ -458,12 +496,16 @@ def obj_cells(fa, fb, oa, ob):
     return out
 
 
+LOADOUT = {4, 5, 6, 7, 8, 0x11}   # MegaMan's AI data: his power attacks (BButton, APwrAtk, ..., the chaos/Beast Out attack)
+
+
 def ai_cells(fa, fb, oa, ob):
     out = []
     if (oa.ai is None) != (ob.ai is None):
         return [('ai', 0, oa.ai is not None, ob.ai is not None)]
     if oa.ai is None:
         return out
+    megaman = oa.kind == 'T1' and fa.canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
     for w in range(0, AI_SIZE, 4):
         wa, wb = u32(oa.ai, w), u32(ob.ai, w)
         view = word_view(fa, fb, wa, wb, None)
@@ -475,6 +517,8 @@ def ai_cells(fa, fb, oa, ob):
             a, b = oa.ai[w + k], ob.ai[w + k]
             if w + k == AI_INDEX:
                 a = fa.canon.ai_index.get(a, a)
+            elif megaman and w + k in LOADOUT and a != 0xFF:
+                a = fa.canon.power_attack.get(a, a)
             if a != b:
                 out.append(('ai', w + k, a, b))
     return out
@@ -561,6 +605,33 @@ def panel_cells(fa, fb, t):
     return out
 
 
+def player_cells(fa, fb):
+    """MegaMan's side's player block, where both traces hold one: every byte the same (his form and his pending form in
+    BN6's numbers, the pending record's object word as what it names, BN5's bytes read in BN6's terms where a translation
+    says so: its mood less its gains, xdiff_events.Translations), or a difference (role 'player': his)"""
+    pa, pb, t = fa.fr.get('player', b''), fb.fr.get('player', b''), fa.fr['t']
+    if not pa or not pb:
+        return []
+    if fa.fr.get('player_over'):
+        pa = bytearray(pa)
+        for k, v in fa.fr['player_over'].items():
+            pa[k] = v
+    out = []
+    for off in range(0, min(len(pa), len(pb))):
+        if PENDING_OBJECT <= off < PENDING_OBJECT + 4:
+            if off == PENDING_OBJECT:
+                va, vb = fa.ptr(u32(pa, off)), fb.ptr(u32(pb, off))
+                if va != vb:
+                    out.append(Diff(t, 'player', 'player', off, va, vb))
+            continue
+        a, b = pa[off], pb[off]
+        if off in (PLAYER_NAVI + NAVI_FORM, PLAYER_PENDING):
+            a = fa.canon.form_of(5, a) if a != 0xFF else a
+        if a != b:
+            out.append(Diff(t, 'player', 'player', off, a, b))
+    return out
+
+
 def frame_diffs(fa, fb):
     t, out = fa.fr['t'], []
     ra = {o.role: o for o in fa.fr['objs']}
@@ -589,4 +660,5 @@ def frame_diffs(fa, fb):
     if oa != ob:
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
     out += panel_cells(fa, fb, t)
+    out += player_cells(fa, fb)
     return out

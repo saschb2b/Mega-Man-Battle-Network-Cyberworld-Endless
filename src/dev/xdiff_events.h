@@ -24,6 +24,7 @@ enum {
 	XD_RESERVE,    /* a panel reserved */
 	XD_BLINK,      /* the blink step of an object flashing */
 	XD_SPRITE,     /* an object's sprite set up (sprite_load) */
+	XD_MOOD,       /* (BN5's alone) a side's mood raised as a hit lands: a the side, b what it rose by (BN5_MOOD_GAIN) */
 };
 
 /* A draw's flags */

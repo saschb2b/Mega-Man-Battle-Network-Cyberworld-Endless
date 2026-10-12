@@ -1,0 +1,178 @@
+{
+ "about": "MegaMan the subject, both games' own (the Souls track's S0): BN5's CanGard V1 at (6,2), the same in both engines (spec cangard_v1), against MegaMan at (2,2) with 2000 HP, his buster at levels 1-1-1 in both, a folder of Cannon * in both (BN5's chip 1 and BN6's, one behaviour), the first Custom screen's Cannon picked and OK; buster shots, the Cannon fired while CanGard's guard is down, steps between the rows and columns. No charged shot: BN5's fires at once where BN6's waits five frames (docs/DEVTOOLS.md, The differential: MegaMan as the subject). Every difference of MegaMan's own (his object, what he owns, his player block) fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "folder5": [
+  "3401"
+ ],
+ "folder6": [
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   2
+  ],
+  [
+   115,
+   "A",
+   2
+  ],
+  [
+   170,
+   "B",
+   2
+  ],
+  [
+   195,
+   "B",
+   2
+  ],
+  [
+   240,
+   "UP",
+   3
+  ],
+  [
+   260,
+   "B",
+   2
+  ],
+  [
+   300,
+   "DOWN",
+   3
+  ],
+  [
+   320,
+   "B",
+   2
+  ],
+  [
+   345,
+   "B",
+   2
+  ],
+  [
+   380,
+   "B",
+   2
+  ],
+  [
+   405,
+   "B",
+   2
+  ],
+  [
+   500,
+   "B",
+   2
+  ],
+  [
+   525,
+   "B",
+   2
+  ],
+  [
+   560,
+   "DOWN",
+   3
+  ],
+  [
+   600,
+   "UP",
+   3
+  ],
+  [
+   640,
+   "B",
+   2
+  ],
+  [
+   665,
+   "B",
+   2
+  ],
+  [
+   700,
+   "B",
+   2
+  ],
+  [
+   725,
+   "B",
+   2
+  ],
+  [
+   760,
+   "RIGHT",
+   3
+  ],
+  [
+   800,
+   "LEFT",
+   3
+  ],
+  [
+   830,
+   "B",
+   2
+  ]
+ ]
+}

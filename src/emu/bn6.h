@@ -85,6 +85,7 @@
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
+#define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
@@ -99,7 +100,8 @@
 #define BN6_MODE_CROSS_SHUT   0x50        /* ... sliding shut, */
 #define BN6_MODE_CROSS        0x54        /* ... open, */
 #define BN6_MODE_CROSS_TAKEN  0x5C        /* ... a Cross chosen in it */
-#define BN6_CUSTOM_CROSS_ROW  (BN6_CUSTOM_SCREEN + 0x1B) /* CROSSSELECT's cursor: its row, of the Crosses MegaMan has in Gregar's order (BN6_FLAG_HEAT_CROSS on), less the one he is in */
+#define BN6_CUSTOM_CROSS_ROW  (BN6_CUSTOM_SCREEN + 0x1B) /* CROSSSELECT's cursor: its row, of the Crosses MegaMan has in Gregar's order (BN6_FLAG_HEAT_CROSS on),
+                                             less each chosen this battle (BN6_CROSSES_USED) and the one he began it in (0x08029EF6 lists them) */
 #define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
 #define BN6_PA_STAR_LIMIT     0x08029606u /* bn6f sub_80295C8, a Program Advance of one chip in codes in a row: cmp r2, #1 (0x2A01), one * of its three at most */
 #define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/ROM_DATA.md) */
@@ -140,6 +142,8 @@
 #define BN6_COLL_FLASH        0x24        /* u16 frames left flashing after a hit (BN5_COLL_FLASH): the blink step reads its bit 1 (BN6_BLINK_FLASHING) */
 #define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
 #define BN6_COLL_BUBBLE       0x2C        /* u16 frames left in a bubble, the same */
+#define BN6_COLL_FLAGS        0x3C        /* u32 its object's flags, ORed in by 0x0801A152 (BN5's 0x08016C42): BN6_OBJ_INVULNERABLE among them */
+#define BN6_OBJ_INVULNERABLE  0x08        /* BN6_COLL_FLAGS: no hit takes it (a hit's invulnerable frames set it, 0x0800EAFA; the same bit in BN5) */
 #define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
 #define BN6_STRUCK_PARALYSIS  0x00000008u /* ... paralysed, BN6_COLL_PARALYSIS frames: CurAction 4 */
 #define BN6_STRUCK_SLIDE      0x00000010u /* ... pushed along a panel (it slides; CurAction kept) */
@@ -154,6 +158,7 @@
 #define BN6_HAND_MAX          6           /* ... six chips at most */
 #define BN6_CUSTOM_PICKS      0x02036508u /* the Custom screen's chips picked: their slots in its hand, in order (BN6_CUSTOM_PICKED of them) */
 #define BN6_BATTLE_NAVI       0x0203CE00u /* eBattleNaviStats0: MegaMan's NaviStats as a battle copies them (bn6f GetBattleNaviStatsAddr), */
+#define BN6_BATTLE_NAVI_SIZE  0x64        /* ... BN6_BATTLE_NAVI_SIZE a side (BN5's 0x60, laid out the same to +0x5F) */
 #define BN6_BATTLE_MOOD       (BN6_BATTLE_NAVI + 0x0E) /* Mood: BN6_MOOD_SYNCHRO Full Synchro, 0 dark (bn6f's emotion getter, Falzar 0x08015B64) */
 #define BN6_MOOD_SYNCHRO      0xFF        /* BN6_BATTLE_MOOD: Full Synchro, the next chip's power x2 (BN6's tutorial) */
 #define BN6_BATTLE_BEAST_TURNS (BN6_BATTLE_NAVI + 0x21) /* BeastOutCounter: the EmotionCounter, 3 as a battle starts, one less each Beast Out turn; 0 tired */
@@ -382,5 +387,6 @@
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
+#include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #endif

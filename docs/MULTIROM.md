@@ -744,6 +744,60 @@ and its calls aimed again (`src/emu/xvirus.c`):
   docs/EMULATION.md, Testing): the install stands in the way of no run
   continued with BN5's ROM taken away or put in.
 
+## Transplanted Souls
+
+Issue #82's fifth call (One net, above): Souls serve every battle, so
+BN5's six Team Colonel Souls move into BN6's own engine as the families
+do, a milestone at a time, each proved against BN5's own battle before
+the next.
+
+- **What a Soul is to BN6's engine**: BN6's Cross is BN5's Soul Unison
+  renumbered (issue #82's research, each place read in both ROMs): one
+  form byte in the battle NaviStats (+0x2C: a Soul by its Navi's AI index
+  in BN5, Team Colonel's 7-12; a Cross 1-10 and Beast Out 0xB-0x18 in
+  BN6), the same 16-byte pending form a side, taken as a turn starts, the
+  same requests and phases of the change, the same six bytes of loadout
+  in MegaMan's AI data. A Soul is a whole sprite where a Cross is MegaMan
+  with a palette and an overlay; BN6 writes a Cross's turns and never
+  counts them, and dropped Chaos Unison's charge.
+- **S0, MegaMan as the differential's subject** (done; docs/DEVTOOLS.md,
+  The differential): a spec can make MegaMan the subject, his setup the
+  same in both games (BN5's event flags for the Souls, a folder in each,
+  his buster, kept from harm) and each Custom screen passed by its own
+  keys in each game, his object, his attacks, effects, sounds and panels,
+  his player block (his battle NaviStats, the Souls or Crosses used, his
+  pending form) compared in BN6's numbers, and the stop rule flipped: a
+  difference of his fails the spec. `megaman_plain` (the buster, a
+  Cannon, steps) passes; `soul_knight_ref`, BN5's own KnightSoul from
+  UNITE to its fourth turn, is traced in BN5 alone until BN6's engine can
+  unite. What it found: BN5 raises the mood of a side that lands a hit,
+  BN6 never (read as a translation until BN5's DarkChip rule is ported),
+  and BN5's plain charged shot fires five frames sooner than BN6's
+  (docs/ROM_DATA.md, MegaMan as the differential's subject).
+- **S1, the proxy form** (done; docs/DEVTOOLS.md, The proxy form): the
+  Souls will stand behind form 8, Falzar's TenguCross, which Gregar keeps
+  in every table by form and never offers. `--dev soulproxy` makes it an
+  exact copy of HeatCross (its eleven tables' entry 8, its NameID's object
+  id, hooks on the three places Gregar's code reads the form itself), and
+  `tools/xproxy.py` proves it: HeatCross committed as form 8 plays as
+  HeatCross every byte of EWRAM and IWRAM, every frame, through the
+  crossing, a charged shot, a Fire chip, the buster, a weakness hit that
+  breaks it and the battle's end, but the form byte's copies and the
+  NameID. Gregar does compare the form with 8 once (TenguCross's Wind
+  bonus, `0x0800EFE6`, behind HeatCross's hooked compare), and from form
+  8 Beast Out is TenguBeast's (0x14): the Souls grey Beast Out while one
+  is united (docs/ROM_DATA.md, MegaMan's forms).
+- **Next**: a Soul's state and UNITE on BN6's Custom screen (UNITE in
+  Beast Out's place by BN5's rule, the record's form the proxy, the Soul's
+  turns counted, no weakness break for a Soul), its look (BN5's sprites,
+  its image in the summon's place), its charged shots and abilities, its
+  passives, Chaos Unison, and BN5's DarkChip rule (the mood's gains, the
+  worried hand). Each Soul gets a differential spec against BN5's own
+  battle as its parts come. Their state in RAM goes where the engine's
+  plan sets it aside (`0x0203FF70`-`0x0203FFEF`), their code and data in
+  `EMU_FREE` + `0x480000` to `+0x4C0000` (docs/EMULATION.md); neither is
+  used yet.
+
 ## Status
 
 - [x] Battle Network 5: Team Colonel (USA): its map and coordinate

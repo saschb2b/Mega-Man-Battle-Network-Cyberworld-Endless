@@ -34,6 +34,8 @@ typedef struct {
 	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0xBB-0xC0
 	                   (xvirus.h; its differential, tools/xcontrol.py) */
 	bool nofamilies; /* no other game's family installed, BN5's ROM read or not (xvirus.h): BN6's battles as its own, to compare */
+	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
+	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
 } DevFlags;
 
 extern DevFlags dev;

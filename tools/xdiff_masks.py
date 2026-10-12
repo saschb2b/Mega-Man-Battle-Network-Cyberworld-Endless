@@ -89,6 +89,8 @@ def who(d, fb, canon, fa=None):
     order, a panel, the engine's draws) or its role's"""
     if d.role == 'family':
         return 'family'
+    if d.role == 'player':
+        return 'megaman'
     return whose_role(d.role, fa, fb) if isinstance(d.role, tuple) else 'battle'
 
 

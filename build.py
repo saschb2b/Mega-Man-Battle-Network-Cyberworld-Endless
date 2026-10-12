@@ -1792,7 +1792,7 @@ def lint_files():
 
 
 # bn6.h and the headers it includes for the PET's and the virus families' addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_families.h', 'bn6_pet.h')
+BN6_HEADERS = ('bn6.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_forms.h')
 
 
 def lint_rom_data(update):

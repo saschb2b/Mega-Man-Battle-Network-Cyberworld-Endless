@@ -15,6 +15,23 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+- **MegaMan checked against BN5's own, and a place for BN5's Souls in
+  BN6's engine (issue #82).** The frame-by-frame comparison with BN5's
+  own battle can now make MegaMan its subject: both games set up alike (a
+  Soul's flags, a folder, his buster, kept from harm), each Custom screen
+  picked by its own keys in each game, his NaviStats, his form and what
+  he used traced in both, and any difference of his fails the check.
+  His buster, a Cannon and his steps behave the same in both over 900
+  frames; BN5's own KnightSoul is traced from UNITE to its fourth turn,
+  ready for when BN6's engine can unite. Two differences turned out to be
+  the engines' own: BN5 raises MegaMan's mood when his hit lands and BN6
+  never does, and BN5's charged shot fires five frames sooner. The Souls
+  will stand behind Falzar's TenguCross, a form Gregar keeps and never
+  offers: a developer switch makes it an exact copy of HeatCross, and
+  HeatCross taken as that form plays as HeatCross itself, every byte of
+  memory every frame, through the crossing, a charged shot, a Fire chip,
+  a weakness hit that breaks it and the battle's end. Battles play as
+  before.
 - **BN5's Handi in BN6's own battles, checked against BN5's own with
   its random numbers replayed (issue #82).** Handi, a virus that picks a
   panel at random, teleports there and drops a bomb, is the second family

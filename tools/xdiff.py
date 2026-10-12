@@ -60,14 +60,22 @@ are still compared after it, to say how far they stayed the same. An
 enemy each game runs its own code for (a spec's natives, their attacks
 and effects) does not stop it: the family is compared on while its world
 (MegaMan, the RNG, the songs, the run order, the panels) stays the same,
-and the first difference there stops it. A spec's "expect" checks both
-traces against what BN5's battle is known to do. --poke and --call break
+and the first difference there stops it. A spec whose subject is MegaMan
+("subject": "megaman", the Souls track) flips the rule: his own state,
+what he owns and the engine's effects are the subject, and their first
+unexplained difference fails it; his side's player block (his battle
+NaviStats, what he used this battle, his pending form) is compared too,
+in BN6's numbers. A reference spec ("kind": "reference") is BN5's battle
+alone, MegaMan's timeline held to what BN5 is known to do, until BN6's
+engine can fight it. A spec's "expect" checks both traces against what
+BN5's battle is known to do. --poke and --call break
 BN6's copy after the install (an immediate, a call's veneer): the
 comparator's own test, which --mutations runs from
 tests/xdiff/mutations.json, each break required to FAIL its spec. Needs
 both ROMs (local only), copied into .build/xdiff/rom; the traces go to
 .build/xdiff/runs. Exits 0 when every spec passes (a smoke spec may end
-inconclusive). The snapshot and its differences are tools/xdiff_snap.py,
+inconclusive, a reference spec REFERENCE). The snapshot and its
+differences are tools/xdiff_snap.py,
 whose a difference is and the masks tools/xdiff_masks.py.
 """
 import argparse
@@ -79,8 +87,8 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, Canon, Frame, assign_roles, frame_diffs,  # noqa: E402
-                        read_trace, role_name, rom)
+from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, SPRITE, PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING,  # noqa: E402
+                        NAVI_FORM, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom)
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 
@@ -133,10 +141,30 @@ def twins_check(legit):
     return items
 
 
+def megaman_items(spec):
+    """MegaMan's setup in each game, as src/dev/xdiff.c takes it: event flags, folders, his buster, kept from harm, the
+    Custom screens' keys (each screen's steps of [keys, frames], "" none)"""
+    parts = []
+    for g in ('5', '6'):
+        if spec.get(f'flags{g}'):
+            parts.append(f'flags{g}=' + ','.join(spec[f'flags{g}']))
+        if spec.get(f'folder{g}'):
+            parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
+        for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
+            parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    if spec.get('buster'):
+        parts.append(f'buster={spec["buster"]}')
+    if spec.get('safe'):
+        parts.append('safe=1')
+    if spec.get('kind') == 'reference':
+        parts.append('game=bn5')
+    return parts
+
+
 def spec_text(spec, out, pokes, calls=(), twins=()):
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
     parts = [f'foes={spec["foes"]}', f'mm={spec.get("mm", "22")}', f'hp={spec.get("hp", 100)}', f'frames={spec.get("frames", 1200)}',
-             f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}']
+             f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}'] + megaman_items(spec)
     if keys:
         parts.append(f'keys={keys}')
     if spec.get('rng'):
@@ -168,6 +196,25 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     return [os.path.join(WORK, 'runs', f'{name}.{g}') for g in ('bn5', 'bn6')]
 
 
+def reference_only(name, spec, a, legit, canon):
+    """A spec BN6's engine cannot fight yet (kind "reference": the subject cannot do what it asks until a later
+    milestone): BN5's battle alone, its timeline reported and checked against what it is known to do"""
+    path = os.path.join(WORK, 'runs', f'{name}.bn5')
+    if not a.no_run:
+        run(name, spec, [], [], a.quiet, twins_check(legit))
+    ta = read_trace(path)
+    ta['code'] = []
+    assign_roles(ta, canon)
+    attribute(ta, canon)
+    lines, bad = player_timeline(ta, canon), check_player(ta, canon, spec.get('expect', {}))
+    print('\n'.join(lines))
+    for line in bad:
+        print(f'  EXPECT {line}')
+    verdict = 'FAIL' if bad else 'REFERENCE'
+    print(f'{name}: {verdict} (reference: BN5\'s battle alone, BN6\'s engine cannot fight it yet)')
+    return verdict, 'reference'
+
+
 def story(trace, canon, upto=None):
     last, lines = None, []
     game = trace['game']
@@ -188,6 +235,58 @@ def story(trace, canon, upto=None):
             lines.append(f'  t{fr["t"]:5d}: {view}{snd}')
             last = view
     return lines
+
+
+# ---- MegaMan's own timeline (a MegaMan spec's, a reference-only spec's) ----
+
+# what of MegaMan a frame shows (BN5's numbers in BN5's trace): each read from his object (o), its AI's data (ai), his
+# side's player block (p)
+MEGAMAN_READS = {
+    'action': lambda o, ai, p: o.o8(OBJ_ACTION),
+    'hp': lambda o, ai, p: o.o16(0x24),
+    'form': lambda o, ai, p: p[PLAYER_NAVI + NAVI_FORM] if p else None,
+    'mood': lambda o, ai, p: p[PLAYER_NAVI + 0x0E] if p else None,
+    'used': lambda o, ai, p: int.from_bytes(p[PLAYER_USED:PLAYER_USED + 4], 'little') if p else None,
+    'pending': lambda o, ai, p: p[PLAYER_PENDING] if p else None,
+    'turns': lambda o, ai, p: ai[0x0F] if ai else None,
+    'loadout': lambda o, ai, p: ai[4:9].hex() + ai[0x11:0x12].hex() if ai else None,
+    'sprite': lambda o, ai, p: o.o32(SPRITE['T1'] + 0x18) - 4 if o.o32(SPRITE['T1'] + 0x18) else 0,
+    'palette': lambda o, ai, p: o.o8(SPRITE['T1'] + 4),
+}
+
+
+def megaman_frames(trace, canon):
+    """each frame's (t, {what: value}) of MegaMan, his game's own numbers"""
+    out = []
+    for fr in trace['frames']:
+        o = next((x for x in fr['objs'] if x.kind == 'T1' and canon.is_megaman(trace['game'], x.o16(OBJ_NAME_ID))), None)
+        if o is not None:
+            out.append((fr['t'], {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}))
+    return out
+
+
+def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'turns', 'used', 'loadout', 'sprite', 'palette', 'mood', 'hp')):
+    """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
+    lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
+    for t, v in megaman_frames(trace, canon):
+        view = tuple(v[k] for k in keys)
+        if view != last:
+            lines.append(f'  t{t:5d}: ' + ' '.join(f'{k} {v[k]:#x}' if isinstance(v[k], int) else f'{k} {v[k]}' for k in keys))
+            last = view
+    return lines
+
+
+def check_player(trace, canon, expect):
+    """a spec's expectations of MegaMan ("megaman": {what: [[t, value], ...]}, his game's own numbers) against a trace"""
+    by_t, bad = dict(megaman_frames(trace, canon)), []
+    for what, pairs in expect.get('megaman', {}).items():
+        for t, want in pairs:
+            got = by_t.get(t, {}).get(what)
+            want = int(want, 0) if isinstance(want, str) and what != 'loadout' else want
+            if got != want:
+                bad.append(f'BN{trace["game"]}: MegaMan\'s {what} at t{t} {got if not isinstance(got, int) else hex(got)}, not '
+                           f'{want if not isinstance(want, int) else hex(want)}')
+    return bad
 
 
 # ---- expectations: the timeline BN5's battle is known to have (in BN6's numbers) ----
@@ -291,12 +390,15 @@ HARD = ('megaman', "megaman's", 'engine')   # whose differences stop a spec as i
 SOFT = ('native', "native's")               # whose leave the family's world the same: compared on
 
 
-def first_unexplained(t, open_, by, natives_at, show):
-    """the verdict a frame's unexplained differences give (None: compare on), and the lines saying so"""
+def first_unexplained(t, open_, by, natives_at, show, subject='family'):
+    """the verdict a frame's unexplained differences give (None: compare on), and the lines saying so. In a MegaMan
+    spec (subject megaman) MegaMan's own state, what he owns and the engine's effects are the subject: they fail it"""
     fam, bat = by.get('family', []), by.get('battle', [])
     hard = [d for w in HARD for d in by.get(w, [])]
+    if subject == 'megaman' and hard:
+        fam, hard = fam + hard, []
     if fam:
-        verdict, why = 'FAIL', "the family's"
+        verdict, why = 'FAIL', "the family's" if subject == 'family' else "MegaMan's, the spec's subject (his object, what he owns, the engine's effects), or the family's"
     elif hard or bat and natives_at is not None:
         verdict, why = 'INCONCLUSIVE', ("MegaMan's own state, what he owns or an effect of the engine's" if hard else
                                         "the battle's, after the natives' own code differed") + ': the stop rule'
@@ -364,7 +466,7 @@ def compare(name, spec, ta, tb, legit, canon, show):
             natives_at = fra['t']
             lines.append(f'  the natives\' own code differs from t{natives_at} on (each game\'s own: compared on while the '
                          f'family\'s world stays the same): {next(d for w in SOFT for d in by.get(w, []))}')
-        v, why = first_unexplained(fra['t'], open_, by, natives_at, show)
+        v, why = first_unexplained(fra['t'], open_, by, natives_at, show, spec.get('subject', 'family'))
         if v is None:
             continue
         verdict, at = v, fra['t']
@@ -403,6 +505,8 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None):
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
+    if spec.get('kind') == 'reference':
+        return reference_only(run_name or name, spec, a, legit, canon)
     run_name = run_name or name
     paths = [os.path.join(WORK, 'runs', f'{run_name}.{g}') for g in ('bn5', 'bn6')] if a.no_run else \
         run(run_name, spec, list(pokes), list(calls), a.quiet, twins_check(legit))
@@ -422,7 +526,9 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None):
     bad = []
     for game, tr in (('BN5', ta), ('BN6', tb)):
         b, seen = check_expect(name, game, tr, canon, spec.get('expect', {}))
-        bad += b
+        bad += b + check_player(tr, canon, spec.get('expect', {}))
+        if spec.get('subject') == 'megaman' and a.story:
+            print('\n'.join(player_timeline(tr, canon)))
         if spec.get('expect'):
             print(f'  {game}: reticles at t{seen["spawns"][:6]}..., sounds at t{seen["sounds"][:6]}..., MegaMan lost {seen["lost"][:8]}, '
                   f'the virus hit {seen["hits"]} times')
@@ -474,7 +580,8 @@ def main():
     print('; '.join(f'{k} {v}' for k, (v, _) in results.items()))
     if a.expect_fail:
         sys.exit(0 if all(v == 'FAIL' for v, _ in results.values()) else 1)
-    sys.exit(0 if all(v == 'PASS' or (v == 'INCONCLUSIVE' and kind == 'smoke') for v, kind in results.values()) else 1)
+    sys.exit(0 if all(v == 'PASS' or (v == 'INCONCLUSIVE' and kind == 'smoke') or (v == 'REFERENCE' and kind == 'reference')
+                      for v, kind in results.values()) else 1)
 
 
 if __name__ == '__main__':

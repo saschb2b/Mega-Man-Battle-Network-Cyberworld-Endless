@@ -47,12 +47,12 @@ static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &guest_dev_worried },
-		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies },
+		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
 		{ "slowboot=", &guest_dev_slowboot }, { "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
-		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast },
+		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }

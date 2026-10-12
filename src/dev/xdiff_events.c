@@ -37,17 +37,18 @@ typedef struct {
 	uint32_t draw[4], spawn, spawn_end, sound, effect, attack, reserved, blink, sprite;
 	uint32_t runner_ret, running, rng[2];
 	uint32_t flash, hides;   /* the flash timer's place in a collision data; its bit 1 as the blink hides an object */
+	uint32_t mood_gain, navi, navi_size;   /* the mood raised as a hit lands (0 none: BN6's) and the battle NaviStats it raises */
 } Game;
 
 static const Game games[2] = {
 	{ { BN5_RNG_DRAW, BN5_RNG_DRAW_POSITIVE, BN5_RNG_DRAW_SECOND, BN5_RNG_DRAW_SECOND_POSITIVE }, BN5_SPAWN_COMMON, BN5_SPAWN_COMMON_END,
 		BN5_PLAY_SOUND, BN5_SPAWN_EFFECT, BN5_SET_ATTACK, BN5_RESERVE_PANEL_DONE, BN5_BLINK_FLASHING, BN5_SPRITE_LOAD, BN5_OBJECT_RUNNER_RET,
 		BN5_OBJECT_RUNNING,
-		{ BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, BN5_COLL_FLASH, 0 },
+		{ BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, BN5_COLL_FLASH, 0, BN5_MOOD_GAIN, BN5_BATTLE_NAVI, BN5_BATTLE_NAVI_SIZE },
 	{ { BN6_RNG_DRAW, BN6_RNG_DRAW_POSITIVE, BN6_RNG_DRAW_SECOND, BN6_RNG_DRAW_SECOND_POSITIVE }, BN6_SPAWN_COMMON, BN6_SPAWN_COMMON_END,
 		BN6_PLAY_SOUND, BN6_SPAWN_EFFECT, BN6_SET_ATTACK, BN6_RESERVE_PANEL_DONE, BN6_BLINK_FLASHING, BN6_SPRITE_LOAD, BN6_OBJECT_RUNNER_RET,
 		BN6_OBJECT_RUNNING,
-		{ BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, BN6_COLL_FLASH, 2 },
+		{ BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, BN6_COLL_FLASH, 2, 0, BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE },
 };
 
 /* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word */
@@ -299,6 +300,17 @@ static HookAct on_blink(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* (r0 the side, r1 the gain: what the mood rises by, as the routine will make it) */
+static HookAct on_mood(HookRegs *r, void *user) {
+	XdLog *log = user;
+	XdEvent *e = call(log, r, XD_MOOD, 0, false);
+	if (!e) return HOOK_CONTINUE;
+	uint32_t mood = hook_read8(log->g->navi + (r->r[0] & 1) * log->g->navi_size + BN6_BATTLE_MOOD - BN6_BATTLE_NAVI), now = mood + r->r[1];
+	e->a = r->r[0] & 1;
+	e->b = mood == 0 || mood == 0xFF ? 0 : (now > 0xFE ? 0xFE : now) - mood;
+	return HOOK_CONTINUE;
+}
+
 /* ---- the logs ---- */
 
 static XdLog *log_make(int game, bool alone) {
@@ -329,6 +341,7 @@ XdLog *xd_log_start(int game) {
 	ok = put(g->spawn, on_spawn, log) && put(g->spawn_end, on_spawned, log) && ok;
 	ok = put(g->sound, on_sound, log) && put(g->effect, on_effect, log) && put(g->attack, on_attack, log) && ok;
 	ok = put(g->reserved, on_reserved, log) && put(g->blink, on_blink, log) && put(g->sprite, on_sprite, log) && ok;
+	if (g->mood_gain) ok = put(g->mood_gain, on_mood, log) && ok;
 	if (!ok) fprintf(stderr, "xdiff: a hook could not be placed on BN%d's core\n", game);
 	return ok ? log : NULL;
 }

@@ -68,9 +68,11 @@
       ]
     },
     "action": {
-      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9).",
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both.",
       "megaman": {
-        "6": "8"
+        "6": "8",
+        "0x1A": "0x1C",
+        "0x1E": "0x16"
       },
       "t3_types": [
         "0x4B"
@@ -105,6 +107,74 @@
           ]
         }
       ]
+    },
+    "form": {
+      "why": "MegaMan's form, his battle NaviStats' +0x2C and his pending form's +0 (the player block, src/dev/xdiff.c): BN5 numbers a Soul by its Navi's AI index (7-12 Team Colonel's), BN6 a Cross 1-10, Beast Out 0xB-0x18. No Soul is installed in BN6's engine yet (a later milestone of the Souls track unites them): none is mapped, and 0 (none) and 0xFF (none pending) are the same in both.",
+      "bn5_to_bn6": {}
+    },
+    "sprites": {
+      "why": "A sprite is compared by what it is, not by where each game keeps it: a sprite state's data pointer (+0x18, the sprite's start + 4) named by the registry's pair, the same list and entry of each game's sprite lists (BN6's RomLayout.sprite_lists 0x08031CC4, BN5's XRomLayout's 0x0803272C: a word per list, a word per entry). Where either game's pointer is one of a pair's, both must be that pair's: MegaMan drawn from another sprite, his flash or a spark another, is a difference. A sprite of no pair (a moved family's, BN5's from its battle's cache in EWRAM) is compared as before, its frames from its own data.",
+      "bn5_lists": "0x0803272C",
+      "bn6_lists": "0x08031CC4",
+      "pairs": [
+        [
+          0,
+          0,
+          0,
+          0,
+          "MegaMan"
+        ],
+        [
+          3,
+          1,
+          3,
+          1,
+          "a chip's muzzle flash (the Cannon's)"
+        ],
+        [
+          3,
+          3,
+          3,
+          3,
+          "his buster's first flash"
+        ],
+        [
+          3,
+          6,
+          3,
+          6,
+          "his buster's second flash"
+        ],
+        [
+          5,
+          1,
+          5,
+          1,
+          "a hit's spark, 7 (a chip's)"
+        ],
+        [
+          5,
+          5,
+          5,
+          5,
+          "a hit's spark, 0 (a shot's)"
+        ],
+        [
+          5,
+          8,
+          5,
+          8,
+          "his buster's charge glow"
+        ]
+      ],
+      "evidence": [
+        "MegaMan's object's sprite state in both traces from t1: BN5 0x081C9804, BN6 0x081D8004 (list 0 entry 0's + 4)",
+        "megaman_plain's traces: his buster's flashes (the first kind's type 5, +4 BN5 0x23 and 0x0D, BN6 6 and 5) drawn from list 3's entries 3 and 6 in both, the Cannon's (+4 0x... ) from entry 1; the sparks (the fourth kind's type 4) of a shot from list 5's 5 and of the Cannon from list 5's 1 in both; the charge glow (type 8) from list 5's 8 in both"
+      ]
+    },
+    "power_attack": {
+      "why": "MegaMan's AI data +4 to +8 and +0x11 name his power attacks (his charged shot's at +7, BPwrAtk), each an entry of each game's table (BN5 0x0800F368, 108 entries; Gregar 0x080117D4, 148): BN5's number read as BN6's. In both games his plain loadout is ff ff 00 01 ff ff (no Cross, no Soul: the normal charged shot, entry 1 of each, BN5 0x0800F5B4 and Gregar 0x08011A7E, 10 x (Attack + 1)), and 0xFF none: the same numbers. A Soul's (KnightSoul's 0x11 and 0x12, its chaos attack 0x38) have no entry in BN6's table yet (the Souls track grows it with their abilities): none mapped.",
+      "bn5_to_bn6": {}
     }
   },
   "layouts": {
@@ -436,11 +506,13 @@
         "megaman's"
       ],
       "sprite_offsets": [
-        "0x01-0x07",
+        "0x01-0x03",
+        "0x05-0x07",
         "0x0A-0x14",
-        "0x16-0x37"
+        "0x16-0x17",
+        "0x1C-0x37"
       ],
-      "why": "MegaMan is drawn from each game's own sprite (BN5's at 0x081C9800, BN6's at 0x081D8000, his sprite state's +0x18 less 4 in each trace), whose frames, their order and their durations differ; the same for what he owns (his buster's charge glow, sprite list 5's 8 in each game). The animation his code picks (+0x00) is compared; what his sprite makes of it is not his logic nor the family's.",
+      "why": "MegaMan is drawn from each game's own sprite (BN5's at 0x081C9800, BN6's at 0x081D8000, his sprite state's +0x18 less 4 in each trace), whose frames, their order and their durations differ; the same for what he owns (his buster's charge glow, sprite list 5's 8 in each game). The animation his code picks (+0x00), his palette (+0x04) and the sprite itself (+0x18, by maps' sprites registry) are compared; what his sprite makes of it is not his logic nor the family's.",
       "evidence": [
         "his sprite state's data pointer: BN5 0x081C9804, BN6 0x081D8004 at t1; his frame (+0x01) runs 1 against 4 from t101 in spec cangard_v1",
         "the charge glow's sprite: BN5's list 5 entry at 0x08032B2C, BN6's at 0x08032134 (each naming its own data)"
@@ -473,13 +545,17 @@
       "whose": [
         "megaman"
       ],
-      "offsets": [
-        "0x0F"
-      ],
       "why": "As the Custom screen closes BN6 sets each side's player's AI data +0x0F to 1; BN5 sets none. The player's own data, which the family never reads (its code reads MegaMan through his object: his panel and coordinates).",
       "evidence": [
         "BN6 0x08009338 (the Custom screen's end): 0x08009360-0x0800937E finds each side's player (0x080103BC) and writes 1 to its AIData +0x0F before the fight's phase",
         "BN5's twin 0x0800879A (the same calls: 0x080091C8, 0x08022C58, 0x08022D6C, 0x080092BC) goes on to the fight's phase at 0x080087C2 with no such write"
+      ],
+      "cells": [
+        [
+          "0x0F",
+          "0x00",
+          "0x01"
+        ]
       ]
     },
     {
@@ -505,13 +581,22 @@
       "types": [
         "0x00"
       ],
-      "offsets": [
-        "0x04"
-      ],
       "why": "As his buster fires the engine spawns two flashes for MegaMan (objects of the first kind, type 5, his object at their +0x4C), by its spawner of such effects with the number of the one wanted in its own list: BN5's numbers them 0x23 and 0x0D, BN6's 6 and 5, each drawn from its own sprite (the mask 'MegaMan's own sprite'). His presentation.",
       "evidence": [
         "the spawner of the first kind's type 5: BN5 0x080B9CAE / BN6 0x080BA6A0 (the first kind's spawner, BN5 0x08003140 / BN6 0x08003320, with r0 5), its number in +4",
         "their sprites: BN5 0x082F261C (named at 0x08032864), BN6 0x082F6444 (named at 0x08031E0C)"
+      ],
+      "cells": [
+        [
+          "0x04",
+          "0x23",
+          "0x06"
+        ],
+        [
+          "0x04",
+          "0x0D",
+          "0x05"
+        ]
       ]
     },
     {
@@ -558,6 +643,148 @@
       "why": "Under rng=replay a draw one game's engine makes and the other's does not has no twin to be replayed from: each is named in legit.json's rng, only, by its game and its caller's range, with both games' routines; neither is the family's (a draw its code led to is never masked). The next draw the replay matches writes the words alike again.",
       "evidence": [
         "legit.json, rng, only: each draw's routines in both games"
+      ]
+    },
+    {
+      "name": "BN6's Beast Out counter",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x21",
+          "0x01",
+          "0x03"
+        ]
+      ],
+      "why": "His battle NaviStats' +0x21 is BN6's BeastOutCounter, 3 as a battle copies his NaviStats from the PET's, one less each Beast Out turn; BN5 has no Beast Out, and its +0x21 holds its save's 1. Neither is read in a battle without Beast Out (the spec's): no part of MegaMan's battle logic here.",
+      "evidence": [
+        "BN6: the counter decremented and written back by 0x08015A38 (its NaviStats setter at 0x08015A78), read as Beast Out ends by 0x080159C6 (0x080159E4), by 0x08013892 and 0x08013DA0 (getters with r1 0x21 at 0x080138F4, 0x08013DB6)",
+        "BN5: its only getter naming +0x21 is at 0x0801292A; 1 in every BN5 trace from t1, 3 in every BN6 trace"
+      ]
+    },
+    {
+      "name": "BN5's own NaviStats +0x3A",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x3A",
+          "0x01",
+          "0x00"
+        ]
+      ],
+      "why": "A byte of BN5's NaviStats its save holds 1, which no getter of Gregar's names: each game's own, constant through the battle.",
+      "evidence": [
+        "BN5 reads it at 0x0802D42C (its NaviStats getter with r1 0x3A); in Gregar no NaviStats getter is called with r1 0x3A (searched: every call of the getters 0x080136B0-0x08013796 and the movs r1 before it)"
+      ]
+    },
+    {
+      "name": "BN5's dark meter",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x44",
+          "0xF4",
+          "0x00"
+        ],
+        [
+          "0x45",
+          "0x01",
+          "0x00"
+        ]
+      ],
+      "why": "BN5 keeps MegaMan's dark meter at its NaviStats' +0x44 (a u16, 500 neutral, BN5_NAVI_METER), which its battle's opening reads for his mood; BN6 has no meter, its +0x44 a byte its loadout reads, 0 in its save. Read only as a battle opens (no DarkChip in the spec): the Souls track ports BN5's mood rule apart from it.",
+      "evidence": [
+        "BN5: the meter written and read as the battle opens, 0x08010EE0 (its NaviStats u16 setter with r1 0x44) and 0x08010F02 (the getter), the mood from it 0x08010EF6-0x08010F1C",
+        "BN6: its +0x44 read as a byte by the loadout routines 0x0800FEEC and 0x0800FF5E (getters at 0x0800FF04, 0x0800FF76)"
+      ]
+    },
+    {
+      "name": "BN6's TagChips",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x56",
+          "0x00",
+          "0xFF"
+        ],
+        [
+          "0x57",
+          "0x00",
+          "0xFF"
+        ],
+        [
+          "0x58",
+          "0x00",
+          "0xFF"
+        ],
+        [
+          "0x59",
+          "0x00",
+          "0xFF"
+        ]
+      ],
+      "why": "BN6's NaviStats keep each folder's two TagChips at +0x56-0x59 (0xFF none, BN6_NAVI_FOLDER1_TAG); BN5 has no TagChips and holds 0 there. The spec's folders set none (src/dev/xdiff.c writes BN6's 0xFF where a spec names a folder).",
+      "evidence": [
+        "BN6: each folder's two TagChips at +0x56 + 2 x its number (BN6_NAVI_FOLDER1_TAG), the NaviStats getter 0x080137B6 called with r1 0x56 + 2 x the folder at 0x08125876 and with 0x56 at 0x08138A76",
+        "BN5: no NaviStats getter is called with r1 0x56-0x59 (searched as for +0x3A)"
+      ]
+    },
+    {
+      "name": "BN6's NaviStats +0x5A and +0x5B",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x5A",
+          "0x00",
+          "0xFF"
+        ],
+        [
+          "0x5B",
+          "0x00",
+          "0xFF"
+        ]
+      ],
+      "why": "Two bytes past BN6's TagChips its save holds 0xFF and BN5's 0: no getter of either game names them; constant through the battle.",
+      "evidence": [
+        "no NaviStats getter of BN5's (0x08010D48-0x08010E30) or Gregar's (0x080136B0-0x08013796) is called with r1 0x5A or 0x5B (searched)"
+      ]
+    },
+    {
+      "name": "BN5's Soul record's chip slot",
+      "part": "player",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x6E",
+          "0xFF",
+          "0x00"
+        ],
+        [
+          "0x6F",
+          "0xFF",
+          "0x00"
+        ]
+      ],
+      "why": "His pending form's +6: BN5's record keeps ColonelSoul's chip there (a u16, 0xFFFF none), reset with the record as each Custom screen opens; BN6's record has no field there and leaves it 0. Colonel's chip comes with his Soul, later in the Souls track.",
+      "evidence": [
+        "BN5: the record's reset 0x080123CC writes +0 and +4 0xFF, then 0x080123F4 writes +6 0xFFFF; the turn's copy reads it at 0x08012406 (ldrh r2,[r3,#6])",
+        "BN6: its twin 0x08015940 writes +0 and +4 0xFF and +8, nothing at +6"
       ]
     }
   ]
