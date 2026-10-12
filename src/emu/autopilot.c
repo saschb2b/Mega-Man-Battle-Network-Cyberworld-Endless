@@ -3,16 +3,15 @@
  * hurt, and holds the pad toward the next panel's centre. In battles it
  * reads the fight: the chips that go together on the Custom screen, each
  * used from a panel where it reaches an enemy, attacks stepped away from,
- * the buster charged in between; in an older net's battle on the guest
- * core the same, from its game's memory (bn5.h). In text it taps A.
- * Testing only. */
+ * the buster charged in between; never a DarkChip (either net's: their
+ * price is the run's max HP), never UNITE (a Soul costs a chip it would
+ * have used: docs/MULTIROM.md). In text it taps A. Testing only. */
 #include "autopilot.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "bn5.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "darkchips.h"
@@ -20,7 +19,6 @@
 #include "director.h"
 #include "emu.h"
 #include "flags.h"
-#include "guest.h"
 #include "layer_objs.h"
 #include "net.h"
 #include "netmap.h"
@@ -28,22 +26,18 @@
 #include "lan_house.h"
 #include "lanhp.h"
 #include "town.h"
-#include "xchips.h"
 
 bool autopilot_on(void) { return getenv("CYBERWORLD_AUTOPILOT") != NULL; }
 
-/* A battle's memory as the fight reads it: BN6's on its own core, or BN5's
- * on the guest's, which lays its battle out as BN6's (its objects' fields,
- * its Custom screen's, its deck's) at its own addresses, its panels 0x24
- * long with their flags further in, and only 16 viruses (bn5.h) */
+/* A battle's memory as the fight reads it: BN6's (BN5's battles on a
+ * second core, which this read at their own addresses, left runs in issue
+ * #82) */
 typedef struct {
 	uint8_t (*r8)(uint32_t);
 	uint16_t (*r16)(uint32_t);
 	uint32_t (*r32)(uint32_t);
 	void (*w16)(uint32_t, uint16_t);
-	int (*chip)(int id);   /* a chip id of its game as BN6's (the guest's by name), 0 for none */
 	uint32_t gamestate, phase, timer, gauge;
-	uint32_t window;       /* the Custom screen's window as it slides in; 0: its slide counted in frames (CUSTOM_SLIDE) */
 	uint32_t hand, cursor, picked, deck;
 	uint32_t panels, panel_size, panel_flags;
 	uint32_t t1, t1_count, t3, t3_count;
@@ -54,17 +48,11 @@ static void bn6_write16(uint32_t a, uint16_t v) {
 	uint8_t b[2] = { (uint8_t)v, (uint8_t)(v >> 8) };
 	emu_write(a, b, 2);
 }
-static int same_chip(int id) { return id; }
 
 static const Battle BN6_BATTLE = {
-	emu_read8, emu_read16, emu_read32, bn6_write16, same_chip, BN6_GAMESTATE, BN6_BATTLE_PHASE, BN6_BATTLE_TIMER, BN6_CUSTOM_GAUGE, 0,
+	emu_read8, emu_read16, emu_read32, bn6_write16, BN6_GAMESTATE, BN6_BATTLE_PHASE, BN6_BATTLE_TIMER, BN6_CUSTOM_GAUGE,
 	BN6_CUSTOM_HAND, BN6_CUSTOM_CURSOR, BN6_CUSTOM_PICKED, BN6_BATTLE_DECK, BN6_FIELD_PANELS, BN6_PANEL_SIZE, BN6_PANEL_FLAGS,
 	BN6_T1_OBJECTS, BN6_T1_COUNT, BN6_T3_OBJECTS, BN6_T3_COUNT, BN6_MEGAMAN_READY,
-};
-static const Battle BN5_BATTLE = {
-	guest_read8, guest_read16, guest_read32, guest_write16, xchips_bn6_of, BN5_GAMESTATE, BN5_BATTLE_PHASE, BN5_BATTLE_TIMER, BN5_CUSTOM_GAUGE,
-	BN5_CUSTOM_WINDOW, BN5_CUSTOM_HAND, BN5_CUSTOM_CURSOR, BN5_CUSTOM_PICKED, BN5_BATTLE_DECK, BN5_FIELD_PANELS, BN5_PANEL_SIZE, BN5_PANEL_FLAGS,
-	BN5_T1_OBJECTS, BN5_T1_COUNT, BN5_T3_OBJECTS, BN5_T3_COUNT, BN5_MEGAMAN_READY,
 };
 static const Battle *B = &BN6_BATTLE;
 
@@ -185,6 +173,7 @@ static uint32_t rhythm_keys(uint32_t frame) {
 #define CUSTOM_SLIDE  16    /* frames the Custom screen takes to slide in */
 #define CHIP_PATIENCE 90    /* frames a chip waits for an enemy in reach before it braves attacks, and twice that before it is used where he stands */
 #define CHARGE        120   /* frames B is held for a charged shot (10 times the buster's 1; it charges in 101-110 at Charge 1) */
+#define BLOCKED       30    /* frames a step he can take leaves him where he stood: an obstacle on that panel (a rock of BN5's fields) */
 #define SETTLED       20    /* frames an enemy stands on its panel before MegaMan goes to where he hits it */
 #define CYCLE_WORTH   10    /* a chip picked: the one drawn in its place next time */
 #define NAVI_HP       300   /* an enemy this strong is a navi (act 1's guardians have 400 and more, its viruses 200 at most) */
@@ -200,10 +189,16 @@ static uint32_t megaman(void) {
 
 static uint32_t panel(int x, int y) { return B->panels + (uint32_t)(y * 8 + x) * B->panel_size; }
 
-/* Panel (x, y) for MegaMan: 0 not his side's or a hole, 1 his, 2 his and
- * poison, which drains him while he stands on it */
+/* The panels of his side an obstacle stands on (a rock, as BN5's fields
+ * place them), found by stepping there in vain: bit (y - 1) * 6 + x - 1,
+ * for the battle */
+static uint32_t obstacles;
+
+/* Panel (x, y) for MegaMan: 0 not his side's, a hole or blocked, 1 his, 2
+ * his and poison, which drains him while he stands on it */
 static int panel_of(int x, int y) {
 	if (x < 1 || x > 6 || y < 1 || y > 3 || B->r8(panel(x, y) + BN6_PANEL_ALLIANCE) != 0) return 0;
+	if (obstacles >> ((y - 1) * 6 + x - 1) & 1) return 0;
 	int type = B->r8(panel(x, y) + BN6_PANEL_TYPE);
 	return type <= BN6_PANEL_HOLE ? 0 : type == BN6_PANEL_POISON ? 2 : 1;
 }
@@ -351,15 +346,14 @@ static int chip_worth(int id, int hurt) {
  * enemies never came near for stood a whole battle); a grab first, then
  * the attacks (those that hit from anywhere before those that need a
  * column), the Atk+ after them, a recovery last */
-/* The hand's chip i as BN6's (chip | code << 9; the guest's by name, in
- * its own code), 0xFFFF for none, and for one BN6 has none of: a DarkChip,
- * an older net's or BN6's own, is never picked, as it costs the run max
- * HP (docs/META.md) */
+/* The hand's chip i (chip | code << 9), 0xFFFF for none, and for a
+ * DarkChip of either net's (BN6's own, the registry's of BN5's: every kind,
+ * darkchips.h), never picked, as it costs the run max HP (docs/META.md) */
+static bool dark_chip(int id) { return dark_chip_kind(id) >= 0 || dark_bn6_kind(id) >= 0; }
+
 static int hand_chip(int i) {
 	int c = B->r16(B->deck + 2 * (uint32_t)i);
-	if (c == 0xFFFF) return c;
-	int id = B->chip(c & 0x1FF);
-	return (id || !(c & 0x1FF)) && dark_bn6_kind(id) < 0 ? (c & ~0x1FF) | id : 0xFFFF;
+	return c == 0xFFFF || dark_chip(c & 0x1FF) ? 0xFFFF : c;
 }
 
 static int plan_picks(int *slots) {
@@ -424,12 +418,28 @@ static bool navi_fight(void) {
 }
 
 /* A step from (col, row) toward (tx, ty), the row first, onto a panel no
- * riskier than his own */
-static uint32_t step_toward(int col, int row, int tx, int ty) {
+ * riskier than his own; where the row's step is blocked in his own
+ * column, a step aside to go round it. *nx, *ny the panel it goes to. */
+static uint32_t step_toward(int col, int row, int tx, int ty, int *nx, int *ny) {
 	int dy = ty > row ? 1 : ty < row ? -1 : 0, dx = tx > col ? 1 : tx < col ? -1 : 0, here = risk(col, row);
-	if (dy && panel_of(col, row + dy) && risk(col, row + dy) <= here) return dy > 0 ? KEY_DOWN : KEY_UP;
-	if (dx && panel_of(col + dx, row) && risk(col + dx, row) <= here) return dx > 0 ? KEY_RIGHT : KEY_LEFT;
+	*nx = col; *ny = row;
+	if (dy && panel_of(col, row + dy) && risk(col, row + dy) <= here) { *ny = row + dy; return dy > 0 ? KEY_DOWN : KEY_UP; }
+	if (dy && !dx && !panel_of(col, row + dy)) dx = col < 3 ? 1 : -1;
+	if (dx && panel_of(col + dx, row) && risk(col + dx, row) <= here) { *nx = col + dx; return dx > 0 ? KEY_RIGHT : KEY_LEFT; }
 	return 0;
+}
+
+/* A step toward (tx, ty) from his panel (col, row) on this frame (`pulse`
+ * its press); a step he could take all along that never moved him marks
+ * the panel blocked, and the way goes round it */
+static uint32_t step_on(int col, int row, int tx, int ty, bool ready, bool pulse) {
+	static uint32_t tried;
+	static int at_col, at_row;
+	if (col != at_col || row != at_row) { at_col = col; at_row = row; tried = 0; }
+	int nx, ny;
+	uint32_t step = step_toward(col, row, tx, ty, &nx, &ny);
+	if (step && ready && ++tried > BLOCKED) { obstacles |= 1u << ((ny - 1) * 6 + nx - 1); tried = 0; }
+	return pulse ? step : 0;
 }
 
 /* A frame of the fight, MegaMan's object `me`: B held without a chip, the
@@ -449,12 +459,12 @@ static uint32_t fight_frame(uint32_t me, uint32_t frame) {
 	bool has = chip != 0xFFFF, ready = B->r8(me + BN6_T1_ACTION) == B->ready, pulse = frame % (2 * PRESS) < PRESS;
 	if (!has && B->r16(B->gauge) >= 0x4000) { charge = 0; return ready && pulse ? KEY_R : 0; }
 	bool waited = has && ++held_for > CHIP_PATIENCE;
-	int kind = has ? chip_kind(B->chip(chip)) : charge >= CHARGE && !navi_fight() ? CK_CANNON : -1;
+	int kind = has ? chip_kind(chip) : charge >= CHARGE && !navi_fight() ? CK_CANNON : -1;
 	bool strike = spot(kind, col, row, waited, &tx, &ty);
 	if (has && held_for > 2 * CHIP_PATIENCE && !strike) { strike = true; tx = col; ty = row; }
 	uint32_t buster = has ? 0 : KEY_B;
 	charge = buster ? charge + 1 : 0;
-	if (tx != col || ty != row) return (pulse ? step_toward(col, row, tx, ty) : 0) | buster;
+	if (tx != col || ty != row) return step_on(col, row, tx, ty, ready, pulse) | buster;
 	if (has) return strike && ready && pulse ? KEY_A : 0;
 	if (strike) { charge = 0; return 0; }
 	return buster;
@@ -462,13 +472,9 @@ static uint32_t fight_frame(uint32_t me, uint32_t frame) {
 
 static uint32_t fight_keys(uint32_t frame) {
 	static uint32_t custom, clock;
-	if (B->r8(B->gamestate) != BN6_SUB_BATTLE) { custom = 0; return frame % 20 < PRESS ? KEY_A : 0; }
+	if (B->r8(B->gamestate) != BN6_SUB_BATTLE) { custom = 0; obstacles = 0; return frame % 20 < PRESS ? KEY_A : 0; }
 	if (B->r8(B->phase) == BN6_PHASE_CUSTOM) {
 		charge = 0;
-		/* (counted from its window open where it is read: BN5's first
-		 * opens a second after the phase, as its viruses appear, and its
-		 * cursor took none of the picks before; BN5_CUSTOM_WINDOW) */
-		if (B->window && B->r8(B->window) < BN5_WINDOW_OPEN) { custom = 0; return 0; }
 		return custom_keys(custom++);
 	}
 	custom = 0;
@@ -477,6 +483,18 @@ static uint32_t fight_keys(uint32_t frame) {
 	clock = B->r32(B->timer);
 	if (clock == was || !me) { charge = 0; return frame % 20 < PRESS ? KEY_A : 0; }
 	return fight_frame(me, frame);
+}
+
+/* On the Custom screen, no A on a DarkChip (the rhythm's blind picks: it
+ * steps past it) nor on UNITE or the Beast Out emblem under OK (the fight
+ * keeps its chips: a Soul would take the last one picked) */
+static uint32_t custom_guard(uint32_t keys) {
+	if (!(keys & KEY_A) || B->r8(B->gamestate) != BN6_SUB_BATTLE || B->r8(B->phase) != BN6_PHASE_CUSTOM) return keys;
+	int cursor = B->r8(B->cursor);
+	if (cursor == BN6_CUSTOM_EMBLEM) return (keys & ~KEY_A) | KEY_UP;
+	if (cursor < B->r8(B->hand) && cursor < 10 && hand_chip(cursor) == 0xFFFF && B->r16(B->deck + 2u * (uint32_t)cursor) != 0xFFFF)
+		return (keys & ~KEY_A) | KEY_RIGHT;
+	return keys;
 }
 
 /* The layer's heal when MegaMan is hurt; once he has been healed on a
@@ -544,9 +562,9 @@ uint32_t autopilot_keys(void) {
 	++frame;
 	int mode = emu_read8(emu_read32(BN6_TOOLKIT));
 	if (mode != BN6_MODE_GAME || emu_read8(BN6_GAMESTATE) != BN6_SUB_MAP) {
-		if (!weak()) return fight_keys(frame);
+		if (!weak()) return custom_guard(fight_keys(frame));
 		weaken_enemies(++battle_frames > WEAK_FRAMES);
-		return rhythm_keys(frame);
+		return custom_guard(rhythm_keys(frame));
 	}
 	battle_frames = 0;
 	if (emu_read8(BN6_CHATBOX)) return (frame / 4) & 1 ? KEY_A : 0;
@@ -599,22 +617,4 @@ uint32_t autopilot_keys(void) {
 		if (d > best) { best = d; k = dirs[i].k; }
 	}
 	return k;
-}
-
-/* A battle on the guest core (guest.h): fought as BN6's, from its game's
- * memory; weak keeps its viruses at 1 HP and plays the rhythm, as in BN6's.
- * Nothing before its battle is on its screen, nor after: A on BN5's map
- * could start a talk there, under the white. */
-uint32_t autopilot_guest_keys(void) {
-	static uint32_t frame, fought;
-	++frame;
-	if (!guest_on_screen()) { fought = 0; return 0; }
-	B = &BN5_BATTLE;
-	uint32_t keys;
-	if (weak()) {
-		weaken_enemies(++fought > WEAK_FRAMES);
-		keys = rhythm_keys(frame);
-	} else keys = fight_keys(frame);
-	B = &BN6_BATTLE;
-	return keys;
 }

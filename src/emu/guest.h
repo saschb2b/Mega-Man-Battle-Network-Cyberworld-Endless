@@ -1,7 +1,8 @@
-/* Another game's battles on a second core beside BN6's (docs/MULTIROM.md,
- * Guest battles): BN5's, on the layers BN5's areas dress, in BN5's own
- * engine. Desktop, Android, iOS, PortMaster and browser builds; the 3DS
- * keeps one ROM. */
+/* Another game's battles on a second core beside BN6's: BN5's own battles
+ * in BN5's own engine, the reference the differential compares BN6's with
+ * (src/dev/xdiff.c, build.py xdiff; docs/MULTIROM.md, Guest battles). A
+ * run's battles are all BN6's since issue #82 (One net): this core takes
+ * no part in runs. Every build but the 3DS's, whose heap holds one ROM. */
 #ifndef CW_GUEST_H
 #define CW_GUEST_H
 
@@ -9,163 +10,36 @@
 #include <stdint.h>
 
 #include "hook.h"
-#include "rom.h"
-#include "xrecords.h"
 
-enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
-#define GUEST_DARK_KINDS 12   /* BN5's DarkChips (darkchips.h) */
-
-/* Makes the guest core for extra ROM `xrom` (rom.h, XR) where the build
- * and the ROMs allow it, and boots it to a playable state (its title, NEW
- * GAME and intro, pressed through once and kept as a state in the data
- * directory; that state loaded later) in the background, never in a
- * frame's way: on a thread of its own on native builds, else a slice of
- * each frame's spare time (guest_tick: the browser's). True once it is
- * ready or as its boot begins: a layer's battles are its game's either way
- * (what a layer makes never hangs on the boot), and a battle asked before
- * the boot is done waits for it (guest_boot_waiting). False where it
- * cannot be. */
+/* Makes the guest core for extra ROM `xrom` (rom.h, XR) and boots it to a
+ * playable state (its title, NEW GAME and intro, pressed through once and
+ * kept as a state in the data directory, xdiff-bn5.state; that state
+ * loaded later), at once, on this thread. True once it is ready; false
+ * where it cannot be. */
 bool guest_start(int xrom);
-/* The frames before a run (the boot screen, the title): BN5's boot begun
- * as early as it can be, where BN5's ROM is there (in the browser only
- * where its state is not kept: a layer loads that quickly), so a battle
- * seldom waits for it. */
-void guest_warm(void);
-/* Each frame, after its drawing: the boot run on for about `ms`
- * milliseconds (the frame's spare time) where it runs a slice a frame, or
- * its end taken in where its thread is done. At its end the guest is
- * ready, and a battle that waited for it begins. */
-void guest_tick(int ms);
-/* Its boot's thread stopped and waited for, as the game ends */
-void guest_quit(void);
-/* How far its boot is, 0-99 (percent), while one runs; -1 none */
-int guest_boot_progress(void);
-/* ... and about how long it has left at the pace it has kept, in
- * milliseconds; 0 while that pace is not known yet, -1 none */
-int guest_boot_left_ms(void);
-/* A battle waits for its boot (guest_battle asked before it was done) */
-bool guest_boot_waiting(void);
-/* (dev: its boot at this many of its frames a frame, on the main thread,
- * the same frames every run, so a battle waits for it behind its screen:
- * --dev slowboot=N) */
-extern int guest_dev_slowboot;
 
-/* MegaMan as the run has him, into a guest battle */
-typedef struct {
-	int hp, max_hp;
-	const uint16_t *folder;           /* the run's (30 BN6 entries, chip | code << 9), each chip as its game's of the same name; NULL: the guest's own */
-	uint8_t dark[GUEST_DARK_KINDS];   /* his DarkChips, counts by kind */
-	uint8_t buster[3];                /* his buster's Attack, Speed and Charge as BN6's NaviCust makes them (BN6_NAVI_ATTACK: 0-4, levels 1-5) */
-	bool star;                        /* the All * helper: every chip in *, the rewards too */
-	uint8_t codes[3];                 /* the folder's codes (run.codes: 1 + the letter, 0 none): half of BN5's chip rewards come in one, as BN6's do */
-	uint8_t souls;                    /* the run's Souls (souls.h), bit k Team Colonel's Soul 7 + k: offered on its Custom screen as its own rule
-	                                   * offers them (UNITE), Chaos Unison with a DarkChip of their kind (docs/META.md) */
-} GuestMegaMan;
-
-/* Begins a battle from BattleSettings record `record`, an address in the
- * guest's ROM (its own game's records: BN5_BATTLE_TABLES), with MegaMan as
- * `mm` has him and its random numbers from `seed` (the run's: as it begins,
- * its game's RNG words are written from it, so its first hand, its Mystery
- * Data and find and its reward come of the seed, and the same seed fights
- * it again as it was): from the next guest frame the guest runs and BN6's
- * core waits (first for the guest's boot, where it still runs:
- * guest_boot_waiting; a headless run's waits for it at once). */
-bool guest_battle(uint32_t record, XScale sc, const GuestMegaMan *mm, uint32_t seed);
-
-/* A territory's guardian from its game (docs/BOSSES.md, BN5's Navis): Navi
- * `ai` (his ids table's AI index, bn5.h BN5_NAVI_*) at `version` (0 V1 ..
- * 3 SP), his HP `hp_cap` as he spawns (0: his own; the act's cap and the
- * Net's clock already in it: director_guest.c), his results
- * screen paying `zenny` for each chip of his reward rows, as BN6's
- * guardians' battles pay where their row holds their chip */
-typedef struct { int ai, version, hp_cap, zenny; } GuestBoss;
-/* Begins his battle as guest_battle begins one, from his game's own record
- * for him at that version (xrecords_navi_record): no running, its results
- * screen on; false where it cannot be. */
-bool guest_boss_battle(const GuestBoss *boss, const GuestMegaMan *mm, uint32_t seed);
-/* Whether battles of game `xrom` can be fought here: the build runs a
- * second core, its ROM is read, and the guest has not failed to boot (one
- * not booted yet counts). */
-bool guest_possible(int xrom);
-/* A guest battle runs: the scene shows and steers the guest. */
-bool guest_active(void);
-/* ... and its battle is on the screen: MegaMan's HP and max HP in it (a
- * state's); false before and after. */
-bool guest_fight_hp(int *hp, int *max);
-/* ... and its Custom gauge (0-0x4000) while it is fought, -1 otherwise */
-int guest_custom_gauge(void);
-/* ... and its battle is on its screen (its game state's battle, not the
- * room its boot left it in, which the battle's opening showed) */
-bool guest_on_screen(void);
-/* ... its memory, bus addresses (its battle as bn5.h names it: the
- * autopilot's and the dev switches'); 0 without a guest */
+/* Its memory, bus addresses (its battle as bn5.h names it); 0 before it
+ * is ready */
 uint8_t guest_read8(uint32_t addr);
 uint16_t guest_read16(uint32_t addr);
 uint32_t guest_read32(uint32_t addr);
 void guest_write16(uint32_t addr, uint16_t v);
 void guest_write32(uint32_t addr, uint32_t v);
 
-/* (dev: the differential's reference, src/dev/xdiff.c) A battle of its
- * game's as its game has it, none of what the run's change: `record` a
- * BattleSettings of `len` bytes, its entities from +0x10 (its pointer at
- * +0xC set to them), MegaMan at `hp` HP and max HP, its own buster,
- * folder, mood and dark meter, its own deck compaction (the shelf left
- * out), its RNG words from `seed` as it begins (guest_battle's). Its boot
- * waited for first (begun by guest_start). False where it cannot be. */
+/* A battle of its game's as its game has it: `record` a BattleSettings of
+ * `len` bytes, its entities from +0x10 (its pointer at +0xC set to them),
+ * MegaMan at `hp` HP and max HP, its own buster, folder, mood and dark
+ * meter, its RNG words from `seed` as it begins (battle_rng_word). From
+ * the next guest frame it runs. False where it cannot be. */
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed);
-/* (dev: the differential's) A hook on its core's code (hook.h: its own
- * table, its BKPT handler put before its board's at the first): once its
- * boot is done; false where it is not, or the hook does not fit. The run's
- * guest battles have none. */
+/* A hook on its core's code (hook.h: its own table, its BKPT handler put
+ * before its board's at the first); false where it is not ready, or the
+ * hook does not fit. */
 bool guest_hook(uint32_t addr, EmuHook fn, void *user);
-/* One frame of the guest with these keys held (GBA key bits). */
-void guest_frame(uint32_t keys);
-/* ... unseen and unheard: a frame run ahead while its battle opens behind
- * the white */
+/* One frame of the guest with these keys held (GBA key bits), its sound
+ * dropped. */
 void guest_frame_quiet(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
-
-/* What its results screen gave, as the run gets it (guest_reward.c) */
-typedef struct {
-	int chip;      /* BN6's chip of its name, and its code (A=0, *=26); 0 none */
-	int code;
-	int from;      /* ... the code it had there, where it came back with another; -1 none */
-	int zenny;     /* ... or zenny */
-	int bugfrags;  /* ... or BugFrags */
-	int heal;      /* ... or the HP restored there (HP+50: the result's hp counts it already) */
-} GuestReward;
-
-typedef struct {
-	int outcome;   /* GUEST_WON, GUEST_LOST (MegaMan deleted) or GUEST_ESCAPED */
-	int frames;    /* how long it ran */
-	int hp;        /* MegaMan's HP at its end */
-	GuestReward reward;   /* (won) its results screen's reward, of the busting level */
-	GuestReward find;     /* ... and its second: the find of a green Mystery Data still on the field at the end */
-	bool dark_used;   /* a DarkChip was used in it */
-	bool dark_rose;   /* ... and MegaMan fell in it and rose again (BN5's own: at 1 HP, the darkness fighting with his body a while) */
-	uint8_t dark[GUEST_DARK_KINDS];   /* the run's DarkChips left after it, by kind */
-	int recoded;      /* the folder's chips that fought with another code (its game's chip lacked theirs) */
-	int recode_chip, recode_from, recode_to;   /* the first of them: its BN6 id, its code, the code it fought with */
-} GuestResult;
-/* Once a battle has ended (guest_active false again): its result, once. */
-bool guest_take_result(GuestResult *out);
-
-/* The background its battles stand in front of, by its own game's number
- * (NetAreaDef.xbg: the dressed area's), where a record leaves it to the
- * map (0xFF), which would be the map its boot state stands on; -1 the
- * map's. */
-extern int guest_backdrop;
-
-/* (dev: MegaMan worried through every guest battle, for captures of a
- * DarkChip offered: --dev worried) */
-extern bool guest_dev_worried;
-/* (dev: a green Mystery Data on the enemies' side in every guest battle,
- * as --dev gem puts one in BN6's: its find, row 0 of BN5_FIND_ROWS where
- * the record sets none) */
-extern bool guest_dev_gem;
-
-/* DarkChip `k`'s name in BN5 (0-11, ids 187-198), "" without BN5 */
-const char *guest_dark_name(int k);
 
 #endif

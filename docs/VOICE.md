@@ -322,8 +322,8 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | Arriving somewhere new, Dad's calls and mail, the act's cards, the short net's end, Chaud after the Secret Area | `src/director/story_words.c` |
 | Chaud's duel call and verdict | `src/director/duel_words.c` |
 | MegaMan on the NaviCust: programs off the board, no room, compression, Reg memory | `src/director/board_words.c`, `src/layer/navicust_words.c` (what each program does, which turn, its bugs) |
-| MegaMan on DarkChips | `src/director/dark_words.c` |
-| The older net's battles, its codes, the chips that sit out; where the nets meet (an older net's area fought our way, the first visitor, the deep) | `src/director/guest_words.c`; its wait screen `src/emu/guest_wait_lines.c` |
+| MegaMan on DarkChips: a price paid, a DarkChip run as its base chip | `src/director/dark_words.c` |
+| Where the nets meet (an older net's area fought our way, the first visitor, the deep); after a CONTINUE without BN5's ROM, its chips and Souls that wait for it | `src/director/nets_words.c` |
 | One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
 | A Cross won, one the run can't carry, the Graveyard's call to the beast, Dad's CybeastButton after the Cybeast | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |

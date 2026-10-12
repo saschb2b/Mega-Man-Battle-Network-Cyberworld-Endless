@@ -1,13 +1,16 @@
-/* The run's DarkChips (docs/META.md, DarkChips in BN5 territory and BN6's
- * own DarkChips; issues #64, #70): which of BN5's twelve kinds it holds,
- * kept beside the run's checkpoint, and the price of one used: one HPMemory
- * of max HP for the rest of the run, for every battle a DarkChip's dark
- * power ran in, in either net. A new run holds none.
+/* The run's DarkChips (docs/META.md, DarkChips; issues #64, #70, #82):
+ * which of BN5's twelve kinds it holds, kept beside the run's checkpoint,
+ * and the price of one used: one HPMemory of max HP for the rest of the
+ * run, for every battle a DarkChip's dark power ran in. A new run holds
+ * none.
  *
- * BN6 keeps five of BN5's twelve, its records 286-290, each BN5's DarkChip
- * of its name: a kind the run holds is one chip, played by BN5's rule in
- * BN5's battles and from BN6's folder in BN6's. DarkPlus, which never joins
- * the chip before it in BN6, sits out of BN6's battles. */
+ * Every kind is one chip of BN6's tables (the chip registry,
+ * xchips_registry.h), played in BN6's battles from the folder: BN6 keeps
+ * five of BN5's twelve, its records 286-290, each BN5's DarkChip of its
+ * name, played by BN6's own rule (a BugFrag a use); BN5's seven of its own
+ * (registry ids 214-220) come into the hand by BN5's worried rule, its
+ * mood brought into BN6's battles (soulmood.h). DarkPlus, which never joins
+ * the chip before it in BN6, sits out of BN6's battles: no flame offers it. */
 #ifndef CW_DARKCHIPS_H
 #define CW_DARKCHIPS_H
 
@@ -34,28 +37,36 @@ void dark_load(uint32_t seed);
  * takes one of each); it held. */
 int dark_count(int k);
 void dark_give(int k);
-/* After a guest battle: what BN5 left of the run's DarkChips (counts by
- * kind, BN5 using them up as it plays them). */
-void dark_set_counts(const uint8_t counts[DARK_KINDS]);
 /* The dev flag's mask, for a new run's first DarkChips (devtools). */
 extern uint16_t dark_dev_mask;
 
 /* BN6's DarkChip `id`'s kind (0-11), -1 for any other chip (DarkPlus's
  * too: it is BN5's kind 3). */
 int dark_bn6_kind(int id);
-/* BN6's chip of kind `k` that its battles play (DrkSword, DarkThnd,
- * DrkRecov, DarkInvs), 0 for a kind they do not. */
+/* BN6's chip of kind `k` that its battles play by BN6's rule (DrkSword,
+ * DarkThnd, DrkRecov, DarkInvs), 0 for a kind they do not. */
 int dark_bn6_id(int k);
+/* Kind `k`'s chip in BN6's tables, whichever rule plays it (BN6's 286-290,
+ * the registry's 214-220), 0 none; and chip `id`'s kind, -1 for no
+ * DarkChip */
+int dark_chip_id(int k);
+int dark_chip_kind(int id);
+/* The kinds a flame offers, a bit each: BN6's own (`bn5` false) its four,
+ * BN5's every kind but DarkPlus (BN6's four among them, played by BN6's
+ * rule; BN5's own seven by BN5's, where its mood is in BN6's battles) */
+#define DARK_PLUS_KIND 3
+unsigned dark_kinds_offered(bool bn5);
 
 /* The kind a flame of darkness on layer `depth` offers: the first the run
  * lacks (`held`, counts by kind) from the run's seed and the act on, of
- * BN5's twelve, or of the four BN6's battles play (`bn6`); -1 where it holds
- * every one. */
-int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_KINDS]);
+ * BN5's flame's kinds, or of the four BN6's battles play (`bn6`), each of
+ * `offered` (a bit a kind, dark_kinds_offered); -1 where it holds every
+ * one. */
+int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_KINDS], unsigned offered);
 /* ... the layer's flame as the run keeps it: picked as the layer is first
  * made, and the same when a CONTINUE makes it again (the run holding that
  * kind by then, where it was taken before the save). */
-int dark_flame_of(uint32_t seed, int depth, int side, bool bn6);
+int dark_flame_of(uint32_t seed, int depth, int side, bool bn6, unsigned offered);
 
 /* The price of a battle a DarkChip's dark power ran in, on MegaMan's base
  * max HP (HPMemory counts into it), max HP and HP: `out` the three after it

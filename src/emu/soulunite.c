@@ -298,8 +298,11 @@ static bool souls_own(int soulbreak) {
 		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak));
 }
 
+static bool done;
+
+bool soulunite_ready(void) { return done; }
+
 bool soulunite_install(int brk, int soulbreak) {
-	static bool done;
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	if (done) return true;
 	if (!R.data || !emu_ready() || !b5 || !soulkinds_make()) return false;

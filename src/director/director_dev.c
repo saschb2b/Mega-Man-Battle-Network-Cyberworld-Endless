@@ -14,7 +14,6 @@
 #include "devtools.h"
 #include "director.h"
 #include "director_folder.h"
-#include "director_guest.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "emu.h"
@@ -124,9 +123,6 @@ static bool dev_gift(const char *name) {
 	else if (!strcmp(name, "regup")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_REG_UP1 + 2, 1);
 	/* (the three a golden gate wants: docs/BOSSES.md, Super bosses) */
 	else if (!strcmp(name, "scrtdata")) game_call(BN6_GIVE_ITEM | 1u, SCRIPTS_SECRET_DATA, 3);
-	/* (a battle in the older net's own engine at once, on a layer whose
-	 * battles are its: docs/MULTIROM.md, Guest battles) */
-	else if (!strcmp(name, "guest") && encounter_guest) guest_begin();
 	else return false;
 	return true;
 }
@@ -294,16 +290,16 @@ int director_dev_chip(const char *spec) {
 /* The battle step (a capture's "0:battle", play.py's battle): the layer's
  * next random battle at once, at the first moment MegaMan stands free on
  * its map (no chat, talk, scene or warp, no guardian's staging, challenge
- * or forced battle under way): on a layer whose battles are an older
- * net's, its battle on the guest core (docs/MULTIROM.md, Guest battles),
- * else BN6's own, forced past its roll as the guardians' are. */
+ * or forced battle under way): BN6's own, forced past its roll as the
+ * guardians' are (an older net's area's its own records in BN6's engine,
+ * docs/MULTIROM.md, One net). */
 void director_dev_battle(void) {
 	if (D.active && !D.town) D.battle_due = true;
 	else printf("battle: only on a layer\n");
 }
 
 static void dev_battle(void) {
-	if ((!D.battle_due && !foes_due) || !on_map() || guest_active() || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping ||
+	if ((!D.battle_due && !foes_due) || !on_map() || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping ||
 		emu_read8(BN6_WARP_PENDING) || !boss_idle() || D.challenge || emu_battle_forcing())
 		return;
 	if (foes_due) {
@@ -313,8 +309,7 @@ static void dev_battle(void) {
 		return;
 	}
 	D.battle_due = false;
-	if (emu_debug_on()) fprintf(stderr, "battle: the step's, %s\n", encounter_guest ? "the guest's" : "BN6's");
-	if (encounter_guest) { guest_begin(); return; }
+	if (emu_debug_on()) fprintf(stderr, "battle: the step's%s\n", D.next.xrecord ? ", an older net's record" : "");
 	Encounter e = D.next;
 	set_encounter(&e, true);
 }

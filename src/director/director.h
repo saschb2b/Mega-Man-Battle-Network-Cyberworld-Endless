@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "guest.h"
-
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
 /* The saved run (seed and depth, peek_run's) was saved at home, in the
@@ -74,9 +72,8 @@ void director_folder_now(uint16_t *folder);
  * code << 9) and their counts, by chip and its record's codes; how many */
 int director_pack_now(uint16_t *entry, uint8_t *count, int most);
 /* MegaMan's HP as the top screen shows it: the Navi's on the map, his
- * battle object's in a battle, the guest's in an older net's battle (true
- * then). */
-bool director_megaman_hp(int *hp, int *max);
+ * battle object's in a battle */
+void director_megaman_hp(int *hp, int *max);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
 /* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it
@@ -114,8 +111,7 @@ void director_dev_home(void);
  * from place to place. */
 void director_dev_hush_home(void);
 /* Dev (the battle step): the layer's next random battle, at the first
- * moment MegaMan is free on its map; the guest's on a layer whose battles
- * are an older net's. */
+ * moment MegaMan is free on its map. */
 void director_dev_battle(void);
 /* Dev (the foes step, issue #82): a battle at once with these enemies, at
  * the first moment MegaMan is free on a layer's map, in BN6's engine
@@ -158,13 +154,6 @@ void director_dev_reveal(void);
 uint32_t director_keys(uint32_t keys);
 /* Rebuilds the saved run's layer and restores the game at its checkpoint. */
 bool director_resume(void);
-/* A battle on the guest core has ended (guest.h): its result into the run. */
-void director_guest_done(const GuestResult *r);
-/* The layer's guardian, one of another game's Navis (guardians.h:
- * guardian_older), begins his battle on the guest core at `version`, his
- * HP held to the act's band (docs/BOSSES.md, BN5's Navis); false where it
- * cannot (its end then comes through director_guest_done, to boss.c) */
-bool director_guest_guardian(int navi, int version);
 /* Once a frame, after the game's frame: exits and encounters. */
 void director_update(void);
 /* Where the test autopilot heads (grid panel): the guardian, to talk to

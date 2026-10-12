@@ -18,7 +18,6 @@
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
-#include "guest.h"
 #include "mapslot.h"
 #include "net.h"
 #include "platform.h"
@@ -26,6 +25,7 @@
 #include "run.h"
 #include "save.h"
 #include "souls.h"
+#include "soulunite.h"
 #include "text.h"
 
 DevFlags dev = { .speed = 1, .duels = -1 };
@@ -46,13 +46,13 @@ static struct {
 static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
-		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &guest_dev_worried },
+		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "visitors", &dev.visitors },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
-		{ "slowboot=", &guest_dev_slowboot }, { "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
+		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 	};
@@ -79,7 +79,6 @@ void devtools_parse(const char *spec) {
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
 	}
-	guest_dev_gem = dev.gem;   /* (BN5's battles too: guest.c) */
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;
 }
@@ -143,33 +142,26 @@ void devtools_zenny(void) {
 }
 
 /* The battle's objects on one side (0 MegaMan, 1 the enemies): HP to `hp`
- * (-1: to its max), only lowered unless `raise`; BN6's, or the guest's
- * while its battle is on its screen (BN5's objects, laid out as BN6's:
- * bn5.h), which BN6's core waits beside. */
-static bool on_guest;
-static uint8_t battle_read8(uint32_t a) { return on_guest ? guest_read8(a) : emu_read8(a); }
-static uint16_t battle_read16(uint32_t a) { return on_guest ? guest_read16(a) : emu_read16(a); }
-
+ * (-1: to its max), only lowered unless `raise` */
 static void battle_hp(int side, int hp, bool raise) {
-	on_guest = guest_on_screen();
-	uint32_t objects = on_guest ? BN5_T1_OBJECTS : BN6_T1_OBJECTS, count = on_guest ? BN5_T1_COUNT : BN6_T1_COUNT;
-	for (uint32_t i = 0; i < count; ++i) {
-		uint32_t o = objects + i * BN6_T1_SIZE;
-		if (!(battle_read8(o) & 1) || battle_read8(o + BN6_T1_ALLIANCE) != side) continue;
-		int cur = battle_read16(o + BN6_T1_HP), max = battle_read16(o + BN6_T1_MAX_HP);
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if (!(emu_read8(o) & 1) || emu_read8(o + BN6_T1_ALLIANCE) != side) continue;
+		int cur = emu_read16(o + BN6_T1_HP), max = emu_read16(o + BN6_T1_MAX_HP);
 		int want = hp < 0 ? max : hp;
 		if (cur <= 0 || want == cur || (!raise && want > cur) || (raise && want < cur)) continue;
 		uint8_t v[2] = { (uint8_t)want, (uint8_t)(want >> 8) };
-		if (on_guest) guest_write16(o + BN6_T1_HP, (uint16_t)want);
-		else emu_write(o + BN6_T1_HP, v, 2);
+		emu_write(o + BN6_T1_HP, v, 2);
 	}
 }
 
-void devtools_guest_update(void) {
-	if (!guest_on_screen()) return;
-	if (dev.god) battle_hp(0, -1, true);
-	if (dev.onehit) battle_hp(1, 1, false);
-	if (dev.fragile) battle_hp(0, 1, false);
+/* (worried: MegaMan's mood as BN5 keeps it in BN6's battles held worried
+ * once the battle's opening set it, so BN5's DarkChips come into his hand,
+ * for captures; soulmood.h) */
+static void keep_worried(void) {
+	uint32_t mood = BN6_SOULS + BN6_SOUL_MOOD;
+	if (!soulunite_ready() || !emu_read8(BN6_SOULS + BN6_SOUL_OPENED) || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) return;
+	if (emu_read8(mood) > BN5_MOOD_WORRIED / 2) emu_write8(mood, BN5_MOOD_WORRIED / 2);
 }
 
 static void act(int item, int dir) {
@@ -260,6 +252,7 @@ void devtools_update(void) {
 		for (int f = BN6_FLAG_HEAT_CROSS; f <= BN6_FLAG_CHARGE_CROSS; ++f) flag_set(f);
 	}
 	if (dev.fragile) battle_hp(0, 1, false);
+	if (dev.worried) keep_worried();
 }
 
 static void line(int x, int y, bool sel, const char *label, const char *value) {

@@ -20,6 +20,7 @@
 #include "run.h"
 #include "second_state.h"
 #include "second_text.h"
+#include "soulunite.h"
 #include "text.h"
 #include "town.h"
 
@@ -160,7 +161,16 @@ static void read_custom(void) {
 	bool crossing = mode == BN6_MODE_CROSS_OPEN || mode == BN6_MODE_CROSS || mode == BN6_MODE_CROSS_SHUT || mode == BN6_MODE_CROSS_TAKEN;
 	S2.cross_under = crossing ? cross_at(emu_read8(BN6_CUSTOM_CROSS_ROW), S2.form) : 0;
 	S2.cursor = emu_read8(BN6_CUSTOM_CURSOR);
-	S2.card = S2.cross_under ? CARD_CROSS : S2.cursor == BN6_CUSTOM_EMBLEM ? CARD_BEAST : S2.cursor < S2.nhand ? CARD_CHIP : CARD_PICKS;
+	/* (the emblem's place is UNITE's while the last chip picked lights a
+	 * held Soul, docs/MULTIROM.md; ColonelSoul's button the two places
+	 * under the picks DustCross keeps, soulcolonel.h) */
+	bool unite = soulunite_ready() && emu_read8(BN6_SOULS + BN6_SOUL_SLOT) == BN6_SLOT_UNITE;
+	S2.unite_soul = unite ? emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_SOUL) : 0;
+	S2.unite_chaos = unite && emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_CHAOS);
+	S2.unite_state = !unite ? 0 : mode == BN6_MODE_UNITE ? 2 : emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_STATE);
+	bool button = S2.soul == BN5_NAVI_COLONEL && (S2.cursor == SECOND_BUTTON_AT || S2.cursor == SECOND_BUTTON_AT + 1);
+	S2.card = S2.cross_under ? CARD_CROSS : S2.cursor == BN6_CUSTOM_EMBLEM ? (unite ? CARD_UNITE : CARD_BEAST) : button ? CARD_BUTTON
+		: S2.cursor < S2.nhand ? CARD_CHIP : CARD_PICKS;
 	S2.npicks = 0;
 	for (int k = 0; k < emu_read8(BN6_CUSTOM_PICKED) && k < 5; ++k) {
 		int slot = emu_read8(BN6_CUSTOM_PICKS + (uint32_t)k);
@@ -175,6 +185,12 @@ static void read_fight(void) {
 	S2.beast_turns = emu_read8(BN6_BATTLE_BEAST_TURNS);
 	S2.beast = flag_get(BN6_FLAG_BEAST_OUT);
 	S2.synchro = emu_read8(BN6_BATTLE_MOOD) == BN6_MOOD_SYNCHRO;
+	/* (a Soul of BN5's, where the Souls stand in BN6's engine: soullife.h) */
+	bool souls = soulunite_ready();
+	S2.soul = souls ? emu_read8(BN6_SOULS + BN6_SOUL_ID) : 0;
+	S2.soul_turns = souls ? emu_read8(BN6_SOULS + BN6_SOUL_TURNS) : 0;
+	S2.soul_chaos = souls && emu_read8(BN6_SOULS + BN6_SOUL_CHAOS);
+	S2.soul_chip = souls ? emu_read16(BN6_SOULS + BN6_SOUL_CHIP) : 0;
 	S2.queue_at = emu_read8(BN6_BATTLE_HAND + BN6_HAND_AT);
 	for (S2.nqueue = 0; S2.nqueue < BN6_HAND_MAX; ++S2.nqueue) {
 		uint16_t id = emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + 2u * (uint32_t)S2.nqueue);
@@ -208,8 +224,8 @@ void second_read_battle(void) {
 	read_fight();
 	if (S2.custom) read_custom();
 	if (emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE_INIT) return;
-	S2.form = S2.beast_turns = S2.nqueue = S2.nfoes = 0;
-	S2.beast = S2.synchro = false;
+	S2.form = S2.beast_turns = S2.nqueue = S2.nfoes = S2.soul = S2.soul_turns = S2.soul_chip = 0;
+	S2.beast = S2.synchro = S2.soul_chaos = false;
 }
 
 /* where at home Lan or MegaMan stands, for its next step (second_home_next) */

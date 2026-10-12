@@ -296,25 +296,16 @@ static void layer_host(int tiles, int *group, int *number) {
 	layer_objs_bystander2 = a->xrom > 0 && a->xnavi2 ? xnavi_slot(a->xrom - 1, a->xnavi2, layer_objs_bystander) : layer_objs_bystander;
 	layer_objs_xlooks = a->xrom > 0 ? a->xlooks : 0;
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
-	guest_backdrop = a->xrom > 0 && a->xbg ? a->xbg : -1;   /* (its own number, in its own game's tables) */
 	xbackdrop_map(tiles);
 	/* (and its battles: its game's records for the map fought in BN6's
 	 * engine where every one of them can be, the deep's both nets', the
-	 * older net's share of its finds and stock, loot.h; else where its own
-	 * engine can fight them on the guest core, guest.c, which its Navis'
-	 * battles take too) */
-	const uint8_t *xb = a->xbattles[layer_in_act(run.depth)];
-	bool nets = loot_layer_nets(run.biome, tiles);
+	 * older net's share of its finds and stock, loot.h; else, an install
+	 * that failed, the BN6 area's it dresses) */
+	loot_layer_nets(run.biome, tiles);
 	D.territory_native = loot_territory >= 0;
 	D.deep = loot_deep[0] >= 0;
-	D.guest_xrom = a->xrom - 1;
-	D.guest_area = a;
-	D.guest_group = xb[0];
-	D.guest_number = xb[1];
-	bool guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1);
-	encounter_guest = !nets && guest && xrecords_count(D.guest_xrom, D.guest_group, D.guest_number) > 0;
-	if (emu_debug_on()) fprintf(stderr, "layer nets: territory %d deep %d %d, older chips %d%%, guest battles %d\n", loot_territory, loot_deep[0], loot_deep[1],
-		loot_older_share, encounter_guest);
+	if (emu_debug_on()) fprintf(stderr, "layer nets: territory %d deep %d %d, older chips %d%%\n", loot_territory, loot_deep[0], loot_deep[1],
+		loot_older_share);
 	dark_flame_setup();
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;

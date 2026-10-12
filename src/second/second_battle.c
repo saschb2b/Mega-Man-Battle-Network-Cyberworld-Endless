@@ -4,9 +4,10 @@
  * large, as the DS games' chip pictures are, with its text from the
  * Library, and the chips picked under it; CROSSSELECT's Cross and the
  * Beast Out emblem get cards of their own (what BN6's tutorials told of
- * them), and OK the picks in order. While MegaMan fights: the chips he
- * holds in their order (the top screen names the next alone), his Cross,
- * Beast Out and Full Synchro, what he knows of a guardian, and each enemy
+ * them), UNITE in the emblem's place and ColonelSoul's button theirs
+ * (BN5's Souls, issue #82), and OK the picks in order. While MegaMan
+ * fights: the chips he holds in their order (the top screen names the next
+ * alone), his Cross or Soul, Beast Out and Full Synchro, what he knows of a guardian, and each enemy
  * by name with its HP. Nothing BN6 keeps from the player: not the
  * folder's draw, not an enemy's next move. */
 #include "second_battle.h"
@@ -94,6 +95,16 @@ static void custom(int x, int y, int w) {
 		second_beast_lines(S2.beast_turns, lines, sizeof lines);
 		card_words("Beast Out", lines, x, y, w);
 		break;
+	case CARD_UNITE: {
+		char name[16];
+		second_unite_lines(&S2, name, sizeof name, lines, sizeof lines);
+		card_words(name, lines, x, y, w);
+		break;
+	}
+	case CARD_BUTTON:
+		second_button_lines(&S2, lines, sizeof lines);
+		card_words("Chip button", lines, x, y, w);
+		break;
 	case CARD_PICKS: card_picks(x, y, w); return;
 	}
 	picks_row(x, y + SECOND_CARD_H + 6);
@@ -115,10 +126,10 @@ static int hand(int x, int y, int w) {
 	return y;
 }
 
-/* His Cross, Beast Out, Full Synchro: a name and a line each; the y under */
+/* His Cross or Soul, Beast Out, Full Synchro: a name and a line each; the y under */
 static int megaman(int x, int y) {
 	SecondStateLine s[3];
-	int n = second_state_lines(S2.form, S2.beast_turns, S2.beast, S2.synchro, s, 3);
+	int n = second_state_lines(&S2, s, 3);
 	for (int i = 0; i < n; ++i, y += 2 * SECOND_LINE_H + 4) {
 		text_draw(x, y, s[i].name, PET_GOLD, TEXT_LEFT);
 		text_draw(x, y + SECOND_LINE_H, s[i].line, PET_WHITE, TEXT_LEFT);

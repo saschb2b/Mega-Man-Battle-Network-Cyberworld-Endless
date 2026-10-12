@@ -19,7 +19,8 @@ typedef struct {
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
-	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a guest battle begun hurt); 0 the max */
+	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a battle begun hurt); 0 the max */
+	bool worried;   /* MegaMan held worried by BN5's mood in BN6's battles, so its DarkChips come (soulmood.h; a capture of one offered) */
 	bool mapall;    /* the layer's map whole, as if every panel were seen (a capture of the map: tools/before_after.py) */
 	int folder;     /* folder=ID: the run's folder all chip ID in * (a capture of one chip's battles, the first hand all of it); 0 none */
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
@@ -59,9 +60,6 @@ bool devtools_open(void);
 void devtools_zenny(void);
 /* After each game frame: the switches' effects. */
 void devtools_update(void);
-/* ... and after each frame of a battle on the guest core (guest.h): god,
- * onehit and fragile on its battle's objects. */
-void devtools_guest_update(void);
 void devtools_draw(void);
 
 /* A frame to save after the next draw (the tour sets it); "" for none. */

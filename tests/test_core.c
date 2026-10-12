@@ -1157,22 +1157,23 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
 	/* BN5's guardians (docs/BOSSES.md, BN5's Navis): the lowest version
-	 * whose HP reaches their band, three quarters of BN6's guardians' (no
-	 * Cross comes into BN5's engine: 300-450 in act 1), V2 at least from act
-	 * 4, and their HP capped at its top, never raised (BN5's own HP: KnightMan
+	 * whose HP reaches their band, BN6's guardians' since they fight in
+	 * BN6's engine (400-600 in act 1; the three-quarters discount stood for
+	 * the Cross that never came into BN5's), V2 at least from act 4, and
+	 * their HP capped at its top, never raised (BN5's own HP: KnightMan
 	 * 600/900/1600/1800, ShadowMan 500/700/1200/1600, ToadMan 700/900/1200/
 	 * 1500, TomahawkMan 700/900/1400/1800, Colonel 400/1200/1800/2000) */
 	const int knight[4] = { 600, 900, 1600, 1800 }, shadow[4] = { 500, 700, 1200, 1600 }, toad[4] = { 700, 900, 1200, 1500 },
 		tomahawk[4] = { 700, 900, 1400, 1800 }, colonel[4] = { 400, 1200, 1800, 2000 };
 	CHECK(pacing_xguardian_version(knight, 0, 0, false) == 0 && pacing_xguardian_version(knight, 1, 0, false) == 0, "KnightMan V1 in acts 1-2");
-	CHECK(pacing_xguardian_version(knight, 1, 0, true) == 1 && pacing_xguardian_hp(900, 1, 0) == 525, "threat 4's V2 from act 2, capped at 525");
-	CHECK(pacing_xguardian_version(toad, 0, 0, false) == 0 && pacing_xguardian_hp(700, 0, 0) == 450, "ToadMan V1 in act 1, held to 450");
-	CHECK(pacing_xguardian_hp(600, 0, 0) == 450, "KnightMan's 600 held to 450 in act 1 (session 68)");
-	CHECK(pacing_xguardian_version(shadow, 1, 0, false) == 0 && pacing_xguardian_version(shadow, 2, 0, false) == 1 &&
-		pacing_xguardian_hp(700, 2, 0) == 700, "ShadowMan V1 in act 2, V2 at 700 in act 3");
+	CHECK(pacing_xguardian_version(knight, 1, 0, true) == 1 && pacing_xguardian_hp(900, 1, 0) == 700, "threat 4's V2 from act 2, capped at 700");
+	CHECK(pacing_xguardian_version(toad, 0, 0, false) == 0 && pacing_xguardian_hp(700, 0, 0) == 600, "ToadMan V1 in act 1, held to 600");
+	CHECK(pacing_xguardian_hp(600, 0, 0) == 600, "KnightMan's 600 his own in act 1");
+	CHECK(pacing_xguardian_version(shadow, 0, 0, false) == 0 && pacing_xguardian_version(shadow, 1, 0, false) == 1 &&
+		pacing_xguardian_hp(700, 1, 0) == 700, "ShadowMan V1 in act 1, V2 at 700 in act 2");
 	CHECK(pacing_xguardian_hp(500, 2, 0) == 500, "never raised to the band's floor");
-	CHECK(pacing_xguardian_version(tomahawk, 2, 0, false) == 0 && pacing_xguardian_version(tomahawk, 3, 0, false) == 1 &&
-		pacing_xguardian_hp(900, 3, 0) == 900, "TomahawkMan V1 in act 3, V2 at 900 in act 4");
+	CHECK(pacing_xguardian_version(tomahawk, 2, 0, false) == 1 && pacing_xguardian_version(tomahawk, 3, 0, false) == 2 &&
+		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 held to 1300 in act 4");
 	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
 	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
 	/* heals: the middle layer of each act on the first two cycles, and the
@@ -1367,9 +1368,6 @@ static void test_talk(void) {
 		snprintf(what, sizeof what, "the arrival's words in area %d", biome);
 		check_talk(what, line);
 		snprintf(what, sizeof what, "the briefing in area %d", biome);
-		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older Net's way.|@M A strong Navi's signal waits at "
-			"the end...|@M We've got no battle data on it,Lan.|@M Watch the yellow panels! Attacks land there!", area);
-		check_talk(what, line);
 		/* (where the nets meet, issue #82: an older net's area's own
 		 * viruses, the deep's both nets', briefing_words.c) */
 		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Its viruses come from the older Net!|@M A strong Navi's signal waits at "
@@ -1405,22 +1403,34 @@ static void test_talk(void) {
 static void test_home_words(void) {
 	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
 	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
-	/* (where the nets meet, issue #82, guest_words.c: the first arrival
-	 * at an older net's area whose viruses fight our way, for a profile
-	 * new to it and one told the old way; the deep's both nets; the first
-	 * visitor of either net, named by the longest of their families') */
+	/* (where the nets meet, issue #82, nets_words.c: the first arrival at
+	 * an older net's area, our way, for a profile new to it and one told
+	 * the old way on the guest core that has left runs; the deep's both
+	 * nets; the first visitor of either net, named by the longest of their
+	 * families'; a CONTINUE without BN5's ROM, its chips and Souls waiting) */
 	check_talk("an older net's area, first", "@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
-		"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!|@M Its own Navis fight the old way,though.|"
-		"@L No Crosses against them? Got it!");
-	check_talk("an older net's area, told the old way", "@M Lan! The older Net's viruses...|@M We fight them our way now. Cross and all!|"
-		"@M Its own Navis still fight the old way.|@L Got it. No Crosses against them!");
+		"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!");
+	check_talk("an older net's area, told the old way", "@M Lan! Our Cross works in the older Net now!|@M Its Navis fight our way too.|"
+		"@L Alright! Cross and all!");
 	check_talk("the deep's both nets", "@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
 		"@M Yeah. Anything could come at us!");
 	check_talk("a visitor of the older net's", "@M Lan,that Cactikil back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
 		"@M Where they meet,yeah. Stay sharp!");
 	check_talk("a visitor of ours", "@M Huh? That HntdCndl was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!");
-	check_talk("the older net's guardian's battle", "@M Lan,he fought on the older Net's system!|@M Its own Navis fight the old way.|"
-		"@M Our chips worked the way it knew them.");
+	check_talk("the older net's chips and Souls, its ROM gone", "@M Huh? Some of our chips came from the older Net...|@L And its cartridge isn't here!|"
+		"@M Right. They'll sit out until it's back!|@M I can't feel the old Souls,Lan...|@M Not till the older Net's back.");
+	/* (a Soul won, guardian_lines.c: the whole of it, with a chip of its
+	 * kind or none, a Soul or a Cross; the short of it; one held) */
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
+		for (int kind = 0; kind < 12; ++kind) {
+			profile.soul_taught = 0;
+			check_talk("a Soul's first words", guardian_soul_words(navi, kind, false, "WideSht1", true));
+			check_talk("a Soul's first words, no chip", guardian_soul_words(navi, kind, false, "", false));
+			profile.soul_taught = 1;
+			check_talk("a Soul's words", guardian_soul_words(navi, kind, false, "", kind & 1));
+			check_talk("a Soul held", guardian_soul_words(navi, kind, true, "", false));
+		}
+	profile.soul_taught = 0;
 	check_talk("Lan's HP's first time", home_hp_words(false));
 	check_talk("Lan's HP, a profile told", home_hp_words(true));
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true, "to the lower left"));
@@ -4310,41 +4320,64 @@ static void test_darkchips(void) {
 	CHECK(dark_bn6_kind(DARK_BN6_FIRST - 1) < 0 && dark_bn6_kind(DARK_BN6_FIRST + DARK_BN6_COUNT) < 0 && dark_bn6_kind(0x47) < 0,
 		"dark: other chips are no DarkChip of BN6's");
 	CHECK(dark_bn6_id(1) == 286 && dark_bn6_id(6) == 287 && dark_bn6_id(7) == 288 && dark_bn6_id(2) == 289, "dark: the four kinds as BN6's chips");
-	CHECK(!dark_bn6_id(3) && !dark_bn6_id(0) && !dark_bn6_id(11), "dark: DarkPlus and BN5's own seven are none of BN6's battles' (%d %d %d)",
+	CHECK(!dark_bn6_id(3) && !dark_bn6_id(0) && !dark_bn6_id(11), "dark: DarkPlus and BN5's own seven are none BN6's rule plays (%d %d %d)",
 		dark_bn6_id(3), dark_bn6_id(0), dark_bn6_id(11));
+	/* (every kind one chip of BN6's tables, issue #82: BN6's five where it
+	 * keeps them, the registry's 214-220 for BN5's own seven, by BN5's ids
+	 * 187-198; each its kind back) */
+	static const int ids[DARK_KINDS] = { 214, 286, 289, 290, 215, 216, 287, 288, 217, 218, 219, 220 };
+	int bad = 0;
+	for (int k = 0; k < DARK_KINDS; ++k) {
+		bad += dark_chip_id(k) != ids[k] || dark_chip_kind(ids[k]) != k;
+		if (dark_bn6_id(k)) bad += dark_bn6_id(k) != dark_chip_id(k);
+	}
+	CHECK(!bad, "dark: %d of the twelve kinds off their chips (BN5's 187-198 by the registry)", bad);
+	CHECK(dark_chip_kind(0x47) < 0 && dark_chip_kind(0) < 0 && dark_chip_kind(213) < 0 && dark_chip_kind(221) < 0 && !dark_chip_id(12) && !dark_chip_id(-1),
+		"dark: other chips and kinds are none");
+	unsigned six = dark_kinds_offered(false), five = dark_kinds_offered(true);
+	CHECK(six == (1u << 1 | 1u << 6 | 1u << 7 | 1u << 2), "dark: BN6's flame offers its four (%#x)", six);
+	CHECK(five == (0xFFFu & ~(1u << DARK_PLUS_KIND)), "dark: BN5's flame offers every kind but DarkPlus (%#x)", five);
 	uint8_t held[DARK_KINDS] = { 0 };
-	int bn6_seen = 0, bad = 0;
+	int bn6_seen = 0, bn5_seen = 0;
+	bad = 0;
 	for (uint32_t seed = 1; seed < 400; ++seed)
 		for (int depth = 2; depth < 30; depth += 3) {
-			int k5 = dark_flame_pick(seed, depth, false, held), was = (int)(((seed ^ (uint32_t)depth * 2654435761u) >> 8) % DARK_KINDS);
-			int k6 = dark_flame_pick(seed, depth, true, held);
-			bad += k5 != was || dark_bn6_id(k6) == 0;
+			uint32_t h = seed ^ (uint32_t)depth * 2654435761u;
+			int k5 = dark_flame_pick(seed, depth, false, held, five), was = (int)((h >> 8) % DARK_KINDS);
+			int k6 = dark_flame_pick(seed, depth, true, held, six);
+			/* (BN5's as it was, DarkPlus passed over to the kind after it) */
+			bad += k5 != (was == DARK_PLUS_KIND ? DARK_PLUS_KIND + 1 : was) || dark_bn6_id(k6) == 0;
 			if (k6 >= 0) bn6_seen |= 1 << k6;
+			if (k5 >= 0) bn5_seen |= 1 << k5;
 		}
 	CHECK(!bad, "dark: %d picks off BN5's rule as it was, or off the four BN6's battles play", bad);
-	CHECK(bn6_seen == (1 << 1 | 1 << 6 | 1 << 7 | 1 << 2), "dark: a BN6 flame offers each of the four over the seeds (%#x)", bn6_seen);
+	CHECK(bn6_seen == (int)six, "dark: a BN6 flame offers each of the four over the seeds (%#x)", bn6_seen);
+	CHECK(bn5_seen == (int)five, "dark: a BN5 flame offers each of its eleven over the seeds (%#x)", bn5_seen);
 	/* (seeds apart in their low bits alone, a test's, start apart too) */
 	int small = 0, kinds_small = 0;
-	for (uint32_t seed = 1; seed <= 12; ++seed) small |= 1 << dark_flame_pick(seed, 2, true, held);
+	for (uint32_t seed = 1; seed <= 12; ++seed) small |= 1 << dark_flame_pick(seed, 2, true, held, six);
 	for (int k = 0; k < DARK_KINDS; ++k) kinds_small += small >> k & 1;
 	CHECK(kinds_small >= 3, "dark: seeds 1 to 12 on layer 2 offer %d of BN6's four kinds, three at least", kinds_small);
 	held[1] = held[6] = held[7] = 1;
 	bad = 0;
-	for (uint32_t seed = 1; seed < 200; ++seed) bad += dark_flame_pick(seed, 5, true, held) != 2;
+	for (uint32_t seed = 1; seed < 200; ++seed) bad += dark_flame_pick(seed, 5, true, held, six) != 2;
 	CHECK(!bad, "dark: with three held, a BN6 flame offers the fourth, DarkInvs (%d seeds off)", bad);
 	held[2] = 1;
-	CHECK(dark_flame_pick(7, 5, true, held) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
-	CHECK(dark_flame_pick(7, 5, false, held) >= 0 && !held[dark_flame_pick(7, 5, false, held)], "dark: ... while BN5's offers a kind the run lacks");
+	CHECK(dark_flame_pick(7, 5, true, held, six) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
+	CHECK(dark_flame_pick(7, 5, false, held, five) >= 0 && !held[dark_flame_pick(7, 5, false, held, five)], "dark: ... while BN5's offers a kind the run lacks");
+	/* (all eleven held: BN5's flame none, DarkPlus never offered) */
+	for (int k = 0; k < DARK_KINDS; ++k) held[k] = k != DARK_PLUS_KIND;
+	CHECK(dark_flame_pick(7, 5, false, held, five) < 0, "dark: every kind but DarkPlus held, no BN5 flame (%d)", dark_flame_pick(7, 5, false, held, five));
 	/* (the layer's flame kept: a CONTINUE on it after it was taken finds the
 	 * same, not the next kind lacked) */
 	dark_new_run(99);
-	int k = dark_flame_of(99, 5, 0, true);
+	int k = dark_flame_of(99, 5, 0, true, six);
 	CHECK(k >= 0 && dark_bn6_id(k), "dark: a new run's BN6 flame holds one of the four (%d)", k);
 	dark_give(k);
-	CHECK(dark_flame_of(99, 5, 0, true) == k, "dark: the layer's flame the same after its chip was taken (%d)", dark_flame_of(99, 5, 0, true));
-	int k8 = dark_flame_of(99, 8, 0, true);
+	CHECK(dark_flame_of(99, 5, 0, true, six) == k, "dark: the layer's flame the same after its chip was taken (%d)", dark_flame_of(99, 5, 0, true, six));
+	int k8 = dark_flame_of(99, 8, 0, true, six);
 	CHECK(k8 >= 0 && k8 != k, "dark: the next act's flame another kind (%d, %d)", k8, k);
-	CHECK(dark_flame_of(99, 8, 0, false) >= 0, "dark: BN5's flame on that layer picked anew, not BN6's kept");
+	CHECK(dark_flame_of(99, 8, 0, false, five) >= 0, "dark: BN5's flame on that layer picked anew, not BN6's kept");
 	dark_new_run(99);
 	int v[3];
 	dark_price_hp(100, 120, 50, v);

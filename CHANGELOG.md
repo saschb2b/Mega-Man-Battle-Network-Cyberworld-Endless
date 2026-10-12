@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- **BN5's Navis guard in BN6's own engine, their Souls serve every
+  battle, BN5's DarkChips come into runs, and BN5's second emulator core
+  leaves runs (issue #82).** A Navi of BN5's who guards an act
+  (KnightMan, ShadowMan, NumberMan, TomahawkMan, ToadMan, Colonel) is
+  fought in BN6's battle engine as BN6's guardians are, every Cross,
+  BeastOut, Soul and chip of the run with MegaMan, at BN6's guardians'
+  band (no longer three quarters of it), his HP raised by the Net's clock
+  as theirs; his Guardian Data gives his own Navi chip, his V1 in the
+  first three acts and his SP from the fourth where it plays. He may
+  guard the short net's last act now, and the Undernet's and the
+  Graveyard's acts draw their guardians from both games' Navis by band.
+  Beaten, his Soul is with MegaMan in every battle after, UNITE on BN6's
+  Custom screen in the Beast Out emblem's place; the second screen names
+  the Soul under the cursor, its turns and the chip it takes, and the
+  Soul he wears. All twelve of BN5's DarkChips are the run's: BN5's flame
+  of darkness on its areas' acts offers them, BN6's flame elsewhere its
+  four, each played by its own net's rule, at one price (20 max HP a
+  battle one is used in; none for one given up for a Chaos Unison). With
+  every battle in BN6's engine, the second core that ran BN5's battles
+  is gone from runs: no five-second start-up on a handheld's first BN5
+  area, no switch of screens, no wait, no chips sitting out of a battle,
+  and in the browser no second core in the page's memory. It stays as
+  the reference the differential compares BN6's battles with
+  (`build.py xdiff`). A data folder's BN5 start-up state is removed once.
+  Layers made before continue afresh (their guardians changed). The
+  test autopilot goes round the rocks BN5's fields put on MegaMan's side,
+  where it stood stuck behind one.
+
 - **One copy of BN5's code for every track, and the obstacle strike for
   either Colonel (issue #82).** The Souls' code runs the copies the Navis
   and the chips made of what it shares (one copy of each moved object,

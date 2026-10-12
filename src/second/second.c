@@ -14,7 +14,6 @@
 #include "director.h"
 #include "emu.h"
 #include "guardians.h"
-#include "guest.h"
 #include "platform.h"
 #include "run.h"
 #include "second_battle.h"
@@ -55,7 +54,6 @@ static SecondContext pet_screen(int screen) {
 static SecondContext context_now(void) {
 	bool home = director_in_town() || director_in_hp();
 	if (!director_on_layer() && !home) return SECOND_DARK;
-	if (guest_active()) return SECOND_BATTLE;
 	switch (emu_read8(emu_read32(BN6_TOOLKIT))) {
 	case BN6_MODE_SUBMENU: return pet_screen(emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU)));
 	case BN6_MODE_SHOP: return SECOND_SHOP;
@@ -86,8 +84,7 @@ static Panel panel_for(SecondContext c) {
 	case SECOND_TRADER: return PANEL_TRADER;
 	case SECOND_PET: case SECOND_KEYITEM: case SECOND_SUBCHIP: case SECOND_COMM: case SECOND_SAVE: return PANEL_HOME;
 	case SECOND_DARK: return PANEL_DARK;
-	/* (an older net's battle runs in BN5's memory: the map then) */
-	case SECOND_BATTLE: if (!guest_active()) return PANEL_BATTLE; break;
+	case SECOND_BATTLE: return PANEL_BATTLE;
 	default: break;
 	}
 	return S2.town ? PANEL_HOME : PANEL_MAP;

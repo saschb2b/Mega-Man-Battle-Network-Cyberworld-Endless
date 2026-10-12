@@ -38,6 +38,33 @@ void second_beast_lines(int turns, char *out, size_t n) {
 	else snprintf(out, n, "MegaMan is tired:|a Beast Out now ends in BeastOver");
 }
 
+const char *second_soul_name(int soul) {
+	static char name[24];
+	int navi = soul >= BN5_NAVI_COLONEL && soul <= BN5_NAVI_TOADMAN ? guardian_of_older(soul) : 0;
+	const char *n = navi ? guardian(navi)->name : "";
+	size_t len = strlen(n);
+	/* (as BN5 names them: ShadowSoul, ColonelSoul) */
+	if (len > 3 && !strcmp(n + len - 3, "Man")) len -= 3;
+	snprintf(name, sizeof name, "%.*s%s", (int)len, n, navi ? "Soul" : "");
+	return name;
+}
+
+void second_unite_lines(const SecondState *s, char *name, size_t nn, char *out, size_t n) {
+	const char *soul = second_soul_name(s->unite_soul);
+	snprintf(name, nn, "UNITE");
+	if (s->unite_state == 1 || !*soul) snprintf(out, n, "Pick a chip of a Soul's kind last|Not while worried or dark|Each Soul once a battle");
+	else if (s->unite_state == 2) snprintf(out, n, "%s%s|Unites as the turn begins|A Soul or a Cross: not both", soul, s->unite_chaos ? ": Chaos Unison" : "");
+	else if (s->unite_chaos) snprintf(out, n, "%s: Chaos Unison|1 turn|Takes the DarkChip picked last: no max HP for it", soul);
+	else snprintf(out, n, "%s|3 turns|Takes the chip picked last|A Soul or a Cross: not both", soul);
+}
+
+void second_button_lines(const SecondState *s, char *out, size_t n) {
+	ChipInfo ci;
+	if (s->soul_chip) chip_info(s->soul_chip, &ci);
+	snprintf(out, n, "A drops the chip picked last in|His charged shot fires it next turn|B gives it back%s%s", s->soul_chip ? "|In it: " : "",
+		s->soul_chip ? ci.name : "");
+}
+
 /* his Cross or Beast Out, as BN6_BATTLE_FORM names it */
 static int form_line(int form, int turns, SecondStateLine *out) {
 	const char *cross = powers_cross_name(form > BN6_FORM_CROSS_BEAST && form < BN6_FORM_BEAST_OVER ? form - BN6_FORM_CROSS_BEAST : form);
@@ -55,8 +82,20 @@ static int form_line(int form, int turns, SecondStateLine *out) {
 	return 1;
 }
 
-int second_state_lines(int form, int turns, bool beast, bool synchro, SecondStateLine *out, int most) {
-	int k = most > 0 ? form_line(form, turns, out) : 0;
+/* the Soul he is united with (BN5's in BN6's engine), its turns left (0:
+ * it ends as the next turn starts) */
+static int soul_line(const SecondState *s, SecondStateLine *out) {
+	snprintf(out->name, sizeof out->name, "%s", second_soul_name(s->soul));
+	if (s->soul_chaos) snprintf(out->line, sizeof out->line, "Chaos Unison");
+	else if (s->soul_turns > 0) snprintf(out->line, sizeof out->line, "%d more turn%s", s->soul_turns, s->soul_turns == 1 ? "" : "s");
+	else snprintf(out->line, sizeof out->line, "The last turn");
+	return 1;
+}
+
+int second_state_lines(const SecondState *s, SecondStateLine *out, int most) {
+	int form = s->form, turns = s->beast_turns;
+	bool beast = s->beast, synchro = s->synchro;
+	int k = most <= 0 ? 0 : s->soul && form == BN6_FORM_PROXY ? soul_line(s, out) : form_line(form, turns, out);
 	bool beastly = form == BN6_FORM_BEAST || (form > BN6_FORM_CROSS_BEAST && form <= BN6_FORM_BEAST_OVER);
 	if (k < most && beast && turns == 0 && !beastly) {
 		snprintf(out[k].name, sizeof out[k].name, "Tired");

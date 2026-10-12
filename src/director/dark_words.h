@@ -4,7 +4,6 @@
 
 #include <stddef.h>
 
-void dark_rose_said(void);
 /* which of MegaMan's words on a DarkChip's price (dark_price_words) */
 enum { DARK_PRICE_BN6, DARK_PRICE_FIRST, DARK_PRICE_MORE };
 const char *dark_price_words(int kind, int lost);

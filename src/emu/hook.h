@@ -17,7 +17,7 @@
  * differential alone (src/dev/xdiff.c), the guest's (hook_core). A hook
  * reads and writes the core it runs on. Two cores' hooks run one core's
  * frame at a time: the guest's hooks are a dev tool's, whose frames run on
- * the thread BN6's do (the guest's boot thread runs without hooks). */
+ * the thread BN6's do. */
 #ifndef CW_HOOK_H
 #define CW_HOOK_H
 

@@ -24,8 +24,8 @@ Commands, apart by ';':
   second          ... and of the second screen (the 3DS's bottom one)
 Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
 flags set, then back as they were), battle (the layer's next random
-battle, as soon as MegaMan is free on its map: on a layer whose battles
-are an older net's, a guest battle), sig (MegaMan in the layer's
+battle, as soon as MegaMan is free on its map; on an older net's area,
+one of its records in BN6's engine), sig (MegaMan in the layer's
 signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
 Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
 200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,

@@ -23,8 +23,8 @@ enum {
 /* Starts the core on a private copy of the ROM (writes to ROM space patch
  * only that copy) and resets it to power-on. */
 bool emu_init(const uint8_t *rom, size_t len);
-/* mGBA's log for every core, quiet (emu_init sets it; the guest's boot,
- * begun first at the title, guest.c, too), set once on the main thread:
+/* mGBA's log for every core, quiet (emu_init sets it; the differential's
+ * second core, guest.c, too), set once on the main thread:
  * its debug lines cost the page a console line each */
 void emu_log_quiet(void);
 bool emu_ready(void);
@@ -47,7 +47,7 @@ extern int emu_draw_waits;
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
 const uint32_t *emu_video(void);
-/* Another core's sound (a struct mCore: the guest's, guest.c) into the
+/* Another core's sound (a struct mCore: the differential's, guest.c) into the
  * same ring BN6's plays from, and the rate it is played at. */
 void emu_audio_from(void *core);
 /* ... or its sound let go, for frames run ahead unseen */

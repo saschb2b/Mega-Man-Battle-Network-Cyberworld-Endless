@@ -46,7 +46,7 @@ static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va
 }
 static struct mLogger logger = { .log = quiet };
 
-/* (once: the guest's boot thread may be reading it when BN6's core is made) */
+/* (once, before any core) */
 void emu_log_quiet(void) {
 	static bool set;
 	if (!set) mLogSetDefaultLogger(&logger);
@@ -135,7 +135,7 @@ void emu_audio_rate(int rate) {
 	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), rate);
 }
 
-/* (a core's sound into the ring: BN6's, or the guest's while it runs) */
+/* (a core's sound into the ring: BN6's, or the differential's second core's) */
 static void pull_audio_from(struct mCore *c) {
 	blip_t *l = c->getAudioChannel(c, 0), *r = c->getAudioChannel(c, 1);
 	int16_t tmp[1024 * 2];

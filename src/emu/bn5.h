@@ -1,5 +1,6 @@
-/* Battle Network 5: Team Colonel (USA): the addresses the guest core uses
- * (guest.c; docs/ROM_DATA.md, BN5 guest battles). BN5 shares BN6's engine:
+/* Battle Network 5: Team Colonel (USA): the addresses the differential's
+ * second core reads (guest.c, src/dev/xdiff.c; docs/ROM_DATA.md, BN5 guest
+ * battles) and what is moved from it into BN6's engine. BN5 shares BN6's engine:
  * its toolkit, game state and battle records are laid out as BN6's are. */
 #ifndef CW_BN5_H
 #define CW_BN5_H
@@ -56,7 +57,7 @@
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */
 #define BN5_OPT_GAME_OVER  0x100   /* BattleSettings +8 options: a loss plays GAME OVER (GetBattleEffects 0x0802B3F2) */
 #define BN5_RECORD_BACKDROP 4      /* BattleSettings +4: its background's number, 0xFF the map's (its routine 0x0808CAE8, a byte per map at 0x0808CB1C) */
-#define BN5_FREE          0x08800000u /* the guest's ROM copy past BN5's 8 MB: its record copies */
+#define BN5_FREE          0x08800000u /* the second core's ROM copy past BN5's 8 MB: its record copies */
 #define BN5_NAVI_FOLDER   (BN5_NAVI_STATS + 0x2D) /* u8: the folder MegaMan fights with (0 the first) */
 #define BN5_NAVI_FOLDER1_REG (BN5_NAVI_STATS + 0x2E) /* u8: the first folder's Regular chip, its entry, 0xFF none (BN6_NAVI_FOLDER1_REG's: read as the
                                        * battle builds its deck, 0x08008D64); BN5 has no TagChips (no reader of its NaviStats +0x56) */
@@ -186,7 +187,7 @@
 #define BN5_CHIP_DARK_GATE 0x15    /* a chip record's +0x15: 0 none; 1 usable only while his dark meter is 470 or more (not dark: HolyDrem, a Navi's
                                     * V1 and SP chips), else only below it (dark: BlakWing, the DS chips); his chip use's test 0x08010110 */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
-/* Its Souls (docs/META.md, Souls in BN5 territory; docs/ROM_DATA.md, BN5's
+/* Its Souls (docs/META.md, Souls; docs/ROM_DATA.md, BN5's
  * Souls): the Custom screen's UNITE command, its Double Soul */
 #define BN5_UNITE_CHECK   0x08024B2Cu /* the check of the last chip picked: its kind (BN5_CHIP_KIND) a Soul's, that Soul's flag set, not used this battle */
 #define BN5_SOUL_FLAGS    0x08024BF4u /* a byte per Soul 1-12: its event flag, 0xFF none (Team ProtoMan's six in this version) */

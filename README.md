@@ -82,14 +82,15 @@ purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, an
 <table align="center">
 <tr>
 <td align="center" width="50%"><img src="docs/clips/acdc-bn5.gif" width="380" alt="With Battle Network 5's ROM: MegaMan walking a layer of BN5's ACDC Area, its cyan platforms and green walkways"></td>
-<td align="center" width="50%"><img src="docs/clips/bn5-battle.gif" width="380" alt="MegaMan walks Battle Network 5's ACDC Area until a battle breaks the map into blocks and fades to white; he fights a Mettaur and a CanGard in BN5's own battle screen"></td>
+<td align="center" width="50%"><img src="docs/clips/bn5-battle.gif" width="380" alt="MegaMan walks Battle Network 5's ACDC Area until a battle starts; he fights BN5's CanGard in BN6's battle engine, its AirShot and Cannon against it"></td>
 </tr>
 </table>
 
 <p align="center">
 Put <i>Team Colonel (USA)</i> beside your BN6 ROM, and BN5's net areas turn up in runs
 in its own tiles, music and bystanders, their battles BN5's own, fought in BN6's engine,
-where its viruses and chips meet BN6's from the second act.
+where its viruses and chips meet BN6's from the second act. Its Navis guard some acts:
+beat one for his Soul, and UNITE with it in every battle after.
 </p>
 
 <h2 align="center">Runs leave options, not power</h2>

@@ -8,15 +8,17 @@ optional, and the more there are, the bigger the pools a run draws from.
 
 ## Data, not code
 
-Every battle, chip effect, virus AI and boss AI in a run is BN6's own
-code; the engine directs it and writes data into BN6's in-memory ROM
-(docs/EMULATION.md). Battle Network 4, 5 and 6 share one engine family:
-their maps, tile sets, palettes, coordinate data, sprites, text scripts,
-chip tables and MP2K songs are the same formats or close to them. A
-second game's data can be drawn and played by BN6; its code cannot run
-inside BN6 as it stands (it calls its own game's addresses), but a virus
-family's can once it is moved: copied into BN6's free space, its calls
-aimed at BN6's routines (Transplanted families, below).
+Every battle of a run is fought in BN6's own engine; the engine directs
+it and writes data into BN6's in-memory ROM (docs/EMULATION.md). Battle
+Network 4, 5 and 6 share one engine family: their maps, tile sets,
+palettes, coordinate data, sprites, text scripts, chip tables and MP2K
+songs are the same formats or close to them. A second game's data can be
+drawn and played by BN6; its code cannot run inside BN6 as it stands (it
+calls its own game's addresses), but a virus family's, a Navi's, a
+chip's or a Soul's can once it is moved: copied into BN6's free space,
+its calls aimed at BN6's routines (Transplanted families, Navis and
+Souls, The chips' code, below), each proved against its own game's
+battle frame by frame.
 
 | Pool | How another game fills it | Cost |
 | --- | --- | --- |
@@ -24,23 +26,18 @@ aimed at BN6's routines (Transplanted families, below).
 | Towns | The same, from its real-world maps | moderate |
 | Music, sounds | Its MP2K songs and their voice groups into BN6's song table | low |
 | NPCs, mugshots | Its sprites as bystanders and dealers | low to moderate |
-| Chips | Where BN6 has the behaviour (most standard chips); its own (Navi chips, seven of its twelve DarkChips) have no code in BN6, which keeps the other five DarkChips with theirs, four of which play in BN6's battles (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md) | limited |
-| Viruses | The families both games have; its own need their AI. BN5 shares 5 of its 33 with BN6 (Mettaur, Catack, Champy, WindBox, Trumpy, by the first name of each family in both games' tables), and its areas' battles are mostly its own (ACDC Area's CanGards and Powies), so a mix from its data alone would take the BN5 out of them; or a family of its own moved whole into BN6's engine, its code with its calls aimed at BN6's (Transplanted families: CanGard so far, met only by the dev steps) | limited; a recipe per family moved |
-| Guardians | Its Navis need their AI: a battle in its own engine | high |
+| Chips | Where BN6 has the behaviour (most standard chips); its own moved into BN6's engine one by one (The chips' code, below), registered in BN6's chip tables (The chip registry); its twelve DarkChips one chip each, BN6's five with BN6's code, its own seven with BN5's rule (docs/META.md, DarkChips) | limited; a unit per chip moved |
+| Viruses | The families both games have, BN6's; its own moved whole into BN6's engine, their code with their calls aimed at BN6's (Transplanted families: every family its areas' records set) | a recipe per family moved |
+| Guardians | Its Navis moved into BN6's engine as its families are (Transplanted Navis: Team Colonel's six and the Dark Soul) | a recipe per Navi moved |
+| Souls | Moved with their look, abilities and passives onto a form BN6 keeps and never offers (Transplanted Souls) | high |
 
-For what needs its game's code, the way is a battle in that game: the
-engine keeps BN6's state, switches the core to the other ROM from a state
-made there, sets up its battle (MegaMan's HP, his folder in its chips),
-runs it, reads the result and brings BN6 back. That takes a battle-level
-port of the other game (its RAM, as `src/emu/bn6.h` is BN6's), a second
-ROM in memory, and shows its battle screens.
-
-A second way is under way for viruses (issue #82, Transplanted families,
-below): a family's own code copied from the other game's ROM into BN6's,
-its calls aimed at BN6's routines, so its viruses fight in BN6's battles
-beside BN6's own. BN5's CanGard is the first: installed wherever BN5's
-ROM is read, it fights in BN6's battles that the dev steps start; no
-run's battles hold it yet.
+Every battle of a run is BN6's own engine's since issue #82's last
+round (One net, below). Before it, what needed BN5's code was fought in
+BN5's: a second core running BN5's ROM, BN6's waiting beside it (Guest
+battles, below, kept as the history it is). That core stays, for one
+use: the differential's reference, BN5's own battle frame by frame
+against BN6's with the code moved (`build.py xdiff`, docs/DEVTOOLS.md,
+The differential).
 
 ## How it is built
 
@@ -96,288 +93,69 @@ run's battles hold it yet.
 
 ## Guest battles
 
-Where BN5 dresses an area and the build can run a second core (desktop,
-Android, iOS, PortMaster, the browser; not the 3DS, which keeps one ROM),
-the layer's random battles were BN5's own, fought in BN5's engine
-(`src/emu/guest.c`, epic #57). Since issue #82's D1 they are fought in
-BN6's engine (One net, below) wherever every record of the area can be,
-which with BN5's ROM read is everywhere; the guest's battles below remain
-where a territory is not native (an install that failed) and for BN5's
-Navis as guardians, until they move into BN6's engine:
+What runs now: none. Every battle of a run is BN6's engine's, BN5's
+areas' too (One net, below), and the guest core (`src/emu/guest.c`) is
+the differential's alone: BN5's own battle as BN5 has it, booted once on
+the main thread and kept as `xdiff-bn5.state` in the differential's data
+folder (`build.py xdiff`, docs/DEVTOOLS.md, The differential). A data
+folder a run's guest kept its boot state in (`guest-bn5-1.state`) has it
+removed once at the next start (`src/core/startup.c`). What it took a
+run, gone with it: BN5's first boot (7210 of its frames: five seconds of
+a Retroid Nova's, a thread of its own on native builds, the browser's
+frames' spare time), the switch of engines and its flash, the older
+net's wait screen, the chips that sat out of its battles for want of a
+BN5 namesake and the codes it read its own way, the guest's ROM copy in
+the browser's memory (below), and some 2,500 lines of run code.
 
-- **When**: BN6's roll decides there is a battle, as on any layer; the
-  hook gives BN6 none (`encounter_guest`), and the director begins a
-  guest battle. BN6's core waits while the guest runs; the screen and the
-  sound are the guest's.
-- **Which**: the area's own maps' records in BN5's numbers (ACDC Area
-  0x90:0, 0x90:1 and 0x86:0 for an act's first, middle and guardian's
-  layers; Oran Area 0x91:0, 0x91:1, 0x86:1; SciLab 0x92:0, 0x92:1, 0x86:2;
-  End Area 0x93:0, 0x86:3, 0x93:1; the Undernet 0x94:0, 0x94:1, 0x86:5;
-  Nebula Area 0x86:6, 0x94:3, 0x86:7), one picked from the layer's seed
-  and the battle's count, held to the act's band as BN6's battles are
-  (pacing.c: their viruses' HP together and the strongest one's damage,
-  from BN5's own enemy tables): the area's own records that fit, else its
-  other maps', else those of BN5's other areas that fit (End Area in an
-  opening act fights ACDC Area's viruses), else its own weakest. BN5's
-  story battles (a record's byte 7 set, its roaming Navis at 2000 HP among
-  them) never.
-- **MegaMan as the run has him**: his HP and max HP, and the run's folder,
-  each chip as BN5's chip of the same name with its own code (the names
-  read from both ROMs and paired by `src/core/xchips.c`, which
-  `tests/test_core.c` runs on made-up tables; 114 of BN6's 313 chips
-  pair), owned in BN5's marks.
-  A chip BN5 has none of sits out, its slot empty (a Standard folder keeps
-  26 of its 30). His buster is the run's: its Attack, Speed and Charge as
-  BN6's NaviCust makes them (Attack+1 to ChargMAX, BustPack), written into
-  BN5's NaviStats before each battle, which keeps them at the same five
-  levels and reads them with BN6's own code (a shot Attack + 1, a charged
-  shot ten times that); BN5's boot state fired 1 a shot and 10 a charge
-  whatever the run's programs. The NaviCust's other programs sit out:
-  parity, no power of BN5's own.
-- **Its rolls**: BN5's random numbers are the run's. On the frame BN5
-  begins a battle, both its RNG words are written from the battle's seed
-  (a random battle's from the layer's seed and its battles so far, as its
-  record is picked; a guardian's from the layer's seed), so its first
-  hand, its green Mystery Data and find and its reward differ from run to
-  run as BN6's do, and the same seed fights the battle again as it was
-  (a CONTINUE, or MegaMan walking into it another way). Its core began
-  each session from its boot state, and every run's first battle in its
-  engine had drawn alike, whatever the seed (issue #102; docs/ROM_DATA.md,
-  BN5's random numbers).
-- **The record's copy**: past BN5's 8 MB in the guest's ROM copy, without
-  its GAME OVER bit, so a loss ends on the map with BN5's result 2 and the
-  run ends as BN6's would (the deletion shown in BN5's battle).
-- **The end**: BN5's result (won, lost, escaped) and the HP the battle
-  left (its BattleState's copy, as BN5 copies it back to its NaviStats
-  only on its own maps' terms) go back into the run. The results screen's
-  rewards go into BN6, both as BN5 gives them to its own save
-  (docs/ROM_DATA.md, BN5's results screen): the busting level's, and
-  where a green Mystery Data stood on the enemies' side unbroken as the
-  battle was won, its find (BN5's own battlefield Mystery Data: some of
-  its records set one, there in about a third of ACDC Area's battles that
-  name one and in every one of the other areas', and any hit breaks it;
-  its find is 1000 to 3000 zenny, 1 to 3 BugFrags or, outside ACDC Area,
-  now and then a chip, as BN5's rows have them). A chip goes in as BN6's chip of
-  the same name, to the Pack (GiveChips), zenny as zenny (GiveZenny),
-  BugFrags as BugFrags (GiveBugfrags): a playtester's screen said "50 z",
-  then "BugFrag 1", and the run had kept the zenny alone (session 69).
-  Before each battle, its enemies' reward rows and the Mystery Data's
-  finds are rewritten where a chip has no BN6 chip of its name: 200 zenny
-  instead, so the screen never shows a chip the run won't get (of the
-  finds' chips, AirHoc S alone); with All * the others are in *; and on
-  every other row of an enemy's (a reward's row comes of the busting
-  level) a chip both games have is put in the first of the folder's codes
-  both games' records of it have (`xchips_fit`), so about half the chips
-  come in the folder's codes, as BN6's rewards lean to them. An HP+N its
-  screen gives (a row's kind 2, as BN6's) is in the HP that comes back.
-  `runlog.txt` has a line for each, as for BN6's battles, with its
-  record, its viruses by BN5's ids and the reward as the run got it, a
-  find after it (docs/DEVTOOLS.md).
-- **The world's reason**: the Nest's copy of the old net reads our data
-  as it knew it, one rule for every seam of the translation. Chips it
-  never had sit out; a chip whose code its chip of that name lacks fights
-  with one it has (the same letter, else its *, else its first: BN5 draws
-  a chip with a code it lacks as nothing); DarkChips are its own; a chip
-  won there crosses back in a code our net knows. MegaMan names each the
-  first time a profile meets it, with the chip ("Huh? In there our
-  Thunder S was Thunder *!"), and says out here the codes are ours again:
-  a quirk of two engines told as the net's own law, which a player can
-  use (a folder of codes the old net lacks fights with wildcards there).
-- **The switch**: arriving where the battles are BN5's, the first time a
-  profile does, MegaMan says the older net had no Crosses and names the
-  folder's chips it never had, which will sit out (three or fewer by name,
-  more as two and how many others: the Storm folder's "Our ElcPuls1,
-  DolThdr1 and Atk+10 didn't exist back then either, so they'll sit
-  out.", the Standard's CrakShot and Atk+10, the Blade's Atk+10). BN6's
-  frame fades to white while BN5's battle opens (its opening drew the
-  room its boot state stands in), breaking into blocks wider than tall
-  as it goes, as BN6's own battle switch draws the map (16 pixels across
-  at most, captured in a BN6 battle), and BN5's picture flashes in once
-  its battle is on its screen; after a profile's first, MegaMan says what
-  it was and names the chips that sat out, the same way.
-- **For tests** (issue #61, docs/DEVTOOLS.md): the battle step
-  (`--input "300:battle"`, play.py's `battle`) starts the layer's next
-  random battle once MegaMan is free on its map, a guest battle on such a
-  layer (`--net-biome x0`, ACDC Area), and `--talk guest:FRAME` one at a
-  frame; a headless run waits for the boot's thread at its first such
-  battle, and `--dev slowboot=N` runs BN5's first boot at N of its frames
-  a frame on the main thread instead (the same frames every run), so a
-  fresh data folder's first BN5 battle waits behind the older net's wait
-  (`--dev quiet,slowboot=12 --input "300:battle"`, the autopilot paging
-  the arrival's words: open from frame 370, the battle at about 640);
-  `--talk dark:FRAME` opens the flame of darkness's talk (a middle
-  layer: `--run-depth 2`), `--dev darkchips=MASK` starts a run holding
-  DarkChips (bit k BN5's id 187 + k), `--dev worried` keeps MegaMan
-  worried in guest battles and `--dev gem` sets a green Mystery Data on
-  the enemies' side of every one, as in BN6's (its find of row 0, 1000
-  zenny or a BugFrag; with `onehit` it more often stands to the end: with
-  `quiet,gem,onehit` and the battle step, the first guest battle on ACDC
-  Area found "BugFrag 1" on seeds 1-8, before its random numbers were the
-  run's); `--guardian 24` to `29` puts one of BN5's
-  Navis (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan)
-  in every act BN5 dresses (`--net-biome x0 --run-depth 3 --guardian 28`:
-  KnightMan at ACDC Area's first act), and `--dev souls=MASK` starts a
-  run holding Souls (bit k Team Colonel's Soul 7 + k: 1 Colonel's, 2
-  ShadowMan's, 4 NumberMan's, 8 TomahawkMan's, 0x10 KnightMan's, 0x20
-  ToadMan's); `--dev god`, `onehit` and `fragile` and the
-  dev menu work in them as in BN6's. `CYBERWORLD_AUTOPILOT=1` fights them
-  as it fights BN6's, from BN5's memory (`src/emu/bn5.h`: its Custom
-  screen's picks, its panels, its viruses and their attacks; never a
-  DarkChip), `weak` keeping their viruses at 1 HP; the run log has a line
-  for each (`guest`, its record, its reward). `CYBERWORLD_EMU_DEBUG=1` names each
-  battle, its folder's chips in and those that sat out, slot by slot
-  ("guest: 4 sat out: CrakShot A, ..."), the buster it goes in with and the
-  one its battle took, a line every 30 of its frames (MegaMan's mood
-  among them), its end, the flame and a DarkChip's price, and with Souls
-  held whether UNITE stood on the first Custom screen and each unison
-  ("guest: MegaMan united with Soul 9, Chaos Unison"); `build.py pacing`
-  lists every act's guest battles against its band, and
-  `tests/test_emu.c` runs two cores side by side.
-- **DarkChips** (docs/META.md, issue #64): the run's go into the guest's
-  folder (three at most, one of each, as BN5's folder editor allows, in
-  slots where chips sat out). BN5 draws them as any chip; the guest's
-  deck compaction at each Custom screen (`0x080250EA`) is replaced by one
-  that shelves a DarkChip behind the deck's end except where BN5's own
-  worried rule put it, so one comes only when MegaMan worries (or is
-  dark), as the rule offers it. Used in a battle, BN5 keeps it, and the
-  run pays: 20 max HP, from the base HPMemory counts into. Each battle
-  starts calm (BN5's mood and dark meter reset), as the run's battles
-  share no darkness. A flame of darkness on the middle layer of such an
-  act holds one the run lacks: BN5's flame, copied from its ROM and
-  turned purple, in a bystander's place. Four kinds BN6 keeps too
-  (DrkSword, DarkThnd, DrkRecov, DarkInvs; docs/META.md, BN6's own
-  DarkChips) play in BN6's battles from its folder: a kind is one chip
-  in both nets, and one in BN6's folder never goes into the guest's as a
-  chip beside the run's copy; BN5's rule brings it, first among the
-  run's three.
-- **Its boot** (the owner's Retroid Nova froze five seconds entering a
-  run's first BN5 area, 5 October 2026: "guest: booted in 7210 frames,
-  5.01 s of its frames' time", the whole boot inside one frame of the
-  layer's setup): BN5's first boot (7210 of its frames, kept as the state
-  `guest-bn5-1.state` in the data folder) begins as the game starts
-  (its boot screen, else the title: `guest_warm`) where BN5's ROM is
-  there and runs in the background, never in a frame's way. On native builds (desktop, Android, iOS, PortMaster) it
-  runs on a thread of its own at a low priority (`boot_main`), which alone
-  touches the guest core until it is ready and nothing of BN6's: the chips
-  of both games are paired, mGBA's logger set and the sound's rate read on
-  the main thread before it starts, mGBA 0.10.5's GBA core shares nothing
-  else between cores (read in its source: the default logger's pointer,
-  its thread logger's key made once, constant tables), the core's first
-  write to its ROM (mGBA copies the ROM to 32 MB then) is the thread's, and
-  the main thread takes its end in at a frame's end (`guest_tick`, a join),
-  `guest_read*` answering 0 until then. `tests/test_emu.c` makes and runs a
-  guest core on a thread while BN6's frames run with their hook, under the
-  sanitizers. The browser, without threads, runs it in each frame's spare
-  time (`guest_tick`: the frame's work and the slice within 10 ms of its
-  1/60 s, 12 ms while a battle waits for it), from the title through the
-  town and the layers, its first write to the ROM held for the first
-  battle's white; there a kept state loads as a layer is made, the page's
-  memory BN6's until then. A layer never waits for the boot or hangs on
-  it: its battles are BN5's wherever BN5's ROM is read and the build runs
-  a second core (`guest_possible`, a boot that failed aside), finished or
-  not, so a run stays the same from its seed whenever the boot ends.
-  A headless run (the captures, the autopilot, `tools/play.py`) waits for
-  a thread's boot at the battle that needs it, without frames, so its
-  frames are the same from run to run: the autopilot over BN5's ACDC Area
-  (seeds 1-3, fresh data folders, and 1-2 with the state kept) gave run
-  logs and frames byte for byte the old build's, which booted inside the
-  layer's setup, and the state the thread keeps is the same file the old
-  boot kept. The boot runs the same frames in the same order everywhere
-  (its keys a function of the frame, `boot_keys`). Measured on an Intel
-  Core Ultra X7 358H (headless, in Docker): the thread's boot took 3.4 to
-  3.6 s of its frames' time; BN6's frames on a layer beside it 0.4 ms of
-  the GBA's and at most 0.8 ms of update and drawing in each second, as
-  after it, where the old build stopped 3.44 s in the layer's setup. On
-  the Nova (untested there yet) its 5.01 s, on a core of its own, would end
-  before a player who presses NEW GAME at once is through the town, its
-  main thread keeping its GBA frames of about 3 ms. In Chrome 152
-  (headless, agent-browser, on a loaded machine): at the title (measured
-  before the boot screen came in) the boot took 8.5 s of its frames and
-  ended 15 s after Jack in, the page's frames
-  16.8 ms at most from the game's first second on; on ACDC Area's first
-  layer it ran in BN6's frames' spare time through the arrival's words to
-  87% when the battle came, which waited about 2 s behind the older net's
-  wait (below), every frame at 16.8 ms at most from the layer's first
-  second (making it paused the page 0.3 s, as before).
-- **The older net's wait** (`src/emu/guest_wait.c`): where a battle comes
-  before the boot is done (a fast player, a slow device, a phone's
-  browser), it waits on the white the switch fades to, as BN6's own
-  battle switch holds white. Designed through the game-design skill's
-  interface layer: a rare loading screen in the encounter's seam, the
-  moment loop's, which must never add time (the frequency-as-budget
-  rule: the switch is seen every battle, the wait at most once a data
-  folder), so it opens only where the wait needs it (the white held 12
-  frames with more than 0.7 s of the boot left at its pace, or 45 frames
-  whatever is left) and closes as the boot ends, the battle opening
-  behind it. Immersion against information is settled in the game's own
-  channels: MegaMan says what happens in BN6's chat box (diegetic: the
-  PET), his mugshot and the chat font from the player's ROM, typed a
-  character a frame, three pages as the wait goes on ("Hold on,Lan! / The
-  older Net's / still starting up...", "It only starts up / this once,Lan.
-  / Then it stays ready!", from 85% "Almost there,Lan... / Just a moment
-  more!", in BN6's voice, docs/VOICE.md); how far it is shows in the battle
-  HUD's own form, where BN6's stands, so BN5's own HUD takes its places as
-  the battle opens: a gauge drawn to the measure of BN6's Custom gauge
-  (its rim, track, fill and pins, captured in a battle as chatbox.c's
-  frame was in a chat), labelled OLD NET where BN6's says CUSTOM, filling
-  with the boot and never ahead of it (an honest telegraph: the boot's
-  frames take about the same time each), and the percent in a box drawn
-  to its HP box's, in the battle font from the ROM. Between them the net's
-  light streams over the white in the chat box's blues, as a jack-in's
-  does. The box opens as BN6's does (three frames from its middle row
-  out), the HUD drops in from the top; no flashes, no sound (the switch's
-  silence). The browser's note it replaces said "Waking the older net...
-  40%" in plain text. Captured with `--dev slowboot=12` (For tests).
-- **In the browser** (issue #68): the page runs one frame at a time with
-  no threads, so the guest's battle frames take BN6's frames' place, never
-  both in one 1/60 s, and its boot's slices fill what a frame leaves
-  (above); the state it keeps goes into IndexedDB (`platform_persist`).
-  The page's WebAssembly memory, 97 MB on a first layer with BN6 alone,
-  was 153 MB on BN5's first layer with the guest booted (BN5's ROM, 8 MB,
-  and the guest core's ROM copy, which mGBA copies to 32 MB at its first
-  patch, as it does BN6's), and 197 MB at most, after a move from Central
-  Area into End Area (the BN5 maps its tiles are learned from); it never
-  shrinks. The JavaScript heap was 21 MB (14 MB with BN6 alone), beside
-  the two ROM files the page keeps in memory. A phone's browser would
-  need about 250 MB for the page, and its slower WebAssembly (three or
-  four times) the title, the town and the first layers' spare time for
-  the boot, else a while behind the older net's wait; untested on a
-  phone.
-- **Its guardians** (docs/BOSSES.md, BN5's Navis; issue #69): on the
-  guardian layer of an act such an area dresses, in half the runs, one of
-  BN5's own Navis guards it, where BN5's net maps set him roaming
-  (`NetAreaDef.xguard`: KnightMan ACDC Area, ShadowMan Oran Area,
-  TomahawkMan SciLab, NumberMan or ToadMan End Area, Colonel its
-  Undernet), decided from the seed and the ROMs present (`run_guardian`),
-  never on the short net's last act. He stands in his own BN5 sprite and
-  face (copied in at Gregar's 78) and is staged as BN6's guardians are; his
-  battle is BN5's, from BN5's own record for him at the version the act's
-  band takes (the story's V1-V3, the net's SP), his stats row's HP in the
-  guest's ROM copy capped at the band's top as he spawns, the record's
-  copy with no running (options `0x20` cleared) and its results screen on
-  (`0x02` set: his V1 records leave it off), his reward rows paying an
-  Unlocker's price, as BN6's guardians' do. Won, his staging goes on as
-  BN6's (his last word, his Guardian Data); lost, the run ends by him.
-- **Souls** (docs/META.md, Souls in BN5 territory; issue #69): a guardian
-  of BN5's, beaten, gives his Soul with his Guardian Data; the run holds
-  it to its end, kept beside its checkpoint (`run.souls`,
-  `src/director/souls.c`), and a new run holds none. Before each guest
-  battle the run's Souls go into BN5's own event flags (eToolkit +0x44):
-  Double Soul's (0x0000) and Chaos Unison's (0x0236) while it holds one,
-  and each Soul's own (0x0008 + k, Colonel's first); BN5's boot state,
-  early in its story, holds none of them, so a run with no Soul fights as
-  before. BN5's Custom screen then offers them by its own rule: UNITE
-  stands under OK while MegaMan is neither worried nor dark as the screen
-  opens, lights when the last chip picked is of a held Soul's kind (a
-  DarkChip of it for Chaos Unison), and each Soul unites once a battle,
-  its Chaos Unison once besides. Given up for Chaos Unison, a DarkChip is
-  no DarkChip used (BN5's use flag stays clear): no max HP for it. A
-  DarkChip comes only while MegaMan worries and UNITE stands only while he
-  does not, so Chaos Unison asks for one offered hurt and kept in the hand
-  to a calmer turn; the shelf (DarkChips, above) keeps a DarkChip once in
-  the hand, worried or not. On BN6's net a Soul does nothing.
-- **Still to come**: the NaviCust's other programs in (those both games
-  have, as BN5's battle reads them), BN5's chips registered in BN6.
+The history (epic #57, issues #61-#69 and #102, until issue #82's last
+round), for what it taught the engine's port:
+
+- **When and which**: where BN5 dressed an area and the build could run a
+  second core (every build but the 3DS's), BN6's roll decided a battle
+  and a hook gave BN6 none; the director began a guest battle instead,
+  BN6's core waiting while BN5's ran. Its record was one of the area's
+  own maps' in BN5's numbers (ACDC Area 0x90:0, 0x90:1 and 0x86:0 for an
+  act's first, middle and guardian's layers; Oran Area 0x91:0, 0x91:1,
+  0x86:1; SciLab 0x92:0, 0x92:1, 0x86:2; End Area 0x93:0, 0x86:3, 0x93:1;
+  the Undernet 0x94:0, 0x94:1, 0x86:5; Nebula Area 0x86:6, 0x94:3,
+  0x86:7), held to the act's band from BN5's own enemy tables; BN5's
+  story battles never. The same maps' records are a territory's now, in
+  BN6's engine (`NetAreaDef.xbattles`).
+- **MegaMan as the run had him**: his HP, the run's folder as BN5's chips
+  of the same name (114 of BN6's 313 paired; a chip BN5 had none of sat
+  out, a code its chip lacked fought as its * or first), his buster as
+  the NaviCust made it, the run's DarkChips by BN5's worried rule
+  (a shelf behind the deck's padding), the run's Souls as BN5's event
+  flags so its own Custom screen offered UNITE. Its random numbers were
+  the run's: both words written from the battle's seed as it began
+  (issue #102; docs/ROM_DATA.md, BN5's random numbers), which the
+  differential's reference still does.
+- **Its results**: BN5's result, the HP the battle left and its results
+  screen's rewards (the busting level's and a green Mystery Data's
+  find) went into the run as BN6's chips of their names, zenny and
+  BugFrags. BN5's own rows are BN6's now, through the chip registry
+  (One net, below).
+- **Its guardians and Souls** (issue #69): BN5's Navis guarded the acts
+  its areas dress in half the runs, fought in BN5's engine at three
+  quarters of BN6's guardians' band (no Cross could come in), never on
+  the short net's last act or Nebula Area, whose Souls would have served
+  no battle of BN5's after them; their Souls woke only in BN5's battles.
+  Since the last round they fight in BN6's engine at BN6's band, and
+  their Souls serve every battle (docs/BOSSES.md, BN5's Navis;
+  docs/META.md, Souls).
+- **Its boot and wait**: BN5's first boot ran in the background from the
+  game's start (a thread of its own on native builds, measured 3.4 to 3.6
+  s on an Intel Core Ultra X7 358H; the browser's frames' spare time),
+  and a battle that came first waited behind the older net's wait, a
+  screen designed through the game-design skill's interface layer: the
+  switch's white, MegaMan's three lines in BN6's chat box, a gauge in the
+  battle HUD's form filling with the boot.
+- **In the browser** (issue #68): the page's WebAssembly memory was 97 MB
+  on a first layer with BN6 alone, 153 MB on BN5's first layer with the
+  guest booted (BN5's ROM, 8 MB, and the guest core's ROM copy, which
+  mGBA copies to 32 MB at its first patch), 197 MB at most; without the
+  second core a run's page holds BN6's core and BN5's ROM file alone
+  (measured: docs/EMULATION.md, The browser's memory).
 
 ## One net: the design (issue #82)
 
@@ -582,16 +360,68 @@ run, meta as variety):
   this run) counts every chip a run can hold of either net.
 - **BN5's viruses' rewards and green Mystery Data** come through the
   registry: its id for the chip where it plays, the stand-in's 200 zenny
-  where it sits out (and in the guest's battles the same).
+  where it sits out.
 - **Words**: the act's card says "Older Net" in a territory, "Both Nets"
   in the deep, "Nets meet" in a BN6 area from act 2 where visitors can
   come (none under the Gentle helper); MegaMan names the first native
   territory, the first visitor and the first deep act once a profile
   (Profile.native_taught, visitor_taught, deep_taught); L's briefing names
-  the older net's viruses or both nets'. Until BN5's Navis move into
-  BN6's engine (the Navi branch), a territory's guardian of BN5's still
-  fights on the guest core, and the words say so: its own Navis fight the
-  old way, no Crosses against them; a Soul wakes against them.
+  the older net's viruses or both nets'. (Until the last round a
+  territory's guardian of BN5's fought on the guest core, and the words
+  said so; a profile told that hears once that its Cross and its Navis
+  are ours now: Profile.navis_ours_told.)
+
+The calls the last round made (12 October 2026, the run's side of issue
+#82: BN5's guardians, Souls in every battle, DarkChips in runs, the
+guest core gone from runs; reasoned with the game-design skill: the
+dialectic what you bring against what you find, the session loop's
+guardian and finds, the run loop's Souls and DarkChips carried, the
+patterns of parity across the nets, an honest telegraph, costed power):
+
+- **A BN5 guardian's Guardian Data** gives his own Navi chip, BN5's V1 of
+  him in the first three acts and his SP from the fourth on (and on later
+  cycles), as BN6's guardians give V1 there and EX or SP after: BN5 has
+  no EX between them, and its SP stands where BN6's EX and SP do. Where
+  his SP sits out of BN6's battles (its code not moved yet: The chip
+  registry), his V1, so the data never gives a chip that cannot play;
+  never his DS (BN5's dark gate, a chip of the darkness the run prices
+  apart). His reward rows' Navi chips pay an Unlocker's price, as BN6's
+  guardians' do.
+- **His HP**: his own at the version his act's band takes, capped at
+  its top as he spawns (BN6_SPAWN_HP), the Net's clock's tenth a notch on
+  the capped HP, BN6's guardians' band (no three-quarters discount: the
+  Cross comes into every battle now).
+- **The deep's pool by band**: in the Undernet's and the Graveyard's acts
+  (and the short net's dark way), a coin of the seed and the act weighed
+  by how many Navis of each net fit the act's band, each as likely: one of
+  BN5's six where it lands on his, else BN6's own pick, which keeps its
+  area's own Navis favoured (run.boss_order). None that already guards a
+  surface act of the run. Everywhere else as before: half the runs on the
+  acts BN5's areas dress, by the Navi BN5 sets roaming there; the short
+  net's last act and Nebula Area allowed now; the Nest the Cybeast's.
+- **UNITE on the second screen**: the Custom screen's emblem place reads
+  UNITE where the last chip picked lights a held Soul, its card naming
+  the Soul, its turns (three, Chaos Unison one), the chip it takes and
+  that a Soul and a Cross are not worn together; grey, what lights it;
+  ColonelSoul's chip button its own card; MegaMan's form line names the
+  Soul he is united with and its turns left. The PET's plain words, as
+  its other cards.
+- **The flames**: BN5's flame (its sprite, turned purple) on the acts
+  BN5's areas dress, where its DarkChips play in BN6's battles, offering
+  every kind but DarkPlus; BN6's own elsewhere, offering its four. A kind
+  is one chip whichever flame gives it, and its words follow the rule it
+  plays by: BN6's four by BN6's (a BugFrag a use), BN5's own seven by
+  BN5's (they come while MegaMan worries; used, he is dark for the
+  battle). DarkPlus is offered by neither until its code plays in BN6's
+  battles.
+- **One price, counted as each net counts a use**: 20 max HP a battle a
+  dark power ran in: BN6's where it ran (a BugFrag paid), BN5's where the
+  chip left the hand used (BN6_HAND_AT moved past it); a DarkChip given up
+  for a Chaos Unison never enters the hand, so it costs nothing (the
+  owner's call of 4 October 2026). The autopilot picks no DarkChip of
+  either net and never presses A on UNITE or the emblem.
+- **Without BN5's ROM**: its chips sit out and its Souls sleep; MegaMan
+  says both once after a CONTINUE ("I can't feel the old Souls,Lan...").
 
 What to watch, and measure (docs/META.md, Measuring it): a visitor whose
 pairing the band does not see (two that pin a row between them); the
@@ -627,9 +457,9 @@ BN5's ROM read and its families moved in): `loot_layer_nets` sets the
 layer's territory, `make_encounter` rolls it (`xterritory_encounter`),
 BN6's step counter starts it, and its results, HP, GAME OVER, run log
 (`x` and the record's address before its foes) and second screen are
-BN6's. The guest core fights only where a territory is not native (an
-install that failed) and its guardians (the Navi branch brings them). A
-territory's Servers and the duel's race are its records too;
+BN6's. Where a territory is not native (an install that failed) its
+layers fight the BN6 area's own battles (until the last round, the guest
+core's). A territory's Servers and the duel's race are its records too;
 `loot_families_here`, the act's viruses' weaknesses and the dealers'
 counter element read its records. Visitors (`src/core/visitors.c`, their
 families' roles from `src/core/visitor_families.c`) and the deep's coin
@@ -642,6 +472,44 @@ native territories, the deep's share of the older net's battles and the
 visitors (none past the band); `--dev visitors` gives every battle the
 rules allow a visitor (docs/DEVTOOLS.md). LAYER_MAKE 92 (the stock rolls
 changed).
+
+**The last round: guardians, Souls and DarkChips in runs, the guest
+gone (in place, issue #82):**
+
+- *BN5's guardians* (`src/layer/xguardian.c`, `src/director/boss.c`,
+  `src/core/run.c`): his battle is BN6's, `xguardian_encounter` his moved
+  id at his version where BN6's guardians stand, no running from him,
+  the boss theme and the area's background as BN6's guardians'; his HP
+  his own held to BN6's guardians' band and raised by the Net's clock as
+  he spawns (`emu_battle_hp`); the results' rows his own, his Navi chips
+  in them zenny (`xguardian_navi_chip`, encounter.c's lean_row); his
+  Guardian Data his Navi chip (above); rival records keyed on navi
+  24-29 as before; where he stands by `run_xguardian_at` (above),
+  his Navi moved in at every version a run fights him at
+  (`xguardian_fightable`) where it was the guest's boot before. The run
+  log's guardian line names him (`g28 n36.0 foehp 600`: navi 28, BN6's
+  family 36 at version 0, his HP as he spawns). LAYER_MAKE 94.
+- *Souls in every battle* (`src/emu/game_hooks.c`): the proxy form and
+  the Souls installed with the core wherever BN5's Navis are (BN5's ROM
+  read, `--dev nonavis` aside), no dev switch; the run's Souls handed to
+  each battle as it begins (`emu_encounter_started`). The second
+  screen's UNITE card, button card and form line (`src/second/`); the
+  run log's `unite N` (a Soul by BN5's number, `c` its Chaos Unison) on a
+  battle's line; the autopilot's `custom_guard`.
+- *DarkChips* (`src/director/darkchips.c`, `director_dark.c`): every kind
+  one chip (`dark_chip_id`, `dark_chip_kind`: BN6's 286-290 and the
+  registry's 214-220), the Pack given each kind that plays, the flames
+  and the price above (`dark_battle_watch`, `dark_after_battle`), BN5's
+  flame's words rewritten (`ta_dark_flame`; the line on rising after a
+  fall, a guest battle's, gone with it).
+- *The guest gone from runs*: `director_guest.c`, `guest_words.c` (its
+  where-the-nets-meet lines to `nets_words.c`), `guest_reward.c`,
+  `guest_wait.c` and its lines deleted; the encounter roll's guest
+  branch, its event, the director's state for it, the run log's guest
+  lines, the scene's switch and flash, the autopilot's BN5 battle, the
+  dev switches `slowboot` and the guest's `gem`, main.c's boot and its
+  slices gone; `guest.c` trimmed to the differential's reference. The
+  profile's fields for it kept, unused (save.h).
 
 **Lava and sea in BN6's engine (P1, in place):** BN5's lava and sea are
 panels BN6 lacks (its 8 is a volcano that erupts, which a step does not
@@ -956,8 +824,8 @@ and its calls aimed again (`src/emu/xvirus.c`):
 - **The differential's tooling milestone** (issue #82): each core
   carries hooks of its own (src/emu/hook.c keeps a table and a queue per
   core, found by the CPU that meets the BKPT; the guest's are the
-  differential's alone, and the run's guest battles have none: a guest
-  battle's 128 pictures and its log are the same as before), on each
+  differential's alone: the run's guest battles, while they lasted, had
+  none, their pictures and logs the same as before), on each
   game's own routines: its draws, every spawn of the first, third and
   fourth kinds, its sounds, effects, setAttack, a panel reserved, the
   blink and a sprite set up, each logged with its frame, its caller, the
@@ -1296,8 +1164,9 @@ into the battle engine).
   kind and its twin's number, a copied sound): each FAILs its spec.
 - **Where they fight**: a battle the `foes` step starts names their ids
   beside BN6's (`0:foes 1C8@52` ShadowMan V1; docs/DEVTOOLS.md, A battle
-  on demand). The run's guardians are BN5's Navis in BN5's own engine as
-  before (docs/BOSSES.md, BN5's Navis; `--guardian 24`-`29`).
+  on demand), and the run's guardians are BN5's Navis in BN6's engine by
+  the same ids since the last round (docs/BOSSES.md, BN5's Navis;
+  `--guardian 24`-`29`; One net, The last round).
 - **Status** (as built): the six pass all three specs, ToadMan's SP with
   BN5's sea's submerge in BN6's engine (One net, The sea's submerge and
   hold, above), which his own specs on the sea prove beside it
@@ -1435,13 +1304,13 @@ chip step gives any one (docs/DEVTOOLS.md).
   rest kept in their order (the Regular chip's and the TagChips' marks
   cleared where theirs went). They are the registry's chips whose code is
   not moved yet (pending; a moved chip, `XREG_MOVED`, plays where BN5's
-  ROM is read, its code installed), BN5's DarkChips until BN5's dark rule comes
-  into BN6's battles, its Program Advances until BN6's lists hold their
+  ROM is read, its code installed), BN5's DarkChips where BN5's dark rule
+  is not in BN6's battles (its mood comes with the Souls: Transplanted
+  Souls, S7), its Program Advances until BN6's lists hold their
   recipes, and every one of BN5's where its ROM is not read. A run
   continued without BN5's ROM whose folder holds one of BN5's chips hears
   MegaMan say so once, as he stands free on the map ("Some of our chips
-  came from the older Net...", `guest_words.c`). BN5's own battles (the
-  guest's) take the registry's chips as BN5's own, by its ids.
+  came from the older Net...", `nets_words.c`).
 - **The ids BN6's code tests**: every literal and immediate of a chip
   bound in Gregar (411, 0x170, 0x140, 0x13F, 0x13A) and every range test
   (221-280, the Navi chips) read in bn6f; the pack's bounds and the
@@ -1850,8 +1719,8 @@ the next.
   bonus, `0x0800EFE6`, behind HeatCross's hooked compare), and from form
   8 Beast Out is TenguBeast's (0x14): the Souls grey Beast Out while one
   is united (docs/ROM_DATA.md, MegaMan's forms).
-- **S2, UNITE and a Soul's life** (done, behind `--dev soulproxy` or
-  `souls=MASK` until the track is whole; docs/DEVTOOLS.md, The proxy
+- **S2, UNITE and a Soul's life** (done; in every battle of a run since
+  the last round, wherever BN5's Navis are; docs/DEVTOOLS.md, The proxy
   form, and The differential; docs/ROM_DATA.md, UNITE on BN6's Custom
   screen): UNITE on BN6's Custom screen by BN5's rule, and a Soul's life
   as BN5 runs it, each Soul behind the proxy (its look and abilities
@@ -1859,7 +1728,7 @@ the next.
   emblem and BN5's UNITE button in one place (One net: the design's finer
   calls): UNITE while the last chip picked lights a held Soul (BN5's check:
   the chip's kind as BN5 has it, which for BN6's chips is BN5's chip of the
-  same name, as the guest battles cross them, or BN6's own kind by name; a
+  same name, as the guest battles crossed them, or BN6's own kind by name; a
   DarkChip of it for Chaos Unison; each once a battle), the emblem by
   BN6's own rule otherwise where Beast Out stands, a grey UNITE where only
   UNITE stands. UNITE stands while the run holds a Soul and MegaMan is
@@ -2127,11 +1996,8 @@ the next.
   SciLab's, End Area's, its Undernet's, Nebula Area's), its record,
   tiles, map, palette and animations copied after BN6's 22 backgrounds,
   in copies of BN6's tables the game's loader is pointed at
-  (`src/gfx/xbackdrop.c`), for the battles fought in BN6's engine there
-  (guardians, ProtoMan's netbattle); a guest battle's record copy names
-  the area's own by BN5's number (its byte +4, which BN5's records leave
-  at 0xFF, the map's: the room the guest's boot state stands in, yellow
-  rings in every area).
+  (`src/gfx/xbackdrop.c`), for every battle fought there: its random
+  battles, its guardian, ProtoMan's netbattle.
 - [ ] Its towns' music. Its lists name ACDC Town's (group 0x00): the
   town 0x03, its houses (maps 1-6) 0x04, map 7 0x05, maps 8-11 0x0C;
   group 0x01's maps 0x05 and 0x0C; in one story state (its third list)
@@ -2184,22 +2050,25 @@ the next.
   its jack-in points, where Lan steps out and the checks' lines for its
   buildings. Oran Isle, the harbour and the castle town would come as
   Seaside and Green Town do, copied whole.
-- [x] Its random battles in its own engine, on a second core, in the
-  areas it dresses (Guest battles, above); since D1 in BN6's engine
-  (One net: native territories), the second core only where a territory
-  is not native.
+- [x] Its random battles in the areas it dresses: in its own engine on a
+  second core at first (Guest battles, above), in BN6's engine since D1
+  (One net: native territories); the second core left runs in the last
+  round, the differential's reference alone.
 - [x] Its viruses and BN6's meet: from act 2 one battle in four takes a
   visitor of the other net, and the deep's acts draw on both nets' late
   areas (One net: D1).
 - [x] Its chips in runs: half the finds and stock on its areas and in the
   deep, its viruses' own rewards, the Library's count and the second
   screen's list (One net: D1).
-- [x] Its guardians, in battles in its own engine: KnightMan, ShadowMan,
-  TomahawkMan, NumberMan, ToadMan and Colonel guard the acts of the areas
-  BN5 sets them in, in half the runs (Guest battles, above; docs/BOSSES.md).
-- [x] Their Souls: beaten, each gives his for the run's BN5 battles, Soul
-  Unison and Chaos Unison on BN5's Custom screen by its own rule (Guest
-  battles, Souls; docs/META.md).
+- [x] Its guardians, in BN6's engine: KnightMan, ShadowMan, TomahawkMan,
+  NumberMan, ToadMan and Colonel guard the acts of the areas BN5 sets
+  them in, in half the runs, and share the deep's acts with BN6's Navis
+  by band (One net, the last round; docs/BOSSES.md).
+- [x] Their Souls: beaten, each gives his for every battle of the run,
+  UNITE on BN6's Custom screen by BN5's rule (Transplanted Souls;
+  docs/META.md).
+- [x] Its DarkChips in runs: all twelve kinds one chip each, BN5's flame
+  on its acts, one price in either net (One net, the last round).
 - [x] Its chips in BN6's own chip tables (The chip registry, above):
   257 of them registered by id, those BN6 has by name BN6's, 138 with
   ids of their own and BN5's records, names, descriptions and art in
@@ -2221,6 +2090,6 @@ the next.
   battle frame by frame (ToadMan's SP with BN5's sea's submerge, made
   again in BN6's engine; the Dark Soul with BN5's chip AI, its lists
   empty in BN6 for want of BN5's record of the chips MegaMan uses);
-  fought where a battle names their ids, not yet in a run (BN5's
-  guardians are fought in BN5's engine for now).
+  fought where a battle names their ids, and as the run's guardians
+  since the last round.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

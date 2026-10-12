@@ -220,29 +220,3 @@ int xrecords_soul_kind(int xrom, int ai) {
 	return XR[xrom].data[BN5_SOUL_KINDS - 0x08000000u + (uint32_t)(ai - 1)];
 }
 
-/* Whether record `r` sets enemy `id` and no other */
-static bool record_alone(const uint8_t *d, uint32_t r, int id) {
-	if (r < 0x08000000u || r - 0x08000000u + 16 > ROM_SIZE) return false;
-	int n = 0, found = 0;
-	for (uint32_t a = rom32(d, r + 12), k = 0; a && k < 16 && a - 0x08000000u + 4 <= ROM_SIZE && d[a - 0x08000000u] != 0xF0; a += 4, ++k) {
-		const uint8_t *e = d + (a - 0x08000000u);
-		if (e[0] != 0x11) continue;
-		++n;
-		found += (e[2] | e[3] << 8) == id;
-	}
-	return n == 1 && found == 1;
-}
-
-uint32_t xrecords_navi_record(int xrom, int ai, int version) {
-	const uint8_t *d = xrom == XROM_BN5_COLONEL_US ? XR[xrom].data : NULL;
-	int id = d ? xrecords_navi_id(d, ai, version) : 0;
-	if (!id) return 0;
-	for (uint32_t i = 0; i < BN5_STORY_BATTLE_COUNT; ++i)
-		if (record_alone(d, BN5_STORY_BATTLES + 16u * i, id)) return BN5_STORY_BATTLES + 16u * i;
-	/* (his SP: the net maps' records, where he roams once its story is over) */
-	for (int g = 0x80; g < 0x80 + XR[xrom].layout->net_groups; ++g)
-		for (int m = 0; m < 16; ++m)
-			for (int i = 0, k = xrecords_count(xrom, g, m); i < k; ++i)
-				if (record_alone(d, xrecords_at(xrom, g, m, i), id)) return xrecords_at(xrom, g, m, i);
-	return 0;
-}

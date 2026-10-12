@@ -21,6 +21,7 @@
 #include "run.h"
 #include "souls.h"
 #include "soulunite.h"
+#include "xguardian.h"
 #include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
@@ -40,7 +41,6 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
  * the record, and whether a battle starts now. */
 static uint32_t record;
 static bool forcing;
-bool encounter_guest;
 /* Whether each record is a guardian's battle, and the battle on is one
  * (emu_encounter_started): his Guardian Data gives his chip, and his
  * battle's own reward gave a second, which no folder can hold (one Mega
@@ -53,13 +53,6 @@ static bool boss_record[2], boss_on;
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
 	if (!r->r[0]) return HOOK_CONTINUE;
-	/* (a layer whose battles are the guest's: none begun here, the
-	 * director starts the guest's, guest.c) */
-	if (encounter_guest) {
-		hook_post(r, EV_GUEST_BATTLE);
-		r->r[12] = BN6_ENCOUNTER_SKIP;
-		return HOOK_JUMP;
-	}
 	r->r[0] = record;
 	return HOOK_CONTINUE;
 }
@@ -175,6 +168,8 @@ int emu_encounter_record(uint32_t settings) {
 	return settings == settings_of(0) ? 0 : settings == settings_of(1) ? 1 : -1;
 }
 
+uint32_t emu_battle_souls(void) { return soulunite_ready() ? emu_read32(BN6_SOULS + BN6_SOUL_USED) : 0; }
+
 void emu_encounter_started(uint32_t settings) {
 	int s = emu_encounter_record(settings);
 	boss_on = s >= 0 && boss_record[s];
@@ -183,7 +178,7 @@ void emu_encounter_started(uint32_t settings) {
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
  * add_keys), so busting him well pays the act's lock. */
-int encounter_boss_zenny(void) {
+static int encounter_boss_zenny(void) {
 	int act = pacing_act(run.depth) + 7 * pacing_loop(run.depth), z = 100 * (6 + 3 * act);
 	return z > 0x3FFF ? 0x3FFF : z;
 }
@@ -212,7 +207,8 @@ static void lean_row(int id) {
 		uint16_t v = enemy_drop(id, (int)k);
 		if (v == 0xFFFF || v >> 14) continue;
 		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
-		if (boss_on && chip_family(chip) == CHIP_FAMILY_NAVI) {
+		bool navi = chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip);   /* (BN5's Navi chips by the registry: their families BN5's) */
+		if (boss_on && navi) {
 			hook_write16(row + 2 * k, boss_zenny());
 			continue;
 		}
@@ -224,7 +220,7 @@ static void lean_row(int id) {
 		 * entry alone, SpoutMan A) */
 		bool held = false;
 		for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
-		if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
+		if (!held && c != '*' && navi) {
 			ChipInfo ci;
 			chip_info(chip, &ci);
 			if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';

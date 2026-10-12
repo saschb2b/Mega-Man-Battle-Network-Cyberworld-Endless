@@ -92,14 +92,9 @@ static void pair(void) {
 		if (xreg_own(&xreg_rows[i])) to_bn5[xreg_rows[i].bn6] = xreg_rows[i].bn5;
 }
 
-int xchips_paired(void) {
+static int xchips_paired(void) {
 	pair();
 	return paired;
-}
-
-int xchips_to_bn5(int id) {
-	pair();
-	return paired && id > 0 && id < XREG_IDS ? to_bn5[id] : 0;
 }
 
 int xchips_bn6_of(int x) {
@@ -122,9 +117,6 @@ int xchips_kind(int kind, uint16_t *out, int max) {
 	return n;
 }
 
-int xchips_sitting_out(const uint16_t *folder, uint16_t *out, int max) {
-	return xchips_paired() ? xchips_out(folder, 30, to_bn5, XREG_IDS, out, max) : 0;
-}
 
 /* BN6's chip `id`'s four codes as its record holds them (0-25 A-Z, 26 *,
  * 0xFF none: the All * helper's aside, which the battle's results apply

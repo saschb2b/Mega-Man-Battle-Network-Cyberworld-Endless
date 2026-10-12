@@ -59,7 +59,7 @@ const ScriptsDark6 *layer_objs_dark6;
  * BN6's own words on DarkChips, a rumor before the find) */
 static bool dark_rumor_due;
 const char *layer_objs_server_navi = "";
-bool layer_objs_dark_first, layer_objs_dark_ours;
+bool layer_objs_dark_first;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -500,7 +500,7 @@ static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	tk->cat = 7;
 	tk->sprite = layer_objs_dark_flame;
 	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark6)
-		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first, layer_objs_dark_ours);
+		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first);
 	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
 	out->dark_flame_obj = i;
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);

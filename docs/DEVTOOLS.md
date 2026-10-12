@@ -194,19 +194,13 @@ on those over the act's cap (stocked one, not two). Last, the Net's clock
 notches, beside the next act's band. The whole report takes about a
 minute.
 
-Where BN5's ROM is beside BN6's, its families are installed as a core
-starts, and each area one of its areas dresses (docs/MULTIROM.md) is
-followed by that area's battles: its own records in BN6's engine where it
-is native (issue #82's D1: rows `native`, `opening` and `challenge`, as
-the director rolls them, `xterritory_encounter`, with how many were the
-older net's), else in BN5's own engine: for every layer of the act, the
-records its first battle (`opening`, the band's lower half) and its
-others (`guest`) are picked from, as the director picks them
-(`xrecords_pool`, `src/core/xrecords.c`: the layer's map's records that
-fit the band, else the area's other maps', else those of BN5's other
-areas, else the map's weakest alone), each as likely: their viruses' HP
-together (lowest, median, highest), the strongest hit, how many records
-and where they came from, and OVER on any past the band. The deep's acts
+Where BN5's ROM is beside BN6's, its families and Navis are installed as
+a core starts, and each area one of its areas dresses (docs/MULTIROM.md)
+is followed by that area's battles: its own records in BN6's engine where
+it is native (issue #82's D1: rows `native`, `opening` and `challenge`,
+as the director rolls them, `xterritory_encounter`, with how many were
+the older net's); where it is not (an install that failed) a line says
+so, its layers fighting the BN6 area's own battles above. The deep's acts
 (the Undernet's, the Graveyard's, the Nest) say "the deep" and count the
 older net's battles among their rolls (about half: One net, the deep).
 Last, the visitors: each net's families as their own records set them
@@ -214,7 +208,12 @@ Last, the visitors: each net's families as their own records set them
 set on special panels alone), then acts 2 to 4's areas and territories,
 300 battles each given a visitor where one fits: how many took one, the
 battles' HP with it, the pairs (the replaced family's AI index > the
-visitor's), OVER past the band.
+visitor's), OVER past the band. The guardians of the older net follow
+the first cycle's own: each of BN5's six in every act its area can come
+in, and in the deep's acts where his HP reaches their band (those short
+of it are not in the pool: said so), at the version he is fought at, his
+own HP and as he spawns, on threat 4 too, against BN6's guardians' band;
+OUTSIDE past it.
 
 Output: `.build/pacing.txt`. It needs the ROM, and prints how many
 battles and guardians were past their band, the territories' included;
@@ -233,14 +232,15 @@ the deep's: docs/MULTIROM.md, One net) has `x` and its address in BN5's
 ROM after MegaMan's HP (`... battle hp 300/300 x811DDD0 v35.0 v35.0 foehp
 160 -> won hp 220`: BN6's AI indexes, BN5's families moved into the
 engine from 32), and a visitor of the other net has `+` before it (`v8.0
-+v34.1 v11.0`). A battle in BN5's engine (docs/MULTIROM.md, Guest battles) has
-`guest` and its record in BN5's ROM after MegaMan's HP, its viruses as `x`
-and BN5's enemy id, and after MegaMan's HP at its end the reward as the
-run got it: `... battle hp 300/300 guest 08121188 x1 x1 x1 foehp 120 ->
-won hp 260 reward 30 zenny` (a chip as BN6's of its name, `reward Wind *`;
-`reward HP+50`, which the HP after counts; `left` for an escape), and
-after it a green Mystery Data's find where one stood on the field to the
-end (`reward 200 zenny find 1 BugFrag`, `find Tornado L`). A last
++v34.1 v11.0`). A guardian's line names him and his foe as the engine
+has him: `g` and his navi number, `n` and his family there with its
+version, and the HP he spawns with (`... guardian hp 100/100 g28 n36.0
+foehp 600 -> won hp 100`: BN5's KnightMan, moved in as Navi AI 36, V1).
+A battle MegaMan united with a Soul in has `unite` and the Soul by BN5's
+number before its end (`unite 9`, NumberMan's; `unite 11c`, KnightMan's
+Chaos Unison). Until issue #82's last round a battle in BN5's engine had
+`guest`, its record and BN5's enemy ids instead (docs/MULTIROM.md, Guest
+battles). A last
 line gives where the run ended (`run over`, or `run won`). Past 512 KB
 the log moves to `runlog.old`. Collected from real runs, it shows where
 runs are lost. The same moments give the anonymous statistics their
@@ -321,8 +321,7 @@ collision problems show up here that the atlas cannot show.
 
 ## Dev menu: shorter test runs
 
-Hold **Select** and press **R**, in battle or on the net, a battle in
-BN5's engine too (docs/MULTIROM.md, Guest battles). The game holds still
+Hold **Select** and press **R**, in battle or on the net. The game holds still
 while the menu is open; **B** or Select+R closes it.
 
 | Item | Effect |
@@ -380,20 +379,23 @@ them, which `tools/xfamily.py` compares with CanGard installed), and
 `xnavicontrol` (the control Navi installed instead of BN5's Navis: BN6's
 own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
 `tools/xcontrol.py --navi`; docs/MULTIROM.md, Transplanted Navis), and
-`nonavis` (no Navi moved into the engine, BN5's ROM read or not). BN5's battles
-have four of their own (docs/MULTIROM.md, Guest battles, For tests):
-`darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
-Souls, bit k Team Colonel's Soul 7 + k; in BN6's battles too, through
-UNITE on BN6's Custom screen with the proxy form installed: The proxy
-form, below) and `slowboot=N` (BN5's first
-boot at N of its frames a frame on the main thread, the same frames every
-run, so a fresh data dir's first BN5 battle waits behind the older net's
-screen: with `CYBERWORLD_AUTOPILOT=1` paging the arrival's words,
-`--net-biome x0 --dev quiet,slowboot=12 --input "300:battle"` opens it at
-frame 370 and the battle at about 640). `darkchips=MASK` holds BN6's
-own DarkChips of those kinds too (0x2 DrkSword, 0x4 DarkInvs, 0x40
-DarkThnd, 0x80 DrkRecov: 0xC6 all four), which the first layer puts in
-BN6's Pack (docs/META.md, BN6's own DarkChips). `folder=ID` makes the
+`nonavis` (no Navi moved into the engine, BN5's ROM read or not: no
+Souls then either). BN5's Souls and DarkChips have three:
+`souls=MASK` (a new run holding BN5's Souls, bit k Team Colonel's Soul
+7 + k: 1 Colonel's, 2 ShadowMan's, 4 NumberMan's, 8 TomahawkMan's, 0x10
+KnightMan's, 0x20 ToadMan's; UNITE on BN6's Custom screen in every battle,
+the Souls installed wherever BN5's Navis are: The proxy form, below),
+`darkchips=MASK` (a new run holding DarkChips, bit k BN5's kind k, its id
+187 + k: BN6's four 0x2 DrkSword, 0x4 DarkInvs, 0x40 DarkThnd, 0x80
+DrkRecov, BN5's own seven 0x1 DarkCirc, 0x10 DrkLance, 0x20 DarkWide,
+0x100 DarkMetr, 0x200 DarkDril, 0x400 DarkTorn, 0x800 DrkSonic; the
+first layer puts each that plays in BN6's battles in the Pack:
+docs/META.md, DarkChips) and `worried` (MegaMan held worried by BN5's
+mood in BN6's battles once each opens, so BN5's DarkChips come into the
+hand's end, for a capture of one offered: with `hp=999/200` the first
+screen opens worried too, and one picked frees the hand's end for the
+next; `0:chip 214 R 1` puts DarkCirc R in the folder). The guest
+battles' `slowboot=N` and their `gem` went with them. `folder=ID` makes the
 run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
 for a capture of one chip in BN6's battles), `folder=ID/N` its first N
 entries alone; `pack=N` puts a copy of each of the first N chips in the
@@ -423,10 +425,6 @@ CYBERWORLD_AUTOPILOT=1 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu 
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --run-depth 19 --seed 7 --dev god,quiet,hp=800 --frames 4000
 ```
 
-Can't die, One-hit enemies, `fragile`, Win this battle and Heal work the
-same in a battle on the guest core: on BN5's battle objects, laid out as
-BN6's (`src/emu/bn5.h`), after each of its frames.
-
 ## A battle on demand
 
 ```bash
@@ -441,17 +439,10 @@ map: no chat, the director's words or a scene, no warp, no guardian's
 staging or challenge under way. It waits that long: an act's arrival
 words must be paged first (the autopilot pages them above; A in the
 script does too).
-On a layer whose battles are BN5's (its territory, docs/MULTIROM.md) it is
-a battle in BN5's engine on the guest core; elsewhere BN6's own, the
-record the roll would have handed out next, forced past the roll as the
-guardians' are (with `--dev quiet` too). `--talk guest:FRAME` begins a
-guest battle at a frame of the layer instead. With
-`CYBERWORLD_EMU_DEBUG=1`, a guest battle prints the record it starts from,
-its folder, a line every 30 of its frames (its game mode and sub-mode, the
-battle's phase, MegaMan's HP, the Custom gauge, the battle's clock, his
-mood) and its end, and with Souls held whether UNITE stood on its first
-Custom screen and each unison; play.py's state says `battle (the older
-net's)` while it runs.
+It is the record the roll would have handed out next, BN6's own or, on a
+layer of BN5's (its territory, docs/MULTIROM.md), one of its records in
+BN6's engine, forced past the roll as the guardians' are (with `--dev
+quiet` too).
 
 The `foes` step (`--input`'s `0:foes 200@52/01@43`, play.py's `foes
 200@52 01@43`) starts a battle of the foes it names, at the same first
@@ -524,7 +515,7 @@ through BN6's generic states, which the fight alone never reaches
 (docs/ROM_DATA.md, Statuses as a hit leaves them).
 
 `tools/xcontrol.py` copies BN6's ROM alone into `.build/xcontrol/rom`
-(a layer of BN5's fights its battles in BN5's engine) and runs its
+(no family, Navi or chip of BN5's in its battles) and runs its
 specs, `fight` and `status` (`--spec` one of them), three battles each,
 with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing). With `--navi`
 it proves the Navis' installer on BN6's own HeatMan (`--dev
@@ -641,13 +632,12 @@ tool run in the game's place, as `--pacing` is) fights one battle twice
 and traces both:
 
 - **The reference**: BN5's battle on the guest core, as BN5 has it
-  (`guest_dev_battle`, guest.c): BN5's random battles' record with the
+  (`guest_dev_battle`, guest.c, the guest core's one use since it left
+  runs in issue #82's last round): BN5's random battles' record with the
   foes named (BN5's ids at their panels), MegaMan at the spec's HP,
-  everything else BN5's own: none of what the run's guest battles change
-  (the versions scaled to the act, the GAME OVER option and backdrop,
-  Souls, DarkChips, the buster, the mood, the run's folder), and BN5's
-  own deck compaction, the shelf's jump undone (put back before a run's
-  next guest battle).
+  everything else BN5's own (its folder, buster, mood and deck
+  compaction). Its core boots once on the main thread and keeps its
+  state as `xdiff-bn5.state` in the differential's data folder.
 - **The subject**: BN6's battle with the families installed, the same
   foes by BN6's ids (BN5's 0x4F-0x54 are 0x200-0x205), forced as the foes
   step forces one (`emu_battle_force`), from BN6's boot state, with only
@@ -1544,11 +1534,13 @@ while one is united.
 
 The Souls stand on it from S2 (`src/emu/soulunite.c`, `soullife.c`,
 `soulkinds.c`; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a
-Soul's life on the proxy form): `--dev souls=MASK` installs the proxy as
-`soulproxy` does and UNITE over it as the core starts (where BN5's ROM
-is read beside BN6's: BN5's art and its A on UNITE are copied from it),
-and gives a new run those Souls, which reach BN6's engine as each battle
-begins. The emblem under OK is UNITE while the last chip picked lights
+Soul's life on the proxy form): wherever BN5's Navis are moved in (BN5's
+ROM read beside BN6's, `nonavis` and `xnavicontrol` aside), the proxy is
+installed as `soulproxy` does and UNITE over it as the core starts (BN5's
+art and its A on UNITE copied from BN5's ROM), every run's battles
+taking the run's Souls as each begins; `--dev souls=MASK` gives a new run
+those Souls. The second screen's card names UNITE's Soul under the
+cursor, and its fight panel the Soul he wears (`--second-shot`). The emblem under OK is UNITE while the last chip picked lights
 a held Soul (`--dev folder=ID` deals a hand of one chip: 140, JustcOne,
 Break as BN5 has it, KnightSoul's kind); A on it gives the chip up and
 shows the Soul, OK unites: the proxy form with the Soul's turns, Beast

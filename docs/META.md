@@ -879,59 +879,69 @@ owner's call decides the what.
   (Dad would call twice in a row, there and after it); the call each
   Net (the run holds it already).
 
-## DarkChips in BN5 territory (3 October 2026)
+## DarkChips (3 October 2026; in every battle since issue #82)
 
-Where BN5 dresses an area its battles are BN5's own (docs/MULTIROM.md,
-Guest battles), and BN5's DarkChips come with them, by its own rule:
-power for a run, at a price the run carries (issue #64, the owner's
-decisions).
+BN5's DarkChips came into runs with BN5's battles (issue #64, the
+owner's decisions): power for a run, at a price the run carries. Until
+issue #82's last round they played only in BN5's own engine, on the
+guest core (docs/MULTIROM.md, Guest battles); now every battle is BN6's
+engine's, and all twelve kinds play there, each by its own net's rule
+(docs/MULTIROM.md, One net: the design, call 6 and the last round).
 
 - **The dialectic** is survival now against strength later: a DarkChip
-  comes into BN5's Custom screen only when MegaMan worries, his HP low
-  after hits, and wins the battle he might have lost, while the act's
-  guardian, a BN6 fight where the run's DarkChips sit out, waits for him
-  weaker.
+  wins the battle MegaMan might have lost, and every battle one is used
+  in leaves him weaker for the rest of the dive.
 - **The pattern** is a bonus with a drawback (costed power forces
   commitment, docs/design: principles): the price is the owner's, "a
-  hefty price": each battle a DarkChip is used in lowers MegaMan's max HP
-  by 20, one HPMemory, for the rest of the run. BN5's own -1 is nothing
-  at a run's HP.
-- **Where a run gets them:** a flame of darkness, BN5's (Nebula Area's
-  flames, copied from the player's BN5 ROM as its HeelNavi is, and turned
-  purple: the owner's "dark purple ghost flame"), stands in a bystander's
-  place on the middle layer of each act whose battles are BN5's, holding
-  a DarkChip the run lacks (from the run's seed and the act). MegaMan
-  names the price before it is taken, all of it the first time a profile
-  meets one, and when it comes every time (a returning playtester heard
-  only "when I'm hurt badly", session 68), and asks, starting on Yes:
-  holding one costs nothing till it is used, and a paging A that said No
-  twice (sessions 67 and 68) sent a playtester through the whole chat
-  again. Yes gives the chip, and the flame goes. A run holds one of each, at most three going into a battle, as
-  BN5's folder takes them.
-- **Variety, not power, across runs:** nothing of them carries over, not
-  the chips, not their price; a new run starts with none.
-- **In BN6's battles too, since issue #70:** BN6 keeps five of BN5's
-  twelve with their code (a player's lead, verified: docs/SOURCES.md),
-  and four of them now play in BN6's battles from the folder, a BN6 flame
-  offering them where BN5 never dresses (BN6's own DarkChips, below). A
-  kind of those four held is one chip in both nets: BN5's flame of one
-  says so ("our net knows this one too"), and BN6's chip of it goes to
-  the Pack. That BN6 "has no code for them" had been assumed, and was
-  wrong.
-- **When he falls after using one** (seen in session 68): BN5 gets
-  MegaMan up at 1 HP, and the darkness fights with his body a while, out
-  of the player's hands. MegaMan says it might at the flame, the first
-  time; after a battle where it happened, he says what it was, before the
-  price.
+  hefty price": each battle a dark power ran in lowers MegaMan's max HP
+  by 20, one HPMemory, for the rest of the run, whichever net's chip it
+  was. BN5's own -1 is nothing at a run's HP.
+- **Twelve kinds, one chip each**: BN6 keeps five of BN5's twelve with
+  their code (BN6's own DarkChips, below); BN5's other seven are the chip
+  registry's (ids 214-220: DarkCirc, DrkLance, DarkWide, DarkMetr,
+  DarkDril, DarkTorn, DrkSonic). A kind held is one chip in the Pack, and
+  goes into the folder by the PET's EDIT, three DarkChips at most (BN6's
+  folder rule; their cards purple).
+- **Each by its net's rule**: BN6's four by BN6's (a BugFrag a use for
+  its dark power, its base chip without one; below); BN5's own seven by
+  BN5's: they come into the hand only while MegaMan worries or is dark,
+  BN5's mood brought into BN6's battles (docs/MULTIROM.md, Transplanted
+  Souls, S7), and one used makes him dark for the battle (BN6's dark too:
+  no Cross, no Beast Out, a weak buster). DarkPlus plays in neither
+  engine's battles yet, and no flame offers it.
 - **When he worries** (4 October 2026): BN5 worries MegaMan by hits, 10
   off his mood each, and opened every battle calm, so it took seven hits
   in one battle, whatever his HP: a playtester at 10 of 120 HP never saw
-  his DarkChip. A battle now opens as worried as his HP says: worried
-  from the start at a quarter of his HP or less, else as much calmer as
-  he is whole, BN5's hits doing the rest. BN5 deals it into the hand the
+  his DarkChip. A battle opens as worried as his HP says: worried from
+  the start at a quarter of his HP or less, else as much calmer as he is
+  whole, BN5's hits doing the rest. BN5 deals it into the hand's end the
   next time chips are drawn while he worries; a counter hit's Full
-  Synchro calms him first, as in BN5. MegaMan says so at the flame:
-  "down to a quarter of my HP, or hit again and again".
+  Synchro calms him first, as in BN5.
+- **Where a run gets them:** a flame of darkness on the middle layer of
+  each act, holding a DarkChip the run lacks (from the run's seed and the
+  act): BN5's flame (Nebula Area's, copied from the player's BN5 ROM as
+  its HeelNavi is, and turned purple: the owner's "dark purple ghost
+  flame") on the acts BN5's areas dress, offering any kind but DarkPlus;
+  BN6's own flame elsewhere, offering its four. MegaMan names the chip,
+  when it comes and its price before it is taken, all of it the first
+  time a profile meets one (a returning playtester heard only "when I'm
+  hurt badly", session 68), the words following the rule the chip plays
+  by; then asks, starting on Yes: holding one costs nothing till it is
+  used, and a paging A that said No twice (sessions 67 and 68) sent a
+  playtester through the whole chat again. Yes gives the chip to the
+  Pack, and the flame goes.
+- **Counted as each net counts a use:** BN6's where its dark power ran (a
+  BugFrag paid); BN5's where it left the hand used. A DarkChip given up
+  for a Chaos Unison is no DarkChip used (BN5's rule): no max HP for it
+  (the owner's call of 4 October 2026).
+- **Variety, not power, across runs:** nothing of them carries over, not
+  the chips, not their price; a new run starts with none. A run
+  continued without BN5's ROM keeps BN5's seven; they sit out of its
+  battles until the ROM is back.
+- **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
+  a battle a DarkChip was used in, the darkness fighting with his body
+  a while (session 68), and MegaMan said so; BN6's engine has its own
+  dark, and that rise does not come with it.
 
 ## BN6's own DarkChips (4 October 2026, issue #70)
 
@@ -1196,18 +1206,19 @@ own code runs them, our part is the run around it (`src/director/darkbn6.c`,
   a part to play says its BBS's post on DarkChips ("A dar...DarkChip!?
   Those are against the law!"), and the folder's NAVIGATOR line is
   MegaMan's.
-- **In BN5's battles,** a DarkChip of BN6's folder is the run's one of its
-  kind: it never goes into BN5's folder as a chip beside the run's copy;
-  BN5's rule brings it, shelved behind the deck until MegaMan worries,
-  and first among the run's three there. BN5's price, no BugFrag. Both
-  nets' rules stay whole: three DarkChips at most in each folder, one of
-  each kind, a BugFrag a use only in BN6's.
+- **In BN5's areas** (until issue #82's last round BN5's own battles,
+  where BN5's rule brought a kind of these four from the run's DarkChips,
+  shelved until MegaMan worried) the four play as everywhere: from the
+  folder, by BN6's rule, a BugFrag a use; BN5's flame offers them there
+  with BN6's flame's words (DarkChips, above).
 - **The autopilot** never picks a DarkChip, BN6's or BN5's.
 
-## Souls in BN5 territory (4 October 2026, issue #69)
+## Souls (4 October 2026, issue #69; in every battle since issue #82)
 
-A BN5 Navi beaten as a territory's guardian (docs/BOSSES.md, BN5's Navis)
-gives his Soul for the run's BN5 battles: BN5's Soul Unison, which its US
+A BN5 Navi beaten as a guardian (docs/BOSSES.md, BN5's Navis) gives his
+Soul for every battle of the run since issue #82's last round (until it,
+for the run's BN5 battles alone, fought in BN5's engine on the guest
+core): BN5's Soul Unison, which its US
 version calls Double Soul and its Custom screen UNITE, and with a
 DarkChip, its Chaos Unison (the owner's call). Reasoned with the
 game-design skill; the owner approved all of it (4 October 2026), the
@@ -1218,20 +1229,21 @@ points first marked as proposals among them.
   unites, since each Soul takes chips of one kind. Inside a battle it
   restates the run's own tension, prepare or press on: a chip of the hand
   given up now for a few turns of the Soul.
-- **The loop layers:** the moment (UNITE on BN5's Custom screen, the turns
-  it lasts), the session (a territory layer's battles), the run (which
-  Souls it carries into its later territories). None reaches the meta
-  loop.
+- **The loop layers:** the moment (UNITE on the Custom screen beside
+  CROSSSELECT, the turns it lasts), the session (a layer's battles), the
+  run (which Souls it carries into every battle after). None reaches the
+  meta loop.
 - **The patterns:** costed power (each unison costs a chip and comes once
-  a battle), nested progression (BN5's Souls beside BN6's Crosses, each
-  serving only its own engine's battles), bonus with drawback (Chaos
-  Unison), meta as variety, not power.
+  a battle), nested progression (BN5's Souls beside BN6's Crosses, a Soul
+  or a Cross at a time, never both), bonus with drawback (Chaos Unison),
+  meta as variety, not power.
 - **What each needs**, BN5's own rule as its ROM has it (docs/ROM_DATA.md,
   BN5's Souls): the last chip picked on the Custom screen of the Soul's
   kind, given up for it. Team Colonel's MegaMan unites with the Souls of
   Colonel's team alone (the other team's six are never offered in this
-  version). In BN6's chips that cross into BN5's battles (by name,
-  docs/MULTIROM.md):
+  version). BN6's chips light it by BN5's kind of their names (soulkinds.h;
+  docs/MULTIROM.md, Transplanted Souls), BN5's own of the registry by
+  their own:
 
   | Soul | Its kind | BN6's chips of it | Chaos Unison with |
   | --- | --- | --- | --- |
@@ -1242,6 +1254,14 @@ points first marked as proposals among them.
   | KnightMan's | Break | JustcOne, BigHook, MetrKnuk | DarkDril |
   | ToadMan's | Aqua | BblWrap | DarkWide |
 
+- **Where**: BN6's Custom screen, in the place under OK where BN6 puts
+  its Beast Out emblem (BN6's emblem is BN5's UNITE button): UNITE while
+  the last chip picked lights a held Soul, the emblem otherwise where the
+  run has Beast Out; a Soul and a Cross are not worn together (another
+  chosen replaces the one he wears), and no Beast Out while a Soul is
+  united. The second screen's card under the cursor names the Soul, its
+  turns, the chip it takes; MegaMan's form line there names the Soul he
+  wears and its turns left.
 - **When**, BN5's own: the UNITE button stands under OK only while
   MegaMan is neither worried nor dark as the Custom screen opens, and
   each Soul unites once a battle, for the turns BN5 gives it (three for
@@ -1255,45 +1275,48 @@ points first marked as proposals among them.
   MegaMan worries (above), and UNITE stands only while he does not, so
   Chaos Unison asks for a DarkChip offered when hurt and kept to a calmer
   turn (a counter hit's Full Synchro, a virus deleted: each lifts his
-  mood); a DarkChip once in the hand stays there, worried or not (the
-  shelf, docs/MULTIROM.md). Its charged shot is the DarkChip's attack
-  (seen: KnightMan's Soul with DarkDril fired a drill). Seen in the game:
-  DarkPlus offered worried, kept, and picked on a calm turn united
-  MegaMan with NumberMan's Soul in Chaos Unison.
+  mood); a DarkChip once in the hand stays there, worried or not. Its
+  charged shot is the DarkChip's attack (seen in BN5's engine: KnightMan's
+  Soul with DarkDril fired a drill). Seen in BN5's engine, before the last
+  round: DarkPlus offered worried, kept, and picked on a calm turn united
+  MegaMan with NumberMan's Soul in Chaos Unison. In BN6's engine Chaos
+  Unison's charge is the Souls track's S6 (docs/MULTIROM.md).
 - **No price for it** (as BN5 has it): BN5 counts a DarkChip
   given up for Chaos Unison as no DarkChip used (its use flag stays
   clear), and the run follows it: no 20 max HP (seen in the game: none
   taken after that Chaos Unison). The DarkChip still leaves the hand for
   the battle. The owner kept it unpriced.
-- **A Soul's span**: the rest of the run, in BN5's battles
-  only, as a Cross serves BN6's; out on BN6's net it does nothing, and
-  MegaMan says so. A run holds every Soul it wins, as BN5's MegaMan holds
-  his: one per BN5 guardian, five at most in a cycle; a second cycle's
-  guardian whose Soul the run holds already adds nothing. Nothing carries
-  over to the next run, and no Soul is brought at setup: a Soul start
-  would be worth nothing in a run the older net never dresses, and it
-  would be power across runs.
+- **A Soul's span**: the rest of the run, in every battle, BN6's areas'
+  and BN5's. A run holds every Soul it wins, as BN5's MegaMan holds his:
+  one per BN5 guardian; a guardian whose Soul the run holds already adds
+  nothing. Nothing carries over to the next run, and no Soul is brought
+  at setup: it would be power across runs. A run continued without BN5's
+  ROM keeps its Souls, asleep until the ROM is back, and MegaMan says so
+  once ("I can't feel the old Souls,Lan...").
 - **The key with the lock**: two kinds have few chips in BN6
   (ToadMan's Aqua only BblWrap, KnightMan's Break JustcOne and two
-  Gigas), so his Guardian Data gives a chip of his Soul's kind in the
-  place of the Navi chip BN6's guardians give (docs/BOSSES.md), and his
-  Soul unites from the next battle on.
+  Gigas). Until the last round his Guardian Data gave a chip of his
+  Soul's kind; now it gives his own Navi chip, as BN6's guardians give
+  theirs (docs/BOSSES.md), BN5's chips of every kind being in the run's
+  finds and stock on its areas (docs/MULTIROM.md, One net).
 - **Said where it happens:** at his Guardian Data MegaMan names the Soul,
-  the chips it takes, UNITE, once a battle, and that it works only in the
-  older net's battles; all of it the first time a profile wins a Soul
-  (`profile.soul_taught`), the Soul and its chips after that, and "We
-  carry his Soul already" where the run holds it.
+  that it is with them every battle, the chip kind it takes (with one of
+  the run's chips of it), UNITE, once a battle; all of it the first time
+  a profile wins a Soul (`profile.soul_taught`), "His Soul,Lan! It's with
+  us every battle." after that, once a profile that a Soul and a Cross
+  are not worn together (`profile.soul_form_taught`), and "We already
+  have his Soul!" where the run holds it.
 - **How it is kept:** which Souls the run holds, beside its checkpoint as
   its DarkChips are (`run.souls`), for the run whose seed it names; a new
-  run holds none. Before each BN5 battle the guest's flags are set from
-  it: BN5's Double Soul flag and its chaos flag while the run holds one,
-  and each Soul's own.
+  run holds none. As each battle begins they are handed to BN6's engine
+  (`soulunite_held`), where the Souls stand wherever BN5's Navis are.
 - **What could go wrong:** the strongest Soul for a folder taken every
   time it is offered (each costs a chip and comes once a battle);
   Chaos Unison as the one right play for a DarkChip (its window is narrow:
   offered worried, united calm); five Souls stacking power within a run
-  (each still once a battle, each a chip given up); a Soul that reads as
-  a Cross in BN6's battles (MegaMan says where it works).
+  (each still once a battle, each a chip given up); a Soul and a Cross
+  read as one thing (the second screen's card and MegaMan's word say
+  they are not worn together).
 
 ## What MegaMan knows (29 September 2026)
 

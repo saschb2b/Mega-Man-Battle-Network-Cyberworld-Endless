@@ -1,8 +1,8 @@
-/* Another game's chips as BN6's, by name (docs/MULTIROM.md, Guest
- * battles): the tables the translation runs on, worked out from the names
- * and codes it is handed, so the tests run it on made-up ones; and the
- * run's chips paired with BN5's, read from both ROMs as the game runs, on
- * every build (none where BN5's ROM is not read). */
+/* Another game's chips as BN6's, by name (docs/MULTIROM.md, One net and
+ * Guest battles): the tables the translation runs on, worked out from the
+ * names and codes it is handed, so the tests run it on made-up ones; and
+ * BN5's chips paired with the run's, read from both ROMs as the game runs,
+ * on every build (none where BN5's ROM is not read). */
 #ifndef CW_XCHIPS_H
 #define CW_XCHIPS_H
 
@@ -12,13 +12,9 @@
 #define XCHIPS_BN6 314           /* BN6's standard, Mega and Giga chips, those a folder holds (ids 1-313) */
 #define XCHIPS_BN6_STANDARD 203  /* ... its standard ones, 1-202 */
 
-/* BN6's chips paired with BN5's of the same name, the first time both ROMs
- * are read (BN5's names in BN6's text codes, rom.h's xrom_text_bn6): how
- * many of BN6's paired, 0 without BN5's ROM */
-int xchips_paired(void);
-/* BN5's chip of BN6's chip `id`'s name, 0 none */
-int xchips_to_bn5(int id);
-/* BN6's chip of BN5's chip `x`'s name, 0 none (its DarkChips) */
+/* BN6's chip of BN5's chip `x`'s name, 0 none (its DarkChips): BN6's
+ * chips paired with BN5's of the same name the first time both ROMs are
+ * read (BN5's names in BN6's text codes, rom.h's xrom_text_bn6) */
 int xchips_bn6_of(int x);
 /* The run's chip for BN5's chip `x` (issue #82, docs/MULTIROM.md, One
  * net): the registry's id for it where it registers it (BN6's own for a
@@ -28,10 +24,6 @@ int xchips_run_chip(int x);
 /* BN6's standard chips whose namesake in BN5 is of kind `kind` (its chip
  * records' BN5_CHIP_KIND), their ids into `out`, in BN6's order; how many */
 int xchips_kind(int kind, uint16_t *out, int max);
-/* The chips of `folder` (30 BN6 entries) BN5 has none of by name: each
- * once, in the folder's order, the first `max` into `out` (BN6 ids); how
- * many there are, 0 without BN5's ROM */
-int xchips_sitting_out(const uint16_t *folder, uint16_t *out, int max);
 /* A reward entry of BN5's (its rows' and its Mystery Data's: BN6's
  * encoding, bits 14-15 0 a chip with its code << 9, 1 zenny, 2 HP, 3
  * BugFrags; 0xFFFF none) as BN6's: a chip as the registry's id for it

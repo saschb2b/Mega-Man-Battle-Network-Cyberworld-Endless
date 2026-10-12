@@ -66,9 +66,21 @@ void runlog_battle_start(const Encounter *e, const char *kind) {
 	L.open = true;
 }
 
-void runlog_guardian_start(int navi) {
+void runlog_guardian_start(int navi, const Encounter *e, int hp) {
 	runlog_battle_start(NULL, "guardian");
 	L.guardian = navi;
+	/* (his number here, and his foe as the engine has it: BN5's by its
+	 * family moved in, docs/MULTIROM.md) */
+	if (e && e->nfoes > 0)
+		L.len += snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " g%d n%d.%d foehp %d", navi, e->foes[0].family, e->foes[0].version, hp);
+	if (L.len >= (int)sizeof L.line) L.len = (int)sizeof L.line - 1;
+}
+
+void runlog_battle_souls(uint32_t used) {
+	/* (each Soul by BN5's number, Team Colonel's 7-12; "c" its Chaos Unison) */
+	for (int n = 7; L.open && n <= 12 && L.len < (int)sizeof L.line - 12; ++n)
+		if (used >> n & 1)
+			L.len += snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " unite %d%s", n, used >> (16 + n) & 1 ? "c" : "");
 }
 
 /* (a guardian's battle over, won, left or MegaMan deleted: the statistics'
@@ -81,34 +93,6 @@ void runlog_battle_end(bool won, int frames) {
 	if (!L.open) return;
 	L.open = false;
 	snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> %s hp %d", won ? "won" : "left", megaman_hp());
-	append(L.line);
-	guardian_over(won ? ANALYTICS_WON : ANALYTICS_LEFT, frames);
-}
-
-/* (a battle as BN6's lines have it, "guest" and its record after the HP,
- * its enemies as "x" and that game's id) */
-static void guest_start_line(const char *kind, uint32_t record, const int *ids, int n, int foehp) {
-	int k = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d %s hp %d/%d guest %08x", (unsigned)run.seed, run.depth, run.biome, kind,
-		megaman_hp(), megaman_max(), (unsigned)record);
-	for (int i = 0; i < n && k < (int)sizeof L.line - 16; ++i) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " x%d", ids[i]);
-	if (k < (int)sizeof L.line - 16) k += snprintf(L.line + k, sizeof L.line - (size_t)k, " foehp %d", foehp);
-	L.len = k < (int)sizeof L.line ? k : (int)sizeof L.line - 1;
-	L.open = true;
-	L.guardian = 0;
-	L.duel = false;
-}
-
-void runlog_guest_start(uint32_t record, const int *ids, int n, int foehp) { guest_start_line("battle", record, ids, n, foehp); }
-
-void runlog_guest_guardian_start(uint32_t record, int navi, int id, int foehp) {
-	guest_start_line("guardian", record, &id, 1, foehp);
-	L.guardian = navi;
-}
-
-void runlog_guest_end(bool won, const char *reward, int frames) {
-	if (!L.open) return;
-	L.open = false;
-	snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> %s hp %d%s%s", won ? "won" : "left", megaman_hp(), won ? " reward " : "", won ? reward : "");
 	append(L.line);
 	guardian_over(won ? ANALYTICS_WON : ANALYTICS_LEFT, frames);
 }

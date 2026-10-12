@@ -42,6 +42,9 @@ enum {
  * not read or a byte it stands on is not as expected. `breaks`
  * SOULUNITE_BREAK_*, 0 none. */
 bool soulunite_install(int breaks, int soulbreak);
+/* Whether the Souls stand in BN6's engine this session (soulunite_install
+ * done): their RAM (BN6_SOULS) is theirs and read */
+bool soulunite_ready(void);
 /* soulbreak (--dev soulbreak=N, a differential spec's): the Souls track's
  * S3-S5 parts broken, each the differential's own test: the look's breaks
  * (soullook.h) in its low nibble, the abilities' (soulpower.h) in the

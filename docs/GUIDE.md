@@ -31,11 +31,15 @@ building the game yourself.
   Area, SciLab, End Area, its Undernet and Nebula Area), each in about
   half the runs that come there, in BN5's own tiles, music and
   bystanders, their random battles BN5's own, fought in BN6's engine
-  (every Cross and chip of the run works there; a Navi of BN5's who
-  guards one fights in BN5's own). From the second act BN5's viruses and
-  BN6's meet in battles, the Undernet's and the Graveyard's acts draw on
-  both, and half the chips their shops and Mystery Data hold are BN5's,
-  which the Library counts apart. A note in
+  (every Cross and chip of the run works there). In half the runs a Navi
+  of BN5's guards such an area (KnightMan, ShadowMan, NumberMan,
+  TomahawkMan, ToadMan, Colonel), and the Undernet's and the Graveyard's
+  acts draw their guardians from both games' Navis; beaten, he gives his
+  Soul, which MegaMan can UNITE with in every battle after. From the
+  second act BN5's viruses and BN6's meet in battles, the Undernet's and
+  the Graveyard's acts draw on both, half the chips their shops and
+  Mystery Data hold are BN5's, which the Library counts apart, and its
+  flames of darkness hold BN5's DarkChips. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
   iPhones and iPads and in the browser; not on the 3DS. Added later, it
@@ -353,11 +357,9 @@ motion, the controls, **Save backup**, which downloads your saves as one
 file, `cyberworld-endless.cwsave`, **Load backup**, which brings it back,
 in this browser or another (the Android and iPhone apps take the same
 file, put in their ROM folder), and **Forget all**, which removes the
-ROMs and saves. BN5's battles run on a second emulator core in the
-page: the first time, BN5 starts up while the title shows (about 20
-seconds on a recent laptop, a slice of each frame), and a battle in its
-areas that comes before it is done waits behind a short note, once per
-browser.
+ROMs and saves. BN5's areas, viruses, Navis and chips run in the same
+emulator as BN6's: nothing more to start up, and the page's memory BN6's
+and BN5's ROM file.
 
 On a phone or tablet the game fills the screen and draws its own buttons
 round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and

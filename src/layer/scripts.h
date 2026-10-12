@@ -88,13 +88,12 @@ typedef struct {
  * last the way on. The run's last guardian gives only what carries over:
  * his chip, for the Library. */
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);
-/* A flame of darkness (docs/META.md, DarkChips in BN5 territory): MegaMan
- * names its DarkChip `chip` and its price (all of it the `first` time), and
- * where BN6 keeps that kind too (`ours`), that our net's battles play it
- * from the folder for a BugFrag; then asks, starting on Yes; Yes sets event
- * flag `flag`, which it leaves by. */
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool ours);
-/* A flame of darkness of BN6's own (docs/META.md, BN6's own DarkChips): its
+/* A flame of darkness holding one of BN5's own DarkChips (docs/META.md,
+ * DarkChips): MegaMan names it, when it comes (BN5's worried rule) and its
+ * price (all of it the `first` time); then asks, starting on Yes; Yes sets
+ * event flag `flag`, which it leaves by. */
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first);
+/* A flame of darkness holding one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
  * DarkChip, its base chip BN6 plays it as without a BugFrag, what its dark
  * power does in MegaMan's words, and whether he says all of its price (a
  * profile's first). */

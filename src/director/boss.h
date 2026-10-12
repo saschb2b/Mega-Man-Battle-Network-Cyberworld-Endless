@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "foes.h"
 #include "guardian_objs.h"
 
 /* A new layer: its guardian (navi 0 for none) with its scripts in `archive`. */
@@ -13,6 +14,8 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g);
 void boss_update(void);
 /* The guardian's battle was started and has not come back yet. */
 bool boss_fighting(void);
+/* ... his battle as it was forced, and the HP he spawns with into *hp */
+const Encounter *boss_battle(int *hp);
 /* Back from the guardian's battle. */
 void boss_battle_over(bool won);
 /* MegaMan was deleted: in the guardian's battle, it remembers. */

@@ -73,10 +73,11 @@ typedef struct {
 	uint8_t reg_taught, tag_taught;
 	uint8_t bbs_seen;         /* the Endless Net BBS's posts when its mail was last marked NEW (rumors) */
 	uint8_t pack_taught;      /* (unused: the Pack is BN6's own, unexplained for its players; kept for the profile's layout) */
-	uint8_t guest_taught;     /* ... and what an older net's battle is (docs/MULTIROM.md, Guest battles) */
+	uint8_t guest_taught;     /* (unused since the guest core left runs, issue #82: what an older net's battle on it was; kept for the profile's layout) */
 	uint8_t dark_taught;      /* ... and all of a DarkChip's price, at the first flame of darkness (docs/META.md) */
-	uint8_t recode_taught;    /* ... and that the older net reads chip codes its own way: 1 going in, 2 coming back */
-	uint8_t cross_old_told;   /* ... and, arriving where its battles are, that the older net had no Crosses */
+	uint8_t recode_taught;    /* (unused since the guest core left runs, issue #82: the guest's codes; kept for the profile's layout) */
+	uint8_t cross_old_told;   /* (unused since the guest core left runs, issue #82: that its battles had no Crosses; kept for the profile's
+	                           * layout, and read once: a profile told so hears that the Cross works there now, nets_words.c) */
 	uint8_t soul_taught;      /* ... and what a Soul of the older net does, at the first Guardian Data that gave one (docs/META.md, Souls) */
 	uint8_t dark6_taught;     /* ... and BN6's own DarkChips (docs/META.md): all of a BN6 flame's words, all of their price after a battle (DARK6_*) */
 	uint8_t back_taught;      /* ... and what a trip back costs, the Net's clock, at the first older portal (docs/HOME.md) */
@@ -104,10 +105,15 @@ typedef struct {
 	/* the Library's ids 320-511 (the registry's chips of BN5's past BN6's
 	 * pack: xchips_registry.h), a bit each, beside `library` */
 	uint8_t library_x[24];
+	/* MegaMan has said that a Soul and a Cross are not worn together, at a
+	 * Guardian Data that gave a Soul (docs/META.md, Souls); that the
+	 * older net's Navis fight our way now, to a profile told they fought
+	 * the old way (issue #82, the guest core gone from runs) */
+	uint8_t soul_form_taught, navis_ours_told;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
-enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 };
+enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };
 

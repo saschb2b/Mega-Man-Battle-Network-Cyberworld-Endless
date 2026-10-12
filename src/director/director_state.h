@@ -49,16 +49,11 @@ typedef struct {
 	Encounter next;        /* that battle */
 	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
-	int guest_xrom, guest_group, guest_number;   /* the layer's battles in another game's engine: its ROM, the map whose records they take */
-	const NetAreaDef *guest_area;   /* ... and the area's whole definition (its other maps' records) */
-	int guest_foes;        /* the viruses its battle under way set, counted as deleted for a win */
-	int guest_guardian;    /* ... or the guardian of the older net it is (guardians.h, guardian_older), 0 none */
+	uint32_t souls_used;   /* the Souls MegaMan united with in the battle under way (emu_battle_souls), for the run log */
 	bool battle_due;       /* (dev: the battle step) the next random battle, at the first free moment on the map */
 	int layer_tiles;       /* the area the layer draws in (layer_area): another game's where it dresses BN6's */
-	bool beat_cross;       /* the arrival's words say the older net had no Crosses */
-	bool beat_out;         /* ... or, to a profile told that, the chips that sit out, once a run */
-	bool beat_beast;       /* ... and that the Cybeast can't come in, the first time a profile arrives holding BeastOut */
-	bool beat_native;      /* ... that an older net's area fights its own viruses our way, the first time a profile comes to one (docs/MULTIROM.md, One net) */
+	bool beat_native;      /* the arrival's words say an older net's area fights our way, the first time a profile comes to one (docs/MULTIROM.md, One net) */
+	bool beat_ours;        /* ... to a profile once told its battles were the old way, that they are ours now, Crosses and all */
 	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
 	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
 	bool deep;             /* ... or the deep's, of both nets (loot_deep) */
@@ -109,15 +104,15 @@ typedef struct {
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named, 0 none (kept across a CONTINUE: act_note) */
-	int guest_due;         /* 1 + the chips that sat out of an older net's first battle, its words due (once a profile) */
-	char guest_out[96];    /* ... those chips, named (out_names) */
-	int recode_due;        /* ... it read a chip's code its own way: 1 going in, 2 the reward coming back (once a profile each) */
-	int recode_chip, recode_from, recode_to;   /* the chip, and its codes out here and in there */
+	bool resumed;          /* a run continued: what of BN5's waits for its ROM looked for once on the map (nets_words.c) */
 	bool old_chips_due;    /* a CONTINUE without BN5's ROM found its chips in the folder: MegaMan's word that they sit out is due */
+	bool old_souls_due;    /* ... or the run's Souls: MegaMan's word that they sleep till it is back is due */
 	int dark_kind;         /* the DarkChip in the layer's flame of darkness (darkchips.h), -1 none */
 	bool dark_given;       /* ... and the run holds it */
 	bool dark_pack_due;    /* BN6's chips of the run's DarkChips are looked for in its Pack and folder, given where missing (dark_pack) */
-	char dark_words[360];  /* MegaMan's words on a DarkChip's price (and a fall it rose from), due ("" none) */
+	char dark_words[360];  /* MegaMan's words on a DarkChip's price, due ("" none) */
+	bool dark5_ran;        /* a DarkChip of BN5's was used in the battle under way (dark_battle_watch): its price after it */
+	int dark_hand_at;      /* ... the hand's next chip as last seen (BN6_HAND_AT) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */

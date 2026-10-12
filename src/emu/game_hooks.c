@@ -13,9 +13,9 @@
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
+#include "rom.h"
 #include "scripts.h"
 #include "soulproxy.h"
-#include "souls.h"
 #include "soulunite.h"
 #include "xchips_install.h"
 
@@ -32,10 +32,12 @@ void game_hooks_install(void) {
 	chat_marks_install();
 	pet_install();
 	pet_text_install();
-	/* (a test's: the Souls' proxy form, --dev soulproxy, and the Souls on it
-	 * in BN6's battles, which --dev souls=MASK asks for too: the run's Souls
-	 * reach it as each battle begins, souls.c) */
-	if (dev.soulproxy || souls_dev_mask) {
+	/* (BN5's Souls on the proxy form in BN6's battles wherever BN5's Navis
+	 * are, every battle of a run: the run's Souls reach them as each battle
+	 * begins, encounter.c; docs/MULTIROM.md, Transplanted Souls. And the
+	 * proxy form for its own test, --dev soulproxy) */
+	bool souls = XR[XROM_BN5_COLONEL_US].data && !dev.nonavis && !dev.xnavicontrol;
+	if (dev.soulproxy || souls) {
 		bool proxy = soulproxy_install(dev.proxybreak);
 		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
 	}

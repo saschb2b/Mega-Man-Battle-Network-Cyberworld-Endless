@@ -23,10 +23,6 @@ extern int encounter_song[2];
 /* The background a battle's record names: -1 for its area's own, as BN6
  * rolls them, or another game's (xbackdrop_install), as the layer sets it. */
 extern int encounter_backdrop;
-/* Set by the director on a layer whose random battles are another game's,
- * on the guest core (guest.h): a battle the roll gives begins none in BN6
- * and queues EV_GUEST_BATTLE. */
-extern bool encounter_guest;
 /* The record the last emu_encounter_set wrote (0 or 1), and which one a
  * battle's BattleSettings pointer (EV_BATTLE_START's r0) is: -1 another,
  * a story or test battle's. */
@@ -35,12 +31,13 @@ int emu_encounter_record(uint32_t settings);
 /* The battle StartBattle was given (EV_BATTLE_START's r0), told between
  * frames: a guardian's pays zenny where his row has his chip, which his
  * Guardian Data gives; and the run's Souls handed to BN6's engine for it
- * (soulunite_held, for UNITE on its Custom screen where the Souls stand in
- * BN6's engine: --dev soulproxy or souls=MASK until the Souls track is done). */
+ * (soulunite_held, for UNITE on its Custom screen: every battle, where the
+ * Souls stand in BN6's engine with BN5's Navis, docs/MULTIROM.md). */
 void emu_encounter_started(uint32_t settings);
-/* The zenny a guardian's battle pays where his reward row holds his chip,
- * which his Guardian Data gives: an Unlocker's price in his act */
-int encounter_boss_zenny(void);
+/* The Souls MegaMan has united with in the battle under way (BN6_SOUL_USED:
+ * bit n Soul n, bit 16 + n its Chaos Unison), 0 where the Souls do not
+ * stand in BN6's engine */
+uint32_t emu_battle_souls(void);
 /* The next battle watched, until emu_battle_unwatch (the duel's: docs/
  * RIVAL.md): MegaMan's hits queued as EV_MEGAMAN_HIT, and the first enemy
  * to spawn given `hp_cap` HP at most (0: its own). */

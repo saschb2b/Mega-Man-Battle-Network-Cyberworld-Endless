@@ -294,8 +294,8 @@ area keeps its viruses, but not the same ones fight after fight.
 Where Battle Network 5's areas dress an act, its random battles are BN5's
 own records, fought in BN6's engine since issue #82's D1 (docs/MULTIROM.md,
 One net: `xterritory_encounter`, BN6's step counter rolling them as its
-own; in BN5's engine on the guest core only where a family of its could
-not be moved in, Guest battles).
+own; before it in BN5's engine on a second core, Guest battles; where a
+family of its could not be moved in, the BN6 area's own battles).
 They were held to the act's band from above only: a record's viruses' HP
 together at most the band's top, its strongest hit at most the cap. BN5
 places its records by its story, so from act 2 its early areas fell far
@@ -344,7 +344,7 @@ What scaling means here, measured on both games' data:
 
 `build.py pacing` measures it: every act's territory battles as BN6's
 engine fights them (native, opening and challenge rows, with how many of
-the older net's; the guest's rows where a territory is not native), the
+the older net's), the
 deep's acts with the older net's share of their battles, and every act's
 battles from the second with a visitor where one fits (the pairs, HP
 against the band): none past the band, at threat 0, over every territory
@@ -540,10 +540,10 @@ Fixed on the way:
 | The super bosses' places, forms and records | `src/core/super_boss.c` (docs/BOSSES.md) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
-| BN5's records inside the band, their viruses' versions | `src/core/xrecords.c` (`xrecords_pool`), `src/core/xbattles.c` (`xterritory_encounter`); `src/director/director_guest.c` (`guest_pick`) where a territory is not native |
+| BN5's records inside the band, their viruses' versions | `src/core/xrecords.c` (`xrecords_pool`), `src/core/xbattles.c` (`xterritory_encounter`) |
 | The layer's nets: a territory, the deep, the older net's chips | `src/core/loot.c` (`loot_layer_nets`, `loot_random_battle`), `src/core/visitors.c` (`nets_battle_area`) |
 | Visitors: the gate, the roles, the band | `src/core/visitors.c`, `src/core/visitor_families.c` |
-| Guardian version | `src/core/loot.c` (`make_boss`) |
+| Guardian version | `src/core/loot.c` (`make_boss`); BN5's guardians' `src/layer/xguardian.c` (`xguardian_version`, `xguardian_encounter`) and their places `src/core/run.c` (`run_xguardian_at`) |
 | Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
 | `src/director/director_layer.c` (roll_encounter), `src/director/director.c` (act_on_choices) | `src/director/director.c` |

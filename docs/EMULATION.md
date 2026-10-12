@@ -125,24 +125,16 @@ another's"):
 | `+0x700000`-`+0x710000` | The Souls' art past their room (`FREE_SOULS_ART`, issue #82's grant to the Souls track): from `+0x700000` the sprites `tools/xsoul.py` places past `SOULS_ART` (none since the tracks' merge: the flash kinds' 3:0x03 and 3:0x00 are the moved objects' copies at the Navis' numbers 5:0xA6 and 4:0xB5, tools/bn5_objects.py, each sprite's bytes in one place), to `+0x70F000`; `+0x70F000`-`+0x70FA00` ColonelSoul's button's art, BN5's copied (`SOULS_COLONEL_ART`: its tiles on the chips' screen lit, grey and chosen, 0x180 bytes each, BN5's lit for chosen; its picture in the chip's window, 0x540 bytes; that picture's palette and the window's name line's), written once a core with the Souls' code | `soulcode.c`, `soulcolonel.c` |
 | `+0x710000`-`+0x800000` | Free | |
 
-The guest core's ROM copy (BN5's, docs/MULTIROM.md, Guest battles) is
-padded the same way; past BN5's 8 MB, from `0x08800000` (`BN5_FREE`): the
-battle's record copy (`+0x00`), a copied record's entity list (`+0x20`: its
-viruses scaled, or `--dev gem`'s Mystery Data set in), the deck's
-shelf (`+0x100`, the DarkChips') and the differential's record (`+0x200`,
-its entities from `+0x210`: `guest_dev_battle`, docs/DEVTOOLS.md, The
-differential, which also puts BN5's own deck compaction back; the shelf
-goes in again before the run's next guest battle). In BN5's own data it writes the
-encounter roll (its answer), the deck's compaction (a jump to the shelf),
-its chips' records, reward rows and battlefield Mystery Data's finds
-(`0x0801D62C`: All *, the rewards' codes and zenny), and for a guardian
-of BN5's (docs/BOSSES.md, BN5's Navis) his
-stats row's HP word at his version, capped to the act's band before his
-battle and its own written back as it ends. Of its event flags (eToolkit
-+0x44, `0x020029F8`) it sets the run's Souls' before each battle, and
-clears those the run lacks: Double Soul's (0x0000), Chaos Unison's
-(0x0236) and each Soul's own (0x0008-0x000D; docs/META.md, Souls in BN5
-territory).
+The guest core's ROM copy (BN5's: the differential's reference since the
+guest left runs, docs/MULTIROM.md, Guest battles) is padded the same way;
+past BN5's 8 MB, from `0x08800000` (`BN5_FREE`), the differential's record
+(`+0x200`, its entities from `+0x210`: `guest_dev_battle`, docs/
+DEVTOOLS.md, The differential). In BN5's own data it writes the encounter
+roll (its answer) alone. Until issue #82's last round a run's guest
+battles wrote there too: a battle's record copy (`+0x00`) and entity list
+(`+0x20`), the DarkChips' deck shelf (`+0x100`), the deck's compaction,
+its chips' records, reward rows and finds (All *, the rewards' codes and
+zenny), a guardian's stats row, and its event flags for the run's Souls.
 
 A battle with a green Mystery Data on the field also rewrites the reward
 row its record names (rows 0 and 1, one per record, of the table at
@@ -204,9 +196,7 @@ at `0x08029606` is `cmp r2, #3`; each new layer writes them as the run's
 helpers have them, and the ROM's own back before the game's own NEW GAME
 boots (the folder it gives is counted in the pack by the records). As
 such a run begins, the folder's 30 entries go to * and each chip's four
-pack counts to its first. A guest battle in BN5's core does the same to
-BN5's copy (its records at `0x01E210`, its check at `0x080252B2`), and
-puts the folder's chips, DarkChips and reward rows in *.
+pack counts to its first.
 
 BN6's own DarkChips (docs/META.md, docs/ROM_DATA.md; issue #70): as each
 layer is made, the records of DrkSword, DarkThnd, DrkRecov and DarkInvs
@@ -239,12 +229,6 @@ test a pseudo-chip by its id through the engine's routine, 0x170-0x19A
 BN6's id test was every id from 0x170, which would take a chip of the
 registry's from 411 for one. Each halfword and word is read first and
 must be BN6's own, the free space `0xFF`; then all are written.
-
-After a battle in BN5's core, BN6's encounter walk (eToolkit `+0x40`,
-bn6f S2001c04: `+0x12` the distance walked since the last battle, `+0x14`
-where the roll last checked) is cleared, as BN6 clears it entering the map
-its own battles return to: the roll's chance rises with that walk, and
-BN6's map is never left around a guest battle.
 
 In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
 given the act's guardian band at most as he spawns, where his own 1800 is
@@ -389,9 +373,8 @@ boss strikes his pose out of the white (it was the Guardian Data's dark
 way into the Undernet); `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
-docs/RIVAL.md; `0x146E`, never cleared by a layer, that the run's chips
-that sit out of the older net's battles were named on its first such
-layer; at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
+docs/RIVAL.md (`0x146E`, which named the chips that sat out of the
+guest core's battles, is free since they left runs); at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the
 askers' scripts set and the director keeps as each visit's places are
 installed, docs/HOME.md piece 5; `0x146C` that the town holds nothing
@@ -452,23 +435,40 @@ director's logic takes in each frame whole, as on the main thread. The emu
 scene's update takes the frame done in and then starts the next, which runs
 while the frame done is drawn from a copy of its picture; keys, frames and
 the logic keep their order, and the autopilot's run log comes out the same.
-A battle on the guest core (docs/MULTIROM.md, Guest battles) begun from a
-frame's logic holds BN6's next frame until it ends, as on the main thread:
-started at once, BN6 had walked one frame further into the battle's
-moment, and the run went another way from there.
 `CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it. With the
 core on its own thread, mGBA's threaded video draws its picture on one
 more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
-BN5's guest core boots on a thread of its own on native builds, from the
-game's start on (docs/MULTIROM.md, Guest battles: its boot): a core the main
-thread leaves alone until the thread is joined at a frame's end, beside
-BN6's on whichever thread BN6's runs. In the browser its boot fills each
-frame's spare time instead: the frame's work and its slice within 10 ms
-of the 1/60 s (12 ms while a battle waits for it), none in a frame
-played unshown (`boot_spare_ms`, `guest_tick`).
+A run has one core, BN6's, on every build since issue #82's last round:
+BN5's guest core, which booted on a thread of its own (the browser's
+frames' spare time) from the game's start on, left runs (docs/MULTIROM.md,
+Guest battles), and the differential's boots it on the main thread.
+
+## The browser's memory
+
+The browser build's WebAssembly memory starts at 64 MB
+(`-sINITIAL_MEMORY=64MB`) and grows as the game asks, never shrinking;
+what it reached is the page's high-water mark (`Module.HEAP8.byteLength`
+in the page). Measured on 12 October 2026 in headless Chrome
+(agent-browser), both ROMs given, the same saves loaded from a backup (a
+run at the arena door of End Area's third layer, an older net's act, seed
+3), each build served by `build.py serve`:
+
+| | This build (issue #82's last round) | Before it (a9d98987, the guest core in runs) |
+| --- | --- | --- |
+| The title | 64 MB | 64 MB |
+| A new game's first layer (Central Area) | 110.6 MB | (not measured) |
+| CONTINUE on the older net's layer | 132.6 MB | 159.2 MB (the guest core booted with it) |
+| A battle there (CanGards, BN6's engine) | 132.6 MB | 159.2 MB |
+
+So a run with BN5's ROM keeps some 27 MB less: the guest core's ROM copy
+(BN5's 8 MB padded to `EMU_ROM_SIZE`, which mGBA copies at its first
+patch) and its own state are gone. The JavaScript heap stayed near 20 MB
+in this build. Issue #68's measure, before BN5's battles came into BN6's
+engine: 97 MB on a first layer with BN6 alone, 153 MB on BN5's first
+layer with the guest booted, 197 MB at most.
 
 ## The core's time
 
@@ -581,8 +581,7 @@ function replacement), while BN6's code stays the ROM's.
   and, for the differential alone, the guest's (`hook_core`, through
   `guest_hook`), so its hooks on BN5's code never touch BN6's core
   (`tests/test_emu.c`: one address hooked on both, each core's frames
-  running its own hook alone, reading its own memory). The run's guest
-  battles carry none: the guest's board keeps its own handler. Two
+  running its own hook alone, reading its own memory). Two
   cores' hooks run one core's frame at a time (the differential's
   frames run on the thread BN6's do).
 
@@ -783,15 +782,17 @@ of 44 virus battles and reached act 1's guardian in 11 runs, but beat him
 once: 400-600 HP against MegaMan's 100. `CYBERWORLD_AUTOPILOT=weak` keeps
 the first autopilot's blind button rhythm and walk, which the docs'
 pictures are timed by, and keeps enemies at 1 HP, so what follows a won
-guardian battle can be tested. In a battle on the guest core (docs/
-MULTIROM.md, Guest battles) both fight as in BN6's, from BN5's memory,
-which lays the battle out as BN6's does at its own addresses
-(`src/emu/bn5.h`, docs/ROM_DATA.md); the autopilot never picks a
-DarkChip. Over seeds 1-12 in ACDC Area, End Area and Nebula Area
-(`--net-biome x0`, `x2`, `x3`, 15000 frames) it won 99 of 100 guest
-battles (a BugTank in the back column outlasted it on a grass field),
-where the button pattern it pressed there before was deleted in seed 1's
-first; `weak`, BN5's viruses at 1 HP, won all 144 of its own.
+guardian battle can be tested. The autopilot never picks a DarkChip of
+either net and never presses A on UNITE or the Beast Out emblem
+(`custom_guard`). A step it could take that leaves MegaMan where he stood
+for half a second marks that panel blocked for the battle (a rock of
+BN5's fields: in BN6's engine since the last round, an autopilot that
+held UP into one stood 13000 frames, `--net-biome x4 --seed 12`), and a
+step into the row it is after, blocked in his column, goes aside first.
+Before issue #82's last round it fought the guest
+core's BN5 battles too, from BN5's memory (99 of 100 won over seeds 1-12
+in three of BN5's areas); BN5's areas and guardians are BN6's battles
+now.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
 map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.

@@ -2,7 +2,7 @@
  * core needed (xrecords.c; docs/MULTIROM.md): a net map's records, the
  * pool a battle is picked from to the act's band, a record's viruses taken
  * up their versions, its Navis' records and stats. Its battles in BN6's
- * engine (xbattles.h) and in its own on the guest core (guest.h) read
+ * engine (xbattles.h) read
  * them. */
 #ifndef CW_XRECORDS_H
 #define CW_XRECORDS_H
@@ -89,9 +89,5 @@ int xrecords_navi_hp(int xrom, int ai, int version, int *element);
 /* The chip kind (BN5_CHIP_KIND) Navi `ai`'s Soul unites with in its game,
  * -1 none */
 int xrecords_soul_kind(int xrom, int ai);
-/* Its game's own battle record for Navi `ai` at `version` (0 V1 .. 3 SP):
- * its story's first that sets him alone, else its net maps' (his SP, where
- * he roams); 0 none. */
-uint32_t xrecords_navi_record(int xrom, int ai, int version);
 
 #endif

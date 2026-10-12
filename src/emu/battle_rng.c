@@ -1,5 +1,5 @@
 /* battle_rng.h: the step both games' RNG words take, and a seed's word (the
- * guest's battles', guest.c; the differential's, src/dev/xdiff.c). */
+ * differential's second core, guest.c, and its specs, src/dev/xdiff.c). */
 #include "battle_rng.h"
 
 #include "bn5.h"

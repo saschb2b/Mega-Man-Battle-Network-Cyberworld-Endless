@@ -17,12 +17,23 @@ void second_cross_lines(int navi, char *out, size_t n);
  * '|', into `out` */
 void second_beast_lines(int turns, char *out, size_t n);
 
+/* A Soul's name by BN5's number (7-12: "KnightSoul"), "" none */
+const char *second_soul_name(int soul);
+/* UNITE's card where the emblem stands (docs/MULTIROM.md, One net): the
+ * Soul the last pick lights, its turns, the chip it takes, a Soul or a
+ * Cross; grey, what lights it; chosen, when it comes (s->unite_*); lines
+ * apart by '|', into `out`, its name into `name` */
+void second_unite_lines(const SecondState *s, char *name, size_t nn, char *out, size_t n);
+/* ColonelSoul's chip button's card: what it does, its chip (s->soul_chip) */
+void second_button_lines(const SecondState *s, char *out, size_t n);
+
 /* One of MegaMan's states while he fights: its name and a line */
 typedef struct { char name[24], line[40]; } SecondStateLine;
-/* His Cross (`form` as BN6_BATTLE_FORM), Beast Out with the turns left,
- * BeastOver, tired (`beast` his and the EmotionCounter, `turns`, at 0),
- * Full Synchro (`synchro`): how many of `most` it wrote into `out` */
-int second_state_lines(int form, int turns, bool beast, bool synchro, SecondStateLine *out, int most);
+/* His Cross (s->form, BN6_BATTLE_FORM) or the Soul he is united with
+ * (s->soul, its turns, its Chaos Unison), Beast Out with the turns left,
+ * BeastOver, tired (Beast Out his and the EmotionCounter at 0), Full
+ * Synchro: how many of `most` it wrote into `out` */
+int second_state_lines(const SecondState *s, SecondStateLine *out, int most);
 
 /* The NaviCust program the NaviCustomizer's cursor is on (s->nc_*): its
  * colour and kind and where that may go, the copies left or where it is,

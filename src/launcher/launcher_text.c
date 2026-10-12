@@ -27,7 +27,7 @@ static const char *const words[] = {
 	"USE THE FOLDER'S",   /* W_USE_FOLDERS */
 	"KEEP THESE",   /* W_KEEP_THESE */
 	"BN6 first: the game runs on it.",   /* W_PLAY_LOCKED */
-	"Its net joins ours: BN5's areas in runs, their battles in its own engine.",   /* W_FIVE_ADDS */
+	"Its net joins ours: BN5's areas, viruses, Navis and chips in runs.",   /* W_FIVE_ADDS */
 	"Nothing chosen.",   /* W_CANCELLED */
 	"This device's saves stay, and replace the folder's copy.",   /* W_SAVES_KEPT */
 	"Starting fresh: the folder's copy is replaced once the game saves.",   /* W_FRESH */

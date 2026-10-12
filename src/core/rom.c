@@ -342,9 +342,10 @@ bool rom_find_close;
  * Their battles are BN5's own maps' by its game's numbers (0x91 Oran Area,
  * 0x92 SciLab, 0x93 End Area, 0x94 the Undernet and Nebula Area, 0x86 the
  * rest of each), an act's layers through the area's maps in BN5's order
- * (docs/ROM_DATA.md, BN5 guest battles). Their guardians may be BN5's own
- * Navis where its net maps' records have them roam (xguard: docs/BOSSES.md,
- * BN5's Navis); Nebula Area's are BN6's. */
+ * (docs/ROM_DATA.md, BN5 guest battles), fought in BN6's engine (issue
+ * #82). Their guardians may be BN5's own Navis where its net maps' records
+ * have them roam (xguard: docs/BOSSES.md, BN5's Navis); Nebula Area's and
+ * the Undernet's acts draw from both nets' Navis by band (run.h). */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 8, .xlooks = XLOOK_CUBE,
