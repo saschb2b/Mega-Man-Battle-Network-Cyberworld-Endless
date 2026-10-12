@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "bytes.h"
+#include "claims.h"
 #include "emu.h"
 #include "xvirus.h"
 
@@ -91,6 +92,14 @@ void xv_insn(uint32_t at, ThumbForm form, uint8_t rd, uint8_t rn, uint16_t was, 
 
 void xv_commit(void) {
 	for (int i = 0; i < tx.n; ++i) emu_write(tx.w[i].at, tx.bytes + tx.w[i].off, tx.w[i].len);
+}
+
+void xv_commit_by(const char *(*writer)(uint32_t at)) {
+	for (int i = 0; i < tx.n; ++i) {
+		claims_begin(writer(tx.w[i].at));
+		emu_write(tx.w[i].at, tx.bytes + tx.w[i].off, tx.w[i].len);
+		claims_end();
+	}
 }
 
 /* ---- what was moved where ---- */

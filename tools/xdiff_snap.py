@@ -13,11 +13,15 @@ WORK = os.path.join(ROOT, '.build', 'xdiff')
 
 # Each game's battle as the trace was read (src/emu/bn5.h, bn6.h)
 GAMES = {
-    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16),
-    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32),
+    5: dict(t1=0x0203B200, t3=0x0203CA40, t4=0x02036F00, panels=0x0203A100, list=0x0200A410, list_end=0x0200ABA0, n1=16,
+            battle=0x02034A90),
+    6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32,
+            battle=0x02034880),
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
+XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and art (src/emu/xnavi_recipe.h, XN_STUBS to XN_END)
+EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -34,6 +38,12 @@ PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+OBJ_OVERLAY_KIND = 0x04   # the companion overlay's kind (the first kind's type 0x56, BN6_OVERLAY_*): its first parameter
+T1_OVERLAY = 0x56
+OVERLAY_KINDS6 = 19   # BN6's own overlay kinds (BN6_OVERLAY_KINDS): the Navis' past them
+# an actor's CurActions kept as a status takes it (the status's, the one before it to go back to, the status's again: both
+# games' paralysis writes them alike, MegaMan's ready 6 in BN5 and 8 in BN6 at +0x5D), read as CurAction is
+OBJ_ACTIONS_KEPT = (0x5C, 0x5D, 0x5E)
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
 AI_INDEX = 0x01
 
@@ -49,12 +59,14 @@ def u32(b, o):
 # ---- traces (src/dev/xdiff.c) ----
 
 class Obj:
-    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over', 'leftover')
+    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over', 'leftover', 'moved', 'sprite')
 
-    def __init__(self, kind, slot, rec, ai, coll, addr):
+    def __init__(self, kind, slot, rec, ai, coll, addr, moved=False):
         self.kind, self.slot, self.rec, self.ai, self.coll, self.addr, self.role = kind, slot, rec, ai, coll, addr, None
         self.over = {}   # (bytes of its record read otherwise: the renderer's places as the family's, xdiff_masks.py)
         self.leftover = False   # (its sprite state the slot's last occupant's: spawned and no sprite set up since, xdiff_events.py)
+        self.moved = moved      # (BN6's: run by the second-level dispatch as its game's moved type)
+        self.sprite = None      # (the CRC32 of the bytes of the sprite it last set up, xdiff_events.py; None unknown)
 
     def canonical(self):
         """its record as it is compared: its slot (+3) counted from its own (objects are matched by role, never by
@@ -73,6 +85,9 @@ class Obj:
 
     def o32(self, off):
         return u32(self.rec, NODE + off)
+
+
+SETUP = 0x10   # an event's flag: made while the battle was set up (src/dev/xdiff_events.h, XD_SETUP)
 
 
 class Event:
@@ -95,10 +110,14 @@ KEPT, REPLAYED, UNMATCHED, UNMAPPED = 1, 2, 4, 8
 def dispatched(rec, kind, side, game, version, seen):
     """an object's record with its type as the second-level dispatch runs it: where BN6's is its kind's dispatch type, the
     number the trace read from the kind's side table by its slot (TRACE_VERSION's), counted into seen"""
-    if version < TRACE_VERSION or game != 6 or rec[NODE + OBJ_TYPE] != DISPATCH[kind]:
+    if not is_dispatched(rec, kind, game, version):
         return rec
     seen[0] += 1
     return rec[:NODE + OBJ_TYPE] + bytes([side]) + rec[NODE + OBJ_TYPE + 1:]
+
+
+def is_dispatched(rec, kind, game, version):
+    return version >= TRACE_VERSION and game == 6 and rec[NODE + OBJ_TYPE] == DISPATCH[kind]
 
 
 def read_trace(path):
@@ -133,20 +152,25 @@ def read_trace(path):
         objs = []
         for i in range(n1):
             slot, has_ai, has_coll = b[p], b[p + 1], b[p + 2]
-            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T1', b[p + 3], game, version, seen)
+            raw = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(raw, 'T1', b[p + 3], game, version, seen)
             ai = b[p + 4 + 0xD8:p + 4 + 0x1D8]
             co = b[p + 4 + 0x1D8:p + 4 + 0x1D8 + COLL_ROOM]
-            objs.append(Obj('T1', slot, rec, ai if has_ai else None, co[:coll] if has_coll else None, g['t1'] + slot * 0xD8))
+            objs.append(Obj('T1', slot, rec, ai if has_ai else None, co[:coll] if has_coll else None, g['t1'] + slot * 0xD8,
+                            is_dispatched(raw, 'T1', game, version)))
             p += 4 + 0x1D8 + COLL_ROOM
         for i in range(n3):
             slot, has_coll = b[p], b[p + 2]
-            rec = dispatched(b[p + 4:p + 4 + 0xD8], 'T3', b[p + 3], game, version, seen)
+            raw = b[p + 4:p + 4 + 0xD8]
+            rec = dispatched(raw, 'T3', b[p + 3], game, version, seen)
             co = b[p + 4 + 0xD8:p + 4 + 0xD8 + COLL_ROOM]
-            objs.append(Obj('T3', slot, rec, None, co[:coll] if has_coll else None, g['t3'] + slot * 0xD8))
+            objs.append(Obj('T3', slot, rec, None, co[:coll] if has_coll else None, g['t3'] + slot * 0xD8, is_dispatched(raw, 'T3', game, version)))
             p += 4 + 0xD8 + COLL_ROOM
         for i in range(n4):
             slot = b[p]
-            objs.append(Obj('T4', slot, dispatched(b[p + 4:p + 4 + 0xC8], 'T4', b[p + 3], game, version, seen), None, None, g['t4'] + slot * 0xC8))
+            raw = b[p + 4:p + 4 + 0xC8]
+            objs.append(Obj('T4', slot, dispatched(raw, 'T4', b[p + 3], game, version, seen), None, None, g['t4'] + slot * 0xC8,
+                            is_dispatched(raw, 'T4', game, version)))
             p += 4 + 0xC8
         panels = [b[p + PANEL_ROOM * i:p + PANEL_ROOM * i + psize] for i in range(PANELS)]
         p += PANEL_ROOM * PANELS
@@ -156,8 +180,12 @@ def read_trace(path):
         p += 8 * ns
         events = [Event(b, p + EVENT_SIZE * i, t) for i in range(nev)]
         p += EVENT_SIZE * nev
+        # (the spawns and sprites' set-ups made while the battle was set up, before its fight: told apart, for which objects set
+        # up no sprite since they spawned alone, src/dev/xdiff_events.h's XD_SETUP)
+        setup = [e for e in events if e.flags & SETUP]
+        events = [e for e in events if not e.flags & SETUP]
         frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events,
-                           player=player))
+                           player=player, setup=setup))
     return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames, dispatched=seen[0], version=version)
 
 
@@ -170,8 +198,24 @@ class Canon:
         self.name_id = num(m['name_id']['bn5_to_bn6'])
         self.t3_type = num(m['t3_type']['bn5_to_bn6'])
         self.effect = num(m['effect']['bn5_to_bn6'])
+        # (the effect ids a Navi's own code renumbers, each Navi its own numbers; BN5's engine's or another enemy's elsewhere:
+        # read as BN6's only where a spec's foes hold one of its ids)
+        self.navi_effects = [({int(x, 0) for x in n['ids']}, num(n['bn5_to_bn6'])) for n in m['effect'].get('navis', [])]
+        self.foes = set()   # (a spec's: its foes' BN5 ids)
         self.panel_type = num(m['panel_type']['bn5_to_bn6'])
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
+        self.navi_ai_index = num(m['navi_ai_index']['bn5_to_bn6']) if 'navi_ai_index' in m else {}
+        self.overlay_kind = num(m['overlay_kind']['bn5_to_bn6']) if 'overlay_kind' in m else {}
+        # (bytes of an enemy's AI data, or of an object of a moved type, its code writes from a pointer's low bytes: read as
+        # the pointer they came from, byte k of the word at `pointer` in the same record)
+        self.pointer_bytes, self.obj_pointer_bytes = {}, {}
+        for rule in legit['layouts'].get('pointer_bytes', {}).get('rules', []):
+            spans = {int(b, 0): (int(rule['pointer'], 0), k) for k, b in enumerate(rule['bytes'])}
+            if rule['part'] == 'ai':
+                for nid in rule['ids']:
+                    self.pointer_bytes.setdefault(int(nid, 0), {}).update(spans)
+            else:
+                self.obj_pointer_bytes.setdefault((rule['kind'], int(rule['type'], 0)), {}).update(spans)
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
         self.layouts = legit['layouts']
@@ -209,6 +253,11 @@ class Canon:
     def nid(self, game, v):
         return self.name_id.get(v, v) if game == 5 else v
 
+    def is_navi(self, game, nid):
+        """a Navi's NameID in its game (BN5's 0x100-0x17F and the Dark Soul's 0x18D), whose AI index counts apart from the
+        viruses'"""
+        return game == 5 and (0x100 <= nid < 0x180 or nid == 0x18D)
+
     def is_megaman(self, game, nid):
         return nid in (set(self.megaman.values()) | self.form_names if game == 6 else self.megaman.keys())
 
@@ -237,8 +286,17 @@ class Canon:
     def t3(self, game, v):
         return self.t3_type.get(v, v) if game == 5 else v
 
+    def foe_effects(self):
+        """the BN6 effect ids the spec's foes' own code draws (their maps' targets): art an install chose"""
+        return {v for ids, effects in self.navi_effects if ids & self.foes for v in effects.values()}
+
     def fx(self, game, v):
-        return self.effect.get(v, v) if game == 5 else v
+        if game != 5:
+            return v
+        for ids, effects in self.navi_effects:
+            if ids & self.foes and v in effects:
+                return effects[v]
+        return self.effect.get(v, v)
 
 
 # ---- roles ----
@@ -259,6 +317,7 @@ def assign_roles(trace, canon):
     """Each object its role: (kind, what it is, the how-manyth of those to appear); one
     that stays in its slot as the same thing keeps it"""
     prev, counts = {}, {}
+    trace['first'] = {}   # (each role's first frame, its timer: a pointer to an object newer than its holder is a stale one's)
     for fr in trace['frames']:
         now = {}
         for o in fr['objs']:
@@ -270,6 +329,7 @@ def assign_roles(trace, canon):
                 key = (o.kind, ident)
                 o.role = (o.kind, ident, counts.get(key, 0))
                 counts[key] = counts.get(key, 0) + 1
+                trace['first'].setdefault(o.role, fr['t'])
             now[(o.kind, o.slot)] = (ident, o.role)
         prev = now
 
@@ -286,6 +346,7 @@ def role_name(r):
 # ---- pointers ----
 
 RAM = ((0x02000000, 0x02040000), (0x03000000, 0x03008000))
+BATTLE_STATE_SPAN = 0x100   # the battle state's bytes a pointer into it is read by
 ROM = (0x08000000, 0x0A000000)
 
 
@@ -309,11 +370,16 @@ class Frame:
                 if o.coll is not None:
                     self.spans.append((co, co + trace['coll'], o.role, 'coll', 0))
         self.spans.append((g['panels'], g['panels'] + PANELS * trace['psize'], 'panels', 'panel', 0))
+        # (the battle's state, BN5_BATTLE_STATE / BN6_BATTLE_STATE: a pointer into it by its offset, as its decoys' slots at
+        # +0x94 and +0x98 are named in both, BN5 0x0800CEE6 / BN6 0x0800EC66, the same code)
+        self.spans.append((g['battle'], g['battle'] + BATTLE_STATE_SPAN, 'battle', 'state', 0))
         # (an object let go this frame, its slot named: its pointers still point there)
         self.slots = [(kind, g[kind.lower()] - NODE, SIZE[kind], n) for kind, n in (('T1', g['n1']), ('T3', 32), ('T4', 32))]
         self.list, self.list_end = g['list'], g['list_end']
         self.by_role = {o.role: o for o in fr['objs']}
-        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1]]
+        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ())
+                                                            if XV_CODE[0] <= m[1] < XV_CODE[1] or XN_ROOM[0] <= m[1] < XN_ROOM[1]
+                                                            or m[1] < EMU_FREE]
 
     def ptr(self, v):
         """a pointer as what it names"""
@@ -328,6 +394,8 @@ class Frame:
                     off = coll_off(self.canon, self.game, off)
                 if part == 'panel':
                     return ('panel', off // self.trace['psize'], panel_off(self.canon, self.game, off % self.trace['psize']))
+                if part == 'state':
+                    return ('battle state', off)
                 return (role_name(role), part, off)
         for kind, base, size, n in self.slots:
             if base <= v < base + size * n:
@@ -416,11 +484,16 @@ def alliance_map(canon):
     return ALLIANCE
 
 
+GUARD_BIT = 0x01   # what the hit pass ORs into what hit an attack that struck a guard: no table word's (legit.json, maps, alliance)
+
+
 @functools.lru_cache(maxsize=None)
 def alliance_or(w5):
     """a word ORed from other objects' +0x30 (what hit or touched an object, legit.json, maps, alliance) as BN6's:
     the OR of the BN6 words of the BN5 words it is made of, where every way of making it of the table's words gives
-    the same; None where none does or two give otherwise (then the word is compared as it is)"""
+    the same, the guard's bit as it is; None where none does or two give otherwise (then the word is compared as it
+    is)"""
+    guard, w5 = w5 & GUARD_BIT, w5 & ~GUARD_BIT
     parts = [k for k in ALLIANCE if k and k & ~w5 == 0]
     if len(parts) > 16:
         return None
@@ -428,7 +501,7 @@ def alliance_or(w5):
     for k in parts:
         made |= {(a | k, b | ALLIANCE[k]) for a, b in made}
     got = {b for a, b in made if a == w5}
-    return got.pop() if len(got) == 1 else None
+    return got.pop() | guard if len(got) == 1 else None
 
 
 def alliance_words(canon, ca):
@@ -483,6 +556,36 @@ def word_view(fa, fb, wa, wb, sprite_rel):
     return None
 
 
+def stale(f, holder, view):
+    """a pointer's view (Frame.ptr) as a stale one's where it is one: to a slot let go, or to an object newer than the
+    object holding it (the slot's occupant as the pointer was written gone, another there since): ('stale', its slot,
+    its part, its offset)"""
+    if not isinstance(view, tuple) or len(view) != 3 or not isinstance(view[0], str):
+        return view
+    if view[0].endswith('(let go)'):
+        return ('stale', view[0].split(' (')[0], view[1], view[2])
+    o = next((x for x in f.fr['objs'] if role_name(x.role) == view[0]), None)
+    first = f.trace.get('first', {})
+    if o is not None and holder.role in first and first.get(o.role, 0) > first[holder.role]:
+        return ('stale', f'{o.kind} slot {o.slot}', view[1], view[2])
+    return view
+
+
+def art_chosen(canon, oa, ob):
+    """whether an object draws art an install chose, compared by its sprite's bytes (xdiff_events.py, Obj.sprite): a moved
+    type's (BN6's run by the dispatch), a moved foe's own body, an effect of a family's or a foe's own ids, a companion overlay
+    of a Navi's own kind; the engine's and MegaMan's own draw each game's art, apart by design"""
+    t = ob.o8(OBJ_TYPE)
+    if ob.moved:
+        return True
+    if ob.kind == 'T1' and t == 0:
+        # (a foe both games have, a native, draws each game's own art: BN6's Mettaur is BN6's)
+        return oa.o16(OBJ_NAME_ID) in canon.foes and ob.o16(OBJ_NAME_ID) not in canon.natives
+    if ob.kind == 'T4' and t == 0:
+        return ob.o8(OBJ_EFFECT) in canon.family_effects | canon.foe_effects()
+    return ob.kind == 'T1' and t == T1_OVERLAY and ob.o8(OBJ_OVERLAY_KIND) >= OVERLAY_KINDS6
+
+
 def obj_cells(fa, fb, oa, ob):
     """(part, offset as BN6 has it, BN5's value, BN6's) for each place they differ, their numbers BN6's"""
     out = []
@@ -506,7 +609,12 @@ def obj_cells(fa, fb, oa, ob):
             na, nb = canon.sprite_name(5, base_a - 4), canon.sprite_name(6, base_b - 4)
             if w - sp == 0x18 and (na or nb):
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
+        if w - sp == 0x18 and oa.sprite and ob.sprite and oa.sprite != ob.sprite and art_chosen(canon, oa, ob):
+            # (the sprite itself, by its bytes: the art of what an install moved or chose, which no number of the two games' says)
+            out.append(('obj', w - NODE, ('sprite bytes', f'{oa.sprite:08x}'), ('sprite bytes', f'{ob.sprite:08x}')))
         view = word_view(fa, fb, wa, wb, rel)
+        if view is not None and view[0] != view[1] and rel is None:
+            view = (stale(fa, oa, view[0]), stale(fb, ob, view[1]))
         if view is not None:
             if view[0] != view[1]:
                 out.append(('obj', w - NODE, view[0], view[1]))
@@ -514,12 +622,22 @@ def obj_cells(fa, fb, oa, ob):
         for k in range(4):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
-            if off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+            # (CurAction numbered as the state tables number it: the first kind's type 0 alone, MegaMan and the enemies, whose
+            # states the tables hold; its other types run routines of their own, a moved one BN5's numbers as they are)
+            if off == OBJ_ACTION and (kind == 'T1' and oa.o8(OBJ_TYPE) == 0 or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+                a = canon.action(5, mm, a)
+            elif off in OBJ_ACTIONS_KEPT and kind == 'T1' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.action(5, mm, a)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)
             elif off == OBJ_EFFECT and kind == 'T4' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.fx(5, a)
+            elif off == OBJ_OVERLAY_KIND and kind == 'T1' and oa.o8(OBJ_TYPE) == T1_OVERLAY:
+                a = canon.overlay_kind.get(a, a)
+            elif off in canon.obj_pointer_bytes.get((kind, oa.o8(OBJ_TYPE)), {}):
+                p, n = canon.obj_pointer_bytes[(kind, oa.o8(OBJ_TYPE))][off]
+                if a == oa.o32(p) >> 8 * n & 0xFF and b == ob.o32(p) >> 8 * n & 0xFF:
+                    a = b
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
                 na, nb = canon.nid(5, oa.o16(OBJ_NAME_ID)), ob.o16(OBJ_NAME_ID)
                 if mm and fa.fr.get('player'):   # (his NameID by his form, BN5's read as BN6 writes it in that form)
@@ -541,6 +659,7 @@ def ai_cells(fa, fb, oa, ob):
         return out
     megaman = oa.kind == 'T1' and fa.canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
     ai5 = soul_ai_read(fa.canon, oa.ai) if megaman else oa.ai
+    pointer_bytes = fa.canon.pointer_bytes.get(oa.o16(OBJ_NAME_ID), {}) if oa.kind == 'T1' and oa.o8(OBJ_TYPE) == 0 else {}
     for w in range(0, AI_SIZE, 4):
         wa, wb = u32(ai5, w), u32(ob.ai, w)
         view = word_view(fa, fb, wa, wb, None)
@@ -551,9 +670,13 @@ def ai_cells(fa, fb, oa, ob):
         for k in range(4):
             a, b = ai5[w + k], ob.ai[w + k]
             if w + k == AI_INDEX:
-                a = fa.canon.ai_index.get(a, a)
+                a = (fa.canon.navi_ai_index if fa.canon.is_navi(5, oa.o16(OBJ_NAME_ID)) else fa.canon.ai_index).get(a, a)
             elif megaman and w + k in LOADOUT and a != 0xFF:
                 a = fa.canon.power_attack.get(a, a)
+            elif w + k in pointer_bytes:
+                p, n = pointer_bytes[w + k]
+                if a == u32(ai5, p) >> 8 * n & 0xFF and b == u32(ob.ai, p) >> 8 * n & 0xFF:
+                    a = b
             if a != b:
                 out.append(('ai', w + k, a, b))
     return out

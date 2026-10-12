@@ -1,0 +1,11 @@
+{
+ "about": "NumberMan V1 (BN5's 0x131, BN6's 0x1CC) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-12), its companion (the first kind's 0x54), its dice, number balls and blocks (the third kind's 5, 0x8B, 0x8C, 0x93 and the fourth's 0x8E) through the dispatch, its effects copied (BN5's 0x02, 0x14), its sounds copied in",
+ "kind": "differential",
+ "foes": "131@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

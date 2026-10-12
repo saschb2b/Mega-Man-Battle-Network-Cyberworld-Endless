@@ -49,7 +49,8 @@
 #include "thumb_reloc.h"
 #include "xdiff_events.h"
 #include "xfields.h"
-#include "xvirus.h"
+#include "xnavi_install.h"
+#include "xsong.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 
@@ -365,6 +366,12 @@ static void players_init(Side *g) {
 static int song_of(const View *v, uint32_t header) {
 	for (uint32_t n = 0; n < SONGS; ++n)
 		if (get32(v->rom + v->songs + 8 * n) == header) return (int)n;
+	/* (a copy of another game's song in one of BN6's slots, xsong.h: by the slot's own number there) */
+	for (uint32_t n = 0; v->game == 6 && n < SONGS; ++n)
+		if (v->rd32(0x08000000u + v->songs + 8 * n) == header) {
+			int copy = xsong_copy_of((int)n, NULL);
+			return copy >= 0 ? copy : (int)n;
+		}
 	return -1;
 }
 
@@ -557,7 +564,10 @@ static bool step(Side *g, const Spec *s) {
 	if (battle && phase == BN6_PHASE_FIGHT) keys |= keys_at(s, t);
 	if (battle && s->safe) keep_safe(v);
 	if (custom && !g->decked) deck_put(g, s);
-	if (g->log) xd_frame(g->log, g->frame, t, battle, g->seeded);
+	if (g->log) {
+		xd_frame(g->log, g->frame, t, battle, g->seeded);
+		xd_setup(g->log, sub == BN6_SUB_BATTLE_INIT);
+	}
 	v->frame(keys);
 	++g->frame;
 	sub = v->rd8(v->gamestate);
@@ -609,12 +619,13 @@ static void fight(Side *a, Side *b, const Spec *s) {
 static void bn6_frame(uint32_t keys) { emu_frame(keys); }
 static void bn5_frame(uint32_t keys) { guest_frame_quiet(keys); }
 
-/* BN5's id as BN6 has it: a moved family's (xvirus_bn5), else the same */
+/* BN5's id as BN6 has it: a moved family's (xvirus_bn5) or Navi's (xnavi_install.h), else the same */
 static int bn6_id(int id) {
 	for (int k = 0; k < xvirus_bn5_count; ++k)
 		for (int v = 0; v < XV_VERSIONS; ++v)
 			if (xvirus_bn5[k]->names[v] == id) return xvirus_bn5[k]->first_id + v;
-	return id;
+	int navi = xnavi_bn6_id(id);
+	return navi >= 0 ? navi : id;
 }
 
 /* the veneer of family f's calls on to BN6's routine `to`, its bus address; 0 none */
@@ -718,7 +729,7 @@ static void subject_setup(const Spec *s) {
 /* BN6's battle with the families installed, forced as the foes step forces one, the ids BN6's */
 static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
-	xvirus_install(XVIRUS_FAMILIES);
+	xnavi_install_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
 	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak))) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
@@ -822,8 +833,10 @@ static bool reference(Side *g, const Spec *s) {
 /* Each core's hooks, once both battles are made (BN5's code is the families' as xvirus_moved has it), and the
  * subject's draws replayed from the reference's where the spec says so; false where they cannot be */
 static bool logs_start(Side *a, Side *b, const Spec *s) {
-	a->log = a->out ? xd_log_start(5) : NULL;
-	b->log = b->out ? xd_log_start(6) : NULL;
+	bool navis = false;
+	for (int i = 0; i < s->nfoes; ++i) navis = navis || xnavi_bn6_id(s->foes[i].id) >= 0;
+	a->log = a->out ? xd_log_start(5, navis) : NULL;
+	b->log = b->out ? xd_log_start(6, navis) : NULL;
 	events = malloc(EVENTS_OUT * sizeof *events);
 	if ((a->out && !a->log) || (b->out && !b->log) || !events) return false;
 	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);

@@ -1,0 +1,11 @@
+{
+ "about": "ShadowMan V1 (BN5's 0x12B, BN6's 0x1C8) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-12) and its own state 1, its decoys (the first kind's 4) and shuriken (the third kind's 7) through the dispatch, its effects copied (BN5's 0x02, 0x17, 0x18), its sound copied in (0xB7)",
+ "kind": "differential",
+ "foes": "12B@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

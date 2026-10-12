@@ -1,0 +1,11 @@
+{
+ "about": "ToadMan V1 (BN5's 0x143, BN6's 0x1D8) alone at (5,2), where BN5's story sets him, MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-13), its two generic overrides (3 and 4), its pre-step B, its lily pads, notes and wave (the third kind's 0x7B, 0x81 and 0x7C through the dispatch), its sounds copied in (0x70, 0xE1, 0x117) and the sea its wave makes (BN5's 0xA, BN6's 14)",
+ "kind": "differential",
+ "foes": "143@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

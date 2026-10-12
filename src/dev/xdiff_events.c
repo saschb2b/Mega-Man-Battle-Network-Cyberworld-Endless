@@ -20,15 +20,19 @@
 #include "emu.h"
 #include "guest.h"
 #include "hook.h"
+#include "rom.h"
 #include "xvirus.h"
 #include "xvirus_dispatch.h"
+#include "xdiff_sprite.h"
+#include "xnavi_bn5.h"
+#include "xsong.h"
 #include "xvirus_families.h"
 
 #define EVENTS_MAX  8192    /* a log's events between two takes (a battle's opening, a frame of the fight) */
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  16      /* the families' blocks of code */
+#define FAMILY_MAX  64      /* the families' and the Navis' blocks of code */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -63,7 +67,7 @@ struct XdLog {
 	const Game *g;
 	int game;
 	bool alone;   /* BN6's against BN6's (xd_control_frame): every place keyed as it is, the control's own code as its copy */
-	bool on, seeded;
+	bool on, seeded, setup;   /* (setup: the battle being set up, its spawns and sprites watched: xd_setup) */
 	uint32_t frame, t;
 	XdEvent ev[EVENTS_MAX];
 	int nev, dropped;
@@ -135,10 +139,11 @@ static uint32_t running(const XdLog *log) {
 }
 
 static XdEvent *add(XdLog *log, int kind, int sub) {
-	if (!log->on) return NULL;
+	bool setup = !log->on && log->setup && (kind == XD_SPAWN || kind == XD_SPRITE);
+	if (!log->on && !setup) return NULL;
 	if (log->nev >= EVENTS_MAX) { ++log->dropped; return NULL; }
 	XdEvent *e = &log->ev[log->nev++];
-	*e = (XdEvent){ .kind = (uint8_t)kind, .sub = (uint8_t)sub, .frame = log->frame, .t = log->t };
+	*e = (XdEvent){ .kind = (uint8_t)kind, .sub = (uint8_t)sub, .flags = setup ? XD_SETUP : 0, .frame = log->frame, .t = log->t };
 	return e;
 }
 
@@ -224,7 +229,7 @@ static HookAct on_draw(HookRegs *r, void *user) {
 
 static HookAct on_spawn(HookRegs *r, void *user) {
 	XdLog *log = user;
-	if (!log->on) return HOOK_CONTINUE;
+	if (!log->on && !log->setup) return HOOK_CONTINUE;
 	XdEvent *e = &log->spawning;
 	*e = (XdEvent){ .kind = XD_SPAWN, .sub = (uint8_t)(r->r[0] & 0xF), .frame = log->frame, .t = log->t };
 	uint32_t lr = hook_read32(r->r[1] + SPAWNER_LR), above = r->r[1] + SPAWNER_LR + 4;
@@ -248,7 +253,9 @@ static HookAct on_spawned(HookRegs *r, void *user) {
 	log->pending = false;
 	XdEvent *e = add(log, XD_SPAWN, 0);
 	if (e) {
+		uint16_t flags = e->flags;
 		*e = log->spawning;
+		e->flags = flags;
 		e->object = r->r[5];
 	}
 	return HOOK_CONTINUE;
@@ -267,8 +274,13 @@ static XdEvent *call(XdLog *log, const HookRegs *r, int kind, int sub, bool push
 }
 
 static HookAct on_sound(HookRegs *r, void *user) {
-	XdEvent *e = call(user, r, XD_SOUND, 0, false);
-	if (e) e->a = r->r[0];
+	XdLog *log = user;
+	XdEvent *e = call(log, r, XD_SOUND, 0, false);
+	/* (a sound of BN5's BN6 plays from a copy, xsong.h: its own number; BN6's own song of a number BN5 plays as another,
+	 * its number with bit 16, never taken for BN5's) */
+	int copy = log->game == 6 ? xsong_copy_of((int)r->r[0], NULL) : -1;
+	bool other = log->game == 6 && copy < 0 && xsong_sound_slot(XROM_BN5_COLONEL_US, (int)r->r[0]) >= 0;
+	if (e) e->a = copy >= 0 ? (uint32_t)copy : r->r[0] | (other ? 0x10000u : 0u);
 	return HOOK_CONTINUE;
 }
 
@@ -294,9 +306,15 @@ static HookAct on_reserved(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* (its sprite by its bytes, a: the two games number theirs otherwise, xdiff_sprite.h; b its list's offset and number) */
 static HookAct on_sprite(HookRegs *r, void *user) {
+	const XdLog *log = user;
 	XdEvent *e = call(user, r, XD_SPRITE, 0, false);
-	if (e) e->object = r->r[5];
+	if (e) {
+		e->object = r->r[5];
+		e->a = xd_sprite_crc(log->game, r->r[1], r->r[2]);
+		e->b = (r->r[1] & 0xFFu) << 8 | (r->r[2] & 0xFFu);
+	}
 	return HOOK_CONTINUE;
 }
 
@@ -324,26 +342,28 @@ static HookAct on_mood(HookRegs *r, void *user) {
 
 /* ---- the logs ---- */
 
-static XdLog *log_make(int game, bool alone) {
+static XdLog *log_make(int game, bool alone, bool navis) {
 	XdLog *log = log_of(game);
 	if (!log) return NULL;
 	log->game = game;
 	log->alone = alone;
 	log->g = &games[game == 6];
-	XvMoved m[64];
-	int n = xvirus_moved(m, 64);
+	static XvMoved m[XV_MOVED_MAX];
+	int n = xvirus_moved(m, XV_MOVED_MAX);
+	/* (the families' code, and the Navis' where a foe is one: xnavi_recipe.h) */
 	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if (m[i].to >= XV_CODE && m[i].to < XV_ART) log->fam[log->nfam++] = m[i];
-	/* (the control's code where BN6 has it: its own Mettaur's, which the moved copy's places are keyed as) */
-	for (int i = 0; alone && i < xvirus_control.nblocks && log->nfam < FAMILY_MAX; ++i) {
-		const XvBlock *b = &xvirus_control.blocks[i];
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART)) log->fam[log->nfam++] = m[i];
+	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
+	 * places are keyed as) */
+	for (int i = 0; alone && i < xvirus_control.nblocks + xnavi_control.code.nblocks && log->nfam < FAMILY_MAX; ++i) {
+		const XvBlock *b = i < xvirus_control.nblocks ? &xvirus_control.blocks[i] : &xnavi_control.code.blocks[i - xvirus_control.nblocks];
 		log->fam[log->nfam++] = (XvMoved){ b->start, b->start, b->end - b->start };
 	}
 	return log;
 }
 
-XdLog *xd_log_start(int game) {
-	XdLog *log = log_make(game, false);
+XdLog *xd_log_start(int game, bool navis) {
+	XdLog *log = log_make(game, false, navis);
 	if (!log) return NULL;
 	bool (*put)(uint32_t, EmuHook, void *) = game == 6 ? emu_hook : guest_hook;
 	const Game *g = log->g;
@@ -363,6 +383,8 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
 	subject->ntwins = ntwins;
 	subject->keyed_t = 0xFFFFFFFFu;
 }
+
+void xd_setup(XdLog *log, bool setup) { log->setup = setup; }
 
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded) {
 	log->frame = frame;
@@ -389,7 +411,7 @@ void xd_counts(const XdLog *log, int out[XD_COUNTS]) {
 /* ---- the control's runs: BN6's draws kept, or replayed from a run that kept them ---- */
 
 static bool control_start(const char *how, XdLog **log, FILE **out) {
-	*log = log_make(6, true);
+	*log = log_make(6, true, true);
 	if (!*log) return false;
 	const Game *g = (*log)->g;
 	bool ok = true;

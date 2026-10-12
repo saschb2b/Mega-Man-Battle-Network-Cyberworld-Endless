@@ -23,7 +23,7 @@ enum {
 	XD_ATTACK,     /* setAttack: sub its N */
 	XD_RESERVE,    /* a panel reserved */
 	XD_BLINK,      /* the blink step of an object flashing */
-	XD_SPRITE,     /* an object's sprite set up (sprite_load) */
+	XD_SPRITE,     /* an object's sprite set up (sprite_load): a its bytes' CRC32 (xdiff_sprite.h), b its list's offset and number */
 	XD_MOOD,       /* (BN5's alone) a side's mood raised as a hit lands: a the side, b what it rose by (BN5_MOOD_GAIN) */
 };
 
@@ -33,6 +33,8 @@ enum {
 	XD_REPLAYED = 2,   /* the subject's, the reference's draw ref - 1's word written into the RNG word first */
 	XD_UNMATCHED = 4,  /* the subject's, with no draw of its key left in the reference's frame: drawn as it is */
 	XD_UNMAPPED = 8,   /* the subject's, its caller neither the family's code nor a twin of BN5's: drawn as it is */
+	XD_SETUP = 0x10,   /* (a spawn's, a sprite's set-up) made while the battle was set up, before its fight: told only for which
+	                      objects set up no sprite since they spawned, compared as nothing else */
 };
 
 /* An event, ten words in the trace (src/dev/xdiff.c): kind, sub and flags;
@@ -65,8 +67,11 @@ typedef struct XdLog XdLog;
 
 /* The log of game 5 (the reference, the guest's core) or 6 (the subject,
  * BN6's), emptied, its hooks placed on its core: NULL where one could not
- * be. The families' code is xvirus_moved's (BN6's copy, BN5's own). */
-XdLog *xd_log_start(int game);
+ * be. The families' code is xvirus_moved's (BN6's copy, BN5's own), and
+ * the Navis' where `navis` (a foe of the spec's is a moved Navi: their
+ * copies hold engine routines BN5 runs for MegaMan too, a Soul's companion,
+ * which are no foe's code in a spec without one). */
+XdLog *xd_log_start(int game, bool navis);
 /* The subject's draws replayed from the reference's: each keyed by the
  * family's own code that led to it (its BN5 address), else by its caller
  * (a BN6 routine's through its twin), the k-th of its key in a frame the
@@ -75,6 +80,10 @@ void xd_replay(XdLog *subject, const XdLog *reference, const XdTwin *twins, int 
 /* Before each frame: the core's frame and the battle's timer, events
  * logged (its battle under way), draws kept and replayed (its fight seeded) */
 void xd_frame(XdLog *log, uint32_t frame, uint32_t t, bool on, bool seeded);
+/* While the battle is set up (before its fight, `on` false): its spawns and
+ * sprites' set-ups logged as XD_SETUP (an object that spawned then and set
+ * up no sprite holds its slot's last occupant's sprite state) */
+void xd_setup(XdLog *log, bool setup);
 /* The events since the last call, oldest first: how many (at most max) */
 int xd_take(XdLog *log, XdEvent *out, int max);
 /* What happened to its draws (the subject's: replayed, unmatched,

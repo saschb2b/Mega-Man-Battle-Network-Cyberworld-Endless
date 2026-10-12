@@ -1,0 +1,11 @@
+{
+ "about": "KnightMan V1 (BN5's 0x13D, BN6's 0x1D4) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-12), its companion's overlay (BN5's kind 1 as BN6's 23: its masks and sprite copied), its wrecking ball and the rocks that fall (the third kind's 0x14, 0x15 and 0x17 through the dispatch), the panels they crack, its PanlGrab (BN6's chip 0xA2) and its sound copied in (0xC0)",
+ "kind": "differential",
+ "foes": "13D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

@@ -1,0 +1,11 @@
+{
+ "about": "KnightMan SP (BN5's 0x140, BN6's 0x1D7) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): the SP's numbers (its HP, its attacks' damage and speed) through the same code as V1",
+ "kind": "differential",
+ "foes": "140@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

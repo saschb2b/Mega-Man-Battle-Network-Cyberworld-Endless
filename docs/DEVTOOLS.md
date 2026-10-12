@@ -356,7 +356,11 @@ step below and `tools/xcontrol.py`; docs/MULTIROM.md, Transplanted
 families; it takes the place of BN5's CanGard, which is installed
 wherever BN5's ROM is read), and `nofamilies` (no family moved into the
 engine, BN5's ROM read or not: BN6's battles as the player's ROM has
-them, which `tools/xfamily.py` compares with CanGard installed). BN5's battles
+them, which `tools/xfamily.py` compares with CanGard installed), and
+`xnavicontrol` (the control Navi installed instead of BN5's Navis: BN6's
+own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
+`tools/xcontrol.py --navi`; docs/MULTIROM.md, Transplanted Navis), and
+`nonavis` (no Navi moved into the engine, BN5's ROM read or not). BN5's battles
 have four of their own (docs/MULTIROM.md, Guest battles, For tests):
 `darkchips=MASK`, `worried`, `souls=MASK` (a new run holding BN5's
 Souls, bit k Team Colonel's Soul 7 + k; in BN6's battles too, through
@@ -441,7 +445,15 @@ BN5's ROM read, BN5's CanGard is AI 32 with ids 0x200-0x205 (its six
 versions, the families' ids from 0x200), and `0:foes 200@52/01@43`
 fights CanGard beside a Mettaur (four foes at most: of six named, BN6's
 battle spawned the first four); `--dev xcontrol` installs the control
-in its place, BN6's own Mettaur moved as AI 32 with the same ids. A
+in its place, BN6's own Mettaur moved as AI 32 with the same ids. BN5's
+Team Colonel Navis moved into the engine (docs/MULTIROM.md, Transplanted
+Navis) take ids 0x1C4-0x1DB, four a Navi (V1, V2, V3, SP): Colonel
+0x1C4, ShadowMan 0x1C8, NumberMan 0x1CC, TomahawkMan 0x1D0, KnightMan
+0x1D4, ToadMan 0x1D8, so `0:foes 1D4@52` fights KnightMan V1 in BN6's
+engine (`--dev xnavicontrol` puts the control HeatMan at 0x1C4-0x1C9).
+The `onehit` step (`0:onehit`) holds every enemy at 1 HP from there on,
+as `--dev onehit` does: a long fight's end, the control Navi's `delete`
+spec. A
 layer dressed as BN5's area has longer arrival words, and its random
 battles are BN5's: seed 15's first area is BN6's own.
 
@@ -492,7 +504,12 @@ through BN6's generic states, which the fight alone never reaches
 `tools/xcontrol.py` copies BN6's ROM alone into `.build/xcontrol/rom`
 (a layer of BN5's fights its battles in BN5's engine) and runs its
 specs, `fight` and `status` (`--spec` one of them), three battles each,
-with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing).
+with `CYBERWORLD_BTRACE=1` (docs/EMULATION.md, Testing). With `--navi`
+it proves the Navis' installer on BN6's own HeatMan (`--dev
+xnavicontrol`): HeatMan V1 native (0x101), installed beside the control,
+and moved (0x1C4), each spec's three battles the same byte for byte
+(`fight`, 4000 frames of his attacks; `status`; `delete`, every enemy
+held at 1 HP by the `onehit` step to the results).
 `tools/xfamily.py` copies both ROMs into `.build/xfamily/rom` and runs
 its specs, `fight`, `status`, `delete` and `native` (`--spec` one of
 them), each battle traced and its checks printed, pictures of CanGard's
@@ -636,10 +653,14 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   RNG draws, every spawn of the first, third and fourth kinds (their
   common routine, entered and left), PlaySoundEffect, an effect's
   spawner, setAttack, a panel reserved, the blink of an object flashing
-  and a sprite set up. Each logs an event with the core's frame, the
+  and a sprite set up (with the CRC32 of the sprite's bytes, decompressed
+  as BN6 draws it, read where the core lists it: `src/dev/xdiff_sprite.c`).
+  Each logs an event with the core's frame, the
   battle's timer before it, its caller (a spawn's: its spawner's), the
   family's own code that led to it (the innermost return address in a
-  family's moved code: BN6's copy, BN5's original) and the outermost
+  family's moved code: BN6's copy, BN5's original; the Navis' moved code
+  only where a foe is a moved Navi, as their copies hold engine routines
+  BN5 runs for MegaMan too, a Soul's companion) and the outermost
   caller (the stack read word by word up to the object runner's return,
   each word that is a return address: after a BL, or after `mov lr,pc;
   bx rN`), and the object running then (the runner's word) or the one
@@ -745,6 +766,14 @@ the masks):
   where it came from (BN5's into a family's code where it is: a callback
   kept in an AI's data), a pointer into each game's own ROM by the data
   there (32 bytes the same), a sprite's frames from its sprite's own data.
+- **Art by its bytes**: what an install chose to draw (an object of a
+  moved type, a foe's own body, an effect of a family's or a foe's own
+  ids, a companion overlay of a Navi's kind) is compared by the bytes of
+  the sprite it last set up, never by its number: the two games number
+  their sprites otherwise (a copy in BN6's grown lists, a twin at another
+  number), and a twin that draws other art fails as `sprite bytes` at
+  its sprite's word (+0x18 of its sprite state). The engine's and
+  MegaMan's own draw each game's art and are not compared so.
 - **Read in BN6's terms** (`tools/xdiff_events.py`, from BN5's own
   events): an object that has reserved a panel reads BN6's bit `0x20` of
   its +0 (BN6 sets it at the first reservation and never clears it while
@@ -889,7 +918,13 @@ its data, an effect id left as BN5's alone and beside a native, a
 strike's effect id, a collision region; Handi's: an immediate, a call
 rebased to its neighbour, its draws shifted onto the other word; the
 dispatch's: a MOVED entry left the stray's, a TWIN entry made BN6's own
-number, a spawn aimed at BN6's spawner as before the dispatch; the lava's
+number, a spawn aimed at BN6's spawner as before the dispatch; the
+Navis': a state number left as BN5's (each Navi's), an effect left as
+BN5's, an overlay spawned of BN6's kind, a battle sprite's number, a
+sprite table's entry, a sprite left at BN5's number where BN6 lists the
+same bytes at another, the moved image object's kind left at BN5's
+sprite and its twin kind at another sprite, a sound left at BN6's
+number; the lava's
 and the sea's: lava's flags, their hooks taken off, the panel lava's
 cooling leaves, the random number its spark draws, the element hit's
 test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
@@ -937,6 +972,33 @@ fill). A family is whole where no decision is left open; the report
 says what each derives and what is left, and `--check` runs in no build
 (it needs the ROMs): `build.py test` holds the generated CanGard and
 Handi to the installed recipes, field for field.
+
+## The Navis' recipe generator
+
+```bash
+python3 tools/xnavirecipe.py              # write src/emu/xnavi_bn5.c: the control's, the moved objects' and BN5's Navis' recipes
+python3 tools/xnavirecipe.py --check      # write nothing: fail where the file differs from what it would write
+python3 tools/xnavirecipe.py --report     # every Navi of Team Colonel's and the Dark Soul: .build/xnavirecipe/report.md
+```
+
+`tools/xnavirecipe.py` (issue #82; docs/MULTIROM.md, Transplanted Navis)
+derives a Navi's recipe as `tools/xrecipe.py` derives a family's, with
+the families' walk, pairs and audits, from BN6's Navi tables instead of
+the families' (`tools/bn5_navi_twins.py`: the Navis' own pairs, audits,
+the routines copied with them, their stubs, the tables their code reads).
+In install order (`NAVIS`, after the control, BN6's own HeatMan derived
+from BN6's ROM): its code walked from its states, hooks and companion
+routines; each object type its code spawns decided as
+`tools/bn5_twins.py`'s TYPES decides it (one decision a type, every
+track's; a type the table decides otherwise, or not at all, is a
+decision); its sprites given one number and one place in the shared art
+whichever Navi draws them, its effects numbers of its own, both in issue
+#82's ranges for the Navis; the image object's kinds it spawns each one
+`tools/bn5_objects.py` fixes, and the moved objects' recipe itself
+(`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
+that table, each twin checked by its bytes). A recipe with a decision
+open is not written; `build.py test` holds every written one whole and
+apart from the others and the families' (`test_xnavi_static`).
 
 ## The proxy form: where a Soul stands
 

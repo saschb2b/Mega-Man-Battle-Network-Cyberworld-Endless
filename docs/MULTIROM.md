@@ -939,6 +939,114 @@ and its calls aimed again (`src/emu/xvirus.c`):
   Testing): the install stands in the way of no run continued with BN5's
   ROM taken away or put in.
 
+## Transplanted Navis
+
+Issue #82's Navi track: BN5's Team Colonel Navis fight in BN6's own battle
+engine, each proved against BN5's own battle frame by frame before it is
+installed. A Navi is a family with more (`src/emu/xnavi_install.c`): its
+code and records are moved by the families' code mover (`xvirus_move.h`,
+the same blocks, pools, veneers and checks), and it is found through
+BN6's Navi tables instead of the families' (docs/ROM_DATA.md, Navis moved
+into the battle engine).
+
+- **The room** (`src/emu/xnavi_room.c`), made once a core after the
+  families' and before any Navi: BN6's thirteen per-AI Navi tables (the
+  state tables, the pre-step, hook A, struct1, struct2, the post hook,
+  spawn start and end, paralysed, frozen, bubbled, flinching, dragged)
+  and the four triples' Navi words (the ice block's size, the held chips,
+  the companion's start and end) copied to 256 AI indexes, the companion
+  overlay's kinds to 64, each word that names one pointed at the copy;
+  the arm points' records of list 2 grown (`xnavi_sprites.c`); and the
+  moved Navis' names, an archive of their own handed out by a hook on
+  BN6's name lookup for their ids (BN6's own Navis read BN6's archive as
+  before). BN5's Navi n of Team Colonel (7-12) is Navi AI 32 + n - 7 with
+  four ids from 0x1C4 + 4 (n - 7): V1, V2, V3 and SP (the Dark Soul's
+  would be AI 38, id 0x1DC); its battle sprite list 2's 0x20 + n - 7.
+- **The control** (`--dev xnavicontrol`, `tools/xcontrol.py --navi`):
+  BN6's own HeatMan derived by the same walk from BN6's ROM and moved as
+  Navi AI 25 with ids 0x1C4-0x1C9. Fought by the same keys as the native
+  HeatMan, his battle is the same byte for byte in EWRAM and IWRAM frame
+  for frame (fight, statuses, deletion), each difference the id, the AI
+  index or the copies' places.
+- **A Navi's recipe** (`src/emu/xnavi_bn5.c`, written by
+  `tools/xnavirecipe.py`; docs/DEVTOOLS.md, The Navis' recipe generator):
+  its code walked from its states, hooks and companion routines; the
+  objects it spawns that BN6 runs otherwise moved through the
+  second-level dispatch, one decision a type for every track
+  (`tools/bn5_twins.py`, TYPES: moved unless BN6 runs the same code and
+  draws the same art); its calls paired with BN6's twins (the families'
+  pairs and audits, `tools/bn5_navi_twins.py`'s beside them); its state
+  numbers from 6 made BN6's from 8; its pre-step and hooks as BN6's
+  tables take them (hook A the empty hook, its frozen and bubbled hooks
+  its paralysis hook: BN5 freezes and bubbles no Navi); its companion's
+  start and end, a routine of BN5's copied where BN6's twin spawns an
+  overlay kind BN6 lacks, the kind then one of its own past BN6's 19
+  (`XN_KIND_OF`) with its masks copied; its panel types BN6's (BN5's
+  lava 8 and sea 0xA as BN6's 13 and 14); KnightMan's chip by its name;
+  Colonel's table of two entries by side moved from BN5's `0x02034000` to
+  `BN6_COLONEL_TABLE` (`0x0203FF60`, zeroed with each battle's RAM) and
+  his slash's three effects in a row. What BN6's engine lacks goes to the
+  Navis' stubs (`XN_STUBS`): BN5's panel claims, which no battle in BN6's
+  engine reaches (their gate, BattleState +0x32 bit 0x40, is set only by
+  BN5's battle setup at `0x0802D594`, which BN6 has no twin of: r0 0, as
+  BN5 answers without it), and the DS version's chip AI, which no recipe
+  installs (logged).
+- **What it draws**, in issue #82's ranges for the Navis: its sprites
+  copied once into the shared art whichever Navi draws them, at list 4's
+  0xA0-0xB5 and list 5's 0xA0-0xA3 (a sprite of list 3 copied into list
+  4, its load's list offset made list 4's), BN6's own where BN6 lists the
+  same bytes; its effects BN6's of the same sprite, animation and palette,
+  else its own from 0xA0 (to 0xBF; 0xA0-0xB1 taken, one number a Navi a
+  BN5 effect); its sounds BN6 numbers otherwise copied in by `xsong.c` at
+  the slot issue #82's plan gives each BN5 sound whichever track plays it
+  (0xC0 at 0x62, 0xB7 at 0x61, 0x70 at 0x5F, 0x117 at 0x5E, 0xE1 at 0x5B,
+  0x115 at 0x5A, 0x105 at 0x59, 0x10C at 0x58, 0x10D at 0x57, 0xCF at
+  0x56), copied only where the slot still holds BN6's empty header.
+- **The engine's objects moved once** (`src/emu/xnavi_objects.c`,
+  `tools/bn5_objects.py`): BN5's image object, the first kind's type 5,
+  which ShadowMan and Colonel spawn through its spawner, is BN6's type 5
+  in name only (BN6 reads a kinds table of its own, its sprites at other
+  numbers). Its module whole, `0x080B9A5C`-`0x080B9D10` (the kinds table,
+  58 kinds of five bytes; the type's routine; the spawner every attack
+  calls; its helpers), is one block installed before any Navi at
+  `XN_OBJECTS`, its type moved through the dispatch for every track; a
+  Navi's call to its spawner goes to the copy. Its kinds' sprites, one
+  table for every track (`tools/bn5_objects.py`): the twelve kinds whose
+  sprite BN6 lists with the same bytes name BN6's (two at another
+  number), kind 3 (ShadowMan's and Colonel's, BN5's 3:0x00) a copy at list
+  4's 0xB5, the other 45 keep BN5's bytes, reached by no installed code
+  (the generator refuses a recipe that spawns one; a track that needs one
+  adds its art there from its own range).
+- **The proof**: `build.py xdiff`, BN5's own battle against BN6's with the
+  Navi moved, every draw of BN6's replayed from BN5's: each Navi's V1
+  alone with MegaMan kept from harm (`*_v1`), V1 against MegaMan's 62
+  inputs (`*_v1_keys`), SP alone (`*_sp`); its objects, its moved types'
+  objects, its effects and its overlay compared in BN6's numbers, and
+  what each draws compared by its sprite's bytes, never its number
+  (`src/dev/xdiff_sprite.c`). `--mutations` breaks each Navi's copy the
+  way a transplant bug would (a state number, an effect, an overlay's
+  kind, a sprite's number, a sprite table's entry, the image object's
+  kind and its twin's number, a copied sound): each FAILs its spec.
+- **Where they fight**: a battle the `foes` step starts names their ids
+  beside BN6's (`0:foes 1C8@52` ShadowMan V1; docs/DEVTOOLS.md, A battle
+  on demand). The run's guardians are BN5's Navis in BN5's own engine as
+  before (docs/BOSSES.md, BN5's Navis; `--guardian 24`-`29`).
+- **Status** (as built): Colonel, ShadowMan, NumberMan, TomahawkMan and
+  KnightMan pass all three specs; ToadMan passes V1 and V1 against the
+  keys, and his SP does not: BN5 submerges an enemy on sea whose AI data
+  +0x48 holds bit 0x20 (his SP, on sea at t657), hidden, with the collision data's
+  flag 0x80000000 and a timer of 0xFFFF at +0x2C, a marker of the fourth
+  kind's 0x3E spawned (`0x0800DEAA`), and hits that are not Elec or
+  0x1008 passing over it (`0x08016948`); BN6's engine uses that flag and
+  timer for a bubble, so the rule needs a place of its own before it can
+  be BN6's (open). The Dark Soul (AI 0x16, id 0x18D) is not moved: its
+  code calls BN5's chip AI (`0x0802BA18`, 31 routines of BN5's
+  `0x0802BD96`-`0x0802C0E0` with no twin, an IWRAM routine's image at
+  `0x081BC994`, setAttack1 with chip actions), which waits on BN5's chips
+  in BN6's engine. Where a failed Chaos Unison spawns it, BN5's
+  `0x08006AAE`, BN6's twin is `BN6_SPAWN_ENEMY_1` (`0x08007696`, the same
+  body with its two entries in the other order), for the Souls track.
+
 ## The chip registry
 
 Issue #82's C1, the ground call 4 stands on: Team Colonel's chips in
@@ -1335,4 +1443,8 @@ the next.
   AirHoc, WideSht1-3, Spreader, DrilArm1-3, Geddon1-3 and Z Saver play
   in BN6's battles; the rest sit out until their code is moved. Nothing
   in a run gives one yet.
+- [x] Its Navis in BN6's own engine (Transplanted Navis, above): Team
+  Colonel's six moved, each proved against BN5's battle frame by frame
+  but ToadMan's SP (BN5's submerge on sea); fought where a battle names
+  their ids, not yet in a run. The Dark Soul waits on BN5's chips.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

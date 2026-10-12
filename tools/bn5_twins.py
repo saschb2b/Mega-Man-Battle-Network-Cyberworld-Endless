@@ -103,3 +103,48 @@ DATA_TWINS = (
     (0x08005CD0, 0x80, 0x080065E0, 'a sine table (its 0x80 bytes the same)'),
     (0x08005D50, 0x80, 0x08006660, 'a cosine table (its 0x80 bytes the same)'),
 )
+
+# The second-level dispatch's decision for each BN5 object type a track's code spawns (issue #82's plan for its tracks):
+# MOVED (BN5's routine for the type copied, src/emu/xvirus_dispatch.h) unless BN6 runs the same code for a type of its own
+# and draws the same art (its sprites compared by their bytes); TWIN that BN6 type. One decision a type, whichever track's
+# code spawns it; at a merge of two tracks' decisions, MOVED wins. tools/xnavirecipe.py refuses a recipe whose type is not
+# decided here as it decides it (the families' entries are the families track's to add). (kind, BN5's type): (decision,
+# BN6's type or None, the track that first spawned it, why)
+NO_TWIN = 'no BN6 type runs the same code (tools/xrecipe_family.py, type_twin: each type of the kind\'s table compared deep)'
+TYPES = {
+    (3, 0x25): ('moved', None, 'families', "CanGard's: " + NO_TWIN),
+    (1, 0x04): ('moved', None, 'navis', "ShadowMan's: " + NO_TWIN),
+    (1, 0x05): ('moved', None, 'navis', "the image object: BN6's type 5 reads a kinds table of its own, other sprites at other numbers; moved "
+                                        "once for every track, its module whole (tools/bn5_objects.py)"),
+    (1, 0x54): ('moved', None, 'navis', "NumberMan's companion: BN6's twin of its spawner spawns BN6's 0x55, no deep twin of BN5's 0x080C33AD"),
+    (1, 0x56): ('twin', 0x56, 'navis', "the companion overlay: the same code (its spawner and end twins, 0x080C3808/0x080C5D18 and "
+                                       "0x080C382C/0x080C5D38); BN5's kinds BN6 lacks take kinds past BN6's 19, their masks and sprites "
+                                       "BN5's bytes (src/emu/xnavi_recipe.h, XnOverlay)"),
+    (3, 0x02): ('moved', None, 'navis', "Colonel's: " + NO_TWIN),
+    (3, 0x05): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
+    (3, 0x07): ('moved', None, 'navis', "ShadowMan's: " + NO_TWIN),
+    (3, 0x14): ('moved', None, 'navis', "KnightMan's wrecking ball: " + NO_TWIN),
+    (3, 0x15): ('moved', None, 'navis', "KnightMan's: " + NO_TWIN),
+    (3, 0x17): ('moved', None, 'navis', "KnightMan's: " + NO_TWIN),
+    (3, 0x1D): ('moved', None, 'navis', "BN5's falling rocks: BN6's 0x1D another rock (its height, sprite 4:5 where BN5's 4:0xE, its collision; "
+                                        "knightman_v1 at t613)"),
+    (3, 0x1F): ('moved', None, 'navis', "TomahawkMan's: " + NO_TWIN),
+    (3, 0x20): ('moved', None, 'navis', "TomahawkMan's: " + NO_TWIN),
+    (3, 0x21): ('moved', None, 'navis', "TomahawkMan's: " + NO_TWIN),
+    (3, 0x22): ('moved', None, 'navis', "TomahawkMan's: " + NO_TWIN),
+    (3, 0x23): ('moved', None, 'navis', "TomahawkMan's: " + NO_TWIN),
+    (3, 0x3C): ('moved', None, 'navis', "Colonel's strike: BN6's 0x3C strikes with effect 0x60, list 4's 0xA, where BN5's with 0x47, list 4's "
+                                        "0x2C (colonel_v1_keys at t1003)"),
+    (3, 0x59): ('moved', None, 'navis', "Colonel's: BN6's 0x080D11C5 no deep twin of BN5's 0x080D1089, its sprite's frames apart (colonel_sp "
+                                        "at t777)"),
+    (3, 0x7B): ('moved', None, 'navis', "ToadMan's: " + NO_TWIN),
+    (3, 0x7C): ('moved', None, 'navis', "ToadMan's: " + NO_TWIN),
+    (3, 0x81): ('moved', None, 'navis', "ToadMan's: " + NO_TWIN),
+    (3, 0x8B): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
+    (3, 0x8C): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
+    (3, 0x93): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
+    (4, 0x09): ('moved', None, 'navis', "BN5's rock fragment: BN6's 9 draws its sprite 4:5 where BN5's 4:0xE (knightman_v1 at t685)"),
+    (4, 0x38): ('moved', None, 'navis', "Colonel's strike's two: " + NO_TWIN + "; BN6's 0x38 sets another palette (+0x95) and draws "
+                                        "otherwise (colonel_sp at t1004)"),
+    (4, 0x8E): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
+}

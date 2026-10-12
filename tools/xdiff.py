@@ -452,7 +452,7 @@ SOFT = ('native', "native's")               # whose leave the family's world the
 def first_unexplained(t, open_, by, natives_at, show, subject='family'):
     """the verdict a frame's unexplained differences give (None: compare on), and the lines saying so. In a MegaMan
     spec (subject megaman) MegaMan's own state, what he owns and the engine's effects are the subject: they fail it"""
-    fam, bat = by.get('family', []) + by.get('panels', []), by.get('battle', [])
+    fam, bat = by.get('family', []) + by.get('panels', []) + by.get('spark', []), by.get('battle', [])
     hard = [d for w in HARD for d in by.get(w, [])]
     if subject == 'megaman' and hard:
         fam, hard = fam + hard, []
@@ -567,6 +567,7 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
+    canon.foes = {int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x}
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
     if spec.get('kind') == 'engine':

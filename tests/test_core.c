@@ -56,6 +56,7 @@
 #include "xchips_text.h"
 #include "soulkinds.h"
 #include "xnavi.h"
+#include "xnavi_bn5.h"
 #include "xsong.h"
 #include "debug.h"
 #include "emu.h"
@@ -3149,6 +3150,69 @@ static void test_xvirus_static(void) {
 	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
 }
 
+/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/MULTIROM.md,
+ * Transplanted Navis), each whole and apart from the others and from the
+ * families: its AI index, ids, home and code its own; a sprite two Navis
+ * draw at one place and number in both (the shared art), no other sprite's
+ * place or number another's; its effects numbers of its own in the Navis'
+ * range; no type two recipes move; the moved objects' recipe whole, its
+ * type moved by it alone, each type a Navi needs one it moves; the
+ * Navis' room laid out in order */
+static int navi_clashes(const XVirusFamily *f, const XVirusFamily *g, bool navis) {
+	int bad = navis && (f->ai == g->ai || spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE));
+	for (int i = 0; i < f->nblocks; ++i)
+		for (int k = 0; k < g->nblocks; ++k)
+			bad += spans_meet(f->blocks[i].at, f->blocks[i].end - f->blocks[i].start, g->blocks[k].at, g->blocks[k].end - g->blocks[k].start);
+	for (int i = 0; i < f->nsprites; ++i)
+		for (int k = 0; k < g->nsprites; ++k) {
+			const XvSprite *a = &f->sprites[i], *b = &g->sprites[k];
+			bool same = a->list == b->list && a->index == b->index && a->to_list == b->to_list && a->to_index == b->to_index && a->at == b->at &&
+				a->room == b->room;
+			bad += !same && (spans_meet(a->at, a->room, b->at, b->room) || (a->to_list == b->to_list && a->to_index == b->to_index));
+		}
+	for (int i = 0; i < f->neffects; ++i)
+		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+	for (int i = 0; i < f->ntypes; ++i)
+		for (int k = 0; k < g->ntypes; ++k)
+			bad += f->types[i].kind == g->types[k].kind && f->types[i].from == g->types[k].from &&
+				(f->types[i].to == XV_TYPE_MOVED || f->types[i].to != g->types[k].to);
+	return bad;
+}
+
+static void test_xnavi_static(void) {
+	char why[160] = "";
+	const XVirusFamily *o = &xnavi_objects_bn5;
+	CHECK(XN_STUBS_END <= XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
+		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		"xnavi: the Navis' room out of order");
+	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
+	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
+	CHECK(xnavi_bn5_count == 6, "xnavi: BN5's Navis listed (%d)", xnavi_bn5_count);
+	for (int i = 0; i < xnavi_bn5_count; ++i) {
+		const XNavi *n = xnavi_bn5[i];
+		const XVirusFamily *f = &n->code;
+		CHECK(xnavi_recipe_ok(n, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xnavi: %s refused: %s", f->name, why);
+		CHECK(f->ai == XN_AI_OF(f->src_ai) && f->first_id == XN_ID_OF(f->src_ai), "xnavi: %s off its fixed numbers", f->name);
+		for (int e = 0; e < f->neffects; ++e)
+			CHECK(f->effects[e].to >= 0xA0 && f->effects[e].to <= 0xBF, "xnavi: %s's effect %#x past the Navis' 0xA0-0xBF", f->name, f->effects[e].to);
+		for (int k = 0; k < i; ++k) {
+			const XNavi *m = xnavi_bn5[k];
+			CHECK(!navi_clashes(f, &m->code, true) && !spans_meet((uint32_t)f->first_id, (uint32_t)n->versions, (uint32_t)m->code.first_id, (uint32_t)m->versions),
+				"xnavi: %s and %s share numbers or room", m->code.name, f->name);
+		}
+		for (int k = 0; k < xvirus_bn5_count; ++k) CHECK(!navi_clashes(f, xvirus_bn5[k], false), "xnavi: %s and %s share numbers or room", f->name, xvirus_bn5[k]->name);
+		CHECK(!navi_clashes(f, o, false), "xnavi: %s and the moved objects share numbers or room", f->name);
+		for (int k = 0; k < n->nneeds; ++k) {
+			bool moved = false;
+			for (int t = 0; t < o->ntypes; ++t) moved = moved || (o->types[t].kind == n->needs[k].kind && o->types[t].from == n->needs[k].from);
+			CHECK(moved, "xnavi: %s needs the type %d:%#x, which the moved objects do not move", f->name, n->needs[k].kind, n->needs[k].from);
+		}
+	}
+	for (int k = 0; k < xvirus_bn5_count; ++k) CHECK(!navi_clashes(o, xvirus_bn5[k], false), "xnavi: the moved objects and %s share numbers or room", xvirus_bn5[k]->name);
+	/* (the check sees a clash: a Navi against itself, its code, effects and types in one place twice) */
+	CHECK(xnavi_bn5_count < 1 || navi_clashes(&xnavi_bn5[0]->code, &xnavi_bn5[0]->code, true) > 0, "xnavi: one Navi's room twice not seen");
+}
+
 /* The free space's plan (free_space.h; docs/EMULATION.md, Memory the
  * engine writes and BN6's RAM): every writer's region in order and apart,
  * inside the ROM copy past the game's 8 MB; each of issue #82's installers'
@@ -4489,6 +4553,7 @@ int main(void) {
 	test_xvirus_recipe();
 	test_xvirus_cangard();
 	test_xvirus_static();
+	test_xnavi_static();
 	test_free_space();
 	test_claims();
 	test_xvirus_dispatch();

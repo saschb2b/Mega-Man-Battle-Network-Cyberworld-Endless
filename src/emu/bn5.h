@@ -137,6 +137,8 @@
                                        * weakness unless Fire, floating or invulnerable, then the panel plain and a spark over it (0x08016DA2) */
 #define BN5_LAVA_STEP_MEGAMAN 0x08016E10u /* ... MegaMan's (his pre-step, 0x0801790E), its tests in another order */
 #define BN5_PANEL_HIT     0x08016D0Cu /* a panel hit by an element (BN6_PANEL_HIT): lava cooled plain by Aqua (0x08016D48) */
+#define BN5_PANEL_BONUS   0x08016AEEu /* what a hit adds for the panel its victim stands on (BN6_PANEL_BONUS), from the hit pass at 0x08016AD6 and
+                                         0x080174C4: the attack's damage once more for Fire on grass (6) and Elec on sea (0xA) */
 #define BN5_PANEL_UPDATE  0x0800A990u /* the per-panel update (BN6_PANEL_UPDATE): lava and sea count their timers down to plain, blinking their last 60 frames */
 #define BN5_SET_PANEL_TYPE 0x0800B2A6u /* object_setPanelType (BN6_SET_PANEL_TYPE): lava and sea made with 0x3C0 frames */
 #define BN5_PANEL_TILESET 0x086F4E5Cu /* its panels' tiles (LZ77) to VRAM from tile 0xA3, 842 of them: lava's from 0x2F5, the sea's from 0x393 */
@@ -238,5 +240,41 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_SPAWN_4       0x080031CCu /* the fourth kind's, after the object running (BN6_SPAWN_4); BN5 has no other of the kind */
 #define BN5_EFFECTS       0x080DFD7Cu /* its effects, 4 bytes an id as BN6_EFFECTS', BN5_EFFECT_COUNT of them */
 #define BN5_EFFECT_COUNT  108         /* ... its effect ids, the effects' code after them (0x080DFF2C) */
+
+/* Its Navis as src/emu/xnavi_install.c moves them into BN6's engine
+ * (issue #82; docs/MULTIROM.md, Transplanted Navis; docs/ROM_DATA.md, The
+ * Navis' tables): the tables they are found through by AI index, laid out
+ * as BN6's (src/emu/bn6_navis.h) but for the three BN6 added (hook A,
+ * frozen, bubbled) */
+#define BN5_NAVI_TABLES   0x080F2374u /* ten per-AI tables, BN5_NAVI_TABLE_STEP apart, BN5_NAVIS words each: 0 the state tables (generic
+                                       * 0-5, its own from 6), 1 the pre-step, 2 struct1, 3 struct2, 4 the post hook, 5 spawn start, 6 spawn end,
+                                       * 7 paralysed, 8 flinching, 9 dragged (BN6's 0, 1, 3, 4, 5, 6, 7, 8, 11, 12) */
+#define BN5_NAVI_TABLE_STEP 0x5C      /* ... from one to the next */
+#define BN5_NAVIS         23          /* ... their entries: AI 0 (a MegaMan of the story's) to 22 (the Dark Soul's) */
+#define BN5_NAVI_NULLSUB  0x080F2749u /* the Navis' empty hook (BN6_NAVI_NULLSUB's) */
+#define BN5_NAVI_FRAME    0x080F2334u /* the Navis' per frame (BN6_NAVI_FRAME's): pre-step, state, post, then a counter-hit tally of its own
+                                       * (0x080F270C, for the busting level: BN6's battles keep theirs) */
+#define BN5_NAVI_HELD     0x08113C78u /* the Navis' held chips' words (BN6_NAVI_HELD_REF's table; its triple 0x08113BE0): Team Colonel's six empty */
+#define BN5_NAVI_COMPANION 0x0800EDB4u /* the routine a Navi's companion begins by, a word an AI (BN6_NAVI_COMPANION_REF's table; triple 0x0800ED1C) */
+#define BN5_NAVI_COMPANION_END 0x0800EF64u /* ... ends by (triple 0x0800EECC) */
+#define BN5_ARM_LISTS     0x080151B8u /* its arm points' tables by struct1's list offset (BN6_ARM_LISTS'): MegaMan's 0x080151C4, the viruses',
+                                       * the Navis' 0x08015C14, BN5_ARM_RECORD bytes a record: */
+#define BN5_ARM_RECORD    0x3C        /* ... 30 points (BN6_ARM_POINTS_BN5) */
+#define BN5_NAVI_NAMES    0x0873C978u /* its Navis' names, a text archive by NameID - 0x100 (BN6_NAVI_NAMES_REF's; 145 entries) */
+/* Its Navis' records: per AI index a block of the ROM, struct1 first, its code after; Team Colonel's six and the Dark Soul's */
+#define BN5_NAVI_ID_FIRST 0x100       /* its Navis' enemy ids from here, six versions an AI (V1, V2, V3, SP, DS, a sixth unused) */
+#define BN5_DARK_SOUL_ID  0x18D       /* the Dark Soul's id (AI 0x16, one version): what a Chaos Unison released at the wrong time spawns */
+#define BN5_NAVI_DARK_SOUL 0x16       /* its AI index */
+/* What BN6's engine lacks, which a Navi's moved code calls: stubbed */
+#define BN5_CLAIM_SPAWN   0x080EA08Cu /* a panel claim spawned (the fourth kind's 0x83) where the battle is a gate's (0x080090E8: BattleState
+                                       * +0x32 bit 0x40, set by 0x0802D594 alone), else r0 0: the stub's answer, its result unread by its callers */
+#define BN5_CLAIM_SPAWN2  0x080EA0BAu /* ... its other spawner, the same */
+#define BN5_CHIP_AI_TEST  0x0802C10Au /* the DS version's chip AI: whether it is under way (AIData +0xF0; set only by BN5_CHIP_AI_ENTER) */
+#define BN5_CHIP_AI_ENTER 0x0802C114u /* ... entered, from a Navi's own code where its version (AIData +0x16) is 4, the DS */
+#define BN5_CHIP_AI_RUN   0x0802B804u /* ... run each frame while under way */
+#define BN5_CHIP_AI_DARK  0x0802BA18u /* ... the Dark Soul's own */
+#define BN5_COLONEL_TABLE 0x02034000u /* Colonel's two 8-byte entries by alliance (written by his AI and the engine's 0x08011C48, read by his
+                                       * attacks' objects): BN6_COLONEL_TABLE in BN6 */
+#define BN5_CHAOS_FAIL_SPAWN 0x08006AAEu /* where a failed Chaos Unison spawns the Dark Soul (BN5_DARK_SOUL_ID) on the other side */
 
 #endif

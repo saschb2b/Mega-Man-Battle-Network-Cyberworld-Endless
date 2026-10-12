@@ -34,6 +34,15 @@
 #define BN6_SET_PANEL_TYPE_IW 0x030079A0u /* bn6f object_setPanelType in IWRAM (r0 column, r1 row, r2 type): a panel of type 0 refused, 9-12 given 0x708 */
 #define BN6_SET_PANEL_TYPE    0x0800CC0Au /* ... its ROM entry, every chip's and attack's: push {r4,r5,r6,lr}, then BN6_SET_PANEL_TYPE_IW */
 #define BN6_WEAKNESS          0x03007440u /* IWRAM: a byte by element x 5 + the attacker's element (0-4), the damage's shift: 1 where it is weak (0x0300742E) */
+/* What a hit adds for the panel its victim stands on (IWRAM 0x03007668,
+ * from the hit pass at 0x03007416 and 0x030076F6, each result added to the
+ * victim's +0x82 or +0x94): r0 the victim's collision data, r1 the
+ * attack's; back in r0 the attack's damage once more for Fire on grass,
+ * else 0. BN5's twin (BN5_PANEL_BONUS) doubles Elec on sea as well: BN6's
+ * branches past that test, the body it took left behind it */
+#define BN6_PANEL_BONUS       0x03007668u /* the routine, push {r4,lr}; its */
+#define BN6_PANEL_BONUS_TESTS 0x03007678u /* ... tests, cmp r1,#1 (r0 the panel's type, r1 the attack's element, r4 its collision data), to */
+#define BN6_PANEL_BONUS_SPAN  0x16        /* ... its last pop (0x0300768C): their bytes, the image's at 0x081D7B78 */
 
 /* A panel's update each frame (0x0800C380, from the field's loop
  * 0x0800BFC4, r7 the panel), and what stands on one (0x0801A186, from each
@@ -61,6 +70,7 @@
 #define BN6_COLL_PANEL_X      0x0A        /* the panel it stands on: its column, */
 #define BN6_COLL_PANEL_Y      0x0B        /* ... and its row */
 #define BN6_COLL_HIT          0x0F        /* the hit's bits (3: struck): BN5 ORs them into its +0x18 and +0x19 too, which it ORs here, BN6 here alone */
+#define BN6_COLL_DAMAGE       0x2E        /* u16, an attack's damage, what each of its hits deals (BN5's +0x2E too) */
 /* (BN6_COLL_FLAGS, bn6.h's, its object's flags as bn6f's object_getFlag reads them, 0x0801A166: poison spares 0x08000028,
  * lava 0x20 and 0x88000206, its damage 9) */
 #define BN6_COLL_DAMAGE_ADD   0x84        /* u16, damage taken outside a hit (lava's), taken off at 0x0800EAC4 */

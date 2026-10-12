@@ -20,6 +20,7 @@
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
 #include "xvirus_grow.h"
+#include "xvirus_move.h"
 #include "xvirus_tx.h"
 
 #define BUS        0x08000000u
@@ -99,8 +100,9 @@ static uint32_t resolve(uint32_t target, void *user) {
 	for (int i = 0; i < c->f->ncalls; ++i)
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
-			/* (one of BN6's routines, or one of the second-level dispatch's spawners) */
-			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL)) break;
+			/* (one of BN6's routines, one of the second-level dispatch's spawners, or one of the Navis' stubs in their code's room,
+			 * xnavi_install.c) */
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART)) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -367,7 +369,9 @@ static void names_set(const XVirusFamily *f, const Game *g) {
 /* Its sprites copied (a compressed one decompressed: BN6 draws a battle
  * sprite whose pointer has bit 31 only once its battle's start put it in
  * a cache) and listed in their grown lists, each number one that BN6's
- * placeholder holds there */
+ * placeholder holds there; a sprite an install before placed at its place
+ * and number (the Navis' shared art, xnavi_recipe.h) kept, its bytes
+ * checked */
 static void sprites_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->nsprites && !xv_failed(); ++i) {
 		const XvSprite *s = &f->sprites[i];
@@ -377,6 +381,12 @@ static void sprites_set(const XVirusFamily *f, const Game *g) {
 			xv_fail("its sprite %d:%#x (%u bytes, %u of room)", s->list, s->index, (unsigned)len, (unsigned)s->room);
 			free(d);
 			return;
+		}
+		if (xvirus_list_slot(s->to_list) >= 0 && emu_read32(XV_LISTS + (uint32_t)xvirus_list_slot(s->to_list) * XV_STEP + 4u * s->to_index) == s->at) {
+			for (uint32_t b = 0; b < len && !xv_failed(); ++b)
+				if (emu_read8(s->at + b) != d[b]) xv_fail("its sprite %d:%#x at %08x is another's", s->list, s->index, (unsigned)s->at);
+			free(d);
+			continue;
 		}
 		uint8_t *p = xv_put(s->at, len, true);
 		if (p) memcpy(p, d, len);
@@ -577,6 +587,39 @@ bool xvirus_install_family(const XVirusFamily *f) {
 		f->first_id + XV_VERSIONS - 1, (unsigned)used, c.pool.n);
 	return true;
 }
+
+/* ---- the code mover, for the Navis' install too (xvirus_move.h) ---- */
+
+static Ctx move_ctx;
+static Game move_game;
+
+bool xv_move_begin(const XVirusFamily *f) {
+	memset(&move_ctx, 0, sizeof move_ctx);
+	move_ctx.f = f;
+	move_ctx.pool = (ThumbVeneers){ move_ctx.veneers, f->home + XV_HOME_VENEERS, (int)(sizeof move_ctx.veneers / THUMB_VENEER_SIZE), 0 };
+	if (!game_of(f->game, &move_game)) return xv_fail("%s: its game's ROM is not read", f->name);
+	move_ctx.rom = move_game.rom;
+	return true;
+}
+
+void xv_move_code(void) {
+	const XVirusFamily *f = move_ctx.f;
+	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(&move_ctx, &f->blocks[i]);
+	for (int i = 0; i < f->nclones && !xv_failed(); ++i) clone_move(&move_ctx, &f->clones[i]);
+	uint8_t *v = move_ctx.pool.n ? xv_put(move_ctx.pool.base, (uint32_t)move_ctx.pool.n * THUMB_VENEER_SIZE, true) : NULL;
+	if (v) memcpy(v, move_ctx.veneers, (size_t)move_ctx.pool.n * THUMB_VENEER_SIZE);
+}
+
+uint32_t xv_move_ref(XvRef r) { return ref_to(move_ctx.f, r); }
+
+void xv_move_art(void) {
+	if (!xv_failed()) sprites_set(move_ctx.f, &move_game);
+	if (!xv_failed()) effects_set(move_ctx.f, &move_game);
+	if (!xv_failed()) types_set(move_ctx.f, &move_game);
+}
+
+const uint8_t *xv_move_rom(void) { return move_ctx.rom; }
+int xv_move_veneers(void) { return move_ctx.pool.n; }
 
 const XVirusFamily *xvirus_installed(int game, int src_ai) {
 	for (int i = 0; i < ninstalled; ++i)

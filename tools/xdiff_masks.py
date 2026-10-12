@@ -3,11 +3,15 @@ each role attributed from both traces (the family's, MegaMan's, a native's, the 
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
 from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
-                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16)
+                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16, u32)
 from xdiff_events import engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+# the hit spark's spawner's return address in each game (BN5 0x080E09B4, BN6 0x080E1C00, called by object_spawnCollisionEffect
+# as an attack with an element strikes): a spark spawned there is the hit's, its kind and place the attack's, its look each
+# game's own (BN6's init runs its sprite a step on, 0x080E1BD0 bl 0x080026C4, which BN5's 0x080E0988 does not)
+HIT_SPARK_CALLERS = {5: 0x080E09BF, 6: 0x080E1C0B}
 
 
 # ---- masks: engine differences, each explained (legit.json) ----
@@ -33,8 +37,9 @@ def whose(f, role, canon, known, depth=0):
     that no object owns), 'engine' (an attack or effect no object owns, of a type the family's code does not
     spawn), 'panels' (the engine's spark over an actor, which BN5's lava spawns as it cools under it, and BN6's as
     src/emu/xpanels.c brings lava in: the code under test as the family's is, its presentation each game's own),
-    or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is its
-    owner's, as the owner's own first frame had it (known)."""
+    'spark' (the engine's spark where an attack with an element struck: its look each game's own, the rest the
+    attack's), or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is
+    its owner's, as the owner's own first frame had it (known)."""
     if role_name(role).startswith(tuple(f'T1:{v:#x}#' for v in canon.megaman.values())):
         return 'megaman'
     if role[0] == 'T1' and role[1] in canon.natives:
@@ -49,6 +54,11 @@ def whose(f, role, canon, known, depth=0):
     # spawned it, which is the actor's own step: MegaMan's on lava would make it his)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and len(p) == 3 and p[1] == 'obj' and p[0].startswith('T1:'):
         return 'panels'
+    # (the spark of a hit with an element, spawned by the engine's object_spawnCollisionEffect as the attack struck: its look
+    # each game's own, the rest of it the attack's: legit.json's masks)
+    e, _ = f.trace.get('spawns', {}).get(role, (None, None))
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and e is not None and e.caller == HIT_SPARK_CALLERS.get(f.game):
+        return 'spark'
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
     by = spawned_by(f.trace, role)
     if by == 'family':
@@ -139,18 +149,24 @@ def places(o):
 
 
 NO_PALETTE = 15     # the palette slot the renderer leaves where it takes none
+NEVER_DRAWN = (0x7FFF, 0xE)   # a family object's tile place and palette slot before its first draw: none of its own
+CACHE = 0x24        # a sprite state's frame copied for its place (0: none, the renderer passed it over)
 
 
 def renderer_ranks(fa, fb, last):
     """the family's renderer places read as the family's own (legit.json, maps, renderer): the renderer hands each
     object it draws its tile place and palette slot in the order it draws, from running counts over everything drawn
     before it, so a family object drawn this frame has each read as its rank among those the family's objects drawn
-    take (two sharing one, as a frame or palette already loaded, share its rank; slot 15, none taken, stays). One not
-    drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one never
-    drawn, or whose place moved undrawn, keeps its place as it is, marked (0x8000) so it never equals a rank."""
+    take (two sharing one, as a frame or palette already loaded, share its rank; slot 15, none taken, stays), drawn
+    meaning visible with its frame copied or kept (its cache set). One not drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one whose
+    place moved undrawn keeps its place as it is, marked (0x8000) so it never equals a rank; one never drawn holds its
+    slot's last occupant's (the renderer writes them as it draws, its spawn clears its record short of them), read as
+    none (NEVER_DRAWN)."""
     for f in (fa, fb):
         fam = [o for o in f.fr['objs'] if whose_role(o.role, fa, fb) == 'family']
-        drawn = [o for o in fam if o.o8(0) & 2]
+        # (drawn: visible, and its frame copied or kept this frame, its cache set: the renderer clears an undrawn sprite's
+        # cache, BN6 0x081D653A-0x081D6544, an object visible yet passed over, NumberMan's companion, among them)
+        drawn = [o for o in fam if o.o8(0) & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
         for k in (0, 1):
             taken = sorted({places(o)[k] for o in drawn} - ({NO_PALETTE} if k else set()))
             for o in fam:
@@ -162,6 +178,8 @@ def renderer_ranks(fa, fb, last):
                     last[key] = (raw, rank)
                 elif key in last and last[key][0] == raw:
                     rank = last[key][1]
+                elif key not in last:
+                    rank = NEVER_DRAWN[k]
                 sp = SPRITE[o.kind] + NODE
                 if k:
                     o.over[sp + 0x15] = (rank if rank is not None else raw) << 4 | o.rec[sp + 0x15] & 0xF

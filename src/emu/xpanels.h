@@ -9,8 +9,8 @@
  *   the lava cools plain under a spark; a Fire object on sea takes
  *   poison's damage (hooks on BN6's code, BN5's rules in C and a little
  *   Thumb of the project's own);
- * - an Aqua hit cools lava, and a chip's lava or sea runs out after
- *   BN5's frames;
+ * - an Aqua hit cools lava, an Elec hit on what stands on sea deals its
+ *   damage twice, and a chip's lava or sea runs out after BN5's frames;
  * - how they look (xpanels_look.c): BN5's tiles and colours.
  * Numbers alone here: BN5's tiles and colours come from the player's ROM
  * as the core starts. */

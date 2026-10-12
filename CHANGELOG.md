@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **BN5's Navis in BN6's own battles (issue #82).** Team Colonel's six,
+  Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan and ToadMan, are
+  moved into BN6's battle engine where BN5's ROM is read: their own code
+  copied from the player's ROM and its calls aimed at BN6's twins, BN6's
+  Navi tables grown for them, their attacks' objects BN6 runs otherwise
+  moved with them, their sprites, effects and sounds copied in, each with
+  its V1, V2, V3 and SP. Each was fought in BN5's own engine and in BN6's
+  and compared frame by frame, what each draws by its bytes: the same,
+  alone and against MegaMan's shots and steps, but ToadMan's SP, whose
+  submerge on sea BN6's engine has no place for yet. BN6's own HeatMan,
+  moved through the same steps, plays byte for byte as before. An Elec
+  hit on a sea panel now counts twice as in BN5. The run's guardians are
+  still fought in BN5's engine; a dev step fights the moved Navis.
 - **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
   records are grown from 411 to 512 in the game's free space, its chips'
   names and descriptions to id 511, and the 257 of Team Colonel's chips a
