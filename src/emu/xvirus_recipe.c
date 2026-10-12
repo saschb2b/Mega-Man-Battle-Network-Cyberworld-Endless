@@ -100,14 +100,19 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 }
 
 #define SPRITE_LISTS 10   /* (RomLayout.sprite_lists) */
-#define TRAITS_MODES 32   /* (BN6_TRAITS_MODE's table) */
 
-/* its sprites each in its own room past XV_ART, at a number of its own */
+int xvirus_list_slot(int list) {
+	static const int grown[XV_LISTS_GROWN] = { BN6_SPRITES_VIRUSES, BN6_SPRITES_NAVIS, BN6_SPRITES_ATTACKS, BN6_SPRITES_LIST5 };
+	for (int i = 0; i < XV_LISTS_GROWN; ++i)
+		if (grown[i] == list) return i;
+	return -1;
+}
+
+/* its sprites each in its own room past XV_ART, at a number of its own in a grown list */
 static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
 	for (int i = 0; i < f->nsprites; ++i) {
 		const XvSprite *s = &f->sprites[i];
-		if (s->list >= SPRITE_LISTS || s->to_list >= SPRITE_LISTS || (s->to_list == BN6_SPRITES_ATTACKS && s->to_index >= XV_LIST_MAX))
-			return no(why, n, "sprite %d's lists", i);
+		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
 		if (s->at < XV_ART || (s->at & 3) || !s->room || s->room > XV_END - s->at) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
@@ -122,22 +127,25 @@ static bool sprites_ok(const XVirusFamily *f, char *why, size_t n) {
 static bool art_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (!sprites_ok(f, why, n)) return false;
 	for (int i = 0; i < f->neffects; ++i) {
-		if (f->effects[i].to < BN6_EFFECT_COUNT || f->effects[i].to >= XV_EFFECTS_MAX) return no(why, n, "effect %#x", f->effects[i].to);
+		if (f->effects[i].to < BN6_EFFECT_COUNT) return no(why, n, "effect %#x, one of BN6's", f->effects[i].to);
 		for (int k = 0; k < i; ++k)
 			if (f->effects[k].to == f->effects[i].to) return no(why, n, "effect %#x twice", f->effects[i].to);
 	}
-	for (int i = 0; i < f->ntypes; ++i)
+	for (int i = 0; i < f->ntypes; ++i) {
+		if (f->types[i].to == XV_T3_DISPATCH) return no(why, n, "attack type %#x, kept for the dispatch", f->types[i].to);
 		for (int k = 0; k < i; ++k)
 			if (f->types[k].to == f->types[i].to) return no(why, n, "attack type %#x twice", f->types[i].to);
-	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES || f->traits.mode >= TRAITS_MODES))
-		return no(why, n, "its struct1 laid out with no battle sprite of list 1, or mode %d", f->traits.mode);
+	}
+	if (f->traits.laid && (!f->nsprites || f->sprites[0].to_list != BN6_SPRITES_VIRUSES))
+		return no(why, n, "its struct1 laid out with no battle sprite of list 1");
 	return true;
 }
 
 bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (!f->name) return no(why, n, "no name");
-	if (f->ai < BN6_FAMILIES || f->ai >= XV_HELD_AIS) return no(why, n, "AI index %d (BN6's tables end at %d, its 35-word ones at %d)", f->ai, BN6_FAMILIES, XV_HELD_AIS);
-	if (f->first_id < 1 || f->first_id + XV_VERSIONS > 0x100) return no(why, n, "enemy ids from %#x", f->first_id);
+	if (f->ai < BN6_FAMILIES || f->ai >= XV_AIS) return no(why, n, "AI index %d (BN6's tables end at %d, the grown ones at %d)", f->ai, BN6_FAMILIES, XV_AIS);
+	if (f->first_id < XV_FIRST_ID || f->first_id + XV_VERSIONS > XV_IDS) return no(why, n, "enemy ids from %#x (the families' are %#x-%#x)", f->first_id,
+		XV_FIRST_ID, XV_IDS - 1);
 	if (f->nstates < 8 || f->nstates > XV_STATES_MAX) return no(why, n, "%d states", f->nstates);
 	if (f->home < XV_HOMES || f->home + XV_HOME_SIZE > XV_CODE || (f->home - XV_HOMES) % XV_HOME_SIZE) return no(why, n, "home %08x", (unsigned)f->home);
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");

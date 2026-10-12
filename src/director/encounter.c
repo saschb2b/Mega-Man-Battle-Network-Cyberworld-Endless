@@ -19,6 +19,7 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
 int encounter_backdrop = -1;
@@ -196,18 +197,20 @@ static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_ze
  * enemy_drop), comes in one of the folder's codes where the chip does, so
  * a chip reward leans half the time, as Mystery Data's; a Navi's chip, in
  * either entry, in its * off the folder's codes, and in his own guardian's
- * battle zenny (boss_on); with the All * helper every chip in *. (From a
- * hook: the rows and the run's codes are only read, and loot_fit_code
- * rolls nothing when always.) */
+ * battle zenny (boss_on); with the All * helper every chip in *. The row
+ * written is the one the results read, in BN6's rows or their grown copy
+ * once other games' families are installed (xvirus.h). (From a hook: the
+ * rows and the run's codes are only read, and loot_fit_code rolls nothing
+ * when always.) */
 static void lean_row(int id) {
-	if (id <= 0 || id >= 0x200) return;
-	uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
+	uint32_t row = id > 0 ? xvirus_drop_row(id) : 0;
+	if (!row) return;
 	for (uint32_t k = 0; k < 20; ++k) {
 		uint16_t v = enemy_drop(id, (int)k);
 		if (v == 0xFFFF || v >> 14) continue;
 		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
 		if (boss_on && chip_family(chip) == CHIP_FAMILY_NAVI) {
-			hook_write16(0x08000000u + row + 2 * k, boss_zenny());
+			hook_write16(row + 2 * k, boss_zenny());
 			continue;
 		}
 		char c = code >= 26 || run_all_star() ? '*' : (char)('A' + code);   /* (every chip in * with All *) */
@@ -223,7 +226,7 @@ static void lean_row(int id) {
 			chip_info(chip, &ci);
 			if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 		}
-		hook_write16(0x08000000u + row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
+		hook_write16(row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
 	}
 }
 

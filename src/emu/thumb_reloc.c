@@ -103,6 +103,9 @@ static const FormBits FORMS[THUMB_FORMS] = {
 	[THUMB_STRH] = { 0x8000, 0, 3, 6, 5, 2 },
 	[THUMB_LDRH] = { 0x8800, 0, 3, 6, 5, 2 },
 	[THUMB_LDR_PC] = { 0x4800, 8, -1, 0, 8, 4 },
+	[THUMB_LSLS] = { 0x0000, 0, 3, 6, 5, 1 },
+	[THUMB_LSRS] = { 0x0800, 0, 3, 6, 5, 1 },
+	[THUMB_ASRS] = { 0x1000, 0, 3, 6, 5, 1 },
 };
 
 bool thumb_imm_decode(uint16_t insn, ThumbForm form, ThumbImm *out) {

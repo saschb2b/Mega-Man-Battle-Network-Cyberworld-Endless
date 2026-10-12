@@ -1,5 +1,5 @@
 {
- "about": "CanRadEX (BN5's 0x52, BN6's 0xbe) alone at (6,2), MegaMan idle at (2,2) with 2000 HP: spec cangard_v1's shape for the version; its reticle strikes for 100 (BN5's per-version table at 0x0810912E)",
+ "about": "CanRadEX (BN5's 0x52, BN6's 0x203) alone at (6,2), MegaMan idle at (2,2) with 2000 HP: spec cangard_v1's shape for the version; its reticle strikes for 100 (BN5's per-version table at 0x0810912E)",
  "kind": "differential",
  "foes": "52@62",
  "mm": "22",

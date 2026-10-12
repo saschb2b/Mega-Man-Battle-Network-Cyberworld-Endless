@@ -15,6 +15,15 @@
 
 #define NAVI_CHALLENGE 40   /* % of challenges from the fourth act on against one of the area's SP navis */
 
+/* An enemy id's triple (version, actor type, AI index) as data.c reads it,
+ * a family moved into the engine's as it was installed; one of no actor
+ * type where it has none */
+static const uint8_t *triple_of(int id) {
+	static const uint8_t none[3] = { 0, 0xFF, 0 };
+	const uint8_t *t = enemy_triple(id);
+	return t ? t : none;
+}
+
 /* When a virus family first meets MegaMan on the net: 0 the surface
  * areas, 1 the Undernet, 2 the Graveyard and the Underground (3 never). The
  * comps and homepages hold families of every stage and keep to the ones the
@@ -34,7 +43,7 @@ static int family_stage(int family) {
 			int n = formations_of(areas[a].biome, &list);
 			for (int i = 0; i < n; ++i)
 				for (int k = 0; k < list[i].n; ++k) {
-					const uint8_t *row = R.data + R.layout->enemy_ids + list[i].ent[k].id * 3;
+					const uint8_t *row = triple_of(list[i].ent[k].id);
 					if (row[1] == 0 && row[2] < 32 && stage[row[2]] > areas[a].stage) stage[row[2]] = (int8_t)areas[a].stage;
 				}
 		}
@@ -46,7 +55,7 @@ static int family_stage(int family) {
 static int viruses_in(const Formation *f) {
 	int n = 0;
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29) ++n;
 	}
 	return n;
@@ -54,7 +63,7 @@ static int viruses_in(const Formation *f) {
 
 static bool reached(const Formation *f, int allowed) {
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29 && family_stage(row[2]) > allowed) return false;
 	}
 	return true;
@@ -93,7 +102,7 @@ static void build_foes(const Formation *f, int depth, int want, bool rare, Encou
 	}
 	*hp = *dmg = 0;
 	for (int i = 0; i < f->n && e->nfoes < MAX_FOES; ++i) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[i].id * 3;
+		const uint8_t *row = triple_of(f->ent[i].id);
 		Foe *o = &e->foes[e->nfoes++];
 		o->version = row[0];
 		o->family = row[2];
@@ -259,7 +268,7 @@ static uint32_t viruses_of(const Formation *f) {
 #define FAMILY_PIRANHA 2
 static int first_family(const Formation *f) {
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		if (row[1] == 0 && row[2] >= 1 && row[2] <= 29) return row[2];
 	}
 	return 0;
@@ -269,7 +278,7 @@ static int first_family(const Formation *f) {
 static uint64_t families_of(const Formation *f) {
 	uint64_t in = 0;
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		if (row[1] == 0 && row[2] > 0 && row[2] < 32) in |= (uint64_t)1 << row[2];
 	}
 	return in;
@@ -279,7 +288,7 @@ static uint64_t families_of(const Formation *f) {
 static int family_count(const Formation *f, int family) {
 	int n = 0;
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		n += row[1] == 0 && row[2] == family;
 	}
 	return n;
@@ -415,7 +424,7 @@ static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
  * version cut, drawn as MegaMan */
 static bool navi_reserved(const Formation *f) {
 	for (int k = 0; k < f->n; ++k) {
-		const uint8_t *row = R.data + R.layout->enemy_ids + f->ent[k].id * 3;
+		const uint8_t *row = triple_of(f->ent[k].id);
 		if (row[1] == 1 && super_reserved_ai(row[2])) return true;
 	}
 	return false;

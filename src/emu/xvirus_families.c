@@ -11,7 +11,7 @@
 #define BN6(a)  { (a), false }   /* one of BN6's */
 #define SAME(a) { (a), (a) }     /* a call of BN6's own code to the same routine, through a veneer */
 
-/* ---- the control: BN6's own Mettaur (AI 1) moved, as AI 32 ----
+/* ---- the control: BN6's own Mettaur (AI 1) moved, as AI 32 with ids from 0x200 ----
  * Its code is 0x0810AFEC-0x0810B5EF, between its held chips and the next
  * family's records: a recursive walk from its state table's own entries
  * reached 1276 bytes of code, 17 literal words and 5 jump tables, and the
@@ -65,7 +65,7 @@ const XVirusFamily xvirus_control = {
 	.game = XV_GAME_BN6,
 	.src_ai = 1,
 	.ai = 32,
-	.first_id = 0xBB,
+	.first_id = XV_FIRST_ID,
 	.home = XV_HOMES,
 	.blocks = control_blocks, .nblocks = (int)(sizeof control_blocks / sizeof *control_blocks),
 	.data = control_data, .ndata = (int)(sizeof control_data / sizeof *control_data),
@@ -81,7 +81,7 @@ const XVirusFamily xvirus_control = {
 	.ice = XV_ICE_OWN,    /* (AI 1's in BN6_ICE_SIZES: 0) */
 };
 
-/* ---- BN5's CanGard (AI 14 there, its enemy ids 0x4F-0x54), as AI 32 ----
+/* ---- BN5's CanGard (AI 14 there, its enemy ids 0x4F-0x54), as AI 32 with ids 0x200-0x205 ----
  * Two blocks of BN5's: CanGard's own code from its first state on, with
  * its jump tables, its state table in BN5's layout (dead in the copy), its
  * per-version tables of numbers and a mask, to the next family's records
@@ -153,8 +153,8 @@ static const XvRef cangard_states[] = {
 };
 
 static const XvSprite cangard_sprites[] = {
-	{ 1, 0x0E, 1, 0x1E, XV_ART, 0x3000 },            /* CanGard (LZ77 in BN5), at list 1's placeholder 0x1E */
-	{ 4, 0x24, 4, 0x5C, XV_ART + 0x3000, 0x800 },    /* the reticle, past list 4's 92 */
+	{ 1, 0x0E, 1, 0x1E, XV_ART, 0x3000 },            /* CanGard (LZ77 in BN5), at list 1's placeholder 0x1E (the grown list's) */
+	{ 4, 0x24, 4, 0x5C, XV_ART + 0x3000, 0x800 },    /* the reticle, past list 4's 92 in its grown copy */
 	{ 4, 0x3D, 4, 0x5D, XV_ART + 0x3800, 0xC00 },    /* the muzzle's blast */
 };
 static const XvId cangard_effects[] = { { 0x57, 0x6C } };
@@ -165,7 +165,7 @@ const XVirusFamily xvirus_cangard = {
 	.game = XROM_BN5_COLONEL_US,
 	.src_ai = 14,
 	.ai = 32,
-	.first_id = 0xBB,
+	.first_id = XV_FIRST_ID,
 	.home = XV_HOMES,
 	.blocks = cangard_blocks, .nblocks = (int)(sizeof cangard_blocks / sizeof *cangard_blocks),
 	.data = cangard_data, .ndata = (int)(sizeof cangard_data / sizeof *cangard_data),
@@ -187,3 +187,6 @@ const XVirusFamily xvirus_cangard = {
 	.effects = cangard_effects, .neffects = (int)(sizeof cangard_effects / sizeof *cangard_effects),
 	.types = cangard_types, .ntypes = (int)(sizeof cangard_types / sizeof *cangard_types),
 };
+
+const XVirusFamily *const xvirus_bn5[] = { &xvirus_cangard };
+const int xvirus_bn5_count = (int)(sizeof xvirus_bn5 / sizeof *xvirus_bn5);

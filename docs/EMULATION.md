@@ -88,7 +88,11 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x2E0000`-`+0x2E1000` | BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
 | `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
 | `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
-| `+0x330000`-`+0x350000` | Virus families moved into BN6's battle engine (issue #82; docs/MULTIROM.md, Transplanted families), written once a core as it starts, at fixed addresses (a state's pointers into them stay good; the ROM copy is not in a state, so every boot writes them the same): `+0x330000` BN6's eleven per-family tables grown from 32 AI indexes to 64, `0x100` apart (BN6's 32 entries, then AI 0's, then the families'), their literals pointed at them; `+0x330B00` the ice blocks' sizes (`BN6_ICE_SIZES`) grown the same way to 64 bytes, the triple's virus word pointed at them (`+0x330B40`-`+0x330C00` free); `+0x330C00` sprite list 4 (`BN6_SPRITES_ATTACKS`) grown from 92 numbers to 128 (the placeholder sprite in the rest), the sprite lists' word for it pointed at it; `+0x330E00` the effects (`BN6_EFFECTS`) grown from 108 to 128 (effect 0's row in the rest), their literal pointed at them; `+0x331000` the viruses' names, BN6's archive rebuilt with the families' after its own (its two literals pointed at it); `+0x332000` the families' homes, `0x800` each: the state table (BN6's layout, 16 entries at most), struct1 (`+0x40`), struct2 (`+0x48`), six empty held-chip lists (`+0x70`, where it holds none) and its veneers (`+0x200`, 12 bytes each: `push {r0,r1}; ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target); `+0x338000`-`+0x340000` their code, block by block, each the same distance from a word boundary as in its game; `+0x340000` what they draw, each sprite in a room of its own (an LZ77 one decompressed). BN5's CanGard, installed wherever BN5's ROM is read, has the first home, its code at `+0x338000` and its reticle's at `+0x338400`, its sprite at `+0x340000` (listed at list 1's `0x1E`, a placeholder in the player's ROM), the reticle's at `+0x343000` (list 4's `0x5C`) and its muzzle's blast at `+0x343800` (list 4's `0x5D`, effect `0x6C`); its attack takes BN6's empty type `0xD1` (`BN6_T3_FREE`) in BN6's own table. The control (`--dev xcontrol`: BN6's own Mettaur moved as AI 32) takes the first home and the first block in CanGard's place; BN6-side only, the guest core's BN5 copy untouched | `xvirus.c`, `xvirus_families.c` |
+| `+0x330000`-`+0x348000` | BN6's battle engine given the room other games' virus families take (issue #82, the engine's capacity; docs/MULTIROM.md, Transplanted families; docs/ROM_DATA.md, The engine's room for moved families), written once a core as it starts, before any family's install and wherever one is installed, at fixed addresses (a state's pointers into them stay good; the ROM copy is not in a state, so every boot writes them the same): each of BN6's tables below copied with its entries as the player's ROM has them and the rest its fill, the one word of the ROM that names it pointed at the copy, each word checked first. `+0x330000` the eleven per-family tables, 256 AI indexes each, `0x400` apart (AI 0's entry in the rest); `+0x332C00` the ice blocks' sizes (`BN6_ICE_SIZES`), 256 bytes; `+0x332D00` the three tables of 35 words by AI index (`BN6_AI_HOOKS`, `BN6_AI_HOOKS2`, `BN6_HELD_CHIPS`), 256 words each, `0x400` apart, their triples' virus words pointed at them (`+0x333900`-`+0x334000` free); `+0x334000` sprite lists 1, 2 (the Navis' battle sprites), 4 and 5, 256 numbers each, `0x400` apart (the placeholder sprite in the rest); `+0x335000` the effects (`BN6_EFFECTS`), 256 ids (effect 0's row in the rest); `+0x335400` the first, third and fourth kinds' types (`BN6_T1_TYPES`, `BN6_T3_TYPES`, `BN6_T4_TYPES`), 256 each, `0x400` apart (0 in the rest; T1 `0x5C`, T3 `0xD2` and T4 `0x91` kept for the second-level dispatch, never a family's); `+0x336000` the enemy ids' triples, `0x400` ids (each past BN6's `0x1C4` its filler `0xBB`'s; `+0x336C00`-`+0x337000` free); `+0x337000` the reward rows, `0x400` ids (each past BN6's `0x191` the filler's row); `+0x341000` the names of the ids from `0x200`, a text archive of 512 entries (16 KB), each an empty name until a family names it, which a hook on BN6's name lookup hands out (Hooks, below); `+0x345000`-`+0x348000` free. The battle's sprite preload is made to read an id's 12 bits, as its spawn does (`0x080029CE`, `0x080029D0`; docs/ROM_DATA.md) | `xvirus_grow.c` |
+| `+0x348000`-`+0x400000` | The families themselves (issue #82; docs/MULTIROM.md, Transplanted families): `+0x348000` their homes, 64 of `0x800`, one a family: the state table (BN6's layout, 16 entries at most), struct1 (`+0x40`), struct2 (`+0x48`), six empty held-chip lists (`+0x70`, where it holds none) and its veneers (`+0x200`, 12 bytes each: `push {r0,r1}; ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target); `+0x368000`-`+0x380000` their code, block by block, each the same distance from a word boundary as in its game; `+0x380000`-`+0x400000` what they draw, each sprite in a room of its own (an LZ77 one decompressed). A family takes an AI index from 32 and six enemy ids from `0x200`, at fixed numbers: its entries go into the grown tables above, each slot checked to hold the fill first. BN5's CanGard, installed wherever BN5's ROM is read, is AI 32 with ids `0x200`-`0x205`: the first home, its code at `+0x368000` and its reticle's at `+0x368400`, its sprite at `+0x380000` (listed at list 1's `0x1E`, a placeholder in the player's ROM), the reticle's at `+0x383000` (list 4's `0x5C`) and its muzzle's blast at `+0x383800` (list 4's `0x5D`, effect `0x6C`); its attack takes the third kind's empty type `0xD1` (`BN6_T3_FREE`). The control (`--dev xcontrol`: BN6's own Mettaur moved as AI 32, ids `0x200`-`0x205`) takes the first home and the first block in CanGard's place; BN6-side only, the guest core's BN5 copy untouched | `xvirus.c`, `xvirus_families.c` |
+| `+0x400000`-`+0x500000` | Kept for BN5's Navis in BN6's engine (issue #82, a later step; nothing written yet): their 13 per-AI tables and the four triples' Navi words grown, the arm points' records (`0x080191C8`), the companion overlay's kinds (`0x080C5B90`, `0x080C5B44`), their names archive rebuilt, their homes, code and sprites (their battle sprites in sprite list 2, grown above) | |
+| `+0x500000`-`+0x700000` | Kept for BN5's chips in BN6's engine (issue #82, a later step; nothing written yet): their records (BN6's at `0x021DA8`, grown to 512 ids), names and descriptions rebuilt, icons and pictures, the attack families' and chip routines' tables, their code | |
+| `+0x700000`-`+0x800000` | Free | |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
@@ -125,25 +129,26 @@ battle; one of BN5's records fought in BN6's engine (issue #82, the
 xrecord step, `src/core/xbattles.c`) with BN5's own row of finds, as
 BN6's (docs/ROM_DATA.md, BN5's records in BN6's engine).
 
-Where BN5's ROM is read, as the core starts (`xvirus_install`), two more
-of BN6's tables are written in place (issue #82, docs/MULTIROM.md): 18
+Where BN5's ROM is read, as the core starts (`xvirus_install`), one more
+of BN6's tables is written in place (issue #82, docs/MULTIROM.md): 18
 battlefields that no BattleSettings of BN6's names (12 bytes each at
 `0x0800D730` + n x 12: 0x09, 0x0D-0x0F, 0x11, 0x1D, 0x22-0x25, 0x28,
 0x2F-0x31, 0x46, 0x55, 0x63 and 0x64) with fields of BN5's that its
 areas' records name, their panels' types as BN6's (`src/emu/xfields.c`;
 docs/ROM_DATA.md, Battlefields and their panels' types), each first
-checked to hold BN6's own; and the reward rows of the ids a virus
-family moved into the engine takes (`0x080AC718` + id x 0x28, 0xBB-0xC0
-for CanGard) with its game's rows for its versions, each entry as
-BN6's (a chip as BN6's of its name, else 200 zenny), each first checked
-to hold BN6's own. Neither is in a state: every boot with the same ROMs
-writes them the same, and BN6's own battles name none of those fields
-or ids.
+checked to hold BN6's own. It is not in a state: every boot with the
+same ROMs writes them the same, and BN6's own battles name none of those
+fields. The reward rows of the ids a virus family moved into the engine
+takes (from 0x200; CanGard's 0x200-0x205) are its game's rows for its
+versions, each entry as BN6's (a chip as BN6's of its name, else 200
+zenny), in the grown copy of the rows (`+0x337000` above), each first
+checked to hold the filler the copy gives the ids past BN6's.
 
 As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
-0x28) are rewritten in the folder's codes, half the time, by a hook on the
-reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md);
-with the All * helper every chip entry in *.
+0x28, or their grown copy at `+0x337000` where a family is installed:
+the rows the results read) are rewritten in the folder's codes, half the
+time, by a hook on the reward pick just before it reads them (docs/META.md,
+docs/ROM_DATA.md); with the All * helper every chip entry in *.
 
 While a run has the All * helper (docs/META.md, issue #18), every chip
 record of ids 1-313 holds * alone (its four codes at `0x021DA8` + id x
@@ -486,9 +491,10 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
 | `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
 | `0x080003A6` | `main_awaitFrame`'s DISPSTAT loop (`src/emu/idle.c`) | answer: the CPU halted till the VBlank interrupt (The core's time) | about four times a frame (each interrupt wakes it) |
-| `0x0802D644` | the delete count raised as a virus of version 0-3 is deleted (`src/emu/xvirus.c`) | answer: returns at once for an AI index of 32 or more (a family moved into the engine, docs/MULTIROM.md), whose byte would lie past the 32 BN6 counts (`0x02000070`) | where a family is installed: once a virus deleted |
+| `0x0802D644` | the delete count raised as a virus of version 0-3 is deleted (`src/emu/xvirus_grow.c`) | answer: returns at once for an AI index of 32 or more (a family moved into the engine, docs/MULTIROM.md), whose byte would lie past the 32 BN6 counts (`0x02000070`) | where a family is installed: once a virus deleted |
 | `0x0802D652` | the delete count's read (the rare versions' check) | answer: 0 for an AI index of 32 or more | the same: once a rare version is looked for |
 | `0x0802D65E` | a rare version's deletion (version 4-5: with event flag 0x1D8 set, the AI index put at `0x0203EAEA` for the chat of new virus data after the results) | answer: returns at once for an AI index of 32 or more | the same: once a rare version deleted |
+| `0x0800EC56` | an enemy id's name (`BN6_NAME_OF`: the viruses' archive, the Navis' past 0xFF, and the id's low byte; `src/emu/xvirus_grow.c`) | answer: for an id from 0x200, a family's, the families' archive (`EMU_FREE` + `0x341000`) and its entry there, id - 0x200 | where a family is installed: once a name plate, as a battle begins |
 
 The duel's two are set as the duel begins and taken off as it ends, so
 the other battles carry no hook a frame per object. The hooks replaced
@@ -576,25 +582,30 @@ MULTIROM.md, Transplanted families). Each of its two specs runs three
 headless battles, each from the same boot, layer and keys and each against
 one Mettaur at the same panel, started by the foes step (`0:foes 01@52`):
 BN6's own, BN6's own with the control installed (`--dev xcontrol`), and
-the control's moved Mettaur (`0:foes BB@52`); it compares them frame by
+the control's moved Mettaur (`0:foes 200@52`); it compares them frame by
 frame, every byte, and each byte that differs must have its reason (a
 pointer into what was moved, read through the installer's map; the enemy
-id and AI index where the battle keeps them; the delete count the
+id and AI index where the battle keeps them; the text archive the name
+plate reads its name from, BN6's viruses' for 0x01 and the families' for
+0x200; the delete count the
 installer's hook keeps AI 32 out of; the interrupt stack below its
 `sp_irq`, `0x03007F60`, dead between frames, where an interrupt's entry
 lands a few cycles apart as the moved code runs). The values of the enemy
 id and AI index are allowed wherever they stand, not at fixed addresses;
 the tool prints each address they explained (the battle's three copies of
-the id, the AI index at `0x02034181`, and the index times 4 that the
+the id, each a u16: `0x020348D4`, `0x0203AAB0`, `0x0203EB56`; the name
+plate's archive at `0x0200A260`, the AI index at `0x02034181`, and the index times 4 that the
 dispatcher leaves in r4: in the deferred-call queue at `0x0200A4A4`, and
 in the parameters of an ice block it spawns, `0x02036874`). The `fight`
 spec: seed 1, MegaMan at 1000 HP (`--dev hp=1000`): 3899 frames of battle
-each, the native and installed runs the same at every byte but a word
-naming the viruses' names, whose archive the install moved, and the moved
+each, the native and installed runs the same at every byte (BN6's tables
+grown for the families and the control installed, BN6's battle reads them
+as its own: not one byte differs), and the moved
 Mettaur the same as BN6's to the results (2903 frames: it changes rows 6
 times and attacks 21 times, its shockwaves taking 110 of MegaMan's HP, and
 takes 12 shots and 3 charged ones to its deletion), where the reward comes
-from each id's own drop row (`0x4064` and `0x403C`). One immediate changed
+from each id's own drop row (`0x4064` both: the control's rows are
+Mettaur's, copied to its ids). One immediate changed
 in the copy (the counter time at `0x0810B142`, `0x1E` to `0x1F`) shows at
 frame 365. The fight never leaves the Mettaur's own states (8-12), so the
 `status` spec gives it, by the status step (`0:status freeze 90`,
@@ -602,7 +613,7 @@ docs/DEVTOOLS.md), each status a hit leaves for the engine to act on, at
 the same frames in all three runs: frozen 90 frames (shot at twice),
 paralysed and bubbled the same, dragged, pushed along, frozen 200 frames
 left to thaw, then the fight's keys: 6299 frames each, native and
-installed the same but for the names' pointer, and the moved Mettaur the
+installed the same at every byte, and the moved Mettaur the
 same as BN6's to the results (3565 frames), through BN6's generic states 4
 (paralysis), 5 (drag, its 25 phases), 6 (frozen, twice) and 7 (bubble),
 their hooks of tables 6, 7, 8 and 10 called through the grown tables, and
@@ -643,12 +654,13 @@ at `0x0203EAEA`. With the installer's hooks on the delete count left out,
 versions 0-3 raise `0x02000090` and versions 4 and 5 put 32 at
 `0x0203EAEA`, and the check fails for each. `native`: BN6's Mettaur fought
 by `xcontrol.py`'s fight keys with CanGard installed and with `--dev
-nofamilies`: 3899 frames the same at every byte but the names archive's
-pointer. Beside it, the autopilot (`CYBERWORLD_AUTOPILOT=1`) with both
+nofamilies`: 3899 frames the same at every byte. Beside it, the autopilot (`CYBERWORLD_AUTOPILOT=1`) with both
 ROMs, CanGard installed and not: seed 1's 15000 frames the same run log
 and last frame, seed 15's 40000 (`--dev god`, two of BN6's battles won)
 the same run log and its checkpoint's `run.state` the same byte for byte,
-so a state saved on a map carries nothing of the install. Not checked there: a real
+so a state saved on a map carries nothing of the install (again with
+BN6's tables grown for the families, against `--dev nofamilies`: run
+log, `run.state`, `run.sav` and `battle.sav` the same). Not checked there: a real
 chip's hit on it, its guard against each kind of chip.
 `tools/xdiff.py` (`build.py xdiff`; docs/DEVTOOLS.md, The differential)
 checks CanGard against BN5's own CanGard, frame by frame: one battle fought

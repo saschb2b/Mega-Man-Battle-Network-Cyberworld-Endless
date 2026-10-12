@@ -572,7 +572,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
 - **The install**, once a core, all or nothing (`xvirus_install_family`):
   every write is staged and made only when every check has passed. Each
   block is copied whole to a fixed place past `EMU_FREE` (docs/
-  EMULATION.md, `+0x330000`), the same distance from a word boundary, so
+  EMULATION.md, `+0x368000`), the same distance from a word boundary, so
   its loads from its own pools and its calls within itself hold; its
   code is walked instruction by instruction (a load from the pool must
   find one of the recipe's pools, a branch stay in its block, no ARM
@@ -582,19 +582,19 @@ and its calls aimed again (`src/emu/xvirus.c`):
   ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target: every
   register, lr and the flags reach the routine as the BL left them, and
   it returns straight to the moved code), BN6's routines being beyond a
-  BL's 4 MiB reach from there (`src/emu/thumb_reloc.c`). BN6's eleven
-  per-family tables are grown to 64 AI indexes and their literals pointed
-  at them, the family's entry filled; its ids' triples, its names in a
-  rebuilt names archive, its held-chip lists' word and its ice block's
-  size (a byte per AI index, grown to 64 as the tables are) written; each
-  word of BN6's changed is read first and must be the one expected. What
-  it draws is copied too (a sprite decompressed where its game's is LZ77:
-  BN6 draws a compressed battle sprite only once its battle's start put
-  it in a cache), listed at a number of BN6's that points at the
-  placeholder sprite or past the end of sprite list 4, which is grown to
-  128 numbers, and its effects past BN6's 108 in the effects' table,
-  grown the same way; its attacks take a type BN6's table leaves empty.
-  data.c's readers are told of its ids (`EnemyMoved`), so the run's own
+  BL's 4 MiB reach from there (`src/emu/thumb_reloc.c`). Its entries go
+  into BN6's tables as they were grown for every family (the engine's
+  room, below), each slot checked to hold the fill first: the eleven
+  per-family tables, its ice block's size and its held-chip lists' word
+  at its AI index; its ids' triples; its names in the families' own
+  archive; each word of BN6's changed is read first and must be the one
+  expected. What it draws is copied too (a sprite decompressed where its
+  game's is LZ77: BN6 draws a compressed battle sprite only once its
+  battle's start put it in a cache), listed in the grown copy of its list
+  at a number that holds the placeholder sprite there (one of BN6's own
+  free numbers, or past the list's end), its effects past BN6's 108 in
+  the grown effects; its attacks take a type the grown table leaves
+  empty. data.c's readers are told of its ids (`EnemyMoved`), so the run's own
   code (the foes step, the second screen's names, a foe's HP and element)
   reads them as the engine does, not as BN6 has them (Mettaur, a blank
   name). Hooks
@@ -603,8 +603,32 @@ and its calls aimed again (`src/emu/xvirus.c`):
   looked for (docs/ROM_DATA.md, the ice block's size): the eleven tables,
   the held chips and two more 35-word tables, the delete count and the ice
   block's size.
+- **The engine's room** (`src/emu/xvirus_grow.c`; docs/ROM_DATA.md, the
+  engine's room for them): every family at fixed numbers, all at once
+  (the static model). Once a core, before any family's install and all or
+  nothing, each table a family is found through is copied past
+  `EMU_FREE` (docs/EMULATION.md, `+0x330000`) with BN6's entries and a
+  fill after them, the one word of the ROM that names it pointed at the
+  copy: the eleven per-family tables, the ice blocks' sizes and the three
+  35-word tables by AI index to 256 AI indexes; sprite lists 1, 2, 4 and
+  5, the effects and the first, third and fourth kinds' types to 256
+  (three types kept for the dispatch that will lift the byte: the third
+  kind's 0xD2, the first's 0x5C, the fourth's 0x91); the enemy ids'
+  triples and their reward rows to 0x400 ids, the ids past BN6's read as
+  its filler 0xBB. A family takes an AI index from 32 and six ids from
+  0x200, past every id BN6 has (its Navis end at 0x190, the player's
+  forms at 0x1C3); the battle reads 12 bits of an id as it spawns one,
+  and its sprite preload, which read 9, is made to read as many; the
+  names of the ids from 0x200 are an archive of their own, which a hook on
+  BN6's name lookup hands out (it took an id past 0xFF for a Navi's).
+  BN6's own battles read the copies as BN6's: with the room made they
+  are the same at every byte (`tools/xcontrol.py`, `tools/xfamily.py
+  --spec native`). Room is kept past it for BN5's Navis and chips
+  (docs/EMULATION.md, `+0x400000` and `+0x500000`). The mode byte of a
+  family's struct1 indexes BN6's 32 bytes for its families (read in one
+  battle mode): kept, a family whose game's mode is past them given 0.
 - **The control** (`--dev xcontrol`): BN6's own Mettaur, AI 1, moved
-  through the same steps as AI 32 with ids 0xBB-0xC0. It must play frame
+  through the same steps as AI 32 with ids 0x200-0x205. It must play frame
   for frame as BN6's: `tools/xcontrol.py` fights it and BN6's own under
   the same keys and compares every byte of EWRAM and IWRAM after each
   frame (docs/EMULATION.md, Testing), in two specs: a fight of shots and
@@ -612,7 +636,7 @@ and its calls aimed again (`src/emu/xvirus.c`):
   gives, one after another (BN6's generic states 4-7: paralysed, dragged,
   frozen in its ice block, bubbled; pushed along), then the fight. In
   both it does, to the battle's results, where the reward comes from each
-  id's own drop row. That is what is proven: seed 1, one Mettaur at one
+  id's own drop row (the control's ids take Mettaur's). That is what is proven: seed 1, one Mettaur at one
   panel, the paths those keys reach. Not reached: state 3 (no way in for
   a virus in BN6) and its table-9 hook, a real chip's hit (the status step
   sets what a hit leaves; the hit's resolution before it is BN6's own
@@ -624,12 +648,12 @@ and its calls aimed again (`src/emu/xvirus.c`):
   `status freeze 90`): the battle's enemies (or one enemy id's) given
   paralysis, freeze, bubble, drag or slide as a hit leaves it, for the
   frames named; BN6's engine acts on it on their next frame.
-- **The foes step** (`--input "0:foes BB@52/01@43"`, play.py's `foes`): a
+- **The foes step** (`--input "0:foes 200@52/01@43"`, play.py's `foes`): a
   battle at once in BN6's engine with the enemies named by id at their
   panels, the moved families among them.
 - **BN5's CanGard** (`xvirus_cangard`, AI 14 in BN5; docs/ROM_DATA.md,
   BN5's CanGard): installed wherever BN5's ROM is read (`--dev
-  nofamilies` leaves it out), as AI 32 with ids 0xBB-0xC0 (CanGard,
+  nofamilies` leaves it out), as AI 32 with ids 0x200-0x205 (CanGard,
   CanGrdEX, CanRaid, CanRadEX, Canlada, CanladEX). Two blocks of BN5's:
   CanGard's own code (its decide, guard and fire states, its per-frame
   hook, its dying wrapper and its release hook) and its attack's, BN5's
@@ -738,18 +762,17 @@ and its calls aimed again (`src/emu/xvirus.c`):
   family calls has its body compared with BN6's before it is paired.
 - **Its rewards**: its reward rows are its game's own for its versions,
   each entry as BN6's (a chip as BN6's of its name, else 200 zenny until
-  BN5's chips are BN6's too), written into BN6's rows of its ids, which
-  the battle's results then lean as BN6's (docs/ROM_DATA.md, BN5's
-  records in BN6's engine).
-- **Not yet**: the families after CanGard, their place in formations (a game-design
-  pass), and BN6's three 35-word per-AI tables, which a fourth family
-  would need moved. The New 3DS keeps no BN5 ROM: no family is installed
-  there. A state saved while a moved family is in battle needs the same
-  families installed to load (they are, at every boot with the same ROMs
-  and switches); one saved on a map is the same byte for byte with
-  CanGard installed or not (a checkpoint's after two of BN6's battles,
-  docs/EMULATION.md, Testing): the install stands in the way of no run
-  continued with BN5's ROM taken away or put in.
+  BN5's chips are BN6's too), written into the rows of its ids in the
+  grown copy, which the battle's results then lean as BN6's
+  (docs/ROM_DATA.md, BN5's records in BN6's engine).
+- **Not yet**: the families after CanGard and their place in formations
+  (a game-design pass). The New 3DS keeps no BN5 ROM: no family is
+  installed there. A state saved while a moved family is in battle needs
+  the same families installed to load (they are, at every boot with the
+  same ROMs and switches); one saved on a map is the same byte for byte
+  with the room made and CanGard installed or not (a checkpoint's after
+  two of BN6's battles, docs/EMULATION.md, Testing): the install stands
+  in the way of no run continued with BN5's ROM taken away or put in.
 
 ## Status
 

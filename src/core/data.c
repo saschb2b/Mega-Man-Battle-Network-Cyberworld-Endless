@@ -165,19 +165,18 @@ void chip_desc(int rom_id, char *out, size_t outlen) {
 }
 
 /* ---- enemy ids another game's family took (xvirus.c) ---- */
-#define ENEMY_IDS 0x200
 static struct {
 	int n;
 	struct { int id; EnemyMoved e; } at[ENEMIES_MOVED_MAX];
-	int16_t slot[ENEMY_IDS];   /* each id's place in at[] plus one, 0 none (the readers below are asked often) */
+	int16_t slot[ENEMY_IDS_MAX];   /* each id's place in at[] plus one, 0 none (the readers below are asked often) */
 } moved;
 
 static const EnemyMoved *moved_of(int id) {
-	return id >= 0 && id < ENEMY_IDS && moved.slot[id] ? &moved.at[moved.slot[id] - 1].e : NULL;
+	return id >= 0 && id < ENEMY_IDS_MAX && moved.slot[id] ? &moved.at[moved.slot[id] - 1].e : NULL;
 }
 
 bool enemy_moved_set(int id, const EnemyMoved *e) {
-	if (id < 0 || id >= ENEMY_IDS) return false;
+	if (id < 0 || id >= ENEMY_IDS_MAX) return false;
 	int i = moved.slot[id] - 1;
 	if (i >= 0) {
 		if (e) moved.at[i].e = *e;
@@ -203,13 +202,16 @@ uint16_t enemy_drop(int id, int k) {
 	const EnemyMoved *m = moved_of(id);
 	if (k < 0 || k >= ENEMY_DROPS) return 0xFFFF;
 	if (m && m->drops_own) return m->drops[k];
-	return R.data && id > 0 && id < ENEMY_IDS ? rom_u16(rom_off(BN6_DROP_ROWS) + (uint32_t)id * 2u * ENEMY_DROPS + 2u * (uint32_t)k) : 0xFFFF;
+	return R.data && id > 0 && id < BN6_DROP_ROW_COUNT ? rom_u16(rom_off(BN6_DROP_ROWS) + (uint32_t)id * 2u * ENEMY_DROPS + 2u * (uint32_t)k) : 0xFFFF;
 }
 
+/* (BN6's names: the viruses' to 0xFF, the Navis' past it by the id's low
+ * byte; a moved id's its own, from 0x200 those of the families alone) */
 void enemy_name(int name_id, char *out, size_t outlen) {
-	const EnemyMoved *m = name_id <= 0xFF ? moved_of(name_id) : NULL;
+	const EnemyMoved *m = moved_of(name_id);
 	if (m) snprintf(out, outlen, "%s", m->name);
-	else rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
+	else if (name_id >= 0 && name_id < 0x200) rom_text(R.layout->enemy_names[name_id > 0xFF], name_id & 0xFF, out, outlen);
+	else if (outlen) *out = 0;
 }
 
 void item_name(int id, char *out, size_t outlen) {
@@ -258,7 +260,7 @@ const int virus_def_count = sizeof virus_defs / sizeof *virus_defs;
 const uint8_t *enemy_triple(int id) {
 	const EnemyMoved *m = moved_of(id);
 	if (m) return m->triple;
-	return R.data && id >= 0 && id < 0x200 ? R.data + R.layout->enemy_ids + id * 3 : NULL;
+	return R.data && id >= 0 && id < BN6_ENEMY_IDS_COUNT ? R.data + R.layout->enemy_ids + id * 3 : NULL;
 }
 
 int enemy_id(int actor_type, int family, int version) {
@@ -266,7 +268,7 @@ int enemy_id(int actor_type, int family, int version) {
 		const uint8_t *e = moved.at[i].e.triple;
 		if (e[0] == version && e[1] == actor_type && e[2] == family) return moved.at[i].id;
 	}
-	for (int id = 0; id < 0x200; ++id) {
+	for (int id = 0; id < BN6_ENEMY_IDS_COUNT; ++id) {
 		const uint8_t *e = enemy_triple(id);
 		if (!e || e[1] > 2) break;
 		if (e[0] == version && e[1] == actor_type && e[2] == family) return id;
@@ -287,7 +289,7 @@ int navi_chip(int navi, int version) {
 static const uint8_t *enemy_record(int id) {
 	const EnemyMoved *m = moved_of(id);
 	if (m) return m->stats;
-	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_stats) return NULL;
+	if (!R.data || id < 0 || id >= BN6_ENEMY_IDS_COUNT || !R.layout->enemy_stats) return NULL;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
 	if (e[1] > 2) return NULL;
 	uint32_t types = rom_u32(R.layout->enemy_stats + (uint32_t)e[1] * 4);
@@ -313,7 +315,7 @@ const char *elem_name(int elem) {
 static const uint8_t *enemy_traits(int id) {
 	const EnemyMoved *m = moved_of(id);
 	if (m) return m->traits;
-	if (!R.data || id < 0 || id >= 0x200 || !R.layout->enemy_traits) return NULL;
+	if (!R.data || id < 0 || id >= BN6_ENEMY_IDS_COUNT || !R.layout->enemy_traits) return NULL;
 	const uint8_t *e = R.data + R.layout->enemy_ids + id * 3;
 	if (e[1] > 2) return NULL;
 	uint32_t types = rom_u32(R.layout->enemy_traits + (uint32_t)e[1] * 4);

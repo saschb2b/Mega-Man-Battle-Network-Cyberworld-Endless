@@ -10,6 +10,18 @@
   net's battles though BN5 has them all, and its Roll DS was taken for
   Roll. Its text now reads in BN6's codes, checked glyph for glyph
   against both games' fonts.
+- **Room for all of BN5's virus families in BN6's battle engine (issue
+  #82).** The tables BN6's engine finds a virus family through (by its AI
+  index, its enemy ids, its sprites, effects and attacks, its reward
+  rows) are grown once as the game starts, wherever BN5's ROM is read, so
+  that every family of BN5's can come in at once at numbers of its own:
+  an AI index from 32, six enemy ids from 0x200, past every id BN6 has.
+  The battle's sprite preload reads an id as the battle's spawn does (12
+  bits where it read 9: an id from 0x200 would have loaded Mettaur's
+  sprite for nothing), and the battle's name plates read the families'
+  names from an archive of their own. CanGard moves to ids 0x200-0x205
+  (`0:foes 200@52`). BN6's own battles are the same at every byte with
+  the tables grown, and room is kept past them for BN5's Navis and chips.
 - **One net, its groundwork (issue #82).** BN5's battle records can be
   fought in BN6's own engine: its viruses as BN6's where both games have
   the family (BN5's V1 and V1EX as BN6's V1, and so on) or as the family
@@ -63,7 +75,7 @@
   paralysed or dragged it lets its reticle go; each version can be
   deleted, and BN6's own battles play the same with it installed
   (`tools/xfamily.py`). Only the dev steps meet it so far (`0:foes
-  BB@52`); which nets and battles it joins is a design question for later.
+  200@52`); which nets and battles it joins is a design question for later.
 - **The groundwork for other games' viruses in BN6's own battles
   (issue #82).** A virus family's code can be moved into BN6's battle
   engine: copied from a ROM into the engine's free space, its calls
@@ -76,7 +88,7 @@
   statuses a hit gives (paralysed, dragged, frozen, bubbled, pushed); the
   ice block a frozen virus is held in takes its size by AI index too, so
   that byte table is grown with the others. Dev steps start a battle of
-  chosen foes (`0:foes BB@52`, play.py's `foes`) and give its enemies a
+  chosen foes (`0:foes 200@52`, play.py's `foes`) and give its enemies a
   status (`0:status freeze 90`, play.py's `status`). No run meets a moved
   family yet; BN5's CanGard comes next.
 

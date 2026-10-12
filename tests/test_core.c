@@ -2827,6 +2827,10 @@ static void test_thumb_imm(void) {
 		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x3E, 0x8FE8 },
 		{ 0x8008, { THUMB_STRH, 0, 1, 0 }, 2, 0x8048 },
 		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1020, 0x49FF },
+		/* (the sprite preload's id mask, 9 bits to 12: xvirus_grow.c) */
+		{ 0x07D2, { THUMB_LSLS, 2, 2, 0x1F }, 0x1C, 0x0712 },
+		{ 0x0DD2, { THUMB_LSRS, 2, 2, 0x17 }, 0x14, 0x0D12 },
+		{ 0x1109, { THUMB_ASRS, 1, 1, 4 }, 8, 0x1209 },
 	};
 	for (size_t i = 0; i < sizeof ok / sizeof *ok; ++i) {
 		uint16_t insn = ok[i].insn;
@@ -2848,6 +2852,9 @@ static void test_thumb_imm(void) {
 		{ 0x7868, { THUMB_LDRB, 0, 5, 1 }, 32 },
 		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x25 },
 		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1024 },
+		{ 0x07D2, { THUMB_LSLS, 2, 2, 0x1F }, 32 },  /* a shift past 31 */
+		{ 0x07D2, { THUMB_LSRS, 2, 2, 0x1F }, 0x1C }, /* lsls read as lsrs */
+		{ 0x0DD2, { THUMB_LSRS, 2, 3, 0x17 }, 0x14 }, /* another register shifted */
 		{ 0x2007, { THUMB_FORMS, 0, 0, 7 }, 9 },
 	};
 	for (size_t i = 0; i < sizeof no / sizeof *no; ++i) {
@@ -2913,7 +2920,7 @@ static void test_xvirus_recipe(void) {
 	char why[160] = "";
 	const XVirusFamily *c = &xvirus_control;
 	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: the control's recipe refused: %s", why);
-	CHECK(c->ai == 32 && c->first_id == 0xBB && c->nstates == 13 && c->ncalls == 32 && c->ice == XV_ICE_OWN,
+	CHECK(c->ai == 32 && c->first_id == XV_FIRST_ID && c->nstates == 13 && c->ncalls == 32 && c->ice == XV_ICE_OWN,
 		"xvirus: the control is AI %d from id %#x", c->ai, c->first_id);
 	/* (its code and data: every halfword of its block code or one range of data) */
 	const XvBlock *b = &c->blocks[0];
@@ -2926,8 +2933,16 @@ static void test_xvirus_recipe(void) {
 	f.ai = 31;
 	recipe_refused(&f, "one of BN6's own AI indexes");
 	f = *c;
-	f.ai = XV_HELD_AIS;
-	recipe_refused(&f, "an AI index past the 35-word tables");
+	f.ai = XV_AIS;
+	recipe_refused(&f, "an AI index past the grown tables");
+	f = *c;
+	f.first_id = 0xBB;
+	recipe_refused(&f, "enemy ids among BN6's own");
+	f.first_id = XV_IDS - XV_VERSIONS + 1;
+	recipe_refused(&f, "enemy ids past the grown ones");
+	f.first_id = XV_IDS - XV_VERSIONS;
+	f.ai = XV_AIS - 1;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: the last AI index and ids refused: %s", why);
 	f = *c;
 	f.home = XV_HOMES + 4;
 	recipe_refused(&f, "a home off its slot");
@@ -3000,7 +3015,7 @@ static void test_xvirus_cangard(void) {
 	char why[160] = "";
 	const XVirusFamily *c = &xvirus_cangard;
 	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: CanGard's recipe refused: %s", why);
-	CHECK(c->game == XROM_BN5_COLONEL_US && c->src_ai == 14 && c->ai == 32 && c->first_id == 0xBB && c->nstates == 12 &&
+	CHECK(c->game == XROM_BN5_COLONEL_US && c->src_ai == 14 && c->ai == 32 && c->first_id == XV_FIRST_ID && c->nstates == 12 &&
 		c->ncalls == 39 && c->nimms == 6 && c->nsprites == 3 && c->traits.laid && c->traits.shadow && !c->traits.element,
 		"xvirus: CanGard is AI %d from id %#x, %d states, %d calls", c->ai, c->first_id, c->nstates, c->ncalls);
 	int code[2] = { 0, 0 };
@@ -3031,6 +3046,12 @@ static void test_xvirus_cangard(void) {
 	sprites[2] = c->sprites[2];
 	sprites[0].to_list = 4;
 	recipe_refused(&f, "its battle sprite out of the viruses' list");
+	sprites[0] = c->sprites[0];
+	sprites[2].to_list = 3;
+	recipe_refused(&f, "a sprite in a list not grown");
+	sprites[2] = c->sprites[2];
+	sprites[2].to_index = 0xFF;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a sprite at the grown list's last number refused: %s", why);
 	XvId fx = { 0x57, 0x61 };
 	f = *c;
 	f.effects = &fx;
@@ -3040,45 +3061,102 @@ static void test_xvirus_cangard(void) {
 	f.types = types;
 	f.ntypes = 2;
 	recipe_refused(&f, "two attacks at one type");
+	types[1].to = XV_T3_DISPATCH;
+	recipe_refused(&f, "an attack at the type the dispatch keeps");
+	types[1].to = 0xD5;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: an attack past BN6's types refused: %s", why);
+	/* (a mode past BN6's table is taken, BN6's record given XV_MODE_PAST: BN5's TestVirs and Tuby) */
 	f = *c;
-	f.traits.mode = 32;
-	recipe_refused(&f, "a mode past BN6's table");
+	f.traits.mode = 0x22;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a mode past BN6's table refused: %s", why);
+	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == XV_LISTS_GROWN - 1 && xvirus_list_slot(3) < 0,
+		"xvirus: the grown lists' places");
+}
+
+/* BN5's families at fixed numbers, all at once (issue #82, the static
+ * model): each recipe whole, and no two sharing an AI index, an enemy id,
+ * a home, a byte of code or art past EMU_FREE, a sprite number, an effect
+ * or an attack's type */
+static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
+
+static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
+	int bad = f->ai == g->ai || spans_meet((uint32_t)f->first_id, XV_VERSIONS, (uint32_t)g->first_id, XV_VERSIONS) ||
+		spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE);
+	for (int i = 0; i < f->nblocks; ++i)
+		for (int k = 0; k < g->nblocks; ++k)
+			bad += spans_meet(f->blocks[i].at, f->blocks[i].end - f->blocks[i].start, g->blocks[k].at, g->blocks[k].end - g->blocks[k].start);
+	for (int i = 0; i < f->nsprites; ++i)
+		for (int k = 0; k < g->nsprites; ++k)
+			bad += spans_meet(f->sprites[i].at, f->sprites[i].room, g->sprites[k].at, g->sprites[k].room) ||
+				(f->sprites[i].to_list == g->sprites[k].to_list && f->sprites[i].to_index == g->sprites[k].to_index);
+	for (int i = 0; i < f->neffects; ++i)
+		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+	for (int i = 0; i < f->ntypes; ++i)
+		for (int k = 0; k < g->ntypes; ++k) bad += f->types[i].to == g->types[k].to;
+	return bad;
+}
+
+static void test_xvirus_static(void) {
+	char why[160] = "";
+	CHECK(xvirus_bn5_count >= 1 && xvirus_bn5[0] == &xvirus_cangard, "xvirus: BN5's families listed (%d)", xvirus_bn5_count);
+	for (int i = 0; i < xvirus_bn5_count; ++i) {
+		const XVirusFamily *f = xvirus_bn5[i];
+		CHECK(xvirus_recipe_ok(f, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xvirus: %s refused: %s", f->name, why);
+		for (int k = 0; k < i; ++k)
+			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
+	}
+	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
+	XVirusFamily twin = xvirus_cangard;
+	twin.ai = 33;
+	twin.first_id = XV_FIRST_ID + XV_VERSIONS;
+	twin.home = XV_HOMES + XV_HOME_SIZE;
+	CHECK(static_clashes(&twin, &xvirus_cangard) > 0, "xvirus: two families' code and art in one place not seen");
+	twin.nblocks = twin.nsprites = twin.neffects = twin.ntypes = 0;
+	CHECK(!static_clashes(&twin, &xvirus_cangard), "xvirus: a family of other numbers and nothing to place taken for a clash");
+	twin.first_id = XV_FIRST_ID + 5;
+	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
 }
 
 /* data.c's readers answer for an enemy id a family took (EnemyMoved), not
  * from the ROM, and from it again once let go */
 static void test_enemy_moved(void) {
 	EnemyMoved e = { { 2, 0, 32 }, { 0x96, 0x10, 2, 8, 0x3C, 0x00 }, { 4, 0x1E, 1, 0, 0x0E, 0, 0x80, 1 }, "CanRaid" };
-	CHECK(enemy_moved_set(0xBD, &e), "data: an enemy id moved");
+	CHECK(enemy_moved_set(0x202, &e), "data: an enemy id moved");
 	char name[20];
-	enemy_name(0xBD, name, sizeof name);
+	enemy_name(0x202, name, sizeof name);
 	int hp = 0, dmg = 0;
-	CHECK(!strcmp(name, "CanRaid") && enemy_stats(0xBD, &hp, &dmg) && hp == 150 && dmg == 60, "data: the moved id reads %s, %d HP, %d damage",
+	CHECK(!strcmp(name, "CanRaid") && enemy_stats(0x202, &hp, &dmg) && hp == 150 && dmg == 60, "data: the moved id reads %s, %d HP, %d damage",
 		name, hp, dmg);
 	/* (its first wheel's element in the HP word's top: 1 Fire, beaten by Aqua; its second-wheel weakness bit 0x80 Sword unread then) */
-	CHECK(enemy_element(0xBD) == ELEM_FIRE && enemy_weakness(0xBD) == ELEM_AQUA, "data: the moved id's element %d, weakness %d",
-		enemy_element(0xBD), enemy_weakness(0xBD));
-	const uint8_t *t = enemy_triple(0xBD);
-	CHECK(t && t[0] == 2 && t[2] == 32 && enemy_id(0, 32, 2) == 0xBD, "data: the moved id's triple and its id");
+	CHECK(enemy_element(0x202) == ELEM_FIRE && enemy_weakness(0x202) == ELEM_AQUA, "data: the moved id's element %d, weakness %d",
+		enemy_element(0x202), enemy_weakness(0x202));
+	const uint8_t *t = enemy_triple(0x202);
+	CHECK(t && t[0] == 2 && t[2] == 32 && enemy_id(0, 32, 2) == 0x202, "data: the moved id's triple and its id");
 	e.stats[1] = 0;   /* (no first-wheel element: the second wheel's) */
-	enemy_moved_set(0xBD, &e);
-	CHECK(enemy_element(0xBD) == ELEM_NULL && enemy_weakness(0xBD) == ELEM_SWORD, "data: the moved id's second wheel");
+	enemy_moved_set(0x202, &e);
+	CHECK(enemy_element(0x202) == ELEM_NULL && enemy_weakness(0x202) == ELEM_SWORD, "data: the moved id's second wheel");
 	/* (with no ROM read, nothing then) */
-	CHECK(enemy_moved_set(0xBD, NULL) && (R.data || (!enemy_stats(0xBD, &hp, &dmg) && enemy_triple(0xBD) == NULL)), "data: the moved id let go");
+	CHECK(enemy_moved_set(0x202, NULL) && (R.data || (!enemy_stats(0x202, &hp, &dmg) && enemy_triple(0x202) == NULL)), "data: the moved id let go");
 	/* (a moved id's own reward row, as its install wrote it: lean_row reads
 	 * it, not the player's ROM's, which gives the id another's; issue #82) */
 	EnemyMoved a = e, b = e;
 	a.drops_own = true;
 	for (int k = 0; k < ENEMY_DROPS; ++k) a.drops[k] = (uint16_t)(0x4000 | (100 + k));
 	b.triple[0] = 3;
-	CHECK(enemy_moved_set(0xBB, &a) && enemy_moved_set(0xBE, &b), "data: two ids moved");
-	CHECK(enemy_drop(0xBB, 0) == 0x4064 && enemy_drop(0xBB, 19) == 0x4077 && enemy_drop(0xBB, 20) == 0xFFFF, "data: a moved id's own reward row (%04X)",
-		enemy_drop(0xBB, 0));
-	CHECK(R.data || enemy_drop(0xBE, 0) == 0xFFFF, "data: a moved id without its own row reads the ROM's (none here)");
+	CHECK(enemy_moved_set(0x200, &a) && enemy_moved_set(0x203, &b), "data: two ids moved");
+	CHECK(enemy_drop(0x200, 0) == 0x4064 && enemy_drop(0x200, 19) == 0x4077 && enemy_drop(0x200, 20) == 0xFFFF, "data: a moved id's own reward row (%04X)",
+		enemy_drop(0x200, 0));
+	CHECK(R.data || enemy_drop(0x203, 0) == 0xFFFF, "data: a moved id without its own row reads the ROM's (none here)");
 	/* (the first let go: the last moved into its place, still found by its id) */
-	CHECK(enemy_moved_set(0xBB, NULL) && enemy_triple(0xBE) && enemy_triple(0xBE)[0] == 3 && enemy_drop(0xBB, 0) != 0x4064,
+	CHECK(enemy_moved_set(0x200, NULL) && enemy_triple(0x203) && enemy_triple(0x203)[0] == 3 && enemy_drop(0x200, 0) != 0x4064,
 		"data: an id let go, the other still read as moved");
-	enemy_moved_set(0xBE, NULL);
+	enemy_moved_set(0x203, NULL);
+	/* (the ids a family may take: to 0x400; one from 0x200 no family took has no name) */
+	CHECK(!enemy_moved_set(ENEMY_IDS_MAX, &a) && enemy_moved_set(ENEMY_IDS_MAX - 1, &a) && enemy_triple(ENEMY_IDS_MAX - 1), "data: the last id a family may take");
+	enemy_moved_set(ENEMY_IDS_MAX - 1, NULL);
+	name[0] = 'x';
+	enemy_name(0x201, name, sizeof name);
+	CHECK(!name[0] && !enemy_triple(0x201), "data: an id from 0x200 no family took (%s)", name);
 }
 
 /* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
@@ -3937,6 +4015,7 @@ int main(void) {
 	test_thumb_veneers();
 	test_xvirus_recipe();
 	test_xvirus_cangard();
+	test_xvirus_static();
 	test_enemy_moved();
 	test_qr();
 	test_backup();

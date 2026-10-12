@@ -6,7 +6,7 @@ Transplanted families).
 The installer that moves another game's virus families into BN6's battle
 engine (src/emu/xvirus.c) is proven first on BN6's own Mettaur: --dev
 xcontrol moves its code, records and tables through the same steps as a
-family of BN5's, as AI 32 with enemy ids 0xBB-0xC0, and that moved Mettaur
+family of BN5's, as AI 32 with enemy ids 0x200-0x205, and that moved Mettaur
 must play frame for frame as BN6's own does. Each spec is three headless
 runs of the host build (build.py shot), each from the same boot and the
 same layer, with the same keys, each a battle the foes step starts against
@@ -16,7 +16,7 @@ IWRAM after every frame of the battle, src/emu/battle_trace.c):
   native     no family installed, BN6's Mettaur (id 0x01)
   installed  the control installed, BN6's Mettaur (id 0x01): the install
              leaves BN6's own battles alone
-  moved      the control installed, the moved Mettaur (id 0xBB)
+  moved      the control installed, the moved Mettaur (id 0x200)
 
 The specs:
 
@@ -34,11 +34,13 @@ The runs are compared frame by frame, every byte, and each byte that
 differs must have its reason (why()): a word pointing into what one run
 moved (the same once each run's installer's map reads it as the address it
 was moved from), BN6's interrupt stack (dead between frames), and between
-installed and moved alone the enemy id (0x01 as 0xBB) and the AI index (1
-as 32) where the battle keeps them, and the delete counts
-(BN6_DELETE_COUNTS, which the installer's hook keeps AI 32 out of); moved
-is compared to the battle's results, where the reward comes from each
-id's own drop row. With --story, the battle's objects (BN6_T1_OBJECTS,
+installed and moved alone the enemy id (0x01 as 0x200) and the AI index (1
+as 32) where the battle keeps them, the text archive the battle's name
+plate reads its name from (BN6's viruses' names for 0x01, the families'
+for 0x200), and the delete counts (BN6_DELETE_COUNTS, which the
+installer's hook keeps AI 32 out of); moved is compared to the battle's
+results, where the reward comes from each id's own drop row (the
+control's ids take Mettaur's). With --story, the battle's objects (BN6_T1_OBJECTS,
 BN6_T3_OBJECTS: CurAction and CurPhase, panel, HP, NameID) as they change,
 the fight the frames compared. Needs the ROM (local only), copied into
 .build/xcontrol/rom alone: a layer of BN5's would fight its battles in
@@ -66,7 +68,9 @@ BATTLE_PHASE, CUSTOM_WINDOW = 0x02034881, 0x02035292
 DELETE_COUNTS = 0x02000070
 AI_DATA_PTR = 0x58           # a battle object's AIData*: +1 its AI index
 NAME_ID = 0x28
-CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID = 32, 0xBB, 1, 0x01
+CONTROL_AI, CONTROL_ID, NATIVE_AI, NATIVE_ID = 32, 0x200, 1, 0x01
+NAMES_BN6, NAMES_FAMILIES = 0x086EE400, 0x08B41000   # the archives an id's name is read from: BN6's viruses' (RomLayout.enemy_names[0]),
+                                                     # the families' from id 0x200 (XV_NAMES, by the hook on BN6_NAME_OF)
 IRQ_STACK = (0x03007F00, 0x03007F60)   # BN6's interrupt stack below its sp_irq (0x03007F60, set by its start code)
 PHASE_RESULTS = 0x10                    # BN6_BATTLE_PHASE: the results, the reward picked from the enemy's drop row
 BATTLE_REWARD = 0x0200A00C              # (BN6_BATTLE_REWARD)
@@ -218,9 +222,11 @@ def why(off, ia, ib, ma, mb, ids):
     once read through each map); BN6's interrupt stack below sp_irq, dead
     between frames, where an interrupt's entry lands a few cycles apart as the
     moved code runs (DISPSTAT's HBlank bit as the handler read it); and with
-    `ids`, the moved Mettaur's enemy id (0x01 as 0xBB) and AI index (1 as 32,
-    and as a table's offset, x 4) where the battle keeps them, and the delete
-    counts' byte for AI 1, which the installer's hook keeps AI 32 out of."""
+    `ids`, the moved Mettaur's enemy id (0x01 as 0x200, a halfword) and AI index (1 as 32,
+    and as a table's offset, x 4) where the battle keeps them, the text archive
+    its name is read from (BN6's viruses' names for id 0x01, the families' for
+    0x200: the hook on the name lookup), and the delete counts' byte for AI 1,
+    which the installer's hook keeps AI 32 out of."""
     w = off & ~3
     va, vb = struct.unpack_from('<I', ia, w)[0], struct.unpack_from('<I', ib, w)[0]
     if va != vb and pointer(va, ma) == pointer(vb, mb):
@@ -230,8 +236,12 @@ def why(off, ia, ib, ma, mb, ids):
         return 'the interrupt stack (dead)'
     if not ids:
         return None
-    if NATIVE_ID <= a < NATIVE_ID + 6 and b == a - NATIVE_ID + CONTROL_ID:
+    h = off & ~1   # (the id a halfword, its two bytes each read through it)
+    na, nb = struct.unpack_from('<H', ia, h)[0], struct.unpack_from('<H', ib, h)[0]
+    if NATIVE_ID <= na < NATIVE_ID + 6 and nb == na - NATIVE_ID + CONTROL_ID:
         return 'the enemy id'
+    if (va, vb) == (NAMES_BN6, NAMES_FAMILIES):
+        return 'the names archive of the id'
     if (a, b) == (NATIVE_AI, CONTROL_AI):
         return 'the AI index'
     if (a, b) == (NATIVE_AI * 4, CONTROL_AI * 4):
@@ -360,7 +370,7 @@ def differential(spec, a):
     if r is not None and r < len(f_i) and r < len(f_m):
         last_i, last_m = f_i[-1][2], f_m[-1][2]
         print(f'the results from frame {r}: the reward {u16(last_i, BATTLE_REWARD):04x} (id 0x01\'s drop row) against '
-              f'{u16(last_m, BATTLE_REWARD):04x} (id 0xBB\'s), the delete counts {u8(last_i, DELETE_COUNTS + NATIVE_AI)} against '
+              f'{u16(last_m, BATTLE_REWARD):04x} (id 0x200\'s), the delete counts {u8(last_i, DELETE_COUNTS + NATIVE_AI)} against '
               f'{u8(last_m, DELETE_COUNTS + NATIVE_AI)} for AI 1 and {u8(last_m, DELETE_COUNTS + CONTROL_AI)} past them for AI 32')
     elif not any(o[0] == 'T1' and o[6] in (NATIVE_ID, CONTROL_ID) and o[2] == 2 for _, _, img in f_m for o in objects(img)):
         print('  (the Mettaur was not deleted: the run ends before the results)')

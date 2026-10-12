@@ -3,8 +3,10 @@
  * a family's own code copied whole from its game's ROM into the core's copy
  * past EMU_FREE, its calls out aimed again at BN6's routines through
  * veneers, the pointers in it moved, a state table laid out BN6's way, and
- * BN6's eleven per-family tables grown past their 32 AI indexes so the
- * family has one of its own, with its enemy ids, names and records.
+ * its entries in BN6's tables, grown past BN6's own once a core so every
+ * family has room at fixed numbers (xvirus_grow.h): an AI index from 32,
+ * six enemy ids from 0x200, its names, records, sprites, effects, attacks
+ * and reward rows.
  *
  * A family is a recipe of numbers alone (xvirus_families.c): addresses,
  * ids, counts and the CRC32s of the ranges it copies. The code and the
@@ -30,26 +32,35 @@ enum {
 };
 /* The families a run may meet (XVIRUS_*), installed into the core's ROM
  * copy once a core, as it starts (patches are not in a state: the same at
- * every boot with the same ROMs), with BN5's battlefields (xfields.h).
+ * every boot with the same ROMs), with BN5's battlefields (xfields.h); BN6's
+ * tables grown first (xvirus_grow.h), wherever a family is installed.
  * Their enemy ids then spawn them, and data.c reads those ids as the
  * engine does (EnemyMoved). Where BN5's ROM is not read yet nothing is
  * done, and a later call (a core's next start, the ROM put in on the ROMs
  * screen meanwhile) installs them. */
 void xvirus_install(int which);
-/* One family into the core's ROM copy: true once it is there (now or
- * before); false, nothing written, where any check failed (the log says
- * which). Another game's family takes its game's reward rows too, each
- * entry as BN6's (xchips.h, xchips_reward_bn6), in BN6's rows of its ids,
- * which data.c's enemy_drop then reads. */
+/* One family into the core's ROM copy (BN6's tables grown first where they
+ * are not yet): true once it is there (now or before); false, nothing of it
+ * written, where any check failed (the log says which). Its reward rows are
+ * its game's own for its versions (another game's, each entry as BN6's:
+ * xchips.h, xchips_reward_bn6) in the rows of its ids, which data.c's
+ * enemy_drop then reads. */
 bool xvirus_install_family(const XVirusFamily *f);
 /* The family of game `game` (an XRomId) whose AI index there is `src_ai`,
  * installed in this core: its recipe (its AI index and first enemy id in
  * BN6, XVirusFamily.ai and .first_id); NULL where it is not. */
 const XVirusFamily *xvirus_installed(int game, int src_ai);
+/* Where enemy `id`'s reward row is in the core's copy, which the battle's
+ * results read (BN6_DROP_ROWS, or its grown copy once the families' room
+ * is made: ids to XV_IDS); 0 for an id past them. Read only what was set
+ * as the core started, so a hook may ask (encounter.c, the reward pick). */
+uint32_t xvirus_drop_row(int id);
 
-/* What was moved where, for a trace's reader (battle_trace.c): an
- * address range of the family's game and BN6's copy of it. */
+/* What was moved where, for a trace's reader (battle_trace.c, xdiff.c): an
+ * address range of a family's game, or of one of BN6's tables, and its
+ * copy */
 typedef struct { uint32_t from, to, len; } XvMoved;
+#define XV_MOVED_MAX 512
 /* the ranges moved so far (at most max), how many */
 int xvirus_moved(XvMoved *out, int max);
 

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "data.h"
 #include "rom.h"
 #include "run.h"
 
@@ -48,7 +49,8 @@ static void add(int biome, uint32_t rec) {
 		uint16_t id = rom_u16(a + 2);
 		f->ent[f->n].panel = R.data[a + 1];
 		f->ent[f->n++].id = id;
-		if (R.data[R.layout->enemy_ids + id * 3 + 1] == 1) f->navi = true;
+		const uint8_t *t = enemy_triple(id);
+		if (t && t[1] == 1) f->navi = true;
 	}
 	if (!f->n) return;
 	origin[biome][count[biome]++] = rec;

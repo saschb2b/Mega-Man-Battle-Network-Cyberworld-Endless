@@ -31,8 +31,8 @@ static bool open_trace(void) {
 	now = malloc(IMAGE);
 	out = was && now ? emu_debug_file("btrace.bin") : NULL;
 	if (!out) { free(was); free(now); was = now = NULL; return false; }
-	XvMoved m[32];
-	int n = xvirus_moved(m, 32);
+	static XvMoved m[XV_MOVED_MAX];
+	int n = xvirus_moved(m, XV_MOVED_MAX);
 	fwrite("BTRC", 1, 4, out);
 	u32_out(1);
 	u32_out((uint32_t)n);

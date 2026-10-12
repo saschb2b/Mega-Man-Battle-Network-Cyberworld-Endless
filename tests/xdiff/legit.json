@@ -2,14 +2,14 @@
   "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The differential). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's spare ids 0xBB-0xC0 (src/emu/xvirus_families.c, .first_id); MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
-        "0x4F": "0xBB",
-        "0x50": "0xBC",
-        "0x51": "0xBD",
-        "0x52": "0xBE",
-        "0x53": "0xBF",
-        "0x54": "0xC0",
+        "0x4F": "0x200",
+        "0x50": "0x201",
+        "0x51": "0x202",
+        "0x52": "0x203",
+        "0x53": "0x204",
+        "0x54": "0x205",
         "0x180": "0x1A0"
       },
       "megaman": {

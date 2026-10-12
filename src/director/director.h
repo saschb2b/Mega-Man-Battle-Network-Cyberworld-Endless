@@ -119,7 +119,7 @@ void director_dev_hush_home(void);
 void director_dev_battle(void);
 /* Dev (the foes step, issue #82): a battle at once with these enemies, at
  * the first moment MegaMan is free on a layer's map, in BN6's engine
- * whatever the layer: "BB@52/01@43", each an enemy id in hex at its panel
+ * whatever the layer: "200@52/01@43", each an enemy id in hex at its panel
  * (column 1-6, then row 1-3), "mm@CR" MegaMan's (2,2 where none), on a
  * plain field with nothing else on it (the families moved into the engine,
  * xvirus.h, beside BN6's own); false, nothing due, where it names none. */
@@ -137,7 +137,7 @@ bool director_dev_xrecord(const char *spec);
 /* Dev (the status step, issue #82): the battle's enemies struck at once
  * with a status as a hit gives it, BN6's engine left to act on it as their
  * next frame starts (docs/MULTIROM.md, Transplanted families): "freeze
- * 90", "paralysis 60 BB" (only enemy id 0xBB), "bubble", "drag", "slide";
+ * 90", "paralysis 60 200" (only enemy id 0x200), "bubble", "drag", "slide";
  * the frames it lasts (60 where none) for the three that last. The
  * enemies struck, how many; 0 where it names none or no battle is on. */
 int director_dev_status(const char *spec);

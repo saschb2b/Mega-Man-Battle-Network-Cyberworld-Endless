@@ -45,7 +45,7 @@
    "name": "a table entry",
    "spec": "cangard_v1_keys",
    "poke": [
-    "08B30380:0810A953:4"
+    "08B30C80:0810A953:4"
    ],
    "what": "AI 32's entry of the grown per-frame table (table 3) the empty hook: the reticle no longer let go as MegaMan leaves the row"
   },

@@ -38,9 +38,9 @@ typedef struct {                                            /* an immediate chan
 
 /* A sprite of its game's (list, number; LZ77 or not) copied whole,
  * decompressed, to `at` (`room` bytes at most) and listed at BN6's
- * (to_list, to_index): a number of BN6's that points at its placeholder
- * (BN6_SPRITE_PLACEHOLDER), or one past the end of list 4
- * (BN6_SPRITES_ATTACKS), which is grown */
+ * (to_list, to_index) in the grown copy of that list (lists 1, 2, 4 and 5,
+ * XV_LISTS): a number that points at BN6's placeholder there
+ * (BN6_SPRITE_PLACEHOLDER), one of BN6's own unused or one past its end */
 typedef struct { uint8_t list, index, to_list, to_index; uint32_t at, room; } XvSprite;
 typedef struct { uint8_t from, to; } XvId;                  /* an id of its game's (an effect, an attack's type) and BN6's in its place */
 /* Its struct1 laid out BN6's way where its game lays it out otherwise
@@ -50,7 +50,8 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
  * (BN6_TRAITS_*) */
 typedef struct {
 	bool laid;                 /* false: its game's record as it is (BN6's own) */
-	uint8_t mode;              /* BN6_TRAITS_MODE: under 32 (its game's own +4) */
+	uint8_t mode;              /* its game's own +4 (BN6_TRAITS_MODE): BN6's record takes it where BN6's table has it (under
+	                              BN6_TRAITS_MODE_COUNT), else XV_MODE_PAST */
 	uint8_t element, weakness; /* BN6's second wheel: BN5's viruses have none */
 	bool shadow;
 } XvTraits;
@@ -59,8 +60,9 @@ typedef struct {
 	const char *name;          /* for the log */
 	int game;                  /* XV_GAME_BN6, or the XRomId of the ROM it comes from */
 	int src_ai;                /* its AI index in its game's per-family tables (its records are checked against them) */
-	int ai;                    /* its AI index in BN6's grown tables (BN6_FAMILIES on) */
-	int first_id;              /* its first enemy id; its versions' follow it */
+	int ai;                    /* its AI index in BN6's grown tables (BN6_FAMILIES to XV_AIS) */
+	int first_id;              /* its first enemy id (XV_FIRST_ID on, a fixed place each family: the static model, issue #82);
+	                              its versions' follow it */
 	uint32_t home;             /* its records in BN6 (XV_HOME_*): the state table, struct1, struct2, held chips, veneers */
 	const XvBlock *blocks;
 	int nblocks;
@@ -76,8 +78,7 @@ typedef struct {
 	int nstates;
 	XvRef hooks[XV_HOOKS];     /* its entries of tables 3-10 */
 	uint32_t struct1, struct2; /* its records in its game (8 bytes: sprites, element; 36: HP and damage per version) */
-	uint16_t names[XV_VERSIONS];   /* its versions' enemy ids in its game: its names' indexes there, and its reward rows' (another
-	                                  game's: xvirus.c, drops_set) */
+	uint16_t names[XV_VERSIONS];   /* its versions' enemy ids in its game: its names' indexes there, and its reward rows' */
 	uint32_t held;             /* its viruses' held chips, lists in BN6's ROM (the control's: its own); 0 none */
 	int ice;                   /* the size of the ice block it is frozen in (BN6_ICE_SIZES: 0 to XV_ICE_MAX), or XV_ICE_OWN, its
 	                              game's own for its AI index there (BN6's for the control); 0 where a recipe says none */
@@ -87,29 +88,53 @@ typedef struct {
 	const XvId *effects;       /* its game's effects it draws, each given BN6's id past BN6_EFFECT_COUNT (the table grown), its sprite
 	                              one of `sprites` */
 	int neffects;
-	const XvId *types;         /* its attacks: its game's types, whose routine is its own code, each given an empty type of BN6's */
+	const XvId *types;         /* its attacks: its game's types of the third kind, whose routine is its own code, each given a type of
+	                              the grown table whose entry is empty (BN6's 0xD1, or one past BN6's 0xD4; never XV_T3_DISPATCH) */
 	int ntypes;
 } XVirusFamily;
 
 #define XV_ICE_OWN (-1)
 #define XV_ICE_MAX 2
+/* The types kept for the second-level dispatch that lifts the byte-wide
+ * type limit (a later step of issue #82: a type per kind whose routine
+ * reads the moved routine from a table by the object's slot), each dead in
+ * BN6 (no spawn names it): never a family's */
+#define XV_T1_DISPATCH 0x5C
+#define XV_T3_DISPATCH 0xD2
+#define XV_T4_DISPATCH 0x91
+#define XV_MODE_PAST 0   /* BN6_TRAITS_MODE given a family whose game's mode is past BN6's table: its byte 0, as most of BN6's families' */
 
 /* Where it all goes, at fixed addresses (pointers into them stay good in
- * the states a session saves): EMU_FREE + 0x330000 to + 0x350000
- * (docs/EMULATION.md) */
-#define XV_AT     (EMU_FREE + 0x330000u)
-#define XV_GROWN  XV_AT                  /* BN6's 11 per-family tables grown to XV_FAMILIES entries, 0x100 apart */
-#define XV_ICE    (XV_AT + 0xB00u)       /* the ice blocks' sizes (BN6_ICE_SIZES) grown to XV_FAMILIES bytes; on to XV_LIST free */
-#define XV_LIST   (XV_AT + 0xC00u)       /* sprite list 4 (BN6_SPRITES_ATTACKS) grown to XV_LIST_MAX numbers */
-#define XV_EFFECTS (XV_AT + 0xE00u)      /* the effects (BN6_EFFECTS) grown to XV_EFFECTS_MAX ids */
-#define XV_NAMES  (XV_AT + 0x1000u)      /* the viruses' names, BN6's archive rebuilt with the families' */
-#define XV_HOMES  (XV_AT + 0x2000u)      /* the families' homes, XV_HOME_SIZE each */
-#define XV_CODE   (XV_AT + 0x8000u)      /* their code, block by block */
-#define XV_ART    (XV_AT + 0x10000u)     /* what they draw: their sprites */
-#define XV_END    (XV_AT + 0x20000u)
-#define XV_LIST_MAX    128
-#define XV_EFFECTS_MAX 128
-#define XV_FAMILIES 64                   /* AI indexes in the grown tables */
+ * the states a session saves): EMU_FREE + 0x330000 to + 0x400000
+ * (docs/EMULATION.md). First BN6's own tables, grown once a core
+ * (xvirus_grow.h): each holds BN6's entries as the player's ROM has them,
+ * the rest its fill, and the one word that names it points here */
+#define XV_AT       (EMU_FREE + 0x330000u)
+#define XV_GROWN    XV_AT                  /* BN6's 11 per-family tables grown to XV_AIS words, XV_STEP apart */
+#define XV_STEP     0x400u
+#define XV_ICE      (XV_AT + 0x2C00u)      /* the ice blocks' sizes (BN6_ICE_SIZES) grown to XV_AIS bytes */
+#define XV_PER_AI   (XV_AT + 0x2D00u)      /* the three 35-word tables by AI index grown to XV_AIS words, XV_STEP apart: BN6_AI_HOOKS,
+                                              BN6_AI_HOOKS2, BN6_HELD_CHIPS */
+#define XV_LISTS    (XV_AT + 0x4000u)      /* sprite lists 1, 2, 4 and 5 grown to XV_LIST_MAX numbers, XV_STEP apart */
+#define XV_EFFECTS  (XV_AT + 0x5000u)      /* the effects (BN6_EFFECTS) grown to XV_EFFECTS_MAX ids */
+#define XV_TYPES    (XV_AT + 0x5400u)      /* the first, third and fourth kinds' types grown to XV_TYPES_MAX, XV_STEP apart */
+#define XV_IDS_AT   (XV_AT + 0x6000u)      /* the enemy ids' triples grown to XV_IDS */
+#define XV_ROWS     (XV_AT + 0x7000u)      /* the reward rows (BN6_DROP_ROWS) grown to XV_IDS */
+#define XV_NAMES    (XV_AT + 0x11000u)     /* the names of ids from XV_FIRST_ID: a text archive of XV_IDS - XV_FIRST_ID entries (BN6_NAME_OF's
+                                              third, by a hook) */
+#define XV_NAMES_ROOM 0x4000u
+/* then the families' own */
+#define XV_HOMES    (XV_AT + 0x18000u)     /* the families' homes, XV_HOME_SIZE each, XV_FAMILIES of them */
+#define XV_CODE     (XV_AT + 0x38000u)     /* their code, block by block */
+#define XV_ART      (XV_AT + 0x50000u)     /* what they draw: their sprites */
+#define XV_END      (XV_AT + 0xD0000u)
+#define XV_AIS      256                    /* AI indexes in the grown tables (AIData +1, a byte) */
+#define XV_LIST_MAX 256                    /* a grown sprite list's numbers (struct1's and sprite_load's, a byte) */
+#define XV_EFFECTS_MAX 256                 /* effect ids (an effect object's +4, a byte) */
+#define XV_TYPES_MAX 256                   /* a kind's types (an object's +1, a byte) */
+#define XV_FIRST_ID 0x200                  /* the families' enemy ids: from here, six one after another a family, */
+#define XV_IDS      0x400                  /* ... to here (the battle's own read of an id takes 12 bits, its preload's patched to as many) */
+#define XV_FAMILIES 64                     /* the families' homes */
 
 /* A family's records in BN6, from its home */
 #define XV_HOME_STATES  0x000   /* its state table, 16 entries at most */
@@ -120,8 +145,10 @@ typedef struct {
 #define XV_HOME_SIZE    0x800
 #define XV_STATES_MAX   16
 
-#define XV_HELD_AIS     35      /* the AI indexes BN6_HELD_CHIPS holds (and two more 35-word tables): a fourth family needs them moved */
-
+#define XV_LISTS_GROWN 4   /* the sprite lists grown (XV_LISTS): 1, 2, 4 and 5 */
+/* A sprite list's place among the grown (0 to XV_LISTS_GROWN - 1), -1 for
+ * one that is not grown. */
+int xvirus_list_slot(int list);
 /* The CRC32 (zlib's) of bytes: a recipe's check on the ranges it copies. */
 uint32_t xvirus_crc32(const uint8_t *p, uint32_t n);
 /* Whether the recipe holds together (AI index, ids, home, its blocks, their

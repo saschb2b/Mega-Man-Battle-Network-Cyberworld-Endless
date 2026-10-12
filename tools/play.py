@@ -28,7 +28,7 @@ battle, as soon as MegaMan is free on its map: on a layer whose battles
 are an older net's, a guest battle), sig (MegaMan in the layer's
 signature, the room it is remembered by: docs/LEVEL_DESIGN.md,
 Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
-BB@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
+200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
 status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
 in hex, struck at once with paralysis, freeze, bubble, drag or slide as a

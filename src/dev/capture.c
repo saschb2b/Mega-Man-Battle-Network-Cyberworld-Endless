@@ -75,7 +75,7 @@ static void parse_script(const char *spec) {
 		InputStep *s = &script[script_len];
 		s->frames = atoi(tok);
 		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
-		 * FROM TO 1|0", "0:battle", "0:foes BB@52/01@43", "0:xrecord
+		 * FROM TO 1|0", "0:battle", "0:foes 200@52/01@43", "0:xrecord
 		 * 811DD90", "0:status freeze 90" and "0:sig": a scripted capture of
 		 * a set piece puts MegaMan at it, of a battle starts the layer's next,
 		 * one of the given foes or one of BN5's records in BN6's engine, of a

@@ -351,7 +351,7 @@ docs/LEVEL_DESIGN.md, Set pieces), and `mapall` (the layer's map whole,
 as if every panel were seen: a capture of the map and its way, as
 `tools/before_after.py` compares two builds' with it), and `xcontrol`
 (the control family installed as the core starts: BN6's own Mettaur
-moved into the engine's free space as AI 32, ids 0xBB-0xC0, for the foes
+moved into the engine's free space as AI 32, ids 0x200-0x205, for the foes
 step below and `tools/xcontrol.py`; docs/MULTIROM.md, Transplanted
 families; it takes the place of BN5's CanGard, which is installed
 wherever BN5's ROM is read), and `nofamilies` (no family moved into the
@@ -427,26 +427,27 @@ mood) and its end, and with Souls held whether UNITE stood on its first
 Custom screen and each unison; play.py's state says `battle (the older
 net's)` while it runs.
 
-The `foes` step (`--input`'s `0:foes BB@52/01@43`, play.py's `foes
-BB@52 01@43`) starts a battle of the foes it names, at the same first
+The `foes` step (`--input`'s `0:foes 200@52/01@43`, play.py's `foes
+200@52 01@43`) starts a battle of the foes it names, at the same first
 free moment: each an enemy id in hex at its panel, column 1-6 then row
 1-3 (`mm@22` puts MegaMan at column 2, row 2, where he stands without),
 on a plain field with nothing else on it, in BN6's engine whatever the
 layer. It names the families moved into the engine (docs/MULTIROM.md,
 Transplanted families) beside BN6's own: with BN5's ROM read, BN5's
-CanGard is AI 32 with ids 0xBB-0xC0 (its six versions), and `0:foes
-BB@52/01@43` fights CanGard beside a Mettaur; `--dev xcontrol` installs
+CanGard is AI 32 with ids 0x200-0x205 (its six versions, the families'
+ids from 0x200), and `0:foes 200@52/01@43` fights CanGard beside a
+Mettaur (four foes at most: of six named, BN6's battle spawned the first four); `--dev xcontrol` installs
 the control in its place, BN6's own Mettaur moved as AI 32 with the same
 ids. A layer dressed as BN5's area has longer arrival words, and its
 random battles are BN5's: seed 15's first area is BN6's own.
 
 ```bash
 CYBERWORLD_ROM_DIR=$PWD/.build/xcontrol/rom python3 build.py shot --scene emu --net-biome 0 --seed 1 --dev xcontrol \
-  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes BB@52" \
+  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes 200@52" \
   --shot 1100:/src/.build/a.bmp
 python3 tools/xcontrol.py --story     # the control against BN6's own Mettaur, frame by frame
 python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1400 \
-  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes BB@52/01@43,260:,4:START,10:,4:A,400:" \
+  --input "300:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes 200@52/01@43,260:,4:START,10:,4:A,400:" \
   --shot 1378:/src/.build/a.bmp   # CanGard's reticle striking MegaMan, its muzzle's blast
 python3 tools/xfamily.py              # CanGard in BN6's battles: fight, statuses, deletions, BN6's own left alone
 ```
@@ -556,7 +557,7 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   own deck compaction, the shelf's jump undone (put back before a run's
   next guest battle).
 - **The subject**: BN6's battle with the families installed, the same
-  foes by BN6's ids (BN5's 0x4F-0x54 are 0xBB-0xC0), forced as the foes
+  foes by BN6's ids (BN5's 0x4F-0x54 are 0x200-0x205), forced as the foes
   step forces one (`emu_battle_force`), from BN6's boot state, with only
   the encounters' hooks and the install's (none of the run's director).
 - **Alignment**: each battle's timer (`BN5_BATTLE_TIMER`,

@@ -77,11 +77,15 @@ typedef enum {
 	THUMB_LDRH,     /* ldrh rd,[rn,#imm]    0-62, even */
 	THUMB_STRH,     /* strh rd,[rn,#imm]    the same */
 	THUMB_LDR_PC,   /* ldr rd,[pc,#imm]     0-1020, a multiple of 4 */
+	THUMB_LSLS,     /* lsls rd,rn,#imm      0-31 (rn the register shifted) */
+	THUMB_LSRS,     /* lsrs rd,rn,#imm      0-31, as the field holds it (0 is a shift by 32) */
+	THUMB_ASRS,     /* asrs rd,rn,#imm      the same */
 	THUMB_FORMS
 } ThumbForm;
 
 /* One instruction of those forms: its low registers (rn 0 where the form
- * has none) and its immediate, in bytes for the loads and stores. */
+ * has none) and its immediate, in bytes for the loads and stores, in bits
+ * for the shifts. */
 typedef struct {
 	ThumbForm form;
 	uint8_t rd, rn;

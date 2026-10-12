@@ -31,7 +31,7 @@ typedef struct {
 	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/BOSSES.md) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
-	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0xBB-0xC0
+	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0x200-0x205
 	                   (xvirus.h; its differential, tools/xcontrol.py) */
 	bool nofamilies; /* no other game's family installed, BN5's ROM read or not (xvirus.h): BN6's battles as its own, to compare */
 } DevFlags;

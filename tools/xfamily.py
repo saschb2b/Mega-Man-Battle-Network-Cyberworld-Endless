@@ -6,7 +6,8 @@ BN5's moved into BN6's battle engine, checked in BN6's own battles (issue
 BN5's CanGard is installed as the core starts wherever BN5's ROM is read
 (src/emu/xvirus.c): its code and its reticle's copied from the player's
 BN5 ROM, its calls aimed at BN6's routines, as AI 32 with enemy ids
-0xBB-0xC0 (its six versions). Each spec is headless runs of the host build
+0x200-0x205 (its six versions), BN6's tables grown for it
+(src/emu/xvirus_grow.c). Each spec is headless runs of the host build
 (build.py shot) with both ROMs, copied into .build/xfamily/rom, from the
 same boot, layer (seed 15, whose first area is BN6's own: a layer dressed
 as BN5's fights its random battles in BN5's engine) and keys, each a battle
@@ -25,7 +26,7 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
            tables 7, 8, 6 and 10: AttackVars +0x30 cleared, the reticle
            gone), and CanGard come back to its own states and fire again;
            the ice block its size (0); the battle on to the end, no crash
-  delete   each version alone (0xBB-0xC0, --dev onehit), MegaMan shooting,
+  delete   each version alone (0x200-0x205, --dev onehit), MegaMan shooting,
            event flag 0x1D8 set first (the rare path's gate): its HP
            (struct2's row), its deletion, the results, BN6's delete counts
            (0x02000070-0x0200009F, versions 0-3's path) and the rare path's
@@ -38,6 +39,7 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
   native   BN6's own Mettaur fought by xcontrol.py's fight keys, CanGard
            not installed (--dev nofamilies) and installed: the same frame
            for frame, every byte, but a pointer into what the install moved
+           (BN6's tables grown among it)
 
 Needs both ROMs (local only). Exits 0 when every check holds.
 """
@@ -55,7 +57,7 @@ ROOT = X.ROOT
 WORK = os.path.join(ROOT, '.build', 'xfamily')
 SHA1 = {'bn6.gba': X.BN6_SHA1, 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
 SEED = 15
-FAMILY_AI, FIRST_ID = 32, 0xBB
+FAMILY_AI, FIRST_ID = 32, 0x200
 RETICLE = 0xD1                 # its attack's type in BN6 (BN6_T3_FREE)
 MUZZLE = 0x6C                  # its muzzle's effect in BN6
 MEGAMAN = 0x1A0                # MegaMan's NameID

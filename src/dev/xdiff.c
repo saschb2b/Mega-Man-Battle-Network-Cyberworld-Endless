@@ -40,7 +40,6 @@
 #define PANELS    40      /* the field's panels, 8 a row, rows 0-4 */
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
-#define MOVED_MAX 32
 
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v` */
@@ -267,8 +266,8 @@ static void header_out(Side *g) {
 	w32(g, (uint32_t)g->v.game);
 	w32(g, g->v.coll_size);
 	w32(g, g->v.panel_size);
-	XvMoved m[MOVED_MAX];
-	int n = g->v.game == 6 ? xvirus_moved(m, MOVED_MAX) : 0;
+	static XvMoved m[XV_MOVED_MAX];
+	int n = g->v.game == 6 ? xvirus_moved(m, XV_MOVED_MAX) : 0;
 	w32(g, (uint32_t)n);
 	for (int i = 0; i < n; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
 }
@@ -415,8 +414,8 @@ static uint32_t veneer_of(uint32_t to) {
  * install (an address of BN5's moved, to its copy), or a call's veneer
  * aimed at another routine */
 static void pokes_put(const Spec *s) {
-	XvMoved m[MOVED_MAX];
-	int n = xvirus_moved(m, MOVED_MAX);
+	static XvMoved m[XV_MOVED_MAX];
+	int n = xvirus_moved(m, XV_MOVED_MAX);
 	for (int i = 0; i < s->npokes; ++i) {
 		const Poke *p = &s->pokes[i];
 		uint32_t at = p->at;
@@ -428,7 +427,8 @@ static void pokes_put(const Spec *s) {
 			printf("xdiff: the call to %08x (veneer %08x) aimed at %08x\n", (unsigned)p->at, (unsigned)at, (unsigned)p->v);
 			continue;
 		}
-		for (int k = 0; k < n; ++k)
+		/* (the family's own ranges, moved last, first: BN6's tables grown are among the ranges too) */
+		for (int k = n - 1; k >= 0; --k)
 			if (at >= m[k].from && at < m[k].from + m[k].len) { at = at - m[k].from + m[k].to; break; }
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
