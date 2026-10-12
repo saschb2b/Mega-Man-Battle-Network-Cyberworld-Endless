@@ -452,6 +452,43 @@ The calls:
    four.
 7. **Nothing reaches the meta loop:** variety, not power, as before.
 
+The finer calls, made once the run's code was mapped (12 October 2026):
+
+- **A family both games have is one family, BN6's** (Mettaur, Catack,
+  Champy, WindBox, Trumpy), as a chip both games have is: BN5's records
+  name BN6's family there, and the Library keeps one entry per name.
+  BN5's six versions (V1, V1EX, V2, V2EX, V3, V3EX) meet BN6's three by
+  tier: V1 and V1EX as V1, and so on.
+- **BN5's version ladder under the act's cap** by the same tiers: where
+  the act allows V1, BN5's records go up to V1EX; V2 to V2EX; V3 to V3EX.
+  The guest battles capped BN5's index with BN6's number, so V2 never
+  passed V1EX.
+- **BN5's guardians take BN6's band.** Their three-quarters discount stood
+  for the Cross that could not come into BN5's engine; every Cross comes
+  now.
+- **Where they guard:** with Souls in every battle, the rules that kept
+  BN5's Navis off the short net's last act and off Nebula Area go; the
+  Undernet's and the Graveyard's acts share one pool of both nets' Navis;
+  the Nest stays the Cybeast's.
+- **Visitors:** a family's role is where its own game sets it (the back
+  when three of four of its placements are in the last column, the front
+  when most are in the first enemy column, else either); random battles
+  only (not a Server's, the duel's or the Gentle helper's eased ones);
+  none in the deep acts, which mix already; a family its game sets only on
+  special fields never visits.
+- **The deep's pools:** the Undernet with BN5's Undernet, the Graveyard
+  with Nebula Area, the Nest with both; a coin each battle between the two
+  nets.
+- **Green Mystery Data in BN5's records** by BN5's own rows; **Mystery
+  Data in its areas** half BN5's chips, as its shops.
+- **A BN5 Navi's Guardian Data** is his own Navi chip, as BN6's guardians
+  give theirs: BN5's chips of every kind are in the run's pools now, so the
+  key chip of his Soul's kind is no longer needed.
+- **DarkPlus** comes as BN5's chip, by BN5's code, where its ROM is read
+  (NumberMan's Chaos Unison takes it); without it, it stays out as now.
+- **A territory's Servers and the duel's race** fight its own records.
+- **Repeats** are kept apart in BN5's pools as in BN6's.
+
 What to watch, and measure (docs/META.md, Measuring it): a visitor whose
 pairing the band does not see (two that pin a row between them); the
 strongest Soul for a folder taken every battle now that it serves every
