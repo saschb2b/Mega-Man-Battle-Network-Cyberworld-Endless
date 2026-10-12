@@ -178,6 +178,8 @@ def megaman_items(spec):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
         parts.append('safe=1')
+    if spec.get('dark'):
+        parts.append('dark=1')
     if spec.get('dslist'):
         parts.append('dslist=1')
     if spec.get('dschips'):

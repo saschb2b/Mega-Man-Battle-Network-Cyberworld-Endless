@@ -58,5 +58,11 @@ bool soulunite_install(int breaks, int soulbreak);
  * differential's from its spec. None (0) leaves BN6's Custom screen as it
  * is, byte for byte. */
 void soulunite_held(unsigned souls);
+/* The differential's Souls (src/dev/xdiff.c, a spec's souls6): where
+ * `souls` names one, the proxy form and the Souls installed with the
+ * spec's breaks (soulunite_install's), MegaMan holding them; each battle begun dark by BN5's
+ * meter where `dark` (soulmood.h's soulmood_dev_dark). False where they
+ * could not be installed. */
+bool soulunite_dev(unsigned souls, int unitebreak, int soulbreak, bool dark);
 
 #endif

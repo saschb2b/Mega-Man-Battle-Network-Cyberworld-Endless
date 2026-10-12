@@ -1,0 +1,87 @@
+{
+ "about": "A DarkChip of BN5's in BN6's engine (issue #82): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (4,2), MegaMan at (2,2) with a folder of DarkTorn T in both games, BN5's chip 197 by BN5's own code and the registry's 219 (BN5's Tornado family 0x22 moved as BN6's 0x72, its subfamily 3: its tornadoes, the third kind's 0x31 moved, by the side's battle counter 3, its flash BN5's 0x17 (BN6's twin family 0x2F draws its own flash, 0x22); a DarkChip of the registry's, dealt straight into the battle deck; KnightSoul held in both (flags5, souls6), so BN6's engine has the Souls and with them BN5's mood and DarkChip rule), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code). BN5's DarkChip use whole in BN6's engine (src/emu/soulmood.c): dark for the battle, his palette BN5's dark one (3), and its after-effect on his battle NaviStats (BN5 0x0802C938: DarkTorn's +0x54 by 100). Compared to t94: the tornadoes delete the foe at t95, a moved virus's deletion (its fourth kind's 0x11 let go a frame later in BN6's engine, the families' track's).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 94,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "hold": 60,
+ "folder5": [
+  "26C5"
+ ],
+ "folder6": [
+  "26DB"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "26C5"
+ ],
+ "deck6": [
+  "26DB"
+ ]
+}

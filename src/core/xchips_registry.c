@@ -231,32 +231,32 @@ const XChipReg xreg_rows[] = {
 	{ 210, 139, XREG_SAME },   /* Meteors */
 	{ 211, 138, XREG_SAME },   /* NumbrBl */
 	{ 212, 291, XREG_MOVED,     0, 0xFF, { 0x09, 0xFF, 0xFF, 0xFF }, 1, 35 },   /* Jealousy */
-	{ 213, 292, XREG_PENDING,   0, 0xFF, { 0x0F, 0xFF, 0xFF, 0xFF }, 1, 40 },   /* Poltrgst */
-	{ 214, 293, XREG_PENDING,   0, 0xFF, { 0x16, 0xFF, 0xFF, 0xFF }, 1, 58 },   /* BlakWing */
+	{ 213, 292, XREG_MOVED,     0, 0xFF, { 0x0F, 0xFF, 0xFF, 0xFF }, 1, 40 },   /* Poltrgst */
+	{ 214, 293, XREG_MOVED,     0, 0xFF, { 0x16, 0xFF, 0xFF, 0xFF }, 1, 58 },   /* BlakWing */
 	{ 216, 140, XREG_SAME },   /* JustcOne */
 	{ 217,  83, XREG_SAME },   /* NeoVari */
 	{ 218, 294, XREG_MOVED,     0, 0xFF, { 0x19, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* Z Saver */
 	{ 220,   8, XREG_SAME },   /* SuprVulc */
 	{ 242, 489, XREG_MOVED,     0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 33 },   /* NumbrMan */
-	{ 243, 490, XREG_PENDING,   0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 66 },   /* NumbrMn[SP] */
-	{ 244, 491, XREG_PENDING,   0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 66 },   /* NumbrMnDS */
+	{ 243, 490, XREG_MOVED,     0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 66 },   /* NumbrMn[SP] */
+	{ 244, 491, XREG_MOVED,     0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 66 },   /* NumbrMnDS */
 	{ 245, 272, XREG_SAME },   /* Colonel */
 	{ 246, 274, XREG_SAME },   /* Colonel[SP] */
-	{ 247, 492, XREG_PENDING,   0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 75 },   /* ColonelDS */
+	{ 247, 492, XREG_MOVED,     0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 1, 75 },   /* ColonelDS */
 	{ 248, 493, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 50 },   /* ShadoMan */
-	{ 249, 494, XREG_PENDING,   0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* ShadoMn[SP] */
-	{ 250, 495, XREG_PENDING,   0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* ShadoMnDS */
+	{ 249, 494, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* ShadoMn[SP] */
+	{ 250, 495, XREG_MOVED,     0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* ShadoMnDS */
 	{ 251, 496, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 43 },   /* TmhwkMan */
-	{ 252, 497, XREG_PENDING,   0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 81 },   /* TmhwkMn[SP] */
-	{ 253, 498, XREG_PENDING,   0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 81 },   /* TmhwkMnDS */
+	{ 252, 497, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 81 },   /* TmhwkMn[SP] */
+	{ 253, 498, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 81 },   /* TmhwkMnDS */
 	{ 254, 499, XREG_MOVED,     0, 0xFF, { 0x0A, 0xFF, 0xFF, 0xFF }, 1, 50 },   /* KnightMn */
-	{ 255, 500, XREG_PENDING,   0, 0xFF, { 0x0A, 0xFF, 0xFF, 0xFF }, 1, 90 },   /* KnigtMn[SP] */
-	{ 256, 501, XREG_PENDING,   0, 0xFF, { 0x0A, 0xFF, 0xFF, 0xFF }, 1, 90 },   /* KnigtMnDS */
+	{ 255, 500, XREG_MOVED,     0, 0xFF, { 0x0A, 0xFF, 0xFF, 0xFF }, 1, 90 },   /* KnigtMn[SP] */
+	{ 256, 501, XREG_MOVED,     0, 0xFF, { 0x0A, 0xFF, 0xFF, 0xFF }, 1, 90 },   /* KnigtMnDS */
 	{ 257, 502, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 53 },   /* ToadMan */
-	{ 258, 503, XREG_PENDING,   0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadMan[SP] */
-	{ 259, 504, XREG_PENDING,   0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadManDS */
+	{ 258, 503, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadMan[SP] */
+	{ 259, 504, XREG_MOVED,     0, 0xFF, { 0x13, 0xFF, 0xFF, 0xFF }, 1, 69 },   /* ToadManDS */
 	{ 306, 306, XREG_SAME },   /* BassAnly */
-	{ 307, 314, XREG_PENDING,   0, 0xFF, { 0x07, 0xFF, 0xFF, 0xFF }, 2, 92 },   /* HolyDrem */
+	{ 307, 314, XREG_MOVED,     0, 0xFF, { 0x07, 0xFF, 0xFF, 0xFF }, 2, 92 },   /* HolyDrem */
 	{ 308, 302, XREG_SAME },   /* BigHook */
 	{ 309, 308, XREG_SAME },   /* CrossDiv */
 	{ 320, 320, XREG_SAME },   /* GigaCan1 */
@@ -292,7 +292,7 @@ bool xreg_own(const XChipReg *r) { return r && r->how != XREG_SAME && r->how != 
 #define BN5_IDS 424   /* BN5's chip records */
 
 /* each BN5 id's row and each own id's, plus one (0: none), made once */
-static struct { bool made; int16_t of_bn5[BN5_IDS], at[XREG_IDS]; } idx;
+static struct { bool made; int16_t of_bn5[BN5_IDS], at[XREG_IDS], named[XREG_IDS]; } idx;
 
 static void index_make(void) {
 	if (idx.made) return;
@@ -301,6 +301,7 @@ static void index_make(void) {
 		const XChipReg *r = &xreg_rows[i];
 		if (r->bn5 < BN5_IDS) idx.of_bn5[r->bn5] = (int16_t)(i + 1);
 		if (xreg_own(r) && r->bn6 < XREG_IDS) idx.at[r->bn6] = (int16_t)(i + 1);
+		if (!xreg_own(r) && r->bn6 < XREG_IDS && !idx.named[r->bn6]) idx.named[r->bn6] = (int16_t)(i + 1);
 	}
 }
 
@@ -312,6 +313,11 @@ const XChipReg *xreg_of_bn5(int bn5) {
 const XChipReg *xreg_at(int bn6) {
 	index_make();
 	return bn6 > 0 && bn6 < XREG_IDS && idx.at[bn6] ? &xreg_rows[idx.at[bn6] - 1] : NULL;
+}
+
+const XChipReg *xreg_named(int bn6) {
+	index_make();
+	return bn6 > 0 && bn6 < XREG_IDS && idx.named[bn6] ? &xreg_rows[idx.named[bn6] - 1] : NULL;
 }
 
 bool xreg_free_id(int id) {

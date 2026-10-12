@@ -1,0 +1,211 @@
+{
+ "about": "Chaos Unison's charged B in both engines (the Souls track's S6, src/emu/soulchaos.c): ShadowSoul held with Chaos Unison (BN5's flags 0009 and 0236, BN6's souls6), a deck of DarkInvs (BN5's 189, BN6's 289: the DarkChip of its kind) given up on the first Custom screen: Chaos Unison, its turns 1. B held 45 frames from t60: charged by its chaos power's time at level 0 (BN5's 0x0801CA68 row 0x31: 40), then the phases' cycle of its row (BN5's 0x08010648: 42 frames, phase 2 its first 21), released in phase 2: the Soul's DarkChip attack (BN5's power attack 0x31, DarkInvs through the chip writer), the level 1. The foe BN5's CanladEX held paralysed at (5,2) (hold: each game's own status step), as the chips' specs hold it. MegaMan's side's chip list given in BN5 (dschips: three Cannons) and BN6's written from it (dslist), so a Dark Soul plays the same chips in both. Every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 500,
+ "hold": 60,
+ "flags5": [
+  "0000",
+  "0009",
+  "0236"
+ ],
+ "folder5": [
+  "34BD"
+ ],
+ "deck5": [
+  "34BD"
+ ],
+ "folder6": [
+  "3521"
+ ],
+ "deck6": [
+  "3521"
+ ],
+ "souls6": "02",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   45
+  ]
+ ],
+ "dschips": [
+  "1",
+  "1",
+  "1"
+ ],
+ "dslist": 1,
+ "sprites": "bytes",
+ "verdict": {
+  "is": "FAIL",
+  "at": 107,
+  "why": "Chaos Unison plays as BN5's to the attack (the charge by row 0x31's time, the phases' cycle, the release in phase 2, the level one up, the chip writer given DarkInvs): what differs from t107 is DarkInvs itself, BN6's own chip of the name (the registry's 289, BN6's support 0x3B, its auto mode: CurAction 0x36 and the third kind's 0x66) where BN5's support 0x3B (0x080E2420, its object the fourth kind's 0x18 at 0x080E23D4) puts MegaMan under BN5's chip AI for 600 frames (0x0802C03E, 0x0802C114 with 0x258, invisible by 0x08016C42's 0x08000000), which BN5's MegaMan runs from his idle states (0x080F04C2, 0x080F0650: the AI data's 0x200 flag, 0x0800E0B0, then 0x0802B4B0); BN6's twin of the first (0x080F1866) goes from the chip request's test straight to 0x0800FA54 (BN5's 0x0800D8D0), no flag tested, and BN6 has no twin of the chip AI (tools/xchiprecipe.py --report: DarkInvs's four calls with none), so BN5's DarkInvs is not moved (CANDIDATES) and ShadowSoul's chaos attack is BN6's DarkInvs (docs/MULTIROM.md, Transplanted Souls)"
+ }
+}

@@ -60,6 +60,9 @@ TWINS = (
     # the battle's events by bit (BN5's 0x0801A410 the bombs', HolyDrem's), where the symbol map has none: BN6's of the same
     # dispatch, each game's own handlers (its audit below)
     (0x0801A410, 0x0801DACC, 'chips'),
+    # MegaMan's NaviCust bugs counted (the Tornado family's subfamily 2's, BN5 0x080ECEC0), where the symbol map has none: BN6's of
+    # the same steps over the same fields of his battle NaviStats but one more, +0x63 (its audit below)
+    (0x0800DC0C, 0x0800FE52, 'chips'),
 )
 
 # The BN5 rows of tools/bn6f_match.py's search that a twin above corrects: its search placed a bn6f function of another
@@ -73,6 +76,20 @@ WRONG_ROWS = (0x080131A0, 0x080142D0, 0x0801412A, 0x080141EC, 0x080142DC, 0x0800
 # 'no': a moved family's code must not be aimed at it; 'copy': BN6's differs where the family's code can see it, so BN5's
 # own body is copied with the family's code (its own calls through their twins), as a routine of BN5's shared code is
 AUDITS = {
+    # the chips' (tools/xchiprecipe.py's HolyDrem and Poltrgst: their doubles of MegaMan)
+    (0x0800DD8C, 0x0801002C): ('ok', "MegaMan's palette (r5 him): each game's own for his body (BN5 0x0800DE90, BN6 0x080100EC call it): "
+                                     "BN5's by his Soul (0, 2 in Chaos Unison), mood and dark meter (dark 2 or 3 by 470, Full Synchro 4, "
+                                     "else 4, 0, 3, 2 by the meter at 1000, 500, 470) and NaviStats +0x4C; BN6's by his form's table "
+                                     "(0x080203EA), Full Synchro 4, else 0, with the Souls' read hooked to BN5's 0 or 2 (0x08010066, "
+                                     "src/emu/soullook.c) and the mood's to BN5's dark 2 or 3 (0x0801006A, src/emu/soulmood.c). "
+                                     "HolyDrem's and Poltrgst's double of him (the first kind's 0x1C, 0x58) draws his sprite by BN6's "
+                                     "selector (MEGAMAN_LOADS), so it wants his palette as BN6 draws him: BN6's own, no meter "
+                                     "coming into a run", ()),
+    # the chips' (tools/xchiprecipe.py's Tornado: DarkTorn's family)
+    (0x0800DC0C, 0x0800FE52): ('ok', "MegaMan's NaviCust bugs counted (his battle NaviStats +0x31 at 1, +0x13, +0x14, +0x16, +0x54, +0x24, "
+                                     "+0x18, +0x19, +0x1A each one): BN6's counts +0x63 too, its Custom screen's bug's turns, which no "
+                                     "battle of a run's gives him; called by the Tornado family's subfamily 2 alone (0x080ECEC0), which no "
+                                     "chip of the registry plays (DarkTorn its 3)", ()),
     # CanGard's (its recipe's, compared since frame by frame with BN5's own)
     (0x0800F29E, 0x08011714): ('ok', "the attack ended: BN6's also clears AttackVars +0x1B, clears AIData +0x44's bits 0x1000003F where "
                                      "BN5's clear 0x0001803F (each game's own bits), and writes CurAction 8 where BN5's 6 (BN6's two "
@@ -427,9 +444,17 @@ TYPES = {
                                           "routines; its sprite by its effect id's row, each game's art for an id (a family's own effects "
                                           "copied under ids of their own where BN5's differ: effect_to)"),
     (4, 0x11): ('twin', 0x11, 'families', "Cactikil's (BN5 0x080E1BFE's): its routines the same bodies; no sprite"),
+    (4, 0x14): ('moved', None, 'chips', "the puff of a chip that does nothing (BN5 0x080E1EF4's; spawned by BN5 0x080E1F76, the misc "
+                                       "family's subfamily 3 moved for DarkPlus): BN6's 0x14 (0x080E3038) the same instructions (tools/"
+                                       "xrecipe_thumb.py compare: SAME) drawing its own art at list 5's 2, BN5's another picture: moved "
+                                       "with BN5's art (the chips' rule: the same code drawing another picture is not the same)"),
     (4, 0x35): ('twin', 0x35, 'families', "the fire column's spark of flame (BN5 0x080E450E's, BN6 0x080E5736's): its routines the same "
                                           "bodies (code and type deep the same); no sprite of its own (it draws through the effect object)"),
     # (the chips': tools/xchiprecipe.py's units, their copies installed before the families')
+    (1, 0x1C): ('moved', None, 'chips', "HolyDrem's double of MegaMan (BN5 0x080BD811): BN6's 0x1C (0x080BE0ED) other code, no BN6 "
+                                        "type runs BN5's"),
+    (1, 0x58): ('moved', None, 'chips', "Poltrgst's double of MegaMan (BN5 0x080C39D1): BN6's 0x58 (0x080C5F6D) other code, no BN6 "
+                                        "type runs BN5's"),
     (1, 0x06): ('moved', None, 'chips', "the Navi chip KnightMn's KnightMan: BN6's 0x06 (0x080BA711) other code, no BN6 "
                                         "type runs BN5's; its battle sprite the Navis' (list 2's 0x20 on)"),
     (1, 0x07): ('moved', None, 'chips', "the Navi chip ShadoMan's ShadowMan: BN6's 0x07 (0x080BA8E9) other code, no BN6 "
@@ -467,6 +492,8 @@ TYPES = {
     (3, 0x4D): ('moved', None, 'chips', "Anti's: no BN6 type runs its code"),
     (3, 0x51): ('moved', None, 'chips', "Quake's rock: BN6's 0x51 (0x080CFF7D) other code, no BN6 type runs BN5's"),
     (3, 0x58): ('moved', None, 'chips', "ZSaver's: no BN6 type runs its code"),
+    (3, 0x31): ('moved', None, 'chips', "the tornado (BN5 0x080CAD49, the Tornado family's: DarkTorn's): BN6's 0x31 (0x080CB7E9) "
+                                        "other code, no BN6 type runs BN5's"),
     (3, 0x5A): ('moved', None, 'chips', "NrthWind's wind: no BN6 type runs its code"),
     (3, 0x5B): ('moved', None, 'chips', "Boxer's punch (its controller's, the fourth kind's 0x64, through 0x080D1508): "
                                         "BN6's 0x5B (0x080D1569) other code, no BN6 type runs BN5's"),
@@ -479,6 +506,12 @@ TYPES = {
     (3, 0x69): ('moved', None, 'chips', "MoonBld's: no BN6 type runs its code"),
     (3, 0x71): ('moved', None, 'chips', "DrilArm's drill: no BN6 type runs its code"),
     (3, 0x78): ('moved', None, 'chips', "DrkSonic's sonic boom: BN6's 0x78 (0x080D58F9) other code, no BN6 type runs BN5's"),
+    (3, 0x7E): ('moved', None, 'chips', "BlakWing's wing (BN5 0x080D6319): BN6's 0x7E (0x080D6899) other code, no BN6 type runs "
+                                        "BN5's"),
+    (3, 0x7F): ('moved', None, 'chips', "BlakWing's wing's second (BN5 0x080D64D5): BN6's 0x7F (0x080D69A9) other code, no BN6 "
+                                        "type runs BN5's"),
+    (3, 0x83): ('moved', None, 'chips', "HolyDrem's shot (BN5 0x080D6B49, list 3's 0x3E: SideBub's copy): BN6's 0x83 (0x080D7125) "
+                                        "other code, no BN6 type runs BN5's"),
     (3, 0x88): ('moved', None, 'chips', "Skully's skull: no BN6 type runs its code"),
     (3, 0x89): ('moved', None, 'chips', "DarkCirc's circle: BN6's 0x89 (0x080D7DCD) other code, no BN6 type runs BN5's"),
     (3, 0x8A): ('moved', None, 'chips', "DarkCirc's circle's second (its 0x89's): BN6's 0x8A (0x080D805D) other code, no "
@@ -526,7 +559,13 @@ TYPES = {
                                         "no BN6 type runs BN5's"),
     (4, 0x4A): ('moved', None, 'chips', "DrkSonic's (its support routine's object): BN6's 0x4A would spawn BN6's own "
                                         "sonic, whose code differs"),
+    (4, 0x54): ('moved', None, 'chips', "BlakWing's (its support routine's object, BN5 0x080E6A09): BN6's 0x54 (0x080E7BDD) "
+                                        "not the same code to its depth"),
+    (4, 0x55): ('moved', None, 'chips', "BlakWing's second (BN5 0x080E6AD9): BN6's 0x55 (0x080E7DD1) not the same code to its "
+                                        "depth"),
     (4, 0x57): ('moved', None, 'chips', "HotBody's aura: no BN6 type runs its code"),
+    (4, 0x59): ('moved', None, 'chips', "HolyDrem's (its support routine's object, BN5 0x080E6EE5): BN6's 0x59 (0x080E836D) other "
+                                        "code, no BN6 type runs BN5's"),
     (4, 0x5E): ('moved', None, 'chips', "DarkCirc's (its support routine's object): BN6's 0x5E would spawn BN6's own "
                                         "circle, whose code differs"),
     (4, 0x64): ('moved', None, 'chips', "Boxer's (the Program Advance's): BN6's 0x64 (0x080E8E0D) other code, no BN6 type "
@@ -536,6 +575,10 @@ TYPES = {
     (4, 0x66): ('moved', None, 'chips', "ShakPar's (the Program Advance's): BN6's 0x66 (0x080E900D) other code, no BN6 "
                                         "type runs BN5's"),
     (4, 0x67): ('moved', None, 'chips', "BoyBomb's thrower: BN6's 0x67 would spawn BN6's own bomb, whose code differs"),
+    (4, 0x72): ('moved', None, 'chips', "Poltrgst's (its support routine's object, BN5 0x080E8D05): BN6's 0x72 (0x080E9AD5) other "
+                                        "code, no BN6 type runs BN5's"),
+    (4, 0x73): ('moved', None, 'chips', "Poltrgst's thrower (BN5 0x080E8DE5: the field's obstacles thrown by 0x0800D5DC's twin, "
+                                        "BN6's runners flying them): BN6's 0x73 (0x080E9BE1) other code, no BN6 type runs BN5's"),
     (4, 0x75): ('moved', None, 'chips', "RainyDay's: no BN6 type runs its code"),
     # (the Souls': tools/xsoul.py's, installed after every other track's, src/emu/xinstall.c; the rest of the types their
     # code spawns are other tracks' copies above, run for them: the image object, NumberSoul's companion (1, 0x54) and bomb

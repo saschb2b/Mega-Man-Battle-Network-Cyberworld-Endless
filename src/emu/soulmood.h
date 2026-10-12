@@ -9,13 +9,15 @@
  * twins of BN5's other writers mirrored (the chip's Full Synchro and Anger,
  * Anger's start and end, a Custom screen's script), a Soul's unison and its
  * end calm him (0x08011A8C), and the battle opens as worried as his HP says
- * (the guest battles' rule). A BN5 DarkChip used makes him dark for the
+ * (the run's rule since issue #64: its BN5 battles opened so on the guest
+ * core). A BN5 DarkChip used makes him dark for the
  * battle (0x0801007C): his mood 0, BN6's own too (no Cross, no Beast Out, a
  * weak buster), a latch of ours (BN6_SOUL_DARK, never BN6's byte 2) that
  * keeps both there. BN5's worried rule deals one of BN5's DarkChips into
  * the hand's end while he worries or is dark (0x08025118), and the deck's
- * compaction shelves the others where no draw reaches them (the guest
- * battles' shelf, guest.c); BN6's own DarkChips keep BN6's rule
+ * compaction shelves the others where no draw reaches them (the run's
+ * shelf since issue #64, four at most: the run's DarkChips are in its
+ * folder, where BN5 keeps its own apart); BN6's own DarkChips keep BN6's rule
  * (darkbn6.c). UNITE reads this mood (soulunite.c), and BN5's dark gate
  * this dark: a chip of the registry's own whose BN5 record names the gate
  * (BlakWing, HolyDrem, a Navi's V1, SP and DS chips) is BN5's dud where it
@@ -36,6 +38,8 @@ enum {
 	SOULMOOD_BREAK_DARK = 4,     /* a BN5 DarkChip used leaves him as he was */
 	SOULMOOD_BREAK_WORRY = 8,    /* UNITE stands while he worries or is dark */
 	SOULMOOD_BREAK_GATE = 16,    /* a chip BN5's dark gate refuses used as it is */
+	SOULMOOD_BREAK_AFTER = 32,   /* a BN5 DarkChip used leaves his NaviStats as they were */
+	SOULMOOD_BREAK_PALETTE = 64, /* dark, his palette BN6's own */
 };
 
 /* (from a hook) side worried or dark by this mood (BN5's emotion getter's 1 or 5, a form and anger aside: 0x08012738) */
@@ -50,6 +54,10 @@ void soulmood_chip_used(uint32_t me, int chip);
  * of the registry's own is not to be used now (BlakWing while he is not dark, HolyDrem while he is, a Navi's chips by
  * theirs), its attack made BN5's dud and true, *record the record its family is read from now */
 bool soulmood_chip_refused(uint32_t me, uint32_t attack, int chip, uint32_t *record);
+
+/* (the differential's item, dark=1: src/dev/xdiff.c through soulunite_dev) each battle begun dark as by BN5's dark meter under 470 (BN5's battle
+ * opens at mood 0, 0x08010F14), his palette BN5's 2 for it */
+void soulmood_dev_dark(bool on);
 
 /* The hooks, once a core, after the Souls' code; false (nothing written)
  * where a byte it stands on is not Gregar's as expected. */

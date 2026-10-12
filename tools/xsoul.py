@@ -166,7 +166,11 @@ ART_FIRST, ART_LAST = 0x4B, 0x5F   # ... at these numbers (soul_room.h's SOUL_LI
 # (None: a number left empty, once BN5's 3:0x03 and 3:0x00, which the image object's kinds now draw at the Navis' numbers:
 # tools/bn5_objects.py's IMAGE_COPIED)
 ART_ORDER = ((4, 0x1F), None, None, (3, 0x1F), (3, 0x14), (4, 0x01), (3, 0x0A), (3, 0x15), (3, 0x05), (5, 0x03),
-             (5, 0x0D), (5, 0x02))
+             (5, 0x0D), (5, 0x02), (4, 0x20), (5, 0x1C))
+# Sprites BN6's own code draws for a Soul where BN5 draws another, copied with the Souls' though no moved routine loads them
+# (src/emu/soulchaos.c hooks the load): Chaos Unison's charge glow, BN5's list 5's 0x1C where his charge glow is its 8 (BN5
+# 0x080E0F9C, the fourth kind's 8 in Chaos Unison; BN6's list 5's 0x1C another picture)
+EXTRA_ART = ((5, 0x1C),)
 # ... and the effects so (their ids from 0xC0 in this order: ColonelSoul's ScreenDivide's three, ShadowSoul's slash,
 # TomahawkSoul's swing, the three BN6 redrew, the obstacle strike's shot's hit), a later walk's numbered after them; an
 # effect another track copied first is that track's number (BEFORE: the Navis' ScreenDivide, slash, swing, 0x14 and 0x02),
@@ -681,6 +685,8 @@ class Deriv:
         for tab in SPRITE_TABLES:
             if any(tab in w.lits.values() for w in self.walks.values()) and not self.shared_at(tab):
                 self.number_sprite_table(tab)
+        for lst, idx in EXTRA_ART:
+            self.place_sprite(lst, idx)
         self.late = True
         for w, site in self.deferred:
             self.number_effect(w, site)

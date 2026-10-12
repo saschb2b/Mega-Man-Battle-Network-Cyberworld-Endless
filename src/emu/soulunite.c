@@ -11,6 +11,7 @@
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
+#include "soulchaos.h"
 #include "soulchips.h"
 #include "soulcolonel.h"
 #include "soulcode.h"
@@ -57,6 +58,13 @@ static uint8_t kinds5[SOULS_BN5], flags5[SOULS_BN5];   /* BN5_SOUL_KINDS, BN5_SO
 static uint32_t emblem_tiles, emblem_pals;   /* the emblem's art, as Gregar's words name it */
 
 void soulunite_held(unsigned souls) { held = souls & ((1u << TEAM_SOULS) - 1); }
+
+bool soulunite_dev(unsigned souls, int unitebreak, int soulbreak, bool dark) {
+	if (souls && !(soulproxy_install(0) && soulunite_install(unitebreak, soulbreak))) return false;
+	soulunite_held(souls);
+	soulmood_dev_dark(dark);
+	return true;
+}
 
 /* ---- what UNITE reads ---- */
 
@@ -293,7 +301,8 @@ static bool expected(const uint8_t *b5) {
 
 /* each Soul's own: its code moved, its look, abilities and passives (the Souls track's S3-S5), all or none of each */
 static bool souls_own(int soulbreak) {
-	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
+	return soulcode_install(&soulcode_bn5) && soullook_install(SOULBREAK_LOOK(soulbreak)) &&
+		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
 		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
 		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak));
 }

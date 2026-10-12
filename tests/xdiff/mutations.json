@@ -1108,6 +1108,148 @@
     "08D90044:46C0"
    ],
    "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in BN6_COLONEL_SIDES, the one field the obstacle strike reads (src/emu/xstrike.c): his side unarmed from t1 where BN5's bit 0x20 is set, the cube no soldier, MegaMan none of the three shots BN5's takes from t50"
+  },
+  {
+   "name": "BN5's DarkChip after-effect left out",
+   "spec": "chip_darkcirc",
+   "soulbreak": 536870912,
+   "what": "the chip's use (src/emu/soulmood.c's after_effect) leaves his battle NaviStats as they were where BN5's 0x0802C938 adds 100 to its +0x54 for DarkCirc: BN6's player block's +0x54 0 against BN5's 0x64 from t32"
+  },
+  {
+   "name": "BN5's dark palette left out",
+   "spec": "chip_drksonic",
+   "soulbreak": 1073741824,
+   "what": "his palette as BN6 reads it by his mood (src/emu/soulmood.c's dark_palette) stays BN6's 0 where BN5's 0x0800DDEC gives a DarkChip used at a neutral meter its 3: his object's +0x94 0 against 3 from t32"
+  },
+  {
+   "name": "BlakWing's object type",
+   "spec": "chip_blakwing",
+   "poke5": [
+    "080E6AB8:2053"
+   ],
+   "what": "BlakWing's object spawned as BN5's fourth kind's 0x53 (movs r0,#0x54 at BN5's 0x080E6AB8, written at its copy) where its own moved 0x54 runs: no wing, the foe keeps its 280"
+  },
+  {
+   "name": "DarkPlus's parameter",
+   "spec": "chip_darkplus",
+   "poke": [
+    "08C031E9:0:1"
+   ],
+   "what": "BN6's record of DarkPlus (290, the core's copy at CHIPS_RECORDS) with its second parameter 0 where BN5's record's is 1 (src/core/chips.c, xrec_same_moved): the moved subfamily 3 puffs (BN5 0x0800E19C), no bonus, the Cannon strikes for 40 against BN5's 90"
+  },
+  {
+   "name": "DarkPlus's store left out",
+   "spec": "chip_darkplus",
+   "poke5": [
+    "0800E1CE:46C0"
+   ],
+   "what": "the moved subfamily 3's strh r2,[r0,r1] (BN5 0x0800E1CE: the power into the hand's next chip's bonus) a nop at its copy: the hand's +0x1A 0 against BN5's 50 from t32, the Cannon's 40 against 90"
+  },
+  {
+   "name": "DarkPlus's flash none",
+   "spec": "chip_darkplus",
+   "poke5": [
+    "0800E1D2:2000"
+   ],
+   "what": "the moved subfamily 3's movs r0,#0x18 (BN5 0x0800E1D2, the green flash's frames) movs r0,#0 at its copy: the flash kept apart (XC_FLASH, src/emu/xchips_flash.c) 0 against BN5's AIData +0x3C 0x17 at t32"
+  },
+  {
+   "name": "DarkPlus's puff's sound",
+   "spec": "chip_darkplus_puff",
+   "poke5": [
+    "0800E202:2091"
+   ],
+   "what": "the moved subfamily 3's puff's sound (movs r0,#0x90 at BN5 0x0800E202) 0x91 at its copy: another song started at t104"
+  },
+  {
+   "name": "a virus's support chip in BN6's timing",
+   "spec": "zomon_v1",
+   "call": [
+    "08B46120:080126E4"
+   ],
+   "what": "Zomon's family's call to the chip writer (XV_CHIP_WRITER, src/emu/xvirus_dispatch.c) aimed at BN6's own (0x080126E4): its AreaGrab's family BN6's support family 0x15, which ends its user's attack a frame after BN5's (0x080ED12A-0x080ED130 against BN5's 0x080EC448): Zomon's states a frame behind BN5's from its first AreaGrab"
+  },
+  {
+   "name": "BN5's support family's frame left out",
+   "spec": "zomon_v1",
+   "poke": [
+    "08E00154:080ED0DD:4"
+   ],
+   "what": "the grown attack families' entry 0x65 (XV_SUPPORT_FAMILY, src/emu/xattack_grow.h) BN6's support family's routine (0x080ED0DC) where XV_SUPPORT runs it twice in its first frame: the AreaGrab's attack ends a frame later than BN5's 0x080EC400"
+  },
+  {
+   "name": "Chaos Unison's phases a frame longer",
+   "spec": "chaos_number_90",
+   "soulbreak": 128,
+   "what": "the chaos phase's step (src/emu/soulchaos.c, SOULCHAOS_BREAK_PHASE) cycles 43 frames where BN5's row 0 (0x08010648) has 42: the cycle's frame (BN6_SOUL_CYCLE) 42 against BN5's AIData +0x1C 0 as the charge's second cycle begins"
+  },
+  {
+   "name": "the Dark Soul a frame later",
+   "spec": "chaos_number_60",
+   "poke": [
+    "08C8325C:2019:2"
+   ],
+   "what": "the failure's phase 4 (CHAOS_FAIL_4, src/emu/soulchaos_thumb.c: BN5's 0x080EE782) counts 0x19 frames where BN5's counts 0x18 (its movs r0,#0x18 at SOULS_CHAOS + 0x15C): the Dark Soul spawned and MegaMan out of the Soul a frame after BN5's"
+  },
+  {
+   "name": "BN6's Program Advances' list alone",
+   "spec": "pa_suprspr1",
+   "poke": [
+    "080295B4:0802BCB0:4"
+   ],
+   "what": "the Custom screen's word of the Program Advances' list (BN6_PA_LIST_REF) BN6's own list again where src/emu/xchips_code.c's pas_stage points it at the list grown with BN5's recipes: the three WideSht1 picked form nothing, used one by one where BN5 forms SuprSpr1"
+  },
+  {
+   "name": "a Program Advance's id",
+   "spec": "pa_suprspr1",
+   "poke": [
+    "08F10002:0165:2"
+   ],
+   "what": "the grown list's first recipe of BN5's (FREE_CHIP_PAS, src/core/xchips_pas.c's SuprSpr1) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
+  },
+  {
+   "name": "no DarkChip dealt into the first worried hand",
+   "spec": "soul_mood_first",
+   "soulbreak": 33554432,
+   "what": "BN5's worried rule (0x08025118) left out of the compaction's hook on the battle's first Custom screen: DarkCirc stays shelved past the deck's place 5 (deck[5]), the second hand's fifth chip a Cannon where BN5's is DarkCirc"
+  },
+  {
+   "name": "HolyDrem's object type",
+   "spec": "chip_holydrem",
+   "poke5": [
+    "080E6F64:205A"
+   ],
+   "what": "the moved HolyDrem's support routine spawns BN5's fourth kind's 0x5A (movs r0,#0x59 at BN5's 0x080E6F64, written at its copy) where its own moved 0x59 runs: no 0x59 in play at t33, the foe not struck as BN5's"
+  },
+  {
+   "name": "Poltrgst's wait",
+   "spec": "chip_poltrgst",
+   "poke5": [
+    "080E8F18:201F"
+   ],
+   "what": "the moved Poltrgst's movs r0,#0x1E (BN5's 0x080E8F18, its object's wait) 0x1F at its copy: the obstacles thrown a frame after BN5's"
+  },
+  {
+   "name": "Tornado's frames",
+   "spec": "chip_darktorn",
+   "poke5": [
+    "080ECE88:202B"
+   ],
+   "what": "the moved Tornado family's movs r0,#0x2A (BN5's 0x080ECE88) 0x2B at its copy: DarkTorn's attack a frame apart from BN5's"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_numbrmnsp",
+   "poke": [
+    "08E00C42:0100:2"
+   ],
+   "what": "NumberMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 9, NumbrMn[SP]'s record's power less 1001; src/emu/xchips_code.c) 256 frames where BN6 keeps none (0xFFFF) and BN5's save none: its power by that time where BN5's is 40"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_numbrmnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
   }
  ]
 }

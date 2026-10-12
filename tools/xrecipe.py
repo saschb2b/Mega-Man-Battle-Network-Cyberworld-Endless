@@ -83,6 +83,9 @@ LIST_NUMBERS = {1: [0x1E, 0x00] + list(range(0x20, 0x100)), 2: list(range(0x30, 
                 4: list(range(0x5C, 0x100)), 5: list(range(0x20, 0x100))}
 FIRST_EFFECT = 0x6C
 BN6_EFFECT_LIST = 4    # the grown list an effect's sprite of an ungrown list is listed in (the attacks' and effects')
+# BN5's chip writer a family calls for a held chip (0x0800FE6A), aimed at the dispatch's own (XV_CHIP_WRITER): BN6's, a support
+# chip's family BN5's support family's timing (XV_SUPPORT_FAMILY: BN6's 0x15 ends the attack a frame later, zomon_v1 at t391)
+CHIP_WRITER = {0x0800FE6A: 'XV_CHIP_WRITER'}
 XV_SPAWN = {(1, 0x08003140): 'XV_SPAWN_1', (1, 0x0800315C): 'XV_SPAWN_1_LAST', (1, 0x080031E8): 'XV_SPAWN_1_LAST',
             (3, 0x08003178): 'XV_SPAWN_3', (3, 0x08003194): 'XV_SPAWN_3_LAST', (3, 0x080031B0): 'XV_SPAWN_3_FIRST',
             (4, 0x080031CC): 'XV_SPAWN_4'}
@@ -439,6 +442,9 @@ def calls_of(r, d, blocks):
     for t, sites in sorted(outs.items(), key=lambda x: min(x[1])):
         if t in BN5['spawners']:
             r.calls.append(dict(bn5=t, bn6=None, spawner=XV_SPAWN[(BN5['spawners'][t], t)], source='the dispatch', cls=None, sites=sites))
+            continue
+        if t in CHIP_WRITER:
+            r.calls.append(dict(bn5=t, bn6=None, spawner=CHIP_WRITER[t], source='the dispatch\'s chip writer', cls=None, sites=sites))
             continue
         tw = f.calls.get(t) or d.pairs.twin(t)
         r.calls.append(dict(bn5=t, bn6=tw[0], spawner=None, source=tw[1], cls=tw[2], detail=tw[3], sites=sites))
@@ -1030,7 +1036,9 @@ def c_recipe(r):
         L.append(f'\t{{ 0x{lo:08X}, 0x{hi:08X}, XV_{k} }},')
     L += ['};', f'static const XvPair {n}_calls[] = {{']
     for c in r.calls:
-        if c['spawner']:
+        if c['spawner'] in CHIP_WRITER.values():
+            L.append(f'\t{{ 0x{c["bn5"]:08X}, {c["spawner"]} }},   /* the dispatch\'s chip writer */')
+        elif c['spawner']:
             L.append(f'\t{{ {BN5_SPAWN_NAME[c["bn5"]]}, {c["spawner"]} }},   /* the dispatch\'s spawner */')
         else:
             how = c['cls'] + (' (audited)' if c.get('audit') else '')

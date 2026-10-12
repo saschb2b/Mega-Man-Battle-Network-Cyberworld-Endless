@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "soul_room.h"
+#include "soulchaos.h"
 #include "soulcode.h"
 #include "soullife.h"
 #include "xsong.h"
@@ -28,9 +29,13 @@ enum { ROW_4, ROW_A, ROW_6, ROW_B, ROW_LEFT, ROW_11 };
 /* The Souls' power attacks whose BN5 routine is an empty one (their charge times alone serve: the A button's charge of a
  * chip, the Souls track's S5): BN5's id, BN6's id after the moved ones */
 static const uint8_t empty_powers[] = { 0x12, 0x18, 0x1B };
+/* ... and the Souls' Chaos Unison's power attacks (their loadouts' sixth, AIData +0x11: the Souls track's S6), BN5's ids, their
+ * routines Chaos Unison's Thumb (soulchaos.c), after the empty ones */
+static const uint8_t chaos_powers[] = { 0x3A, 0x31, 0x32, 0x33, 0x38, 0x34 };
 
 static int breaks;
 static int nmoved;   /* the recipe's power attacks */
+static int nchaos;   /* the chaos power attacks in the table (none where Chaos Unison is not installed) */
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 
@@ -45,7 +50,25 @@ static int power6(int id5) {
 	if (p >= 0) return p;
 	for (size_t i = 0; i < sizeof empty_powers; ++i)
 		if (empty_powers[i] == id5) return SOUL_POWER_FIRST + nmoved + (int)i;
+	for (int i = 0; i < nchaos; ++i)
+		if (chaos_powers[i] == id5) return SOUL_POWER_FIRST + nmoved + (int)sizeof empty_powers + i;
 	return NONE;
+}
+
+/* BN5's id and the routine of the grown table's Souls' entry i (the moved, the empty, the chaos ones), 0 where none */
+static uint32_t routine_of(int i, int *id5) {
+	const SoulCode *c = &soulcode_bn5;
+	int empty = (int)sizeof empty_powers;
+	if (i < nmoved) {
+		*id5 = c->powers[i].id;
+		return soulcode_moved(c->powers[i].entry);
+	}
+	if (i < nmoved + empty) {
+		*id5 = empty_powers[i - nmoved];
+		return BN6_POWER_EMPTY | 1;
+	}
+	*id5 = chaos_powers[i - nmoved - empty];
+	return soulchaos_power(*id5);
 }
 
 /* ---- the hooks: MegaMan's loadout, element, weakness and buster bonus in a Soul ---- */
@@ -90,7 +113,8 @@ static bool tables(void) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	const SoulCode *c = &soulcode_bn5;
 	nmoved = c->npowers;
-	int n = BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers;
+	nchaos = soulchaos_power(chaos_powers[0]) ? (int)sizeof chaos_powers : 0;
+	int n = BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos;
 	if (SOUL_POWER_FIRST != BN6_POWER_ATTACK_COUNT || SOULS_POWERS + 4u * (uint32_t)n > SOULS_POWERS_END ||
 		SOULS_CHARGES + BN6_CHARGE_ROW * (uint32_t)n > SOULS_CHARGES_END || n > NONE)
 		return false;
@@ -98,8 +122,8 @@ static bool tables(void) {
 	memcpy(powers, R.data + (BN6_POWER_ATTACKS - BUS), 4 * BN6_POWER_ATTACK_COUNT);
 	memcpy(charges, R.data + (BN6_CHARGE_TIMES - BUS), BN6_CHARGE_ROW * BN6_POWER_ATTACK_COUNT);
 	for (int i = 0; i < n - BN6_POWER_ATTACK_COUNT; ++i) {
-		int id5 = i < nmoved ? c->powers[i].id : empty_powers[i - nmoved];
-		uint32_t routine = i < nmoved ? soulcode_moved(c->powers[i].entry) : BN6_POWER_EMPTY | 1;
+		int id5 = 0;
+		uint32_t routine = routine_of(i, &id5);
 		if (!routine) return false;
 		put32(powers + 4 * (BN6_POWER_ATTACK_COUNT + i), routine);
 		uint8_t *row = charges + BN6_CHARGE_ROW * (BN6_POWER_ATTACK_COUNT + i);
@@ -116,7 +140,7 @@ static bool tables(void) {
 		r6[ROW_6] = r5[ROW_6];
 		r6[ROW_B] = (uint8_t)power6(r5[ROW_B]);
 		r6[ROW_LEFT] = r5[ROW_LEFT] == NONE ? NONE : (uint8_t)power6(r5[ROW_LEFT]);
-		r6[ROW_11] = NONE;   /* (Chaos Unison's charged attack: the Souls track's S6) */
+		r6[ROW_11] = nchaos ? (uint8_t)power6(r5[ROW_11]) : NONE;   /* (Chaos Unison's charged attack: the Souls track's S6, soulchaos.c) */
 		if (r6[ROW_B] == NONE || (r5[ROW_LEFT] != NONE && r6[ROW_LEFT] == NONE)) return false;
 		if (breaks & SOULPOWER_BREAK_FAMILY) r6[ROW_B] = (uint8_t)(SOUL_POWER_FIRST + (r6[ROW_B] - SOUL_POWER_FIRST + 1) % nmoved);
 	}

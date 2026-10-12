@@ -3398,6 +3398,7 @@ static void test_free_space(void) {
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
+		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -3466,7 +3467,8 @@ static void test_free_space(void) {
 		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
 		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },
 		{ "the loadouts", SOULS_LOADOUTS, SOULS_LOADOUTS_END }, { "the faces", SOULS_FACES, SOULS_FACES_END },
-		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "the songs", SOULS_SONGS, SOULS_SONGS_END },
+		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "Chaos Unison's Thumb", SOULS_CHAOS, SOULS_CHAOS_END },
+		{ "the songs", SOULS_SONGS, SOULS_SONGS_END },
 		{ "the code", SOULS_CODE, SOULS_CODE_END }, { "the attacks' sprites", SOULS_ART, SOULS_FACE_TILES },
 		{ "the faces' tiles and digits", SOULS_FACE_TILES, SOULS_DIGITS_END }, { "list 0", SOULS_LIST0, SOULS_LIST0_END },
 		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
@@ -4076,16 +4078,18 @@ static void test_chip_code(void) {
 	int moved = 0;
 	for (int i = 0; i < xchips_moved_count; ++i) {
 		const XChipMoved *m = &xchips_moved[i];
-		const XChipReg *r = xreg_at(m->bn6);
+		/* (an own row's, or BN6's own chip of a name whose code is BN5's: tools/xchiprecipe.py's SAME_MOVED, DarkPlus) */
+		const XChipReg *r = xreg_at(m->bn6), *named = r ? NULL : xreg_named(m->bn6);
 		bool unit = false;
 		for (int k = 0; k < xchips_bn5_count && !unit; ++k) {
 			const XChipUnit *u = &xchips_bn5[k];
 			unit = u->kind == XCHIP_ATTACK ? m->family == u->number
 			                               : m->family == (u->kind == XCHIP_SUPPORT ? BN6_CHIP_SUPPORT_FAMILY : BN6_CHIP_NAVI_FAMILY) && m->sub == u->number;
 		}
-		CHECK(r && (r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK) && unit && xchips_moved_of(m->bn6) == m,
-			"chips' code: moved chip %d a moved row, or a Program Advance's or a DarkChip's waiting for its rule, playing a unit", m->bn6);
-		moved += r && r->how != XREG_MOVED;
+		CHECK(((r && (r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK)) || (named && named->how == XREG_SAME)) && unit &&
+			xchips_moved_of(m->bn6) == m, "chips' code: moved chip %d a moved row, a Program Advance's, a DarkChip's or one of BN6's own "
+			"by name, playing a unit", m->bn6);
+		moved += !r || r->how != XREG_MOVED;
 	}
 	for (int i = 0; i < xreg_count; ++i)
 		if (xreg_rows[i].how == XREG_MOVED) {

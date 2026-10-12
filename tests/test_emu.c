@@ -52,7 +52,7 @@
 Platform P;
 void platform_persist(void) {}
 
-#define ROM_SIZE 0x400
+#define ROM_SIZE 0x800   /* (room for a full table of hooks on its zeros from 0x300: HOOK_MAX 192, issue #82) */
 #define IWRAM 0x03000000u
 
 static int failures;

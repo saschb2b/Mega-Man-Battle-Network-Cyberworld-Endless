@@ -41,7 +41,7 @@ SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (ob
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 DISPATCH_COPY = 0x3C                               # a virus's AI data's u16 BN6's dispatcher copies its object's +0x3E into
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
-TRACE_VERSION = 7   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block and the dispatch's types; version 2
+TRACE_VERSION = 8   # (src/dev/xdiff.c's: the state BN6's engine keeps apart, the player block and the dispatch's types; version 2
                     # traces, with none of them, still read)
 # MegaMan's side's player block (src/dev/xdiff.c, trace version 5): his battle NaviStats, the word of what was used this
 # battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes, the Souls' state in BN6's engine (BN6_SOULS' 0x80
@@ -253,7 +253,9 @@ class Canon:
                              for r in m['action'].get('megaman_by_attack', [])]
         self.layouts = legit['layouts']
         self.legit = legit
-        self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
+        # (a type named "N twin": only where BN6's object runs BN6's own type of it, a moved copy keeping BN5's numbers)
+        self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', []) if ' ' not in x}
+        self.t3_actions_twin = {int(x.split()[0], 0) for x in m['action'].get('t3_types', []) if x.endswith(' twin')}
         self._legit_t3_actions, self.effect_bytes = set(self.t3_actions), set()
         self.tables = [dict(t, bn5=int(t['bn5'], 0), bn6=int(t['bn6'], 0)) for t in m.get('rom_tables', {}).get('tables', [])]
         self.natives = set()   # (a spec's: enemies both games have, by BN6's id; their attacks' types, their effects)
@@ -269,6 +271,9 @@ class Canon:
         self.form_base = int(forms.get('base', '0'), 0)
         self.form_names = {self.form_base + f for f in range(1, int(forms.get('forms', '0'), 0) + 1)}
         self.souls = m.get('souls', {})
+        self.virus_support = int(m['chip_id']['virus_support'], 0) if 'virus_support' in m.get('chip_id', {}) else None
+        fl = m.get('green_flash', {})
+        self.green_flash = dict(bn5_ai=int(fl.get('bn5_ai', '0x3C'), 0), size=int(fl.get('size', 2)))
         # (BN5's chip ids as BN6's: the registry's rows, legit.json's maps, chip_id; the places they are kept, an AI data's and
         # an object's of a type of the third or fourth kind)
         self.chip_rows = registry_rows(m['chip_id']['registry']) if 'chip_id' in m else {}
@@ -283,6 +288,12 @@ class Canon:
         self.power_attack = num(m['power_attack']['bn5_to_bn6']) if 'power_attack' in m else {}
         self.flash = num(m['flash']['bn5_to_bn6']) if 'flash' in m else {}
         self.sprite_pairs = m['sprites'] if 'sprites' in m else None
+        # (objects that keep the sprite they load by its list and number in their own bytes, BN5's read as BN6's through the
+        # sprites the installs copied: legit.json's maps, sprite_numbers)
+        sn = m.get('sprite_numbers', {})
+        self.sprite_number_objs = {(k.split(':')[0], int(k.split(':')[1], 0)): (int(v['list'], 0), int(v['number'], 0))
+                                   for k, v in sn.get('objects', {}).items()}
+        self.sprite_number_map = sprite_numbers_of(sn.get('recipes', []))
         self._sprites = None
         self.sprite_bytes = False   # (a spec's "sprites": "bytes": a sprite of no pair compared by its bytes, both games' in their ROMs)
         self._sprite_sha = {5: None, 6: None}
@@ -391,14 +402,15 @@ class Canon:
     def behaviour6(self, chip6):
         """(family, subfamily) BN6's engine runs BN6's chip chip6 by: its record's, or for one of the registry's own ids the
         twin's family with the row's subfamily or the twin's (src/core/xchips_record.c, behaviour), or the moved code's
-        (src/core/xchips_moved.c, where its code moved), else the inert family"""
+        (src/core/xchips_moved.c, where its code moved: one of BN6's own ids too, whose record BN6's engine makes BN5's
+        chip's, src/core/chips.c), else the inert family"""
+        moved = self.moved_chips().get(chip6)
+        if moved:
+            return moved
         rec = self.record(6, chip6)
         if rec is not None:
             return rec[0x0B], rec[0x0C]
         row = next((r for r in self.chip_rows.values() if r[0] == chip6), None)
-        moved = self.moved_chips().get(chip6)
-        if moved:
-            return moved
         if row and row[2]:
             twin = self.record(6, row[2])
             return twin[0x0B], row[3] if row[3] != 0xFF else twin[0x0C]
@@ -410,7 +422,7 @@ class Canon:
             self._moved = moved_rows()
         return self._moved
 
-    def chip_action(self, ai5, v):
+    def chip_action(self, ai5, v, mm=False):
         """an object's CurAction v (BN5's) as BN6's where it is the family of the chip it uses (its AttackVars +0x14: a
         virus's, the chip writer's, BN5 0x0800FE7C / BN6 0x080126F6, which returns the chip record's +0x0B for setAttack0;
         MegaMan's, his chip use's) by BN5's record: BN6's family of BN6's chip (behaviour6: its record's, the moved code's,
@@ -421,7 +433,10 @@ class Canon:
         rec5 = self.record(5, chip5)
         if rec5 is None or rec5[0x0B] != v:
             return None
-        return self.behaviour6(self.chip(5, chip5))[0]
+        fam = self.behaviour6(self.chip(5, chip5))[0]
+        # (a virus's support chip runs BN5's support family's timing, BN6's 0x15 through the families' own entry: legit.json's
+        # maps, chip_id, virus_support; MegaMan's and a moved Navi's own BN6's 0x15, `mm`)
+        return self.virus_support if fam == SUPPORT_FAMILY and not mm and self.virus_support else fam
 
     def chip_object(self, kind, t5):
         """the places (u16) an object of BN5's type t5 of this kind keeps a chip id at (legit.json, maps, chip_id, places)"""
@@ -436,8 +451,9 @@ class Canon:
 
     def paired(self, c5, c6):
         """whether the spec's folders pair BN5's chip c5 with BN6's c6, another chip of the same name in each game (each its
-        own record and numbers): BN6's own chip, not one of the registry's own ids (whose record is BN5's)"""
-        return self.chips.get(c5) == c6 and not own_id(c6)
+        own record and numbers): BN6's own chip, not one of the registry's own ids (whose record is BN5's), nor one of BN6's
+        whose record BN6's engine makes BN5's where its code moved (src/core/chips.c, xrec_same_moved: DarkPlus)"""
+        return self.chips.get(c5) == c6 and not own_id(c6) and c6 not in self.moved_chips()
 
     def mm_attack_action(self, v, ai):
         """MegaMan's CurAction v (BN5's) as BN6's by his attack where his AI data names it (maps, action, megaman_by_attack),
@@ -696,6 +712,21 @@ def sprite_copies_of(recipe):
     return out
 
 
+def sprite_numbers_of(recipes):
+    """(BN5's list, number) -> [(BN6's list, number), ...] of every sprite a recipe's XvSprite rows copy (tools/xchiprecipe.py's,
+    xrecipe.py's, xnavirecipe.py's, xsoul.py's: BN5's list and number, BN6's, the copy's place), each copy of it in the
+    recipes' order"""
+    import re
+    out = {}
+    for r in recipes:
+        with open(os.path.join(ROOT, r), encoding='utf-8') as f:
+            for m in re.finditer(r'\{ (\d), 0x([0-9A-F]{2}), (\d), 0x([0-9A-F]{2}), ', f.read()):
+                copies = out.setdefault((int(m.group(1)), int(m.group(2), 16)), [])
+                if (int(m.group(3)), int(m.group(4), 16)) not in copies:
+                    copies.append((int(m.group(3)), int(m.group(4), 16)))
+    return out
+
+
 def sprite_copies(recipes):
     out = {}
     for r in recipes:
@@ -920,9 +951,12 @@ def word_view(fa, fb, wa, wb, sprite_rel):
         # (and a routine's address an object keeps, each game's twin: legit.json's pairs)
         if (wa, wb) in fa.canon.code_pairs:
             return ('code twin', wa), ('code twin', wa)
-        va, vb = fa.ptr(wa), fb.ptr(wb)
-        if va[0] == 'raw' and vb[0] == 'raw' and table_view(fa.canon, wa, wb):
+        # (a pointer into a table both games' ROMs hold, each its own: read so though BN5's lies in a block a moved
+        # family copied, where BN6's points into its own table, not the copy: chip_poltrgst's cube, BN5's obstacle code
+        # a Navi's moved too)
+        if table_view(fa.canon, wa, wb):
             return table_view(fa.canon, wa, wb)
+        va, vb = fa.ptr(wa), fb.ptr(wb)
         if va[0] == 'raw' and vb[0] == 'raw':
             if ROM[0] <= wa < ROM[1] and ROM[0] <= wb < ROM[1] and twin(wa, wb):
                 return ('twin data',), ('twin data',)
@@ -954,8 +988,9 @@ def art_chosen(canon, oa, ob):
     if ob.moved:
         return True
     if ob.kind == 'T1' and t == 0:
-        # (a foe both games have, a native, draws each game's own art: BN6's Mettaur is BN6's)
-        return oa.o16(OBJ_NAME_ID) in canon.foes and ob.o16(OBJ_NAME_ID) not in canon.natives
+        # (a foe both games have, a native, draws each game's own art: BN6's Mettaur is BN6's; the Dark Soul a failed Chaos
+        # Unison spawns is a moved foe whatever the spec's foes, drawn from the Navis' copy of MegaMan's sprite)
+        return (oa.o16(OBJ_NAME_ID) in canon.foes or oa.o16(OBJ_NAME_ID) == DARK_SOUL_5) and ob.o16(OBJ_NAME_ID) not in canon.natives
     if ob.kind == 'T4' and t == 0:
         return ob.o8(OBJ_EFFECT) in canon.family_effects | canon.foe_effects()
     return ob.kind == 'T1' and t == T1_OVERLAY and ob.o8(OBJ_OVERLAY_KIND) >= OVERLAY_KINDS6
@@ -966,6 +1001,7 @@ def obj_cells(fa, fb, oa, ob):
     out = []
     canon, kind = fa.canon, oa.kind
     mm = kind == 'T1' and canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
+    own = mm or (kind == 'T1' and canon.is_navi(5, oa.o16(OBJ_NAME_ID)))   # (a support chip in BN6's own family: MegaMan's, a Navi's)
     sp = SPRITE[kind] + NODE
     ra, rb = oa.canonical(), ob.canonical()
     base_a, base_b = u32(ra, sp + 0x18), u32(rb, sp + 0x18)
@@ -1015,9 +1051,10 @@ def obj_cells(fa, fb, oa, ob):
                 a = b   # (a chip the spec's folders pair: each game's own record's family, BN5's 0x25 WideSht BN6's 0x30)
             elif off == OBJ_ACTION and mm and canon.mm_attack_action(a, oa.ai) is not None:
                 a = canon.mm_attack_action(a, oa.ai)   # (his attack's family as BN6 runs it: a Soul's, before a chip's)
-            elif off == OBJ_ACTION and kind == 'T1' and oa.o8(OBJ_TYPE) == 0 and canon.chip_action(oa.ai, a) is not None:
-                a = canon.chip_action(oa.ai, a)
-            elif off == OBJ_ACTION and (kind == 'T1' and oa.o8(OBJ_TYPE) == 0 or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+            elif off == OBJ_ACTION and kind == 'T1' and oa.o8(OBJ_TYPE) == 0 and canon.chip_action(oa.ai, a, own) is not None:
+                a = canon.chip_action(oa.ai, a, own)
+            elif off == OBJ_ACTION and (kind == 'T1' and oa.o8(OBJ_TYPE) == 0 or kind == 'T3' and (canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions or
+                                        canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions_twin and not ob.moved)):
                 a = canon.action(5, mm, a, oa.ai)
             elif off in OBJ_ACTIONS_KEPT and kind == 'T1' and oa.o8(OBJ_TYPE) == 0:
                 a = canon.action(5, mm, a)
@@ -1039,6 +1076,15 @@ def obj_cells(fa, fb, oa, ob):
                 rec5 = canon.record(5, chip5)
                 if rec5 is not None and a == rec5[0x0C]:
                     a = canon.behaviour6(canon.chip(5, chip5))[1]
+            elif (kind, oa.o8(OBJ_TYPE)) in canon.sprite_number_objs and off in canon.sprite_number_objs[(kind, oa.o8(OBJ_TYPE))]:
+                # (the sprite it keeps by its list and number, BN5's read as BN6's where an install copied it: sprite_numbers)
+                # (one BN5 sprite two installs copied, each its own number, the same bytes: BN6's where it is one of them,
+                # Guard's 3:0x00 at 3:0xF7 and the Navis' at 4:0xB5, which ShadowSoul's slash's afterimage loads)
+                lo, no = canon.sprite_number_objs[(kind, oa.o8(OBJ_TYPE))]
+                key = (oa.o8(lo) // 4, oa.o8(no))
+                cands = canon.sprite_number_map.get(key, [key])
+                l6, n6 = next((c for c in cands if c == (ob.o8(lo) // 4, ob.o8(no))), cands[0])
+                a = 4 * l6 if off == lo else n6
             elif off in (OBJ_CHIP, OBJ_CHIP + 1) and kind == 'T1':
                 ca, cb = canon.chip(5, oa.o16(OBJ_CHIP)), ob.o16(OBJ_CHIP)
                 a, b = (ca & 0xFF, cb & 0xFF) if off == OBJ_CHIP else (ca >> 8, cb >> 8)
@@ -1115,7 +1161,8 @@ def ai_cells(fa, fb, oa, ob):
     return out
 
 
-ATTACK_SUB, ATTACK_CHIP = 0xA3, 0xB4   # an AI data's AttackVars +3, the chip's subfamily, and +0x14, the chip used
+ATTACK_SUB, ATTACK_CHIP = 0xA3, 0xB4
+SUPPORT_FAMILY = 0x15   # BN6's (and BN5's) support chips' family
 
 
 def chip_ids_read(canon, ai):
@@ -1315,9 +1362,10 @@ def soul_ai(canon):
 
 def soul_ai_read(canon, ai):
     """BN5's MegaMan's AI data read as BN6's: its Soul's state is BN5's alone there (BN6 keeps it in BN6_SOULS, its own
-    bytes at those places being its own), so it reads 0 there and is compared through soul_cells"""
+    bytes at those places being its own), so it reads 0 there and is compared through soul_cells; and its green flash's
+    frames, which BN6's engine keeps apart (legit.json, maps, flash: compared through apart_cells)"""
     out = bytearray(ai)
-    for off, size in soul_ai(canon).values():
+    for off, size in list(soul_ai(canon).values()) + [(canon.green_flash['bn5_ai'], canon.green_flash['size'])]:
         out[off:off + size] = bytes(size)
     return bytes(out)
 
@@ -1487,6 +1535,11 @@ def apart_cells(fa, fb, t):
             out += [Diff(t, 'battle', 'chip AI lists', side + k, sa[k], sb[k]) for k in range(DARK_LIST) if sa[k] != sb[k]]
     na, nb = pa[APART_SEA + 2 * DARK_LIST:][:COLONEL_SIDES], pb[APART_SEA + 2 * DARK_LIST:][:COLONEL_SIDES]   # (the rest BN6's own)
     out += [Diff(t, 'battle', 'the Navis\' state', k, na[k], nb[k]) for k in range(len(na)) if na[k] != nb[k]]
+    # (the moved state: BN5's green flash by side, BN5's from each side's player's AI data (legit.json, maps, green_flash), BN6's
+    # engine's XC_FLASH; MegaMan's side's his, the other's the battle's)
+    fl = fa.canon.green_flash
+    ma, mb = pa[end + APART_DARK:][:2 * fl['size']], pb[end + APART_DARK:][:2 * fl['size']]
+    out += [Diff(t, 'player' if k < fl['size'] else 'battle', 'green flash', k, ma[k], mb[k]) for k in range(len(ma)) if ma[k] != mb[k]]
     return out
 
 

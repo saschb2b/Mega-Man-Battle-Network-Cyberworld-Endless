@@ -14,8 +14,13 @@ const XChipMoved xchips_moved[] = {
 	{ 214, 0x15, 0x54 },   /* DarkCirc */
 	{ 216, 0x75, 0x02 },   /* DarkWide */
 	{ 217, 0x6A, 0x11 },   /* DarkMetr */
+	{ 218, 0x9F, 0x01 },   /* DarkDril */
+	{ 219, 0x72, 0x03 },   /* DarkTorn */
 	{ 220, 0x15, 0x45 },   /* DrkSonic */
+	{ 290, 0x6A, 0x03 },   /* DarkPlus */
 	{ 291, 0x15, 0x3D },   /* Jealousy */
+	{ 292, 0x15, 0x5B },   /* Poltrgst */
+	{ 293, 0x15, 0x4A },   /* BlakWing */
 	{ 294, 0x84, 0x00 },   /* Z Saver */
 	{ 295, 0x6F, 0x00 },   /* Guard1 */
 	{ 296, 0x6F, 0x01 },   /* Guard2 */
@@ -23,6 +28,7 @@ const XChipMoved xchips_moved[] = {
 	{ 298, 0x6B, 0x00 },   /* CrakOut */
 	{ 299, 0x6B, 0x01 },   /* DublCrak */
 	{ 300, 0x6B, 0x02 },   /* TripCrak */
+	{ 314, 0x15, 0x4D },   /* HolyDrem */
 	{ 350, 0x69, 0x04 },   /* InfVulc1 */
 	{ 351, 0x69, 0x05 },   /* InfVulc2 */
 	{ 352, 0x69, 0x06 },   /* InfVulc3 */
@@ -117,10 +123,21 @@ const XChipMoved xchips_moved[] = {
 	{ 487, 0x78, 0x00 },   /* WoodNos2 */
 	{ 488, 0x78, 0x00 },   /* WoodNos3 */
 	{ 489, 0x1B, 0x1D },   /* NumbrMan */
+	{ 490, 0x1B, 0x1D },   /* NumbrMn{9e} */
+	{ 491, 0x1B, 0x1D },   /* NumbrMn{9f} */
+	{ 492, 0x1B, 0x27 },   /* Colonel{9f} */
 	{ 493, 0x1B, 0x28 },   /* ShadoMan */
+	{ 494, 0x1B, 0x28 },   /* ShadoMn{9e} */
+	{ 495, 0x1B, 0x28 },   /* ShadoMn{9f} */
 	{ 496, 0x1B, 0x29 },   /* TmhwkMan */
+	{ 497, 0x1B, 0x29 },   /* TmhwkMn{9e} */
+	{ 498, 0x1B, 0x29 },   /* TmhwkMn{9f} */
 	{ 499, 0x1B, 0x22 },   /* KnightMn */
+	{ 500, 0x1B, 0x22 },   /* KnigtMn{9e} */
+	{ 501, 0x1B, 0x22 },   /* KnigtMn{9f} */
 	{ 502, 0x1B, 0x2A },   /* ToadMan */
+	{ 503, 0x1B, 0x2A },   /* ToadMan{9e} */
+	{ 504, 0x1B, 0x2A },   /* ToadMan{9f} */
 };
 const int xchips_moved_count = (int)(sizeof xchips_moved / sizeof *xchips_moved);
 

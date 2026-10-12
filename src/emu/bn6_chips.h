@@ -97,4 +97,25 @@
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/EMULATION.md) */
 
+/* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
+#define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */
+#define BN6_FLASH_COUNT_OP    0x6DAC      /* ... its ldr r4,[r5,#0x58] there, checked before the hook */
+#define BN6_FLASH_TINT        0x0801B15Au /* an object's colours' chain (0x0801AF44): bl 0x080168C8, BN5's 0x08013738 (BN5 tints before it) */
+#define BN6_FLASH_TINT_BL     0xFBB5F7FBu /* ... its two halves */
+#define BN6_OBJ_SPRITE_BLOCK  0x02        /* an object's +2: its sprite state's block, the high four bits times 16 (sprite_setColorShader 0x08002ED0) */
+#define BN6_SPRITE_SHADER     0x06        /* ... the colour shader there, u16 (strh r0,[r3,#6]) */
+#define BN6_DARK_AFTERS       0x0800B7BCu /* BN6_DARK_AFTER's table by the DarkChip's id less 0x11E, a routine each: */
+#define BN6_DARK_AFTER_HPBUG  0x0800B80Eu /* ... DarkPlus's (its fifth): the NaviStats' HP bug +4, at most 7 */
+#define BN6_DARKPLUS          0x122       /* BN6's DarkPlus (its DarkChipID 4) */
+#define BN6_CHIP_WRITER       0x080126E4u /* the chip writer, its first entry (r4 1: the chip's use logged; a virus's held chip, BN5's
+                                             0x0800FE6A): AttackVars from the record of r0, its family returned */
+#define BN6_SUPPORT_RUN       0x080ED0DCu /* the support family 0x15's routine: phase 0 the chip's routine, then +1 1; phase 1 the attack's end
+                                             (BN5's 0x080EC400 ends it in phase 0's frame) */
+#define BN6_PA_LIST           0x0802BCB0u /* the Program Advances' list the Custom screen walks (0x08029520): a recipe's address each, */
+#define BN6_PA_COUNT          43          /* ... these, then 0 (0x0802BD5C) */
+#define BN6_PA_LIST_REF       0x080295B4u /* ... its one word (loaded at 0x08029556; the link battles' list, 0x0802BC60, its own word 0x080295B8) */
+#define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
+#define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
+#define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
+
 #endif

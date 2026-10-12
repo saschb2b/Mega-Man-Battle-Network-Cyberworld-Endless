@@ -81,6 +81,7 @@ RARE_BYTE = 0x0203EAEA         # where it then puts the AI index (byte 0xA of th
 METTAUR_AI, METTAUR_IDS = 1, (0x01, 0x05)   # BN6's own Mettaur, versions 0 and 4: the delete spec's control
 STATS_HP = (60, 120, 150, 180, 230, 280)   # (BN5's struct2 for CanGard, as the delete spec reads it from the battle)
 STATUS_ACTION = {'freeze': 6, 'bubble': 7, 'paralysis': 4, 'drag': 5}
+BATTLE_FLAGS, TIME_STOP = 0x02034880 + 0x32, 4   # BN6_BATTLE_FLAGS (src/emu/bn6_panels.h): BN6_TIME_STOP while time stands still
 CUSTOM_CLOSED = ['260:', '4:START', '10:', '4:A']   # the Custom screen closed with OK, after the foes step
 KEYS_FRAMES = sum(int(k.split(':')[0]) for k in X.KEYS_BEFORE.split(',') + CUSTOM_CLOSED)   # the frame a spec's keys begin at
 
@@ -436,7 +437,7 @@ def look(img, ids):
                     owned[a] = kind
     lo, hi = DELETE_COUNTS
     return dict(me=me, owned=owned, counts=bytes(img[X.off_of(lo):X.off_of(hi)]), rare=X.u8(img, RARE_BYTE),
-                phase=X.u8(img, X.BATTLE_PHASE))
+                phase=X.u8(img, X.BATTLE_PHASE), stopped=bool(X.u16(img, BATTLE_FLAGS) & TIME_STOP))
 
 
 def plain_run(fam):
@@ -479,6 +480,8 @@ def families_spec(c, a):
             # more, by the battle's timer, the step's wait counted from the Custom screen's OK, FIGHT_AFTER frames before
             # the timer runs; else 120 frames in. Not while it runs a chip's family, CurAction 0x10 on: the engine's chip
             # code, whose time freeze, Zomon's AreaGrab's, holds every status until it ends)
+            # (nor while time stands still after it, BN6_TIME_STOP: Zomon's AreaGrab ends its user's attack in its first frame,
+            # BN5's support family's timing, its time freeze on)
             # (a mark's status where it stands in its first state of its own, CurAction 8: a state of a family's may take the
             # hit's bits itself before BN6's status step reads them, Appley's 11 among them)
             at = mark_at = 120 + FIGHT_AFTER
@@ -488,7 +491,7 @@ def families_spec(c, a):
                     seen = look(img, fam['ids'])
                     if timer < 30 or not seen['me']:
                         continue
-                    if not found and seen['owned'] and seen['me']['action'] < 0x10:
+                    if not found and seen['owned'] and seen['me']['action'] < 0x10 and not seen['stopped']:
                         at, found = timer + FIGHT_AFTER + 2, True
                     if not mark_found and seen['me']['action'] == 8:
                         mark_at, mark_found = timer + FIGHT_AFTER + 2, True

@@ -79,6 +79,9 @@ static const Change code_changes[] = {
 	{ BN6_PSEUDO_POOL, 2, { 0x0170, 0 }, { LO(ROUTINE(CODE_PSEUDO)), HI(ROUTINE(CODE_PSEUDO)) } },
 	{ BN6_PSEUDO_TEST_NAVI, 3, { 0x429A, 0xDB00, 0x2101 }, { MOV_LR_PC, 0x4718, NOP } },
 	{ BN6_PSEUDO_POOL_NAVI, 2, { 0x0170, 0 }, { LO(ROUTINE(CODE_PSEUDO)), HI(ROUTINE(CODE_PSEUDO)) } },
+	/* (the Library's P.A. tab's builder to 349: the registry's 350 on are Program Advances of library type 4 and no library
+	 * number, which it would list at the slot before its buffer once formed: docs/ROM_DATA.md, BN5's Program Advances) */
+	{ BN6_PA_LIBRARY_BOUND, 2, { 0x001E, 0 }, { 0x001D, 0 } },
 };
 #define NCODE (int)(sizeof code_changes / sizeof *code_changes)
 

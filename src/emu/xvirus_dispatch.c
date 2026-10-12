@@ -193,9 +193,49 @@ static void spawner(uint8_t *out, int i) {
 	word(out, lit + 8, xvirus_dispatch_side(kind));
 }
 
+/* XV_SUPPORT (r5 the virus, r7 its attack's variables): BN5's support family (0x080EC400) ends a virus's support chip in the
+ * frame its routine runs, BN6's (0x080ED0DC) a frame later (phase 1): BN6's run twice in the one frame, +1 back to 0 as BN5's
+ * leaves it (BN6's family itself as it is, which MegaMan's own support chips run):
+ *   push {lr}; ldr r3,=family; mov lr,pc; bx r3; ldr r3,=family; mov lr,pc; bx r3; movs r0,#0; strb r0,[r7,#1]; pop {pc} */
+static void support(uint8_t *out) {
+	uint32_t base = XV_SUPPORT - XV_STUBS, lit = base + 0x14;
+	Asm a = { out, base };
+	op(&a, 0xB500u);   /* push {lr} */
+	for (int k = 0; k < 2; ++k) {
+		ldr_pc(&a, 3, lit);
+		op(&a, MOV_LR_PC);
+		op(&a, bx(3));
+	}
+	op(&a, 0x2000u);   /* movs r0,#0 */
+	op(&a, 0x7078u);   /* strb r0,[r7,#1] */
+	op(&a, POP_PC);
+	word(out, lit, BN6_SUPPORT_RUN | 1);
+}
+
+/* XV_CHIP_WRITER (BN5's 0x0800FE6A from a moved family's code): BN6's (0x080126E4), a support chip's family (0x15) BN5's
+ * timing's (XV_SUPPORT_FAMILY), for setAttack0 after it:
+ *   push {lr}; ldr r3,=writer; mov lr,pc; bx r3; cmp r0,#0x15; bne 1f; movs r0,#XV_SUPPORT_FAMILY; 1: pop {pc} */
+static void chip_writer(uint8_t *out) {
+	uint32_t base = XV_CHIP_WRITER - XV_STUBS, lit = base + 0x10;
+	Asm a = { out, base };
+	op(&a, 0xB500u);
+	ldr_pc(&a, 3, lit);
+	op(&a, MOV_LR_PC);
+	op(&a, bx(3));
+	op(&a, 0x2800u | BN6_CHIP_SUPPORT_FAMILY);   /* cmp r0,#0x15 */
+	uint32_t bne = a.at;
+	op(&a, 0);
+	op(&a, 0x2000u | XV_SUPPORT_FAMILY);
+	put16(out + bne, b_cond(NE, bne, a.at));
+	op(&a, POP_PC);
+	word(out, lit, BN6_CHIP_WRITER | 1);
+}
+
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	memset(out, 0, XV_STUBS_SIZE);
 	none(out);
 	for (int k = 0; k < XV_DISPATCH_KINDS; ++k) dispatch(out, k);
 	for (int i = 0; i < XV_SPAWNERS; ++i) spawner(out, i);
+	support(out);
+	chip_writer(out);
 }

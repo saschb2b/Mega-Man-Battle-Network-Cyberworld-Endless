@@ -1,0 +1,234 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of RockCube *, Poltrgst P and 28 Cannon A in both games, dealt in that order, BN5's chips 99 and 213 by BN5's own code and BN6's 143 and the registry's 292 (Poltrgst's code moved: BN5's support routine 0x31 as BN6's 0x5B, its object the fourth kind's 0x72, its double of MegaMan the first kind's 0x58, drawn from his own sprite in each game, and its thrower the fourth kind's 0x73), both picked on the first Custom screen and OK: the RockCube used at t30 stands before him, Poltrgst at t70 throws it at a panel of the enemy's (a random number each obstacle, BN5 0x0800D5F6 / BN6 0x0800F6C6): every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "3463",
+  "1ED5",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "folder6": [
+  "348F",
+  "1F24",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   70,
+   "A",
+   2
+  ]
+ ],
+ "deck5": [
+  "3463",
+  "1ED5",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "deck6": [
+  "348F",
+  "1F24",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "sprites": "bytes"
+}

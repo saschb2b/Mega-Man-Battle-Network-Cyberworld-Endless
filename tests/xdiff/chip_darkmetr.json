@@ -1,5 +1,5 @@
 {
- "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkMetr F in both games, BN5's chip 195 by BN5's own code and the registry's 217 by the same code moved (BN5's misc family 0x1A as BN6's 0x6A, subfamily 0x11 (Astroid's controller, its kind the DarkChip's); a DarkChip of the registry's, dealt straight into the battle deck; KnightSoul held in both (flags5, souls6), so BN6's engine has the Souls and with them BN5's mood and DarkChip rule (S7)), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkMetr F in both games, BN5's chip 195 by BN5's own code and the registry's 217 by the same code moved (BN5's misc family 0x1A as BN6's 0x6A, subfamily 0x11 (Astroid's controller, its kind the DarkChip's); a DarkChip of the registry's, dealt straight into the battle deck; KnightSoul held in both (flags5, souls6), so BN6's engine has the Souls and with them BN5's mood and DarkChip rule (S7)), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code). BN5's DarkChip use whole in BN6's engine (src/emu/soulmood.c): dark for the battle, his palette BN5's dark one (3, a DarkChip used at a neutral meter: BN5 0x0800DDEC, his object's +0x94), and its after-effect on his battle NaviStats (BN5 0x0802C938: DarkMetr's +0x19 by 2), a NaviCust bug both engines read alike, the emotion window glitching on it (its draws each game's own frames: legit.json's rng, only).",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
@@ -83,10 +83,5 @@
  ],
  "deck6": [
   "0AD9"
- ],
- "verdict": {
-  "is": "FAIL",
-  "at": 32,
-  "why": "BN5's DarkChip rule as the Souls track's S7 brought it holds (KnightSoul held in both, souls6: the Souls installed and with them BN5's mood, src/emu/soulmood.c: his mood 0 in both as the chip is used); what differs from t32 is what BN5's DarkChip use does past it that no track ports yet (docs/MULTIROM.md, Transplanted Souls, S7's open): the chip's after-effect on his NaviStats (BN5 0x0802C938: the player block's +0x19 by 2), his object's +0x94 (3) and the random numbers it draws (BN5 0x080197B1); DarkMetr's own code moved plays as BN5's (the misc family's subfamily 0x11, Astroid's controller, the fourth kind's 0x46, and its meteors, the third kind's 0x56); --survey: nothing else differs, unmasked"
- }
+ ]
 }
