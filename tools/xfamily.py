@@ -43,7 +43,8 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
            installed: the same frame for frame, every byte, but a pointer
            into what the install moved (BN6's tables grown among it) and
            the code in IWRAM the lava's and the sea's install keeps patched
-           (src/emu/xpanels.c)
+           (src/emu/xpanels.c, and the hit gate's tests of a hidden target,
+           src/emu/xsea.c)
 
 Needs both ROMs (local only). Exits 0 when every check holds.
 """

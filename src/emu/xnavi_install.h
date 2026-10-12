@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "xnavi_dark.h"
 #include "xnavi_recipe.h"
 #include "xvirus.h"
 
@@ -27,7 +28,8 @@ enum {
 void xnavi_install_all(int which);
 /* Another game's content moved into BN6's engine as the core starts: the
  * virus families `families` names (xvirus_install's XVIRUS_*), then the
- * Navis `navis` names (XNAVI_*) */
+ * Navis `navis` names (XNAVI_*), then BN5's sea's submerge (xsea.h) where
+ * its sea came in */
 void xnavi_install_core(int families, int navis);
 /* One Navi into the core's ROM copy (the rooms grown first): true once it
  * is there (now or before); false, nothing of it written, where any check

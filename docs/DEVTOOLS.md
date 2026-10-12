@@ -683,7 +683,7 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   code led to it. Without the replay Handi parts at its first draw that
   BN5's buster or shake moved (`rng=follow`: t305, none: t35).
 - **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
-  5): a record each time the timer moves while the battle fights: the
+  7): a record each time the timer moves while the battle fights: the
   objects of the first, third and fourth kinds in play (each from its list
   node on, its AI's data and its collision data, and in BN6's the byte
   the second-level dispatch's side table holds for its slot), the 40 panels, the order
@@ -693,8 +693,18 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   pending form: docs/ROM_DATA.md, MegaMan as the differential's subject;
   the Souls' state in BN6's engine, `BN6_SOULS`' 0x80 bytes, zero in
   BN5's; the Custom screen's element 0xB, UNITE, as each game's last
-  screen left it), and the hooks' events since the record before (the
-  first record's from the battle's start).
+  screen left it), what BN6's engine keeps apart of the objects (the sea's
+  submerge's 0x90 bytes, `RAM_SEA`: the submerged by their collision
+  data's bit and their markers; zero in BN5's, which keeps it in the
+  collision data, read there as BN6 keeps it by legit.json's `layouts`
+  `sea`: under or not, its marker compared as an object; the Dark Soul's
+  chip AI's lists, BN5's from its own `0x02034C20`, compared while BN5's
+  Dark Soul is in play, its chips as BN6's ids by the chip registry and
+  a side of none alike in both; the Navis' own state, Colonel's sides'
+  bits, BN5's from BattleState +0x5C; the Dark Soul's AI data past
+  0x100, its chip ids BN6's), and the hooks' events since the record
+  before (the first record's from the battle's start; a battle's end
+  after its fight is no record's, its events counted lost).
 - **The field**: `field=XX` fights both on BN5's battlefield XX, BN6's as
   `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
   their panels' types), `field=XX:YY` BN6's own field YY against it; the
@@ -703,13 +713,25 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   `field_lava*` and `field_sea*` on BN5's lava and sea as BN6's engine
   runs them (`src/emu/xpanels.c`; docs/MULTIROM.md, One net): each of the
   eight fields, MegaMan stepping onto lava, a Fire CanGard on lava and on
-  sea, an Aqua hit on lava, their timers running out.
+  sea, an Aqua hit on lava, their timers running out; `toadman_sea`,
+  `toadman_sea_elec` and `tomahawkman_sea` the sea's submerge and hold
+  (`src/emu/xsea.c`: ToadMan under the sea, a buster's shot passing over
+  him and an Elec one reaching him, MegaMan and TomahawkMan held as they
+  come to sea under the splash).
 - **A change in both games**: `both=A:V[:N]` writes into both games'
   copies alike, BN5's at its own address and BN6's at the moved copy of
   it (a family's element given, to put the engine's handling of it under
-  test: CanGard made Fire, its reticle made Aqua), and `mm_element=N`
+  test: CanGard made Fire, its reticle made Aqua), `each=A5:A6:V:N` writes
+  V (N bytes) into a table of the engine's both games hold, each at its
+  own address (BN5's at A5, BN6's at A6: the buster's shot made Elec in
+  `toadman_sea_elec`), and `mm_element=N`
   gives MegaMan element N as the fight begins (his object's and his
-  collision data's).
+  collision data's). `dschips=C,...` gives MegaMan's side's chip AI list
+  in BN5 (BN5's chip ids, hex, as its battle makes one: in order, none
+  after them, their count, no sequences), and with it or `dslist=1`
+  BN6's lists are written from BN5's as BN6's fight begins, their chips
+  BN6's by the chip registry (`darksoul_cannon`, `darksoul_sword`: the
+  Dark Soul's chip AI takes them).
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy; one in RAM once the game has booted, over what it copied there,
@@ -924,10 +946,14 @@ BN5's, an overlay spawned of BN6's kind, a battle sprite's number, a
 sprite table's entry, a sprite left at BN5's number where BN6 lists the
 same bytes at another, the moved image object's kind left at BN5's
 sprite and its twin kind at another sprite, a sound left at BN6's
-number; the lava's
+number, Colonel's side's bit not kept, the Dark Soul's record of a chip
+holding BN6's byte for BN5's region or another approach, the Navis'
+buster another family; the lava's
 and the sea's: lava's flags, their hooks taken off, the panel lava's
 cooling leaves, the random number its spark draws, the element hit's
-test that lets Aqua cool it; MegaMan's: his buster's flash, a chip's
+test that lets Aqua cool it; the sea's submerge's: its hit gate letting
+every attack through and stopping Elec, its marker not kept, its splash
+another effect; MegaMan's: his buster's flash, a chip's
 damage; the Souls': a Soul's turns 4, its used bit not set, UNITE lit
 for a wrong kind, Beast Out lit while united, a Soul kept past a Cross,
 each by `unitebreak`), each of which must FAIL its spec.

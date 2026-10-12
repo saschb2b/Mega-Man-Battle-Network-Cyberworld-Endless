@@ -19,6 +19,7 @@
 #include "xnavi_objects.h"
 #include "xnavi_room.h"
 #include "xnavi_sprites.h"
+#include "xsea.h"
 #include "xsong.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -135,6 +136,7 @@ static void records_set(const XNavi *n, const Game *g) {
 	if (!xv_failed()) xn_set_word(XN_T_HELD, (uint32_t)f->ai, held);
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION, (uint32_t)f->ai, xv_move_ref(n->companion));
 	if (!xv_failed()) xn_set_word(XN_T_COMPANION_END, (uint32_t)f->ai, xv_move_ref(n->companion_end));
+	if (!xv_failed()) xn_set_word(XN_T_HIDE, (uint32_t)f->ai, xv_move_ref(n->hide));
 }
 
 /* ---- its companion's overlay of a kind BN6 lacks ---- */
@@ -271,25 +273,43 @@ static void sounds_set(const XNavi *n) {
 	}
 }
 
+/* ---- BN5's attack families it runs (XnFamily), in BN6's grown table ---- */
+
+static void families_set(const XNavi *n) {
+	for (int i = 0; i < n->nfamilies && !xv_failed(); ++i) xn_family_set(n->families[i].bn6, xv_move_ref(n->families[i].at));
+}
+
 /* ---- a Navi ---- */
 
 #define INSTALLED_MAX XN_HOMES_MAX
 static const XNavi *installed[INSTALLED_MAX];
 static int ninstalled;
 
-bool xnavi_install(const XNavi *n) {
-	const XVirusFamily *f = &n->code;
-	for (int i = 0; i < ninstalled; ++i)
-		if (installed[i] == n) return true;
+/* What a Navi's install needs made first: BN6's tables grown, its battle sprite placed, the moved objects it runs, BN6's
+ * attack families grown where it moves one; false, told, where one is not */
+static bool ready_for(const XNavi *n) {
+	const char *name = n->code.name;
 	if (!xn_grow() || (n->sprite_of >= 0 && !xnavi_sprite_install(n->sprite_of))) {
-		fprintf(stderr, "xnavi: %s not installed: BN6's tables not grown, or its battle sprite not placed\n", f->name);
+		fprintf(stderr, "xnavi: %s not installed: BN6's tables not grown, or its battle sprite not placed\n", name);
 		return false;
 	}
 	for (int i = 0; i < n->nneeds; ++i)
 		if (!xnavi_objects_have(n->needs[i].kind, n->needs[i].from)) {
-			fprintf(stderr, "xnavi: %s not installed: the moved objects' type %d:%#x is not there\n", f->name, n->needs[i].kind, n->needs[i].from);
+			fprintf(stderr, "xnavi: %s not installed: the moved objects' type %d:%#x is not there\n", name, n->needs[i].kind, n->needs[i].from);
 			return false;
 		}
+	if (n->nfamilies && !xn_families_ready()) {
+		fprintf(stderr, "xnavi: %s not installed: BN6's attack families not grown\n", name);
+		return false;
+	}
+	return true;
+}
+
+bool xnavi_install(const XNavi *n) {
+	const XVirusFamily *f = &n->code;
+	for (int i = 0; i < ninstalled; ++i)
+		if (installed[i] == n) return true;
+	if (!ready_for(n)) return false;
 	Game g;
 	sounds_in(n);
 	xv_tx_begin();
@@ -300,6 +320,7 @@ bool xnavi_install(const XNavi *n) {
 		if (!xv_failed()) records_set(n, &g);
 		if (!xv_failed()) overlay_set(n, &g);
 		if (!xv_failed()) ids_set(n, &g);
+		if (!xv_failed()) families_set(n);
 		xv_move_art();
 		sounds_set(n);
 	}
@@ -345,10 +366,13 @@ void xnavi_install_all(int which) {
 	else {
 		xnavi_objects_install();
 		for (int i = 0; i < xnavi_bn5_count; ++i) xnavi_install(xnavi_bn5[i]);
+		int dark = xnavi_bn6_id(BN5_DARK_SOUL_ID);
+		if (dark >= 0) xnavi_dark_install(dark);
 	}
 }
 
 void xnavi_install_core(int families, int navis) {
 	xvirus_install(families);
 	xnavi_install_all(navis);
+	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
 }

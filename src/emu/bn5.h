@@ -123,7 +123,18 @@
 #define BN5_PANEL_HOLY    9           /* its panel type: holy (BN6_PANEL_HOLY's flag; damage halved, 0x0800C80C) */
 #define BN5_PANEL_LAVA    8           /* its panel type: lava (none in BN6: a non-Fire object on it takes 50 and it cools plain, 0x08016DA2;
                                        * BN6's 8 another panel: the differential's MegaMan stepped onto it unhurt, an attack rose from it) */
-#define BN5_PANEL_SEA     0x0A        /* its panel type: sea (none in BN6: a Fire object on it hurt, 0x08016EC4; a Wood hit dries it) */
+/* Its sea's submerge (none in BN6's engine: xsea.c makes it again) */
+#define BN5_SEA_TEST      0x08017028u /* on sea (BN5_PANEL_SEA) with the AI's traits (+0x48) 0x20: the collision data's +0x2C 0xFFFF, else 0 */
+#define BN5_SEA_SUBMERGE  0x0800DF52u /* ... from MegaMan's and the Navis' status step (0x08017D7C): flag 0x80000000 where +0x2C holds 0xFFFF and
+                                       * none of the flags 0x00500C00 */
+#define BN5_HIDE_STEP     0x0800DEAAu /* what is hidden (0x80000004: invisible or submerged) not drawn, its marker spawned and kept at the
+                                       * collision data's +0x50 (BN5_SEA_MARKER_SPAWN), ended as it shows; from 0x08017DB4 */
+#define BN5_HIT_HIDDEN    0x08016948u /* the hit gate's test: a hidden target hit only by an attack of flags 0x1008, or of Elec */
+#define BN5_PANEL_ARRIVED 0x08017156u /* what the panel an object comes to does, from each actor's pre-step: on sea, a non-Aqua object not
+                                       * floating nor going under held 0x14 frames (BN5_IMMOBILIZE) under a splash (effect 0x63, 0x080171E0) */
+#define BN5_IMMOBILIZE    0x0800CDA2u /* r0 frames at the collision data's +0x24, flag 0x4000 */
+#define BN5_SEA_MARKER_SPAWN 0x080E4D1Eu /* the marker, the fourth kind's 0x3E (a ripple, list 3's 0x2D), spawned: r5 the object, r0 it */
+#define BN5_PANEL_SEA     0x0A        /* its panel type: sea (none in BN6: a Fire object on it hurt as on poison, BN5_PANEL_STEP at 0x08016C9E; a Wood hit dries it) */
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
 #define BN5_PANEL_FLAGS   0x18        /* ... and its flags here, u32 (BN6's at +0x14), BN6_PANEL_STRUCK while an enemy's attack is on it */
@@ -257,6 +268,8 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_NAVI_HELD     0x08113C78u /* the Navis' held chips' words (BN6_NAVI_HELD_REF's table; its triple 0x08113BE0): Team Colonel's six empty */
 #define BN5_NAVI_COMPANION 0x0800EDB4u /* the routine a Navi's companion begins by, a word an AI (BN6_NAVI_COMPANION_REF's table; triple 0x0800ED1C) */
 #define BN5_NAVI_COMPANION_END 0x0800EF64u /* ... ends by (triple 0x0800EECC) */
+#define BN5_NAVI_HIDE     0x0800F134u /* ... an attack of its hides the overlay by (0x0800F114: BN6_NAVI_HIDE_REF's table), a word an AI: */
+#define BN5_OVERLAY_HIDE  0x080C3836u /* ... the overlay's hide, the others the empty companion (0x0800F194) */
 #define BN5_ARM_LISTS     0x080151B8u /* its arm points' tables by struct1's list offset (BN6_ARM_LISTS'): MegaMan's 0x080151C4, the viruses',
                                        * the Navis' 0x08015C14, BN5_ARM_RECORD bytes a record: */
 #define BN5_ARM_RECORD    0x3C        /* ... 30 points (BN6_ARM_POINTS_BN5) */
@@ -272,7 +285,36 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_CHIP_AI_TEST  0x0802C10Au /* the DS version's chip AI: whether it is under way (AIData +0xF0; set only by BN5_CHIP_AI_ENTER) */
 #define BN5_CHIP_AI_ENTER 0x0802C114u /* ... entered, from a Navi's own code where its version (AIData +0x16) is 4, the DS */
 #define BN5_CHIP_AI_RUN   0x0802B804u /* ... run each frame while under way */
-#define BN5_CHIP_AI_DARK  0x0802BA18u /* ... the Dark Soul's own */
+#define BN5_CHIP_AI_DARK  0x0802BA18u /* ... the Dark Soul's own (its state AIData +0xF0: +1 its step, +2 and +3 their phases, +4 its
+                                       * misses, +5 and +0xC its target's, +0x24 the chip under way) */
+#define BN5_DARK_REGION   0x08013C64u /* its actor's init: the Dark Soul's id's test (ldr r0,=BN5_DARK_SOUL_ID), its region 0x13 */
+#define BN5_DARK_PLATE    0x08013394u /* its arrival into a fight under way (AIData +2 not 0, 0x080131A0: substate 0x08013387): the Dark
+                                       * Soul's id's test, 0x0801A5BC(0, 0), which lists a foe and its HP, skipped */
+#define BN5_AI_DATA_SIZE  0x140       /* an AI's data, BN5's (BN6_AI_DATA_SIZE 0x100: BN6 dropped the DS's chip AI, +0xF0 to +0x13F) */
+#define BN5_DARK_LISTS    0x02034C20u /* the chip AI's lists, BN5_DARK_LIST_SIZE a side: its chips (u16 each, 0x2A of them: a chip's
+                                       * id, or 0x8000 + a sequence's number; 0xFFFF none), +0x54 their count (u32), +0x58 eight
+                                       * sequences of 16 bytes (its place's offsets from the target, s8 each, then up to seven chips,
+                                       * 0xFFFF after them); copied as each battle is set up (0x08009B92) from what the battle's
+                                       * exchange carried, made of the save's usage record (0x0802C7C2, eToolkit +0x78) */
+#define BN5_DARK_LIST_SIZE 0xE0u     /* ... a side's bytes */
+#define BN5_DARK_LIST_COUNT 0x54u    /* ... the chips' count (u32) in a side's */
+#define BN5_DARK_SEQUENCES 0x58u     /* ... its sequences in a side's */
+/* A chip record's bytes the Dark Soul's chip AI reads (by 0x0801DF0C, BN6's twin the same code; its attack, 0x0802C098, reads
+ * +4, +0xA-+0xC, +0x10 and +0x14, which BN6's records hold the same way), which BN5's records give a meaning BN6's do not */
+#define BN5_CHIP_DS_FLAGS  0x09       /* bit 0: a chip it plays from a step of its own (0x0802B8CC, 0x0802BAEE: state 0x10 or 0x18) */
+#define BN5_CHIP_DS_USAGE  0x0D       /* the approach it takes (0x08029B54: its routines' table 0x08029B6C; bn6f's DarkSoulUsage) */
+#define BN5_CHIP_DS_PICKS  0x0E       /* bits 0 and 1: a chip its list's search moves to the front (0x0802BE80 bit 0, 0x0802BECC bit 1) */
+#define BN5_CHIP_DS_REGION 0x17       /* the panels it aims from (0x08029D24, 0x08029E30, 0x0802AC2E; BN5's DS region table 0x08022AF8;
+                                       * BN6's byte here its lock-on type, BN6_CHIP_LOCK_ON_TYPE) */
+#define BN5_BATTLE_BITS   0x5C        /* BattleState +0x5C, a word of bits (0x0800131E sets, 0x0800132A clears, 0x08001336 reads): 1, 2,
+                                       * 4 and 8 the sides' (0x0C as each battle is set up, 0x08008F64), 0x10 and 0x20 a Colonel's on
+                                       * side 0 and 1 (BN5_COLONEL_SIDE_SET; read by the obstacles' dark hole, BN5_DARK_HOLE_TEST), 0x40
+                                       * the field's slide as a battle ends (BN6's 0x10) */
+#define BN5_COLONEL_SIDE_SET 0x080CAD06u /* a Colonel's side's bit set (0x10 side 0, 0x20 side 1): from Colonel's spawn's end (his table 6,
+                                       * 0x080F8500, at 0x080F8524) after his table (0x080CACE0), and ColonelSoul's (0x08011C42) */
+#define BN5_DARK_HOLE_TEST 0x080CABEAu /* an obstacle's panel the side opposite a Colonel's, his bit set, a panel beside it his side's
+                                       * (0x080CAC42, 0x080CAC98): from the obstacles' states (0x08018014, 0x0801817C, 0x080182E8,
+                                       * 0x08018444), a T3 0x30 spawned there (0x080CABCA) */
 #define BN5_COLONEL_TABLE 0x02034000u /* Colonel's two 8-byte entries by alliance (written by his AI and the engine's 0x08011C48, read by his
                                        * attacks' objects): BN6_COLONEL_TABLE in BN6 */
 #define BN5_CHAOS_FAIL_SPAWN 0x08006AAEu /* where a failed Chaos Unison spawns the Dark Soul (BN5_DARK_SOUL_ID) on the other side */

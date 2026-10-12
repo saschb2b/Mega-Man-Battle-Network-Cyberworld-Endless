@@ -86,10 +86,11 @@ static uint32_t moved_to(const XVirusFamily *f, uint32_t a) {
 }
 
 /* a pointer into the blocks, moved: a Thumb one must name code, any
- * other the start of a range of data */
+ * other the start of a range of data (bytes may start at an odd address:
+ * a raw range's) */
 static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
-	if (v & 1) return xvirus_is_code(f, v & ~1u);
 	const XvData *d = xvirus_data_at(f, v);
+	if (v & 1) return xvirus_is_code(f, v & ~1u) || (d && d->start == v && d->kind == XV_RAW);
 	return d && d->start == v;
 }
 
@@ -396,7 +397,8 @@ static void sprites_set(const XVirusFamily *f, const Game *g) {
 }
 
 /* Its effects in the grown effects' table: its game's entry with its
- * sprite as BN6 lists it (one of the recipe's) */
+ * sprite as BN6 lists it (one of the recipe's); an entry an install
+ * before wrote the same kept (the Navis share their effects' numbers) */
 static void effects_set(const XVirusFamily *f, const Game *g) {
 	for (int i = 0; i < f->neffects && !xv_failed(); ++i) {
 		const XvId *e = &f->effects[i];
@@ -405,7 +407,10 @@ static void effects_set(const XVirusFamily *f, const Game *g) {
 		for (int k = 0; src && k < f->nsprites; ++k)
 			if (4u * f->sprites[k].list == src[0] && f->sprites[k].index == src[1]) s = &f->sprites[k];
 		if (!s) { xv_fail("its effect %#x draws none of its sprites", e->from); return; }
-		xg_set_word(XG_EFFECTS, e->to, (uint32_t)(4u * s->to_list) | (uint32_t)s->to_index << 8 | (uint32_t)src[2] << 16 | (uint32_t)src[3] << 24);
+		uint32_t word = (uint32_t)(4u * s->to_list) | (uint32_t)s->to_index << 8 | (uint32_t)src[2] << 16 | (uint32_t)src[3] << 24;
+		/* (one an install before wrote, the same: the Navis' effects one number whichever of them spawns it) */
+		if (emu_read32(XV_EFFECTS + 4u * e->to) == word) continue;
+		xg_set_word(XG_EFFECTS, e->to, word);
 	}
 }
 

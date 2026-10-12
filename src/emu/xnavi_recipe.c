@@ -7,6 +7,7 @@
 
 #include "bn6.h"
 #include "rom.h"
+#include "xattack_grow.h"
 #include "xnavi_room.h"
 #include "xvirus_dispatch.h"
 
@@ -80,8 +81,8 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 		if (!ref_ok(f, f->states[i])) return no(why, len, "state %d (%08x)", i, (unsigned)f->states[i].addr);
 	for (int i = 0; i < XV_HOOKS; ++i)
 		if (!ref_ok(f, f->hooks[i])) return no(why, len, "hook %d (%08x)", i, (unsigned)f->hooks[i].addr);
-	const XvRef more[4] = { n->prestep, n->hook_a, n->companion, n->companion_end };
-	for (int i = 0; i < 4; ++i)
+	const XvRef more[5] = { n->prestep, n->hook_a, n->companion, n->companion_end, n->hide };
+	for (int i = 0; i < 5; ++i)
 		if (!ref_ok(f, more[i])) return no(why, len, "its pre-step, hook A or companion (%08x)", (unsigned)more[i].addr);
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
@@ -125,11 +126,17 @@ static bool overlay_ok(const XNavi *n, char *why, size_t len) {
 	return true;
 }
 
-/* the moved objects' types it needs: each of a kind the dispatch moves, its type moved (xnavi_objects.h) */
+/* the moved objects' types it needs: each of a kind the dispatch moves, its type moved (xnavi_objects.h); and BN5's
+ * attack families it moves: each at BN6's number for it, in the moved families' range, its routine its own code */
 static bool needs_ok(const XNavi *n, char *why, size_t len) {
 	for (int i = 0; i < n->nneeds; ++i)
 		if (xvirus_dispatch_slot(n->needs[i].kind) < 0 || n->needs[i].to != XV_TYPE_MOVED)
 			return no(why, len, "its need %d:%#x", n->needs[i].kind, n->needs[i].from);
+	for (int i = 0; i < n->nfamilies; ++i) {
+		const XnFamily *x = &n->families[i];
+		if (x->bn6 != XN_FAMILY_OF(x->bn5) || x->bn6 < XATTACK_CHIPS || x->bn6 >= XATTACK_CHIPS_END || !x->at.own || !ref_ok(&n->code, x->at))
+			return no(why, len, "its family %#x as %#x (%08x)", x->bn5, x->bn6, (unsigned)x->at.addr);
+	}
 	return true;
 }
 
@@ -192,6 +199,8 @@ static bool objects_refs_ok(const XVirusFamily *f, char *why, size_t len) {
 
 bool xnavi_objects_ok(const XVirusFamily *f, char *why, size_t len) {
 	if (!f->name || f->home != XN_OBJECTS_HOME || f->nblocks < 1 || f->nclones) return no(why, len, "its name, home or blocks");
-	if (f->neffects || f->nstates || f->ntypes < 1) return no(why, len, "effects or states of its own, or no type");
+	if (f->nstates || f->ntypes < 1) return no(why, len, "states of its own, or no type");
+	for (int i = 0; i < f->neffects; ++i)
+		if (f->effects[i].to < BN6_EFFECT_COUNT) return no(why, len, "effect %#x, one of BN6's", f->effects[i].to);
 	return objects_code_ok(f, why, len) && objects_refs_ok(f, why, len);
 }

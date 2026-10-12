@@ -39,15 +39,33 @@
 #define XN_STUBS      FREE_NAVI_CODE      /* the stubs BN5's Navis' calls to what BN6 lacks go to (xnavi_install.c): */
 #define XN_STUB_ZERO  (XN_STUBS + 0x00u)  /* ... r0 0 (a panel claim's spawners, the DS chip AI's test) */
 #define XN_STUB_DS    (XN_STUBS + 0x10u)  /* ... the DS chip AI entered or run: logged (versions 0-3 never reach it) */
-#define XN_STUBS_END  (XN_STUBS + 0x100u)
-#define XN_OBJECTS    XN_STUBS_END        /* BN5's engine objects moved once for every track (xnavi_objects.h), to: */
+#define XN_STUB_BUSTER (XN_STUBS + 0x20u) /* ... the Navis' buster's setup (BN5's attack setup 0x3E, which BN6 has none of: AttackVars +8
+                                             its buster's level + 1, +0xA 0, r0 its family XN_FAMILY_OF(0x16)), 0x20 bytes */
+#define XN_STUB_SIDES (XN_STUBS + 0x40u)  /* ... BattleState +0x5C's bits r0 ORed into the moved Colonel's own (BN6_COLONEL_SIDES) */
+#define XN_STUB_CHIPDATA (XN_STUBS + 0x50u) /* ... the Dark Soul's chip AI's record of BN6's chip r0 (BN5's 0x0801DF0C): XN_DARK_RECORDS' */
+#define XN_STUBS_END  (XN_STUBS + 0x60u)
+#define XN_SEA        XN_STUBS_END        /* BN5's sea's submerge's code (xsea.c), to: */
+#define XN_SEA_END    (XN_STUBS + 0x100u)
+#define XN_OBJECTS    XN_SEA_END          /* BN5's engine objects moved once for every track (xnavi_objects.h), to: */
 #define XN_OBJECTS_END (FREE_NAVI_CODE + 0x2000u)
 #define XN_OBJECTS_HOME (XN_HOMES + (XN_HOMES_MAX - 1) * XV_HOME_SIZE)   /* ... their home (their veneers), the last of the homes */
 #define XN_CODE       XN_OBJECTS_END      /* the Navis' code, block by block, a room each, to: */
 #define XN_ART        FREE_NAVI_ART       /* what their attacks draw: a room each (their overlays' masks), then: */
 #define XN_SHARED_ART (FREE_NAVI_ART + 0x2000u)  /* ... their sprites, each at a place and number of its own whichever Navi draws it,
                                                       copied by the first install that needs it, to: */
-#define XN_END        FREE_CHIP_CODE
+#define XN_END        XN_DARK_RECORDS
+#define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
+                                                        its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
+
+/* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at
+ * 0x50 + F, as the chips' are (issue #82's plan) */
+#define XN_FAMILY_OF(f) (0x50 + (f))
+
+/* An attack family of BN5's it runs that BN6 has none of: its routine (in
+ * its blocks) put in BN6's attack families grown at `bn6`
+ * (XN_FAMILY_OF(bn5)), where the entry still holds the grown table's stub
+ * (another track's copy of the same family there is left as it is) */
+typedef struct { uint8_t bn5, bn6; XvRef at; } XnFamily;
 
 /* A sound its code starts that BN6 has as another song, or none: its
  * game's song copied in (xsong.h, played by its own players) and the
@@ -71,6 +89,7 @@ typedef struct {
 	int versions;               /* its versions installed, ids first_id on (BN5's V1, V2, V3, SP: 4; BN6's control 6) */
 	XvRef prestep, hook_a;      /* its tables 1 and 2: BN6's pre-step for its kind (A-D), hook A (the Navis' empty hook) */
 	XvRef companion, companion_end;   /* the routines its companion starts and ends by (the triples' Navi words at its AI index) */
+	XvRef hide;                 /* the routine its attacks hide its companion's overlay by (BN6_NAVI_HIDE_REF's words at its AI index) */
 	int sprite_of;              /* BN5's Navi whose battle sprite it draws at its number (xnavi_sprites.h); -1 its struct1's own */
 	uint16_t shown[XV_VERSIONS];   /* each version's name as its game shows it: an entry of its Navi names (BN5 shows Colonel V3 as V1) */
 	const XnSound *sounds;      /* the sounds BN6 numbers otherwise */
@@ -78,6 +97,8 @@ typedef struct {
 	const XnOverlay *overlay;   /* its companion's overlay of its own kind, NULL none */
 	const XvType *needs;        /* the moved objects' types its code spawns (xnavi_objects.h), each installed before it */
 	int nneeds;
+	const XnFamily *families;   /* BN5's attack families it runs, moved with it */
+	int nfamilies;
 } XNavi;
 
 /* Whether the recipe holds together (AI index, ids, home, its blocks in

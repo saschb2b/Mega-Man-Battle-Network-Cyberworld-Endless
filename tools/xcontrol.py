@@ -109,10 +109,13 @@ MAIN_STACK = (0x03007C00, 0x03007DFC)  # BN6's main stack below the main loop's 
                                         # frames. Its VBlank handler runs nested on it (the sound driver's frames), saving the
                                         # registers of what it interrupted (the BIOS's LZ77 decompression of the battle's sprite
                                         # preload): a few cycles' difference leaves other words there (the panels' flags read from ROM)
-KEPT_CODE = ((0x0300791C, 0x03007920), (0x03007742, 0x03007772), (0x03007678, 0x0300768E))   # IWRAM's code the engine keeps
+KEPT_CODE = ((0x0300791C, 0x03007920), (0x03007742, 0x03007772), (0x03007678, 0x0300768E),
+             (0x0300724A, 0x03007258), (0x0300728C, 0x0300729C))   # IWRAM's code the engine keeps
                                         # patched where BN5's ROM is read (src/emu/xpanels.c, emu_keep: the panels' flags' literal
                                         # BN6_PANEL_FLAGS_REF, the element hit's tests from BN6_PANEL_HIT_COOL, BN6_HIT_COOL_SPAN bytes,
-                                        # the panel bonus's tests from BN6_PANEL_BONUS_TESTS, BN6_PANEL_BONUS_SPAN): code, the same every frame
+                                        # the panel bonus's tests from BN6_PANEL_BONUS_TESTS, BN6_PANEL_BONUS_SPAN; src/emu/xsea.c: the
+                                        # hit gate's tests of a hidden target, BN6_HIT_HIDDEN and BN6_HIT_HIDDEN2 with their spans): code,
+                                        # the same every frame
 PHASE_RESULTS = 0x10                    # BN6_BATTLE_PHASE: the results, the reward picked from the enemy's drop row
 BATTLE_REWARD = 0x0200A00C              # (BN6_BATTLE_REWARD)
 

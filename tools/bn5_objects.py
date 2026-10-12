@@ -1,6 +1,6 @@
 """bn5_objects.py: BN5 Team Colonel's engine objects that BN6 Cybeast Gregar (USA) runs otherwise, each moved into BN6
 once, whole, for every track that spawns one (issue #82's plan for its tracks: the Navis, the virus families, the chips),
-and what each one's moved copy draws. Numbers only. tools/xnavirecipe.py builds the moved copies
+and what each one's moved copy draws: the image object, and the sea's marker. Numbers only. tools/xnavirecipe.py builds the moved copies
 (src/emu/xnavi_bn5.c, xnavi_objects_bn5; installed by src/emu/xnavi_objects.c before any Navi), checks this file
 against both ROMs, and refuses a recipe that spawns a kind this file leaves unfixed; the other tracks' generators read it
 for the kinds their code spawns (docs/MULTIROM.md, The engine's objects moved once; docs/ROM_DATA.md)."""
@@ -23,6 +23,28 @@ IMAGE = dict(
     roots=(0x080B9B80, 0x080B9BA0, 0x080B9C26, 0x080B9CAE, 0x080B9CD6, 0x080B9CE0, 0x080B9CEE, 0x080B9CFA),
 )
 
+# BN5's sea's marker, the fourth kind's type 0x3E: where an object stands submerged on sea (BN5's 0x0800DEAA, from the
+# status step of MegaMan and the Navis, 0x08017DB4), a ripple following it (sprite list 3's 0x2D, a splash, effect 0x5D,
+# its fourth frame), ended (+8 = 8) as it surfaces. BN6's type 0x3E is its invisibility's shadow, the same code drawing list
+# 3's 0x00, and nothing of BN6's spawns it (its spawner 0x080E60CA has no caller): moved, its module whole, for the sea's
+# submerge in BN6's engine (src/emu/xsea.c, which calls its spawner)
+SEA_MARKER = dict(
+    kind=4, type=0x3E,
+    region=(0x080E4C4C, 0x080E4D3C),   # the type's routine to the end routine's last instruction
+    routine=0x080E4C4C,                # BN5_T4_TYPES' entry 0x3E: 0x080E4C4D (its jump table 0x080E4C64: init, update, the engine's destroy)
+    spawner=0x080E4D1E,                # r5 the object it follows: r0 the marker or 0
+    end=0x080E4D36,                    # r0 the marker
+    roots=(0x080E4C4C, 0x080E4C70, 0x080E4CB2, 0x080E4D1E, 0x080E4D36),
+)
+
+# The modules, in the order they are laid out at XN_OBJECTS (src/emu/xnavi_recipe.h), each a block of its own
+MODULES = (IMAGE, SEA_MARKER)
+
+# BN5's engine effects BN6 has none of that the project's own code spawns where BN5's engine does: the splash of a
+# non-Aqua object stepping onto sea, immobilized (BN5's 0x08017156 at 0x080171E0, src/emu/xsea.c's), effect 0x63 (list
+# 5's 0x1F). Each copied with the moved objects, at a number of the Navis' range.
+ENGINE_EFFECTS = (0x63,)
+
 # Each kind's sprite in the moved copy, one table for every track: a kind not listed keeps BN5's two bytes (its list
 # offset and number), drawn by nothing a track installs ('unfixed': a recipe whose code spawns it is refused until the
 # track that needs it adds it here, its art from its own range of numbers).
@@ -38,4 +60,11 @@ IMAGE_TWIN = {
 IMAGE_COPIED = {
     # ShadowMan's and Colonel's image (BN5's sprite 3:0x00), at the end of the Navis' list 4 range (0xA0-0xB5)
     0x03: (4, 0xB5, 'navis'),
+    # the Navis' buster's muzzle (BN5's family 0x16, the Dark Soul's: BN5's sprite 3:0x06, 903 bytes, none of BN6's the
+    # same), at list 5's 0xA5, past the Navis' 0xA0-0xA4 (asked of the plan's owner with this change)
+    0x0D: (5, 0xA5, 'navis'),
+    # the Dark Soul's buster's arm (BN5's 0x080EBBA6 for its AI index: BN5's sprite 3:0x03, 8063 bytes, none of BN6's the
+    # same), at list 5's 0xA6 (asked with this change: the Souls' branch copies the same bytes for its kinds 0x23 and 0x33 at
+    # list 0's 0x4C; one place kept at the merge)
+    0x23: (5, 0xA6, 'navis'),
 }

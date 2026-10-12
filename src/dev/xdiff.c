@@ -60,7 +60,16 @@
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
 #define MAX_TWINS 16
-#define TRACE_VERSION 5   /* (the player block, the Souls' version 4, and the dispatch's types, the dispatch's 3, in one) */
+#define TRACE_VERSION 7   /* (the chip AI's lists and the Navis' own state in the state kept apart; the state BN6's engine keeps apart, BN5's sea's submerge,
+                             version 6; the player block, the Souls' version 4, and the dispatch's types, the dispatch's 3, in one) */
+#define APART_SEA (RAM_DARK_LISTS - RAM_SEA)   /* what BN6's engine keeps apart of the objects': the sea's room (xsea.h: the submerged, their markers), */
+#define APART_LISTS (RAM_NAVIS - RAM_DARK_LISTS)   /* ... then the chip AI's lists, both sides (BN6_DARK_LISTS; BN5's BN5_DARK_LISTS), */
+#define APART_NAVIS (RAM_DARK_AI - RAM_NAVIS)   /* ... then the Navis' own state (Colonel's sides' bits: BN5's of BattleState +0x5C, the rest 0), */
+#define APART_DARK (BN5_AI_DATA_SIZE - BN6_AI_DATA_SIZE)   /* ... then the Dark Soul's AI data past BN6's 0x100 (its chip AI's state; 0 none out) */
+#define APART_SIZE (APART_SEA + APART_LISTS + APART_NAVIS + APART_DARK)
+#define COLONEL_SIDES 0x30u   /* (BN5_BATTLE_BITS' bits a Colonel's: 0x10 side 0, 0x20 side 1) */
+_Static_assert(APART_SEA <= 0x100u && APART_LISTS == 2u * BN5_DARK_LIST_SIZE && APART_NAVIS <= 0x100u && APART_DARK <= 0x100u,
+	"the apart block's parts as bytes_out writes them");
 #define USED_SIZE 4   /* the word of what was used this battle (BN5_SOULS_USED, BN6_CROSSES_USED) */
 #define SOULS_SIZE BN6_SOULS_SIZE   /* the Souls' state in BN6's engine (BN6_SOULS: both sides', the rest of its range) */
 #define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE + SOULS_SIZE + BN6_ELEMENT_SIZE)   /* the player block */
@@ -69,7 +78,8 @@
 #define MAX_SCRIPT_STEPS 32
 
 typedef struct { uint32_t t, n, keys; } Key;
-typedef struct { uint32_t at, v; int size; bool both; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both: BN5's copy too */
+typedef struct { uint32_t at, v; int size; bool both; uint32_t at5; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v`; both:
+                                                                              BN5's copy too; at5: BN5's at its own place (each=) */
 
 /* A Custom screen's keys (cust5=, cust6=): game 5 or 6's screen n (1 the
  * first), each step its keys for its frames from the frame its window first
@@ -92,6 +102,9 @@ typedef struct {
 	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
+	bool dslist;                               /* BN6's chip AI's lists written from BN5's as its fight begins (xnavi_dark.h) */
+	uint16_t dschips[BN6_FOLDER_ENTRIES];      /* MegaMan's side's chip AI list in BN5, BN5's chip ids, written as its fight begins (dslist too) */
+	int ndschips;
 	CustomScript scripts[MAX_SCRIPTS];
 	int nscripts;
 	Key keys[MAX_KEYS];
@@ -204,6 +217,17 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 	return -1;
 }
 
+/* the Dark Soul's chip AI's lists: BN6's written from BN5's (dslist), MegaMan's side's in BN5 given (dschips, BN5's ids) */
+static int dark_parse(Spec *s, const char *name, char *v) {
+	int got[BN6_FOLDER_ENTRIES];
+	if (!strcmp(name, "dslist")) return (s->dslist = atoi(v) != 0), 1;
+	if (strcmp(name, "dschips")) return -1;
+	int n = hex_list(v, got, BN6_FOLDER_ENTRIES);
+	for (int i = 0; i < n; ++i) s->dschips[i] = (uint16_t)got[i];
+	s->dslist = true;
+	return (s->ndschips = n) > 0;
+}
+
 /* the spec's numbers: MegaMan's panel and HP, the frames, the seed; -1 where `name` is none of them */
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
@@ -236,10 +260,16 @@ static bool twin_parse(Spec *s, const char *v) {
 /* the comparator's own test's breaks: a poke, a call aimed elsewhere; and
  * a spec's change made in both games' copies alike (both=, an address of
  * BN5's: an element given, to put the engine's handling of it under
- * test); -1 where `name` is none of them */
+ * test), or in each game at its own place (each=BN5:BN6:value:size: a
+ * table of the engine's both games have); -1 where `name` is none of them */
 static int breaks_parse(Spec *s, const char *name, const char *v) {
-	unsigned a, b;
+	unsigned a, b, c;
 	int n = 2;
+	if (!strcmp(name, "each")) {
+		if (s->npokes >= MAX_POKES || sscanf(v, "%x:%x:%x:%d", &a, &b, &c, &n) != 4 || (n != 1 && n != 2 && n != 4)) return 0;
+		s->pokes[s->npokes++] = (Poke){ b, c, n, false, a };
+		return 1;
+	}
 	bool call = !strcmp(name, "call"), both = !strcmp(name, "both");
 	if (!call && !both && strcmp(name, "poke")) return -1;
 	if (s->npokes >= MAX_POKES) return 0;
@@ -252,6 +282,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	int r = numbers_parse(s, name, v);
 	if (r < 0) r = breaks_parse(s, name, v);
 	if (r < 0) r = megaman_parse(s, name, v);
+	if (r < 0) r = dark_parse(s, name, v);
 	if (r >= 0) return r > 0;
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
@@ -317,7 +348,7 @@ static bool in_ewram(uint32_t a) { return a >= BN6_EWRAM && a < BN6_EWRAM_END; }
 typedef struct { uint32_t info, header, clock; } Player;
 #define BEGUN_MAX 32
 
-typedef struct {
+typedef struct Side_ {
 	View v;
 	XdLog *log;   /* its core's hooks' events (xdiff_events.h) */
 	FILE *out;
@@ -326,6 +357,7 @@ typedef struct {
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	bool seeded, fought, done, decked;
+	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
 } Side;
 
 static void w32(Side *g, uint32_t v) {
@@ -403,6 +435,7 @@ static void header_out(Side *g) {
 	w32(g, (uint32_t)n);
 	for (int i = 0; i < n; ++i) { w32(g, m[i].from); w32(g, m[i].to); w32(g, m[i].len); }
 	w32(g, PLAYER_SIZE);
+	w32(g, APART_SIZE);
 }
 
 /* MegaMan's side's player block: his battle NaviStats, what was used this battle, his pending form */
@@ -458,6 +491,15 @@ static void objects_out(Side *g, const uint8_t *s1, int n1, const uint8_t *s3, i
 #define EVENTS_OUT 8192
 static XdEvent *events;
 
+/* BN5's Dark Soul's AI data (BN5_DARK_SOUL_ID's object in play among the first kind's), 0 none */
+static uint32_t dark_ai5(const View *v, const uint8_t *s1, int n1) {
+	for (int i = 0; i < n1; ++i) {
+		uint32_t obj = v->t1 + (uint32_t)s1[i] * BN6_T1_SIZE;
+		if ((v->rd32(obj + BN6_T1_NAME_ID) & 0xFFFFu) == BN5_DARK_SOUL_ID) return v->rd32(obj + BN6_T1_AI_DATA);
+	}
+	return 0;
+}
+
 static void frame_out(Side *g) {
 	const View *v = &g->v;
 	int nev = g->log && events ? xd_take(g->log, events, EVENTS_OUT) : 0;
@@ -475,6 +517,18 @@ static void frame_out(Side *g) {
 	w32(g, v->rd32(v->rng[1]));
 	w32(g, (uint32_t)nev);
 	player_out(g);
+	/* (BN6's: RAM_SEA on; BN5 keeps the sea's in the objects' collision data, read by the differential as BN6 keeps it, and its
+	 * lists at its own address) */
+	bytes_out(g, v->game == 6 ? RAM_SEA : 0, APART_SEA, APART_SEA);
+	for (uint32_t k = 0; k < APART_LISTS; k += BN5_DARK_LIST_SIZE)
+		bytes_out(g, (v->game == 6 ? RAM_DARK_LISTS : BN5_DARK_LISTS) + k, BN5_DARK_LIST_SIZE, BN5_DARK_LIST_SIZE);
+	if (v->game == 6) bytes_out(g, RAM_NAVIS, APART_NAVIS, APART_NAVIS);
+	else {
+		w32(g, v->rd32(v->state + BN5_BATTLE_BITS) & COLONEL_SIDES);
+		bytes_out(g, 0, APART_NAVIS - 4, APART_NAVIS - 4);
+	}
+	uint32_t dark = v->game == 6 ? (v->rd32(BN6_DARK_AI_OWNER) ? BN6_DARK_AI : 0) : dark_ai5(v, s1, n1);
+	bytes_out(g, dark ? dark + BN6_AI_DATA_SIZE : 0, APART_DARK, APART_DARK);
 	objects_out(g, s1, n1, s3, n3, s4, n4);
 	for (uint32_t p = 0; p < PANELS; ++p) bytes_out(g, v->panels + p * v->panel_size, v->panel_size, BN5_PANEL_SIZE);
 	for (int i = 0; i < no; ++i) w32(g, order[i]);
@@ -544,6 +598,39 @@ static void deck_put(Side *g, const Spec *s) {
 	for (int i = 0; i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
 }
 
+/* BN6's chip AI's lists written from BN5's (dslist=1), its chip ids BN6's (xnavi_dark.h), after BN6's fight's first frame
+ * (BN5's had its first first): the Dark Soul plays the chips BN5's battle holds for it */
+static void lists_copy(const Side *g) {
+	uint8_t b5[2 * BN5_DARK_LIST_SIZE], b6[sizeof b5];
+	for (uint32_t i = 0; i < sizeof b5; i += 4) put32(b5 + i, g->ref->v.rd32(BN5_DARK_LISTS + i));
+	int lost = xnavi_dark_lists_from(b5, b6, sizeof b6);
+	for (uint32_t i = 0; i < sizeof b6; i += 4) g->v.wr32(RAM_DARK_LISTS + i, get32(b6 + i));
+	printf("xdiff: BN6's chip AI's lists written from BN5's: %u and %u chips, %d none in BN6\n", (unsigned)get32(b6 + BN5_DARK_LIST_COUNT),
+		(unsigned)get32(b6 + BN5_DARK_LIST_SIZE + BN5_DARK_LIST_COUNT), lost);
+}
+
+/* MegaMan's side's chip AI list in BN5 (dschips=), after its fight's first frame: its chips in order, none (0xFFFF) after
+ * them, their count, no sequences, as BN5's battle makes one (0x0802C7A4: the list filled with 0xFF first) */
+static void dschips_put(const Side *g, const Spec *s) {
+	uint32_t at = BN5_DARK_LISTS + BN5_DARK_LIST_SIZE * (g->v.rd8(BN5_BATTLE_SIDE) & 1u);
+	for (uint32_t i = 0; i < BN5_DARK_LIST_SIZE; i += 4) g->v.wr32(at + i, 0xFFFFFFFFu);
+	for (int i = 0; i + 1 < s->ndschips; i += 2) g->v.wr32(at + 2u * (uint32_t)i, s->dschips[i] | (uint32_t)s->dschips[i + 1] << 16);
+	if (s->ndschips & 1) g->v.wr32(at + 2u * (uint32_t)(s->ndschips - 1), s->dschips[s->ndschips - 1] | 0xFFFF0000u);
+	g->v.wr32(at + BN5_DARK_LIST_COUNT, (uint32_t)s->ndschips);
+}
+
+/* After a fight's first frame: both RNG words, MegaMan's element, the chip AI's lists (BN5's given, BN6's from BN5's) */
+static void seed(Side *g, const Spec *s) {
+	const View *v = &g->v;
+	v->wr32(v->rng[0], s->seed[0]);
+	v->wr32(v->rng[1], s->seed[1]);
+	if (s->mm_element >= 0) element_set(v, s->mm_element);
+	if (s->ndschips && v->game == 5) dschips_put(g, s);
+	if (s->dslist && v->game == 6 && g->ref->seeded) lists_copy(g);
+	g->seeded = true;
+	g->nbegun = 0;   /* (the fight's sounds from here) */
+}
+
 /* One frame of a battle: each Custom screen passed by its keys (custom_keys)
  * from its window's opening; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -573,13 +660,7 @@ static bool step(Side *g, const Spec *s) {
 	sub = v->rd8(v->gamestate);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;
-	if (fighting && !g->seeded) {
-		v->wr32(v->rng[0], s->seed[0]);
-		v->wr32(v->rng[1], s->seed[1]);
-		if (s->mm_element >= 0) element_set(v, s->mm_element);
-		g->seeded = true;
-		g->nbegun = 0;   /* (the fight's sounds from here) */
-	}
+	if (fighting && !g->seeded) seed(g, s);
 	sounds(g);
 	if (fighting && t != g->last) {
 		frame_out(g);
@@ -811,13 +892,15 @@ static bool reference(Side *g, const Spec *s) {
 	}
 	rec[len++] = 0xF0;
 	if (!guest_dev_battle(rec, len, s->hp, s->seed[0])) return false;
-	/* (a spec's change in both games: BN5's copy at its own address) */
+	/* (a spec's change in both games: BN5's copy at its own address, or at BN5's own place) */
 	for (int i = 0; i < s->npokes; ++i) {
 		const Poke *p = &s->pokes[i];
-		if (!p->both) continue;
-		if (p->size == 4) guest_write32(p->at, p->v);
-		else guest_write16(p->at, (uint16_t)p->v);
-		printf("xdiff: both games' %08x = %0*x\n", (unsigned)p->at, 2 * p->size, (unsigned)p->v);
+		uint32_t at = p->at5 ? p->at5 : p->at;
+		if (!p->both && !p->at5) continue;
+		if (p->size == 4) guest_write32(at, p->v);
+		else if (p->size == 2) guest_write16(at, (uint16_t)p->v);
+		else guest_wr8(at, (uint8_t)p->v);
+		printf("xdiff: both games' %08x = %0*x\n", (unsigned)at, 2 * p->size, (unsigned)p->v);
 	}
 	reference_setup(s);
 	g->v = (View){ .game = 5, .gamestate = BN5_GAMESTATE, .state = BN5_BATTLE_STATE, .window = BN5_CUSTOM_WINDOW,
@@ -873,6 +956,7 @@ int xdiff_run(const char *text) {
 		return 1;
 	}
 	if (!logs_start(&a, &b, &s)) return 1;
+	b.ref = &a;   /* (read where BN5's battle is fought too: dslist) */
 	fight(ra ? &a : NULL, rb ? &b : NULL, &s);
 	if (a.out) fclose(a.out);
 	if (b.out) fclose(b.out);

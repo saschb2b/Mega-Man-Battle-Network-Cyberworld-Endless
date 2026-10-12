@@ -342,6 +342,72 @@
     "08DA16A4:20C0"
    ],
    "what": "KnightMan's sound (BN5 0x080FBE08: movs r0,#0xC0, its copy at XN_CODE + 0xF000 + 0x6A4) left at 0xC0, BN6's another song, where the install makes it the slot BN5's 0xC0 is copied to (0x62, src/audio/xsong.c): BN6's own song of the number told from the copy (xsong_sound_slot)"
+  },
+  {
+   "name": "the submerged hit by any attack",
+   "spec": "toadman_sea",
+   "poke": [
+    "08D9008E:2400",
+    "08D900C2:2400"
+   ],
+   "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
+  },
+  {
+   "name": "Elec stopped by the submerged",
+   "spec": "toadman_sea_elec",
+   "poke": [
+    "08D90084:2C07",
+    "08D900B6:2C07"
+   ],
+   "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
+  },
+  {
+   "name": "the sea's marker not kept",
+   "spec": "toadman_sp",
+   "poke": [
+    "08D9006A:46C0"
+   ],
+   "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
+  },
+  {
+   "name": "the sea's splash another effect",
+   "spec": "tomahawkman_sea",
+   "poke": [
+    "08D900DA:2414"
+   ],
+   "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
+  },
+  {
+   "name": "Colonel's side's bit not kept",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D90044:46C0"
+   ],
+   "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in his field (BN6_COLONEL_SIDES): BN5's bit 0x20 set as he is spawned, at t1, where BN6's field stays 0"
+  },
+  {
+   "name": "the Dark Soul's record of a chip BN6's region",
+   "spec": "darksoul_sword",
+   "poke": [
+    "08DFAC4B:02:1"
+   ],
+   "what": "the Dark Soul's record of the Sword (XN_DARK_RECORDS + 71 * 0x2C + 0x17, src/emu/xnavi_dark.c) holding BN6's byte 2 (its lock-on type) where BN5's region 6 is kept: its approach goes elsewhere at t77"
+  },
+  {
+   "name": "the Dark Soul's record of a chip another approach",
+   "spec": "darksoul_cannon",
+   "poke": [
+    "08DFA039:01:1"
+   ],
+   "what": "the Dark Soul's record of the Cannon (XN_DARK_RECORDS + 1 * 0x2C + 0xD) naming approach 1 (Thunder's) where BN5's 0: its approach's state at t264"
+  },
+  {
+   "name": "the Navis' buster another family",
+   "spec": "darksoul_v1",
+   "poke": [
+    "08D90038:2010"
+   ],
+   "what": "the Navis' buster's setup (XN_STUB_BUSTER, its movs r0 at + 0x18) answering family 0x10 (the step) where BN5's 0x16 is BN6's 0x66 (XN_FAMILY_OF): the Dark Soul's first shot at t16"
   }
  ]
 }

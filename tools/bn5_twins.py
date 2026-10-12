@@ -144,6 +144,8 @@ TYPES = {
     (3, 0x8C): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (3, 0x93): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),
     (4, 0x09): ('moved', None, 'navis', "BN5's rock fragment: BN6's 9 draws its sprite 4:5 where BN5's 4:0xE (knightman_v1 at t685)"),
+    (4, 0x3E): ('moved', None, 'navis', "the sea's marker (tools/bn5_objects.py, SEA_MARKER): BN6's 0x3E its invisibility's shadow, the "
+                                        "same code drawing list 3's 0x00 where BN5's draws 0x2D, and nothing of BN6's spawns it"),
     (4, 0x38): ('moved', None, 'navis', "Colonel's strike's two: " + NO_TWIN + "; BN6's 0x38 sets another palette (+0x95) and draws "
                                         "otherwise (colonel_sp at t1004)"),
     (4, 0x8E): ('moved', None, 'navis', "NumberMan's: " + NO_TWIN),

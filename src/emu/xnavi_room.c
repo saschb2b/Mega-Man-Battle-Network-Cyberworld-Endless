@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "hook.h"
 #include "rom.h"
+#include "xattack_grow.h"
 #include "xnavi_recipe.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -41,7 +42,9 @@ static void specs(void) {
 	T[XN_T_COMPANION_END] = (Room){ BN6_NAVI_COMPANION_END_REF, BN6_NAVIS, 4, XN_COMPANION_END, XN_AIS };
 	T[XN_T_OVL_MASKS] = (Room){ BN6_OVERLAY_MASKS_REF, BN6_OVERLAY_KINDS, 4, XN_OVL_MASKS, XN_KINDS };
 	T[XN_T_OVL_SPRITES] = (Room){ BN6_OVERLAY_SPRITES_REF, BN6_OVERLAY_KINDS, 2, XN_OVL_SPRITES, XN_KINDS };
+	T[XN_T_HIDE] = (Room){ BN6_NAVI_HIDE_REF, BN6_NAVIS, 4, XN_HIDE, XN_AIS };
 }
+_Static_assert(XN_NAMES + XN_NAMES_ROOM <= XN_HIDE && XN_HIDE + 4u * XN_AIS <= XN_ROOM_END, "the hide's words after the names, in the room");
 
 static bool in_rom(uint32_t a, uint32_t n) { return a >= BUS && a - BUS <= ROM_SIZE && n <= ROM_SIZE - (a - BUS); }
 
@@ -106,6 +109,50 @@ bool xn_name(uint32_t i, uint32_t off, const uint8_t *text, uint32_t len) {
 #define MOVS_R0_0 0x2000u   /* movs r0, #0 */
 #define BX_LR     0x4770u   /* bx lr */
 
+/* The Navis' buster's setup, BN5's attack setup 0x3E (0x0800FAFE, which BN6's setups lack) run as the setups' dispatcher
+ * runs one (0x0800F350: r6 its AIData, r7 its AttackVars, both kept): its buster's level (its side's NaviStats +1, by
+ * BN6's twin of BN5's getter) + 1 at AttackVars +8, 0 at +0xA, and its family as BN6's grown table numbers it in r0 */
+static const uint16_t buster_code[] = {
+	0xB5C0,           /* +00 push {r6,r7,lr} */
+	0x6DAE,           /* +02 ldr r6,[r5,#0x58] */
+	0x1C37,           /* +04 adds r7,r6,#0 */
+	0x37A0,           /* +06 adds r7,#0xA0 */
+	0x2101,           /* +08 movs r1,#1 */
+	0x4B04,           /* +0A ldr r3,[pc,#0x10]: the getter (+0x1C) */
+	0x46FE,           /* +0C mov lr,pc */
+	0x4718,           /* +0E bx r3 */
+	0x3001,           /* +10 adds r0,#1 */
+	0x8138,           /* +12 strh r0,[r7,#8] */
+	0x2000,           /* +14 movs r0,#0 */
+	0x8178,           /* +16 strh r0,[r7,#0xA] */
+	0x2000 | XN_FAMILY_OF(0x16),   /* +18 movs r0,#family */
+	0xBDC0,           /* +1A pop {r6,r7,pc} */
+};
+#define NAVI_STAT 0x08013774u   /* BN6's twin of BN5's 0x08010DEE: a byte of its side's battle NaviStats (r1 its offset) */
+_Static_assert(XN_STUB_BUSTER + 0x20u <= XN_STUBS_END && XN_FAMILY_OF(0x16) <= 0xFF, "the buster's stub in the stubs' room");
+
+/* The moved Colonel's write of BattleState +0x5C's bits (BN5's 0x0800131E, from BN5_COLONEL_SIDE_SET): r0 ORed into his
+ * own (BN6_COLONEL_SIDES), BN6's bits of the same values another meaning (BN6_BATTLE_BITS) */
+static const uint16_t sides_code[] = {
+	0x4902,           /* +00 ldr r1,[pc,#8]: the field (+0x0C) */
+	0x780A,           /* +02 ldrb r2,[r1] */
+	0x4302,           /* +04 orrs r2,r0 */
+	0x700A,           /* +06 strb r2,[r1] */
+	0x4770,           /* +08 bx lr */
+};
+_Static_assert(XN_STUB_SIDES + 0x10u <= XN_STUBS_END && !(XN_STUB_SIDES & 3), "the sides' stub in the stubs' room, its literal on a word");
+
+/* A chip's record by its id as BN5's 0x0801DF0C (and BN6's twin) finds it, in the Dark Soul's records (XN_DARK_RECORDS,
+ * xnavi_dark.c): r0 the record, r1 and r2 clobbered as the original's */
+static const uint16_t chipdata_code[] = {
+	0x4902,           /* +00 ldr r1,[pc,#8]: the records (+0x0C) */
+	0x222C,           /* +02 movs r2,#0x2C */
+	0x4350,           /* +04 muls r0,r2 */
+	0x1840,           /* +06 adds r0,r0,r1 */
+	0x4770,           /* +08 bx lr */
+};
+_Static_assert(XN_STUB_CHIPDATA + 0x10u <= XN_STUBS_END && !(XN_STUB_CHIPDATA & 3), "the records' stub in the stubs' room, its literal on a word");
+
 static void stubs_make(void) {
 	uint8_t *p = xv_put(XN_STUBS, XN_STUBS_END - XN_STUBS, true);
 	if (!p) return;
@@ -113,6 +160,34 @@ static void stubs_make(void) {
 	put16(p + (XN_STUB_ZERO - XN_STUBS), MOVS_R0_0);
 	put16(p + (XN_STUB_ZERO - XN_STUBS) + 2, BX_LR);
 	put16(p + (XN_STUB_DS - XN_STUBS), BX_LR);
+	uint8_t *b = p + (XN_STUB_BUSTER - XN_STUBS);
+	for (size_t i = 0; i < sizeof buster_code / 2; ++i) put16(b + 2 * i, buster_code[i]);
+	put32(b + 0x1C, NAVI_STAT | 1u);
+	uint8_t *c = p + (XN_STUB_SIDES - XN_STUBS);
+	for (size_t i = 0; i < sizeof sides_code / 2; ++i) put16(c + 2 * i, sides_code[i]);
+	put32(c + 0x0C, BN6_COLONEL_SIDES);
+	uint8_t *d = p + (XN_STUB_CHIPDATA - XN_STUBS);
+	for (size_t i = 0; i < sizeof chipdata_code / 2; ++i) put16(d + 2 * i, chipdata_code[i]);
+	put32(d + 0x0C, XN_DARK_RECORDS);
+}
+
+/* ---- BN5's attack families a Navi runs, in BN6's attack families grown ---- */
+
+bool xn_families_ready(void) { return xattack_grow(); }
+
+void xn_family_set(int family, uint32_t to) {
+	uint32_t at = xattack_entry(family);
+	if (!at || family < XATTACK_BN6_END || !to) {
+		xv_fail("its family %#x at %08x", family, (unsigned)to);
+		return;
+	}
+	uint32_t was = emu_read32(at);
+	if (was == (to | 1u)) return;
+	if (was != (XATTACK_STUB | 1u)) {
+		fprintf(stderr, "xnavi: BN6's attack family %#x already holds %08x: left as it is\n", family, (unsigned)was);
+		return;
+	}
+	xv_word(at, XATTACK_STUB | 1u, to | 1u);
 }
 
 /* The DS version's chip AI reached: no version a recipe installs (V1, V2,
@@ -176,4 +251,7 @@ void xn_set_word(int t, uint32_t i, uint32_t v) {
 	if (p) put32(p, v);
 }
 
-const char *xn_writer(uint32_t at) { return at >= FREE_VIRUS_ROOM && at < FREE_FAMILIES ? XV_CLAIMS : XN_CLAIMS; }
+const char *xn_writer(uint32_t at) {
+	if (at >= FREE_ATTACK_FAMILIES && at < FREE_ATTACK_FAMILIES_END) return XATTACK_CLAIMS;
+	return at >= FREE_VIRUS_ROOM && at < FREE_FAMILIES ? XV_CLAIMS : XN_CLAIMS;
+}

@@ -67,6 +67,7 @@
 #include "bn6.h"
 #include "xpanels.h"
 #include "xpanels_look.h"
+#include "xsea.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
@@ -3154,7 +3155,7 @@ static void test_xvirus_static(void) {
  * Transplanted Navis), each whole and apart from the others and from the
  * families: its AI index, ids, home and code its own; a sprite two Navis
  * draw at one place and number in both (the shared art), no other sprite's
- * place or number another's; its effects numbers of its own in the Navis'
+ * place or number another's; an effect two spawn one number, in the Navis'
  * range; no type two recipes move; the moved objects' recipe whole, its
  * type moved by it alone, each type a Navi needs one it moves; the
  * Navis' room laid out in order */
@@ -3170,8 +3171,9 @@ static int navi_clashes(const XVirusFamily *f, const XVirusFamily *g, bool navis
 				a->room == b->room;
 			bad += !same && (spans_meet(a->at, a->room, b->at, b->room) || (a->to_list == b->to_list && a->to_index == b->to_index));
 		}
+	/* (an effect two of them spawn: one number for one BN5 effect) */
 	for (int i = 0; i < f->neffects; ++i)
-		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+		for (int k = 0; k < g->neffects; ++k) bad += (f->effects[i].to == g->effects[k].to) != (f->effects[i].from == g->effects[k].from);
 	for (int i = 0; i < f->ntypes; ++i)
 		for (int k = 0; k < g->ntypes; ++k)
 			bad += f->types[i].kind == g->types[k].kind && f->types[i].from == g->types[k].from &&
@@ -3182,12 +3184,12 @@ static int navi_clashes(const XVirusFamily *f, const XVirusFamily *g, bool navis
 static void test_xnavi_static(void) {
 	char why[160] = "";
 	const XVirusFamily *o = &xnavi_objects_bn5;
-	CHECK(XN_STUBS_END <= XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
-		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
-		"xnavi: the Navis' room out of order");
+	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
+		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Dark Soul's records)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 6, "xnavi: BN5's Navis listed (%d)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 7, "xnavi: BN5's Navis listed (%d: the six and the Dark Soul)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -3287,6 +3289,8 @@ static void test_free_space(void) {
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },
+		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
+		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
 		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_BATTLE_SPARE },
 		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
@@ -3296,6 +3300,12 @@ static void test_free_space(void) {
 		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
 		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
+	CHECK(BN6_DARK_LISTS == RAM_DARK_LISTS && RAM_DARK_LISTS + 2u * BN5_DARK_LIST_SIZE == RAM_NAVIS && BN6_COLONEL_SIDES == RAM_NAVIS &&
+		BN6_DARK_AI_OWNER > BN6_COLONEL_SIDES && BN6_DARK_AI_POOL + 4u <= RAM_DARK_AI && BN6_DARK_AI == RAM_DARK_AI &&
+		RAM_DARK_AI + BN5_AI_DATA_SIZE <= RAM_BATTLE,
+		"BN6's RAM: the chip AI's lists at %08x, two sides, then Colonel's sides' bits, the Dark Soul's AI data", (unsigned)RAM_DARK_LISTS);
+	CHECK(XSEA_MASK == RAM_SEA && XSEA_MARKERS + 32u * 4u <= XSEA_RAM_END && XSEA_RAM_END <= RAM_DARK_LISTS,
+		"BN6's RAM: the sea's submerge at %08x-%08x", (unsigned)RAM_SEA, (unsigned)XSEA_RAM_END);
 	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_BATTLE_SPARE && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
 		"BN6's RAM: the Souls' state at %08x, %#x bytes", (unsigned)BN6_SOULS, (unsigned)BN6_SOULS_SIZE);
 }

@@ -32,7 +32,7 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  64      /* the families' and the Navis' blocks of code */
+#define FAMILY_MAX  128     /* the families' and the Navis' blocks of code */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -130,6 +130,12 @@ static void callers(const XdLog *log, XdEvent *e, uint32_t ret, uint32_t sp) {
 		e->outer = w;
 		if (!e->family && family_of(log, w)) e->family = w;
 	}
+}
+
+/* MegaMan, the first kind's first object, runs no family's or Navi's own code: an event while he runs that an engine
+ * routine a Navi's copy holds led to (BN5's engine runs it for him too: the buster's arm, 0x080EBBA6) is not the family's */
+static void megamans(const XdLog *log, XdEvent *e, uint32_t running_now) {
+	if (running_now == (log->game == 6 ? BN6_T1_OBJECTS : BN5_T1_OBJECTS)) e->family = 0;
 }
 
 /* the object the runner runs now (0 none) */
@@ -243,6 +249,7 @@ static HookAct on_spawn(HookRegs *r, void *user) {
 	}
 	callers(log, e, lr, above);
 	e->b = running(log);
+	megamans(log, e, e->b);
 	log->pending = true;
 	return HOOK_CONTINUE;
 }
@@ -269,6 +276,7 @@ static XdEvent *call(XdLog *log, const HookRegs *r, int kind, int sub, bool push
 		if (pushed) callers(log, e, hook_read32(r->sp), r->sp + 4);
 		else callers(log, e, r->lr, r->sp);
 		e->object = running(log);
+		megamans(log, e, e->object);
 	}
 	return e;
 }
@@ -351,8 +359,11 @@ static XdLog *log_make(int game, bool alone, bool navis) {
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
 	/* (the families' code, and the Navis' where a foe is one: xnavi_recipe.h) */
-	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART)) log->fam[log->nfam++] = m[i];
+	for (int i = 0; i < n; ++i)
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART)) {
+			if (log->nfam < FAMILY_MAX) log->fam[log->nfam++] = m[i];
+			else fprintf(stderr, "xdiff: the families' and Navis' code past %d blocks: %08x not watched\n", FAMILY_MAX, (unsigned)m[i].from);
+		}
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */
 	for (int i = 0; alone && i < xvirus_control.nblocks + xnavi_control.code.nblocks && log->nfam < FAMILY_MAX; ++i) {

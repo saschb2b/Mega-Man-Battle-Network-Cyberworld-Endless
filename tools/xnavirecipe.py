@@ -44,7 +44,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # The Navis written into the C file, in install order: BN5's AI index and the project's name for it. Each one's numbers
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
-NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'))
+NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -56,16 +56,22 @@ FREE_NAVI_CODE, FREE_NAVI_ART, FREE_NAVI_HOMES = EMU_FREE + 0x590000, EMU_FREE +
 XN_OBJECTS, XN_CODE = FREE_NAVI_CODE + 0x100, FREE_NAVI_CODE + 0x2000
 XN_SLOT_CODE, XN_SLOT_ART, XN_HOME_SIZE = 0x3C00, 0x400, 0x800
 XN_FIRST_ID, XN_FIRST_AI = 0x1C4, 25
-XN_SHARED_ART, XN_END = FREE_NAVI_ART + 8 * XN_SLOT_ART, EMU_FREE + 0x600000
+XN_SHARED_ART, XN_END = FREE_NAVI_ART + 8 * XN_SLOT_ART, EMU_FREE + 0x600000 - 0x6000   # (to XN_DARK_RECORDS)
 XN_OBJECTS_HOME = FREE_NAVI_HOMES + 15 * XN_HOME_SIZE
 CONTROL_SLOT = 7
 CODE_STEP = 0x100
 # the numbers the Navis' attacks' art takes in the grown lists and effects, issue #82's plan for its tracks (each its own
 # range, so their branches merge: the families' effects 0x6C-0x9F, the Navis' 0xA0-0xBF, the Souls' 0xC0-0xCF, the
-# chips' 0xD0-0xFF; lists 4 and 5 the families' upward from BN6's end, the Navis' 0xA0-0xB5 and 0xA0-0xA3, the chips'
+# chips' 0xD0-0xFF; lists 4 and 5 the families' upward from BN6's end, the Navis' 0xA0-0xB5 and 0xA0-0xA6, the chips'
 # downward from 0xFF). A sprite takes one number and one place whichever Navi draws it (the shared art)
-NAVI_LIST_NUMBERS = {4: list(range(0xA0, 0xB6)), 5: list(range(0xA0, 0xA4))}
+NAVI_LIST_NUMBERS = {4: list(range(0xA0, 0xB6)), 5: list(range(0xA0, 0xA7))}
 NAVI_FIRST_EFFECT, NAVI_LAST_EFFECT = 0xA0, 0xBF
+# BN5's attack family F in BN6's grown table (src/emu/xnavi_recipe.h, XN_FAMILY_OF): 0x50 + F, as the chips' are
+XN_FAMILY_FIRST = 0x50
+# the routine a Navi's attacks hide its companion's overlay by, a word an AI: BN5's words (BN5_NAVI_HIDE), BN6's
+# (BN6_NAVI_HIDE_REF's), and BN5's two routines' twins: the empty companion's, the overlay's hide
+HIDE5, HIDE6 = 0x0800F134, 0x08011470
+HIDE_TWINS = {0x0800F194: 0x080114D4, 0x080C3836: 0x080C5D42}
 # the Navis' battle sprites in BN6's list 2 (src/emu/xnavi_sprites.c: BN5's Navi n at 0x20 + n - 7, the Dark Soul's at 0x26),
 # each installed with its Navi: its code's loads of its own (BN5's list 2 number n) take its number there
 HELD_CHIP = 0x2A   # an object's chip it uses next (BN6_T1_CHIP), 0xFFFF none
@@ -102,7 +108,7 @@ class NaviDeriver(Deriver):
 
     def kind_of(self, f, t):
         t &= ~1
-        if f.region[0] <= t < f.region[1]:
+        if any(lo <= t < hi for lo, hi in getattr(f, 'regions', [f.region])):
             return 'own', None
         if not self.control and in_objects(t):
             return 'engine', (objects_at(t), 'the moved objects', 'SAME', None)
@@ -112,7 +118,7 @@ class NaviDeriver(Deriver):
             return 'engine', (NT.GENERIC_TWINS[t], 'navis', 'SAME', None)
         if t in NT.COMPANIONS:
             return 'foreign', (None, 'navis', None, None)
-        if t in NT.SPAWNS_OTHER or t in NT.COPIED:
+        if t in NT.SPAWNS_OTHER or t in NT.COPIED or t in family_routines(f.ai):
             return 'foreign', (None, 'navis', None, None)
         return Deriver.kind_of(self, f, t)
 
@@ -232,15 +238,17 @@ class NaviDeriver(Deriver):
     def spawn(self, f, w, site, spawner, todo):
         """the dispatch's spawn, but an object the moved objects' unit runs (tools/bn5_objects.py): needed, not walked"""
         v, _ = T.back_value(w, site, 0)
-        if (BN5['spawners'][spawner], v) == OBJECT_TYPE and not in_objects(f.region[0]):
+        if (BN5['spawners'][spawner], v) in OBJECT_TYPES and not in_objects(f.region[0]):
             f.calls[spawner] = (None, 'the dispatch', None, None)
-            f.needs = getattr(f, 'needs', set()) | {OBJECT_TYPE}
+            f.needs = getattr(f, 'needs', set()) | {(BN5['spawners'][spawner], v)}
             return
         Deriver.spawn(self, f, w, site, spawner, todo)
 
     def call(self, f, w, site, t, ctx, todo):
         if not self.control and t in NT.STUBS:
             f.calls[t] = (None, 'stub', None, NT.STUBS[t])
+            if t in NT.STUB_ARGS and T.back_value(w, site, 0)[0] != NT.STUB_ARGS[t]:
+                f.decide('stub', f'{site:08X}: a call to {t:08X} with r0 another than {NT.STUB_ARGS[t]:#x}, the one its stub serves')
             return
         if not self.control and t in BN5['spawners']:
             self.spawn(f, w, site, t, todo)
@@ -260,18 +268,38 @@ class Recipe:
     pass
 
 
-# BN5's engine objects moved once, whole, for every track (tools/bn5_objects.py): the image object's module, one block at
-# XN_OBJECTS (src/emu/xnavi_recipe.h), what a Navi's code calls in it reached at its copy there
-OBJECT_TYPE = (OB.IMAGE['kind'], OB.IMAGE['type'])
+# BN5's engine objects moved once, whole, for every track (tools/bn5_objects.py): each module one block at XN_OBJECTS
+# (src/emu/xnavi_recipe.h), in MODULES' order, each from a CODE_STEP boundary the same distance from a word's as in BN5;
+# what a Navi's code calls in one reached at its copy there
+OBJECT_TYPES = {(m['kind'], m['type']) for m in OB.MODULES}
+
+
+def module_places():
+    """each module's region and where it goes"""
+    out, at = [], XN_OBJECTS
+    for m in OB.MODULES:
+        lo, hi = m['region']
+        to = X.rounded(at, CODE_STEP) + (lo & 3)
+        out.append((lo, hi, to))
+        at = to + (hi - lo)
+    return out
 
 
 def in_objects(a):
-    return OB.IMAGE['region'][0] <= a < OB.IMAGE['region'][1]
+    return any(lo <= a < hi for lo, hi, _ in module_places())
 
 
 def objects_at(a):
-    lo = OB.IMAGE['region'][0]
-    return X.rounded(XN_OBJECTS, CODE_STEP) + (lo & 3) + (a - lo)
+    return next((to + (a - lo) for lo, hi, to in module_places() if lo <= a <= hi), None)
+
+
+def family_routines(ai):
+    """the routines of BN5's attack families a Navi takes with it (bn5_navi_twins.FAMILIES): each family's and its
+    phases'"""
+    out = set()
+    for a, phases, _ in NT.FAMILIES.get(ai, {}).values():
+        out |= {a, *phases}
+    return out
 
 
 def ids_of(rom, ai, kind):
@@ -306,6 +334,7 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     comp = [src.u32(game[k] + 4 * ai) for k in ('comp', 'comp_end')]
     companion_start = comp[0] & ~1
     roots += [c & ~1 for c in comp if d.kind_of(f, c)[0] in ('own', 'foreign')]
+    roots += [a for fam, (a, _, _) in NT.FAMILIES.get(ai, {}).items()] + list(NT.EXTRA_ROOTS.get(ai, {}))
     d.walk_navi(f, sorted(set(roots)))
     blocks = blocks_of(d, f)
     for _ in range(8):
@@ -376,10 +405,14 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     r.imms, r.words, r.numbers, r.sounds = [], [], [], []
     r.sprites, r.effects, r.types, r.more_imms, r.held_out = [], [], [], [], []
     r.overlay, r.bytes, r.needs, r.kinds = None, [], [], []
+    r.families = [(fam, XN_FAMILY_FIRST + fam, a | 1) for fam, (a, _, _) in sorted(NT.FAMILIES.get(ai, {}).items())]
     if not control:
         for k, d in [x for x in f.decisions if x[0] == 'curaction' and int(x[1].split(':')[0], 16) in NT.OWN_STATES]:
             f.decisions.remove((k, d))
             f.notes.append(f'{d.split(":")[0]}: {NT.OWN_STATES[int(d.split(":")[0], 16)]}: no Navi state, kept')
+        for k, d in [x for x in f.decisions if x[0] == 'curaction' and int(x[1].split(':')[0], 16) in NT.CURACTIONS]:
+            f.decisions.remove((k, d))
+            f.notes.append(f'{d.split(":")[0]}: {NT.CURACTIONS[int(d.split(":")[0], 16)]}')
         more_paths(r)
         overlay_of(r, src)
         chips_of(r, src, b6)
@@ -390,6 +423,7 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
         table_sounds(r, src, b6)
         sounds_of(r, src, b6)
         panel_types(r)
+        navi_ai_cmps(r)
         X.conditions_of(r, pairs)
         r.imms = X.unique_imms(f.imms + r.more_imms)
         r.numbers = sorted((lit, was, now) for lit, (was, now, why) in f.numbers.items())
@@ -399,37 +433,10 @@ def derive(src, b6, pairs, ai, slot, alloc, control=False):
     return r
 
 
-def derive_objects(src, b6, pairs, alloc):
-    """the moved objects' unit (tools/bn5_objects.py): the image object's module whole, one block, walked from each of its
-    routines; its kinds' sprites as the table fixes them, each twin checked by its bytes, each copy at its number in the
-    shared art; every other kind BN5's bytes, noted"""
-    o = OB.IMAGE
-    d = NaviDeriver(src, b6, pairs, NAVI5)
-    f = Family(-1)
-    f.region, f.st, f.s1, f.s2, f.states5, f.ids5 = o['region'], o['region'][0], o['region'][0], None, [], [None] * 6
-    d.walk_navi(f, list(o['roots']))
-    blocks = [o['region']]
-    outside = sorted(a for a in d.covered(f) if not blocks[0][0] <= a < blocks[0][1])
-    if outside:
-        f.decide('block', f'its walk covers {outside[0]:08X}, outside its module')
-    f.data = pointer_words(src, d.classify(f, blocks), blocks)
-    d.scan(f)
-    raw_code_pointers(d, f, src)
-    d.scan_words(f, blocks)
-    r = Recipe()
-    r.f, r.ai5, r.slot, r.control = f, -1, None, False
-    lo, hi = blocks[0]
-    r.blocks = [(lo, hi, objects_at(lo), zlib.crc32(src.bytes(lo, hi - lo)) & 0xFFFFFFFF)]
-    if objects_at(hi) > XN_CODE:
-        f.decide('room', f'its module ends at {objects_at(hi):08X}, past the moved objects\' room')
-    r.data = f.data
-    calls_of(r, d, blocks)
-    r.sprites, r.effects, r.types, r.bytes, r.needs, r.kinds = [], [], [], [], [], []
-    X.types_of(r)
-    types_decided(r)
-    X.conditions_of(r, pairs)
-    if f.effects or f.sounds or any(k != (None, None) for k in f.loads):
-        f.decide('art', 'its code starts an effect or a sound, or loads a sprite by a number of its own')
+def image_kinds_fixed(r, src, b6, alloc):
+    """the image object's kinds' sprites as tools/bn5_objects.py fixes them: each twin checked by its bytes, each copy at its
+    number in the shared art; every other kind BN5's bytes, noted"""
+    o, f = OB.IMAGE, r.f
     for k in range(o['count']):
         at = o['kinds'] + 5 * k
         l5, i5 = src.u8(at), src.u8(at + 1)
@@ -456,7 +463,75 @@ def derive_objects(src, b6, pairs, alloc):
                 r.bytes.append(dict(at=at + 1, was=i5, now=ti, why=why))
         else:
             f.notes.append(f'kind {k:#x}: BN5\'s sprite {lst}:{i5:#x} kept (no installed code spawns it)')
-    r.imms = X.unique_imms(f.imms)
+
+
+def objects_art(r, src, b6, alloc):
+    """the modules' own draws: a sprite loaded by its number BN6's of the same bytes (else a decision), an effect BN6's of
+    the same sprite, animation and palette or one of the Navis' range (its sprite in the shared art), the immediate that
+    names it BN6's; no sound"""
+    f = r.f
+    if f.sounds:
+        f.decide('art', 'its code starts a sound')
+    for (l, v), sites in sorted(f.loads.items(), key=lambda x: str(x[0])):
+        if (l, v) == (None, None):
+            continue   # (the image object's, by its kind's entry: image_kinds_fixed)
+        same = bn6_twin(src, b6, l // 4, v)[0] if l is not None and v is not None else None
+        if same != v:
+            f.decide('sprite', f'its sprite {l}:{v}: BN6 lists its bytes at {same}')
+    for e, sites in sorted(list(f.effects.items()) + [(x, []) for x in OB.ENGINE_EFFECTS], key=lambda x: str(x[0])):
+        if e is None:
+            f.decide('effect', f'an effect id made otherwise at {", ".join(f"{s:08X}" for s, _ in sites)}')
+            continue
+        e6 = X.effect_twin(src, b6, e, lambda lst, idx: bn6_twin(src, b6, lst, idx))
+        if e6 is None:
+            e6, _ = alloc.number('effect', e)
+            row = src.bytes(BN5['effects'] + 4 * e, 4)
+            if (e, e6) not in r.effects:
+                r.effects.append((e, e6))
+                if bn6_twin(src, b6, row[0] // 4, row[1])[0] is None:
+                    to, x = alloc.shared(src, row[0] // 4, row[1])
+                    if to is None:
+                        f.decide('effect', f'its effect {e:#x}\'s sprite has no place')
+                    elif not any(y['list'] == x['list'] and y['index'] == x['index'] for y in r.sprites):
+                        r.sprites.append(dict(x))
+                else:
+                    f.decide('effect', f'its effect {e:#x} draws BN6\'s sprite: an entry naming BN6\'s wanted')
+        if e6 != e:
+            for s_, chain in sites:
+                X.imm_for(r, chain, 4, e, e6, f'its effect: {e:#x} in BN5, {e6:#x} in BN6')
+
+
+def derive_objects(src, b6, pairs, alloc):
+    """the moved objects' unit (tools/bn5_objects.py): each module whole, one block, walked from each of its routines; the
+    image object's kinds' sprites as the table fixes them; the modules' own sprites and effects as BN6 numbers them"""
+    d = NaviDeriver(src, b6, pairs, NAVI5)
+    f = Family(-1)
+    f.regions = [m['region'] for m in OB.MODULES]
+    f.region, f.st, f.s1, f.s2, f.states5, f.ids5 = f.regions[0], f.regions[0][0], f.regions[0][0], None, [], [None] * 6
+    d.walk_navi(f, [x for m in OB.MODULES for x in m['roots']])
+    blocks = list(f.regions)
+    outside = sorted(a for a in d.covered(f) if not any(lo <= a < hi for lo, hi in blocks))
+    if outside:
+        f.decide('block', f'its walk covers {outside[0]:08X}, outside its modules')
+    f.data = pointer_words(src, d.classify(f, blocks), blocks)
+    d.scan(f)
+    raw_code_pointers(d, f, src)
+    d.scan_words(f, blocks)
+    r = Recipe()
+    r.f, r.ai5, r.slot, r.control = f, -1, None, False
+    r.blocks = [(lo, hi, objects_at(lo), zlib.crc32(src.bytes(lo, hi - lo)) & 0xFFFFFFFF) for lo, hi in blocks]
+    end = max(objects_at(hi - 2) + 2 for lo, hi in blocks)
+    if end > XN_CODE:
+        f.decide('room', f'its modules end at {end:08X}, past the moved objects\' room')
+    r.data = f.data
+    calls_of(r, d, blocks)
+    r.sprites, r.effects, r.types, r.bytes, r.needs, r.kinds, r.more_imms = [], [], [], [], [], [], []
+    X.types_of(r)
+    types_decided(r)
+    X.conditions_of(r, pairs)
+    image_kinds_fixed(r, src, b6, alloc)
+    objects_art(r, src, b6, alloc)
+    r.imms = X.unique_imms(f.imms + r.more_imms)
     r.numbers = sorted((lit, was, now) for lit, (was, now, why) in f.numbers.items())
     r.words = sorted((v, to) for v, (to, why, tw) in f.words.items())
     return r
@@ -488,7 +563,7 @@ def sounds_of(r, b5, b6):
         if v is None:
             r.f.decide('sound', f'a sound made otherwise at {", ".join(f"{s:08X}" for s, _ in sites)}')
             continue
-        same = X.song_sig(b5, BN5['songs'], v) == X.song_sig(b6, X.BN6['songs'], v)
+        same = X.song_sig(b5, BN5['songs'], v) == X.song_sig(b6, X.BN6['songs'], v) or v in NT.SOUNDS_AS_BN6
         r.sounds.append((v, same))
         if same:
             continue
@@ -601,8 +676,11 @@ def needs_of(r):
     names; and the image object's kinds it spawns, each one the table fixes (a kind left with BN5's bytes a decision)"""
     f = r.f
     needs = set(getattr(f, 'needs', set()))
-    if any(c['source'] == 'the moved objects' for c in r.calls) or any(in_objects(v & ~1) for v in f.words):
-        needs.add(OBJECT_TYPE)
+    for m in OB.MODULES:
+        lo, hi = m['region']
+        if any(c['bn6'] is not None and c['source'] == 'the moved objects' and lo <= c['bn5'] < hi for c in r.calls) or \
+                any(lo <= (v & ~1) < hi for v in f.words):
+            needs.add((m['kind'], m['type']))
     r.needs = sorted(needs)
     r.kinds = sorted(image_kinds(r))
     for k in r.kinds:
@@ -617,6 +695,10 @@ def image_kinds(r):
     for w in f.walks.values():
         for site, t in w.bls.items():
             if t != OB.IMAGE['spawner']:
+                continue
+            if site in NT.IMAGE_KINDS:
+                for k in NT.IMAGE_KINDS[site][0]:
+                    out.setdefault(k, [])
                 continue
             last = next((a for a in sorted((a for a in w.insns if a < site), reverse=True) if T.writes(w.insns[a], 4)), None)
             i = w.insns.get(last)
@@ -673,6 +755,21 @@ def packed_sprites(r):
                 continue
             out.add((lit, v))
     return out
+
+
+def navi_ai_cmps(r):
+    """its copied code's compares of a Navi's AI index with BN5's number (tools/bn5_navi_twins.py, NAVI_AI_CMPS): BN6's
+    number for it, the instruction checked"""
+    for w in r.f.walks.values():
+        for a in sorted(set(w.insns) & set(NT.NAVI_AI_CMPS)):
+            x = w.insns[a]
+            v = x.f[1] if x.form == 'cmp' else None
+            if v not in SIX + (DARK_SOUL,):
+                r.f.decide('navi ai', f'{a:08X}: not a compare with a moved Navi\'s AI index ({x.form})')
+                continue
+            to = 32 + (6 if v == DARK_SOUL else v - 7)
+            r.more_imms.append(dict(at=a, form='THUMB_CMP', rd=x.f[0], rn=0, was=v, now=to,
+                                    why=f'{NT.NAVI_AI_CMPS[a]}: BN5\'s AI index {v:#x}, BN6\'s {to:#x}'))
 
 
 def panel_types(r):
@@ -754,7 +851,10 @@ def pointer_words(src, data, blocks):
     points into it (the installer moves a pointer to a data range's start alone)"""
     inside = lambda v: any(lo <= (v & ~1) < hi for lo, hi in blocks)
     words = [w for lo, hi, k in data if k in ('RAW', 'POOL') for w in range((lo + 3) & ~3, hi - 3, 4) if inside(src.u32(w))]
-    targets = {src.u32(w) for w in words if not src.u32(w) & 1}
+    # (a word naming its raw data, at an even address or an odd one, bytes: the chip AI's regions' table, 0x08022AF8; an odd
+    # one that names code is a Thumb routine's)
+    in_raw = lambda v: any(lo <= v < hi for lo, hi, k in data if k == 'RAW')
+    targets = {src.u32(w) for w in words if not src.u32(w) & 1 or in_raw(src.u32(w))}
     out = []
     for lo, hi, k in data:
         if k != 'RAW':
@@ -858,6 +958,7 @@ def hooks_of(r, d, hooks, comp):
         r.hooks = [own(hooks[k]) for k in (POST, SPAWN, SPAWNED, PARALYSIS, FREEZE, BUBBLE, FLINCH, DRAG)]
         r.prestep, r.hook_a = own(hooks[PRESTEP]), own(hooks[HOOK_A])
         r.companion = [own(c) for c in comp]
+        r.hide = own(d.b5.u32(HIDE6 + 4 * r.ai5))
         return
     k5 = {POST: POST, SPAWN: SPAWN, SPAWNED: SPAWNED, PARALYSIS: PARALYSIS, FREEZE: PARALYSIS, BUBBLE: PARALYSIS, FLINCH: FLINCH, DRAG: DRAG}
     r.hooks = [ref_of(d, f, hooks[k5[k]], g['nullsub'], NT.NULLSUB6) for k in (POST, SPAWN, SPAWNED, PARALYSIS, FREEZE, BUBBLE, FLINCH, DRAG)]
@@ -869,6 +970,9 @@ def hooks_of(r, d, hooks, comp):
         f.decide('pre-step', f'its pre-step {pre:08X} is none of BN5\'s four')
     r.hook_a = ('BN6', NT.NULLSUB6 | 1)
     r.companion = [ref_of(d, f, c, NT.EMPTY_COMPANION5, NT.EMPTY_COMPANION6) for c in comp]
+    # (the routine its attacks hide its companion's overlay by: BN5's words at BN5_NAVI_HIDE by its AI index, BN6's twin)
+    hide = d.b5.u32(HIDE5 + 4 * r.ai5) & ~1
+    r.hide = ('BN6', HIDE_TWINS[hide] | 1) if hide in HIDE_TWINS else ref_of(d, f, hide)
 
 
 def overlay_of(r, src):
@@ -1016,8 +1120,8 @@ def art_of(r, b5, b6, alloc):
     for site, at, rd, e0, n in getattr(f, 'effect_ranges', []):
         # (n effects from e0, by a variable added to it: as many of BN6's in a row, each with its sprite, the add's
         # immediate the first)
-        e6s = [alloc.number('effect', (r.ai5, e0 + k)) for k in range(n)]
-        if any(not fresh for _, fresh in e6s) or [e for e, _ in e6s] != list(range(e6s[0][0], e6s[0][0] + n)):
+        e6s = [alloc.number('effect', e0 + k) for k in range(n)]
+        if [e for e, _ in e6s] != list(range(e6s[0][0], e6s[0][0] + n)):
             f.decide('effect', f'{site:08X}: its effects {e0:#x}-{e0 + n - 1:#x} take no {n} of BN6\'s in a row')
             continue
         for k, (e6, _) in enumerate(e6s):
@@ -1035,8 +1139,8 @@ def art_of(r, b5, b6, alloc):
         if e6 is None:
             row = b5.bytes(BN5['effects'] + 4 * e, 4)
             lst, idx = row[0] // 4, row[1]
-            e6, fresh = alloc.number('effect', (r.ai5, e))
-            if fresh:
+            e6, _ = alloc.number('effect', e)
+            if (e, e6) not in r.effects:
                 r.effects.append((e, e6))
                 if (lst, idx) not in [(s['list'], s['index']) for s in r.sprites]:
                     same, _ = bn6_twin(b5, b6, lst, idx)
@@ -1074,8 +1178,8 @@ def art_of(r, b5, b6, alloc):
 
 class Alloc(X.Alloc):
     """the numbers the Navis' art takes, in install order: a sprite one number and one place in the shared art whichever
-    Navi draws it (each Navi's recipe lists it, its install copying it where none before it did); an effect one number a
-    Navi (each Navi's install all or nothing on its own, its effects' table entries its own)"""
+    Navi draws it, an effect one number whichever Navi (or the moved objects) spawns it (each recipe lists them, its
+    install writing them where none before it did)"""
 
     def __init__(self):
         super().__init__()
@@ -1219,6 +1323,9 @@ def c_recipe(r, label):
     if r.needs:
         L.append(f'static const XvType {n}_needs[] = {{ ' + ', '.join(f'{{ {k}, 0x{t:02X}, XV_TYPE_MOVED }}' for k, t in r.needs) +
                  ' };   /* the moved objects\' (xnavi_objects.h) */')
+    if getattr(r, 'families', None):
+        L.append(f'static const XnFamily {n}_families[] = {{ ' + ', '.join(f'{{ 0x{b5:02X}, 0x{b6:02X}, OWN(0x{a:08X}) }}' for b5, b6, a in r.families) +
+                 ' };   /* BN5\'s attack families it runs, moved with it (XN_FAMILY_OF) */')
     game = 'XV_GAME_BN6' if r.control else 'XROM_BN5_COLONEL_US'
     L += ['', f'{"const" if r.control else "static const"} XNavi {"xnavi_control" if r.control else "bn5_" + n} = {{', '\t.code = {',
           f'\t\t.name = "{label} ({who})",', f'\t\t.game = {game},', f'\t\t.src_ai = {r.ai5},', f'\t\t.ai = {r.ai},',
@@ -1238,7 +1345,7 @@ def c_recipe(r, label):
     L.append('\t},')
     L.append(f'\t.versions = {r.versions},')
     L.append(f'\t.prestep = {ref_text(r.prestep)}, .hook_a = {ref_text(r.hook_a)},')
-    L.append(f'\t.companion = {ref_text(r.companion[0])}, .companion_end = {ref_text(r.companion[1])},')
+    L.append(f'\t.companion = {ref_text(r.companion[0])}, .companion_end = {ref_text(r.companion[1])}, .hide = {ref_text(r.hide)},')
     L.append(f'\t.sprite_of = {r.sprite_of},')
     if r.overlay:
         L.append(f'\t.overlay = &{n}_overlay,')
@@ -1248,6 +1355,8 @@ def c_recipe(r, label):
         L.append(f'\t.sounds = {n}_sounds, .nsounds = (int)(sizeof {n}_sounds / sizeof *{n}_sounds),')
     if r.needs:
         L.append(f'\t.needs = {n}_needs, .nneeds = (int)(sizeof {n}_needs / sizeof *{n}_needs),')
+    if getattr(r, 'families', None):
+        L.append(f'\t.families = {n}_families, .nfamilies = (int)(sizeof {n}_families / sizeof *{n}_families),')
     L.append('};')
     return '\n'.join(L), None if r.control else f'&bn5_{n}'
 
@@ -1255,15 +1364,17 @@ def c_recipe(r, label):
 def c_objects(r):
     """the moved objects' unit (tools/bn5_objects.py): its code and art as a family's recipe has them, no AI of its own"""
     n = 'objects'
-    L = ['/* ---- BN5\'s engine objects moved once for every track (tools/bn5_objects.py): its image object, the first kind\'s type 5, '
-         'its module whole; its kinds\' sprites as BN6 lists them where a kind is fixed, BN5\'s bytes where none installed spawns it ---- */',
+    L = ['/* ---- BN5\'s engine objects moved once for every track (tools/bn5_objects.py), each module whole: its image object (the first '
+         'kind\'s type 5; its kinds\' sprites as BN6 lists them where a kind is fixed, BN5\'s bytes where none installed spawns it) and '
+         'its sea\'s marker (the fourth kind\'s 0x3E) ---- */',
          '']
     L += c_code(r, n, XN_OBJECTS, 'XN_OBJECTS')
     L += c_art(r, n)
     L += ['', 'const XVirusFamily xnavi_objects_bn5 = {', '\t.name = "BN5\'s moved objects",', '\t.game = XROM_BN5_COLONEL_US,',
           '\t.src_ai = -1,', '\t.ai = -1,', f'\t.home = XN_HOMES + 0x{XN_OBJECTS_HOME - FREE_NAVI_HOMES:X},']
     L += [x[1:] for x in c_fields(r, n, (('blocks', True), ('data', True), ('calls', True), ('words', r.words), ('imms', r.imms),
-                                          ('numbers', r.numbers), ('bytes', r.bytes), ('sprites', r.sprites), ('types', r.types)))]
+                                          ('numbers', r.numbers), ('bytes', r.bytes), ('sprites', r.sprites), ('effects', r.effects),
+                                          ('types', r.types)))]
     L.append('};')
     return '\n'.join(L)
 

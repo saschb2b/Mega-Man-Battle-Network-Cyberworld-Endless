@@ -8,6 +8,7 @@ from xdiff_events import engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
 SPARK = 0x04   # the fourth kind's type of the engine's spark (BN6_SPAWN_SPARK's, sprite list 5's 5)
+STEP_FAMILY = 0x10   # the step's attack family, the same in both: not a chip's
 # the hit spark's spawner's return address in each game (BN5 0x080E09B4, BN6 0x080E1C00, called by object_spawnCollisionEffect
 # as an attack with an element strikes): a spark spawned there is the hit's, its kind and place the attack's, its look each
 # game's own (BN6's init runs its sprite a step on, 0x080E1BD0 bl 0x080026C4, which BN5's 0x080E0988 does not)
@@ -30,6 +31,17 @@ def flashing(f, role):
     return u16(o.coll, off) != 0
 
 
+def chip_running(f, role, canon):
+    """the object of this role (the family's: a moved Navi) runs a chip as it spawns (its CurAction a family of BN6's
+    numbers, not the step's and none moved: the chip's family from BN6's record, src/emu/xnavi_bn5.c's CURACTIONS), the
+    spawn made by that family's code, no family's on the stack (spawned_by)"""
+    o = f.by_role.get(role)
+    if o is None or o.kind != 'T1' or not o.o16(OBJ_NAME_ID):
+        return False
+    a = canon.action(f.game, False, o.o8(OBJ_ACTION))
+    return a > STEP_FAMILY and a not in canon.families.values()
+
+
 def whose(f, role, canon, known, depth=0):
     """'megaman' (his object), "megaman's" (what he owns: an object whose +0x4C names his or one of his, or an
     attack of his side with no object over it: his buster's shots), 'native' (an enemy both games have, each
@@ -38,7 +50,8 @@ def whose(f, role, canon, known, depth=0):
     spawn), 'panels' (the engine's spark over an actor, which BN5's lava spawns as it cools under it, and BN6's as
     src/emu/xpanels.c brings lava in: the code under test as the family's is, its presentation each game's own),
     'spark' (the engine's spark where an attack with an element struck: its look each game's own, the rest the
-    attack's), or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is
+    attack's), "chip's" (what a chip the family's Navi uses spawns, BN6's chip family by BN6's record: its look each
+    game's own, as MegaMan's chips', the rest compared: chip_running), or None (the family's: its enemy, what it owns, its attacks and effects). An object owned by another is
     its owner's, as the owner's own first frame had it (known)."""
     if role_name(role).startswith(tuple(f'T1:{v:#x}#' for v in canon.megaman.values())):
         return 'megaman'
@@ -65,6 +78,8 @@ def whose(f, role, canon, known, depth=0):
         return None
     if by is not None and by != role:
         w = known[by] if by in known else whose(f, by, canon, known, depth + 1)
+        if w is None and chip_running(f, by, canon):
+            return "chip's"
         return {'megaman': "megaman's", 'native': "native's"}.get(w, w)
     if len(p) == 3 and p[1] in ('obj', 'ai'):
         up = next((x.role for x in f.fr['objs'] if role_name(x.role) == p[0]), None)
@@ -151,6 +166,7 @@ def places(o):
 NO_PALETTE = 15     # the palette slot the renderer leaves where it takes none
 NEVER_DRAWN = (0x7FFF, 0xE)   # a family object's tile place and palette slot before its first draw: none of its own
 CACHE = 0x24        # a sprite state's frame copied for its place (0: none, the renderer passed it over)
+SHARED = 0x4000     # a family object's tile place where BN5's renderer shares it with another's of the same sprite
 
 
 def renderer_ranks(fa, fb, last):
@@ -161,16 +177,32 @@ def renderer_ranks(fa, fb, last):
     meaning visible with its frame copied or kept (its cache set). One not drawn keeps the place it was last drawn at, and the rank it had there (last: each game's role's last); one whose
     place moved undrawn keeps its place as it is, marked (0x8000) so it never equals a rank; one never drawn holds its
     slot's last occupant's (the renderer writes them as it draws, its spawn clears its record short of them), read as
-    none (NEVER_DRAWN)."""
+    none (NEVER_DRAWN). A family object whose place in BN5 is one an object not the family's draws this frame (the
+    same frame or palette, which the renderer keeps where it is: BN5's MegaMan's own art, the Dark Soul's buster's arm and
+    muzzle, 3:0x03 and 3:0x06, which BN6's MegaMan draws from its own) shares it there: that place not ranked in either
+    game, read as SHARED (a palette slot as NO_PALETTE) in both."""
+    others = [o for o in fa.fr['objs'] if whose_role(o.role, fa, fb) != 'family' and o.o8(0) & 2]
+    shared = []
+    for k in (0, 1):
+        held = {places(o)[k] for o in others} - ({NO_PALETTE} if k else set())
+        shared.append({o.role for o in fa.fr['objs'] if whose_role(o.role, fa, fb) == 'family' and places(o)[k] in held})
     for f in (fa, fb):
         fam = [o for o in f.fr['objs'] if whose_role(o.role, fa, fb) == 'family']
         # (drawn: visible, and its frame copied or kept this frame, its cache set: the renderer clears an undrawn sprite's
         # cache, BN6 0x081D653A-0x081D6544, an object visible yet passed over, NumberMan's companion, among them)
         drawn = [o for o in fam if o.o8(0) & 2 and u32(o.rec, SPRITE[o.kind] + NODE + CACHE)]
         for k in (0, 1):
-            taken = sorted({places(o)[k] for o in drawn} - ({NO_PALETTE} if k else set()))
+            taken = sorted({places(o)[k] for o in drawn if o.role not in shared[k]} - ({NO_PALETTE} if k else set()))
             for o in fam:
                 raw, key, rank = places(o)[k], (f.game, o.role, k), None
+                sp = SPRITE[o.kind] + NODE
+                if o.role in shared[k]:
+                    if k:
+                        o.over[sp + 0x15] = NO_PALETTE << 4 | o.rec[sp + 0x15] & 0xF
+                    else:
+                        o.over[sp + 8], o.over[sp + 9] = SHARED & 0xFF, SHARED >> 8
+                    last.pop(key, None)
+                    continue
                 if k and raw == NO_PALETTE:
                     continue
                 if o in drawn:
@@ -180,7 +212,6 @@ def renderer_ranks(fa, fb, last):
                     rank = last[key][1]
                 elif key not in last:
                     rank = NEVER_DRAWN[k]
-                sp = SPRITE[o.kind] + NODE
                 if k:
                     o.over[sp + 0x15] = (rank if rank is not None else raw) << 4 | o.rec[sp + 0x15] & 0xF
                 else:

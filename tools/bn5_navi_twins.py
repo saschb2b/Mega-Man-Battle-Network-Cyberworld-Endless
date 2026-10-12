@@ -23,7 +23,29 @@ EMPTY_COMPANION5, EMPTY_COMPANION6 = 0x0800F194, 0x080114D4
 # then), the DS version's chip AI's test (AIData +0xF0, set only by its entry: 0) and its entry and run (reached only by
 # version 4, the DS, which no recipe installs: logged)
 STUBS = {0x080EA08C: 'XN_STUB_ZERO', 0x080EA0BA: 'XN_STUB_ZERO', 0x0802C10A: 'XN_STUB_ZERO', 0x0802C114: 'XN_STUB_DS',
-         0x0802B804: 'XN_STUB_DS'}
+         0x0802B804: 'XN_STUB_DS',
+         # the Dark Soul's chip AI's call at 0x0802BA7C, which BN5's ROM aims at data (0x081BC994: the end of a table of
+         # pointers, then 0xFF fill; its DS twin at 0x0802B86A calls 0x0802BE52): behind 0x0802C016's count, which stays 0
+         # (its two counters, AIData +0x110 and +0xF8, written by 0x0802BF52 alone, which nothing calls or names), dead: r0 0
+         0x081BC994: 'XN_STUB_ZERO',
+         # the attack setups by number (BN5's 0x0800F350, its table 0x0800F368; BN6's 0x080117BA another table): the Dark
+         # Soul's chip AI calls it with 0x3E alone (0x0802BB90), the Navis' buster (BN5's 0x0800FAFE: AttackVars +8 the
+         # buster's level + 1, +0xA 0, CurAction 0x16), which BN6 has no setup of: the stub makes the same, its family BN6's
+         # number for BN5's 0x16 (FAMILIES)
+         0x0800F350: 'XN_STUB_BUSTER',
+         # BattleState +0x5C's bits set (BN5's 0x0800131E), which the moved Colonel calls alone (BN5_COLONEL_SIDE_SET, from his
+         # spawn's end: 0x10 side 0, 0x20 side 1, read by BN5's obstacles' dark hole); BN6 numbers the word's bits otherwise
+         # (its 0x10 the field's slide as a battle ends, BN5's 0x40) and reads no Colonel's: his bits kept in a field of the
+         # Navis' own (BN6_COLONEL_SIDES)
+         0x0800131E: 'XN_STUB_SIDES',
+         # a chip's record by its id (BN5's 0x0801DF0C, BN6's twin 0x08021AA4 the same code), which the Dark Soul's chip AI
+         # alone calls: its choice and approach read four bytes BN5 gives a meaning BN6's records do not hold (+9 bit 0,
+         # +0xD the kind of approach, +0xE bits 0-1, +0x17 the region it aims from; BN6's +0x17 its lock-on type), its attack
+         # (0x0802C098) BN6's own (+4, +0xA-+0xC, +0x10, +0x14: BN6's action for the chip): the Dark Soul's records, BN6's
+         # with BN5's four bytes, by BN6's id (src/emu/xnavi_dark.c)
+         0x0801DF0C: 'XN_STUB_CHIPDATA'}
+# The one number each stub serves where the stubbed routine takes one (r0 at every call): the generator's check
+STUB_ARGS = {0x0800F350: 0x3E}
 
 # BN5's panel types as BN6's (tests/xdiff/legit.json, maps, panel_type): its lava and sea BN6's 13 and 14 where
 # src/emu/xpanels.c brings them in, its holy BN6's 5; a Navi's code that sets a panel's type or compares one read from a
@@ -85,6 +107,27 @@ OWN_STATES = {
     0x080C9154: "TomahawkMan's 0x23 copies the state of its owner, his 0x1F",
 }
 
+# A Navi's setAttack whose CurAction its code makes otherwise than by a number of its own, each judged (the generator's
+# curaction check): the site of the call, and why BN6's engine runs what BN5's does
+CURACTIONS = {
+    # the Dark Soul's chip AI: the chip's family from its record (0x0802C098: BN6's record of the chip's id by BN6's
+    # GetChipData, so BN6's family for BN6's chips and the registry's for BN5's own, as the chip runs for MegaMan)
+    0x0802C0D2: "the chip's family from its record (BN6's, by BN6's chip id)",
+    # ... the Navis' buster, its setup the stub's (XN_STUB_BUSTER: BN6's number for BN5's family 0x16, FAMILIES)
+    0x0802BB96: "the Navis' buster, its family the moved one's number (XN_STUB_BUSTER)",
+    # ... its state 0xC (AIData +0xF2), which nothing of the Dark Soul's code sets (no 0xC stored there; BN5's DS twin's
+    # 0x0802B95A alone): dead, its CurAction from BN6's setups by AIData +7 as the pair has it
+    0x0802BC42: "dead: the chip AI's state 0xC, which nothing of the Dark Soul's sets",
+}
+
+# BN5's sounds a Navi's code plays that BN6 has as another song, played as BN6's of the same number all the same: {sound:
+# why}
+SOUNDS_AS_BN6 = {
+    # the buster's: BN5 plays 0x6A for MegaMan's buster and the Navis' alike (0x080EBAE2, 0x080EC51C); BN6's 0x6A is its
+    # MegaMan's buster's, remade, which BN6's engine plays for his buster: the Navis' buster sounds as his, as in BN5
+    0x6A: "the buster's sound, MegaMan's and the Navis' alike",
+}
+
 # Sounds a moved object starts from a table of its kinds (ldr r1,[r5,#0x60]; ldrh r0,[r1,#n]: its entry +n): (the table,
 # its entries' size, the sound's offset, how many), each entry's sound checked to be the same song in both, else a
 # decision
@@ -104,11 +147,80 @@ COPIED = {
     # a panel within a pattern of the region table (0x0801629C) from a place and facing: Colonel's three (0x080F870C,
     # 0x080F8762, 0x080F87B8)
     0x08029C5A: "Colonel's pattern test",
+    # BN5's chip AI, the Dark Soul's (BN5_CHIP_AI_DARK, 0x0802BA18, from its state 6; AIData +0xF0 its state): it plays the
+    # chips of its foe's side's list (RAM_TWINS below), each as its own attack, after moving where the chip reaches its
+    # target; the DS versions' twin of it (BN5_CHIP_AI_RUN) stays stubbed. Its routines, the machine's
+    0x0802BA18: "the Dark Soul's chip AI", 0x0802BD96: "the chip AI: the next object of its foe's side",
+    0x0802BDB8: "the chip AI: its next target", 0x0802BDE4: "the chip AI: an object of its foe's side",
+    0x0802BE0A: "the chip AI: its target index on", 0x0802BE9E: "the chip AI: a chip of flag 2 first",
+    0x0802BEEE: "the chip AI: the first of its foe's list", 0x0802BF02: "the chip AI: a sequence's entry",
+    0x0802BEA4: "the chip AI: a chip of flag 2 first, its foe's (EXTRA_ROOTS)",
+    0x0802BF20: "the chip AI: its foe's list turned", 0x0802C016: "the chip AI: a count (0: its counters never move)",
+    0x0802C02A: "the chip AI: the other count (0)", 0x0802C098: "the chip AI: a chip's numbers written, its attack begun",
+    0x0802C0E0: "the chip AI: its foe's list shuffled",
+    # ... and its approach (0x08029BF0 begun with a chip and a target, 0x08029B40 under way): where a chip of each kind
+    # reaches the target from, and the walk there
+    0x08029B40: "the approach under way", 0x08029BF0: "the approach begun", 0x08029C04: "the approach",
+    0x08029C1A: "the approach", 0x08029CB6: "the approach", 0x08029D00: "the approach", 0x08029E5E: "the approach",
+    0x08029F42: "the approach", 0x0802A084: "the approach", 0x0802A188: "the approach", 0x0802A20C: "the approach",
+    0x0802A290: "the approach", 0x0802A42A: "the approach", 0x0802A4DE: "the approach", 0x0802A5EC: "the approach",
+    0x0802A672: "the approach", 0x0802A72C: "the approach", 0x0802A758: "the approach", 0x0802A7CE: "the approach",
+    0x0802A8CE: "the approach", 0x0802A93E: "the approach", 0x0802AB22: "the approach", 0x0802AB86: "the approach",
+    0x0802ACE2: "the approach", 0x0802AD32: "the approach", 0x0802ADF6: "the approach",
+    # ... the places a chip reaches its target from, by the chip AI's own table of regions (0x08022AF8, 23 patterns; BN6's
+    # table at 0x08019B78 is another): a pattern by number, and a random panel of one from the foe's side (BN6's twin of
+    # the latter, 0x08015E46, keeps the side)
+    0x08022AF0: "the chip AI's region by number", 0x08012C30: "a random panel of the chip AI's region, from the foe's side",
+    # ... and BN5's random panel of a region itself (GetRandomRelativePanelFiltered): its candidates kept from sp+0x18,
+    # where the fifth on overwrites its own saved place and on (sp+0x1C on), which BN6's twin (0x08015E58) mended (sp+0):
+    # BN5's copied, so a region of more than four panels picks as BN5's does
+    0x08012C48: "BN5's random panel of a region, its candidates over its saved place past four",
+    # the buster's arm drawn (from the Navis' buster, BN5's family 0x16): BN5's image object's kind for the Navi by its AI
+    # index (0x23 for the Dark Soul, palette 0xE), through the moved image object, where BN6's twin (0x080EC8A2, 0x080EC8B2)
+    # spawns BN6's own type 5 with BN6's kinds and AI indexes
+    0x080EBB96: "the buster's arm", 0x080EBBA6: "the buster's arm, by the Navi's AI index",
 }
+# A Navi's copied code that compares a Navi's AI index (AIData +1) with BN5's number of one of the moved Navis: the
+# compare's immediate made BN6's number for it (src/emu/xnavi_recipe.h, XN_AI_OF), {site: why}
+NAVI_AI_CMPS = {
+    # the buster's arm (BN5's 0x080EBBA6, copied with the Dark Soul: BN6's twin, 0x080EC8B2, draws BN6's arms by BN6's AI
+    # indexes): the Dark Soul's own arm, the image object's kind 0x23 with palette 0xE
+    0x080EBC3C: "the buster's arm: the Dark Soul's",
+}
+
+# The image object's kinds a spawn of a Navi's copied code makes otherwise than by an immediate before it: {site: (the kinds
+# it makes for the Navi that runs the copy, why)}
+IMAGE_KINDS = {
+    # the buster's arm (BN5's 0x080EBBA6, the Dark Soul's copy): r4 0x23 + its palette 0xE << 24 on the Dark Soul's branch
+    # (AIData +1 0x16, NAVI_AI_CMPS); its others (0x2B, 0x33) other objects' alone, which never run this copy
+    0x080EBC7E: ((0x23,), "the Dark Soul's buster's arm"),
+}
+
+# Routines of its game's a Navi's walk takes though nothing of it calls them: {Navi: {routine: why}}
+EXTRA_ROOTS = {
+    # the chip AI's search for a chip of flag 2, its foe's variant: its head sits between the own side's head (0x0802BE9E,
+    # walked) and their common body (0x0802BEAC), which the walked head branches to: walked, its blocks one
+    0x16: {0x0802BEA4: "between a walked head and its body"},
+}
+
+# BN5's attack families a Navi's code runs that BN6 has none of (its CurAction from 0x10, run from the families' table):
+# each copied with its Navi and put in BN6's attack families grown (xattack_grow.h) at BN6's number for it, 0x50 + its
+# BN5 number as the chips' are (issue #82's plan), where the entry still holds the stub. {Navi: {BN5 family: (its routine,
+# its phases' routines, why)}}
+FAMILIES = {
+    # the Navis' buster (BN5's family 0x16: a muzzle of the image object's kind 0xD, sound 0x6A, a shot of BN5's 0x0800D928),
+    # which the Dark Soul fires after it moves (its setup BN5's 0x3E, XN_STUB_BUSTER); BN6's 0x16 is MegaMan's charged shot
+    # and no family of BN6's runs it
+    0x16: {0x16: (0x080EC4A4, (0x080EC4C4, 0x080EC4DC, 0x080EC538), "the Navis' buster")},
+}
+
 # BN5's RAM a Navi's code names, and BN6's in its place (the RAM plan: src/emu/free_space.h, bn6_navis.h)
 RAM_TWINS = {
     # Colonel's table, two 8-byte entries by side (BN5_COLONEL_TABLE): BN6_COLONEL_TABLE, zeroed as each battle is set up
     0x02034000: (0x0203FF60, 0x10, "Colonel's table (BN6_COLONEL_TABLE)"),
+    # the chip AI's lists, 0xE0 bytes a side (BN5_DARK_LISTS: its chips, a count, its sequences): BN6_DARK_LISTS, zeroed as
+    # each battle is set up
+    0x02034C20: (0x0203FBE0, 0x1C0, "the chip AI's lists (BN6_DARK_LISTS)"),
 }
 
 # BN5's routines that set an object's sprite up from a packed word in r0: its number (bits 0-7), its list's offset (8-15),
@@ -127,11 +239,30 @@ TWINS = (
     # an enemy spawned mid-battle, its +5 and AIData +2 0 or 1 by its entry (BN5_CHAOS_FAIL_SPAWN the second): the same
     # body, its entries in the other order (the symbol map's pair for the first, 0x0800728C, is no twin)
     (0x08006AA4, 0x080076A0, 'navis'), (0x08006AAE, 0x08007696, 'navis'),
+    # setAttack1 (BN6's of the same table, 0x08011680 + 4 n), and the attack setups by number (a table of routines that
+    # write AttackVars and give CurAction: BN5's 0x0800F368, BN6's 0x080117D4)
+    (0x0800F204, 0x08011684, 'navis'),
+    # the count of a side's statuses its NaviStats hold, and the battle's handlers run by the bits of BattleState +0x44
+    (0x0800DC0C, 0x0800FE52, 'navis'), (0x0801A410, 0x0801DACC, 'navis'),
 )
 
 # Each DIFF pair's audit (verdict, why, conditions), as tools/bn5_twins.py's AUDITS; the record is docs/ROM_DATA.md's
 # (The Navis' engine twins)
 AUDITS = {
+    (0x0800E0B6, 0x08010332): ('ok', "a step's style by its side's battle NaviStats (the r2 of 0x0800F280's move): BN5's 4 where its +0x29 "
+                                     "is 0, unless +0x2C is 8 (then 0), else a table's by +0x29 and +0x2B; BN6's 1 in the battle mode 9 "
+                                     "(BattleSettings +3, 0x0802D234), else 4 where +0x29 is 0, else its table's: the Dark Soul's side is "
+                                     "the foes' (1), whose battle NaviStats both games leave 0 in a battle of a run (BN5 0x0203C8E0, BN6 "
+                                     "0x0203CE64; read in darksoul_v1), in no battle of mode 9: 4 in both",
+                               ("the Dark Soul's side's NaviStats 0", "no battle of mode 9")),
+    (0x0800DC0C, 0x0800FE52): ('ok', "how many of its side's statuses its battle NaviStats hold (+0x31 at 1, +0x13, +0x14, +0x16, +0x54's "
+                                     "halfword, +0x24, +0x18, +0x19, +0x1A): BN6 counts +0x63 too; the Dark Soul's side's (the foes') "
+                                     "battle NaviStats are 0 in both games (read in darksoul_v1): 0 in both",
+                               ("the Dark Soul's side's NaviStats 0",)),
+    (0x0800F204, 0x08011684): ('ok', "setAttack1: movs r2,#1, on to the common part setAttack4's audit judges (the same AttackVars set, "
+                                     "BN6's clearing AttackVars +0x1D and +0x1E besides, as for BN6's own Navis)", ()),
+    (0x0800F208, 0x08011688): ('ok', "setAttack2: movs r2,#2, on to the same common part (setAttack4's audit), the Dark Soul's chip AI's "
+                                     "chips begun so with their family (CURACTIONS)", ()),
     (0x08015140, 0x08018810): ('ok', "an object's arm point (r0 its NameID, r1 the point, r2 its alliance, r3 its flip), which the moved image "
                                      "object reads by its kind's +4 (0x080B9C10, points 0-0x1C): BN6 answers (0, 7) for NameIDs 0xCD-0xFF "
                                      "(none of a Navi's: the moved Navis' ids are 0x1C4 on), finds list 0's record through MegaMan's form "
@@ -164,11 +295,17 @@ AUDITS = {
                                      "rest the same but for the branches past the call", ()),
     (0x08017FCC, 0x0801B394): ('ok', "an obstacle's states (the third kind's that run a virus's: Handi's bomb, Colonel's 0x3C and 0x59): "
                                      "the collision data's final damage and what hit it each game's (BN5 +0x78 and +0x68, BN6 +0x80 and "
-                                     "+0x70: the collision layout); BN5's alone the block at 0x08018002-0x0801802E, a dark hole "
-                                     "spawned where its panel's side's bit 0x10 or 0x20 of BattleState +0x5C is set (0x080CABEA "
-                                     "reads it through 0x08001336, 0x080CABCA spawns the third kind's 0x30), which BN5 sets to 0x0C "
-                                     "as each battle is set up (0x08008F64, its setter's one caller): none of the two bits in a "
-                                     "battle of a run", ()),
+                                     "+0x70: the collision layout); BN5's alone the block at 0x08018002-0x0801802E (as its three other "
+                                     "obstacle states, 0x0801817C, 0x080182E8, 0x08018444): the dark hole, the third kind's 0x30 "
+                                     "spawned (0x080CABCA) where the obstacle stands on a panel of the side opposite a Colonel whose "
+                                     "side's bit of BattleState +0x5C is set and a panel beside it holds his side's (BN5_DARK_HOLE_TEST, "
+                                     "0x080CAC42, 0x080CAC98). Colonel sets his bit as he is spawned, every battle he fights "
+                                     "(BN5_COLONEL_SIDE_SET; the moved Colonel's write kept in BN6_COLONEL_SIDES, XN_STUB_SIDES, the "
+                                     "differential comparing it with BN5's bit), so BN6's twin lacks a rule BN5 runs in his battles: "
+                                     "reached by an obstacle on MegaMan's side (a chip's, a family's) beside a panel Colonel's side "
+                                     "holds, which no spec of his makes (colonel_v1, colonel_v1_keys, colonel_sp: no third kind's 0x30 in "
+                                     "BN5's traces); open, with the obstacles a run's Colonel battle may hold",
+                               ("no obstacle on MegaMan's side in a Colonel battle",)),
     (0x080C3808, 0x080C5D18): ('ok', "the companion overlay spawned (the first kind's 0x56, its parameters from r4: its kind, 0 and "
                                      "the two bytes of the companion's r2, 0 from the triples' caller, BN5 0x0800ECFE / BN6 "
                                      "0x08010DEE): the same steps but BN6 copies its Navi's +0x16 as a halfword (its alliance "

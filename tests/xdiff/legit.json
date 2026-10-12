@@ -2,7 +2,7 @@
   "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and replays BN6's draws from BN5's by the twins of its rng, the engine's own draws one game alone makes named there too (rng), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The differential). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
         "0x4F": "0x200",
         "0x50": "0x201",
@@ -40,6 +40,7 @@
         "0x126": "0x1C5",
         "0x127": "0x1C6",
         "0x128": "0x1C7",
+        "0x18D": "0x1DC",
         "0x180": "0x1A0"
       },
       "megaman": {
@@ -59,14 +60,15 @@
       }
     },
     "navi_ai_index": {
-      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32.",
+      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38.",
       "bn5_to_bn6": {
         "12": "37",
         "11": "36",
         "8": "33",
         "9": "34",
         "10": "35",
-        "7": "32"
+        "7": "32",
+        "22": "38"
       }
     },
     "overlay_kind": {
@@ -86,9 +88,10 @@
       "bn5_to_bn6": {}
     },
     "effect": {
-      "why": "An effect object's id (+4 of the fourth kind's type 0): CanGard's muzzle blast is BN5's 0x57, copied as BN6's 0x6C (the immediate at BN5 0x08108FB6). Each Navi's own effects take numbers of their own from 0xA0, the Navis' range (src/emu/xnavi_bn5.c, its effects: tools/xnavirecipe.py, one number a Navi a BN5 effect), and an effect BN6 draws alike is BN6's (Colonel's 0x47, his strike's: BN6's 0x60, list 4's 0x0A the same bytes as BN5's list 4's 0x2C, its animation and palette 0, tools/xrecipe.py's effect_twin), read so only where a spec's foes hold one of its ids (navis): BN5's engine and its other enemies spawn those BN5 ids for effects of their own (the Mettaur's 0x14), each compared as BN6's of its number.",
+      "why": "An effect object's id (+4 of the fourth kind's type 0): CanGard's muzzle blast is BN5's 0x57, copied as BN6's 0x6C (the immediate at BN5 0x08108FB6). The Navis' own effects take numbers from 0xA0, the Navis' range, one a BN5 effect whichever Navi (or the sea's marker, tools/bn5_objects.py) spawns it (src/emu/xnavi_bn5.c, its effects: tools/xnavirecipe.py), and an effect BN6 draws alike is BN6's (Colonel's 0x47, his strike's: BN6's 0x60, list 4's 0x0A the same bytes as BN5's list 4's 0x2C, its animation and palette 0, tools/xrecipe.py's effect_twin), read so only where a spec's foes hold one of its ids (navis): BN5's engine and its other enemies spawn those BN5 ids for effects of their own (the Mettaur's 0x14), each compared as BN6's of its number. BN5's sea's splash (0x63, a non-Aqua object stepping onto sea: BN5_PANEL_ARRIVED) is BN6's 0xAC wherever it is spawned, the moved objects' copy (tools/bn5_objects.py, ENGINE_EFFECTS; src/emu/xsea.c spawns it).",
       "bn5_to_bn6": {
-        "0x57": "0x6C"
+        "0x57": "0x6C",
+        "0x63": "0xAC"
       },
       "navis": [
         {
@@ -114,7 +117,7 @@
           "name": "KnightMan",
           "bn5_to_bn6": {
             "0x02": "0xA2",
-            "0x14": "0xA3"
+            "0x14": "0xA0"
           }
         },
         {
@@ -126,9 +129,9 @@
           ],
           "name": "ShadowMan",
           "bn5_to_bn6": {
-            "0x02": "0xA4",
-            "0x17": "0xA5",
-            "0x18": "0xA6"
+            "0x02": "0xA2",
+            "0x17": "0xA3",
+            "0x18": "0xA4"
           }
         },
         {
@@ -140,8 +143,8 @@
           ],
           "name": "NumberMan",
           "bn5_to_bn6": {
-            "0x02": "0xA7",
-            "0x14": "0xA8"
+            "0x02": "0xA2",
+            "0x14": "0xA0"
           }
         },
         {
@@ -153,9 +156,9 @@
           ],
           "name": "TomahawkMan",
           "bn5_to_bn6": {
-            "0x05": "0xA9",
-            "0x45": "0xAA",
-            "0x46": "0xAB"
+            "0x05": "0xA5",
+            "0x45": "0xA6",
+            "0x46": "0xA7"
           }
         },
         {
@@ -168,12 +171,12 @@
           "name": "Colonel",
           "bn5_to_bn6": {
             "0x47": "0x60",
-            "0x48": "0xAC",
-            "0x49": "0xAD",
-            "0x4A": "0xAE",
-            "0x01": "0xAF",
-            "0x02": "0xB0",
-            "0x14": "0xB1"
+            "0x48": "0xA8",
+            "0x49": "0xA9",
+            "0x4A": "0xAA",
+            "0x01": "0xAB",
+            "0x02": "0xA2",
+            "0x14": "0xA0"
           }
         }
       ]
@@ -203,7 +206,7 @@
       ]
     },
     "renderer": {
-      "why": "Each frame the sprite renderer hands each object it draws a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and a palette slot (+0x15's high nibble) from the slots taken before it; a frame or palette already loaded this frame is given its place or slot again. The code is the same in both games, but what each draws (MegaMan's own sprite, his flash and sparks, BN6's own effects, a native) differs, so the numbers do. A family object's place and slot are read as their rank among those the family's objects drawn that frame take: the family's own draw order and sharing, compared; what else is drawn among them is no part of the family's. One not drawn (its +0x00 bit 0x02 clear, or its cache, +0x24, clear: the renderer passed it over, NumberMan's companion while visible) keeps the place it was last drawn at, so it keeps that rank; one whose place moved undrawn is compared as it is; one never drawn holds its slot's last occupant's places (its spawn clears its record short of them), read as none. Slot 15 (none taken) stays. The frames the family draws are compared from its sprite's own data (+0x1C, +0x20) and its cache (+0x24), so its tile counts are. The same places of what is not the family's are masked (the renderer's slots, the renderer's palette slot).",
+      "why": "Each frame the sprite renderer hands each object it draws a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and a palette slot (+0x15's high nibble) from the slots taken before it; a frame or palette already loaded this frame is given its place or slot again. The code is the same in both games, but what each draws (MegaMan's own sprite, his flash and sparks, BN6's own effects, a native) differs, so the numbers do. A family object's place and slot are read as their rank among those the family's objects drawn that frame take: the family's own draw order and sharing, compared; what else is drawn among them is no part of the family's. One not drawn (its +0x00 bit 0x02 clear, or its cache, +0x24, clear: the renderer passed it over, NumberMan's companion while visible) keeps the place it was last drawn at, so it keeps that rank; one whose place moved undrawn is compared as it is; one never drawn holds its slot's last occupant's places (its spawn clears its record short of them), read as none. Slot 15 (none taken) stays. The frames the family draws are compared from its sprite's own data (+0x1C, +0x20) and its cache (+0x24), so its tile counts are. The same places of what is not the family's are masked (the renderer's slots, the renderer's palette slot). A family object whose place (or slot) in BN5 is one an object not the family's draws that frame (the renderer keeps a frame or palette already loaded where it is: the Dark Soul's buster's arm and muzzle, 3:0x03 and 3:0x06, the same art as BN5's MegaMan's own, which BN6's MegaMan draws from BN6's) is ranked in neither game, read as shared in both (tools/xdiff_masks.py, SHARED).",
       "evidence": [
         "the renderer: BN5 0x081C7F26-0x081C804C and BN6 0x081D64BE-0x081D65E4 (the IWRAM renderer's ROM copies), the same code but for their literal pools",
         "the tile place: BN5 0x081C7FF4-0x081C7FFC / BN6 0x081D658C-0x081D6594, the running count's value stored and the frame's tiles added to it (BN6 0x081D6562-0x081D6566, 0x081D6590-0x081D6594); a frame already copied this frame is given its place again (found at BN6 0x081D66A8-0x081D66C6, stored at 0x081D65B8); a sprite not drawn keeps its old place, its cache cleared (BN6 0x081D653A-0x081D6544)",
@@ -220,7 +223,7 @@
       ]
     },
     "action": {
-      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both.",
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both. A foe's attack family (CurAction from 0x10, run from each game's table of families) is the same number in both where BN6's family of that number is BN5's (the step 0x10, which the Dark Soul's moves take, 0x0800F280 / 0x080116F6), and BN5's family F that BN6 has none of, moved with the Navi that runs it, BN6's 0x50 + F in the grown table (families; src/emu/xnavi_recipe.h, XN_FAMILY_OF): the Navis' buster, BN5's 0x16, as 0x66.",
       "megaman": {
         "6": "8",
         "0x1A": "0x1C",
@@ -228,12 +231,18 @@
       },
       "t3_types": [
         "0x4B"
-      ]
+      ],
+      "families": {
+        "0x16": "0x66"
+      }
     },
     "sound": {
-      "why": "A sound is compared by its song number: the music player it plays on is its song table entry's, each game's own (song 0x6A, MegaMan's buster's, is BN5's player 22 and BN6's player 0; the reticle's 0xAE player 4 in both).",
+      "why": "A sound is compared by its song number: the music player it plays on is its song table entry's, each game's own (song 0x6A, MegaMan's buster's, is BN5's player 22 and BN6's player 0; the reticle's 0xAE player 4 in both). A song each game plays on another player (players_apart: 0x6A, the buster's, which BN5 plays for MegaMan's buster and the Navis' alike and BN6 for MegaMan's, the Dark Soul's taking BN6's: tools/bn5_navi_twins.py, SOUNDS_AS_BN6) begins or not as its own player there is free (BN5's player 22 busy with MegaMan's charged shot's 0x6B, BN6's player 0 free): asked for in both games in a frame (their sound events, which are compared as the family's calls), it is left out of the songs begun.",
       "evidence": [
         "the song tables: BN5 0x08155BF4, BN6 0x08159F48 (RomLayout.song_table), 8 bytes a song: its header, its player"
+      ],
+      "players_apart": [
+        "0x6A"
       ]
     },
     "family_effects": {
@@ -252,13 +261,7 @@
         "0xA8",
         "0xA9",
         "0xAA",
-        "0xAB",
-        "0xAC",
-        "0xAD",
-        "0xAE",
-        "0xAF",
-        "0xB0",
-        "0xB1"
+        "0xAB"
       ]
     },
     "rom_tables": {
@@ -274,6 +277,18 @@
           "evidence": [
             "the obstacle's spawner BN5 0x080CF37E / BN6 0x080CF4EC: +0x60 = the table + 8 x +4 (BN5 0x080CF396-0x080CF3A0, the table's one literal 0x080CF43C / BN6 0x080CF504-0x080CF50E, 0x080CF5B0)",
             "the tables' 64 bytes the same in both but entry 1's HP (BN5 300, BN6 200, +2): the bytes after them are each game's own code and pools"
+          ]
+        },
+        {
+          "name": "the projectile kinds",
+          "bn5": "0x080C4800",
+          "bn6": "0x080C64E8",
+          "entry": 12,
+          "count": 15,
+          "why": "the third kind's type 0 (a shot: 0x0800D928 / 0x0800FAAC spawn it, 0x080C4ABC / 0x080C686E) keeps at +0x4C its kind's entry in this table (its kind its spawner's r0: the Navis' buster's 3, BN5's family 0x16): kinds 0-14 the same in both, each entry the same bytes but 4, 5 and 12 (BN6's own flags, +3), from 15 on each game's own kinds",
+          "evidence": [
+            "the table's word: BN5 0x080C4AD4, BN6 0x080C68F4; its element of kind 0 at +3, the differential's each= item in toadman_sea_elec (BN5 0x080C4803 / BN6 0x080C64EB)",
+            "the Dark Soul's buster's shot (darksoul_v1) points at kind 3: BN5 0x080C4824, BN6 0x080C650C, the entry's 12 bytes the same (0405000005ffff01ff000000)"
           ]
         }
       ]
@@ -432,7 +447,8 @@
         "BN5 +0x6C and +0x70 are BN5's own: what hit it, by the side of the hitter (+0x6C + 4 x the hitter's +5: BN5 0x080169C0-0x080169CA, 0x080169E8-0x080169F2, 0x08016A28-0x08016A34), ORed into +0x68 after each pair (BN5 0x080168C6-0x080168D4: the rule bn5_or); BN6's hit pass ORs into +0x70 itself (0x081D77DE-0x081D77E2, 0x081D7800-0x081D7804, 0x081D783A-0x081D7840)",
         "BN5 +0x18 and +0x19 are BN5's own: the hitter's +0x0E ORed into +0x18 + the hitter's +5 (BN5 0x08016A9E-0x08016AA8), both ORed into +0x0F after each pair (BN5 0x080168D6-0x080168E4: the rule bn5_or); BN6's hit pass ORs the hitter's +0x0E into +0x0F itself (0x081D78B2-0x081D78B8)",
         "BN6 +0x74-0x7B and +0x18, +0x19 are BN6's own, zero unless an element is in play: the hit's multiplier less one at +0x74 and +0x75 (0x081D78C8-0x081D78F4), the hitter's +0x19 ORed into +0x76 and +0x77 (0x081D7844-0x081D784C, 0x081D7BDA-0x081D7BE2), element 3's damage at +0x78 (0x081D78F6-0x081D7904); +0x19 is the high nibble of the object's element byte (the setup, 0x08019FC4-0x08019FC8), +0x18 read against it (0x081D78D4)",
-        "BN5 +0x1E is BN6 +0x1C, the paralysis' frames left (BN6_COLL_PARALYSIS): the flinch's status cleared, BN5 0x0801707C (strh r0,[r3,#0x1E]) / BN6 0x0801A284 (strh r0,[r3,#0x1C]), a LAYOUT pair (tools/bn5_navi_twins.py); in toadman_v1 MegaMan paralysed by ToadMan's note at t223, 0x59 in both"
+        "BN5 +0x1E is BN6 +0x1C, the paralysis' frames left (BN6_COLL_PARALYSIS): the flinch's status cleared, BN5 0x0801707C (strh r0,[r3,#0x1E]) / BN6 0x0801A284 (strh r0,[r3,#0x1C]), a LAYOUT pair (tools/bn5_navi_twins.py); in toadman_v1 MegaMan paralysed by ToadMan's note at t223, 0x59 in both",
+        "BN5 +0x22 and +0x24 are BN6 +0x20 and +0x22: the timers of the blind (flag 0x2000) and the held (0x4000, bn6f's OBJECT_FLAGS_IMMOBILIZED), counted down and their flags cleared at 0 by the same steps, BN5 0x0800CC0C-0x0800CC1C and 0x0800CC32 / BN6 0x0800E8E2-0x0800E8F2 and 0x0800E908; BN5's sea holds a non-Aqua object stepping onto it there (BN5 0x0800CDA2: strh r0,[r1,#0x24], xsea.c's BN6_COLL_IMMOBILE): toadman_sea at t211"
       ],
       "segments": [
         [
@@ -454,6 +470,11 @@
           30,
           28,
           2
+        ],
+        [
+          34,
+          32,
+          4
         ],
         [
           38,
@@ -536,6 +557,26 @@
           "the readers: BN5 0x08016BBC / BN6 0x0801A0BA (alliance x 4 + region x 8 into the table, its one literal at BN5 0x08016C00 / BN6 0x0801A0D0); the setup's stores BN5 0x0801678A, 0x080167A6 / BN6 0x08019FE8, 0x0801A004",
           "the tables' ends: code follows at BN5 0x080165E4 and BN6 0x08019F44 (the same routine in both, push {r4,r6,r7,lr})"
         ]
+      }
+    },
+    "sea": {
+      "why": "BN5's sea's submerge (bn5.h: BN5_SEA_TEST, BN5_SEA_SUBMERGE, BN5_HIDE_STEP): BN5 keeps it in the object's collision data, its +0x2C 0xFFFF while it stands on sea with its traits' bit 0x20, its flag 0x80000000, and the marker that follows it at +0x50. BN6's engine has no submerge (its bubble took the flag and the timer, +0x50 its invisibility's marker), and the port keeps it apart (src/emu/xsea.c, RAM_SEA: the mask of the submerged collision data's own bits, BN6_COLL_INDEX_BIT, then their markers by that bit's index; the trace's apart bytes). BN5's read as the port keeps it: the timer and the flag out of the record, the flag compared with the mask, the marker with the port's by what each names.",
+      "evidence": [
+        "BN5 0x08017048-0x0801704A: ldr r0,=0xFFFF; strh r0,[r7,#0x2C] on sea (type 0xA) with [AIData +0x48] & 0x20 (0x0800E0B0), else 0 (0x0801704E); from 0x0800DF54, which sets flag 0x80000000 (0x0800DF7C-0x0800DF7E, object_setFlag) where +0x2C holds 0xFFFF and none of 0x00500C00, else clears it",
+        "BN5 0x0800DEB0-0x0800DED0: flags & 0x80000004 clear the object's visible bit and spawn the marker (0x080E4D1E) into +0x50 (str r0,[r4,r7], r7 0x50) where none, else end it (0x080E4D36) and clear +0x50",
+        "BN6 0x0800E820-0x0800E832: +0x2C its bubble's timer, counted down, flag 0x80000000 cleared with it at 0 (0x0801A15C); its hide step 0x0801012C (+0x50 its marker) called by nothing",
+        "toadman_sp at t657: ToadMan SP under on the sea his own attack made, BN5's +0x2C 0xFFFF, flag 0x80000000 and its marker at +0x50, the port's mask and marker the same"
+      ],
+      "bn5": {
+        "timer": "0x2C",
+        "flags": "0x3C",
+        "flag": "0x80000000",
+        "marker": "0x50"
+      },
+      "bn6": {
+        "index_bit": "0x44",
+        "mask": "0x00",
+        "markers": "0x04"
       }
     },
     "panel": {
@@ -796,7 +837,8 @@
         "native's",
         "engine",
         "panels",
-        "spark"
+        "spark",
+        "chip's"
       ]
     },
     {
@@ -817,7 +859,8 @@
         "native's",
         "engine",
         "panels",
-        "spark"
+        "spark",
+        "chip's"
       ]
     },
     {
@@ -838,6 +881,24 @@
       "evidence": [
         "his sprite state's data pointer: BN5 0x081C9804, BN6 0x081D8004 at t1; his frame (+0x01) runs 1 against 4 from t101 in spec cangard_v1",
         "the charge glow's sprite: BN5's list 5 entry at 0x08032B2C, BN6's at 0x08032134 (each naming its own data)"
+      ]
+    },
+    {
+      "name": "a chip's own art",
+      "part": "obj",
+      "sprite_offsets": [
+        "0x01-0x03",
+        "0x05-0x07",
+        "0x0A-0x14",
+        "0x16-0x17",
+        "0x1C-0x37"
+      ],
+      "why": "A chip a moved Navi uses (the Dark Soul's chip AI: setAttack2 with the chip's family from its record, the Dark Soul's record of BN6's chip id with BN6's family, src/emu/xnavi_dark.c, as MegaMan's chips run: src/emu/xnavi_bn5.c, CURACTIONS) runs that family's code of each game's own, which draws the chip's art of each game's own (the Cannon's image, BN5's and BN6's sprite lists' own): its objects' sprite states compared as MegaMan's chips' are, their places, damage and timing as the family's.",
+      "evidence": [
+        "darksoul_cannon: the Dark Soul's Cannon (family 0x14 in both) at t78, its image (the first kind's type 5, kind 0) drawn from BN5's sprite at 0x082EE71C and BN6's at 0x082F2F3C, BN6's spawned by BN6's own type 5 (its family's code, 0x080EC2xx, no moved code on the stack)"
+      ],
+      "whose": [
+        "chip's"
       ]
     },
     {

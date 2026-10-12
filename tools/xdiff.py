@@ -72,8 +72,9 @@ numbers. A reference spec ("kind": "reference") is BN5's battle alone,
 MegaMan's timeline held to what BN5 is known to do, until BN6's engine
 can fight it. A spec's "expect" checks both traces against what BN5's
 battle is known to do; its "both" writes into both games' copies alike
-(an element given), its "mm_element" gives MegaMan one as the fight
-begins. --poke and --call break BN6's copy after the install (an
+(an element given), its "each" into each game at its own place
+(BN5's:BN6's:value:size, a table both engines hold), its "mm_element"
+gives MegaMan one as the fight begins. --poke and --call break BN6's copy after the install (an
 immediate, a call's veneer; a poke in RAM after the boot, over the code
 the game copied there): the comparator's own test, which --mutations
 runs from tests/xdiff/mutations.json, each break required to FAIL its
@@ -167,6 +168,10 @@ def megaman_items(spec):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
         parts.append('safe=1')
+    if spec.get('dslist'):
+        parts.append('dslist=1')
+    if spec.get('dschips'):
+        parts.append('dschips=' + ','.join(spec['dschips']))
     if spec.get('kind') == 'reference':
         parts.append('game=bn5')
     if spec.get('kind') == 'engine':
@@ -189,6 +194,7 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
     if 'mm_element' in spec:
         parts.append(f'mm_element={spec["mm_element"]}')
     parts += [f'both={b}' for b in spec.get('both', [])]
+    parts += [f'each={b}' for b in spec.get('each', [])]
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 

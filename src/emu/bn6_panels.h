@@ -77,6 +77,44 @@
 #define BN6_COLL_POISON       0x8C        /* u16, poison's damage, a point each 7 frames (the sea's on a Fire object, as xpanels.c brings it) */
 #define BN6_COLL_FIRE_DAMAGE  0x96        /* u16, the frame's Fire damage (+0x94 to +0x9C the five elements', summed at 0x0801A916) */
 
+/* BN5's sea's submerge (bn5.h, BN5_SEA_SUBMERGE), which BN6's engine dropped
+ * (its bubble took the collision data's flag and timer), made again by
+ * xsea.c: where its steps go in BN6's status step of MegaMan and the Navis
+ * (0x0801AF44, BN5's 0x08017BD0), and the tests of an object hidden that
+ * BN5 makes of the invisible and the submerged alike */
+#define BN6_STATUS_SEA        0x0801B132u /* bl 0x08014326, after the invisibility's timer (0x08010162, BN5's 0x0800DEE0): where BN5's sea's
+                                             test runs (BN5_SEA_SUBMERGE, at 0x08017D7C) */
+#define BN6_STATUS_HIDE       0x0801B16Eu /* bl 0x0801A166, after the sprite's steps: where BN5 hides what is hidden (BN5_HIDE_STEP, at
+                                             0x08017DB4); BN6's own of it, 0x0801012C, which hides the invisible, is called by nothing */
+#define BN6_COLL_MADE         0x080198CAu /* str r0,[r5,#0x54]: a collision data made (0x08019892), r0 it; BN5's clears its submerge with it */
+#define BN6_COLL_INDEX_BIT    0x44        /* a collision data's own bit of the 32 (bn6f CollisionIndexBit, set as the pool is made, 0x08019884) */
+#define BN6_HIT_HIDDEN        0x0300724Au /* the hit gate's test of an invisible target (IWRAM, the image at 0x081D774A): movs r4,#4; tst r0,r4;
+                                             beq; ldr r4,=0x1008; tst r3,r4; bne; pop (r0 the target's flags, r3 the attack's +0x30, r6 the
+                                             attack's collision data, r7 the target's), */
+#define BN6_HIT_HIDDEN_SPAN   14          /* ... its bytes, to the gate's next test (0x03007258); */
+#define BN6_HIT_HIDDEN2       0x0300728Cu /* ... and its test the other way (the image at 0x081D778C): movs r4,#4; tst r2,r4; beq; ldr r3,
+                                             [r7,#0x30]; ldr r4,=0x1008; tst r3,r4; bne; pop (r2 the first's flags, r6 its collision data), */
+#define BN6_HIT_HIDDEN2_SPAN  16          /* ... its bytes, to the next (0x0300729C) */
+#define BN6_SHOW_AFTER_HIDDEN 0x080E2728u /* tst r0,r1 (r1 4, r5 the object): an attack's end showing its user unless invisible (BN5's
+                                             0x080E153E tests 0x80000004) */
+#define BN6_CHILD_HIDDEN      0x080C643Cu /* tst r0,r1 (r1 4, r5 the parent): the first kind's 0x5E hidden with its parent (BN5's 0x080C4782
+                                             tests 0x80000004) */
+#define BN6_AI_TRAITS         0x48        /* an AI's data's traits (u32; BN5's at the same place), */
+#define BN6_TRAIT_SUBMERGES   0x20        /* ... goes under on sea (BN5's: ToadMan's, ToadSoul's) */
+#define BN6_SEA_KEPT_UP       0x00500C00u /* the object's flags (BN6_COLL_FLAGS) that keep it up (BN5's 0x0800DF76) */
+#define BN6_OBJ_VISIBLE       0x02        /* an object's +0: drawn this frame */
+/* ... and what BN5's sea does to a non-Aqua object stepping onto it, which
+ * BN6's twin of the step (BN5_PANEL_ARRIVED) lacks: holds it */
+#define BN6_PANEL_ARRIVED     0x0801A36Au /* what the panel an object comes to does (BN5's 0x08017156): the conveyors, ice's slide; */
+#define BN6_ARRIVED_TYPE      0x0801A3CEu /* ... cmp r1,#7, the ice's test (r1 the panel's type, r5 the object, r7 its collision data; r0 and
+                                             r4 free): where BN5 tests its sea (0xA) too, */
+#define BN6_ARRIVED_END       0x0801A3D8u /* ... its pop {r4,r7,pc} */
+#define BN6_COLL_IMMOBILE     0x22        /* u16 frames left held (BN5's +0x24), BN6_OBJ_IMMOBILIZED cleared at 0 (0x0800E8E2) */
+#define BN6_OBJ_IMMOBILIZED   0x4000      /* BN6_COLL_FLAGS: it cannot move (bn6f OBJECT_FLAGS_IMMOBILIZED) */
+#define BN6_OBJ_FLOATS        0x20        /* BN6_COLL_FLAGS: it floats (bn6f OBJECT_FLAGS_FLOATSHOE) */
+#define BN6_SEA_HOLD          0x14        /* the frames BN5's sea holds it (movs r0,#0x14 at 0x080171D4) */
+#define BN6_OBJ_HIDDEN        0x04        /* BN6_COLL_FLAGS: invisible (BN5's 0x80000004 the invisible and the submerged) */
+
 /* How the panels are drawn: each frame (0x0800C5E0, from the battle's
  * three loops) the panel palettes' animations step (0x0800C192), then
  * each panel's 5x3 tiles go to BG2's map from the tile table by its
