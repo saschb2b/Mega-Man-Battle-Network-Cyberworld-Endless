@@ -25,9 +25,12 @@ SIZE = {'T1': 0xD8, 'T3': 0xD8, 'T4': 0xC8}       # an object's record, from its
 SPRITE = {'T1': 0x90, 'T3': 0x90, 'T4': 0x80}     # its sprite's state in it (object offsets)
 SPRITE_DATA = (0x18, 0x1C, 0x20, 0x24)            # ... the words that point into the sprite's own data
 AI_SIZE, COLL_ROOM, PANEL_ROOM, PANELS = 0x100, 0xA8, 0x24, 40
-# MegaMan's side's player block (src/dev/xdiff.c, trace version 3): his battle NaviStats, the word of what was used this
-# battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes
+# MegaMan's side's player block (src/dev/xdiff.c, trace version 4): his battle NaviStats, the word of what was used this
+# battle (BN5's Souls, BN6's Crosses), his pending form's 16 bytes, the Souls' state in BN6's engine (BN6_SOULS' 0x80
+# bytes, BN5's zero), the Custom screen's element 0xB (UNITE: BN5_CUSTOM_UNITE, BN6_CUSTOM_UNITE)
 PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING, NAVI_FORM = 0x00, 0x64, 0x68, 0x2C
+PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
+SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
 AI_INDEX = 0x01
@@ -165,6 +168,11 @@ class Canon:
         self.native_attacks, self.native_effects = set(), set()
         self.family_effects = {int(x, 0) for x in m['family_effects']['bn6']}
         self.form = num(m['form']['bn5_to_bn6']) if 'form' in m else {}
+        # (MegaMan's NameID in a form of BN6's: its base plus the form, legit.json's name_id; his role is MegaMan's whatever his form)
+        forms = m['name_id'].get('megaman_forms', {})
+        self.form_base = int(forms.get('base', '0'), 0)
+        self.form_names = {self.form_base + f for f in range(1, int(forms.get('forms', '0'), 0) + 1)}
+        self.souls = m.get('souls', {})
         self.power_attack = num(m['power_attack']['bn5_to_bn6']) if 'power_attack' in m else {}
         self.sprite_pairs = m['sprites'] if 'sprites' in m else None
         self._sprites = None
@@ -188,7 +196,17 @@ class Canon:
         return self.name_id.get(v, v) if game == 5 else v
 
     def is_megaman(self, game, nid):
-        return nid in (self.megaman.values() if game == 6 else self.megaman.keys())
+        return nid in (set(self.megaman.values()) | self.form_names if game == 6 else self.megaman.keys())
+
+    def megaman_role(self, game, nid):
+        """MegaMan's role whatever his form: BN6's NameID in a form (0x1AB + the form) read as his own"""
+        return next(iter(self.megaman.values())) if game == 6 and nid in self.form_names else nid
+
+    def megaman_nid(self, form5):
+        """BN5's MegaMan's NameID (0x180 in any form) as BN6 writes his: 0x1A0, or the form's (0x1AB + the form, the form
+        BN6's for BN5's: a Soul behind the proxy)"""
+        form = self.form_of(5, form5)
+        return self.form_base + form if form and self.form_base else next(iter(self.megaman.values()))
 
     def action(self, game, megaman, v):
         """CurAction as BN6 numbers it: a virus's 0-5 the same, BN5's 6 BN6's 8, 7 on two up; MegaMan's by his map"""
@@ -215,7 +233,7 @@ def identity(game, o, canon):
     """what an object is, in BN6's numbers: an enemy by its id, an attack by its type, an effect by its type, and an
     effect object (the fourth kind's type 0) by its effect id too, so one spawned with the wrong id is another role"""
     if o.kind == 'T1':
-        return canon.nid(game, o.o16(OBJ_NAME_ID))
+        return canon.megaman_role(game, canon.nid(game, o.o16(OBJ_NAME_ID)))
     if o.kind == 'T3':
         return canon.t3(game, o.o8(OBJ_TYPE))
     if o.o8(OBJ_TYPE) == 0:
@@ -490,6 +508,8 @@ def obj_cells(fa, fb, oa, ob):
                 a = canon.fx(5, a)
             elif off in (OBJ_NAME_ID, OBJ_NAME_ID + 1) and kind == 'T1':
                 na, nb = canon.nid(5, oa.o16(OBJ_NAME_ID)), ob.o16(OBJ_NAME_ID)
+                if mm and fa.fr.get('player'):   # (his NameID by his form, BN5's read as BN6 writes it in that form)
+                    na = canon.megaman_nid(fa.fr['player'][PLAYER_NAVI + NAVI_FORM])
                 a, b = (na & 0xFF, nb & 0xFF) if off == OBJ_NAME_ID else (na >> 8, nb >> 8)
             if a != b:
                 out.append(('obj', off, a, b))
@@ -506,15 +526,16 @@ def ai_cells(fa, fb, oa, ob):
     if oa.ai is None:
         return out
     megaman = oa.kind == 'T1' and fa.canon.is_megaman(5, oa.o16(OBJ_NAME_ID))
+    ai5 = soul_ai_read(fa.canon, oa.ai) if megaman else oa.ai
     for w in range(0, AI_SIZE, 4):
-        wa, wb = u32(oa.ai, w), u32(ob.ai, w)
+        wa, wb = u32(ai5, w), u32(ob.ai, w)
         view = word_view(fa, fb, wa, wb, None)
         if view is not None:
             if view[0] != view[1]:
                 out.append(('ai', w, view[0], view[1]))
             continue
         for k in range(4):
-            a, b = oa.ai[w + k], ob.ai[w + k]
+            a, b = ai5[w + k], ob.ai[w + k]
             if w + k == AI_INDEX:
                 a = fa.canon.ai_index.get(a, a)
             elif megaman and w + k in LOADOUT and a != 0xFF:
@@ -605,6 +626,60 @@ def panel_cells(fa, fb, t):
     return out
 
 
+# ---- a Soul's state: BN5's in MegaMan's AI data and its form byte, BN6's engine's in BN6_SOULS (legit.json, maps, souls) ----
+
+def soul_ai(canon):
+    """BN5's AI data's places of a Soul's state: {field: (offset, size)}"""
+    return {k: (int(v[0], 0), v[1]) for k, v in canon.souls.get('bn5_ai', {}).items()}
+
+
+def soul_ai_read(canon, ai):
+    """BN5's MegaMan's AI data read as BN6's: its Soul's state is BN5's alone there (BN6 keeps it in BN6_SOULS, its own
+    bytes at those places being its own), so it reads 0 there and is compared through soul_cells"""
+    out = bytearray(ai)
+    for off, size in soul_ai(canon).values():
+        out[off:off + size] = bytes(size)
+    return bytes(out)
+
+
+def soul_view(canon, game, fr, ai):
+    """the Soul MegaMan is united with, as BN6_SOULS' side lays it out: {field: value} (BN5's from its form byte and his AI
+    data while it is a Soul, all 0 in none; BN6's from its block, side 0)"""
+    p = fr.get('player', b'')
+    if len(p) < PLAYER_UNITE:
+        return None
+    fields = canon.souls.get('bn6_side', {})
+    if game == 6:
+        side = p[PLAYER_SOULS:PLAYER_SOULS + SOULS_SIDE]
+        return {k: int.from_bytes(side[int(v[0], 0):int(v[0], 0) + v[1]], 'little') for k, v in fields.items()}
+    form = p[PLAYER_NAVI + NAVI_FORM]
+    view = {k: 0 for k in fields}
+    if form and ai is not None:
+        view['soul'] = form
+        for k, (off, size) in soul_ai(canon).items():
+            v = int.from_bytes(ai[off:off + size], 'little')
+            view[k] = 0 if v == (1 << 8 * size) - 1 and size > 1 else v   # (ColonelSoul's chip: BN5's 0xFFFF none, BN6's 0)
+    view['used'] = int.from_bytes(p[PLAYER_USED:PLAYER_USED + 4], 'little')
+    return view
+
+
+def soul_cells(fa, fb, ai5, ai6):
+    """A Soul's state in both games (BN5's own places, BN6's engine's block): each field the same, the used word BN5's
+    Souls' against the block's, BN6's Crosses' word none (BN5 has no Cross), and the Custom screen's element 0xB (UNITE)
+    byte for byte; each a difference of MegaMan's (role 'player')"""
+    canon, t = fa.canon, fa.fr['t']
+    va, vb = soul_view(canon, 5, fa.fr, ai5), soul_view(canon, 6, fb.fr, ai6)
+    if va is None or vb is None:
+        return []
+    out = [Diff(t, 'player', f'soul {k}', 0, va[k], vb[k]) for k in va if va[k] != vb.get(k)]
+    crosses = int.from_bytes(fb.fr['player'][PLAYER_USED:PLAYER_USED + 4], 'little')
+    if crosses:
+        out.append(Diff(t, 'player', 'crosses used', PLAYER_USED, 0, crosses))
+    ua, ub = fa.fr['player'][PLAYER_UNITE:PLAYER_UNITE + 12], fb.fr['player'][PLAYER_UNITE:PLAYER_UNITE + 12]
+    out += [Diff(t, 'player', 'unite', k, ua[k], ub[k]) for k in range(len(ua)) if ua[k] != ub[k]]
+    return out
+
+
 def player_cells(fa, fb):
     """MegaMan's side's player block, where both traces hold one: every byte the same (his form and his pending form in
     BN6's numbers, the pending record's object word as what it names, BN5's bytes read in BN6's terms where a translation
@@ -617,7 +692,9 @@ def player_cells(fa, fb):
         for k, v in fa.fr['player_over'].items():
             pa[k] = v
     out = []
-    for off in range(0, min(len(pa), len(pb))):
+    for off in range(0, min(len(pa), len(pb), PLAYER_SOULS)):
+        if PLAYER_USED <= off < PLAYER_USED + 4:
+            continue   # (BN5's Souls used, BN6's Crosses: soul_cells)
         if PENDING_OBJECT <= off < PENDING_OBJECT + 4:
             if off == PENDING_OBJECT:
                 va, vb = fa.ptr(u32(pa, off)), fb.ptr(u32(pb, off))
@@ -661,4 +738,7 @@ def frame_diffs(fa, fb):
         out.append(Diff(t, 'battle', 'run order', 0, oa, ob))
     out += panel_cells(fa, fb, t)
     out += player_cells(fa, fb)
+    mm = [next((o.ai for o in f.fr['objs'] if o.kind == 'T1' and f.canon.is_megaman(f.game, o.o16(OBJ_NAME_ID))), None) for f in (fa, fb)]
+    if fb.fr.get('player') and len(fb.fr['player']) >= PLAYER_UNITE:
+        out += soul_cells(fa, fb, mm[0], mm[1])
     return out

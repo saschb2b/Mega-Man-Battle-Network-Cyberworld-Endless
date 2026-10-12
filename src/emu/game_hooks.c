@@ -13,6 +13,8 @@
 #include "protoman_cross.h"
 #include "scripts.h"
 #include "soulproxy.h"
+#include "souls.h"
+#include "soulunite.h"
 
 void game_hooks_install(void) {
 	gamecall_install();
@@ -21,8 +23,13 @@ void game_hooks_install(void) {
 	chat_marks_install();
 	pet_install();
 	pet_text_install();
-	/* (a test's: the Souls' proxy form, --dev soulproxy) */
-	if (dev.soulproxy) soulproxy_install(dev.proxybreak);
+	/* (a test's: the Souls' proxy form, --dev soulproxy, and the Souls on it
+	 * in BN6's battles, which --dev souls=MASK asks for too: the run's Souls
+	 * reach it as each battle begins, souls.c) */
+	if (dev.soulproxy || souls_dev_mask) {
+		bool proxy = soulproxy_install(dev.proxybreak);
+		if (proxy) soulunite_install(dev.unitebreak);
+	}
 }
 
 void game_hooks_after_boot(void) {

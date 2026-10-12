@@ -769,11 +769,12 @@ the next.
   pending form) compared in BN6's numbers, and the stop rule flipped: a
   difference of his fails the spec. `megaman_plain` (the buster, a
   Cannon, steps) passes; `soul_knight_ref`, BN5's own KnightSoul from
-  UNITE to its fourth turn, is traced in BN5 alone until BN6's engine can
-  unite. What it found: BN5 raises the mood of a side that lands a hit,
-  BN6 never (read as a translation until BN5's DarkChip rule is ported),
-  and BN5's plain charged shot fires five frames sooner than BN6's
-  (docs/ROM_DATA.md, MegaMan as the differential's subject).
+  UNITE to its fourth turn, was traced in BN5 alone until BN6's engine
+  could unite (S2 made it the two-game `soul_knight`). What it found:
+  BN5 raises the mood of a side that lands a hit, BN6 never (read as a
+  translation until BN5's DarkChip rule is ported), and BN5's plain
+  charged shot fires five frames sooner than BN6's (docs/ROM_DATA.md,
+  MegaMan as the differential's subject).
 - **S1, the proxy form** (done; docs/DEVTOOLS.md, The proxy form): the
   Souls will stand behind form 8, Falzar's TenguCross, which Gregar keeps
   in every table by form and never offers. `--dev soulproxy` makes it an
@@ -787,16 +788,60 @@ the next.
   bonus, `0x0800EFE6`, behind HeatCross's hooked compare), and from form
   8 Beast Out is TenguBeast's (0x14): the Souls grey Beast Out while one
   is united (docs/ROM_DATA.md, MegaMan's forms).
-- **Next**: a Soul's state and UNITE on BN6's Custom screen (UNITE in
-  Beast Out's place by BN5's rule, the record's form the proxy, the Soul's
-  turns counted, no weakness break for a Soul), its look (BN5's sprites,
-  its image in the summon's place), its charged shots and abilities, its
-  passives, Chaos Unison, and BN5's DarkChip rule (the mood's gains, the
-  worried hand). Each Soul gets a differential spec against BN5's own
-  battle as its parts come. Their state in RAM goes where the engine's
-  plan sets it aside (`0x0203FF70`-`0x0203FFEF`), their code and data in
-  `EMU_FREE` + `0x480000` to `+0x4C0000` (docs/EMULATION.md); neither is
-  used yet.
+- **S2, UNITE and a Soul's life** (done, behind `--dev soulproxy` or
+  `souls=MASK` until the track is whole; docs/DEVTOOLS.md, The proxy
+  form, and The differential; docs/ROM_DATA.md, UNITE on BN6's Custom
+  screen): UNITE on BN6's Custom screen by BN5's rule, and a Soul's life
+  as BN5 runs it, each Soul behind the proxy (its look and abilities
+  HeatCross's until S3 and S4). Element 0xB under OK is BN6's Beast Out
+  emblem and BN5's UNITE button in one place (One net: the design's finer
+  calls): UNITE while the last chip picked lights a held Soul (BN5's check:
+  the chip's kind as BN5 has it, which for BN6's chips is BN5's chip of the
+  same name, as the guest battles cross them, or BN6's own kind by name; a
+  DarkChip of it for Chaos Unison; each once a battle), the emblem by
+  BN6's own rule otherwise where Beast Out stands, a grey UNITE where only
+  UNITE stands. UNITE stands while the run holds a Soul and MegaMan is
+  neither worried nor dark by BN5's mood (his battle mood with BN5's
+  thresholds, a battle opened as worried as his HP says: the part of
+  BN5's mood UNITE needs; the rest, the gains and the DarkChip rule, is
+  S7), nor beasted out. A on it runs BN5's own code for it, moved into
+  BN6's copy, which enters BN6's still-present mode 0x24 for a UNITE
+  chosen: the last pick given up, UNITE first among the picks, the Soul's
+  picture from BN5's ROM; B gives the chip back, as BN5's does; the chip
+  given up leaves the deck, as BN5's (BN6 does so for its emblem in a
+  link battle alone); OK commits the proxy form, the Soul's turns (3, 1
+  for Chaos Unison) and its used bit. The Soul takes MegaMan as he enters
+  the proxy, its turns count down as each Custom screen opens (BN5 counts
+  them there, in the step that opens the screen, before its window slides
+  in: its code and a frame's trace agree), and it ends as the turn after
+  its last starts: BN6 checks a form's end before its Custom screen as
+  well, for Beast Out, so the Soul's end waits for the turn's start after
+  the screen, the one check BN5 makes in a battle not linked. Another Soul
+  or a Cross chosen while one is united replaces it; Beast Out stays grey
+  while one is (from the proxy it would be TenguBeast's); no weakness
+  break for a Soul. The differential holds it to BN5's own battle frame
+  by frame: `soul_knight` (KnightSoul united at the first turn, its turns
+  3, 2, 1, 0, its end at t1564 in both engines), `soul_replace`
+  (KnightSoul then ToadSoul), `soul_grey` (UNITE grey for a chip of no
+  held Soul's kind) and `soul_chaos` (NumberSoul's Chaos Unison, one
+  turn); `soul_cross` and `soul_beast` hold BN6's alone (a Cross over a
+  Soul, Beast Out greyed); five mutations fail; and `tools/xproxy.py
+  --souls` finds BN6's own battle the same every byte with the Souls
+  installed and none held, the proxy HeatCross through their stubs.
+  What it found: the given-up chip's leaving the deck and the end's order
+  against the Custom screen both differ in BN6's code and are put right;
+  a turn's change takes BN6 four frames more than BN5 (its form check
+  before the screen), and a Soul's crossing six fewer than BN5's unison
+  (the proxy's summon), frames whose draws the differential explains.
+- **Next**: a Soul's look (BN5's sprites, its image in the summon's
+  place, its sound), its charged shots and abilities, its passives (a
+  ToadSoul's and a ShadowSoul's flags, NumberSoul's hand of ten),
+  Chaos Unison's charge, and BN5's DarkChip rule (the mood's gains, the
+  worried hand). Each part's masks in the differential (tests/xdiff/
+  legit.json, "until the Souls track's S3" to "S6") go as it comes.
+  Their state in RAM is the engine's plan's (`0x0203FF70`-`0x0203FFEF`,
+  `BN6_SOULS`), their code and data in `EMU_FREE` + `0x480000` to
+  `+0x4C0000` (docs/EMULATION.md).
 
 ## Status
 

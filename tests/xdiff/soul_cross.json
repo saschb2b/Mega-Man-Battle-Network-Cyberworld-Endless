@@ -1,0 +1,209 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "A Cross chosen while a Soul is united, BN6's engine alone (BN5 has no Cross; the Souls track's S2): KnightSoul united at the first turn (a deck of JustcOne J, UNITE), HeatCross chosen on the second Custom screen's CROSSSELECT (its flag E2 set): MegaMan leaves the proxy for HeatCross as the turn starts, the Soul gone (one form at a time), its used bit kept for the battle, HeatCross's used bit set.",
+ "kind": "engine",
+ "frames": 1000,
+ "flags6": [
+  "00E2"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "UP",
+    3
+   ],
+   [
+    "",
+    30
+   ],
+   [
+    "A",
+    3
+   ],
+   [
+    "",
+    90
+   ],
+   [
+    "A",
+    3
+   ],
+   [
+    "",
+    20
+   ],
+   [
+    "START",
+    3
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    3
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "form": [
+    [
+     1,
+     "0x08"
+    ],
+    [
+     523,
+     "0x08"
+    ],
+    [
+     524,
+     "0x01"
+    ],
+    [
+     1000,
+     "0x01"
+    ]
+   ],
+   "soul": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     523,
+     "0x0B"
+    ],
+    [
+     524,
+     "0x00"
+    ],
+    [
+     1000,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x800"
+    ],
+    [
+     1000,
+     "0x800"
+    ]
+   ],
+   "used": [
+    [
+     523,
+     "0x0"
+    ],
+    [
+     524,
+     "0x1"
+    ]
+   ]
+  }
+ },
+ "expect_why": "One form at a time (docs/MULTIROM.md, One net: the design): a Cross chosen while a Soul is united is committed as BN6 commits a Cross (0x0802937A: its form, its used bit 0 for HeatCross), and the turn's crossing leaves form 8 through its removal entry (src/emu/soullife.c), which clears the Soul."
+}

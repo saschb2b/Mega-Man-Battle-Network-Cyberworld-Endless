@@ -49,6 +49,7 @@
 #include "padmap.h"
 #include "buttons.h"
 #include "xchips.h"
+#include "soulkinds.h"
 #include "xnavi.h"
 #include "xsong.h"
 #include "debug.h"
@@ -3252,6 +3253,19 @@ static void test_xchips(void) {
 	CHECK(xchips_fit(cannon, cannon6, nofolder, 2, 1) == 2, "xchips: a folder of no codes leaves it (%d)", xchips_fit(cannon, cannon6, nofolder, 2, 1));
 }
 
+/* BN6's chips as BN5's UNITE reads them (src/emu/soulkinds.c; the Souls
+ * track's S2): BN6's eleven kinds as BN5 numbers the kind of their name
+ * (BN6 has neither Recovery nor Invisible; none is BN5's 12), and nothing
+ * before both ROMs are read. */
+static void test_soulkinds(void) {
+	static const int as5[11] = { 0, 1, 2, 3, 5, 6, 8, 9, 10, 11, SOULKIND_NONE };   /* (Fire .. Break, none) */
+	for (int k = 0; k < 11; ++k)
+		CHECK(soulkinds_bn5(k) == as5[k], "soulkinds: BN6's kind %d as BN5's %d (%d)", k, as5[k], soulkinds_bn5(k));
+	CHECK(soulkinds_bn5(11) == SOULKIND_NONE && soulkinds_bn5(12) == SOULKIND_NONE && soulkinds_bn5(-1) == SOULKIND_NONE,
+		"soulkinds: BN6's Program Advances and others (11, 12) as none");
+	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
+}
+
 /* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
  * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
  * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
@@ -3883,6 +3897,7 @@ int main(void) {
 	test_all_star();
 	test_beast();
 	test_xchips();
+	test_soulkinds();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();

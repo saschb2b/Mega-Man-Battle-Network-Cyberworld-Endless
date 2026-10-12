@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""xproxy.py [--seed S] [--story] [--quiet] [--no-run] [--mutations]: the Souls' proxy form's
+"""xproxy.py [--seed S] [--story] [--quiet] [--no-run] [--mutations] [--souls]: the Souls' proxy form's
 self-differential (issue #82, the Souls track's S1; docs/MULTIROM.md,
 Transplanted Souls; docs/DEVTOOLS.md, The proxy form).
 
@@ -41,8 +41,24 @@ reported, not counted). Needs
 the ROM (local only), copied into .build/xproxy/rom alone (a layer of
 BN5's would fight its battles in BN5's engine). Exits 0 when the proxy
 is HeatCross frame for frame and tengu is not.
+
+--souls runs the same four with the Souls installed over the proxy (the
+Souls track's S2: UNITE on the Custom screen and a Soul's life, src/emu/
+soulunite.c and soullife.c, which --dev soulproxy installs where BN5's ROM
+is read beside BN6's), no Soul held: BN5's ROM beside BN6's in
+.build/xproxy-souls/rom, the seed one whose layer is BN6's own (15: a
+seed of a dressed layer fights its battles in BN5's engine, and the
+checks say so), each install's line required. The same verdicts then say
+that the Souls' install with no Soul held leaves BN6's battle alone every
+byte (native against installed: the Custom screen, the turn's change, a
+weakness hit), and that the proxy plays as HeatCross through a Soul's
+life's two stubs, which its overlay entries 8 then point at (installed
+against proxy). With --mutations, each break of the proxy must still
+part it from HeatCross with the Souls over it (where a break leaves its
+tables not HeatCross's, the Souls' install refuses to stand on it).
 """
 import argparse
+import hashlib
 import os
 import shutil
 import subprocess
@@ -53,6 +69,9 @@ import xcontrol as X  # noqa: E402  (its trace reader, the image's places and th
 
 ROOT = X.ROOT
 WORK = os.path.join(ROOT, '.build', 'xproxy')
+BN5_SHA1 = '5f472f78d8de2df01d5039e045c043cb40969a39'   # Team Colonel (USA), as tools/xdiff.py finds it
+SOULS_SEED = 15                                          # --souls: a seed whose layer of --net-biome 0 BN5 does not dress
+SOULS_LINE = "soulunite: UNITE on the Custom screen, the Souls' life on the proxy form"
 
 # (src/emu/bn6.h, bn6_forms.h)
 BATTLE_NAVI, FORM_AT = 0x0203CE00, 0x2C          # BN6_BATTLE_NAVI, BN6_BATTLE_FORM's offset
@@ -108,18 +127,22 @@ def run(name, dev, cross, seed, quiet):
     boot = os.path.join(WORK, 'boot-3.state')
     if os.path.exists(boot):
         shutil.copy(boot, os.path.join(data, 'boot-3.state'))
-    shots = ','.join(f'{t}:/src/.build/xproxy/{name}/f{t}.bmp' for t in (1250, 1330, 1400, 1520, 1700, 1900, 2100))
-    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/.build/xproxy/{name}', '--scene', 'emu',
+    sub = os.path.basename(WORK)
+    shots = ','.join(f'{t}:/src/.build/{sub}/{name}/f{t}.bmp' for t in (1250, 1330, 1400, 1520, 1700, 1900, 2100))
+    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/.build/{sub}/{name}', '--scene', 'emu',
            '--net-biome', '0', '--seed', str(seed), '--dev', dev, '--frames', '4400', '--input', keys(cross), '--shot', shots]
     env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'), CYBERWORLD_BTRACE='1')
     env.pop('CYBERWORLD_XDRAWS', None)
     out = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
-    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('soulproxy', 'cross', 'foes'))]
+    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('soulproxy', 'cross', 'foes', 'soulunite', 'soullife'))]
     if not quiet:
         for l in lines:
             print(f'  {name}: {l}')
     if out.returncode:
         sys.exit(f'{name}: the run failed\n' + out.stderr[-2000:])
+    # (a break of --mutations that leaves the proxy's tables not HeatCross's has the Souls refuse it: soullife.c checks them first)
+    if SOULS and 'soulproxy' in dev and 'proxybreak' not in dev and SOULS_LINE not in lines:
+        sys.exit(f'{name}: the Souls were not installed over the proxy (no "{SOULS_LINE}")')
     if not os.path.exists(boot) and os.path.exists(os.path.join(data, 'boot-3.state')):
         shutil.copy(os.path.join(data, 'boot-3.state'), boot)
     return os.path.join(data, 'btrace.bin')
@@ -264,6 +287,20 @@ def mutations(a, installed):
     return caught == reached
 
 
+SOULS = False
+
+
+def find_bn5():
+    """BN5 Team Colonel's ROM beside BN6's (by its SHA-1), for --souls"""
+    for name in sorted(os.listdir(X.ROM_DIR)):
+        path = os.path.join(X.ROM_DIR, name)
+        if name.lower().endswith('.gba') and os.path.isfile(path):
+            with open(path, 'rb') as f:
+                if hashlib.sha1(f.read()).hexdigest() == BN5_SHA1:
+                    return path
+    sys.exit(f'no BN5 Team Colonel ROM in {X.ROM_DIR} (--souls needs it)')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--seed', type=int, default=1)
@@ -271,11 +308,21 @@ def main():
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--no-run', action='store_true', help='compare the traces of the last runs')
     ap.add_argument('--mutations', action='store_true', help='also each part of the install left out: each must part the proxy from HeatCross')
+    ap.add_argument('--souls', action='store_true', help='the Souls installed over the proxy (BN5\'s ROM beside BN6\'s), no Soul held')
     a = ap.parse_args()
+    global WORK, SOULS
+    SOULS = a.souls
+    if a.souls:
+        WORK = os.path.join(ROOT, '.build', 'xproxy-souls')
+        if a.seed == 1:
+            a.seed = SOULS_SEED
     os.makedirs(os.path.join(WORK, 'rom'), exist_ok=True)
     rom = os.path.join(WORK, 'rom', 'bn6.gba')
     if not os.path.exists(rom):
         shutil.copy(X.find_rom(), rom)
+    rom5 = os.path.join(WORK, 'rom', 'bn5.gba')
+    if a.souls and not os.path.exists(rom5):
+        shutil.copy(find_bn5(), rom5)
     if not a.no_run:
         subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
     base = 'hp=1000,folder=20,onehit'

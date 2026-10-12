@@ -151,6 +151,27 @@
 #define BN5_CUSTOM_UNITE  0x02036C94u /* the Custom screen's UNITE (its element 0xB, 12 bytes): +0 2 where it stands, +5 the Soul the last chip picked
                                        * unites, +6 1 for Chaos Unison, +7 0 ready, 1 grey, 2 chosen */
 #define BN5_BATTLE_SOUL   (BN5_BATTLE_NAVI + 0x2C) /* u8, MegaMan's side's: the Soul he is united with (its Navi's AI index), 0 none */
+/* UNITE as BN6's engine takes it over (src/emu/soulunite.c, the Souls track's
+ * S2; docs/ROM_DATA.md, UNITE on BN6's Custom screen): its rule, read here and
+ * done there, and what of it is copied from the player's ROM */
+#define BN5_UNITE_STAND   0x08023C8Cu /* the rule it stands by as the Custom screen opens: its Navi 0, neither worried (BN5_MOOD_WORRIED) nor
+                                       * dark (0), Double Soul learned; then grey (+7 1) until a pick lights it */
+#define BN5_MOOD_WORRIED  0x40        /* BN5_BATTLE_MOOD: worried from 1 to this, dark at 0 (its emotion getter 0x08012738: 1 worried, 5 dark) */
+#define BN5_UNITE_A       0x08024976u /* A on UNITE, BN5_UNITE_A_SIZE bytes: lit, sound 0x81 and the Custom screen's mode 0x24; grey, 0x69. Moved into
+                                       * BN6's copy whole, its two calls to BN5_PLAY_SOUND aimed at BN6_PLAY_SOUND */
+#define BN5_UNITE_A_SIZE  0x24
+#define BN5_UNITE_A_CRC   0xF347D9BBu /* (CRC32 of its bytes in the player's ROM: the move checks it first) */
+#define BN5_UNITE_COMMIT  0x08024FFA  /* OK's commit of UNITE (from 0x08024DF0, the pick of type 2): turns 3 + NaviStats +0x32 (1-9), 1 for Chaos
+                                       * Unison; the record (0x080123E8: the Soul, chaos, turns); the used bit (BN5_SOULS_USED) */
+#define BN5_UNITE_TAKE_BACK 0x08024D48u /* B with UNITE the last pick: the chip given up back in its place (element 0xB's +4), UNITE lit (+7 0) */
+#define BN5_TURN_COUNT    0x08012484u /* a side's Soul one turn less (its AIData +0x0F, unless 0 or 0xFF; its NaviStats +0x29 0), called for both sides
+                                       * (0x0800778C, 0x08007796) right after the Custom screen opens (0x0802CA68), in the step 0x08007774 */
+#define BN5_TURN_END      0x08012464u /* as a turn starts with no form pending (0x08011E02): a form and no turns left end it (0x08012432) */
+#define BN5_UNITE_ART_TILES 0x08024574u /* the word naming UNITE's art in the chip's window: 0x087335A4, BN5_UNITE_ART_SIZE bytes (0x08024544) */
+#define BN5_UNITE_ART_PALS  0x08024578u /* ... its palettes: 0x08736004, 0x20 bytes each by element 0xB's +6 (0 a Soul, 1 Chaos Unison) */
+#define BN5_UNITE_ART_SIZE  0x540
+#define BN5_SOUL_PICTURES 0x08023358u /* mode 0x24's word naming the Souls' pictures: 0x0874B2BC, 0x80 bytes by Soul 1-12, 0xD Chaos Unison */
+#define BN5_SOUL_PICTURE_PAL 0x08023350u /* ... and their palette: 0x0874BDBC, 0x20 bytes */
 /* Team Colonel's Navis, by AI index: their Souls are the six its MegaMan
  * unites with (BN5_SOUL_FLAGS) */
 enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TOMAHAWKMAN, BN5_NAVI_KNIGHTMAN, BN5_NAVI_TOADMAN };

@@ -10,7 +10,10 @@
  * record's from the battle's start); MegaMan's side's player block (his
  * battle NaviStats, BN6_BATTLE_NAVI_SIZE bytes, BN5's padded; the word of
  * what was used this battle, BN5_SOULS_USED or BN6_CROSSES_USED; his side's
- * pending form, BN5_SOUL_PENDING's or BN6_CROSS_PENDING's 16 bytes); then
+ * pending form, BN5_SOUL_PENDING's or BN6_CROSS_PENDING's 16 bytes; the
+ * Souls' state in BN6's engine, BN6_SOULS' SOULS_SIZE bytes, BN5's zero;
+ * the Custom screen's element 0xB, UNITE, BN6_CUSTOM_UNITE's or
+ * BN5_CUSTOM_UNITE's 12 bytes, as its last screen left it); then
  * each object of the first kind (its slot,
  * whether its AI's data and collision data are read, its 0xD8 bytes from
  * its list node on (BN6_OBJECT_NODE before it), its AI's 0x100 and its
@@ -38,6 +41,8 @@
 #include "foes.h"
 #include "guest.h"
 #include "rom.h"
+#include "soulproxy.h"
+#include "soulunite.h"
 #include "thumb_reloc.h"
 #include "xdiff_events.h"
 #include "xvirus.h"
@@ -50,9 +55,10 @@
 #define OPENING   3000    /* the frames a battle may take to its fight */
 #define MOVED_MAX 32
 #define MAX_TWINS 16
-#define TRACE_VERSION 3
+#define TRACE_VERSION 4
 #define USED_SIZE 4   /* the word of what was used this battle (BN5_SOULS_USED, BN6_CROSSES_USED) */
-#define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE)   /* the player block */
+#define SOULS_SIZE BN6_SOULS_SIZE   /* the Souls' state in BN6's engine (BN6_SOULS: both sides', the rest of its range) */
+#define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE + SOULS_SIZE + BN6_ELEMENT_SIZE)   /* the player block */
 #define MAX_FLAGS 16
 #define MAX_SCRIPTS 8
 #define MAX_SCRIPT_STEPS 32
@@ -73,6 +79,10 @@ typedef struct {
 	int flags[2][MAX_FLAGS], nflags[2];        /* event flags set before the battle: [0] BN5's, [1] BN6's */
 	uint16_t folder[2][BN6_FOLDER_ENTRIES];    /* its first folder, each game's (0 none given) */
 	int nfolder[2];
+	uint16_t deck[2][BN6_FOLDER_ENTRIES];      /* each game's battle deck in this order, written as its battle runs (0 none given) */
+	int ndeck[2];
+	unsigned souls6;                           /* the Souls BN6's MegaMan holds, the Souls installed in its engine (soulunite.h); 0 none */
+	int unitebreak;                            /* (the comparator's own test) UNITE's rule broken (SOULUNITE_BREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
 	CustomScript scripts[MAX_SCRIPTS];
@@ -172,6 +182,13 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->folder[k][i] = (uint16_t)got[i % n];
 		return (s->nfolder[k] = n) > 0;
 	}
+	if (!strcmp(name, "deck5") || !strcmp(name, "deck6")) {
+		int n = hex_list(v, got, BN6_FOLDER_ENTRIES);
+		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->deck[k][i] = (uint16_t)got[i % n];
+		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;
+	}
+	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
+	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "cust5") || !strcmp(name, "cust6")) return script_parse(s, 5 + k, v);
 	if (!strcmp(name, "buster"))
 		return sscanf(v, "%d:%d:%d", &s->buster[0], &s->buster[1], &s->buster[2]) == 3 && s->buster[0] >= 0 && s->buster[0] <= BN5_BUSTER_MAX &&
@@ -263,11 +280,13 @@ typedef struct {
 	int nt1;
 	uint32_t panels, panel_size, list, list_end, coll_size, mplays;
 	uint32_t navi, navi_size, used, pending, side;   /* MegaMan's player block's places (BN6_BATTLE_NAVI's or BN5's) */
+	uint32_t souls, unite, deck;   /* ... BN6_SOULS (0: none, BN5's), the Custom screen's element 0xB, the battle's deck */
 	const uint8_t *rom;
 	uint32_t songs;   /* (its song table, a ROM offset) */
 	uint8_t (*rd8)(uint32_t);
 	uint32_t (*rd32)(uint32_t);
 	void (*wr32)(uint32_t, uint32_t);
+	void (*wr16)(uint32_t, uint16_t);
 	void (*frame)(uint32_t);
 } View;
 
@@ -287,7 +306,7 @@ typedef struct {
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
 	int nbegun, custom, screen, traced;   /* (custom: the frames since this Custom screen's window first read open, -1 none; screen: its number) */
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
-	bool seeded, fought, done;
+	bool seeded, fought, done, decked;
 } Side;
 
 static void w32(Side *g, uint32_t v) {
@@ -368,6 +387,8 @@ static void player_out(Side *g) {
 	bytes_out(g, v->navi + side * v->navi_size, v->navi_size, BN6_BATTLE_NAVI_SIZE);
 	w32(g, v->rd32(v->used));
 	bytes_out(g, v->pending + side * BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE, BN6_CROSS_PENDING_SIZE);
+	bytes_out(g, v->souls, SOULS_SIZE, SOULS_SIZE);
+	bytes_out(g, v->unite, BN6_ELEMENT_SIZE, BN6_ELEMENT_SIZE);
 }
 
 /* the objects in the order they run, their addresses into `order`: how many */
@@ -462,6 +483,18 @@ static void keep_safe(const View *v) {
 	if (in_ewram(coll)) v->wr32(coll + BN6_COLL_FLAGS, v->rd32(coll + BN6_COLL_FLAGS) | BN6_OBJ_INVULNERABLE);
 }
 
+/* (deck5=, deck6=) the battle's deck in the spec's order, as the battle's
+ * phase first reads the Custom screen's (each game makes and shuffles its
+ * deck as the first turn begins, both by then) and before its window opens
+ * and takes a pick: each game's hands its own chips in the same places,
+ * whatever each game's shuffle drew (the hand's chips are its elements'
+ * pointers into the deck, BN6_ELEMENT_DECK) */
+static void deck_put(Side *g, const Spec *s) {
+	int k = g->v.game == 5 ? 0 : 1;
+	g->decked = true;
+	for (int i = 0; i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
+}
+
 /* One frame of a battle: each Custom screen passed by its keys (custom_keys)
  * from its window's opening; the fight's keys by its timer; both RNG words
  * written after its first frame; a new value of its timer while it fights
@@ -481,6 +514,7 @@ static bool step(Side *g, const Spec *s) {
 	}
 	if (battle && phase == BN6_PHASE_FIGHT) keys |= keys_at(s, t);
 	if (battle && s->safe) keep_safe(v);
+	if (custom && !g->decked) deck_put(g, s);
 	if (g->log) xd_frame(g->log, g->frame, t, battle, g->seeded);
 	v->frame(keys);
 	++g->frame;
@@ -504,15 +538,23 @@ static bool step(Side *g, const Spec *s) {
 	return traced;
 }
 
-/* Both battles, each to its fight's first frame, then a frame of each in
- * turn; with `follow`, BN6's RNG words written from BN5's after each frame
- * both traced at the same time (rng=follow) */
+/* Both battles, each to its fight's first frame, then by the battle's
+ * clock: a frame of each in turn while their timers read the same, the one
+ * whose timer has gone on waiting while the other's still holds (a turn's
+ * change, a unison's crossing: each game takes frames of its own there), so
+ * each game's frames of a timer value run with the other's at it too, the
+ * reference's first (the replay finds its draws made); with `follow`, BN6's
+ * RNG words written from BN5's once both have traced a timer value
+ * (rng=follow) */
 static void fight(Side *a, Side *b, const Spec *s) {
 	while (a && !a->seeded && !a->done) step(a, s);
 	while (b && !b->seeded && !b->done) step(b, s);
+	uint32_t followed = 0;
 	while ((a && !a->done) || (b && !b->done)) {
-		bool ta = a && step(a, s), tb = b && step(b, s);
-		if (s->follow && ta && tb && a->last == b->last) {
+		bool both = a && b && !a->done && !b->done, go_a = a && (!both || a->last <= b->last), go_b = b && (!both || b->last <= a->last);
+		bool ta = go_a && step(a, s), tb = go_b && step(b, s);
+		if (s->follow && both && (ta || tb) && a->last == b->last && a->last != followed) {
+			followed = a->last;
 			b->v.wr32(b->v.rng[0], a->v.rd32(a->v.rng[0]));
 			b->v.wr32(b->v.rng[1], a->v.rd32(a->v.rng[1]));
 		}
@@ -635,6 +677,12 @@ static void subject_setup(const Spec *s) {
 static bool subject(Side *g, const Spec *s) {
 	if (!emu_init(R.data, ROM_SIZE)) return false;
 	xvirus_install(XVIRUS_FAMILIES);
+	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
+	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak))) {
+		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
+		return false;
+	}
+	soulunite_held(s->souls6);
 	pokes_put(s);
 	emu_encounters_install();
 	emu_boot();
@@ -659,8 +707,9 @@ static bool subject(Side *g, const Spec *s) {
 		.rng = { BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, .t1 = BN6_T1_OBJECTS, .t3 = BN6_T3_OBJECTS, .t4 = BN6_T4_OBJECTS, .nt1 = BN6_T1_COUNT,
 		.panels = BN6_FIELD_PANELS, .panel_size = BN6_PANEL_SIZE, .list = BN6_OBJECT_LIST, .list_end = BN6_OBJECT_LIST_END,
 		.coll_size = BN6_COLL_SIZE, .mplays = BN6_MPLAYS, .navi = BN6_BATTLE_NAVI, .navi_size = BN6_BATTLE_NAVI_SIZE, .used = BN6_CROSSES_USED,
-		.pending = BN6_CROSS_PENDING, .side = BN6_BATTLE_SIDE, .rom = R.data, .songs = R.layout->song_table,
-		.rd8 = emu_read8, .rd32 = emu_read32, .wr32 = emu_write32, .frame = bn6_frame };
+		.pending = BN6_CROSS_PENDING, .side = BN6_BATTLE_SIDE, .souls = BN6_SOULS, .unite = BN6_CUSTOM_UNITE, .deck = BN6_BATTLE_DECK,
+		.rom = R.data, .songs = R.layout->song_table, .rd8 = emu_read8, .rd32 = emu_read32, .wr32 = emu_write32, .wr16 = bn6_wr16,
+		.frame = bn6_frame };
 	return open_out(g, s, "bn6");
 }
 
@@ -707,8 +756,9 @@ static bool reference(Side *g, const Spec *s) {
 		.rng = { BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, .t1 = BN5_T1_OBJECTS, .t3 = BN5_T3_OBJECTS, .t4 = BN5_T4_OBJECTS, .nt1 = BN5_T1_COUNT,
 		.panels = BN5_FIELD_PANELS, .panel_size = BN5_PANEL_SIZE, .list = BN5_OBJECT_LIST, .list_end = BN5_OBJECT_LIST_END,
 		.coll_size = BN5_COLL_SIZE, .mplays = BN5_MPLAYS, .navi = BN5_BATTLE_NAVI, .navi_size = BN5_BATTLE_NAVI_SIZE, .used = BN5_SOULS_USED,
-		.pending = BN5_SOUL_PENDING, .side = BN5_BATTLE_SIDE, .rom = x->data, .songs = x->layout->song_table,
-		.rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32, .frame = bn5_frame };
+		.pending = BN5_SOUL_PENDING, .side = BN5_BATTLE_SIDE, .souls = 0, .unite = BN5_CUSTOM_UNITE, .deck = BN5_BATTLE_DECK,
+		.rom = x->data, .songs = x->layout->song_table, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
+		.wr16 = guest_write16, .frame = bn5_frame };
 	return open_out(g, s, "bn5");
 }
 

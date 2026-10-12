@@ -34,7 +34,9 @@ int emu_encounter_slot(void);
 int emu_encounter_record(uint32_t settings);
 /* The battle StartBattle was given (EV_BATTLE_START's r0), told between
  * frames: a guardian's pays zenny where his row has his chip, which his
- * Guardian Data gives. */
+ * Guardian Data gives; and the run's Souls handed to BN6's engine for it
+ * (soulunite_held, for UNITE on its Custom screen where the Souls stand in
+ * BN6's engine: --dev soulproxy or souls=MASK until the Souls track is done). */
 void emu_encounter_started(uint32_t settings);
 /* The zenny a guardian's battle pays where his reward row holds his chip,
  * which his Guardian Data gives: an Unlocker's price in his act */

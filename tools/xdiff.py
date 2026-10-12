@@ -88,7 +88,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, SPRITE, PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING,  # noqa: E402
-                        NAVI_FORM, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom)
+                        PLAYER_UNITE, NAVI_FORM, Canon, Frame, assign_roles, frame_diffs, read_trace, role_name, rom, soul_view)
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 
@@ -150,14 +150,22 @@ def megaman_items(spec):
             parts.append(f'flags{g}=' + ','.join(spec[f'flags{g}']))
         if spec.get(f'folder{g}'):
             parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
+        if spec.get(f'deck{g}'):
+            parts.append(f'deck{g}=' + ','.join(spec[f'deck{g}']))
         for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    if spec.get('souls6'):
+        parts.append(f'souls6={spec["souls6"]}')
+    if spec.get('unitebreak'):
+        parts.append(f'unitebreak={spec["unitebreak"]}')
     if spec.get('buster'):
         parts.append(f'buster={spec["buster"]}')
     if spec.get('safe'):
         parts.append('safe=1')
     if spec.get('kind') == 'reference':
         parts.append('game=bn5')
+    if spec.get('kind') == 'engine':
+        parts.append('game=bn6')
     return parts
 
 
@@ -215,6 +223,27 @@ def reference_only(name, spec, a, legit, canon):
     return verdict, 'reference'
 
 
+def engine_only(name, spec, a, legit, canon):
+    """A spec of what BN6's engine does that BN5's has no twin of (kind "engine": a Cross or Beast Out beside a Soul):
+    BN6's battle alone, MegaMan's timeline reported and checked against what it is to do, in BN6's numbers"""
+    path = os.path.join(WORK, 'runs', f'{name}.bn6')
+    if not a.no_run:
+        run(name, spec, [], [], a.quiet, ())
+    tb = read_trace(path)
+    assign_roles(tb, canon)
+    attribute(tb, canon)
+    lines, bad = player_timeline(tb, canon), check_player(tb, canon, spec.get('expect', {}))
+    print('\n'.join(lines))
+    sounds = {int(x, 0) for x in spec.get('expect', {}).get('sounds', [])}
+    heard = {snd for fr in tb['frames'] for _, snd in fr['sounds']}
+    bad += [f'BN6: sound {x:#x} never begun' for x in sorted(sounds - heard)]
+    for line in bad:
+        print(f'  EXPECT {line}')
+    verdict = 'FAIL' if bad else 'PASS'
+    print(f'{name}: {verdict} (engine: BN6\'s battle alone, held to what it is to do)')
+    return verdict, 'engine'
+
+
 def story(trace, canon, upto=None):
     last, lines = None, []
     game = trace['game']
@@ -240,7 +269,8 @@ def story(trace, canon, upto=None):
 # ---- MegaMan's own timeline (a MegaMan spec's, a reference-only spec's) ----
 
 # what of MegaMan a frame shows (BN5's numbers in BN5's trace): each read from his object (o), its AI's data (ai), his
-# side's player block (p)
+# side's player block (p); a Soul's (soul, its turns, its chaos, the Souls used) as both games keep it (xdiff_snap.soul_view:
+# the same numbers in both), the Custom screen's element 0xB as its last screen left it (unite: its +7, 0 lit, 1 grey, 2 chosen)
 MEGAMAN_READS = {
     'action': lambda o, ai, p: o.o8(OBJ_ACTION),
     'hp': lambda o, ai, p: o.o16(0x24),
@@ -252,7 +282,10 @@ MEGAMAN_READS = {
     'loadout': lambda o, ai, p: ai[4:9].hex() + ai[0x11:0x12].hex() if ai else None,
     'sprite': lambda o, ai, p: o.o32(SPRITE['T1'] + 0x18) - 4 if o.o32(SPRITE['T1'] + 0x18) else 0,
     'palette': lambda o, ai, p: o.o8(SPRITE['T1'] + 4),
+    'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
+    'unite stands': lambda o, ai, p: p[PLAYER_UNITE] if p and len(p) > PLAYER_UNITE else None,
 }
+SOUL_READS = ('soul', 'chaos', 'soul turns', 'souls used')   # (from soul_view, both games: its 'turns' and 'used' named apart)
 
 
 def megaman_frames(trace, canon):
@@ -261,11 +294,15 @@ def megaman_frames(trace, canon):
     for fr in trace['frames']:
         o = next((x for x in fr['objs'] if x.kind == 'T1' and canon.is_megaman(trace['game'], x.o16(OBJ_NAME_ID))), None)
         if o is not None:
-            out.append((fr['t'], {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}))
+            v = {k: f(o, o.ai, fr.get('player')) for k, f in MEGAMAN_READS.items()}
+            soul = soul_view(canon, trace['game'], fr, o.ai) or {}
+            v.update({'soul': soul.get('soul'), 'chaos': soul.get('chaos'), 'soul turns': soul.get('turns'), 'souls used': soul.get('used')})
+            out.append((fr['t'], v))
     return out
 
 
-def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'turns', 'used', 'loadout', 'sprite', 'palette', 'mood', 'hp')):
+def player_timeline(trace, canon, keys=('action', 'form', 'pending', 'soul', 'chaos', 'soul turns', 'souls used', 'unite', 'loadout', 'sprite',
+                                        'palette', 'mood', 'hp')):
     """MegaMan's timeline in his game's own numbers: a line each time what `keys` name changes"""
     lines, last = [f' BN{trace["game"]}\'s MegaMan:'], None
     for t, v in megaman_frames(trace, canon):
@@ -498,15 +535,18 @@ def survey(spec, ta, tb, legit, canon):
     return [f'  {n:5d}x {k[0]} {k[1]}+{k[2]:#04x}{f" [{k[3]}]" if k[3] else ""}: first {d}' for k, (n, d) in sorted(seen.items(), key=lambda x: x[1][1].t)]
 
 
-def one(name, a, legit, canon, pokes=(), calls=(), run_name=None):
-    """one spec run and compared: its verdict and kind"""
+def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
+    """one spec run and compared: its verdict and kind (extra: items put in its spec, a mutation's dev break)"""
     with open(os.path.join(SPECS, f'{name}.json')) as f:
         spec = json.load(f)
+    spec.update(extra or {})
     canon.natives = {int(x, 0) for x in spec.get('natives', [])}
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
     if spec.get('kind') == 'reference':
         return reference_only(run_name or name, spec, a, legit, canon)
+    if spec.get('kind') == 'engine':
+        return engine_only(run_name or name, spec, a, legit, canon)
     run_name = run_name or name
     paths = [os.path.join(WORK, 'runs', f'{run_name}.{g}') for g in ('bn5', 'bn6')] if a.no_run else \
         run(run_name, spec, list(pokes), list(calls), a.quiet, twins_check(legit))
@@ -566,7 +606,8 @@ def main():
         caught = 0
         for k, m in enumerate(muts):
             print(f'== mutation {k + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}')
-            verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}')
+            extra = {'unitebreak': m['unitebreak']} if 'unitebreak' in m else None
+            verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}', extra)
             caught += verdict == 'FAIL'
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
         print(f'{caught} of {len(muts)} mutations caught')

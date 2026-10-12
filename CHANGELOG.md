@@ -15,6 +15,20 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+- **UNITE on BN6's Custom screen, and a Soul's life as BN5 runs it
+  (issue #82).** Behind a developer switch until the Souls are whole,
+  BN5's Souls unite in BN6's battles: the emblem under OK becomes BN5's
+  UNITE while the last chip picked lights a Soul the run holds (by the
+  chip's kind as BN5 has it), shows BN5's art and the Soul's picture, and
+  OK takes MegaMan into the Soul for three turns (Chaos Unison's one),
+  counted down as each Custom screen opens and ended as the turn after
+  its last starts, as BN5 does; another Soul or a Cross replaces it, and
+  Beast Out stays grey while it lasts. The Soul still looks and fights as
+  HeatCross for now. The frame-by-frame comparison with BN5's own battle
+  holds it there: KnightSoul's whole life, a Soul replacing a Soul, UNITE
+  grey for a chip of no Soul's kind and NumberSoul's Chaos Unison behave
+  as in BN5, and five deliberate breaks of the rule are each caught.
+  Battles without the switch play as before.
 - **MegaMan checked against BN5's own, and a place for BN5's Souls in
   BN6's engine (issue #82).** The frame-by-frame comparison with BN5's
   own battle can now make MegaMan its subject: both games set up alike (a
