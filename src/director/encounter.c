@@ -28,7 +28,7 @@ int encounter_backdrop = -1;
  * it. A battle the game has rolled but not yet set up reads the record it
  * was handed (rewritten in place, a re-roll in that gap gave the battle
  * another's MegaMan panel and field). */
-#define RECORDS     (EMU_FREE + 0x200)
+#define RECORDS     FREE_RECORDS
 #define RECORD_SIZE 0x80
 #define BG_MAP_OWN  0xFF   /* a record's background (+4): the map's own, as BN6's story records name it (Bass's, the Cybeast's) */
 static int slot;

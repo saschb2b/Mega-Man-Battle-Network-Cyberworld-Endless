@@ -49,6 +49,7 @@
 #include "padmap.h"
 #include "buttons.h"
 #include "chips.h"
+#include "claims.h"
 #include "xchips.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
@@ -62,6 +63,8 @@
 #include "battle_rng.h"
 #include "bn5.h"
 #include "bn6.h"
+#include "xpanels.h"
+#include "xpanels_look.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
@@ -3145,6 +3148,116 @@ static void test_xvirus_static(void) {
 	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
 }
 
+/* The free space's plan (free_space.h; docs/EMULATION.md, Memory the
+ * engine writes and BN6's RAM): every writer's region in order and apart,
+ * inside the ROM copy past the game's 8 MB; each of issue #82's installers'
+ * own layout inside its region (the families' room and the families, the
+ * chip registry, the lava and sea); BN6's RAM the plan gives them, its parts
+ * in order and apart, the pack's extension and the dispatch's side tables
+ * where the plan puts them */
+typedef struct { const char *what; uint32_t at, end; } Region;
+
+/* each region not empty, inside [lo, hi), and past the one before it */
+static void regions_apart(const char *plan, const Region *r, int n, uint32_t lo, uint32_t hi) {
+	for (int i = 0; i < n; ++i)
+		CHECK(r[i].at < r[i].end && r[i].at >= lo && r[i].end <= hi && (!i || r[i].at >= r[i - 1].end),
+			"%s: %s %08x-%08x is empty, outside %08x-%08x or over %s", plan, r[i].what, (unsigned)r[i].at, (unsigned)r[i].end, (unsigned)lo,
+			(unsigned)hi, i ? r[i - 1].what : "nothing");
+}
+
+static void test_free_space(void) {
+	static const Region rom[] = {
+		{ "a direct warp", FREE_WARP, FREE_CALL_RETURN }, { "a game call's return", FREE_CALL_RETURN, FREE_NO_MYSTERY },
+		{ "the empty Mystery Data list", FREE_NO_MYSTERY, FREE_RECORDS }, { "the battle records", FREE_RECORDS, FREE_RECORDS_END },
+		{ "Rush's gaps", FREE_RUSH, FREE_RUSH_END }, { "handler 3's records", FREE_BLOCKERS, FREE_BLOCKERS_END },
+		{ "the layer's warp list", FREE_WARP_LIST, FREE_LAYER }, { "the layers' data", FREE_LAYER, FREE_TILE_MAP },
+		{ "the tile map", FREE_TILE_MAP, FREE_COORDS }, { "the coordinate data", FREE_COORDS, FREE_TOWN_TILE_MAP },
+		{ "the town's tile map", FREE_TOWN_TILE_MAP, FREE_TOWN_COORDS }, { "the town's coordinate data", FREE_TOWN_COORDS, FREE_TOWN },
+		{ "the town's data", FREE_TOWN, FREE_LAN_HP }, { "Lan's HP's and house's", FREE_LAN_HP, FREE_TALK },
+		{ "the conversations", FREE_TALK, FREE_LABEL }, { "the map-name label", FREE_LABEL, FREE_PET_LABEL },
+		{ "the PET's PLACE", FREE_PET_LABEL, FREE_PET_TEXT }, { "the key items' names", FREE_PET_TEXT, FREE_PET_DESCS },
+		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
+		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
+		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
+		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
+		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },
+		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
+		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
+		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
+		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_TAIL },
+	};
+	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
+	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
+	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
+	const Region room[] = {
+		{ "the per-family tables", XV_GROWN, XV_GROWN + XV_TABLES * XV_STEP }, { "the ice sizes", XV_ICE, XV_ICE + XV_AIS },
+		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "the sprite lists", XV_LISTS, XV_LISTS + XV_LISTS_GROWN * XV_STEP },
+		{ "the effects", XV_EFFECTS, XV_EFFECTS + 4u * XV_EFFECTS_MAX }, { "the kinds' types", XV_TYPES, XV_TYPES + 3 * XV_STEP },
+		{ "the enemy ids", XV_IDS_AT, XV_IDS_AT + 3u * XV_IDS }, { "the reward rows", XV_ROWS, XV_ROWS + 2u * ENEMY_DROPS * XV_IDS },
+		{ "the ids' names", XV_NAMES, XV_NAMES + XV_NAMES_ROOM },
+		{ "MOVED", XV_MOVED_TABLES, XV_MOVED_TABLES + XV_DISPATCH_KINDS * XV_STEP },
+		{ "TWIN", XV_TWIN_TABLES, XV_TWIN_TABLES + XV_DISPATCH_KINDS * 0x100u }, { "the dispatch's code", XV_STUBS, XV_STUBS_END },
+	};
+	CHECK(XV_AT == FREE_VIRUS_ROOM, "free space: the families' room at %08x", (unsigned)XV_AT);
+	regions_apart("the families' room", room, (int)(sizeof room / sizeof *room), FREE_VIRUS_ROOM, FREE_FAMILIES);
+	const Region fam[] = {
+		{ "the homes", XV_HOMES, XV_HOMES + XV_FAMILIES * XV_HOME_SIZE }, { "the code", XV_CODE, XV_ART }, { "the art", XV_ART, XV_END },
+	};
+	regions_apart("the families", fam, (int)(sizeof fam / sizeof *fam), FREE_FAMILIES, FREE_CHIPS);
+	const Region chips[] = {
+		{ "the records", CHIPS_RECORDS, CHIPS_RECORDS + CHIPS_IDS * BN6_CHIP_RECORD_SIZE },
+		{ "the names, 0-255", CHIPS_NAMES0, CHIPS_NAMES0 + CHIPS_NAMES_ROOM }, { "the names, 256-511", CHIPS_NAMES1, CHIPS_NAMES1 + CHIPS_NAMES_ROOM },
+		{ "the descriptions, 0-255", CHIPS_DESCS0, CHIPS_DESCS0 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 256-511", CHIPS_DESCS1, CHIPS_DESCS1 + CHIPS_DESCS_ROOM },
+		{ "the routines", CHIPS_CODE, CHIPS_CODE + 0x400u }, { "the art", CHIPS_ART, CHIPS_FREE_END },
+	};
+	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
+	regions_apart("the chip registry", chips, (int)(sizeof chips / sizeof *chips), FREE_CHIPS, FREE_SOULS);
+	const Region panels[] = {
+		{ "the panels' flags", XP_FLAGS, XP_FLAGS + 16 * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
+		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE },
+	};
+	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
+	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
+	/* (BN6's RAM: persistent, then per battle) */
+	static const Region ram[] = {
+		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },
+		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
+		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_BATTLE_SPARE },
+		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
+	};
+	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
+	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
+		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
+	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
+		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
+}
+
+/* The installers' claims (claims.h): an installer's own bytes again, its
+ * neighbour's and a gap between pass; another's over them, nested or after,
+ * and a hook outside any installer on an installer's bytes are told */
+static void test_claims(void) {
+	claims_reset();
+	claims_quiet(true);
+	claims_begin("a");
+	CHECK(claims_note(0x08900000u, 0x10) && claims_note(0x08900010u, 4) && claims_note(0x08900004u, 2), "claims: an installer's own bytes refused");
+	claims_begin("b");
+	CHECK(claims_note(0x08900020u, 8), "claims: a neighbour's bytes past the first's refused");
+	CHECK(!claims_note(0x08900012u, 4), "claims: a nested installer over the first's bytes not told");
+	claims_end();
+	CHECK(claims_note(0x08900040u, 4) && claims_who(0x08900040u) && !strcmp(claims_who(0x08900040u), "a"),
+		"claims: the first installer's writes after the nested one's not its own");
+	claims_end();
+	CHECK(claims_note(0x08900000u, 0x100), "claims: a write outside any installer claimed");
+	CHECK(!claims_hook(0x08900003u) && claims_hook(0x08900030u), "claims: a hook on an installer's bytes not told, or one beside them refused");
+	CHECK(claims_who(0x08900030u) && !strcmp(claims_who(0x08900030u), CLAIMS_HOOKS) && !claims_who(0x08900038u),
+		"claims: whose a byte is (%s)", claims_who(0x08900030u) ? claims_who(0x08900030u) : "no one's");
+	CHECK(claims_overlaps() == 2, "claims: %d overlaps told, not 2", claims_overlaps());
+	claims_reset();
+	claims_quiet(false);
+	CHECK(!claims_overlaps() && !claims_who(0x08900000u), "claims: not forgotten");
+}
+
 /* The second-level dispatch's numbers and code (issue #82,
  * xvirus_dispatch.h): BN5's seven spawners each to the dispatch's of its
  * kind and place, BN6's own and any other routine to none; its tables and
@@ -4360,6 +4473,8 @@ int main(void) {
 	test_xvirus_recipe();
 	test_xvirus_cangard();
 	test_xvirus_static();
+	test_free_space();
+	test_claims();
 	test_xvirus_dispatch();
 	test_xvirus_generated();
 	test_enemy_moved();

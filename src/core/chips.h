@@ -23,8 +23,8 @@
 
 #define CHIPS_IDS 512                          /* the records: ids 0-511 (nine bits) */
 #define CHIPS_BN6_RECORDS 411                  /* BN6's own, 0-410 */
-#define CHIPS_FREE (EMU_FREE + 0x400000u)      /* the chips' place in the core's copy (docs/EMULATION.md), to: */
-#define CHIPS_FREE_END (EMU_FREE + 0x480000u)
+#define CHIPS_FREE FREE_CHIPS                  /* the chips' place in the core's copy (free_space.h; docs/EMULATION.md), to: */
+#define CHIPS_FREE_END FREE_SOULS
 #define CHIPS_RECORDS (CHIPS_FREE + 0x0000u)   /* 512 records, 0x2C each */
 #define CHIPS_NAMES0 (CHIPS_FREE + 0x6000u)    /* the names' text archives: ids 0-255, */
 #define CHIPS_NAMES1 (CHIPS_FREE + 0x7000u)    /* ... 256-511, 0x1000 each */

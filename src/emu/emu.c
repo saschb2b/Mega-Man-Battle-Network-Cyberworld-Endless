@@ -1,5 +1,6 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
+#include "claims.h"
 #include "compat.h"
 #include "platform.h"
 
@@ -108,8 +109,20 @@ static void wait_frame(void);
 bool emu_ready(void) { return core != NULL; }
 void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); } }
 
-bool emu_hook(uint32_t addr, EmuHook fn, void *user) { wait_frame(); return core && hook_add(addr, fn, user); }
-bool emu_hook_event(uint32_t addr, int kind) { wait_frame(); return core && hook_add_event(addr, kind); }
+bool emu_hook(uint32_t addr, EmuHook fn, void *user) {
+	wait_frame();
+	bool ok = core && hook_add(addr, fn, user);
+	if (ok) claims_hook(addr);
+	return ok;
+}
+
+bool emu_hook_event(uint32_t addr, int kind) {
+	wait_frame();
+	bool ok = core && hook_add_event(addr, kind);
+	if (ok) claims_hook(addr);
+	return ok;
+}
+
 void emu_unhook(uint32_t addr) { wait_frame(); if (core) hook_remove(addr); }
 void emu_sync(void) { wait_frame(); }
 int emu_hook_events(HookEvent *out, int max) { wait_frame(); return core ? hook_drain(out, max) : 0; }
@@ -294,11 +307,23 @@ const uint32_t *emu_video(void) { return threaded ? shown : video; }
 uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
-void emu_write8(uint32_t a, uint8_t v) { wait_frame(); if (core) core->rawWrite8(core, a, -1, v); }
-void emu_write32(uint32_t a, uint32_t v) { wait_frame(); if (core) core->rawWrite32(core, a, -1, v); }
+void emu_write8(uint32_t a, uint8_t v) {
+	wait_frame();
+	claims_note(a, 1);
+	if (core) core->rawWrite8(core, a, -1, v);
+}
+
+void emu_write32(uint32_t a, uint32_t v) {
+	wait_frame();
+	claims_note(a, 4);
+	if (core) core->rawWrite32(core, a, -1, v);
+}
+
 void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
-	for (size_t i = 0; i < len; ++i) emu_write8(a + (uint32_t)i, p[i]);
+	wait_frame();
+	claims_note(a, (uint32_t)len);
+	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
 
 /* ---- RAM kept patched (emu_keep) ---- */
@@ -322,6 +347,7 @@ static void keep_put(bool own) {
 bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
 	wait_frame();
 	if (!core || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	claims_note(addr, (uint32_t)len);
 	kept[nkept].addr = addr;
 	kept[nkept].len = (uint32_t)len;
 	memcpy(kept[nkept].was, was, len);

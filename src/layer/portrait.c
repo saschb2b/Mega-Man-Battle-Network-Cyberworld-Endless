@@ -19,7 +19,7 @@
 #include "rom.h"
 #include "xnavi.h"
 
-#define PORTRAIT_AT   (EMU_FREE + 0x166000)   /* (docs/EMULATION.md) */
+#define PORTRAIT_AT   FREE_PORTRAITS          /* (docs/EMULATION.md) */
 #define PORTRAIT_SIZE 0x500
 #define BUS           0x08000000u
 #define LIST_BATTLE   0

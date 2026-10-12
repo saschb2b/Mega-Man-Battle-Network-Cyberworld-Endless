@@ -18,8 +18,8 @@
 #include "emu.h"
 #include "rom.h"
 
-#define XNAVI_AT   (EMU_FREE + 0x260000)   /* (docs/EMULATION.md) */
-#define XNAVI_END  (EMU_FREE + 0x2A0000)
+#define XNAVI_AT   FREE_XNAVIS             /* (docs/EMULATION.md) */
+#define XNAVI_END  FREE_BACKDROPS
 #define XNAVI_GUARD_AT (XNAVI_END - 0x12000)   /* (a guardian of another game's, one at a time: KnightMan's, the largest, 68033 bytes) */
 #define BUS        0x08000000u
 #define LIST_NAVIS 6                       /* sprite lists: the Navis and Mr. Progs */
@@ -222,8 +222,8 @@ int xnavi_object(int which) {
 
 /* ---- BN6's own flame of darkness (docs/META.md, BN6's own DarkChips) ---- */
 
-#define FLAME_AT  (EMU_FREE + 0x2E0000)   /* (docs/EMULATION.md: its own place, the same with or without another game's ROM) */
-#define FLAME_END (EMU_FREE + 0x2E1000)
+#define FLAME_AT  FREE_FLAME              /* (docs/EMULATION.md: its own place, the same with or without another game's ROM) */
+#define FLAME_END FREE_FLAME_END
 
 int xnavi_bn6_flame(void) {
 	if (!R.data || !R.layout || !R.layout->sprite_lists) return -1;

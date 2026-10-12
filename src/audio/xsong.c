@@ -14,8 +14,8 @@
 #include "emu.h"
 #include "rom.h"
 
-#define XSONG_AT    (EMU_FREE + 0x1A0000)   /* (docs/EMULATION.md) */
-#define XSONG_END   (EMU_FREE + 0x260000)
+#define XSONG_AT    FREE_SONGS              /* (docs/EMULATION.md) */
+#define XSONG_END   FREE_XNAVIS
 #define SLOT_FIRST  0x26    /* BN6's empty song slots, 0x26-0x62: a shared header of no tracks (docs/ROM_DATA.md) */
 #define SLOT_LAST   0x62
 #define BGM_PLAYER  31      /* BN6's music player, 8 tracks */

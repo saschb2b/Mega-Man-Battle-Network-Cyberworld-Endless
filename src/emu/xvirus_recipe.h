@@ -137,11 +137,12 @@ typedef struct {
 #define XV_MODE_PAST 0   /* BN6_TRAITS_MODE given a family whose game's mode is past BN6's table: its byte 0, as most of BN6's families' */
 
 /* Where it all goes, at fixed addresses (pointers into them stay good in
- * the states a session saves): EMU_FREE + 0x330000 to + 0x400000
- * (docs/EMULATION.md). First BN6's own tables, grown once a core
- * (xvirus_grow.h): each holds BN6's entries as the player's ROM has them,
- * the rest its fill, and the one word that names it points here */
-#define XV_AT       (EMU_FREE + 0x330000u)
+ * the states a session saves): the plan's FREE_VIRUS_ROOM and FREE_FAMILIES,
+ * to FREE_CHIPS (free_space.h; docs/EMULATION.md). First BN6's own tables,
+ * grown once a core (xvirus_grow.h): each holds BN6's entries as the
+ * player's ROM has them, the rest its fill, and the one word that names it
+ * points here */
+#define XV_AT       FREE_VIRUS_ROOM
 #define XV_GROWN    XV_AT                  /* BN6's 11 per-family tables grown to XV_AIS words, XV_STEP apart */
 #define XV_STEP     0x400u
 #define XV_ICE      (XV_AT + 0x2C00u)      /* the ice blocks' sizes (BN6_ICE_SIZES) grown to XV_AIS bytes */
@@ -174,10 +175,10 @@ typedef struct {
 #define XV_SPAWNERS 6
 #define XV_STUBS_END (XV_STUBS + 0x200u)
 /* then the families' own */
-#define XV_HOMES    (XV_AT + 0x18000u)     /* the families' homes, XV_HOME_SIZE each, XV_FAMILIES of them */
+#define XV_HOMES    FREE_FAMILIES          /* the families' homes, XV_HOME_SIZE each, XV_FAMILIES of them */
 #define XV_CODE     (XV_AT + 0x38000u)     /* their code, block by block */
 #define XV_ART      (XV_AT + 0x50000u)     /* what they draw: their sprites */
-#define XV_END      (XV_AT + 0xD0000u)
+#define XV_END      FREE_CHIPS
 #define XV_AIS      256                    /* AI indexes in the grown tables (AIData +1, a byte) */
 #define XV_LIST_MAX 256                    /* a grown sprite list's numbers (struct1's and sprite_load's, a byte) */
 #define XV_EFFECTS_MAX 256                 /* effect ids (an effect object's +4, a byte) */

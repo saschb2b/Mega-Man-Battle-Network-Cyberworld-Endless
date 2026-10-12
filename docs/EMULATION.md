@@ -72,7 +72,16 @@ places, the same at every boot with the same ROMs (a state's pointers into
 them stay good): the virus families' room and the second-level dispatch,
 the families, the chips, room kept for the Souls, the lava and sea, then
 room kept for the Navis and the chips' moved code, each its own and none
-written by another:
+written by another. The plan's numbers are `src/emu/free_space.h`
+(`FREE_*`), which every writer below takes its place from;
+`tests/test_core.c` checks its regions in order and apart and each
+installer's own layout inside its region, and as the core starts each
+installer's writes are claimed byte by byte (`src/emu/claims.c`: the free
+space it fills, BN6's own words and instructions it changes, RAM it keeps
+patched, the instructions its hooks stand on, and every other hook's), a
+write or hook over another's bytes told on stderr (`CYBERWORLD_EMU_DEBUG`
+prints the count: "claims: 105 ranges of 5 writers ..., 0 over
+another's"):
 
 | Offset | Contents | Code |
 | --- | --- | --- |
@@ -270,7 +279,9 @@ The Standard folder writes nothing.
 
 The engine keeps its own state out of BN6's RAM but where issue #82's
 RAM plan gives the moved content room that BN6 leaves alone, by one plan
-every track follows:
+every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
+`tests/test_core.c` checks in order and apart, `BN6_PACK_EXT` and
+`BN6_DISPATCH_SIDE` at its places):
 
 | Range | Contents | Code |
 | --- | --- | --- |
@@ -653,11 +664,14 @@ spawned as its kind's dispatch type, its number in the side table by the
 object's slot and its MOVED routine run with r1 the number times four; a
 twin spawned as BN6's own number (its number in the side table too,
 where nothing reads it); a type no family named let go as it first runs.
-Last, RAM kept patched (`emu_keep`): the patch made where the game's own
+Then RAM kept patched (`emu_keep`): the patch made where the game's own
 bytes are, a state saved with the game's own there (another core loading
 it reads them), the patch made again as the state is loaded, and bytes
-that read neither left alone. `build.py test` runs it with the address
-and undefined-behaviour sanitizers, as CI does.
+that read neither left alone. Last, the installers' claims through
+`emu.c`'s writes and hooks (`src/emu/claims.c`): an installer's bytes its
+own, another's write over them told, a write outside any installer
+nobody's, and a hook set on an installer's bytes told. `build.py test`
+runs it with the address and undefined-behaviour sanitizers, as CI does.
 
 ## Testing
 

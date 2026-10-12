@@ -6,12 +6,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "free_space.h"   /* EMU_FREE and the plan of what goes past it */
 #include "hook.h"
 
 #define EMU_W 240
 #define EMU_H 160
-#define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space */
-#define EMU_FREE 0x08800000u      /* first free bus address past an 8 MB game */
+#define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space (free_space.h) */
 
 /* GBA key bits */
 enum {
@@ -58,13 +58,15 @@ int emu_audio_out_rate(void);
 uint8_t emu_read8(uint32_t addr);
 uint16_t emu_read16(uint32_t addr);
 uint32_t emu_read32(uint32_t addr);
+/* (each write an installer's while it installs: claims.h) */
 void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
 
 /* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
  * between frames: on the Thumb instruction at addr, an answer hook or an
- * event hook queuing `kind`; and taken off. */
+ * event hook queuing `kind` (its instruction claimed: claims.h); and taken
+ * off. */
 bool emu_hook(uint32_t addr, EmuHook fn, void *user);
 bool emu_hook_event(uint32_t addr, int kind);
 void emu_unhook(uint32_t addr);

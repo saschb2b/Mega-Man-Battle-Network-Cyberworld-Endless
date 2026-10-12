@@ -44,8 +44,8 @@
  * the floor get the wall types the original maps use: 1 NE, 2 SW, 3 SE, 4 NW
  * edges and 5 E, 6 S, 7 N, 8 W outer corners. */
 
-#define TILEMAP_AT  (EMU_FREE + 0x10000) /* generated tile map (LZ77) */
-#define XGFX_AT     (EMU_FREE + 0x170000)   /* another game's area: its tile set and palette (docs/EMULATION.md) */
+#define TILEMAP_AT  FREE_TILE_MAP        /* generated tile map (LZ77) */
+#define XGFX_AT     FREE_XAREA              /* another game's area: its tile set and palette (docs/EMULATION.md) */
 #define XGFX_SIZE   0x30000
 
 /* the centrepieces' tiles (the four surface areas share their tile set) */

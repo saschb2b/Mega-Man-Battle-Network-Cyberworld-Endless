@@ -14,6 +14,7 @@
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
+#include "claims.h"
 #include "debug.h"
 #include "emu.h"
 #include "rom.h"
@@ -105,6 +106,7 @@ enum { CALL_SET_TYPE, CALL_COORDS, CALL_JITTER, CALL_SPARK, CALLS };
 static const uint32_t calls[CALLS] = { BN6_SET_PANEL_TYPE, BN6_PANEL_COORDS, BN6_PLACE_JITTER, BN6_SPAWN_SPARK };
 #define STUB_CODE 0x30
 #define STUB_SIZE (STUB_CODE + CALLS * THUMB_VENEER_SIZE)
+_Static_assert(XP_STUB + STUB_SIZE <= XP_TILES, "the lava's cooling past its room (xpanels_look.h)");
 
 static uint16_t imm(ThumbForm form, int rd, int rn, int value) {
 	ThumbImm in = { form, (uint8_t)rd, (uint8_t)rn, (uint16_t)value };
@@ -307,6 +309,7 @@ void xpanels_install(int xrom) {
 		fprintf(stderr, "xpanels: BN5's lava and sea not in BN6's engine: %s is not as expected\n", why);
 		return;
 	}
+	claims_begin("lava and sea (xpanels.c)");
 	emu_write(XP_FLAGS, flags, sizeof flags);
 	emu_write(XP_STUB, stub, sizeof stub);
 	uint8_t ref_now[4];
@@ -315,5 +318,6 @@ void xpanels_install(int xrom) {
 	iwram_patch(BN6_PANEL_HIT_COOL, cool_was, cool, sizeof cool);
 	xpanels_look_write();
 	ready = hooks_set();
+	claims_end();
 	printf("xpanels: BN5's lava and sea %s BN6's engine, as its panel types %d and %d\n", ready ? "in" : "NOT in", XPANEL_LAVA, XPANEL_SEA);
 }

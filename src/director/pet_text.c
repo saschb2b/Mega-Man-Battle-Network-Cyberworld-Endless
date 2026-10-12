@@ -23,10 +23,10 @@
 #include "save.h"
 #include "text.h"
 
-#define NAMES_AT   (EMU_FREE + 0x154000)   /* the key items' names */
-#define DESCS_AT   (EMU_FREE + 0x155000)   /* ... their descriptions */
-#define MAILS_AT   (EMU_FREE + 0x158000)   /* the mails' senders and subjects */
-#define BODIES_AT  (EMU_FREE + 0x15A000)   /* ... their bodies */
+#define NAMES_AT   FREE_PET_TEXT           /* the key items' names */
+#define DESCS_AT   FREE_PET_DESCS          /* ... their descriptions */
+#define MAILS_AT   FREE_PET_MAILS          /* the mails' senders and subjects */
+#define BODIES_AT  FREE_PET_BODIES         /* ... their bodies */
 #define NAMES_MAX  0x1000
 #define DESCS_MAX  0x3000
 #define MAILS_MAX  0x2000

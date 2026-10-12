@@ -11,13 +11,14 @@
 
 #include "emu.h"
 
-/* Where it all goes, at fixed addresses (docs/EMULATION.md): EMU_FREE +
- * 0x4C0000 to + 0x4D0000 */
-#define XP_AT        (EMU_FREE + 0x4C0000u)
+/* Where it all goes, at fixed addresses: the plan's FREE_PANELS
+ * (free_space.h; docs/EMULATION.md) */
+#define XP_AT        FREE_PANELS
 #define XP_FLAGS     XP_AT                 /* BN6's panel flags table grown to 16 words (xpanels.c) */
 #define XP_STUB      (XP_AT + 0x40u)       /* the lava's cooling, Thumb, and its veneers on to BN6's routines (xpanels.c) */
-#define XP_TILES     (XP_AT + 0x100u)      /* BN6's panel tile table grown to 15 types (0xB40 bytes) */
-#define XP_END       (XP_AT + 0x10000u)
+#define XP_TILES     (XP_AT + 0x100u)      /* BN6's panel tile table grown to 15 types, */
+#define XP_TILES_SIZE 0xB40u               /* ... 6 entries of 32 bytes a type */
+#define XP_END       FREE_PANELS_END
 
 /* Both ROMs read and what is to be written made; false, the log saying
  * why, where either is not as expected */

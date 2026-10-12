@@ -8,6 +8,7 @@
 
 #include "bn5.h"
 #include "bn6.h"
+#include "claims.h"
 #include "emu.h"
 #include "rom.h"
 #include "xpanels.h"
@@ -61,6 +62,7 @@ static bool translate(const uint8_t *d, int f, uint8_t out[BN6_FIELD_SIZE]) {
 void xfields_install(int xrom) {
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;
+	claims_begin("the battlefields (xfields.c)");
 	xpanels_install(xrom);   /* (lava and sea first: the fields with them want them) */
 	int own = 0, written = 0;
 	for (size_t i = 0; i < NFIELDS; ++i) {
@@ -81,6 +83,7 @@ void xfields_install(int xrom) {
 		own += fields[i].own;
 		written += !fields[i].own;
 	}
+	claims_end();
 	printf("xfields: BN5's battlefields as BN6's, %d its own of the same panels and %d written\n", own, written);
 }
 

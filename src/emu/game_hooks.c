@@ -2,6 +2,8 @@
  * (docs/EMULATION.md); this one keeps their order. */
 #include "game_hooks.h"
 
+#include "claims.h"
+#include "debug.h"
 #include "encounter.h"
 #include "events.h"
 #include "gamecall.h"
@@ -25,6 +27,7 @@ void game_hooks_install(void) {
 	chat_marks_install();
 	pet_install();
 	pet_text_install();
+	if (emu_debug_on()) claims_report();
 }
 
 void game_hooks_after_boot(void) {

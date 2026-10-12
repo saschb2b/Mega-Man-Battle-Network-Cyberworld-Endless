@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "chips.h"
+#include "claims.h"
 #include "debug.h"
 #include "emu.h"
 #include "hook.h"
@@ -210,9 +211,11 @@ bool xchips_install(void) {
 		fprintf(stderr, "chips: BN6's chip tables not moved: %s\n", why[0] ? why : "no image, or the core's copy changed since");
 		return false;
 	}
+	claims_begin("the chip registry (xchips_install.c)");
 	write_all(img, len);
 	memcpy(sits, chips_sit_bits(), sizeof sits);
 	if (!installed_len && !emu_hook(BN6_DECK_DEALT, deal, NULL)) fprintf(stderr, "chips: no hook on the deck's deal: BN5's chips play where they sit out\n");
+	claims_end();
 	installed_len = len;
 	installed_rom5 = rom5;
 	chips_installed(true);

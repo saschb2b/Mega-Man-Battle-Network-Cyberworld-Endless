@@ -10,8 +10,9 @@
  * a block of Thumb code moved into BN6's copy, its calls out through
  * veneers (src/emu/thumb_reloc.c, issue #82), and the second-level
  * dispatch's code (src/emu/xvirus_dispatch.c) run against spawners and
- * routines of the test's own. Last, RAM the engine keeps patched, the
- * game's own bytes in the states it saves (emu.c, emu_keep).
+ * routines of the test's own. Then RAM the engine keeps patched, the
+ * game's own bytes in the states it saves (emu.c, emu_keep); last, the
+ * installers' claims through emu.c's writes and hooks (claims.h).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -40,6 +41,7 @@
 #endif
 
 #include "emu.h"
+#include "claims.h"
 #include "hook.h"
 #include "platform.h"
 #include "thumb_reloc.h"
@@ -728,6 +730,33 @@ static void kept_ram(void) {
 	remove(KEPT_STATE);
 }
 
+/* ---- the installers' claims through emu.c (claims.h, issue #82) ----
+ * emu_write's, emu_write32's and emu_write8's bytes the installer's that
+ * writes them, another's over them told, a write outside any installer
+ * nobody's, and a hook set on an installer's bytes told */
+static void claimed_writes(void) {
+	static const uint8_t b[16] = { 0 };
+	int sits = 0;
+	claims_reset();
+	claims_quiet(true);
+	claims_begin("x");
+	emu_write(0x08900000u, b, sizeof b);
+	claims_end();
+	CHECK(claims_who(0x0890000Fu) && !strcmp(claims_who(0x0890000Fu), "x"), "claims: emu_write's last byte not the installer's");
+	claims_begin("y");
+	emu_write32(0x0890000Cu, 0);
+	emu_write8(0x08900020u, 0);
+	claims_end();
+	emu_write8(0x08900030u, 0);
+	CHECK(claims_overlaps() == 1 && claims_who(0x08900020u) && !strcmp(claims_who(0x08900020u), "y") && !claims_who(0x08900030u),
+		"claims: %d overlaps told, the bytes %s's and %s's", claims_overlaps(), claims_who(0x08900020u) ? claims_who(0x08900020u) : "no one",
+		claims_who(0x08900030u) ? claims_who(0x08900030u) : "no one");
+	CHECK(emu_hook(0x08900004u, counted, &sits) && claims_overlaps() == 2, "claims: a hook on an installer's bytes not told (%d)", claims_overlaps());
+	emu_unhook(0x08900004u);
+	claims_reset();
+	claims_quiet(false);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -820,8 +849,9 @@ int main(void) {
 	moved_block();
 	dispatch_run();
 	kept_ram();
+	claimed_writes();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
 	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
-		"the second-level dispatch's code, RAM kept patched but in its states\n");
+		"the second-level dispatch's code, RAM kept patched but in its states, the installers' writes claimed\n");
 	return 0;
 }

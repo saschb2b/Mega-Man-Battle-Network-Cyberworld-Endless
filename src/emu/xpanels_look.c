@@ -67,6 +67,8 @@ static Kind kinds[2] = {
 		{ 0, 1, 2, 3, 4, 5, 0xFF, 7, 8, 9, 0xFF, 12, 13, 14, 15, 0xFF }, 0, 0, { 0 }, { { { 0 } } }, 0 },
 };
 
+_Static_assert(TYPES * ENTRIES * ENTRY == XP_TILES_SIZE && XP_TILES + XP_TILES_SIZE <= XP_END, "the grown tile table past its room");
+
 static struct {
 	uint8_t table[TYPES * ENTRIES * ENTRY];
 	uint8_t tiles[2][KIND_TILES * TILE];   /* lava's and the sea's, their colours BN6's */

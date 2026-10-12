@@ -65,9 +65,9 @@ void begin_area(bool new_act) {
 /* The label the game keeps at the map's bottom right: its own name for the
  * original map ("AquarumComp3") gave way to where the run is. The game's
  * label routine is pointed at an archive of ours whose every name is it. */
-#define LABEL_AT    (EMU_FREE + 0x152000)
+#define LABEL_AT    FREE_LABEL
 #define LABEL_SIZE  0x1000
-#define PET_LABEL_AT (EMU_FREE + 0x153000)   /* the PET's PLACE: the area and the layer (docs/EMULATION.md) */
+#define PET_LABEL_AT FREE_PET_LABEL          /* the PET's PLACE: the area and the layer (docs/EMULATION.md) */
 
 /* The archive holds more than names: the PET prints its HP, zenny and
  * BugFrags by scripts 0xF0-0xF2, and others are placeholders. A copy of the
