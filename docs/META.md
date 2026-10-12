@@ -349,7 +349,10 @@ against what you find**; each piece restates it.
    across runs, so traders become the collector's machine. The summary
    counts a run's new entries; STD, MEGA and GIGA COMP mark a class
    complete, counted over the chips the net can give. Entries grant
-   nothing in battle.
+   nothing in battle. Where BN5's ROM is read, its chips that come into
+   runs (docs/MULTIROM.md, One net) join the collection too, ids to 511:
+   counted apart ("Older Net" on the second screen's Library, which lists
+   them), so the class marks stay BN6's and no mark needs BN5's ROM.
 4. **Programs found join later runs** (docs/NAVICUST.md, 7): the
    NaviCust vendor lists first two of the programs earlier runs ran with,
    and names them. Not the gift: it is the first layer's lesson, picked for

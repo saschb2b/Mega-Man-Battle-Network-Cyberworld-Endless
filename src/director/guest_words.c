@@ -1,6 +1,7 @@
-/* MegaMan and Lan on the older net's battles (docs/MULTIROM.md,
- * docs/VOICE.md): its battles on arriving, the chips that sit out, its
- * codes read its own way. */
+/* MegaMan and Lan on the older net (docs/MULTIROM.md, docs/VOICE.md): its
+ * battles on arriving, the chips that sit out, its codes read its own way;
+ * and where the nets meet (One net: the design): an older net's area whose
+ * viruses fight in our engine, the first visitor, the deep's both nets. */
 #include "guest_words.h"
 
 #include <stdio.h>
@@ -16,6 +17,7 @@
 #include "guest.h"
 #include "save.h"
 #include "talk.h"
+#include "visitor_families.h"
 #include "xchips.h"
 
 /* The folder's chips the older net never had (guest.c), named as MegaMan
@@ -84,6 +86,53 @@ void older_net_words(void) {
 		snprintf(D.beat + k, sizeof D.beat - k, "|@L Then it's you and %s,MegaMan!", n > 0 ? "the other chips" : "our chips");
 }
 
+/* Where the nets meet, the first time a profile comes there, after the
+ * arrival's own words (docs/MULTIROM.md, One net: the telegraph): an older
+ * net's area whose viruses fight in our engine (a profile told the old
+ * way hears it changed; its own Navis still fight the old way, on the
+ * guest core, until they move into BN6's engine too), and the deep, where
+ * both nets' viruses come */
+void nets_arrival_words(void) {
+	/* (an older net's area: a territory's, or the deep's dressed in one) */
+	D.beat_native = (D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS)) && !profile.native_taught;
+	D.beat_deep = D.deep && !profile.deep_taught;
+	size_t k = strlen(D.beat);
+	if (D.beat_native && (profile.cross_old_told || profile.guest_taught))
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! The older Net's viruses...|@M We fight them our way now. Cross and all!|"
+			"@M Its own Navis still fight the old way.|@L Got it. No Crosses against them!", k ? "|" : "");
+	else if (D.beat_native)
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
+			"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!|@M Its own Navis fight the old way,though.|"
+			"@L No Crosses against them? Got it!", k ? "|" : "");
+	if (D.beat_deep && k < sizeof D.beat)
+		snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
+			"@M Yeah. Anything could come at us!", k ? "|" : "");
+}
+
+/* (a battle over: the first visitor a profile met, its words due) */
+void nets_battle_note(const Encounter *e) {
+	if (!e->visitor || profile.visitor_taught || D.visitor_due) return;
+	D.visitor_due = e->xrecord ? 2 : 1;
+	D.visitor_family = e->foes[e->visitor - 1].family;
+}
+
+/* MegaMan on the first visitor a profile met: one of the older net's in
+ * a battle of ours, or one of ours in the older net's (docs/MULTIROM.md,
+ * One net: the telegraph), named by its family */
+static void visitor_words(void) {
+	if (!D.visitor_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
+	char name[24], words[240];
+	enemy_name(visitor_id(D.visitor_due == 1 ? VISIT_BN5 : VISIT_BN6, D.visitor_family, 0), name, sizeof name);
+	if (D.visitor_due == 1)
+		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
+			"@M Where they meet,yeah. Stay sharp!", name);
+	else snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!", name);
+	if (!talk_start(words, FACE_MEGAMAN)) return;
+	D.visitor_due = 0;
+	profile.visitor_taught = 1;
+	profile_save();
+}
+
 /* After a CONTINUE without BN5's ROM, the run's folder holding chips of
  * BN5's (docs/MULTIROM.md, One net: the design, call 4): they sit out of
  * battles until it is back, and MegaMan says so, on the map, once. */
@@ -112,13 +161,21 @@ static void recode_words(char *out, size_t size) {
  * why chips sat out. A BN5 battle opened with no word of why the screen,
  * the chips' art and their rules changed. */
 void guest_words(void) {
+	visitor_words();
 	if ((!D.guest_due && !D.recode_due) || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
 	char words[720];
 	int k = 0;
-	if (D.guest_due) {
-		int out = D.guest_due - 1;
+	/* (where the area's viruses fight our way, a territory's or the
+	 * deep's, the older net's battle was its guardian's: its own Navis
+	 * fight the old way) */
+	if (D.guest_due && (D.territory_native || D.deep))
+		k = snprintf(words, sizeof words, "@M Lan,he fought on the older Net's system!|@M Its own Navis fight the old way.|"
+			"@M Our chips worked the way it knew them.");
+	else if (D.guest_due)
 		k = snprintf(words, sizeof words, "@M Lan,that battle ran on an older Net's system!|@L The Nest copied that Net too!?|"
 			"@M Battles and all. Its viruses fight the old way.|@M And our chips work the way it knew them.");
+	if (D.guest_due) {
+		int out = D.guest_due - 1;
 		/* (unless the arrival's words named them on this run: said twice,
 		 * as new, session 69) */
 		if (out > 0 && !flag_get(RUN_OUT_NAMED_FLAG))

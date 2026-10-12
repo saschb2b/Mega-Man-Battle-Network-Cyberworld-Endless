@@ -194,16 +194,27 @@ on those over the act's cap (stocked one, not two). Last, the Net's clock
 notches, beside the next act's band. The whole report takes about a
 minute.
 
-Where BN5's ROM is beside BN6's, each area one of its areas dresses
-(docs/MULTIROM.md) is followed by that area's battles in BN5's own engine:
-for every layer of the act, the records its first battle (`opening`, the
-band's lower half) and its others (`guest`) are picked from, as the
-director picks them (`xrecords_pool`, `src/core/xrecords.c`: the
-layer's map's records that fit the band, else the area's other maps',
-else those of BN5's other areas, else the map's weakest alone), each as
-likely: their viruses' HP together (lowest, median, highest), the
-strongest hit, how many records and where they came from, and OVER on
-any past the band.
+Where BN5's ROM is beside BN6's, its families are installed as a core
+starts, and each area one of its areas dresses (docs/MULTIROM.md) is
+followed by that area's battles: its own records in BN6's engine where it
+is native (issue #82's D1: rows `native`, `opening` and `challenge`, as
+the director rolls them, `xterritory_encounter`, with how many were the
+older net's), else in BN5's own engine: for every layer of the act, the
+records its first battle (`opening`, the band's lower half) and its
+others (`guest`) are picked from, as the director picks them
+(`xrecords_pool`, `src/core/xrecords.c`: the layer's map's records that
+fit the band, else the area's other maps', else those of BN5's other
+areas, else the map's weakest alone), each as likely: their viruses' HP
+together (lowest, median, highest), the strongest hit, how many records
+and where they came from, and OVER on any past the band. The deep's acts
+(the Undernet's, the Graveyard's, the Nest) say "the deep" and count the
+older net's battles among their rolls (about half: One net, the deep).
+Last, the visitors: each net's families as their own records set them
+(their role, stage and placements; `*` those that may visit, `!` those
+set on special panels alone), then acts 2 to 4's areas and territories,
+300 battles each given a visitor where one fits: how many took one, the
+battles' HP with it, the pairs (the replaced family's AI index > the
+visitor's), OVER past the band.
 
 Output: `.build/pacing.txt`. It needs the ROM, and prints how many
 battles and guardians were past their band, the territories' included;
@@ -217,7 +228,12 @@ folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
 area, what kind of battle (`battle`, `challenge`, `duel` for ProtoMan's,
 `guardian`), MegaMan's HP and max HP before, each foe as
 family.version, the foes' HP together, and MegaMan's HP after (or
-"deleted"). A battle in BN5's engine (docs/MULTIROM.md, Guest battles) has
+"deleted"). One of BN5's records fought in BN6's engine (a territory's,
+the deep's: docs/MULTIROM.md, One net) has `x` and its address in BN5's
+ROM after MegaMan's HP (`... battle hp 300/300 x811DDD0 v35.0 v35.0 foehp
+160 -> won hp 220`: BN6's AI indexes, BN5's families moved into the
+engine from 32), and a visitor of the other net has `+` before it (`v8.0
++v34.1 v11.0`). A battle in BN5's engine (docs/MULTIROM.md, Guest battles) has
 `guest` and its record in BN5's ROM after MegaMan's HP, its viruses as `x`
 and BN5's enemy id, and after MegaMan's HP at its end the reward as the
 run got it: `... battle hp 300/300 guest 08121188 x1 x1 x1 foehp 120 ->
@@ -329,11 +345,15 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Nine more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Ten more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: `tools/trailer.py` plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
-check it and its reward; BN5's battles too, with BN5's own find), `veteran` (a profile that has met seven
+check it and its reward; BN5's battles too, with BN5's own find),
+`visitors` (every random battle the visitors' rules allow takes a visitor
+of the other net, not one in four: from act 2, where BN5's ROM is read,
+docs/MULTIROM.md, One net; `CYBERWORLD_EMU_DEBUG` prints each roll's foes,
+the visitor's family among them, and the run log marks it `+`), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
 has none: the PET's mails for `build.py screenshots pet`) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his

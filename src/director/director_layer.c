@@ -179,12 +179,14 @@ void lock_run(void) {
 
 /* The next random battle: the run's first two and every one on the first
  * layer after a guardian from the lower half of the act's band
- * (docs/PROGRESSION.md). */
+ * (docs/PROGRESSION.md); from the second act one in four with a visitor of
+ * the other net (visitors.h, docs/MULTIROM.md). */
 void roll_encounter(void) {
 	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
 		(run.depth == 1 ? D.battles < 2 : true);
 	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
-	Encounter e = make_encounter(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL);
+	loot_visitors_always = dev.visitors;
+	Encounter e = loot_random_battle(run.depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
 	if (dev.gem) loot_add_gem(&e);
 	set_encounter(&e, false);
 }
@@ -296,14 +298,23 @@ static void layer_host(int tiles, int *group, int *number) {
 	encounter_backdrop = a->xrom > 0 && a->xbg ? xbackdrop_install(a->xrom - 1, a->xbg, -1) : -1;
 	guest_backdrop = a->xrom > 0 && a->xbg ? a->xbg : -1;   /* (its own number, in its own game's tables) */
 	xbackdrop_map(tiles);
-	/* (and its battles, where its own engine can fight them on the guest
-	 * core: its game's records for the map, guest.c) */
+	/* (and its battles: its game's records for the map fought in BN6's
+	 * engine where every one of them can be, the deep's both nets', the
+	 * older net's share of its finds and stock, loot.h; else where its own
+	 * engine can fight them on the guest core, guest.c, which its Navis'
+	 * battles take too) */
 	const uint8_t *xb = a->xbattles[layer_in_act(run.depth)];
+	bool nets = loot_layer_nets(run.biome, tiles);
+	D.territory_native = loot_territory >= 0;
+	D.deep = loot_deep[0] >= 0;
 	D.guest_xrom = a->xrom - 1;
 	D.guest_area = a;
 	D.guest_group = xb[0];
 	D.guest_number = xb[1];
-	encounter_guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1) && xrecords_count(D.guest_xrom, D.guest_group, D.guest_number) > 0;
+	bool guest = a->xrom > 0 && xb[0] && guest_start(a->xrom - 1);
+	encounter_guest = !nets && guest && xrecords_count(D.guest_xrom, D.guest_group, D.guest_number) > 0;
+	if (emu_debug_on()) fprintf(stderr, "layer nets: territory %d deep %d %d, older chips %d%%, guest battles %d\n", loot_territory, loot_deep[0], loot_deep[1],
+		loot_older_share, encounter_guest);
 	dark_flame_setup();
 	if (a->xrom) { *group = a->over[0]; *number = a->over[1]; return; }
 	*group = a->group;

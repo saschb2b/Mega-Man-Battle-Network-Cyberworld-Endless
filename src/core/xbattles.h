@@ -51,6 +51,11 @@ int xbattle_why(int xrom, uint32_t record, int *what);
  * -1 none (*why XB_NAVI or XB_FAMILY, *what its AI index there) */
 int xbattle_enemy_bn6(int xrom, int id, int *why, int *what);
 
+/* Whether BN6's virus family `family` (its AI index, 1-29) is one game
+ * `xrom` has by name (BN5's Mettaur, Catack, Champy, WindBox, Trumpy):
+ * one family of both nets, BN6's */
+bool xbattle_shared(int xrom, int family);
+
 /* Territory `area` (NET_AREAS + k, an area of another game's, rom.h): the
  * random records (byte 7 clear) of its three maps (NetAreaDef.xbattles),
  * how many, and into *fightable how many of them xbattle_fightable takes */
@@ -58,6 +63,10 @@ int xterritory_records(int area, int *fightable);
 /* ... whether every one of them can be fought in BN6's engine: its random
  * battles can be its own records there (issue #82's M3) */
 bool xterritory_native(int area);
+/* The territory of another game's whose look a run's BN6 area `biome`
+ * takes (NetAreaDef.like: BN5's Undernet the Undernet's, Nebula Area the
+ * Graveyard's) where its ROM is read and it is native, -1 none */
+int xterritory_like(int biome);
 /* A random battle on a layer of territory `area` at `depth`, of `kind`
  * (loot.h's ENC_*), from its own records as BN6's are from its areas'
  * (docs/PROGRESSION.md): the act's band (the lower half for the run's
@@ -72,5 +81,11 @@ bool xterritory_native(int area);
  * from_pick the record's offset in its ROM. False where none can be
  * (*out unchanged). */
 bool xterritory_encounter(int depth, int area, int kind, Encounter *out);
+/* The virus families (a bit each, by BN6's AI index: the families moved
+ * into the engine from 32) territory `area`'s plain random battles can
+ * hold at `depth`, as xterritory_encounter picks them; and into weak[f]
+ * (NULL: none) a bit per ELEM_* each family is weak to as they field it.
+ * No random numbers drawn. */
+uint64_t xterritory_families(int depth, int area, uint16_t weak[64]);
 
 #endif

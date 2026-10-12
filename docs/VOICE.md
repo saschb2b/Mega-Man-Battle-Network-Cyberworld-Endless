@@ -323,7 +323,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | Chaud's duel call and verdict | `src/director/duel_words.c` |
 | MegaMan on the NaviCust: programs off the board, no room, compression, Reg memory | `src/director/board_words.c`, `src/layer/navicust_words.c` (what each program does, which turn, its bugs) |
 | MegaMan on DarkChips | `src/director/dark_words.c` |
-| The older net's battles, its codes, the chips that sit out | `src/director/guest_words.c`; its wait screen `src/emu/guest_wait_lines.c` |
+| The older net's battles, its codes, the chips that sit out; where the nets meet (an older net's area fought our way, the first visitor, the deep) | `src/director/guest_words.c`; its wait screen `src/emu/guest_wait_lines.c` |
 | One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
 | A Cross won, one the run can't carry, the Graveyard's call to the beast, Dad's CybeastButton after the Cybeast | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |

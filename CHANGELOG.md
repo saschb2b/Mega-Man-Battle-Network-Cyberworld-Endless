@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- **The older net's areas fight in BN6's engine, its chips come into
+  runs, and the nets meet (issue #82, D1).** Where BN5's ROM is read, an
+  area of its that dresses an act fights its own random battles, its own
+  records, in BN6's battles: every Cross, BeastOut and chip of the run
+  works there, BN6's step counter starts them, its results are BN6's, and
+  BN5's viruses drop their own rewards (BN5's chips as the registry has
+  them; one that sits out still pays 200 zenny). Its Servers and the
+  duel's race are its records too. From the second act, one battle in
+  four takes a virus of the other net in place of one of its own: BN5's
+  viruses visit BN6's areas, BN6's visit BN5's, each where its own game
+  sets its kind (the front, the back, either), never one the battle
+  holds, at the version that keeps the battle in its band. The Undernet's
+  and the Graveyard's acts and the Nest draw their battles from both
+  nets' late areas, a coin a battle. Half the chips of the older net's
+  areas' and the deep's dealers, Mystery Data and traders come from
+  BN5's catalogue, those that play in BN6's battles. The Library counts
+  BN5's chips apart ("Older Net" on the second screen, which lists
+  them), the classes' marks staying BN6's. The act's card says "Older
+  Net", "Nets meet" or "Both Nets", and MegaMan names the first of each
+  once. BN5's Navis still guard in BN5's own engine. Layers made before
+  continue afresh (their stock changed).
+
 - **Every virus family of BN5's that BN6 lacks, in BN6's own battles
   (issue #82).** After CanGard and Handi, 23 more are moved into BN6's
   battle engine by their own code wherever BN5's ROM is read: Powie,

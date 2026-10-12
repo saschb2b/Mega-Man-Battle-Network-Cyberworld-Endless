@@ -14,7 +14,8 @@
 #include "rom.h"
 #include "xchips.h"
 
-/* The zenny a reward's chip pays where BN6 has none of its name: the
+/* The zenny a reward's chip pays where the run has no chip for it (none of
+ * its name nor the registry's, or one that sits out: xchips_run_chip): the
  * results screen shows what the run gets (docs/MULTIROM.md, Guest
  * battles) */
 #define REWARD_ZENNY XCHIPS_STAND_IN
@@ -43,7 +44,7 @@ static uint16_t row_coded(uint16_t v, uint32_t i, const uint8_t codes[3]) {
 	uint32_t x = v & 0x1FF;
 	uint8_t other[4], bn6[4];
 	for (uint32_t k = 0; k < 4; ++k) other[k] = XR[XROM_BN5_COLONEL_US].data[BN5_CHIP_RECORDS + 0x2Cu * x + k];
-	bn6_codes(xchips_bn6_of((int)x), bn6);
+	bn6_codes(xchips_run_chip((int)x), bn6);
 	return (uint16_t)(x | (uint32_t)xchips_fit(other, bn6, codes, v >> 9 & 0x1F, (int)i) << 9);
 }
 
@@ -56,7 +57,7 @@ static bool is_chip(uint16_t v) { return v && v != 0xFFFF && !(v >> 14) && (v & 
  * half the time in the folder's codes. Zenny, HP and BugFrags as they are. */
 static uint16_t entry_fit(uint16_t v, int i, const GuestRowsFit *how) {
 	if (!is_chip(v)) return v;
-	if (!xchips_bn6_of(v & 0x1FF)) return zenny_word(REWARD_ZENNY);
+	if (!xchips_run_chip(v & 0x1FF)) return zenny_word(REWARD_ZENNY);
 	return how->star ? chip_entry_star(v) : i >= 0 ? row_coded(v, (uint32_t)i, how->codes) : v;
 }
 
@@ -98,7 +99,7 @@ GuestReward guest_reward_of(uint16_t word) {
 	else if (kind == BN5_REWARD_HP) r.heal = n;
 	else if (kind == BN5_REWARD_BUGFRAGS) r.bugfrags = n;
 	else if (x < BN5_CHIPS) {
-		r.chip = xchips_bn6_of(x);
+		r.chip = xchips_run_chip(x);
 		if (!r.chip) { r.zenny = REWARD_ZENNY; return r; }
 		/* (in a code BN6's chip of its name has: the same letter, else its
 		 * *, else its first; MegaMan says so the first time,

@@ -49,13 +49,17 @@ void runlog_battle_start(const Encounter *e, const char *kind) {
 		run.biome, kind, megaman_hp(), megaman_max());
 	L.guardian = 0;
 	L.duel = !strcmp(kind, "duel");
+	/* (an older net's record fought in BN6's engine: "x" and its address
+	 * there, docs/MULTIROM.md; a visitor of the other net "+" before it) */
+	if (e && e->xrecord) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " x%07X", (unsigned)(e->xrecord & 0xFFFFFFFu));
 	int total = 0;
 	for (int i = 0; e && i < e->nfoes && n < (int)sizeof L.line - 16; ++i) {
 		const Foe *f = &e->foes[i];
 		int hp, dmg;
 		if (f->kind == FOE_ROCK || !enemy_stats(f->id, &hp, &dmg)) continue;
 		total += hp;
-		n += snprintf(L.line + n, sizeof L.line - (size_t)n, " %c%d.%d", f->kind == FOE_NAVI ? 'n' : 'v', f->family, f->version);
+		n += snprintf(L.line + n, sizeof L.line - (size_t)n, " %s%c%d.%d", e->visitor == i + 1 ? "+" : "", f->kind == FOE_NAVI ? 'n' : 'v', f->family,
+			f->version);
 	}
 	if (e && n < (int)sizeof L.line - 16) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " foehp %d", total);
 	L.len = n < (int)sizeof L.line ? n : (int)sizeof L.line - 1;

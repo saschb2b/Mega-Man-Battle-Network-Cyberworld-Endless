@@ -67,11 +67,16 @@ int second_record(SecondRow *out, int most);
  * `base_hp`: HPMemory counts into the base, programs on top), the Cross
  * brought: how many rows of `most` */
 int second_status(SecondRow *out, int most, int max_hp, int base_hp);
-/* The Library's classes against what a run can hold, and the chips new
- * this run: how many rows of `most` */
+/* The Library's classes against what a run can hold (BN6's three, then
+ * the older net's own where BN5's ROM is read: issue #82), and the chips
+ * new this run: how many rows of `most` */
 int second_library(SecondRow *out, int most);
 /* What the Library is to a run, a line */
 const char *second_library_line(void);
+/* The older net's own chips the Library holds, named after a heading,
+ * into `out` ("" none): the second screen lists them under the older net
+ * (docs/MULTIROM.md, One net: the Library) */
+void second_library_older(char *out, size_t n);
 /* What the run holds of a chip in any code, the Library's card's: its
  * copies in the folder and in the pack, as rows; how many of `most` */
 int second_copies(SecondRow *out, int most, int folder, int pack);

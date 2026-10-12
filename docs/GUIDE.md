@@ -30,7 +30,12 @@ building the game yourself.
   in runs, in place of the BN6 areas they resemble (ACDC Area, Oran
   Area, SciLab, End Area, its Undernet and Nebula Area), each in about
   half the runs that come there, in BN5's own tiles, music and
-  bystanders, their random battles fought in BN5's own engine. A note in
+  bystanders, their random battles BN5's own, fought in BN6's engine
+  (every Cross and chip of the run works there; a Navi of BN5's who
+  guards one fights in BN5's own). From the second act BN5's viruses and
+  BN6's meet in battles, the Undernet's and the Graveyard's acts draw on
+  both, and half the chips their shops and Mystery Data hold are BN5's,
+  which the Library counts apart. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
   iPhones and iPads and in the browser; not on the 3DS. Added later, it
