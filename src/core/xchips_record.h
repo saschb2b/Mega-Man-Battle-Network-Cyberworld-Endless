@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "xchips_moved.h"
 #include "xchips_registry.h"
 
 #define XREC_SIZE 0x2C   /* a chip record (BN6_CHIP_RECORD_SIZE; BN5's the same, its fields named as BN6's in bn6.h) */
@@ -33,6 +34,7 @@ typedef struct {
 	const XChipReg *reg;
 	uint16_t abc;          /* its place in the folder editor's ABC order (xrec_abc_place) */
 	uint32_t art[3];       /* its icon's, picture's and picture palette's bus addresses in the core's copy */
+	const XChipMoved *moved;   /* (XREG_MOVED) its code moved from BN5's: the family and subfamily its record takes there, else NULL */
 } XRecordFrom;
 
 /* BN5's record as BN6's: BN5's numbers (codes, elements, rarity, type, MB,
@@ -40,9 +42,13 @@ typedef struct {
  * gate), BN6's icon element, the twin's family, lock-on and lock-on type
  * (and subfamily, but the row's), out of BN6's Library screen (library
  * number and flags 0: docs/MULTIROM.md, the Library call), its own id its
- * ID sort key, no DarkChipID. A chip that sits out for want of its code
- * keeps an inert family, no lock-on and no parameters; a power BN5
- * computes (1001 and up, BN5's own table) is not BN6's to show: 0, unshown. */
+ * ID sort key, no DarkChipID. A chip whose code moved (XREG_MOVED) takes
+ * its moved family and subfamily and BN5's parameters, no lock-on (BN5's
+ * code knows none). A chip that sits out for want of its code keeps an
+ * inert family, no lock-on and no parameters. A power BN5 computes (1000
+ * and up, by BN5's own table) is a playing chip's (a twin's or a moved
+ * one's) BN6 entry where a helper moved its routine (xchips_power_of), else
+ * not BN6's to show: 0, unshown. */
 void xrec_from_bn5(const XRecordFrom *in, uint8_t out[XREC_SIZE]);
 /* The placeholder where BN5's ROM is not read: the row's codes, type and
  * MB, a DarkChip's class, no power, Null, inert, BN6's blank art

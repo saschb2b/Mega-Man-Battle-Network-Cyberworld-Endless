@@ -1,5 +1,5 @@
 {
- "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy; nothing of the ROMs here.",
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here.",
  "mutations": [
   {
    "name": "an immediate",
@@ -573,9 +573,9 @@
    "name": "a chip's damage",
    "spec": "megaman_plain",
    "poke": [
-    "08021DEE:0029"
+    "08C00046:0029"
    ],
-   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A, 0x08021DA8 + 0x2C + 0x1A): CanGard's HP after the Cannon"
+   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A in the registry's copy the game reads, CHIPS_RECORDS + 0x2C + 0x1A, BN6's own table at 0x08021DA8 moved there): CanGard's HP after the Cannon"
   },
   {
    "name": "a Soul's turns four",
@@ -667,9 +667,9 @@
    "name": "a sprite table's entry not renumbered",
    "spec": "numberman_v1",
    "poke": [
-    "08D9A801:06:1"
+    "08D9A701:06:1"
    ],
-   "what": "NumberMan's companion's sprite table (BN5 0x080C33A8, its kind 0's number at +1, its copy at XN_CODE + 0x8800 + 0x1) left at BN5's list 4 number 6, BN6's another sprite, where the recipe makes it 0xAC, BN5's copied (XvByte)"
+   "what": "NumberMan's companion's sprite table (BN5 0x080C33A8, its kind 0's number at +1, its copy at XN_CODE + 0x8700 + 0x1) left at BN5's list 4 number 6, BN6's another sprite, where the recipe makes it 0xAC, BN5's copied (XvByte)"
   },
   {
    "name": "a Navi's state number not moved (TomahawkMan)",
@@ -776,6 +776,158 @@
     "08D90038:2010"
    ],
    "what": "the Navis' buster's setup (XN_STUB_BUSTER, its movs r0 at + 0x18) answering family 0x10 (the step) where BN5's 0x16 is BN6's 0x66 (XN_FAMILY_OF): the Dark Soul's first shot at t16"
+  },
+  {
+   "name": "a moved chip's family in its record",
+   "spec": "chip_crakout",
+   "poke": [
+    "08C03343:6C:1"
+   ],
+   "what": "CrakOut's record (the registry's 298 at CHIPS_RECORDS) naming family 0x6C, whose grown entry is the stub, where the install gives it 0x6B: MegaMan's attack ends at once"
+  },
+  {
+   "name": "a moved family's entry",
+   "spec": "chip_crakout",
+   "poke": [
+    "08E0016C:08E003C1:4"
+   ],
+   "what": "the grown attack families' entry 0x6B (FREE_ATTACK_FAMILIES + 0x16C) left at the stub (XATTACK_STUB) where the install points it at CrakOut's moved code"
+  },
+  {
+   "name": "a number in a moved family's code",
+   "spec": "chip_crakout",
+   "what": "CrakOut's wait (movs r0,#0xF at BN5's 0x080EC8BA, written at its copy) one frame shorter: the crack a frame early",
+   "poke5": [
+    "080EC8BA:200E"
+   ]
+  },
+  {
+   "name": "a moved object's type",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's aura spawned as BN5's fourth kind's 0x56 (movs r0,#0x57 at BN5's 0x080E6CF8, written at its copy), a type the dispatch was given none of",
+   "poke5": [
+    "080E6CF8:2056"
+   ]
+  },
+  {
+   "name": "a moved family's sound",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's sound 0xF7 (movs r0,#0xF7 at BN5's 0x080DA4B6, written at its copy) played as 0xF6",
+   "poke5": [
+    "080DA4B6:20F6"
+   ]
+  },
+  {
+   "name": "a moved chip's family, HotBody's",
+   "spec": "chip_hotbody1",
+   "poke": [
+    "08C04F73:A7:1"
+   ],
+   "what": "HotBody1's record (462) naming family 0xA7 (the stub) where the install gives it 0xA8"
+  },
+  {
+   "name": "a moved support routine's entry",
+   "spec": "chip_jealousy",
+   "poke": [
+    "08E004F4:08E00C01:4"
+   ],
+   "what": "the grown support routines' entry 0x3D (XC_SUPPORT + 0xF4) left at their stub (XC_STUBS) where the install points it at Jealousy's moved routine"
+  },
+  {
+   "name": "a moved support routine's object type",
+   "spec": "chip_jealousy",
+   "what": "Jealousy's object spawned as BN5's fourth kind's 0x35 (movs r0,#0x36 at BN5's 0x080E462C, written at its copy) where BN6's twin 0x36 runs",
+   "poke5": [
+    "080E462C:2035"
+   ]
+  },
+  {
+   "name": "a moved chip's subfamily in its record",
+   "spec": "chip_nrthwind",
+   "poke": [
+    "08C04E98:3E:1"
+   ],
+   "what": "NrthWind's record (457) naming support entry 0x3E (the stub) where the install gives it 0x3F"
+  },
+  {
+   "name": "a moved support routine's object type, NrthWind's",
+   "spec": "chip_nrthwind",
+   "what": "NrthWind's wind spawned as BN5's fourth kind's 0x38 (movs r0,#0x39 at BN5's 0x080E4940, written at its copy) where BN5's own 0x39 runs, moved",
+   "poke5": [
+    "080E4940:2038"
+   ]
+  },
+  {
+   "name": "a moved chip's sound's slot",
+   "spec": "chip_metagel",
+   "poke5": [
+    "080CE170:2053"
+   ],
+   "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x59, movs r0,#0x59 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one (0xE4's, which no chip copies): a song missing"
+  },
+  {
+   "name": "a moved chip's effect's id",
+   "spec": "chip_rainyday",
+   "poke5": [
+    "080D996E:2461"
+   ],
+   "what": "RainyDay's effect 0x61 (given an id of the chips', movs r4 at BN5's 0x080D996E, written at its copy) spawned as BN6's own 0x61, another picture"
+  },
+  {
+   "name": "the muzzle flash's sprite",
+   "spec": "chip_drilarm1",
+   "poke5": [
+    "080B9B48:1E:1"
+   ],
+   "what": "the flash 0x2F's number byte in the helper's copy of its table (BN5's 0x080B9B48, set to the number of the chips' where BN5's list 3 0x1E was copied) left at 0x1E: BN6's list 3 0x1E drawn, another picture"
+  },
+  {
+   "name": "a packed sprite word",
+   "spec": "chip_mrkcan1",
+   "poke5": [
+    "080E5794:00001024:4"
+   ],
+   "what": "MrkCan's mark's packed sprite word (its literal at BN5's 0x080E5794, given the number of the chips' where BN5's list 4 0x24 was copied, for the second packed setup 0x08018926) left at 0x1024: BN6's list 4 0x24 drawn, another picture"
+  },
+  {
+   "name": "a computed power's routine",
+   "spec": "chip_cusvolt1",
+   "poke": [
+    "08E02324:08E00C01:4"
+   ],
+   "what": "BN6's grown table of computed powers' entry 0xC9 (CusVolt1's 1073 as 1201, XC_POWERS + 4 x 0xC9) aimed at the stub (power 0, returning by mov pc, lr as the reader's mov lr, pc needs) where the install gives it the PowerCusVolt helper's copy: its damage 0"
+  },
+  {
+   "name": "a point of MegaMan's sprite",
+   "spec": "chip_cusvolt1",
+   "poke5": [
+    "080DD588:211A"
+   ],
+   "what": "CusVolt's volt placed by BN6's point 0x1A (movs r1,#0x1A at BN5's 0x080DD588, written at its copy) where the install gives it 0x1B (POINTS): the volt a panel ahead"
+  },
+  {
+   "name": "a collision data's offset added",
+   "spec": "chip_antifire",
+   "poke5": [
+    "080CF6CC:307C"
+   ],
+   "what": "the Anti trap's damage by element read at BN5's +0x7C (adds r0,#0x7C at BN5's 0x080CF6CC, written at its copy) where the install gives it BN6's +0x84 (COLL_SUMS): the trap never springs"
+  },
+  {
+   "name": "a table's effect id",
+   "spec": "chip_crakbom",
+   "poke5": [
+    "080C94D1:51:1"
+   ],
+   "what": "CrakBom's crack effect (its kind's row of the crack bombs' table, BN5's 0x080C94D1, given an id of the chips') left at 0x51: BN6's own effect 0x51, another picture"
+  },
+  {
+   "name": "a hit's stat parameter",
+   "spec": "chip_moonbld1",
+   "poke5": [
+    "080D33B4:01180003:4"
+   ],
+   "what": "MoonBld's hit words (its literal at BN5's 0x080D33B4, the stat effect 0x18's parameter given by BN6's rule, HIT_STATS) left as BN5's: BN6's rule bugs the foe's AI data"
   }
  ]
 }

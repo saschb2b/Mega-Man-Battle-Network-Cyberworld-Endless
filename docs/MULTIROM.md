@@ -796,7 +796,8 @@ and its calls aimed again (`src/emu/xvirus.c`):
   the engine writes): the chip registry at `+0x400000` (The chip
   registry, below), the Souls at `+0x480000` (Transplanted Souls,
   below), the lava and sea at `+0x4C0000`, room kept for the Navis at
-  `+0x500000` and the chips' moved code at `+0x600000`. The mode byte of a
+  `+0x500000` (their battle sprites first) and the chips' moved code at
+  `+0x600000` (The chips' code, below). The mode byte of a
   family's struct1 indexes BN6's 32 bytes for its families (read in one
   battle mode): kept, a family whose game's mode is past them given 0.
 - **The second-level dispatch** (`src/emu/xvirus_dispatch.c`;
@@ -1267,7 +1268,7 @@ into the battle engine).
   numbers). Its module whole, `0x080B9A5C`-`0x080B9D10` (the kinds table,
   58 kinds of five bytes; the type's routine; the spawner every attack
   calls; its helpers), is one block installed before any family or Navi
-  at `XN_OBJECTS` (`xnavi_install_core`), its type moved through the
+  at `XN_OBJECTS` (`xinstall_core`), its type moved through the
   dispatch for every track; a Navi's or a family's call to its spawner
   goes to the copy (WuNote's, its image kind 0x30). Its kinds' sprites, one
   table for every track (`tools/bn5_objects.py`): the twelve kinds whose
@@ -1353,15 +1354,17 @@ chip step gives any one (docs/DEVTOOLS.md).
   take ids of their own: BN6's records no chip uses (203-220, 291-300,
   314 and 350-367: blank-named, named by none of its tables, docs/
   ROM_DATA.md, The chip registry) and 411-511, past its 411 records.
-  203-213 are the eleven BN6's code already plays under other names
-  (AirHoc over AirHocky's family; WideSht1-3 over WideSht's; Spreader
-  over Spreadr1's; DrilArm1-3 over DrilArm's; Geddon1-3 over Geddon's,
-  which cracks, breaks or poisons by its first parameter as BN5's three
-  do), 214-220 the seven DarkChips, 291-294 the Megas (Z Saver among
-  them: BN6's Z Saver is a pseudo-chip of its battles, which no folder
-  holds, so BN5's has an id of its own over that pseudo-chip's family),
+  203-207 and 211-213 are the eight BN6's code already plays under other
+  names (AirHoc over AirHocky's family; WideSht1-3 over WideSht's;
+  Spreader over Spreadr1's; Geddon1-3 over Geddon's, which cracks, breaks
+  or poisons by its first parameter as BN5's three do), 208-210 DrilArm1-3
+  (C1 played them over BN6's DrilArm family; BN5's own drill since, moved:
+  The chips' code), 214-220 the seven DarkChips, 291-294 the Megas (Z
+  Saver among them: BN6's Z Saver is a pseudo-chip of its battles, which
+  no folder holds, so BN5's has an id of its own, its code BN5's, moved),
   295-300 the first chips to be moved (Guard1-3, CrakOut, DublCrak,
-  TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364 the fifteen
+  TripCrak: the three crack chips moved, The chips' code below), 314
+  HolyDrem beside BN6's Gigas, 350-364 the fifteen
   Program Advances beside BN6's, 411-504 the rest, the Navi chips last
   (489-504; Colonel and Colonel SP are BN6's). 365-367 and 505-511 stay
   free. A row of its own keeps its codes, library type and MB: what its
@@ -1431,7 +1434,8 @@ chip step gives any one (docs/DEVTOOLS.md).
   `sub_800A3E4`): the chips that sit out are taken out of the deck, the
   rest kept in their order (the Regular chip's and the TagChips' marks
   cleared where theirs went). They are the registry's chips whose code is
-  not moved yet (pending), BN5's DarkChips until BN5's dark rule comes
+  not moved yet (pending; a moved chip, `XREG_MOVED`, plays where BN5's
+  ROM is read, its code installed), BN5's DarkChips until BN5's dark rule comes
   into BN6's battles, its Program Advances until BN6's lists hold their
   recipes, and every one of BN5's where its ROM is not read. A run
   continued without BN5's ROM whose folder holds one of BN5's chips hears
@@ -1459,8 +1463,8 @@ its one other chip, and a run saved with BN5's chips continued without BN5's ROM
 words); the autopilot's seeds 1-12 the same, run log for run log, as
 before the tables moved.
 
-Not yet, each its later milestone's: the 104 pending chips' code (Guard
-and the crack chips first); CustSwrd's power (BN5's computed power 44,
+Not yet, each its later milestone's: the 96 pending chips' code (The
+chips' code, below, says what each unit waits for); CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood
 traps (BN6's traps trigger by chip id and it has no elemental kinds);
 BN5's DarkChips (M8, the dark rule); its Program Advances (M6: their
@@ -1474,6 +1478,333 @@ came with D1, One net); the folder editor's pack list, 0xA000 bytes, holds
 order stamps' clear at a NEW GAME covers BN6's 320 ids (the extension's
 start at 0 from the power-on clear); the link battle's copy of the pack
 (0xF00 bytes, no run reaches it).
+
+## The chips' code
+
+Issue #82's C2 and C3: a chip of BN5's proven to play as BN5 plays it,
+and BN5's own code moved into BN6's engine for the chips BN6 has no code
+of. The registry's ids, records and art stay C1's (above).
+
+- **The chips' differential (C2)** (`tests/xdiff/chip_*.json`; docs/
+  DEVTOOLS.md, The differential: a chip as the subject): MegaMan is the
+  subject; each game gets a folder of the chip (BN5's id and the
+  registry's, owned in BN6's pack as its deal asks), the first Custom
+  screen's chip picked and OK, the chip used at t30 against BN5's
+  CanladEX held paralysed (each game's own paralysis timer and struck
+  bit, set each fight frame: BN5's collision data +0x1E, BN6's +0x1C).
+  Compared frame by frame: MegaMan's CurAction (a C1 chip's family as
+  its BN6 twin's, a moved chip's as its moved number), his attack
+  variables and AI data, every object the chip spawns (by each game's
+  type, through the dispatch's TWIN and MOVED, and the picture it draws
+  by its sprite's bytes where both games' are in their ROMs: the same
+  code drawing another picture at the same number is a difference, an
+  effect object's picture its effect id's), effects, sounds, draws and
+  the target's HP. What differs and is the engine's, not the chip's,
+  is explained in `tests/xdiff/legit.json` with both games' routines
+  (never on a chip's own records): BN6's chip use ORs into the attack's
+  element a hit flag by its icon element (`0x080129E4`: Sword 0x80,
+  Cursor 0x40, Wind 0x20, Break 0x10; BN5's has none), carried on by the
+  chip's objects; BN6's support family ends its attack a frame later than
+  BN5's; BN6's hit-clear keeps a wrong word in a time stop
+  (`0x0801A022`); a sword's slash's last frame (each game's own sprite);
+  each game's muzzle flashes by its own table (WideSht's flash 0x2A in
+  BN5 and 0x59 in BN6 the same picture); the tables a chip's objects index
+  by kind (the thrown bombs', the spread shot's, the pucks', the guards');
+  NrthWind's gusts drawn by a routine the same in both (a twin of the
+  replay). docs/ROM_DATA.md, BN5's chips' code in BN6's engine, has
+  each with its addresses.
+- **Its verdicts**: BN6's own chips in both games (Cannon, Sword,
+  MiniBomb, AreaGrab) PASS, each game drawing its own chip with its own
+  pictures (BN6 redrew MegaMan's sword, list 3's 0, and his bomb's hand,
+  list 3's 2; there a sprite is compared by its frames' layout); of the
+  C1 plays with BN6's code under BN5's records, WideSht1-3, Spreader,
+  AirHoc and Geddon1-3 PASS, their pictures the same bytes (each
+  difference the engine's: WideSht's wave handed another spawn word,
+  Spreader's shot another collision region, AirHocky's wait counted
+  from another frame to the same end, Geddon's subfamily BN6's). C2
+  found BN6's DrilArm family (0x2E) winding up 9 frames longer than
+  BN5's 0x4F and BN6's Z Saver family (0x5B) slashing a frame sooner with
+  a collision flag and an AI field BN5's has not: decided (below), they
+  now run BN5's own code and PASS.
+- **The design calls, decided** (the owner's; issue #82): BN5's chips
+  behave as BN5's. DrilArm1-3 and Z Saver are move-class (BN5's own
+  code, moved: they sat out until it was, the registry's
+  `XREG_PENDING`, now `XREG_MOVED`). BlakWing's and HolyDrem's dark gates
+  (their records' +0x15: BN5's chip use lets BlakWing out only to a dark
+  MegaMan, the dark meter under 470, and HolyDrem only to a light one)
+  are BN5's own rule and come with the mood port (the Souls track's S7):
+  until then both sit out, their units derived (BlakWing's whole). The
+  plus chips stay BN6's rule (one chip per name: Attck+10, Navi+20 and
+  Attck+30 are BN6's own ids, merged into the chip before them as BN5's
+  merges its own, a puff used alone), but DarkPlus is BN5's: used alone,
+  +50 to the next chip (BN5's misc family 0x1A's subfamily 3,
+  `0x0800E190`), not done yet (What the rest wait for, below).
+- **The units (C3)**: a unit is one of BN5's attack families (the
+  routine a chip's CurAction runs) or one of its support or Navi chips'
+  routines (by subfamily), with every routine and object it reaches that
+  BN6 has no twin of. `tools/xchiprecipe.py` derives each from both ROMs
+  on the families' generator (docs/DEVTOOLS.md, The chip recipe
+  generator) and writes `src/emu/xchips_bn5.c` (numbers only) and
+  `src/core/xchips_moved.c` (each moved chip's id, family and
+  subfamily); `src/emu/xchips_code.c` installs them on xvirus's
+  machinery as the core starts, before the registry's records, all or
+  nothing. A twin of an object's code counts only where it is the same
+  code to its depth and draws the same pictures: the sprites both load
+  by number must be each game's of the same bytes (BN6's own T3 0x45 is
+  MetaGel's gel drawing another sprite, its animation 14 frames longer;
+  BN6's T3 0x18, CrakOut's crack, and T4 0x3A, NrthWind's gust, draw
+  others at the numbers BN5's do: the differential's runs found them);
+  an object BN6's twin would spawn of a type BN6 runs other code for
+  moves with its spawner; the hit area and the effect object are BN6's
+  own, audited. Each object type a unit spawns through the second-level
+  dispatch has one decision for every track, moved or twin, written in
+  `tools/bn5_twins.py` (`TYPES`; the generator fails on a type it spawns
+  that has none or another), and a moved type one copy, the first
+  track's to install it (`src/emu/xinstall.c`: the moved objects and
+  the Navis, then the chips' code, then the families): a unit spawns the
+  Navis' copy of their attacks' objects (the Navi chips' NumberMan,
+  KnightMan and ToadMan attacks run the Navis' own; a unit's call into
+  that code, ToadMan's note spawner, goes to the Navis' copy too, one
+  copy run by both) and of the moved objects', and the families spawn
+  the chips' of the types both move
+  (SideBub's water and bubbles Marina's, the crack bombs' Bugtank's,
+  BoyBomb's bomb BomBoy's, the misc family's meteor MetFire's fire
+  column, Pulsar's Batty's, the wide shot Lark's: each kind's row the
+  chips' copy fixes).
+- **What a unit's code is given**:
+  - *Sprites*: one BN6 keeps another of at the number BN5's code loads is
+    copied from BN5's ROM into a number of the chips' in BN6's grown list
+    (lists 1-5, the chips' from 0xFF down, the families' from the bottom
+    up, list 2's 0x20-0x2F the Navis'; list 3, the attacks', grown once
+    for every track, `XV_LIST3`), the load set to it: by its immediate,
+    the packed word of either packed setup (`0x0800F198`, `0x08018926`), or
+    a kind table's row (`TABLE_SPRITES`: the bubbles', the obstacles', the
+    shockwave's, the shield's, the geyser's); MegaMan's own sprite (the
+    swords' afterimage, BN5's family 0x49's) is each game's own.
+  - *Effects*: one whose entry differs takes BN6's of the same sprite
+    bytes, animation and palette, else an id of the chips' (0xD0-0xFF,
+    from the top down) whose entry names BN5's sprite, copied; by its
+    immediate (a number added to a value shifted past its byte too:
+    Slasher's), a byte table's row (`TABLE_EFFECTS`: Z Saver's, CustSwrd's,
+    Katana's, ElcReel's, the crack bombs', the seeds', the spread shot's),
+    an id handed to the engine's routine that spawns effects over a
+    pattern of panels (`EFFECT_CALLS`, `0x08018838`), or a run of them by
+    an object's kind (`EFFECT_RANGES`: Colonel's soldiers', base + kind,
+    one run in BN6's ids).
+  - *Sounds*: a song BN6 has another of at BN5's number is copied by
+    `src/audio/xsong.c` (`xsong_install_at`) into one of BN6's empty song
+    slots, the one fixed for that sound whichever track copies it (the
+    shared allocations: 0xBC 0x55, 0xB7 0x61, 0x6F 0x54, 0xE4 0x53, 0x70
+    0x5F, 0xBA 0x60, 0xC0 0x62; their second amendment: 0x105 0x59, 0x115
+    0x5A, 0x117 0x5E, 0x119 0x4D, 0x8E 0x4C, the fixed ones from 0x40 up,
+    the per-run themes 0x26-0x3F; the chips' own from 0x52 down: 0x12E 0x52,
+    0xA6 0x51, 0xC6 0x50, 0xBD 0x4F, 0x10E 0x4E, 0xE1 0x4B, 0x4A next),
+    taken only where the slot still holds BN6's empty header; the
+    immediates name the slot, a table's row its bytes (`TABLE_SOUNDS`: the
+    Anti chips' counter's, the seeds', the crack bombs', the spread
+    shot's, DrkSonic's sonic's).
+  - *Panels*: BN5's lava, sea and holy (8, 0xA, 9) are BN6's 13, 14 and 5
+    (src/emu/xpanels.c brings lava and sea in), set or compared by
+    immediate or a table's row (`TABLE_PANELS`: the panel changer's kinds,
+    the seeds'; `PANEL_LOOKUPS`: ElemRage's element by MegaMan's panel);
+    BN5's magnet panel (5), which BN6 lacks, is a type no panel has (0xFE)
+    where a unit compares with it and left where no moved unit reads its
+    row. A panel's fields past its first 0x10 bytes are read at BN6's
+    place (the flags, BN5 +0x18, BN6 +0x14: legit.json's panel layout).
+  - *Collision data and MegaMan's points*: an offset into an object's
+    collision data is BN6's (legit.json's layout), the immediates of loads
+    and stores through it and a number added to its address
+    (`COLL_SUMS`: the Anti trap's damage by element, BN5 +0x7C, BN6
+    +0x84). A point of MegaMan's sprite a unit asks for (`0x08015140`'s
+    r1, `0x08015164`'s r2) is BN6's of the same number where his rows
+    give the same, else BN6's that `POINTS` names (CusVolt's 0x1A as BN6's
+    0x1B, the centre, 2 pixels further right as every point of his), else
+    a stub answering BN5's numbers (`UNIT_STUBS`: ElemRage's 0x14, (-1,
+    26) in every row of BN5's, none of BN6's).
+  - *Helpers*: BN5's code several units call whose object one copy alone
+    may move (the dispatch moves a type once) is installed once before
+    the units, at `XC_HELPERS`, and the units' calls aimed at it: the
+    buster arm (`0x080EBB96`, BN5's plain buster's too), the shake
+    (`0x080D3286`, the third kind's 0x68: SpShake's and ShakPar's), and the
+    computed powers' routines (below). The muzzle flash (MegaMan's arm as
+    a chip takes it: its spawner `0x080B9CAE`, the first kind's 0x05, its
+    58-entry table at `0x080B9A5C`) is BN5's image object, moved once for
+    every track with the Navis' install (The engine's objects moved once):
+    a unit's calls into its module go to that copy, and the entries the
+    units name are fixed there (`tools/bn5_objects.py`: BN6's twin, or
+    BN5's sprite copied at the Navis' place or a number of the chips' in
+    list 3). The differential counts no helper's calls as a unit's.
+  - *Computed powers*: a record's power of 1000 and up is an index into
+    each game's table of routines that compute it (BN6's 45 at
+    `0x080109DC`, BN5's 76 at `0x0800E728`). BN6's is grown once to 256 at
+    `XC_POWERS` (its word `0x080109D4` pointed there), its own 45 kept,
+    BN5's entry i at 0x80 + i where a helper moved its routine
+    (CustSwrd's 1045 and CusVolt1-3's 1073-1075 by the Custom gauge, the
+    Navi chips' SP by BN5's fixed link powers, `UNIT_STUBS` answering the
+    link bit 1 as BN6 keeps no deletion times of BN5's Navis, and DS by the
+    side's battle counter 3), the rest a stub (power 0); a playing chip's record
+    takes BN6's entry (`xchips_power_of`), still computed and shown.
+  - *Subfamilies a unit plays*: a family's table of routines by
+    subfamily (`SUB_TABLES`: the bombs', the misc family's) keeps the
+    entries of the subfamilies its moved rows play (moved, Program
+    Advances and the DarkChips of `DARK_MOVED`, waiting for their rules);
+    the rest, BN6's own chips' (`XREG_SAME`, run by BN6's code), aimed at
+    a stub and not walked.
+  - *Another family started*: a chip whose code starts another of BN5's
+    families (Slasher's `setAttack0(0x49)`, the player's 0x80000 reaction)
+    gives the immediate the started family's moved number (0x99).
+  - *Stubs*: a panel claim's spawners (`0x080EA08C`, `0x080EA0BA`) answer
+    r0 0. Proved inert in every battle a run fights: they spawn the
+    fourth kind's 0x83 (the one object that uses BN5's panel-claim pool,
+    `0x0802E920`-`0x0802EAB4`, and its RAM) only where the battle's bit
+    0x40 is set (`0x080090E8`, BattleState +0x32); the moved spawner's
+    gate is BN6's twin (`0x0800A8F8`), BN6's bit set only by `0x0802E112`
+    for a link battle (the link's state `0x0200AD04`, or the Beast Link
+    Gate's event flag 0x1722), as BN5 sets its own only at `0x0802D594`.
+    No RAM is taken for the pool. Every stub returns by `mov pc, lr`, BN6's
+    own idiom: the readers of the support, Navi and computed powers' tables
+    call through `mov lr, pc` (BN6 `0x080ED100`, `0x080E2BE6`,
+    `0x08017B1E`, `0x080109CA`), a return address without the Thumb bit,
+    which a `bx lr` would go on from in ARM state (the differential's
+    mutation of a computed power found it: BN6's Custom screen never
+    opened).
+- **The numbers, one table for every track**: BN6's attack families
+  grown once to 240 entries, CurAction 0x10-0xFF (`src/emu/xattack_grow.c`:
+  BN6's 0x10-0x5E, the chips' 0x60-0xBF, the Souls' 0xC0-0xCF, the rest
+  spare, every entry not given a stub that ends the attack); BN5's
+  family F is BN6's 0x50 + F. BN6's support and Navi chips' routines
+  grown to 256 entries each, BN6's own first; BN5's support subfamily S
+  is BN6's 0x2A + S, its Navi subfamily S BN6's 0x1D + S. Fixed by BN5's
+  numbers, the same at every boot and in every build.
+- **Moved** (94 chips, each family's spec PASS, its objects' pictures
+  compared by their bytes, the registry's `XREG_MOVED`, playing where
+  BN5's ROM is read): CrakOut, DublCrak, TripCrak (BN5's family 0x1B as
+  0x6B: its crack moved with its sprite), HotBody1-3 (0x58 as 0xA8),
+  Jealousy and NrthWind (support 0x13 and 0x15 as 0x3D and 0x3F),
+  MetaGel (support 0x06 as 0x30: its gel's sprite into list 3, sound 0x105
+  at slot 0x59), Blinder (0x08 as 0x32, sound 0xBC at 0x55), Skully1-3
+  (0x55 as 0xA5, sound 0xB7 at 0x61), DrilArm1-3 (0x4F as 0x9F: its flash
+  0x2F's drill arm copied), RainyDay (support 0x3D as 0x67: its effects
+  0x61 and 0x29, its sea's compare BN6's 14), WoodNos1-3 (0x28), CactBal1-3
+  (0x48), SpShake1-3 (0x51), Pulsar1-3 (0x52), each through the buster
+  arm, MrkCan1-3 (0x4E: its mark's sprite by the second packed setup, its
+  flashes 0x2C-0x2E, sound 0xBD), SideBub1-3 (0x1C: the bubbles' kind
+  table), AqWhirl1-3 (0x47: its effect 0x4F, sound 0x70 at 0x5F, its sea
+  BN6's 14, its claim spawner stubbed), Z Saver (0x34 as 0x84: the swords'
+  reach `0x08012530` copied, its flashes and slashes' effects BN5's),
+  Katana1-3 (0x54), ElcReel1-3 (0x23), BoyBomb1-3 (support 0x3A as 0x64),
+  Guard1-3 and CrsShld1-3 (0x1F as 0x6F), MoonBld1-3 (0x53 as 0xA3),
+  CusVolt1-3 (0x27 as 0x77, their powers computed), CustSwrd (BN5's sword
+  family 0x13 as 0x63: BN6's own runs its subfamily 7 with its effect
+  0x28, a spark, where BN5's is CustSwrd's slash), the Anti chips
+  (support 0x0C as 0x36: a foe's strike made Fire or Elec in both games'
+  copies springs the trap, the counter's sound 0x12E at 0x52), Slasher
+  (0x29 as 0x79, and BN5's 0x49 as 0x99, the family it starts: a foe on
+  MegaMan's side of the field), ElemRage (0x56 as 0xA6: on grass Wood, on
+  lava Fire), the bombs (0x12 as 0x62: Quake1-3, CrakBom, ParaBom,
+  ResetBom, LavaSeed, CannBall, Geyser, SeaSeed, SeaSeed's sound 0xE1 at
+  0x4B) and the misc family (0x1A as 0x6A: RedFrut1-3, Voltz1-3,
+  Astroid1-3, WavePit on the sea, RedWave on lava, MudWave, whose waves
+  rise from holes, which no field of BN5's has: its use alone compared),
+  and the Navi chips NumbrMan, ShadoMan, TmhwkMan, KnightMn and ToadMan
+  (their V1s: BN5's Navi routines 0x00, 0x0B, 0x0C, 0x05 and 0x0D as
+  0x1D, 0x28, 0x29, 0x22 and 0x2A, each drawing its Navi's own battle
+  sprite, the Navis' list 2's `0x20` + AI - 7, and running the Navis'
+  copies of their attacks' objects: NumberMan's dice, KnightMan's
+  wrecking ball, ToadMan's notes; KnightMan's companion begun and ended
+  by BN6's AI index for him, 0x24, `NAVI_AI_CALLS`, and his object's own
+  states kept BN5's numbers, `OWN_STATES`). Skully's spec holds a
+  recorded FAIL (`verdict`): the engine's status mark over the foe (the
+  fourth kind's 0x06, the same code in both) drawn from each game's own
+  list 5's 0x0B; `--survey`: nothing else differs. Blinder's recorded
+  FAIL (its blind mark at CanladEX's arm point) no longer holds since the
+  virus families bring their own arm points: it passes. Mutations (`--mutations`)
+  break each kind of number a unit is given (a record's family or
+  subfamily, a grown entry, a number in its code, an object's type, a
+  sound and its slot, an effect's id, a copied sprite's row in the
+  flash's and a kind table) and each fails its spec.
+- **What the differential found, and why** (each its cause, the fix the
+  generator's and the cause in `tools/xchiprecipe.py`'s tables):
+  - The one copy of a type two tracks spawn: BomBoy's specs ran the
+    chips' copy of the bomb (the third kind's 0x3E) once the chips' code
+    installed first, and at a paralysis (bomboy_v1_keys) its states mixed
+    two numberings: BN5's own actions table by the obstacle runner, whose
+    generic states BN6's twins number as BN6's. The bomb's update is now
+    BN6's twin (`FORCE_TWIN`: BN6's table, as the families' copy had it),
+    its CurAction read as BN6's (legit.json, t3_types); a family's spec
+    counts the chips' copy it runs as its own code (`xd_log_shared`).
+    KnightMn's object froze BN6's battle (its own states' table by +9 read
+    at 0xE: `OWN_STATES`) and summoned another AI's companion (BN6's AI
+    index for him: `NAVI_AI_CALLS`); the SP and DS powers' routines read
+    their records' powers less BN5's bases (`POWER_BASES`).
+  - BoyBomb: moved BN6's battle stood still once its thrower's time stop
+    ended. Its bomb's actions are a table of routines BN5's code hands to
+    the obstacle's state runner (`0x08017FCC`), which the deriver cut at
+    its first entry far from it: the rest BN5's addresses in BN6's ROM.
+    Now a table handed in a register is walked whole (`TABLE_ARGS`), and a
+    table whose next word is a routine too is a decision.
+  - Guard: the shield's collision data recorded the reticle's strike with
+    bit 0x80 more in BN6's: the comparator's own reading of an alliance
+    byte dropped the rest bits (`tools/xdiff_snap.py`, alliance_or), not
+    the chip's. CrsShld's shield kept another word at +0x64: BN6's own
+    shield (the third kind's 0x2B, the same code) reads its kinds from its
+    own table (BN6 `0x080CAED4`), BN5's (`0x080CA2D8`) another sprite at
+    CrsShld3's row: moved with BN5's table (`FORCE_MOVED`, `FORCE_COPY`).
+  - MoonBld: the foe's AI data apart from the blade's hit on, and 1 HP: the
+    hit's stat effect 0x18 is each game's own rule (BN6's virus pre-step
+    `0x08013B20` adds the parameter to the AI data's +0x12, BN5 none): the
+    sweep copied, its hit's parameter given in BN6's terms (`HIT_STATS`);
+    the blade's register its spawn keeps from the calls before it (+0x3C,
+    its first frame alone, read by nothing) a mask.
+  - CusVolt: the volt a panel ahead in BN6's: its place by MegaMan's
+    point 0x1A, another point in BN6's rows (`POINTS`).
+  - The Anti chips: no counter in BN6's: the trap reads the struck's
+    damage by element at BN5's place in the collision data (`COLL_SUMS`);
+    its counter's explosion spawner differs below (moved).
+  - DrkSonic: its sonic's time read from a table its BN6 twin keeps
+    otherwise (BN5's 60, 60, 60, 60, 120 by kind, BN6's 170, 60, 170, 30),
+    the same code: a twin now also compares the data its literals name
+    (`same_data`), which moved that phase and found the explosion's and
+    MrkCan's, CannBall's and Astroid's tables (each audited or moved).
+  - Geyser, CannBall: each game's own spark sprite (list 5's 5) lives
+    shorter in BN6's (masks).
+- **Waiting for their rules** (their code moved and installed, their rows
+  sitting out, `xchips_moved.c` naming their moved family and subfamily
+  so their records take it): the Program Advances InfVulc1-3 (BN5's
+  Vulcan family 0x19 as 0x69), SuprSpr1-3 (the spread family 0x25 as
+  0x75), Boxer1-3, ShakPar1-3 and CacDanc1-3 (the misc family's
+  subfamilies 0x15-0x17), formed once BN6's lists hold their recipes;
+  the DarkChips DarkCirc (support 0x2A as 0x54), DrkSonic (support 0x1B
+  as 0x45), DarkWide (the spread family's subfamily 2) and DarkMetr (the
+  misc family's 0x11), their dark rules S7's. Dealt straight into the
+  battle deck, InfVulc1, SuprSpr1, Boxer1 and ShakPar1 PASS; the four
+  DarkChips hold a recorded FAIL at their use, BN5's dark rule (MegaMan's
+  mood to 0, a stat's price, his mark, random draws: S7's), nothing else
+  differing; CacDanc has no code a deck can deal (BN5's custom screen
+  makes any code of it a blank chip).
+- **What the rest wait for** (`tools/xchiprecipe.py --report`):
+  - The Navi chips' SP and DS (11: NumbrMan, ShadoMan, TmhwkMan,
+    KnightMn and ToadMan's SP and DS, ColonelDS): their code their V1s',
+    their powers computed (BN5's table of them at 0x80 + i, their bases
+    BN6's records' numbers, `POWER_BASES`), their rows sitting out
+    (`ROWS_WAIT`): an SP's power is the link battle's fixed one where
+    BN5's is by its best deletion time, which BN6 keeps none of
+    (`chip_numbrmnsp`: 70 against 40, nothing else differing), and BN5's
+    battle, a DS dealt first and picked, has MegaMan use another chip
+    (`chip_numbrmnds`, `chip_colonelds`), not traced yet. Their specs are
+    references until they play.
+  - DrkLance, DarkDril and DarkTorn: over their twins' families, their
+    dark rules S7's.
+  - DarkPlus as BN5's (+50 to the next chip): BN5's misc family's
+    subfamily 3 and the next chip's damage reading the bonus, engine work.
+  - HolyDrem and BlakWing: their dark gates with the mood port (S7);
+    Poltrgst (support 0x31): a sprite by a table of its own and a pair to
+    audit (`0x0800DD8C`, HolyDrem's too).
+- **A moved virus's deletion**: the specs stop before a foe is deleted
+  (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
+  spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
+  `0x02034A90`, BN6 `0x02034880`) the comparator does not read in BN6's
+  terms, the virus families' track's.
 
 ## Transplanted Souls
 
@@ -1733,10 +2064,18 @@ the next.
   257 of them registered by id, those BN6 has by name BN6's, 138 with
   ids of their own and BN5's records, names, descriptions and art in
   BN6's tables grown to 512, placeholders where its ROM is not read.
-  AirHoc, WideSht1-3, Spreader, DrilArm1-3, Geddon1-3 and Z Saver play
-  in BN6's battles; the rest sit out until their code is moved. Those
-  that play come into runs (One net: D1); a chip that sits out never
-  enters a pool.
+  AirHoc, WideSht1-3, Spreader and Geddon1-3 play in BN6's battles by
+  BN6's code, those of The chips' code by BN5's own code moved; the rest
+  sit out until theirs is. Those that play come into runs (One net: D1);
+  a chip that sits out never enters a pool.
+- [x] Its chips judged against BN5's own (The chips' code, above): each
+  used in both games and compared frame by frame; BN6's own and eight of
+  C1's twelve the same as BN5's, DrilArm1-3 and Z Saver BN5's own code
+  since (decided).
+- [ ] Its chips' code in BN6's engine: the chips of The chips' code
+  moved and proven (Moved); the rest wait, each for what The chips' code
+  names (a found difference to trace, the mood port), with its Program
+  Advances and DarkChips.
 - [x] Its Navis in BN6's own engine (Transplanted Navis, above): Team
   Colonel's six and the Dark Soul moved, each proved against BN5's
   battle frame by frame (ToadMan's SP with BN5's sea's submerge, made

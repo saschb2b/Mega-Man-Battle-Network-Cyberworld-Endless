@@ -112,6 +112,8 @@ class Deriver:
         # numbers unaudited, its Navis proven frame for frame by tools/xdiff.py instead)
         self.audit_numbers = True
 
+    join_pool_gaps = True   # (blocks_of: a routine's run and its pool's joined across other code, the bytes between zeroed)
+
     def table(self, ai, k):
         return self.b5.u32(BN5['fam'] + BN5['step'] * k + 4 * ai)
 
@@ -195,6 +197,9 @@ class Deriver:
             return False
         if (kind, v5) in bn5_twins.MOVE_TYPES:
             return False
+        rec = bn5_twins.TYPES.get((kind, v5))
+        if rec is not None and rec[0] == 'moved':
+            return False   # (one decision a type for every track: moved where any track's code needs BN5's, a merge's moved winning)
         if not self.art_same:
             return True
         s5 = self.type_sprites(self.b5, r5 & ~1, BN5['sprite_load'])
@@ -500,9 +505,10 @@ class Deriver:
         if run:
             runs.append([run[0], (run[1] + 1) & ~1])
         # (a routine whose literal pool lies past other code of its game, which no walk reached: one block from its code to
-        # its pool, the bytes between dead in the copy, zeroed)
+        # its pool, the bytes between dead in the copy, zeroed; a deriver that joins such runs its own way leaves them apart:
+        # the chips', tools/xchiprecipe.py, its gaps' routines walked as its own)
         f.gaps = getattr(f, 'gaps', [])
-        merged = True
+        merged = self.join_pool_gaps
         while merged:
             merged = False
             for w in f.walks.values():

@@ -26,7 +26,7 @@ enum {
 	XG_AI_HOOKS,                   /* the three 35-word tables, a word an AI index: BN6_AI_HOOKS, */
 	XG_AI_HOOKS2,                  /* ... BN6_AI_HOOKS2, */
 	XG_HELD,                       /* ... BN6_HELD_CHIPS */
-	XG_LIST,                       /* sprite lists 1, 2, 4 and 5: XG_LIST + xvirus_list_slot(list), a word a number */
+	XG_LIST,                       /* sprite lists 1, 2, 4, 5 and 3: XG_LIST + xvirus_list_slot(list), a word a number */
 	XG_EFFECTS = XG_LIST + XV_LISTS_GROWN,   /* the effects, a word an effect id */
 	XG_T1,                         /* the first, third and fourth kinds' types, a word a type */
 	XG_T3,

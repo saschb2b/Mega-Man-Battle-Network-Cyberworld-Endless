@@ -228,6 +228,10 @@ def registry():
 
 # ---- a family's recipe ----
 
+# The tracks whose copies of a moved type install before the families' (src/emu/xinstall.c, xinstall_core)
+BEFORE_FAMILIES = ('navis', 'chips')
+
+
 class Alloc:
     """the numbers the families take, in install order"""
 
@@ -241,8 +245,12 @@ class Alloc:
                 self.lists[lst].remove(num)
         self.memo = {}   # (what, BN5's number) -> BN6's, one BN5 thing one BN6 number across families
         # (kind, BN5's type) -> the family that moved it first: those after spawn its copy; the moved objects' first of all
-        # (tools/bn5_objects.py, installed before any family)
+        # (tools/bn5_objects.py), then the types whose copy tools/bn5_twins.py's TYPES gives the Navis or the chips' code, all
+        # installed before any family (src/emu/xinstall.c, xinstall_core)
         self.moved_types = {(m['kind'], m['type']): 'the moved objects' for m in OB.MODULES}
+        for key, rec in bn5_twins.TYPES.items():
+            if rec[0] == 'moved' and rec[2] in BEFORE_FAMILIES:
+                self.moved_types.setdefault(key, f'the {rec[2]}\' copy')
 
     def number(self, kind, key):
         k = (kind, key)

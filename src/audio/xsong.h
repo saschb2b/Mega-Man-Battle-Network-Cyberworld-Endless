@@ -52,5 +52,13 @@ uint32_t xsong_pack(int xrom, int song, uint32_t at, uint8_t *out, uint32_t room
  * there, as xsong_install_sound would have: the other tracks' installs find
  * it, and xsong_copy_of names it. False where `slot` is not the sound's. */
 bool xsong_found(int xrom, int song, int slot);
+/* A sound of extra ROM `xrom` in BN6 at the one slot fixed for it (issue
+ * #82's shared allocations: one sound one slot, whichever track copies
+ * it; BN5's chips' code, xchips_code.c), played by the players its game
+ * names: `slot`, copied now where the slot still holds BN6's empty header
+ * or before (another track's copy noted there); -1 where it cannot be (the
+ * slot another song's, not the one xsong_sound_slot gives the sound, or the
+ * sound copied at another slot). */
+int xsong_install_at(int xrom, int song, int slot);
 
 #endif

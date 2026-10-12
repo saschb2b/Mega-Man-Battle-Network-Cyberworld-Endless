@@ -26,7 +26,7 @@
 #include "visitor_families.h"
 #include "visitors.h"
 #include "xbattles.h"
-#include "xnavi_install.h"
+#include "xinstall.h"
 
 #define ROLLS 300
 
@@ -500,7 +500,7 @@ int pacing_report_run(const char *path) {
 	 * issue #82) */
 	if (XR[XROM_BN5_COLONEL_US].data) {
 		if (!emu_init(R.data, ROM_SIZE)) return 1;
-		xnavi_install_core(XVIRUS_FAMILIES, XNAVI_BN5);
+		xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	}
 	FILE *out = fopen(path, "w");
 	if (!out) return 1;

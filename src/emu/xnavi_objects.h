@@ -6,9 +6,9 @@
  * calls, its helpers) at XN_OBJECTS, its type moved through the
  * second-level dispatch (xvirus_dispatch.h), its kinds' sprites as BN6
  * lists them where a kind is fixed (xnavi_bn5.c, xnavi_objects_bn5). One
- * install, all or nothing, before any family's or Navi's (xnavi_install.c,
- * xnavi_install_core: a family's code calls into them too, WuNote's image,
- * and its type is run as theirs, XV_TYPE_SHARED). */
+ * install, all or nothing, before any Navi's, chip's code or family's
+ * (xinstall.h: a chip's or a family's code calls into them too, the muzzle
+ * flashes, WuNote's image, and its type is run as theirs, XV_TYPE_SHARED). */
 #ifndef CW_XNAVI_OBJECTS_H
 #define CW_XNAVI_OBJECTS_H
 

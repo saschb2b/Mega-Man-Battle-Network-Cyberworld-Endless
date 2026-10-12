@@ -320,12 +320,13 @@ int xsong_copy_of(int slot, int *xrom) {
 }
 
 /* BN5's sounds that are no BN6 song, each at a slot of its own whichever
- * track's code plays it (issue #82's plan for its tracks; docs/ROM_DATA.md,
- * BN6's empty song slots): copied by the first install that needs it,
- * found there by the others */
+ * track's code plays it (issue #82's plan for its tracks and its
+ * amendments; docs/ROM_DATA.md, BN6's empty song slots): copied by the
+ * first install that needs it, found there by the others */
 static const struct { uint16_t song; uint8_t slot; } BN5_SOUNDS[] = {
 	{ 0xC0, 0x62 }, { 0xB7, 0x61 }, { 0xBA, 0x60 }, { 0x70, 0x5F }, { 0x117, 0x5E }, { 0x129, 0x5D }, { 0x16B, 0x5C }, { 0xE1, 0x5B },
 	{ 0x115, 0x5A }, { 0x105, 0x59 }, { 0x10C, 0x58 }, { 0x10D, 0x57 }, { 0xCF, 0x56 }, { 0xBC, 0x55 }, { 0x6F, 0x54 }, { 0xE4, 0x53 },
+	{ 0x12E, 0x52 }, { 0xA6, 0x51 }, { 0xC6, 0x50 }, { 0xBD, 0x4F }, { 0x10E, 0x4E }, { 0x119, 0x4D }, { 0x8E, 0x4C },
 };
 
 int xsong_sound_slot(int xrom, int song) {
@@ -355,4 +356,23 @@ bool xsong_found(int xrom, int song, int slot) {
 	if (X.nsongs >= (int)(sizeof X.song / sizeof *X.song)) return false;
 	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, emu_read32(BUS + R.layout->song_table + (uint32_t)slot * 8) };
 	return true;
+}
+
+static bool slot_taken(int slot) {
+	for (int i = 0; i < X.nsongs; ++i)
+		if (X.song[i].slot == slot) return true;
+	return false;
+}
+
+int xsong_install_at(int xrom, int song, int slot) {
+	xsong_install(xrom, -1, -1);
+	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || slot < SOUND_FIRST || slot > SOUND_LAST || xsong_sound_slot(xrom, song) != slot)
+		return -1;
+	/* (copied before, or noted where another track's install copied it: at its slot alone, one BN5 sound one slot) */
+	int at = slot_of(xrom, song);
+	if (at >= 0) return at == slot ? slot : -1;
+	/* (the slot still BN6's empty one, as the player's ROM has it: no copy of anything there yet) */
+	uint32_t entry = BUS + R.layout->song_table + (uint32_t)slot * 8;
+	if (slot_taken(slot) || emu_read32(entry) != get32(R.data + (entry - BUS)) || emu_read32(entry + 4) != get32(R.data + (entry - BUS) + 4)) return -1;
+	return copy_in(xrom, song, true, slot) ? slot : -1;
 }

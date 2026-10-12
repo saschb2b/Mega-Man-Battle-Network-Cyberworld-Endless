@@ -1,0 +1,86 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkCirc R in both games, BN5's chip 187 by BN5's own code and the registry's 214 by the same code moved (BN5's support routine 0x2A as BN6's 0x54; a DarkChip of the registry's, dealt straight into the battle deck, as its rule (S7) is to come), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "22BB"
+ ],
+ "folder6": [
+  "22D6"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "22BB"
+ ],
+ "deck6": [
+  "22D6"
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 32,
+  "why": "BN5's dark rule, S7's to bring (docs/MULTIROM.md): the DarkChip used, BN5's battle drops MegaMan's mood to 0 (his NaviStats +0x0E, the player block's), takes its price (the player block's +0x54: 0x64), marks his object (+0x94: 3) and draws random numbers for it (BN5 0x080197B1), none of which BN6's battle does yet; DarkCirc's own code moved plays as BN5's (its support object, the fourth kind's 0x5E, its circle, the third kind's 0x89 and 0x8A, its sounds 0xBD and 0x10E from their slots 0x4F and 0x4E); --survey: nothing else differs, unmasked"
+ }
+}

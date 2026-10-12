@@ -23,16 +23,10 @@ enum {
 	XNAVI_NONE,      /* --dev nonavis: none */
 };
 /* The Navis a battle may meet, installed once a core as it starts (after
- * the families, xvirus.h, and the moved objects): their ids then spawn them
- * (the foes step), and data.c reads those ids as the engine does
- * (EnemyMoved). */
+ * the moved objects, before BN5's chips' code and the families: xinstall.h):
+ * their ids then spawn them (the foes step), and data.c reads those ids as
+ * the engine does (EnemyMoved). */
 void xnavi_install_all(int which);
-/* Another game's content moved into BN6's engine as the core starts: BN5's
- * engine objects every track runs (xnavi_objects.h) where BN5's families or
- * Navis come in, the virus families `families` names (xvirus_install's
- * XVIRUS_*), then the Navis `navis` names (XNAVI_*), then BN5's sea's
- * submerge (xsea.h) where its sea came in */
-void xnavi_install_core(int families, int navis);
 /* One Navi into the core's ROM copy (the rooms grown first): true once it
  * is there (now or before); false, nothing of it written, where any check
  * failed (the log says which). */

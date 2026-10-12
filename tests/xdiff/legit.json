@@ -52,6 +52,104 @@
         "why": "MegaMan's NameID in a form of BN6's is 0x1AB + the form (0x08015B22 writes it as he crosses: 0x1AC-0x1C3; 0x1A0 in none), where BN5's stays 0x180 through a Soul and its end (the research's runs/nid). His role is MegaMan's whatever his form; his NameID is compared as BN6 writes it for the form BN5's maps to (a Soul behind the proxy, 0x1B3)."
       }
     },
+    "chip_id": {
+      "why": "A chip id: BN5's by the chip registry's rows (src/core/xchips_registry.c: a chip both games name alike BN6's id, BN5's other chips the ids of their own), read from the source the game is built from, as BN6's engine has them in its tables (docs/MULTIROM.md, The chip registry). Translated where an object keeps one: a battle object's chip (+0x2A, BN6_T1_CHIP, the chip it uses next, u16, 0xFFFF none: written as the hand deals it to MegaMan and as a virus picks its own) (a virus's held chip picked, or its own code's: Zomon's AreaGrab), and the AI data's places below (its AttackVars +0x14, the chip used, written by the chip's use, BN5 0x0800FF68 / BN6 0x08012824, and by a virus's chip writer, BN5 0x0800FE7C / BN6 0x080126F6: strh r0,[r7,#0x14], r7 the AI data + 0xA0). A virus's CurAction from 0x10 that is the family the chip writer returned for its chip (the record's +0x0B, BN5 0x0800FEBA / BN6 0x0801273A, for setAttack0) is read as BN6's family of BN6's chip (tools/xdiff_snap.py, chip_action): the same chip in each game's own numbers. And where a support chip's routine keeps it: its object's +0x30 (r7 as the support family calls the routine: the chip used, its AttackVars +6 above it; BN5 0x080EC416 / BN6 0x080ED0F8), by the object's type (t4: the fourth kind's). The support chips' objects keep it so: each spawned by its support routine with r7 the chip (and AttackVars +6 above it), stored at +0x30 (MetaGel's 0x21, Blinder's 0x23, Jealousy's 0x36, NrthWind's 0x39, BoyBomb's 0x67, RainyDay's 0x75, BlakWing's 0x54, HolyDrem's 0x59, HotBody's 0x57, the Anti chips' setter 0x2A and its counter 0x2B (spawned by BN5 0x080E38E2 as its trap springs), DarkCirc's 0x5E and DrkSonic's 0x4A (chip_darkcirc, chip_drksonic: 0xBB and 0xC6 there in BN5's, BN6's ids 0xD6 and 0xDC): their routines BN5 0x080E2F84, 0x080E3228, 0x080E4628, 0x080E493C, 0x080E816E, 0x080E91EE, 0x080E6AB4, 0x080E6F60 HotBody's family 0x080F0222 and the Anti chips' 0x080E380A (0x080E3828), each str r7,[r0,#0x30]); and the third kind's: the Anti chips' trap 0x4D, its setter's chip passed on (BN5 0x080CF7F4: str r7,[r0,#0x30]).",
+      "registry": "src/core/xchips_registry.c",
+      "evidence": [
+        "zomon_v1 t1: Zomon's +0x2A 0x75 in BN5's (its set-up's movs r0,#0x75; strh r0,[r5,#0x2A], BN5 0x08108932-0x08108934: chip 117, AreaGrab) and 0xA3 in BN6's (163, AreaGrab: the registry's row 117 to 163, SAME); t390 its AttackVars +0x14 the same chip, its CurAction the chip's family 0x15 by each game's record (BN5 0x0801E210 + 0x2C x 117, BN6 0x08021DA8 + 0x2C x 163, +0x0B 0x15 in both)"
+      ],
+      "places": {
+        "ai": [
+          "0xB4"
+        ],
+        "t4": {
+          "0x03": [
+            "0x30"
+          ],
+          "0x1D": [
+            "0x30"
+          ],
+          "0x21": [
+            "0x30"
+          ],
+          "0x23": [
+            "0x30"
+          ],
+          "0x36": [
+            "0x30"
+          ],
+          "0x39": [
+            "0x30"
+          ],
+          "0x67": [
+            "0x30"
+          ],
+          "0x75": [
+            "0x30"
+          ],
+          "0x54": [
+            "0x30"
+          ],
+          "0x59": [
+            "0x30"
+          ],
+          "0x57": [
+            "0x30"
+          ],
+          "0x2A": [
+            "0x30"
+          ],
+          "0x2B": [
+            "0x30"
+          ],
+          "0x5E": [
+            "0x30"
+          ],
+          "0x4A": [
+            "0x30"
+          ],
+          "0x10": [
+            "0x30"
+          ]
+        },
+        "t3": {
+          "0x4D": [
+            "0x30"
+          ]
+        }
+      },
+      "subs": {
+        "t4": {
+          "0x10": [
+            "0x19",
+            "0x3C"
+          ]
+        }
+      },
+      "subs_why": "Where an object keeps its chip's subfamily beside the chip (subs, by the object's type: the bytes, a word's low byte, that hold it), BN5's is read as BN6's of BN6's chip (behaviour6: its record's, or the moved code's entry), where it is BN5's record's (+0x0C). The Navi chip's object, the fourth kind's 0x10, spawned by the Navi family's routine (BN5's family 0x41 at 0x080EC458, BN6's 0x1B at 0x080ED690, the same steps) through its spawner (BN5 0x080E1AC0, BN6 0x080E2C6C): the AttackVars' subfamily (+3) its +0x3C, the spawner's ldr r1,[r0,#0x3c]; strb r1,[r0,#0x19] (BN5 0x080E1AEC-0x080E1AEE) its +0x19 too, and the chip (+0x14, +6 above it) its +0x30; a Navi chip moved as BN5's Navi routine S runs as BN6's 0x1D + S (chip_numbrman: 0 as 0x1D, chip_shadoman 0xB as 0x28, at t33)"
+    },
+    "code_twins": {
+      "why": "A routine's address an object keeps (a Thumb pointer into each game's own code) is the same routine where both games' routines are twins: the same instructions but for the calls' targets, each game's own twin. Listed by pair, each pair's bodies compared (pairs). And a moved family's code may keep a routine of BN5's engine as a callback (its attack's variables +0x28, a jump table of its own): the install names BN6's twin there (the recipe's words). The snapshot reads such a word of BN5's as the twin the family's recipe gives it, where BN6's word is that twin: a translation by the recipe's pairs, each pair's bodies compared by tools/xrecipe.py (the same, the same but for the offsets of loads and stores, or a differing pair its audit takes, bn5_twins.AUDITS); a word aimed elsewhere in BN6 stays a difference.",
+      "evidence": [
+        "tests/xdiff/families.json, code_twins: each family's pairs, written by tools/xrecipe.py with src/emu/xvirus_bn5.c",
+        "flashy_v1, powie_v1: the attack's callback BN5 0x08012A21 / BN6 0x08015C49 and BN5 0x08012A6D / BN6 0x08015C95, each family's recipe's pair"
+      ],
+      "pairs": [
+        [
+          "0x080E08D9",
+          "0x080E1B1D",
+          "AreaGrab's and PanlGrab's support routine (subfamily 0 in both: BN5's table 0x080297BC, BN6's 0x0802CCB4): its spawn of the fourth kind's type 3 leaves the routine's address, the support family's r3, in its object's +0x3C (the spawner keeps r1-r4 as the object's words)",
+          "BN5 0x080E08D8-0x080E08F9 / BN6 0x080E1B1C-0x080E1B3D: the same 17 instructions but for the spawner's call (BN5 0x080031CC / BN6 0x080033AC, the fourth kind's)",
+          "tools/xrecipe_thumb.py compare: SAME"
+        ],
+        [
+          "0x080E286F",
+          "0x080E38A7",
+          "Geddon's support routine (BN5's subfamily 4, BN6's 3): its spawn of the fourth kind's type 0x1D leaves the routine's address in its +0x3C as AreaGrab's does",
+          "BN5 0x080E286E / BN6 0x080E38A6: the same instructions but for the calls' targets (tools/xrecipe_thumb.py compare: SAME)"
+        ]
+      ]
+    },
     "ai_index": {
       "why": "AIData +1, the AI index the engine finds a family's tables by: CanGard's 14 in BN5, 32 in BN6's grown tables; Handi's 4, 33 (xvirus_cangard and xvirus_handi .src_ai, .ai).",
       "bn5_to_bn6": {
@@ -162,6 +260,17 @@
         }
       ]
     },
+    "flash": {
+      "why": "A muzzle flash (the first kind's type 5, spawned by BN5 0x080B9CAE / BN6 0x080BA6A0 with its number in r4, kept at +4) is drawn by the entry of that number in each game's table of flashes, 5 bytes each (BN5 0x080B9A5C, BN6 0x080BA444, read at BN5 0x080B9BA8 / BN6 0x080BA570: its list, sprite, animation and palette): BN6 numbers the same flash otherwise. Each pair here names the same entry, or the same picture (the sprites byte for byte) at another number of list 3.",
+      "bn5_to_bn6": {
+        "0x09": "0x15",
+        "0x11": "0x23"
+      },
+      "evidence": [
+        "BN5's entry 0x09 and BN6's 0x15: 0C 19 00 00 0B (list 3's 0x19, animation 0): Spreader's flash (BN5 0x080EC5B4's family, BN6 Spreadr1's 0x25)",
+        "BN5's entry 0x11 (0C 2A 00 00 0C) and BN6's 0x23 (0C 59 00 00 0C): list 3's 0x2A in BN5 (0x08314EBC) and 0x59 in BN6 (0x08348D44), the same 1216 bytes: WideSht's flash (BN5 0x080ED0BE movs r4,#0x11; BN6 0x080EE8CA movs r4,#0x23, the same family routine but for it)"
+      ]
+    },
     "panel_type": {
       "why": "A panel's type (+2), the type it is drawn as (+6, the one-frame override's at +8) and the low nibble of its flags (BN5's +0x18, BN6's +0x14, the type ORed into its table's word): BN5's lava (8) and sea (0xA) are BN6's free types 13 and 14 where src/emu/xpanels.c brings them in, BN5's holy (9) BN6's 5 (src/emu/xfields.c), the rest the same numbers.",
       "evidence": [
@@ -176,7 +285,7 @@
       }
     },
     "alliance": {
-      "why": "A collision data's +0x30 (what it is) and +0x34 (what it strikes) are words the engine's setup takes from a table by the object's alliance and a region its caller names, two words a region, and ORs the time stop's bit 0x10000 into +0x30 while time is stopped; each game has its own table (layouts, collision, alliance_masks), whose entries mostly differ by BN6's bit 0x80. So a BN5 word is read as the BN6 entry at its place in BN5's table (with the time stop's bit as it is): over the 160 entries each BN5 word gives one BN6 word (a word two entries would give otherwise would be left as it is; none does). A hit and a touch OR the other object's +0x30 into what hit or touched it (BN6's +0x70 and +0x6C, BN5's +0x68 and +0x64): such a word is read as the OR of the BN6 words of the table's words it is made of, where every way of making it gives the same (else it is compared as it is), its bit 0x01 as it is: the hit pass's own where an attack struck a guard, no table word's. Not the family's code: the setup and the hit pass are the engine's, and the family's region and alliance are compared through them (a family object set up with another region reads as another BN6 word).",
+      "why": "A collision data's +0x30 (what it is) and +0x34 (what it strikes) are words the engine's setup takes from a table by the object's alliance and a region its caller names, two words a region, and ORs the time stop's bit 0x10000 into +0x30 while time is stopped; each game has its own table (layouts, collision, alliance_masks), whose entries mostly differ by BN6's bit 0x80. So a BN5 word is read as the BN6 entry at its place in BN5's table (with the time stop's bit as it is): over the 160 entries each BN5 word gives one BN6 word (a word two entries would give otherwise would be left as it is; none does). A hit and a touch OR the other object's +0x30 into what hit or touched it (BN6's +0x70 and +0x6C, BN5's +0x68 and +0x64): such a word is read as the OR of the BN6 words of the table's words it is made of, where every way of making it gives the same (else it is compared as it is), its bit 0x01 as it is: the hit pass's own where an attack struck a guard, no table word's. Not the family's code: the setup and the hit pass are the engine's, and the family's region and alliance are compared through them (a family object set up with another region reads as another BN6 word). A BN5 word two places give otherwise, BN6's with bit 0x80 at one and without at the other (BN5's 0 is BN6's 0 at region 0 and 0x80 at others), is read as BN6's where BN6's is either: the place is the setup's own (its r1 and r2), which no trace records.",
       "evidence": [
         "the setup: BN5 0x08016760-0x080167AE / BN6 0x08019FB4-0x0801A00C, the same steps: +0x30 from the table's reader (BN5 0x08016BBC / BN6 0x0801A0BA: alliance x 4 + region x 8) for the region in r1, stored at BN5 0x0801678A / BN6 0x08019FE8; 0x10000 ORed in where the time stop's test (BN5 0x08008A78 / BN6 0x0800A098, bit 2 of the battle's flags) is set (BN5 0x08016792-0x0801679C / BN6 0x08019FF0-0x08019FFA); +0x34 for the region in r2 (BN5 0x080167A6 / BN6 0x0801A004)",
         "the tables (layouts, collision, alliance_masks): BN5 0x08016364 reads 0x08410000, 0x04210000, 0x80000000, 0x40000000 (entries 2, 3, 8, 9) where BN6 0x08019C7C reads 0x08410080, 0x04210080, 0x80000080, 0x40000080; entries 4-7, 10, 11 alike in both; of BN5's 160 words 128 have their BN6 entry with the bit, 30 the same word, region 61's two (BN5 0x80000080, 0x40000080) BN6's 0x80",
@@ -205,14 +314,15 @@
       ]
     },
     "action": {
-      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both. The first kind's +0x5D is a CurAction too, read the same way: a status saves the object's state word (+0x08: +0x09 its CurAction) at +0x5C as it takes it and restores it as it ends (the paralysis's, BN5 0x0800CB84-0x0800CB8C / BN6 0x0800E76C-0x0800E774, then CurAction 4; the restores, e.g. BN5 0x0801384E / BN6 0x0801575C: ldr r0,[r5,#0x5C]; str r0,[r5,#8]). A foe's attack family (CurAction from 0x10, run from each game's table of families) is the same number in both where BN6's family of that number is BN5's (the step 0x10, which the Dark Soul's moves take, 0x0800F280 / 0x080116F6), and BN5's family F that BN6 has none of, moved with the Navi that runs it, BN6's 0x50 + F in the grown table (families; src/emu/xnavi_recipe.h, XN_FAMILY_OF): the Navis' buster, BN5's 0x16, as 0x66; a virus's own action of a chip's family by its chip (chip_id).",
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9; the bomb BomBoy throws and BoyBomb sets, the third kind's 0x3E, its update BN6's twin 0x080CD4A8 in the one copy both run, the chips', from BN6's table: bomboy_v1 its bomb's 6 in BN5 and 8 in BN6 at t19). MegaMan's actions of a family (CurAction from 0x10, run from each game's table of families, BN5 0x080EB514, Gregar 0x080EBFA0) by the twin of each: BN5's 0x1A, the Soul's unison and its end (the player update 0x08014604 sets it from AIData +0x44's bits 0x4000 and 0x40), is BN6's 0x1C, the Cross's and Beast Out's (its twin 0x08017BC0, the same steps); BN5's 0x1E, the plain charged shot (0x080ECAB8), is BN6's 0x16 (0x080ED140), the same phases but BN5's first: it tests the battle's flag 0x40 (0x080ECAE0) and fires at once where it is clear, where BN6's always waits 5 frames first (0x080ED168), so a charged shot parts the two games (no spec fires one: docs/DEVTOOLS.md, The differential). The step (0x10), the buster (0x11) and the Cannon's (0x14) are the same number in both. The first kind's +0x5D is a CurAction too, read the same way: a status saves the object's state word (+0x08: +0x09 its CurAction) at +0x5C as it takes it and restores it as it ends (the paralysis's, BN5 0x0800CB84-0x0800CB8C / BN6 0x0800E76C-0x0800E774, then CurAction 4; the restores, e.g. BN5 0x0801384E / BN6 0x0801575C: ldr r0,[r5,#0x5C]; str r0,[r5,#8]). A foe's attack family (CurAction from 0x10, run from each game's table of families) is the same number in both where BN6's family of that number is BN5's (the step 0x10, which the Dark Soul's moves take, 0x0800F280 / 0x080116F6), and BN5's family F that BN6 has none of, moved with the Navi that runs it, BN6's 0x50 + F in the grown table (families; src/emu/xnavi_recipe.h, XN_FAMILY_OF): the Navis' buster, BN5's 0x16, as 0x66; a virus's own action of a chip's family by its chip (chip_id).",
       "megaman": {
         "6": "8",
         "0x1A": "0x1C",
         "0x1E": "0x16"
       },
       "t3_types": [
-        "0x4B"
+        "0x4B",
+        "0x3E"
       ],
       "families": {
         "0x16": "0x66"
@@ -283,6 +393,54 @@
           "evidence": [
             "the type's set-up BN5 0x080E0A0C-0x080E0A16 / BN6 0x080E1C58-0x080E1C62: +0x60 = the table + 8 x +4 (its literals BN5 0x080E0B00 / BN6 0x080E1D4C); entries 0 and 1 14 0B 00 00 00 80 00 00 and 14 09 00 00 00 20 00 00 in both",
             "batty_v2 t340: the confusion's effect over MegaMan, kind 0, its +0x60 0x080E09D4 in BN5's, 0x080E1C20 in BN6's"
+          ]
+        },
+        {
+          "name": "the thrown bombs' kinds",
+          "bn5": "0x080C5594",
+          "bn6": "0x080C7410",
+          "entry": 4,
+          "count": 3,
+          "why": "the third kind's type 8 (a thrown bomb: MiniBomb's) keeps at +0x60 the entry of its kind (its +4) in this table: its collision's region and alliance and its sprite's animation; MiniBomb's kind 0",
+          "evidence": [
+            "the bomb's spawn BN5 0x080C5600-0x080C5608 / BN6 0x080C7470-0x080C7478: +0x60 = the table + 4 x +4 (its one literal BN5 0x080C563C / BN6 0x080C74AC), the same code in both",
+            "the tables' first three entries the same in both (0A 05 00 00, 04 05 03 01, 0A 05 01 00); BN5's has seven entries, BN6's four (its fourth BN5's seventh)"
+          ]
+        },
+        {
+          "name": "the spread shot's kinds",
+          "bn5": "0x080C6C08",
+          "bn6": "0x080C8144",
+          "entry": 6,
+          "count": 7,
+          "why": "the third kind's type 0x12 (Spreader's shot and the spread chips') keeps at +0x60 the entry of its kind in this table, three u16 each (its collision's words); Spreader's the fourth (+0x12)",
+          "evidence": [
+            "the shot's spawn, BN5 0x080C6E0E / BN6's twin, its table's literal BN5 0x080C6E24 / BN6 0x080C8360; read at BN5 0x080C6DFA (ldr r3,[r5,#0x60]; ldrb r3,[r3,#1])",
+            "the tables' first 43 bytes the same in both (seven entries; BN6's eighth carries 3 where BN5's 0)"
+          ]
+        },
+        {
+          "name": "the pucks' kinds",
+          "bn5": "0x080CA48C",
+          "bn6": "0x080CB088",
+          "entry": 3,
+          "count": 4,
+          "why": "the third kind's type 0x2E (a puck: AirHoc's, AirHocky's) keeps at +0x60 the entry of its kind in this table, three bytes each (its collision's region and alliance, its sprite's animation); AirHoc's the third (+6)",
+          "evidence": [
+            "the puck's setup reads +0x60 from the table's one literal, BN5 0x080CA54C / BN6 0x080CB148",
+            "the tables' 12 bytes the same in both (06 01 06, 0A 01 06, 0A 01 06, 12 01 06); code follows them, each game's own"
+          ]
+        },
+        {
+          "name": "the guards' kinds",
+          "bn5": "0x080CA2D8",
+          "bn6": "0x080CAED4",
+          "entry": 6,
+          "count": 3,
+          "why": "the third kind's type 0x2B (the shield a Guard chip raises before MegaMan: BN5's 0x080CA454 spawns it, BN6's twin 0x080CB050) keeps at +0x64 the entry of its kind in this table, six bytes each (its sprite list 3's 0x1B, two animations, its palette); Guard1-3's the first three (their subfamilies)",
+          "evidence": [
+            "the shield's table: its one literal BN5 0x080CA478 / BN6 0x080CB074",
+            "the tables' first three entries the same in both (0C 1B 00 01 0E 00, 0C 1B 02 03 0E 00, 0C 1B 04 05 0E 00); the fourth BN5's 08 01 03 04 04 07 where BN6's 08 00 03 04 04 07"
           ]
         }
       ]
@@ -362,24 +520,27 @@
           5,
           11,
           "a status's effect over its object, confusion's (the fourth kind's type 6, kind 0)"
+        ],
+        [
+          3,
+          42,
+          3,
+          89,
+          "WideSht's muzzle flash (the same 1216 bytes in both)"
+        ],
+        [
+          3,
+          25,
+          3,
+          25,
+          "Spreader's muzzle flash (each game's own picture)"
         ]
       ],
       "evidence": [
         "MegaMan's object's sprite state in both traces from t1: BN5 0x081C9804, BN6 0x081D8004 (list 0 entry 0's + 4)",
         "megaman_plain's traces: his buster's flashes (the first kind's type 5, +4 BN5 0x23 and 0x0D, BN6 6 and 5) drawn from list 3's entries 3 and 6 in both, the Cannon's (+4 0x... ) from entry 1; the sparks (the fourth kind's type 4) of a shot from list 5's 5 and of the Cannon from list 5's 1 in both; the charge glow (type 8) from list 5's 8 in both",
-        "batty_v2 t340 and batty_ex t594: the confusion's effect over MegaMan (the fourth kind's type 6, kind 0: rom_tables' status effect's kinds, entry 0 14 0B in both) drawn from list 5's 0x0B in both, BN5's 0x08388B3C and BN6's 0x083AC4C0, not the same bytes (each game's own art: by its bytes BN5's eb827365979a, BN6's 456608f57b2d)"
-      ]
-    },
-    "chip_id": {
-      "why": "A chip id: BN5's by the chip registry's rows (src/core/xchips_registry.c: a chip both games name alike BN6's id, BN5's other chips the ids of their own), read from the source the game is built from, as BN6's engine has them in its tables (docs/MULTIROM.md, The chip registry). Translated where an object keeps one: a battle object's chip (+0x2A, BN6_T1_CHIP, the chip it uses next, u16, 0xFFFF none: written as a virus's held chip is picked, or by its own code, Zomon's AreaGrab), and the AI data's places below (its AttackVars +0x14, the chip used, written by the chip writer, BN5 0x0800FE7C / BN6 0x080126F6: strh r0,[r7,#0x14], r7 the AI data + 0xA0). A virus's CurAction from 0x10 that is the family the chip writer returned for its chip (the record's +0x0B, BN5 0x0800FEBA / BN6 0x0801273A, for setAttack0) is read as BN6's family of BN6's chip (tools/xdiff_snap.py, chip_action): the same chip in each game's own numbers (the chips track's names and map, merged with it).",
-      "registry": "src/core/xchips_registry.c",
-      "places": {
-        "ai": [
-          "0xB4"
-        ]
-      },
-      "evidence": [
-        "zomon_v1 t1: Zomon's +0x2A 0x75 in BN5's (its set-up's movs r0,#0x75; strh r0,[r5,#0x2A], BN5 0x08108932-0x08108934: chip 117, AreaGrab) and 0xA3 in BN6's (163, AreaGrab: the registry's row 117 to 163, SAME); t390 its AttackVars +0x14 the same chip, its CurAction the chip's family 0x15 by each game's record (BN5 0x0801E210 + 0x2C x 117, BN6 0x08021DA8 + 0x2C x 163, +0x0B 0x15 in both)"
+        "batty_v2 t340 and batty_ex t594: the confusion's effect over MegaMan (the fourth kind's type 6, kind 0: rom_tables' status effect's kinds, entry 0 14 0B in both) drawn from list 5's 0x0B in both, BN5's 0x08388B3C and BN6's 0x083AC4C0, not the same bytes (each game's own art: by its bytes BN5's eb827365979a, BN6's 456608f57b2d)",
+        "the chips' flashes (maps, flash): list 3's 0x2A in BN5 and 0x59 in BN6 the same bytes; list 3's 0x19 in each its own picture (7716 bytes in BN5, 4876 in BN6), drawn for Spreader's flash by the same entry of both tables"
       ]
     },
     "power_attack": {
@@ -454,13 +615,6 @@
         "tinhawk_v1, batty_v1, cactikil_v1: BN6's +0x3C its object's +0x3E (0x28, 2, 0xC) at the first frame the object's +0x3E is set, BN5's 0"
       ]
     },
-    "code_twins": {
-      "why": "A moved family's code may keep a routine of BN5's engine as a callback (its attack's variables +0x28, a jump table of its own): the install names BN6's twin there (the recipe's words). The snapshot reads such a word of BN5's as the twin the family's recipe gives it, where BN6's word is that twin: a translation by the recipe's pairs, each pair's bodies compared by tools/xrecipe.py (the same, the same but for the offsets of loads and stores, or a differing pair its audit takes, bn5_twins.AUDITS); a word aimed elsewhere in BN6 stays a difference.",
-      "evidence": [
-        "tests/xdiff/families.json, code_twins: each family's pairs, written by tools/xrecipe.py with src/emu/xvirus_bn5.c",
-        "flashy_v1, powie_v1: the attack's callback BN5 0x08012A21 / BN6 0x08015C49 and BN5 0x08012A6D / BN6 0x08015C95, each family's recipe's pair"
-      ]
-    },
     "navi_ai_index": {
       "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38.",
       "bn5_to_bn6": {
@@ -497,7 +651,9 @@
         "BN5 +0x18 and +0x19 are BN5's own: the hitter's +0x0E ORed into +0x18 + the hitter's +5 (BN5 0x08016A9E-0x08016AA8), both ORed into +0x0F after each pair (BN5 0x080168D6-0x080168E4: the rule bn5_or); BN6's hit pass ORs the hitter's +0x0E into +0x0F itself (0x081D78B2-0x081D78B8)",
         "BN6 +0x74-0x7B and +0x18, +0x19 are BN6's own, zero unless an element is in play: the hit's multiplier less one at +0x74 and +0x75 (0x081D78C8-0x081D78F4), the hitter's +0x19 ORed into +0x76 and +0x77 (0x081D7844-0x081D784C, 0x081D7BDA-0x081D7BE2), element 3's damage at +0x78 (0x081D78F6-0x081D7904); +0x19 is the high nibble of the object's element byte (the setup, 0x08019FC4-0x08019FC8), +0x18 read against it (0x081D78D4)",
         "BN5 +0x1E is BN6 +0x1C, the paralysis' frames left (BN6_COLL_PARALYSIS): the flinch's status cleared, BN5 0x0801707C (strh r0,[r3,#0x1E]) / BN6 0x0801A284 (strh r0,[r3,#0x1C]), a LAYOUT pair (tools/bn5_navi_twins.py); in toadman_v1 MegaMan paralysed by ToadMan's note at t223, 0x59 in both",
-        "BN5 +0x22 and +0x24 are BN6 +0x20 and +0x22: the timers of the blind (flag 0x2000) and the held (0x4000, bn6f's OBJECT_FLAGS_IMMOBILIZED), counted down and their flags cleared at 0 by the same steps, BN5 0x0800CC0C-0x0800CC1C and 0x0800CC32 / BN6 0x0800E8E2-0x0800E8F2 and 0x0800E908; BN5's sea holds a non-Aqua object stepping onto it there (BN5 0x0800CDA2: strh r0,[r1,#0x24], xsea.c's BN6_COLL_IMMOBILE): toadman_sea at t211"
+        "BN5 +0x22 and +0x24 are BN6 +0x20 and +0x22: the timers of the blind (flag 0x2000) and the held (0x4000, bn6f's OBJECT_FLAGS_IMMOBILIZED), counted down and their flags cleared at 0 by the same steps, BN5 0x0800CC0C-0x0800CC1C and 0x0800CC32 / BN6 0x0800E8E2-0x0800E8F2 and 0x0800E908; BN5's sea holds a non-Aqua object stepping onto it there (BN5 0x0800CDA2: strh r0,[r1,#0x24], xsea.c's BN6_COLL_IMMOBILE): toadman_sea at t211",
+        "BN5 +0x1E is BN6 +0x1C, the paralysis timer (BN5_COLL_PARALYSIS, BN6_COLL_PARALYSIS): each game's status step counts it down as its first act, BN5 0x0800CB5C-0x0800CB60 (ldrh r0,[r6,#0x1e]; subs; strh) / BN6 0x0800E744-0x0800E748 (the same at #0x1c), the same routine in both (its paralysis bit 8 of the struck word +0x40 at the same place, BN5 0x0800CB76 / BN6 0x0800E75E); the chips' specs hold their target paralysed (tests/xdiff, hold)",
+        "BN5 +0x20, +0x22, +0x24 are BN6 +0x1E, +0x20, +0x22, the statuses' timers after the paralysis's: the clear BN5 0x08017060 / BN6 0x0801A264 zeroes BN5 +0x1E-+0x24 / BN6 +0x1C-+0x22 in that order after the same flags; the status step counts the blindness down at BN5 +0x22 / BN6 +0x20 (BN5 0x0800CC32-0x0800CC42 / BN6 0x0800E908-0x0800E918) and keeps its mark (the fourth kind's 0x06, spawned by BN5 0x080E0ADE / BN6 0x080E1D2A) at +0x4C in both (BN5 0x0800CC44-0x0800CC68 / BN6 0x0800E91A-0x0800E93E), the status before it its time at BN5 +0x24 / BN6 +0x22 and its mark at +0x48 (BN5 0x0800CBFC-0x0800CC10 / BN6 0x0800E8D2-0x0800E8E6); chip_blinder: CanladEX blinded 478 frames from t34 at BN5 +0x22 / BN6 +0x20, its mark at +0x4C"
       ],
       "segments": [
         [
@@ -538,7 +694,7 @@
         [
           48,
           48,
-          28
+          32
         ],
         [
           96,
@@ -607,7 +763,19 @@
           "the tables' ends: code follows at BN5 0x080165E4 and BN6 0x08019F44 (the same routine in both, push {r4,r6,r7,lr})",
           "a word ORed of them holds the hit pass's own flags too, bits no table word of either game has (their 160 and 178 words together 0xFFFDFFBE: 0x1, 0x40 and 0x20000 none's), kept as they are: bit 0 ORed into what hit an object (BN5 0x080169BE-0x080169CA into +0x6C or +0x70 by the hitter's side / BN6 0x081D77DC-0x081D77E2 into +0x70), 0x20000 with the hitter's word (BN5 0x080169E4 / BN6 0x081D77FC); bladia_v1_keys t516: MegaMan's shot struck by Bladia, its word 0x04310001 in BN5's (+0x68 and +0x6C) and 0x04310081 in BN6's (+0x70), Bladia's table word 0x04310000 / 0x04310080 and bit 0"
         ]
-      }
+      },
+      "bn6_slips": [
+        {
+          "offset": "0x54",
+          "size": 4,
+          "why": "BN6's hit-clear (0x0801A018, a frame's hits taken from an object's collision data) means to keep the hits of a time stop at +0x54 (it ORs +0x54 and +0x70 into r0) but stores r1, its caller's leftover (0x0801A022: str r1,[r4,#0x54]), and clears it once time runs again: a slip of BN6's engine, in a word no moved code names (BN5's twin keeps its own there, the hits ORed, 0x08016B30). Compared nowhere: as a support chip is used, the battle stands still a frame (the support family's 0x0800BF16, BN5's 0x0800A50A) and every object's +0x54 holds that leftover for it.",
+          "evidence": [
+            "BN6 0x0801A01C-0x0801A022: ldr r2,[r4,#0x70]; ldr r0,[r4,#0x54]; orrs r0,r2; str r1,[r4,#0x54]; then 0x0801A032 clears it where the time stop's test (0x0800A098) is clear",
+            "BN5 0x08016B26-0x08016B30: ldr r2,[r4,#0x70]; ldr r1,[r4,#0x5c]; orrs r1,r2; str r1,[r4,#0x5c]; orrs r1,r2; str r1,[r4,#0x54]",
+            "chip_areagrab: CanladEX's +0x54 4 in BN6's alone at t33, the frame AreaGrab's support routine runs"
+          ]
+        }
+      ]
     },
     "panel": {
       "why": "A panel is 0x24 bytes in BN5 and 0x20 in BN6: +0x00-0x0F the same (type +2, alliance +3, the state the panel's update keeps at +0x0E), BN5's alliance timer +0x12 BN6's +0x10 (the alliance's setter, BN5 0x0800B2D6 / BN6 0x0800CC14: strh at +0x12 / +0x10), the flags BN5 +0x18 / BN6 +0x14 (BN5_PANEL_FLAGS, BN6_PANEL_FLAGS; the panel's parameters read there, BN5 0x0800AFB0 / BN6 0x0800C8F8), +0x1C / +0x18, and the object holding it BN5 +0x20 / BN6 +0x1C (the panel's reservation, BN5 0x08018654 / BN6 0x0801BB1C)",
@@ -770,6 +938,13 @@
         "word": 0,
         "what": "the camera's shake, its y",
         "evidence": "as its x"
+      },
+      {
+        "bn6": "0x080D1518",
+        "bn5": "0x080D13B4",
+        "len": "0x2E",
+        "what": "NrthWind's wind (BN5's T3 0x5A, its state routine BN5 0x080D136A / BN6 0x080D14CE) puts a gust (T4 0x3A) at a place GetRNG picks every eight frames",
+        "evidence": "BN5 0x080D13B4-0x080D13E1 / BN6 0x080D1518-0x080D1545: the same instructions but for the BLs' targets (GetRNG BN5 0x08001490 / BN6 0x0800151C, the gust's spawner BN5 0x080E4A10 / BN6 0x080E5C38); its one caller each (BN5 0x080D1378, BN6 0x080D14DC) at the same place in the same routine"
       }
     ],
     "only": {
@@ -1098,6 +1273,73 @@
       ]
     },
     {
+      "name": "a chip's muzzle flash's place",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T1"
+      ],
+      "types": [
+        "0x00"
+      ],
+      "offsets": [
+        "0x34-0x4B"
+      ],
+      "why": "A chip's muzzle flash (the first kind's type 5, BN5's own code in both: the chips' helper's copy, tools/xchiprecipe.py, HELPERS) stands at MegaMan's arm, at the point its table's entry names (its byte 4: MrkCan's 0x12), an offset each game takes from its own arm-point records by his NameID (BN5 0x08015140, BN6 0x08018810: the pair's audit, tools/bn5_twins.py), his frames each game's own (the mask 'MegaMan's own sprite'): his presentation, the flash's code BN5's.",
+      "evidence": [
+        "its point: BN5 0x080B9C02-0x080B9C1A (its entry's byte 4, then 0x08015140 by his +0x28, into its +0x40 and +0x48); each frame 0x080B9C26-0x080B9C44 its place his +0x34-0x3F plus those",
+        "chip_mrkcan1: the flash 0x2C's place 7 pixels apart from t76, its point's offset (+0x40, +0x48) apart with it"
+      ]
+    },
+    {
+      "name": "a chip's object at MegaMan's centre",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0xB8"
+      ],
+      "offsets": [
+        "0x34-0x37"
+      ],
+      "why": "CusVolt's volt (the third kind's 0xB8, BN5's code in both) stands each frame 40 pixels ahead of MegaMan at his centre, the point of his sprite BN5 numbers 0x1A and BN6 0x1B (tools/xchiprecipe.py, POINTS: BN6's 0x1A another): an offset each game takes from its own rows by his NameID (BN5 0x08015140, BN6 0x08018810), BN6's 2 pixels further right, as every point of his (the mask 'MegaMan's charge glow's place'). Its height (+0x38-0x3F) and its panel (+0x12, +0x13), which its strike reads, stay compared.",
+      "evidence": [
+        "its place: BN5 0x080DD56A-0x080DD5A0 (MegaMan's +0x34-0x3F, 40 pixels ahead, then point 0x1A's offset by his +0x28 added to x and z)",
+        "MegaMan's first row: BN5 0x080151C4 point 0x1A (0, 18), BN6 0x080188C0 point 0x1B (2, 18), point 0x00 (0, 0) against (2, 0)",
+        "chip_cusvolt1: the volt's x -20 in BN5's, -18 in BN6's from t38, its panel 3 in both"
+      ]
+    },
+    {
+      "name": "a spawn's leftover registers",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0x69"
+      ],
+      "offsets": [
+        "0x10-0x13",
+        "0x3C-0x3F"
+      ],
+      "when": "spawned now",
+      "why": "MoonBld's blade (the third kind's 0x69, BN5's code in both) is spawned by 0x080D3398 through the common spawn, which keeps its caller's r1-r4 as the object's words (r1 at +0x10, r3 at +0x3C): MoonBld's attack sets neither (0x080EF9C2-0x080EF9DC), so the blade takes what the attack's own calls left: r1's top byte a byte of a return address into MoonBld's code (BN5's own, BN6's copy's: apart where the copy stands), r3 the attack's own caller's, BN5's RunAIAttack (0x0801857A) MegaMan's AI data, BN6's (0x0801B9E6) the battle state. Its first sweep (0x080D332C) writes its panel over +0x10-+0x13 and MegaMan's place over +0x34-+0x3F, so the words live their first frame alone, read by nothing.",
+      "evidence": [
+        "chip_moonbld1: the blade's +0x3C MegaMan's AI data in BN5's, 0x02034880 in BN6's at t38, its first frame; equal from t39",
+        "chip_moonbld1: its +0x13 0x67 in BN5's, 0x97 in BN6's at t38 (+0x34 the same return address in both, BN5's 0x080EF967 and its copy), +0x12 and +0x13 its panel, (3, 2), in both from t39",
+        "BN5 0x080D3398: push {r0,r1,r2,r5}; movs r0,#0x69; bl 0x08003178 (the third kind's spawn, r1-r4 its words)"
+      ]
+    },
+    {
       "name": "the hit spark's life",
       "part": [
         "in play",
@@ -1105,7 +1347,8 @@
       ],
       "whose": [
         "megaman's",
-        "spark"
+        "spark",
+        "engine"
       ],
       "kinds": [
         "T4"
@@ -1117,11 +1360,18 @@
         "0x00",
         "0x08"
       ],
-      "why": "Where MegaMan's shot strikes, the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) and its first frames are compared. The same spark where a family's attack strikes (whose spark: the attack calls the engine's object_spawnCollisionEffect, which spawns it with the attack's hit effect as its kind) lives as long as its sprite's frames do, each game's own.",
+      "why": "Where MegaMan's shot strikes, or a chip's attack through the engine's hit area (the third kind's 0x03, the spark at its +0x4C: the engine's, tools/xdiff_masks.py), the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) is compared, what its sprite makes of its frames is not (as the lava's spark's). The same spark where a family's attack strikes (whose spark: the attack calls the engine's object_spawnCollisionEffect, which spawns it with the attack's hit effect as its kind) lives as long as its sprite's frames do, each game's own.",
       "evidence": [
         "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
         "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's",
-        "marina_v1: the spark of Marina's attack (kind 2, owner the third kind's type 0x8F in both) gone from BN6's at t528, from BN5's a frame on"
+        "marina_v1: the spark of Marina's attack (kind 2, owner the third kind's type 0x8F in both) gone from BN6's at t528, from BN5's a frame on",
+        "chip_mrkcan1: a spark of MrkCan's shot a frame apart in its sprite (its sprite state's +1, 2 against 1) at t92",
+        "chip_geyser: the spark of Geyser's hit (the hit area BN6's own, spawned by the moved geyser) a frame apart, its sprite state's +1 3 against 2, at t82"
+      ],
+      "sprite_offsets": [
+        "0x01-0x07",
+        "0x0A-0x14",
+        "0x16-0x37"
       ]
     },
     {
@@ -1605,6 +1855,203 @@
       "evidence": [
         "soul_chaos: UNITE's +2 and +3 BN5 9 and 5 from t524 (the screen that opened with NumberSoul's Chaos Unison's last turn), BN6 0xFF and 0xFF",
         "the elements' templates (0x08025E08 BN5, 0x0802A7C8 Gregar): element 0xB's 0B 0A 09 05 in both"
+      ]
+    },
+    {
+      "name": "BN6's hit flag by a chip's icon element",
+      "part": "ai",
+      "whose": [
+        "megaman"
+      ],
+      "offsets": [
+        "0xA2"
+      ],
+      "bits": "0xF0",
+      "direction": "bn6",
+      "when": "icon flag",
+      "why": "As a chip is used BN6's engine ORs into its attack element (MegaMan's AttackVars +2, his AI data +0xA2) a hit flag by its record's icon element (Sword 0x80, Cursor 0x40, Wind 0x20, Break 0x10: the table at 0x080129E4), which BN6's hit pass acts on (a Break breaks a guard, a Sword is a sword); BN5's chip use writes the element alone. BN6's engine rule for every chip, BN5's among them (docs/MULTIROM.md, One net: the chips' finer calls); the flag is the one the chip in use (his AttackVars +0x14) has by its icon element, BN6's record's or, for a chip of the registry's own, its BN5 record's as BN6's (src/core/xchips_record.c).",
+      "evidence": [
+        "BN6 0x0801271E-0x08012728 (the chip's numbers written for its attack, 0x080126E4): ldrb r1,[r6,#4]; ldrb r2,[r6,#6]; ldr r0,=0x080129E4; ldrb r0,[r0,r2]; orrs r1,r0; strb r1,[r7,#2]",
+        "BN5 0x0800FEA4-0x0800FEA6 (its twin, 0x0800FE6A): ldrb r1,[r6,#4]; strb r1,[r7,#2]",
+        "the table's 16 bytes: 00 00 00 00 00 80 40 00 20 10 00 00 00 00 00 00 (icon element 5 Sword, 6 Cursor, 8 Wind, 9 Break)",
+        "chip_sword: MegaMan's +0xA2 0 in BN5's and 0x80 in BN6's from the Sword's use (t32) on"
+      ]
+    },
+    {
+      "name": "the sword's slash's last frame",
+      "part": [
+        "in play",
+        "obj"
+      ],
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "effects": [
+        "0x18",
+        "0x16",
+        "0x17"
+      ],
+      "offsets": [
+        "0x00",
+        "0x08"
+      ],
+      "why": "A sword's slash is an effect object (the fourth kind's type 0, effect 0x18: sprite list 3's 0x14, its animation 2, both games' effect tables alike; a Katana's 0x16 and 0x17 its animations 0 and 1), drawn from each game's own sprite: BN5's animation 2 has four frames (4, 3, 3 and 2 frames), BN6's three (4, 3, 3), so BN5's slash is still drawn (its frame's place on) the frame BN6's ends, and lives two frames longer. Its place and first frames are compared.",
+      "evidence": [
+        "the effects' tables: BN5 0x080DFD7C + 0x18 x 4, BN6 0x080E16D4 + 0x18 x 4: 0C 14 02 00 in both",
+        "the sprites: BN5 0x0830105C, BN6 0x0830E6BC (list 3's 0x14), their animation 2's frames 4, 3, 3, 2 and 4, 3, 3",
+        "chip_sword: the slash in play from t44 in both, to t54 in BN6's and t56 in BN5's, its flags and frame apart at t54",
+        "chip_katana1: Katana's second slash (effect 0x16, list 3's 0x14's animation 0, both tables 0C 14 00 00) ended in BN6's at t57 while BN5's is still drawn"
+      ]
+    },
+    {
+      "name": "the spark effect's last frames",
+      "part": [
+        "in play",
+        "obj"
+      ],
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T4"
+      ],
+      "effects": [
+        "0x11"
+      ],
+      "offsets": [
+        "0x00",
+        "0x08"
+      ],
+      "why": "Effect 0x11 (the fourth kind's type 0) draws the hit spark's sprite, list 5's 5, its animation 1 (both games' effect tables alike), each game its own sprite: BN5's animation 1 has five frames of 2, BN6's four, so BN5's effect is still drawn (in play, its state 4) the two frames after BN6's ends (its state 8, then gone), as the hit spark's own life ('the hit spark's life'). Its place and first frames are compared.",
+      "evidence": [
+        "the effects' tables: BN5 0x080DFD7C + 0x11 x 4, BN6 0x080E16D4 + 0x11 x 4: 14 05 01 00 in both",
+        "the sprites: BN5 0x0837D994, BN6 0x083A0320 (list 5's 5), their animation 1's frames 2, 2, 2, 2, 2 and 2, 2, 2, 2",
+        "chip_cannball: CannBall's burst (effect 0x11, from its moved code) ended in BN6's at t100 (its state 8) while BN5's is still drawn"
+      ]
+    },
+    {
+      "name": "BN6's support family's extra frame",
+      "part": [
+        "obj",
+        "ai"
+      ],
+      "whose": [
+        "megaman"
+      ],
+      "when": "support lag",
+      "why": "BN6's support family (0x15, 0x080ED0DC) runs the chip's routine, marks its AttackVars +1 and ends the attack at its next frame (0x080ED130: object_exitAttackState), where BN5's (0x080EC400) ends it in the frame it runs the routine (0x080EC448): MegaMan stands in CurAction 0x15 a frame longer in BN6's engine and goes through his after-chip wait (his +0x20 counted down from 9, his +0x0A/+0x0B, his AI data +0x48) a frame behind BN5's, the same values a frame later. BN6's engine's own family for every support chip, BN5's included (docs/MULTIROM.md, One net: the chips' finer calls); each such byte must be the one BN5's MegaMan had the frame before.",
+      "evidence": [
+        "BN6 0x080ED0DC-0x080ED134: phase 0 runs the routine (0x080ED102) and sets AttackVars +1 (0x080ED12C); phase 1 ends the attack (0x080ED130)",
+        "BN5 0x080EC400-0x080EC44C: runs the routine (0x080EC420), then ends the attack (0x080EC448), one phase",
+        "chip_areagrab: MegaMan's CurAction 0x15 at t32 in both, his ready state's from t33 in BN5's and t34 in BN6's, every byte of it a frame behind until t44"
+      ]
+    },
+    {
+      "name": "WideSht's wave's spawn word",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0x3B"
+      ],
+      "cells": [
+        [
+          "0x3E",
+          "0x00",
+          "0x10"
+        ]
+      ],
+      "why": "BN6's WideSht family (0x30) hands its wave's spawner r3 = 0x100000 where BN5's (0x25) hands 0, and the common spawn keeps the caller's r1-r4 as the object's words (r3 at +0x3C): the wave's +0x3E reads 0x10 in BN6's battle alone. No code of the wave's reads its +0x3C (its routines, BN5 0x080CC878 / BN6 0x080CCD0C, walked), and the battle goes on the same.",
+      "evidence": [
+        "BN5 0x080ED132: movs r3,#0, then bl 0x080CCA62 (the wave's spawner); BN6 0x080EE93C-0x080EE93E: movs r3,#0x10; lsls r3,r3,#0x10, then bl 0x080CCEF6",
+        "the common spawn BN6 0x080032BC-0x080032C6: ldm r7!,{r0-r4} (the caller's r0-r4, pushed by its spawner); strb r0,[r5,#1]; str r1,[r5,#0x34]; str r2,[r5,#0x38]; str r3,[r5,#0x3c]; str r4,[r5,#4]",
+        "chip_widesht1-3: the wave's +0x3E 0 in BN5's and 0x10 in BN6's from its spawn, every other byte of it the same"
+      ]
+    },
+    {
+      "name": "BN6's spread shot's region",
+      "part": "coll",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T3"
+      ],
+      "types": [
+        "0x12"
+      ],
+      "cells": [
+        [
+          "0x30",
+          "0x00",
+          "0x80"
+        ]
+      ],
+      "why": "The spread shot (the third kind's type 0x12, Spreader's) sets up its collision with region 61 for what it is in BN6 (0x080C8202: movs r1,#0x3d) where BN5's sets region 0 (0x080C6CCE: movs r1,#0): BN6's table gives region 61 the word 0x80 (BN6's bit by which its second pass lets an object whose +0x3C has 0x20 touch it, 0x081D7BAE), BN5's region 0 none. BN6's shot is one such objects may touch; nothing in the spec's battle does. Its other byte the same.",
+      "evidence": [
+        "BN5 0x080C6CCE-0x080C6CD4 / BN6 0x080C8202-0x080C8208: the shot's collision setup (BN5 0x08016760 / BN6 0x08019FB4) with r1 0 / 0x3D, r2 5",
+        "the alliance tables at region 61 (entries 122, 123): BN5 0x80000080, 0x40000080; BN6 0x80, 0x80; at region 0 both 0",
+        "chip_spreader: the shot's +0x30 0 in BN5's and 0x80 in BN6's while it flies (t34-t36), its explosion's (region 15, then 0) as legit.json's alliance map reads it"
+      ]
+    },
+    {
+      "name": "BN6's hit flag on a chip's objects",
+      "part": [
+        "obj",
+        "coll"
+      ],
+      "whose": [
+        "megaman's"
+      ],
+      "offsets": [
+        "0x0E",
+        "0x19",
+        "0x38"
+      ],
+      "bits": "0xF0",
+      "direction": "bn6",
+      "bn5_none": 0,
+      "when": "icon flag",
+      "why": "The hit flag BN6's chip use ORs into the chip's attack element by its icon element (the mask above) goes on with the element: the chip's objects take it as their element (+0x0E, from the family's r2), and BN6's collision setup keeps the element's high nibble apart at its +0x19 (0x08019FC4-0x08019FC8: ands #0xF0; strb [r7,#0x19]), a place BN5's layout has none of. Only the chip in use's flag, only where BN6 has it and BN5 not. An object of the fourth kind a support routine spawns keeps r2, the element, at +0x38 (the common spawn's words: r1-r4 at +0x34, +0x38, +0x3C, +4).",
+      "evidence": [
+        "BN6's collision setup 0x08019FBA-0x08019FC8: the object's +0x0E, its low nibble to +2 and its high to +0x19",
+        "chip_airhoc: the puck's +0x0E and its collision data's +0x19 0x10 (Break, AirHoc's icon element) in BN6's battle alone, from its spawn (t35)",
+        "chip_nrthwind: NrthWind's wind (the fourth kind's type 0x39) +0x38 0x20 (Wind, its icon element) in BN6's battle alone"
+      ]
+    },
+    {
+      "name": "AirHocky's wait's bookkeeping",
+      "part": "ai",
+      "whose": [
+        "megaman"
+      ],
+      "families": [
+        "0x26"
+      ],
+      "cells": [
+        [
+          "0xA1",
+          "0x04",
+          "0x00"
+        ],
+        [
+          "0xB0",
+          "0x00",
+          "0x0F"
+        ]
+      ],
+      "why": "After the puck BN5's AirHoc (its family 0x21) and BN6's AirHocky (0x26, whose code the registry's AirHoc plays) wait 15 frames before the attack ends, at the same frame: BN6's sets its timer (AttackVars +0x10, 15) as its first phase ends (0x080EE05E) where BN5's sets it at its second phase's start with that phase's mark (AttackVars +1, 4: 0x080ECE18-0x080ECE1E): for one frame BN6's timer reads 15 where BN5's still 0, and through the wait BN5's +1 reads 4 where BN6's 0. The same timer and the same end (CurAction 8 at t63 in both).",
+      "evidence": [
+        "BN5 0x080ECE02-0x080ECE0C (phase 0's end: strh 4 to AttackVars +0); 0x080ECE10-0x080ECE2A (phase 1: +1 0 sets +0x10 15 and +1 4, counts down, ends the attack)",
+        "BN6 0x080EE056-0x080EE064 (phase 0's end: +0x10 15, strh 4 to +0); its phase 1 counts it down",
+        "chip_airhoc: AttackVars +0x10 15 at t47 in BN6's, 14 at t48 in both, the attack's end at t63 in both"
       ]
     }
   ]

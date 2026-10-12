@@ -345,8 +345,7 @@ static const XVirusFamily bn5_powie = {
 
 static const XvBlock bugtank_blocks[] = {
 	{ 0x08105DE8, 0x081060E8, XV_CODE + 0x1600, 0x7B208735u },
-	{ 0x080C928C, 0x080C92F2, XV_CODE + 0x1A00, 0x7533EA15u },
-	{ 0x080C9420, 0x080C943C, XV_CODE + 0x1C00, 0xD58CA8F2u },
+	{ 0x080C9420, 0x080C943C, XV_CODE + 0x1A00, 0xD58CA8F2u },
 };
 static const XvData bugtank_data[] = {
 	{ 0x08105E98, 0x08105E9C, XV_POOL },
@@ -367,21 +366,8 @@ static const XvData bugtank_data[] = {
 	{ 0x081060D0, 0x081060D4, XV_POOL },
 	{ 0x081060D4, 0x081060E4, XV_RAW },
 	{ 0x081060E4, 0x081060E8, XV_POOL },
-	{ 0x080C929E, 0x080C92A0, XV_RAW },
-	{ 0x080C92A0, 0x080C92A4, XV_POOL },
-	{ 0x080C92A4, 0x080C92B0, XV_TABLE },
 };
 static const XvPair bugtank_calls[] = {
-	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
-	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
-	{ 0x080C92F2, 0x080CA102 },   /* map:bytes, SAME */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
@@ -400,13 +386,7 @@ static const XvPair bugtank_calls[] = {
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
 };
-static const XvPair bugtank_words[] = {
-	{ 0x080138EB, 0x08016C8B },
-	{ 0x080C92F3, 0x080CA103 },
-};
 static const XvImm bugtank_imms[] = {
-	{ 0x080C92B2, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its sprite's list: 3 in BN5, 4 in BN6 (its own not grown) */
-	{ 0x080C92B4, THUMB_MOVS, 2, 0, 0x2, 0x5E },   /* its sprite: list 3 0x2 in BN5, 0x5e in BN6 */
 	{ 0x08105F12, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 	{ 0x08105F4E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 	{ 0x08105F72, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
@@ -420,9 +400,8 @@ static const XvRef bugtank_states[] = {
 };
 static const XvSprite bugtank_sprites[] = {
 	{ 1, 0x03, 1, 0x21, XV_ART + 0xC000, 0x3000 },   /* (LZ77 in BN5) */
-	{ 3, 0x02, 4, 0x5E, XV_ART + 0xF000, 0x2000 },
 };
-static const XvType bugtank_types[] = { { 3, 0x24, XV_TYPE_MOVED } };
+static const XvType bugtank_types[] = { { 3, 0x24, XV_TYPE_SHARED } };
 static const uint16_t bugtank_held[XV_VERSIONS * 16] = {
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 	0x34A3, 0x34A3, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -442,7 +421,6 @@ static const XVirusFamily bn5_bugtank = {
 	.blocks = bugtank_blocks, .nblocks = (int)(sizeof bugtank_blocks / sizeof *bugtank_blocks),
 	.data = bugtank_data, .ndata = (int)(sizeof bugtank_data / sizeof *bugtank_data),
 	.calls = bugtank_calls, .ncalls = (int)(sizeof bugtank_calls / sizeof *bugtank_calls),
-	.words = bugtank_words, .nwords = (int)(sizeof bugtank_words / sizeof *bugtank_words),
 	.imms = bugtank_imms, .nimms = (int)(sizeof bugtank_imms / sizeof *bugtank_imms),
 	.states = bugtank_states, .nstates = (int)(sizeof bugtank_states / sizeof *bugtank_states),
 	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
@@ -457,9 +435,9 @@ static const XVirusFamily bn5_bugtank = {
 /* ---- BN5's Dominerd (AI 5 there, its enemy ids 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e), as AI 36 with ids 0x218-0x21d ---- */
 
 static const XvBlock dominerd_blocks[] = {
-	{ 0x081064CC, 0x08106A08, XV_CODE + 0x1E00, 0xFFA4BD54u },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x2402, 0xA53A3BEFu },
-	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x2602, 0x8F659214u },
+	{ 0x081064CC, 0x08106A08, XV_CODE + 0x1C00, 0xFFA4BD54u },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x2202, 0xA53A3BEFu },
+	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x2402, 0x8F659214u },
 };
 static const XvData dominerd_data[] = {
 	{ 0x081064DA, 0x081064DC, XV_RAW },
@@ -543,14 +521,14 @@ static const XvRange dominerd_ranges[] = {
 	{ 0x081067F8, 0x218, 0x21D },   /* NameIDs 0x19-0x1e in BN5, 0x218-0x21d in BN6 */
 };
 static const XvClone dominerd_clones[] = {
-	{ 0x08106710, 0x08106726, XV_CODE + 0x2800, 0x08013824, 0x08016B36, { 0 } },   /* its paralysis wrapper for BN6's state 6 */
-	{ 0x08106710, 0x08106726, XV_CODE + 0x2A00, 0x08013824, 0x08016B72, { 0 } },   /* its paralysis wrapper for BN6's state 7 */
+	{ 0x08106710, 0x08106726, XV_CODE + 0x2600, 0x08013824, 0x08016B36, { 0 } },   /* its paralysis wrapper for BN6's state 6 */
+	{ 0x08106710, 0x08106726, XV_CODE + 0x2800, 0x08013824, 0x08016B72, { 0 } },   /* its paralysis wrapper for BN6's state 7 */
 };
 static const XvRef dominerd_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), OWN(0x08106711), BN6(0x08016CE9), CLONE(1, 0x08106711), CLONE(2, 0x08106711), OWN(0x0810675F), BN6(0x0810AE95), BN6(0x0810AB35), OWN(0x081064CD), OWN(0x08106699),
 };
 static const XvSprite dominerd_sprites[] = {
-	{ 1, 0x05, 1, 0x22, XV_ART + 0x11000, 0x2000 },
+	{ 1, 0x05, 1, 0x22, XV_ART + 0xF000, 0x2000 },
 };
 
 static const XVirusFamily bn5_dominerd = {
@@ -580,11 +558,9 @@ static const XVirusFamily bn5_dominerd = {
 /* ---- BN5's MetFire (AI 6 there, its enemy ids 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24), as AI 37 with ids 0x21e-0x223 ---- */
 
 static const XvBlock metfire_blocks[] = {
-	{ 0x08106AF4, 0x08106DD4, XV_CODE + 0x2C00, 0x336DDF02u },
-	{ 0x080D0C0C, 0x080D0D20, XV_CODE + 0x3000, 0xCF20A9B0u },
-	{ 0x080D0E2C, 0x080D0E4A, XV_CODE + 0x3200, 0x293B728Bu },
-	{ 0x080EA08C, 0x080EA0BA, XV_CODE + 0x3400, 0x23FC3BE1u },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x3602, 0x21492011u },
+	{ 0x08106AF4, 0x08106DD4, XV_CODE + 0x2A00, 0x336DDF02u },
+	{ 0x080D0E2C, 0x080D0E4A, XV_CODE + 0x2E00, 0x293B728Bu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x3002, 0x21492011u },
 };
 static const XvData metfire_data[] = {
 	{ 0x08106B02, 0x08106B04, XV_RAW },
@@ -606,36 +582,11 @@ static const XvData metfire_data[] = {
 	{ 0x08106DB4, 0x08106DBC, XV_POOL },
 	{ 0x08106DBC, 0x08106DCC, XV_RAW },
 	{ 0x08106DCC, 0x08106DD4, XV_POOL },
-	{ 0x080D0C0C, 0x080D0C30, XV_RAW },
-	{ 0x080D0C3E, 0x080D0C40, XV_RAW },
-	{ 0x080D0C40, 0x080D0C44, XV_POOL },
-	{ 0x080D0C44, 0x080D0C50, XV_TABLE },
-	{ 0x080D0D12, 0x080D0D14, XV_RAW },
-	{ 0x080D0D14, 0x080D0D20, XV_POOL },
 	{ 0x08104D94, 0x08104D98, XV_POOL },
 	{ 0x08104D98, 0x08104DA8, XV_TABLE },
 };
 static const XvPair metfire_calls[] = {
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x08002630, 0x080026C4 },   /* map:calls+bytes, SAME */
-	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
-	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
-	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C3A, 0x0801A146 },   /* project:families, DIFF (audited) */
-	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
-	{ 0x080172CE, 0x0801A4D0 },   /* map:bytes, SAME */
-	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
-	{ 0x080E450E, 0x080E5736 },   /* map:bytes, SAME */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
-	{ 0x080090E8, 0x0800A8F8 },   /* map:bytes, SAME */
-	{ BN5_SPAWN_4, XV_SPAWN_4 },   /* the dispatch's spawner */
 	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
 	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
 	{ 0x08002C56, 0x08002DEA },   /* project:cangard, SAME */
@@ -652,25 +603,20 @@ static const XvPair metfire_calls[] = {
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x08012A20, 0x08015C48 },   /* map:bytes, SAME */
 	{ 0x0800B494, 0x0800CE64 },   /* map:bytes, SAME */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
 	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
 };
 static const XvPair metfire_words[] = {
-	{ 0x080138EB, 0x08016C8B },
-	{ 0x080D0D21, 0x080D0CF9 },
 	{ 0x08104BFD, 0x0810AE95 },
 	{ 0x08104DA9, 0x0810ACC9 },
 	{ 0x08104DEB, 0x0810AD0B },
 	{ 0x08104E61, 0x0810AD81 },
 };
 static const XvImm metfire_imms[] = {
-	{ 0x080D0C66, THUMB_MOVS, 1, 0, 0xC, 0x10 },   /* its table 080D0C0C's sprites' list: 3 in BN5, 4 in BN6 (its own not grown) */
 	{ 0x08106C74, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x08106C8C, THUMB_MOVS, 0, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
 	{ 0x08106C90, THUMB_MOVS, 0, 0, 0x15, 0x6E },   /* its effect: 0x15 in BN5, 0x6e in BN6 */
 	{ 0x08106CA4, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
-};
-static const XvByte metfire_bytes[] = {
-	{ 0x080D0C0C, 0x31, 0x5F },   /* a sprite of its table 080D0C0C: list 3 0x31 in BN5, 0x5f in BN6 */
 };
 static const XvRange metfire_ranges[] = {
 	{ 0x08106C46, 0x21E, 0x223 },   /* NameIDs 0x1f-0x24 in BN5, 0x21e-0x223 in BN6 */
@@ -679,10 +625,9 @@ static const XvRef metfire_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08106C19), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x08106AF5),
 };
 static const XvSprite metfire_sprites[] = {
-	{ 1, 0x06, 1, 0x23, XV_ART + 0x13000, 0x3000 },   /* (LZ77 in BN5) */
-	{ 3, 0x31, 4, 0x5F, XV_ART + 0x16000, 0x800 },
+	{ 1, 0x06, 1, 0x23, XV_ART + 0x11000, 0x3000 },   /* (LZ77 in BN5) */
 };
-static const XvType metfire_types[] = { { 3, 0x56, XV_TYPE_MOVED } };
+static const XvType metfire_types[] = { { 3, 0x56, XV_TYPE_SHARED } };
 static const uint16_t metfire_held[XV_VERSIONS * 16] = {
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 	0x348F, 0x348F, 0x348F, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -704,7 +649,6 @@ static const XVirusFamily bn5_metfire = {
 	.calls = metfire_calls, .ncalls = (int)(sizeof metfire_calls / sizeof *metfire_calls),
 	.words = metfire_words, .nwords = (int)(sizeof metfire_words / sizeof *metfire_words),
 	.imms = metfire_imms, .nimms = (int)(sizeof metfire_imms / sizeof *metfire_imms),
-	.bytes = metfire_bytes, .nbytes = (int)(sizeof metfire_bytes / sizeof *metfire_bytes),
 	.ranges = metfire_ranges, .nranges = (int)(sizeof metfire_ranges / sizeof *metfire_ranges),
 	.states = metfire_states, .nstates = (int)(sizeof metfire_states / sizeof *metfire_states),
 	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
@@ -719,10 +663,10 @@ static const XVirusFamily bn5_metfire = {
 /* ---- BN5's Shakey (AI 7 there, its enemy ids 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a), as AI 38 with ids 0x224-0x229 ---- */
 
 static const XvBlock shakey_blocks[] = {
-	{ 0x08106EC0, 0x081072BC, XV_CODE + 0x3800, 0xE01DACDBu },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x3C02, 0xA53A3BEFu },
-	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x3E00, 0x838CAF0Du },
-	{ 0x081072BC, 0x08107334, XV_CODE + 0x4000, 0x9B7C0F9Fu },
+	{ 0x08106EC0, 0x081072BC, XV_CODE + 0x3200, 0xE01DACDBu },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x3602, 0xA53A3BEFu },
+	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x3800, 0x838CAF0Du },
+	{ 0x081072BC, 0x08107334, XV_CODE + 0x3A00, 0x9B7C0F9Fu },
 };
 static const XvData shakey_data[] = {
 	{ 0x08106ECE, 0x08106ED0, XV_RAW },
@@ -790,7 +734,7 @@ static const XvRef shakey_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810721B), BN6(0x0810AE95), OWN(0x08106EC1),
 };
 static const XvSprite shakey_sprites[] = {
-	{ 1, 0x07, 1, 0x24, XV_ART + 0x16800, 0x1000 },
+	{ 1, 0x07, 1, 0x24, XV_ART + 0x14000, 0x1000 },
 };
 
 static const XVirusFamily bn5_shakey = {
@@ -817,9 +761,9 @@ static const XVirusFamily bn5_shakey = {
 /* ---- BN5's NinJoy (AI 9 there, its enemy ids 0x31, 0x32, 0x33, 0x34, 0x35, 0x36), as AI 39 with ids 0x22a-0x22f ---- */
 
 static const XvBlock ninjoy_blocks[] = {
-	{ 0x081078DC, 0x08107D44, XV_CODE + 0x4200, 0x0F7B27BFu },
-	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x4802, 0x8F659214u },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x4A02, 0x21492011u },
+	{ 0x081078DC, 0x08107D44, XV_CODE + 0x3C00, 0x0F7B27BFu },
+	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x4202, 0x8F659214u },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x4402, 0x21492011u },
 };
 static const XvData ninjoy_data[] = {
 	{ 0x081078EA, 0x081078EC, XV_RAW },
@@ -894,8 +838,8 @@ static const XvRef ninjoy_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x08107C05), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08107C21), OWN(0x081078DD), OWN(0x08104D87),
 };
 static const XvSprite ninjoy_sprites[] = {
-	{ 1, 0x09, 1, 0x25, XV_ART + 0x17800, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x37, 4, 0x60, XV_ART + 0x19800, 0xC00 },
+	{ 1, 0x09, 1, 0x25, XV_ART + 0x15000, 0x2000 },   /* (LZ77 in BN5) */
+	{ 4, 0x37, 4, 0x5E, XV_ART + 0x17000, 0xC00 },
 };
 static const XvId ninjoy_effects[] = { { 0x4E, 0x6F } };
 
@@ -924,8 +868,9 @@ static const XVirusFamily bn5_ninjoy = {
 /* ---- BN5's Lark (AI 11 there, its enemy ids 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42), as AI 40 with ids 0x230-0x235 ---- */
 
 static const XvBlock lark_blocks[] = {
-	{ 0x08107F8C, 0x08108254, XV_CODE + 0x4C00, 0xC9817107u },
-	{ 0x08108254, 0x081082C4, XV_CODE + 0x5000, 0x06CDB91Eu },
+	{ 0x08107F8C, 0x08108254, XV_CODE + 0x4600, 0xC9817107u },
+	{ 0x080CCA62, 0x080CCA8C, XV_CODE + 0x4A02, 0x6C409C7Cu },
+	{ 0x08108254, 0x081082C4, XV_CODE + 0x4C00, 0x06CDB91Eu },
 };
 static const XvData lark_data[] = {
 	{ 0x08107F9A, 0x08107F9C, XV_RAW },
@@ -952,10 +897,10 @@ static const XvData lark_data[] = {
 	{ 0x08108254, 0x081082C4, XV_RAW },
 };
 static const XvPair lark_calls[] = {
+	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
 	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
 	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x080CCA62, 0x080CCEF6 },   /* map:bytes, SAME */
 	{ 0x08002C56, 0x08002DEA },   /* project:cangard, SAME */
 	{ 0x08104B1C, 0x0810A960 },   /* project:handi, SAME */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
@@ -989,8 +934,9 @@ static const XvRef lark_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08108035), BN6(0x0810AE95), BN6(0x0810AB35), OWN(0x08107F8D),
 };
 static const XvSprite lark_sprites[] = {
-	{ 1, 0x0B, 1, 0x26, XV_ART + 0x1A800, 0x3000 },   /* (LZ77 in BN5) */
+	{ 1, 0x0B, 1, 0x26, XV_ART + 0x18000, 0x3000 },   /* (LZ77 in BN5) */
 };
+static const XvType lark_types[] = { { 3, 0x3B, XV_TYPE_SHARED } };
 static const uint16_t lark_held[XV_VERSIONS * 16] = {
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
 	0x35C8, 0x35C8, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -1022,16 +968,15 @@ static const XVirusFamily bn5_lark = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x0B, .element = 0, .weakness = 0, .shadow = true },
 	.sprites = lark_sprites, .nsprites = (int)(sizeof lark_sprites / sizeof *lark_sprites),
+	.types = lark_types, .ntypes = (int)(sizeof lark_types / sizeof *lark_types),
 };
 /* ---- BN5's BomBoy (AI 12 there, its enemy ids 0x43, 0x44, 0x45, 0x46, 0x47, 0x48), as AI 41 with ids 0x236-0x23b ---- */
 
 static const XvBlock bomboy_blocks[] = {
-	{ 0x08108340, 0x081086EC, XV_CODE + 0x5200, 0x923D786Eu },
-	{ 0x080CCEDC, 0x080CCEFC, XV_CODE + 0x5600, 0x60DBE9DAu },
-	{ 0x080CCF0E, 0x080CCFD0, XV_CODE + 0x5802, 0xD30E7093u },
-	{ 0x080CD1C8, 0x080CD200, XV_CODE + 0x5A00, 0x36DE3168u },
-	{ 0x080CD282, 0x080CD3B4, XV_CODE + 0x5C02, 0xEF65060Bu },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x5E02, 0x21492011u },
+	{ 0x08108340, 0x081086EC, XV_CODE + 0x4E00, 0x923D786Eu },
+	{ 0x080CD1C8, 0x080CD200, XV_CODE + 0x5200, 0x36DE3168u },
+	{ 0x080CD282, 0x080CD3B4, XV_CODE + 0x5402, 0xEF65060Bu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x5602, 0x21492011u },
 };
 static const XvData bomboy_data[] = {
 	{ 0x0810834E, 0x08108350, XV_RAW },
@@ -1059,9 +1004,6 @@ static const XvData bomboy_data[] = {
 	{ 0x081086D4, 0x081086D8, XV_POOL },
 	{ 0x081086D8, 0x081086E8, XV_RAW },
 	{ 0x081086E8, 0x081086EC, XV_POOL },
-	{ 0x080CCEEA, 0x080CCEEC, XV_RAW },
-	{ 0x080CCEEC, 0x080CCEF0, XV_POOL },
-	{ 0x080CCEF0, 0x080CCEFC, XV_TABLE },
 	{ 0x080CD2D2, 0x080CD3A0, XV_ZERO },
 	{ 0x080CD3A0, 0x080CD3A4, XV_POOL },
 	{ 0x080CD3A4, 0x080CD3AC, XV_ZERO },
@@ -1070,25 +1012,6 @@ static const XvData bomboy_data[] = {
 	{ 0x08104D98, 0x08104DA8, XV_TABLE },
 };
 static const XvPair bomboy_calls[] = {
-	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
-	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
-	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
-	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
-	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
-	{ 0x08002AE6, 0x08002C7A },   /* map:calls+bytes, SAME */
-	{ 0x080DFFD2, 0x080E1932 },   /* project:cangard, SAME */
-	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
-	{ 0x08018654, 0x0801BB1C },   /* map:calls, DIFF (audited) */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x0800D544, 0x0800F614 },   /* map:bytes, SAME */
 	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
@@ -1100,12 +1023,15 @@ static const XvPair bomboy_calls[] = {
 	{ 0x080CD2D2, 0x080CD7C4 },   /* map:bytes, SAME */
 	{ 0x0800F29E, 0x08011714 },   /* project:cangard, DIFF (audited) */
 	{ 0x0800CA62, 0x0800E5E2 },   /* map:bytes, SAME */
+	{ 0x08018654, 0x0801BB1C },   /* map:calls, DIFF (audited) */
+	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
 	{ 0x08018676, 0x0801BB46 },   /* map:calls, LAYOUT */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
 	{ 0x080CD200, 0x080CD6F2 },   /* map:bytes, SAME */
 	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
 	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
+	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
 	{ 0x08013944, 0x08016CE8 },   /* project:research, SAME */
 	{ 0x080133CE, 0x080165C2 },   /* project:cangard, SAME */
 	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
@@ -1113,15 +1039,12 @@ static const XvPair bomboy_calls[] = {
 	{ 0x0800B688, 0x0800D086 },   /* map:bytes, SAME */
 };
 static const XvPair bomboy_words[] = {
-	{ 0x080CCEFD, 0x080CD3D5 },
-	{ 0x080CCFD1, 0x080CD4A9 },
 	{ 0x08104BFD, 0x0810AE95 },
 	{ 0x08104DA9, 0x0810ACC9 },
 	{ 0x08104DEB, 0x0810AD0B },
 	{ 0x08104E61, 0x0810AD81 },
 };
 static const XvImm bomboy_imms[] = {
-	{ 0x080CCF16, THUMB_MOVS, 2, 0, 0x36, 0x61 },   /* its sprite: list 4 0x36 in BN5, 0x61 in BN6 */
 	{ 0x081085CC, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x081085FC, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 (setAttack0): BN6's two status states before the family's own */
 	{ 0x08108622, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
@@ -1136,10 +1059,9 @@ static const XvRef bomboy_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x08108563), BN6(0x080166AF), BN6(0x08016B03), OWN(0x08108539), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810857B), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x08108341), OWN(0x08108391),
 };
 static const XvSprite bomboy_sprites[] = {
-	{ 1, 0x0C, 1, 0x27, XV_ART + 0x1D800, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x36, 4, 0x61, XV_ART + 0x1F800, 0x800 },
+	{ 1, 0x0C, 1, 0x27, XV_ART + 0x1B000, 0x2000 },   /* (LZ77 in BN5) */
 };
-static const XvType bomboy_types[] = { { 3, 0x3E, XV_TYPE_MOVED } };
+static const XvType bomboy_types[] = { { 3, 0x3E, XV_TYPE_SHARED } };
 
 static const XVirusFamily bn5_bomboy = {
 	.name = "BomBoy (BN5's)",
@@ -1166,8 +1088,8 @@ static const XVirusFamily bn5_bomboy = {
 /* ---- BN5's Zomon (AI 13 there, its enemy ids 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e), as AI 42 with ids 0x23c-0x241 ---- */
 
 static const XvBlock zomon_blocks[] = {
-	{ 0x081087D8, 0x08108D28, XV_CODE + 0x6000, 0x45D9DACCu },
-	{ 0x08104C1C, 0x08104C38, XV_CODE + 0x6600, 0x2A5560B0u },
+	{ 0x081087D8, 0x08108D28, XV_CODE + 0x5800, 0x45D9DACCu },
+	{ 0x08104C1C, 0x08104C38, XV_CODE + 0x5E00, 0x2A5560B0u },
 };
 static const XvData zomon_data[] = {
 	{ 0x081087E6, 0x081087E8, XV_RAW },
@@ -1247,8 +1169,8 @@ static const XvRef zomon_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08108961), OWN(0x08104C1D), BN6(0x0810AB35), OWN(0x081087D9), BN6(0x0810AE95),
 };
 static const XvSprite zomon_sprites[] = {
-	{ 1, 0x0D, 1, 0x28, XV_ART + 0x20000, 0x4000 },   /* (LZ77 in BN5) */
-	{ 3, 0x14, 4, 0x62, XV_ART + 0x24000, 0x2800 },
+	{ 1, 0x0D, 1, 0x28, XV_ART + 0x1D000, 0x4000 },   /* (LZ77 in BN5) */
+	{ 3, 0x14, 4, 0x5F, XV_ART + 0x21000, 0x2800 },
 };
 static const XvId zomon_effects[] = { { 0x17, 0x70 }, { 0x16, 0x71 } };
 static const uint16_t zomon_held[XV_VERSIONS * 16] = {
@@ -1286,11 +1208,11 @@ static const XVirusFamily bn5_zomon = {
 /* ---- BN5's Drixol (AI 16 there, its enemy ids 0x5b, 0x5c, 0x5d, 0x5e, 0x5f, 0x60), as AI 43 with ids 0x242-0x247 ---- */
 
 static const XvBlock drixol_blocks[] = {
-	{ 0x0810971C, 0x08109BF8, XV_CODE + 0x6800, 0xF894CE81u },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x6E02, 0xA53A3BEFu },
-	{ 0x080E95DC, 0x080E96A2, XV_CODE + 0x7000, 0xF0B85ED1u },
-	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x7200, 0x838CAF0Du },
-	{ 0x08104C1C, 0x08104C38, XV_CODE + 0x7400, 0x2A5560B0u },
+	{ 0x0810971C, 0x08109BF8, XV_CODE + 0x6000, 0xF894CE81u },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x6602, 0xA53A3BEFu },
+	{ 0x080E95DC, 0x080E96A2, XV_CODE + 0x6800, 0xF0B85ED1u },
+	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x6A00, 0x838CAF0Du },
+	{ 0x08104C1C, 0x08104C38, XV_CODE + 0x6C00, 0x2A5560B0u },
 };
 static const XvData drixol_data[] = {
 	{ 0x0810972A, 0x0810972C, XV_RAW },
@@ -1368,7 +1290,7 @@ static const XvPair drixol_words[] = {
 	{ 0x08104BFD, 0x0810AE95 },
 };
 static const XvImm drixol_imms[] = {
-	{ 0x080E9600, THUMB_MOVS, 2, 0, 0x3F, 0x63 },   /* its sprite: list 4 0x3f in BN5, 0x63 in BN6 */
+	{ 0x080E9600, THUMB_MOVS, 2, 0, 0x3F, 0x60 },   /* its sprite: list 4 0x3f in BN5, 0x60 in BN6 */
 	{ 0x08104BE2, THUMB_LDR, 0, 3, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x081099D2, THUMB_MOVS, 4, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
 	{ 0x08109A0C, THUMB_MOVS, 4, 0, 0x15, 0x6E },   /* its effect: 0x15 in BN5, 0x6e in BN6 */
@@ -1387,8 +1309,8 @@ static const XvRef drixol_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08109A93), OWN(0x08104C1D), BN6(0x0810AB35), OWN(0x0810971D),
 };
 static const XvSprite drixol_sprites[] = {
-	{ 1, 0x10, 1, 0x29, XV_ART + 0x26800, 0x3000 },   /* (LZ77 in BN5) */
-	{ 4, 0x3F, 4, 0x63, XV_ART + 0x29800, 0x1000 },
+	{ 1, 0x10, 1, 0x29, XV_ART + 0x23800, 0x3000 },   /* (LZ77 in BN5) */
+	{ 4, 0x3F, 4, 0x60, XV_ART + 0x26800, 0x1000 },
 };
 static const XvType drixol_types[] = { { 4, 0x78, XV_TYPE_MOVED } };
 
@@ -1418,8 +1340,8 @@ static const XVirusFamily bn5_drixol = {
 /* ---- BN5's Batty (AI 17 there, its enemy ids 0x61, 0x62, 0x63, 0x64, 0x65, 0x66), as AI 44 with ids 0x248-0x24d ---- */
 
 static const XvBlock batty_blocks[] = {
-	{ 0x08109CE4, 0x0810A088, XV_CODE + 0x7600, 0x6C83B155u },
-	{ 0x080D33B8, 0x080D3570, XV_CODE + 0x7A00, 0xB5B961B7u },
+	{ 0x08109CE4, 0x0810A088, XV_CODE + 0x6E00, 0x6C83B155u },
+	{ 0x080D354C, 0x080D356C, XV_CODE + 0x7200, 0xC6462C95u },
 };
 static const XvData batty_data[] = {
 	{ 0x08109CF2, 0x08109CF4, XV_RAW },
@@ -1450,45 +1372,12 @@ static const XvData batty_data[] = {
 	{ 0x0810A06C, 0x0810A070, XV_POOL },
 	{ 0x0810A070, 0x0810A080, XV_RAW },
 	{ 0x0810A080, 0x0810A088, XV_POOL },
-	{ 0x080D33CA, 0x080D33CC, XV_RAW },
-	{ 0x080D33CC, 0x080D33D0, XV_POOL },
-	{ 0x080D33D0, 0x080D33DC, XV_TABLE },
-	{ 0x080D34C4, 0x080D34C8, XV_POOL },
-	{ 0x080D34C8, 0x080D34D0, XV_TABLE },
-	{ 0x080D3548, 0x080D354C, XV_POOL },
-	{ 0x080D356C, 0x080D3570, XV_POOL },
 };
 static const XvPair batty_calls[] = {
-	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
-	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
-	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
-	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08017054, 0x0801A258 },   /* map:bytes, SAME */
-	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
-	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
-	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
-	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
-	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
-	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
-	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
-	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
-	{ 0x0800B380, 0x0800CCBE },   /* project:research, DIFF (audited) */
-	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
-	{ 0x080DFFD2, 0x080E1932 },   /* project:cangard, SAME */
-	{ 0x080C4E72, 0x080C6BDA },   /* map:bytes, SAME */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
 	{ 0x0800CA62, 0x0800E5E2 },   /* map:bytes, SAME */
 	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
+	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
 	{ 0x08018654, 0x0801BB1C },   /* map:calls, DIFF (audited) */
 	{ 0x08016B90, 0x0801A07C },   /* project:cangard, SAME */
 	{ 0x08018676, 0x0801BB46 },   /* map:calls, LAYOUT */
@@ -1496,6 +1385,7 @@ static const XvPair batty_calls[] = {
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x08002C56, 0x08002DEA },   /* project:cangard, SAME */
 	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
 	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
 	{ 0x080131A0, 0x08016380 },   /* project:research, SAME */
 	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
@@ -1505,30 +1395,19 @@ static const XvPair batty_calls[] = {
 	{ 0x0800B614, 0x0800D012 },   /* map:bytes, SAME */
 };
 static const XvPair batty_words[] = {
-	{ 0x080138EB, 0x08016C8B },
 	{ 0x08104BFD, 0x0810AE95 },
 };
 static const XvImm batty_imms[] = {
-	{ 0x080D33E4, THUMB_MOVS, 2, 0, 0x3A, 0x64 },   /* its sprite: list 4 0x3a in BN5, 0x64 in BN6 */
-	{ 0x080D3476, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-	{ 0x080D3514, THUMB_ADDS, 4, 0, 0x56, 0x72 },   /* its effect: 0x56 in BN5, 0x72 in BN6 */
 	{ 0x08109F7C, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
 	{ 0x08109FF6, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
-};
-static const XvNumber batty_numbers[] = {
-	{ 0x080D3548, 0x0405FF10, 0x0405FF10 },
-	{ 0x080D356C, 0x03800000, 0x03800000 },
 };
 static const XvRef batty_states[] = {
 	OWN(0x08109EC5), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x08109ED7), OWN(0x08109CE5), OWN(0x08109D99),
 };
 static const XvSprite batty_sprites[] = {
-	{ 1, 0x11, 1, 0x2A, XV_ART + 0x2A800, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x3A, 4, 0x64, XV_ART + 0x2C800, 0x800 },
-	{ 4, 0x3B, 4, 0x65, XV_ART + 0x2D000, 0x1000 },
+	{ 1, 0x11, 1, 0x2A, XV_ART + 0x27800, 0x2000 },   /* (LZ77 in BN5) */
 };
-static const XvId batty_effects[] = { { 0x56, 0x72 } };
-static const XvType batty_types[] = { { 3, 0x6A, XV_TYPE_MOVED } };
+static const XvType batty_types[] = { { 3, 0x6A, XV_TYPE_SHARED } };
 
 static const XVirusFamily bn5_batty = {
 	.name = "Batty (BN5's)",
@@ -1542,7 +1421,6 @@ static const XVirusFamily bn5_batty = {
 	.calls = batty_calls, .ncalls = (int)(sizeof batty_calls / sizeof *batty_calls),
 	.words = batty_words, .nwords = (int)(sizeof batty_words / sizeof *batty_words),
 	.imms = batty_imms, .nimms = (int)(sizeof batty_imms / sizeof *batty_imms),
-	.numbers = batty_numbers, .nnumbers = (int)(sizeof batty_numbers / sizeof *batty_numbers),
 	.states = batty_states, .nstates = (int)(sizeof batty_states / sizeof *batty_states),
 	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), OWN(0x08109E95), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
 	.struct1 = 0x08109BF8, .struct2 = 0x08109C00,
@@ -1550,14 +1428,13 @@ static const XVirusFamily bn5_batty = {
 	.ice = 0,
 	.traits = { .laid = true, .mode = 0x11, .element = 0, .weakness = 0, .shadow = true },
 	.sprites = batty_sprites, .nsprites = (int)(sizeof batty_sprites / sizeof *batty_sprites),
-	.effects = batty_effects, .neffects = (int)(sizeof batty_effects / sizeof *batty_effects),
 	.types = batty_types, .ntypes = (int)(sizeof batty_types / sizeof *batty_types),
 };
 /* ---- BN5's Skarab (AI 18 there, its enemy ids 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c), as AI 45 with ids 0x24e-0x253 ---- */
 
 static const XvBlock skarab_blocks[] = {
-	{ 0x0810A174, 0x0810A4C4, XV_CODE + 0x7C00, 0x6322155Au },
-	{ 0x080DEDDC, 0x080DF0D8, XV_CODE + 0x8000, 0x64989091u },
+	{ 0x0810A174, 0x0810A4C4, XV_CODE + 0x7400, 0x6322155Au },
+	{ 0x080DEDDC, 0x080DF0D8, XV_CODE + 0x7800, 0x64989091u },
 };
 static const XvData skarab_data[] = {
 	{ 0x0810A1BA, 0x0810A1BC, XV_RAW },
@@ -1650,7 +1527,7 @@ static const XvPair skarab_words[] = {
 	{ 0x08104E61, 0x0810AD81 },
 };
 static const XvImm skarab_imms[] = {
-	{ 0x080DEE18, THUMB_MOVS, 2, 0, 0x50, 0x66 },   /* its sprite: list 4 0x50 in BN5, 0x66 in BN6 */
+	{ 0x080DEE18, THUMB_MOVS, 2, 0, 0x50, 0x61 },   /* its sprite: list 4 0x50 in BN5, 0x61 in BN6 */
 	{ 0x080DEEA0, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x080DEEC4, THUMB_MOVS, 4, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
 	{ 0x0810A296, THUMB_MOVS, 0, 0, 0xB7, 0x61 },   /* its sound 0xb7: BN5's copied into BN6's empty slot 0x61 */
@@ -1663,14 +1540,14 @@ static const XvImm skarab_imms[] = {
 	{ 0x0810A3FA, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
 };
 static const XvSong skarab_songs[] = {
-	{ 0xB7, 0x61, XV_ART + 0x31800, 0x100 },   /* its sound 0xb7, BN5's song copied */
+	{ 0xB7, 0x61, XV_ART + 0x2D000, 0x100 },   /* its sound 0xb7, BN5's song copied */
 };
 static const XvRef skarab_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x0810A325), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810A337), OWN(0x0810A175), OWN(0x0810A18B), OWN(0x0810A1D1), OWN(0x0810A223),
 };
 static const XvSprite skarab_sprites[] = {
-	{ 1, 0x12, 1, 0x2B, XV_ART + 0x2E000, 0x3000 },   /* (LZ77 in BN5) */
-	{ 4, 0x50, 4, 0x66, XV_ART + 0x31000, 0x800 },
+	{ 1, 0x12, 1, 0x2B, XV_ART + 0x29800, 0x3000 },   /* (LZ77 in BN5) */
+	{ 4, 0x50, 4, 0x61, XV_ART + 0x2C800, 0x800 },
 };
 static const XvType skarab_types[] = { { 3, 0xC1, XV_TYPE_MOVED } };
 static const uint16_t skarab_held[XV_VERSIONS * 16] = {
@@ -1708,9 +1585,9 @@ static const XVirusFamily bn5_skarab = {
 /* ---- BN5's Draggin (AI 20 there, its enemy ids 0x73, 0x74, 0x75, 0x76, 0x77, 0x78), as AI 46 with ids 0x254-0x259 ---- */
 
 static const XvBlock draggin_blocks[] = {
-	{ 0x0810ACE0, 0x0810B080, XV_CODE + 0x8400, 0xB5C313FEu },
-	{ 0x080D7270, 0x080D7378, XV_CODE + 0x8800, 0x94910498u },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x8A02, 0x21492011u },
+	{ 0x0810ACE0, 0x0810B080, XV_CODE + 0x7C00, 0xB5C313FEu },
+	{ 0x080D7270, 0x080D7378, XV_CODE + 0x8000, 0x94910498u },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0x8202, 0x21492011u },
 };
 static const XvData draggin_data[] = {
 	{ 0x0810ACEE, 0x0810ACF0, XV_RAW },
@@ -1790,7 +1667,7 @@ static const XvPair draggin_words[] = {
 	{ 0x08104E61, 0x0810AD81 },
 };
 static const XvImm draggin_imms[] = {
-	{ 0x080D72A0, THUMB_MOVS, 2, 0, 0x40, 0x67 },   /* its sprite: list 4 0x40 in BN5, 0x67 in BN6 */
+	{ 0x080D72A0, THUMB_MOVS, 2, 0, 0x40, 0x62 },   /* its sprite: list 4 0x40 in BN5, 0x62 in BN6 */
 	{ 0x080D731A, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x0810AF98, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810AFBA, THUMB_MOVS, 0, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
@@ -1805,8 +1682,8 @@ static const XvRef draggin_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810AF01), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x0810ACE1),
 };
 static const XvSprite draggin_sprites[] = {
-	{ 1, 0x14, 1, 0x2C, XV_ART + 0x32000, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x40, 4, 0x67, XV_ART + 0x34000, 0x2000 },
+	{ 1, 0x14, 1, 0x2C, XV_ART + 0x2D800, 0x2000 },   /* (LZ77 in BN5) */
+	{ 4, 0x40, 4, 0x62, XV_ART + 0x2F800, 0x2000 },
 };
 static const XvType draggin_types[] = { { 3, 0x87, XV_TYPE_MOVED } };
 static const uint16_t draggin_held[XV_VERSIONS * 16] = {
@@ -1844,9 +1721,9 @@ static const XVirusFamily bn5_draggin = {
 /* ---- BN5's Whirly (AI 21 there, its enemy ids 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e), as AI 47 with ids 0x25a-0x25f ---- */
 
 static const XvBlock whirly_blocks[] = {
-	{ 0x0810B16C, 0x0810B824, XV_CODE + 0x8C00, 0x86808BABu },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x9402, 0xA53A3BEFu },
-	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x9600, 0x838CAF0Du },
+	{ 0x0810B16C, 0x0810B824, XV_CODE + 0x8400, 0x86808BABu },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x8C02, 0xA53A3BEFu },
+	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0x8E00, 0x838CAF0Du },
 };
 static const XvData whirly_data[] = {
 	{ 0x0810B17A, 0x0810B17C, XV_RAW },
@@ -1942,7 +1819,7 @@ static const XvNumber whirly_numbers[] = {
 };
 static const XvByte whirly_bytes[] = {
 	{ 0x0810B589, 0x15, 0x2D },   /* a sprite of its table 0810B588: list 1 0x15 in BN5, 0x2d in BN6 */
-	{ 0x0810B58B, 0x08, 0x68 },   /* a sprite of its table 0810B588: list 4 0x8 in BN5, 0x68 in BN6 */
+	{ 0x0810B58B, 0x08, 0x63 },   /* a sprite of its table 0810B588: list 4 0x8 in BN5, 0x63 in BN6 */
 };
 static const XvRange whirly_ranges[] = {
 	{ 0x0810B51A, 0x25A, 0x25F },   /* NameIDs 0x79-0x7e in BN5, 0x25a-0x25f in BN6 */
@@ -1951,8 +1828,8 @@ static const XvRef whirly_states[] = {
 	BN6(0x08016381), OWN(0x0810B5E9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810B61D), BN6(0x0810AE95), BN6(0x0810AB35), OWN(0x0810B16D),
 };
 static const XvSprite whirly_sprites[] = {
-	{ 1, 0x15, 1, 0x2D, XV_ART + 0x36000, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x08, 4, 0x68, XV_ART + 0x38000, 0x1000 },
+	{ 1, 0x15, 1, 0x2D, XV_ART + 0x31800, 0x2000 },   /* (LZ77 in BN5) */
+	{ 4, 0x08, 4, 0x63, XV_ART + 0x33800, 0x1000 },
 };
 static const uint16_t whirly_held[XV_VERSIONS * 16] = {
 	0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
@@ -1989,12 +1866,9 @@ static const XVirusFamily bn5_whirly = {
 /* ---- BN5's Marina (AI 22 there, its enemy ids 0x7f, 0x80, 0x81, 0x82, 0x83, 0x84), as AI 48 with ids 0x260-0x265 ---- */
 
 static const XvBlock marina_blocks[] = {
-	{ 0x0810B910, 0x0810BC5C, XV_CODE + 0x9800, 0xE2AF121Cu },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x9C02, 0xA53A3BEFu },
-	{ 0x080C5386, 0x080C53DE, XV_CODE + 0x9E02, 0x4A1B50AFu },
-	{ 0x080C5DF4, 0x080C6000, XV_CODE + 0xA000, 0xEDB80F1Au },
-	{ 0x080D856C, 0x080D87D0, XV_CODE + 0xA400, 0x7524551Eu },
-	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0xA800, 0x4F85166Bu },
+	{ 0x0810B910, 0x0810BC5C, XV_CODE + 0x9000, 0xE2AF121Cu },
+	{ 0x080D87A2, 0x080D87CA, XV_CODE + 0x9402, 0x5F5D2D0Bu },
+	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0x9600, 0x4F85166Bu },
 };
 static const XvData marina_data[] = {
 	{ 0x0810B91E, 0x0810B920, XV_RAW },
@@ -2016,87 +1890,30 @@ static const XvData marina_data[] = {
 	{ 0x0810BC3C, 0x0810BC40, XV_POOL },
 	{ 0x0810BC40, 0x0810BC50, XV_RAW },
 	{ 0x0810BC50, 0x0810BC5C, XV_POOL },
-	{ 0x080C5DF4, 0x080C5EB4, XV_RAW },
-	{ 0x080C5EC6, 0x080C5EC8, XV_RAW },
-	{ 0x080C5EC8, 0x080C5ECC, XV_POOL },
-	{ 0x080C5ECC, 0x080C5ED8, XV_TABLE },
-	{ 0x080C5FE8, 0x080C5FFC, XV_ZERO },
-	{ 0x080C5FFC, 0x080C6000, XV_POOL },
-	{ 0x080D857E, 0x080D8580, XV_RAW },
-	{ 0x080D8580, 0x080D8584, XV_POOL },
-	{ 0x080D8584, 0x080D8590, XV_TABLE },
-	{ 0x080D86F6, 0x080D86F8, XV_RAW },
-	{ 0x080D86F8, 0x080D86FC, XV_POOL },
-	{ 0x080D86FC, 0x080D8708, XV_TABLE },
-	{ 0x080D8796, 0x080D8798, XV_RAW },
-	{ 0x080D8798, 0x080D879C, XV_POOL },
-	{ 0x080D879C, 0x080D87A2, XV_RAW },
-	{ 0x080D87CA, 0x080D87CC, XV_RAW },
-	{ 0x080D87CC, 0x080D87D0, XV_POOL },
 };
 static const XvPair marina_calls[] = {
-	{ 0x08016BBC, 0x0801A0BA },   /* search, SAME */
-	{ 0x080165E4, 0x08019F44 },   /* project:families, DIFF (audited) */
-	{ 0x0800CE1E, 0x0800EB9E },   /* map:calls, LAYOUT */
-	{ 0x0800C7CC, 0x0800E3BE },   /* map:calls, DIFF (audited) */
-	{ 0x08002C44, 0x08002DD8 },   /* map:bytes, SAME */
-	{ 0x08002C1C, 0x08002DB0 },   /* map:bytes, SAME */
-	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
-	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
-	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
-	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
-	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
-	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
-	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
-	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
-	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
-	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
-	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
-	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
-	{ 0x08017054, 0x0801A258 },   /* map:bytes, SAME */
-	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
-	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
-	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
-	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
-	{ 0x0800CB00, 0x0800E6E8 },   /* map:bytes, SAME */
-	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
-	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
-	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
-	{ 0x0800B380, 0x0800CCBE },   /* project:research, DIFF (audited) */
 	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
-	{ 0x080187A2, 0x0801BCA6 },   /* map:bytes, SAME */
-	{ 0x080138EA, 0x08016C8A },   /* project:cangard, DIFF (audited) */
-	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
-	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
-	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
-	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
-	{ 0x08008A78, 0x0800A098 },   /* project:cangard, SAME */
 	{ 0x0800F2A6, 0x0801171C },   /* map:calls, DIFF (audited) */
 	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
 	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
 	{ 0x08104B1C, 0x0810A960 },   /* project:handi, SAME */
+	{ 0x0800C6CA, 0x0800E2CA },   /* project:cangard, SAME */
 	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
 	{ 0x0800E096, 0x08010312 },   /* map:bytes, SAME */
 	{ 0x08008A1C, 0x0800A03C },   /* project:cangard, LAYOUT */
+	{ 0x08008A78, 0x0800A098 },   /* project:cangard, SAME */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x0800AFB0, 0x0800C8F8 },   /* map:calls, LAYOUT */
 	{ 0x08016C4C, 0x0801A15C },   /* project:cangard, SAME */
 	{ 0x080DFFD2, 0x080E1932 },   /* project:cangard, SAME */
+	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
 	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
 	{ 0x0810567C, 0x0810AA2A },   /* project:handi, SAME */
 	{ 0x08104C38, 0x0810AB34 },   /* search, SAME */
 	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
 };
-static const XvPair marina_words[] = {
-	{ 0x080138EB, 0x08016C8B },
-};
 static const XvImm marina_imms[] = {
-	{ 0x080C5F74, THUMB_LDR, 1, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-	{ 0x080D85AA, THUMB_MOVS, 2, 0, 0x41, 0x69 },   /* its sprite: list 4 0x41 in BN5, 0x69 in BN6 */
-	{ 0x080D869A, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-	{ 0x0810BA28, THUMB_MOVS, 4, 0, 0x5D, 0x73 },   /* its effect: 0x5d in BN5, 0x73 in BN6 */
+	{ 0x0810BA28, THUMB_MOVS, 4, 0, 0x5D, 0x72 },   /* its effect: 0x5d in BN5, 0x72 in BN6 */
 	{ 0x0810BA80, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810BAE8, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810BB1A, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
@@ -2106,12 +1923,6 @@ static const XvImm marina_imms[] = {
 static const XvNumber marina_numbers[] = {
 	{ 0x0810B9A0, 0x03800000, 0x03800000 },
 };
-static const XvByte marina_bytes[] = {
-	{ 0x080C5E6A, 0x41, 0x69 },   /* a sprite of its table 080C5DF4: list 4 0x41 in BN5, 0x69 in BN6 */
-	{ 0x080C5E7A, 0x41, 0x69 },   /* a sprite of its table 080C5DF4: list 4 0x41 in BN5, 0x69 in BN6 */
-	{ 0x080C5E8A, 0x41, 0x69 },   /* a sprite of its table 080C5DF4: list 4 0x41 in BN5, 0x69 in BN6 */
-	{ 0x080C5E9A, 0x41, 0x69 },   /* a sprite of its table 080C5DF4: list 4 0x41 in BN5, 0x69 in BN6 */
-};
 static const XvRange marina_ranges[] = {
 	{ 0x0810B958, 0x260, 0x265 },   /* NameIDs 0x7f-0x84 in BN5, 0x260-0x265 in BN6 */
 };
@@ -2119,12 +1930,11 @@ static const XvRef marina_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810BA31), OWN(0x08104C0D), BN6(0x0810AB35), OWN(0x0810B911),
 };
 static const XvSprite marina_sprites[] = {
-	{ 1, 0x16, 1, 0x2E, XV_ART + 0x39000, 0x1000 },   /* (LZ77 in BN5) */
-	{ 4, 0x41, 4, 0x69, XV_ART + 0x3A000, 0x1000 },
-	{ 5, 0x1E, 5, 0x21, XV_ART + 0x3B000, 0xC00 },
+	{ 1, 0x16, 1, 0x2E, XV_ART + 0x34800, 0x1000 },   /* (LZ77 in BN5) */
+	{ 5, 0x1E, 5, 0x21, XV_ART + 0x35800, 0xC00 },
 };
-static const XvId marina_effects[] = { { 0x5D, 0x73 } };
-static const XvType marina_types[] = { { 3, 0x0B, XV_TYPE_MOVED }, { 3, 0x8F, XV_TYPE_MOVED } };
+static const XvId marina_effects[] = { { 0x5D, 0x72 } };
+static const XvType marina_types[] = { { 3, 0x8F, XV_TYPE_SHARED } };
 
 static const XVirusFamily bn5_marina = {
 	.name = "Marina (BN5's)",
@@ -2136,10 +1946,8 @@ static const XVirusFamily bn5_marina = {
 	.blocks = marina_blocks, .nblocks = (int)(sizeof marina_blocks / sizeof *marina_blocks),
 	.data = marina_data, .ndata = (int)(sizeof marina_data / sizeof *marina_data),
 	.calls = marina_calls, .ncalls = (int)(sizeof marina_calls / sizeof *marina_calls),
-	.words = marina_words, .nwords = (int)(sizeof marina_words / sizeof *marina_words),
 	.imms = marina_imms, .nimms = (int)(sizeof marina_imms / sizeof *marina_imms),
 	.numbers = marina_numbers, .nnumbers = (int)(sizeof marina_numbers / sizeof *marina_numbers),
-	.bytes = marina_bytes, .nbytes = (int)(sizeof marina_bytes / sizeof *marina_bytes),
 	.ranges = marina_ranges, .nranges = (int)(sizeof marina_ranges / sizeof *marina_ranges),
 	.states = marina_states, .nstates = (int)(sizeof marina_states / sizeof *marina_states),
 	.hooks = { OWN(0x0810B9D7), BN6(BN6_FAMILY_NULLSUB), OWN(0x0810B9CD), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
@@ -2154,10 +1962,10 @@ static const XVirusFamily bn5_marina = {
 /* ---- BN5's Flashy (AI 23 there, its enemy ids 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a), as AI 49 with ids 0x266-0x26b ---- */
 
 static const XvBlock flashy_blocks[] = {
-	{ 0x0810BD48, 0x0810C1C4, XV_CODE + 0xAA00, 0x8EAEFDA1u },
-	{ 0x080D3B50, 0x080D3CDA, XV_CODE + 0xB000, 0xE027226Cu },
-	{ 0x08104B4C, 0x08104B80, XV_CODE + 0xB200, 0xD74B7D5Eu },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xB402, 0x21492011u },
+	{ 0x0810BD48, 0x0810C1C4, XV_CODE + 0x9800, 0x8EAEFDA1u },
+	{ 0x080D3B50, 0x080D3CDA, XV_CODE + 0x9E00, 0xE027226Cu },
+	{ 0x08104B4C, 0x08104B80, XV_CODE + 0xA000, 0xD74B7D5Eu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xA202, 0x21492011u },
 };
 static const XvData flashy_data[] = {
 	{ 0x0810BD56, 0x0810BD58, XV_RAW },
@@ -2251,7 +2059,7 @@ static const XvPair flashy_words[] = {
 	{ 0x08104E61, 0x0810AD81 },
 };
 static const XvImm flashy_imms[] = {
-	{ 0x080D3B80, THUMB_MOVS, 2, 0, 0x3E, 0x6A },   /* its sprite: list 4 0x3e in BN5, 0x6a in BN6 */
+	{ 0x080D3B80, THUMB_MOVS, 2, 0, 0x3E, 0x64 },   /* its sprite: list 4 0x3e in BN5, 0x64 in BN6 */
 	{ 0x080D3C0E, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x0810BDBC, THUMB_MOVS, 4, 0, 0x15, 0x6E },   /* its effect: 0x15 in BN5, 0x6e in BN6 */
 	{ 0x0810BDE4, THUMB_MOVS, 4, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
@@ -2269,14 +2077,14 @@ static const XvRange flashy_ranges[] = {
 	{ 0x0810C160, 0x266, 0x26B },   /* NameIDs 0x85-0x8a in BN5, 0x266-0x26b in BN6 */
 };
 static const XvSong flashy_songs[] = {
-	{ 0xBA, 0x60, XV_ART + 0x3E000, 0x100 },   /* its sound 0xba, BN5's song copied */
+	{ 0xBA, 0x60, XV_ART + 0x38800, 0x100 },   /* its sound 0xba, BN5's song copied */
 };
 static const XvRef flashy_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810C075), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x0810BD49),
 };
 static const XvSprite flashy_sprites[] = {
-	{ 1, 0x17, 1, 0x2F, XV_ART + 0x3C000, 0x1000 },
-	{ 4, 0x3E, 4, 0x6A, XV_ART + 0x3D000, 0x1000 },
+	{ 1, 0x17, 1, 0x2F, XV_ART + 0x36800, 0x1000 },
+	{ 4, 0x3E, 4, 0x64, XV_ART + 0x37800, 0x1000 },
 };
 static const XvType flashy_types[] = { { 3, 0x6F, XV_TYPE_MOVED } };
 
@@ -2306,9 +2114,9 @@ static const XVirusFamily bn5_flashy = {
 /* ---- BN5's Eleogre (AI 24 there, its enemy ids 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90), as AI 50 with ids 0x26c-0x271 ---- */
 
 static const XvBlock eleogre_blocks[] = {
-	{ 0x0810C2B0, 0x0810C780, XV_CODE + 0xB600, 0x01260ACAu },
-	{ 0x080D3CBC, 0x080D3CDA, XV_CODE + 0xBC00, 0x7A9ADD7Bu },
-	{ 0x08104B96, 0x08104BBC, XV_CODE + 0xBE02, 0x8F659214u },
+	{ 0x0810C2B0, 0x0810C780, XV_CODE + 0xA400, 0x01260ACAu },
+	{ 0x080D3CBC, 0x080D3CDA, XV_CODE + 0xAA00, 0x7A9ADD7Bu },
+	{ 0x08104B96, 0x08104BBC, XV_CODE + 0xAC02, 0x8F659214u },
 };
 static const XvData eleogre_data[] = {
 	{ 0x0810C2BE, 0x0810C2C0, XV_RAW },
@@ -2382,7 +2190,7 @@ static const XvRef eleogre_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810C5C1), BN6(0x0810AE95), OWN(0x0810C2B1), BN6(0x0810AB35),
 };
 static const XvSprite eleogre_sprites[] = {
-	{ 1, 0x18, 1, 0x30, XV_ART + 0x3E800, 0x2000 },   /* (LZ77 in BN5) */
+	{ 1, 0x18, 1, 0x30, XV_ART + 0x39000, 0x2000 },   /* (LZ77 in BN5) */
 };
 static const XvType eleogre_types[] = { { 3, 0x6F, XV_TYPE_SHARED } };
 
@@ -2411,11 +2219,11 @@ static const XVirusFamily bn5_eleogre = {
 /* ---- BN5's Cactikil (AI 25 there, its enemy ids 0x91, 0x92, 0x93, 0x94, 0x95, 0x96), as AI 51 with ids 0x272-0x277 ---- */
 
 static const XvBlock cactikil_blocks[] = {
-	{ 0x0810C86C, 0x0810CC8C, XV_CODE + 0xC000, 0x940C91A4u },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0xC602, 0xA53A3BEFu },
-	{ 0x080BB9C4, 0x080BBB88, XV_CODE + 0xC800, 0xF1AE1059u },
-	{ 0x080C5386, 0x080C53DE, XV_CODE + 0xCA02, 0x4A1B50AFu },
-	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0xCC00, 0x838CAF0Du },
+	{ 0x0810C86C, 0x0810CC8C, XV_CODE + 0xAE00, 0x940C91A4u },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0xB402, 0xA53A3BEFu },
+	{ 0x080BB9C4, 0x080BBB88, XV_CODE + 0xB600, 0xF1AE1059u },
+	{ 0x080C5386, 0x080C53DE, XV_CODE + 0xB802, 0x4A1B50AFu },
+	{ 0x08104BBC, 0x08104BFC, XV_CODE + 0xBA00, 0x838CAF0Du },
 };
 static const XvData cactikil_data[] = {
 	{ 0x0810C87A, 0x0810C87C, XV_RAW },
@@ -2515,7 +2323,7 @@ static const XvImm cactikil_imms[] = {
 	{ 0x080BB9FC, THUMB_MOVS, 2, 0, 0x19, 0x31 },   /* its sprite: list 1 0x19 in BN5, 0x31 in BN6 */
 	{ 0x08104BE2, THUMB_LDR, 0, 3, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x0810CA24, THUMB_MOVS, 4, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
-	{ 0x0810CAF6, THUMB_MOVS, 2, 0, 0x30, 0x6B },   /* its sprite: list 4 0x30 in BN5, 0x6b in BN6 */
+	{ 0x0810CAF6, THUMB_MOVS, 2, 0, 0x30, 0x65 },   /* its sprite: list 4 0x30 in BN5, 0x65 in BN6 */
 	{ 0x0810CC3E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 };
 static const XvNumber cactikil_numbers[] = {
@@ -2526,8 +2334,8 @@ static const XvRef cactikil_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x0810CB75), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810CBA5), OWN(0x0810C86D),
 };
 static const XvSprite cactikil_sprites[] = {
-	{ 1, 0x19, 1, 0x31, XV_ART + 0x40800, 0x1000 },   /* (LZ77 in BN5) */
-	{ 4, 0x30, 4, 0x6B, XV_ART + 0x41800, 0x1800 },
+	{ 1, 0x19, 1, 0x31, XV_ART + 0x3B000, 0x1000 },   /* (LZ77 in BN5) */
+	{ 4, 0x30, 4, 0x65, XV_ART + 0x3C000, 0x1800 },
 };
 static const XvType cactikil_types[] = { { 1, 0x11, XV_TYPE_MOVED } };
 
@@ -2556,12 +2364,12 @@ static const XVirusFamily bn5_cactikil = {
 /* ---- BN5's WuNote (AI 26 there, its enemy ids 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9c), as AI 52 with ids 0x278-0x27d ---- */
 
 static const XvBlock wunote_blocks[] = {
-	{ 0x0810CD78, 0x0810D290, XV_CODE + 0xCE00, 0x49C8083Bu },
-	{ 0x080BC6EC, 0x080BC82E, XV_CODE + 0xD400, 0x5569E6C2u },
-	{ 0x080C5386, 0x080C53DE, XV_CODE + 0xD602, 0x4A1B50AFu },
-	{ 0x080D6C90, 0x080D6EB0, XV_CODE + 0xD800, 0xAD752C27u },
-	{ 0x08104B4C, 0x08104B80, XV_CODE + 0xDC00, 0xD74B7D5Eu },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xDE02, 0x21492011u },
+	{ 0x0810CD78, 0x0810D290, XV_CODE + 0xBC00, 0x49C8083Bu },
+	{ 0x080BC6EC, 0x080BC82E, XV_CODE + 0xC200, 0x5569E6C2u },
+	{ 0x080C5386, 0x080C53DE, XV_CODE + 0xC402, 0x4A1B50AFu },
+	{ 0x080D6C90, 0x080D6EB0, XV_CODE + 0xC600, 0xAD752C27u },
+	{ 0x08104B4C, 0x08104B80, XV_CODE + 0xCA00, 0xD74B7D5Eu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xCC02, 0x21492011u },
 };
 static const XvData wunote_data[] = {
 	{ 0x0810CD86, 0x0810CD88, XV_RAW },
@@ -2697,7 +2505,7 @@ static const XvRef wunote_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x0810D0F1), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810D111), BN6(0x0810AE95), OWN(0x0810CD79), OWN(0x0810CE71), OWN(0x08104D87),
 };
 static const XvSprite wunote_sprites[] = {
-	{ 1, 0x1A, 1, 0x32, XV_ART + 0x43000, 0x2000 },   /* (LZ77 in BN5) */
+	{ 1, 0x1A, 1, 0x32, XV_ART + 0x3D800, 0x2000 },   /* (LZ77 in BN5) */
 };
 static const XvType wunote_types[] = { { 1, 0x05, XV_TYPE_SHARED }, { 1, 0x16, XV_TYPE_MOVED }, { 3, 0x84, XV_TYPE_MOVED } };
 
@@ -2726,12 +2534,12 @@ static const XVirusFamily bn5_wunote = {
 /* ---- BN5's Appley (AI 27 there, its enemy ids 0x9d, 0x9e, 0x9f, 0xa0, 0xa1, 0xa2), as AI 53 with ids 0x27e-0x283 ---- */
 
 static const XvBlock appley_blocks[] = {
-	{ 0x0810D37C, 0x0810D874, XV_CODE + 0xE000, 0x08929E7Du },
-	{ 0x080C10F8, 0x080C12C0, XV_CODE + 0xE600, 0xD6114BDEu },
-	{ 0x080DBAF4, 0x080DBC38, XV_CODE + 0xE800, 0x7F26FB77u },
-	{ 0x080DBC4C, 0x080DBC6A, XV_CODE + 0xEA00, 0xF03FE711u },
-	{ 0x080EADC0, 0x080EAE26, XV_CODE + 0xEC00, 0x491FE2BCu },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xEE02, 0x21492011u },
+	{ 0x0810D37C, 0x0810D874, XV_CODE + 0xCE00, 0x08929E7Du },
+	{ 0x080C10F8, 0x080C12C0, XV_CODE + 0xD400, 0xD6114BDEu },
+	{ 0x080DBAF4, 0x080DBC38, XV_CODE + 0xD600, 0x7F26FB77u },
+	{ 0x080DBC4C, 0x080DBC6A, XV_CODE + 0xD800, 0xF03FE711u },
+	{ 0x080EADC0, 0x080EAE26, XV_CODE + 0xDA00, 0x491FE2BCu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xDC02, 0x21492011u },
 };
 static const XvData appley_data[] = {
 	{ 0x0810D38A, 0x0810D38C, XV_RAW },
@@ -2849,8 +2657,8 @@ static const XvPair appley_words[] = {
 };
 static const XvImm appley_imms[] = {
 	{ 0x080C1120, THUMB_MOVS, 2, 0, 0x1B, 0x33 },   /* its sprite: list 1 0x1b in BN5, 0x33 in BN6 */
-	{ 0x080C11FE, THUMB_MOVS, 4, 0, 0x26, 0x74 },   /* its effect: 0x26 in BN5, 0x74 in BN6 */
-	{ 0x080DBB20, THUMB_MOVS, 2, 0, 0x39, 0x6D },   /* its sprite: list 4 0x39 in BN5, 0x6d in BN6 */
+	{ 0x080C11FE, THUMB_MOVS, 4, 0, 0x26, 0x73 },   /* its effect: 0x26 in BN5, 0x73 in BN6 */
+	{ 0x080DBB20, THUMB_MOVS, 2, 0, 0x39, 0x66 },   /* its sprite: list 4 0x39 in BN5, 0x66 in BN6 */
 	{ 0x080DBBC0, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x080DBBEC, THUMB_MOVS, 4, 0, 0x14, 0x6D },   /* its effect: 0x14 in BN5, 0x6d in BN6 */
 	{ 0x0810D5AC, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
@@ -2866,11 +2674,11 @@ static const XvRef appley_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), OWN(0x0810D46D), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810D553), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x0810D37D),
 };
 static const XvSprite appley_sprites[] = {
-	{ 1, 0x1B, 1, 0x33, XV_ART + 0x45000, 0x2000 },   /* (LZ77 in BN5) */
-	{ 4, 0x39, 4, 0x6D, XV_ART + 0x47000, 0x800 },
-	{ 4, 0x17, 4, 0x6E, XV_ART + 0x47800, 0x800 },
+	{ 1, 0x1B, 1, 0x33, XV_ART + 0x3F800, 0x2000 },   /* (LZ77 in BN5) */
+	{ 4, 0x39, 4, 0x66, XV_ART + 0x41800, 0x800 },
+	{ 4, 0x17, 4, 0x67, XV_ART + 0x42000, 0x800 },
 };
-static const XvId appley_effects[] = { { 0x26, 0x74 } };
+static const XvId appley_effects[] = { { 0x26, 0x73 } };
 static const XvType appley_types[] = { { 1, 0x2F, XV_TYPE_MOVED }, { 3, 0xAC, XV_TYPE_MOVED }, { 4, 0x90, XV_TYPE_MOVED } };
 
 static const XVirusFamily bn5_appley = {
@@ -2900,9 +2708,9 @@ static const XVirusFamily bn5_appley = {
 /* ---- BN5's BigBrute (AI 28 there, its enemy ids 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8), as AI 54 with ids 0x284-0x289 ---- */
 
 static const XvBlock bigbrute_blocks[] = {
-	{ 0x0810D960, 0x0810DD70, XV_CODE + 0xF000, 0x1C16C032u },
-	{ 0x080D2264, 0x080D236C, XV_CODE + 0xF600, 0x77B05DFDu },
-	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xF802, 0x21492011u },
+	{ 0x0810D960, 0x0810DD70, XV_CODE + 0xDE00, 0x1C16C032u },
+	{ 0x080D2264, 0x080D236C, XV_CODE + 0xE400, 0x77B05DFDu },
+	{ 0x08104D86, 0x08104DA8, XV_CODE + 0xE602, 0x21492011u },
 };
 static const XvData bigbrute_data[] = {
 	{ 0x0810D96E, 0x0810D970, XV_RAW },
@@ -2982,17 +2790,17 @@ static const XvImm bigbrute_imms[] = {
 	{ 0x080D230E, THUMB_LDR, 0, 7, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
 	{ 0x0810DAE6, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810DB40, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
-	{ 0x0810DB5C, THUMB_MOVS, 0, 0, 0x12, 0x75 },   /* its effect: 0x12 in BN5, 0x75 in BN6 */
-	{ 0x0810DB60, THUMB_MOVS, 0, 0, 0x13, 0x76 },   /* its effect: 0x13 in BN5, 0x76 in BN6 */
+	{ 0x0810DB5C, THUMB_MOVS, 0, 0, 0x12, 0x74 },   /* its effect: 0x12 in BN5, 0x74 in BN6 */
+	{ 0x0810DB60, THUMB_MOVS, 0, 0, 0x13, 0x75 },   /* its effect: 0x13 in BN5, 0x75 in BN6 */
 	{ 0x0810DB8A, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
 };
 static const XvRef bigbrute_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810DA85), BN6(0x0810AE95), OWN(0x08104D87), OWN(0x0810D961),
 };
 static const XvSprite bigbrute_sprites[] = {
-	{ 1, 0x1C, 1, 0x34, XV_ART + 0x48000, 0x7000 },   /* (LZ77 in BN5) */
+	{ 1, 0x1C, 1, 0x34, XV_ART + 0x42800, 0x7000 },   /* (LZ77 in BN5) */
 };
-static const XvId bigbrute_effects[] = { { 0x12, 0x75 }, { 0x13, 0x76 } };
+static const XvId bigbrute_effects[] = { { 0x12, 0x74 }, { 0x13, 0x75 } };
 static const XvType bigbrute_types[] = { { 3, 0x61, XV_TYPE_MOVED } };
 
 static const XVirusFamily bn5_bigbrute = {
@@ -3020,10 +2828,10 @@ static const XVirusFamily bn5_bigbrute = {
 /* ---- BN5's TinHawk (AI 29 there, its enemy ids 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae), as AI 55 with ids 0x28a-0x28f ---- */
 
 static const XvBlock tinhawk_blocks[] = {
-	{ 0x0810DE5C, 0x0810E710, XV_CODE + 0xFA00, 0x00142C9Au },
-	{ 0x08016B96, 0x08016BBC, XV_CODE + 0x10402, 0xA53A3BEFu },
-	{ 0x08104B96, 0x08104BFC, XV_CODE + 0x10602, 0xEFA709B2u },
-	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0x10800, 0x4F85166Bu },
+	{ 0x0810DE5C, 0x0810E710, XV_CODE + 0xE800, 0x00142C9Au },
+	{ 0x08016B96, 0x08016BBC, XV_CODE + 0xF202, 0xA53A3BEFu },
+	{ 0x08104B96, 0x08104BFC, XV_CODE + 0xF402, 0xEFA709B2u },
+	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0xF600, 0x4F85166Bu },
 };
 static const XvData tinhawk_data[] = {
 	{ 0x0810DE6A, 0x0810DE6C, XV_RAW },
@@ -3098,13 +2906,13 @@ static const XvPair tinhawk_calls[] = {
 };
 static const XvImm tinhawk_imms[] = {
 	{ 0x08104BE2, THUMB_LDR, 0, 3, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
-	{ 0x0810DED4, THUMB_MOVS, 4, 0, 0x13, 0x76 },   /* its effect: 0x13 in BN5, 0x76 in BN6 */
-	{ 0x0810DEEE, THUMB_MOVS, 4, 0, 0x12, 0x75 },   /* its effect: 0x12 in BN5, 0x75 in BN6 */
-	{ 0x0810E16E, THUMB_ADDS, 4, 0, 0x62, 0x77 },   /* its effect: 0x62 in BN5, 0x77 in BN6 */
-	{ 0x0810E258, THUMB_MOVS, 4, 0, 0x13, 0x76 },   /* its effect: 0x13 in BN5, 0x76 in BN6 */
-	{ 0x0810E272, THUMB_MOVS, 4, 0, 0x12, 0x75 },   /* its effect: 0x12 in BN5, 0x75 in BN6 */
-	{ 0x0810E2CA, THUMB_MOVS, 4, 0, 0x13, 0x76 },   /* its effect: 0x13 in BN5, 0x76 in BN6 */
-	{ 0x0810E2E4, THUMB_MOVS, 4, 0, 0x12, 0x75 },   /* its effect: 0x12 in BN5, 0x75 in BN6 */
+	{ 0x0810DED4, THUMB_MOVS, 4, 0, 0x13, 0x75 },   /* its effect: 0x13 in BN5, 0x75 in BN6 */
+	{ 0x0810DEEE, THUMB_MOVS, 4, 0, 0x12, 0x74 },   /* its effect: 0x12 in BN5, 0x74 in BN6 */
+	{ 0x0810E16E, THUMB_ADDS, 4, 0, 0x62, 0x76 },   /* its effect: 0x62 in BN5, 0x76 in BN6 */
+	{ 0x0810E258, THUMB_MOVS, 4, 0, 0x13, 0x75 },   /* its effect: 0x13 in BN5, 0x75 in BN6 */
+	{ 0x0810E272, THUMB_MOVS, 4, 0, 0x12, 0x74 },   /* its effect: 0x12 in BN5, 0x74 in BN6 */
+	{ 0x0810E2CA, THUMB_MOVS, 4, 0, 0x13, 0x75 },   /* its effect: 0x13 in BN5, 0x75 in BN6 */
+	{ 0x0810E2E4, THUMB_MOVS, 4, 0, 0x12, 0x74 },   /* its effect: 0x12 in BN5, 0x74 in BN6 */
 	{ 0x0810E3C8, THUMB_CMP, 0, 0, 0x9, 0xB },   /* CurAction 9 compared */
 	{ 0x0810E480, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810E4D2, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
@@ -3118,10 +2926,10 @@ static const XvRef tinhawk_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810E3D5), BN6(0x0810AE95), OWN(0x0810DE5D), OWN(0x0810DF6F),
 };
 static const XvSprite tinhawk_sprites[] = {
-	{ 1, 0x1D, 1, 0x35, XV_ART + 0x4F000, 0x5000 },   /* (LZ77 in BN5) */
-	{ 5, 0x0E, 5, 0x22, XV_ART + 0x54000, 0xC00 },
+	{ 1, 0x1D, 1, 0x35, XV_ART + 0x49800, 0x5000 },   /* (LZ77 in BN5) */
+	{ 5, 0x0E, 5, 0x22, XV_ART + 0x4E800, 0xC00 },
 };
-static const XvId tinhawk_effects[] = { { 0x62, 0x77 } };
+static const XvId tinhawk_effects[] = { { 0x62, 0x76 } };
 
 static const XVirusFamily bn5_tinhawk = {
 	.name = "TinHawk (BN5's)",
@@ -3147,10 +2955,10 @@ static const XVirusFamily bn5_tinhawk = {
 /* ---- BN5's Bladia (AI 30 there, its enemy ids 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4), as AI 56 with ids 0x290-0x295 ---- */
 
 static const XvBlock bladia_blocks[] = {
-	{ 0x0810E7FC, 0x0810EC34, XV_CODE + 0x10A00, 0x7048D0EBu },
-	{ 0x08104B4C, 0x08104B80, XV_CODE + 0x11000, 0xD74B7D5Eu },
-	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x11202, 0x8F659214u },
-	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0x11400, 0x4F85166Bu },
+	{ 0x0810E7FC, 0x0810EC34, XV_CODE + 0xF800, 0x7048D0EBu },
+	{ 0x08104B4C, 0x08104B80, XV_CODE + 0xFE00, 0xD74B7D5Eu },
+	{ 0x08104B96, 0x08104BBC, XV_CODE + 0x10002, 0x8F659214u },
+	{ 0x08104C0C, 0x08104C1C, XV_CODE + 0x10200, 0x4F85166Bu },
 };
 static const XvData bladia_data[] = {
 	{ 0x0810E87E, 0x0810E880, XV_RAW },
@@ -3217,9 +3025,9 @@ static const XvPair bladia_words[] = {
 	{ 0x0801629C, 0x08019B78 },
 };
 static const XvImm bladia_imms[] = {
-	{ 0x0810E952, THUMB_MOVS, 4, 0, 0x60, 0x78 },   /* its effect: 0x60 in BN5, 0x78 in BN6 */
-	{ 0x0810E9E8, THUMB_MOVS, 4, 0, 0x12, 0x75 },   /* its effect: 0x12 in BN5, 0x75 in BN6 */
-	{ 0x0810EA24, THUMB_MOVS, 4, 0, 0x13, 0x76 },   /* its effect: 0x13 in BN5, 0x76 in BN6 */
+	{ 0x0810E952, THUMB_MOVS, 4, 0, 0x60, 0x77 },   /* its effect: 0x60 in BN5, 0x77 in BN6 */
+	{ 0x0810E9E8, THUMB_MOVS, 4, 0, 0x12, 0x74 },   /* its effect: 0x12 in BN5, 0x74 in BN6 */
+	{ 0x0810EA24, THUMB_MOVS, 4, 0, 0x13, 0x75 },   /* its effect: 0x13 in BN5, 0x75 in BN6 */
 	{ 0x0810EAEA, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810EB30, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
 	{ 0x0810EB84, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
@@ -3228,10 +3036,10 @@ static const XvRef bladia_states[] = {
 	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF), BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73), OWN(0x0810EAB1), OWN(0x0810E7FD), OWN(0x0810E979), OWN(0x0810E871), BN6(0x0810AB35), BN6(0x0810AE95),
 };
 static const XvSprite bladia_sprites[] = {
-	{ 1, 0x1E, 1, 0x36, XV_ART + 0x55000, 0x4000 },   /* (LZ77 in BN5) */
-	{ 4, 0x48, 4, 0x6F, XV_ART + 0x59000, 0x800 },
+	{ 1, 0x1E, 1, 0x36, XV_ART + 0x4F800, 0x4000 },   /* (LZ77 in BN5) */
+	{ 4, 0x48, 4, 0x68, XV_ART + 0x53800, 0x800 },
 };
-static const XvId bladia_effects[] = { { 0x60, 0x78 } };
+static const XvId bladia_effects[] = { { 0x60, 0x77 } };
 
 static const XVirusFamily bn5_bladia = {
 	.name = "Bladia (BN5's)",

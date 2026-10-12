@@ -50,7 +50,11 @@
 #include "buttons.h"
 #include "chips.h"
 #include "claims.h"
+#include "xattack_grow.h"
 #include "xchips.h"
+#include "xchips_bn5.h"
+#include "xchips_code.h"
+#include "xchips_moved.h"
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
@@ -3104,7 +3108,7 @@ static void test_xvirus_cangard(void) {
 	sprites[0].to_list = 4;
 	recipe_refused(&f, "its battle sprite out of the viruses' list");
 	sprites[0] = c->sprites[0];
-	sprites[2].to_list = 3;
+	sprites[2].to_list = 6;
 	recipe_refused(&f, "a sprite in a list not grown");
 	sprites[2] = c->sprites[2];
 	sprites[2].to_index = 0xFF;
@@ -3143,7 +3147,8 @@ static void test_xvirus_cangard(void) {
 	f = *c;
 	f.traits.mode = 0x22;
 	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a mode past BN6's table refused: %s", why);
-	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == XV_LISTS_GROWN - 1 && xvirus_list_slot(3) < 0,
+	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == 3 && xvirus_list_slot(BN6_SPRITES_LIST3) == XV_LISTS_GROWN - 1 &&
+		xvirus_list_slot(6) < 0,
 		"xvirus: the grown lists' places");
 }
 
@@ -3185,22 +3190,37 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 	return bad;
 }
 
-/* a type each family shares (XV_TYPE_SHARED) is one a family before it in the install order moved, or BN5's engine
- * objects' moved once before any family (xnavi_objects.h: WuNote's image) */
-static bool shared_moved_before(int i) {
-	const XVirusFamily *f = xvirus_bn5[i];
-	for (int t = 0; t < f->ntypes; ++t) {
-		if (f->types[t].to != XV_TYPE_SHARED) continue;
-		bool found = false;
-		for (int u = 0; u < xnavi_objects_bn5.ntypes; ++u)
-			found |= xnavi_objects_bn5.types[u].kind == f->types[t].kind && xnavi_objects_bn5.types[u].from == f->types[t].from &&
-				xnavi_objects_bn5.types[u].to == XV_TYPE_MOVED;
-		for (int k = 0; k < i && !found; ++k)
-			for (int u = 0; u < xvirus_bn5[k]->ntypes; ++u)
-				found |= xvirus_bn5[k]->types[u].kind == f->types[t].kind && xvirus_bn5[k]->types[u].from == f->types[t].from &&
-					xvirus_bn5[k]->types[u].to == XV_TYPE_MOVED;
-		if (!found) return false;
-	}
+/* The tracks' recipes in their install order (xinstall.h): BN5's moved engine objects, the Navis, BN5's chips' code, the
+ * families. Whether a recipe of a track before track `track`'s recipe `at` (or one of that track's own before it) moves
+ * the type kind:from (XV_TYPE_MOVED): the copy a recipe that shares it (XV_TYPE_SHARED) spawns */
+enum { TRACK_OBJECTS, TRACK_NAVIS, TRACK_CHIPS, TRACK_FAMILIES };
+
+static bool moves(const XVirusFamily *f, int kind, int from) {
+	for (int u = 0; u < f->ntypes; ++u)
+		if (f->types[u].kind == kind && f->types[u].from == from && f->types[u].to == XV_TYPE_MOVED) return true;
+	return false;
+}
+
+static bool moved_before(int track, int at, int kind, int from) {
+	bool found = track > TRACK_OBJECTS && moves(&xnavi_objects_bn5, kind, from);
+	for (int k = 0; track >= TRACK_NAVIS && k < (track == TRACK_NAVIS ? at : xnavi_bn5_count) && !found; ++k) found = moves(&xnavi_bn5[k]->code, kind, from);
+	for (int k = 0; track >= TRACK_CHIPS && k < (track == TRACK_CHIPS ? at : xchips_bn5_count) && !found; ++k) found = moves(&xchips_bn5[k].code, kind, from);
+	for (int k = 0; track == TRACK_FAMILIES && k < at && !found; ++k) found = moves(xvirus_bn5[k], kind, from);
+	return found;
+}
+
+/* each type a recipe shares one a recipe before it in the install order moved */
+static bool shared_moved_before(const XVirusFamily *f, int track, int at) {
+	for (int t = 0; t < f->ntypes; ++t)
+		if (f->types[t].to == XV_TYPE_SHARED && !moved_before(track, at, f->types[t].kind, f->types[t].from)) return false;
+	return true;
+}
+
+/* each type a recipe moves one no recipe of an earlier track moved (one copy a type, issue #82's plan for its tracks: the
+ * dispatch's MOVED entry the first install's; a later track shares it); the chips' units, one step, may each move one */
+static bool moved_once(const XVirusFamily *f, int track) {
+	for (int t = 0; t < f->ntypes; ++t)
+		if (f->types[t].to == XV_TYPE_MOVED && track > TRACK_OBJECTS && moved_before(track, 0, f->types[t].kind, f->types[t].from)) return false;
 	return true;
 }
 
@@ -3213,7 +3233,8 @@ static void test_xvirus_static(void) {
 		CHECK(xvirus_recipe_ok(f, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xvirus: %s refused: %s", f->name, why);
 		CHECK(f->ai == BN6_FAMILIES + i && f->first_id == XV_FIRST_ID + XV_VERSIONS * i && f->home == XV_HOMES + XV_HOME_SIZE * (uint32_t)i,
 			"xvirus: %s off its slot %d", f->name, i);
-		CHECK(shared_moved_before(i), "xvirus: %s shares a type no family before it moved", f->name);
+		CHECK(shared_moved_before(f, TRACK_FAMILIES, i), "xvirus: %s shares a type no recipe before it moved", f->name);
+		CHECK(moved_once(f, TRACK_FAMILIES), "xvirus: %s moves a type a track before it moved", f->name);
 		for (int k = 0; k < i; ++k)
 			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
 	}
@@ -3345,12 +3366,14 @@ static void test_free_space(void) {
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
 	const Region room[] = {
 		{ "the per-family tables", XV_GROWN, XV_GROWN + XV_TABLES * XV_STEP }, { "the ice sizes", XV_ICE, XV_ICE + XV_AIS },
-		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "the sprite lists", XV_LISTS, XV_LISTS + XV_LISTS_GROWN * XV_STEP },
+		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "sprite list 3", XV_LIST3, XV_LIST3 + XV_STEP },
+		{ "sprite lists 1, 2, 4 and 5", XV_LISTS, XV_LISTS + (XV_LISTS_GROWN - 1) * XV_STEP },
 		{ "the effects", XV_EFFECTS, XV_EFFECTS + 4u * XV_EFFECTS_MAX }, { "the kinds' types", XV_TYPES, XV_TYPES + 3 * XV_STEP },
 		{ "the enemy ids", XV_IDS_AT, XV_IDS_AT + 3u * XV_IDS }, { "the reward rows", XV_ROWS, XV_ROWS + 2u * ENEMY_DROPS * XV_IDS },
 		{ "the ids' names", XV_NAMES, XV_NAMES + XV_NAMES_ROOM },
 		{ "MOVED", XV_MOVED_TABLES, XV_MOVED_TABLES + XV_DISPATCH_KINDS * XV_STEP },
 		{ "TWIN", XV_TWIN_TABLES, XV_TWIN_TABLES + XV_DISPATCH_KINDS * 0x100u }, { "the dispatch's code", XV_STUBS, XV_STUBS_END },
+		{ "the families' pre-steps", XV_PRESTEP, XV_PRESTEP + 4u * XV_AIS },
 	};
 	CHECK(XV_AT == FREE_VIRUS_ROOM, "free space: the families' room at %08x", (unsigned)XV_AT);
 	regions_apart("the families' room", room, (int)(sizeof room / sizeof *room), FREE_VIRUS_ROOM, FREE_FAMILIES);
@@ -3374,6 +3397,27 @@ static void test_free_space(void) {
 	};
 	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
 	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
+	/* (the Navis' room's battle sprites first, one copy for every track: the Navis' track's xnavi_sprites.c) */
+	const Region navis[] = { { "the Navis' battle sprites", FREE_NAVI_SPRITES, FREE_NAVI_SPRITES_END } };
+	regions_apart("the Navis' room", navis, 1, FREE_NAVIS, FREE_CHIP_CODE);
+	CHECK(FREE_NAVI_SPRITES == FREE_NAVIS && FREE_NAVI_SPRITES_END - FREE_NAVI_SPRITES == 0x80000u, "free space: the Navis' sprites the room's first 0x80000");
+	/* (the chips' code: BN6's attack families grown, its support and Navi routines grown, the units: xattack_grow.c, xchips_code.c) */
+	const Region code[] = {
+		{ "the attack families", FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END }, { "the support routines", XC_SUPPORT, XC_SUPPORT + 4u * XC_ROUTINES },
+		{ "the Navi routines", XC_NAVI, XC_NAVI + 4u * XC_ROUTINES }, { "their stubs", XC_STUBS, XC_STUBS_END },
+		{ "the helpers' code", XC_HELPERS, XC_POWERS }, { "the computed powers", XC_POWERS, XC_POWERS + 4u * 256u },
+		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_ART }, { "what they draw", XC_ART, XC_END },
+	};
+	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_TAIL);
+	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
+	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
+	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
+		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= 0x100,
+		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls' apart");
+	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
+		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
+	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
+		"free space: the units' routines past BN6's own, its Navi chips' right after its support chips'");
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },
@@ -3920,6 +3964,77 @@ static void test_xtext(void) {
 	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
 }
 
+/* BN5's chips' code (issue #82's C3; docs/MULTIROM.md, The chips' code):
+ * the generated units (src/emu/xchips_bn5.c) each a recipe the installer
+ * takes in the chips' region, numbered by BN5's own number and homed in
+ * order; the moved chips (src/core/xchips_moved.c) each a registry row of
+ * XREG_MOVED playing a unit's number, and every such row one of them. */
+static void test_chip_code(void) {
+	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS }, helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
+	char why[160] = "";
+	CHECK(xchips_bn5_count >= 4 && xchips_bn5_count <= XC_UNITS, "chips' code: %d units", xchips_bn5_count);
+	bool units = false;
+	for (int i = 0; i < xchips_bn5_count; ++i) {
+		const XChipUnit *u = &xchips_bn5[i];
+		/* (the helpers first, their code before the homes, no table's entry) */
+		bool helper = u->kind == XCHIP_HELPER;
+		CHECK(!helper || !units, "chips' code: the helper %s before the units", u->code.name);
+		units |= !helper;
+		CHECK(xvirus_code_ok(&u->code, helper ? &helpers : &region, why, sizeof why), "chips' code: %s refused: %s", u->code.name, why);
+		int number = helper ? 0 : u->kind == XCHIP_ATTACK ? 0x50 + u->bn5 : (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI) + u->bn5;
+		CHECK(u->number == number && u->home == XC_HOMES + XC_HOME_SIZE * (uint32_t)i && u->code.nblocks > 0 &&
+			(u->entry & 1) && xvirus_block_of(&u->code, u->entry & ~1u), "chips' code: %s's number %#x by BN5's, its home and entry", u->code.name, u->number);
+		CHECK(u->kind != XCHIP_ATTACK || (u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END), "chips' code: %s among the chips' families",
+			u->code.name);
+		CHECK(u->kind == XCHIP_ATTACK || u->number < XC_ROUTINES, "chips' code: %s within its routines' table", u->code.name);
+		/* (its types shared with the tracks installed before it, the moved objects' and the Navis', one copy a type) */
+		CHECK(shared_moved_before(&u->code, TRACK_CHIPS, i) && moved_once(&u->code, TRACK_CHIPS), "chips' code: %s shares a type no track before "
+			"it moved, or moves one another did", u->code.name);
+		for (int k = 0; k < i && !helper; ++k)
+			CHECK(xchips_bn5[k].kind != u->kind || xchips_bn5[k].number != u->number, "chips' code: %s's number twice", u->code.name);
+	}
+	int moved = 0;
+	for (int i = 0; i < xchips_moved_count; ++i) {
+		const XChipMoved *m = &xchips_moved[i];
+		const XChipReg *r = xreg_at(m->bn6);
+		bool unit = false;
+		for (int k = 0; k < xchips_bn5_count && !unit; ++k) {
+			const XChipUnit *u = &xchips_bn5[k];
+			unit = u->kind == XCHIP_ATTACK ? m->family == u->number
+			                               : m->family == (u->kind == XCHIP_SUPPORT ? BN6_CHIP_SUPPORT_FAMILY : BN6_CHIP_NAVI_FAMILY) && m->sub == u->number;
+		}
+		CHECK(r && (r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK) && unit && xchips_moved_of(m->bn6) == m,
+			"chips' code: moved chip %d a moved row, or a Program Advance's or a DarkChip's waiting for its rule, playing a unit", m->bn6);
+		moved += r && r->how != XREG_MOVED;
+	}
+	for (int i = 0; i < xreg_count; ++i)
+		if (xreg_rows[i].how == XREG_MOVED) {
+			++moved;
+			CHECK(xchips_moved_of(xreg_rows[i].bn6) != NULL, "chips' code: the registry's moved chip %d plays a unit", xreg_rows[i].bn6);
+		}
+	CHECK(moved == xchips_moved_count && moved >= 10, "chips' code: as many chips moved as rows (CrakOut, DublCrak, TripCrak, HotBody1-3, Jealousy, "
+		"NrthWind, MetaGel, Blinder and on: %d, %d)", moved, xchips_moved_count);
+	/* (their songs: each in one of BN6's empty slots, one BN5 sound one slot, no slot two sounds') */
+	int songs = 0;
+	for (int i = 0; i < xchips_bn5_count; ++i)
+		for (int k = 0; k < xchips_bn5[i].nsongs; ++k) {
+			const XcSong *x = &xchips_bn5[i].songs[k];
+			++songs;
+			CHECK(x->slot >= 0x40 && x->slot <= 0x62, "chips' code: %s's sound %#x at slot %#x, one of BN6's empty ones the sounds take", xchips_bn5[i].code.name,
+				x->song, x->slot);
+			for (int j = 0; j <= i; ++j)
+				for (int q = 0; q < xchips_bn5[j].nsongs && (j < i || q < k); ++q) {
+					const XcSong *y = &xchips_bn5[j].songs[q];
+					CHECK((y->song == x->song) == (y->slot == x->slot), "chips' code: sounds %#x and %#x, slots %#x and %#x: one sound one slot", y->song, x->song,
+						y->slot, x->slot);
+				}
+		}
+	CHECK(songs >= 2, "chips' code: MetaGel's and Blinder's sounds copied in (%d)", songs);
+	const XChipMoved *crak = xchips_moved_of(298), *wind = xchips_moved_of(457);
+	CHECK(crak && crak->family == 0x6B && wind && wind->family == BN6_CHIP_SUPPORT_FAMILY && wind->sub == 0x3F && !xchips_moved_of(1),
+		"chips' code: CrakOut BN5's family 0x1B as 0x6B, NrthWind its support routine 0x15 as 0x3F, Cannon none");
+}
+
 /* The chip registry (src/core/xchips_registry.c; docs/MULTIROM.md, The
  * chip registry, issue #82): the table as decided (Team Colonel's chips a
  * run can meet, one chip per name, the rest in BN6's free ids), its checks
@@ -3936,14 +4051,19 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 257 && own == 138 && plays == 12 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 12 playing now, "
+	CHECK(xreg_count == 257 && own == 138 && plays == 8 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 8 playing now, "
 		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 15 + 94, "registry: the Program Advances and 94 chips past 319, in the pack's extension (%d)", high);
+	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	CHECK(!xreg_check(moved_row, 1, why, sizeof why) && xreg_check(no_way, 1, why, sizeof why) == 1, "registry: a moved chip's row taken, a way past it refused");
 	const XChipReg *ws = xreg_of_bn5(9), *cannon = xreg_of_bn5(1), *atk = xreg_of_bn5(149), *z = xreg_of_bn5(218);
 	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");
 	CHECK(cannon && cannon->bn6 == 1 && cannon->how == XREG_SAME && !xreg_at(1), "registry: BN5's Cannon is BN6's own");
 	CHECK(atk && atk->bn6 == 192 && atk->how == XREG_ALIAS, "registry: Attck+10 is BN6's Atk+10, which BN6's hand merges by its id");
-	CHECK(z && xreg_own(z) && z->twin == 381, "registry: Z Saver an id of its own over BN6's pseudo-chip of its name, which no folder holds");
+	const XChipReg *drill = xreg_of_bn5(72);
+	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
+		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
 	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
 		"registry: the free ids, BN6's own and its pseudo-chips' not");
@@ -3988,6 +4108,22 @@ static void test_chip_records(void) {
 	xrec_from_bn5(&in, out);
 	CHECK(out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && out[BN6_CHIP_SUBFAMILY] == XREC_INERT_SUB && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_PARAMS] &&
 		!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: one whose code BN6 lacks inert, its computed power (BN5's) none");
+	in.twin = twin;
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xAD && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x30,
+		"records: a twin's computed power (CustSwrd's 1045) at BN6's grown entry, still computed and shown (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	in.twin = NULL;
+	const XChipMoved moved = { 474, 0x77, 0 };
+	in.moved = &moved;
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1073);
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xC9 && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x77,
+		"records: a moved chip's computed power (CusVolt1's 1073) at BN6's grown entry (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1048);
+	xrec_from_bn5(&in, out);
+	CHECK(!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: a computed power no helper moved: none");
+	for (int i = 0; i < xchips_powers_count; ++i)
+		CHECK(xchips_powers[i].bn6 >= 0x80 && xchips_powers[i].bn6 == 0x80 + xchips_powers[i].bn5, "records: BN5's computed power %d at BN6's entry 0x80 + its own", 1000 + xchips_powers[i].bn5);
 	const uint32_t blank[3] = { 0x087237D0u, 0x086F3AF0u, 0x086F3AF0u };
 	XChipReg dark = { 187, 214, XREG_DARK, 142, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 0, 99 };
 	xrec_placeholder(&dark, 33, blank, out);
@@ -4871,6 +5007,7 @@ int main(void) {
 	test_beast();
 	test_xchips();
 	test_xtext();
+	test_chip_code();
 	test_chip_registry();
 	test_chip_records();
 	test_chips_image();

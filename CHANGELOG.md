@@ -79,6 +79,43 @@
   MegaMan uses most, which BN6 does not record, so in BN6 it moves and
   fires its buster. Colonel's mark of his side no longer touches the bit
   BN6 reads for the field's slide at a battle's end.
+- **BN5's own code for its chips BN6 has none of (issue #82).** 94 of Team
+  Colonel's chips fight in BN6's battles by BN5's own code, moved from the
+  player's BN5 ROM into BN6's engine as the game starts: CrakOut,
+  DublCrak, TripCrak, HotBody1-3, Jealousy, NrthWind, MetaGel, Blinder,
+  Skully1-3, DrilArm1-3, RainyDay, WoodNos1-3, CactBal1-3, SpShake1-3,
+  Pulsar1-3, MrkCan1-3, SideBub1-3, AqWhirl1-3, Z Saver, Katana1-3,
+  ElcReel1-3, BoyBomb1-3, Guard1-3, CrsShld1-3, MoonBld1-3, CusVolt1-3 and
+  CustSwrd (their damage by the Custom gauge, BN5's own rule, in BN6's
+  grown table of computed powers), AntiFire, AntiWatr, AntiElec and
+  AntiWood, Slasher, ElemRage, the bombs (Quake1-3, CrakBom, ParaBom,
+  ResetBom, LavaSeed, CannBall, Geyser, SeaSeed) and RedFrut1-3, Voltz1-3,
+  Astroid1-3, WavePit, RedWave and MudWave, and the Navi chips NumbrMan,
+  ShadoMan, TmhwkMan, KnightMn and ToadMan, each drawn with BN5's own
+  pictures where BN6 keeps others at their numbers (MegaMan's arm as each
+  chip takes it too), its effects BN5's and its sounds BN5's songs, copied
+  into BN6's empty song slots. Each was used in BN5's own engine and in
+  BN6's and compared frame by frame, every object's picture by its bytes:
+  the same (Skully but for the confusion mark over a BN5 virus, each
+  game's own picture). DrilArm1-3 and Z Saver, which BN6's own code played
+  until now, play as BN5's since (BN5's chips behave as BN5's). BN6's
+  tables of attacks, support chips and Navi chips are grown once for every
+  BN5 attack and the Souls' to come, and its attacks' sprite list for
+  every track. The other chips that BN6's code plays under BN5's names
+  were judged the same way: AirHoc, WideSht1-3, Spreader and Geddon1-3
+  play as BN5's do. The code of the Program Advances InfVulc, SuprSpr,
+  Boxer, ShakPar and CacDanc and of the DarkChips DarkCirc, DrkSonic,
+  DarkWide and DarkMetr is moved too, waiting for the lists that form them
+  and for the dark rules. The Navi chips summon their Navis as BN5's do,
+  in their Navis' own pictures and with their Navis' own attacks; their
+  SP and DS wait for their powers (BN6 keeps no deletion times of BN5's
+  Navis). Where BN5's chips and its viruses or Navis share an object, one
+  copy serves all (the Navis' attacks for the Navi chips, the chips'
+  bombs and bubbles for the viruses that throw them), and the muzzle
+  flashes are BN5's own, moved once for everyone. The chips that still
+  sit out wait for what docs/MULTIROM.md names; those that play come
+  into runs. Layers made before continue afresh (the older net's stock
+  holds more chips).
 - **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
   records are grown from 411 to 512 in the game's free space, its chips'
   names and descriptions to id 511, and the 257 of Team Colonel's chips a

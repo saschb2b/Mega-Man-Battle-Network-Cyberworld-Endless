@@ -79,6 +79,17 @@ typedef struct XdLog XdLog;
  * copies hold engine routines BN5 runs for MegaMan too, a Soul's companion,
  * which are no foe's code in a spec without one). */
 XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis);
+/* The chips' units whose moved code is the family's in the logs started after: those BN6's folder `folder` (its `n`
+ * chips, as the spec gives them: code << 9 | id) plays */
+void xd_log_units(const uint16_t *folder, int n);
+/* ... and those that moved a type one of the spec's families `fams` runs as theirs (XV_TYPE_SHARED: the chips' copy, run
+ * for the family, its code the family's as a family's that moved a type another shares is) */
+void xd_log_shared(const XVirusFamily *const *fams, int n);
+/* Whether the trace names BN6's moved range at `to` (its header's, which the comparator reads pointers by): every
+ * family's and helper's, a chip unit's where the spec plays it or a family of its shares its copy (xd_log_units,
+ * xd_log_shared: another unit's copy of BN5's data, which BN6's own code has a twin of, read as BN5's own in BN5 and BN6's
+ * twin's in BN6) */
+bool xd_moved_kept(uint32_t to);
 /* The subject's draws replayed from the reference's: each keyed by the
  * family's own code that led to it (its BN5 address), else by its caller
  * (a BN6 routine's through its twin), the k-th of its key in a frame the
@@ -108,5 +119,9 @@ void xd_counts(const XdLog *log, int out[XD_COUNTS]);
  * path); and as its results begin, what became of them on stdout
  * ("xdraws: ..."). The run with the same draws plays the same. */
 void xd_control_frame(const char *how);
+
+/* The song a BN6 slot plays a copy of (xsong.h): its number in its own
+ * game, -1 for one of BN6's own: a sound read in BN5's numbers. */
+int xd_song_copy(int slot);
 
 #endif

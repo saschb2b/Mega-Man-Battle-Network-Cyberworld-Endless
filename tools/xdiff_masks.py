@@ -3,7 +3,7 @@ each role attributed from both traces (the family's, MegaMan's, a native's, the 
 of the family's objects read in the family's own order, and each mask of tests/xdiff/legit.json applied by its
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
 from xdiff_snap import (NODE, SIZE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, PLAYER_NAVI, NAVI_FORM,
-                        PLAYER_SOULS, PLAYER_UNITE, Frame, role_name, u16, u32)
+                        PLAYER_SOULS, PLAYER_UNITE, Diff, Frame, icon_flag, role_name, u16, u32)
 from xdiff_events import engine_chose, engine_draw, spawned_by, spawns_of
 from xdiff_snap import DRAW
 
@@ -15,6 +15,9 @@ STEP_FAMILY = 0x10   # the step's attack family, the same in both: not a chip's
 # attack's, its look each game's own (BN6's init runs its sprite a step on, 0x080E1BD0 bl 0x080026C4, which BN5's
 # 0x080E0988 does not)
 SPARK_SPAWNER = {5: (0x080E09B4, 0x18), 6: (0x080E1C00, 0x18)}
+# The engine's hit area's routine (the third kind's 0x03: BN5 0x080C4DB8, BN6 0x080C6B20), its states run from there: a
+# spawn whose outermost caller returns into it is the hit area's
+HIT_AREA = {5: (0x080C4DB8, 0x080C4DC6), 6: (0x080C6B20, 0x080C6B2E)}
 
 
 # ---- masks: engine differences, each explained (legit.json) ----
@@ -86,6 +89,8 @@ def whose_of(f, role, canon, known, depth):
         return None
     if o.kind == 'T1' and o.o16(OBJ_NAME_ID):
         return None
+    if f'{role[0]}:{role[1]:#04x}' in canon.megaman_types if isinstance(role[1], int) else False:
+        return "megaman's"   # (a spec's chip's objects whose spawn no hook sees: its megaman_types)
     p = f.ptr(o.o32(0x4C))
     # (the spark of a hit the family's code led to, its body's as its attacks': whose() names it the spark)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spawned_by(f.trace, role) == 'family' and spark_spawned(f.trace, role):
@@ -99,6 +104,14 @@ def whose_of(f, role, canon, known, depth):
     # its look each game's own, the rest of it the attack's: whose() names it the spark, legit.json's masks)
     if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK and spark_spawned(f.trace, role):
         return None
+    # (a spark where an attack struck, spawned by the engine's hit area, the third kind's 0x03 (BN6's own, audited:
+    # tools/xchiprecipe.py, TYPE_AUDITS; often gone by the next frame) other than through object_spawnCollisionEffect: the
+    # engine's, whose attack it marks)
+    if o.kind == 'T4' and o.o8(OBJ_TYPE) == SPARK:
+        e = f.trace.get('spawns', {}).get(role, (None, None))[0]
+        lo, hi = HIT_AREA[f.game]
+        if e is not None and lo <= (e.outer & ~1) < hi:
+            return 'engine'
     # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
     by = spawned_by(f.trace, role)
     if by == 'family':
@@ -371,8 +384,62 @@ def in_both(d, fa, fb):
     return isinstance(d.role, tuple) and all(d.role in f.trace.get('whose', {}) for f in (fa, fb))
 
 
+ATTACK_CHIP = 0xB4   # MegaMan's AI data: AttackVars +0x14, the chip used (legit.json, maps, chip_id)
+
+
+def his_icon_flag(d, fb):
+    """the bits BN6 has and BN5 not are BN6's hit flag for the icon element of the chip BN6's MegaMan uses (his AttackVars
+    +0x14): BN6's chip use ORs it into the attack element (0x08012722), BN5's sets none (0x0800FEA4); his chip's objects carry
+    it where they take the element (their +0x0E, their collision data's +0x19)"""
+    a = 0 if d.a is None else d.a
+    if not isinstance(a, int) or not isinstance(d.b, int) or a & ~d.b:
+        return False
+    d = Diff(d.t, d.role, d.part, d.off, a, d.b)
+    mm = next((o for o in fb.fr['objs'] if o.kind == 'T1' and fb.canon.is_megaman(6, o.o16(OBJ_NAME_ID))), None)
+    chip = u16(mm.ai, ATTACK_CHIP) if mm is not None and mm.ai is not None else None
+    return chip is not None and d.b & ~d.a == icon_flag(fb.canon, chip) != 0
+
+
+SUPPORT_FAMILY = 0x15   # the support chips' family: MegaMan's CurAction as one is used (BN6_CHIP_SUPPORT_FAMILY)
+ATTACK_PHASE = 0xA1    # MegaMan's AI data: AttackVars +1, the attack's phase
+SUPPORT_LAG = 12        # the frames after the family's end in which BN6's MegaMan may still lag BN5's by its one frame
+
+
+def megaman_in(f):
+    return next((o for o in f.fr['objs'] if o.kind == 'T1' and f.canon.is_megaman(f.game, o.o16(OBJ_NAME_ID))), None)
+
+
+def support_lag(d, fa, fb, prev):
+    """BN6's support family ends its attack a frame after BN5's (BN6 0x080ED12A: AttackVars +1 set, the end at its next frame,
+    0x080ED130; BN5 0x080EC448 ends it at once): from BN5's end MegaMan's own byte in BN6's frame is the one BN5's frame
+    before had (his object's in BN6's numbers, his AI data's), within SUPPORT_LAG frames of BN5's CurAction 0x15"""
+    if d.role != ('T1', next(iter(fa.canon.megaman.values())), 0) or d.part not in ('obj', 'ai') or not prev:
+        return False
+    frames = fa.trace['frames']
+    k = next((i for i, fr in enumerate(frames) if fr is fa.fr), None)
+    if not k or not any(megaman_action(Frame(fa.trace, frames[j], fa.canon)) == SUPPORT_FAMILY for j in range(max(0, k - SUPPORT_LAG), k)):
+        return False
+    before = megaman_in(prev[0])
+    if before is None:
+        return False
+    if d.part == 'ai' and d.off == ATTACK_PHASE and d.b == 1 and megaman_action(fb) == SUPPORT_FAMILY:
+        return True   # (its mark of the routine run, AttackVars +1, in its extra frame)
+    if d.part == 'ai':
+        return before.ai is not None and before.ai[d.off] == d.b
+    v = before.o8(d.off)
+    return (fa.canon.action(5, True, v) if d.off == OBJ_ACTION else v) == d.b
+
+
+def spawned_now(d, prev):
+    """the difference's object new this frame: its role in neither game's frame before"""
+    return not prev or not any(o.role == d.role for f in prev for o in f.fr['objs'])
+
+
 WHEN = {
     'in both': lambda d, fa, fb, prev: in_both(d, fa, fb),
+    'support lag': support_lag,
+    'spawned now': lambda d, fa, fb, prev: spawned_now(d, prev),
+    'icon flag': lambda d, fa, fb, prev: his_icon_flag(d, fb),
     'hand of ten': lambda d, fa, fb, prev: hand_of_ten(d, fa),
     'his panel': lambda d, fa, fb, prev: his_panel(d, fa, fb),
     'chaos unites': lambda d, fa, fb, prev: unites_now(fa, fb, True),
@@ -406,6 +473,10 @@ def mask_applies(m, d, fa, fb, prev):
     if 'types' in m and (not isinstance(d.role, tuple) or
                          (d.role[1][0] if isinstance(d.role[1], tuple) else d.role[1]) not in [int(x, 0) for x in m['types']]):
         return False
+    if 'families' in m and megaman_action(fb) not in [int(x, 0) for x in m['families']]:
+        return False
+    if 'effects' in m and (not isinstance(d.role, tuple) or not isinstance(d.role[1], tuple) or d.role[1][1] not in [int(x, 0) for x in m['effects']]):
+        return False
     if 'whose' in m and who(d, fb, fa.canon, fa) not in m['whose']:
         return False
     if 'when' in m and not WHEN[m['when']](d, fa, fb, prev):
@@ -424,9 +495,12 @@ def mask_applies(m, d, fa, fb, prev):
 def mask_of(d, masks, fa, fb, prev):
     """the mask (or masks, where each explains some of a byte's bits) that explains d; None where none does, and
     always where d is on the family's own records (what the engine writes there is read as BN6's in the snapshot,
-    never masked). A mask's bits with "direction": "bn6" explain a bit only where BN6 has it and BN5 not ("bn5" the other way)."""
+    never masked). A mask's bits with "direction": "bn6" explain a bit only where BN6 has it and BN5 not ("bn5" the other way); a
+    byte only BN6's layout has (BN5's None) is read as 0 by a mask that says "bn5_none": 0."""
     if who(d, fb, fa.canon, fa) == 'family':
         return None
+    if d.a is None and isinstance(d.b, int) and any(m.get('bn5_none') == 0 and mask_applies(m, d, fa, fb, prev) for m in masks):
+        d = Diff(d.t, d.role, d.part, d.off, 0, d.b)
     bits, names = 0, []
     for m in masks:
         if not mask_applies(m, d, fa, fb, prev):

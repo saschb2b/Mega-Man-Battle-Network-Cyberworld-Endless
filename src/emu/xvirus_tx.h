@@ -39,6 +39,10 @@ void xv_commit(void);
  * address it is staged at (a Navi's install writes the families' grown
  * tables as theirs, its own room as its own) */
 void xv_commit_by(const char *(*writer)(uint32_t at));
+/* ... those whose address `part` takes alone, in their order: a step whose
+ * writes belong to several installers' claims made in parts, each within its
+ * own (claims.h); the parts together every write once. */
+void xv_commit_where(bool (*part)(uint32_t at));
 
 /* What was moved where (xvirus.h's xvirus_moved): an address range of a
  * family's game, or of BN6's own table, and its copy. */

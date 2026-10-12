@@ -59,7 +59,8 @@
 #define FREE_PANELS_END     (EMU_FREE + 0x4D0000u)
 #define FREE_NAVIS          (EMU_FREE + 0x500000u)   /* BN5's Navis in BN6's engine (xnavi_*.c), to FREE_CHIP_CODE: */
 #define FREE_NAVI_SPRITES   (EMU_FREE + 0x500000u)   /* ... their battle sprites, a fixed place each, and the arm points grown (xnavi_sprites.c), to: */
-#define FREE_NAVI_ROOM      (EMU_FREE + 0x580000u)   /* ... BN6's Navi tables grown for them (xnavi_room.c), to: */
+#define FREE_NAVI_SPRITES_END (EMU_FREE + 0x580000u) /* ... (the Navi chips' and the Souls' one copy of each Navi's sprite there too) */
+#define FREE_NAVI_ROOM      FREE_NAVI_SPRITES_END    /* ... BN6's Navi tables grown for them (xnavi_room.c), to: */
 #define FREE_NAVI_HOMES     (EMU_FREE + 0x588000u)   /* ... their homes: state table, records, veneers (xnavi_install.c), to: */
 #define FREE_NAVI_CODE      (EMU_FREE + 0x590000u)   /* ... their code and their objects', block by block, to: */
 #define FREE_NAVI_ART       (EMU_FREE + 0x5B0000u)   /* ... what their attacks draw, to FREE_CHIP_CODE */

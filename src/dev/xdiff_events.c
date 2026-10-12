@@ -21,6 +21,9 @@
 #include "guest.h"
 #include "hook.h"
 #include "rom.h"
+#include "xchips_bn5.h"
+#include "xchips_code.h"
+#include "xchips_moved.h"
 #include "xvirus.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
@@ -33,7 +36,8 @@
 #define DRAWS_MAX   32768   /* the reference's draws kept for the replay: a battle's */
 #define KEYS_MAX    64      /* the keys a frame's draws take */
 #define CHAIN_WORDS 96      /* the stack words looked through for callers further out */
-#define FAMILY_MAX  256     /* the families' and the Navis' blocks of code (BN5's 25 families' 80 or so, and their clones; the Navis') */
+#define FAMILY_MAX  XV_MOVED_MAX   /* the families', the Navis' and the played chips' blocks of code (BN5's 25 families' 80 or so, and
+                                      * their clones; the Navis'; the chips' units') */
 #define SPAWNER_LR  0x18    /* a spawner's frame (push {r7,lr}; sub sp,#0x14) from its five words: its lr, its caller */
 #define DISPATCH_FRAME 0x1C /* ... and above it, where the second-level dispatch's spawner called it, that one's (push {r0,lr}): its
                                game's type, its own caller (xvirus_dispatch.c) */
@@ -354,6 +358,48 @@ static HookAct on_mood(HookRegs *r, void *user) {
 
 /* ---- the logs ---- */
 
+/* The chips' units a spec's folder plays (src/core/xchips_moved.c: its chips' families, by number): their code alone the
+ * family's. Another unit's copy of BN5's code, which BN5's own code calls too (BoyBomb's explosion spawner, which a
+ * Handi's bomb calls in BN5), is BN5's own there and BN6's twin's in BN6, so it is no family's in either. */
+static bool unit_used[XC_UNITS];
+
+void xd_log_units(const uint16_t *folder, int n) {
+	memset(unit_used, 0, sizeof unit_used);
+	for (int i = 0; i < n; ++i) {
+		const XChipMoved *m = xchips_moved_of(folder[i] & 0x1FF);
+		for (int u = 0; m && u < xchips_bn5_count && u < XC_UNITS; ++u) {
+			const XChipUnit *x = &xchips_bn5[u];
+			if ((x->kind == XCHIP_ATTACK && x->number == m->family) ||
+			    (x->kind == XCHIP_SUPPORT && m->family == BN6_CHIP_SUPPORT_FAMILY && x->number == m->sub) ||
+			    (x->kind == XCHIP_NAVI && m->family == BN6_CHIP_NAVI_FAMILY && x->number == m->sub))
+				unit_used[u] = true;
+		}
+	}
+}
+
+static bool moved_for(const XVirusFamily *f, const XVirusFamily *of);
+
+void xd_log_shared(const XVirusFamily *const *fams, int n) {
+	for (int u = 0; u < xchips_bn5_count && u < XC_UNITS; ++u)
+		for (int i = 0; i < n && !unit_used[u]; ++i) unit_used[u] = moved_for(&xchips_bn5[u].code, fams[i]);
+}
+
+/* whether BN6's copy at `to` is a used unit's */
+static bool chip_used(uint32_t to);
+
+bool xd_moved_kept(uint32_t to) {
+	return !(to >= FREE_CHIP_MOVED && to < FREE_TAIL) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
+}
+
+static bool chip_used(uint32_t to) {
+	for (int u = 0; u < xchips_bn5_count && u < XC_UNITS; ++u)
+		for (int k = 0; unit_used[u] && k < xchips_bn5[u].code.nblocks; ++k) {
+			const XvBlock *b = &xchips_bn5[u].code.blocks[k];
+			if (to >= b->at && to < b->at + (b->end - b->start)) return true;
+		}
+	return false;
+}
+
 /* a family that moved a type `of` runs as shared (XV_TYPE_SHARED): its copy is the one `of` runs */
 static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
 	for (int i = 0; i < of->ntypes; ++i)
@@ -388,9 +434,12 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	log->g = &games[game == 6];
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
-	/* (the spec's families' code, and the Navis' where a foe is one: xnavi_recipe.h) */
+	/* (the spec's families' code, the Navis' where a foe is one, xnavi_recipe.h, and the moved code of the chips the spec plays,
+	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
+	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams, navis)) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART)) {
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART && spec_code(&m[i], fams, nfams, navis)) || (navis && m[i].to >= XN_CODE && m[i].to < XN_ART) ||
+		    (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES) && chip_used(m[i].to))) {
 			if (log->nfam < FAMILY_MAX) log->fam[log->nfam++] = m[i];
 			else fprintf(stderr, "xdiff: the families' and Navis' code past %d blocks: %08x not watched\n", FAMILY_MAX, (unsigned)m[i].from);
 		}
@@ -505,3 +554,5 @@ void xd_control_frame(const char *how) {
 	out = NULL;
 	done = true;
 }
+
+int xd_song_copy(int slot) { return xsong_copy_of(slot, NULL); }

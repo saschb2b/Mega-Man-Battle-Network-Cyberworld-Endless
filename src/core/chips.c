@@ -210,7 +210,8 @@ static void records_make(const uint32_t blank[3]) {
 			continue;
 		}
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }
-		XRecordFrom in = { M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, r->twin ? table + XREC_SIZE * r->twin : NULL, r, 0, { 0 } };
+		XRecordFrom in = { M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, r->twin ? table + XREC_SIZE * r->twin : NULL, r, 0, { 0 },
+			r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK ? xchips_moved_of(id) : NULL };
 		memcpy(in.art, M.art[id], sizeof in.art);
 		xrec_from_bn5(&in, out);
 	}
@@ -220,7 +221,8 @@ static void sits_make(void) {
 	memset(M.sits, 0, sizeof M.sits);
 	for (int i = 0; i < xreg_count; ++i) {
 		const XChipReg *r = &xreg_rows[i];
-		if (xreg_own(r) && !(r->how == XREG_RECORD && M.rom5)) M.sits[r->bn6 >> 3] |= (uint8_t)(1u << (r->bn6 & 7));
+		bool plays = (r->how == XREG_RECORD || (r->how == XREG_MOVED && xchips_moved_of(r->bn6))) && M.rom5;
+		if (xreg_own(r) && !plays) M.sits[r->bn6 >> 3] |= (uint8_t)(1u << (r->bn6 & 7));
 	}
 }
 

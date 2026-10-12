@@ -19,7 +19,7 @@
 #include "save.h"
 #include "second.h"
 #include "tour.h"
-#include "xnavi_install.h"
+#include "xinstall.h"
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -62,7 +62,7 @@ static void enter(void) {
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
 	/* (other games' virus families in BN6's battle engine first: the ROM
 	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
-	xnavi_install_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
+	xinstall_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
 		dev.xnavicontrol ? XNAVI_CONTROL : dev.nonavis ? XNAVI_NONE : XNAVI_BN5);
 	game_hooks_install();
 	cinema_reset();

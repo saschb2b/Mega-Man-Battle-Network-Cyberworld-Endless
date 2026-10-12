@@ -318,7 +318,9 @@ def native(c, a):
     keys = X.fight()
     (ma, fa, la), (mb, fb, lb) = (run('native', name, '01@52', keys, 4800, dev) for name, dev in
                                   (('alone', 'nofamilies,nonavis,hp=1000'), ('installed', 'hp=1000')))
-    c(not any(l.startswith(('xvirus', 'xnavi:')) for l in la) and any(l.startswith('xvirus') for l in lb),
+    # (BN6's tables grown in both where BN5's ROM is read: its chips' moved code takes them, xchips_code.c; CanGard's own
+    # install line in the second alone, and BN5's Navis' too, docs/MULTIROM.md, Transplanted Navis)
+    c(not any(l.startswith(('xvirus: CanGard', 'xnavi:')) for l in la) and any(l.startswith('xvirus: CanGard') for l in lb),
       'CanGard installed in the second run alone (and BN5\'s Navis, docs/MULTIROM.md, Transplanted Navis)')
     explained, bad = X.compare(fa, fb, ma, mb, False)
     for reason, where in sorted(explained.items()):

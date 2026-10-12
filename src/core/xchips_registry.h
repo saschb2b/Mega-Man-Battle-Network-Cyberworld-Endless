@@ -24,6 +24,8 @@ enum {
 	XREG_DARK,      /* a DarkChip of its own: its record ready, it sits out until BN5's dark rule comes into BN6's battles */
 	XREG_PENDING,   /* an id of its own whose code BN6 lacks: its record shown, it sits out until its code is moved */
 	XREG_PA,        /* a Program Advance of its own: its record, formed once BN6's lists hold its recipes */
+	XREG_MOVED,     /* an id of its own whose code BN6 lacks, moved from BN5's into BN6's engine (src/core/xchips_moved.h: its family and
+	                   subfamily there): it plays where BN5's ROM is read */
 };
 
 typedef struct {

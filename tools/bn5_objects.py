@@ -1,10 +1,11 @@
 """bn5_objects.py: BN5 Team Colonel's engine objects that BN6 Cybeast Gregar (USA) runs otherwise, each moved into BN6
 once, whole, for every track that spawns one (issue #82's plan for its tracks: the Navis, the virus families, the chips),
 and what each one's moved copy draws: the image object, and the sea's marker. Numbers only. tools/xnavirecipe.py builds the moved copies
-(src/emu/xnavi_bn5.c, xnavi_objects_bn5; installed by src/emu/xnavi_objects.c before any family or Navi), checks this
-file against both ROMs, and refuses a recipe that spawns a kind this file leaves unfixed; the other tracks' generators read
-it for the kinds their code spawns and aim their calls into a module at its copy (tools/xrecipe.py for the families:
-WuNote's image; docs/MULTIROM.md, The engine's objects moved once; docs/ROM_DATA.md)."""
+(src/emu/xnavi_bn5.c, xnavi_objects_bn5; installed by src/emu/xnavi_objects.c before any Navi, chip's code or family),
+checks this file against both ROMs, and refuses a recipe that spawns a kind this file leaves unfixed; the other tracks'
+generators read it for the kinds their code spawns and aim their calls into a module at its copy (tools/xrecipe.py for the
+families: WuNote's image; tools/xchiprecipe.py for the chips' code: the muzzle flashes; docs/MULTIROM.md, The engine's
+objects moved once; docs/ROM_DATA.md)."""
 
 # BN5's image object, the first kind's type 5 (an image an attack shows: a sprite by its kind, the object's +4). BN6's
 # type 5 is another object (its own kinds table at 0x080BA444, 52 kinds, other sprites and numbers), so BN5's type 5 is
@@ -44,7 +45,7 @@ MODULES = (IMAGE, SEA_MARKER)
 # Where the moved copies stand in BN6: XN_OBJECTS (the Navis' code's room, FREE_NAVI_CODE, + 0x100) to XN_OBJECTS_END
 # (+ 0x2000), each module one block in MODULES' order, each from a 0x100 boundary the same distance from a word's as in
 # BN5. tools/xnavirecipe.py copies them there; a family's or a Navi's code that calls into one is aimed at its copy there
-# (tools/xrecipe.py, tools/xnavirecipe.py), and installed after it (src/emu/xnavi_install.c, xnavi_install_core)
+# (tools/xrecipe.py, tools/xnavirecipe.py), and installed after it (src/emu/xinstall.c, xinstall_core)
 OBJECTS_AT, OBJECTS_END, OBJECTS_STEP = 0x08800000 + 0x590000 + 0x100, 0x08800000 + 0x590000 + 0x2000, 0x100
 
 
@@ -104,4 +105,24 @@ IMAGE_COPIED = {
     # BN6's the same), at list 4's 0x6C of the families' range (issue #82's shared allocations: the families' copy of the
     # module merged into this one, its number kept)
     0x30: (4, 0x6C, 'families'),
+    # the chips' muzzle flashes (BN5's chips' code: tools/xchiprecipe.py, FLASH_NUMBERS and its units' own numbers): the
+    # swords' 0x0A and 0x32 the same sprite as 0x03 (3:0x00), the buster arm's 0x33 as 0x23 (3:0x03), at the Navis' places
+    # (the Navis' places win for every kind both tracks fix); the rest, none of BN6's the same, at numbers of the chips' in
+    # list 3 (downward from 0xFF, past their units' own; 3:0x02 the number a unit, the bombs', loads it at)
+    0x0A: (4, 0xB5, 'chips'),
+    0x32: (4, 0xB5, 'chips'),
+    0x33: (5, 0xA6, 'chips'),
+    0x04: (3, 0xF3, 'chips'),   # the bombs' (3:0x02, as 0x1A, 0x28 and 0x2A)
+    0x1A: (3, 0xF3, 'chips'),
+    0x28: (3, 0xF3, 'chips'),
+    0x2A: (3, 0xF3, 'chips'),
+    0x0B: (3, 0xEE, 'chips'),   # (3:0x1D, as 0x1F)
+    0x1F: (3, 0xEE, 'chips'),
+    0x2B: (3, 0xED, 'chips'),   # the buster arm's in a form (3:0x04)
+    0x2C: (3, 0xEC, 'chips'),   # MrkCan's (3:0x1C, as 0x2D and 0x2E)
+    0x2D: (3, 0xEC, 'chips'),
+    0x2E: (3, 0xEC, 'chips'),
+    0x34: (3, 0xEB, 'chips'),   # (3:0x33)
+    0x35: (3, 0xEA, 'chips'),   # (3:0x38)
+    0x36: (3, 0xE9, 'chips'),   # (3:0x39)
 }

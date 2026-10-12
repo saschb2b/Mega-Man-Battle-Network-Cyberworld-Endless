@@ -1,0 +1,86 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkWide T in both games, BN5's chip 192 by BN5's own code and the registry's 216 by the same code moved (BN5's spread family 0x25 as BN6's 0x75, subfamily 2, its graphics BN5's; a DarkChip of the registry's, dealt straight into the battle deck, as its rule (S7) is to come), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "26C0"
+ ],
+ "folder6": [
+  "26D8"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "26C0"
+ ],
+ "deck6": [
+  "26D8"
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 32,
+  "why": "BN5's dark rule, S7's to bring (docs/MULTIROM.md): the DarkChip used, BN5's battle drops MegaMan's mood to 0 (his NaviStats +0x0E, the player block's), counts it (+0x14: 4) and marks his object (+0x94: 3), and draws a random number for it at t46 (BN5 0x080197B1), none of which BN6's battle does yet; DarkWide's own code moved plays as BN5's (its flash 0x37 from the helper's copy of BN5's table, its wide shot, the third kind's 0x3B); --survey: its afterimage (the fourth kind's 0x28) draws MegaMan's own sprite, each game's own (MEGAMAN_LOADS), apart in its bytes with the spec's sprites: bytes"
+ }
+}

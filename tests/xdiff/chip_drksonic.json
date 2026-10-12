@@ -1,0 +1,86 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DrkSonic E in both games, BN5's chip 198 by BN5's own code and the registry's 220 by the same code moved (BN5's support routine 0x1B as BN6's 0x45; a DarkChip of the registry's, dealt straight into the battle deck, as its rule (S7) is to come), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "08C6"
+ ],
+ "folder6": [
+  "08DC"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "08C6"
+ ],
+ "deck6": [
+  "08DC"
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 32,
+  "why": "BN5's dark rule, S7's to bring (docs/MULTIROM.md): the DarkChip used, BN5's battle drops MegaMan's mood to 0 (his NaviStats +0x0E, the player block's), takes its price (the player block's +0x31: 1), marks his object (+0x94: 3) and draws random numbers for it (BN5 0x080197B1), none of which BN6's battle does yet; DrkSonic's own code moved plays as BN5's (its support object, the fourth kind's 0x4A, its sonic boom, the third kind's 0x78, its time by kind from BN5's own table: BN6's twin of that phase, 0x080D5B20, read another, which tools/xchiprecipe.py's same_data now tells, its sound 0x70 from slot 0x5F); --survey: nothing else differs, unmasked"
+ }
+}

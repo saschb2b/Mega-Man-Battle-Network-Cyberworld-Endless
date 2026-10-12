@@ -19,7 +19,6 @@
 #include "xnavi_objects.h"
 #include "xnavi_room.h"
 #include "xnavi_sprites.h"
-#include "xsea.h"
 #include "xsong.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -369,12 +368,4 @@ void xnavi_install_all(int which) {
 		int dark = xnavi_bn6_id(BN5_DARK_SOUL_ID);
 		if (dark >= 0) xnavi_dark_install(dark);
 	}
-}
-
-void xnavi_install_core(int families, int navis) {
-	/* (BN5's engine objects moved once, before any family's or Navi's install that runs one: WuNote's image too) */
-	if (emu_ready() && XR[XROM_BN5_COLONEL_US].data && (families == XVIRUS_FAMILIES || navis == XNAVI_BN5)) xnavi_objects_install();
-	xvirus_install(families);
-	xnavi_install_all(navis);
-	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
 }

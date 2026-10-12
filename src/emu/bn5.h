@@ -80,6 +80,8 @@
                                              0x080151B8): the viruses' records' word (sprite list 1's numbers: 0x080154D0) */
 #define BN5_ARM_VIRUSES_COUNT 31          /* ... its records, the Navis' table after them (0x08015C14) */
 #define BN5_ARM_VIRUS_SIZE    0x3C        /* ... a record: 30 points, x and y signed bytes */
+#define BN5_CHIP_POWERS   0x0800E728u /* the computed powers' routines by power - 1000 (BN6_CHIP_POWERS'), 76 of them, read at 0x0800E70E */
+#define BN5_CHIP_POWERS_COUNT 76          /* ... its entries (1000-1075), BN6 growing its own table with those a helper moves */
 #define BN5_CHIP_RECORDS  0x01E210u   /* (ROM offset) its chips' records, 0x2C each in BN6's ChipData layout: +0..3 the chip's four codes (0-25 A-Z, 26 *, 0xFF none) */
 #define BN5_PA_STAR_LIMIT 0x080252B2u /* a Program Advance of one chip in codes in a row: cmp r2, #1, one * of its three at most, as BN6's (BN6_PA_STAR_LIMIT) */
 /* its DarkChips (docs/ROM_DATA.md, BN5 guest battles; .build research):
@@ -116,6 +118,7 @@
 #define BN5_OBJECT_LIST_END 0x0200ABA0u /* ... to this node */
 #define BN5_COLL_SIZE     0xA0        /* a collision data's bytes (BN6_COLL_SIZE, 8 more): laid out otherwise from +0x14 (tests/xdiff/legit.json's layout) */
 #define BN5_COLL_FLASH    0x26        /* u16 frames left flashing after a hit (BN6_COLL_FLASH, at +0x24 there) */
+#define BN5_COLL_PARALYSIS 0x1E       /* u16 frames left paralysed (BN6_COLL_PARALYSIS, at +0x1C there): its status step 0x0800CB48 counts it down */
 #define BN5_COLL_MASKS    0x08016364u /* its collision data's mask words by alliance and region (BN6_COLL_MASKS), */
 #define BN5_COLL_MASK_WORDS 160        /* ... 80 regions, BN6's 89 */
 #define BN5_MPLAYS        0x08155A74u /* its music players (BN6_MPLAYS) */

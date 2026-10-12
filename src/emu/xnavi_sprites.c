@@ -99,7 +99,7 @@ static bool record_of(int list, int index, uint8_t out[BN6_ARM_RECORD]) {
 /* the sprite copied and its record written, every byte checked first */
 static bool place_in(int i, int list, int index) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
-	uint32_t len = 0, entry = XV_LISTS + (uint32_t)xvirus_list_slot(BN6_SPRITES_NAVIS) * XV_STEP + 4u * PLACES[i].number;
+	uint32_t len = 0, entry = xvirus_list_entry(BN6_SPRITES_NAVIS, PLACES[i].number);
 	uint8_t rec[BN6_ARM_RECORD];
 	uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, list, index, &len);
 	bool ok = d && len <= PLACES[i].room && record_of(list, index, rec) && emu_read32(entry) == BN6_SPRITE_PLACEHOLDER;
