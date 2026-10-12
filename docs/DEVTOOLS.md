@@ -541,7 +541,8 @@ python3 build.py shot --data-dir /src/.build/xdiff/data \
 ```
 
 Issue #82 moves BN5's virus families into BN6's battle engine by their own
-code (docs/MULTIROM.md, Transplanted families). The differential proves a
+code (docs/MULTIROM.md, Transplanted families: CanGard, then Handi, the
+first that draws random numbers and moves). The differential proves a
 moved family behaves as it does in BN5's own engine, frame by frame. Local
 only: it needs both ROMs (CI runs the unit tests of its parts).
 
@@ -573,11 +574,45 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   written from BN5's after each frame both traced: BN5's buster draws one
   more number a shot than BN6's, so without it everything that draws
   later (a hit's spark) would part.
-- **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c): a record
-  each time the timer moves while the battle fights: the objects of the
-  first, third and fourth kinds in play (each from its list node on, its
-  AI's data and its collision data), the 40 panels, the order the objects
-  ran in, the songs the music players began, both RNG words.
+- **The hooks** (`src/dev/xdiff_events.c`): each core carries hooks of
+  its own (src/emu/hook.c keeps a table per core; the guest's are the
+  differential's alone, `guest_hook`), on each game's own routines
+  (bn5.h, bn6.h; docs/ROM_DATA.md, The differential's hooks): its four
+  RNG draws, every spawn of the first, third and fourth kinds (their
+  common routine, entered and left), PlaySoundEffect, an effect's
+  spawner, setAttack, a panel reserved, the blink of an object flashing
+  and a sprite set up. Each logs an event with the core's frame, the
+  battle's timer before it, its caller (a spawn's: its spawner's), the
+  family's own code that led to it (the innermost return address in a
+  family's moved code: BN6's copy, BN5's original) and the outermost
+  caller (the stack read word by word up to the object runner's return,
+  each word that is a return address: after a BL, or after `mov lr,pc;
+  bx rN`), and the object running then (the runner's word) or the one
+  it concerns.
+- **The replay** (`rng=replay`): BN5's draws are kept as they are made,
+  each keyed by the family's code that led to it (its BN5 address) or
+  else by its caller; each of BN6's is keyed the same way, its caller in
+  a BN6 routine read as the same place in the routine's BN5 twin
+  (`twin=BN6:BN5:LEN[:WORD]`, the twins of legit.json's rng, each
+  checked byte for byte but for BLs and literal loads as the spec is
+  made), and the k-th draw of a key in a frame (by the timer before it)
+  is given the word BN5's k-th of that key drew from, written into the
+  RNG word before it reads it: the family's code draws BN5's numbers
+  whatever the engine drew around it. A twin may name the word BN5's
+  draws take where they are not BN6's (the camera's shake: BN6's from its
+  second word, BN5's from its first), so the shake is the same too. A
+  draw with no twin in the other game's frame is reported, never forced:
+  BN5's buster's extra draw is the engine's own (legit.json's rng, only,
+  both routines cited); any other is a difference, the family's where its
+  code led to it. Without the replay Handi parts at its first draw that
+  BN5's buster or shake moved (`rng=follow`: t305, none: t35).
+- **The traces** (`OUT.bn5`, `OUT.bn6`, their format in xdiff.c, version
+  2): a record each time the timer moves while the battle fights: the
+  objects of the first, third and fourth kinds in play (each from its list
+  node on, its AI's data and its collision data), the 40 panels, the order
+  the objects ran in, the songs the music players began, both RNG words,
+  and the hooks' events since the record before (the first record's from
+  the battle's start).
 - **The field**: `field=XX` fights both on BN5's battlefield XX, BN6's as
   `src/emu/xfields.c` installs it (docs/ROM_DATA.md, Battlefields and
   their panels' types), `field=XX:YY` BN6's own field YY against it; the
@@ -585,7 +620,7 @@ only: it needs both ROMs (CI runs the unit tests of its parts).
   BN5's poison, grass and ice, every panel's type and flags compared.
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
-  copy) and `call=F:T` aims the family's veneer to BN6's routine F at T.
+  copy) and `call=F:T` aims each family's veneer to BN6's routine F at T.
 
 `tools/xdiff.py` copies both ROMs into `.build/xdiff/rom`, builds the host
 binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
@@ -599,6 +634,10 @@ the masks):
   the third and fourth by their type (an effect object, the fourth kind's
   type 0, by its effect id in BN6's numbers too, so one spawned with the
   wrong id is a role the other game lacks), each by the order it appeared.
+  An object is the family's where its spawn's call chain passed through
+  the family's code, or the object that ran as it was spawned is the
+  family's (the hooks' spawn events): so an extra object the subject's
+  family code spawns fails, whatever its +0x4C names.
 - **In BN6's numbers** (`tests/xdiff/legit.json`, maps, each with why):
   the enemy ids, MegaMan's NameID (0x180 against 0x1A0), CurAction (BN5's
   0-5 BN6's 0-5, 6 BN6's 8, 7 on two up; MegaMan's ready 6 against 8), the
@@ -615,11 +654,33 @@ the masks):
   frame take (`renderer`: the renderer counts them over everything drawn
   before, so what else is drawn is no part of the family's; one not drawn
   keeps the rank of its last place); an object's slot (+3) counted from
-  its own (`slot`). A difference prints BN5's value as read so.
+  its own (`slot`); an attack of the third kind that runs a virus's states
+  (`action`, `t3_types`: Handi's bomb) its CurAction as a virus's; a
+  pointer into a table both games hold whose end the 32 bytes would run
+  past (`rom_tables`: Handi's bomb's kinds) by its place there, the entry
+  the same. A difference prints BN5's value as read so.
 - **Pointers by what they name**: an object by its role and part (its
   node, its AI's data, its collision data), a panel, ROM that was moved by
-  where it came from, a pointer into each game's own ROM by the data there
-  (32 bytes the same), a sprite's frames from its sprite's own data.
+  where it came from (BN5's into a family's code where it is: a callback
+  kept in an AI's data), a pointer into each game's own ROM by the data
+  there (32 bytes the same), a sprite's frames from its sprite's own data.
+- **Read in BN6's terms** (`tools/xdiff_events.py`, from BN5's own
+  events): an object that has reserved a panel reads BN6's bit `0x20` of
+  its +0 (BN6 sets it at the first reservation and never clears it while
+  the object lives; BN5 has none); an object the blink ran on reads its
+  visible bit (`0x02`) in BN6's phase (the two hide a flashing object on
+  opposite frames of the same timer). Neither is a mask: each is the
+  object's own record read as BN6 would have written it, and the family's
+  records are compared through it like any other's. An object spawned
+  while the hooks watched that has set up no sprite since holds the
+  slot's last occupant's sprite state (the spawn clears the record only
+  to there): its sprite state is compared from its set-up on, and one
+  game's setting one up where the other's does not is a difference.
+- **The family's calls by their call sites**: in each frame, the calls
+  its code made (the events whose chain passed through it: spawns by
+  kind and type, sounds, effects, setAttack, reservations, draws), each
+  with its call site in BN5's numbers, in the order made, in BN6's
+  numbers: the same in both, or the family's difference.
 - **Each structure through its own layout** (legit.json, layouts): the
   collision data (0xA0 bytes in BN5, 0xA8 in BN6, laid out otherwise from
   +0x14) and the panels (0x24 and 0x20), each segment with the paired
@@ -664,11 +725,21 @@ the masks):
 every frame by whose and where, `--no-run` compares the last traces,
 `--poke` and `--call` break the subject for one run, and `--mutations`
 runs `tests/xdiff/mutations.json`, the breaks a transplant bug would make
-(an immediate, a state number and an offset left as BN5's, a call aimed at
-nothing or at the wrong twin, a table's entry, a number in its data, an
-effect id left as BN5's alone and beside a native, a strike's effect id,
-a collision region), each of which must FAIL its spec. docs/MULTIROM.md, Transplanted families, has
+(CanGard's: an immediate, a state number and an offset left as BN5's, a
+call aimed at nothing or at the wrong twin, a table's entry, a number in
+its data, an effect id left as BN5's alone and beside a native, a
+strike's effect id, a collision region; Handi's: an immediate, a call
+rebased to its neighbour, its draws shifted onto the other word), each of
+which must FAIL its spec. docs/MULTIROM.md, Transplanted families, has
 what they showed.
+
+The control (`tools/xcontrol.py`, BN6's own Mettaur moved) runs with the
+replay too: `CYBERWORLD_XDRAWS=keep` keeps a run's battle draws in its
+data folder (`xdraws.bin`), keyed as the replay keys them (the control's
+code at BN6's own place and as its moved copy alike), and
+`CYBERWORLD_XDRAWS=PATH` replays them from there; the native run keeps,
+the two others replay each draw (none unmatched) and stay the same frame
+for frame.
 
 ## Sprite gallery
 

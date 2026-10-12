@@ -30,6 +30,12 @@ The specs:
              states 4-7 through its state table, the hooks of tables 6-10
              and the ice block's size by its AI index (BN6_ICE_SIZES)
 
+With the replay on (the default; --no-replay leaves it off), the native
+run keeps its battle's draws and the other two replay each of them from
+it, keyed as the differential's rng=replay keys them (the control's moved
+code as BN6's own: CYBERWORLD_XDRAWS, src/dev/xdiff_events.h): each must
+be matched, and the runs still the same frame for frame.
+
 The runs are compared frame by frame, every byte, and each byte that
 differs must have its reason (why()): a word pointing into what one run
 moved (the same once each run's installer's map reads it as the address it
@@ -49,6 +55,7 @@ BN5's engine. Exits 0 when the runs are the same frame for frame.
 import argparse
 import hashlib
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -124,11 +131,14 @@ def find_rom():
     sys.exit(f'no BN6 Gregar ROM in {ROM_DIR}')
 
 
-def run(spec, name, dev, foe, seed, frames, quiet):
+def run(spec, name, dev, foe, seed, frames, quiet, draws=''):
+    """One run traced (its btrace.bin), and its draws kept (draws 'keep') or replayed from another run's (a path in the
+    image, /src/...), as the differential's rng=replay keys them (CYBERWORLD_XDRAWS, src/dev/xdiff_events.h): the path to
+    its trace, and what its draws came to (the 'xdraws:' line)"""
     data = os.path.join(WORK, spec, name)
     os.makedirs(data, exist_ok=True)
     for f in os.listdir(data):
-        if f == 'btrace.bin' or f.endswith('.bmp'):
+        if f in ('btrace.bin', 'xdraws.bin') or f.endswith('.bmp'):
             os.remove(os.path.join(data, f))
     boot = os.path.join(WORK, 'boot-3.state')
     if os.path.exists(boot):
@@ -140,9 +150,9 @@ def run(spec, name, dev, foe, seed, frames, quiet):
     cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/.build/xcontrol/{spec}/{name}',
            '--scene', 'emu', '--net-biome', '0', '--seed', str(seed), '--dev', dev, '--frames', str(frames),
            '--input', keys, '--shot', shots]
-    env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'), CYBERWORLD_BTRACE='1')
+    env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'), CYBERWORLD_BTRACE='1', CYBERWORLD_XDRAWS=draws)
     out = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
-    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('xvirus', 'foes', 'status'))]
+    lines = [l for l in out.stdout.splitlines() + out.stderr.splitlines() if l.startswith(('xvirus', 'foes', 'status', 'xdraws'))]
     if not quiet:
         for l in lines:
             print(f'  {name}: {l}')
@@ -150,7 +160,7 @@ def run(spec, name, dev, foe, seed, frames, quiet):
         sys.exit(f'{name}: the run failed\n' + out.stderr[-2000:])
     if not os.path.exists(boot) and os.path.exists(os.path.join(data, 'boot-3.state')):
         shutil.copy(os.path.join(data, 'boot-3.state'), boot)
-    return os.path.join(data, 'btrace.bin')
+    return os.path.join(data, 'btrace.bin'), next((l for l in lines if l.startswith('xdraws')), '')
 
 
 def read_trace(path):
@@ -332,14 +342,35 @@ def story(frames):
 FRAMES = {'fight': 4800, 'status': 7200}   # each spec's run, its Mettaur deleted and the results shown well before
 
 
+def replayed(line, kept):
+    """whether a run's draws were each replayed from the native run's (none unmatched or unmapped, as many as it kept)"""
+    m = re.match(r'xdraws: (\d+) replayed, (\d+) unmatched, (\d+) unmapped', line)
+    return bool(m) and int(m.group(1)) == kept and m.group(2) == m.group(3) == '0'
+
+
 def differential(spec, a):
-    """One spec's three runs compared: whether they are the same frame for frame."""
+    """One spec's three runs compared: whether they are the same frame for frame. With the replay on (the default),
+    the native run keeps its battle's draws and the other two replay each of them from it, the control's moved code
+    keyed as BN6's own (rng=replay's keys): the same frame for frame with it, every draw matched."""
     print(f'== {spec}')
-    traces = {}
+    traces, draws, kept = {}, '', 0
     for name, dev, foe in (('native', 'hp=1000', NATIVE_ID), ('installed', 'xcontrol,hp=1000', NATIVE_ID),
                            ('moved', 'xcontrol,hp=1000', CONTROL_ID)):
-        traces[name] = read_trace(run(spec, name, dev, foe, a.seed, a.frames or FRAMES[spec], a.quiet))
-        print(f'{name}: {len(traces[name][1])} frames of battle traced, {len(traces[name][0])} ranges moved')
+        if not a.no_replay:
+            draws = 'keep' if name == 'native' else f'/src/.build/xcontrol/{spec}/native/xdraws.bin'
+        path, line = run(spec, name, dev, foe, a.seed, a.frames or FRAMES[spec], a.quiet, draws)
+        traces[name] = read_trace(path)
+        print(f'{name}: {len(traces[name][1])} frames of battle traced, {len(traces[name][0])} ranges moved' +
+              (f'; {line}' if line else ''))
+        if not a.no_replay and name == 'native':
+            m = re.match(r'xdraws: (\d+) kept', line)
+            kept = int(m.group(1)) if m else 0
+            if not kept:
+                print('  the native run kept no draws (its battle did not end in the run?)')
+                return False
+        elif not a.no_replay and not replayed(line, kept):
+            print(f'  {name}: its draws not each replayed from the native run\'s {kept}')
+            return False
     (m_n, f_n), (m_i, f_i), (m_m, f_m) = traces['native'], traces['installed'], traces['moved']
     if a.story:
         print('the fight (moved):')
@@ -385,6 +416,7 @@ def main():
     ap.add_argument('--frames', type=int, default=0, help="each run's frames (the spec's own where 0)")
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--story', action='store_true', help='print the fight frame by frame')
+    ap.add_argument('--no-replay', action='store_true', help="the draws left as each run makes them (no CYBERWORLD_XDRAWS)")
     a = ap.parse_args()
     os.makedirs(os.path.join(WORK, 'rom'), exist_ok=True)
     rom = os.path.join(WORK, 'rom', 'bn6.gba')

@@ -1,8 +1,8 @@
 {
-  "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The differential). No game code here: addresses and numbers only.",
+  "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and replays BN6's draws from BN5's by the twins of its rng, the engine's own draws one game alone makes named there too (rng), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/MULTIROM.md, Transplanted families; docs/DEVTOOLS.md, The differential). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
         "0x4F": "0x200",
         "0x50": "0x201",
@@ -10,6 +10,12 @@
         "0x52": "0x203",
         "0x53": "0x204",
         "0x54": "0x205",
+        "0x13": "0x206",
+        "0x14": "0x207",
+        "0x15": "0x208",
+        "0x16": "0x209",
+        "0x17": "0x20A",
+        "0x18": "0x20B",
         "0x180": "0x1A0"
       },
       "megaman": {
@@ -17,9 +23,10 @@
       }
     },
     "ai_index": {
-      "why": "AIData +1, the AI index the engine finds a family's tables by: CanGard's 14 in BN5, 32 in BN6's grown tables (xvirus_cangard .src_ai, .ai).",
+      "why": "AIData +1, the AI index the engine finds a family's tables by: CanGard's 14 in BN5, 32 in BN6's grown tables; Handi's 4, 33 (xvirus_cangard and xvirus_handi .src_ai, .ai).",
       "bn5_to_bn6": {
-        "14": "32"
+        "14": "32",
+        "4": "33"
       }
     },
     "t3_type": {
@@ -61,10 +68,13 @@
       ]
     },
     "action": {
-      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces).",
+      "why": "CurAction (+9). A virus's: BN5 numbers generic states 0-5 and its own from 6, BN6 generic 0-7 and its own from 8 (two status states, frozen and bubbled, between), so BN5's 0-5 are BN6's 0-5, its 6 BN6's 8, 7 on two up (every family table in both ROMs; the attack's end writes 6 at BN5 0x0800F2E2 and 8 at BN6 0x08011754). MegaMan's: ready 6 in BN5, 8 in BN6 (BN5_MEGAMAN_READY, BN6_MEGAMAN_READY), his others the same (a step 0x10, hit 3, seen in both traces). The same numbering holds for an attack of the third kind that runs the same states: its state table BN5's generic 0-5 and its own from 6, BN6's 0-7 and its own from 8 (t3_types; Handi's obstacle, the third kind's type 0x4B, run by BN5 0x08017FCC / BN6 0x0801B394 from its state table BN5 0x080CF118, 8 entries, BN6 0x080CF264, 10: its own 6 and 7 BN6's 8 and 9).",
       "megaman": {
         "6": "8"
-      }
+      },
+      "t3_types": [
+        "0x4B"
+      ]
     },
     "sound": {
       "why": "A sound is compared by its song number: the music player it plays on is its song table entry's, each game's own (song 0x6A, MegaMan's buster's, is BN5's player 22 and BN6's player 0; the reticle's 0xAE player 4 in both).",
@@ -77,6 +87,23 @@
       "bn6": [
         "0x6C",
         "0x0E"
+      ]
+    },
+    "rom_tables": {
+      "why": "A pointer into each game's own ROM is read by the data there (32 bytes the same: a table both games have). Where a table's end is followed by other bytes in each game, the 32 bytes from its last entries run past it: such a table is named here, by its place in both and its entries' size and count, and a pointer into it is read as its place in it, the entry there the same bytes in both (else the entry differs, and so does the pointer).",
+      "tables": [
+        {
+          "name": "Handi's bomb's kinds",
+          "bn5": "0x080CEFCC",
+          "bn6": "0x080CF11C",
+          "entry": 8,
+          "count": 8,
+          "why": "the third kind's type 0x4B (the obstacle Handi drops) keeps at +0x60 the entry of its kind (its +4) in this table: its sprite's animation, HP and collision's region and alliance; Handi's kinds are 2-7 (its version's pair, BN5 0x08106330-0x08106336)",
+          "evidence": [
+            "the obstacle's spawner BN5 0x080CF37E / BN6 0x080CF4EC: +0x60 = the table + 8 x +4 (BN5 0x080CF396-0x080CF3A0, the table's one literal 0x080CF43C / BN6 0x080CF504-0x080CF50E, 0x080CF5B0)",
+            "the tables' 64 bytes the same in both but entry 1's HP (BN5 300, BN6 200, +2): the bytes after them are each game's own code and pools"
+          ]
+        }
       ]
     }
   },
@@ -225,6 +252,77 @@
       ]
     }
   },
+  "rng": {
+    "why": "rng=replay (src/dev/xdiff_events.c): each of BN6's draws is keyed by the family's own code that led to it (its BN5 address, through what the install moved) or else by its caller, a BN6 routine's place read as the same place in its BN5 twin (twins), and the k-th draw of a key in a frame (by the battle's timer before it) is given the word the reference's k-th of that key drew from, written into the RNG word it reads, before it reads it: the family's code draws BN5's numbers whatever the engine drew around it. A draw of either game with no twin in the other's frame is reported, never forced: the engine's own draws one game alone makes (only) are explained there, each with both games' routines; any other is a difference (the family's where its code led to it).",
+    "twins": [
+      {
+        "bn6": "0x080050EC",
+        "bn5": "0x08004C98",
+        "len": "0x1A",
+        "what": "the game state's routine (bn6f cbGameState): GetRNG and GetRNGSecondary once a frame",
+        "evidence": "BN5 0x08004C98-0x08004CB1 / BN6 0x080050EC-0x08005105: the same instructions but for the literal (its state's jump table) and the BLs' targets, GetRNG (BN5 0x08001490 / BN6 0x0800151C) and GetRNGSecondary (0x080014C0 / 0x0800154C) at +0x10 and +0x14"
+      },
+      {
+        "bn6": "0x08000300",
+        "bn5": "0x08000300",
+        "len": "0x2A",
+        "what": "the main loop's frame: GetRNGSecondary once a frame after the game's routine",
+        "evidence": "BN5 / BN6 0x08000300-0x08000329: the same instructions at the same addresses but for the BLs' targets, GetRNGSecondary at 0x0800031C in both"
+      },
+      {
+        "bn6": "0x08013D5E",
+        "bn5": "0x080113AE",
+        "len": "0x42",
+        "what": "a pick by GetRNG from a table the battle's NaviStats bytes 0x14 and 0x15 fill (MegaMan's buster, as a shot is made)",
+        "evidence": "BN5 0x080113AE-0x080113EF / BN6 0x08013D5E-0x08013D9F: the same instructions but for the BLs' targets (GetBattleNaviStatsByte_AllianceFromBattleObject BN5 0x08010DEE / BN6 0x08013774, GetRNG); seen in cangard_v1_keys at each shot in both"
+      },
+      {
+        "bn6": "0x0801BDDE",
+        "bn5": "0x080188DA",
+        "len": "0x26",
+        "what": "AddRandomVarianceToTwoCoords: a hit's spark set off its place by GetRNG",
+        "evidence": "BN5 0x080188DA-0x080188FF / BN6 0x0801BDDE-0x0801BE03: the same instructions but for the BL's target (GetRNG)"
+      },
+      {
+        "bn6": "0x08000C72",
+        "bn5": "0x08000B92",
+        "len": "0x34",
+        "what": "ShuffleByteList_PrimaryRNG: a list shuffled by GetPositiveSignedRNG",
+        "evidence": "BN5 0x08000B92-0x08000BC5 / BN6 0x08000C72-0x08000CA5: the same instructions but for the BLs' targets (GetPositiveSignedRNG BN5 0x080014A6 / BN6 0x08001532)"
+      },
+      {
+        "bn6": "0x08030226",
+        "bn5": "0x08030D9E",
+        "len": "0x6",
+        "word": 0,
+        "what": "the camera's shake, its x: BN6's from its second word, BN5's from its first",
+        "evidence": "BN6 0x080301E8 (bn6f camera_doShakeEffect) draws twice a shaking frame by GetRNGSecondary (0x08030226, 0x0803024C), BN5's twin 0x08030D7C twice by GetRNG (0x08030D9E, 0x08030DC4); each draw masked by the same table (BN6 0x08030284, BN5 0x08030DF8, 8 bytes a strength), shifted and centred alike into the camera's x (BN6 +0x3C, BN5 +0x38) and then y (+0x40, +0x3C): the same numbers make the same shake"
+      },
+      {
+        "bn6": "0x0803024C",
+        "bn5": "0x08030DC4",
+        "len": "0x6",
+        "word": 0,
+        "what": "the camera's shake, its y",
+        "evidence": "as its x"
+      }
+    ],
+    "only": {
+      "why": "A draw one game's engine makes and the other's does not (neither routine is the family's): reported where it falls and explained here, by game and the range its caller lies in. Where the other game makes none, the words part for the rest of that frame, and the next draw the replay matches writes them alike again.",
+      "draws": [
+        {
+          "game": 5,
+          "from": "0x0800F560",
+          "to": "0x0800F566",
+          "what": "BN5's buster: one more draw as a shot begins",
+          "evidence": [
+            "BN5 0x0800F560: the shot's setup draws a positive random number (BN5 0x080014A6) and tests bit 3 of it (0x0800F564)",
+            "BN6's buster damage 0x0801265C-0x08012698 (Attack, the table at 0x080126A4, the Cross's bonus at 0x080126B0) draws none"
+          ]
+        }
+      ]
+    }
+  },
   "masks": [
     {
       "name": "BN5's panel restore timers",
@@ -285,7 +383,7 @@
       ],
       "bits": "0x02",
       "when": "flashing",
-      "why": "An object flashing after a hit (its collision data's flash timer counting down, the same in both) is hidden on every other pair of frames by its header's visible bit; BN6 hides it on the pairs BN5 shows it. The family's code never touches the bit: it is the engine's step every object runs.",
+      "why": "An object flashing after a hit (its collision data's flash timer counting down, the same in both) is hidden on every other pair of frames by its header's visible bit; BN6 hides it on the pairs BN5 shows it. Where the blink step runs on the object itself, BN5's bit is read in BN6's phase (tools/xdiff_events.py, from BN5's own blink events: no mask); this mask is left for an object whose bit follows the flashing one that owns it (MegaMan's buster flashes, their +0x4C his), on the frames he flashes. The family's code never touches the bit: it is the engine's step every object runs.",
       "evidence": [
         "BN5 0x080137AA-0x080137B6: the timer (+0x26) shifted right twice, the bit cleared unless the carry is set (bhs past the bics)",
         "BN6 0x08016956-0x08016962: the timer (+0x24) the same, the bit cleared unless the carry is clear (blo past the bics)"
@@ -385,20 +483,6 @@
       ]
     },
     {
-      "name": "BN6's panel reservation flag",
-      "part": "obj",
-      "offsets": [
-        "0x00"
-      ],
-      "bits": "0x20",
-      "why": "Reserving a panel (an object stepping onto it) marks the panel in both games; BN6 also sets bit 0x20 of the reserving object's flags, BN5 does not (from his first step MegaMan's flags read 0x35 in BN6 where 0x15 in BN5). Exact: the bit, BN6 having it and BN5 not.",
-      "evidence": [
-        "BN6 0x0801BB1C: the panel's reserver (+0x1C) and flag 0x80 (+0x14) set, then 0x0801BB36-0x0801BB3A ORs 0x20 into the object's +0",
-        "BN5 0x08018654: the panel's reserver (+0x20) and flag 0x80 (+0x18) set, then 0x0801866E returns 1, the object untouched"
-      ],
-      "direction": "bn6"
-    },
-    {
       "name": "BN5's buster draw",
       "part": "rng",
       "when": "buster draw",
@@ -465,6 +549,15 @@
       "evidence": [
         "the song tables' entries for 0x6A: BN5 0x08155F44 (player 22), BN6 0x0815A298 (player 0); for 0x8F: player 0 in both, priority 192 (its header's +2)",
         "the start of a song: BN6 0x08150C90-0x08150C98 (the sound engine's start of a song, 0x08150C54) keeps a playing song of higher priority (its info +9) and starts none"
+      ]
+    },
+    {
+      "name": "the engine's own draws",
+      "part": "draw",
+      "when": "engine draw",
+      "why": "Under rng=replay a draw one game's engine makes and the other's does not has no twin to be replayed from: each is named in legit.json's rng, only, by its game and its caller's range, with both games' routines; neither is the family's (a draw its code led to is never masked). The next draw the replay matches writes the words alike again.",
+      "evidence": [
+        "legit.json, rng, only: each draw's routines in both games"
       ]
     }
   ]

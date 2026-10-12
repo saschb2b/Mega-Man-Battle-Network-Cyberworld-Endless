@@ -539,8 +539,9 @@ by tier, BN6's repeat rule, the run's random numbers), which
 `make_encounter` takes where `loot_territory` names the area, set by
 nothing yet (M3). BN5's text reads in BN6's codes (docs/ROM_DATA.md,
 BN5's text). `build.py xrecords` lists what each territory can fight so
-far: 44 of its 214 random records with CanGard alone (ACDC Area 21 of
-34, SciLab 19 of 36); the xrecord step fights one (docs/DEVTOOLS.md).
+far: 52 of its 214 random records with CanGard and Handi (ACDC Area 21
+of 34, SciLab 26 of 36; 44 with CanGard alone); the xrecord step fights
+one (docs/DEVTOOLS.md).
 Not translatable as BN6 has them: BN5's lava and sea panels (the
 Undernet's and Nebula Area's fields 0x73-0x76, End Area's 0x42-0x45:
 BN6's 8 is another panel and BN6 has no sea), a decision for M3; and
@@ -723,10 +724,13 @@ and its calls aimed again (`src/emu/xvirus.c`):
   everything drawn, MegaMan's blinking sprite among it), an object's slot
   (from its own). On what is not CanGard's:
   each game's panel restore timers (their bytes and values pinned);
-  the blink of an object flashing after a hit, on the other frames;
+  the blink of an object flashing after a hit, on the other frames (since
+  the tooling's milestone, below, only where an object's bit follows its
+  owner's: MegaMan's buster flashes);
   MegaMan's own sprites and the place of his charge glow; the player's AI
   data +0x0F BN6 sets as the Custom screen closes; BN6's panel
-  reservation flag; BN5's buster's one more random draw; BN6's buster
+  reservation flag (since the milestone read from BN5's own reservations,
+  no mask); BN5's buster's one more random draw; BN6's buster
   sound on a player a hit's sound holds; the hit spark's frame more of
   life. BN5's split of a hit's result (by the hitter's side, +0x6C and
   +0x70) and of its modifier (+0x18, +0x19) is no mask but held to its
@@ -739,20 +743,66 @@ and its calls aimed again (`src/emu/xvirus.c`):
   data, the muzzle's effect id left as BN5's, alone and beside the
   Mettaur, the strike's effect id, the reticle's collision region) each
   fail their spec, nine of them where every timeline check still holds (`build.py xdiff
-  --mutations`). What it does not reach: CanGard deleted, struck by a
+  --mutations`). What it did not reach then (12 October 2026), each
+  reached since by the tooling's milestone (below): an extra object the
+  subject spawns whose owner names MegaMan's or a native's, a family that
+  draws random numbers, and a family whose objects flash or step onto
+  panels. What it still does not reach: CanGard deleted, struck by a
   chip, or beside BN5's other families; an element in play; BN6's freeze
   and bubble (BN5 has neither; `tools/xfamily.py` covers them in BN6
-  alone); an extra object the subject spawns that the reference has none
-  of, whose owner (+0x4C) names MegaMan's or a native's (only the spawns'
-  call sites, per-core hooks, would say whose code made it); a family
-  that draws random numbers, which needs each
-  draw replayed by the core it is made in (per-core hooks; CanGard draws
-  none); and a family whose objects flash after a hit or step onto
-  panels, where the engine's own bits differ (the blink's phase, BN6's
-  reservation flag): masked on MegaMan, they fail on a family's records
-  until they too are read as BN6's.
+  alone).
+- **The differential's tooling milestone** (issue #82): each core
+  carries hooks of its own (src/emu/hook.c keeps a table and a queue per
+  core, found by the CPU that meets the BKPT; the guest's are the
+  differential's alone, and the run's guest battles have none: a guest
+  battle's 128 pictures and its log are the same as before), on each
+  game's own routines: its draws, every spawn of the first, third and
+  fourth kinds, its sounds, effects, setAttack, a panel reserved, the
+  blink and a sprite set up, each logged with its frame, its caller, the
+  family's code that led to it and the outermost caller
+  (`src/dev/xdiff_events.c`; docs/DEVTOOLS.md, The differential). The
+  comparator compares the family's calls by their call sites and gives an
+  object to the family whose code spawned it. With `rng=replay` each of
+  BN6's draws is given the word BN5's draw of the same key (the family's
+  call site, or the caller's BN5 twin) drew from, so the family draws
+  BN5's numbers whatever the engine drew around it; BN6's camera shake,
+  which draws from its second word where BN5's draws from its first, is
+  given BN5's numbers the same way, and BN5's buster's extra draw is the
+  one draw left unmatched, the engine's own (both routines cited in
+  `tests/xdiff/legit.json`, rng). BN6's reservation bit and the blink's
+  phase are read from BN5's own events into its records as BN6 would have
+  written them: translations, not masks. The control runs with the
+  replay on and stays the same frame for frame (`tools/xcontrol.py`: each
+  of the native run's 8800 and 10783 draws replayed, none unmatched).
+- **BN5's Handi** (`xvirus_handi`, AI 4 in BN5; docs/ROM_DATA.md, BN5's
+  Handi), the second family, the first that draws random numbers and
+  moves: installed after CanGard as AI 33 with ids 0x206-0x20B (Handi,
+  HandiEX, Hando, HandoEX, Handum, HandumEX), the static layout's second
+  family (its home, code and sprite the second of each). One block of BN5's, its
+  decision (a coin for its wait), the engine's wait and its attack: a
+  teleport to a panel its callback picks at random (BN5's
+  `0x08012DCC`, BN6's `0x08015FDC`, which draws), reserved as it goes,
+  then a bomb dropped in front of it (the third kind's type 0x4B, BN6's
+  own, an obstacle with HP that counts down and bursts for its version's
+  damage, 50 to 200). Three entries of its attack's jump table name the
+  engine's own steps (the teleport's start, the teleport, the wait): the
+  installer takes them from the recipe's words, BN6's twins (each body
+  compared; BN5's teleport also sets the facing again at its end, to the
+  0 an enemy spawns with on a plain field, where BN6's leaves it: not
+  reached on a field of another column pattern). 14 calls to 11 routines, two
+  immediates (its wait's and its attack's CurAction). Its specs, all
+  with `rng=replay`: `handi_v1`, Handi alone against MegaMan idle: the
+  same over 1200 frames, its three teleports (to 4,1, 4,2, 4,3) and its
+  four bombs as BN5's battle has them, MegaMan 50 down at t306, t636 and
+  t966; `handi_v1_keys`, cangard_v1_keys' 62 inputs: the same, Handi hit
+  9 times, its bombs shot down but one, its teleports to other panels;
+  its five other versions alone (`handi_ex` to `handi_v3ex`): the same,
+  their bombs for 70, 90, 120, 160 and 200. Its breaks fail (`--mutations`):
+  its wait's CurAction left as BN5's (t2), its panel's pick rebased to
+  the routine after it (t21: it teleports onto MegaMan's side), its draws
+  shifted onto the other word (t2: no draw of BN5's to give them).
 - **Families after CanGard** (issue #82's survey of BN5's 30, static
-  only): 17 more take CanGard's recipe as it is (Handi, Shakey, Trumpy,
+  only; Handi since moved, above): 17 more take CanGard's recipe as it is (Handi, Shakey, Trumpy,
   NinJoy, WindBox, BomBoy, Catack, Drixol, Batty, Marina, Flashy, Eleogre,
   BigBrute, TinHawk, Bladia, Tuby and AI 33's); ten pass a chip of BN5's
   to their attack and need a chip map besides (Mettaur, Powie, Bugtank,
@@ -765,14 +815,17 @@ and its calls aimed again (`src/emu/xvirus.c`):
   BN5's chips are BN6's too), written into the rows of its ids in the
   grown copy, which the battle's results then lean as BN6's
   (docs/ROM_DATA.md, BN5's records in BN6's engine).
-- **Not yet**: the families after CanGard and their place in formations
-  (a game-design pass). The New 3DS keeps no BN5 ROM: no family is
-  installed there. A state saved while a moved family is in battle needs
-  the same families installed to load (they are, at every boot with the
-  same ROMs and switches); one saved on a map is the same byte for byte
-  with the room made and CanGard installed or not (a checkpoint's after
-  two of BN6's battles, docs/EMULATION.md, Testing): the install stands
-  in the way of no run continued with BN5's ROM taken away or put in.
+- **Not yet**: the families after CanGard and Handi and their place in
+  formations (a game-design pass). Handi is installed wherever BN5's ROM
+  is read, as CanGard is, and BN5's records that name it are fought in
+  BN6's engine as CanGard's are (`build.py xrecords`). The New 3DS keeps
+  no BN5 ROM: no family is installed there. A state saved while a moved
+  family is in battle needs the same families installed to load (they
+  are, at every boot with the same ROMs and switches); one saved on a map
+  is the same byte for byte with the room made and the families installed
+  or not (a checkpoint's after two of BN6's battles, docs/EMULATION.md,
+  Testing): the install stands in the way of no run continued with BN5's
+  ROM taken away or put in.
 
 ## Status
 

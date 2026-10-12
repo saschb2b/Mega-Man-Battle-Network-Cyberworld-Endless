@@ -88,6 +88,30 @@
     "080C95DE:2106"
    ],
    "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
+  },
+  {
+   "name": "an immediate, Handi's",
+   "spec": "handi_v1",
+   "poke": [
+    "081062E8:2007"
+   ],
+   "what": "its wait's CurAction left at BN5's 7 (BN6's bubbled state) where the recipe makes it 9 (movs r0,#7 before its setAttack0)"
+  },
+  {
+   "name": "a rebased call",
+   "spec": "handi_v1",
+   "call": [
+    "08015FDC:08016004"
+   ],
+   "what": "the veneer of its panel's pick (BN5 0x08012DCC, BN6 0x08015FDC: a panel of its own side at random) rebased to the routine after it (0x08016004, a pick among the other side's panels, which draws as many numbers)"
+  },
+  {
+   "name": "a shifted RNG call",
+   "spec": "handi_v1",
+   "call": [
+    "08001532:08001562"
+   ],
+   "what": "its draws (GetPositiveSignedRNG, BN6 0x08001532) shifted onto the second word (GetPositiveSignedRNGSecondary, 0x08001562): the replay finds no draw of the reference's to give them, and they draw what they find"
   }
  ]
 }

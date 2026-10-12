@@ -34,6 +34,21 @@
 #define BN5_RNG_SECONDARY 0x02001C94u /* u32, its second ones (bn6f eSecondaryRngSeed, BN6's 0x02001120): GetRNGSecondary 0x080014C0 steps it twice a
                                        * frame (0x0800031C, 0x08004CAC); a battle's folder is shuffled from it as the battle begins (0x08008D82): the first hand */
 #define BN5_RNG_XOR       0x873CA9E5u /* both words' step: x = ((x rotl 1) + 1) ^ this; SeedRNG 0x08001488 sets the first to 0xA338244F at the start */
+/* Its battle engine's routines the differential hooks (src/dev/xdiff_events.c), BN6's in bn6.h: the same code */
+#define BN5_RNG_DRAW      0x08001490u /* GetRNG (BN6_RNG_DRAW) */
+#define BN5_RNG_DRAW_POSITIVE 0x080014A6u /* GetPositiveSignedRNG */
+#define BN5_RNG_DRAW_SECOND 0x080014C0u /* GetRNGSecondary */
+#define BN5_RNG_DRAW_SECOND_POSITIVE 0x080014D6u /* GetPositiveSignedRNGSecondary */
+#define BN5_SPAWN_COMMON  0x08003098u /* SpawnBattleObjectCommon (BN6_SPAWN_COMMON) */
+#define BN5_SPAWN_COMMON_END 0x080030E8u /* ... its end: r5 the object spawned, 0 none */
+#define BN5_PLAY_SOUND    0x08000598u /* PlaySoundEffect: r0 the song */
+#define BN5_SPAWN_EFFECT  0x080DFFD2u /* an effect spawned: r4's low byte its id (BN6_SPAWN_EFFECT) */
+#define BN5_SPRITE_LOAD   0x08002650u /* sprite_load: r5 the object whose sprite state is set up anew (BN6_SPRITE_LOAD) */
+#define BN5_SET_ATTACK    0x0800F21Cu /* setAttack's common part (setAttack0-6 at 0x0800F200 + 4N): r0 the CurAction, r2 N, r5 the object */
+#define BN5_RESERVE_PANEL_DONE 0x0801866Eu /* object_reservePanel (0x08018654) once the panel is reserved: r5 the object (no bit set in it) */
+#define BN5_BLINK_FLASHING 0x080137A8u /* the blink step of an object flashing: bit 1 of its flash timer (+0x26) clear hides it (BN6's opposite) */
+#define BN5_OBJECT_RUNNER_RET 0x08003020u /* RunBattleObjectLogic (0x08002FCC): the return address an object's call chain ends at */
+#define BN5_OBJECT_RUNNING 0x0200BBF0u /* u32 the node of the object running, 0 outside the runner (0x08002FE2) */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */
@@ -89,6 +104,7 @@
 #define BN5_OBJECT_LIST   0x0200A410u /* its battle's objects in the order they run (BN6_OBJECT_LIST), */
 #define BN5_OBJECT_LIST_END 0x0200ABA0u /* ... to this node */
 #define BN5_COLL_SIZE     0xA0        /* a collision data's bytes (BN6_COLL_SIZE, 8 more): laid out otherwise from +0x14 (tests/xdiff/legit.json's layout) */
+#define BN5_COLL_FLASH    0x26        /* u16 frames left flashing after a hit (BN6_COLL_FLASH, at +0x24 there) */
 #define BN5_COLL_MASKS    0x08016364u /* its collision data's mask words by alliance and region (BN6_COLL_MASKS), */
 #define BN5_COLL_MASK_WORDS 160        /* ... 80 regions, BN6's 89 */
 #define BN5_MPLAYS        0x08155A74u /* its music players (BN6_MPLAYS) */
