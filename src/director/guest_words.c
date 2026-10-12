@@ -84,6 +84,16 @@ void older_net_words(void) {
 		snprintf(D.beat + k, sizeof D.beat - k, "|@L Then it's you and %s,MegaMan!", n > 0 ? "the other chips" : "our chips");
 }
 
+/* After a CONTINUE without BN5's ROM, the run's folder holding chips of
+ * BN5's (docs/MULTIROM.md, One net: the design, call 4): they sit out of
+ * battles until it is back, and MegaMan says so, on the map, once. */
+void old_chips_words(void) {
+	if (!D.old_chips_due || talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || !on_map()) return;
+	if (talk_start("@M Huh? Some of our chips came from the older Net...|@L And its cartridge isn't here!|@M Right. They'll sit out until it's back!",
+		    FACE_MEGAMAN))
+		D.old_chips_due = false;
+}
+
 /* ... and the words, after the older net's own if both are due */
 static void recode_words(char *out, size_t size) {
 	ChipInfo ci;

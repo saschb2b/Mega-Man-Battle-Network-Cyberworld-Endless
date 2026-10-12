@@ -321,6 +321,7 @@ void drop_events(void) {
 static void words_due(void) {
 	gate_and_rush_words();
 	guest_words();
+	old_chips_words();
 	dark_flame_watch();
 	/* (BN6's own DarkChips: in the Pack, their power as the BugFrags held
 	 * say, the price of a battle their dark power ran in) */

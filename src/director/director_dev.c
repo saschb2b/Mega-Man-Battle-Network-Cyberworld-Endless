@@ -261,6 +261,34 @@ int director_dev_status(const char *spec) {
 	return n;
 }
 
+int director_dev_chip(const char *spec) {
+	int id = 0, n = 1;
+	char code[4] = "";
+	int got = sscanf(spec, "%i %3s %d", &id, code, &n);
+	int c = code[0] == '*' ? CHIP_CODE_STAR : code[0] >= 'A' && code[0] <= 'Z' ? code[0] - 'A' : -1;
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (got < 2 || id <= 0 || id >= PACK_CHIPS || c < 0 || n < 1 || n > BN6_FOLDER_ENTRIES || data < BN6_EWRAM || data >= BN6_EWRAM_END) {
+		printf("chip: %s is none (an id 1-511, a code A-Z or *, then how many in the folder), or the folder is not there\n", spec);
+		return 0;
+	}
+	uint16_t e = (uint16_t)(id | c << 9);
+	uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
+	for (uint32_t i = 0; i < (uint32_t)n; ++i) emu_write(data + 2 * i, b, sizeof b);
+	own_folder_chips();
+	/* (the pack's counts hold the folder's copies too, outside the folder
+	 * editor, which takes them out as it opens: n for the folder, one more
+	 * the pack's own; the chips written over stay counted, as spares) */
+	uint32_t out[2] = { 0, 0 };
+	bool given = game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, (uint32_t)c, (uint32_t)n + 1, out);
+	ChipInfo ci;
+	chip_info(id, &ci);
+	uint32_t at = pack_entry(id);
+	printf("chip: %s (%d) %c in the folder's first %d, one more in the pack%s (its counts %d %d %d %d)\n", ci.name, id,
+		c == CHIP_CODE_STAR ? '*' : 'A' + c, n, given ? "" : ": not given", at ? emu_read8(at) : -1, at ? emu_read8(at + 1) : -1,
+		at ? emu_read8(at + 2) : -1, at ? emu_read8(at + 3) : -1);
+	return n;
+}
+
 /* The battle step (a capture's "0:battle", play.py's battle): the layer's
  * next random battle at once, at the first moment MegaMan stands free on
  * its map (no chat, talk, scene or warp, no guardian's staging, challenge

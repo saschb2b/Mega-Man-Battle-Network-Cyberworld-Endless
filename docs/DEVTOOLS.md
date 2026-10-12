@@ -503,6 +503,24 @@ Identity), on the free panel nearest its anchor; play.py's state (with
 and in the world. The `identity-*` screenshots and the `identity` clip
 are made with it.
 
+The `chip` step (`--input`'s `0:chip 204 L 29`, play.py's `chip 204 L
+29`; issue #82) puts chip ID (1-511: BN6's, or one of BN5's in BN6's
+tables, docs/MULTIROM.md, The chip registry) in code CODE (a letter or
+`*`) into the folder's first N entries (one where none), owned as BN6
+marks a chip it gives, and gives it to the pack N + 1 times through
+BN6's GiveChips (outside the folder editor the pack's counts hold the
+folder's copies: one is the pack's own). It prints the chip's name and
+its four counts in the pack (an id from 320 counts in the pack's
+extension: `0:chip 411 M 1`, MrkCan1, reads "its counts 2 0 0 0"). A
+battle then deals the folder as BN6 does, with the chips that sit out
+taken out of the deck (`CYBERWORLD_EMU_DEBUG=1` prints how many).
+
+```bash
+CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1700 --dev quiet \
+  --input "300:,0:chip 204 L 29,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,4:A,56:,0:foes 01@52,260:,4:A,10:,4:START,10:,4:A,150:,4:A,200:" \
+  --shot 1150:/src/.build/a.bmp,1365:/src/.build/b.bmp   # WideSht1 L's card on the Custom screen, BN5's picture; its wave at the Mettaur
+```
+
 ## BN5's records in BN6's engine
 
 ```bash

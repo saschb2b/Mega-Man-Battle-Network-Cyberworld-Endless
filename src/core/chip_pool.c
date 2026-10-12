@@ -10,6 +10,7 @@
 
 #include <string.h>
 
+#include "chips.h"
 #include "data.h"
 #include "game.h"
 #include "rom.h"
@@ -22,9 +23,10 @@ static int count[CHIP_TIERS];
 static bool loaded;
 
 int chip_pool_tier(int id) {
-	if (!R.data || id <= 0 || id > LAST_CHIP) return -1;
-	const uint8_t *c = R.data + R.layout->chip_data + (uint32_t)id * 0x2C;
-	if (c[0] > 26 || !c[0x15]) return -1;   /* no code, or not in the library */
+	/* (BN5's chips in BN6's tables come into runs' finds and stock with
+	 * issue #82's run systems, not yet: docs/MULTIROM.md, The chip registry) */
+	const uint8_t *c = id > 0 && id <= LAST_CHIP && !chips_bn5(id) ? chips_record(id) : NULL;
+	if (!c || c[0] > 26 || !c[0x15]) return -1;   /* no code, or not in the library */
 	int flags = c[0x16];
 	if (flags & 0x01 || flags & 0x20 || flags == 0x10) return -1;
 	/* (no picture of its own: a chip cut from the US version, which passes
@@ -54,7 +56,7 @@ static void load(void) {
 
 int chip_pool_class(int id) {
 	if (chip_pool_tier(id) < 0) return -1;
-	int t = R.data[R.layout->chip_data + (uint32_t)id * 0x2C + 7];
+	int t = chips_record(id)[7];
 	return t <= 2 ? t : -1;
 }
 

@@ -5,6 +5,8 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "bytes.h"
+#include "chips.h"
 #include "darkchips.h"
 #include "data.h"
 #include "debug.h"
@@ -17,8 +19,10 @@
 static unsigned ran, base_ran;   /* the battle's DarkChips, a bit per DarkChipID: their dark power ran; their base chip ran */
 static int powered = -1;         /* the records' power as last written: 1 their own, 0 their base chips', -1 not yet */
 
-/* chip `id`'s record (a ROM offset) */
-static uint32_t record(int id) { return R.layout->chip_data + (uint32_t)id * BN6_CHIP_RECORD_SIZE; }
+/* chip `id`'s record as the core's copy holds it (src/core/chips.h), and
+ * where the game reads it, which a write goes to */
+static const uint8_t *record(int id) { return chips_record(id); }
+static uint32_t record_bus(int id) { return chips_table_bus() + (uint32_t)id * BN6_CHIP_RECORD_SIZE; }
 
 int darkbn6_base(int id) {
 	int d = id - DARK_BN6_FIRST;
@@ -29,9 +33,9 @@ int darkbn6_base(int id) {
 }
 
 void darkbn6_does(int id, char *out, size_t n) {
-	if (!R.data || !R.layout || dark_bn6_kind(id) < 0) { if (n) out[0] = 0; return; }
-	uint32_t rec = record(id);
-	int power = rom_u16(rec + BN6_CHIP_ATTACK_POWER), sub = R.data[rec + BN6_CHIP_SUBFAMILY];
+	const uint8_t *rec = record(id);
+	if (!rec || dark_bn6_kind(id) < 0) { if (n) out[0] = 0; return; }
+	int power = get16(rec + BN6_CHIP_ATTACK_POWER), sub = rec[BN6_CHIP_SUBFAMILY];
 	switch (id - DARK_BN6_FIRST) {
 	case 0: snprintf(out, n, "a %d slash on the six panels ahead", power); break;
 	case 1: snprintf(out, n, "a %d Thunder that paralyzes", power); break;
@@ -47,10 +51,8 @@ void darkbn6_does(int id, char *out, size_t n) {
 static void power(bool own) {
 	for (int i = 0; i < DARK_BN6_PLAYED; ++i) {
 		int id = DARK_BN6_FIRST + i, from = own ? id : darkbn6_base(id);
-		if (!from) continue;
-		uint16_t v = rom_u16(record(from) + BN6_CHIP_ATTACK_POWER);
-		uint8_t b[2] = { (uint8_t)v, (uint8_t)(v >> 8) };
-		emu_write(BUS + record(id) + BN6_CHIP_ATTACK_POWER, b, sizeof b);
+		if (!from || !record(from)) continue;
+		emu_write(record_bus(id) + BN6_CHIP_ATTACK_POWER, record(from) + BN6_CHIP_ATTACK_POWER, 2);
 	}
 	powered = own;
 	if (emu_debug_on()) fprintf(stderr, "dark: BN6's DarkChips show %s power\n", own ? "their own" : "their base chips'");
@@ -75,7 +77,7 @@ static uint16_t alpha_place(int id) {
 	char best[sizeof ci.name] = "";
 	uint16_t place = 1;
 	for (int c = 1; c < SORTED_CHIPS; ++c) {
-		uint16_t a = rom_u16(record(c) + BN6_CHIP_ALPHA_SORT);
+		uint16_t a = get16(record(c) + BN6_CHIP_ALPHA_SORT);
 		if (!a || dark_bn6_kind(c) >= 0) continue;
 		chip_info(c, &ci);
 		if (name_cmp(ci.name, me.name) < 0 && (!best[0] || name_cmp(ci.name, best) > 0)) {
@@ -87,16 +89,17 @@ static uint16_t alpha_place(int id) {
 }
 
 void darkbn6_records(void) {
-	if (!R.data || !R.layout || !R.layout->chip_data) return;
+	if (!record(0)) return;
 	static uint16_t alpha[DARK_BN6_PLAYED];
 	for (int i = 0; i < DARK_BN6_PLAYED; ++i) {
 		int id = DARK_BN6_FIRST + i, from = darkbn6_base(id);
 		if (!from) continue;
-		uint32_t rec = record(id);
-		emu_write8(BUS + rec + BN6_CHIP_EFFECT_FLAGS, (uint8_t)(R.data[rec + BN6_CHIP_EFFECT_FLAGS] | BN6_CHIP_DARK_CLASS));
-		emu_write8(BUS + rec + BN6_CHIP_LIBRARY_FLAGS, (uint8_t)(R.data[rec + BN6_CHIP_LIBRARY_FLAGS] & ~BN6_CHIP_UNLISTED));
+		const uint8_t *rec = record(id);
+		uint32_t bus = record_bus(id);
+		emu_write8(bus + BN6_CHIP_EFFECT_FLAGS, (uint8_t)(rec[BN6_CHIP_EFFECT_FLAGS] | BN6_CHIP_DARK_CLASS));
+		emu_write8(bus + BN6_CHIP_LIBRARY_FLAGS, (uint8_t)(rec[BN6_CHIP_LIBRARY_FLAGS] & ~BN6_CHIP_UNLISTED));
 		/* (the icon, picture and palette pointers: the base chip's) */
-		emu_write(BUS + rec + BN6_CHIP_ICON_PTR, R.data + record(from) + BN6_CHIP_ICON_PTR, BN6_CHIP_RECORD_SIZE - BN6_CHIP_ICON_PTR);
+		emu_write(bus + BN6_CHIP_ICON_PTR, record(from) + BN6_CHIP_ICON_PTR, BN6_CHIP_RECORD_SIZE - BN6_CHIP_ICON_PTR);
 		/* (their places in the editor's sorts, 0 on all five: its swap tells
 		 * two chips apart by the ID's place and the code, so it took any two
 		 * DarkChips for one chip and let one in for another past the folder's
@@ -104,15 +107,15 @@ void darkbn6_records(void) {
 		 * names before theirs) */
 		if (!alpha[i]) alpha[i] = alpha_place(id);
 		uint8_t sort[2][2] = { { (uint8_t)alpha[i], (uint8_t)(alpha[i] >> 8) }, { (uint8_t)id, (uint8_t)(id >> 8) } };
-		emu_write(BUS + rec + BN6_CHIP_ALPHA_SORT, sort[0], 2);
-		emu_write(BUS + rec + BN6_CHIP_ID_SORT, sort[1], 2);
+		emu_write(bus + BN6_CHIP_ALPHA_SORT, sort[0], 2);
+		emu_write(bus + BN6_CHIP_ID_SORT, sort[1], 2);
 	}
 	powered = -1;
 	darkbn6_sync();
 }
 
 void darkbn6_sync(void) {
-	if (!R.data || !R.layout || !R.layout->chip_data) return;
+	if (!record(0)) return;
 	int own = emu_read32(BN6_BUGFRAGS) > 0;
 	if (own != powered) power(own);
 }

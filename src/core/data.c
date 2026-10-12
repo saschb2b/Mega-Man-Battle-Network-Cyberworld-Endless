@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "bytes.h"
+#include "chips.h"
 #include "rom.h"
 #include "run.h"
 
@@ -105,24 +107,31 @@ const ChipDef *chip_def(int rom_id) {
 }
 
 bool chip_direct(int rom_id) {
-	const uint8_t *c = R.data + R.layout->chip_data + (uint32_t)rom_id * 0x2C;
-	if (c[0xF] == 1) return true;
+	const uint8_t *c = chips_record(rom_id);
+	if (!c) return false;
+	if (c[BN6_CHIP_LOCK_ON] == 1) return true;
 	/* (and the families that strike outright without the lock-on: the Navi
 	 * chips, MachGun, AquaNdl, WaveArm, AirSpin, the Dragons) */
-	switch (c[0xB]) {
+	switch (c[BN6_CHIP_FAMILY]) {
 	case 27: case 41: case 49: case 50: case 56: case 81: return true;
 	default: return false;
 	}
 }
 
-int chip_family(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB]; }
+int chip_family(int rom_id) {
+	const uint8_t *c = chips_record(rom_id);
+	return c ? c[BN6_CHIP_FAMILY] : 0;
+}
 
 bool chip_melee(int rom_id) {
-	int family = R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0xB];
+	int family = chip_family(rom_id);
 	return family == 19 || family == 63 || family == 64;
 }
 
-bool chip_standard(int rom_id) { return R.data[R.layout->chip_data + (uint32_t)rom_id * 0x2C + 0x7] == 0; }
+bool chip_standard(int rom_id) {
+	const uint8_t *c = chips_record(rom_id);
+	return c && c[BN6_CHIP_LIBRARY_TYPE] == 0;
+}
 
 /* Whether chip `rom_id` is a Navi's, in any of its three versions. */
 static bool navi_chip_of(int rom_id) {
@@ -133,15 +142,15 @@ static bool navi_chip_of(int rom_id) {
 
 void chip_info(int rom_id, ChipInfo *out) {
 	memset(out, 0, sizeof *out);
-	uint32_t rec = R.layout->chip_data + rom_id * 0x2C;
-	if (rom_id < 256) rom_text(R.layout->chip_names[0], rom_id, out->name, sizeof out->name);
-	else rom_text(R.layout->chip_names[1], rom_id - 256, out->name, sizeof out->name);
-	out->power = rom_u16(rec + 0x1A);
-	out->mb = R.data[rec + 8];
-	out->element = R.data[rec + 4];
-	out->chip_element = R.data[rec + 6];
+	const uint8_t *rec = chips_record(rom_id);
+	if (!rec) return;
+	chips_name(rom_id, out->name, sizeof out->name);
+	out->power = get16(rec + BN6_CHIP_ATTACK_POWER);
+	out->mb = rec[BN6_CHIP_MB];
+	out->element = rec[BN6_CHIP_ATTACK_ELEMENT];
+	out->chip_element = rec[BN6_CHIP_ELEMENT];
 	for (int i = 0; i < 4; ++i) {
-		uint8_t c = R.data[rec + i];
+		uint8_t c = rec[BN6_CHIP_CODES + i];
 		if (c == 0xFF) continue;
 		out->codes[out->ncodes++] = c == 26 ? '*' : (char)('A' + c);
 	}
@@ -159,10 +168,7 @@ void chip_info(int rom_id, ChipInfo *out) {
 	if (d->kind == CK_RECOVER) out->power = d->param;
 }
 
-void chip_desc(int rom_id, char *out, size_t outlen) {
-	if (rom_id < 256) rom_desc(R.layout->chip_descs[0], rom_id, out, outlen);
-	else rom_desc(R.layout->chip_descs[1], rom_id - 256, out, outlen);
-}
+void chip_desc(int rom_id, char *out, size_t outlen) { chips_desc(rom_id, out, outlen); }
 
 /* ---- enemy ids another game's family took (xvirus.c) ---- */
 static struct {

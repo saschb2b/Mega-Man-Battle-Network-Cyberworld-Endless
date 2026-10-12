@@ -7,5 +7,6 @@
 int out_names(char *s, size_t n);
 void older_net_words(void);
 void guest_words(void);
+void old_chips_words(void);
 
 #endif

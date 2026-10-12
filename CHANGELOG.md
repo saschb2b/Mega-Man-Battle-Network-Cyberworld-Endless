@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
+  records are grown from 411 to 512 in the game's free space, its chips'
+  names and descriptions to id 511, and the 257 of Team Colonel's chips a
+  run can meet are registered there by id: the 116 BN6 has by name (and
+  three its US release names otherwise) are BN6's own, the other 138 have
+  ids of their own, their records made from BN5's field by field, their
+  names and descriptions in BN6's text, their icons and pictures copied
+  from the player's BN5 ROM as the game starts. The pack counts them (ids
+  from 320 on in memory BN6 leaves unused), the folder holds them, the
+  Custom screen deals them with BN5's art, and the eleven BN6's code
+  already plays under other names fight in BN6's battles (AirHoc,
+  WideSht1-3, Spreader, DrilArm1-3, Geddon1-3), and Z Saver; the rest sit
+  out of the deck until their code is moved. Without BN5's ROM each is a
+  placeholder that keeps its id, codes and MB, so a run saved with one
+  continues, the chip sits out, and MegaMan says why. Nothing in a run
+  gives one yet; a dev step does (docs/DEVTOOLS.md).
 - **BN5's chips by their own names (issue #82).** BN5 numbers its text
   otherwise than BN6 past letters and digits (BN6 put its version marks
   first), and BN5's names were read with BN6's table: its M-Cannon read

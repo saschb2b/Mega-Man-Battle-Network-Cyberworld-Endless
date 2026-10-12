@@ -334,25 +334,8 @@
 #define BN6_PROTOMAN_CROSS_END 0x080FDFA0u /* ProtoMan landing from his cross (bn6f sub_80FCC4C + 0x2C; issue #55), his collision data just restored: strh r0,[r2,#0x2E], r2 his collision data */
 
 /* BN6's own DarkChips (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md;
- * issue #70): a chip record's fields (RomLayout.chip_data, 0x2C bytes an
- * id; bn6f ChipData), the routines every chip use runs, the battle's
- * BugFrags (Gregar's as Falzar's) */
-#define BN6_CHIP_RECORD_SIZE  0x2C
-#define BN6_CHIP_ELEMENT      0x06        /* ChipElement: its icon's element (0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Plus, 5 Sword, 6 Cursor, 7 Break, 8 Wind, 9 Obstacle, 10 Null) */
-#define BN6_CHIP_LIBRARY_TYPE 0x07        /* LibraryType: 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance */
-#define BN6_CHIP_EFFECT_FLAGS 0x09        /* EffectFlags: BN6_CHIP_DARK_CLASS makes a DarkChip (the folder's three, MegaMan's NAVIGATOR line, the purple card) */
-#define BN6_CHIP_SUBFAMILY    0x0C        /* AttackSubFamily: a recovery chip's amount (BN6_RECOVERY_AMOUNTS), a sword's area */
-#define BN6_CHIP_LIBRARY_FLAGS 0x16       /* LibraryFlags: BN6_CHIP_UNLISTED keeps a chip out of the pack's list (bn6f sub_811FE7C) */
-#define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
-#define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
-#define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
-                                             sub_811FCB8, sub_811FE7C); 0 on the five DarkChips, so it took any two for one chip and skipped its limits */
-#define BN6_CHIP_DARK_ID      0x1F        /* DarkChipID: 0-4 BN6's five DarkChips, 0xFF any other chip */
-#define BN6_CHIP_ICON_PTR     0x20        /* ChipIconPtr, then ChipImagePtr and ChipPalettePtr: the hand's icon, the card's picture */
-#define BN6_CHIP_IMAGE_PTR    0x24
-#define BN6_CHIP_PALETTE_PTR  0x28
-#define BN6_CHIP_DARK_CLASS   0x20
-#define BN6_CHIP_UNLISTED     0x20
+ * issue #70): the routines every chip use runs, the battle's BugFrags
+ * (Gregar's as Falzar's); a chip record's fields are bn6_chips.h's */
 #define BN6_DARK_FIRST_ID     0x11E       /* DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus: chips 0x11E-0x122 */
 #define BN6_DARK_AFTER        0x0800B79Au /* bn6f sub_800B79A, a chip's after-effects as it runs: r0 the chip that ran (a DarkChip's id only where
                                              its dark power ran, a BugFrag paid), r5 its user; the NaviCust's HP bug its table at 0x0800B7BC adds */
@@ -394,6 +377,7 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #endif

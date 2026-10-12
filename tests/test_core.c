@@ -48,7 +48,11 @@
 #include "touch_layout.h"
 #include "padmap.h"
 #include "buttons.h"
+#include "chips.h"
 #include "xchips.h"
+#include "xchips_record.h"
+#include "xchips_registry.h"
+#include "xchips_text.h"
 #include "xnavi.h"
 #include "xsong.h"
 #include "debug.h"
@@ -3363,6 +3367,7 @@ static void test_all_star(void) {
 	layout.chip_names[0] = layout.chip_names[1] = 0x2000;
 	R.data = calloc(ROM_SIZE, 1);
 	R.layout = &layout;
+	chips_forget();   /* (the chips' image of another made-up ROM, maybe at the same address) */
 	if (!R.data) { CHECK(false, "all star: no memory for a made-up ROM"); return; }
 	static const uint8_t codes[3][4] = { { 0, 1, 2, 26 }, { 1, 3, 5, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF } };   /* Cannon's A B C *, B D F, none */
 	for (int i = 0; i < 3; ++i) memcpy(R.data + 0x1000 + 0x2C * (i + 1), codes[i], 4);
@@ -3583,6 +3588,153 @@ static void test_xtext(void) {
 	CHECK(xrom_text_bn6(XROM_BN5_COLONEL_US, ds, sizeof ds, out, 2) == 2 && out[1] == 0x0E, "xtext: the room for its text kept");
 	/* (BN6's own text, and another game's that spells as BN6's: as it is) */
 	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
+}
+
+/* The chip registry (src/core/xchips_registry.c; docs/MULTIROM.md, The
+ * chip registry, issue #82): the table as decided (Team Colonel's chips a
+ * run can meet, one chip per name, the rest in BN6's free ids), its checks
+ * failing on made-up rows that break each rule, and its lookups both ways. */
+static void test_chip_registry(void) {
+	char why[96] = "";
+	int bad = xreg_check(xreg_rows, xreg_count, why, sizeof why);
+	CHECK(!bad, "registry: the table holds its rules (%s)", why);
+	int own = 0, plays = 0, dark = 0, pas = 0, high = 0;
+	for (int i = 0; i < xreg_count; ++i) {
+		own += xreg_own(&xreg_rows[i]);
+		plays += xreg_rows[i].how == XREG_RECORD;
+		dark += xreg_rows[i].how == XREG_DARK;
+		pas += xreg_rows[i].how == XREG_PA;
+		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
+	}
+	CHECK(xreg_count == 257 && own == 138 && plays == 12 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 12 playing now, "
+		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(high == 15 + 94, "registry: the Program Advances and 94 chips past 319, in the pack's extension (%d)", high);
+	const XChipReg *ws = xreg_of_bn5(9), *cannon = xreg_of_bn5(1), *atk = xreg_of_bn5(149), *z = xreg_of_bn5(218);
+	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");
+	CHECK(cannon && cannon->bn6 == 1 && cannon->how == XREG_SAME && !xreg_at(1), "registry: BN5's Cannon is BN6's own");
+	CHECK(atk && atk->bn6 == 192 && atk->how == XREG_ALIAS, "registry: Attck+10 is BN6's Atk+10, which BN6's hand merges by its id");
+	CHECK(z && xreg_own(z) && z->twin == 381, "registry: Z Saver an id of its own over BN6's pseudo-chip of its name, which no folder holds");
+	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
+	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
+		"registry: the free ids, BN6's own and its pseudo-chips' not");
+	/* (made-up rows, each breaking one rule) */
+	static const XChipReg twice[] = { { 9, 204, XREG_RECORD, 23, 0xFF, { 0 }, 0, 0 }, { 9, 205, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg taken[] = { { 12, 221, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg two_at[] = { { 12, 411, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 }, { 13, 411, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg no_twin[] = { { 9, 204, XREG_RECORD, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg pseudo[] = { { 218, 381, XREG_SAME, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg pa[] = { { 323, 350, XREG_PA, 0, 0xFF, { 0 }, 0, 5 } };
+	CHECK(xreg_check(twice, 2, why, sizeof why) == 2 && xreg_check(taken, 1, why, sizeof why) == 1 && xreg_check(two_at, 2, why, sizeof why) == 2 &&
+		xreg_check(no_twin, 1, why, sizeof why) == 1 && xreg_check(pseudo, 1, why, sizeof why) == 1 && xreg_check(pa, 1, why, sizeof why) == 1,
+		"registry: a BN5 id twice, an id BN6 uses, an id twice, a playing record without its twin, a pseudo-chip's pair, a PA of no PA type: refused");
+}
+
+/* A registered chip's record (src/core/xchips_record.c): BN5's numbers,
+ * BN6's icon element, its twin's behaviour, out of BN6's Library; a
+ * placeholder's; the folder editor's ABC place; BN5's icons' colours; the
+ * battle deck without the chips that sit out. Made-up records. */
+static void test_chip_records(void) {
+	static const int icon[][2] = { { 0, 0 }, { 3, 3 }, { 4, 10 }, { 5, 4 }, { 6, 5 }, { 7, 10 }, { 8, 6 }, { 9, 7 }, { 10, 8 }, { 11, 9 }, { 12, 10 }, { 13, 11 }, { 40, 10 } };
+	for (size_t i = 0; i < sizeof icon / sizeof *icon; ++i)
+		CHECK(xrec_icon_element(icon[i][0]) == icon[i][1], "records: BN5's icon element %d as BN6's %d (%d)", icon[i][0], icon[i][1], xrec_icon_element(icon[i][0]));
+	uint8_t bn5[XREC_SIZE] = { 0x0B, 0x0C, 0x0D, 0xFF, 2, 0, 1, 0, 10, 0x4A, 0x14, 0x25, 0, 0, 4, 0, 3, 0, 0, 0, 0, 0, 0, 22 }, twin[XREC_SIZE] = { 0 }, out[XREC_SIZE];
+	bn5[BN6_CHIP_ATTACK_POWER] = 70;
+	twin[BN6_CHIP_FAMILY] = 0x30;
+	twin[BN6_CHIP_LOCK_ON] = 1;
+	twin[BN6_CHIP_LOCK_ON_TYPE] = 3;
+	XChipReg reg = { 9, 204, XREG_RECORD, 23, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 10 };
+	XRecordFrom in = { bn5, twin, &reg, 509, { 0x08C11000u, 0x08C20000u, 0x08C30000u } };
+	xrec_from_bn5(&in, out);
+	CHECK(!memcmp(out, bn5, 4) && out[BN6_CHIP_FAMILY] == 0x30 && out[BN6_CHIP_SUBFAMILY] == 0 && out[BN6_CHIP_LOCK_ON] == 1 && out[BN6_CHIP_LOCK_ON_TYPE] == 3 &&
+		out[BN6_CHIP_EFFECT_FLAGS] == 0x0A && out[BN6_CHIP_PARAMS] == 3 && get16(out + BN6_CHIP_ATTACK_POWER) == 70 && out[BN6_CHIP_LIBRARY_NUMBER] == 0 &&
+		get16(out + BN6_CHIP_ALPHA_SORT) == 509 && get16(out + BN6_CHIP_ID_SORT) == 204 && out[BN6_CHIP_DARK_ID] == 0xFF && get32(out + BN6_CHIP_ICON_PTR) == 0x08C11000u &&
+		get32(out + BN6_CHIP_PALETTE_PTR) == 0x08C30000u && out[BN6_CHIP_ELEMENT] == 1, "records: WideSht1 over WideSht's family with BN5's numbers, out of the Library");
+	reg.sub = 2;
+	xrec_from_bn5(&in, out);
+	CHECK(out[BN6_CHIP_SUBFAMILY] == 2, "records: a subfamily of the row's own (DarkWide's)");
+	in.twin = NULL;
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1045);
+	bn5[BN6_CHIP_EFFECT_FLAGS] = 0xDA;
+	xrec_from_bn5(&in, out);
+	CHECK(out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && out[BN6_CHIP_SUBFAMILY] == XREC_INERT_SUB && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_PARAMS] &&
+		!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: one whose code BN6 lacks inert, its computed power (BN5's) none");
+	const uint32_t blank[3] = { 0x087237D0u, 0x086F3AF0u, 0x086F3AF0u };
+	XChipReg dark = { 187, 214, XREG_DARK, 142, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 0, 99 };
+	xrec_placeholder(&dark, 33, blank, out);
+	CHECK(out[0] == 0x11 && out[1] == 0xFF && out[BN6_CHIP_MB] == 99 && out[BN6_CHIP_EFFECT_FLAGS] == BN6_CHIP_DARK_CLASS && !get16(out + BN6_CHIP_ATTACK_POWER) &&
+		out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 214 &&
+		out[BN6_CHIP_ELEMENT] == 10, "records: a DarkChip's placeholder keeps its codes, MB and class, BN6's blank art");
+	const char *names[] = { "Cannon", "AirShot", "WideSwrd", "", "Zeta" };
+	const uint16_t places[] = { 52, 5, 509, 7, 0 };
+	CHECK(xrec_abc_place("WideSht1", names, places, 5) == 52 && xrec_abc_place("WideSwrd2", names, places, 5) == 509 &&
+		xrec_abc_place("Aaa", names, places, 5) == 1 && xrec_abc_place("Zz", names, places, 5) == 509, "records: the ABC place after the name before");
+	uint8_t pal5[32] = { 0 }, pal6[32] = { 0 }, map[16];
+	put16(pal6 + 2 * 3, 0x001F);   /* (BN6's 3 red, its others black) */
+	put16(pal5 + 2 * 12, 0x001E);  /* (BN5's 12 near red) */
+	xrec_icon_colours(pal5, pal6, map);
+	CHECK(map[0] == 0 && map[9] == 9 && map[12] == 3, "records: BN5's icon colours 0-9 as they are, 12 as BN6's nearest (%d %d)", map[9], map[12]);
+	uint8_t ic[0x80];
+	memset(ic, 0xC9, sizeof ic);
+	xrec_icon_recolour(ic, map);
+	CHECK(ic[0] == 0x39 && ic[0x7F] == 0x39, "records: an icon's two pixels a byte recoloured (%02X)", ic[0]);
+	uint8_t sits[64] = { 0 };
+	sits[204 >> 3] |= 1u << (204 & 7);
+	uint16_t deck[8] = { 1, 204 | 11 << 9, 5, 204 | 11 << 9, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+	unsigned first;
+	int taken = xrec_deck_sit_out(deck, 8, sits, 3, &first);
+	CHECK(taken == 2 && deck[0] == 1 && deck[1] == 5 && deck[2] == 0xFFFF && first == 2u, "records: two chips sit out of the deck, the second of its first "
+		"three among them, the rest in order (%d %04X %04X %u)", taken, deck[1], deck[2], first);
+}
+
+/* The chips' image (src/core/chips.c) over a made-up BN6 ROM without BN5's:
+ * BN6's records and names as they are, the registry's ids as placeholders
+ * (their codes, "BN5-9", sitting out), 512 records, names of ids past
+ * BN6's archives; and a BN5 description's script in BN6's codes, its
+ * commands kept (rom.c, xrom_script_bn6). */
+static void test_chips_image(void) {
+	static RomLayout layout;
+	layout.chip_data = 0x1000;
+	layout.chip_names[0] = 0x8000;
+	layout.chip_names[1] = 0x9000;
+	layout.chip_descs[0] = 0xA000;
+	layout.chip_descs[1] = 0xB000;
+	R.data = calloc(ROM_SIZE, 1);
+	R.layout = &layout;
+	chips_forget();
+	if (!R.data) { CHECK(false, "chips: no memory for a made-up ROM"); return; }
+	uint8_t *cannon = R.data + 0x1000 + XREC_SIZE;
+	cannon[0] = 0; cannon[1] = 1; cannon[2] = 2; cannon[3] = 26;
+	put16(cannon + BN6_CHIP_ATTACK_POWER, 40);
+	/* (names: two entries, "Cannon" for 1) */
+	static const uint8_t names0[] = { 4, 0, 5, 0, 0xE6, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33, 0xE6 };
+	memcpy(R.data + 0x8000, names0, sizeof names0);
+	ChipInfo ci;
+	chip_info(1, &ci);
+	CHECK(!strcmp(ci.name, "Cannon") && !strcmp(ci.codes, "ABC*") && ci.power == 40, "chips: BN6's Cannon as its ROM has it (%s %s %d)", ci.name, ci.codes, ci.power);
+	chip_info(204, &ci);
+	char desc[64];
+	chip_desc(204, desc, sizeof desc);
+	CHECK(!strcmp(ci.name, "BN5-9") && !strcmp(ci.codes, "LMN") && ci.mb == 10 && chips_sits_out(204) && !chips_sits_out(1) && chips_bn5(204) && !chips_from_bn5(),
+		"chips: BN5's WideSht1 without its ROM a placeholder of its codes, sitting out (%s %s %d)", ci.name, ci.codes, ci.mb);
+	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
+	CHECK(chips_record(511) && !chips_record(512) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204, "chips: 512 records, the registry's its id's sort place");
+	chip_info(509, &ci);
+	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's has no name (%s)", ci.name);
+	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),
+		"chips: bytes by bus address, the player's ROM below 8 MB, the chips' place past EMU_FREE");
+	free(R.data);
+	R.data = NULL;
+	R.layout = NULL;
+	chips_forget();
+	CHECK(!chips_record(1), "chips: none without a ROM");
+	static const uint8_t script[] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00, 0x17, 0x93, 0x0D, 0xE9, 0x0B, 0x9E, 0xE7, 0x01, 0xE6, 0xE8, 0x07 };
+	uint8_t out[32];
+	size_t n = xrom_script_bn6(XROM_BN5_COLONEL_US, script, sizeof script, out, sizeof out);
+	static const uint8_t want[] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00, 0x17, 0x98, 0x0D, 0xE9, 0x0B, 0x43, 0xE7, 0x01, 0xE6 };
+	CHECK(n == sizeof want && !memcmp(out, want, sizeof want), "chips: a BN5 description's script in BN6's codes, its commands kept, to its end (%d)", (int)n);
+	char text[32];
+	rom_desc_bytes(want, sizeof want, text, sizeof text);
+	CHECK(!strcmp(text, "M-C A\x04"), "chips: the description read past its box's commands (%s)", text);
 }
 
 /* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
@@ -4220,6 +4372,9 @@ int main(void) {
 	test_beast();
 	test_xchips();
 	test_xtext();
+	test_chip_registry();
+	test_chip_records();
+	test_chips_image();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();

@@ -624,8 +624,11 @@ and its calls aimed again (`src/emu/xvirus.c`):
   BN6's name lookup hands out (it took an id past 0xFF for a Navi's).
   BN6's own battles read the copies as BN6's: with the room made they
   are the same at every byte (`tools/xcontrol.py`, `tools/xfamily.py
-  --spec native`). Room is kept past it for BN5's Navis and chips
-  (docs/EMULATION.md, `+0x400000` and `+0x500000`). The mode byte of a
+  --spec native`). Past it the plan goes on (docs/EMULATION.md, Memory
+  the engine writes): the chip registry at `+0x400000` (The chip
+  registry, below), room kept for the Souls at `+0x480000`, the lava and
+  sea at `+0x4C0000`, the Navis at `+0x500000` and the chips' moved code
+  at `+0x600000`. The mode byte of a
   family's struct1 indexes BN6's 32 bytes for its families (read in one
   battle mode): kept, a family whose game's mode is past them given 0.
 - **The second-level dispatch** (`src/emu/xvirus_dispatch.c`;
@@ -894,6 +897,149 @@ and its calls aimed again (`src/emu/xvirus.c`):
   Testing): the install stands in the way of no run continued with BN5's
   ROM taken away or put in.
 
+## The chip registry
+
+Issue #82's C1, the ground call 4 stands on: Team Colonel's chips in
+BN6's own chip tables, so the pack, the folder, the Custom screen and
+BN6's battles take them by their ids as they take BN6's, the same ids at
+every boot, with BN5's ROM or without it. What is registered is the
+finer calls' subset (One net, above). Nothing in a run gives one of them
+yet: the run's finds, shops, traders and rewards come with the later
+milestones (Not yet, below); the chip step gives one (docs/DEVTOOLS.md).
+
+- **The registry** (`src/core/xchips_registry.c`, numbers only): 257 of
+  BN5's chips, each with its id in BN6's tables and how it comes in. One
+  chip per name: the 116 BN6 has by name are BN6's own (its id, record
+  and code), and so are three its US release names otherwise (Attck+10
+  and Attck+30, BN6's Atk+10 and Atk+30, which BN6's hand merges into the
+  chip before them by their ids; PitHoky, BN6's PitHocky). The other 138
+  take ids of their own: BN6's records no chip uses (203-220, 291-300,
+  314 and 350-367: blank-named, named by none of its tables, docs/
+  ROM_DATA.md, The chip registry) and 411-511, past its 411 records.
+  203-213 are the eleven BN6's code already plays under other names
+  (AirHoc over AirHocky's family; WideSht1-3 over WideSht's; Spreader
+  over Spreadr1's; DrilArm1-3 over DrilArm's; Geddon1-3 over Geddon's,
+  which cracks, breaks or poisons by its first parameter as BN5's three
+  do), 214-220 the seven DarkChips, 291-294 the Megas (Z Saver among
+  them: BN6's Z Saver is a pseudo-chip of its battles, which no folder
+  holds, so BN5's has an id of its own over that pseudo-chip's family),
+  295-300 the first chips to be moved (Guard1-3, CrakOut, DublCrak,
+  TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364 the fifteen
+  Program Advances beside BN6's, 411-504 the rest, the Navi chips last
+  (489-504; Colonel and Colonel SP are BN6's). 365-367 and 505-511 stay
+  free. A row of its own keeps its codes, library type and MB: what its
+  placeholder needs. The pairs were made by name from both ROMs, which
+  their SHA-1s fix; the unit tests hold the table to its rules
+  (`xreg_check`: every BN5 id once, every own id once and free, every
+  BN6 id one of BN6's folder chips or Program Advances, every twin one of
+  BN6's records). Of BN5's other chips of a name BN6 has, none is in the
+  subset (Team ProtoMan's GunDelEX and Otenko, the Navi chips of Navis
+  who guard no run, BN5's pseudo-chips).
+- **The tables, one place to read them** (`src/core/chips.c`): BN6's
+  records cannot grow where they are (other data follows them), so all
+  512 are made anew from the player's ROMs: BN6's 411 as they are, the
+  registry's at their ids, a blank record at every id past them; the
+  names' and the descriptions' text archives for ids 0-511, BN6's own
+  entries copied and the registry's in BN6's text codes (BN5's read
+  through `xrom_text_bn6`, its descriptions' box commands kept); BN5's
+  icons, pictures and palettes, a picture or palette two chips share
+  copied once. The same bytes go into the core's copy (below) and are
+  what the run's code reads: every reader of a chip's record, name,
+  description or art (data.c's chip info, the chip pool, BN6's
+  DarkChips' power, the guardians' rarity, the second screen's cards and
+  icons, gfx.c's tiles, the All * helper's codes) takes them from
+  `chips_record`, `chips_name`, `chips_desc` or `chips_bytes`, never
+  from the player's file; what writes into the records in the core's
+  copy (the All * helper, BN6's DarkChips) writes where the game reads
+  them (`chips_table_bus`). 174560 bytes with BN5's ROM, 69632 without.
+- **A record field by field** (`src/core/xchips_record.c`): BN5's
+  record has BN6's layout, its numbers taken as they are (codes,
+  elements, rarity, type, MB, parameters, lockout, power, gate) but four:
+  its icon element (+6) as BN6's (BN5 numbers its Recovery, Invisible
+  and the rest otherwise: measured over the 151 chips both games name
+  alike), its lock-on type (+0x17, another meaning in BN5) and its family,
+  subfamily and lock-on from its twin (the BN6 chip whose code plays it),
+  its Library number and flags 0 (out of BN6's Library screen: the
+  finer calls' Library), its ID sort key its own id, its ABC place after
+  the BN6 chip whose name comes last before its own, no DarkChipID. A
+  power BN5 computes (1001 and up, an index into BN5's own table, past
+  BN6's) is shown as none. A chip whose code BN6 lacks keeps an inert
+  family (BN6's blank records', 0x1C sub 3), no lock-on and no
+  parameters. Its icon is drawn in BN6's icons' palette (BN5's outline is
+  grey where BN6's is teal; its other colours the same or BN6's nearest).
+- **Without BN5's ROM, placeholders**: the registry's chips keep their
+  ids, codes, library type and MB, so a saved folder or pack never names
+  garbage and the folder's rules (MB, Mega and Giga counts) still hold;
+  each reads "BN5-<its BN5 number>", its card "Needs BN5 / ROM back / to
+  battle", Null, BN6's blank art. BN5's ROM put in later (the ROMs
+  screen) brings its chips in for theirs as a game is next entered: the
+  image is made again and written over the placeholders'.
+- **The install** (`src/emu/xchips_install.c`), at every start of the
+  core before the boot, all or nothing (every word and halfword it
+  changes read first and BN6's own or already its; its place in the free
+  space 0xFF or already its): the image past `EMU_FREE` + `0x400000`
+  (docs/EMULATION.md), getChip's one literal pointed at the 512 records,
+  the 23 words that name the four text archives pointed at the new ones,
+  and BN6's pack routines split so ids 320-511 count in an extension of
+  the pack in EWRAM BN6 leaves alone (`0x02010CE0`-`0x020115DF`, 12 bytes
+  an id: cleared at power-on with the rest of EWRAM, held by every state
+  and so by `run.state`): the count's and the total's lookups, the pack's
+  totals, its list in the folder editor (to id 511) and its clear (the
+  folder editor's exit clears the pack and gives its list back: a clear
+  that left the extension counted it twice). BN6's support and Navi
+  chips tested a pseudo-chip by its id (every id from 0x170): the test is
+  kept to its own (0x170-0x19A), so a chip from 411 is none. Every write
+  and its original bytes: docs/ROM_DATA.md, The chip registry.
+- **Sitting out** (a hook at the end of the battle deck's deal, bn6f
+  `sub_800A3E4`): the chips that sit out are taken out of the deck, the
+  rest kept in their order (the Regular chip's and the TagChips' marks
+  cleared where theirs went). They are the registry's chips whose code is
+  not moved yet (pending), BN5's DarkChips until BN5's dark rule comes
+  into BN6's battles, its Program Advances until BN6's lists hold their
+  recipes, and every one of BN5's where its ROM is not read. A run
+  continued without BN5's ROM whose folder holds one of BN5's chips hears
+  MegaMan say so once, as he stands free on the map ("Some of our chips
+  came from the older Net...", `guest_words.c`). BN5's own battles (the
+  guest's) take the registry's chips as BN5's own, by its ids.
+- **The ids BN6's code tests**: every literal and immediate of a chip
+  bound in Gregar (411, 0x170, 0x140, 0x13F, 0x13A) and every range test
+  (221-280, the Navi chips) read in bn6f; the pack's bounds and the
+  pseudo-chip test patched, the rest out of the registry's way or out of
+  a run's reach (the link battle's copy of the pack), and the tables an id
+  indexes (the ownership marks and their keys, the Library's flags) sized
+  for nine bits by BN6 itself: docs/ROM_DATA.md, The chip registry.
+
+Checked: the unit tests (the registry's rules, records made from made-up
+BN5 records, placeholders, the ABC place, the icons' colours, the deck's
+sit-out, the image's archives read back); in the game, WideSht1 L on
+BN6's Custom screen with BN5's picture (L, Aqua, 70), fired at a Mettaur
+(BN5's water wave over WideSht's family, the Mettaur deleted), MrkCan1
+(id 411) in the PET's Chip Folder and in the folder editor's pack (its
+count in the extension, the same after the editor is left and opened
+again) with BN5's description, a folder of 29 MrkCan1 dealing a hand of
+its one other chip, and a run saved with BN5's chips continued without BN5's ROM
+(its placeholders in the folder, three sitting out of a battle, MegaMan's
+words); the autopilot's seeds 1-12 the same, run log for run log, as
+before the tables moved.
+
+Not yet, each its later milestone's: the 104 pending chips' code (Guard
+and the crack chips first); CustSwrd's power (BN5's computed power 44,
+past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood
+traps (BN6's traps trigger by chip id and it has no elemental kinds);
+BN5's DarkChips (M8, the dark rule); its Program Advances (M6: their
+recipes in BN6's lists, and the battle's 32 Program Advance bits a side
+at `0x0203CA48`, which ids from 352 pass); its Navi chips (M7: AntiNavi's
+range, 221-280, and the battle's record of the last Navi chip at
+`0x0203C960`); the Library (M9: BN6's Mega, Giga and P.A. tabs by their
+own numbers, the profile's Library of 320 ids, the second screen's);
+the run's finds, shops, traders and rewards (the chip pool leaves BN5's
+chips out, and a reward of BN5's in BN5's own battles is still the
+stand-in's zenny); the folder editor's pack list, 0xA000 bytes, holds
+1280 chip-codes where ids to 511 could make 2044 (no run comes near); the
+order stamps' clear at a NEW GAME covers BN6's 320 ids (the extension's
+start at 0 from the power-on clear); the link battle's copy of the pack
+(0xF00 bytes, no run reaches it).
+
 ## Status
 
 - [x] Battle Network 5: Team Colonel (USA): its map and coordinate
@@ -1041,4 +1187,11 @@ and its calls aimed again (`src/emu/xvirus.c`):
 - [x] Their Souls: beaten, each gives his for the run's BN5 battles, Soul
   Unison and Chaos Unison on BN5's Custom screen by its own rule (Guest
   battles, Souls; docs/META.md).
+- [x] Its chips in BN6's own chip tables (The chip registry, above):
+  257 of them registered by id, those BN6 has by name BN6's, 138 with
+  ids of their own and BN5's records, names, descriptions and art in
+  BN6's tables grown to 512, placeholders where its ROM is not read.
+  AirHoc, WideSht1-3, Spreader, DrilArm1-3, Geddon1-3 and Z Saver play
+  in BN6's battles; the rest sit out until their code is moved. Nothing
+  in a run gives one yet.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

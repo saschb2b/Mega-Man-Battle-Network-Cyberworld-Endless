@@ -274,6 +274,9 @@ bool director_resume(void) {
 	bool same = same_layer();
 	if (emu_load_state(path)) {
 		lock_run();
+		/* (chips of BN5's in the folder, BN5's ROM not read: they sit out,
+		 * and MegaMan says so, docs/MULTIROM.md) */
+		D.old_chips_due = folder_old_chips_out();
 		if (home) return resume_home();
 		spins_sync();
 		/* (the ScrtData the state holds, as the game counts them) */

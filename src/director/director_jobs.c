@@ -37,14 +37,13 @@ static struct {
  * Folder's (the script checks the Pack as Lan talks) */
 static void bring_chips(JobTalk *jt, int element) {
 	jt->nbring = 0;
-	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
-	bool pack_ok = pack >= BN6_EWRAM && pack + 12u * PACK_CHIPS < BN6_EWRAM_END;
-	for (int id = 1; pack_ok && id < PACK_CHIPS && jt->nbring < JOB_BRING_MAX; ++id) {
-		if (chip_hits_with(id) != element) continue;
+	for (int id = 1; id < PACK_CHIPS && jt->nbring < JOB_BRING_MAX; ++id) {
+		uint32_t at = pack_listed(id) ? pack_entry(id) : 0;
+		if (!at || chip_hits_with(id) != element) continue;
 		ChipInfo ci;
 		chip_info(id, &ci);
 		for (int k = 0; k < ci.ncodes && k < 4 && jt->nbring < JOB_BRING_MAX; ++k)
-			if (emu_read8(pack + 12u * (uint32_t)id + (uint32_t)k)) {
+			if (emu_read8(at + (uint32_t)k)) {
 				jt->bring_chip[jt->nbring] = id;
 				jt->bring_code[jt->nbring++] = ci.codes[k] == '*' ? 26 : ci.codes[k] - 'A';
 			}
