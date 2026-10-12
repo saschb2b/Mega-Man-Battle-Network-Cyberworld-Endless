@@ -207,6 +207,10 @@ static void records_make(const uint32_t blank[3]) {
 		const XChipReg *r = xreg_at(id);
 		if (!r) {
 			memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
+			/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
+			const XChipMoved *mv = M.rom5 && id < CHIPS_BN6_RECORDS ? xchips_moved_of(id) : NULL;
+			const XChipReg *named = mv ? xreg_named(id) : NULL;
+			if (named) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
 			continue;
 		}
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }

@@ -64,8 +64,9 @@ static bool ref_ok(const XVirusFamily *f, XvRef r) {
 	return r.own ? (r.addr & 1) && xvirus_is_code(f, r.addr & ~1u) : bn6_routine(r.addr);
 }
 
-/* the families' region: their code from XV_CODE, their art from XV_ART */
-static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, 0, 0 };
+/* the families' region: their code from XV_CODE, their art from XV_ART; their one stub the chip writer's (XV_CHIP_WRITER,
+ * their support chips' family BN5's: xvirus_dispatch.c) */
+static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_ART_END, XV_CHIP_WRITER, XV_STUBS_END };
 
 static bool blocks_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (f->nblocks < 1) return no(why, n, "no blocks");

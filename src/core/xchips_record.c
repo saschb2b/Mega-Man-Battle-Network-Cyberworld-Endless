@@ -65,6 +65,21 @@ void xrec_from_bn5(const XRecordFrom *in, uint8_t out[XREC_SIZE]) {
 	art_put(out, in->art);
 }
 
+#define REC_DAMAGE_HIGH 0x0A   /* (the damage's upper half: its element and hit flags, AttackVars +0xA by the chip writer, BN6 0x0801270A) */
+#define REC_AFTER_SUB 0x0D     /* (two bytes no chip use reads: BN5's taken with the subfamily) */
+
+void xrec_same_moved(const uint8_t bn5[XREC_SIZE], const XChipMoved *moved, uint8_t out[XREC_SIZE]) {
+	out[BN6_CHIP_ATTACK_ELEMENT] = bn5[BN6_CHIP_ATTACK_ELEMENT];
+	out[BN6_CHIP_EFFECT_FLAGS] = (uint8_t)((bn5[BN6_CHIP_EFFECT_FLAGS] & ~BN6_CHIP_IN_LIBRARY) | (out[BN6_CHIP_EFFECT_FLAGS] & BN6_CHIP_IN_LIBRARY));
+	out[REC_DAMAGE_HIGH] = bn5[REC_DAMAGE_HIGH];
+	out[BN6_CHIP_FAMILY] = moved->family;
+	out[BN6_CHIP_SUBFAMILY] = moved->sub;
+	memcpy(out + REC_AFTER_SUB, bn5 + REC_AFTER_SUB, 2);
+	out[BN6_CHIP_LOCK_ON] = out[BN6_CHIP_LOCK_ON_TYPE] = 0;
+	memcpy(out + BN6_CHIP_PARAMS, bn5 + BN6_CHIP_PARAMS, 5);
+	out[BN6_CHIP_DARK_ID] = 0xFF;
+}
+
 void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3], uint8_t out[XREC_SIZE]) {
 	memset(out, 0, XREC_SIZE);
 	memcpy(out + BN6_CHIP_CODES, reg->codes, 4);

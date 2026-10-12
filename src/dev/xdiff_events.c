@@ -19,12 +19,12 @@
 #include "debug.h"
 #include "emu.h"
 #include "guest.h"
-#include "hook.h"
 #include "rom.h"
 #include "soulcode.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
 #include "xchips_moved.h"
+#include "xchips_pas.h"
 #include "xvirus.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
@@ -364,17 +364,32 @@ static HookAct on_mood(HookRegs *r, void *user) {
  * Handi's bomb calls in BN5), is BN5's own there and BN6's twin's in BN6, so it is no family's in either. */
 static bool unit_used[XC_UNITS];
 
+/* the units chip `id`'s moved code runs */
+static void units_of(int id) {
+	const XChipMoved *m = xchips_moved_of(id);
+	for (int u = 0; m && u < xchips_bn5_count && u < XC_UNITS; ++u) {
+		const XChipUnit *x = &xchips_bn5[u];
+		if ((x->kind == XCHIP_ATTACK && x->number == m->family) ||
+		    (x->kind == XCHIP_SUPPORT && m->family == BN6_CHIP_SUPPORT_FAMILY && x->number == m->sub) ||
+		    (x->kind == XCHIP_NAVI && m->family == BN6_CHIP_NAVI_FAMILY && x->number == m->sub))
+			unit_used[u] = true;
+	}
+}
+
+static bool in_folder(const uint16_t *folder, int n, int id) {
+	for (int i = 0; i < n; ++i)
+		if ((folder[i] & 0x1FF) == id) return true;
+	return false;
+}
+
 void xd_log_units(const uint16_t *folder, int n) {
 	memset(unit_used, 0, sizeof unit_used);
-	for (int i = 0; i < n; ++i) {
-		const XChipMoved *m = xchips_moved_of(folder[i] & 0x1FF);
-		for (int u = 0; m && u < xchips_bn5_count && u < XC_UNITS; ++u) {
-			const XChipUnit *x = &xchips_bn5[u];
-			if ((x->kind == XCHIP_ATTACK && x->number == m->family) ||
-			    (x->kind == XCHIP_SUPPORT && m->family == BN6_CHIP_SUPPORT_FAMILY && x->number == m->sub) ||
-			    (x->kind == XCHIP_NAVI && m->family == BN6_CHIP_NAVI_FAMILY && x->number == m->sub))
-				unit_used[u] = true;
-		}
+	for (int i = 0; i < n; ++i) units_of(folder[i] & 0x1FF);
+	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
+	for (int k = 0; k < xchips_pas_count; ++k) {
+		bool all = true;
+		for (int j = 0; j < (xchips_pas[k].kind == 4 ? xchips_pas[k].n : 1) && all; ++j) all = in_folder(folder, n, xchips_pas[k].parts[j]);
+		if (all) units_of(xchips_pas[k].pa);
 	}
 }
 

@@ -1,0 +1,172 @@
+{
+ "about": "DarkPlus before a Cannon that Attck+10 joins (issue #82's final engine round), as chip_darkplus: BN5's CanladEX held paralysed at (5,2), MegaMan at (2,2), DarkPlus *, Cannon * and Attck+10 * picked in that order on the first Custom screen (BN5's chips 190, 1 and 149; BN6's 290, 1 and 192, Atk+10: BN6's hand merges it into the Cannon before it, as BN5's 0x08024F12 does, its +10 the Cannon's bonus from the fight's start) and OK (BN6's deck four DarkPlus more before them, shelved as the first screen opens: src/emu/soulmood.c, compact); KnightSoul held in both. DarkPlus used at t30 stores its 50 over the Cannon's bonus, not added to it (BN5's strh at 0x0800E1CE), so the Cannon used at t100 strikes for 90. Every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "hold": 60,
+ "frames": 200,
+ "folder5": [
+  "34BE",
+  "3401",
+  "3495"
+ ],
+ "deck5": [
+  "34BE",
+  "3401",
+  "3495",
+  "3401",
+  "3401"
+ ],
+ "folder6": [
+  "3522",
+  "3401",
+  "34C0"
+ ],
+ "deck6": [
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3401",
+  "34C0",
+  "3401",
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

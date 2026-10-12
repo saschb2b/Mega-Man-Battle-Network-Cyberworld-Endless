@@ -72,9 +72,15 @@
                                              (BN6 checks a form's end before the screen too, 0x0800840C; BN5 alone after it, 0x08007D0C) */
 #define BN6_SOUL_MOOD         0x0E        /* u8 the side's mood as BN5 keeps it (BN5_BATTLE_MOOD's: 0 dark, 1-0x40 worried, 0xFF Full Synchro;
                                              src/emu/soulmood.c), beside BN6's own (BN6_NAVI_MOOD) */
-#define BN6_SOUL_DARK         0x0F        /* u8 1 once a BN5 DarkChip made the side dark for the battle (BN5's use byte, never BN6's byte 2) */
+#define BN6_SOUL_DARK         0x0F        /* u8 the side dark for the battle (BN5's use byte, never BN6's byte 2): BN6_DARK_CHIP once a BN5 DarkChip
+                                             made it so, BN6_DARK_METER where it began so (BN5's dark meter under 470: the differential's alone) */
+#define BN6_DARK_CHIP         1           /* BN6_SOUL_DARK: a BN5 DarkChip used, its meter as neutral (BN5's palette 3, 0x0800DDEC) */
+#define BN6_DARK_METER        2           /* BN6_SOUL_DARK: dark by BN5's meter (its palette 2, 0x0800DDDC) */
 #define BN6_SOUL_USED         0x10        /* u32 the Souls united this battle: bit n Soul n, bit 16 + n its Chaos Unison (BN5_SOULS_USED's layout) */
 #define BN6_SOUL_NEXT_CHIP    0x14        /* u16 the chip ColonelSoul's button took, committed at OK, 0 none (BN5's Custom record +6, 0xFFFF none) */
+#define BN6_SOUL_CYCLE        0x16        /* u8 the Chaos Unison's charge's frame in its phases' cycle (BN5's AIData +0x1C; S6) */
+#define BN6_SOUL_REQUEST      0x17        /* u8 1 while its release's request (AIData +0x44's 0x8000 or 0x10000) is the Souls': the attack's end
+                                             clears it as BN5's does (0x0800F2D0's 0x1803F) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
@@ -96,6 +102,9 @@
 #define BN6_CUSTOM_CROSS_TAKEN (BN6_CUSTOM_SCREEN + 0x19) /* u8 1 once a Cross is chosen on CROSSSELECT: the emblem stays grey (0x08028F6C) */
 #define BN6_MODE_UNITE        0x24        /* BN6_CUSTOM_MODE: BN5's UNITE chosen (0x08027044 from the mode table 0x08026AA4), which no Gregar code sets */
 #define BN6_BATTLE_PLAYERS    (BN6_BATTLE_STATE + 0xD0) /* each side's player object, a word every BN6_BATTLE_PLAYER_STEP bytes (0x080103BC) */
+#define BN6_BATTLE_SIDE_NAVIS (BN6_BATTLE_STATE + 0x80) /* each side's four Navis' objects (0 none), 0x10 bytes a side (BN5's the same: 0x0810436C) */
+#define BN6_T1_ANIM           0x10        /* an object's animation (CurAnim, u8: 0x0800F2B6 sets it) */
+#define BN6_T1_PARENT         0x4C        /* an object's parent (a charge glow's owner, BN5's the same: 0x080E0E46) */
 #define BN6_BATTLE_PLAYER_STEP 0x10       /* ... bytes from one side's to the next */
 #define BN6_BATTLE_SETTINGS   (BN6_BATTLE_STATE + 0x3C) /* u32 the battle's BattleSettings; its +3 the mode (0x0802D234), BN6_BATTLE_LINK a link */
 #define BN6_SETTINGS_MODE     0x03        /* a BattleSettings' +3: the battle's mode (0x0802D242), BN6_BATTLE_LINK a link */
@@ -105,6 +114,9 @@
 #define BN6_NAVI_SIDE_NAVI    0x29        /* a battle NaviStats' +0x29: the Navi it is, 0 MegaMan (the turns count down for him alone, 0x08015A16) */
 #define BN6_AI_ANGER          0x34        /* u16 a player's AI data +0x34: his anger's frames (both games' emotion getters: 3, which UNITE stands in) */
 #define BN6_AI_FLAGS          0x44        /* u32 a player's AI data +0x44: his requests (0x40 to leave his form: 0x08015994; 0x4000 to enter one) */
+#define BN6_AI_POWER_CHAOS    0x11        /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */
+#define BN6_AI_CHARGE         0x1D        /* u8 his charge: 0 none, 1 charging, 2 full (both games' 0x08012F30 / 0x080105B0) */
+#define BN6_AI_CHARGE_BUTTON  0x1E        /* u8 ... its button: 1 A, 2 B (0x08012EEC, 0x08012F02) */
 #define BN6_NAVI_TURN_EXTRA   0x32        /* a battle NaviStats' +0x32, signed: turns added to a Cross's three, 1-9 in all (0x0802A118; BN5's OK too) */
 /* The hooks (soulunite.c, soullife.c; docs/EMULATION.md, Hooks) */
 #define BN6_UNITE_STAND       0x08027EC6u /* tst r0,r0 after Beast Out's test (0x08029FB0, r0) in the Custom screen's set-up: element 0xB stands */
@@ -214,6 +226,9 @@
 #define BN6_MOOD_FROM_SCRIPT  0x08027310u /* ... a Custom screen's script (0x0802359C); */
 #define BN6_CALM_FROM_CHIP    0x08012876u /* the calm's: the chip's Anger (0x0800FFB8), */
 #define BN6_CALM_FROM_ANGER   0x0801438Eu /* ... Anger's end (0x08011A74) */
+#define BN6_PALETTE_MOOD      0x0801006Au /* movs r1,#0xe in his palette (0x0801002C) with no form or a Beast Out's: his mood read (Full Synchro 4,
+                                             else 0; BN5's twin 0x0800DDCC gives dark 2 or 3 by the meter, BN6's no dark), */
+#define BN6_PALETTE_MOOD_DONE 0x08010078u /* ... on to its form's test and the NaviCust's colour, r4 the palette */
 #define BN6_COMPACT           0x0802945Au /* the deck's compaction (BN5's 0x080250EA, the same body), its call as a Custom screen opens */
 #define BN6_COMPACT_CALL      0x08026954u /* ... (BN5 calls its worried rule just before, 0x08022CFC) */
 /* A Soul's chips (soulchips.c; S5) */
@@ -280,5 +295,34 @@
                                              0x080CABF8, the same bit at BN5_PANEL_FLAGS' place) */
 #define BN6_PANEL_ENEMIES     0x04000000u /* BN6_PANEL_FLAGS: an object of side 1 on it (bn6f's "enemy alliance"; BN5's the same, its table 0x080CAC90 by side) */
 #define BN6_PANEL_ALLIES      0x08000000u /* ... of side 0 (bn6f's "ally alliance") */
+
+/* Chaos Unison (the Souls track's S6, soulchaos.c): what it stands on of BN6's charge, release, request and glow, by BN5's */
+#define BN6_CHAOS_CHARGE      0x08012F62u /* push {r4,r7,lr}: a charge's time by r0 (1 A, 2 B), r5 MegaMan (BN5's 0x08010654, which a chaos B
+                                             answers from his AIData +0x11's power by the chaos level) */
+#define BN6_CHAOS_DUE         0x08012E8Au /* bl 0x08012EBC: the charge's state each frame (BN5's 0x0801053C), r4 his AI data; BN5's 0x080105F0 */
+#define BN6_CHAOS_PHASE       0x08012E8Eu /* ... after it, pop {r4,r6,pc}: the chaos phase's step (BN6 has none) */
+#define BN6_CHAOS_RELEASE     0x080131D4u /* bl 0x0800FFE4: the release's request, r0 1 or 2 (a charged B), r4 his AI data (BN5's 0x08010870,
+                                             0x8000 or 0x10000 there for a chaos B) */
+#define BN6_CHAOS_CONSUME     0x080F180Eu /* bl 0x0800FFFE in the player's requests (0x080F1694, push {r4,r6,r7,lr}) past the charged B's 2, r0 the
+                                             requests (BN5's 0x080F0436: 0x8000 and 0x10000 here) */
+#define BN6_COUNTER_TEST      0x080EBA84u /* tst r0,r1 in the player's update (0x080EA734), r1 0x8600: BN6's counter requests, its 0x8000 one BN5 has
+                                             not (BN5's 0x080EB0D8 tests 0x600), a request BN5's chaos B makes */
+#define BN6_COUNTER_TEST_1D   0x080ED7B0u /* ... the same in family 0x1D's (BN5's 0x080ED422), */
+#define BN6_COUNTER_TEST_1E   0x080ED90Eu /* ... family 0x1E's (0x080EDDB2), */
+#define BN6_COUNTER_TEST_37   0x080EEE32u /* ... family 0x37's (0x080EEAE4) */
+#define BN6_CHAOS_END         0x08011744u /* bl 0x0800FFEE in the attack's end (0x08011714), r0 0x1000003F the requests it clears, r6 the
+                                             attack's kind (BN5's 0x0800F2D0 clears 0x1803F, its kind 6 his chaos) */
+#define BN6_GLOW_SHOW         0x080E21E4u /* beq in the charge glow's update (the fourth kind's 8, r4 its owner): a B charge seen whatever the
+                                             side (BN5's 0x080E0ECE: in chaos by the side, 0x080091EA) */
+#define BN6_GLOW_SHOW_SIDE    0x080E21E6u /* ... the side's test */
+#define BN6_GLOW_PICK         0x080E2272u /* movs r2,#8: the glow's sprite past A's 0x15 (BN5's 0x080E0F94: 0x1C in chaos), */
+#define BN6_GLOW_PICK_NEXT    0x080E2274u /* ... on past it */
+#define BN6_GLOW_LOAD         0x080E2280u /* ... its bl sprite_load, r1 list 5's offset 0x14, r2 the number */
+#define BN6_GLOW_ANIM         0x080E2208u /* cmp r0,#0 past strb r0,[r5,#0x10]: its animation the charge's state (BN5's 0x080E0F0A: the chaos phase
+                                             + 2 for a full chaos B), r6 its owner's AI data */
+#define BN6_GLOW_SOUND        0x080E22A8u /* beq in its sounds (0x080E229A, r1 its owner): a B charge's whatever the side (BN5's 0x080E0FD4) */
+#define BN6_GLOW_SOUND_SIDE   0x080E22AAu /* ... the side's test */
+#define BN6_GLOW_SPRITE_CHAOS 0x1C        /* the chaos glow's number its +0x6C keeps (BN5's list 5's) */
+#define BN6_CHAOS_FAMILY      0xC7        /* the failure's attack family (BN5's 0x39, 0x080EE724; xattack_grow.h's Souls' range) */
 
 #endif

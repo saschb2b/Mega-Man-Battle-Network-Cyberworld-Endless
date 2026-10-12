@@ -45,7 +45,6 @@
 #include "foes.h"
 #include "guest.h"
 #include "rom.h"
-#include "soulproxy.h"
 #include "soulunite.h"
 #include "thumb_reloc.h"
 #include "xchips_install.h"
@@ -58,16 +57,20 @@
 #define PANELS    40      /* the field's panels, 8 a row, rows 0-4 */
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
-#define TRACE_VERSION 7   /* (the chip AI's lists and the Navis' own state in the state kept apart; the state BN6's engine keeps apart, BN5's sea's submerge,
-                             version 6; the player block, the Souls' version 4, and the dispatch's types, the dispatch's 3, in one) */
+#define TRACE_VERSION 8   /* (the moved state, BN5's green flash, in the state kept apart; the chip AI's lists and the Navis' own state, version 7; the
+                             state BN6's engine keeps apart, BN5's sea's submerge, version 6; the player block, the Souls' version 4, and the
+                             dispatch's types, the dispatch's 3, in one) */
 #define APART_SEA (RAM_DARK_LISTS - RAM_SEA)   /* what BN6's engine keeps apart of the objects': the sea's room (xsea.h: the submerged, their markers), */
 #define APART_LISTS (RAM_NAVIS - RAM_DARK_LISTS)   /* ... then the chip AI's lists, both sides (BN6_DARK_LISTS; BN5's BN5_DARK_LISTS), */
 #define APART_NAVIS (RAM_DARK_AI - RAM_NAVIS)   /* ... then the Navis' own state (Colonel's sides' bits: BN5's of BattleState +0x5C, the rest 0), */
 #define APART_DARK (BN5_AI_DATA_SIZE - BN6_AI_DATA_SIZE)   /* ... then the Dark Soul's AI data past BN6's 0x100 (its chip AI's state; 0 none out) */
-#define APART_SIZE (APART_SEA + APART_LISTS + APART_NAVIS + APART_DARK)
+#define APART_MOVED (RAM_DISPATCH_SIDE - RAM_BATTLE)   /* ... then the moved state (BN5's green flash by side, XC_FLASH: BN5's AIData +0x3C of
+                                                        each side's player) */
+#define APART_SIZE (APART_SEA + APART_LISTS + APART_NAVIS + APART_DARK + APART_MOVED)
 #define COLONEL_SIDES 0x30u   /* (BN5_BATTLE_BITS' bits a Colonel's: 0x10 side 0, 0x20 side 1) */
 _Static_assert(APART_SEA <= 0x100u && APART_LISTS == 2u * BN5_DARK_LIST_SIZE && APART_NAVIS <= 0x100u && APART_DARK <= 0x100u,
 	"the apart block's parts as bytes_out writes them");
+#define METER_DARK 400   /* (dark=1) BN5's dark meter under its 470 (0x0800DDE4, 0x08012832: the battle opens dark) */
 #define USED_SIZE 4   /* the word of what was used this battle (BN5_SOULS_USED, BN6_CROSSES_USED) */
 #define SOULS_SIZE BN6_SOULS_SIZE   /* the Souls' state in BN6's engine (BN6_SOULS: both sides', the rest of its range) */
 #define PLAYER_SIZE (USED_SIZE + BN6_BATTLE_NAVI_SIZE + BN6_CROSS_PENDING_SIZE + SOULS_SIZE + BN6_ELEMENT_SIZE)   /* the player block */
@@ -285,6 +288,17 @@ static void frame_out(Side *g) {
 	}
 	uint32_t dark = v->game == 6 ? (v->rd32(BN6_DARK_AI_OWNER) ? BN6_DARK_AI : 0) : dark_ai5(v, s1, n1);
 	bytes_out(g, dark ? dark + BN6_AI_DATA_SIZE : 0, APART_DARK, APART_DARK);
+	if (v->game == 6) bytes_out(g, RAM_BATTLE, APART_MOVED, APART_MOVED);
+	else {
+		uint32_t flash = 0;
+		for (uint32_t side = 0; side < 2; ++side) {
+			uint32_t obj = v->rd32(v->state + BN6_BATTLE_PLAYERS - BN6_BATTLE_STATE + side * BN6_BATTLE_PLAYER_STEP);
+			uint32_t ai = in_ewram(obj) ? v->rd32(obj + BN6_T1_AI_DATA) : 0;
+			flash |= (in_ewram(ai) ? v->rd32(ai + BN5_AI_FLASH) & 0xFFFFu : 0) << (16 * side);
+		}
+		w32(g, flash);
+		bytes_out(g, 0, APART_MOVED - 4, APART_MOVED - 4);
+	}
 	objects_out(g, s1, n1, s3, n3, s4, n4);
 	for (uint32_t p = 0; p < PANELS; ++p) bytes_out(g, v->panels + p * v->panel_size, v->panel_size, BN5_PANEL_SIZE);
 	for (int i = 0; i < no; ++i) w32(g, order[i]);
@@ -633,11 +647,10 @@ static bool subject(Side *g, const Spec *s) {
 	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
 	xchips_install();
 	/* (souls6=: the Souls in BN6's engine over the proxy form, MegaMan holding them) */
-	if (s->souls6 && !(soulproxy_install(0) && soulunite_install(s->unitebreak, s->soulbreak))) {
+	if (!soulunite_dev(s->souls6, s->unitebreak, s->soulbreak, s->dark)) {
 		fprintf(stderr, "xdiff: the Souls could not be installed in BN6's engine\n");
 		return false;
 	}
-	soulunite_held(s->souls6);
 	pokes_put(s, false);
 	emu_encounters_install();
 	emu_boot();
@@ -696,6 +709,12 @@ static void reference_setup(const Spec *s) {
 	static const uint32_t buster[3] = { BN5_NAVI_ATTACK, BN5_NAVI_SPEED, BN5_NAVI_CHARGE };
 	for (int i = 0; i < 3; ++i)
 		if (s->buster[i] >= 0) guest_wr8(buster[i], (uint8_t)s->buster[i]);
+	/* (dark=1: his dark meter under 470, which the battle's copy takes as it begins and opens at mood 0, 0x08010EFE-0x08010F1C) */
+	if (s->dark) {
+		guest_write16(BN5_NAVI_METER, METER_DARK);
+		uint32_t check = guest_read32(BN5_TOOLKIT + BN5_TOOLKIT_METER_CHECK);
+		if (in_ewram(check)) guest_write32(check, METER_DARK ^ guest_read32(BN5_METER_KEY));
+	}
 }
 
 /* BN5's own battle on the guest core, as BN5 has it (guest_dev_battle) */

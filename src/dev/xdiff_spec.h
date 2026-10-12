@@ -48,6 +48,8 @@ typedef struct {
 	int soulbreak;                             /* ... a Soul's look, abilities or passives broken (soulunite.h's SOULBREAK_*) */
 	int buster[3];                             /* Attack, Speed and Charge in both, levels less one; -1 each game's own */
 	bool safe;                                 /* MegaMan kept from harm: his collision data's BN6_OBJ_INVULNERABLE every frame */
+	bool dark;                                 /* MegaMan dark as the battle begins: BN5's dark meter under 470, BN6's engine the same
+	                                              (soulmood.h's soulmood_dev_dark; the Souls installed, souls6) */
 	bool dslist;                               /* BN6's chip AI's lists written from BN5's as its fight begins (xnavi_dark.h) */
 	uint16_t dschips[BN6_FOLDER_ENTRIES];      /* MegaMan's side's chip AI list in BN5, BN5's chip ids, written as its fight begins (dslist too) */
 	int ndschips;

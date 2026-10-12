@@ -48,6 +48,9 @@ bool xreg_own(const XChipReg *r);
 const XChipReg *xreg_of_bn5(int bn5);
 /* The row whose own id is `bn6`, NULL where BN6's id `bn6` is BN6's own */
 const XChipReg *xreg_at(int bn6);
+/* The row of BN5's chip paired by name with BN6's own chip `bn6` (XREG_SAME
+ * or XREG_ALIAS: the first, where two names share it), NULL where none is */
+const XChipReg *xreg_named(int bn6);
 
 /* The ids a row of its own may take: BN6's records no chip of the game
  * uses (blank-named, named by none of its tables, docs/ROM_DATA.md) and

@@ -70,7 +70,9 @@
 #define FREE_CHIP_MOVED     FREE_ATTACK_FAMILIES_END /* ... then the chips' moved code, its tables and what it draws (xchips_code.c), to: */
 #define FREE_SOULS_ART      (EMU_FREE + 0x700000u)   /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c), to: */
 #define FREE_SOULS_ART_END  (EMU_FREE + 0x710000u)
-#define FREE_TAIL           (EMU_FREE + 0x710000u)   /* free to FREE_END */
+#define FREE_CHIP_PAS       (EMU_FREE + 0x710000u)   /* BN6's Program Advances' list grown with BN5's (xchips_code.c): their recipes, then the list, to: */
+#define FREE_CHIP_PAS_END   (EMU_FREE + 0x710400u)
+#define FREE_TAIL           (EMU_FREE + 0x710400u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
 /* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */

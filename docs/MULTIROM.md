@@ -1012,9 +1012,10 @@ and its calls aimed again (`src/emu/xvirus.c`):
 - **Each fought in both engines**: seven specs a family (`tests/xdiff`:
   V1 alone where BN5's own records set it against MegaMan idle, V1
   against cangard_v1_keys' 62 inputs, and each other version alone), all
-  with `rng=replay` and `"sprites": "bytes"`: 168 of the 175 the same
-  over every fight frame, among them every one of CanGard's and Handi's
-  as before; Zomon's seven fail, below. What the families showed the
+  with `rng=replay` and `"sprites": "bytes"`: all 175 the same over
+  every fight frame, among them every one of CanGard's and Handi's as
+  before, and Zomon's seven since its chip's family keeps BN5's timing
+  (below). What the families showed the
   comparator of the engine's own, each in `tests/xdiff/legit.json` with
   both games' routines: the hit spark a family's attack strikes with and
   the effect a twin routine of the engine's spawns are each game's art
@@ -1032,19 +1033,32 @@ and its calls aimed again (`src/emu/xvirus.c`):
   blindness's marks over it at BN5's arm point, and each of its six
   versions deleted with BN6's delete counts and the rare path's byte
   untouched.
-- **Zomon** fails all seven from the frame after its first AreaGrab
+- **Zomon** failed all seven from the frame after its first AreaGrab
   (V1 t391, EX t363, V1's keys t410, V2 t344, V2EX t325, V3 t307, V3EX
-  t280), every byte the same before it. Its set-up gives its object
-  AreaGrab by hand, BN6's own chip of the name (the registry's 117 as
-  163), which BN6's own chip code runs: both games spawn the time freeze
-  at the same frame, take MegaMan's front column and play its sounds at
-  the next, but BN6's family of time-freeze chips (0x15, `0x080ED0DC`)
-  ends its user's attack a frame later than BN5's (`0x080EC400`, which
-  spawns and ends in one frame: `bl 0x0800F29E` at `0x080EC448`; BN6's
-  marks its AttackVars +1 at `0x080ED12A`-`0x080ED12C` and ends at the
-  next frame's `0x080ED130`), so Zomon's own states run a frame behind
-  from there and its later draws part. An engine difference, not its
-  code's: installed, its AreaGrab as BN6 runs its own.
+  t280), every byte the same before it, until issue #82's final engine
+  round. Its set-up gives its object AreaGrab by hand, BN6's own chip of
+  the name (the registry's 117 as 163), which BN6's own chip code runs:
+  both games spawn the time freeze at the same frame, take MegaMan's
+  front column and play its sounds at the next, but BN6's family of
+  time-freeze chips (0x15, `0x080ED0DC`) ends its user's attack a frame
+  later than BN5's (`0x080EC400`, which spawns and ends in one frame:
+  `bl 0x0800F29E` at `0x080EC448`; BN6's marks its AttackVars +1 at
+  `0x080ED12A`-`0x080ED12C` and ends at the next frame's `0x080ED130`),
+  so Zomon's own states ran a frame behind. Now a moved family's call
+  to the chip writer (BN5's `0x0800FE6A`) goes to the dispatch's
+  `XV_CHIP_WRITER`, which calls BN6's (`0x080126E4`) and answers its
+  support family as 0x65 (`XV_SUPPORT_FAMILY`), whose routine runs
+  BN6's support routine twice in its first frame, the chip's and the
+  attack's end (`XV_SUPPORT`): BN5's timing for a virus's chip, MegaMan's
+  support chips BN6's family as before (docs/ROM_DATA.md, A virus's
+  support chip in BN6's engine). BN6 plays the hurt sound of a lethal
+  hit before its HP test (`0x0801BA3C`), BN5 none (`0x080185C4`): the
+  engine's, a mask. All seven PASS; two mutations (the writer's call
+  aimed at BN6's own, the family's entry BN6's routine) fail V1's.
+  `tools/xfamily.py` gives its statuses outside the time freeze its
+  AreaGrab leaves standing once its attack has ended (BN6's status step
+  waits while time stands still, `BN6_TIME_STOP`): at battle frame 120,
+  Zomon holding no object of its own there.
 
 - **Its rewards**: its reward rows are its game's own for its versions,
   each entry as BN6's (a chip as BN6's of its name, else 200 zenny until
@@ -1054,8 +1068,8 @@ and its calls aimed again (`src/emu/xvirus.c`):
 - **Not yet**: the families' place in formations and a run's battles (a
   game-design pass). The held chips whose code is BN5's alone (MetaGel,
   Blinder, AntiWatr, AntiElec) wait for the chips track to move it; until
-  then a virus uses one with a puff. Zomon's AreaGrab is BN6's own, a
-  frame longer than BN5's. Every family is installed wherever BN5's ROM is
+  then a virus uses one with a puff. Zomon's AreaGrab is BN6's own chip,
+  run with BN5's support family's timing. Every family is installed wherever BN5's ROM is
   read, and BN5's records that name one are fought in BN6's engine
   (`build.py xrecords`). The New 3DS keeps no BN5 ROM: no family is
   installed there. A state saved while a moved family is in battle needs
@@ -1304,10 +1318,12 @@ chip step gives any one (docs/DEVTOOLS.md).
   rest kept in their order (the Regular chip's and the TagChips' marks
   cleared where theirs went). They are the registry's chips whose code is
   not moved yet (pending; a moved chip, `XREG_MOVED`, plays where BN5's
-  ROM is read, its code installed), BN5's DarkChips where BN5's dark rule
-  is not in BN6's battles (its mood comes with the Souls: Transplanted
-  Souls, S7), its Program Advances until BN6's lists hold their
-  recipes, and every one of BN5's where its ROM is not read. A run
+  ROM is read, its code installed; none pending since issue #82's final
+  engine round), BN5's DarkChips but where BN5's dark rule runs (the
+  Souls installed: shelved, and dealt by the worried rule, Transplanted
+  Souls, S7), its Program Advances (formed on the Custom screen from
+  BN6's list grown with their recipes, never dealt, as BN6's own), and
+  every one of BN5's where its ROM is not read. A run
   continued without BN5's ROM whose folder holds one of BN5's chips hears
   MegaMan say so once, as he stands free on the map ("Some of our chips
   came from the older Net...", `nets_words.c`).
@@ -1332,13 +1348,15 @@ its one other chip, and a run saved with BN5's chips continued without BN5's ROM
 words); the autopilot's seeds 1-12 the same, run log for run log, as
 before the tables moved.
 
-Not yet, each its later milestone's: the 96 pending chips' code (The
-chips' code, below, says what each unit waits for); CustSwrd's power (BN5's computed power 44,
+Not yet, each its later milestone's: DarkInvs's code, the one unit
+left (The chips' code, What remains, below); CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood
 traps (BN6's traps trigger by chip id and it has no elemental kinds);
-BN5's DarkChips (M8, the dark rule); its Program Advances (M6: their
-recipes in BN6's lists, and the battle's 32 Program Advance bits a side
-at `0x0203CA48`, which ids from 352 pass); its Navi chips (M7: AntiNavi's
+BN5's DarkChips and its Program Advances came in issue #82's final
+engine round (the dark rule with the Souls, the recipes in BN6's list:
+the battle's Program Advance bits at `0x0203CA48` hold ids to 383 on
+side 0, the link list, side 1's, BN6's own: docs/ROM_DATA.md, BN5's
+Program Advances in BN6's lists); its Navi chips (M7: AntiNavi's
 range, 221-280, and the battle's record of the last Navi chip at
 `0x0203C960`); the Library (M9: BN6's Mega, Giga and P.A. tabs by their
 own numbers; the profile's Library of 512 ids and the second screen's
@@ -1401,13 +1419,13 @@ of. The registry's ids, records and art stay C1's (above).
   `XREG_PENDING`, now `XREG_MOVED`). BlakWing's and HolyDrem's dark gates
   (their records' +0x15: BN5's chip use lets BlakWing out only to a dark
   MegaMan, the dark meter under 470, and HolyDrem only to a light one)
-  are BN5's own rule and come with the mood port (the Souls track's S7):
-  until then both sit out, their units derived (BlakWing's whole). The
+  are BN5's own rule and came with the mood port (the Souls track's S7):
+  both play, their units moved (Their rules in place, below). The
   plus chips stay BN6's rule (one chip per name: Attck+10, Navi+20 and
   Attck+30 are BN6's own ids, merged into the chip before them as BN5's
   merges its own, a puff used alone), but DarkPlus is BN5's: used alone,
   +50 to the next chip (BN5's misc family 0x1A's subfamily 3,
-  `0x0800E190`), not done yet (What the rest wait for, below).
+  `0x0800E190`): done (Their rules in place, below).
 - **The units (C3)**: a unit is one of BN5's attack families (the
   routine a chip's CurAction runs) or one of its support or Navi chips'
   routines (by subfamily), with every routine and object it reaches that
@@ -1637,38 +1655,81 @@ of. The registry's ids, records and art stay C1's (above).
     MrkCan's, CannBall's and Astroid's tables (each audited or moved).
   - Geyser, CannBall: each game's own spark sprite (list 5's 5) lives
     shorter in BN6's (masks).
-- **Waiting for their rules** (their code moved and installed, their rows
-  sitting out, `xchips_moved.c` naming their moved family and subfamily
-  so their records take it): the Program Advances InfVulc1-3 (BN5's
-  Vulcan family 0x19 as 0x69), SuprSpr1-3 (the spread family 0x25 as
-  0x75), Boxer1-3, ShakPar1-3 and CacDanc1-3 (the misc family's
-  subfamilies 0x15-0x17), formed once BN6's lists hold their recipes;
-  the DarkChips DarkCirc (support 0x2A as 0x54), DrkSonic (support 0x1B
-  as 0x45), DarkWide (the spread family's subfamily 2) and DarkMetr (the
-  misc family's 0x11), their dark rules S7's. Dealt straight into the
-  battle deck, InfVulc1, SuprSpr1, Boxer1 and ShakPar1 PASS; the four
-  DarkChips hold a recorded FAIL at their use, BN5's dark rule (MegaMan's
-  mood to 0, a stat's price, his mark, random draws: S7's), nothing else
-  differing; CacDanc has no code a deck can deal (BN5's custom screen
-  makes any code of it a blank chip).
-- **What the rest wait for** (`tools/xchiprecipe.py --report`):
-  - The Navi chips' SP and DS (11: NumbrMan, ShadoMan, TmhwkMan,
-    KnightMn and ToadMan's SP and DS, ColonelDS): their code their V1s',
-    their powers computed (BN5's table of them at 0x80 + i, their bases
-    BN6's records' numbers, `POWER_BASES`), their rows sitting out
-    (`ROWS_WAIT`): an SP's power is the link battle's fixed one where
-    BN5's is by its best deletion time, which BN6 keeps none of
-    (`chip_numbrmnsp`: 70 against 40, nothing else differing), and BN5's
-    battle, a DS dealt first and picked, has MegaMan use another chip
-    (`chip_numbrmnds`, `chip_colonelds`), not traced yet. Their specs are
-    references until they play.
-  - DrkLance, DarkDril and DarkTorn: over their twins' families, their
-    dark rules S7's.
-  - DarkPlus as BN5's (+50 to the next chip): BN5's misc family's
-    subfamily 3 and the next chip's damage reading the bonus, engine work.
-  - HolyDrem and BlakWing: their dark gates with the mood port (S7);
-    Poltrgst (support 0x31): a sprite by a table of its own and a pair to
-    audit (`0x0800DD8C`, HolyDrem's too).
+- **Their rules in place** (issue #82's final engine round; their code
+  moved and installed, `xchips_moved.c` naming their moved family and
+  subfamily so their records take it):
+  - The Program Advances InfVulc1-3 (BN5's Vulcan family 0x19 as 0x69),
+    SuprSpr1-3 (the spread family 0x25 as 0x75), Boxer1-3, ShakPar1-3
+    and CacDanc1-3 (the misc family's subfamilies 0x15-0x17) are formed
+    on BN6's Custom screen: BN6's list of recipes grown with BN5's
+    (`src/core/xchips_pas.c`, written by `tools/xchiprecipe.py` from
+    BN5's list `0x08028020` in BN6's ids; docs/ROM_DATA.md, BN5's Program
+    Advances in BN6's lists), BN6's 43 first, so BN6's recipe wins where
+    two are the same, the P.A. screen drawing every part's code letter.
+    Their rows sit out of the deck as BN6's own Program Advances do (a PA
+    is formed, never dealt). `pa_infvulc1`, `pa_suprspr1`, `pa_shakpar1`
+    and `pa_cacdanc1` PASS: the same three picks form it in both games,
+    the P.A. screen shown, used at t30 and played by its moved code frame
+    for frame to the foe's deletion. Never formed in BN6's (kept as BN5's
+    recipes, `PA_UNFORMED`; whether another rule replaces them is the
+    owner's call): InfVulc2 and InfVulc3, whose parts' codes in BN6's
+    records (Vulcan2 D, F, L; Vulcan3 A, G, R) never make three in a row,
+    and Boxer1-3, whose three FireHit are BN6's own FlmHook1-3's recipes,
+    first in the list. The Library's P.A. tab lists BN6's own alone (its
+    builder bound to 349: the registry's 350 would land before its
+    buffer); BN5's in BN6's Library are M9's.
+  - The DarkChips DarkCirc (support 0x2A as 0x54), DrkSonic (support
+    0x1B as 0x45), DarkWide (the spread family's subfamily 2), DarkMetr
+    (the misc family's 0x11), DrkLance (over its twin's family), DarkDril
+    (BN5's drill, 0x4F as 0x9F), DarkTorn (BN5's Tornado family 0x22 as
+    0x72, its flash 0x17), BlakWing (support 0x20 as 0x4A) and DarkPlus
+    play by BN5's dark rule with the Souls installed (S7: the mood, the
+    gate, the use, each one's after-effect on his battle NaviStats
+    `0x0802C938`, his dark palette): their specs PASS, their recorded
+    verdicts gone, BlakWing's dark in both (BN5's meter under 470, BN6's
+    latch). DarkPlus is BN5's: the registry's DarkPlus is BN6's own 290
+    by name, whose record takes BN5's family and parameters where BN5's
+    ROM is read (`SAME_MOVED`), so it stores its power, +50, in the
+    hand's next attack chip and flashes him green 24 frames (the flash
+    kept apart from his AIData +0x3C, BN6's resting height; docs/ROM_DATA.md,
+    BN5's DarkPlus and its green flash), a puff with no attack after it
+    (`chip_darkplus`, `chip_darkplus_merge` with Atk+10, `chip_darkplus_puff`).
+  - The Navi chips' SP and DS (NumbrMan, ShadoMan, TmhwkMan, KnightMn
+    and ToadMan's SP and DS, ColonelDS) play: an SP's power is BN5's
+    computed one by its best deletion time, which BN6 keeps none of for
+    BN5's Navis (`XC_SP_TIMES`, a table of none: BN5's power for a save
+    without one, 40 for NumbrMn[SP]: `chip_numbrmnsp`, `chip_knigtmnsp`);
+    a DS is dealt as any chip and BN5's dark gate lets it out to a dark
+    MegaMan alone (refused, the chip of nothing in both: `chip_numbrmnds`,
+    `chip_colonelds`; dark, NumberMan's and Colonel's attacks in both:
+    `chip_numbrmnds_dark`, `chip_colonelds_dark`). ColonelDS's object
+    calls the companion's triple with its third table, the same as the
+    second in both games, which the Navis grow in BN6 (`NAVI_TRIPLES`).
+  - HolyDrem (support 0x23 as 0x4D: its double of MegaMan drawn from
+    his own sprite in each game, its shots from BN5's point 0x1D of his,
+    answered with BN5's numbers), Poltrgst (support 0x31 as 0x5B: the
+    obstacles it throws by its own table of kinds, MegaMan's double as
+    HolyDrem's) and the Tornado family move whole: `chip_holydrem`,
+    `chip_poltrgst` (a RockCube to throw), `chip_darktorn` PASS. A double
+    of MegaMan is set up through his form's overlay entry with the double
+    as its object: with a Soul united BN5 runs the Soul's own entry for
+    it (`0x0800F01C`), where the proxy form's gave it HeatCross's overlay
+    (the first kind's 0x56): `src/emu/soullife.c` routes it to the
+    Soul's (`soul_knight_holydrem`: HolyDrem used in KnightSoul, FAIL at
+    t624 before, PASS after).
+- **What remains** (`tools/xchiprecipe.py --report`: 51 units, 50 with
+  no decision open): DarkInvs (BN5's support 0x3B, `CANDIDATES`). BN5's
+  puts MegaMan under its chip AI for 600 frames, invisible (its object,
+  the fourth kind's 0x18, calls `0x0802C03E` and `0x0802C114`), which
+  BN5's MegaMan runs from his idle states (`0x080F04C2`, `0x080F0650`:
+  the AI data's flag 0x200, then `0x0802B4B0`); BN6's twin of those
+  states (`0x080F1866`) has no such path and BN6 no twin of the chip AI,
+  which the Dark Soul's moved code holds for a Navi and not for the
+  player. Moving it means MegaMan's player code run by BN5's chip AI in
+  BN6's engine, a piece of its own. Until then the registry's DarkInvs is
+  BN6's own of the name (289, BN6's support 0x3B: its auto mode, another
+  attack), and so is ShadowSoul's Chaos Unison attack (Transplanted
+  Souls, S6).
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
@@ -1847,9 +1908,35 @@ the next.
   list 5's 0xA6: one place for each sprite's bytes once the tracks
   merge, tools/bn5_objects.py), and ColonelSoul's button's art in the
   room issue #82 granted (`FREE_SOULS_ART`).
-- **S7, BN5's mood and its DarkChip rule** (done but for BN5's DarkChips'
-  own attacks and after-effects; docs/ROM_DATA.md, BN5's mood in BN6's
-  battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
+- **S6, Chaos Unison** (done; issue #82's final engine round,
+  `src/emu/soulchaos.c`, `soulchaos_thumb.c`; docs/ROM_DATA.md, Chaos
+  Unison): a Soul united by a DarkChip of its kind charges B as BN5's
+  does, its time its chaos power's row by the chaos level (40 frames at
+  level 0, to 150 at 4), then a cycle of phases by the level's row (BN5's
+  `0x08010648`: 42 frames at level 0, phase 2 its first 21), shown by
+  BN5's dark charge glow (the Souls' copy, its animation the phase).
+  Released in phase 2 it is the Soul's DarkChip attack through the chip
+  writer, BN6's chip use of the registry's id (ColonelSoul's DrkSonic,
+  NumberSoul's DarkPlus, TomahawkSoul's DrkLance, KnightSoul's DarkDril,
+  ToadSoul's DarkWide, each by BN5's code), the level one up (4 at
+  most); released in another phase it fails as BN5's family 0x39 does:
+  MegaMan out of the Soul and the Dark Soul (the moved Navi) on the
+  other side, its chip lists, where the battle gave none, MegaMan's
+  folder's chips, the most of a chip first (BN5 keeps the chips he uses
+  most, BN6 no record of them). BN6 reads the chaos request 0x8000 as a
+  counter's: its four tests of it drop that bit while the Souls' request
+  stands. The power attacks are entries of the Souls' grown power table
+  (BN6's 0x9F-0xA4), the failure the attack family 0xC7. Held to BN5's
+  battle frame by frame by 19 specs (`chaos_*`: each Soul's success at a
+  hold of 45 frames and failure at 60, NumberSoul's holds 75, 90, 105,
+  120, 150, 180 and 210: 45, 90, 180 and 210 succeed, the rest fail, as
+  BN5's), two mutations failing (the cycle a frame longer, the Dark Soul
+  a frame later). ShadowSoul's attack is BN6's own DarkInvs (BN5's puts
+  MegaMan under its chip AI, which BN6's player code has no path to:
+  The chips' code, What remains): `chaos_shadow_45` holds that recorded
+  FAIL at its attack (t107), everything before it the same.
+- **S7, BN5's mood and its DarkChip rule** (done; docs/ROM_DATA.md, BN5's
+  mood in BN6's battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
   beside BN6's own, by BN5's rules (a hit taken lowers it, a hit landed
   raises it, a counter calms him to Full Synchro, BN6's twins of BN5's
   other writers mirrored, a Soul's unison and end calm him, the battle
@@ -1865,10 +1952,14 @@ the next.
   while dark): refused, the chip is BN5's chip of nothing; the battle's
   dark stands for BN5's dark meter, which no run has. Held to BN5's own
   battle by `soul_mood_dark`, `soul_mood_unite` and `soul_mood_gate`, the
-  mood compared in every Soul's spec, five mutations failing. Open: the
-  DarkChips' attacks and each one's after-effect on his NaviStats
-  (`0x0802C938`), the chips track's; Chaos Unison (S6) after the next
-  merge.
+  mood compared in every Soul's spec, five mutations failing. Since
+  issue #82's final engine round each DarkChip's after-effect on his
+  battle NaviStats (`0x0802C938`, ported) and his dark palette by BN5's
+  rule (BN6's twin reads Full Synchro alone) are BN5's too, the worried
+  rule held on the battle's first screen as well (`soul_mood_first`:
+  the DarkChip into deck[5], past the five the screen deals, in both),
+  and BN5's DarkChips' own attacks play by their code (The chips' code,
+  Their rules in place).
 - **At the tracks' merge** (issue #82's four tracks in one tree): one
   copy of each moved type, the first install's (`src/emu/xinstall.c`:
   the moved objects and the Navis, the chips' code, the families, the
@@ -1900,15 +1991,14 @@ the next.
   object being the code Colonel's moved copy runs, its expectations held
   in both battles), a mutation of his side's bit failing it. BN5's
   DarkChips' specs hold the Souls (KnightSoul) so that BN5's mood and
-  DarkChip rule are in place: the mood matches, their recorded FAILs keep
-  what S7 leaves open (each chip's after-effect on his NaviStats,
-  `0x0802C938`, his object's +0x94 and its random numbers); BlakWing and
-  HolyDrem stay BN5's battles alone (BlakWing's own code needs a MegaMan
-  dark in both, BN5's meter under 470; HolyDrem's unit three decisions
-  open: tools/xchiprecipe.py's report).
-- **Next**: Chaos Unison's charge (S6), after the tracks' merge. Its
-  masks in the differential (tests/xdiff/legit.json, "until the Souls
-  track's S6") go as it comes. The Souls' state in RAM is the engine's
+  DarkChip rule are in place: since the final engine round they PASS,
+  their recorded FAILs gone (each chip's after-effect and his dark
+  palette ported), BlakWing's run dark in both (BN5's meter under 470,
+  BN6's latch) and HolyDrem's moved.
+- **Next**: the Souls' engine is whole but for ShadowSoul's chaos
+  attack (BN5's DarkInvs, with MegaMan's player code under BN5's chip
+  AI); the masks the differential kept "until the Souls track's S6" are
+  gone. The Souls' state in RAM is the engine's
   plan's (`0x0203FF70`-`0x0203FFEF`, `BN6_SOULS`), their code and data
   in `EMU_FREE` + `0x480000` to `+0x4C0000` and their art past it at
   `+0x700000` to `+0x710000` (docs/EMULATION.md; laid out in

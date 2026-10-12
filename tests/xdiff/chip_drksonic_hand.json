@@ -1,0 +1,138 @@
+{
+ "about": "DrkSonic used from the hand leaves it (the run side's finding): as chip_drksonic, BN5's CanladEX held paralysed at (5,2), MegaMan at (2,2), KnightSoul held (BN5's DarkChip rule), a deck of DrkSonic E then Cannon * (BN5's 198 and 1, BN6's 220 and 1; BN6's deck five DrkSonic first, the run's shelf taking four, src/emu/soulmood.c), both picked on the first Custom screen and OK; DrkSonic used at t30 (the hand's index one on, its next chip the Cannon: BN5 0x0800DA10, BN6 0x0800FC7C), the Cannon at t200: every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "hold": 60,
+ "folder5": [
+  "08C6",
+  "3401"
+ ],
+ "folder6": [
+  "08DC",
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   200,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "08C6",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "deck6": [
+  "08DC",
+  "08DC",
+  "08DC",
+  "08DC",
+  "08DC",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ]
+}

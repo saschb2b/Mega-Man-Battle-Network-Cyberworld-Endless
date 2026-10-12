@@ -454,6 +454,10 @@ def mask_applies(m, d, fa, fb, prev):
         songs = {int(x, 0) for x in m['songs']}
         if not (set(d.a) - set(d.b) <= songs and not set(d.b) - set(d.a)):
             return False
+    if 'songs6' in m:   # (a song in BN6's frame alone, those named alone, the rest the same)
+        songs = {int(x, 0) for x in m['songs6']}
+        if not (set(d.b) - set(d.a) <= songs and not set(d.a) - set(d.b)):
+            return False
     if 'song_for' in m:   # (BN5's song in place of BN6's: [BN5's, BN6's], the rest the same)
         a5, b6 = (int(x, 0) for x in m['song_for'])
         if sorted(b6 if x == a5 else x for x in d.a) != sorted(d.b):

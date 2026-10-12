@@ -102,6 +102,7 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		return sscanf(v, "%d:%d:%d", &s->buster[0], &s->buster[1], &s->buster[2]) == 3 && s->buster[0] >= 0 && s->buster[0] <= BN5_BUSTER_MAX &&
 			s->buster[1] >= 0 && s->buster[1] <= BN5_BUSTER_MAX && s->buster[2] >= 0 && s->buster[2] <= BN5_BUSTER_MAX;
 	if (!strcmp(name, "safe")) return (s->safe = atoi(v) != 0), 1;
+	if (!strcmp(name, "dark")) return (s->dark = atoi(v) != 0), 1;
 	return -1;
 }
 

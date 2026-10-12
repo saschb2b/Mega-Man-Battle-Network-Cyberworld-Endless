@@ -15,6 +15,7 @@
 #include "data.h"
 #include "hook.h"
 #include "rom.h"
+#include "xattack_grow.h"
 #include "xchips.h"
 #include "xfields.h"
 #include "xnavi.h"
@@ -113,7 +114,8 @@ static uint32_t resolve(uint32_t target, void *user) {
 			 * xnavi_install.c, or the moved objects'; or a stub or a helper of the installer's region, xvirus_code_stage's: the
 			 * chips', xchips_code.h) */
 			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
-			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) && !own) break;
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && !(to >= FREE_NAVI_CODE && to < FREE_NAVI_ART) &&
+				!own) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -893,7 +895,12 @@ void xvirus_install(int which) {
 	claims_begin(XV_CLAIMS);
 	if (which == XVIRUS_CONTROL) xvirus_install_family(&xvirus_control);
 	else if (which == XVIRUS_FAMILIES) {
-		for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
+		/* (a virus's support chip, BN5's support family's timing: its family's entry, which the dispatch's chip writer names, set
+		 * before a family whose code calls it; none of them where the table cannot grow) */
+		if (!xg_grow() || !xattack_grow() || !xattack_set(XV_SUPPORT_FAMILY, XV_SUPPORT | 1u))
+			fprintf(stderr, "xvirus: BN5's support family's timing not placed: no family installed\n");
+		else
+			for (int i = 0; i < xvirus_bn5_count; ++i) xvirus_install_family(xvirus_bn5[i]);
 		xfields_install(XROM_BN5_COLONEL_US);
 	}
 	claims_end();

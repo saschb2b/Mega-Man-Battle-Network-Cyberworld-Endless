@@ -1086,14 +1086,16 @@ the masks):
   `megaman_forms`: 0x1AB + the form, his role MegaMan's in any form). The
   Soul itself is compared every frame (`souls`): BN5's form byte and the
   places of its AI data where it keeps a Soul's state (its turns +0x0F,
-  chaos +0x12, the chaos charge's phase +0x1F, ColonelSoul's chip +0x32,
-  the chaos level +0x6C: read 0 there as BN6's, whose AI data has its own
-  fields at those places) against `BN6_SOULS`; BN5's used word against
+  chaos +0x12, the chaos charge's cycle +0x1C and phase +0x1F,
+  ColonelSoul's chip +0x32, the chaos level +0x6C: read 0 there as
+  BN6's, whose AI data has its own fields at those places) against
+  `BN6_SOULS`; BN5's used word against
   the Souls' block's, BN6's Crosses' used word none; the Custom screen's
-  UNITE byte for byte. What the Souls track has not brought yet is masked
-  while both games' MegaMan is united, each mask named for the milestone
-  that brings it (Chaos Unison's charge glow and its attack in the
-  loadout, until S6). The expectations read `soul`, `chaos`, `soul turns`
+  UNITE byte for byte. Nothing of a Soul is masked since S6 brought
+  Chaos Unison's charge glow and its attack in the loadout (the chaos
+  specs, `chaos_*`: each Soul's DarkChip attack at a hold of 45 frames,
+  its failure at 60, and NumberSoul's holds from 75 to 210 besides; ShadowSoul's attack
+  BN6's own DarkInvs, a recorded verdict). The expectations read `soul`, `chaos`, `soul turns`
   and `souls used` the same way in both games, and `unite` (UNITE's +7)
   and `unite stands` (its +0).
   `soul_knight` (KnightSoul: a deck of JustcOne J in both, the first
@@ -1319,8 +1321,12 @@ BN6 twin writes the second word BN5's stores into the BIOS); each compare
 of a CurAction read given BN6's number; a sprite of a list BN6 has not
 grown placed in list 4; and a call into the dead bytes of its block (a
 routine of its game's BN6 has a twin of, zeroed in the copy) goes to the
-twin (`src/emu/xvirus.c`, dead_calls). Tuby and the unnamed AI 31-33 are
-left out: no battle record of BN5's names them.
+twin (`src/emu/xvirus.c`, dead_calls); its calls of BN5's chip writer
+(`0x0800FE6A`, a held chip's use) go to the dispatch's own
+(`CHIP_WRITER`: `XV_CHIP_WRITER`, BN6's writer with a support chip's
+family run in BN5's support family's frame, Zomon's AreaGrab). Tuby and
+the unnamed AI 31-33 are left out: no battle record of BN5's names
+them.
 
 ## The Navis' recipe generator
 
@@ -1398,13 +1404,20 @@ routines' 0x1D + S; homes and code in `UNITS`' order, a new unit after
 the last. `UNITS` are the ones written, each whole and its chips' specs
 passing; `CANDIDATES` are derived for the report alone, each with what
 it still needs. `src/core/xchips_moved.c` takes the registry's
-`XREG_MOVED` rows of the written units, and the Program Advances and
-the DarkChips of `DARK_MOVED` whose code moved (their records take the
-moved family; they sit out until their rules come): a unit's chips must
-be `XREG_MOVED` (the generator refuses to write otherwise; a record of a
-subfamily the unit plays none of, and the Navi chips' while their specs
-wait, `ROWS_WAIT`, excepted), and a chip whose unit is not written stays
-`XREG_PENDING`, sitting out. A twin is also held to read the same data:
+`XREG_MOVED` rows of the written units, the Program Advances and the
+DarkChips of `DARK_MOVED` whose code moved (their records take the
+moved family; a Program Advance is formed, never dealt, and a DarkChip
+comes by BN5's dark rule, the Souls'), and BN6's own chips of a name
+whose code is BN5's, `SAME_MOVED` (DarkPlus: BN6's record of it takes
+BN5's family and parameters where BN5's ROM is read): a unit's chips
+must be `XREG_MOVED` (the generator refuses to write otherwise; a record
+of a subfamily the unit plays none of, and `ROWS_WAIT`, none now,
+excepted), and a chip whose unit is not written stays `XREG_PENDING`,
+sitting out (none since issue #82's final engine round). It writes
+`src/core/xchips_pas.c` too: BN5's recipes of the registry's Program
+Advances (BN5's list `0x08028020`) in BN6's ids, for BN6's list grown
+with them (`pa_rows`; `PA_UNFORMED` the recipes BN6's codes or a recipe
+of BN6's before them never let form, each its reason). A twin is also held to read the same data:
 the tables its literals name, where they are plain bytes in both ROMs,
 must be the same (`same_data`: DrkSonic's sonic's times by kind its BN6
 twin keeps otherwise).
@@ -1439,8 +1452,12 @@ number); BN5's lava, sea and holy
 set or compared are BN6's 13, 14 and 5. `HELPERS` holds the computed
 powers' routines too (BN5's table of them `0x0800E728`: BN6's grown at
 `XC_POWERS`, BN5's entry i at 0x80 + i), `UNIT_STUBS` calls one unit
-aims at a stub (the SP powers' link bit answered 1; ElemRage's point
-0x14 answered with BN5's numbers), `TABLE_ARGS` the routines a unit
+aims at a stub (ElemRage's point 0x14 and HolyDrem's 0x1D answered
+with BN5's numbers), `WORDS_TO` a literal of BN5's RAM a unit names that
+BN6 keeps at a place of the chips' own (the SP powers' best deletion
+times, `XC_SP_TIMES`, a table of none), `AFTERIMAGE_SPAWN` the
+afterimage's spawner, whose packed word a unit hands it names a sprite
+(DarkWide's wave's), `TABLE_ARGS` the routines a unit
 hands a table of routines to (an obstacle's actions: walked whole),
 `TABLE_SOUNDS` and `EFFECT_CALLS`, `EFFECT_RANGES`, `PANEL_LOOKUPS`,
 `COLL_SUMS` and `POINTS` the numbers a unit gives by a table's row, an
@@ -1468,11 +1485,14 @@ goes to that copy (`navi_modules`, read from `src/emu/xnavi_bn5.c`: the
 Navi's block holding the type's routine, the routines its code reaches
 there); `NAVI_AI_CALLS` the routines a Navi chip's object hands a Navi's
 AI index (its companion begun and ended: BN6's index for BN5's Navi
-there, 32 + n - 7); `OWN_STATES` the CurActions an object writes into a
+there, 32 + n - 7; `NAVI_TRIPLES` the companion's triples whose third
+table is the same as their second in both games, ColonelDS's object's
+call with the third given the second's kind); `OWN_STATES` the CurActions an object writes into a
 states table of its own, kept BN5's; `POWER_BASES` the bases a computed
 power's routine subtracts from its record's power, BN6's records'
 numbers; `ROWS_WAIT` the registry's chips a written unit plays that
-still sit out, by BN5's id, each its reason (the Navi chips' SP and DS);
+still sit out, by BN5's id, each its reason (none since the Navi chips'
+SP and DS play);
 `FORCE_TWIN` a routine aimed at its BN6 twin though their tables differ
 (the bomb's update, whose BN6 twin runs BN6's actions table, its status
 states numbered as BN6's generic states write them).

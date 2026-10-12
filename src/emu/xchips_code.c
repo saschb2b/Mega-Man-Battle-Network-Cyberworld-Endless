@@ -11,7 +11,9 @@
 #include "rom.h"
 #include "xattack_grow.h"
 #include "xchips_bn5.h"
+#include "xchips_flash.h"
 #include "xchips_moved.h"
+#include "xchips_pas.h"
 #include "xnavi_sprites.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -51,7 +53,17 @@ static void stubs_stage(void) {
 	put16(p + 18, 0x3801);
 	put16(p + 20, 0x211A);
 	put16(p + 22, 0x46F7);
-	for (int k = 24; k < 32; k += 2) put16(p + k, 0x46C0);
+	/* (BN5's point 0x1D of MegaMan's, 0x08015140's answer: x 40 by his facing, r2 his side and r3 his flip as 0x0800C6CE has them
+	 * (1 - 2 x (side ^ flip)), y 20) */
+	put16(p + 24, 0x2028);   /* movs r0,#0x28 */
+	put16(p + 26, 0x405A);   /* eors r2,r3 */
+	put16(p + 28, 0xD000);   /* beq +2 */
+	put16(p + 30, 0x4240);   /* negs r0,r0 */
+	put16(p + 32, 0x2114);   /* movs r1,#0x14 */
+	put16(p + 34, 0x46F7);   /* mov pc,lr */
+	for (uint32_t k = 36; k < XC_SP_TIMES - XC_STUBS; k += 2) put16(p + k, 0x46C0);
+	/* (the SP powers' deletion times, none: 0xFFFF each, both sides) */
+	for (uint32_t k = XC_SP_TIMES - XC_STUBS; k < XC_STUBS_END - XC_STUBS; k += 2) put16(p + k, 0xFFFF);
 }
 
 /* a table copied, BN6's entries as the player's ROM has them (the core's copy the same), the rest its stub; its words
@@ -142,6 +154,43 @@ static void powers_stage(void) {
 	if (!xv_failed()) xv_word(BN6_CHIP_POWERS_REF, BN6_CHIP_POWERS, XC_POWERS);
 }
 
+/* BN6's after-effects of its own DarkChips (BN6_DARK_AFTERS): DarkPlus's (its HP bug) the Navi stub's return where BN5's
+ * DarkPlus runs in BN6's record of its name (src/core/chips.c, xrec_same_moved), which BN5's dark rule follows (soulmood.c's
+ * after-effect, BN5_DARK_AFTER's), not BN6's */
+static void dark_after_stage(void) {
+	if (!xchips_moved_of(BN6_DARKPLUS)) return;
+	xv_word(BN6_DARK_AFTERS + 4u * (BN6_DARKPLUS - BN6_DARK_FIRST_ID), BN6_DARK_AFTER_HPBUG | 1u, (XC_STUBS + 4u) | 1u);
+}
+
+/* BN6's list of Program Advances grown (FREE_CHIP_PAS): BN6's 43 recipes, then BN5's of the registry's (src/core/xchips_pas.c,
+ * BN6's first where two are the same), then 0; its word pointed at it (the link battles' list, 0x0802BC60, BN6's own); the
+ * P.A. screen's code letters drawn for every registered part (BN5's 0x08027BCE draws them below 0x160 as BN6's; BN6's own parts
+ * are all below it, the registry's SpShake and CactBal past it) */
+static void pas_stage(void) {
+	if (rom_u32(BN6_PA_LIST_REF - BUS) != BN6_PA_LIST || rom_u32(BN6_PA_LIST - BUS + 4u * BN6_PA_COUNT) != 0) {
+		xv_fail("BN6's Program Advances' list is not at %08x", (unsigned)BN6_PA_LIST);
+		return;
+	}
+	uint32_t list = FREE_CHIP_PAS_END - 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count + 1u), at = 0;
+	uint8_t *e = xv_put(FREE_CHIP_PAS, list - FREE_CHIP_PAS, true), *l = xv_put(list, FREE_CHIP_PAS_END - list, true);
+	if (!e || !l) return;
+	for (uint32_t i = 0; i < BN6_PA_COUNT; ++i) put32(l + 4 * i, rom_u32(BN6_PA_LIST - BUS + 4 * i));
+	for (int k = 0; k < xchips_pas_count; ++k) {
+		const XChipPa *r = &xchips_pas[k];
+		uint32_t parts = r->kind == 4 ? r->n : 1;
+		if (parts > XCHIP_PA_PARTS || at + 4 + 2 * parts > list - FREE_CHIP_PAS) { xv_fail("a Program Advance's recipe, %u", r->pa); return; }
+		e[at] = r->n;
+		e[at + 1] = r->kind;
+		put16(e + at + 2, r->pa);
+		for (uint32_t j = 0; j < parts; ++j) put16(e + at + 4 + 2 * j, r->parts[j]);
+		put32(l + 4u * (BN6_PA_COUNT + (uint32_t)k), FREE_CHIP_PAS + at);
+		at += 4 + 2 * parts;
+	}
+	put32(l + 4u * (BN6_PA_COUNT + (uint32_t)xchips_pas_count), 0);
+	xv_word(BN6_PA_LIST_REF, BN6_PA_LIST, list);
+	xv_word(BN6_PA_LETTERS, 0x160, 0x200);
+}
+
 /* ---- the step's writes, each part under its own claims ---- */
 
 static bool in_room(uint32_t at) { return at >= FREE_VIRUS_ROOM && at < FREE_FAMILIES; }
@@ -205,6 +254,14 @@ bool xchips_code_install(void) {
 		at = "BN6's computed powers";
 		powers_stage();
 	}
+	if (!xv_failed()) {
+		at = "BN6's DarkPlus's after-effect";
+		dark_after_stage();
+	}
+	if (!xv_failed()) {
+		at = "BN6's Program Advances";
+		pas_stage();
+	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN5's chips' code not installed (%s): %s\n", at, xv_why());
 		xv_tx_end();
@@ -220,5 +277,6 @@ bool xchips_code_install(void) {
 		}
 	installed = true;
 	printf("xchips_code: %d units of BN5's chips' code (%u bytes written)\n", xchips_bn5_count, (unsigned)used);
+	xchips_flash_install();
 	return true;
 }

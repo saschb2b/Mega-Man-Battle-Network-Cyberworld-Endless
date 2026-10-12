@@ -16,19 +16,23 @@
 #include "rom.h"
 #include "soullife.h"
 #include "xchips_install.h"
+#include "xchips_moved.h"
 #include "xchips_registry.h"
+#include "xvirus_recipe.h"
 
 #define BUS 0x08000000u
 #define MOOD_CALM 0x80       /* BN5's calm (0x08011A8C), the opening's at full HP */
 #define MOOD_SYNCHRO 0xFF    /* Full Synchro */
 #define MOOD_TOP 0xFE        /* the most a gain raises it (0x08012810) */
-#define WORRIED_HP 4         /* the opening's: worried at a quarter of his HP or less (guest.c's mood_of) */
+#define WORRIED_HP 4         /* the opening's: worried at a quarter of his HP or less (the run's rule since issue #64) */
 #define MOOD_WORRIED_OPEN 0x30
 #define LOW_HP 2             /* the worried rule's low HP: under a quarter (lsrs r1,r1,#2 at 0x08025168) */
-#define SHELF 4              /* the most DarkChips the shelf keeps behind the padding (guest.c's shelf) */
+#define SHELF 4              /* the most DarkChips the shelf keeps behind the padding (the run's shelf since issue #64) */
 #define BN5_DRKRECOV 194     /* BN5's DrkRecov, the worried rule's choice at low HP (cmp r0,#0xc2 at 0x08025196) */
 #define LEAVE_FORM 0x40u     /* AI data +0x44's request to leave the form (BN6's 0x08015994 sets it) */
 #define GATE_NOT_DARK 1      /* BN5_CHIP_DARK_GATE: usable only while he is not dark (any other but 0: only while he is) */
+#define BN5_PALETTE_DARK 2   /* his palette dark by BN5's meter (0x0800DDDC), */
+#define BN5_PALETTE_DARK_CHIP 3   /* ... and with a DarkChip used at 470 or more (0x0800DDEC)*/
 /* the emotion BN5's getter answers (0x08012738), in its order: a form, anger, dark, Full Synchro, calm, worried */
 enum { EMO_CALM, EMO_WORRIED, EMO_SYNCHRO, EMO_ANGER, EMO_FORM, EMO_DARK };
 
@@ -45,6 +49,7 @@ static uint32_t mood_at(int side) { return soul_field(side, BN6_SOUL_MOOD); }
  * chip: BN6_SOUL_OPENED); whether a BN5 DarkChip made it dark for the battle */
 static int soulmood_of(int side) { return hook_read8(mood_at(side)); }
 static bool soulmood_dark(int side) { return done && hook_read8(soul_field(side, BN6_SOUL_DARK)); }
+static bool dev_dark;   /* (soulmood_dev_dark: each battle begun dark by BN5's meter, the differential's item) */
 
 /* BN5's three writers: set (0x080127CE: none at dark), gain (0x080127FA: none at Full Synchro, 0xFE at most), loss
  * (0x08012818: never under 1, none at dark) */
@@ -70,7 +75,7 @@ static int emotion(int side) {
 	return !m ? EMO_DARK : m == MOOD_SYNCHRO ? EMO_SYNCHRO : m > BN5_MOOD_WORRIED ? EMO_CALM : EMO_WORRIED;
 }
 
-/* the battle's opening: side's mood as worried as his HP and max HP say, Full Synchro kept (the guest battles' mood_of) */
+/* the battle's opening: side's mood as worried as his HP and max HP say, Full Synchro kept (the run's rule since issue #64) */
 static void soulmood_open(int side, int hp, int max_hp) {
 	if (!done) return;
 	int mood = max_hp <= 0 ? MOOD_CALM : hp * WORRIED_HP <= max_hp ? MOOD_WORRIED_OPEN : 0x40 + 0x40 * hp / max_hp;
@@ -139,23 +144,90 @@ static HookAct keep_dark(HookRegs *r, void *user) {
 
 /* ---- a BN5 DarkChip used ---- */
 
-static bool bn5_dark_chip(int chip) {
+/* BN5's id of BN5's DarkChip `chip` (BN6's id) in BN6's battles, 0 for none: an own id's DarkChip (XREG_DARK), or BN6's chip
+ * of a name BN5's DarkChip plays where its code moved (DarkPlus: BN6's record BN5's chip in what it does, chips.c), a DarkChip
+ * by BN5's record (BN6_CHIP_DARK_CLASS in its effect flags, both games' bit) */
+static int bn5_dark_id(int chip) {
 	const XChipReg *row = chip > 0 ? xreg_at(chip) : NULL;
-	return row && row->how == XREG_DARK;
+	if (row) return row->how == XREG_DARK ? row->bn5 : 0;
+	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
+	row = chip > 0 && rom5 && xchips_moved_of(chip) ? xreg_named(chip) : NULL;
+	return row && (rom5[BN5_CHIP_RECORDS + (uint32_t)row->bn5 * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS] & BN6_CHIP_DARK_CLASS) ? row->bn5 : 0;
+}
+
+static bool bn5_dark_chip(int chip) { return bn5_dark_id(chip) != 0; }
+
+/* side dark for the battle as BN5's DarkChip use (0x0801005E-0x08010080) or its meter makes it: its mood 0 and the latch's
+ * `how`, BN6's own mood 0 with it (no Cross, no Beast Out, a weak buster), his anger gone as BN5's calm after it clears it
+ * (0x08011AA8) */
+static void darken(int side, uint32_t ai, int how) {
+	set(side, 0);
+	/* (dark by the meter stays so: BN5's palette 2 whatever DarkChip he uses after, 0x0800DDD8's test of the meter first) */
+	uint32_t latch = soul_field(side, BN6_SOUL_DARK);
+	if (hook_read8(latch) != BN6_DARK_METER) hook_write8(latch, (uint8_t)how);
+	hook_write8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_MOOD, 0);
+	if (ai) hook_write16(ai + BN6_AI_ANGER, 0);
+}
+
+/* BN5's after-effects of its DarkChips (BN5_DARK_AFTER: each DarkChip's routine of the twelve at 0x0802C9A8-0x0802CA66,
+ * by its id), a write of the user's battle NaviStats each: the NaviCust's bugs, the same fields in BN6's NaviStats, which
+ * BN6's twins of BN5's readers read alike (0x0800FE52, BN5's 0x0800DC0C: the emotion window's glitch, its random numbers;
+ * 0x08013FD0, BN5's 0x080115E8: +0x54's damage; 0x0800FEA0 the HP bug). BN5's link battle adds the HP bug instead
+ * (0x0802C95E), which no battle of BN6's engine is for a DarkChip of BN5's. BN5's id, the field, how, the value */
+enum { AFTER_SET, AFTER_ADD_TO_7, AFTER_ADD16 };
+static const struct { uint8_t bn5, field, how, value; } afters[] = {
+	{ 187, 0x54, AFTER_ADD16, 100 },    /* DarkCirc (0x0802C9A8) */
+	{ 188, 0x14, AFTER_SET, 4 },        /* DrkSword (0x0802C9BC) */
+	{ 189, 0x31, AFTER_SET, 1 },        /* DarkInvs (0x0802C9C8) */
+	{ 190, 0x31, AFTER_SET, 1 },        /* DarkPlus (0x0802C9D4) */
+	{ 191, 0x16, AFTER_SET, 2 },        /* DrkLance (0x0802C9E0) */
+	{ 192, 0x14, AFTER_SET, 4 },        /* DarkWide (0x0802C9EC) */
+	{ 193, 0x19, AFTER_ADD_TO_7, 2 },   /* DarkThnd (0x0802C9F8) */
+	{ 194, 0x18, AFTER_SET, 7 },        /* DrkRecov (0x0802CA10) */
+	{ 195, 0x19, AFTER_ADD_TO_7, 2 },   /* DarkMetr (0x0802CA1C) */
+	{ 196, 0x12, AFTER_SET, 4 },        /* DarkDril (0x0802CA34): */
+	{ 196, 0x13, AFTER_SET, 4 },        /* ... both */
+	{ 197, 0x54, AFTER_ADD16, 100 },    /* DarkTorn (0x0802CA48) */
+	{ 198, 0x31, AFTER_SET, 1 },        /* DrkSonic (0x0802CA5C) */
+};
+
+static void after_effect(int side, int bn5) {
+	uint32_t navi = BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE;
+	for (size_t i = 0; i < sizeof afters / sizeof *afters; ++i) {
+		if (afters[i].bn5 != bn5) continue;
+		uint32_t at = navi + afters[i].field;
+		int v = afters[i].how == AFTER_ADD16 ? hook_read16(at) + afters[i].value : afters[i].how == AFTER_ADD_TO_7 ?
+			hook_read8(at) + afters[i].value : afters[i].value;
+		if (afters[i].how == AFTER_ADD16) hook_write16(at, (uint16_t)v);
+		else hook_write8(at, (uint8_t)(afters[i].how == AFTER_ADD_TO_7 && v > 7 ? 7 : v));
+	}
 }
 
 void soulmood_chip_used(uint32_t me, int chip) {
 	int side = side_of(me);
-	if (!done || !bn5_dark_chip(chip) || navi8(side, BN6_NAVI_SIDE_NAVI) || (breaks & SOULMOOD_BREAK_DARK)) return;
-	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
-	/* (a Soul united ends: BN5 asks it at once, 0x08010068; here BN6's request to leave the form, 0x08015994's) */
-	if (soul_united(side)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
-	set(side, 0);
-	hook_write8(soul_field(side, BN6_SOUL_DARK), 1);
-	/* (dark is BN6's dark too: its own mood 0, his anger gone as BN5's calm after it clears it, 0x08011AA8) */
-	hook_write8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_MOOD, 0);
-	hook_write16(ai + BN6_AI_ANGER, 0);
+	if (!done || !bn5_dark_chip(chip)) return;
+	/* (his dark: MegaMan's alone, BN5's test of his side's Navi, 0x0801004E) */
+	if (!navi8(side, BN6_NAVI_SIDE_NAVI) && !(breaks & SOULMOOD_BREAK_DARK)) {
+		uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
+		/* (a Soul united ends: BN5 asks it at once, 0x08010068; here BN6's request to leave the form, 0x08015994's) */
+		if (soul_united(side)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
+		darken(side, ai, BN6_DARK_CHIP);
+	}
+	/* (its after-effect: whoever used it, BN5's call at 0x08010086 for every chip used) */
+	if (!(breaks & SOULMOOD_BREAK_AFTER)) after_effect(side, bn5_dark_id(chip));
 }
+
+/* (his palette as BN6 reads it by his mood, no form or a Beast Out's: r5 him) BN5's dark ones (0x0800DDD8-0x0800DDEE): 2 dark
+ * by the meter, 3 a DarkChip used at a neutral meter, as a run's always is; on to the form's test and NaviCust's colour */
+static HookAct dark_palette(HookRegs *r, void *user) {
+	int side = side_of(r->r[5]), how = soulmood_dark(side) ? hook_read8(soul_field(side, BN6_SOUL_DARK)) : 0;
+	if (!how || (breaks & SOULMOOD_BREAK_PALETTE)) return HOOK_CONTINUE;
+	r->r[4] = how == BN6_DARK_METER ? BN5_PALETTE_DARK : BN5_PALETTE_DARK_CHIP;
+	r->r[12] = (uint32_t)(uintptr_t)user | 1;
+	return HOOK_JUMP;
+}
+
+void soulmood_dev_dark(bool on) { dev_dark = on; }
 
 /* BN5's dark gate (0x08010110, at its chip use 0x080100DE): a chip of its own whose BN5 record names one is usable only
  * while he is not dark, or only while he is, where his side names no Navi (+0x29); dark is the battle's here (a BN5
@@ -192,7 +264,10 @@ static uint32_t rng_secondary(void) {
 
 /* BN5's worried rule (0x08025118), while he worries or is dark: one of BN5's DarkChips the deck holds (at low HP its
  * DrkRecov where it holds one; else each after the first by a coin), swapped into the deck's place at the hand's size
- * where no DarkChip stands before it */
+ * (the Custom screen's +6, read before the compaction: 0x080251C2-0x080251D2) where no DarkChip stands before it. As BN5's
+ * runs it before the compaction (0x08022CFC, then 0x080250EA), the first screen's lands at deck[5], the sixth, past the
+ * five it offers, in both games; the next screen's compaction takes the chips used out before it, which brings it into
+ * the hand's end (soul_mood_first: BN5's and BN6's hands the same at both screens) */
 static void worried_rule(uint16_t deck[BN6_DECK_SIZE], int side) {
 	uint32_t obj = player(side);
 	bool low = obj && hook_read16(obj + BN6_T1_HP) < hook_read16(obj + BN6_T1_MAX_HP) >> LOW_HP;
@@ -220,16 +295,18 @@ static void worried_rule(uint16_t deck[BN6_DECK_SIZE], int side) {
 }
 
 /* (the deck's compaction as a Custom screen opens, its first instruction; lr its caller) BN5's worried rule before it,
- * then the compaction with the guest battles' shelf (guest.c's): a BN5 DarkChip stays live only in the hand after the
+ * then the compaction with the run's shelf (since issue #64): a BN5 DarkChip stays live only in the hand after the
  * battle's first screen, or at the hand's end while he worries or is dark; the others behind the padding, four at most */
 static HookAct compact(HookRegs *r, void *user) {
 	(void)user;
 	int side = hook_read8(BN6_BATTLE_SIDE) & 1;
-	/* (the battle's opening, at its first screen: his mood as worried as his HP says, the guest battles' rule) */
+	/* (the battle's opening, at its first screen: his mood as worried as his HP says, the run's rule) */
 	uint32_t opened = soul_field(side, BN6_SOUL_OPENED), obj = player(side);
 	if (!hook_read8(opened) && obj) {
 		hook_write8(opened, 1);
 		soulmood_open(side, hook_read16(obj + BN6_T1_HP), hook_read16(obj + BN6_T1_MAX_HP));
+		/* (begun dark by BN5's meter, as BN5's battle opens under 470: 0x08010F14's mood 0) */
+		if (dev_dark) darken(side, hook_read32(obj + BN6_T1_AI_DATA), BN6_DARK_METER);
 	}
 	uint16_t deck[BN6_DECK_SIZE];
 	bool any = false;
@@ -265,7 +342,13 @@ static bool expected(void) {
 		{ BN6_MOOD_HIT, 0x218E }, { BN6_MOOD_SET, 0xB570 }, { BN6_MOOD_SET_WRITE, 0x7384 }, { BN6_MOOD_CALM, 0xB500 },
 		{ BN6_MOOD_CALM_WRITE, 0x7381 }, { BN6_COMPACT, 0xB5D0 }, { BN6_MOOD_FROM_CHIP, 0xF003 }, { BN6_MOOD_FROM_ANGER, 0xF001 },
 		{ BN6_MOOD_FROM_SCRIPT, 0xF7EE }, { BN6_CALM_FROM_CHIP, 0xF001 }, { BN6_CALM_FROM_ANGER, 0xF000 }, { BN6_COMPACT_CALL, 0xF002 },
+		{ BN6_PALETTE_MOOD, 0x210E }, { BN6_PALETTE_MOOD_DONE, 0x212C },
 	};
+	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
+	if (!rom5 || xvirus_crc32(rom5 + (BN5_DARK_AFTER - BUS), BN5_DARK_AFTER_END - BN5_DARK_AFTER) != BN5_DARK_AFTER_CRC) {
+		fprintf(stderr, "soulmood: BN5's DarkChips' after-effects are not the ones expected\n");
+		return false;
+	}
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i)
 		if (rom_u16(code[i].at - BUS) != code[i].op) {
 			fprintf(stderr, "soulmood: %08x is not the instruction expected\n", (unsigned)code[i].at);
@@ -282,12 +365,13 @@ bool soulmood_install(int brk) {
 	claims_begin(SOULMOOD_CLAIMS);
 	bool ok = emu_hook(BN6_MOOD_HIT, hit, NULL) && emu_hook(BN6_MOOD_SET, mirror_set, NULL) &&
 		emu_hook(BN6_MOOD_CALM, mirror_calm, NULL) && emu_hook(BN6_MOOD_SET_WRITE, keep_dark, (void *)(uintptr_t)BN6_MOOD_SET_PAST) &&
-		emu_hook(BN6_MOOD_CALM_WRITE, keep_dark, (void *)(uintptr_t)BN6_MOOD_CALM_PAST) && emu_hook(BN6_COMPACT, compact, NULL);
+		emu_hook(BN6_MOOD_CALM_WRITE, keep_dark, (void *)(uintptr_t)BN6_MOOD_CALM_PAST) && emu_hook(BN6_COMPACT, compact, NULL) &&
+		emu_hook(BN6_PALETTE_MOOD, dark_palette, (void *)(uintptr_t)BN6_PALETTE_MOOD_DONE);
 	claims_end();
 	/* (BN5's DarkChips come into the deck from now on, shelved: the registry's sit-out of them lifted) */
 	if (ok) xchips_dark_shelved(true);
 	done = ok;
-	printf("soulmood: BN5's mood in BN6's battles%s%s\n", ok ? ": its hits, its writers' twins, its dark, the worried rule, the shelf and the gate"
+	printf("soulmood: BN5's mood in BN6's battles%s%s\n", ok ? ": its hits, its writers' twins, its dark, its after-effects, its palette, the worried rule, the shelf and the gate"
 		: " NOT placed whole", brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
 	return ok;
 }

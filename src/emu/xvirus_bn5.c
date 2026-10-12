@@ -271,7 +271,7 @@ static const XvPair powie_calls[] = {
 	{ 0x0810567C, 0x0810AA2A },   /* project:handi, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x08012A6C, 0x08015C94 },   /* map:bytes, SAME */
 };
@@ -382,7 +382,7 @@ static const XvPair bugtank_calls[] = {
 	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
 };
@@ -598,7 +598,7 @@ static const XvPair metfire_calls[] = {
 	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x08012A20, 0x08015C48 },   /* map:bytes, SAME */
@@ -913,7 +913,7 @@ static const XvPair lark_calls[] = {
 	{ 0x08104C38, 0x0810AB34 },   /* search, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 };
 static const XvPair lark_words[] = {
@@ -1138,7 +1138,7 @@ static const XvPair zomon_calls[] = {
 	{ 0x08008A78, 0x0800A098 },   /* project:cangard, SAME */
 	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
 	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
 	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
@@ -1515,7 +1515,7 @@ static const XvPair skarab_calls[] = {
 	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x0810567C, 0x0810AA2A },   /* project:handi, SAME */
 	{ 0x08012C1E, 0x08015E46 },   /* map:bytes, SAME */
@@ -1653,7 +1653,7 @@ static const XvPair draggin_calls[] = {
 	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 	{ 0x08012FBC, 0x080161C4 },   /* near, SAME */
 	{ 0x0800B544, 0x0800CF14 },   /* map:bytes, SAME */
@@ -1802,7 +1802,7 @@ static const XvPair whirly_calls[] = {
 	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
 	{ 0x0800D010, 0x0800ED90 },   /* map:calls, DIFF (audited) */
 	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
-	{ 0x0800FE6A, 0x080126E4 },   /* project:research, DIFF (audited) */
+	{ 0x0800FE6A, XV_CHIP_WRITER },   /* the dispatch's chip writer */
 	{ 0x0800D23E, 0x0800F322 },   /* map:bytes, SAME */
 };
 static const XvImm whirly_imms[] = {

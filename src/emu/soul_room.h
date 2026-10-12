@@ -51,7 +51,10 @@
 #define SOULS_FACES_END    (FREE_SOULS + 0x002D00u)
 #define SOULS_FACE_PALS    (FREE_SOULS + 0x002D00u)   /* ... its palettes, BN6's 0x20 each by face, then the Souls', to: */
 #define SOULS_FACE_PALS_END (FREE_SOULS + 0x003100u)
-#define SOULS_SONGS        (FREE_SOULS + 0x003100u)   /* kept free (the Souls' sounds go to the slot each sound has, xsong_install_at), to: */
+#define SOULS_CHAOS        (FREE_SOULS + 0x003100u)   /* Chaos Unison's Thumb (soulchaos.c: its power attacks, the requests' ends, the failure's
+                                                          family), to: */
+#define SOULS_CHAOS_END    (FREE_SOULS + 0x003800u)
+#define SOULS_SONGS        (FREE_SOULS + 0x003800u)   /* kept free (the Souls' sounds go to the slot each sound has, xsong_install_at), to: */
 #define SOULS_SONGS_END    (FREE_SOULS + 0x004000u)
 #define SOULS_CODE         (FREE_SOULS + 0x004000u)   /* BN5's code the Souls run, moved (soulcode_bn5.c), to: */
 #define SOULS_CODE_END     (FREE_SOULS + 0x007000u)

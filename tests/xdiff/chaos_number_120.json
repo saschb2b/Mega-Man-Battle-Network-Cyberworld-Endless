@@ -1,0 +1,205 @@
+{
+ "about": "Chaos Unison's charged B in both engines (the Souls track's S6, src/emu/soulchaos.c): NumberSoul held with Chaos Unison (BN5's flags 000A and 0236, BN6's souls6), a deck of DarkPlus (BN5's 190, BN6's 290: the DarkChip of its kind) given up on the first Custom screen: Chaos Unison, its turns 1. B held 120 frames from t60: charged by its chaos power's time at level 0 (BN5's 0x0801CA68 row 0x32: 40), then the phases' cycle of its row (BN5's 0x08010648: 42 frames, phase 2 its first 21), released past it: the failure (BN5's family 0x39, BN6's 0xC7): the battle's flag 4, sound 0x8E, the Dark Soul spawned on the enemy's side at its 8th frame from the end, MegaMan out of the Soul at once (BN6's leave's steps). The foe BN5's CanGard at (6,2), free. MegaMan's side's chip list given in BN5 (dschips: three Cannons) and BN6's written from it (dslist), so a Dark Soul plays the same chips in both. Every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 500,
+ "flags5": [
+  "0000",
+  "000A",
+  "0236"
+ ],
+ "folder5": [
+  "34BE"
+ ],
+ "deck5": [
+  "34BE"
+ ],
+ "folder6": [
+  "3522"
+ ],
+ "deck6": [
+  "3522"
+ ],
+ "souls6": "04",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   120
+  ]
+ ],
+ "dschips": [
+  "1",
+  "1",
+  "1"
+ ],
+ "dslist": 1,
+ "sprites": "bytes"
+}

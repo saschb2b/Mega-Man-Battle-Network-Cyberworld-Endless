@@ -50,6 +50,15 @@ typedef struct {
  * one's) BN6 entry where a helper moved its routine (xchips_power_of), else
  * not BN6's to show: 0, unshown. */
 void xrec_from_bn5(const XRecordFrom *in, uint8_t out[XREC_SIZE]);
+/* BN6's own record of a chip BN5's of its name plays (a SAME row whose code
+ * moved, tools/xchiprecipe.py's SAME_MOVED: DarkPlus), made BN5's chip in
+ * what it does where BN5's ROM is read: the moved family and subfamily,
+ * BN5's attack element, effect flags (but the Library's, BN6's), the
+ * damage's upper half (+0xA) and the bytes after the subfamily, its
+ * parameters and lockout, no lock-on and no DarkChipID (BN5's dark rule,
+ * not BN6's BugFrag); BN6's codes, rarity, icon, MB, power, Library and
+ * sort places and art kept. `bn5` BN5's record, `out` BN6's, changed. */
+void xrec_same_moved(const uint8_t bn5[XREC_SIZE], const XChipMoved *moved, uint8_t out[XREC_SIZE]);
 /* The placeholder where BN5's ROM is not read: the row's codes, type and
  * MB, a DarkChip's class, no power, Null, inert, BN6's blank art
  * (`blank`: icon, picture, palette). */

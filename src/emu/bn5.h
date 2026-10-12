@@ -186,6 +186,10 @@
                                     * 8 Cursor, 9 Obstacle, 10 Wind, 11 Break, 12 none */
 #define BN5_CHIP_DARK_GATE 0x15    /* a chip record's +0x15: 0 none; 1 usable only while his dark meter is 470 or more (not dark: HolyDrem, a Navi's
                                     * V1 and SP chips), else only below it (dark: BlakWing, the DS chips); his chip use's test 0x08010110 */
+#define BN5_DARK_AFTER    0x0802C938u /* a chip used (its chip use's call, 0x08010086): one of its DarkChips (187-198) runs its routine by
+                                       * id from 0x0802C978 on the user's battle NaviStats (src/emu/soulmood.c) */
+#define BN5_DARK_AFTER_END 0x0802CA68u /* ... the end of its routines and their table, the bytes the port reads */
+#define BN5_DARK_AFTER_CRC 0x25D4DB46u /* ... their CRC32, the port's source */
 #define BN5_SOUL_KINDS    0x08024BE4u /* a byte per Soul 1-12 (its Navi's AI index): the chip kind it unites with (the UNITE check 0x08024B2C) */
 /* Its Souls (docs/META.md, Souls; docs/ROM_DATA.md, BN5's
  * Souls): the Custom screen's UNITE command, its Double Soul */
@@ -322,6 +326,7 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_DARK_PLATE    0x08013394u /* its arrival into a fight under way (AIData +2 not 0, 0x080131A0: substate 0x08013387): the Dark
                                        * Soul's id's test, 0x0801A5BC(0, 0), which lists a foe and its HP, skipped */
 #define BN5_AI_DATA_SIZE  0x140       /* an AI's data, BN5's (BN6_AI_DATA_SIZE 0x100: BN6 dropped the DS's chip AI, +0xF0 to +0x13F) */
+#define BN5_AI_FLASH      0x3C        /* AIData +0x3C, u16: the green flash's frames left (DarkPlus's: bn5_chips.h; BN6's +0x3C his resting height) */
 #define BN5_DARK_LISTS    0x02034C20u /* the chip AI's lists, BN5_DARK_LIST_SIZE a side: its chips (u16 each, 0x2A of them: a chip's
                                        * id, or 0x8000 + a sequence's number; 0xFFFF none), +0x54 their count (u32), +0x58 eight
                                        * sequences of 16 bytes (its place's offsets from the target, s8 each, then up to seven chips,

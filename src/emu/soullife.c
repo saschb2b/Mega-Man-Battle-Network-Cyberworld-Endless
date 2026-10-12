@@ -52,7 +52,8 @@ static void side_disarm(int side) {
 
 /* (r5 MegaMan's object, entering form 8: BN5 takes the Soul pending as the
  * form byte is written, 0x08012088; here the overlay's spawn, just after
- * BN6 writes it, 0x08014C5C) the Soul committed, its chaos and turns */
+ * BN6 writes it, 0x08014C5C) the Soul committed, its chaos and turns; or
+ * a double of him (BN6's 0x08011420, a chip's), its Soul's own entry */
 static HookAct entered(HookRegs *r, void *user) {
 	(void)user;
 	int side = soul_side_of(r->r[5]);
@@ -71,6 +72,10 @@ static HookAct entered(HookRegs *r, void *user) {
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 	}
+	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for
+	 * it, 0x0800F01C, where the proxy's would give it HeatCross's overlay) */
+	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
+	if (!next && soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_enter[soul]);
 	return go(r, enter_to);
 }
 
@@ -82,7 +87,8 @@ static HookAct left(HookRegs *r, void *user) {
 	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
 	if (soul) soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
 	if (soul && !keep_soul) {
-		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN };
+		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN,
+			BN6_SOUL_CYCLE };
 		for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hook_write8(soul_field(side, fields[i]), 0);
 		side_disarm(side);
 		hook_write16(soul_field(side, BN6_SOUL_CHIP), 0);

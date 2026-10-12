@@ -127,7 +127,8 @@ def family_calls(f):
         elif e.kind == ATTACK:
             # (a chip's family, the chip writer's for setAttack0, as BN6's of its chip: xdiff_snap's chip_action)
             o = next((x for x in f.fr['objs'] if x.addr == e.b), None) if game == 5 else None
-            fam = canon.chip_action(o.ai, e.a) if o is not None else None
+            nid = o.o16(0x28) if o is not None else 0
+            fam = canon.chip_action(o.ai, e.a, canon.is_megaman(5, nid) or canon.is_navi(5, nid)) if o is not None else None
             what = fam if fam is not None else canon.action(game, False, e.a)
         elif e.kind == SOUND:
             what = canon.snd(game, e.a)

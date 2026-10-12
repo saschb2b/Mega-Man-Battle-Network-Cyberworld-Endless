@@ -26,12 +26,17 @@
 #define XC_STUBS     (XC_AT + 0x800u)      /* their stubs: a support routine's (+0, nothing spawned: r0 0, a unit's call to
                                             * a panel claim's spawner too: tools/xchiprecipe.py, STUBS; an unused computed
                                             * power's), a Navi's (+4), r0 1 (+8: tools/xchiprecipe.py, UNIT_STUBS), MegaMan's
-                                            * point (-1, 26) in r0, r1 (+0x10: UNIT_STUBS, BN5's point 0x14 in every row of his).
+                                            * point (-1, 26) in r0, r1 (+0x10: UNIT_STUBS, BN5's point 0x14 in every row of his),
+                                            * his point 0x1D, (40, 20) by his facing (+0x18: HolyDrem's, BN5's in every row of his).
                                             * Each returns by mov pc, lr, as BN6's own code does: the tables' readers call through
                                             * mov lr, pc (BN6 0x080109CA, 0x080ED100, 0x080E2BE6, 0x08017B1E), a return address
                                             * without the Thumb bit, which a bx lr would go on from in ARM state */
-#define XC_STUBS_END (XC_STUBS + 0x20u)
-#define XC_HELPERS   (XC_STUBS + 0x20u)    /* the helpers' code (XCHIP_HELPER: BN5's code several units call, installed once), to: */
+#define XC_SP_TIMES  (XC_STUBS + 0x30u)    /* BN5's best deletion times of its Navis' SPs as the SP powers read them (BN5's battle
+                                            * copy 0x0203E560: u16 frames by the Navi's AI index, XC_SP_SIDE a side, 0xFFFF none),
+                                            * none: BN6 keeps no deletion time of BN5's Navis */
+#define XC_SP_SIDE   0x2Cu
+#define XC_STUBS_END (XC_STUBS + 0x90u)
+#define XC_HELPERS   (XC_STUBS + 0x90u)    /* the helpers' code (XCHIP_HELPER: BN5's code several units call, installed once), to: */
 #define XC_POWERS    (XC_AT + 0x1C00u)     /* BN6's computed powers' routines grown to 256 (BN6_CHIP_POWERS' 45 as the ROM has them,
                                               BN5's entry i at XC_POWER_FIRST + i where a helper moved its routine, the rest the
                                               stub: power 0), BN6_CHIP_POWERS_REF pointed at them */

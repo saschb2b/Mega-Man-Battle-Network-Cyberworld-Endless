@@ -30,6 +30,28 @@
   test autopilot goes round the rocks BN5's fields put on MegaMan's side,
   where it stood stuck behind one.
 
+- **Chaos Unison, BN5's Program Advances and its last chips in BN6's
+  battles (issue #82).** Where BN5's ROM is read, a Soul united by a
+  DarkChip of its kind charges B as in BN5, its dark glow pulsing through
+  BN5's phases: let go at the right moment it fires the Soul's DarkChip
+  attack and the next charge takes longer; at the wrong one MegaMan
+  falls out of the Soul and his Dark Soul appears on the other side,
+  playing the chips of his folder. BN5's Program Advances form on BN6's
+  Custom screen by BN5's recipes (SuprSpr, ShakPar, CacDanc and InfVulc1;
+  where both games name the same chips BN6's comes first, so three
+  FireHit still make FlmHook, and InfVulc2 and 3 cannot form from BN6's
+  Vulcan codes). DarkPlus is BN5's: 50 more for the next chip and
+  MegaMan flashing green. The Navi chips' SP and DS play (an SP at BN5's
+  power for a Navi never beaten, a DS only while MegaMan is dark), as do
+  HolyDrem, Poltrgst and BlakWing, and HolyDrem's and Poltrgst's double
+  of MegaMan no longer wears HeatCross's armour in a Soul. BN5's
+  DarkChips leave their own
+  marks on MegaMan's stats and turn his colours as in BN5, and the first
+  Custom screen of a worried MegaMan holds one back as BN5 does. Zomon's
+  AreaGrab ends as soon as in BN5. ShadowSoul's Chaos Unison fires
+  BN6's own DarkInvs (BN5's hands MegaMan to the game's own AI, still to
+  come). Each is held to BN5's own battle frame by frame.
+
 - **One copy of BN5's code for every track, and the obstacle strike for
   either Colonel (issue #82).** The Souls' code runs the copies the Navis
   and the chips made of what it shares (one copy of each moved object,
