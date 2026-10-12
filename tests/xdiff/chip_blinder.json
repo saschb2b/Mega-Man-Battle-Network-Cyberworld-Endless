@@ -1,6 +1,6 @@
 {
- "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of Blinder A in both games, BN5's chip 129 by BN5's own code and the registry's 456 by the same code moved (BN5's support routine 0x08 as BN6's 0x32), the first Custom screen's chip picked and OK, used at t30: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its sound 0xBC is another song in BN6 (BN5's copied by xsong at a fixed slot, its number set in the copy at install, wanted first).",
- "kind": "reference",
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of Blinder A in both games, BN5's chip 129 by BN5's own code and the registry's 456 by the same code moved (BN5's support routine 0x08 as BN6's 0x32), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
  "mm": "22",
@@ -71,5 +71,10 @@
    2
   ]
  ],
- "sprites": "bytes"
+ "sprites": "bytes",
+ "verdict": {
+  "is": "FAIL",
+  "at": 34,
+  "why": "Blinder's own code moved plays as BN5's (its flash and its hit, the foe blinded for the same 478 frames at BN5's collision +0x22, BN6's +0x20, its mark's word at +0x4C in both: legit.json's collision layout); what differs is the blind mark over the foe (the fourth kind's 0x06, spawned by the engine's status step, the same code in both), 10 pixels to one side: it stands at its target's point 5 by the target's NameID's arm-point record (BN5 0x08015140, BN6 0x08018810), and CanladEX's in BN6 is not BN5's: the moved family's arm points (the virus families' track) to settle, not the chip's code; --survey: nothing else differs, unmasked, in the 300 frames (the mark's place, its row's address and its picture alone)"
+ }
 }

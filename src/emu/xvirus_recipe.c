@@ -58,7 +58,7 @@ static bool ref_ok(const XVirusFamily *f, XvRef r) {
 }
 
 /* the families' region: their code from XV_CODE, their art from XV_ART */
-static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_END };
+static const XvRegion families = { XV_CODE, XV_ART, XV_ART, XV_END, 0, 0 };
 
 static bool blocks_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (f->nblocks < 1) return no(why, n, "no blocks");
@@ -137,14 +137,17 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 	return true;
 }
 
-/* its calls out (each to one of BN6's routines, or the dispatch's spawner for one of its game's) and its immediates */
-static bool calls_ok(const XVirusFamily *f, char *why, size_t n) {
+/* its calls out (each to one of BN6's routines, one of its region's stubs, or the dispatch's spawner for one of its
+ * game's) and its immediates */
+static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		if (xvirus_block_of(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
-		/* (one of BN6's routines, or the second-level dispatch's spawner where it calls one of its game's: never another) */
+		/* (one of BN6's routines or its region's stubs, or the second-level dispatch's spawner where it calls one of its
+		 * game's: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
-		if ((c->to & 1) || (spawner ? c->to != spawner : !bn6_routine(c->to | 1)))
+		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
+		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1)))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
 			if (f->calls[k].from == c->from) return no(why, n, "call %08x twice", (unsigned)c->from);
@@ -159,7 +162,7 @@ static bool calls_ok(const XVirusFamily *f, char *why, size_t n) {
 #define SPRITE_LISTS 10   /* (RomLayout.sprite_lists) */
 
 int xvirus_list_slot(int list) {
-	static const int grown[XV_LISTS_GROWN] = { BN6_SPRITES_VIRUSES, BN6_SPRITES_NAVIS, BN6_SPRITES_ATTACKS, BN6_SPRITES_LIST5 };
+	static const int grown[XV_LISTS_GROWN] = { BN6_SPRITES_VIRUSES, BN6_SPRITES_NAVIS, BN6_SPRITES_ATTACKS, BN6_SPRITES_LIST5, BN6_SPRITES_LIST3 };
 	for (int i = 0; i < XV_LISTS_GROWN; ++i)
 		if (grown[i] == list) return i;
 	return -1;
@@ -210,12 +213,12 @@ bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n) {
 	if (!f->struct1 || !f->struct2 || (f->held && (f->held < BUS || f->held >= BN6_END))) return no(why, n, "its records");
 	if (f->ice != XV_ICE_OWN && (f->ice < 0 || f->ice > XV_ICE_MAX)) return no(why, n, "an ice block of size %d", f->ice);
 	return blocks_ok(f, &families, why, n) && data_ok(f, why, n) && clones_ok(f, &families, why, n) && fixes_ok(f, why, n) && refs_ok(f, why, n) &&
-		calls_ok(f, why, n) && art_ok(f, &families, why, n);
+		calls_ok(f, &families, why, n) && art_ok(f, &families, why, n);
 }
 
 bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
 	if (!f->name) return no(why, n, "no name");
 	if (f->nstates || f->held || f->held_chips || f->traits.laid) return no(why, n, "states, records or held chips: a family's, not code alone");
-	return blocks_ok(f, r, why, n) && data_ok(f, why, n) && clones_ok(f, r, why, n) && fixes_ok(f, why, n) && calls_ok(f, why, n) &&
+	return blocks_ok(f, r, why, n) && data_ok(f, why, n) && clones_ok(f, r, why, n) && fixes_ok(f, why, n) && calls_ok(f, r, why, n) &&
 		art_ok(f, r, why, n);
 }

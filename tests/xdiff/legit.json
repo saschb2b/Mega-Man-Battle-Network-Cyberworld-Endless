@@ -419,7 +419,8 @@
         "BN5 +0x6C and +0x70 are BN5's own: what hit it, by the side of the hitter (+0x6C + 4 x the hitter's +5: BN5 0x080169C0-0x080169CA, 0x080169E8-0x080169F2, 0x08016A28-0x08016A34), ORed into +0x68 after each pair (BN5 0x080168C6-0x080168D4: the rule bn5_or); BN6's hit pass ORs into +0x70 itself (0x081D77DE-0x081D77E2, 0x081D7800-0x081D7804, 0x081D783A-0x081D7840)",
         "BN5 +0x18 and +0x19 are BN5's own: the hitter's +0x0E ORed into +0x18 + the hitter's +5 (BN5 0x08016A9E-0x08016AA8), both ORed into +0x0F after each pair (BN5 0x080168D6-0x080168E4: the rule bn5_or); BN6's hit pass ORs the hitter's +0x0E into +0x0F itself (0x081D78B2-0x081D78B8)",
         "BN6 +0x74-0x7B and +0x18, +0x19 are BN6's own, zero unless an element is in play: the hit's multiplier less one at +0x74 and +0x75 (0x081D78C8-0x081D78F4), the hitter's +0x19 ORed into +0x76 and +0x77 (0x081D7844-0x081D784C, 0x081D7BDA-0x081D7BE2), element 3's damage at +0x78 (0x081D78F6-0x081D7904); +0x19 is the high nibble of the object's element byte (the setup, 0x08019FC4-0x08019FC8), +0x18 read against it (0x081D78D4)",
-        "BN5 +0x1E is BN6 +0x1C, the paralysis timer (BN5_COLL_PARALYSIS, BN6_COLL_PARALYSIS): each game's status step counts it down as its first act, BN5 0x0800CB5C-0x0800CB60 (ldrh r0,[r6,#0x1e]; subs; strh) / BN6 0x0800E744-0x0800E748 (the same at #0x1c), the same routine in both (its paralysis bit 8 of the struck word +0x40 at the same place, BN5 0x0800CB76 / BN6 0x0800E75E); the chips' specs hold their target paralysed (tests/xdiff, hold)"
+        "BN5 +0x1E is BN6 +0x1C, the paralysis timer (BN5_COLL_PARALYSIS, BN6_COLL_PARALYSIS): each game's status step counts it down as its first act, BN5 0x0800CB5C-0x0800CB60 (ldrh r0,[r6,#0x1e]; subs; strh) / BN6 0x0800E744-0x0800E748 (the same at #0x1c), the same routine in both (its paralysis bit 8 of the struck word +0x40 at the same place, BN5 0x0800CB76 / BN6 0x0800E75E); the chips' specs hold their target paralysed (tests/xdiff, hold)",
+        "BN5 +0x20, +0x22, +0x24 are BN6 +0x1E, +0x20, +0x22, the statuses' timers after the paralysis's: the clear BN5 0x08017060 / BN6 0x0801A264 zeroes BN5 +0x1E-+0x24 / BN6 +0x1C-+0x22 in that order after the same flags; the status step counts the blindness down at BN5 +0x22 / BN6 +0x20 (BN5 0x0800CC32-0x0800CC42 / BN6 0x0800E908-0x0800E918) and keeps its mark (the fourth kind's 0x06, spawned by BN5 0x080E0ADE / BN6 0x080E1D2A) at +0x4C in both (BN5 0x0800CC44-0x0800CC68 / BN6 0x0800E91A-0x0800E93E), the status before it its time at BN5 +0x24 / BN6 +0x22 and its mark at +0x48 (BN5 0x0800CBFC-0x0800CC10 / BN6 0x0800E8D2-0x0800E8E6); chip_blinder: CanladEX blinded 478 frames from t34 at BN5 +0x22 / BN6 +0x20, its mark at +0x4C"
       ],
       "segments": [
         [
@@ -440,12 +441,7 @@
         [
           30,
           28,
-          2
-        ],
-        [
-          38,
-          36,
-          6
+          14
         ],
         [
           46,
@@ -455,7 +451,7 @@
         [
           48,
           48,
-          28
+          32
         ],
         [
           96,
@@ -918,6 +914,27 @@
       ]
     },
     {
+      "name": "a chip's muzzle flash's place",
+      "part": "obj",
+      "whose": [
+        "megaman's"
+      ],
+      "kinds": [
+        "T1"
+      ],
+      "types": [
+        "0x00"
+      ],
+      "offsets": [
+        "0x34-0x4B"
+      ],
+      "why": "A chip's muzzle flash (the first kind's type 5, BN5's own code in both: the chips' helper's copy, tools/xchiprecipe.py, HELPERS) stands at MegaMan's arm, at the point its table's entry names (its byte 4: MrkCan's 0x12), an offset each game takes from its own arm-point records by his NameID (BN5 0x08015140, BN6 0x08018810: the pair's audit, tools/bn5_twins.py), his frames each game's own (the mask 'MegaMan's own sprite'): his presentation, the flash's code BN5's.",
+      "evidence": [
+        "its point: BN5 0x080B9C02-0x080B9C1A (its entry's byte 4, then 0x08015140 by his +0x28, into its +0x40 and +0x48); each frame 0x080B9C26-0x080B9C44 its place his +0x34-0x3F plus those",
+        "chip_mrkcan1: the flash 0x2C's place 7 pixels apart from t76, its point's offset (+0x40, +0x48) apart with it"
+      ]
+    },
+    {
       "name": "the hit spark's life",
       "part": [
         "in play",
@@ -936,10 +953,16 @@
         "0x00",
         "0x08"
       ],
-      "why": "Where MegaMan's shot strikes, the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) and its first frames are compared.",
+      "why": "Where MegaMan's shot strikes, the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) is compared, what its sprite makes of its frames is not (as the lava's spark's).",
       "evidence": [
         "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
-        "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's"
+        "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's",
+        "chip_mrkcan1: a spark of MrkCan's shot a frame apart in its sprite (its sprite state's +1, 2 against 1) at t92"
+      ],
+      "sprite_offsets": [
+        "0x01-0x07",
+        "0x0A-0x14",
+        "0x16-0x37"
       ]
     },
     {
@@ -1349,17 +1372,20 @@
         "T4"
       ],
       "effects": [
-        "0x18"
+        "0x18",
+        "0x16",
+        "0x17"
       ],
       "offsets": [
         "0x00",
         "0x08"
       ],
-      "why": "A sword's slash is an effect object (the fourth kind's type 0, effect 0x18: sprite list 3's 0x14, its animation 2, both games' effect tables alike), drawn from each game's own sprite: BN5's animation 2 has four frames (4, 3, 3 and 2 frames), BN6's three (4, 3, 3), so BN5's slash is still drawn (its frame's place on) the frame BN6's ends, and lives two frames longer. Its place and first frames are compared.",
+      "why": "A sword's slash is an effect object (the fourth kind's type 0, effect 0x18: sprite list 3's 0x14, its animation 2, both games' effect tables alike; a Katana's 0x16 and 0x17 its animations 0 and 1), drawn from each game's own sprite: BN5's animation 2 has four frames (4, 3, 3 and 2 frames), BN6's three (4, 3, 3), so BN5's slash is still drawn (its frame's place on) the frame BN6's ends, and lives two frames longer. Its place and first frames are compared.",
       "evidence": [
         "the effects' tables: BN5 0x080DFD7C + 0x18 x 4, BN6 0x080E16D4 + 0x18 x 4: 0C 14 02 00 in both",
         "the sprites: BN5 0x0830105C, BN6 0x0830E6BC (list 3's 0x14), their animation 2's frames 4, 3, 3, 2 and 4, 3, 3",
-        "chip_sword: the slash in play from t44 in both, to t54 in BN6's and t56 in BN5's, its flags and frame apart at t54"
+        "chip_sword: the slash in play from t44 in both, to t54 in BN6's and t56 in BN5's, its flags and frame apart at t54",
+        "chip_katana1: Katana's second slash (effect 0x16, list 3's 0x14's animation 0, both tables 0C 14 00 00) ended in BN6's at t57 while BN5's is still drawn"
       ]
     },
     {

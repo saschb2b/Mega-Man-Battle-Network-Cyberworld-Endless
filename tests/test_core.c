@@ -3063,7 +3063,7 @@ static void test_xvirus_cangard(void) {
 	sprites[0].to_list = 4;
 	recipe_refused(&f, "its battle sprite out of the viruses' list");
 	sprites[0] = c->sprites[0];
-	sprites[2].to_list = 3;
+	sprites[2].to_list = 6;
 	recipe_refused(&f, "a sprite in a list not grown");
 	sprites[2] = c->sprites[2];
 	sprites[2].to_index = 0xFF;
@@ -3102,7 +3102,8 @@ static void test_xvirus_cangard(void) {
 	f = *c;
 	f.traits.mode = 0x22;
 	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a mode past BN6's table refused: %s", why);
-	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == XV_LISTS_GROWN - 1 && xvirus_list_slot(3) < 0,
+	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == 3 && xvirus_list_slot(BN6_SPRITES_LIST3) == XV_LISTS_GROWN - 1 &&
+		xvirus_list_slot(6) < 0,
 		"xvirus: the grown lists' places");
 }
 
@@ -3196,7 +3197,8 @@ static void test_free_space(void) {
 	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
 	const Region room[] = {
 		{ "the per-family tables", XV_GROWN, XV_GROWN + XV_TABLES * XV_STEP }, { "the ice sizes", XV_ICE, XV_ICE + XV_AIS },
-		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "the sprite lists", XV_LISTS, XV_LISTS + XV_LISTS_GROWN * XV_STEP },
+		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "sprite list 3", XV_LIST3, XV_LIST3 + XV_STEP },
+		{ "sprite lists 1, 2, 4 and 5", XV_LISTS, XV_LISTS + (XV_LISTS_GROWN - 1) * XV_STEP },
 		{ "the effects", XV_EFFECTS, XV_EFFECTS + 4u * XV_EFFECTS_MAX }, { "the kinds' types", XV_TYPES, XV_TYPES + 3 * XV_STEP },
 		{ "the enemy ids", XV_IDS_AT, XV_IDS_AT + 3u * XV_IDS }, { "the reward rows", XV_ROWS, XV_ROWS + 2u * ENEMY_DROPS * XV_IDS },
 		{ "the ids' names", XV_NAMES, XV_NAMES + XV_NAMES_ROOM },
@@ -3734,19 +3736,24 @@ static void test_xtext(void) {
  * order; the moved chips (src/core/xchips_moved.c) each a registry row of
  * XREG_MOVED playing a unit's number, and every such row one of them. */
 static void test_chip_code(void) {
-	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END };
+	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_HOMES }, helpers = { XC_HELPERS, XC_HOMES, XC_ART, XC_END, XC_STUBS, XC_HOMES };
 	char why[160] = "";
 	CHECK(xchips_bn5_count >= 4 && xchips_bn5_count <= XC_UNITS, "chips' code: %d units", xchips_bn5_count);
+	bool units = false;
 	for (int i = 0; i < xchips_bn5_count; ++i) {
 		const XChipUnit *u = &xchips_bn5[i];
-		CHECK(xvirus_code_ok(&u->code, &region, why, sizeof why), "chips' code: %s refused: %s", u->code.name, why);
-		int number = u->kind == XCHIP_ATTACK ? 0x50 + u->bn5 : (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI) + u->bn5;
+		/* (the helpers first, their code before the homes, no table's entry) */
+		bool helper = u->kind == XCHIP_HELPER;
+		CHECK(!helper || !units, "chips' code: the helper %s before the units", u->code.name);
+		units |= !helper;
+		CHECK(xvirus_code_ok(&u->code, helper ? &helpers : &region, why, sizeof why), "chips' code: %s refused: %s", u->code.name, why);
+		int number = helper ? 0 : u->kind == XCHIP_ATTACK ? 0x50 + u->bn5 : (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI) + u->bn5;
 		CHECK(u->number == number && u->home == XC_HOMES + XC_HOME_SIZE * (uint32_t)i && u->code.nblocks > 0 &&
 			(u->entry & 1) && xvirus_block_of(&u->code, u->entry & ~1u), "chips' code: %s's number %#x by BN5's, its home and entry", u->code.name, u->number);
 		CHECK(u->kind != XCHIP_ATTACK || (u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END), "chips' code: %s among the chips' families",
 			u->code.name);
 		CHECK(u->kind == XCHIP_ATTACK || u->number < XC_ROUTINES, "chips' code: %s within its routines' table", u->code.name);
-		for (int k = 0; k < i; ++k)
+		for (int k = 0; k < i && !helper; ++k)
 			CHECK(xchips_bn5[k].kind != u->kind || xchips_bn5[k].number != u->number, "chips' code: %s's number twice", u->code.name);
 	}
 	int moved = 0;
@@ -3766,8 +3773,23 @@ static void test_chip_code(void) {
 			++moved;
 			CHECK(xchips_moved_of(xreg_rows[i].bn6) != NULL, "chips' code: the registry's moved chip %d plays a unit", xreg_rows[i].bn6);
 		}
-	CHECK(moved == xchips_moved_count && moved == 8, "chips' code: 8 chips moved (CrakOut, DublCrak, TripCrak, HotBody1-3, Jealousy, NrthWind: %d, %d)",
-		moved, xchips_moved_count);
+	CHECK(moved == xchips_moved_count && moved >= 10, "chips' code: as many chips moved as rows (CrakOut, DublCrak, TripCrak, HotBody1-3, Jealousy, "
+		"NrthWind, MetaGel, Blinder and on: %d, %d)", moved, xchips_moved_count);
+	/* (their songs: each in one of BN6's empty slots, one BN5 sound one slot, no slot two sounds') */
+	int songs = 0;
+	for (int i = 0; i < xchips_bn5_count; ++i)
+		for (int k = 0; k < xchips_bn5[i].nsongs; ++k) {
+			const XcSong *x = &xchips_bn5[i].songs[k];
+			++songs;
+			CHECK(x->slot >= 0x26 && x->slot <= 0x62, "chips' code: %s's sound %#x at slot %#x, one of BN6's empty ones", xchips_bn5[i].code.name, x->song, x->slot);
+			for (int j = 0; j <= i; ++j)
+				for (int q = 0; q < xchips_bn5[j].nsongs && (j < i || q < k); ++q) {
+					const XcSong *y = &xchips_bn5[j].songs[q];
+					CHECK((y->song == x->song) == (y->slot == x->slot), "chips' code: sounds %#x and %#x, slots %#x and %#x: one sound one slot", y->song, x->song,
+						y->slot, x->slot);
+				}
+		}
+	CHECK(songs >= 2, "chips' code: MetaGel's and Blinder's sounds copied in (%d)", songs);
 	const XChipMoved *crak = xchips_moved_of(298), *wind = xchips_moved_of(457);
 	CHECK(crak && crak->family == 0x6B && wind && wind->family == BN6_CHIP_SUPPORT_FAMILY && wind->sub == 0x3F && !xchips_moved_of(1),
 		"chips' code: CrakOut BN5's family 0x1B as 0x6B, NrthWind its support routine 0x15 as 0x3F, Cannon none");
@@ -3789,7 +3811,7 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 257 && own == 138 && plays == 12 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 12 playing now, "
+	CHECK(xreg_count == 257 && own == 138 && plays == 8 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 8 playing now, "
 		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 15 + 94, "registry: the Program Advances and 94 chips past 319, in the pack's extension (%d)", high);
 	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
@@ -3799,7 +3821,9 @@ static void test_chip_registry(void) {
 	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");
 	CHECK(cannon && cannon->bn6 == 1 && cannon->how == XREG_SAME && !xreg_at(1), "registry: BN5's Cannon is BN6's own");
 	CHECK(atk && atk->bn6 == 192 && atk->how == XREG_ALIAS, "registry: Attck+10 is BN6's Atk+10, which BN6's hand merges by its id");
-	CHECK(z && xreg_own(z) && z->twin == 381, "registry: Z Saver an id of its own over BN6's pseudo-chip of its name, which no folder holds");
+	const XChipReg *drill = xreg_of_bn5(72);
+	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
+		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
 	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
 	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
 		"registry: the free ids, BN6's own and its pseudo-chips' not");

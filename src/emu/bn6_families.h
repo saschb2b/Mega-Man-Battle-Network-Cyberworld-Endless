@@ -86,6 +86,8 @@
 #define BN6_SPRITES_NAVIS_COUNT 23        /* ... its numbers (0x08031DA4 on) */
 #define BN6_SPRITE_PLACEHOLDER 0x084DC040u /* the placeholder sprite (a white dot) a list's unused numbers point at: list 1's 0x00 and 0x1E, list 7's
                                              numbers no map lists (src/layer/xnavi.c) */
+#define BN6_SPRITES_LIST3     3           /* sprite list 3, the chips' attacks (MegaMan's sword, a gel, a crack's hole): */
+#define BN6_SPRITES_LIST3_COUNT 105       /* ... its numbers (0x08031E00 on, list 4's after them) */
 #define BN6_SPRITES_ATTACKS   4           /* sprite list 4, the battle's attacks and effects (their objects'): */
 #define BN6_SPRITES_ATTACKS_COUNT 92      /* ... its numbers (0x08031FA4 on, list 5's after them) */
 #define BN6_SPRITES_LIST5     5           /* sprite list 5 (MegaMan's buster's charge, a hit's spark): */

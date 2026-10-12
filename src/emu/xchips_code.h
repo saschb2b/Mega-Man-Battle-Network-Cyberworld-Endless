@@ -23,9 +23,11 @@
 #define XC_AT        FREE_CHIP_MOVED
 #define XC_SUPPORT   (XC_AT + 0x000u)      /* the support routines grown: a Thumb routine per subfamily, 256 */
 #define XC_NAVI      (XC_AT + 0x400u)      /* the Navi chips' routines grown, 256 */
-#define XC_STUBS     (XC_AT + 0x800u)      /* their stubs: a support routine's (+0, nothing spawned: r0 0) and a Navi's (+4) */
+#define XC_STUBS     (XC_AT + 0x800u)      /* their stubs: a support routine's (+0, nothing spawned: r0 0, a unit's call to
+                                            * a panel claim's spawner too: tools/xchiprecipe.py, STUBS) and a Navi's (+4) */
 #define XC_STUBS_END (XC_STUBS + 8u)
-#define XC_HOMES     (XC_AT + 0x1000u)     /* each unit's veneers, XC_HOME_SIZE apart, */
+#define XC_HELPERS   (XC_STUBS + 0x10u)    /* the helpers' code (XCHIP_HELPER: BN5's code several units call, installed once), to: */
+#define XC_HOMES     (XC_AT + 0x2000u)     /* each unit's veneers, XC_HOME_SIZE apart, */
 #define XC_HOME_SIZE 0x400u
 #define XC_UNITS     64                    /* ... this many units */
 #define XC_CODE      (XC_HOMES + XC_HOME_SIZE * XC_UNITS)   /* the units' code, block by block, to: */

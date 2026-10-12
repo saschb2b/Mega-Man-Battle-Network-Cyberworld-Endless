@@ -23,5 +23,16 @@ bool xsong_walk(const uint8_t *seq, uint32_t n, uint32_t base, const uint32_t *s
  * order, so each has the same place in every session; again where the
  * core's ROM copy was made anew. */
 int xsong_install(int xrom, int song, int fallback);
+/* The song a BN6 slot plays a copy of: its number in its own game (the
+ * game in *xrom where not NULL), -1 for a slot of BN6's own. For a reader
+ * comparing the two games' sounds (the differential). */
+int xsong_copy_of(int slot, int *xrom);
+/* A sound of extra ROM `xrom` in BN6 at the one slot fixed for it (issue
+ * #82's shared allocations: one sound one slot, whichever track copies
+ * it; BN5's chips' code, xchips_code.c), played by the players its game
+ * names: `slot`, copied now where the slot still holds BN6's empty header
+ * or before; -1 where it cannot be (the slot another song's, or the sound
+ * copied at another slot). */
+int xsong_install_at(int xrom, int song, int slot);
 
 #endif

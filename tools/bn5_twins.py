@@ -42,6 +42,12 @@ TWINS = (
     # the chips' (tools/xchiprecipe.py): the support objects' generic end substate, where the symbol map placed a routine of
     # another body (BN6's 0x080EA56C); the same body at BN6's 0x0800BC88, the substate BN6's own support objects name
     (0x0800A2F0, 0x0800BC88, 'chips'),
+    # an object's element into its collision data (WoodNos's, CactBal's and the misc family's objects'), where the symbol map
+    # has none: BN6's of the same steps, a mask besides (its audit below)
+    (0x08016C3A, 0x0801A146, 'chips'),
+    # an obstacle's pre-step (BoyBomb's bomb's), where the symbol map has none: BN6's of the same steps but the lava's call
+    # (its audit below)
+    (0x08017A70, 0x0801ADFA, 'chips'),
 )
 
 # The BN5 rows of tools/bn6f_match.py's search that a twin above corrects: its search placed a bn6f function of another
@@ -93,7 +99,31 @@ AUDITS = {
     (0x0800F2A6, 0x0801171C): ('ok', "the attack ended (the wait's form): as 0x0800F29E's twin", ('no_attack6',)),
     (0x0800B2A6, 0x0800CC0A): ('ok', "object_setPanelType: BN6's (in IWRAM) times its conveyors 9-12 where BN5 times its lava 8 and sea "
                                      "10; types 0-4, 6 and 7 are the same panels in both", ('panel_types',)),
-    # the chips' code's (tools/xchiprecipe.py; issue #82's C3)
+    # the chips' code's (tools/xchiprecipe.py; issue #82's C3); the four after the first the Navis' survey's too (their
+    # tools/bn5_navi_twins.py), the bodies compared again here
+    (0x0800AFC2, 0x0800C90A): ('ok', "object_getPanelDataOffset: BN6 runs the same code from IWRAM (0x03007955: bn6f's "
+                                     "_object_getPanelDataOffset, x and y in range, (y x 8 + x) x the panel's size), each game's "
+                                     "panel at its own size (BN5 0x24 at 0x0203A100, BN6 0x20); a unit reads its type (+2) and "
+                                     "alliance (+3), the same offsets in both, its types BN6's (tools/xchiprecipe.py checks both)", ()),
+    (0x08016C3A, 0x0801A146): ('ok', "an object's element (+0x0E) copied into its collision data (+9): BN6 masks it with 0xF, its high "
+                                     "nibble BN6's hit flag by a chip's icon element (legit.json's mask), which BN5's objects leave 0: "
+                                     "the same element", ()),
+    (0x08017FCC, 0x0801B394): ('ok', "an obstacle's states (the third kind's that run as a virus: BoyBomb's bomb, DrkSonic's): the "
+                                     "collision data's final damage and what hit it each game's (BN5 +0x78 and +0x68, BN6 +0x80 and "
+                                     "+0x70: the collision layout); BN5's alone a dark hole spawned (0x08018002-0x0801802E) where its "
+                                     "panel's side's bit 0x10 or 0x20 of BattleState +0x5C is set, which BN5 sets to 0x0C as each "
+                                     "battle is set up (0x08008F64): none of the two in a battle of a run", ()),
+    (0x08017A70, 0x0801ADFA): ('ok', "an obstacle's pre-step (BN6_STEP_OBSTACLE_D's routine, BoyBomb's bomb's): BN5's steps its object on "
+                                     "lava first (0x08017A9A: 0x08016D78, BN5_LAVA_STEP) where BN6's has no call, src/emu/xpanels.c "
+                                     "hooking its next instruction (0x0801AE24) with BN5's rule: the same once lava is in, the rest the "
+                                     "same but for the branches past the call (as the Navis' audit of 0x08017A10)", ()),
+    (0x0800B144, 0x0800CA8C): ('ok', "a panel broken to a hole (Guard's obstacle's): the same steps on the panel's flags at each game's "
+                                     "offset (BN5 +0x18, BN6 +0x14), each clearing its own bits as it sets the hole's type 1 (BN5's "
+                                     "0x23F5F, BN6's 0x3F5F: BN5's 0x20000 its sea's), the same sound 0x97", ()),
+    (0x0800B050, 0x0800C998): ('ok', "a panel cracked: the same steps on the panel's flags at each game's offset (BN5 +0x18, BN6 +0x14), "
+                                     "each clearing its own bits as it sets the cracked type 3 (BN5's 0x23F0F, BN6's 0x3F0F, BN5's "
+                                     "0x20000 its sea's); BN6 makes a panel's whole flags word again from its type as it updates it "
+                                     "(IWRAM 0x030078DC)", ()),
     (0x08015140, 0x08018810): ('ok', "an object's point (r1) by its NameID's arm-point record: BN6's records are 0x44 bytes (34 points) where "
                                      "BN5's 0x3C (30), BN6's first 22 points of MegaMan's the same bytes as BN5's (his form 0's record: "
                                      "0x08015C14 in BN5, 0x080191C8 in BN6), and BN6 answers (0, 7) for its filler ids 0xCD-0xFF, no "
@@ -111,3 +141,44 @@ DATA_TWINS = (
     (0x08005CD0, 0x80, 0x080065E0, 'a sine table (its 0x80 bytes the same)'),
     (0x08005D50, 0x80, 0x08006660, 'a cosine table (its 0x80 bytes the same)'),
 )
+
+# The second-level dispatch's decision for each of BN5's object types a moved unit's code spawns through it (issue #82's
+# shared allocations): MOVED, BN5's own code run for the type in BN6's engine, unless the type is proven the same in BN6,
+# its code to its depth and what it draws by its bytes: TWIN, BN6's type of that number run in its place. One decision
+# per type, whichever track's code spawns it, written here by the track that met it first (at a merge MOVED wins);
+# tools/xchiprecipe.py fails where a unit it writes spawns a type that has none here or another. (kind, BN5's type):
+# (decision, track, why)
+DISPATCH = {
+    (1, 0x05): ('MOVED', 'chips', "the muzzle flash (MegaMan's arm as a chip's attack takes it): BN6's 0x05 not the same code (its "
+                                  "forms' and Beast Out's own tests, its own table's numbers); moved once, its spawner a helper of the "
+                                  "chips' (tools/xchiprecipe.py, HELPERS)"),
+    (3, 0x0B): ('MOVED', 'chips', "SideBub's: no BN6 type runs its code"),
+    (3, 0x18): ('MOVED', 'chips', "CrakOut's crack: BN6's 0x18 the same code, another sprite at list 5's 0xE"),
+    (3, 0x45): ('MOVED', 'chips', "MetaGel's gel: BN6's 0x45 draws list 3's 0, its animation 14 frames longer"),
+    (3, 0x58): ('MOVED', 'chips', "ZSaver's: no BN6 type runs its code"),
+    (3, 0x5A): ('MOVED', 'chips', "NrthWind's wind: no BN6 type runs its code"),
+    (3, 0x5D): ('MOVED', 'chips', "AqWhirl's: no BN6 type runs its code"),
+    (3, 0x5E): ('MOVED', 'chips', "CactBal's: no BN6 type runs its code"),
+    (3, 0x68): ('MOVED', 'chips', "SpShake's: no BN6 type runs its code"),
+    (3, 0x6A): ('MOVED', 'chips', "Pulsar's: no BN6 type runs its code"),
+    (3, 0x71): ('MOVED', 'chips', "DrilArm's drill: no BN6 type runs its code"),
+    (3, 0x88): ('MOVED', 'chips', "Skully's skull: no BN6 type runs its code"),
+    (3, 0x8F): ('MOVED', 'chips', "SideBub's: no BN6 type runs its code"),
+    (3, 0x97): ('MOVED', 'chips', "RainyDay's: no BN6 type runs its code"),
+    (3, 0x9B): ('MOVED', 'chips', "AqWhirl's: no BN6 type runs its code"),
+    (3, 0x9D): ('MOVED', 'chips', "HotBody's fire: no BN6 type runs its code"),
+    (3, 0xA4): ('MOVED', 'chips', "ElcReel's: no BN6 type runs its code"),
+    (3, 0xA6): ('MOVED', 'chips', "WoodNos's: no BN6 type runs its code"),
+    (3, 0xA7): ('MOVED', 'chips', "WoodNos's: no BN6 type runs its code"),
+    (3, 0xC0): ('MOVED', 'chips', "AqWhirl's: no BN6 type runs its code"),
+    (4, 0x0A): ('MOVED', 'chips', "Blinder's flash: BN6's 0x0A not the same code to its depth"),
+    (4, 0x21): ('MOVED', 'chips', "MetaGel's thrower: BN6's twin spawns BN6's own gel"),
+    (4, 0x23): ('MOVED', 'chips', "Blinder's light: no BN6 type runs its code"),
+    (4, 0x28): ('MOVED', 'chips', "the swords' afterimage (Z Saver's, MoonBld's, Katana's): no BN6 type runs its code"),
+    (4, 0x36): ('TWIN', 'chips', "Jealousy's hit on each foe: BN6's 0x36 the same code to its depth, drawing nothing of its own"),
+    (4, 0x39): ('MOVED', 'chips', "NrthWind's time stop: no BN6 type runs its code"),
+    (4, 0x3A): ('MOVED', 'chips', "NrthWind's gusts: BN6's 0x3A the same code, another sprite at its number"),
+    (4, 0x44): ('MOVED', 'chips', "MrkCan's: no BN6 type runs its code"),
+    (4, 0x57): ('MOVED', 'chips', "HotBody's aura: no BN6 type runs its code"),
+    (4, 0x75): ('MOVED', 'chips', "RainyDay's: no BN6 type runs its code"),
+}

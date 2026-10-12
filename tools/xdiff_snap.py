@@ -19,6 +19,7 @@ GAMES = {
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
 XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
+XC_ART = 0x08EA0000                                # ... their copies of BN5's sprites from here (src/emu/xchips_code.h, XC_ART)
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -35,6 +36,7 @@ PLAYER_SOULS, PLAYER_UNITE = 0x78, 0xF8
 SOULS_SIDE = 0x20                 # BN6_SOULS_SIDE: a side's Souls' state
 PENDING_OBJECT = PLAYER_PENDING + 8   # (the pending record's +8: his battle object)
 OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT = 0x28, 0x09, 0x01, 0x04
+OBJ_SAVED = 0x5C   # (an object's state word saved as a flinch or a status interrupts it)
 OBJ_CHIP = 0x2A   # the chip a battle object uses next (BN6_T1_CHIP, u16; 0xFFFF none)
 FLASH = 5         # the first kind's type of a muzzle flash, its +4 the flash's number in each game's table (legit.json, maps, flash)
 DISPATCH = {'T1': 0x5C, 'T3': 0xD2, 'T4': 0x91}  # each kind's second-level dispatch type (src/emu/xvirus_recipe.h, XV_T*_DISPATCH)
@@ -173,6 +175,7 @@ class Canon:
         self.name_id = num(m['name_id']['bn5_to_bn6'])
         self.t3_type = num(m['t3_type']['bn5_to_bn6'])
         self.effect = num(m['effect']['bn5_to_bn6'])
+        self.effect.update(chip_effects())   # (and the moved chips' own, their ids from the generated units)
         self.panel_type = num(m['panel_type']['bn5_to_bn6'])
         self.ai_index = num(m['ai_index']['bn5_to_bn6'])
         self.megaman = num(m['name_id']['megaman'])
@@ -270,6 +273,21 @@ class Canon:
                     self._sprites[g][entry] = pair[4]
         return self._sprites[game].get(base)
 
+    def copy_of(self, base):
+        """BN5's sprite (its list word) a BN6 list word names where it is a moved chip's copy of it (src/emu/xchips_bn5.c's
+        XvSprite lists: BN5's list and number copied to a place of XC_ART's), else None"""
+        if not hasattr(self, '_copies'):
+            import re
+            self._copies = {}
+            path = os.path.join(ROOT, 'src', 'emu', 'xchips_bn5.c')
+            text = open(path, encoding='utf-8').read() if os.path.exists(path) else ''
+            lists = int(self.sprite_pairs['bn5_lists'], 0) if self.sprite_pairs else 0
+            for lst, idx, off in re.findall(r'\{ (\d+), 0x([0-9A-F]+), \d+, 0x[0-9A-F]+, XC_ART \+ 0x([0-9A-F]+), 0x[0-9A-F]+ \}', text):
+                if lists:
+                    entry = u32(rom(5), u32(rom(5), lists - ROM[0] + 4 * int(lst)) - ROM[0] + 4 * int(idx, 16)) & 0x7FFFFFFF
+                    self._copies[XC_ART + int(off, 16)] = entry
+        return self._copies.get(base & 0x7FFFFFFF)
+
     def sprite_sha(self, game, base):
         """a sprite in this game's ROM by its bytes (an uncompressed one of its sprite lists whose list word is `base`): the
         first 12 hex digits of their SHA-1, or None (compressed, copied or in RAM: compared as before, its frames from its own
@@ -357,6 +375,22 @@ def icon_flag(canon, chip6):
     else:
         return 0
     return rom(6)[ICON_FLAGS - ROM[0] + icon] if icon < 16 else 0
+
+
+def chip_effects():
+    """the effects BN5's moved chips' code draws under ids of the chips' own (src/emu/xchips_bn5.c, written by
+    tools/xchiprecipe.py: each unit's XvId list, BN5's id and BN6's): {BN5's: BN6's}"""
+    import re
+    path = os.path.join(ROOT, 'src', 'emu', 'xchips_bn5.c')
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding='utf-8') as f:
+        text = f.read()
+    out = {}
+    for body in re.findall(r'static const XvId \w+_effects\[\] = \{(.*?)\};', text):
+        for a, b in re.findall(r'\{ (0x[0-9A-F]+), (0x[0-9A-F]+) \}', body):
+            out[int(a, 16)] = int(b, 16)
+    return out
 
 
 def moved_rows():
@@ -659,7 +693,11 @@ def obj_cells(fa, fb, oa, ob):
             rel = ('sprite data', wa - base_a), ('sprite data', wb - base_b)
             # (the sprite itself, its data pointer: by the registry where either game's is one of its pairs)
             na, nb = canon.sprite_name(5, base_a - 4), canon.sprite_name(6, base_b - 4)
-            if w - sp == 0x18 and (na or nb):
+            # (a sprite BN6 draws from a moved chip's copy of BN5's: as BN5's sprite it copies, the same picture)
+            copy = canon.copy_of(base_b - 4) if w - sp == 0x18 else None
+            if copy is not None:
+                rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', canon.sprite_name(5, copy) or f'{copy:#x}')
+            elif w - sp == 0x18 and (na or nb):
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
             elif w - sp == 0x18 and canon.sprite_bytes and not (kind == 'T4' and oa.o8(OBJ_TYPE) == 0):
                 # (a sprite of no pair, both games' in their ROMs: the same picture where the same bytes; not an effect
@@ -679,6 +717,11 @@ def obj_cells(fa, fb, oa, ob):
             if off == OBJ_ACTION and mm:
                 a = canon.chip_action(oa.ai, a)
             elif off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
+                a = canon.action(5, mm, a)
+            elif off == OBJ_SAVED + 1 and kind == 'T1' and not mm and oa.o32(OBJ_SAVED):
+                # (the state word a flinch or a status saves at +0x5C where it is 0, its +9 the action it left: BN5
+                # 0x08017D02-0x08017D0A / BN6 0x0801B066-0x0801B06C, the status step BN5 0x0800CB84-0x0800CB8C / BN6
+                # 0x0800E76C-0x0800E774: read as +0x09 is; chip_drilarm1, CanladEX's 8 in BN5, 0xA in BN6, as it flinched)
                 a = canon.action(5, mm, a)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)

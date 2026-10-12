@@ -76,6 +76,7 @@ typedef struct {
 	uint8_t veneers[XV_HOME_SIZE - XV_HOME_VENEERS];
 	uint32_t missing;   /* a call the recipe does not name */
 	const XvClone *clone;   /* the clone being moved: its call aimed otherwise */
+	const XvRegion *region; /* (code alone, xvirus_code_stage) its installer's region: its calls may go to its stubs */
 } Ctx;
 
 /* where an address of a copied block is in BN6 (its Thumb bit kept); 0 for none */
@@ -100,8 +101,10 @@ static uint32_t resolve(uint32_t target, void *user) {
 	for (int i = 0; i < c->f->ncalls; ++i)
 		if (c->f->calls[i].from == target) {
 			uint32_t to = c->f->calls[i].to & ~1u;
-			/* (one of BN6's routines, or one of the second-level dispatch's spawners) */
-			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL)) break;
+			/* (one of BN6's routines, or one of the second-level dispatch's spawners; or a stub or a helper of the installer's
+			 * region, xvirus_code_stage's: the chips', xchips_code.h) */
+			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
+			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && !own) break;
 			return thumb_veneer_get(&c->pool, to);
 		}
 	c->missing = target;
@@ -588,6 +591,7 @@ bool xvirus_code_stage(const XVirusFamily *f, const XvRegion *r, uint32_t veneer
 	memset(&c, 0, sizeof c);
 	c.f = f;
 	c.rom = g.rom;
+	c.region = r;
 	int cap = (int)(sizeof c.veneers / THUMB_VENEER_SIZE);
 	c.pool = (ThumbVeneers){ c.veneers, veneers, nveneers < cap ? nveneers : cap, 0 };
 	for (int i = 0; i < f->nblocks && !xv_failed(); ++i) block_move(&c, &f->blocks[i]);

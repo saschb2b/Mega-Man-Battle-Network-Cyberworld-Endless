@@ -1,0 +1,80 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of Skully1 C in both games, BN5's chip 69 by BN5's own code and the registry's 441 by the same code moved (BN5's family 0x55 as BN6's 0xA5), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0445"
+ ],
+ "folder6": [
+  "05B9"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "verdict": {
+  "is": "FAIL",
+  "at": 65,
+  "why": "Skully's own code moved plays as BN5's to the skull's hit (its throw, flight, sound 0xB7 from its copy at slot 0x61, the hit and the foe confused alike); what differs at t65 is the engine's confusion mark over the foe (the fourth kind's 0x06, spawned by the engine's status step, the same code in both): it stands at its target's point 5 by the target's NameID's arm-point record (BN5 0x08015140, BN6 0x08018810), CanladEX's in BN6 not BN5's (the moved family's arm points, the virus families' track, as chip_blinder's mark), and each game draws it from its own list 5's 0x0B (BN6 redrew it): neither the chip's code; --survey: nothing else differs, unmasked, in the 300 frames (the mark's place, its row's address and its picture alone)"
+ }
+}

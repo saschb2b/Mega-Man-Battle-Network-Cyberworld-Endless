@@ -1,0 +1,75 @@
+{
+ "about": "A chip of BN5's whose code is to move into BN6's engine (issue #82's C3), BN5's battle alone until it does: CrsShld1 against an attack, BN5's CanGard V1 at (6,2) free (not held: spec cangard_v1, its reticle on MegaMan's panel at t85), MegaMan at (2,2) with a folder of CrsShld1 B in both games, BN5's chip 169 by BN5's own code and the registry's 477 by the same code moved (BN5's family 0x1F as BN6's 0x6F), raised at t76: the reticle's strike met by the shield and sent back as BN5's shockwave: what BN5's battle does, for the differential once its unit moves (docs/MULTIROM.md, The chips' code). Not moved yet: its unit derives whole (Guard's family 0x1F), but moved, its shield (the third kind's 0x2B) holds another word at +0x64 from t79 (0xA2F0 against 0xAEEC), to be traced first.",
+ "kind": "reference",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 360,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 0,
+ "folder5": [
+  "02A9"
+ ],
+ "folder6": [
+  "03DD"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   76,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

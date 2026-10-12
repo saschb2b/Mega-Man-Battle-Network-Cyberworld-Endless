@@ -53,13 +53,15 @@ static void specs(void) {
 	G[XG_AI_HOOKS] = (Grow){ "a table of hooks by AI index", BN6_AI_HOOKS_REF, BN6_HELD_AIS, 4, XV_PER_AI, XV_AIS, 0, 0 };
 	G[XG_AI_HOOKS2] = (Grow){ "a table of hooks by AI index", BN6_AI_HOOKS2_REF, BN6_HELD_AIS, 4, XV_PER_AI + XV_STEP, XV_AIS, 0, 0 };
 	G[XG_HELD] = (Grow){ "the held chips", BN6_HELD_CHIPS_REF, BN6_HELD_AIS, 4, XV_PER_AI + 2 * XV_STEP, XV_AIS, 0, 0 };
+	/* (in xvirus_list_slot's order; list 3, the chips' attacks, the last, at a place of its own) */
 	static const uint32_t lists[XV_LISTS_GROWN][2] = {
 		{ BN6_SPRITES_VIRUSES, BN6_SPRITES_VIRUSES_COUNT }, { BN6_SPRITES_NAVIS, BN6_SPRITES_NAVIS_COUNT },
 		{ BN6_SPRITES_ATTACKS, BN6_SPRITES_ATTACKS_COUNT }, { BN6_SPRITES_LIST5, BN6_SPRITES_LIST5_COUNT },
+		{ BN6_SPRITES_LIST3, BN6_SPRITES_LIST3_COUNT },
 	};
 	for (uint32_t i = 0; i < XV_LISTS_GROWN; ++i)
-		G[XG_LIST + i] = (Grow){ "a sprite list", BUS + R.layout->sprite_lists + 4 * lists[i][0], lists[i][1], 4, XV_LISTS + i * XV_STEP,
-			XV_LIST_MAX, -1, BN6_SPRITE_PLACEHOLDER };
+		G[XG_LIST + i] = (Grow){ "a sprite list", BUS + R.layout->sprite_lists + 4 * lists[i][0], lists[i][1], 4,
+			lists[i][0] == BN6_SPRITES_LIST3 ? XV_LIST3 : XV_LISTS + i * XV_STEP, XV_LIST_MAX, -1, BN6_SPRITE_PLACEHOLDER };
 	G[XG_EFFECTS] = (Grow){ "the effects", BN6_EFFECTS_REF, BN6_EFFECT_COUNT, 4, XV_EFFECTS, XV_EFFECTS_MAX, 0, 0 };
 	G[XG_T1] = (Grow){ "the first kind's types", BN6_T1_TYPES_REF, BN6_TYPES_T1_COUNT, 4, XV_TYPES, XV_TYPES_MAX, -1, 0, 1 };
 	G[XG_T3] = (Grow){ "the third kind's types", BN6_T3_TYPES_REF, BN6_TYPES_T3_COUNT, 4, XV_TYPES + XV_STEP, XV_TYPES_MAX, -1, 0, 3 };

@@ -318,6 +318,38 @@
    "poke5": [
     "080E4940:2038"
    ]
+  },
+  {
+   "name": "a moved chip's sound's slot",
+   "spec": "chip_metagel",
+   "poke5": [
+    "080CE170:2053"
+   ],
+   "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x52, movs r0,#0x52 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one: a song missing"
+  },
+  {
+   "name": "a moved chip's effect's id",
+   "spec": "chip_rainyday",
+   "poke5": [
+    "080D996E:2461"
+   ],
+   "what": "RainyDay's effect 0x61 (given an id of the chips', movs r4 at BN5's 0x080D996E, written at its copy) spawned as BN6's own 0x61, another picture"
+  },
+  {
+   "name": "the muzzle flash's sprite",
+   "spec": "chip_drilarm1",
+   "poke5": [
+    "080B9B48:1E:1"
+   ],
+   "what": "the flash 0x2F's number byte in the helper's copy of its table (BN5's 0x080B9B48, set to the number of the chips' where BN5's list 3 0x1E was copied) left at 0x1E: BN6's list 3 0x1E drawn, another picture"
+  },
+  {
+   "name": "a packed sprite word",
+   "spec": "chip_mrkcan1",
+   "poke5": [
+    "080E5794:00001024:4"
+   ],
+   "what": "MrkCan's mark's packed sprite word (its literal at BN5's 0x080E5794, given the number of the chips' where BN5's list 4 0x24 was copied, for the second packed setup 0x08018926) left at 0x1024: BN6's list 4 0x24 drawn, another picture"
   }
  ]
 }

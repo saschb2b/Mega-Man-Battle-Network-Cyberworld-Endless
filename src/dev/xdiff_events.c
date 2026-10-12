@@ -20,6 +20,8 @@
 #include "emu.h"
 #include "guest.h"
 #include "hook.h"
+#include "xchips_code.h"
+#include "xsong.h"
 #include "xvirus.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_families.h"
@@ -267,8 +269,11 @@ static XdEvent *call(XdLog *log, const HookRegs *r, int kind, int sub, bool push
 }
 
 static HookAct on_sound(HookRegs *r, void *user) {
-	XdEvent *e = call(user, r, XD_SOUND, 0, false);
-	if (e) e->a = r->r[0];
+	XdLog *log = user;
+	XdEvent *e = call(log, r, XD_SOUND, 0, false);
+	/* (a sound of BN5's BN6 plays from a copy, xsong.h: its own number) */
+	int copy = log->game == 6 ? xsong_copy_of((int)r->r[0], NULL) : -1;
+	if (e) e->a = copy >= 0 ? (uint32_t)copy : r->r[0];
 	return HOOK_CONTINUE;
 }
 
@@ -332,9 +337,11 @@ static XdLog *log_make(int game, bool alone) {
 	log->g = &games[game == 6];
 	static XvMoved m[XV_MOVED_MAX];
 	int n = xvirus_moved(m, XV_MOVED_MAX);
-	/* (the families' code, and the chips' moved code: its draws keyed by BN5's own places as a family's are) */
+	/* (the families' code, and the chips' moved code: its draws keyed by BN5's own places as a family's are; not the chips'
+	 * helpers', BN5's code every chip and MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n && log->nfam < FAMILY_MAX; ++i)
-		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL)) log->fam[log->nfam++] = m[i];
+		if ((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= FREE_CHIP_MOVED && m[i].to < FREE_TAIL && !(m[i].to >= XC_HELPERS && m[i].to < XC_HOMES)))
+			log->fam[log->nfam++] = m[i];
 	/* (the control's code where BN6 has it: its own Mettaur's, which the moved copy's places are keyed as) */
 	for (int i = 0; alone && i < xvirus_control.nblocks && log->nfam < FAMILY_MAX; ++i) {
 		const XvBlock *b = &xvirus_control.blocks[i];
@@ -443,3 +450,5 @@ void xd_control_frame(const char *how) {
 	out = NULL;
 	done = true;
 }
+
+int xd_song_copy(int slot) { return xsong_copy_of(slot, NULL); }

@@ -8,6 +8,7 @@
 #ifndef CW_XCHIPS_BN5_H
 #define CW_XCHIPS_BN5_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "xvirus_recipe.h"
@@ -17,15 +18,24 @@ enum {
 	XCHIP_ATTACK,    /* an attack family: its entry of the grown attack families (xattack_grow.h), a chip's family */
 	XCHIP_SUPPORT,   /* a support routine: its entry of the grown support routines, a chip's subfamily under family 0x15 */
 	XCHIP_NAVI,      /* a Navi chip's routine: its entry of the grown Navi routines, a chip's subfamily under family 0x1B */
+	XCHIP_HELPER,    /* a helper: BN5's code several units call whose object one copy alone may move (the muzzle flash), at
+	                    XC_HELPERS, installed before the units; no entry of a table, its `entry` the routine they call */
 };
+
+/* A sound its code starts that BN6 has another song at: BN5's song copied
+ * into BN6's slot fixed for it (xsong.h, xsong_install_at), the immediates
+ * that name it given the slot */
+typedef struct { uint16_t song; uint8_t slot; } XcSong;
 
 typedef struct {
 	uint8_t kind;          /* XCHIP_* */
-	uint8_t bn5;           /* BN5's family (an attack) or subfamily (a support or Navi routine) */
-	uint8_t number;        /* BN6's: its family (XATTACK_CHIPS on), or its entry in the grown routines' table */
+	uint8_t bn5;           /* BN5's family (an attack) or subfamily (a support or Navi routine); a helper's 0 */
+	uint8_t number;        /* BN6's: its family (XATTACK_CHIPS on), or its entry in the grown routines' table; a helper's 0 */
 	uint32_t entry;        /* the routine the table names, BN5's address (Thumb): moved with the code */
 	uint32_t home;         /* its veneers' place (XC_HOMES, XC_HOME_SIZE each) */
 	XVirusFamily code;     /* its code alone: blocks, data, calls, words, immediates, numbers, the objects it spawns, what it draws */
+	const XcSong *songs;   /* its sounds copied in (NULL none) */
+	int nsongs;
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];

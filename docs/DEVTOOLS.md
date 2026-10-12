@@ -863,7 +863,19 @@ the masks):
   family through the registry: a C1 chip's BN6 twin's, a moved chip's
   moved number (`src/core/xchips_moved.c`). A run that never reaches its
   fight says where each game stood ("never reached its fight: its game
-  state, its battle's phase, Custom screen, frames").
+  state, its battle's phase, Custom screen, frames"). A moved chip's
+  copies are read as BN5's: a sprite BN6 draws from a unit's copy as the
+  BN5 sprite it copies (`src/emu/xchips_bn5.c`'s `XvSprite` rows), an
+  effect id of the chips' as BN5's (its `XvId` rows), a song BN6 plays
+  from a copy in one of its slots as BN5's number (`xsong_copy_of`);
+  an object's state word saved at +0x5C as a flinch or a status
+  interrupts it has its action read as +0x09's. The chips' helpers'
+  code (the muzzle flash, the buster arm) is no unit's: BN5's own buster
+  runs it too, so its calls are compared as the engine's. A spec whose
+  target's own rule meets the chip (`hold: 0` where a flinching hit ends
+  a paralysis in BN5's hit pass and not in BN6's: DrilArm's) says why in
+  its `about`; one held to a recorded FAIL (`verdict`: Blinder's and
+  Skully's status marks over a moved foe) has its `--survey` named there.
 - **A Soul's life** (the Souls track's S2; docs/MULTIROM.md, Transplanted
   Souls): with the Souls installed in BN6's engine (`souls6=`), a Soul
   stands behind the proxy form, 8, where BN5's form byte names the Soul:
@@ -1016,6 +1028,31 @@ it still needs. `src/core/xchips_moved.c` takes the registry's
 `XREG_MOVED` rows of the written units: a unit's chips must be
 `XREG_MOVED` (the generator refuses to write otherwise), and a chip whose
 unit is not written stays `XREG_PENDING`, sitting out.
+
+What else a unit is given, each a table of the generator's with its why:
+`HELPERS`, BN5's code several units call whose object one copy alone may
+move (the muzzle flash, the buster arm), derived first and installed
+once before the units at `XC_HELPERS`, every routine of theirs a unit
+calls aimed at their copy (the flash's table's sprites copied for the
+numbers the units give it, by one instruction or `FLASH_NUMBERS`, read
+from each call site); `STUBS`, routines aimed at the chips' own stubs
+(a panel claim's spawners, proved inert: docs/MULTIROM.md, The chips'
+code); `COPY_HELPERS`, BN5's engine routines with no twin copied with a
+unit (the swords' reach); `DATA_SIZES`, raw tables longer than the walk
+can tell; `DEAD_CODE`, unreached bytes no word, call or branch names;
+`TABLE_SPRITES`, `TABLE_EFFECTS` and `TABLE_PANELS`, an object's kind
+table whose rows' sprites, effect ids or panel types are given BN6's or
+the chips' numbers by their bytes (`XvByte`); `MEGAMAN_LOADS`, MegaMan's
+own sprite loaded by a unit (each game's own); `SOUND_SLOTS`, the song
+slot each copied sound takes (the shared allocations'; the chips' own
+from 0x52 down), its immediates set to it and `src/audio/xsong.c`'s
+`xsong_install_at` copying the song as the units install; effects whose
+entry differs take BN6's of the same sprite, animation and palette or an
+id of the chips' (0xD0-0xFF, from the top down); BN5's lava, sea and holy
+set or compared are BN6's 13, 14 and 5. Every object type a written unit
+spawns through the dispatch must have its decision, MOVED or TWIN, in
+`tools/bn5_twins.py`'s `DISPATCH` (one for every track): the generator
+refuses to write where one is missing or another.
 
 ## The proxy form: where a Soul stands
 

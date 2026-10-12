@@ -148,6 +148,7 @@ typedef struct {
 #define XV_ICE      (XV_AT + 0x2C00u)      /* the ice blocks' sizes (BN6_ICE_SIZES) grown to XV_AIS bytes */
 #define XV_PER_AI   (XV_AT + 0x2D00u)      /* the three 35-word tables by AI index grown to XV_AIS words, XV_STEP apart: BN6_AI_HOOKS,
                                               BN6_AI_HOOKS2, BN6_HELD_CHIPS */
+#define XV_LIST3    (XV_AT + 0x3900u)      /* sprite list 3 grown to XV_LIST_MAX numbers (the chips' track's, once for every track) */
 #define XV_LISTS    (XV_AT + 0x4000u)      /* sprite lists 1, 2, 4 and 5 grown to XV_LIST_MAX numbers, XV_STEP apart */
 #define XV_EFFECTS  (XV_AT + 0x5000u)      /* the effects (BN6_EFFECTS) grown to XV_EFFECTS_MAX ids */
 #define XV_TYPES    (XV_AT + 0x5400u)      /* the first, third and fourth kinds' types grown to XV_TYPES_MAX, XV_STEP apart */
@@ -196,7 +197,7 @@ typedef struct {
 #define XV_HOME_SIZE    0x800
 #define XV_STATES_MAX   16
 
-#define XV_LISTS_GROWN 4   /* the sprite lists grown (XV_LISTS): 1, 2, 4 and 5 */
+#define XV_LISTS_GROWN 5   /* the sprite lists grown: 1, 2, 4 and 5 (XV_LISTS), 3 (XV_LIST3) */
 /* A sprite list's place among the grown (0 to XV_LISTS_GROWN - 1), -1 for
  * one that is not grown. */
 int xvirus_list_slot(int list);
@@ -207,8 +208,9 @@ uint32_t xvirus_crc32(const uint8_t *p, uint32_t n);
 bool xvirus_recipe_ok(const XVirusFamily *f, char *why, size_t n);
 /* Where a recipe's code and art may go: the families' (XV_CODE to XV_ART,
  * XV_ART to XV_END), or another installer's region (a chip's code,
- * xchips_code.h) */
-typedef struct { uint32_t code, code_end, art, art_end; } XvRegion;
+ * xchips_code.h), and the stubs of its own its calls may go to besides
+ * BN6's routines (stubs to stubs_end; the families' none) */
+typedef struct { uint32_t code, code_end, art, art_end, stubs, stubs_end; } XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites
  * within `r`; where not, why. */

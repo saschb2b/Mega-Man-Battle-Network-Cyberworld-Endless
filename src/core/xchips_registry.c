@@ -10,10 +10,11 @@
  * a pseudo-chip of its battles (Z Saver, 381), which no folder holds; and
  * the three BN6's US release named otherwise (Attck+10 and Attck+30, BN6's
  * Atk+10 and Atk+30, which BN6's hand merges into the chip before them by
- * their ids; PitHoky, PitHocky). The rest take ids of their own: 203-213
- * the eleven BN6's code plays now (over AirHocky's, WideSht's, Spreadr1's,
- * DrilArm's and Geddon's families: BN6's Geddon cracks, breaks or poisons
- * by its first parameter as BN5's three do), 214-220 the seven DarkChips,
+ * their ids; PitHoky, PitHocky). The rest take ids of their own: 203-207
+ * and 211-213 the eight BN6's code plays now (over AirHocky's, WideSht's,
+ * Spreadr1's and Geddon's families: BN6's Geddon cracks, breaks or poisons
+ * by its first parameter as BN5's three do), 208-210 DrilArm1-3 (BN5's own
+ * drill, moved as Z Saver is), 214-220 the seven DarkChips,
  * 291-294 the Megas, 295-300 the first chips to be moved (Guard1-3,
  * CrakOut, DublCrak, TripCrak), 314 HolyDrem beside BN6's Gigas, 350-364
  * the Program Advances beside BN6's, 411 on the rest, the Navi chips last.
@@ -37,21 +38,21 @@ const XChipReg xreg_rows[] = {
 	{   9, 204, XREG_RECORD,  23, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 10 },   /* WideSht1 */
 	{  10, 205, XREG_RECORD,  23, 0xFF, { 0x04, 0x05, 0x06, 0xFF }, 0, 30 },   /* WideSht2 */
 	{  11, 206, XREG_RECORD,  23, 0xFF, { 0x12, 0x13, 0x14, 0xFF }, 0, 50 },   /* WideSht3 */
-	{  12, 411, XREG_PENDING,   0, 0xFF, { 0x0C, 0x0A, 0x12, 0xFF }, 0, 18 },   /* MrkCan1 */
-	{  13, 412, XREG_PENDING,   0, 0xFF, { 0x03, 0x05, 0x19, 0xFF }, 0, 27 },   /* MrkCan2 */
-	{  14, 413, XREG_PENDING,   0, 0xFF, { 0x04, 0x11, 0x18, 0xFF }, 0, 36 },   /* MrkCan3 */
+	{  12, 411, XREG_MOVED,     0, 0xFF, { 0x0C, 0x0A, 0x12, 0xFF }, 0, 18 },   /* MrkCan1 */
+	{  13, 412, XREG_MOVED,     0, 0xFF, { 0x03, 0x05, 0x19, 0xFF }, 0, 27 },   /* MrkCan2 */
+	{  14, 413, XREG_MOVED,     0, 0xFF, { 0x04, 0x11, 0x18, 0xFF }, 0, 36 },   /* MrkCan3 */
 	{  15,   5, XREG_SAME },   /* Vulcan1 */
 	{  16,   6, XREG_SAME },   /* Vulcan2 */
 	{  17,   7, XREG_SAME },   /* Vulcan3 */
 	{  18, 207, XREG_RECORD,   9, 0xFF, { 0x02, 0x03, 0x04, 0x1A }, 0, 10 },   /* Spreader */
 	{  19,  30, XREG_SAME },   /* Thunder */
 	{  20,  69, XREG_SAME },   /* IceSeed */
-	{  21, 414, XREG_PENDING,   0, 0xFF, { 0x05, 0x0F, 0x13, 0xFF }, 0, 14 },   /* Pulsar1 */
-	{  22, 415, XREG_PENDING,   0, 0xFF, { 0x04, 0x06, 0x0C, 0xFF }, 0, 26 },   /* Pulsar2 */
-	{  23, 416, XREG_PENDING,   0, 0xFF, { 0x02, 0x11, 0x12, 0xFF }, 0, 38 },   /* Pulsar3 */
-	{  24, 417, XREG_PENDING,   0, 0xFF, { 0x06, 0x07, 0x08, 0xFF }, 0, 30 },   /* SpShake1 */
-	{  25, 418, XREG_PENDING,   0, 0xFF, { 0x01, 0x02, 0x03, 0xFF }, 0, 40 },   /* SpShake2 */
-	{  26, 419, XREG_PENDING,   0, 0xFF, { 0x12, 0x13, 0x14, 0xFF }, 0, 50 },   /* SpShake3 */
+	{  21, 414, XREG_MOVED,     0, 0xFF, { 0x05, 0x0F, 0x13, 0xFF }, 0, 14 },   /* Pulsar1 */
+	{  22, 415, XREG_MOVED,     0, 0xFF, { 0x04, 0x06, 0x0C, 0xFF }, 0, 26 },   /* Pulsar2 */
+	{  23, 416, XREG_MOVED,     0, 0xFF, { 0x02, 0x11, 0x12, 0xFF }, 0, 38 },   /* Pulsar3 */
+	{  24, 417, XREG_MOVED,     0, 0xFF, { 0x06, 0x07, 0x08, 0xFF }, 0, 30 },   /* SpShake1 */
+	{  25, 418, XREG_MOVED,     0, 0xFF, { 0x01, 0x02, 0x03, 0xFF }, 0, 40 },   /* SpShake2 */
+	{  26, 419, XREG_MOVED,     0, 0xFF, { 0x12, 0x13, 0x14, 0xFF }, 0, 50 },   /* SpShake3 */
 	{  27,  53, XREG_SAME },   /* Static */
 	{  28, 191, XREG_SAME },   /* LifeSync */
 	{  29,  54, XREG_SAME },   /* MiniBomb */
@@ -85,21 +86,21 @@ const XChipReg xreg_rows[] = {
 	{  57, 432, XREG_PENDING,   0, 0xFF, { 0x04, 0x0D, 0x19, 0xFF }, 0, 23 },   /* MoonBld1 */
 	{  58, 433, XREG_PENDING,   0, 0xFF, { 0x06, 0x0E, 0x15, 0xFF }, 0, 36 },   /* MoonBld2 */
 	{  59, 434, XREG_PENDING,   0, 0xFF, { 0x02, 0x0B, 0x13, 0xFF }, 0, 49 },   /* MoonBld3 */
-	{  60, 435, XREG_PENDING,   0, 0xFF, { 0x03, 0x07, 0x12, 0xFF }, 0, 25 },   /* Katana1 */
-	{  61, 436, XREG_PENDING,   0, 0xFF, { 0x01, 0x11, 0x16, 0xFF }, 0, 37 },   /* Katana2 */
-	{  62, 437, XREG_PENDING,   0, 0xFF, { 0x00, 0x09, 0x19, 0xFF }, 0, 49 },   /* Katana3 */
+	{  60, 435, XREG_MOVED,     0, 0xFF, { 0x03, 0x07, 0x12, 0xFF }, 0, 25 },   /* Katana1 */
+	{  61, 436, XREG_MOVED,     0, 0xFF, { 0x01, 0x11, 0x16, 0xFF }, 0, 37 },   /* Katana2 */
+	{  62, 437, XREG_MOVED,     0, 0xFF, { 0x00, 0x09, 0x19, 0xFF }, 0, 49 },   /* Katana3 */
 	{  63,  12, XREG_SAME },   /* TankCan1 */
 	{  64,  13, XREG_SAME },   /* TankCan2 */
 	{  65,  14, XREG_SAME },   /* TankCan3 */
 	{  66, 438, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x19, 0xFF }, 0, 24 },   /* RedFrut1 */
 	{  67, 439, XREG_PENDING,   0, 0xFF, { 0x05, 0x13, 0x16, 0xFF }, 0, 48 },   /* RedFrut2 */
 	{  68, 440, XREG_PENDING,   0, 0xFF, { 0x07, 0x0E, 0x14, 0xFF }, 0, 62 },   /* RedFrut3 */
-	{  69, 441, XREG_PENDING,   0, 0xFF, { 0x02, 0x0A, 0x12, 0xFF }, 0, 34 },   /* Skully1 */
-	{  70, 442, XREG_PENDING,   0, 0xFF, { 0x00, 0x07, 0x15, 0xFF }, 0, 50 },   /* Skully2 */
-	{  71, 443, XREG_PENDING,   0, 0xFF, { 0x06, 0x0D, 0x14, 0xFF }, 0, 76 },   /* Skully3 */
-	{  72, 208, XREG_RECORD,  51, 0xFF, { 0x00, 0x09, 0x16, 0xFF }, 0, 38 },   /* DrilArm1 */
-	{  73, 209, XREG_RECORD,  51, 0xFF, { 0x03, 0x0B, 0x12, 0xFF }, 0, 51 },   /* DrilArm2 */
-	{  74, 210, XREG_RECORD,  51, 0xFF, { 0x08, 0x0F, 0x19, 0xFF }, 0, 64 },   /* DrilArm3 */
+	{  69, 441, XREG_MOVED,     0, 0xFF, { 0x02, 0x0A, 0x12, 0xFF }, 0, 34 },   /* Skully1 */
+	{  70, 442, XREG_MOVED,     0, 0xFF, { 0x00, 0x07, 0x15, 0xFF }, 0, 50 },   /* Skully2 */
+	{  71, 443, XREG_MOVED,     0, 0xFF, { 0x06, 0x0D, 0x14, 0xFF }, 0, 76 },   /* Skully3 */
+	{  72, 208, XREG_MOVED,     0, 0xFF, { 0x00, 0x09, 0x16, 0xFF }, 0, 38 },   /* DrilArm1 */
+	{  73, 209, XREG_MOVED,     0, 0xFF, { 0x03, 0x0B, 0x12, 0xFF }, 0, 51 },   /* DrilArm2 */
+	{  74, 210, XREG_MOVED,     0, 0xFF, { 0x08, 0x0F, 0x19, 0xFF }, 0, 64 },   /* DrilArm3 */
 	{  75, 144, XREG_SAME },   /* TimeBom1 */
 	{  76, 200, XREG_SAME },   /* TimeBom2 */
 	{  77, 201, XREG_SAME },   /* TimeBom3 */
@@ -120,7 +121,7 @@ const XChipReg xreg_rows[] = {
 	{  92, 299, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0,  7 },   /* DublCrak */
 	{  93, 300, XREG_MOVED,     0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 10 },   /* TripCrak */
 	{  94, 141, XREG_SAME },   /* Magnum */
-	{  95, 450, XREG_PENDING,   0, 0xFF, { 0x05, 0x0D, 0x13, 0xFF }, 0, 52 },   /* MetaGel */
+	{  95, 450, XREG_MOVED,     0, 0xFF, { 0x05, 0x0D, 0x13, 0xFF }, 0, 52 },   /* MetaGel */
 	{  96, 134, XREG_SAME },   /* Snake */
 	{  97, 142, XREG_SAME },   /* CircGun */
 	{  98, 145, XREG_SAME },   /* Mine */
@@ -151,10 +152,10 @@ const XChipReg xreg_rows[] = {
 	{ 123, 211, XREG_RECORD, 167, 0xFF, { 0x0C, 0x0F, 0x19, 0x1A }, 0, 34 },   /* Geddon1 */
 	{ 124, 212, XREG_RECORD, 167, 0xFF, { 0x07, 0x13, 0x16, 0xFF }, 0, 47 },   /* Geddon2 */
 	{ 125, 213, XREG_RECORD, 167, 0xFF, { 0x00, 0x0E, 0x15, 0xFF }, 0, 62 },   /* Geddon3 */
-	{ 126, 454, XREG_PENDING,   0, 0xFF, { 0x01, 0x06, 0x0B, 0xFF }, 0, 47 },   /* RainyDay */
+	{ 126, 454, XREG_MOVED,     0, 0xFF, { 0x01, 0x06, 0x0B, 0xFF }, 0, 47 },   /* RainyDay */
 	{ 127, 194, XREG_SAME },   /* ColorPt */
 	{ 128, 455, XREG_PENDING,   0, 0xFF, { 0x04, 0x0A, 0x16, 0xFF }, 0, 39 },   /* ElemRage */
-	{ 129, 456, XREG_PENDING,   0, 0xFF, { 0x00, 0x03, 0x07, 0x1A }, 0,  9 },   /* Blinder */
+	{ 129, 456, XREG_MOVED,     0, 0xFF, { 0x00, 0x03, 0x07, 0x1A }, 0,  9 },   /* Blinder */
 	{ 130, 126, XREG_SAME },   /* AirSpin1 */
 	{ 131, 127, XREG_SAME },   /* AirSpin2 */
 	{ 132, 128, XREG_SAME },   /* AirSpin3 */
@@ -182,15 +183,15 @@ const XChipReg xreg_rows[] = {
 	{ 154, 462, XREG_MOVED,     0, 0xFF, { 0x00, 0x05, 0x0F, 0xFF }, 0, 28 },   /* HotBody1 */
 	{ 155, 463, XREG_MOVED,     0, 0xFF, { 0x02, 0x11, 0x16, 0xFF }, 0, 40 },   /* HotBody2 */
 	{ 156, 464, XREG_MOVED,     0, 0xFF, { 0x09, 0x0C, 0x12, 0xFF }, 0, 52 },   /* HotBody3 */
-	{ 157, 465, XREG_PENDING,   0, 0xFF, { 0x01, 0x05, 0x0D, 0xFF }, 0, 30 },   /* AqWhirl1 */
-	{ 158, 466, XREG_PENDING,   0, 0xFF, { 0x00, 0x07, 0x0E, 0xFF }, 0, 42 },   /* AqWhirl2 */
-	{ 159, 467, XREG_PENDING,   0, 0xFF, { 0x03, 0x08, 0x11, 0xFF }, 0, 54 },   /* AqWhirl3 */
-	{ 160, 468, XREG_PENDING,   0, 0xFF, { 0x03, 0x10, 0x12, 0xFF }, 0, 25 },   /* SideBub1 */
-	{ 161, 469, XREG_PENDING,   0, 0xFF, { 0x07, 0x0B, 0x16, 0xFF }, 0, 35 },   /* SideBub2 */
-	{ 162, 470, XREG_PENDING,   0, 0xFF, { 0x04, 0x0D, 0x0F, 0xFF }, 0, 45 },   /* SideBub3 */
-	{ 163, 471, XREG_PENDING,   0, 0xFF, { 0x02, 0x15, 0x19, 0xFF }, 0, 32 },   /* ElcReel1 */
-	{ 164, 472, XREG_PENDING,   0, 0xFF, { 0x01, 0x10, 0x18, 0xFF }, 0, 46 },   /* ElcReel2 */
-	{ 165, 473, XREG_PENDING,   0, 0xFF, { 0x04, 0x0B, 0x11, 0xFF }, 0, 60 },   /* ElcReel3 */
+	{ 157, 465, XREG_MOVED,     0, 0xFF, { 0x01, 0x05, 0x0D, 0xFF }, 0, 30 },   /* AqWhirl1 */
+	{ 158, 466, XREG_MOVED,     0, 0xFF, { 0x00, 0x07, 0x0E, 0xFF }, 0, 42 },   /* AqWhirl2 */
+	{ 159, 467, XREG_MOVED,     0, 0xFF, { 0x03, 0x08, 0x11, 0xFF }, 0, 54 },   /* AqWhirl3 */
+	{ 160, 468, XREG_MOVED,     0, 0xFF, { 0x03, 0x10, 0x12, 0xFF }, 0, 25 },   /* SideBub1 */
+	{ 161, 469, XREG_MOVED,     0, 0xFF, { 0x07, 0x0B, 0x16, 0xFF }, 0, 35 },   /* SideBub2 */
+	{ 162, 470, XREG_MOVED,     0, 0xFF, { 0x04, 0x0D, 0x0F, 0xFF }, 0, 45 },   /* SideBub3 */
+	{ 163, 471, XREG_MOVED,     0, 0xFF, { 0x02, 0x15, 0x19, 0xFF }, 0, 32 },   /* ElcReel1 */
+	{ 164, 472, XREG_MOVED,     0, 0xFF, { 0x01, 0x10, 0x18, 0xFF }, 0, 46 },   /* ElcReel2 */
+	{ 165, 473, XREG_MOVED,     0, 0xFF, { 0x04, 0x0B, 0x11, 0xFF }, 0, 60 },   /* ElcReel3 */
 	{ 166, 474, XREG_PENDING,   0, 0xFF, { 0x00, 0x15, 0x18, 0x1A }, 0, 40 },   /* CusVolt1 */
 	{ 167, 475, XREG_PENDING,   0, 0xFF, { 0x02, 0x04, 0x06, 0xFF }, 0, 55 },   /* CusVolt2 */
 	{ 168, 476, XREG_PENDING,   0, 0xFF, { 0x06, 0x0C, 0x0F, 0xFF }, 0, 70 },   /* CusVolt3 */
@@ -200,12 +201,12 @@ const XChipReg xreg_rows[] = {
 	{ 172, 480, XREG_PENDING,   0, 0xFF, { 0x01, 0x04, 0x19, 0xFF }, 0, 42 },   /* WavePit */
 	{ 173, 481, XREG_PENDING,   0, 0xFF, { 0x00, 0x05, 0x07, 0xFF }, 0, 48 },   /* RedWave */
 	{ 174, 482, XREG_PENDING,   0, 0xFF, { 0x03, 0x0D, 0x16, 0xFF }, 0, 54 },   /* MudWave */
-	{ 175, 483, XREG_PENDING,   0, 0xFF, { 0x07, 0x08, 0x09, 0xFF }, 0, 10 },   /* CactBal1 */
-	{ 176, 484, XREG_PENDING,   0, 0xFF, { 0x10, 0x11, 0x12, 0xFF }, 0, 30 },   /* CactBal2 */
-	{ 177, 485, XREG_PENDING,   0, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 50 },   /* CactBal3 */
-	{ 178, 486, XREG_PENDING,   0, 0xFF, { 0x05, 0x11, 0x16, 0xFF }, 0, 27 },   /* WoodNos1 */
-	{ 179, 487, XREG_PENDING,   0, 0xFF, { 0x09, 0x13, 0x19, 0xFF }, 0, 40 },   /* WoodNos2 */
-	{ 180, 488, XREG_PENDING,   0, 0xFF, { 0x08, 0x12, 0x15, 0xFF }, 0, 53 },   /* WoodNos3 */
+	{ 175, 483, XREG_MOVED,     0, 0xFF, { 0x07, 0x08, 0x09, 0xFF }, 0, 10 },   /* CactBal1 */
+	{ 176, 484, XREG_MOVED,     0, 0xFF, { 0x10, 0x11, 0x12, 0xFF }, 0, 30 },   /* CactBal2 */
+	{ 177, 485, XREG_MOVED,     0, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 50 },   /* CactBal3 */
+	{ 178, 486, XREG_MOVED,     0, 0xFF, { 0x05, 0x11, 0x16, 0xFF }, 0, 27 },   /* WoodNos1 */
+	{ 179, 487, XREG_MOVED,     0, 0xFF, { 0x09, 0x13, 0x19, 0xFF }, 0, 40 },   /* WoodNos2 */
+	{ 180, 488, XREG_MOVED,     0, 0xFF, { 0x08, 0x12, 0x15, 0xFF }, 0, 53 },   /* WoodNos3 */
 	{ 187, 214, XREG_DARK, 142, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 0, 99 },   /* DarkCirc */
 	{ 188, 286, XREG_SAME },   /* DrkSword */
 	{ 189, 289, XREG_SAME },   /* DarkInvs */
@@ -234,7 +235,7 @@ const XChipReg xreg_rows[] = {
 	{ 214, 293, XREG_PENDING,   0, 0xFF, { 0x16, 0xFF, 0xFF, 0xFF }, 1, 58 },   /* BlakWing */
 	{ 216, 140, XREG_SAME },   /* JustcOne */
 	{ 217,  83, XREG_SAME },   /* NeoVari */
-	{ 218, 294, XREG_RECORD, 381, 0xFF, { 0x19, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* Z Saver */
+	{ 218, 294, XREG_MOVED,     0, 0xFF, { 0x19, 0xFF, 0xFF, 0xFF }, 1, 80 },   /* Z Saver */
 	{ 220,   8, XREG_SAME },   /* SuprVulc */
 	{ 242, 489, XREG_PENDING,   0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 33 },   /* NumbrMan */
 	{ 243, 490, XREG_PENDING,   0, 0xFF, { 0x0D, 0xFF, 0xFF, 0xFF }, 1, 66 },   /* NumbrMn[SP] */

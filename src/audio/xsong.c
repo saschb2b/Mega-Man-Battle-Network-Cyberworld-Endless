@@ -212,11 +212,12 @@ static uint32_t copy_song(uint32_t header) {
 }
 
 /* Song `song` of extra ROM `xrom` copied in after those before it, and
- * entered in the next slot; false where it cannot be (the slot then stays
- * BN6's empty one). */
-static bool copy_in(int xrom, int song) {
-	int slot = SLOT_FIRST + X.nsongs;
-	if (slot > SLOT_LAST || xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
+ * entered in slot `slot`, played by BN6's music player, or (`own`) by
+ * the players its game's entry names (a sound, as BN6's and BN5's players
+ * are the same 32); false where it cannot be (the slot then stays BN6's
+ * empty one). */
+static bool copy_in(int xrom, int song, bool own, int slot) {
+	if (slot < SLOT_FIRST || slot > SLOT_LAST || X.nsongs >= SLOT_LAST - SLOT_FIRST + 1 || xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data || !XR[xrom].layout->song_table || song < 0 ||
 		(uint32_t)song * 8 + 8 > ROM_SIZE - XR[xrom].layout->song_table)
 		return false;
 	xr = XR[xrom].data;
@@ -224,9 +225,10 @@ static bool copy_in(int xrom, int song) {
 	uint32_t header = copy_song(get32(xr + XR[xrom].layout->song_table + (uint32_t)song * 8));
 	if (!header) return false;
 	uint8_t entry[8];
+	const uint8_t *was = xr + XR[xrom].layout->song_table + (uint32_t)song * 8;
 	put32(entry, header);
-	put16(entry + 4, BGM_PLAYER);
-	put16(entry + 6, BGM_PLAYER);
+	put16(entry + 4, own ? get16(was + 4) : BGM_PLAYER);
+	put16(entry + 6, own ? get16(was + 6) : BGM_PLAYER);
 	emu_write(BUS + R.layout->song_table + (uint32_t)slot * 8, entry, sizeof entry);
 	X.song[X.nsongs++] = (__typeof__(X.song[0])){ xrom, song, slot, header };
 	if (emu_debug_on())
@@ -253,16 +255,43 @@ int xsong_install(int xrom, int song, int fallback) {
 		X.next = XSONG_AT;
 		for (int k = 0; k < XAREAS_MAX; ++k) {
 			const NetAreaDef *x = net_area_def(NET_AREAS + k);
-			if (x && x->xrom > 0 && x->xsong && slot_of(x->xrom - 1, x->xsong) < 0) copy_in(x->xrom - 1, x->xsong);
+			if (x && x->xrom > 0 && x->xsong && slot_of(x->xrom - 1, x->xsong) < 0) copy_in(x->xrom - 1, x->xsong, false, SLOT_FIRST + X.nsongs);
 		}
 		/* then the battle themes of the games whose areas are there (after
 		 * the areas' own, which a state saved before them points into) */
 		for (int i = 0; i < XROM_COUNT; ++i)
 			for (int b = 0; b < 2; ++b) {
 				int theme = XR[i].data && XR[i].layout->nareas ? XR[i].layout->battle_songs[b] : 0;
-				if (theme && slot_of(i, theme) < 0) copy_in(i, theme);
+				if (theme && slot_of(i, theme) < 0) copy_in(i, theme, false, SLOT_FIRST + X.nsongs);
 			}
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;
+}
+
+int xsong_copy_of(int slot, int *xrom) {
+	for (int i = 0; i < X.nsongs; ++i)
+		if (X.song[i].slot == slot) {
+			if (xrom) *xrom = X.song[i].rom;
+			return X.song[i].song;
+		}
+	return -1;
+}
+
+static bool slot_taken(int slot) {
+	for (int i = 0; i < X.nsongs; ++i)
+		if (X.song[i].slot == slot) return true;
+	return false;
+}
+
+int xsong_install_at(int xrom, int song, int slot) {
+	xsong_install(xrom, -1, -1);
+	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || slot < SLOT_FIRST || slot > SLOT_LAST) return -1;
+	/* (copied before: at its slot alone, one BN5 sound one slot whichever track copies it) */
+	int at = slot_of(xrom, song);
+	if (at >= 0) return at == slot ? slot : -1;
+	/* (the slot still BN6's empty one, as the player's ROM has it: no copy of anything there yet) */
+	uint32_t entry = BUS + R.layout->song_table + (uint32_t)slot * 8;
+	if (slot_taken(slot) || emu_read32(entry) != get32(R.data + (entry - BUS)) || emu_read32(entry + 4) != get32(R.data + (entry - BUS) + 4)) return -1;
+	return copy_in(xrom, song, true, slot) ? slot : -1;
 }

@@ -372,6 +372,12 @@ static void players_init(Side *g) {
 static int song_of(const View *v, uint32_t header) {
 	for (uint32_t n = 0; n < SONGS; ++n)
 		if (get32(v->rom + v->songs + 8 * n) == header) return (int)n;
+	/* (a copy of another game's song in one of BN6's slots, xsong.h: by the slot's own number there) */
+	for (uint32_t n = 0; v->game == 6 && n < SONGS; ++n)
+		if (v->rd32(0x08000000u + v->songs + 8 * n) == header) {
+			int copy = xd_song_copy((int)n);
+			return copy >= 0 ? copy : (int)n;
+		}
 	return -1;
 }
 

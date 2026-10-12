@@ -12,6 +12,7 @@
 #include "xchips_bn5.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
+#include "xsong.h"
 #include "xvirus_tx.h"
 
 #define BUS 0x08000000u
@@ -30,7 +31,8 @@ static const Routines tables[2] = {
 };
 
 /* the stubs (the project's own Thumb): a support routine that spawns nothing (movs r0,#0; bx lr: the support family takes
- * r0 as the object spawned) and a Navi routine that does nothing (bx lr; nop) */
+ * r0 as the object spawned; a unit's calls to BN5's panel claim spawners go there too, their gate clear in every battle a
+ * run fights: tools/xchiprecipe.py, STUBS) and a Navi routine that does nothing (bx lr; nop) */
 static void stubs_stage(void) {
 	uint8_t *p = xv_put(XC_STUBS, XC_STUBS_END - XC_STUBS, true);
 	if (!p) return;
@@ -56,7 +58,27 @@ static void routines_stage(const Routines *t) {
 
 /* ---- a unit ---- */
 
-static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END };
+/* (a unit's code past the homes, a helper's before them; the calls of either to the stubs or the helpers' code, each into a
+ * helper before it: helper_calls_check) */
+static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_HOMES };
+static const XvRegion helpers = { XC_HELPERS, XC_HOMES, XC_ART, XC_END, XC_STUBS, XC_HOMES };
+
+/* each call of a unit's into the helpers' code: to code of a helper installed before it (its copy of a BN5 routine) */
+static void helper_calls_check(const XChipUnit *u, int at) {
+	for (int i = 0; i < u->code.ncalls && !xv_failed(); ++i) {
+		uint32_t to = u->code.calls[i].to;
+		if (to < XC_HELPERS || to >= XC_HOMES) continue;
+		bool ok = false;
+		for (int k = 0; k < at && !ok; ++k) {
+			const XChipUnit *h = &xchips_bn5[k];
+			for (int b = 0; h->kind == XCHIP_HELPER && b < h->code.nblocks && !ok; ++b) {
+				const XvBlock *x = &h->code.blocks[b];
+				ok = to >= x->at && to < x->at + (x->end - x->start) && xvirus_is_code(&h->code, x->start + (to - x->at));
+			}
+		}
+		if (!ok) xv_fail("its call %08x to %08x, no helper's code", (unsigned)u->code.calls[i].from, (unsigned)to);
+	}
+}
 
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
  * its stub first */
@@ -80,6 +102,14 @@ static void entry_stage(const XChipUnit *u) {
 		uint8_t *p = xv_put(at, 4, false);
 		if (p) put32(p, to);
 	}
+}
+
+/* its sounds' songs copied into their slots (before the step: the songs' copies are xsong.c's own, made at once; a song not
+ * copied fails the unit, its immediates naming the slot) */
+static void songs_in(const XChipUnit *u) {
+	for (int i = 0; i < u->nsongs && !xv_failed(); ++i)
+		if (xsong_install_at(u->code.game, u->songs[i].song, u->songs[i].slot) != u->songs[i].slot)
+			xv_fail("its sound %#x not copied to slot %#x", u->songs[i].song, u->songs[i].slot);
 }
 
 /* ---- the step's writes, each part under its own claims ---- */
@@ -118,7 +148,14 @@ bool xchips_code_install(void) {
 		const XChipUnit *u = &xchips_bn5[i];
 		at = u->code.name;
 		if (u->home < XC_HOMES || u->home + XC_HOME_SIZE > XC_CODE || (u->home - XC_HOMES) % XC_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
-		else if (xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u);
+		else if (u->kind == XCHIP_HELPER) {
+			helper_calls_check(u, i);
+			if (!xv_failed()) xvirus_code_stage(&u->code, &helpers, u->home, (int)(XC_HOME_SIZE / 12));
+		} else {
+			helper_calls_check(u, i);
+			songs_in(u);
+			if (!xv_failed() && xvirus_code_stage(&u->code, &region, u->home, (int)(XC_HOME_SIZE / 12))) entry_stage(u);
+		}
 	}
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN5's chips' code not installed (%s): %s\n", at, xv_why());
