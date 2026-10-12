@@ -12,5 +12,10 @@ extern const XVirusFamily xvirus_control;
  * and records copied from the player's BN5 ROM, as AI 32 with enemy ids
  * 0xBB-0xC0 (CanGard, CanGrdEX, CanRaid, CanRadEX, Canlada, CanladEX) */
 extern const XVirusFamily xvirus_cangard;
+/* BN5's Handi (issue #82's second, the first that draws random numbers and
+ * moves): its code and records copied from the player's BN5 ROM, as AI 33
+ * with enemy ids 0xC1-0xC6 (Handi, HandiEX, Hando, HandoEX, Handum,
+ * HandumEX) */
+extern const XVirusFamily xvirus_handi;
 
 #endif

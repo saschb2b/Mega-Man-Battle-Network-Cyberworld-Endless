@@ -231,14 +231,16 @@ static bool word_fix(const XVirusFamily *f, int kind, uint32_t a, uint8_t *w) {
 		put32(w, moved_to(f, v));
 		return true;
 	}
-	if (kind == XV_TABLE) return fail("the jump table's word at %08x points out (%08x)", (unsigned)a, (unsigned)v);
+	/* (a jump table's entry out of the blocks: a routine of its game's whose twin the recipe names, a Thumb pointer) */
+	if (kind == XV_TABLE && !(v & 1)) return fail("the jump table's word at %08x points out (%08x)", (unsigned)a, (unsigned)v);
 	/* (RAM, I/O and ROM: what the code names there is its game's) */
-	if (kind == XV_RAW || v < 0x02000000u || v >= 0x0E000000u) return true;
+	if (kind == XV_RAW || (kind == XV_POOL && (v < 0x02000000u || v >= 0x0E000000u))) return true;
 	for (int k = 0; k < f->nwords; ++k)
 		if (f->words[k].from == v) {
 			put32(w, f->words[k].to);
 			return true;
 		}
+	if (kind == XV_TABLE) return fail("the jump table's word at %08x points out (%08x), at no routine the recipe names", (unsigned)a, (unsigned)v);
 	return fail("the literal at %08x names %08x, which the recipe does not", (unsigned)a, (unsigned)v);
 }
 
@@ -707,5 +709,8 @@ void xvirus_install(int which) {
 	if (done || !emu_ready()) return;
 	done = true;
 	if (which == XVIRUS_CONTROL) xvirus_install_family(&xvirus_control);
-	else if (which == XVIRUS_FAMILIES && XR[XROM_BN5_COLONEL_US].data) xvirus_install_family(&xvirus_cangard);
+	else if (which == XVIRUS_FAMILIES && XR[XROM_BN5_COLONEL_US].data) {
+		xvirus_install_family(&xvirus_cangard);
+		xvirus_install_family(&xvirus_handi);
+	}
 }

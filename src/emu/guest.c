@@ -828,6 +828,13 @@ bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed
 
 void guest_write32(uint32_t a, uint32_t v) { if (ready) core->rawWrite32(core, a, -1, v); }
 
+bool guest_hook(uint32_t addr, EmuHook fn, void *user) {
+#ifndef __EMSCRIPTEN__
+	boot_join(false);
+#endif
+	return ready && hook_on(hook_core(core), addr, fn, user);
+}
+
 bool guest_active(void) { return active; }
 
 bool guest_on_screen(void) { return active && phase == PH_BATTLE && sub_mode() == BN5_SUB_BATTLE; }
@@ -973,6 +980,7 @@ uint32_t guest_read32(uint32_t a) { (void)a; return 0; }
 void guest_write16(uint32_t a, uint16_t v) { (void)a; (void)v; }
 void guest_write32(uint32_t a, uint32_t v) { (void)a; (void)v; }
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed) { (void)record; (void)len; (void)hp; (void)seed; return false; }
+bool guest_hook(uint32_t addr, EmuHook fn, void *user) { (void)addr; (void)fn; (void)user; return false; }
 int guest_chip_bn6(int id) { (void)id; return 0; }
 
 #endif

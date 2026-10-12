@@ -17,6 +17,7 @@ GAMES = {
     6: dict(t1=0x0203A9B0, t3=0x0203CFE0, t4=0x02036870, panels=0x02039AE0, list=0x02009380, list_end=0x02009AB0, n1=32),
 }
 RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RNG_XOR)
+XV_CODE = (0x08B38000, 0x08B40000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
 MEGAMAN_BUSTER = 0x11                             # MegaMan's CurAction as his buster fires, in both
 TWIN = 32                                         # the bytes two ROM pointers' data must share to be the same data
 NODE = 0x10                                       # the list node before an object (BN6_OBJECT_NODE)
@@ -39,11 +40,12 @@ def u32(b, o):
 # ---- traces (src/dev/xdiff.c) ----
 
 class Obj:
-    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over')
+    __slots__ = ('kind', 'slot', 'rec', 'ai', 'coll', 'addr', 'role', 'over', 'leftover')
 
     def __init__(self, kind, slot, rec, ai, coll, addr):
         self.kind, self.slot, self.rec, self.ai, self.coll, self.addr, self.role = kind, slot, rec, ai, coll, addr, None
         self.over = {}   # (bytes of its record read otherwise: the renderer's places as the family's, xdiff_masks.py)
+        self.leftover = False   # (its sprite state the slot's last occupant's: spawned and no sprite set up since, xdiff_events.py)
 
     def canonical(self):
         """its record as it is compared: its slot (+3) counted from its own (objects are matched by role, never by
@@ -64,12 +66,29 @@ class Obj:
         return u32(self.rec, NODE + off)
 
 
+class Event:
+    """One of a core's hooks' events (src/dev/xdiff_events.h): kind, sub and flags; the core's frame and the battle's timer
+    before it; its caller, the family's code that led to it, the outermost caller; the object; a and b; ref"""
+    __slots__ = ('kind', 'sub', 'flags', 'frame', 't', 'caller', 'family', 'outer', 'object', 'a', 'b', 'ref', 'at')
+
+    def __init__(self, b, p, at):
+        self.kind, self.sub, self.flags = b[p], b[p + 1], u16(b, p + 2)
+        (self.frame, self.t, self.caller, self.family, self.outer, self.object, self.a, self.b,
+         self.ref) = struct.unpack_from('<9I', b, p + 4)
+        self.at = at   # (the timer of the record it came in)
+
+
+EVENT_SIZE = 40
+DRAW, SPAWN, SOUND, EFFECT, ATTACK, RESERVE, BLINK, SPRITE_SET = range(1, 9)
+KEPT, REPLAYED, UNMATCHED, UNMAPPED = 1, 2, 4, 8
+
+
 def read_trace(path):
     with open(path, 'rb') as f:
         b = f.read()
     if b[:4] != b'XDF1':
         sys.exit(f'{path}: no trace')
-    _, game, coll, psize, nm = struct.unpack_from('<5I', b, 4)
+    version, game, coll, psize, nm = struct.unpack_from('<5I', b, 4)
     p = 24
     moved = [struct.unpack_from('<3I', b, p + 12 * i) for i in range(nm)]
     p += 12 * nm
@@ -81,6 +100,10 @@ def read_trace(path):
         sub, ph, n1, n3, n4, ns, no = b[p + 12:p + 19]
         rng = struct.unpack_from('<2I', b, p + 20)
         p += 28
+        nev = 0
+        if version >= 2:
+            nev = struct.unpack_from('<I', b, p)[0]
+            p += 4
         objs = []
         for i in range(n1):
             slot, has_ai, has_coll = b[p], b[p + 1], b[p + 2]
@@ -105,7 +128,9 @@ def read_trace(path):
         p += 4 * no
         sounds = [struct.unpack_from('<2I', b, p + 8 * i) for i in range(ns)]
         p += 8 * ns
-        frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds))
+        events = [Event(b, p + EVENT_SIZE * i, t) for i in range(nev)]
+        p += EVENT_SIZE * nev
+        frames.append(dict(f=f, t=t, sub=sub, ph=ph, rng=rng, objs=objs, panels=panels, order=order, sounds=sounds, events=events))
     return dict(game=game, coll=coll, psize=psize, moved=moved, frames=frames)
 
 
@@ -122,6 +147,9 @@ class Canon:
         self.megaman = num(m['name_id']['megaman'])
         self.mm_action = num(m['action']['megaman'])
         self.layouts = legit['layouts']
+        self.legit = legit
+        self.t3_actions = {int(x, 0) for x in m['action'].get('t3_types', [])}
+        self.tables = [dict(t, bn5=int(t['bn5'], 0), bn6=int(t['bn6'], 0)) for t in m.get('rom_tables', {}).get('tables', [])]
         self.natives = set()   # (a spec's: enemies both games have, by BN6's id; their attacks' types, their effects)
         self.native_attacks, self.native_effects = set(), set()
         self.family_effects = {int(x, 0) for x in m['family_effects']['bn6']}
@@ -219,6 +247,7 @@ class Frame:
         self.slots = [(kind, g[kind.lower()] - NODE, SIZE[kind], n) for kind, n in (('T1', g['n1']), ('T3', 32), ('T4', 32))]
         self.list, self.list_end = g['list'], g['list_end']
         self.by_role = {o.role: o for o in fr['objs']}
+        self.moved = trace['moved'] if self.game == 6 else [m for m in trace.get('code', ()) if XV_CODE[0] <= m[1] < XV_CODE[1]]
 
     def ptr(self, v):
         """a pointer as what it names"""
@@ -237,10 +266,13 @@ class Frame:
         for kind, base, size, n in self.slots:
             if base <= v < base + size * n:
                 return (f'{kind} slot {(v - base) // size} (let go)', 'obj', (v - base) % size - NODE)
-        if self.game == 6 and ROM[0] <= v < ROM[1]:
-            for frm, to, ln in self.trace['moved']:
-                if to <= (v & ~1) < to + ln:
-                    return ('rom', v - to + frm)
+        if ROM[0] <= v < ROM[1]:
+            # (BN6's: what was moved, as where it came from; BN5's: the families' code where it is, as the BN6 trace's
+            # moved blocks name it, so a pointer to their code reads alike in both, a callback kept in an AI's data)
+            for frm, to, ln in self.moved:
+                base = to if self.game == 6 else frm
+                if base <= (v & ~1) < base + ln:
+                    return ('rom', v - base + frm)
         return ('raw', v)
 
 
@@ -354,6 +386,20 @@ def bn5_coll_off(canon, o6):
     sys.exit(f'collision +{o6:#x}: no BN5 place in legit.json\'s layout')
 
 
+def table_view(canon, wa, wb):
+    """two pointers into a table both games' ROMs hold (legit.json, maps, rom_tables), as (the table, the place in it), the
+    entry's bytes the same in both; None where either points elsewhere"""
+    for t in canon.tables:
+        ia, ib, n = wa - t['bn5'], wb - t['bn6'], t['entry'] * t['count']
+        if not (0 <= ia < n and 0 <= ib < n):
+            continue
+        k = ia - ia % t['entry']
+        same = ia == ib and rom(5)[t['bn5'] - ROM[0] + k:t['bn5'] - ROM[0] + k + t['entry']] == \
+            rom(6)[t['bn6'] - ROM[0] + k:t['bn6'] - ROM[0] + k + t['entry']]
+        return ('table', t['name'], ia), ('table', t['name'], ib) if same or ia != ib else ('table', t['name'], ib, 'its entry otherwise')
+    return None
+
+
 def word_view(fa, fb, wa, wb, sprite_rel):
     """two words as each game means them: pointers by what they name, a pointer into each game's own ROM by
     the data there (None: no pointer, compare the bytes)"""
@@ -361,6 +407,8 @@ def word_view(fa, fb, wa, wb, sprite_rel):
         return sprite_rel
     if is_ptr(wa) or is_ptr(wb):
         va, vb = fa.ptr(wa), fb.ptr(wb)
+        if va[0] == 'raw' and vb[0] == 'raw' and table_view(fa.canon, wa, wb):
+            return table_view(fa.canon, wa, wb)
         if va[0] == 'raw' and vb[0] == 'raw':
             if ROM[0] <= wa < ROM[1] and ROM[0] <= wb < ROM[1] and twin(wa, wb):
                 return ('twin data',), ('twin data',)
@@ -377,7 +425,13 @@ def obj_cells(fa, fb, oa, ob):
     sp = SPRITE[kind] + NODE
     ra, rb = oa.canonical(), ob.canonical()
     base_a, base_b = u32(ra, sp + 0x18), u32(rb, sp + 0x18)
-    for w in range(8, SIZE[kind], 4):   # (its node's links: the run order, compared as such)
+    # (a sprite state is no state of the object's before it sets one up: its spawn clears its record to there, kinds 1
+    # and 3 0x8C bytes from +4, kind 4 0x7C, BN5 0x080030CC / BN6 0x080032AC, and the slot's last occupant's is left)
+    if oa.leftover != ob.leftover:
+        out.append(('obj', sp - NODE, 'no sprite set up' if oa.leftover else 'its sprite set up', 'no sprite set up' if ob.leftover else
+                    'its sprite set up'))
+    end = sp if oa.leftover or ob.leftover else SIZE[kind]
+    for w in range(8, end, 4):   # (its node's links: the run order, compared as such)
         wa, wb = u32(ra, w), u32(rb, w)
         rel = None
         if w - sp in SPRITE_DATA and base_a and base_b and is_ptr(wa) and is_ptr(wb):
@@ -390,7 +444,7 @@ def obj_cells(fa, fb, oa, ob):
         for k in range(4):
             off = w + k - NODE
             a, b = ra[w + k], rb[w + k]
-            if off == OBJ_ACTION and kind == 'T1':
+            if off == OBJ_ACTION and (kind == 'T1' or kind == 'T3' and canon.t3(5, oa.o8(OBJ_TYPE)) in canon.t3_actions):
                 a = canon.action(5, mm, a)
             elif off == OBJ_TYPE and kind == 'T3':
                 a = canon.t3(5, a)

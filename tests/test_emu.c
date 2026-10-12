@@ -4,7 +4,8 @@
  * an answer hook and a halt from one (issues #30, #35). Then two cores side
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
- * it, without, on a ROM that also sounds a tone; and the guest's made and
+ * it, without, on a ROM that also sounds a tone, then with hooks of its own
+ * as the differential gives it (issue #82); and the guest's made and
  * run on a thread of its own while BN6's frames run, as its boot is. Last,
  * a block of Thumb code moved into BN6's copy, its calls out through
  * veneers (src/emu/thumb_reloc.c, issue #82).
@@ -126,6 +127,11 @@ static HookAct halting(HookRegs *r, void *user) { (void)r; ++*(int *)user; hook_
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
 
+/* ... and the guest's own (the differential's, issue #82): one tripling r0
+ * where BN6's doubles it, one reading what the core it runs on holds */
+static HookAct tripled(HookRegs *r, void *user) { r->r[0] *= 3; ++*(int *)user; return HOOK_CONTINUE; }
+static HookAct marked(HookRegs *r, void *user) { (void)r; *(uint32_t *)user = hook_read32(0x02000000); return HOOK_CONTINUE; }
+
 /* ---- two cores (issue #61) ---- */
 
 /* A second core as src/emu/guest.c makes one: from its own copy of the
@@ -166,6 +172,42 @@ static int ring_drain(int *swing) {
 	}
 	if (swing) *swing = total > 0 ? hi - lo : 0;
 	return total;
+}
+
+/* Each core its own hooks (hook_core): the guest's hook at the address of
+ * BN6's runs in the guest's frames alone, BN6's in BN6's alone, each
+ * reading its own core's memory; detached, the guest runs its own code
+ * again */
+static void cores_apart(struct mCore *g) {
+	HookCore *gh = hook_core(g);
+	int guest_hits = 0;
+	uint32_t seen = 0;
+	CHECK(gh && hook_on(gh, 0x080000F8, tripled, &guest_hits) && hook_on(gh, 0x080000E8, marked, &seen), "the guest's own hooks at 0xF8 and 0xE8");
+	CHECK(!hook_on(gh, 0x080000F8, tripled, &guest_hits), "a second hook at the guest's 0xF8 refused");
+	CHECK(emu_read16(0x080000F8) == 0xBECE && emu_read16(0x080000E8) == 0x2009 && g->rawRead16(g, 0x080000E8, -1) == 0xBECE,
+		"the BKPTs each in its own core's copy: BN6's %04x at 0xF8 and %04x at 0xE8, the guest's %04x at 0xE8", emu_read16(0x080000F8),
+		emu_read16(0x080000E8), g->rawRead16(g, 0x080000E8, -1));
+	g->reset(g);
+	g->rawWrite32(g, 0x02000000, -1, 0xB5B5B5B5);
+	guest_run(g, 1);
+	CHECK(stored(g, 0) == 25 && stored(g, 3) == 39 && guest_hits == 1, "the guest's frame: %u %u, its hook %d times (not 25 39, once)", stored(g, 0),
+		stored(g, 3), guest_hits);
+	CHECK(seen == 0xB5B5B5B5, "the guest's hook read %08x, not its own core's B5B5B5B5", seen);
+	uint32_t strays = hook_strays;
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read32(IWRAM) == 20 && emu_read32(IWRAM + 12) == 39 && guest_hits == 1 && hook_strays == strays,
+		"BN6's frame: %u %u, the guest's hook %d times, %u strays (its own hook alone)", emu_read32(IWRAM), emu_read32(IWRAM + 12), guest_hits,
+		hook_strays - strays);
+	hook_detach(g);
+	g->reset(g);
+	guest_run(g, 1);
+	CHECK(stored(g, 0) == 15 && guest_hits == 1 && g->rawRead16(g, 0x080000F8, -1) == 0x300A, "the guest detached: %u, its code %04x at 0xF8",
+		stored(g, 0), g->rawRead16(g, 0x080000F8, -1));
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's detach: %u", emu_read32(IWRAM));
 }
 
 static void two_cores(void) {
@@ -255,6 +297,7 @@ static void two_cores(void) {
 	CHECK(emu_read32(0x02000000) == 0xB6B6B6B6, "BN6's EWRAM moved with the guest's state: %08x", emu_read32(0x02000000));
 	emu_frame(0);
 	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's state: %u", emu_read32(IWRAM));
+	cores_apart(g);
 	emu_unhook(0x080000F8);
 	mCoreConfigDeinit(&g->config);
 	g->deinit(g);
@@ -577,6 +620,7 @@ int main(void) {
 	CHECK(halts == 1 && ((struct GBA *)core->board)->cpu->halted, "halted: the hook ran %d times, halted %d", halts, ((struct GBA *)core->board)->cpu->halted);
 	CHECK(stored(core, 3) == 39, "the code before the halt ran: %u", stored(core, 3));
 	hook_remove(0x080000F0);
+	hook_detach(core);
 	mCoreConfigDeinit(&core->config);
 	core->deinit(core);
 
@@ -584,6 +628,6 @@ int main(void) {
 	two_threads();
 	moved_block();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, on one thread and on two, a moved block's calls through veneers\n");
+	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers\n");
 	return 0;
 }

@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hook.h"
 #include "rom.h"
 
 enum { GUEST_WON, GUEST_LOST, GUEST_ESCAPED };
@@ -130,6 +131,11 @@ void guest_write32(uint32_t addr, uint32_t v);
  * out), its RNG words from `seed` as it begins (guest_battle's). Its boot
  * waited for first (begun by guest_start). False where it cannot be. */
 bool guest_dev_battle(const uint8_t *record, uint32_t len, int hp, uint32_t seed);
+/* (dev: the differential's) A hook on its core's code (hook.h: its own
+ * table, its BKPT handler put before its board's at the first): once its
+ * boot is done; false where it is not, or the hook does not fit. The run's
+ * guest battles have none. */
+bool guest_hook(uint32_t addr, EmuHook fn, void *user);
 /* BN6's chip of the same name as its game's chip `id`, 0 for none (its
  * DarkChips) */
 int guest_chip_bn6(int id);

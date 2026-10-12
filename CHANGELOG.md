@@ -15,6 +15,24 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+- **BN5's Handi in BN6's own battles, checked against BN5's own with
+  its random numbers replayed (issue #82).** Handi, a virus that picks a
+  panel at random, teleports there and drops a bomb, is the second family
+  moved into BN6's battle engine (AI 33, its six versions), and the first
+  that draws random numbers and moves. The comparison with BN5's own
+  battle now hooks both games' code: every random draw, spawn, sound,
+  effect and state change, each with the code that made it. BN6's draws
+  are given the numbers BN5's same draws took, so the family decides as
+  in BN5 whatever the engines drew around it (BN6's camera shake draws
+  from another word than BN5's; BN5's buster draws once more a shot), and
+  the family's calls are compared by where its code made them. Handi
+  idle, under 62 of MegaMan's inputs and in each of its versions behaves
+  the same in both over 1200 frames, teleporting to the same panels and
+  bursting for the same damage on the same frames; three deliberate
+  breaks of its move are caught, among them its draws moved to the other
+  word. BN6's own Mettaur, moved as the control, still plays frame for
+  frame as BN6's with its draws replayed. Battles in BN5's own engine
+  play as before.
 - **BN5's CanGard checked against BN5's own, frame by frame (issue
   #82).** The same battle is fought in BN5's engine and in BN6's with
   CanGard moved in, and compared every fight frame (`build.py xdiff`):

@@ -449,6 +449,16 @@ function replacement), while BN6's code stays the ROM's.
   the ROM stays; one in RAM is written again after a state is loaded or the
   core reset (`hook_reapply`). A hook taken off restores the original; its
   slot stays only while the CPU may hold its BKPT in the prefetch.
+- **A table per core.** Each core attached keeps its own hooks and queue,
+  found by the CPU that met the BKPT, and a hook reads and writes the core
+  it runs on: BN6's (`hook_attach`, which `emu_hook` and the others use)
+  and, for the differential alone, the guest's (`hook_core`, through
+  `guest_hook`), so its hooks on BN5's code never touch BN6's core
+  (`tests/test_emu.c`: one address hooked on both, each core's frames
+  running its own hook alone, reading its own memory). The run's guest
+  battles carry none: the guest's board keeps its own handler. Two
+  cores' hooks run one core's frame at a time (the differential's
+  frames run on the thread BN6's do).
 
 The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 
@@ -472,6 +482,13 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x0802D644` | the delete count raised as a virus of version 0-3 is deleted (`src/emu/xvirus.c`) | answer: returns at once for an AI index of 32 or more (a family moved into the engine, docs/MULTIROM.md), whose byte would lie past the 32 BN6 counts (`0x02000070`) | where a family is installed: once a virus deleted |
 | `0x0802D652` | the delete count's read (the rare versions' check) | answer: 0 for an AI index of 32 or more | the same: once a rare version is looked for |
 | `0x0802D65E` | a rare version's deletion (version 4-5: with event flag 0x1D8 set, the AI index put at `0x0203EAEA` for the chat of new virus data after the results) | answer: returns at once for an AI index of 32 or more | the same: once a rare version deleted |
+
+The differential (`--xdiff`, dev only; docs/DEVTOOLS.md) hooks both cores
+on each game's own routines: the four RNG draws, the spawns' common
+routine at its start and its end, PlaySoundEffect, an effect's spawner,
+setAttack, a panel reserved, the blink and sprite_load (docs/ROM_DATA.md,
+The differential's hooks); `CYBERWORLD_XDRAWS` puts the draws' four on
+BN6's core for the control's runs (`tools/xcontrol.py`).
 
 The duel's two are set as the duel begins and taken off as it ends, so
 the other battles carry no hook a frame per object. The hooks replaced

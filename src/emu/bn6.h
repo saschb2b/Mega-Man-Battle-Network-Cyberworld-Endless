@@ -137,6 +137,7 @@
 #define BN6_COLL_MASK_WORDS   178         /* ... BN5_COLL_MASKS' first 160 with bit 0x80 or as they are, but region 61's (tests/xdiff/legit.json) */
 #define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
 #define BN6_COLL_PARALYSIS    0x1C        /* u16 frames left paralysed, one less each frame (0x0800E730, the status step every virus runs) */
+#define BN6_COLL_FLASH        0x24        /* u16 frames left flashing after a hit (BN5_COLL_FLASH): the blink step reads its bit 1 (BN6_BLINK_FLASHING) */
 #define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
 #define BN6_COLL_BUBBLE       0x2C        /* u16 frames left in a bubble, the same */
 #define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
@@ -170,7 +171,24 @@
 #define BN6_OBJECT_LIST_END   0x02009AB0u /* ... its object (+4 the next), to this one, the list's end */
 #define BN6_RNG_PRIMARY       0x020013F0u /* u32, the random numbers' first word (BN5_RNG_PRIMARY's): its step at 0x0800151C, run once a frame (0x080050FC) */
 #define BN6_RNG_SECONDARY     0x02001120u /* u32, the second (BN5_RNG_SECONDARY's): its step at 0x0800154C, run twice a frame (0x08005100, 0x0800031C) */
+/* The battle engine's routines the differential hooks on both cores (src/dev/xdiff_events.c; BN5's in bn5.h), each a draw, a call or a step it logs with its caller */
+#define BN6_RNG_DRAW          0x0800151Cu /* GetRNG: the first word stepped, its value in r0 (push {r7,lr} first: lr its caller) */
+#define BN6_RNG_DRAW_POSITIVE 0x08001532u /* GetPositiveSignedRNG: the same, bit 31 cleared */
+#define BN6_RNG_DRAW_SECOND   0x0800154Cu /* GetRNGSecondary: the second word stepped */
+#define BN6_RNG_DRAW_SECOND_POSITIVE 0x08001562u /* GetPositiveSignedRNGSecondary: the same, bit 31 cleared */
+#define BN6_SPAWN_COMMON      0x08003278u /* SpawnBattleObjectCommon: r0 the kind (1, 3, 4), r1 its spawner's five words (the type first; its caller at r1 + 0x18) */
+#define BN6_SPAWN_COMMON_END  0x080032C8u /* ... its end (add sp,#4): r5 the object spawned, 0 none */
+#define BN6_PLAY_SOUND        0x080005CCu /* PlaySoundEffect: r0 the song */
+#define BN6_SPAWN_EFFECT      0x080E1932u /* an effect spawned (the fourth kind's type 0): r4's low byte the effect's id */
+#define BN6_SPRITE_LOAD       0x080026E4u /* sprite_load: r5 the object whose sprite state (past what its spawn clears) is set up anew */
+#define BN6_SET_ATTACK        0x08011698u /* setAttack's common part (setAttack0-5 at 0x08011680 + 4N branch to it): r0 the CurAction, r2 N, r5 the object */
+#define BN6_RESERVE_PANEL_DONE 0x0801BB3Eu /* object_reservePanel (0x0801BB1C) once the panel is reserved and BN6_OBJ_RESERVED set: r5 the object */
+#define BN6_OBJ_RESERVED      0x20        /* a battle object's +0: set as it first reserves a panel (0x0801BB36), never cleared while it lives (BN5 has no such bit) */
+#define BN6_BLINK_FLASHING    0x08016954u /* the blink step of an object flashing (its flags 0x202): bit 1 of its collision data's flash timer (+0x24) set hides it */
+#define BN6_OBJECT_RUNNER_RET 0x08003200u /* RunBattleObjectLogic (0x080031AC) calls each object by mov lr,pc; bx r0: the return address an object's call chain ends at */
+#define BN6_OBJECT_RUNNING    0x0200AF70u /* u32 the node of the object running (its object 0x10 on), 0 outside the runner (0x080031C2, 0x0800320A) */
 #define BN6_PHASE_FIGHT       0x0C        /* BN6_BATTLE_PHASE: fighting (from BATTLE START! on, the pause too) */
+#define BN6_PHASE_RESULTS     0x10        /* BN6_BATTLE_PHASE: over, its results (the reward picked from the enemies' drop rows) */
 #define BN6_WINDOW_OPEN       0x78        /* BN6_CUSTOM_WINDOW: open */
 #define BN6_MPLAYS            0x08159DC8u /* the sound's music players (MP2K), BN6_MPLAY_COUNT of 12 bytes: +0 its MusicPlayerInfo in EWRAM (+0 the song's */
 #define BN6_MPLAY_COUNT       32          /* ... header, +0xC its clock, 0 as a song starts); a song table entry names its player (RomLayout.song_table) */

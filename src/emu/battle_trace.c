@@ -7,6 +7,7 @@
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
+#include "xdiff_events.h"
 #include "xvirus.h"
 
 #define IWRAM      0x03000000u   /* (the GBA's) */
@@ -64,7 +65,12 @@ static uint32_t runs(bool write) {
 
 void battle_trace_frame(void) {
 	static int on = -1;
-	if (on < 0) on = getenv("CYBERWORLD_BTRACE") != NULL;
+	static const char *draws;
+	if (on < 0) {
+		on = getenv("CYBERWORLD_BTRACE") != NULL;
+		draws = getenv("CYBERWORLD_XDRAWS");
+	}
+	if (draws && *draws) xd_control_frame(draws);
 	if (!on) return;
 	uint8_t sub = emu_read8(BN6_GAMESTATE);
 	if (sub != BN6_SUB_BATTLE_INIT && sub != BN6_SUB_BATTLE) return;

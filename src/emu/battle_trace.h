@@ -12,7 +12,8 @@
 #ifndef CW_BATTLE_TRACE_H
 #define CW_BATTLE_TRACE_H
 
-/* After each frame of the game (emu_debug_frame): a record where a battle is on and the trace asked for. */
+/* After each frame of the game (emu_debug_frame): a record where a battle is on and the trace asked for; and with
+ * CYBERWORLD_XDRAWS=keep|PATH, the battle's draws kept or replayed (xd_control_frame, tools/xcontrol.py). */
 void battle_trace_frame(void);
 
 #endif

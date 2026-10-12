@@ -4,15 +4,20 @@
 family moved into BN6's battle engine (issue #82; docs/MULTIROM.md,
 Transplanted families; docs/DEVTOOLS.md, The differential).
 
-BN5's CanGard runs in BN6's battle engine by its own code, moved from the
-player's ROM (src/emu/xvirus.c). Each spec (tests/xdiff/SPEC.json) fights
-one battle twice with the host build's --xdiff (src/dev/xdiff.c): in BN5's
-own engine on the guest core, as BN5 has it (the reference), and in BN6's
-with the family installed (the subject), a frame of each in turn once each
-fights, each traced a fight frame at a time (the battle's timer the clock
-in both, never the cores' frames; the same keys by that timer; the same
-RNG words in both after the fight's first frame, BN6's following BN5's
-each frame where the spec says rng=follow). This compares the two:
+BN5's CanGard and Handi run in BN6's battle engine by their own code,
+moved from the player's ROM (src/emu/xvirus.c). Each spec
+(tests/xdiff/SPEC.json) fights one battle twice with the host build's
+--xdiff (src/dev/xdiff.c): in BN5's own engine on the guest core, as BN5
+has it (the reference), and in BN6's with the families installed (the
+subject), a frame of each in turn once each fights, each traced a fight
+frame at a time (the battle's timer the clock in both, never the cores'
+frames; the same keys by that timer; the same RNG words in both after the
+fight's first frame, BN6's following BN5's each frame where the spec says
+rng=follow, or each of BN6's draws given the word BN5's same draw took
+where it says rng=replay, legit.json's twins passed along). Each core's
+hooks log its draws, spawns, sounds, effects, setAttack, reservations,
+blinks and sprites with their callers (src/dev/xdiff_events.c), read by
+tools/xdiff_events.py. This compares the two:
 
   objects     matched by role, never by slot: the battle objects of the
               first kind by their enemy id, the third by their type, the
@@ -33,7 +38,12 @@ each frame where the spec says rng=follow). This compares the two:
               was moved by where it came from, each game's own ROM by the
               data there, a sprite's frames from its own data)
   per frame   the RNG words, the songs begun, the order the objects of
-              both run in, the panels
+              both run in, the panels; the family's calls by their call
+              sites (each event its code led to, in BN5's numbers), and
+              under rng=replay each draw with no twin in the other game
+  in BN6's    BN5's objects' reservation bit and blink phase read from
+  terms       BN5's own events as BN6 would have written them; a sprite
+              state no sprite was set up in left uncompared
 
 Each difference must be explained: by a mask in tests/xdiff/legit.json
 (an engine difference that is not the family's code, each with why and
@@ -69,15 +79,17 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, Canon, Frame, assign_roles, frame_diffs, read_trace,  # noqa: E402
-                        role_name)
+from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, Canon, Frame, assign_roles, frame_diffs,  # noqa: E402
+                        read_trace, role_name, rom)
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
+from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 
 SPECS = os.path.join(ROOT, 'tests', 'xdiff')
 LEGIT = os.path.join(SPECS, 'legit.json')
 MUTATIONS = os.path.join(SPECS, 'mutations.json')
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
+ROM_BASE = ROM_RANGE[0]
 
 
 # ---- a spec ----
@@ -100,7 +112,28 @@ def find_roms():
     return rom
 
 
-def spec_text(spec, out, pokes, calls=()):
+def twins_check(legit):
+    """Each twin of legit.json's rng is what it says: BN6's and BN5's bytes the same over its length, but where both hold a
+    BL (to each game's own routine) or the same load from a literal pool (each game's own word); the twins as the spec's
+    items (src/dev/xdiff.c)"""
+    items = []
+    for t in legit['rng']['twins']:
+        a6, a5, n = (int(t[k], 0) for k in ('bn6', 'bn5', 'len'))
+        b6, b5 = rom(6)[a6 - ROM_BASE:a6 - ROM_BASE + n], rom(5)[a5 - ROM_BASE:a5 - ROM_BASE + n]
+        k = 0
+        while k + 1 < n:
+            h6, h5 = b6[k] | b6[k + 1] << 8, b5[k] | b5[k + 1] << 8
+            if h6 >> 11 == 0x1E and h5 >> 11 == 0x1E and k + 3 < n:   # (a BL's two halves)
+                k += 4
+                continue
+            if h6 != h5 and not (h6 >> 11 == 9 and h5 >> 11 == 9 and h6 & 0x700 == h5 & 0x700):
+                sys.exit(f'legit.json\'s twin BN6 {a6:#x} / BN5 {a5:#x} differs at +{k:#x}: {h6:04x} | {h5:04x}')
+            k += 2
+        items.append(f'twin={a6:08X}:{a5:08X}:{n:X}' + (f':{t["word"]}' if 'word' in t else ''))
+    return items
+
+
+def spec_text(spec, out, pokes, calls=(), twins=()):
     keys = ','.join(f'{t}:{k}:{n}' for t, k, n in spec.get('keys', []))
     parts = [f'foes={spec["foes"]}', f'mm={spec.get("mm", "22")}', f'hp={spec.get("hp", 100)}', f'frames={spec.get("frames", 1200)}',
              f'seed={spec.get("seed", "12345678:9ABCDEF0")}', f'out={out}']
@@ -108,11 +141,13 @@ def spec_text(spec, out, pokes, calls=()):
         parts.append(f'keys={keys}')
     if spec.get('rng'):
         parts.append(f'rng={spec["rng"]}')
+    if spec.get('rng') == 'replay':
+        parts += list(twins)
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
 
-def run(name, spec, pokes, calls, quiet):
+def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     out = f'/src/.build/xdiff/runs/{name}'
@@ -121,7 +156,7 @@ def run(name, spec, pokes, calls, quiet):
         if os.path.exists(p):
             os.remove(p)
     cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', '/src/.build/xdiff/data', '--xdiff',
-           spec_text(spec, out, pokes, calls)]
+           spec_text(spec, out, pokes, calls, twins)]
     env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'))
     r = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
     lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus'))]
@@ -240,6 +275,11 @@ def check_expect(name, game, trace, canon, expect):
                     bad.append(f'{game}: MegaMan out of its row t{tl[out]["t"]}-t{tl[i - 1]["t"]}, the virus in {last[0] if last else None} '
                                f'at its end, not {expect["out_of_row_holds"]}')
                 out = None
+    for t, panel in expect.get('virus_panels', []):
+        r = by_t.get(t)
+        got = '%d%d' % foe(r)[2] if r and foe(r) else None
+        if got != panel:
+            bad.append(f'{game}: the virus at t{t} on {got}, not {panel}')
     hits = sum(1 for i in range(1, len(tl)) for role, (_, hp, _) in tl[i]['foes'].items()
                if role in tl[i - 1]['foes'] and hp < tl[i - 1]['foes'][role][1])
     if 'virus_hits_at_least' in expect and hits < expect['virus_hits_at_least']:
@@ -271,6 +311,30 @@ def first_unexplained(t, open_, by, natives_at, show):
     return verdict, lines
 
 
+def compared(spec, ta, tb, legit, canon, counts=None):
+    """Each frame both traces hold, as compared: (BN5's frame, its view, BN6's view, their differences, each with the
+    mask that explains it): the engine's own bits of BN5's objects read in BN6's terms first (a panel reserved, the
+    blink's phase: xdiff_events.Translations, counted into `counts`), the family's calls compared by their call sites,
+    and under rng=replay the draws with no twin among the differences"""
+    ranks, prev, trans = {}, (), Translations()
+    matched = matched_draws(tb) if spec.get('rng') == 'replay' else None
+    bt = {f['t']: f for f in tb['frames']}
+    for fra in ta['frames']:
+        frb = bt.get(fra['t'])
+        if frb is None:
+            continue
+        fa, fb = Frame(ta, fra, canon), Frame(tb, frb, canon)
+        for k, v in trans.apply(fa, fb).items():
+            if counts is not None:
+                counts[k] = counts.get(k, 0) + v
+        renderer_ranks(fa, fb, ranks)
+        diffs = frame_diffs(fa, fb) + call_diffs(fa, fb) + (draw_diffs(fa, fb, matched) if matched is not None else [])
+        for d in diffs:
+            d.mask = mask_of(d, legit['masks'], fa, fb, prev)
+        yield fra, fa, fb, diffs
+        prev = (fa, fb)
+
+
 def compare(name, spec, ta, tb, legit, canon, show):
     """The verdict: ('PASS'|'FAIL'|'INCONCLUSIVE', the frame of it, lines to print). The first unexplained
     difference decides. The family's fails the spec. MegaMan's own, what he owns or an effect of the engine's stops
@@ -279,26 +343,17 @@ def compare(name, spec, ta, tb, legit, canon, show):
     (MegaMan, the RNG, the songs, the run order, the panels) is still the same, so the family is still compared,
     until any of those differs (then the stop: the natives may be why). After a stop the frames are still compared,
     the family's roles alone, to say how far they went on the same (not a verdict)."""
-    masks = legit['masks']
-    used, lines, ranks = {}, [], {}
+    used, lines, read = {}, [], {}
     fa_all, fb_all = ta['frames'], tb['frames']
-    bt = {f['t']: f for f in fb_all}
-    verdict, at, prev, n, after, natives_at = 'PASS', None, (), 0, None, None
-    for fra in fa_all:
-        frb = bt.get(fra['t'])
-        if frb is None:
-            continue
-        fa, fb = Frame(ta, fra, canon), Frame(tb, frb, canon)
-        renderer_ranks(fa, fb, ranks)
-        diffs, by = frame_diffs(fa, fb), {}
+    verdict, at, n, after, natives_at = 'PASS', None, 0, None, None
+    for fra, fa, fb, diffs in compared(spec, ta, tb, legit, canon, read):
+        by = {}
         for d in diffs:
-            d.mask = mask_of(d, masks, fa, fb, prev)
             w = who(d, fb, canon, fa)
             if d.mask and verdict == 'PASS':
                 used[d.mask] = used.get(d.mask, 0) + 1
             elif not d.mask:
                 by.setdefault(w, []).append(d)
-        prev = (fa, fb)
         open_ = [d for d in diffs if not d.mask]
         if verdict == 'INCONCLUSIVE':
             if by.get('family') and after is None:
@@ -323,28 +378,21 @@ def compare(name, spec, ta, tb, legit, canon, show):
         lines.append(f'  the traces are {len(fa_all)} and {len(fb_all)} fight frames long')
         verdict, at = 'FAIL', min(len(fa_all), len(fb_all))
     lines.insert(0, f'  {n} fight frames compared (t{fa_all[0]["t"]}-t{fa_all[-1]["t"]}), masks applied (none on the '
-                 f'family\'s own records, where none may): ' + (', '.join(f'{k} x{v}' for k, v in sorted(used.items())) or 'none'))
+                 f'family\'s own records, where none may): ' + (', '.join(f'{k} x{v}' for k, v in sorted(used.items())) or 'none') +
+                 '; BN5\'s records read in BN6\'s terms: ' + (', '.join(f'{k} x{v}' for k, v in sorted(read.items()) if v) or 'none'))
     return verdict, at, lines
 
 
-def survey(ta, tb, legit, canon):
+def survey(spec, ta, tb, legit, canon):
     """every difference of every frame, by whose, part and place: how many, the first, its values"""
-    seen, prev, ranks = {}, (), {}
-    bt = {f['t']: f for f in tb['frames']}
-    for fra in ta['frames']:
-        frb = bt.get(fra['t'])
-        if frb is None:
-            continue
-        fa, fb = Frame(ta, fra, canon), Frame(tb, frb, canon)
-        renderer_ranks(fa, fb, ranks)
-        for d in frame_diffs(fa, fb):
-            d.mask = mask_of(d, legit['masks'], fa, fb, prev)
-            w = who(d, fb, canon, fa) if isinstance(d.role, tuple) else str(d.role).split(' ')[0]
-            key = (role_name(d.role) if w == 'family' else w, d.part, d.off, d.mask)
+    seen = {}
+    for _, fa, fb, diffs in compared(spec, ta, tb, legit, canon):
+        for d in diffs:
+            w = who(d, fb, canon, fa) if isinstance(d.role, tuple) or d.role == 'family' else str(d.role).split(' ')[0]
+            key = (role_name(d.role) if w == 'family' and isinstance(d.role, tuple) else w, d.part, d.off, d.mask)
             if key not in seen:
                 seen[key] = [0, d]
             seen[key][0] += 1
-        prev = (fa, fb)
     return [f'  {n:5d}x {k[0]} {k[1]}+{k[2]:#04x}{f" [{k[3]}]" if k[3] else ""}: first {d}' for k, (n, d) in sorted(seen.items(), key=lambda x: x[1][1].t)]
 
 
@@ -357,8 +405,9 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None):
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
     run_name = run_name or name
     paths = [os.path.join(WORK, 'runs', f'{run_name}.{g}') for g in ('bn5', 'bn6')] if a.no_run else \
-        run(run_name, spec, list(pokes), list(calls), a.quiet)
+        run(run_name, spec, list(pokes), list(calls), a.quiet, twins_check(legit))
     ta, tb = read_trace(paths[0]), read_trace(paths[1])
+    ta['code'] = tb['moved']   # (the families' blocks: BN5's code where the install found it)
     for tr in (ta, tb):
         assign_roles(tr, canon)
         attribute(tr, canon)
@@ -367,7 +416,7 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None):
             print(f' {label}:')
             print('\n'.join(story(tr, canon)))
     if a.survey:
-        print('\n'.join(survey(ta, tb, legit, canon)))
+        print('\n'.join(survey(spec, ta, tb, legit, canon)))
     verdict, at, lines = compare(name, spec, ta, tb, legit, canon, a.show)
     print('\n'.join(lines))
     bad = []

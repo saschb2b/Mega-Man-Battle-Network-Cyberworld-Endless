@@ -20,7 +20,8 @@
 enum {
 	XV_POOL,    /* literal words: one that points into a copied block is moved with it; one in RAM, I/O or ROM
 	               elsewhere must be one of the recipe's words; any other is a number, kept */
-	XV_TABLE,   /* a jump table: Thumb pointers into a copied block, each moved */
+	XV_TABLE,   /* a jump table: Thumb pointers into a copied block, each moved, or to a routine of its game's whose twin of BN6's the
+	               recipe's words name */
 	XV_RAW,     /* bytes as they are (tables of numbers, alignment): no word of them may point into a block */
 	XV_ZERO,    /* bytes dead in the copy, zeroed (the family's state table in its game's layout) */
 };
@@ -68,7 +69,8 @@ typedef struct {
 	int ndata;
 	const XvPair *calls;       /* the routines its BLs call outside the blocks: its game's, BN6's in their place */
 	int ncalls;
-	const XvPair *words;       /* the literal words that name RAM, I/O or ROM outside the blocks: its game's, BN6's */
+	const XvPair *words;       /* the literal words that name RAM, I/O or ROM outside the blocks, and a jump table's entries out of
+	                              them: its game's, BN6's */
 	int nwords;
 	const XvImm *imms;
 	int nimms;

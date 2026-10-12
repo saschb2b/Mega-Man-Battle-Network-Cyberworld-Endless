@@ -1,20 +1,23 @@
 /* xdiff.h: the differential's two battles, each traced. A trace is
- * "XDF1", its version (1), the game (5 or 6), its collision data's and
+ * "XDF1", its version (2), the game (5 or 6), its collision data's and
  * panel's sizes, the ranges the install moved (xvirus.h's XvMoved: from,
  * to, len; BN6's alone) and then a record per fight frame (each new value
  * of the battle's timer while it fights): "FRAM", the core's frame, the
  * timer, the sub-mode, the phase, how many battle objects of the first,
  * third and fourth kinds are in play, sounds begun and objects in the run
- * order, both RNG words; then each object of the first kind (its slot,
+ * order, both RNG words, how many events its core's hooks logged since the
+ * record before (xdiff_events.h; the first record's from the battle's
+ * start); then each object of the first kind (its slot,
  * whether its AI's data and collision data are read, its 0xD8 bytes from
  * its list node on (BN6_OBJECT_NODE before it), its AI's 0x100 and its
  * collision data's BN6_COLL_SIZE, BN5's padded), each of the third (its
  * slot, its bytes, its collision data), each of the fourth (its slot, its
  * 0xC8 bytes from its node), the 40 panels (BN5_PANEL_SIZE each,
- * BN6's padded), the run order (each object's address), and the sounds
- * begun (a music player and the song's number). All u32 little-endian but
- * the counts and slots. Local only: both ROMs, and what it writes is
- * their RAM (kept in .build, never in git). */
+ * BN6's padded), the run order (each object's address), the sounds
+ * begun (a music player and the song's number), and the events
+ * (XD_EVENT_WORDS words each: kind, sub and flags in the first). All u32
+ * little-endian but the counts and slots. Local only: both ROMs, and what
+ * it writes is their RAM (kept in .build, never in git). */
 #include "xdiff.h"
 
 #include <stdio.h>
@@ -31,6 +34,7 @@
 #include "guest.h"
 #include "rom.h"
 #include "thumb_reloc.h"
+#include "xdiff_events.h"
 #include "xvirus.h"
 #include "xvirus_families.h"
 
@@ -40,6 +44,8 @@
 #define SONGS     0x400   /* the song table's entries looked through for a header */
 #define OPENING   3000    /* the frames a battle may take to its fight */
 #define MOVED_MAX 32
+#define MAX_TWINS 16
+#define TRACE_VERSION 2
 
 typedef struct { uint32_t t, n, keys; } Key;
 typedef struct { uint32_t at, v; int size; } Poke;   /* size 0: a call's veneer, from BN6's routine `at` to `v` */
@@ -53,8 +59,10 @@ typedef struct {
 	uint32_t seed[2];
 	Poke pokes[MAX_POKES];
 	int npokes;
+	XdTwin twins[MAX_TWINS];
+	int ntwins;
 	char out[256];
-	bool bn5, bn6, follow;
+	bool bn5, bn6, follow, replay;
 } Spec;
 
 /* ---- the spec ---- */
@@ -117,6 +125,17 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 	return 1;
 }
 
+/* "080050EC:08004C98:1A[:0]": a BN6 routine whose body is BN5's, a draw within it keyed by its BN5 twin (rng=replay), and
+ * the word BN5's draws there take where not BN6's */
+static bool twin_parse(Spec *s, const char *v) {
+	unsigned a, b, n;
+	int word = -1;
+	int got = sscanf(v, "%x:%x:%x:%d", &a, &b, &n, &word);
+	if (s->ntwins >= MAX_TWINS || got < 3 || !n || word < -1 || word > 1) return false;
+	s->twins[s->ntwins++] = (XdTwin){ a, b, n, word };
+	return true;
+}
+
 /* the comparator's own test's breaks: a poke, a call aimed elsewhere; -1 where `name` is neither */
 static int breaks_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
@@ -136,7 +155,8 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 	if (!strcmp(name, "foes")) return foes_parse(s, v);
 	if (!strcmp(name, "keys")) return keys_parse(s, v);
 	if (!strcmp(name, "out")) return snprintf(s->out, sizeof s->out, "%s", v) > 0;
-	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow"));
+	if (!strcmp(name, "rng")) return (s->follow = !strcmp(v, "follow")) || (s->replay = !strcmp(v, "replay"));
+	if (!strcmp(name, "twin")) return twin_parse(s, v);
 	if (!strcmp(name, "game")) {
 		s->bn5 = !strcmp(v, "bn5");
 		s->bn6 = !strcmp(v, "bn6");
@@ -148,7 +168,7 @@ static bool item_parse(Spec *s, const char *name, char *v) {
 static bool spec_parse(const char *text, Spec *s) {
 	*s = (Spec){ .mm = 0x22, .hp = 100, .frames = 1200, .seed = { 0x12345678u, 0x9ABCDEF0u }, .bn5 = true, .bn6 = true };
 	snprintf(s->out, sizeof s->out, "xdiff");
-	char buf[2048];
+	char buf[4096];
 	snprintf(buf, sizeof buf, "%s", text);
 	char *save = NULL;
 	for (char *t = strtok_r(buf, ";", &save); t; t = strtok_r(NULL, ";", &save)) {
@@ -186,6 +206,7 @@ typedef struct { uint32_t info, header, clock; } Player;
 
 typedef struct {
 	View v;
+	XdLog *log;   /* its core's hooks' events (xdiff_events.h) */
 	FILE *out;
 	Player players[BN6_MPLAY_COUNT];
 	uint16_t begun[BEGUN_MAX][2];   /* (player, song) begun since the last frame traced */
@@ -254,7 +275,7 @@ static void sounds(Side *g) {
 
 static void header_out(Side *g) {
 	fwrite("XDF1", 1, 4, g->out);
-	w32(g, 1);
+	w32(g, TRACE_VERSION);
 	w32(g, (uint32_t)g->v.game);
 	w32(g, g->v.coll_size);
 	w32(g, g->v.panel_size);
@@ -293,8 +314,13 @@ static void objects_out(Side *g, const uint8_t *s1, int n1, const uint8_t *s3, i
 	}
 }
 
+/* the events its hooks logged since the last record (made with the logs) */
+#define EVENTS_OUT 8192
+static XdEvent *events;
+
 static void frame_out(Side *g) {
 	const View *v = &g->v;
+	int nev = g->log && events ? xd_take(g->log, events, EVENTS_OUT) : 0;
 	uint8_t s1[BN6_T1_COUNT], s3[BN6_T3_COUNT], s4[BN6_T4_COUNT];
 	int n1 = in_play(v, v->t1, BN6_T1_SIZE, v->nt1, s1), n3 = in_play(v, v->t3, BN6_T1_SIZE, BN6_T3_COUNT, s3);
 	int n4 = in_play(v, v->t4, BN6_T4_SIZE, BN6_T4_COUNT, s4);
@@ -307,11 +333,18 @@ static void frame_out(Side *g) {
 	w8s(g, (uint8_t)n4, (uint8_t)ns, (uint8_t)no, 0);
 	w32(g, v->rd32(v->rng[0]));
 	w32(g, v->rd32(v->rng[1]));
+	w32(g, (uint32_t)nev);
 	objects_out(g, s1, n1, s3, n3, s4, n4);
 	for (uint32_t p = 0; p < PANELS; ++p) bytes_out(g, v->panels + p * v->panel_size, v->panel_size, BN5_PANEL_SIZE);
 	for (int i = 0; i < no; ++i) w32(g, order[i]);
 	for (int i = 0; i < ns; ++i) { w32(g, g->begun[i][0]); w32(g, g->begun[i][1]); }
 	g->nbegun = 0;
+	for (int i = 0; i < nev; ++i) {
+		const XdEvent *e = &events[i];
+		w8s(g, e->kind, e->sub, (uint8_t)e->flags, (uint8_t)(e->flags >> 8));
+		const uint32_t words[XD_EVENT_WORDS - 1] = { e->frame, e->t, e->caller, e->family, e->outer, e->object, e->a, e->b, e->ref };
+		for (int k = 0; k < XD_EVENT_WORDS - 1; ++k) w32(g, words[k]);
+	}
 }
 
 /* ---- a battle fought ---- */
@@ -339,6 +372,7 @@ static bool step(Side *g, const Spec *s) {
 		keys = g->custom < 4 ? KEY_START : g->custom >= 12 && g->custom < 16 ? KEY_A : 0;
 	} else g->custom = -1;
 	if (battle && phase == BN6_PHASE_FIGHT) keys |= keys_at(s, t);
+	if (g->log) xd_frame(g->log, g->frame, t, battle, g->seeded);
 	v->frame(keys);
 	++g->frame;
 	sub = v->rd8(v->gamestate);
@@ -381,17 +415,20 @@ static void fight(Side *a, Side *b, const Spec *s) {
 static void bn6_frame(uint32_t keys) { emu_frame(keys); }
 static void bn5_frame(uint32_t keys) { guest_frame_quiet(keys); }
 
-/* BN5's id as BN6 has it: the moved family's, else the same */
+/* the families the differential knows: BN5's, moved */
+static const XVirusFamily *const families[] = { &xvirus_cangard, &xvirus_handi };
+#define NFAMILIES ((int)(sizeof families / sizeof *families))
+
+/* BN5's id as BN6 has it: a moved family's, else the same */
 static int bn6_id(int id) {
-	const XVirusFamily *f = &xvirus_cangard;
-	for (int v = 0; v < XV_VERSIONS; ++v)
-		if (f->names[v] == id) return f->first_id + v;
+	for (int k = 0; k < NFAMILIES; ++k)
+		for (int v = 0; v < XV_VERSIONS; ++v)
+			if (families[k]->names[v] == id) return families[k]->first_id + v;
 	return id;
 }
 
-/* the veneer of the moved family's calls on to BN6's routine `to`, its bus address; 0 none */
-static uint32_t veneer_of(uint32_t to) {
-	const XVirusFamily *f = &xvirus_cangard;
+/* the veneer of family f's calls on to BN6's routine `to`, its bus address; 0 none */
+static uint32_t veneer_of(const XVirusFamily *f, uint32_t to) {
 	for (uint32_t at = f->home + XV_HOME_VENEERS; at + THUMB_VENEER_SIZE <= f->home + XV_HOME_SIZE; at += THUMB_VENEER_SIZE) {
 		uint8_t v[THUMB_VENEER_SIZE];
 		uint32_t t;
@@ -400,6 +437,18 @@ static uint32_t veneer_of(uint32_t to) {
 		if (t == (to & ~1u)) return at;
 	}
 	return 0;
+}
+
+/* each family's veneer on to BN6's routine `at` aimed at `v` instead */
+static void call_aim(uint32_t at, uint32_t v) {
+	uint8_t b[4];
+	put32(b, v | 1);
+	for (int k = 0; k < NFAMILIES; ++k) {
+		uint32_t veneer = veneer_of(families[k], at);
+		if (!veneer) continue;
+		emu_write(veneer + 8, b, 4);
+		printf("xdiff: %s's call to %08x (veneer %08x) aimed at %08x\n", families[k]->name, (unsigned)at, (unsigned)veneer, (unsigned)v);
+	}
 }
 
 /* the comparator's own test: bytes written into BN6's copy after the
@@ -413,10 +462,7 @@ static void pokes_put(const Spec *s) {
 		uint32_t at = p->at;
 		uint8_t b[4];
 		if (!p->size) {
-			at = veneer_of(p->at);
-			put32(b, p->v | 1);
-			if (at) emu_write(at + 8, b, 4);
-			printf("xdiff: the call to %08x (veneer %08x) aimed at %08x\n", (unsigned)p->at, (unsigned)at, (unsigned)p->v);
+			call_aim(p->at, p->v);
 			continue;
 		}
 		for (int k = 0; k < n; ++k)
@@ -495,6 +541,30 @@ static bool reference(Side *g, const Spec *s) {
 	return open_out(g, s, "bn5");
 }
 
+/* Each core's hooks, once both battles are made (BN5's code is the families' as xvirus_moved has it), and the
+ * subject's draws replayed from the reference's where the spec says so; false where they cannot be */
+static bool logs_start(Side *a, Side *b, const Spec *s) {
+	a->log = a->out ? xd_log_start(5) : NULL;
+	b->log = b->out ? xd_log_start(6) : NULL;
+	events = malloc(EVENTS_OUT * sizeof *events);
+	if ((a->out && !a->log) || (b->out && !b->log) || !events) return false;
+	if (s->replay && a->log && b->log) xd_replay(b->log, a->log, s->twins, s->ntwins);
+	return true;
+}
+
+/* what was traced, and what became of each core's draws */
+static void summary(const Side *a, const Side *b, const Spec *s) {
+	printf("xdiff: BN5's battle %d fight frames traced, BN6's %d%s\n", a->fought ? a->traced : -1, b->fought ? b->traced : -1,
+		s->follow ? " (BN6's RNG words following BN5's)" : s->replay ? " (BN6's draws replayed from BN5's)" : "");
+	for (int k = 0; k < 2; ++k) {
+		const Side *g = k ? b : a;
+		int n[XD_COUNTS];
+		if (!g->log) continue;
+		xd_counts(g->log, n);
+		printf("xdiff: BN%d's hooks: %d draws replayed, %d unmatched, %d unmapped; %d events lost\n", 5 + k, n[0], n[1], n[2], n[3]);
+	}
+}
+
 int xdiff_run(const char *text) {
 	static Spec s;
 	static Side a, b;
@@ -511,10 +581,10 @@ int xdiff_run(const char *text) {
 		fprintf(stderr, "xdiff: a battle could not be begun\n");
 		return 1;
 	}
+	if (!logs_start(&a, &b, &s)) return 1;
 	fight(ra ? &a : NULL, rb ? &b : NULL, &s);
 	if (a.out) fclose(a.out);
 	if (b.out) fclose(b.out);
-	printf("xdiff: BN5's battle %d fight frames traced, BN6's %d%s\n", ra && a.fought ? a.traced : -1, rb && b.fought ? b.traced : -1,
-		s.follow ? " (BN6's RNG words following BN5's)" : "");
+	summary(&a, &b, &s);
 	return (ra && !a.fought) || (rb && !b.fought) ? 1 : 0;
 }

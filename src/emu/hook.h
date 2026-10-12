@@ -10,7 +10,14 @@
  * - an answer hook returns, or changes, what the director prepared before the
  *   frame.
  * A hook reads and writes the game's memory with hook_read and hook_write:
- * emu_read and emu_write wait for the frame the hook runs in. */
+ * emu_read and emu_write wait for the frame the hook runs in.
+ *
+ * Each core has a table of its own, found by the CPU that meets the BKPT:
+ * BN6's (hook_attach, which the calls that name no core take) and, for the
+ * differential alone (src/dev/xdiff.c), the guest's (hook_core). A hook
+ * reads and writes the core it runs on. Two cores' hooks run one core's
+ * frame at a time: the guest's hooks are a dev tool's, whose frames run on
+ * the thread BN6's do (the guest's boot thread runs without hooks). */
 #ifndef CW_HOOK_H
 #define CW_HOOK_H
 
@@ -18,6 +25,7 @@
 #include <stdint.h>
 
 struct mCore;
+typedef struct HookCore HookCore;   /* a core's hooks: its table and its queue */
 
 /* What a hook reads, and may change: r0-r12 and lr go back into the CPU
  * (BN6's routines keep their object in r5); sp is read only; pc is the
@@ -42,8 +50,16 @@ typedef struct {
 	uint32_t r[8], lr;   /* r0-r7 and lr as it met them */
 } HookEvent;
 
-/* Our BKPT handler, before the board's: once, as the core is made. */
+/* Our BKPT handler, before the board's: once, as the core is made. Its
+ * table is the one the calls below that name no core take. */
 void hook_attach(struct mCore *core);
+/* Another core's own table, our handler put before its board's at the
+ * first call (NULL where every entry is taken): the guest's, for the
+ * differential's hooks on BN5's code. */
+HookCore *hook_core(struct mCore *core);
+/* The core's table gone and its board's handler back, before the core is
+ * let go (a test's cores). */
+void hook_detach(struct mCore *core);
 
 /* The table, for a core that is not running (emu.c's emu_hook and the
  * others wait for the frame first): a Thumb instruction at `addr` (its
@@ -52,6 +68,8 @@ void hook_attach(struct mCore *core);
 bool hook_add(uint32_t addr, EmuHook fn, void *user);
 bool hook_add_arm(uint32_t addr, EmuHook fn, void *user);
 bool hook_add_event(uint32_t addr, int kind);
+/* hook_add on a core of its own (hook_core's) */
+bool hook_on(HookCore *core, uint32_t addr, EmuHook fn, void *user);
 void hook_remove(uint32_t addr);
 /* Hooks in RAM written again, over what a state or a reset put there. */
 void hook_reapply(void);
@@ -74,7 +92,7 @@ void hook_write16(uint32_t addr, uint16_t v);
 void hook_write32(uint32_t addr, uint32_t v);
 
 /* Hits so far (CYBERWORLD_EMU_DEBUG's 30-frame line), events lost to a
- * full queue, and BKPTs of ours met where no hook is. */
+ * full queue, and BKPTs of ours met where no hook is: every core's. */
 extern uint32_t hook_hits, hook_dropped, hook_strays;
 
 #endif

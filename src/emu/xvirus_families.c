@@ -187,3 +187,87 @@ const XVirusFamily xvirus_cangard = {
 	.effects = cangard_effects, .neffects = (int)(sizeof cangard_effects / sizeof *cangard_effects),
 	.types = cangard_types, .ntypes = (int)(sizeof cangard_types / sizeof *cangard_types),
 };
+
+/* ---- BN5's Handi (AI 4 there, its enemy ids 0x13-0x18), as AI 33 ----
+ * Its code is one block of BN5's, from its attack state on to the next
+ * family's records (AI 5's struct1, 0x081063E0): its attack state's jump
+ * table, its other states, its state table in BN5's layout (dead in the
+ * copy), its tables of numbers and the callback its teleport calls to pick
+ * a panel at random. Three of its attack's steps are the engine's own
+ * (BN5's shared virus code, 0x08104AC0 on): its jump table names their
+ * twins in BN6 (words), each body compared. A BL scan finds 1 call within
+ * it and 14 out, to 11 routines, each paired with BN6's (docs/ROM_DATA.md,
+ * BN5's Handi). It draws random numbers (three calls of its own, one in
+ * the panel's pick) and teleports, reserving the panel it goes to. */
+
+static const XvBlock handi_blocks[] = {
+	{ 0x081061D4, 0x081063E0, XV_CODE + 0x800, 0x4D6C3897u },
+};
+
+static const XvData handi_data[] = {
+	{ 0x081061E2, 0x081061E4, XV_RAW }, { 0x081061E4, 0x081061E8, XV_POOL }, { 0x081061E8, 0x08106200, XV_TABLE },
+	{ 0x08106288, 0x081062AC, XV_ZERO },   /* its state table, BN5's layout: BN6's in its home */
+	{ 0x081062C0, 0x081062C4, XV_POOL }, { 0x081062C4, 0x081062CC, XV_TABLE },
+	{ 0x08106304, 0x08106308, XV_POOL }, { 0x08106308, 0x08106310, XV_RAW },   /* (its waits, by a coin and its column) */
+	{ 0x08106384, 0x0810638C, XV_POOL }, { 0x0810638C, 0x08106392, XV_RAW }, { 0x08106392, 0x08106398, XV_RAW },   /* (by version) */
+	{ 0x081063C6, 0x081063C8, XV_RAW }, { 0x081063C8, 0x081063CC, XV_POOL }, { 0x081063CC, 0x081063DC, XV_RAW },   /* (the panels' filter) */
+	{ 0x081063DC, 0x081063E0, XV_POOL },   /* (its callback, the panel's pick) */
+};
+
+/* BN5's routines it calls and BN6's in their place (each pair's bodies compared, docs/ROM_DATA.md): a positive random number,
+ * an animation's frame, its facing, its counter time, its attack begun, a panel picked at random, an object's flag set, its
+ * attack's object spawned (the third kind's type 0x4B in both), the battle's objects counted, its teleport's end, the
+ * panels' filter by its side */
+static const XvPair handi_calls[] = {
+	{ 0x080014A6, 0x08001532 }, { 0x08002C56, 0x08002DEA }, { 0x0800C6CA, 0x0800E2CA }, { 0x0800CCD2, 0x0800E9DC },
+	{ 0x0800F200, 0x08011680 }, { 0x08012DCC, 0x08015FDC }, { 0x08016C42, 0x0801A152 }, { 0x080CF37E, 0x080CF4EC },
+	{ 0x08104B1C, 0x0810A960 }, { 0x08104E60, 0x0810AD80 }, { 0x0810567C, 0x0810AA2A },
+};
+
+/* its attack's steps that are the engine's own, BN5's and BN6's twin: a
+ * teleport begun (the panel picked and reserved), the teleport, a wait */
+static const XvPair handi_words[] = {
+	{ 0x08104DA9, 0x0810ACC9 }, { 0x08104DEB, 0x0810AD0B }, { 0x08104BFD, 0x0810AE95 },
+};
+
+static const XvImm handi_imms[] = {
+	{ 0x081062E8, THUMB_MOVS, 0, 0, 7, 9 },    /* its wait's CurAction: BN5's 7, BN6's two status states before it */
+	{ 0x08106362, THUMB_MOVS, 0, 0, 8, 10 },   /* its attack's: 8, 10 */
+};
+
+/* its states BN6's way: BN6's generic 0-7, its own decision (8), the engine's wait (9), its attack (10) */
+static const XvRef handi_states[] = {
+	BN6(0x08016381), BN6(0x080165B9), BN6(0x080165C3), BN6(0x080166AF),
+	BN6(0x08016B03), BN6(0x08016CE9), BN6(0x08016B37), BN6(0x08016B73),
+	OWN(0x081062AD), BN6(0x0810AE95), OWN(0x081061D5),
+};
+
+static const XvSprite handi_sprites[] = {
+	{ 1, 0x04, 1, 0x00, XV_ART + 0x4800, 0x3000 },   /* Handi (LZ77 in BN5), at list 1's placeholder 0x00 */
+};
+
+const XVirusFamily xvirus_handi = {
+	.name = "Handi (BN5's)",
+	.game = XROM_BN5_COLONEL_US,
+	.src_ai = 4,
+	.ai = 33,
+	.first_id = 0xC1,
+	.home = XV_HOMES + XV_HOME_SIZE,
+	.blocks = handi_blocks, .nblocks = (int)(sizeof handi_blocks / sizeof *handi_blocks),
+	.data = handi_data, .ndata = (int)(sizeof handi_data / sizeof *handi_data),
+	.calls = handi_calls, .ncalls = (int)(sizeof handi_calls / sizeof *handi_calls),
+	.words = handi_words, .nwords = (int)(sizeof handi_words / sizeof *handi_words),
+	.imms = handi_imms, .nimms = (int)(sizeof handi_imms / sizeof *handi_imms),
+	.states = handi_states, .nstates = (int)(sizeof handi_states / sizeof *handi_states),
+	/* (none: BN5's tables give it the empty hook in all six) */
+	.hooks = {
+		BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB),
+		BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB),
+	},
+	.struct1 = 0x081060E8, .struct2 = 0x081060F0,
+	.names = { 0x13, 0x14, 0x15, 0x16, 0x17, 0x18 },
+	.held = 0,   /* (none: BN5's lists for it are empty) */
+	.ice = 0,    /* (BN5 freezes none) */
+	.traits = { .laid = true, .mode = 0x0B, .element = 0, .weakness = 0, .shadow = true },
+	.sprites = handi_sprites, .nsprites = (int)(sizeof handi_sprites / sizeof *handi_sprites),
+};

@@ -4,6 +4,7 @@ of the family's objects read in the family's own order, and each mask of tests/x
 place and its rule, never to the family's own records (docs/DEVTOOLS.md, The differential)."""
 from xdiff_snap import (NODE, SPRITE, OBJ_NAME_ID, OBJ_ACTION, OBJ_TYPE, OBJ_EFFECT, RNG_XOR, MEGAMAN_BUSTER, Frame,
                         role_name, u16)
+from xdiff_events import engine_draw, spawned_by, spawns_of
 
 
 # ---- masks: engine differences, each explained (legit.json) ----
@@ -38,6 +39,13 @@ def whose(f, role, canon, known, depth=0):
         return None
     if o.kind == 'T1' and o.o16(OBJ_NAME_ID):
         return None
+    # (whose code spawned it, where the hooks saw its spawn: the family's code, or the object that ran as it was spawned)
+    by = spawned_by(f.trace, role)
+    if by == 'family':
+        return None
+    if by is not None and by != role:
+        w = known[by] if by in known else whose(f, by, canon, known, depth + 1)
+        return {'megaman': "megaman's", 'native': "native's"}.get(w, w)
     p = f.ptr(o.o32(0x4C))
     if len(p) == 3 and p[1] in ('obj', 'ai'):
         up = next((x.role for x in f.fr['objs'] if role_name(x.role) == p[0]), None)
@@ -57,6 +65,7 @@ def whose(f, role, canon, known, depth=0):
 
 def attribute(trace, canon):
     """each role's whose(), as its first frame has it (where what owns it is still there), kept for its life"""
+    trace['spawns'] = spawns_of(trace)
     trace['whose'] = {}
     for fr in trace['frames']:
         f = Frame(trace, fr, canon)
@@ -76,7 +85,10 @@ def whose_role(role, fa, fb):
 
 
 def who(d, fb, canon, fa=None):
-    """whose a difference is: 'battle' (no object's: the RNG, the songs, the run order, a panel) or its role's"""
+    """whose a difference is: the family's (its calls, its draws), 'battle' (no object's: the RNG, the songs, the run
+    order, a panel, the engine's draws) or its role's"""
+    if d.role == 'family':
+        return 'family'
     return whose_role(d.role, fa, fb) if isinstance(d.role, tuple) else 'battle'
 
 
@@ -150,6 +162,7 @@ def renderer_ranks(fa, fb, last):
 WHEN = {
     'flashing': lambda d, fa, fb, prev: any(flashing(f, d.role) for f in (fa, fb) + prev),
     'buster draw': buster_draw,
+    'engine draw': lambda d, fa, fb, prev: engine_draw(d, fa.canon.legit),
 }
 
 
