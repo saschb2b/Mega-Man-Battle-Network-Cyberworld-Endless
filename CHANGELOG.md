@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.12.0 (2026-10-13)
 
 - **Saves move between systems (issue #114).** SAVES on the title writes
   your profile and the run's checkpoint to one file,
