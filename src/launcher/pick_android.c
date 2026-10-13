@@ -4,8 +4,9 @@
  * read and write, for the looks at later starts and the saves' copy) or
  * files, several at once; each .gba there told by its header's game code,
  * BN6's and BN5's checked by their SHA-1 and copied into the app's ROM
- * folder, where the game reads them; a .cwsave in the folder copied to
- * the data folder's found.cwsave, which the launcher offers back. */
+ * folder, where the game reads them. SAVES' pickers and its transfer
+ * place: the folder chosen there, else the ROM folder (mirror.h reads it
+ * once a start, through savesGet). */
 #include "pick.h"
 
 #ifdef __ANDROID__
@@ -15,6 +16,8 @@
 #include <string.h>
 
 #include <SDL.h>
+
+#include "pick_saves.h"
 
 /* a call into GameActivity: its environment, the activity and the method */
 typedef struct {
@@ -92,7 +95,7 @@ bool pick_open(int kind, int slot) {
 
 bool pick_busy(void) { return busy; }
 
-/* romsResult's "status\nsaves\nwhat the look found", once a picker closed */
+/* romsResult's "status\n0\nwhat the look found", once a picker closed */
 bool pick_done(PickResult *r) {
 	char s[1200];
 	if (!busy || !call_string("romsResult", s, sizeof s)) return false;
@@ -100,7 +103,6 @@ bool pick_done(PickResult *r) {
 	memset(r, 0, sizeof *r);
 	char *nl = strchr(s, '\n'), *nl2 = nl ? strchr(nl + 1, '\n') : NULL;
 	r->status = atoi(s) > 0 ? 1 : -1;
-	r->saves = nl && nl[1] == '1';
 	snprintf(r->text, sizeof r->text, "%s", nl2 ? nl2 + 1 : "");
 	return true;
 }
@@ -116,7 +118,60 @@ int pick_look(char *msg, size_t n) {
 
 bool pick_folder(char *name, size_t n) { return call_string("romsFolder", name, n) && name[0]; }
 
-bool pick_saves_put(const char *from) { return call_bool_string("savesPut", from); }
+/* name(String) returning an int */
+static int call_int_string(const char *name, const char *arg) {
+	Call c;
+	if (!call_begin(&c, name, "(Ljava/lang/String;)I")) return 0;
+	jstring s = (*c.env)->NewStringUTF(c.env, arg);
+	jint v = s ? (*c.env)->CallIntMethod(c.env, c.activity, c.m, s) : 0;
+	if (s) (*c.env)->DeleteLocalRef(c.env, s);
+	return call_end(&c) ? (int)v : 0;
+}
+
+static int saves_get(const char *to) { return call_int_string("savesGet", to); }
+static bool saves_put(const char *from) { return call_bool_string("savesPut", from); }
+
+int pick_saves_read(uint8_t **bytes, size_t *n) { return saves_read_through(saves_get, bytes, n); }
+bool pick_saves_put(const uint8_t *bytes, size_t n) { return saves_put_through(saves_put, bytes, n); }
+bool pick_saves_stat(uint64_t *size, int64_t *mtime) {
+	(void)size;
+	(void)mtime;
+	return false;
+}
+bool pick_saves_place(char *out, size_t n) { return call_string("savesFolder", out, n) && out[0]; }
+bool pick_saves_scope(char *out, size_t n) { return n > 1 && call_string("savesScope", out, n) && out[0] && strlen(out) + 1 < n; }
+
+static bool saves_busy;
+static int saves_kind;
+
+static bool saves_dialog_open(int kind, const char *from) {
+	Call c;
+	if (busy || saves_busy || !call_begin(&c, "savesPick", "(ILjava/lang/String;)Z")) return false;
+	jstring s = from ? (*c.env)->NewStringUTF(c.env, from) : NULL;
+	jboolean v = (*c.env)->CallBooleanMethod(c.env, c.activity, c.m, (jint)kind, s);
+	if (s) (*c.env)->DeleteLocalRef(c.env, s);
+	saves_busy = call_end(&c) && v;
+	saves_kind = kind;
+	return saves_busy;
+}
+
+bool pick_saves_import(void) { return saves_dialog_open(0, NULL); }
+bool pick_saves_export(const char *from) { return saves_dialog_open(1, from); }
+bool pick_saves_choose_folder(void) { return saves_dialog_open(2, NULL); }
+bool pick_saves_busy(void) { return saves_busy; }
+void pick_saves_cancel(void) {}
+
+bool pick_saves_done(PickResult *r) {
+	char s[1200];
+	if (!saves_busy || !call_string("savesResult", s, sizeof s)) return false;
+	saves_busy = false;
+	memset(r, 0, sizeof *r);
+	r->status = atoi(s);
+	r->path = saves_kind == 0 && r->status == 1;
+	char *nl = strchr(s, '\n');
+	snprintf(r->text, sizeof r->text, "%s", nl ? nl + 1 : "");
+	return true;
+}
 #else
 typedef int pick_android_unused;
 #endif

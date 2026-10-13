@@ -18,10 +18,12 @@ finish-args:
   - --share=network
   # game controllers
   - --device=all
-  # the ROM, read only, where players keep it: the game finds it by its
-  # contents in Downloads, EmuDeck's and RetroDECK's gba folders (on the
-  # home or an SD card) and ~/ROMs, and copies it into its own folder
-  - --filesystem=xdg-download:ro
+  # Downloads, read and written: the ROM found there by its contents, and
+  # SAVES' file exported there and imported from there (docs/SAVES.md)
+  - --filesystem=xdg-download
+  # the ROM, read only, where players keep it: EmuDeck's and RetroDECK's
+  # gba folders (on the home or an SD card) and ~/ROMs; the game copies it
+  # into its own folder
   - --filesystem=~/Emulation/roms/gba:ro
   - --filesystem=~/retrodeck/roms/gba:ro
   - --filesystem=~/ROMs:ro

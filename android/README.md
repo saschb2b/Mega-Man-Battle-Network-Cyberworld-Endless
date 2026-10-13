@@ -35,13 +35,20 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   (`src/analytics/analytics_net.c`). They are the one reason the app asks
   for the `INTERNET` permission.
 - The saves and settings are in `files/data`, which uninstalling deletes.
-  So the game keeps a copy in the folder chosen (`src/launcher/mirror.c`):
-  `cyberworld-endless.cwsave` (`src/core/backup.h`), packed a few seconds
-  after the game last wrote a file and as the app goes to the background,
-  and written into the folder by `savesPut` (written whole as a new file,
-  then put in the old one's place where the folder's provider renames).
-  A folder chosen that holds one has it copied to `files/data/found.cwsave`,
-  and the ROMs screen offers it back. Android's Auto Backup takes the saves
+  The game keeps a copy of the saves, `cyberworld-endless.cwsave`
+  (`src/core/backup.h`), in a folder outside the app
+  (`src/launcher/mirror.c`, docs/SAVES.md): the ROM folder, or a folder
+  chosen with **SAVES › FOLDER**. It is packed a few seconds after the
+  game last wrote a file and as the app goes to the background, and
+  written into the folder by `savesPut` (whole as a new file, then put in
+  the old one's place where the folder's provider renames). `savesGet`
+  reads the folder's file for the game once a start (1 read, 0 none, -1
+  there but unreadable); the ROMs' look leaves it alone. A file there
+  that another device wrote is not written over until the player answers
+  SAVES' comparison of it. After a reinstall, choosing the ROM folder
+  again finds the copy, and the game opens that comparison beside the
+  new install's empty saves; **SAVES › IMPORT** takes a `.cwsave` from
+  anywhere else. Android's Auto Backup takes the saves
   and settings, never the ROMs (`res/xml/backup_rules.xml`,
   `data_extraction_rules.xml`); with no rules it took everything, ROMs
   too, and a reinstall could bring BN6 back with older saves and never
@@ -121,8 +128,8 @@ time.
 ## Signing
 
 Android installs an update over an app only when both carry the same
-signature, and uninstalling deletes the app's saves (all but their copy in
-the ROM folder), so every release has to be signed with one key. `build.py android` signs with it when these are set:
+signature, and uninstalling deletes the app's saves (external exports
+survive), so every release has to be signed with one key. `build.py android` signs with it when these are set:
 
 | Variable | |
 | --- | --- |
@@ -148,8 +155,8 @@ base64 -w0 release.jks   # the value of ANDROID_KEYSTORE_BASE64
 ```
 
 Keep the keystore and its password safe outside the repository: a lost key
-means players reinstall to update, their saves coming back only from the
-copy in their ROM folder.
+means players reinstall to update and need an exported copy to bring
+their saves back.
 
 ## Installing
 
@@ -163,14 +170,17 @@ and optionally Mega Man Battle Network 5: Team Colonel (USA).
 To try it in the emulator, push copies of the ROMs into its storage, for
 instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
 Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
-ROMs: 3 .gba, kept 3, refused [Falzar.gba: BN6 Cybeast Falzar, not Gregar],
-saves found`) and the game's own line, `BN5 found: ...`. A reinstall's
-saves: play until the game saves, check that
+ROMs: 3 .gba, kept 3, refused [Falzar.gba: BN6 Cybeast Falzar, not Gregar]`)
+and the game's own line, `BN5 found: ...`. A reinstall's saves: play
+until the game saves, check that
 `/sdcard/Download/ROMs/cyberworld-endless.cwsave` is there, `adb uninstall
 io.github.saschb2b.cyberworldendless`, install the APK again and choose the
-folder: the ROMs screen asks **SAVES FOUND**, and **BRING BACK** puts back
-`files/data/savedata` as it was (the emulator, with `adb root`, can hash
-both).
+folder: the game opens **SAVES** with the copy beside this device's empty
+saves, the cursor on the file's. **BRING BACK** puts the progress and
+checkpoint back in `files/data/savedata`, and CONTINUE goes on from the
+same layer (the emulator, with `adb root`, can hash the files against
+the ones before). **SAVES › IMPORT** takes a file from anywhere else;
+see [Moving saves between devices](../docs/GUIDE.md#moving-saves-between-devices).
 
 Joy-Cons can be tried there without the hardware: `tools/jc_uinput.c`
 (built with this image's NDK, the command in its first lines) makes a left

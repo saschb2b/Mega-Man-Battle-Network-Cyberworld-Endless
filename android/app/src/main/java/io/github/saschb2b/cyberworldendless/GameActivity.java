@@ -38,6 +38,7 @@ public class GameActivity extends SDLActivity {
     /** Starts the launcher open (RomActivity's: the icon's ROMs shortcut). */
     static final String EXTRA_LAUNCHER = "launcher";
     static final int PICK_FOLDER = 1, PICK_FILES = 2;
+    static final int SAVES_IMPORT = 3, SAVES_EXPORT = 4, SAVES_FOLDER = 5;
 
     /* the layer's map on a display beside this one, where there is one */
     private SecondScreen second;
@@ -45,12 +46,33 @@ public class GameActivity extends SDLActivity {
     /* a picker's end, for romsResult: "status\nsaves\nwords" */
     private volatile String picked;
     private volatile boolean picking;
+    /* SAVES' picker: its end for savesResult ("status\ntext"), its kind
+     * while it is open (-1 none) and an export's file */
+    private volatile String savesPicked;
+    private volatile int savesKind = -1;
+    private File savesExport;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!mBrokenLibraries) second = SecondScreen.open(this);
+        /* (the activity made again while SAVES' picker was open: its answer
+         * still comes here, and an export still has its file to write) */
+        if (state != null && state.getInt("savesKind", -1) >= 0) {
+            savesKind = state.getInt("savesKind");
+            String from = state.getString("savesExport");
+            savesExport = from == null ? null : new File(from);
+            picking = true;
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        if (savesKind < 0) return;
+        state.putInt("savesKind", savesKind);
+        if (savesExport != null) state.putString("savesExport", savesExport.getPath());
     }
 
     private RomLook roms() {
@@ -119,15 +141,15 @@ public class GameActivity extends SDLActivity {
             try {
                 startActivityForResult(i, kind == 1 ? PICK_FILES : PICK_FOLDER);
             } catch (ActivityNotFoundException e) {
-                done(0, false, kind == 1 ? "This device has no file picker." : "This device has no folder picker: choose the files instead.");
+                done(0, kind == 1 ? "This device has no file picker." : "This device has no folder picker: choose the files instead.");
             }
         });
         return true;
     }
 
     /** A picker's end, once: "status\nsaves\nwhat its look found" (status 1
-     *  looked, 0 nothing chosen; saves 1 where the folder held their copy),
-     *  null while it is open. */
+     *  looked, 0 nothing chosen; saves always 0, as the game reads the saves
+     *  folder itself: savesGet), null while it is open. */
     public String romsResult() {
         String r = picked;
         if (r != null) picked = null;
@@ -152,22 +174,112 @@ public class GameActivity extends SDLActivity {
         return roms().folder() != null ? roms().folderName() : null;
     }
 
-    /** The saves' copy at `from` written into the folder kept (mirror.c). */
+    /** The saves' copy at `from` written into the saves folder (mirror.c). */
     public boolean savesPut(String from) {
         return roms().putSaves(new File(from));
     }
 
-    private void done(int status, boolean saves, String words) {
+    /** The saves folder's copy read into `to` (RomLook.getSaves): 1 copied,
+     *  0 none there to read, -1 there but unreadable. */
+    public int savesGet(String to) {
+        return roms().getSaves(new File(to));
+    }
+
+    /** The saves folder: its name, null for none. */
+    public String savesFolder() {
+        return roms().savesFolder() == null ? null : roms().savesFolderName();
+    }
+
+    /** The saves folder's address, which tells one folder from another. */
+    public String savesScope() {
+        Uri folder = roms().savesFolder();
+        return folder == null ? null : folder.toString();
+    }
+
+    /** Opens SAVES' picker: a file to import (0), a new file to export
+     *  `from` into (1), or the saves folder (2). False where one is open. */
+    public boolean savesPick(int kind, String from) {
+        if (picking) return false;
+        picking = true;
+        savesPicked = null;
+        savesExport = from == null ? null : new File(from);
+        runOnUiThread(() -> {
+            Intent i = new Intent(kind == 2 ? Intent.ACTION_OPEN_DOCUMENT_TREE
+                : kind == 1 ? Intent.ACTION_CREATE_DOCUMENT : Intent.ACTION_OPEN_DOCUMENT);
+            if (kind != 2) {
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType(kind == 1 ? "application/octet-stream" : "*/*");
+                if (kind == 1) i.putExtra(Intent.EXTRA_TITLE, RomLook.SAVES);
+            } else {
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            }
+            Uri folder = roms().savesFolder();
+            if (Build.VERSION.SDK_INT >= 26 && folder != null) i.putExtra(DocumentsContract.EXTRA_INITIAL_URI, folder);
+            savesKind = kind;
+            try {
+                startActivityForResult(i, kind == 2 ? SAVES_FOLDER : kind == 1 ? SAVES_EXPORT : SAVES_IMPORT);
+            } catch (ActivityNotFoundException e) {
+                savesDone(-2, "This device has no file picker.");
+            }
+        });
+        return true;
+    }
+
+    /** SAVES' picker's end, once: "status\ntext" (status 1 done, -1 nothing
+     *  chosen, -2 failed; the text an import's copy, an export's file name,
+     *  the folder's name, or why it failed), null while it is open. */
+    public String savesResult() {
+        String r = savesPicked;
+        if (r != null) savesPicked = null;
+        return r;
+    }
+
+    private void savesDone(int status, String text) {
+        savesKind = -1;
         picking = false;
-        picked = status + "\n" + (saves ? 1 : 0) + "\n" + (words == null ? "" : words);
+        savesPicked = status + "\n" + (text == null ? "" : text);
+    }
+
+    private void savesEnd(int request, int result, Intent data) {
+        /* (the picker is closed: what is left is the copy) */
+        savesKind = -1;
+        if (result != RESULT_OK || data == null || data.getData() == null) { savesDone(-1, ""); return; }
+        Uri uri = data.getData();
+        int flags = data.getFlags();
+        File from = savesExport;
+        new Thread(() -> {
+            RomLook r = roms();
+            if (request == SAVES_FOLDER) {
+                String name = r.nameOf(uri);
+                boolean ok = r.keepSavesFolder(uri, name, flags);
+                savesDone(ok ? 1 : -2, ok ? name : "The folder could not be kept.");
+            } else if (request == SAVES_IMPORT) {
+                File to = new File(RomLook.dataDir(this), "saves-import.cwsave");
+                boolean ok = r.copySaves(uri, to);
+                savesDone(ok ? 1 : -2, ok ? to.getPath() : "The file could not be read.");
+            } else {
+                boolean ok = r.export(from, uri);
+                savesDone(ok ? 1 : -2, ok ? r.fileName(uri) : "The file could not be written.");
+            }
+        }, "saves-transfer").start();
+    }
+
+    /* (romsResult's saves stays 0: the game reads the saves folder itself) */
+    private void done(int status, String words) {
+        picking = false;
+        picked = status + "\n0\n" + (words == null ? "" : words);
     }
 
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         super.onActivityResult(request, result, data);
+        if (request == SAVES_IMPORT || request == SAVES_EXPORT || request == SAVES_FOLDER) {
+            savesEnd(request, result, data);
+            return;
+        }
         if (request != PICK_FOLDER && request != PICK_FILES) return;
         if (result != RESULT_OK || data == null) {
-            done(0, false, request == PICK_FOLDER && Build.VERSION.SDK_INT >= 30
+            done(0, request == PICK_FOLDER && Build.VERSION.SDK_INT >= 30
                 ? "No folder chosen. If your ROMs are in Download itself, choose the files instead." : "");
             return;
         }
@@ -180,7 +292,7 @@ public class GameActivity extends SDLActivity {
                 String name = r.nameOf(tree);
                 r.keepFolder(tree, name, flags);
                 RomLook.Look l = r.lookFolder(tree, name, true);
-                done(1, l.saves, r.words(l));
+                done(1, r.words(l));
             }).start();
             return;
         }
@@ -190,7 +302,7 @@ public class GameActivity extends SDLActivity {
         else if (data.getData() != null) files.add(data.getData());
         new Thread(() -> {
             RomLook.Look l = r.lookFiles(files);
-            done(1, false, r.words(l));
+            done(1, r.words(l));
         }).start();
     }
 

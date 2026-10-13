@@ -1,9 +1,9 @@
 /* pick.h on the iPhone and iPad: Files' pickers over the game (ios.m), the
  * folder the ROMs are in (kept as a bookmark, looked in again at each
  * start) or files, several at once; BN6's and BN5's ROMs, checked by
- * their SHA-1, copied into the app's rom/ folder; a .cwsave in the folder
- * copied to the app's found.cwsave, which the launcher offers back, and
- * the saves' copy written into the folder (mirror.h). */
+ * their SHA-1, copied into the app's rom/ folder; and SAVES' pickers and
+ * its transfer place: the folder chosen there, else the ROM folder
+ * (ios_saves.m; mirror.h reads it once a start). */
 #include "pick.h"
 
 #ifdef CW_IOS
@@ -12,6 +12,8 @@
 
 #include "game.h"
 #include "ios.h"
+#include "ios_saves.h"
+#include "pick_saves.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -40,7 +42,6 @@ bool pick_done(PickResult *r) {
 	busy = false;
 	memset(r, 0, sizeof *r);
 	r->status = k;
-	r->saves = k > 0 && ios_pick_saves();
 	snprintf(r->text, sizeof r->text, "%s", k > 0 ? msg : "");
 	return true;
 }
@@ -55,7 +56,43 @@ int pick_look(char *msg, size_t n) {
 
 bool pick_folder(char *name, size_t n) { return ios_rom_folder_name(name, n); }
 
-bool pick_saves_put(const char *from) { return ios_saves_put(from); }
+int pick_saves_read(uint8_t **bytes, size_t *n) { return saves_read_through(ios_saves_get, bytes, n); }
+bool pick_saves_put(const uint8_t *bytes, size_t n) { return saves_put_through(ios_saves_put, bytes, n); }
+bool pick_saves_stat(uint64_t *size, int64_t *mtime) {
+	(void)size;
+	(void)mtime;
+	return false;
+}
+bool pick_saves_place(char *out, size_t n) { return ios_saves_folder_name(out, n); }
+bool pick_saves_scope(char *out, size_t n) { return ios_saves_folder_scope(out, n); }
+
+static bool saves_busy;
+static int saves_kind;
+
+static bool saves_dialog_open(int kind, const char *from) {
+	if (busy || saves_busy || !ios_saves_pick(P.window, g_data_dir, kind, from)) return false;
+	saves_kind = kind;
+	saves_busy = true;
+	return true;
+}
+
+bool pick_saves_import(void) { return saves_dialog_open(0, NULL); }
+bool pick_saves_export(const char *from) { return saves_dialog_open(1, from); }
+bool pick_saves_choose_folder(void) { return saves_dialog_open(2, NULL); }
+bool pick_saves_busy(void) { return saves_busy; }
+void pick_saves_cancel(void) {}
+
+bool pick_saves_done(PickResult *r) {
+	char msg[1024];
+	int status = saves_busy ? ios_saves_result(msg, sizeof msg) : 0;
+	if (!status) return false;
+	saves_busy = false;
+	memset(r, 0, sizeof *r);
+	r->status = status;
+	r->path = saves_kind == 0 && status == 1;
+	snprintf(r->text, sizeof r->text, "%s", msg);
+	return true;
+}
 #else
 typedef int pick_ios_unused;
 #endif

@@ -41,7 +41,7 @@ void scene_set(const Scene *s) { pending = s; }
 
 static const Scene *scene_by_name(const char *n) {
 	/* (the launcher is a start's own: --scene launcher opens it, then the title) */
-	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu };
+	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu, &scene_saves };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;

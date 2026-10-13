@@ -263,24 +263,11 @@ static NSString *words(CWLook *l, BOOL sent) {
 static char pick_msg[1024];   /* (ios_pick_result) */
 static char note[256];        /* (ios_rom_note) */
 static BOOL fetching;         /* a pick sent for its folder's files in iCloud */
-static BOOL picked_saves;     /* (ios_pick_saves) */
 
 /* What a look that took BN6 says: the ROMs copied in, and from where */
 static NSString *took_words(CWLook *l) {
 	NSString *what = (l.kept & IOS_ROM_BN5) ? [NSString stringWithFormat:@"%s and %s", known[0].tag, known[1].tag] : @(known[0].tag);
 	return l.where ? [NSString stringWithFormat:@"Took %@ from %@.", what, l.where] : [NSString stringWithFormat:@"Took %@.", what];
-}
-
-/* The saves' copy in the folder (a reinstall's), copied to `to`: whether there was one */
-static BOOL fetch_saves(NSURL *folder, NSString *to) {
-	__block BOOL ok = NO;
-	NSURL *saves = [folder URLByAppendingPathComponent:@BACKUP_NAME];
-	if (![NSFileManager.defaultManager fileExistsAtPath:saves.path]) return NO;
-	coordinated(saves, ^(NSURL *at) {
-		NSData *data = [NSData dataWithContentsOfURL:at];
-		if (data.length && data.length <= BACKUP_MAX) ok = [data writeToFile:to atomically:YES];
-	});
-	return ok;
 }
 
 static void to_c(NSString *s, char *out, size_t n) {
@@ -354,8 +341,6 @@ static int picked;   /* (ios_pick_result) */
 				[prefs setObject:where forKey:kFolderName];
 			}
 			l = look_in(folder, where, want, self.dir, NO);
-			/* (the saves a reinstall left there, for the launcher to offer back) */
-			picked_saves = fetch_saves(folder, [[self.dir stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"found.cwsave"]);
 			/* (a ROM folder's files still in iCloud are sent for; a library's are not) */
 			if (l.cloud.count && (NSUInteger)l.gba + l.cloud.count <= CLOUD_FETCH) {
 				for (NSURL *u in l.cloud) [NSFileManager.defaultManager startDownloadingUbiquitousItemAtURL:u error:nil];
@@ -397,22 +382,23 @@ static UIWindow *window_of(void *window) {
 }
 
 void ios_pick_roms(void *window, const char *dir, int what) {
-	UIViewController *top = window_of(window).rootViewController;
-	while (top.presentedViewController) top = top.presentedViewController;
-	if (!top) { picked = -1; return; }
-	if (!picker_delegate) picker_delegate = [CWRomPicker new];
-	picker_delegate.dir = @(dir);
-	picker_delegate.what = what;
-	/* (a folder opened in place, its scope the app's to enter; files as copies) */
-	UIDocumentPickerViewController *files = what == IOS_PICK_FOLDER
-		? [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[ UTTypeFolder ]]
-		: [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[ UTTypeData ] asCopy:YES];
-	files.delegate = picker_delegate;
-	files.allowsMultipleSelection = what == IOS_PICK_FILES;
-	picked = 0;
-	picked_saves = NO;
-	pick_msg[0] = 0;
-	[top presentViewController:files animated:YES completion:nil];
+	@autoreleasepool {
+		UIViewController *top = window_of(window).rootViewController;
+		while (top.presentedViewController) top = top.presentedViewController;
+		if (!top) { picked = -1; return; }
+		if (!picker_delegate) picker_delegate = [CWRomPicker new];
+		picker_delegate.dir = @(dir);
+		picker_delegate.what = what;
+		/* (a folder opened in place, its scope the app's to enter; files as copies) */
+		UIDocumentPickerViewController *files = what == IOS_PICK_FOLDER
+			? [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[ UTTypeFolder ]]
+			: [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[ UTTypeData ] asCopy:YES];
+		files.delegate = picker_delegate;
+		files.allowsMultipleSelection = what == IOS_PICK_FILES;
+		picked = 0;
+		pick_msg[0] = 0;
+		[top presentViewController:files animated:YES completion:nil];
+	}
 }
 
 int ios_pick_result(char *msg, size_t msglen) {
@@ -422,66 +408,53 @@ int ios_pick_result(char *msg, size_t msglen) {
 	return r;
 }
 
-bool ios_pick_saves(void) { return picked_saves; }
 
 bool ios_rom_folder_name(char *out, size_t n) {
-	NSUserDefaults *prefs = NSUserDefaults.standardUserDefaults;
-	if (![prefs dataForKey:kFolder]) return false;
-	to_c([prefs stringForKey:kFolderName] ?: @"your ROM folder", out, n);
-	return true;
-}
-
-bool ios_saves_put(const char *from) {
 	@autoreleasepool {
-		NSData *mark = [NSUserDefaults.standardUserDefaults dataForKey:kFolder];
-		NSData *data = [NSData dataWithContentsOfFile:@(from)];
-		if (!mark || !data.length) return false;
-		BOOL stale = NO;
-		NSURL *folder = [NSURL URLByResolvingBookmarkData:mark options:0 relativeToURL:nil bookmarkDataIsStale:&stale error:nil];
-		if (!folder) return false;
-		BOOL scoped = [folder startAccessingSecurityScopedResource];
-		__block BOOL ok = NO;
-		NSError *err = nil;
-		/* (written as Files' providers want it: coordinated, whole) */
-		[[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:[folder URLByAppendingPathComponent:@BACKUP_NAME]
-			options:NSFileCoordinatorWritingForReplacing error:&err byAccessor:^(NSURL *at) { ok = [data writeToURL:at atomically:YES]; }];
-		if (scoped) [folder stopAccessingSecurityScopedResource];
-		if (!ok) NSLog(@"saves: the copy in the ROM folder could not be written: %@", err.localizedDescription);
-		return ok;
+		NSUserDefaults *prefs = NSUserDefaults.standardUserDefaults;
+		if (![prefs dataForKey:kFolder]) return false;
+		to_c([prefs stringForKey:kFolderName] ?: @"your ROM folder", out, n);
+		return true;
 	}
 }
 
 void ios_rom_note(void *window) {
-	UIView *view = window_of(window).rootViewController.view;
-	if (!note[0] || !view) return;
-	UILabel *label = [UILabel new];
-	label.text = @(note);
-	note[0] = 0;
-	label.numberOfLines = 0;
-	label.textAlignment = NSTextAlignmentCenter;
-	label.textColor = UIColor.whiteColor;
-	label.font = [UIFont boldSystemFontOfSize:15];
-	label.backgroundColor = [UIColor colorWithRed:16 / 255.0 green:54 / 255.0 blue:74 / 255.0 alpha:0.92];
-	label.layer.cornerRadius = 8;
-	label.layer.masksToBounds = YES;
-	label.userInteractionEnabled = NO;
-	CGRect safe = UIEdgeInsetsInsetRect(view.bounds, view.safeAreaInsets);
-	CGSize fit = [label sizeThatFits:CGSizeMake(safe.size.width - 48, CGFLOAT_MAX)];
-	label.frame = CGRectMake(safe.origin.x + (safe.size.width - fit.width - 24) / 2, CGRectGetMaxY(safe) - fit.height - 40, fit.width + 24, fit.height + 16);
-	[view addSubview:label];
-	[UIView animateWithDuration:0.4 delay:4.0 options:0 animations:^{ label.alpha = 0; } completion:^(BOOL done) { (void)done; [label removeFromSuperview]; }];
+	@autoreleasepool {
+		UIView *view = window_of(window).rootViewController.view;
+		if (!note[0] || !view) return;
+		UILabel *label = [UILabel new];
+		label.text = @(note);
+		note[0] = 0;
+		label.numberOfLines = 0;
+		label.textAlignment = NSTextAlignmentCenter;
+		label.textColor = UIColor.whiteColor;
+		label.font = [UIFont boldSystemFontOfSize:15];
+		label.backgroundColor = [UIColor colorWithRed:16 / 255.0 green:54 / 255.0 blue:74 / 255.0 alpha:0.92];
+		label.layer.cornerRadius = 8;
+		label.layer.masksToBounds = YES;
+		label.userInteractionEnabled = NO;
+		CGRect safe = UIEdgeInsetsInsetRect(view.bounds, view.safeAreaInsets);
+		CGSize fit = [label sizeThatFits:CGSizeMake(safe.size.width - 48, CGFLOAT_MAX)];
+		label.frame = CGRectMake(safe.origin.x + (safe.size.width - fit.width - 24) / 2, CGRectGetMaxY(safe) - fit.height - 40, fit.width + 24, fit.height + 16);
+		[view addSubview:label];
+		[UIView animateWithDuration:0.4 delay:4.0 options:0 animations:^{ label.alpha = 0; } completion:^(BOOL done) { (void)done; [label removeFromSuperview]; }];
+	}
 }
 
 void ios_haptic(void) {
-	static UIImpactFeedbackGenerator *tick;
-	if (!tick) tick = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
-	[tick impactOccurred];
+	@autoreleasepool {
+		static UIImpactFeedbackGenerator *tick;
+		if (!tick) tick = [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
+		[tick impactOccurred];
+	}
 }
 
 void ios_safe_insets(void *window, float *top, float *left, float *bottom, float *right) {
-	UIEdgeInsets e = window_of(window).safeAreaInsets;
-	*top = (float)e.top;
-	*left = (float)e.left;
-	*bottom = (float)e.bottom;
-	*right = (float)e.right;
+	@autoreleasepool {
+		UIEdgeInsets e = window_of(window).safeAreaInsets;
+		*top = (float)e.top;
+		*left = (float)e.left;
+		*bottom = (float)e.bottom;
+		*right = (float)e.right;
+	}
 }

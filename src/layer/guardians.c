@@ -169,7 +169,7 @@ static const NetAreaDef *dressed(int biome) {
 bool guardian_area_older(int biome) { return dressed(biome) != NULL; }
 
 /* BN6's own name for the area */
-static const char *own_name(int biome) {
+const char *guardian_area_original_name(int biome) {
 	static const char *const names[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Central Area", [BIOME_SEASIDE] = "Seaside Area", [BIOME_SKY] = "Sky Area",
 		[BIOME_GREEN] = "Green Area", [BIOME_GRAVEYARD] = "Graveyard", [BIOME_UNDERNET] = "Undernet",
@@ -185,7 +185,7 @@ static const char *own_name(int biome) {
 
 const char *guardian_area_name(int biome) {
 	const NetAreaDef *x = dressed(biome);
-	return x ? x->name : own_name(biome);
+	return x ? x->name : guardian_area_original_name(biome);
 }
 
 const char *guardian_area_short(int biome) {
@@ -209,7 +209,7 @@ const char *guardian_area_in_text(int biome, int side) {
 	/* (another game's area in its place goes by its own name, "Nebula
 	 * Area", but by BN6's as BN6 says it: BN5's Undernet is the Undernet) */
 	const char *name = guardian_area_name(biome);
-	bool the = !strcmp(name, own_name(biome)) && (biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET || biome == BIOME_SECRET || biome == BIOME_NEST);
+	bool the = !strcmp(name, guardian_area_original_name(biome)) && (biome == BIOME_GRAVEYARD || biome == BIOME_UNDERNET || biome == BIOME_SECRET || biome == BIOME_NEST);
 	snprintf(buf, sizeof buf, "%s%s", the ? "the " : "", name);
 	return buf;
 }

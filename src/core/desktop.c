@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "backup.h"
 #include "compat.h"
 #include "launcher_roms.h"
 #include "platform.h"
@@ -250,6 +251,36 @@ bool desktop_choose_rom(int slot, char *path, size_t n) {
 #endif
 }
 
+bool desktop_choose_saves(int kind, const char *title, const char *start, char *path, size_t n) {
+	path[0] = 0;
+#ifdef __APPLE__
+	char script[400];
+	snprintf(script, sizeof script, "on run argv\nPOSIX path of (%s with prompt (item 2 of argv)%s default location (POSIX file (item 1 of argv)))\nend run",
+		kind == 2 ? "choose folder" : kind == 1 ? "choose file name" : "choose file", kind == 1 ? " default name \"" BACKUP_NAME "\"" : "");
+	const char *argv[] = { "osascript", "-e", script, start, title, NULL };
+	return run(argv, path, n) && path[0];
+#else
+	if (on_path("zenity")) {
+		char titlearg[100], initial[1200];
+		snprintf(titlearg, sizeof titlearg, "--title=%s", title);
+		snprintf(initial, sizeof initial, "--filename=%s%s", start, kind == 1 ? "/" BACKUP_NAME : "/");
+		const char *argv[] = { "zenity", "--file-selection", titlearg, initial,
+			kind == 2 ? "--directory" : kind == 1 ? "--save" : "--file-filter=*.cwsave",
+			kind == 1 ? "--confirm-overwrite" : NULL, NULL };
+		return run(argv, path, n) && path[0];
+	}
+	if (on_path("kdialog")) {
+		char initial[1200];
+		snprintf(initial, sizeof initial, "%s%s", start, kind == 1 ? "/" BACKUP_NAME : "/");
+		const char *argv[] = { "kdialog", "--title", title,
+			kind == 2 ? "--getexistingdirectory" : kind == 1 ? "--getsavefilename" : "--getopenfilename", initial,
+			kind == 2 ? NULL : "*.cwsave", NULL };
+		return run(argv, path, n) && path[0];
+	}
+	return false;
+#endif
+}
+
 /* ---- the ROM where front ends keep it ---- */
 
 /* The Downloads folder as the desktop names it (user-dirs.dirs), else ~/Downloads. */
@@ -271,6 +302,14 @@ static void downloads_dir(const char *home, char *out, size_t n) {
 		break;
 	}
 	fclose(f);
+}
+
+/* (read, not made: pick_saves_put makes it at the first write there) */
+bool desktop_saves_default(char *path, size_t n) {
+	const char *home = getenv("HOME");
+	if (!home || !*home) return false;
+	downloads_dir(home, path, n);
+	return true;
 }
 
 bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {

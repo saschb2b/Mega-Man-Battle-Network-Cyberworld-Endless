@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "title_lines.h"
-#include "touch.h"
 #include "analytics_ask.h"
 #include "audio.h"
 #include "controls.h"
@@ -28,6 +27,7 @@
 #include "meta.h"
 #include "powers.h"
 #include "save.h"
+#include "saves.h"
 #include "second.h"
 #include "text.h"
 
@@ -56,6 +56,7 @@ static const uint8_t cycle[] = { 0x09, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 
 
 bool title_summary;
 bool title_setup;
+bool title_menu;
 uint32_t title_seed;
 char title_cause[48];
 char title_learned[24];
@@ -310,6 +311,9 @@ static void enter(void) {
 		S.menu = 1;
 		setup_open();
 	}
+	/* (back from SAVES: the menu it was opened from) */
+	if (title_menu) S.pressed = S.menu = 1;
+	title_menu = false;
 	/* (the anonymous statistics' question, once: the first start where the
 	 * build can send, after the start's screens, issue #104) */
 	if (entries == 1) analytics_ask_offer();
@@ -322,13 +326,14 @@ static void jack_in(void);
  * question, its one setting (issue #104), where the build can send; with
  * L held, the developer's sprite gallery, which SELECT alone opened
  * before. R: the ROMs' screen, the launcher, to add BN5 after the first
- * start (issue #97), where the build has one. True when it took the
- * press. */
+ * start (issue #97), where the build has one. L alone: SAVES (saves.h),
+ * kept off the menu's ROM-drawn rows. True when it took the press. */
 static bool select_pressed(void) {
 	if (btn_pressed(BTN_R) && launcher_open()) {
 		audio_sfx(SFX_SELECT);
 		return true;
 	}
+	if (saves_key()) return true;
 	if (!btn_pressed(BTN_SELECT)) return false;
 #ifndef __3DS__
 	if (!btn_held(BTN_L)) {
@@ -620,8 +625,18 @@ static void setup_draw(int x0, int y0) {
 	note_more(cx, y0 + ny + (five ? 0 : 2) + note_line(cx, y0 + ny, note, sky) * 12, locked, nlocked);
 }
 
+static void summary_update(void) {
+	if (S.t <= SUMMARY_MIN || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return;
+	S.summary = false;
+	audio_music(MUS_TITLE);
+	S.t = S.shown_at = 0;
+	S.new_marks = meta_marks_new();
+	if (S.new_marks) audio_sfx(SFX_REVEAL);
+}
+
 static void update(void) {
 	++S.t;
+	saves_tick();
 	if (S.leaving) {
 		++S.leaving;
 		if (S.jack_v < 96) S.jack_v += 4;
@@ -640,18 +655,7 @@ static void update(void) {
 	}
 	if (S.setup) { setup_update(); return; }
 	if (!S.summary && S.t - S.shown_at >= SHOW_FRAMES) { S.first = false; show_next(); }
-	if (S.summary) {
-		/* then the net comes back for PRESS START */
-		if (S.t > SUMMARY_MIN && (btn_pressed(BTN_A) || btn_pressed(BTN_START))) {
-			S.summary = false;
-			audio_music(MUS_TITLE);
-			S.t = S.shown_at = 0;
-			/* (the summary has room for two unlocks: a mark shows itself) */
-			S.new_marks = meta_marks_new();
-			if (S.new_marks) audio_sfx(SFX_REVEAL);
-		}
-		return;
-	}
+	if (S.summary) { summary_update(); return; }
 	if (!S.pressed) { press_start(); return; }
 	if (!S.menu) {
 		if (S.t - S.pressed >= MENU_AFTER) S.menu = S.t;
@@ -786,25 +790,31 @@ static void found_draw(int x0, int y0) {
 /* The word under the picture: (a keyboard's Start, where no controller is:
  * a PC player had no word of which key it is) ENTER before the menu, and
  * with the menu where the controls are set, on the player's own SELECT
- * (controls_word: "R", "Minus", "SELECT"), and the ROMs, on R, where the
- * launcher is (issue #97: no way to add BN5 had been found); on the 3DS
- * its SELECT's statistics, where the build can send them */
+ * (controls_word: "R", "Minus", "SELECT"), SAVES on L, and the ROMs, on
+ * R, where the launcher is (issue #97: no way to add BN5 had been found);
+ * on the 3DS its SELECT's statistics, where the build can send them */
 static void hint_draw(int x0, int y0) {
 	SDL_Color grey = rgba(150, 160, 190, 255);
-	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
+	if (!S.menu && !S.pressed && controls_keyboard_only()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
 #ifdef __3DS__
-	if (S.menu && !S.confirm && analytics_ask_here()) minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), "SELECT: Statistics", grey, 1);
-#else
 	if (!S.menu || S.confirm) return;
 	char hint[64];
-	snprintf(hint, sizeof hint, "%s: Controls", controls_word(BTN_SELECT));
+	snprintf(hint, sizeof hint, "%sL: %s", analytics_ask_here() ? "SELECT: Statistics   " : "", saves_word_hint());
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
+#else
+	if (!S.menu || S.confirm) return;
+	/* (controls_word's own buffer, one word at a time) */
+	char hint[80], l[32];
+	snprintf(l, sizeof l, "%s", controls_word(BTN_L));
+	snprintf(hint, sizeof hint, "%s: Controls  %s: %s", controls_word(BTN_SELECT), l, saves_word_hint());
 	if (launcher_here()) {
 		size_t m = strlen(hint);
-		snprintf(hint + m, sizeof hint - m, "   %s: ROMs", controls_word(BTN_R));
+		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", controls_word(BTN_R));
 	}
-	/* (under NEW GAME; with CONTINUE under it, in the rows between the
-	 * logo and the menu, where CONTINUE's row had hidden it) */
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
+	/* (in the rows between the logo and the menu: under NEW GAME it ran
+	 * into the build's line and the best layer's once SAVES joined it,
+	 * and CONTINUE's row hides it there) */
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
 #endif
 }
 

@@ -15,6 +15,7 @@
 
 #include <SDL_syswm.h>
 
+#include "backup.h"
 #include "compat.h"
 #include "launcher_roms.h"
 #include "platform.h"
@@ -49,6 +50,53 @@ bool desktop_choose_rom(int slot, char *path, size_t n) {
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER;
 	HRESULT com = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	bool ok = GetOpenFileNameW(&ofn) && utf8(file, path, n) && path[0];
+	if (SUCCEEDED(com)) CoUninitialize();
+	return ok;
+}
+
+bool desktop_saves_default(char *path, size_t n) {
+	PWSTR w = NULL;
+	bool ok = SHGetKnownFolderPath(&FOLDERID_Downloads, 0, NULL, &w) == S_OK && utf8(w, path, n);
+	CoTaskMemFree(w);
+	return ok;
+}
+
+static HWND game_window(void) {
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	return P.window && SDL_GetWindowWMInfo(P.window, &info) && info.subsystem == SDL_SYSWM_WINDOWS ? info.info.win.window : NULL;
+}
+
+bool desktop_choose_saves(int kind, const char *title, const char *start, char *path, size_t n) {
+	wchar_t initial[2048] = L"", file[2048] = L"", heading[128] = L"";
+	if (!MultiByteToWideChar(CP_UTF8, 0, start, -1, initial, (int)(sizeof initial / sizeof *initial)) ||
+		!MultiByteToWideChar(CP_UTF8, 0, title, -1, heading, (int)(sizeof heading / sizeof *heading))) return false;
+	HRESULT com = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	bool ok = false;
+	if (kind == 2) {
+		BROWSEINFOW bi;
+		memset(&bi, 0, sizeof bi);
+		bi.hwndOwner = game_window();
+		bi.lpszTitle = heading;
+		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+		PIDLIST_ABSOLUTE id = SHBrowseForFolderW(&bi);
+		ok = id && SHGetPathFromIDListW(id, file) && utf8(file, path, n);
+		CoTaskMemFree(id);
+	} else {
+		OPENFILENAMEW ofn;
+		memset(&ofn, 0, sizeof ofn);
+		if (kind == 1) MultiByteToWideChar(CP_UTF8, 0, BACKUP_NAME, -1, file, (int)(sizeof file / sizeof *file));
+		ofn.lStructSize = sizeof ofn;
+		ofn.hwndOwner = game_window();
+		ofn.lpstrFilter = L"Saves (*.cwsave)\0*.cwsave\0All files\0*.*\0";
+		ofn.lpstrFile = file;
+		ofn.nMaxFile = (DWORD)(sizeof file / sizeof *file);
+		ofn.lpstrInitialDir = initial;
+		ofn.lpstrDefExt = L"cwsave";
+		ofn.lpstrTitle = heading;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER | (kind == 1 ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+		ok = (kind == 1 ? GetSaveFileNameW(&ofn) : GetOpenFileNameW(&ofn)) && utf8(file, path, n);
+	}
 	if (SUCCEEDED(com)) CoUninitialize();
 	return ok;
 }

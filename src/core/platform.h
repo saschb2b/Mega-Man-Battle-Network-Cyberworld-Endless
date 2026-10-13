@@ -135,8 +135,7 @@ bool platform_tap(int *x, int *y);
 /* ... where the mouse is over it, or a finger on it: its canvas pixel;
  * false where neither is */
 bool platform_pointer(int *x, int *y);
-/* ... a file dropped on the window since the last call (a desktop's): its
- * path, once */
+/* A file dropped on the window this frame (a desktop's): its path, once. */
 bool platform_dropped(char *path, size_t n);
 /* Escape or Android's Back asks `back` first while it is set (true: it
  * took the press); NULL for none */

@@ -7,8 +7,10 @@
  * game, to add BN5. The ROMs come from the system's own chooser (pick.h),
  * a file dropped on the window, or the places the game looks; on a phone
  * the folder chosen may hold the saves a reinstall left there (mirror.h),
- * and the launcher offers them back. Its layout and picture are
- * launcher_draw.c's, its words launcher_text.c's. */
+ * which SAVES compares with this device's (src/saves/). Its layout and
+ * picture are launcher_draw.c's, its words launcher_text.c's. */
+#include "launcher_state.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,14 +20,13 @@
 #include "game.h"
 #include "gfx.h"
 #include "launcher_roms.h"
-#include "launcher_state.h"
 #include "mirror.h"
 #include "pick.h"
 #include "platform.h"
 #include "rivals.h"
 #include "rom.h"
 #include "save.h"
-#include "save_queue.h"
+#include "saves.h"
 
 #define LOOK_FRAMES 180   /* a ROM put in by hand looked for every three seconds */
 
@@ -69,7 +70,9 @@ static void shown_path(const char *path, char *out, size_t n) {
 static void saves_line(void) {
 	char path[700];
 	if (L.kinds & PICK_FOLDER) {
-		saves_line_phone(L.folder, mirror_last() < 0, L.saves, sizeof L.saves);
+		MirrorStatus m;
+		mirror_status(&m);
+		saves_line_phone(m.place, m.state != MIRROR_OFF, m.state == MIRROR_FAILED, L.saves, sizeof L.saves);
 		return;
 	}
 	snprintf(path, sizeof path, "%s/savedata", g_data_dir);
@@ -105,67 +108,6 @@ void launcher_cursor_note(char *out, size_t n, int *kind) {
 	}
 }
 
-/* ---- the saves a folder held ---- */
-
-static void ask_about(const char *path) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	BackupInfo f;
-	bool ok = b && backup_info(b, n, &f);
-	free(b);
-	if (!ok) { say(launcher_word(W_SAVES_DAMAGED), NOTE_BAD); return; }
-	BackupInfo here;
-	save_queue_wait();   /* (the saves as the game last wrote them) */
-	bool have = backup_local_info(g_data_dir, &here);
-	if (have && here.hash == f.hash) return;   /* (these saves, the same) */
-	L.asking = true;
-	L.found = f;
-	L.here = here;
-	L.here_saves = have;
-	/* (the cursor on the saves with more runs in them, this device's at a tie) */
-	L.answer = have && here.runs >= f.runs ? ANSWER_NO : ANSWER_YES;
-	snprintf(L.found_path, sizeof L.found_path, "%s", path);
-	const char *base = strrchr(path, '/');
-	ask_saves(L.folder[0] ? L.folder : base ? base + 1 : path, &f, have ? &here : NULL, L.ask_text, sizeof L.ask_text);
-	/* (no copy over them while the question is open) */
-	mirror_hold(true);
-	sound(SFX_REVEAL);
-}
-
-/* (the folder's saves copied in to be asked about: gone once answered) */
-static void forget_copy(void) {
-	if (L.found_copy) remove(L.found_path);
-	L.found_copy = false;
-}
-
-static void answer(bool yes) {
-	L.asking = false;
-	mirror_hold(false);
-	if (!yes) {
-		forget_copy();
-		say(launcher_word(L.here_saves ? W_SAVES_KEPT : W_FRESH), NOTE_INFO);
-		sound(SFX_CANCEL);
-		return;
-	}
-	size_t n = 0;
-	uint8_t *b = backup_read_file(L.found_path, &n);
-	save_queue_wait();
-	bool ok = b && backup_unpack(g_data_dir, b, n);
-	free(b);
-	forget_copy();
-	if (!ok) { say(launcher_word(W_NO_SAVES_BACK), NOTE_BAD); return; }
-	/* (over the title the game's profile is read again; from the start it
-	 * is read as the game begins) */
-	if (L.from_title) {
-		save_init();
-		rivals_load();
-	}
-	char s[120];
-	note_restored(&L.found, s, sizeof s);
-	say(s, NOTE_GOOD);
-	sound(SFX_GOT);
-}
-
 /* ---- what comes in ---- */
 
 /* the ROMs looked for again: the places by hand, a phone's folder kept;
@@ -194,54 +136,49 @@ static void look_again(bool said) {
 }
 
 /* A picker closed: a desktop's file taken, a phone's look's copies read */
-static void picked(void) {
+static bool picked(void) {
 	PickResult r;
-	if (!pick_done(&r)) return;
+	if (!pick_done(&r)) return false;
 	int asked = L.busy_slot == SLOT_BN5 ? SLOT_BN5 : SLOT_BN6;
 	L.busy_slot = -1;
-	if (r.status < 0) { say(launcher_word(W_CANCELLED), NOTE_INFO); return; }
+	if (r.status < 0) { say(launcher_word(W_CANCELLED), NOTE_INFO); return false; }
 	if (r.path) {
 		bool beside;
 		char s[600];
 		int took = roms_take(r.text, L.rom_dir, s, sizeof s, &beside);
 		say(s, took >= 0 ? NOTE_GOOD : NOTE_BAD);
 		sound(took >= 0 ? SFX_CONFIRM : SFX_ERROR);
-		return;
+		return false;
 	}
 	bool had[SLOTS] = { roms_have(SLOT_BN6), roms_have(SLOT_BN5) };
 	roms_reload(L.rom_dir);
 	bool came = (!had[SLOT_BN6] && roms_have(SLOT_BN6)) || (!had[SLOT_BN5] && roms_have(SLOT_BN5));
 	say(r.text, came ? NOTE_GOOD : roms_have(asked) ? NOTE_INFO : NOTE_BAD);
-	/* (a folder newly chosen: the saves copied there at once, or, where it
-	 * held saves of its own, once the question over them is answered) */
+	/* (a folder newly chosen: looked at for the saves' copy, which SAVES
+	 * compares where it holds saves not answered, saves.h) */
 	char was[sizeof L.folder];
 	snprintf(was, sizeof was, "%s", L.folder);
 	if (!pick_folder(L.folder, sizeof L.folder)) snprintf(L.folder, sizeof L.folder, "%s", was);
-	else if (strcmp(was, L.folder) || mirror_last() < 0) mirror_new_folder();
-	if (r.saves) {
-		char path[620];
-		snprintf(path, sizeof path, "%s/found.cwsave", g_data_dir);
-		ask_about(path);
-		/* (no question: the same saves as here, or damaged) */
-		if (!L.asking) remove(path);
-		else L.found_copy = true;
-	}
+	else if (strcmp(was, L.folder)) mirror_new_folder();
+	return false;
 }
 
 /* a file dropped on the window: a ROM, or a .cwsave's saves */
-static void dropped(void) {
+static bool dropped(void) {
 	char path[1024];
-	if (!platform_dropped(path, sizeof path)) return;
+	if (pick_busy() || pick_saves_busy()) return false;
+	if (!platform_dropped(path, sizeof path)) return false;
 	size_t n = strlen(path);
-	if (n > 7 && !strcmp(path + n - 7, ".cwsave")) {
-		if (!L.asking) ask_about(path);
-		return;
+	if (n > 7 && !SDL_strcasecmp(path + n - 7, ".cwsave")) {
+		saves_import(path);
+		return true;
 	}
 	bool beside;
 	char s[600];
 	int took = roms_take(path, L.rom_dir, s, sizeof s, &beside);
 	say(s, took >= 0 ? NOTE_GOOD : NOTE_BAD);
 	sound(took >= 0 ? SFX_CONFIRM : SFX_ERROR);
+	return false;
 }
 
 /* a cartridge just in: its drop, and the cursor on to PLAY once BN6 is */
@@ -366,32 +303,7 @@ static void keys(const LauncherLayout *lay) {
 	else if (btn_pressed(BTN_B) && L.from_title && !pick_busy()) leave_for_game();
 }
 
-/* the question: left and right choose, A answers, B keeps what is here */
-static void ask_update(const LauncherLayout *lay) {
-	int x, y;
-	SDL_Point p;
-	if (platform_tap(&x, &y)) {
-		p = (SDL_Point){ x, y };
-		if (SDL_PointInRect(&p, &lay->ask_yes)) { answer(true); return; }
-		if (SDL_PointInRect(&p, &lay->ask_no)) { answer(false); return; }
-	}
-	if (platform_pointer(&x, &y)) {
-		p = (SDL_Point){ x, y };
-		if (SDL_PointInRect(&p, &lay->ask_yes)) L.answer = ANSWER_YES;
-		if (SDL_PointInRect(&p, &lay->ask_no)) L.answer = ANSWER_NO;
-	}
-	if (btn_pressed(BTN_LEFT) || btn_pressed(BTN_RIGHT) || btn_pressed(BTN_UP) || btn_pressed(BTN_DOWN)) {
-		L.answer ^= 1;
-		sound(SFX_CURSOR);
-	}
-	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) answer(L.answer == ANSWER_YES);
-	else if (btn_pressed(BTN_B)) answer(false);
-}
-
-/* Escape or Back: the question's No; over the title, back to it; at the
- * start the quit prompt's (false) */
 static bool back(void) {
-	if (L.asking) { answer(false); return true; }
 	if (!L.from_title || pick_busy()) return false;
 	leave_for_game();
 	return true;
@@ -420,20 +332,18 @@ static void enter(void) {
 static void leave(void) {
 	platform_own_taps(false);
 	platform_on_back(NULL);
-	mirror_hold(false);
 }
 
 static void update(void) {
 	++L.t;
 	LauncherLayout lay;
 	launcher_layout(&lay);
-	picked();
-	dropped();
+	if (picked() || dropped()) return;
+	saves_tick();
 	if (!roms_have(SLOT_BN6) && !pick_busy() && L.t - L.looked_at >= LOOK_FRAMES) look_again(false);
 	fills();
 	/* (kept up: a copy refused shows at once) */
 	saves_line();
-	if (L.asking) { ask_update(&lay); return; }
 	pointer(&lay);
 	keys(&lay);
 	if (L.note[0] && L.note_focus != L.focus) L.note[0] = 0;

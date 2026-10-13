@@ -4,6 +4,7 @@
 #include "director_board.h"
 
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 
 #include "board_words.h"
@@ -58,6 +59,8 @@ void off_board_forget(void) {
  * reminder again after each one (session 65) */
 #define BOARD_NOTE_MAGIC 0x42524431u   /* "BRD1" */
 typedef struct { uint32_t seed; uint8_t placed[sizeof placed_seen], explained[sizeof off_explained]; } BoardNote;
+_Static_assert(sizeof(BoardNote) == 52 && offsetof(BoardNote, seed) == 0 && offsetof(BoardNote, placed) == 4 &&
+	offsetof(BoardNote, explained) == 28, "Board save layout changed");
 
 void off_board_save(void) {
 	BoardNote b = { run.seed, { 0 }, { 0 } };

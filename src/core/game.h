@@ -23,6 +23,7 @@ extern const Scene scene_intro;   /* the start: the boot screen and the GitHub n
 extern const Scene scene_gallery;
 extern const Scene scene_emu;     /* the game itself, on the embedded core */
 extern const Scene scene_launcher; /* the ROMs before the game: two cartridges, PLAY (src/launcher/) */
+extern const Scene scene_saves;    /* SAVES: export, import, Undo (src/saves/) */
 
 /* The launcher: at a start, shown where it is wanted (LAUNCHER_AUTO: no
  * BN6, the first start, BN5 gone since the last), always (LAUNCHER_OPEN) or
@@ -44,6 +45,7 @@ extern bool emu_start_at_home;    /* ... or at home before its first layer's act
 bool emu_saved_home(uint32_t seed, int depth);
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
+extern bool title_menu;             /* ... or on its menu (back from SAVES) */
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */
 extern bool title_new_best;         /* ... deeper than any run before */

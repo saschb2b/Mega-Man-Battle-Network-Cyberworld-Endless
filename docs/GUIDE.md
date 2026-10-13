@@ -8,7 +8,7 @@ building the game yourself.
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -101,13 +101,10 @@ goes back to the title.
 
 The screen also says where your saves are kept. On a PC or a Mac that is
 the data folder, which uninstalling leaves alone. On a phone or tablet,
-where uninstalling the app deletes its files, the app keeps a copy of the
-saves in the ROM folder you chose, `cyberworld-endless.cwsave`, renewed a
-few seconds after each save. After a reinstall, choose that folder again:
-the screen finds the copy and offers it back (**BRING BACK** or **START
-FRESH**); where the device has saves of its own, it shows both and asks
-which to keep. ROMs chosen as files leave no folder for the copy: the
-screen says so.
+where uninstalling the app deletes its files, it names the folder that
+keeps a copy for a reinstall: the ROM folder you chose, or another chosen
+with **SAVES › FOLDER** ([Moving saves between devices](#moving-saves-between-devices)).
+ROMs chosen as files leave no folder for the copy until you choose one.
 
 ### On Windows
 
@@ -246,12 +243,13 @@ pressed, and Back asks before it quits. On a handheld with a second
 screen, such as the AYN Thor, the lower one is the PET beside the game, as
 on a 3DS ([android/README.md](../android/README.md#the-second-screen)).
 
-Uninstalling the app deletes its own files, the saves among them, but
-not the copy of the saves it keeps in your ROM folder
-(`cyberworld-endless.cwsave`, renewed a few seconds after each save):
-after a reinstall, choose the same folder and the ROMs screen offers the
-saves back. Android's own backup, where it is turned on, keeps the saves
-and settings too, never the ROMs.
+Uninstalling the app deletes its own files, the saves among them. The
+game keeps a copy, `cyberworld-endless.cwsave`, in your ROM folder or a
+folder chosen with **SAVES › FOLDER**; after a reinstall, choose that
+folder again and the game offers the copy back
+([Moving saves between devices](#moving-saves-between-devices)).
+Android's own backup, where it is turned on, keeps the saves and settings
+too, never the ROMs.
 
 ### On an iPhone or iPad
 
@@ -281,10 +279,10 @@ marketplaceID").
    downloaded first (in a big folder, download BN6's in Files yourself).
    Or tap **FILES INSTEAD** and pick the ROMs, or put them in Files, **On
    My iPhone › Cyberworld**, where the app keeps your saves too and looks
-   at every start. Deleting the app deletes that folder with it, but not
-   the copy of your saves the app keeps in the ROM folder you chose
-   (`cyberworld-endless.cwsave`): after a reinstall, choose that folder
-   again and the ROMs screen offers them back.
+   at every start. Deleting the app deletes that folder with it. The
+   game keeps a copy of the saves, `cyberworld-endless.cwsave`, in your
+   ROM folder or a folder chosen with **SAVES › FOLDER**; after a
+   reinstall, choose that folder again and the game offers the copy back.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
 PlayStation). `cyberworld-endless.ipa` on the releases page is the app
@@ -354,13 +352,13 @@ cartridge, and keeps them, with your saves, in the browser's own storage
 (IndexedDB); they are never uploaded. Next time **Play** starts straight
 away, the game at the largest whole scale the window holds. **Menu** over
 the screen (or F1) pauses the game and holds the rest: Fullscreen, Smooth
-motion, the controls, **Save backup**, which downloads your saves as one
-file, `cyberworld-endless.cwsave`, **Load backup**, which brings it back,
-in this browser or another (the Android and iPhone apps take the same
-file, put in their ROM folder), and **Forget all**, which removes the
-ROMs and saves. BN5's areas, viruses, Navis and chips run in the same
-emulator as BN6's: nothing more to start up, and the page's memory BN6's
-and BN5's ROM file.
+motion, the controls, **Save backup** and **Load backup**, which open the
+game's **SAVES** screen over the title ([Moving saves between devices](#moving-saves-between-devices)),
+and **Forget all**, which removes the ROMs and saves. SAVES exports one
+`cyberworld-endless.cwsave` file or imports one through the browser's own
+file chooser; the same file works on the other systems. BN5's areas,
+viruses, Navis and chips run in the same emulator as BN6's: nothing more to
+start up, and the page's memory BN6's and BN5's ROM file.
 
 On a phone or tablet the game fills the screen and draws its own buttons
 round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and
@@ -701,10 +699,35 @@ PortMaster handheld, `~/.local/share/cyberworld-endless/` on Linux
 (the Flatpak's under `~/.var/app/`), `%LOCALAPPDATA%\cyberworld-endless\`
 on Windows and `~/Library/Application Support/cyberworld-endless/` on a
 Mac, where uninstalling leaves them. A phone or tablet keeps a copy in its
-ROM folder, and the browser's player saves a backup file
-([The ROMs screen](#the-roms-screen), [In a browser](#in-a-browser)). To
+ROM folder or a folder you choose, and **SAVES** on the title exports one
+file on every system ([Moving saves between devices](#moving-saves-between-devices)). To
 give up a run without playing it out, delete `savedata/run.sav`; your
 best depth is kept in `profile.sav`.
+
+### Moving saves between devices
+
+Press L on the title (Q on a keyboard) to open **SAVES**. **EXPORT**
+writes your progress, unlocks, Library, records and the current run's
+checkpoint to one file, `cyberworld-endless.cwsave` (no ROM in it). Copy
+it to the other device, start the game there with your own ROM and
+choose **SAVES › IMPORT**: both saves are shown side by side, yours are
+kept unless you choose **USE THE FILE'S**, and **UNDO IMPORT** brings
+back what an import replaced. Runs from two devices are never merged;
+controls, screen settings, volumes and your statistics answer stay on
+each. In the browser, **Save backup** in the player's menu opens SAVES
+over the title, and **Load backup** opens it with the file chooser.
+
+On Android, an iPhone or an iPad the game keeps that file in your ROM
+folder, or one you choose with **FOLDER**, a few seconds after each save.
+After a reinstall, choose that folder again: the game finds the copy and
+offers it back. It never writes over a file another device left there,
+and asks once which saves to keep. **AUTO-COPY** turns the copy on or
+off; elsewhere it starts off and goes to Downloads (a PC or a Mac) or
+the data folder (a PortMaster handheld, the 3DS).
+
+A file from a newer version of the game, a damaged one, or a run that
+needs BN5 where **BN5 Team Colonel (USA)** is missing (always on the 3DS)
+is refused, and your saves stay as they were.
 
 ## Screen
 

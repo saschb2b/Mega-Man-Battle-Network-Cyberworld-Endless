@@ -33,5 +33,8 @@ bool controls_takes_buttons(void);
 /* The words for the button a GBA button (BTN_*) is on, on the device used
  * last: "R" on a keyboard, "Minus" on a Nintendo pad, "SELECT" by touch. */
 const char *controls_word(uint32_t bit);
+/* The keyboard alone: no controller in, no touch controls shown (the
+ * title then names ENTER for START) */
+bool controls_keyboard_only(void);
 
 #endif

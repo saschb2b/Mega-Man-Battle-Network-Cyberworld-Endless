@@ -203,22 +203,26 @@ int pixfont_wrap(const char *text, int w, int scale, char lines[][96], int most)
 		/* (words while they fit, a word too long for a line cut where it must) */
 		while (*p && *p != '\n') {
 			size_t word = strcspn(p, " \n");
-			char next[96];
+			/* (room for the line, a space and the word whole: a line's
+			 * buffer too short for them is a line too long for them) */
+			char next[2 * 96];
 			snprintf(next, sizeof next, "%s%s%.*s", line, len ? " " : "", (int)(word < 90 ? word : 90), p);
-			if (len && pixfont_width(next, scale) > w) break;
-			if (!len && pixfont_width(next, scale) > w) {
+			bool over = pixfont_width(next, scale) > w || strlen(next) >= sizeof line;
+			if (len && over) break;
+			if (!len && over) {
 				size_t cut = word;
 				while (cut > 1) {
 					snprintf(next, sizeof next, "%.*s", (int)--cut, p);
 					if (pixfont_width(next, scale) <= w) break;
 				}
-				snprintf(line, sizeof line, "%s", next);
+				len = (int)(cut < sizeof line - 1 ? cut : sizeof line - 1);
+				memcpy(line, next, (size_t)len);
+				line[len] = 0;
 				p += cut;
-				len = (int)cut;
 				break;
 			}
-			snprintf(line, sizeof line, "%s", next);
-			len = (int)strlen(line);
+			len = (int)strlen(next);
+			memcpy(line, next, (size_t)len + 1);
 			p += word;
 			while (*p == ' ') ++p;
 		}

@@ -5,12 +5,17 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
+#include <io.h>
 #include <windows.h>
 #elif defined(__APPLE__)
 #include <limits.h>
 #include <mach-o/dyld.h>
 #include <stdlib.h>
 #else
+#include <unistd.h>
+#endif
+#if !defined(_WIN32) && !defined(__3DS__) && !defined(__EMSCRIPTEN__)
+#include <fcntl.h>
 #include <unistd.h>
 #endif
 
@@ -49,5 +54,27 @@ bool cw_rename(const char *from, const char *to) {
 	remove(to);
 #endif
 	return rename(from, to) == 0;
+#endif
+}
+
+bool cw_fsync_file(FILE *f) {
+	if (fflush(f) != 0) return false;
+#ifdef _WIN32
+	return _commit(_fileno(f)) == 0;
+#elif defined(__3DS__) || defined(__EMSCRIPTEN__)
+	return true;
+#else
+	return fsync(fileno(f)) == 0;
+#endif
+}
+
+void cw_fsync_dir(const char *dir) {
+#if defined(_WIN32) || defined(__3DS__) || defined(__EMSCRIPTEN__)
+	(void)dir;
+#else
+	int fd = open(dir, O_RDONLY);
+	if (fd < 0) return;
+	fsync(fd);
+	close(fd);
 #endif
 }

@@ -288,7 +288,6 @@ void platform_own_taps(bool on) {
 	layout_canvas();
 #ifdef CW_DESKTOP
 	if (!P.headless) SDL_ShowCursor(on || !P.fullscreen ? SDL_ENABLE : SDL_DISABLE);
-	SDL_EventState(SDL_DROPFILE, on ? SDL_ENABLE : SDL_DISABLE);
 #endif
 }
 
@@ -481,9 +480,14 @@ static void phone_controls(void) {
 #endif
 }
 
+/* (a file dropped on the window: the title's and SAVES', as a screen's own) */
+static void input_start(void) {
+	keymap_default();
+	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+}
+
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
-	keymap_default();
 	if (headless) {
 		/* (the variables, not their hints: SDL before 2.0.22, as on older
 		 * handhelds, has no hints for them) */
@@ -506,6 +510,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 			return false;
 		}
 	}
+	input_start();
 	Uint32 flags = SDL_WINDOW_SHOWN;
 	int ww = force_w, wh = force_h;
 	P.forced = force_w && force_h;
@@ -731,10 +736,10 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	case SDL_MOUSEMOTION:
 	case SDL_MOUSEBUTTONUP: mouse(e); break;
-	/* (a file dropped on the window: a screen of its own's) */
+	/* (a file dropped: the title and SAVES take it, as screens that own their taps do) */
 	case SDL_DROPFILE:
 	case SDL_DROPTEXT:
-		if (own_taps && e->type == SDL_DROPFILE && e->drop.file) snprintf(dropped, sizeof dropped, "%s", e->drop.file);
+		if (e->type == SDL_DROPFILE && e->drop.file) snprintf(dropped, sizeof dropped, "%s", e->drop.file);
 		SDL_free(e->drop.file);
 		break;
 	case SDL_WINDOWEVENT:
@@ -744,6 +749,7 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	/* (and the saves' copy made: the app may be ended there unasked) */
 	case SDL_APP_WILLENTERBACKGROUND: let_go(); mirror_flush(); break;
+	case SDL_APP_DIDENTERFOREGROUND: mirror_rescan(); break;   /* (another device's saves may have come) */
 	/* (the renderer's textures lost: the controls' art is made again) */
 	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); ++P.textures_lost; break;
 	default:
@@ -798,6 +804,7 @@ void platform_poll(void) {
 	follow_screen();
 	pads_begin();
 	nkeys_pressed = 0;
+	dropped[0] = 0;
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) poll_event(&e);
 	pads_poll();
@@ -976,10 +983,8 @@ void platform_persist(void) {
 #ifdef __EMSCRIPTEN__
 	/* the browser's files live in memory until they are synced to IndexedDB */
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
-#else
-	/* (a phone's saves copied to the ROM folder a moment later: mirror.h) */
-	mirror_note();
 #endif
+	mirror_note();   /* (the saves' copy a moment later, their summary read again: mirror.h) */
 }
 
 bool platform_save_canvas(const char *path) {

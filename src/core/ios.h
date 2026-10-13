@@ -32,13 +32,10 @@ int ios_pick_result(char *msg, size_t msglen);
  * be opened any more (`msg` says so then). `msg` is left alone when the
  * look has nothing new to say. */
 int ios_rom_folder_look(const char *dir, unsigned want, char *msg, size_t msglen);
-/* Whether the folder the last pick chose held the saves' copy (backup.h's
- * BACKUP_NAME, a reinstall's): copied to found.cwsave beside `dir` for the
- * launcher to offer back */
-bool ios_pick_saves(void);
 /* The folder picked earlier: its name; false where none is kept */
 bool ios_rom_folder_name(char *out, size_t n);
-/* The saves file `from` written into that folder as BACKUP_NAME (mirror.h),
+/* The saves file `from` written into the saves' folder (ios_saves.h: the
+ * one chosen in SAVES, else the ROM folder) as BACKUP_NAME (mirror.h),
  * whole or not at all; false where none is kept or it refused */
 bool ios_saves_put(const char *from);
 /* A note a look left (a Battle Network ROM refused beside BN6's), shown
