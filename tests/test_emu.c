@@ -184,7 +184,7 @@ static uint8_t *file_bytes(const char *path, size_t *n) {
 }
 
 /* a block of n bytes, each the mark */
-static void *marked(uint8_t mark, size_t n) {
+static void *filled(uint8_t mark, size_t n) {
 	uint8_t *b = malloc(n);
 	if (b) memset(b, mark, n);
 	return b;
@@ -207,7 +207,7 @@ static void save_queue_checks(void) {
 	/* in the order they came: the last of each file stands, whole */
 	bool queued = true;
 	for (int k = 1; k <= 40; ++k)
-		queued = save_queue_file(k % 2 ? a : b, marked((uint8_t)k, 4096 + (size_t)k), 4096 + (size_t)k) && queued;
+		queued = save_queue_file(k % 2 ? a : b, filled((uint8_t)k, 4096 + (size_t)k), 4096 + (size_t)k) && queued;
 	CHECK(queued, "the save queue took the files");
 	save_queue_wait();
 	CHECK(file_is(a, 39, 4096 + 39) && file_is(b, 40, 4096 + 40), "each file the last queued for it, whole");
@@ -216,11 +216,11 @@ static void save_queue_checks(void) {
 	CHECK(!left, "no file left beside its place");
 	if (left) fclose(left);
 	/* the game's end writes what is queued before the thread goes */
-	for (int k = 41; k <= 60; ++k) save_queue_file(k % 2 ? a : b, marked((uint8_t)k, 300000), 300000);
+	for (int k = 41; k <= 60; ++k) save_queue_file(k % 2 ? a : b, filled((uint8_t)k, 300000), 300000);
 	save_queue_quit();
 	CHECK(file_is(a, 59, 300000) && file_is(b, 60, 300000), "a quit writes every file queued first");
 	/* and a file queued after it starts the thread again */
-	CHECK(save_queue_file(a, marked(61, 10), 10), "queued after a quit");
+	CHECK(save_queue_file(a, filled(61, 10), 10), "queued after a quit");
 	save_queue_wait();
 	CHECK(file_is(a, 61, 10), "written by a thread started again");
 	/* written at once, the same way */
