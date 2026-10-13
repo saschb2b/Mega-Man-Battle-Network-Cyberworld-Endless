@@ -70,7 +70,7 @@ static int copy_state(NSURL *folder, NSURL *file) {
 	} else {
 		NSNumber *cloud = nil;
 		NSString *status = nil;
-		[file getResourceValue:&cloud forKey:NSURLUbiquitousItemIsUbiquitousKey error:nil];
+		[file getResourceValue:&cloud forKey:NSURLIsUbiquitousItemKey error:nil];
 		if (!cloud.boolValue) return 1;
 		[file getResourceValue:&status forKey:NSURLUbiquitousItemDownloadingStatusKey error:nil];
 		if (!status || [status isEqualToString:NSURLUbiquitousItemDownloadingStatusCurrent]) return 1;
