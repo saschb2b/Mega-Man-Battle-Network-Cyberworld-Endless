@@ -145,3 +145,12 @@ const char *saves_same(void) { return "The file holds the saves already here."; 
 const char *saves_no_continue(void) { return "The checkpoint could not be loaded. Your saves are kept."; }
 
 const char *saves_not_written(void) { return "The file could not be written."; }
+
+const char *saves_waiting(int action) {
+	return action == SAVES_EXPORT ? "Choose where it goes, in the picker." : action == SAVES_IMPORT ? "Choose the file, in the picker." :
+		"Choose the folder, in the picker.";
+}
+
+const char *saves_cancelled(int action) {
+	return action == SAVES_EXPORT ? "Nothing exported." : action == SAVES_IMPORT ? "Nothing imported." : "The folder is as it was.";
+}

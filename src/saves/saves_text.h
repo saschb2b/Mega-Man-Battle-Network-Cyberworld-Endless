@@ -41,6 +41,10 @@ void saves_exported(const char *where, char *out, size_t n);
 const char *saves_same(void);
 /* An export that could not be written */
 const char *saves_not_written(void);
+/* home's line while the picker for `action` (SAVES_EXPORT, SAVES_IMPORT,
+ * SAVES_FOLDER) is open, and after it was cancelled */
+const char *saves_waiting(int action);
+const char *saves_cancelled(int action);
 /* A checkpoint that would not load after an import */
 const char *saves_no_continue(void);
 

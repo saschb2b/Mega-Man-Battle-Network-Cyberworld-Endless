@@ -123,6 +123,7 @@ static void export_file(void) {
 	}
 	SV.busy = true;
 	picking = SAVES_EXPORT;
+	snprintf(SV.said, sizeof SV.said, "%s", saves_waiting(picking));
 }
 
 static void import_file(void) {
@@ -130,6 +131,7 @@ static void import_file(void) {
 	if (pick_saves_auto_enabled() && saves_compare_held()) return;
 	SV.busy = pick_saves_import();
 	picking = SAVES_IMPORT;
+	if (SV.busy) snprintf(SV.said, sizeof SV.said, "%s", saves_waiting(picking));
 }
 
 static void continue_run(void) {
@@ -143,6 +145,7 @@ static void continue_run(void) {
 
 void saves_activate(int action) {
 	if (SV.busy) return;
+	SV.said[0] = 0;
 	if (R.data && action != SAVES_TAKE && action != SAVES_UNDO) audio_sfx(action == SAVES_KEEP || action == SAVES_DONE ? SFX_CANCEL : SFX_SELECT);
 	switch (action) {
 	case SAVES_EXPORT: export_file(); break;
@@ -155,6 +158,7 @@ void saves_activate(int action) {
 	case SAVES_FOLDER:
 		SV.busy = pick_saves_choose_folder();
 		picking = SAVES_FOLDER;
+		if (SV.busy) snprintf(SV.said, sizeof SV.said, "%s", saves_waiting(picking));
 		break;
 	case SAVES_KEEP: saves_leave_compare(true); break;
 	case SAVES_TAKE: take(); break;
@@ -183,10 +187,14 @@ bool saves_picked(void) {
 	PickResult r;
 	if (!pick_saves_done(&r)) return false;
 	SV.busy = false;
+	SV.said[0] = 0;
 	char staged[700];
 	export_path(staged, sizeof staged);
 	remove(staged);
-	if (r.status == -1) return true;
+	if (r.status == -1) {
+		snprintf(SV.said, sizeof SV.said, "%s", saves_cancelled(picking));
+		return true;
+	}
 	if (r.status < 0) { saves_result(r.text); return true; }
 	if (r.path) import_picked(r.text);
 	else if (picking == SAVES_FOLDER) {

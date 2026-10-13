@@ -388,6 +388,7 @@ static void test_export(void) {
 static void test_busy(void) {
 	open_home();
 	CHECK(choose(SAVES_IMPORT) && SV.busy && picker_open, "saves: IMPORT opens the picker");
+	CHECK(!strcmp(SV.said, saves_waiting(SAVES_IMPORT)), "saves: home's line says what the picker waits for: \"%s\"", SV.said);
 	press(BTN_A);
 	CHECK(SV.busy, "saves: nothing chosen while the picker is open");
 	press(BTN_B);
@@ -397,6 +398,7 @@ static void test_busy(void) {
 	picker_ended = true;
 	press(0);
 	CHECK(!SV.busy && SV.view == SAVES_HOME, "saves: a cancelled picker leaves home as it was");
+	CHECK(!strcmp(SV.said, saves_cancelled(SAVES_IMPORT)), "saves: ... and says so: \"%s\"", SV.said);
 	press(BTN_B);
 }
 

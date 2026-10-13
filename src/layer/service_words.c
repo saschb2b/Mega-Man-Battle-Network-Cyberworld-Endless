@@ -151,9 +151,9 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 	if (first)
 		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!%s%s|It only comes when I'm worried.|"
 			"At a quarter HP,or hit again and again!|It's real power... But it eats at me.|Use one,and I go dark for that battle.|"
-			"And each battle I use one in...|...I lose %d max HP. For the rest of this dive!", chip, bar, does, DARK_PRICE);
+			"And each battle I use one in...|...takes %d max HP,for this whole dive!", chip, bar, does, DARK_PRICE);
 	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s%s|It comes when I'm worried,at a quarter HP.|"
-		"Each battle I use one in costs %d max HP.", chip, bar, does, DARK_PRICE);
+		"Each battle I use one in takes %d max HP,for the dive.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
 	/* (on Yes: holding one costs nothing till it's used, and a paging A
@@ -180,10 +180,10 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 	if (d->first)
 		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!|Its darkness feeds on bugs!|"
 			"Each use burns one of our BugFrags...|...for %s!|Then it bugs me,like a NaviCust bug.|For the rest of that battle!|"
-			"No BugFrags? Then it's only %s %s.|And each battle it runs in costs %d max HP.|For the rest of this dive...",
+			"No BugFrags? Then it's only %s %s.|And each battle it runs in...|...takes %d max HP,for this whole dive!",
 			d->chip, d->does, an, d->base, DARK_PRICE);
 	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|Each use burns a BugFrag...|...for %s.|"
-		"Then it bugs me for the battle.|No BugFrags? Then it's %s %s.|Each battle it runs in costs %d max HP.", d->chip, d->does, an, d->base,
+		"Then it bugs me for the battle.|No BugFrags? Then it's %s %s.|Each battle it runs in takes %d max HP,for the dive.", d->chip, d->does, an, d->base,
 		DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);

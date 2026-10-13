@@ -56,6 +56,7 @@ bool saves_open(void) {
 	if (now == &scene_emu) return false;
 	SV.back = now == &scene_launcher ? &scene_launcher : &scene_title;
 	SV.busy = false;
+	SV.said[0] = 0;
 	saves_clear_file();
 	/* (the player asked: the copy's place looked at, a desktop's Downloads
 	 * too) */

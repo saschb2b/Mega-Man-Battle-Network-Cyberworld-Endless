@@ -36,6 +36,7 @@ typedef struct {
 	size_t size;
 	BackupStatus status;   /* the file's, checked */
 	char note[700];        /* the comparison's or the result's words */
+	char said[96];         /* home's line in the copy's place: a picker's wait, or its cancel (a playtester's EXPORT said nothing, session 74) */
 } Saves;
 
 extern Saves SV;

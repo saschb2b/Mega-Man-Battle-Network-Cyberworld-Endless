@@ -89,7 +89,7 @@ void saves_draw(void) {
 		mirror_status(&m);
 		char line[1200];
 		saves_status_line(&m, backup_blocked(), pick_saves_capabilities() & SAVES_CAN_FOLDER, line, sizeof line);
-		clipped(l.line.x, l.line.y, line, l.line.w, PET_WHITE);
+		clipped(l.line.x, l.line.y, SV.said[0] ? SV.said : line, l.line.w, SV.said[0] ? PET_GOLD : PET_WHITE);
 	} else if (SV.view == SAVES_COMPARE) {
 		panel(l.here, &SV.here, false, SV.unreadable, true);
 		panel(l.file, &SV.file, true, SV.status == BACKUP_DAMAGED, true);
