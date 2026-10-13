@@ -100,3 +100,10 @@ void dark_price_hp(int base, int max, int hp, int out[3]) {
 	out[1] = max - (base - out[0]);
 	out[2] = hp > out[1] ? out[1] : hp;
 }
+
+bool dark_chip_is(int id) { return dark_chip_kind(id) >= 0; }
+
+unsigned dark_ran_add(unsigned ran, int id, int dark_id) {
+	if (!dark_chip_is(id)) return ran;
+	return ran | (dark_id >= 0 && dark_id < DARK_BN6_COUNT ? 1u << dark_id : DARK_RAN_BN5);
+}

@@ -415,10 +415,21 @@ patterns of parity across the nets, an honest telegraph, costed power):
   battle). DarkPlus is offered by neither until its code plays in BN6's
   battles.
 - **One price, counted as each net counts a use**: 20 max HP a battle a
-  dark power ran in: BN6's where it ran (a BugFrag paid), BN5's where the
-  chip left the hand used (BN6_HAND_AT moved past it); a DarkChip given up
-  for a Chaos Unison never enters the hand, so it costs nothing (the
-  owner's call of 4 October 2026). The autopilot picks no DarkChip of
+  dark power ran in, once a battle however many ran: counted where BN6
+  runs a chip's after-effects (`0x0800B79A`, from every chip use,
+  `0x080128EA`), for every DarkChip of the registry, either net's
+  (`dark_chip_is`): BN6's where its dark power ran (a BugFrag paid; its
+  base chip's id reaches it where it fell back), BN5's by its rule. A
+  DarkChip given up for a Chaos Unison never enters the hand, and the
+  Soul's DarkChip attack goes through the chip writer alone, never that
+  routine, so it costs nothing (the owner's call of 4 October 2026).
+  Until the last integration round BN5's were counted off the hand
+  (BN6_HAND_AT moved past one), the same uses by another road; one hook
+  counts both nets now. Checked in play (`tools/play.py`, `--net-biome
+  x0`, `--dev worried,god`): DrkSonic used costs 100 to 80 after its
+  battle; DrkSonic and DrkSword in one battle 100 to 80 once, a BugFrag
+  paid for DrkSword; ShadowSoul's Chaos Unison with DarkInvs given up and
+  its DarkInvs fired leaves 100 of 100 and the BugFrags as they were. The autopilot picks no DarkChip of
   either net and never presses A on UNITE or the emblem.
 - **Without BN5's ROM**: its chips sit out and its Souls sleep; MegaMan
   says both once after a CONTINUE ("I can't feel the old Souls,Lan...").
@@ -499,7 +510,7 @@ gone (in place, issue #82):**
 - *DarkChips* (`src/director/darkchips.c`, `director_dark.c`): every kind
   one chip (`dark_chip_id`, `dark_chip_kind`: BN6's 286-290 and the
   registry's 214-220), the Pack given each kind that plays, the flames
-  and the price above (`dark_battle_watch`, `dark_after_battle`), BN5's
+  and the price above (`dark_after_battle`; the hook in `darkbn6.c`), BN5's
   flame's words rewritten (`ta_dark_flame`; the line on rising after a
   fall, a guest battle's, gone with it).
 - *The guest gone from runs*: `director_guest.c`, `guest_words.c` (its

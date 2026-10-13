@@ -1,8 +1,8 @@
 /* BN6's own DarkChips in its battles (docs/META.md, BN6's own DarkChips;
  * docs/ROM_DATA.md; issue #70): the records of the four its battles play
  * made whole in the core's ROM copy, their power honest to the BugFrags
- * held, and the hooks that see a DarkChip's dark power run, which the run's
- * price (darkchips.h) is counted by. */
+ * held, and the hooks that see a DarkChip's dark power run, either net's,
+ * which the run's price (darkchips.h) is counted by. */
 #ifndef CW_DARKBN6_H
 #define CW_DARKBN6_H
 
@@ -26,12 +26,14 @@ void darkbn6_battle_begins(void);
  * more, their base chip's with none, which is what lands (an honest
  * Custom screen); on the map, where the BugFrags change. */
 void darkbn6_sync(void);
-/* A hook's event (EV_DARK_RAN, EV_DARK_BASE): noted for the battle; the
- * battle's last BugFrag spent, the rest of it shows the base chips' power. */
+/* A hook's event (EV_DARK_RAN: a DarkChip of either net's ran for
+ * MegaMan; EV_DARK_BASE): noted for the battle; the battle's last BugFrag
+ * spent, the rest of it shows the base chips' power. */
 void darkbn6_event(const HookEvent *e);
-/* ... the battle over: the DarkChips whose dark power ran in it, and those
- * that ran as their base chip for want of a BugFrag, a bit per DarkChipID
- * (0 DrkSword .. 4 DarkPlus); each forgotten as it is taken. */
+/* ... the battle over: the DarkChips that ran in it (darkchips.h's
+ * dark_ran_add bits: BN6's by DarkChipID, DARK_RAN_BN5 for BN5's rule),
+ * and BN6's that ran as their base chip for want of a BugFrag, a bit per
+ * DarkChipID (0 DrkSword .. 4 DarkPlus); each forgotten as it is taken. */
 unsigned darkbn6_ran_take(void);
 unsigned darkbn6_base_take(void);
 /* The base chip BN6 plays DarkChip `id` (286-290) as without a BugFrag,

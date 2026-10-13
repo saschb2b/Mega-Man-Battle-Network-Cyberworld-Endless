@@ -111,8 +111,6 @@ typedef struct {
 	bool dark_given;       /* ... and the run holds it */
 	bool dark_pack_due;    /* BN6's chips of the run's DarkChips are looked for in its Pack and folder, given where missing (dark_pack) */
 	char dark_words[360];  /* MegaMan's words on a DarkChip's price, due ("" none) */
-	bool dark5_ran;        /* a DarkChip of BN5's was used in the battle under way (dark_battle_watch): its price after it */
-	int dark_hand_at;      /* ... the hand's next chip as last seen (BN6_HAND_AT) */
 	int mail_due;          /* a guardian whose battle data Dad has just mailed (the PET's E-Mail), 0 none */
 	bool mail_quiet;       /* the session's first mails come without a word (a run's start brings every guardian's) */
 	bool pet_refreshed;    /* the layer's PET words, items and mail made (once on the map: a warp's frames go by unseen) */

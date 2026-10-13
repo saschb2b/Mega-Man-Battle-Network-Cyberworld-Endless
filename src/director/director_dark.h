@@ -8,7 +8,6 @@ void dark_flame_setup(void);
 void dark_flame_watch(void);
 void dark_price(bool bn6);
 void dark_after_battle(void);
-void dark_battle_watch(void);
 void dark_pack(void);
 void dark_forget(void);
 

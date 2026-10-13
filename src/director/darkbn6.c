@@ -15,8 +15,9 @@
 #include "rom.h"
 
 #define BUS 0x08000000u
+#define CHIP_IDS 512   /* (BN6's chip ids: nine bits, the registry's XREG_IDS) */
 
-static unsigned ran, base_ran;   /* the battle's DarkChips, a bit per DarkChipID: their dark power ran; their base chip ran */
+static unsigned ran, base_ran;   /* the battle's DarkChips: those that ran (dark_ran_add's bits); BN6's whose base chip ran, by DarkChipID */
 static int powered = -1;         /* the records' power as last written: 1 their own, 0 their base chips', -1 not yet */
 
 /* chip `id`'s record as the core's copy holds it (src/core/chips.h), and
@@ -127,8 +128,13 @@ void darkbn6_battle_begins(void) {
 
 void darkbn6_event(const HookEvent *e) {
 	if (e->kind == EV_DARK_RAN) {
-		uint32_t d = e->r[0] - BN6_DARK_FIRST_ID;
-		if (d < (uint32_t)DARK_BN6_COUNT) ran |= 1u << d;
+		/* (by the rule its record names: BN6's DarkChipID, a BugFrag paid; none, BN5's) */
+		int id = (int)(e->r[0] % CHIP_IDS);
+		const uint8_t *rec = record(id);
+		unsigned bit = dark_ran_add(0, id, rec ? rec[BN6_CHIP_DARK_ID] : 0xFF);
+		ran |= bit;
+		if (bit == DARK_RAN_BN5 && emu_debug_on()) fprintf(stderr, "dark: DarkChip %d ran by BN5's rule, no BugFrag\n", id);
+		if (!(bit & DARK_RAN_BN6)) return;
 		uint32_t left = emu_read32(BN6_BATTLE_BUGFRAGS);
 		if (emu_debug_on()) fprintf(stderr, "dark: DarkChip %#x's dark power ran, a BugFrag paid, %u left in the battle\n", (unsigned)e->r[0], (unsigned)left);
 		/* (the battle's last BugFrag spent: its next Custom screens show
@@ -154,11 +160,16 @@ unsigned darkbn6_base_take(void) {
 
 /* ---- the hooks: MegaMan's side's chip uses only ---- */
 
-/* a chip's after-effects as it runs (BN6_DARK_AFTER): a DarkChip's id
- * reaches it only where its dark power ran, a BugFrag paid */
+/* every DarkChip of the registry, either net's (dark_chip_is), a bit an id: what the hook below tests, made once */
+static uint32_t dark_ids[CHIP_IDS / 32];
+
+/* a chip's after-effects as it runs (BN6_DARK_AFTER, from every chip use, 0x080128EA: r0 the chip that ran): a DarkChip of
+ * either net's, BN5's own seven and BN6's five (a BN6 one's id reaches it only where its dark power ran, a BugFrag paid; its
+ * base chip's where it fell back). A Chaos Unison's DarkChip attack runs through the chip writer alone, never here. */
 static HookAct after(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[0] - BN6_DARK_FIRST_ID < (uint32_t)DARK_BN6_COUNT && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 0) hook_post(r, EV_DARK_RAN);
+	uint32_t id = r->r[0];
+	if (id < CHIP_IDS && (dark_ids[id / 32] >> (id % 32) & 1) && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 0) hook_post(r, EV_DARK_RAN);
 	return HOOK_CONTINUE;
 }
 
@@ -174,6 +185,8 @@ void darkbn6_install(void) {
 	static bool done;
 	if (done) return;
 	done = true;
+	for (int id = 1; id < CHIP_IDS; ++id)
+		if (dark_chip_is(id)) dark_ids[id / 32] |= 1u << (id % 32);
 	emu_hook(BN6_DARK_AFTER, after, NULL);
 	emu_hook(BN6_DARK_CHECK, check, NULL);
 }

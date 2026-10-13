@@ -931,9 +931,10 @@ engine's, and all twelve kinds play there, each by its own net's rule
   playtester through the whole chat again. Yes gives the chip to the
   Pack, and the flame goes.
 - **Counted as each net counts a use:** BN6's where its dark power ran (a
-  BugFrag paid); BN5's where it left the hand used. A DarkChip given up
-  for a Chaos Unison is no DarkChip used (BN5's rule): no max HP for it
-  (the owner's call of 4 October 2026).
+  BugFrag paid); BN5's where it ran by BN5's rule, both where BN6 runs a
+  chip's after-effects, once a battle however many ran. A DarkChip given
+  up for a Chaos Unison is no DarkChip used (BN5's rule): no max HP for
+  it (the owner's call of 4 October 2026).
 - **Variety, not power, across runs:** nothing of them carries over, not
   the chips, not their price; a new run starts with none. A run
   continued without BN5's ROM keeps BN5's seven; they sit out of its

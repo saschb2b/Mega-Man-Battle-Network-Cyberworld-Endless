@@ -74,4 +74,22 @@ int dark_flame_of(uint32_t seed, int depth, int side, bool bn6, unsigned offered
  * most the max). */
 void dark_price_hp(int base, int max, int hp, int out[3]);
 
+/* Chip `id` (BN6's tables) one of the run's DarkChips, either net's: the
+ * registry's dark rows, BN6's 286-290 and BN5's own 214-220 (dark_chip_id
+ * of every kind); the test the price's hook makes of every chip MegaMan
+ * runs (darkbn6.c). */
+bool dark_chip_is(int id);
+/* A battle's DarkChips that ran, a bit each: BN6's rule's by their
+ * DarkChipID (1 << 0-4, a BugFrag paid), and DARK_RAN_BN5 for one by
+ * BN5's (its record's DarkChipID 0xFF: BN5's own seven, and DarkPlus
+ * where BN5's plays in BN6's record of its name) */
+#define DARK_RAN_BN6 0x1Fu
+#define DARK_RAN_BN5 0x20u
+/* ... `ran` with chip `id` run for MegaMan (BN6_DARK_AFTER's chip: a
+ * DarkChip of BN6's only where its dark power ran, its base chip's id
+ * where it fell back) and `dark_id` its record's DarkChipID: unchanged
+ * for any chip but a DarkChip. A DarkChip given up for a Chaos Unison
+ * never runs so (its attack goes through the chip writer alone): none. */
+unsigned dark_ran_add(unsigned ran, int id, int dark_id);
+
 #endif

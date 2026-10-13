@@ -4390,6 +4390,22 @@ static void test_darkchips(void) {
 	CHECK(v[2] == 100, "dark: HP held to the new max (%d)", v[2]);
 	dark_price_hp(25, 45, 45, v);
 	CHECK(v[0] == 10 && v[1] == 30 && v[2] == 30, "dark: the base never under 10 (%d %d %d)", v[0], v[1], v[2]);
+	/* (the price's hook on every chip MegaMan runs, darkbn6.c: the registry's
+	 * twelve dark rows, either net's, and no other id; each by the rule its
+	 * record's DarkChipID names, two in a battle one price) */
+	int darks = 0;
+	for (int id = 0; id < XREG_IDS; ++id) darks += dark_chip_is(id);
+	CHECK(darks == DARK_KINDS && dark_chip_is(220) && dark_chip_is(214) && dark_chip_is(286) && dark_chip_is(290),
+		"dark: the hook's DarkChips the twelve of either net (%d), DrkSonic's 220 among them", darks);
+	CHECK(!dark_chip_is(0x47) && !dark_chip_is(213) && !dark_chip_is(221) && !dark_chip_is(291) && !dark_chip_is(0),
+		"dark: Sword (a DrkSword fallen back), the registry's neighbours and none no DarkChip");
+	CHECK(dark_ran_add(0, 220, 0xFF) == DARK_RAN_BN5, "dark: DrkSonic run, BN5's rule (%#x)", dark_ran_add(0, 220, 0xFF));
+	CHECK(dark_ran_add(0, 286, 0) == 1u && dark_ran_add(0, 289, 3) == 8u, "dark: DrkSword and DarkInvs with a BugFrag, BN6's by DarkChipID");
+	CHECK(dark_ran_add(0, 290, 0xFF) == DARK_RAN_BN5 && dark_ran_add(0, 290, 4) == 0x10u,
+		"dark: DarkPlus BN5's where its code plays in BN6's record (no DarkChipID), BN6's by its own");
+	CHECK(dark_ran_add(0, 0x47, 0xFF) == 0 && dark_ran_add(DARK_RAN_BN5, 0x47, 0xFF) == DARK_RAN_BN5, "dark: any other chip leaves it");
+	CHECK(dark_ran_add(dark_ran_add(0, 220, 0xFF), 214, 0xFF) == DARK_RAN_BN5 && (dark_ran_add(DARK_RAN_BN5, 286, 0) & DARK_RAN_BN6) == 1u,
+		"dark: two of BN5's in a battle one bit (one price), BN6's beside them its own");
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,

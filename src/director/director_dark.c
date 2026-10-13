@@ -125,36 +125,18 @@ void dark_price(bool bn6) {
 	dark_price_told = true;
 }
 
-/* A battle's frame: the chips MegaMan used since the last (his hand's next
- * chip moved on past them, BN6_HAND_AT), one of BN5's DarkChips among
- * them, its price after the battle. Read off the hand, so a DarkChip of
- * any family counts as BN5 counts its use (one given up for a Chaos Unison
- * never enters the hand: none used, no price). */
-void dark_battle_watch(void) {
-	int at = emu_read8(BN6_BATTLE_HAND + BN6_HAND_AT);
-	for (int i = D.dark_hand_at; i < at && i < BN6_HAND_MAX; ++i) {
-		int k = dark_chip_kind(emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + 2u * (uint32_t)i) & 0x1FF);
-		if (k >= 0 && !dark_bn6_id(k)) {
-			if (!D.dark5_ran && emu_debug_on()) fprintf(stderr, "dark: BN5's DarkChip of kind %d used\n", k);
-			D.dark5_ran = true;
-		}
-	}
-	D.dark_hand_at = at;
-}
-
 /* After a battle (docs/META.md, DarkChips): where a DarkChip's dark power
- * ran, BN6's (a BugFrag paid) or BN5's (one used: dark_battle_watch), its
- * price, once a battle; else, where one of BN6's ran as its base chip for
- * want of a BugFrag, MegaMan says so, once a session (a Sword's 80 where
- * the card had read DrkSword's 400 from the battle's start, or since its
- * last BugFrag). */
+ * ran, either net's (darkbn6.c's hook on every chip MegaMan runs: BN6's
+ * where a BugFrag was paid, BN5's by its rule; one given up for a Chaos
+ * Unison never runs there), its price, once a battle; else, where one of
+ * BN6's ran as its base chip for want of a BugFrag, MegaMan says so, once
+ * a session (a Sword's 80 where the card had read DrkSword's 400 from the
+ * battle's start, or since its last BugFrag). */
 static bool dark_base_told;
 void dark_after_battle(void) {
 	if (D.in_battle) return;
 	unsigned ran = darkbn6_ran_take(), base = darkbn6_base_take();
-	bool five = D.dark5_ran;
-	D.dark5_ran = false;
-	if (ran || five) { dark_price(ran != 0); return; }
+	if (ran) { dark_price((ran & DARK_RAN_BN6) != 0); return; }
 	if (!base || dark_base_told) return;
 	int d = 0;
 	while (d < DARK_BN6_COUNT - 1 && !(base >> d & 1)) ++d;

@@ -311,7 +311,6 @@ void drop_events(void) {
 	HookEvent ev[32];
 	while (emu_hook_events(ev, 32) == 32) {}
 	darkbn6_battle_begins();
-	D.dark5_ran = false;
 	dark_forget();
 }
 
@@ -401,14 +400,12 @@ static void battle_update(void) {
 		const Encounter *g = guardian ? boss_battle(&hp) : NULL;
 		if (guardian) runlog_guardian_start(D.objs.guardian.navi, g, hp);
 		D.souls_used = 0;
-		D.dark_hand_at = 0;
 		home_jobs_battle_start();
 	}
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
-		dark_battle_watch();   /* (a DarkChip of BN5's used: its price after the battle) */
 	}
 	/* the duel's time: the results screen's DeleteTime (its hits
 	 * come as events: docs/RIVAL.md) */
