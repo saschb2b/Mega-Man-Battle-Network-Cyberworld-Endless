@@ -1149,7 +1149,9 @@ the masks):
   Chaos Unison's charge glow and its attack in the loadout (the chaos
   specs, `chaos_*`: each Soul's DarkChip attack at a hold of 45 frames,
   its failure at 60, and NumberSoul's holds from 75 to 210 besides; ShadowSoul's attack
-  BN6's own DarkInvs, a recorded verdict). The expectations read `soul`, `chaos`, `soul turns`
+  BN5's own DarkInvs, moved, which `chaos_shadow_45` holds frame for frame; `soul_mood_chaos`
+  the way a run reaches it, a DarkChip kept while worried and given up once a landed chip
+  calms him, as BN5 refuses UNITE while he worries). The expectations read `soul`, `chaos`, `soul turns`
   and `souls used` the same way in both games, and `unite` (UNITE's +7)
   and `unite stands` (its +0).
   `soul_knight` (KnightSoul: a deck of JustcOne J in both, the first
