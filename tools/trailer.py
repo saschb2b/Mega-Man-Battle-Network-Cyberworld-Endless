@@ -10,9 +10,13 @@ backdrop, the words, the logo (tools/steam_art.py's) and the music
 (tools/trailer_music.py), an original piece played through a model of the
 Game Boy Advance's sound. None of Capcom's sound is in it.
 
-    python3 build.py host && python3 tools/trailer.py [--keep]
+    python3 build.py host && python3 tools/trailer.py [--keep] [--cut 0.12.0]
 
 --keep reuses the footage of an earlier run (.build/trailer).
+--cut 0.12.0 makes docs/clips/trailer-0.12.0.*: the same advert for one
+release's news (BN5's net in BN6's engine), its footage the release
+pictures' own scripted runs (build.py's SCREENSHOTS and CLIPS), BN5 Team
+Colonel's ROM beside BN6's.
 """
 import math
 import os
@@ -38,6 +42,15 @@ BARS = 13
 FRAMES = BARS * BAR + 18       # (and a breath of black at the end)
 HEAVY = '/usr/share/fonts/truetype/lato/Lato-Black.ttf'
 NARROW = '/usr/share/fonts/opentype/urw-base35/NimbusSansNarrow-BoldOblique.otf'
+
+# ---- what a cut draws: the trailer's own, or a release's (--cut) ----
+NAME = 'trailer'
+SUBTITLE = 'A ROGUELIKE FOR MEGA MAN BATTLE NETWORK 6'
+PLATFORMS = 'WINDOWS  ·  MAC  ·  LINUX  ·  STEAM DECK  ·  PORTMASTER  ·  BROWSER'
+NOTICE = ('Unofficial fan project, not affiliated with Capcom. Runs from your own Mega Man Battle Network 6: '
+          'Cybeast Gregar (USA) ROM.')
+PLAY_LABEL = 'WATCH THE TRAILER'
+PLATFORMS_SIZE = 34
 
 # ---- footage: scripted headless runs, every second frame (30 fps) ----
 
@@ -91,9 +104,10 @@ def capture(name, args, env, script, first, last):
     saved = {k: os.environ.get(k) for k in env}
     os.environ.update(env)
     extra = ['--input', script] if script else []
+    rel = os.path.relpath(WORK, ROOT)
     code = build.docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir',
-                        f'/src/.build/trailer/data-{name}', *args, *extra, '--frames', str(last + 1),
-                        '--shot-range', f'{first}:{last}:/src/.build/trailer/{name}/f',
+                        f'/src/{rel}/data-{name}', *args, *extra, '--frames', str(last + 1),
+                        '--shot-range', f'{first}:{last}:/src/{rel}/{name}/f',
                         mounts=[(build.default_rom_dir(), '/rom:ro')])
     for k, v in saved.items():
         if v is None:
@@ -306,12 +320,11 @@ def compose():
     lg = logo()
     hero = Image.open(os.path.join(ROOT, 'linux', 'steam', 'hero.png')).convert('RGB')
     hero = hero.resize((round(hero.width * H / hero.height), H), Image.NEAREST)
-    subtitle = small('A ROGUELIKE FOR MEGA MAN BATTLE NETWORK 6', 40, (255, 240, 160))
-    plats = small('WINDOWS  ·  MAC  ·  LINUX  ·  STEAM DECK  ·  PORTMASTER  ·  BROWSER', 34)
+    subtitle = small(SUBTITLE, 40, (255, 240, 160))
+    plats = small(PLATFORMS, PLATFORMS_SIZE)
     free = chrome('FREE  ·  BRING YOUR OWN ROM', 60, slant=0.18)
     url = small('saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless', 30, (170, 220, 255))
-    notice = small('Unofficial fan project, not affiliated with Capcom. Runs from your own Mega Man Battle Network 6: '
-                   'Cybeast Gregar (USA) ROM.', 20, (150, 170, 200))
+    notice = [small(line, 20, (150, 170, 200)) for line in NOTICE.split('\n')]   # (a line each, the last at the foot)
     cuts = {B(s[0], s[1]) for s in SHOTS} | {B(0, b) for b in (1, 2, 3)} | {B(11)} | {B(12, b) for b in (0, 1, 2)}
     rnd = random.Random(7)
     for fr in range(FRAMES):
@@ -370,7 +383,8 @@ def compose():
                 im.alpha_composite(plats, ((W - plats.width) // 2, 420))
             if k >= 2 * BEAT:
                 im.alpha_composite(url, ((W - url.width) // 2, 500))
-            im.alpha_composite(notice, ((W - notice.width) // 2, 650))
+            for k_line, line in enumerate(notice):
+                im.alpha_composite(line, ((W - line.width) // 2, 650 - 26 * (len(notice) - 1 - k_line)))
         # the words: in with a slam (big, trailing), out with a stretch
         for (wb, wbeat, wlen, text, where) in WORDS:
             start = B(wb, wbeat)
@@ -426,25 +440,26 @@ def encode():
     common = ['-y', '-loglevel', 'error', '-framerate', str(FPS), '-i', f'/src/{rel}/frames/%05d.png',
               '-i', f'/src/{rel}/music.wav', '-shortest']
     jobs = [common + ['-c:v', 'libx264', '-crf', '27', '-preset', 'slow', '-maxrate', '3M', '-bufsize', '6M', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k',
-                      '-movflags', '+faststart', '/src/docs/clips/trailer.mp4'],
+                      '-movflags', '+faststart', f'/src/docs/clips/{NAME}.mp4'],
             common + ['-c:v', 'libvpx-vp9', '-b:v', '2M', '-crf', '38', '-row-mt', '1', '-pix_fmt', 'yuv420p', '-c:a', 'libopus',
-                      '-b:a', '128k', '/src/docs/clips/trailer.webm']]
+                      '-b:a', '128k', f'/src/docs/clips/{NAME}.webm']]
     for args in jobs:
         if subprocess.call(['docker', 'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src',
                             build.FFMPEG_IMAGE, *args]) != 0:
             sys.exit('ffmpeg failed')
     poster = Image.open(os.path.join(WORK, 'frames', f'{B(11) + 20:05d}.png'))
-    poster.save(os.path.join(OUT, 'trailer.png'), optimize=True)
+    poster.save(os.path.join(OUT, f'{NAME}.png'), optimize=True)
     play_poster()
 
 
 def play_poster():
-    """docs/clips/trailer-play.png: the poster with a play button, for the
-    README, which links the MP4 (GitHub plays no video from a repository)."""
-    im = Image.open(os.path.join(OUT, 'trailer.png')).convert('RGBA')
+    """docs/clips/trailer-play.png (a cut's NAME-play.png): the poster with a
+    play button, for the README and the release's notes, which link the MP4
+    (GitHub plays no video from a repository)."""
+    im = Image.open(os.path.join(OUT, f'{NAME}.png')).convert('RGBA')
     over = Image.new('RGBA', im.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(over)
-    label = 'WATCH THE TRAILER'
+    label = PLAY_LABEL
     font = ImageFont.truetype(NARROW, 44)
     w, h = int(d.textlength(label, font=font)) + 150, 92
     x0, y0 = (W - w) // 2, 572
@@ -453,20 +468,111 @@ def play_poster():
     d.polygon([(cx - 14, cy - 20), (cx - 14, cy + 20), (cx + 22, cy)], fill=(255, 214, 16, 255))
     d.text((x0 + 100, cy), label, font=font, fill=(255, 255, 255, 255), anchor='lm')
     im.alpha_composite(over)
-    im.convert('RGB').save(os.path.join(OUT, 'trailer-play.png'), optimize=True)
+    im.convert('RGB').save(os.path.join(OUT, f'{NAME}-play.png'), optimize=True)
+
+
+# ---- a release's cut: 0.12.0, one Battle Network ----
+
+def from_shots(name, first, last):
+    """A scene from build.py's SCREENSHOTS entry `name`: its run, its input
+    and its environment, game frames first to last"""
+    e = next(x for x in build.SCREENSHOTS if x[0] == name)
+    argv = list(e[1])
+    script = None
+    if '--input' in argv:
+        i = argv.index('--input')
+        script = argv[i + 1]
+        del argv[i:i + 2]
+    return (argv, dict(e[3]), script, first, last)
+
+
+def from_clips(name):
+    """A scene from build.py's CLIPS entry `name`, as build.py clips runs it"""
+    e = next(x for x in build.CLIPS if x[0] == name)
+    return (e[1], dict(e[2]), e[3], e[4], e[5])
+
+
+def cut_0120():
+    """0.12.0's news: BN5's viruses, panels, guardians, Souls, Chaos Unison,
+    DarkChips, the nets meeting, the Dark Soul, and saves that travel"""
+    global NAME, WORK, SCENES, SHOTS, WORDS, CAPTIONS, SUBTITLE, PLATFORMS, PLATFORMS_SIZE, NOTICE, PLAY_LABEL
+    NAME, WORK = 'trailer-0.12.0', os.path.join(ROOT, '.build', 'trailer-0.12.0')
+    SCENES = {
+        'viruses': from_shots('bn5-viruses', 640, 940),
+        'lava': from_shots('bn5-lava', 640, 940),
+        'sea': from_shots('bn5-sea', 700, 1000),
+        'toadman': from_shots('bn5-toadman', 1000, 2620),
+        'chaos': from_shots('bn5-chaos', 1000, 1300),
+        'visitor': from_shots('bn5-visitor', 480, 700),
+        'darksoul': from_shots('bn5-darksoul', 640, 900),
+        'unite': from_clips('bn5-one-net'),
+        'darkinvs': from_clips('bn5-darkinvs'),
+    }
+    SHOTS = CUT_0120_SHOTS
+    WORDS = CUT_0120_WORDS
+    CAPTIONS = CUT_0120_CAPTIONS
+    SUBTITLE = 'VERSION 0.12.0  ·  ONE BATTLE NETWORK'
+    PLATFORMS, PLATFORMS_SIZE = 'WINDOWS  ·  MAC  ·  LINUX  ·  ANDROID  ·  IPHONE  ·  NEW 3DS  ·  PORTMASTER  ·  BROWSER', 30
+    NOTICE = ('Unofficial fan project, not affiliated with Capcom. Runs from your own Mega Man Battle Network 6: '
+              'Cybeast Gregar (USA) ROM.\nMega Man Battle Network 5: Team Colonel (USA) beside it brings its net.')
+    PLAY_LABEL = "WATCH WHAT'S NEW"
+
+
+# (bar, beat, beats, scene, its first frame, frames a frame, punch): the
+# frames picked from each scene's contact sheet
+CUT_0120_SHOTS = [
+    (1, 0, 4, 'viruses', 36, 1, True),
+    (2, 0, 2, 'lava', 96, 1, True), (2, 2, 2, 'sea', 60, 1, True),
+    (3, 0, 1, 'toadman', 30, 0, True), (3, 1, 3, 'toadman', 330, 1, True),
+    (4, 0, 4, 'unite', 44, 1, True),
+    (5, 0, 2, 'unite', 144, 1, True), (5, 2, 2, 'unite', 300, 1, True),
+    (6, 0, 4, 'chaos', 64, 1, True),
+    (7, 0, 2, 'darkinvs', 6, 1, True), (7, 2, 2, 'darkinvs', 320, 1, True),
+    (8, 0, 4, 'visitor', 20, 1, True),
+    (9, 0, 4, 'darksoul', 20, 1, True),
+    (10, 0, 2, 'still', 'saves-compare', 0, True), (10, 2, 2, 'still', 'saves-result', 0, True),
+]
+
+CUT_0120_WORDS = [
+    (0, 1, 1, 'ONE', 'mid'), (0, 2, 1, 'BATTLE', 'mid'), (0, 3, 1, 'NETWORK', 'mid'),
+    (1, 0, 2, "BN5'S NET", 'low'), (1, 2, 2, "IN BN6'S ENGINE", 'low'),
+    (2, 0, 2, 'LAVA.', 'low'), (2, 2, 2, 'SEA.', 'low'),
+    (3, 0, 4, 'GUARDIANS', 'low'),
+    (4, 0, 4, 'UNITE!', 'top'),
+    (5, 0, 4, 'SOULS', 'low'),
+    (6, 0, 4, 'CHAOS UNISON', 'low'),
+    (7, 0, 4, 'DARKCHIPS', 'low'),
+    (8, 0, 2, 'THE NETS', 'low'), (8, 2, 2, 'MEET', 'low'),
+    (9, 0, 4, 'THE DARK SOUL', 'low'),
+    (10, 0, 2, 'SAVES', 'low'), (10, 2, 2, 'THAT TRAVEL', 'low'),
+]
+
+CUT_0120_CAPTIONS = [
+    (1, 0, 4, 'BN5 TEAM COLONEL BESIDE BN6  ·  ITS VIRUSES BY THEIR OWN CODE'),
+    (3, 0, 4, 'TOADMAN  ·  KNIGHTMAN  ·  SHADOWMAN  ·  NUMBERMAN  ·  TOMAHAWKMAN  ·  COLONEL'),
+    (5, 0, 4, "A GUARDIAN'S SOUL, IN EVERY BATTLE"),
+    (7, 0, 4, 'FROM THE FLAMES OF DARKNESS  ·  AT A PRICE'),
+    (10, 0, 4, 'PC  ·  PHONE  ·  HANDHELD  ·  NEW 3DS  ·  BROWSER'),
+]
 
 
 def main():
     keep = '--keep' in sys.argv
+    if '--cut' in sys.argv:
+        which = sys.argv[sys.argv.index('--cut') + 1]
+        if which != '0.12.0':
+            sys.exit(f'no cut {which}: 0.12.0')
+        cut_0120()
     os.makedirs(WORK, exist_ok=True)
-    SCENES['powers'] = powers_scene()
+    if NAME == 'trailer':
+        SCENES['powers'] = powers_scene()
     for name, spec in SCENES.items():
         if not (keep and os.path.isdir(os.path.join(WORK, name)) and os.listdir(os.path.join(WORK, name))):
             capture(name, *spec)
     trailer_music.render(os.path.join(WORK, 'music.wav'))
     compose()
     encode()
-    print('wrote docs/clips/trailer.mp4, .webm and .png')
+    print(f'wrote docs/clips/{NAME}.mp4, .webm and .png')
 
 
 if __name__ == '__main__':
