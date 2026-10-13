@@ -1060,9 +1060,12 @@ the masks):
   his code picks, his palette and the sprite itself are compared), his
   form and pending form (`form`), and his side's player block byte for
   byte. BN5 raises the mood of the side that lands a hit (no counter),
-  BN6 has no such gain: BN5's mood is read less what its gains added (a
-  translation from BN5's own events, not a mask), until the Souls track
-  ports BN5's DarkChip rule. BN5's plain charged shot fires at once where
+  BN6 has no such gain: BN5's mood is read less what its gains added
+  since it was last set outright (a translation from BN5's own events,
+  not a mask: its gains, `BN5_MOOD_GAIN`, and its set and calm,
+  `BN5_MOOD_SET` and `BN5_MOOD_CALM`, which BN6's twins write alike;
+  before the set reset it, a calmed 0x80 read as 0x08 in
+  `chaos_shadow_turn`, its recorded FAIL until the release candidate). BN5's plain charged shot fires at once where
   BN6's waits 5 frames (docs/ROM_DATA.md, MegaMan as the differential's
   subject): an engine difference, so no spec fires one. `megaman_plain`
   (CanGard V1 against MegaMan at 2000 HP, his buster 1-1-1, a folder of
@@ -1222,9 +1225,13 @@ the masks):
   hand's end in both games and both cursors stand on it, used: his mood 0
   to the end; `compare_to` its use, as BN6 runs the registry's DarkCirc
   by its twin's family), `soul_mood_unite` (worried, KnightSoul's Break
-  chip picked last: UNITE does not stand in either) and `soul_mood_gate`
-  (BlakWing used while he is not dark: the chip of nothing in both) pass;
-  their breaks fail them.
+  chip picked last: UNITE does not stand in either), `soul_mood_gate`
+  (BlakWing used while he is not dark: the chip of nothing in both) and
+  `soul_mood_chaos` (DarkDril dealt worried and kept, a Cannon landed,
+  KnightSoul's Chaos Unison on the calm screen after) pass; their breaks
+  fail them. `tinhawk_megaman` holds MegaMan the subject against TinHawk:
+  struck again the frame his flash ends, he blinks most of the battle in
+  both games.
 - **ColonelSoul's button, chip shot and strike** (the track's S5): his
   chip committed at OK (BN5's pending record's +6, 0xFFFF none; the
   Souls' block's +0x14, 0 none) and his chip for the turn (BN5's AI

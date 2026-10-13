@@ -52,6 +52,8 @@
 #define BN5_OBJECT_RUNNING 0x0200BBF0u /* u32 the node of the object running, 0 outside the runner (0x08002FE2) */
 #define BN5_MOOD_GAIN     0x080127FAu /* a side's battle mood raised by r1 (r0 the side: not at 0, dark, nor 0xFF, Full Synchro; 0xFE at most), as
                                        * the hit pass lands a hit that is no counter (0x08017018); BN6's hit pass has no such call (0x0801A228) */
+#define BN5_MOOD_SET      0x080127CEu /* a side's battle mood set to r1 (r0 the side; not at 0, dark), BN6_MOOD_SET's twin */
+#define BN5_MOOD_CALM     0x08011A8Cu /* the mood of r5 (him) calmed to 0x80 where it is not 0, dark (BN6_MOOD_CALM's twin) */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */

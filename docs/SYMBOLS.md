@@ -79,9 +79,9 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| Code (routines, hooks, instructions) | 244 | 18 |
+| Code (routines, hooks, instructions) | 244 | 19 |
 | ROM data (tables, text, literals) | 257 | 158 |
-| ROM, code or data not told | 350 | 398 |
+| ROM, code or data not told | 350 | 397 |
 | RAM (variables, structures) | 94 | 47 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 137 | 33 |

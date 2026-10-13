@@ -51,17 +51,19 @@ typedef struct {
 	uint32_t runner_ret, running, rng[2];
 	uint32_t flash, hides;   /* the flash timer's place in a collision data; its bit 1 as the blink hides an object */
 	uint32_t mood_gain, navi, navi_size;   /* the mood raised as a hit lands (0 none: BN6's) and the battle NaviStats it raises */
+	uint32_t mood_set, mood_calm;          /* ... and set outright (0 none: BN6's) */
 } Game;
 
 static const Game games[2] = {
 	{ { BN5_RNG_DRAW, BN5_RNG_DRAW_POSITIVE, BN5_RNG_DRAW_SECOND, BN5_RNG_DRAW_SECOND_POSITIVE }, BN5_SPAWN_COMMON, BN5_SPAWN_COMMON_END,
 		BN5_PLAY_SOUND, BN5_SPAWN_EFFECT, BN5_SET_ATTACK, BN5_RESERVE_PANEL_DONE, BN5_BLINK_FLASHING, BN5_SPRITE_LOAD, BN5_OBJECT_RUNNER_RET,
 		BN5_OBJECT_RUNNING,
-		{ BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, BN5_COLL_FLASH, 0, BN5_MOOD_GAIN, BN5_BATTLE_NAVI, BN5_BATTLE_NAVI_SIZE },
+		{ BN5_RNG_PRIMARY, BN5_RNG_SECONDARY }, BN5_COLL_FLASH, 0, BN5_MOOD_GAIN, BN5_BATTLE_NAVI, BN5_BATTLE_NAVI_SIZE, BN5_MOOD_SET,
+		BN5_MOOD_CALM },
 	{ { BN6_RNG_DRAW, BN6_RNG_DRAW_POSITIVE, BN6_RNG_DRAW_SECOND, BN6_RNG_DRAW_SECOND_POSITIVE }, BN6_SPAWN_COMMON, BN6_SPAWN_COMMON_END,
 		BN6_PLAY_SOUND, BN6_SPAWN_EFFECT, BN6_SET_ATTACK, BN6_RESERVE_PANEL_DONE, BN6_BLINK_FLASHING, BN6_SPRITE_LOAD, BN6_OBJECT_RUNNER_RET,
 		BN6_OBJECT_RUNNING,
-		{ BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, BN6_COLL_FLASH, 2, 0, BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE },
+		{ BN6_RNG_PRIMARY, BN6_RNG_SECONDARY }, BN6_COLL_FLASH, 2, 0, BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE, 0, 0 },
 };
 
 /* A draw kept: the battle's timer, its key (a BN5 address), the word it was drawn from, which word */
@@ -357,6 +359,25 @@ static HookAct on_mood(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* (BN5_MOOD_SET: r0 the side; BN5_MOOD_CALM: r5 him) the mood written outright, as BN6's twins write its own: what the
+ * gains had raised it by is gone (tools/xdiff_events.py's reading of BN5's mood in BN6's terms) */
+static void mood_set(XdLog *log, const HookRegs *r, uint32_t side) {
+	XdEvent *e = call(log, r, XD_MOOD, 0, false);
+	if (!e) return;
+	e->a = (side & 1) | XD_MOOD_SET;
+	e->b = 0;
+}
+
+static HookAct on_mood_set(HookRegs *r, void *user) {
+	mood_set(user, r, r->r[0]);
+	return HOOK_CONTINUE;
+}
+
+static HookAct on_mood_calm(HookRegs *r, void *user) {
+	mood_set(user, r, hook_read8(r->r[5] + BN6_T1_ALLIANCE));
+	return HOOK_CONTINUE;
+}
+
 /* ---- the logs ---- */
 
 /* The chips' units a spec's folder plays (src/core/xchips_moved.c: its chips' families, by number): their code alone the
@@ -488,6 +509,7 @@ XdLog *xd_log_start(int game, const XVirusFamily *const *fams, int n, bool navis
 	ok = put(g->sound, on_sound, log) && put(g->effect, on_effect, log) && put(g->attack, on_attack, log) && ok;
 	ok = put(g->reserved, on_reserved, log) && put(g->blink, on_blink, log) && put(g->sprite, on_sprite, log) && ok;
 	if (g->mood_gain) ok = put(g->mood_gain, on_mood, log) && ok;
+	if (g->mood_set) ok = put(g->mood_set, on_mood_set, log) && put(g->mood_calm, on_mood_calm, log) && ok;
 	if (!ok) fprintf(stderr, "xdiff: a hook could not be placed on BN%d's core\n", game);
 	return ok ? log : NULL;
 }

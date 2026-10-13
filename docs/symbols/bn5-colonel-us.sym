@@ -228,7 +228,7 @@
 080107DC bn6_flash_count
 08010850 chaos_unison.release
 08010902 chip_soul_kind_shadowsoul_6_sword
-08011A8C bn5_mood_bn6.calm
+08011A8C BN5_MOOD_CALM
 08011BA4 BN5_SOUL_READY
 08011CCC BN5_SOUL_REAPPLY
 08011DD4 colonelsoul_button_chip.to
@@ -244,7 +244,7 @@
 08012704 bn5_souls.emotion
 08012705 bn5_darkchips.emotion
 08012738 emotion_getter
-080127CE bn5_mood_bn6.set
+080127CE BN5_MOOD_SET
 080127FA BN5_MOOD_GAIN
 08012818 bn5_mood_bn6.loss
 0801285E soul_chips.modifier_sound

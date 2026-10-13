@@ -1828,11 +1828,14 @@ of. The registry's ids, records and art stay C1's (above).
     ends (`0x0801214A`, `0x08012276`, beside its calm): `darkinvs_leave`
     from soullife.c's enter and leave. `chaos_shadow_turn` (ShadowSoul's
     one turn ending at the second Custom screen while the machine runs)
-    holds a recorded FAIL at t524: the machine stops in both and every
-    byte of his AI data and object is the same to t760, but his battle
-    NaviStats +0x0E reads 0x08 in BN5 against BN6's 0x80 from the Soul's
-    end (BN5's calm writes 0x80 where it is not 0; a NumberSoul's Chaos
-    Unison ending so without DarkInvs passes): untraced. Not ported:
+    PASS: the machine stops in both and every byte of his AI data and
+    object is the same to t760. Its recorded FAIL at t524 (his battle
+    NaviStats +0x0E read 0x08 in BN5 against BN6's 0x80 from the Soul's
+    end) was the differential's own: its reading of BN5's mood in BN6's
+    terms took DarkInvs's hits' gains off a mood BN5's calm had set to
+    0x80; since the release candidate's fixes it takes them off only
+    since the mood was last set (`BN5_MOOD_SET`, `BN5_MOOD_CALM`
+    logged). Not ported:
     BN5's other three exits, `0x0802CCA4`, `0x0802CE3A` and `0x0802D028`,
     each in a routine that sets his HP from his NaviStats, clears his
     statuses, calms him and his invisibility (BN5's own resets of him; no

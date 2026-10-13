@@ -26,8 +26,10 @@ enum {
 	XD_RESERVE,    /* a panel reserved */
 	XD_BLINK,      /* the blink step of an object flashing */
 	XD_SPRITE,     /* an object's sprite set up (sprite_load): a its bytes' CRC32 (xdiff_sprite.h), b its list's offset and number */
-	XD_MOOD,       /* (BN5's alone) a side's mood raised as a hit lands: a the side, b what it rose by (BN5_MOOD_GAIN) */
+	XD_MOOD,       /* (BN5's alone) a side's mood raised as a hit lands: a the side, b what it rose by (BN5_MOOD_GAIN); or set
+	                * outright, a the side with XD_MOOD_SET (BN5_MOOD_SET, BN5_MOOD_CALM), as BN6's twins set its own */
 };
+#define XD_MOOD_SET 2
 
 /* A draw's flags */
 enum {
