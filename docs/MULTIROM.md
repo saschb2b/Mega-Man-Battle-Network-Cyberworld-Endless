@@ -2069,8 +2069,12 @@ the next.
   HolyDrem and a Navi's V1 and SP chips only while not, the DS chips only
   while dark): refused, the chip is BN5's chip of nothing; the battle's
   dark stands for BN5's dark meter, which no run has. Held to BN5's own
-  battle by `soul_mood_dark`, `soul_mood_unite` and `soul_mood_gate`, the
-  mood compared in every Soul's spec, five mutations failing. Since
+  battle by `soul_mood_dark`, `soul_mood_unite`, `soul_mood_gate` and
+  `soul_mood_chaos` (Chaos Unison as BN5's play reaches it: DarkDril
+  offered worried, kept, a Cannon's landed hit lifting him by its 0x1E,
+  BN5's gain, where the buster's hits lift none, and KnightSoul's Chaos
+  Unison on the calm screen after), the mood compared in every Soul's
+  spec, a mutation of each rule failing. Since
   issue #82's final engine round each DarkChip's after-effect on his
   battle NaviStats (`0x0802C938`, ported) is BN5's too (his dark palette
   BN6's own since 13 October 2026: BN6's MegaMan has none, BN5's numbers

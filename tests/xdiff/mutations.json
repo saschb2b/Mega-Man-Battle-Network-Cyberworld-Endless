@@ -1208,6 +1208,12 @@
    "what": "BN5's worried rule (0x08025118) left out of the compaction's hook on the battle's first Custom screen: DarkCirc stays shelved past the deck's place 5 (deck[5]), the second hand's fifth chip a Cannon where BN5's is DarkCirc"
   },
   {
+   "name": "a landed hit lifts no worry before Chaos Unison",
+   "spec": "soul_mood_chaos",
+   "soulbreak": 16777216,
+   "what": "the hit's mood step (src/emu/soulmood.c, BN6_MOOD_HIT) raises his mood by nothing where BN5's adds the Cannon's 0x1E: he stays worried at 0x3A, UNITE does not stand on the third screen and no Chaos Unison comes where BN5's unites KnightSoul"
+  },
+  {
    "name": "HolyDrem's object type",
    "spec": "chip_holydrem",
    "poke5": [

@@ -1,0 +1,178 @@
+{
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "A9@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "folder5": [
+  "3401"
+ ],
+ "folder6": [
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   2
+  ],
+  [
+   115,
+   "A",
+   2
+  ],
+  [
+   170,
+   "B",
+   2
+  ],
+  [
+   195,
+   "B",
+   2
+  ],
+  [
+   240,
+   "UP",
+   3
+  ],
+  [
+   260,
+   "B",
+   2
+  ],
+  [
+   300,
+   "DOWN",
+   3
+  ],
+  [
+   320,
+   "B",
+   2
+  ],
+  [
+   345,
+   "B",
+   2
+  ],
+  [
+   380,
+   "B",
+   2
+  ],
+  [
+   405,
+   "B",
+   2
+  ],
+  [
+   500,
+   "B",
+   2
+  ],
+  [
+   525,
+   "B",
+   2
+  ],
+  [
+   560,
+   "DOWN",
+   3
+  ],
+  [
+   600,
+   "UP",
+   3
+  ],
+  [
+   640,
+   "B",
+   2
+  ],
+  [
+   665,
+   "B",
+   2
+  ],
+  [
+   700,
+   "B",
+   2
+  ],
+  [
+   725,
+   "B",
+   2
+  ],
+  [
+   760,
+   "RIGHT",
+   3
+  ],
+  [
+   800,
+   "LEFT",
+   3
+  ],
+  [
+   830,
+   "B",
+   2
+  ]
+ ],
+ "about": "MegaMan the subject against BN5's TinHawk V1 (BN5's 0xa9, BN6's 0x28a) at (6,2), MegaMan at (2,2) with 2000 HP, his buster at levels 1-1-1 and a folder of Cannon * in both (megaman_plain's keys: the first screen's Cannon picked, OK, fired at t115, buster shots, steps between the rows and columns). TinHawk's dive strikes him and it stays on his panel, so its touch strikes him again the frame his flash after a hit runs out (BN5's 120 frames, BN6_COLL_FLASH), and he blinks through most of the battle in both games: a still frame every multiple of four frames from a hit catches him hidden every time (the release candidate's 'MegaMan vanished' in TinHawk's battles). Every difference of MegaMan's own (his object, what he owns, his player block, his blink) fails it."
+}
