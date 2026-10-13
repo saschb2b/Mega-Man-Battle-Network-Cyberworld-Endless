@@ -25,6 +25,7 @@
 #include "rivals.h"
 #include "rom.h"
 #include "save.h"
+#include "save_queue.h"
 
 #define LOOK_FRAMES 180   /* a ROM put in by hand looked for every three seconds */
 
@@ -114,6 +115,7 @@ static void ask_about(const char *path) {
 	free(b);
 	if (!ok) { say(launcher_word(W_SAVES_DAMAGED), NOTE_BAD); return; }
 	BackupInfo here;
+	save_queue_wait();   /* (the saves as the game last wrote them) */
 	bool have = backup_local_info(g_data_dir, &here);
 	if (have && here.hash == f.hash) return;   /* (these saves, the same) */
 	L.asking = true;
@@ -147,6 +149,7 @@ static void answer(bool yes) {
 	}
 	size_t n = 0;
 	uint8_t *b = backup_read_file(L.found_path, &n);
+	save_queue_wait();
 	bool ok = b && backup_unpack(g_data_dir, b, n);
 	free(b);
 	forget_copy();

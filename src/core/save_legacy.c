@@ -13,6 +13,7 @@
 #include "game.h"
 #include "run.h"
 #include "save_blob.h"
+#include "save_queue.h"
 
 #define RUN_MAGIC_V1 0x43574531u /* "CWE1" */
 #define RUN_MAGIC_V2 0x43574532u /* "CWE2" */
@@ -188,6 +189,7 @@ bool legacy_load_run(void) {
 /* The game's state for the run's checkpoint lived beside the game. */
 void legacy_move_state(void) {
 	char old[600], cur[600];
+	save_queue_wait();
 	snprintf(old, sizeof old, "%s/run.state", g_data_dir);
 	save_path(cur, sizeof cur, "run.state");
 	FILE *f = fopen(cur, "rb");

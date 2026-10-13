@@ -1,11 +1,14 @@
 /* Checksummed save files in savedata/, shared by save.c and the readers of
- * older formats in save_legacy.c. */
+ * older formats in save_legacy.c; written by the save queue's thread
+ * (save_queue.h: what reads or removes them outside these waits for it). */
 #ifndef CW_SAVE_BLOB_H
 #define CW_SAVE_BLOB_H
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#include "save_queue.h"
 
 void save_path(char *out, size_t n, const char *name);
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n);
