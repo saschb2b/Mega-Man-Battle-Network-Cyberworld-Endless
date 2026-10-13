@@ -86,6 +86,15 @@ void darkinvs_enter(uint32_t me, uint16_t frames) {
 	if (emu_debug_on()) fprintf(stderr, "darkinvs: MegaMan under BN5's chip AI for %u frames\n", (unsigned)frames);
 }
 
+void darkinvs_leave(uint32_t me) {
+	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
+	if (!(hook_read32(ai + BN6_AI_MODES) & BN5_AI_UNDER)) return;
+	hook_write16(ai + BN5_AI_UNDER_TIME, 0);
+	hook_write8(ai + BN5_CHIP_AI_STATE, 0);
+	hook_write32(ai + BN6_AI_MODES, hook_read32(ai + BN6_AI_MODES) & ~(uint32_t)BN5_AI_UNDER);
+	if (emu_debug_on()) fprintf(stderr, "darkinvs: MegaMan out of BN5's chip AI, a Soul's unison begun or ended\n");
+}
+
 /* (--dev chipai) entered once a battle, two seconds in; its time and BN5's end are DarkInvs's (timer, reaction) */
 static void dev_step(uint32_t me) {
 	uint32_t t = hook_read32(BN6_BATTLE_TIMER);

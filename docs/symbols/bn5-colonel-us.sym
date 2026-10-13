@@ -235,7 +235,7 @@
 08012008 BN5_UNITE_IMAGE_PHASE
 0801211E camera_initshakeeffect
 0801214A bn5_darkinvs_bn6.from
-08012276 bn5_darkinvs_bn6.from_2
+08012276 from_0x0801214a
 080123CC colonelsoul_button_chip_2
 08012464 BN5_TURN_END
 08012484 BN5_TURN_COUNT
@@ -274,7 +274,7 @@
 08014374 anger_start
 0801438E anger_end_bn6_mood_from_chip
 08014490 bn5_darkinvs_bn6.readers
-08014498 bn5_darkinvs_bn6.from_3
+08014498 bn5_darkinvs_bn6.from_2
 080144A2 read_past_time_stop_test
 080144B2 bn5_darkinvs_bn6.to
 080145FC ai_chip_use_word_for_support
@@ -314,7 +314,7 @@
 080172F0 his_state_0
 080172F6 his_set_up_past_ai_data
 080178E4 bn5_darkinvs_bn6.twin
-08017976 bn5_darkinvs_bn6.from_4
+08017976 bn5_darkinvs_bn6.from_3
 08017A10 obstacle_pre_step
 08017BD0 bn5_sea_submerge_3
 08017D7C bn5_sea_submerge.call
@@ -449,13 +449,13 @@
 0802C0DA bn5_darkinvs_bn6.player_chip_ai_own_side_heads_5
 0802C10A BN5_CHIP_AI_TEST
 0802C114 BN5_CHIP_AI_ENTER
-0802C12A bn5_darkinvs_bn6.exits
+0802C12A darkinvs_leave
 0802C938 BN5_DARK_AFTER
 0802C978 darkcirc_0x54_one_hundred_more
 0802CA68 BN5_DARK_AFTER_END
-0802CCA4 bn5_darkinvs_bn6.from_5
-0802CE3A bn5_darkinvs_bn6.from_6
-0802D028 bn5_darkinvs_bn6.from_7
+0802CCA4 bn5_darkinvs_bn6_2
+0802CE3A bn5_darkinvs_bn6_3
+0802D028 bn5_darkinvs_bn6_4
 0802D510 battle_bit_0x40
 0802D594 one_setter
 0802E920 panel_claim_pool
@@ -574,7 +574,7 @@
 080EE745 chaos_unison_3
 080EE783 chaos_unison_4
 080EE7E5 battle_0x32_bit_4
-080EF270 bn5_darkinvs_bn6_2
+080EF270 bn5_darkinvs_bn6_5
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
 080F04CC idle_states

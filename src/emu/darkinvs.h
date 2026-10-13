@@ -35,5 +35,10 @@ void darkinvs_dev(bool on);
  * BN5's DarkInvs does (its AI data moved first where it is BN6's 0x100);
  * from a hook (hook_read and hook_write). */
 void darkinvs_enter(uint32_t me, uint16_t frames);
+/* ... and out of it, as BN5's 0x0802C12A takes him out where a Soul's
+ * unison begins or ends (0x0801214A, 0x08012276): its time and state
+ * cleared, the flag dropped (soullife.c); where the chip AI has him. From
+ * a hook. */
+void darkinvs_leave(uint32_t me);
 
 #endif

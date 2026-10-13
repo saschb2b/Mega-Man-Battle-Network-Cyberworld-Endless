@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "bn6_navis.h"
+#include "darkinvs.h"
 #include "emu.h"
 #include "soulmood.h"
 
@@ -69,6 +70,7 @@ static HookAct entered(HookRegs *r, void *user) {
 		 * it again: xstrike.h) */
 		if (next != SOUL_COLONEL) side_disarm(side);
 		soulmood_unison(side);   /* (BN5's calm as he unites, 0x08012146) */
+		darkinvs_leave(r->r[5]);   /* (... and out of its chip AI, 0x0801214A) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 	}
@@ -85,7 +87,10 @@ static HookAct left(HookRegs *r, void *user) {
 	(void)user;
 	int side = soul_side_of(r->r[5]);
 	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
-	if (soul) soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
+	if (soul) {
+		soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
+		darkinvs_leave(r->r[5]);   /* (... and out of its chip AI, 0x08012276) */
+	}
 	if (soul && !keep_soul) {
 		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN,
 			BN6_SOUL_CYCLE };
