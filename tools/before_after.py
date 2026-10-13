@@ -4,11 +4,12 @@ as this build does, side by side, for a release's notes (docs/releases/).
 
 OLD's host binary is built once in a worktree of its tag (.build/before/OLD,
 build.py host there); each scene below runs headless with it and with this
-build's (build/host/cyberworld, build it first), on BN6's ROM alone, and
-docs/screenshots/compare-NAME.png gets both frames at 2x, OLD's on the left,
-each under its version. A layer seed makes the same layout in both where the
-generator kept its layouts, and the autopilot walks it frame for frame alike,
-so a pair shows one spot drawn twice.
+build's (build/host/cyberworld, build it first), on BN6's ROM alone (BN5's
+beside it for a scene named for BN5), and docs/screenshots/compare-NAME.png
+gets both frames at 2x, OLD's on the left, each under its version. A layer
+seed makes the same layout in both where the generator kept its layouts, and
+the autopilot walks it frame for frame alike, so a pair shows one spot drawn
+twice.
 
   python3 tools/before_after.py v0.5.3 --new 0.6.0
   python3 tools/before_after.py v0.5.3 --new 0.6.0 sky nest
@@ -97,6 +98,14 @@ SCENES = [
     # himself; the arrivals moved the layer's layout, so the autopilot
     # reaches the arena at a frame of each build's own, OLD's first)
     ('judgeman', ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--guardian', '15'], WEAK, (1285, 915)),
+    # (0.12.0's one net, issue #82, with BN5's ROM beside BN6's (a name with
+    # "bn5" in it): a random battle of BN5's ACDC Area in BN5's engine on the
+    # guest core, then in BN6's, MegaMan's Cannon at CanGard; KnightMan
+    # guarding ACDC Area, his rocks falling, in either engine)
+    ('bn5-battle', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet', '--input', '460:battle'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, (800, 880)),
+    ('bn5-guardian', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '3', '--seed', '3', '--guardian', '28', '--dev', 'quiet'],
+     {'CYBERWORLD_AUTOPILOT': '1'}, 1940),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -118,7 +127,8 @@ def old_binary(tag, picks=()):
 
 def frame(binary, args, env, at, out, whole=0):
     """Frame `at` of a headless run of `binary` (relative to ROOT), the game's 240 x 160;
-    or with `whole`, the whole screen (--screen-shot: the touch controls on it), shrunk by it."""
+    or with `whole`, the whole screen (--screen-shot: the touch controls on it), shrunk by it.
+    On BN6's ROM alone, but a scene named for BN5 (`out`) with BN5's beside it."""
     from PIL import Image
     tmp = os.path.join(ROOT, '.build', 'before', 'shot')
     shutil.rmtree(tmp, ignore_errors=True)
@@ -128,7 +138,7 @@ def frame(binary, args, env, at, out, whole=0):
     try:
         code = build.docker(binary, '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/before/shot/data', *args,
                             '--frames', str(at + 1), '--screen-shot' if whole else '--shot', f'{at}:/src/.build/before/shot/f.bmp',
-                            mounts=build.docs_rom_mounts())
+                            mounts=build.docs_rom_mounts(bn5='bn5' in out))
     finally:
         for k, v in saved.items():
             if v is None:

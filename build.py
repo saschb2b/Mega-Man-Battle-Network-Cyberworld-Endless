@@ -1079,6 +1079,22 @@ SECOND_7 = ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', 
 # turn begins)
 BN5_UNITE = ('100:,' + '4:A,6:,' * 17 + '0:battle,190:,6:RIGHT,10:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,'
              '6:A,60:,6:UP,14:,6:A,500:')
+# 0.12.0's one net (issue #82): BN5's viruses, Navis, Souls and DarkChips in
+# BN6's own engine. (ACDC Area's arrival words paged, then the foes step's
+# battle on BN6's plain field, its Custom screen open by frame 500)
+ONE_NET = ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4']
+ONE_PAGED = '100:,' + '4:A,6:,' * 17
+# (ShadowSoul: a folder of Sword, its first fifteen Invisibl, Invisibl
+# ShadowSoul's kind; Powie, Marina and Powie V3; a Sword picked, an
+# Invisibl last, UNITE, OK; the Sword held charged as the turn begins: he
+# steps behind Powie V3 and slashes)
+ONE_SOUL = (ONE_PAGED + '0:chip 177 * 15,0:foes 20c@52/260@63/20e@41,230:,6:A,8:,6:RIGHT,6:,6:RIGHT,6:,6:RIGHT,6:,6:A,8:,'
+            '6:RIGHT,6:,6:RIGHT,6:,6:DOWN,30:,6:A,60:,6:UP,14:,6:A,330:,70:A,120:,100:B,100:')
+# (BN5's worried rule: MegaMan held at 200 of 999 HP, a DarkChip in the
+# folder's first entry; the first screen's chip picked and used, the
+# second screen by L with the DarkChip at the hand's end, under the cursor)
+ONE_WORRIED = '230:,6:A,10:,6:START,10:,6:A,150:,6:A,520:,6:L,70:,'
+ONE_DARKINVS = ONE_PAGED + '0:chip 289 * 1,0:foes 1D4@52,' + ONE_WORRIED + '6:A,20:,6:START,20:,6:A,150:,6:A,800:'
 PAGED_7 = '600:,' + '4:A,6:,' * 110
 SECOND_HERO = (PAGED_7 + '30:,40:UP,0:battle,215:,6:A,24:,6:RIGHT,24:,6:RIGHT,24:,6:A,24:,6:START,36:,6:A,150:,'
                '6:DOWN,12:,6:A,70:')
@@ -1304,6 +1320,40 @@ SCREENSHOTS = [
     ('dark-chip', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,darkchips=0x2,folder=286/3', '--talk', 'bugfrags:420',
                    '--input', '100:,' + '4:A,6:,' * 30 + '40:,0:battle,220:,6:A,20:,6:START,20:,6:A,120:,6:RIGHT,20:,6:A,200:,6:A,60:,6:A,60:,6:A,60:,6:A,150:,'
                    + '6:A,100:,' * 10], [(650, 'dark-chip-custom'), (882, 'dark-chip'), (2160, 'dark-chip-price')], {}),
+    # 0.12.0's notes, one net (issue #82): BN5's TinHawk, Powie and Marina
+    # with BN6's HUD; ToadMan guarding SciLab Area, his card and his sea; the
+    # Dark Soul's buster; ShadowSoul's charged Sword behind Powie V3;
+    # KnightSoul's Chaos Unison, a folder of DarkDril, its drill at Colonel
+    ('bn5-viruses', ONE_NET + ['--dev', 'quiet', '--input', ONE_PAGED + '0:foes 28a@42/20c@53/260@63,260:,4:START,10:,4:A,600:'],
+     [(820, 'bn5-viruses')], {}),
+    ('bn5-toadman', ['--scene', 'emu', '--net-biome', 'x1', '--run-depth', '3', '--seed', '3', '--guardian', '29', '--dev', 'quiet'],
+     [(1050, 'bn5-toadman-card'), (2500, 'bn5-toadman')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn5-darksoul', ONE_NET + ['--dev', 'quiet', '--input', ONE_PAGED + '0:foes 1DC@52,260:,4:START,10:,4:A,600:'],
+     [(780, 'bn5-darksoul')], {}),
+    ('bn5-one-net', ONE_NET + ['--dev', 'quiet,god,souls=2,folder=71', '--input', ONE_SOUL], [(1140, 'bn5-shadowsoul')], {}),
+    ('bn5-chaos', ONE_NET + ['--dev', 'quiet,god,souls=16,folder=218', '--input', ONE_PAGED + '0:foes 1C4@52,230:,6:A,10:,'
+                             + '6:RIGHT,8:,' * 5 + '6:DOWN,30:,6:A,60:,6:UP,14:,6:A,380:,45:B,300:'], [(1186, 'bn5-chaos')], {}),
+    # (BN5's DarkChips: its purple flame on ACDC Area's middle layer, MegaMan
+    # placed by it, its DrkSonic named and offered; DarkInvs at the hand's
+    # end, the game fighting KnightMan for MegaMan, grey; DarkPlus, then
+    # the Cannon it made 50 stronger)
+    ('bn5-dark-flame', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '2', '--seed', '3', '--dev', 'quiet', '--input',
+                        '100:,' + '4:A,6:,' * 30 + '20:,0:place -116 76 7,40:,6:A,140:,' + '6:A,74:,' * 16],
+     [(686, 'bn5-dark-flame-words'), (1484, 'bn5-dark-flame')], {}),
+    ('bn5-darkinvs', ONE_NET + ['--dev', 'quiet,worried,hp=999/200', '--input', ONE_DARKINVS],
+     [(1240, 'bn5-darkinvs-offer'), (1940, 'bn5-darkinvs')], {}),
+    ('bn5-darkplus', ONE_NET + ['--dev', 'quiet,worried,hp=999/200,folder=1', '--input', ONE_PAGED + '0:chip 290 * 1,0:foes 260@52/20d@43,'
+                                + ONE_WORRIED + '6:A,20:,6:LEFT,10:,6:A,20:,6:START,20:,6:A,150:,6:A,60:,6:A,200:'], [(1580, 'bn5-darkplus')], {}),
+    # (BN5's lava and sea as BN6's panels: MetFires on BN5's field 0x65 as
+    # BN6 has it, Marina and Powie on its sea and grass, 0x66; a BN6
+    # Central Area battle of act 2 with BN5's Cactikil EX visiting, every
+    # battle taking one)
+    ('bn5-lava', ONE_NET + ['--dev', 'quiet', '--input', ONE_PAGED + '0:foes 21e@52/21f@43/field@65,260:,4:START,10:,4:A,600:'],
+     [(820, 'bn5-lava')], {}),
+    ('bn5-sea', ONE_NET + ['--dev', 'quiet', '--input', ONE_PAGED + '0:foes 260@52/20c@43/field@66,260:,4:START,10:,4:A,600:'],
+     [(900, 'bn5-sea')], {}),
+    ('bn5-visitor', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '5', '--seed', '3', '--dev', 'quiet,visitors', '--input', '300:battle'],
+     [(580, 'bn5-visitor')], {'CYBERWORLD_AUTOPILOT': '1'}),
     # 0.9.0's notes, each by its feature. (MegaMan's word on GitHub, typed out)
     ('notice', ['--scene', 'intro'], [(230, 'notice')], {}),
     # (SELECT on the title: the controls screen, an Xbox pad attached)
@@ -1596,6 +1646,12 @@ CLIPS = [
     # 7's layer 2, its Cannon countering the Mettaur, then A+B+SELECT+START
     # held; Cyberworld Endless's title, START, CONTINUE on Layer 2)
     ('soft-reset', SECOND_7, {}, SECOND_HERO + '70:,6:A+B+SELECT+START,90:,6:START,100:', 2270, 2620),
+    # (0.12.0's one net, issue #82: BN5's Powie and Marina named on BN6's
+    # Custom screen, UNITE with ShadowMan's Soul, the unison, ShadowSoul's
+    # charged Sword behind Powie V3; DarkInvs dealt at the hand's end while
+    # MegaMan worries, the game fighting KnightMan for him, grey)
+    ('bn5-one-net', ONE_NET + ['--dev', 'quiet,god,souls=2,folder=71'], {}, ONE_SOUL, 504, 1190),
+    ('bn5-darkinvs', ONE_NET + ['--dev', 'quiet,worried,hp=999/200'], {}, ONE_DARKINVS, 1240, 1950),
 ]
 
 
@@ -1607,7 +1663,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
-               'soft-reset': (None, 15)}
+               'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12)}
 
 
 def clips(only=None):
