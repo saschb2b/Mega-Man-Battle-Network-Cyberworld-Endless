@@ -1,11 +1,19 @@
 /* Hooks (src/emu/hook.c) on mGBA, without the game's ROM: a ROM of our own
  * bytes that calls three routines and stores what they return, run for a
  * frame with hooks of every kind on them (issue #27), an event posted from
- * an answer hook and a halt from one (issues #30, #35). Then two cores side
+ * an answer hook and a halt from one (issues #30, #35), and the table full
+ * (HOOK_MAX), its hooks found as the code meets them. Then two cores side
  * by side, as BN6's and the guest's run (issue #61): BN6's made by
  * src/emu/emu.c with our BKPT handler, the guest's as src/emu/guest.c makes
- * it, without, on a ROM that also sounds a tone; and the guest's made and
- * run on a thread of its own while BN6's frames run, as its boot is.
+ * it, without, on a ROM that also sounds a tone, then with hooks of its own
+ * as the differential gives it (issue #82); and the guest's made and
+ * run on a thread of its own while BN6's frames run, as its boot is. Then
+ * a block of Thumb code moved into BN6's copy, its calls out through
+ * veneers (src/emu/thumb_reloc.c, issue #82), and the second-level
+ * dispatch's code (src/emu/xvirus_dispatch.c) run against spawners and
+ * routines of the test's own. Then RAM the engine keeps patched, the
+ * game's own bytes in the states it saves (emu.c, emu_keep); last, the
+ * installers' claims through emu.c's writes and hooks (claims.h).
  *
  * The ROM: an ARM branch at 0 to 0xC0 (mGBA's GBAIsROM wants 0xEA at 3 and
  * 0x96 at 0xB2, nothing more), which switches to Thumb at 0xD0:
@@ -34,14 +42,17 @@
 #endif
 
 #include "emu.h"
+#include "claims.h"
 #include "hook.h"
 #include "platform.h"
+#include "thumb_reloc.h"
+#include "xvirus_dispatch.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
 Platform P;
 void platform_persist(void) {}
 
-#define ROM_SIZE 0x400
+#define ROM_SIZE 0x800   /* (room for a full table of hooks on its zeros from 0x300: HOOK_MAX 192, issue #82) */
 #define IWRAM 0x03000000u
 
 static int failures;
@@ -123,6 +134,40 @@ static HookAct halting(HookRegs *r, void *user) { (void)r; ++*(int *)user; hook_
 
 static uint32_t stored(struct mCore *core, int i) { return core->rawRead32(core, IWRAM + 4u * (uint32_t)i, -1); }
 
+/* The table full (HOOK_MAX): three hooks the code meets (its calls at 0xF8,
+ * 0xFC and 0x100, each r0 doubled) put in first, the rest on the ROM's
+ * zeros that never run, every halfword from 0x300 on (one of them in
+ * 0x100's bucket, which is found then by the table read through); one more
+ * refused; each of the three run as the code meets it; all taken off */
+#define FULL_AT 0x08000300u
+
+static void full_table(struct mCore *core) {
+	/* (0x08000100's bucket is FULL_AT + 2's, which takes it: that hit goes
+	 * through the table read through, hook.c's find) */
+	static const uint32_t met[3] = { 0x080000F8, 0x080000FC, 0x08000100 };
+	int added = 0;
+	for (int i = 0; i < 3; ++i) added += hook_add(met[i], doubled, NULL);
+	for (uint32_t i = 0; i < HOOK_MAX - 3; ++i) added += hook_add(FULL_AT + 2 * i, doubled, NULL);
+	CHECK(added == HOOK_MAX && !hook_add(FULL_AT - 0x100, doubled, NULL), "the table full: %d hooks put in of %d, one more refused", added,
+		HOOK_MAX);
+	uint32_t hits = hook_hits, strays = hook_strays;
+	core->reset(core);
+	core->runFrame(core);
+	/* (5 x 2 + 10, 7 x 2 + 20, the bkpt #1's 3, 9 x 2 + 30) */
+	CHECK(stored(core, 0) == 20 && stored(core, 1) == 34 && stored(core, 2) == 3 && stored(core, 3) == 48 && hook_hits - hits == 3 &&
+		hook_strays == strays, "the full table's hooks: %u %u %u %u, %u hits, %u strays", stored(core, 0), stored(core, 1), stored(core, 2),
+		stored(core, 3), hook_hits - hits, hook_strays - strays);
+	for (int i = 0; i < 3; ++i) hook_remove(met[i]);
+	for (uint32_t i = 0; i < HOOK_MAX - 3; ++i) hook_remove(FULL_AT + 2 * i);
+	CHECK(core->rawRead16(core, 0x080000F8, -1) == 0x300A && core->rawRead16(core, FULL_AT, -1) == 0 &&
+		core->rawRead16(core, FULL_AT + 2 * (HOOK_MAX - 4), -1) == 0, "the full table's originals back");
+}
+
+/* ... and the guest's own (the differential's, issue #82): one tripling r0
+ * where BN6's doubles it, one reading what the core it runs on holds */
+static HookAct tripled(HookRegs *r, void *user) { r->r[0] *= 3; ++*(int *)user; return HOOK_CONTINUE; }
+static HookAct marked(HookRegs *r, void *user) { (void)r; *(uint32_t *)user = hook_read32(0x02000000); return HOOK_CONTINUE; }
+
 /* ---- two cores (issue #61) ---- */
 
 /* A second core as src/emu/guest.c makes one: from its own copy of the
@@ -163,6 +208,42 @@ static int ring_drain(int *swing) {
 	}
 	if (swing) *swing = total > 0 ? hi - lo : 0;
 	return total;
+}
+
+/* Each core its own hooks (hook_core): the guest's hook at the address of
+ * BN6's runs in the guest's frames alone, BN6's in BN6's alone, each
+ * reading its own core's memory; detached, the guest runs its own code
+ * again */
+static void cores_apart(struct mCore *g) {
+	HookCore *gh = hook_core(g);
+	int guest_hits = 0;
+	uint32_t seen = 0;
+	CHECK(gh && hook_on(gh, 0x080000F8, tripled, &guest_hits) && hook_on(gh, 0x080000E8, marked, &seen), "the guest's own hooks at 0xF8 and 0xE8");
+	CHECK(!hook_on(gh, 0x080000F8, tripled, &guest_hits), "a second hook at the guest's 0xF8 refused");
+	CHECK(emu_read16(0x080000F8) == 0xBECE && emu_read16(0x080000E8) == 0x2009 && g->rawRead16(g, 0x080000E8, -1) == 0xBECE,
+		"the BKPTs each in its own core's copy: BN6's %04x at 0xF8 and %04x at 0xE8, the guest's %04x at 0xE8", emu_read16(0x080000F8),
+		emu_read16(0x080000E8), g->rawRead16(g, 0x080000E8, -1));
+	g->reset(g);
+	g->rawWrite32(g, 0x02000000, -1, 0xB5B5B5B5);
+	guest_run(g, 1);
+	CHECK(stored(g, 0) == 25 && stored(g, 3) == 39 && guest_hits == 1, "the guest's frame: %u %u, its hook %d times (not 25 39, once)", stored(g, 0),
+		stored(g, 3), guest_hits);
+	CHECK(seen == 0xB5B5B5B5, "the guest's hook read %08x, not its own core's B5B5B5B5", seen);
+	uint32_t strays = hook_strays;
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read32(IWRAM) == 20 && emu_read32(IWRAM + 12) == 39 && guest_hits == 1 && hook_strays == strays,
+		"BN6's frame: %u %u, the guest's hook %d times, %u strays (its own hook alone)", emu_read32(IWRAM), emu_read32(IWRAM + 12), guest_hits,
+		hook_strays - strays);
+	hook_detach(g);
+	g->reset(g);
+	guest_run(g, 1);
+	CHECK(stored(g, 0) == 15 && guest_hits == 1 && g->rawRead16(g, 0x080000F8, -1) == 0x300A, "the guest detached: %u, its code %04x at 0xF8",
+		stored(g, 0), g->rawRead16(g, 0x080000F8, -1));
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's detach: %u", emu_read32(IWRAM));
 }
 
 static void two_cores(void) {
@@ -252,6 +333,7 @@ static void two_cores(void) {
 	CHECK(emu_read32(0x02000000) == 0xB6B6B6B6, "BN6's EWRAM moved with the guest's state: %08x", emu_read32(0x02000000));
 	emu_frame(0);
 	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's state: %u", emu_read32(IWRAM));
+	cores_apart(g);
 	emu_unhook(0x080000F8);
 	mCoreConfigDeinit(&g->config);
 	g->deinit(g);
@@ -330,6 +412,381 @@ static void two_threads(void) {
 	g->deinit(g);
 }
 
+/* ---- a block moved, its calls out through veneers (issue #82) ---- */
+
+/* As a routine of another game's is moved into BN6's free space: a block of
+ * our own bytes, made as if it stood at SRC in that game, calling two of
+ * its routines there (SRC_EXT1, SRC_EXT2), one immediate of it patched,
+ * copied to MOVED in BN6's copy of the ROM (emu_write, as an installer
+ * writes), those calls aimed at two routines of this ROM's (the stubs),
+ * 11 MiB away: so far that a BL reaches them only through a veneer. Each
+ * stub, ARM code, keeps the registers and the flags it met, which must be
+ * the ones the block set before its BL, with lr its way back into the
+ * block. The BLs and the patch are thumb_reloc.c's own, run by the CPU. */
+#define SRC 0x08001000u
+#define SRC_EXT1 0x08001800u
+#define SRC_EXT2 0x08001C00u
+#define STUB1 0x08000200u
+#define STUB2 0x08000240u
+#define MOVED 0x08B34000u
+#define VENEERS 0x08B31000u
+#define LOAD 0x26                /* the block's routine that loads the registers */
+#define PATCHED 0x20             /* its movs r1,#0x11, made #0x5A as it moves */
+#define POOL 0x4C                /* its literal pool: r0-r12's values, then three words of its own */
+#define BLOCK (POOL + 16 * 4)    /* its bytes */
+#define REC1 (IWRAM + 0x100)     /* what each stub met: r0-r12, lr, sp, CPSR */
+#define REC2 (IWRAM + 0x140)
+#define DONE (IWRAM + 0x80)      /* the block's last stores: a word, then the patched byte at +8 */
+#define SP_SEEN (IWRAM + 0x84)   /* its sp, as it began */
+#define DONE_MARK 0x600DF00Du
+
+/* r6 and r7 for the flags: cmp r6,r7 is N and V (0x7FFFFFFF - -1), cmp r6,r6 Z and C */
+static uint32_t reg_value(int i) { return i == 6 ? 0x7FFFFFFFu : i == 7 ? 0xFFFFFFFFu : 0x01010101u * (uint32_t)(i + 1); }
+
+/* ldr rd,[pc,#..] at `at` of the word at `lit` (both in the block) */
+static void ldr_pc(uint8_t *b, uint32_t at, int rd, uint32_t lit) { put16(b, at, (uint16_t)(0x4800 | rd << 8 | (lit - ((at + 4) & ~3u)) / 4)); }
+
+/* The block, its BLs encoded where it stood (at SRC):
+ *   00 mov r0,sp; ldr r1,=SP_SEEN; str r0,[r1]
+ *   06 bl load;   cmp r6,r7;  bl SRC_EXT1 (N V)
+ *   10 bl load;   cmp r6,r6;  bl SRC_EXT2 (Z C)
+ *   1A ldr r0,=DONE; ldr r1,=DONE_MARK; str r1,[r0]
+ *   20 movs r1,#0x11; strb r1,[r0,#8]; b .
+ *   26 load: r8-r12 through r0, then r0-r7, from the pool; bx lr
+ * Its BLs' offsets in bls; how many (-1 where one would not encode). */
+static int make_block(uint8_t *b, uint32_t *bls) {
+	static const struct { uint32_t at, to; } calls[4] = { { 0x06, SRC + LOAD }, { 0x0C, SRC_EXT1 }, { 0x10, SRC + LOAD }, { 0x16, SRC_EXT2 } };
+	memset(b, 0, BLOCK);
+	put16(b, 0x00, 0x4668);   /* mov r0,sp */
+	ldr_pc(b, 0x02, 1, POOL + 13 * 4);
+	put16(b, 0x04, 0x6008);   /* str r0,[r1] */
+	put16(b, 0x0A, 0x42BE);   /* cmp r6,r7 */
+	put16(b, 0x14, 0x42B6);   /* cmp r6,r6 */
+	ldr_pc(b, 0x1A, 0, POOL + 14 * 4);
+	ldr_pc(b, 0x1C, 1, POOL + 15 * 4);
+	put16(b, 0x1E, 0x6001);   /* str r1,[r0] */
+	put16(b, PATCHED, 0x2111);   /* movs r1,#0x11 */
+	put16(b, 0x22, 0x7201);   /* strb r1,[r0,#8] */
+	put16(b, 0x24, 0xE7FE);   /* b . */
+	uint32_t at = LOAD;
+	for (int r = 8; r <= 12; ++r) {
+		ldr_pc(b, at, 0, POOL + 4u * (uint32_t)r);
+		put16(b, at + 2, (uint16_t)(0x4680 | (r - 8)));   /* mov rN,r0 */
+		at += 4;
+	}
+	for (int r = 0; r <= 7; ++r, at += 2) ldr_pc(b, at, r, POOL + 4u * (uint32_t)r);
+	put16(b, at, 0x4770);     /* bx lr */
+	for (int r = 0; r <= 12; ++r) put32(b, POOL + 4u * (uint32_t)r, reg_value(r));
+	put32(b, POOL + 13 * 4, SP_SEEN);
+	put32(b, POOL + 14 * 4, DONE);
+	put32(b, POOL + 15 * 4, DONE_MARK);
+	for (int i = 0; i < 4; ++i) {
+		if (!thumb_bl_write(b, calls[i].at, SRC, calls[i].to)) return -1;
+		bls[i] = calls[i].at;
+	}
+	return 4;
+}
+
+/* A stub at `at`, entered in Thumb: on into ARM, every register and the
+ * CPSR kept at rec (r0 at rec, rN at rec + 4N, lr, sp and the CPSR after),
+ * back by bx lr:
+ *   bx pc; nop
+ *   stmfd sp!,{r0}; ldr r0,=rec+4; stmia r0,{r1-r12,lr}; ldmfd sp!,{r1}
+ *   str r1,[r0,#-4]; str sp,[r0,#0x34]; mrs r1,cpsr; str r1,[r0,#0x38]; bx lr */
+static void stub(uint32_t at, uint32_t rec) {
+	static const uint32_t arm[9] = { 0xE92D0001, 0xE59F0018, 0xE8805FFE, 0xE8BD0002, 0xE5001004, 0xE580D034, 0xE10F1000, 0xE5801038, 0xE12FFF1E };
+	uint8_t s[0x2C];
+	put16(s, 0, 0x4778);
+	put16(s, 2, 0x46C0);
+	for (int i = 0; i < 9; ++i) put32(s, 4 + 4u * (uint32_t)i, arm[i]);
+	put32(s, 0x28, rec + 4);
+	emu_write(at, s, sizeof s);
+}
+
+/* the block's calls out: to the stub that stands for each, through its veneer */
+typedef struct {
+	ThumbVeneers pool;
+	int asked;
+} CallsOut;
+
+static uint32_t to_stub(uint32_t target, void *user) {
+	CallsOut *c = user;
+	++c->asked;
+	uint32_t to = target == SRC_EXT1 ? STUB1 : target == SRC_EXT2 ? STUB2 : 0;
+	return to ? thumb_veneer_get(&c->pool, to) : 0;
+}
+
+/* a record's register, r0-r12, then lr (13), sp (14), the CPSR (15) */
+static uint32_t met(uint32_t rec, int i) { return emu_read32(rec + 4u * (uint32_t)i); }
+
+static void moved_block(void) {
+	static uint8_t block[BLOCK], veneers[4 * THUMB_VENEER_SIZE];
+	uint32_t made[8], found[8];
+	int n = make_block(block, made);
+	int scanned = thumb_bl_scan(block, POOL, found, 8);
+	CHECK(n == 4 && scanned == n && !memcmp(found, made, sizeof *made * (size_t)n), "the block's BLs: %d found, %d made", scanned, n);
+	uint16_t hi, lo;
+	CHECK(!thumb_bl_encode(MOVED + 0x0C, STUB1, &hi, &lo), "a BL from the moved block reaches the stub");
+	/* its movs r1,#0x11 made #0x5A, as a recipe's immediates are */
+	static const ThumbImm was = { THUMB_MOVS, 1, 0, 0x11 };
+	uint16_t insn = (uint16_t)(block[PATCHED] | block[PATCHED + 1] << 8);
+	CHECK(thumb_imm_patch(&insn, &was, 0x5A) && insn == 0x215A, "the block's movs patched: %04x", insn);
+	put16(block, PATCHED, insn);
+	CallsOut calls = { .pool = { .bytes = veneers, .base = VENEERS, .cap = 4 } };
+	ThumbBlock b = { block, BLOCK, SRC, MOVED };
+	bool moved = thumb_block_rebase(&b, found, scanned, to_stub, &calls);
+	CHECK(moved && calls.asked == 2 && calls.pool.n == 2, "the block moved: %d, its calls out asked %d, %d veneers", moved, calls.asked, calls.pool.n);
+	if (!moved) return;
+	emu_write(MOVED, block, BLOCK);
+	emu_write(VENEERS, veneers, (size_t)calls.pool.n * THUMB_VENEER_SIZE);
+	stub(STUB1, REC1);
+	stub(STUB2, REC2);
+	for (uint32_t a = DONE; a < REC2 + 0x40; a += 4) emu_write32(a, 0);
+	/* (the ROM's own start goes on to the moved block, after a reset: the
+	 * core's copy keeps what was written into it) */
+	emu_write32(0x080000C8, MOVED | 1);
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	uint32_t sp = emu_read32(SP_SEEN);
+	CHECK(emu_read32(DONE) == DONE_MARK, "the moved block did not run to its end: %08x", emu_read32(DONE));
+	CHECK(sp >> 24 == 0x03, "the block's sp: %08x", sp);
+	CHECK(emu_read8(DONE + 8) == 0x5A, "the patched movs stored %02x, not 5a", emu_read8(DONE + 8));
+	/* each stub as the block called it: every register, lr back into the
+	 * block after its BL, sp, and the flags of its cmp */
+	static const struct { uint32_t rec, back, nzcv; } call[2] = { { REC1, 0x10, 0x9 }, { REC2, 0x1A, 0x6 } };
+	for (int k = 0; k < 2; ++k) {
+		uint32_t rec = call[k].rec;
+		for (int i = 0; i <= 12; ++i) CHECK(met(rec, i) == reg_value(i), "call %d: r%d %08x, not %08x", k + 1, i, met(rec, i), reg_value(i));
+		CHECK(met(rec, 13) == ((MOVED + call[k].back) | 1), "call %d: lr %08x, not %08x", k + 1, met(rec, 13), (MOVED + call[k].back) | 1);
+		CHECK(met(rec, 14) == sp, "call %d: sp %08x, not the block's %08x", k + 1, met(rec, 14), sp);
+		CHECK(met(rec, 15) >> 28 == call[k].nzcv, "call %d: flags %x, not %x", k + 1, met(rec, 15) >> 28, call[k].nzcv);
+	}
+	/* the veneers as the core reads them */
+	uint8_t v[THUMB_VENEER_SIZE];
+	uint32_t t1 = 0, t2 = 0;
+	for (uint32_t i = 0; i < THUMB_VENEER_SIZE; ++i) v[i] = emu_read8(VENEERS + i);
+	bool v1 = thumb_veneer_target(v, &t1);
+	for (uint32_t i = 0; i < THUMB_VENEER_SIZE; ++i) v[i] = emu_read8(VENEERS + THUMB_VENEER_SIZE + i);
+	bool v2 = thumb_veneer_target(v, &t2);
+	CHECK(v1 && v2 && t1 == STUB1 && t2 == STUB2, "the veneers in the ROM: %08x %08x", t1, t2);
+	emu_write32(0x080000C8, 0x080000D1);
+}
+
+/* ---- the second-level dispatch's code run (issue #82) ----
+ *
+ * Its code (xvirus_dispatch_code) at XV_STUBS, its tables as xvirus_grow.c
+ * leaves them, a family's entries set, and in their places routines of the
+ * test's own: BN6's spawner of the third kind (keeps the registers it met,
+ * the two words above its sp, and gives back an object or none, r0 and r1
+ * changed), object_freeMemory (keeps r5) and a moved routine (keeps r0, r1,
+ * r5 and lr). A driver near the stubs calls the dispatch's spawner as a
+ * moved family's code does (r0 its game's type, r1-r4 the object's words),
+ * keeps the registers it gets back, then runs the dispatch's type as BN6's
+ * runner does (mov lr,pc; bx r0, r5 the object). */
+#define DRV (XV_STUBS + 0x400u)           /* the driver, */
+#define DRV_BACK 0x1A                     /* ... where the spawner returns to (after its BL), */
+#define DRV_RAN 0x2A                      /* ... where the dispatch's run returns to, */
+#define DRV_LITS 0x34                     /* ... its words: the object, the slot's side byte, the type, the record, run or not, the
+                                             dispatch, the mark's place and the mark */
+#define MOVED_RT (DRV + 0x80u)            /* the moved routine */
+#define FAKE_SPAWN BN6_SPAWN_3_AT         /* BN6's spawner, the one XV_SPAWN_3 calls */
+#define BN6_SPAWN_3_AT 0x08003358u
+#define FAKE_FREE 0x08003458u             /* BN6's object_freeMemory, the one the stray's routine goes to */
+#define REC_SPAWN (IWRAM + 0x400)         /* what the spawner met: r0-r4, then the two words above its sp */
+#define REC_AFTER (IWRAM + 0x440)         /* r0-r5 as the driver got them back */
+#define REC_MOVED (IWRAM + 0x480)         /* r0, r1, r5 and lr the moved routine met */
+#define REC_FREE (IWRAM + 0x4A0)          /* r5 object_freeMemory met */
+#define RAN_MARK (IWRAM + 0x4B0)
+#define OBJ (IWRAM + 0x500)               /* the object, its slot at +3: */
+#define SLOT 5
+#define SIDE3 (0x0203FF20u + SLOT)        /* the third kind's side table's byte for it (BN6_DISPATCH_SIDE + 0x20) */
+
+/* ldr rd,[pc,#..] at `at` (an address) of the word at `lit` */
+static uint16_t ldr_lit(uint32_t at, int rd, uint32_t lit) { return (uint16_t)(0x4800 | rd << 8 | (lit - ((at + 4) & ~3u)) / 4); }
+
+static void code_at(uint32_t at, const uint16_t *ops, int n, const uint32_t *lits, int nlits, uint32_t lit_off) {
+	uint8_t b[0x80] = { 0 };
+	for (int i = 0; i < n; ++i) put16(b, 2u * (uint32_t)i, ops[i]);
+	for (int i = 0; i < nlits; ++i) put32(b, lit_off + 4u * (uint32_t)i, lits[i]);
+	emu_write(at, b, lit_off + 4u * (uint32_t)nlits);
+}
+
+/* the driver, for one run: its game's type, the object the spawner gives back, whether the dispatch's type runs, the mark */
+static void driver(uint32_t type, uint32_t obj, bool run, uint32_t mark) {
+	uint16_t ops[DRV_LITS / 2];
+	int n = 0;
+	uint32_t lit = DRV + DRV_LITS;
+	ops[n++] = ldr_lit(DRV + 0x00, 0, lit);            /* ldr r0,=OBJ */
+	ops[n++] = 0x2100 | SLOT;                          /* movs r1,#SLOT */
+	ops[n++] = 0x70C1;                                 /* strb r1,[r0,#3] */
+	ops[n++] = ldr_lit(DRV + 0x06, 0, lit + 4);        /* ldr r0,=SIDE3 */
+	ops[n++] = 0x21EE;                                 /* movs r1,#0xEE */
+	ops[n++] = 0x7001;                                 /* strb r1,[r0] */
+	ops[n++] = ldr_lit(DRV + 0x0C, 0, lit + 8);        /* ldr r0,=type */
+	ops[n++] = 0x2111;                                 /* movs r1..r4 */
+	ops[n++] = 0x2222;
+	ops[n++] = 0x2333;
+	ops[n++] = 0x2444;
+	n += 2;                                            /* bl XV_SPAWN_3 (0x16) */
+	ops[n++] = ldr_lit(DRV + 0x1A, 7, lit + 12);       /* ldr r7,=REC_AFTER */
+	ops[n++] = 0xC73F;                                 /* stmia r7!,{r0-r5} */
+	ops[n++] = ldr_lit(DRV + 0x1E, 0, lit + 16);       /* ldr r0,=run */
+	ops[n++] = 0x2800;                                 /* cmp r0,#0 */
+	ops[n++] = 0xD002;                                 /* beq 0x2A */
+	ops[n++] = ldr_lit(DRV + 0x24, 0, lit + 20);       /* ldr r0,=the dispatch's type's routine */
+	ops[n++] = 0x46FE;                                 /* mov lr,pc */
+	ops[n++] = 0x4700;                                 /* bx r0 */
+	ops[n++] = ldr_lit(DRV + 0x2A, 0, lit + 24);       /* ldr r0,=RAN_MARK */
+	ops[n++] = ldr_lit(DRV + 0x2C, 1, lit + 28);       /* ldr r1,=mark */
+	ops[n++] = 0x6001;                                 /* str r1,[r0] */
+	ops[n++] = 0xE7FE;                                 /* b . */
+	ops[n++] = 0x46C0;
+	const uint32_t lits[8] = { OBJ, SIDE3, type, REC_AFTER, run, xvirus_dispatch_routine(3) | 1, RAN_MARK, mark };
+	uint16_t hi, lo;
+	thumb_bl_encode(DRV + 0x16, XV_SPAWN_3, &hi, &lo);
+	ops[11] = hi;
+	ops[12] = lo;
+	code_at(DRV, ops, n, lits, 8, DRV_LITS);
+	/* BN6's spawner, giving back `obj`:
+	 *   ldr r5,=REC_SPAWN; stmia r5!,{r0-r4}; ldr r0,[sp]; str r0,[r5]; ldr r0,[sp,#4]; str r0,[r5,#4]
+	 *   ldr r5,=obj; movs r0,#0x77; movs r1,#0x66; mov pc,lr */
+	const uint16_t spawn[10] = { ldr_lit(FAKE_SPAWN, 5, FAKE_SPAWN + 0x14), 0xC51F, 0x9800, 0x6028, 0x9801, 0x6068,
+		ldr_lit(FAKE_SPAWN + 0x0C, 5, FAKE_SPAWN + 0x18), 0x2077, 0x2166, 0x46F7 };
+	const uint32_t spawn_lits[2] = { REC_SPAWN, obj };
+	code_at(FAKE_SPAWN, spawn, 10, spawn_lits, 2, 0x14);
+}
+
+static uint32_t rec(uint32_t at, int i) { return emu_read32(at + 4u * (uint32_t)i); }
+
+static void dispatch_run(void) {
+	static uint8_t code[XV_STUBS_SIZE];
+	xvirus_dispatch_code(code);
+	emu_write(XV_STUBS, code, sizeof code);
+	/* its tables blank, as xvirus_grow.c makes them, then a family's entries: the third kind's 0x25 moved, 0x30 BN6's 0x4B */
+	static uint8_t moved[3 * XV_STEP], twin[3 * 0x100];
+	for (uint32_t i = 0; i < sizeof moved; i += 4) put32(moved, i, XV_STUB_NONE | 1);
+	memset(twin, XV_TYPE_MOVED, sizeof twin);
+	emu_write(XV_MOVED_TABLES, moved, sizeof moved);
+	emu_write(XV_TWIN_TABLES, twin, sizeof twin);
+	emu_write32(xvirus_dispatch_moved_at(3, 0x25), MOVED_RT | 1);
+	uint8_t b = 0x4B;
+	emu_write(xvirus_dispatch_twin_at(3, 0x30), &b, 1);
+	/* the moved routine: ldr r6,=REC_MOVED; stmia r6!,{r0,r1,r5}; mov r0,lr; str r0,[r6]; mov pc,lr */
+	const uint16_t moved_rt[6] = { ldr_lit(MOVED_RT, 6, MOVED_RT + 0x0C), 0xC623, 0x4670, 0x6030, 0x46F7, 0x46C0 };
+	const uint32_t moved_lit = REC_MOVED;
+	code_at(MOVED_RT, moved_rt, 6, &moved_lit, 1, 0x0C);
+	/* object_freeMemory: ldr r6,=REC_FREE; str r5,[r6]; mov pc,lr */
+	const uint16_t free_rt[4] = { ldr_lit(FAKE_FREE, 6, FAKE_FREE + 0x08), 0x6035, 0x46F7, 0x46C0 };
+	const uint32_t free_lit = REC_FREE;
+	code_at(FAKE_FREE, free_rt, 4, &free_lit, 1, 0x08);
+	emu_write32(0x080000C8, DRV | 1);
+	static const struct { const char *what; uint32_t type, obj; bool run; uint32_t r0, side; } runs[4] = {
+		{ "moved", 0x1225, OBJ, true, XV_T3_DISPATCH, 0x25 },   /* (its low byte the type, as the spawn stores it) */
+		{ "BN6's twin", 0x30, OBJ, false, 0x4B, 0x30 },
+		{ "none spawned", 0x25, 0, false, XV_T3_DISPATCH, 0xEE },
+		{ "a stray", 0x26, OBJ, true, XV_T3_DISPATCH, 0x26 },
+	};
+	for (int k = 0; k < 4; ++k) {
+		driver(runs[k].type, runs[k].obj, runs[k].run, 0xD15A0000u + (uint32_t)k);
+		for (uint32_t a = REC_SPAWN; a < RAN_MARK + 4; a += 4) emu_write32(a, 0);
+		emu_reset();
+		emu_frame(0);
+		emu_sync();
+		const char *w = runs[k].what;
+		CHECK(rec(RAN_MARK, 0) == 0xD15A0000u + (uint32_t)k, "dispatch, %s: the driver did not run to its end (%08x)", w, rec(RAN_MARK, 0));
+		/* BN6's spawner met BN6's type, the object's words, and the frame above it: its game's type and the way back */
+		CHECK(rec(REC_SPAWN, 0) == runs[k].r0 && rec(REC_SPAWN, 1) == 0x11 && rec(REC_SPAWN, 2) == 0x22 && rec(REC_SPAWN, 3) == 0x33 &&
+			rec(REC_SPAWN, 4) == 0x44, "dispatch, %s: the spawner met r0 %#x, r1-r4 %#x %#x %#x %#x", w, rec(REC_SPAWN, 0),
+			rec(REC_SPAWN, 1), rec(REC_SPAWN, 2), rec(REC_SPAWN, 3), rec(REC_SPAWN, 4));
+		CHECK(rec(REC_SPAWN, 5) == runs[k].type && rec(REC_SPAWN, 6) == ((DRV + DRV_BACK) | 1), "dispatch, %s: the frame above the spawner: %#x, %08x",
+			w, rec(REC_SPAWN, 5), rec(REC_SPAWN, 6));
+		/* back: r0 and r1 as the spawner left them, r2-r4 kept, r5 the object; its side byte its game's type */
+		CHECK(rec(REC_AFTER, 0) == 0x77 && rec(REC_AFTER, 1) == 0x66 && rec(REC_AFTER, 2) == 0x22 && rec(REC_AFTER, 4) == 0x44 &&
+			rec(REC_AFTER, 5) == runs[k].obj, "dispatch, %s: back r0 %#x r1 %#x r5 %08x", w, rec(REC_AFTER, 0), rec(REC_AFTER, 1), rec(REC_AFTER, 5));
+		CHECK(emu_read8(SIDE3) == runs[k].side, "dispatch, %s: the side byte %#x, not %#x", w, emu_read8(SIDE3), runs[k].side);
+	}
+	/* the moved routine ran on the dispatch's type as BN5's runner runs it (the last run's: the stray's freed instead) */
+	CHECK(rec(REC_FREE, 0) == OBJ, "dispatch: the stray not let go (%08x)", rec(REC_FREE, 0));
+	CHECK(rec(REC_MOVED, 0) == 0, "dispatch: the stray ran the moved routine");
+	driver(0x25, OBJ, true, 0xD15A0010u);
+	emu_reset();
+	emu_frame(0);
+	emu_sync();
+	CHECK(rec(REC_MOVED, 0) == (MOVED_RT | 1) && rec(REC_MOVED, 1) == 0x25 * 4 && rec(REC_MOVED, 2) == OBJ && rec(REC_MOVED, 3) == DRV + DRV_RAN,
+		"dispatch: the moved routine met r0 %08x, r1 %#x, r5 %08x, lr %08x", rec(REC_MOVED, 0), rec(REC_MOVED, 1), rec(REC_MOVED, 2), rec(REC_MOVED, 3));
+	emu_write32(0x080000C8, 0x080000D1);
+}
+
+/* ---- RAM kept patched (emu.c's emu_keep, issue #82) ---- */
+
+/* As the engine keeps IWRAM's copy of the game's code patched: the
+ * engine's bytes made where the game's own are, a state saved with the
+ * game's own there (another core reads them so), the engine's made again
+ * as one is loaded, and bytes that read neither left as they are */
+#define KEPT (IWRAM + 0x200)
+#define KEPT_STATE "build/host/test_emu.state"
+
+static uint32_t state_word(uint32_t addr) {
+	static uint8_t rom[ROM_SIZE];
+	static uint32_t video[240 * 160];
+	make_rom(rom);
+	struct mCore *g = guest_core(rom, video);
+	struct VFile *vf = VFileOpen(KEPT_STATE, O_RDONLY);
+	uint32_t v = g && vf && mCoreLoadStateNamed(g, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC) ? g->rawRead32(g, addr, -1) : 0xDEADBEEF;
+	if (vf) vf->close(vf);
+	if (g) {
+		mCoreConfigDeinit(&g->config);
+		g->deinit(g);
+	}
+	return v;
+}
+
+static void kept_ram(void) {
+	static const uint8_t own[4] = { 0x11, 0x11, 0x11, 0x11 }, ours[4] = { 0x22, 0x22, 0x22, 0x22 };
+	emu_write32(KEPT, 0x11111111);
+	CHECK(emu_keep(KEPT, own, ours, sizeof own), "a patch kept");
+	CHECK(emu_read32(KEPT) == 0x22222222, "the patch made: %08x", emu_read32(KEPT));
+	CHECK(emu_save_state(KEPT_STATE), "a state saved");
+	CHECK(emu_read32(KEPT) == 0x22222222, "the patch after the save: %08x", emu_read32(KEPT));
+	CHECK(state_word(KEPT) == 0x11111111, "the state holds %08x, not the game's own 11111111", state_word(KEPT));
+	emu_write32(KEPT, 0x33333333);
+	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x22222222, "the patch after the state loaded: %08x", emu_read32(KEPT));
+	/* (another's bytes there: neither the game's nor the patch's) */
+	emu_write32(KEPT, 0x44444444);
+	CHECK(emu_save_state(KEPT_STATE) && state_word(KEPT) == 0x44444444 && emu_read32(KEPT) == 0x44444444, "another's bytes saved as %08x, left %08x",
+		state_word(KEPT), emu_read32(KEPT));
+	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x44444444, "another's bytes loaded made %08x", emu_read32(KEPT));
+	remove(KEPT_STATE);
+}
+
+/* ---- the installers' claims through emu.c (claims.h, issue #82) ----
+ * emu_write's, emu_write32's and emu_write8's bytes the installer's that
+ * writes them, another's over them told, a write outside any installer
+ * nobody's, and a hook set on an installer's bytes told */
+static void claimed_writes(void) {
+	static const uint8_t b[16] = { 0 };
+	int sits = 0;
+	claims_reset();
+	claims_quiet(true);
+	claims_begin("x");
+	emu_write(0x08900000u, b, sizeof b);
+	claims_end();
+	CHECK(claims_who(0x0890000Fu) && !strcmp(claims_who(0x0890000Fu), "x"), "claims: emu_write's last byte not the installer's");
+	claims_begin("y");
+	emu_write32(0x0890000Cu, 0);
+	emu_write8(0x08900020u, 0);
+	claims_end();
+	emu_write8(0x08900030u, 0);
+	CHECK(claims_overlaps() == 1 && claims_who(0x08900020u) && !strcmp(claims_who(0x08900020u), "y") && !claims_who(0x08900030u),
+		"claims: %d overlaps told, the bytes %s's and %s's", claims_overlaps(), claims_who(0x08900020u) ? claims_who(0x08900020u) : "no one",
+		claims_who(0x08900030u) ? claims_who(0x08900030u) : "no one");
+	CHECK(emu_hook(0x08900004u, counted, &sits) && claims_overlaps() == 2, "claims: a hook on an installer's bytes not told (%d)", claims_overlaps());
+	emu_unhook(0x08900004u);
+	claims_reset();
+	claims_quiet(false);
+}
+
 int main(void) {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	static uint8_t rom[ROM_SIZE];
@@ -404,6 +861,8 @@ int main(void) {
 	hook_remove(IWRAM + 0x100);
 	CHECK(core->rawRead16(core, IWRAM + 0x100, -1) == 0x3014, "the reset's code back as it is taken off");
 
+	full_table(core);
+
 	/* a halt from a hook: the loop at 0xF0 met once, then the CPU idle for
 	 * the rest of the frame (no interrupt is on to end it) */
 	int halts = 0;
@@ -413,12 +872,18 @@ int main(void) {
 	CHECK(halts == 1 && ((struct GBA *)core->board)->cpu->halted, "halted: the hook ran %d times, halted %d", halts, ((struct GBA *)core->board)->cpu->halted);
 	CHECK(stored(core, 3) == 39, "the code before the halt ran: %u", stored(core, 3));
 	hook_remove(0x080000F0);
+	hook_detach(core);
 	mCoreConfigDeinit(&core->config);
 	core->deinit(core);
 
 	two_cores();
 	two_threads();
+	moved_block();
+	dispatch_run();
+	kept_ram();
+	claimed_writes();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, on one thread and on two\n");
+	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
+		"the second-level dispatch's code, RAM kept patched but in its states, the installers' writes claimed\n");
 	return 0;
 }

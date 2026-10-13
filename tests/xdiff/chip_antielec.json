@@ -1,0 +1,77 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX at (6,2) (its HP past the counter's damage), its reticle's strike made Elec in both games' copies (both: its element's movs r1,#0 made #3, as field_lava_aqua's Aqua), MegaMan at (2,2) with a folder of AntiElec A in both games, BN5's chip 142 by BN5's own code and the registry's 460 by the same code moved (BN5's support routine 0x0C as BN6's 0x36: its setter, the fourth kind's 0x2A, and its trap, the third kind's 0x4D), the first Custom screen's chip picked and OK, used at t30, the trap sprung by the Elec strike, its counter's sound 0x12E BN5's copied to slot 0x52: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "folder5": [
+  "008E"
+ ],
+ "folder6": [
+  "01CC"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "both": [
+  "080C976E:2103"
+ ],
+ "sprites": "bytes"
+}

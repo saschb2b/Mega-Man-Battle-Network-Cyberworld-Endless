@@ -9,12 +9,10 @@
 
 #include <stdio.h>
 
-#include "bn6.h"
 #include "bn6_fields.h"
 #include "boss_grand.h"
 #include "cinema.h"
 #include "debug.h"
-#include "director.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
@@ -24,10 +22,12 @@
 #include "loot.h"
 #include "net_arena.h"
 #include "netmap.h"
+#include "pacing.h"
 #include "platform.h"
 #include "powers.h"
 #include "rivals.h"
 #include "save.h"
+#include "xguardian.h"
 
 #define WALK_NEAR   52   /* world units from the guardian MegaMan walks up to, where he has no place beside him */
 #define WALK_FRAMES 100  /* his steps up to a guardian, at most */
@@ -60,6 +60,9 @@ static struct {
 	int leg;                 /* ... the eighth his steps' leg keeps (walk_toward), -1 none yet */
 	uint32_t archive;
 	GuardianStage g;
+	Encounter fought;        /* his battle, as it was forced (the run log's), */
+	int fought_hp;           /* ... and the HP he spawns with */
+	bool soul_new;           /* BN5's guardian beaten, his Soul new to the run: his data's words told it (souls.h) */
 } B;
 
 static void to(int state) {
@@ -236,28 +239,36 @@ static void wait_update(void) {
 /* What the Guardian Data, taken, has told once: the draft the board's rules,
  * BN5's guardian's what a Soul does (docs/META.md, Souls) */
 static void reward_taught(void) {
-	bool soul = guardian_older(B.g.navi) && !profile.soul_taught, board = !profile.navicust_taught && run.side_kind == LAYER_NORMAL;
+	bool older = B.soul_new, soul = older && !profile.soul_taught, form = older && !profile.soul_form_taught,
+		board = !profile.navicust_taught && run.side_kind == LAYER_NORMAL;
 	if (soul) profile.soul_taught = 1;
+	if (form) profile.soul_form_taught = 1;
 	if (board) profile.navicust_taught = 1;
-	if (soul || board) profile_save();
+	if (soul || form || board) profile_save();
 }
 
 /* No question after his words: the battle begins, the player's again. */
 static void fight_begin(void) {
 	cinema_input(CINEMA_FREE);
 	cinema_letterbox(false);
-	/* (BN5's in BN5's engine, on the guest core: docs/BOSSES.md, BN5's
-	 * Navis; its end comes back through director_guest_done) */
-	if (guardian_older(B.g.navi) && director_guest_guardian(B.g.navi, B.g.version)) return;
-	/* (else BN6's battle: the area's own guardian where the guest cannot
-	 * fight his) */
-	Encounter e = make_boss(run.depth, run.biome, guardian_older(B.g.navi) ? run.boss_order[run.biome] : B.g.navi);
+	/* (BN5's in BN6's engine as BN6's are, his moved id at the version his
+	 * act's band takes: docs/BOSSES.md, BN5's Navis) */
+	bool older = guardian_older(B.g.navi);
+	Encounter e = older ? xguardian_encounter(B.g.navi, B.g.version) : make_boss(run.depth, run.biome, B.g.navi);
 	/* (no running from a guardian, as from BN6's story bosses: a
 	 * playtester ran from CircusMan at 5 HP, healed beside the arena and
 	 * came back to a fresh fight) */
 	e.held = true;
-	/* (a tenth more HP each notch of the Net's clock, docs/HOME.md) */
-	emu_battle_clock(navi_hp(e.foes[0].family, e.foes[0].version));
+	/* (a tenth more HP each notch of the Net's clock, docs/HOME.md: on his
+	 * own HP, or on BN5's held to the act's band, as he spawns) */
+	int own = navi_hp(e.foes[0].family, e.foes[0].version);
+	if (older) own = xguardian_hp(B.g.navi, B.g.version);
+	int fought = older ? xguardian_hp_fought(B.g.navi, B.g.version, run.depth) : own;
+	B.fought_hp = pacing_clock_hp(fought, run.clock);
+	emu_battle_hp(own, B.fought_hp);
+	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d\n", B.g.navi, e.foes[0].id, e.foes[0].version, own,
+		B.fought_hp);
+	B.fought = e;
 	emu_battle_force(&e);
 }
 
@@ -371,6 +382,11 @@ void boss_update(void) {
 
 bool boss_fighting(void) { return B.state == B_FIGHT; }
 
+const Encounter *boss_battle(int *hp) {
+	*hp = B.fought_hp;
+	return &B.fought;
+}
+
 void boss_battle_over(bool won) {
 	if (B.state != B_FIGHT) return;
 	if (!won) {
@@ -380,7 +396,7 @@ void boss_battle_over(bool won) {
 	}
 	rival_result(B.g.navi, RIVAL_MEGAMAN_WON);
 	run.bosses_beaten++;
-	powers_after_boss(B.g.navi);
+	B.soul_new = powers_after_boss(B.g.navi);
 	if (run.side_kind == LAYER_SECRET) run.secret_cleared = true;
 	to(B_AFTER);
 }

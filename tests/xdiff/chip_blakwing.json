@@ -1,0 +1,204 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of BlakWing W and 29 Cannon A in both games, the BlakWing dealt first (a Mega chip), BN5's chip 214 by BN5's own code and the registry's 293 by the same code moved (BN5's support routine 0x20 as BN6's 0x4A: its two objects of the fourth kind 0x54 and 0x55 and its wings of the third, 0x7E and 0x7F, moved), MegaMan dark as the battle begins in both (dark: BN5's dark meter under 470, BN6's engine the same through src/emu/soulmood.c with KnightSoul held, flags5 and souls6, so the Souls and BN5's mood are installed): BN5 lets BlakWing out only to a dark MegaMan (its record's +0x15 2, 0x08010110). The first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "dark": true,
+ "hold": 60,
+ "folder5": [
+  "2CD6",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "folder6": [
+  "2D25",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "deck5": [
+  "2CD6",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "deck6": [
+  "2D25",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "sprites": "bytes"
+}

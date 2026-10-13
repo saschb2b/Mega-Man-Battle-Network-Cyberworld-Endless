@@ -1,0 +1,29 @@
+{
+ "about": "BN5's field 0x74 (lava at columns 3 and 4 of row 1, 1 and 6 of row 3) as BN6's, xpanels.c and xfields.c: MegaMan at (2,2) and CanGard V1 at (5,2) idle on plain panels; the panels' types, flags and timers compared each frame, lava running out after 960 frames, blinking its last 60",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "field": "74",
+ "expect": {
+  "panels": [
+   [
+    958,
+    "31",
+    13
+   ],
+   [
+    959,
+    "31",
+    2
+   ],
+   [
+    959,
+    "63",
+    2
+   ]
+  ]
+ }
+}

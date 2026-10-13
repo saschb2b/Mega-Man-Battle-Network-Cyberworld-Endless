@@ -1,0 +1,266 @@
+{
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "about": "Chaos Unison's one turn, in both engines (the Souls track's S2): NumberSoul held with Chaos Unison (BN5's flags 000A and 0236, BN6's souls6), a deck of DarkPlus * in both (BN5's chip 190 and BN6's 290: a DarkChip of Plus, NumberSoul's kind, as BN5 has them), the first Custom screen's DarkPlus given up: Chaos Unison, its turns 1, ended as the turn after the next Custom screen starts. Its used bit is its Chaos Unison's (16 + 9). The lifetime is compared every frame; his look and abilities are the proxy's while united.",
+ "kind": "differential",
+ "frames": 1200,
+ "flags5": [
+  "0000",
+  "000A",
+  "0236"
+ ],
+ "folder5": [
+  "34BE"
+ ],
+ "deck5": [
+  "34BE"
+ ],
+ "folder6": [
+  "3522"
+ ],
+ "deck6": [
+  "3522"
+ ],
+ "souls6": "04",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x09"
+    ],
+    [
+     523,
+     "0x09"
+    ],
+    [
+     524,
+     "0x00"
+    ]
+   ],
+   "chaos": [
+    [
+     1,
+     "0x01"
+    ],
+    [
+     523,
+     "0x01"
+    ],
+    [
+     524,
+     "0x00"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x01"
+    ],
+    [
+     523,
+     "0x01"
+    ],
+    [
+     524,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x2000000"
+    ],
+    [
+     1200,
+     "0x2000000"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own rule: a DarkChip of a held Soul's kind lights its Chaos Unison where flag 0x0236 is set (0x08024B76-0x08024BC4: +6 1, the used bit 16 + n); OK gives it one turn (0x08025012-0x08025016), the countdown takes it to 0 as the next Custom screen opens and it ends as that turn starts; AIData +0x12 1 (0x08012164)."
+}

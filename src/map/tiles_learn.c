@@ -42,8 +42,8 @@ static void learn_shapes(const Src *src, uint8_t *pads, TileBook *out) {
 	uint8_t *walled_pads = own ? tl_find_pads(&walled) : pads;
 	if (!own) walled = *src;
 	out->nshapes = 0;
-	out->shapes = malloc(SPAN * SPAN * sizeof *out->shapes);
-	for (int B = -SPAN / 2 + 1; out->shapes && B < SPAN / 2 - 1; ++B)
+	out->shapes = walled_pads ? malloc(SPAN * SPAN * sizeof *out->shapes) : NULL;   /* (none: memory ran out) */
+	for (int B = -SPAN / 2 + 1; out->shapes && walled_pads && B < SPAN / 2 - 1; ++B)
 		for (int A = -SPAN / 2 + 1; A < SPAN / 2 - 1; ++A) {
 			unsigned oa = 0, ob = 0;
 			bool mixed = false;
@@ -306,6 +306,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	Src src = { a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, NULL, NULL, styles & TILES_INNER_WALLS, NULL };
 	if (!src_open(&src)) return;   /* (a book of nothing) */
 	uint8_t *pads = tl_find_pads(&src);
+	if (!pads) { src_close(&src); return; }   /* (a book of nothing) */
 	src.pads = pads;
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0, false };
 	tl_calibrate(a, &src, &g);
@@ -373,6 +374,7 @@ void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uin
 	Src src = { a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, NULL, NULL, styles & TILES_INNER_WALLS, NULL };
 	if (!src_open(&src)) return;
 	uint8_t *pads = tl_find_pads(&src);
+	if (!pads) { src_close(&src); return; }
 	int H = SPAN / 2, a0 = H, a1 = -H, b0 = H, b1 = -H;
 	for (int B = -H; B < H; ++B)
 		for (int A = -H; A < H; ++A)

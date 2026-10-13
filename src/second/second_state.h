@@ -33,8 +33,10 @@ typedef enum {
 } SecondContext;
 
 /* What the Custom screen's card shows: the chip under the cursor, the
- * Cross under CROSSSELECT's, Beast Out on its emblem, the picks on OK */
-typedef enum { CARD_CHIP, CARD_CROSS, CARD_BEAST, CARD_PICKS } SecondCard;
+ * Cross under CROSSSELECT's, Beast Out on its emblem or UNITE in its place
+ * (BN5's, issue #82), ColonelSoul's chip button, the picks on OK */
+typedef enum { CARD_CHIP, CARD_CROSS, CARD_BEAST, CARD_UNITE, CARD_BUTTON, CARD_PICKS } SecondCard;
+#define SECOND_BUTTON_AT 8   /* ColonelSoul's button: the Custom screen's elements 8 and 9 (soulcolonel.h) */
 
 /* What the NaviCustomizer's cursor is on: a program in the list, RUN, a
  * program on the board, one held over it; or none of them */
@@ -102,7 +104,13 @@ typedef struct {
 	int picks[5], npicks;         /* ... the slots picked, in order */
 	uint16_t queue[BN6_HAND_MAX], queue_power[BN6_HAND_MAX], queue_bonus[BN6_HAND_MAX];   /* the chips held after OK */
 	int nqueue, queue_at;         /* ... and the one up next */
+	int unite_soul;               /* ... UNITE where the emblem stands (BN6_SOUL_SLOT): the Soul the last pick lights (BN5's 7-12), 0 none */
+	bool unite_chaos;             /* ... its Chaos Unison */
+	int unite_state;              /* ... 0 lit, 1 grey, 2 chosen (BN6_ELEMENT_STATE) */
 	int form;                     /* MegaMan's Cross or Beast Out (BN6_BATTLE_FORM) */
+	int soul, soul_turns;         /* ... the Soul he is united with (BN5's 7-12; souls.h), 0 none, and its turns left */
+	bool soul_chaos;              /* ... its Chaos Unison */
+	uint16_t soul_chip;           /* ... ColonelSoul's: the chip his button holds, 0 none */
 	int beast_turns;              /* ... the EmotionCounter */
 	bool beast;                   /* ... Beast Out his (BN6_FLAG_BEAST_OUT) */
 	bool synchro;                 /* ... Full Synchro */

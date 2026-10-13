@@ -1,0 +1,29 @@
+{
+ "about": "BN5's field 0x43 (sea and grass) as BN6's, xpanels.c and xfields.c: MegaMan at (2,2) and CanGard V1 at (5,2) idle on grass; the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "43",
+ "expect": {
+  "panels": [
+   [
+    600,
+    "51",
+    14
+   ],
+   [
+    600,
+    "32",
+    14
+   ],
+   [
+    600,
+    "13",
+    14
+   ]
+  ]
+ }
+}

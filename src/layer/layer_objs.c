@@ -55,11 +55,12 @@ unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
 const ScriptsDark6 *layer_objs_dark6;
+const char *layer_objs_dark_does = "";
 /* (a layer with a flame: its first bystander free of a part to play runs
  * BN6's own words on DarkChips, a rumor before the find) */
 static bool dark_rumor_due;
 const char *layer_objs_server_navi = "";
-bool layer_objs_dark_first, layer_objs_dark_ours;
+bool layer_objs_dark_first;
 
 #define FRAGMENT_CHANCE 35   /* % a deep layer hides a ScrtData */
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
@@ -500,7 +501,7 @@ static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	tk->cat = 7;
 	tk->sprite = layer_objs_dark_flame;
 	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark6)
-		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_first, layer_objs_dark_ours);
+		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_does, layer_objs_dark_first);
 	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
 	out->dark_flame_obj = i;
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
@@ -636,6 +637,11 @@ static void install_begin(Install *in) {
 	bool weakless = navi_of_act > 0 && guardian_weakness(navi_of_act) <= 0;
 	rolls_of(0x101);
 	in->nstock = shop_dealer_stock(run.depth, weakless ? -1 : in->counter, weakless ? in->counter : 0, in->stock);
+	if (emu_debug_on()) {
+		fprintf(stderr, "dealer:");
+		for (int i = 0; i < in->nstock; ++i) fprintf(stderr, " %d/%d%s", in->stock[i].kind, in->stock[i].id, in->stock[i].kind == 2 && chip_pool_older(in->stock[i].id) ? "(BN5's)" : "");
+		fprintf(stderr, "\n");
+	}
 	in->plan.stock = in->stock;
 	in->plan.nstock = in->nstock;
 	/* (a purple data's key in a blue one, three layers in ten: a lock and
@@ -752,7 +758,7 @@ static void install_gift(Install *in, Talker *tk) {
 	ChipInfo ci;
 	int chip = -1;
 	for (int tries = 0; tries < 24; ++tries) {
-		int c = chip_pool_pick(2);
+		int c = loot_pool_pick(2);
 		if (c <= 0) break;
 		chip_info(c, &ci);
 		chip = c;

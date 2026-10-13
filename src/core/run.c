@@ -8,10 +8,10 @@
 #include "pacing.h"
 #include "rivals.h"
 #include "guardians.h"
-#include "guest.h"
 #include "net.h"
 #include "save.h"
 #include "super_boss.h"
+#include "xguardian.h"
 
 Run run;
 
@@ -54,19 +54,57 @@ int run_dress(int biome) {
 	return biome;
 }
 
-int run_xguardian_at(int act, int biome) {
+/* A surface act's: where an area of BN5's dresses it and names a Navi of
+ * its roaming there (NetAreaDef.xguard), in half the runs (a coin of its
+ * own per area, beside the dress's) */
+static int dressed_xguardian(int act, int biome) {
 	int a = run_dress(biome);
 	const NetAreaDef *x = a >= NET_AREAS ? net_area_def(a) : NULL;
-	if (!x || x->xrom <= 0 || !x->xguard[0] || !guest_possible(x->xrom - 1)) return 0;
-	if (guardian_older(run_debug_xguardian)) return run_debug_xguardian;
-	/* (not the short net's last act, whose Nest is BN6's: his Soul would
-	 * serve no battle of his game's after him) */
-	if (act < 0 || act > 5 || (run.mode == RUN_SHORT && act >= 2)) return 0;
-	/* (a coin of its own per area, beside the dress's: half the runs) */
+	if (!x || x->xrom <= 0 || !x->xguard[0] || act < 0 || act > 5) return 0;
 	uint32_t h = (run.seed ^ 0x47524431u) * 2654435761u;   /* "GRD1" */
 	int k = a - NET_AREAS;
 	if (!(h >> (8 + k) & 1)) return 0;
-	return guardian_of_older(x->xguard[1] && (h >> (20 + k) & 1) ? x->xguard[1] : x->xguard[0]);
+	int navi = guardian_of_older(x->xguard[1] && (h >> (20 + k) & 1) ? x->xguard[1] : x->xguard[0]);
+	return xguardian_fightable(navi) ? navi : 0;
+}
+
+/* (BN5's Navi `navi` fits act `act`'s band at the version he is fought at
+ * there: his HP as fought reaching its floor) */
+static bool xguardian_fits(int navi, int act) {
+	int hp[4], lo, hi;
+	for (int v = 0; v < 4; ++v) hp[v] = xguardian_hp(navi, v);
+	int v = pacing_xguardian_version(hp, act, 0, false);
+	pacing_guardian_band(act, &lo, &hi);
+	return hp[v] >= 0 && pacing_xguardian_hp(hp[v], act, 0) >= lo;
+}
+
+/* The deep acts' (the Undernet's and the Graveyard's areas, whatever
+ * dresses them; docs/MULTIROM.md, One net: where they guard): both nets'
+ * Navis that fit the act's band in one pool, each as likely, by a coin of
+ * the seed and the act: one of BN5's, or 0, BN6's own pick standing (its
+ * area's own favoured, as ever: run.boss_order). None that guards a
+ * surface act of the run already. */
+static int deep_xguardian(int act, int biome) {
+	int n6 = 0, n5 = 0, cand[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1];
+	for (unsigned i = 0; i < sizeof navis; ++i) n6 += pacing_guardian_miss(navis[i], act, 0, false, navi_hp) == 0;
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi) {
+		bool taken = false;
+		for (int a = 0; a < 4; ++a) taken |= run.biome_order[a] != biome && dressed_xguardian(a, run.biome_order[a]) == navi;
+		if (!taken && xguardian_fightable(navi) && xguardian_fits(navi, act)) cand[n5++] = navi;
+	}
+	if (!n5) return 0;
+	uint32_t h = ((run.seed ^ 0x44454550u) + (uint32_t)act * 0x9E3779B9u) * 2654435761u;   /* "DEEP" */
+	uint32_t k = (h >> 8) % (uint32_t)(n5 + n6);
+	return k < (uint32_t)n5 ? cand[k] : 0;
+}
+
+int run_xguardian_at(int act, int biome) {
+	bool deep = biome == BIOME_UNDERNET || biome == BIOME_GRAVEYARD;
+	/* (a test's Navi of BN5's in every act BN5's areas dress and the deep's: --guardian 24-29) */
+	if (guardian_older(run_debug_xguardian) && xguardian_fightable(run_debug_xguardian) && (deep || run_dress(biome) >= NET_AREAS))
+		return act >= 0 && act <= 5 ? run_debug_xguardian : 0;
+	if (act < 0 || act > 5) return 0;
+	return deep ? deep_xguardian(act, biome) : dressed_xguardian(act, biome);
 }
 
 int run_guardian(int biome) {

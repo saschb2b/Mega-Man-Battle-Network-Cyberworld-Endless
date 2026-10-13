@@ -1,0 +1,216 @@
+{
+ "about": "BN5's KnightSoul's chip charge in both engines (the Souls track's S5): KnightSoul united (its flag 000C, souls6 0x10) with a deck of JustcOne J (BN5's chip 216, BN6's 140: Break, KnightSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (BN5 0x08010902: a chip of the Soul's kind; BN6's test 0x08013236 answered so for a Soul, src/emu/soulchips.c), its charge time BN5's (0x12's row), released at t232 as the chip used charged (BN5 0x0800D9E8; BN6's release 0x0800FBA4 sent to the chip's use for the Souls' empty power attacks) and doubled (BN5 0x080103C8: 0xFF, his damage once more; BN6's bonus 0x08012C7C answered so). JustcOne is another chip in each game (its power 280 and 220, its sub-family and object its own): the spec ends as it is used, its numbers compared as what the use added to each game's own record (legit.json's chips' numbers: the damage 200% of the record's in both), CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 232,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "12D8"
+ ],
+ "deck5": [
+  "12D8"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   130
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: KnightSoul united from t1, the chip charged from t100 and used charged at t232."
+}

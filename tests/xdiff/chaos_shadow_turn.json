@@ -1,0 +1,252 @@
+{
+ "about": "ShadowSoul's Chaos Unison's DarkInvs (chaos_shadow_45's battle), its Soul's one turn ending at the second Custom screen (L at t520, OK) while BN5's chip AI has MegaMan: BN5 takes him out of it as the Soul ends (0x08012276: 0x0802C12A, its time and state cleared, the flag dropped; src/emu/darkinvs.c's darkinvs_leave from soullife.c's leave), the machine stopped in both from t524, MegaMan his own. Every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 760,
+ "hold": 60,
+ "flags5": [
+  "0000",
+  "0009",
+  "0236"
+ ],
+ "folder5": [
+  "34BD"
+ ],
+ "deck5": [
+  "34BD"
+ ],
+ "folder6": [
+  "3521"
+ ],
+ "deck6": [
+  "3521"
+ ],
+ "souls6": "02",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   45
+  ],
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "dschips": [
+  "1",
+  "1",
+  "1"
+ ],
+ "dslist": 1,
+ "sprites": "bytes",
+ "verdict": {
+  "is": "FAIL",
+  "at": 524,
+  "why": "the chip AI left as BN5 leaves it (its time, state and flag, every byte of MegaMan's AI data and object the same from t524 to t760), but his battle NaviStats +0x0E: BN5's 0x08 against BN6's 0x80 from the Soul's end on, BN5's calm (0x08011A8C, 0x08012272) writing 0x80 where it is not 0 and BN6's twin 0x80 (soulmood's mood, the story's, 0x80 in both): untraced, BN5's write of 0x08 there found in neither the leave nor the chip AI's exit; a NumberSoul's Chaos Unison ending at the same screen without DarkInvs (chaos_number_45's battle so extended) passes"
+ }
+}

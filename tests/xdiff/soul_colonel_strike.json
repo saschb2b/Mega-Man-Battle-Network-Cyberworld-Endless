@@ -1,0 +1,300 @@
+{
+ "about": "ColonelSoul's obstacle strike (the Souls track's S5): ColonelSoul united (a RockCube picked last, UNITE, OK), MegaMan at (3,2), CanGard at (6,2). On the second screen a RockCube, used at t620: the cube stands at (4,2), on the enemy's area, with CanGard behind it (BN5's second search, 0x080CAC98), so its states turn it at once (BN5's block 0x08018002-0x0801802E, BN6's at 0x0801B3CA through the Souls' Thumb) into BN5's soldier, the third kind's 0x30 (moved), which fires three shots (BN5's 0x12, the chips' copy, its row for the strike fixed there) at CanGard for 12 each (t640, t650, t660: his table's first word, ColonelSoul's ready's), then goes (t690). Frame for frame but t623-t633 (compare_skip): the RockCube's own use, BN6's chip and BN5's, each its own code (BN6 holds MegaMan a frame longer in it, and its name's object and the cube's placement are each game's).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0008",
+  "0236"
+ ],
+ "folder5": [
+  "3463"
+ ],
+ "deck5": [
+  "3463"
+ ],
+ "folder6": [
+  "348F"
+ ],
+ "deck6": [
+  "348F"
+ ],
+ "souls6": "01",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   620,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "foe_hp": [
+   [
+    620,
+    60
+   ],
+   [
+    639,
+    60
+   ],
+   [
+    640,
+    48
+   ],
+   [
+    650,
+    36
+   ],
+   [
+    660,
+    24
+   ],
+   [
+    700,
+    24
+   ]
+  ],
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x07"
+    ],
+    [
+     700,
+     "0x07"
+    ]
+   ],
+   "hp": [
+    [
+     700,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's battle: the strike's shots each take 12 from CanGard (the strike's word, (0x28 + 10 x the buster's Attack...) as ColonelSoul's ready writes it, 0x08011C48), the first at t640; BN6's the same through the moved soldier and the Colonel's table in RAM_COLONEL.",
+ "compare_skip": [
+  [
+   623,
+   633
+  ]
+ ]
+}

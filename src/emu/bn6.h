@@ -85,6 +85,7 @@
 #define BN6_MUSIC_STOPPED     (1u << 31)  /* BN6_MUSIC_STATUS: stopped */
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
+#define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
@@ -99,7 +100,8 @@
 #define BN6_MODE_CROSS_SHUT   0x50        /* ... sliding shut, */
 #define BN6_MODE_CROSS        0x54        /* ... open, */
 #define BN6_MODE_CROSS_TAKEN  0x5C        /* ... a Cross chosen in it */
-#define BN6_CUSTOM_CROSS_ROW  (BN6_CUSTOM_SCREEN + 0x1B) /* CROSSSELECT's cursor: its row, of the Crosses MegaMan has in Gregar's order (BN6_FLAG_HEAT_CROSS on), less the one he is in */
+#define BN6_CUSTOM_CROSS_ROW  (BN6_CUSTOM_SCREEN + 0x1B) /* CROSSSELECT's cursor: its row, of the Crosses MegaMan has in Gregar's order (BN6_FLAG_HEAT_CROSS on),
+                                             less each chosen this battle (BN6_CROSSES_USED) and the one he began it in (0x08029EF6 lists them) */
 #define BN6_BATTLE_DECK       0x0203CDB0u /* the battle's folder as it is drawn, u16 chip | code << 9 (26 *); used chips leave it, 0xFFFF after the rest */
 #define BN6_PA_STAR_LIMIT     0x08029606u /* bn6f sub_80295C8, a Program Advance of one chip in codes in a row: cmp r2, #1 (0x2A01), one * of its three at most */
 #define BN6_PA_STAR_ANY       0x2A03      /* ... cmp r2, #3: three *, the All * helper's (docs/ROM_DATA.md) */
@@ -111,12 +113,26 @@
 #define BN6_PANEL_HOLE        1           /* BN6_PANEL_TYPE: a hole */
 #define BN6_PANEL_PLAIN       2           /* BN6_PANEL_TYPE: a plain panel */
 #define BN6_PANEL_POISON      4           /* BN6_PANEL_TYPE: poison */
+#define BN6_FIELD_COLUMNS     8           /* BN6_FIELD_PANELS' panels a row (the field's 6 and a border each side) */
 #define BN6_PANEL_STRUCK      0x40000000u /* BN6_PANEL_FLAGS: an enemy's attack on the panel */
+#define BN6_PANEL_CRACKED     3           /* BN6_PANEL_TYPE: cracked (a step breaks it to a hole: object_crackPanel 0x0800C938 writes it) */
+#define BN6_PANEL_HOLY        5           /* BN6_PANEL_TYPE: holy (damage on it halved, 0x0800E3F0) */
+#define BN6_PANEL_GRASS       6           /* BN6_PANEL_TYPE: grass (heals a Wood object on it, 0x0801A1D2; a Fire hit burns it plain, 0x03007704) */
+#define BN6_PANEL_ICE         7           /* BN6_PANEL_TYPE: ice (an object not of Aqua slides on it, 0x08016754) */
+#define BN6_PANEL_FLAGS_OF    0x081D7E20u /* the flags each panel type gives (+0x14), a u32 a type, 13 of them (IWRAM 0x03007920, copied from here) */
+#define BN6_FIELDS            0x0800D730u /* the battlefields: 12 bytes each, three u32 rows (rows 1-3), a nibble a column (1-6), the panel's
+                                             type (BN6_PANEL_TYPE), read by bn6f sub_800C4BC through sub_800C6D6's literal 0x0800C8D4 */
+#define BN6_FIELD_COUNT       237         /* ... its fields: 0-236, up to the code at 0x0800E24C (a BattleSettings' byte 0 names one) */
+#define BN6_FIELD_SIZE        12          /* ... a field's bytes */
 #define BN6_BATTLE_TIMER      0x020348C0u /* u32, the frames a battle has run (held on the Custom screen and in the pause): the results screen's DeleteTime (docs/ROM_DATA.md) */
 #define BN6_T1_OBJECTS        0x0203A9B0u /* eT1BattleObject0: viruses and navis in a battle (BattleObject), */
 #define BN6_T1_SIZE           0xD8        /* ... each this long, its fields from its start: */
 #define BN6_T1_COUNT          0x20        /* 32 of them */
 #define BN6_T1_IN_PLAY        0x00        /* bit 0 in play */
+#define BN6_T1_TYPE           0x01        /* its type, the routine its kind's table runs it by (BN6_T1_TYPES, BN6_T3_TYPES, BN6_T4_TYPES): written by
+                                             the spawn alone (0x080032BE), read by the runner (0x080031F4) and by the third kind's type 0x10,
+                                             which looks for its own among the third kind's objects (0x080C802E) */
+#define BN6_T1_SLOT           0x03        /* its slot among its kind's 32, written once as the battle sets the slots up (0x080034BE) */
 #define BN6_T1_ACTION         0x09        /* CurAction: MegaMan's BN6_MEGAMAN_READY when he can act, 0x10 a step, 0x12-0x16 a chip */
 #define BN6_MEGAMAN_READY     0x08        /* BN6_T1_ACTION: MegaMan's when he can act */
 #define BN6_T1_PANEL_X        0x12        /* PanelX and PanelY: its column and row, 0 off the field */
@@ -124,12 +140,37 @@
 #define BN6_T1_FUTURE_X       0x14        /* FuturePanelX and Y: the panel it is headed for (a thrown attack's landing), 0 none */
 #define BN6_T1_FUTURE_Y       0x15
 #define BN6_T1_ALLIANCE       0x16        /* Alliance: 0 MegaMan's side, 1 the enemies' */
+#define BN6_T1_FLIP           0x17        /* DirectionFlip: its facing turned (BN6's 0x0800E2CA: +1 or -1 a step by it and the alliance) */
 #define BN6_T1_HP             0x24        /* HP and MaxHP, u16 */
 #define BN6_T1_MAX_HP         0x26
 #define BN6_T1_CHIP           0x2A        /* the chip it uses next (u16 id), 0xFFFF none */
 #define BN6_T1_NAME_ID        0x28        /* NameID, u16: its name, the viruses' (RomLayout.enemy_names[0]) to 0xFF, the Navis' past it */
 #define BN6_T1_ELEMENT        0x0E        /* Element */
+#define BN6_T1_COLLISION      0x54        /* CollisionDataPtr: its collision data, in EWRAM (docs/ROM_DATA.md, Statuses as a hit leaves them), its fields BN6_COLL_* */
+#define BN6_T1_AI_DATA        0x58        /* AIDataPtr: its AI's data in EWRAM, BN6_AI_DATA_SIZE bytes: +1 its AI index, +0x80 its state, +0xA0 its attack's variables */
+#define BN6_AI_DATA_SIZE      0x100       /* an AI's data (BN6_T1_AI_DATA), the same in BN5 */
+#define BN6_COLL_SIZE         0xA8        /* a collision data's bytes (BN5_COLL_SIZE: BN5's are 8 fewer) */
+#define BN6_COLL_MASKS        0x08019C7Cu /* the words a collision data's +0x30 and +0x34 are set from, by alliance and region (two a region), BN6_COLL_MASK_WORDS of them; */
+#define BN6_COLL_MASK_WORDS   178         /* ... BN5_COLL_MASKS' first 160 with bit 0x80 or as they are, but region 61's (tests/xdiff/legit.json) */
 #define BN6_COLL_REGION       0x01        /* in its collision data (CollisionDataPtr +0x54, bn6f collision_data_struct), Region: the panels it is struck on and strikes, bn6f PanelOffsetListsPointerTable's index, 0 none (nothing touches it), 1 its own panel */
+#define BN6_COLL_PARALYSIS    0x1C        /* u16 frames left paralysed, one less each frame (0x0800E730, the status step every virus runs) */
+#define BN6_COLL_CONFUSE      0x1E        /* u16 frames left confused, the same (its mark over it, the fourth kind's 6 of kind 0, at +0x48) */
+#define BN6_COLL_BLIND        0x20        /* u16 frames left blinded, the same (its mark, kind 1, at +0x4C) */
+#define BN6_COLL_FLASH        0x24        /* u16 frames left flashing after a hit (BN5_COLL_FLASH): the blink step reads its bit 1 (BN6_BLINK_FLASHING) */
+#define BN6_COLL_FREEZE       0x2A        /* u16 frames left frozen in an ice block, the same */
+#define BN6_COLL_BUBBLE       0x2C        /* u16 frames left in a bubble, the same */
+#define BN6_COLL_FLAGS        0x3C        /* u32 its object's flags, ORed in by 0x0801A152 (BN5's 0x08016C42), read by object_getFlag (0x0801A166):
+                                             BN6_OBJ_INVULNERABLE among them; poison spares 0x08000028, lava 0x20 and 0x88000206 (bn6_panels.h) */
+#define BN6_OBJ_INVULNERABLE  0x08        /* BN6_COLL_FLAGS: no hit takes it (a hit's invulnerable frames set it, 0x0800EAFA; the same bit in BN5) */
+#define BN6_COLL_STRUCK       0x40        /* u32 what the hits of a frame left it, acted on by its next (0x0801B1C4, a virus's every frame), each bit cleared there: */
+#define BN6_STRUCK_PARALYSIS  0x00000008u /* ... paralysed, BN6_COLL_PARALYSIS frames: CurAction 4 */
+#define BN6_STRUCK_SLIDE      0x00000010u /* ... pushed along a panel (it slides; CurAction kept) */
+#define BN6_STRUCK_BLIND      0x00000020u /* ... blinded, BN6_COLL_BLIND frames, its mark spawned over it at its arm point 5 (0x0800E920-0x0800E93E) */
+#define BN6_STRUCK_CONFUSE    0x00000080u /* ... confused, BN6_COLL_CONFUSE frames, its other statuses' timers cleared, its mark over it
+                                             (0x0800E8B0-0x0800E8DE) */
+#define BN6_STRUCK_DRAG       0x00000100u /* ... dragged: CurAction 5 */
+#define BN6_STRUCK_FREEZE     0x00010000u /* ... frozen, BN6_COLL_FREEZE frames, an ice block spawned round it (BN6_ICE_SIZES): CurAction 6 */
+#define BN6_STRUCK_BUBBLE     0x00020000u /* ... bubbled, BN6_COLL_BUBBLE frames: CurAction 7 */
 #define BN6_BATTLE_HAND       0x020349C0u /* MegaMan's hand after OK (bn6f getBattleHandAddr_8010018; the enemies' 0x50 on): */
 #define BN6_HAND_AT           0x00        /* ... the chip up next, an index */
 #define BN6_HAND_CHIPS        0x02        /* ... the chips' ids, u16, six at most, 0xFFFF after them */
@@ -138,6 +179,7 @@
 #define BN6_HAND_MAX          6           /* ... six chips at most */
 #define BN6_CUSTOM_PICKS      0x02036508u /* the Custom screen's chips picked: their slots in its hand, in order (BN6_CUSTOM_PICKED of them) */
 #define BN6_BATTLE_NAVI       0x0203CE00u /* eBattleNaviStats0: MegaMan's NaviStats as a battle copies them (bn6f GetBattleNaviStatsAddr), */
+#define BN6_BATTLE_NAVI_SIZE  0x64        /* ... BN6_BATTLE_NAVI_SIZE a side (BN5's 0x60, laid out the same to +0x5F) */
 #define BN6_BATTLE_MOOD       (BN6_BATTLE_NAVI + 0x0E) /* Mood: BN6_MOOD_SYNCHRO Full Synchro, 0 dark (bn6f's emotion getter, Falzar 0x08015B64) */
 #define BN6_MOOD_SYNCHRO      0xFF        /* BN6_BATTLE_MOOD: Full Synchro, the next chip's power x2 (BN6's tutorial) */
 #define BN6_BATTLE_BEAST_TURNS (BN6_BATTLE_NAVI + 0x21) /* BeastOutCounter: the EmotionCounter, 3 as a battle starts, one less each Beast Out turn; 0 tired */
@@ -147,6 +189,35 @@
 #define BN6_FORM_BEAST_OVER   23          /* BN6_BATTLE_FORM: BeastOver, the Cybeast's power out of hand */
 #define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
 #define BN6_T3_COUNT          0x20        /* 32 of them */
+#define BN6_T4_OBJECTS        0x02036870u /* the battle's fourth kind of object (effects: a muzzle's blast, an ice block; the kind's record at 0x08003310), */
+#define BN6_T4_SIZE           0xC8        /* ... each this long, its fields as T1's to +0x5C, */
+#define BN6_T4_COUNT          0x20        /* ... 32 of them */
+#define BN6_OBJECT_NODE       0x10        /* the list node before each battle object (+4 the next node; its kinds' sizes count it) */
+#define BN6_OBJECT_LIST       0x02009380u /* the battle's objects in the order they run each frame: a head whose +4 is the first node, a node the 16 bytes before */
+#define BN6_OBJECT_LIST_END   0x02009AB0u /* ... its object (+4 the next), to this one, the list's end */
+#define BN6_RNG_PRIMARY       0x020013F0u /* u32, the random numbers' first word (BN5_RNG_PRIMARY's): its step at 0x0800151C, run once a frame (0x080050FC) */
+#define BN6_RNG_SECONDARY     0x02001120u /* u32, the second (BN5_RNG_SECONDARY's): its step at 0x0800154C, run twice a frame (0x08005100, 0x0800031C) */
+/* The battle engine's routines the differential hooks on both cores (src/dev/xdiff_events.c; BN5's in bn5.h), each a draw, a call or a step it logs with its caller */
+#define BN6_RNG_DRAW          0x0800151Cu /* GetRNG: the first word stepped, its value in r0 (push {r7,lr} first: lr its caller) */
+#define BN6_RNG_DRAW_POSITIVE 0x08001532u /* GetPositiveSignedRNG: the same, bit 31 cleared */
+#define BN6_RNG_DRAW_SECOND   0x0800154Cu /* GetRNGSecondary: the second word stepped */
+#define BN6_RNG_DRAW_SECOND_POSITIVE 0x08001562u /* GetPositiveSignedRNGSecondary: the same, bit 31 cleared */
+#define BN6_SPAWN_COMMON      0x08003278u /* SpawnBattleObjectCommon: r0 the kind (1, 3, 4), r1 its spawner's five words (the type first; its caller at r1 + 0x18) */
+#define BN6_SPAWN_COMMON_END  0x080032C8u /* ... its end (add sp,#4): r5 the object spawned, 0 none */
+#define BN6_PLAY_SOUND        0x080005CCu /* PlaySoundEffect: r0 the song */
+#define BN6_SPAWN_EFFECT      0x080E1932u /* an effect spawned (the fourth kind's type 0): r4's low byte the effect's id */
+#define BN6_SPRITE_LOAD       0x080026E4u /* sprite_load: r5 the object whose sprite state (past what its spawn clears) is set up anew */
+#define BN6_SET_ATTACK        0x08011698u /* setAttack's common part (setAttack0-5 at 0x08011680 + 4N branch to it): r0 the CurAction, r2 N, r5 the object */
+#define BN6_RESERVE_PANEL_DONE 0x0801BB3Eu /* object_reservePanel (0x0801BB1C) once the panel is reserved and BN6_OBJ_RESERVED set: r5 the object */
+#define BN6_OBJ_RESERVED      0x20        /* a battle object's +0: set as it first reserves a panel (0x0801BB36), never cleared while it lives (BN5 has no such bit) */
+#define BN6_BLINK_FLASHING    0x08016954u /* the blink step of an object flashing (its flags 0x202): bit 1 of its collision data's flash timer (+0x24) set hides it */
+#define BN6_OBJECT_RUNNER_RET 0x08003200u /* RunBattleObjectLogic (0x080031AC) calls each object by mov lr,pc; bx r0: the return address an object's call chain ends at */
+#define BN6_OBJECT_RUNNING    0x0200AF70u /* u32 the node of the object running (its object 0x10 on), 0 outside the runner (0x080031C2, 0x0800320A) */
+#define BN6_PHASE_FIGHT       0x0C        /* BN6_BATTLE_PHASE: fighting (from BATTLE START! on, the pause too) */
+#define BN6_PHASE_RESULTS     0x10        /* BN6_BATTLE_PHASE: over, its results (the reward picked from the enemies' drop rows) */
+#define BN6_WINDOW_OPEN       0x78        /* BN6_CUSTOM_WINDOW: open */
+#define BN6_MPLAYS            0x08159DC8u /* the sound's music players (MP2K), BN6_MPLAY_COUNT of 12 bytes: +0 its MusicPlayerInfo in EWRAM (+0 the song's */
+#define BN6_MPLAY_COUNT       32          /* ... header, +0xC its clock, 0 as a song starts); a song table entry names its player (RomLayout.song_table) */
 #define BN6_NAVI_STATS        0x020047CCu /* eNaviStats0: MegaMan's (NaviStats) */
 #define BN6_NAVI_HP           (BN6_NAVI_STATS + 0x40) /* CurHP and MaxHP, u16 */
 #define BN6_NAVI_MAX_HP       (BN6_NAVI_STATS + 0x42)
@@ -256,7 +327,7 @@
 #define BN6_SET_EVENT_FLAG    0x0802F114u /* SetEventFlag: r0 the flag (SetEventFlagFromImmediate, 0x0802F110, falls into it); the chat's EA 00 command calls it */
 #define BN6_GIVE_ITEM         0x0803CD6Cu /* GiveItem (Falzar 0x0803CD98): r0 the key item, r1 how many */
 #define BN6_CHAT_RUN_SCRIPT   0x08040359u /* chatbox_runScript (archive, script index) */
-#define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags; a guest battle's BugFrags) */
+#define BN6_GIVE_BUGFRAGS     0x0803D055u /* GiveBugfrags (count): the protected count and its checks, capped at 9999 (--talk bugfrags) */
 #define BN6_GIVE_ZENNY        0x0803CFCDu /* GiveZenny (amount): ProtectedZenny and its checks, capped at 999999 (Falzar 0x0803CFF9) */
 #define BN6_WARP_DEPART_JACK_OUT 0x080059B5u /* warp departure 8: the jack-out cutscene, then warp */
 #define BN6_OW_HOOK           0x080050ECu /* cbGameState_80050EC, run every frame of the game mode: a hook runs the engine's calls in its place */
@@ -276,25 +347,8 @@
 #define BN6_PROTOMAN_CROSS_END 0x080FDFA0u /* ProtoMan landing from his cross (bn6f sub_80FCC4C + 0x2C; issue #55), his collision data just restored: strh r0,[r2,#0x2E], r2 his collision data */
 
 /* BN6's own DarkChips (docs/ROM_DATA.md, BN6's own DarkChips; docs/META.md;
- * issue #70): a chip record's fields (RomLayout.chip_data, 0x2C bytes an
- * id; bn6f ChipData), the routines every chip use runs, the battle's
- * BugFrags (Gregar's as Falzar's) */
-#define BN6_CHIP_RECORD_SIZE  0x2C
-#define BN6_CHIP_ELEMENT      0x06        /* ChipElement: its icon's element (0 Fire, 1 Aqua, 2 Elec, 3 Wood, 4 Plus, 5 Sword, 6 Cursor, 7 Break, 8 Wind, 9 Obstacle, 10 Null) */
-#define BN6_CHIP_LIBRARY_TYPE 0x07        /* LibraryType: 0 standard, 1 Mega, 2 Giga, 3 secret, 4 a Program Advance */
-#define BN6_CHIP_EFFECT_FLAGS 0x09        /* EffectFlags: BN6_CHIP_DARK_CLASS makes a DarkChip (the folder's three, MegaMan's NAVIGATOR line, the purple card) */
-#define BN6_CHIP_SUBFAMILY    0x0C        /* AttackSubFamily: a recovery chip's amount (BN6_RECOVERY_AMOUNTS), a sword's area */
-#define BN6_CHIP_LIBRARY_FLAGS 0x16       /* LibraryFlags: BN6_CHIP_UNLISTED keeps a chip out of the pack's list (bn6f sub_811FE7C) */
-#define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
-#define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
-#define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
-                                             sub_811FCB8, sub_811FE7C); 0 on the five DarkChips, so it took any two for one chip and skipped its limits */
-#define BN6_CHIP_DARK_ID      0x1F        /* DarkChipID: 0-4 BN6's five DarkChips, 0xFF any other chip */
-#define BN6_CHIP_ICON_PTR     0x20        /* ChipIconPtr, then ChipImagePtr and ChipPalettePtr: the hand's icon, the card's picture */
-#define BN6_CHIP_IMAGE_PTR    0x24
-#define BN6_CHIP_PALETTE_PTR  0x28
-#define BN6_CHIP_DARK_CLASS   0x20
-#define BN6_CHIP_UNLISTED     0x20
+ * issue #70): the routines every chip use runs, the battle's BugFrags
+ * (Gregar's as Falzar's); a chip record's fields are bn6_chips.h's */
 #define BN6_DARK_FIRST_ID     0x11E       /* DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus: chips 0x11E-0x122 */
 #define BN6_DARK_AFTER        0x0800B79Au /* bn6f sub_800B79A, a chip's after-effects as it runs: r0 the chip that ran (a DarkChip's id only where
                                              its dark power ran, a BugFrag paid), r5 its user; the NaviCust's HP bug its table at 0x0800B7BC adds */
@@ -336,5 +390,11 @@
 #define BN6_CUSTOM_GAUGE      0x020352A0u /* u16, the Custom gauge: full at 0x4000 (bn6f SetCustGauge, eStruct2035280 + 0x20) */
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
+#include "bn6_attacks.h"   /* the attack families, power attacks and charge times, as the engine grows them (issue #82) */
+#include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
+#include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
+#include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
+#include "bn6_navis.h"   /* the battle engine's Navis: their tables by AI index, the routines they name, their arm points (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
+#include "bn6_panels.h"   /* the battlefield's panels as the engine updates, draws and acts on them (issue #82) */
 #endif

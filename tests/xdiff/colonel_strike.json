@@ -1,0 +1,122 @@
+{
+ "about": "A Navi Colonel's obstacle strike (issue #82: BN5's rule for either Colonel, src/emu/xstrike.c): Colonel V1 (BN5's 0x125, BN6's 0x1C4) alone at (5,2), MegaMan at (2,2) with 2000 HP and a folder of RockCube in both games (BN5's 0x63, BN6's 0x8F), the first Custom screen's chip picked and OK, used at t30: the cube stands at (3,2), on MegaMan's area, MegaMan behind it (BN5's second search, 0x080CAC98), and Colonel's spawn armed his side (BN5's BattleState +0x5C 0x20, BN5_COLONEL_SIDE_SET; BN6's BN6_COLONEL_SIDES through his moved code's XN_STUB_SIDES), so the obstacle's states (BN5's block 0x08018002-0x0801802E; BN6's at 0x0801B3CA through the strike's Thumb) turn it into the soldier, which fires at MegaMan: the one field ColonelSoul's ready arms too (soul_colonel_strike). Compared frame by frame to t43 (compare_to: from the cube's own use on, BN5's RockCube object is the code Colonel's moved copy runs, the reference's family's, and BN6's MegaMan's own chip's, so the two are told apart by whose code and BN6's redrawn effects 0x01 and 0x02 cannot be masked; t33-t43, the RockCube's own use, left out), its expectations holding both battles to the end: the soldier's three shots at MegaMan, frame for frame the same in both (expect). Every draw of BN6's replayed from BN5's (rng=replay); effects read as BN5's by their copies (effect_copies).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "125@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "effect_copies": true,
+ "safe": 0,
+ "folder5": [
+  "3463"
+ ],
+ "deck5": [
+  "3463"
+ ],
+ "folder6": [
+  "348F"
+ ],
+ "deck6": [
+  "348F"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "compare_skip": [
+  [
+   33,
+   43
+  ]
+ ],
+ "compare_to": 43,
+ "expect": {
+  "megaman": {
+   "hp": [
+    [
+     47,
+     "0x7D0"
+    ],
+    [
+     50,
+     "0x7CB"
+    ],
+    [
+     57,
+     "0x7CB"
+    ],
+    [
+     60,
+     "0x7C6"
+    ],
+    [
+     67,
+     "0x7C6"
+    ],
+    [
+     70,
+     "0x7C1"
+    ],
+    [
+     200,
+     "0x7C1"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's battle: the soldier stands from t34 (the third kind's 0x30, spawned by the obstacle's states' block through 0x080CABCA), fires three shots (the third kind's 0x12, t48, t58, t68) that strike MegaMan behind the cube for 5 each (its table's first word, Colonel's: BN5_COLONEL_TABLE), the first at t50, and goes at t100; BN6's the same through the strike's Thumb, the Souls' moved soldier (installed with the core where BN5's Navis are) and the chips' copy of its shot, his side armed by Colonel's moved spawn in BN6_COLONEL_SIDES."
+}

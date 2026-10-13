@@ -19,6 +19,10 @@ neighbours in its file share, where its bytes are there. RAM the literals
 hold is checked against bn6f's addresses (Gregar's RAM is laid out as
 Falzar's). In BN5, another game, only its bytes and the references count.
 
+In BN5, the routines this project paired with their twins in Gregar
+(tools/bn5_twins.py) are the twins' functions too, where the search placed
+none or, for the rows that file lists, another of another body.
+
 Writes .build/symbols/match/bn6f-gregar.csv and bn6f-bn5.csv (or into
 --out): per function its bn6f name, its Falzar address, where it is in the
 ROM, how it was located and how many references agree; then the data and
@@ -33,6 +37,7 @@ symbols --bn6f DIR runs both.
   python3 tools/bn6f_match.py --bn6f DIR --report FUNCTION   # one function's bytes against Gregar's, writes nothing
 """
 import argparse
+import bisect
 import csv
 import hashlib
 import io
@@ -1517,11 +1522,75 @@ def iwram(fns, where):
 COLUMNS = ('kind', 'name', 'falzar', 'address', 'size', 'mode', 'scope', 'source', 'confidence', 'refs', 'against', 'pools')
 
 
-def tables(fns, where, votes, ram, rom_key, commit):
+def twins(fns, gregar, where):
+    """BN5's routines that this project paired with their twins in Gregar,
+    each pair's bodies compared and the differing ones audited
+    (tools/bn5_twins.py; docs/SYMBOLS.md, Twins of the project's): the
+    function located at the twin in Gregar (gregar, its where) goes to the
+    BN5 routine, as 'twin', where BN5's search placed it nowhere and placed
+    nothing else there, or where it placed another function of another
+    body there by one reference (bn5_twins.WRONG_ROWS, which that function
+    leaves). A twin inside one of Gregar's functions (code that bn6f left as
+    data in it) is named by that function and the offset. Changes where
+    (BN5's) and returns the rows of the twins inside functions and what was
+    done."""
+    import bn5_twins
+    entries, spans = {}, []
+    for k, (a, how, *_) in gregar.items():
+        fn = fns[k]
+        if fn.f.kind != 'function' or not 0x08000000 <= a < 0x0A000000:
+            continue
+        entries[a] = k
+        size = fn.layout_at(a).size if how in VERIFIED else None
+        if size:
+            spans.append((a, a + size, k))
+    spans.sort()
+    placed = {a: k for k, (a, *_) in where.items() if fns[k].f.kind == 'function'}
+    rows, told, corrected = [], dict(added=0, corrected=0, agreed=0, inside=0, apart=0), set()
+    for b5, b6, _ in bn5_twins.TWINS:
+        k = entries.get(b6)
+        if k is None:
+            i = bisect.bisect_right(spans, (b6, float('inf'), 0)) - 1
+            if i < 0 or not spans[i][0] < b6 < spans[i][1]:
+                print(f'bn5-colonel: the twin {hx(b5)} of {hx(b6)}: no function of Gregar\'s is there, left unnamed')
+                told['apart'] += 1
+                continue
+            a, _, k = spans[i]
+            fn = fns[k]
+            rows.append(('function', f'{fn.name}+0x{b6 - a:X}', hx(fn.falzar + b6 - a if fn.falzar is not None else None),
+                         hx(b5), '', fn.f.mode, fn.f.scope, f'{fn.f.path}:{fn.f.line}', 'twin', '', '', ''))
+            told['inside'] += 1
+            continue
+        if k in where and where[k][0] == b5:
+            told['agreed'] += 1
+            continue
+        if k in where:
+            print(f'bn5-colonel: {fns[k].name}, the twin {hx(b5)}\'s, was located at {hx(where[k][0])}: kept there')
+            told['apart'] += 1
+            continue
+        other = placed.get(b5)
+        if other is not None:
+            if b5 not in bn5_twins.WRONG_ROWS:
+                print(f'bn5-colonel: {fns[other].name} was located at {hx(b5)}, which pairs with {fns[k].name}: kept')
+                told['apart'] += 1
+                continue
+            del where[other]
+            corrected.add(b5)
+            told['corrected'] += 1
+        else:
+            told['added'] += 1
+        where[k] = (b5, 'twin', 0, 0)
+    for b5 in sorted(set(bn5_twins.WRONG_ROWS) - corrected):
+        print(f'bn5-colonel: {hx(b5)}, a row tools/bn5_twins.py names wrong, was not: drop it from WRONG_ROWS')
+    return rows, told
+
+
+def tables(fns, where, votes, ram, rom_key, commit, extra=()):
     """The CSV: the bn6f commit it was made from (a row of kind "# bn6f"),
     every function (for Gregar, located or not), then the data labels of
     the data located between functions and the ones only the references
-    name, then the RAM labels the literals hold as Falzar's. Returns its
+    name, then the RAM labels the literals hold as Falzar's; extra, rows
+    of its own (twins inside functions), after the functions. Returns its
     text and what it holds."""
     out = io.StringIO()
     w = csv.writer(out, lineterminator='\n')
@@ -1558,6 +1627,8 @@ def tables(fns, where, votes, ram, rom_key, commit):
         told['located'] += 1
         w.writerow(('function', name, hx(fn.falzar), hx(a), size, f.mode, f.scope, f'{f.path}:{f.line}', how,
                     agree or '', other or '', pools))
+    for row in extra:
+        w.writerow(row)
     for fn in fns:
         if fn.f.kind != 'data' or fn.index not in where:
             continue
@@ -1658,6 +1729,7 @@ def main():
     ram = ram_labels(a.bn6f)
     commit = commit_of(a.bn6f)
     os.makedirs(a.out, exist_ok=True)
+    gregar = None
     for key, sha1, out in ROMS:
         rom = find_rom(a.roms, sha1)
         if rom is None:
@@ -1668,7 +1740,16 @@ def main():
         if a.report:
             report(fns, consts, rom, a.report, where)
             return 0
-        text, told = tables(fns, where, votes, ram, key, commit)
+        extra = ()
+        if key == 'bn6-gregar':
+            gregar = where
+        elif gregar is None:
+            print(f'{key}: no Gregar ROM, so none of its twins (tools/bn5_twins.py) named')
+        else:
+            extra, paired = twins(fns, gregar, where)
+            print(f'{key}: the project\'s twins: {paired["agreed"]} where the search put them, {paired["added"]} added, '
+                  f'{paired["corrected"]} in another\'s place, {paired["inside"]} inside a function, {paired["apart"]} not taken')
+        text, told = tables(fns, where, votes, ram, key, commit, extra)
         with open(os.path.join(a.out, out), 'w', encoding='utf-8', newline='\n') as f:
             f.write(text)
         hows = {}

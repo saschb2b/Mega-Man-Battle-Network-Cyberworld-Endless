@@ -209,20 +209,29 @@ clean:
 TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
 TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
-	src/audio/xsong.c src/layer/xnavi.c \
-	src/core/data.c src/core/xchips.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
+	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xchips_bn5.c src/emu/soulcode_bn5.c \
+	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
-	src/core/super_boss.c src/layer/super_lines.c \
+	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c
-build/host/test_core: $(TEST_SRCS) src/*/*.h
+# (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
+# without, so an object built without it never stands in for one CI's flags would refuse)
+TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
+TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
+$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
+build/host/test_core: $(TEST_OBJS)
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
+	$(CC_host) $(TEST_SAN) -o $@ $(TEST_OBJS) -lm
 
 # the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes),
-# and two cores side by side, BN6's through emu.c (its sound's ring)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/core/compat.c
+# two cores side by side, BN6's through emu.c (its sound's ring), and a block
+# of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
+# second-level dispatch's code run (xvirus_dispatch.c)
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

@@ -3,8 +3,9 @@
 #ifndef CW_GAME_HOOKS_H
 #define CW_GAME_HOOKS_H
 
-/* Those the boot already needs: game calls, the idle VBlank wait, the NPCs'
- * reach, the chat's marks, the PET's entries and their text */
+/* Those the boot already needs: BN6's chip tables (xchips_install.h), game
+ * calls, the idle VBlank wait, the NPCs' reach, the chat's marks, the PET's
+ * entries and their text */
 void game_hooks_install(void);
 /* Those after it, on a booted game or a resumed run: its battles (ProtoMan's
  * cross mended among them) and its events */

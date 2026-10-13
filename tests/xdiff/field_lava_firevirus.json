@@ -1,0 +1,42 @@
+{
+ "about": "BN5's field 0x73 (lava at columns 2 and 5 of row 2) as BN6's: CanGard V1 made Fire in both games' copies (both: its HP word's element) on lava at (5,2) is not hurt and the lava stays, till it runs out after 960 frames, blinking its last 60, in both; MegaMan at (1,2); the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "12",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "field": "73",
+ "both": [
+  "08108D30:103C"
+ ],
+ "expect": {
+  "foe_hp": [
+   [
+    1,
+    60
+   ],
+   [
+    1200,
+    60
+   ]
+  ],
+  "panels": [
+   [
+    958,
+    "52",
+    13
+   ],
+   [
+    959,
+    "52",
+    2
+   ],
+   [
+    959,
+    "22",
+    2
+   ]
+  ]
+ }
+}

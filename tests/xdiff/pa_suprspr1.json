@@ -1,0 +1,153 @@
+{
+ "about": "BN5's Program Advance SuprSpr1 formed on BN6's Custom screen (issue #82's final engine round; docs/MULTIROM.md, The chip registry): BN5's CanladEX held paralysed (hold: each game's own status step) at (5,2), MegaMan at (2,2) with a folder of WideSht1 L, M and N (BN5's 9, the registry's 204), the three picked in that order on the first Custom screen and OK: BN5's list forms it (0x08028020, its checker 0x080251E0) and BN6's list grown with BN5's recipes (src/core/xchips_pas.c, src/emu/xchips_code.c: BN6's 43 first, the word 0x080295B4 at the copy) forms it as BN6's own (0x08029520), BN5's 329, the registry's 356; the P.A. screen shown in both, the PA used at t30 and played by its moved code: every difference of BN6's play from BN5's fails it, to t117 (the foe's deletion at t118, a moved virus family's: its fourth kind's 0x11's RAM pointer, the families' track's, as chip_infvulc1's).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "frames": 117,
+ "folder5": [
+  "1609",
+  "1809",
+  "1A09"
+ ],
+ "deck5": [
+  "1609",
+  "1809",
+  "1A09"
+ ],
+ "folder6": [
+  "16CC",
+  "18CC",
+  "1ACC"
+ ],
+ "deck6": [
+  "16CC",
+  "18CC",
+  "1ACC"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ }
+}

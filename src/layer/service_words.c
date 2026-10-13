@@ -134,28 +134,26 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 	return i;
 }
 
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool ours) {
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first) {
 	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
-	 * first time: docs/META.md, issue #65) */
-	/* (when it comes, said every time: a returning playtester heard only
-	 * "when I'm hurt badly", session 68; and what BN5 does when MegaMan
-	 * falls after using one, seen there: he rose at 1 HP and the darkness
-	 * fought with his body a while) */
-	/* (and a kind BN6 keeps too, `ours`: in our net's battles a chip of our
-	 * folder that burns a BugFrag a use, docs/META.md, BN6's own DarkChips) */
-	char words[800];
+	 * first time: docs/META.md, issue #65; when it comes, said every time:
+	 * a returning playtester heard only "when I'm hurt badly", session 68.
+	 * One by BN5's rule: BN5's worried rule deals it into his hand in our
+	 * battles too, and one used makes him dark for that battle, as BN5's
+	 * do: docs/MULTIROM.md, One net. DarkPlus and DarkInvs say what they
+	 * do, as the owner's calls of 13 October 2026 ask: `does`, pages apart
+	 * by '|', "" none) */
+	const char *bar = does && *does ? "|" : "";
+	if (!does) does = "";
+	char words[720];
 	if (first)
-		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!|%s.|But only when I'm worried!|"
-			"Down to a quarter HP,or hit again and again.|You'll see it on my face.|A COUNTER calms me down.|%s"
-			"It's real power... But it eats at me.|Each battle I use one in,I lose %d max HP.|For the rest of this dive!|"
-			"And if I fall after using one...|The darkness might get me up,and fight in my body.|...That's not our way,Lan.", chip,
-			ours ? "In the old Net's battles,it comes to me" : "It comes only in the old Net's battles",
-			ours ? "Our Net knows this one,too!|In our battles,it's a Folder chip.|Each use burns a BugFrag.|" : "", DARK_PRICE);
-	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|It comes in the old Net's battles,when I'm worried.|"
-		"At a quarter HP,or hit again and again.%s|Each battle I use one in costs %d max HP.", chip,
-		ours ? "|In ours,it's a Folder chip.|Each use burns a BugFrag." : "", DARK_PRICE);
+		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!%s%s|It only comes when I'm worried.|"
+			"At a quarter HP,or hit again and again!|It's real power... But it eats at me.|Use one,and I go dark for that battle.|"
+			"And each battle I use one in...|...I lose %d max HP. For the rest of this dive!", chip, bar, does, DARK_PRICE);
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s%s|It comes when I'm worried,at a quarter HP.|"
+		"Each battle I use one in costs %d max HP.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
 	/* (on Yes: holding one costs nothing till it's used, and a paging A
@@ -166,8 +164,7 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, bool first, bool o
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, ours ? "It's ours now,Lan.\nAnd in our Pack,too.\nEither way...\nit takes its price."
-		: "It's ours now,Lan...\nIt'll come when I'm\nworried. At a price.", false);
+	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nTo use it,pick PET,\nFolder,then EDIT.\nIt'll come when I'm\nworried. At a price.", false);
 	ta_end(t);
 	return i;
 }

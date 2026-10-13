@@ -44,12 +44,9 @@
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
 #define LAYER_NUMBER_SEALED_FLAG 0x1466
 /* The layer's flame of darkness gave its DarkChip, and left (docs/META.md,
- * DarkChips in BN5 territory). (0x1467-0x1469: the draft's fit flags,
+ * DarkChips). (0x1467-0x1469: the draft's fit flags,
  * guardian_objs.h) */
 #define LAYER_DARK_TAKEN_FLAG  0x146D
-/* The run's chips that sit out of the older net's battles were named
- * (a run's, never cleared by a layer; a new run starts without it). */
-#define RUN_OUT_NAMED_FLAG     0x146E
 
 typedef struct {
 	int start_x, start_y;      /* world position of the warp in */
@@ -104,20 +101,22 @@ extern unsigned layer_objs_xlooks;
 /* The level of the layer's official gate (docs/RIVAL.md), 0 for none. */
 extern int layer_objs_official_level;
 /* Set before layer_objs_install on a layer that holds a flame of darkness:
- * its list-7 sprite (-1: none), the DarkChip in it, and for BN5's flame
- * whether MegaMan says all of its price (a profile's first) and whether
- * BN6's battles play its kind too (layer_objs_dark_first, _ours). It
- * stands in its last bystander's place. */
+ * its list-7 sprite (-1: none), the DarkChip in it, and for one of BN5's
+ * own whether MegaMan says all of its price (a profile's first:
+ * layer_objs_dark_first). It stands in its last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
-/* ... a flame of BN6's own (docs/META.md, BN6's own DarkChips): its words'
- * pieces, NULL for BN5's */
+/* ... one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
+ * words' pieces, NULL for BN5's own */
 extern const ScriptsDark6 *layer_objs_dark6;
+/* ... one played by BN5's rule: what it does in MegaMan's words (DarkPlus,
+ * DarkInvs), "" for one whose words say none */
+extern const char *layer_objs_dark_does;
 /* Set before layer_objs_install where the layer's Server holds a Navi (its
  * battle rolled with the layer): the words its signal is named by ("" for
  * viruses). */
 extern const char *layer_objs_server_navi;
-extern bool layer_objs_dark_first, layer_objs_dark_ours;
+extern bool layer_objs_dark_first;
 extern bool layer_objs_duel_later;
 
 #endif

@@ -60,7 +60,7 @@ typedef struct {
 	uint8_t xbg;             /* its battles' background in its own game's tables (0: the BN6 area's) */
 	bool held;               /* (another game's) kept out of runs, its look still rough; --net-biome xN draws it (docs/MULTIROM.md) */
 	uint8_t xbattles[3][2];  /* (another game's) per layer of an act, the map (group, number) whose battle records its random battles take,
-	                          * fought in its own engine on the guest core (guest.h); group 0: its layers fight BN6's battles */
+	                          * fought in BN6's engine (xbattles.h); group 0: its layers fight BN6's battles */
 	uint8_t xguard[2];       /* (another game's) the Navis of its game (their ids table's AI index) who may guard its acts, as its own net maps
 	                          * set them (docs/BOSSES.md, BN5's Navis); 0 none: BN6's guardians */
 } NetAreaDef;
@@ -179,11 +179,26 @@ void rom_text(uint32_t archive, int index, char *out, size_t outlen);
 /* ... `n` bytes of the game's text, to the first command (0xE5 on): a
  * script read from the core's memory (an archive the run rebuilt) */
 void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
-/* ... the same in extra ROM `xrom` (rom.h, XR), "" where it is not there */
+/* ... the same in extra ROM `xrom` (rom.h, XR), "" where it is not there:
+ * its text in BN6's codes first (xrom_text_bn6) */
 void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen);
-/* A description's text (a chip's): script `index` of `archive` past its
- * box commands, its lines joined by spaces. */
-void rom_desc(uint32_t archive, int index, char *out, size_t outlen);
+/* Text of extra ROM `xrom` in BN6's codes (docs/ROM_DATA.md, BN5's text):
+ * BN5 spells letters and digits as BN6 does but numbers the rest
+ * otherwise, BN6 having put its five version marks at 0x40-0x44. `n`
+ * bytes of `src`, to its first command (0xE5 on), into `dst` (`max` at
+ * most), each as BN6's code of the same glyph: BN5's DS mark, which BN6
+ * has none of, as the letters D and S; a glyph BN6's font lacks left out.
+ * How many were written. Every BN5 string read as text or copied into
+ * BN6's archives goes through it. */
+size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max);
+/* ... a script of extra ROM `xrom`'s (a chip's description) in BN6's
+ * codes: its text as xrom_text_bn6's, its commands kept with their
+ * arguments (E8 three, F1 two, E7 one; E9, the next line; others left
+ * out), up to its end (E6), which is written; how many bytes were. */
+size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max);
+/* A description's text (a chip's): the script at `s` (`n` bytes at most)
+ * past its box commands, its lines joined by spaces. */
+void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen);
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]);
 

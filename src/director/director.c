@@ -24,7 +24,6 @@
 #include "director_dev.h"
 #include "director_duel.h"
 #include "director_folder.h"
-#include "director_guest.h"
 #include "director_home.h"
 #include "director_keys.h"
 #include "director_layer.h"
@@ -37,10 +36,10 @@
 #include "game.h"
 #include "gamecall.h"
 #include "guardians.h"
-#include "guest_words.h"
 #include "lesson_words.h"
 #include "loot.h"
 #include "meta.h"
+#include "nets_words.h"
 #include "netmap.h"
 #include "pet_text.h"
 #include "rivals.h"
@@ -109,9 +108,7 @@ bool director_arrived(void) {
 
 /* ---- dev tools (src/dev/devtools.c) ---- */
 
-/* (not through a guest battle, which BN6 waits out on its map: the touch
- * controls' D-pad keeps to four ways in its battle, as in BN6's) */
-bool director_on_map(void) { return D.active && on_map() && !guest_active(); }
+bool director_on_map(void) { return D.active && on_map(); }
 
 void director_stop(void) { D.active = false; }
 
@@ -304,7 +301,6 @@ static void take_events(void) {
 				if (D.objs.choice[k].flag == (int)ev[i].r[0] && flag_get(D.objs.choice[k].flag)) D.choices_due |= 1u << k;
 			break;
 		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
-		case EV_GUEST_BATTLE: if (on_layer) guest_begin(); break;
 		case EV_JOB: home_jobs_flag((int)ev[i].r[0]); break;
 		}
 }
@@ -320,13 +316,13 @@ void drop_events(void) {
 
 static void words_due(void) {
 	gate_and_rush_words();
-	guest_words();
+	nets_words_due();
 	dark_flame_watch();
-	/* (BN6's own DarkChips: in the Pack, their power as the BugFrags held
-	 * say, the price of a battle their dark power ran in) */
+	/* (the run's DarkChips: in the Pack, BN6's power as the BugFrags held
+	 * say, the price of a battle a dark power ran in, either net's) */
 	dark_pack();
 	darkbn6_sync();
-	dark6_after_battle();
+	dark_after_battle();
 	if (D.dark_words[0] && !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && talk_start(D.dark_words, FACE_MEGAMAN))
 		D.dark_words[0] = 0;
 	home_jobs_words();
@@ -399,14 +395,18 @@ static void battle_update(void) {
 		bool guardian = boss_fighting();
 		D.record_known = guardian;
 		if (!guardian && !D.challenge) ++D.battles;
-		/* (the one fought: an older net's guardian whose engine could not
-		 * fight him leaves the area's own, boss.c) */
-		int navi = D.objs.guardian.navi;
-		if (guardian) runlog_guardian_start(guardian_older(navi) ? run.boss_order[run.biome] : navi);
+		/* (the one fought, BN5's by his id moved into BN6's engine) */
+		int hp = 0;
+		const Encounter *g = guardian ? boss_battle(&hp) : NULL;
+		if (guardian) runlog_guardian_start(D.objs.guardian.navi, g, hp);
+		D.souls_used = 0;
 		home_jobs_battle_start();
 	}
 	D.in_battle = true;
-	if (sub == BN6_SUB_BATTLE) home_jobs_battle_frame();
+	if (sub == BN6_SUB_BATTLE) {
+		home_jobs_battle_frame();
+		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
+	}
 	/* the duel's time: the results screen's DeleteTime (its hits
 	 * come as events: docs/RIVAL.md) */
 	if (D.duel && sub == BN6_SUB_BATTLE) {
@@ -446,6 +446,7 @@ static void after_battle(void) {
 	D.placed_told = false;
 	D.battle_record = 0;
 	bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
+	runlog_battle_souls(D.souls_used);
 	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
 	/* (a request's battles: a guardian's counts for none) */
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
@@ -465,6 +466,7 @@ static void after_battle(void) {
 		} else fprintf(stderr, "battle reward %04x\n", r);
 	}
 	if (won && !boss_fighting()) run.viruses_deleted += D.foes;
+	if (!boss_fighting()) nets_battle_note(&D.next);   /* (a visitor of the other net: MegaMan's word, once a profile) */
 	if (!D.challenge && !boss_fighting()) roll_encounter();
 }
 

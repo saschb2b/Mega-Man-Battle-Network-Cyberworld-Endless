@@ -1,0 +1,216 @@
+{
+ "about": "BN5's ToadSoul's chip charge in both engines (the Souls track's S5): ToadSoul united (its flag 000D, souls6 0x20) with a deck of an Aqua WideSht (BN5's WideSht1 L, 9; BN6's WideSht P, 23: Aqua, ToadSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (an Aqua chip, 0x08010902), its charge time BN5's (0x1B's row), released at t232 as the chip used charged and doubled (0x080103C8), as in soul_knight_charge. The two WideShts are each game's own (70 and 100, BN5's family 0x25, BN6's 0x30): the spec ends as it is used, the family and numbers read by each game's own record.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 232,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000D",
+  "0236"
+ ],
+ "folder5": [
+  "1609"
+ ],
+ "deck5": [
+  "1609"
+ ],
+ "folder6": [
+  "1E17"
+ ],
+ "deck6": [
+  "1E17"
+ ],
+ "souls6": "20",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   130
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: ToadSoul united from t1, the chip charged from t100 and used charged at t232."
+}

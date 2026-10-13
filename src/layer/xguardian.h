@@ -5,7 +5,20 @@
 #ifndef CW_XGUARDIAN_H
 #define CW_XGUARDIAN_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+#include "foes.h"
+
+/* Whether BN5's guardian `navi` is fought here: his Navi moved into BN6's
+ * engine at every version a run fights him at (xnavi_install.h), which
+ * BN5's ROM read brings (on the 3DS where its heap has room for it,
+ * start_3ds.c) */
+bool xguardian_fightable(int navi);
+/* His battle in BN6's engine (docs/BOSSES.md, BN5's Navis): his moved id
+ * at `version` where BN6's guardians stand, the boss theme, no running;
+ * none (nfoes 0) where he is not fightable */
+Encounter xguardian_encounter(int navi, int version);
 
 /* The version (0 V1, 1 V2, 2 V3, 3 SP) BN5's guardian `navi` is fought at
  * on layer `depth` (pacing_xguardian_version, from his HP in his game) */
@@ -21,21 +34,22 @@ int xguardian_hp_fought(int navi, int version, int depth);
 int guardian_element(int navi);
 int guardian_weakness(int navi);
 
-/* A chip of his Soul's kind (the chips his Soul unites with in his game,
- * BN5_CHIP_KIND) for his Guardian Data, in place of the Navi chip
- * BN6's guardians give (docs/BOSSES.md): one of BN6's standard chips whose
- * namesake in his game is of it, rolled from `seed` (the rarest left out
- * where there are others); its code into *code, as a guardian's Navi chip
- * comes (the folder's where the chip has it, else its *, else its first);
- * 0 none */
-int xguardian_chip(int navi, uint32_t seed, int *code);
+/* His Navi chip for his Guardian Data, as BN6's guardians give theirs
+ * (docs/BOSSES.md): BN5's V1 chip of him in the first three acts, his SP
+ * from the fourth (where BN6's give EX or SP: BN5 has no EX) where it plays
+ * in BN6's battles, else his V1; its code into *code (the folder's where
+ * the chip has it, else its *, else its first); 0 none */
+int xguardian_chip(int navi, int depth, int *code);
+/* Whether BN6 chip `chip` is one of BN5's Navi chips of the six (V1, SP,
+ * DS: a guardian's reward row holds his) */
+bool xguardian_navi_chip(int chip);
 
-/* What his Guardian Data says of his Soul (docs/META.md, Souls in BN5
- * territory): that MegaMan got it, the chips it takes, UNITE, once a
- * battle, his kind of DarkChip, and that it works in the older net's
- * battles alone; all of it the first time a profile wins one
- * (profile.soul_taught), the Soul and its chips after that, and that the
- * run holds it already where it does. Chat boxes split by '|'. */
+/* What his Guardian Data says of his Soul (docs/META.md, Souls): that
+ * MegaMan got it, that it is with them every battle, the chips that unite
+ * with it, once a battle; all of it the first time a profile wins one
+ * (profile.soul_taught), and once a profile that a Soul and a Cross are
+ * not worn together (profile.soul_form_taught); that the run holds it
+ * already where it does. Chat boxes split by '|'. */
 const char *xguardian_soul_words(int navi);
 
 /* The list-6 number he stands in and speaks with, his sprite and face

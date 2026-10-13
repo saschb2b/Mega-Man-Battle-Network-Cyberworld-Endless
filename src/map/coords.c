@@ -18,8 +18,8 @@
 #include "lz.h"
 #include "netmap.h"
 
-#define COORD_AT (EMU_FREE + 0x60000) /* generated coordinate data */
-#define TOWN_COORD_AT (EMU_FREE + 0x130000) /* the town's */
+#define COORD_AT FREE_COORDS          /* generated coordinate data */
+#define TOWN_COORD_AT FREE_TOWN_COORDS      /* the town's */
 
 /* One cell's shape: key, then lowest z, value, height, type. */
 typedef struct { uint16_t key; uint8_t shape[4]; } Cell;

@@ -116,6 +116,6 @@ const char *guardian_area_short(int biome);
 const char *guardian_area_motto(int biome);
 
 /* (guardian_lines.c) MegaMan on an older net guardian's Soul */
-const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, const char *dark);
+const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, bool form);
 
 #endif

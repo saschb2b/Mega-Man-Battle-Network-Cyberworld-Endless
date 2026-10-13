@@ -113,9 +113,7 @@ void save_checkpoint(void) {
 }
 
 bool director_can_suspend(void) {
-	/* (not through a guest battle: BN6 stands on the map while it runs, and
-	 * a quit there skipped the battle) */
-	return D.active && !D.town && !D.gameover && !guest_active() && !D.warping && boss_idle() && !D.challenge && hold_save_ok();
+	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && hold_save_ok();
 }
 
 const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
@@ -274,6 +272,9 @@ bool director_resume(void) {
 	bool same = same_layer();
 	if (emu_load_state(path)) {
 		lock_run();
+		/* (chips or Souls of BN5's, BN5's ROM not read: they wait for it,
+		 * and MegaMan says so, docs/MULTIROM.md) */
+		D.resumed = true;
 		if (home) return resume_home();
 		spins_sync();
 		/* (the ScrtData the state holds, as the game counts them) */

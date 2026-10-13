@@ -1,7 +1,8 @@
-/* The run's Souls (docs/META.md, Souls in BN5 territory; issue #69): which
- * of BN5's Team Colonel Navis the run has beaten as a territory's guardian
- * (docs/BOSSES.md, BN5's Navis) and holds the Soul of, for its BN5
- * battles; kept beside the run's checkpoint. A new run holds none. */
+/* The run's Souls (docs/META.md, Souls; issues #69, #82): which of BN5's
+ * Team Colonel Navis the run has beaten as a guardian (docs/BOSSES.md,
+ * BN5's Navis) and holds the Soul of, for every battle of the run, the
+ * Souls standing in BN6's engine (docs/MULTIROM.md, Transplanted Souls);
+ * kept beside the run's checkpoint. A new run holds none. */
 #ifndef CW_SOULS_H
 #define CW_SOULS_H
 
@@ -18,7 +19,8 @@ void souls_begin(uint32_t seed);
  * seed it names. */
 void souls_save(void);
 void souls_load(uint32_t seed);
-/* The Souls held, bit k BN5's Soul 7 + k (guest.h: GuestMegaMan.souls) */
+/* The Souls held, bit k BN5's Soul 7 + k (soulunite.h's, handed to BN6's
+ * engine as each battle begins: encounter.c) */
 unsigned souls_held(void);
 /* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older),
  * and his given */

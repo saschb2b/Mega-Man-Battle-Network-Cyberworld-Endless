@@ -22,15 +22,15 @@
 /* Layer data comes from a bump allocator over two halves, one per layer in
  * turn: the map being left keeps running its NPC scripts while the next
  * layer is built during its warp. */
-#define SCRATCH      (EMU_FREE + 0x3000)
+#define SCRATCH      FREE_LAYER
 #define SCRATCH_HALF 0x6800
-#define WARP_LIST    (EMU_FREE + 0x2F00)  /* the layer map's warps: entry 1 is the exit */
-#define NO_MYSTERY   (EMU_FREE + 0x0180)  /* an empty Mystery Data list, for the maps the layers left */
-#define TOWN_ARENA   (EMU_FREE + 0x140000) /* the town's data, apart from the layers' */
+#define WARP_LIST    FREE_WARP_LIST       /* the layer map's warps: entry 1 is the exit */
+#define NO_MYSTERY   FREE_NO_MYSTERY      /* an empty Mystery Data list, for the maps the layers left */
+#define TOWN_ARENA   FREE_TOWN             /* the town's data, apart from the layers' */
 #define TOWN_SIZE    0x8000
-#define HP_ARENA     (EMU_FREE + 0x148000) /* Lan's HP's (docs/HOME.md) */
+#define HP_ARENA     FREE_LAN_HP           /* Lan's HP's (docs/HOME.md) */
 #define HP_SIZE      0x8000
-#define INDOORS_ARENA (EMU_FREE + 0x320000) /* home's other places: AsterLand, the Cyber Academy */
+#define INDOORS_ARENA FREE_INDOORS          /* home's other places: AsterLand, the Cyber Academy */
 #define INDOORS_PART 0x8000                /* ... each its own */
 
 #define RW_GROUPS      7

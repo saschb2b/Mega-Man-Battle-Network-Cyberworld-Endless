@@ -13,8 +13,8 @@
 #include "bytes.h"
 #include "emu.h"
 
-#define WARP_DATA (EMU_FREE + 0x000)  /* a warp record and a one-entry warp list */
-#define RETURN_AT (EMU_FREE + 0x100)  /* where a called routine returns: a hook */
+#define WARP_DATA FREE_WARP           /* a warp record and a one-entry warp list */
+#define RETURN_AT FREE_CALL_RETURN    /* where a called routine returns: a hook */
 
 /* The call: set between frames, run and answered by the hooks */
 static struct {

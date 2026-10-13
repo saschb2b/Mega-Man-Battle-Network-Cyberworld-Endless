@@ -1,0 +1,81 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of InfVulc1 A in both games, BN5's chip 323 by BN5's own code and the registry's 350 by the same code moved (BN5's Vulcan family 0x19 as BN6's 0x69, subfamily 4; a Program Advance of the registry's, dealt straight into the battle deck, as its rule is to come), the first Custom screen's chip picked and OK, used at t30, its shots till the foe's deletion (t182: a moved virus family's deletion, its fourth kind's 0x11's RAM pointer, the families' track's): every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 170,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "0143"
+ ],
+ "folder6": [
+  "015E"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "deck5": [
+  "0143"
+ ],
+ "deck6": [
+  "015E"
+ ]
+}

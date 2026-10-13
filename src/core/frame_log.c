@@ -10,6 +10,9 @@
 #include "emu.h"
 #include "platform.h"
 #include "platform_second.h"
+#ifdef __3DS__
+#include "start_3ds.h"
+#endif
 
 bool platform_frame_log;
 
@@ -51,7 +54,11 @@ void frame_log_present(uint64_t present) {
 		extern uint64_t emu_core_ticks, emu_core_unshown_ticks;
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
+#ifdef __3DS__
+		char bottom[320] = "";
+#else
 		char bottom[160] = "";
+#endif
 		uint64_t second_ticks;
 		int seconds = platform_second_parts(&second_ticks);
 		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
@@ -61,6 +68,14 @@ void frame_log_present(uint64_t present) {
 			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing", emu_draw_waits);
 			emu_draw_waits = 0;
 		}
+#ifdef __3DS__
+		/* (and the heap, whose high-water mark a layer's learning raises:
+		 * docs/EMULATION.md, The 3DS's memory) */
+		char heap[120];
+		start_3ds_heap(heap, sizeof heap);
+		size_t at = strlen(bottom);
+		snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
+#endif
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"
 			" the longest update and drawing %.1f ms%s\n",

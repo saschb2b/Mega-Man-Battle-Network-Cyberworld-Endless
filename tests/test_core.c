@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "darkchips.h"
@@ -48,11 +49,39 @@
 #include "touch_layout.h"
 #include "padmap.h"
 #include "buttons.h"
+#include "chips.h"
+#include "claims.h"
+#include "xattack_grow.h"
 #include "xchips.h"
+#include "xchips_bn5.h"
+#include "xchips_code.h"
+#include "xchips_moved.h"
+#include "xchips_record.h"
+#include "xchips_registry.h"
+#include "xchips_text.h"
+#include "soulkinds.h"
 #include "xnavi.h"
+#include "xnavi_bn5.h"
 #include "xsong.h"
 #include "debug.h"
 #include "emu.h"
+#include "bytes.h"
+#include "thumb_reloc.h"
+#include "battle_rng.h"
+#include "bn5.h"
+#include "bn6.h"
+#include "xpanels.h"
+#include "visitor_families.h"
+#include "visitors.h"
+#include "xpanels_look.h"
+#include "xsea.h"
+#include "xvirus_bn5.h"
+#include "xvirus_dispatch.h"
+#include "xvirus_families.h"
+#include "xvirus_shim.h"
+#include "soul_room.h"
+#include "soulcode.h"
+#include "xnavi_sprites.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -104,7 +133,23 @@ void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
 void profile_save(void) {}
 int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
 int chip_pool_class_count(int cls) { (void)cls; return 0; }
+bool chip_pool_older(int rom_id) { (void)rom_id; return false; }
+int chip_pool_tier(int rom_id) { (void)rom_id; return -1; }
 bool town_after_abandon;
+/* (the nets' meeting, issue #82: no ROMs, so the families the visitors
+ * come from are the tests' own, test_visitors; the older net's chips'
+ * share, home's requests' rolls; BN6's stages by depth) */
+int loot_older_share;
+bool loot_visitors_always;
+int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
+static VisitorKin test_kin[2][4];
+static int test_nkin[2], test_role[2][64], test_id[2][64][6], test_panel = 2;
+int visitor_kin(int net, const VisitorKin **out) { *out = test_kin[net & 1]; return test_nkin[net & 1]; }
+int visitor_role_in(int net, int family) { return family > 0 && family < 64 ? test_role[net & 1][family] : VISITOR_FREE; }
+int visitor_id(int net, int family, int version) {
+	return family > 0 && family < 64 && version >= 0 && version < 6 && test_id[net & 1][family][version] ? test_id[net & 1][family][version] : -1;
+}
+int visitor_panel(const Encounter *e, int col, int row) { (void)e; (void)col; (void)row; return test_panel; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -1113,22 +1158,23 @@ static void test_pacing(void) {
 	CHECK(pacing_guardian_version(3, 3, 0, false, fake_navi_hp) == 1, "SlashMan EX in the fourth act");
 	CHECK(pacing_guardian_version(3, 0, 1, false, fake_navi_hp) == 2, "SP on the second cycle");
 	/* BN5's guardians (docs/BOSSES.md, BN5's Navis): the lowest version
-	 * whose HP reaches their band, three quarters of BN6's guardians' (no
-	 * Cross comes into BN5's engine: 300-450 in act 1), V2 at least from act
-	 * 4, and their HP capped at its top, never raised (BN5's own HP: KnightMan
+	 * whose HP reaches their band, BN6's guardians' since they fight in
+	 * BN6's engine (400-600 in act 1; the three-quarters discount stood for
+	 * the Cross that never came into BN5's), V2 at least from act 4, and
+	 * their HP capped at its top, never raised (BN5's own HP: KnightMan
 	 * 600/900/1600/1800, ShadowMan 500/700/1200/1600, ToadMan 700/900/1200/
 	 * 1500, TomahawkMan 700/900/1400/1800, Colonel 400/1200/1800/2000) */
 	const int knight[4] = { 600, 900, 1600, 1800 }, shadow[4] = { 500, 700, 1200, 1600 }, toad[4] = { 700, 900, 1200, 1500 },
 		tomahawk[4] = { 700, 900, 1400, 1800 }, colonel[4] = { 400, 1200, 1800, 2000 };
 	CHECK(pacing_xguardian_version(knight, 0, 0, false) == 0 && pacing_xguardian_version(knight, 1, 0, false) == 0, "KnightMan V1 in acts 1-2");
-	CHECK(pacing_xguardian_version(knight, 1, 0, true) == 1 && pacing_xguardian_hp(900, 1, 0) == 525, "threat 4's V2 from act 2, capped at 525");
-	CHECK(pacing_xguardian_version(toad, 0, 0, false) == 0 && pacing_xguardian_hp(700, 0, 0) == 450, "ToadMan V1 in act 1, held to 450");
-	CHECK(pacing_xguardian_hp(600, 0, 0) == 450, "KnightMan's 600 held to 450 in act 1 (session 68)");
-	CHECK(pacing_xguardian_version(shadow, 1, 0, false) == 0 && pacing_xguardian_version(shadow, 2, 0, false) == 1 &&
-		pacing_xguardian_hp(700, 2, 0) == 700, "ShadowMan V1 in act 2, V2 at 700 in act 3");
+	CHECK(pacing_xguardian_version(knight, 1, 0, true) == 1 && pacing_xguardian_hp(900, 1, 0) == 700, "threat 4's V2 from act 2, capped at 700");
+	CHECK(pacing_xguardian_version(toad, 0, 0, false) == 0 && pacing_xguardian_hp(700, 0, 0) == 600, "ToadMan V1 in act 1, held to 600");
+	CHECK(pacing_xguardian_hp(600, 0, 0) == 600, "KnightMan's 600 his own in act 1");
+	CHECK(pacing_xguardian_version(shadow, 0, 0, false) == 0 && pacing_xguardian_version(shadow, 1, 0, false) == 1 &&
+		pacing_xguardian_hp(700, 1, 0) == 700, "ShadowMan V1 in act 1, V2 at 700 in act 2");
 	CHECK(pacing_xguardian_hp(500, 2, 0) == 500, "never raised to the band's floor");
-	CHECK(pacing_xguardian_version(tomahawk, 2, 0, false) == 0 && pacing_xguardian_version(tomahawk, 3, 0, false) == 1 &&
-		pacing_xguardian_hp(900, 3, 0) == 900, "TomahawkMan V1 in act 3, V2 at 900 in act 4");
+	CHECK(pacing_xguardian_version(tomahawk, 2, 0, false) == 1 && pacing_xguardian_version(tomahawk, 3, 0, false) == 2 &&
+		pacing_xguardian_hp(1400, 3, 0) == 1300, "TomahawkMan V2 in act 3, V3 held to 1300 in act 4");
 	CHECK(pacing_xguardian_version(colonel, 4, 0, false) == 1, "Colonel V2 in the Undernet's act");
 	CHECK(pacing_xguardian_version(colonel, 4, 1, false) == 3 && pacing_xguardian_hp(2000, 4, 1) == 2000, "SP, his own HP, on a later cycle");
 	/* heals: the middle layer of each act on the first two cycles, and the
@@ -1323,8 +1369,13 @@ static void test_talk(void) {
 		snprintf(what, sizeof what, "the arrival's words in area %d", biome);
 		check_talk(what, line);
 		snprintf(what, sizeof what, "the briefing in area %d", biome);
-		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Battles here run the older Net's way.|@M A strong Navi's signal waits at "
-			"the end...|@M We've got no battle data on it,Lan.|@M Watch the yellow panels! Attacks land there!", area);
+		/* (where the nets meet, issue #82: an older net's area's own
+		 * viruses, the deep's both nets', briefing_words.c) */
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Its viruses come from the older Net!|@M A strong Navi's signal waits at "
+			"the end...", area);
+		check_talk(what, line);
+		snprintf(line, sizeof line, "@M Layer 19,Lan. We're in %s!|@M Both Nets' viruses come down here!|@M A strong Navi's signal waits at "
+			"the end...", area);
 		check_talk(what, line);
 		for (int navi = 1; navi <= 18; ++navi) {
 			if (navi == 17) continue;
@@ -1353,6 +1404,34 @@ static void test_talk(void) {
 static void test_home_words(void) {
 	const char *ports[3] = { home_portal_name(0), home_portal_name(2), home_portal_name(4) };
 	for (int k = 0; k < 5; ++k) CHECK(home_portal_name(k)[0], "portal %d has a name", k);
+	/* (where the nets meet, issue #82, nets_words.c: the first arrival at
+	 * an older net's area, our way, for a profile new to it and one told
+	 * the old way on the guest core that has left runs; the deep's both
+	 * nets; the first visitor of either net, named by the longest of their
+	 * families'; a CONTINUE without BN5's ROM, its chips and Souls waiting) */
+	check_talk("an older net's area, first", "@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
+		"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!");
+	check_talk("an older net's area, told the old way", "@M Lan! Our Cross works in the older Net now!|@M Its Navis fight our way too.|"
+		"@L Alright! Cross and all!");
+	check_talk("the deep's both nets", "@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
+		"@M Yeah. Anything could come at us!");
+	check_talk("a visitor of the older net's", "@M Lan,that Cactikil back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
+		"@M Where they meet,yeah. Stay sharp!");
+	check_talk("a visitor of ours", "@M Huh? That HntdCndl was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!");
+	check_talk("the older net's chips and Souls, its ROM gone", "@M Huh? Some of our chips came from the older Net...|@L And its cartridge isn't here!|"
+		"@M Right. They'll sit out until it's back!|@M I can't feel the old Souls,Lan...|@M Not till the older Net's back.");
+	/* (a Soul won, guardian_lines.c: the whole of it, with a chip of its
+	 * kind or none, a Soul or a Cross; the short of it; one held) */
+	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
+		for (int kind = 0; kind < 12; ++kind) {
+			profile.soul_taught = 0;
+			check_talk("a Soul's first words", guardian_soul_words(navi, kind, false, "WideSht1", true));
+			check_talk("a Soul's first words, no chip", guardian_soul_words(navi, kind, false, "", false));
+			profile.soul_taught = 1;
+			check_talk("a Soul's words", guardian_soul_words(navi, kind, false, "", kind & 1));
+			check_talk("a Soul held", guardian_soul_words(navi, kind, true, "", false));
+		}
+	profile.soul_taught = 0;
 	check_talk("Lan's HP's first time", home_hp_words(false));
 	check_talk("Lan's HP, a profile told", home_hp_words(true));
 	check_talk("the errands at home", home_errands_words("@M Home's to the upper right,Lan!|@M The PC's up in your room!", true, true, "to the lower left"));
@@ -1689,6 +1768,99 @@ static void test_kept_walk(void) {
 	CHECK(off == 0, "the map's kept walk differed from the arrow's search on %d of %d walks", off, walks);
 }
 
+/* An area's share of a test, every area's at once: body(b, out) in a
+ * process of its own for each area (its layers its own, as each area's
+ * generation is), what it printed passed on in the areas' order, its
+ * failed checks counted here and its `n` counts added into `sum`. A test
+ * of every area walks MegaMan through hundreds of layers frame by frame;
+ * one area after another, two of them took 26 of the suite's 36 seconds.
+ * An area whose process cannot start runs here, as before. */
+#define AREA_COUNTS 8
+typedef struct { uint32_t magic; int failures, out[AREA_COUNTS]; } AreaResult;
+#define AREA_MAGIC 0x41524541u
+static void each_area(void (*body)(int b, int *out), int *sum, int n) {
+	int fd[BIOME_COUNT];
+	pid_t pid[BIOME_COUNT];
+	fflush(stdout);
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int p[2];
+		pid[b] = -1;
+		if (pipe(p) != 0) { fd[b] = -1; continue; }
+		pid[b] = fork();
+		if (pid[b] == 0) {   /* (the area's process: its lines and then its counts into the pipe) */
+			close(p[0]);
+			dup2(p[1], 1);
+			close(p[1]);
+			AreaResult r = { AREA_MAGIC, 0, { 0 } };
+			failures = 0;
+			body(b, r.out);
+			r.failures = failures;
+			fflush(stdout);
+			_exit(write(1, &r, sizeof r) == (ssize_t)sizeof r ? 0 : 1);
+		}
+		close(p[1]);
+		fd[b] = p[0];
+		if (pid[b] < 0) { close(p[0]); fd[b] = -1; }
+	}
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		AreaResult r = { AREA_MAGIC, 0, { 0 } };
+		if (fd[b] < 0) {   /* (no process: the area here) */
+			body(b, r.out);
+		} else {
+			size_t len = 0, cap = 4096;
+			char *text = malloc(cap);
+			ssize_t got;
+			while (text && (got = read(fd[b], text + len, cap - len)) > 0)
+				if ((len += (size_t)got) == cap) text = realloc(text, cap *= 2);
+			close(fd[b]);
+			int status = 0;
+			waitpid(pid[b], &status, 0);
+			if (!text || len < sizeof r || !WIFEXITED(status) || WEXITSTATUS(status) != 0 ||
+				(memcpy(&r, text + len - sizeof r, sizeof r), r.magic != AREA_MAGIC)) {
+				++failures;
+				printf("FAIL area %d: its process ended without its counts\n", b);
+				free(text);
+				continue;
+			}
+			fwrite(text, 1, len - sizeof r, stdout);
+			free(text);
+			failures += r.failures;
+		}
+		for (int k = 0; k < n; ++k) sum[k] += r.out[k];
+	}
+}
+
+/* One area's walks of test_arrow_areas: walks, lost, stops, band looks,
+ * across the grid, walks held there, their looks, stuck */
+static void arrow_area(int b, int *now) {
+	int walks = 0, lost = 0, there = 0, looks = 0, still = 0, stuck = 0;
+	int frames = arrow_frames, stalls = arrow_stalls, stops = arrow_stops, turns = arrow_turns, swings = arrow_swings;
+	int band = arrow_band_looks, diagonals = arrow_band_diagonals;
+	for (uint32_t seed = 1; seed <= 60; ++seed) {
+		layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+		int tx, ty, sx, sy;
+		if (!arrow_goal(&tx, &ty)) continue;
+		for (int r = -1; r < layer.nrooms; ++r) {
+			if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
+			++walks;
+			lost += follow_arrow(sx, sy, tx, ty) < 0;
+			int n = 0, s = 0;
+			bool stood;
+			if (hold_arrow(sx, sy, tx, ty, 24, &n, &s, &stood) >= 0) { ++there; looks += n; still += s; }
+			if (stood && ++stuck <= 3) printf("  area %d seed %u: held, the arrow's way stood MegaMan still on the way from %d,%d to %d,%d\n", b, seed, sx, sy, tx, ty);
+		}
+	}
+	frames = arrow_frames - frames; stalls = arrow_stalls - stalls; stops = arrow_stops - stops; turns = arrow_turns - turns;
+	swings = arrow_swings - swings; band = arrow_band_looks - band; diagonals = arrow_band_diagonals - diagonals;
+	if (getenv("CW_WAY_STATS"))
+		printf("  arrow area %2d: %3d walks of %3.0f frames, %.2f stops (%d frames still) and %.2f turns a walk (%.2f swung back), %4.1f%% of %5d"
+			" looks on a band across the grid; held, %.1f looks a walk (%.1f%% of held frames still), %d stuck, %d out of time\n",
+			b, walks, (double)frames / walks, (double)stops / walks, stalls, (double)turns / walks, (double)swings / walks, 100.0 * diagonals / band,
+			band, (double)looks / there, 100.0 * still / (24.0 * looks), stuck, walks - there - stuck);
+	int counts[AREA_COUNTS] = { walks, lost, stops, band, diagonals, there, looks, stuck };
+	memcpy(now, counts, sizeof counts);
+}
+
 /* Following the arrow in every area, from the arrival and each room to the
  * exit or the guardian (sixty layers each, as test_walks'): it never loses
  * MegaMan, never shows a way across the grid on a walkway or band, and
@@ -1702,35 +1874,8 @@ static void test_arrow_areas(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
-	int all[8] = { 0 };   /* walks, lost, stops, band looks, across the grid, walks held there, their looks, stuck */
-	for (int b = 0; b < BIOME_COUNT; ++b) {
-		int walks = 0, lost = 0, there = 0, looks = 0, still = 0, stuck = 0;
-		int frames = arrow_frames, stalls = arrow_stalls, stops = arrow_stops, turns = arrow_turns, swings = arrow_swings;
-		int band = arrow_band_looks, diagonals = arrow_band_diagonals;
-		for (uint32_t seed = 1; seed <= 60; ++seed) {
-			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
-			int tx, ty, sx, sy;
-			if (!arrow_goal(&tx, &ty)) continue;
-			for (int r = -1; r < layer.nrooms; ++r) {
-				if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
-				++walks;
-				lost += follow_arrow(sx, sy, tx, ty) < 0;
-				int n = 0, s = 0;
-				bool stood;
-				if (hold_arrow(sx, sy, tx, ty, 24, &n, &s, &stood) >= 0) { ++there; looks += n; still += s; }
-				if (stood && ++stuck <= 3) printf("  area %d seed %u: held, the arrow's way stood MegaMan still on the way from %d,%d to %d,%d\n", b, seed, sx, sy, tx, ty);
-			}
-		}
-		frames = arrow_frames - frames; stalls = arrow_stalls - stalls; stops = arrow_stops - stops; turns = arrow_turns - turns;
-		swings = arrow_swings - swings; band = arrow_band_looks - band; diagonals = arrow_band_diagonals - diagonals;
-		if (getenv("CW_WAY_STATS"))
-			printf("  arrow area %2d: %3d walks of %3.0f frames, %.2f stops (%d frames still) and %.2f turns a walk (%.2f swung back), %4.1f%% of %5d"
-				" looks on a band across the grid; held, %.1f looks a walk (%.1f%% of held frames still), %d stuck, %d out of time\n",
-				b, walks, (double)frames / walks, (double)stops / walks, stalls, (double)turns / walks, (double)swings / walks, 100.0 * diagonals / band,
-				band, (double)looks / there, 100.0 * still / (24.0 * looks), stuck, walks - there - stuck);
-		int now[8] = { walks, lost, stops, band, diagonals, there, looks, stuck };
-		for (int k = 0; k < 8; ++k) all[k] += now[k];
-	}
+	int all[AREA_COUNTS] = { 0 };   /* walks, lost, stops, band looks, across the grid, walks held there, their looks, stuck */
+	each_area(arrow_area, all, AREA_COUNTS);
 	CHECK(all[1] == 0, "the arrow lost MegaMan on %d of %d walks in every area", all[1], all[0]);
 	CHECK(all[4] == 0, "the arrow pointed across the grid on a walkway or band at %d of %d looks", all[4], all[3]);
 	CHECK(all[7] == 0, "held, the arrow's way stood MegaMan still on %d of %d walks", all[7], all[0]);
@@ -1783,50 +1928,57 @@ static int mouth_spot(int mx, int my, int ax, int ay, double o, int tx, int ty, 
  * carried him over the lane where the floor went on past it. On a walkway
  * or band the arrow shows its way (test_arrow_areas); those spots are
  * counted apart. */
+/* One area's mouths of test_arrow_mouths: spots, misses, spots on a band */
+static void mouth_area(int b, int *out) {
+	static int16_t walk[MAP_W * MAP_H];
+	static uint8_t done[MAP_H][MAP_W][4];
+	int spots = 0, misses = 0, bands = 0;
+	for (uint32_t seed = 1; seed <= 60; ++seed) {
+		layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+		int tx, ty, sx, sy, len;
+		if (!arrow_goal(&tx, &ty)) continue;
+		memset(done, 0, sizeof done);
+		for (int r = -1; r < layer.nrooms; ++r) {
+			if (!arrow_start(r, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) continue;
+			int n = route_walk_len;
+			memcpy(walk, route_walk, sizeof walk[0] * (size_t)n);
+			/* (each step from walk[i], the mouth, into walk[i - 1], the lane's first panel) */
+			for (int i = n - 1; i >= 1; --i) {
+				int mx = walk[i] % MAP_W, my = walk[i] / MAP_W, ax = walk[i - 1] % MAP_W - mx, ay = walk[i - 1] / MAP_W - my;
+				int d = ax > 0 ? 0 : ax < 0 ? 1 : ay > 0 ? 2 : 3, ux = ay != 0, uy = ax != 0, lo = 0, hi = 0;
+				if (done[my][mx][d]) continue;
+				done[my][mx][d] = 1;
+				while (walk_floor(mx - (lo + 1) * ux, my - (lo + 1) * uy) && walk_floor(mx + ax - (lo + 1) * ux, my + ay - (lo + 1) * uy)) ++lo;
+				while (walk_floor(mx + (hi + 1) * ux, my + (hi + 1) * uy) && walk_floor(mx + ax + (hi + 1) * ux, my + ay + (hi + 1) * uy)) ++hi;
+				if (lo + hi + 1 > 2) continue;
+				/* (whole units off the end panels' middles, as BN6 places him) */
+				for (int s = -1; s <= 1; s += 2)
+					for (int k = 13; k <= 60; k += 2) {
+						double o = s < 0 ? -lo - k / 32.0 : hi + k / 32.0;
+						int way, got = mouth_spot(mx, my, ax, ay, o, tx, ty, &way);
+						spots += got == 1 || got == -1;
+						bands += got == 2;
+						if (got >= 0) continue;
+						if (++misses <= 5)
+							printf("  area %d seed %u: stopped at %.3f,%.3f off the mouth %d,%d, the arrow's way %d held did not walk MegaMan onto its lane\n", b,
+								seed, mx + (ay ? o : 0), my + (ax ? o : 0), mx, my, way);
+					}
+			}
+		}
+	}
+	if (getenv("CW_WAY_STATS")) printf("  mouths area %2d: %d of %d spots stopped off a lane, the arrow's way held not onto it\n", b, misses, spots);
+	out[0] = spots;
+	out[1] = misses;
+	out[2] = bands;
+}
+
 static void test_arrow_mouths(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
-	static int16_t walk[MAP_W * MAP_H];
-	static uint8_t done[MAP_H][MAP_W][4];
-	int spots = 0, misses = 0, bands = 0;
-	for (int b = 0; b < BIOME_COUNT; ++b) {
-		int area_spots = spots, area_misses = misses;
-		for (uint32_t seed = 1; seed <= 60; ++seed) {
-			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
-			int tx, ty, sx, sy, len;
-			if (!arrow_goal(&tx, &ty)) continue;
-			memset(done, 0, sizeof done);
-			for (int r = -1; r < layer.nrooms; ++r) {
-				if (!arrow_start(r, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) continue;
-				int n = route_walk_len;
-				memcpy(walk, route_walk, sizeof walk[0] * (size_t)n);
-				/* (each step from walk[i], the mouth, into walk[i - 1], the lane's first panel) */
-				for (int i = n - 1; i >= 1; --i) {
-					int mx = walk[i] % MAP_W, my = walk[i] / MAP_W, ax = walk[i - 1] % MAP_W - mx, ay = walk[i - 1] / MAP_W - my;
-					int d = ax > 0 ? 0 : ax < 0 ? 1 : ay > 0 ? 2 : 3, ux = ay != 0, uy = ax != 0, lo = 0, hi = 0;
-					if (done[my][mx][d]) continue;
-					done[my][mx][d] = 1;
-					while (walk_floor(mx - (lo + 1) * ux, my - (lo + 1) * uy) && walk_floor(mx + ax - (lo + 1) * ux, my + ay - (lo + 1) * uy)) ++lo;
-					while (walk_floor(mx + (hi + 1) * ux, my + (hi + 1) * uy) && walk_floor(mx + ax + (hi + 1) * ux, my + ay + (hi + 1) * uy)) ++hi;
-					if (lo + hi + 1 > 2) continue;
-					/* (whole units off the end panels' middles, as BN6 places him) */
-					for (int s = -1; s <= 1; s += 2)
-						for (int k = 13; k <= 60; k += 2) {
-							double o = s < 0 ? -lo - k / 32.0 : hi + k / 32.0;
-							int way, got = mouth_spot(mx, my, ax, ay, o, tx, ty, &way);
-							spots += got == 1 || got == -1;
-							bands += got == 2;
-							if (got >= 0) continue;
-							if (++misses <= 5)
-								printf("  area %d seed %u: stopped at %.3f,%.3f off the mouth %d,%d, the arrow's way %d held did not walk MegaMan onto its lane\n", b,
-									seed, mx + (ay ? o : 0), my + (ax ? o : 0), mx, my, way);
-						}
-				}
-			}
-		}
-		if (getenv("CW_WAY_STATS")) printf("  mouths area %2d: %d of %d spots stopped off a lane, the arrow's way held not onto it\n", b, misses - area_misses, spots - area_spots);
-	}
+	int all[3] = { 0 };   /* spots, misses, spots on a band */
+	each_area(mouth_area, all, 3);
+	int spots = all[0], misses = all[1], bands = all[2];
 	CHECK(misses == 0, "stopped off a lane's mouth, the arrow's way held did not walk MegaMan onto the lane at %d of %d spots", misses, spots);
 	printf("  mouths: %d spots stopped off a lane's mouth (and %d on a walkway or band), %d where the arrow's way held did not walk MegaMan onto it\n",
 		spots, bands, misses);
@@ -2707,6 +2859,1043 @@ static void test_xsong(void) {
 	CHECK(!xsong_walk(memacc, 5, base, starts, 1, ptrs, &n, 8, programs), "xsong: MEMACC refused");
 }
 
+/* Both games' RNG step and a seed's word (battle_rng.c): the guest's
+ * battles' words as docs/ROM_DATA.md has them for seed 1 (BN5's random
+ * numbers), a fixed point of the step, and one step of the differential's
+ * (BN5's word on the frame its buster draws once more: tests/xdiff) */
+static void test_battle_rng(void) {
+	CHECK(battle_rng_word(0x85EBCA77u) == 0x9BB31115u && battle_rng_word(0x85EBCA77u ^ 0x5EC0DA27u) == 0xDCB010DDu,
+		"battle_rng: seed 1's words %08x %08x", (unsigned)battle_rng_word(0x85EBCA77u), (unsigned)battle_rng_word(0x85EBCA77u ^ 0x5EC0DA27u));
+	CHECK(battle_rng_step(0x7D14675Cu) == 0x7D14675Cu && battle_rng_step(0x82EB98A1u) == 0x82EB98A1u, "battle_rng: the step's two fixed points");
+	CHECK(battle_rng_step(0xEC0BC510u) == 0x5F2B23C7u, "battle_rng: a step (%08x)", (unsigned)battle_rng_step(0xEC0BC510u));
+	int on = 0;
+	for (uint32_t s = 1; s < 200000; s += 7) {
+		uint32_t w = battle_rng_word(s), x = w;
+		for (int k = 0; k < 9; ++k) on += (x = battle_rng_step(x)) == w;
+	}
+	CHECK(!on, "battle_rng: %d seeds' words on the step's shortest cycles", on);
+}
+
+/* Thumb code moved (thumb_reloc.c, issue #82); tests/test_emu.c runs a
+ * moved block in mGBA. A BL's halves both ways, to the ends of its reach
+ * and refused a step past them; an odd address refused. */
+static void test_thumb_bl(void) {
+	uint16_t hi = 0, lo = 0;
+	uint32_t t = 0;
+	/* (test_emu's ROM: 0xD2 to 0xF8) */
+	CHECK(thumb_bl_encode(0x080000D2, 0x080000F8, &hi, &lo) && hi == 0xF000 && lo == 0xF811, "thumb: bl 0xD2 to 0xF8 (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(0x080000D2, 0xF000, 0xF811, &t) && t == 0x080000F8, "thumb: its target (%08x)", t);
+	const uint32_t at = 0x08800000;
+	CHECK(thumb_bl_encode(at, at + 4 + 0x3FFFFE, &hi, &lo) && hi == 0xF3FF && lo == 0xFFFF, "thumb: the furthest on (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(at, hi, lo, &t) && t == at + 4 + 0x3FFFFE, "thumb: the furthest on back (%08x)", t);
+	CHECK(thumb_bl_encode(at, at + 4 - 0x400000, &hi, &lo) && hi == 0xF400 && lo == 0xF800, "thumb: the furthest back (%04x %04x)", hi, lo);
+	CHECK(thumb_bl_decode(at, hi, lo, &t) && t == at + 4 - 0x400000, "thumb: the furthest back, back (%08x)", t);
+	hi = lo = 0x1234;
+	CHECK(!thumb_bl_encode(at, at + 4 + 0x400000, &hi, &lo) && !thumb_bl_encode(at, at + 2 - 0x400000, &hi, &lo), "thumb: a step past either end refused");
+	CHECK(!thumb_bl_encode(at, at + 0x101, &hi, &lo) && !thumb_bl_encode(at + 1, at + 0x100, &hi, &lo), "thumb: an odd target or address refused");
+	CHECK(hi == 0x1234 && lo == 0x1234, "thumb: a refused BL wrote its halves (%04x %04x)", hi, lo);
+	/* every distance, both ways, there and back */
+	int bad = 0;
+	for (int32_t off = -0x400000; off < 0x400000; off += 0x1F2E) {
+		uint32_t to = at + 4 + (uint32_t)off;
+		if (!thumb_bl_encode(at, to, &hi, &lo) || !thumb_is_bl(hi, lo) || !thumb_bl_decode(at, hi, lo, &t) || t != to) ++bad;
+	}
+	CHECK(!bad, "thumb: %d BLs not there and back", bad);
+	CHECK(!thumb_bl_decode(at, 0xF811, 0xF000, &t) && !thumb_bl_decode(at, 0x2005, 0xF811, &t) && !thumb_bl_decode(at, 0xF000, 0x2005, &t),
+		"thumb: halves out of order, or not a BL's, read as one");
+}
+
+/* The BLs of a run of code found, half a BL refused; a block's calls out
+ * aimed again from where it moved, those within it left; all or nothing. */
+static uint32_t thumb_resolve(uint32_t target, void *user) {
+	++*(int *)user;
+	return target == 0x08002000u ? 0x08A00400u : target == 0x08003000u ? 0x08A0040Cu : target == 0x08004000u ? 0x08000200u : 0;
+}
+
+static void test_thumb_block(void) {
+	const uint32_t from = 0x08001000, to = 0x08A00000;
+	uint8_t code[0x20], was[0x20];
+	memset(code, 0, sizeof code);
+	put16(code + 0x00, 0x2007);                     /* movs r0,#7 */
+	thumb_bl_write(code, 0x02, from, from + 0x18);  /* within */
+	thumb_bl_write(code, 0x06, from, 0x08002000);   /* out */
+	put16(code + 0x0A, 0x6EB8);                     /* ldr r0,[r7,#0x68] */
+	thumb_bl_write(code, 0x0C, from, 0x08003000);   /* out */
+	put16(code + 0x10, 0x4770);                     /* bx lr */
+	uint32_t offs[8], one[1] = { 0 }, scratch[8];
+	int n = thumb_bl_scan(code, 0x12, offs, 8);
+	CHECK(n == 3 && offs[0] == 0x02 && offs[1] == 0x06 && offs[2] == 0x0C, "thumb: the run's BLs (%d)", n);
+	CHECK(thumb_bl_scan(code, 0x12, one, 1) == 3 && one[0] == 0x02, "thumb: BLs past max counted, not kept");
+	CHECK(thumb_bl_scan(code, 0x08, scratch, 8) == -1, "thumb: a run ending in half a BL refused");
+	put16(code + 0x12, 0xF800);
+	CHECK(thumb_bl_scan(code, sizeof code, scratch, 8) == -1, "thumb: a lone lo half refused");
+	memcpy(was, code, sizeof code);
+
+	int asked = 0;
+	ThumbBlock b = { code, sizeof code, from, to };
+	uint32_t t = 0;
+	CHECK(thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && asked == 2, "thumb: the block moved (asked %d)", asked);
+	CHECK(!memcmp(code + 0x02, was + 0x02, 4) && thumb_bl_read(code, 0x02, to, &t) && t == to + 0x18, "thumb: the call within, as it was (%08x)", t);
+	CHECK(thumb_bl_read(code, 0x06, to, &t) && t == 0x08A00400, "thumb: the first call out (%08x)", t);
+	CHECK(thumb_bl_read(code, 0x0C, to, &t) && t == 0x08A0040C, "thumb: the second call out (%08x)", t);
+	CHECK(!memcmp(code, was, 2) && !memcmp(code + 0x0A, was + 0x0A, 2), "thumb: the rest of the block untouched");
+
+	/* refused, the block as it was: a call out with no answer; one out of
+	 * reach from its new address; a move off the alignment; an offset
+	 * that holds no BL, an odd one, one past the end */
+	memcpy(code, was, sizeof code);
+	thumb_bl_write(code, 0x0C, from, 0x08005000);
+	memcpy(was, code, sizeof code);
+	CHECK(!thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: a call with nowhere to go moved");
+	thumb_bl_write(code, 0x0C, from, 0x08004000);
+	memcpy(was, code, sizeof code);
+	CHECK(!thumb_block_rebase(&b, offs, 3, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: a call out of reach moved");
+	ThumbBlock off4 = { code, sizeof code, from, to + 2 };
+	CHECK(!thumb_block_rebase(&off4, offs, 2, thumb_resolve, &asked), "thumb: a block moved off its alignment");
+	static const uint32_t no_bl[] = { 0x00 }, odd[] = { 0x03 }, past[] = { 0x1E };
+	CHECK(!thumb_block_rebase(&b, no_bl, 1, thumb_resolve, &asked) && !thumb_block_rebase(&b, odd, 1, thumb_resolve, &asked) &&
+		!thumb_block_rebase(&b, past, 1, thumb_resolve, &asked) && !memcmp(code, was, sizeof code), "thumb: an offset with no BL moved");
+	CHECK(thumb_block_rebase(&b, offs, 0, thumb_resolve, &asked), "thumb: a block without calls refused");
+}
+
+/* Immediates in their instruction: the recipe's four (issue #82's
+ * CanGard: movs r0, adds r4, movs r2, ldr r0,[r7]) patched, every
+ * mismatch refused and the instruction kept; every form there and back. */
+static void test_thumb_imm(void) {
+	static const struct { uint16_t insn; ThumbImm was; uint16_t imm, now; } ok[] = {
+		{ 0x2007, { THUMB_MOVS, 0, 0, 7 }, 9, 0x2009 },
+		{ 0x3457, { THUMB_ADDS, 4, 0, 0x57 }, 0x6C, 0x346C },
+		{ 0x2224, { THUMB_MOVS, 2, 0, 0x24 }, 0x5C, 0x225C },
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x70, 0x6F38 },
+		{ 0x2804, { THUMB_CMP, 0, 0, 4 }, 5, 0x2805 },
+		{ 0x3901, { THUMB_SUBS, 1, 0, 1 }, 2, 0x3902 },
+		{ 0x6048, { THUMB_STR, 0, 1, 4 }, 0x7C, 0x67C8 },
+		{ 0x7030, { THUMB_STRB, 0, 6, 0 }, 31, 0x77F0 },
+		{ 0x7868, { THUMB_LDRB, 0, 5, 1 }, 2, 0x78A8 },
+		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x3E, 0x8FE8 },
+		{ 0x8008, { THUMB_STRH, 0, 1, 0 }, 2, 0x8048 },
+		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1020, 0x49FF },
+		/* (the sprite preload's id mask, 9 bits to 12: xvirus_grow.c) */
+		{ 0x07D2, { THUMB_LSLS, 2, 2, 0x1F }, 0x1C, 0x0712 },
+		{ 0x0DD2, { THUMB_LSRS, 2, 2, 0x17 }, 0x14, 0x0D12 },
+		{ 0x1109, { THUMB_ASRS, 1, 1, 4 }, 8, 0x1209 },
+	};
+	for (size_t i = 0; i < sizeof ok / sizeof *ok; ++i) {
+		uint16_t insn = ok[i].insn;
+		ThumbImm got;
+		CHECK(thumb_imm_decode(insn, ok[i].was.form, &got) && got.rd == ok[i].was.rd && got.rn == ok[i].was.rn && got.imm == ok[i].was.imm,
+			"thumb: %04x read as its form", insn);
+		CHECK(thumb_imm_patch(&insn, &ok[i].was, ok[i].imm) && insn == ok[i].now, "thumb: %04x patched to %04x, not %04x", ok[i].insn, insn, ok[i].now);
+	}
+	static const struct { uint16_t insn; ThumbImm was; uint16_t imm; } no[] = {
+		{ 0x2007, { THUMB_ADDS, 0, 0, 7 }, 9 },      /* another form */
+		{ 0x2007, { THUMB_MOVS, 1, 0, 7 }, 9 },      /* another register */
+		{ 0x2007, { THUMB_MOVS, 0, 0, 8 }, 9 },      /* another immediate */
+		{ 0x2007, { THUMB_MOVS, 0, 0, 7 }, 256 },    /* too big */
+		{ 0x6EB8, { THUMB_LDR, 0, 6, 0x68 }, 0x70 }, /* another base */
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x72 }, /* not a word's */
+		{ 0x6EB8, { THUMB_LDR, 0, 7, 0x68 }, 0x80 }, /* too far */
+		{ 0x6EB8, { THUMB_STR, 0, 7, 0x68 }, 0x70 }, /* a store */
+		{ 0x6EB8, { THUMB_LDRB, 0, 7, 0x68 }, 0x70 },
+		{ 0x7868, { THUMB_LDRB, 0, 5, 1 }, 32 },
+		{ 0x8CA8, { THUMB_LDRH, 0, 5, 0x24 }, 0x25 },
+		{ 0x4907, { THUMB_LDR_PC, 1, 0, 28 }, 1024 },
+		{ 0x07D2, { THUMB_LSLS, 2, 2, 0x1F }, 32 },  /* a shift past 31 */
+		{ 0x07D2, { THUMB_LSRS, 2, 2, 0x1F }, 0x1C }, /* lsls read as lsrs */
+		{ 0x0DD2, { THUMB_LSRS, 2, 3, 0x17 }, 0x14 }, /* another register shifted */
+		{ 0x2007, { THUMB_FORMS, 0, 0, 7 }, 9 },
+	};
+	for (size_t i = 0; i < sizeof no / sizeof *no; ++i) {
+		uint16_t insn = no[i].insn;
+		CHECK(!thumb_imm_patch(&insn, &no[i].was, no[i].imm) && insn == no[i].insn, "thumb: patch %zu of %04x taken (%04x)", i, no[i].insn, insn);
+	}
+	uint16_t insn = 0;
+	static const ThumbImm misfit[] = { { THUMB_MOVS, 8, 0, 1 }, { THUMB_MOVS, 0, 1, 1 }, { THUMB_LDR, 0, 8, 4 } };
+	for (size_t i = 0; i < sizeof misfit / sizeof *misfit; ++i)
+		CHECK(!thumb_imm_encode(&misfit[i], &insn) && insn == 0, "thumb: register %zu that does not fit taken (%04x)", i, insn);
+	int bad = 0;
+	for (int f = 0; f < THUMB_FORMS; ++f)
+		for (unsigned imm = 0; imm < 1024; ++imm)
+			for (uint8_t rd = 0; rd < 8; ++rd)
+				for (uint8_t rn = 0; rn < 8; ++rn) {
+					ThumbImm in = { (ThumbForm)f, rd, rn, (uint16_t)imm }, back;
+					if (!thumb_imm_encode(&in, &insn)) continue;
+					if (!thumb_imm_decode(insn, in.form, &back) || back.rd != rd || back.rn != rn || back.imm != imm) ++bad;
+					for (int g = 0; g < THUMB_FORMS; ++g)
+						if (g != f && thumb_imm_decode(insn, (ThumbForm)g, &back)) ++bad;
+				}
+	CHECK(!bad, "thumb: %d immediates not there and back, or read as another form", bad);
+}
+
+/* Veneers: their bytes, a misaligned one refused, read back; a pool of
+ * them, one per target, full at its room. */
+static void test_thumb_veneers(void) {
+	static const uint8_t want[THUMB_VENEER_SIZE] = { 0x03, 0xB4, 0x01, 0x48, 0x01, 0x90, 0x01, 0xBD, 0x81, 0x63, 0x01, 0x08 };
+	uint8_t v[THUMB_VENEER_SIZE];
+	uint32_t t = 0;
+	CHECK(thumb_veneer(v, 0x08B31000, 0x08016381) && !memcmp(v, want, sizeof v), "thumb: a veneer's bytes");
+	CHECK(thumb_veneer(v, 0x08B31000, 0x08016380) && !memcmp(v, want, sizeof v), "thumb: a veneer's target given without its Thumb bit");
+	CHECK(thumb_veneer_target(v, &t) && t == 0x08016380, "thumb: a veneer's target read back (%08x)", t);
+	CHECK(!thumb_veneer(v, 0x08B31002, 0x08016381), "thumb: a veneer off a word boundary");
+	v[5] = 0x91;
+	CHECK(!thumb_veneer_target(v, &t), "thumb: other bytes read as a veneer");
+
+	uint8_t room[3 * THUMB_VENEER_SIZE];
+	ThumbVeneers pool = { room, 0x08B31000, 3, 0 };
+	uint32_t a = thumb_veneer_get(&pool, 0x08016381), b = thumb_veneer_get(&pool, 0x0801A152), a2 = thumb_veneer_get(&pool, 0x08016380);
+	uint32_t c = thumb_veneer_get(&pool, 0x0801A15C), d = thumb_veneer_get(&pool, 0x0801A166);
+	CHECK(a == 0x08B31000 && b == 0x08B3100C && a2 == a && c == 0x08B31018 && !d && pool.n == 3, "thumb: the pool (%08x %08x %08x %08x %08x, %d made)", a, b, a2,
+		c, d, pool.n);
+	CHECK(thumb_veneer_target(room + THUMB_VENEER_SIZE, &t) && t == 0x0801A152, "thumb: the pool's second veneer (%08x)", t);
+	ThumbVeneers off = { room, 0x08B31002, 3, 0 };
+	CHECK(!thumb_veneer_get(&off, 0x08016381) && off.n == 0, "thumb: a pool off a word boundary");
+}
+
+/* A virus family's recipe (issue #82, xvirus_recipe.h) holds together
+ * before any ROM is read: the control's does, and each way of breaking a
+ * copy of it is caught with its reason; the CRC32 the blocks are checked
+ * by is zlib's. */
+static bool recipe_refused(const XVirusFamily *f, const char *what) {
+	char why[160] = "";
+	bool ok = xvirus_recipe_ok(f, why, sizeof why);
+	CHECK(!ok && why[0], "xvirus: a recipe with %s taken", what);
+	return !ok;
+}
+
+static void test_xvirus_recipe(void) {
+	const uint8_t digits[] = "123456789";
+	CHECK(xvirus_crc32(digits, 9) == 0xCBF43926u && xvirus_crc32(digits, 0) == 0, "xvirus: CRC32 %08x", xvirus_crc32(digits, 9));
+	char why[160] = "";
+	const XVirusFamily *c = &xvirus_control;
+	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: the control's recipe refused: %s", why);
+	CHECK(c->ai == 32 && c->first_id == XV_FIRST_ID && c->nstates == 13 && c->ncalls == 32 && c->ice == XV_ICE_OWN,
+		"xvirus: the control is AI %d from id %#x", c->ai, c->first_id);
+	/* (its code and data: every halfword of its block code or one range of data) */
+	const XvBlock *b = &c->blocks[0];
+	int code = 0, data = 0;
+	for (uint32_t a = b->start; a < b->end; a += 2) xvirus_is_code(c, a) ? ++code : ++data;
+	CHECK(code * 2 == 1276 && xvirus_block_of(c, b->end) == NULL && xvirus_data_at(c, 0x0810B024) && !xvirus_is_code(c, 0x0810B026),
+		"xvirus: the control's block holds %d bytes of code, %d of data", code * 2, data * 2);
+
+	XVirusFamily f = *c;
+	f.ai = 31;
+	recipe_refused(&f, "one of BN6's own AI indexes");
+	f = *c;
+	f.ai = XV_AIS;
+	recipe_refused(&f, "an AI index past the grown tables");
+	f = *c;
+	f.first_id = 0xBB;
+	recipe_refused(&f, "enemy ids among BN6's own");
+	f.first_id = XV_IDS - XV_VERSIONS + 1;
+	recipe_refused(&f, "enemy ids past the grown ones");
+	f.first_id = XV_IDS - XV_VERSIONS;
+	f.ai = XV_AIS - 1;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: the last AI index and ids refused: %s", why);
+	f = *c;
+	f.home = XV_HOMES + 4;
+	recipe_refused(&f, "a home off its slot");
+	f = *c;
+	f.ice = XV_ICE_MAX + 1;
+	recipe_refused(&f, "an ice block past BN6's sizes");
+	f.ice = -2;
+	recipe_refused(&f, "an ice block of no size");
+	XvBlock blocks[2] = { c->blocks[0], c->blocks[0] };
+	f = *c;
+	blocks[0].at = XV_CODE + 2;
+	f.blocks = blocks;
+	recipe_refused(&f, "a block moved off its word alignment");
+	blocks[0] = c->blocks[0];
+	blocks[1].start = b->end - 0x10;
+	blocks[1].end = b->end + 0x10;
+	blocks[1].at = XV_CODE + 0x1000;
+	f.nblocks = 2;
+	recipe_refused(&f, "two blocks over the same code");
+	XvData data_bad[64];
+	memcpy(data_bad, c->data, (size_t)c->ndata * sizeof *data_bad);
+	f = *c;
+	f.data = data_bad;
+	data_bad[0].start = 0x0810B022;
+	recipe_refused(&f, "a literal pool off a word boundary");
+	data_bad[0] = c->data[0];
+	data_bad[c->ndata] = (XvData){ 0x0810B5F0, 0x0810B5F4, XV_RAW };
+	f.ndata = c->ndata + 1;
+	recipe_refused(&f, "data past its block");
+	data_bad[c->ndata] = (XvData){ 0x0810B020, 0x0810B02C, XV_RAW };
+	recipe_refused(&f, "two ranges of data over one another");
+	XvRef states[16];
+	memcpy(states, c->states, (size_t)c->nstates * sizeof *states);
+	f = *c;
+	f.states = states;
+	states[9] = (XvRef){ 0x0810B029, true };
+	recipe_refused(&f, "a state of its own in its data");
+	states[9] = (XvRef){ 0x0810AFEC, true };
+	recipe_refused(&f, "a state of its own without the Thumb bit");
+	states[9] = (XvRef){ 0x09000001, false };
+	recipe_refused(&f, "a state past BN6's ROM");
+	f = *c;
+	f.nstates = 7;
+	recipe_refused(&f, "fewer states than BN6's generic eight");
+	XvPair calls[40];
+	memcpy(calls, c->calls, (size_t)c->ncalls * sizeof *calls);
+	f = *c;
+	f.calls = calls;
+	calls[3].to |= 1;
+	recipe_refused(&f, "a call aimed at a Thumb bit");
+	calls[3] = c->calls[3];
+	calls[4].from = 0x0810B040;
+	recipe_refused(&f, "a call into its own code");
+	calls[4] = calls[5];
+	recipe_refused(&f, "a call named twice");
+	XvImm imm = { 0x0810B026, THUMB_MOVS, 0, 0, 1, 2 };
+	f = *c;
+	f.imms = &imm;
+	f.nimms = 1;
+	recipe_refused(&f, "an immediate in a literal pool");
+}
+
+/* BN5's CanGard's recipe (issue #82): whole before any ROM is read, its
+ * two blocks' code and data as its research found them, its state table
+ * BN6's twelve, its 39 calls; and each way of breaking what it draws
+ * caught: a sprite out of the art's room or over another, an effect among
+ * BN6's own, an attack's type twice, its struct1 laid out with a mode
+ * past BN6's table */
+static void test_xvirus_cangard(void) {
+	char why[160] = "";
+	const XVirusFamily *c = &xvirus_cangard;
+	CHECK(xvirus_recipe_ok(c, why, sizeof why), "xvirus: CanGard's recipe refused: %s", why);
+	CHECK(c->game == XROM_BN5_COLONEL_US && c->src_ai == 14 && c->ai == 32 && c->first_id == XV_FIRST_ID && c->nstates == 12 &&
+		c->ncalls == 39 && c->nimms == 5 && c->nsprites == 3 && c->traits.laid && c->traits.shadow && !c->traits.element,
+		"xvirus: CanGard is AI %d from id %#x, %d states, %d calls", c->ai, c->first_id, c->nstates, c->ncalls);
+	int code[2] = { 0, 0 };
+	for (int i = 0; i < c->nblocks; ++i)
+		for (uint32_t a = c->blocks[i].start; a < c->blocks[i].end; a += 2) code[i] += xvirus_is_code(c, a);
+	/* (CanGard's 812 bytes less 142 of data: its state table's 40, 48 of jump tables, 28 of pools, 26 of numbers and
+	 * padding; the reticle's 620 less 72: 24 of jump tables, 16 of pools, 32 of numbers and padding) */
+	CHECK(code[0] * 2 == 670 && code[1] * 2 == 548, "xvirus: CanGard's blocks hold %d and %d bytes of code",
+		code[0] * 2, code[1] * 2);
+	CHECK(c->states[8].own && c->states[8].addr == 0x08109087 && !c->states[6].own && c->states[6].addr == 0x08016B37,
+		"xvirus: CanGard's decide at 8, BN6's freeze at 6");
+	/* (its BN5 state table is dead in the copy: one range, zeroed) */
+	const XvData *st = xvirus_data_at(c, 0x08109000);
+	CHECK(st && st->kind == XV_ZERO && st->start == 0x08109000 && st->end == 0x08109028, "xvirus: CanGard's BN5 state table zeroed");
+
+	XVirusFamily f = *c;
+	XvSprite sprites[3];
+	memcpy(sprites, c->sprites, sizeof sprites);
+	f.sprites = sprites;
+	sprites[1].at = XV_CODE;
+	recipe_refused(&f, "a sprite among the code");
+	sprites[1] = c->sprites[1];
+	sprites[2].at = sprites[1].at + 0x10;
+	recipe_refused(&f, "two sprites in one room");
+	sprites[2] = c->sprites[2];
+	sprites[2].to_index = sprites[1].to_index;
+	recipe_refused(&f, "two sprites at one number");
+	sprites[2] = c->sprites[2];
+	sprites[0].to_list = 4;
+	recipe_refused(&f, "its battle sprite out of the viruses' list");
+	sprites[0] = c->sprites[0];
+	sprites[2].to_list = 6;
+	recipe_refused(&f, "a sprite in a list not grown");
+	sprites[2] = c->sprites[2];
+	sprites[2].to_index = 0xFF;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a sprite at the grown list's last number refused: %s", why);
+	XvId fx = { 0x57, 0x61 };
+	f = *c;
+	f.effects = &fx;
+	recipe_refused(&f, "an effect among BN6's own");
+	XvType types[2] = { { 3, 0x25, XV_TYPE_MOVED }, { 3, 0x25, 0x4B } };
+	f = *c;
+	f.types = types;
+	f.ntypes = 2;
+	recipe_refused(&f, "one type named twice");
+	types[1] = (XvType){ 3, 0x26, XV_T3_DISPATCH };
+	recipe_refused(&f, "a type made the dispatch's own");
+	types[1] = (XvType){ 2, 0x26, XV_TYPE_MOVED };
+	recipe_refused(&f, "a type of a kind the dispatch has none of");
+	types[1] = (XvType){ 1, 0x25, XV_TYPE_MOVED };
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: one number of two kinds refused: %s", why);
+	types[1] = (XvType){ 3, 0x26, 0x4B };
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a twin of BN6's refused: %s", why);
+	/* (its reticle's spawn: the dispatch's spawner, never BN6's own nor another of the dispatch's) */
+	XvPair calls[39];
+	memcpy(calls, c->calls, sizeof calls);
+	f = *c;
+	f.calls = calls;
+	for (int i = 0; i < c->ncalls; ++i)
+		if (calls[i].from == BN5_SPAWN_3) calls[i].to = BN6_SPAWN_3;
+	recipe_refused(&f, "its game's spawner aimed at BN6's");
+	for (int i = 0; i < c->ncalls; ++i)
+		if (calls[i].from == BN5_SPAWN_3) calls[i].to = XV_SPAWN_3_LAST;
+	recipe_refused(&f, "its game's spawner aimed at another of the dispatch's");
+	calls[0].to = XV_SPAWN_3;
+	recipe_refused(&f, "a call of no spawner aimed at the dispatch's");
+	/* (a mode past BN6's table is taken, BN6's record given XV_MODE_PAST: BN5's TestVirs and Tuby) */
+	f = *c;
+	f.traits.mode = 0x22;
+	CHECK(xvirus_recipe_ok(&f, why, sizeof why), "xvirus: a mode past BN6's table refused: %s", why);
+	CHECK(xvirus_list_slot(BN6_SPRITES_VIRUSES) == 0 && xvirus_list_slot(BN6_SPRITES_LIST5) == 3 && xvirus_list_slot(BN6_SPRITES_LIST3) == XV_LISTS_GROWN - 1 &&
+		xvirus_list_slot(6) < 0,
+		"xvirus: the grown lists' places");
+}
+
+/* BN5's families at fixed numbers, all at once (issue #82, the static
+ * model): each recipe whole, and no two sharing an AI index, an enemy id,
+ * a home, a byte of code or art past EMU_FREE, a sprite number, an effect
+ * or an attack's type */
+static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
+
+static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
+	int bad = f->ai == g->ai || spans_meet((uint32_t)f->first_id, XV_VERSIONS, (uint32_t)g->first_id, XV_VERSIONS) ||
+		spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE);
+	for (int i = 0; i < f->nblocks; ++i)
+		for (int k = 0; k < g->nblocks; ++k)
+			bad += spans_meet(f->blocks[i].at, f->blocks[i].end - f->blocks[i].start, g->blocks[k].at, g->blocks[k].end - g->blocks[k].start);
+	for (int i = 0; i < f->nsprites; ++i)
+		for (int k = 0; k < g->nsprites; ++k)
+			bad += spans_meet(f->sprites[i].at, f->sprites[i].room, g->sprites[k].at, g->sprites[k].room) ||
+				(f->sprites[i].to_list == g->sprites[k].to_list && f->sprites[i].to_index == g->sprites[k].to_index);
+	for (int i = 0; i < f->neffects; ++i)
+		for (int k = 0; k < g->neffects; ++k) bad += f->effects[i].to == g->effects[k].to;
+	/* (a type both move: two routines for one entry; or both name, with another twin; one moved by a family before the
+	 * other, g, and shared by f, is one routine) */
+	for (int i = 0; i < f->ntypes; ++i)
+		for (int k = 0; k < g->ntypes; ++k) {
+			const XvType *a = &f->types[i], *b = &g->types[k];
+			if (a->kind != b->kind || a->from != b->from) continue;
+			bool shared = (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_SHARED);
+			bad += !shared && (a->to == XV_TYPE_MOVED || a->to != b->to);
+		}
+	/* (a song slot, or a song's bytes over the other's art) */
+	for (int i = 0; i < f->nsongs; ++i) {
+		for (int k = 0; k < g->nsongs; ++k)
+			bad += f->songs[i].slot == g->songs[k].slot || spans_meet(f->songs[i].at, f->songs[i].room, g->songs[k].at, g->songs[k].room);
+		for (int k = 0; k < g->nsprites; ++k) bad += spans_meet(f->songs[i].at, f->songs[i].room, g->sprites[k].at, g->sprites[k].room);
+	}
+	for (int i = 0; i < g->nsongs; ++i)
+		for (int k = 0; k < f->nsprites; ++k) bad += spans_meet(g->songs[i].at, g->songs[i].room, f->sprites[k].at, f->sprites[k].room);
+	return bad;
+}
+
+/* The tracks' recipes in their install order (xinstall.h): BN5's moved engine objects, the Navis, BN5's chips' code, the
+ * families, the Souls' code. Whether a recipe of a track before track `track`'s recipe `at` (or one of that track's own before it) moves
+ * the type kind:from (XV_TYPE_MOVED): the copy a recipe that shares it (XV_TYPE_SHARED) spawns */
+enum { TRACK_OBJECTS, TRACK_NAVIS, TRACK_CHIPS, TRACK_FAMILIES, TRACK_SOULS };
+
+static bool moves(const XVirusFamily *f, int kind, int from) {
+	for (int u = 0; u < f->ntypes; ++u)
+		if (f->types[u].kind == kind && f->types[u].from == from && f->types[u].to == XV_TYPE_MOVED) return true;
+	return false;
+}
+
+static bool moved_before(int track, int at, int kind, int from) {
+	bool found = track > TRACK_OBJECTS && moves(&xnavi_objects_bn5, kind, from);
+	for (int k = 0; track >= TRACK_NAVIS && k < (track == TRACK_NAVIS ? at : xnavi_bn5_count) && !found; ++k) found = moves(&xnavi_bn5[k]->code, kind, from);
+	for (int k = 0; track >= TRACK_CHIPS && k < (track == TRACK_CHIPS ? at : xchips_bn5_count) && !found; ++k) found = moves(&xchips_bn5[k].code, kind, from);
+	for (int k = 0; track >= TRACK_FAMILIES && k < (track == TRACK_FAMILIES ? at : xvirus_bn5_count) && !found; ++k) found = moves(xvirus_bn5[k], kind, from);
+	return found;
+}
+
+/* each type a recipe shares one a recipe before it in the install order moved */
+static bool shared_moved_before(const XVirusFamily *f, int track, int at) {
+	for (int t = 0; t < f->ntypes; ++t)
+		if (f->types[t].to == XV_TYPE_SHARED && !moved_before(track, at, f->types[t].kind, f->types[t].from)) return false;
+	return true;
+}
+
+/* each type a recipe moves one no recipe of an earlier track moved (one copy a type, issue #82's plan for its tracks: the
+ * dispatch's MOVED entry the first install's; a later track shares it); the chips' units, one step, may each move one */
+static bool moved_once(const XVirusFamily *f, int track) {
+	for (int t = 0; t < f->ntypes; ++t)
+		if (f->types[t].to == XV_TYPE_MOVED && track > TRACK_OBJECTS && moved_before(track, 0, f->types[t].kind, f->types[t].from)) return false;
+	return true;
+}
+
+/* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
+ * chips' unit's */
+static bool copied_before(uint32_t bn5, uint32_t bn6) {
+	const XVirusFamily *fs[1 + XN_HOMES_MAX + XC_UNITS];
+	int n = 0;
+	fs[n++] = &xnavi_objects_bn5;
+	for (int k = 0; k < xnavi_bn5_count && k < XN_HOMES_MAX; ++k) fs[n++] = &xnavi_bn5[k]->code;
+	for (int k = 0; k < xchips_bn5_count && k < XC_UNITS; ++k) fs[n++] = &xchips_bn5[k].code;
+	for (int i = 0; i < n; ++i)
+		for (int b = 0; b < fs[i]->nblocks; ++b)
+			if (bn5 >= fs[i]->blocks[b].start && bn5 < fs[i]->blocks[b].end && bn6 == fs[i]->blocks[b].at + (bn5 - fs[i]->blocks[b].start))
+				return true;
+	return false;
+}
+
+/* the Souls' code, installed after every other track (xinstall.h): each type it moves one no track before it moved, each it
+ * shares one moved before it, each of its routes another track's copy of the same BN5 address, each effect it shares
+ * none of its own */
+static void test_soulcode_shared(void) {
+	const SoulCode *c = &soulcode_bn5;
+	for (int i = 0; i < c->ntypes; ++i) {
+		const SoulType *t = &c->types[i];
+		bool before = moved_before(TRACK_SOULS, 0, t->kind, t->type);
+		CHECK(t->to == XV_TYPE_SHARED ? before : (t->to != XV_TYPE_MOVED || !before), "souls' code: its type %d:%#x %s", t->kind, t->type,
+			t->to == XV_TYPE_SHARED ? "shared, moved by no track before it" : "moved, where a track before it moved it");
+	}
+	for (int i = 0; i < c->nroutes; ++i)
+		CHECK(copied_before(c->routes[i].bn5, c->routes[i].bn6), "souls' code: its route of BN5's %08x to %08x, no earlier track's copy",
+			(unsigned)c->routes[i].bn5, (unsigned)c->routes[i].bn6);
+	for (int i = 0; i < c->nshared_effects; ++i)
+		for (int k = 0; k < c->neffects; ++k)
+			CHECK(c->effects[k].to != c->shared_effects[i], "souls' code: effect %#x both shared and its own", c->shared_effects[i]);
+}
+
+static void test_xvirus_static(void) {
+	char why[160] = "";
+	/* (BN5's 25 families not BN6's by name, CanGard and Handi first: the static model's slots, issue #82's A2b) */
+	CHECK(xvirus_bn5_count == 25 && xvirus_bn5[0]->src_ai == 14 && xvirus_bn5[1]->src_ai == 4, "xvirus: BN5's families listed (%d)", xvirus_bn5_count);
+	for (int i = 0; i < xvirus_bn5_count; ++i) {
+		const XVirusFamily *f = xvirus_bn5[i];
+		CHECK(xvirus_recipe_ok(f, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xvirus: %s refused: %s", f->name, why);
+		CHECK(f->ai == BN6_FAMILIES + i && f->first_id == XV_FIRST_ID + XV_VERSIONS * i && f->home == XV_HOMES + XV_HOME_SIZE * (uint32_t)i,
+			"xvirus: %s off its slot %d", f->name, i);
+		CHECK(shared_moved_before(f, TRACK_FAMILIES, i), "xvirus: %s shares a type no recipe before it moved", f->name);
+		CHECK(moved_once(f, TRACK_FAMILIES), "xvirus: %s moves a type a track before it moved", f->name);
+		for (int k = 0; k < i; ++k)
+			CHECK(!static_clashes(f, xvirus_bn5[k]), "xvirus: %s and %s share numbers or room", xvirus_bn5[k]->name, f->name);
+	}
+	/* (the check sees a clash: CanGard against itself moved by a home and its ids) */
+	XVirusFamily twin = xvirus_cangard;
+	twin.ai = 33;
+	twin.first_id = XV_FIRST_ID + XV_VERSIONS;
+	twin.home = XV_HOMES + XV_HOME_SIZE;
+	CHECK(static_clashes(&twin, &xvirus_cangard) > 0, "xvirus: two families' code and art in one place not seen");
+	twin.nblocks = twin.nsprites = twin.neffects = twin.ntypes = 0;
+	CHECK(!static_clashes(&twin, &xvirus_cangard), "xvirus: a family of other numbers and nothing to place taken for a clash");
+	twin.first_id = XV_FIRST_ID + 5;
+	CHECK(static_clashes(&twin, &xvirus_cangard) == 1, "xvirus: two families' ids over one another not seen");
+}
+
+/* BN5's Navis' recipes as installed (xnavi_bn5.c; docs/MULTIROM.md,
+ * Transplanted Navis), each whole and apart from the others and from the
+ * families: its AI index, ids, home and code its own; a sprite two Navis
+ * draw at one place and number in both (the shared art), no other sprite's
+ * place or number another's; an effect two Navis spawn one number, in the
+ * Navis' range, and no number two effects' (a family's copy of the same
+ * BN5 effect is the families' own number, issue #82's ranges a track each);
+ * no type two recipes move, but one a family runs as the moved objects'
+ * (XV_TYPE_SHARED); the moved objects' recipe whole, its type moved by it
+ * alone, each type a Navi needs one it moves; the Navis' room laid out in
+ * order */
+static int navi_clashes(const XVirusFamily *f, const XVirusFamily *g, bool navis) {
+	int bad = navis && (f->ai == g->ai || spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE));
+	for (int i = 0; i < f->nblocks; ++i)
+		for (int k = 0; k < g->nblocks; ++k)
+			bad += spans_meet(f->blocks[i].at, f->blocks[i].end - f->blocks[i].start, g->blocks[k].at, g->blocks[k].end - g->blocks[k].start);
+	for (int i = 0; i < f->nsprites; ++i)
+		for (int k = 0; k < g->nsprites; ++k) {
+			const XvSprite *a = &f->sprites[i], *b = &g->sprites[k];
+			bool same = a->list == b->list && a->index == b->index && a->to_list == b->to_list && a->to_index == b->to_index && a->at == b->at &&
+				a->room == b->room;
+			bad += !same && (spans_meet(a->at, a->room, b->at, b->room) || (a->to_list == b->to_list && a->to_index == b->to_index));
+		}
+	/* (an effect two Navis spawn: one number for one BN5 effect; any two recipes: no number for two) */
+	for (int i = 0; i < f->neffects; ++i)
+		for (int k = 0; k < g->neffects; ++k) {
+			bool to = f->effects[i].to == g->effects[k].to, from = f->effects[i].from == g->effects[k].from;
+			bad += navis ? to != from : to && !from;
+		}
+	for (int i = 0; i < f->ntypes; ++i)
+		for (int k = 0; k < g->ntypes; ++k) {
+			const XvType *a = &f->types[i], *b = &g->types[k];
+			bool shares = (a->to == XV_TYPE_MOVED && b->to == XV_TYPE_SHARED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED);
+			bad += a->kind == b->kind && a->from == b->from && !shares && (a->to == XV_TYPE_MOVED || a->to != b->to);
+		}
+	return bad;
+}
+
+static void test_xnavi_static(void) {
+	char why[160] = "";
+	const XVirusFamily *o = &xnavi_objects_bn5;
+	CHECK(XN_STUB_DS < XN_STUB_BUSTER && XN_STUB_BUSTER < XN_STUB_SIDES && XN_STUB_SIDES < XN_STUB_CHIPDATA && XN_STUB_CHIPDATA < XN_STUBS_END && XN_STUBS_END == XN_SEA && XN_SEA < XN_SEA_END && XN_SEA_END == XN_OBJECTS && XN_OBJECTS < XN_OBJECTS_END && XN_OBJECTS_END <= XN_CODE && XN_CODE < XN_ART &&
+		XN_ART < XN_SHARED_ART && XN_SHARED_ART < XN_END && XN_END == XN_DARK_RECORDS && XN_DARK_RECORDS + XREG_IDS * 0x2Cu <= FREE_CHIP_CODE && XN_OBJECTS_HOME + XV_HOME_SIZE <= FREE_NAVI_CODE,
+		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Dark Soul's records)");
+	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
+	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
+	CHECK(xnavi_bn5_count == 7, "xnavi: BN5's Navis listed (%d: the six and the Dark Soul)", xnavi_bn5_count);
+	for (int i = 0; i < xnavi_bn5_count; ++i) {
+		const XNavi *n = xnavi_bn5[i];
+		const XVirusFamily *f = &n->code;
+		CHECK(xnavi_recipe_ok(n, why, sizeof why) && f->game == XROM_BN5_COLONEL_US, "xnavi: %s refused: %s", f->name, why);
+		CHECK(f->ai == XN_AI_OF(f->src_ai) && f->first_id == XN_ID_OF(f->src_ai), "xnavi: %s off its fixed numbers", f->name);
+		for (int e = 0; e < f->neffects; ++e)
+			CHECK(f->effects[e].to >= 0xA0 && f->effects[e].to <= 0xBF, "xnavi: %s's effect %#x past the Navis' 0xA0-0xBF", f->name, f->effects[e].to);
+		for (int k = 0; k < i; ++k) {
+			const XNavi *m = xnavi_bn5[k];
+			CHECK(!navi_clashes(f, &m->code, true) && !spans_meet((uint32_t)f->first_id, (uint32_t)n->versions, (uint32_t)m->code.first_id, (uint32_t)m->versions),
+				"xnavi: %s and %s share numbers or room", m->code.name, f->name);
+		}
+		for (int k = 0; k < xvirus_bn5_count; ++k) CHECK(!navi_clashes(f, xvirus_bn5[k], false), "xnavi: %s and %s share numbers or room", f->name, xvirus_bn5[k]->name);
+		CHECK(!navi_clashes(f, o, false), "xnavi: %s and the moved objects share numbers or room", f->name);
+		for (int k = 0; k < n->nneeds; ++k) {
+			bool moved = false;
+			for (int t = 0; t < o->ntypes; ++t) moved = moved || (o->types[t].kind == n->needs[k].kind && o->types[t].from == n->needs[k].from);
+			CHECK(moved, "xnavi: %s needs the type %d:%#x, which the moved objects do not move", f->name, n->needs[k].kind, n->needs[k].from);
+		}
+	}
+	for (int k = 0; k < xvirus_bn5_count; ++k) CHECK(!navi_clashes(o, xvirus_bn5[k], false), "xnavi: the moved objects and %s share numbers or room", xvirus_bn5[k]->name);
+	/* (the check sees a clash: a Navi against itself, its code, effects and types in one place twice) */
+	CHECK(xnavi_bn5_count < 1 || navi_clashes(&xnavi_bn5[0]->code, &xnavi_bn5[0]->code, true) > 0, "xnavi: one Navi's room twice not seen");
+}
+
+/* The free space's plan (free_space.h; docs/EMULATION.md, Memory the
+ * engine writes and BN6's RAM): every writer's region in order and apart,
+ * inside the ROM copy past the game's 8 MB; each of issue #82's installers'
+ * own layout inside its region (the families' room and the families, the
+ * chip registry, the lava and sea); BN6's RAM the plan gives them, its parts
+ * in order and apart, the pack's extension and the dispatch's side tables
+ * where the plan puts them */
+typedef struct { const char *what; uint32_t at, end; } Region;
+
+/* each region not empty, inside [lo, hi), and past the one before it */
+static void regions_apart(const char *plan, const Region *r, int n, uint32_t lo, uint32_t hi) {
+	for (int i = 0; i < n; ++i)
+		CHECK(r[i].at < r[i].end && r[i].at >= lo && r[i].end <= hi && (!i || r[i].at >= r[i - 1].end),
+			"%s: %s %08x-%08x is empty, outside %08x-%08x or over %s", plan, r[i].what, (unsigned)r[i].at, (unsigned)r[i].end, (unsigned)lo,
+			(unsigned)hi, i ? r[i - 1].what : "nothing");
+}
+
+static void test_free_space(void) {
+	static const Region rom[] = {
+		{ "a direct warp", FREE_WARP, FREE_CALL_RETURN }, { "a game call's return", FREE_CALL_RETURN, FREE_NO_MYSTERY },
+		{ "the empty Mystery Data list", FREE_NO_MYSTERY, FREE_RECORDS }, { "the battle records", FREE_RECORDS, FREE_RECORDS_END },
+		{ "Rush's gaps", FREE_RUSH, FREE_RUSH_END }, { "handler 3's records", FREE_BLOCKERS, FREE_BLOCKERS_END },
+		{ "the layer's warp list", FREE_WARP_LIST, FREE_LAYER }, { "the layers' data", FREE_LAYER, FREE_TILE_MAP },
+		{ "the tile map", FREE_TILE_MAP, FREE_COORDS }, { "the coordinate data", FREE_COORDS, FREE_TOWN_TILE_MAP },
+		{ "the town's tile map", FREE_TOWN_TILE_MAP, FREE_TOWN_COORDS }, { "the town's coordinate data", FREE_TOWN_COORDS, FREE_TOWN },
+		{ "the town's data", FREE_TOWN, FREE_LAN_HP }, { "Lan's HP's and house's", FREE_LAN_HP, FREE_TALK },
+		{ "the conversations", FREE_TALK, FREE_LABEL }, { "the map-name label", FREE_LABEL, FREE_PET_LABEL },
+		{ "the PET's PLACE", FREE_PET_LABEL, FREE_PET_TEXT }, { "the key items' names", FREE_PET_TEXT, FREE_PET_DESCS },
+		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
+		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
+		{ "a Chip Trader's prizes of both nets", FREE_TRADER_LIST, FREE_TRADER_LIST_END },
+		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
+		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
+		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },
+		{ "home's other places", FREE_INDOORS, FREE_VIRUS_ROOM }, { "the families' room", FREE_VIRUS_ROOM, FREE_FAMILIES },
+		{ "the families", FREE_FAMILIES, FREE_CHIPS }, { "the chip registry", FREE_CHIPS, FREE_SOULS },
+		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
+		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
+		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
+		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
+	};
+	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
+	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
+	regions_apart("the free space", rom, (int)(sizeof rom / sizeof *rom), EMU_FREE, FREE_END);
+	/* (the families' room, xvirus_grow.c: BN6's tables grown and the second-level dispatch) */
+	const Region room[] = {
+		{ "the per-family tables", XV_GROWN, XV_GROWN + XV_TABLES * XV_STEP }, { "the ice sizes", XV_ICE, XV_ICE + XV_AIS },
+		{ "the tables by AI index", XV_PER_AI, XV_PER_AI + 3 * XV_STEP }, { "sprite list 3", XV_LIST3, XV_LIST3 + XV_STEP },
+		{ "sprite lists 1, 2, 4 and 5", XV_LISTS, XV_LISTS + (XV_LISTS_GROWN - 1) * XV_STEP },
+		{ "the effects", XV_EFFECTS, XV_EFFECTS + 4u * XV_EFFECTS_MAX }, { "the kinds' types", XV_TYPES, XV_TYPES + 3 * XV_STEP },
+		{ "the enemy ids", XV_IDS_AT, XV_IDS_AT + 3u * XV_IDS }, { "the reward rows", XV_ROWS, XV_ROWS + 2u * ENEMY_DROPS * XV_IDS },
+		{ "the ids' names", XV_NAMES, XV_NAMES + XV_NAMES_ROOM },
+		{ "MOVED", XV_MOVED_TABLES, XV_MOVED_TABLES + XV_DISPATCH_KINDS * XV_STEP },
+		{ "TWIN", XV_TWIN_TABLES, XV_TWIN_TABLES + XV_DISPATCH_KINDS * 0x100u }, { "the dispatch's code", XV_STUBS, XV_STUBS_END },
+		{ "the families' pre-steps", XV_PRESTEP, XV_PRESTEP + 4u * XV_AIS },
+	};
+	CHECK(XV_AT == FREE_VIRUS_ROOM, "free space: the families' room at %08x", (unsigned)XV_AT);
+	regions_apart("the families' room", room, (int)(sizeof room / sizeof *room), FREE_VIRUS_ROOM, FREE_FAMILIES);
+	const Region fam[] = {
+		{ "the homes", XV_HOMES, XV_HOMES + XV_FAMILIES * XV_HOME_SIZE }, { "the code", XV_CODE, XV_ART }, { "the art", XV_ART, XV_ART_END },
+		{ "the arm points", XV_ARMS, XV_ARMS + XV_LIST_MAX * BN6_ARM_VIRUS_SIZE },
+	};
+	regions_apart("the families", fam, (int)(sizeof fam / sizeof *fam), FREE_FAMILIES, FREE_CHIPS);
+	const Region chips[] = {
+		{ "the records", CHIPS_RECORDS, CHIPS_RECORDS + CHIPS_IDS * BN6_CHIP_RECORD_SIZE },
+		{ "the names, 0-255", CHIPS_NAMES0, CHIPS_NAMES0 + CHIPS_NAMES_ROOM }, { "the names, 256-511", CHIPS_NAMES1, CHIPS_NAMES1 + CHIPS_NAMES_ROOM },
+		{ "the descriptions, 0-255", CHIPS_DESCS0, CHIPS_DESCS0 + CHIPS_DESCS_ROOM },
+		{ "the descriptions, 256-511", CHIPS_DESCS1, CHIPS_DESCS1 + CHIPS_DESCS_ROOM },
+		{ "the routines", CHIPS_CODE, CHIPS_CODE + 0x400u }, { "the art", CHIPS_ART, CHIPS_FREE_END },
+	};
+	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
+	regions_apart("the chip registry", chips, (int)(sizeof chips / sizeof *chips), FREE_CHIPS, FREE_SOULS);
+	const Region panels[] = {
+		{ "the panels' flags", XP_FLAGS, XP_FLAGS + 16 * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
+		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE },
+	};
+	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
+	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
+	/* (the Navis' room's battle sprites first, one copy for every track: the Navis' track's xnavi_sprites.c) */
+	const Region navis[] = { { "the Navis' battle sprites", FREE_NAVI_SPRITES, FREE_NAVI_SPRITES_END } };
+	regions_apart("the Navis' room", navis, 1, FREE_NAVIS, FREE_CHIP_CODE);
+	CHECK(FREE_NAVI_SPRITES == FREE_NAVIS && FREE_NAVI_SPRITES_END - FREE_NAVI_SPRITES == 0x80000u, "free space: the Navis' sprites the room's first 0x80000");
+	/* (the chips' code: BN6's attack families grown, its support and Navi routines grown, the units: xattack_grow.c, xchips_code.c) */
+	const Region code[] = {
+		{ "the attack families", FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END }, { "the support routines", XC_SUPPORT, XC_SUPPORT + 4u * XC_ROUTINES },
+		{ "the Navi routines", XC_NAVI, XC_NAVI + 4u * XC_ROUTINES }, { "their stubs", XC_STUBS, XC_STUBS_END },
+		{ "the helpers' code", XC_HELPERS, XC_POWERS }, { "the computed powers", XC_POWERS, XC_POWERS + 4u * 256u },
+		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_ART }, { "what they draw", XC_ART, XC_END },
+	};
+	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_SOULS_ART);
+	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
+	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
+	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
+		XATTACK_BN6_END <= XATTACK_CHIPS && XATTACK_CHIPS_END == XATTACK_SOULS && XATTACK_SOULS_END <= 0x100,
+		"free space: the attack families to CurAction 0xFF, BN6's, the chips', the Souls' apart");
+	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
+		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
+	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
+		"free space: the units' routines past BN6's own, its Navi chips' right after its support chips'");
+	/* (the Souls' room, soul_room.h: each part of the Souls' install, the tracks' S2-S5) */
+	const Region souls[] = {
+		{ "UNITE's", SOULS_UNITE, SOULS_UNITE_END }, { "the stubs", SOULS_STUBS, SOUL_STUB_STRIKE_CHECK + 4 },
+		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
+		{ "the hooks' Thumb", SOULS_THUMB, SOULS_THUMB_END },
+		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
+		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
+		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },
+		{ "the loadouts", SOULS_LOADOUTS, SOULS_LOADOUTS_END }, { "the faces", SOULS_FACES, SOULS_FACES_END },
+		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "Chaos Unison's Thumb", SOULS_CHAOS, SOULS_CHAOS_END },
+		{ "the songs", SOULS_SONGS, SOULS_SONGS_END },
+		{ "the code", SOULS_CODE, SOULS_CODE_END }, { "the attacks' sprites", SOULS_ART, SOULS_FACE_TILES },
+		{ "the faces' tiles and digits", SOULS_FACE_TILES, SOULS_DIGITS_END }, { "list 0", SOULS_LIST0, SOULS_LIST0_END },
+		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
+	};
+	regions_apart("the Souls' room", souls, (int)(sizeof souls / sizeof *souls), FREE_SOULS, FREE_PANELS);
+	/* (the hooks' Thumb: soulchips.c's, the counter's, ColonelSoul's, each apart) */
+	const Region thumb[] = {
+		{ "the chips' Thumb", SOULS_THUMB, SOULS_THUMB + 0x24 }, { "the counter's", SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 0x24 },
+		{ "ColonelSoul's phases", SOULS_COLONEL, SOUL_COLONEL_DRAW }, { "his draw", SOUL_COLONEL_DRAW, SOUL_COLONEL_DRAW2 },
+		{ "his draw on UNITE's", SOUL_COLONEL_DRAW2, SOUL_COLONEL_STRIKE }, { "his strike's block", SOUL_COLONEL_STRIKE, SOUL_COLONEL_UNDO },
+		{ "his button's chip given back", SOUL_COLONEL_UNDO, SOULS_COLONEL_END },
+	};
+	regions_apart("the hooks' Thumb", thumb, (int)(sizeof thumb / sizeof *thumb), SOULS_THUMB, SOULS_THUMB_END);
+	/* (FREE_SOULS_ART: tools/xsoul.py's sprites, then ColonelSoul's button's art, BN5's: its tiles by state, picture, palettes) */
+	const Region art[] = {
+		{ "the sprites", FREE_SOULS_ART, SOULS_COLONEL_ART }, { "the button's tiles", SOULS_COLONEL_ART, SOULS_COLONEL_INFO },
+		{ "its picture", SOULS_COLONEL_INFO, SOULS_COLONEL_INFO_PAL }, { "its palettes", SOULS_COLONEL_INFO_PAL, SOULS_COLONEL_ART_END },
+	};
+	regions_apart("the Souls' art past their room", art, (int)(sizeof art / sizeof *art), FREE_SOULS_ART, FREE_SOULS_ART_END);
+	CHECK(SOULS_COLONEL_INFO - SOULS_COLONEL_ART == 3 * 0x180 && SOULS_COLONEL_INFO_PAL - SOULS_COLONEL_INFO == 0x540 &&
+		SOULS_COLONEL_NAME_PAL - SOULS_COLONEL_INFO_PAL == 0x20 && SOULS_COLONEL_ART_END - SOULS_COLONEL_NAME_PAL == 0x20 &&
+		(SOULS_COLONEL_ART & 0x1F) == 0, "the Souls' art: ColonelSoul's button's parts as BN5's sizes, word-aligned");
+	/* (each grown table's room for BN6's entries and the Souls': 14 sprites, 148 power attacks, 23 faces; six Souls, eleven
+	 * power attacks, BN5's eleven digits; the effects the tracks' allocations give the Souls) */
+	CHECK(SOULS_LIST0 + 4u * SOULS_LIST0_ENTRIES <= SOULS_LIST0_END && SOUL_LIST0_FIRST + 6 <= SOUL_LIST0_ART_FIRST &&
+		SOULS_ARM_ROWS + 0x44u * (3 + 6) <= SOULS_ARM_ROWS_END && SOULS_POWERS + 4u * (SOUL_POWER_FIRST + 11) <= SOULS_POWERS_END &&
+		SOULS_CHARGES + 10u * (SOUL_POWER_FIRST + 11) <= SOULS_CHARGES_END && SOULS_LOADOUTS + 6u * 6 <= SOULS_LOADOUTS_END &&
+		SOULS_FACES + 4u * (SOUL_FACE_FIRST + 6) <= SOULS_FACES_END && SOULS_FACE_PALS + 0x20u * (SOUL_FACE_FIRST + 6) <= SOULS_FACE_PALS_END &&
+		SOULS_FACE_TILES + 6u * 0x100 <= SOULS_DIGITS && SOULS_DIGITS + 11u * 0x80 <= SOULS_DIGITS_END && SOULS_DIGITS_END <= SOULS_ART_END &&
+		SOUL_EFFECT_FIRST == 0xC0 && SOUL_EFFECT_LAST == 0xCF,
+		"the Souls' room: a grown table's entries past its room");
+	/* (BN6's RAM: persistent, then per battle) */
+	static const Region ram[] = {
+		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
+		{ "spare, persistent", RAM_PLAYER_AI_END, RAM_PERSISTENT_END },
+		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
+		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
+		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
+		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_BATTLE_SPARE },
+		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
+	};
+	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
+	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
+		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
+	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,
+		"BN6's RAM: the dispatch's side tables at %08x", (unsigned)BN6_DISPATCH_SIDE);
+	CHECK(BN6_DARK_LISTS == RAM_DARK_LISTS && RAM_DARK_LISTS + 2u * BN5_DARK_LIST_SIZE == RAM_NAVIS && BN6_COLONEL_SIDES == RAM_NAVIS &&
+		BN6_DARK_AI_OWNER > BN6_COLONEL_SIDES && BN6_DARK_AI_POOL + 4u <= RAM_DARK_AI && BN6_DARK_AI == RAM_DARK_AI &&
+		RAM_DARK_AI + BN5_AI_DATA_SIZE <= RAM_BATTLE,
+		"BN6's RAM: the chip AI's lists at %08x, two sides, then Colonel's sides' bits, the Dark Soul's AI data", (unsigned)RAM_DARK_LISTS);
+	CHECK(XSEA_MASK == RAM_SEA && XSEA_MARKERS + 32u * 4u <= XSEA_RAM_END && XSEA_RAM_END <= RAM_DARK_LISTS,
+		"BN6's RAM: the sea's submerge at %08x-%08x", (unsigned)RAM_SEA, (unsigned)XSEA_RAM_END);
+	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_BATTLE_SPARE && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
+		"BN6's RAM: the Souls' state at %08x, %#x bytes", (unsigned)BN6_SOULS, (unsigned)BN6_SOULS_SIZE);
+}
+
+/* The installers' claims (claims.h): an installer's own bytes again, its
+ * neighbour's and a gap between pass; another's over them, nested or after,
+ * and a hook outside any installer on an installer's bytes are told */
+static void test_claims(void) {
+	claims_reset();
+	claims_quiet(true);
+	claims_begin("a");
+	CHECK(claims_note(0x08900000u, 0x10) && claims_note(0x08900010u, 4) && claims_note(0x08900004u, 2), "claims: an installer's own bytes refused");
+	claims_begin("b");
+	CHECK(claims_note(0x08900020u, 8), "claims: a neighbour's bytes past the first's refused");
+	CHECK(!claims_note(0x08900012u, 4), "claims: a nested installer over the first's bytes not told");
+	claims_end();
+	CHECK(claims_note(0x08900040u, 4) && claims_who(0x08900040u) && !strcmp(claims_who(0x08900040u), "a"),
+		"claims: the first installer's writes after the nested one's not its own");
+	claims_end();
+	CHECK(claims_note(0x08900000u, 0x100), "claims: a write outside any installer claimed");
+	CHECK(!claims_hook(0x08900003u) && claims_hook(0x08900030u), "claims: a hook on an installer's bytes not told, or one beside them refused");
+	CHECK(claims_who(0x08900030u) && !strcmp(claims_who(0x08900030u), CLAIMS_HOOKS) && !claims_who(0x08900038u),
+		"claims: whose a byte is (%s)", claims_who(0x08900030u) ? claims_who(0x08900030u) : "no one's");
+	CHECK(claims_overlaps() == 2, "claims: %d overlaps told, not 2", claims_overlaps());
+	claims_reset();
+	claims_quiet(false);
+	CHECK(!claims_overlaps() && !claims_who(0x08900000u), "claims: not forgotten");
+}
+
+/* The second-level dispatch's numbers and code (issue #82,
+ * xvirus_dispatch.h): BN5's seven spawners each to the dispatch's of its
+ * kind and place, BN6's own and any other routine to none; its tables and
+ * side tables by kind; and its code as the project encodes it, each
+ * literal load reaching the word it names (run on the CPU in
+ * tests/test_emu.c) */
+static uint32_t stub_literal(const uint8_t *code, uint32_t at) {
+	uint16_t op = get16(code + (at - XV_STUBS));
+	uint32_t lit = ((at + 4) & ~3u) + 4u * (op & 0xFFu);
+	return (op & 0xF800) == 0x4800 && lit + 4 <= XV_STUBS_END ? get32(code + (lit - XV_STUBS)) : 0;
+}
+
+static void test_xvirus_dispatch(void) {
+	static const struct { uint32_t bn5, to; int kind; uint32_t bn6; } spawners[7] = {
+		{ BN5_SPAWN_1, XV_SPAWN_1, 1, BN6_SPAWN_1 }, { BN5_SPAWN_1_LAST, XV_SPAWN_1_LAST, 1, BN6_SPAWN_1_LAST },
+		{ BN5_SPAWN_1_LAST2, XV_SPAWN_1_LAST, 1, BN6_SPAWN_1_LAST }, { BN5_SPAWN_3, XV_SPAWN_3, 3, BN6_SPAWN_3 },
+		{ BN5_SPAWN_3_LAST, XV_SPAWN_3_LAST, 3, BN6_SPAWN_3_LAST }, { BN5_SPAWN_3_FIRST, XV_SPAWN_3_FIRST, 3, BN6_SPAWN_3_FIRST },
+		{ BN5_SPAWN_4, XV_SPAWN_4, 4, BN6_SPAWN_4 },
+	};
+	for (int i = 0; i < 7; ++i) {
+		int kind = 0;
+		uint32_t bn6 = 0, to = xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, spawners[i].bn5);
+		CHECK(to == spawners[i].to && xvirus_dispatch_is_spawner(to, &kind, &bn6) && kind == spawners[i].kind && bn6 == spawners[i].bn6,
+			"dispatch: BN5's spawner %08x to %08x (kind %d, BN6's %08x)", (unsigned)spawners[i].bn5, (unsigned)to, kind, (unsigned)bn6);
+	}
+	CHECK(!xvirus_dispatch_spawner(XV_GAME_BN6, BN6_SPAWN_3) && !xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, BN6_SPAWN_3) &&
+		!xvirus_dispatch_spawner(XROM_BN5_COLONEL_US, 0x08016C42), "dispatch: a spawner for BN6's own, or a routine of no spawn");
+	CHECK(!xvirus_dispatch_is_spawner(XV_SPAWN_1 + 2, NULL, NULL) && !xvirus_dispatch_is_spawner(XV_STUB_NONE, NULL, NULL) &&
+		!xvirus_dispatch_is_spawner(XV_SPAWN_1 + XV_SPAWNERS * XV_SPAWN_STEP, NULL, NULL), "dispatch: an address of no spawner taken for one");
+	CHECK(xvirus_dispatch_type(1) == XV_T1_DISPATCH && xvirus_dispatch_type(3) == XV_T3_DISPATCH && xvirus_dispatch_type(4) == XV_T4_DISPATCH &&
+		xvirus_dispatch_type(2) < 0, "dispatch: its types");
+	CHECK(xvirus_dispatch_side(3) == BN6_DISPATCH_SIDE + BN6_DISPATCH_SIDE_STEP && xvirus_dispatch_moved_at(4, 0x10) ==
+		XV_MOVED_TABLES + 2 * XV_STEP + 0x40 && xvirus_dispatch_twin_at(1, 0xFF) == XV_TWIN_TABLES + 0xFF && !xvirus_dispatch_twin_at(3, 0x100),
+		"dispatch: its tables' places");
+	/* (its places: the tables, then the code, short of the families' homes) */
+	CHECK(XV_TWIN_TABLES >= XV_MOVED_TABLES + 3 * XV_STEP && XV_STUBS >= XV_TWIN_TABLES + 0x300 && XV_STUBS_END <= XV_HOMES &&
+		XV_DISPATCH >= XV_NAMES + XV_NAMES_ROOM, "dispatch: its room");
+	static uint8_t code[XV_STUBS_SIZE];
+	xvirus_dispatch_code(code);
+	CHECK(stub_literal(code, XV_STUB_NONE) == (BN6_OBJECT_FREE | 1) && get16(code + 2) == 0x4700, "dispatch: the stray's routine");
+	for (int kind = 1; kind <= 4; ++kind) {
+		uint32_t r = xvirus_dispatch_routine(kind);
+		if (!r) continue;
+		CHECK(get16(code + (r - XV_STUBS)) == 0x78E8 && stub_literal(code, r + 2) == xvirus_dispatch_side(kind) &&
+			stub_literal(code, r + 8) == xvirus_dispatch_moved_at(kind, 0) && get16(code + (r + 0xC - XV_STUBS)) == 0x4700,
+			"dispatch: kind %d's routine", kind);
+	}
+	for (int i = 0; i < 7; ++i) {
+		uint32_t s = spawners[i].to;
+		CHECK(get16(code + (s - XV_STUBS)) == 0xB501 && stub_literal(code, s + 2) == xvirus_dispatch_twin_at(spawners[i].kind, 0) &&
+			get16(code + (s + 0xE - XV_STUBS)) == (0x2000 | (uint32_t)xvirus_dispatch_type(spawners[i].kind)) &&
+			stub_literal(code, s + 0x10) == (spawners[i].bn6 | 1) && get16(code + (s + 0x12 - XV_STUBS)) == 0x46FE &&
+			stub_literal(code, s + 0x1E) == xvirus_dispatch_side(spawners[i].kind) && get16(code + (s + 0x2A - XV_STUBS)) == 0xBD00,
+			"dispatch: the spawner at %08x", (unsigned)s);
+	}
+}
+
+/* The recipes tools/xrecipe.py writes (src/emu/xvirus_bn5.c, from the two
+ * ROMs) against the ones the build installs (xvirus_families.c's xvirus_bn5,
+ * made by hand and each compared frame by frame with BN5's own battle):
+ * every field the same, the arrays whose order the install does not depend on
+ * (data, calls, words, immediates, numbers, bytes, effects, types) as sets,
+ * the rest (blocks, states, hooks, sprites, clones) in their order */
+#define SAME_SET(A, NA, B, NB, EQ) same_set((A), (NA), (B), (NB), sizeof *(A), (EQ))
+static bool same_set(const void *a, int na, const void *b, int nb, size_t size, bool (*eq)(const void *, const void *)) {
+	if (na != nb) return false;
+	for (int i = 0; i < na; ++i) {
+		int in_a = 0, in_b = 0;
+		for (int k = 0; k < na; ++k) in_a += eq((const char *)a + (size_t)i * size, (const char *)a + (size_t)k * size);
+		for (int k = 0; k < nb; ++k) in_b += eq((const char *)a + (size_t)i * size, (const char *)b + (size_t)k * size);
+		if (in_a != in_b) return false;
+	}
+	return true;
+}
+static bool data_eq(const void *x, const void *y) {
+	const XvData *a = x, *b = y;
+	return a->start == b->start && a->end == b->end && a->kind == b->kind;
+}
+static bool pair_eq(const void *x, const void *y) {
+	const XvPair *a = x, *b = y;
+	return a->from == b->from && a->to == b->to;
+}
+static bool imm_eq(const void *x, const void *y) {
+	const XvImm *a = x, *b = y;
+	return a->at == b->at && a->form == b->form && a->rd == b->rd && a->rn == b->rn && a->was == b->was && a->now == b->now;
+}
+static bool number_eq(const void *x, const void *y) {
+	const XvNumber *a = x, *b = y;
+	return a->at == b->at && a->was == b->was && a->now == b->now;
+}
+static bool byte_eq(const void *x, const void *y) {
+	const XvByte *a = x, *b = y;
+	return a->at == b->at && a->was == b->was && a->now == b->now;
+}
+static bool id_eq(const void *x, const void *y) {
+	const XvId *a = x, *b = y;
+	return a->from == b->from && a->to == b->to;
+}
+static bool type_eq(const void *x, const void *y) {
+	const XvType *a = x, *b = y;
+	return a->kind == b->kind && a->from == b->from && a->to == b->to;
+}
+static bool ref_eq(XvRef a, XvRef b) { return a.addr == b.addr && a.own == b.own && a.clone == b.clone; }
+
+/* which field differs (NULL: none) */
+static const char *recipe_differs(const XVirusFamily *g, const XVirusFamily *h) {
+	if (strcmp(g->name, h->name) || g->game != h->game || g->src_ai != h->src_ai || g->ai != h->ai || g->first_id != h->first_id ||
+		g->home != h->home)
+		return "its numbers (name, game, AI indexes, ids, home)";
+	if (g->nblocks != h->nblocks) return "its blocks";
+	for (int i = 0; i < g->nblocks; ++i)
+		if (memcmp(&g->blocks[i], &h->blocks[i], sizeof *g->blocks)) return "its blocks";
+	if (!SAME_SET(g->data, g->ndata, h->data, h->ndata, data_eq)) return "its data";
+	if (!SAME_SET(g->calls, g->ncalls, h->calls, h->ncalls, pair_eq)) return "its calls";
+	if (!SAME_SET(g->words, g->nwords, h->words, h->nwords, pair_eq)) return "its words";
+	if (!SAME_SET(g->imms, g->nimms, h->imms, h->nimms, imm_eq)) return "its immediates";
+	if (!SAME_SET(g->numbers, g->nnumbers, h->numbers, h->nnumbers, number_eq)) return "its numbers";
+	if (!SAME_SET(g->bytes, g->nbytes, h->bytes, h->nbytes, byte_eq)) return "its bytes";
+	if (g->nstates != h->nstates) return "its states";
+	for (int i = 0; i < g->nstates; ++i)
+		if (!ref_eq(g->states[i], h->states[i])) return "its states";
+	for (int i = 0; i < XV_HOOKS; ++i)
+		if (!ref_eq(g->hooks[i], h->hooks[i])) return "its hooks";
+	if (g->struct1 != h->struct1 || g->struct2 != h->struct2 || memcmp(g->names, h->names, sizeof g->names) || g->held != h->held ||
+		g->ice != h->ice || g->traits.laid != h->traits.laid || g->traits.mode != h->traits.mode || g->traits.element != h->traits.element ||
+		g->traits.weakness != h->traits.weakness || g->traits.shadow != h->traits.shadow)
+		return "its records";
+	if (!g->held_chips != !h->held_chips || (g->held_chips && memcmp(g->held_chips, h->held_chips, XV_VERSIONS * 16 * sizeof *g->held_chips)))
+		return "its held chips";
+	if (g->nsprites != h->nsprites) return "its sprites";
+	for (int i = 0; i < g->nsprites; ++i)
+		if (memcmp(&g->sprites[i], &h->sprites[i], sizeof *g->sprites)) return "its sprites";
+	if (!SAME_SET(g->effects, g->neffects, h->effects, h->neffects, id_eq)) return "its effects";
+	if (!SAME_SET(g->types, g->ntypes, h->types, h->ntypes, type_eq)) return "its types";
+	if (g->nclones != h->nclones) return "its clones";
+	for (int i = 0; i < g->nclones; ++i)
+		if (memcmp(&g->clones[i], &h->clones[i], sizeof *g->clones)) return "its clones";
+	if (g->nranges != h->nranges || g->ncmps != h->ncmps || g->nsongs != h->nsongs || g->prestep != h->prestep) return "its shims or songs";
+	for (int i = 0; i < g->nranges; ++i)
+		if (memcmp(&g->ranges[i], &h->ranges[i], sizeof *g->ranges)) return "its NameID ranges";
+	for (int i = 0; i < g->ncmps; ++i)
+		if (memcmp(&g->cmps[i], &h->cmps[i], sizeof *g->cmps)) return "its chip compares";
+	for (int i = 0; i < g->nsongs; ++i)
+		if (memcmp(&g->songs[i], &h->songs[i], sizeof *g->songs)) return "its songs";
+	return NULL;
+}
+
+static void test_xvirus_generated(void) {
+	static const XVirusFamily *const by_hand[] = { &xvirus_cangard, &xvirus_handi };
+	int compared = 0;
+	for (int i = 0; i < xvirus_bn5_count; ++i) {
+		const XVirusFamily *g = xvirus_bn5[i];
+		for (int k = 0; k < (int)(sizeof by_hand / sizeof *by_hand); ++k) {
+			const XVirusFamily *h = by_hand[k];
+			if (h->src_ai != g->src_ai) continue;
+			const char *d = recipe_differs(g, h);
+			CHECK(!d, "xrecipe: the generated %s is not the one made by hand: %s", g->name, d ? d : "");
+			++compared;
+		}
+	}
+	CHECK(compared == 2, "xrecipe: %d of the 2 families made by hand generated", compared);
+	/* (the comparison sees a difference: CanGard's recipe with one call's twin otherwise) */
+	XVirusFamily other = xvirus_cangard;
+	XvPair calls[64];
+	memcpy(calls, other.calls, (size_t)other.ncalls * sizeof *calls);
+	calls[3].to += 2;
+	other.calls = calls;
+	CHECK(recipe_differs(&other, &xvirus_cangard) != NULL, "xrecipe: a call aimed otherwise not seen");
+	other = xvirus_cangard;
+	other.nimms -= 1;
+	CHECK(recipe_differs(&other, &xvirus_cangard) != NULL, "xrecipe: an immediate missing not seen");
+}
+
+/* The families' shims (issue #82's A2b, xvirus_shim.h): a NameID range's
+ * loads of BN6's bounds and its branch on to the routine's veneer; a chip
+ * compare's stacked scratch register, its compare and the way on where the
+ * branch is taken; the two pre-steps ported from BN5's dispatcher, each
+ * ending on to BN6's state step; and each refused where it cannot be */
+static uint32_t shim_lit(const uint8_t *code, uint32_t off) {
+	uint16_t op = get16(code + off);
+	return (op & 0xF800) == 0x4800 ? get32(code + ((off + 4) & ~3u) + 4u * (op & 0xFFu)) : 0xFFFFFFFFu;
+}
+
+static void test_xvirus_shims(void) {
+	uint8_t r[XV_SHIM_RANGE_SIZE];
+	const uint32_t home = XV_HOMES + XV_HOME_SHIMS, veneer = XV_HOMES + XV_HOME_VENEERS + 3 * THUMB_VENEER_SIZE;
+	CHECK(xvirus_shim_range(r, home, 0x23C, 0x241, veneer), "shims: a NameID range refused");
+	CHECK((get16(r) & 0xFF00) == 0x4900 && shim_lit(r, 0) == 0x23C && (get16(r + 2) & 0xFF00) == 0x4A00 && shim_lit(r, 2) == 0x241,
+		"shims: a NameID range's bounds %#x %#x", shim_lit(r, 0), shim_lit(r, 2));
+	CHECK((get16(r + 4) & 0xF800) == 0xE000 && home + 8 + 2 * ((get16(r + 4) & 0x7FFu)) == veneer, "shims: a NameID range's branch %04x",
+		get16(r + 4));
+	CHECK(!xvirus_shim_range(r, home + 2, 0, 1, veneer) && !xvirus_shim_range(r, home, 0, 1, home + 0x1000),
+		"shims: a NameID range off its word, or its veneer out of a branch's reach, taken");
+	uint8_t k[XV_SHIM_CMP_SIZE];
+	const uint32_t to = XV_CODE + 0x1234;
+	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");
+	CHECK(get16(k) == 0xB401 && shim_lit(k, 2) == 0x1C8 && get16(k + 4) == 0x4284 && get16(k + 6) == 0xBC01 && get16(k + 8) == 0xD103,
+		"shims: a chip compare's compare (%04x %04x %04x %04x)", get16(k), get16(k + 4), get16(k + 6), get16(k + 8));
+	CHECK(get16(k + 10) == 0xB401 && shim_lit(k, 12) == (to | 1) && get16(k + 14) == 0x4686 && get16(k + 16) == 0xBC01 &&
+		get16(k + 18) == 0x4770, "shims: a chip compare's way on to %08x", shim_lit(k, 12));
+	/* (a compare of r0 keeps r1 aside; bne's taken where the compare is not equal) */
+	CHECK(xvirus_shim_cmp(k, home, 0, 0x100, false, to) && get16(k) == 0xB402 && get16(k + 4) == 0x4288 && get16(k + 8) == 0xD003,
+		"shims: a compare of r0, or a bne's, made otherwise");
+	CHECK(!xvirus_shim_cmp(k, home, 8, 0x100, true, to) && !xvirus_shim_cmp(k, home, 1, 0x100, true, to | 1),
+		"shims: a high register, or a way on with its Thumb bit, taken");
+	uint8_t p[XV_SHIM_PRESTEP_MAX];
+	const uint32_t whiches[2] = { BN5_PRESTEP_APPLEY, BN5_PRESTEP_DOMINERD };
+	for (int i = 0; i < 2; ++i) {
+		int n = xvirus_shim_prestep(p, sizeof p, home, whiches[i], veneer, veneer + THUMB_VENEER_SIZE);
+		CHECK(n > 8 && get32(p + n - 8) == (BN6_VIRUS_STATE_STEP | 1) && get32(p + n - 4) == 0x1FE, "shims: pre-step %08x (%d bytes)",
+			(unsigned)whiches[i], n);
+		int bx = n - 10;
+		while (bx > 0 && get16(p + bx) != 0x4700) bx -= 2;
+		CHECK(bx > 0 && shim_lit(p, (uint32_t)bx - 2) == (BN6_VIRUS_STATE_STEP | 1), "shims: pre-step %08x not on to BN6's state step",
+			(unsigned)whiches[i]);
+	}
+	CHECK(!xvirus_shim_prestep(p, sizeof p, home, 0x08104550u, veneer, veneer) && !xvirus_shim_prestep(p, 16, home, BN5_PRESTEP_DOMINERD, veneer, veneer),
+		"shims: a pre-step no port makes, or too little room, taken");
+}
+
+/* data.c's readers answer for an enemy id a family took (EnemyMoved), not
+ * from the ROM, and from it again once let go */
+static void test_enemy_moved(void) {
+	EnemyMoved e = { { 2, 0, 32 }, { 0x96, 0x10, 2, 8, 0x3C, 0x00 }, { 4, 0x1E, 1, 0, 0x0E, 0, 0x80, 1 }, "CanRaid" };
+	CHECK(enemy_moved_set(0x202, &e), "data: an enemy id moved");
+	char name[20];
+	enemy_name(0x202, name, sizeof name);
+	int hp = 0, dmg = 0;
+	CHECK(!strcmp(name, "CanRaid") && enemy_stats(0x202, &hp, &dmg) && hp == 150 && dmg == 60, "data: the moved id reads %s, %d HP, %d damage",
+		name, hp, dmg);
+	/* (its first wheel's element in the HP word's top: 1 Fire, beaten by Aqua; its second-wheel weakness bit 0x80 Sword unread then) */
+	CHECK(enemy_element(0x202) == ELEM_FIRE && enemy_weakness(0x202) == ELEM_AQUA, "data: the moved id's element %d, weakness %d",
+		enemy_element(0x202), enemy_weakness(0x202));
+	const uint8_t *t = enemy_triple(0x202);
+	CHECK(t && t[0] == 2 && t[2] == 32 && enemy_id(0, 32, 2) == 0x202, "data: the moved id's triple and its id");
+	e.stats[1] = 0;   /* (no first-wheel element: the second wheel's) */
+	enemy_moved_set(0x202, &e);
+	CHECK(enemy_element(0x202) == ELEM_NULL && enemy_weakness(0x202) == ELEM_SWORD, "data: the moved id's second wheel");
+	/* (with no ROM read, nothing then) */
+	CHECK(enemy_moved_set(0x202, NULL) && (R.data || (!enemy_stats(0x202, &hp, &dmg) && enemy_triple(0x202) == NULL)), "data: the moved id let go");
+	/* (a moved id's own reward row, as its install wrote it: lean_row reads
+	 * it, not the player's ROM's, which gives the id another's; issue #82) */
+	EnemyMoved a = e, b = e;
+	a.drops_own = true;
+	for (int k = 0; k < ENEMY_DROPS; ++k) a.drops[k] = (uint16_t)(0x4000 | (100 + k));
+	b.triple[0] = 3;
+	CHECK(enemy_moved_set(0x200, &a) && enemy_moved_set(0x203, &b), "data: two ids moved");
+	CHECK(enemy_drop(0x200, 0) == 0x4064 && enemy_drop(0x200, 19) == 0x4077 && enemy_drop(0x200, 20) == 0xFFFF, "data: a moved id's own reward row (%04X)",
+		enemy_drop(0x200, 0));
+	CHECK(R.data || enemy_drop(0x203, 0) == 0xFFFF, "data: a moved id without its own row reads the ROM's (none here)");
+	/* (the first let go: the last moved into its place, still found by its id) */
+	CHECK(enemy_moved_set(0x200, NULL) && enemy_triple(0x203) && enemy_triple(0x203)[0] == 3 && enemy_drop(0x200, 0) != 0x4064,
+		"data: an id let go, the other still read as moved");
+	enemy_moved_set(0x203, NULL);
+	/* (the ids a family may take: to 0x400; one from 0x200 no family took has no name) */
+	CHECK(!enemy_moved_set(ENEMY_IDS_MAX, &a) && enemy_moved_set(ENEMY_IDS_MAX - 1, &a) && enemy_triple(ENEMY_IDS_MAX - 1), "data: the last id a family may take");
+	enemy_moved_set(ENEMY_IDS_MAX - 1, NULL);
+	name[0] = 'x';
+	enemy_name(0x201, name, sizeof name);
+	CHECK(!name[0] && !enemy_triple(0x201), "data: an id from 0x200 no family took (%s)", name);
+}
+
 /* The All * helper (docs/META.md, issue #18): every chip in *. The engine's
  * view of a record (chip_info, which every reward, stock and prize takes
  * its code from) holds * alone while the helper is on, and the record's own
@@ -2719,6 +3908,7 @@ static void test_all_star(void) {
 	layout.chip_names[0] = layout.chip_names[1] = 0x2000;
 	R.data = calloc(ROM_SIZE, 1);
 	R.layout = &layout;
+	chips_forget();   /* (the chips' image of another made-up ROM, maybe at the same address) */
 	if (!R.data) { CHECK(false, "all star: no memory for a made-up ROM"); return; }
 	static const uint8_t codes[3][4] = { { 0, 1, 2, 26 }, { 1, 3, 5, 0xFF }, { 0xFF, 0xFF, 0xFF, 0xFF } };   /* Cannon's A B C *, B D F, none */
 	for (int i = 0; i < 3; ++i) memcpy(R.data + 0x1000 + 0x2C * (i + 1), codes[i], 4);
@@ -2890,6 +4080,309 @@ static void test_xchips(void) {
 	CHECK(xchips_fit(two, cannon6, sab, 3, 5) == 3, "xchips: no code of the folder in both: as it was (%d)", xchips_fit(two, cannon6, sab, 3, 5));
 	const uint8_t nofolder[3] = { 0, 0, 0 };
 	CHECK(xchips_fit(cannon, cannon6, nofolder, 2, 1) == 2, "xchips: a folder of no codes leaves it (%d)", xchips_fit(cannon, cannon6, nofolder, 2, 1));
+	/* (BN5's names in BN6's text codes first, rom.h's xrom_text_bn6: its
+	 * M-Cannon's dash is 0x93, which BN6's table reads as nothing, and its
+	 * Roll DS's mark 0x9F, which BN6 has no glyph for; issue #82) */
+	static const uint8_t mcannon5[] = { 0x17, 0x93, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33, 0xE6 }, rollds5[] = { 0x1C, 0x34, 0x31, 0x31, 0x9F, 0xE6 };
+	static char names5[3][XCHIP_NAME];
+	uint8_t bn6[32];
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN5_COLONEL_US, mcannon5, sizeof mcannon5, bn6, sizeof bn6), names5[1], XCHIP_NAME);
+	rom_text_bytes(bn6, xrom_text_bn6(XROM_BN5_COLONEL_US, rollds5, sizeof rollds5, bn6, sizeof bn6), names5[2], XCHIP_NAME);
+	static const char names6b[3][XCHIP_NAME] = { "", "M-Cannon", "Roll" };
+	uint16_t to5[3], from5[3];
+	CHECK(xchips_pair(names6b, 3, (const char (*)[XCHIP_NAME])names5, 3, to5, from5) == 1 && to5[1] == 1 && !to5[2] && !from5[2],
+		"xchips: BN5's M-Cannon pairs with BN6's, its Roll DS (%s) not with Roll", names5[2]);
+	/* (a reward entry of BN5's as BN6's: no chip paired without the ROMs,
+	 * the stand-in's zenny; zenny, BugFrags and none as they are) */
+	CHECK(xchips_reward_bn6(0x0001) == (0x4000 | XCHIPS_STAND_IN) && xchips_reward_bn6(0x43E8) == 0x43E8 && xchips_reward_bn6(0xC003) == 0xC003 &&
+		xchips_reward_bn6(0xFFFF) == 0xFFFF, "xchips: BN5's rewards as BN6's without a pairing");
+}
+
+/* BN5's text in BN6's codes (rom.h, xrom_text_bn6; docs/ROM_DATA.md,
+ * BN5's text): BN6 put its five version marks at 0x40-0x44, so BN5's codes
+ * from 0x40 are five on, its marks and punctuation where BN6 has their
+ * glyphs, its DS mark as the letters D and S, a glyph BN6 lacks left out;
+ * letters and digits the same. Both fonts compared glyph for glyph. */
+static void test_xtext(void) {
+	static const struct { uint8_t in[8]; int n; const char *ascii; } cases[] = {
+		{ { 0x17, 0x93, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33 }, 8, "M-Cannon" },   /* (its dash) */
+		{ { 0x18, 0x26, 0x3B, 0x2E, 0x99, 0x03, 0x01 }, 7, "Navi+20" },          /* (its +, BN6's 0x9E; read as BN6's 0x99 it was an x) */
+		{ { 0x1C, 0x34, 0x31, 0x31, 0x9E }, 5, "Roll\x04" },                     /* (its SP mark, BN6's 0x43) */
+		{ { 0x1C, 0x34, 0x31, 0x31, 0x9F }, 5, "RollDS" },                        /* (its DS mark, which BN6 lacks) */
+		{ { 0x0B, 0xB0, 0x0C }, 3, "AB" },                                        /* (its omega, which BN6 lacks) */
+		{ { 0x0B, 0x98, 0x0C, 0xE6, 0x0D }, 5, "A?B" },                           /* (its ?, and the end at a command) */
+	};
+	for (size_t i = 0; i < sizeof cases / sizeof *cases; ++i) {
+		uint8_t bn6[16];
+		char ascii[24];
+		size_t n = xrom_text_bn6(XROM_BN5_COLONEL_US, cases[i].in, (size_t)cases[i].n, bn6, sizeof bn6);
+		rom_text_bytes(bn6, n, ascii, sizeof ascii);
+		CHECK(!strcmp(ascii, cases[i].ascii), "xtext: BN5's case %d reads %s, not %s", (int)i, ascii, cases[i].ascii);
+	}
+	const uint8_t kana[] = { 0x40, 0x92, 0x94, 0xA0, 0xAD };
+	uint8_t out[8];
+	CHECK(xrom_text_bn6(XROM_BN5_COLONEL_US, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x45 && out[1] == 0x97 && out[2] == 0x99 &&
+		out[3] == 0xA3 && out[4] == 0xB0, "xtext: BN5's codes past BN6's marks, five and three on (%02X %02X %02X %02X %02X)", out[0], out[1],
+		out[2], out[3], out[4]);
+	/* (its room kept: the DS mark's two letters at its end, one of them) */
+	const uint8_t ds[] = { 0x0B, 0x9F };
+	CHECK(xrom_text_bn6(XROM_BN5_COLONEL_US, ds, sizeof ds, out, 2) == 2 && out[1] == 0x0E, "xtext: the room for its text kept");
+	/* (BN6's own text, and another game's that spells as BN6's: as it is) */
+	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
+}
+
+/* BN5's chips' code (issue #82's C3; docs/MULTIROM.md, The chips' code):
+ * the generated units (src/emu/xchips_bn5.c) each a recipe the installer
+ * takes in the chips' region, numbered by BN5's own number and homed in
+ * order; the moved chips (src/core/xchips_moved.c) each a registry row of
+ * XREG_MOVED playing a unit's number, and every such row one of them. */
+static void test_chip_code(void) {
+	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS }, helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
+	char why[160] = "";
+	CHECK(xchips_bn5_count >= 4 && xchips_bn5_count <= XC_UNITS, "chips' code: %d units", xchips_bn5_count);
+	bool units = false;
+	for (int i = 0; i < xchips_bn5_count; ++i) {
+		const XChipUnit *u = &xchips_bn5[i];
+		/* (the helpers first, their code before the homes, no table's entry) */
+		bool helper = u->kind == XCHIP_HELPER;
+		CHECK(!helper || !units, "chips' code: the helper %s before the units", u->code.name);
+		units |= !helper;
+		CHECK(xvirus_code_ok(&u->code, helper ? &helpers : &region, why, sizeof why), "chips' code: %s refused: %s", u->code.name, why);
+		int number = helper ? 0 : u->kind == XCHIP_ATTACK ? 0x50 + u->bn5 : (u->kind == XCHIP_SUPPORT ? XC_FIRST_SUPPORT : XC_FIRST_NAVI) + u->bn5;
+		CHECK(u->number == number && u->home == XC_HOMES + XC_HOME_SIZE * (uint32_t)i && u->code.nblocks > 0 &&
+			(u->entry & 1) && xvirus_block_of(&u->code, u->entry & ~1u), "chips' code: %s's number %#x by BN5's, its home and entry", u->code.name, u->number);
+		CHECK(u->kind != XCHIP_ATTACK || (u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END), "chips' code: %s among the chips' families",
+			u->code.name);
+		CHECK(u->kind == XCHIP_ATTACK || u->number < XC_ROUTINES, "chips' code: %s within its routines' table", u->code.name);
+		/* (its types shared with the tracks installed before it, the moved objects' and the Navis', one copy a type) */
+		CHECK(shared_moved_before(&u->code, TRACK_CHIPS, i) && moved_once(&u->code, TRACK_CHIPS), "chips' code: %s shares a type no track before "
+			"it moved, or moves one another did", u->code.name);
+		for (int k = 0; k < i && !helper; ++k)
+			CHECK(xchips_bn5[k].kind != u->kind || xchips_bn5[k].number != u->number, "chips' code: %s's number twice", u->code.name);
+	}
+	int moved = 0;
+	for (int i = 0; i < xchips_moved_count; ++i) {
+		const XChipMoved *m = &xchips_moved[i];
+		/* (an own row's, or BN6's own chip of a name whose code is BN5's: tools/xchiprecipe.py's SAME_MOVED, DarkPlus) */
+		const XChipReg *r = xreg_at(m->bn6), *named = r ? NULL : xreg_named(m->bn6);
+		bool unit = false;
+		for (int k = 0; k < xchips_bn5_count && !unit; ++k) {
+			const XChipUnit *u = &xchips_bn5[k];
+			unit = u->kind == XCHIP_ATTACK ? m->family == u->number
+			                               : m->family == (u->kind == XCHIP_SUPPORT ? BN6_CHIP_SUPPORT_FAMILY : BN6_CHIP_NAVI_FAMILY) && m->sub == u->number;
+		}
+		CHECK(((r && (r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK)) || (named && named->how == XREG_SAME)) && unit &&
+			xchips_moved_of(m->bn6) == m, "chips' code: moved chip %d a moved row, a Program Advance's, a DarkChip's or one of BN6's own "
+			"by name, playing a unit", m->bn6);
+		moved += !r || r->how != XREG_MOVED;
+	}
+	for (int i = 0; i < xreg_count; ++i)
+		if (xreg_rows[i].how == XREG_MOVED) {
+			++moved;
+			CHECK(xchips_moved_of(xreg_rows[i].bn6) != NULL, "chips' code: the registry's moved chip %d plays a unit", xreg_rows[i].bn6);
+		}
+	CHECK(moved == xchips_moved_count && moved >= 10, "chips' code: as many chips moved as rows (CrakOut, DublCrak, TripCrak, HotBody1-3, Jealousy, "
+		"NrthWind, MetaGel, Blinder and on: %d, %d)", moved, xchips_moved_count);
+	/* (their songs: each in one of BN6's empty slots, one BN5 sound one slot, no slot two sounds') */
+	int songs = 0;
+	for (int i = 0; i < xchips_bn5_count; ++i)
+		for (int k = 0; k < xchips_bn5[i].nsongs; ++k) {
+			const XcSong *x = &xchips_bn5[i].songs[k];
+			++songs;
+			CHECK(x->slot >= 0x40 && x->slot <= 0x62, "chips' code: %s's sound %#x at slot %#x, one of BN6's empty ones the sounds take", xchips_bn5[i].code.name,
+				x->song, x->slot);
+			for (int j = 0; j <= i; ++j)
+				for (int q = 0; q < xchips_bn5[j].nsongs && (j < i || q < k); ++q) {
+					const XcSong *y = &xchips_bn5[j].songs[q];
+					CHECK((y->song == x->song) == (y->slot == x->slot), "chips' code: sounds %#x and %#x, slots %#x and %#x: one sound one slot", y->song, x->song,
+						y->slot, x->slot);
+				}
+		}
+	CHECK(songs >= 2, "chips' code: MetaGel's and Blinder's sounds copied in (%d)", songs);
+	const XChipMoved *crak = xchips_moved_of(298), *wind = xchips_moved_of(457);
+	CHECK(crak && crak->family == 0x6B && wind && wind->family == BN6_CHIP_SUPPORT_FAMILY && wind->sub == 0x3F && !xchips_moved_of(1),
+		"chips' code: CrakOut BN5's family 0x1B as 0x6B, NrthWind its support routine 0x15 as 0x3F, Cannon none");
+}
+
+/* The chip registry (src/core/xchips_registry.c; docs/MULTIROM.md, The
+ * chip registry, issue #82): the table as decided (Team Colonel's chips a
+ * run can meet, one chip per name, the rest in BN6's free ids), its checks
+ * failing on made-up rows that break each rule, and its lookups both ways. */
+static void test_chip_registry(void) {
+	char why[96] = "";
+	int bad = xreg_check(xreg_rows, xreg_count, why, sizeof why);
+	CHECK(!bad, "registry: the table holds its rules (%s)", why);
+	int own = 0, plays = 0, dark = 0, pas = 0, high = 0;
+	for (int i = 0; i < xreg_count; ++i) {
+		own += xreg_own(&xreg_rows[i]);
+		plays += xreg_rows[i].how == XREG_RECORD;
+		dark += xreg_rows[i].how == XREG_DARK;
+		pas += xreg_rows[i].how == XREG_PA;
+		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
+	}
+	CHECK(xreg_count == 257 && own == 138 && plays == 8 && dark == 7 && pas == 15, "registry: 257 chips, 138 of ids of their own, 8 playing now, "
+		"7 DarkChips, 15 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(high == 15 + 94, "registry: the Program Advances and 94 chips past 319, in the pack's extension (%d)", high);
+	static const XChipReg moved_row[] = { { 91, 298, XREG_MOVED, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	static const XChipReg no_way[] = { { 91, 298, XREG_MOVED + 1, 0, 0xFF, { 0x1A, 0xFF, 0xFF, 0xFF }, 0, 4 } };
+	CHECK(!xreg_check(moved_row, 1, why, sizeof why) && xreg_check(no_way, 1, why, sizeof why) == 1, "registry: a moved chip's row taken, a way past it refused");
+	const XChipReg *ws = xreg_of_bn5(9), *cannon = xreg_of_bn5(1), *atk = xreg_of_bn5(149), *z = xreg_of_bn5(218);
+	CHECK(ws && ws->bn6 == 204 && ws->how == XREG_RECORD && ws->twin == 23 && xreg_at(204) == ws, "registry: BN5's WideSht1 is 204, over BN6's WideSht");
+	CHECK(cannon && cannon->bn6 == 1 && cannon->how == XREG_SAME && !xreg_at(1), "registry: BN5's Cannon is BN6's own");
+	CHECK(atk && atk->bn6 == 192 && atk->how == XREG_ALIAS, "registry: Attck+10 is BN6's Atk+10, which BN6's hand merges by its id");
+	const XChipReg *drill = xreg_of_bn5(72);
+	CHECK(z && xreg_own(z) && z->how == XREG_MOVED && drill && drill->bn6 == 208 && drill->how == XREG_MOVED,
+		"registry: Z Saver an id of its own (BN6's of its name a pseudo-chip no folder holds), it and DrilArm1 BN5's own code moved");
+	CHECK(!xreg_of_bn5(215) && !xreg_of_bn5(310) && !xreg_of_bn5(278) && !xreg_of_bn5(313), "registry: Otenko, BugCharg, Django and Phoenix out");
+	CHECK(xreg_free_id(203) && xreg_free_id(511) && !xreg_free_id(221) && !xreg_free_id(368) && !xreg_free_id(410) && !xreg_free_id(512),
+		"registry: the free ids, BN6's own and its pseudo-chips' not");
+	/* (made-up rows, each breaking one rule) */
+	static const XChipReg twice[] = { { 9, 204, XREG_RECORD, 23, 0xFF, { 0 }, 0, 0 }, { 9, 205, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg taken[] = { { 12, 221, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg two_at[] = { { 12, 411, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 }, { 13, 411, XREG_PENDING, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg no_twin[] = { { 9, 204, XREG_RECORD, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg pseudo[] = { { 218, 381, XREG_SAME, 0, 0xFF, { 0 }, 0, 0 } };
+	static const XChipReg pa[] = { { 323, 350, XREG_PA, 0, 0xFF, { 0 }, 0, 5 } };
+	CHECK(xreg_check(twice, 2, why, sizeof why) == 2 && xreg_check(taken, 1, why, sizeof why) == 1 && xreg_check(two_at, 2, why, sizeof why) == 2 &&
+		xreg_check(no_twin, 1, why, sizeof why) == 1 && xreg_check(pseudo, 1, why, sizeof why) == 1 && xreg_check(pa, 1, why, sizeof why) == 1,
+		"registry: a BN5 id twice, an id BN6 uses, an id twice, a playing record without its twin, a pseudo-chip's pair, a PA of no PA type: refused");
+}
+
+/* A registered chip's record (src/core/xchips_record.c): BN5's numbers,
+ * BN6's icon element, its twin's behaviour, out of BN6's Library; a
+ * placeholder's; the folder editor's ABC place; BN5's icons' colours; the
+ * battle deck without the chips that sit out. Made-up records. */
+static void test_chip_records(void) {
+	static const int icon[][2] = { { 0, 0 }, { 3, 3 }, { 4, 10 }, { 5, 4 }, { 6, 5 }, { 7, 10 }, { 8, 6 }, { 9, 7 }, { 10, 8 }, { 11, 9 }, { 12, 10 }, { 13, 11 }, { 40, 10 } };
+	for (size_t i = 0; i < sizeof icon / sizeof *icon; ++i)
+		CHECK(xrec_icon_element(icon[i][0]) == icon[i][1], "records: BN5's icon element %d as BN6's %d (%d)", icon[i][0], icon[i][1], xrec_icon_element(icon[i][0]));
+	uint8_t bn5[XREC_SIZE] = { 0x0B, 0x0C, 0x0D, 0xFF, 2, 0, 1, 0, 10, 0x4A, 0x14, 0x25, 0, 0, 4, 0, 3, 0, 0, 0, 0, 0, 0, 22 }, twin[XREC_SIZE] = { 0 }, out[XREC_SIZE];
+	bn5[BN6_CHIP_ATTACK_POWER] = 70;
+	twin[BN6_CHIP_FAMILY] = 0x30;
+	twin[BN6_CHIP_LOCK_ON] = 1;
+	twin[BN6_CHIP_LOCK_ON_TYPE] = 3;
+	XChipReg reg = { 9, 204, XREG_RECORD, 23, 0xFF, { 0x0B, 0x0C, 0x0D, 0xFF }, 0, 10 };
+	XRecordFrom in = { bn5, twin, &reg, 509, { 0x08C11000u, 0x08C20000u, 0x08C30000u } };
+	xrec_from_bn5(&in, out);
+	CHECK(!memcmp(out, bn5, 4) && out[BN6_CHIP_FAMILY] == 0x30 && out[BN6_CHIP_SUBFAMILY] == 0 && out[BN6_CHIP_LOCK_ON] == 1 && out[BN6_CHIP_LOCK_ON_TYPE] == 3 &&
+		out[BN6_CHIP_EFFECT_FLAGS] == 0x0A && out[BN6_CHIP_PARAMS] == 3 && get16(out + BN6_CHIP_ATTACK_POWER) == 70 && out[BN6_CHIP_LIBRARY_NUMBER] == 0 &&
+		get16(out + BN6_CHIP_ALPHA_SORT) == 509 && get16(out + BN6_CHIP_ID_SORT) == 204 && out[BN6_CHIP_DARK_ID] == 0xFF && get32(out + BN6_CHIP_ICON_PTR) == 0x08C11000u &&
+		get32(out + BN6_CHIP_PALETTE_PTR) == 0x08C30000u && out[BN6_CHIP_ELEMENT] == 1, "records: WideSht1 over WideSht's family with BN5's numbers, out of the Library");
+	reg.sub = 2;
+	xrec_from_bn5(&in, out);
+	CHECK(out[BN6_CHIP_SUBFAMILY] == 2, "records: a subfamily of the row's own (DarkWide's)");
+	in.twin = NULL;
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1045);
+	bn5[BN6_CHIP_EFFECT_FLAGS] = 0xDA;
+	xrec_from_bn5(&in, out);
+	CHECK(out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && out[BN6_CHIP_SUBFAMILY] == XREC_INERT_SUB && !out[BN6_CHIP_LOCK_ON] && !out[BN6_CHIP_PARAMS] &&
+		!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: one whose code BN6 lacks inert, its computed power (BN5's) none");
+	in.twin = twin;
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xAD && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x30,
+		"records: a twin's computed power (CustSwrd's 1045) at BN6's grown entry, still computed and shown (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	in.twin = NULL;
+	const XChipMoved moved = { 474, 0x77, 0 };
+	in.moved = &moved;
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1073);
+	xrec_from_bn5(&in, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + 0xC9 && out[BN6_CHIP_EFFECT_FLAGS] == 0x9A && out[BN6_CHIP_FAMILY] == 0x77,
+		"records: a moved chip's computed power (CusVolt1's 1073) at BN6's grown entry (%d, %02x)", get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
+	put16(bn5 + BN6_CHIP_ATTACK_POWER, 1048);
+	xrec_from_bn5(&in, out);
+	CHECK(!get16(out + BN6_CHIP_ATTACK_POWER) && out[BN6_CHIP_EFFECT_FLAGS] == 0x18, "records: a computed power no helper moved: none");
+	for (int i = 0; i < xchips_powers_count; ++i)
+		CHECK(xchips_powers[i].bn6 >= 0x80 && xchips_powers[i].bn6 == 0x80 + xchips_powers[i].bn5, "records: BN5's computed power %d at BN6's entry 0x80 + its own", 1000 + xchips_powers[i].bn5);
+	const uint32_t blank[3] = { 0x087237D0u, 0x086F3AF0u, 0x086F3AF0u };
+	XChipReg dark = { 187, 214, XREG_DARK, 142, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 0, 99 };
+	xrec_placeholder(&dark, 33, blank, out);
+	CHECK(out[0] == 0x11 && out[1] == 0xFF && out[BN6_CHIP_MB] == 99 && out[BN6_CHIP_EFFECT_FLAGS] == BN6_CHIP_DARK_CLASS && !get16(out + BN6_CHIP_ATTACK_POWER) &&
+		out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY && get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 214 &&
+		out[BN6_CHIP_ELEMENT] == 10, "records: a DarkChip's placeholder keeps its codes, MB and class, BN6's blank art");
+	const char *names[] = { "Cannon", "AirShot", "WideSwrd", "", "Zeta" };
+	const uint16_t places[] = { 52, 5, 509, 7, 0 };
+	CHECK(xrec_abc_place("WideSht1", names, places, 5) == 52 && xrec_abc_place("WideSwrd2", names, places, 5) == 509 &&
+		xrec_abc_place("Aaa", names, places, 5) == 1 && xrec_abc_place("Zz", names, places, 5) == 509, "records: the ABC place after the name before");
+	uint8_t pal5[32] = { 0 }, pal6[32] = { 0 }, map[16];
+	put16(pal6 + 2 * 3, 0x001F);   /* (BN6's 3 red, its others black) */
+	put16(pal5 + 2 * 12, 0x001E);  /* (BN5's 12 near red) */
+	xrec_icon_colours(pal5, pal6, map);
+	CHECK(map[0] == 0 && map[9] == 9 && map[12] == 3, "records: BN5's icon colours 0-9 as they are, 12 as BN6's nearest (%d %d)", map[9], map[12]);
+	uint8_t ic[0x80];
+	memset(ic, 0xC9, sizeof ic);
+	xrec_icon_recolour(ic, map);
+	CHECK(ic[0] == 0x39 && ic[0x7F] == 0x39, "records: an icon's two pixels a byte recoloured (%02X)", ic[0]);
+	uint8_t sits[64] = { 0 };
+	sits[204 >> 3] |= 1u << (204 & 7);
+	uint16_t deck[8] = { 1, 204 | 11 << 9, 5, 204 | 11 << 9, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+	unsigned first;
+	int taken = xrec_deck_sit_out(deck, 8, sits, 3, &first);
+	CHECK(taken == 2 && deck[0] == 1 && deck[1] == 5 && deck[2] == 0xFFFF && first == 2u, "records: two chips sit out of the deck, the second of its first "
+		"three among them, the rest in order (%d %04X %04X %u)", taken, deck[1], deck[2], first);
+}
+
+/* The chips' image (src/core/chips.c) over a made-up BN6 ROM without BN5's:
+ * BN6's records and names as they are, the registry's ids as placeholders
+ * (their codes, "BN5-9", sitting out), 512 records, names of ids past
+ * BN6's archives; and a BN5 description's script in BN6's codes, its
+ * commands kept (rom.c, xrom_script_bn6). */
+static void test_chips_image(void) {
+	static RomLayout layout;
+	layout.chip_data = 0x1000;
+	layout.chip_names[0] = 0x8000;
+	layout.chip_names[1] = 0x9000;
+	layout.chip_descs[0] = 0xA000;
+	layout.chip_descs[1] = 0xB000;
+	R.data = calloc(ROM_SIZE, 1);
+	R.layout = &layout;
+	chips_forget();
+	if (!R.data) { CHECK(false, "chips: no memory for a made-up ROM"); return; }
+	uint8_t *cannon = R.data + 0x1000 + XREC_SIZE;
+	cannon[0] = 0; cannon[1] = 1; cannon[2] = 2; cannon[3] = 26;
+	put16(cannon + BN6_CHIP_ATTACK_POWER, 40);
+	/* (names: two entries, "Cannon" for 1) */
+	static const uint8_t names0[] = { 4, 0, 5, 0, 0xE6, 0x0D, 0x26, 0x33, 0x33, 0x34, 0x33, 0xE6 };
+	memcpy(R.data + 0x8000, names0, sizeof names0);
+	ChipInfo ci;
+	chip_info(1, &ci);
+	CHECK(!strcmp(ci.name, "Cannon") && !strcmp(ci.codes, "ABC*") && ci.power == 40, "chips: BN6's Cannon as its ROM has it (%s %s %d)", ci.name, ci.codes, ci.power);
+	chip_info(204, &ci);
+	char desc[64];
+	chip_desc(204, desc, sizeof desc);
+	CHECK(!strcmp(ci.name, "BN5-9") && !strcmp(ci.codes, "LMN") && ci.mb == 10 && chips_sits_out(204) && !chips_sits_out(1) && chips_bn5(204) && !chips_from_bn5(),
+		"chips: BN5's WideSht1 without its ROM a placeholder of its codes, sitting out (%s %s %d)", ci.name, ci.codes, ci.mb);
+	CHECK(!strcmp(desc, "Needs BN5 ROM back to battle"), "chips: the placeholder's description (%s)", desc);
+	CHECK(chips_record(511) && !chips_record(512) && get16(chips_record(204) + BN6_CHIP_ID_SORT) == 204, "chips: 512 records, the registry's its id's sort place");
+	chip_info(509, &ci);
+	CHECK(!ci.name[0], "chips: an id past BN6's archives and the registry's has no name (%s)", ci.name);
+	CHECK(chips_bytes(0x08001000u + XREC_SIZE, 4) == cannon && !chips_bytes(0x0BFFFFFFu, 4) && chips_bytes(CHIPS_RECORDS, XREC_SIZE) == chips_record(0),
+		"chips: bytes by bus address, the player's ROM below 8 MB, the chips' place past EMU_FREE");
+	free(R.data);
+	R.data = NULL;
+	R.layout = NULL;
+	chips_forget();
+	CHECK(!chips_record(1), "chips: none without a ROM");
+	static const uint8_t script[] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00, 0x17, 0x93, 0x0D, 0xE9, 0x0B, 0x9E, 0xE7, 0x01, 0xE6, 0xE8, 0x07 };
+	uint8_t out[32];
+	size_t n = xrom_script_bn6(XROM_BN5_COLONEL_US, script, sizeof script, out, sizeof out);
+	static const uint8_t want[] = { 0xE8, 0x06, 0x01, 0x01, 0xF1, 0x00, 0x00, 0x17, 0x98, 0x0D, 0xE9, 0x0B, 0x43, 0xE7, 0x01, 0xE6 };
+	CHECK(n == sizeof want && !memcmp(out, want, sizeof want), "chips: a BN5 description's script in BN6's codes, its commands kept, to its end (%d)", (int)n);
+	char text[32];
+	rom_desc_bytes(want, sizeof want, text, sizeof text);
+	CHECK(!strcmp(text, "M-C A\x04"), "chips: the description read past its box's commands (%s)", text);
+}
+
+/* BN6's chips as BN5's UNITE reads them (src/emu/soulkinds.c; the Souls
+ * track's S2): BN6's eleven kinds as BN5 numbers the kind of their name
+ * (BN6 has neither Recovery nor Invisible; none is BN5's 12), and nothing
+ * before both ROMs are read. */
+static void test_soulkinds(void) {
+	static const int as5[11] = { 0, 1, 2, 3, 5, 6, 8, 9, 10, 11, SOULKIND_NONE };   /* (Fire .. Break, none) */
+	for (int k = 0; k < 11; ++k)
+		CHECK(soulkinds_bn5(k) == as5[k], "soulkinds: BN6's kind %d as BN5's %d (%d)", k, as5[k], soulkinds_bn5(k));
+	CHECK(soulkinds_bn5(11) == SOULKIND_NONE && soulkinds_bn5(12) == SOULKIND_NONE && soulkinds_bn5(-1) == SOULKIND_NONE,
+		"soulkinds: BN6's Program Advances and others (11, 12) as none");
+	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
 }
 
 /* The run's DarkChips (src/director/darkchips.c; docs/META.md, BN6's own
@@ -2906,41 +4399,77 @@ static void test_darkchips(void) {
 	CHECK(dark_bn6_kind(DARK_BN6_FIRST - 1) < 0 && dark_bn6_kind(DARK_BN6_FIRST + DARK_BN6_COUNT) < 0 && dark_bn6_kind(0x47) < 0,
 		"dark: other chips are no DarkChip of BN6's");
 	CHECK(dark_bn6_id(1) == 286 && dark_bn6_id(6) == 287 && dark_bn6_id(7) == 288 && dark_bn6_id(2) == 289, "dark: the four kinds as BN6's chips");
-	CHECK(!dark_bn6_id(3) && !dark_bn6_id(0) && !dark_bn6_id(11), "dark: DarkPlus and BN5's own seven are none of BN6's battles' (%d %d %d)",
+	CHECK(!dark_bn6_id(3) && !dark_bn6_id(0) && !dark_bn6_id(11), "dark: DarkPlus and BN5's own seven are none BN6's rule plays (%d %d %d)",
 		dark_bn6_id(3), dark_bn6_id(0), dark_bn6_id(11));
+	/* (every kind one chip of BN6's tables, issue #82: BN6's five where it
+	 * keeps them, the registry's 214-220 for BN5's own seven, by BN5's ids
+	 * 187-198; each its kind back) */
+	static const int ids[DARK_KINDS] = { 214, 286, 289, 290, 215, 216, 287, 288, 217, 218, 219, 220 };
+	int bad = 0;
+	for (int k = 0; k < DARK_KINDS; ++k) {
+		bad += dark_chip_id(k) != ids[k] || dark_chip_kind(ids[k]) != k;
+		if (dark_bn6_id(k)) bad += dark_bn6_id(k) != dark_chip_id(k);
+	}
+	CHECK(!bad, "dark: %d of the twelve kinds off their chips (BN5's 187-198 by the registry)", bad);
+	CHECK(dark_chip_kind(0x47) < 0 && dark_chip_kind(0) < 0 && dark_chip_kind(213) < 0 && dark_chip_kind(221) < 0 && !dark_chip_id(12) && !dark_chip_id(-1),
+		"dark: other chips and kinds are none");
+	unsigned six = dark_kinds_offered(false, false), five = dark_kinds_offered(true, false);
+	CHECK(six == (1u << 1 | 1u << 6 | 1u << 7 | 1u << 2), "dark: BN6's flame offers its four (%#x)", six);
+	CHECK(dark_kinds_offered(false, true) == six, "dark: BN6's flame never offers DarkPlus, BN5's code or not (the owner's call of 13 October 2026)");
+	CHECK(five == (0xFFFu & ~(1u << DARK_PLUS_KIND)), "dark: BN5's flame offers every kind but DarkPlus where BN5's code plays none (%#x)", five);
+	unsigned twelve = dark_kinds_offered(true, true);
+	CHECK(twelve == 0xFFFu, "dark: BN5's flame offers all twelve where BN5's code plays DarkPlus (%#x)", twelve);
 	uint8_t held[DARK_KINDS] = { 0 };
-	int bn6_seen = 0, bad = 0;
+	int bn6_seen = 0, bn5_seen = 0;
+	bad = 0;
 	for (uint32_t seed = 1; seed < 400; ++seed)
 		for (int depth = 2; depth < 30; depth += 3) {
-			int k5 = dark_flame_pick(seed, depth, false, held), was = (int)(((seed ^ (uint32_t)depth * 2654435761u) >> 8) % DARK_KINDS);
-			int k6 = dark_flame_pick(seed, depth, true, held);
-			bad += k5 != was || dark_bn6_id(k6) == 0;
+			uint32_t h = seed ^ (uint32_t)depth * 2654435761u;
+			int k5 = dark_flame_pick(seed, depth, false, held, five), was = (int)((h >> 8) % DARK_KINDS);
+			int k6 = dark_flame_pick(seed, depth, true, held, six);
+			/* (BN5's as it was, DarkPlus passed over to the kind after it) */
+			bad += k5 != (was == DARK_PLUS_KIND ? DARK_PLUS_KIND + 1 : was) || dark_bn6_id(k6) == 0;
 			if (k6 >= 0) bn6_seen |= 1 << k6;
+			if (k5 >= 0) bn5_seen |= 1 << k5;
 		}
 	CHECK(!bad, "dark: %d picks off BN5's rule as it was, or off the four BN6's battles play", bad);
-	CHECK(bn6_seen == (1 << 1 | 1 << 6 | 1 << 7 | 1 << 2), "dark: a BN6 flame offers each of the four over the seeds (%#x)", bn6_seen);
+	CHECK(bn6_seen == (int)six, "dark: a BN6 flame offers each of the four over the seeds (%#x)", bn6_seen);
+	CHECK(bn5_seen == (int)five, "dark: a BN5 flame offers each of its eleven over the seeds (%#x)", bn5_seen);
 	/* (seeds apart in their low bits alone, a test's, start apart too) */
 	int small = 0, kinds_small = 0;
-	for (uint32_t seed = 1; seed <= 12; ++seed) small |= 1 << dark_flame_pick(seed, 2, true, held);
+	for (uint32_t seed = 1; seed <= 12; ++seed) small |= 1 << dark_flame_pick(seed, 2, true, held, six);
 	for (int k = 0; k < DARK_KINDS; ++k) kinds_small += small >> k & 1;
 	CHECK(kinds_small >= 3, "dark: seeds 1 to 12 on layer 2 offer %d of BN6's four kinds, three at least", kinds_small);
 	held[1] = held[6] = held[7] = 1;
 	bad = 0;
-	for (uint32_t seed = 1; seed < 200; ++seed) bad += dark_flame_pick(seed, 5, true, held) != 2;
+	for (uint32_t seed = 1; seed < 200; ++seed) bad += dark_flame_pick(seed, 5, true, held, six) != 2;
 	CHECK(!bad, "dark: with three held, a BN6 flame offers the fourth, DarkInvs (%d seeds off)", bad);
 	held[2] = 1;
-	CHECK(dark_flame_pick(7, 5, true, held) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
-	CHECK(dark_flame_pick(7, 5, false, held) >= 0 && !held[dark_flame_pick(7, 5, false, held)], "dark: ... while BN5's offers a kind the run lacks");
+	CHECK(dark_flame_pick(7, 5, true, held, six) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
+	CHECK(dark_flame_pick(7, 5, false, held, five) >= 0 && !held[dark_flame_pick(7, 5, false, held, five)], "dark: ... while BN5's offers a kind the run lacks");
+	/* (all eleven held: BN5's flame none where DarkPlus is not offered,
+	 * DarkPlus where it is; BN5's pick as it was, DarkPlus in its place) */
+	for (int k = 0; k < DARK_KINDS; ++k) held[k] = k != DARK_PLUS_KIND;
+	CHECK(dark_flame_pick(7, 5, false, held, five) < 0, "dark: every kind but DarkPlus held, no BN5 flame (%d)", dark_flame_pick(7, 5, false, held, five));
+	CHECK(dark_flame_pick(7, 5, false, held, twelve) == DARK_PLUS_KIND, "dark: ... and DarkPlus where BN5's code plays it (%d)", dark_flame_pick(7, 5, false, held, twelve));
+	memset(held, 0, sizeof held);
+	bad = 0;
+	for (uint32_t seed = 1; seed < 400; ++seed) {
+		uint32_t h = seed ^ 5u * 2654435761u;
+		bad += dark_flame_pick(seed, 5, false, held, twelve) != (int)((h >> 8) % DARK_KINDS);
+	}
+	CHECK(!bad, "dark: BN5's flame with DarkPlus offered picks as it was, DarkPlus where it fell (%d seeds off)", bad);
+	for (int k = 0; k < DARK_KINDS; ++k) held[k] = k != DARK_PLUS_KIND;
 	/* (the layer's flame kept: a CONTINUE on it after it was taken finds the
 	 * same, not the next kind lacked) */
 	dark_new_run(99);
-	int k = dark_flame_of(99, 5, 0, true);
+	int k = dark_flame_of(99, 5, 0, true, six);
 	CHECK(k >= 0 && dark_bn6_id(k), "dark: a new run's BN6 flame holds one of the four (%d)", k);
 	dark_give(k);
-	CHECK(dark_flame_of(99, 5, 0, true) == k, "dark: the layer's flame the same after its chip was taken (%d)", dark_flame_of(99, 5, 0, true));
-	int k8 = dark_flame_of(99, 8, 0, true);
+	CHECK(dark_flame_of(99, 5, 0, true, six) == k, "dark: the layer's flame the same after its chip was taken (%d)", dark_flame_of(99, 5, 0, true, six));
+	int k8 = dark_flame_of(99, 8, 0, true, six);
 	CHECK(k8 >= 0 && k8 != k, "dark: the next act's flame another kind (%d, %d)", k8, k);
-	CHECK(dark_flame_of(99, 8, 0, false) >= 0, "dark: BN5's flame on that layer picked anew, not BN6's kept");
+	CHECK(dark_flame_of(99, 8, 0, false, five) >= 0, "dark: BN5's flame on that layer picked anew, not BN6's kept");
 	dark_new_run(99);
 	int v[3];
 	dark_price_hp(100, 120, 50, v);
@@ -2949,6 +4478,22 @@ static void test_darkchips(void) {
 	CHECK(v[2] == 100, "dark: HP held to the new max (%d)", v[2]);
 	dark_price_hp(25, 45, 45, v);
 	CHECK(v[0] == 10 && v[1] == 30 && v[2] == 30, "dark: the base never under 10 (%d %d %d)", v[0], v[1], v[2]);
+	/* (the price's hook on every chip MegaMan runs, darkbn6.c: the registry's
+	 * twelve dark rows, either net's, and no other id; each by the rule its
+	 * record's DarkChipID names, two in a battle one price) */
+	int darks = 0;
+	for (int id = 0; id < XREG_IDS; ++id) darks += dark_chip_is(id);
+	CHECK(darks == DARK_KINDS && dark_chip_is(220) && dark_chip_is(214) && dark_chip_is(286) && dark_chip_is(290),
+		"dark: the hook's DarkChips the twelve of either net (%d), DrkSonic's 220 among them", darks);
+	CHECK(!dark_chip_is(0x47) && !dark_chip_is(213) && !dark_chip_is(221) && !dark_chip_is(291) && !dark_chip_is(0),
+		"dark: Sword (a DrkSword fallen back), the registry's neighbours and none no DarkChip");
+	CHECK(dark_ran_add(0, 220, 0xFF) == DARK_RAN_BN5, "dark: DrkSonic run, BN5's rule (%#x)", dark_ran_add(0, 220, 0xFF));
+	CHECK(dark_ran_add(0, 286, 0) == 1u && dark_ran_add(0, 289, 3) == 8u, "dark: DrkSword and DarkInvs with a BugFrag, BN6's by DarkChipID");
+	CHECK(dark_ran_add(0, 290, 0xFF) == DARK_RAN_BN5 && dark_ran_add(0, 290, 4) == 0x10u,
+		"dark: DarkPlus BN5's where its code plays in BN6's record (no DarkChipID), BN6's by its own");
+	CHECK(dark_ran_add(0, 0x47, 0xFF) == 0 && dark_ran_add(DARK_RAN_BN5, 0x47, 0xFF) == DARK_RAN_BN5, "dark: any other chip leaves it");
+	CHECK(dark_ran_add(dark_ran_add(0, 220, 0xFF), 214, 0xFF) == DARK_RAN_BN5 && (dark_ran_add(DARK_RAN_BN5, 286, 0) & DARK_RAN_BN6) == 1u,
+		"dark: two of BN5's in a battle one bit (one price), BN6's beside them its own");
 }
 
 /* A script of the game's own text run as a chat says it (src/layer/text.c,
@@ -3481,6 +5026,158 @@ static void test_analytics(void) {
 	rmdir(base);
 }
 
+/* The nets' meeting (issue #82, docs/MULTIROM.md, One net): a family's
+ * role by its placements; the visitors' gate, one battle in each four, the
+ * same at every reroll; the rules that keep visitors out; a visitor's
+ * place, family and version against the band; the deep's coin between the
+ * nets, reproducible from the run's random numbers */
+static EnemyMoved test_enemy(int family, int version, int hp, int dmg) {
+	EnemyMoved e;
+	memset(&e, 0, sizeof e);
+	e.triple[0] = (uint8_t)version;
+	e.triple[2] = (uint8_t)family;
+	e.stats[0] = (uint8_t)hp; e.stats[1] = (uint8_t)(hp >> 8);
+	e.stats[4] = (uint8_t)dmg; e.stats[5] = (uint8_t)(dmg >> 8);
+	return e;
+}
+
+static Encounter test_battle(int n, int col) {
+	Encounter e;
+	memset(&e, 0, sizeof e);
+	for (int i = 0; i < n; ++i) e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 2, 0, col, i, 0x300 };
+	return e;
+}
+
+static void test_visitors(void) {
+	CHECK(visitor_role(0, 0, 4) == VISITOR_BACK && visitor_role(0, 1, 3) == VISITOR_BACK && visitor_role(1, 1, 2) == VISITOR_FREE &&
+		visitor_role(3, 0, 1) == VISITOR_FRONT && visitor_role(2, 1, 1) == VISITOR_FREE && visitor_role(0, 0, 0) == VISITOR_FREE,
+		"visitors: a family's role by its placements");
+	/* (one in each four, and the same again) */
+	int blocks = 0, odd = 0, at[4] = { 0 };
+	for (uint32_t seed = 1; seed <= 64; ++seed)
+		for (int b = 0; b < 25; ++b) {
+			int n = 0;
+			for (int i = 4 * b; i < 4 * b + 4; ++i)
+				if (visitor_gate(seed * 2654435761u, i)) { ++n; ++at[i & 3]; odd += visitor_gate(seed * 2654435761u, i) != true; }
+			blocks += n == 1;
+		}
+	CHECK(blocks == 64 * 25 && !odd, "visitors: the gate takes one battle in each four (%d of %d blocks)", blocks, 64 * 25);
+	CHECK(at[0] && at[1] && at[2] && at[3], "visitors: the gate's battle not always the same of the four");
+	CHECK(!visitor_gate(1, -1), "visitors: no gate before a battle");
+	/* (the rules: none without the older net's families, before act 2,
+	 * past an opening, with the Gentle helper, in the deep) */
+	memset(test_kin, 0, sizeof test_kin);
+	test_nkin[VISIT_BN6] = test_nkin[VISIT_BN5] = 0;
+	loot_visitors_always = true;
+	run.helpers = 0;
+	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none without the older net's families");
+	test_nkin[VISIT_BN5] = 1;
+	test_kin[VISIT_BN5][0] = (VisitorKin){ 40, VISITOR_FREE, 0, false, true, 10 };
+	CHECK(visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL) && !visitor_due(1, 0, 3, BIOME_CENTRAL, ENC_NORMAL) &&
+		!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_EASY) && !visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_CHALLENGE) &&
+		!visitor_due(1, 0, 14, BIOME_UNDERNET, ENC_NORMAL) && !visitor_due(1, 0, 17, BIOME_GRAVEYARD, ENC_NORMAL) &&
+		!visitor_due(1, 0, 19, BIOME_NEST, ENC_NORMAL), "visitors: the rules that keep them out");
+	run.helpers = HELP_GENTLE;
+	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none with the Gentle helper");
+	run.helpers = 0;
+	loot_visitors_always = false;
+	/* (a battle of BN6's three viruses, 60 HP each, at act 2: band 150-280,
+	 * cap 80, BN6's V1, so BN5's V1EX at most) */
+	memset(test_id, 0, sizeof test_id);
+	memset(test_role, 0, sizeof test_role);
+	EnemyMoved foe = test_enemy(2, 0, 60, 10);
+	enemy_moved_set(0x300, &foe);
+	static const int hp5[6] = { 40, 60, 80, 100, 120, 140 };
+	for (int v = 0; v < 6; ++v) {
+		EnemyMoved x = test_enemy(40, v, hp5[v], 10 + 10 * v);
+		enemy_moved_set(0x310 + v, &x);
+		test_id[VISIT_BN5][40][v] = 0x310 + v;
+	}
+	run.threat = 0;
+	rng_seed(7);
+	Encounter e = test_battle(3, 4);
+	CHECK(visitor_apply(&e, 5) && e.visitor >= 1 && e.foes[e.visitor - 1].family == 40 && e.foes[e.visitor - 1].id == 0x311 &&
+		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && (e.from_families >> 40 & 1),
+		"visitors: one of the older net's, at its highest version under the band, on the replaced one's panel");
+	CHECK(!visitor_apply(&e, 5), "visitors: one a battle");
+	/* (the band's top: three of 90 HP, 270, where V1EX's 60 for one of
+	 * them is 240 and fits, and five of them nothing fits) */
+	EnemyMoved heavy = test_enemy(2, 0, 90, 10);
+	enemy_moved_set(0x300, &heavy);
+	e = test_battle(3, 4);
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].id == 0x311, "visitors: the band kept with the replaced one's HP gone");
+	EnemyMoved huge = test_enemy(2, 0, 250, 10);
+	enemy_moved_set(0x300, &huge);
+	e = test_battle(2, 4);
+	Encounter was = e;
+	CHECK(!visitor_apply(&e, 5) && !memcmp(&e, &was, sizeof e), "visitors: none where no version keeps the band, the battle as it was");
+	enemy_moved_set(0x300, &foe);
+	/* (the role: a back family's place is the last column, and only a
+	 * back family takes it) */
+	test_role[VISIT_BN6][2] = VISITOR_BACK;
+	e = test_battle(2, 4);
+	CHECK(!visitor_apply(&e, 5), "visitors: none for a back family out of the back");
+	e = test_battle(2, 5);
+	CHECK(!visitor_apply(&e, 5), "visitors: a family of either role never takes a back family's place");
+	test_kin[VISIT_BN5][0].role = VISITOR_BACK;
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].col == 5, "visitors: a back family for a back family, at the back");
+	test_role[VISIT_BN6][2] = VISITOR_FREE;
+	test_kin[VISIT_BN5][0].role = VISITOR_FREE;
+	/* (a family the battle holds, a bound one, one not reached yet, a
+	 * panel neither plain nor cracked: none) */
+	e = test_battle(2, 4);
+	e.foes[1].family = 40;
+	e.foes[1].id = 0x310;
+	CHECK(!visitor_apply(&e, 5), "visitors: never a family the battle holds");
+	test_kin[VISIT_BN5][0].visits = false;
+	e = test_battle(2, 4);
+	CHECK(!visitor_apply(&e, 5), "visitors: none that may not visit");
+	test_kin[VISIT_BN5][0].visits = true;
+	test_kin[VISIT_BN5][0].stage = 2;
+	CHECK(!visitor_apply(&e, 5), "visitors: none its own net meets later");
+	test_kin[VISIT_BN5][0].stage = 0;
+	test_panel = 7;
+	CHECK(!visitor_apply(&e, 5), "visitors: none on a panel neither plain nor cracked");
+	test_panel = 2;
+	/* (the same seed, the same visitor) */
+	test_nkin[VISIT_BN5] = 2;
+	test_kin[VISIT_BN5][1] = (VisitorKin){ 41, VISITOR_FREE, 0, false, true, 10 };
+	for (int v = 0; v < 6; ++v) test_id[VISIT_BN5][41][v] = 0x310 + v;
+	Encounter a = test_battle(3, 4), b = test_battle(3, 4);
+	rng_seed(99);
+	visitor_apply(&a, 5);
+	rng_seed(99);
+	visitor_apply(&b, 5);
+	CHECK(!memcmp(&a, &b, sizeof a), "visitors: the same seed, the same visitor");
+	for (int v = 0; v < 6; ++v) enemy_moved_set(0x310 + v, NULL);
+	enemy_moved_set(0x300, NULL);
+	test_nkin[VISIT_BN5] = 0;
+	/* (the deep: a coin a battle between the nets, the Nest's older half
+	 * between its two areas; a territory's always its own; nothing drawn
+	 * outside the deep) */
+	int none[2] = { -1, -1 }, one[2] = { 24, -1 }, two[2] = { 24, 22 }, seen[3] = { 0 };
+	rng_seed(5);
+	uint32_t s0 = rng_state();
+	CHECK(nets_battle_area(none, 21) == 21 && nets_battle_area(none, -1) == -1 && rng_state() == s0, "the deep: outside it a territory's own, nothing drawn");
+	int bn6 = 0, first[64];
+	for (int i = 0; i < 1000; ++i) {
+		int x = nets_battle_area(one, 21);
+		bn6 += x == -1;
+		if (i < 64) first[i] = x;
+		CHECK(x == -1 || x == 24, "the deep: BN6's or the older net's area");
+	}
+	CHECK(bn6 > 400 && bn6 < 600, "the deep: a coin between the nets (%d of 1000 BN6's)", bn6);
+	rng_seed(5);
+	bool same = true;
+	for (int i = 0; i < 64; ++i) same &= nets_battle_area(one, 21) == first[i];
+	CHECK(same, "the deep: the same seed, the same battles");
+	for (int i = 0; i < 1000; ++i) {
+		int x = nets_battle_area(two, -1);
+		++seen[x == -1 ? 0 : x == 24 ? 1 : 2];
+	}
+	CHECK(seen[0] > 400 && seen[1] > 150 && seen[2] > 150, "the deep: the Nest's both areas (%d %d %d)", seen[0], seen[1], seen[2]);
+}
+
 int main(void) {
 	test_sha1();
 	test_jobs();
@@ -3507,6 +5204,22 @@ int main(void) {
 	test_touch();
 	test_padmap();
 	test_xsong();
+	test_thumb_bl();
+	test_thumb_block();
+	test_battle_rng();
+	test_thumb_imm();
+	test_thumb_veneers();
+	test_xvirus_recipe();
+	test_xvirus_cangard();
+	test_xvirus_static();
+	test_soulcode_shared();
+	test_xnavi_static();
+	test_free_space();
+	test_claims();
+	test_xvirus_dispatch();
+	test_xvirus_generated();
+	test_xvirus_shims();
+	test_enemy_moved();
 	test_qr();
 	test_backup();
 	test_launcher();
@@ -3515,10 +5228,17 @@ int main(void) {
 	test_all_star();
 	test_beast();
 	test_xchips();
+	test_xtext();
+	test_chip_code();
+	test_chip_registry();
+	test_chip_records();
+	test_chips_image();
+	test_soulkinds();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();
 	test_analytics();
+	test_visitors();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

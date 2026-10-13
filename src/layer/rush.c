@@ -20,7 +20,7 @@
 #include "net_shapes.h"
 #include "netmap.h"
 
-#define RUSH_AT (EMU_FREE + 0x0400)      /* the engine's tables (docs/EMULATION.md) */
+#define RUSH_AT FREE_RUSH                /* the engine's tables (docs/EMULATION.md) */
 #define RUSH_GROUPS     (RUSH_AT)         /* a per-map array for each group 0x80-0x96 */
 #define RUSH_NO_MAPS    (RUSH_AT + 0x60)  /* every map of a group: none */
 #define RUSH_HOST_MAPS  (RUSH_AT + 0xA0)  /* the layer's group's maps */

@@ -14,6 +14,7 @@
 #endif
 
 #include "debug.h"
+#include "devtools.h"
 #include "director.h"
 #include "director_hold.h"
 #include "flags.h"
@@ -21,11 +22,12 @@
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"
+#include "soulproxy.h"
 
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160]; int place[3], flags[3]; unsigned hold; bool placed, flagged, battle, sig, held; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -51,6 +53,26 @@ static void parse_buttons(const char *s, InputStep *step) {
 	}
 }
 
+/* a dev step that takes its words whole ("foes SPEC", "status SPEC",
+ * "xrecord ADDR", "chip ID CODE [N]", "cross F", "onehit"), into its step;
+ * false where `tok` is none */
+static bool text_step(const char *tok, InputStep *s) {
+	if (!strcmp(tok, "onehit")) s->onehit = true;
+	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
+	else if (!strncmp(tok, "status ", 7)) snprintf(s->status, sizeof s->status, "%s", tok + 7);
+	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
+	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
+	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
+	else return false;
+	return true;
+}
+
+/* whether a step is one of the dev steps (no buttons, no frames of its own) */
+static bool dev_step(const InputStep *s) {
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->sig || s->held ||
+		s->onehit;
+}
+
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
 static void parse_script(const char *spec) {
 	char *copy = strdup(spec);
@@ -60,17 +82,21 @@ static void parse_script(const char *spec) {
 		InputStep *s = &script[script_len];
 		s->frames = atoi(tok);
 		/* (remote play's dev steps too, as "0:place X Y FACE", "0:flags
-		 * FROM TO 1|0", "0:battle" and "0:sig": a scripted capture of a set
-		 * piece puts MegaMan at it, of a battle starts the layer's next, of
-		 * a layer's signature puts him in it; "300:battle" waits its 300
-		 * frames first) */
+		 * FROM TO 1|0", "0:battle", "0:foes 200@52/01@43", "0:xrecord
+		 * 811DD90", "0:status freeze 90", "0:cross 8" and "0:sig": a scripted
+		 * capture of a set piece puts MegaMan at it, of a battle starts the
+		 * layer's next, one of the given foes or one of BN5's records in BN6's
+		 * engine, of a status gives the battle's enemies one, of a cross
+		 * commits the next Cross chosen as that form, of a layer's signature
+		 * puts him in it; "300:battle" waits its 300 frames first) */
 		if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
+		else if (colon && text_step(colon + 1, s)) {}
 		else if (colon && !strcmp(colon + 1, "sig")) s->sig = true;
 		else if (colon && !strncmp(colon + 1, "stuck ", 6)) s->held = (s->hold = held_parse(colon + 7)) != 0;
 		else if (colon) parse_buttons(colon + 1, s);
-		if ((s->placed || s->flagged || s->battle || s->sig || s->held) && s->frames > 0 && script_len + 1 < 512) {
+		if (dev_step(s) && s->frames > 0 && script_len + 1 < 512) {
 			script[script_len + 1] = *s;
 			script[script_len + 1].frames = 0;
 			*s = (InputStep){ .frames = s->frames };
@@ -139,6 +165,23 @@ static void write_state(const char *path) {
 	fclose(f);
 }
 
+/* A step's dev steps on the game: a battle, foes, a record of BN5's, a
+ * status, a chip, the form the next Cross chosen takes (soulproxy.h), the
+ * signature, the run saved with MegaMan held (a CONTINUE's recovery, issue
+ * #23), its enemies held at 1 HP */
+static void emu_steps(const InputStep *s) {
+	if (s->battle) director_dev_battle();
+	if (s->foes[0]) director_dev_foes(s->foes);
+	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
+	if (s->status[0]) director_dev_status(s->status);
+	if (s->chip[0]) director_dev_chip(s->chip);
+	if (s->cross) soulproxy_cross(s->cross);
+	if (s->sig) director_dev_signature();
+	if (s->held) director_dev_hold(s->hold);
+	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
+	if (s->onehit) devtools_parse("onehit");
+}
+
 /* The steps of no frames at the script's position: pictures, states. */
 static void script_actions(void) {
 	while (script_pos < script_len && script[script_pos].frames == 0) {
@@ -148,10 +191,7 @@ static void script_actions(void) {
 		if (s->state[0]) write_state(s->state);
 		if (s->dump[0]) emu_debug_dump(s->dump);
 		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
-		if (s->battle && scene_current() == &scene_emu) director_dev_battle();
-		if (s->sig && scene_current() == &scene_emu) director_dev_signature();
-		/* (the run saved with MegaMan held: a CONTINUE's recovery, issue #23) */
-		if (s->held && scene_current() == &scene_emu) director_dev_hold(s->hold);
+		if (scene_current() == &scene_emu) emu_steps(s);
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
 		if (s->flagged && scene_current() == &scene_emu) {
 			static bool was[FLAG_COUNT];
@@ -185,7 +225,13 @@ static bool remote_open(const char *dir) {
 /* One line: "N BUTTONS" holds them N frames, "shot PATH", "second PATH"
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
- * "battle" (the layer's next random battle, director_dev_battle), "sig"
+ * "battle" (the layer's next random battle, director_dev_battle), "foes
+ * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
+ * record of BN5's in BN6's engine, director_dev_xrecord), "status SPEC" (the
+ * battle's enemies given a status, director_dev_status), "chip ID CODE
+ * [N]" (a chip in the folder's first entries and the pack,
+ * director_dev_chip), "cross F" (the next Cross chosen committed as form
+ * F, soulproxy_cross), "sig"
  * (MegaMan in the layer's signature, director_dev_signature), "stuck MASK"
  * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";
  * items apart by ';'. */
@@ -202,6 +248,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (!strcmp(tok, "battle")) s->battle = true;
+		else if (text_step(tok, s)) {}
 		else if (!strcmp(tok, "sig")) s->sig = true;
 		else if (!strncmp(tok, "stuck ", 6)) s->held = (s->hold = held_parse(tok + 6)) != 0;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }

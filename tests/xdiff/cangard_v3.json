@@ -1,0 +1,16 @@
+{
+ "about": "Canlada (BN5's 0x53, BN6's 0x204) alone at (6,2), MegaMan idle at (2,2) with 2000 HP: spec cangard_v1's shape for the version; its reticle strikes for 150 (BN5's per-version table at 0x0810912E)",
+ "kind": "differential",
+ "foes": "53@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "expect": {
+  "reticle_type": "0x25",
+  "reticle_damage": 150,
+  "megaman_hit_damage": 150,
+  "megaman_hit_at_least": 3
+ },
+ "sprites": "bytes"
+}

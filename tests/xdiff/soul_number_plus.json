@@ -1,0 +1,329 @@
+{
+ "about": "BN5's NumberSoul's passives in both engines (the Souls track's S5): NumberSoul held (BN5's flags 0000, 000A and 0236; BN6's souls6 04), a deck of BusterUp * then fourteen Cannon * in both (BN5's chips 115 and 1, BN6's 175 and 1: Plus, NumberSoul's kind, and a chip of no kind), the first Custom screen's BusterUp given up for UNITE and OK; it unites as the first turn starts. The second Custom screen (L at t520) deals NumberSoul's hand of ten (BN5 0x08025C20: its elements laid out for ten), its first Cannon picked and OK; A at t600 fires it: an attack chip of no kind with NumberSoul united strikes for 10 more (BN5 0x0800D0A0: its 40 and 10), CanGard V1 at (6,2) from MegaMan at (2,2), 2000 HP, kept from harm; A again at t700 with no chip in hand.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000A",
+  "0236"
+ ],
+ "folder5": [
+  "3473",
+  "3401"
+ ],
+ "deck5": [
+  "3473",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "folder6": [
+  "34AF",
+  "3401"
+ ],
+ "deck6": [
+  "34AF",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "souls6": "04",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   600,
+   "A",
+   2
+  ],
+  [
+   700,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x09"
+    ],
+    [
+     900,
+     "0x09"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     524,
+     "0x02"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x200"
+    ]
+   ],
+   "hp": [
+    [
+     900,
+     "0x7D0"
+    ]
+   ]
+  },
+  "foe_hp": [
+   [
+    623,
+    60
+   ],
+   [
+    624,
+    10
+   ]
+  ]
+ },
+ "expect_why": "BN5's own course (its trace, the reference): NumberSoul united from t1 (its AI index 9, its turns 3, one less as the second screen opens at t524, its used bit 0x200); the Cannon used from t602 (MegaMan's CurAction 0x14 in both), its shot striking CanGard at t624 for 50 (60 to 10): the Cannon's 40 and NumberSoul's 10; MegaMan never hit (safe)."
+}

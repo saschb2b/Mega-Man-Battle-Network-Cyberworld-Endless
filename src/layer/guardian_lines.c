@@ -372,30 +372,31 @@ const char *guardian_defeat(int navi) {
 	return navi > 0 && navi < NLINES && lines[navi].defeat ? lines[navi].defeat : "Ugh... You win...";
 }
 
-/* MegaMan on an older net guardian's Soul (docs/META.md, Souls in BN5
- * territory), won from `navi`, of chip kind `kind` (BN5_CHIP_KIND, 0-11):
- * one held already (`held`); else what it does, the whole of it the first
- * time, `chip` one of BN6's chips of its kind ("" none), `dark` the
- * DarkChip that unites with it (NULL none) */
-const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, const char *dark) {
-	static char s[720];
-	/* (the kinds by BN5_CHIP_KIND, as MegaMan says them) */
-	static const char *const kinds[12] = { "Fire", "Aqua", "Elec", "Wood", "Recovery", "Plus", "Sword", "Invisible", "Cursor", "obstacle",
-		"Wind", "Break" };
+/* MegaMan on an older net guardian's Soul (docs/META.md, Souls), won from
+ * `navi`, of chip kind `kind` (BN5_CHIP_KIND, 0-11): one held already
+ * (`held`); else that it serves every battle, the whole of it the first
+ * time, `chip` one of the run's chips of its kind ("" none); and, where
+ * `form` (once a profile), that a Soul and a Cross are not worn together */
+const char *guardian_soul_words(int navi, int kind, bool held, const char *chip, bool form) {
+	static char s[600];
+	/* (the kinds by BN5_CHIP_KIND, as MegaMan says them, and their articles) */
+	static const char *const kinds[12] = { "a Fire", "an Aqua", "an Elec", "a Wood", "a Recovery", "a Plus", "a Sword", "an Invisible", "a Cursor",
+		"an obstacle", "a Wind", "a Break" };
 	const char *name = guardian(navi)->name;
 	if (held) {
 		snprintf(s, sizeof s, "@M %s's Soul data... We already have his Soul!", name);
 		return s;
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
-	/* (where it wakes, and the run's chips that unite with it: the run's
-	 * own; how a Soul Unison goes is BN5's, its players know it) */
-	if (profile.soul_taught)
-		snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It wakes in the older Net's battles.");
+	/* (BN5's Soul Unison in BN6's battles, every one of them, docs/MULTIROM.md,
+	 * One net: the last chip picked of its kind given up for UNITE) */
+	if (profile.soul_taught) k += snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It's with us every battle.");
 	else {
-		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It wakes in the older Net's battles.|@M Our %s chips unite us there%s%s!", name,
-			kinds[kind], chip[0] ? ",like " : "", chip);
-		if (dark && k < (int)sizeof s) snprintf(s + k, sizeof s - (size_t)k, "|@M The DarkChip %s unites us too...", dark);
+		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It's with us every battle now.", name);
+		if (chip[0] && k < (int)sizeof s) k += snprintf(s + k, sizeof s - (size_t)k, "|@M Pick %s chip last,like %s.", kinds[kind], chip);
+		else if (k < (int)sizeof s) k += snprintf(s + k, sizeof s - (size_t)k, "|@M Pick %s chip last.", kinds[kind]);
+		if (k < (int)sizeof s) k += snprintf(s + k, sizeof s - (size_t)k, "|@M Then UNITE! Once a battle.");
 	}
+	if (form && k < (int)sizeof s) snprintf(s + k, sizeof s - (size_t)k, "|@M A Soul or a Cross,though. Not both!");
 	return s;
 }
