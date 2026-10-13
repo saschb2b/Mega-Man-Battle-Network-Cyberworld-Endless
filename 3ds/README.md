@@ -20,6 +20,14 @@ GBA core alone takes longer than a frame there.
   `sdmc:/3ds/cyberworld-endless/rom/`, or stays where 3DS players keep GBA
   games (`sdmc:/roms/gba`, `sdmc:/roms`, `sdmc:/gba`). Any file name works:
   the game reads the header and checks the contents.
+- Mega Man Battle Network 5: Team Colonel (USA), if you have it, goes
+  beside BN6's ROM, or in any of those folders. Its net joins the runs as
+  on every other system (docs/GUIDE.md, What you need): BN5's areas, their
+  viruses, Navis, chips, Souls and DarkChips. The start then takes a few
+  seconds more, as the game reads and checks BN5's file, and the title
+  says "BN5 found" in its top right corner. A 3DS whose memory had no room
+  for it would leave it unread and play BN6's net alone, and say so (the
+  PET's home and `log.txt`); a New 3DS has room (Memory, below).
 - The first NEW GAME boots BN6 from power-on once, about 15 seconds of black
   screen; later starts load what it kept (`boot-3.state`).
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
@@ -48,8 +56,7 @@ GBA core alone takes longer than a frame there.
   collection, E-Mail the mail's sender by face and name; in a shop it
   shows the entry under the cursor with what the run holds of it, at a
   trader what it takes and gives; on the title, the PET at rest with
-  the profile's record. BN5's older net does not come to the 3DS: it has
-  no memory for a second game beside BN6, and the PET says so.
+  the profile's record, and whether BN5's net joins the runs.
 - Saves, `settings.ini`, `keys.ini` and `log.txt` are in
   `sdmc:/3ds/cyberworld-endless/`.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
@@ -85,10 +92,23 @@ What differs from the other builds:
 
 - **Memory** (`src/core/start_3ds.c`): the app splits its memory itself before
   `main`, the heap as large as its 96 MB area takes, the linear heap (the
-  screens' and the sound's buffers) the rest; a heap of all but the linear
-  heap's share passed the area. mGBA's 3DS setup, linked in, copies the ROM
-  into a buffer of its own, which `docker/mgba.sh` makes 16 MB, and draws
-  32-bit pictures as on every other target.
+  screens' and the sound's buffers, and the GBA's own RAM, which mGBA puts
+  there) the rest; a heap of all but the linear heap's share passed the
+  area. mGBA's 3DS setup, linked in, takes a ROM buffer from the heap
+  before `main` (16 MB, `docker/mgba.sh`) for loaders of its own that the
+  game never calls: the core maps the game's padded 16 MB copy as it is
+  (`src/emu/emu.c`), so the game gives the buffer back at its start. The
+  heap then holds BN6's ROM (8 MB), the core's copy (16 MB) and BN5's ROM
+  where it is read (8 MB): 32 MB, against the 40 MB BN6 alone had taken
+  with the buffer held. BN5's ROM is read where the heap keeps 80 MB free
+  for it, the core's copy still to come and a run's play. The tiles
+  learned from a layer's area's original maps are kept for that area
+  alone (`src/map/netmap.c`): kept for every area a run passed through,
+  they filled the heap in long runs. An area a run comes back to is
+  learned again, a few seconds more on that layer's making (`log.txt`:
+  "area N learned again"). What play takes, and what a long run leaves,
+  is measured in docs/EMULATION.md, The 3DS's memory. mGBA draws 32-bit
+  pictures as on every other target.
 - **The picture** (`src/core/present_3ds.c`): the software renderer draws a
   240 x 160 canvas into memory the GPU reads; the GPU's copy engine moves it
   into a texture and citro2d draws it. SDL's own present copied and turned
@@ -138,8 +158,29 @@ What differs from the other builds:
   (the page's `web/assets/qr.js` draws one in node too).
 - `frame_log = on` in `settings.ini` writes a line a second: frames shown and
   played, a frame's update (the GBA's share, with and without its
-  picture), drawing and present, and the second's longest update and
-  drawing.
+  picture), drawing and present, the second's longest update and
+  drawing, and the heap ("heap N KB in use, M KB at most of 98304 KB":
+  M is its high-water mark, which a layer's area learned raises).
+- **The heap on this computer**: `python3 tools/heap3ds.py` plays long
+  runs of the host build headless with the 3DS's heap modelled
+  (`tools/heap3ds.c`: 96 MB, the core's copy kept, an allocation past it
+  refused), as the 3DS before mGBA's buffer was given back, with BN6
+  alone, and with BN5 read; per run its peak, the allocations refused
+  and how deep it went. Before a device run of a change to what a layer
+  allocates.
+- **BN5 on the 3DS**, on a New 3DS with both ROMs (BN5's beside BN6's):
+  `log.txt` says "mGBA's ROM buffer given back to the heap, 16384 KB",
+  "BN5 found: Mega Man Battle Network 5: Team Colonel (USA)", "BN5 read
+  and checked in N ms" with the heap, and after NEW GAME "the core
+  started, the installs done" with the heap, beside the installs' own
+  lines (BN5's Navis, chips' code, families); the title's "BN5 found" note
+  and the PET's home ("BN5 found: the older net joins the runs"); a layer
+  of each of BN5's areas, over 3dslink with `-- --scene emu --net-biome
+  x0` (to `x5`), or new games until an act's card names one, its music,
+  bystanders and a battle of its viruses; with `frame_log = on`, the
+  heap's high-water mark through a few acts, under the heap's size;
+  CONTINUE on one of its layers; and BN5's ROM taken away: the PET says
+  "BN5 not found beside BN6", and a run continued goes on in BN6's tiles.
 - **3dslink** (`/opt/devkitpro/tools/bin/3dslink -a 3DS-ADDRESS FILE.3dsx`,
   Y in the Homebrew Launcher) sends the build and shows its output here.
 - Luma3DS keeps crash dumps in `sdmc:/luma/dumps/arm11/`: registers at 40

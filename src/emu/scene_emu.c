@@ -9,8 +9,6 @@
 #include "pet.h"
 #include "director.h"
 #include "emu.h"
-#include "guest.h"
-#include "guest_wait.h"
 #include "game.h"
 #include "game_hooks.h"
 #include "gfx.h"
@@ -19,6 +17,10 @@
 #include "save.h"
 #include "second.h"
 #include "tour.h"
+#include "xinstall.h"
+#ifdef __3DS__
+#include "start_3ds.h"
+#endif
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -59,6 +61,17 @@ static void enter(void) {
 	text_draw(P.w / 2, P.h / 2 - 8, "Building the net...", WHITE, TEXT_CENTER);
 	platform_present_now();
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
+	/* (other games' virus families in BN6's battle engine first: the ROM
+	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
+	xinstall_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
+		dev.xnavicontrol ? XNAVI_CONTROL : dev.nonavis ? XNAVI_NONE : XNAVI_BN5);
+#ifdef __3DS__
+	/* (what the core's copy and the installs left of the heap, BN5's or
+	 * not: 3ds/README.md, Testing on a 3DS) */
+	char heap[120];
+	start_3ds_heap(heap, sizeof heap);
+	printf("3ds: the core started, the installs done; %s\n", heap);
+#endif
 	game_hooks_install();
 	cinema_reset();
 	if (emu_resume_requested) {
@@ -99,97 +112,29 @@ static void after_frame(void) {
 	emu_debug_frame();
 }
 
-/* The keys a guest battle gets (guest.h): the player's, or the autopilot's,
- * which reads its battle as it reads BN6's (autopilot.c) */
-/* An L or R pressed before the Custom gauge filled, kept two and a half
- * seconds and given as it fills (let go a frame first, so BN5 sees a
- * press), again every 20 frames until the screen opens, as BN6's battles
- * keep one (director_keys.c custom_buffer): a playtester's R pressed a little early did
- * nothing in BN5's battles, twice (session 65). */
-static uint32_t guest_custom_keep(uint32_t keys) {
-	static int kept, step;
-	static uint32_t was;
-	uint32_t lr = keys & (KEY_L | KEY_R), pressed = lr & ~was;
-	was = lr;
-	int gauge = guest_custom_gauge();
-	if (gauge < 0) { kept = step = 0; return keys; }
-	if (pressed) { kept = gauge >= 0x4000 ? 0 : 150; step = 0; return keys; }
-	if (kept <= 0) return keys;
-	--kept;
-	if (gauge < 0x4000) return keys;
-	int s = step++ % 20;
-	return s == 0 ? keys & ~(KEY_L | KEY_R) : s == 1 ? keys | KEY_R : keys;
-}
-
-static uint32_t guest_keys(void) {
-	return autopilot_on() ? autopilot_guest_keys() : guest_custom_keep(keys_from_buttons());
-}
-
-/* A flash as the guest's battle takes the screen, frames left (the switch
- * of engines, framed as BN6's own battles open with one; issue #65) */
-#define GUEST_FLASH 20
-static int guest_flash, guest_wait;   /* (and frames the guest has run before its battle shows: BN6's frame fades to white) */
-
-/* The guest's last frame plain white (a few pixels across it) */
-static bool guest_white(void) {
-	const uint32_t *v = guest_video();
-	if (!v) return false;
-	static const int at[6][2] = { { 8, 8 }, { 120, 20 }, { 232, 40 }, { 60, 80 }, { 180, 120 }, { 120, 152 } };
-	for (int k = 0; k < 6; ++k) {
-		uint32_t c = v[at[k][1] * EMU_W + at[k][0]];
-		if ((c & 0xF0) < 0xF0 || (c >> 8 & 0xF0) < 0xF0 || (c >> 16 & 0xF0) < 0xF0) return false;
-	}
-	return true;
-}
-
-/* A battle on the guest core: its frames in BN6's place, BN6's core
- * waiting, and its result into the run as it ends */
-static bool guest_update(void) {
-	static bool was;
-	bool shown = guest_on_screen();
-	if (shown && !was) guest_flash = GUEST_FLASH;
-	else if (guest_flash > 0) --guest_flash;
-	guest_wait = guest_active() && !shown ? guest_wait + 1 : 0;
-	was = shown;
-	/* (where the battle waits for the guest's boot, the older net's wait
-	 * on the white: guest_wait.c) */
-	guest_wait_update(guest_boot_waiting(), guest_wait >= GUEST_FLASH);
-	GuestResult r;
-	/* (one that waited for a boot that failed ended unfought, as the boot
-	 * did, between the frames: guest_tick) */
-	if (!guest_active() && guest_take_result(&r)) director_guest_done(&r);
-	if (!guest_active()) return false;
-	/* (the dev menu over it too: it holds still while the menu is open) */
-	uint32_t keys = devtools_keys(guest_keys());
-	if (devtools_open()) return true;
-	/* (its boot first, where the battle waits for it: it runs in the
-	 * background, guest_tick, which begins the battle at its end) */
-	if (guest_boot_waiting()) return true;
-	/* (while its battle opens on a plain white screen, or before it shows:
-	 * four of its frames a frame, unheard; BN5's opening held the white two
-	 * and a half seconds, which a playtester read as a hang, session 65) */
-	if (!shown || guest_white())
-		for (int i = 0; i < 4 * dev.speed && guest_active() && (!guest_on_screen() || guest_white()); ++i) guest_frame_quiet(keys);
-	else
-		for (int i = 0; i < dev.speed && guest_active(); ++i) {
-			guest_frame(keys);
-			devtools_guest_update();
-		}
-	if (guest_take_result(&r)) director_guest_done(&r);
+/* The GBA's reset chord belongs to the run's title (issue #113): checked
+ * on the player's mapped buttons before the PET, the map and the cinema
+ * take keys, and before the core sees them. The last checkpoint stays as
+ * it was, as a quit in a battle leaves it: CONTINUE takes the run up
+ * through the director, where BN6's own title would start on the map
+ * tables the run has taken over. */
+static bool soft_reset(void) {
+	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
+	if ((keys_from_buttons() & chord) != chord) return false;
+	emu_sync();
+	director_stop();
+	cinema_reset();
+	started = false;
+	P.quit_prompt = 0;
+	scene_set(&scene_title);
 	return true;
 }
 
 static void update(void) {
 	emu_drawing = false;
-	/* (the run's time, its battles in the older net's engine too: the
-	 * statistics' minutes, save.h) */
+	if (soft_reset()) return;
+	/* (the run's time: the statistics' minutes, save.h) */
 	profile_played_frame();
-	/* (an older net's battle: BN6's frame waits, the second screen still
-	 * follows) */
-	if (guest_update()) {
-		second_update();
-		return;
-	}
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();
@@ -200,9 +145,6 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); return; }
 		for (int i = 0; i < dev.speed; ++i) {
 			if (started) after_frame();
-			/* (a guest battle begun from it: BN6's next frame waits for its
-			 * end, as on the main thread, where it had run a frame further) */
-			if (guest_active()) { started = false; break; }
 			emu_frame(cinema_keys(frame_keys()));
 			started = true;
 		}
@@ -211,26 +153,12 @@ static void update(void) {
 	}
 	uint32_t keys = frame_keys();
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
-	/* (fast-forwarded: several game frames to one shown; none past a guest
-	 * battle begun from one) */
-	for (int i = 0; i < dev.speed && !guest_active(); ++i) {
+	/* (fast-forwarded: several game frames to one shown) */
+	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
 	}
 	if (revealed || director_arrived()) ++revealed;
-}
-
-/* BN6's frame as the switch to a guest battle takes it, `t` frames in: in
- * blocks growing wider than tall as it fades to white, as BN6's own battle
- * switch draws the map (captured in a BN6 battle: 16 pixels wide at most) */
-static void switch_blocks(uint32_t *px, int t) {
-	int mx = 1 + t * 15 / GUEST_FLASH, my = 1 + t * 3 / GUEST_FLASH;
-	for (int y0 = 0; y0 < EMU_H; y0 += my)
-		for (int x0 = 0; x0 < EMU_W; x0 += mx) {
-			uint32_t c = px[y0 * EMU_W + x0];
-			for (int y = y0; y < y0 + my && y < EMU_H; ++y)
-				for (int x = x0; x < x0 + mx && x < EMU_W; ++x) px[y * EMU_W + x] = c;
-		}
 }
 
 /* The town's hour on its picture (docs/HOME.md, piece 8): each colour
@@ -267,12 +195,9 @@ static void draw(void) {
 	}
 	/* mGBA keeps layer flags in the top byte; GL renderers read it as alpha */
 	static uint32_t px[EMU_W * EMU_H];
-	/* (the guest's battle once it is on its screen: before, BN6's last
-	 * frame, where its opening drew the room its boot left it in) */
-	bool guest = guest_on_screen();
-	const uint32_t *v = guest ? guest_video() : emu_video();
+	const uint32_t *v = emu_video();
 	bool box = false;
-	int hour = guest ? 0 : director_town_tint(&box);
+	int hour = director_town_tint(&box);
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
 #ifdef __3DS__
@@ -281,29 +206,15 @@ static void draw(void) {
 		px[i] = c | 0xFF000000u;
 #endif
 	}
-	if (!guest && guest_wait > 0 && guest_wait < GUEST_FLASH) switch_blocks(px, guest_wait);
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	int dx = 0, dy = 0;
-	if (!guest) cinema_offset(&dx, &dy);   /* (a shake under way as it began holds still while it runs) */
+	cinema_offset(&dx, &dy);
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
-	/* (another game's battle: its own screen, none of the layer's marks;
-	 * the dev menu's alone) */
-	if (guest) {
-		if (guest_flash > 0) fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_flash * 255 / GUEST_FLASH)));
-		guest_wait_draw(P.core_x, P.core_y);   /* (closing over its battle's own white, where one waited) */
-		devtools_draw();
-		return;
-	}
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	cinema_draw();
 	director_draw_map();
-	if (guest_wait > 0) {
-		fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, rgba(255, 255, 255, (Uint8)(guest_wait >= GUEST_FLASH ? 255 : guest_wait * 255 / GUEST_FLASH)));
-		guest_wait_draw(P.core_x, P.core_y);
-		return;
-	}
 	director_draw_counts();
 	director_draw_bug_note();
 	director_draw_duel();

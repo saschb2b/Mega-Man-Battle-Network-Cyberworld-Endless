@@ -1,0 +1,11 @@
+{
+ "about": "Colonel V1 (BN5's 0x125, BN6's 0x1C4) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-13), its cape (the overlay's BN5 kind 3 as BN6's 19), its soldiers and cannons (the third kind's 2) through the dispatch, its slash's three effects (BN5's 0x48-0x4A as BN6's 0xCC-0xCE in a row), its table moved (BN6_COLONEL_TABLE), its pattern test copied (0x08029C5A), its sound copied in (0xCF)",
+ "kind": "differential",
+ "foes": "125@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

@@ -19,7 +19,6 @@
 #include "director_state.h"
 #include "director_way.h"
 #include "emu.h"
-#include "encounter.h"
 #include "guardians.h"
 #include "loot.h"
 #include "netmap.h"
@@ -141,12 +140,12 @@ static int family_words(char *buf, int k, int size) {
 		{ FAMILY_STARFISH, "@M We might meet StarFish again!|@M Their bubbles soak up our shots.|@M Touch one,and it traps us!|"
 			"@M A chip that drops from above gets past them!|" },
 	};
-	/* (none where the area's battles are another game's: L warned of
-	 * StarFish in End Area, whose battle was BN5's Whirlies, session 65) */
-	if (encounter_guest) return k;
-	uint32_t fams = loot_families_here(run.depth, run.biome);
+	/* (a territory's own records and the deep's both nets are
+	 * loot_families_here's: L warned of StarFish in End Area, whose battle
+	 * was BN5's Whirlies, session 65) */
+	uint64_t fams = loot_families_here(run.depth, run.biome);
 	for (unsigned i = 0; i < sizeof warn / sizeof *warn; ++i)
-		if (fams & (1u << warn[i].family) && profile_family_fought(warn[i].family))
+		if (fams >> warn[i].family & 1 && profile_family_fought(warn[i].family))
 			k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "%s", warn[i].words);
 	return k;
 }
@@ -417,7 +416,9 @@ static int first_words(char *buf, int k, int size) {
 	/* (a trip back: its way home, docs/HOME.md) */
 	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.", area);
 	else ADD("@M Layer %d,Lan. We're in %s!", run.depth, area);
-	if (encounter_guest) ADD("|@M Battles here run the older Net's way.");
+	/* (where the nets meet: docs/MULTIROM.md, One net) */
+	if (D.deep) ADD("|@M Both Nets' viruses come down here!");
+	else if (D.territory_native) ADD("|@M Its viruses come from the older Net!");
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
 	/* (not after the act's arrival words, which spoke of him; a
 	 * CONTINUE does not say them again, and there he is spoken of) */

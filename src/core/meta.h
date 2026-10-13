@@ -60,12 +60,16 @@ enum {
 };
 
 /* The profile's Library: every chip MegaMan has held, in any run (BN6's
- * own Library, which each run's game is given). */
+ * own Library, which each run's game is given), ids 1-511 (META_LIBRARY_IDS:
+ * the registry's chips of BN5's among them, issue #82). */
+#define META_LIBRARY_IDS 512
 bool meta_library_has(int id);
 /* Adds chip `id`; whether it was new. */
 bool meta_library_add(int id);
-/* The Library's chips of a class (0 standard, 1 Mega, 2 Giga; -1 all), and
- * how many the current run added. */
+/* The Library's chips of a class (0 standard, 1 Mega, 2 Giga, BN6's;
+ * META_OLDER the older net's own a run can find now, chip_pool.h; -1 all
+ * a run can hold, both nets'), and how many the current run added. */
+#define META_OLDER 3
 int meta_library_count(int cls);
 int meta_library_new(void);
 /* Whether the short net's dark way into the Undernet is open: the Secret

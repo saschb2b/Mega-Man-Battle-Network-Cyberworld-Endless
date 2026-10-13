@@ -1,0 +1,11 @@
+{
+ "about": "TomahawkMan V1 (BN5's 0x137, BN6's 0x1D0) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Navi in BN6's engine, its own states (BN6's 8-12), its tomahawks, swings and whirlwinds (the third kind's 0x1F-0x23) through the dispatch, its effects copied (BN5's 0x05, 0x45, 0x46), its sounds copied in",
+ "kind": "differential",
+ "foes": "137@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

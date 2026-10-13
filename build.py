@@ -55,6 +55,12 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 (docs/DEVTOOLS.md)
   python3 build.py pacing       every act's battles and guardians against
                                 their bands, in .build/pacing.txt
+  python3 build.py xdiff [SPEC ...] [--mutations]
+                                the differential (issue #82): a family moved
+                                into BN6's engine against its own game's
+                                battle, frame by frame (tools/xdiff.py, the
+                                specs and masks in tests/xdiff); local only,
+                                both ROMs
                                 (docs/DEVTOOLS.md)
   python3 build.py screenshots  the game captured headlessly for the site and
                                 the README, into docs/screenshots
@@ -168,7 +174,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -1067,6 +1073,12 @@ FIT_PAGES = '300:,' + '6:A,134:,' * 4 + '2230:,' + '6:A,174:,' * 12
 # battle's Custom screen, its cards and picks, the fight's hand as the
 # first Cannon counters the Mettaur into Full Synchro)
 SECOND_7 = ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--net-biome', '3', '--dev', 'quiet']
+# (BN5's UNITE on BN6's Custom screen: ACDC Area's first battle, its first
+# hand's BusterUp, four of them in the folder, picked in the fourth slot;
+# on to OK, down to UNITE, A, back up to OK, A: NumberMan's Soul as the
+# turn begins)
+BN5_UNITE = ('100:,' + '4:A,6:,' * 17 + '0:battle,190:,6:RIGHT,10:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,'
+             '6:A,60:,6:UP,14:,6:A,500:')
 PAGED_7 = '600:,' + '4:A,6:,' * 110
 SECOND_HERO = (PAGED_7 + '30:,40:UP,0:battle,215:,6:A,24:,6:RIGHT,24:,6:RIGHT,24:,6:A,24:,6:START,36:,6:A,150:,'
                '6:DOWN,12:,6:A,70:')
@@ -1270,21 +1282,19 @@ SCREENSHOTS = [
                     '100:,' + '4:A,6:,' * 30 + '20:,0:place 20 172 3,200:'], [(560, 'bn5-nebula')], {}),
     # (KnightMan guarding ACDC Area's first act: the autopilot walks to
     # his arena, his card, his BN5 sprite, his own face in the chat, his
-    # wrecking ball in BN5's battle; not the weak one, which holds him at 1 HP)
+    # rocks in BN6's battle, his own moved in; not the weak one, which
+    # holds him at 1 HP)
     ('bn5-guardian', ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '3', '--seed', '3', '--guardian', '28', '--dev', 'quiet'],
-     [(1470, 'bn5-guardian-card'), (1545, 'bn5-guardian'), (1620, 'bn5-guardian-talk'), (2400, 'bn5-guardian-battle')],
+     [(1130, 'bn5-guardian-card'), (1213, 'bn5-guardian'), (1290, 'bn5-guardian-talk'), (2060, 'bn5-guardian-battle')],
      {'CYBERWORLD_AUTOPILOT': '1'}),
     # (NumberMan's Guardian Data giving his Soul, End Area; then a run
-    # holding his Soul: BusterUp picked on BN5's Custom screen, UNITE, the
-    # unison as the turn begins)
+    # holding his Soul, four BusterUps in its folder: BusterUp picked on
+    # BN6's Custom screen, UNITE in the emblem's place, the unison as the
+    # turn begins)
     ('bn5-soul', ['--scene', 'emu', '--net-biome', 'x2', '--run-depth', '3', '--seed', '3', '--guardian', '26', '--dev', 'quiet', '--talk', 'reward:420',
                   '--input', '100:,' + '4:A,6:,' * 30 + '100:,' + '6:A,94:,' * 12], [(700, 'bn5-soul'), (1080, 'bn5-soul-words')], {}),
-    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4', '--input',
-                   '100:,' + '4:A,6:,' * 30 + '0:battle,160:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,6:A,60:,6:UP,14:,6:A,500:'],
-     [(710, 'bn5-unite'), (1040, 'bn5-unison')], {}),
-    # (the older net's wait: BN5's first boot slowed, a battle at once)
-    ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=4', '--input', '300:battle'],
-     [(480, 'bn5-wait'), (1050, 'bn5-wait-2'), (1650, 'bn5-wait-3')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4,folder=175/4', '--input', BN5_UNITE],
+     [(600, 'bn5-unite'), (880, 'bn5-unison')], {}),
     # (BN6's own DarkChips, on BN6's ROM alone: a flame on Central's middle
     # layer, Chaud's call paged, MegaMan placed by it and speaking to it;
     # DrkSword drawn in a battle's first hand, a BugFrag burnt for its 400,
@@ -1493,18 +1503,15 @@ CLIPS = [
     # (HeatCross brought, a cybertree in Green: "Leave it to me!")
     ('obstacle', ['--scene', 'emu', '--run-depth', '3', '--net-biome', '3', '--seed', '3', '--dev', 'quiet,pieces=8', '--setup', 'endless,0,0,0,1'], {},
      '300:,0:place 20 108 5,20:,6:A,89:,6:A,134:,6:A,39:,6:A,60:,6:A,10:,70:DOWN+LEFT', 310, 729),
-    # (0.9.0's: a random battle in BN5's engine on ACDC Area, from the
-    # switch out of BN6's map through its first turn, the autopilot
-    # fighting; UNITE with NumberMan's Soul on BN5's Custom screen to the
-    # unison; DrkSword from a BN6 battle's first hand, its dark slash)
+    # (0.9.0's, made again with every battle in BN6's engine: a random
+    # battle of BN5's ACDC Area from BN6's map through its first turn, the
+    # autopilot fighting; UNITE with NumberMan's Soul on BN6's Custom
+    # screen to the unison; DrkSword from a BN6 battle's first hand, its
+    # dark slash)
     ('bn5-battle', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet'], {'CYBERWORLD_AUTOPILOT': '1'}, '460:battle', 436, 916),
-    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4'], {},
-     '100:,' + '4:A,6:,' * 30 + '0:battle,160:,6:RIGHT,10:,6:RIGHT,10:,6:A,40:,6:RIGHT,8:,6:RIGHT,8:,6:RIGHT,10:,6:DOWN,40:,6:A,60:,6:UP,14:,6:A,500:', 550, 1030),
+    ('bn5-unite', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,souls=4,folder=175/4'], {}, BN5_UNITE, 500, 1040),
     ('dark-chip', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,darkchips=0x2,folder=286/3', '--talk', 'bugfrags:420'], {},
      '100:,' + '4:A,6:,' * 30 + '40:,0:battle,220:,6:A,20:,6:START,20:,6:A,120:,6:RIGHT,20:,6:A,200:', 606, 966),
-    # (the older net's wait, BN5's first boot slowed to 12 of its frames a
-    # frame: the switch, the wait filling, the battle opening behind it)
-    ('bn5-wait', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet,slowboot=12'], {'CYBERWORLD_AUTOPILOT': '1'}, '300:battle', 340, 820),
     # (0.9.0's start: the developer's boot screen, MegaMan's word on GitHub, the title)
     ('intro', ['--scene', 'intro'], {}, None, 1, 380),
     # (0.10.0's: the second screen following the game, as a New 3DS shows it)
@@ -1538,7 +1545,7 @@ CLIPS = [
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
-               'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15), 'bn5-wait': (None, 15),
+               'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15)}
 
@@ -1785,8 +1792,8 @@ def lint_files():
     return not bad
 
 
-# bn6.h and the header it includes for the PET's addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_pet.h')
+# bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/)
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h')
 
 
 def lint_rom_data(update):
@@ -1875,9 +1882,13 @@ def lint_complexity(update):
 def lint_analyzer(update):
     """GCC's analyzer over the host build's sources, at -O2 as it builds."""
     from collections import Counter
-    script = ('for f in src/*/*.c; do gcc -std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
+    # line naming their function, so files' lines must not interleave)
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
-              '-isystem /opt/mgba/host/include -c -o /dev/null "$f"; done 2>&1')
+              '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
+              'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
+              'cat "$out"/*')
     build('host')   # (its version.h)
     out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                          ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
@@ -2174,7 +2185,7 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'screenshots', 'clips', 'town', 'world', 'symbols'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'clean':
@@ -2182,7 +2193,7 @@ def main():
         return
     if a.action == 'test':
         ensure_image()
-        code = docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else []))
+        code = docker('make', 'test', f'-j{os.cpu_count() or 4}', *(['WERROR=1'] if os.environ.get('CI') else []))
         # (linux/steam/add-to-steam.py and the site's pages, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
@@ -2254,6 +2265,12 @@ def main():
     if a.action == 'screenshots':
         build('host')
         sys.exit(screenshots(a.rest or None))
+    if a.action == 'xdiff':
+        # (local only: both ROMs; the tool builds the host binary and runs it once a spec)
+        sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xdiff.py'), *a.rest]))
+    if a.action == 'xrecords':
+        # (local only: both ROMs; BN5's records in BN6's engine, each fightable or why not)
+        sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xrecords.py'), *a.rest]))
     if a.action == 'pacing':
         build('host')
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))

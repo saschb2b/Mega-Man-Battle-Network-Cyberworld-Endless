@@ -15,7 +15,7 @@
 #include "script_kit.h"
 #include "text.h"
 
-#define TALK_AT   (EMU_FREE + 0x150000)   /* one archive, rewritten for each conversation */
+#define TALK_AT   FREE_TALK               /* one archive, rewritten for each conversation */
 #define TALK_SIZE 0x2000
 
 static struct {

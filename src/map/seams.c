@@ -27,11 +27,14 @@ static void put(TileSeams *s, uint64_t h) {
 	s->n++;
 }
 
-static void grow(TileSeams *s) {
+/* (false where memory ran out: the table kept as it was) */
+static bool grow(TileSeams *s) {
 	TileSeams t = { calloc(s->cap ? s->cap * 2 : 1u << 14, sizeof *t.slot), s->cap ? s->cap * 2 : 1u << 14, 0 };
+	if (!t.slot) return false;
 	for (unsigned i = 0; i < s->cap; ++i) if (s->slot[i]) put(&t, s->slot[i]);
 	free(s->slot);
 	*s = t;
+	return true;
 }
 
 /* Tile i of map a as its neighbours see it. */
@@ -45,13 +48,16 @@ static uint32_t look(const AreaSrc *a, bool bg_in_map, int tx, int ty) {
 	return SEAM_VOID;
 }
 
+/* (a map's pairs left out where memory ran out: tools/heap3ds.py's 3DS
+ * crashed here, learning a layer's area in a long run) */
 void seams_add(TileSeams *s, const AreaSrc *a, bool bg_in_map) {
-	uint32_t *k = malloc((size_t)a->tw * a->th * sizeof *k);
+	uint32_t *k = calloc((size_t)a->tw * a->th, sizeof *k);
+	if (!k) return;
 	for (int ty = 0; ty < a->th; ++ty)
 		for (int tx = 0; tx < a->tw; ++tx) k[ty * a->tw + tx] = look(a, bg_in_map, tx, ty);
 	for (int ty = 0; ty < a->th; ++ty)
 		for (int tx = 0; tx < a->tw; ++tx) {
-			if (2 * (s->n + 2) >= s->cap) grow(s);
+			if (2 * (s->n + 2) >= s->cap && !grow(s)) { free(k); return; }
 			uint32_t here = k[ty * a->tw + tx];
 			if (tx + 1 < a->tw) put(s, hash(here, k[ty * a->tw + tx + 1], false));
 			if (ty + 1 < a->th) put(s, hash(here, k[(ty + 1) * a->tw + tx], true));

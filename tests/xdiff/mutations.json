@@ -1,0 +1,1265 @@
+{
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*, or a Soul's look, abilities and passives: soulbreak, SOULBREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here.",
+ "mutations": [
+  {
+   "name": "an immediate",
+   "spec": "cangard_v1",
+   "poke": [
+    "08108F12:0540"
+   ],
+   "what": "the fire state's flag (lsls r0,r0,#0x16: 0x400000) shifted one less (0x200000): the wrong flag set as it fires"
+  },
+  {
+   "name": "a state number not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "081090C6:2007"
+   ],
+   "what": "the guard's CurAction left at BN5's 7 (BN6's frozen state) where the recipe makes it 9"
+  },
+  {
+   "name": "an offset not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9636:6EB8"
+   ],
+   "what": "the reticle's read of a hit's flags left at BN5's +0x68 where BN6 keeps them at +0x70"
+  },
+  {
+   "name": "a call aimed at a routine of nothing",
+   "spec": "cangard_v1",
+   "call": [
+    "0800E9DC:0810A953"
+   ],
+   "what": "the veneer to BN6's counter time aimed at the families' empty hook"
+  },
+  {
+   "name": "a call aimed at the wrong twin",
+   "spec": "cangard_v1",
+   "call": [
+    "0801A152:0801A15C"
+   ],
+   "what": "the veneer to BN6's routine that sets an object's flag (0x0801A152) aimed at its neighbour that clears it (0x0801A15C)"
+  },
+  {
+   "name": "a table entry",
+   "spec": "cangard_v1_keys",
+   "poke": [
+    "08B30C80:0810A953:4"
+   ],
+   "what": "AI 32's entry of the grown per-frame table (table 3) the empty hook: the reticle no longer let go as MegaMan leaves the row"
+  },
+  {
+   "name": "a number in its data",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9624:0A0B"
+   ],
+   "what": "the reticle's frames a panel for V1 11 where BN5 has 12"
+  },
+  {
+   "name": "an effect id not moved",
+   "spec": "cangard_v1",
+   "poke": [
+    "08108FB6:3457"
+   ],
+   "what": "the muzzle blast spawned with BN5's effect id 0x57 (adds r4,#0x57) where the recipe gives BN6's 0x6C: in BN6's numbers another effect, which only the reference can say is the family's"
+  },
+  {
+   "name": "an effect id not moved, beside a native",
+   "spec": "cangard_mettaur",
+   "poke": [
+    "08108FB6:3457"
+   ],
+   "what": "the same break in the smoke spec: the family's world is still the same at its first blast (the Mettaur's own differences compared on), so it must fail there"
+  },
+  {
+   "name": "the strike's effect id",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C9660:240F"
+   ],
+   "what": "the reticle's strike spawning effect 0x0F where BN5's spawns 0x0E (movs r4,#0xe)"
+  },
+  {
+   "name": "a region number",
+   "spec": "cangard_v1",
+   "poke": [
+    "080C95DE:2106"
+   ],
+   "what": "the reticle's collision data set up for region 6 where BN5's names region 4 (movs r1,#4 before the engine's setup): its +0x30 another word of the alliance table (BN5's 0x40000002 where 0x40000000), which only the tables' map reads as its own (legit.json, maps, alliance)"
+  },
+  {
+   "name": "an immediate, Handi's",
+   "spec": "handi_v1",
+   "poke": [
+    "081062E8:2007"
+   ],
+   "what": "its wait's CurAction left at BN5's 7 (BN6's bubbled state) where the recipe makes it 9 (movs r0,#7 before its setAttack0)"
+  },
+  {
+   "name": "a rebased call",
+   "spec": "handi_v1",
+   "call": [
+    "08015FDC:08016004"
+   ],
+   "what": "the veneer of its panel's pick (BN5 0x08012DCC, BN6 0x08015FDC: a panel of its own side at random) rebased to the routine after it (0x08016004, a pick among the other side's panels, which draws as many numbers)"
+  },
+  {
+   "name": "a shifted RNG call",
+   "spec": "handi_v1",
+   "call": [
+    "08001532:08001562"
+   ],
+   "what": "its draws (GetPositiveSignedRNG, BN6 0x08001532) shifted onto the second word (GetPositiveSignedRNGSecondary, 0x08001562): the replay finds no draw of the reference's to give them, and they draw what they find"
+  },
+  {
+   "name": "an immediate, Powie's",
+   "spec": "powie_v1",
+   "poke": [
+    "08105BB8:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Powie's",
+   "spec": "powie_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Bugtank's",
+   "spec": "bugtank_v1",
+   "poke": [
+    "08105F12:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Bugtank's",
+   "spec": "bugtank_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Dominerd's",
+   "spec": "dominerd_v1",
+   "poke": [
+    "08106824:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Dominerd's",
+   "spec": "dominerd_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, MetFire's",
+   "spec": "metfire_v1",
+   "poke": [
+    "08106C74:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, MetFire's",
+   "spec": "metfire_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Shakey's",
+   "spec": "shakey_v1",
+   "poke": [
+    "08107242:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Shakey's",
+   "spec": "shakey_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, NinJoy's",
+   "spec": "ninjoy_v1",
+   "poke": [
+    "08107C98:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, NinJoy's",
+   "spec": "ninjoy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Lark's",
+   "spec": "lark_v1",
+   "poke": [
+    "0810818C:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Lark's",
+   "spec": "lark_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, BomBoy's",
+   "spec": "bomboy_v1",
+   "poke": [
+    "081085CC:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, BomBoy's",
+   "spec": "bomboy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Zomon's",
+   "spec": "zomon_v1",
+   "poke": [
+    "08108A96:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Zomon's",
+   "spec": "zomon_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Drixol's",
+   "spec": "drixol_v1",
+   "poke": [
+    "08109AF4:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Drixol's",
+   "spec": "drixol_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Batty's",
+   "spec": "batty_v1",
+   "poke": [
+    "08109F7C:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Batty's",
+   "spec": "batty_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Skarab's",
+   "spec": "skarab_v1",
+   "poke": [
+    "0810A35E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Skarab's",
+   "spec": "skarab_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Draggin's",
+   "spec": "draggin_v1",
+   "poke": [
+    "0810AF98:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Draggin's",
+   "spec": "draggin_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Whirly's",
+   "spec": "whirly_v1",
+   "poke": [
+    "0810B76E:2008"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Whirly's",
+   "spec": "whirly_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Marina's",
+   "spec": "marina_v1",
+   "poke": [
+    "0810BA80:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Marina's",
+   "spec": "marina_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Flashy's",
+   "spec": "flashy_v1",
+   "poke": [
+    "0810C09E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Flashy's",
+   "spec": "flashy_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Eleogre's",
+   "spec": "eleogre_v1",
+   "poke": [
+    "0810C5EE:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Eleogre's",
+   "spec": "eleogre_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Cactikil's",
+   "spec": "cactikil_v1",
+   "poke": [
+    "0810CC3E:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Cactikil's",
+   "spec": "cactikil_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, WuNote's",
+   "spec": "wunote_v1",
+   "poke": [
+    "0810D146:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, WuNote's",
+   "spec": "wunote_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Appley's",
+   "spec": "appley_v1",
+   "poke": [
+    "0810D5AC:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Appley's",
+   "spec": "appley_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, BigBrute's",
+   "spec": "bigbrute_v1",
+   "poke": [
+    "0810DAE6:2009"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, BigBrute's",
+   "spec": "bigbrute_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, TinHawk's",
+   "spec": "tinhawk_v1",
+   "poke": [
+    "0810E3C8:2809"
+   ],
+   "what": "a CurAction its code compares left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, TinHawk's",
+   "spec": "tinhawk_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "an immediate, Bladia's",
+   "spec": "bladia_v1",
+   "poke": [
+    "0810EAEA:2007"
+   ],
+   "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+  },
+  {
+   "name": "a rebased call, Bladia's",
+   "spec": "bladia_v1",
+   "call": [
+    "08011680:0810A953"
+   ],
+   "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+  },
+  {
+   "name": "a wrong MOVED entry",
+   "spec": "cangard_v1",
+   "poke": [
+    "08B45494:08B45F01:4"
+   ],
+   "what": "the dispatch's MOVED entry for the reticle (the third kind's BN5 type 0x25, at XV_MOVED_TABLES + 0x400 + 4 x 0x25) the stray's routine, as if no family had moved it: the reticle let go as it first runs"
+  },
+  {
+   "name": "a wrong TWIN",
+   "spec": "cangard_v1",
+   "poke": [
+    "08B45D25:25:1"
+   ],
+   "what": "the dispatch's TWIN entry for BN5's type 0x25 (XV_TWIN_TABLES + 0x100 + 0x25) made BN6's own 0x25 where it is moved (0xFF): the reticle spawned as BN6's attack of that number"
+  },
+  {
+   "name": "a spawn not retargeted",
+   "spec": "cangard_v1",
+   "call": [
+    "08B46000:08003358"
+   ],
+   "what": "the veneer to the dispatch's spawner of the third kind (XV_SPAWN_3) aimed at BN6's own spawner (0x08003358), as before the dispatch: BN5's 0x25 spawned as BN6's 0x25"
+  },
+  {
+   "name": "lava's flags",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0034:00010010:4"
+   ],
+   "what": "lava's word in BN6's grown flags table (xpanels.c, EMU_FREE + 0x4C0000 + 13 x 4) a plain panel's 0x10010 where BN5's lava gives 0x11010"
+  },
+  {
+   "name": "lava underfoot not hooked",
+   "spec": "field_lava_76",
+   "poke": [
+    "0801A802:B550"
+   ],
+   "what": "BN6's own push {r4,r6,lr} back over the hook at the actors' status step (BN6_OBJECT_STATUS), where BN5 steps an object on lava first: CanGard unhurt on lava, the lava not cooled"
+  },
+  {
+   "name": "the sea underfoot not hooked",
+   "spec": "field_sea",
+   "poke": [
+    "0801A1AA:2804"
+   ],
+   "what": "BN6's own cmp r0,#4 back over the hook in what a panel does to an actor (BN6_PANEL_STEP_POISON): the Fire CanGard on sea unhurt"
+  },
+  {
+   "name": "lava's count not hooked",
+   "spec": "field_lava_firevirus",
+   "poke": [
+    "0800C3B8:2809"
+   ],
+   "what": "BN6's own cmp r0,#9 back over the hook in the per-panel update (BN6_PANEL_UPDATE_CONVEYOR): lava's timer written 0x708 each frame, never counted down, never running out"
+  },
+  {
+   "name": "the cooling's panel",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0048:2203"
+   ],
+   "what": "the stub's movs r2,#2 (the panel made plain as lava cools under MegaMan) made #3: a cracked panel"
+  },
+  {
+   "name": "the spark's place unmoved",
+   "spec": "field_lava",
+   "poke": [
+    "08CC0090:0810A953:4"
+   ],
+   "what": "the stub's veneer to the routine that moves the spark's place by a random amount (BN6_PLACE_JITTER) aimed at the families' empty hook: no random number drawn as lava cools"
+  },
+  {
+   "name": "Aqua cools no lava",
+   "spec": "field_lava_aqua",
+   "poke": [
+    "03007768:280F"
+   ],
+   "what": "the element hit's lava test in IWRAM (xpanels.c, BN6_PANEL_HIT_COOL + 0x26, written after the boot over the routine the game copied) made cmp r0,#15: an Aqua hit on lava leaves it, where BN5's cools it plain"
+  },
+  {
+   "name": "MegaMan's buster flash",
+   "spec": "megaman_plain",
+   "poke": [
+    "080EC8D6:2407"
+   ],
+   "what": "BN6's first flash of his buster spawned as its effect 7 where 6 (the arm flash's routine 0x080EC8B2: movs r4,#6 at 0x080EC8D6): MegaMan's own state, which a family spec reads as inconclusive (cangard_v1_keys stops there) and a MegaMan spec fails"
+  },
+  {
+   "name": "a chip's damage",
+   "spec": "megaman_plain",
+   "poke": [
+    "08C00046:0029"
+   ],
+   "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A in the registry's copy the game reads, CHIPS_RECORDS + 0x2C + 0x1A, BN6's own table at 0x08021DA8 moved there): CanGard's HP after the Cannon"
+  },
+  {
+   "name": "a Soul's turns four",
+   "spec": "soul_knight",
+   "unitebreak": 1,
+   "what": "OK's commit of UNITE in BN6's engine gives a Soul 4 turns where BN5's gives 3 (0x08024FFA): KnightSoul's turns 4 at t1, its end a turn late"
+  },
+  {
+   "name": "its used bit not set",
+   "spec": "soul_knight",
+   "unitebreak": 2,
+   "what": "the commit leaves the Souls' used word alone (BN5 ORs bit 11 in at 0x08025042): the same Soul could unite again in the battle; the used word 0 against BN5's 0x800"
+  },
+  {
+   "name": "UNITE lit for a wrong kind",
+   "spec": "soul_grey",
+   "unitebreak": 4,
+   "what": "the check of the last pick lights a Soul for the kind after its own (BN5's table 0x08024BE4 read one off): KnightSoul (Break, 0xB) lit by a Cannon (no kind, 0xC), which BN5 leaves grey: BN6 unites"
+  },
+  {
+   "name": "Beast Out lit while united",
+   "spec": "soul_beast",
+   "unitebreak": 8,
+   "what": "the emblem's lit test (0x0802A57A) not answered grey while a Soul is united: A on it takes Beast Out from the proxy, form 0x14 (TenguBeast) where the spec holds form 8"
+  },
+  {
+   "name": "a Soul kept past a Cross",
+   "spec": "soul_cross",
+   "unitebreak": 16,
+   "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
+  },
+  {
+   "name": "a Navi's state number not moved",
+   "spec": "toadman_v1",
+   "poke": [
+    "08DA4CC8:200B"
+   ],
+   "what": "ToadMan's first decision's CurAction (BN5 0x080FC460, BN6's copy at XN_CODE + 0x12C00 + 0xC8) left at BN5's 11 (BN6's his third own state) where the recipe makes it 13"
+  },
+  {
+   "name": "a Navi's effect not renumbered",
+   "spec": "toadman_v1",
+   "poke": [
+    "08DA51E6:245D"
+   ],
+   "what": "ToadMan's teleport's effect (BN5 0x080FC97E: movs r4,#0x5D, its copy at XN_CODE + 0x12C00 + 0x5E6) left at BN5's 0x5D, which BN6 numbers another, where the recipe makes it BN6's 0xA1, the copy of BN5's"
+  },
+  {
+   "name": "a Navi's state number not moved (KnightMan)",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA121E:2009"
+   ],
+   "what": "KnightMan's decision's CurAction (BN5 0x080FB982, BN6's copy at XN_CODE + 0xF000 + 0x21E) left at BN5's 9 (BN6's his own first, his idle) where the recipe makes it 11"
+  },
+  {
+   "name": "a Navi's overlay of BN6's kind",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA1C04:2401"
+   ],
+   "what": "KnightMan's companion's overlay spawned as kind 1 (BN5 0x0800EE74, its copy at XN_CODE + 0xFC02 + 0x2): BN6's own kind 1, another Navi's masks and sprite, where the recipe makes it 23, BN5's kind 1 copied"
+  },
+  {
+   "name": "a Navi's state number not moved (ShadowMan)",
+   "spec": "shadowman_v1",
+   "poke": [
+    "08D95E8E:2007"
+   ],
+   "what": "ShadowMan's first decision's CurAction (BN5 0x080F94B6, BN6's copy at XN_CODE + 0x3C00 + 0x28E) left at BN5's 7 (BN6's bubbled state) where the recipe makes it 9"
+  },
+  {
+   "name": "a Navi's own battle sprite not renumbered",
+   "spec": "shadowman_v1",
+   "poke": [
+    "08D9682C:2208"
+   ],
+   "what": "ShadowMan's decoys' sprite (BN5 0x080B9498: movs r2,#8, list 2's ShadowMan in BN5, its copy at XN_CODE + 0x4800 + 0x2C) left at 8, BN6's list 2 number 8 another Navi, where the recipe makes it 0x21, his battle sprite's number in BN6's list 2 (xnavi_sprites.c)"
+  },
+  {
+   "name": "a Navi's state number not moved (NumberMan)",
+   "spec": "numberman_v1",
+   "poke": [
+    "08D9991A:2009"
+   ],
+   "what": "NumberMan's decision's CurAction (BN5 0x080F9F86, BN6's copy at XN_CODE + 0x7800 + 0x11A) left at BN5's 9 where the recipe makes it 11"
+  },
+  {
+   "name": "a sprite table's entry not renumbered",
+   "spec": "numberman_v1",
+   "poke": [
+    "08D9A701:06:1"
+   ],
+   "what": "NumberMan's companion's sprite table (BN5 0x080C33A8, its kind 0's number at +1, its copy at XN_CODE + 0x8700 + 0x1) left at BN5's list 4 number 6, BN6's another sprite, where the recipe makes it 0xAC, BN5's copied (XvByte)"
+  },
+  {
+   "name": "a Navi's state number not moved (TomahawkMan)",
+   "spec": "tomahawkman_v1",
+   "poke": [
+    "08D9D636:2009"
+   ],
+   "what": "TomahawkMan's decision's CurAction (BN5 0x080FADAA, BN6's copy at XN_CODE + 0xB400 + 0x236) left at BN5's 9 where the recipe makes it 11"
+  },
+  {
+   "name": "a sprite left at BN5's number where BN6 has it at another",
+   "spec": "tomahawkman_v1",
+   "poke": [
+    "08D9E570:2229"
+   ],
+   "what": "TomahawkMan's swing's sprite (BN5 0x080C8860: movs r2,#0x29, list 4, its copy at XN_CODE + 0xC100 + 0x470) left at 0x29, BN6's another sprite, where the recipe makes it 0x2B, BN6's of the same bytes"
+  },
+  {
+   "name": "the image object's kind left at BN5's sprite",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D90110:00:1"
+   ],
+   "what": "the moved image object's kind 3 (BN5's kinds table 0x080B9A5C + 0x10, its copy at XN_OBJECTS + 0x0 + 0x10) left naming list 4's number 0, BN6's another sprite, where tools/bn5_objects.py's copy makes it 0xB5 (BN5's sprite 3:0x00, Colonel's image at t254): the sprite's bytes compared, never its number"
+  },
+  {
+   "name": "the image object's twin kind at another sprite",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D901BA:09:1"
+   ],
+   "what": "the moved image object's kind 0x25 (its copy's entry at XN_OBJECTS + 0x0 + 0xBA) naming BN6's list 3 number 9 where tools/bn5_objects.py's twin is number 8, the same bytes as BN5's 3:0x08: the sprite's bytes compared"
+  },
+  {
+   "name": "a Navi's sound left at BN6's number",
+   "spec": "knightman_v1",
+   "poke": [
+    "08DA16A4:20C0"
+   ],
+   "what": "KnightMan's sound (BN5 0x080FBE08: movs r0,#0xC0, its copy at XN_CODE + 0xF000 + 0x6A4) left at 0xC0, BN6's another song, where the install makes it the slot BN5's 0xC0 is copied to (0x62, src/audio/xsong.c): BN6's own song of the number told from the copy (xsong_sound_slot)"
+  },
+  {
+   "name": "the submerged hit by any attack",
+   "spec": "toadman_sea",
+   "poke": [
+    "08D9008E:2400",
+    "08D900C2:2400"
+   ],
+   "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
+  },
+  {
+   "name": "Elec stopped by the submerged",
+   "spec": "toadman_sea_elec",
+   "poke": [
+    "08D90084:2C07",
+    "08D900B6:2C07"
+   ],
+   "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
+  },
+  {
+   "name": "the sea's marker not kept",
+   "spec": "toadman_sp",
+   "poke": [
+    "08D9006A:46C0"
+   ],
+   "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
+  },
+  {
+   "name": "the sea's splash another effect",
+   "spec": "tomahawkman_sea",
+   "poke": [
+    "08D900DA:2414"
+   ],
+   "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
+  },
+  {
+   "name": "Colonel's side's bit not kept",
+   "spec": "colonel_v1",
+   "poke": [
+    "08D90044:46C0"
+   ],
+   "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in his field (BN6_COLONEL_SIDES): BN5's bit 0x20 set as he is spawned, at t1, where BN6's field stays 0"
+  },
+  {
+   "name": "the Dark Soul's record of a chip BN6's region",
+   "spec": "darksoul_sword",
+   "poke": [
+    "08DFAC4B:02:1"
+   ],
+   "what": "the Dark Soul's record of the Sword (XN_DARK_RECORDS + 71 * 0x2C + 0x17, src/emu/xnavi_dark.c) holding BN6's byte 2 (its lock-on type) where BN5's region 6 is kept: its approach goes elsewhere at t77"
+  },
+  {
+   "name": "the Dark Soul's record of a chip another approach",
+   "spec": "darksoul_cannon",
+   "poke": [
+    "08DFA039:01:1"
+   ],
+   "what": "the Dark Soul's record of the Cannon (XN_DARK_RECORDS + 1 * 0x2C + 0xD) naming approach 1 (Thunder's) where BN5's 0: its approach's state at t264"
+  },
+  {
+   "name": "the Navis' buster another family",
+   "spec": "darksoul_v1",
+   "poke": [
+    "08D90038:2010"
+   ],
+   "what": "the Navis' buster's setup (XN_STUB_BUSTER, its movs r0 at + 0x18) answering family 0x10 (the step) where BN5's 0x16 is BN6's 0x66 (XN_FAMILY_OF): the Dark Soul's first shot at t16"
+  },
+  {
+   "name": "a moved chip's family in its record",
+   "spec": "chip_crakout",
+   "poke": [
+    "08C03343:6C:1"
+   ],
+   "what": "CrakOut's record (the registry's 298 at CHIPS_RECORDS) naming family 0x6C, whose grown entry is the stub, where the install gives it 0x6B: MegaMan's attack ends at once"
+  },
+  {
+   "name": "a moved family's entry",
+   "spec": "chip_crakout",
+   "poke": [
+    "08E0016C:08E003C1:4"
+   ],
+   "what": "the grown attack families' entry 0x6B (FREE_ATTACK_FAMILIES + 0x16C) left at the stub (XATTACK_STUB) where the install points it at CrakOut's moved code"
+  },
+  {
+   "name": "a number in a moved family's code",
+   "spec": "chip_crakout",
+   "what": "CrakOut's wait (movs r0,#0xF at BN5's 0x080EC8BA, written at its copy) one frame shorter: the crack a frame early",
+   "poke5": [
+    "080EC8BA:200E"
+   ]
+  },
+  {
+   "name": "a moved object's type",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's aura spawned as BN5's fourth kind's 0x56 (movs r0,#0x57 at BN5's 0x080E6CF8, written at its copy), a type the dispatch was given none of",
+   "poke5": [
+    "080E6CF8:2056"
+   ]
+  },
+  {
+   "name": "a moved family's sound",
+   "spec": "chip_hotbody1",
+   "what": "HotBody's sound 0xF7 (movs r0,#0xF7 at BN5's 0x080DA4B6, written at its copy) played as 0xF6",
+   "poke5": [
+    "080DA4B6:20F6"
+   ]
+  },
+  {
+   "name": "a moved chip's family, HotBody's",
+   "spec": "chip_hotbody1",
+   "poke": [
+    "08C04F73:A7:1"
+   ],
+   "what": "HotBody1's record (462) naming family 0xA7 (the stub) where the install gives it 0xA8"
+  },
+  {
+   "name": "a moved support routine's entry",
+   "spec": "chip_jealousy",
+   "poke": [
+    "08E004F4:08E00C01:4"
+   ],
+   "what": "the grown support routines' entry 0x3D (XC_SUPPORT + 0xF4) left at their stub (XC_STUBS) where the install points it at Jealousy's moved routine"
+  },
+  {
+   "name": "a moved support routine's object type",
+   "spec": "chip_jealousy",
+   "what": "Jealousy's object spawned as BN5's fourth kind's 0x35 (movs r0,#0x36 at BN5's 0x080E462C, written at its copy) where BN6's twin 0x36 runs",
+   "poke5": [
+    "080E462C:2035"
+   ]
+  },
+  {
+   "name": "a moved chip's subfamily in its record",
+   "spec": "chip_nrthwind",
+   "poke": [
+    "08C04E98:3E:1"
+   ],
+   "what": "NrthWind's record (457) naming support entry 0x3E (the stub) where the install gives it 0x3F"
+  },
+  {
+   "name": "a moved support routine's object type, NrthWind's",
+   "spec": "chip_nrthwind",
+   "what": "NrthWind's wind spawned as BN5's fourth kind's 0x38 (movs r0,#0x39 at BN5's 0x080E4940, written at its copy) where BN5's own 0x39 runs, moved",
+   "poke5": [
+    "080E4940:2038"
+   ]
+  },
+  {
+   "name": "a moved chip's sound's slot",
+   "spec": "chip_metagel",
+   "poke5": [
+    "080CE170:2053"
+   ],
+   "what": "MetaGel's sound 0x105 (BN5's song copied to BN6's slot 0x59, movs r0,#0x59 at BN5's 0x080CE170, written at its copy) played from slot 0x53, BN6's empty one (0xE4's, which no chip copies): a song missing"
+  },
+  {
+   "name": "a moved chip's effect's id",
+   "spec": "chip_rainyday",
+   "poke5": [
+    "080D996E:2461"
+   ],
+   "what": "RainyDay's effect 0x61 (given an id of the chips', movs r4 at BN5's 0x080D996E, written at its copy) spawned as BN6's own 0x61, another picture"
+  },
+  {
+   "name": "the muzzle flash's sprite",
+   "spec": "chip_drilarm1",
+   "poke5": [
+    "080B9B48:1E:1"
+   ],
+   "what": "the flash 0x2F's number byte in the helper's copy of its table (BN5's 0x080B9B48, set to the number of the chips' where BN5's list 3 0x1E was copied) left at 0x1E: BN6's list 3 0x1E drawn, another picture"
+  },
+  {
+   "name": "a packed sprite word",
+   "spec": "chip_mrkcan1",
+   "poke5": [
+    "080E5794:00001024:4"
+   ],
+   "what": "MrkCan's mark's packed sprite word (its literal at BN5's 0x080E5794, given the number of the chips' where BN5's list 4 0x24 was copied, for the second packed setup 0x08018926) left at 0x1024: BN6's list 4 0x24 drawn, another picture"
+  },
+  {
+   "name": "a computed power's routine",
+   "spec": "chip_cusvolt1",
+   "poke": [
+    "08E02324:08E00C01:4"
+   ],
+   "what": "BN6's grown table of computed powers' entry 0xC9 (CusVolt1's 1073 as 1201, XC_POWERS + 4 x 0xC9) aimed at the stub (power 0, returning by mov pc, lr as the reader's mov lr, pc needs) where the install gives it the PowerCusVolt helper's copy: its damage 0"
+  },
+  {
+   "name": "a point of MegaMan's sprite",
+   "spec": "chip_cusvolt1",
+   "poke5": [
+    "080DD588:211A"
+   ],
+   "what": "CusVolt's volt placed by BN6's point 0x1A (movs r1,#0x1A at BN5's 0x080DD588, written at its copy) where the install gives it 0x1B (POINTS): the volt a panel ahead"
+  },
+  {
+   "name": "a collision data's offset added",
+   "spec": "chip_antifire",
+   "poke5": [
+    "080CF6CC:307C"
+   ],
+   "what": "the Anti trap's damage by element read at BN5's +0x7C (adds r0,#0x7C at BN5's 0x080CF6CC, written at its copy) where the install gives it BN6's +0x84 (COLL_SUMS): the trap never springs"
+  },
+  {
+   "name": "a table's effect id",
+   "spec": "chip_crakbom",
+   "poke5": [
+    "080C94D1:51:1"
+   ],
+   "what": "CrakBom's crack effect (its kind's row of the crack bombs' table, BN5's 0x080C94D1, given an id of the chips') left at 0x51: BN6's own effect 0x51, another picture"
+  },
+  {
+   "name": "a hit's stat parameter",
+   "spec": "chip_moonbld1",
+   "poke5": [
+    "080D33B4:01180003:4"
+   ],
+   "what": "MoonBld's hit words (its literal at BN5's 0x080D33B4, the stat effect 0x18's parameter given by BN6's rule, HIT_STATS) left as BN5's: BN6's rule bugs the foe's AI data"
+  },
+  {
+   "name": "a Soul's sprite another's",
+   "spec": "soul_colonel",
+   "soulbreak": 1,
+   "what": "the sprite selector's hook (src/emu/soullook.c, BN6_FORM_SPRITE_READ) gives each Soul the next Soul's sprite of the grown list 0: ColonelSoul drawn as ShadowSoul (BN5's list 0 8), its frames another sprite's"
+  },
+  {
+   "name": "a Soul's palette",
+   "spec": "soul_number",
+   "soulbreak": 2,
+   "what": "the palette hooks give a Soul its sprite's palette 1 where BN5's 0x0800DD8C gives 0 (2 in Chaos Unison): NumberSoul's sprite state's palette 1"
+  },
+  {
+   "name": "TomahawkSoul's landing still",
+   "spec": "soul_tomahawk",
+   "soulbreak": 4,
+   "what": "the crossing's phase 2 leaves the camera still for TomahawkSoul where BN5's phase 2 shakes it 30 frames (0x0801211E): its draws and the battle's flag 0x20 missing"
+  },
+  {
+   "name": "a Soul's buster flash BN6's object",
+   "spec": "soul_buster",
+   "soulbreak": 8,
+   "what": "MegaMan's arm flash in a Soul (BN5's kind 0x23, its frame the Soul) spawned by BN6's spawner as BN6's object (src/emu/soullook.c's redirect to BN5's moved spawner left out): BN6's own kind 0x23 of its own table, another sprite and object where BN5 runs its image object"
+  },
+  {
+   "name": "no chip charged in a Soul",
+   "spec": "soul_knight_charge",
+   "soulbreak": 65536,
+   "what": "the chip charge's test (BN6_CHARGE_TEST, src/emu/soulchips.c) answers no for a Soul where BN5's 0x08010902 charges a chip of its kind: KnightSoul's JustcOne used as A is pressed, uncharged"
+  },
+  {
+   "name": "a charged chip not doubled",
+   "spec": "soul_toad_charge",
+   "soulbreak": 131072,
+   "what": "the charged chip's bonus (BN6_CHARGE_BONUS) none for ToadSoul where BN5's 0x080103C8 doubles it: its damage the record's"
+  },
+  {
+   "name": "TomahawkSoul's Wood chip not doubled on grass",
+   "spec": "soul_tomahawk_wood",
+   "soulbreak": 262144,
+   "what": "the chip's modifier (BN6_CHIP_MODIFIED) leaves TomahawkSoul's Wood chip on grass alone where BN5's 0x08010322 doubles it and makes the panel plain"
+  },
+  {
+   "name": "KnightSoul's front column unguarded",
+   "spec": "soul_knight_front",
+   "soulbreak": 524288,
+   "what": "a chip used from KnightSoul's front column leaves him no unharmed frames where BN5's 0x0801038A gives 50"
+  },
+  {
+   "name": "a counter's first frame left to the next",
+   "spec": "soul_shadow_left",
+   "poke": [
+    "08C81A54:46C046C0:4"
+   ],
+   "what": "the Souls' Thumb for BN5's counter start (SOUL_STUB_COUNTER) calls BN6's twin and not the family's first frame (its second bl two nops), as BN6's twin alone does: the counter a frame later than BN5's"
+  },
+  {
+   "name": "TomahawkSoul of no element",
+   "spec": "soul_tomahawk_heal",
+   "soulbreak": 64,
+   "what": "the element's hook gives TomahawkSoul none where BN5's table gives Wood: no heal on grass (BN6's grass step heals a Wood actor)"
+  },
+  {
+   "name": "a charged shot's charge",
+   "spec": "soul_shadow",
+   "soulbreak": 16,
+   "what": "the grown charge times (SOULS_CHARGES) 10 frames longer than BN5's for each Soul's power attack: ShadowSoul's slash fires later"
+  },
+  {
+   "name": "a charged shot's family",
+   "spec": "soul_knight_shot",
+   "soulbreak": 32,
+   "what": "each Soul's loadout names the next Soul's power attack for its charged shot (SOULS_LOADOUTS' +7): KnightSoul fires ToadSoul's"
+  },
+  {
+   "name": "a Soul's element",
+   "spec": "soul_toad",
+   "soulbreak": 64,
+   "what": "the element's hook gives a Soul none where BN5's table 0x0800E62C gives ToadSoul Aqua: his object's +0x0E and collision data's +2 0"
+  },
+  {
+   "name": "NumberSoul's hand of nine",
+   "spec": "soul_number_plus",
+   "soulbreak": 256,
+   "what": "the hand size's hook (BN6_HAND_SIZE_SET) deals NumberSoul 9 where BN5's 0x08025C24 deals 10: the second screen's elements laid out for nine"
+  },
+  {
+   "name": "NumberSoul's bonus left out",
+   "spec": "soul_number_plus",
+   "soulbreak": 512,
+   "what": "the bonus by form (BN6's 0x0800EF34, soulproxy.c's hook) gives NumberSoul's Cannon no +10 (BN5's 0x0800D0CA): CanGard struck for 40 where BN5's for 50"
+  },
+  {
+   "name": "ShadowSoul's passives left out",
+   "spec": "soul_shadow",
+   "soulbreak": 1024,
+   "what": "the proxy's passives' entry (BN6_FORM_PASSIVES' 8, soulpassive.c) runs none for a Soul where BN5's ready table 0x08011BA4 runs ShadowSoul's FloatShoe (0x08011C78): his collision's flags without it"
+  },
+  {
+   "name": "a Soul's song not copied",
+   "spec": "soul_toad",
+   "poke": [
+    "0815A238:0815AE18:4"
+   ],
+   "what": "BN6's song slot 0x5E (the song table 0x08159F48 + 8 x 0x5E) its empty header again where src/emu/soulpower.c entered BN5's 0x117 (ToadSoul's waves): BN6 plays the empty song"
+  },
+  {
+   "name": "a landed hit's mood left out",
+   "spec": "soul_knight_front",
+   "soulbreak": 16777216,
+   "what": "the hit's mood step (src/emu/soulmood.c, BN6_MOOD_HIT) raises the attacker's mood by nothing where BN5's 0x080127FA adds the hit's gain: KnightSoul's JustcOne lands and his mood stays 0x80 where BN5's goes to 0x9E"
+  },
+  {
+   "name": "no DarkChip dealt into a worried hand",
+   "spec": "soul_mood_dark",
+   "soulbreak": 33554432,
+   "what": "BN5's worried rule (0x08025118) left out of the compaction's hook: DarkCirc stays shelved, the second hand all Cannon, the cursor on the first"
+  },
+  {
+   "name": "a BN5 DarkChip used leaves him as he was",
+   "spec": "soul_mood_dark",
+   "soulbreak": 67108864,
+   "what": "the chip's use (soulmood_chip_used) leaves the mood where BN5's 0x0801007C sets it 0: DarkCirc used, his mood still worried"
+  },
+  {
+   "name": "UNITE stands while worried",
+   "spec": "soul_mood_unite",
+   "soulbreak": 134217728,
+   "what": "UNITE's rule (src/emu/soulunite.c's calm_enough) reads no worry where BN5_UNITE_STAND refuses it: KnightSoul's Break chip lights UNITE and he unites while worried"
+  },
+  {
+   "name": "BN5's dark gate left out",
+   "spec": "soul_mood_gate",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets BlakWing through while MegaMan is not dark where BN5's 0x08010110 refuses it: the attack's chip BlakWing (0x125) where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "ShadowSoul's charged sword BN6's",
+   "spec": "soul_shadow_slash",
+   "soulbreak": 1048576,
+   "what": "the chip's family read (BN6_CHIP_FAMILY_READ) leaves ShadowSoul's charged sword to BN6's sword family where BN5's 0x080EBDEC takes his path before the enemy: he slashes where he stands, at (2,2), where BN5's is behind CanGard at (6,2)"
+  },
+  {
+   "name": "ColonelSoul's button lit for any pick",
+   "spec": "soul_colonel_grey",
+   "soulbreak": 2048,
+   "what": "the button's rule (src/emu/soulcolonel.c's lit) takes any chip where BN5's 0x08024C04 refuses a chip of a kind: the RockCube lights it, A loads it, and his charged shot is the chip shot (BN6's 0x95) where BN5's stays ScreenDivide"
+  },
+  {
+   "name": "no obstacle strike",
+   "spec": "soul_colonel_strike",
+   "soulbreak": 4096,
+   "what": "the strike's test (src/emu/xstrike.c's strike_test) finds no enemy where BN5's 0x080CABEA finds CanGard behind the RockCube: the cube stays a cube, no soldier, CanGard keeps his 60"
+  },
+  {
+   "name": "B leaves the button's chip in it",
+   "spec": "soul_colonel_undo",
+   "soulbreak": 8192,
+   "what": "B on the chips (src/emu/soulcolonel.c's undo) runs BN6's B alone where BN5's 0x08024CEA gives the button's chip back first: the Cannon stays in the button, OK commits it (the block's +0x14 1 where BN5's is none) and MegaMan holds no chip at t700"
+  },
+  {
+   "name": "the button's chip left in the deck",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 16384,
+   "what": "OK's picks spent (src/emu/soulcolonel.c's spent) leave the button's Cannon in the deck where BN5's 0x080250CC spends it: the third hand's first chip the Cannon again where BN5's is a RockCube"
+  },
+  {
+   "name": "his charged shot ScreenDivide with a chip",
+   "spec": "soul_colonel_chip",
+   "soulbreak": 32768,
+   "what": "the turn's start (src/emu/soulcolonel.c's turn) keeps his charged shot ScreenDivide (BN6's 0x94) with the Cannon in the button where BN5's 0x080124A6 makes it the chip shot (0x13): ScreenDivide at t952 where BN5 fires the Cannon"
+  },
+  {
+   "name": "a Navi Colonel's side not arming the obstacle strike",
+   "spec": "colonel_strike",
+   "poke": [
+    "08D90044:46C0"
+   ],
+   "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in BN6_COLONEL_SIDES, the one field the obstacle strike reads (src/emu/xstrike.c): his side unarmed from t1 where BN5's bit 0x20 is set, the cube no soldier, MegaMan none of the three shots BN5's takes from t50"
+  },
+  {
+   "name": "BN5's DarkChip after-effect left out",
+   "spec": "chip_darkcirc",
+   "soulbreak": 536870912,
+   "what": "the chip's use (src/emu/soulmood.c's after_effect) leaves his battle NaviStats as they were where BN5's 0x0802C938 adds 100 to its +0x54 for DarkCirc: BN6's player block's +0x54 0 against BN5's 0x64 from t32"
+  },
+  {
+   "name": "BlakWing's object type",
+   "spec": "chip_blakwing",
+   "poke5": [
+    "080E6AB8:2053"
+   ],
+   "what": "BlakWing's object spawned as BN5's fourth kind's 0x53 (movs r0,#0x54 at BN5's 0x080E6AB8, written at its copy) where its own moved 0x54 runs: no wing, the foe keeps its 280"
+  },
+  {
+   "name": "DarkPlus's parameter",
+   "spec": "chip_darkplus",
+   "poke": [
+    "08C031E9:0:1"
+   ],
+   "what": "BN6's record of DarkPlus (290, the core's copy at CHIPS_RECORDS) with its second parameter 0 where BN5's record's is 1 (src/core/chips.c, xrec_same_moved): the moved subfamily 3 puffs (BN5 0x0800E19C), no bonus, the Cannon strikes for 40 against BN5's 90"
+  },
+  {
+   "name": "DarkPlus's store left out",
+   "spec": "chip_darkplus",
+   "poke5": [
+    "0800E1CE:46C0"
+   ],
+   "what": "the moved subfamily 3's strh r2,[r0,r1] (BN5 0x0800E1CE: the power into the hand's next chip's bonus) a nop at its copy: the hand's +0x1A 0 against BN5's 50 from t32, the Cannon's 40 against 90"
+  },
+  {
+   "name": "DarkPlus's flash none",
+   "spec": "chip_darkplus",
+   "poke5": [
+    "0800E1D2:2000"
+   ],
+   "what": "the moved subfamily 3's movs r0,#0x18 (BN5 0x0800E1D2, the green flash's frames) movs r0,#0 at its copy: the flash kept apart (XC_FLASH, src/emu/xchips_flash.c) 0 against BN5's AIData +0x3C 0x17 at t32"
+  },
+  {
+   "name": "DarkPlus's puff's sound",
+   "spec": "chip_darkplus_puff",
+   "poke5": [
+    "0800E202:2091"
+   ],
+   "what": "the moved subfamily 3's puff's sound (movs r0,#0x90 at BN5 0x0800E202) 0x91 at its copy: another song started at t104"
+  },
+  {
+   "name": "a virus's support chip in BN6's timing",
+   "spec": "zomon_v1",
+   "call": [
+    "08B46120:080126E4"
+   ],
+   "what": "Zomon's family's call to the chip writer (XV_CHIP_WRITER, src/emu/xvirus_dispatch.c) aimed at BN6's own (0x080126E4): its AreaGrab's family BN6's support family 0x15, which ends its user's attack a frame after BN5's (0x080ED12A-0x080ED130 against BN5's 0x080EC448): Zomon's states a frame behind BN5's from its first AreaGrab"
+  },
+  {
+   "name": "BN5's support family's frame left out",
+   "spec": "zomon_v1",
+   "poke": [
+    "08E00154:080ED0DD:4"
+   ],
+   "what": "the grown attack families' entry 0x65 (XV_SUPPORT_FAMILY, src/emu/xattack_grow.h) BN6's support family's routine (0x080ED0DC) where XV_SUPPORT runs it twice in its first frame: the AreaGrab's attack ends a frame later than BN5's 0x080EC400"
+  },
+  {
+   "name": "Chaos Unison's phases a frame longer",
+   "spec": "chaos_number_90",
+   "soulbreak": 128,
+   "what": "the chaos phase's step (src/emu/soulchaos.c, SOULCHAOS_BREAK_PHASE) cycles 43 frames where BN5's row 0 (0x08010648) has 42: the cycle's frame (BN6_SOUL_CYCLE) 42 against BN5's AIData +0x1C 0 as the charge's second cycle begins"
+  },
+  {
+   "name": "the Dark Soul a frame later",
+   "spec": "chaos_number_60",
+   "poke": [
+    "08C8325C:2019:2"
+   ],
+   "what": "the failure's phase 4 (CHAOS_FAIL_4, src/emu/soulchaos_thumb.c: BN5's 0x080EE782) counts 0x19 frames where BN5's counts 0x18 (its movs r0,#0x18 at SOULS_CHAOS + 0x15C): the Dark Soul spawned and MegaMan out of the Soul a frame after BN5's"
+  },
+  {
+   "name": "BN6's Program Advances' list alone",
+   "spec": "pa_suprspr1",
+   "poke": [
+    "080295B4:0802BCB0:4"
+   ],
+   "what": "the Custom screen's word of the Program Advances' list (BN6_PA_LIST_REF) BN6's own list again where src/emu/xchips_code.c's pas_stage points it at the list grown with BN5's recipes: the three WideSht1 picked form nothing, used one by one where BN5 forms SuprSpr1"
+  },
+  {
+   "name": "a Program Advance's id",
+   "spec": "pa_suprspr1",
+   "poke": [
+    "08F10002:0165:2"
+   ],
+   "what": "the grown list's first recipe of BN5's (FREE_CHIP_PAS, src/core/xchips_pas.c's SuprSpr1) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
+  },
+  {
+   "name": "no DarkChip dealt into the first worried hand",
+   "spec": "soul_mood_first",
+   "soulbreak": 33554432,
+   "what": "BN5's worried rule (0x08025118) left out of the compaction's hook on the battle's first Custom screen: DarkCirc stays shelved past the deck's place 5 (deck[5]), the second hand's fifth chip a Cannon where BN5's is DarkCirc"
+  },
+  {
+   "name": "HolyDrem's object type",
+   "spec": "chip_holydrem",
+   "poke5": [
+    "080E6F64:205A"
+   ],
+   "what": "the moved HolyDrem's support routine spawns BN5's fourth kind's 0x5A (movs r0,#0x59 at BN5's 0x080E6F64, written at its copy) where its own moved 0x59 runs: no 0x59 in play at t33, the foe not struck as BN5's"
+  },
+  {
+   "name": "Poltrgst's wait",
+   "spec": "chip_poltrgst",
+   "poke5": [
+    "080E8F18:201F"
+   ],
+   "what": "the moved Poltrgst's movs r0,#0x1E (BN5's 0x080E8F18, its object's wait) 0x1F at its copy: the obstacles thrown a frame after BN5's"
+  },
+  {
+   "name": "Tornado's frames",
+   "spec": "chip_darktorn",
+   "poke5": [
+    "080ECE88:202B"
+   ],
+   "what": "the moved Tornado family's movs r0,#0x2A (BN5's 0x080ECE88) 0x2B at its copy: DarkTorn's attack a frame apart from BN5's"
+  },
+  {
+   "name": "an SP's deletion time",
+   "spec": "chip_numbrmnsp",
+   "poke": [
+    "08E00C42:0100:2"
+   ],
+   "what": "NumberMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 9, NumbrMn[SP]'s record's power less 1001; src/emu/xchips_code.c) 256 frames where BN6 keeps none (0xFFFF) and BN5's save none: its power by that time where BN5's is 40"
+  },
+  {
+   "name": "a DS chip let through while not dark",
+   "spec": "chip_numbrmnds",
+   "soulbreak": 268435456,
+   "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "DarkInvs's time a frame short",
+   "spec": "chip_darkinvs",
+   "poke5": [
+    "080E2444:0257"
+   ],
+   "what": "the time BN5's DarkInvs hands its chip AI (the literal 600 at BN5's 0x080E2444) 599 at its moved copy: MegaMan's AI data +0x36 a frame apart from BN5's from the machine's entry (src/emu/darkinvs.c)"
+  },
+  {
+   "name": "DarkInvs's end a frame long",
+   "spec": "chip_darkinvs_end",
+   "poke5": [
+    "080EF288:2018"
+   ],
+   "what": "BN5's family 0x49, which ends DarkInvs where its time runs out (its movs r0,#0x17 at 0x080EF288, its frames), 0x18 at its moved copy (BN6's 0x99): MegaMan given back a frame after BN5's"
+  }
+ ]
+}

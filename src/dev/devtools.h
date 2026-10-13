@@ -15,10 +15,12 @@ typedef struct {
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
 	bool gem;       /* every random battle with a Mystery Data on the field */
+	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	int duels;      /* duels=N: the rival's wins made N, for a capture of a rung or an official gate (docs/RIVAL.md); -1 left alone */
 	int hp;         /* hp=N: MegaMan's max HP N, his HP with it each time the max moves (a later act's fight swept at a playtester's HP); 0 left alone */
-	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a guest battle begun hurt); 0 the max */
+	int hp_now;     /* hp=N/H: ... and his HP H through the run's first 600 frames (a battle begun hurt); 0 the max */
+	bool worried;   /* MegaMan held worried by BN5's mood in BN6's battles, so its DarkChips come (soulmood.h; a capture of one offered) */
 	bool mapall;    /* the layer's map whole, as if every panel were seen (a capture of the map: tools/before_after.py) */
 	int folder;     /* folder=ID: the run's folder all chip ID in * (a capture of one chip's battles, the first hand all of it); 0 none */
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
@@ -31,6 +33,17 @@ typedef struct {
 	int side;       /* side=N: the run starts on side layer N at --run-depth, 1 the Undernet (its golden gate), 2 the Secret Area (Bass's once the title's S is held, --marks 08: docs/BOSSES.md) */
 	int bass;       /* bass=N: MegaMan's wins over Bass made N (his form: Bass, SP from 1, BX from 2 with the Cybeast beaten) */
 	int beast;      /* beast=N: ... and over the Cybeast (its rematch's words; Bass BX) */
+	bool xcontrol;  /* the control family installed as the core starts: BN6's own Mettaur moved as AI 32, enemy ids 0x200-0x205
+	                   (xvirus.h; its differential, tools/xcontrol.py) */
+	bool nofamilies; /* no other game's family installed, BN5's ROM read or not (xvirus.h): BN6's battles as its own, to compare */
+	bool xnavicontrol; /* the control Navi installed as the core starts: BN6's own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9
+	                      (xnavi_install.h; its differential, tools/xcontrol.py --navi) */
+	bool nonavis;   /* no other game's Navi installed, BN5's ROM read or not (xnavi_install.h) */
+	bool chipai;    /* MegaMan under BN5's chip AI two seconds into each battle, for 600 frames (darkinvs.h: DarkInvs's machine) */
+	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
+	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
+	int unitebreak; /* unitebreak=N: UNITE's rule broken, the differential's own test (soulunite.h, SOULUNITE_BREAK_*) */
+	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
 } DevFlags;
 
 extern DevFlags dev;
@@ -48,9 +61,6 @@ bool devtools_open(void);
 void devtools_zenny(void);
 /* After each game frame: the switches' effects. */
 void devtools_update(void);
-/* ... and after each frame of a battle on the guest core (guest.h): god,
- * onehit and fragile on its battle's objects. */
-void devtools_guest_update(void);
 void devtools_draw(void);
 
 /* A frame to save after the next draw (the tour sets it); "" for none. */

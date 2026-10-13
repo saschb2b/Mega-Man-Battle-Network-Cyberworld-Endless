@@ -1,0 +1,75 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's C3): Guard1 against an attack, BN5's CanGard V1 at (6,2) free (not held: spec cangard_v1, its reticle on MegaMan's panel at t85), MegaMan at (2,2) with a folder of Guard1 A in both games, BN5's chip 88 by BN5's own code and the registry's 295 by the same code moved (BN5's family 0x1F as BN6's 0x6F), raised at t76: the reticle's strike met by the shield and sent back as BN5's shockwave: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 360,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 0,
+ "folder5": [
+  "0058"
+ ],
+ "folder6": [
+  "0127"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   76,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "chips.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -348,7 +349,9 @@ uint32_t gfx_lz_ref(uint32_t lz) {
 static const uint8_t *tile_data(uint32_t tile) {
 	static uint8_t *blocks[8];
 	static size_t block_len[8];
-	if (!(tile & 0x80000000u)) return tile + 32 <= ROM_SIZE ? R.data + tile : NULL;
+	/* (a ROM offset: the player's ROM, or past it the chips' place in the
+	 * core's copy, a chip of BN5's icon and picture: src/core/chips.h) */
+	if (!(tile & 0x80000000u)) return chips_offset_bytes(tile, 32);
 	int b = (int)((tile >> 24) & 0x7F);
 	uint32_t off = tile & 0xFFFFFF;
 	if (b >= extra_n) return NULL;
@@ -359,9 +362,7 @@ static const uint8_t *tile_data(uint32_t tile) {
 
 typedef struct { uint32_t key_tile, key_pal; uint8_t flip, used; SDL_Texture *tex; } TileEntry;
 
-static const uint8_t *pal_bytes(uint32_t pal) {
-	return pal + 32 <= ROM_SIZE ? R.data + pal : NULL;
-}
+static const uint8_t *pal_bytes(uint32_t pal) { return chips_offset_bytes(pal, 32); }
 static TileEntry tile_cache[4096];
 
 static SDL_Texture *tile_texture(uint32_t tile, uint32_t pal, int flip) {

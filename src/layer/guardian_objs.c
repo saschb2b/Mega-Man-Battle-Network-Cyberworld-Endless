@@ -57,11 +57,11 @@ static const Guardian *guardian_faced(int navi) {
 }
 
 /* The chip his Guardian Data gives: his Navi chip at the version fought,
- * or, for BN5's, whose Navi chips BN6 lacks, a chip of his Soul's kind
- * (docs/BOSSES.md, BN5's Navis); its code into *code, 0 none */
+ * BN5's his own registered (V1, or SP from the fourth act: docs/BOSSES.md,
+ * BN5's Navis); its code into *code, 0 none */
 static int guardian_chip(const GuardianStage *g, int *code) {
 	*code = 26;
-	if (guardian_older(g->navi)) return xguardian_chip(g->navi, run.layer_seed * 2654435761u >> 8, code);
+	if (guardian_older(g->navi)) return xguardian_chip(g->navi, run.depth, code);
 	/* (a super boss's GigaChip, in its one code: super_boss.h) */
 	int chip = super_boss(g->navi) ? super_chip(g->navi, g->version) : navi_chip(g->navi, g->version);
 	if (chip <= 0) return chip;
@@ -79,8 +79,8 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 }
 
 /* What his Guardian Data says of the power it gives: a Cross's words
- * (powers.c), or BN5's guardian's Soul, for the run's BN5 battles
- * (docs/META.md, Souls in BN5 territory) */
+ * (powers.c), or BN5's guardian's Soul, for every battle of the run
+ * (docs/META.md, Souls) */
 static const char *reward_power(int navi) {
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }

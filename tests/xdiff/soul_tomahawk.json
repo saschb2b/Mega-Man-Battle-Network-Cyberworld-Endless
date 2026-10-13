@@ -1,0 +1,247 @@
+{
+ "about": "BN5's TomahawkSoul and its charged shot in both engines (the Souls track's S3-S5): its flag (000B) with Double Soul's and Chaos Unison's in BN5, the Souls installed in BN6's engine holding it (souls6), a deck of Boomer * (BN5's chip 6, BN6's 116: Wood, TomahawkSoul's kind), the first Custom screen's chip picked and given up, UNITE and OK; it unites as the first turn starts: its look (BN5's sprite list 0 by the Soul, its palette, its face and turns), its loadout in BN6's numbers. B held from t100 for 190 frames (its charge 160): its landing as it unites (the camera shaken 30 frames, BN5's phase 2 0x0801211E), its grass (BN5's ready routine 0x08011C90, moved: MegaMan's panels grass), its element Wood, and its charged shot, a swing (BN5's power attack 0x1A, BN6's 0x99; its family 0x45, BN6's 0xC5; its swing BN5's effect 0x45 with BN5's sprite, the Navis' copy 0xA6 (TomahawkMan's)), strikes Canlada (CanGard V3, BN5's 0x53) at (4,2), MegaMan at (3,2) with 2000 HP, kept from harm. Every frame compared, MegaMan's own state a difference.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "53@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 500,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000B",
+  "0236"
+ ],
+ "folder5": [
+  "3406"
+ ],
+ "deck5": [
+  "3406"
+ ],
+ "folder6": [
+  "3474"
+ ],
+ "deck6": [
+  "3474"
+ ],
+ "souls6": "08",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   190
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x0A"
+    ],
+    [
+     319,
+     "0x0A"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x400"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ],
+   "hp": [
+    [
+     500,
+     "0x7D0"
+    ]
+   ]
+  },
+  "foe_hp": [
+   [
+    301,
+    230
+   ],
+   [
+    302,
+    150
+   ]
+  ]
+ },
+ "expect_why": "BN5's own course (its trace, the reference): TomahawkSoul united from t1 (its AI index 10, its turns 3, its used bit 0x400 for the battle, UNITE chosen on the first screen), its charged shot's family from t292 to its ready state again at t320, the foe's HP 230 before its hit and 150 at t302; MegaMan never hit (safe)."
+}

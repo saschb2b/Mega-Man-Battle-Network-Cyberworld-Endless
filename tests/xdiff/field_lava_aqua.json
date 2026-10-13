@@ -1,0 +1,49 @@
+{
+ "about": "BN5's field 0x73 (lava at columns 2 and 5 of row 2) as BN6's: MegaMan made Fire in both (mm_element) steps from (1,2) onto lava, which leaves him and it be; CanGard V1 at (6,2), its reticle made Aqua in both games' copies (both: its element's movs r1,#0 made #2), strikes him there: the Aqua cools the lava plain in both (BN5's 0x08016D48, BN6's IWRAM 0x03007742 as xpanels.c makes it again) and Fire, weak to Aqua, takes it doubled; the panels compared each frame",
+ "kind": "differential",
+ "foes": "4F@62",
+ "mm": "12",
+ "mm_element": 1,
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "73",
+ "keys": [
+  [
+   40,
+   "RIGHT",
+   2
+  ]
+ ],
+ "both": [
+  "080C976E:2102"
+ ],
+ "expect": {
+  "megaman_hp_lost": [
+   [
+    194,
+    20
+   ],
+   [
+    388,
+    20
+   ],
+   [
+    582,
+    20
+   ]
+  ],
+  "panels": [
+   [
+    193,
+    "22",
+    13
+   ],
+   [
+    194,
+    "22",
+    2
+   ]
+  ]
+ }
+}

@@ -93,14 +93,16 @@ const char *powers_den_text(int depth) {
 	return depth <= CYCLE_LAYERS && !run_beast_start() ? powers_beast_words() : NULL;
 }
 
-void powers_after_boss(int navi) {
+bool powers_after_boss(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
-	/* BN5's guardians their Soul, for the run's BN5 battles (docs/META.md,
-	 * Souls in BN5 territory) */
+	/* BN5's guardians their Soul, for every battle of the run (docs/META.md,
+	 * Souls) */
+	bool soul = guardian_older(navi) && !soul_held(navi);
 	soul_give(navi);
 	/* the Cybeast's fall gives BeastOut for the rest of the run (issue
 	 * #109: beat the beast, then its power), as Dad says in his call
 	 * (powers_den_text) */
 	if (navi == SUPER_CYBEAST) flag_set(BN6_FLAG_BEAST_OUT);
+	return soul;
 }

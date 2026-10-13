@@ -292,7 +292,10 @@ area keeps its viruses, but not the same ones fight after fight.
 ### BN5's battles: one band, floor and cap (4 October 2026)
 
 Where Battle Network 5's areas dress an act, its random battles are BN5's
-own records, fought in BN5's engine (docs/MULTIROM.md, Guest battles).
+own records, fought in BN6's engine since issue #82's D1 (docs/MULTIROM.md,
+One net: `xterritory_encounter`, BN6's step counter rolling them as its
+own; before it in BN5's engine on a second core, Guest battles; where a
+family of its could not be moved in, the BN6 area's own battles).
 They were held to the act's band from above only: a record's viruses' HP
 together at most the band's top, its strongest hit at most the cap. BN5
 places its records by its story, so from act 2 its early areas fell far
@@ -327,11 +330,25 @@ What scaling means here, measured on both games' data:
 - **The dialectic** stays BN6's fair challenge against the area's
   identity: a territory's battles are its own formations first, grown to
   the act, and only a thin pool borrows from BN5's other maps.
+- **In BN6's engine (D1)** the same pool, the act's version by tier (BN6's
+  V1 lets BN5's records go to V1EX, V2 to V2EX, V3 to V3EX), BN6's easing
+  (an opening battle the band's lower half, two viruses at most, the run's
+  first one virus), BN6's repeat rule and its random numbers; a family
+  both games have is BN6's at the tier of its version, measured by BN6's
+  stats.
+- **Visitors and the deep** (docs/MULTIROM.md, One net): from act 2 one
+  battle in four takes a virus of the other net at the highest version
+  that keeps the battle's HP to the band's top and its hit to the cap;
+  the deep's acts take each battle by a coin from BN6's area's own or the
+  older net's late areas', each held to the band as above.
 
-`build.py pacing` measures it: every act's guest battles, with how many
-fall under the floor (none, at threat 0, over every territory and cycle)
-and how many versions they went up (none in acts 1 and 2 at threat 0,
-whose version is V1; about one from act 3).
+`build.py pacing` measures it: every act's territory battles as BN6's
+engine fights them (native, opening and challenge rows, with how many of
+the older net's), the
+deep's acts with the older net's share of their battles, and every act's
+battles from the second with a visitor where one fits (the pairs, HP
+against the band): none past the band, at threat 0, over every territory
+and cycle.
 
 ### Choosing areas
 
@@ -523,8 +540,10 @@ Fixed on the way:
 | The super bosses' places, forms and records | `src/core/super_boss.c` (docs/BOSSES.md) |
 | Act and guardian layers | `src/net/net_gen.c` (`biome_for_depth`, `is_boss_depth`) |
 | Formation pick, versions inside the band | `src/core/loot.c` (`make_encounter`) |
-| BN5's records inside the band, their viruses' versions | `src/emu/guest_records.c` (`guest_pool`), `src/director/director_guest.c` (`guest_pick`) |
-| Guardian version | `src/core/loot.c` (`make_boss`) |
+| BN5's records inside the band, their viruses' versions | `src/core/xrecords.c` (`xrecords_pool`), `src/core/xbattles.c` (`xterritory_encounter`) |
+| The layer's nets: a territory, the deep, the older net's chips | `src/core/loot.c` (`loot_layer_nets`, `loot_random_battle`), `src/core/visitors.c` (`nets_battle_area`) |
+| Visitors: the gate, the roles, the band | `src/core/visitors.c`, `src/core/visitor_families.c` |
+| Guardian version | `src/core/loot.c` (`make_boss`); BN5's guardians' `src/layer/xguardian.c` (`xguardian_version`, `xguardian_encounter`) and their places `src/core/run.c` (`run_xguardian_at`) |
 | Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
 | `src/director/director_layer.c` (roll_encounter), `src/director/director.c` (act_on_choices) | `src/director/director.c` |

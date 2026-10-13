@@ -22,7 +22,7 @@ static const char *const words[] = {
 	"DONE",   /* W_DONE */
 	"FILES INSTEAD",   /* W_FILES_INSTEAD */
 	"BN6 first: the game runs on it.",   /* W_PLAY_LOCKED */
-	"Its net joins ours: BN5's areas in runs, their battles in its own engine.",   /* W_FIVE_ADDS */
+	"Its net joins ours: BN5's areas, viruses, Navis and chips in runs.",   /* W_FIVE_ADDS */
 	"Nothing chosen.",   /* W_CANCELLED */
 };
 _Static_assert(sizeof words / sizeof *words == W_COUNT, "a word for each LauncherWord");

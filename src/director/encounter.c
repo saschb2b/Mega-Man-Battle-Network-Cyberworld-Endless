@@ -19,6 +19,10 @@
 #include "pacing.h"
 #include "rom.h"
 #include "run.h"
+#include "souls.h"
+#include "soulunite.h"
+#include "xguardian.h"
+#include "xvirus.h"
 
 int encounter_song[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
 int encounter_backdrop = -1;
@@ -27,7 +31,7 @@ int encounter_backdrop = -1;
  * it. A battle the game has rolled but not yet set up reads the record it
  * was handed (rewritten in place, a re-roll in that gap gave the battle
  * another's MegaMan panel and field). */
-#define RECORDS     (EMU_FREE + 0x200)
+#define RECORDS     FREE_RECORDS
 #define RECORD_SIZE 0x80
 #define BG_MAP_OWN  0xFF   /* a record's background (+4): the map's own, as BN6's story records name it (Bass's, the Cybeast's) */
 static int slot;
@@ -37,7 +41,6 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
  * the record, and whether a battle starts now. */
 static uint32_t record;
 static bool forcing;
-bool encounter_guest;
 /* Whether each record is a guardian's battle, and the battle on is one
  * (emu_encounter_started): his Guardian Data gives his chip, and his
  * battle's own reward gave a second, which no folder can hold (one Mega
@@ -50,13 +53,6 @@ static bool boss_record[2], boss_on;
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
 	if (!r->r[0]) return HOOK_CONTINUE;
-	/* (a layer whose battles are the guest's: none begun here, the
-	 * director starts the guest's, guest.c) */
-	if (encounter_guest) {
-		hook_post(r, EV_GUEST_BATTLE);
-		r->r[12] = BN6_ENCOUNTER_SKIP;
-		return HOOK_JUMP;
-	}
 	r->r[0] = record;
 	return HOOK_CONTINUE;
 }
@@ -131,10 +127,16 @@ void emu_encounter_set(const Encounter *e) {
 		*p++ = (uint8_t)(arg >> 8);
 	}
 	if (gem && R.layout->battle_gem_rewards) {
-		uint16_t r[4];
-		loot_gem_rewards(run.depth, r);
+		/* (its own finds where its game's record names them: another game's
+		 * battle, xbattles.c; else the run's, each of four twice) */
+		uint16_t r[8];
+		if (e->gem_own) memcpy(r, e->gem_row, sizeof r);
+		else {
+			loot_gem_rewards(run.depth, r);
+			for (int k = 7; k >= 0; --k) r[k] = r[k / 2];
+		}
 		uint8_t row[16];
-		for (int k = 0; k < 8; ++k) { row[2 * k] = (uint8_t)r[k / 2]; row[2 * k + 1] = (uint8_t)(r[k / 2] >> 8); }
+		for (int k = 0; k < 8; ++k) { row[2 * k] = (uint8_t)r[k]; row[2 * k + 1] = (uint8_t)(r[k] >> 8); }
 		emu_write(0x08000000u + R.layout->battle_gem_rewards + (uint32_t)next * 16, row, sizeof row);
 	}
 	*p++ = 0xF0;
@@ -166,14 +168,17 @@ int emu_encounter_record(uint32_t settings) {
 	return settings == settings_of(0) ? 0 : settings == settings_of(1) ? 1 : -1;
 }
 
+uint32_t emu_battle_souls(void) { return soulunite_ready() ? emu_read32(BN6_SOULS + BN6_SOUL_USED) : 0; }
+
 void emu_encounter_started(uint32_t settings) {
 	int s = emu_encounter_record(settings);
 	boss_on = s >= 0 && boss_record[s];
+	soulunite_held(souls_held());   /* (the run's Souls for UNITE, where the Souls stand in BN6's engine: soulunite.h) */
 }
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
  * add_keys), so busting him well pays the act's lock. */
-int encounter_boss_zenny(void) {
+static int encounter_boss_zenny(void) {
 	int act = pacing_act(run.depth) + 7 * pacing_loop(run.depth), z = 100 * (6 + 3 * act);
 	return z > 0x3FFF ? 0x3FFF : z;
 }
@@ -185,22 +190,26 @@ static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_ze
  * spawned, then one of its row's 20 entries by the busting level, a coin
  * and MegaMan's HP; a chip entry has bits 14-15 clear, the id in 0-8 and
  * the code in 9-13. The coin picks between the two entries of a pair: the
- * second of each, rewritten from the ROM's own in the core's copy, comes in
- * one of the folder's codes where the chip does, so a chip reward leans
- * half the time, as Mystery Data's; a Navi's chip, in either entry, in its
- * * off the folder's codes, and in his own guardian's battle zenny
- * (boss_on); with the All * helper every chip in *. (From a hook: the
- * player's ROM and the run's codes are only read, and loot_fit_code rolls
- * nothing when always.) */
+ * second of each, rewritten from the row's own in the core's copy (the
+ * player's ROM's, or a moved family's as its install wrote it: data.h's
+ * enemy_drop), comes in one of the folder's codes where the chip does, so
+ * a chip reward leans half the time, as Mystery Data's; a Navi's chip, in
+ * either entry, in its * off the folder's codes, and in his own guardian's
+ * battle zenny (boss_on); with the All * helper every chip in *. The row
+ * written is the one the results read, in BN6's rows or their grown copy
+ * once other games' families are installed (xvirus.h). (From a hook: the
+ * rows and the run's codes are only read, and loot_fit_code rolls nothing
+ * when always.) */
 static void lean_row(int id) {
-	if (id <= 0 || id >= 0x200) return;
-	uint32_t row = BN6_DROP_ROWS - 0x08000000u + (uint32_t)id * 0x28;
+	uint32_t row = id > 0 ? xvirus_drop_row(id) : 0;
+	if (!row) return;
 	for (uint32_t k = 0; k < 20; ++k) {
-		uint16_t v = rom_u16(row + 2 * k);
+		uint16_t v = enemy_drop(id, (int)k);
 		if (v == 0xFFFF || v >> 14) continue;
 		int chip = v & 0x1FF, code = v >> 9 & 0x1F;
-		if (boss_on && chip_family(chip) == CHIP_FAMILY_NAVI) {
-			hook_write16(0x08000000u + row + 2 * k, boss_zenny());
+		bool navi = chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip);   /* (BN5's Navi chips by the registry: their families BN5's) */
+		if (boss_on && navi) {
+			hook_write16(row + 2 * k, boss_zenny());
 			continue;
 		}
 		char c = code >= 26 || run_all_star() ? '*' : (char)('A' + code);   /* (every chip in * with All *) */
@@ -211,12 +220,12 @@ static void lean_row(int id) {
 		 * entry alone, SpoutMan A) */
 		bool held = false;
 		for (int h = 0; h < 3 && run.codes[h]; ++h) held |= c == 'A' + run.codes[h] - 1;
-		if (!held && c != '*' && chip_family(chip) == CHIP_FAMILY_NAVI) {
+		if (!held && c != '*' && navi) {
 			ChipInfo ci;
 			chip_info(chip, &ci);
 			if (memchr(ci.codes, '*', (size_t)ci.ncodes)) c = '*';
 		}
-		hook_write16(0x08000000u + row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
+		hook_write16(row + 2 * k, (uint16_t)((v & ~(0x1F << 9)) | (c == '*' ? 26 : c - 'A') << 9));
 	}
 }
 
@@ -278,10 +287,9 @@ void emu_battle_unwatch(void) {
 	cap = hp_from = 0;
 }
 
-void emu_battle_clock(int own) {
-	int more = pacing_clock_hp(own, run.clock);
-	if (own <= 0 || more == own) return;
+void emu_battle_hp(int from, int to) {
+	if (from <= 0 || to <= 0 || to == from) return;
 	emu_hook(BN6_SPAWN_HP, spawned, NULL);
-	hp_from = own;
-	hp_to = more;
+	hp_from = from;
+	hp_to = to;
 }

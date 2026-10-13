@@ -128,25 +128,19 @@ static void print_near(int id, int x, int y, void *ctx) {
 }
 
 /* What the game is doing, for a state, and MegaMan's HP there: in a
- * battle the HUD's is his battle object's, and in an older net's battle
- * the guest's (BN6 stands on the map meanwhile, at the battle's start's) */
-bool director_megaman_hp(int *hp, int *max) {
-	if (guest_fight_hp(hp, max)) return true;
+ * battle the HUD's is his battle object's */
+void director_megaman_hp(int *hp, int *max) {
 	*hp = emu_read16(BN6_NAVI_HP);
 	*max = emu_read16(BN6_NAVI_MAX_HP);
-	/* (an older net's battle beginning or ending: the Navi's still) */
-	if (guest_active() || on_map()) return false;
+	if (on_map()) return;
 	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
 		if ((emu_read8(o) & 1) && emu_read8(o + BN6_T1_ALLIANCE) == 0) { *hp = emu_read16(o + BN6_T1_HP); *max = emu_read16(o + BN6_T1_MAX_HP); break; }
 	}
-	return false;
 }
 
 static const char *state_doing(int *hp, int *max) {
-	if (director_megaman_hp(hp, max)) return "battle (the older net's)";
-	/* (its opening and its end, the screen white or BN5's: still its) */
-	if (guest_active()) return "battle (the older net's, beginning or ending)";
+	director_megaman_hp(hp, max);
 	int mode = main_mode(), sub = emu_read8(BN6_GAMESTATE);
 	return mode == BN6_MODE_GAME_OVER ? "gameover"
 		: mode != BN6_MODE_GAME ? "menu"
@@ -155,17 +149,8 @@ static const char *state_doing(int *hp, int *max) {
 
 /* In a battle, the panel MegaMan stands on, from the left and the top: a
  * player sees it at a glance, a playtester reading stills misread it turn
- * after turn, as BN6 draws him half a row above his panel. In an older
- * net's battle too, with its gauge (a playtester misread rows against
- * KnightMan and held a charge in his row, session 68; MegaMan is its first
- * object, bn5.h). */
+ * after turn, as BN6 draws him half a row above his panel. */
 static void battle_describe(FILE *f) {
-	if (guest_on_screen() && guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_X)) {
-		int g = guest_custom_gauge();
-		if (g >= 0) fprintf(f, "custom gauge %d%%\n", g * 100 / 0x4000);
-		fprintf(f, "megaman stands column %d row %d\n", guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_X), guest_read8(BN5_T1_OBJECTS + BN6_T1_PANEL_Y));
-		return;
-	}
 	if (on_map()) return;
 	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
 		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;

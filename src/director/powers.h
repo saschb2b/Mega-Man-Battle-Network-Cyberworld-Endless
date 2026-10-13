@@ -6,8 +6,9 @@
 #include <stdbool.h>
 
 /* After a won boss battle against `navi` (navi index): his Cross, BN5's
- * guardian's Soul, and BeastOut from the Cybeast (issue #109). */
-void powers_after_boss(int navi);
+ * guardian's Soul, and BeastOut from the Cybeast (issue #109); true where
+ * a Soul new to the run came. */
+bool powers_after_boss(int navi);
 /* The Cross of `navi` (HeatMan 1 .. ChargeMan 5), NULL for a navi with none. */
 const char *powers_cross_name(int navi);
 /* The attacks that hit MegaMan twice as hard in that Cross ("Aqua"). */

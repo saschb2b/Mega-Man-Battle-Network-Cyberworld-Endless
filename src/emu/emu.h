@@ -6,12 +6,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "free_space.h"   /* EMU_FREE and the plan of what goes past it */
 #include "hook.h"
 
 #define EMU_W 240
 #define EMU_H 160
-#define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space */
-#define EMU_FREE 0x08800000u      /* first free bus address past an 8 MB game */
+#define EMU_ROM_SIZE 0x1000000u  /* the in-memory ROM: the game, then free space (free_space.h) */
 
 /* GBA key bits */
 enum {
@@ -23,8 +23,8 @@ enum {
 /* Starts the core on a private copy of the ROM (writes to ROM space patch
  * only that copy) and resets it to power-on. */
 bool emu_init(const uint8_t *rom, size_t len);
-/* mGBA's log for every core, quiet (emu_init sets it; the guest's boot,
- * begun first at the title, guest.c, too), set once on the main thread:
+/* mGBA's log for every core, quiet (emu_init sets it; the differential's
+ * second core, guest.c, too), set once on the main thread:
  * its debug lines cost the page a console line each */
 void emu_log_quiet(void);
 bool emu_ready(void);
@@ -47,7 +47,7 @@ extern int emu_draw_waits;
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
 const uint32_t *emu_video(void);
-/* Another core's sound (a struct mCore: the guest's, guest.c) into the
+/* Another core's sound (a struct mCore: the differential's, guest.c) into the
  * same ring BN6's plays from, and the rate it is played at. */
 void emu_audio_from(void *core);
 /* ... or its sound let go, for frames run ahead unseen */
@@ -58,13 +58,15 @@ int emu_audio_out_rate(void);
 uint8_t emu_read8(uint32_t addr);
 uint16_t emu_read16(uint32_t addr);
 uint32_t emu_read32(uint32_t addr);
+/* (each write an installer's while it installs: claims.h) */
 void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
 
 /* A hook on the game's code (hook.h; docs/EMULATION.md, Hooks), set
  * between frames: on the Thumb instruction at addr, an answer hook or an
- * event hook queuing `kind`; and taken off. */
+ * event hook queuing `kind` (its instruction claimed: claims.h); and taken
+ * off. */
 bool emu_hook(uint32_t addr, EmuHook fn, void *user);
 bool emu_hook_event(uint32_t addr, int kind);
 void emu_unhook(uint32_t addr);
@@ -77,6 +79,15 @@ bool emu_save_state(const char *path);
 /* As emu_save_state, its file written by the save queue (save_queue.h) */
 bool emu_save_state_queued(const char *path);
 bool emu_load_state(const char *path);
+
+/* RAM the engine keeps patched, where the game copies code into it from a
+ * ROM image the engine patched the same way (IWRAM's routines, copied as
+ * the game powers on): `len` bytes (64 at most) at `addr`, the game's own
+ * `was` and the engine's `now`. Made the engine's now and after each state
+ * is loaded, where they read the game's own; a state is saved with the
+ * game's own there, so it holds the game's RAM and loads in any build,
+ * with the patch or without. False where there is no core or no room. */
+bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len);
 
 /* Stereo 16-bit samples at the given rate, pulled by the audio device.
  * Returns the frames written; silence fills the rest. */

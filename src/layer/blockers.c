@@ -35,7 +35,7 @@
 #define H3_LITERAL   0x080A66D4u   /* handler 3's records' literal (Gregar) */
 #define H3_TABLE     0x080A6144u   /* ... BN6's 86 (ids 0x00-0x55) */
 #define H3_ORIGINALS 86
-#define BLOCKERS_AT  (EMU_FREE + 0x0700)   /* BN6's records, then the engine's (docs/EMULATION.md) */
+#define BLOCKERS_AT  FREE_BLOCKERS         /* BN6's records, then the engine's (docs/EMULATION.md) */
 #define BLOCK_ID0    0x56          /* the engine's: + variant x 8 + slot */
 #define BLOCK_SLOTS  8
 #define NET_CHECKS   0x08034728u   /* per internet group from 0x80, per map: the 16 checks' scripts */

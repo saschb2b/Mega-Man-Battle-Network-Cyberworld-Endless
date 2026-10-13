@@ -1,0 +1,16 @@
+{
+ "about": "the Dark Soul as in darksoul_v1, MegaMan's side's chip list given (dschips: three Cannons, BN5's chip 1, BN6's 1 by the chip registry; dslist, BN6's list written from BN5's): its chip AI takes the first, goes where it reaches MegaMan (its approach, by BN5's bytes of the chip's record: the Dark Soul's records, src/emu/xnavi_dark.c), fires it (setAttack2 with the chip's family, BN6's 0x14, the record's BN6 part), turns its list",
+ "kind": "differential",
+ "foes": "18D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 900,
+ "seed": "12345678:9ABCDEF0",
+ "safe": 1,
+ "rng": "replay",
+ "dschips": [
+  "1",
+  "1",
+  "1"
+ ]
+}

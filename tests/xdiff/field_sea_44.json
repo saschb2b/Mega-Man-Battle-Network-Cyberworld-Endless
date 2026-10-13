@@ -1,0 +1,25 @@
+{
+ "about": "BN5's field 0x44 (sea and grass) as BN6's, xpanels.c and xfields.c: MegaMan on sea at (1,1), not of Fire, unhurt in both; CanGard V1 at (5,2) on grass; the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "11",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "44",
+ "expect": {
+  "megaman_hp_lost": [],
+  "panels": [
+   [
+    600,
+    "11",
+    14
+   ],
+   [
+    600,
+    "53",
+    14
+   ]
+  ]
+ }
+}

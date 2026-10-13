@@ -37,7 +37,7 @@
 #include "job_words.h"
 #include "townsrc.h"
 
-#define TOWN_TILEMAP_AT (EMU_FREE + 0x100000) /* the town's tile map (LZ77) */
+#define TOWN_TILEMAP_AT FREE_TOWN_TILE_MAP    /* the town's tile map (LZ77) */
 
 #define PLAN_R 64                 /* the plan spans cells -PLAN_R .. PLAN_R - 1 */
 #define PLAN_N (2 * PLAN_R)

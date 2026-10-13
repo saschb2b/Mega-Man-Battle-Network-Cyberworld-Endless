@@ -10,14 +10,14 @@
 #include "director_folder.h"
 #include "director_layer.h"
 #include "director_state.h"
-#include "encounter.h"
 #include "gfx.h"
 #include "guardians.h"
-#include "guest_words.h"
 #include "meta.h"
+#include "nets_words.h"
 #include "powers.h"
 #include "rivals.h"
 #include "save.h"
+#include "visitors.h"
 
 /* The net's version: the Nest rebuilds it, one stronger, each time its
  * guardian falls (1 for the first cycle). */
@@ -29,9 +29,9 @@ void beat_said(void) {
 	if (run.biome == BIOME_NEST) cinema_shake(30, 3);
 	D.guardian_named = D.beat_guardian;
 	D.beat[0] = 0;
-	if (D.beat_cross) { profile.cross_old_told = 1; profile_save(); }
-	if (D.beat_beast) { profile.beast |= BEAST_OLD_TOLD; profile_save(); }
-	if (D.beat_cross || D.beat_out) flag_set(RUN_OUT_NAMED_FLAG);
+	if (D.beat_ours) { profile.navis_ours_told = profile.native_taught = 1; profile_save(); }
+	if (D.beat_native) { profile.native_taught = 1; profile_save(); }
+	if (D.beat_deep) { profile.deep_taught = 1; profile_save(); }
 }
 
 /* Arriving where super boss `navi` waits (docs/BOSSES.md, Super bosses),
@@ -111,7 +111,16 @@ void arrival_words(void) {
 				"@L Then let's go find out who!", area);
 		D.beat_guardian = true;
 	}
-	older_net_words();
+	nets_arrival_words();
+}
+
+/* What the act's card says of the nets, where they meet (docs/MULTIROM.md,
+ * One net: the telegraph): an older net's area, the deep's both nets, and
+ * from the second act a BN6 area its visitors come to */
+static const char *nets_card(int biome) {
+	if (D.deep) return " - Both Nets";
+	if (D.territory_native) return " - Older Net";
+	return visitors_here(run.depth, biome) ? " - Nets meet" : "";
 }
 
 void area_card(void) {
@@ -143,13 +152,8 @@ void area_card(void) {
 		snprintf(ahead, sizeof ahead, "%s deleted", guardian(D.objs.guardian.navi)->name);
 	/* (a trip back: what it has cost, docs/HOME.md) */
 	if (run.side_kind == LAYER_BACK) snprintf(ahead, sizeof ahead, "The Net's clock: %d", run.clock);
-	/* (and where its battles are another game's, so: the owner's call for
-	 * issue #65, the card and L saying it, no card of its own at the
-	 * switch) */
-	if (encounter_guest) {
-		size_t k = strlen(act);
-		snprintf(act + k, sizeof act - k, " - older Net battles");
-	}
+	size_t k = strlen(act);
+	snprintf(act + k, sizeof act - k, "%s", nets_card(biome));
 	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
 }
 

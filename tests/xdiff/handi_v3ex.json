@@ -1,0 +1,17 @@
+{
+ "about": "HandumEX (BN5's 0x18, BN6's 0x20b) alone at (6,2), MegaMan idle at (2,2) with 2000 HP: spec handi_v1's shape for the version, every draw of BN6's replayed from BN5's (rng=replay); its bomb bursts for 200 (BN5's per-version table at 0x08106392)",
+ "kind": "differential",
+ "foes": "18@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "expect": {
+  "reticle_type": "0x4B",
+  "reticle_damage": 200,
+  "megaman_hit_damage": 200,
+  "megaman_hit_at_least": 2
+ },
+ "sprites": "bytes"
+}

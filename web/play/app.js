@@ -13,8 +13,8 @@ const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
 // The ROMs the game takes, each told by its header's game code, checked by
 // its SHA-1 and kept under its own name in ROM_DIR, where the game finds
 // BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
-// optional, whose net areas and their battles in BN5's own engine then
-// join runs (docs/MULTIROM.md). The names and words of Android's ROM page.
+// optional, whose net areas, viruses, Navis and chips then join runs, fought in
+// BN6's engine (docs/MULTIROM.md). The names and words of Android's ROM page.
 const JA = LANG === 'ja';
 const ROMS = {
 	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)' },

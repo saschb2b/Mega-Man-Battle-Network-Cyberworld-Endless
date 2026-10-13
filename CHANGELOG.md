@@ -14,6 +14,15 @@
   device's file: the game asks once which saves to keep. Bringing saves
   back had been the ROMs screen's question, on phones only, and the
   browser's page had written a format of its own.
+
+- **A soft reset returns to Cyberworld Endless's title (issue #113, from
+  Mattwj).** A+B+Select+Start reset Gregar to its own title while the run
+  went on underneath, and going back in could put MegaMan elsewhere on the
+  map. The four buttons, as mapped, now return to this game's title before
+  the game sees them, in a battle too, and CONTINUE takes the run up at its
+  last checkpoint. Held on the title, they no longer become the
+  controller's quit.
+
 - **No freeze at a save on the New 3DS.** A checkpoint wrote some ten
   files on the frame that saved, each beside its place and then renamed
   over it, and on the 3DS's SD card each step is a call to its file
@@ -23,6 +32,7 @@
   a quit and the saves' copies wait for it. The run's state written from
   memory is the state written to its file, byte for byte. The browser
   writes each file at once, as before.
+
 - **The act's card and the notes drawn at full speed on the New 3DS.**
   Their text went glyph by glyph through SDL's software renderer, a 16 by
   16 cell blended for each letter and a surface made and freed for each
@@ -30,6 +40,381 @@
   a second as it showed. A line drawn on two frames running is drawn once
   and blended whole: the same pixels (1940 frames compared, byte for
   byte), the card's drawing about twice as fast.
+
+- **BN5's own DarkInvs and DarkPlus (issue #82).** Where BN5's ROM is
+  read, DarkInvs is BN5's: it comes while MegaMan worries, and used, the
+  game drives him for ten seconds, unseen and untouchable, picking chips
+  from his folder, walking to where they reach and firing, then gives him
+  back, as BN5 does, frame for frame (ShadowSoul's Chaos Unison fires it
+  too). BN5's flame of darkness may now hold DarkPlus, also by BN5's rule:
+  used, his next attack chip hits 50 harder ("Cannon 40+50"). Both cost
+  what every DarkChip costs, 20 max HP for the battle, and MegaMan says
+  at the flame what each does; the Pack shows them with BN5's own
+  pictures. BN6's flame never offers DarkPlus (BN6's own does nothing),
+  and without BN5's ROM DarkInvs keeps BN6's rule. After any BN5
+  DarkChip MegaMan keeps his own colours: BN6's sprite has no dark
+  palette, and BN5's number for it had drawn him tan. The owner's two calls
+  on DarkInvs and DarkPlus are written into docs/META.md and
+  docs/MULTIROM.md.
+
+- **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
+  beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New
+  3DS reads it as every other system does: BN5's areas, viruses, Navis,
+  chips, Souls and DarkChips join its runs, the title says "BN5 found"
+  and the PET's home that the older net joins. The room comes from mGBA's
+  3DS setup, which took a 16 MB ROM buffer at every start that the game
+  never used: given back, the heap holds BN5's 8 MB and still keeps 8 MB
+  more free than BN6 alone left it before, so a 3DS without BN5 gains
+  16 MB. A 3DS whose heap had no room for BN5 would leave it unread, play
+  BN6's net, and say so. Long runs no longer fill the 3DS's heap: the
+  tiles learned from an area's original maps are kept for the layer's own
+  area alone, not for every area the run passed through, which in long
+  runs had left the heap too short to learn later areas' tiles whole (the
+  heap modelled on a computer; an area the run comes back to is learned
+  again, a few seconds on that layer's making). `log.txt` gives
+  the heap's use after the ROMs and after the installs, and `frame_log`'s
+  lines its high-water mark. Learning a layer's tiles with the heap run
+  out no longer crashes the game where it looked for the map's pads or
+  the pairs of its tiles. `tools/heap3ds.py` models the 3DS's heap on a
+  computer: long runs' peaks and the allocations refused.
+
+- **BN5's Navis guard in BN6's own engine, their Souls serve every
+  battle, BN5's DarkChips come into runs, and BN5's second emulator core
+  leaves runs (issue #82).** A Navi of BN5's who guards an act
+  (KnightMan, ShadowMan, NumberMan, TomahawkMan, ToadMan, Colonel) is
+  fought in BN6's battle engine as BN6's guardians are, every Cross,
+  BeastOut, Soul and chip of the run with MegaMan, at BN6's guardians'
+  band (no longer three quarters of it), his HP raised by the Net's clock
+  as theirs; his Guardian Data gives his own Navi chip, his V1 in the
+  first three acts and his SP from the fourth where it plays. He may
+  guard the short net's last act now, and the Undernet's and the
+  Graveyard's acts draw their guardians from both games' Navis by band.
+  Beaten, his Soul is with MegaMan in every battle after, UNITE on BN6's
+  Custom screen in the Beast Out emblem's place; the second screen names
+  the Soul under the cursor, its turns and the chip it takes, and the
+  Soul he wears. All twelve of BN5's DarkChips are the run's: BN5's flame
+  of darkness on its areas' acts offers them, BN6's flame elsewhere its
+  four, each played by its own net's rule, at one price (20 max HP a
+  battle one is used in; none for one given up for a Chaos Unison). With
+  every battle in BN6's engine, the second core that ran BN5's battles
+  is gone from runs: no five-second start-up on a handheld's first BN5
+  area, no switch of screens, no wait, no chips sitting out of a battle,
+  and in the browser no second core in the page's memory. It stays as
+  the reference the differential compares BN6's battles with
+  (`build.py xdiff`). A data folder's BN5 start-up state is removed once.
+  Layers made before continue afresh (their guardians changed). The
+  test autopilot goes round the rocks BN5's fields put on MegaMan's side,
+  where it stood stuck behind one.
+
+- **Chaos Unison, BN5's Program Advances and its last chips in BN6's
+  battles (issue #82).** Where BN5's ROM is read, a Soul united by a
+  DarkChip of its kind charges B as in BN5, its dark glow pulsing through
+  BN5's phases: let go at the right moment it fires the Soul's DarkChip
+  attack and the next charge takes longer; at the wrong one MegaMan
+  falls out of the Soul and his Dark Soul appears on the other side,
+  playing the chips of his folder. BN5's Program Advances form on BN6's
+  Custom screen by BN5's recipes (SuprSpr, ShakPar, CacDanc and InfVulc1;
+  where both games name the same chips BN6's comes first, so three
+  FireHit still make FlmHook, and InfVulc2 and 3 cannot form from BN6's
+  Vulcan codes). DarkPlus is BN5's: 50 more for the next chip and
+  MegaMan flashing green. The Navi chips' SP and DS play (an SP at BN5's
+  power for a Navi never beaten, a DS only while MegaMan is dark), as do
+  HolyDrem, Poltrgst and BlakWing, and HolyDrem's and Poltrgst's double
+  of MegaMan no longer wears HeatCross's armour in a Soul. BN5's
+  DarkChips leave their own
+  marks on MegaMan's stats and turn his colours as in BN5, and the first
+  Custom screen of a worried MegaMan holds one back as BN5 does. Zomon's
+  AreaGrab ends as soon as in BN5. ShadowSoul's Chaos Unison fires
+  BN6's own DarkInvs (BN5's hands MegaMan to the game's own AI, still to
+  come). Each is held to BN5's own battle frame by frame.
+
+- **One copy of BN5's code for every track, and the obstacle strike for
+  either Colonel (issue #82).** The Souls' code runs the copies the Navis
+  and the chips made of what it shares (one copy of each moved object,
+  one number for each BN5 effect and sprite) and is installed with the
+  rest of BN5's code where its Navis are. An obstacle on the side
+  opposite an armed Colonel turns into BN5's soldier whether that
+  Colonel is BN5's Navi fought in BN6's engine or ColonelSoul, both
+  arming one field, and the soldier is drawn with BN5's own sprite (it
+  had been BN6's picture of the same number). BN5's DarkChips are
+  compared with the Souls held, BN5's dark rule in place.
+
+- **The older net's areas fight in BN6's engine, its chips come into
+  runs, and the nets meet (issue #82, D1).** Where BN5's ROM is read, an
+  area of its that dresses an act fights its own random battles, its own
+  records, in BN6's battles: every Cross, BeastOut and chip of the run
+  works there, BN6's step counter starts them, its results are BN6's, and
+  BN5's viruses drop their own rewards (BN5's chips as the registry has
+  them; one that sits out still pays 200 zenny). Its Servers and the
+  duel's race are its records too. From the second act, one battle in
+  four takes a virus of the other net in place of one of its own: BN5's
+  viruses visit BN6's areas, BN6's visit BN5's, each where its own game
+  sets its kind (the front, the back, either), never one the battle
+  holds, at the version that keeps the battle in its band. The Undernet's
+  and the Graveyard's acts and the Nest draw their battles from both
+  nets' late areas, a coin a battle. Half the chips of the older net's
+  areas' and the deep's dealers, Mystery Data and traders come from
+  BN5's catalogue, those that play in BN6's battles. The Library counts
+  BN5's chips apart ("Older Net" on the second screen, which lists
+  them), the classes' marks staying BN6's. The act's card says "Older
+  Net", "Nets meet" or "Both Nets", and MegaMan names the first of each
+  once. BN5's Navis still guard in BN5's own engine. Layers made before
+  continue afresh (their stock changed).
+
+- **Every virus family of BN5's that BN6 lacks, in BN6's own battles
+  (issue #82).** After CanGard and Handi, 23 more are moved into BN6's
+  battle engine by their own code wherever BN5's ROM is read: Powie,
+  Bugtank, Dominerd, MetFire, Shakey, NinJoy, Lark, BomBoy, Zomon,
+  Drixol, Batty, Skarab, Draggin, Whirly, Marina, Flashy, Eleogre,
+  Cactikil, WuNote, Appley, BigBrute, TinHawk and Bladia, each with its
+  six versions (AI 34-56, ids 0x20C-0x295). Their recipes are made by
+  the generator from the two ROMs, numbers only, and nothing of either
+  game is in the project: the code, records, sprites, names and sounds
+  are copied from the player's ROMs as the game starts. What a family
+  asked of BN6's engine that BN6 never did for its own is made for it:
+  its held chips are the chip registry's (BN6's own chip of a name, else
+  the registry's id for it), its tests of a chip's id and its lookups by
+  a range of enemy ids go through a few instructions of the project's
+  own, Dominerd's and Appley's step before their state (which BN5's
+  engine took for their ids alone) runs from a hook on BN6's, the ids in
+  their tables of data take BN6's numbers, and a sound BN6 has no song of
+  is copied once into the song slot every track uses for it. Each family
+  is fought in BN5's own engine and in BN6's and compared frame by
+  frame, seven battles a family, every version, their pictures compared
+  by their bytes: the same in all but Zomon's, whose AreaGrab is BN6's
+  own chip run by BN6's own code, which ends its time freeze a frame
+  later than BN5's (the same up to there). The comparator learned the
+  engine's own presentation where a family's attack lands (each game's
+  spark and explosion art), chip ids in each game's numbers, and BN6's
+  fixes of BN5's bugs that a family can see: BN5's own routine is copied
+  where BN6's would change what the family does. A confused or blinded
+  family wears its mark where BN5 puts it: each brings its own arm points. Their place in a run's
+  battles is a later step.
+
+- **BN5's Navis in BN6's own battles (issue #82).** Team Colonel's six,
+  Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan and ToadMan, are
+  moved into BN6's battle engine where BN5's ROM is read: their own code
+  copied from the player's ROM and its calls aimed at BN6's twins, BN6's
+  Navi tables grown for them, their attacks' objects BN6 runs otherwise
+  moved with them, their sprites, effects and sounds copied in, each with
+  its V1, V2, V3 and SP. Each was fought in BN5's own engine and in BN6's
+  and compared frame by frame, what each draws by its bytes: the same,
+  alone and against MegaMan's shots and steps. BN6's own HeatMan, moved
+  through the same steps, plays byte for byte as before. An Elec hit on
+  a sea panel now counts twice as in BN5. The run's guardians are still
+  fought in BN5's engine; a dev step fights the moved Navis.
+
+- **BN5's sea, whole in BN6's engine (issue #82).** ToadMan's SP goes
+  under the sea as in BN5: hidden, a ripple following him, and only Elec
+  attacks and the few that strike the invisible reach him there. Anything
+  not Aqua that steps onto a sea panel, MegaMan too, is held a moment in a
+  splash, as BN5's sea holds it.
+
+- **The Dark Soul in BN6's own battles (issue #82).** BN5's Dark Soul is
+  moved into BN6's battle engine with the chip AI BN6 dropped: it takes
+  the chips of its foe's side's list, goes where each reaches him, uses
+  it as BN6 uses that chip, and fires the Navis' buster between, proved
+  against BN5's battle frame by frame alone, against MegaMan's shots and
+  with a list of Cannons or Swords. BN5 makes that list from the chips
+  MegaMan uses most, which BN6 does not record, so in BN6 it moves and
+  fires its buster. Colonel's mark of his side no longer touches the bit
+  BN6 reads for the field's slide at a battle's end.
+
+- **BN5's own code for its chips BN6 has none of (issue #82).** 94 of Team
+  Colonel's chips fight in BN6's battles by BN5's own code, moved from the
+  player's BN5 ROM into BN6's engine as the game starts: CrakOut,
+  DublCrak, TripCrak, HotBody1-3, Jealousy, NrthWind, MetaGel, Blinder,
+  Skully1-3, DrilArm1-3, RainyDay, WoodNos1-3, CactBal1-3, SpShake1-3,
+  Pulsar1-3, MrkCan1-3, SideBub1-3, AqWhirl1-3, Z Saver, Katana1-3,
+  ElcReel1-3, BoyBomb1-3, Guard1-3, CrsShld1-3, MoonBld1-3, CusVolt1-3 and
+  CustSwrd (their damage by the Custom gauge, BN5's own rule, in BN6's
+  grown table of computed powers), AntiFire, AntiWatr, AntiElec and
+  AntiWood, Slasher, ElemRage, the bombs (Quake1-3, CrakBom, ParaBom,
+  ResetBom, LavaSeed, CannBall, Geyser, SeaSeed) and RedFrut1-3, Voltz1-3,
+  Astroid1-3, WavePit, RedWave and MudWave, and the Navi chips NumbrMan,
+  ShadoMan, TmhwkMan, KnightMn and ToadMan, each drawn with BN5's own
+  pictures where BN6 keeps others at their numbers (MegaMan's arm as each
+  chip takes it too), its effects BN5's and its sounds BN5's songs, copied
+  into BN6's empty song slots. Each was used in BN5's own engine and in
+  BN6's and compared frame by frame, every object's picture by its bytes:
+  the same (Skully but for the confusion mark over a BN5 virus, each
+  game's own picture). DrilArm1-3 and Z Saver, which BN6's own code played
+  until now, play as BN5's since (BN5's chips behave as BN5's). BN6's
+  tables of attacks, support chips and Navi chips are grown once for every
+  BN5 attack and the Souls' to come, and its attacks' sprite list for
+  every track. The other chips that BN6's code plays under BN5's names
+  were judged the same way: AirHoc, WideSht1-3, Spreader and Geddon1-3
+  play as BN5's do. The code of the Program Advances InfVulc, SuprSpr,
+  Boxer, ShakPar and CacDanc and of the DarkChips DarkCirc, DrkSonic,
+  DarkWide and DarkMetr is moved too, waiting for the lists that form them
+  and for the dark rules. The Navi chips summon their Navis as BN5's do,
+  in their Navis' own pictures and with their Navis' own attacks; their
+  SP and DS wait for their powers (BN6 keeps no deletion times of BN5's
+  Navis). Where BN5's chips and its viruses or Navis share an object, one
+  copy serves all (the Navis' attacks for the Navi chips, the chips'
+  bombs and bubbles for the viruses that throw them), and the muzzle
+  flashes are BN5's own, moved once for everyone. The chips that still
+  sit out wait for what docs/MULTIROM.md names; those that play come
+  into runs. Layers made before continue afresh (the older net's stock
+  holds more chips).
+
+- **BN5's chips in BN6's own chip tables (issue #82).** BN6's chip
+  records are grown from 411 to 512 in the game's free space, its chips'
+  names and descriptions to id 511, and the 257 of Team Colonel's chips a
+  run can meet are registered there by id: the 116 BN6 has by name (and
+  three its US release names otherwise) are BN6's own, the other 138 have
+  ids of their own, their records made from BN5's field by field, their
+  names and descriptions in BN6's text, their icons and pictures copied
+  from the player's BN5 ROM as the game starts. The pack counts them (ids
+  from 320 on in memory BN6 leaves unused), the folder holds them, the
+  Custom screen deals them with BN5's art, and the eleven BN6's code
+  already plays under other names fight in BN6's battles (AirHoc,
+  WideSht1-3, Spreader, DrilArm1-3, Geddon1-3), and Z Saver; the rest sit
+  out of the deck until their code is moved. Without BN5's ROM each is a
+  placeholder that keeps its id, codes and MB, so a run saved with one
+  continues, the chip sits out, and MegaMan says why. Nothing in a run
+  gives one yet; a dev step does (docs/DEVTOOLS.md).
+
+- **BN5's chips by their own names (issue #82).** BN5 numbers its text
+  otherwise than BN6 past letters and digits (BN6 put its version marks
+  first), and BN5's names were read with BN6's table: its M-Cannon read
+  as "MCannon", its Navi+20 as "Navix20", its SP mark as another sign, so
+  a run's M-Cannon, Navi+20, ProtoMan SP and Colonel SP sat out the older
+  net's battles though BN5 has them all, and its Roll DS was taken for
+  Roll. Its text now reads in BN6's codes, checked glyph for glyph
+  against both games' fonts.
+
+- **BN5's lava and sea in BN6's own battles (issue #82).** BN6 has
+  neither: its volcano panel erupts and does not burn a step, and it has
+  no sea, so BN5's fields with them (the Undernet's and Nebula Area's
+  lava, End Area's sea) could not be fought in BN6's engine. Where BN5's
+  ROM is read they are now panels of BN6's engine that behave as BN5's:
+  lava burns whatever steps on it for 50 (100 where Fire beats it),
+  spares Fire, and cools plain under a spark; the sea hurts a Fire
+  object a point every 7 frames, as poison does; Aqua cools lava; both
+  run out after 16 seconds. They look as BN5's, its tiles and its
+  colours' animations, in BN6's panel frames. Each of the eight fields
+  is fought in BN5's own engine and in BN6's and compared frame by
+  frame: the same, under MegaMan, a Fire CanGard and a plain one, and an
+  Aqua hit. Nothing in a run uses them yet; BN5's records on them now
+  wait only for their viruses (one of Nebula Area's is fightable).
+
+- **BN5's Souls look and fight as BN5's in BN6's battles (issue #82).**
+  Still behind the developer switch, a Soul united is now BN5's own:
+  MegaMan drawn from BN5's sprite of the Soul in its colours, the Soul's
+  image and sounds as he unites (TomahawkSoul landing with a shake), its
+  face and turns in the emotion window, and each Soul's charged shot
+  BN5's own code, moved into BN6's engine: ColonelSoul's ScreenDivide,
+  ShadowSoul's slash, NumberSoul's bomb, TomahawkSoul's swing,
+  KnightSoul's wrecking ball (it confuses) and ToadSoul's sound waves
+  (they paralyse), with BN5's charge times, effects, sounds and arm
+  flashes, and the Soul's element. Its passives as it unites come too (ShadowSoul's
+  float shoes, TomahawkSoul's grass, ToadSoul's sea flag), and NumberSoul
+  deals a hand of ten and adds 10 to a plain attack chip. The
+  frame-by-frame comparison with BN5's own battle holds each Soul's shot
+  there, and a deliberate break of each part is caught. What a Soul
+  does to chips comes too: A held charges a chip of the Soul's kind
+  (ShadowSoul's swords, KnightSoul's Break chips and ToadSoul's Aqua
+  chips, the last two doubled), TomahawkSoul's Wood chip is doubled on
+  grass and grass heals him, KnightSoul is unharmed for a moment after a
+  chip used from his front column, and ShadowSoul's B+Left stance
+  counters as BN5's, the effects BN6 draws otherwise drawn as BN5's.
+  ShadowSoul's charged sword now matches BN5's with no enemy in reach as
+  well: a branch in its moved code had been split from the instruction
+  it jumps to. ColonelSoul's own come in full: his button on the Custom
+  screen, BN5's in look and rule, lights for a plain attack chip picked
+  last; A drops that chip into it, B gives it back, and OK keeps it for
+  his charged shot, which fires it (ScreenDivide without one). While he
+  is united, an obstacle on the enemy's area with an enemy before it
+  turns into BN5's soldier, which fires three shots. Still to come:
+  Chaos Unison's charge.
+
+- **BN5's mood and its DarkChips in BN6's battles (issue #82).** Behind
+  the same developer switch, BN6's battles keep BN5's mood beside their
+  own: hits taken worry MegaMan, hits landed and counters lift him, and a
+  battle opens as worried as his HP. While he worries, one of BN5's
+  DarkChips in his folder comes into his hand at the end, the cursor on
+  it, and none before; used, he is dark for the rest of the battle (no
+  Cross, no Beast Out, a weak buster). BN6's own DarkChips keep BN6's
+  rule. UNITE does not stand while he worries or is dark, and BN5's rule
+  that BlakWing and a Navi's DS chip work only while he is dark, HolyDrem
+  and a Navi's other chips only while he is not, is in place for when
+  their code comes. Each is compared with BN5's own battle frame by
+  frame.
+
+- **UNITE on BN6's Custom screen, and a Soul's life as BN5 runs it
+  (issue #82).** Behind a developer switch until the Souls are whole,
+  BN5's Souls unite in BN6's battles: the emblem under OK becomes BN5's
+  UNITE while the last chip picked lights a Soul the run holds (by the
+  chip's kind as BN5 has it), shows BN5's art and the Soul's picture, and
+  OK takes MegaMan into the Soul for three turns (Chaos Unison's one),
+  counted down as each Custom screen opens and ended as the turn after
+  its last starts, as BN5 does; another Soul or a Cross replaces it, and
+  Beast Out stays grey while it lasts. The Soul still looks and fights as
+  HeatCross for now. The frame-by-frame comparison with BN5's own battle
+  holds it there: KnightSoul's whole life, a Soul replacing a Soul, UNITE
+  grey for a chip of no Soul's kind and NumberSoul's Chaos Unison behave
+  as in BN5, and five deliberate breaks of the rule are each caught.
+  Battles without the switch play as before.
+
+- **MegaMan checked against BN5's own, and a place for BN5's Souls in
+  BN6's engine (issue #82).** The frame-by-frame comparison with BN5's
+  own battle can now make MegaMan its subject: both games set up alike (a
+  Soul's flags, a folder, his buster, kept from harm), each Custom screen
+  picked by its own keys in each game, his NaviStats, his form and what
+  he used traced in both, and any difference of his fails the check.
+  His buster, a Cannon and his steps behave the same in both over 900
+  frames; BN5's own KnightSoul is traced from UNITE to its fourth turn,
+  ready for when BN6's engine can unite. Two differences turned out to be
+  the engines' own: BN5 raises MegaMan's mood when his hit lands and BN6
+  never does, and BN5's charged shot fires five frames sooner. The Souls
+  will stand behind Falzar's TenguCross, a form Gregar keeps and never
+  offers: a developer switch makes it an exact copy of HeatCross, and
+  HeatCross taken as that form plays as HeatCross itself, every byte of
+  memory every frame, through the crossing, a charged shot, a Fire chip,
+  a weakness hit that breaks it and the battle's end. Battles play as
+  before.
+
+- **BN5's own attacks in BN6's battle engine, and its families' recipes
+  made from the ROMs (issue #82).** BN6 runs a battle object by its type,
+  a byte, and a family of BN5's spawns objects of BN5's types, which BN6
+  either runs as something else or has no room for. One type of each kind
+  of object that BN6 never spawns now runs whatever moved routine the
+  object was spawned as, by a byte beside it in RAM the battle clears:
+  CanGard's reticle is BN5's own attack 0x25 again, no longer given a
+  spare number of BN6's, and Cactikil's and WuNote's helpers can come in
+  the same way. A tool derives each BN5 family's recipe from the two
+  ROMs, numbers only: its code, its calls' twins in BN6 (each pair's
+  bodies compared, and where they differ an audit of what the family
+  asks of it), its numbers in BN6's terms, its records, chips and
+  drawings. It writes CanGard's and Handi's exactly as they are installed,
+  finds 15 of BN5's 35 families whole and names what the rest still need.
+  BN6's own battles are the same at every byte.
+
+- **Room for all of BN5's virus families in BN6's battle engine (issue
+  #82).** The tables BN6's engine finds a virus family through (by its AI
+  index, its enemy ids, its sprites, effects and attacks, its reward
+  rows) are grown once as the game starts, wherever BN5's ROM is read, so
+  that every family of BN5's can come in at once at numbers of its own:
+  an AI index from 32, six enemy ids from 0x200, past every id BN6 has.
+  The battle's sprite preload reads an id as the battle's spawn does (12
+  bits where it read 9: an id from 0x200 would have loaded Mettaur's
+  sprite for nothing), and the battle's name plates read the families'
+  names from an archive of their own. CanGard moves to ids 0x200-0x205
+  (`0:foes 200@52`). BN6's own battles are the same at every byte with
+  the tables grown, and room is kept past them for BN5's Navis and chips.
+
+- **One net, its groundwork (issue #82).** BN5's battle records can be
+  fought in BN6's own engine: its viruses as BN6's where both games have
+  the family (BN5's V1 and V1EX as BN6's V1, and so on) or as the family
+  moved into the engine, its battlefields as BN6's (the same panels, its
+  holes, grass and ice; its lava and sea BN6 has none of), its green
+  Mystery Data by BN5's rule with BN5's finds, and a moved family's
+  rewards its own (CanGard's had been the filler rows BN6 leaves at the
+  ids it took: zenny and a Cannon *). Nothing in a run
+  uses it yet; `build.py xrecords` lists what each of BN5's areas can
+  fight so far (53 of its 214 records with CanGard, Handi, lava and
+  sea), and a dev step fights any one of them.
 
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the
@@ -44,6 +429,71 @@
   The player keeps one set of ROMs and saves for both. A test holds the
   two in step: the same ids, pictures and scripts, and every link between
   the pages.
+
+- **BN5's Handi in BN6's own battles, checked against BN5's own with
+  its random numbers replayed (issue #82).** Handi, a virus that picks a
+  panel at random, teleports there and drops a bomb, is the second family
+  moved into BN6's battle engine (AI 33, its six versions), and the first
+  that draws random numbers and moves. The comparison with BN5's own
+  battle now hooks both games' code: every random draw, spawn, sound,
+  effect and state change, each with the code that made it. BN6's draws
+  are given the numbers BN5's same draws took, so the family decides as
+  in BN5 whatever the engines drew around it (BN6's camera shake draws
+  from another word than BN5's; BN5's buster draws once more a shot), and
+  the family's calls are compared by where its code made them. Handi
+  idle, under 62 of MegaMan's inputs and in each of its versions behaves
+  the same in both over 1200 frames, teleporting to the same panels and
+  bursting for the same damage on the same frames; three deliberate
+  breaks of its move are caught, among them its draws moved to the other
+  word. BN6's own Mettaur, moved as the control, still plays frame for
+  frame as BN6's with its draws replayed. Battles in BN5's own engine
+  play as before.
+
+- **BN5's CanGard checked against BN5's own, frame by frame (issue
+  #82).** The same battle is fought in BN5's engine and in BN6's with
+  CanGard moved in, and compared every fight frame (`build.py xdiff`):
+  CanGard alone, idle or under 62 of MegaMan's inputs, each of its six
+  versions, behaves the same in both over 1200 frames, its reticle
+  appearing, walking and striking on the same frames for the same damage.
+  Every difference the comparison found was the two engines' own, each
+  written down with both games' routines, none in what was moved; none is
+  let pass on CanGard's own objects, where the engine's own numbers are
+  read as BN6's (the collision tables' words, the order sprites are drawn
+  in, an object's slot). Beside a Mettaur,
+  which each game runs by its own code, CanGard is compared until the
+  Mettaur's shockwave changes MegaMan's panel. Eleven deliberate breaks
+  of the move are each caught, among them an effect spawned with BN5's
+  number.
+
+- **BN5's CanGard fights in BN6's own battles (issue #82).** Where Team
+  Colonel's ROM sits beside BN6's, its CanGard is moved into BN6's battle
+  engine as the game starts: its code and its reticle's copied from the
+  player's BN5 ROM, their 39 calls aimed at BN6's routines, its states
+  laid out BN6's way, its sprite, the reticle's and its muzzle's blast
+  listed where BN6 has room, its six versions' names, HP and damage read
+  from BN5's records. In a battle beside a Mettaur it guards, locks its
+  reticle onto MegaMan's panel and fires, by BN5's own code for it;
+  frozen, bubbled,
+  paralysed or dragged it lets its reticle go; each version can be
+  deleted, and BN6's own battles play the same with it installed
+  (`tools/xfamily.py`). Only the dev steps meet it so far (`0:foes
+  200@52`); which nets and battles it joins is a design question for later.
+
+- **The groundwork for other games' viruses in BN6's own battles
+  (issue #82).** A virus family's code can be moved into BN6's battle
+  engine: copied from a ROM into the engine's free space, its calls
+  aimed at BN6's routines through veneers, BN6's per-family tables grown
+  to give it an AI index of its own, with its ids, names and records, all
+  or nothing and every old word checked. It is proven on BN6's own
+  Mettaur (`--dev xcontrol`): moved as AI 32, it fights frame for frame
+  as BN6's does, every byte of the game's memory compared
+  (`tools/xcontrol.py`), in a fight to its deletion and through the
+  statuses a hit gives (paralysed, dragged, frozen, bubbled, pushed); the
+  ice block a frozen virus is held in takes its size by AI index too, so
+  that byte table is grown with the others. Dev steps start a battle of
+  chosen foes (`0:foes 200@52`, play.py's `foes`) and give its enemies a
+  status (`0:status freeze 90`, play.py's `status`). No run meets a moved
+  family yet; BN5's CanGard comes next.
 
 ## 0.11.4 (2026-10-08)
 

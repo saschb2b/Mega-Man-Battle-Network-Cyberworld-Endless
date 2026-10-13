@@ -1,0 +1,298 @@
+{
+ "about": "BN5's KnightSoul in both engines (the Souls track's S2: in BN6's on the proxy form, its look and abilities HeatCross's until S3 and S4): its flag (0x000C) with Double Soul's and Chaos Unison's in BN5, the Souls installed in BN6's engine holding it (souls6), a deck of JustcOne J in both (BN5's chip 216 and BN6's 140, Break as BN5 has it: KnightSoul's kind), the first Custom screen's first chip picked and given up, UNITE and OK; it unites as the first turn starts, the Custom screens opened by L count its turns down, and it ends as the turn after its last starts. CanGard V1 at (6,2) the foe, MegaMan at (2,2) with 2000 HP, kept from harm. The lifetime is compared every frame (the Soul, its chaos, its turns, the Souls used, UNITE on the Custom screen); his look and abilities are the proxy's while united (legit.json's masks, until S3 and S4).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 2300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "12D8"
+ ],
+ "deck5": [
+  "12D8"
+ ],
+ "folder6": [
+  "128C"
+ ],
+ "deck6": [
+  "128C"
+ ],
+ "souls6": "10",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ],
+  [
+   1040,
+   "L",
+   3
+  ],
+  [
+   1560,
+   "L",
+   3
+  ],
+  [
+   2080,
+   "L",
+   3
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x0B"
+    ],
+    [
+     1563,
+     "0x0B"
+    ],
+    [
+     1564,
+     "0x00"
+    ],
+    [
+     2300,
+     "0x00"
+    ]
+   ],
+   "chaos": [
+    [
+     1,
+     "0x00"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     523,
+     "0x03"
+    ],
+    [
+     524,
+     "0x02"
+    ],
+    [
+     1043,
+     "0x02"
+    ],
+    [
+     1044,
+     "0x01"
+    ],
+    [
+     1563,
+     "0x01"
+    ],
+    [
+     1564,
+     "0x00"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x800"
+    ],
+    [
+     2300,
+     "0x800"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ],
+    [
+     524,
+     "0x01"
+    ]
+   ],
+   "hp": [
+    [
+     2300,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course (the research of issue #82's Souls, its notes and runs; BN5 0x08024FFA, 0x08012484, 0x08012464): the Soul united as the first turn starts (KnightMan's AI index 11; the timer holds through the unison), its turns 3, one less as each Custom screen opens, and its end as the turn after the screen that took the last starts (t1564), BN6's the same frame by the timer; its used bit 11 (0x800) for the battle; UNITE chosen on the first screen (+7 2), grey on the next (no pick); MegaMan never hit (safe=1)."
+}

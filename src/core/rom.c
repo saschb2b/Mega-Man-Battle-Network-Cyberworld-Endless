@@ -167,26 +167,99 @@ void rom_text_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
 }
 
 /* Entry `index` of the text archive at offset `archive` of ROM `data`
- * (ROM_SIZE bytes), in ASCII: BN5 spells its text as BN6 does. */
-static void text_of(const uint8_t *data, uint32_t archive, int index, char *out, size_t outlen) {
+ * (ROM_SIZE bytes): where its bytes begin, `*n` of them to the ROM's end
+ * (64 at most) */
+static const uint8_t *entry_of(const uint8_t *data, uint32_t archive, int index, size_t *n) {
 	uint32_t at = archive + 2u * (uint32_t)index, p = ROM_SIZE;
 	if (at + 2 <= ROM_SIZE) p = archive + (uint32_t)(data[at] | data[at + 1] << 8);
-	size_t n = p < ROM_SIZE ? ROM_SIZE - p : 0;
-	rom_text_bytes(data + (p < ROM_SIZE ? p : 0), n < 64 ? n : 64, out, outlen);
+	*n = p < ROM_SIZE ? ROM_SIZE - p : 0;
+	if (*n > 64) *n = 64;
+	return data + (p < ROM_SIZE ? p : 0);
 }
 
-void rom_text(uint32_t archive, int index, char *out, size_t outlen) { text_of(R.data, archive, index, out, outlen); }
+void rom_text(uint32_t archive, int index, char *out, size_t outlen) {
+	size_t n;
+	const uint8_t *s = entry_of(R.data, archive, index, &n);
+	rom_text_bytes(s, n, out, outlen);
+}
+
+/* A code of BN5 Team Colonel's text as BN6's code of the same glyph
+ * (docs/ROM_DATA.md, BN5's text: both fonts compared glyph for glyph):
+ * the same to 0x3F (space, digits, letters, *), then five on, as BN6 put
+ * its version marks at 0x40-0x44 before the rest, three on past BN5's own
+ * marks; XTEXT_DS for its DS mark, -1 for a glyph BN6's font lacks (its
+ * alpha, beta, omega and three more) */
+#define XTEXT_DS (-2)
+static int bn5_code(uint8_t c) {
+	if (c < 0x40) return c;
+	if (c <= 0x92 || (c >= 0x94 && c <= 0x9A)) return c + 5;
+	if (c >= 0xA0 && c <= 0xAD && c != 0xA5) return c + 3;
+	switch (c) {
+	case 0x93: case 0x9C: return 0x98;   /* a dash (BN6's names spell theirs 0x98; its 0xA1 is the same glyph) */
+	case 0x9D: return 0xA2;              /* ! */
+	case 0x9E: return 0x43;              /* the SP mark */
+	case 0x9F: return XTEXT_DS;          /* the DS mark: none in BN6 */
+	case 0x9B: case 0xA5: case 0xB1: case 0xB4: return 0xA0;   /* the empty box */
+	case 0xAE: case 0xAF: case 0xB0: case 0xB5: case 0xB6: case 0xB7: return -1;
+	default: return c;                   /* (0xB2, 0xB3, 0xB8 on: the same) */
+	}
+}
+
+size_t xrom_text_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
+	size_t k = 0;
+	for (size_t i = 0; i < n && src[i] < 0xE5; ++i) {
+		int c = xrom == XROM_BN5_COLONEL_US ? bn5_code(src[i]) : src[i];
+		/* (the DS mark spelt as BN6 can: D and S) */
+		const uint8_t ds[2] = { 0x0B + 'D' - 'A', 0x0B + 'S' - 'A' }, one[1] = { (uint8_t)c };
+		const uint8_t *put = c == XTEXT_DS ? ds : one;
+		size_t len = c == XTEXT_DS ? 2 : c >= 0 ? 1 : 0;
+		for (size_t j = 0; j < len && k < max; ++j) dst[k++] = put[j];
+	}
+	return k;
+}
 
 void xrom_text(int xrom, uint32_t archive, int index, char *out, size_t outlen) {
 	if (xrom < 0 || xrom >= XROM_COUNT || !XR[xrom].data) { if (outlen) out[0] = 0; return; }
-	text_of(XR[xrom].data, archive, index, out, outlen);
+	size_t n;
+	const uint8_t *s = entry_of(XR[xrom].data, archive, index, &n);
+	uint8_t bn6[96];
+	rom_text_bytes(bn6, xrom_text_bn6(xrom, s, n, bn6, sizeof bn6), out, outlen);
 }
 
-void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
-	uint32_t p = archive + rom_u16(archive + 2 * index);
+/* the arguments a script command of a description takes (a byte past it):
+ * E8 three, F1 two, E7 one; E9 and E6 none; -1 one it does not know */
+static int command_args(uint8_t c) {
+	switch (c) {
+	case 0xE8: return 3;
+	case 0xF1: return 2;
+	case 0xE7: return 1;
+	case 0xE9: case 0xE6: return 0;
+	default: return -1;
+	}
+}
+
+size_t xrom_script_bn6(int xrom, const uint8_t *src, size_t n, uint8_t *dst, size_t max) {
+	size_t k = 0;
+	for (size_t i = 0; i < n && k < max;) {
+		if (src[i] < 0xE5) {
+			size_t run = i;
+			while (run < n && src[run] < 0xE5) ++run;
+			k += xrom_text_bn6(xrom, src + i, run - i, dst + k, max - k);
+			i = run;
+			continue;
+		}
+		int args = command_args(src[i]);
+		if (args < 0) { ++i; continue; }
+		for (int j = 0; j <= args && i < n && k < max; ++j) dst[k++] = src[i++];
+		if (dst[k - 1] == 0xE6 && !args) break;
+	}
+	return k;
+}
+
+void rom_desc_bytes(const uint8_t *s, size_t n, char *out, size_t outlen) {
 	size_t o = 0;
-	for (int i = 0; i < 96 && o + 1 < outlen;) {
-		uint8_t c = R.data[p + i];
+	for (size_t i = 0; i < n && o + 1 < outlen;) {
+		uint8_t c = s[i];
 		if (c == 0xE8) { i += 4; continue; }   /* ts_msg_open_quick_ext */
 		if (c == 0xF1) { i += 3; continue; }   /* ts_text_speed */
 		if (c == 0xE9) { out[o++] = ' '; ++i; continue; }   /* a new line */
@@ -194,7 +267,7 @@ void rom_desc(uint32_t archive, int index, char *out, size_t outlen) {
 		for (const char *g = glyph(c); *g && o + 1 < outlen; ++g) out[o++] = *g;
 		++i;
 	}
-	out[o] = 0;
+	if (outlen) out[o] = 0;
 }
 
 /* ---- Discovery ---- */
@@ -244,9 +317,9 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 			snprintf(R.path, sizeof R.path, "%s", path);
 #if !defined(__3DS__)
 			/* (other games' ROMs beside it lend a run their areas,
-			 * docs/MULTIROM.md: a 3DS has no memory for another; a
-			 * browser holds the files chosen on its page, BN5's beside
-			 * BN6's in its storage) */
+			 * docs/MULTIROM.md: the 3DS's own start reads them where
+			 * its heap has room, start_3ds.c; a browser holds the files
+			 * chosen on its page, BN5's beside BN6's in its storage) */
 			xrom_find_beside();
 #endif
 			return true;
@@ -269,9 +342,10 @@ bool rom_find_close;
  * Their battles are BN5's own maps' by its game's numbers (0x91 Oran Area,
  * 0x92 SciLab, 0x93 End Area, 0x94 the Undernet and Nebula Area, 0x86 the
  * rest of each), an act's layers through the area's maps in BN5's order
- * (docs/ROM_DATA.md, BN5 guest battles). Their guardians may be BN5's own
- * Navis where its net maps' records have them roam (xguard: docs/BOSSES.md,
- * BN5's Navis); Nebula Area's are BN6's. */
+ * (docs/ROM_DATA.md, BN5 guest battles), fought in BN6's engine (issue
+ * #82). Their guardians may be BN5's own Navis where its net maps' records
+ * have them roam (xguard: docs/BOSSES.md, BN5's Navis); Nebula Area's and
+ * the Undernet's acts draw from both nets' Navis by band (run.h). */
 static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 8, .xlooks = XLOOK_CUBE,

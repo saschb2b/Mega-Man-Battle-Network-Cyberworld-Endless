@@ -1,0 +1,91 @@
+{
+ "about": "Handi V1 (BN5's 0x13, BN6's 0x206) alone at (6,2), MegaMan idle at (2,2) with 2000 HP, every draw of BN6's replayed from BN5's (rng=replay): the pass/fail spec of a family that draws random numbers and moves. It decides (its own state 8), waits (the engine's 9), teleports to a panel its callback picks at random (its own attack, 10: the panel reserved, the teleport's engine steps its jump table names) and drops a bomb in front of it (the third kind's type 0x4B, an obstacle that counts down and bursts for its version's damage, 50: BN5's per-version table at 0x08106392). No mask applies to its records, its bomb's or what they spawn",
+ "kind": "differential",
+ "foes": "13@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "expect": {
+  "actions": [
+   [
+    1,
+    8
+   ],
+   [
+    2,
+    9
+   ],
+   [
+    19,
+    8
+   ],
+   [
+    20,
+    10
+   ],
+   [
+    349,
+    8
+   ],
+   [
+    350,
+    10
+   ]
+  ],
+  "virus_panels": [
+   [
+    45,
+    "62"
+   ],
+   [
+    46,
+    "41"
+   ],
+   [
+    376,
+    "42"
+   ],
+   [
+    1036,
+    "43"
+   ]
+  ],
+  "reticle_type": "0x4B",
+  "reticle_spawns": [
+   87,
+   417,
+   747,
+   1077
+  ],
+  "reticle_path": [
+   [
+    87,
+    "31"
+   ]
+  ],
+  "reticle_damage": 50,
+  "sound": "0xC3",
+  "sound_at": [
+   306,
+   636,
+   966
+  ],
+  "megaman_hp_lost": [
+   [
+    306,
+    50
+   ],
+   [
+    636,
+    50
+   ],
+   [
+    966,
+    50
+   ]
+  ]
+ },
+ "sprites": "bytes"
+}

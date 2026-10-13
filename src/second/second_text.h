@@ -17,12 +17,23 @@ void second_cross_lines(int navi, char *out, size_t n);
  * '|', into `out` */
 void second_beast_lines(int turns, char *out, size_t n);
 
+/* A Soul's name by BN5's number (7-12: "KnightSoul"), "" none */
+const char *second_soul_name(int soul);
+/* UNITE's card where the emblem stands (docs/MULTIROM.md, One net): the
+ * Soul the last pick lights, its turns, the chip it takes, a Soul or a
+ * Cross; grey, what lights it; chosen, when it comes (s->unite_*); lines
+ * apart by '|', into `out`, its name into `name` */
+void second_unite_lines(const SecondState *s, char *name, size_t nn, char *out, size_t n);
+/* ColonelSoul's chip button's card: what it does, its chip (s->soul_chip) */
+void second_button_lines(const SecondState *s, char *out, size_t n);
+
 /* One of MegaMan's states while he fights: its name and a line */
 typedef struct { char name[24], line[40]; } SecondStateLine;
-/* His Cross (`form` as BN6_BATTLE_FORM), Beast Out with the turns left,
- * BeastOver, tired (`beast` his and the EmotionCounter, `turns`, at 0),
- * Full Synchro (`synchro`): how many of `most` it wrote into `out` */
-int second_state_lines(int form, int turns, bool beast, bool synchro, SecondStateLine *out, int most);
+/* His Cross (s->form, BN6_BATTLE_FORM) or the Soul he is united with
+ * (s->soul, its turns, its Chaos Unison), Beast Out with the turns left,
+ * BeastOver, tired (Beast Out his and the EmotionCounter at 0), Full
+ * Synchro: how many of `most` it wrote into `out` */
+int second_state_lines(const SecondState *s, SecondStateLine *out, int most);
 
 /* The NaviCust program the NaviCustomizer's cursor is on (s->nc_*): its
  * colour and kind and where that may go, the copies left or where it is,
@@ -67,11 +78,16 @@ int second_record(SecondRow *out, int most);
  * `base_hp`: HPMemory counts into the base, programs on top), the Cross
  * brought: how many rows of `most` */
 int second_status(SecondRow *out, int most, int max_hp, int base_hp);
-/* The Library's classes against what a run can hold, and the chips new
- * this run: how many rows of `most` */
+/* The Library's classes against what a run can hold (BN6's three, then
+ * the older net's own where BN5's ROM is read: issue #82), and the chips
+ * new this run: how many rows of `most` */
 int second_library(SecondRow *out, int most);
 /* What the Library is to a run, a line */
 const char *second_library_line(void);
+/* The older net's own chips the Library holds, named after a heading,
+ * into `out` ("" none): the second screen lists them under the older net
+ * (docs/MULTIROM.md, One net: the Library) */
+void second_library_older(char *out, size_t n);
 /* What the run holds of a chip in any code, the Library's card's: its
  * copies in the folder and in the pack, as rows; how many of `most` */
 int second_copies(SecondRow *out, int most, int folder, int pack);

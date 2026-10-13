@@ -1,0 +1,201 @@
+{
+ "about": "BN5's worried rule on the battle's first Custom screen (the Souls track's S7; src/emu/soulmood.c, worried_rule): KnightSoul held, the battle begun dark in both (dark: BN5's meter under 470, BN6's engine's latch), a deck of Cannon * with BN5's DarkCirc R (BN6's registry id 214) twenty-first. The first screen's worried rule (BN5 0x08025118, before the compaction 0x080250EA) swaps the first DarkChip into the deck's place at the hand's count (the screen's +6, 5: deck[5], the sixth, past the five the screen offers), in both: the first hand five Cannons, its first picked (the cursor on no DarkChip) and used at t30; the second screen's compaction takes the used Cannon out, so DarkCirc stands fifth, the hand's end (slot 4), the cursor starting on it in both (BN6 0x0802806C, BN5 0x08023EC4): picked, OK, used at t1500. Compared frame by frame to t1503 (DarkCirc deletes CanGard at t1504, the families' deletion), the action held by the expectations.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": false,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "folder5": [
+  "3401",
+  "22BB"
+ ],
+ "deck5": [
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "22BB",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "folder6": [
+  "3401",
+  "22D6"
+ ],
+ "deck6": [
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "22D6",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "souls6": "10",
+ "dark": true,
+ "frames": 1503,
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   1400,
+   "L",
+   3
+  ],
+  [
+   1500,
+   "A",
+   2
+  ]
+ ]
+}

@@ -30,10 +30,19 @@ building the game yourself.
   in runs, in place of the BN6 areas they resemble (ACDC Area, Oran
   Area, SciLab, End Area, its Undernet and Nebula Area), each in about
   half the runs that come there, in BN5's own tiles, music and
-  bystanders, their random battles fought in BN5's own engine. A note in
+  bystanders, their random battles BN5's own, fought in BN6's engine
+  (every Cross and chip of the run works there). In half the runs a Navi
+  of BN5's guards such an area (KnightMan, ShadowMan, NumberMan,
+  TomahawkMan, ToadMan, Colonel), and the Undernet's and the Graveyard's
+  acts draw their guardians from both games' Navis; beaten, he gives his
+  Soul, which MegaMan can UNITE with in every battle after. From the
+  second act BN5's viruses and BN6's meet in battles, the Undernet's and
+  the Graveyard's acts draw on both, half the chips their shops and
+  Mystery Data hold are BN5's, which the Library counts apart, and its
+  flames of darkness hold BN5's DarkChips. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
-  iPhones and iPads and in the browser; not on the 3DS. Added later, it
+  iPhones and iPads, a New 3DS and in the browser. Added later, it
   is found at the next start beside BN6 (on Android, an iPhone or an
   iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
   on the title also opens the [ROMs screen](#the-roms-screen) to add it,
@@ -315,7 +324,8 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
-name works. The first NEW GAME boots BN6 once, about 15 seconds of black
+name works. BN5 Team Colonel's goes beside it, or in any of those folders.
+The first NEW GAME boots BN6 once, about 15 seconds of black
 screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
 layer's map, always open, in the folder editor the whole folder, in a
@@ -346,11 +356,9 @@ motion, the controls, **Save backup** and **Load backup**, which open the
 game's **SAVES** screen over the title ([Moving saves between devices](#moving-saves-between-devices)),
 and **Forget all**, which removes the ROMs and saves. SAVES exports one
 `cyberworld-endless.cwsave` file or imports one through the browser's own
-file chooser; the same file works on the other systems. BN5's battles run on a second emulator core in the
-page: the first time, BN5 starts up while the title shows (about 20
-seconds on a recent laptop, a slice of each frame), and a battle in its
-areas that comes before it is done waits behind a short note, once per
-browser.
+file chooser; the same file works on the other systems. BN5's areas,
+viruses, Navis and chips run in the same emulator as BN6's: nothing more to
+start up, and the page's memory BN6's and BN5's ROM file.
 
 On a phone or tablet the game fills the screen and draws its own buttons
 round the picture, sized for a thumb: a D-pad, A, B, L, R, Start and
@@ -394,6 +402,10 @@ marked so), its shoulders and triggers L and R, Start is Start and Back
 (Minus) is Select; holding Back and Start for a second, twice, quits,
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
+
+**Soft reset:** **A+B+Select+Start** together, as mapped, returns to the
+title, in a battle too. **CONTINUE** takes the run up at its last
+checkpoint; what came after it is lost.
 
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 **Select** on the title screen opens it (the line under the menu names the

@@ -1,0 +1,154 @@
+{
+ "about": "DarkPlus with no chip after it (issue #82's final engine round), as chip_darkplus: BN5's CanladEX held paralysed at (5,2), MegaMan at (2,2), Cannon * and DarkPlus * picked in that order on the first Custom screen (its cursor starting on the DarkChip in both, BN6's 0x0802806C: LEFT first) and OK (BN6's deck four DarkPlus more after the Cannon, shelved as the first screen opens: src/emu/soulmood.c, compact); KnightSoul held in both. The Cannon used at t30 strikes for 40; DarkPlus used at t100 finds the hand's end (0xFFFF) and puffs (BN5's 0x0800E1E0: the fourth kind's 0x14 by BN5's 0x080E1F76, moved with BN5's art, and sound 0x90), no flash, yet makes him dark by BN5's rule. Every difference of BN6's play from BN5's fails it.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "hold": 60,
+ "frames": 200,
+ "folder5": [
+  "3401",
+  "34BE"
+ ],
+ "deck5": [
+  "3401",
+  "34BE",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "folder6": [
+  "3401",
+  "3522"
+ ],
+ "deck6": [
+  "3401",
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "LEFT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "LEFT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

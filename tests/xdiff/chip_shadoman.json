@@ -1,0 +1,197 @@
+{
+ "about": "A Navi chip of BN5's whose code moved into BN6's engine (issue #82's C3): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan with a folder of one ShadoMan S and 29 Cannon A in both games, the ShadoMan dealt first (a Mega chip: a folder of them alone never deals), BN5's chip 248 by BN5's own code and the registry's 493 by the same code moved (BN5's Navi routine 0x0B as BN6's 0x28: its Navi's battle sprite the Navis' own, list 2's 0x20 on, its attack's objects the Navis' copies), the first Custom screen's chip picked and OK, used at t30: every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "hold": 60,
+ "folder5": [
+  "24F8",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "folder6": [
+  "25ED",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "deck5": [
+  "24F8",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "deck6": [
+  "25ED",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001",
+  "0001"
+ ],
+ "sprites": "bytes"
+}

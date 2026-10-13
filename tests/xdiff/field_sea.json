@@ -1,0 +1,37 @@
+{
+ "about": "BN5's field 0x42 (sea and grass) as BN6's, xpanels.c and xfields.c: CanGard V3 made Fire in both games' copies (both: its HP word's element) on sea at (4,1) takes 1 HP each 7 frames in both, as on poison, till the sea runs out after 960 frames; MegaMan on grass at (2,2); the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "52@41",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "field": "42",
+ "both": [
+  "08108D42:10B4"
+ ],
+ "expect": {
+  "foe_hp": [
+   [
+    1,
+    179
+   ],
+   [
+    1200,
+    43
+   ]
+  ],
+  "panels": [
+   [
+    958,
+    "41",
+    14
+   ],
+   [
+    959,
+    "41",
+    2
+   ]
+  ]
+ }
+}

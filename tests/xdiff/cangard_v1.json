@@ -1,0 +1,149 @@
+{
+ "about": "CanGard V1 alone at (6,2), MegaMan idle at (2,2) with 100 HP: the pass/fail spec; its reticle strikes for 10 (BN5's per-version table at 0x0810912E). No mask applies to CanGard's, its reticle's or its effects' records (none may: legit.json's about); what the engine writes there in its own numbers is read as BN6's (legit.json, maps: alliance, renderer, slot)",
+ "kind": "differential",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 100,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "expect": {
+  "actions": [
+   [
+    1,
+    8
+   ],
+   [
+    3,
+    9
+   ],
+   [
+    4,
+    8
+   ],
+   [
+    5,
+    10
+   ],
+   [
+    131,
+    8
+   ],
+   [
+    132,
+    9
+   ],
+   [
+    133,
+    8
+   ],
+   [
+    134,
+    10
+   ],
+   [
+    228,
+    8
+   ],
+   [
+    229,
+    9
+   ],
+   [
+    230,
+    8
+   ],
+   [
+    231,
+    10
+   ]
+  ],
+  "reticle_type": "0x25",
+  "reticle_damage": 10,
+  "reticle_spawns": [
+   17,
+   146,
+   243,
+   340,
+   437,
+   534,
+   631,
+   728,
+   825,
+   922,
+   1019,
+   1116
+  ],
+  "reticle_path": [
+   [
+    17,
+    "62"
+   ],
+   [
+    22,
+    "62"
+   ],
+   [
+    23,
+    "52"
+   ],
+   [
+    34,
+    "52"
+   ],
+   [
+    35,
+    "42"
+   ],
+   [
+    47,
+    "32"
+   ],
+   [
+    59,
+    "22"
+   ]
+  ],
+  "sound": "0xAE",
+  "sound_at": [
+   76,
+   173,
+   270,
+   367,
+   464,
+   561,
+   658,
+   755,
+   852,
+   949,
+   1046,
+   1143
+  ],
+  "megaman_hp_lost": [
+   [
+    85,
+    10
+   ],
+   [
+    279,
+    10
+   ],
+   [
+    473,
+    10
+   ],
+   [
+    667,
+    10
+   ],
+   [
+    861,
+    10
+   ],
+   [
+    1055,
+    10
+   ]
+  ]
+ },
+ "sprites": "bytes"
+}

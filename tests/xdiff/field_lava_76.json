@@ -1,0 +1,39 @@
+{
+ "about": "BN5's field 0x76 (lava over most of its right) as BN6's, xpanels.c and xfields.c: CanGard V1 on lava at (5,2) takes 50 as the battle opens and the lava under it cools plain, in both; MegaMan at (2,2); the panels' types, flags and timers compared each frame",
+ "kind": "differential",
+ "foes": "4F@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "76",
+ "expect": {
+  "foe_hp": [
+   [
+    1,
+    10
+   ],
+   [
+    600,
+    10
+   ]
+  ],
+  "panels": [
+   [
+    1,
+    "52",
+    2
+   ],
+   [
+    1,
+    "42",
+    13
+   ],
+   [
+    600,
+    "63",
+    13
+   ]
+  ]
+ }
+}

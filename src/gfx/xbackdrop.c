@@ -22,10 +22,10 @@
 #include "lz.h"
 #include "rom.h"
 
-#define XBG_AT   (EMU_FREE + 0x2A0000)   /* (docs/EMULATION.md) */
-#define XBG_END  (EMU_FREE + 0x2E0000)
-#define XMAP_AT  (EMU_FREE + 0x310000)   /* the net maps' (docs/EMULATION.md) */
-#define XMAP_END (EMU_FREE + 0x320000)
+#define XBG_AT   FREE_BACKDROPS          /* (docs/EMULATION.md) */
+#define XBG_END  FREE_FLAME
+#define XMAP_AT  FREE_MAP_BACKDROPS      /* the net maps' (docs/EMULATION.md) */
+#define XMAP_END FREE_INDOORS
 #define BUS      0x08000000u
 #define BN6_BGS  22                      /* BN6's own, 0x00-0x15 */
 #define XBGS_MAX 8                       /* room after them in the tables' copies */

@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "guest.h"
-
 /* Builds the run's current layer in its area's map and warps MegaMan in. */
 bool director_start_layer(void);
 /* The saved run (seed and depth, peek_run's) was saved at home, in the
@@ -74,9 +72,8 @@ void director_folder_now(uint16_t *folder);
  * code << 9) and their counts, by chip and its record's codes; how many */
 int director_pack_now(uint16_t *entry, uint8_t *count, int most);
 /* MegaMan's HP as the top screen shows it: the Navi's on the map, his
- * battle object's in a battle, the guest's in an older net's battle (true
- * then). */
-bool director_megaman_hp(int *hp, int *max);
+ * battle object's in a battle */
+void director_megaman_hp(int *hp, int *max);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
 /* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it
@@ -114,9 +111,39 @@ void director_dev_home(void);
  * from place to place. */
 void director_dev_hush_home(void);
 /* Dev (the battle step): the layer's next random battle, at the first
- * moment MegaMan is free on its map; the guest's on a layer whose battles
- * are an older net's. */
+ * moment MegaMan is free on its map. */
 void director_dev_battle(void);
+/* Dev (the foes step, issue #82): a battle at once with these enemies, at
+ * the first moment MegaMan is free on a layer's map, in BN6's engine
+ * whatever the layer: "200@52/01@43", each an enemy id in hex at its panel
+ * (column 1-6, then row 1-3), "mm@CR" MegaMan's (2,2 where none), on a
+ * plain field with nothing else on it (the families moved into the engine,
+ * xvirus.h, beside BN6's own); false, nothing due, where it names none. */
+bool director_dev_foes(const char *spec);
+/* Dev (the xrecord step, issue #82): a battle record of BN5's, "ADDR" its
+ * address in BN5's ROM in hex (its battle tables' BattleSettings: build.py
+ * xrecords lists them), fought at once in BN6's engine as a territory's
+ * random battle would be (xbattles.h: its foes by BN6's ids at its
+ * panels, its field as BN6's, its green Mystery Data by BN5's rule and
+ * rows, its rocks), at the first moment MegaMan is free on a layer's map,
+ * whatever the layer; "ADDR UP" with its viruses UP versions up (BN5's
+ * index: V1EX one up from V1). False, nothing due, where it cannot be
+ * fought (the log says why). */
+bool director_dev_xrecord(const char *spec);
+/* Dev (the status step, issue #82): the battle's enemies struck at once
+ * with a status as a hit gives it, BN6's engine left to act on it as their
+ * next frame starts (docs/MULTIROM.md, Transplanted families): "freeze
+ * 90", "paralysis 60 200" (only enemy id 0x200), "bubble", "drag", "slide";
+ * the frames it lasts (60 where none) for the three that last. The
+ * enemies struck, how many; 0 where it names none or no battle is on. */
+int director_dev_status(const char *spec);
+/* Dev (the chip step, issue #82): chip ID in code CODE (a letter or *) in
+ * the folder's first N entries (one where none), owned as BN6 marks a chip
+ * it gives, and given to the pack N + 1 times (BN6's GiveChips, which puts
+ * it in the Library too; the pack's counts hold the folder's copies, so one
+ * is the pack's own): "203 L", "0x1C0 * 3". The entries written, 0 where it
+ * names none or the game's folder is not there yet. */
+int director_dev_chip(const char *spec);
 /* The run saved with BN6 holding MegaMan by the mask's holds (director_hold.h's
  * HELD_*), which no save of the run writes: a CONTINUE's recovery tested */
 void director_dev_hold(unsigned mask);
@@ -127,13 +154,6 @@ void director_dev_reveal(void);
 uint32_t director_keys(uint32_t keys);
 /* Rebuilds the saved run's layer and restores the game at its checkpoint. */
 bool director_resume(void);
-/* A battle on the guest core has ended (guest.h): its result into the run. */
-void director_guest_done(const GuestResult *r);
-/* The layer's guardian, one of another game's Navis (guardians.h:
- * guardian_older), begins his battle on the guest core at `version`, his
- * HP held to the act's band (docs/BOSSES.md, BN5's Navis); false where it
- * cannot (its end then comes through director_guest_done, to boss.c) */
-bool director_guest_guardian(int navi, int version);
 /* Once a frame, after the game's frame: exits and encounters. */
 void director_update(void);
 /* Where the test autopilot heads (grid panel): the guardian, to talk to

@@ -1,0 +1,32 @@
+{
+ "about": "BN5's field 0x52 (ice in columns 2-5) as BN6's, xfields.c (BN6's own 0xDE): MegaMan on ice at (2,2) steps up, then down: one press slides him from row 1 to row 3 in both, his panels changing on the same frames (t125, t133); a smoke spec, as his Y16 while he slides is each engine's own step (2 apart at t132, where it stops)",
+ "kind": "smoke",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "field": "52",
+ "keys": [
+  [
+   40,
+   "UP",
+   2
+  ],
+  [
+   120,
+   "DOWN",
+   2
+  ],
+  [
+   200,
+   "DOWN",
+   2
+  ],
+  [
+   280,
+   "UP",
+   2
+  ]
+ ]
+}

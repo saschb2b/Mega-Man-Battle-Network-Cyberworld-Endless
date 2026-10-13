@@ -138,5 +138,35 @@ int navi_chip(int navi, int version);
 /* The ROM's HP and attack damage of enemy `id` (bn6f enemy_getStruct2);
  * false when unknown. */
 bool enemy_stats(int id, int *hp, int *damage);
+/* Enemy `id`'s triple in the ids table (RomLayout.enemy_ids): its version,
+ * actor type (0 a virus, 1 a Navi) and AI index; NULL when unknown. */
+const uint8_t *enemy_triple(int id);
+
+/* An enemy id another game's virus family took in BN6's battle engine
+ * (src/emu/xvirus.c, issue #82; docs/MULTIROM.md, Transplanted families),
+ * as the engine reads it there once the family is installed: the readers
+ * above answer for it from this, not from the player's ROM, where BN6
+ * gives no such id (the families' are from 0x200, past BN6's 0x1C4). */
+#define ENEMY_DROPS 20   /* a reward row's entries (BN6_DROP_ROWS: 0x28 bytes an id) */
+typedef struct {
+	uint8_t triple[3];   /* version, actor type, AI index */
+	uint8_t stats[6];    /* its version's struct2 row (the record enemy_stats reads) */
+	uint8_t traits[8];   /* its struct1, BN6's layout (the second wheel's element and weakness at 5 and 6) */
+	char name[20];
+	bool drops_own;      /* its reward row is its own, as the install wrote it into the core's copy: */
+	uint16_t drops[ENEMY_DROPS];
+} EnemyMoved;
+/* The ids another game's families may take (BN5's families of six versions,
+ * 32 of them at most, and their Navis to come, issue #82) */
+#define ENEMIES_MOVED_MAX 256
+/* ... ids below this (the families' to 0x400, src/emu/xvirus_recipe.h XV_IDS) */
+#define ENEMY_IDS_MAX 0x400
+/* Enemy `id` read from `e` from now on (copied); NULL: from the ROM again.
+ * False where no more ids can be told so. */
+bool enemy_moved_set(int id, const EnemyMoved *e);
+/* Entry `k` (0-19) of enemy `id`'s reward row as the battle's results read
+ * it: a moved id's own where the install wrote one, else the player's ROM's
+ * (BN6_DROP_ROWS); 0xFFFF none */
+uint16_t enemy_drop(int id, int k);
 
 #endif

@@ -15,6 +15,13 @@ Nothing from the ROM is shipped.
 | Battles, net movement, menus, messages, shops, traders | The game's code |
 | Run structure, layer generation, loot, saves, the title | Cyberworld Endless |
 
+The player's A+B+Select+Start returns to Cyberworld Endless's title
+before the core sees it (`scene_emu.c`, issue #113): BN6's own reset would
+start its title on the map tables the run has taken over. The director
+stops without saving, so CONTINUE takes the run up at its last checkpoint,
+as after a quit in a battle. The four buttons held together are no
+controller's Select+Start quit either.
+
 ## Why an emulator
 
 Ship of Harkinian runs Ocarina of Time with no emulator, and Zelda64Recomp
@@ -65,7 +72,23 @@ a map for hooks, as Majora's Mask's does for Zelda64Recomp.
 ## Memory the engine writes
 
 The core runs a copy of the ROM padded to 16 MB. Everything the engine adds
-lives past the original data, from `EMU_FREE` (`0x08800000`):
+lives past the original data, from `EMU_FREE` (`0x08800000`), by one plan
+that every part and every track of issue #82 follows, in offset order (a
+span no row names is free). Issue #82's rows, from `+0x330000`, are fixed
+places, the same at every boot with the same ROMs (a state's pointers into
+them stay good): the virus families' room and the second-level dispatch,
+the families, the chips, the Souls, the lava and sea, then room kept
+for the Navis and the chips' moved code, each its own and none written
+by another. The plan's numbers are `src/emu/free_space.h`
+(`FREE_*`), which every writer below takes its place from;
+`tests/test_core.c` checks its regions in order and apart and each
+installer's own layout inside its region, and as the core starts each
+installer's writes are claimed byte by byte (`src/emu/claims.c`: the free
+space it fills, BN6's own words and instructions it changes, RAM it keeps
+patched, the instructions its hooks stand on, and every other hook's), a
+write or hook over another's bytes told on stderr (`CYBERWORLD_EMU_DEBUG`
+prints the count: "claims: 105 ranges of 5 writers ..., 0 over
+another's"):
 
 | Offset | Contents | Code |
 | --- | --- | --- |
@@ -74,20 +97,13 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x0180` | An empty Mystery Data list (12 zero bytes): every map a layer took and left points at it, as BN6 rolls every map's Mystery Data at each jack-in (docs/ROM_DATA.md, Map takeover); the rest to `+0x0200` free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | `mapslot.c` |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
-| `+0x0700`-`+0x12E0` | Map-object handler 3's records (issue #42): BN6's 86, then the engine's Link Navi obstacles and cubes, 13 variants of 8 slots each (the last four another game's looks: BN5's Security Cube, its wall of dark flames two ways and its dark hole, a prop that never opens, docs/MULTIROM.md); its literal points here, written once a core | `blockers.c` |
 | `+0x0400`-`+0x0640` | Rush's gaps (issue #14): the gap table from group 0x80 that the check's literals point at, a group's empty map list, the layer's group's maps, the layer's gap records, and handler 0x25's records (BN6's 13, then the layer's two) | `rush.c` |
+| `+0x0700`-`+0x12E0` | Map-object handler 3's records (issue #42): BN6's 86, then the engine's Link Navi obstacles and cubes, 13 variants of 8 slots each (the last four another game's looks: BN5's Security Cube, its wall of dark flames two ways and its dark hole, a prop that never opens, docs/MULTIROM.md); its literal points here, written once a core | `blockers.c` |
 | `+0x2F00` | The layer map's warp list (entry 1: the exit pad) | `mapslot.c` |
 | `+0x3000`-`+0x10000` | Layer data in two halves, one per layer in turn: NPC lists and scripts, text archive, Mystery Data, sprite list | `mapslot.c` |
 | `+0x10000` | Generated tile map (LZ77, literal blocks) | `netmap.c` |
 | `+0x60000` | Generated coordinate data (walls, the exit pad's trigger) | `coords.c` |
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
-| `+0x170000`-`+0x1A0000` | Another game's net area (docs/MULTIROM.md): its tile set, a header of its own before its two blocks encoded again, and its palette as it is; the map its layers take over points at them | `netmap.c` |
-| `+0x1A0000`-`+0x260000` | Other games' songs (docs/MULTIROM.md): each song's sequence with its pointers moved, the voices it selects, their key splits, drum kits, samples and waves (a piece two songs share once); BN6's empty song slots from 0x26 point at them. Every song the other games' areas play is copied the first time one is needed, in the areas' order, then their games' battle themes, so each has the same place in every session (a checkpoint's state holds the music player's pointers into it) | `xsong.c` |
-| `+0x260000`-`+0x2A0000` | Other games' Navis (docs/MULTIROM.md): an overworld sprite and its mugshot each, copied whole (their offsets are their own); Gregar's list 6 and mugshots point at them from a number Falzar's Navis have there (72, 74, 76-78). Copied, as the songs are, all at once in the areas' order. After them the other games' map objects (sprites of their list 7), all at once the first time one is needed, each at a list-7 number of its own that points at the placeholder `0x084DC040`: BN5's flame of darkness (a DarkChip's, docs/META.md) at 160, decompressed and its palette turned purple, its Security Cube at 146, its wall of dark flames at 138, decompressed, a dark hole at 135. Its last `0x12000` bytes (from `+0x28E000`) hold a guardian of another game's (docs/BOSSES.md, BN5's Navis): his sprite and face, copied anew on each layer he guards and listed at Gregar's 78, which no area's Navi takes | `xnavi.c` |
-| `+0x2A0000`-`+0x2E0000` | Other games' battle backgrounds (docs/MULTIROM.md): each one's BGAnimData record, its tiles and map (LZ77 encoded again), palette, animation scripts and the tiles and lists their frames name; then copies of BN6's three background tables (records, animations, scroll entries) with them after BN6's 22, which the loader's literals point at. Copied all at once in the areas' order | `xbackdrop.c` |
-| `+0x2E0000`-`+0x2E1000` | BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
-| `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
-| `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
 | `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
@@ -97,43 +113,99 @@ lives past the original data, from `EMU_FREE` (`0x08800000`):
 | `+0x153000`-`+0x154000` | The PET's PLACE: the same copy, its names pointed at the area and the layer ("JudgeTree 14") | `director_layer.c` |
 | `+0x154000`-`+0x166000` | The PET's words (docs/PET.md): the key items' names (+0x154000) and descriptions (+0x155000), the mails' senders and subjects (+0x158000) and bodies (+0x15A000), each BN6's archive rebuilt with the run's scripts in place of some | `pet_text.c` |
 | `+0x166000`-`+0x167900` | Portraits of Falzar's Navis (docs/BOSSES.md): one mugshot sprite each, 0x500 apart (SpoutMan first), made from the Navi's battle sprite on the layer he guards; the mugshot table points at them from numbers empty in Gregar | `portrait.c` |
+| `+0x168000`-`+0x169000` | A layer's Chip Trader's prizes of both nets (issue #82, docs/MULTIROM.md, One net): on the older net's areas and in the deep, where BN5's ROM is read, the list its pool's entry points at, BN6's pool's records fitted to the folder's codes as a layer's are, then as many of BN5's catalogue's of each rarity (6-byte records, a 0 chip ending it); written as the layer's trader is installed | `trader.c` |
+| `+0x170000`-`+0x1A0000` | Another game's net area (docs/MULTIROM.md): its tile set, a header of its own before its two blocks encoded again, and its palette as it is; the map its layers take over points at them | `netmap.c` |
+| `+0x1A0000`-`+0x260000` | Other games' songs (docs/MULTIROM.md): each song's sequence with its pointers moved, the voices it selects, their key splits, drum kits, samples and waves (a piece two songs share once); BN6's empty song slots from 0x26 to 0x3F point at them (issue #82's shared allocations: the slots above, 0x40-0x62, are the sounds the other games' families, Navis, Souls and chips copy, each BN5 sound at a fixed one). Every song the other games' areas play is copied the first time one is needed, in the areas' order, then their games' battle themes, so each has the same place in every session (a checkpoint's state holds the music player's pointers into it) | `xsong.c` |
+| `+0x260000`-`+0x2A0000` | Other games' Navis (docs/MULTIROM.md): an overworld sprite and its mugshot each, copied whole (their offsets are their own); Gregar's list 6 and mugshots point at them from a number Falzar's Navis have there (72, 74, 76-78). Copied, as the songs are, all at once in the areas' order. After them the other games' map objects (sprites of their list 7), all at once the first time one is needed, each at a list-7 number of its own that points at the placeholder `0x084DC040`: BN5's flame of darkness (a DarkChip's, docs/META.md) at 160, decompressed and its palette turned purple, its Security Cube at 146, its wall of dark flames at 138, decompressed, a dark hole at 135. Its last `0x12000` bytes (from `+0x28E000`) hold a guardian of another game's (docs/BOSSES.md, BN5's Navis): his sprite and face, copied anew on each layer he guards and listed at Gregar's 78, which no area's Navi takes | `xnavi.c` |
+| `+0x2A0000`-`+0x2E0000` | Other games' battle backgrounds (docs/MULTIROM.md): each one's BGAnimData record, its tiles and map (LZ77 encoded again), palette, animation scripts and the tiles and lists their frames name; then copies of BN6's three background tables (records, animations, scroll entries) with them after BN6's 22, which the loader's literals point at. Copied all at once in the areas' order | `xbackdrop.c` |
+| `+0x2E0000`-`+0x2E1000` | BN6's own flame of darkness (docs/META.md, BN6's own DarkChips): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
+| `+0x310000`-`+0x320000` | Other games' net maps' backdrops and animations (docs/MULTIROM.md): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built | `xbackdrop.c` |
+| `+0x320000`-`+0x330000` | Home's other places (docs/HOME.md, piece 10), a part each: AsterLand's (`+0x320000`) and the Cyber Academy's four maps' (`+0x328000`): their NPC lists and their people's scripts and words, empty map scripts, their own warp lists (BN6's doors copied in, the doors out pointed where the planned town has them) and the music lists | `mapslot.c`, `indoors.c`, `aster_land.c`, `academy.c` |
+| `+0x330000`-`+0x348000` | BN6's battle engine given the room other games' virus families take (issue #82, the engine's capacity; docs/MULTIROM.md, Transplanted families; docs/ROM_DATA.md, The engine's room for moved families), written once a core as it starts, before any family's install and wherever one is installed, at fixed addresses (a state's pointers into them stay good; the ROM copy is not in a state, so every boot writes them the same): each of BN6's tables below copied with its entries as the player's ROM has them and the rest its fill, the one word of the ROM that names it pointed at the copy, each word checked first. `+0x330000` the eleven per-family tables, 256 AI indexes each, `0x400` apart (AI 0's entry in the rest); `+0x332C00` the ice blocks' sizes (`BN6_ICE_SIZES`), 256 bytes; `+0x332D00` the three tables of 35 words by AI index (`BN6_AI_HOOKS`, `BN6_AI_HOOKS2`, `BN6_HELD_CHIPS`), 256 words each, `0x400` apart, their triples' virus words pointed at them; `+0x333900` sprite list 3 (the attacks' sprites: MegaMan's sword, the chips' objects), 256 numbers (BN6's 105 as the ROM has them, the placeholder in the rest; grown once for every track, the chips' taking its numbers from `0xFF` down, `XV_LIST3`), `+0x333D00`-`+0x334000` free; `+0x334000` sprite lists 1, 2 (the Navis' battle sprites), 4 and 5, 256 numbers each, `0x400` apart (the placeholder sprite in the rest); `+0x335000` the effects (`BN6_EFFECTS`), 256 ids (effect 0's row in the rest); `+0x335400` the first, third and fourth kinds' types (`BN6_T1_TYPES`, `BN6_T3_TYPES`, `BN6_T4_TYPES`), 256 each, `0x400` apart (0 in the rest; T1 `0x5C`, T3 `0xD2` and T4 `0x91` the second-level dispatch's routines, below, each checked first to hold BN6's placeholder, never a family's); `+0x336000` the enemy ids' triples, `0x400` ids (each past BN6's `0x1C4` its filler `0xBB`'s; `+0x336C00`-`+0x337000` free); `+0x337000` the reward rows, `0x400` ids (each past BN6's `0x191` the filler's row); `+0x341000` the names of the ids from `0x200`, a text archive of 512 entries (16 KB), each an empty name until a family names it, which a hook on BN6's name lookup hands out (Hooks, below); `+0x345000` the second-level dispatch (docs/MULTIROM.md, Transplanted families; docs/ROM_DATA.md, the second-level dispatch): MOVED, the moved routine (Thumb) for each of a game's types, 256 words for each of the first, third and fourth kinds, `0x400` apart, every entry the stray's routine until a family names its type; `+0x345C00` TWIN, BN6's own number for each type or `0xFF` where it is moved, 256 bytes a kind, `0x100` apart, `0xFF` until a family names it; `+0x345F00`-`+0x346100` its code, the project's own Thumb made field by field (`xvirus_dispatch.c`): the stray's routine, the three dispatch types' routines (`+0x345F10`, `0x20` apart) and the six spawners a moved family's calls go to (`+0x345F80`, `0x40` apart), `+0x346100` a virus's support chip run with BN5's support family's timing (`XV_SUPPORT`, the attack family 0x65: BN6's support routine twice in its first frame, docs/ROM_DATA.md, A virus's support chip) and `+0x346120` the chip writer a moved family's code calls (`XV_CHIP_WRITER`: BN6's, its support family answered as 0x65), its side tables in RAM (BN6's RAM, below); `+0x346200` the families' pre-steps (`XV_PRESTEP`, issue #82's A2b: 256 words by AI index, 0 none, a word a family whose game's dispatcher acts for its ids before its state, Dominerd's and Appley's, its pre-step's Thumb address in its home, which a hook on BN6's dispatcher runs: docs/ROM_DATA.md, their shims and pre-steps); `+0x346100`-`+0x346200` and `+0x346600`-`+0x348000` free. The battle's sprite preload is made to read an id's 12 bits, as its spawn does (`0x080029CE`, `0x080029D0`; docs/ROM_DATA.md) | `xvirus_grow.c` |
+| `+0x348000`-`+0x400000` | The families themselves (issue #82; docs/MULTIROM.md, Transplanted families): `+0x348000` their homes, 64 of `0x800`, one a family: the state table (BN6's layout, 16 entries at most), struct1 (`+0x40`), struct2 (`+0x48`), six empty held-chip lists (`+0x70`, where it holds none), its shims (`+0x130`, `XV_HOME_SHIMS`, the project's own Thumb from its recipe's numbers: its pre-step, its NameID ranges' and its chip compares'; docs/ROM_DATA.md, their shims and pre-steps) and its veneers (`+0x200`, 12 bytes each: `push {r0,r1}; ldr r0,[pc,#4]; str r0,[sp,#4]; pop {r0,pc}` and the target); `+0x368000`-`+0x380000` their code, block by block, each the same distance from a word boundary as in its game; `+0x380000`-`+0x3FBC00` what they draw, each sprite in a room of its own (an LZ77 one decompressed), and the sounds BN6 has no song of (a song packed whole, its sequence, voice group and samples, in a room of its own there, listed at one of BN6's empty song slots, a fixed one per BN5 sound whatever track copies it, the families' `0x60`-`0x62`: docs/ROM_DATA.md, their sounds). `+0x3FBC00`-`+0x400000` the viruses' arm points' records grown to every number of sprite list 1 (`XV_ARMS`, 256 of 0x44 bytes, the word of BN6's that names them pointed here: docs/ROM_DATA.md, their arm points), a family's at its battle sprite's number. Since issue #82's A2b every family BN5 has and BN6 lacks is installed, 25 of them: AI 32-56 with ids `0x200`-`0x295`, homes, code and art one after another in that order (docs/MULTIROM.md, BN5's families, all of them). A family takes an AI index from 32 and six enemy ids from `0x200`, at fixed numbers: its entries go into the grown tables above, each slot checked to hold the fill first. BN5's CanGard, installed wherever BN5's ROM is read, is AI 32 with ids `0x200`-`0x205`: the first home, its code at `+0x368000` and its reticle's at `+0x368400`, its sprite at `+0x380000` (listed at list 1's `0x1E`, a placeholder in the player's ROM), the reticle's at `+0x383000` (list 4's `0x5C`) and its muzzle's blast at `+0x383800` (list 4's `0x5D`, effect `0x6C`); its attack is BN5's third kind's type `0x25`, spawned through the second-level dispatch (its MOVED entry the reticle's code, its TWIN entry `0xFF`). BN5's Handi is AI 33 with ids `0x206`-`0x20B`: the second home (`+0x348800`), its code at `+0x368800`, its sprite at `+0x384800` (listed at list 1's `0x00`, a placeholder in the player's ROM); its bomb is BN6's own attack (type `0x4B`). The control (`--dev xcontrol`: BN6's own Mettaur moved as AI 32, ids `0x200`-`0x205`) takes the first home and the first block in CanGard's place; BN6-side only, the guest core's BN5 copy untouched | `xvirus.c`, `xvirus_families.c` |
+| `+0x400000`-`+0x480000` | BN6's chip tables, grown and moved (issue #82; docs/MULTIROM.md, The chip registry), written as the core starts, the same at every boot with the same ROMs (a state holds none of it; a saved folder, pack or Library names the same chip with BN5's ROM or without it): `+0x400000` the 512 chip records (0x2C each: BN6's 411, the registry's chips of BN5's at their ids, a blank record at each id past them), `getChip`'s one literal (`0x08021AB0`) pointed at them; `+0x406000` and `+0x407000` the names' text archives, ids 0-255 and 256-511 (0x1000 each), `+0x408000` and `+0x40C000` the descriptions' (0x4000 each), their 23 words pointed at them; `+0x410000` the engine's own Thumb routines (0x88 bytes: the pack's split, its totals' count, its clear, the pseudo-chips' test; below); from `+0x411000` BN5's icons (0x80 each, in BN6's icons' palette), pictures (0x540) and their palettes (0x20), a picture or palette two chips share once. Without BN5's ROM each of its chips is a placeholder (its codes, type and MB the registry's, BN6's blank art and an inert behaviour) and nothing past `+0x411000` is written | `chips.c`, `xchips_install.c` |
+| `+0x480000`-`+0x4C0000` | BN5's Souls in BN6's engine (issue #82; docs/MULTIROM.md, Transplanted Souls), written once a core as it starts where the Souls are installed (`--dev soulproxy` or `souls=MASK`, BN5's ROM read beside BN6's; the Souls track's S2): `+0x000` and `+0x004` the two stubs of a Soul's life (a `bx lr` each, hooked: the proxy's entries 8 of the overlay tables point at them, as MegaMan enters and leaves form 8); `+0x012` BN5's A on UNITE (`BN5_UNITE_A`, 0x24 bytes, the same distance from a word boundary as in BN5) and `+0x040` its one veneer, on to BN6's PlaySoundEffect; `+0x100` UNITE's art for the chip's window (`BN5_UNITE_ART_SIZE`, 0x540 bytes) and `+0x700` its two palettes, a Soul's and Chaos Unison's; `+0x800` the Souls' pictures (14 of 0x80 bytes by BN5's number: none, Souls 1-12, Chaos Unison) and `+0xF00` their palette, each copied from BN5's ROM. Mode 0x24's three words point at the pictures and their palette (`BN6_UNITE_PICTURES`, `BN6_UNITE_PICTURES_2`, `BN6_UNITE_PICTURE_PAL`: Gregar reads them in that mode alone, which it never enters), and the emblem art's two words (`BN6_EMBLEM_ART_TILES`, `BN6_EMBLEM_ART_PALS`) at UNITE's art while element 0xB is UNITE, Gregar's own back while it is the emblem. From `+0x1000` the look, abilities and passives (the track's S3-S5, `src/emu/soul_room.h`, the same at every boot with the same ROMs; each number they take from issue #82's tracks' allocations): `+0x1000` eight stubs (a `bx lr` each, hooked: BN5's pending Soul, a spawn left out, the form read by object and by side, which the moved code calls; the proxy's two passive entries; ColonelSoul's side's strike set and BN5's test of an obstacle, `xstrike.c`), `+0x1080` the crossing's phases with BN5's phase 1 (four words), `+0x1100` the moved code's veneers (12 bytes each), `+0x1A00` the Souls' own Thumb (`SOULS_THUMB`, `soul_room.h`): TomahawkSoul's plain panel after his doubled Wood chip and the chip charge's two answers (`movs r0` and `bx lr`, as BN6's callers test the flags; `soulchips.c`), at `+0x1A40` BN5's counter's start (`SOUL_STUB_COUNTER`: BN6's twin called, then the counter family's first frame at once, as BN5's `0x0800E338` runs it; `soulcode.c`), and from `+0x1A80` ColonelSoul's (`soulcolonel.c`): his button's two phases (BN5's, moved: a table of two words), `+0x1A90` and `+0x1AC0` the loaded chip's draw (BN5's `0x080254F8`, moved) before BN6's last draw of the chips' mode and at the end of UNITE's, `+0x1B00` BN5's obstacle states' block (`0x08018002`-`0x0801802E`, the strike, `xstrike.c`: either Colonel's side, written with the core where BN5's Navis are) and `+0x1B80` B giving the button's chip back (BN5's `0x08024CEA`-`0x08024D28`), `+0x1C80` list 0's arm row by sprite number grown and `+0x1D80` its arm rows grown (BN6's three, then the Souls' with BN5's points), `+0x2100` the power attacks grown (BN6's 148, then the Souls' 11 and Chaos Unison's 6) and `+0x2500` their charge times (10 bytes each), `+0x2C00` the Souls' loadouts (6 bytes each), `+0x2C80` the emotion window's faces' table grown and `+0x2D00` their palettes (BN6's 23, then the Souls'), `+0x3100` Chaos Unison's Thumb (`SOULS_CHAOS`, the Souls track's S6, `soulchaos.c`: its six power attacks, the chip writer with each one's DarkChip, the requests' ends, the failure's family 0xC7 with BN5's phases and BN6's steps of a form's end, two stubs), `+0x3800` kept free (BN5's songs a Soul plays go where every track's sounds go, `xsong_install_at`: each at the slot the allocations give that sound, 0x70 at 0x5F, 0x117 at 0x5E, 0x115 at 0x5A, copied into xsong's room or found there where another track's install copied it first), `+0x4000` BN5's code the Souls run (`soulcode_bn5.c`'s 21 blocks, each its CRC32 checked as it is copied, ColonelSoul's strike's soldier among them; the types it shares the other tracks' copies, its calls into them its routes; written with the core where BN5's Navis are, for the obstacle strike, `xinstall.c`), `+0x7000` what they draw that BN6 and no other track has by its bytes (the soldier's, an effect's, ToadSoul's flash's sprites), `+0x15000` the Souls' faces and BN5's emotion window digits, `+0x15C00` BN6's sprite list 0 grown (0x60 words: BN6's as its code reads them through list 0 to 0x44, the Souls' 0x45-0x4A, what their code draws from 0x4B; list 0 the Souls' alone; grown by the Souls' code's install, its art listed, the look listing the Souls' own), `+0x16000` MegaMan in each Soul (BN5's sprite list 0, 7-12, 0x28203 bytes). Their effects take BN6's grown effect ids 0xC0-0xCF where no other track copied the same BN5 effect first, their objects the families' second-level dispatch (`xvirus_dispatch.c`; every BN5 type moved once, its decision and whose copy in `tools/bn5_twins.py`'s TYPES), their families BN6's attack families grown at `+0x600000` (0xC0-0xC7, Chaos Unison's failure 0xC7). The proxy form itself writes BN6's own tables in place (entry 8 of each table by form and its hooks' BKPTs: docs/ROM_DATA.md, MegaMan's forms) and form 8's object id in the enemy ids' table the engine reads (where the families' room has grown it, its copy at `+0x336000`, through the room's own writer, `xg_bn6_entry`) | `soulproxy.c`, `soulunite.c`, `soullife.c`, `soulcode.c`, `soullook.c`, `soulpower.c`, `soulpassive.c`, `soulchips.c`, `soulcolonel.c`, `xstrike.c`, `soulchaos.c` |
+| `+0x4C0000`-`+0x4D0000` | BN5's lava and sea in BN6's battle engine (issue #82; docs/MULTIROM.md, One net; docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), written once a core as it starts where BN5's ROM is read, at fixed addresses (IWRAM's copy of the flags' literal names the first, and a state holds IWRAM): `+0x4C0000` BN6's panel flags table grown to 16 words (BN6's 13, BN5's lava's at 13, its sea's at 14, type 0's at 15), the literal of its IWRAM routine pointed at it; `+0x4C0040` the lava's cooling, a few instructions of the project's own Thumb (the panel set plain, the spark's place moved by a random number, the spark), and its four veneers on to BN6's routines after it; `+0x4C0100` BN6's panel tile table grown to 15 types, lava's and the sea's entries BN5's with their tiles at 0x295 on, its literal pointed at it; the rest free (the tiles themselves go to VRAM from C as a battle first shows them, the panels' draw hook below: a tile set grown with them, which the game decompresses as every battle begins, made BN6's own battles start later and their runs differ) | `xpanels.c`, `xpanels_look.c` |
+| `+0x4D0000`-`+0x500000` | Free | |
+| `+0x500000`-`+0x600000` | BN5's Navis in BN6's battle engine (issue #82; docs/MULTIROM.md, Transplanted Navis; docs/ROM_DATA.md, Navis moved into the battle engine), written once a core as it starts where BN5's ROM is read (`--dev xnavicontrol` the control instead, `nonavis` none), at fixed addresses, the same at every boot with the same ROMs: `+0x500000` their battle sprites, each at a place of its own (`xnavi_sprites.c`: Colonel's first, the Dark Soul's at `+0x544000`), listed at list 2's 0x20 + n - 7, and from `+0x57B000` the Navis' arm points' records grown to every number of list 2; `+0x580000` BN6's thirteen Navi tables grown to 256 AI indexes (`0x400` apart), the ice block's sizes (`+0x583400`), the held chips' words (`+0x583500`), the companion's start and end (`+0x583900`, `+0x583D00`), the overlay's masks and sprites grown to 64 kinds (`+0x584100`, `+0x584200`), the moved Navis' names (`+0x584400`); `+0x588000` their homes, 16 of `0x800` (the families' layout), the last the moved objects'; `+0x590000` the Navis' stubs (`0x60`: r0 0, the DS chip AI logged, the Navis' buster's setup, Colonel's sides' bits kept in his field, the Dark Soul's chip records by id), `+0x590060` BN5's sea's submerge's code (`0xA0`, `xsea.c`: the marker's spawn, the hit gate's two tests, the splash of an object the sea holds, their veneers), `+0x590100` BN5's engine objects moved once for every track (`xnavi_objects.c`: the image object's module and the sea's marker's, a block each), `+0x592000` the Navis' code, a room of `0x3C00` each (Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan, the Dark Soul, the control); `+0x5B0000` a room of `0x400` each for its overlay's masks, then from `+0x5B2000` the shared art: every sprite their attacks draw once, at a place and number of its own whichever Navi draws it (lists 4 and 5 grown, `+0x334000`'s), copied by the first install that needs it, to `+0x5FA000`; `+0x5FA000` the Dark Soul's chip records (`XN_DARK_RECORDS`: BN6's 512 records with the four bytes its chip AI reads BN5's, `0x5800` bytes) | `xnavi_sprites.c`, `xnavi_room.c`, `xnavi_install.c`, `xnavi_objects.c`, `xsea.c`, `xnavi_dark.c` |
+| `+0x600000`-`+0x700000` | The code of BN5's chips moved into BN6's engine (issue #82's C3; docs/MULTIROM.md, The chips' code; docs/ROM_DATA.md, BN5's chips' code in BN6's engine), written once a core as it starts where BN5's ROM is read, all or nothing, after the moved objects and the Navis and before the families (`xinstall.c`: a type the moved objects or a Navi moved its units spawn as that copy, and a family one of theirs as theirs), at fixed addresses (their records, names and art are at `+0x400000`): `+0x600000` BN6's attack families grown (`FREE_ATTACK_FAMILIES`, `xattack_grow.c`), one table for every track that adds an attack: 240 entries for CurAction 0x10-0xFF, BN6's 79 (0x10-0x5E) as the player's ROM has them, 0x60-0xBF the chips' (BN5's family F at 0x50 + F), 0xC0-0xCF the Souls', 0xD0-0xFF spare, every entry not given its stub at `+0x6003C0` (`ldr r0,[pc,#0]; bx r0` and `0x08011715`, BN6's object_exitAttackState: the attack ends), its two words (`0x0801BB10`, `0x080EC384`) pointed at it, each checked first; `+0x600400` BN6's support chips' routines grown to 256 (BN6's 0x2A as the ROM has them, the units' from 0x2A + BN5's subfamily), `+0x600800` its Navi chips' routines to 256 (BN6's 29, the units' from 0x1D + BN5's), their four words (`0x080ED138`, `0x08017BB8`; `0x080E2CF0`, `0x08017BBC`) pointed at them; `+0x600C00` their stubs (a support routine that spawns nothing, `movs r0,#0; mov pc,lr`, a panel claim's spawners' too, an unused computed power's and an unplayed subfamily's; a Navi routine that does nothing, `mov pc,lr`; `+0x600C08` r0 1, `movs r0,#1; mov pc,lr`, the SP powers' link bit; `+0x600C10` MegaMan's point (-1, 26) in r0 and r1, ElemRage's; `+0x600C18` his point 0x1D, (40, 20) by his facing, HolyDrem's; each returning by `mov pc,lr` as BN6's own routines do, since the tables' readers call through `mov lr, pc`, a return address without the Thumb bit that a `bx lr` would go on from in ARM state); `+0x600C30` the SP powers' best deletion times (`XC_SP_TIMES`, BN5's `0x0203E560` as they read it: 0xFFFF each, none, 0x2C a side); `+0x600C90`-`+0x602000` the helpers' code (`XC_HELPERS`: BN5's code several units call, installed once before them: the buster arm, the shake, the computed powers' routines; the muzzle flash BN5's image object, moved once for every track at `+0x590100` with its kinds' sprites, `tools/bn5_objects.py`), the only code besides BN6's and the moved objects' that a unit's calls may reach; `+0x602000` BN6's computed powers' routines grown to 256 (`XC_POWERS`: BN6's 45 as the player's ROM has them, BN5's entry i at 0x80 + i where a helper moved its routine, the rest the stub), its one word (`0x080109D4`) pointed at it; `+0x602400` each unit's veneers (the helpers' first), 64 homes of `0x400` in the install's order; `+0x612400` the units' code, block by block in `UNITS`' order, each the same distance from a word boundary as in BN5; `+0x6A0000`-`+0x700000` what they draw, each sprite in a room of its own (BN5's sprite of a list and number BN6 keeps another of, listed at a number of the chips' in the grown list: lists 1-5, list 3 grown at `+0x333900` for every track by this one), the chips taking the grown lists' numbers from `0xFF` down, the families from the bottom up, each slot checked to hold the fill first; the grown effects' ids 0xD0-0xFF from the top down; BN5's sounds BN6 has another song of at their slots fixed for every track (0x40-0x62, the chips' own from 0x52 down, `xsong_install_at`, docs/MULTIROM.md, The chips' code). BN6's chip records are named moved as the registry writes them (BN6's at `0x08021DA8` to `+0x400000`), so a trace or the differential's poke at BN6's own record reads the copy the game reads | `xattack_grow.c`, `xchips_code.c`, `xchips_bn5.c` |
+| `+0x700000`-`+0x710000` | The Souls' art past their room (`FREE_SOULS_ART`, issue #82's grant to the Souls track): from `+0x700000` the sprites `tools/xsoul.py` places past `SOULS_ART` (none since the tracks' merge: the flash kinds' 3:0x03 and 3:0x00 are the moved objects' copies at the Navis' numbers 5:0xA6 and 4:0xB5, tools/bn5_objects.py, each sprite's bytes in one place), to `+0x70F000`; `+0x70F000`-`+0x70FA00` ColonelSoul's button's art, BN5's copied (`SOULS_COLONEL_ART`: its tiles on the chips' screen lit, grey and chosen, 0x180 bytes each, BN5's lit for chosen; its picture in the chip's window, 0x540 bytes; that picture's palette and the window's name line's), written once a core with the Souls' code | `soulcode.c`, `soulcolonel.c` |
+| `+0x710000`-`+0x710400` | BN6's Program Advances' list grown with BN5's (`FREE_CHIP_PAS`, issue #82; docs/ROM_DATA.md, BN5's Program Advances in BN6's lists), written as the chips' code is installed, where BN5's ROM is read: BN5's recipes of the registry's in BN6's ids (`src/core/xchips_pas.c`, 6 bytes each), then at the end BN6's 43 recipes' words, BN5's after them and 0, the Custom screen's word (`0x080295B4`) pointed at it | `xchips_code.c` |
+| `+0x710400`-`+0x710440` | The player's chip AI's stub (`FREE_CHIP_AI`, issue #82): from BN6's idle state's hook, a call into BN5's chip AI for the player (moved with the Dark Soul's code) and the state left as BN5's leaves it (`movs r0,#1; pop {r4,r6,r7,pc}`), where BN5's ROM is read | `darkinvs.c` |
+| `+0x710440`-`+0x800000` | Free | |
 
-The guest core's ROM copy (BN5's, docs/MULTIROM.md, Guest battles) is
-padded the same way; past BN5's 8 MB, from `0x08800000` (`BN5_FREE`): the
-battle's record copy (`+0x00`), a copied record's entity list (`+0x20`: its
-viruses scaled, or `--dev gem`'s Mystery Data set in) and the deck's
-shelf (`+0x100`, the DarkChips'). In BN5's own data it writes the
-encounter roll (its answer), the deck's compaction (a jump to the shelf),
-its chips' records, reward rows and battlefield Mystery Data's finds
-(`0x0801D62C`: All *, the rewards' codes and zenny), and for a guardian
-of BN5's (docs/BOSSES.md, BN5's Navis) his
-stats row's HP word at his version, capped to the act's band before his
-battle and its own written back as it ends. Of its event flags (eToolkit
-+0x44, `0x020029F8`) it sets the run's Souls' before each battle, and
-clears those the run lacks: Double Soul's (0x0000), Chaos Unison's
-(0x0236) and each Soul's own (0x0008-0x000D; docs/META.md, Souls in BN5
-territory).
+The guest core's ROM copy (BN5's: the differential's reference since the
+guest left runs, docs/MULTIROM.md, Guest battles) is padded the same way;
+past BN5's 8 MB, from `0x08800000` (`BN5_FREE`), the differential's record
+(`+0x200`, its entities from `+0x210`: `guest_dev_battle`, docs/
+DEVTOOLS.md, The differential). In BN5's own data it writes the encounter
+roll (its answer) alone. Until issue #82's last round a run's guest
+battles wrote there too: a battle's record copy (`+0x00`) and entity list
+(`+0x20`), the DarkChips' deck shelf (`+0x100`), the deck's compaction,
+its chips' records, reward rows and finds (All *, the rewards' codes and
+zenny), a guardian's stats row, and its event flags for the run's Souls.
 
 A battle with a green Mystery Data on the field also rewrites the reward
 row its record names (rows 0 and 1, one per record, of the table at
 `0x080211A0`, docs/ROM_DATA.md) with the run's own rewards before the
-battle.
+battle; one of BN5's records fought in BN6's engine (issue #82, the
+xrecord step, `src/core/xbattles.c`) with BN5's own row of finds, as
+BN6's (docs/ROM_DATA.md, BN5's records in BN6's engine).
+
+Where BN5's ROM is read, as the core starts (`xvirus_install`), one more
+of BN6's tables is written in place (issue #82, docs/MULTIROM.md): 26
+battlefields that no BattleSettings of BN6's names (12 bytes each at
+`0x0800D730` + n x 12: 0x09, 0x0D-0x0F, 0x11, 0x1D, 0x22-0x25, 0x28,
+0x2F-0x31, 0x46, 0x55, 0x63 and 0x64, and for BN5's lava and sea 0x56,
+0x5F, 0x61, 0x65-0x67, 0x69 and 0x6A) with fields of BN5's that its
+areas' records name, their panels' types as BN6's (`src/emu/xfields.c`;
+docs/ROM_DATA.md, Battlefields and their panels' types), each first
+checked to hold BN6's own. It is not in a state: every boot with the
+same ROMs writes them the same, and BN6's own battles name none of those
+fields. The reward rows of the ids a virus family moved into the engine
+takes (from 0x200; CanGard's 0x200-0x205) are its game's rows for its
+versions, each entry as BN6's (a chip as BN6's of its name, else 200
+zenny), in the grown copy of the rows (`+0x337000` above), each first
+checked to hold the filler the copy gives the ids past BN6's. For BN5's
+lava and sea, BN6's panel types 13 and 14 (`src/emu/xpanels.c`;
+docs/ROM_DATA.md, BN5's lava and sea in BN6's engine), two of BN6's
+IWRAM routines are patched too: the literal that
+names the panels' flags table (`0x0300791C`, pointed at the grown table
+in the free space), the element hit's volcano and conveyor tests
+(`0x03007742`-`0x03007771`, made again with lava cooled under Aqua as
+the volcano is) and the panel bonus's tests (`0x03007678`-`0x0300768D`,
+made again with an Elec hit on sea counted twice as BN5's are, after
+Fire on grass), and for BN5's sea's submerge (`src/emu/xsea.c`;
+docs/ROM_DATA.md, BN5's sea's submerge and hold in BN6's engine) the hit
+gate's two tests of an invisible target (`0x0300724A`-`0x03007257` and
+`0x0300728C`-`0x0300729B`, each made a call to the project's own test in
+ROM, which stops a hit on the submerged as BN6's stops one on the
+invisible but for Elec), each in the routines' image in ROM (`0x081D6000` on),
+which the game copies to IWRAM as it powers on, and kept so in RAM
+(`emu_keep`): a state is saved with BN6's own bytes there, so it loads
+in any build, and they are made the engine's again as one is loaded.
+BN6's own battles run as they did: its panels take the element hit's
+steps in the same cycles (but a Wood hit on a conveyor, three more),
+their flags are read from the ROM's table (a few wait states a read),
+and lava's and the sea's tiles go to VRAM from C, at no cost in the
+game's cycles, only where a battle shows them; the autopilot's runs over
+seeds 1-12 log the same battles as the build before, and draw the same
+picture every 250 frames.
 
 As a battle ends, the reward rows of its enemies (`0x080AC718` + id x
-0x28) are rewritten in the folder's codes, half the time, by a hook on the
-reward pick just before it reads them (docs/META.md, docs/ROM_DATA.md);
-with the All * helper every chip entry in *.
+0x28, or their grown copy at `+0x337000` where a family is installed:
+the rows the results read) are rewritten in the folder's codes, half the
+time, by a hook on the reward pick just before it reads them (docs/META.md,
+docs/ROM_DATA.md); with the All * helper every chip entry in *.
 
 While a run has the All * helper (docs/META.md, issue #18), every chip
-record of ids 1-313 holds * alone (its four codes at `0x021DA8` + id x
-0x2C written `1A FF FF FF`), and the Program Advance check's `cmp r2, #1`
+record of ids 1-511 holds * alone (its four codes at the chip records'
+place, `EMU_FREE` + `0x400000` + id x 0x2C, written `1A FF FF FF`), and the Program Advance check's `cmp r2, #1`
 at `0x08029606` is `cmp r2, #3`; each new layer writes them as the run's
 helpers have them, and the ROM's own back before the game's own NEW GAME
 boots (the folder it gives is counted in the pack by the records). As
 such a run begins, the folder's 30 entries go to * and each chip's four
-pack counts to its first. A guest battle in BN5's core does the same to
-BN5's copy (its records at `0x01E210`, its check at `0x080252B2`), and
-puts the folder's chips, DarkChips and reward rows in *.
+pack counts to its first.
 
 BN6's own DarkChips (docs/META.md, docs/ROM_DATA.md; issue #70): as each
 layer is made, the records of DrkSword, DarkThnd, DrkRecov and DarkInvs
@@ -149,11 +221,23 @@ a battle begins: their own with one or more, their base chip's with none,
 and the base chip's for the rest of a battle whose last BugFrag a
 DarkChip spent. DarkPlus's record is left as it is, out of the pack.
 
-After a battle in BN5's core, BN6's encounter walk (eToolkit `+0x40`,
-bn6f S2001c04: `+0x12` the distance walked since the last battle, `+0x14`
-where the roll last checked) is cleared, as BN6 clears it entering the map
-its own battles return to: the roll's chance rises with that walk, and
-BN6's map is never left around a guest battle.
+BN6's chip tables (issue #82; docs/MULTIROM.md, The chip registry;
+`src/emu/xchips_install.c`), as the core starts: besides the records,
+archives and art past `EMU_FREE` (above), BN6's pack routines are split
+so ids 320-511 count in an extension of the pack, 12 bytes an id from
+`0x02010CE0` to `0x020115E0` (EWRAM BN6 leaves alone: only its power-on
+clear writes it, as it writes the pack; a state saves it with the rest):
+getOffsetToQuantityOfChipCode's tail (`0x08021C9A`) and GetTotalChipCount's
+(`0x08021BE4`) jump to the engine's routines, the pack totals' count
+(`0x08021CD6`) calls one and its loop runs to 511 (`0x08021D04`), the
+pack's list runs to 511 (`0x08121D2C`, 0x13A before), and its clear
+(`0x08021C70`, a NEW GAME's and the folder editor's as it writes the pack
+again) clears the extension too. The support and Navi chips' routines
+test a pseudo-chip by its id through the engine's routine, 0x170-0x19A
+(`0x080ED11C`, `0x080ED6C4`, their literals `0x080ED13C`, `0x080ED6D8`):
+BN6's id test was every id from 0x170, which would take a chip of the
+registry's from 411 for one. Each halfword and word is read first and
+must be BN6's own, the free space `0xFF`; then all are written.
 
 In the rival's netbattle (docs/RIVAL.md), ProtoMan's HP and MaxHP are
 given the act's guardian band at most as he spawns, where his own 1800 is
@@ -192,6 +276,43 @@ At a new run's start the engine writes the chosen starting folder (docs/META.md)
 over the game's first folder: 30 u16 at the chip data eToolkit `+0x48` points
 at (docs/ROM_DATA.md, chip folders), as BN6's own GiveFolder copies one in.
 The Standard folder writes nothing.
+
+### BN6's RAM
+
+The engine keeps its own state out of BN6's RAM but where issue #82's
+RAM plan gives the moved content room that BN6 leaves alone, by one plan
+every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
+`tests/test_core.c` checks in order and apart, `BN6_PACK_EXT` and
+`BN6_DISPATCH_SIDE` at its places):
+
+| Range | Contents | Code |
+| --- | --- | --- |
+| `0x02010CE0`-`0x020115DF` | Persistent: the chip pack's extension, ids 320-511, 12 bytes an id (`BN6_PACK_EXT`; docs/MULTIROM.md, The chip registry) | `xchips_install.c` |
+| `0x020115E0`-`0x0201172F` | Persistent: MegaMan's AI data, BN5's 0x140 bytes, where BN5's ROM is read (`RAM_PLAYER_AI`: his object's +0x58 pointed here as he is set up, `0x080172F6`, his pool's 0x100 bytes copied first, the rest zero; BN5's chip AI keeps its state from +0xF0 to +0x13F, past BN6's 0x100), then at `0x02011720` his place in BN6's pool; DarkInvs's machine, docs/MULTIROM.md, The chips' code | `darkinvs.c` |
+| `0x02011730`-`0x020117FF` | Persistent: spare | |
+| `0x0203FB50`-`0x0203FBDF` | Per battle: BN5's sea's submerge (`RAM_SEA`; `XSEA_MASK` the submerged, a bit each by its collision data's own, `BN6_COLL_INDEX_BIT`; `XSEA_MARKERS` each one's marker by that bit's index, 32 words; 0x84 bytes used), which BN5 keeps in the collision data where BN6 keeps its bubble | `xsea.c` |
+| `0x0203FBE0`-`0x0203FD9F` | Per battle: the Dark Soul's chip AI's lists (`RAM_DARK_LISTS`, `BN6_DARK_LISTS`: BN5's `0x02034C20` laid out as BN5's, 0xE0 a side, BN6's chip ids), empty (0) as each battle is set up | `xnavi_dark.c`, `xnavi_bn5.c` |
+| `0x0203FDA0`-`0x0203FDAF` | Per battle: the moved Navis' own state (`RAM_NAVIS`): Colonel's sides' bits (`BN6_COLONEL_SIDES`, which BN5 keeps in BattleState +0x5C), the object the Dark Soul's AI data is now and its own in the pool (`BN6_DARK_AI_OWNER`, `BN6_DARK_AI_POOL`) | `xnavi_room.c`, `xnavi_dark.c` |
+| `0x0203FDB0`-`0x0203FEEF` | Per battle: the Dark Soul's AI data (`RAM_DARK_AI`, `BN6_DARK_AI`: BN5's 0x140 bytes, its chip AI's state past BN6's 0x100), one Dark Soul's at a time | `xnavi_dark.c` |
+| `0x0203FEF0`-`0x0203FEFF` | Per battle: the moved chips' own state (`RAM_BATTLE`): BN5's green flash's frames, a u16 a side (`XC_FLASH`, which BN5 keeps in his AIData +0x3C, BN6's resting height; docs/ROM_DATA.md, BN5's DarkPlus and its green flash), zeroed with the battle's RAM; `+4` on kept for the moved families' | `xchips_flash.c` |
+| `0x0203FF00`-`0x0203FF5F` | Per battle: the second-level dispatch's side tables (`BN6_DISPATCH_SIDE`: a byte an object slot, its game's type, 32 for each of the first, third and fourth kinds), written by the dispatch's spawners and read by its routines | `xvirus_dispatch.c` |
+| `0x0203FF60`-`0x0203FF6F` | Per battle: BN5's Colonel's table moved (`BN6_COLONEL_TABLE`, `RAM_COLONEL`: two 8-byte entries by side, which BN5 keeps at `0x02034000`), written by his moved code and read by his attacks' objects, zeroed with the battle's RAM as each battle is set up | `xnavi_bn5.c` |
+| `0x0203FF70`-`0x0203FFEF` | Per battle: the Souls' state in BN6's battles (`BN6_SOULS`: 0x20 bytes a side, and room for the track's later milestones; each side's +0x0E and +0x0F BN5's mood as BN6's battles keep it and whether a BN5 DarkChip made him dark, +0x06 the chaos level, +0x16 the Chaos Unison's charge's frame in its phases' cycle and +0x17 its release's request standing (`BN6_SOUL_LEVEL`, `BN6_SOUL_CYCLE`, `BN6_SOUL_REQUEST`: BN5's AIData +0x6C and +0x1C; docs/ROM_DATA.md, Chaos Unison), +0x14 the chip ColonelSoul's button took, committed at OK (his obstacle strike's side is `BN6_COLONEL_SIDES`, the Navis' field a Navi Colonel's spawn sets too, never BattleState +0x5C's bits, which BN6 reads as its own); docs/ROM_DATA.md, BN5's mood in BN6's battles; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a Soul's life on the proxy form): so every battle begins with no Soul, read and written by the Souls' hooks alone | `soulunite.c`, `soullife.c`, `soulmood.c`, `soulcolonel.c`, `soulchaos.c` |
+| `0x0203FFF0`-`0x0203FFFF` | Per battle: spare (the game call's old mark, not used since issue #33) | |
+
+Persistent, `0x02010CDC`-`0x020117FF`: the engine RAM survey of issue #82
+(static scans, 592 runs, every RAM byte logged) found it written by the
+power-on clear (`0x080001CC`) alone and read by nothing, the RFU library's
+globals below it and the battle sprite pool from `0x02011800` above; the
+pack's extension starts on a 16-byte boundary, the four bytes before it
+left. Per battle, `0x0203FB50`-`0x0203FFFF` (1200 bytes): the battle's
+setup clears it every battle (`0x080071F2`, a fill of
+`0x0203CDA8`-`0x0203FFFF`), and nothing else of BN6's reads or writes it
+(the engine research's watch over its runs; no code literal points past
+`0x0203F7E0`, and the fourth kind's list at `0x0203F750`, its count a
+byte, reaches `0x0203FB4F` at most). Both are in a state as all of EWRAM
+is.
+
 ## A layer
 
 1. `net_gen.c` generates rooms, walkways and objects from the run seed.
@@ -262,9 +383,8 @@ boss strikes his pose out of the white (it was the Guardian Data's dark
 way into the Undernet); `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
-docs/RIVAL.md; `0x146E`, never cleared by a layer, that the run's chips
-that sit out of the older net's battles were named on its first such
-layer; at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
+docs/RIVAL.md (`0x146E`, which named the chips that sat out of the
+guest core's battles, is free since they left runs); at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the
 askers' scripts set and the director keeps as each visit's places are
 installed, docs/HOME.md piece 5; `0x146C` that the town holds nothing
@@ -325,23 +445,120 @@ director's logic takes in each frame whole, as on the main thread. The emu
 scene's update takes the frame done in and then starts the next, which runs
 while the frame done is drawn from a copy of its picture; keys, frames and
 the logic keep their order, and the autopilot's run log comes out the same.
-A battle on the guest core (docs/MULTIROM.md, Guest battles) begun from a
-frame's logic holds BN6's next frame until it ends, as on the main thread:
-started at once, BN6 had walked one frame further into the battle's
-moment, and the run went another way from there.
 `CYBERWORLD_EMU_THREAD=1` runs it so on a computer, to test it. With the
 core on its own thread, mGBA's threaded video draws its picture on one
 more (`threadedVideo`), beside the emulation; the worker waits for it at
 each frame's end, so the picture copied is whole. On the 3DS that thread
 is on the main core, which waits most of a frame for the emulation.
 
-BN5's guest core boots on a thread of its own on native builds, from the
-game's start on (docs/MULTIROM.md, Guest battles: its boot): a core the main
-thread leaves alone until the thread is joined at a frame's end, beside
-BN6's on whichever thread BN6's runs. In the browser its boot fills each
-frame's spare time instead: the frame's work and its slice within 10 ms
-of the 1/60 s (12 ms while a battle waits for it), none in a frame
-played unshown (`boot_spare_ms`, `guest_tick`).
+A run has one core, BN6's, on every build since issue #82's last round:
+BN5's guest core, which booted on a thread of its own (the browser's
+frames' spare time) from the game's start on, left runs (docs/MULTIROM.md,
+Guest battles), and the differential's boots it on the main thread.
+
+## The browser's memory
+
+The browser build's WebAssembly memory starts at 64 MB
+(`-sINITIAL_MEMORY=64MB`) and grows as the game asks, never shrinking;
+what it reached is the page's high-water mark (`Module.HEAP8.byteLength`
+in the page). Measured on 12 October 2026 in headless Chrome
+(agent-browser), both ROMs given, the same saves loaded from a backup (a
+run at the arena door of End Area's third layer, an older net's act, seed
+3), each build served by `build.py serve`:
+
+| | This build (issue #82's last round) | Before it (a9d98987, the guest core in runs) |
+| --- | --- | --- |
+| The title | 64 MB | 64 MB |
+| A new game's first layer (Central Area) | 110.6 MB | (not measured) |
+| CONTINUE on the older net's layer | 132.6 MB | 159.2 MB (the guest core booted with it) |
+| A battle there (CanGards, BN6's engine) | 132.6 MB | 159.2 MB |
+
+So a run with BN5's ROM keeps some 27 MB less: the guest core's ROM copy
+(BN5's 8 MB padded to `EMU_ROM_SIZE`, which mGBA copies at its first
+patch) and its own state are gone. The JavaScript heap stayed near 20 MB
+in this build. Issue #68's measure, before BN5's battles came into BN6's
+engine: 97 MB on a first layer with BN6 alone, 153 MB on BN5's first
+layer with the guest booted, 197 MB at most.
+
+## The 3DS's memory
+
+The New 3DS gives the game 124 MB. `src/core/start_3ds.c` splits it before
+`main`: the heap takes all its area holds, 96 MB, and the linear heap the
+rest, some 13 MB (the screens', the sound's, and the GBA's own RAM, which
+mGBA's 3DS setup takes there). The heap is what runs short. What it holds
+for a whole session:
+
+| | The 3DS before issue #82's 3DS round | BN6 alone now | With BN5's ROM now |
+| --- | --- | --- | --- |
+| mGBA's ROM buffer | 16 MB | given back | given back |
+| BN6's ROM (`R.data`, the player's bytes) | 8 MB | 8 MB | 8 MB |
+| The core's copy (`EMU_ROM_SIZE`, patched) | 16 MB | 16 MB | 16 MB |
+| BN5's ROM (`XR`) | | | 8 MB |
+| All | 40 MB | 24 MB | 32 MB |
+
+mGBA's 3DS setup (its `ctru-heap.c`, linked in with the core) takes its ROM
+buffer before `main`, 16 MB as `docker/mgba.sh` builds it, for loaders of
+its own (`mCorePreloadVF`, `mCoreLoadFile`) the game never calls: `emu.c`
+hands the core its padded copy as a file in memory, which `GBALoadROM`
+maps as it is for a 16 MB ROM and patches in place (mGBA 0.10.5's
+`src/gba/gba.c` and `memory.c`'s `_pristineCow`). `start_3ds.c` gives the
+buffer back at the start. BN5's ROM is then read whole, as on every
+build, where the heap still has 80 MB free for it: its own 8 MB, the
+core's copy still to come and 56 MB of play (a New 3DS has some 88 MB
+free there); short of that it is left unread, the run is BN6's, and the
+log and the PET's home say so.
+
+What play takes was measured on a computer (`tools/heap3ds.py`,
+docs/DEVTOOLS.md: the host build's allocations counted as the 3DS's heap
+holds them, the core's copy kept, one past 96 MB refused). The installs
+keep little of the heap (BN5's code and data, some 2 MB of its file read,
+go into the core's copy, past the game's 8 MB). A layer's area learned
+from its original maps takes up to 50 MB at once (a map, its mirror image
+and its raised views, each a whole map's pixels twice), and what it
+learned stays, 2 to 7 MB an area. Kept for every area a run had passed
+through, those filled the heap in long runs: with the 3DS as it was, 20
+of 24 long runs (seeds 1-24, the test autopilot kept alive, 120000
+frames, 5 to 41 layers) had allocations refused, 544 in all (a map's
+mirror image not learned, a book of its tiles lost, a cache left out).
+So the 3DS keeps the learned maps of the layer's own area alone
+(`src/map/netmap.c`), and an area a run comes back to is learned again,
+the same (the endless net's acts once round: some 4 times a long run;
+`log.txt` says "area N learned again"). Two areas kept refused
+allocations in 17 of the 24 runs with BN5's ROM read.
+
+| The same 24 long runs | The 3DS before | BN6 alone now | With BN5's ROM now |
+| --- | --- | --- | --- |
+| The heap's peak | 96 MB (full) | 87.7 MB | 95.8 MB |
+| Runs with an allocation refused | 20 (544 refused) | 0 | 5 (6 refused: a speed cache of the tiles' learning each, its result the same) |
+| Crashes | 0 | 0 | 0 |
+| Areas learned again | 0 | 95 | 111 |
+
+With BN5's ROM the heap is near full at a long run's worst: modelled 6 MB
+short (`--cap 90`, what the 3DS's fragmentation might take), the same runs
+with BN5 refused 332 allocations in 20 of the 24, 39 of them a book of an
+area's tiles lost (its layers drawn from fewer of its original tiles),
+none crashed; BN6 alone refused none. Two crashes the model found on the
+way, an allocation refused where its result was used unchecked, are
+mended: the pads found in a map's floor
+(`tl_find_pads`) and the tile pairs its neighbours show (`seams_add`).
+Other places in the map's learning still use an allocation unchecked
+(`tests/lint/analyzer.txt`'s `decor.c`, `props.c`, `stairs.c`). The model
+counts bytes, not the 3DS's fragmentation, so the device's own numbers are
+`log.txt`'s: the heap after the ROMs are read ("3ds: BN5 read and checked
+... heap N KB in use, M KB at most of 98304 KB") and after the installs
+("3ds: the core started, the installs done"), and with `frame_log = on`
+each second's line, whose "at most" is the heap's high-water mark (malloc's
+trimming is off on the 3DS, so the space it took never shrinks).
+
+BN5's ROM read in windows from the SD card instead, as a run needs it,
+would keep its 8 MB out of the heap: its readers (the installs, the
+dressing of a layer, its records and text, some 40 files over
+`XR[].data`) read about 2 MB of it at the start (the installs, measured
+page by page) and a layer's dressing 70 to 140 KB more. With the buffer
+given back and one area's maps kept, the heap holds the file whole, and
+every system reads BN5 alike. Where a New 3DS's own log shows BN5's long
+runs short (the heap's "at most" at its size, `log.txt`), those windows
+are the next room to make: some 6 MB.
 
 ## The core's time
 
@@ -443,8 +660,20 @@ function replacement), while BN6's code stays the ROM's.
   browser build has no threads, and the same rules hold there.
 - **States and resets.** A state holds RAM, not the ROM copy, so a hook in
   the ROM stays; one in RAM is written again after a state is loaded or the
-  core reset (`hook_reapply`). A hook taken off restores the original; its
+  core reset (`hook_reapply`). A patch of RAM the game copies from a ROM
+  image patched alike (IWRAM's routines, as the game powers on) is kept
+  (`emu_keep`): saved with the game's own bytes, made the engine's again
+  as a state is loaded. A hook taken off restores the original; its
   slot stays only while the CPU may hold its BKPT in the prefetch.
+- **A table per core.** Each core attached keeps its own hooks and queue,
+  found by the CPU that met the BKPT, and a hook reads and writes the core
+  it runs on: BN6's (`hook_attach`, which `emu_hook` and the others use)
+  and, for the differential alone, the guest's (`hook_core`, through
+  `guest_hook`), so its hooks on BN5's code never touch BN6's core
+  (`tests/test_emu.c`: one address hooked on both, each core's frames
+  running its own hook alone, reading its own memory). Two
+  cores' hooks run one core's frame at a time (the differential's
+  frames run on the thread BN6's do).
 
 The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 
@@ -453,6 +682,7 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `0x08005A98`, `0x08005AE2` | checkThenStartBattle: its first test, the branch after the roll | answer: a forced battle, the engine's record (issue #29) | once a frame on the map |
 | `0x08005BC8` | StartBattle | event: the record the battle starts from | once a battle |
 | `0x080AC180` | the reward pick (bn6f `sub_80AA910`) | answer: its enemies' reward rows rewritten first | once a battle, as it ends |
+| `0x0800A4D2` | the battle's deck dealt from the folder (bn6f `sub_800A3E4` at its end, `src/emu/xchips_install.c`) | answer: the chips that sit out (a chip of BN5's whose code BN6 lacks, a DarkChip of BN5's, every one of BN5's without its ROM: docs/MULTIROM.md) taken out of the deck, the rest in their order, `0xFFFF` after them; the Regular chip's and the TagChips' marks (BattleState `+0x17`, `+0x44`) cleared where theirs sat out | once a battle |
 | `0x08010D58` | every chip use's DarkChip check (bn6f `sub_8010D58`, `src/director/darkbn6.c`) | answer, posting an event (`hook_post`) where a DarkChip of MegaMan's runs as its base chip, no BugFrag in the battle's count | once a chip used |
 | `0x0800B79A` | a chip's after-effects as it runs (bn6f `sub_800B79A`) | answer, posting an event where a DarkChip's dark power ran for MegaMan (its id 0x11E-0x122 reaches it only then): its price after the battle | once a chip used |
 | `0x0800E2D8` | object_subtractHP | answer, posting an event (`hook_post`) where MegaMan's HP falls | in the rival's duel only: once per battle object a frame |
@@ -465,6 +695,129 @@ The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 | `EMU_FREE` + `0x100` | where a game call's routine returns | answer: its r0 and r1 kept, r4-r11 put back, on to the main loop | once a call |
 | `0x08120B90` | the PET's input handler (`src/director/pet.c`) | answer: A on Save taken for the engine (docs/PET.md) | each frame the PET takes input |
 | `0x080003A6` | `main_awaitFrame`'s DISPSTAT loop (`src/emu/idle.c`) | answer: the CPU halted till the VBlank interrupt (The core's time) | about four times a frame (each interrupt wakes it) |
+| `0x0801A802`, `0x0801AD3C`, `0x0801AD94`, `0x0801ADC8`, `0x0801AE24`, `0x080DA5FA` | each actor's status step (its pre-steps' first call), four obstacles' pre-steps and one object's routine: where BN5 steps an object on its lava first (`src/emu/xpanels.c`) | answer: an object on lava hurt as BN5 hurts it, then the lava cooled under a spark by a few instructions of the project's own (`EMU_FREE` + `0x4C0040`), which come back to the hooked instruction, run then | where BN5's ROM is read: once per actor and obstacle a frame |
+| `0x0801A1AA` | what the panel under an actor does to it, its poison test (`xpanels.c`) | answer: a Fire object on sea taken as on poison | the same: once per actor a frame |
+| `0x0800C3B8` | the per-panel update, its conveyors' test (`xpanels.c`) | answer: lava and sea counted down to plain as a conveyor, from BN5's 0x3C0 | the same: once per panel a frame |
+| `0x0800CC0A` | object_setPanelType (`xpanels.c`) | answer: a chip's lava or sea made with BN5's 0x3C0 frames | the same: once a panel set |
+| `0x0800C5E6` | the panels' draw, past its palettes' step (`src/emu/xpanels_look.c`) | answer: where lava or sea is on the field, its tiles written into VRAM at tile 0x295 on if a word of each says they are not there (a battle's first frame with them), and its colours over the volcano's or the conveyors', by BN5's animations (where those are not on the field) | the same: once a battle frame |
+| `0x0802D644` | the delete count raised as a virus of version 0-3 is deleted (`src/emu/xvirus_grow.c`) | answer: returns at once for an AI index of 32 or more (a family moved into the engine, docs/MULTIROM.md), whose byte would lie past the 32 BN6 counts (`0x02000070`) | where a family is installed: once a virus deleted |
+| `0x0802D652` | the delete count's read (the rare versions' check) | answer: 0 for an AI index of 32 or more | the same: once a rare version is looked for |
+| `0x0802D65E` | a rare version's deletion (version 4-5: with event flag 0x1D8 set, the AI index put at `0x0203EAEA` for the chat of new virus data after the results) | answer: returns at once for an AI index of 32 or more | the same: once a rare version deleted |
+| `0x0800EC56` | an enemy id's name (`BN6_NAME_OF`: the viruses' archive, the Navis' past 0xFF, and the id's low byte; `src/emu/xvirus_grow.c`) | answer: for an id from 0x200, a family's, the families' archive (`EMU_FREE` + `0x341000`) and its entry there, id - 0x200 | where a family is installed: once a name plate, as a battle begins |
+
+The differential (`--xdiff`, dev only; docs/DEVTOOLS.md) hooks both cores
+on each game's own routines: the four RNG draws, the spawns' common
+routine at its start and its end, PlaySoundEffect, an effect's spawner,
+setAttack, a panel reserved, the blink and sprite_load (docs/ROM_DATA.md,
+The differential's hooks), and BN5's alone where a hit landed raises a
+side's mood (`BN5_MOOD_GAIN`, which BN6 has not: MegaMan as the
+differential's subject); `CYBERWORLD_XDRAWS` puts the draws' four on
+BN6's core for the control's runs (`tools/xcontrol.py`).
+
+The Souls' proxy form (`--dev soulproxy`, dev only; docs/DEVTOOLS.md, The
+proxy form) hooks the three places Gregar's code reads MegaMan's form
+itself, each answering form 8 as HeatCross's 1 and running on: the chips'
+bonus by form (`0x0800EF62`, r0), his arm flash's look (`0x080EC8DE`, r0)
+and the summon as he crosses (`0x08014BB6`, r4). With a Soul united the
+first two answer the Soul's (BN5's bonus by form, NumberSoul's +10, on to
+the bonuses' end `0x0800F090`; BN5's flash kind and the Soul as its
+frame). The dev step `cross F`
+hooks CROSSSELECT's commit (`0x08029394`): the next form it writes (r0)
+is F, once.
+
+The Souls on it (the same switches, or `--dev souls=MASK`; the Souls
+track's S2, `src/emu/soulunite.c` and `soullife.c`; docs/ROM_DATA.md,
+UNITE on BN6's Custom screen, and a Soul's life on the proxy form) add
+fourteen, each an answer that leaves BN6's own way alone while the run
+holds no Soul:
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x08027EC6` | the Custom screen's set-up, at Beast Out's test for element 0xB (`BN6_UNITE_STAND`) | answer: element 0xB stands for UNITE too (BN5's rule), its role and art chosen; a battle's first screen opens his mood as his HP says; a Soul's screen marked | once a Custom screen |
+| `0x0802A57A` | the emblem's lit test (`BN6_EMBLEM_LIT`) | answer: grey for UNITE (the check below lights it), and for the emblem while a Soul is united | as the screen draws element 0xB |
+| `0x08028F48` | element 0xB's update after each pick (`BN6_UNITE_LIT`) | answer: UNITE lit for a Soul the last pick lights (BN5's check), else the emblem by BN6's rule or UNITE grey | once a pick |
+| `0x08028D6C` | A on element 0xB (`BN6_EMBLEM_A`) | answer: BN5's own code for UNITE, moved to `EMU_FREE` + `0x480012`, into mode 0x24 | once A on it |
+| `0x08029072` | B on the last pick (`BN6_EMBLEM_B`) | answer: UNITE's chip given back, its icon redrawn, on to BN6's own end of it (`0x080290F2`) | once B on UNITE |
+| `0x08029418` | the picks leaving the deck (`BN6_EMBLEM_GIVEN`) | answer: UNITE's chip leaves it too, as in BN5 | once a screen's OK |
+| `0x08029150` | OK's commit of a type 2 pick (`BN6_EMBLEM_COMMIT`) | answer: UNITE's, the proxy form with the Soul's turns and its used bit, on past Beast Out's (`0x08029154`) | once OK on UNITE |
+| `0x08008472`, `0x0800847C` | the turn's change, BN6's countdown calls (`BN6_TURN_COUNT`, `BN6_TURN_COUNT_1`) | answer: a Soul's turns one less, as BN5 counts them | once a Custom screen, per side |
+| `0x0801488A`, `0x080148B2` | the turn's form check, Beast Out's end asked (`BN6_TURN_END`, `BN6_TURN_END_1`) | answer: a Soul out of turns ends, through BN6's request to leave the form (`0x08014890`, `0x080148B8`) | twice a turn, per side |
+| `0x0801B034` | the weakness break (`BN6_FORM_BREAK`) | answer: none for a Soul (on at `0x0801B052`) | once a weakness hit |
+| `EMU_FREE` + `0x480000`, + `0x480004` | the proxy's overlay entries 8, entered and left | answer: the Soul committed taken up, or cleared, then on to HeatCross's own; a double of MegaMan set up while a Soul is his (HolyDrem's, Poltrgst's) on to the Soul's own entry, as BN5's `0x0800F01C` | once a form entered or left, a double made |
+
+A Soul's look, abilities and passives (the track's S3-S5, `src/emu/soullook.c`, `soulpower.c`, `soulpassive.c` and `soulcode.c`; docs/ROM_DATA.md, A Soul's look, abilities and passives) add these, each answering only for MegaMan in the proxy form with a Soul (BN6's own way otherwise):
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x0800FCA4` | the sprite selector's read by the form (`BN6_FORM_SPRITE_READ`) | answer: the Soul's sprite in the grown list 0 | as his sprite is set |
+| `0x08010066`, `0x080BF518` | his palette's reads by the form (`BN6_FORM_PALETTE_READ`, `BN6_FORM_PALETTE_READ2`) | answer: palette 0, 2 in Chaos Unison | as his palette is set |
+| `0x08014A82` | the crossing's phases by the form (`BN6_CROSSING_PHASES`) | answer: BN6's phases with BN5's phase 1, the Soul's image (`EMU_FREE` + `0x481080`) | each frame of a unison |
+| `0x08014C8E` | the crossing's phase 2, its sound (`BN6_CROSSING_SOUND`) | answer: none (BN5's phase 1 played it); TomahawkSoul's landing: the camera shaken, the battle's flag 0x20 | once a unison |
+| `0x080C1D40`, `0x080C1D88`, `0x080C1E66` | the image's sprite, its decoration and its end (`BN6_SOUL_IMAGE_SPRITE`, `_DECO`, `_UNDECO`) | answer: the Soul's Navi's battle sprite in list 2; no decoration of BN6's | once a unison |
+| `0x0801E6C2`, `0x0801E666` | the emotion window's and the Custom screen's face by the form (`BN6_FACE_OF_FORM`, `BN6_FACE_OF_FORM2`) | answer: the Soul's face and its turns | as the face is drawn |
+| `0x0801D814`, `0x0801CBFE` | whether the window counts, its digits (`BN6_FACE_COUNTER`, `BN6_FACE_DIGITS`) | answer: always for a Soul, in BN5's digits | as the face is drawn |
+| `0x080EC954` | MegaMan's arm flash routine before its call of BN6's flash spawner (`BN6_ARM_FLASH_SPAWN`) | jump: a Soul's kind (BN5's 0x23, 0x33) to BN5's spawner, moved, on as the call returns: BN5's own flash object with BN5's kinds | once a flash |
+| `0x080BA5A2` | a Cross's flash raised in BN6's own flash's set-up (`BN6_FLASH_HEIGHT`) | answer: a Soul's at its kind's height, as BN5's | once a flash of BN6's |
+| `0x0800FF3E`, `0x08010884`, `0x080108A8`, `0x0801268C` | his loadout's, element's, weakness's and buster bonus's reads by the form (`BN6_FORM_LOADOUT_READ`, `_ELEMENT_READ`, `_WEAKNESS_READ`, `_BONUS_READ`) | answer: the Soul's row in BN6's ids, its element, no weakness, no bonus | as a form is set up, a shot fired |
+| `EMU_FREE` + `0x481000`-`0x48100C` | the moved code's stubs: BN5's pending Soul, a spawn left out, the form by object and by side | answer: from `BN6_SOULS` | as the moved code calls them |
+| the moved code's reads of BN5's AI data's Soul fields (`soulcode_bn5.c`'s fields) | in BN5's code moved | answer: from `BN6_SOULS`, where BN6's AI data holds its own | as the moved code reads them |
+| `EMU_FREE` + `0x481010`, + `0x481014` | the proxy's passive entries 8 (`BN6_FORM_PASSIVES`, `BN6_FORM_PASSIVES_COLL`) | answer: the Soul's, BN5's routine moved, or none; HeatCross's without a Soul | as a form is set up, its state set again |
+| `0x0802A494` | the Custom screen's hand size set (`BN6_HAND_SIZE_SET`) | answer: NumberSoul's ten | once a screen |
+| `0x08013236` | the chip charge's test (`BN6_CHARGE_TEST`) | jump: a chip of the Soul's kind charges by BN5's rule (ShadowSoul's swords, KnightSoul's Break chips, ToadSoul's Aqua chips), else none; the answer one of the two `movs` and `bx lr` at `SOULS_THUMB` | as A is held with a chip |
+| `0x08012C7C` | a charged chip's bonus (`BN6_CHARGE_BONUS`) | answer: KnightSoul's and ToadSoul's double (0xFF), none for the rest | once a chip used |
+| `0x0800FBA4` | the release of a charged A, its power attack (`BN6_CHARGED_RELEASE`) | jump: a Soul's empty power attack to the chip used charged (`0x0800FBEC`) | once a release |
+| `0x0801285E` | the chip's damage as its modifier leaves it (`BN6_CHIP_MODIFIED`) | jump: TomahawkSoul's Wood attack chip on grass doubled, to the Thumb that makes the panel plain and plays the modifier's sound | once a chip used |
+| `0x080128E8` | the chip use's end (`BN6_CHIP_USED_END`) | answer: BN5's DarkChip use (dark for the battle), BN5's dark gate (a chip refused made the chip of nothing), KnightSoul's 50 frames unharmed from his front column | once a chip used |
+| `0x080128EE` | the chip's family read (`BN6_CHIP_FAMILY_READ`) | jump: ShadowSoul's charged sword to BN5's sword family, moved | once a chip used |
+| `0x08010340` | the shadow's type by side (`BN6_SHADOW_TYPE_SIDE`) | jump: none for ShadowSoul (BN5's `0x0800E0B6`) | as his shadow is set |
+
+ColonelSoul's button, chip shot and obstacle strike (the track's S5, `src/emu/soulcolonel.c`; docs/ROM_DATA.md, ColonelSoul's button, chip shot and obstacle strike) add these, each answering only where MegaMan is united with ColonelSoul (BN6's own way, DustCross's, otherwise):
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x08027F10` | DustCross's elements 8 and 9 as a Custom screen opens (`BN6_DUST_ELEMENTS`) | answer: BN5's ColonelSoul's set-up (`0x08023D70`), the button grey | once a screen |
+| `0x08028F84` | DustCross's lit rule (`BN6_DUST_LIT`) | answer: BN5's (`0x08024C04`), its chip, slot and place kept | after each pick |
+| `0x08027410` | mode 0x38's phases' table (`BN6_DUST_PHASES`) | jump: BN5's two phases, moved | A on the button |
+| `0x08028342`, `0x08028782`, `0x0802878C`, `0x080287DE` | the button's tiles and the chip's window's picture and palettes (`BN6_DUST_ART`, `BN6_DUST_INFO_ART`, `BN6_DUST_INFO_PAL`, `BN6_DUST_NAME_PAL`) | jump: BN5's art, copied (`SOULS_COLONEL_ART`) | as each is drawn |
+| `0x08026CFA`, `0x08027058` | mode 4's last draw, mode 0x24's end (`BN6_MODE4_LAST_DRAW`, `BN6_MODE24_END`) | jump: BN5's draw of the loaded chip, moved, then on | each frame the button is chosen |
+| `0x08029032` | B on the chips (`BN6_CUSTOM_B`) | jump: the button's chip given back first (BN5's `0x08024CEA`), then BN6's end | B with the button the last thing done |
+| `0x08029222`, `0x08029458` | OK's end, its picks spent (`BN6_OK_END`, `BN6_OK_SPENT`) | answer: the button's chip committed (the block's +0x14) and its deck entry spent | once OK |
+| `0x0801486C` | the turn's form check (`BN6_TURN_FORMS`) | answer: his chip his (the block's +4) and his charged shot the chip shot, ScreenDivide without | as a turn begins |
+| `0x0801B3CA`, `0x0801B506`, `0x0801B646`, `0x0801B786` | the obstacles' states at their collision flags' read (`BN6_OBSTACLE_FLAGS_A`-`_D`) | jump: BN5's block (`SOUL_COLONEL_STRIKE`): an obstacle the strike finds turns into BN5's soldier (`xstrike.c`, with the core where BN5's Navis are: either Colonel's side) | each frame of an obstacle while a side is armed |
+| `EMU_FREE` + `0x481018`, + `0x48101C` | the moved code's stubs: his side's strike set, BN5's test of an obstacle (`SOUL_STUB_STRIKE`, `SOUL_STUB_STRIKE_CHECK`; `xstrike.c`) | answer: his side's bit in `BN6_COLONEL_SIDES`, where a Navi Colonel's spawn sets his; BN5's searches on BN6's panels | as he unites; as the strike's block runs |
+
+BN5's mood in BN6's battles (the track's S7, `src/emu/soulmood.c`; docs/ROM_DATA.md, BN5's mood in BN6's battles) adds these where the Souls are installed, each keeping BN5's mood in the Souls' block beside BN6's own:
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x0801A24C` | a hit's mood step, past BN6's own Full Synchro (`BN6_MOOD_HIT`) | answer: the attacker's mood up by the hit's gain (no counter), a counter's Full Synchro, the struck's down by its loss | once a hit |
+| `0x08015BEC`, `0x080143A6` | BN6's mood set and calm (`BN6_MOOD_SET`, `BN6_MOOD_CALM`) | answer: BN5's twin writers' callers mirrored (the chip's Full Synchro and Anger, Anger's start and end, a Custom screen's script) | as BN6 writes its own |
+| `0x08015C0E`, `0x080143B0` | their writes (`BN6_MOOD_SET_WRITE`, `BN6_MOOD_CALM_WRITE`) | jump: none while a BN5 DarkChip keeps him dark (past to `0x08015C10`, `0x080143B2`) | as BN6 writes its own |
+| `0x0802945A` | the deck's compaction as a Custom screen opens (`BN6_COMPACT`) | answer: the battle's opening mood at its first screen; where the deck holds a BN5 DarkChip, BN5's worried rule (the first DarkChip into the deck's place at the hand's count, deck[5] on the first screen) and the run's shelf of BN5's DarkChips, the compaction ours | once a screen |
+
+Chaos Unison (the track's S6, `src/emu/soulchaos.c`; docs/ROM_DATA.md, Chaos Unison) adds these where the Souls' own code is placed, each answering only for a side united in a Chaos Unison (`BN6_SOUL_CHAOS`) or while its release's request stands (`BN6_SOUL_REQUEST`):
+
+| Address | Routine | Kind | Runs |
+| --- | --- | --- | --- |
+| `0x08012F62` | a charge's time by its button (`BN6_CHAOS_CHARGE`) | answer: a chaos B's, his chaos power's row of the charge times by the level (BN5's `0x08010654`) | as a charge starts |
+| `0x08012E8A`, `0x08012E8E` | the charge's state's step and past it (`BN6_CHAOS_DUE`, `BN6_CHAOS_PHASE`) | answer: the phases' cycle of a full chaos B stepped (BN5's `0x080105F0`), `BN6_SOUL_CYCLE` | each frame of a charge |
+| `0x080131D4` | the release's request (`BN6_CHAOS_RELEASE`) | answer: 0x8000 in phase 2, else 0x10000 (BN5's), the request the Souls' | once a release |
+| `0x080F180E` | the player's requests read (`BN6_CHAOS_CONSUME`) | jump: the chaos attack (the level one up, the power attack by his AIData +0x11) or the failure (family 0xC7), Chaos Unison's Thumb | once a release |
+| `0x080F1870` | the player's idle state past the chip request's test (`BN6_PLAYER_IDLE_FREE`, `darkinvs.c`, where BN5's ROM is read) | jump: BN5's chip AI for the player, through `FREE_CHIP_AI`, where his AI data's +0x48 bit 0x200 stands (BN5's rule; nothing of BN6's sets it) | a frame he idles |
+| `0x080172F6` | the player's set-up past his AI data's lay-out (`BN6_PLAYER_INIT_AI`, `darkinvs.c`) | answer: his AI data moved into `RAM_PLAYER_AI` (BN5's 0x140 bytes) | once a battle |
+| `0x0801AD10` | the player's frame's end (`BN6_PLAYER_FRAME_END`) | answer: BN5's time under the chip AI counted down (AIData +0x36, BN5's `0x0800DBD8`), at 0 his request 0x80000 | a frame he runs |
+| `0x080144A2` | BN6's drain while AIData +0x36 is not 0 (`BN6_AI_DRAIN_TEST`) | jump: none while the chip AI has him (to `0x080144B2`) | a frame |
+| `0x080ED12A` | the support family past the chip's routine (`BN6_SUPPORT_MARK`) | jump: DarkInvs's (subfamily 0x65) attack ended in this frame, BN5's (to `0x080ED130`) | a support chip used |
+| `0x080EBA9C` | the attack's requests' answer to 0x80000 (`BN6_REACTION_START`) | jump: BN5's family 0x49 (BN6's 0x99) where the chip AI has him, on at the bl `0x080EBA9E` | DarkInvs's end |
+| the Navis' copy of BN5's `0x080EBBFE` | its buster arm's read of his Chaos Unison (`BN5_ARM_CHAOS_READ`) | jump: the Souls' block's `BN6_SOUL_CHAOS` | a buster shot of the machine's |
+| `XC_STUBS` + 0x24, + 0x28, + 0x2C | DarkInvs's calls BN6 has no twin of (`XC_STUB_DARKINVS`) | answer: the chip AI's state cleared, its entry (time, flag, list), his statuses cleared at BN6's places and BN5's calm of his mood | DarkInvs used |
+| `0x08011744` | the attack's end, its requests cleared (`BN6_CHAOS_END`) | answer: BN5's 0x18000 cleared too; the failure's kind his chaos ended | once an attack ends |
+| `0x080EBA84`, `0x080ED7B0`, `0x080ED90E`, `0x080EEE32` | BN6's tests of the counter requests 0x8600 (`BN6_COUNTER_TEST`, `_1D`, `_1E`, `_37`) | answer: 0x8000 left out while the Souls' request stands (BN5 tests 0x600) | each frame |
+| `0x080E21E4`, `0x080E22A8` | the charge glow's and its sounds' side tests (`BN6_GLOW_SHOW`, `BN6_GLOW_SOUND`) | jump: in chaos, BN5's test by the side | each frame of a glow |
+| `0x080E2272`, `0x080E2280`, `0x080E2208` | the glow's sprite past A's, its load, its animation (`BN6_GLOW_PICK`, `BN6_GLOW_LOAD`, `BN6_GLOW_ANIM`) | answer: BN5's dark glow (the Souls' copy in list 0), its animation the phase + 2 once full | as the glow is set and each frame |
+| `EMU_FREE` + `0x4833EC` | the failure's stub (`CHAOS_OUT_STUB`, a `bx lr` in Chaos Unison's Thumb) | answer: a Dark Soul already out ended, his side's chip lists where the battle gave none | once a failure |
+
+BN5's green flash (the chips' code, `src/emu/xchips_flash.c`; docs/ROM_DATA.md, BN5's DarkPlus and its green flash) adds two hooks on the moved DarkPlus's stores of it (in its copy, under the chips' claims) and two of BN6's: the player's timers past the time stop's test (`0x080107DC`, `BN6_FLASH_COUNT`: the flash's frames one less) and an object's colours' chain before `0x080168C8` (`0x0801B15A`, `BN6_FLASH_TINT`: the colour shader by BN5's table while it lasts), each frame of a battle where BN5's chips' code is installed.
 
 The duel's two are set as the duel begins and taken off as it ends, so
 the other battles carry no hook a frame per object. The hooks replaced
@@ -505,8 +858,29 @@ into it goes to its own board, which skips it, never to BN6's hooks (the
 hook table is BN6's core's: the guest has none); each one's RAM is its
 own; the guest's tone reaches the ring BN6's silence fills, and a frame of
 it let go (`emu_audio_drop_from`) does not; its state saves and loads with
-BN6's RAM untouched. `build.py test` runs
-it with the address and undefined-behaviour sanitizers, as CI does.
+BN6's RAM untouched. Then a block of Thumb code of the test's own, made as
+if it stood in another game, is moved into BN6's copy with `emu_write`
+(`src/emu/thumb_reloc.c`, issue #82): its call within itself left alone,
+its two calls out aimed at stubs of the ROM's own 11 MiB away, beyond a
+BL's 4 MiB, through 12-byte veneers (`push {r0,r1}; ldr r0,[pc,#4];
+str r0,[sp,#4]; pop {r0,pc}` and the target). Each stub, ARM code, keeps
+what it met: r0-r12, sp and the flags as the block set them before its
+BL, and lr its way back into the block; and the copy's writes outlast the
+core's reset that starts it. Then the second-level dispatch's code
+(`xvirus_dispatch_code`) run on the core with a driver of the test's own
+that stands in for BN6's spawner, its free and its runner: a moved type
+spawned as its kind's dispatch type, its number in the side table by the
+object's slot and its MOVED routine run with r1 the number times four; a
+twin spawned as BN6's own number (its number in the side table too,
+where nothing reads it); a type no family named let go as it first runs.
+Then RAM kept patched (`emu_keep`): the patch made where the game's own
+bytes are, a state saved with the game's own there (another core loading
+it reads them), the patch made again as the state is loaded, and bytes
+that read neither left alone. Last, the installers' claims through
+`emu.c`'s writes and hooks (`src/emu/claims.c`): an installer's bytes its
+own, another's write over them told, a write outside any installer
+nobody's, and a hook set on an installer's bytes told. `build.py test`
+runs it with the address and undefined-behaviour sanitizers, as CI does.
 
 ## Testing
 
@@ -522,17 +896,129 @@ of 44 virus battles and reached act 1's guardian in 11 runs, but beat him
 once: 400-600 HP against MegaMan's 100. `CYBERWORLD_AUTOPILOT=weak` keeps
 the first autopilot's blind button rhythm and walk, which the docs'
 pictures are timed by, and keeps enemies at 1 HP, so what follows a won
-guardian battle can be tested. In a battle on the guest core (docs/
-MULTIROM.md, Guest battles) both fight as in BN6's, from BN5's memory,
-which lays the battle out as BN6's does at its own addresses
-(`src/emu/bn5.h`, docs/ROM_DATA.md); the autopilot never picks a
-DarkChip. Over seeds 1-12 in ACDC Area, End Area and Nebula Area
-(`--net-biome x0`, `x2`, `x3`, 15000 frames) it won 99 of 100 guest
-battles (a BugTank in the back column outlasted it on a grass field),
-where the button pattern it pressed there before was deleted in seed 1's
-first; `weak`, BN5's viruses at 1 HP, won all 144 of its own.
+guardian battle can be tested. The autopilot never picks a DarkChip of
+either net and never presses A on UNITE or the Beast Out emblem
+(`custom_guard`). A step it could take that leaves MegaMan where he stood
+for half a second marks that panel blocked for the battle (a rock of
+BN5's fields: in BN6's engine since the last round, an autopilot that
+held UP into one stood 13000 frames, `--net-biome x4 --seed 12`), and a
+step into the row it is after, blocked in his column, goes aside first.
+Before issue #82's last round it fought the guest
+core's BN5 battles too, from BN5's memory (99 of 100 won over seeds 1-12
+in three of BN5's areas); BN5's areas and guardians are BN6's battles
+now.
 `tools/device_run.py` runs a build on the device from `/tmp`. `CYBERWORLD_EMU_DEBUG=1` prints the depth, game mode, position,
 map and the hooks' hits so far every 30 frames, prints the generated walls, and writes the tile map to
 `.build/gen_tilemap.bin`.
 `--net-biome N` puts every layer in one area, `--net-layout N` builds every
 layer in one layout (`LAYOUT_*` in `src/net/net_layouts.h`).
+`CYBERWORLD_BTRACE=1` writes each frame of a battle's memory, EWRAM and
+IWRAM, into the data folder's `btrace.bin`, as what changed since the
+frame before (`src/emu/battle_trace.c`, its format in its header), for
+`tools/xcontrol.py`: the control family's differential (issue #82; docs/
+MULTIROM.md, Transplanted families). Each of its two specs runs three
+headless battles, each from the same boot, layer and keys and each against
+one Mettaur at the same panel, started by the foes step (`0:foes 01@52`):
+BN6's own, BN6's own with the control installed (`--dev xcontrol`), and
+the control's moved Mettaur (`0:foes 200@52`); it compares them frame by
+frame, every byte, and each byte that differs must have its reason (a
+pointer into what was moved, read through the installer's map; the enemy
+id and AI index where the battle keeps them; the text archive the name
+plate reads its name from, BN6's viruses' for 0x01 and the families' for
+0x200; the delete count the
+installer's hook keeps AI 32 out of; the interrupt stack below its
+`sp_irq`, `0x03007F60`, dead between frames, where an interrupt's entry
+lands a few cycles apart as the moved code runs; the main stack below the
+main loop's pointer as it waits for the next frame, `0x03007DFC` (read
+by a hook at its DISPSTAT loop), also dead between frames, where the
+VBlank handler's nested frames save what they interrupted (the BIOS's
+decompression of the battle's sprites) a few cycles apart where the
+lava's and the sea's install has the panels' flags read from ROM; and,
+with BN5's ROM read, the code in IWRAM that install keeps patched,
+`0x0300791C`-`0x0300791F`, `0x03007742`-`0x03007771` and
+`0x03007678`-`0x0300768D`, and the sea's submerge's, `0x0300724A`-`0x03007257`
+and `0x0300728C`-`0x0300729B`). The values of the enemy
+id and AI index are allowed wherever they stand, not at fixed addresses;
+the tool prints each address they explained (the battle's three copies of
+the id, each a u16: `0x020348D4`, `0x0203AAB0`, `0x0203EB56`; the name
+plate's archive at `0x0200A260`, the AI index at `0x02034181`, and the index times 4 that the
+dispatcher leaves in r4: in the deferred-call queue at `0x0200A4A4`, and
+in the parameters of an ice block it spawns, `0x02036874`). The `fight`
+spec: seed 1, MegaMan at 1000 HP (`--dev hp=1000`): 3899 frames of battle
+each, the native and installed runs the same at every byte (BN6's tables
+grown for the families and the control installed, BN6's battle reads them
+as its own: not one byte differs), and the moved
+Mettaur the same as BN6's to the results (2903 frames: it changes rows 6
+times and attacks 21 times, its shockwaves taking 110 of MegaMan's HP, and
+takes 12 shots and 3 charged ones to its deletion), where the reward comes
+from each id's own drop row (`0x4064` both: the control's rows are
+Mettaur's, copied to its ids). One immediate changed
+in the copy (the counter time at `0x0810B142`, `0x1E` to `0x1F`) shows at
+frame 365. The fight never leaves the Mettaur's own states (8-12), so the
+`status` spec gives it, by the status step (`0:status freeze 90`,
+docs/DEVTOOLS.md), each status a hit leaves for the engine to act on, at
+the same frames in all three runs: frozen 90 frames (shot at twice),
+paralysed and bubbled the same, dragged, pushed along, frozen 200 frames
+left to thaw, then the fight's keys: 6299 frames each, native and
+installed the same at every byte, and the moved Mettaur the
+same as BN6's to the results (3565 frames), through BN6's generic states 4
+(paralysis), 5 (drag, its 25 phases), 6 (frozen, twice) and 7 (bubble),
+their hooks of tables 6, 7, 8 and 10 called through the grown tables, and
+both ice blocks of size 0. Before the ice blocks' sizes were grown the
+moved Mettaur's block was size 1 (it read past BN6's 30 viruses into the
+Navis') and the run differed at the first freeze, frame 342; with the
+control's recipe set to `.ice = 1` it differs there the same way. Not
+reached: CurAction 3 (no way in for a virus, docs/ROM_DATA.md) and its
+table-9 hook, a hit's own way to the statuses (the step sets what a hit
+leaves; the resolution before it is BN6's own code, which reads a family
+only through the tables the installer grows), and the rest of a battle's
+statuses that are no state (confusion, blindness, holds).
+`tools/xfamily.py` checks BN5's CanGard, the first family of another
+game's (docs/MULTIROM.md, Transplanted families), in BN6's own battles:
+headless runs with both ROMs (copied into `.build/xfamily/rom`), seed 15
+(whose first area is BN6's own, not dressed as BN5's), each battle started
+by the foes step and traced. `fight`: CanGard V1 at (5,2) beside a Mettaur
+at (4,3), MegaMan idle at (2,2): its states 8, 9 and 10 alone after its
+spawn, its reticle (BN5's type `0x25` through the second-level dispatch: the
+third kind's `0xD2`, `0x25` in its side table) spawned on its panel and walking a panel
+at a time to MegaMan's, then spawned on his, striking him for 10 each time
+he was not still flashing from a hit (4 times in 1500 frames; Mettaur's
+shockwaves the rest), its muzzle's blast (effect `0x6C`) drawn as it
+fires, its MaxHP 60, element 0 and a shadow. `status`: freeze, bubble,
+paralysis and drag, each by the status step while its reticle is out
+(battle frames 43, 140, 237 and 334): each the frame after in BN6's
+state for it (6, 7, 4, 5), its AttackVars +0x30 cleared and the reticle
+gone two frames on (the release hook in tables 7, 8, 6 and 10), back in
+its own states when the status ends and firing again; its ice block size
+0; the battle on to the end. `delete`: each version alone, `--dev
+onehit`, MegaMan shooting, event flag 0x1D8 set before the battle (the
+gate of BN6's rare path, which versions 4 and 5 take): each spawned with
+its struct2 row's MaxHP, deleted, its reticle gone, the results reached,
+BN6's delete counts (`0x02000070`-`0x0200009F`, versions 0-3's path) and
+the rare path's byte (`0x0203EAEA`, the chat of new virus data's index)
+unchanged. Then the control, BN6's own Mettaur deleted the same way:
+version 0 (id `0x01`) raises `0x02000071`, version 4 (id `0x05`) puts 1
+at `0x0203EAEA`. With the installer's hooks on the delete count left out,
+versions 0-3 raise `0x02000090` and versions 4 and 5 put 32 at
+`0x0203EAEA`, and the check fails for each. `native`: BN6's Mettaur fought
+by `xcontrol.py`'s fight keys with CanGard installed and with `--dev
+nofamilies`: 3899 frames the same at every byte. Beside it, the autopilot (`CYBERWORLD_AUTOPILOT=1`) with both
+ROMs, CanGard installed and not: seed 1's 15000 frames the same run log
+and last frame, seed 15's 40000 (`--dev god`, two of BN6's battles won)
+the same run log and its checkpoint's `run.state` the same byte for byte,
+so a state saved on a map carries nothing of the install (again with
+BN6's tables grown for the families, against `--dev nofamilies`: run
+log, `run.state`, `run.sav` and `battle.sav` the same). Not checked there: a real
+chip's hit on it, its guard against each kind of chip.
+`tools/xdiff.py` (`build.py xdiff`; docs/DEVTOOLS.md, The differential)
+checks CanGard against BN5's own CanGard, frame by frame: one battle fought
+in BN5's engine on the guest core (`--xdiff`'s reference, BN5's battle as
+BN5 has it) and in BN6's with the family installed, aligned by each
+battle's timer, compared by role through each game's numbers and layouts,
+each difference either an engine difference explained with both games'
+routines in `tests/xdiff/legit.json` (never on the family's own
+records, where the engine's numbers are read as BN6's) or a failure,
+MegaMan's own state stopping a spec as
+inconclusive. Its specs and what they showed are in docs/MULTIROM.md,
+Transplanted families; `--mutations` breaks the install eleven ways a
+transplant bug would and each break fails its spec.

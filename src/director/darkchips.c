@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include "save_blob.h"
+#include "xchips_registry.h"
 
 #define DARK_MAGIC 0x444B4331u   /* "DKC1" */
 
@@ -46,8 +47,6 @@ void dark_give(int k) {
 	if (k >= 0 && k < DARK_KINDS) dark.count[k] = 1;   /* (one of each, as BN5's folder takes them) */
 }
 
-void dark_set_counts(const uint8_t counts[DARK_KINDS]) { memcpy(dark.count, counts, sizeof dark.count); }
-
 /* BN6's five by DarkChipID, as BN5's kinds (DrkSword 188, DarkThnd 193,
  * DrkRecov 194, DarkInvs 189, DarkPlus 190: paired by name, docs/ROM_DATA.md) */
 static const int8_t bn6_kinds[DARK_BN6_COUNT] = { 1, 6, 7, 2, 3 };
@@ -60,7 +59,24 @@ int dark_bn6_id(int k) {
 	return 0;
 }
 
-int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_KINDS]) {
+int dark_chip_id(int k) {
+	const XChipReg *r = k >= 0 && k < DARK_KINDS ? xreg_of_bn5(DARK_FIRST_BN5_ID + k) : NULL;
+	return r ? r->bn6 : 0;
+}
+
+int dark_chip_kind(int id) {
+	for (int k = 0; id > 0 && k < DARK_KINDS; ++k)
+		if (dark_chip_id(k) == id) return k;
+	return -1;
+}
+
+unsigned dark_kinds_offered(bool bn5, bool plus) {
+	unsigned m = 0;
+	for (int i = 0; i < DARK_BN6_PLAYED; ++i) m |= 1u << bn6_kinds[i];
+	return bn5 ? ((1u << DARK_KINDS) - 1) & ~(plus ? 0u : 1u << DARK_PLUS_KIND) : m;
+}
+
+int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_KINDS], unsigned offered) {
 	int n = bn6 ? DARK_BN6_PLAYED : DARK_KINDS;
 	uint32_t h = seed ^ (uint32_t)depth * 2654435761u;
 	/* (BN5's as it was; BN6's mixed first, so seeds that differ in their
@@ -68,16 +84,16 @@ int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_
 	int k0 = (int)((bn6 ? (h * 2246822519u) >> 16 : h >> 8) % (uint32_t)n);
 	for (int j = 0; j < n; ++j) {
 		int i = (k0 + j) % n, k = bn6 ? bn6_kinds[i] : i;
-		if (!held[k]) return k;
+		if (!held[k] && (offered >> k & 1)) return k;
 	}
 	return -1;
 }
 
-int dark_flame_of(uint32_t seed, int depth, int side, bool bn6) {
+int dark_flame_of(uint32_t seed, int depth, int side, bool bn6, unsigned offered) {
 	uint8_t net = bn6 ? DARK_FLAME_BN6 : 0;
 	if (dark.flame_depth == depth && dark.flame_side == side && dark.flame_kind && (dark.flame_kind & DARK_FLAME_BN6) == net)
 		return (dark.flame_kind & ~DARK_FLAME_BN6) - 1;
-	int k = dark_flame_pick(seed, depth, bn6, dark.count);
+	int k = dark_flame_pick(seed, depth, bn6, dark.count, offered);
 	dark.flame_depth = (uint16_t)depth;
 	dark.flame_side = (uint8_t)side;
 	dark.flame_kind = (uint8_t)(k >= 0 ? (k + 1) | net : 0);
@@ -88,4 +104,11 @@ void dark_price_hp(int base, int max, int hp, int out[3]) {
 	out[0] = base > DARK_PRICE + 10 ? base - DARK_PRICE : 10;
 	out[1] = max - (base - out[0]);
 	out[2] = hp > out[1] ? out[1] : hp;
+}
+
+bool dark_chip_is(int id) { return dark_chip_kind(id) >= 0; }
+
+unsigned dark_ran_add(unsigned ran, int id, int dark_id) {
+	if (!dark_chip_is(id)) return ran;
+	return ran | (dark_id >= 0 && dark_id < DARK_BN6_COUNT ? 1u << dark_id : DARK_RAN_BN5);
 }

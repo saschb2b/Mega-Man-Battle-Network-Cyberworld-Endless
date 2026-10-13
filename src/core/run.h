@@ -93,10 +93,12 @@ int run_guardian(int biome);
  * none (its guardian deleted, docs/HOME.md) */
 int run_layer_guardian(void);
 /* Another game's Navi guarding act `act` (0-based) in area `biome`, 0 for
- * none (docs/BOSSES.md, BN5's Navis): where an area of his game dresses it
- * and names him (NetAreaDef.xguard), the build can fight its battles, and
- * the run's seed says so, in half the runs, never on the short net's last
- * act. From the seed and the ROMs present: nothing is saved. */
+ * none (docs/BOSSES.md, BN5's Navis), fought in BN6's engine where his
+ * Navi is moved in: on a surface act where an area of his game dresses it
+ * and names him (NetAreaDef.xguard), in half the runs; in the deep's acts
+ * (the Undernet's, the Graveyard's) where his HP fits the act's band, by a
+ * coin weighed by how many of each net's Navis fit it. From the seed and
+ * the ROMs present: nothing is saved. */
 int run_xguardian_at(int act, int biome);
 /* (dev: --guardian N with one of another game's Navis, who then guards
  * every area his game dresses; --net-biome xN's area, which draws its BN6

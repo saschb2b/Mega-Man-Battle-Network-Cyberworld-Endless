@@ -3,6 +3,7 @@
 #define CW_FOES_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 enum { FOE_VIRUS, FOE_NAVI, FOE_ROCK };
 
@@ -37,9 +38,22 @@ typedef struct {
 	int nobj;
 	/* the area's battle it was rolled from, kept in mind once fought
 	 * (loot_battle_fought): the area, the battle (-1 none), its virus
-	 * families and its viruses */
+	 * families (a bit each, by BN6's AI index: the families moved into the
+	 * engine from 32) and its viruses */
 	int from_biome, from_pick;
-	unsigned from_families, from_viruses;
+	uint64_t from_families;
+	unsigned from_viruses;
+	/* another game's battle fought in BN6's engine (xbattles.h, issue #82):
+	 * its record there (0: BN6's own), and the foe that came from the
+	 * other net into it (1 + its index, 0 none: docs/MULTIROM.md, One net) */
+	uint32_t xrecord;
+	int visitor;
+	/* its Mystery Data's finds its own (its game's rows, as BN6's names
+	 * them: xbattles.c), not the run's roll (loot_gem_rewards): the eight
+	 * entries the battle draws one of (bits 14-15: 0 a chip, its id and
+	 * code << 9; 1 zenny; 3 BugFrags) */
+	bool gem_own;
+	uint16_t gem_row[8];
 } Encounter;
 
 #endif

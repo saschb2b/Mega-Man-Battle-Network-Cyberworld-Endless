@@ -10,8 +10,5 @@
 bool autopilot_on(void);
 /* GBA keys for this frame. */
 uint32_t autopilot_keys(void);
-/* ... and for this frame of a battle on the guest core (guest.h), from its
- * own game's memory; none before its battle is on its screen. */
-uint32_t autopilot_guest_keys(void);
 
 #endif

@@ -32,7 +32,7 @@ int tl_src_floor(int A, int B, const void *ctx);
 
 #define PAD_LOOK 8      /* how far a tile of the wrong look (pad or not) is */
 
-uint8_t *tl_find_pads(const Src *s);
+uint8_t *tl_find_pads(const Src *s);   /* (NULL: no memory for them) */
 unsigned tl_nearest(int phase, bool corner);
 void tl_occupancy(TileFloor floor, const void *ctx, int A, int B, unsigned *a, unsigned *b);
 /* (bits set: libgcc's call, on a machine without the instruction, was a

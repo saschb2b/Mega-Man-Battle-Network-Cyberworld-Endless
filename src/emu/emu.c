@@ -1,5 +1,6 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
+#include "claims.h"
 #include "compat.h"
 #include "platform.h"
 #include "save_queue.h"
@@ -46,7 +47,7 @@ static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va
 }
 static struct mLogger logger = { .log = quiet };
 
-/* (once: the guest's boot thread may be reading it when BN6's core is made) */
+/* (once, before any core) */
 void emu_log_quiet(void) {
 	static bool set;
 	if (!set) mLogSetDefaultLogger(&logger);
@@ -66,10 +67,11 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	memcpy(copy, rom, len);
 	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
 #ifdef __3DS__
-	/* (on the 3DS the core copies the ROM into a buffer of its own as it
-	 * loads, mGBA's FIXED_ROM_BUFFER: it reads this copy as it is, which
-	 * lives as long as the core, as a chunk made from it would be a third
-	 * 16 MB on a 3DS's heap) */
+	/* (on the 3DS the core maps this copy as it is and patches it in place
+	 * (GBALoadROM maps a 16 MB ROM), so it lives as long as the core: a
+	 * chunk made from it would be a second 16 MB on a 3DS's heap. mGBA's
+	 * own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game never
+	 * calls, and start_3ds.c gives it back) */
 	struct VFile *vf = VFileFromMemory(copy, EMU_ROM_SIZE);
 	if (!vf) { free(copy); return false; }
 #else
@@ -109,8 +111,20 @@ static void wait_frame(void);
 bool emu_ready(void) { return core != NULL; }
 void emu_reset(void) { wait_frame(); if (core) { core->reset(core); hook_reapply(); } }
 
-bool emu_hook(uint32_t addr, EmuHook fn, void *user) { wait_frame(); return core && hook_add(addr, fn, user); }
-bool emu_hook_event(uint32_t addr, int kind) { wait_frame(); return core && hook_add_event(addr, kind); }
+bool emu_hook(uint32_t addr, EmuHook fn, void *user) {
+	wait_frame();
+	bool ok = core && hook_add(addr, fn, user);
+	if (ok) claims_hook(addr);
+	return ok;
+}
+
+bool emu_hook_event(uint32_t addr, int kind) {
+	wait_frame();
+	bool ok = core && hook_add_event(addr, kind);
+	if (ok) claims_hook(addr);
+	return ok;
+}
+
 void emu_unhook(uint32_t addr) { wait_frame(); if (core) hook_remove(addr); }
 void emu_sync(void) { wait_frame(); }
 int emu_hook_events(HookEvent *out, int max) { wait_frame(); return core ? hook_drain(out, max) : 0; }
@@ -123,7 +137,7 @@ void emu_audio_rate(int rate) {
 	blip_set_rates(core->getAudioChannel(core, 1), core->frequency(core), rate);
 }
 
-/* (a core's sound into the ring: BN6's, or the guest's while it runs) */
+/* (a core's sound into the ring: BN6's, or the differential's second core's) */
 static void pull_audio_from(struct mCore *c) {
 	blip_t *l = c->getAudioChannel(c, 0), *r = c->getAudioChannel(c, 1);
 	int16_t tmp[1024 * 2];
@@ -295,11 +309,54 @@ const uint32_t *emu_video(void) { return threaded ? shown : video; }
 uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
-void emu_write8(uint32_t a, uint8_t v) { wait_frame(); if (core) core->rawWrite8(core, a, -1, v); }
-void emu_write32(uint32_t a, uint32_t v) { wait_frame(); if (core) core->rawWrite32(core, a, -1, v); }
+void emu_write8(uint32_t a, uint8_t v) {
+	wait_frame();
+	claims_note(a, 1);
+	if (core) core->rawWrite8(core, a, -1, v);
+}
+
+void emu_write32(uint32_t a, uint32_t v) {
+	wait_frame();
+	claims_note(a, 4);
+	if (core) core->rawWrite32(core, a, -1, v);
+}
+
 void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
-	for (size_t i = 0; i < len; ++i) emu_write8(a + (uint32_t)i, p[i]);
+	wait_frame();
+	claims_note(a, (uint32_t)len);
+	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
+}
+
+/* ---- RAM kept patched (emu_keep) ---- */
+
+#define KEEP_MAX 8
+#define KEEP_LEN 64
+static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
+static int nkept;
+
+/* each patch's bytes made the engine's (or, `own`, the game's again) where
+ * they read the other; bytes that read neither are left as they are */
+static void keep_put(bool own) {
+	for (int i = 0; i < nkept; ++i) {
+		const uint8_t *from = own ? kept[i].now : kept[i].was, *to = own ? kept[i].was : kept[i].now;
+		bool there = true;
+		for (uint32_t k = 0; there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == from[k];
+		for (uint32_t k = 0; there && k < kept[i].len; ++k) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
+	}
+}
+
+bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
+	wait_frame();
+	if (!core || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	claims_note(addr, (uint32_t)len);
+	kept[nkept].addr = addr;
+	kept[nkept].len = (uint32_t)len;
+	memcpy(kept[nkept].was, was, len);
+	memcpy(kept[nkept].now, now, len);
+	++nkept;
+	keep_put(false);
+	return true;
 }
 
 /* A path for mGBA's own files: on the 3DS they go to the SD card's file
@@ -320,7 +377,11 @@ bool emu_save_state(const char *path) {
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	struct VFile *vf = VFileOpen(vf_path(tmp), O_CREAT | O_TRUNC | O_RDWR);
 	if (!vf) return false;
+	/* (with the game's own bytes where the engine keeps RAM patched: a
+	 * state holds the game's RAM, whatever build loads it) */
+	keep_put(true);
 	bool ok = mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	keep_put(false);
 	vf->close(vf);
 	if (ok) ok = cw_rename(tmp, path);
 	else remove(tmp);
@@ -364,7 +425,11 @@ bool emu_load_state(const char *path) {
 	if (!vf) return false;
 	bool ok = mCoreLoadStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
 	vf->close(vf);
-	/* (a state holds RAM, not the ROM copy: hooks in RAM are written again) */
-	if (ok) hook_reapply();
+	/* (a state holds RAM, not the ROM copy: hooks in RAM are written again,
+	 * and the patches the engine keeps there) */
+	if (ok) {
+		hook_reapply();
+		keep_put(false);
+	}
 	return ok;
 }

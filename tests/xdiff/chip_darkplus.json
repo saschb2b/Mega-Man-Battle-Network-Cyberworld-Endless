@@ -1,0 +1,138 @@
+{
+ "about": "A chip of BN5's whose code moved into BN6's engine (issue #82's final engine round): BN5's CanladEX held paralysed (hold: each game's own status step, the same bits in both) at (5,2), MegaMan at (2,2) with a folder of DarkPlus * and Cannon * in both games (BN5's chips 190 and 1; BN6's 290, the chip of DarkPlus's name, its record BN5's DarkPlus in what it does where BN5's ROM is read, src/core/chips.c, and 1), both picked on the first Custom screen and OK (BN6's deck four DarkPlus more before them, which the guest battles' rule shelves as the first screen opens, a BN5 DarkChip out of the first hand but where he worries or is dark, four at most: src/emu/soulmood.c, compact; BN5's deck dealt as the spec writes it); KnightSoul held in both (flags5, souls6), so BN6's engine has the Souls and with them BN5's mood and DarkChip rule (S7). DarkPlus used at t30 runs BN5's misc family's subfamily 3 moved (0x0800E190): its power, 50, stored as the bonus of the hand's next chip, the Cannon (hand +0x1A, BN6's reader the same: its use adds it to the Cannon's 40), MegaMan flashing green 24 frames (BN5's AIData +0x3C, kept apart by BN6's engine: src/emu/xchips_flash.c), sound 0x157; dark for the battle and DarkPlus's after-effect (NaviStats +0x31 = 1) by BN5's rule; the Cannon used at t100 strikes for 90. Every difference of BN6's play from BN5's fails it (docs/MULTIROM.md, The chips' code).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "54@52",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "000C",
+  "0236"
+ ],
+ "souls6": "10",
+ "hold": 60,
+ "frames": 200,
+ "folder5": [
+  "34BE",
+  "3401"
+ ],
+ "deck5": [
+  "34BE",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "folder6": [
+  "3522",
+  "3401"
+ ],
+ "deck6": [
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3522",
+  "3401",
+  "3401",
+  "3401",
+  "3401"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes"
+}

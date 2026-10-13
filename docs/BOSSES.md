@@ -115,36 +115,36 @@ band (400-600 in act 1 up to 1200-2000 in act 6), else another Navi in the
 band, else the pool's nearest. Acts 1-3 fight V1, acts 4-6 EX where it
 fits, the Nest, the Secret Area and later cycles SP.
 
-## BN5's Navis (4 October 2026, issue #69)
+## BN5's Navis (4 October 2026, issue #69; in BN6's engine since issue #82)
 
 Where Battle Network 5: Team Colonel dresses an area its random battles
-are BN5's own, fought on the guest core (docs/MULTIROM.md, Guest
-battles). The owner's call: BN5's Navis guard some of those acts, fought
-in BN5's engine; beaten, a Navi gives his Soul for the run's BN5 battles
-(docs/META.md, Souls in BN5 territory). Standing beside it: no Cross in
-BN5's battles (MegaMan says so arriving), while a BN6 guardian's fight
-there keeps the Cross; DarkChips cost 20 max HP per battle used; no power
-creep across runs. What follows was reasoned with the game-design skill,
-and the owner approved all of it (4 October 2026), the points first
-marked as proposals among them.
+are its own records (docs/MULTIROM.md, One net). The owner's call: BN5's
+Navis guard some of those acts; beaten, a Navi gives his Soul for every
+battle of the run (docs/META.md, Souls). Until issue #82's last round
+they were fought in BN5's own engine on a second core (docs/MULTIROM.md,
+Guest battles), with no Cross in their battles; since it they are moved
+into BN6's battle engine (docs/MULTIROM.md, Transplanted Navis) and
+fought as BN6's guardians are, Cross, Beast Out, Souls and DarkChips
+and all. Standing beside it: DarkChips cost 20 max HP per battle used; no
+power creep across runs. What follows was reasoned with the game-design
+skill, and the owner approved the first of it (4 October 2026); the last
+round's calls stand on the owner's delegation (12 October 2026).
 
 - **The dialectic** is the meta layer's, what you bring against what you
   find, met at an act's end: the guardian's Soul is found, and the folder
   brought decides how much it is worth, as it unites with chips of one
-  kind. It feeds the progression loop (the act's last fight, in the
-  territory's own engine, so the territory stays whole from its first
-  battle to its guardian) and the run loop (the Souls a run carries into
-  its later territories).
+  kind. It feeds the progression loop (the act's last fight) and the run
+  loop (the Souls a run carries into every battle after).
 - **The patterns:** nested progression, Souls being BN5's axis beside
-  BN6's Crosses, each serving only its own engine's battles (augment, not
-  replace); the honest telegraph, the territory's look, words and card
-  already saying whose battles these are; meta as variety, nothing of it
+  BN6's Crosses (a Soul or a Cross at a time, never both); parity across
+  the nets (his band, his Guardian Data and his staging BN6's
+  guardians'); the honest telegraph, the territory's look, words and card
+  already saying whose net this is; meta as variety, nothing of it
   carried to the next run.
 - **What to watch:** a Soul the folder cannot use (see the table: two
-  kinds have few chips in BN6), answered by the chip his Guardian Data
-  gives; a guardian fight that is only harder for a BN6 folder (chips sit
-  out, no Cross), answered by the act's band and the Soul it pays; a Soul
-  won with no BN5 battle left to serve, answered by where they stand.
+  kinds have few chips in BN6); the strongest Soul taken every battle
+  now that it serves every one (each still costs a chip and comes once a
+  battle).
 
 **Which Navis, where**. BN5's own data places its Navis: its
 net maps' battle records list each Navi's SP version on the maps he
@@ -159,21 +159,23 @@ sets him in:
 | Oran Area (Green Area) | Oran Area 1 | ShadowMan | Invisible chips |
 | SciLab (Sky Area) | SciLab 4 | TomahawkMan | Wood chips |
 | Undernet (Undernet) | Undernet 3 | Colonel | Obstacle chips |
-| Nebula Area (Graveyard) | (Bass) | none: BN6's guardians | |
+| Nebula Area (Graveyard) | (Bass) | the deep's pool | |
 
-Nebula Area keeps BN6's guardians: BN5 lists none of the six there, its
-act is the last before the Nest (a Soul won there would serve no BN5
-battle in the cycle), and the Graveyard's guardian is the one whose fall
-stirs the Cybeast in MegaMan before the Nest.
-
-**How often**: on the guardian layer of an act whose area
-BN5 dresses, in half the runs (a coin of the run's seed for each area, of
-its own beside the dress's), where the build can run the guest. Not the
-short net's last act (its Nest is BN6's: no BN5 battle would follow the
-Soul), the Nest, the Secret Area or an Undernet detour. Else BN6's
-guardian, as before. Nothing is saved for it: a run continued without
-BN5's ROM, or on a build without the second core, meets BN6's guardian
-there, as its layers come in BN6's own tiles.
+**How often**: on the guardian layer of a surface act whose area BN5
+dresses, in half the runs (a coin of the run's seed for each area, of its
+own beside the dress's), the short net's last act among them now that a
+Soul serves every battle after it. In the deep's acts, the Undernet's and
+the Graveyard's (whatever dresses them) and the short net's dark way, the
+two nets' Navis share one pool by band: a coin of the seed and the act
+weighed by how many of each net's fit the act's band, each as likely,
+one of BN5's six where it lands on his (none that already guards a
+surface act of the run), else BN6's own pick, its area's own Navis
+favoured as ever. Not the Nest (the Cybeast's), the Secret Area or an
+Undernet detour. Nothing is saved for it: a run continued without BN5's
+ROM meets BN6's guardian there, as its layers come in BN6's own tiles,
+and a New 3DS whose heap has no room for BN5's ROM, which then leaves it
+unread (docs/EMULATION.md, The 3DS's memory), none of his. `--guardian 24`-`29`
+puts one in every act BN5 dresses and every deep act.
 
 **His band**. BN5's story holds a record for each of them at
 V1, V2 and V3, its net one at SP (docs/ROM_DATA.md, BN5's Navis). He is
@@ -182,27 +184,26 @@ versions, docs/PROGRESSION.md): the lowest of V1 to V3 whose HP reaches his
 band, V2 at least from act 4 (as BN6's guardians fight EX there) and from
 act 2 on threat 4; SP on later cycles. His HP above the band's top is
 capped there as he spawns, as the netbattle caps ProtoMan's (docs/
-RIVAL.md), never raised: the version brings the attacks, the cap holds the
-fight's length. His band is three quarters of BN6's guardians'
-(`pacing_xguardian_band`): he is fought in his own engine, where the run's
-Cross never comes and the buster is the NaviCust's alone, 10 a charged shot
-in act 1. At BN6's band KnightMan, 600 HP behind armor that turns every
-blow but while he swings or leaps, outlasted a playtester's whole act-1 kit
-by half (session 68), where the act's BN6 guardian, fought with HeatCross,
-had fallen in 28 seconds (session 67). The Net Dealer's word on the act's
-layers names KnightMan's opening. So every first-cycle guardian lies in his
-band (`build.py pacing`):
+RIVAL.md), never raised but by the Net's clock (docs/HOME.md): the
+version brings the attacks, the cap holds the fight's length. His band is
+BN6's guardians' (400-600 in act 1 up to 1200-2000 in act 6). It was three
+quarters of theirs while he was fought in BN5's engine, where the run's
+Cross never came (KnightMan's 600 behind armor outlasted a playtester's
+act-1 kit by half, session 68); every Cross comes into his battle now. So
+every first-cycle guardian lies in his band (`build.py pacing`):
 
 | Guardian | Act (band) | Version, BN5's HP | Fought at |
 | --- | --- | --- | --- |
-| KnightMan | 1 (300-450), 2 (450-525) | V1, 600 | 450 / 525 |
-| NumberMan | 1, 2 | V1, 600 | 450 / 525 |
-| ToadMan | 1 / 2 | V1, 700 | 450 / 525 |
-| ShadowMan | 2 / 3 (600-750) | V1, 500 / V2, 700 | 500 / 700 |
-| TomahawkMan | 3 / 4 (750-975) | V1, 700 / V2, 900 | 700 / 900 |
-| Colonel | 5 (825-1125) | V2, 1200 | 1125 |
+| KnightMan | 1 (400-600), 2 (600-700) | V1, 600 | 600 / 600 |
+| NumberMan | 1, 2 | V1, 600 | 600 / 600 |
+| ToadMan | 1 / 2 | V1, 700 | 600 / 700 |
+| ShadowMan | 2 / 3 (800-1000) | V2, 700 / V3, 1200 | 700 / 1000 |
+| TomahawkMan | 3 / 4 (1000-1300) | V2, 900 / V3, 1400 | 900 / 1300 |
+| Colonel | 5 (1100-1500) | V2, 1200 | 1200 |
+| the deep's (5, 6: 1100-1500, 1200-2000) | | V2 or V3, 1200-1600 | 1200-1600 |
 
-BN5's HUD names his version as BN5 does: Colonel's V2 is its DarkCol.
+His name in the battle is BN5's for that version (the moved Navis' own
+names: Colonel's V2 is its DarkCol).
 
 **The fight.** Staged as BN6's: the arena, the door's save, his log-in,
 title card and intro in our own words (BN5's text is never copied), his
@@ -210,21 +211,20 @@ moves briefed from battle data once met in any run (docs/META.md, what
 MegaMan knows), the rival record his own (beside BN6's Colonel and
 TomahawkMan, who are other Navis' copies). He stands in his own BN5
 overworld sprite and speaks with his own BN5 face, copied in from the
-player's BN5 ROM as its bystanders are. The battle is BN5's, from BN5's
-own record for him at that version, with its boss theme and the area's
-background: MegaMan as the run has him (HP, folder in BN5's chips, buster,
-DarkChips), no running, his results screen paying the zenny BN6's
-guardians pay where their row holds their chip. Lost, the run ends as at
-any guardian.
+player's BN5 ROM as its bystanders are. The battle is BN6's engine's (his
+moved id, Navi AI 32-37, at his version), with the area's boss theme and
+background: no running, his reward rows paying the zenny BN6's guardians
+pay where their row holds their Navi chip. Lost, the run ends as at any
+guardian.
 
 **His Guardian Data**: his Soul with MegaMan's words, five
-HPMemory, a full heal and the NaviCust's draft, as BN6's;
-and in his Navi chip's place (BN6 has none of his) a chip of his Soul's
-kind that BN6 has, in the folder's code or *, so the Soul unites from
-the next battle on: KnightMan's JustcOne, ToadMan's BblWrap, one of
-ShadowMan's Invisibl, Mine or AntiDmg, of NumberMan's BusterUp, ColorPt or
-DblPoint, of TomahawkMan's Boomer, Lance or Snake, of Colonel's obstacle
-chips (RockCube, the TimeBoms, Fanfare and the rest).
+HPMemory, a full heal and the NaviCust's draft, as BN6's; and his own
+Navi chip, registered in BN6's chip tables (docs/MULTIROM.md, The chip
+registry), as BN6's guardians give theirs: BN5's V1 of him in the first
+three acts, his SP from the fourth (BN5 has no EX: its SP stands where
+BN6's EX and SP do), his V1 where his SP does not play in BN6's battles
+yet; in the folder's code or *. Until the last round it gave a chip of
+his Soul's kind in that place, as BN6 had none of his.
 
 ## Super bosses (6 October 2026, issue #100)
 

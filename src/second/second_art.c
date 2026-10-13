@@ -9,6 +9,7 @@
 
 #include "bn6.h"
 #include "bytes.h"
+#include "chips.h"
 #include "gfx.h"
 #include "rom.h"
 
@@ -16,12 +17,8 @@
 #define ICON_BYTES 128   /* 2 x 2 tiles of 4 bits a pixel */
 #define ART_TILES 42     /* a card's picture: 7 x 6 tiles, uncompressed, in its record's palette */
 
-/* the chip's record, NULL past the ROM */
-static const uint8_t *record(int chip) {
-	if (!R.layout) return NULL;
-	size_t at = R.layout->chip_data + (size_t)chip * BN6_CHIP_RECORD_SIZE;
-	return chip > 0 && chip < 512 && R.data && at + BN6_CHIP_RECORD_SIZE <= ROM_SIZE ? R.data + at : NULL;
-}
+/* the chip's record as the core's copy holds it (src/core/chips.h), NULL none */
+static const uint8_t *record(int chip) { return chip > 0 ? chips_record(chip) : NULL; }
 
 int second_chip_rank(int chip) {
 	const uint8_t *r = record(chip);
@@ -39,8 +36,10 @@ int second_chip_element(int chip) {
 void second_chip_icon(int chip, int x, int y) {
 	const uint8_t *r = record(chip);
 	if (!r) return;
+	/* (its icon where the core's copy holds it: past the player's ROM for
+	 * one of BN5's, which gfx.c's tiles read through chips_offset_bytes) */
 	uint32_t at = get32(r + BN6_CHIP_ICON_PTR);
-	if (at < 0x08000000u || at - 0x08000000u + ICON_BYTES > ROM_SIZE) return;
+	if (!chips_bytes(at, ICON_BYTES)) return;
 	rom_tiles(at - 0x08000000u, R.layout->chip_icon_pal, x, y, 2, 2, 0);
 }
 
@@ -48,7 +47,7 @@ void second_chip_art(int chip, int x, int y, int scale) {
 	const uint8_t *r = record(chip);
 	if (!r) return;
 	uint32_t art = get32(r + BN6_CHIP_IMAGE_PTR), pal = get32(r + BN6_CHIP_PALETTE_PTR);
-	if (art < 0x08000000u || pal < 0x08000000u || art - 0x08000000u + ART_TILES * 32 > ROM_SIZE || pal - 0x08000000u + 32 > ROM_SIZE) return;
+	if (!chips_bytes(art, ART_TILES * 32) || !chips_bytes(pal, 32)) return;
 	rom_tiles_scaled(art - 0x08000000u, pal - 0x08000000u, x, y, 7, 6, scale);
 }
 
