@@ -193,8 +193,8 @@ $(OUT)/obj/%.o: src/%.m | $(GEN)/version.h
 
 $(GEN)/version.h: FORCE
 	@mkdir -p $(GEN)
-	@printf '#define CW_VERSION "%s"\n' '$(VERSION)' > $@.new
-	@if cmp -s $@.new $@; then rm -f $@.new; else mv $@.new $@; fi
+	@printf '#define CW_VERSION "%s"\n' '$(VERSION)' > $@.new.$$$$; \
+	if cmp -s $@.new.$$$$ $@; then rm -f $@.new.$$$$; else mv $@.new.$$$$ $@; fi
 
 FORCE:
 
