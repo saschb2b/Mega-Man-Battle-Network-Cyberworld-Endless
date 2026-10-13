@@ -1,3 +1,7 @@
+/* pick_saves.h, and pick.h's saves where the systems share them: the
+ * device-local saves.ini (the automatic copy on or off, the folder kept),
+ * and the transfer place where it is a plain folder (a desktop's, the
+ * data folder of a PortMaster handheld or the 3DS). */
 #include "pick_saves.h"
 
 #include <stdint.h>
@@ -7,6 +11,7 @@
 #include <sys/stat.h>
 
 #include "backup.h"
+#include "compat.h"
 #include "game.h"
 #include "pick.h"
 #include "platform.h"
@@ -42,18 +47,8 @@ static bool prefs_write(void) {
 	char path[600], text[1200];
 	snprintf(path, sizeof path, "%s/saves.ini", g_data_dir);
 	int len = snprintf(text, sizeof text, "auto=%d\nfolder=%s\n", automatic, folder);
-	bool ok = len > 0 && (size_t)len < sizeof text && backup_write_file(path, (const uint8_t *)text, (size_t)len);
-	if (ok) platform_persist();
-	return ok;
+	return len > 0 && (size_t)len < sizeof text && backup_write_file(path, (const uint8_t *)text, (size_t)len);
 }
-
-#ifdef CW_DESKTOP
-static bool saves_folder_kept(char *out, size_t n) {
-	prefs_load();
-	if (n) snprintf(out, n, "%s", folder);
-	return folder[0] != 0;
-}
-#endif
 
 bool saves_folder_keep(const char *path) {
 	prefs_load();
@@ -86,95 +81,87 @@ void pick_saves_auto(bool enabled) {
 	prefs_write();
 }
 
-bool saves_copy(const char *from, const char *to) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(from, &n);
-	bool ok = b && backup_write_file(to, b, n);
-	free(b);
+#if defined(__ANDROID__) || defined(CW_IOS)
+int saves_read_through(int (*get)(const char *to), uint8_t **bytes, size_t *n) {
+	char tmp[600];
+	snprintf(tmp, sizeof tmp, "%s/saves-in.tmp", g_data_dir);
+	*bytes = NULL;
+	int r = get(tmp);
+	if (r > 0) {
+		*bytes = backup_read_file(tmp, n);
+		if (!*bytes) r = -1;
+	}
+	remove(tmp);
+	return r;
+}
+
+bool saves_put_through(bool (*put)(const char *from), const uint8_t *bytes, size_t n) {
+	char tmp[600];
+	snprintf(tmp, sizeof tmp, "%s/saves-out.tmp", g_data_dir);
+	bool ok = backup_write_file(tmp, bytes, n) && put(tmp);
+	remove(tmp);
 	return ok;
 }
-
-bool saves_stage(const char *from, const char *to) {
-	struct stat st;
-	if (stat(from, &st) != 0 || !S_ISREG(st.st_mode)) return false;
-	if (saves_copy(from, to)) return true;
-	static const uint8_t refused[] = "The incoming saves file could not be read.";
-	return backup_write_file(to, refused, sizeof refused - 1);
-}
-
+#else
+/* (a desktop's Downloads asked of the system once: its user-dirs.dirs
+ * read, never a folder made, until something is written there) */
 bool pick_saves_place(char *name, size_t n) {
-#if defined(__ANDROID__) || defined(CW_IOS)
-	return saves_phone_place(name, n);
-#elif defined(CW_DESKTOP)
-	if (saves_folder_kept(name, n)) return true;
-	return desktop_saves_default(name, n);
+#if defined(CW_DESKTOP)
+	static char downloads[1024];
+	static bool asked, have;
+	prefs_load();
+	if (folder[0]) {
+		snprintf(name, n, "%s", folder);
+		return true;
+	}
+	if (!asked) {
+		have = desktop_saves_default(downloads, sizeof downloads);
+		asked = true;
+	}
+	if (have) snprintf(name, n, "%s", downloads);
+	return have;
 #elif defined(__EMSCRIPTEN__)
-	if (n) snprintf(name, n, "Downloads");
-	return true;
-#else
-	if (n) snprintf(name, n, "%s", g_data_dir);
-	return true;
-#endif
-}
-
-bool pick_saves_scope(char *out, size_t n) {
-#if defined(__ANDROID__) || defined(CW_IOS)
-	return saves_phone_scope(out, n);
-#elif defined(__EMSCRIPTEN__)
-	if (n) out[0] = 0;
+	(void)name;
+	(void)n;
 	return false;
 #else
-	return pick_saves_place(out, n);
+	snprintf(name, n, "%s", g_data_dir);
+	return true;
 #endif
 }
 
-/* Keep the first damaged candidate too: the screen can explain the
- * refusal, and an automatic export must not erase it on the way there. */
-#ifndef __EMSCRIPTEN__
-static bool different(const char *path, const BackupInfo *local, bool have, uint32_t ignored, uint32_t exported) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	uint32_t hash = 2166136261u;
-	for (size_t i = 0; b && i < n; ++i) hash = (hash ^ b[i]) * 16777619u;
-	BackupInfo info;
-	bool found = false;
-	if (b && (!ignored || hash != ignored)) {
-		bool valid = backup_info(b, n, &info) && info.status == BACKUP_OK;
-		found = !valid || ((!exported || hash != exported) && (!have || info.hash != local->hash));
-	}
-	free(b);
-	return found;
-}
-#endif
+bool pick_saves_scope(char *out, size_t n) { return pick_saves_place(out, n); }
 
-static bool find(const char *to, uint32_t ignored, uint32_t exported) {
-#ifdef __EMSCRIPTEN__
-	(void)to;
-	(void)ignored;
-	(void)exported;
-	return false;
-#else
-	BackupInfo local;
-	bool have = backup_local_info(g_data_dir, &local);
-	if (pick_saves_get(to) && different(to, &local, have, ignored, exported)) return true;
-#ifdef CW_DESKTOP
-	char place[1024], path[1100];
-	if (desktop_saves_default(place, sizeof place)) {
-		snprintf(path, sizeof path, "%s/%s", place, BACKUP_NAME);
-		if (saves_stage(path, to) && different(to, &local, have, ignored, exported)) return true;
-	}
-#else
+static bool place_file(char *path, size_t n) {
+	char place[1024];
+	if (!pick_saves_place(place, sizeof place)) return false;
+	return snprintf(path, n, "%s/%s", place, BACKUP_NAME) < (int)n;
+}
+
+int pick_saves_read(uint8_t **bytes, size_t *n) {
 	char path[1100];
-#endif
-	snprintf(path, sizeof path, "%s/%s", g_data_dir, BACKUP_NAME);
-	if (saves_stage(path, to) && different(to, &local, have, ignored, exported)) return true;
-	remove(to);
-	return false;
-#endif
+	struct stat st;
+	*bytes = NULL;
+	if (!place_file(path, sizeof path) || stat(path, &st) != 0) return 0;
+	if (!S_ISREG(st.st_mode)) return -1;
+	*bytes = backup_read_file(path, n);
+	return *bytes ? 1 : -1;
 }
 
-bool pick_saves_find(const char *to) { return find(to, 0, 0); }
-
-bool pick_saves_discover(const char *to, uint32_t ignored_hash, uint32_t exported_hash) {
-	return find(to, ignored_hash, exported_hash);
+bool pick_saves_stat(uint64_t *size, int64_t *mtime) {
+	char path[1100];
+	struct stat st;
+	if (!place_file(path, sizeof path) || stat(path, &st) != 0) return false;
+	*size = (uint64_t)st.st_size;
+	*mtime = (int64_t)st.st_mtime;
+	return true;
 }
+
+bool pick_saves_put(const uint8_t *bytes, size_t n) {
+	char place[1024], path[1100];
+	if (!pick_saves_place(place, sizeof place)) return false;
+	cw_mkdir(place);   /* (a desktop's Downloads, made at the first write there) */
+	snprintf(path, sizeof path, "%s/%s", place, BACKUP_NAME);
+	return backup_write_file(path, bytes, n);
+}
+#endif

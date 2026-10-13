@@ -113,11 +113,10 @@ static bool game_frame(void) {
 	capture_input();
 	platform_poll();
 	capture_taps();
-	saves_tick();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
 	if (controls_shown()) controls_update();
-	else if (!pending && current && current->update && !touch_paused()) current->update();
+	else if (current && current->update && !touch_paused()) current->update();
 	/* (BN5's boot begun as the game starts, at its boot screen or title,
 	 * as early as it can be: guest.h) */
 	if (current != &scene_emu) guest_warm();
@@ -459,7 +458,6 @@ static void game_begin(void) {
  * scene; -1 to go on, else the exit code of a tool that ran */
 static int game_start(const Options *o, bool rom_ok, const char *msg) {
 	opts = *o;
-	saves_init();
 	if (launcher_start(o->launcher, o->rom_dir, game_begin)) return -1;
 	if (!rom_ok) {
 		fprintf(stderr, "%s\n", msg);

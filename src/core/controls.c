@@ -420,6 +420,8 @@ void controls_finger(uint32_t type, SDL_FingerID id, int x, int y) {
 
 /* ---- the words for the other screens' prompts ---- */
 
+bool controls_keyboard_only(void) { return !platform_pad_present() && !touch_shown(); }
+
 const char *controls_word(uint32_t bit) {
 	static char s[32];
 	int gba = 0, family, style;

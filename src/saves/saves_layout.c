@@ -1,70 +1,42 @@
+/* saves_layout.h. Buttons two a row where the canvas is wide, one a row
+ * where it is narrow (a phone held upright), the last of an odd count
+ * the row's width; under the panels at home, at the foot of the others. */
 #include "saves_layout.h"
 
 #include <limits.h>
 
-static void add(SavesLayout *l, int x, int y, int w, int h, int action) {
-	l->buttons[l->count++] = (SavesButton){ { x, y, w, h }, action };
-}
+#define ROW 18     /* a button's height and its gap */
+#define NARROW 230
 
-static void pair(SavesLayout *l, int w, int y, int left, int right) {
-	int bw = (w - 16) / 2;
-	add(l, 6, y, bw, 16, left);
-	add(l, 10 + bw, y, bw, 16, right);
-}
-
-SavesLayout saves_layout(int width, int height, SavesView view, bool resume, bool result_undo) {
+SavesLayout saves_layout(int width, int height, SavesView view, const int *actions, int n) {
 	SavesLayout l = { 0 };
+	bool narrow = width < NARROW;
+	int cols = narrow ? 1 : 2, rows = (n + cols - 1) / cols, inner = width - 12;
 	l.back = (SDL_Rect){ width - 48, 2, 44, 16 };
-	l.hint = (SDL_Rect){ 8, height - 10, width - 16, 9 };
-	bool narrow = width < 230;
+	int top = 24;
 	if (view == SAVES_HOME) {
-		l.hero = (SDL_Rect){ 6, 24, width - 12, 45 };
-		l.status = (SDL_Rect){ 6, 70, width - 12, 24 };
-		if (narrow) {
-			static const int actions[] = { SAVES_EXPORT, SAVES_IMPORT, SAVES_UNDO, SAVES_DETAILS, SAVES_OPTIONS };
-			for (int i = 0; i < 5; ++i) add(&l, 6, 96 + i * 18, width - 12, 16, actions[i]);
-			l.hint = (SDL_Rect){ 8, 189, width - 16, height - 191 };
-		} else {
-			pair(&l, width, 96, SAVES_EXPORT, SAVES_IMPORT);
-			pair(&l, width, 114, SAVES_UNDO, SAVES_DETAILS);
-			add(&l, 6, 132, width - 12, 16, SAVES_OPTIONS);
-		}
-	} else if (view == SAVES_TRANSFER) {
-		l.status = (SDL_Rect){ 6, 24, width - 12, 25 };
-		add(&l, 6, 53, width - 12, 18, SAVES_AUTO);
-		add(&l, 6, 74, width - 12, 18, SAVES_FOLDER);
-		add(&l, 6, 95, width - 12, 18, SAVES_RETRY);
-		l.hint = (SDL_Rect){ 8, 118, width - 16, height - 120 };
+		l.here = (SDL_Rect){ 6, top, inner, 48 };
+		l.line = (SDL_Rect){ 8, top + 51, width - 16, 9 };
+		top += 64;
 	} else if (view == SAVES_COMPARE) {
+		int ph = 58;   /* (a title and four rows) */
 		if (narrow) {
-			l.hero = (SDL_Rect){ 6, 24, width - 12, 42 };
-			l.file = (SDL_Rect){ 6, 69, width - 12, 42 };
-			l.note = (SDL_Rect){ 8, 114, width - 16, 44 };
-			static const int actions[] = { SAVES_KEEP, SAVES_TAKE, SAVES_HERE_DETAILS, SAVES_FILE_DETAILS };
-			for (int i = 0; i < 4; ++i) add(&l, 6, height - 74 + i * 18, width - 12, 16, actions[i]);
+			l.here = (SDL_Rect){ 6, top, inner, ph };
+			l.file = (SDL_Rect){ 6, top + ph + 3, inner, ph };
 		} else {
-			int bw = (width - 16) / 2;
-			l.hero = (SDL_Rect){ 6, 24, bw, 58 };
-			l.file = (SDL_Rect){ bw + 10, 24, bw, 58 };
-			l.note = (SDL_Rect){ 8, 85, width - 16, 32 };
-			pair(&l, width, height - 41, SAVES_KEEP, SAVES_TAKE);
-			pair(&l, width, height - 23, SAVES_HERE_DETAILS, SAVES_FILE_DETAILS);
+			l.here = (SDL_Rect){ 6, top, (inner - 4) / 2, ph };
+			l.file = (SDL_Rect){ 10 + (inner - 4) / 2, top, (inner - 4) / 2, ph };
 		}
-		l.hint.h = 0;
-	} else if (view == SAVES_DETAIL) {
-		l.content = (SDL_Rect){ 8, 38, width - 16, height - 68 };
-		pair(&l, width, height - 26, SAVES_PREV, SAVES_NEXT);
-	} else {
-		int action = resume ? SAVES_CONTINUE : SAVES_DONE;
-		int y = height - (narrow && result_undo ? 61 : 43);
-		l.note = (SDL_Rect){ 10, 28, width - 20, y - 32 };
-		if (narrow && result_undo) {
-			add(&l, 6, y, width - 12, 18, action);
-			add(&l, 6, y + 20, width - 12, 16, SAVES_UNDO);
-		} else if (result_undo) pair(&l, width, y, action, SAVES_UNDO);
-		else add(&l, 6, y, width - 12, 18, action);
-		add(&l, 6, height - 23, width - 12, 16, SAVES_DETAILS);
-		l.hint.h = 0;
+		top = l.file.y + ph + 4;
+	}
+	int buttons_y = view == SAVES_HOME ? top : height - rows * ROW - 4;
+	if (view != SAVES_HOME) l.line = (SDL_Rect){ 10, top + (view == SAVES_RESULT ? 6 : 0), width - 20, buttons_y - top - 6 };
+	int bw = cols == 1 ? inner : (inner - 4) / 2;
+	for (int i = 0; i < n && i < SAVES_ACTIONS; ++i) {
+		int row = i / cols, col = i % cols;
+		bool whole = cols == 2 && i == n - 1 && n % 2;
+		SDL_Rect r = { 6 + col * (bw + 4), buttons_y + row * ROW, whole ? inner : bw, ROW - 2 };
+		l.buttons[l.count++] = (SavesButton){ r, actions[i] };
 	}
 	return l;
 }

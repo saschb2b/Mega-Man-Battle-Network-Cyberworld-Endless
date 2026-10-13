@@ -134,8 +134,8 @@ void saves_line_phone(const char *folder, bool automatic, bool refused, char *ou
 	/* (a long name cut, so that the line stays one) */
 	if (folder && strlen(folder) > 14) snprintf(f, sizeof f, "%.12s...", folder);
 	else snprintf(f, sizeof f, "%s", folder ? folder : "");
-	if (!automatic) snprintf(out, n, "Saves: on this device\nAuto-export is off");
-	else if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a Saves folder to keep a copy");
+	if (!automatic) snprintf(out, n, "Saves: on this device\nNo copy: turned off in SAVES");
+	else if (!f[0]) snprintf(out, n, "Saves: on this device only\nChoose a folder in SAVES for a copy");
 	else if (refused) snprintf(out, n, "Saves: on this device only\nNo copy in %s: choose it again", f);
 	else snprintf(out, n, "Saves: on this device\nA copy in %s, for a reinstall", f);
 }

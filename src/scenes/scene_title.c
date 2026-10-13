@@ -12,7 +12,6 @@
 #include <string.h>
 
 #include "title_lines.h"
-#include "touch.h"
 #include "analytics_ask.h"
 #include "audio.h"
 #include "controls.h"
@@ -28,6 +27,7 @@
 #include "meta.h"
 #include "powers.h"
 #include "save.h"
+#include "saves.h"
 #include "second.h"
 #include "text.h"
 
@@ -56,6 +56,7 @@ static const uint8_t cycle[] = { 0x09, 0x0B, 0x04, 0x0D, 0x14, 0x0F, 0x13, 0x15 
 
 bool title_summary;
 bool title_setup;
+bool title_menu;
 uint32_t title_seed;
 char title_cause[48];
 char title_learned[24];
@@ -310,6 +311,9 @@ static void enter(void) {
 		S.menu = 1;
 		setup_open();
 	}
+	/* (back from SAVES: the menu it was opened from) */
+	if (title_menu) S.pressed = S.menu = 1;
+	title_menu = false;
 	/* (the anonymous statistics' question, once: the first start where the
 	 * build can send, after the start's screens, issue #104) */
 	if (entries == 1) analytics_ask_offer();
@@ -322,13 +326,14 @@ static void jack_in(void);
  * question, its one setting (issue #104), where the build can send; with
  * L held, the developer's sprite gallery, which SELECT alone opened
  * before. R: the ROMs' screen, the launcher, to add BN5 after the first
- * start (issue #97), where the build has one. True when it took the
- * press. */
+ * start (issue #97), where the build has one. L alone: SAVES (saves.h),
+ * kept off the menu's ROM-drawn rows. True when it took the press. */
 static bool select_pressed(void) {
 	if (btn_pressed(BTN_R) && launcher_open()) {
 		audio_sfx(SFX_SELECT);
 		return true;
 	}
+	if (saves_key()) return true;
 	if (!btn_pressed(BTN_SELECT)) return false;
 #ifndef __3DS__
 	if (!btn_held(BTN_L)) {
@@ -631,6 +636,7 @@ static void summary_update(void) {
 
 static void update(void) {
 	++S.t;
+	saves_tick();
 	if (S.leaving) {
 		++S.leaving;
 		if (S.jack_v < 96) S.jack_v += 4;
@@ -674,10 +680,9 @@ static void update(void) {
 		S.confirm = false;
 	} else {
 		if (select_pressed()) return;
-		int items = S.has_save ? 3 : 2, d = btn_repeat(BTN_UP) ? -1 : btn_repeat(BTN_DOWN) ? 1 : 0;
-		if (d) { S.cursor = (S.cursor + items + d) % items; audio_sfx(SFX_CURSOR); }
+		int items = S.has_save ? 2 : 1;
+		if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
 		if (!ok) return;
-		if (S.cursor == items - 1) { saves_open(); return; }
 		if (S.cursor == 0 && S.has_save) {
 			S.confirm = true;
 			S.yes = false;
@@ -785,25 +790,30 @@ static void found_draw(int x0, int y0) {
 /* The word under the picture: (a keyboard's Start, where no controller is:
  * a PC player had no word of which key it is) ENTER before the menu, and
  * with the menu where the controls are set, on the player's own SELECT
- * (controls_word: "R", "Minus", "SELECT"), and the ROMs, on R, where the
- * launcher is (issue #97: no way to add BN5 had been found); on the 3DS
- * its SELECT's statistics, where the build can send them */
+ * (controls_word: "R", "Minus", "SELECT"), SAVES on L, and the ROMs, on
+ * R, where the launcher is (issue #97: no way to add BN5 had been found);
+ * on the 3DS its SELECT's statistics, where the build can send them */
 static void hint_draw(int x0, int y0) {
 	SDL_Color grey = rgba(150, 160, 190, 255);
-	if (!S.menu && !S.pressed && !platform_pad_present() && !touch_shown()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
+	if (!S.menu && !S.pressed && controls_keyboard_only()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
 #ifdef __3DS__
-	if (S.menu && !S.confirm && analytics_ask_here()) minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.menu ? 94 : S.has_save ? 107 : 138), "SELECT: Statistics", grey, 1);
-#else
 	if (!S.menu || S.confirm) return;
 	char hint[64];
-	snprintf(hint, sizeof hint, "%s: Controls", controls_word(BTN_SELECT));
+	snprintf(hint, sizeof hint, "%sL: %s", analytics_ask_here() ? "SELECT: Statistics   " : "", saves_word_hint());
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
+#else
+	if (!S.menu || S.confirm) return;
+	/* (controls_word's own buffer, one word at a time) */
+	char hint[80], l[32];
+	snprintf(l, sizeof l, "%s", controls_word(BTN_L));
+	snprintf(hint, sizeof hint, "%s: Controls  %s: %s", controls_word(BTN_SELECT), l, saves_word_hint());
 	if (launcher_here()) {
 		size_t m = strlen(hint);
-		snprintf(hint + m, sizeof hint - m, "   %s: ROMs", controls_word(BTN_R));
+		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", controls_word(BTN_R));
 	}
 	/* (under NEW GAME; with CONTINUE under it, in the rows between the
 	 * logo and the menu, where CONTINUE's row had hidden it) */
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.menu ? 94 : S.has_save ? 107 : 138), hint, grey, 1);
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
 #endif
 }
 
@@ -916,7 +926,7 @@ static void draw(void) {
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
 	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
-		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + (S.menu ? 134 : 126), 4, 4, 0);
+		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 	top_draw(x0, y0);
 
 	if (S.summary) { summary_draw(x0, y0); return; }
@@ -926,7 +936,7 @@ static void draw(void) {
 	 * the question's box covers both) */
 	if (!S.confirm) {
 		char v[40];
-		if (!S.menu) minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
+		minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
 		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
 		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
 			snprintf(v, sizeof v, "Best: Layer %d", best);
@@ -947,16 +957,15 @@ static void draw(void) {
 		int n = S.has_save ? 2 : 1;
 		for (int i = 0; i < n; ++i) {
 			uint32_t first = i == 0 ? 35 : 55;
-			int y = y0 + 104 + i * 16;
+			int y = y0 + 112 + i * 16;
 			rom_tiles(text + first * 32, T.menu_pal, x0 + 88, y, 4, 2, 0);
 			rom_tiles(text + (first + 8) * 32, T.menu_pal, x0 + 120, y, 4, 2, 0);
 			rom_tiles(text + (first + 16) * 32, T.menu_pal, x0 + 152, y, 2, 2, 0);
 		}
-		continue_label(x0 + 170, y0 + 122);
-		text_draw(x0 + 89, y0 + 105 + n * 16, "SAVES", WHITE, TEXT_LEFT);
+		continue_label(x0 + 170, y0 + 130);
 		/* the arrow cycles three frames, 6 frames each */
 		int f = ((S.t - S.menu) / 6) % 3;
-		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 105 + S.cursor * 16, 2, 2, 0);
+		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);
 	}
 	if (S.confirm) {
 		/* over the menu, MegaMan asks as in the game's chats: two lines,

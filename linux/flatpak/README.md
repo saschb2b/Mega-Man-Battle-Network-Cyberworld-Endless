@@ -35,10 +35,13 @@ image).
 
 - Wayland or X11, PulseAudio (PipeWire), and the input devices for
   controllers.
-- Read only, where the game looks for the ROM by its contents: Downloads,
-  EmuDeck's `~/Emulation/roms/gba`, RetroDECK's `~/retrodeck/roms/gba`,
-  `~/ROMs`, `~/roms`, and `/run/media` for the same folders on an SD card.
-  A ROM found there is copied into the game's own folder.
+- Downloads, read and written: the game looks there for the ROM by its
+  contents, and SAVES exports `cyberworld-endless.cwsave` there and
+  imports it from there.
+- Read only, where the game also looks for the ROM: EmuDeck's
+  `~/Emulation/roms/gba`, RetroDECK's `~/retrodeck/roms/gba`, `~/ROMs`,
+  `~/roms`, and `/run/media` for the same folders on an SD card. A ROM
+  found there is copied into the game's own folder.
 
 ## Steam
 

@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "backup.h"
 #include "compat.h"
 #include "launcher_roms.h"
 #include "platform.h"
@@ -250,31 +251,30 @@ bool desktop_choose_rom(int slot, char *path, size_t n) {
 #endif
 }
 
-bool desktop_choose_saves(int kind, const char *start, char *path, size_t n) {
+bool desktop_choose_saves(int kind, const char *title, const char *start, char *path, size_t n) {
 	path[0] = 0;
 #ifdef __APPLE__
-	const char *script = kind == 2 ? "on run argv\nPOSIX path of (choose folder with prompt \"Choose the auto-export folder\" default location (POSIX file (item 1 of argv)))\nend run"
-		: kind == 1 ? "on run argv\nPOSIX path of (choose file name with prompt \"Export saves\" default name \"cyberworld-endless.cwsave\" default location (POSIX file (item 1 of argv)))\nend run"
-		: "on run argv\nPOSIX path of (choose file with prompt \"Import saves\" default location (POSIX file (item 1 of argv)))\nend run";
-	const char *argv[] = { "osascript", "-e", script, start, NULL };
+	char script[400];
+	snprintf(script, sizeof script, "on run argv\nPOSIX path of (%s with prompt (item 2 of argv)%s default location (POSIX file (item 1 of argv)))\nend run",
+		kind == 2 ? "choose folder" : kind == 1 ? "choose file name" : "choose file", kind == 1 ? " default name \"" BACKUP_NAME "\"" : "");
+	const char *argv[] = { "osascript", "-e", script, start, title, NULL };
 	return run(argv, path, n) && path[0];
 #else
-	const char *title = kind == 2 ? "Choose the auto-export folder" : kind == 1 ? "Export saves" : "Import saves";
 	if (on_path("zenity")) {
 		char titlearg[100], initial[1200];
 		snprintf(titlearg, sizeof titlearg, "--title=%s", title);
-		snprintf(initial, sizeof initial, "--filename=%s%s", start, kind == 1 ? "/cyberworld-endless.cwsave" : "/");
+		snprintf(initial, sizeof initial, "--filename=%s%s", start, kind == 1 ? "/" BACKUP_NAME : "/");
 		const char *argv[] = { "zenity", "--file-selection", titlearg, initial,
-			kind == 2 ? "--directory" : kind == 1 ? "--save" : "--file-filter=Saves | *.cwsave",
+			kind == 2 ? "--directory" : kind == 1 ? "--save" : "--file-filter=*.cwsave",
 			kind == 1 ? "--confirm-overwrite" : NULL, NULL };
 		return run(argv, path, n) && path[0];
 	}
 	if (on_path("kdialog")) {
 		char initial[1200];
-		snprintf(initial, sizeof initial, "%s%s", start, kind == 1 ? "/cyberworld-endless.cwsave" : "/");
+		snprintf(initial, sizeof initial, "%s%s", start, kind == 1 ? "/" BACKUP_NAME : "/");
 		const char *argv[] = { "kdialog", "--title", title,
 			kind == 2 ? "--getexistingdirectory" : kind == 1 ? "--getsavefilename" : "--getopenfilename", initial,
-			kind == 2 ? NULL : "*.cwsave|Saves", NULL };
+			kind == 2 ? NULL : "*.cwsave", NULL };
 		return run(argv, path, n) && path[0];
 	}
 	return false;
@@ -304,26 +304,12 @@ static void downloads_dir(const char *home, char *out, size_t n) {
 	fclose(f);
 }
 
+/* (read, not made: pick_saves_put makes it at the first write there) */
 bool desktop_saves_default(char *path, size_t n) {
 	const char *home = getenv("HOME");
 	if (!home || !*home) return false;
 	downloads_dir(home, path, n);
-	make_dirs(path);
 	return true;
-}
-
-void desktop_saves_reveal(const char *path) {
-#ifdef __APPLE__
-	const char *argv[] = { "open", "-R", path, NULL };
-	run(argv, NULL, 0);
-#else
-	char dir[1100];
-	snprintf(dir, sizeof dir, "%s", path);
-	char *slash = strrchr(dir, '/');
-	if (slash) *slash = 0;
-	const char *argv[] = { "xdg-open", dir, NULL };
-	run(argv, NULL, 0);
-#endif
 }
 
 bool desktop_rom_elsewhere(const char *rom_dir, char *msg, size_t msglen) {

@@ -1,5 +1,7 @@
-/* Choices and picker outcomes for the portable saves screen. */
-#include "saves_state.h"
+/* saves_actions.h. Nothing here changes the saves but USE THE FILE'S and
+ * UNDO IMPORT (backup.h's transactions), and the copy's answers mirror.h
+ * keeps. */
+#include "saves_actions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,180 +9,197 @@
 #include "audio.h"
 #include "mirror.h"
 #include "pick.h"
+#include "platform.h"
+#include "rivals.h"
 #include "rom.h"
 #include "save.h"
+#include "saves_state.h"
 #include "saves_text.h"
 
-bool saves_disabled(int action) {
-	if (SV.busy) return true;
+static int picking;   /* the picker open: SAVES_EXPORT, SAVES_IMPORT, SAVES_FOLDER */
+
+static bool bn5(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
+
+int saves_actions(int *out) {
+	int n = 0;
 	unsigned caps = pick_saves_capabilities();
-	switch (action) {
-	case SAVES_EXPORT: return !SV.have;
-	case SAVES_UNDO: return !SV.undo;
-	case SAVES_AUTO: return !(caps & SAVES_CAN_AUTO);
-	case SAVES_FOLDER: return !(caps & SAVES_CAN_FOLDER);
-	case SAVES_RETRY: return !(caps & SAVES_CAN_AUTO) || !pick_saves_auto_enabled() || !SV.place[0] || !SV.have;
-	case SAVES_CONTINUE: return !SV.resume || !SV.result_resume;
-	case SAVES_TAKE: return SV.status != BACKUP_OK;
-	case SAVES_PREV: return SV.details_page <= 0;
-	case SAVES_NEXT: return SV.details_page >= saves_details_pages() - 1;
-	default: return false;
-	}
-}
-
-static void undo_preview(void) {
-	saves_refresh();
-	SV.status = backup_undo_info(g_data_dir, &SV.file) ? backup_check(&SV.file, XR[XROM_BN5_COLONEL_US].data != NULL) : SV.file.status;
-	SV.undo_preview = true;
-	SV.view = SAVES_COMPARE;
-	SV.focus = SAVES_KEEP;
-	SV.path[0] = 0;
-	mirror_hold(true);
-	if (SV.status != BACKUP_OK) saves_refusal(SV.status, &SV.file, SV.note, sizeof SV.note);
-	else saves_undo_loss(SV.note, sizeof SV.note);
-}
-
-static BackupStatus restore_previous(void) {
-	BackupInfo previous;
-	if (!backup_undo_info(g_data_dir, &previous)) return previous.status;
-	BackupStatus status = backup_check(&previous, XR[XROM_BN5_COLONEL_US].data != NULL);
-	if (status != BACKUP_OK) return status;
-	if (previous.hash != SV.file.hash) return BACKUP_IO;
-	return backup_undo(g_data_dir) ? BACKUP_OK : BACKUP_IO;
-}
-
-void saves_answer(bool take) {
-	if (!saves_comparing() || (take && SV.status != BACKUP_OK)) return;
-	bool undo = SV.undo_preview;
-	int previous_layer = SV.here.run_depth;
-	if (take) {
-		BackupStatus status = undo ? restore_previous() : backup_restore(g_data_dir, SV.bytes, SV.size, XR[XROM_BN5_COLONEL_US].data != NULL);
-		if (status != BACKUP_OK) {
-			SV.status = status;
-			saves_refusal(status, &SV.file, SV.note, sizeof SV.note);
-			SV.view = SAVES_COMPARE;
-			SV.focus = SAVES_KEEP;
-			return;
+	if (SV.view == SAVES_HOME) {
+		if (SV.have) out[n++] = SAVES_EXPORT;
+		out[n++] = SAVES_IMPORT;
+		if (SV.undo) out[n++] = SAVES_UNDO;
+		if (caps & SAVES_CAN_AUTO) out[n++] = SAVES_AUTO;
+		if (caps & SAVES_CAN_FOLDER) out[n++] = SAVES_FOLDER;
+	} else if (SV.view == SAVES_COMPARE) {
+		if (SV.status != BACKUP_OK) out[n++] = SAVES_DONE;
+		else {
+			out[n++] = SV.have ? SAVES_KEEP : SAVES_DONE;
+			out[n++] = SAVES_TAKE;
 		}
-		saves_reload();
-	}
-	saves_clear_file();
-	if (!take) {
-		SV.view = SAVES_HOME;
-		SV.focus = undo ? SAVES_UNDO : SAVES_IMPORT;
-		saves_feedback("Kept this device's saves.");
 	} else {
-		char text[350];
-		saves_success(undo, previous_layer, text, sizeof text);
-		saves_result(text, !undo);
-		SV.result_resume = SV.resume;
-		if (SV.result_resume) SV.focus = SAVES_CONTINUE;
+		out[n++] = SV.resume ? SAVES_CONTINUE : SAVES_DONE;
+		if (SV.offer_undo) out[n++] = SAVES_UNDO;
 	}
-	if (R.data) audio_sfx(take ? SFX_GOT : SFX_CANCEL);
+	return n;
 }
 
-static void exported(const char *where) {
-	char text[1100];
-	snprintf(text, sizeof text, "Exported %s to %s.", BACKUP_NAME, where && *where ? where : SV.place);
-	saves_result(text, false);
+static void reload(void) {
+	/* (the profile and the rival's record read again over the title; the
+	 * launcher's game reads them as it begins) */
+	if (R.data) {
+		save_init();
+		rivals_load();
+	}
+	platform_persist();
+	saves_refresh();
 }
+
+/* the result's CONTINUE: where the run on this device can go on */
+static bool can_continue(void) {
+	return R.data && SV.here.has_run && backup_check(&SV.here, bn5()) == BACKUP_OK;
+}
+
+static void take(void) {
+	BackupInfo before = SV.here;
+	bool had = SV.have, from_place = SV.from_place;
+	BackupStatus status = backup_restore(g_data_dir, SV.bytes, SV.size, bn5());
+	if (status != BACKUP_OK) {
+		saves_clear_file();
+		saves_refusal(status, &SV.file, SV.note, sizeof SV.note);
+		saves_result(SV.note);
+		return;
+	}
+	if (from_place) mirror_answer(true);
+	saves_clear_file();
+	reload();
+	char text[300];
+	saves_imported(&SV.here, &before, had, text, sizeof text);
+	saves_result(text);
+	SV.offer_undo = SV.undo;
+	SV.undone = false;
+	SV.resume = can_continue();
+	SV.focus = SV.resume ? SAVES_CONTINUE : SAVES_DONE;
+	if (R.data) audio_sfx(SFX_GOT);
+}
+
+/* UNDO IMPORT: the two folders swapped at once, the result offering the
+ * swap again (UNDO: the imported saves back) */
+static void undo(void) {
+	BackupInfo previous, was = SV.here;
+	bool redo = SV.view == SAVES_RESULT && SV.undone;
+	BackupStatus status = backup_undo_info(g_data_dir, &previous) ? backup_check(&previous, bn5()) : previous.status;
+	if (status == BACKUP_OK && !backup_undo(g_data_dir)) status = BACKUP_IO;
+	if (status != BACKUP_OK) {
+		saves_refusal(status, &previous, SV.note, sizeof SV.note);
+		saves_result(SV.note);
+		return;
+	}
+	reload();
+	char text[300];
+	if (redo) saves_imported(&SV.here, &was, true, text, sizeof text);
+	else saves_undone(&SV.here, SV.have, text, sizeof text);
+	saves_result(text);
+	SV.undone = !redo;
+	SV.offer_undo = true;
+	SV.resume = can_continue();
+	SV.focus = SV.resume ? SAVES_CONTINUE : SAVES_DONE;
+	if (R.data) audio_sfx(SFX_GOT);
+}
+
+/* (the data folder's file an export hands its picker, gone once it ends) */
+static void export_path(char *out, size_t n) { snprintf(out, n, "%s/saves-export.tmp", g_data_dir); }
 
 static void export_file(void) {
 	size_t n = 0;
 	uint8_t *bytes = backup_pack(g_data_dir, 0, &n);
 	char path[700];
-	snprintf(path, sizeof path, "%s/export.cwsave", g_data_dir);
+	export_path(path, sizeof path);
 	bool ok = bytes && backup_write_file(path, bytes, n);
+	if (ok) mirror_wrote(bytes, n);
 	free(bytes);
-	if (!ok) { saves_result("The export could not be written. Check your device's free space and try Export again.", false); return; }
-	if (!pick_saves_export(path)) { saves_result("The export could not be written to your folder. Check its access and free space, then try Export again.", false); return; }
-	SV.busy = pick_saves_busy();
-	if (SV.busy) mirror_hold(true);
-	else exported(SV.place);
-	saves_refresh();
+	if (!ok || !pick_saves_export(path)) {
+		remove(path);
+		saves_result(saves_not_written());
+		return;
+	}
+	SV.busy = true;
+	picking = SAVES_EXPORT;
 }
 
 static void import_file(void) {
-	if (pick_saves_import()) { SV.busy = true; mirror_hold(true); return; }
-	char path[700];
-	snprintf(path, sizeof path, "%s/found.cwsave", g_data_dir);
-	if (pick_saves_find(path)) saves_import(path);
-	else {
-		char text[1100];
-		snprintf(text, sizeof text, "Put %s in %s, then choose Import a file.", BACKUP_NAME, SV.place);
-		saves_result(text, false);
-	}
-}
-
-static void show_details(bool file) {
-	SV.details_back = SV.view;
-	SV.details_focus = SV.focus;
-	SV.details_file = file;
-	SV.details_page = 0;
-	SV.view = SAVES_DETAIL;
-	SV.focus = SAVES_NEXT;
-}
-
-static void transfer_action(int action) {
-	if (action == SAVES_AUTO) {
-		pick_saves_auto(!pick_saves_auto_enabled());
-		if (pick_saves_auto_enabled()) mirror_retry();
-		saves_feedback(pick_saves_auto_enabled() ? "Auto-export on. The folder is checked before copying." : "Auto-export off. Use Export a copy when needed.");
-	} else if (action == SAVES_RETRY) {
-		mirror_retry();
-		saves_feedback("Retrying. The folder is checked before copying.");
-	} else if (pick_saves_choose_folder()) {
-		SV.busy = true;
-		mirror_hold(true);
-	}
+	/* (the copy's place holding saves not answered: those first) */
+	if (pick_saves_auto_enabled() && saves_compare_held()) return;
+	SV.busy = pick_saves_import();
+	picking = SAVES_IMPORT;
 }
 
 static void continue_run(void) {
-	if (!R.data || !load_run()) { saves_result("This checkpoint could not be loaded. Your saves are kept. Return to SAVES to inspect it.", false); return; }
+	if (!load_run()) {
+		saves_result(saves_no_continue());
+		return;
+	}
 	emu_resume_requested = true;
 	scene_set(&scene_emu);
 }
 
 void saves_activate(int action) {
 	if (SV.busy) return;
-	SV.feedback[0] = 0;
-	if (saves_disabled(action)) {
-		char reason[200];
-		saves_action_hint(action, reason, sizeof reason);
-		saves_feedback(reason);
-		return;
-	}
-	SV.operation = action;
+	if (R.data && action != SAVES_TAKE && action != SAVES_UNDO) audio_sfx(action == SAVES_KEEP || action == SAVES_DONE ? SFX_CANCEL : SFX_SELECT);
 	switch (action) {
 	case SAVES_EXPORT: export_file(); break;
 	case SAVES_IMPORT: import_file(); break;
-	case SAVES_UNDO: undo_preview(); break;
-	case SAVES_OPTIONS: SV.view = SAVES_TRANSFER; SV.focus = SAVES_AUTO; break;
-	case SAVES_DETAILS: case SAVES_HERE_DETAILS: show_details(false); break;
-	case SAVES_FILE_DETAILS: show_details(true); break;
-	case SAVES_AUTO: case SAVES_FOLDER: case SAVES_RETRY: transfer_action(action); break;
+	case SAVES_UNDO: undo(); break;
+	case SAVES_AUTO:
+		pick_saves_auto(!pick_saves_auto_enabled());
+		mirror_new_folder();
+		break;
+	case SAVES_FOLDER:
+		SV.busy = pick_saves_choose_folder();
+		picking = SAVES_FOLDER;
+		break;
+	case SAVES_KEEP: saves_leave_compare(true); break;
+	case SAVES_TAKE: take(); break;
 	case SAVES_CONTINUE: continue_run(); break;
-	case SAVES_DONE: SV.view = SAVES_HOME; SV.focus = SAVES_IMPORT; break;
-	case SAVES_KEEP: case SAVES_TAKE: saves_answer(action == SAVES_TAKE); break;
-	case SAVES_PREV: --SV.details_page; break;
-	case SAVES_NEXT: ++SV.details_page; break;
-	default: break;
+	default:
+		if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
+		else {
+			SV.view = SAVES_HOME;
+			SV.focus = SV.have ? SAVES_EXPORT : SAVES_IMPORT;
+		}
+		break;
 	}
 }
 
+static void import_picked(const char *path) {
+	size_t n = 0;
+	uint8_t *bytes = backup_read_file(path, &n);
+	/* (a phone's or the page's copy of the file chosen: gone once read) */
+	char staged[700];
+	snprintf(staged, sizeof staged, "%s/saves-import.cwsave", g_data_dir);
+	remove(staged);
+	saves_compare(bytes, bytes ? n : 0, false);
+}
+
 bool saves_picked(void) {
-	PickResult result;
-	if (!pick_saves_done(&result)) return false;
+	PickResult r;
+	if (!pick_saves_done(&r)) return false;
 	SV.busy = false;
-	if (!saves_comparing()) mirror_hold(false);
-	if (result.status < 0) {
-		if (result.status == -1) saves_feedback("Cancelled. Your saves are kept.");
-		else saves_result(result.text, false);
-		return true;
+	char staged[700];
+	export_path(staged, sizeof staged);
+	remove(staged);
+	if (r.status == -1) return true;
+	if (r.status < 0) { saves_result(r.text); return true; }
+	if (r.path) import_picked(r.text);
+	else if (picking == SAVES_FOLDER) {
+		/* (a folder chosen: looked at now, its saves compared where it has
+		 * some not answered yet) */
+		mirror_new_folder();
+		mirror_look();
+		saves_refresh();
+		if (mirror_incoming()) saves_compare_held();
+	} else {
+		char text[1200];
+		saves_exported(r.text, text, sizeof text);
+		saves_result(text);
 	}
-	if (SV.operation == SAVES_IMPORT) { saves_import(result.text); return true; }
-	saves_refresh();
-	if (SV.operation == SAVES_EXPORT) exported(result.text);
-	else { mirror_new_folder(); saves_feedback("Transfer folder selected. Checked before copying."); }
 	return true;
 }

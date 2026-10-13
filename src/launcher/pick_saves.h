@@ -1,18 +1,22 @@
-/* Shared device-local preferences and ordinary-file transfer helpers. */
+/* What the systems' pickers share for SAVES (pick_saves.c): the folder
+ * kept in saves.ini, device-local. */
 #ifndef CW_PICK_SAVES_H
 #define CW_PICK_SAVES_H
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
+/* The folder chosen for the automatic copy (a desktop's): kept */
 bool saves_folder_keep(const char *path);
-bool saves_copy(const char *from, const char *to);
-/* A present file that cannot be read stages a refusal marker, so an
- * automatic write never destroys an unreadable incoming file. */
-bool saves_stage(const char *from, const char *to);
-/* Phones keep a transfer folder separately, with the ROM folder as the
- * initial default. Choosing one never changes where ROMs are looked for. */
-bool saves_phone_place(char *out, size_t n);
-bool saves_phone_scope(char *out, size_t n);
+
+#if defined(__ANDROID__) || defined(CW_IOS)
+/* (phones) The provider's file read through a file of the data folder's
+ * own, gone again once read: `get` copies it there (1), finds none (0) or
+ * cannot read it (-1) */
+int saves_read_through(int (*get)(const char *to), uint8_t **bytes, size_t *n);
+/* ... and written through one: `put` copies it into the place */
+bool saves_put_through(bool (*put)(const char *from), const uint8_t *bytes, size_t n);
+#endif
 
 #endif

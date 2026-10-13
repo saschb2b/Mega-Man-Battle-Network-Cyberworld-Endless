@@ -1,194 +1,146 @@
+/* saves_text.h. Menu words: short, plain, in capitals on the buttons as
+ * on the ROMs screen; one name for each thing: this device, the file, the
+ * folder, the build, Layer N and Act N (story_words.c's capitals). */
 #include "saves_text.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include "guardians.h"
-#include "mirror.h"
 #include "pick.h"
 #include "rom.h"
+#include "saves.h"
 #include "saves_state.h"
 
-const char *saves_label(int action) {
-	static const char *const labels[] = {
-		"Export a copy", "Import a file", "Undo last import", "Options", "Details",
-		"Auto-export", "Choose folder", "Retry copy", "Done", "Continue",
-		"Keep this device", "Use file", "Local details", "File details", "Previous", "Next"
-	};
-	if (action == SAVES_TAKE && SV.undo_preview) return "Restore";
-	if (action == SAVES_FILE_DETAILS && SV.undo_preview) return "Undo details";
-	return action >= 0 && action < SAVES_ACTIONS ? labels[action] : "SAVES";
-}
+const char *saves_word_title(void) { return "SAVES"; }
 
-const char *saves_hint(int action) {
+const char *saves_word_hint(void) { return "Saves"; }
+
+const char *saves_word_back(void) { return "BACK"; }
+
+const char *saves_label(int action) {
 	switch (action) {
-	case SAVES_EXPORT: return "Copy your progress and checkpoint to a file.";
-	case SAVES_IMPORT: return "Compare a file before replacing your saves.";
-	case SAVES_UNDO: return "Preview the saves replaced by your import.";
-	case SAVES_OPTIONS: return "Automatic copies, folder and retry.";
-	case SAVES_DETAILS: case SAVES_HERE_DETAILS: return "Read the full save details and folder.";
-	case SAVES_FILE_DETAILS: return "Read the other copy's full details.";
-	case SAVES_AUTO: return "Keep a fresh file in your folder after each save.";
-	case SAVES_FOLDER: return "Choose the folder used for automatic copies and incoming saves.";
-	case SAVES_RETRY: return "Check the folder for incoming saves, then try copying again.";
-	case SAVES_CONTINUE: return "Resume this device's checkpoint.";
-	case SAVES_KEEP: return "Keep this device's current progress.";
-	case SAVES_TAKE: return "Replace this device's progress. Undo keeps the current copy.";
-	default: return "Your device settings stay here.";
+	case SAVES_EXPORT: return "EXPORT";
+	case SAVES_IMPORT: return "IMPORT";
+	case SAVES_UNDO: return SV.undone ? "UNDO" : "UNDO IMPORT";
+	case SAVES_AUTO: return pick_saves_auto_enabled() ? "AUTO-COPY: ON" : "AUTO-COPY: OFF";
+	case SAVES_FOLDER: return "FOLDER";
+	case SAVES_KEEP: return "KEEP THESE";
+	case SAVES_TAKE: return SV.have ? "USE THE FILE'S" : "BRING BACK";
+	case SAVES_CONTINUE: return "CONTINUE";
+	default: return "DONE";
 	}
 }
 
-static void date_text(uint64_t stamp, bool full, char *out, size_t n) {
+const char *saves_panel_title(bool file) { return file ? "THE FILE" : "THIS DEVICE"; }
+
+static void when(uint64_t stamp, char *out, size_t n) {
 	time_t seconds = (time_t)stamp;
 	struct tm *date = stamp ? localtime(&seconds) : NULL;
-	if (date && full) strftime(out, n, "%Y-%m-%d %H:%M", date);
-	else if (date) strftime(out, n, "%m-%d %H:%M", date);
-	else snprintf(out, n, "unknown");
+	if (!date || !strftime(out, n, "%m-%d %H:%M", date)) out[0] = 0;
 }
 
-void saves_summary(const BackupInfo *info, int row, char *out, size_t n) {
-	*out = 0;
-	if (row == 0) { snprintf(out, n, "%d runs / best %d", info->runs, info->best); return; }
-	if (row == 1) {
-		if (info->run_depth) snprintf(out, n, "Layer %d / act %d", info->run_depth, info->run_act);
-		else snprintf(out, n, "No run in progress");
-		return;
-	}
-	if (row == 2 && info->run_depth) {
-		const NetAreaDef *a = R.layout && info->run_area >= 0 ? net_area_def(info->run_area) : NULL;
-		const char *name = a && a->name ? a->name : info->needs_bn5 ? "Older net" : guardian_area_original_name(info->run_area);
-		snprintf(out, n, "%s%s", name, info->needs_bn5 ? " (BN5)" : "");
-		return;
-	}
-	if (row == 3) { date_text(info->stamp, true, out, n); return; }
-	if (row == 4) snprintf(out, n, "%s%s%s", info->system[0] ? info->system : "Device unknown", info->device[0] ? " / " : "", info->device);
-	if (row == 5) snprintf(out, n, "Build: %s", info->version[0] ? info->version : "unknown (old file)");
-	if (row == 6) date_text(info->stamp, false, out, n);
+static const char *area_name(const BackupInfo *info) {
+	const NetAreaDef *a = R.layout && !info->needs_bn5 && info->run_area >= 0 ? net_area_def(info->run_area) : NULL;
+	if (a && a->name) return a->name;
+	return info->needs_bn5 ? "The older Net (BN5)" : guardian_area_original_name(info->run_area);
 }
 
-void saves_refusal(BackupStatus status, const BackupInfo *info, char *out, size_t n) {
+int saves_rows(const BackupInfo *info, bool damaged, bool source, char rows[4][64]) {
+	if (damaged) {
+		snprintf(rows[0], 64, "Damaged");
+		return 1;
+	}
+	int k = 0, best = info->best > info->run_depth ? info->best : info->run_depth;
+	if (info->run_depth > 0) {
+		snprintf(rows[k++], 64, "Layer %d, Act %d", info->run_depth, info->run_act);
+		const char *area = area_name(info);
+		if (area && *area) snprintf(rows[k++], 64, "%s", area);
+	}
+	if (info->runs > 0) snprintf(rows[k++], 64, "%d run%s, best Layer %d", info->runs, info->runs == 1 ? "" : "s", best);
+	else if (info->run_depth <= 0 && best > 0) snprintf(rows[k++], 64, "Best Layer %d", best);
+	if (!k) snprintf(rows[k++], 64, "No runs yet");
+	if (source && k < 4) {
+		char date[32];
+		when(info->stamp, date, sizeof date);
+		const char *system = info->system[0] ? info->system : "";
+		snprintf(rows[k++], 64, "%s%s%s", system, *system && *date ? ", " : "", date);
+		if (!rows[k - 1][0]) --k;
+	}
+	return k;
+}
+
+void saves_status_line(const MirrorStatus *m, bool blocked, bool can_choose, char *out, size_t n) {
+	out[0] = 0;
+	if (blocked) { snprintf(out, n, "Not saving: savedata could not be put back."); return; }
+	const char *p = m->place;
+	char date[32];
+	switch (m->state) {
+	case MIRROR_OFF: if (*p) snprintf(out, n, "Folder: %s", p); break;
+	case MIRROR_WAITING: snprintf(out, n, "Copies go to %s", p); break;
+	case MIRROR_COPIED:
+		when(m->copied_at, date, sizeof date);
+		snprintf(out, n, "Copied to %s %s", p, date);
+		break;
+	case MIRROR_FAILED: snprintf(out, n, can_choose ? "No copy in %s: choose it again" : "No copy in %s: it could not be written", p); break;
+	case MIRROR_HELD: snprintf(out, n, "New saves in %s: IMPORT shows them", p); break;
+	case MIRROR_UNREAD: snprintf(out, n, "No copy: the file in %s could not be read", p); break;
+	}
+}
+
+static void phrase(const BackupInfo *info, char *out, size_t n) {
+	int best = info->best > info->run_depth ? info->best : info->run_depth;
+	if (info->run_depth > 0) snprintf(out, n, "a run on Layer %d", info->run_depth);
+	else if (info->runs > 0) snprintf(out, n, "%d run%s, best Layer %d", info->runs, info->runs == 1 ? "" : "s", best);
+	else snprintf(out, n, "no runs yet");
+}
+
+void saves_compare_note(const BackupInfo *here, bool have, const char *place, char *out, size_t n) {
+	int used;
+	if (!have) used = snprintf(out, n, "This device has no saves yet.");
+	else if (here->run_depth > 0) used = snprintf(out, n, "USE THE FILE'S replaces your Layer %d run. UNDO IMPORT brings it back.", here->run_depth);
+	else used = snprintf(out, n, "USE THE FILE'S replaces your saves. UNDO IMPORT brings them back.");
+	if (place && have && used > 0 && (size_t)used < n)
+		snprintf(out + used, n - (size_t)used, "\nKEEP THESE: the copy in %s becomes this device's.", place);
+}
+
+void saves_refusal(BackupStatus status, const BackupInfo *file, char *out, size_t n) {
+	const char *why;
+	char made[160];
 	switch (status) {
 	case BACKUP_NEWER_BUILD:
 	case BACKUP_NEWER_FORMAT:
 	case BACKUP_INCOMPATIBLE_RUN:
-		snprintf(out, n, "Made by %s: update this device first. Your saves are kept.", info->version[0] ? info->version : "a newer build"); break;
-	case BACKUP_NEEDS_BN5: snprintf(out, n, "Needs BN5 Team Colonel (USA). Add its ROM first. Your saves are kept."); break;
-	case BACKUP_DAMAGED: snprintf(out, n, "This copy is damaged or is not a saves file. Your saves are kept."); break;
-	case BACKUP_IO: snprintf(out, n, "The saves could not be read or written. Check access and free space. Your saves are kept."); break;
-	default: snprintf(out, n, "Your controls, screen, volumes and statistics answer stay here."); break;
+		snprintf(made, sizeof made, "Made by %s, newer than this one: update the game first.", file->version[0] ? file->version : "a newer build");
+		why = made;
+		break;
+	case BACKUP_NEEDS_BN5: why = "This run needs BN5 Team Colonel (USA)."; break;
+	case BACKUP_IO: why = "The saves could not be written here."; break;
+	default: why = "Not a saves file, or damaged."; break;
 	}
+	snprintf(out, n, "%s\nYour saves are kept.", why);
 }
 
-void saves_loss(const BackupInfo *here, const BackupInfo *file, char *out, size_t n) {
-	char replace[120];
-	if (P.w < 230) snprintf(replace, sizeof replace, "Use file. Undo available.");
-	else if (here->run_depth && file->run_depth) snprintf(replace, sizeof replace, "Replace layer %d with %d. Undo available.", here->run_depth, file->run_depth);
-	else if (here->run_depth) snprintf(replace, sizeof replace, "Replace your layer %d run. Undo available.", here->run_depth);
-	else snprintf(replace, sizeof replace, "Replace this device's progress. Undo available.");
-	snprintf(out, n, "%s\nSettings stay here.%s", replace, pick_saves_auto_enabled() && (pick_saves_capabilities() & SAVES_CAN_AUTO)
-		? "\nKeep copies to folder (Auto on)." : "");
+void saves_imported(const BackupInfo *now, const BackupInfo *before, bool had, char *out, size_t n) {
+	char got[64];
+	phrase(now, got, sizeof got);
+	if (had && before->run_depth > 0) snprintf(out, n, "Saves imported: %s. UNDO IMPORT brings back your Layer %d run.", got, before->run_depth);
+	else if (had) snprintf(out, n, "Saves imported: %s. UNDO IMPORT brings back your saves.", got);
+	else snprintf(out, n, "Saves imported: %s.", got);
 }
 
-void saves_undo_loss(char *out, size_t n) {
-	if (P.w < 230) snprintf(out, n, "Restore previous saves.\nUndo keeps current saves.\nSettings stay here.");
-	else if (SV.file.run_depth) snprintf(out, n, "Restore layer %d. Undo keeps current saves.\nSettings stay here.", SV.file.run_depth);
-	else snprintf(out, n, "Restore previous progress (no active run).\nUndo keeps current saves. Settings stay here.");
+void saves_undone(const BackupInfo *now, bool have, char *out, size_t n) {
+	char got[64];
+	phrase(now, got, sizeof got);
+	if (have) snprintf(out, n, "Your saves are back: %s. UNDO swaps them again.", got);
+	else snprintf(out, n, "The import is undone. UNDO swaps it back.");
 }
 
-void saves_action_hint(int action, char *out, size_t n) {
-	const char *hint = saves_hint(action);
-	unsigned caps = pick_saves_capabilities();
-	if (action == SAVES_EXPORT && !SV.have) hint = "Start a game before exporting its saves.";
-	else if (action == SAVES_UNDO && !SV.undo) hint = "No import to undo yet.";
-	else if (action == SAVES_AUTO && !(caps & SAVES_CAN_AUTO)) hint = "This browser uses manual downloads. Use Export a copy.";
-	else if (action == SAVES_FOLDER && !(caps & SAVES_CAN_FOLDER)) hint = caps & SAVES_CAN_AUTO
-		? "This system uses the folder shown above. Details shows its full path." : "This browser uses downloads and uploads, without a transfer folder.";
-	else if (action == SAVES_RETRY && (!(caps & SAVES_CAN_AUTO) || !pick_saves_auto_enabled())) hint = caps & SAVES_CAN_AUTO
-		? "Turn Auto-export on to retry a folder copy." : "Use Export a copy to download again in this browser.";
-	else if (action == SAVES_RETRY && !SV.place[0]) hint = "Choose a transfer folder before trying an automatic copy.";
-	else if (action == SAVES_RETRY && !SV.have) hint = "Start a game first. Its progress can then be copied.";
-	else if (action == SAVES_TAKE && SV.status != BACKUP_OK) hint = "This copy cannot be used. Read the reason above or its Details.";
-	snprintf(out, n, "%s", hint);
-}
+void saves_exported(const char *where, char *out, size_t n) { snprintf(out, n, "Exported to %s.", where); }
 
-static const char *copy_state(MirrorState state) {
-	switch (state) {
-	case MIRROR_PENDING: return "Copy pending";
-	case MIRROR_COPIED: return "Copied to folder";
-	case MIRROR_FAILED: return "Copy failed - Retry in Options";
-	case MIRROR_INCOMING: return "Incoming saves - compare first";
-	default: return "No automatic copy yet";
-	}
-}
+const char *saves_same(void) { return "The file holds the saves already here."; }
 
-void saves_transfer_status(char *out, size_t n) {
-	if (!(pick_saves_capabilities() & SAVES_CAN_AUTO)) {
-		snprintf(out, n, "Browser: manual downloads\nKeep a copy before clearing storage");
-		return;
-	}
-	if (!SV.have) {
-		snprintf(out, n, "No saves to copy yet\nFolder: %s", SV.place[0] ? SV.place : "not chosen");
-		return;
-	}
-	MirrorStatus status;
-	mirror_status(&status);
-	char date[64];
-	date_text(status.copied_at, false, date, sizeof date);
-	snprintf(out, n, "%s%s%s\nFolder: %s", pick_saves_auto_enabled() ? copy_state(status.state) : "Auto-export off",
-		status.copied_at && status.state == MIRROR_COPIED ? " " : "", status.copied_at && status.state == MIRROR_COPIED ? date : "",
-		SV.place[0] ? SV.place : "not chosen");
-}
+const char *saves_no_continue(void) { return "The checkpoint could not be loaded. Your saves are kept."; }
 
-void saves_details_text(char *out, size_t n) {
-	const BackupInfo *info = SV.details_file ? &SV.file : &SV.here;
-	char progress[128], area[128], runs[128], played[64], source[160], build[128];
-	saves_summary(info, 1, progress, sizeof progress);
-	saves_summary(info, 2, area, sizeof area);
-	saves_summary(info, 0, runs, sizeof runs);
-	saves_summary(info, 3, played, sizeof played);
-	saves_summary(info, 4, source, sizeof source);
-	saves_summary(info, 5, build, sizeof build);
-	const char *label = SV.details_file ? SV.undo_preview ? "Previous local saves" : "Incoming file" : "This device";
-	const char *message = SV.details_back == SAVES_RESULT || (SV.details_file && SV.status != BACKUP_OK) ? SV.note : "";
-	int used = snprintf(out, n, "%s%s%s\n%s\n%s\n%s\nLast played: %s\n%s\n%s\n", message, *message ? "\n" : "", label, progress, area, runs, played, source, build);
-	if (used < 0 || (size_t)used >= n) return;
-	if (SV.details_file) {
-		snprintf(out + used, n - (size_t)used, "%s", SV.undo_preview ? "Kept before the last import. Restore swaps this copy with the current saves. Device settings stay here."
-			: SV.path[0] ? SV.path : "File selected for import");
-		return;
-	}
-	MirrorStatus status;
-	mirror_status(&status);
-	char copied[64];
-	date_text(status.copied_at, true, copied, sizeof copied);
-	snprintf(out + used, n - (size_t)used, "Auto-export: %s\n%s\nLast successful automatic copy: %s\nTransfer folder: %s\nA folder copy does not confirm cloud sync. Your controls, screen, volumes and statistics answer stay on this device.",
-		pick_saves_auto_enabled() ? "on" : "off", copy_state(status.state), copied, SV.place[0] ? SV.place : "unavailable (manual downloads)");
-}
-
-const char *saves_panel_title(bool file) {
-	return file ? SV.undo_preview ? "Previous saves" : "The file" : "This device";
-}
-
-const char *saves_view_title(void) {
-	switch (SV.view) {
-	case SAVES_TRANSFER: return "OPTIONS";
-	case SAVES_DETAIL: return "DETAILS";
-	case SAVES_COMPARE: return SV.undo_preview ? "UNDO IMPORT" : "COMPARE SAVES";
-	default: return "SAVES";
-	}
-}
-
-void saves_page_label(int page, int pages, char *out, size_t n) {
-	snprintf(out, n, "Page %d / %d", page + 1, pages);
-}
-
-void saves_success(bool undo, int previous_layer, char *out, size_t n) {
-	char progress[96], recovery[100];
-	saves_summary(&SV.here, 1, progress, sizeof progress);
-	if (undo) snprintf(recovery, sizeof recovery, "Current saves remain available in Undo.");
-	else if (previous_layer) snprintf(recovery, sizeof recovery, "Undo brings back your previous layer %d run.", previous_layer);
-	else snprintf(recovery, sizeof recovery, "Undo brings back your previous progress.");
-	const char *next = SV.resume ? " Continue resumes this checkpoint." : SV.here.has_run
-		? " Open the game with its ROM to continue." : " Your progress is ready for the next run.";
-	snprintf(out, n, "%s %s. %s%s", undo ? "Previous saves restored." : "Imported.", progress, recovery, next);
-}
+const char *saves_not_written(void) { return "The file could not be written."; }

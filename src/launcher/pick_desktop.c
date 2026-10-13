@@ -11,12 +11,14 @@
 #ifdef CW_DESKTOP
 #include <SDL.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "desktop.h"
 #include "backup.h"
+#include "desktop.h"
 #include "game.h"
 #include "pick_saves.h"
+#include "pick_text.h"
 
 static SDL_Thread *thread;
 static SDL_atomic_t state;   /* 0 open, 1 a file chosen, -1 none */
@@ -70,60 +72,64 @@ bool pick_folder(char *name, size_t n) {
 	return false;
 }
 
-bool pick_saves_put(const char *from) {
-	char folder[1024], to[1100];
-	if (!pick_saves_place(folder, sizeof folder)) return false;
-	snprintf(to, sizeof to, "%s/%s", folder, BACKUP_NAME);
-	return saves_copy(from, to);
-}
-
-bool pick_saves_get(const char *to) {
-	char folder[1024], from[1100];
-	if (!pick_saves_place(folder, sizeof folder)) return false;
-	snprintf(from, sizeof from, "%s/%s", folder, BACKUP_NAME);
-	return saves_stage(from, to);
-}
+/* ---- SAVES' choosers: on a thread of their own, as the ROM's ---- */
 
 static SDL_Thread *save_thread;
-static SDL_atomic_t save_state;
+static SDL_atomic_t save_state;   /* 0 open, 1 done, -1 cancelled, -2 failed */
 static int save_kind;
-static char save_from[1024], save_chosen[1024];
-
-static void keep_parent(const char *path) {
-	char folder[1024];
-	snprintf(folder, sizeof folder, "%s", path);
-	char *slash = strrchr(folder, '/');
-	if (slash && slash != folder) { *slash = 0; saves_folder_keep(folder); }
-}
+static char save_from[1024], save_start[1024], save_chosen[1024], save_title[64];
 
 static int choose_saves(void *user) {
 	(void)user;
-	char folder[1024];
-	bool have = pick_saves_place(folder, sizeof folder);
-	bool dialog = !desktop_big_screen() && desktop_can_choose();
-	int status = -1;
-	if (dialog) {
-		if (desktop_choose_saves(save_kind, have ? folder : g_data_dir, save_chosen, sizeof save_chosen)) status = 1;
-	} else if (save_kind == 0) {
-		snprintf(save_chosen, sizeof save_chosen, "%s/saves-found.cwsave", g_data_dir);
-		status = pick_saves_find(save_chosen) ? 1 : -2;
-	} else if (save_kind == 1 && have) {
-		snprintf(save_chosen, sizeof save_chosen, "%.*s/%s", (int)sizeof save_chosen - 30, folder, BACKUP_NAME);
-		status = 1;
-	}
+	int status = desktop_choose_saves(save_kind, save_title, save_start, save_chosen, sizeof save_chosen) ? 1 : -1;
+	/* (an export's bytes copied where the player chose, read from the
+	 * data folder's file SAVES wrote) */
 	if (status == 1 && save_kind == 1) {
-		status = saves_copy(save_from, save_chosen) ? 1 : -2;
-		if (status == 1 && dialog) desktop_saves_reveal(save_chosen);
+		size_t n = 0;
+		uint8_t *b = backup_read_file(save_from, &n);
+		status = b && backup_write_file(save_chosen, b, n) ? 1 : -2;
+		free(b);
+		if (status < 0) snprintf(save_chosen, sizeof save_chosen, "%s", pick_text_not_written());
 	}
-	if (status == -2) snprintf(save_chosen, sizeof save_chosen, "%s", save_kind == 0 ? "No saves file found in Downloads or the data folder." : "The saves file could not be exported.");
 	SDL_AtomicSet(&save_state, status);
 	return 0;
 }
 
+static bool dialogs(void) { return !desktop_big_screen() && desktop_can_choose(); }
+
+/* (no dialog: the place's own file, read or written at once) */
+static void at_once(int kind, const char *from) {
+	char place[1024];
+	bool have = pick_saves_place(place, sizeof place);
+	snprintf(save_chosen, sizeof save_chosen, "%.990s/%s", have ? place : g_data_dir, BACKUP_NAME);
+	int status = -2;
+	if (kind == 0) {
+		FILE *f = fopen(save_chosen, "rb");
+		if (f) fclose(f);
+		status = f ? 1 : -2;
+		if (!f) pick_text_none_found(have ? place : g_data_dir, save_chosen, sizeof save_chosen);
+	} else if (kind == 1) {
+		size_t n = 0;
+		uint8_t *b = backup_read_file(from, &n);
+		status = b && pick_saves_put(b, n) ? 1 : -2;
+		free(b);
+		if (status < 0) snprintf(save_chosen, sizeof save_chosen, "%s", pick_text_not_written());
+	}
+	save_kind = kind;
+	SDL_AtomicSet(&save_state, status);
+}
+
 static bool saves_dialog_open(int kind, const char *from) {
-	if (thread || save_thread || (kind == 2 && (desktop_big_screen() || !desktop_can_choose()))) return false;
+	if (thread || save_thread || SDL_AtomicGet(&save_state)) return false;
+	if (!dialogs()) {
+		if (kind == 2) return false;
+		at_once(kind, from);
+		return true;
+	}
 	save_kind = kind;
 	snprintf(save_from, sizeof save_from, "%s", from ? from : "");
+	snprintf(save_title, sizeof save_title, "%s", pick_text_title(kind));
+	if (!pick_saves_place(save_start, sizeof save_start)) snprintf(save_start, sizeof save_start, "%s", g_data_dir);
 	save_chosen[0] = 0;
 	SDL_AtomicSet(&save_state, 0);
 	save_thread = SDL_CreateThread(choose_saves, "saves-chooser", NULL);
@@ -133,22 +139,23 @@ static bool saves_dialog_open(int kind, const char *from) {
 bool pick_saves_import(void) { return saves_dialog_open(0, NULL); }
 bool pick_saves_export(const char *from) { return saves_dialog_open(1, from); }
 bool pick_saves_choose_folder(void) { return saves_dialog_open(2, NULL); }
-bool pick_saves_busy(void) { return save_thread != NULL; }
+bool pick_saves_busy(void) { return save_thread != NULL || SDL_AtomicGet(&save_state) != 0; }
+void pick_saves_cancel(void) {}
 
 bool pick_saves_done(PickResult *r) {
-	if (!save_thread || !SDL_AtomicGet(&save_state)) return false;
-	SDL_WaitThread(save_thread, NULL);
+	int status = SDL_AtomicGet(&save_state);
+	if (!status) return false;
+	if (save_thread) SDL_WaitThread(save_thread, NULL);
 	save_thread = NULL;
+	SDL_AtomicSet(&save_state, 0);
 	memset(r, 0, sizeof *r);
-	r->status = SDL_AtomicGet(&save_state);
-	r->path = save_kind == 0;
+	r->status = status;
+	r->path = save_kind == 0 && status == 1;
 	snprintf(r->text, sizeof r->text, "%s", save_chosen);
-	/* Persist on the game's thread: platform_persist also notes the next
-	 * auto-export, whose state the worker must not change. */
-	if (r->status == 1 && save_kind == 1) keep_parent(save_chosen);
-	else if (r->status == 1 && save_kind == 2 && !saves_folder_keep(save_chosen)) {
+	/* (kept on the game's thread: saves.ini is the game's) */
+	if (status == 1 && save_kind == 2 && !saves_folder_keep(save_chosen)) {
 		r->status = -2;
-		snprintf(r->text, sizeof r->text, "The transfer folder could not be remembered.");
+		snprintf(r->text, sizeof r->text, "%s", pick_text_folder_not_kept());
 	}
 	return true;
 }

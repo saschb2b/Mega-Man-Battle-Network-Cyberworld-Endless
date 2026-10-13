@@ -748,6 +748,9 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	/* (and the saves' copy made: the app may be ended there unasked) */
 	case SDL_APP_WILLENTERBACKGROUND: let_go(); mirror_flush(); break;
+	/* (back: the copy's place looked at again, another device's saves
+	 * may have come in meanwhile) */
+	case SDL_APP_DIDENTERFOREGROUND: mirror_rescan(); break;
 	/* (the renderer's textures lost: the controls' art is made again) */
 	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); ++P.textures_lost; break;
 	default:
@@ -975,10 +978,10 @@ void platform_persist(void) {
 #ifdef __EMSCRIPTEN__
 	/* the browser's files live in memory until they are synced to IndexedDB */
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
-#else
-	/* (a phone's saves copied to the ROM folder a moment later: mirror.h) */
-	mirror_note();
 #endif
+	/* (the saves' copy made a moment later, and their summary read again
+	 * when next asked: mirror.h) */
+	mirror_note();
 }
 
 bool platform_save_canvas(const char *path) {

@@ -1,16 +1,17 @@
-/* Three ordinary-file places behind desktop picker adapters, with invented
- * progress only: a skipped first candidate must not mask a later import. */
-#include <assert.h>
+/* A desktop's transfer place (pick_saves.c with CW_DESKTOP) under the
+ * automatic copy's look (mirror.c), with invented saves: Downloads asked
+ * of the system once and never made until a write; not looked in until
+ * the player asks (SAVES opened) or turns the copy on; a file unchanged
+ * by size and time not read again; a folder chosen looked at anew. */
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
-#include <time.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <utime.h>
 
-#include <SDL.h>
-
-#include "backup_fixture.h"
+#include "backup.h"
 #include "backup_internal.h"
 #include "compat.h"
 #include "desktop.h"
@@ -19,264 +20,153 @@
 #include "pick.h"
 #include "pick_saves.h"
 #include "platform.h"
+#include "save.h"
+#include "save_format.h"
 
 char g_data_dir[512];
 static char downloads[600];
-static Uint32 ticks = 5000;
-static bool rom_picker, saves_picker, fail_put;
-static time_t copy_time = 1700000000;
+static int asked_downloads;
+static Uint32 ticks = 10000;
+static int failures;
+#define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
 
 Uint32 SDL_GetTicks(void) { return ticks; }
-time_t time(time_t *out) { if (out) *out = copy_time; return copy_time; }
 void platform_persist(void) { mirror_note(); }
 bool desktop_big_screen(void) { return false; }
 bool desktop_can_choose(void) { return true; }
-bool pick_busy(void) { return rom_picker; }
-bool pick_saves_busy(void) { return saves_picker; }
 bool desktop_saves_default(char *path, size_t n) {
+	++asked_downloads;
 	snprintf(path, n, "%s", downloads);
-	return downloads[0] != 0;
-}
-
-static bool place_file(char *path, size_t n) {
-	char folder[1024];
-	if (!pick_saves_place(folder, sizeof folder)) return false;
-	snprintf(path, n, "%s/%s", folder, BACKUP_NAME);
 	return true;
 }
+bool pick_busy(void) { return false; }
+bool pick_saves_busy(void) { return false; }
 
-bool pick_saves_get(const char *to) {
-	char path[1100];
-	return place_file(path, sizeof path) && saves_stage(path, to);
+static void remove_tree(const char *path) {
+	DIR *dir = opendir(path);
+	if (!dir) { remove(path); return; }
+	for (struct dirent *e; (e = readdir(dir));) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) continue;
+		char child[1400];
+		snprintf(child, sizeof child, "%s/%s", path, e->d_name);
+		remove_tree(child);
+	}
+	closedir(dir);
+	cw_rmdir(path);
 }
 
-bool pick_saves_put(const char *from) {
-	char path[1100];
-	return !fail_put && place_file(path, sizeof path) && saves_copy(from, path);
+static bool blob(const char *path, uint32_t magic, const void *value, uint32_t size) {
+	uint8_t *bytes = malloc(12 + size);
+	if (!bytes) return false;
+	backup_put32(bytes, magic);
+	backup_put32(bytes + 4, size);
+	backup_put32(bytes + 8, backup_fnv(value, size, 2166136261u));
+	memcpy(bytes + 12, value, size);
+	bool ok = backup_write_file(path, bytes, size + 12);
+	free(bytes);
+	return ok;
 }
 
-static void progress(const char *dir, unsigned runs) {
-	char path[600];
+static bool progress(const char *dir, int runs) {
+	char path[700];
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	cw_mkdir(path);
+	Profile p = { .runs = runs, .best_depth = 4 };
 	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	assert(b && n >= 20);
-	backup_put32(b + 12, runs);
-	backup_put32(b + 8, backup_fnv(b + 12, backup_get32(b + 4), 2166136261u));
-	assert(backup_write_file(path, b, n));
-	free(b);
+	return blob(path, PROFILE_MAGIC, &p, sizeof p);
 }
 
-static void same_bytes(const char *path, const uint8_t *expected, size_t length) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	assert(b && n == length && !memcmp(b, expected, n));
-	free(b);
-}
-
-static void picker_protection(const char *folder, const uint8_t *incoming, size_t n) {
-	char path[1100], staged[600];
-	snprintf(path, sizeof path, "%s/%s", folder, BACKUP_NAME);
-	assert(backup_write_file(path, incoming, n));
-	pick_saves_auto(true);
-	for (int kind = 0; kind < 2; ++kind) {
-		bool *busy = kind ? &saves_picker : &rom_picker;
-		*busy = true;
-		/* A picker worker retains its new destination before handing its
-		 * result to the frame loop. Neither discovery nor writes may race it. */
-		assert(saves_folder_keep(folder));
-		mirror_new_folder();
-		ticks += 4000;
-		mirror_tick();
-		assert(!mirror_scan(staged, sizeof staged));
-		mirror_flush();
-		same_bytes(path, incoming, n);
-		*busy = false;
-		assert(mirror_scan(staged, sizeof staged));
-		same_bytes(staged, incoming, n);
-		mirror_flush();
-		same_bytes(path, incoming, n);
-		mirror_hold(false);
-	}
-}
-
-static int receipt_check(const char *dir, const char *stamp, const char *destination) {
-	snprintf(g_data_dir, sizeof g_data_dir, "%s", dir);
-	MirrorStatus status;
-	mirror_status(&status);
-	assert(!status.copied_at && status.state == MIRROR_IDLE);
-	mirror_tick();
-	mirror_status(&status);
-	uint64_t expected = strtoull(stamp, NULL, 10);
-	assert(status.copied_at == expected && !strcmp(status.destination, destination));
-	assert(status.state == (expected ? MIRROR_COPIED : MIRROR_IDLE));
-	return 0;
-}
-
-static void receipt_restart(uint64_t stamp, const char *destination) {
-	char expected[32];
-	snprintf(expected, sizeof expected, "%llu", (unsigned long long)stamp);
-	pid_t child = fork();
-	assert(child >= 0);
-	if (!child) {
-		execl("/proc/self/exe", "test_discovery", "--receipt-check", g_data_dir, expected, destination, (char *)NULL);
-		_exit(127);
-	}
-	int status;
-	assert(waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
-}
-
-static void receipt_status(void) {
-	char base[] = "build/host/test-receipt-XXXXXX", first[600], next[600], path[1100], receipt_path[600];
-	assert(mkdtemp(base));
-	snprintf(g_data_dir, sizeof g_data_dir, "%s/local", base);
-	snprintf(first, sizeof first, "%s/first", base);
-	snprintf(next, sizeof next, "%s/next", base);
-	snprintf(downloads, sizeof downloads, "%s/downloads", base);
-	assert(!cw_mkdir(g_data_dir) && !cw_mkdir(first) && !cw_mkdir(next) && !cw_mkdir(downloads));
-	assert(backup_restore(g_data_dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
-	assert(saves_folder_keep(first));
-	pick_saves_auto(true);
-	mirror_new_folder();
-	mirror_flush();
-	MirrorStatus status;
-	mirror_status(&status);
-	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time && !strcmp(status.destination, first));
-	char initial[sizeof g_data_dir], other[600];
-	memcpy(initial, g_data_dir, sizeof initial);
+/* another device's saves with `runs` runs as a .cwsave at `path` */
+static bool foreign(const char *base, const char *path, int runs) {
+	char other[700];
 	snprintf(other, sizeof other, "%s/other", base);
-	assert(!cw_mkdir(other));
-	snprintf(g_data_dir, sizeof g_data_dir, "%s/other", base);
-	assert(saves_folder_keep(first));
-	mirror_status(&status);
-	assert(!status.copied_at && status.state == MIRROR_IDLE);
-	memcpy(g_data_dir, initial, sizeof g_data_dir);
-	mirror_status(&status);
-	receipt_restart(status.copied_at, first);
-	snprintf(receipt_path, sizeof receipt_path, "%s/saves-export.receipt", g_data_dir);
-	size_t receipt_n = 0;
-	uint8_t *receipt_bytes = backup_read_file(receipt_path, &receipt_n);
-	assert(receipt_bytes);
-	uint64_t previous = status.copied_at;
-	progress(g_data_dir, 4);
-	mirror_note();
-	mirror_status(&status);
-	assert(status.state == MIRROR_PENDING && status.copied_at == previous);
-	fail_put = true;
-	ticks += 4000;
-	mirror_tick();
-	mirror_status(&status);
-	assert(status.state == MIRROR_FAILED && status.copied_at == previous && !strcmp(status.destination, first));
-	same_bytes(receipt_path, receipt_bytes, receipt_n);
-	/* Retry copies the current progress and updates its receipt only after
-	 * the adapter succeeds, even after a cold restart retained the old time. */
-	receipt_restart(previous, first);
-	fail_put = false;
-	copy_time += 60;
-	mirror_retry();
-	mirror_status(&status);
-	assert(status.state == MIRROR_PENDING && status.copied_at == previous);
-	mirror_tick();
-	mirror_status(&status);
-	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time);
-	previous = status.copied_at;
-	snprintf(path, sizeof path, "%s/%s", first, BACKUP_NAME);
-	assert(backup_write_file(path, backup_fixture, sizeof backup_fixture));
-	mirror_note();
-	ticks += 4000;
-	mirror_tick();
-	mirror_status(&status);
-	assert(status.state == MIRROR_INCOMING && status.copied_at == previous);
-	mirror_retry();
-	mirror_flush();
-	same_bytes(path, backup_fixture, sizeof backup_fixture);
-	mirror_hold(false);
-	mirror_flush();
-	/* Selecting a folder elsewhere in the launcher can change the scope
-	 * without mirror_new_folder. The same progress still needs a new copy. */
-	assert(saves_folder_keep(next));
-	mirror_status(&status);
-	assert(!status.copied_at && status.state == MIRROR_PENDING && !strcmp(status.destination, next));
-	copy_time += 60;
-	mirror_flush();
-	mirror_status(&status);
-	assert(status.state == MIRROR_COPIED && status.copied_at == (uint64_t)copy_time && !strcmp(status.destination, next));
-	snprintf(path, sizeof path, "%s/%s", next, BACKUP_NAME);
+	remove_tree(other);
+	cw_mkdir(other);
 	size_t n = 0;
-	uint8_t *copied = backup_read_file(path, &n);
-	BackupInfo info;
-	assert(copied && backup_info(copied, n, &info) && info.runs == 4);
-	free(copied);
-	receipt_restart(status.copied_at, next);
-	assert(backup_write_file(receipt_path, (const uint8_t *)"damaged", 7));
-	receipt_restart(0, next);
-	assert(saves_folder_keep(""));
-	downloads[0] = 0;
-	mirror_status(&status);
-	assert(!status.copied_at && status.state != MIRROR_COPIED && !status.destination[0]);
-	free(receipt_bytes);
+	uint8_t *b = progress(other, runs) ? backup_pack(other, 1600000000u, &n) : NULL;
+	bool ok = b && backup_write_file(path, b, n);
+	free(b);
+	remove_tree(other);
+	return ok;
 }
 
-int main(int argc, char **argv) {
-	if (argc == 5 && !strcmp(argv[1], "--receipt-check")) return receipt_check(argv[2], argv[3], argv[4]);
-	char base[] = "build/host/test-discovery-XXXXXX", kept[600], remote[600];
-	char own[700], downloaded[700], data_file[600], staged[600], manual[600];
-	assert(mkdtemp(base));
-	snprintf(g_data_dir, sizeof g_data_dir, "%s/local", base);
-	snprintf(kept, sizeof kept, "%s/kept", base);
-	snprintf(downloads, sizeof downloads, "%s/downloads", base);
-	snprintf(remote, sizeof remote, "%s/remote", base);
-	assert(!cw_mkdir(g_data_dir) && !cw_mkdir(kept) && !cw_mkdir(downloads) && !cw_mkdir(remote));
-	assert(backup_restore(g_data_dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
-	assert(backup_restore(remote, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
-	assert(saves_folder_keep(kept));
+static int held_runs(void) {
+	const uint8_t *b;
+	size_t n;
+	BackupInfo info;
+	return mirror_held(&b, &n) && backup_info(b, n, &info) ? info.runs : -1;
+}
+
+static void test_place(const char *base) {
+	snprintf(g_data_dir, sizeof g_data_dir, "%s/data", base);
+	snprintf(downloads, sizeof downloads, "%s/Downloads", base);
+	cw_mkdir(g_data_dir);
+	CHECK(progress(g_data_dir, 1), "discovery: local progress made");
+	struct stat st;
+	MirrorStatus m;
+	mirror_status(&m);
+	mirror_status(&m);
+	CHECK(!strcmp(m.place, downloads) && asked_downloads == 1 && stat(downloads, &st) != 0,
+		"discovery: Downloads asked once, never made by a look at the status (asked %d)", asked_downloads);
+
+	/* not looked in until asked */
+	cw_mkdir(downloads);
+	char file[800];
+	snprintf(file, sizeof file, "%s/%s", downloads, BACKUP_NAME);
+	CHECK(foreign(base, file, 7), "discovery: another device's file in Downloads");
+	CHECK(!mirror_incoming() && held_runs() < 0, "discovery: the copy off, Downloads is not looked in at the title");
+	mirror_look();
+	CHECK(held_runs() == 7, "discovery: SAVES opened, the player asked: Downloads looked in (%d runs)", held_runs());
+
+	/* unchanged by size and time: not read again */
+	struct stat was;
+	CHECK(!stat(file, &was), "discovery: the file's time read");
+	CHECK(foreign(base, file, 8), "discovery: a file of the same size put there");
+	struct utimbuf back = { was.st_atime, was.st_mtime };
+	CHECK(!utime(file, &back), "discovery: its time put back");
+	mirror_look();
+	CHECK(held_runs() == 7, "discovery: same size and time: the place's file is not read again");
+	struct utimbuf later = { was.st_atime + 10, was.st_mtime + 10 };
+	CHECK(!utime(file, &later), "discovery: its time moved on");
+	mirror_look();
+	CHECK(held_runs() == 8, "discovery: a changed time: read again (%d runs)", held_runs());
+
+	/* a folder chosen: the place, looked at anew */
+	char chosen[700];
+	snprintf(chosen, sizeof chosen, "%s/chosen", base);
+	cw_mkdir(chosen);
+	CHECK(saves_folder_keep(chosen), "discovery: a folder kept");
+	mirror_new_folder();
+	mirror_look();
+	mirror_status(&m);
+	CHECK(!strcmp(m.place, chosen) && held_runs() < 0, "discovery: the chosen folder is the place, nothing held there");
 	pick_saves_auto(true);
-	mirror_new_folder();
-	mirror_flush();
-	assert(mirror_last() == 1);
-	snprintf(own, sizeof own, "%s/%s", kept, BACKUP_NAME);
-	snprintf(downloaded, sizeof downloaded, "%s/%s", downloads, BACKUP_NAME);
-	snprintf(data_file, sizeof data_file, "%s/%s", g_data_dir, BACKUP_NAME);
-	snprintf(manual, sizeof manual, "%s/manual.cwsave", g_data_dir);
-	size_t own_n = 0, first_n = 0, second_n = 0;
-	uint8_t *own_bytes = backup_read_file(own, &own_n);
-	assert(own_bytes);
-	pick_saves_auto(false);
-	progress(g_data_dir, 3);
-	progress(remote, 1);
-	uint8_t *first = backup_pack(remote, 0, &first_n);
-	assert(first && backup_write_file(downloaded, first, first_n));
-
-	/* The recognized old output in the kept folder cannot hide Downloads.
-	 * Manual Import can still explicitly choose that older own output. */
-	mirror_new_folder();
-	assert(mirror_scan(staged, sizeof staged));
-	same_bytes(staged, first, first_n);
-	same_bytes(own, own_bytes, own_n);
-	assert(pick_saves_find(manual));
-	same_bytes(manual, own_bytes, own_n);
-
-	/* Keep dismisses only those exact Downloads bytes: the data folder's
-	 * next candidate is still found, with auto-export disabled. */
-	mirror_hold(false);
-	progress(remote, 2);
-	uint8_t *second = backup_pack(remote, 0, &second_n);
-	assert(second && backup_write_file(data_file, second, second_n));
+	mirror_note();
 	ticks += 4000;
-	assert(mirror_scan(staged, sizeof staged));
-	same_bytes(staged, second, second_n);
-	mirror_flush();
-	same_bytes(own, own_bytes, own_n);
-	same_bytes(downloaded, first, first_n);
-	same_bytes(data_file, second, second_n);
-	BackupInfo local;
-	assert(backup_local_info(g_data_dir, &local) && local.runs == 3);
-	mirror_hold(false);
-	picker_protection(remote, second, second_n);
-	free(own_bytes);
-	free(first);
-	free(second);
-	receipt_status();
-	puts("discovery: fallback, picker protection and scoped copy receipts/retry passed");
+	mirror_tick();
+	snprintf(file, sizeof file, "%s/%s", chosen, BACKUP_NAME);
+	mirror_status(&m);
+	CHECK(!stat(file, &st) && m.state == MIRROR_COPIED, "discovery: the copy made in the chosen folder (state %d)", (int)m.state);
+
+	/* Downloads made at the first write there, not before */
+	remove_tree(downloads);
+	CHECK(saves_folder_keep(""), "discovery: back to Downloads");
+	mirror_new_folder();
+	mirror_note();
+	ticks += 4000;
+	mirror_tick();
+	snprintf(file, sizeof file, "%s/%s", downloads, BACKUP_NAME);
+	CHECK(!stat(file, &st), "discovery: Downloads made by the copy's write, the copy in it");
+}
+
+int main(void) {
+	char base[128];
+	snprintf(base, sizeof base, "build/host/test-discovery-%d", (int)getpid());
+	remove_tree(base);
+	cw_mkdir(base);
+	test_place(base);
+	remove_tree(base);
+	if (failures) return 1;
+	printf("discovery: Downloads asked once and made at a write; looked in when asked; unchanged files not read again\n");
 	return 0;
 }

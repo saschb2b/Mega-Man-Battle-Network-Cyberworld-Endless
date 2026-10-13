@@ -65,6 +65,8 @@ const W = JA ? {
 	zipped: (name) => name + ' は圧縮されています。先に展開してください。', refused: (name, why) => name + '：' + why + '。',
 	more: (n) => 'ほか ' + n + ' 件。',
 	savesNeedRom: 'SAVES を開くには、先に BN6 の ROM を選んでください。',
+	savesAtTitle: 'SAVES はタイトル画面で開きます。ランの途中では開けません。',
+	savesPick: '「バックアップを読み込む」を押して、ファイルを選んでください。',
 	backedUp: (file) => 'バックアップを保存しました：' + file + '。',
 	forget: 'このブラウザから ROM とすべてのセーブを消しますか？',
 	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
@@ -86,6 +88,8 @@ const W = JA ? {
 	zipped: (name) => name + ' is zipped: unzip it first.', refused: (name, why) => name + ': ' + why + '.',
 	more: (n) => 'and ' + n + ' more.',
 	savesNeedRom: 'Choose your BN6 ROM before opening SAVES.',
+	savesAtTitle: 'SAVES opens on the title: go there first.',
+	savesPick: 'Choose the file with Load backup.',
 	backedUp: (file) => 'Backup saved: ' + file + '.',
 	forget: 'Remove your ROMs and all saves from this browser?',
 	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
@@ -375,19 +379,25 @@ document.addEventListener('drop', (e) => {
 
 const SAVES_PICKED = '/tmp/cw-import.cwsave';
 
+// SAVES over the title, never in a run (the core says 0 there: the run's
+// progress is the title's to keep first)
 function openSaves() {
 	if (!ready) { say(W.loading); return false; }
 	if (!kept('bn6')) { say(W.savesNeedRom); return false; }
 	if (!started) start();
+	if (!Module.ccall('cw_saves_open', 'number', [], [])) { say(W.savesAtTitle); return false; }
 	closeMenu();
-	Module.ccall('cw_saves_open', null, [], []);
 	canvas.focus();
 	return true;
 }
 
+// The core's IMPORT: a browser opens its file chooser only from a click of
+// the player's own, so the menu's Load backup is shown for it; the core
+// lets go of its wait at B or after a minute
 function pickSaves() {
-	$('saves-file').value = '';
-	$('saves-file').click();
+	openMenu();
+	$('menu-note').textContent = W.savesPick;
+	$('import').focus();
 }
 
 function pickedSaves(path) {
@@ -432,7 +442,8 @@ function downloadSaves(path, name) {
 }
 
 $('export').addEventListener('click', openSaves);
-$('import').addEventListener('click', openSaves);
+// (the chooser opened in the click itself, as the player's own gesture)
+$('import').addEventListener('click', () => { if (openSaves()) $('saves-file').click(); });
 $('saves-file').addEventListener('change', takeSaves);
 $('saves-file').addEventListener('cancel', () => pickedSaves(''));
 

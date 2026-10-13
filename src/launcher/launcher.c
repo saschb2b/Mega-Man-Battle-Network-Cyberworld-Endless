@@ -7,8 +7,8 @@
  * game, to add BN5. The ROMs come from the system's own chooser (pick.h),
  * a file dropped on the window, or the places the game looks; on a phone
  * the folder chosen may hold the saves a reinstall left there (mirror.h),
- * and the launcher offers them back. Its layout and picture are
- * launcher_draw.c's, its words launcher_text.c's. */
+ * which SAVES compares with this device's (src/saves/). Its layout and
+ * picture are launcher_draw.c's, its words launcher_text.c's. */
 #include "launcher_state.h"
 
 #include <stdio.h>
@@ -27,7 +27,6 @@
 #include "rom.h"
 #include "save.h"
 #include "saves.h"
-#include "save_queue.h"
 
 #define LOOK_FRAMES 180   /* a ROM put in by hand looked for every three seconds */
 
@@ -71,8 +70,9 @@ static void shown_path(const char *path, char *out, size_t n) {
 static void saves_line(void) {
 	char path[700];
 	if (L.kinds & PICK_FOLDER) {
-		if (!pick_saves_place(path, sizeof path)) path[0] = 0;
-		saves_line_phone(path, pick_saves_auto_enabled(), mirror_last() < 0, L.saves, sizeof L.saves);
+		MirrorStatus m;
+		mirror_status(&m);
+		saves_line_phone(m.place, m.state != MIRROR_OFF, m.state == MIRROR_FAILED, L.saves, sizeof L.saves);
 		return;
 	}
 	snprintf(path, sizeof path, "%s/savedata", g_data_dir);
@@ -107,10 +107,6 @@ void launcher_cursor_note(char *out, size_t n, int *kind) {
 		break;
 	}
 }
-
-/* ---- the saves a folder held ---- */
-
-static void ask_about(const char *path) { saves_import(path); }
 
 /* ---- what comes in ---- */
 
@@ -158,18 +154,12 @@ static bool picked(void) {
 	roms_reload(L.rom_dir);
 	bool came = (!had[SLOT_BN6] && roms_have(SLOT_BN6)) || (!had[SLOT_BN5] && roms_have(SLOT_BN5));
 	say(r.text, came ? NOTE_GOOD : roms_have(asked) ? NOTE_INFO : NOTE_BAD);
-	/* (a folder newly chosen: the saves copied there at once, or, where it
-	 * held saves of its own, once the question over them is answered) */
+	/* (a folder newly chosen: looked at for the saves' copy, which SAVES
+	 * compares where it holds saves not answered, saves.h) */
 	char was[sizeof L.folder];
 	snprintf(was, sizeof was, "%s", L.folder);
 	if (!pick_folder(L.folder, sizeof L.folder)) snprintf(L.folder, sizeof L.folder, "%s", was);
-	else if (strcmp(was, L.folder) || mirror_last() < 0) mirror_new_folder();
-	if (r.saves) {
-		char path[620];
-		snprintf(path, sizeof path, "%s/found.cwsave", g_data_dir);
-		ask_about(path);
-		return true;
-	}
+	else if (strcmp(was, L.folder)) mirror_new_folder();
 	return false;
 }
 
@@ -180,7 +170,7 @@ static bool dropped(void) {
 	if (!platform_dropped(path, sizeof path)) return false;
 	size_t n = strlen(path);
 	if (n > 7 && !SDL_strcasecmp(path + n - 7, ".cwsave")) {
-		ask_about(path);
+		saves_import(path);
 		return true;
 	}
 	bool beside;
@@ -349,6 +339,7 @@ static void update(void) {
 	LauncherLayout lay;
 	launcher_layout(&lay);
 	if (picked() || dropped()) return;
+	saves_tick();
 	if (!roms_have(SLOT_BN6) && !pick_busy() && L.t - L.looked_at >= LOOK_FRAMES) look_again(false);
 	fills();
 	/* (kept up: a copy refused shows at once) */

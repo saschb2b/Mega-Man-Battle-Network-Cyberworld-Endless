@@ -167,7 +167,6 @@ final class RomLook {
         String where;                                   // the folder's name; null for files picked
         String lost;                                    // the folder could not be opened: why
         int files, gba, battleNetwork;                  // files picked; .gba looked at; Battle Network ROMs refused
-        boolean saves;                                  // the folder's saves' copy copied to the data folder's found.cwsave
         final boolean[] kept = new boolean[ROMS.length];   // copied in now
         final boolean[] had = new boolean[ROMS.length];    // offered, a copy kept already
         final List<String> refused = new ArrayList<>();    // "name: why", Battle Network ROMs first
@@ -184,7 +183,7 @@ final class RomLook {
      * A look at the folder (tree, called where): its .gba files and those of
      * the folders directly in it. A look no player asked for (a start's) is
      * quick: only an 8 MB .gba not settled before (its document, size and
-     * date) is opened. A pick's also fetches the saves' copy in the folder.
+     * date) is opened. The saves' copy is the game's to read (savesGet).
      */
     Look lookFolder(Uri tree, String where, boolean pick) {
         Look l = new Look();
@@ -194,7 +193,6 @@ final class RomLook {
         try {
             if (!pick && !granted(tree, false)) throw new SecurityException("its access is no longer held");
             walk(tree, DocumentsContract.getTreeDocumentId(tree), 1, !pick, seen, l);
-            if (pick) l.saves = fetchSaves(tree);
         } catch (Exception e) {
             l.lost = e.getClass().getSimpleName() + ": " + e.getMessage();
         }
@@ -203,7 +201,7 @@ final class RomLook {
             prefs.edit().putStringSet("seen", seen).apply();
         }
         Log.i(TAG, "looked in " + where + ": " + l.gba + " .gba" + (l.bits() != 0 ? ", kept " + l.bits() : "")
-            + (l.refused.isEmpty() ? "" : ", refused " + l.refused) + (l.saves ? ", saves found" : "")
+            + (l.refused.isEmpty() ? "" : ", refused " + l.refused)
             + (l.lost != null ? ", could not open it (" + l.lost + ")" : ""));
         return l;
     }
@@ -354,59 +352,64 @@ final class RomLook {
 
     // ---- the saves' copy in the folder (src/launcher/mirror.h) ----
 
-    /** Null means the folder was listed successfully and has no such
-     *  child. A provider failure must never authorize replacing saves. */
-    private Uri child(Uri tree, String name) throws FileNotFoundException {
+    /** The first of `names` the folder holds, in that order; null where it
+     *  was listed and holds none. A folder that cannot be listed throws, so
+     *  a failing provider is never taken for a file that is not there. */
+    private Uri child(Uri tree, String... names) throws FileNotFoundException {
         String doc = DocumentsContract.getTreeDocumentId(tree);
+        Uri[] found = new Uri[names.length];
         try (Cursor c = ctx.getContentResolver().query(DocumentsContract.buildChildDocumentsUriUsingTree(tree, doc),
                 new String[] { Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME }, null, null, null)) {
             if (c == null) throw new FileNotFoundException("the folder's files could not be listed");
             while (c.moveToNext())
-                if (name.equals(c.getString(1))) return DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
+                for (int k = 0; k < names.length; ++k)
+                    if (found[k] == null && names[k].equals(c.getString(1))) found[k] = DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0));
         }
+        for (Uri u : found) if (u != null) return u;
         return null;
     }
 
-    /** The folder's saves' copy, a reinstall's, copied to the data folder's
-     *  found.cwsave (a new one, where a write was cut short before its
-     *  rename, as well as none). */
-    boolean fetchSaves(Uri tree) {
-        return fetchSaves(tree, new File(dataDir(ctx), "found.cwsave"));
-    }
-
-    boolean fetchSaves(Uri tree, File to) {
+    /** The saves folder's SAVES (or SAVES.new, where a write was cut short
+     *  before its rename) copied whole to `to`: 1 copied; 0 where there is
+     *  none, no folder kept or its access gone, or it cannot be listed (a
+     *  write there would fail too); -1 where it is there but cannot be
+     *  read. Nothing is left at `to` but a whole copy. */
+    int getSaves(File to) {
+        Uri tree = savesFolder(), saves;
         try {
-            Uri saves = child(tree, SAVES);
-            if (saves == null) saves = child(tree, SAVES + ".new");
-            if (saves == null) return false;
-            if (copySaves(saves, to)) return true;
+            saves = tree != null && granted(tree, false) ? child(tree, SAVES, SAVES + ".new") : null;
         } catch (Exception e) {
-            Log.w(TAG, "saves: the transfer folder could not be inspected: " + e.getMessage());
+            Log.w(TAG, "saves: " + savesFolderName() + " could not be listed: " + e.getMessage());
+            saves = null;
         }
-        /* An unreadable file or listing gets the common refusal screen.
-         * The automatic copy stays held until the player's decision. */
-        try (OutputStream out = new FileOutputStream(to)) {
-            out.write("The incoming saves file could not be read.".getBytes(StandardCharsets.US_ASCII));
-            return true;
-        } catch (Exception e) { return false; }
+        if (saves == null) {
+            to.delete();
+            new File(to.getPath() + ".part").delete();
+            return 0;
+        }
+        return copySaves(saves, to) ? 1 : -1;
     }
 
-    /** Only stages bytes: validation and the comparison stay in C on
-     *  every system. A failed read leaves the old staged file alone. */
-    boolean copySaves(Uri saves, File to) {
-        File part = new File(to.getPath() + ".part");
-        dataDir(ctx).mkdirs();
-        try (InputStream in = ctx.getContentResolver().openInputStream(saves); OutputStream out = new FileOutputStream(part)) {
-            if (in == null) return false;
+    /** The file at `from` copied whole to `to`, by way of a .part: bytes
+     *  only, as the game checks and compares them on every system. False
+     *  where it cannot be read, is empty or past SAVES_MAX; nothing is left
+     *  at `to` then. */
+    boolean copySaves(Uri from, File to) {
+        File part = new File(to.getPath() + ".part"), dir = to.getParentFile();
+        if (dir != null) dir.mkdirs();
+        long n = 0;
+        try (InputStream in = ctx.getContentResolver().openInputStream(from); OutputStream out = new FileOutputStream(part)) {
+            if (in == null) n = -1;
             byte[] buf = new byte[1 << 16];
-            long n = 0;
-            for (int k; (k = in.read(buf)) > 0 && n <= SAVES_MAX; n += k) out.write(buf, 0, k);
-            if (n == 0 || n > SAVES_MAX) { part.delete(); return false; }
+            for (int k; n >= 0 && n <= SAVES_MAX && (k = in.read(buf)) > 0; n += k) out.write(buf, 0, k);
         } catch (Exception e) {
-            part.delete();
-            return false;
+            Log.w(TAG, "saves: " + SAVES + " could not be read: " + e.getMessage());
+            n = -1;
         }
-        return part.renameTo(to);
+        if (n > 0 && n <= SAVES_MAX && part.renameTo(to)) return true;
+        part.delete();
+        to.delete();
+        return false;
     }
 
     String fileName(Uri uri) {
@@ -448,6 +451,19 @@ final class RomLook {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** SAVES' export: the file `from` written into the document the picker
+     *  created; where that fails, the document is deleted again, so no empty
+     *  or partial file is left behind. */
+    boolean export(File from, Uri to) {
+        if (from != null && write(from, to)) return true;
+        try {
+            DocumentsContract.deleteDocument(ctx.getContentResolver(), to);
+        } catch (Exception e) {
+            Log.w(TAG, "saves: the export's empty file could not be deleted: " + e.getMessage());
+        }
+        return false;
     }
 
     boolean write(File from, Uri to) {

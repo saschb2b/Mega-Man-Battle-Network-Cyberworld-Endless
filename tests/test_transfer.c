@@ -1,6 +1,9 @@
-/* The no-picker transfer store, with a deterministic clock and synthetic
- * progress: a synced-in file must survive until the player's decision. */
-#include <assert.h>
+/* The automatic copy (src/launcher/mirror.c) where the transfer place is
+ * the data folder itself (pick_none.c: PortMaster, the 3DS), with saves of
+ * invented bytes: it writes only where the place's file is absent, its
+ * own, or answered; holds over another device's; keeps an answer across a
+ * restart (this program run again); and its look writes nothing. */
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,278 +11,234 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <SDL.h>
-
-#include "backup_fixture.h"
+#include "backup.h"
 #include "backup_internal.h"
 #include "compat.h"
 #include "game.h"
 #include "mirror.h"
 #include "pick.h"
 #include "platform.h"
-#include "version.h"
+#include "save_format.h"
+#include "save.h"
 
 char g_data_dir[512];
-static Uint32 ticks = 5000;
+static Uint32 ticks = 10000;
+static int failures;
+#define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
 
 Uint32 SDL_GetTicks(void) { return ticks; }
 void platform_persist(void) { mirror_note(); }
 
-static void advance(void) { ticks += 4000; mirror_tick(); }
+static void remove_tree(const char *path) {
+	DIR *dir = opendir(path);
+	if (!dir) { remove(path); return; }
+	for (struct dirent *e; (e = readdir(dir));) {
+		if (!strcmp(e->d_name, ".") || !strcmp(e->d_name, "..")) continue;
+		char child[1400];
+		snprintf(child, sizeof child, "%s/%s", path, e->d_name);
+		remove_tree(child);
+	}
+	closedir(dir);
+	cw_rmdir(path);
+}
 
-static void progress(const char *dir, unsigned runs) {
-	char path[600];
+static bool blob(const char *path, uint32_t magic, const void *value, uint32_t size) {
+	uint8_t *bytes = malloc(12 + size);
+	if (!bytes) return false;
+	backup_put32(bytes, magic);
+	backup_put32(bytes + 4, size);
+	backup_put32(bytes + 8, backup_fnv(value, size, 2166136261u));
+	memcpy(bytes + 12, value, size);
+	bool ok = backup_write_file(path, bytes, size + 12);
+	free(bytes);
+	return ok;
+}
+
+/* invented progress in `dir`: `runs` runs */
+static bool progress(const char *dir, int runs) {
+	char path[700];
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	cw_mkdir(path);
+	Profile p = { .runs = runs, .best_depth = 3 + runs };
 	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	assert(b && n >= 20);
-	backup_put32(b + 12, runs);
-	backup_put32(b + 8, backup_fnv(b + 12, backup_get32(b + 4), 2166136261u));
-	assert(backup_write_file(path, b, n));
-	free(b);
+	return blob(path, PROFILE_MAGIC, &p, sizeof p);
 }
 
-static BackupInfo file_info(const char *path) {
+/* the saves of another device with `runs` runs, as a .cwsave in `path` */
+static bool foreign(const char *base, const char *path, int runs) {
+	char other[700];
+	snprintf(other, sizeof other, "%s/other", base);
+	remove_tree(other);
+	cw_mkdir(other);
 	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	BackupInfo info;
-	assert(b && backup_info(b, n, &info));
+	uint8_t *b = progress(other, runs) ? backup_pack(other, 1600000000u + (uint64_t)runs, &n) : NULL;
+	bool ok = b && backup_write_file(path, b, n);
 	free(b);
-	return info;
+	remove_tree(other);
+	return ok;
 }
 
-static void same_bytes(const char *path, const uint8_t *expected, size_t length) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	assert(b && n == length && !memcmp(b, expected, n));
-	free(b);
+static uint8_t *read_all(const char *path, size_t *n) { return backup_read_file(path, n); }
+
+static bool same_bytes(const char *path, const uint8_t *b, size_t n) {
+	size_t m = 0;
+	uint8_t *c = read_all(path, &m);
+	bool same = c && m == n && !memcmp(b, c, n);
+	free(c);
+	return same;
 }
 
-static uint8_t *manifest_bytes(uint8_t *b, size_t n) {
-	size_t at = BACKUP_HEAD;
-	while (at + 6 < n - 4) {
-		size_t len = (size_t)b[at] | (size_t)b[at + 1] << 8;
-		uint32_t size = backup_get32(b + at + 2 + len);
-		if (strlen(BACKUP_MANIFEST) == len && !memcmp(b + at + 2, BACKUP_MANIFEST, len)) return b + at + 6 + len;
-		at += 6 + len + size;
+/* the saves rest, then a frame */
+static void rest(void) {
+	ticks += 4000;
+	mirror_tick();
+}
+
+/* (a folder's files, their sizes and times: a look must change none) */
+typedef struct { char name[256]; long long size, mtime; } Entry;
+static int listing(const char *dir, Entry *out, int most) {
+	DIR *d = opendir(dir);
+	int n = 0;
+	if (!d) return 0;
+	for (struct dirent *e; (e = readdir(d)) && n < most;) {
+		if (e->d_name[0] == '.') continue;
+		char path[1200];
+		struct stat st;
+		snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+		if (stat(path, &st)) continue;
+		snprintf(out[n].name, sizeof out[n].name, "%s", e->d_name);
+		out[n].size = (long long)st.st_size;
+		out[n++].mtime = (long long)st.st_mtime;
 	}
-	return NULL;
+	closedir(d);
+	return n;
 }
 
-static void future_file(const char *path, bool build) {
-	size_t n = 0;
-	uint8_t *b = backup_read_file(path, &n);
-	assert(b);
-	BackupInfo local, future;
-	assert(backup_info(b, n, &local));
-	uint8_t *manifest = manifest_bytes(b, n);
-	assert(manifest);
-	if (build) manifest[strlen("format=2\nversion=")] = '9';
-	else manifest[7] = '3';
-	backup_put32(b + n - 4, backup_fnv(b, n - 4, 2166136261u));
-	assert(backup_info(b, n, &future) && future.hash == local.hash &&
-		future.status == (build ? BACKUP_NEWER_BUILD : BACKUP_NEWER_FORMAT));
-	assert(backup_write_file(path, b, n));
-	/* Downgrading the app must not treat its previously exported newer
-	 * carrier as safe to overwrite just because its fingerprint is known. */
-	char fingerprint[600];
-	uint8_t known[4];
-	backup_put32(known, backup_fnv(b, n, 2166136261u));
-	snprintf(fingerprint, sizeof fingerprint, "%s/saves-export.hash", g_data_dir);
-	assert(backup_write_file(fingerprint, known, sizeof known));
-	mirror_new_folder();
-	advance();
-	char staged[600];
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	same_bytes(path, b, n);
-	mirror_hold(false);
-	mirror_flush();
-	assert(file_info(path).status == BACKUP_OK);
-	free(b);
-}
-
-static void parent_fork(void) {
-	char base[] = "build/host/test-parent-fork-XXXXXX", remote[600], path[600], staged[600];
-	assert(mkdtemp(base));
-	snprintf(g_data_dir, sizeof g_data_dir, "%s/local", base);
-	snprintf(remote, sizeof remote, "%s/remote", base);
-	assert(cw_mkdir(g_data_dir) == 0 && cw_mkdir(remote) == 0);
-	assert(backup_restore(g_data_dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
-	pick_saves_auto(true);
-	mirror_new_folder();
-	mirror_flush();
-	snprintf(path, sizeof path, "%s/%s", g_data_dir, BACKUP_NAME);
-	size_t n = 0, incoming_n = 0;
-	uint8_t *first = backup_read_file(path, &n);
-	assert(first && backup_restore(remote, first, n, true) == BACKUP_OK);
-	free(first);
-
-	/* Two devices independently make revision 2 from the same revision 1. */
-	progress(g_data_dir, 10);
-	uint8_t *local = backup_pack(g_data_dir, 0, &n);
-	BackupInfo local_parent, file, latest;
-	assert(local && backup_info(local, n, &local_parent));
-	free(local);
-	progress(remote, 20);
-	uint8_t *incoming = backup_pack(remote, 0, &incoming_n);
-	assert(incoming && backup_info(incoming, incoming_n, &file));
-	assert(!strcmp(file.save_id, local_parent.save_id) && file.revision == local_parent.revision && file.hash != local_parent.hash);
-	/* Local advances again before the other revision 2 arrives by sync. */
-	progress(g_data_dir, 30);
-	/* (the summary reads only now: an export's pack writes the revision) */
-	uint8_t *packed = backup_pack(g_data_dir, 0, &n);
-	bool advanced = packed && backup_info(packed, n, &latest) && latest.parent_revision == file.revision;
-	free(packed);
-	assert(advanced);
-	assert(backup_write_file(path, incoming, incoming_n));
-	mirror_new_folder();   /* clear volatile recognition, preserving the on-disk export fingerprint */
-	advance();
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	same_bytes(path, incoming, incoming_n);
-	/* A new process has no volatile mirror state to recognize the file by. */
-	pid_t child = fork();
-	assert(child >= 0);
-	if (!child) {
-		execl("/proc/self/exe", "test_transfer", "--restart-check", g_data_dir, (char *)NULL);
-		_exit(127);
+static bool same_listing(const Entry *a, int na, const Entry *b, int nb) {
+	if (na != nb) return false;
+	for (int i = 0; i < na; ++i) {
+		bool found = false;
+		for (int j = 0; j < nb; ++j)
+			found |= !strcmp(a[i].name, b[j].name) && a[i].size == b[j].size && a[i].mtime == b[j].mtime;
+		if (!found) return false;
 	}
-	int status;
-	assert(waitpid(child, &status, 0) == child && WIFEXITED(status) && WEXITSTATUS(status) == 0);
-
-	/* Restart-style reset must not turn the parent-number fork into our output. */
-	mirror_hold(false);
-	mirror_new_folder();
-	advance();
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	same_bytes(path, incoming, incoming_n);
-	mirror_hold(false);
-	mirror_flush();
-	assert(file_info(path).runs == 30);
-	free(incoming);
+	return true;
 }
 
-static int restart_check(const char *dir) {
-	snprintf(g_data_dir, sizeof g_data_dir, "%s", dir);
-	mirror_new_folder();
-	advance();
-	char path[600], staged[600];
-	snprintf(path, sizeof path, "%s/%s", g_data_dir, BACKUP_NAME);
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	assert(file_info(path).runs == 20);
-	return 0;
+/* This program run again on `dir`, as a restart: its exit status says
+ * whether its first look found saves to compare (1), or none (0) */
+static int fresh_look(const char *self, const char *dir) {
+	pid_t pid = fork();
+	if (pid == 0) {
+		execl(self, self, "--look", dir, (char *)NULL);
+		_exit(99);
+	}
+	int status = 0;
+	if (pid < 0 || waitpid(pid, &status, 0) < 0 || !WIFEXITED(status)) return -1;
+	return WEXITSTATUS(status);
 }
 
-static void export_results(const char *path, const uint8_t *bytes, size_t n) {
-	char from[600];
-	snprintf(from, sizeof from, "%s/export.cwsave", g_data_dir);
-	assert(backup_write_file(from, bytes, n));
-	assert(pick_saves_export(from) && pick_saves_busy());
-	PickResult result;
-	assert(pick_saves_done(&result) && result.status == 1 && !result.path);
-	assert(!pick_saves_busy() && !pick_saves_done(&result));
-	same_bytes(path, bytes, n);
-	/* A directory at the destination forces the atomic write to fail.
-	 * Completion must report failure, never leave a success or bare path. */
-	assert(remove(path) == 0 && cw_mkdir(path) == 0);
-	assert(pick_saves_export(from) && pick_saves_busy());
-	assert(pick_saves_done(&result) && result.status == -2 && !result.path);
-	assert(strstr(result.text, "could not be exported") && !pick_saves_busy());
-	assert(!pick_saves_done(&result));
+static void test_copy(const char *self, const char *base) {
+	snprintf(g_data_dir, sizeof g_data_dir, "%s/device", base);
+	remove_tree(g_data_dir);
+	cw_mkdir(g_data_dir);
+	char ini[700], place_file[700];
+	snprintf(ini, sizeof ini, "%s/saves.ini", g_data_dir);
+	CHECK(backup_write_file(ini, (const uint8_t *)"auto=1\nfolder=\n", 15), "transfer: the copy turned on");
+	snprintf(place_file, sizeof place_file, "%s/%s", g_data_dir, BACKUP_NAME);
+	CHECK(progress(g_data_dir, 2), "transfer: local progress made");
+
+	/* absent: written */
+	mirror_rescan();
+	mirror_note();
+	rest();
+	size_t n = 0;
+	uint8_t *mine = read_all(place_file, &n);
+	MirrorStatus m;
+	mirror_status(&m);
+	CHECK(mine && m.state == MIRROR_COPIED && m.copied_at, "transfer: no file in the place: the copy made (state %d)", (int)m.state);
+	CHECK(fresh_look(self, g_data_dir) == 0, "transfer: after a restart this device's own copy is no incoming saves");
+
+	/* another device's file: held, never written over */
+	CHECK(foreign(base, place_file, 9), "transfer: another device's file in the place");
+	size_t fn = 0;
+	uint8_t *theirs = read_all(place_file, &fn);
+	mirror_rescan();
+	CHECK(mirror_incoming(), "transfer: another device's file is offered once");
+	CHECK(!mirror_incoming(), "transfer: ... and not again in the same look");
+	CHECK(progress(g_data_dir, 3), "transfer: local progress changes");
+	mirror_note();
+	rest();
+	mirror_flush();
+	mirror_status(&m);
+	CHECK(theirs && same_bytes(place_file, theirs, fn) && m.state == MIRROR_HELD,
+		"transfer: the copy holds over another device's file (state %d)", (int)m.state);
+	CHECK(fresh_look(self, g_data_dir) == 1, "transfer: unanswered, a restart offers it again");
+
+	/* answered without leave (DONE, B): kept so across a restart, still held */
+	mirror_answer(false);
+	CHECK(fresh_look(self, g_data_dir) == 0, "transfer: an answer is kept on disk: a restart does not reopen it");
+	mirror_note();
+	rest();
+	CHECK(same_bytes(place_file, theirs, fn), "transfer: DONE gives no leave to write over it");
+
+	/* KEEP THESE: leave given, the next copy writes over it */
+	mirror_rescan();
+	(void)mirror_incoming();
+	mirror_answer(true);
+	rest();
+	mirror_status(&m);
+	CHECK(!same_bytes(place_file, theirs, fn) && m.state == MIRROR_COPIED, "transfer: KEEP THESE lets the save held back write over it");
+	CHECK(fresh_look(self, g_data_dir) == 0, "transfer: and the copy is this device's after a restart");
+	free(theirs);
+	free(mine);
+
+	/* a look writes nothing, with another device's file there */
+	CHECK(foreign(base, place_file, 11), "transfer: another device's file again");
+	Entry before[64], after[64];
+	int nb = listing(g_data_dir, before, 64);
+	mirror_rescan();
+	(void)mirror_incoming();
+	mirror_look();
+	int na = listing(g_data_dir, after, 64);
+	CHECK(same_listing(before, nb, after, na), "transfer: the look at the place wrote nothing (%d files, then %d)", nb, na);
+
+	/* the place's file unreadable: no copy over it */
+	remove(place_file);
+	CHECK(cw_mkdir(place_file) == 0, "transfer: a folder where the file goes");
+	mirror_rescan();
+	mirror_note();
+	rest();
+	mirror_status(&m);
 	struct stat st;
-	assert(stat(path, &st) == 0 && S_ISDIR(st.st_mode));
-	same_bytes(from, bytes, n);
-	assert(rmdir(path) == 0);
+	CHECK(m.state == MIRROR_UNREAD && !stat(place_file, &st) && S_ISDIR(st.st_mode), "transfer: an unreadable place holds the copy (state %d)", (int)m.state);
+	cw_rmdir(place_file);
+
+	/* an export's bytes are this device's own where they turn up again */
+	size_t en = 0;
+	uint8_t *exported = backup_pack(g_data_dir, 0, &en);
+	if (exported) mirror_wrote(exported, en);
+	CHECK(exported && backup_write_file(place_file, exported, en), "transfer: an export in the place");
+	CHECK(progress(g_data_dir, 5), "transfer: progress after the export");
+	CHECK(fresh_look(self, g_data_dir) == 0, "transfer: the device's own older export is no incoming saves");
+	free(exported);
+	char receipts[700];
+	snprintf(receipts, sizeof receipts, "%s/saves-receipts.txt", g_data_dir);
+	CHECK(access(receipts, F_OK) == 0, "transfer: the receipts kept in the data folder");
 }
 
 int main(int argc, char **argv) {
-	if (argc == 3 && !strcmp(argv[1], "--restart-check")) return restart_check(argv[2]);
-	char base[] = "build/host/test-transfer-XXXXXX", remote[600], path[600], staged[600];
-	assert(mkdtemp(base));
-	snprintf(g_data_dir, sizeof g_data_dir, "%s/local", base);
-	snprintf(remote, sizeof remote, "%s/remote", base);
-	assert(cw_mkdir(g_data_dir) == 0 && cw_mkdir(remote) == 0);
-	assert(backup_restore(g_data_dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK);
-	pick_saves_auto(true);
-	mirror_new_folder();
-	mirror_flush();
-	snprintf(path, sizeof path, "%s/%s", g_data_dir, BACKUP_NAME);
-	assert(mirror_last() == 1 && file_info(path).runs == 0);
-
-	/* The local checkpoint refreshes our own output without a question. */
-	progress(g_data_dir, 1);
-	mirror_new_folder();   /* also clears the last-output memory, as a restart does */
-	advance();
-	assert(!mirror_scan(staged, sizeof staged));
-	assert(file_info(path).runs == 1);
-
-	/* A second device continues the same save, then places its file here. */
-	size_t n = 0, incoming_n = 0;
-	uint8_t *local = backup_read_file(path, &n);
-	assert(local && backup_restore(remote, local, n, true) == BACKUP_OK);
-	free(local);
-	progress(remote, 2);
-	uint8_t *incoming = backup_pack(remote, 2000000000u, &incoming_n);
-	assert(incoming && backup_write_file(path, incoming, incoming_n));
-	mirror_note();
-	advance();
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	same_bytes(path, incoming, incoming_n);
-	same_bytes(staged, incoming, incoming_n);
-
-	/* Keep this device is the explicit decision that permits replacing it. */
-	mirror_hold(false);
-	mirror_flush();
-	assert(file_info(path).runs == 1 && !mirror_scan(staged, sizeof staged));
-
-	/* A damaged file gets the same protection, including on backgrounding. */
-	incoming[0] ^= 1;
-	assert(backup_write_file(path, incoming, incoming_n));
-	mirror_note();
-	advance();
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	same_bytes(path, incoming, incoming_n);
-	mirror_hold(false);
-	mirror_flush();
-	assert(file_info(path).runs == 1);
-	incoming[0] ^= 1;
-
-	/* Compatibility preflight applies even when the payload matches ours. */
-	future_file(path, false);
-	unsigned int major, minor, patch;
-	if (sscanf(CW_VERSION, "%u.%u.%u", &major, &minor, &patch) == 3 && major < 9) future_file(path, true);
-
-	/* Too-large input is refused without erasing the source either. */
-	FILE *large = fopen(path, "wb");
-	assert(large && fseek(large, BACKUP_MAX, SEEK_SET) == 0 && fputc(1, large) == 1);
-	assert(fclose(large) == 0);
-	mirror_note();
-	advance();
-	assert(mirror_scan(staged, sizeof staged));
-	mirror_flush();
-	struct stat st;
-	assert(stat(path, &st) == 0 && (uint64_t)st.st_size > BACKUP_MAX);
-	mirror_hold(false);
-	mirror_flush();
-	assert(file_info(path).runs == 1);
-
-	/* Import without a picker stages bytes; it never writes local progress. */
-	assert(backup_write_file(path, incoming, incoming_n));
-	assert(pick_saves_import());
-	PickResult picked;
-	assert(pick_saves_done(&picked) && picked.status == 1 && picked.path);
-	assert(!pick_saves_done(&picked));
-	same_bytes(picked.text, incoming, incoming_n);
-	BackupInfo here;
-	assert(backup_local_info(g_data_dir, &here) && here.runs == 1);
-	export_results(path, incoming, incoming_n);
-	free(incoming);
-	parent_fork();
-	puts("transfer: auto-export, divergent-parent and damaged-file protection, known-place import passed");
+	if (argc == 3 && !strcmp(argv[1], "--look")) {
+		snprintf(g_data_dir, sizeof g_data_dir, "%s", argv[2]);
+		return mirror_incoming() ? 1 : 0;
+	}
+	char base[128];
+	snprintf(base, sizeof base, "build/host/test-transfer-%d", (int)getpid());
+	remove_tree(base);
+	cw_mkdir(base);
+	test_copy(argv[0], base);
+	remove_tree(base);
+	if (failures) return 1;
+	printf("transfer: the copy writes only its own, holds over another device's, keeps answers, looks without writing\n");
 	return 0;
 }

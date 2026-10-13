@@ -15,6 +15,7 @@
 
 #include <SDL_syswm.h>
 
+#include "backup.h"
 #include "compat.h"
 #include "launcher_roms.h"
 #include "platform.h"
@@ -66,16 +67,17 @@ static HWND game_window(void) {
 	return P.window && SDL_GetWindowWMInfo(P.window, &info) && info.subsystem == SDL_SYSWM_WINDOWS ? info.info.win.window : NULL;
 }
 
-bool desktop_choose_saves(int kind, const char *start, char *path, size_t n) {
-	wchar_t initial[2048] = L"", file[2048] = L"";
-	if (!MultiByteToWideChar(CP_UTF8, 0, start, -1, initial, (int)(sizeof initial / sizeof *initial))) return false;
+bool desktop_choose_saves(int kind, const char *title, const char *start, char *path, size_t n) {
+	wchar_t initial[2048] = L"", file[2048] = L"", heading[128] = L"";
+	if (!MultiByteToWideChar(CP_UTF8, 0, start, -1, initial, (int)(sizeof initial / sizeof *initial)) ||
+		!MultiByteToWideChar(CP_UTF8, 0, title, -1, heading, (int)(sizeof heading / sizeof *heading))) return false;
 	HRESULT com = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	bool ok = false;
 	if (kind == 2) {
 		BROWSEINFOW bi;
 		memset(&bi, 0, sizeof bi);
 		bi.hwndOwner = game_window();
-		bi.lpszTitle = L"Choose the auto-export folder";
+		bi.lpszTitle = heading;
 		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 		PIDLIST_ABSOLUTE id = SHBrowseForFolderW(&bi);
 		ok = id && SHGetPathFromIDListW(id, file) && utf8(file, path, n);
@@ -83,7 +85,7 @@ bool desktop_choose_saves(int kind, const char *start, char *path, size_t n) {
 	} else {
 		OPENFILENAMEW ofn;
 		memset(&ofn, 0, sizeof ofn);
-		if (kind == 1) wcscpy(file, L"cyberworld-endless.cwsave");
+		if (kind == 1) MultiByteToWideChar(CP_UTF8, 0, BACKUP_NAME, -1, file, (int)(sizeof file / sizeof *file));
 		ofn.lStructSize = sizeof ofn;
 		ofn.hwndOwner = game_window();
 		ofn.lpstrFilter = L"Saves (*.cwsave)\0*.cwsave\0All files\0*.*\0";
@@ -91,20 +93,12 @@ bool desktop_choose_saves(int kind, const char *start, char *path, size_t n) {
 		ofn.nMaxFile = (DWORD)(sizeof file / sizeof *file);
 		ofn.lpstrInitialDir = initial;
 		ofn.lpstrDefExt = L"cwsave";
-		ofn.lpstrTitle = kind == 1 ? L"Export saves" : L"Import saves";
+		ofn.lpstrTitle = heading;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER | (kind == 1 ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
 		ok = (kind == 1 ? GetSaveFileNameW(&ofn) : GetOpenFileNameW(&ofn)) && utf8(file, path, n);
 	}
 	if (SUCCEEDED(com)) CoUninitialize();
 	return ok;
-}
-
-void desktop_saves_reveal(const char *path) {
-	wchar_t file[2048], args[2100];
-	if (!MultiByteToWideChar(CP_UTF8, 0, path, -1, file, (int)(sizeof file / sizeof *file))) return;
-	for (wchar_t *c = file; *c; ++c) if (*c == '/') *c = '\\';
-	swprintf(args, sizeof args / sizeof *args, L"/select,\"%ls\"", file);
-	ShellExecuteW(game_window(), L"open", L"explorer.exe", args, NULL, SW_SHOWNORMAL);
 }
 
 /* ---- the ROM where downloads and front ends keep it ---- */
