@@ -130,7 +130,8 @@ endif
 # the 3DS's ARM11, SDL2 and mGBA linked in, a .3dsx for the Homebrew
 # Launcher with its title and icon, and the same game as a CIA the HOME
 # Menu installs, with a banner (3ds/banner.png, tools/steam_art.py) that
-# plays the trailer's opening hits
+# plays a few seconds of the current trailer's music (its BANNER,
+# tools/trailers/)
 ifeq ($(TARGET),3ds)
 ARCH_3DS := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 # the anonymous statistics' requests (src/analytics/): devkitPro's libcurl
@@ -149,8 +150,8 @@ $(OUT)/cyberworld-endless.smdh: 3ds/icon.png
 	/opt/devkitpro/tools/bin/smdhtool --create "Cyberworld Endless" "A Mega Man Battle Network 6 roguelike" "saschb2b" $< $@
 $(OUT)/cyberworld-endless.3dsx: $(BIN) $(OUT)/cyberworld-endless.smdh
 	/opt/devkitpro/tools/bin/3dsxtool $(BIN) $@ --smdh=$(OUT)/cyberworld-endless.smdh
-$(OUT)/banner.wav: tools/trailer_music.py
-	python3 tools/trailer_music.py $@ --seconds 2.9 --rate 32728
+$(OUT)/banner.wav: tools/trailer_music.py $(wildcard tools/trailers/*.py)
+	python3 tools/trailer_music.py $@ --banner --rate 32728
 $(OUT)/banner.bnr: 3ds/banner.png $(OUT)/banner.wav
 	bannertool makebanner -i 3ds/banner.png -a $(OUT)/banner.wav -o $@
 $(OUT)/cyberworld-endless.cia: $(BIN) 3ds/cia.rsf $(OUT)/cyberworld-endless.smdh $(OUT)/banner.bnr

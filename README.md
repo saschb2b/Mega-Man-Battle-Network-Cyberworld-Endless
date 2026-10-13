@@ -20,7 +20,7 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 <p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
 
 <p align="center">
-<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The trailer, 21 seconds with sound: the Cyberworld Endless logo, a roguelike for Mega Man Battle Network 6. Watch the trailer"></a>
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.12.0 trailer, 36 seconds with sound: the Cyberworld Endless logo over the freed net, version 0.12.0, One Battle Network. Watch the 0.12.0 trailer"></a>
 </p>
 
 <p align="center">

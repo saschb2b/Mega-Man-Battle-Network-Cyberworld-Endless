@@ -17,7 +17,7 @@ states or disassembly files. `.gitignore` covers the usual names; check
 `git status` before committing anything. Screenshots of the game running
 are the one exception: `docs/screenshots/` and the short videos in
 `docs/clips/`, made by `build.py screenshots`, `build.py clips` and
-`tools/trailer.py` (the trailer, its music original), for the README and
+`tools/trailer.py` (the trailers, their music original), for the README and
 the site.
 
 ## Read before changing
@@ -65,6 +65,7 @@ the site.
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
 | `.claude/skills/playtest-loop/` | The playtest loop as a skill: a persona plays through `tools/play.py`, its reports are triaged and fixed, and the loop's log (`lessons.md`) grows with every session |
 | `.claude/skills/game-design/` | The game-design skill (from saschb2b/skills): the lens, pattern catalog and frameworks to reason from before a design decision |
+| `.claude/skills/trailer/` | The trailer skill: a release's trailer from the brief to the site, its music's habits read from the ROM (`scripts/song_habits.py`), checked without ears (`scripts/music_check.py`), its frames picked and reviewed on contact sheets (`scripts/sheets.py`), and the log of the trailers made (`lessons.md`) |
 | `.claude/skills/agent-browser/` | The agent-browser skill: a real Chrome driven from the shell (`npm i -g agent-browser`), to look over the site at desktop and phone widths |
 | `port/` | The PortMaster port: the launcher, `port.json`, `gameinfo.xml` and the README of PortMaster-New's `ports/cyberworld/`; `build.py package` puts them in that folder's layout in `build/port/cyberworld/`, with the screenshot (`docs/screenshots/portmaster.png`), the binary and one `licenses/LICENSE.<part>.txt` per part |
 | `linux/` | The Linux release: its README, the tar.gz's menu installer, the `.desktop` entry, AppStream metadata and the icons (`tools/app_icon.py`) that the AppImage, the `.deb` and the Flatpak (`linux/flatpak/`: its manifest, how to build it and bring it to Flathub) carry. The app ID `io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless` is the window's class too (`src/core/platform.h`); `src/core/desktop.c` finds the ROM, opens the file chooser for the ROMs screen (`zenity`, `kdialog`, `osascript`) and adds the AppImage to the menu. `linux/steam/`: `add-to-steam.py` (the game as a non-Steam shortcut, with the library artwork `tools/steam_art.py` draws), which every Linux build carries and `--add-to-steam` runs |
@@ -72,10 +73,10 @@ the site.
 | `android/` | The Android app (`build.py android`): a Gradle project whose `RomActivity` starts the game (the icon's ROMs shortcut asking for the ROMs screen), whose `RomLook` looks at what the ROMs screen's pickers chose (Android's folder picker, or the files in one picker; each `.gba` told by its game code, BN6's and BN5's checked by SHA-1 and copied into the app's files; the folder, kept read and write, looked in again at each start and given the saves' copy; `res/xml/backup_rules.xml` keeps the ROMs out of Android's backups) and whose `GameActivity` is SDL's activity running the game's C in a process of its own (`:game`, ended with the session), built by the NDK from every `src/*/*.c` (`app/jni/CMakeLists.txt`) with SDL2's own source and the GBA core; its README says how releases are signed |
 | `macos/` | The macOS app: `deps.sh` (SDL2 and mGBA as universal static libraries, on a Mac), the bundle's `Info.plist`, its icon (`tools/app_icon.py`) and the .dmg's README; `build.py macos` runs only on a Mac, so CI's macOS job builds and checks it |
 | `ios/` | The iPhone and iPad app (`build.py ios`, on a Mac with Xcode): its README (AltStore and SideStore, the ROM through Files, building), `deps.sh` (SDL2 and mGBA as static arm64 libraries for the phone or the Simulator), the bundle's `Info.plist` and its icons (`tools/app_icon.py`). `src/core/ios.m` is UIKit's (the Files pickers for the ROM folder or files and the folder's looks at each start, haptics, the safe area, the `main` that hands SDL's to UIKit), `src/core/ios_saves.m` SAVES' pickers and the saves' copy in a folder; `tools/altstore_source.py` writes the AltStore source each release carries. CI's ios job builds the IPA and starts the Simulator's app |
-| `3ds/` | The Nintendo 3DS build (`build.py 3ds`, issue #9): its README (playing, building, testing on a 3DS), the icon, the CIA's title settings (`cia.rsf`, for makerom) and the HOME Menu's banner (`banner.png`, `tools/steam_art.py`; its sound the trailer's first bar, `tools/trailer_music.py --seconds`). `src/core/present_3ds.c` puts the canvas on the top screen through the GPU (citro2d), and the second screen on the bottom one (`src/second/`, drawn by `platform.c` every tenth frame); `src/emu/emu.c` runs the GBA core on the New 3DS's third core where the system gives one, its picture drawn on the main core (mGBA's threaded video); `src/core/start_3ds.c` splits the app's memory, gives back the ROM buffer mGBA's 3DS setup takes and never uses, and reads BN5's ROM where the heap has room for it (docs/EMULATION.md, The 3DS's memory; `tools/heap3ds.py` models that heap on the host build) |
+| `3ds/` | The Nintendo 3DS build (`build.py 3ds`, issue #9): its README (playing, building, testing on a 3DS), the icon, the CIA's title settings (`cia.rsf`, for makerom) and the HOME Menu's banner (`banner.png`, `tools/steam_art.py`; its sound a few seconds of the current trailer's music, `tools/trailer_music.py --banner`). `src/core/present_3ds.c` puts the canvas on the top screen through the GPU (citro2d), and the second screen on the bottom one (`src/second/`, drawn by `platform.c` every tenth frame); `src/emu/emu.c` runs the GBA core on the New 3DS's third core where the system gives one, its picture drawn on the main core (mGBA's threaded video); `src/core/start_3ds.c` splits the app's memory, gives back the ROM buffer mGBA's 3DS setup takes and never uses, and reads BN5's ROM where the heap has room for it (docs/EMULATION.md, The 3DS's memory; `tools/heap3ds.py` models that heap on the host build) |
 | `web/` | The project site on GitHub Pages, laid out like BN6's PET screens: the home page (`index.html`, `assets/`), the downloads in `download/` (the newest release's files, one system at a time), the player in `play/` (ROM check and storage: BN6's, and BN5's beside it, each told by its game code and checked by its SHA-1; scaling), the FAQ in `faq/` as the PET's E-Mail, its answers taken from the docs, and `404.html`. Each page has its Japanese one in `ja/`, written for Japan's players, who know the game as ロックマンエグゼ6 (the ROM they need said first; BN6's names as Capcom's Japanese releases write them): the same page in all but its words, with the same ids, pictures, clips and scripts, which take their words from the page's `lang`. `tests/test_site.py` holds the two in step, with their hreflang links, canonical addresses and every link between the pages; a change to a page's words changes its Japanese one too. `assets/qr.js` draws the 3DS title's link as a QR code for FBI; `assets/site.js` sends the analytics' events (Umami: what was done, never by whom; links name theirs with `data-umami-event`). Each page has its canonical address, Open Graph tags and schema.org data; `build.py site` adds the sitemap, the FAQ's FAQPage data and the content hash on each page's own files. Its frames and icons (`assets/ui/*.png`) are drawn by `tools/site_art.py`, not taken from the ROM |
 | `docs/screenshots/` | Screenshots of the game for the README and the site (`build.py screenshots`) |
-| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image); the trailer, the site's hero, and `trailer-play.png`, its poster with a play button, which the README links to the MP4 (`tools/trailer.py`) |
+| `docs/clips/` | Short videos of the game for the site: WebM, MP4 and a poster each, and a GIF of those the README shows (`build.py clips`, ffmpeg in a pinned image); the current trailer (`trailer.*`: the site's hero and every page's preview picture) and `trailer-play.png`, its poster with a play button, which the README links to the MP4 (`tools/trailer.py`, Trailers below) |
 | `docker/` | Build images: `Dockerfile` (host, Debian trixie), `Dockerfile.portmaster` (the PortMaster port's aarch64 binary: Debian bullseye's glibc 2.31 and SDL2 2.0.14, older than any firmware PortMaster serves; `debian/eol` from its snapshot), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads), `Dockerfile.3ds` (devkitPro's devkitARM, SDL2 and mGBA's library for the 3DS, makerom and bannertool from their sources for the CIA: `ctrtools.sh`) |
 | `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot |
 
@@ -174,6 +175,25 @@ and screens, "is this fun") goes through the game-design skill first: name
 the dialectic it serves, the loop layer it feeds and the patterns it uses,
 before the numbers. This holds mid-implementation too.
 
+## Trailers
+
+A release whose news changes how the game looks or plays (a minor
+version, 0.N.0, as a rule) gets a trailer of its own (the trailer skill,
+`.claude/skills/trailer/`), which replaces the last one everywhere: the project's face changes with the game rather than
+piling up. Each one is new, its look and its music, not the last one's
+with new shots. A cut is `tools/trailers/vX_Y_Z.py` (its footage, from the
+release pictures' scripted runs, and its look) with `vX_Y_Z_music.py` (an
+original piece in the manner of a game it shows, written from that game's
+habits, never its notes) and `CURRENT` in `tools/trailers/__init__.py`.
+`python3 tools/trailer.py` writes `docs/clips/trailer.*`, which the
+project page's hero, every page's preview picture, the README, the
+AltStore source and the 3DS banner's sound (the piece's `BANNER`) follow
+by themselves; the hero's `aria-label` and VideoObject data on the home
+page and its Japanese one, and the README's alt text, are rewritten for
+it. The release's notes open with it (`../clips/trailer-play.png` linking
+`../clips/trailer.mp4`, both kept by the tag). An older trailer stays at
+its release's tag and still renders from its cut, into `.build/` only.
+
 ## Build and verify
 
 ```sh
@@ -206,7 +226,7 @@ python3 tools/site_art.py              # web/assets/ui: the site's pixel-art fra
 python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: the application icon
 python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo); 3ds/banner.png
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
-python3 tools/trailer.py [--keep]      # docs/clips/trailer.*: the 20-second trailer, its music by tools/trailer_music.py
+python3 tools/trailer.py [VERSION] [--keep]   # docs/clips/trailer.*: the current trailer (tools/trailers/; an older VERSION into .build/ only)
 python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's chime (Pixabay's "UI Success Chime", kept out of git) and its two tones
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
@@ -301,7 +321,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
-| Release | Device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
+| Release | A new trailer where the release earns one (Trailers), made before the tag; device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
 
 ## Device testing
 

@@ -375,7 +375,8 @@ python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 
 Ten more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
-the first battle on, for a capture of them: `tools/trailer.py` plays one),
+the first battle on, for a capture of them: 0.3.0's trailer,
+`tools/trailers/v0_3_0.py`, plays one),
 `gem` (every random battle with a green Mystery Data on the field, to
 check it and its reward; BN5's battles too, with BN5's own find),
 `visitors` (every random battle the visitors' rules allow takes a visitor

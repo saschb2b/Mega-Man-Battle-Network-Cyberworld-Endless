@@ -11,8 +11,8 @@ GBA core alone takes longer than a frame there.
   project's page shows the newest release's CIA as a QR code: in FBI,
   Remote Install, then Scan QR Code, and FBI downloads and installs it.
   Or copy the CIA to the SD card and install it from FBI's SD browser.
-  The game then has its icon on the HOME Menu, and its banner plays the
-  trailer's opening hits. FBI's Titles list deletes it again.
+  The game then has its icon on the HOME Menu, and its banner plays a
+  few seconds of the current trailer's music. FBI's Titles list deletes it again.
 - **The Homebrew Launcher:** copy `cyberworld-endless.3dsx` to
   `sdmc:/3ds/` and start it there. It is the same game, with the same
   saves.
@@ -84,9 +84,9 @@ citro2d, SDL2 built for the 3DS (`docker/sdl2.sh 3ds`), mGBA's library
 both. The CIA is the same program as the `.3dsx`, packed by makerom with
 `3ds/cia.rsf`, its title settings: a New 3DS title at 804 MHz with the L2
 cache, 124 MB for the application, the third core allowed, a 1 MB stack.
-Its banner is `3ds/banner.png` (`tools/steam_art.py`) with the first 2.9
-seconds of the trailer's music (`tools/trailer_music.py --seconds 2.9 --rate
-32728`), made into a banner by bannertool.
+Its banner is `3ds/banner.png` (`tools/steam_art.py`) with 2.9 seconds of
+the current trailer's music, its BANNER (`tools/trailer_music.py --banner
+--rate 32728`), made into a banner by bannertool.
 
 What differs from the other builds:
 
