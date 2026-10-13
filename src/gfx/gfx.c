@@ -658,20 +658,20 @@ static void raw_text(int x, int y, const char *s, SDL_Color c, int scale);
  * same colour and alpha: the same pixels, each blended once, as the
  * glyphs' texels never overlap (a glyph's advance is its texels' width).
  * One that changes each frame (a timer) stays glyph by glyph. */
-#define LINES 12
-#define LINE_MAX 64
-typedef struct { char s[LINE_MAX]; int scale, w; uint64_t frame; SDL_Texture *tex; } Line;
-static Line lines[LINES], seen_lines[LINES];   /* (drawn whole; and met once, waiting for a second draw) */
+#define TEXT_LINES 12
+#define LINE_CHARS 64
+typedef struct { char s[LINE_CHARS]; int scale, w; uint64_t frame; SDL_Texture *tex; } Line;
+static Line lines[TEXT_LINES], seen_lines[TEXT_LINES];   /* (drawn whole; and met once, waiting for a second draw) */
 
 static Line *line_find(Line *set, const char *s, int scale) {
-	for (int i = 0; i < LINES; ++i)
+	for (int i = 0; i < TEXT_LINES; ++i)
 		if (set[i].scale == scale && !strcmp(set[i].s, s)) return &set[i];
 	return NULL;
 }
 
 static Line *line_oldest(Line *set) {
 	Line *o = &set[0];
-	for (int i = 1; i < LINES; ++i)
+	for (int i = 1; i < TEXT_LINES; ++i)
 		if (!set[i].scale || (o->scale && set[i].frame < o->frame)) o = &set[i];
 	return o;
 }
@@ -679,14 +679,14 @@ static Line *line_oldest(Line *set) {
 /* the string's texture (its texels white and shade, as the atlas's), or
  * NULL where it is to be drawn glyph by glyph */
 static SDL_Texture *line_tex(const char *s, int scale) {
-	if (!font_tex || strlen(s) >= LINE_MAX) return NULL;
+	if (!font_tex || strlen(s) >= LINE_CHARS) return NULL;
 	uint64_t now = P.frame;
 	Line *l = line_find(lines, s, scale);
 	if (l) { l->frame = now; return l->tex; }
 	Line *met = line_find(seen_lines, s, scale);
 	if (!met || met->frame + 1 < now) {
 		met = met ? met : line_oldest(seen_lines);
-		snprintf(met->s, LINE_MAX, "%s", s);
+		snprintf(met->s, LINE_CHARS, "%s", s);
 		met->scale = scale;
 		met->frame = now;
 		return NULL;
@@ -718,7 +718,7 @@ static SDL_Texture *line_tex(const char *s, int scale) {
 	SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 	l = line_oldest(lines);
 	if (l->tex) SDL_DestroyTexture(l->tex);
-	snprintf(l->s, LINE_MAX, "%s", s);
+	snprintf(l->s, LINE_CHARS, "%s", s);
 	l->scale = scale;
 	l->w = w;
 	l->frame = now;
