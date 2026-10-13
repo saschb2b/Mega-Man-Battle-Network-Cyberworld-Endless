@@ -2,25 +2,18 @@
 
 ## Unreleased
 
-- **Saves move between every system (issue #114).** SAVES on the title
-  exports one `.cwsave` with your progress and current checkpoint, and
-  imports one through your system's file chooser. Before replacing
-  anything, the screen compares this device and the file: runs, best
-  layer, and the current run's layer, act and area. Details pages show
-  last played and keep full device names, game versions and paths readable.
-  Keep this device is selected first; Undo last import previews what was
-  replaced before Restore brings it back. The first screen leads with
-  the run and the folder copy's status; Options holds automatic copies,
-  the transfer folder and Retry copy. Successful imports can Continue
-  their checkpoint directly. Controls, touch layout, screen settings,
-  volumes and the statistics answer stay local. Newer or damaged files,
-  incompatible checkpoints and BN5 runs without BN5's ROM are refused
-  before saves change. The browser's Save backup and Load backup now open
-  this same screen; its page hands files to the core rather than writing
-  a second backup format. Auto-export keeps a fresh copy in the chosen
-  folder after each save on native builds; the browser uses manual
-  downloads and uploads. A copy found at startup goes through the same
-  comparison before anything can overwrite it.
+- **Saves move between systems (issue #114).** SAVES on the title writes
+  your profile and the run's checkpoint to one file,
+  `cyberworld-endless.cwsave`, and reads one in on any other system: both
+  saves side by side, yours kept unless you choose the file's, and UNDO
+  IMPORT to bring them back. It opens with L on the title (Q on a
+  keyboard), and in the browser from the menu's Save backup and Load
+  backup. Controls, screen and volumes stay on each device. A newer
+  build's file, a damaged one, or a BN5 run without BN5 is refused. The
+  phones' automatic copy in the ROM folder never writes over another
+  device's file: the game asks once which saves to keep. Bringing saves
+  back had been the ROMs screen's question, on phones only, and the
+  browser's page had written a format of its own.
 - **No freeze at a save on the New 3DS.** A checkpoint wrote some ten
   files on the frame that saved, each beside its place and then renamed
   over it, and on the 3DS's SD card each step is a call to its file

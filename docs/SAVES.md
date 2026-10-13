@@ -1,180 +1,230 @@
 # Portable saves
 
-SAVES on the title moves one profile and its checkpoint between the
-project's systems (issue #114). The player exports a `.cwsave`, takes it
-to another device, and imports it there. The receiving screen compares
-both copies before the player chooses one. The progress is replaced as a
-whole; separate runs are not merged. [The guide](GUIDE.md#moving-saves-between-devices)
-has the player's steps.
+How a player's progress and the run's checkpoint move from one system to
+another (issue #114). SAVES on the title writes them to one file,
+`cyberworld-endless.cwsave`, and reads one in on any other system, the
+browser included. On Android and iOS, where uninstalling deletes the
+app's files, the game also keeps that file in a folder outside the app,
+and a reinstall finds it there. The player's steps are in
+[the guide](GUIDE.md#moving-saves-between-devices). The screen is
+`src/saves/`, the file `src/core/backup*.c`, the automatic copy
+`src/launcher/mirror.c`.
 
-The design serves the session and progression loops: earned progress can
-follow the player, while replacing a checkpoint remains a deliberate
-choice. The comparison shows both copies, focuses Keep this device and
-names the run that Import would replace. Undo supplies the recovery path.
+## Design
 
-The first screen leads with the current run's layer, act and area, then
-the profile's runs and record and the transfer folder's copy status.
-Export and Import are followed by Undo, Details and Options. Options
-holds automatic copying, folder selection and Retry copy. Routine changes
-give inline feedback. Controller directions follow the actual button
-positions; portrait menus stack the same actions. Back and result buttons
-respond to their visible hit areas.
+Moving a run between systems takes one decision and never costs
+progress. It is a rare errand, done a few times in a player's life with
+the game, so it is a usability problem, not an engageability one: the
+screen has to be read at a glance and be hard to get wrong, and need not
+be fun.
 
-The comparison shows progress and recorded times without ranking divergent
-runs by revision or device clock. Keep is the safe first choice. The screen
-also says that Keep can refresh the folder copy when Auto-export is on.
-Each copy's Details pages preserve its full device name, build and path,
-and Back returns to the same comparison. Import results name the installed
-run, offer Continue where its checkpoint is available, and retain Undo.
+Three patterns shape it. An honest telegraph: before anything changes,
+both saves stand side by side, and a line says what the choice replaces
+and how it comes back. Error prevention: a file that cannot be used is
+refused before anything changes, and nothing is destroyed silently; what
+an import replaces stays for UNDO IMPORT, and what Undo held before that
+stays as a file. Respect for the player's time: three views (home,
+compare, result), only the buttons that can be used, the cursor on the
+likelier answer, and a found copy asked about once, not at every start.
 
-The screen's course, drawing and words live in `src/saves/`. Every entry
-into an import uses the same core preflight: a system picker, a dropped
-file or a copy found at startup. The browser's menu opens that screen
-through `cw_saves_open`; its page does not parse, pack or restore saves.
+SAVES opens with L on the title (Q on a keyboard; the line of keys under
+the menu names it), and in the browser also from the page's menu. It
+opens over the title or the ROMs screen, never in a run, and stays off
+the title's menu, whose rows are drawn from the ROM.
+
+## The three views
+
+**Home.** THIS DEVICE's panel says the run ("Layer 4, Act 2" and its
+area) and the profile ("3 runs, best Layer 9", or "No runs yet"). One
+line under it says where the copy goes and how the last one went
+("Copied to ROMs 10-12 14:03", "No copy in ROMs: choose it again", "New
+saves in ROMs: IMPORT shows them", ROMs being the folder). The buttons:
+EXPORT where there are saves, IMPORT, UNDO IMPORT where an import can be
+undone, AUTO-COPY: ON or OFF where the system has the automatic copy,
+FOLDER where it has a folder chooser.
+
+**Compare.** THIS DEVICE and THE FILE side by side, each with its run,
+area, runs and best, and the system and date it was last played on
+("Android, 10-13 09:12": the system's name, never the device's or the
+host's). A note says what USE THE FILE'S replaces and that UNDO IMPORT
+brings it back; where the file is the automatic copy's own and the copy
+is on, it adds that KEEP THESE makes the folder's copy this device's. The
+cursor starts on the side with more progress (more runs, then the deeper
+best; this device's at a tie), so after a reinstall it is on the file's.
+On a device with no saves the buttons are DONE and BRING BACK. A refused
+file shows one reason and "Your saves are kept.", with DONE alone: a
+newer build's file, a damaged one (its column says only "Damaged"), or a
+run that needs BN5 where BN5's ROM is missing. A file that holds the very
+saves already here goes straight to the result, which says so.
+
+**Result.** What the import put in and what Undo brings back ("Saves
+imported: a run on Layer 2. UNDO IMPORT brings back your Layer 5 run."),
+with CONTINUE where that run can go on, else DONE. UNDO IMPORT is a
+direct swap with no preview; its result offers UNDO again, which swaps
+them back. An export's result says where the file went.
 
 ## What travels
 
-The carrier contains only the known progress files under `savedata/`:
+The file holds only the progress files under `savedata/`:
 
 | Files | What they hold |
 | --- | --- |
 | `profile.sav` | Runs, records, unlocks and the Library |
 | `rivals.sav`, `battle.sav` | The rival's and the guardians' records |
 | `run.sav`, `run.state` | The current run and its emulator checkpoint |
-| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board` | The checkpoint's generation version, area and accompanying run data |
-| `transfer.manifest` | Its version, provenance and progress summary |
+| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board` | The checkpoint's generation version, area and the rest of the run's data |
+| `transfer.manifest` | Its format, where it was made and a summary of its progress |
 
-ROMs, boot states and unknown files are never packed. Keys, controller
-bindings, touch layout, display settings and statistics consent stay in
-the receiving data folder. The music and sound volumes are stored inside
-`Profile`, so export normalizes those two fields and recalculates the
-profile checksum; import restores the receiving profile's volumes before
-installing it. A volume change therefore does not make a new portable
-revision.
+ROMs, boot states and any other file are never packed. Controls, keys,
+the touch layout, screen settings, the volumes and the statistics answer
+stay on each device, as do SAVES' own files (below). The two volumes are
+stored inside `Profile`, so an export sets them to fixed values and
+recomputes the profile's checksum, and an import or an Undo keeps the
+receiving device's: a change of volume is not a change of the saves.
 
 ## Carrier and manifest
 
-`src/core/backup.c` keeps the original carrier, so `.cwsave` files made
-before this screen still read. Every number is little endian:
+`src/core/backup.c` keeps the first carrier, so every `.cwsave` made
+before SAVES still reads. Every number is little endian:
 
 | Field | Size |
 | --- | --- |
 | `CWSAVE1\n` | 8 bytes |
-| Timestamp, seconds since 1970 (last played in v2; export time in old files) | u64 |
+| Timestamp, seconds since 1970 (the last progress write; an export's time in old files) | u64 |
 | File count | u32 |
 | Each file: name length, name, byte length, bytes | u16, that many bytes, u32, that many bytes |
-| FNV-1a of all preceding carrier bytes | u32 |
+| FNV-1a of all the bytes before it | u32 |
 
-The complete carrier is at most 16 MiB, with at most 64 entries and each
-entry at most 4 MiB. All names and bounds are checked before any callback
-can write a file. Duplicate names, embedded nulls, path traversal and
-unrecognized names are refused. The four settings files in an old
-carrier (`settings.ini`, `keys.ini`, `pad.ini`, `touch.ini`) are accepted
-for compatibility and ignored when installing it.
+A file is at most 16 MiB, with at most 64 entries of at most 4 MiB each.
+Every name and bound is checked before anything is written: duplicate
+names, embedded nulls, paths that climb out and unknown names are
+refused. The four settings files an old carrier held (`settings.ini`,
+`keys.ini`, `pad.ini`, `touch.ini`) are accepted and left out of the
+install.
 
-V2 adds the fixed-schema `savedata/transfer.manifest` text file inside
-that carrier; the outer magic stays the same. It records:
+Format 2 adds `savedata/transfer.manifest` among the files; the magic
+stays the same. It is text with a fixed schema and order: `format`,
+`version` (the full build, a development build's suffix too),
+`run_magic` and `layer_make` (the checkpoint's compatibility), `stamp`,
+`system`, `device`, `save_id`, `revision`, `parent_id`,
+`parent_revision`, `payload_hash`, `files`, then the summary: `runs`,
+`best`, `run_depth`, `run_area`, `run_act` and `needs_bn5`. `system` and
+`device` both hold the platform's name (Linux, Windows, macOS, Android,
+iPhone, PortMaster, New 3DS, browser), never a device or host name; the
+comparison shows it with the date.
 
-- Format and full game build, including the development build suffix.
-- `RUN_MAGIC` and `LAYER_MAKE` for checkpoint compatibility.
-- Last played, source system and device, and the save's identity,
-  revision and parent revision.
-- The portable payload hash and file count.
-- Runs played, best layer, current layer, act, area and whether the
-  checkpoint needs BN5.
+`backup_manifest.c` writes a new stamp and revision only when the
+progress changed, so starting the game or exporting the same saves twice
+makes no new version. `backup_info.c` reads the summary from the
+checksummed save files and refuses a manifest that disagrees with them.
+A file without a manifest shows what its profile and run say.
 
-`backup_manifest.c` updates the timestamp and revision only when the
-portable payload changes. Starting the game or exporting the same saves
-again keeps their provenance. `backup_info.c` derives the summary from
-the checksummed save blobs and verifies it against the manifest, rather
-than trusting the manifest's labels alone. Old files without a manifest
-still show what their profile and run say; missing provenance is unknown.
+## Import, undo and recovery
 
-## Import and undo
+`backup_check` refuses a damaged file, a newer format, a newer build or
+layer-generation version (`LAYER_MAKE`), a newer run format
+(`RUN_MAGIC`), and a run that needs BN5 where the receiving build has no
+BN5 ROM. A refusal changes nothing. The pre-emulator `CWE1` run format
+still imports without a `run.state` (CONTINUE builds its layer afresh);
+a later run without its state is refused. An existing profile that
+cannot be read refuses an import or an Undo before any folder moves.
 
-`backup_check` refuses damaged carriers, unsupported formats, a newer
-release or development revision, a newer layer-generation version and an
-unsupported run structure. A BN5 checkpoint also requires the receiving
-build to have BN5's ROM available. The source build is shown with the
-refusal so the player knows when to update. No refusal changes the local
-progress or checkpoint.
-The pre-emulator `CWE1` run format remains readable without a `run.state`;
-CONTINUE rebuilds its layer fresh, as the existing legacy loader does.
-Modern active runs still require their emulator checkpoint.
+`backup_restore` (`backup_restore.c`) installs a file in steps that a
+power cut cannot leave half done:
 
-`backup_restore` stages all accepted files in `savedata.import/` and
-checks every write before renaming anything. It then keeps the previous
-complete `savedata/` as `savedata.old/` and installs the staged folder.
-Failure rolls back the renames. Startup recovery restores the previous
-folder if an interrupted install left `savedata/` absent.
+1. Every file is staged in `savedata.import/`, each written whole and
+   flushed (fsync where the system has it), and the staged folder is
+   read back and hashed.
+2. Where `savedata.old/` holds an earlier import's Undo, it is kept as
+   `saves-replaced-1.cwsave` in the data folder; the older ones move to
+   `-2` and `-3`, and a fourth is dropped.
+3. `savedata.pending` is written with the staged saves' hash, then the
+   renames: the old Undo aside as `savedata.undo/`, `savedata/` to
+   `savedata.old/`, the staged folder to `savedata/`. A rename that fails
+   rolls back the ones before it.
+4. `savedata/` is read back; where it holds the staged hash,
+   `savedata.undo/` and `savedata.pending` are removed.
 
-Undo swaps the complete current and previous folders. The next successful
-import replaces the previous undo copy. The player can therefore bring
-back the progress and checkpoint that the last import replaced, including
-a different local run.
-Before Restore, `backup_undo_info` reads the actual previous folder without
-rewriting its manifest or changing its files. An empty previous folder is
-shown as empty progress. The core checks compatibility and reads it again
-before swapping; a changed or unreadable copy is refused.
-An unreadable existing profile refuses import or Undo before the folders
-change; an empty profile is synthesized only when the previous profile
-is confirmed absent.
+`backup_recover` runs at every start before anything reads the saves (the
+ROMs screen first), and before each import. Where `savedata.pending`
+names saves that `savedata/` does not hold, or `savedata/` is missing,
+`savedata.old/` comes back as `savedata/` (and `savedata.undo/` as
+`savedata.old/`), and the leftovers are removed. If `savedata/` is still
+missing while saves wait in a folder beside it, the game writes no saves
+over them (`backup_blocked`), and SAVES says "Not saving: savedata could
+not be put back."
+
+UNDO IMPORT reads `savedata.old/` without changing it, checks it as an
+import would, writes this device's volumes into its profile, and swaps
+the two folders through `savedata.swap/`. Undo again swaps them back.
+
+## The automatic copy
+
+`src/launcher/mirror.c` keeps `cyberworld-endless.cwsave` in a transfer
+folder: on Android and iOS the ROM folder, or a folder chosen with
+FOLDER; on a desktop its Downloads or a chosen folder; on a PortMaster
+handheld and the 3DS the data folder. It is on by default on Android and
+iOS and off elsewhere (`saves.ini`); the browser has none and exports by
+download.
+
+Three seconds after the game last wrote its saves, so that a
+checkpoint's files are all written, and as the app goes to the
+background or quits, it packs the saves and writes the file whole. It
+writes only where the folder's file is absent, is one this device wrote,
+holds the saves already here, or is one the player answered with USE THE
+FILE'S or KEEP THESE. Any other file holds the copy, and the game opens
+its comparison once, over the title or the ROMs screen. The answer is
+kept per folder, so the comparison does not reopen at every start; a
+file left with DONE or B keeps holding the copy, and with the copy on
+IMPORT shows it first. A file that cannot be read holds the copy too (on
+iOS one in iCloud and not yet on the phone, which is sent for). A copy
+that fails is tried again at the next save, and the line on SAVES' home
+says so.
+
+The folder is read once a start or resume and as SAVES opens (a
+desktop's Downloads only then, or with the copy on): its file read into
+memory and hashed, nothing written. Where the system can tell a file's
+size and time without reading it, a changed file is read again before a
+copy; a phone's document provider cannot, and is read once a start.
+Nothing looks at the folder every few seconds.
+
+`saves-receipts.txt` in the data folder is what the copy remembers,
+device-local and never exported. `wrote HASH` lines hold the last eight
+files this device wrote out (copies and exports alike), so its own file
+is never taken for another device's. `folder ANSWERED ALLOWS COPIED_AT
+SCOPE` lines, one for each of the last four folders, hold the file the
+player answered there, whether that answer lets the copy write over it,
+and the time of the last copy. SCOPE is the folder's identity: a full
+path, an Android document tree's URI, or an iOS folder's resolved URL.
+
+`saves.ini` holds the copy's switch and the chosen folder. With
+`saves-receipts.txt`, `saves-replaced-1.cwsave` to `-3` and
+`savedata.old/`, that is all SAVES keeps in the data folder; its
+temporary files (an export's, a picked file's copy) are removed once
+written or read.
 
 ## Platform boundary
 
-`src/launcher/pick_saves.c` and each platform's picker move files between
-the data folder and a transfer destination. Native builds can keep a
-fresh automatic copy after each save, on by default for phone apps and
-optional elsewhere. The browser offers manual downloads and uploads; its
-automatic-copy and folder actions are unavailable. The pickers do not
-decide which progress wins. `src/launcher/mirror.c` maintains the chosen automatic
-copy and finds a copy at startup before writing over it.
-Its device-local, checksummed `saves-export.receipt` remembers the exact
-carrier fingerprint, successful automatic-copy time and destination;
-the older `saves-export.hash` remains a discovery fallback. The receipt is
-scoped to the full native path, Android document-tree URI or resolved
-iOS folder bookmark, so identically named provider folders do not share
-copy status. Failed copies retain the last successful time; Retry checks
-for incoming saves before writing again. A folder copy does not confirm
-that a cloud provider has synced it. Revision numbers alone do not
-identify that output: two devices can independently make different
-revision 2s from revision 1. A divergent copy, including one at a local
-parent revision, stays held for the comparison screen.
-Discovery and automatic writes wait until native ROM and saves pickers
-finish, including their background work retaining a new destination.
-Android folder-listing failures stage a refusal rather than claiming an
-incoming file is absent, and failed listings cannot authorize writes.
+Each system's pickers (`src/launcher/pick.h`) move a file between the
+data folder and the world outside, and never decide which saves win:
+every file, whatever brought it, goes through the same check and
+comparison. The desktops use their file dialogs (`pick_desktop.c`; no
+folder chooser in Steam's big screen); Android its document pickers and
+the kept folder tree (`pick_android.c` through `GameActivity` and
+`RomLook`: `savesGet` answers 1 read, 0 none, -1 unreadable); iOS its
+Files pickers and a bookmark (`pick_ios.c`, `src/core/ios_saves.m`); a
+PortMaster handheld and the 3DS the data folder's own file
+(`pick_none.c`). A `.cwsave` dropped on a desktop's window opens the same
+comparison.
 
-In the browser, `Module.savesPick()` opens the hidden file input. The
-page stages its bytes as `/tmp/cw-import.cwsave` and calls
-`cw_saves_import(path)`; cancellation sends an empty path. The core owns
-validation, comparison, installation and the persistence call. Export
-hands a core-produced file to `Module.savesDownload(path, name)`, which
-downloads the bytes unchanged. Local savedata, its undo folder and
-settings continue to live in IndexedDB.
-
-## Validation and limits
-
-| Check | Verified locally |
-| --- | --- |
-| Carrier and restore tests | ROM-free tests cover the carrier, legacy files, metadata, local settings and the transactional installer. |
-| Failure and legacy regressions | Injected unreadable profiles preserve both current and Undo folders; the pre-emulator run format imports without a state while modern runs without one are refused. Busy ROM/saves pickers protect incoming files, and failed exports report failure. |
-| SAVES interface regressions | Production scene input, spatial focus, touch hit areas, import and Undo transactions, result actions, full Details paging and copy failure/retry are tested under sanitizers with synthetic progress. |
-| Android provider errors | Production `RomLook` runs against JVM provider doubles for absent files, null/error listings, broken cursors, unreadable files and recovery; failed old/stale lookups perform no writes or deletes. This does not establish physical-provider behavior. |
-| Linux native import and Undo | A layer 2 checkpoint replaced a local layer 5 run; Undo brought layer 5 back. The local settings file stayed unchanged. |
-| Native to browser | An isolated layer 2, seed 7 checkpoint imported through the real Chrome player's file input. CONTINUE showed layer 2 and loaded that map, with its 430,144-byte emulator state present. Settings stayed byte identical and both volume values stayed at 9. |
-| Browser persistence and Undo | IndexedDB reload kept the imported layer and ROM. Undo restored the browser's complete pre-import profile, preserving the imported run in the previous folder. Picker cancellation returned to the title without changing the run. A dropped `.cwsave` reached the same core check and left the local run unchanged. |
-| Browser export | Export wrote a core-produced `.cwsave`; the page downloaded its bytes unchanged for the return transfer. Both menu shortcuts also opened SAVES before PLAY. |
-| Browser to native | The browser-produced file replaced the native test device's layer 5 checkpoint. CONTINUE resumed the same layer 2 map and Lan/Chaud dialogue. |
-| Browser to Android to native | In an isolated Android emulator, the native document picker imported the browser export and CONTINUE resumed layer 2. Choosing a separate Saves folder kept the ROMs folder unchanged. The native export picker returned a byte-identical carrier, which imported and resumed on Linux. Android's statistics answer and Linux's settings stayed local. |
-| Native file drops | Injected SDL file-drop events at the title and ROMs screen opened the comparison with Keep selected, including a simultaneous START press. Both local layer 5 checkpoints stayed unchanged. |
-| Portrait touch | The comparison fit a 360×640 display with full action labels. A scripted tap on Use file installed layer 2 and kept the receiving settings unchanged. |
-| Cross builds | The Windows, Android, browser and New 3DS targets built with warnings treated as errors. |
-
-These checks use local Linux builds, headless Chrome, an isolated Android
-emulator and test saves. They do not establish hardware behavior on a ROCKNIX handheld, a
-physical New 3DS or phone, or the Steam Deck's Gaming Mode. macOS and iOS
-builds, signing and iOS Simulator startup passed in CI. Apple picker
-behavior has not been exercised. No ROM or
-game-derived save, state or transfer file is published; committed test
-fixtures contain only synthetic bytes.
+The browser's page (`web/play/app.js`) opens SAVES through
+`cw_saves_open`, which refuses in a run (the page then says to go to the
+title first). Its menu's Save backup opens SAVES; Load backup opens it
+and the page's file chooser at once, as a browser opens a chooser only
+in the player's own click, so SAVES' IMPORT in the browser points to
+that button and waits for it (B, or a minute, lets it go). The page
+hands a chosen or dropped file to `cw_saves_import` as
+`/tmp/cw-import.cwsave` (an empty path for a cancel) and downloads the
+bytes the core made through `Module.savesDownload`; it never reads or
+writes the format itself. The saves, their Undo and the settings stay in
+IndexedDB.

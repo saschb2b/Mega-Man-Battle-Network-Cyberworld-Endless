@@ -51,21 +51,22 @@ The app's Documents folder, which Files shows as **On My iPhone ›
 Cyberworld**, holds the ROMs' copies (`rom/bn6g.gba`, `rom/bn5c.gba`),
 the saves and `settings.ini`,
 `keys.ini` and `touch.ini`, as a desktop's data folder does; a player can
-copy the saves off there. Uninstalling the app deletes it. With
-**Auto-export** on, the app keeps a copy in the transfer folder shown in
-**SAVES**, using the ROM folder by default; **Choose folder** can select
-another destination. The copy is
-`cyberworld-endless.cwsave` (`src/core/backup.h`, the format the Android
-app and the browser's backups share), written a few seconds after the
-game last saved and as the app goes to the background, through the
-folder's bookmark as a coordinated write that replaces the old copy
-whole. After a reinstall, select the ROMs again and use **SAVES → Import**
-to choose that file. A ROM folder chosen that holds one also has it
-copied to `found.cwsave`, and the ROMs screen opens SAVES to compare it
-with this device. SAVES on the title also exports and imports that portable file
-and controls its automatic copy. Imported progress keeps the receiving
-device's controls, display, volumes and statistics answer; Undo last import
-brings back what was replaced. See
+copy the saves off there. Uninstalling the app deletes it, so the game
+keeps a copy of the saves, `cyberworld-endless.cwsave`
+(`src/core/backup.h`, the same file on every system), in a folder
+outside the app (`src/launcher/mirror.c`, docs/SAVES.md): the ROM
+folder, or a folder chosen with **SAVES › FOLDER**
+(`src/core/ios_saves.m`). It is written a few seconds after the game
+last saved and as the app goes to the background, through the folder's
+bookmark as a coordinated write that replaces the old copy whole. A
+file there that another device wrote is not written over until the
+player answers SAVES' comparison of it; one in iCloud and not yet on the
+phone is sent for and holds the copy too, never read as absent. After a
+reinstall, choosing the ROM folder again finds the copy, and the game
+opens that comparison beside the new install's empty saves; **SAVES ›
+IMPORT** takes a `.cwsave` from anywhere else. Imported progress keeps
+the receiving device's controls, display, volumes and statistics answer,
+and **UNDO IMPORT** brings back what was replaced. See
 [Moving saves between devices](../docs/GUIDE.md#moving-saves-between-devices).
 
 ## Building (on a Mac)
@@ -80,8 +81,8 @@ the GBA core as static arm64 libraries for the SDK (`iphoneos`, or
 `iphonesimulator` for an Apple silicon Mac's Simulator) into
 `.build/ios-deps/`. `make TARGET=ios` builds the game's C and
 `src/core/ios.m` (the Files pickers and the ROM folder's looks, the
-saves' copy in that folder, the haptics, the safe area, and the
-`main` that hands SDL's to UIKit); `build.py` makes the bundle from
+haptics, the safe area, and the `main` that hands SDL's to UIKit) and
+`src/core/ios_saves.m` (SAVES' pickers and the saves' copy in a folder); `build.py` makes the bundle from
 `ios/Info.plist` and the icons in `ios/icons/` (`tools/app_icon.py`), signs
 it ad hoc and zips `Payload/` into the IPA.
 
