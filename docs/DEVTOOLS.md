@@ -431,8 +431,12 @@ OK he picks from his folder's chips, walks to where one reaches and uses
 it, its end by its time and BN5's as DarkInvs's: docs/MULTIROM.md, The
 chips' code, DarkInvs, moved). The guest
 battles' `slowboot=N` and their `gem` went with them. `folder=ID` makes the
-run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
-for a capture of one chip in BN6's battles), `folder=ID/N` its first N
+run's folder thirty of chip ID in *, or in its first code where its record
+has no * (`folder=286`: every hand DrkSword, for a capture of one chip in
+BN6's battles; `folder=218`, DarkDril in D: BN6 draws a chip in a code its
+record lacks blank, no picture, no code and no effect, its own JustcOne and
+FireBrn2 in * too, and the `chip` step says so where it is given one),
+`folder=ID/N` its first N
 entries alone; `pack=N` puts a copy of each of the first N chips in the
 Pack, in its first code (the folder editor's Pack and its scroll on the
 second screen, issue #75); `programs=N` gives a copy of each of the first

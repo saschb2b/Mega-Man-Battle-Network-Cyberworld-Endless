@@ -281,9 +281,12 @@ int director_dev_chip(const char *spec) {
 	ChipInfo ci;
 	chip_info(id, &ci);
 	uint32_t at = pack_entry(id);
-	printf("chip: %s (%d) %c in the folder's first %d, one more in the pack%s (its counts %d %d %d %d)\n", ci.name, id,
-		c == CHIP_CODE_STAR ? '*' : 'A' + c, n, given ? "" : ": not given", at ? emu_read8(at) : -1, at ? emu_read8(at + 1) : -1,
-		at ? emu_read8(at + 2) : -1, at ? emu_read8(at + 3) : -1);
+	char letter = c == CHIP_CODE_STAR ? '*' : (char)('A' + c);
+	printf("chip: %s (%d) %c in the folder's first %d, one more in the pack%s (its counts %d %d %d %d)%s\n", ci.name, id,
+		letter, n, given ? "" : ": not given", at ? emu_read8(at) : -1, at ? emu_read8(at + 1) : -1,
+		at ? emu_read8(at + 2) : -1, at ? emu_read8(at + 3) : -1,
+		/* (BN6 draws a chip in a code its record lacks blank in battle: no picture, no code, no effect) */
+		ci.ncodes && !strchr(ci.codes, letter) ? ": a code its record lacks, blank in battle" : "");
 	return n;
 }
 

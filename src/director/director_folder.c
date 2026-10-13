@@ -115,15 +115,20 @@ static void dev_pack(void) {
 	}
 }
 
-/* (dev: folder=ID, the run's folder all chip ID in *, owned as the folder's
- * chips are: a capture of one chip's battles, the first hand all of it;
- * folder=ID/N its first N entries; pack=N, dev_pack) */
+/* (dev: folder=ID, the run's folder all chip ID in *, or in its first code
+ * where its record has no * (BN6 draws a chip in a code its record lacks
+ * blank, with no code and no effect: BN6's own JustcOne and FireBrn2 in *),
+ * owned as the folder's chips are: a capture of one chip's battles, the
+ * first hand all of it; folder=ID/N its first N entries; pack=N, dev_pack) */
 void dev_folder(void) {
 	dev_pack();
 	if (dev.zenny > 0) game_call(BN6_GIVE_ZENNY, (uint32_t)dev.zenny, 0);
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	if (dev.folder <= 0 || dev.folder >= 0x200 || data < BN6_EWRAM || data >= BN6_EWRAM_END) return;
-	uint8_t e[2] = { (uint8_t)dev.folder, (uint8_t)(dev.folder >> 8 | CHIP_CODE_STAR << 1) };
+	ChipInfo ci;
+	chip_info(dev.folder, &ci);
+	int code = !ci.ncodes || strchr(ci.codes, '*') || ci.codes[0] < 'A' || ci.codes[0] > 'Z' ? CHIP_CODE_STAR : ci.codes[0] - 'A';
+	uint8_t e[2] = { (uint8_t)dev.folder, (uint8_t)(dev.folder >> 8 | code << 1) };
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES && (int)i < dev.folder_n; ++i) emu_write(data + 2 * i, e, sizeof e);
 	own_folder_chips();
 }
