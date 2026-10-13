@@ -44,8 +44,10 @@ is HeatCross frame for frame and tengu is not.
 
 --souls runs the same four with the Souls installed over the proxy (the
 Souls track's S2: UNITE on the Custom screen and a Soul's life, src/emu/
-soulunite.c and soullife.c, which --dev soulproxy installs where BN5's ROM
-is read beside BN6's), no Soul held: BN5's ROM beside BN6's in
+soulunite.c and soullife.c, which install with the proxy wherever BN5's
+ROM is read beside BN6's and its Navis are: native and tengu run with
+--dev nonavis, no Navi of BN5's and so no Soul), no Soul held: BN5's ROM
+beside BN6's in
 .build/xproxy-souls/rom, the seed one whose layer is BN6's own (15: a
 seed of a dressed layer fights its battles in BN5's engine, and the
 checks say so), each install's line required. The same verdicts then say
@@ -145,6 +147,8 @@ def run(name, dev, cross, seed, quiet):
     # (a break of --mutations that leaves the proxy's tables not HeatCross's has the Souls refuse it: soullife.c checks them first)
     if SOULS and 'soulproxy' in dev and 'proxybreak' not in dev and SOULS_LINE not in lines:
         sys.exit(f'{name}: the Souls were not installed over the proxy (no "{SOULS_LINE}")')
+    if SOULS and 'soulproxy' not in dev and any(l.startswith('soulproxy') for l in lines):
+        sys.exit(f'{name}: the proxy was installed in a run without it')
     if not os.path.exists(boot) and os.path.exists(os.path.join(data, 'boot-3.state')):
         shutil.copy(os.path.join(data, 'boot-3.state'), boot)
     return os.path.join(data, 'btrace.bin')
@@ -365,8 +369,11 @@ def main():
         subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
     base = 'hp=1000,folder=20,onehit'
     runs = {}
-    for name, dev, cross in (('native', base, False), ('installed', 'soulproxy,' + base, False), ('proxy', 'soulproxy,' + base, True),
-                             ('tengu', base, True)):
+    # (--souls: the Souls, and the proxy under them, install wherever BN5's ROM is read since issue #82's run round, so the
+    # runs without the proxy keep BN5's Navis out, and the Souls with them, nonavis)
+    plain = ('nonavis,' if a.souls else '') + base
+    for name, dev, cross in (('native', plain, False), ('installed', 'soulproxy,' + base, False), ('proxy', 'soulproxy,' + base, True),
+                             ('tengu', plain, True)):
         path = os.path.join(WORK, name, 'btrace.bin') if a.no_run else run(name, dev, cross, a.seed, a.quiet)
         runs[name] = X.read_trace(path)
         print(f'{name}: {len(runs[name][1])} frames of battle traced')
