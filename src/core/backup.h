@@ -1,8 +1,8 @@
-/* The saves in one file (backup.c): savedata/ progress and the current run as
- * a .cwsave, which a phone keeps beside the ROMs in the folder the player
- * chose (the launcher, src/launcher/), so that a reinstall finds them
- * there, and which the browser's page exports and imports
- * (the browser's page downloads the core's bytes). Nothing of the ROM is in it. */
+/* The saves in one file (backup.c, docs/SAVES.md): savedata/'s progress and
+ * the current run as a .cwsave, which SAVES exports and imports on every
+ * system (src/saves/) and the automatic copy keeps in a folder
+ * (src/launcher/mirror.c), so that a phone's reinstall finds it there.
+ * Nothing of the ROM is in it. */
 #ifndef CW_BACKUP_H
 #define CW_BACKUP_H
 
@@ -37,18 +37,18 @@ typedef struct {
 
 /* The saves in `data_dir` as one .cwsave's bytes (malloc'd, `n` long),
  * stamped `stamp` (0: the latest progress file's write time); NULL where
- * there are none (no profile yet). Unchanged progress keeps its manifest. */
+ * there are none (no profile yet). Unchanged progress keeps its manifest;
+ * changed progress writes a new one (savedata/transfer.manifest). */
 uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n);
-/* Mobile adapters supply the system's device name/model before exporting. */
-void backup_set_device(const char *name);
 /* What a .cwsave holds; false for bytes that are none, or damaged */
 bool backup_info(const uint8_t *bytes, size_t n, BackupInfo *info);
 /* Preflight after backup_info: a refused file never reaches the local saves. */
 BackupStatus backup_check(const BackupInfo *info, bool bn5);
+/* Its saves into `data_dir`: every file staged and flushed first, the
+ * savedata/ there kept as savedata.old/ (Undo's), the one kept before that
+ * as saves-replaced-1.cwsave (the last three kept); anything but BACKUP_OK
+ * and the saves are as they were */
 BackupStatus backup_restore(const char *data_dir, const uint8_t *bytes, size_t n, bool bn5);
-/* Its saves into `data_dir`, the savedata/ there kept as savedata.old/
- * first (the one kept before gone); false, and nothing changed, for bytes
- * that are no .cwsave */
 bool backup_unpack(const char *data_dir, const uint8_t *bytes, size_t n);
 /* Undo the last successful import; swaps the two complete savedata folders. */
 bool backup_can_undo(const char *data_dir);
@@ -56,9 +56,15 @@ bool backup_can_undo(const char *data_dir);
  * progress is a valid zero summary; false reports damaged/unreadable data. */
 bool backup_undo_info(const char *data_dir, BackupInfo *info);
 bool backup_undo(const char *data_dir);
-/* Recover an import interrupted between folder renames before reading saves. */
+/* An import cut short put right, before anything reads the saves: a
+ * savedata/ missing or not the one installed is the one before again.
+ * False where it cannot be; then backup_blocked() until it is. */
 bool backup_recover(const char *data_dir);
-/* The saves in `data_dir` now, as backup_info says them; false for none */
+/* savedata/ is missing and the saves are in a folder beside it that could
+ * not be put back: nothing is to write a fresh savedata/ over them */
+bool backup_blocked(void);
+/* The saves in `data_dir` now, as backup_info says them; false for none.
+ * Read only: nothing is written. */
 bool backup_local_info(const char *data_dir, BackupInfo *info);
 /* A file's bytes (malloc'd), at most BACKUP_MAX; NULL where it cannot be read */
 uint8_t *backup_read_file(const char *path, size_t *n);

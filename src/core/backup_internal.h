@@ -18,7 +18,10 @@ bool backup_saved_name(const char *name);
 bool backup_progress_name(const char *name);
 void backup_normalize_profile(uint8_t *data, size_t n, const uint8_t *local, size_t local_n);
 bool backup_manifest_read(const uint8_t *data, size_t n, BackupInfo *info);
+/* This system's name, as a manifest gives it (never the device's) */
+const char *backup_system_name(void);
 bool backup_manifest_update(const char *data_dir, uint64_t stamp, BackupInfo *info, char *out, size_t n);
 void backup_remove_dir(const char *dir);
+uint8_t *backup_pack_dir(const char *dir, size_t *n, bool *empty, BackupInfo *info);
 
 #endif

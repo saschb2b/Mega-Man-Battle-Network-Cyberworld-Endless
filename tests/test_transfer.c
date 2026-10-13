@@ -127,7 +127,11 @@ static void parent_fork(void) {
 	assert(!strcmp(file.save_id, local_parent.save_id) && file.revision == local_parent.revision && file.hash != local_parent.hash);
 	/* Local advances again before the other revision 2 arrives by sync. */
 	progress(g_data_dir, 30);
-	assert(backup_local_info(g_data_dir, &latest) && latest.parent_revision == file.revision);
+	/* (the summary reads only now: an export's pack writes the revision) */
+	uint8_t *packed = backup_pack(g_data_dir, 0, &n);
+	bool advanced = packed && backup_info(packed, n, &latest) && latest.parent_revision == file.revision;
+	free(packed);
+	assert(advanced);
 	assert(backup_write_file(path, incoming, incoming_n));
 	mirror_new_folder();   /* clear volatile recognition, preserving the on-disk export fingerprint */
 	advance();

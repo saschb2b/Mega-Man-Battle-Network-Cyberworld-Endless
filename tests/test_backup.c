@@ -17,15 +17,24 @@
 #include "rom.h"
 #include "save_format.h"
 #include "save_layout.h"
+#include "save_queue.h"
+#include "layer_make.h"
 #include "version.h"
 
 static int failures;
-static const char *unreadable_profile;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
 
-uint8_t *__wrap_backup_read_file(const char *path, size_t *n) {
-	if (unreadable_profile && !strcmp(path, unreadable_profile)) { *n = 0; return NULL; }
-	return __real_backup_read_file(path, n);
+/* (save_queue.h: nothing queued in these tests; the waits counted) */
+static int waits;
+void save_queue_wait(void) { ++waits; }
+
+/* A file made unreadable for real: a folder in its place, its bytes kept
+ * beside it; `undo` puts them back */
+static bool unreadable(const char *path, bool undo) {
+	char kept[260];
+	snprintf(kept, sizeof kept, "%s.kept", path);
+	if (undo) return rmdir(path) == 0 && rename(kept, path) == 0;
+	return rename(path, kept) == 0 && mkdir(path, 0755) == 0;
 }
 
 /* a save blob as save.c writes one: magic, size, FNV-1a checksum, bytes */
@@ -239,12 +248,11 @@ static void test_manifest(void) {
 	blob_file(path, PROFILE_MAGIC, &p, sizeof p);
 	struct utimbuf checkpoint_time = { 1700000000, 1700000000 };
 	CHECK(utime(path, &checkpoint_time) == 0, "backup: synthetic checkpoint write time set");
-	backup_set_device("Test device");
 	size_t n = 0, m = 0;
 	uint8_t *a = backup_pack(dir, 0, &n);
 	BackupInfo i, j;
-	CHECK(a && backup_info(a, n, &i) && !strcmp(i.device, "Test device") && i.revision == 1 && !i.parent_id[0] && i.stamp == 1700000000u,
-		"backup: manifest identifies first profile revision and source device");
+	CHECK(a && backup_info(a, n, &i) && i.system[0] && !strcmp(i.device, i.system) && i.revision == 1 && !i.parent_id[0] && i.stamp == 1700000000u,
+		"backup: manifest identifies first profile revision and names the system only, never the device");
 	if (!a) { remove_tree(dir); return; }
 	uint8_t *profile_bytes = member(a, n, "savedata/profile.sav");
 	CHECK(profile_bytes && !backup_get32(profile_bytes + 12 + 28) && !backup_get32(profile_bytes + 12 + 32),
@@ -479,21 +487,210 @@ static void test_profile_read_failure(void) {
 	blob_file(old, PROFILE_MAGIC, &prior, sizeof prior);
 	size_t current_n = 0, old_n = 0;
 	uint8_t *current_bytes = backup_read_file(current, &current_n), *old_bytes = backup_read_file(old, &old_n);
-	unreadable_profile = old;
+	CHECK(unreadable(old, false), "backup: the Undo profile made unreadable");
 	CHECK(!backup_undo(dir), "backup: a present but unreadable Undo profile is never synthesized as empty progress");
-	unreadable_profile = NULL;
+	CHECK(unreadable(old, true), "backup: the Undo profile readable again");
 	CHECK(read_matches(current, current_bytes, current_n) && read_matches(old, old_bytes, old_n) && access(swap, F_OK) != 0,
 		"backup: an Undo-profile read failure keeps both complete folders and volumes byte-for-byte");
-	unreadable_profile = current;
+	CHECK(unreadable(current, false), "backup: the current profile made unreadable");
 	CHECK(!backup_undo(dir), "backup: an unreadable current profile refuses Undo rather than resetting its local volumes");
 	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_IO,
 		"backup: an unreadable current profile refuses Import rather than resetting its local volumes");
-	unreadable_profile = NULL;
+	CHECK(unreadable(current, true), "backup: the current profile readable again");
 	CHECK(read_matches(current, current_bytes, current_n) && read_matches(old, old_bytes, old_n) &&
 		access(swap, F_OK) != 0 && access(stage, F_OK) != 0,
 		"backup: a current-profile read failure keeps both folders and volumes untouched without staging an Import");
 	free(current_bytes);
 	free(old_bytes);
+	remove_tree(dir);
+}
+
+
+/* A carrier of the given names, each with the fixture's profile bytes */
+static uint8_t *named_carrier(const char *const *names, int count, size_t *n) {
+	const uint8_t *member_bytes = backup_fixture + BACKUP_HEAD + 2 + 20 + 4;   /* (its one member's bytes) */
+	uint32_t size = backup_get32(backup_fixture + BACKUP_HEAD + 2 + 20);
+	size_t total = BACKUP_HEAD + 4;
+	for (int i = 0; i < count; ++i) total += 6 + strlen(names[i]) + size;
+	uint8_t *b = calloc(1, total);
+	if (!b) return NULL;
+	memcpy(b, backup_fixture, BACKUP_HEAD);
+	backup_put32(b + 16, (uint32_t)count);
+	size_t at = BACKUP_HEAD;
+	for (int i = 0; i < count; ++i) {
+		size_t len = strlen(names[i]);
+		b[at] = (uint8_t)len;
+		memcpy(b + at + 2, names[i], len);
+		backup_put32(b + at + 2 + len, size);
+		memcpy(b + at + 6 + len, member_bytes, size);
+		at += 6 + len + size;
+	}
+	rechecksum(b, total);
+	*n = total;
+	return b;
+}
+
+/* The carrier's names: each known once, nothing else */
+static void test_names(void) {
+	size_t n = 0;
+	const char *const one[] = { "savedata/profile.sav" };
+	uint8_t *b = named_carrier(one, 1, &n);
+	BackupInfo info;
+	CHECK(b && backup_walk(b, n, NULL, NULL) && backup_info(b, n, &info), "backup: the synthetic carrier builder makes a valid carrier");
+	free(b);
+	const char *const twice[] = { "savedata/profile.sav", "savedata/profile.sav" };
+	b = named_carrier(twice, 2, &n);
+	CHECK(b && !backup_walk(b, n, NULL, NULL), "backup: a name twice is refused");
+	free(b);
+	static const char *const strangers[] = { "savedata/evil.sav", "../profile.sav", "savedata/../profile.sav", "profile.sav", "savedata/" };
+	for (size_t i = 0; i < sizeof strangers / sizeof *strangers; ++i) {
+		const char *const list[] = { "savedata/profile.sav", strangers[i] };
+		b = named_carrier(list, 2, &n);
+		CHECK(b && !backup_walk(b, n, NULL, NULL), "backup: an unrecognised name refused: %s", strangers[i]);
+		free(b);
+	}
+}
+
+/* The build's order against this one's, a.b.c+k: a newer release or a
+ * later build of this one is refused; this one and older ones are not */
+static void newer_cases(const BackupInfo *info, unsigned a, unsigned b, unsigned c, unsigned k) {
+	struct { char version[64]; BackupStatus want; } cases[8];
+	int count = 0;
+	snprintf(cases[count].version, 64, "%s", CW_VERSION); cases[count++].want = BACKUP_OK;
+	snprintf(cases[count].version, 64, "%u.%u.%u", a, b, c + 1); cases[count++].want = BACKUP_NEWER_BUILD;
+	snprintf(cases[count].version, 64, "%u.%u.%u", a + 1, 0, 0); cases[count++].want = BACKUP_NEWER_BUILD;
+	snprintf(cases[count].version, 64, "%u.%u.%u+%u.gtest", a, b, c, k + 1); cases[count++].want = BACKUP_NEWER_BUILD;
+	snprintf(cases[count].version, 64, "%u.%u.%u+%u.gtest", a, b, c, k); cases[count++].want = BACKUP_OK;
+	snprintf(cases[count].version, 64, "%u.%u.%u", a, b, c); cases[count++].want = BACKUP_OK;
+	snprintf(cases[count].version, 64, "dev"); cases[count++].want = BACKUP_OK;
+	if (c) { snprintf(cases[count].version, 64, "%u.%u.%u+999999", a, b, c - 1); cases[count++].want = BACKUP_OK; }
+	for (int i = 0; i < count; ++i) {
+		BackupInfo t = *info;
+		snprintf(t.version, sizeof t.version, "%s", cases[i].version);
+		CHECK(backup_check(&t, true) == cases[i].want, "backup: %s against %s: %d, not %d", cases[i].version, CW_VERSION,
+			(int)backup_check(&t, true), (int)cases[i].want);
+	}
+}
+
+/* ... and a newer layer generation is refused */
+static void test_newer(void) {
+	BackupInfo info;
+	CHECK(backup_info(backup_fixture_v2, sizeof backup_fixture_v2, &info), "backup: v2 fixture read for the build checks");
+	unsigned a, b, c, k = 0;
+	const char *suffix = strpbrk(CW_VERSION, "+-");
+	if (suffix) k = (unsigned)strtoul(suffix + 1 + (!strncmp(suffix + 1, "git", 3) ? 3 : 0), NULL, 10);
+	if (sscanf(CW_VERSION, "%u.%u.%u", &a, &b, &c) == 3) newer_cases(&info, a, b, c, k);
+	else {
+		/* (an unversioned build orders nothing: the run's format checks stay) */
+		BackupInfo t = info;
+		snprintf(t.version, sizeof t.version, "999.0.0");
+		CHECK(backup_check(&t, true) == BACKUP_OK, "backup: an unversioned build (%s) refuses no release by its number", CW_VERSION);
+	}
+	BackupInfo t = info;
+	t.layer_make = LAYER_MAKE + 1;
+	CHECK(backup_check(&t, true) == BACKUP_NEWER_BUILD, "backup: a newer layer generation is refused");
+	t.layer_make = LAYER_MAKE;
+	CHECK(backup_check(&t, true) == BACKUP_OK, "backup: this layer generation is taken");
+}
+
+static int count_files(const char *dir) {
+	DIR *d = opendir(dir);
+	int n = 0;
+	if (!d) return -1;
+	for (struct dirent *e; (e = readdir(d));) n += e->d_name[0] != '.';
+	closedir(d);
+	return n;
+}
+
+/* A second import keeps the saves Undo held as a file, the last three */
+static void test_replaced(void) {
+	char dir[80], path[200];
+	snprintf(dir, sizeof dir, "build/host/test-replaced-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	Profile p = { .runs = 1 };
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	mkdir(path, 0755);
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+	blob_file(path, PROFILE_MAGIC, &p, sizeof p);
+	BackupInfo first;
+	CHECK(backup_local_info(dir, &first), "backup: the first saves read");
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: a first import");
+	snprintf(path, sizeof path, "%s/saves-replaced-1.cwsave", dir);
+	CHECK(access(path, F_OK) != 0, "backup: a first import keeps its Undo folder, no file yet");
+	for (int round = 2; round <= 5; ++round) {
+		snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+		p.runs = round;
+		blob_file(path, PROFILE_MAGIC, &p, sizeof p);
+		CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: import %d", round);
+	}
+	size_t n = 0;
+	BackupInfo kept;
+	snprintf(path, sizeof path, "%s/saves-replaced-3.cwsave", dir);
+	uint8_t *b = backup_read_file(path, &n);
+	CHECK(b && backup_info(b, n, &kept) && kept.runs == 2, "backup: the oldest of three kept is the second import's Undo (%d runs)", b ? kept.runs : -1);
+	free(b);
+	snprintf(path, sizeof path, "%s/saves-replaced-1.cwsave", dir);
+	b = backup_read_file(path, &n);
+	CHECK(b && backup_info(b, n, &kept) && kept.runs == 4, "backup: the newest kept is the Undo the last import replaced (%d runs)", b ? kept.runs : -1);
+	free(b);
+	snprintf(path, sizeof path, "%s/saves-replaced-4.cwsave", dir);
+	CHECK(access(path, F_OK) != 0, "backup: no more than three kept");
+	snprintf(path, sizeof path, "%s/savedata.pending", dir);
+	CHECK(access(path, F_OK) != 0, "backup: no install marker left after a good install");
+	remove_tree(dir);
+}
+
+/* backup_local_info reads and writes nothing */
+static void test_local_read_only(void) {
+	char dir[80], path[200];
+	snprintf(dir, sizeof dir, "build/host/test-local-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	mkdir(path, 0755);
+	Profile p = { .runs = 2, .best_depth = 5 };
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+	blob_file(path, PROFILE_MAGIC, &p, sizeof p);
+	int before = waits;
+	BackupInfo info;
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	CHECK(backup_local_info(dir, &info) && info.runs == 2 && count_files(path) == 1 && waits > before,
+		"backup: the local summary writes no manifest, and waits for the save queue first");
+	remove_tree(dir);
+}
+
+/* An install a power cut stopped: the saves before it come back */
+static void test_pending(void) {
+	char dir[80], path[200], pending[200];
+	snprintf(dir, sizeof dir, "build/host/test-pending-%d", (int)getpid());
+	remove_tree(dir);
+	mkdir(dir, 0755);
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	mkdir(path, 0755);
+	Profile p = { .runs = 6 };
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+	blob_file(path, PROFILE_MAGIC, &p, sizeof p);
+	CHECK(backup_restore(dir, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "backup: pending fixture imported");
+	/* (as if the staged folder came in damaged: the marker still there) */
+	snprintf(pending, sizeof pending, "%s/savedata.pending", dir);
+	uint8_t mark[4];
+	backup_put32(mark, 0x12345678u);
+	CHECK(backup_write_file(pending, mark, sizeof mark), "backup: an install's marker set");
+	BackupInfo info;
+	CHECK(backup_recover(dir) && backup_local_info(dir, &info) && info.runs == 6 && access(pending, F_OK) != 0 && !backup_blocked(),
+		"backup: savedata not the one staged: the saves before the import back (%d runs)", info.runs);
+	/* (savedata gone, its saves beside it and no way back: no writes) */
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	char swap[200];
+	snprintf(swap, sizeof swap, "%s/savedata.swap", dir);
+	CHECK(rename(path, swap) == 0, "backup: savedata moved aside");
+	snprintf(path, sizeof path, "%s/savedata.old", dir);
+	remove_tree(path);
+	mkdir(path, 0755);
+	backup_write_file(pending, mark, sizeof mark);
+	CHECK(backup_recover(dir) && !backup_blocked() && backup_local_info(dir, &info) && info.runs == 6,
+		"backup: an interrupted swap is put back before the marker is judged");
 	remove_tree(dir);
 }
 
@@ -508,5 +705,10 @@ int test_backup(void) {
 	test_undo_empty();
 	test_undo_info();
 	test_profile_read_failure();
+	test_names();
+	test_newer();
+	test_replaced();
+	test_local_read_only();
+	test_pending();
 	return failures;
 }

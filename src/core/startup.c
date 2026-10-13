@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "analytics_net.h"
+#include "backup.h"
 #include "capture.h"
 #include "compat.h"
 #include "desktop.h"
@@ -114,6 +115,9 @@ void data_dir_setup(bool given) {
 		snprintf(rom, sizeof rom, "%s/rom", g_data_dir);
 		make_dirs(rom);
 	}
+	/* (an import a power cut stopped put right before anything, the ROMs
+	 * screen first, reads the saves: backup.h) */
+	backup_recover(g_data_dir);
 }
 
 #ifdef CW_IOS

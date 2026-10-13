@@ -13,6 +13,7 @@
 
 #include "backup_internal.h"
 #include "compat.h"
+#include "save_queue.h"
 
 #define MAGIC "CWSAVE1\n"
 
@@ -44,7 +45,7 @@ bool backup_write_file(const char *path, const uint8_t *bytes, size_t n) {
 	FILE *f = fopen(tmp, "wb");
 	if (!f) return false;
 	bool ok = fwrite(bytes, 1, n, f) == n;
-	ok = fflush(f) == 0 && ok;
+	ok = cw_fsync_file(f) && ok;
 	ok = fclose(f) == 0 && ok;
 	if (ok) ok = cw_rename(tmp, path);
 	if (!ok) remove(tmp);
@@ -160,6 +161,7 @@ static bool finish(Pack *p, uint64_t stamp) {
 }
 
 uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
+	save_queue_wait();   /* (the files a checkpoint queued, all written) */
 	Pack p = { .ok = true };
 	if (!grow(&p, BACKUP_HEAD)) return NULL;
 	memcpy(p.buf, MAGIC, 8);
@@ -178,52 +180,71 @@ uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
 	return p.buf;
 }
 
-bool backup_undo_info(const char *data_dir, BackupInfo *info) {
+/* A folder of saves as a .cwsave's bytes, read only: its manifest goes
+ * with them where it describes these very files (a later save outdates
+ * it). NULL with `empty` where the folder holds no progress at all. */
+uint8_t *backup_pack_dir(const char *dir, size_t *n, bool *empty, BackupInfo *info) {
 	memset(info, 0, sizeof *info);
 	info->status = BACKUP_IO;
+	*empty = false;
 	Pack p = { .ok = true };
-	if (!grow(&p, BACKUP_HEAD)) return false;
+	if (!grow(&p, BACKUP_HEAD)) return NULL;
 	memcpy(p.buf, MAGIC, 8);
 	p.n = BACKUP_HEAD;
-	char dir[1100], path[1200];
-	snprintf(dir, sizeof dir, "%s/savedata.old", data_dir);
+	char path[1200];
 	snprintf(path, sizeof path, "%s/transfer.manifest", dir);
-	bool ok = false;
-	size_t n = 0;
+	size_t mn = 0;
 	uint8_t *manifest = NULL;
 	BackupInfo recorded;
+	bool ok = false;
 	if (!add_progress(&p, dir)) goto done;
-	manifest = backup_read_file(path, &n);
+	manifest = backup_read_file(path, &mn);
 	if (!manifest) {
 		struct stat st;
 		if (stat(path, &st) == 0 || errno != ENOENT) goto done;
-	} else if (!backup_manifest_read(manifest, n, &recorded)) { info->status = BACKUP_DAMAGED; goto done; }
+	} else if (!backup_manifest_read(manifest, mn, &recorded)) { info->status = BACKUP_DAMAGED; goto done; }
 	if (!p.count) {
+		*empty = !manifest;
 		info->format = 1;
 		info->status = manifest ? BACKUP_DAMAGED : BACKUP_OK;
-		ok = !manifest;
 		goto done;
 	}
 	if (!finish(&p, p.latest) || !backup_info(p.buf, p.n + 4, info)) goto done;
-	/* A valid older manifest can lag behind later local saves. Only reuse
-	 * its source metadata when it describes these exact progress bytes. */
 	if (manifest && recorded.hash == info->hash) {
-		add_bytes(&p, BACKUP_MANIFEST, manifest, n);
+		add_bytes(&p, BACKUP_MANIFEST, manifest, mn);
 		if (!finish(&p, recorded.stamp) || !backup_info(p.buf, p.n + 4, info)) goto done;
 	}
 	ok = true;
 done:
-	if (!ok && info->status == BACKUP_OK) info->status = BACKUP_IO;
 	free(manifest);
-	free(p.buf);
-	return ok;
+	if (!ok) {
+		if (info->status == BACKUP_OK && !*empty) info->status = BACKUP_IO;
+		free(p.buf);
+		return NULL;
+	}
+	*n = p.n + 4;
+	return p.buf;
 }
 
-bool backup_local_info(const char *data_dir, BackupInfo *info) {
+static bool dir_info(const char *data_dir, const char *name, BackupInfo *info, bool empty_ok) {
+	save_queue_wait();
+	char dir[1100];
+	snprintf(dir, sizeof dir, "%s/%s", data_dir, name);
 	size_t n = 0;
-	uint8_t *b = backup_pack(data_dir, 0, &n);
-	bool ok = b && backup_info(b, n, info);
+	bool empty;
+	uint8_t *b = backup_pack_dir(dir, &n, &empty, info);
 	free(b);
+	if (b) return true;
+	return empty && empty_ok;
+}
+
+bool backup_undo_info(const char *data_dir, BackupInfo *info) { return dir_info(data_dir, "savedata.old", info, true); }
+
+/* (read only: nothing is written, the manifest neither; saves not yet
+ * exported are this system's) */
+bool backup_local_info(const char *data_dir, BackupInfo *info) {
+	bool ok = dir_info(data_dir, "savedata", info, false) && info->has_profile;
 	if (!ok) memset(info, 0, sizeof *info);
+	else if (!info->system[0]) snprintf(info->system, sizeof info->system, "%s", backup_system_name());
 	return ok;
 }

@@ -12,17 +12,6 @@
 #include "save_format.h"
 #include "version.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-static char device_name[64];
-
-void backup_set_device(const char *name) {
-	snprintf(device_name, sizeof device_name, "%s", name ? name : "");
-	for (char *p = device_name; *p; ++p) if ((unsigned char)*p < 32) *p = ' ';
-}
-
 /* Text with a fixed schema and order, also readable beside the local saves. */
 bool backup_manifest_read(const uint8_t *data, size_t n, BackupInfo *info) {
 	if (!n || n >= BACKUP_MANIFEST_MAX || memchr(data, 0, n)) return false;
@@ -69,15 +58,17 @@ static void random_id(char out[33]) {
 	for (int i = 0; i < 4; ++i) snprintf(out + 8 * i, 9, "%08x", words[i]);
 }
 
-static const char *system_name(void) {
+/* The system that made the saves, which the comparison shows: its name
+ * and nothing of the player's (no host or device name) */
+const char *backup_system_name(void) {
 #if defined(__EMSCRIPTEN__)
 	return "browser";
 #elif defined(__3DS__)
-	return "3DS";
+	return "New 3DS";
 #elif defined(__ANDROID__)
 	return "Android";
 #elif defined(CW_IOS)
-	return "iOS";
+	return "iPhone";
 #elif defined(_WIN32)
 	return "Windows";
 #elif defined(__APPLE__)
@@ -87,19 +78,6 @@ static const char *system_name(void) {
 #else
 	return "PortMaster";
 #endif
-}
-
-static void local_device(char out[64]) {
-	if (!device_name[0]) {
-#ifdef _WIN32
-		DWORD size = sizeof device_name;
-		if (!GetComputerNameA(device_name, &size)) device_name[0] = 0;
-#elif !defined(__EMSCRIPTEN__) && !defined(__3DS__)
-		if (gethostname(device_name, sizeof device_name - 1)) device_name[0] = 0;
-#endif
-		if (!device_name[0]) backup_set_device(system_name());
-	}
-	snprintf(out, 64, "%s", device_name);
 }
 
 bool backup_manifest_update(const char *data_dir, uint64_t stamp, BackupInfo *info, char *out, size_t n) {
@@ -122,8 +100,8 @@ bool backup_manifest_update(const char *data_dir, uint64_t stamp, BackupInfo *in
 	if (!info->run_magic) info->run_magic = RUN_MAGIC;
 	if (!info->layer_make) info->layer_make = LAYER_MAKE;
 	snprintf(info->version, sizeof info->version, "%s", CW_VERSION);
-	snprintf(info->system, sizeof info->system, "%s", system_name());
-	local_device(info->device);
+	snprintf(info->system, sizeof info->system, "%s", backup_system_name());
+	snprintf(info->device, sizeof info->device, "%s", backup_system_name());
 	if (have) {
 		if (previous.revision == UINT32_MAX) return false;
 		memcpy(info->save_id, previous.save_id, sizeof info->save_id);

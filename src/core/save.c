@@ -40,6 +40,9 @@ static uint32_t checksum(const void *p, size_t n) {
  * written save; by the save queue's thread where there is one, so the
  * frame only copies the bytes: true then means queued) */
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
+	/* (the saves beside a missing savedata/, not put back: no fresh one
+	 * over them, backup.h) */
+	if (backup_blocked()) return false;
 	char dir[600], file[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	cw_mkdir(dir);
