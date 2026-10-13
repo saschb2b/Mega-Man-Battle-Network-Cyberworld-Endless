@@ -1836,12 +1836,15 @@ of. The registry's ids, records and art stay C1's (above).
     run's battle seen to reach them). A battle that ends under the chip AI
     leaves the flag in `RAM_PLAYER_AI`, which the next battle's set-up
     overwrites with his fresh AI data (seen: the next battle his own).
-    *His look*: grey while it runs is
-    BN5's number too (palette 1 in both games' traces); but BN5's dark
-    palettes (2 and 3), which `soulmood.c` hands BN6's MegaMan by number,
-    are other colours in BN6's sprite: after a BN5 DarkChip he is drawn
-    tan for the battle (DarkPlus's and DarkInvs's play checks), where BN5
-    draws him dark. To compare each game's colours at those numbers.
+    *His look*: under the chip AI both engines give him their palette 1
+    (the same branch in BN5's 0x0800DD8C and BN6's 0x0801002C), each
+    sprite's own grey. BN5's dark palettes (2 by the meter, 3 after a
+    DarkChip) are its sprite's dark blues, BN6's MegaMan's 2 and 3 yellow
+    and tan (his NaviCust's), read from both ROMs' MegaMan sprite: given
+    BN5's numbers he was drawn tan after every BN5 DarkChip. Since 13
+    October 2026 BN6's engine gives him his own (0, BN6 having no dark
+    palette), never a colour BN5 does not show; legit.json's mask "BN5's
+    dark palettes" cites both routines.
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
@@ -2066,8 +2069,9 @@ the next.
   battle by `soul_mood_dark`, `soul_mood_unite` and `soul_mood_gate`, the
   mood compared in every Soul's spec, five mutations failing. Since
   issue #82's final engine round each DarkChip's after-effect on his
-  battle NaviStats (`0x0802C938`, ported) and his dark palette by BN5's
-  rule (BN6's twin reads Full Synchro alone) are BN5's too, the worried
+  battle NaviStats (`0x0802C938`, ported) is BN5's too (his dark palette
+  BN6's own since 13 October 2026: BN6's MegaMan has none, BN5's numbers
+  drew him tan; The chips' code, DarkInvs, moved), the worried
   rule held on the battle's first screen as well (`soul_mood_first`:
   the DarkChip into deck[5], past the five the screen deals, in both),
   and BN5's DarkChips' own attacks play by their code (The chips' code,
@@ -2109,8 +2113,7 @@ the next.
   BN6's latch) and HolyDrem's moved.
 - **Next**: the Souls' engine is whole, ShadowSoul's chaos attack
   (BN5's DarkInvs) since 13 October 2026; what is left of DarkInvs is The
-  chips' code's (DarkInvs, moved: its five exits, a dark palette's
-  colours). The masks the differential kept "until the Souls track's S6"
+  chips' code's (DarkInvs, moved: three of its exits). The masks the differential kept "until the Souls track's S6"
   are gone. The Souls' state in RAM is the engine's
   plan's (`0x0203FF70`-`0x0203FFEF`, `BN6_SOULS`), their code and data
   in `EMU_FREE` + `0x480000` to `+0x4C0000` and their art past it at

@@ -249,9 +249,6 @@
 #define BN6_MOOD_FROM_SCRIPT  0x08027310u /* ... a Custom screen's script (0x0802359C); */
 #define BN6_CALM_FROM_CHIP    0x08012876u /* the calm's: the chip's Anger (0x0800FFB8), */
 #define BN6_CALM_FROM_ANGER   0x0801438Eu /* ... Anger's end (0x08011A74) */
-#define BN6_PALETTE_MOOD      0x0801006Au /* movs r1,#0xe in his palette (0x0801002C) with no form or a Beast Out's: his mood read (Full Synchro 4,
-                                             else 0; BN5's twin 0x0800DDCC gives dark 2 or 3 by the meter, BN6's no dark), */
-#define BN6_PALETTE_MOOD_DONE 0x08010078u /* ... on to its form's test and the NaviCust's colour, r4 the palette */
 #define BN6_COMPACT           0x0802945Au /* the deck's compaction (BN5's 0x080250EA, the same body), its call as a Custom screen opens */
 #define BN6_COMPACT_CALL      0x08026954u /* ... (BN5 calls its worried rule just before, 0x08022CFC) */
 /* A Soul's chips (soulchips.c; S5) */

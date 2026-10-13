@@ -787,7 +787,6 @@ BN5's mood in BN6's battles (the track's S7, `src/emu/soulmood.c`; docs/ROM_DATA
 | `0x08015BEC`, `0x080143A6` | BN6's mood set and calm (`BN6_MOOD_SET`, `BN6_MOOD_CALM`) | answer: BN5's twin writers' callers mirrored (the chip's Full Synchro and Anger, Anger's start and end, a Custom screen's script) | as BN6 writes its own |
 | `0x08015C0E`, `0x080143B0` | their writes (`BN6_MOOD_SET_WRITE`, `BN6_MOOD_CALM_WRITE`) | jump: none while a BN5 DarkChip keeps him dark (past to `0x08015C10`, `0x080143B2`) | as BN6 writes its own |
 | `0x0802945A` | the deck's compaction as a Custom screen opens (`BN6_COMPACT`) | answer: the battle's opening mood at its first screen; where the deck holds a BN5 DarkChip, BN5's worried rule (the first DarkChip into the deck's place at the hand's count, deck[5] on the first screen) and the run's shelf of BN5's DarkChips, the compaction ours | once a screen |
-| `0x0801006A` | his palette by the mood (`BN6_PALETTE_MOOD`) | jump: dark by BN5's rule (2 where the battle began dark, 3 after a BN5 DarkChip), on at `0x08010078` (`BN6_PALETTE_MOOD_DONE`); BN6's own read where he is not | as his palette is set |
 
 Chaos Unison (the track's S6, `src/emu/soulchaos.c`; docs/ROM_DATA.md, Chaos Unison) adds these where the Souls' own code is placed, each answering only for a side united in a Chaos Unison (`BN6_SOUL_CHAOS`) or while its release's request stands (`BN6_SOUL_REQUEST`):
 

@@ -20,6 +20,7 @@
 #include "xnavi_bn5.h"
 #include "xchips_moved.h"
 #include "xnavi_install.h"
+#include "xnavi_room.h"
 #include "xvirus.h"
 
 #define POOL_AT (RAM_PLAYER_AI + BN5_AI_DATA_SIZE)   /* (his own AI data's place in BN6's pool while the block holds it) */
@@ -212,7 +213,13 @@ bool darkinvs_install(void) {
 		emu_hook(BN6_SUPPORT_MARK, support_end, (void *)(uintptr_t)BN6_SUPPORT_END) &&
 		emu_hook(BN6_REACTION_START, reaction, (void *)(uintptr_t)BN6_REACTION_CALL);
 	uint32_t arm = dark_code(BN5_ARM_CHAOS_READ | 1u) & ~1u;
+	claims_end();
+	/* (the hooks on another track's bytes claimed as that track's, as xchips_flash.c's are: the Navis' copy of the arm, the
+	 * chips' stubs) */
+	claims_begin(XN_CLAIMS);
 	ok = ok && arm && emu_hook(arm, arm_chaos, (void *)(uintptr_t)(arm + 2));
+	claims_end();
+	claims_begin(XC_CLAIMS);
 	/* (BN5's DarkInvs's calls, where its unit is installed: xchips_code.c's stubs) */
 	if (ok && xchips_moved_of(BN6_DARKINVS))
 		ok = emu_hook(XC_STUBS + XC_STUB_DARKINVS, stub_reset, NULL) && emu_hook(XC_STUBS + XC_STUB_DARKINVS + 4, stub_enter, NULL) &&

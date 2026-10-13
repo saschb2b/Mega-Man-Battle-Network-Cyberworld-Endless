@@ -1189,6 +1189,32 @@
   },
   "masks": [
     {
+      "name": "BN5's dark palettes",
+      "part": "obj",
+      "whose": [
+        "megaman"
+      ],
+      "cells": [
+        [
+          "0x94",
+          "0x02",
+          "0x00"
+        ],
+        [
+          "0x94",
+          "0x03",
+          "0x00"
+        ]
+      ],
+      "why": "MegaMan's palette (his object's +0x94) while he is dark: BN5's 2 (dark by the meter) or 3 (a DarkChip used at a neutral meter, as a battle of ours always is), its own sprite's dark blues; BN6's MegaMan has no dark palette, its 2 and 3 other colours of his (yellow and tan, his NaviCust's), so BN6's engine gives him his own, 0 (src/emu/soulmood.c leaves BN6's routine be): a colour BN5 never shows is never shown. Everything else of his dark (his mood 0, no Cross, no Beast Out, the weak buster) is compared as before; Full Synchro's 4 and a NaviCust colour (both games' +0x4C / +0x10 times 5 on) are the same numbers in both.",
+      "evidence": [
+        "BN5 0x0800DD8C (his palette by his state): mood 0 gives 2, and 3 where the dark meter (0x0801287A) is 470 or more (0x0800DDD8-0x0800DDEE); mood 0xFF 4; under the chip AI (AIData +0x48 0x200) 1",
+        "BN6 0x0801002C, its twin: under the chip AI 1, mood 0xFF 4 (0x0801006A-0x08010076), else 0; no dark branch",
+        "both ROMs' MegaMan sprite (list 0 entry 0, its palettes read with the sprite's own layout): BN5's 2 and 3 dark blues, BN6's 2 yellow and 3 tan; 0, 4 the same colours in both; 1, the chip AI's, each game's own grey",
+        "chip_drksonic, chip_darkinvs: his +0x94 3 in BN5 from his DarkChip's use, 0 in BN6"
+      ]
+    },
+    {
       "name": "the emotion window's glitch's draw",
       "part": "rng",
       "when": "glitch draw",

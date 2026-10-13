@@ -1116,12 +1116,6 @@
    "what": "the chip's use (src/emu/soulmood.c's after_effect) leaves his battle NaviStats as they were where BN5's 0x0802C938 adds 100 to its +0x54 for DarkCirc: BN6's player block's +0x54 0 against BN5's 0x64 from t32"
   },
   {
-   "name": "BN5's dark palette left out",
-   "spec": "chip_drksonic",
-   "soulbreak": 1073741824,
-   "what": "his palette as BN6 reads it by his mood (src/emu/soulmood.c's dark_palette) stays BN6's 0 where BN5's 0x0800DDEC gives a DarkChip used at a neutral meter its 3: his object's +0x94 0 against 3 from t32"
-  },
-  {
    "name": "BlakWing's object type",
    "spec": "chip_blakwing",
    "poke5": [

@@ -39,7 +39,6 @@ enum {
 	SOULMOOD_BREAK_WORRY = 8,    /* UNITE stands while he worries or is dark */
 	SOULMOOD_BREAK_GATE = 16,    /* a chip BN5's dark gate refuses used as it is */
 	SOULMOOD_BREAK_AFTER = 32,   /* a BN5 DarkChip used leaves his NaviStats as they were */
-	SOULMOOD_BREAK_PALETTE = 64, /* dark, his palette BN6's own */
 };
 
 /* (from a hook) side worried or dark by this mood (BN5's emotion getter's 1 or 5, a form and anger aside: 0x08012738) */

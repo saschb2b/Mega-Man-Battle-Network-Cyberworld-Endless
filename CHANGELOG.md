@@ -12,7 +12,9 @@
   what every DarkChip costs, 20 max HP for the battle, and MegaMan says
   at the flame what each does; the Pack shows them with BN5's own
   pictures. BN6's flame never offers DarkPlus (BN6's own does nothing),
-  and without BN5's ROM DarkInvs keeps BN6's rule. The owner's two calls
+  and without BN5's ROM DarkInvs keeps BN6's rule. After any BN5
+  DarkChip MegaMan keeps his own colours: BN6's sprite has no dark
+  palette, and BN5's number for it had drawn him tan. The owner's two calls
   on DarkInvs and DarkPlus are written into docs/META.md and
   docs/MULTIROM.md.
 
