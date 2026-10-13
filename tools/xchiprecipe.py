@@ -1914,7 +1914,8 @@ def moved_file(rows, powers):
 BN5_PA_LIST, BN5_PA_LIST_REF = 0x08028020, 0x08025260   # BN5's Custom screen's list of its recipes (0x080251E0's), its word
 PA_KIND_SAME, PA_KIND_IDS = 0, 4                       # a recipe's kind: n of one chip, codes in a row (0x080295C8); these ids (0x0802961A)
 # Recipes of BN5's that BN6's list holds but its codes, or a recipe of BN6's before it, never let form (kept: BN5's recipe whole,
-# which a deck of BN5's codes would form; the owner's call whether another rule replaces it, docs/MULTIROM.md)
+# which a deck of BN5's codes would form; they stay unformed, BN6's codes and recipes first: the decision of issue #82's last
+# integration round, docs/MULTIROM.md)
 PA_UNFORMED = {
     324: "three Vulcan2 of codes in a row, BN6's Vulcan2 D, F and L (BN6's record), none three in a row",
     325: "three Vulcan3, BN6's A, G and R, none three in a row",

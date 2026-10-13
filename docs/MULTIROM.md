@@ -412,8 +412,9 @@ patterns of parity across the nets, an honest telegraph, costed power):
   is one chip whichever flame gives it, and its words follow the rule it
   plays by: BN6's four by BN6's (a BugFrag a use), BN5's own seven by
   BN5's (they come while MegaMan worries; used, he is dark for the
-  battle). DarkPlus is offered by neither until its code plays in BN6's
-  battles.
+  battle). DarkPlus plays by BN5's rule where its ROM is read (the
+  final engine round), but neither flame offers it yet (the owner's
+  call).
 - **One price, counted as each net counts a use**: 20 max HP a battle a
   dark power ran in, once a battle however many ran: counted where BN6
   runs a chip's after-effects (`0x0800B79A`, from every chip use,
@@ -1681,12 +1682,14 @@ of. The registry's ids, records and art stay C1's (above).
     is formed, never dealt). `pa_infvulc1`, `pa_suprspr1`, `pa_shakpar1`
     and `pa_cacdanc1` PASS: the same three picks form it in both games,
     the P.A. screen shown, used at t30 and played by its moved code frame
-    for frame to the foe's deletion. Never formed in BN6's (kept as BN5's
-    recipes, `PA_UNFORMED`; whether another rule replaces them is the
-    owner's call): InfVulc2 and InfVulc3, whose parts' codes in BN6's
-    records (Vulcan2 D, F, L; Vulcan3 A, G, R) never make three in a row,
-    and Boxer1-3, whose three FireHit are BN6's own FlmHook1-3's recipes,
-    first in the list. The Library's P.A. tab lists BN6's own alone (its
+    for frame to the foe's deletion. Never formed in BN6's, and so they
+    stay (the decision of issue #82's last integration round: BN6's codes
+    and recipes come first, no rule of ours replaces BN5's; kept as BN5's
+    recipes, `PA_UNFORMED`): InfVulc2 and InfVulc3, whose parts' codes in
+    BN6's records (Vulcan2 D, F, L; Vulcan3 A, G, R) never make three in
+    a row, and Boxer1-3, whose three FireHit are BN6's own FlmHook1-3's
+    recipes, first in the list. Their rows stay registered (a save that
+    names one reads the same chip), unformed. The Library's P.A. tab lists BN6's own alone (its
     builder bound to 349: the registry's 350 would land before its
     buffer); BN5's in BN6's Library are M9's.
   - The DarkChips DarkCirc (support 0x2A as 0x54), DrkSonic (support

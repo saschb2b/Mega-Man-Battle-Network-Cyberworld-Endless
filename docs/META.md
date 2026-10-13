@@ -907,8 +907,10 @@ engine's, and all twelve kinds play there, each by its own net's rule
   BN5's: they come into the hand only while MegaMan worries or is dark,
   BN5's mood brought into BN6's battles (docs/MULTIROM.md, Transplanted
   Souls, S7), and one used makes him dark for the battle (BN6's dark too:
-  no Cross, no Beast Out, a weak buster). DarkPlus plays in neither
-  engine's battles yet, and no flame offers it.
+  no Cross, no Beast Out, a weak buster). DarkPlus plays by BN5's rule
+  where its ROM is read (issue #82's final engine round: 50 more for the
+  next chip), but no flame offers it yet: whether one does is the
+  owner's call.
 - **When he worries** (4 October 2026): BN5 worries MegaMan by hits, 10
   off his mood each, and opened every battle calm, so it took seven hits
   in one battle, whatever his HP: a playtester at 10 of 120 HP never saw
@@ -1035,8 +1037,10 @@ recommended (4 October 2026), then what was built (As built, below).
 - **D. Max HP alone, BN6's BugFrag patched out:** one price, but BN6's own
   rule, its fall-back to the base chip and darkness fed by bugs all go.
 - **E. B with BN5's gate:** BN6's deck keeps a DarkChip back until MegaMan
-  is down to a quarter of his HP, as the guest's shelf does
-  (docs/MULTIROM.md, DarkChips). Closest to BN5's feel, but BN6 has no
+  is down to a quarter of his HP, as the guest's shelf did (the guest
+  battles' until issue #82's last round, docs/MULTIROM.md, Guest
+  battles; with one engine BN5's own worried rule deals BN5's DarkChips
+  in BN6's battles, Transplanted Souls, S7). Closest to BN5's feel, but BN6 has no
   worry of its own to read, so the gate would be ours, and the player
   loses the when.
 

@@ -9,8 +9,9 @@
  * five of BN5's twelve, its records 286-290, each BN5's DarkChip of its
  * name, played by BN6's own rule (a BugFrag a use); BN5's seven of its own
  * (registry ids 214-220) come into the hand by BN5's worried rule, its
- * mood brought into BN6's battles (soulmood.h). DarkPlus, which never joins
- * the chip before it in BN6, sits out of BN6's battles: no flame offers it. */
+ * mood brought into BN6's battles (soulmood.h). DarkPlus, BN6's 290, plays
+ * BN5's code where BN5's ROM is read (xchips_moved.c), but no flame offers
+ * it (the owner's call). */
 #ifndef CW_DARKCHIPS_H
 #define CW_DARKCHIPS_H
 
