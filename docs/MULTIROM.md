@@ -1744,6 +1744,53 @@ of. The registry's ids, records and art stay C1's (above).
   BN6's own of the name (289, BN6's support 0x3B: its auto mode, another
   attack), and so is ShadowSoul's Chaos Unison attack (Transplanted
   Souls, S6).
+- **DarkInvs on the moved chip AI, tried in the last integration
+  round and kept BN6's.** What a probe proved (not kept): BN5's chip AI
+  for the player (`0x0802B4B0`-`0x0802B804`, with its own side's heads
+  `0x0802BE52`, `0x0802BEEA`, `0x0802BEFE`, `0x0802BF1A` and `0x0802C0DA`
+  before the Dark Soul's foe-side ones) moves with the Dark Soul's
+  through `tools/xnavirecipe.py`, no decision left open, given three
+  lines: the machine and the foe-side head `0x0802BE58` as `EXTRA_ROOTS`
+  of AI 0x16 (without the head the block from `0x0802BE52` ends in a
+  branch out of it, `0x0802BE56`, and the Dark Soul is not installed),
+  and two `CURACTIONS` (`0x0802B62C`, the Navis' buster as
+  `0x0802BB96`; `0x0802B6D2`, dead: its state 0xC is set by nothing of
+  the machine's). The Dark Soul's code grows from 12 blocks and 7936
+  bytes to 14 and 8856, the machine at `XN_CODE + 0x18300`. A hook on
+  BN6's idle state past the chip request's test (`0x080F1870`, r0
+  0xFFFF) ran it where MegaMan's AI data's flag word held 0x200 (+0x48
+  in both games: BN5's `0x0800E096`, BN6's `0x08010312`; no code of
+  BN6's sets that bit), his AI data moved into a block of BN5's 0x140
+  bytes (the chip AI keeps its state from +0xF0 to +0x13F, the next
+  slot's in BN6's pool) and his own side's list made from his folder (as
+  Chaos Unison's failure makes it): in a battle of ACDC Area, no button
+  pressed, MegaMan took Cannon from the list, walked to where it
+  reaches and deleted the Mettaur with it. The machine drives BN6's
+  MegaMan. What the round did not reach, each a piece of its own:
+  BN5's DarkInvs itself (support 0x3B, `0x080E2420`; its object, the
+  fourth kind's 0x18 at `0x080E2390`; the recipe's four calls with no
+  twin: the chip AI's reset and entry, `0x0802C03E` and `0x0802C114`
+  with 600, to the Dark Soul's copies once his AI data has moved;
+  `0x08017060`, his statuses cleared; `0x08011A8C`, BN5's calm, which
+  `soulmood.c` mirrors for the Souls' unisons alone; and a sprite loaded
+  at `0x080BA6F4` by a number made otherwise); its end, none of which
+  BN6's twins do (BN5's timer at AI data +0x36, `0x0800DBF0`, asking
+  0x80000 at 0; its end family `0x080EF270`, the flag and the
+  invisibility, his collision's 0x08000000, cleared, `0x08016C4C`; and
+  the five places BN5's engine leaves the chip AI, `0x0802C12A` from
+  `0x0801214A`, `0x08012276`, `0x0802CCA4`, `0x0802CE3A` and
+  `0x0802D028`); MegaMan drawn grey while the machine ran (untraced:
+  its state 8 calls BN5's `0x0801A410` with 0x40, BN6's `0x0801DACC`);
+  the proof frame for frame, a chip spec of its own and `chaos_shadow_45`
+  and `_60` against BN5 over 600 frames of its choices, walks and chips;
+  and a design call that is the owner's: BN5's code in the registry's
+  DarkInvs is BN6's record 289 taking BN5's family where BN5's ROM is
+  read (as DarkPlus's 290), which takes BN6's own rule from the chip a
+  run's BN6 flame offers (a BugFrag a use, Invisibl without one, and
+  its words) on every build that reads BN5's ROM and leaves it on those
+  that do not. Until both, the registry's DarkInvs and ShadowSoul's
+  chaos attack stay BN6's own, `chaos_shadow_45` its recorded FAIL at
+  t107.
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
@@ -1946,8 +1993,9 @@ the next.
   120, 150, 180 and 210: 45, 90, 180 and 210 succeed, the rest fail, as
   BN5's), two mutations failing (the cycle a frame longer, the Dark Soul
   a frame later). ShadowSoul's attack is BN6's own DarkInvs (BN5's puts
-  MegaMan under its chip AI, which BN6's player code has no path to:
-  The chips' code, What remains): `chaos_shadow_45` holds that recorded
+  MegaMan under its chip AI, which BN6's player code has no path to; a
+  probe drove him with the Dark Soul's moved chip AI, what is left is
+  in The chips' code, What remains): `chaos_shadow_45` holds that recorded
   FAIL at its attack (t107), everything before it the same.
 - **S7, BN5's mood and its DarkChip rule** (done; docs/ROM_DATA.md, BN5's
   mood in BN6's battles): `src/emu/soulmood.c` keeps BN5's mood in the Souls' block
@@ -2011,7 +2059,9 @@ the next.
   BN6's latch) and HolyDrem's moved.
 - **Next**: the Souls' engine is whole but for ShadowSoul's chaos
   attack (BN5's DarkInvs, with MegaMan's player code under BN5's chip
-  AI); the masks the differential kept "until the Souls track's S6" are
+  AI: the machine drives him, the chip, its end, its proof and the
+  owner's call on DarkInvs's rule in runs are left, The chips' code,
+  What remains); the masks the differential kept "until the Souls track's S6" are
   gone. The Souls' state in RAM is the engine's
   plan's (`0x0203FF70`-`0x0203FFEF`, `BN6_SOULS`), their code and data
   in `EMU_FREE` + `0x480000` to `+0x4C0000` and their art past it at
