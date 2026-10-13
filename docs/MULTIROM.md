@@ -1230,7 +1230,10 @@ into the battle engine).
   BN5's two tests of its id (its collision's region 0x13; arriving in a
   fight under way, as a failed Chaos Unison brings it, no entry in the
   foes' list of four that shows their HP, BN6's `0x0801DC7C`, where at a
-  battle's start both games list it as any foe) made by hooks. What BN6's engine has no room
+  battle's start both games list it as any foe) made by hooks. Its name
+  is DarkSoul, the word BN5's script calls it by (`BN5_DARK_SOUL_NAME`):
+  BN5's names archive gives its id DrkCloud, which BN5's own first Custom
+  screen shows for it, and BN6's second screen names it as it fights. What BN6's engine has no room
   for is kept apart: its AI data's 0x140 bytes (BN6's are 0x100; BN5's
   chip AI keeps its state from +0xF0) in the battle's RAM, its two
   lists there too, and the chip records it reads, BN6's with the four

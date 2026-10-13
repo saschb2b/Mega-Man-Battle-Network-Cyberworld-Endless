@@ -218,7 +218,9 @@
   with a list of Cannons or Swords. BN5 makes that list from the chips
   MegaMan uses most, which BN6 does not record, so in BN6 it moves and
   fires its buster. Colonel's mark of his side no longer touches the bit
-  BN6 reads for the field's slide at a battle's end.
+  BN6 reads for the field's slide at a battle's end. It goes by DarkSoul,
+  as BN5's script calls it: BN5's list of names gives its number to
+  DrkCloud, which the Custom screen and the second screen showed.
 
 - **BN5's own code for its chips BN6 has none of (issue #82).** 94 of Team
   Colonel's chips fight in BN6's battles by BN5's own code, moved from the
