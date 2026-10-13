@@ -26,10 +26,11 @@ int saves_rows(const BackupInfo *info, bool damaged, bool source, char rows[4][6
 /* The line under home's panel: where the copy goes and how it went;
  * `blocked` where the saves could not be put back (backup_blocked) */
 void saves_status_line(const MirrorStatus *m, bool blocked, bool can_choose, char *out, size_t n);
-/* The comparison's words: what USE THE FILE'S replaces, and with
+/* The comparison's words: what USE THE FILE'S replaces (`unreadable`:
+ * this device's saves that cannot be read), and with
  * `place` (the copy's place's own file, the copy on) what KEEP THESE does
  * to it */
-void saves_compare_note(const BackupInfo *here, bool have, const char *place, char *out, size_t n);
+void saves_compare_note(const BackupInfo *here, bool have, bool unreadable, const char *place, char *out, size_t n);
 /* Why a file is refused; this device's saves are kept */
 void saves_refusal(BackupStatus status, const BackupInfo *file, char *out, size_t n);
 /* The results: an import (`before`: the saves it replaced, `had` any),

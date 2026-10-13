@@ -400,6 +400,28 @@ static void test_busy(void) {
 	press(BTN_B);
 }
 
+/* This device's saves there but unreadable: said so, never "no saves" */
+static void test_unreadable(const char *base) {
+	char file[700], dir[700], path[800];
+	snprintf(file, sizeof file, "%s/in.cwsave", base);
+	CHECK(file_of(base, file, 2, 3, 0), "saves: a file for the unreadable device");
+	snprintf(g_data_dir, sizeof g_data_dir, "%.400s/broken", base);
+	snprintf(dir, sizeof dir, "%s", g_data_dir);
+	snprintf(path, sizeof path, "%s/savedata", dir);
+	cw_mkdir(dir);
+	cw_mkdir(path);
+	snprintf(path, sizeof path, "%s/savedata/profile.sav", dir);
+	CHECK(cw_mkdir(path) == 0, "saves: a profile that cannot be read");
+	mirror_note();
+	open_home();
+	saves_import(file);
+	press(0);
+	CHECK(SV.unreadable && strstr(SV.note, "cannot be read") && !strcmp(saves_label(SAVES_TAKE), "USE THE FILE'S") && drawn("Damaged"),
+		"saves: unreadable saves are said so, not called none: %s", SV.note);
+	press(BTN_B);
+	press(BTN_B);
+}
+
 int main(void) {
 	char base[128];
 	snprintf(base, sizeof base, "build/host/test-saves-%d", (int)getpid());
@@ -422,6 +444,7 @@ int main(void) {
 		test_place_file(base);
 		test_export();
 		test_busy();
+		test_unreadable(base);
 	}
 	free(SV.bytes);
 	remove_tree(base);

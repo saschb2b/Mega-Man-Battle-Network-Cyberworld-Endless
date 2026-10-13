@@ -50,8 +50,11 @@ host's). A note says what USE THE FILE'S replaces and that UNDO IMPORT
 brings it back; where the file is the automatic copy's own and the copy
 is on, it adds that KEEP THESE makes the folder's copy this device's. The
 cursor starts on the side with more progress (more runs, then the deeper
-best; this device's at a tie), so after a reinstall it is on the file's.
-On a device with no saves the buttons are DONE and BRING BACK. A refused
+layer, a best or the run on now; this device's at a tie), so after a
+reinstall it is on the file's. On a device with no saves the buttons are
+DONE and BRING BACK; saves here that cannot be read are said so (their
+column "Damaged"), and an import keeps them for UNDO IMPORT like any
+other. A refused
 file shows one reason and "Your saves are kept.", with DONE alone: a
 newer build's file, a damaged one (its column says only "Damaged"), or a
 run that needs BN5 where BN5's ROM is missing. A file that holds the very

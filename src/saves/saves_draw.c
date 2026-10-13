@@ -84,18 +84,18 @@ void saves_draw(void) {
 		fill_rect(l.back.x, l.back.y, l.back.w, l.back.h, PET_SLOT_EDGE);
 		fill_rect(l.back.x + 1, l.back.y + 1, l.back.w - 2, l.back.h - 2, PET_SLOT);
 		pixfont_draw(l.back.x + l.back.w / 2, l.back.y + 4, saves_word_back(), PET_WHITE, shade(), PIXFONT_CENTER, 1);
-		panel(l.here, &SV.here, false, false, false);
+		panel(l.here, &SV.here, false, SV.unreadable, false);
 		MirrorStatus m;
 		mirror_status(&m);
 		char line[1200];
 		saves_status_line(&m, backup_blocked(), pick_saves_capabilities() & SAVES_CAN_FOLDER, line, sizeof line);
 		clipped(l.line.x, l.line.y, line, l.line.w, PET_WHITE);
 	} else if (SV.view == SAVES_COMPARE) {
-		panel(l.here, &SV.here, false, false, true);
+		panel(l.here, &SV.here, false, SV.unreadable, true);
 		panel(l.file, &SV.file, true, SV.status == BACKUP_DAMAGED, true);
 		note(l.line, SV.note, SV.status == BACKUP_OK ? PET_WHITE : PET_GOLD);
 	} else {
-		fill_rect(6, l.line.y - 4, P.w - 12, l.line.h + 8, PET_NAVY);
+		fill_rect(6, l.line.y - 4, P.w - 12, l.line.h + 1, PET_NAVY);
 		note(l.line, SV.note, PET_WHITE);
 	}
 	for (int i = 0; i < l.count; ++i) button(l.buttons[i]);

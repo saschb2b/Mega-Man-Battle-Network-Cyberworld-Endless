@@ -244,7 +244,12 @@ bool backup_undo_info(const char *data_dir, BackupInfo *info) { return dir_info(
  * exported are this system's) */
 bool backup_local_info(const char *data_dir, BackupInfo *info) {
 	bool ok = dir_info(data_dir, "savedata", info, false) && info->has_profile;
-	if (!ok) memset(info, 0, sizeof *info);
-	else if (!info->system[0]) snprintf(info->system, sizeof info->system, "%s", backup_system_name());
+	if (!ok) {
+		/* (its status kept: BACKUP_OK for no saves, else saves that cannot
+		 * be read) */
+		BackupStatus status = info->status;
+		memset(info, 0, sizeof *info);
+		info->status = status;
+	} else if (!info->system[0]) snprintf(info->system, sizeof info->system, "%s", backup_system_name());
 	return ok;
 }

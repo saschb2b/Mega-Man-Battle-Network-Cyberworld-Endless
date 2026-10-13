@@ -24,6 +24,7 @@ typedef struct {
 	int focus;             /* the button the cursor is on */
 	BackupInfo here, file; /* this device's saves and the file's */
 	bool have;             /* this device has saves */
+	bool unreadable;       /* ... saves it cannot read (here.status says why) */
 	bool undo;             /* ... and the ones an import replaced */
 	bool busy;             /* a picker open */
 	bool from_place;       /* the file compared is the copy's place's own (mirror.h) */

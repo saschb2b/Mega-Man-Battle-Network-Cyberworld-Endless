@@ -27,7 +27,7 @@ const char *saves_label(int action) {
 	case SAVES_AUTO: return pick_saves_auto_enabled() ? "AUTO-COPY: ON" : "AUTO-COPY: OFF";
 	case SAVES_FOLDER: return "FOLDER";
 	case SAVES_KEEP: return "KEEP THESE";
-	case SAVES_TAKE: return SV.have ? "USE THE FILE'S" : "BRING BACK";
+	case SAVES_TAKE: return SV.have || SV.unreadable ? "USE THE FILE'S" : "BRING BACK";
 	case SAVES_CONTINUE: return "CONTINUE";
 	default: return "DONE";
 	}
@@ -96,9 +96,10 @@ static void phrase(const BackupInfo *info, char *out, size_t n) {
 	else snprintf(out, n, "no runs yet");
 }
 
-void saves_compare_note(const BackupInfo *here, bool have, const char *place, char *out, size_t n) {
+void saves_compare_note(const BackupInfo *here, bool have, bool unreadable, const char *place, char *out, size_t n) {
 	int used;
-	if (!have) used = snprintf(out, n, "This device has no saves yet.");
+	if (unreadable) used = snprintf(out, n, "This device's saves cannot be read. UNDO IMPORT brings them back.");
+	else if (!have) used = snprintf(out, n, "This device has no saves yet.");
 	else if (here->run_depth > 0) used = snprintf(out, n, "USE THE FILE'S replaces your Layer %d run. UNDO IMPORT brings it back.", here->run_depth);
 	else used = snprintf(out, n, "USE THE FILE'S replaces your saves. UNDO IMPORT brings them back.");
 	if (place && have && used > 0 && (size_t)used < n)
@@ -127,7 +128,7 @@ void saves_imported(const BackupInfo *now, const BackupInfo *before, bool had, c
 	phrase(now, got, sizeof got);
 	if (had && before->run_depth > 0) snprintf(out, n, "Saves imported: %s. UNDO IMPORT brings back your Layer %d run.", got, before->run_depth);
 	else if (had) snprintf(out, n, "Saves imported: %s. UNDO IMPORT brings back your saves.", got);
-	else snprintf(out, n, "Saves imported: %s.", got);
+	else snprintf(out, n, "Saves imported: %s. UNDO IMPORT takes them out again.", got);
 }
 
 void saves_undone(const BackupInfo *now, bool have, char *out, size_t n) {

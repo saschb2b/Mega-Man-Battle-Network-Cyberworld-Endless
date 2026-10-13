@@ -63,8 +63,9 @@ bool backup_recover(const char *data_dir);
 /* savedata/ is missing and the saves are in a folder beside it that could
  * not be put back: nothing is to write a fresh savedata/ over them */
 bool backup_blocked(void);
-/* The saves in `data_dir` now, as backup_info says them; false for none.
- * Read only: nothing is written. */
+/* The saves in `data_dir` now, as backup_info says them; false for none
+ * (status BACKUP_OK) or none readable (another status). Read only:
+ * nothing is written. */
 bool backup_local_info(const char *data_dir, BackupInfo *info);
 /* A file's bytes (malloc'd), at most BACKUP_MAX; NULL where it cannot be read */
 uint8_t *backup_read_file(const char *path, size_t *n);

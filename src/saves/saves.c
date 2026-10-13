@@ -27,6 +27,7 @@ Saves SV;
 
 void saves_refresh(void) {
 	SV.have = mirror_local(&SV.here);
+	SV.unreadable = !SV.have && SV.here.status != BACKUP_OK;
 	SV.undo = backup_can_undo(g_data_dir);
 }
 
@@ -65,12 +66,15 @@ bool saves_open(void) {
 	return true;
 }
 
-/* (the side with more progress: more runs, then the deeper best, this
+/* (a record's deepest layer: its best, or the run on now where deeper) */
+static int deepest(const BackupInfo *info) { return info->best > info->run_depth ? info->best : info->run_depth; }
+
+/* (the side with more progress: more runs, then the deeper layer, this
  * device's at a tie; a reinstall's empty saves never) */
 static bool file_ahead(void) {
 	if (!SV.have) return true;
 	if (SV.file.runs != SV.here.runs) return SV.file.runs > SV.here.runs;
-	return SV.file.best > SV.here.best;
+	return deepest(&SV.file) > deepest(&SV.here);
 }
 
 void saves_compare(uint8_t *bytes, size_t n, bool from_place) {
@@ -100,7 +104,7 @@ void saves_compare(uint8_t *bytes, size_t n, bool from_place) {
 		MirrorStatus m;
 		mirror_status(&m);
 		bool place = from_place && m.state != MIRROR_OFF;
-		saves_compare_note(&SV.here, SV.have, place ? m.place : NULL, SV.note, sizeof SV.note);
+		saves_compare_note(&SV.here, SV.have, SV.unreadable, place ? m.place : NULL, SV.note, sizeof SV.note);
 		SV.focus = file_ahead() ? SAVES_TAKE : SV.have ? SAVES_KEEP : SAVES_DONE;
 	}
 	if (R.data) audio_sfx(SFX_REVEAL);
