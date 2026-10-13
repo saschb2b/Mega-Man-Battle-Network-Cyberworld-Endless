@@ -93,12 +93,16 @@ its differences are tools/xdiff_snap.py, whose a difference is and the
 masks tools/xdiff_masks.py.
 """
 import argparse
+import contextlib
 import hashlib
+import io
 import json
+import multiprocessing
 import os
 import shutil
 import subprocess
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, SPRITE, PLAYER_NAVI, PLAYER_USED, PLAYER_PENDING,  # noqa: E402
@@ -214,6 +218,20 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
     return ';'.join(parts)
 
 
+def shot_command():
+    """the host build's headless run in the build image, as build.py shot starts it, without its make: main() builds
+    once, so a spec's run is one container (build.py's IMAGE and Docker engine)"""
+    sys.path.insert(0, ROOT)
+    import build
+    return (['docker'] + (['--context', build.CONTEXT] if build.CONTEXT else []) +
+            ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src',
+             '-v', f'{os.path.join(WORK, "rom")}:/rom:ro', build.IMAGE, 'build/host/cyberworld', '--headless', '--rom-dir', '/rom',
+             '--data-dir', '/src/.build/xdiff/data'])
+
+
+SHOT = []   # (shot_command(), once a process)
+
+
 def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
@@ -225,10 +243,9 @@ def run(name, spec, pokes, calls, quiet, twins=()):
         p = os.path.join(WORK, 'runs', f'{name}.{g}')
         if os.path.exists(p):
             os.remove(p)
-    cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', '/src/.build/xdiff/data', '--xdiff',
-           spec_text(spec, out, pokes, calls, twins)]
-    env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'))
-    r = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
+    if not SHOT:
+        SHOT.extend(shot_command())
+    r = subprocess.run(SHOT + ['--xdiff', spec_text(spec, out, pokes, calls, twins)], cwd=ROOT, capture_output=True, text=True)
     lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus', 'xchips', 'xattack'))]
     if not quiet:
         for l in lines:
@@ -670,6 +687,51 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     return verdict, kind
 
 
+# ---- the specs side by side ----
+# Each spec is one battle in a container of its own and its comparison in a process of its own: they share nothing but
+# the boot states in .build/xdiff/data, which the first run writes where they are missing and every run after only reads
+
+JOB = {}   # (what a worker's specs share: the arguments, legit.json and its Canon, set before the pool forks)
+
+
+def job(item):
+    """one spec (or mutation) in a worker: (its index, everything it printed, its verdict, its kind)"""
+    k, name, pokes, calls, run_name, extra = item
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        try:
+            verdict, kind = one(name, JOB['a'], JOB['legit'], JOB['canon'], pokes, calls, run_name, extra)
+        except SystemExit as e:   # (a run that failed: its reason, and the spec failed)
+            print(e.code if isinstance(e.code, str) else f'{run_name or name}: exited {e.code}')
+            verdict, kind = 'FAIL', 'error'
+    return k, out.getvalue(), verdict, kind
+
+
+def run_all(items, a, legit, canon, head):
+    """items as job() takes them, each printed whole as it ends (head(item) first), on a.jobs workers; their verdicts and
+    kinds in the items' order. Where a boot state is missing, the first runs alone, so that one run writes it"""
+    JOB.update(a=a, legit=legit, canon=canon)
+    done = [None] * len(items)
+
+    def show(item, text, verdict, kind):
+        print(head(item) + text, end='', flush=True)
+        done[item[0]] = (verdict, kind)
+
+    rest = list(items)
+    warm = a.no_run or all(os.path.exists(os.path.join(WORK, 'data', f)) for f in ('boot-3.state', 'xdiff-bn5.state'))
+    while rest and (a.jobs <= 1 or not warm or len(rest) == 1):
+        item = rest.pop(0)
+        show(item, *job(item)[1:])
+        warm = True
+    if rest:
+        # (forked, so each worker has JOB as main() set it: Python 3.14's default start, forkserver, would not)
+        with ProcessPoolExecutor(max_workers=min(a.jobs, len(rest)), mp_context=multiprocessing.get_context('fork')) as pool:
+            futures = {pool.submit(job, item): item for item in rest}
+            for f in as_completed(futures):
+                show(futures[f], *f.result()[1:])
+    return done
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('specs', nargs='*', help='specs in tests/xdiff (all where none)')
@@ -682,6 +744,8 @@ def main():
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--survey', action='store_true', help='every difference over every frame, counted by where (masks applied), no stop')
     ap.add_argument('--mutations', action='store_true', help='tests/xdiff/mutations.json: each must FAIL its spec')
+    ap.add_argument('-j', '--jobs', type=int, default=max(1, (os.cpu_count() or 2) - 2),
+                    help='specs run side by side (default: the CPUs but two; 1 one at a time)')
     a = ap.parse_args()
     with open(LEGIT) as f:
         legit = json.load(f)
@@ -692,21 +756,26 @@ def main():
     if a.mutations:
         with open(MUTATIONS) as f:
             muts = json.load(f)['mutations']
-        caught = 0
-        for k, m in enumerate(muts):
-            print(f'== mutation {k + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}')
-            extra = {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None
-            verdict, _ = one(m['spec'], a, legit, canon, m.get('poke', []), m.get('call', []), f'mutation{k + 1}', extra)
-            caught += verdict == 'FAIL'
+        items = [(k, m['spec'], m.get('poke', []), m.get('call', []), f'mutation{k + 1}',
+                  {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None) for k, m in enumerate(muts)]
+
+        def head(item):
+            m = muts[item[0]]
+            return f'== mutation {item[0] + 1}, {m["name"]} ({m["what"]}), on {m["spec"]}\n'
+
+        verdicts = run_all(items, a, legit, canon, head)
+        for k, (verdict, _) in enumerate(verdicts):
             print(f'mutation {k + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
+        caught = sum(v == 'FAIL' for v, _ in verdicts)
         print(f'{caught} of {len(muts)} mutations caught')
         sys.exit(0 if caught == len(muts) else 1)
     names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n not in ('legit.json', 'mutations.json', 'families.json'))
-    results = {}
-    for name in names:
-        with open(os.path.join(SPECS, f'{name}.json')) as f:
-            print(f'== {name}: {json.load(f).get("about", "")}')
-        results[name] = one(name, a, legit, canon, a.poke, a.call)
+    def head(item):
+        with open(os.path.join(SPECS, f'{item[1]}.json')) as f:
+            return f'== {item[1]}: {json.load(f).get("about", "")}\n'
+
+    items = [(k, name, a.poke, a.call, None, None) for k, name in enumerate(names)]
+    results = dict(zip(names, run_all(items, a, legit, canon, head)))
     print('; '.join(f'{k} {v}' for k, (v, _) in results.items()))
     if a.expect_fail:
         sys.exit(0 if all(v == 'FAIL' for v, _ in results.values()) else 1)

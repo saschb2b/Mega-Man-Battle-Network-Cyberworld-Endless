@@ -465,6 +465,21 @@ def mask_applies(m, d, fa, fb, prev):
     return True
 
 
+PARTS = {}   # id(masks) -> (masks, {part: its masks in their order}): mask_applies' first test, made once a list
+
+
+def by_part(masks, part):
+    """the masks of `masks` whose place includes `part`, in their order (the rest never apply to its differences)"""
+    held = PARTS.get(id(masks))
+    if held is None or held[0] is not masks:
+        index = {}
+        for m in masks:
+            for p in m['part'] if isinstance(m['part'], list) else [m['part']]:
+                index.setdefault(p, []).append(m)
+        held = PARTS[id(masks)] = (masks, index)
+    return held[1].get(part, ())
+
+
 def mask_of(d, masks, fa, fb, prev):
     """the mask (or masks, where each explains some of a byte's bits) that explains d; None where none does, and
     always where d is on the family's own records (what the engine writes there is read as BN6's in the snapshot,
@@ -472,6 +487,7 @@ def mask_of(d, masks, fa, fb, prev):
     byte only BN6's layout has (BN5's None) is read as 0 by a mask that says "bn5_none": 0."""
     if who(d, fb, fa.canon, fa) == 'family':
         return None
+    masks = by_part(masks, d.part)
     if d.a is None and isinstance(d.b, int) and any(m.get('bn5_none') == 0 and mask_applies(m, d, fa, fb, prev) for m in masks):
         d = Diff(d.t, d.role, d.part, d.off, 0, d.b)
     bits, names = 0, []

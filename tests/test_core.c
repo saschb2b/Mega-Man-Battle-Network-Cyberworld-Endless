@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "darkchips.h"
@@ -1767,6 +1768,99 @@ static void test_kept_walk(void) {
 	CHECK(off == 0, "the map's kept walk differed from the arrow's search on %d of %d walks", off, walks);
 }
 
+/* An area's share of a test, every area's at once: body(b, out) in a
+ * process of its own for each area (its layers its own, as each area's
+ * generation is), what it printed passed on in the areas' order, its
+ * failed checks counted here and its `n` counts added into `sum`. A test
+ * of every area walks MegaMan through hundreds of layers frame by frame;
+ * one area after another, two of them took 26 of the suite's 36 seconds.
+ * An area whose process cannot start runs here, as before. */
+#define AREA_COUNTS 8
+typedef struct { uint32_t magic; int failures, out[AREA_COUNTS]; } AreaResult;
+#define AREA_MAGIC 0x41524541u
+static void each_area(void (*body)(int b, int *out), int *sum, int n) {
+	int fd[BIOME_COUNT];
+	pid_t pid[BIOME_COUNT];
+	fflush(stdout);
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int p[2];
+		pid[b] = -1;
+		if (pipe(p) != 0) { fd[b] = -1; continue; }
+		pid[b] = fork();
+		if (pid[b] == 0) {   /* (the area's process: its lines and then its counts into the pipe) */
+			close(p[0]);
+			dup2(p[1], 1);
+			close(p[1]);
+			AreaResult r = { AREA_MAGIC, 0, { 0 } };
+			failures = 0;
+			body(b, r.out);
+			r.failures = failures;
+			fflush(stdout);
+			_exit(write(1, &r, sizeof r) == (ssize_t)sizeof r ? 0 : 1);
+		}
+		close(p[1]);
+		fd[b] = p[0];
+		if (pid[b] < 0) { close(p[0]); fd[b] = -1; }
+	}
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		AreaResult r = { AREA_MAGIC, 0, { 0 } };
+		if (fd[b] < 0) {   /* (no process: the area here) */
+			body(b, r.out);
+		} else {
+			size_t len = 0, cap = 4096;
+			char *text = malloc(cap);
+			ssize_t got;
+			while (text && (got = read(fd[b], text + len, cap - len)) > 0)
+				if ((len += (size_t)got) == cap) text = realloc(text, cap *= 2);
+			close(fd[b]);
+			int status = 0;
+			waitpid(pid[b], &status, 0);
+			if (!text || len < sizeof r || !WIFEXITED(status) || WEXITSTATUS(status) != 0 ||
+				(memcpy(&r, text + len - sizeof r, sizeof r), r.magic != AREA_MAGIC)) {
+				++failures;
+				printf("FAIL area %d: its process ended without its counts\n", b);
+				free(text);
+				continue;
+			}
+			fwrite(text, 1, len - sizeof r, stdout);
+			free(text);
+			failures += r.failures;
+		}
+		for (int k = 0; k < n; ++k) sum[k] += r.out[k];
+	}
+}
+
+/* One area's walks of test_arrow_areas: walks, lost, stops, band looks,
+ * across the grid, walks held there, their looks, stuck */
+static void arrow_area(int b, int *now) {
+	int walks = 0, lost = 0, there = 0, looks = 0, still = 0, stuck = 0;
+	int frames = arrow_frames, stalls = arrow_stalls, stops = arrow_stops, turns = arrow_turns, swings = arrow_swings;
+	int band = arrow_band_looks, diagonals = arrow_band_diagonals;
+	for (uint32_t seed = 1; seed <= 60; ++seed) {
+		layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+		int tx, ty, sx, sy;
+		if (!arrow_goal(&tx, &ty)) continue;
+		for (int r = -1; r < layer.nrooms; ++r) {
+			if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
+			++walks;
+			lost += follow_arrow(sx, sy, tx, ty) < 0;
+			int n = 0, s = 0;
+			bool stood;
+			if (hold_arrow(sx, sy, tx, ty, 24, &n, &s, &stood) >= 0) { ++there; looks += n; still += s; }
+			if (stood && ++stuck <= 3) printf("  area %d seed %u: held, the arrow's way stood MegaMan still on the way from %d,%d to %d,%d\n", b, seed, sx, sy, tx, ty);
+		}
+	}
+	frames = arrow_frames - frames; stalls = arrow_stalls - stalls; stops = arrow_stops - stops; turns = arrow_turns - turns;
+	swings = arrow_swings - swings; band = arrow_band_looks - band; diagonals = arrow_band_diagonals - diagonals;
+	if (getenv("CW_WAY_STATS"))
+		printf("  arrow area %2d: %3d walks of %3.0f frames, %.2f stops (%d frames still) and %.2f turns a walk (%.2f swung back), %4.1f%% of %5d"
+			" looks on a band across the grid; held, %.1f looks a walk (%.1f%% of held frames still), %d stuck, %d out of time\n",
+			b, walks, (double)frames / walks, (double)stops / walks, stalls, (double)turns / walks, (double)swings / walks, 100.0 * diagonals / band,
+			band, (double)looks / there, 100.0 * still / (24.0 * looks), stuck, walks - there - stuck);
+	int counts[AREA_COUNTS] = { walks, lost, stops, band, diagonals, there, looks, stuck };
+	memcpy(now, counts, sizeof counts);
+}
+
 /* Following the arrow in every area, from the arrival and each room to the
  * exit or the guardian (sixty layers each, as test_walks'): it never loses
  * MegaMan, never shows a way across the grid on a walkway or band, and
@@ -1780,35 +1874,8 @@ static void test_arrow_areas(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
-	int all[8] = { 0 };   /* walks, lost, stops, band looks, across the grid, walks held there, their looks, stuck */
-	for (int b = 0; b < BIOME_COUNT; ++b) {
-		int walks = 0, lost = 0, there = 0, looks = 0, still = 0, stuck = 0;
-		int frames = arrow_frames, stalls = arrow_stalls, stops = arrow_stops, turns = arrow_turns, swings = arrow_swings;
-		int band = arrow_band_looks, diagonals = arrow_band_diagonals;
-		for (uint32_t seed = 1; seed <= 60; ++seed) {
-			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
-			int tx, ty, sx, sy;
-			if (!arrow_goal(&tx, &ty)) continue;
-			for (int r = -1; r < layer.nrooms; ++r) {
-				if (!arrow_start(r, tx, ty, &sx, &sy)) continue;
-				++walks;
-				lost += follow_arrow(sx, sy, tx, ty) < 0;
-				int n = 0, s = 0;
-				bool stood;
-				if (hold_arrow(sx, sy, tx, ty, 24, &n, &s, &stood) >= 0) { ++there; looks += n; still += s; }
-				if (stood && ++stuck <= 3) printf("  area %d seed %u: held, the arrow's way stood MegaMan still on the way from %d,%d to %d,%d\n", b, seed, sx, sy, tx, ty);
-			}
-		}
-		frames = arrow_frames - frames; stalls = arrow_stalls - stalls; stops = arrow_stops - stops; turns = arrow_turns - turns;
-		swings = arrow_swings - swings; band = arrow_band_looks - band; diagonals = arrow_band_diagonals - diagonals;
-		if (getenv("CW_WAY_STATS"))
-			printf("  arrow area %2d: %3d walks of %3.0f frames, %.2f stops (%d frames still) and %.2f turns a walk (%.2f swung back), %4.1f%% of %5d"
-				" looks on a band across the grid; held, %.1f looks a walk (%.1f%% of held frames still), %d stuck, %d out of time\n",
-				b, walks, (double)frames / walks, (double)stops / walks, stalls, (double)turns / walks, (double)swings / walks, 100.0 * diagonals / band,
-				band, (double)looks / there, 100.0 * still / (24.0 * looks), stuck, walks - there - stuck);
-		int now[8] = { walks, lost, stops, band, diagonals, there, looks, stuck };
-		for (int k = 0; k < 8; ++k) all[k] += now[k];
-	}
+	int all[AREA_COUNTS] = { 0 };   /* walks, lost, stops, band looks, across the grid, walks held there, their looks, stuck */
+	each_area(arrow_area, all, AREA_COUNTS);
 	CHECK(all[1] == 0, "the arrow lost MegaMan on %d of %d walks in every area", all[1], all[0]);
 	CHECK(all[4] == 0, "the arrow pointed across the grid on a walkway or band at %d of %d looks", all[4], all[3]);
 	CHECK(all[7] == 0, "held, the arrow's way stood MegaMan still on %d of %d walks", all[7], all[0]);
@@ -1861,50 +1928,57 @@ static int mouth_spot(int mx, int my, int ax, int ay, double o, int tx, int ty, 
  * carried him over the lane where the floor went on past it. On a walkway
  * or band the arrow shows its way (test_arrow_areas); those spots are
  * counted apart. */
+/* One area's mouths of test_arrow_mouths: spots, misses, spots on a band */
+static void mouth_area(int b, int *out) {
+	static int16_t walk[MAP_W * MAP_H];
+	static uint8_t done[MAP_H][MAP_W][4];
+	int spots = 0, misses = 0, bands = 0;
+	for (uint32_t seed = 1; seed <= 60; ++seed) {
+		layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+		int tx, ty, sx, sy, len;
+		if (!arrow_goal(&tx, &ty)) continue;
+		memset(done, 0, sizeof done);
+		for (int r = -1; r < layer.nrooms; ++r) {
+			if (!arrow_start(r, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) continue;
+			int n = route_walk_len;
+			memcpy(walk, route_walk, sizeof walk[0] * (size_t)n);
+			/* (each step from walk[i], the mouth, into walk[i - 1], the lane's first panel) */
+			for (int i = n - 1; i >= 1; --i) {
+				int mx = walk[i] % MAP_W, my = walk[i] / MAP_W, ax = walk[i - 1] % MAP_W - mx, ay = walk[i - 1] / MAP_W - my;
+				int d = ax > 0 ? 0 : ax < 0 ? 1 : ay > 0 ? 2 : 3, ux = ay != 0, uy = ax != 0, lo = 0, hi = 0;
+				if (done[my][mx][d]) continue;
+				done[my][mx][d] = 1;
+				while (walk_floor(mx - (lo + 1) * ux, my - (lo + 1) * uy) && walk_floor(mx + ax - (lo + 1) * ux, my + ay - (lo + 1) * uy)) ++lo;
+				while (walk_floor(mx + (hi + 1) * ux, my + (hi + 1) * uy) && walk_floor(mx + ax + (hi + 1) * ux, my + ay + (hi + 1) * uy)) ++hi;
+				if (lo + hi + 1 > 2) continue;
+				/* (whole units off the end panels' middles, as BN6 places him) */
+				for (int s = -1; s <= 1; s += 2)
+					for (int k = 13; k <= 60; k += 2) {
+						double o = s < 0 ? -lo - k / 32.0 : hi + k / 32.0;
+						int way, got = mouth_spot(mx, my, ax, ay, o, tx, ty, &way);
+						spots += got == 1 || got == -1;
+						bands += got == 2;
+						if (got >= 0) continue;
+						if (++misses <= 5)
+							printf("  area %d seed %u: stopped at %.3f,%.3f off the mouth %d,%d, the arrow's way %d held did not walk MegaMan onto its lane\n", b,
+								seed, mx + (ay ? o : 0), my + (ax ? o : 0), mx, my, way);
+					}
+			}
+		}
+	}
+	if (getenv("CW_WAY_STATS")) printf("  mouths area %2d: %d of %d spots stopped off a lane, the arrow's way held not onto it\n", b, misses, spots);
+	out[0] = spots;
+	out[1] = misses;
+	out[2] = bands;
+}
+
 static void test_arrow_mouths(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
-	static int16_t walk[MAP_W * MAP_H];
-	static uint8_t done[MAP_H][MAP_W][4];
-	int spots = 0, misses = 0, bands = 0;
-	for (int b = 0; b < BIOME_COUNT; ++b) {
-		int area_spots = spots, area_misses = misses;
-		for (uint32_t seed = 1; seed <= 60; ++seed) {
-			layer_generate(seed * 104729u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
-			int tx, ty, sx, sy, len;
-			if (!arrow_goal(&tx, &ty)) continue;
-			memset(done, 0, sizeof done);
-			for (int r = -1; r < layer.nrooms; ++r) {
-				if (!arrow_start(r, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) continue;
-				int n = route_walk_len;
-				memcpy(walk, route_walk, sizeof walk[0] * (size_t)n);
-				/* (each step from walk[i], the mouth, into walk[i - 1], the lane's first panel) */
-				for (int i = n - 1; i >= 1; --i) {
-					int mx = walk[i] % MAP_W, my = walk[i] / MAP_W, ax = walk[i - 1] % MAP_W - mx, ay = walk[i - 1] / MAP_W - my;
-					int d = ax > 0 ? 0 : ax < 0 ? 1 : ay > 0 ? 2 : 3, ux = ay != 0, uy = ax != 0, lo = 0, hi = 0;
-					if (done[my][mx][d]) continue;
-					done[my][mx][d] = 1;
-					while (walk_floor(mx - (lo + 1) * ux, my - (lo + 1) * uy) && walk_floor(mx + ax - (lo + 1) * ux, my + ay - (lo + 1) * uy)) ++lo;
-					while (walk_floor(mx + (hi + 1) * ux, my + (hi + 1) * uy) && walk_floor(mx + ax + (hi + 1) * ux, my + ay + (hi + 1) * uy)) ++hi;
-					if (lo + hi + 1 > 2) continue;
-					/* (whole units off the end panels' middles, as BN6 places him) */
-					for (int s = -1; s <= 1; s += 2)
-						for (int k = 13; k <= 60; k += 2) {
-							double o = s < 0 ? -lo - k / 32.0 : hi + k / 32.0;
-							int way, got = mouth_spot(mx, my, ax, ay, o, tx, ty, &way);
-							spots += got == 1 || got == -1;
-							bands += got == 2;
-							if (got >= 0) continue;
-							if (++misses <= 5)
-								printf("  area %d seed %u: stopped at %.3f,%.3f off the mouth %d,%d, the arrow's way %d held did not walk MegaMan onto its lane\n", b,
-									seed, mx + (ay ? o : 0), my + (ax ? o : 0), mx, my, way);
-						}
-				}
-			}
-		}
-		if (getenv("CW_WAY_STATS")) printf("  mouths area %2d: %d of %d spots stopped off a lane, the arrow's way held not onto it\n", b, misses - area_misses, spots - area_spots);
-	}
+	int all[3] = { 0 };   /* spots, misses, spots on a band */
+	each_area(mouth_area, all, 3);
+	int spots = all[0], misses = all[1], bands = all[2];
 	CHECK(misses == 0, "stopped off a lane's mouth, the arrow's way held did not walk MegaMan onto the lane at %d of %d spots", misses, spots);
 	printf("  mouths: %d spots stopped off a lane's mouth (and %d on a walkway or band), %d where the arrow's way held did not walk MegaMan onto it\n",
 		spots, bands, misses);

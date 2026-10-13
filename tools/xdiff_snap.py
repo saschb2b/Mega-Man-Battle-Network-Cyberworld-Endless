@@ -217,6 +217,18 @@ def read_trace(path):
 
 # ---- each game's numbers as BN6's (legit.json's maps) ----
 
+PLACES = {}   # (id of a raw table, kind, type) -> (the table, kept so its id stays its own; its places): read per word
+
+
+def places_of(raw, kind, t5):
+    """the places a raw table of legit.json (by kind, then BN5's type) gives an object of kind `kind` and BN5's type t5"""
+    key = (id(raw), kind, t5)
+    if key not in PLACES:
+        by_type = {int(k, 0): v for k, v in raw.get(kind.lower(), {}).items()}
+        PLACES[key] = (raw, frozenset(int(x, 0) for x in by_type.get(t5, [])))
+    return PLACES[key][1]
+
+
 class Canon:
     def __init__(self, legit):
         m = legit['maps']
@@ -440,14 +452,12 @@ class Canon:
 
     def chip_object(self, kind, t5):
         """the places (u16) an object of BN5's type t5 of this kind keeps a chip id at (legit.json, maps, chip_id, places)"""
-        by_type = {int(k, 0): v for k, v in self.chip_places_raw.get(kind.lower(), {}).items()}
-        return {int(x, 0) for x in by_type.get(t5, [])}
+        return places_of(self.chip_places_raw, kind, t5)
 
     def chip_sub(self, kind, t5):
         """the places (a byte each) an object of BN5's type t5 of this kind keeps its chip's subfamily at (legit.json, maps,
         chip_id, subs)"""
-        by_type = {int(k, 0): v for k, v in self.chip_subs_raw.get(kind.lower(), {}).items()}
-        return {int(x, 0) for x in by_type.get(t5, [])}
+        return places_of(self.chip_subs_raw, kind, t5)
 
     def paired(self, c5, c6):
         """whether the spec's folders pair BN5's chip c5 with BN6's c6, another chip of the same name in each game (each its
@@ -735,7 +745,10 @@ def sprite_copies(recipes):
 
 
 def is_ptr(v):
-    return any(lo <= v < hi for lo, hi in RAM) or ROM[0] <= v < ROM[1]
+    return 0x02000000 <= v < 0x02040000 or 0x03000000 <= v < 0x03008000 or ROM[0] <= v < ROM[1]
+
+
+assert RAM == ((0x02000000, 0x02040000), (0x03000000, 0x03008000))   # (is_ptr's ranges, written out: it runs per word)
 
 
 class Frame:

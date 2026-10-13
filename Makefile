@@ -214,9 +214,16 @@ TEST_SRCS := tests/test_core.c src/core/rom.c src/core/pacing.c src/net/net_gen.
 	src/core/backup.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c
-build/host/test_core: $(TEST_SRCS) src/*/*.h
+# (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
+# without, so an object built without it never stands in for one CI's flags would refuse)
+TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
+TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
+$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
+build/host/test_core: $(TEST_OBJS)
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) $(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_SRCS) -lm
+	$(CC_host) $(TEST_SAN) -o $@ $(TEST_OBJS) -lm
 
 # the hooks on mGBA itself (tests/test_emu.c: a ROM of the test's own bytes),
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
