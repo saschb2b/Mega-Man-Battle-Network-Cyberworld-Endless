@@ -556,7 +556,10 @@ BN5 animates them, in a battle that shows them and none of those; the
 frames round them are BN6's. BN6's own battles keep every byte of their
 state with them brought in (`tools/xfamily.py --spec native`: BN6's
 Mettaur with BN5's install and without), but for the IWRAM code the
-install patches and the dead stack, where the flags, now read from ROM,
+install patches, the dead stack, and what the Souls do with none held
+(installed with BN5's Navis since issue #82's run round: a pointer into
+the faces' tables they grow, BN5's mood in their own block, as
+`tools/xproxy.py --souls` explains them), where the flags, now read from ROM,
 move an interrupt a few cycles. Their records now translate
 (`src/emu/xfields.c`: BN6's fields 0x56, 0x5F, 0x61, 0x65 for lava,
 0x66, 0x67, 0x69, 0x6A for the sea), held back by their families alone:

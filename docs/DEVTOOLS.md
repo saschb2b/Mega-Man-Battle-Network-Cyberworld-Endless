@@ -1603,7 +1603,10 @@ abilities and passives), each break of its rule `unitebreak=N`, of its
 look, abilities and passives `soulbreak=N`. `tools/xproxy.py
 --souls` runs the four runs above with the Souls installed (BN5's ROM
 beside BN6's in `.build/xproxy-souls/rom`, seed 15, whose layer BN5 does
-not dress) and no Soul held: native and installed the same every byte
+not dress) and no Soul held, native and tengu with `--dev nonavis` (the
+Souls, and the proxy under them, install with BN5's Navis wherever its
+ROM is read since issue #82's run round): native and installed the same
+every byte
 (the Souls' hooks leave BN6's battle alone while none is held; a pointer
 into a table the Souls grow, the emotion window's faces and their
 palettes, read through its copy, BN6's bytes at the same place; BN5's
