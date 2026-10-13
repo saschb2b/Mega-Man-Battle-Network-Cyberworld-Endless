@@ -78,9 +78,11 @@ SOUND_SLOTS = {0xC0: 0x62, 0xB7: 0x61, 0xBA: 0x60}
 REGISTRY_C = os.path.join(ROOT, 'src', 'core', 'xchips_registry.c')
 # the numbers the grown lists and tables give the families, in turn (xvirus_recipe.h: BN6's placeholders first)
 # (issue #82's shared allocations, binding: list 1 BN6's placeholders 0x00 and 0x1E, then upward from BN6's end; list 2
-# upward from 0x30, the Navis' 0x20-0x2F skipped; lists 4 and 5 upward from BN6's ends; the chips take theirs down from 0xFF)
+# upward from 0x30, the Navis' 0x20-0x2F skipped; lists 4 and 5 upward from BN6's ends, list 5's at 0x80 as BN6 reads it
+# (BN6_SPRITES_LIST5_THROUGH: the real world's people, 5:0x20-0x7F, are list 6's table read through list 5's word); the
+# chips take theirs down from 0xFF)
 LIST_NUMBERS = {1: [0x1E, 0x00] + list(range(0x20, 0x100)), 2: list(range(0x30, 0x100)),
-                4: list(range(0x5C, 0x100)), 5: list(range(0x20, 0x100))}
+                4: list(range(0x5C, 0x100)), 5: list(range(0x80, 0x100))}
 FIRST_EFFECT = 0x6C
 BN6_EFFECT_LIST = 4    # the grown list an effect's sprite of an ungrown list is listed in (the attacks' and effects')
 XV_SPAWN = {(1, 0x08003140): 'XV_SPAWN_1', (1, 0x0800315C): 'XV_SPAWN_1_LAST', (1, 0x080031E8): 'XV_SPAWN_1_LAST',

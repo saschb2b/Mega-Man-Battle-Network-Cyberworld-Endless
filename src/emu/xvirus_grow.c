@@ -57,7 +57,7 @@ static void specs(void) {
 	/* (in xvirus_list_slot's order; list 3, the chips' attacks, the last, at a place of its own) */
 	static const uint32_t lists[XV_LISTS_GROWN][2] = {
 		{ BN6_SPRITES_VIRUSES, BN6_SPRITES_VIRUSES_COUNT }, { BN6_SPRITES_NAVIS, BN6_SPRITES_NAVIS_COUNT },
-		{ BN6_SPRITES_ATTACKS, BN6_SPRITES_ATTACKS_COUNT }, { BN6_SPRITES_LIST5, BN6_SPRITES_LIST5_COUNT },
+		{ BN6_SPRITES_ATTACKS, BN6_SPRITES_ATTACKS_COUNT }, { BN6_SPRITES_LIST5, BN6_SPRITES_LIST5_THROUGH },
 		{ BN6_SPRITES_LIST3, BN6_SPRITES_LIST3_COUNT },
 	};
 	for (uint32_t i = 0; i < XV_LISTS_GROWN; ++i)

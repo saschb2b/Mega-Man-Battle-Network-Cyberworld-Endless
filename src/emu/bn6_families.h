@@ -91,7 +91,10 @@
 #define BN6_SPRITES_ATTACKS   4           /* sprite list 4, the battle's attacks and effects (their objects'): */
 #define BN6_SPRITES_ATTACKS_COUNT 92      /* ... its numbers (0x08031FA4 on, list 5's after them) */
 #define BN6_SPRITES_LIST5     5           /* sprite list 5 (MegaMan's buster's charge, a hit's spark): */
-#define BN6_SPRITES_LIST5_COUNT 32        /* ... its numbers (0x08032114 on) */
+#define BN6_SPRITES_LIST5_COUNT 32        /* ... its numbers (0x08032114 on, list 6's after them) */
+#define BN6_SPRITES_LIST5_THROUGH 0x80    /* ... read past them into list 6's table, the real world's people (5:0x20-0x7F: Lan's
+                                             family, the town's folk, src/world/town_lines.c; sprite_load called from 0x0809FB58):
+                                             a grown list 5 keeps BN6's words to 0x7F, measured (docs/ROM_DATA.md) */
 #define BN6_EFFECTS           0x080E16D4u /* the effects a battle draws (the fourth kind of object's type 0, by the effect id at its +4), 4 bytes
                                              each: a sprite list's offset (as BN6_TRAITS_LIST), its number, the animation, a palette added */
 #define BN6_EFFECTS_REF       0x080E1970u /* ... the one literal that names them (read at 0x080E18AA) */

@@ -304,7 +304,7 @@ static const XvRef powie_states[] = {
 };
 static const XvSprite powie_sprites[] = {
 	{ 1, 0x02, 1, 0x20, XV_ART + 0x7800, 0x2000 },
-	{ 5, 0x0D, 5, 0x20, XV_ART + 0x9800, 0x1400 },
+	{ 5, 0x0D, 5, 0x80, XV_ART + 0x9800, 0x1400 },
 };
 static const XvId powie_effects[] = { { 0x14, 0x6D }, { 0x15, 0x6E } };
 static const uint16_t powie_held[XV_VERSIONS * 16] = {
@@ -1931,7 +1931,7 @@ static const XvRef marina_states[] = {
 };
 static const XvSprite marina_sprites[] = {
 	{ 1, 0x16, 1, 0x2E, XV_ART + 0x34800, 0x1000 },   /* (LZ77 in BN5) */
-	{ 5, 0x1E, 5, 0x21, XV_ART + 0x35800, 0xC00 },
+	{ 5, 0x1E, 5, 0x81, XV_ART + 0x35800, 0xC00 },
 };
 static const XvId marina_effects[] = { { 0x5D, 0x72 } };
 static const XvType marina_types[] = { { 3, 0x8F, XV_TYPE_SHARED } };
@@ -2927,7 +2927,7 @@ static const XvRef tinhawk_states[] = {
 };
 static const XvSprite tinhawk_sprites[] = {
 	{ 1, 0x1D, 1, 0x35, XV_ART + 0x49800, 0x5000 },   /* (LZ77 in BN5) */
-	{ 5, 0x0E, 5, 0x22, XV_ART + 0x4E800, 0xC00 },
+	{ 5, 0x0E, 5, 0x82, XV_ART + 0x4E800, 0xC00 },
 };
 static const XvId tinhawk_effects[] = { { 0x62, 0x76 } };
 
