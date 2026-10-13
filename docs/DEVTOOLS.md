@@ -640,6 +640,7 @@ python3 build.py xdiff                       # every spec in tests/xdiff: PASS, 
 python3 build.py xdiff cangard_v1 --story    # one spec, the battle as each game fought it
 python3 build.py xdiff cangard_v1_keys --survey   # every difference of every frame, counted, masked or not
 python3 build.py xdiff --mutations           # the comparator's own test: each break must FAIL its spec
+python3 build.py xdiff zomon_v1 -j 1         # one spec at a time (the default: the CPUs but two side by side)
 python3 build.py xdiff megaman_plain --story # MegaMan the subject: his timeline in both games
 python3 tools/xproxy.py --mutations          # the Souls' proxy form against HeatCross (The proxy form, below)
 python3 build.py shot --data-dir /src/.build/xdiff/data \
@@ -655,6 +656,17 @@ alone against MegaMan idle, V1 against `cangard_v1_keys`' 62 inputs, and
 each other version alone: `NAME_v1`, `NAME_v1_keys`, `NAME_ex` to
 `NAME_v3ex`). Local
 only: it needs both ROMs (CI runs the unit tests of its parts).
+
+The specs run side by side, as many as the machine's CPUs but two
+(`-j N`; mutations too): each is one battle in a container of its own and
+its comparison in a process of its own, forked, sharing only the boot
+states in `.build/xdiff/data`, which the first run writes where they are
+missing (that run goes alone) and every run after only reads. Each spec's
+lines print whole as it ends, so their order is the order they end in;
+the summary line keeps the specs' order. A spec takes about 9 seconds
+(its battle about 5 in mGBA, its comparison about 3 in Python): the 325
+specs take about 55 minutes one at a time (10 seconds each, measured on one) and took 2 minutes 44 seconds on 16 CPUs,
+with the same verdicts at the same frames (`-j 1` keeps one at a time).
 
 `--xdiff SPEC` (`src/dev/xdiff.c`, its items parsed in `xdiff_spec.c`, a
 tool run in the game's place, as `--pacing` is) fights one battle twice

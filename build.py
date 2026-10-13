@@ -1882,9 +1882,13 @@ def lint_complexity(update):
 def lint_analyzer(update):
     """GCC's analyzer over the host build's sources, at -O2 as it builds."""
     from collections import Counter
-    script = ('for f in src/*/*.c; do gcc -std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
+    # line naming their function, so files' lines must not interleave)
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
-              '-isystem /opt/mgba/host/include -c -o /dev/null "$f"; done 2>&1')
+              '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
+              'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
+              'cat "$out"/*')
     build('host')   # (its version.h)
     out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                          ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
@@ -2189,7 +2193,7 @@ def main():
         return
     if a.action == 'test':
         ensure_image()
-        code = docker('make', 'test', *(['WERROR=1'] if os.environ.get('CI') else []))
+        code = docker('make', 'test', f'-j{os.cpu_count() or 4}', *(['WERROR=1'] if os.environ.get('CI') else []))
         # (linux/steam/add-to-steam.py and the site's pages, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
