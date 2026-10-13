@@ -10,8 +10,9 @@
  * name, played by BN6's own rule (a BugFrag a use); BN5's seven of its own
  * (registry ids 214-220) come into the hand by BN5's worried rule, its
  * mood brought into BN6's battles (soulmood.h). DarkPlus, BN6's 290, plays
- * BN5's code where BN5's ROM is read (xchips_moved.c), but no flame offers
- * it (the owner's call). */
+ * BN5's code by BN5's rule where BN5's ROM is read (xchips_moved.c), and
+ * BN5's flame alone offers it there (the owner's call of 13 October 2026:
+ * BN6's US DarkPlus does nothing). */
 #ifndef CW_DARKCHIPS_H
 #define CW_DARKCHIPS_H
 
@@ -53,10 +54,11 @@ int dark_bn6_id(int k);
 int dark_chip_id(int k);
 int dark_chip_kind(int id);
 /* The kinds a flame offers, a bit each: BN6's own (`bn5` false) its four,
- * BN5's every kind but DarkPlus (BN6's four among them, played by BN6's
- * rule; BN5's own seven by BN5's, where its mood is in BN6's battles) */
+ * never DarkPlus; BN5's every kind (BN6's four among them; BN5's own seven
+ * by BN5's rule, where its mood is in BN6's battles), DarkPlus only where
+ * BN5's code plays it (`plus`) */
 #define DARK_PLUS_KIND 3
-unsigned dark_kinds_offered(bool bn5);
+unsigned dark_kinds_offered(bool bn5, bool plus);
 
 /* The kind a flame of darkness on layer `depth` offers: the first the run
  * lacks (`held`, counts by kind) from the run's seed and the act on, of

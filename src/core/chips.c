@@ -43,7 +43,15 @@ static uint32_t entry_at(const uint8_t *rom, uint32_t archive, uint32_t i, const
 	return p + n < ROM_SIZE && n < ENTRY_MAX ? n + 1 : 0;
 }
 
-/* the BN5 records' art planned: each own row's three places, BN6's blank
+/* A row whose art is BN5's: an own row's, and (after them all, so that
+ * theirs keep their places) BN6's own chip of a name whose record BN5's
+ * code plays where its ROM is read (SAME_MOVED: DarkPlus, which BN6's US
+ * version left a blank picture and an icon reading its id) */
+static bool art_row(const XChipReg *r, int pass) {
+	return pass ? r->how == XREG_SAME && M.rom5 && xchips_moved_of(r->bn6) != NULL : xreg_own(r);
+}
+
+/* the BN5 records' art planned: each such row's three places, BN6's blank
  * where BN5's record has none (a picture and palette at one word), a
  * picture or palette two of BN5's chips share copied once; the art's
  * bytes, 0 without BN5's ROM */
@@ -51,9 +59,10 @@ static uint32_t art_plan(const uint32_t blank[3]) {
 	uint32_t at = CHIPS_ART;
 	static uint32_t from[XREG_IDS * 2], to[XREG_IDS * 2];
 	int nshared = 0;
-	for (int i = 0; i < xreg_count; ++i) {
-		const XChipReg *r = &xreg_rows[i];
-		if (!xreg_own(r)) continue;
+	memset(M.art, 0, sizeof M.art);
+	for (int n = 0; n < 2 * xreg_count; ++n) {
+		const XChipReg *r = &xreg_rows[n % xreg_count];
+		if (!art_row(r, n / xreg_count)) continue;
 		uint32_t *a = M.art[r->bn6];
 		memcpy(a, blank, sizeof M.art[0]);
 		if (!M.rom5) continue;
@@ -78,9 +87,9 @@ static void art_copy(void) {
 	if (!M.rom5) return;
 	uint8_t map[16];
 	xrec_icon_colours(M.rom5 + BN5_CHIP_ICON_PAL, R.data + R.layout->chip_icon_pal, map);
-	for (int i = 0; i < xreg_count; ++i) {
-		const XChipReg *r = &xreg_rows[i];
-		if (!xreg_own(r)) continue;
+	for (int n = 0; n < 2 * xreg_count; ++n) {
+		const XChipReg *r = &xreg_rows[n % xreg_count];
+		if (!art_row(r, n / xreg_count)) continue;
 		const uint8_t *rec = M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5;
 		static const uint32_t size[3] = { ICON_BYTES, PICTURE_BYTES, PALETTE_BYTES };
 		for (int k = 0; k < 3; ++k) {
@@ -211,6 +220,8 @@ static void records_make(const uint32_t blank[3]) {
 			const XChipMoved *mv = M.rom5 && id < CHIPS_BN6_RECORDS ? xchips_moved_of(id) : NULL;
 			const XChipReg *named = mv ? xreg_named(id) : NULL;
 			if (named) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
+			/* (and BN5's art, art_row's) */
+			for (int k = 0; named && M.art[id][0] && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, M.art[id][k]);
 			continue;
 		}
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }

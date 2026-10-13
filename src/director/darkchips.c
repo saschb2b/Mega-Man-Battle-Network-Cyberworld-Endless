@@ -65,10 +65,10 @@ int dark_chip_kind(int id) {
 	return -1;
 }
 
-unsigned dark_kinds_offered(bool bn5) {
+unsigned dark_kinds_offered(bool bn5, bool plus) {
 	unsigned m = 0;
 	for (int i = 0; i < DARK_BN6_PLAYED; ++i) m |= 1u << bn6_kinds[i];
-	return bn5 ? ((1u << DARK_KINDS) - 1) & ~(1u << DARK_PLUS_KIND) : m;
+	return bn5 ? ((1u << DARK_KINDS) - 1) & ~(plus ? 0u : 1u << DARK_PLUS_KIND) : m;
 }
 
 int dark_flame_pick(uint32_t seed, int depth, bool bn6, const uint8_t held[DARK_KINDS], unsigned offered) {

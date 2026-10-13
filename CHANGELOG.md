@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **DarkPlus from BN5's flame of darkness (issue #82).** Where BN5's ROM
+  is read, BN5's flame may hold DarkPlus, played by BN5's rule: it comes
+  while MegaMan worries, and used, it makes his next attack chip 50
+  stronger ("Cannon 40+50"), at the one price of every DarkChip, 20 max
+  HP for the battle. MegaMan says what it does before it is taken, and
+  the Pack shows it with BN5's own picture and icon. BN6's flame never
+  offers it: BN6's own DarkPlus does nothing. The owner's two calls on
+  DarkInvs and DarkPlus are written into docs/META.md and
+  docs/MULTIROM.md.
+
 - **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
   beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New
   3DS reads it as every other system does: BN5's areas, viruses, Navis,

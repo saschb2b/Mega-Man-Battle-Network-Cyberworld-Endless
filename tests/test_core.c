@@ -4412,9 +4412,12 @@ static void test_darkchips(void) {
 	CHECK(!bad, "dark: %d of the twelve kinds off their chips (BN5's 187-198 by the registry)", bad);
 	CHECK(dark_chip_kind(0x47) < 0 && dark_chip_kind(0) < 0 && dark_chip_kind(213) < 0 && dark_chip_kind(221) < 0 && !dark_chip_id(12) && !dark_chip_id(-1),
 		"dark: other chips and kinds are none");
-	unsigned six = dark_kinds_offered(false), five = dark_kinds_offered(true);
+	unsigned six = dark_kinds_offered(false, false), five = dark_kinds_offered(true, false);
 	CHECK(six == (1u << 1 | 1u << 6 | 1u << 7 | 1u << 2), "dark: BN6's flame offers its four (%#x)", six);
-	CHECK(five == (0xFFFu & ~(1u << DARK_PLUS_KIND)), "dark: BN5's flame offers every kind but DarkPlus (%#x)", five);
+	CHECK(dark_kinds_offered(false, true) == six, "dark: BN6's flame never offers DarkPlus, BN5's code or not (the owner's call of 13 October 2026)");
+	CHECK(five == (0xFFFu & ~(1u << DARK_PLUS_KIND)), "dark: BN5's flame offers every kind but DarkPlus where BN5's code plays none (%#x)", five);
+	unsigned twelve = dark_kinds_offered(true, true);
+	CHECK(twelve == 0xFFFu, "dark: BN5's flame offers all twelve where BN5's code plays DarkPlus (%#x)", twelve);
 	uint8_t held[DARK_KINDS] = { 0 };
 	int bn6_seen = 0, bn5_seen = 0;
 	bad = 0;
@@ -4443,9 +4446,19 @@ static void test_darkchips(void) {
 	held[2] = 1;
 	CHECK(dark_flame_pick(7, 5, true, held, six) < 0, "dark: with the four held, no BN6 flame, BN5's kinds lacked or not");
 	CHECK(dark_flame_pick(7, 5, false, held, five) >= 0 && !held[dark_flame_pick(7, 5, false, held, five)], "dark: ... while BN5's offers a kind the run lacks");
-	/* (all eleven held: BN5's flame none, DarkPlus never offered) */
+	/* (all eleven held: BN5's flame none where DarkPlus is not offered,
+	 * DarkPlus where it is; BN5's pick as it was, DarkPlus in its place) */
 	for (int k = 0; k < DARK_KINDS; ++k) held[k] = k != DARK_PLUS_KIND;
 	CHECK(dark_flame_pick(7, 5, false, held, five) < 0, "dark: every kind but DarkPlus held, no BN5 flame (%d)", dark_flame_pick(7, 5, false, held, five));
+	CHECK(dark_flame_pick(7, 5, false, held, twelve) == DARK_PLUS_KIND, "dark: ... and DarkPlus where BN5's code plays it (%d)", dark_flame_pick(7, 5, false, held, twelve));
+	memset(held, 0, sizeof held);
+	bad = 0;
+	for (uint32_t seed = 1; seed < 400; ++seed) {
+		uint32_t h = seed ^ 5u * 2654435761u;
+		bad += dark_flame_pick(seed, 5, false, held, twelve) != (int)((h >> 8) % DARK_KINDS);
+	}
+	CHECK(!bad, "dark: BN5's flame with DarkPlus offered picks as it was, DarkPlus where it fell (%d seeds off)", bad);
+	for (int k = 0; k < DARK_KINDS; ++k) held[k] = k != DARK_PLUS_KIND;
 	/* (the layer's flame kept: a CONTINUE on it after it was taken finds the
 	 * same, not the next kind lacked) */
 	dark_new_run(99);

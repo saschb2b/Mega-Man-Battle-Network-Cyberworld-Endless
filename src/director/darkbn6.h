@@ -6,6 +6,7 @@
 #ifndef CW_DARKBN6_H
 #define CW_DARKBN6_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "hook.h"
@@ -36,6 +37,11 @@ void darkbn6_event(const HookEvent *e);
  * DarkChipID (0 DrkSword .. 4 DarkPlus); each forgotten as it is taken. */
 unsigned darkbn6_ran_take(void);
 unsigned darkbn6_base_take(void);
+/* DarkChip `id` (286-290) one whose record BN5's code plays where BN5's
+ * ROM is read, by BN5's rule (src/core/chips.c, xrec_same_moved: DarkPlus,
+ * the owner's call of 13 October 2026; never where BN5's ROM is not read):
+ * the pack lists it with BN5's art, and none of BN6's rule touches it. */
+bool darkbn6_bn5_code(int id);
 /* The base chip BN6 plays DarkChip `id` (286-290) as without a BugFrag,
  * read from its own routines; 0 where they are not as expected. */
 int darkbn6_base(int id);

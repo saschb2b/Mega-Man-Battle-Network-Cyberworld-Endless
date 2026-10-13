@@ -28,10 +28,18 @@ static bool dark_price_told;    /* MegaMan has said all of a DarkChip's price (a
  * in them (soulmood.h, with the Souls where BN5's Navis are) */
 static bool dark_bn5_plays(void) { return soulunite_ready(); }
 
-/* Kind `k` plays in BN6's battles: BN6's four by BN6's rule, BN5's own
- * seven by BN5's where its mood is in; DarkPlus not (darkchips.h) */
+/* Kind `k` played by BN6's rule (a BugFrag a use, its base chip without
+ * one): BN6's four, but one whose record BN5's code plays where BN5's ROM
+ * is read (darkbn6_bn5_code) */
+static bool dark_bn6_rule(int k) { return dark_bn6_id(k) && !darkbn6_bn5_code(dark_bn6_id(k)); }
+
+/* Kind `k` plays in BN6's battles: by BN6's rule, or by BN5's where its
+ * mood is in (BN5's own seven, and BN6's record of a name BN5's code
+ * plays: DarkPlus only so, darkchips.h) */
 static bool dark_kind_plays(int k) {
-	return dark_bn6_id(k) || (k != DARK_PLUS_KIND && dark_chip_id(k) && dark_bn5_plays());
+	int id = dark_chip_id(k);
+	if (dark_bn6_rule(k)) return true;
+	return id && (k != DARK_PLUS_KIND || darkbn6_bn5_code(id)) && dark_bn5_plays();
 }
 
 /* A flame holding kind `k`, one BN6's battles play by BN6's rule (docs/META.md,
@@ -66,22 +74,29 @@ static void dark6_flame_setup(int k, int flame) {
 void dark_flame_setup(void) {
 	layer_objs_dark_flame = -1;
 	layer_objs_dark6 = NULL;
+	layer_objs_dark_plus = 0;
 	D.dark_kind = -1;
 	D.dark_given = false;
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
 	bool five = D.layer_tiles >= NET_AREAS && dark_bn5_plays();
-	D.dark_kind = dark_flame_of(run.seed, run.depth, run.side_kind, !five, dark_kinds_offered(five));
+	/* (DarkPlus by BN5's flame alone, where BN5's code plays it: the
+	 * owner's call of 13 October 2026; BN6's US DarkPlus does nothing) */
+	D.dark_kind = dark_flame_of(run.seed, run.depth, run.side_kind, !five, dark_kinds_offered(five, five && dark_kind_plays(DARK_PLUS_KIND)));
 	if (D.dark_kind < 0) return;
 	int flame = five ? xnavi_object(XOBJ_DARK_FLAME) : xnavi_bn6_flame();
-	if (dark_bn6_id(D.dark_kind)) { dark6_flame_setup(D.dark_kind, flame); return; }
+	if (dark_bn6_rule(D.dark_kind)) { dark6_flame_setup(D.dark_kind, flame); return; }
 	static char chip[20];
 	ChipInfo ci;
-	chip_info(dark_chip_id(D.dark_kind), &ci);
+	int id = dark_chip_id(D.dark_kind);
+	chip_info(id, &ci);
 	if (!ci.name[0]) return;
 	layer_objs_dark_flame = flame;
 	snprintf(chip, sizeof chip, "%s", ci.name);
 	layer_objs_dark_chip = chip;
 	layer_objs_dark_first = !profile.dark_taught;
+	/* (what DarkPlus does, by its record's power: BN5's +50 to the next
+	 * attack chip) */
+	layer_objs_dark_plus = D.dark_kind == DARK_PLUS_KIND ? ci.power : 0;
 	if (emu_debug_on()) fprintf(stderr, "dark: BN5's flame of darkness with %s, list 7 %d\n", chip, layer_objs_dark_flame);
 }
 

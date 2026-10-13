@@ -109,6 +109,9 @@ extern const char *layer_objs_dark_chip;
 /* ... one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
  * words' pieces, NULL for BN5's own */
 extern const ScriptsDark6 *layer_objs_dark6;
+/* ... one played by BN5's rule that adds power to the next attack chip
+ * (DarkPlus): how much, for MegaMan's words; 0 for any other */
+extern int layer_objs_dark_plus;
 /* Set before layer_objs_install where the layer's Server holds a Navi (its
  * battle rolled with the layer): the words its signal is named by ("" for
  * viruses). */

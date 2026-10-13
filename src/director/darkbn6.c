@@ -13,6 +13,7 @@
 #include "emu.h"
 #include "events.h"
 #include "rom.h"
+#include "xchips_moved.h"
 
 #define BUS 0x08000000u
 #define CHIP_IDS 512   /* (BN6's chip ids: nine bits, the registry's XREG_IDS) */
@@ -47,12 +48,16 @@ void darkbn6_does(int id, char *out, size_t n) {
 	}
 }
 
+bool darkbn6_bn5_code(int id) {
+	return id >= DARK_BN6_FIRST && id < DARK_BN6_FIRST + DARK_BN6_COUNT && chips_from_bn5() && xchips_moved_of(id) != NULL;
+}
+
 /* The four records' power: their own (with a BugFrag), or their base
- * chip's, the ROM's either way */
+ * chip's, the ROM's either way (BN6's rule's alone) */
 static void power(bool own) {
 	for (int i = 0; i < DARK_BN6_PLAYED; ++i) {
 		int id = DARK_BN6_FIRST + i, from = own ? id : darkbn6_base(id);
-		if (!from || !record(from)) continue;
+		if (!from || !record(from) || darkbn6_bn5_code(id)) continue;
 		emu_write(record_bus(id) + BN6_CHIP_ATTACK_POWER, record(from) + BN6_CHIP_ATTACK_POWER, 2);
 	}
 	powered = own;
@@ -91,16 +96,20 @@ static uint16_t alpha_place(int id) {
 
 void darkbn6_records(void) {
 	if (!record(0)) return;
-	static uint16_t alpha[DARK_BN6_PLAYED];
-	for (int i = 0; i < DARK_BN6_PLAYED; ++i) {
+	static uint16_t alpha[DARK_BN6_COUNT];
+	for (int i = 0; i < DARK_BN6_COUNT; ++i) {
+		/* (BN6's four by BN6's rule; one whose record BN5's code plays,
+		 * DarkPlus where BN5's ROM is read, by BN5's, its art BN5's:
+		 * chips.c) */
 		int id = DARK_BN6_FIRST + i, from = darkbn6_base(id);
-		if (!from) continue;
+		bool bn5 = darkbn6_bn5_code(id);
+		if (!bn5 && (!from || i >= DARK_BN6_PLAYED)) continue;
 		const uint8_t *rec = record(id);
 		uint32_t bus = record_bus(id);
 		emu_write8(bus + BN6_CHIP_EFFECT_FLAGS, (uint8_t)(rec[BN6_CHIP_EFFECT_FLAGS] | BN6_CHIP_DARK_CLASS));
 		emu_write8(bus + BN6_CHIP_LIBRARY_FLAGS, (uint8_t)(rec[BN6_CHIP_LIBRARY_FLAGS] & ~BN6_CHIP_UNLISTED));
 		/* (the icon, picture and palette pointers: the base chip's) */
-		emu_write(bus + BN6_CHIP_ICON_PTR, record(from) + BN6_CHIP_ICON_PTR, BN6_CHIP_RECORD_SIZE - BN6_CHIP_ICON_PTR);
+		if (!bn5) emu_write(bus + BN6_CHIP_ICON_PTR, record(from) + BN6_CHIP_ICON_PTR, BN6_CHIP_RECORD_SIZE - BN6_CHIP_ICON_PTR);
 		/* (their places in the editor's sorts, 0 on all five: its swap tells
 		 * two chips apart by the ID's place and the code, so it took any two
 		 * DarkChips for one chip and let one in for another past the folder's

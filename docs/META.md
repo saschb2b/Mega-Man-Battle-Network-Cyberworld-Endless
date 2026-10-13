@@ -909,8 +909,8 @@ engine's, and all twelve kinds play there, each by its own net's rule
   Souls, S7), and one used makes him dark for the battle (BN6's dark too:
   no Cross, no Beast Out, a weak buster). DarkPlus plays by BN5's rule
   where its ROM is read (issue #82's final engine round: 50 more for the
-  next chip), but no flame offers it yet: whether one does is the
-  owner's call.
+  next attack chip), and BN5's flame offers it there (the owner's call of
+  13 October 2026, below).
 - **When he worries** (4 October 2026): BN5 worries MegaMan by hits, 10
   off his mood each, and opened every battle calm, so it took seven hits
   in one battle, whatever his HP: a playtester at 10 of 120 HP never saw
@@ -923,8 +923,10 @@ engine's, and all twelve kinds play there, each by its own net's rule
   each act, holding a DarkChip the run lacks (from the run's seed and the
   act): BN5's flame (Nebula Area's, copied from the player's BN5 ROM as
   its HeelNavi is, and turned purple: the owner's "dark purple ghost
-  flame") on the acts BN5's areas dress, offering any kind but DarkPlus;
-  BN6's own flame elsewhere, offering its four. MegaMan names the chip,
+  flame") on the acts BN5's areas dress, offering every kind, DarkPlus
+  among them where BN5's code plays it; BN6's own flame elsewhere,
+  offering its four, never DarkPlus. MegaMan names the chip, what DarkPlus
+  does ("My next attack chip hits 50 harder!", its power the record's),
   when it comes and its price before it is taken, all of it the first
   time a profile meets one (a returning playtester heard only "when I'm
   hurt badly", session 68), the words following the rule the chip plays
@@ -941,6 +943,29 @@ engine's, and all twelve kinds play there, each by its own net's rule
   the chips, not their price; a new run starts with none. A run
   continued without BN5's ROM keeps BN5's seven; they sit out of its
   battles until the ROM is back.
+- **The owner's calls of 13 October 2026** ("yes to all"; they replace
+  the "is the owner's call" lines of issue #82's last rounds):
+  1. *DarkInvs:* BN5's own DarkInvs replaces BN6's DarkInvs rule wherever
+     BN5's ROM is read: BN5's code in BN6's record 289 (as DarkPlus's
+     290), BN5's rule, the game driving MegaMan. BN6's rule (a BugFrag a
+     use, Invisibl without one, BN6's flame's words for it) stays only
+     where BN5's ROM is absent: a 3DS without it, a run with BN6 alone.
+     The price stays as decided: 20 max HP for a battle its dark power ran
+     in, once a battle; a DarkChip given up for Chaos Unison costs
+     nothing. (Its engine is docs/MULTIROM.md's, The chips' code, What
+     remains: until it is in, the registry's DarkInvs plays BN6's own.)
+  2. *DarkPlus:* offered by BN5's flame of darkness, by BN5's rule (50
+     more for the next attack chip), never by BN6's flame: BN6's US
+     DarkPlus does nothing, and offering it there would be a trap. Built:
+     BN5's flame offers it where BN5's code plays BN6's record 290
+     (`dark_kinds_offered`), its pick from the run's seed and the act as
+     before, DarkPlus where it falls; MegaMan says what it does; the Pack
+     lists it with BN5's own art (`src/core/chips.c`, `darkbn6_records`)
+     and EDIT puts it in. Seen in play (`tools/play.py`, seed 1024,
+     `--net-biome x0 --run-depth 2 --dev worried,god`): the flame's words,
+     DarkPlus taken to the Pack and swapped into the folder, dealt by
+     BN5's worried rule, the next Cannon "40+50", 100 max HP to 80 after
+     the battle, once.
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
   a battle a DarkChip was used in, the darkness fighting with his body
   a while (session 68), and MegaMan said so; BN6's engine has its own
@@ -1211,6 +1236,10 @@ own code runs them, our part is the run around it (`src/director/darkbn6.c`,
   a part to play says its BBS's post on DarkChips ("A dar...DarkChip!?
   Those are against the law!"), and the folder's NAVIGATOR line is
   MegaMan's.
+- **Where BN5's ROM is read** (the owner's call of 13 October 2026,
+  DarkChips above): DarkPlus is BN5's chip in BN6's record and BN5's
+  flame offers it; DarkInvs follows as its engine comes in. BN6's rule
+  here stays where BN5's ROM is not read.
 - **In BN5's areas** (until issue #82's last round BN5's own battles,
   where BN5's rule brought a kind of these four from the run's DarkChips,
   shelved until MegaMan worried) the four play as everywhere: from the

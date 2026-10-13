@@ -271,7 +271,14 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   give theirs: BN5's chips of every kind are in the run's pools now, so the
   key chip of his Soul's kind is no longer needed.
 - **DarkPlus** comes as BN5's chip, by BN5's code, where its ROM is read
-  (NumberMan's Chaos Unison takes it); without it, it stays out as now.
+  (NumberMan's Chaos Unison takes it), and BN5's flame offers it there
+  (the owner's call of 13 October 2026); without it, it stays out as now.
+- **DarkInvs** (the owner's call of 13 October 2026): BN5's own replaces
+  BN6's DarkInvs rule wherever BN5's ROM is read, BN5's code in BN6's
+  record 289 as DarkPlus's in 290, the game driving MegaMan; BN6's rule (a
+  BugFrag a use, Invisibl without one, BN6's flame's words) only where
+  BN5's ROM is absent. The price as decided: 20 max HP a battle its dark
+  power ran in, once; one given up for Chaos Unison nothing.
 - **A territory's Servers and the duel's race** fight its own records.
 - **Repeats** are kept apart in BN5's pools as in BN6's.
 - **The chips a run can meet are registered**, no more: BN5's standard
@@ -413,13 +420,13 @@ patterns of parity across the nets, an honest telegraph, costed power):
   its other cards.
 - **The flames**: BN5's flame (its sprite, turned purple) on the acts
   BN5's areas dress, where its DarkChips play in BN6's battles, offering
-  every kind but DarkPlus; BN6's own elsewhere, offering its four. A kind
-  is one chip whichever flame gives it, and its words follow the rule it
-  plays by: BN6's four by BN6's (a BugFrag a use), BN5's own seven by
-  BN5's (they come while MegaMan worries; used, he is dark for the
-  battle). DarkPlus plays by BN5's rule where its ROM is read (the
-  final engine round), but neither flame offers it yet (the owner's
-  call).
+  every kind (DarkPlus where BN5's code plays it: the owner's call of 13
+  October 2026); BN6's own elsewhere, offering its four, never DarkPlus
+  (BN6's US DarkPlus does nothing). A kind is one chip whichever flame
+  gives it, and its words follow the rule it plays by: BN6's four by
+  BN6's (a BugFrag a use), BN5's own seven and DarkPlus by BN5's (they
+  come while MegaMan worries; used, he is dark for the battle; DarkPlus's
+  words say what it does, 50 more for the next attack chip).
 - **One price, counted as each net counts a use**: 20 max HP a battle a
   dark power ran in, once a battle however many ran: counted where BN6
   runs a chip's after-effects (`0x0800B79A`, from every chip use,
@@ -1790,15 +1797,16 @@ of. The registry's ids, records and art stay C1's (above).
   `0x0802D028`); MegaMan drawn grey while the machine ran (untraced:
   its state 8 calls BN5's `0x0801A410` with 0x40, BN6's `0x0801DACC`);
   the proof frame for frame, a chip spec of its own and `chaos_shadow_45`
-  and `_60` against BN5 over 600 frames of its choices, walks and chips;
-  and a design call that is the owner's: BN5's code in the registry's
-  DarkInvs is BN6's record 289 taking BN5's family where BN5's ROM is
-  read (as DarkPlus's 290), which takes BN6's own rule from the chip a
-  run's BN6 flame offers (a BugFrag a use, Invisibl without one, and
-  its words) on every build that reads BN5's ROM and leaves it on those
-  that do not. Until both, the registry's DarkInvs and ShadowSoul's
-  chaos attack stay BN6's own, `chaos_shadow_45` its recorded FAIL at
-  t107.
+  and `_60` against BN5 over 600 frames of its choices, walks and chips.
+  The design call is made (the owner's of 13 October 2026): BN5's code in
+  the registry's DarkInvs is BN6's record 289 taking BN5's family where
+  BN5's ROM is read (as DarkPlus's 290, `SAME_MOVED`), which takes BN6's
+  own rule from the chip a run's BN6 flame offers (a BugFrag a use,
+  Invisibl without one, and its words) on every build that reads BN5's
+  ROM and leaves it on those that do not (`darkbn6_bn5_code`: the run's
+  side already follows a record so made, as DarkPlus's does). Until the
+  engine is in, the registry's DarkInvs and ShadowSoul's chaos attack
+  stay BN6's own, `chaos_shadow_45` its recorded FAIL at t107.
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5
@@ -2067,9 +2075,9 @@ the next.
   BN6's latch) and HolyDrem's moved.
 - **Next**: the Souls' engine is whole but for ShadowSoul's chaos
   attack (BN5's DarkInvs, with MegaMan's player code under BN5's chip
-  AI: the machine drives him, the chip, its end, its proof and the
-  owner's call on DarkInvs's rule in runs are left, The chips' code,
-  What remains); the masks the differential kept "until the Souls track's S6" are
+  AI: the machine drives him, the chip, its end and its proof are left,
+  The chips' code, What remains; the owner's call on its rule in runs is
+  made, 13 October 2026: BN5's wherever its ROM is read); the masks the differential kept "until the Souls track's S6" are
   gone. The Souls' state in RAM is the engine's
   plan's (`0x0203FF70`-`0x0203FFEF`, `BN6_SOULS`), their code and data
   in `EMU_FREE` + `0x480000` to `+0x4C0000` and their art past it at
