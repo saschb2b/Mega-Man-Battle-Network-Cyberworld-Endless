@@ -1389,7 +1389,53 @@ SCREENSHOTS = [
     # screenshots() gives it both ROMs and a Linux player's saves folder)
     ('launcher-desktop', ['--scene', 'launcher', '--size', '1280x720'], [(90, 'launcher-desktop')], {}, 2),
     ('launcher-phone', ['--scene', 'launcher', '--size', '1080x2400', '--dpi', '420'], [(90, 'launcher-phone')], {}, 3),
+    # 0.12.0's notes. (SAVES, issue #114, at the game's own 240 x 160: this
+    # device's run on seed 7's layer 2 at home; IMPORT, its file another
+    # device's, seed 3's layer 8 on a veteran profile, the two side by side;
+    # USE THE FILE'S, the result offering CONTINUE and UNDO IMPORT;
+    # screenshots() makes both devices' saves, saves_devices)
+    ('saves', ['--scene', 'saves', '--size', '240x160', '--input', '60:,6:RIGHT,20:,6:A,80:,6:A,80:'],
+     [(50, 'saves-home'), (150, 'saves-compare'), (270, 'saves-result')], {}),
+    # (BN5's ACDC Area on a New 3DS's two screens, issue #9: seed 4's first
+    # layer walked by the weak autopilot, the layer's map on the bottom one)
+    ('3ds-bn5', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet'],
+     [(760, '3ds-bn5')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
 ]
+
+
+SAVES_HOME = '/home/player'
+
+
+def saves_devices(tmp):
+    """SAVES' pictures (issue #114): two devices' saves, each with a run's
+    checkpoint the game wrote. The other device, a veteran profile on seed
+    3's layer 8, exports with EXPORT into its Downloads (no file dialog in
+    the build image: the file goes there at once); this device, seed 7's
+    layer 2, is tmp/data, with that file in its player's Downloads
+    (tmp/home, which the run sees as SAVES_HOME: the screen shows the
+    folder's whole path)."""
+    work = os.path.join(ROOT, '.build', 'saves-devices')
+    shutil.rmtree(work, ignore_errors=True)
+    paged = '100:,' + '4:A,6:,' * 40 + '100:'
+    devices = (('other', ['--scene', 'emu', '--run-depth', '8', '--seed', '3', '--dev', 'veteran,quiet']),
+               ('here', ['--scene', 'emu', '--run-depth', '2', '--seed', '7', '--dev', 'quiet']),
+               ('other', ['--scene', 'saves', '--size', '240x160', '--input', '60:,6:A,60:']))
+    for dev, args in devices:
+        os.makedirs(os.path.join(work, dev, 'home'), exist_ok=True)
+        run = ['--input', paged, '--frames', '700'] if args[1] == 'emu' else ['--frames', '140']
+        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', f'/src/.build/saves-devices/{dev}/data',
+                      *args, *run, mounts=docs_rom_mounts(), env=[('HOME', f'/src/.build/saves-devices/{dev}/home')])
+        if code:
+            return code
+    exported = os.path.join(work, 'other', 'home', 'Downloads', 'cyberworld-endless.cwsave')
+    if not os.path.exists(os.path.join(work, 'here', 'data', 'savedata', 'run.state')) or not os.path.exists(exported):
+        print('saves_devices: a checkpoint or the export is missing')
+        return 1
+    shutil.rmtree(os.path.join(tmp, 'data'), ignore_errors=True)
+    shutil.copytree(os.path.join(work, 'here', 'data'), os.path.join(tmp, 'data'))
+    os.makedirs(os.path.join(tmp, 'home', 'Downloads'))
+    shutil.copy(exported, os.path.join(tmp, 'home', 'Downloads'))
+    return 0
 
 
 def two_screens(top, bottom):
@@ -1430,9 +1476,18 @@ def screenshots(only=None):
         rom_screen = name.startswith('launcher')
         home = '/src/.build/screenshots/home'
         data = home + '/.local/share/cyberworld-endless' if rom_screen else '/src/.build/screenshots/data'
+        # (SAVES: two devices' saves, this one's player's home a neutral one)
+        saves = name == 'saves'
+        mounts = docs_rom_mounts(bn5='bn5' in name or rom_screen)
+        if saves:
+            code = saves_devices(tmp)
+            if code:
+                return code
+            home = SAVES_HOME
+            mounts = mounts + [(os.path.join(tmp, 'home'), SAVES_HOME)]
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
                       *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=docs_rom_mounts(bn5='bn5' in name or rom_screen), env=[('HOME', home)] if rom_screen else ())
+                      mounts=mounts, env=[('HOME', home)] if rom_screen or saves else ())
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1537,6 +1592,10 @@ CLIPS = [
     # Data turning where he stood, seed 7's layer 3)
     ('guardian-logout', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12', '--dev', 'god,onehit'],
      {'CYBERWORLD_AUTOPILOT': '1'}, None, 2640, 2840),
+    # (0.12.0: the soft reset, issue #113: the second screen's fight on seed
+    # 7's layer 2, its Cannon countering the Mettaur, then A+B+SELECT+START
+    # held; Cyberworld Endless's title, START, CONTINUE on Layer 2)
+    ('soft-reset', SECOND_7, {}, SECOND_HERO + '70:,6:A+B+SELECT+START,90:,6:START,100:', 2270, 2620),
 ]
 
 
@@ -1547,7 +1606,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
-               'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15)}
+               'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
+               'soft-reset': (None, 15)}
 
 
 def clips(only=None):
