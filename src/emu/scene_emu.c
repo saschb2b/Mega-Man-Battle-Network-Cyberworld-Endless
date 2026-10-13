@@ -18,6 +18,9 @@
 #include "second.h"
 #include "tour.h"
 #include "xinstall.h"
+#ifdef __3DS__
+#include "start_3ds.h"
+#endif
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -62,6 +65,13 @@ static void enter(void) {
 	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
 	xinstall_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
 		dev.xnavicontrol ? XNAVI_CONTROL : dev.nonavis ? XNAVI_NONE : XNAVI_BN5);
+#ifdef __3DS__
+	/* (what the core's copy and the installs left of the heap, BN5's or
+	 * not: 3ds/README.md, Testing on a 3DS) */
+	char heap[120];
+	start_3ds_heap(heap, sizeof heap);
+	printf("3ds: the core started, the installs done; %s\n", heap);
+#endif
 	game_hooks_install();
 	cinema_reset();
 	if (emu_resume_requested) {

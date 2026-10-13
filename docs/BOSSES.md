@@ -173,7 +173,8 @@ surface act of the run), else BN6's own pick, its area's own Navis
 favoured as ever. Not the Nest (the Cybeast's), the Secret Area or an
 Undernet detour. Nothing is saved for it: a run continued without BN5's
 ROM meets BN6's guardian there, as its layers come in BN6's own tiles,
-and a build that reads no BN5 (the 3DS) none of his. `--guardian 24`-`29`
+and a New 3DS whose heap has no room for BN5's ROM, which then leaves it
+unread (docs/EMULATION.md, The 3DS's memory), none of his. `--guardian 24`-`29`
 puts one in every act BN5 dresses and every deep act.
 
 **His band**. BN5's story holds a record for each of them at

@@ -66,10 +66,11 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	memcpy(copy, rom, len);
 	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
 #ifdef __3DS__
-	/* (on the 3DS the core copies the ROM into a buffer of its own as it
-	 * loads, mGBA's FIXED_ROM_BUFFER: it reads this copy as it is, which
-	 * lives as long as the core, as a chunk made from it would be a third
-	 * 16 MB on a 3DS's heap) */
+	/* (on the 3DS the core maps this copy as it is and patches it in place
+	 * (GBALoadROM maps a 16 MB ROM), so it lives as long as the core: a
+	 * chunk made from it would be a second 16 MB on a 3DS's heap. mGBA's
+	 * own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game never
+	 * calls, and start_3ds.c gives it back) */
 	struct VFile *vf = VFileFromMemory(copy, EMU_ROM_SIZE);
 	if (!vf) { free(copy); return false; }
 #else

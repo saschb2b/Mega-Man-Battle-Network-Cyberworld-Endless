@@ -282,7 +282,36 @@ with gaps near 16.7 ms is the GBA's pace;
 fewer shown with more played is the loop catching up (a slow machine, a
 missed refresh). On the Steam Deck OLED in Desktop Mode it showed 60 shown
 and played a second, gaps 15-18 ms, after the first layer's first seconds
-(27 shown, 52 played, while the layer is made).
+(27 shown, 52 played, while the layer is made). On the 3DS (`frame_log =
+on` in `settings.ini`) each line ends with the heap: its use and its
+high-water mark against its size (docs/EMULATION.md, The 3DS's memory).
+
+## The 3DS's heap on a computer
+
+```bash
+python3 tools/heap3ds.py                     # seeds 1-12, the three cases below
+python3 tools/heap3ds.py --seeds 1-24 --cases bn5 --no-build
+python3 tools/heap3ds.py --cases bn5 --cap 90   # a heap 6 MB short: what a refusal does where fragmentation took that much
+```
+
+`tools/heap3ds.py` plays long runs of the host build headless (the test
+autopilot with `--dev god,onehit`, 120000 frames: act after act, area after
+area) with `tools/heap3ds.c` preloaded, which counts every allocation as
+the New 3DS's heap holds it: 96 MB, the core's 16 MB ROM copy kept (a
+computer's core copies it and frees it), mGBA's 16 MB ROM buffer held from
+the start where the case says so, and an allocation past the heap refused
+as the 3DS's malloc refuses it, its place named; a crash is named too. The
+cases: `today`, the 3DS before issue #82's 3DS round (BN6's ROM alone,
+the buffer held, every area's learned maps kept: the host build as it is);
+`bn6` and `bn5`, the 3DS now (the buffer given back, the layer's own
+area's learned maps kept alone: the host built with `CW_HEAP_3DS` into
+`build/heap3ds`), BN6's ROM alone and with BN5's read. `--as-3ds PATH`
+runs those two on another build of the host (`make TARGET=host
+OUT=build/k2 "EXTRA_CFLAGS=-DCW_HEAP_3DS -DAREAS_KEPT=2"`: two areas
+kept). Per run: the peak, the allocations refused,
+how deep the run went, how often an area was learned again. It models the
+bytes, not the 3DS's fragmentation: the device's own numbers are
+`log.txt`'s heap lines.
 
 ## Town and world: the real world
 
