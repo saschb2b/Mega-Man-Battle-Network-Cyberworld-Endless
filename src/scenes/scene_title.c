@@ -800,7 +800,7 @@ static void hint_draw(int x0, int y0) {
 	if (!S.menu || S.confirm) return;
 	char hint[64];
 	snprintf(hint, sizeof hint, "%sL: %s", analytics_ask_here() ? "SELECT: Statistics   " : "", saves_word_hint());
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
 #else
 	if (!S.menu || S.confirm) return;
 	/* (controls_word's own buffer, one word at a time) */
@@ -811,9 +811,10 @@ static void hint_draw(int x0, int y0) {
 		size_t m = strlen(hint);
 		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", controls_word(BTN_R));
 	}
-	/* (under NEW GAME; with CONTINUE under it, in the rows between the
-	 * logo and the menu, where CONTINUE's row had hidden it) */
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + (S.has_save ? 107 : 138), hint, grey, 1);
+	/* (in the rows between the logo and the menu: under NEW GAME it ran
+	 * into the build's line and the best layer's once SAVES joined it,
+	 * and CONTINUE's row hides it there) */
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
 #endif
 }
 
