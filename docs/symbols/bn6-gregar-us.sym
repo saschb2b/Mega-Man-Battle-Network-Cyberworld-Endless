@@ -694,8 +694,8 @@
 08031CC4 RomLayout.sprite_lists
 08031CC8 virus_families_moved.sprite_lists_words
 08031CCC virus_families_moved.sprite_lists_words_2
-08031CD4 virus_families_moved.lists_1_2_4_5_32
-08031CD8 virus_families_moved.lists_1_2_4_5_32_2
+08031CD4 virus_families_moved.sprite_lists_words_3
+08031CD8 virus_families_moved.0x08031cd4
 08031D24 virus_families_moved_3
 08031D9C virus_families_moved_4
 08031E00 sprite_list_3
@@ -786,6 +786,7 @@
 0809F164 BN6_TALK_PROBES
 0809F168 BN6_TALK_PROBE_Y
 0809F170 BN6_TALK_PROBE_RADIUS
+0809FB58 list_5_0x2c_0x38_from
 080A0614 purple_mystery_data.literal
 080A061C palette_by_type
 080A484C BN6_MYSTERY_DATA
