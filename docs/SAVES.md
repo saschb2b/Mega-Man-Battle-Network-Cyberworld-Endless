@@ -113,7 +113,7 @@ stays the same. It is text with a fixed schema and order: `format`,
 `parent_revision`, `payload_hash`, `files`, then the summary: `runs`,
 `best`, `run_depth`, `run_area`, `run_act` and `needs_bn5`. `system` and
 `device` both hold the platform's name (Linux, Windows, macOS, Android,
-iPhone, PortMaster, New 3DS, browser), never a device or host name; the
+iOS, PortMaster, New 3DS, browser), never a device or host name; the
 comparison shows it with the date.
 
 `backup_manifest.c` writes a new stamp and revision only when the
