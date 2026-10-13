@@ -1807,6 +1807,54 @@ of. The registry's ids, records and art stay C1's (above).
   side already follows a record so made, as DarkPlus's does). Until the
   engine is in, the registry's DarkInvs and ShadowSoul's chaos attack
   stay BN6's own, `chaos_shadow_45` its recorded FAIL at t107.
+- **DarkInvs's machine, in place (13 October 2026)**: the probe's three
+  lines are `tools/bn5_navi_twins.py`'s (the player's chip AI
+  `0x0802B4B0` and its own side's heads copied with the Dark Soul's, its
+  buster `0x0802B62C` and dead state `0x0802B6D2` in `CURACTIONS`): the
+  Dark Soul's code grows to 14 blocks, 8856 bytes, every Dark Soul and
+  chaos spec as before. `src/emu/darkinvs.c` hooks BN6's idle state past
+  the chip request's test (`0x080F1870`, `BN6_PLAYER_IDLE_FREE`) and, where
+  MegaMan's AI data's +0x48 bit 0x200 stands, runs the machine through a
+  stub (`FREE_CHIP_AI`) that leaves the state as BN5's does (`movs r0,#1;
+  pop {r4,r6,r7,pc}`, BN5's `0x080F04DC`-`0x080F04E2`); `darkinvs_enter`
+  makes BN5's `0x0802C03E` and `0x0802C114` on his AI data moved into BN5's
+  0x140 bytes (`RAM_PLAYER_AI`, his own pool's place kept beside it) and
+  fills his own side's list from his folder (`soulchaos_lists_fill`, the
+  failed Chaos Unison's). Reached by `--dev chipai` alone (two seconds
+  into each battle, 600 frames, then out, his own AI data given back),
+  never in a run: in an ACDC Area battle, no button after OK, he walks to
+  the Mettaur's row, fires Cannon and deletes it, and the battle ends and
+  the map comes back as ever. **What remains of DarkInvs**, in order:
+  - *The unit* (`CANDIDATES`' support 0x3B: 3 blocks, 860 bytes): its
+    calls `0x0802C03E` and `0x0802C114` aimed at a routine of ours that
+    moves his AI data first and does what `darkinvs_enter` does (BN5's
+    copies in the Dark Soul's code write +0xF0 of BN6's 0x100); BN5's
+    `0x08017060` (his statuses cleared: read, no BN6 twin found yet) and
+    `0x08011A8C` (BN5's calm, which `soulmood.c` mirrors for the
+    unisons) each a decision; the sprite loaded at `0x080BA6F4` (the
+    effect `0x080BA7DA` spawns at his panel); then `SAME_MOVED` gives
+    BN6's record 289 BN5's family where BN5's ROM is read and the run's
+    side follows (`darkbn6_bn5_code`, as DarkPlus's), the flames' words
+    BN5's rule's.
+  - *Its end*: BN5's timer (AIData +0x36, counted down in `0x0800DBF0`,
+    BN5's player's per frame) asks 0x80000 at 0, whose family
+    (`0x080EF270`) clears the flag and the invisibility (collision
+    0x08000000, `0x08016C4C`); BN6's twins count nothing there; and the
+    five places BN5's engine leaves the chip AI (`0x0802C12A` from
+    `0x0801214A`, `0x08012276`, `0x0802CCA4`, `0x0802CE3A`, `0x0802D028`).
+    Until then `--dev chipai` leaves by the battle's timer.
+  - *His look*: grey while the machine runs (seen again). Not the state 8's
+    `0x0801A410`(0x40): that is the battle's event dispatch, bit 6 the
+    same steps in both (`tools/bn5_twins.py`'s audit). A lead: BN5's dark
+    palettes (2 and 3) are numbers of BN5's MegaMan sprite that
+    `soulmood.c` hands BN6's, whose palettes there are other colours: in
+    play a BN5 DarkChip used (DarkPlus, this round's play check) drew him
+    tan for the rest of the battle where BN5 draws him dark. To compare
+    each game's colours at those numbers, the differential's sprite bytes'
+    way.
+  - *The proof*: `chip_darkinvs` against BN5 over its 600 frames,
+    `chaos_shadow_45` and `_60` passing (their recorded verdict
+    updated only then), a mutation of the new code failing its spec.
 - **A moved virus's deletion**: the specs stop before a foe is deleted
   (Boxer1, InfVulc1, SuprSpr1, DarkMetr): a moved family's deleted virus
   spawns the fourth kind's 0x11 with a RAM pointer at +0x34 (BN5

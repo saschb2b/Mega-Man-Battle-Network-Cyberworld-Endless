@@ -157,6 +157,7 @@
 0800DEAA BN5_HIDE_STEP
 0800DEE0 bn5_sea_submerge
 0800DF52 BN5_SEA_SUBMERGE
+0800E096 set_by
 0800E0B6 soul_chips.0
 0800E190 plus_chip_used_alone
 0800E1C8 bn5_darkplus_green
@@ -421,10 +422,16 @@
 08029C5A colonel_pattern_test
 08029CD4 colonelsoul_button_chip.slot_drawn_2
 08029D34 mode_4_last_draw_call
+0802B4B0 BN5_CHIP_AI_PLAYER
 0802B804 BN5_CHIP_AI_RUN
 0802BA18 BN5_CHIP_AI_DARK
 0802BD96 chip_ai_routines
+0802BE52 bn5_chip_ai.player_chip_ai_own_side_heads
+0802BEEA bn5_chip_ai.player_chip_ai_own_side_heads_2
+0802BEFE bn5_chip_ai.player_chip_ai_own_side_heads_3
+0802BF1A bn5_chip_ai.player_chip_ai_own_side_heads_4
 0802C098 chip_ai_routines_approach_attack
+0802C0DA bn5_chip_ai.player_chip_ai_own_side_heads_5
 0802C10A BN5_CHIP_AI_TEST
 0802C114 BN5_CHIP_AI_ENTER
 0802C938 BN5_DARK_AFTER
@@ -538,6 +545,8 @@
 080EE7E5 battle_0x32_bit_4
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
+080F04CC idle_states
+080F0650 bn6_player_idle_state_past_chip
 080F2334 BN5_NAVI_FRAME
 080F2374 BN5_NAVI_TABLES
 080F2488 navis_stats

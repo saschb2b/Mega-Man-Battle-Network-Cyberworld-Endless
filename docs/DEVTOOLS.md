@@ -423,7 +423,13 @@ docs/META.md, DarkChips) and `worried` (MegaMan held worried by BN5's
 mood in BN6's battles once each opens, so BN5's DarkChips come into the
 hand's end, for a capture of one offered: with `hp=999/200` the first
 screen opens worried too, and one picked frees the hand's end for the
-next; `0:chip 214 R 1` puts DarkCirc R in the folder). The guest
+next; `0:chip 214 R 1` puts DarkCirc R in the folder), and `chipai`
+(MegaMan put under BN5's chip AI for the player two seconds into each
+battle, for 600 frames, as BN5's DarkInvs puts him: its machine,
+`src/emu/darkinvs.c`, with no button pressed after the Custom screen's
+OK he picks from his folder's chips, walks to where one reaches and uses
+it; BN5's DarkInvs itself and its end are not in yet, docs/MULTIROM.md,
+The chips' code). The guest
 battles' `slowboot=N` and their `gem` went with them. `folder=ID` makes the
 run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
 for a capture of one chip in BN6's battles), `folder=ID/N` its first N

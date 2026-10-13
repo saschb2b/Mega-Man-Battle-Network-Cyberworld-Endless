@@ -30,6 +30,11 @@ enum { SOULCHAOS_BREAK_PHASE = 8 };   /* the phase's cycle a frame longer than B
  * family, its hooks. Once a core; false, nothing hooked, where a byte it
  * stands on is not as expected (the log says which). */
 bool soulchaos_install(int breaks);
+/* The chip AI's lists of `side` where the battle gave it none
+ * (BN6_DARK_LISTS): its folder's chips BN5's have, the most of a chip
+ * first; what a failed Chaos Unison's Dark Soul and BN5's DarkInvs play
+ * (darkinvs.h). From a hook. */
+void soulchaos_lists_fill(int side);
 /* The Thumb address of BN5's chaos power attack `bn5_id` (0x31-0x3A, a
  * Soul's loadout's sixth), 0 for another or where it is not installed */
 uint32_t soulchaos_power(int bn5_id);

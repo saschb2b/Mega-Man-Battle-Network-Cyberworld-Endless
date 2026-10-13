@@ -114,6 +114,9 @@
 #define BN6_NAVI_SIDE_NAVI    0x29        /* a battle NaviStats' +0x29: the Navi it is, 0 MegaMan (the turns count down for him alone, 0x08015A16) */
 #define BN6_AI_ANGER          0x34        /* u16 a player's AI data +0x34: his anger's frames (both games' emotion getters: 3, which UNITE stands in) */
 #define BN6_AI_FLAGS          0x44        /* u32 a player's AI data +0x44: his requests (0x40 to leave his form: 0x08015994; 0x4000 to enter one) */
+#define BN6_AI_MODES          0x48        /* u32 a player's AI data +0x48: flags (0x08010312 sets them; BN5's 0x200, BN5_AI_UNDER, no code of BN6's) */
+#define BN6_PLAYER_IDLE_FREE  0x080F1870u /* the player's idle state past the chip request's test (0x080F186E: r0 0xFFFF, none asked), its routine's
+                                             frame push {r4,r6,r7,lr}: where BN5's twin (0x080F04CC) runs its chip AI while BN5_AI_UNDER stands */
 #define BN6_AI_POWER_CHAOS    0x11        /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */
 #define BN6_AI_CHARGE         0x1D        /* u8 his charge: 0 none, 1 charging, 2 full (both games' 0x08012F30 / 0x080105B0) */
 #define BN6_AI_CHARGE_BUTTON  0x1E        /* u8 ... its button: 1 A, 2 B (0x08012EEC, 0x08012F02) */

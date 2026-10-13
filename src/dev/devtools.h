@@ -39,6 +39,7 @@ typedef struct {
 	bool xnavicontrol; /* the control Navi installed as the core starts: BN6's own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9
 	                      (xnavi_install.h; its differential, tools/xcontrol.py --navi) */
 	bool nonavis;   /* no other game's Navi installed, BN5's ROM read or not (xnavi_install.h) */
+	bool chipai;    /* MegaMan under BN5's chip AI two seconds into each battle, for 600 frames (darkinvs.h: DarkInvs's machine) */
 	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
 	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
 	int unitebreak; /* unitebreak=N: UNITE's rule broken, the differential's own test (soulunite.h, SOULUNITE_BREAK_*) */

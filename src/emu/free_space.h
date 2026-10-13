@@ -72,12 +72,16 @@
 #define FREE_SOULS_ART_END  (EMU_FREE + 0x710000u)
 #define FREE_CHIP_PAS       (EMU_FREE + 0x710000u)   /* BN6's Program Advances' list grown with BN5's (xchips_code.c): their recipes, then the list, to: */
 #define FREE_CHIP_PAS_END   (EMU_FREE + 0x710400u)
-#define FREE_TAIL           (EMU_FREE + 0x710400u)   /* free to FREE_END */
+#define FREE_CHIP_AI        (EMU_FREE + 0x710400u)   /* the player's chip AI's stub (darkinvs.c), to: */
+#define FREE_CHIP_AI_END    (EMU_FREE + 0x710440u)
+#define FREE_TAIL           (EMU_FREE + 0x710440u)   /* free to FREE_END */
 
 /* ---- BN6's RAM it leaves alone (docs/EMULATION.md, BN6's RAM) ---- */
 /* Persistent: only the power-on clear writes 0x02010CDC-0x020117FF */
 #define RAM_PACK_EXT        0x02010CE0u   /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT; xchips_install.c), to: */
-#define RAM_PACK_EXT_END    0x020115E0u   /* ... then spare, persistent, to: */
+#define RAM_PACK_EXT_END    0x020115E0u   /* ... then: */
+#define RAM_PLAYER_AI       0x020115E0u   /* MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place (darkinvs.c), to: */
+#define RAM_PLAYER_AI_END   0x02011730u   /* ... then spare, persistent, to: */
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
 /* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
  * else of BN6's reads or writes 0x0203FB50 on */

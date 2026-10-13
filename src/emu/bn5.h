@@ -320,6 +320,12 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_CHIP_AI_TEST  0x0802C10Au /* the DS version's chip AI: whether it is under way (AIData +0xF0; set only by BN5_CHIP_AI_ENTER) */
 #define BN5_CHIP_AI_ENTER 0x0802C114u /* ... entered, from a Navi's own code where its version (AIData +0x16) is 4, the DS */
 #define BN5_CHIP_AI_RUN   0x0802B804u /* ... run each frame while under way */
+#define BN5_CHIP_AI_PLAYER 0x0802B4B0u /* ... the player's own (its own side's lists), run from BN5's idle states (0x080F04DC, 0x080F0660)
+                                       * while his AI data's BN5_AI_UNDER flag stands (BN5's DarkInvs sets it: BN5_CHIP_AI_ENTER from
+                                       * 0x080E2402), else its state cleared (0x0802C03E, 0x40 bytes from +0xF0) */
+#define BN5_AI_UNDER      0x200       /* ... the flag: AIData +0x48's bit (BN5's 0x0800E096 sets it, as BN6's 0x08010312 its bits there) */
+#define BN5_AI_UNDER_TIME 0x36        /* ... its time, AIData +0x36 (u16: 600 from DarkInvs, counted down by 0x0800DBF0) */
+#define BN5_CHIP_AI_STATE 0xF0        /* ... its state from AIData +0xF0 (+0: 1 under way), 0x40 bytes the entry clears */
 #define BN5_CHIP_AI_DARK  0x0802BA18u /* ... the Dark Soul's own (its state AIData +0xF0: +1 its step, +2 and +3 their phases, +4 its
                                        * misses, +5 and +0xC its target's, +0x24 the chip under way) */
 #define BN5_DARK_REGION   0x08013C64u /* its actor's init: the Dark Soul's id's test (ldr r0,=BN5_DARK_SOUL_ID), its region 0x13 */

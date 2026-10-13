@@ -213,7 +213,7 @@ static HookAct glow_anim(HookRegs *r, void *user) {
 
 /* the chip lists of `side` where the battle gave it none: the folder's chips BN5's have (the registry's rows: the chip AI
  * reads BN5's bytes of their records, xnavi_dark.c), the most of a chip first, the folder's order between equals */
-static void lists_fill(int side) {
+void soulchaos_lists_fill(int side) {
 	uint32_t list = BN6_DARK_LISTS + (uint32_t)side * BN5_DARK_LIST_SIZE;
 	if (hook_read32(list + BN5_DARK_LIST_COUNT)) return;
 	uint32_t folder = hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS) + FOLDER_BYTES * hook_read8(BN6_NAVI_FOLDER);
@@ -248,7 +248,7 @@ static HookAct out(HookRegs *r, void *user) {
 		if (obj && dark_id >= 0 && hook_read16(obj + BN6_T1_NAME_ID) == (uint16_t)dark_id)
 			hook_write16(hook_read32(obj + BN6_T1_AI_DATA) + BN5_DARK_SOUL_TIMER, 0);
 	}
-	lists_fill(side);
+	soulchaos_lists_fill(side);
 	return HOOK_CONTINUE;
 }
 

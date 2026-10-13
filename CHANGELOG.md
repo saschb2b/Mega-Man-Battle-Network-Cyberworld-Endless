@@ -10,7 +10,10 @@
   the Pack shows it with BN5's own picture and icon. BN6's flame never
   offers it: BN6's own DarkPlus does nothing. The owner's two calls on
   DarkInvs and DarkPlus are written into docs/META.md and
-  docs/MULTIROM.md.
+  docs/MULTIROM.md. BN5's DarkInvs, the game driving MegaMan, comes
+  next: its machine, BN5's chip AI for the player, is moved with the
+  Dark Soul's and drives him in BN6's battles behind a developer switch
+  (`--dev chipai`); the chip itself, its end and its proof are left.
 
 - **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
   beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New

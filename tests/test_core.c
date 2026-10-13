@@ -3482,7 +3482,7 @@ static void test_free_space(void) {
 		{ "the Souls' room", FREE_SOULS, FREE_PANELS }, { "the lava and sea", FREE_PANELS, FREE_PANELS_END },
 		{ "the Navis' room", FREE_NAVIS, FREE_CHIP_CODE }, { "the chips' code's room", FREE_CHIP_CODE, FREE_SOULS_ART },
 		{ "the Souls' art past their room", FREE_SOULS_ART, FREE_SOULS_ART_END },
-		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END },
+		{ "the Program Advances' list", FREE_CHIP_PAS, FREE_CHIP_PAS_END }, { "the player's chip AI's stub", FREE_CHIP_AI, FREE_CHIP_AI_END },
 	};
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -3586,7 +3586,8 @@ static void test_free_space(void) {
 		"the Souls' room: a grown table's entries past its room");
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
-		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "spare, persistent", RAM_PACK_EXT_END, RAM_PERSISTENT_END },
+		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
+		{ "spare, persistent", RAM_PLAYER_AI_END, RAM_PERSISTENT_END },
 		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },

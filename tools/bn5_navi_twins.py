@@ -118,6 +118,9 @@ CURACTIONS = {
     # ... its state 0xC (AIData +0xF2), which nothing of the Dark Soul's code sets (no 0xC stored there; BN5's DS twin's
     # 0x0802B95A alone): dead, its CurAction from BN6's setups by AIData +7 as the pair has it
     0x0802BC42: "dead: the chip AI's state 0xC, which nothing of the Dark Soul's sets",
+    # the player's chip AI: the Navis' buster (as 0x0802BB96), and its state 0xC (AIData +0xF2), which nothing of its own sets
+    0x0802B62C: "the player's chip AI: the Navis' buster (XN_STUB_BUSTER)",
+    0x0802B6D2: "dead: the player's chip AI's state 0xC, which nothing of its own sets",
 }
 
 # BN5's sounds a Navi's code plays that BN6 has as another song, played as BN6's of the same number all the same: {sound:
@@ -150,7 +153,10 @@ COPIED = {
     # BN5's chip AI, the Dark Soul's (BN5_CHIP_AI_DARK, 0x0802BA18, from its state 6; AIData +0xF0 its state): it plays the
     # chips of its foe's side's list (RAM_TWINS below), each as its own attack, after moving where the chip reaches its
     # target; the DS versions' twin of it (BN5_CHIP_AI_RUN) stays stubbed. Its routines, the machine's
-    0x0802BA18: "the Dark Soul's chip AI", 0x0802BD96: "the chip AI: the next object of its foe's side",
+    0x0802BA18: "the Dark Soul's chip AI", 0x0802B4B0: "the player's chip AI (its own side's lists)",
+    0x0802BE52: "the chip AI: a chip of flag 1 first, its own side's", 0x0802BE58: "the chip AI: a chip of flag 1 first, its foe's", 0x0802BEEA: "the chip AI: the first of its own list",
+    0x0802BEFE: "the chip AI: a sequence's entry, its own side's", 0x0802BF1A: "the chip AI: its own list turned",
+    0x0802C0DA: "the chip AI: its own list shuffled", 0x0802BD96: "the chip AI: the next object of its foe's side",
     0x0802BDB8: "the chip AI: its next target", 0x0802BDE4: "the chip AI: an object of its foe's side",
     0x0802BE0A: "the chip AI: its target index on", 0x0802BE9E: "the chip AI: a chip of flag 2 first",
     0x0802BEEE: "the chip AI: the first of its foe's list", 0x0802BF02: "the chip AI: a sequence's entry",
@@ -200,7 +206,11 @@ IMAGE_KINDS = {
 EXTRA_ROOTS = {
     # the chip AI's search for a chip of flag 2, its foe's variant: its head sits between the own side's head (0x0802BE9E,
     # walked) and their common body (0x0802BEAC), which the walked head branches to: walked, its blocks one
-    0x16: {0x0802BEA4: "between a walked head and its body"},
+    0x16: {0x0802BEA4: "between a walked head and its body",
+           # BN5's chip AI for the player (BN5's MegaMan's idle states run it while his AI data's flag 0x200 stands: 0x080F04DC,
+           # 0x080F0660; BN5's DarkInvs sets it, 0x0802C114): copied with the Dark Soul's, whose routines it shares, its own
+           # side's heads before their common bodies
+           0x0802B4B0: "the player's chip AI", 0x0802BE58: "between a walked head and its body"},
 }
 
 # BN5's attack families a Navi's code runs that BN6 has none of (its CurAction from 0x10, run from the families' table):

@@ -357,6 +357,7 @@
 0801012C bn5_sea_submerge
 08010230 hp_bug_drain
 080102A4 hp_bug_drain_table
+08010312 set_by
 08010332 actor_shadow_type
 08010340 BN6_SHADOW_TYPE_SIDE
 0801034E BN6_SHADOW_TYPE_DONE
@@ -919,6 +920,7 @@
 080EEE32 BN6_COUNTER_TEST_37
 080EFCC8 bn5_chips_code.effect_tables_2
 080F180E BN6_CHAOS_CONSUME
+080F1870 BN6_PLAYER_IDLE_FREE
 080F2334 bn5_navi_frame
 080F2374 bn5_navi_tables
 080F2749 bn5_navi_nullsub
