@@ -21,6 +21,22 @@
   folder after each save on native builds; the browser uses manual
   downloads and uploads. A copy found at startup goes through the same
   comparison before anything can overwrite it.
+- **No freeze at a save on the New 3DS.** A checkpoint wrote some ten
+  files on the frame that saved, each beside its place and then renamed
+  over it, and on the 3DS's SD card each step is a call to its file
+  system: the game stood still for 0.8 to 1.1 seconds at every layer's
+  checkpoint. The frame now only copies the files' bytes, and a thread of
+  their own writes them in order, the same way; a CONTINUE, a run's end,
+  a quit and the saves' copies wait for it. The run's state written from
+  memory is the state written to its file, byte for byte. The browser
+  writes each file at once, as before.
+- **The act's card and the notes drawn at full speed on the New 3DS.**
+  Their text went glyph by glyph through SDL's software renderer, a 16 by
+  16 cell blended for each letter and a surface made and freed for each
+  letter of the big name: the card took the game from 60 to 33-43 frames
+  a second as it showed. A line drawn on two frames running is drawn once
+  and blended whole: the same pixels (1940 frames compared, byte for
+  byte), the card's drawing about twice as fast.
 
 - **The site in Japanese:** the home page, the downloads, the FAQ and the
   browser player under `ja/`, written for Japan's players, who know the

@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "compat.h"
 #include <string.h>
@@ -15,6 +16,7 @@
 #include "save_blob.h"
 #include "save_format.h"
 #include "save_layout.h"
+#include "save_queue.h"
 
 /* (Run is saved as it lies in memory: a change to it does not compile
  * until someone decides about the saves before it, issue #19) */
@@ -34,26 +36,32 @@ static uint32_t checksum(const void *p, size_t n) {
 	return h;
 }
 
+/* (written beside and renamed over: a power cut never leaves a half
+ * written save; by the save queue's thread where there is one, so the
+ * frame only copies the bytes: true then means queued) */
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
-	char dir[600], file[600], tmp[620];
+	char dir[600], file[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	cw_mkdir(dir);
 	save_path(file, sizeof file, name);
-	snprintf(tmp, sizeof tmp, "%s.tmp", file);
-	FILE *f = fopen(tmp, "wb");
-	if (!f) return false;
 	uint32_t hdr[3] = { magic, (uint32_t)n, checksum(data, n) };
-	bool ok = fwrite(hdr, sizeof hdr, 1, f) == 1 && fwrite(data, n, 1, f) == 1;
-	ok = fflush(f) == 0 && ok;
-	fclose(f);
-	/* Atomic replace so a power cut never leaves a half-written save. */
-	ok = ok && cw_rename(tmp, file);
+	uint8_t *bytes = malloc(sizeof hdr + n);
+	if (!bytes) return false;
+	memcpy(bytes, hdr, sizeof hdr);
+	memcpy(bytes + sizeof hdr, data, n);
+	bool ok = save_queue_file(file, bytes, sizeof hdr + n);
+	if (!ok) {
+		save_queue_wait();   /* (after those queued before it) */
+		ok = save_file_write(file, bytes, sizeof hdr + n);
+		free(bytes);
+	}
 	platform_persist();
 	return ok;
 }
 
 static bool read_blob(const char *name, uint32_t magic, void *data, size_t n, bool upto) {
 	char file[600];
+	save_queue_wait();
 	save_path(file, sizeof file, name);
 	FILE *f = fopen(file, "rb");
 	if (!f) return false;
@@ -134,6 +142,7 @@ bool load_run(void) {
 
 void save_delete(void) {
 	char file[600];
+	save_queue_wait();   /* (a write still queued would bring the run back) */
 	save_path(file, sizeof file, "run.sav");
 	remove(file);
 	save_path(file, sizeof file, "battle.sav");

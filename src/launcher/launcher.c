@@ -27,6 +27,7 @@
 #include "rom.h"
 #include "save.h"
 #include "saves.h"
+#include "save_queue.h"
 
 #define LOOK_FRAMES 180   /* a ROM put in by hand looked for every three seconds */
 

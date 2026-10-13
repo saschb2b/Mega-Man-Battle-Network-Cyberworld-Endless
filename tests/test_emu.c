@@ -36,6 +36,7 @@
 #include "emu.h"
 #include "hook.h"
 #include "platform.h"
+#include "save_queue.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
 Platform P;
@@ -165,6 +166,72 @@ static int ring_drain(int *swing) {
 	return total;
 }
 
+/* ---- the saves' files written off the frame (save_queue.c) ---- */
+
+/* a file's bytes, or NULL (*n its length) */
+static uint8_t *file_bytes(const char *path, size_t *n) {
+	FILE *f = fopen(path, "rb");
+	*n = 0;
+	if (!f) return NULL;
+	fseek(f, 0, SEEK_END);
+	long len = ftell(f);
+	fseek(f, 0, SEEK_SET);
+	uint8_t *b = len > 0 ? malloc((size_t)len) : NULL;
+	if (b && fread(b, 1, (size_t)len, f) == (size_t)len) *n = (size_t)len;
+	fclose(f);
+	if (!*n) { free(b); return NULL; }
+	return b;
+}
+
+/* a block of n bytes, each the mark */
+static void *filled(uint8_t mark, size_t n) {
+	uint8_t *b = malloc(n);
+	if (b) memset(b, mark, n);
+	return b;
+}
+
+static bool file_is(const char *path, uint8_t mark, size_t n) {
+	size_t got = 0;
+	uint8_t *b = file_bytes(path, &got);
+	bool ok = b && got == n;
+	for (size_t i = 0; ok && i < n; ++i) ok = b[i] == mark;
+	free(b);
+	return ok;
+}
+
+static void save_queue_checks(void) {
+	char dir[] = "/tmp/cw-saves-XXXXXX", a[64], b[64], tmp[80];
+	if (!mkdtemp(dir)) { ++failures; printf("FAIL: no folder for the save queue's files\n"); return; }
+	snprintf(a, sizeof a, "%s/a.sav", dir);
+	snprintf(b, sizeof b, "%s/b.sav", dir);
+	/* in the order they came: the last of each file stands, whole */
+	bool queued = true;
+	for (int k = 1; k <= 40; ++k)
+		queued = save_queue_file(k % 2 ? a : b, filled((uint8_t)k, 4096 + (size_t)k), 4096 + (size_t)k) && queued;
+	CHECK(queued, "the save queue took the files");
+	save_queue_wait();
+	CHECK(file_is(a, 39, 4096 + 39) && file_is(b, 40, 4096 + 40), "each file the last queued for it, whole");
+	snprintf(tmp, sizeof tmp, "%s.tmp", a);
+	FILE *left = fopen(tmp, "rb");
+	CHECK(!left, "no file left beside its place");
+	if (left) fclose(left);
+	/* the game's end writes what is queued before the thread goes */
+	for (int k = 41; k <= 60; ++k) save_queue_file(k % 2 ? a : b, filled((uint8_t)k, 300000), 300000);
+	save_queue_quit();
+	CHECK(file_is(a, 59, 300000) && file_is(b, 60, 300000), "a quit writes every file queued first");
+	/* and a file queued after it starts the thread again */
+	CHECK(save_queue_file(a, filled(61, 10), 10), "queued after a quit");
+	save_queue_wait();
+	CHECK(file_is(a, 61, 10), "written by a thread started again");
+	/* written at once, the same way */
+	uint8_t now[5] = { 62, 62, 62, 62, 62 };
+	CHECK(save_file_write(b, now, sizeof now) && file_is(b, 62, sizeof now), "a file written at once");
+	save_queue_quit();
+	remove(a);
+	remove(b);
+	rmdir(dir);
+}
+
 static void two_cores(void) {
 	static uint8_t rom[ROM_SIZE], tone[ROM_SIZE];
 	static uint32_t video[240 * 160];
@@ -252,6 +319,24 @@ static void two_cores(void) {
 	CHECK(emu_read32(0x02000000) == 0xB6B6B6B6, "BN6's EWRAM moved with the guest's state: %08x", emu_read32(0x02000000));
 	emu_frame(0);
 	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's state: %u", emu_read32(IWRAM));
+	/* BN6's state written from memory by the save queue, byte for byte the
+	 * state written to its file at once, and loaded back */
+	char sdir[] = "/tmp/cw-state-XXXXXX", qp[64], dp[64];
+	if (mkdtemp(sdir)) {
+		snprintf(qp, sizeof qp, "%s/run.state", sdir);
+		snprintf(dp, sizeof dp, "%s/direct.state", sdir);
+		bool q = emu_save_state_queued(qp), d = emu_save_state(dp);
+		save_queue_wait();
+		size_t nq = 0, nd = 0;
+		uint8_t *bq = file_bytes(qp, &nq), *bd = file_bytes(dp, &nd);
+		CHECK(q && d && bq && bd && nq == nd && !memcmp(bq, bd, nq), "the queued state the state written at once: %zu and %zu bytes", nq, nd);
+		CHECK(emu_load_state(qp), "the queued state loaded");
+		free(bq);
+		free(bd);
+		remove(qp);
+		remove(dp);
+		rmdir(sdir);
+	}
 	emu_unhook(0x080000F8);
 	mCoreConfigDeinit(&g->config);
 	g->deinit(g);
@@ -418,7 +503,8 @@ int main(void) {
 
 	two_cores();
 	two_threads();
+	save_queue_checks();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
-	printf("all hook checks passed, the two cores kept apart, on one thread and on two\n");
+	printf("all hook checks passed, the two cores kept apart, on one thread and on two, the saves written off the frame\n");
 	return 0;
 }

@@ -2,6 +2,7 @@
 #include "emu.h"
 #include "compat.h"
 #include "platform.h"
+#include "save_queue.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -327,7 +328,36 @@ bool emu_save_state(const char *path) {
 	return ok;
 }
 
+/* The state's bytes into memory, for the save queue to write (a
+ * checkpoint's, which the game does not wait on): the memory sized from
+ * the last state and some, a state that fills it taken as cut short and
+ * written at once instead, as emu_save_state writes */
+#define STATE_EXTRA (160u * 1024u)   /* (past the core's state: its extdata, the game's flash save the largest) */
+bool emu_save_state_queued(const char *path) {
+	static size_t room;
+	wait_frame();
+	if (!core) return false;
+	size_t want = room ? room : core->stateSize(core) + STATE_EXTRA;
+	/* (zeroed, as a new file is: mGBA writes the state into the file's
+	 * memory, and leaves the fields it does not use as it found them) */
+	uint8_t *bytes = calloc(1, want);
+	struct VFile *vf = bytes ? VFileFromMemory(bytes, want) : NULL;
+	bool ok = vf && mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	off_t n = ok ? vf->seek(vf, 0, SEEK_CUR) : 0;
+	if (vf) vf->close(vf);
+	if (ok && n > 0 && (size_t)n < want) {
+		room = (size_t)n + 4096;
+		if (save_queue_file(path, bytes, (size_t)n)) { platform_persist(); return true; }
+	} else if (ok) {
+		room = want * 2;
+	}
+	free(bytes);
+	save_queue_wait();   /* (after those queued before it) */
+	return emu_save_state(path);
+}
+
 bool emu_load_state(const char *path) {
+	save_queue_wait();
 	wait_frame();
 	if (!core) return false;
 	struct VFile *vf = VFileOpen(vf_path(path), O_RDONLY);

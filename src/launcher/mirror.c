@@ -16,6 +16,7 @@
 #include "game.h"
 #include "pick.h"
 #include "platform.h"
+#include "save_queue.h"
 
 #define REST_MS 3000   /* the saves untouched this long: a checkpoint's files all written */
 
@@ -187,6 +188,7 @@ static void put(void) {
 	snprintf(attempted_scope, sizeof attempted_scope, "%s", scope);
 	snprintf(attempted_destination, sizeof attempted_destination, "%s", folder);
 	dirty = false;
+	save_queue_wait();   /* (the files a checkpoint queued, all written) */
 	size_t n = 0;
 	uint8_t *b = backup_pack(g_data_dir, 0, &n);
 	BackupInfo info;
