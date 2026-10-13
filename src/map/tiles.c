@@ -201,11 +201,14 @@ int tl_src_floor(int A, int B, const void *ctx) {
 }
 
 /* The source's pads: panels of small platforms (at most PAD_PANELS in 2 x 2
- * blocks, joined to the rest by 1-wide bridges at most). SPAN x SPAN. */
+ * blocks, joined to the rest by 1-wide bridges at most). SPAN x SPAN; NULL
+ * where memory ran out (tools/heap3ds.py's 3DS crashed on it, learning a
+ * layer's area in a long run). */
 #define PAD_PANELS 12
 
 uint8_t *tl_find_pads(const Src *s) {
 	uint8_t *block = calloc(SPAN * SPAN, 1), *pad = calloc(SPAN * SPAN, 1);
+	if (!block || !pad) { free(block); free(pad); return NULL; }
 	int H = SPAN / 2;
 	for (int j = 0; j + 1 < SPAN; ++j)
 		for (int i = 0; i + 1 < SPAN; ++i)

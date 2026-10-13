@@ -12,7 +12,8 @@
 
 /* Whether BN5's guardian `navi` is fought here: his Navi moved into BN6's
  * engine at every version a run fights him at (xnavi_install.h), which
- * BN5's ROM read brings on every build but the 3DS's */
+ * BN5's ROM read brings (on the 3DS where its heap has room for it,
+ * start_3ds.c) */
 bool xguardian_fightable(int navi);
 /* His battle in BN6's engine (docs/BOSSES.md, BN5's Navis): his moved id
  * at `version` where BN6's guardians stand, the boss theme, no running;

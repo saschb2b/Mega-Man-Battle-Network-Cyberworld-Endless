@@ -317,9 +317,9 @@ bool rom_load_file(const char *path, char *msg, size_t msglen) {
 			snprintf(R.path, sizeof R.path, "%s", path);
 #if !defined(__3DS__)
 			/* (other games' ROMs beside it lend a run their areas,
-			 * docs/MULTIROM.md: a 3DS has no memory for another; a
-			 * browser holds the files chosen on its page, BN5's beside
-			 * BN6's in its storage) */
+			 * docs/MULTIROM.md: the 3DS's own start reads them where
+			 * its heap has room, start_3ds.c; a browser holds the files
+			 * chosen on its page, BN5's beside BN6's in its storage) */
 			xrom_find_beside();
 #endif
 			return true;

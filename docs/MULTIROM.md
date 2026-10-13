@@ -87,9 +87,14 @@ The differential).
    play page (`web/play/app.js`) takes BN5's file beside BN6's, either
    told by its header's game code and checked by its SHA-1, and keeps it
    in IndexedDB beside BN6's (`rom/bn5c.gba`), where `xrom_find_beside`
-   reads it (issue #68). A New 3DS's 96 MB heap holds BN6 twice (mGBA's
-   copy and the engine's) with little room left: there another game's
-   data would be taken in as a run needs it, its ROM not kept.
+   reads it (issue #68). The New 3DS reads BN5's file whole as well,
+   beside BN6's or in the 3DS's other ROM folders (`src/core/start_3ds.c`),
+   where its 96 MB heap has room for it: mGBA's 3DS setup had taken a
+   16 MB ROM buffer it never used, which the game now gives back, so with
+   BN5's 8 MB read the heap's fixed part is 8 MB smaller than the 3DS's
+   with BN6 alone was (docs/EMULATION.md, The 3DS's memory). A 3DS short
+   of room leaves BN5's ROM unread, a run of BN6's, and its log and PET
+   say so.
 
 ## Guest battles
 
@@ -1056,9 +1061,9 @@ and its calls aimed again (`src/emu/xvirus.c`):
   Blinder, AntiWatr, AntiElec) wait for the chips track to move it; until
   then a virus uses one with a puff. Zomon's AreaGrab is BN6's own, a
   frame longer than BN5's. Every family is installed wherever BN5's ROM is
-  read, and BN5's records that name one are fought in BN6's engine
-  (`build.py xrecords`). The New 3DS keeps no BN5 ROM: no family is
-  installed there. A state saved while a moved family is in battle needs
+  read, the New 3DS too (Platforms, above), and BN5's records that name
+  one are fought in BN6's engine (`build.py xrecords`). A state saved
+  while a moved family is in battle needs
   the same families installed to load (they are, at every boot with the
   same ROMs and switches); one saved on a map is the same byte for byte
   with the room made and the families installed or not (a checkpoint's
@@ -1927,8 +1932,9 @@ the next.
   Team Colonel sits beside BN6's ROM (`run_dress`, from the run's seed and
   the ROMs there: no save changes, and a run continued without it goes on
   in Central Area's tiles), named on the act's card, in MegaMan's words,
-  L's and the PET's. Read where BN6's ROM is, on every build but the 3DS's
-  (the browser's from the files its page took, issue #68).
+  L's and the PET's. Read where BN6's ROM is, on every build (the
+  browser's from the files its page took, issue #68; the 3DS's where its
+  heap has room, Platforms above).
 - [x] End Area (7-9, dressing Seaside Area) and Nebula Area (13-14, the
   Graveyard, under Green Area's map: the Graveyard's group sets its own
   palette), each tuned over the atlas's layers (`--atlas DIR:aN:3`);
@@ -2092,4 +2098,10 @@ the next.
   empty in BN6 for want of BN5's record of the chips MegaMan uses);
   fought where a battle names their ids, and as the run's guardians
   since the last round.
+- [x] On the New 3DS too (Platforms, above): BN5's ROM read whole beside
+  BN6's where the heap has room, in the 16 MB mGBA's 3DS setup had held
+  unused; its layers' learned maps kept for the layer's own area alone
+  there (docs/EMULATION.md, The 3DS's memory; `tools/heap3ds.py`). Built
+  and modelled on a computer; a New 3DS's own run with both ROMs is
+  3ds/README.md's checklist.
 - [ ] Team ProtoMan (the other version), Battle Network 4, BN6 Falzar.

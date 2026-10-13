@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
+  beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New
+  3DS reads it as every other system does: BN5's areas, viruses, Navis,
+  chips, Souls and DarkChips join its runs, the title says "BN5 found"
+  and the PET's home that the older net joins. The room comes from mGBA's
+  3DS setup, which took a 16 MB ROM buffer at every start that the game
+  never used: given back, the heap holds BN5's 8 MB and still keeps 8 MB
+  more free than BN6 alone left it before, so a 3DS without BN5 gains
+  16 MB. A 3DS whose heap had no room for BN5 would leave it unread, play
+  BN6's net, and say so. Long runs no longer fill the 3DS's heap: the
+  tiles learned from an area's original maps are kept for the layer's own
+  area alone, not for every area the run passed through, which in long
+  runs had left the heap too short to learn later areas' tiles whole (the
+  heap modelled on a computer; an area the run comes back to is learned
+  again, a few seconds on that layer's making). `log.txt` gives
+  the heap's use after the ROMs and after the installs, and `frame_log`'s
+  lines its high-water mark. Learning a layer's tiles with the heap run
+  out no longer crashes the game where it looked for the map's pads or
+  the pairs of its tiles. `tools/heap3ds.py` models the 3DS's heap on a
+  computer: long runs' peaks and the allocations refused.
+
 - **BN5's Navis guard in BN6's own engine, their Souls serve every
   battle, BN5's DarkChips come into runs, and BN5's second emulator core
   leaves runs (issue #82).** A Navi of BN5's who guards an act

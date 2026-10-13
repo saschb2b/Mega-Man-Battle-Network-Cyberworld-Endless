@@ -12,7 +12,6 @@ src/map/props.c: floor_emblem_on: dereference of possibly-NULL 'q' [-Wanalyzer-p
 src/map/props.c: props_learn_pad: use of possibly-NULL '*out.tiles' where non-null expected [-Wanalyzer-possible-null-argument]
 src/map/props.c: props_mirror_walls: dereference of possibly-NULL 'malloc((long unsigned int)(*a.nsec[0] + 1) * 8)' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: props_mirror_walls: dereference of possibly-NULL 'malloc((long unsigned int)(*a.nsec[2] + 1) * 8)' [-Wanalyzer-possible-null-dereference]
-src/map/seams.c: seams_add: dereference of possibly-NULL 'k' [-Wanalyzer-possible-null-dereference]
 src/map/stairs.c: component: dereference of possibly-NULL 'out' [-Wanalyzer-possible-null-dereference]
 src/map/stairs.c: component: dereference of possibly-NULL 'seen' [-Wanalyzer-possible-null-dereference]
 src/map/tilemap.c: label_pieces: dereference of possibly-NULL 'all.label' [-Wanalyzer-possible-null-dereference]

@@ -53,6 +53,68 @@ const int nm_ornament_tile[3] = { 0x379, 0x372, 0x375 };
 
 static Learned learned[NET_AREAS + XAREAS_MAX];
 
+/* The areas whose learned maps are kept: all of them on a computer, the
+ * layer's own alone on the 3DS. Each area keeps 2 to 7 MB once learned,
+ * and in a long run the areas kept, with a new one's learning, filled the
+ * 3DS's 96 MB heap: allocations refused in most long runs; with two kept,
+ * still in most where BN5's ROM was read (docs/EMULATION.md, The 3DS's
+ * memory; CW_HEAP_3DS builds the host so, for tools/heap3ds.py, and
+ * AREAS_KEPT sets another number there). An area left behind is learned
+ * again, the same, where a run comes back to it: the endless net's acts
+ * once round, a detour's way back. */
+#ifndef AREAS_KEPT
+#if defined(__3DS__) || defined(CW_HEAP_3DS)
+#define AREAS_KEPT 1
+#else
+#define AREAS_KEPT 0   /* (all) */
+#endif
+#endif
+static unsigned area_used[NET_AREAS + XAREAS_MAX], area_clock;
+static bool area_forgotten[NET_AREAS + XAREAS_MAX];
+
+/* What `L` learned, freed: the area is learned afresh where it is asked
+ * for again */
+static void forget(Learned *L) {
+	for (int k = 0; k < MAX_BOOKS; ++k) tiles_free(&L->book[k]);
+	seams_free(&L->seams);
+	decor_free(&L->decor);
+	stairs_free(L->stairs);
+	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
+		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };
+	for (size_t i = 0; i < sizeof stamps / sizeof *stamps; ++i) props_free(stamps[i]);
+	memset(L, 0, sizeof *L);
+}
+
+/* (before area `area` is learned: the least lately used others forgotten
+ * past AREAS_KEPT) */
+static void forget_areas(int area) {
+	while (AREAS_KEPT) {
+		int oldest = -1, held = 0;
+		for (int a = 0; a < NET_AREAS + XAREAS_MAX; ++a) {
+			if (a == area || !learned[a].tried) continue;
+			++held;
+			if (oldest < 0 || area_used[a] < area_used[oldest]) oldest = a;
+		}
+		if (held < AREAS_KEPT || oldest < 0) return;
+		printf("netmap: area %d's learned maps forgotten for area %d's (%d kept)\n", oldest, area, AREAS_KEPT);
+		forget(&learned[oldest]);
+		area_forgotten[oldest] = true;
+	}
+}
+
+/* Area `area`'s maps learned, once while it is kept */
+static Learned *learn_area(int area) {
+	Learned *L = &learned[area];
+	area_used[area] = ++area_clock;
+	if (!L->tried) {
+		forget_areas(area);
+		L->tried = true;
+		L->ok = nm_learn(area, L);
+		if (area_forgotten[area]) printf("netmap: area %d learned again\n", area);
+	}
+	return L;
+}
+
 int netmap_scenery;
 LegalStats netmap_legal;
 LastMap nm_last;
@@ -400,8 +462,7 @@ static void legalize(Learned *L, const NetLayout *lay) {
 bool netmap_build(int area, const NetLayout *lay) {
 	const NetAreaDef *na = net_area_def(area);
 	if (!na) return false;
-	Learned *L = &learned[area];
-	if (!L->tried) { L->tried = true; L->ok = nm_learn(area, L); }
+	Learned *L = learn_area(area);
 	if (!L->ok) return false;
 	nm_cur = lay;
 	one_floor = !na->walk_styles;
@@ -439,8 +500,7 @@ bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_sl
 /* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
 static unsigned netmap_stair_dirs(int area, int *rise) {
 	if (!net_area_def(area)) return 0;
-	Learned *L = &learned[area];
-	if (!L->tried) { L->tried = true; L->ok = nm_learn(area, L); }
+	Learned *L = learn_area(area);
 	unsigned dirs = 0;
 	*rise = 0;
 	for (int d = 0; d < STAIR_DIRS; ++d)

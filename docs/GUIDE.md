@@ -42,7 +42,7 @@ building the game yourself.
   flames of darkness hold BN5's DarkChips. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
-  iPhones and iPads and in the browser; not on the 3DS. Added later, it
+  iPhones and iPads, a New 3DS and in the browser. Added later, it
   is found at the next start beside BN6 (on Android, an iPhone or an
   iPad, in the folder you chose); on a PC, a Mac, a phone or a tablet, R
   on the title also opens the [ROMs screen](#the-roms-screen) to add it,
@@ -326,7 +326,8 @@ same game for the Homebrew Launcher (`sdmc:/3ds/`).
 
 Put your ROM in `sdmc:/3ds/cyberworld-endless/rom/`, or leave it where you
 keep GBA games (`sdmc:/roms/gba/`, `sdmc:/roms/`, `sdmc:/gba/`): any file
-name works. The first NEW GAME boots BN6 once, about 15 seconds of black
+name works. BN5 Team Colonel's goes beside it, or in any of those folders.
+The first NEW GAME boots BN6 once, about 15 seconds of black
 screen. The bottom screen is the PET beside the game, framed like BN6's
 own PET screens, with HP, Zenny and BugFrags; on the net it shows the
 layer's map, always open, in the folder editor the whole folder, in a

@@ -24,6 +24,9 @@
 #include "save.h"
 #include "shop.h"
 #include "trader.h"
+#ifdef __3DS__
+#include "start_3ds.h"
+#endif
 
 void second_cross_lines(int navi, char *out, size_t n) {
 	const char *strong = powers_cross_strength(navi), *navis = powers_cross_on_navis(navi);
@@ -286,15 +289,14 @@ void second_layer_next(int guardian_navi, char *out, size_t n) {
 	else snprintf(out, n, "Find the exit pad");
 }
 
-/* (on the 3DS BN5 is never looked for, its memory holding no second core:
- * "not found beside BN6" sent a player to check his ROM, issue #107) */
+/* (on the 3DS BN5's ROM is read where the heap has room for it beside
+ * BN6's, start_3ds.c: left unread, "not found" would send a player to
+ * check his ROM, issue #107) */
 const char *second_bn5_line(bool found) {
 #ifdef __3DS__
-	(void)found;
-	return "BN5's older net: on PC and phones, not the 3DS";
-#else
-	return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6";
+	if (!found && start_3ds_bn5_unread()) return "BN5 found, but this 3DS has no room for it";
 #endif
+	return found ? "BN5 found: the older net joins the runs" : "BN5 not found beside BN6";
 }
 
 /* (where a chip's copies are, a shop's and the Library's) */

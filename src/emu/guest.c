@@ -17,7 +17,7 @@
 #include "emu.h"
 #include "rom.h"
 
-/* (every build but the 3DS's, whose heap holds one ROM) */
+/* (every build but the 3DS's, whose heap holds no second core) */
 #if !defined(__3DS__)
 
 #include <mgba/core/blip_buf.h>
@@ -213,7 +213,7 @@ void guest_frame_quiet(uint32_t keys) {
 
 const uint32_t *guest_video(void) { return video; }
 
-#else   /* (one ROM: the 3DS) */
+#else   /* (one core: the 3DS) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
 uint8_t guest_read8(uint32_t a) { (void)a; return 0; }
