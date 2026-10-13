@@ -17,6 +17,7 @@ const XChipMoved xchips_moved[] = {
 	{ 218, 0x9F, 0x01 },   /* DarkDril */
 	{ 219, 0x72, 0x03 },   /* DarkTorn */
 	{ 220, 0x15, 0x45 },   /* DrkSonic */
+	{ 289, 0x15, 0x65 },   /* DarkInvs */
 	{ 290, 0x6A, 0x03 },   /* DarkPlus */
 	{ 291, 0x15, 0x3D },   /* Jealousy */
 	{ 292, 0x15, 0x5B },   /* Poltrgst */

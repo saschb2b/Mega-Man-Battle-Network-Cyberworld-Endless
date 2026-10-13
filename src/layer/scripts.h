@@ -89,11 +89,11 @@ typedef struct {
  * his chip, for the Library. */
 int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);
 /* A flame of darkness holding a DarkChip BN5's rule plays (docs/META.md,
- * DarkChips): MegaMan names it, what it does where it adds `plus` power to
- * the next attack chip (DarkPlus; 0 for another), when it comes (BN5's
+ * DarkChips): MegaMan names it, what it does (`does`, pages apart by '|',
+ * "" or NULL none: DarkPlus's, DarkInvs's), when it comes (BN5's
  * worried rule) and its price (all of it the `first` time); then asks,
  * starting on Yes; Yes sets event flag `flag`, which it leaves by. */
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, int plus, bool first);
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first);
 /* A flame of darkness holding one BN6's own rule plays (docs/META.md, BN6's own DarkChips): its
  * DarkChip, its base chip BN6 plays it as without a BugFrag, what its dark
  * power does in MegaMan's words, and whether he says all of its price (a

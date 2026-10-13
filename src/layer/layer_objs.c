@@ -55,7 +55,7 @@ unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
 const ScriptsDark6 *layer_objs_dark6;
-int layer_objs_dark_plus;
+const char *layer_objs_dark_does = "";
 /* (a layer with a flame: its first bystander free of a part to play runs
  * BN6's own words on DarkChips, a rumor before the find) */
 static bool dark_rumor_due;
@@ -501,7 +501,7 @@ static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	tk->cat = 7;
 	tk->sprite = layer_objs_dark_flame;
 	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark6)
-		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_plus, layer_objs_dark_first);
+		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_does, layer_objs_dark_first);
 	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
 	out->dark_flame_obj = i;
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);

@@ -2,18 +2,19 @@
 
 ## Unreleased
 
-- **DarkPlus from BN5's flame of darkness (issue #82).** Where BN5's ROM
-  is read, BN5's flame may hold DarkPlus, played by BN5's rule: it comes
-  while MegaMan worries, and used, it makes his next attack chip 50
-  stronger ("Cannon 40+50"), at the one price of every DarkChip, 20 max
-  HP for the battle. MegaMan says what it does before it is taken, and
-  the Pack shows it with BN5's own picture and icon. BN6's flame never
-  offers it: BN6's own DarkPlus does nothing. The owner's two calls on
-  DarkInvs and DarkPlus are written into docs/META.md and
-  docs/MULTIROM.md. BN5's DarkInvs, the game driving MegaMan, comes
-  next: its machine, BN5's chip AI for the player, is moved with the
-  Dark Soul's and drives him in BN6's battles behind a developer switch
-  (`--dev chipai`); the chip itself, its end and its proof are left.
+- **BN5's own DarkInvs and DarkPlus (issue #82).** Where BN5's ROM is
+  read, DarkInvs is BN5's: it comes while MegaMan worries, and used, the
+  game drives him for ten seconds, unseen and untouchable, picking chips
+  from his folder, walking to where they reach and firing, then gives him
+  back, as BN5 does, frame for frame (ShadowSoul's Chaos Unison fires it
+  too). BN5's flame of darkness may now hold DarkPlus, also by BN5's rule:
+  used, his next attack chip hits 50 harder ("Cannon 40+50"). Both cost
+  what every DarkChip costs, 20 max HP for the battle, and MegaMan says
+  at the flame what each does; the Pack shows them with BN5's own
+  pictures. BN6's flame never offers DarkPlus (BN6's own does nothing),
+  and without BN5's ROM DarkInvs keeps BN6's rule. The owner's two calls
+  on DarkInvs and DarkPlus are written into docs/META.md and
+  docs/MULTIROM.md.
 
 - **BN5's net on the New 3DS (issue #82).** With Team Colonel (USA)
   beside BN6's ROM, or in any folder the 3DS looks in for BN6's, the New

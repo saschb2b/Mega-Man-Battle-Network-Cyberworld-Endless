@@ -19,6 +19,22 @@
 #define BN5_FLASH_TINT_CRC    0x8F9A13FBu
 #define BN5_FLASH_TINTS       0x080136D0u /* ... the table: 8 bytes */
 
+/* DarkInvs (darkinvs.c): BN5's chip AI for the player, which its object puts MegaMan under, its time, its end and what its
+ * object clears */
+#define BN5_CHIP_AI_PLAYER 0x0802B4B0u /* its chip AI for the player (its own side's lists; the Dark Soul's beside it), run from BN5's idle states (0x080F04DC, 0x080F0660)
+                                       * while his AI data's BN5_AI_UNDER flag stands (BN5's DarkInvs sets it: BN5_CHIP_AI_ENTER from
+                                       * 0x080E2402), else its state cleared (0x0802C03E, 0x40 bytes from +0xF0) */
+#define BN5_AI_UNDER      0x200       /* ... the flag: AIData +0x48's bit (BN5's 0x0800E096 sets it, as BN6's 0x08010312 its bits there) */
+#define BN5_AI_UNDER_TIME 0x36        /* ... its time, AIData +0x36 (u16: 600 from DarkInvs, counted down by 0x0800DBF0) */
+#define BN5_AI_UNDER_END  0x80000     /* ... at its time's 0 (0x0800DBD8, the player's frame's last: 0x08017976) his request (AIData +0x44), which
+                                       * BN5's family 0x49 answers (0x080EF270: the flag and the invisibility cleared; started by
+                                       * 0x080EB0EA, 0x080ED43C) */
+#define BN5_STATUS_FLAGS  0xE800      /* what DarkInvs's 0x08017060 clears of his collision's flags (+0x3C), */
+#define BN5_STATUS_FLAGS2 0x8068      /* ... and of +0x40, with the four status times after (BN5 +0x1E-+0x25) */
+#define BN5_CHIP_AI_STATE 0xF0        /* ... its state from AIData +0xF0 (+0: 1 under way), 0x40 bytes the entry clears */
+#define BN5_ARM_CHAOS_READ 0x080EBBFEu /* ldrb r1,[r7,#0x12] in its buster arm (0x080EBBA6, MegaMan in a form): his Chaos Unison (AIData +0x12),
+                                       * the flash BN5_FLASH_CHAOS where set (0x080EBC04) */
+
 /* Chaos Unison (soulchaos.c), BN5's code it ports: */
 #define BN5_CHAOS_PHASE       0x080105F0u /* the chaos charge's phase each frame (its cycle AIData +0x1C, the phase +0x1F), to */
 #define BN5_CHAOS_PHASE_END   0x08010654u

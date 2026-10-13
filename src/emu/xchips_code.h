@@ -31,6 +31,9 @@
                                             * Each returns by mov pc, lr, as BN6's own code does: the tables' readers call through
                                             * mov lr, pc (BN6 0x080109CA, 0x080ED100, 0x080E2BE6, 0x08017B1E), a return address
                                             * without the Thumb bit, which a bx lr would go on from in ARM state */
+#define XC_STUB_DARKINVS 0x24u             /* ... and DarkInvs's (tools/xchiprecipe.py, UNIT_STUBS): its chip AI's state cleared
+                                            * (+0x24), entered (+0x28), his statuses cleared (+0x2C), each mov pc,lr, hooked
+                                            * (src/emu/darkinvs.c) */
 #define XC_SP_TIMES  (XC_STUBS + 0x30u)    /* BN5's best deletion times of its Navis' SPs as the SP powers read them (BN5's battle
                                             * copy 0x0203E560: u16 frames by the Navi's AI index, XC_SP_SIDE a side, 0xFFFF none),
                                             * none: BN6 keeps no deletion time of BN5's Navis */

@@ -184,6 +184,21 @@ def buster_draw(d, fa, fb, prev):
             (not prev or megaman_action(prev[1]) != MEGAMAN_BUSTER))
 
 
+# the battle NaviStats' NaviCust bugs the emotion window's glitch tests (BN5 0x0800DC0C / BN6 0x0800FE52, the same fields)
+GLITCH_BUGS = (0x31, 0x13, 0x14, 0x16, 0x54, 0x24, 0x18, 0x19)
+
+
+def glitch_draw(d, fa, fb, prev):
+    """the frame one game's emotion window glitch draws its length from the second RNG word at its own frames (legit.json,
+    rng, only: a frame apart in the two engines): the first words the same, one game's second the other's stepped once,
+    MegaMan's side bugged in both (a BN5 DarkChip's after-effect)"""
+    if d.part != 'rng' or not isinstance(d.a, tuple) or not isinstance(d.b, tuple):
+        return False
+    (a1, a2), (b1, b2) = d.a, d.b
+    bugged = lambda f: any(len(f.fr.get('player', b'')) > PLAYER_NAVI + k and f.fr['player'][PLAYER_NAVI + k] for k in GLITCH_BUGS)
+    return a1 == b1 and (a2 == rng_step(b2) or b2 == rng_step(a2)) and bugged(fa) and bugged(fb)
+
+
 def offsets_of(m, d):
     """the places a mask names, as object offsets: its own, its sprite's (from the sprite's state in the object), ranges A-B"""
     out = set()
@@ -418,6 +433,7 @@ WHEN = {
     'form left': lambda d, fa, fb, prev: form_left(fb),
     'flashing': lambda d, fa, fb, prev: any(flashing(f, d.role) for f in (fa, fb) + prev),
     'buster draw': buster_draw,
+    'glitch draw': glitch_draw,
     'engine draw': lambda d, fa, fb, prev: engine_draw(d, fa.canon.legit),
 }
 

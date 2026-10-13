@@ -453,6 +453,8 @@ TYPES = {
     # (the chips': tools/xchiprecipe.py's units, their copies installed before the families')
     (1, 0x1C): ('moved', None, 'chips', "HolyDrem's double of MegaMan (BN5 0x080BD811): BN6's 0x1C (0x080BE0ED) other code, no BN6 "
                                         "type runs BN5's"),
+    (1, 0x09): ('moved', None, 'chips', "DarkInvs's double of MegaMan (BN5 0x080BA6A9: his own sprite, flickering him 30 frames, then sound 0x143): " + NO_TWIN),
+    (4, 0x18): ('moved', None, 'chips', "DarkInvs's object (BN5 0x080E2391: the double spawned, then MegaMan put under BN5's chip AI, src/emu/darkinvs.c): " + NO_TWIN),
     (1, 0x58): ('moved', None, 'chips', "Poltrgst's double of MegaMan (BN5 0x080C39D1): BN6's 0x58 (0x080C5F6D) other code, no BN6 "
                                         "type runs BN5's"),
     (1, 0x06): ('moved', None, 'chips', "the Navi chip KnightMn's KnightMan: BN6's 0x06 (0x080BA711) other code, no BN6 "

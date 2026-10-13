@@ -202,10 +202,5 @@
   "1"
  ],
  "dslist": 1,
- "sprites": "bytes",
- "verdict": {
-  "is": "FAIL",
-  "at": 107,
-  "why": "Chaos Unison plays as BN5's to the attack (the charge by row 0x31's time, the phases' cycle, the release in phase 2, the level one up, the chip writer given DarkInvs): what differs from t107 is DarkInvs itself, BN6's own chip of the name (the registry's 289, BN6's support 0x3B, its auto mode: CurAction 0x36 and the third kind's 0x66) where BN5's support 0x3B (0x080E2420, its object the fourth kind's 0x18 at 0x080E23D4) puts MegaMan under BN5's chip AI for 600 frames (0x0802C03E, 0x0802C114 with 0x258, invisible by 0x08016C42's 0x08000000), which BN5's MegaMan runs from his idle states (0x080F04C2, 0x080F0650: the AI data's 0x200 flag, 0x0800E0B0, then 0x0802B4B0); BN6's twin of the first (0x080F1866) goes from the chip request's test straight to 0x0800FA54 (BN5's 0x0800D8D0), no flag tested, and BN6 has no twin of the chip AI (tools/xchiprecipe.py --report: DarkInvs's four calls with none), so BN5's DarkInvs is not moved (CANDIDATES) and ShadowSoul's chaos attack is BN6's DarkInvs (docs/MULTIROM.md, Transplanted Souls)"
- }
+ "sprites": "bytes"
 }

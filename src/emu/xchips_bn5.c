@@ -4088,6 +4088,82 @@ static const XvType poltrgst_types[] = { { 1, 0x58, XV_TYPE_MOVED }, { 4, 0x72, 
 	.calls = poltrgst_calls, .ncalls = (int)(sizeof poltrgst_calls / sizeof *poltrgst_calls), \
 	.words = poltrgst_words, .nwords = (int)(sizeof poltrgst_words / sizeof *poltrgst_words), \
 	.types = poltrgst_types, .ntypes = (int)(sizeof poltrgst_types / sizeof *poltrgst_types) }
+/* ---- DarkInvs: BN5's support 0x3b (080E2421) as BN6's 0x65 ---- */
+
+static const XvBlock darkinvs_blocks[] = {
+	{ 0x080BA6A8, 0x080BA804, XC_CODE + 0xC870, 0x1889BD41u },
+	{ 0x080E1534, 0x080E1678, XC_CODE + 0xC9D0, 0x94DC8D54u },
+	{ 0x080E2390, 0x080E244C, XC_CODE + 0xCB20, 0xB49D749Du },
+};
+static const XvData darkinvs_data[] = {
+	{ 0x080BA6BA, 0x080BA6BC, XV_RAW },
+	{ 0x080BA6BC, 0x080BA6C0, XV_POOL },
+	{ 0x080BA6C0, 0x080BA6CC, XV_TABLE },
+	{ 0x080E1670, 0x080E1678, XV_POOL },
+	{ 0x080E239E, 0x080E23A0, XV_RAW },
+	{ 0x080E23A0, 0x080E23A4, XV_POOL },
+	{ 0x080E23A4, 0x080E23B0, XV_TABLE },
+	{ 0x080E23BE, 0x080E23C0, XV_RAW },
+	{ 0x080E23C0, 0x080E23C4, XV_POOL },
+	{ 0x080E23C4, 0x080E23D4, XV_TABLE },
+	{ 0x080E2442, 0x080E2444, XV_RAW },
+	{ 0x080E2444, 0x080E244C, XV_POOL },
+};
+static const XvPair darkinvs_calls[] = {
+	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
+	{ 0x0800D1B8, 0x0800F29C },   /* map:bytes, SAME */
+	{ 0x08010D64, 0x080136CC },   /* map:calls+bytes, SAME */
+	{ 0x0800DA32, 0x0800FC9E },   /* map:calls, SAME */
+	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
+	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
+	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
+	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
+	{ 0x0800DD8C, 0x0801002C },   /* map:calls, DIFF (audited) */
+	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
+	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
+	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
+	{ 0x08010DEE, 0x08013774 },   /* map:calls+bytes, SAME */
+	{ 0x0800F0E4, 0x08011420 },   /* map:calls+bytes, SAME */
+	{ 0x080E14AA, 0x080E268E },   /* map:bytes, SAME */
+	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
+	{ 0x0800DE7A, 0x080100D6 },   /* near, SAME */
+	{ 0x0800EEB6, 0x08011044 },   /* map:bytes, SAME */
+	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
+	{ BN5_SPAWN_1, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
+	{ 0x0800CDEC, 0x0800EB6C },   /* map:bytes, SAME */
+	{ 0x0800E0A0, 0x0801031C },   /* map:bytes, SAME */
+	{ 0x080E0E02, 0x080E210C },   /* map:calls, SAME */
+	{ 0x080091EA, 0x0800A9EC },   /* map:bytes, SAME */
+	{ 0x0801A390, 0x0801DA48 },   /* map:bytes, SAME */
+	{ 0x080E0F86, 0x080E2264 },   /* search, SAME */
+	{ 0x080C47F6, 0x080C64BC },   /* search, by place, SAME */
+	{ 0x080E0DFC, 0x080E2106 },   /* map:calls+bytes, SAME */
+	{ 0x0801A410, 0x0801DACC },   /* project:chips, SAME */
+	{ 0x0802C03E, 0x08E00C24 },   /* a stub, STUB */
+	{ 0x0802C114, 0x08E00C28 },   /* a stub, STUB */
+	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
+	{ 0x08017060, 0x08E00C2C },   /* a stub, STUB */
+	{ 0x08011A8C, 0x080143A6 },   /* forced, SAME */
+	{ BN5_SPAWN_4, XV_SPAWN_4 },   /* the dispatch's spawner */
+};
+static const XvPair darkinvs_words[] = {
+	{ 0x08000000, 0x08000000 },
+	{ 0x0800325D, 0x08003459 },
+	{ 0x08009FB3, 0x0800B917 },
+	{ 0x08009FE9, 0x0800B94D },
+	{ 0x0800A01B, 0x0800B9B1 },
+	{ 0x0800A2F1, 0x0800BC89 },
+	{ 0x0800A327, 0x0800BD35 },
+};
+static const XvType darkinvs_types[] = { { 1, 0x09, XV_TYPE_MOVED }, { 4, 0x18, XV_TYPE_MOVED } };
+
+#define DARKINVS_CODE { .name = "DarkInvs (BN5's)", .game = XROM_BN5_COLONEL_US, \
+	.blocks = darkinvs_blocks, .nblocks = (int)(sizeof darkinvs_blocks / sizeof *darkinvs_blocks), \
+	.data = darkinvs_data, .ndata = (int)(sizeof darkinvs_data / sizeof *darkinvs_data), \
+	.calls = darkinvs_calls, .ncalls = (int)(sizeof darkinvs_calls / sizeof *darkinvs_calls), \
+	.words = darkinvs_words, .nwords = (int)(sizeof darkinvs_words / sizeof *darkinvs_words), \
+	.types = darkinvs_types, .ntypes = (int)(sizeof darkinvs_types / sizeof *darkinvs_types) }
 const XChipUnit xchips_bn5[] = {
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080EBB97, XC_HOMES + 0x0, BUSTERARM_CODE, NULL, 0, 0x00 },
 	{ XCHIP_HELPER, 0x00, 0x00, 0x080D3287, XC_HOMES + 0x400, SHAKE_CODE, NULL, 0, 0x00 },
@@ -4139,5 +4215,6 @@ const XChipUnit xchips_bn5[] = {
 	{ XCHIP_ATTACK, 0x22, 0x72, 0x080ECE2F, XC_HOMES + 0xBC00, TORNADO_CODE, NULL, 0, 0x00 },
 	{ XCHIP_SUPPORT, 0x23, 0x4D, 0x080E6F61, XC_HOMES + 0xC000, HOLYDREM_CODE, NULL, 0, 0x00 },
 	{ XCHIP_SUPPORT, 0x31, 0x5B, 0x080E8DC3, XC_HOMES + 0xC400, POLTRGST_CODE, NULL, 0, 0x00 },
+	{ XCHIP_SUPPORT, 0x3B, 0x65, 0x080E2421, XC_HOMES + 0xC800, DARKINVS_CODE, NULL, 0, 0x00 },
 };
 const int xchips_bn5_count = (int)(sizeof xchips_bn5 / sizeof *xchips_bn5);

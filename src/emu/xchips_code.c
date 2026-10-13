@@ -61,7 +61,11 @@ static void stubs_stage(void) {
 	put16(p + 30, 0x4240);   /* negs r0,r0 */
 	put16(p + 32, 0x2114);   /* movs r1,#0x14 */
 	put16(p + 34, 0x46F7);   /* mov pc,lr */
-	for (uint32_t k = 36; k < XC_SP_TIMES - XC_STUBS; k += 2) put16(p + k, 0x46C0);
+	/* (DarkInvs's three, src/emu/darkinvs.c's hooks on them: mov pc,lr; nop each) */
+	for (uint32_t k = XC_STUB_DARKINVS; k < XC_SP_TIMES - XC_STUBS; k += 4) {
+		put16(p + k, 0x46F7);
+		put16(p + k + 2, 0x46C0);
+	}
 	/* (the SP powers' deletion times, none: 0xFFFF each, both sides) */
 	for (uint32_t k = XC_SP_TIMES - XC_STUBS; k < XC_STUBS_END - XC_STUBS; k += 2) put16(p + k, 0xFFFF);
 }

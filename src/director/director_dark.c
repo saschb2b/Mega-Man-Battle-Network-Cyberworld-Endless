@@ -74,7 +74,7 @@ static void dark6_flame_setup(int k, int flame) {
 void dark_flame_setup(void) {
 	layer_objs_dark_flame = -1;
 	layer_objs_dark6 = NULL;
-	layer_objs_dark_plus = 0;
+	layer_objs_dark_does = "";
 	D.dark_kind = -1;
 	D.dark_given = false;
 	if (run.side_kind != LAYER_NORMAL || layer_in_act(run.depth) != 1) return;
@@ -95,8 +95,9 @@ void dark_flame_setup(void) {
 	layer_objs_dark_chip = chip;
 	layer_objs_dark_first = !profile.dark_taught;
 	/* (what DarkPlus does, by its record's power: BN5's +50 to the next
-	 * attack chip) */
-	layer_objs_dark_plus = D.dark_kind == DARK_PLUS_KIND ? ci.power : 0;
+	 * attack chip; DarkInvs, BN5's where its ROM is read: its 600 frames
+	 * under the darkness, unseen) */
+	layer_objs_dark_does = dark_bn5_does(D.dark_kind == DARK_PLUS_KIND ? ci.power : 0, D.dark_kind == DARK_INVS_KIND);
 	if (emu_debug_on()) fprintf(stderr, "dark: BN5's flame of darkness with %s, list 7 %d\n", chip, layer_objs_dark_flame);
 }
 

@@ -106,6 +106,7 @@
 #define BN6_SPRITE_SHADER     0x06        /* ... the colour shader there, u16 (strh r0,[r3,#6]) */
 #define BN6_DARK_AFTERS       0x0800B7BCu /* BN6_DARK_AFTER's table by the DarkChip's id less 0x11E, a routine each: */
 #define BN6_DARK_AFTER_HPBUG  0x0800B80Eu /* ... DarkPlus's (its fifth): the NaviStats' HP bug +4, at most 7 */
+#define BN6_DARKINVS          0x121       /* BN6's DarkInvs (its DarkChipID 3) */
 #define BN6_DARKPLUS          0x122       /* BN6's DarkPlus (its DarkChipID 4) */
 #define BN6_CHIP_WRITER       0x080126E4u /* the chip writer, its first entry (r4 1: the chip's use logged; a virus's held chip, BN5's
                                              0x0800FE6A): AttackVars from the record of r0, its family returned */

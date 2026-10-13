@@ -58,6 +58,7 @@ int dark_chip_kind(int id);
  * by BN5's rule, where its mood is in BN6's battles), DarkPlus only where
  * BN5's code plays it (`plus`) */
 #define DARK_PLUS_KIND 3
+#define DARK_INVS_KIND 2           /* (BN5's DarkInvs: 600 frames under its chip AI, src/emu/darkinvs.h) */
 unsigned dark_kinds_offered(bool bn5, bool plus);
 
 /* The kind a flame of darkness on layer `depth` offers: the first the run

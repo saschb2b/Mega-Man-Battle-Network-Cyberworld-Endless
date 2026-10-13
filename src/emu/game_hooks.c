@@ -42,8 +42,8 @@ void game_hooks_install(void) {
 		bool proxy = soulproxy_install(dev.proxybreak);
 		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
 	}
-	/* (BN5's chip AI for the player, moved with the Dark Soul: DarkInvs's machine; docs/MULTIROM.md, The chips' code) */
-	if (souls) darkinvs_install(dev.chipai);
+	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/MULTIROM.md) */
+	darkinvs_dev(dev.chipai);
 	if (emu_debug_on()) claims_report();
 }
 

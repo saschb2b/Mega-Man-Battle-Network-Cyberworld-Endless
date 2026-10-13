@@ -16,6 +16,14 @@ const char *dark_price_words(int kind, int lost) {
 	return words;
 }
 
+const char *dark_bn5_does(int plus, bool invs) {
+	static char words[96];
+	if (plus > 0) snprintf(words, sizeof words, "My next attack chip hits %d harder!", plus);
+	else if (invs) snprintf(words, sizeof words, "For ten seconds,the darkness takes over!|It fights for us. Nothing can touch me!");
+	else words[0] = 0;
+	return words;
+}
+
 /* A DarkChip that ran as its base chip for want of a BugFrag, into `out` */
 void dark_base_words(char *out, size_t n, const char *dark, const char *base) {
 	snprintf(out, n, "@M We had no BugFrags,Lan...|@M So that %s was only a %s.", dark, base);

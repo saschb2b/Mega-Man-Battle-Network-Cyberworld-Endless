@@ -11,6 +11,7 @@
 #include "bn6_forms.h"
 #include "bn6_navis.h"
 #include "bytes.h"
+#include "darkinvs.h"
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
@@ -345,6 +346,8 @@ bool soulchaos_install(int brk) {
 	bool ok = xattack_set(BN6_CHAOS_FAMILY, (SOULS_CHAOS + CHAOS_FAIL_FAMILY) | 1u) && hooks();
 	claims_end();
 	done = ok;
+	/* (BN5's chip AI for the player, which ShadowSoul's chaos attack, BN5's DarkInvs, puts him under: darkinvs.h) */
+	if (ok) darkinvs_install();
 	printf("soulchaos: Chaos Unison%s%s%s\n", ok ? ": its charge, phases, glow, release, attacks and failure" : " NOT placed whole",
 		dark_id < 0 ? " (no Dark Soul installed: a failure spawns none)" : "", glow_number < 0 ? " (no dark glow copied)" : "");
 	return ok;

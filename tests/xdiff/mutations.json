@@ -1250,6 +1250,22 @@
    "spec": "chip_numbrmnds",
    "soulbreak": 268435456,
    "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
+  },
+  {
+   "name": "DarkInvs's time a frame short",
+   "spec": "chip_darkinvs",
+   "poke5": [
+    "080E2444:0257"
+   ],
+   "what": "the time BN5's DarkInvs hands its chip AI (the literal 600 at BN5's 0x080E2444) 599 at its moved copy: MegaMan's AI data +0x36 a frame apart from BN5's from the machine's entry (src/emu/darkinvs.c)"
+  },
+  {
+   "name": "DarkInvs's end a frame long",
+   "spec": "chip_darkinvs_end",
+   "poke5": [
+    "080EF288:2018"
+   ],
+   "what": "BN5's family 0x49, which ends DarkInvs where its time runs out (its movs r0,#0x17 at 0x080EF288, its frames), 0x18 at its moved copy (BN6's 0x99): MegaMan given back a frame after BN5's"
   }
  ]
 }

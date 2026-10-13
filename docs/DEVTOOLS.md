@@ -428,8 +428,8 @@ next; `0:chip 214 R 1` puts DarkCirc R in the folder), and `chipai`
 battle, for 600 frames, as BN5's DarkInvs puts him: its machine,
 `src/emu/darkinvs.c`, with no button pressed after the Custom screen's
 OK he picks from his folder's chips, walks to where one reaches and uses
-it; BN5's DarkInvs itself and its end are not in yet, docs/MULTIROM.md,
-The chips' code). The guest
+it, its end by its time and BN5's as DarkInvs's: docs/MULTIROM.md, The
+chips' code, DarkInvs, moved). The guest
 battles' `slowboot=N` and their `gem` went with them. `folder=ID` makes the
 run's folder thirty of chip ID in * (`folder=286`: every hand DrkSword,
 for a capture of one chip in BN6's battles), `folder=ID/N` its first N

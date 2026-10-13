@@ -952,8 +952,15 @@ engine's, and all twelve kinds play there, each by its own net's rule
      where BN5's ROM is absent: a 3DS without it, a run with BN6 alone.
      The price stays as decided: 20 max HP for a battle its dark power ran
      in, once a battle; a DarkChip given up for Chaos Unison costs
-     nothing. (Its engine is docs/MULTIROM.md's, The chips' code, What
-     remains: until it is in, the registry's DarkInvs plays BN6's own.)
+     nothing. Built the same day (docs/MULTIROM.md, The chips' code,
+     DarkInvs, moved): BN5's code moved into BN6's engine, held to BN5's
+     battle frame by frame; where BN5's ROM is read DarkInvs comes into
+     the hand while MegaMan worries, makes him dark, and for ten seconds
+     the game drives him, unseen; its flame's words say so ("For ten
+     seconds,the darkness takes over!", then that nothing can touch him)
+     with BN5's rule's. Seen in play (`--net-biome x0 --dev worried,god`,
+     `chip 289 * 1`): the game fired his buster and threw his MiniBomb, the
+     Mettaur fell, max HP 140 to 120 once, the next battle his own.
   2. *DarkPlus:* offered by BN5's flame of darkness, by BN5's rule (50
      more for the next attack chip), never by BN6's flame: BN6's US
      DarkPlus does nothing, and offering it there would be a trap. Built:
@@ -1237,9 +1244,9 @@ own code runs them, our part is the run around it (`src/director/darkbn6.c`,
   Those are against the law!"), and the folder's NAVIGATOR line is
   MegaMan's.
 - **Where BN5's ROM is read** (the owner's call of 13 October 2026,
-  DarkChips above): DarkPlus is BN5's chip in BN6's record and BN5's
-  flame offers it; DarkInvs follows as its engine comes in. BN6's rule
-  here stays where BN5's ROM is not read.
+  DarkChips above): DarkPlus and DarkInvs are BN5's chips in BN6's
+  records (DarkInvs from either flame, by BN5's rule and words; DarkPlus
+  from BN5's alone). BN6's rule here stays where BN5's ROM is not read.
 - **In BN5's areas** (until issue #82's last round BN5's own battles,
   where BN5's rule brought a kind of these four from the run's DarkChips,
   shelved until MegaMan worried) the four play as everywhere: from the

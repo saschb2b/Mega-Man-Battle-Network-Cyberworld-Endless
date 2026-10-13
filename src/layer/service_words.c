@@ -134,7 +134,7 @@ int ta_challenge(TextArchive *t, int flag, const char *prize, const char *navi) 
 	return i;
 }
 
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, int plus, bool first) {
+int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first) {
 	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
@@ -142,17 +142,18 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, int plus, bool fir
 	 * a returning playtester heard only "when I'm hurt badly", session 68.
 	 * One by BN5's rule: BN5's worried rule deals it into his hand in our
 	 * battles too, and one used makes him dark for that battle, as BN5's
-	 * do: docs/MULTIROM.md, One net. DarkPlus says what it does, as the
-	 * owner asked of its offer, 13 October 2026) */
-	char does[64] = "";
-	if (plus > 0) snprintf(does, sizeof does, "|My next attack chip hits %d harder!", plus);
-	char words[660];
+	 * do: docs/MULTIROM.md, One net. DarkPlus and DarkInvs say what they
+	 * do, as the owner's calls of 13 October 2026 ask: `does`, pages apart
+	 * by '|', "" none) */
+	const char *bar = does && *does ? "|" : "";
+	if (!does) does = "";
+	char words[720];
 	if (first)
-		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!%s|It only comes when I'm worried.|"
+		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!%s%s|It only comes when I'm worried.|"
 			"At a quarter HP,or hit again and again!|It's real power... But it eats at me.|Use one,and I go dark for that battle.|"
-			"And each battle I use one in...|...I lose %d max HP. For the rest of this dive!", chip, does, DARK_PRICE);
-	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s|It comes when I'm worried,at a quarter HP.|"
-		"Each battle I use one in costs %d max HP.", chip, does, DARK_PRICE);
+			"And each battle I use one in...|...I lose %d max HP. For the rest of this dive!", chip, bar, does, DARK_PRICE);
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s%s|It comes when I'm worried,at a quarter HP.|"
+		"Each battle I use one in costs %d max HP.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
 	/* (on Yes: holding one costs nothing till it's used, and a paging A

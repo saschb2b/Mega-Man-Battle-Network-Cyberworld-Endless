@@ -115,6 +115,26 @@
 #define BN6_AI_ANGER          0x34        /* u16 a player's AI data +0x34: his anger's frames (both games' emotion getters: 3, which UNITE stands in) */
 #define BN6_AI_FLAGS          0x44        /* u32 a player's AI data +0x44: his requests (0x40 to leave his form: 0x08015994; 0x4000 to enter one) */
 #define BN6_AI_MODES          0x48        /* u32 a player's AI data +0x48: flags (0x08010312 sets them; BN5's 0x200, BN5_AI_UNDER, no code of BN6's) */
+#define BN6_SUPPORT_MARK      0x080ED12Au /* movs r0,#1 in the support family (0x080ED0DC, r7 the attack's variables) past the chip's routine, before
+                                             its +1 marked: the attack ended at the next frame (BN5's twin 0x080EC400 ends it now, 0x080EC448), */
+#define BN6_SUPPORT_END       0x080ED130u /* ... its end (bl 0x08011714, then pop) */
+#define BN6_ATTACK_SUB        0x03        /* the attack's variables' +3: its subfamily (the support routine by it: BN6_CHIP_ROUTINES) */
+#define BN6_SUPPORT_DARKINVS  0x65        /* BN5's DarkInvs's support routine (its support 0x3B as BN6's 0x2A + 0x3B: xchips_code.h) */
+#define BN6_REACTION_START    0x080EBA9Cu /* movs r0,#0x49 in the attack's requests (0x080EBA74, r5 him) past its 0x80000 test: BN6's family 0x49 started
+                                             (bl 0x08011680 next), where BN5's twin (0x080EB0F0) starts BN5's of the number */
+#define BN6_REACTION_CALL     0x080EBA9Eu /* ... the bl that starts it */
+#define BN6_REACTION_BN5      (0x50 + 0x49) /* ... BN5's family 0x49 as BN6's grown table holds it (xattack_grow.h: BN5's family F at 0x50 + F) */
+#define BN6_AI_DRAIN          0x36        /* u16 a player's AI data +0x36: while not 0, 1 HP a frame lost (BN6_AI_DRAIN_TEST) and his mood held (0x08014490's
+                                             readers); BN5 keeps its chip AI's time there (BN5_AI_UNDER_TIME), which drains nothing */
+#define BN6_AI_DRAIN_TEST     0x080144A2u /* ldr r3,[r5,#0x58] in the drain (0x08014498, push {lr}; from 0x0801B13A), past its time stop's test, */
+#define BN6_AI_DRAIN_DONE     0x080144B2u /* ... its pop {pc} */
+#define BN6_PLAYER_INIT_AI    0x080172F6u /* ldrb r0,[r5,#0x16] in the player's set-up (0x080172F0, his state 0, r5 him), past 0x0800F35C, which lays his
+                                             AI data out: before any of his set-up names it */
+#define BN6_PLAYER_FRAME_END  0x0801AD10u /* pop {r4,r7,pc}: the player's frame's end (0x0801AC6C, r5 him), where BN5's twin (0x080178E4) calls
+                                             0x0800DBD8 last, the time under its chip AI (BN5_AI_UNDER_TIME) counted down */
+#define BN6_TOOLKIT_PAUSE     0x3C        /* eToolkit +0x3C: a block whose +0xA (BN6_PAUSED) is not 0 while the battle is paused (bn6f battle_isPaused,
+                                             0x0800A03C; BN5's +9) */
+#define BN6_PAUSED            0x0A
 #define BN6_PLAYER_IDLE_FREE  0x080F1870u /* the player's idle state past the chip request's test (0x080F186E: r0 0xFFFF, none asked), its routine's
                                              frame push {r4,r6,r7,lr}: where BN5's twin (0x080F04CC) runs its chip AI while BN5_AI_UNDER stands */
 #define BN6_AI_POWER_CHAOS    0x11        /* u8 a player's AI data +0x11: his loadout's sixth (BN5's Chaos Unison's power attack, 0x0801CA18) */

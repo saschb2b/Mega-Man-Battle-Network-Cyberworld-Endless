@@ -86,6 +86,11 @@ FORCE_COPY = {
 # Routines aimed at their BN6 twin though the twin's tables differ from BN5's in length (the same code else, the families'
 # copy's choice of the same routine, proven by their specs): BN5's routine: (BN6's, why)
 FORCE_TWIN = {
+    0x08011A8C: (0x080143A6, "BN5's calm (DarkInvs's object, 0x080E2410: his mood 0x80 where it is not 0, his collision's 0x200000 and "
+                             "+0x40's 0x200 cleared, AIData +0x34 and +0x4C zeroed): BN6's twin the same steps but the mood written "
+                             "where it is 0 too, which src/emu/soulmood.c's keep_dark holds back while a BN5 DarkChip keeps him dark "
+                             "(the one mood 0 a battle of ours has); BN5's mood block calmed by darkinvs.c's hook on the statuses' "
+                             "stub before it (soulmood_unison)"),
     0x080CCFD0: (0x080CD4A8, "BoyBomb's and BomBoy's bomb's update (the third kind's 0x3E, its states run by the obstacle runner "
                              "0x08017FCC / 0x0801B394): BN6's twin runs BN6's actions table, its two status states before the bomb's "
                              "own, as BN6's generic states number them (BN5's 0x080133C4's twin writes 8 where BN5's 6); BN5's own "
@@ -164,6 +169,14 @@ SUB_STUB = 4
 # Calls aimed at the chips' stubs in one unit alone (by its label): the SP power's gate (0x080090E8, the battle's link bit)
 # answering 1, so BN5's fixed powers of a link battle are taken (0x0800E95C) where BN5 reads its own deletion times
 UNIT_STUBS = {
+    # (DarkInvs's object, 0x080E23D4: MegaMan put under BN5's chip AI. BN5's 0x0802C03E and 0x0802C114 write his AI data's +0xF0
+    # on, past BN6's 0x100 bytes: hooked stubs that move it into BN5's 0x140 first and enter the machine as BN5's do; BN5's
+    # 0x08017060 clears his statuses at BN5's places of the collision data, BN6 none: a hooked stub at BN6's (src/emu/darkinvs.c))
+    'DarkInvs': {0x0802C03E: (0x24, "the chip AI's state cleared (BN5's 0x40 bytes from AIData +0xF0), his AI data moved into BN5's "
+                                    "0x140 bytes first: darkinvs.c's hook"),
+                 0x0802C114: (0x28, "the chip AI entered (AIData +0x36 r0, +0xF0 1, +0x48's 0x200; his side's lists): darkinvs.c's hook"),
+                 0x08017060: (0x2C, "his statuses cleared (collision +0x3C's 0xE800, +0x40's 0x8068, the four times BN5 +0x1E-+0x25, "
+                                    "BN6 +0x1C-+0x23: legit.json's layout): darkinvs.c's hook")},
     # (ElemRage's flame's place: BN5's point 0x14 of MegaMan's sprite, (-1, 26) in every one of his rows, BN6's 0x14 another,
     # (20, 25), and none of BN6's (1, 26): the call answered with BN5's numbers, POINTS)
     'ElemRage': {0x08015164: (0x10, "MegaMan's point 0x14, (-1, 26) in each of BN5's rows (0x080151C4 on): BN5's numbers")},
@@ -221,6 +234,8 @@ TABLE_SPRITES = {
 # Sprite loads of MegaMan's own sprite, whatever it is (0x0800DA6A's list and number: his body's), each game's own: BN5's
 # load site: why
 MEGAMAN_LOADS = {
+    0x080BA6F4: "DarkInvs's double of MegaMan (the first kind's 0x09, its set-up 0x080BA6CC): MegaMan's own sprite where its user is "
+                "his (0x0800D1B8's kind 2), its list and number 0x0800DA32's by his NaviStats +0x2C and +0x29, BN6's own in BN6",
     0x080BD86A: "HolyDrem's double of MegaMan (the first kind's 0x1C, its set-up 0x080BD834): MegaMan's own sprite where its user "
                 "is his (0x0800D1B8's kind 2), its list and number 0x0800DA32's by his NaviStats +0x2C and +0x29 (BN6's twin "
                 "0x0800FC9E, a Soul's by src/emu/soullook.c's hook), else its user's by its NameID (0x0800D188); BN6's own in BN6",
@@ -380,10 +395,11 @@ UNITS = (
     ('attack', 0x22, 'Tornado'),
     ('support', 0x23, 'HolyDrem'),
     ('support', 0x31, 'Poltrgst'),
+    ('support', 0x3B, 'DarkInvs'),
 )
 # The next units, derived for the report alone (--report) until what each needs is in: its decisions there, and the
 # chips' differential's finding where a spec ran it (docs/MULTIROM.md, The chips' code: what remains)
-CANDIDATES = (('support', 0x3B, 'DarkInvs'),)
+CANDIDATES = ()
 
 
 # ---- the registry's rows: which chips a unit plays ----
@@ -750,6 +766,9 @@ DARK_MOVED = {
 # ROM is read, BN6's record of the name takes the moved family and subfamily, and BN5's parameters and effect flags (src/core/
 # chips.c, records_make), as an own id's record does
 SAME_MOVED = {
+    189: "DarkInvs: BN5's support 0x3B (0x080E2420) puts MegaMan under its chip AI for 600 frames, invisible, the game driving "
+         "him (src/emu/darkinvs.c); BN6's 289 runs BN6's support 0x26, its own auto mode (the owner's call of 13 October 2026: "
+         "BN5's wherever its ROM is read)",
     190: "DarkPlus: BN5's misc family's subfamily 3 (0x0800E190) stores its power in the next chip of the hand where that chip "
          "is an attack (and flashes him green 24 frames); BN6's 290 runs BN6's subfamily 3 (0x08010488), which lacks the hand's "
          "branch and puffs (chip_darkplus)",

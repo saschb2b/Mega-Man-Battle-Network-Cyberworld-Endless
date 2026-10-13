@@ -281,7 +281,7 @@ every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
 | Range | Contents | Code |
 | --- | --- | --- |
 | `0x02010CE0`-`0x020115DF` | Persistent: the chip pack's extension, ids 320-511, 12 bytes an id (`BN6_PACK_EXT`; docs/MULTIROM.md, The chip registry) | `xchips_install.c` |
-| `0x020115E0`-`0x0201172F` | Persistent: MegaMan's AI data under BN5's chip AI (`RAM_PLAYER_AI`: BN5's 0x140 bytes, his object's +0x58 pointed here as the machine is entered, then at `0x02011720` his own AI data's place in BN6's pool, given back as he leaves it; DarkInvs's machine, docs/MULTIROM.md, The chips' code) | `darkinvs.c` |
+| `0x020115E0`-`0x0201172F` | Persistent: MegaMan's AI data, BN5's 0x140 bytes, where BN5's ROM is read (`RAM_PLAYER_AI`: his object's +0x58 pointed here as he is set up, `0x080172F6`, his pool's 0x100 bytes copied first, the rest zero; BN5's chip AI keeps its state from +0xF0 to +0x13F, past BN6's 0x100), then at `0x02011720` his place in BN6's pool; DarkInvs's machine, docs/MULTIROM.md, The chips' code | `darkinvs.c` |
 | `0x02011730`-`0x020117FF` | Persistent: spare | |
 | `0x0203FB50`-`0x0203FBDF` | Per battle: BN5's sea's submerge (`RAM_SEA`; `XSEA_MASK` the submerged, a bit each by its collision data's own, `BN6_COLL_INDEX_BIT`; `XSEA_MARKERS` each one's marker by that bit's index, 32 words; 0x84 bytes used), which BN5 keeps in the collision data where BN6 keeps its bubble | `xsea.c` |
 | `0x0203FBE0`-`0x0203FD9F` | Per battle: the Dark Soul's chip AI's lists (`RAM_DARK_LISTS`, `BN6_DARK_LISTS`: BN5's `0x02034C20` laid out as BN5's, 0xE0 a side, BN6's chip ids), empty (0) as each battle is set up | `xnavi_dark.c`, `xnavi_bn5.c` |
@@ -798,6 +798,13 @@ Chaos Unison (the track's S6, `src/emu/soulchaos.c`; docs/ROM_DATA.md, Chaos Uni
 | `0x080131D4` | the release's request (`BN6_CHAOS_RELEASE`) | answer: 0x8000 in phase 2, else 0x10000 (BN5's), the request the Souls' | once a release |
 | `0x080F180E` | the player's requests read (`BN6_CHAOS_CONSUME`) | jump: the chaos attack (the level one up, the power attack by his AIData +0x11) or the failure (family 0xC7), Chaos Unison's Thumb | once a release |
 | `0x080F1870` | the player's idle state past the chip request's test (`BN6_PLAYER_IDLE_FREE`, `darkinvs.c`, where BN5's ROM is read) | jump: BN5's chip AI for the player, through `FREE_CHIP_AI`, where his AI data's +0x48 bit 0x200 stands (BN5's rule; nothing of BN6's sets it) | a frame he idles |
+| `0x080172F6` | the player's set-up past his AI data's lay-out (`BN6_PLAYER_INIT_AI`, `darkinvs.c`) | answer: his AI data moved into `RAM_PLAYER_AI` (BN5's 0x140 bytes) | once a battle |
+| `0x0801AD10` | the player's frame's end (`BN6_PLAYER_FRAME_END`) | answer: BN5's time under the chip AI counted down (AIData +0x36, BN5's `0x0800DBD8`), at 0 his request 0x80000 | a frame he runs |
+| `0x080144A2` | BN6's drain while AIData +0x36 is not 0 (`BN6_AI_DRAIN_TEST`) | jump: none while the chip AI has him (to `0x080144B2`) | a frame |
+| `0x080ED12A` | the support family past the chip's routine (`BN6_SUPPORT_MARK`) | jump: DarkInvs's (subfamily 0x65) attack ended in this frame, BN5's (to `0x080ED130`) | a support chip used |
+| `0x080EBA9C` | the attack's requests' answer to 0x80000 (`BN6_REACTION_START`) | jump: BN5's family 0x49 (BN6's 0x99) where the chip AI has him, on at the bl `0x080EBA9E` | DarkInvs's end |
+| the Navis' copy of BN5's `0x080EBBFE` | its buster arm's read of his Chaos Unison (`BN5_ARM_CHAOS_READ`) | jump: the Souls' block's `BN6_SOUL_CHAOS` | a buster shot of the machine's |
+| `XC_STUBS` + 0x24, + 0x28, + 0x2C | DarkInvs's calls BN6 has no twin of (`XC_STUB_DARKINVS`) | answer: the chip AI's state cleared, its entry (time, flag, list), his statuses cleared at BN6's places and BN5's calm of his mood | DarkInvs used |
 | `0x08011744` | the attack's end, its requests cleared (`BN6_CHAOS_END`) | answer: BN5's 0x18000 cleared too; the failure's kind his chaos ended | once an attack ends |
 | `0x080EBA84`, `0x080ED7B0`, `0x080ED90E`, `0x080EEE32` | BN6's tests of the counter requests 0x8600 (`BN6_COUNTER_TEST`, `_1D`, `_1E`, `_37`) | answer: 0x8000 left out while the Souls' request stands (BN5 tests 0x600) | each frame |
 | `0x080E21E4`, `0x080E22A8` | the charge glow's and its sounds' side tests (`BN6_GLOW_SHOW`, `BN6_GLOW_SOUND`) | jump: in chaos, BN5's test by the side | each frame of a glow |

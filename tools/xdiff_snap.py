@@ -1036,7 +1036,7 @@ def obj_cells(fa, fb, oa, ob):
             copy = canon.copy_of(base_b - 4) if w - sp == 0x18 else None
             if copy is not None:
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', canon.sprite_name(5, copy) or f'{copy:#x}')
-            elif w - sp == 0x18 and (na or nb) and not art_chosen(canon, oa, ob):
+            elif w - sp == 0x18 and (na or nb) and (not art_chosen(canon, oa, ob) or na == nb):
                 rel = ('sprite', na or f'{base_a - 4:#x}'), ('sprite', nb or f'{base_b - 4:#x}')
             elif w - sp == 0x18 and canon.sprite_bytes and not (kind == 'T4' and oa.o8(OBJ_TYPE) == 0):
                 # (a sprite of no pair, both games' in their ROMs or a family's copy: the same picture where the same bytes;
@@ -1044,7 +1044,11 @@ def obj_cells(fa, fb, oa, ob):
                 ha, hb = canon.sprite_sha(5, base_a - 4), canon.sprite_sha(6, base_b - 4)
                 if ha and hb:
                     rel = ('sprite', f'bytes {ha}'), ('sprite', f'bytes {hb}')
-        if w - sp == 0x18 and oa.sprite and ob.sprite and oa.sprite != ob.sprite and art_chosen(canon, oa, ob):
+        # (a moved type drawing a sprite both games name by one pair, MegaMan's own as BN5's family 0x49's afterimage loads it
+        # by his form, 0x080BA944: each game's own of that pair, as the pair says, chip_darkinvs_end)
+        paired = base_a and base_b and canon.sprite_name(5, base_a - 4) is not None and \
+            canon.sprite_name(5, base_a - 4) == canon.sprite_name(6, base_b - 4)
+        if w - sp == 0x18 and oa.sprite and ob.sprite and oa.sprite != ob.sprite and art_chosen(canon, oa, ob) and not paired:
             # (the sprite itself, by its bytes: the art of what an install moved or chose, which no number of the two games' says)
             out.append(('obj', w - NODE, ('sprite bytes', f'{oa.sprite:08x}'), ('sprite bytes', f'{ob.sprite:08x}')))
         view = word_view(fa, fb, wa, wb, rel)
