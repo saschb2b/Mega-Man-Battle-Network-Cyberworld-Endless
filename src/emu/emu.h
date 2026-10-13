@@ -76,6 +76,8 @@ int emu_hook_events(HookEvent *out, int max);
 
 /* Save states in the data directory (made on the device, never shipped). */
 bool emu_save_state(const char *path);
+/* As emu_save_state, its file written by the save queue (save_queue.h) */
+bool emu_save_state_queued(const char *path);
 bool emu_load_state(const char *path);
 
 /* RAM the engine keeps patched, where the game copies code into it from a

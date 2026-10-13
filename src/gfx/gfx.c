@@ -648,10 +648,97 @@ int text_width(const char *s) {
 
 static void raw_text(int x, int y, const char *s, SDL_Color c, int scale);
 
+/* ---- a line of text drawn whole ----
+ * SDL's software renderer (the 3DS's, the headless captures') blits a
+ * string glyph by glyph: each a 16x16 cell of the atlas for a glyph some
+ * 6 wide, its colour and alpha applied to every texel, and scaled, a
+ * surface made and freed for each glyph. An area's card took 8 to 10 ms
+ * a frame of a New 3DS's drawing that way. A string drawn on two frames
+ * running (or twice in one) is drawn once into a texture of its own, the
+ * atlas's texels at their places and scale, and blitted whole with the
+ * same colour and alpha: the same pixels, each blended once, as the
+ * glyphs' texels never overlap (a glyph's advance is its texels' width).
+ * One that changes each frame (a timer) stays glyph by glyph. */
+#define TEXT_LINES 12
+#define LINE_CHARS 64
+typedef struct { char s[LINE_CHARS]; int scale, w; uint64_t frame; SDL_Texture *tex; } Line;
+static Line lines[TEXT_LINES], seen_lines[TEXT_LINES];   /* (drawn whole; and met once, waiting for a second draw) */
+
+static Line *line_find(Line *set, const char *s, int scale) {
+	for (int i = 0; i < TEXT_LINES; ++i)
+		if (set[i].scale == scale && !strcmp(set[i].s, s)) return &set[i];
+	return NULL;
+}
+
+static Line *line_oldest(Line *set) {
+	Line *o = &set[0];
+	for (int i = 1; i < TEXT_LINES; ++i)
+		if (!set[i].scale || (o->scale && set[i].frame < o->frame)) o = &set[i];
+	return o;
+}
+
+/* the string's texture (its texels white and shade, as the atlas's), or
+ * NULL where it is to be drawn glyph by glyph */
+static SDL_Texture *line_tex(const char *s, int scale) {
+	if (!font_tex || strlen(s) >= LINE_CHARS) return NULL;
+	uint64_t now = P.frame;
+	Line *l = line_find(lines, s, scale);
+	if (l) { l->frame = now; return l->tex; }
+	Line *met = line_find(seen_lines, s, scale);
+	if (!met || met->frame + 1 < now) {
+		met = met ? met : line_oldest(seen_lines);
+		snprintf(met->s, LINE_CHARS, "%s", s);
+		met->scale = scale;
+		met->frame = now;
+		return NULL;
+	}
+	int w = text_width(s) * scale, h = 16 * scale;
+	if (w <= 0) return NULL;
+	uint32_t *px = calloc((size_t)w * (size_t)h, 4);
+	if (!px) return NULL;
+	int x = 0;
+	for (const char *p = s; *p; ++p) {
+		unsigned char ch = (unsigned char)*p;
+		if ((ch < 32 && ch > 5) || ch >= 128) continue;
+		for (int k = glyph_first[ch]; k < glyph_first[ch + 1]; ++k) {
+			int tx = glyph_texels[k] & 15, ty = glyph_texels[k] >> 4 & 15;
+			uint32_t v = font_px[ty * 16 * 128 + ch * 16 + tx];
+			for (int j = 0; j < scale; ++j)
+				for (int i = 0; i < scale; ++i) {
+					int qx = x + tx * scale + i;
+					if (qx < w) px[(ty * scale + j) * w + qx] = v;
+				}
+		}
+		x += font_w[ch] * scale;
+	}
+	SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormatFrom(px, w, h, 32, w * 4, SDL_PIXELFORMAT_ARGB8888);
+	SDL_Texture *tex = surf ? SDL_CreateTextureFromSurface(P.renderer, surf) : NULL;
+	if (surf) SDL_FreeSurface(surf);
+	free(px);
+	if (!tex) return NULL;
+	SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+	l = line_oldest(lines);
+	if (l->tex) SDL_DestroyTexture(l->tex);
+	snprintf(l->s, LINE_CHARS, "%s", s);
+	l->scale = scale;
+	l->w = w;
+	l->frame = now;
+	l->tex = tex;
+	return tex;
+}
+
 void text_draw_scaled(int x, int y, const char *s, SDL_Color c, int align, int scale) {
 	if (align == TEXT_CENTER) x -= text_width(s) * scale / 2;
 	else if (align == TEXT_RIGHT) x -= text_width(s) * scale;
 	if (raw.px) { raw_text(x, y, s, c, scale); return; }
+	SDL_Texture *whole = line_tex(s, scale);
+	if (whole) {
+		SDL_SetTextureColorMod(whole, c.r, c.g, c.b);
+		SDL_SetTextureAlphaMod(whole, c.a);
+		SDL_Rect dst = { x, y, text_width(s) * scale, 16 * scale };
+		SDL_RenderCopy(P.renderer, whole, NULL, &dst);
+		return;
+	}
 	SDL_SetTextureColorMod(font_tex, c.r, c.g, c.b);
 	SDL_SetTextureAlphaMod(font_tex, c.a);
 	for (; *s; ++s) {

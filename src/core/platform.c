@@ -20,6 +20,7 @@
 #include "gfx.h"
 #include "keymap.h"
 #include "mirror.h"
+#include "save_queue.h"
 #include "pads.h"
 #include "touch.h"
 #ifdef CW_IOS
@@ -568,8 +569,10 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 }
 
 void platform_shutdown(void) {
-	/* (the saves as the game ends them, copied before it goes: mirror.h;
-	 * a statistics' request under way given up) */
+	/* (the saves as the game ends them, written and then copied before it
+	 * goes: save_queue.h, mirror.h; a statistics' request under way given
+	 * up) */
+	save_queue_quit();
 	mirror_flush();
 	analytics_net_quit();
 	pads_close();

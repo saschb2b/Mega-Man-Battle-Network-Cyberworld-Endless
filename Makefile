@@ -229,9 +229,9 @@ build/host/test_core: $(TEST_OBJS)
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

@@ -99,7 +99,7 @@ void save_checkpoint(void) {
 	library_from_game();
 	programs_from_game();
 	save_run();
-	emu_save_state(path);
+	emu_save_state_queued(path);
 	int make = LAYER_MAKE;
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
 	save_write_blob("run.area", LAYER_AREA_MAGIC, &D.layer_tiles, sizeof D.layer_tiles);
@@ -187,11 +187,14 @@ void checkpoint_update(void) {
 	if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 }
 
+/* (at a quit, or as iOS sends the game to the background, where it may
+ * end it unasked: its files written before it returns, save_queue.h) */
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
 	suspending = true;
 	save_checkpoint();
 	suspending = false;
+	save_queue_wait();
 	return true;
 }
 
