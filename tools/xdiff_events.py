@@ -13,6 +13,7 @@ OBJ_VISIBLE = 0x02    # ... drawn this frame: the blink hides a flashing object 
 NAMES = {DRAW: 'draw', SPAWN: 'spawn', SOUND: 'sound', EFFECT: 'effect', ATTACK: 'setAttack', RESERVE: 'reserve', BLINK: 'blink',
          SPRITE_SET: 'sprite', MOOD: 'mood'}
 NAVI_MOOD = PLAYER_NAVI + 0x0E   # his battle NaviStats' mood in the player block
+MOOD_SET = 2                     # an XD_MOOD event's side 0 with XD_MOOD_SET: BN5's mood set outright (BN5_MOOD_SET, BN5_MOOD_CALM)
 
 
 def site(trace, a):
@@ -73,7 +74,10 @@ class Translations:
                 blinked.add(role)
             elif e.kind == MOOD and e.a == 0:
                 self.gained += e.b
-        # (BN5's mood as BN6's: less what its gains raised it by, where it is neither Full Synchro nor dark, whose rules both share)
+            elif e.kind == MOOD and e.a == MOOD_SET:   # (set outright, as BN6's twins set its own: the gains' rise gone)
+                self.gained = 0
+        # (BN5's mood as BN6's: less what its gains raised it by since it was last set outright, where it is neither Full Synchro
+        # nor dark, whose rules both share)
         player = fa.fr.get('player')
         if player and self.gained and player[NAVI_MOOD] not in (0, 0xFF):
             fa.fr['player_over'] = {NAVI_MOOD: max(player[NAVI_MOOD] - self.gained, 1)}
@@ -117,7 +121,8 @@ def family_calls(f):
     has it)"""
     canon, game, out = f.canon, f.game, []
     for e in f.fr['events']:
-        if not own(f, e) or e.kind == BLINK:
+        # (a mood set outright is the translation's mark alone, BN5's: BN6's twins write its own, which the frame compares)
+        if not own(f, e) or e.kind == BLINK or (e.kind == MOOD and e.a & MOOD_SET):
             continue
         at = site(f.trace, e.family)
         if e.kind == SPAWN:

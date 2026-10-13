@@ -1,5 +1,5 @@
 {
- "about": "ShadowSoul's Chaos Unison's DarkInvs (chaos_shadow_45's battle), its Soul's one turn ending at the second Custom screen (L at t520, OK) while BN5's chip AI has MegaMan: BN5 takes him out of it as the Soul ends (0x08012276: 0x0802C12A, its time and state cleared, the flag dropped; src/emu/darkinvs.c's darkinvs_leave from soullife.c's leave), the machine stopped in both from t524, MegaMan his own. Every difference of BN6's play from BN5's fails it.",
+ "about": "ShadowSoul's Chaos Unison's DarkInvs (chaos_shadow_45's battle), its Soul's one turn ending at the second Custom screen (L at t520, OK) while BN5's chip AI has MegaMan: BN5 takes him out of it as the Soul ends (0x08012276: 0x0802C12A, its time and state cleared, the flag dropped; src/emu/darkinvs.c's darkinvs_leave from soullife.c's leave), the machine stopped in both from t524, MegaMan his own, his battle NaviStats' mood 0x80 in both as the Soul's end calms him. Every difference of BN6's play from BN5's fails it. (Its recorded FAIL at t524, BN5's mood read as 0x08 against BN6's 0x80, was the comparator's: its reading of BN5's mood in BN6's terms took the gains DarkInvs's hits had raised it by off a mood the calm had set; the gains count since the last set now, BN5_MOOD_SET and BN5_MOOD_CALM logged.)",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
@@ -243,10 +243,5 @@
   "1"
  ],
  "dslist": 1,
- "sprites": "bytes",
- "verdict": {
-  "is": "FAIL",
-  "at": 524,
-  "why": "the chip AI left as BN5 leaves it (its time, state and flag, every byte of MegaMan's AI data and object the same from t524 to t760), but his battle NaviStats +0x0E: BN5's 0x08 against BN6's 0x80 from the Soul's end on, BN5's calm (0x08011A8C, 0x08012272) writing 0x80 where it is not 0 and BN6's twin 0x80 (soulmood's mood, the story's, 0x80 in both): untraced, BN5's write of 0x08 there found in neither the leave nor the chip AI's exit; a NumberSoul's Chaos Unison ending at the same screen without DarkInvs (chaos_number_45's battle so extended) passes"
- }
+ "sprites": "bytes"
 }

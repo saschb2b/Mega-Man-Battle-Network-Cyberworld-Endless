@@ -187,8 +187,17 @@ static uint32_t name_bn6(const Game *g, const uint8_t *s, uint32_t n, uint8_t *o
 	return k;
 }
 
+/* a word of a game's script at `bus`: `n` letters (its text codes 0x0B-0x3F), where the ROM is the one expected */
+static bool script_word(const uint8_t *rom, uint32_t bus, uint32_t n) {
+	if (bus < BUS || bus - BUS + n > ROM_SIZE) return false;
+	for (uint32_t k = 0; k < n; ++k)
+		if (rom[bus - BUS + k] < 0x0B || rom[bus - BUS + k] > 0x3F) return false;
+	return true;
+}
+
 /* its versions' names from its game's Navi archive (each version's as its
- * game shows it), BN6's codes, each ended */
+ * game shows it), BN6's codes, each ended; the Dark Soul's the word BN5's
+ * script calls it by (BN5_DARK_SOUL_NAME), its id's entry being another's */
 static void names_of(const XNavi *n, const Game *g) {
 	for (int v = 0; v < n->versions && !xv_failed(); ++v) {
 		uint32_t i = (uint32_t)(n->shown[v] ? n->shown[v] : n->code.names[v]) - 0x100u, at = g->names - BUS + 2 * i;
@@ -196,6 +205,10 @@ static void names_of(const XNavi *n, const Game *g) {
 		uint32_t p = g->names - BUS + get16(g->rom + at), len = 0;
 		while (p + len < ROM_SIZE && len < NAME_MAX && g->rom[p + len] != TEXT_END) ++len;
 		if (p + len >= ROM_SIZE || len >= NAME_MAX) { xv_fail("its name %d has no end", v); return; }
+		if (g->bn5 && n->code.names[v] == BN5_DARK_SOUL_ID && script_word(g->rom, BN5_DARK_SOUL_NAME, BN5_DARK_SOUL_NAME_LEN)) {
+			p = BN5_DARK_SOUL_NAME - BUS;
+			len = BN5_DARK_SOUL_NAME_LEN;
+		}
 		uint32_t k = name_bn6(g, g->rom + p, len, rec.name[v], NAME_MAX - 1);
 		rec.name[v][k] = TEXT_END;
 		rec.name_len[v] = k + 1;

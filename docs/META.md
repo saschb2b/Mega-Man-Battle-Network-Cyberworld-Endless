@@ -1320,7 +1320,11 @@ points first marked as proposals among them.
   charged shot is the DarkChip's attack (seen in BN5's engine: KnightMan's
   Soul with DarkDril fired a drill). Seen in BN5's engine, before the last
   round: DarkPlus offered worried, kept, and picked on a calm turn united
-  MegaMan with NumberMan's Soul in Chaos Unison. In BN6's engine Chaos
+  MegaMan with NumberMan's Soul in Chaos Unison. In BN6's engine the
+  same play is held to BN5's own battle frame by frame (`soul_mood_chaos`:
+  DarkDril offered worried and kept, a Cannon landed, KnightSoul's Chaos
+  Unison on the next screen); what lifts him is a chip's landed hit (a
+  Cannon 0x1E, as BN5 counts it), never the buster's. Chaos
   Unison's charge is the Souls track's S6 (docs/MULTIROM.md).
 - **No price for it** (as BN5 has it): BN5 counts a DarkChip
   given up for Chaos Unison as no DarkChip used (its use flag stays

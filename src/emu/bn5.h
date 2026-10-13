@@ -52,6 +52,8 @@
 #define BN5_OBJECT_RUNNING 0x0200BBF0u /* u32 the node of the object running, 0 outside the runner (0x08002FE2) */
 #define BN5_MOOD_GAIN     0x080127FAu /* a side's battle mood raised by r1 (r0 the side: not at 0, dark, nor 0xFF, Full Synchro; 0xFE at most), as
                                        * the hit pass lands a hit that is no counter (0x08017018); BN6's hit pass has no such call (0x0801A228) */
+#define BN5_MOOD_SET      0x080127CEu /* a side's battle mood set to r1 (r0 the side; not at 0, dark), BN6_MOOD_SET's twin */
+#define BN5_MOOD_CALM     0x08011A8Cu /* the mood of r5 (him) calmed to 0x80 where it is not 0, dark (BN6_MOOD_CALM's twin) */
 #define BN5_RESULT_WON     1       /* BN5_BATTLE_RESULT (its +1): won */
 #define BN5_RESULT_LOST    2       /* BN5_BATTLE_RESULT (its +1): lost */
 #define BN5_RESULT_ESCAPED 4       /* BN5_BATTLE_RESULT (its +1): escaped */
@@ -313,6 +315,10 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_NAVI_ID_FIRST 0x100       /* its Navis' enemy ids from here, six versions an AI (V1, V2, V3, SP, DS, a sixth unused) */
 #define BN5_DARK_SOUL_ID  0x18D       /* the Dark Soul's id (AI 0x16, one version): what a Chaos Unison released at the wrong time spawns */
 #define BN5_NAVI_DARK_SOUL 0x16       /* its AI index */
+#define BN5_DARK_SOUL_NAME 0x087F4404u /* "DarkSoul", a word of its script: the Dark Soul's name in BN6's engine. Its id's entry
+                                       * in BN5_NAVI_NAMES reads DrkCloud (BN5's own first Custom screen names the id so), and a
+                                       * failed Chaos Unison brings it later, past the one screen that names the foes */
+#define BN5_DARK_SOUL_NAME_LEN 8   /* ... its letters, no end of its own (the script runs on) */
 /* What BN6's engine lacks, which a Navi's moved code calls: stubbed */
 #define BN5_CLAIM_SPAWN   0x080EA08Cu /* a panel claim spawned (the fourth kind's 0x83) where the battle is a gate's (0x080090E8: BattleState
                                        * +0x32 bit 0x40, set by 0x0802D594 alone), else r0 0: the stub's answer, its result unread by its callers */

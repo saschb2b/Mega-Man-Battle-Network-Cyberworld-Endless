@@ -1230,7 +1230,10 @@ into the battle engine).
   BN5's two tests of its id (its collision's region 0x13; arriving in a
   fight under way, as a failed Chaos Unison brings it, no entry in the
   foes' list of four that shows their HP, BN6's `0x0801DC7C`, where at a
-  battle's start both games list it as any foe) made by hooks. What BN6's engine has no room
+  battle's start both games list it as any foe) made by hooks. Its name
+  is DarkSoul, the word BN5's script calls it by (`BN5_DARK_SOUL_NAME`):
+  BN5's names archive gives its id DrkCloud, which BN5's own first Custom
+  screen shows for it, and BN6's second screen names it as it fights. What BN6's engine has no room
   for is kept apart: its AI data's 0x140 bytes (BN6's are 0x100; BN5's
   chip AI keeps its state from +0xF0) in the battle's RAM, its two
   lists there too, and the chip records it reads, BN6's with the four
@@ -1825,11 +1828,14 @@ of. The registry's ids, records and art stay C1's (above).
     ends (`0x0801214A`, `0x08012276`, beside its calm): `darkinvs_leave`
     from soullife.c's enter and leave. `chaos_shadow_turn` (ShadowSoul's
     one turn ending at the second Custom screen while the machine runs)
-    holds a recorded FAIL at t524: the machine stops in both and every
-    byte of his AI data and object is the same to t760, but his battle
-    NaviStats +0x0E reads 0x08 in BN5 against BN6's 0x80 from the Soul's
-    end (BN5's calm writes 0x80 where it is not 0; a NumberSoul's Chaos
-    Unison ending so without DarkInvs passes): untraced. Not ported:
+    PASS: the machine stops in both and every byte of his AI data and
+    object is the same to t760. Its recorded FAIL at t524 (his battle
+    NaviStats +0x0E read 0x08 in BN5 against BN6's 0x80 from the Soul's
+    end) was the differential's own: its reading of BN5's mood in BN6's
+    terms took DarkInvs's hits' gains off a mood BN5's calm had set to
+    0x80; since the release candidate's fixes it takes them off only
+    since the mood was last set (`BN5_MOOD_SET`, `BN5_MOOD_CALM`
+    logged). Not ported:
     BN5's other three exits, `0x0802CCA4`, `0x0802CE3A` and `0x0802D028`,
     each in a routine that sets his HP from his NaviStats, clears his
     statuses, calms him and his invisibility (BN5's own resets of him; no
@@ -2066,8 +2072,12 @@ the next.
   HolyDrem and a Navi's V1 and SP chips only while not, the DS chips only
   while dark): refused, the chip is BN5's chip of nothing; the battle's
   dark stands for BN5's dark meter, which no run has. Held to BN5's own
-  battle by `soul_mood_dark`, `soul_mood_unite` and `soul_mood_gate`, the
-  mood compared in every Soul's spec, five mutations failing. Since
+  battle by `soul_mood_dark`, `soul_mood_unite`, `soul_mood_gate` and
+  `soul_mood_chaos` (Chaos Unison as BN5's play reaches it: DarkDril
+  offered worried, kept, a Cannon's landed hit lifting him by its 0x1E,
+  BN5's gain, where the buster's hits lift none, and KnightSoul's Chaos
+  Unison on the calm screen after), the mood compared in every Soul's
+  spec, a mutation of each rule failing. Since
   issue #82's final engine round each DarkChip's after-effect on his
   battle NaviStats (`0x0802C938`, ported) is BN5's too (his dark palette
   BN6's own since 13 October 2026: BN6's MegaMan has none, BN5's numbers
