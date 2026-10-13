@@ -68,7 +68,7 @@ const char *backup_system_name(void) {
 #elif defined(__ANDROID__)
 	return "Android";
 #elif defined(CW_IOS)
-	return "iPhone";
+	return "iOS";   /* (an iPhone or an iPad alike) */
 #elif defined(_WIN32)
 	return "Windows";
 #elif defined(__APPLE__)
