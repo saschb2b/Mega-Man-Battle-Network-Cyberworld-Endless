@@ -41,10 +41,13 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
   native   BN6's own Mettaur fought by xcontrol.py's fight keys, CanGard
            and BN5's Navis not installed (--dev nofamilies,nonavis) and
            installed: the same frame for frame, every byte, but a pointer
-           into what the install moved (BN6's tables grown among it) and
-           the code in IWRAM the lava's and the sea's install keeps patched
+           into what the install moved (BN6's tables grown among it), the
+           code in IWRAM the lava's and the sea's install keeps patched
            (src/emu/xpanels.c, and the hit gate's tests of a hidden target,
-           src/emu/xsea.c)
+           src/emu/xsea.c), and what the Souls do with no Soul held, which
+           install with BN5's Navis since issue #82's run round (xproxy.py
+           --souls's: a pointer into a table their install grew, BN5's mood
+           in their own block)
 
 Needs both ROMs (local only). Exits 0 when every check holds.
 """
@@ -323,7 +326,10 @@ def native(c, a):
     # install line in the second alone, and BN5's Navis' too, docs/MULTIROM.md, Transplanted Navis)
     c(not any(l.startswith(('xvirus: CanGard', 'xnavi:')) for l in la) and any(l.startswith('xvirus: CanGard') for l in lb),
       'CanGard installed in the second run alone (and BN5\'s Navis, docs/MULTIROM.md, Transplanted Navis)')
-    explained, bad = X.compare(fa, fb, ma, mb, False)
+    # (the Souls, which install with BN5's Navis, compared as xproxy.py --souls compares them: no Soul held)
+    import xproxy
+    xproxy.SOULS = True
+    explained, bad = xproxy.compare(fa, fb, ma, mb, False)
     for reason, where in sorted(explained.items()):
         print(f'  {reason}: {len(where)} bytes ({" ".join(f"{x:08x}" for x in sorted(where)[:8])})')
     for frame, addr, x, y in bad[:12]:
