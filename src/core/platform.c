@@ -480,6 +480,7 @@ static void phone_controls(void) {
 #endif
 }
 
+/* (a file dropped on the window: the title's and SAVES', as a screen's own) */
 static void input_start(void) {
 	keymap_default();
 	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
@@ -735,7 +736,7 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	case SDL_MOUSEMOTION:
 	case SDL_MOUSEBUTTONUP: mouse(e); break;
-	/* Files reach the title as well as screens that own their taps. */
+	/* (a file dropped: the title and SAVES take it, as screens that own their taps do) */
 	case SDL_DROPFILE:
 	case SDL_DROPTEXT:
 		if (e->type == SDL_DROPFILE && e->drop.file) snprintf(dropped, sizeof dropped, "%s", e->drop.file);
@@ -748,9 +749,7 @@ static void poll_event(const SDL_Event *e) {
 		break;
 	/* (and the saves' copy made: the app may be ended there unasked) */
 	case SDL_APP_WILLENTERBACKGROUND: let_go(); mirror_flush(); break;
-	/* (back: the copy's place looked at again, another device's saves
-	 * may have come in meanwhile) */
-	case SDL_APP_DIDENTERFOREGROUND: mirror_rescan(); break;
+	case SDL_APP_DIDENTERFOREGROUND: mirror_rescan(); break;   /* (another device's saves may have come) */
 	/* (the renderer's textures lost: the controls' art is made again) */
 	case SDL_RENDER_DEVICE_RESET: touch_reset_art(); ++P.textures_lost; break;
 	default:
@@ -985,9 +984,7 @@ void platform_persist(void) {
 	/* the browser's files live in memory until they are synced to IndexedDB */
 	emscripten_run_script("if (typeof Module.persist === 'function') Module.persist();");
 #endif
-	/* (the saves' copy made a moment later, and their summary read again
-	 * when next asked: mirror.h) */
-	mirror_note();
+	mirror_note();   /* (the saves' copy a moment later, their summary read again: mirror.h) */
 }
 
 bool platform_save_canvas(const char *path) {
