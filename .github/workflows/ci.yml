@@ -23,22 +23,41 @@ env:
 
 jobs:
   server:
-    name: Server (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Server (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - {runner: ubuntu-22.04, architecture: x64, target: linux-x86_64}
+          - {runner: ubuntu-22.04-arm, architecture: arm64, target: linux-arm64}
+          - {runner: windows-2022, architecture: x64, target: windows-x64}
+          - {runner: macos-15-intel, architecture: x64, target: macos-x86_64}
+          - {runner: macos-15, architecture: arm64, target: macos-arm64}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - run: python -m unittest discover -s server/tests -v
-      - run: python server/build.py
-      - run: python build/server/cyberworld-server.pyz --help
+        with:
+          python-version: '3.13.16'
+          architecture: ${{ matrix.architecture }}
+          cache: pip
+          cache-dependency-path: server/requirements-build.txt
+      - name: Pinned server packaging tools
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r server/requirements-build.txt
+      - name: Server protocol and moderation tests
+        run: python -m unittest discover -s server/tests -v
+      - name: Native server and real process smoke
+        run: python server/release.py --native
+      - name: Python source bundle and real process smoke
+        if: matrix.target == 'linux-x86_64'
+        run: python server/release.py
       - uses: actions/upload-artifact@v4
         with:
-          name: cyberworld-server-${{ matrix.os }}
-          path: build/server/
+          name: cyberworld-server-${{ matrix.target }}
+          path: build/release/cyberworld-server-*.zip
+          if-no-files-found: error
           retention-days: 14
 
   lint:

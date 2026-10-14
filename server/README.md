@@ -59,8 +59,15 @@ The chosen official endpoint is
 prepare that deployment; they do not create a DNS record, certificate,
 Coolify service or public server by themselves.
 
-Use `server/compose.coolify.yaml` as the Compose file in a Coolify Git
-resource, with the repository root available as its build context. Give
+Use the Docker Compose build strategy in a Coolify Git resource with
+**Base Directory** `/` and **Docker Compose Location**
+`/server/compose.coolify.yaml`. Enable **Preserve repository during
+deployment** so the read-only configuration file remains available on the
+deployment host. Leave raw deployment and custom build/start commands off.
+Coolify passes the Base Directory as Compose's project directory; the
+build context `.` and bind source `./server/server.coolify.ini` are therefore
+relative to the repository root, even though the Compose file is in `server/`.
+Give
 the `cyberworld` service the domain `https://cyberworld.saschb2b.com` and
 container port **8765**. Coolify's proxy terminates TLS and forwards
 WebSocket upgrades; no certificate is stored in the app container. Point
@@ -77,9 +84,18 @@ the game there. The process binds `0.0.0.0` inside the container.
 Local validation uses:
 
 ```sh
-docker compose -f server/compose.coolify.yaml config --quiet
-docker compose -f server/compose.coolify.yaml build
+docker compose --project-directory . -f server/compose.coolify.yaml config --quiet
+docker compose --project-directory . -f server/compose.coolify.yaml build
 ```
+
+Run these commands from the repository root. Omitting `--project-directory`
+changes relative-path resolution to the Compose file's `server/` directory.
+Coolify's [Compose guide](https://coolify.io/docs/applications/builds/docker-compose)
+documents the Base Directory settings and repository preservation needed
+for file bind mounts. After loading the Compose definition, check that the
+configuration mount resolves to a file ending in `/server/server.coolify.ini`,
+the only writable persistent mount is `/data`, and the domain forwards to
+the service's internal port 8765. Do not add a host port mapping.
 
 After deployment, verify HTTPS `/health`, a native client and a browser
 client through `/presence`, then test a moderator action and a restart
