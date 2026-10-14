@@ -200,6 +200,9 @@
 #define BN6_CROSSING_SOUND    0x08014C8Eu /* movs r0,#0x8D in phase 2: the sound BN5's unison plays in its phase 1 (0x08012054), */
 #define BN6_CROSSING_SOUND_NEXT 0x08014C94u /* ... on to its movs r0,#0x77 */
 #define BN6_TOOLKIT_CAMERA    0x0C        /* eToolkit +0x0C: the camera's state, +0x0C its shake's frames and +0x0E its strength, as BN6's */
+#define BN6_CAMERA_RENDER_X   0x3C        /* camera's displayed 16.16 world coordinates, after shake (bn6f sub_300631C) */
+#define BN6_CAMERA_RENDER_Y   0x40
+#define BN6_CAMERA_RENDER_Z   0x44
 #define BN6_CAMERA_SHAKE      0x0C        /* ... camera_initShakeEffect sets them (0x080302A8; BN5's 0x08030E1C the same), the shake each */
 #define BN6_CAMERA_SHAKE_STRENGTH 0x0E    /* ... frame drawing two random numbers (BN6 0x080301E8 from the second word, BN5 0x08030D7C from the first) */
 #define BN6_BATTLE_FLAG_HOLD  0x20        /* BN6_BATTLE_FLAGS (bn6_panels.h): set through a unison's or crossing's last phase, which clears it (BN6

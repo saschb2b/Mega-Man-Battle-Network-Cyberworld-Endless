@@ -11,7 +11,7 @@ static struct {
 	EMSCRIPTEN_WEBSOCKET_T socket;
 	OnlineBrowserMessage received;
 	OnlineBrowserClosed closed;
-	uint8_t hello[64];
+	uint8_t hello[52 + ONLINE_NAME_BYTES];
 	size_t hello_size;
 } browser;
 
@@ -26,7 +26,10 @@ bool online_browser_send(const uint8_t *data, size_t size) {
 
 static bool opened(int type, const EmscriptenWebSocketOpenEvent *event, void *user) {
 	(void)type; (void)user;
-	if (event->socket == browser.socket && !online_browser_send(browser.hello, browser.hello_size)) browser.closed();
+	if (event->socket != browser.socket) return true;
+	char protocol[64];
+	if (emscripten_websocket_get_protocol(browser.socket, protocol, sizeof protocol) != EMSCRIPTEN_RESULT_SUCCESS ||
+	    strcmp(protocol, ONLINE_SUBPROTOCOL) || !online_browser_send(browser.hello, browser.hello_size)) browser.closed();
 	return true;
 }
 
