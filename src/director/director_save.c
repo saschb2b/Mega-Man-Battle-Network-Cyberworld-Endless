@@ -265,6 +265,10 @@ static bool resume_home(void) {
 
 bool director_resume(void) {
 	drop_events();
+	/* A checkpoint resumed is already saved. Requests from a previous
+	 * scene (including a Square visit) must not save the new scene's RAM. */
+	D.checkpoint = D.checkpoint_here = D.checkpoint_data = D.checkpoint_door = false;
+	D.home_save_due = false;
 	off_board_load();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";

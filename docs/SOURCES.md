@@ -100,6 +100,26 @@ pages searched for ディーラー, ショップ and 商人; the web for エグ�
 language (MMKB's, Wikipedia's and kamigame's area lists): the project's own
 takes BN3's シークレットエリア.
 
+## Net Square's NPC movement spike (issue #120)
+
+**Verified in the disassembly:** bn6f's `data/SpritePointersList.s`,
+`npcSpritePtrs[0x37]`, is MegaMan's overworld sprite (list 6). Its
+`include/bytecode/npc_script.inc` and `asm/npc.s` define the commands the
+Phase 0 room uses: `0x08`/`0x09` show/hide an active NPC, `0x14` gives its
+position, `0x16` selects its animation, `0x10` waits, and `0x02` jumps.
+`NPCCommand_set_animation` changes `AnimationSelect`; the NPC's update
+compares it with `AnimationSelectUpdate` before loading animation data.
+Writing the same animation again therefore keeps its cadence. The room
+uses the existing NPC scripts' noninteraction and no-collision commands,
+and never replaces the local player's movement.
+
+The spike's trace checks the resulting NPC pool against each received
+peer's position through the existing `BN6_NPC_X16`, `BN6_NPC_Y16` and
+`BN6_NPC_Z16` fields (docs/ROM_DATA.md, The game's structures read field by
+field). Its other players are NPCs controlled between emulator frames,
+not a claim that BN6's original multiplayer shares an overworld. The
+two-instance proof and its limits are recorded in docs/ONLINE.md.
+
 ## Learned from players
 
 | What | Who, where | Verified |
@@ -107,3 +127,37 @@ takes BN3's シークレットエリア.
 | A+B+Select+Start resets Gregar to its own title, escaping Cyberworld Endless's director | Mattwj, issue #113 | Yes: bn6f's `main_static_screen_fade_8000454` checks the four held low bits (`0x0F`) and a newly pressed one before reinitializing the toolkit and game. The local byte match locates the same function in Gregar. Reproduced with scripted input in the town; the core returned to Gregar's title while the Cyberworld scene stayed active. |
 | BN6 keeps DarkChips from the Japan-only Beast Link Gate: if one is in the folder it spends a BugFrag per use, and without BugFrags it is its base chip (DrkSword a Sword); an unused MegaMan line limits them in a folder | CybeastID, issue #64, 4 October 2026 | Yes, by the code and in play (issue #70's spike; docs/ROM_DATA.md, BN6's own DarkChips): five records in Gregar (DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus; ids 286-290) whose `DarkChipID` (+0x1F) every chip use reads (bn6f `sub_8010D58`); used with a BugFrag in hand it takes one at once, from the save and the battle's count, and the DarkChip runs; with none it is its base chip (Sword, Thunder, Recov10, Invisibl, Atk+10), seen for all five. The line is MegaMan's, in the folder editor's NAVIGATOR box ("You can use only 3 of the same DarkChips."), and comes only with BN6's DarkChip flag (effect flags 0x20), which no US record carries: seen with the flag set in the core's copy. What the account leaves out: each paid use also gives MegaMan the NaviCust's HP bug for the rest of that battle (DrkSword +2, DarkThnd +1, DrkRecov to 7, the most, DarkPlus +4, DarkInvs none); DarkPlus never joins the chip before it in the US version, so alone it does nothing at that price; DarkInvs is eight seconds untouchable while the game fights for MegaMan; the US version hides them from the pack, so its folder editor cannot take them in, and left their sort keys 0, by which the editor takes any two of them for one chip and lets one in for another past the three (found building them, issue #70); their icons are placeholders reading their id in hex (not kept, as this row first said) over the shared blank picture `0x086F3AF0`. bn6f `sub_800F4B2` spends a BugFrag for both the DarkChips and the Giga chips BugRSwrd's and BgDthThd's charged shots (`sub_8011E40`, `sub_8011E78`). The US text still names a "BeastLink Gate" (that it is not connected, bn6f `CompText86DA1B8`) and a Chip Gate; that the DarkChips came with it is the player's word, not verified |
 | Silence's music playing while ProtoMan dashes his X-shaped charge left him untouchable after it, attacks passing through him with no clank of armor or shield, for several turns; perhaps BN6's own | CybeastID, issue #55, 3 October 2026 | Yes, and BN6's own, in romlab on the plain ROM (docs/ROM_DATA.md, ProtoMan's cross): his cross's dash (bn6f `sub_80FCB64`) turns his collision region off at any contact and on again in each new column, and its end (bn6f `sub_80FCC4C`) does not turn it on. Silence's music strikes every enemy on the field with a zero-damage blind every few frames (bn6f `sub_80D43E8`), so a pulse after the last stroke's last column leaves him on no panel: 23 buster shots after it in his row, no damage. Silence only makes it likely: MegaMan standing where the last stroke ends does it too. It lasts until his next cross, which needs him at half his HP or less and MegaMan on the middle row's middle or front panel; off them, for the rest of the fight. Mended by a hook (docs/FIDELITY.md) |
+
+Net Square names use the overworld projection verified in bn6f
+`sub_300631C`, with the camera coordinates supplied by
+`camera_doShakeEffect_80301e8` (15 October 2026; docs/ROM_DATA.md).
+The lookup credits bn6f’s contributors; no disassembly or graphics are
+part of the client change.
+
+## Actual Practice NetBattle (issue #120)
+
+**Verified by experiment on 15 October 2026:** two plain Gregar ROM cores
+linked through the pinned mGBA SIO driver can enter Single Battle →
+Practice through the PET's Comm menu and finish with complementary win
+and loss results. `build.py online-link --practice --rom PATH` repeats the
+experiment. Every active battle-timer frame agrees on both MegaMen's HP
+and panel positions; the final result and return to Comm agree too.
+The exact starter-loadout input script and limits are in
+[ONLINE_LINK.md](ONLINE_LINK.md).
+
+The menu distinction was first checked in bn6f's
+`data/textscript/compressed/CompText86DA1B8.s`, scripts 17/25 (Practice)
+and 18/26 (Battle). Its contributors' `eStruct200A008_setBattleResult`
+and `eStruct200A008_getBattleResult` identify the byte the proof already
+reads as `BN6_BATTLE_RESULT`; the experiment observes 1 for the winner and
+2 for the loser. No disassembly, save, ROM bytes or extracted assets are
+included in the harness. No Tango implementation was consulted.
+
+**Verified in official product documentation, 15 October 2026:**
+[Tango's site](https://tango.n1gp.net/) advertises rollback play for every
+English and Japanese Battle Network game, automatic accurate match
+replays and shared-link-code matchmaking. This is documentation-only
+prior art; no implementation was opened or copied. The features do not
+establish an algorithm or permission to reuse code. Our separate
+processes' measured serial stalls, recorded in ONLINE_LINK.md, motivate
+the proposed frame-level input design independently.

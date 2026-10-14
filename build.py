@@ -73,6 +73,11 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
+  python3 build.py server       build the ROM-free server zipapp
+  python3 build.py server-run   run the built server (arguments follow)
+  python3 build.py server-test  server/protocol tests, without game dependencies
+  python3 build.py online-proof build and run two game clients through the server
+  python3 build.py online-link  mGBA serial cable and state restoration probe
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -2000,7 +2005,7 @@ def lint_analyzer(update):
     from collections import Counter
     # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
     # line naming their function, so files' lines must not interleave)
-    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
               'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
@@ -2255,7 +2260,7 @@ def lint_headers():
         if first != f'#include "{own}"':
             bad.append(f'{os.path.relpath(c, ROOT)}: includes {first or "nothing"} before its own {own}')
     build('host')   # (its version.h)
-    script = ('for h in src/*/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    script = ('for h in src/*/*.h shared/online/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include -Wno-pragma-once-outside-header -x c "$h" 2>&1 | grep -q "error" && echo "$h"; done; true')
     out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
@@ -2301,9 +2306,12 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-proof', 'online-link'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
+    if a.action in ('server', 'server-run', 'server-test', 'online-proof', 'online-link'):
+        from tools.online_workspace import dispatch
+        sys.exit(dispatch(a.action, a.rest))
     if a.action == 'clean':
         shutil.rmtree(os.path.join(ROOT, 'build'), ignore_errors=True)
         return
@@ -2315,6 +2323,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
+        if code == 0:
+            code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
     if a.action == 'lint':
         ensure_image()
@@ -2409,6 +2419,8 @@ def main():
         sys.exit(tiles(*rest[:1], baseline='--baseline' in a.rest))
     if a.action in ('all', 'host', 'shot'):
         build('host')
+    if a.action == 'all':
+        subprocess.run([sys.executable, os.path.join(ROOT, 'server', 'build.py')], check=True)
     if a.action == 'asan':
         build('asan')
     if a.action in ('all', 'device', 'package'):

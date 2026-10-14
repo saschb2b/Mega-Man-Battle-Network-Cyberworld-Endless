@@ -6,7 +6,6 @@
 #   nesting: a function indented past 5 levels: give the inner part a function of its own
 #   duplicate: blocks of 10 lines or more repeated between two files (or in one): one function for both
 # fix one, then build.py lint --update
-duplicate src/core/save_legacy.c 17
 duplicate src/gfx/gfx.c src/layer/text.c 21
 includes src/director/director.c 35
 includes src/director/director_layer.c 33
@@ -40,7 +39,6 @@ params src/map/tiles.c:tl_expect_look 8
 params src/map/tiles_pick.c:best 16
 params src/map/tiles_pick.c:tiles_pick 13
 params src/map/tiles_pick.c:why_off 14
-params src/scenes/scene_title.c:stamp 10
 params src/world/town.c:tile 8
 params src/world/townmath.h:town_move_tile 10
 params src/world/townsrc.c:townsrc_synth 9

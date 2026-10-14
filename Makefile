@@ -46,7 +46,7 @@ GEN := $(OUT)/gen
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
@@ -85,7 +85,7 @@ MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
 IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
              $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
 CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
-OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o
+OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o $(OUT)/obj/online/online_apple.o
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
@@ -116,7 +116,7 @@ endif
 # drives the frames, files kept in IndexedDB
 ifeq ($(TARGET),web)
 CFLAGS := $(filter-out -g,$(CFLAGS)) -sUSE_SDL=2 -DDISABLE_THREADING
-LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js \
+LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js -lwebsocket.js \
           -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sFORCE_FILESYSTEM=1 -sENVIRONMENT=web \
           -sEXPORTED_RUNTIME_METHODS=callMain,ccall,FS,IDBFS,addRunDependency,removeRunDependency -sEXPORT_NAME=Module \
           -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused,_cw_saves_open,_cw_saves_import
@@ -258,13 +258,92 @@ build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves
+# Only the ROM-free comparators are retained from tiles.c in this test.
+build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
+		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
+
+NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_identity.c \
+	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
+build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \
+		-o $@ $(NETWORK_TEST_SRCS) $(shell pkg-config --libs sdl2) -lm
+
+ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/core/compat.c
+build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
+
+LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
+build/host/test_legacy: $(LEGACY_TEST_SRCS)
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(LEGACY_TEST_SRCS)
+
+build/host/test_online_link_ipc: tools/online_link_ipc_test.c tools/online_link_ipc_wire.c tools/online_link_ipc_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-o $@ tools/online_link_ipc_test.c tools/online_link_ipc_wire.c
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
 	build/host/test_saves
+	build/host/test_tiles_order
+	build/host/test_network
+	build/host/test_online
+	build/host/test_legacy
+	build/host/test_online_link_ipc
 .PHONY: test
+
+# Native transport runtime checks use the same platform sources as the game.
+TRANSPORT_TEST_SRCS := tests/test_online_transport.c src/online/online_transport.c src/online/online_wire.c \
+	src/online/online_socket.c src/online/online_stream.c src/online/online_windows.c \
+	src/online/network_identity.c src/core/rom.c
+TRANSPORT_PROBE := $(OUT)/online-transport-probe$(if $(filter windows,$(TARGET)),.exe)
+$(TRANSPORT_PROBE): $(TRANSPORT_TEST_SRCS) src/online/*.h shared/online/protocol.h
+	@mkdir -p $(@D)
+	$(CC) $(filter-out -MMD -MP,$(CFLAGS)) -ffunction-sections -fdata-sections -o $@ $(TRANSPORT_TEST_SRCS) \
+		$(filter-out -mwindows,$(LDLIBS)) $(if $(filter macos,$(TARGET)),-Wl$(comma)-dead_strip,-Wl$(comma)--gc-sections) \
+		$(if $(filter windows,$(TARGET)),-mconsole)
+
+comma := ,
+online-transport: $(TRANSPORT_PROBE)
+.PHONY: online-transport
+
+# The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).
+ONLINE_LINK_SRCS := tools/online_link_probe.c src/online/online_snapshot.c
+ONLINE_LINK_PROBE := $(OUT)/online-link-probe$(if $(filter windows,$(TARGET)),.exe)
+$(ONLINE_LINK_PROBE): $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
+	@mkdir -p $(@D)
+	$(CC) $(filter-out -MMD -MP -Dmain=SDL_main,$(CFLAGS)) -DNDEBUG -o $@ $(ONLINE_LINK_SRCS) \
+		$(filter-out -mwindows -lSDL2main -lmingw32,$(LDLIBS)) $(if $(filter windows,$(TARGET)),-mconsole)
+
+online-link: $(ONLINE_LINK_PROBE)
+
+ONLINE_BN6_LINK_SRCS := tools/online_link_bn6.c tools/online_link_script.c tools/online_link_ipc.c tools/online_link_ipc_wire.c
+build/host/online-link-bn6: $(ONLINE_BN6_LINK_SRCS) tools/online_link_script.h tools/online_link_ipc.h tools/online_link_ipc_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_BN6_LINK_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-link-bn6: build/host/online-link-bn6
+
+server:
+	python3 server/build.py
+
+server-test:
+	python3 -m unittest discover -s server/tests
+
+.PHONY: online-link online-link-bn6 server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)

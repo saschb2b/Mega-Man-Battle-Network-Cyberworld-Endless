@@ -562,7 +562,10 @@ int tl_cmp_u32(const void *a, const void *b) {
 int tl_cmp_count(const void *a, const void *b) {
 	const TileCand *x = a, *y = b;
 	if (x->key != y->key) return x->key < y->key ? -1 : 1;
-	return (x->count < y->count) - (x->count > y->count);
+	if (x->count != y->count) return (x->count < y->count) - (x->count > y->count);
+	/* qsort is not stable: equal counts otherwise choose different tiles
+	 * under glibc and wasm's libc. Keep the preceding pair order explicitly. */
+	return tl_cmp_cand(a, b);
 }
 
 /* Per material and phase, the looks of floor with the same floor all

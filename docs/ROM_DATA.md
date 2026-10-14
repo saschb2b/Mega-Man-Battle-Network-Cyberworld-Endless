@@ -190,3 +190,32 @@ to confirm findings against real frames and VRAM.
 | The second screen's E-Mail (`src/second/second_read.c`, `second_mail.c`, issue #83) | E-Mail's state (the PET screen's, `0x02009A30`, E-Mail on its own, `BN6_MODE_MAIL`, too): +0x1E the mails its list holds, +0x20 the cursor's row (0-3), +0x24 the list's scroll; `0x02027590` the list as shown, sorted, `0x20` bytes an entry, 128 at most: +0x10 its sender's script (2n), +0x14 its subject's (2n + 1), +0x18 its mail (u16), +0x1C its number as shown; the names read through the literal `0x08129E90` (`BN6_MAIL_TEXT_PTR`) | bn6f's `HandleEmailMenu81279F8`: its setup `sub_8127A1C`, its list `sub_81283A0` (the entries from the mail ids at `0x02006530` and their rows, bn6f `byte_812851C`, zeroing `0x1000` bytes first), `sub_8128318` opening the mail at row + scroll, `sub_8128008` drawing a row's subject and sender from their scripts. BN6's own mail bodies open with their sender's face where a person sent them (bn6f `CompText86D0614`: Dad's first sets mugshot 5, the Net Police's and the NaviCust Support Center's none), as the run's do (`src/director/pet_text.c`: Dad's, a guardian's mail then turning to MegaMan's, the BBS's to each poster's): the second screen takes the sender's face from the run's mails (`pet_mail_face`), the board's none. Watched on 6 October 2026 in runs through `tools/play.py` (seed 7, `--net-biome 3`) with `CYBERWORLD_WATCH='02009A30:64,02027590:64'`: with three mails +0x1E read 3 and the first entry's sender 0x26, subject 0x27, mail 0x13 (19, the Dive report, "Dad") and number 3, as the top screen lists it; with `--dev quiet,veteran`'s ten, five DOWNs set the row to 3 and the scroll to 2: BlastMan, the sixth, on both screens. Verify: `python3 tools/play.py start NAME --fresh --seed 7 -- --scene emu --run-depth 2 --net-biome 3 --dev quiet,veteran`, the arrival's chats paged, START, E-Mail, then `second`: Dad's face, "Dad", Dive report, New mail 10 of 10; two DOWNs NetBBS with no face; A on CircusMan opens Dad's mail beside his face. |
 | Dev tools (`src/dev/devtools.c`, docs/DEVTOOLS.md) | `0x08005A8C` checkThenStartBattle, event flags `0x1700` and `0x173E`, `0x0203A9B0` T1 battle objects, `0x020047CC` Navi stats, `0x02001B80`+0x5C zenny | checkThenStartBattle returns before the random-battle roll while flag `0x1700` is set (a BBS request sets it; the game clears it on entering a map). Flag `0x173E`, tested next, is the SlipRun state: the player's update clears it every frame (bn6f `ow_player.s`), so setting it does nothing. T1 objects are 0xD8 bytes, 0x20 slots, bit 0 of +0 active, +0x16 alliance (0 MegaMan's side), +0x24 HP, +0x26 max HP; HP 0 deletes the object once the turn runs. Navi stats +0x40 HP, +0x42 max HP. Zenny is GameState +0x5C; the text command `EF 0E` (ts_check_give_zenny) with a u32 amount adds to it. Tested headlessly. |
 | The super bosses (`src/core/super_boss.c`, `src/layer/guardians.c`, `src/director/boss_grand.c`, docs/BOSSES.md, Super bosses; issue #100) | Enemy id table AIs 19 (Bass) and 20 (Gregar); story battle records at `0x0B06E0` + 16 × index: Bass `0x88`, Bass SP `0x89`, Bass BX `0x8D`, Gregar `0x84`, Gregar SP `0x85`; sprite list 6 `0x5B` (Bass) and `0x58` (the beast), list 7 `0x9B` (Bass's stone); sounds `0xE3`, `0xFE`, `0x100`, `0xD7`; chips 301 (Bass), 304 (ColForce), 305 (BugRSwrd), 306 (BassAnly) | Their versions read from the enemy id table at `0x0182C4` (version, type 1, AI): Bass 1800 at version 0, Bass BX 3400 at 1, Bass SP 2700 at 3 (2 is a BassXX of 2700 whose reward row pays 1 zenny, unused), Gregar 2500 at 0, Gregar SP 4000 at 2, their HP from the stats at `0x00F260`; the records by bn6f's `cs_start_fixed_battle` indices in their cutscenes (16 bytes each: field, music at +2, `0x16` Bass's and `0x17` Gregar's, background at +4, `0xFF` the map's own, which our record of a super boss's battle takes too), the same in Falzar. Only these numbers are used: their battles are built as every guardian's. The sprites drawn with `--sheet` (Bass cloaked, facing right through down-left, 24 a pose, 25 the cloak off, 26 throwing it open; the beast crouching 25, 27, 28, rearing 26, 29; the stone standing, 2 broken, 3 shaking); the sounds rendered with `--render-song` (`0xE3` a rumble of 0.8 s, `0xFE` a burst, `0x100` an impact, `0xD7` a fading tone), as bn6f's scenes before the records play them. Verify: `--scene emu --run-depth 19 --seed 7 --dev god,hp=800` meets Gregar at 2500 HP in the endless Nest; `--run-depth 8 --marks 08 --dev side=2` Bass at 1800 in the Secret Area, `bass=1` Bass SP, `bass=2,beast=1` Bass BX. |
+
+### Net Square name tags (issue #120)
+
+The camera pointer at Toolkit +0x0C already has the name `BN6_TOOLKIT_CAMERA`.
+Its displayed world coordinates are 16.16 words at +0x3C, +0x40 and +0x44
+(`BN6_CAMERA_RENDER_X/Y/Z`), after shake. Located in bn6f
+`camera_doShakeEffect_80301e8` and its overworld sprite projection
+`sub_300631C`: relative world coordinates dx,dy,dz draw at
+`(120 + dx + dy, 82 + (dy - dx)/2 - dz)`. The online labels read these
+fields between frames; drawing reads only the captured label positions.
+Verify with two clients walking to opposite Square edges: names stay over
+their own MegaMen while the camera scrolls. No new ROM data is installed.
+
+### Practice NetBattle result observations (issue #120)
+
+The actual Practice NetBattle proof (`tools/online_link_bn6.c` and
+`tools/online_link_script.c`, 15 October 2026) adds no offsets. It uses the
+existing named PET, battle and object fields documented above. On both plain Gregar
+cores, `BN6_BATTLE_SIDE` identifies global side 0 or 1; the first two
+`BN6_T1_OBJECTS` records hold those sides' MegaMen in the same global
+order. Reading their `BN6_T1_HP`, `BN6_T1_PANEL_X` and `BN6_T1_PANEL_Y`
+at each `BN6_BATTLE_TIMER` value agrees for all 1,433 active frames of
+the scripted Practice battle. At return to Comm, `BN6_BATTLE_RESULT`
+is 1 for side 0's win and 2 for side 1's loss; their final global HP is
+100/0. bn6f's `eStruct200A008_setBattleResult` and
+`eStruct200A008_getBattleResult` independently identify that existing
+result byte. Reproduce with `python3 build.py online-link --practice
+--rom /path/to/bn6g.gba`; [ONLINE_LINK.md](ONLINE_LINK.md) records the
+menu inputs and the experiment's scope.

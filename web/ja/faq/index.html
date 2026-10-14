@@ -52,7 +52,7 @@
 </header>
 
 <main class="wrap">
-	<div class="band"><h1>よくある質問</h1><span class="hint">新着 <b id="new">18</b></span></div>
+	<div class="band"><h1>よくある質問</h1><span class="hint">新着 <b id="new">21</b></span></div>
 
 	<!-- the English page's letters (faq/index.html), in Japanese: the same ids and order -->
 	<div class="mailbox">
@@ -63,6 +63,9 @@
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>なぜゲームが入っていないの？</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>ブラウザ版はROMをアップロードする？</span></a></li>
 				<li><a class="row" href="#statistics"><i class="icon i-mail" aria-hidden="true"></i><span>ゲームは何か送信する？</span></a></li>
+				<li><a class="row" href="#network"><i class="icon i-mail" aria-hidden="true"></i><span>オンラインでほかのプレイヤーに会える？</span></a></li>
+				<li><a class="row" href="#network-privacy"><i class="icon i-mail" aria-hidden="true"></i><span>サーバーには何が伝わる？</span></a></li>
+				<li><a class="row" href="#hosting"><i class="icon i-mail" aria-hidden="true"></i><span>自分のネットスクエアを開ける？</span></a></li>
 				<li><a class="row" href="#where"><i class="icon i-mail" aria-hidden="true"></i><span>どこで遊べる？</span></a></li>
 				<li><a class="row" href="#deck"><i class="icon i-mail" aria-hidden="true"></i><span>Steam DeckでSteamに追加するには？</span></a></li>
 				<li><a class="row" href="#run"><i class="icon i-mail" aria-hidden="true"></i><span>ランとは？</span></a></li>
@@ -125,7 +128,44 @@
 					<h2>ゲームは何か送信する？</h2>
 					<p>あなたが「はい」と答えたときだけです。最初の起動で、匿名のプレイ統計を送ってよいかを一度だけたずねます。カーソルは<b>No</b>にあり、「はい」と答えるまで何も送りません。「はい」のときに送るのは、起動時のシステムとバージョンと画面の大きさ、各ランの開始時の設定、ガーディアン戦の結果（勝ち負け、ロックマンの残りHP、秒数）、ランの終わり方（どこまで進んだか、誰に負けたか、何分か）で、送り先は開発者のUmamiにある、ゲーム自身のサイトです。名前、あなたや端末のID、ROM、セーブ、ファイルの場所は送らず、Cookieも使いません。</p>
 					<p>答えを変えるには、タイトルでSelectを押して操作設定の画面を開きます。<b>Statistics</b>の行にあなたの答えが表示され、もう一度たずねます。3DSでは、タイトルでSelectを押すともう一度たずねます。<code>settings.ini</code>に<code>statistics = off</code>と書いても同じです。このサイトのページも、ゲームとは別に、訪問数とダウンロード数をUmamiで、匿名かつCookieなしで数えています。</p>
+					<p>実験段階の<a href="#network">NETWORK</a>機能では、サーバーへの接続前に、統計とは別に同意をたずねます。その接続では名前、位置、公開ナビカードを送ります。統計の設定をオフにしても、NETWORKの接続設定は変わりません。</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#anonymous-statistics">ガイド：匿名の統計（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="network">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>オンラインでほかのプレイヤーに会える？</h2>
+					<p>開発中のビルドには、タイトル画面に実験段階の<b>NETWORK</b>があります。公開リリースにはまだ含まれていません。ニックネームとサーバーを選び、接続時の説明を読んでからネットスクエアへ。1つのチャンネルには最大8人のナビが入り、サーバーは複数のチャンネルを開けます。</p>
+					<p>一緒に歩き、定型文やエモートを送り、Inspectでほかのナビの公開カードを見られます。自由入力のチャット、トレード、アリーナはまだありません。訪問してもHPの回復、チップ、通貨は得られず、ランを進めたり上書きしたりしません。帰ると保存済みのチェックポイントに戻り、セーブがなければタイトルに戻ります。</p>
+					<p>オンライン機能の第1段階は、まだ開発中です。実際のLinux版2台が、稼働中のサーバーを通じて暗号化した接続で出会い、互いの動きが一致すること、セーブが変わらないこと、帰ると装備が元に戻ることを確認しました。開発用サーバーは<code>cyberworld.saschb2b.com</code>で稼働し、ブラウザからの暗号化した接続と、管理者によるミュート・解除も確認しています。ほかの端末での実際の接続試験は、これからです。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#network">ガイド：Network（英語）</a> ·
+						<a href="https://cyberworld.saschb2b.com/health" data-umami-event="outbound" data-umami-event-to="network-status">サーバーの状態</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="network-privacy">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>サーバーには何が伝わる？</h2>
+					<p>運営者には、あなたのIPアドレス、ニックネーム、位置、公開ナビカードが伝わります。カードにはHP、バスターの能力、ナビカスタマイザーの盤面の色、ソウル、クロス、深度、アクト、最高深度、称号マークが含まれます。同じチャンネルのプレイヤーには、名前、動き、カードが見えます。ROM、セーブ、フォルダ、パックはアップロードしません。</p>
+					<p>アカウントやメールアドレスは不要です。ランダムに作る秘密の識別キーは、端末内のNetwork設定に保存されます。ゲームはそのキーからサーバーごとに異なる識別情報を作って送り、サーバーはミュート、ブロック、管理用の公開IDに変換します。秘密のキー自体は送りません。人に見られてもよいニックネームを選んでください。</p>
+					<p>定型文とエモートは、続けて送れる回数を制限しています。自分の端末で相手をミュート、ブロックでき、運営者はゲストを切断、ミュート、アクセス禁止にできます。ただしゲストの識別情報なので、端末の設定を消すとアクセス禁止を回避できてしまいます。運営者のルールを守り、ほかのプレイヤーを尊重してください。ログと保存期間は運営者ごとに決まります。Inspectのカードは各プレイヤーのゲームから届く情報で、実績を証明するものではありません。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#network">ガイド：Network（英語）</a> ·
+						<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#tls-and-privacy">サーバー運営とプライバシー（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="hosting">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>自分のネットスクエアを開ける？</h2>
+					<p>はい。リポジトリには、ROMを必要としない独立したサーバーがあります。Python 3.11以降のzipapp、またはDockerイメージとしてビルドします。サーバーはエミュレーターを動かさず、ゲームの素材も必要としません。各プレイヤーのゲームが、共通のシードと自分のROMから同じ世界を作ります。</p>
+					<p>名前、歓迎メッセージ、シード、チャンネルと参加人数の上限、接続を許すブラウザのオリジンを設定できます。公開サーバーには暗号化した<code>wss://</code>接続が必要です。同梱のCoolify設定はHTTPSプロキシの後ろでサーバーを動かします。識別用の秘密ファイルと管理記録は、更新しても残るストレージに保存してください。管理はローカルのコマンドで行い、公開の管理用エンドポイントはありません。</p>
+					<p>NETWORKで自分のサーバーのアドレスを追加できます。公式サーバーを使う必要はありません。サーバーの<code>/health</code>は、プレイヤーや名前を載せず、稼働状況と参加人数を返します。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md">サーバーの設定とルール（英語）</a> ·
+						<a href="https://cyberworld.saschb2b.com/health" data-umami-event="outbound" data-umami-event-to="network-status">公式サーバーの状態</a></p>
 				</div>
 			</article>
 
