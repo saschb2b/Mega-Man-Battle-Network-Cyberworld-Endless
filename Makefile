@@ -258,12 +258,20 @@ build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves
+# Only the ROM-free comparators are retained from tiles.c in this test.
+build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
+		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
 	build/host/test_saves
+	build/host/test_tiles_order
 .PHONY: test
 
 # the tests' link as build.py lint reads it: which of the game's functions
