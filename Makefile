@@ -274,13 +274,23 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_tiles_order
 .PHONY: test
 
+# The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).
+ONLINE_LINK_SRCS := tools/online_link_probe.c src/online/online_snapshot.c
+build/host/online-link-probe: $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_LINK_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-link: build/host/online-link-probe
+
 server:
 	python3 server/build.py
 
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: server server-test
+.PHONY: online-link server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)

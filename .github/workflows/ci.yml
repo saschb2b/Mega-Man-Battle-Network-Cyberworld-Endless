@@ -80,6 +80,7 @@ jobs:
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - run: python3 build.py test
+      - run: python3 build.py online-link
 
   handheld:
     name: PortMaster (aarch64)

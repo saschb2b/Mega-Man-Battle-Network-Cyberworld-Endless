@@ -77,6 +77,7 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py server-run   run the built server (arguments follow)
   python3 build.py server-test  server/protocol tests, without game dependencies
   python3 build.py online-proof build and run two game clients through the server
+  python3 build.py online-link  mGBA serial cable and state restoration probe
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -2305,10 +2306,10 @@ def lint(update=False):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-proof'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-proof', 'online-link'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
-    if a.action in ('server', 'server-run', 'server-test', 'online-proof'):
+    if a.action in ('server', 'server-run', 'server-test', 'online-proof', 'online-link'):
         from tools.online_workspace import dispatch
         sys.exit(dispatch(a.action, a.rest))
     if a.action == 'clean':
