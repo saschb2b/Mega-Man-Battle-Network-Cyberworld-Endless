@@ -218,11 +218,51 @@ Measured on the Linux development host, 15 October 2026:
   trust plus hostname verification is the selected model; a valid
   public certificate is needed for public hosting.
 
+Additional platform checks on 15 October 2026:
+
+- **Physical Pocket Nova / ROCKNIX:** the aarch64 game and a desktop peer
+  visited the public WSS server with identical seed 120/hash 4132376369.
+  All 189 handheld and 197 desktop NPC samples matched interpolation.
+  Handheld median/max RTT was 40/47 ms. The actual depth-29, 1,000-HP
+  checkpoint was borrowed into a temporary test directory, restored
+  identically after leaving, and all 13 installed files stayed unchanged.
+  An untrusted TLS fixture received a TLS handshake but no application
+  bytes; the game reported certificate failure and restored the checkpoint.
+  `tools/online_platform_rocknix.py` repeats the test through an existing
+  authenticated SSH control socket and removes its temporary launcher.
+- **Windows and macOS native networking:** the game's actual transport
+  sources passed on Windows Server 2022 x64 and macOS 15.7.9 ARM64 in
+  [CI run 38654155398](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38654155398).
+  Each exercised real protocol exchange, reconnect, Inspect, emotes,
+  channels, disconnect, malformed server frames, cancellation, untrusted
+  TLS rejection and the public WSS endpoint. Public RTTs were 128–129 ms
+  from Windows and 126 ms from macOS. The probe reads no ROM, so full
+  game/checkpoint and device-specific behavior remain separate checks.
+- **Android 14 emulator, actual release APK:** joined the public WSS
+  server, moved through six observed positions, and produced 104 positioned
+  peer-NPC samples matching interpolation in the desktop game. All 12
+  Android checkpoint files and the desktop checkpoint stayed unchanged.
+  A self-signed local TLS server observed a ClientHello and a certificate
+  rejection alert, with no application bytes. This exposed and fixed an
+  Android partial-read mismatch during WebSocket handshakes, and a held
+  touch leaking from the title into the Network address editor.
+  `tools/online_platform_android.py` repeats this on a disposable emulator;
+  screenshots verify the touch menu, peer display and checkpoint return.
+
+The Pocket Nova was the only physical test device available. No physical
+iPhone/iPad, Android phone or New 3DS pass is implied by a build, native
+desktop runtime check or emulator result.
+
 Evidence stays under `.build/online-proof/`, `.build/online-load-proof/`,
 `.build/online-browser/`, `.build/online-browser-v2/`, `.build/online-social/`,
 `.build/online-reset-proof/`, `.build/online-bench/` and `.build/online-tls/`.
 Hosted proof records are in `.build/online-public/` and
-`.build/online-public-browser/`. The public A record was independently
+`.build/online-public-browser/`. Physical handheld results are in
+`.build/online-platform-rocknix/` and `.build/online-platform-nova/`;
+downloaded native transport reports are in `.build/online-transport-ci/`.
+Android APK evidence is in `.build/online-platform-android/`; actual
+Practice-battle and delayed-worker evidence is in `.build/online-battle/`.
+The public A record was independently
 verified as `204.168.144.168`; while the development machine's resolver
 retained its earlier NXDOMAIN, only the proof processes mapped that one
 hostname to the published address. The original URL, TLS SNI, certificate
@@ -233,11 +273,12 @@ predict internet or handheld performance.
 | --- | --- | --- |
 | Transport | Versioned WebSocket server, native platform backends and browser WebSocket, bounded polling, ping/pong, TLS certificate/hostname verification | Measure and test the implemented backends on every target's real hardware; see the server README's verification matrix |
 | Players as NPCs | Sixteen native games, two full channels, interpolated NPC coordinates and identity labels | Hardware performance, adverse internet conditions and longer soak tests |
-| Link cable | Two mGBA cores exchange serial words using mGBA's lockstep API; memory state benchmark | Actual BN6 Practice NetBattle, separate-process serial scheduling and injected network delay |
+| Link cable | Actual BN6 Practice completed in one process and in two separate workers; all 1,433 active frames agree; injected peer loss and corruption detected; 50/100/150 ms serial delay measured | Raw serial waiting is too slow for real-time play; frame-level netplay, complete delayed battles and rollback remain unproven |
 | Carried MegaMan | Actual checkpoint loadout borrowed and restored through map reconstruction; leave, disconnect and process shutdown preserve checkpoint files | Broader device and power-loss testing; no Arena result or trade mutation is enabled |
 | World from seed | Two game instances build identical geometry/tile hashes from server seed without sending assets | Final Square layout, generator-version migration and all platform determinism |
 
-These results establish the tested presence and checkpoint paths. They do
-not establish a working PvP battle. A public launch also needs the host's
+These results establish the tested presence and checkpoint paths and a
+local Practice battle experiment. They do not establish an internet Arena.
+A public launch also needs the host's
 retention policy, named moderators, backup/restart checks and the remaining
 target checks in the server README.

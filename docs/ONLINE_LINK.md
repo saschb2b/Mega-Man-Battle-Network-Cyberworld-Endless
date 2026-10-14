@@ -36,7 +36,7 @@ restored both loadouts identically. All 12 checkpoint files per client
 were unchanged after the visit and shutdown. The two processes agreed on
 the server's seed and generated map, and all measured NPC coordinates
 matched the rendered peer coordinates. These are presence and checkpoint
-results; the linked-battle gates below remain open.
+results; the separate linked-battle measurements follow below.
 
 ## Phase 0: the local cable experiment
 
@@ -94,6 +94,112 @@ Every address is an existing `bn6.h` name. Souls and the run's other side
 records remain separate from the emulator state. The standalone probe
 supplies zero Souls; its synthetic test checks a nonzero caller mask.
 
+The same Release/NDEBUG probe also ran on the physical Retroid Pocket
+Nova through PortMaster on 15 October 2026, with the installed ROM and a
+temporary copy of its real run state (1,000 HP and a 30-chip folder).
+The raw state is 397,312 bytes, or 3,178,496 bytes for eight slots; the
+complete state is 430,144 bytes. Three runs measured raw capture at
+0.0144–0.0153 ms and restore at 0.0199–0.0210 ms. Complete-state restore
+took 0.1361–0.1404 ms. All 294,912 RAM bytes, 32,768 savedata bytes and
+the 6,664-byte carried record restored exactly. The ROM-free cable's 256
+transfers took 11.00–13.56 ms. Hashes of all 13 original files remained
+unchanged. Local evidence: `.build/online-platform-nova/state-report.json`
+and `state-benchmark.txt` beside it. These capture and restore timings do
+not measure rollback replay or a full game's replay cost.
+
+## Actual Practice NetBattle
+
+`python3 build.py online-link --practice --rom /path/to/bn6g.gba` now
+finishes BN6's own Single Battle → Practice on two cores. It creates the
+project's ordinary pre-director boot state in a new ignored evidence
+directory, then loads that state into two **plain ROM** cores. An existing
+`--state /path/to/boot-3.state` skips boot preparation. A run checkpoint
+is not an acceptable substitute: its patched map would need reconstruction.
+
+From that boot, the script opens the PET, selects Comm, Link Cable,
+NetBattle, Single Battle and Practice, and confirms the game's save and
+connection questions. Both flash-save devices exist only in memory. Each
+game chooses OK without chips; side 0 charges and releases its buster
+while side 1 stands still. No battle function is injected and neither
+core's ROM is patched. This is one controlled battle with the starter
+MegaMen, not coverage of every folder, form or battle setting.
+
+The command fails unless the game's result bytes identify the winner and
+loser, both cores return to Comm, and their battle timer, global HP and
+positions agree. A CSV also records both cores at every video frame. The
+Python verifier aligns those observations by BN6's battle timer and
+requires complete active-frame coverage with identical HP and positions.
+SHA-256 checks confirm that the supplied ROM and boot state are unchanged.
+The report, CSV and complete-frame PPM screenshots stay under
+`.build/online-battle/`; they are not release inputs.
+
+Measured on the pinned Linux host core on 15 October 2026:
+
+| Observation | Result |
+| --- | --- |
+| Actual multiplayer serial transfers, including menu negotiation | 18,855 |
+| Active battle frames compared | 1,433, with no HP or position disagreement |
+| Damage | Ten charge shots of 10 HP, on the same battle timers in both cores |
+| Final global HP | Side 0: 100; side 1: 0 |
+| Game results | Side 0: 1 (won); side 1: 2 (lost) |
+| Final battle timer | 1,433 in both cores |
+| Return | Both at the original Practice menu |
+
+`tools/online_link_script.c` holds the exact controller sequence and the
+logical result checks. `tools/online_link_bn6.c` runs the cores with the
+pinned SIO driver; it also accepts bounded `run`, `shot`, `status`,
+`ipcfull` and `ipcactive` research commands.
+
+### Two processes and delayed serial delivery
+
+```sh
+python3 tools/online_link_ipc.py --rom /path/to/bn6g.gba \
+  --state /path/to/boot-3.state --wall-ms 60000 --window both
+```
+
+Each worker executes its own core in a separate process, starting from
+the fresh boot state. The parent coordinates numeric cable fields, cycle
+credits and transfer phases over bounded local socket messages. Inherited
+peer cores are inert driver shadows; no ROM or RAM is sent. The pinned
+mGBA scheduler's sleeping-slave and posted-credit rules are preserved.
+The report checks separate worker PIDs, serial receive transcripts and
+both games' HP and panel positions at each active battle timer.
+
+The complete zero-delay run passed with 18,828 serial transfers per
+worker, identical serial hashes, all 1,433 active frames agreeing, and
+the same 1/2 results and 100/0 HP as the local experiment. Under the
+concurrent matrix's host load it took 37.658 seconds; this developer
+coordinator's wall time is not a production performance target.
+
+The delay model adds one optimistic delivery hold per real serial
+transfer, when the master's words become available to the slave. This
+is **not an RTT** and not a WebSocket transport. Cycle bookkeeping stays
+local. `--window custom` begins at the first Custom screen. The additional
+`--window active` excludes negotiation, Custom selection and the intro;
+it starts only after both battle timers run, then keeps applying delay.
+
+| Added delivery delay | Active frames compared at the 60-second bound | Applied delay | Full battle completed |
+| --- | --- | --- | --- |
+| 50 ms | 95, all matching | 43.727 s | No |
+| 100 ms | 48, all matching | 44.657 s | No |
+| 150 ms | 35, all matching | 49.133 s | No |
+
+The active-only cases began at relative frame 1,149 and serial transfer
+4,579. All three kept identical serial transcripts until the deadline.
+The wider Custom-screen cases also reached their bound without completing
+the fight. A forced disconnect and a deliberately corrupted delivered
+word each stopped the coordinator after 20 transfers, rather than hanging
+or reporting a successful battle. The corruption check is the harness's
+serial consistency check, not a claim about BN6's own desync detection.
+Malformed framing, EOF and stalled input also have ROM-free checks.
+
+Local evidence is `.build/online-battle/ipc-mqvtfpaj/report.json` for the
+active-only matrix and `ipc-mc8btuem/report.json` for the wider window.
+Both reports retain unchanged source-file hashes. No delayed case is
+claimed as a completed fight: these bounded results reject raw serial
+delivery as a real-time Internet battle design, even under the optimistic
+delay model. The production presence server carries no serial messages.
+
 ### What this answers, and what remains
 
 The pinned core can link two local instances without adding another
@@ -101,12 +207,11 @@ emulator or importing Tango code. Local state capture and restore have
 ample time on this desktop, and a complete local snapshot can protect
 RAM and flash. This does **not** establish a network Arena or rollback.
 
-The next cable experiment must start BN6's actual Practice NetBattle,
-finish a battle with both sides agreeing, then put the serial boundary
-between two processes with 0, 50, 100 and 150 ms of injected delay. That
-gate remains open. The presence server has no serial-relay message in
-Phase 0; its successful two-client connection is evidence for presence,
-not evidence for a NetBattle.
+Actual Practice battles now pass both in one process and in two separate
+processes at zero added delay. The 50/100/150 ms experiments establish a
+negative real-time feasibility result for raw serial delivery. A network
+Arena still needs a frame-level input design, replay validation, recovery
+and per-platform replay budgets. It remains disabled.
 
 mGBA's local lockstep object shares cycle budgets, transfer phases and
 receive buffers between the two cores. Sending the words alone over a
@@ -115,8 +220,8 @@ state also needs to be saved or reconstructed alongside a core state for
 rollback. A raw core state does not contain the ROM patches, the run's
 side records or the network session. These are explicit design gates.
 
-The browser, PortMaster, Android, Apple systems, Windows and the New 3DS
-have not been timed by this experiment. In particular, the desktop's
+The browser, Android, Apple systems, Windows and the New 3DS
+have not been timed by this state experiment. In particular, the desktop's
 state times cannot establish the 3DS's replay budget. The experiment's
 binary can be built for each target, but a target's runtime measurement
 and a real linked battle are required before enabling its Arena.
@@ -124,10 +229,11 @@ and a real linked battle are required before enabling its Arena.
 BN6's Practice choice itself is **verified in the local bn6f text
 scripts**: `CompText86DA1B8` scripts 17/25 describe and label Practice,
 and 18/26 describe and label Battle, whose loss forfeits a Pack chip.
-That verifies the menu distinction, not the game's entire reward or
-result path. The existing experiment recorded in [RIVAL.md](RIVAL.md)
-establishes that the link-battle option waits for a partner. No new ROM
-offset was introduced here.
+The actual starter-loadout Practice experiment above additionally verifies
+its result and return path. It does not establish the chip-forfeit path
+for the separate Battle choice. The existing experiment recorded in
+[RIVAL.md](RIVAL.md) establishes that the link-battle option waits for a
+partner. No new ROM offset was introduced here.
 
 The emulator interfaces were checked against the pinned upstream
 [SIO lockstep implementation](https://github.com/mgba-emu/mgba/blob/0.10.5/src/gba/sio/lockstep.c)
@@ -135,3 +241,11 @@ and [core interfaces](https://github.com/mgba-emu/mgba/blob/0.10.5/src/gba/core.
 The probe must be compiled with `NDEBUG`, matching the Release library:
 the upstream lockstep structures have conditional debug fields. No
 Tango implementation code was consulted or copied.
+
+As documentation-only prior art, [Tango's official site](https://tango.n1gp.net/)
+advertises rollback, support for every English and Japanese Battle Network
+game, automatic accurate replays and matchmaking by a shared link code
+(checked 15 October 2026). Those product claims establish existing
+behavior, not an algorithm or code that can be reused. The frame-level
+design direction above follows independently from this probe's measured
+serial stalls.

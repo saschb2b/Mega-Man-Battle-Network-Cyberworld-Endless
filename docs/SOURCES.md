@@ -133,3 +133,31 @@ Net Square names use the overworld projection verified in bn6f
 `camera_doShakeEffect_80301e8` (15 October 2026; docs/ROM_DATA.md).
 The lookup credits bn6f’s contributors; no disassembly or graphics are
 part of the client change.
+
+## Actual Practice NetBattle (issue #120)
+
+**Verified by experiment on 15 October 2026:** two plain Gregar ROM cores
+linked through the pinned mGBA SIO driver can enter Single Battle →
+Practice through the PET's Comm menu and finish with complementary win
+and loss results. `build.py online-link --practice --rom PATH` repeats the
+experiment. Every active battle-timer frame agrees on both MegaMen's HP
+and panel positions; the final result and return to Comm agree too.
+The exact starter-loadout input script and limits are in
+[ONLINE_LINK.md](ONLINE_LINK.md).
+
+The menu distinction was first checked in bn6f's
+`data/textscript/compressed/CompText86DA1B8.s`, scripts 17/25 (Practice)
+and 18/26 (Battle). Its contributors' `eStruct200A008_setBattleResult`
+and `eStruct200A008_getBattleResult` identify the byte the proof already
+reads as `BN6_BATTLE_RESULT`; the experiment observes 1 for the winner and
+2 for the loser. No disassembly, save, ROM bytes or extracted assets are
+included in the harness. No Tango implementation was consulted.
+
+**Verified in official product documentation, 15 October 2026:**
+[Tango's site](https://tango.n1gp.net/) advertises rollback play for every
+English and Japanese Battle Network game, automatic accurate match
+replays and shared-link-code matchmaking. This is documentation-only
+prior art; no implementation was opened or copied. The features do not
+establish an algorithm or permission to reuse code. Our separate
+processes' measured serial stalls, recorded in ONLINE_LINK.md, motivate
+the proposed frame-level input design independently.

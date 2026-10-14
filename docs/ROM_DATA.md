@@ -202,3 +202,20 @@ Its displayed world coordinates are 16.16 words at +0x3C, +0x40 and +0x44
 fields between frames; drawing reads only the captured label positions.
 Verify with two clients walking to opposite Square edges: names stay over
 their own MegaMen while the camera scrolls. No new ROM data is installed.
+
+### Practice NetBattle result observations (issue #120)
+
+The actual Practice NetBattle proof (`tools/online_link_bn6.c` and
+`tools/online_link_script.c`, 15 October 2026) adds no offsets. It uses the
+existing named PET, battle and object fields documented above. On both plain Gregar
+cores, `BN6_BATTLE_SIDE` identifies global side 0 or 1; the first two
+`BN6_T1_OBJECTS` records hold those sides' MegaMen in the same global
+order. Reading their `BN6_T1_HP`, `BN6_T1_PANEL_X` and `BN6_T1_PANEL_Y`
+at each `BN6_BATTLE_TIMER` value agrees for all 1,433 active frames of
+the scripted Practice battle. At return to Comm, `BN6_BATTLE_RESULT`
+is 1 for side 0's win and 2 for side 1's loss; their final global HP is
+100/0. bn6f's `eStruct200A008_setBattleResult` and
+`eStruct200A008_getBattleResult` independently identify that existing
+result byte. Reproduce with `python3 build.py online-link --practice
+--rom /path/to/bn6g.gba`; [ONLINE_LINK.md](ONLINE_LINK.md) records the
+menu inputs and the experiment's scope.

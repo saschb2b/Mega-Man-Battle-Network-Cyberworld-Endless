@@ -178,17 +178,30 @@ modified client can claim another HP or board; Inspect is informational.
 | Target | Backend | Verification |
 | --- | --- | --- |
 | Linux desktop | SDL worker, runtime libcurl byte stream, bounded WebSocket framing with HTTP/1.1 upgrade | Two actual games over public WSS: 211 matching NPC observations, median RTTs 33/39 ms, saves unchanged and both loadouts restored on leaving; local peer departure/server-stop checks also pass |
-| PortMaster/Linux ARM64 | Same libcurl backend | Cross-build and lint; device network test still required |
-| macOS | Same backend with system `libcurl.dylib` | Full app build passes CI; live game connection and TLS refusal tests remain |
+| PortMaster/Linux ARM64 | Same libcurl backend | Physical Pocket Nova on ROCKNIX: public WSS and reciprocal desktop movement pass (189 actual NPC samples, median/max RTT 40/47 ms); depth-29 checkpoint restored identically, all 13 installed save files unchanged; untrusted TLS rejected |
+| macOS | Same backend with system `libcurl.dylib` | Actual transport runs on macOS 15.7.9 ARM64: public WSS, protocol exchange, reconnect, cancellation, disconnect, hostile frames and untrusted TLS pass; full game/checkpoint testing on a Mac remains |
 | Browser | Emscripten WebSocket callbacks on the main thread | Chrome/WebAssembly and native: same seeded map, reciprocal NPC movement, median 4 ms loopback RTT; public WSS connection from the allowed site origin verified |
-| Windows | Asynchronous WinHTTP WebSocket callbacks, decoded on the SDL worker; Windows certificate and hostname verification | Full build passes with warnings as errors and in CI; live Windows connection and TLS refusal test required |
+| Windows | Asynchronous WinHTTP WebSocket callbacks, decoded on the SDL worker; Windows certificate and hostname verification | Actual transport runs on Windows Server 2022 x64: public WSS, protocol exchange, reconnect, cancellation, disconnect, hostile frames and untrusted TLS pass; full game/checkpoint testing on Windows remains |
 | New 3DS | Linked libcurl/mbedTLS, shared SOC/SSL services, packaged Let's Encrypt roots, PS random bytes | Full devkitARM build and CIA/3DSX link with warnings as errors; hardware Wi-Fi, trust and memory-budget tests required |
-| Android | Java Socket/SSLSocket through JNI, shared bounded WebSocket framing, system certificate and hostname verification | Three-ABI APK build and socket/TLS boundary tests pass locally and in CI; live device connection remains |
+| Android | Java Socket/SSLSocket through JNI, shared bounded WebSocket framing, system certificate and hostname verification | Actual APK on Android 14 emulator passed public WSS, movement, 104 positioned NPC samples, unchanged checkpoints and certificate refusal; physical phone remains untested |
 | iOS | NSURLSessionWebSocketTask, bounded send/open waits and queued receive, system trust | Device and Simulator builds plus an actual Simulator launch pass CI; live device connection and TLS refusal tests remain |
 
 The current build/package evidence is
-[CI run 38652295286](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38652295286).
+[CI run 38654155398](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38654155398).
 Server executable smoke tests below are separate from game-client connection tests.
+
+The native transport probe compiles the game's actual SDL worker, protocol
+decoder and platform socket backend, with compatibility metadata in place
+of a ROM. It checks movement against an independent socket client, Inspect,
+emotes and channel changes, then hostile frames, interrupted connections,
+reopening and refusal of an untrusted TLS server before any application
+data is sent. Build it with `make online-transport` in the matching build
+environment (`TARGET=windows` or `TARGET=macos` there), then run
+`python3 tests/test_online_transport.py --binary PATH --public` on that OS.
+The CI workflow's optional `public_wss` input enables its deployed-server
+check; ordinary CI needs only local test servers. Reports are retained as
+the `online-transport-*` workflow artifacts. These are networking runtime
+checks, not ROM-backed gameplay or proof of every physical device.
 
 All existing offline builds remain supported. This is not a claim that
 the epic's full cross-platform transport spike is complete. Production
