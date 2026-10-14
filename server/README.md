@@ -58,8 +58,9 @@ The development server is deployed in Coolify at
 `wss://cyberworld.saschb2b.com/presence`, with
 [HTTPS health status](https://cyberworld.saschb2b.com/health). Its certificate,
 browser WSS connection from `https://saschb2b.github.io`, and moderator
-mute/unmute have been verified. Two actual native game instances also passed
-the public WSS proof: 211 matching NPC observations, shared seed 120 and
+mute/unmute have been verified. The same browser identity survived a server
+redeploy with the persistent state volume retained. Two actual native game
+instances also passed the public WSS proof: 211 matching NPC observations, shared seed 120 and
 map hash 4132376369, median RTTs of 33/39 ms and a maximum of 49 ms. All 24
 save files stayed unchanged, and leaving restored both depth-3 loadouts.
 The proof used a process-local DNS mapping because the test machine retained
@@ -182,11 +183,11 @@ modified client can claim another HP or board; Inspect is informational.
 | Browser | Emscripten WebSocket callbacks on the main thread | Chrome/WebAssembly and native: same seeded map, reciprocal NPC movement, median 4 ms loopback RTT; public WSS connection from the allowed site origin verified |
 | Windows | Asynchronous WinHTTP WebSocket callbacks, decoded on the SDL worker; Windows certificate and hostname verification | Full build passes with warnings as errors and in CI; live Windows connection and TLS refusal test required |
 | New 3DS | Linked libcurl/mbedTLS, shared SOC/SSL services, packaged Let's Encrypt roots, PS random bytes | Full devkitARM build and CIA/3DSX link with warnings as errors; hardware Wi-Fi, trust and memory-budget tests required |
-| Android | Java Socket/SSLSocket through JNI, shared bounded WebSocket framing, system certificate and hostname verification | Three-ABI APK build passes; socket/TLS boundary tests pass locally after correcting the test container's runner UID; live device connection remains |
+| Android | Java Socket/SSLSocket through JNI, shared bounded WebSocket framing, system certificate and hostname verification | Three-ABI APK build and socket/TLS boundary tests pass locally and in CI; live device connection remains |
 | iOS | NSURLSessionWebSocketTask, bounded send/open waits and queued receive, system trust | Device and Simulator builds plus an actual Simulator launch pass CI; live device connection and TLS refusal tests remain |
 
 The current build/package evidence is
-[CI run 38650948269](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38650948269).
+[CI run 38652295286](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38652295286).
 Server executable smoke tests below are separate from game-client connection tests.
 
 All existing offline builds remain supported. This is not a claim that
@@ -216,7 +217,7 @@ MIT license and `BUILD.json`. Native archives include their runtime notices
 and need no installed Python. The Docker recipe remains available for
 containers. No new release has been published by this change. All five
 native server targets passed their packaging jobs in
-[CI run 38650948269](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38650948269):
+[CI run 38652295286](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38652295286):
 Linux x86-64/ARM64, Windows x64 and macOS Intel/ARM64. Each passed all 21
 server tests, freezing, isolated help/health/admin smoke checks and artifact
 upload. The Python zipapp bundle also passed its build and process smoke.

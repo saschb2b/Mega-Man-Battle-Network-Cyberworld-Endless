@@ -177,6 +177,8 @@ Measured on the Linux development host, 15 October 2026:
   `https://saschb2b.github.io` origin negotiated protocol v2 and received
   snapshots. Muting its temporary test identity through the container's
   administrative CLI suppressed its phrase; unmuting restored it.
+  The same browser identity survived redeployment with the server's
+  persistent state volume retained; the temporary mute was removed.
   This checks the deployed browser transport; the full browser game
   proof below checks the emulator and generated world.
 - **Phase 1, two native games:** both borrowed real depth-three
