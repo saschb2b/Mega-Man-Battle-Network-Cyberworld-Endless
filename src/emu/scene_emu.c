@@ -12,6 +12,7 @@
 #include "game.h"
 #include "game_hooks.h"
 #include "gfx.h"
+#include "online_scene.h"
 #include "platform.h"
 #include "rom.h"
 #include "save.h"
@@ -82,25 +83,29 @@ static void enter(void) {
 		director_before_boot();
 		emu_boot();
 		game_hooks_after_boot();
-		if (emu_start_in_town) director_start_run();
+		if (online_scene_enabled()) { director_stop(); online_scene_start(); }
+		else if (emu_start_in_town) director_start_run();
 		else director_start_layer();
-		if (emu_start_at_home) director_dev_home();
+		if (emu_start_at_home && !online_scene_enabled()) director_dev_home();
 		emu_start_in_town = emu_start_at_home = false;
 	}
 	audio_external(emu_audio_read);
 }
 
 static void leave(void) {
+	if (online_scene_enabled()) online_scene_end();
 	audio_external(NULL);
 	platform_second_screen(NULL, NULL);
 }
 
 static uint32_t frame_keys(void) {
+	if (online_scene_enabled()) return online_scene_keys(keys_from_buttons());
 	return director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
 }
 
 /* What follows a frame of the game: the run's logic on it. */
 static void after_frame(void) {
+	if (online_scene_enabled()) { online_scene_update(); second_update(); emu_debug_frame(); return; }
 	director_see();
 	director_update();
 	director_hold_watch();
@@ -133,8 +138,9 @@ static bool soft_reset(void) {
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
+	if (online_scene_enabled() && !online_scene_ready()) { online_scene_update(); return; }
 	/* (the run's time: the statistics' minutes, save.h) */
-	profile_played_frame();
+	if (!online_scene_enabled()) profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();
@@ -148,7 +154,7 @@ static void update(void) {
 			emu_frame(cinema_keys(frame_keys()));
 			started = true;
 		}
-		if (revealed || director_arrived()) ++revealed;
+		if (revealed || (online_scene_enabled() ? online_scene_arrived() : director_arrived())) ++revealed;
 		return;
 	}
 	uint32_t keys = frame_keys();
@@ -158,7 +164,7 @@ static void update(void) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
 	}
-	if (revealed || director_arrived()) ++revealed;
+	if (revealed || (online_scene_enabled() ? online_scene_arrived() : director_arrived())) ++revealed;
 }
 
 /* The town's hour on its picture (docs/HOME.md, piece 8): each colour
@@ -211,8 +217,13 @@ static void draw(void) {
 	cinema_offset(&dx, &dy);
 	SDL_Rect dst = { P.core_x + dx, P.core_y + dy, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
-	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
+	if (!revealed) {
+		fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK);
+		if (online_scene_enabled()) online_scene_draw();
+		return;
+	}
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
+	if (online_scene_enabled()) { online_scene_draw(); return; }
 	cinema_draw();
 	director_draw_map();
 	director_draw_counts();

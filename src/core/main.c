@@ -20,7 +20,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "meta.h"
-#include "net_layouts.h"
+#include "online_transport.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
@@ -165,7 +165,7 @@ static bool step(void) {
 		if ((SDL_GetPerformanceCounter() - t0) * 1000 < SDL_GetPerformanceFrequency()) SDL_Delay(1);
 		return true;
 	}
-	if (!loop.headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
+	if (!loop.headless || online_transport_enabled() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 		loop.acc += elapsed();
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
 		loop.acc -= 1.0 / 60.0;
@@ -220,6 +220,7 @@ static void on_quit_signal(int sig) { (void)sig; quit_signal = 1; }
 /* What the command line asks for (main) */
 typedef struct {
 	const char *rom_dir;
+	const char *online_url, *online_name;
 	bool fullscreen, data_dir_given, screen_given, headless;
 	const char *start_scene;
 	int run_depth, guardian_navi;
@@ -285,10 +286,11 @@ static int run_option(const char *a, const char *v, Options *o) {
 	/* --marks HEX: the title's marks as if earned, for a capture */
 	else if (!strcmp(a, "--marks")) o->marks_spec = (int)strtol(v, NULL, 16);
 	else if (!strcmp(a, "--talk")) director_dev_talks = v;
-	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	else if (!strcmp(a, "--dev")) devtools_parse(v);
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;
+	else if (!strcmp(a, "--online")) o->online_url = v;
+	else if (!strcmp(a, "--online-name")) o->online_name = v;
 	else return 0;
 	return 2;
 }
@@ -313,6 +315,20 @@ static int parse_args(int argc, char **argv, Options *o) {
 			return 2;
 		}
 		i += took - 1;
+	}
+	/* Phase 0 is an explicit developer visit with its own data directory.
+	 * A typo must never open the ordinary run in the player's directory. */
+	if (o->online_name && !o->online_url) {
+		fprintf(stderr, "--online-name needs --online URL\n");
+		return 2;
+	}
+	if (o->online_url) {
+		if (!o->data_dir_given) {
+			fprintf(stderr, "--online needs --data-dir for an isolated Phase 0 visit\n");
+			return 2;
+		}
+		o->start_scene = "emu";
+		o->launcher = LAUNCHER_OFF;
 	}
 	return -1;
 }
@@ -407,6 +423,18 @@ static void start_scene(const Options *o) {
 	scene_set(first_scene(s, o->headless));
 }
 
+/* The online spike boots its own scene without making a run. */
+static void start_requested_scene(const Options *o) {
+	if (!o->online_url) { start_scene(o); return; }
+	audio_init();
+	if (!online_transport_start(o->online_url, o->online_name ? o->online_name : "MegaMan")) {
+		fprintf(stderr, "online: transport could not start\n");
+		P.quit = true;
+		return;
+	}
+	scene_set(&scene_emu);
+}
+
 /* The game from the ROM read: its font, the saves, the dev tools' veteran
  * and marks; false where it cannot be decoded (the error says so) */
 static bool game_ready(const Options *o) {
@@ -424,7 +452,7 @@ static bool game_ready(const Options *o) {
 /* PLAY on the launcher at the start: the game, as a start with its ROM
  * goes on (no dev tool: the launcher shows at a plain start alone) */
 static void game_begin(void) {
-	if (game_ready(&opts)) start_scene(&opts);
+	if (game_ready(&opts)) start_requested_scene(&opts);
 }
 
 /* The game on the ROM found (`rom_ok`, else `msg` says why): the launcher
@@ -444,7 +472,7 @@ static int game_start(const Options *o, bool rom_ok, const char *msg) {
 		platform_shutdown();
 		return r;
 	}
-	start_scene(o);
+	start_requested_scene(o);
 	return -1;
 }
 
@@ -473,6 +501,7 @@ static int frame_loop(const Options *o) {
 	while (!P.quit && !quit_signal && step()) {}
 	/* a run on a layer is kept where MegaMan stands */
 	if (current == &scene_emu) director_suspend();
+	online_transport_end();
 	cores_quit();
 #endif
 	platform_shutdown();

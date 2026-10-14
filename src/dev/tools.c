@@ -5,10 +5,12 @@
 #include "tools.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "atlas.h"
 #include "audio.h"
+#include "net_layouts.h"
 #include "pacing_report.h"
 #include "sheets.h"
 #include "xdiff.h"
@@ -23,6 +25,7 @@ bool tools_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--pacing")) pacing_spec = v;
 	else if (!strcmp(a, "--xdiff")) xdiff_spec = v;
 	else if (!strcmp(a, "--xrecords")) xrecords_spec = v;
+	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	else return false;
 	return true;
 }

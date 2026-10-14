@@ -100,6 +100,26 @@ pages searched for ディーラー, ショップ and 商人; the web for エグ�
 language (MMKB's, Wikipedia's and kamigame's area lists): the project's own
 takes BN3's シークレットエリア.
 
+## Net Square's NPC movement spike (issue #120)
+
+**Verified in the disassembly:** bn6f's `data/SpritePointersList.s`,
+`npcSpritePtrs[0x37]`, is MegaMan's overworld sprite (list 6). Its
+`include/bytecode/npc_script.inc` and `asm/npc.s` define the commands the
+Phase 0 room uses: `0x08`/`0x09` show/hide an active NPC, `0x14` gives its
+position, `0x16` selects its animation, `0x10` waits, and `0x02` jumps.
+`NPCCommand_set_animation` changes `AnimationSelect`; the NPC's update
+compares it with `AnimationSelectUpdate` before loading animation data.
+Writing the same animation again therefore keeps its cadence. The room
+uses the existing NPC scripts' noninteraction and no-collision commands,
+and never replaces the local player's movement.
+
+The spike's trace checks the resulting NPC pool against each received
+peer's position through the existing `BN6_NPC_X16`, `BN6_NPC_Y16` and
+`BN6_NPC_Z16` fields (docs/ROM_DATA.md, The game's structures read field by
+field). Its other players are NPCs controlled between emulator frames,
+not a claim that BN6's original multiplayer shares an overworld. The
+two-instance proof and its limits are recorded in docs/ONLINE.md.
+
 ## Learned from players
 
 | What | Who, where | Verified |
