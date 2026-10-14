@@ -34,6 +34,8 @@ bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 	curl_easy_setopt(connection, CURLOPT_URL, address);
 	curl_easy_setopt(connection, CURLOPT_PROXY, "");
 	curl_easy_setopt(connection, CURLOPT_CONNECT_ONLY, 1L);
+	/* Our raw WebSocket Upgrade uses HTTP/1.1, including TLS ALPN. */
+	curl_easy_setopt(connection, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
 	curl_easy_setopt(connection, CURLOPT_CONNECTTIMEOUT, 5L);
 	curl_easy_setopt(connection, CURLOPT_TIMEOUT, 7L);
 	curl_easy_setopt(connection, CURLOPT_NOSIGNAL, 1L);

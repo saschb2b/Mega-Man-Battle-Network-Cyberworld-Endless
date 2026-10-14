@@ -10,7 +10,7 @@ enum {
 	OPT_URL = 10002, OPT_PROXY = 10004, OPT_CONNECTTIMEOUT = 78, OPT_TIMEOUT = 13,
 	OPT_NOSIGNAL = 99, OPT_CONNECT_ONLY = 141, OPT_NOPROGRESS = 43,
 	OPT_XFERINFODATA = 10057, OPT_XFERINFOFUNCTION = 20219,
-	OPT_SSL_VERIFYPEER = 64, OPT_SSL_VERIFYHOST = 81,
+	OPT_SSL_VERIFYPEER = 64, OPT_SSL_VERIFYHOST = 81, OPT_HTTP_VERSION = 84,
 	CURL_AGAIN = 81
 };
 static struct {
@@ -70,6 +70,8 @@ bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 	stream.easy_setopt(stream.handle, OPT_URL, address);
 	stream.easy_setopt(stream.handle, OPT_PROXY, "");
 	stream.easy_setopt(stream.handle, OPT_CONNECT_ONLY, 1L);
+	/* Our raw WebSocket Upgrade uses HTTP/1.1, including TLS ALPN. */
+	stream.easy_setopt(stream.handle, OPT_HTTP_VERSION, 2L);
 	stream.easy_setopt(stream.handle, OPT_CONNECTTIMEOUT, 5L);
 	stream.easy_setopt(stream.handle, OPT_TIMEOUT, 7L);
 	stream.easy_setopt(stream.handle, OPT_NOSIGNAL, 1L);
