@@ -6,6 +6,7 @@ does not replace an Android device test. Run with a JDK, or --docker to use
 the repository's cyberworld-android build image.
 """
 import argparse
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -112,7 +113,7 @@ def main():
         def run(*arguments):
             command = list(arguments)
             if options.docker:
-                command = ['docker', '--context', 'default', 'run', '--rm', '-u', '1000:1000',
+                command = ['docker', '--context', 'default', 'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}',
                            '-v', f'{ROOT}:/src', '-w', '/src', 'cyberworld-android'] + command
             subprocess.run(command, check=True, timeout=60)
         key = path(folder / 'server.p12')
