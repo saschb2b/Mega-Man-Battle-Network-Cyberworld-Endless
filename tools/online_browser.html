@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Net Square Phase 0 browser probe</title>
+<style>
+body { background: #101d2c; color: #e6f5ff; font: 16px sans-serif; max-width: 800px; margin: 2em auto; }
+label { display: block; margin: 1em 0; } input { min-width: 280px; } canvas { image-rendering: pixelated; }
+pre { white-space: pre-wrap; font-size: 12px; }
+</style>
+<h1>Net Square Phase 0 browser probe</h1>
+<p>Developer test only. Your ROM is read into this tab's memory and never uploaded or persisted.</p>
+<label>Server <input id="endpoint" value="ws://127.0.0.1:8765/presence"></label>
+<label>Name <input id="name" value="Browser" maxlength="16"></label>
+<label>BN6 Gregar USA ROM <input id="rom" type="file" accept=".gba"></label>
+<button id="start" disabled>Connect and walk the test route</button>
+<p id="status" role="status">Loading the game build…</p>
+<canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Game"></canvas>
+<pre id="log"></pre>
+<script>
+const statusLine = document.getElementById('status');
+const startButton = document.getElementById('start');
+const log = text => {
+    const box = document.getElementById('log');
+    box.textContent = (box.textContent + text + '\n').split('\n').slice(-40).join('\n');
+};
+var Module = {
+    canvas: document.getElementById('canvas'),
+    print: log, printErr: log,
+    onRuntimeInitialized: () => { statusLine.textContent = 'Choose your ROM, then connect.'; startButton.disabled = false; },
+    preRun: [() => { ENV.CYBERWORLD_ONLINE_TRACE = '/online-trace.jsonl'; }],
+};
+startButton.onclick = async () => {
+    const file = document.getElementById('rom').files[0];
+    if (!file) { statusLine.textContent = 'Choose your own BN6 Gregar USA ROM first.'; return; }
+    startButton.disabled = true;
+    try {
+        Module.FS.mkdir('/rom'); Module.FS.mkdir('/visit');
+        Module.FS.writeFile('/rom/bn6.gba', new Uint8Array(await file.arrayBuffer()));
+        statusLine.textContent = 'Running isolated test route. Reload to start another visit.';
+        Module.callMain(['--rom-dir', '/rom', '--data-dir', '/visit', '--window', '--size', '720x480',
+            '--online', document.getElementById('endpoint').value, '--online-name', document.getElementById('name').value,
+            '--input', '180:,30:UP,45:,30:DOWN,45:,24:LEFT,45:,24:RIGHT,220:']);
+    } catch (error) { statusLine.textContent = String(error); }
+};
+</script>
+<script src="../build/web/cyberworld.js"></script>
+</html>

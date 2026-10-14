@@ -1,4 +1,4 @@
-"""The monorepo's independent server commands, called by build.py."""
+"""The monorepo's server and online spike commands, called by build.py."""
 from pathlib import Path
 import subprocess
 import sys
@@ -18,4 +18,8 @@ def dispatch(action, rest):
         return code
     if action == 'server-run':
         return subprocess.call([sys.executable, str(ROOT / 'build/server/cyberworld-server.pyz'), *rest], cwd=ROOT)
+    if action == 'online-proof':
+        import build
+        build.build('linux')
+        return subprocess.call([sys.executable, str(ROOT / 'tools/online_proof.py'), *rest], cwd=ROOT)
     raise ValueError(action)
