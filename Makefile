@@ -297,6 +297,21 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_legacy
 .PHONY: test
 
+# Native transport runtime checks use the same platform sources as the game.
+TRANSPORT_TEST_SRCS := tests/test_online_transport.c src/online/online_transport.c src/online/online_wire.c \
+	src/online/online_socket.c src/online/online_stream.c src/online/online_windows.c \
+	src/online/network_identity.c src/core/rom.c
+TRANSPORT_PROBE := $(OUT)/online-transport-probe$(if $(filter windows,$(TARGET)),.exe)
+$(TRANSPORT_PROBE): $(TRANSPORT_TEST_SRCS) src/online/*.h shared/online/protocol.h
+	@mkdir -p $(@D)
+	$(CC) $(filter-out -MMD -MP,$(CFLAGS)) -ffunction-sections -fdata-sections -o $@ $(TRANSPORT_TEST_SRCS) \
+		$(filter-out -mwindows,$(LDLIBS)) $(if $(filter macos,$(TARGET)),-Wl$(comma)-dead_strip,-Wl$(comma)--gc-sections) \
+		$(if $(filter windows,$(TARGET)),-mconsole)
+
+comma := ,
+online-transport: $(TRANSPORT_PROBE)
+.PHONY: online-transport
+
 # The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).
 ONLINE_LINK_SRCS := tools/online_link_probe.c src/online/online_snapshot.c
 build/host/online-link-probe: $(ONLINE_LINK_SRCS) src/online/online_snapshot.h

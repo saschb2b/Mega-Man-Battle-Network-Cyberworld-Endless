@@ -9,6 +9,11 @@ on:
     branches: [main, dev]
   pull_request:
   workflow_dispatch:
+    inputs:
+      public_wss:
+        description: Also exercise native clients against the official development server
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -20,6 +25,7 @@ concurrency:
 
 env:
   DOCKER_CONTEXT_NAME: ""   # build.py: the runner's own Docker, not Docker Desktop
+  CYBERWORLD_TEST_PUBLIC_WSS: ${{ inputs.public_wss && 'true' || 'false' }}
 
 jobs:
   server:
@@ -100,6 +106,16 @@ jobs:
         with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - run: python3 build.py test
       - run: python3 build.py online-link
+      - name: Native transport runtime and hostile-server checks
+        run: |
+          docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" -w /src cyberworld-build make online-transport WERROR=1
+          docker run --rm -u "$(id -u):$(id -g)" -e CYBERWORLD_TEST_PUBLIC_WSS -v "$PWD:/src" -w /src cyberworld-build python3 tests/test_online_transport.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: online-transport-linux
+          path: .build/online-transport/report.json
+          retention-days: 14
 
   handheld:
     name: PortMaster (aarch64)
@@ -166,6 +182,14 @@ jobs:
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
       - run: python3 build.py windows
+      - name: Build the actual Windows transport for runtime checks
+        run: docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" -w /src cyberworld-windows make TARGET=windows online-transport WERROR=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: online-transport-windows-probe
+          path: build/windows/online-transport-probe.exe
+          if-no-files-found: error
+          retention-days: 14
       - name: One .exe that needs only Windows' own DLLs, and an installer
         run: |
           file build/windows-stage/cyberworld-endless.exe | tee /dev/stderr | grep -q 'PE32+ executable.*(GUI).*x86-64'
@@ -183,6 +207,27 @@ jobs:
           path: |
             build/release/cyberworld-endless-windows-x64.zip
             build/release/cyberworld-endless-windows-x64-setup.exe
+          retention-days: 14
+
+  windows-transport:
+    name: Windows transport runtime
+    needs: windows
+    runs-on: windows-2022
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: online-transport-windows-probe
+          path: build/windows
+      - name: WinHTTP connections, reconnect, hostile peers and TLS refusal
+        shell: bash
+        run: python tests/test_online_transport.py --binary build/windows/online-transport-probe.exe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: online-transport-windows
+          path: .build/online-transport/report.json
           retention-days: 14
 
   n3ds:
@@ -248,6 +293,16 @@ jobs:
           path: .build/macos-deps
           key: macos-deps-macos15-${{ hashFiles('macos/deps.sh') }}
       - run: python3 build.py macos
+      - name: System libcurl connections, reconnect, hostile peers and TLS refusal
+        run: |
+          make TARGET=macos online-transport WERROR=1
+          python3 tests/test_online_transport.py --binary build/macos/online-transport-probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: online-transport-macos
+          path: .build/online-transport/report.json
+          retention-days: 14
       - name: One app for Apple silicon and Intel that starts
         run: |
           app="build/macos/Cyberworld Endless.app"
