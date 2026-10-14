@@ -31,6 +31,8 @@
 	<true/>
 	<key>GCSupportsControllerUserInteraction</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Connect to a Network server you choose on your local network.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>MIT license. Mega Man Battle Network is © Capcom; unofficial, not affiliated.</string>
 </dict>

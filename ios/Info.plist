@@ -69,6 +69,8 @@
 	<true/>
 	<key>GCSupportsControllerUserInteraction</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Connect to a Network server you choose on your local network.</string>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>
