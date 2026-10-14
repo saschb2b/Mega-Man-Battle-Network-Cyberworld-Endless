@@ -282,3 +282,17 @@ local Practice battle experiment. They do not establish an internet Arena.
 A public launch also needs the host's
 retention policy, named moderators, backup/restart checks and the remaining
 target checks in the server README.
+
+## Draft review milestone
+
+`codex/online-net-square` stops at the monorepo, the deployed Net Square
+development service, checkpoint-safe visits and repeatable technical
+proofs. The whole-frame `network-desktop-alpha.png` and
+`network-desktop-beta.png` in `docs/screenshots/` show two interactive
+Linux clients connected to that service; `network-pocket-nova.png` is
+from the physical handheld and `network-android.png` from the Android
+emulator running the release APK. They are gameplay captures, not mockups.
+
+Trade Central and the production Arena are not enabled. Complete delayed
+battles, rollback and the remaining physical-device checks are follow-up
+work; this milestone does not close epic #120 or publish a game release.
