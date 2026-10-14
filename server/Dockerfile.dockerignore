@@ -12,3 +12,8 @@
 **/*.state
 server/server.ini
 server/*.jsonl
+**/server-data/**
+**/identity.key
+**/moderation.json
+**/moderation.lock
+**/players.json

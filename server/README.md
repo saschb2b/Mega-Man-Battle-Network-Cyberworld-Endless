@@ -1,9 +1,10 @@
-# Cyberworld presence server: Phase 0
+# Cyberworld Net Square server v1
 
 A separate, ROM-free component of the Cyberworld Endless monorepo.
-Python 3.11 or newer is its only runtime dependency. It holds one temporary
-Net Square, eight players at most, and relays their positions. It has no
-account database, trades, chat, battle relay or persistent player state.
+Python 3.11 or newer is its only runtime dependency. It relays presence,
+quick phrases and emotes, and public Inspect cards. Eight players fit in
+each channel; the default total cap of 64 creates eight channels. There
+are no accounts, e-mail addresses, trades, arbitrary chat or battle relay.
 
 ## Build and host locally
 
@@ -24,20 +25,20 @@ python3 build/server/cyberworld-server.pyz --config server/server.example.ini
 
 The zipapp can be copied to another computer with Python installed. The
 configuration is supplied explicitly; without one the server binds
-`127.0.0.1:8765`, seed 120, capacity 8, snapshots at 20 Hz. Ctrl+C stops it
+`127.0.0.1:8765`, seed 120, room capacity 8, total cap 64, snapshots at 20 Hz. Ctrl+C stops it
 and closes its clients. `--host`, `--port` and `--seed` override the INI.
 Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v1`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v2`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
 
 ```sh
 docker build -f server/Dockerfile -t cyberworld-server .
-docker run --rm -p 127.0.0.1:8765:8765 cyberworld-server
+docker run --rm -p 127.0.0.1:8765:8765 -v cyberworld-state:/data cyberworld-server
 ```
 
 The Dockerfile-specific ignore file restricts the build context to server
@@ -45,6 +46,79 @@ code and the shared protocol. The final image runs as a non-root user,
 contains the zipapp and Python, and has no game or ROM dependency.
 Mount a config read-only and pass `--config /path/server.ini` to customize
 it; container traffic needs `host = 0.0.0.0` inside the container.
+
+`GET /health` returns JSON with the configured name, message of the day,
+protocol, occupancy and limits. It contains no player identities. The
+`free_text`, `trading` and `arena` flags must remain false in server v1;
+attempting to enable an unimplemented feature refuses startup.
+
+## Coolify deployment
+
+The chosen official endpoint is
+`wss://cyberworld.saschb2b.com/presence`. The files in this repository
+prepare that deployment; they do not create a DNS record, certificate,
+Coolify service or public server by themselves.
+
+Use `server/compose.coolify.yaml` as the Compose file in a Coolify Git
+resource, with the repository root available as its build context. Give
+the `cyberworld` service the domain `https://cyberworld.saschb2b.com` and
+container port **8765**. Coolify's proxy terminates TLS and forwards
+WebSocket upgrades; no certificate is stored in the app container. Point
+the domain's DNS record to the Coolify host before enabling its certificate.
+Do not publish container port 8765 directly to the internet.
+
+The compose file includes a health check, restart policy, read-only root
+filesystem, a private persistent `cyberworld-state` volume at `/data`, and
+bounded Docker logs. It runs as UID 10001. The read-only
+`server.coolify.ini` allows the published game's browser origin
+`https://saschb2b.github.io`; add another exact origin only when serving
+the game there. The process binds `0.0.0.0` inside the container.
+
+Local validation uses:
+
+```sh
+docker compose -f server/compose.coolify.yaml config --quiet
+docker compose -f server/compose.coolify.yaml build
+```
+
+After deployment, verify HTTPS `/health`, a native client and a browser
+client through `/presence`, then test a moderator action and a restart
+with the same identity. The local and device checks in the platform table
+remain necessary; a healthy HTTP endpoint alone proves no gameplay.
+
+## Identity, moderation and backups
+
+Clients keep a random private guest key. The server derives a public
+identity specific to this server, so a player's identity does not become
+a cross-server tracking identifier. Its `identity.key` salt and moderation
+lists live in the private state directory (`server-data/` by default;
+`--state-dir` overrides it). The salt is generated once. Keep that
+directory across upgrades: losing the salt changes public identities and
+invalidates bans and players' local block lists. Do not publish it.
+
+There is no remote administration endpoint. Use the CLI with filesystem
+access to the state directory. The local roster supplies public IDs;
+private player keys are never retained. Commands take effect within a
+second. `ban`, `unban`, `mute`, `unmute` and `kick` are supported:
+
+```sh
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin list
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin mute --identity PUBLIC_ID --reason "Repeated disruption"
+python3 server/admin.py unmute PUBLIC_ID --state-dir server-data
+```
+
+In Coolify's container terminal, substitute `/data` and
+`/app/cyberworld-server.pyz`. A kick disconnects current sessions; a ban
+also refuses subsequent visits. Mutes persist and suppress phrases and
+emotes, while movement and Inspect remain available. An optional
+`whitelist` is a space-separated list of public IDs allowed to connect.
+Profiles remain anonymous: resetting a private key can evade a ban.
+An allowlist is available where a host needs stricter admission.
+
+Back up the config and private state volume together, with access limited
+to moderators. Moderation updates use an atomic replace; concurrent local
+CLI edits are locked. There is no game save or ROM to back up on the
+server. Restore the same `identity.key` when restoring moderation lists.
 
 ## TLS and privacy
 
@@ -61,14 +135,17 @@ native clients only. An HTTPS page requires `wss://`, as enforced by the
 browser. The origin check is not player authentication.
 
 The host sees connecting IPs at the network layer, display names and
-positions. Default logs contain joins, leaves, refusals and sampled
-positions, not IP addresses or private player files. `--event-log FILE`
+positions and the numeric public card (HP, buster stats, Souls, Crosses,
+depth, best depth, title marks and colored NaviCust board). Default logs
+contain joins, public IDs, names, channels, leaves and refusals, not IPs
+or private player files. `--event-log FILE`
 optionally writes JSONL evidence; choose your own rotation/retention.
-There is no database to back up in Phase 0: retain only the config and
-TLS material if needed. The world is reconstructed from its seed.
+Sampled positions are logged only with that explicit evidence option.
+The world is reconstructed from its seed.
 
-No official public server is launched by this spike. Accounts, moderation,
-channels and the official hosting policy remain later work.
+The official hosting policy and named moderators must be set before a
+public launch. The server can validate ranges and compatibility, but a
+modified client can claim another HP or board; Inspect is informational.
 
 ## Client platform status
 
@@ -87,3 +164,12 @@ targets, including the 3DS's trust roots and socket initialization.
 
 See [the Phase 0 proof](../docs/ONLINE.md) and
 [the wire format](../shared/online/README.md).
+
+## Release packaging
+
+The zipapp and Docker image are the implemented, ROM-free distribution
+artifacts. Native self-contained server executables for Linux x86-64 and
+ARM64, Windows and macOS still need per-platform packaging and smoke tests.
+Python is required outside Docker until those release jobs exist. Keep
+the shared protocol in the same release as the game; v1 wire clients
+cannot enter a v2 server.

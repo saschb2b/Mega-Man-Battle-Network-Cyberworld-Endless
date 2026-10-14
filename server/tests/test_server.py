@@ -61,7 +61,7 @@ class Client:
 
 class ServerTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.server = Server(seed=123456, capacity=2)
+        self.server = Server(seed=123456, capacity=2, player_cap=2)
         self.port = await self.server.start("127.0.0.1", 0)
         self.clients = []
 
@@ -86,8 +86,10 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         message = await second.message(protocol.SPEC["snapshot"])
         self.assertEqual(message[1], 1)
         peer = protocol.PEER.unpack(message[2:])
-        self.assertEqual(peer[:5], (struct.unpack("!I", welcome[5:9])[0], 123, -234, 12, 7))
-        self.assertEqual(peer[5].rstrip(b"\0"), b"Lan")
+        self.assertEqual(peer[0], struct.unpack("!I", welcome[5:9])[0])
+        self.assertEqual(peer[1], welcome[14:30])
+        self.assertEqual(peer[2:6], (123, -234, 12, 7))
+        self.assertEqual(peer[6].rstrip(b"\0"), b"Lan")
         await first.close()
         self.clients.remove(first)
         for _ in range(20):
@@ -98,7 +100,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.server.players), 1)
 
     async def test_rejects_incompatible_identity(self):
-        for identity, code in ((dict(version=2), 2), (dict(layer_make=0), 3),
+        for identity, code in ((dict(version=protocol.SPEC["version"] + 1), 2), (dict(layer_make=0), 3),
                                (dict(layer_hash=0), 3), (dict(rom_code="BAD!"), 4),
                                (dict(rom_sha1="00" * 20), 4)):
             client, response = await self.connect(**identity)
@@ -153,7 +155,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         reader, writer = await asyncio.open_connection("127.0.0.1", self.port)
         writer.write(b"GET /presence HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
                      b"Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: MDEyMzQ1Njc4OWFiY2RlZg==\r\n"
-                     b"Sec-WebSocket-Protocol: cyberworld.presence.v1\r\nOrigin: https://untrusted.invalid\r\n\r\n")
+                     b"Sec-WebSocket-Protocol: cyberworld.presence.v2\r\nOrigin: https://untrusted.invalid\r\n\r\n")
         await writer.drain()
         self.assertTrue((await reader.read()).startswith(b"HTTP/1.1 400"))
         self.assertFalse(self.server.players)
@@ -165,13 +167,18 @@ class ContractTests(unittest.TestCase):
     def test_shared_constants_and_game_generation_match(self):
         header = (ROOT / "shared/online/protocol.h").read_text()
         for name in ("hello", "welcome", "state", "snapshot", "error", "ping", "pong",
-                     "max_players", "name_bytes", "max_message", "coordinate_limit"):
+                     "max_players", "name_bytes", "max_message", "coordinate_limit", "profile", "inspect", "card",
+                     "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
+                     "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
         make = (ROOT / "src/net/layer_make.h").read_text()
         self.assertEqual(int(re.search(r"#define LAYER_MAKE (\d+)", make)[1]), protocol.SPEC["layer_make"])
         self.assertEqual(int(re.search(r"#define LAYER_MAKE_HASH (0x\w+)u", make)[1], 16), protocol.SPEC["layer_hash"])
+        self.assertEqual(protocol.PROFILE.size, protocol.SPEC["profile_bytes"])
+        self.assertEqual(protocol.PEER.size, protocol.SPEC["peer_bytes"])
+        self.assertEqual(protocol.WELCOME.size, protocol.SPEC["welcome_bytes"])
 
     def test_invalid_payloads(self):
         for data in (b"", b"\x03", protocol.STATE.pack(3, 0, 0, 0, 8)):

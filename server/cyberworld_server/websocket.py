@@ -4,13 +4,14 @@ import asyncio
 import base64
 import hashlib
 import struct
+import json
 
 from .protocol import ProtocolError, SPEC
 
 GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 
-async def upgrade(reader, writer, origins):
+async def upgrade(reader, writer, origins, health=None):
     try:
         request = await asyncio.wait_for(reader.readuntil(b"\r\n\r\n"), 5)
         lines = request.decode("ascii").split("\r\n")
@@ -21,6 +22,12 @@ async def upgrade(reader, writer, origins):
             if key in headers:
                 raise ValueError("Duplicate header")
             headers[key] = value.strip()
+        if lines[0] == "GET /health HTTP/1.1" and health is not None:
+            body = json.dumps(health, separators=(",", ":")).encode()
+            writer.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: no-store\r\n"
+                          "Connection: close\r\nContent-Length: " + str(len(body)) + "\r\n\r\n").encode() + body)
+            await asyncio.wait_for(writer.drain(), 2)
+            return False
         key = headers.get("sec-websocket-key", "")
         valid_key = len(base64.b64decode(key, validate=True)) == 16
     except (ValueError, UnicodeError, asyncio.LimitOverrunError) as exc:
@@ -28,9 +35,9 @@ async def upgrade(reader, writer, origins):
     if len(request) > 8192 or lines[0] != "GET /presence HTTP/1.1":
         raise ProtocolError("Use /presence")
     if (not valid_key or headers.get("upgrade", "").lower() != "websocket"
-            or "upgrade" not in headers.get("connection", "").lower().split(", ")
+            or "upgrade" not in [part.strip() for part in headers.get("connection", "").lower().split(",")]
             or headers.get("sec-websocket-version") != "13"
-            or SPEC["subprotocol"] not in headers.get("sec-websocket-protocol", "").split(", ")
+            or SPEC["subprotocol"] not in [part.strip() for part in headers.get("sec-websocket-protocol", "").split(",")]
             or not headers.get("host")):
         raise ProtocolError("WebSocket version or subprotocol mismatch")
     if "origin" in headers and headers["origin"] not in origins:
@@ -40,6 +47,7 @@ async def upgrade(reader, writer, origins):
                   "Connection: Upgrade\r\nSec-WebSocket-Accept: " + accept +
                   "\r\nSec-WebSocket-Protocol: " + SPEC["subprotocol"] + "\r\n\r\n").encode())
     await asyncio.wait_for(writer.drain(), 2)
+    return True
 
 
 def frame(data, opcode=2):
