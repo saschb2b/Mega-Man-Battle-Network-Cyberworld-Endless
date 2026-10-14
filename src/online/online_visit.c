@@ -33,6 +33,14 @@ static bool visit_error(char *error, size_t cap, const char *message) {
 	return false;
 }
 
+static bool begin_error(char *error, size_t cap, const char *message) {
+	run = visit.before;
+	profile = visit.profile;
+	rng_restore(visit.rng);
+	loot_memory_set(&visit.battle_before);
+	return visit_error(error, cap, message);
+}
+
 bool online_visit_begin(const char *url, const char *name, const uint8_t identity[16], char *error, size_t cap) {
 	if (visit.active || visit.returning) return visit_error(error, cap, online_visit_open);
 	emu_sync();
@@ -48,18 +56,12 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 		char path[600];
 		save_state_path(path, sizeof path);
 		FILE *state = fopen(path, "rb");
-		if (!state) {
-			run = visit.before;
-			loot_memory_set(&visit.battle_before);
-			return visit_error(error, cap, online_visit_save_first);
-		}
+		if (!state) return begin_error(error, cap, online_visit_save_first);
 		fclose(state);
 	} else memset(&run, 0, sizeof run);
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
-		run = visit.before;
-		loot_memory_set(&visit.battle_before);
-		return visit_error(error, cap, online_visit_connect_failed);
+		return begin_error(error, cap, online_visit_connect_failed);
 	}
 	visit.active = true;
 	visit.ready = false;
@@ -180,6 +182,11 @@ void online_visit_left(void) {
 	if (visit.returning && !visit.checkpoint) {
 		visit.returning = false;
 		fprintf(stderr, "online: no checkpoint; returned to title\n");
+	} else if (visit.preserve && !visit.returning) {
+		/* A deliberate reset to title ends the borrowed checkpoint's
+		 * guard before a later NEW GAME can begin. */
+		restore_metadata();
+		visit.preserve = false;
 	}
 }
 

@@ -89,7 +89,9 @@ static void after_frame(void) {
  * tables the run has taken over. */
 static bool soft_reset(void) {
 	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
-	if ((keys_from_buttons() & chord) != chord) return false;
+	uint32_t keys = keys_from_buttons();
+	if (!online_visit_active()) keys = online_visit_run_keys(keys);
+	if ((keys & chord) != chord) return false;
 	if (online_visit_active()) { online_visit_return(); return true; }
 	emu_sync();
 	director_stop();

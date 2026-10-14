@@ -9,6 +9,9 @@ import contextlib
 import hashlib
 import json
 import os
+import re
+import shutil
+import socket
 import statistics
 from pathlib import Path
 import subprocess
@@ -84,6 +87,10 @@ def validate_client(name, rows, other, original, directory):
     remote = {position(peer) for row in connected for peer in row['peers']}
     real_npcs = {tuple(peer[k] for k in ('npc_x', 'npc_y', 'npc_z'))
                  for row in connected for peer in row['peers'] if peer['npc_match']}
+    rendered = [peer for row in connected for peer in row['peers'] if peer['npc_match']]
+    if any(tuple(peer['npc_' + axis] for axis in ('x', 'y', 'z')) !=
+           tuple(peer['rendered_' + axis] for axis in ('x', 'y', 'z')) for peer in rendered):
+        raise RuntimeError(f'{name}: actual game NPC diverged from the interpolated position')
     other_local = {position(row['local']) for row in other}
     if min(len(local), len(remote), len(real_npcs)) < 3:
         raise RuntimeError(f'{name}: local, remote and real NPC motion were not all observed')
@@ -94,9 +101,57 @@ def validate_client(name, rows, other, original, directory):
     latency = [row['latency_ms'] for row in connected if row.get('latency_ms', 0)]
     return dict(samples=len(rows), local_positions=len(local), peer_positions=len(remote),
                 real_npc_positions=len(real_npcs), matched_other_positions=len(real_npcs & other_local),
+                interpolated_samples_matching_game=len(rendered),
                 checkpoint_files_unchanged=len(original),
                 round_trip_median_ms=statistics.median(latency) if latency else None,
                 round_trip_max_ms=max(latency, default=None))
+
+
+def validate_return(name, evidence):
+    log = (evidence / f'{name}.log').read_text()
+    carried = re.search(r'online: carried checkpoint=yes depth=(\d+) hp=(\d+) max_hp=(\d+) souls=(\d+)', log)
+    if not carried or int(carried[1]) != 3:
+        raise RuntimeError(f'{name}: did not carry the real depth-three checkpoint')
+    if 'online: checkpoint return=restored carried=identical' not in log:
+        raise RuntimeError(f'{name}: did not restore an identical carried loadout after the visit')
+    return dict(depth=int(carried[1]), hp=int(carried[2]), max_hp=int(carried[3]),
+                souls=int(carried[4]), returned_loadout_identical=True)
+
+
+def validate_entry_failures(binary, roms, evidence):
+    results = {}
+    # Keep the port bound but not listening, guaranteeing refusal without
+    # accidentally connecting to another local service.
+    with socket.socket() as refused:
+        refused.bind(('127.0.0.1', 0))
+        url = f'ws://127.0.0.1:{refused.getsockname()[1]}/presence'
+        cases = {'empty': 'online: no checkpoint; returned to title',
+                 'missing': 'Continue and save your run before going online.',
+                 'corrupt': 'Your checkpoint could not be opened. Your save is unchanged.'}
+        for case, expected in cases.items():
+            directory = evidence / f'entry-{case}'
+            if case == 'empty':
+                directory.mkdir()
+            else:
+                shutil.copytree(evidence / 'Alpha', directory)
+                state = directory / 'savedata/run.state'
+                if case == 'missing':
+                    state.unlink()
+                else:
+                    state.write_bytes(b'Unreadable checkpoint for a rejection test.\n')
+            before = hashes(directory / 'savedata')
+            log = evidence / f'entry-{case}.log'
+            command = [str(binary), '--headless', '--rom-dir', str(roms), '--data-dir', str(directory),
+                       '--online', url, '--online-name', 'EntryTest', '--frames', '500']
+            with log.open('w') as output:
+                subprocess.run(command, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT,
+                               check=True, timeout=45)
+            if expected not in log.read_text():
+                raise RuntimeError(f'{case}: visit did not take its expected return/rejection path; see {log}')
+            if hashes(directory / 'savedata') != before:
+                raise RuntimeError(f'{case}: visit changed checkpoint files')
+            results[case] = dict(expected_path_observed=True, checkpoint_files_unchanged=len(before))
+    return results
 
 
 def run(args, evidence):
@@ -112,7 +167,8 @@ def run(args, evidence):
     with contextlib.ExitStack() as stack:
         output = stack.enter_context((evidence / 'server.log').open('w'))
         server = subprocess.Popen([sys.executable, str(server_binary), '--host', '127.0.0.1',
-                                   '--port', '0', '--seed', str(args.seed), '--event-log', str(event_file)],
+                                   '--port', '0', '--seed', str(args.seed), '--event-log', str(event_file),
+                                   '--state-dir', str(evidence / 'server-data')],
                                   cwd=ROOT, stdout=output, stderr=subprocess.STDOUT)
         stack.callback(stop, server)
         listening = wait_for(lambda: next((row for row in records(event_file)
@@ -120,9 +176,12 @@ def run(args, evidence):
                              10, f'Server did not start; see {evidence / "server.log"}')
         url = f'ws://127.0.0.1:{listening["port"]}/presence'
         clients = {}
-        scripts = {'Alpha': '180:,30:UP,45:,30:DOWN,45:,24:LEFT,45:,24:RIGHT,220:',
-                   'Beta': '210:,24:RIGHT,45:,24:LEFT,45:,30:DOWN,45:,30:UP,400:'}
-        for name, frames in (('Alpha', 660), ('Beta', 900)):
+        # Alpha leaves from the Network menu; Beta is idle when the server
+        # disconnects. Neither resumes offline play after the borrowed visit.
+        leave = '4:START,8:,' + '4:DOWN,8:,' * 4 + '4:A,200:'
+        scripts = {'Alpha': '180:,30:UP,45:,30:DOWN,45:,24:LEFT,45:,24:RIGHT,100:,' + leave,
+                   'Beta': '210:,24:RIGHT,45:,24:LEFT,45:,30:DOWN,45:,30:UP,600:'}
+        for name, frames in (('Alpha', 800), ('Beta', 1100)):
             output = stack.enter_context((evidence / f'{name}.log').open('w'))
             env = dict(os.environ, CYBERWORLD_ONLINE_TRACE=str(evidence / f'{name}.jsonl'))
             command = [str(binary), '--headless', '--size', '720x480', '--rom-dir', str(args.rom_dir),
@@ -147,6 +206,7 @@ def run(args, evidence):
     report = dict(seed=args.seed, endpoint=url, clients={})
     for name, other in (('Alpha', 'Beta'), ('Beta', 'Alpha')):
         report['clients'][name] = validate_client(name, rows[name], rows[other], saved[name], evidence / name)
+        report['clients'][name]['carried_checkpoint'] = validate_return(name, evidence)
     worlds = {(row['seed'], row['world_hash']) for stream in rows.values() for row in stream}
     if len(worlds) != 1 or next(iter(worlds))[0] != args.seed:
         raise RuntimeError('The clients did not construct the same server-seeded world')
@@ -156,7 +216,9 @@ def run(args, evidence):
     if len([row for row in events if row['event'] == 'join']) != 2:
         raise RuntimeError('Server did not accept exactly two game clients')
     report.update(world_hash=next(iter(worlds))[1], peer_departure_observed=True,
-                  server_disconnect_observed=True, result='passed')
+                  server_disconnect_observed=True, voluntary_return_observed=True,
+                  checkpoint_return_observed=True, result='passed')
+    report['entry_checks'] = validate_entry_failures(binary, args.rom_dir, evidence)
     (evidence / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     for name in clients:
         try:
