@@ -14,6 +14,8 @@ tools/romlab/romlab.bin
 *.dat
 rom/
 savedata/
+network.ini
+network.ini.tmp
 
 # A host's private settings and optional evidence logs are not distribution files.
 /server/server.ini

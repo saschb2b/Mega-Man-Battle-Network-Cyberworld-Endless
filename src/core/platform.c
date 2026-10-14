@@ -23,6 +23,7 @@
 #include "save_queue.h"
 #include "pads.h"
 #include "touch.h"
+#include "text_input.h"
 #ifdef CW_IOS
 #include "ios.h"
 #endif
@@ -480,11 +481,8 @@ static void phone_controls(void) {
 #endif
 }
 
-/* (a file dropped on the window: the title's and SAVES', as a screen's own) */
-static void input_start(void) {
-	keymap_default();
-	SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
-}
+/* Keyboard defaults and file drops are ready before the first event. */
+static void input_start(void) { keymap_default(); SDL_EventState(SDL_DROPFILE, SDL_ENABLE); }
 
 bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 	P.headless = headless;
@@ -719,6 +717,7 @@ static void let_go(void) {
 }
 
 static void poll_event(const SDL_Event *e) {
+	if (text_input_event(e)) { key_bits = key_tapped = 0; P.keyboard_last = true; return; }
 	switch (e->type) {
 	case SDL_QUIT: P.quit = true; printf("quit: the window closed, or the system asked\n"); break;
 	case SDL_FINGERDOWN:
