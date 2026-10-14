@@ -16,7 +16,7 @@ file(GLOB DIRS LIST_DIRECTORIES true ${GAME}/src/*)
 file(WRITE ${CMAKE_BINARY_DIR}/gen/version.h "#define CW_VERSION \"${CW_VERSION}\"\n")
 
 add_library(main SHARED ${SRCS})
-target_include_directories(main PRIVATE ${DIRS} ${CMAKE_BINARY_DIR}/gen)
+target_include_directories(main PRIVATE ${DIRS} ${GAME}/shared/online ${CMAKE_BINARY_DIR}/gen)
 target_include_directories(main SYSTEM PRIVATE ${MGBA}/include)
 # (the Makefile's warnings, clang's share of them: issue #19)
 target_compile_options(main PRIVATE -std=c11 -O2 -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers
