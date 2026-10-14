@@ -5,6 +5,7 @@
 
 #include "compat.h"
 #include "game.h"
+#include "platform.h"
 
 #define PEOPLE_MAX 64
 static struct { uint8_t identity[ONLINE_IDENTITY_BYTES]; unsigned flags; } people[PEOPLE_MAX];
@@ -53,6 +54,7 @@ static bool write_people(void) {
 	if (fclose(file)) ok = false;
 	if (ok) ok = cw_rename(temp, path);
 	if (!ok) remove(temp);
+	else { cw_fsync_dir(g_data_dir); platform_persist(); }
 	return ok;
 }
 

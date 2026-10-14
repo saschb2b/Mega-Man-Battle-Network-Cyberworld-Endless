@@ -114,8 +114,8 @@ static void card_draw(void) {
 	online_card_buster(stats, sizeof stats, p->attack, p->speed, p->charge);
 	small(12, 73, stats, WHITE);
 	board_draw(p);
-	small(12, 89, lines[3], rgba(100, 210, 245, 255)); powers_draw(p->souls, true, 89);
-	small(12, 112, lines[4], rgba(100, 210, 245, 255)); powers_draw(p->crosses, false, 112);
+	small(12, 94, lines[3], rgba(100, 210, 245, 255)); powers_draw(p->souls, true, 94);
+	small(12, 118, lines[4], rgba(100, 210, 245, 255)); powers_draw(p->crosses, false, 118);
 	unsigned marks = 0;
 	for (unsigned i = 0; i < 16; ++i) if (p->marks & (1u << i)) ++marks;
 	online_card_marks(stats, sizeof stats, marks); small(184, 83, stats, WHITE);

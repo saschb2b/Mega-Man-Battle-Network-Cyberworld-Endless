@@ -11,6 +11,7 @@ EM_JS(int, identity_random, (uint8_t *out), {
 });
 #elif defined(_WIN32)
 #include <windows.h>
+#include <string.h>
 #elif defined(__3DS__)
 #include <3ds.h>
 #else
@@ -24,7 +25,10 @@ bool network_identity(uint8_t out[NETWORK_ID_BYTES]) {
 	typedef BOOLEAN (WINAPI *RandomBytes)(PVOID, ULONG);
 	HMODULE library = LoadLibraryW(L"advapi32.dll");
 	if (!library) return false;
-	RandomBytes random_bytes = (RandomBytes)GetProcAddress(library, "SystemFunction036");
+	FARPROC address = GetProcAddress(library, "SystemFunction036");
+	RandomBytes random_bytes;
+	_Static_assert(sizeof random_bytes == sizeof address, "Windows function pointer size");
+	memcpy(&random_bytes, &address, sizeof random_bytes);
 	bool ok = random_bytes && random_bytes(out, NETWORK_ID_BYTES);
 	FreeLibrary(library);
 	return ok;

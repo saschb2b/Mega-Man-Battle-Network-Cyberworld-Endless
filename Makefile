@@ -85,7 +85,7 @@ MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
 IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
              $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
 CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
-OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o
+OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o $(OUT)/obj/online/online_apple.o
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
@@ -265,13 +265,36 @@ build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/ti
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
 		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order
+NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_identity.c \
+	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
+build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \
+		-o $@ $(NETWORK_TEST_SRCS) $(shell pkg-config --libs sdl2) -lm
+
+ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/core/compat.c
+build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
+
+LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
+build/host/test_legacy: $(LEGACY_TEST_SRCS)
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(LEGACY_TEST_SRCS)
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
 	build/host/test_saves
 	build/host/test_tiles_order
+	build/host/test_network
+	build/host/test_online
+	build/host/test_legacy
 .PHONY: test
 
 # The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).

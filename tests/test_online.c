@@ -8,8 +8,11 @@
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_wire.h"
+#include "platform.h"
 
 char g_data_dir[512];
+static unsigned persists;
+void platform_persist(void) { ++persists; }
 
 static void welcome(OnlineSnapshot *out) {
 	uint8_t bytes[32] = { ONLINE_WELCOME };
@@ -76,9 +79,11 @@ static void motion(void) {
 	online_motion_update(&a, 1125, &out);
 	assert(out.peers[0].x == 50); /* halfway between the two older samples */
 	assert(online_people_toggle(a.peers[0].identity, ONLINE_BLOCKED));
+	assert(persists == 1);
 	online_motion_update(&a, 1150, &out); assert(!out.peer_count);
 	online_people_load(); assert(online_people_flags(a.peers[0].identity) == ONLINE_BLOCKED);
 	assert(online_people_toggle(a.peers[0].identity, ONLINE_BLOCKED));
+	assert(persists == 2);
 	online_motion_update(&a, 1150, &out); assert(out.peers[0].x == 100);
 	a.peer_count = 0; a.position_serial = 4; a.position_ticks = 1150;
 	online_motion_update(&a, 1150, &out); assert(!out.peer_count); /* departure is immediate */
