@@ -16,7 +16,13 @@ def link_probe(rest):
     parser = argparse.ArgumentParser(prog='build.py online-link')
     parser.add_argument('--rom', type=Path)
     parser.add_argument('--state', type=Path)
+    parser.add_argument('--practice', action='store_true', help="complete BN6's actual two-core Practice NetBattle")
     args = parser.parse_args(rest)
+    if args.practice:
+        if not args.rom:
+            parser.error('--practice needs the player\'s --rom')
+        from tools.online_link_practice import run
+        return run(args.rom, args.state)
     if bool(args.rom) != bool(args.state):
         parser.error('--rom and --state are supplied together')
     build.ensure_image()

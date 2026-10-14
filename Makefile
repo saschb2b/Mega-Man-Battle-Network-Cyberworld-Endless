@@ -328,13 +328,22 @@ $(ONLINE_LINK_PROBE): $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
 
 online-link: $(ONLINE_LINK_PROBE)
 
+ONLINE_BN6_LINK_SRCS := tools/online_link_bn6.c tools/online_link_script.c tools/online_link_ipc.c tools/online_link_ipc_wire.c
+build/host/online-link-bn6: $(ONLINE_BN6_LINK_SRCS) tools/online_link_script.h tools/online_link_ipc.h tools/online_link_ipc_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_BN6_LINK_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-link-bn6: build/host/online-link-bn6
+
 server:
 	python3 server/build.py
 
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: online-link server server-test
+.PHONY: online-link online-link-bn6 server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
