@@ -117,7 +117,7 @@ void online_stream_close(void) {
 	memset(&stream, 0, sizeof stream);
 }
 
-#else
+#elif !defined(__ANDROID__) && (!defined(__3DS__) || !defined(CW_3DS_CURL))
 
 bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t size) {
 	(void)url; (void)stop;

@@ -8,6 +8,7 @@
 #include "protocol.h"
 #include "rom.h"
 
+#if !defined(_WIN32) && !defined(CW_IOS)
 static uint8_t incoming[ONLINE_MAX_MESSAGE * 2 + 16];
 static size_t buffered;
 
@@ -156,3 +157,4 @@ void online_socket_close(void) {
 	online_stream_close();
 	buffered = 0;
 }
+#endif
