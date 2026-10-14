@@ -285,7 +285,12 @@ build/host/test_legacy: $(LEGACY_TEST_SRCS)
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -o $@ $(LEGACY_TEST_SRCS)
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy
+build/host/test_online_link_ipc: tools/online_link_ipc_test.c tools/online_link_ipc_wire.c tools/online_link_ipc_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-o $@ tools/online_link_ipc_test.c tools/online_link_ipc_wire.c
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
