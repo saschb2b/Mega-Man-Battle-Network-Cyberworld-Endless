@@ -394,7 +394,7 @@ jobs:
   pages:
     name: Publish on GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, handheld, linux, windows, android, macos, ios, web]
+    needs: [test, handheld, linux, windows, windows-transport, android, macos, ios, web]
     runs-on: ubuntu-latest
     permissions:
       pages: write
