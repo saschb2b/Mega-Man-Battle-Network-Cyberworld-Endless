@@ -9,6 +9,7 @@
 #include "layer_make.h"
 #include "online_browser.h"
 #include "online_socket.h"
+#include "online_wire.h"
 #include "rom.h"
 
 static struct {
@@ -19,101 +20,32 @@ static struct {
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
-	uint8_t hello[64];
+	uint8_t hello[80];
+	struct { uint8_t data[ONLINE_PROFILE_BYTES + 1]; size_t size; } queue[16];
+	unsigned queue_read, queue_write;
 	size_t hello_size;
 	uint32_t last_send, last_ping, last_receive;
 } transport;
 
-static void put16(uint8_t *out, uint16_t value) {
-	out[0] = (uint8_t)(value >> 8); out[1] = (uint8_t)value;
-}
-
-static void put32(uint8_t *out, uint32_t value) {
-	out[0] = (uint8_t)(value >> 24); out[1] = (uint8_t)(value >> 16);
-	out[2] = (uint8_t)(value >> 8); out[3] = (uint8_t)value;
-}
-
-static uint32_t get32(const uint8_t *in) {
-	return (uint32_t)in[0] << 24 | (uint32_t)in[1] << 16 | (uint32_t)in[2] << 8 | in[3];
-}
-
-static int32_t signed32(const uint8_t *in) {
-	uint32_t value = get32(in);
-	return (int32_t)((int64_t)(value & INT32_MAX) - (int64_t)(value >> 31) * 2147483648LL);
-}
-
-static bool valid_name(const char *name) {
-	size_t size = strlen(name);
-	if (!size || size > ONLINE_NAME_BYTES) return false;
-	for (size_t i = 0; i < size; ++i) {
-		char c = name[i];
-		bool alnum = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
-		if (!alnum && (!i || (c != ' ' && c != '_' && c != '-'))) return false;
-	}
-	return true;
-}
-
-static bool build_hello(const char *name) {
-	if (!R.layout || !R.layout->code || !R.layout->sha1 || !valid_name(name)) return false;
+static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
+	if (!R.layout || !R.layout->code || !R.layout->sha1 || !online_wire_name(name)) return false;
 	uint8_t *out = transport.hello;
 	out[0] = ONLINE_HELLO;
-	put16(out + 1, ONLINE_PROTOCOL_VERSION);
-	put16(out + 3, LAYER_MAKE);
-	put32(out + 5, LAYER_MAKE_HASH);
+	online_put16(out + 1, ONLINE_PROTOCOL_VERSION);
+	online_put16(out + 3, LAYER_MAKE);
+	online_put32(out + 5, LAYER_MAKE_HASH);
 	memcpy(out + 9, R.layout->code, 4);
 	for (size_t i = 0; i < 20; ++i) {
 		char pair[3] = { R.layout->sha1[i * 2], R.layout->sha1[i * 2 + 1], 0 };
 		out[13 + i] = (uint8_t)strtoul(pair, NULL, 16);
 	}
 	size_t length = strlen(name);
-	out[33] = (uint8_t)length;
-	memcpy(out + 34, name, length);
-	transport.hello_size = 34 + length;
+	memcpy(out + 33, identity, ONLINE_IDENTITY_BYTES);
+	online_put16(out + 49, 0);
+	out[51] = (uint8_t)length;
+	memcpy(out + 52, name, length);
+	transport.hello_size = 52 + length;
 	return true;
-}
-
-static bool read_peers(const uint8_t *data, size_t size, OnlineSnapshot *snapshot) {
-	if (size < 2 || data[1] >= ONLINE_MAX_PLAYERS || size != 2 + (size_t)data[1] * 33) return false;
-	snapshot->peer_count = data[1];
-	for (size_t i = 0; i < snapshot->peer_count; ++i) {
-		const uint8_t *in = data + 2 + i * 33;
-		OnlinePeer *peer = &snapshot->peers[i];
-		peer->id = get32(in);
-		peer->x = signed32(in + 4); peer->y = signed32(in + 8); peer->z = signed32(in + 12);
-		peer->facing = in[16];
-		memcpy(peer->name, in + 17, ONLINE_NAME_BYTES);
-		peer->name[ONLINE_NAME_BYTES] = '\0';
-		if (!peer->id || peer->id == snapshot->player_id || peer->facing > 7 || !valid_name(peer->name)) return false;
-		if (peer->x < -ONLINE_COORDINATE_LIMIT || peer->x > ONLINE_COORDINATE_LIMIT ||
-		    peer->y < -ONLINE_COORDINATE_LIMIT || peer->y > ONLINE_COORDINATE_LIMIT ||
-		    peer->z < -ONLINE_COORDINATE_LIMIT || peer->z > ONLINE_COORDINATE_LIMIT) return false;
-		for (size_t j = 0; j < i; ++j) if (snapshot->peers[j].id == peer->id) return false;
-	}
-	return true;
-}
-
-static bool message(const uint8_t *data, size_t size, OnlineSnapshot *snapshot) {
-	if (data[0] == ONLINE_WELCOME && !snapshot->connected && size == 12) {
-		snapshot->seed = get32(data + 1);
-		snapshot->player_id = get32(data + 5);
-		if (!snapshot->player_id || !data[11] || data[11] > ONLINE_MAX_PLAYERS) return false;
-		snapshot->connected = true;
-		fprintf(stderr, "online: connected id=%u seed=%u\n", snapshot->player_id, snapshot->seed);
-		return true;
-	}
-	if (data[0] == ONLINE_ERROR && size >= 3 && size <= 99) {
-		size_t length = size - 3;
-		for (size_t i = 0; i < length; ++i) snapshot->error[i] = data[i + 3] >= 32 && data[i + 3] < 127 ? (char)data[i + 3] : '?';
-		snapshot->error[length] = '\0';
-		return false;
-	}
-	if (!snapshot->connected) return false;
-	if (data[0] == ONLINE_SNAPSHOT) return read_peers(data, size, snapshot);
-	if (data[0] == ONLINE_PONG && size == 5) {
-		snapshot->latency_ms = SDL_GetTicks() - get32(data + 1);
-		return snapshot->latency_ms < 15000;
-	}
-	return false;
 }
 
 static bool send_message(const uint8_t *data, size_t size) {
@@ -139,9 +71,35 @@ static bool send_position(void) {
 	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
 	uint8_t data[14];
 	data[0] = ONLINE_STATE;
-	put32(data + 1, (uint32_t)local.x); put32(data + 5, (uint32_t)local.y); put32(data + 9, (uint32_t)local.z);
+	online_put32(data + 1, (uint32_t)local.x); online_put32(data + 5, (uint32_t)local.y); online_put32(data + 9, (uint32_t)local.z);
 	data[13] = local.facing;
 	return send_message(data, sizeof data);
+}
+
+static bool send_queued(void) {
+	uint8_t data[ONLINE_PROFILE_BYTES + 1];
+	size_t size = 0;
+	if (transport.mutex) SDL_LockMutex(transport.mutex);
+	if (transport.queue_read != transport.queue_write) {
+		unsigned slot = transport.queue_read++ % 16;
+		size = transport.queue[slot].size;
+		memcpy(data, transport.queue[slot].data, size);
+	}
+	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+	return !size || send_message(data, size);
+}
+
+static bool enqueue(const uint8_t *data, size_t size) {
+	if (!transport.enabled || size > sizeof transport.queue[0].data) return false;
+	if (transport.mutex) SDL_LockMutex(transport.mutex);
+	bool room = transport.queue_write - transport.queue_read < 16;
+	if (room) {
+		unsigned slot = transport.queue_write++ % 16;
+		transport.queue[slot].size = size;
+		memcpy(transport.queue[slot].data, data, size);
+	}
+	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+	return room;
 }
 
 #ifndef __EMSCRIPTEN__
@@ -154,18 +112,18 @@ static void connected_loop(OnlineSnapshot *snapshot) {
 		if (got < 0) break;
 		if (got) {
 			last_receive = now;
-			if (!message(data, (size_t)got, snapshot)) break;
+			if (!online_wire_message(data, (size_t)got, now, snapshot)) break;
 			publish(snapshot);
 		}
 		if (now - last_receive > (snapshot->connected ? 15000u : 5000u)) break;
 		if (snapshot->connected && now - last_send >= 50) {
 			last_send = now;
-			if (!send_position()) break;
+			if (!send_position() || !send_queued()) break;
 		}
 		if (snapshot->connected && now - last_ping >= 2000) {
 			last_ping = now;
 			data[0] = ONLINE_PING;
-			put32(data + 1, now);
+			online_put32(data + 1, now);
 			if (!online_socket_send(data, 5)) break;
 		}
 		SDL_Delay(2);
@@ -183,7 +141,7 @@ static void browser_closed(void) {
 
 static void browser_received(const uint8_t *data, size_t size) {
 	transport.last_receive = SDL_GetTicks();
-	if (!message(data, size, &transport.snapshot)) browser_closed();
+	if (!online_wire_message(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
 }
 
 static void browser_poll(void) {
@@ -196,12 +154,12 @@ static void browser_poll(void) {
 	if (!transport.snapshot.connected) return;
 	if (now - transport.last_send >= 50) {
 		transport.last_send = now;
-		if (!send_position()) browser_closed();
+		if (!send_position() || !send_queued()) browser_closed();
 	}
 	if (now - transport.last_ping >= 2000) {
 		uint8_t data[5] = { ONLINE_PING };
 		transport.last_ping = now;
-		put32(data + 1, now);
+		online_put32(data + 1, now);
 		if (!send_message(data, sizeof data)) browser_closed();
 	}
 }
@@ -224,10 +182,10 @@ static int worker(void *unused) {
 }
 #endif
 
-bool online_transport_start(const char *url, const char *name) {
+bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
 	online_transport_end();
 	transport.enabled = true;
-	if (!url || !name || strlen(url) >= sizeof transport.url || !build_hello(name)) {
+	if (!url || !name || !identity || strlen(url) >= sizeof transport.url || !build_hello(name, identity)) {
 		SDL_strlcpy(transport.snapshot.error, "Online needs BN6 and a 1-16 character name", sizeof transport.snapshot.error);
 		return false;
 	}
@@ -264,6 +222,28 @@ void online_transport_snapshot(OnlineSnapshot *out) {
 	if (transport.mutex) SDL_LockMutex(transport.mutex);
 	*out = transport.snapshot;
 	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+}
+
+bool online_transport_profile(const OnlineProfile *profile) {
+	uint8_t data[ONLINE_PROFILE_BYTES + 1];
+	return online_wire_profile(data, profile) && enqueue(data, sizeof data);
+}
+
+bool online_transport_inspect(uint32_t player_id) {
+	uint8_t data[5] = { ONLINE_INSPECT };
+	online_put32(data + 1, player_id);
+	return player_id && enqueue(data, sizeof data);
+}
+
+bool online_transport_social(uint8_t kind, uint8_t value) {
+	uint8_t data[3] = { ONLINE_SOCIAL, kind, value };
+	return kind <= 1 && value < (kind ? ONLINE_EMOTE_COUNT : ONLINE_PHRASE_COUNT) && enqueue(data, sizeof data);
+}
+
+bool online_transport_channel(uint16_t channel) {
+	uint8_t data[3] = { ONLINE_CHANNEL };
+	online_put16(data + 1, channel);
+	return enqueue(data, sizeof data);
 }
 
 void online_transport_end(void) {
