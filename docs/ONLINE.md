@@ -7,6 +7,8 @@ fixed quick phrases and emotes, and moderation. Trading and the Arena
 remain disabled. The selected official endpoint is
 `wss://cyberworld.saschb2b.com/presence`; hosting and operational checks
 are described in [the server README](../server/README.md).
+It is deployed in Coolify as a development service; this branch has not
+been released to players.
 
 ## Repository boundaries
 
@@ -163,6 +165,20 @@ state size/timing and exact limits of that evidence.
 
 Measured on the Linux development host, 15 October 2026:
 
+- **Hosted WSS, two native games:** the Coolify server at
+  `cyberworld.saschb2b.com` passed with a trusted HTTPS certificate.
+  Both games built seed 120/hash 4132376369, moved reciprocally, and
+  produced 211 matching interpolated NPC samples. Median round trips
+  were 33/39 ms, maximum 49 ms. Both restored identical depth-three
+  loadouts through Leave; all 24 checkpoint files remained unchanged.
+  The test exposed and fixed curl negotiating HTTP/2 for a raw HTTP/1.1
+  WebSocket Upgrade: desktop and 3DS curl streams now request HTTP/1.1.
+- **Hosted browser and moderation:** a browser at the published
+  `https://saschb2b.github.io` origin negotiated protocol v2 and received
+  snapshots. Muting its temporary test identity through the container's
+  administrative CLI suppressed its phrase; unmuting restored it.
+  This checks the deployed browser transport; the full browser game
+  proof below checks the emulator and generated world.
 - **Phase 1, two native games:** both borrowed real depth-three
   checkpoints. Start → Leave and a server disconnect restored identical
   carried records; all 12 checkpoint files per game were unchanged after
@@ -203,7 +219,12 @@ Measured on the Linux development host, 15 October 2026:
 Evidence stays under `.build/online-proof/`, `.build/online-load-proof/`,
 `.build/online-browser/`, `.build/online-browser-v2/`, `.build/online-social/`,
 `.build/online-reset-proof/`, `.build/online-bench/` and `.build/online-tls/`.
-Loopback timings do not
+Hosted proof records are in `.build/online-public/` and
+`.build/online-public-browser/`. The public A record was independently
+verified as `204.168.144.168`; while the development machine's resolver
+retained its earlier NXDOMAIN, only the proof processes mapped that one
+hostname to the published address. The original URL, TLS SNI, certificate
+verification and browser origin stayed intact. Loopback timings do not
 predict internet or handheld performance.
 
 | Spike | Implemented experiment | Gate before a player release |
