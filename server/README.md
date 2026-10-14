@@ -88,8 +88,9 @@ remain necessary; a healthy HTTP endpoint alone proves no gameplay.
 
 ## Identity, moderation and backups
 
-Clients keep a random private guest key. The server derives a public
-identity specific to this server, so a player's identity does not become
+Clients keep a random private guest key on the device and derive a separate
+token for each server address; the original key is never sent. The server
+derives a public identity from that token, so the identity does not become
 a cross-server tracking identifier. Its `identity.key` salt and moderation
 lists live in the private state directory (`server-data/` by default;
 `--state-dir` overrides it). The salt is generated once. Keep that
@@ -149,27 +150,62 @@ modified client can claim another HP or board; Inspect is informational.
 
 ## Client platform status
 
-| Target | Phase 0 backend | Verification |
+| Target | Backend | Verification |
 | --- | --- | --- |
 | Linux desktop | SDL worker, runtime libcurl byte stream, bounded WebSocket framing | Two real game processes, movement, peer departure and server shutdown |
 | PortMaster/Linux ARM64 | Same libcurl backend | Cross-build and lint; device network test still required |
 | macOS | Same backend with system `libcurl.dylib` | Code path supplied; needs a Mac build and live test |
 | Browser | Emscripten WebSocket callbacks on the main thread | Chrome/WebAssembly and native: same seeded map, reciprocal NPC movement, median 3 ms loopback RTT |
-| Windows, Android, iOS, New 3DS | Explicit unavailable result | Backend implementation and device measurements remain a gate |
+| Windows | Asynchronous WinHTTP WebSocket callbacks, decoded on the SDL worker; Windows certificate and hostname verification | MinGW object build with warnings as errors; live Windows connection and TLS refusal test required |
+| New 3DS | Linked libcurl/mbedTLS, shared SOC/SSL services, packaged Let's Encrypt roots, PS random bytes | Full devkitARM build and CIA/3DSX link with warnings as errors; hardware Wi-Fi, trust and memory-budget tests required |
+| Android, iOS | Platform backends in progress | Device connection and TLS refusal measurements remain a gate |
 
 All existing offline builds remain supported. This is not a claim that
-the epic's full cross-platform transport spike is complete. A production
-portable TLS backend must be selected and packaged for the remaining
-targets, including the 3DS's trust roots and socket initialization.
+the epic's full cross-platform transport spike is complete. Production
+platform tests must cover the remaining targets. The 3DS's bundled roots
+support the documented Let's Encrypt deployment; other certificate
+authorities require an explicit root-bundle update, never a validation bypass.
 
 See [the Phase 0 proof](../docs/ONLINE.md) and
 [the wire format](../shared/online/README.md).
 
 ## Release packaging
 
-The zipapp and Docker image are the implemented, ROM-free distribution
-artifacts. Native self-contained server executables for Linux x86-64 and
-ARM64, Windows and macOS still need per-platform packaging and smoke tests.
-Python is required outside Docker until those release jobs exist. Keep
-the shared protocol in the same release as the game; v1 wire clients
-cannot enter a v2 server.
+The release workflow builds six ROM-free server archives beside the game:
+
+| Archive | Runs with |
+| --- | --- |
+| `cyberworld-server-python.zip` | Python 3.11+ on any supported server OS |
+| `cyberworld-server-linux-x86_64.zip` | x86-64 Linux, Ubuntu 22.04/glibc 2.35 or newer |
+| `cyberworld-server-linux-arm64.zip` | ARM64 Linux, Ubuntu 22.04/glibc 2.35 or newer |
+| `cyberworld-server-windows-x64.zip` | 64-bit Windows 10/11 or Server 2022 |
+| `cyberworld-server-macos-x86_64.zip` | Intel Mac, macOS 15 or newer |
+| `cyberworld-server-macos-arm64.zip` | Apple Silicon Mac, macOS 15 or newer |
+
+Each archive includes the executable or zipapp, example INI, this guide,
+MIT license and `BUILD.json`. Native archives include their runtime notices
+and need no installed Python. The Docker recipe remains available for
+containers. These jobs are prepared for the next release; no new release
+has been published by this change. The Linux native package and zipapp have
+been tested locally; Windows, ARM64 and Mac artifacts still need their CI runs.
+
+Build the zipapp archive with `python3 server/release.py`. For a native
+archive, create a Python virtual environment, install the build tools with
+`python -m pip install --require-hashes --only-binary=:all: -r server/requirements-build.txt`,
+then run `python server/release.py --native` on the target OS and architecture.
+The workflow pins Python 3.13.16 and PyInstaller 6.16.0, with all packaging
+dependencies and wheel hashes fixed. It uses the documented
+[GitHub runner labels](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+and [PyInstaller's native build and data-file options](https://pyinstaller.org/en/v6.16.0/usage.html).
+
+Every package must pass `--help`, an isolated server process serving
+`/health` with the current protocol, and a local administration command.
+The smoke runs outside the checkout, so a missing bundled `protocol.json`
+fails before publication. Protocol/moderation tests run on every matrix OS.
+Source zipapp entries have fixed ordering, times and permissions; native
+builds also fix the hash seed and build timestamp. Hosted runner images
+and system libraries can change, so native outputs are not promised to be
+byte-identical across runner updates. Release checksums cover every archive.
+
+Keep the shared protocol in the same release as the game; v1 wire clients
+cannot enter a v2 server. Preserve the private state directory when upgrading.
