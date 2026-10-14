@@ -22,6 +22,25 @@ env:
   DOCKER_CONTEXT_NAME: ""   # build.py: the runner's own Docker, not Docker Desktop
 
 jobs:
+  server:
+    name: Server (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python -m unittest discover -s server/tests -v
+      - run: python server/build.py
+      - run: python build/server/cyberworld-server.pyz --help
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cyberworld-server-${{ matrix.os }}
+          path: build/server/
+          retention-days: 14
+
   lint:
     name: Lint scripts
     runs-on: ubuntu-latest

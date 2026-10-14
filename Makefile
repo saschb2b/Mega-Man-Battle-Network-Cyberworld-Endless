@@ -274,6 +274,14 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_tiles_order
 .PHONY: test
 
+server:
+	python3 server/build.py
+
+server-test:
+	python3 -m unittest discover -s server/tests
+
+.PHONY: server server-test
+
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
 LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))

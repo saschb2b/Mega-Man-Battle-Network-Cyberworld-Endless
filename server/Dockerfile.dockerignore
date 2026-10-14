@@ -1,0 +1,14 @@
+**
+!LICENSE
+!server/
+!server/**
+!shared/
+!shared/online/
+!shared/online/**
+**/__pycache__/
+**/*.pyc
+**/*.gba
+**/*.sav
+**/*.state
+server/server.ini
+server/*.jsonl
