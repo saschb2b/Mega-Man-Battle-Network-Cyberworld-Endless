@@ -1,9 +1,12 @@
-# Online development: monorepo and Phase 0
+# Online development: monorepo and Net Square
 
 [Epic #120](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/120)
-adds a social Net Square beside the run. This is its opt-in technical
-spike. There is no public server, player-facing Network menu, trade, or
-Arena in this phase.
+adds a social Net Square beside the run. Phase 1 provides the opt-in
+Network screen, checkpoint-safe visits, channels, public Navi cards,
+fixed quick phrases and emotes, and moderation. Trading and the Arena
+remain disabled. The selected official endpoint is
+`wss://cyberworld.saschb2b.com/presence`; hosting and operational checks
+are described in [the server README](../server/README.md).
 
 ## Repository boundaries
 
@@ -21,7 +24,8 @@ are stable across the supported platforms. `build.py all` builds the
 server alongside the host and PortMaster clients; `build.py test` includes
 the server suite. The server builds and tests without SDL, mGBA, Docker,
 or a ROM. It is packaged as a Python zipapp requiring Python 3.11 or
-newer; native standalone server executables are a Phase 1 packaging task.
+newer. Release CI packages native standalone server executables for Linux,
+Windows and macOS alongside the portable Python archive.
 
 The dependency direction is client → wire contract ← server. The server
 does not import game code, run an emulator, receive a save state, or read
@@ -38,6 +42,7 @@ developer tools. The proof has no dependency on a public endpoint.
 python3 build.py server-test
 python3 build.py online-link
 python3 build.py online-proof
+python3 tools/online_load_proof.py --clients 16
 python3 tools/online_bench.py
 ```
 
@@ -51,9 +56,14 @@ Each walks a different scripted route. It checks:
 - Remote positions reached the actual BN6 NPC object pool, matching the
   other game process's movement.
 - A departing player disappeared from the remaining client.
-- Stopping the server cleared the remaining client's connection/peers.
+- Start → Leave and a server disconnect both restored the carried
+  checkpoint through map reconstruction and the regular CONTINUE path.
+- Each restored folder, Pack, NaviCust, HP and powers record was identical
+  to the one borrowed at entry.
 - Every checkpoint file retained exactly the same SHA-256 before and
   after the visits, including the forced disconnect.
+- Empty save folders returned to the title; missing and unreadable state
+  files were refused without changing the remaining checkpoint files.
 
 The proof retains logs, numerical JSONL traces, full-frame screenshots
 and `report.json` under a fresh `.build/online-proof/run-*/`. Failed runs
@@ -78,10 +88,13 @@ build/linux/cyberworld --window --rom-dir "$CYBERWORLD_ROM_DIR" \
   --data-dir .build/online-beta --online ws://127.0.0.1:8765/presence --online-name Beta
 ```
 
-The Phase 0 command requires an explicit `--data-dir`. It starts an
-isolated Square without starting a run or invoking its save logic. The
-ordinary direction buttons and B move MegaMan through BN6 itself. The
-PET and jacking out are disabled in the technical room. Escape exits.
+The developer command requires an explicit `--data-dir`; the Network
+screen uses the player's existing folder. Both borrow the saved run's
+MegaMan when a readable checkpoint exists. A player without one visits
+with the boot loadout. Ordinary direction buttons and B move MegaMan
+through BN6 itself. A opens the player list; Start opens Network options,
+including Leave. PET access and jacking out are disabled in the Square.
+Escape closes the game while preserving the checkpoint.
 Headless online clients run at wall-clock speed so they can interact;
 ordinary headless tests retain their existing fast execution.
 
@@ -99,9 +112,11 @@ in-memory filesystem. It is not part of the published game site.
 The dialectic is **the run's integrity against the community's
 generosity**, from the epic and the repository's game-design skill.
 This social loop sits beside the run and follows *variety, not power*.
-The spike therefore has no healing, rewards, currency or encounters.
-It tests presence and movement without choosing Phase 1's final entry
-flow or Phase 2's trade policy.
+The Square therefore has no healing, rewards, currency or encounters.
+The player chooses a name and server, gives server-specific consent,
+then borrows the checkpoint for a visit. The save remains authoritative;
+online RAM is never checkpointed. [ONLINE_LINK.md](ONLINE_LINK.md) describes
+the return and shutdown guards. Phase 2's trade policy remains undecided.
 
 The server sends only its seed and compatibility metadata. Each client
 makes a small room with the existing ROM-backed map builder; a
@@ -121,16 +136,26 @@ Other players are noninteracting NPCs with MegaMan's sprite. Eight
 reserved NPC scripts share one sprite entry, within the existing 16-NPC
 and 12-sprite limits. Existing NPC bytecode sets position, facing and
 standing/walking animation; no movement assistance is added to MegaMan.
-The displayed peer name identifies the received avatar. Source
+Movement renders from a bounded 100 ms interpolation history, while
+collision and local movement remain BN6's. Peer names and fixed social
+messages appear over their avatars. Source
 verification is in [SOURCES.md](SOURCES.md#net-squares-npc-movement-spike-issue-120).
 
 The binary protocol rejects a mismatched protocol version, `LAYER_MAKE`,
 generation hash, ROM code or ROM SHA-1. It limits names, positions, message
 size, connected players, pending handshakes, per-client traffic and output
-buffers. Phase 0 is one room of at most eight players. It relays position
-snapshots at 20 Hz; smoothing, channels and moderation are Phase 1 work.
+buffers. Each channel holds at most eight players; the default total cap
+of 64 provides eight channels. It relays position snapshots at 20 Hz.
+The private local guest secret derives a separate key for each server.
+Local mute/block choices use the server's stable public identity; hosts
+can ban, mute, kick or allowlist through a local administrative CLI.
 
-## Phase 0 evidence and gates
+Inspect sends a bounded informational card: HP, buster levels, Souls,
+Crosses, depth/act, best depth, title marks and 49 NaviCust cell colors.
+Folder and Pack contents, saves and emulator states stay on the device.
+The server validates ranges but cannot prove a modified client's claims.
+
+## Evidence and remaining gates
 
 The numerical proof is repeatable with the commands above. The separate
 [link and carried-MegaMan report](ONLINE_LINK.md) gives the serial test,
@@ -138,11 +163,30 @@ state size/timing and exact limits of that evidence.
 
 Measured on the Linux development host, 15 October 2026:
 
-- **Two native game processes:** seeds 120 and 121 passed. The latter's
+- **Phase 1, two native games:** both borrowed real depth-three
+  checkpoints. Start → Leave and a server disconnect restored identical
+  carried records; all 12 checkpoint files per game were unchanged after
+  shutdown. All 191 measured peer NPC samples matched the interpolated
+  game coordinates. Empty, missing and corrupt checkpoint cases passed.
+- **Phase 1, sixteen native games:** two full eight-player channels,
+  at least 90 full-channel samples per game, 10,248 matching actual NPC
+  samples, and 192 unchanged checkpoint files. All sixteen restored their
+  carried loadouts after disconnect. Median local round trips were 1–2 ms.
+- **Phase 1, Chrome/WebAssembly and native:** the v2 subprotocol accepted
+  a maximum-length 16-character browser name. Both worlds had seed 120
+  and hash 4132376369. All 578 browser and 592 native measured NPC samples
+  matched interpolation; each traced movement that matched the other
+  process. Median local round trips were 4 ms browser and 2 ms native.
+- **Phase 1, social controls:** actual game instances exercised Inspect,
+  local block, a received quick phrase and emote, and a channel switch.
+  Both returned with their save files unchanged. A separate held-reset
+  regression kept the restored game active through 20 held chord frames;
+  a released and freshly pressed chord then reached the title normally.
+- **Phase 0, two native game processes:** seeds 120 and 121 passed. The latter's
   map hash was 1199273041; both clients' median round trip was 1 ms and
   maximum 2 ms. Actual NPC movement, peer departure, server shutdown and
   all 12 checkpoint files per client were checked.
-- **Chrome/WebAssembly and native:** seed 120, map hash 4132376369 on
+- **Phase 0, Chrome/WebAssembly and native:** seed 120, map hash 4132376369 on
   both. Browser median/max round trip 3/7 ms; native 2/3 ms. Both traced
   moving NPC coordinates that matched the other process's local movement.
 - **Eight ROM-free wire clients for ten seconds:** 197 complete room
@@ -156,19 +200,21 @@ Measured on the Linux development host, 15 October 2026:
   trust plus hostname verification is the selected model; a valid
   public certificate is needed for public hosting.
 
-Evidence stays under `.build/online-proof/`, `.build/online-browser/`,
-`.build/online-bench/` and `.build/online-tls/`. Loopback timings do not
+Evidence stays under `.build/online-proof/`, `.build/online-load-proof/`,
+`.build/online-browser/`, `.build/online-browser-v2/`, `.build/online-social/`,
+`.build/online-reset-proof/`, `.build/online-bench/` and `.build/online-tls/`.
+Loopback timings do not
 predict internet or handheld performance.
 
 | Spike | Implemented experiment | Gate before a player release |
 | --- | --- | --- |
-| Transport | Versioned WebSocket server, bounded native polling on a worker, ping/pong, TLS certificate/hostname verification | Measure every target on real hardware and finish the platform backends identified in the server README |
-| Players as NPCs | Two game processes move remote MegaMan NPCs; telemetry reads actual NPC coordinates | Interpolation, identity labels over avatars, full room/channel load test |
+| Transport | Versioned WebSocket server, native platform backends and browser WebSocket, bounded polling, ping/pong, TLS certificate/hostname verification | Measure and test the implemented backends on every target's real hardware; see the server README's verification matrix |
+| Players as NPCs | Sixteen native games, two full channels, interpolated NPC coordinates and identity labels | Hardware performance, adverse internet conditions and longer soak tests |
 | Link cable | Two mGBA cores exchange serial words using mGBA's lockstep API; memory state benchmark | Actual BN6 Practice NetBattle, separate-process serial scheduling and injected network delay |
-| Carried MegaMan | Read-only folder/Pack/board/HP/powers record; save/load restores all EWRAM/IWRAM bytes; visit keeps checkpoint files unchanged | Apply the carried record to a visit and resume through the game's normal checkpoint flow; crash recovery across that whole flow |
+| Carried MegaMan | Actual checkpoint loadout borrowed and restored through map reconstruction; leave, disconnect and process shutdown preserve checkpoint files | Broader device and power-loss testing; no Arena result or trade mutation is enabled |
 | World from seed | Two game instances build identical geometry/tile hashes from server seed without sending assets | Final Square layout, generator-version migration and all platform determinism |
 
-These gates are recorded answers from the spikes, not claims of a
-completed Phase 1 or a working PvP battle. The official server address,
-hosting budget and moderators remain owner decisions. No public endpoint
-or new player-facing release is deployed by this work.
+These results establish the tested presence and checkpoint paths. They do
+not establish a working PvP battle. A public launch also needs the host's
+retention policy, named moderators, backup/restart checks and the remaining
+target checks in the server README.
