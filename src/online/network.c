@@ -14,6 +14,12 @@
 NetworkState N;
 static char pending_note[160];
 
+static bool finger_down(void) {
+	for (int i = 0; i < SDL_GetNumTouchDevices(); ++i)
+		if (SDL_GetNumTouchFingers(SDL_GetTouchDevice(i)) > 0) return true;
+	return false;
+}
+
 void network_open(void) { scene_set(&scene_network); }
 
 void network_message(const char *message) {
@@ -45,6 +51,7 @@ bool network_back(void) {
 
 static void enter(void) {
 	memset(&N, 0, sizeof N);
+	N.wait_touch = finger_down();
 	N.row = NETWORK_ROW_JOIN;
 	N.identity_ok = network_prefs_read(g_data_dir, &N.prefs);
 	if (!N.identity_ok) {
@@ -109,6 +116,13 @@ static void privacy_update(void) {
 }
 
 static void update(void) {
+	/* The virtual A button's lift belongs to the title that opened us. */
+	if (N.wait_touch) {
+		int x, y;
+		platform_tap(&x, &y);
+		N.wait_touch = finger_down();
+		return;
+	}
 	if (N.view == NETWORK_EDIT_NAME || N.view == NETWORK_EDIT_SERVER) { network_edit_update(); return; }
 	if (N.view == NETWORK_PRIVACY) { privacy_update(); return; }
 	if (btn_pressed(BTN_B)) { network_back(); return; }

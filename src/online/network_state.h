@@ -11,7 +11,7 @@ enum { NETWORK_ROW_NAME, NETWORK_ROW_SERVER, NETWORK_ROW_ADD, NETWORK_ROW_JOIN, 
 typedef struct {
 	NetworkPrefs prefs;
 	int view, row, key, privacy;
-	bool identity_ok, adding;
+	bool identity_ok, adding, wait_touch;
 	char edit[NETWORK_URL], note[160];
 } NetworkState;
 
