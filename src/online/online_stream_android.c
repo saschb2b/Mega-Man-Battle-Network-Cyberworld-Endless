@@ -65,7 +65,9 @@ bool online_stream_send(const uint8_t *data, size_t size) {
 
 static int read_bytes(uint8_t *data, size_t size, jmethodID method) {
 	JNIEnv *env = SDL_AndroidGetJNIEnv();
-	if (!env || !stream || size > 2048) return -1;
+	if (!env || !stream) return -1;
+	/* A stream may return fewer bytes than the caller's buffer holds. */
+	if (size > 2048) size = 2048;
 	jbyteArray bytes = (*env)->CallObjectMethod(env, stream, method, (jint)size);
 	if (!java_ok(env) || !bytes) return -1;
 	jsize count = (*env)->GetArrayLength(env, bytes);
