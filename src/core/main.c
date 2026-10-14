@@ -20,7 +20,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "meta.h"
-#include "online_transport.h"
+#include "online_visit.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
@@ -41,7 +41,7 @@ void scene_set(const Scene *s) { pending = s; }
 
 static const Scene *scene_by_name(const char *n) {
 	/* (the launcher is a start's own: --scene launcher opens it, then the title) */
-	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu, &scene_saves };
+	const Scene *all[] = { &scene_title, &scene_intro, &scene_gallery, &scene_emu, &scene_saves, &scene_network };
 	for (size_t i = 0; i < sizeof all / sizeof *all; ++i)
 		if (!strcmp(all[i]->name, n)) return all[i];
 	return NULL;
@@ -148,7 +148,7 @@ static bool step(void) {
 	 * drawn, which iOS refuses an app it cannot see, till it comes back) */
 	if (P.background) {
 		static bool kept;
-		if (!kept && current == &scene_emu) director_suspend();
+		if (!kept && current == &scene_emu && !online_visit_preserves_checkpoint()) director_suspend();
 		kept = true;
 		SDL_Delay(50);
 		platform_poll();
@@ -165,7 +165,7 @@ static bool step(void) {
 		if ((SDL_GetPerformanceCounter() - t0) * 1000 < SDL_GetPerformanceFrequency()) SDL_Delay(1);
 		return true;
 	}
-	if (!loop.headless || online_transport_enabled() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
+	if (!loop.headless || online_visit_active() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 		loop.acc += elapsed();
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
 		loop.acc -= 1.0 / 60.0;
@@ -316,7 +316,7 @@ static int parse_args(int argc, char **argv, Options *o) {
 		}
 		i += took - 1;
 	}
-	/* Phase 0 is an explicit developer visit with its own data directory.
+	/* The command-line join is explicit, with its own data directory.
 	 * A typo must never open the ordinary run in the player's directory. */
 	if (o->online_name && !o->online_url) {
 		fprintf(stderr, "--online-name needs --online URL\n");
@@ -324,7 +324,7 @@ static int parse_args(int argc, char **argv, Options *o) {
 	}
 	if (o->online_url) {
 		if (!o->data_dir_given) {
-			fprintf(stderr, "--online needs --data-dir for an isolated Phase 0 visit\n");
+			fprintf(stderr, "--online needs --data-dir to identify the checkpoint to carry\n");
 			return 2;
 		}
 		o->start_scene = "emu";
@@ -423,16 +423,16 @@ static void start_scene(const Options *o) {
 	scene_set(first_scene(s, o->headless));
 }
 
-/* The online spike boots its own scene without making a run. */
+/* A command-line join carries the same checkpoint as the Network screen. */
 static void start_requested_scene(const Options *o) {
 	if (!o->online_url) { start_scene(o); return; }
 	audio_init();
-	if (!online_transport_start(o->online_url, o->online_name ? o->online_name : "MegaMan")) {
-		fprintf(stderr, "online: transport could not start\n");
+	char error[128];
+	if (!online_visit_command(o->online_url, o->online_name, error, sizeof error)) {
+		fprintf(stderr, "online: %s\n", error);
 		P.quit = true;
 		return;
 	}
-	scene_set(&scene_emu);
 }
 
 /* The game from the ROM read: its font, the saves, the dev tools' veteran
@@ -500,8 +500,8 @@ static int frame_loop(const Options *o) {
 #else
 	while (!P.quit && !quit_signal && step()) {}
 	/* a run on a layer is kept where MegaMan stands */
-	if (current == &scene_emu) director_suspend();
-	online_transport_end();
+	if (online_visit_preserves_checkpoint()) online_visit_shutdown();
+	else if (current == &scene_emu) director_suspend();
 	cores_quit();
 #endif
 	platform_shutdown();

@@ -1,7 +1,6 @@
 /* The running game in the window: the core's frame in the 240x160 view,
  * its sound on the audio device and the port's buttons as GBA keys. */
 #include "audio.h"
-#include "boot.h"
 #include "cinema.h"
 #include "autopilot.h"
 #include "debug.h"
@@ -10,18 +9,14 @@
 #include "director.h"
 #include "emu.h"
 #include "game.h"
-#include "game_hooks.h"
 #include "gfx.h"
 #include "online_scene.h"
+#include "online_visit.h"
 #include "platform.h"
-#include "rom.h"
 #include "save.h"
 #include "second.h"
 #include "tour.h"
-#include "xinstall.h"
-#ifdef __3DS__
-#include "start_3ds.h"
-#endif
+#include "scene_emu_start.h"
 
 static SDL_Texture *tex;
 bool emu_resume_requested;
@@ -55,52 +50,21 @@ static void enter(void) {
 	/* (the second screen, issue #72: the 3DS's bottom one, a display
 	 * beside an Android handheld's) */
 	platform_second_screen(second_draw, second_changed);
-	/* (making a run's net takes a while on a slow machine: twenty seconds
-	 * of black on a 3DS read as a hang) */
-	platform_begin_frame();
-	fill_rect(0, 0, P.w, P.h, BLACK);
-	text_draw(P.w / 2, P.h / 2 - 8, "Building the net...", WHITE, TEXT_CENTER);
-	platform_present_now();
-	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "the GBA core did not start (too little memory?)\n"); return; }
-	/* (other games' virus families in BN6's battle engine first: the ROM
-	 * copy's patches, the same at every boot; docs/MULTIROM.md) */
-	xinstall_core(dev.xcontrol ? XVIRUS_CONTROL : dev.nofamilies ? XVIRUS_NONE : XVIRUS_FAMILIES,
-		dev.xnavicontrol ? XNAVI_CONTROL : dev.nonavis ? XNAVI_NONE : XNAVI_BN5);
-#ifdef __3DS__
-	/* (what the core's copy and the installs left of the heap, BN5's or
-	 * not: 3ds/README.md, Testing on a 3DS) */
-	char heap[120];
-	start_3ds_heap(heap, sizeof heap);
-	printf("3ds: the core started, the installs done; %s\n", heap);
-#endif
-	game_hooks_install();
-	cinema_reset();
-	if (emu_resume_requested) {
-		emu_resume_requested = false;
-		game_hooks_after_boot();
-		director_resume();
-	} else {
-		director_before_boot();
-		emu_boot();
-		game_hooks_after_boot();
-		if (online_scene_enabled()) { director_stop(); online_scene_start(); }
-		else if (emu_start_in_town) director_start_run();
-		else director_start_layer();
-		if (emu_start_at_home && !online_scene_enabled()) director_dev_home();
-		emu_start_in_town = emu_start_at_home = false;
-	}
+	if (!scene_emu_start()) return;
 	audio_external(emu_audio_read);
 }
 
 static void leave(void) {
 	if (online_scene_enabled()) online_scene_end();
+	online_visit_left();
 	audio_external(NULL);
 	platform_second_screen(NULL, NULL);
 }
 
 static uint32_t frame_keys(void) {
 	if (online_scene_enabled()) return online_scene_keys(keys_from_buttons());
-	return director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
+	uint32_t keys = online_visit_run_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+	return director_keys(pet_keys(devtools_keys(keys)));
 }
 
 /* What follows a frame of the game: the run's logic on it. */
@@ -126,6 +90,7 @@ static void after_frame(void) {
 static bool soft_reset(void) {
 	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
 	if ((keys_from_buttons() & chord) != chord) return false;
+	if (online_visit_active()) { online_visit_return(); return true; }
 	emu_sync();
 	director_stop();
 	cinema_reset();
@@ -137,6 +102,7 @@ static bool soft_reset(void) {
 
 static void update(void) {
 	emu_drawing = false;
+	if (online_visit_transitioning()) return;
 	if (soft_reset()) return;
 	if (online_scene_enabled() && !online_scene_ready()) { online_scene_update(); return; }
 	/* (the run's time: the statistics' minutes, save.h) */
@@ -151,6 +117,7 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); return; }
 		for (int i = 0; i < dev.speed; ++i) {
 			if (started) after_frame();
+			if (online_visit_transitioning()) return;
 			emu_frame(cinema_keys(frame_keys()));
 			started = true;
 		}
@@ -163,6 +130,7 @@ static void update(void) {
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
+		if (online_visit_transitioning()) return;
 	}
 	if (revealed || (online_scene_enabled() ? online_scene_arrived() : director_arrived())) ++revealed;
 }
