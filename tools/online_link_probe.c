@@ -9,6 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 #include <mgba/core/blip_buf.h>
 #include <mgba/core/config.h>
@@ -50,9 +54,16 @@ static void quiet_log(struct mLogger *logger, int category, enum mLogLevel level
 static struct mLogger quiet = { .log = quiet_log };
 
 static double millis(void) {
+#ifdef _WIN32
+	LARGE_INTEGER now, frequency;
+	QueryPerformanceCounter(&now);
+	QueryPerformanceFrequency(&frequency);
+	return (double)now.QuadPart * 1000 / (double)frequency.QuadPart;
+#else
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	return (double)now.tv_sec * 1000 + (double)now.tv_nsec / 1000000;
+#endif
 }
 
 static bool cable_signal(struct mLockstep *lock, unsigned mask) {

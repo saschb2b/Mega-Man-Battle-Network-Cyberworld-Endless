@@ -300,6 +300,7 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_network
 	build/host/test_online
 	build/host/test_legacy
+	build/host/test_online_link_ipc
 .PHONY: test
 
 # Native transport runtime checks use the same platform sources as the game.
@@ -319,13 +320,13 @@ online-transport: $(TRANSPORT_PROBE)
 
 # The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).
 ONLINE_LINK_SRCS := tools/online_link_probe.c src/online/online_snapshot.c
-build/host/online-link-probe: $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
+ONLINE_LINK_PROBE := $(OUT)/online-link-probe$(if $(filter windows,$(TARGET)),.exe)
+$(ONLINE_LINK_PROBE): $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
 	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_LINK_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+	$(CC) $(filter-out -MMD -MP -Dmain=SDL_main,$(CFLAGS)) -DNDEBUG -o $@ $(ONLINE_LINK_SRCS) \
+		$(filter-out -mwindows -lSDL2main -lmingw32,$(LDLIBS)) $(if $(filter windows,$(TARGET)),-mconsole)
 
-online-link: build/host/online-link-probe
+online-link: $(ONLINE_LINK_PROBE)
 
 server:
 	python3 server/build.py

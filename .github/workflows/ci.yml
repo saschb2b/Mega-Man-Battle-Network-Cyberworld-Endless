@@ -182,12 +182,14 @@ jobs:
       - uses: ./.github/actions/image
         with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
       - run: python3 build.py windows
-      - name: Build the actual Windows transport for runtime checks
-        run: docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" -w /src cyberworld-windows make TARGET=windows online-transport WERROR=1
+      - name: Build the Windows transport and ROM-free state probes
+        run: docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/src" -w /src cyberworld-windows make TARGET=windows online-transport online-link WERROR=1
       - uses: actions/upload-artifact@v4
         with:
           name: online-transport-windows-probe
-          path: build/windows/online-transport-probe.exe
+          path: |
+            build/windows/online-transport-probe.exe
+            build/windows/online-link-probe.exe
           if-no-files-found: error
           retention-days: 14
       - name: One .exe that needs only Windows' own DLLs, and an installer
@@ -210,7 +212,7 @@ jobs:
           retention-days: 14
 
   windows-transport:
-    name: Windows transport runtime
+    name: Windows transport and state runtime
     needs: windows
     runs-on: windows-2022
     timeout-minutes: 10
@@ -223,11 +225,17 @@ jobs:
       - name: WinHTTP connections, reconnect, hostile peers and TLS refusal
         shell: bash
         run: python tests/test_online_transport.py --binary build/windows/online-transport-probe.exe
+      - name: ROM-free two-core cable and synthetic state timings
+        shell: bash
+        run: python tools/online_link_native.py --binary build/windows/online-link-probe.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: online-transport-windows
-          path: .build/online-transport/report.json
+          path: |
+            .build/online-transport/report.json
+            .build/online-link-native/report.json
+            .build/online-link-native/probe.log
           retention-days: 14
 
   n3ds:
@@ -295,13 +303,18 @@ jobs:
       - run: python3 build.py macos
       - name: System libcurl connections, reconnect, hostile peers and TLS refusal
         run: |
-          make TARGET=macos online-transport WERROR=1
+          make TARGET=macos online-transport online-link WERROR=1
           python3 tests/test_online_transport.py --binary build/macos/online-transport-probe
+      - name: ROM-free two-core cable and synthetic state timings
+        run: python3 tools/online_link_native.py --binary build/macos/online-link-probe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: online-transport-macos
-          path: .build/online-transport/report.json
+          path: |
+            .build/online-transport/report.json
+            .build/online-link-native/report.json
+            .build/online-link-native/probe.log
           retention-days: 14
       - name: One app for Apple silicon and Intel that starts
         run: |
