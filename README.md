@@ -143,6 +143,8 @@ the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworl
 &nbsp;·&nbsp;
 <a href="AGENTS.md">For developers</a>
 &nbsp;·&nbsp;
+<a href="docs/ONLINE.md">Online development</a>
+&nbsp;·&nbsp;
 <a href="https://buymeacoffee.com/qohreuukw">Buy me a coffee</a>
 </p>
 
