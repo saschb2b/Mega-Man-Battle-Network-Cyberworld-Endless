@@ -52,7 +52,7 @@
 </header>
 
 <main class="wrap">
-	<div class="band"><h1>FAQ</h1><span class="hint">New <b id="new">18</b></span></div>
+	<div class="band"><h1>FAQ</h1><span class="hint">New <b id="new">21</b></span></div>
 
 	<div class="mailbox">
 		<nav class="panel inbox" id="inbox" aria-label="Questions">
@@ -62,6 +62,9 @@
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>Why isn't the game included?</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>Does the browser upload my ROM?</span></a></li>
 				<li><a class="row" href="#statistics"><i class="icon i-mail" aria-hidden="true"></i><span>Does the game send anything?</span></a></li>
+				<li><a class="row" href="#network"><i class="icon i-mail" aria-hidden="true"></i><span>Can I meet other players online?</span></a></li>
+				<li><a class="row" href="#network-privacy"><i class="icon i-mail" aria-hidden="true"></i><span>What does an online server see?</span></a></li>
+				<li><a class="row" href="#hosting"><i class="icon i-mail" aria-hidden="true"></i><span>Can I host my own Net Square?</span></a></li>
 				<li><a class="row" href="#where"><i class="icon i-mail" aria-hidden="true"></i><span>Where can I play?</span></a></li>
 				<li><a class="row" href="#deck"><i class="icon i-mail" aria-hidden="true"></i><span>How do I add it to Steam on a Deck?</span></a></li>
 				<li><a class="row" href="#run"><i class="icon i-mail" aria-hidden="true"></i><span>What is a run?</span></a></li>
@@ -153,7 +156,64 @@
 						asks again; on the 3DS, Select on the title asks again. <code>statistics = off</code> in <code>settings.ini</code>
 						does the same. This site's pages count their own visits and downloads with Umami, anonymously and without
 						cookies, apart from the game's.</p>
+					<p>The experimental <a href="#network">NETWORK</a> feature has its own consent before connecting to a server.
+						That connection sends your name, position and public Navi card; the statistics setting does not control it.</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#anonymous-statistics">Guide: Anonymous statistics</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="network">
+				<span class="who">From: Guide</span>
+				<div class="textbox">
+					<h2>Can I meet other players online?</h2>
+					<p>The development build has an experimental <b>NETWORK</b> entry on the title screen. Choose a nickname and
+						server, read its connection notice, then join the Net Square. Each channel holds up to eight Navis;
+						a server can run several channels.</p>
+					<p>Walk together, use preset quick phrases and emotes, and Inspect another Navi's public card. There is no
+						free-text chat, trading or Arena yet. Visiting grants no healing, chips or currency and does not advance
+						or overwrite your run. Leaving returns you to your saved checkpoint, or to the title if you have no run.</p>
+					<p>This first online phase is still in development. Two-player presence has been demonstrated with Linux and
+						browser builds; live connection tests on the other devices remain pending. The official address,
+						<code>cyberworld.saschb2b.com</code>, is being prepared and is not yet promised to be available.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#network">Guide: Network</a> ·
+						<a href="https://cyberworld.saschb2b.com/health" data-umami-event="outbound" data-umami-event-to="network-status">Server status</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="network-privacy">
+				<span class="who">From: Guide</span>
+				<div class="textbox">
+					<h2>What does an online server see?</h2>
+					<p>The host sees your internet address, nickname, position and public Navi card: HP, buster stats, NaviCust
+						board colors, Souls, Crosses, depth, act, best depth and title marks. Players in your channel see your
+						name, movement and card. Your ROM, save, folder and Pack are never uploaded.</p>
+					<p>There is no account or email address. A random private identity stays in your local Network settings;
+						the game sends a different derived token to each server. The server turns that into a public ID for
+						mute, block and moderation. Your private identity is never sent. Choose a nickname you are comfortable sharing.</p>
+					<p>Quick phrases and emotes have a cooldown. You can mute or block someone locally, and the host can kick,
+						mute or ban a guest. These are guest identities: resetting local settings can evade a ban. Follow the
+						host's rules and respect other players. Each operator controls their own logs and retention; Inspect
+						cards are reported by clients, not verified achievements.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#network">Guide: Network</a> ·
+						<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#tls-and-privacy">Hosting and privacy</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="hosting">
+				<span class="who">From: Guide</span>
+				<div class="textbox">
+					<h2>Can I host my own Net Square?</h2>
+					<p>Yes. The repository includes a separate, ROM-free server, built as a Python 3.11+ zipapp or a Docker image.
+						It runs no emulator and needs no game assets. Each player's game builds the shared world from its seed
+						using that player's own ROM.</p>
+					<p>The configuration sets its name, welcome message, seed, channel and player limits, and allowed browser
+						origins. Public servers need encrypted <code>wss://</code> connections; the included Coolify setup puts
+						the server behind its HTTPS proxy. Keep the private identity and moderation files in persistent storage.
+						Administration uses a local command, with no public admin endpoint.</p>
+					<p>Add your server's address in NETWORK. The official server is optional. A server's <code>/health</code>
+						endpoint reports availability and occupancy without listing players or their names.</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md">Server setup and rules</a> ·
+						<a href="https://cyberworld.saschb2b.com/health" data-umami-event="outbound" data-umami-event-to="network-status">Official server status</a></p>
 				</div>
 			</article>
 

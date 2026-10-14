@@ -378,8 +378,33 @@ Each start opens with the developer's boot screen and a note from MegaMan
 on where to report bugs and ideas: the project's GitHub page, with a QR
 code for a phone's camera. Any button skips them.
 
-On the title screen, press Start and choose **NEW GAME** or **CONTINUE**.
-CONTINUE shows how deep your saved run is; the corner shows your best depth.
+On the title screen, press Start and choose **NEW GAME**, **CONTINUE**, or
+**NETWORK**. CONTINUE shows how deep your saved run is; the corner shows your
+best depth.
+
+<a id="network"></a>
+
+**NETWORK** opens the Net Square, a shared place to meet other Navis. Choose
+**NAME** to set your display name, and **SERVER** to edit a server address.
+Left and Right on SERVER switch between saved addresses; **ADD SERVER** keeps
+another, up to four. The official server is listed on the first visit. Type
+with a keyboard, tap the letters, or use the D-pad and A; L erases a letter,
+Start keeps the field, and B cancels.
+
+**JOIN SQUARE** asks before the first connection to each server. Other
+players see your name, movement and Navi setup; the server receives your
+network address and an identity specific to that server. Opening NETWORK
+alone does not connect. Your name, servers and private identity stay in
+`network.ini` beside the settings; the private identity itself is never
+sent. Your ROM and save remain on your device.
+
+The Square borrows MegaMan's setup from your last checkpoint. Choose
+**RETURN** from its Start menu to continue that checkpoint; with no saved
+run, RETURN goes to the title. The visit does not advance or overwrite your
+offline run. There are no battles or trades in this first version. A opens
+the list of Navis to inspect their setups, send a preset phrase or emote,
+or mute or block someone. Start also opens the Square menu. Community
+operators can host their own server; see the [server guide](../server/README.md).
 
 In the net, the buttons are the Game Boy Advance's and BN6 plays as it always
 has. On a keyboard the layout is the one Capcom's PC version (the Legacy
