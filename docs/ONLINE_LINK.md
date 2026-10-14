@@ -107,6 +107,23 @@ unchanged. Local evidence: `.build/online-platform-nova/state-report.json`
 and `state-benchmark.txt` beside it. These capture and restore timings do
 not measure rollback replay or a full game's replay cost.
 
+The ROM-free probe also ran natively in CI on Windows Server 2022 x64
+and macOS ARM64. Each checked 256 cable transfers, all 1,024 received
+words, the synthetic carried record and exact restoration of 294,912 RAM
+bytes. Both measured a 397,312-byte raw state (3,178,496 bytes for eight).
+
+| Native synthetic probe | Raw save / restore | Complete-state restore |
+| --- | --- | --- |
+| Windows x64 | 0.0079 / 0.0136 ms | 0.0889 ms |
+| macOS ARM64 | 0.0109 / 0.0180 ms | 0.1304 ms |
+
+These complete states are 397,360 bytes with **zero savedata bytes**;
+the probe's original tiny ROM has no game save. They do not establish
+real checkpoint, linked-game or rollback replay costs on these platforms.
+Evidence: Windows in [run 38655727100](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38655727100),
+macOS in [run 38656161798](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38656161798),
+the `online-link-native` reports within each native transport artifact.
+
 ## Actual Practice NetBattle
 
 `python3 build.py online-link --practice --rom /path/to/bn6g.gba` now
@@ -220,8 +237,9 @@ state also needs to be saved or reconstructed alongside a core state for
 rollback. A raw core state does not contain the ROM patches, the run's
 side records or the network session. These are explicit design gates.
 
-The browser, Android, Apple systems, Windows and the New 3DS
-have not been timed by this state experiment. In particular, the desktop's
+The browser, Android, iOS and the New 3DS have no state timing here;
+Windows and macOS have only the synthetic CI measurements above.
+In particular, the desktop's
 state times cannot establish the 3DS's replay budget. The experiment's
 binary can be built for each target, but a target's runtime measurement
 and a real linked battle are required before enabling its Arena.

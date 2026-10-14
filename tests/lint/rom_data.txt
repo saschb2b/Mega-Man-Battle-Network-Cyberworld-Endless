@@ -9,7 +9,6 @@ RomLayout menu_pal
 RomLayout navicust_programs
 RomLayout text_pal
 RomLayout text_tiles
-bn6.h BN6_BATTLE_RESULT
 bn6.h BN6_CHAT_RUN_SCRIPT
 bn6.h BN6_DIALOGUE_LOCK
 bn6.h BN6_EVENT_FLAGS
