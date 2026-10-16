@@ -15,6 +15,7 @@
 
 #include "bn6.h"
 #include "bytes.h"
+#include "claims.h"
 #include "emu.h"
 #include "flags.h"
 #include "lz.h"
@@ -25,7 +26,7 @@
 #define SCRATCH      FREE_LAYER
 #define SCRATCH_HALF 0x6800
 #define WARP_LIST    FREE_WARP_LIST       /* the layer map's warps: entry 1 is the exit */
-#define NO_MYSTERY   FREE_NO_MYSTERY      /* an empty Mystery Data list, for the maps the layers left */
+#define NO_MYSTERY   FREE_NO_MYSTERY      /* an empty Mystery Data list, for every map but the layer's */
 #define TOWN_ARENA   FREE_TOWN             /* the town's data, apart from the layers' */
 #define TOWN_SIZE    0x8000
 #define HP_ARENA     FREE_LAN_HP           /* Lan's HP's (docs/HOME.md) */
@@ -254,30 +255,32 @@ static uint32_t mystery_slot(int group, int number) {
 	return 0;
 }
 
-/* `slot` given the layer's list at `md_at`, and every other map a layer
- * took an empty one. BN6 rolls every net map's green Mystery Data again at
- * each jack-in (bn6f sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md), and
- * a map a layer left kept its list in the half a later layer has written
- * over: a jack-in from home read one and crashed the game. (An empty
- * list, not none: the roll ends a group's maps at a null.) */
+/* `slot` given the layer's list at `md_at`, every other map an empty one.
+ * BN6 rerolls every net map's green Mystery Data at each jack-in (bn6f
+ * sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md), clearing their flags.
+ * Untouched maps share the run's flags: one cleared JOB_SETTLED_FLAG,
+ * letting an asker pay again (issue #122). Previously used maps must be
+ * emptied too: their lists live in a layer half that will be overwritten.
+ * Keep the null terminators: an empty list lets the roll reach later maps. */
 static void mystery_none(uint32_t slot) {
 	static const uint8_t none[12] = { 0 };
+	claims_begin("map Mystery Data");
 	emu_write(NO_MYSTERY, none, sizeof none);
 	emu_write32(slot, NO_MYSTERY);
+	claims_end();
 }
 
 static void mystery_only(uint32_t slot, uint32_t md_at) {
-	static uint32_t slots[64];   /* (more than the maps the areas take) */
-	static int n;
 	static const uint8_t none[12] = { 0 };
+	claims_begin("map Mystery Data");
 	emu_write(NO_MYSTERY, none, sizeof none);
-	bool known = false;
-	for (int i = 0; i < n; ++i) {
-		known |= slots[i] == slot;
-		if (slots[i] != slot) emu_write32(slots[i], NO_MYSTERY);
+	for (uint32_t a = BN6_MYSTERY_DATA; emu_read32(a) != 1; a += 8) {
+		if (!emu_read32(a)) continue;
+		for (uint32_t at = emu_read32(a + 4); emu_read32(at); at += 4)
+			if (at != slot) emu_write32(at, NO_MYSTERY);
 	}
-	if (!known && n < (int)(sizeof slots / sizeof slots[0])) slots[n++] = slot;
 	emu_write32(slot, md_at);
+	claims_end();
 }
 
 /* The map's Mystery Data (mapslot_install's, a net map's) */
