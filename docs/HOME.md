@@ -482,6 +482,14 @@ can be taken. The run's save holds the request (`RUN_MAGIC` "CWE9"; an
 older save continues with none). Not yet: the objects' comps as a busting
 errand.
 
+A settled request stays settled through jack-in and jack-out (issue #122,
+reported by Baine53). The layer install empties unused maps' Mystery Data
+lists, whose jack-in reroll otherwise cleared the flags that guard the
+request's payout and the visit's order. The generated layer keeps its own
+list; a CONTINUE rebuilds the same tables before loading the saved state.
+Verified in Gregar's code and by claiming the lab's 1000 Zenny, jacking in
+at Lan's PC, jacking out and talking again (docs/ROM_DATA.md, Map takeover).
+
 After the first playtest of home (session 69, 5 October 2026), through
 the game-design lens: the vow is press on against prepare, a bonus with
 its drawback, and the playtester's bet broke both its terms. It was
