@@ -1,7 +1,7 @@
 # Trade inventory reader: acceptance before implementation
 
-Status: acceptance recorded; original-game experiment and runtime reader
-not yet implemented. The immutable validator's synthetic tests are a
+Status: acceptance and comparator recorded; original-game exploratory
+experiments reached all three folders. The runtime reader is not yet implemented. The immutable validator's synthetic tests are a
 separate, completed check and cannot pass this acceptance.
 
 ## Pinned target and goal
@@ -58,9 +58,19 @@ reports the first different chip/code, expected count and actual count.
 The local report records target and fixture hashes, inputs, frame
 numbers, native menu states, verdicts and untested paths.
 
+`tools/online_trade_compare.py` owns the six required folder scenarios,
+state reachability and exact byte comparisons. Each case has two native
+control lanes and one capture lane. It compares every canonical ID/code
+count, the whole EWRAM plus IWRAM at identical sampled frames, and both
+the prepared object and its eligibility output after live Pack changes.
+A missing menu, shortened sample, differing native control or unreached
+lifetime challenge is INCONCLUSIVE. `tests/test_online_trade_compare.py`
+uses invented bytes to check this comparator; it is not native evidence.
+
 Deliberately break the reader in each of these ways; every relevant
 scenario must fail: include equipped copies as spares; ignore the second
-owned folder; subtract the borrowed ExtraFolder; collapse different codes
+owned folder; omit the borrowed ExtraFolder (native editor experiments
+remove its copies too); collapse different codes
 of one name; retain a pointer to live Pack memory; and write one observed
 RAM byte during capture. A mutation with no scenario reaching its faulty
 path is INCONCLUSIVE and leaves the acceptance incomplete.
