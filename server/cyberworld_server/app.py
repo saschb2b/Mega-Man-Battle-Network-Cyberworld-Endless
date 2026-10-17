@@ -28,7 +28,6 @@ class Player:
     social_tokens: float = 2
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
-    inspect_time: float = 0
 
 
 class Server:
@@ -166,7 +165,7 @@ class Server:
             if now - player.profile_time >= 1:
                 player.profile, player.profile_time = profile, now
         elif len(data) == 5 and data[0] == protocol.SPEC["inspect"]:
-            await self.inspect(player, struct.unpack("!I", data[1:])[0], now)
+            await self.inspect(player, struct.unpack("!I", data[1:])[0])
         elif data and data[0] == protocol.SPEC["social"]:
             await self.social(player, data, now)
         elif len(data) == 3 and data[0] == protocol.SPEC["channel"]:
@@ -205,10 +204,10 @@ class Server:
         await self.welcome(player)
         self.event("channel", id=player.id, channel=channel)
 
-    async def inspect(self, player, target, now):
-        if now - player.inspect_time < 0.25:
-            return
-        player.inspect_time = now
+    async def inspect(self, player, target):
+        # Every accepted request needs a reply: reopening a card otherwise
+        # waits forever for a serial that a silent per-card throttle dropped.
+        # serve_player already bounds all messages with its token bucket.
         peer = self.players.get(target)
         if not peer or peer.channel != player.channel:
             await self.notice(player, 13, "Player is no longer in this channel")

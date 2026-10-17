@@ -74,9 +74,15 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         await second.send(bytes((protocol.SPEC["inspect"],)) + welcome[5:9])
         card = await second.message(protocol.SPEC["card"])
         self.assertEqual(card, bytes((protocol.SPEC["card"],)) + welcome[5:9] + welcome[14:30] + profile)
+        # Rapid back/reopen must produce a fresh card response, not silently
+        # strand the client waiting for its next card serial.
+        request = bytes((protocol.SPEC["inspect"],)) + welcome[5:9]
+        await second.send(request)
+        await second.send(request)
+        self.assertEqual(await second.message(protocol.SPEC["card"]), card)
+        self.assertEqual(await second.message(protocol.SPEC["card"]), card)
         await first.send(struct.pack("!BH", protocol.SPEC["channel"], 2))
         await first.message(protocol.SPEC["welcome"])
-        await asyncio.sleep(0.26)
         await second.send(bytes((protocol.SPEC["inspect"],)) + welcome[5:9])
         self.assertEqual((await second.message(protocol.SPEC["notice"]))[1:3], b"\x00\x0d")
 
