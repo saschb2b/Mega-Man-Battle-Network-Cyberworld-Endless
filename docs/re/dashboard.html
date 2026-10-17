@@ -214,9 +214,11 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "id": "trade-stage-routines",
       "name": "Checkpoint swap against original chip routines",
-      "phase": 4,
-      "status": "active",
-      "note": "Four pristine Take/Give controls repeat, including counter wrap. Independent unchanged-source reloads repeat; reviewed full-state control comparison adds no ignored bytes. Candidate/mutation proof is ongoing. docs/re/trade-stage-reload.md"
+      "phase": 6,
+      "status": "passed",
+      "specs": { "pass": 4, "fail": 0, "inconclusive": 0 },
+      "mutations": { "caught": 12, "total": 12 },
+      "note": "Pristine ordinary BN6 only: four native routine cases, independent source reload controls and original editor agree; all twelve faults caught, no ignored bytes. Actual project saves, BN5, All * and journal handoff remain separate. docs/re/trade-stage-evidence.md"
     },
     {
       "id": "arena-carried-chip",

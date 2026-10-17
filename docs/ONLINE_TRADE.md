@@ -303,6 +303,22 @@ These lifecycle APIs are not yet connected to startup, NEW GAME or save
 writers. Unsupported storage backends retain their offline behavior and
 must never advertise safe trade capability.
 
+## Implemented: isolated pristine-state staging
+
+`online_trade_stage.[ch]` returns owned checkpoint bytes from an immutable
+source and matching prepared inventory. It has no live core, networking
+or filesystem handle. Four native Take/Give cases, fresh reloads and the
+original folder editor agree; all twelve deliberate faults are caught
+([evidence](re/trade-stage-evidence.md)). The returned file changes only
+the exact outgoing/incoming counts, incoming ownership and Library bit,
+incoming code's acquisition stamp and shared order counter.
+
+This first proven envelope is pristine BN6 with ordinary codes. Actual
+project saves use the project's reconstructed ROM/core context and are
+currently refused, as are BN5, Souls and All *. Their acceptance and the
+journal handoff remain separate. This building block does not enable
+player trades. The original full cable Trade attempt remains inconclusive.
+
 ## Required before a swap can modify a checkpoint
 
 Eligibility is not a commit. The full transaction needs one immutable

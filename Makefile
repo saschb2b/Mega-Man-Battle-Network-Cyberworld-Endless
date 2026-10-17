@@ -308,7 +308,8 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_online_trade_identity build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+test: build/host/test_online_trade_stage build/host/test_online_trade_identity build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+	build/host/test_online_trade_stage
 	build/host/test_online_trade_identity
 	build/host/test_online_trade_journal
 	build/host/test_online_trade_capture
@@ -477,6 +478,17 @@ build/host/test_online_trade_identity: $(TRADE_IDENTITY_TEST_SRCS) src/online/*.
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_IDENTITY_TEST_MAIN -o $@ $(TRADE_IDENTITY_TEST_SRCS)
 
+TRADE_STAGE_PROBE ?= .build/online-trade-stage
+TRADE_STAGE_SOURCE ?= src/online/online_trade_stage.c
+TRADE_STAGE_PROBE_SOURCE ?= tools/online_trade_stage_probe.c
+TRADE_STAGE_PROBE_SRCS := $(TRADE_STAGE_PROBE_SOURCE) tools/online_trade_runtime.c $(TRADE_STAGE_SOURCE) \
+	src/online/online_trade_terms.c src/core/sha256.c $(filter-out tools/online_trade_probe.c,$(TRADE_PROBE_SRCS))
+$(TRADE_STAGE_PROBE): $(TRADE_STAGE_PROBE_SRCS) tools/online_trade_runtime.h src/online/*.h src/emu/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-Itools -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_STAGE_PROBE_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
+
 TRADE_RELOAD_PROBE ?= .build/online-trade-reload
 TRADE_RELOAD_SRCS := tools/online_trade_reload.c tools/online_trade_runtime.c src/core/rom.c src/core/data.c src/core/compat.c
 $(TRADE_RELOAD_PROBE): $(TRADE_RELOAD_SRCS) tools/online_trade_runtime.h src/emu/*.h
@@ -484,3 +496,15 @@ $(TRADE_RELOAD_PROBE): $(TRADE_RELOAD_SRCS) tools/online_trade_runtime.h src/emu
 	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_RELOAD_SRCS) \
 		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
+
+TRADE_STAGE_TEST_SRCS := tests/test_online_trade_stage.c src/online/online_trade_stage.c src/online/online_trade_capture.c \
+	src/online/online_trade_inventory.c src/online/online_trade_terms.c src/core/sha256.c
+build/host/test_online_trade_stage: $(TRADE_STAGE_TEST_SRCS) src/online/*.h src/emu/*.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g -D_DEFAULT_SOURCE $(TEST_SAN) -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_STAGE_TEST_SRCS) -Wl,--gc-sections
+
+LINT_TRADE_STAGE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_STAGE_TEST_SRCS))
+build/lint/test_online_trade_stage: $(LINT_TRADE_STAGE_OBJS)
+	@mkdir -p $(@D)
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm

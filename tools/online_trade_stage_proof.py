@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LIBRARY = "/opt/mgba/host/lib/libmgba.a"
 # Fixed at observer review. Never regenerate these from candidate runs.
 REVIEWED = {
-    "tools/online_trade_stage_compare.py": "662e79911140f1f5b07ca1be77f522d2f9b11e448eff90c793c9a31c11defdd7",
+    "tools/online_trade_reload.c": "ed0b8ba29a4ef71bc1cbc19a75b930564b98ded427c313204edcbf28b2ab4377",
+    "tools/online_trade_stage_compare.py": "a5333ea68048981275d9e5c61c64388886488f7ff33d196a33bcda7e6e314ad4",
     "tools/online_trade_routines.c": "cbee8a49abe7fb3fb6272617eddf7e95cad7f088311aeeb40c54473a6cc132d7",
     "tools/online_trade_runtime.c": "d715803772265a42a9d84ec4c0352fd6e74b4f0f4c812879261ec447c96a6663",
     "tools/online_trade_runtime.h": "5f3b9866da8fa14c080fd51dcaa6b64286746307c1c28ededfe5634da20f8ade",
