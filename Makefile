@@ -420,6 +420,14 @@ $(TRADE_PROBE): $(TRADE_PROBE_SRCS) src/online/*.h src/emu/*.h
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_PROBE_SRCS) \
 		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
 
+TRADE_ROUTINE_PROBE ?= .build/online-trade-routines
+TRADE_ROUTINE_SRCS := tools/online_trade_routines.c tools/online_trade_runtime.c $(filter-out tools/online_trade_probe.c,$(TRADE_PROBE_SRCS))
+$(TRADE_ROUTINE_PROBE): $(TRADE_ROUTINE_SRCS) tools/online_trade_runtime.h src/online/*.h src/emu/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_ROUTINE_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
+
 TRADE_TERMS_TEST_SRCS := tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c
 build/host/test_online_trade_terms: $(TRADE_TERMS_TEST_SRCS) src/online/online_trade_terms.h src/core/sha256.h shared/online/trade.h
 	@mkdir -p build/host

@@ -196,7 +196,14 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "phase": 2,
       "status": "stalled",
       "specs": {"pass": 0, "fail": 0, "inconclusive": 1},
-      "note": "Native peer exchange stopped after three connection variants stalled before completion: trade-stage-link-attempts.md. Routine-level fallback acceptance proposed separately; no checkpoint patch or complete exchange is proven."
+      "note": "Native peer exchange stopped after three connection variants stalled before completion: trade-stage-link-attempts.md. It remains open despite the separately accepted routine-level fallback."
+    },
+    {
+      "id": "trade-stage-routines",
+      "name": "Checkpoint swap against original chip routines",
+      "phase": 4,
+      "status": "active",
+      "note": "Four original controls repeat complete state, call returns and editor counts; source pins fixed in online_trade_stage_proof.py. Counter wrap reached. Candidate and mutation proof remain pending: trade-stage-routine-evidence.md."
     }
   ],
   "ledger": {
