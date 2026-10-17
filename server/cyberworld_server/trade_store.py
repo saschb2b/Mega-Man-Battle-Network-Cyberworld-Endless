@@ -20,9 +20,9 @@ _SCHEMA = (
     "CREATE TABLE service (id INTEGER PRIMARY KEY CHECK (id = 1), identity BLOB NOT NULL)",
     """CREATE TABLE trades (
         id BLOB PRIMARY KEY, left_id BLOB NOT NULL, left_checkpoint BLOB NOT NULL,
-        left_chip INTEGER NOT NULL, left_run BLOB NOT NULL, left_revision INTEGER NOT NULL,
+        left_chip INTEGER NOT NULL, left_run BLOB NOT NULL, left_revision INTEGER NOT NULL, left_rules INTEGER NOT NULL,
         right_id BLOB NOT NULL, right_checkpoint BLOB NOT NULL,
-        right_chip INTEGER NOT NULL, right_run BLOB NOT NULL, right_revision INTEGER NOT NULL,
+        right_chip INTEGER NOT NULL, right_run BLOB NOT NULL, right_revision INTEGER NOT NULL, right_rules INTEGER NOT NULL,
         state INTEGER NOT NULL DEFAULT 0,
         prepared INTEGER NOT NULL DEFAULT 0, applied INTEGER NOT NULL DEFAULT 0
     )""",
@@ -47,6 +47,7 @@ class Side:
     chip: int
     run_id: bytes
     revision: int
+    rules: int = 0
 
     def validate(self):
         if not isinstance(self.identity, bytes) or len(self.identity) != 16 or not any(self.identity):
@@ -57,10 +58,14 @@ class Side:
             raise TradeError("Invalid run identity")
         if type(self.revision) is not int or not 0 <= self.revision < 0xffffffff:
             raise TradeError("Invalid trade revision")
+        if type(self.rules) is not int or not 0 <= self.rules <= 3:
+            raise TradeError("Invalid carried rules")
         if type(self.chip) is not int or not 0 < self.chip <= 0xffff:
             raise TradeError("Invalid chip entry")
         if not 1 <= self.chip & 0x1ff <= 511 or self.chip >> 9 > 26:
             raise TradeError("Invalid chip ID or code")
+        if self.rules & 2 and self.chip >> 9 != 26:
+            raise TradeError("All * offers must keep their code")
 
 
 @dataclass(frozen=True)
@@ -78,7 +83,7 @@ class Decision:
         data = b"Cyberworld trade 1\0" + self.server + self.transaction
         for side in (self.left, self.right):
             data += side.identity + side.run_id + struct.pack("!I", side.revision)
-            data += side.checkpoint + struct.pack("!H", side.chip)
+            data += side.checkpoint + struct.pack("!HB", side.chip, side.rules)
         return hashlib.sha256(data).digest()
 
     def participant(self, identity):
@@ -156,7 +161,7 @@ class TradeStore:
         row = self.db.execute("SELECT * FROM trades WHERE id=?", (transaction,)).fetchone()
         if row is None:
             raise TradeError("Unknown transaction; restore the server's decision history")
-        decision = Decision(row[0], Side(*row[1:6]), Side(*row[6:11]), *row[11:], self.server_identity)
+        decision = Decision(row[0], Side(*row[1:7]), Side(*row[7:13]), *row[13:], self.server_identity)
         decision.left.validate()
         decision.right.validate()
         if (type(decision.state) is not int or decision.state not in (OFFERED, COMMITTED, ABORTED) or
@@ -166,7 +171,7 @@ class TradeStore:
                 (decision.state != COMMITTED and decision.prepared == 3) or
                 (decision.state != COMMITTED and decision.applied) or
                 decision.left.identity == decision.right.identity or decision.left.run_id == decision.right.run_id or
-                decision.left.chip == decision.right.chip):
+                decision.left.chip == decision.right.chip or (decision.left.rules ^ decision.right.rules) & 2):
             raise TradeError("Damaged trade decision; restore the server's decision history")
         if identity is not None:
             decision.participant(identity)
@@ -186,6 +191,8 @@ class TradeStore:
         right.validate()
         if left.identity == right.identity or left.run_id == right.run_id or left.chip == right.chip:
             raise TradeError("Trade needs two players and two different entries")
+        if (left.rules ^ right.rules) & 2:
+            raise TradeError("The runs use different All * rules")
         with self._transaction():
             for side in (left, right):
                 if self.pending(side.identity):
@@ -196,9 +203,9 @@ class TradeStore:
                                    (side.run_id, side.revision)).fetchone():
                     raise TradeError("Run revision was already traded; reconcile before offering again")
             transaction = secrets.token_bytes(16)
-            self.db.execute("INSERT INTO trades VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
-                            (transaction, left.identity, left.checkpoint, left.chip, left.run_id, left.revision,
-                             right.identity, right.checkpoint, right.chip, right.run_id, right.revision))
+            self.db.execute("INSERT INTO trades VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
+                            (transaction, left.identity, left.checkpoint, left.chip, left.run_id, left.revision, left.rules,
+                             right.identity, right.checkpoint, right.chip, right.run_id, right.revision, right.rules))
             self.db.executemany("INSERT INTO reservations VALUES (?, ?, ?)",
                                 [(side.identity, side.run_id, transaction) for side in (left, right)])
             return self._read(transaction)

@@ -130,6 +130,34 @@ corrupted history, incompatible schemas, injected storage failure and process de
 the coordinator's storage behavior; it does not prove a client wrote a
 prepared checkpoint, or replace the client recovery tests below.
 
+## Implemented: live offer coordination
+
+`server/cyberworld_server/trade_lobby.py` holds at most one live have/want
+listing per present player. Listings are scoped to their channel; both
+selected entries must still match when a request reserves the pair.
+Posting another checkpoint or moving channels withdraws the old listing.
+All * flags are part of the immutable terms and must match. BN5
+availability remains a local registry check; a server cannot prove the
+contents of a player's ROM or Pack.
+
+After reservation, both listings disappear until the decision resolves.
+A disconnect asks the durable store to abort an offer that has not
+committed; it cannot undo a commit. Reconnection returns an unresolved
+committed decision. Each client must recapture its installed checkpoint
+revision before advertising again. Replaying an old acknowledgement does
+not erase that newer readiness. Database work runs off the presence event
+loop. The module has no public socket entry point yet.
+
+The confirmation digest is SHA-256 over `Cyberworld trade 1` followed by
+a zero byte, the 32-byte server identity, the 16-byte transaction ID, then
+each side in left/right order: public identity (16), run identity (16),
+revision (4, network byte order), checkpoint SHA-256 (32), exact chip/code
+entry (2, network byte order), and rules (1: bit 0 BN5, bit 1 All *).
+State, prepared and applied masks are not terms and cannot change this
+digest. This format is the common contract for the client journal and
+upcoming wire codec. Persisted schemas are validated exactly; these
+components have not yet been enabled in a released trade service.
+
 ## Required before a swap can modify a checkpoint
 
 Eligibility is not a commit. The full transaction needs one immutable

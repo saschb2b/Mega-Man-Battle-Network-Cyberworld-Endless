@@ -118,7 +118,7 @@ class TradeStoreTests(unittest.TestCase):
 
     def test_confirmation_binds_run_and_revision_as_well_as_checkpoint(self):
         trade = self.create()
-        for side in (replace(self.left, run_id=b"x" * 16), replace(self.left, revision=1)):
+        for side in (replace(self.left, run_id=b"x" * 16), replace(self.left, revision=1), replace(self.left, rules=1)):
             with self.subTest(side=side):
                 self.assertNotEqual(trade.digest, replace(trade, left=side).digest)
         self.assertNotEqual(trade.digest, replace(trade, server=b"s" * 32).digest)
@@ -185,6 +185,7 @@ class TradeStoreTests(unittest.TestCase):
         bad += [replace(self.left, checkpoint=value) for value in (bytes(32), b"A" * 31)]
         bad += [replace(self.left, run_id=value) for value in (bytes(16), b"1" * 15)]
         bad += [replace(self.left, revision=value) for value in (-1, 0xffffffff, True, "0")]
+        bad += [replace(self.left, rules=value) for value in (-1, 4, 2, True, "0")]
         bad += [replace(self.left, chip=chip) for chip in (-1, 0, 512, 27 << 9 | 1, 65536, True)]
         for side in bad:
             with self.subTest(side=side), self.assertRaises(TradeError):
