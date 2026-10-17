@@ -36,8 +36,9 @@ OnlineTradeJournalState online_trade_journal_recover(const char *root, OnlineTra
 /* Only an authoritative, matching server decision may call this. Exact
  * terms are compared; COMMITTED can never become ABORTED. */
 OnlineTradeJournalState online_trade_journal_decide(const char *root, const OnlineTradeTerms *terms, bool committed);
-/* After the server durably acknowledges local APPLIED, release the
- * journal. Repeated acknowledgement after success is harmless. */
+/* After the server durably acknowledges local APPLIED, remember its run
+ * revision in local history before releasing the journal. Repeated
+ * acknowledgement after success is harmless; missing history blocks. */
 bool online_trade_journal_acknowledged(const char *root, const OnlineTradeTerms *terms);
 
 #endif

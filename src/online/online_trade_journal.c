@@ -5,6 +5,8 @@
 
 #include "online_trade_files.h"
 #include "online_trade_record.h"
+#include "online_trade_identity.h"
+#include "online_trade_history_internal.h"
 #include "sha256.h"
 
 #define JOURNAL_BYTES (10 + ONLINE_TRADE_TERMS_BYTES + 96 + 32)
@@ -236,6 +238,21 @@ OnlineTradeJournalState online_trade_journal_decide(const char *root, const Onli
 	return result;
 }
 
+static bool remember_applied(const Paths *p, const OnlineTradeTerms *terms, bool remember) {
+	char path[TRADE_PATH_MAX];
+	size_t n = 0;
+	uint8_t *record = trade_files_path(path, p->current, "run.trade") ? trade_files_read(path, &n) : NULL;
+	uint32_t seed;
+	bool ok = online_trade_record_has(record, n, terms) && online_trade_identity_seed(p->root, &seed);
+	if (ok) {
+		OnlineTradeHistoryResult history = remember ? online_trade_history_remember_locked(p->root, seed, record, n) :
+			online_trade_history_check_locked(p->root, seed, record, n);
+		ok = history == TRADE_HISTORY_OK;
+	}
+	free(record);
+	return ok;
+}
+
 bool online_trade_journal_acknowledged(const char *root, const OnlineTradeTerms *terms) {
 	if (!trade_files_supported()) return false;
 	Paths p;
@@ -243,15 +260,9 @@ bool online_trade_journal_acknowledged(const char *root, const OnlineTradeTerms 
 	int fd = trade_files_lock(root);
 	if (fd < 0) return false;
 	OnlineTradeJournal journal;
-	bool ok;
-	if (!trade_files_kind(p.pending)) {
-		char path[TRADE_PATH_MAX];
-		size_t n = 0;
-		uint8_t *record = trade_files_path(path, p.current, "run.trade") ? trade_files_read(path, &n) : NULL;
-		ok = !trade_files_kind(p.previous) && !trade_files_kind(p.stage) && online_trade_record_has(record, n, terms);
-		free(record);
-	} else ok = journal_read(&p, &journal) && journal.state == TRADE_JOURNAL_APPLIED &&
-		same_terms(&journal.terms, terms) && matches(p.current, journal.staged) && finish_cleanup(&p);
+	OnlineTradeJournalState current = recover(&p, &journal);
+	bool ok = current == TRADE_JOURNAL_CLEAR ? remember_applied(&p, terms, false) :
+		current == TRADE_JOURNAL_APPLIED && same_terms(&journal.terms, terms) && remember_applied(&p, terms, true) && finish_cleanup(&p);
 	trade_files_unlock(fd);
 	return ok;
 }

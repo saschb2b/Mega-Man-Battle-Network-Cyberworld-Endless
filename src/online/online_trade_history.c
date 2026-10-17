@@ -170,6 +170,10 @@ OnlineTradeHistoryResult online_trade_history_remember_locked(const char *root, 
 	return record_locked(root, seed, record, n, true);
 }
 
+OnlineTradeHistoryResult online_trade_history_check_locked(const char *root, uint32_t seed, const uint8_t *record, size_t n) {
+	return record_locked(root, seed, record, n, false);
+}
+
 static OnlineTradeHistoryResult record_operation(const char *root, uint32_t seed, const uint8_t *record, size_t n, bool write) {
 	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
 	int lock = trade_files_lock(root);

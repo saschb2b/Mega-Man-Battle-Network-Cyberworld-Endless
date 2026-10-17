@@ -12,6 +12,8 @@
 #include "online_trade_journal.h"
 #include "online_trade_history.h"
 #include "online_trade_record.h"
+#include "run.h"
+#include "save_format.h"
 #include "sha256.h"
 
 static int failures;
@@ -65,9 +67,15 @@ static bool fixture(Fixture *f) {
 		f->terms.side[i].chip = (uint16_t)(i + 1);
 	}
 	uint8_t record[ONLINE_TRADE_RECORD_INITIAL];
+	Run saved = { .active = true, .seed = 17, .depth = 4 };
+	uint8_t run_blob[12 + sizeof saved];
+	uint32_t header[3] = { RUN_MAGIC, sizeof saved, 2166136261u };
+	memcpy(run_blob + 12, &saved, sizeof saved);
+	for (size_t i = 12; i < sizeof run_blob; ++i) header[2] = (header[2] ^ run_blob[i]) * 16777619u;
+	memcpy(run_blob, header, sizeof header);
 	return online_trade_record_new(f->terms.side[0].run_id, record) &&
 		put(f->current, "run.trade", record, sizeof record) && put(f->current, "profile.sav", original, sizeof original) &&
-		put(f->current, "run.sav", original, sizeof original) && put(f->current, "run.state", original, sizeof original) &&
+		put(f->current, "run.sav", run_blob, sizeof run_blob) && put(f->current, "run.state", original, sizeof original) &&
 		put(f->current, "run.act", original, sizeof original) && put(f->current, "transfer.manifest", original, sizeof original) &&
 		put(f->undo, "run.state", original, sizeof original) && trade_files_sync(f->current) && trade_files_sync(f->root) &&
 		trade_files_hash(f->current, false, f->source) && trade_files_hash(f->undo, false, f->undo_hash) &&
@@ -81,6 +89,8 @@ static void unchanged(const char *directory, const uint8_t expected[32]) {
 }
 
 static void prepared(Fixture *f) {
+	uint8_t namespace_id[16] = { 21 };
+	CHECK(online_trade_history_create(f->root, namespace_id));
 	CHECK(online_trade_journal_prepare(f->root, &f->terms, 0, &change, 1));
 	OnlineTradeJournal journal;
 	CHECK(online_trade_journal_recover(f->root, &journal) == TRADE_JOURNAL_PREPARED);
@@ -118,6 +128,9 @@ static void commit_and_retry(void) {
 	CHECK(online_trade_journal_decide(f.root, &f.terms, false) == TRADE_JOURNAL_BROKEN);
 	CHECK(online_trade_journal_decide(f.root, &f.terms, true) == TRADE_JOURNAL_APPLIED);
 	CHECK(online_trade_journal_acknowledged(f.root, &f.terms));
+	uint8_t prior[ONLINE_TRADE_RECORD_INITIAL];
+	CHECK(online_trade_record_new(f.terms.side[0].run_id, prior));
+	CHECK(online_trade_history_check(f.root, 17, prior, sizeof prior) == TRADE_HISTORY_STALE);
 	CHECK(online_trade_journal_recover(f.root, NULL) == TRADE_JOURNAL_CLEAR);
 	CHECK(online_trade_journal_acknowledged(f.root, &f.terms));
 	CHECK(!online_trade_journal_acknowledged(f.root, &other));

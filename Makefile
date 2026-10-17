@@ -453,7 +453,7 @@ build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
 	@mkdir -p $(@D)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 
-TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c src/online/online_trade_history.c \
+TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c src/online/online_trade_history.c src/online/online_trade_identity.c \
 	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
 build/host/test_online_trade_journal: $(TRADE_JOURNAL_TEST_SRCS) src/online/*.h src/core/sha256.h shared/online/trade.h
 	@mkdir -p build/host
