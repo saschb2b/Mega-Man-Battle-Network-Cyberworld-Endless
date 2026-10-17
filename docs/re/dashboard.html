@@ -194,8 +194,9 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "id": "trade-stage",
       "name": "Checkpoint chip swap against native Trade",
       "phase": 2,
-      "status": "active",
-      "note": "Reviewed acceptance: trade-stage-goal.md. Establish native chip exchange effects before mutating a private checkpoint."
+      "status": "stalled",
+      "specs": {"pass": 0, "fail": 0, "inconclusive": 1},
+      "note": "Native peer exchange stopped after three connection variants stalled before completion: trade-stage-link-attempts.md. Routine-level fallback acceptance proposed separately; no checkpoint patch or complete exchange is proven."
     }
   ],
   "ledger": {

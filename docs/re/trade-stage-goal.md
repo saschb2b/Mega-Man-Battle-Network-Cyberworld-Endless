@@ -1,7 +1,10 @@
 # Staged checkpoint chip swap: acceptance before implementation
 
-Status: proposed acceptance for review. No swap routine is implemented by
-this unit. The accepted inventory reader is a prerequisite, not its oracle.
+Status: reviewed acceptance; native peer-exchange investigation stopped
+as [INCONCLUSIVE](trade-stage-link-attempts.md) after its three attempts.
+No swap routine is implemented by this unit. The accepted inventory
+reader is a prerequisite, not its oracle. A separately reviewed
+[routine-level fallback](trade-stage-routine-goal.md) is proposed.
 
 ## Pinned target and first unit
 
