@@ -124,7 +124,7 @@
 #define BN6_FOLDER_COUNT_FIELD 0x05       /* byte in the structure at BN6_TOOLKIT_STEPS; valid folder slots, 1-3 */
 #define BN6_FOLDER_KINDS      0x020018ECu /* high nibble per slot: 0 first editable, 1 second editable, 2 borrowed Extra */
 #define BN6_FOLDER_NAMES      0x02001850u /* three runtime names; the native GiveFolder initializes an Extra's name */
-#define BN6_FOLDER_NAME_BYTES 32
+#define BN6_FOLDER_NAME_BYTES 32          /* bytes reserved for each runtime folder name */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
 
 #endif
