@@ -399,9 +399,15 @@ alone does not connect. Your name, servers and private identity stay in
 `network.ini` beside the settings; the private identity itself is never
 sent. Your ROM and save remain on your device.
 
+Between acts, R at Lan's PC offers **JACK IN**, **NETWORK**, or **CANCEL**.
+NETWORK saves your current home progress and position first, including
+shopping and requests. If the save fails, Lan stays at the PC so you can
+retry. Back from NETWORK and leaving the Square return to that PC save.
+Before the first act, R keeps its usual jack-in.
+
 The Square borrows MegaMan's setup from your last checkpoint. Choose
-**RETURN** from its Start menu to continue that checkpoint; with no saved
-run, RETURN goes to the title. The visit does not advance or overwrite your
+**LEAVE SQUARE** from its Start menu to continue that checkpoint; with no saved
+run, leaving goes to the title. The visit does not advance or overwrite your
 offline run. There are no battles or trades in this first version. A opens
 the list of Navis to inspect their setups, send a preset phrase or emote,
 or mute or block someone. Start also opens the Square menu. Community

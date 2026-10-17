@@ -5,6 +5,7 @@
 
 #include "audio.h"
 #include "network_state.h"
+#include "network_origin.h"
 #include "network_text.h"
 #include "online_visit.h"
 #include "platform.h"
@@ -20,11 +21,13 @@ static bool finger_down(void) {
 	return false;
 }
 
-void network_open(void) { scene_set(&scene_network); }
+void network_open(void) { network_origin_set(false); scene_set(&scene_network); }
+
+void network_open_checkpoint(void) { network_origin_set(true); scene_set(&scene_network); }
 
 void network_message(const char *message) {
 	snprintf(pending_note, sizeof pending_note, "%s", message ? message : "");
-	network_open();
+	scene_set(&scene_network);
 }
 
 bool network_store(void) {
@@ -42,8 +45,7 @@ bool network_back(void) {
 		N.view = NETWORK_HOME;
 		N.note[0] = 0;
 	} else {
-		title_menu = true;
-		scene_set(&scene_title);
+		network_origin_back(N.note, sizeof N.note);
 	}
 	audio_sfx(SFX_CANCEL);
 	return true;

@@ -7,6 +7,7 @@
 #include "devtools.h"
 #include "pet.h"
 #include "director.h"
+#include "director_pc.h"
 #include "emu.h"
 #include "game.h"
 #include "gfx.h"
@@ -55,6 +56,7 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	director_pc_reset();
 	if (online_scene_enabled()) online_scene_end();
 	online_visit_left();
 	audio_external(NULL);
@@ -64,7 +66,7 @@ static void leave(void) {
 static uint32_t frame_keys(void) {
 	if (online_scene_enabled()) return online_scene_keys(keys_from_buttons());
 	uint32_t keys = online_visit_run_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
-	return director_keys(pet_keys(devtools_keys(keys)));
+	return director_keys(director_pc_keys(pet_keys(devtools_keys(keys))));
 }
 
 /* What follows a frame of the game: the run's logic on it. */
@@ -119,6 +121,7 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); return; }
 		for (int i = 0; i < dev.speed; ++i) {
 			if (started) after_frame();
+			if (director_pc_update()) return;
 			if (online_visit_transitioning()) return;
 			emu_frame(cinema_keys(frame_keys()));
 			started = true;
@@ -132,6 +135,7 @@ static void update(void) {
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
+		if (director_pc_update()) return;
 		if (online_visit_transitioning()) return;
 	}
 	if (revealed || (online_scene_enabled() ? online_scene_arrived() : director_arrived())) ++revealed;
@@ -201,6 +205,7 @@ static void draw(void) {
 	director_draw_duel();
 	director_draw_tent();
 	devtools_draw();
+	director_pc_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };
