@@ -18,12 +18,14 @@ class PackagingTests(unittest.TestCase):
             first = BUILD.build(Path(directory) / "a/server.pyz")
             second = BUILD.build(Path(directory) / "b/server.pyz")
             self.assertEqual(first.read_bytes(), second.read_bytes())
-            expected = {"__main__.py", "LICENSE", "cyberworld_server/protocol.json"}
+            expected = {"__main__.py", "LICENSE", "cyberworld_server/protocol.json", "cyberworld_server/trade.json"}
             expected.update("cyberworld_server/" + file.name for file in (ROOT / "server/cyberworld_server").glob("*.py"))
             with zipfile.ZipFile(first) as archive:
                 self.assertEqual(set(archive.namelist()), expected)
                 self.assertEqual(json.loads(archive.read("cyberworld_server/protocol.json")),
                                  json.loads((ROOT / "shared/online/protocol.json").read_text()))
+                self.assertEqual(json.loads(archive.read("cyberworld_server/trade.json")),
+                                 json.loads((ROOT / "shared/online/trade.json").read_text()))
                 self.assertTrue(all(entry.date_time == (1980, 1, 1, 0, 0, 0) for entry in archive.infolist()))
 
 
