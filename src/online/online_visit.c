@@ -11,6 +11,8 @@
 #include "game_hooks.h"
 #include "loot.h"
 #include "navicust.h"
+#include "online_capture.h"
+#include "online_fresh.h"
 #include "online_scene.h"
 #include "online_transport.h"
 #include "online_visit_text.h"
@@ -127,12 +129,14 @@ bool online_visit_prepare(char *error, size_t cap) {
 		director_before_boot();
 		ok = emu_boot();
 		game_hooks_after_boot();
+		if (ok) online_fresh_prepare();
 	}
 	director_stop();
 	cinema_reset();
 	if (!ok || !online_snapshot_read(&visit.loadout, visit.checkpoint ? souls_held() : 0))
 		return visit_error(error, cap, online_visit_checkpoint_failed);
 	visit.ready = true;
+	online_capture_loadout(&visit.loadout, visit.checkpoint);
 	fprintf(stderr, "online: carried checkpoint=%s depth=%d hp=%u max_hp=%u souls=%u\n",
 		visit.checkpoint ? "yes" : "no", visit.checkpoint ? visit.saved.depth : 0,
 		visit.loadout.hp, visit.loadout.max_hp, visit.loadout.souls);

@@ -407,7 +407,10 @@ Before the first act, R keeps its usual jack-in.
 
 <img src="screenshots/network-pc.png" width="240" alt="Lan's PC between acts: Jack in, Network, and Cancel; Network saves here first.">
 
-The Square borrows MegaMan's setup from your last checkpoint. Choose
+The Square borrows MegaMan's setup from your last checkpoint. Without a saved
+run, you visit as a fresh MegaMan using the title's remembered starting folder,
+Cross and helpers, restricted to choices you have unlocked. This creates no
+run and gives no starting gifts or progress. Choose
 **LEAVE SQUARE** from its Start menu to continue that checkpoint; with no saved
 run, leaving goes to the title. The visit does not advance or overwrite your
 offline run. There are no battles or trades in this first version. A opens

@@ -95,6 +95,14 @@ bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_cle
 
 int meta_threat_open(void) { return profile.threat_open > THREAT_MAX ? THREAT_MAX : profile.threat_open; }
 
+MetaLoadout meta_last_loadout(void) {
+	return (MetaLoadout){
+		.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD,
+		.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0,
+		.helpers = (uint8_t)(profile.last_helpers & ((1u << meta_helpers_shown()) - 1u)),
+	};
+}
+
 const char *meta_threat_rule(int rung) {
 	static const char *const rules[THREAT_MAX] = {
 		"Viruses a version stronger from act 2",

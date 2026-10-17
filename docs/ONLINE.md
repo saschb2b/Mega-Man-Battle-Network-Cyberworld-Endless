@@ -306,6 +306,17 @@ with a retry. `tools/online_pc_proof.py` passes 12 checks covering failure,
 retry, cancel, local-server visit, unchanged checkpoint return and ordinary
 jack-in. `network-pc.png` shows the actual game menu.
 
+Without a checkpoint, the visitor uses the title's remembered, unlocked
+folder, Cross and helper choices. This serves the same run-integrity / social
+expression tension: the social loop shows a starting loadout, using
+loadout-as-budget and variety rather than permanent power. It never creates
+a run, rolls a seed or grants the run's starting gift. The title and visit
+share one validator. `tools/online_fresh_proof.py` checks six real-game cases:
+Standard, Blade with Cross, Storm with All *, unlocked BeastOut, locked
+choices and invalid remembered values. All connect and return, keep fresh
+HP, leave the profile unchanged and create no checkpoint. The optional
+`CYBERWORLD_LOADOUT_TRACE` contains local numeric observations only.
+
 Trade Central and the production Arena are not enabled. The
 [trade contract](ONLINE_TRADE.md) records immutable eligibility, a native
 inventory capture accepted against six original editor scenarios, durable

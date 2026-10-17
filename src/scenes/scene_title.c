@@ -217,10 +217,11 @@ static void setup_open(void) {
 	 * run again as before) */
 	for (int r = ROW_GO - 1; r >= 0; --r) if (row_new(r)) S.row = r;
 	S.net = profile.last_net == RUN_ENDLESS && meta_endless_open() ? RUN_ENDLESS : RUN_SHORT;
-	S.folder = meta_folder_open(profile.last_folder) ? profile.last_folder : FOLDER_STANDARD;
-	S.cross = meta_cross_open(profile.last_cross) ? profile.last_cross : 0;
+	MetaLoadout loadout = meta_last_loadout();
+	S.folder = loadout.folder;
+	S.cross = loadout.cross;
 	S.threat = profile.last_threat <= meta_threat_open() ? profile.last_threat : meta_threat_open();
-	S.helpers = profile.last_helpers & ((1 << meta_helpers_shown()) - 1);
+	S.helpers = loadout.helpers;
 	/* (on BeastOut where it is the news: the Help row's only kind, the
 	 * helper a profile earns, issue #99) */
 	S.helper = row_new(ROW_HELPERS) && meta_beast_open() ? HELPER_BEAST : 0;

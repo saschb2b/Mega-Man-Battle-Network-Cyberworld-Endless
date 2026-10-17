@@ -46,6 +46,10 @@ bool meta_beast_open(void);
  * open. */
 int meta_helpers_shown(void);
 
+typedef struct { uint8_t folder, cross, helpers; } MetaLoadout;
+/* The remembered title loadout, restricted to options still unlocked. */
+MetaLoadout meta_last_loadout(void);
+
 /* The title's marks, BN6's own (its GetTitleScreenIconCount bits, drawn
  * with its sprites): each for a milestone here, never power. */
 enum {
