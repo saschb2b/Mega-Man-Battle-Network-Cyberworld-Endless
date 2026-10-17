@@ -539,6 +539,28 @@ panel reads the list as the screen shows it (sorted, sold-out ones kept
 as BN6 keeps them), so the order's chip under the cursor is the one it
 names.
 
+Sorted (issue #124, a player's ask: "the same options I have access to in
+my chip folders"). BN6's Order Service lists the Library's chips by ID
+alone, five rows a page, though its folder editor and the Chip Trader
+beside the counter sort theirs on START by seven keys (docs/SOURCES.md):
+a Library of a few runs is pages of paging for one chip. The list is
+BN6's own screen, so the sort is BN6's own too, in the clerk's box: START
+on his list goes on to the next key in the SORT window's order (ID,
+ABCDE, Code, Attack, Element, No., MB), each the way BN6 first sorts by
+it (Attack and No. down, the rest up, ties by ID), and SELECT turns it
+round, as BN6 does for a key picked twice; the cursor goes back to the
+top, BN6's select sound plays and his box says the sort over the buttons
+("By Attack,high first!", `place_lines.c`), where BN6's prompt had L/R
+and B alone. No. counts the copies of the entry, its chip in its code,
+in the folder and the Pack, as the second screen does. The sort is the
+session's: the list opens in it again, after a quit or at the next
+visit. Nothing about what the order costs or gives changes: one order a
+visit, at its price, the sure thing found sooner. As built
+(`src/world/order_sort.c`, docs/ROM_DATA.md): the entries BN6 found as
+the screen opened are sorted between frames by BN6's own keys, the
+screen makes its list again from them, BN6's own way back to the list
+runs his prompt, and a hook on the chat has ours said in its place.
+
 ### 7. A town that remembers
 
 - **The run**: people speak of the last guardian deleted, the act,
