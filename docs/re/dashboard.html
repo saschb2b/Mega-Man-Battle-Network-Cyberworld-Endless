@@ -112,7 +112,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     "oracle": "Pristine ROM, local mGBA cable pair; fresh scripted baseline per experiment"
   },
   "goal": {
-    "acceptance": "Restore a complete local cable pair and reproduce every state, flash, cable, scheduling and input observation through the reviewed replay horizons. The accepted delayed-input and inventory units remain bounded evidence, not production feature approval.",
+    "acceptance": "Carry a native chip into the local Practice pair and match the original selected-chip behavior before broadening delayed-input or production Arena acceptance. The completed local replay and inventory units remain bounded evidence.",
     "non_goals": [
       "This research view does not certify the whole epic.",
       "No current result proves production Arena, rollback or hardware suitability."
@@ -120,19 +120,19 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     "legal": "Player-owned ROM stays read-only; saves and states stay local. Controlled test peers only. No Tango source."
   },
   "phase": {
-    "current": 2,
-    "unit": "arena-cable-snapshot"
+    "current": 1,
+    "unit": "arena-carried-chip"
   },
   "stop_rule": [
     {
       "id": "specs",
       "met": false,
-      "evidence": "Snapshot acceptance is reviewed in arena-next-goal.md; comparator review precedes observer and restore code."
+      "evidence": "Local replay passed36 cases. The carried-chip unit now needs its independent original control and reviewed comparator."
     },
     {
       "id": "mutations",
       "met": false,
-      "evidence": "Five restore faults must be exercised; unavailable native paths remain INCONCLUSIVE."
+      "evidence": "All five replay faults were caught; carried-chip faults remain to be exercised."
     },
     {
       "id": "ledger",
@@ -147,7 +147,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "id": "ci",
       "met": false,
-      "evidence": "The preceding full test suite passed. New snapshot work will add its own verification."
+      "evidence": "Replay comparator guards pass12 tests; pinned one-command original-bound proof passes. Carried-chip checks are pending."
     }
   ],
   "units": [
@@ -186,16 +186,29 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "id": "arena-cable-snapshot",
       "name": "Complete cable pair snapshot and replay",
-      "phase": 2,
-      "status": "active",
-      "note": "Reviewed acceptance: arena-next-goal.md. Original-observer equivalence, real flash change and a nonidle scheduled cable event must be reached before restore is accepted."
+      "phase": 6,
+      "status": "passed",
+      "note": "2,823 full original records agree;36 exact1/4/8-frame replays at six exercised points, twice; all five faults caught. No masks. Nonidle cable and native flash reached. docs/ONLINE_REPLAY.md",
+      "specs": {
+        "pass": 36,
+        "fail": 0,
+        "inconclusive": 0
+      },
+      "mutations": {
+        "caught": 5,
+        "total": 5
+      }
     },
     {
       "id": "trade-stage",
       "name": "Checkpoint chip swap against native Trade",
       "phase": 2,
       "status": "stalled",
-      "specs": {"pass": 0, "fail": 0, "inconclusive": 1},
+      "specs": {
+        "pass": 0,
+        "fail": 0,
+        "inconclusive": 1
+      },
       "note": "Native peer exchange stopped after three connection variants stalled before completion: trade-stage-link-attempts.md. It remains open despite the separately accepted routine-level fallback."
     },
     {
@@ -203,7 +216,14 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "name": "Checkpoint swap against original chip routines",
       "phase": 4,
       "status": "active",
-      "note": "Four original controls repeat complete state, call returns and editor counts; source pins fixed in online_trade_stage_proof.py. Counter wrap reached. Candidate and mutation proof remain pending: trade-stage-routine-evidence.md."
+      "note": "Four pristine Take/Give controls repeat, including counter wrap. Independent unchanged-source reloads repeat; reviewed full-state control comparison adds no ignored bytes. Candidate/mutation proof is ongoing. docs/re/trade-stage-reload.md"
+    },
+    {
+      "id": "arena-carried-chip",
+      "name": "Carried native chip in Practice",
+      "phase": 1,
+      "status": "active",
+      "note": "Reviewed unit3 in arena-next-goal.md. Original selected-chip fixture first; no candidate acceptance yet."
     }
   ],
   "ledger": {
@@ -212,20 +232,20 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
   "masks": [],
   "open_questions": [
     {
-      "question": "Can a complete local cable pair rewind and replay exactly, including pending events and native flash changes?",
-      "settles_with": "Independent full-trace comparison, six reached snapshot points, three horizons, repeated restores and five exercised faults."
+      "question": "Does a carried native chip produce the same selection, hand, damage and RNG behavior as the original Practice fixture?",
+      "settles_with": "Independent native-chip observations, reviewed full-frame comparison and deliberate carried-chip faults."
     },
     {
-      "question": "Which Pack, ownership and Library bytes does a native chip exchange change?",
-      "settles_with": "Two repeated pristine native exchanges before accepting a checkpoint-only swap."
+      "question": "Can the original chip-routine result be staged into a real project checkpoint without changing unrelated bytes?",
+      "settles_with": "Pinned original Take/Give controls, protected-byte and fresh-reload comparisons, then separately proved journal integration."
     }
   ],
   "decisions": [],
   "not_reached": [
     "Carried loadouts and transplanted BN5 content in live PvP",
-    "Rollback and replay validation",
+    "Remote input prediction/correction and production rollback",
     "Physical device performance",
-    "Trade checkpoint durability and interrupted recovery"
+    "Trade integration with actual checkpoint installation and server recovery"
   ],
   "history": [
     {
@@ -251,6 +271,14 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "mutations_caught": 2,
       "mutations_total": 2,
       "note": "Delayed frame-input Practice unit accepted at four one-way delays. Snapshot and native swap research continue under separately reviewed goals."
+    },
+    {
+      "at": "2026-10-17T23:39:11.519271+00:00",
+      "specs_pass": 36,
+      "specs_total": 36,
+      "mutations_caught": 5,
+      "mutations_total": 5,
+      "note": "Complete local cable pair snapshot unit accepted. Five fresh controls agree;36 replays and five faults pass the pinned comparator. Carried-chip unit starts next."
     }
   ]
 }

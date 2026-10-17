@@ -15,7 +15,8 @@ dependency-free view of the current research, not evidence by itself.
 | Existing virus differential | `tests/xdiff/`, `tools/xdiff.py`, [DEVTOOLS.md](../DEVTOOLS.md) |
 | Link and snapshot experiments | [ONLINE_LINK.md](../ONLINE_LINK.md) |
 | Accepted Arena frame-input experiment | [Arena frame goal](arena-frame-goal.md), [results and limits](../ONLINE_FRAME.md), `tools/online_frame_compare.py` |
-| Current cable snapshot and carried-chip units | [Next Arena goals](arena-next-goal.md) |
+| Accepted local cable snapshot/replay | [Replay report](../ONLINE_REPLAY.md), [numeric evidence](arena-replay-evidence.json) |
+| Current carried-chip unit | [Next Arena goals](arena-next-goal.md) |
 | Accepted trade inventory and recovery design | [Trade inventory goal](trade-inventory-goal.md), [inventory evidence](trade-inventory-evidence.md), [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
 | Current checkpoint swap unit | [Native Trade and staged swap goal](trade-stage-goal.md) |
 
