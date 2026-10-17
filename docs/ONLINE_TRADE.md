@@ -89,6 +89,45 @@ make WERROR=1 build/host/test_online_trade_inventory
 build/host/test_online_trade_inventory
 ```
 
+## Implemented: durable server decisions
+
+`server/cyberworld_server/trade_store.py` is a separately tested storage
+component, not yet exposed through the presence protocol. SQLite FULL
+synchronous transactions hold both sides of each immutable offer. Each
+participant is identified by its server-specific public identity, opaque
+run identity, monotonic trade revision, checkpoint SHA-256 and one numeric
+chip/code entry. The confirmation
+digest binds both sides and the randomly generated transaction ID.
+
+Only the second distinct participant's valid PREPARED can commit. The
+commit and both spent-revision records become durable together, before
+any notification can be sent. Repeated preparations, cancellations and
+acknowledgements return the same decision. A committed decision cannot
+be aborted. Each identity and run remain reserved until that participant
+acknowledges installation. Even after both acknowledgements, the spent
+run revision and any older revision cannot fund another trade, including
+a copy imported with a different checkpoint hash or guest identity. This
+prevents replay by a conforming client, not deliberate forgery of run
+identities or revisions by a modified offline client.
+
+Every read/decision/write operation takes SQLite's writer reservation
+before reading, so two database connections cannot race a stale cancel
+against a commit. On exclusive service startup, recovery aborts open
+offers and preserves committed decisions. It first checks decisions,
+reservations and spent revisions for consistency; damaged history and
+unsupported database schemas fail closed without releasing a run.
+Unknown transaction IDs are
+errors, never evidence that the other side did not receive a chip.
+The decision history has no automatic deletion policy yet. It must be
+backed up with the server identity key before enabling live trades.
+
+The ROM-free suite exercises duplicate messages, mismatched terms,
+unauthorized access, reservation conflicts, cancellation at each
+precommit boundary, acknowledgement, copied runs and stale revision reuse,
+corrupted history, incompatible schemas, injected storage failure and process death after either preparation. This proves
+the coordinator's storage behavior; it does not prove a client wrote a
+prepared checkpoint, or replace the client recovery tests below.
+
 ## Required before a swap can modify a checkpoint
 
 Eligibility is not a commit. The full transaction needs one immutable
