@@ -374,13 +374,21 @@ build/host/online-replay-observer: tools/online_replay_observer.c $(ONLINE_REPLA
 
 online-replay-observer: build/host/online-replay-observer
 
+build/host/online-replay-micro-observer: tools/online_replay_micro_observer.c tools/online_replay_execute.c tools/online_replay_execute.h $(ONLINE_REPLAY_COMMON_SRCS) tools/online_replay_observe.h tools/online_frame_pair_internal.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include tools/online_replay_micro_observer.c tools/online_replay_execute.c $(ONLINE_REPLAY_COMMON_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-replay-micro-observer: build/host/online-replay-micro-observer
+
 server:
 	python3 server/build.py
 
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: online-link online-link-bn6 online-frame online-replay-observer server server-test
+.PHONY: online-link online-link-bn6 online-frame online-replay-observer online-replay-micro-observer server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)

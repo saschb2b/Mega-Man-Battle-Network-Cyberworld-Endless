@@ -1,0 +1,214 @@
+{
+  "local_evidence": ".build/online-replay/micro-_u3dqcy8",
+  "target": {
+    "rom_sha256": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "boot_sha256": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6",
+    "linked_library_sha256": "5b02195c77b74ffa6622952706025bc7e5a77bd5d14d9306e0bbc84ab789f0cd"
+  },
+  "source_hashes": {
+    "tools/online_replay_observe.c": "5c4dce38d643a230340c0fb6f57e56fad182cf36aecca84ca39b0afbe6add8a0",
+    "tools/online_replay_observe.h": "0ce82f9e625ca9102344f3421eccfb69ce8913130c2c77430a8fc7d22b6ae9fe",
+    "tools/online_replay_micro_observer.c": "062f4574cccf74e1a36f189ce764c5dbc2b1029e2eb2f49b768fdb9447fb7a65",
+    "tools/online_replay_execute.c": "8fba507ff54395600011e4eee4af3679a847c98459b251e0e6709b3a0b8d4244",
+    "tools/online_replay_execute.h": "56a9b89b3c1a2df077b66c88b5e71aa7e19db85eecf98016e6779056b9ff8745",
+    "tools/online_frame_pair.c": "eb483a3a0dbe5d78a4717dbbcfa730b0e5438c0ce2fcf136f9cdce8bc0ec9ed4",
+    "tools/online_frame_pair_internal.h": "eb146b21b9b62b5bc5f6045c8ddd922dc57a8ff8359671ae6c9bf39f67750432",
+    "tools/online_frame_pair.h": "fa5fe070e4043ff130eba017ab53e4d74af3474588f2676f79b711c3108c6a71",
+    "tools/online_frame_wire.c": "c29d8d1ca06ccaa586e10939432710e77b8ce02d05e3dd0313cb8612b04097f2",
+    "tools/online_link_script.c": "bbca6b2079acc64f1fdd5b1f78fbca328f222b9df0fe9e358529d638c359eaf8",
+    "tools/online_replay_compare.py": "969543efbfd76c24e7539fe923e5f017f07ee974f4d35d0d1455b48ac7894591",
+    "tests/test_online_replay_compare.py": "f35d3270a9382cf11800592dbaf7ababc2b6f866119d983f2bdbc7f687fad7ad",
+    "src/core/sha256.c": "a8501a17522241e931d01dcec699170373db50339a51c701c09abbf5a8b94b24",
+    "src/core/sha256.h": "d82bef532dd873452a24414e098a036c0d43b3661d68fea9a9f01dd7da44ad73"
+  },
+  "binary_sha256": "32608490e8285062555a212b34c85b39505faa33a149037eb2317a5b414caff8",
+  "baseline_evidence_sha256": "d6244c177a569f96bf70c31470b5dfe72238c246c643c189e25254f89c9f7e0f",
+  "baseline_full_trace_sha256": "030a1976e81a4b730d378bf030da9dd465945b651779f980dec937f14ea761c0",
+  "source_before": {
+    "rom": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "state": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6"
+  },
+  "verdict": "PASS",
+  "original_active_timers": 1433,
+  "full_records": 2823,
+  "points": {
+    "flash-change": 295,
+    "custom": 813,
+    "held-charge": 1151,
+    "before-release": 1252,
+    "after-damage": 2527,
+    "nonidle-cable": 1150
+  },
+  "cable_boundary": {
+    "cursor": {
+      "stage": "check-targets",
+      "frame": 1150,
+      "round": 7333,
+      "targets": [
+        2010,
+        2010
+      ],
+      "relative": 192,
+      "battle": true,
+      "keys": [
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ]
+    },
+    "state": {
+      "frame": 1150,
+      "hash_algorithm": "sha256",
+      "cores": [
+        {
+          "state": {
+            "bytes": 397312,
+            "sha256": "8792598f4f1443a7247fd230f7edab40206d6d2550c1ddaa519210ef86be8e82"
+          },
+          "flash": {
+            "bytes": 32768,
+            "sha256": "be8c944010463ba93cafe566515f891562c93ac17c1151056b67435e2cb89c05"
+          }
+        },
+        {
+          "state": {
+            "bytes": 397312,
+            "sha256": "1e8fc1cc8395ffc107e28c5de7e75aecd972e4d7147896b3188589ecfc465a2d"
+          },
+          "flash": {
+            "bytes": 32768,
+            "sha256": "be8c944010463ba93cafe566515f891562c93ac17c1151056b67435e2cb89c05"
+          }
+        }
+      ],
+      "cable": {
+        "attached": 2,
+        "phase": 1,
+        "cycles": 6075,
+        "attached_multi": 2,
+        "attached_normal": 0,
+        "waiting": 0,
+        "transfers": 4588,
+        "running": 1,
+        "multi_recv": [
+          62716,
+          62716,
+          65535,
+          65535
+        ],
+        "normal_recv": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "nodes": [
+          {
+            "credit": 0,
+            "next_event": 0,
+            "event_diff": 1706,
+            "mode": 2,
+            "normal_so": true,
+            "transfer_finished": true,
+            "siocnt": 24715,
+            "rcnt": 1,
+            "scheduled": true,
+            "event_delay": -2,
+            "event_priority": 128
+          },
+          {
+            "credit": -246362,
+            "next_event": -100982652,
+            "event_diff": 1,
+            "mode": 2,
+            "normal_so": true,
+            "transfer_finished": true,
+            "siocnt": 24607,
+            "rcnt": 5,
+            "scheduled": true,
+            "event_delay": -1,
+            "event_priority": 128
+          }
+        ]
+      },
+      "pair": {
+        "frame": 1150,
+        "start_frames": [
+          1817,
+          1817
+        ],
+        "traced_frames": [
+          2009,
+          2009
+        ],
+        "entry_step": 23,
+        "entry_frame": 0
+      },
+      "samples": [
+        [
+          0,
+          0,
+          1,
+          6553700,
+          33882626,
+          2009,
+          135796776,
+          67111940
+        ],
+        [
+          0,
+          1,
+          1,
+          6553700,
+          33882626,
+          2009,
+          135796776,
+          67111940
+        ]
+      ],
+      "inputs": [
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          0
+        ]
+      ]
+    }
+  },
+  "source_after": {
+    "rom": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "state": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6"
+  },
+  "trace_sha256": {
+    "micro-b.jsonl": "030a1976e81a4b730d378bf030da9dd465945b651779f980dec937f14ea761c0",
+    "micro-a-cable.json": "425a6531735c5a6ceddaa1ac4d7489088f07b9045d2f7e1f25fe7a32c9f2cd4d",
+    "micro-a.jsonl": "030a1976e81a4b730d378bf030da9dd465945b651779f980dec937f14ea761c0",
+    "micro-b.csv": "508d32c23ab5526511dca2c87eb419cd6cff30b8d18a4ee9906ee0ae26ea8d32",
+    "micro-b-cable.json": "425a6531735c5a6ceddaa1ac4d7489088f07b9045d2f7e1f25fe7a32c9f2cd4d",
+    "micro-a.csv": "508d32c23ab5526511dca2c87eb419cd6cff30b8d18a4ee9906ee0ae26ea8d32"
+  }
+}
