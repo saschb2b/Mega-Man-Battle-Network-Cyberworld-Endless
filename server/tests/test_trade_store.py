@@ -121,6 +121,20 @@ class TradeStoreTests(unittest.TestCase):
         for side in (replace(self.left, run_id=b"x" * 16), replace(self.left, revision=1)):
             with self.subTest(side=side):
                 self.assertNotEqual(trade.digest, replace(trade, left=side).digest)
+        self.assertNotEqual(trade.digest, replace(trade, server=b"s" * 32).digest)
+
+    def test_server_identity_persists_and_changed_identity_cannot_read_history(self):
+        trade = self.create()
+        self.restart()
+        self.assertEqual(self.store.server_identity, trade.server)
+        with self.assertRaisesRegex(TradeError, "server identity"):
+            TradeStore(self.path, b"s" * 32)
+        self.assertEqual(self.store.status(trade.transaction, self.left.identity).digest, trade.digest)
+        fresh = TradeStore(self.path / "explicit", b"s" * 32)
+        try:
+            self.assertEqual(fresh.server_identity, b"s" * 32)
+        finally:
+            fresh.close()
 
     def test_unsupported_or_damaged_schema_is_preserved_and_refused(self):
         mutations = ("PRAGMA user_version=2", "PRAGMA user_version=0",

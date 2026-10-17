@@ -17,6 +17,7 @@ import threading
 OFFERED, COMMITTED, ABORTED = 0, 1, 2
 
 _SCHEMA = (
+    "CREATE TABLE service (id INTEGER PRIMARY KEY CHECK (id = 1), identity BLOB NOT NULL)",
     """CREATE TABLE trades (
         id BLOB PRIMARY KEY, left_id BLOB NOT NULL, left_checkpoint BLOB NOT NULL,
         left_chip INTEGER NOT NULL, left_run BLOB NOT NULL, left_revision INTEGER NOT NULL,
@@ -70,10 +71,11 @@ class Decision:
     state: int
     prepared: int
     applied: int
+    server: bytes
 
     @property
     def digest(self):
-        data = b"Cyberworld trade 1\0" + self.transaction
+        data = b"Cyberworld trade 1\0" + self.server + self.transaction
         for side in (self.left, self.right):
             data += side.identity + side.run_id + struct.pack("!I", side.revision)
             data += side.checkpoint + struct.pack("!H", side.chip)
@@ -96,7 +98,10 @@ class TradeStore:
     No automatic history deletion: unknown is never interpreted as aborted.
     """
 
-    def __init__(self, directory):
+    def __init__(self, directory, server_identity=None):
+        if server_identity is not None and (not isinstance(server_identity, bytes) or
+                len(server_identity) != 32 or not any(server_identity)):
+            raise TradeError("Invalid server identity")
         root = Path(directory)
         root.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.lock = threading.RLock()
@@ -104,22 +109,29 @@ class TradeStore:
         try:
             self.db.execute("PRAGMA journal_mode=WAL")
             self.db.execute("PRAGMA synchronous=FULL")
-            self._initialize()
+            self._initialize(server_identity)
         except BaseException:
             self.db.close()
             raise
 
-    def _initialize(self):
+    def _initialize(self, server_identity):
         with self._transaction():
             version = self.db.execute("PRAGMA user_version").fetchone()[0]
             schema = self.db.execute("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL").fetchall()
             if version == 0 and not schema:
                 for statement in _SCHEMA:
                     self.db.execute(statement)
+                self.db.execute("INSERT INTO service VALUES (1, ?)",
+                                (server_identity or secrets.token_bytes(32),))
                 self.db.execute("PRAGMA user_version=1")
             elif version != 1 or {" ".join(row[0].split()) for row in schema} != {
                     " ".join(statement.split()) for statement in _SCHEMA}:
                 raise TradeError("Unsupported trade history schema; keep the existing database")
+            rows = self.db.execute("SELECT identity FROM service WHERE id=1").fetchall()
+            if (len(rows) != 1 or not isinstance(rows[0][0], bytes) or len(rows[0][0]) != 32 or
+                    not any(rows[0][0]) or (server_identity is not None and rows[0][0] != server_identity)):
+                raise TradeError("Changed or missing server identity; restore the server's decision history")
+            self.server_identity = rows[0][0]
 
     def close(self):
         with self.lock:
@@ -144,7 +156,7 @@ class TradeStore:
         row = self.db.execute("SELECT * FROM trades WHERE id=?", (transaction,)).fetchone()
         if row is None:
             raise TradeError("Unknown transaction; restore the server's decision history")
-        decision = Decision(row[0], Side(*row[1:6]), Side(*row[6:11]), *row[11:])
+        decision = Decision(row[0], Side(*row[1:6]), Side(*row[6:11]), *row[11:], self.server_identity)
         decision.left.validate()
         decision.right.validate()
         if (type(decision.state) is not int or decision.state not in (OFFERED, COMMITTED, ABORTED) or

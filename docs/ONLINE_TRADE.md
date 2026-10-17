@@ -97,7 +97,9 @@ synchronous transactions hold both sides of each immutable offer. Each
 participant is identified by its server-specific public identity, opaque
 run identity, monotonic trade revision, checkpoint SHA-256 and one numeric
 chip/code entry. The confirmation
-digest binds both sides and the randomly generated transaction ID.
+digest binds both sides, the persistent server identity and the randomly
+generated transaction ID. Opening existing history with a changed server
+identity is refused; a new database cannot silently answer for an old one.
 
 Only the second distinct participant's valid PREPARED can commit. The
 commit and both spent-revision records become durable together, before
