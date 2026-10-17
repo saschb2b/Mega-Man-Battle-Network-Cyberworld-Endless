@@ -273,7 +273,7 @@ predict internet or handheld performance.
 | --- | --- | --- |
 | Transport | Versioned WebSocket server, native platform backends and browser WebSocket, bounded polling, ping/pong, TLS certificate/hostname verification | Measure and test the implemented backends on every target's real hardware; see the server README's verification matrix |
 | Players as NPCs | Sixteen native games, two full channels, interpolated NPC coordinates and identity labels | Hardware performance, adverse internet conditions and longer soak tests |
-| Link cable | Actual BN6 Practice completed in one process and in two separate workers; all 1,433 active frames agree; injected peer loss and corruption detected; 50/100/150 ms serial delay measured | Raw serial waiting is too slow for real-time play; frame-level netplay, complete delayed battles and rollback remain unproven |
+| Link cable | Original Practice repeated; delayed frame inputs complete at 0/50/100/150 ms with 2,822 full replica frames and 1,433 original active timers agreeing; corruption and peer loss detected ([limits](ONLINE_FRAME.md)) | Two cores per client and three buffered frames; production integration, carried loadouts, rollback and hardware performance remain unproven |
 | Carried MegaMan | Actual checkpoint loadout borrowed and restored through map reconstruction; leave, disconnect and process shutdown preserve checkpoint files | Broader device and power-loss testing; no Arena result or trade mutation is enabled |
 | World from seed | Two game instances build identical geometry/tile hashes from server seed without sending assets | Final Square layout, generator-version migration and all platform determinism |
 
@@ -300,11 +300,20 @@ navigation; `tools/online_network_proof.py` checks those paths. Rapid
 Inspect reopen requests receive a fresh response instead of waiting
 indefinitely behind the former card-specific throttle.
 
+Between acts, R at Lan's PC opens Jack in / Network / Cancel. A visit
+waits for a fresh checkpoint; an observed write failure stays at the PC
+with a retry. `tools/online_pc_proof.py` passes 12 checks covering failure,
+retry, cancel, local-server visit, unchanged checkpoint return and ordinary
+jack-in. `network-pc.png` shows the actual game menu.
+
 Trade Central and the production Arena are not enabled. The
-[trade contract](ONLINE_TRADE.md) records implemented immutable eligibility
-and durable server decisions, and the client recovery still required.
-[Reviewed research goals](re/README.md) separately gate native inventory
-capture and delayed-input Practice battles against the original game.
-Home-PC entry, full trade integration, carried-loadout battles, rollback
-and remaining physical-device checks are ongoing work. This draft does
-not yet close epic #120 or publish a game release.
+[trade contract](ONLINE_TRADE.md) records immutable eligibility, a native
+inventory capture accepted against six original editor scenarios, durable
+server decisions and the client recovery still required. The
+[delayed Practice experiment](ONLINE_FRAME.md) completes its four-delay
+matrix, with explicit two-core and observation limits.
+[Reviewed research goals](re/README.md) now gate native chip exchange,
+private checkpoint mutation and complete cable snapshot/replay. Full trade
+integration, carried-loadout battles, rollback and remaining physical-device
+checks are ongoing work. This draft does not yet close epic #120 or
+publish a game release.

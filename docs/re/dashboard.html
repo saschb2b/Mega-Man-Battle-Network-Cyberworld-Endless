@@ -101,7 +101,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
 <script type="application/json" id="re-state">
 {
   "schema": "re-state/1",
-  "generated_at": "2026-10-17T22:51:47.847458+00:00",
+  "generated_at": "2026-10-17T23:00:40.736903+00:00",
   "generated_by": "Codex",
   "project": "Cyberworld Endless: online research",
   "target": {
@@ -112,7 +112,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     "oracle": "Pristine ROM, local mGBA cable pair; fresh scripted baseline per experiment"
   },
   "goal": {
-    "acceptance": "For Practice NetBattle, frame-input replication must match a fresh original local cable battle throughout the declared input scripts and complete at every tested delay. The comparator must reject deliberate divergence and incomplete evidence.",
+    "acceptance": "Restore a complete local cable pair and reproduce every state, flash, cable, scheduling and input observation through the reviewed replay horizons. The accepted delayed-input and inventory units remain bounded evidence, not production feature approval.",
     "non_goals": [
       "This research view does not certify the whole epic.",
       "No current result proves production Arena, rollback or hardware suitability."
@@ -120,43 +120,52 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     "legal": "Player-owned ROM stays read-only; saves and states stay local. Controlled test peers only. No Tango source."
   },
   "phase": {
-    "current": 5,
-    "unit": "arena-frame-input"
+    "current": 2,
+    "unit": "arena-cable-snapshot"
   },
   "stop_rule": [
     {
       "id": "specs",
       "met": false,
-      "evidence": "Reviewed goal/comparator committed; delayed subject is still being checked against the original."
+      "evidence": "Snapshot acceptance is reviewed in arena-next-goal.md; comparator review precedes observer and restore code."
     },
     {
       "id": "mutations",
       "met": false,
-      "evidence": "Comparator guard tests pass; complete real-input mutation runs are still pending."
+      "evidence": "Five restore faults must be exercised; unavailable native paths remain INCONCLUSIVE."
     },
     {
       "id": "ledger",
       "met": true,
-      "evidence": "This Arena unit adds no ROM location; named existing fields stay in docs/ROM_DATA.md."
+      "evidence": "Existing address and source ledgers remain authoritative; accepted reports link exact observations."
     },
     {
       "id": "masks",
       "met": true,
-      "evidence": "No masks or logical observation differences are allowed."
+      "evidence": "No state, flash, cable or scheduling masks are allowed."
     },
     {
       "id": "ci",
       "met": false,
-      "evidence": "Comparator commands are added to build.py test; current full-suite verification is pending."
+      "evidence": "The preceding full test suite passed. New snapshot work will add its own verification."
     }
   ],
   "units": [
     {
       "id": "arena-frame-input",
       "name": "Frame-input Practice battle",
-      "phase": 5,
-      "status": "active",
-      "note": "Original repeats agree through 1,433 active timers. The delayed subject is not accepted yet; first timing differences are being corrected against the fixed oracle."
+      "phase": 6,
+      "status": "passed",
+      "note": "0/50/100/150 ms: 2,822 matching full replica frames, 1,433 original active timers and final results. Corruption and peer loss detected. Two cores per client and three buffered frames. docs/ONLINE_FRAME.md",
+      "specs": {
+        "pass": 4,
+        "fail": 0,
+        "inconclusive": 0
+      },
+      "mutations": {
+        "caught": 2,
+        "total": 2
+      }
     },
     {
       "id": "trade-pack",
@@ -175,11 +184,18 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       }
     },
     {
-      "id": "arena-rollback",
-      "name": "Rollback including cable state",
-      "phase": 0,
-      "status": "planned",
-      "note": "Requires a new acceptance and complete snapshot of cable scheduling."
+      "id": "arena-cable-snapshot",
+      "name": "Complete cable pair snapshot and replay",
+      "phase": 2,
+      "status": "active",
+      "note": "Reviewed acceptance: arena-next-goal.md. Original-observer equivalence, real flash change and a nonidle scheduled cable event must be reached before restore is accepted."
+    },
+    {
+      "id": "trade-stage",
+      "name": "Checkpoint chip swap against native Trade",
+      "phase": 2,
+      "status": "active",
+      "note": "Reviewed acceptance: trade-stage-goal.md. Establish native chip exchange effects before mutating a private checkpoint."
     }
   ],
   "ledger": {
@@ -188,8 +204,12 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
   "masks": [],
   "open_questions": [
     {
-      "question": "Can delayed frame-input replicas finish a Practice fight identical to an original local cable pair?",
-      "settles_with": "Fresh original comparison at 0, 50, 100 and 150 ms with mutation checks."
+      "question": "Can a complete local cable pair rewind and replay exactly, including pending events and native flash changes?",
+      "settles_with": "Independent full-trace comparison, six reached snapshot points, three horizons, repeated restores and five exercised faults."
+    },
+    {
+      "question": "Which Pack, ownership and Library bytes does a native chip exchange change?",
+      "settles_with": "Two repeated pristine native exchanges before accepting a checkpoint-only swap."
     }
   ],
   "decisions": [],
@@ -215,6 +235,14 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "mutations_caught": 6,
       "mutations_total": 6,
       "note": "Trade inventory reader accepted against the original editor, with no masks. Checkpoint mutation and durability remain separate work."
+    },
+    {
+      "at": "2026-10-17T23:00:40.736903+00:00",
+      "specs_pass": 4,
+      "specs_total": 4,
+      "mutations_caught": 2,
+      "mutations_total": 2,
+      "note": "Delayed frame-input Practice unit accepted at four one-way delays. Snapshot and native swap research continue under separately reviewed goals."
     }
   ]
 }

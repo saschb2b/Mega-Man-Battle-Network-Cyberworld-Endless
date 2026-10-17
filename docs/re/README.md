@@ -14,8 +14,10 @@ dependency-free view of the current research, not evidence by itself.
 | Free space and write claims | [EMULATION.md](../EMULATION.md), `src/emu/free_space.h`, `claims.h` |
 | Existing virus differential | `tests/xdiff/`, `tools/xdiff.py`, [DEVTOOLS.md](../DEVTOOLS.md) |
 | Link and snapshot experiments | [ONLINE_LINK.md](../ONLINE_LINK.md) |
-| Current Arena frame-input investigation | [Arena frame goal](arena-frame-goal.md), `tools/online_frame_compare.py` |
-| Trade inventory and recovery design | [Trade inventory goal](trade-inventory-goal.md), [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
+| Accepted Arena frame-input experiment | [Arena frame goal](arena-frame-goal.md), [results and limits](../ONLINE_FRAME.md), `tools/online_frame_compare.py` |
+| Current cable snapshot and carried-chip units | [Next Arena goals](arena-next-goal.md) |
+| Accepted trade inventory and recovery design | [Trade inventory goal](trade-inventory-goal.md), [inventory evidence](trade-inventory-evidence.md), [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
+| Current checkpoint swap unit | [Native Trade and staged swap goal](trade-stage-goal.md) |
 
 New work starts with a sentence naming the unit, observable, input/state
 coverage, original-game oracle and allowed differences. Pin its ROM hash
@@ -45,11 +47,13 @@ contacts an original game's online service nor touches other players'
 accounts. No Tango implementation is an input to this MIT codebase.
 
 Raw serial delivery with injected internet-scale delay is a recorded
-negative result, not a completed delayed fight. The next experiment keeps
+negative result, not a completed delayed fight. The accepted frame-input experiment keeps
 the cable inside each local pair of cores and sends frame-numbered inputs.
-Even a passing result would not prove carried-loadout exchange, production
-matchmaking, rollback, replay integrity or handheld performance. Those
-remain separate units with their own acceptance criteria.
+It completes at 0/50/100/150 ms of one-way delay; see its report for the
+three-frame buffer and observation limits. This does not prove
+carried-loadout exchange, production matchmaking, rollback, replay
+integrity or handheld performance. Those remain separate units with
+their own acceptance criteria.
 
 ## Skill provenance
 
