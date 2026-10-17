@@ -10,6 +10,7 @@
 
 #include "online_trade_files.h"
 #include "online_trade_journal.h"
+#include "online_trade_history.h"
 #include "online_trade_record.h"
 #include "sha256.h"
 
@@ -223,6 +224,55 @@ static void record_integrity(void) {
 	erase(f.root);
 }
 
+static void history_checks(void) {
+	Fixture f;
+	CHECK(fixture(&f));
+	uint8_t namespace_id[16] = { 21 }, actual[16], initial[ONLINE_TRADE_RECORD_INITIAL];
+	CHECK(online_trade_history_namespace(f.root, actual) == TRADE_HISTORY_MISSING);
+	CHECK(online_trade_history_create(f.root, namespace_id));
+	CHECK(online_trade_history_namespace(f.root, actual) == TRADE_HISTORY_OK && !memcmp(actual, namespace_id, 16));
+	namespace_id[0] ^= 1;
+	CHECK(!online_trade_history_create(f.root, namespace_id));
+	CHECK(online_trade_record_new(f.terms.side[0].run_id, initial));
+	CHECK(online_trade_history_check(f.root, 17, initial, sizeof initial) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_remember(f.root, 17, initial, sizeof initial) == TRADE_HISTORY_OK);
+	size_t n, second_n, divergent_n;
+	uint8_t *one = online_trade_record_append(initial, sizeof initial, &f.terms, 0, f.source, &n);
+	CHECK(one != NULL);
+	CHECK(online_trade_history_remember(f.root, 17, one, n) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_check(f.root, 17, initial, sizeof initial) == TRADE_HISTORY_STALE);
+	CHECK(online_trade_history_check(f.root, 18, one, n) == TRADE_HISTORY_STALE);
+	OnlineTradeTerms changed = f.terms;
+	++changed.transaction[0];
+	uint8_t *divergent = online_trade_record_append(initial, sizeof initial, &changed, 0, f.source, &divergent_n);
+	CHECK(online_trade_history_remember(f.root, 17, divergent, divergent_n) == TRADE_HISTORY_STALE);
+	++changed.side[0].revision;
+	uint8_t *two = online_trade_record_append(one, n, &changed, 0, f.source, &second_n);
+	CHECK(online_trade_history_check(f.root, 17, two, second_n) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_remember(f.root, 17, two, second_n) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_check(f.root, 17, one, n) == TRADE_HISTORY_STALE);
+	CHECK(online_trade_history_legacy(f.root, 17, initial) == TRADE_HISTORY_STALE);
+	free(one); free(two); free(divergent);
+	uint8_t legacy[ONLINE_TRADE_RECORD_INITIAL];
+	CHECK(online_trade_history_legacy(f.root, 99, legacy) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_legacy(f.root, 99, initial) == TRADE_HISTORY_OK && !memcmp(legacy, initial, sizeof initial));
+	CHECK(online_trade_record_read(legacy, sizeof legacy, f.terms.side[0].run_id, NULL));
+	one = online_trade_record_append(legacy, sizeof legacy, &f.terms, 0, f.source, &n);
+	CHECK(online_trade_history_remember(f.root, 99, one, n) == TRADE_HISTORY_OK);
+	CHECK(online_trade_history_legacy(f.root, 99, initial) == TRADE_HISTORY_STALE);
+	CHECK(online_trade_history_check(f.root, 99, legacy, sizeof legacy) == TRADE_HISTORY_STALE);
+	free(one);
+	CHECK(put(f.root, "trade.history", original, sizeof original));
+	CHECK(online_trade_history_namespace(f.root, actual) == TRADE_HISTORY_BROKEN);
+	CHECK(!online_trade_history_create(f.root, namespace_id));
+	unchanged(f.current, f.source);
+	erase(f.root);
+	CHECK(fixture(&f));
+	CHECK(put(f.root, "trade.history.tmp", original, sizeof original));
+	CHECK(!online_trade_history_create(f.root, namespace_id));
+	erase(f.root);
+}
+
 #ifdef CW_TRADE_FILES_TEST
 static unsigned boundary, target;
 static bool crash;
@@ -235,22 +285,72 @@ static bool fault(const char *name) {
 	return false;
 }
 
-typedef enum { PREPARE, COMMIT, ACK, CERTIFY } Operation;
+typedef enum { PREPARE, COMMIT, ACK, CERTIFY, HISTORY, LEGACY, CREATE } Operation;
+static OnlineTradeHistoryResult remember_trade(const Fixture *f) {
+	size_t n = 0, receipt_n = 0;
+	uint8_t *initial = get(f->current, "run.trade", &n);
+	uint8_t *receipt = online_trade_record_append(initial, n, &f->terms, 0, f->source, &receipt_n);
+	OnlineTradeHistoryResult result = online_trade_history_remember(f->root, 17, receipt, receipt_n);
+	free(initial); free(receipt);
+	return result;
+}
+
 static void operate(Fixture *f, Operation op) {
 	if (op == PREPARE) (void)online_trade_journal_prepare(f->root, &f->terms, 0, &change, 1);
 	if (op == COMMIT) (void)online_trade_journal_decide(f->root, &f->terms, true);
 	if (op == ACK) (void)online_trade_journal_acknowledged(f->root, &f->terms);
 	if (op == CERTIFY) (void)online_trade_journal_recover(f->root, NULL);
+	if (op == HISTORY) (void)remember_trade(f);
+	if (op == LEGACY) {
+		uint8_t initial[ONLINE_TRADE_RECORD_INITIAL];
+		(void)online_trade_history_legacy(f->root, 99, initial);
+	}
+	if (op == CREATE) {
+		uint8_t namespace_id[16] = { 21 };
+		(void)online_trade_history_create(f->root, namespace_id);
+	}
 }
 
 static void ready(Fixture *f, Operation op) {
 	CHECK(fixture(f));
-	if (op != PREPARE) prepared(f);
+	if (op == COMMIT || op == ACK || op == CERTIFY) prepared(f);
+	if (op == HISTORY || op == LEGACY) {
+		uint8_t namespace_id[16] = { 21 };
+		CHECK(online_trade_history_create(f->root, namespace_id));
+	}
 	if (op == ACK) CHECK(online_trade_journal_decide(f->root, &f->terms, true) == TRADE_JOURNAL_APPLIED);
+}
+
+static void recovered_history(Fixture *f, Operation op) {
+	CHECK(online_trade_journal_recover(f->root, NULL) == TRADE_JOURNAL_CLEAR);
+	if (op == HISTORY) {
+		CHECK(remember_trade(f) == TRADE_HISTORY_OK);
+		size_t n = 0;
+		uint8_t *initial = get(f->current, "run.trade", &n);
+		CHECK(online_trade_history_check(f->root, 17, initial, n) == TRADE_HISTORY_STALE);
+		free(initial);
+	} else if (op == LEGACY) {
+		uint8_t a[ONLINE_TRADE_RECORD_INITIAL], b[ONLINE_TRADE_RECORD_INITIAL];
+		CHECK(online_trade_history_legacy(f->root, 99, a) == TRADE_HISTORY_OK);
+		CHECK(online_trade_history_legacy(f->root, 99, b) == TRADE_HISTORY_OK && !memcmp(a, b, sizeof a));
+	} else {
+		uint8_t namespace_id[16] = { 21 }, actual[16];
+		OnlineTradeHistoryResult result = online_trade_history_namespace(f->root, actual);
+		CHECK(result == TRADE_HISTORY_MISSING || result == TRADE_HISTORY_OK);
+		/* Interrupted first creation may require inspection of its .tmp;
+		 * never silently replace a namespace that was actually installed. */
+		if (result == TRADE_HISTORY_OK) {
+			CHECK(!memcmp(namespace_id, actual, 16));
+			CHECK(online_trade_history_create(f->root, namespace_id));
+		}
+	}
+	unchanged(f->current, f->source);
+	unchanged(f->undo, f->undo_hash);
 }
 
 static void recovered(Fixture *f, Operation op) {
 	OnlineTradeJournalState state = online_trade_journal_recover(f->root, NULL);
+	if (op == HISTORY || op == LEGACY || op == CREATE) { recovered_history(f, op); return; }
 	if (op == PREPARE || op == CERTIFY) {
 		CHECK(state == TRADE_JOURNAL_CLEAR || state == TRADE_JOURNAL_PREPARED);
 		unchanged(f->current, f->source);
@@ -401,10 +501,10 @@ static void fault_sweep(Operation op) {
 int test_online_trade_journal(void) {
 	failures = 0;
 	CHECK(trade_files_supported());
-	commit_and_retry(); abort_and_invalid_source(); malformed_storage(); record_integrity();
+	commit_and_retry(); abort_and_invalid_source(); malformed_storage(); record_integrity(); history_checks();
 #ifdef CW_TRADE_FILES_TEST
 	source_is_durable(); visible_is_not_durable(); damaged_committed_stage(); damaged_write_readback();
-	fault_sweep(PREPARE); fault_sweep(COMMIT); fault_sweep(ACK); fault_sweep(CERTIFY);
+	fault_sweep(PREPARE); fault_sweep(COMMIT); fault_sweep(ACK); fault_sweep(CERTIFY); fault_sweep(HISTORY); fault_sweep(LEGACY); fault_sweep(CREATE);
 #endif
 	printf("trade journal: %s\n", failures ? "FAILED" : "passed");
 	return failures;

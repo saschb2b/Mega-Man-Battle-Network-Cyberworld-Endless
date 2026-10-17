@@ -70,6 +70,20 @@ uint8_t *online_trade_record_append(const uint8_t *prior, size_t n, const Online
 	return out;
 }
 
+bool online_trade_record_history(const uint8_t *data, size_t n, uint32_t revision, uint8_t out[32]) {
+	uint32_t count;
+	if (!out || !online_trade_record_read(data, n, NULL, &count) || revision > count) return false;
+	uint8_t encoded[4];
+	put_revision(encoded, revision);
+	CwSha256 hash;
+	cw_sha256_init(&hash);
+	cw_sha256_update(&hash, data, HEADER_BYTES - 4);
+	cw_sha256_update(&hash, encoded, sizeof encoded);
+	cw_sha256_update(&hash, data + HEADER_BYTES, revision * RECEIPT_BYTES);
+	cw_sha256_final(&hash, out);
+	return true;
+}
+
 bool online_trade_record_has(const uint8_t *data, size_t n, const OnlineTradeTerms *terms) {
 	uint32_t revision;
 	uint8_t encoded[ONLINE_TRADE_TERMS_BYTES];

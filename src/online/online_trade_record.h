@@ -10,6 +10,8 @@
 
 bool online_trade_record_new(const uint8_t run_id[16], uint8_t out[ONLINE_TRADE_RECORD_INITIAL]);
 bool online_trade_record_read(const uint8_t *data, size_t n, uint8_t run_id[16], uint32_t *revision);
+/* Digest of a validated prefix, independent of later appended receipts. */
+bool online_trade_record_history(const uint8_t *data, size_t n, uint32_t revision, uint8_t out[32]);
 bool online_trade_record_has(const uint8_t *data, size_t n, const OnlineTradeTerms *terms);
 /* A new malloc'd record; prior is unchanged. Only after durable server
  * COMMITTED may a checkpoint carrying this receipt become playable. */

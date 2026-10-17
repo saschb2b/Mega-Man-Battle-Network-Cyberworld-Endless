@@ -218,7 +218,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
 	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
-	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c
+	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -431,7 +431,7 @@ build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
 	@mkdir -p $(@D)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 
-TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c \
+TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c src/online/online_trade_history.c \
 	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
 build/host/test_online_trade_journal: $(TRADE_JOURNAL_TEST_SRCS) src/online/*.h src/core/sha256.h shared/online/trade.h
 	@mkdir -p build/host

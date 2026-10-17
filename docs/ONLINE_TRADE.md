@@ -222,6 +222,36 @@ Startup and save-writer gates, stale-restore history, the private-core
 swap and live two-player confirmation remain
 separate integration work below.
 
+## Implemented: isolated local receipt history
+
+`online_trade_history.[ch]` keeps an installation namespace and each
+known run's seed, highest settled revision and receipt-prefix SHA-256
+outside `savedata`. A candidate must retain the known seed and extend
+that exact receipt history; an older revision or divergent history is
+refused. Updates use the same checked file write, read-back and directory
+flush path. History is never pruned automatically; its bounded 4,096
+entries fail closed when full.
+
+The legacy migration helper derives one run identity from a durable
+installation namespace and the existing run seed. It writes that mapping
+before returning the initial receipt. Retrying an untraded migration
+returns the same identity. A known traded seed with a missing receipt,
+or a seed already assigned by the explicit new-run path, is refused.
+Damaged history never creates a replacement namespace. These rules do
+not identify a clone on a never-seen installation or prevent an owner
+editing offline files.
+
+This component is not yet connected to import, Undo or journal
+acknowledgement. Those callers must complete the durable history update
+before making progress playable; read-only preflight is insufficient.
+Tests check stale and divergent chains, matching extensions, seed
+changes, stable migration retries, traded legacy receipts, corruption and
+namespace replacement. Another 72 injected error/process-death cases
+cover history update, migration and first namespace creation, making
+808 storage interruption cases in the focused suite. An interrupted
+first namespace creation can remain blocked for inspection of its
+temporary file; it never silently replaces an installed namespace.
+
 ## Required before a swap can modify a checkpoint
 
 Eligibility is not a commit. The full transaction needs one immutable
