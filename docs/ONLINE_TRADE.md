@@ -209,18 +209,19 @@ the complete stage. Recovery finishes that installation or leaves it
 blocked; it never restores the old chip to play after a commit. State
 and receipt move together as a directory. `trade.previous` is dedicated
 to this transaction; the player's `savedata.old` Undo slot is untouched.
-The journal remains until the server acknowledges local APPLIED. Repeated
+The journal remains until the server acknowledges local APPLIED and its
+receipt revision is durably recorded in local history. Repeated
 commit and acknowledgement are harmless. Unknown decisions, altered
 terms and damaged stages remain blocked. Receipt chains describe settled
 trades, so a later ordinary checkpoint need not match an old receipt's
 post-content digest.
 
 The ROM-free suite injects an I/O refusal and process death at each of
-368 storage boundaries: 172 prepare, 80 commit/install, 32 acknowledgement
+384 storage boundaries: 172 prepare, 80 commit/install, 48 acknowledgement
 and 84 PREPARED recertification boundaries. It also checks visible but
 unflushed preparation, write/read-back corruption, a damaged committed
 stage, missing/malformed receipts, strict file names and preservation of
-Undo. All 736 interruption cases passed with ASan/UBSan and `-Werror`.
+Undo. All 768 interruption cases passed with ASan/UBSan and `-Werror`.
 These are Linux process-death and injected I/O-failure tests, not physical
 power-cut evidence or certification of another platform's storage.
 
@@ -231,9 +232,9 @@ build/host/test_online_trade_journal
 
 The lightweight transaction and receipt checks also run in `test_core`;
 the full fault sweep runs in the ordinary `make test` suite.
-Startup and save-writer gates, stale-restore history, the private-core
-swap and live two-player confirmation remain
-separate integration work below.
+Startup/save-writer gates and stale-restore history are integrated below.
+The private-core swap and live two-player confirmation remain separate
+integration work.
 
 ## Implemented: isolated local receipt history
 
@@ -254,14 +255,16 @@ Damaged history never creates a replacement namespace. These rules do
 not identify a clone on a never-seen installation or prevent an owner
 editing offline files.
 
-This component is not yet connected to import, Undo or journal
-acknowledgement. Those callers must complete the durable history update
-before making progress playable; read-only preflight is insufficient.
+Import and Undo check a candidate's receipt history before replacing any
+files. They durably remember the installed receipt before making it
+playable. Journal acknowledgement records history before removing its
+reservation; failure leaves APPLIED pending. A missing receipt on a known
+traded seed cannot enter through the legacy migration path.
 Tests check stale and divergent chains, matching extensions, seed
 changes, stable migration retries, traded legacy receipts, corruption and
 namespace replacement. Another 72 injected error/process-death cases
 cover history update, migration and first namespace creation, making
-808 storage interruption cases in the focused suite. An interrupted
+840 storage interruption cases in the focused suite. An interrupted
 first namespace creation can remain blocked for inspection of its
 temporary file; it never silently replaces an installed namespace.
 
@@ -299,9 +302,28 @@ make WERROR=1 build/host/test_online_trade_identity
 build/host/test_online_trade_identity
 ```
 
-These lifecycle APIs are not yet connected to startup, NEW GAME or save
-writers. Unsupported storage backends retain their offline behavior and
-must never advertise safe trade capability.
+`online_trade_gate.[ch]` now runs recovery before ordinary import recovery
+or save readers. An unresolved intent or transaction blocks continuation,
+new-run setup, save/blob/state writes, deletion, import, export, Undo,
+automatic copies and ordinary Square admission. Only the current live
+NEW GAME session may write through its unbound intent; it cannot load the
+abandoned old checkpoint. Its first complete save includes the profile,
+checks the writer failure sequence after the queue drains, then binds the
+identity. Failed binding does not claim “Run saved”; a bound recovery
+failure stops the core before another gameplay frame. Returning to the
+title before that first save makes the intent unbound again.
+
+Explicit run completion/loss remembers receipt history before removing
+the ended checkpoint and receipt, checks directory persistence, and
+blocks on a partial failure. The host tests cover old-revision imports,
+receiptless known seeds, Undo, pending journals beside interrupted
+imports, writer/read restrictions and first-save admission. Unsupported
+storage backends retain ordinary offline behavior, recognize copied
+pending artifacts as blocked, and never advertise safe trade capability.
+The emulator hook suite also uses its own test ROM to verify that an
+unbound intent refuses direct and queued state writes without changing the
+checkpoint, refuses state loading without changing RAM, and leaves the
+separate boot cache usable.
 
 ## Implemented: isolated pristine-state staging
 

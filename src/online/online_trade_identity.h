@@ -28,5 +28,6 @@ OnlineTradeIdentityState online_trade_identity_recover(const char *root);
 bool online_trade_identity_discard(const char *root);
 /* Read the current format's checksummed active run seed, without globals. */
 bool online_trade_identity_seed(const char *root, uint32_t *seed);
+bool online_trade_identity_seed_dir(const char *directory, uint32_t *seed);
 
 #endif

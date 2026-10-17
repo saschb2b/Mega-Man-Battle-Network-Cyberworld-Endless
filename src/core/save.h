@@ -137,6 +137,10 @@ void profile_code_note(int program);
 void save_init(void);
 bool save_exists(void);
 bool save_run(void);
+/* One full checkpoint's write boundary; first-checkpoint identity binding
+ * waits for all files and observes their write-failure sequence. */
+bool save_checkpoint_begin(unsigned *failures_before);
+bool save_checkpoint_end(unsigned failures_before);
 bool load_run(void);
 /* The saved run without loading it (none from before the current save format). */
 bool peek_run(Run *out);
@@ -150,7 +154,11 @@ void profile_save(void);
 void profile_played_frame(void);
 /* A new run from the title: the seed's, or the next seed's where its act 1
  * guardian is the last run's (BlastMan six runs running). */
-void run_new_varied(uint32_t seed);
+bool run_new_varied(uint32_t seed);
+/* After a direct developer start selected its run, before core play. */
+bool save_new_run_ready(void);
+bool save_can_visit(void);
+bool save_playable(void);
 void profile_record_run(void);
 
 #endif

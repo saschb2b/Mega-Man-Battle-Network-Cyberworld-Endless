@@ -45,6 +45,7 @@ static bool begin_error(char *error, size_t cap, const char *message) {
 
 bool online_visit_begin(const char *url, const char *name, const uint8_t identity[16], char *error, size_t cap) {
 	if (visit.active || visit.returning) return visit_error(error, cap, online_visit_open);
+	if (!save_can_visit()) return visit_error(error, cap, online_visit_recovery);
 	emu_sync();
 	save_queue_wait();
 	visit.before = run;

@@ -14,6 +14,8 @@
 #include "backup_fixture_v2.h"
 #include "backup_internal.h"
 #include "online_trade_record.h"
+#include "online_trade_files.h"
+#include "online_trade_gate.h"
 #include "save.h"
 #include "rom.h"
 #include "save_format.h"
@@ -698,7 +700,7 @@ static void test_pending(void) {
 /* Receipts travel with a checkpoint unchanged; their own validation is
  * separate from the carrier checksum and ordinary save-blob checksum. */
 static void test_trade_receipts(void) {
-	char base[80], from[96], to[96], path[160], other[160];
+	char base[80], from[96], to[96], path[160], other[160], third[96];
 	snprintf(base, sizeof base, "build/host/test-trade-transfer-%d", (int)getpid());
 	remove_tree(base); mkdir(base, 0755);
 	snprintf(from, sizeof from, "%s/from", base); mkdir(from, 0755);
@@ -734,6 +736,38 @@ static void test_trade_receipts(void) {
 		CHECK(same_file(path, other), "trade: malformed import leaves current receipt untouched");
 		receipt[8] ^= 1; rechecksum(carrier, n);
 	}
+	CHECK(backup_write_file(path, initial, sizeof initial), "trade: older revision fixture written");
+	size_t older_n = 0;
+	uint8_t *older = backup_pack(from, 2, &older_n);
+	CHECK(older && backup_restore(to, older, older_n, true) == BACKUP_IO, "trade: stale imported revision refused before replacement");
+	snprintf(third, sizeof third, "%s/third", base); mkdir(third, 0755);
+	CHECK(older && backup_restore(third, older, older_n, true) == BACKUP_OK && backup_restore(third, carrier, n, true) == BACKUP_OK,
+		"trade: previously unknown history can advance on a fresh installation");
+	CHECK(!backup_undo(third), "trade: Undo cannot restore its older traded revision");
+	free(older);
+	CHECK(remove(path) == 0, "trade: receiptless older fixture made");
+	older = backup_pack(from, 3, &older_n);
+	CHECK(older && backup_restore(to, older, older_n, true) == BACKUP_IO, "trade: missing receipt on a known traded seed cannot become legacy");
+	free(older);
+	CHECK(receipt && backup_write_file(path, receipt, record_n), "trade: current source receipt restored");
+	CHECK(same_file(path, other), "trade: stale and receiptless imports leave the installed checkpoint untouched");
+	char current[160], reserved[160], import_pending[160];
+	snprintf(current, sizeof current, "%s/savedata", to);
+	uint8_t before[32], after[32], bad[4] = { 0 };
+	CHECK(trade_files_hash(current, false, before), "trade: reserved checkpoint hash read");
+	snprintf(reserved, sizeof reserved, "%s/trade.pending", to);
+	snprintf(import_pending, sizeof import_pending, "%s/savedata.pending", to);
+	CHECK(backup_write_file(reserved, bad, sizeof bad) && backup_write_file(import_pending, bad, sizeof bad), "trade: unresolved trade beside interrupted import");
+	CHECK(!backup_recover(to) && !backup_undo(to) && backup_restore(to, carrier, n, true) == BACKUP_IO,
+		"trade: pending transaction precedes import recovery, Undo and replacement");
+	size_t blocked_n = 0;
+	uint8_t *blocked_export = backup_pack(to, 4, &blocked_n);
+	CHECK(!blocked_export, "trade: unresolved checkpoint cannot be exported");
+	free(blocked_export);
+	CHECK(access(import_pending, F_OK) == 0 && trade_files_hash(current, false, after) && !memcmp(before, after, 32),
+		"trade: reserved files and interrupted import marker remain unchanged");
+	CHECK(remove(reserved) == 0 && remove(import_pending) == 0 && online_trade_gate_recover() && backup_recover(to),
+		"trade: repaired fixture explicitly recovers before ordinary access");
 	free(carrier);
 	CHECK(backup_restore(to, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK && backup_undo(to),
 		"trade: ordinary import and Undo retain whole receipt-bearing checkpoint");

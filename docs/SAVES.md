@@ -127,9 +127,21 @@ A `run.trade` record has its own SHA-256 checksum and strict receipt
 chain validation, separate from the carrier and save-blob checksums. It
 requires an active run with its checkpoint. Its bytes enter the manifest
 hash and travel unchanged through export, import and Undo; its historic
-post-trade digest does not prohibit later offline progress. This portable
-record support does not enable live trading; recovery gates and stale
-revision checks are tracked in [ONLINE_TRADE.md](ONLINE_TRADE.md).
+post-trade digest does not prohibit later offline progress. Local trade
+history stays outside `savedata`: import and Undo refuse older or
+divergent known receipt histories, including a known traded run whose
+receipt is missing. Pending trade recovery takes precedence over import
+recovery and blocks export, import, Undo and the automatic copy. These
+storage protections do not enable live trading; their tests and platform
+limits are in [ONLINE_TRADE.md](ONLINE_TRADE.md).
+
+The title's recovery screen keeps an unfinished first save out of
+CONTINUE. Discarding it requires a second choice whose default is **Keep
+saved files**; B cancels that confirmation. A pending trade or damaged
+storage offers **Retry recovery** or **Quit**, without deleting the
+reservation. Retry currently checks local storage; reconnecting to settle
+a pending trade remains integration work. If CONTINUE cannot load its
+checkpoint, the title reports that failure without starting a new run.
 
 ## Import, undo and recovery
 

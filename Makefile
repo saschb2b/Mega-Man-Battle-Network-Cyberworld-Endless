@@ -208,6 +208,9 @@ clean:
 # ROM-free unit tests (host only), with the address and undefined-behaviour
 # sanitizers
 TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
+TRADE_STORAGE_SRCS := src/online/online_trade_admit.c src/online/online_trade_gate.c src/online/online_trade_identity.c \
+	src/online/online_trade_history.c src/online/online_trade_journal.c src/online/online_trade_files.c \
+	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c src/online/network_identity.c
 TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xchips_bn5.c src/emu/soulcode_bn5.c \
@@ -219,7 +222,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
 	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
 	tests/test_online_trade_authority.c src/online/online_trade_authority.c \
-	tests/test_online_trade_identity.c src/online/online_trade_identity.c \
+	tests/test_online_trade_identity.c src/online/online_trade_identity.c src/online/online_trade_admit.c src/online/online_trade_gate.c src/online/network_identity.c \
 	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
@@ -236,14 +239,14 @@ build/host/test_core: $(TEST_OBJS)
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
+TEST_EMU_SRCS := tests/test_emu.c tests/test_online_trade_io.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c $(TRADE_STORAGE_SRCS)
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
+build/host/test_emu: $(TEST_EMU_SRCS) tests/test_online_trade_io.h src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h src/online/*.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -Isrc/online -Ishared/online -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
 
-TRADE_RECORD_SRCS := src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
+TRADE_RECORD_SRCS := $(TRADE_STORAGE_SRCS)
 TEST_TRANSFER_SRCS := tests/test_transfer.c src/launcher/mirror.c src/launcher/pick_saves.c src/launcher/pick_none.c src/launcher/pick_text.c \
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
 build/host/test_transfer: $(TEST_TRANSFER_SRCS) src/*/*.h | $(GEN)/version.h
@@ -472,7 +475,7 @@ build/host/test_online_trade_authority: $(TRADE_AUTHORITY_TEST_SRCS) src/online/
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_AUTHORITY_TEST_MAIN -o $@ $(TRADE_AUTHORITY_TEST_SRCS)
 
-TRADE_IDENTITY_TEST_SRCS := tests/test_online_trade_identity.c src/online/online_trade_identity.c $(filter-out tests/test_online_trade_journal.c,$(TRADE_JOURNAL_TEST_SRCS))
+TRADE_IDENTITY_TEST_SRCS := tests/test_online_trade_identity.c $(TRADE_STORAGE_SRCS)
 build/host/test_online_trade_identity: $(TRADE_IDENTITY_TEST_SRCS) src/online/*.h src/core/run.h src/core/save_format.h shared/online/trade.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \

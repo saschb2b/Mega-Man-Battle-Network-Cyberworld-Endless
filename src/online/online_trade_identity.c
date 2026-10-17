@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "online_trade_bytes.h"
 #include "online_trade_files.h"
 #include "online_trade_history_internal.h"
 #include "run.h"
@@ -16,13 +17,6 @@ static const uint8_t magic[8] = { 'C', 'W', 'T', 'N', '0', '1', '\r', '\n' };
 typedef struct { bool bound; uint32_t seed; uint8_t id[16], content[32]; } Marker;
 typedef struct { char current[TRADE_PATH_MAX], marker[TRADE_PATH_MAX], temporary[TRADE_PATH_MAX], receipt[TRADE_PATH_MAX], receipt_temporary[TRADE_PATH_MAX]; } Paths;
 
-static uint32_t get32(const uint8_t *p) { return (uint32_t)p[0] << 24 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 8 | p[3]; }
-static void put32(uint8_t *p, uint32_t n) { for (unsigned i = 0; i < 4; ++i) p[i] = (uint8_t)(n >> (24 - 8 * i)); }
-static bool nonzero(const uint8_t *p, size_t n) {
-	uint8_t any = 0;
-	for (size_t i = 0; i < n; ++i) any |= p[i];
-	return any != 0;
-}
 static bool paths(Paths *p, const char *root) {
 	return trade_files_path(p->current, root, "savedata") && trade_files_path(p->marker, root, "trade.newrun") &&
 		trade_files_path(p->temporary, root, "trade.newrun.tmp") && trade_files_path(p->receipt, p->current, "run.trade") && trade_files_path(p->receipt_temporary, p->current, "run.trade.tmp");
@@ -35,10 +29,9 @@ static bool no_transaction(const char *root) {
 	return true;
 }
 
-bool online_trade_identity_seed(const char *root, uint32_t *seed) {
-	Paths p;
+bool online_trade_identity_seed_dir(const char *directory, uint32_t *seed) {
 	char path[TRADE_PATH_MAX];
-	if (!seed || !paths(&p, root) || !trade_files_path(path, p.current, "run.sav")) return false;
+	if (!seed || !trade_files_path(path, directory, "run.sav")) return false;
 	size_t n = 0;
 	uint8_t *data = trade_files_read(path, &n);
 	bool ok = data && n == 12 + sizeof(Run);
@@ -53,17 +46,22 @@ bool online_trade_identity_seed(const char *root, uint32_t *seed) {
 	return ok;
 }
 
+bool online_trade_identity_seed(const char *root, uint32_t *seed) {
+	Paths p;
+	return paths(&p, root) && online_trade_identity_seed_dir(p.current, seed);
+}
+
 static bool read_marker(const Paths *p, Marker *m) {
 	size_t n = 0;
 	uint8_t *data = trade_files_read(p->marker, &n), hash[32];
 	bool ok = data && n == MARKER_BYTES;
 	if (ok) {
 		cw_sha256(data, n - 32, hash);
-		ok = !memcmp(data, magic, 8) && data[8] <= 1 && nonzero(data + 13, 16) &&
-			!memcmp(hash, data + n - 32, 32) && (data[8] ? nonzero(data + 29, 32) : !nonzero(data + 29, 32));
+		ok = !memcmp(data, magic, 8) && data[8] <= 1 && trade_bytes_nonzero(data + 13, 16) &&
+			!memcmp(hash, data + n - 32, 32) && (data[8] ? trade_bytes_nonzero(data + 29, 32) : !trade_bytes_nonzero(data + 29, 32));
 	}
 	if (ok) {
-		m->bound = data[8] != 0; m->seed = get32(data + 9);
+		m->bound = data[8] != 0; m->seed = trade_bytes_get32(data + 9);
 		memcpy(m->id, data + 13, 16); memcpy(m->content, data + 29, 32);
 	}
 	free(data);
@@ -72,7 +70,7 @@ static bool read_marker(const Paths *p, Marker *m) {
 
 static bool write_marker(const char *root, const Paths *p, const Marker *m) {
 	uint8_t data[MARKER_BYTES] = { 0 };
-	memcpy(data, magic, 8); data[8] = m->bound; put32(data + 9, m->seed);
+	memcpy(data, magic, 8); data[8] = m->bound; trade_bytes_put32(data + 9, m->seed);
 	memcpy(data + 13, m->id, 16); memcpy(data + 29, m->content, 32);
 	cw_sha256(data, sizeof data - 32, data + sizeof data - 32);
 	return trade_files_write(p->marker, data, sizeof data) && trade_files_sync(root);
@@ -136,7 +134,7 @@ OnlineTradeIdentityState online_trade_identity_recover(const char *root) {
 
 bool online_trade_identity_intent(const char *root, uint32_t seed, const uint8_t random_id[16]) {
 	Paths p;
-	if (!trade_files_supported() || !random_id || !nonzero(random_id, 16) || !paths(&p, root)) return false;
+	if (!trade_files_supported() || !random_id || !trade_bytes_nonzero(random_id, 16) || !paths(&p, root)) return false;
 	int lock = trade_files_lock(root);
 	if (lock < 0) return false;
 	Marker m = { .seed = seed };

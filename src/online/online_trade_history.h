@@ -14,6 +14,9 @@ typedef enum {
  * Existing history never changes namespace. This does not create a run. */
 bool online_trade_history_create(const char *root, const uint8_t namespace_id[16]);
 OnlineTradeHistoryResult online_trade_history_namespace(const char *root, uint8_t out[16]);
+/* A receiptless checkpoint may be legacy only if this seed has never
+ * traded or been assigned by explicit NEW GAME on this installation. */
+OnlineTradeHistoryResult online_trade_history_missing(const char *root, uint32_t seed);
 /* Read-only preflight. Unknown run IDs are permitted; known IDs must
  * retain their seed and extend the saved receipt prefix. */
 OnlineTradeHistoryResult online_trade_history_check(const char *root, uint32_t seed, const uint8_t *record, size_t n);

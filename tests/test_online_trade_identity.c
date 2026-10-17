@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "online_trade_files.h"
+#include "online_trade_gate.h"
 #include "online_trade_history.h"
 #include "online_trade_identity.h"
 #include "online_trade_journal.h"
@@ -177,6 +178,43 @@ static void invalid_source(void) {
 	erase(f.root);
 }
 
+static void gate_lifecycle(void) {
+	Fixture f;
+	CHECK(fixture(&f));
+	online_trade_gate_start(f.root);
+	CHECK(online_trade_gate_state() == TRADE_GATE_CLEAR && online_trade_gate_playable());
+	CHECK(online_trade_gate_new_run(17));
+	CHECK(online_trade_gate_state() == TRADE_GATE_NEW_RUN);
+	CHECK(online_trade_gate_read("profile.sav") && !online_trade_gate_read("run.sav"));
+	CHECK(!online_trade_gate_transfer(f.root));
+	CHECK(!online_trade_gate_checkpoint(false) && online_trade_gate_state() == TRADE_GATE_NEW_RUN);
+	online_trade_gate_start(f.root);
+	CHECK(online_trade_gate_state() == TRADE_GATE_NEW_RUN);
+	CHECK(online_trade_gate_checkpoint(true));
+	CHECK(online_trade_gate_state() == TRADE_GATE_CLEAR && online_trade_gate_admit(f.root));
+	CHECK(online_trade_history_missing(f.root, 17) == TRADE_HISTORY_STALE);
+	CHECK(online_trade_gate_end_run() && online_trade_gate_state() == TRADE_GATE_CLEAR);
+	CHECK(kind(f.current, "run.sav") == 0 && kind(f.current, "run.state") == 0 && kind(f.current, "run.trade") == 0);
+	CHECK(online_trade_history_missing(f.root, 17) == TRADE_HISTORY_STALE);
+	CHECK(online_trade_gate_new_run(18));
+	CHECK(!online_trade_gate_recover() && online_trade_gate_state() == TRADE_GATE_UNBOUND);
+	char run_path[TRADE_PATH_MAX], boot_path[TRADE_PATH_MAX];
+	CHECK(trade_files_path(run_path, f.current, "run.state") && trade_files_path(boot_path, f.root, "boot-3.state"));
+	CHECK(!online_trade_gate_playable() && !online_trade_gate_read("profile.sav"));
+	CHECK(!online_trade_gate_write(run_path) && !online_trade_gate_load(run_path));
+	CHECK(online_trade_gate_write(boot_path) && online_trade_gate_load(boot_path));
+	CHECK(!online_trade_gate_new_run(19));
+	CHECK(online_trade_gate_discard() && online_trade_gate_state() == TRADE_GATE_CLEAR);
+	bytes_match(f.current, "profile.sav", profile, sizeof profile);
+	CHECK(put(f.root, "trade.pending", state, sizeof state));
+	CHECK(!online_trade_gate_recover() && online_trade_gate_state() == TRADE_GATE_BLOCKED);
+	CHECK(!online_trade_gate_transfer(f.root) && !online_trade_gate_discard());
+	CHECK(remove_file(f.root, "trade.pending") && online_trade_gate_recover());
+	CHECK(put(f.root, "trade.history", state, sizeof state));
+	CHECK(!online_trade_gate_recover() && online_trade_gate_state() == TRADE_GATE_BLOCKED);
+	erase(f.root);
+}
+
 #ifdef CW_TRADE_FILES_TEST
 static unsigned boundary, target;
 static bool death;
@@ -318,7 +356,7 @@ static void installed_receipt_survives_progress(void) {
 
 int test_online_trade_identity(void) {
 	failures = 0;
-	intent_and_binding(); explicit_discard(); legacy_migration(); invalid_source();
+	intent_and_binding(); explicit_discard(); legacy_migration(); invalid_source(); gate_lifecycle();
 #ifdef CW_TRADE_FILES_TEST
 	recovery_must_certify(); installed_receipt_survives_progress();
 	for (Operation op = INTENT; op <= RECOVER; ++op) fault_sweep(op);

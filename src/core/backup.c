@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 
 #include "backup_internal.h"
+#include "online_trade_gate.h"
 #include "compat.h"
 #include "save_queue.h"
 
@@ -161,6 +162,7 @@ static bool finish(Pack *p, uint64_t stamp) {
 }
 
 uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
+	if (!online_trade_gate_transfer(data_dir)) return NULL;
 	save_queue_wait();   /* (the files a checkpoint queued, all written) */
 	Pack p = { .ok = true };
 	if (!grow(&p, BACKUP_HEAD)) return NULL;

@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-void save_checkpoint(void);
+bool save_checkpoint(void);
 void arena_door_save(void);
 /* Home's saves (docs/HOME.md), once a frame at home: the run saved in the
  * town between acts, a CONTINUE going on there: its checkpoint in Lan's HP

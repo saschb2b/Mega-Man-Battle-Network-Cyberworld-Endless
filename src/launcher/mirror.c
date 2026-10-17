@@ -6,6 +6,7 @@
  * the last copy. A look at the place reads its file into memory and
  * writes nothing. */
 #include "mirror.h"
+#include "online_trade_gate.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -191,6 +192,7 @@ static void judge(uint8_t *b, size_t n) {
 }
 
 static void look(void) {
+	if (!online_trade_gate_transfer(g_data_dir)) return;
 	if (pick_busy() || pick_saves_busy()) return;   /* (once the picker is done) */
 	char was[sizeof scope];
 	snprintf(was, sizeof was, "%s", scope);
@@ -309,6 +311,7 @@ void mirror_note(void) {
 /* (no copy while the last look holds it; a look due again, after a resume
  * or a folder chosen, is put()'s to make) */
 void mirror_tick(void) {
+	if (!online_trade_gate_transfer(g_data_dir)) return;
 	bool held = looked && (verdict == LOOK_HELD || verdict == LOOK_UNREAD);
 	if (dirty && !held && SDL_GetTicks() - written_at >= REST_MS) put();
 }

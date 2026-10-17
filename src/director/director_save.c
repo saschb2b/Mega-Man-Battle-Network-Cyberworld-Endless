@@ -99,7 +99,9 @@ static void act_note_apply(void) {
 		act_note.act, act_note.viruses, act_note.frames, act_note.dealer);
 }
 
-void save_checkpoint(void) {
+bool save_checkpoint(void) {
+	unsigned failures_before;
+	if (!save_checkpoint_begin(&failures_before)) return false;
 	char path[600];
 	save_state_path(path, sizeof path);
 	library_from_game();
@@ -116,6 +118,7 @@ void save_checkpoint(void) {
 	dark_save();
 	souls_save();
 	off_board_save();
+	return save_checkpoint_end(failures_before);
 }
 
 bool director_can_suspend(void) {
@@ -145,16 +148,18 @@ void director_save_here(void) {
 void arena_door_save(void) {
 	if (!hold_save_ok() || D.warping) return;
 	D.checkpoint_door = true;
-	save_checkpoint();
+	bool saved = save_checkpoint();
 	D.checkpoint_door = false;
+	if (!saved) return;
 	D.saved_at = "Run saved at the arena's door";
 	cinema_note("Run saved", 150);
 }
 
-static void home_save(void) {
-	save_checkpoint();
+static bool home_save(void) {
+	if (!save_checkpoint()) return false;
 	D.saved_at = "Run saved at home";
 	cinema_note("Run saved", 150);
+	return true;
 }
 
 /* Home's saves once MegaMan (or Lan) is free: its checkpoint in Lan's HP,
@@ -162,14 +167,12 @@ static void home_save(void) {
 void home_saves(void) {
 	if (!hold_save_ok()) return;
 	if (D.home_save_due) {
-		D.home_save_due = false;
 		D.checkpoint_here = true;
-		home_save();
+		D.home_save_due = !home_save();
 		D.checkpoint_here = false;
 	}
 	if (D.home && home_in_hp() && D.intro_said && !D.home_saved) {
-		D.home_saved = true;
-		home_save();
+		D.home_saved = home_save();
 	}
 }
 
@@ -183,7 +186,7 @@ void checkpoint_update(void) {
 	if (boss_take_checkpoint()) D.checkpoint = D.checkpoint_data = true;
 	if (!D.checkpoint || D.frame < CHECKPOINT_AFTER || !hold_save_ok()) return;
 	D.checkpoint = false;
-	save_checkpoint();
+	if (!save_checkpoint()) { D.checkpoint = true; return; }
 	/* (said: a playtester who plays in short sessions asked where it is
 	 * safe to stop) */
 	D.saved_at = D.checkpoint_here ? "Run saved where you saved it" : D.checkpoint_data ? "Run saved at the Guardian Data" :
@@ -198,10 +201,10 @@ void checkpoint_update(void) {
 bool director_suspend(void) {
 	if (!director_can_suspend()) return false;
 	suspending = true;
-	save_checkpoint();
+	bool saved = save_checkpoint();
 	suspending = false;
 	save_queue_wait();
-	return true;
+	return saved;
 }
 
 /* Whether the layer just rebuilt is the one the checkpoint saved: made by

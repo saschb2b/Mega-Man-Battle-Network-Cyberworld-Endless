@@ -104,6 +104,16 @@ static bool soft_reset(void) {
 	return true;
 }
 
+static bool save_recovery_due(void) {
+	if (save_playable()) return false;
+	emu_sync();
+	director_stop();
+	started = false;
+	title_menu = true;
+	scene_set(&scene_title);
+	return true;
+}
+
 static void update(void) {
 	emu_drawing = false;
 	if (online_visit_transitioning()) return;
@@ -121,6 +131,7 @@ static void update(void) {
 		if (devtools_open()) { frame_keys(); return; }
 		for (int i = 0; i < dev.speed; ++i) {
 			if (started) after_frame();
+			if (save_recovery_due()) return;
 			if (director_pc_update()) return;
 			if (online_visit_transitioning()) return;
 			emu_frame(cinema_keys(frame_keys()));
@@ -135,6 +146,7 @@ static void update(void) {
 	for (int i = 0; i < dev.speed; ++i) {
 		emu_frame(cinema_keys(keys));
 		after_frame();
+		if (save_recovery_due()) return;
 		if (director_pc_update()) return;
 		if (online_visit_transitioning()) return;
 	}

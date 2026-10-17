@@ -8,6 +8,7 @@
 #include <SDL.h>
 
 #include "compat.h"
+#include "online_trade_gate.h"
 
 static SDL_atomic_t failures;
 
@@ -15,6 +16,7 @@ unsigned save_write_failures(void) { return (unsigned)SDL_AtomicGet(&failures); 
 void save_write_failed(void) { SDL_AtomicAdd(&failures, 1); }
 
 bool save_file_write(const char *path, const void *data, size_t n) {
+	if (!online_trade_gate_write(path)) { save_write_failed(); return false; }
 	char tmp[620];
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "wb");
@@ -103,6 +105,7 @@ static bool started(void) {
 
 bool save_queue_file(const char *path, void *data, size_t n) {
 	if (!started()) return false;
+	if (!online_trade_gate_write(path)) return false;
 	Job *j = malloc(sizeof *j);
 	if (!j) return false;
 	snprintf(j->path, sizeof j->path, "%s", path);

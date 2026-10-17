@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "online_trade_bytes.h"
 #include "online_trade_files.h"
 #include "online_trade_record.h"
 #include "online_trade_identity.h"
@@ -26,11 +27,6 @@ static bool paths(Paths *p, const char *root) {
 		trade_files_path(p->temporary, root, "trade.pending.tmp");
 }
 
-static bool nonzero(const uint8_t *p, size_t n) {
-	uint8_t any = 0;
-	for (size_t i = 0; i < n; ++i) any |= p[i];
-	return any != 0;
-}
 
 static bool journal_read(const Paths *p, OnlineTradeJournal *journal) {
 	size_t n;
@@ -48,7 +44,7 @@ static bool journal_read(const Paths *p, OnlineTradeJournal *journal) {
 		memcpy(journal->staged, data + HASH_OFFSET + 32, 32);
 		memcpy(journal->post_content, data + HASH_OFFSET + 64, 32);
 		ok = !memcmp(journal->source, journal->terms.side[journal->side].checkpoint, 32) &&
-			nonzero(journal->staged, 32) && nonzero(journal->post_content, 32);
+			trade_bytes_nonzero(journal->staged, 32) && trade_bytes_nonzero(journal->post_content, 32);
 	}
 	free(data);
 	return ok;
