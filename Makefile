@@ -297,7 +297,12 @@ build/host/test_online_link_ipc: tools/online_link_ipc_test.c tools/online_link_
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-o $@ tools/online_link_ipc_test.c tools/online_link_ipc_wire.c
 
-test: build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc
+build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_frame_wire.c tools/online_frame_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
+
+test: build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
 	build/host/test_online_trade_capture
 	build/host/test_core
 	build/host/test_emu
@@ -309,6 +314,7 @@ test: build/host/test_online_trade_capture build/host/test_core build/host/test_
 	build/host/test_online
 	build/host/test_legacy
 	build/host/test_online_link_ipc
+	build/host/test_online_frame_wire
 .PHONY: test
 
 # Native transport runtime checks use the same platform sources as the game.
@@ -345,13 +351,22 @@ build/host/online-link-bn6: $(ONLINE_BN6_LINK_SRCS) tools/online_link_script.h t
 
 online-link-bn6: build/host/online-link-bn6
 
+ONLINE_FRAME_SRCS := tools/online_frame_worker.c tools/online_frame_pair.c tools/online_frame_wire.c tools/online_link_script.c
+build/host/online-frame-worker: $(ONLINE_FRAME_SRCS) tools/online_frame_pair.h tools/online_frame_wire.h tools/online_link_script.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_FRAME_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-frame: build/host/online-frame-worker
+
 server:
 	python3 server/build.py
 
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: online-link online-link-bn6 server server-test
+.PHONY: online-link online-link-bn6 online-frame server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
