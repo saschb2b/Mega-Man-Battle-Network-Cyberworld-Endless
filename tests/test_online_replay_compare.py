@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.online_replay_compare import (HORIZONS, MUTATIONS, TARGET, TOTAL, Mismatch, Unreached,
+from tools.online_replay_compare import (HORIZONS, MUTATIONS, TARGET, TOTAL, Mismatch, Unreached, accept_cable_stop,
                                         accept_mutation, accept_observer, accept_replays, read_cable, read_trace, select_points, verify_manifest)
 
 
@@ -221,6 +221,110 @@ class ReplayComparatorTests(unittest.TestCase):
                 repeated = self.write('repeated.jsonl', rows)
                 with self.assertRaisesRegex(Mismatch, 'original versus instruction executor'):
                     accept_observer('old.csv', 'new.csv', repeated, repeated, cable, cable, self.original)
+
+    def stop_fixture(self):
+        self.rows[25]['cable']['phase'] = 0
+        self.rows[1150]['cable']['phase'] = 1
+        for row in self.rows[958:]:
+            row['pair']['start_frames'] = [2000, 2000]
+            row['pair']['traced_frames'] = [2000 + row['frame'] - 958] * 2
+            for sample in row['samples']:
+                sample[5] = 2000 + row['frame'] - 958
+        for name in ('micro-a', 'micro-b', 'baseline', 'noop'):
+            self.write(f'{name}.jsonl', self.rows)
+        cable = dict(state=copy.deepcopy(self.rows[1150]),
+                     cursor=dict(stage='check-targets', frame=1150, round=4, targets=[2193, 2193],
+                                 relative=192, battle=True, keys=copy.deepcopy(self.rows[1150]['inputs'])))
+        for name in ('micro-a-cable', 'micro-b-cable'):
+            (self.path / f'{name}.json').write_text(json.dumps(cable))
+        for name, frame in select_points(self.rows, cable).items():
+            for horizon in HORIZONS:
+                for repeat in (1, 2):
+                    label = f'{name}-{horizon}-{repeat}'
+                    first = frame
+                    if name == 'nonidle-cable':
+                        first += 1
+                        (self.path / f'{label}-immediate.json').write_text(json.dumps(cable))
+                    self.write(f'{label}.jsonl', self.rows[first:frame + horizon + 1])
+        immediate = copy.deepcopy(cable)
+        for node in immediate['state']['cable']['nodes']:
+            node['scheduled'] = False
+        (self.path / 'omit-cable-immediate.json').write_text(json.dumps(immediate))
+        self.write('omit-cable.jsonl', self.rows[1151:1155])
+        row = copy.deepcopy(self.rows[1154])
+        row['samples'][1][5] += 4
+        row['pair']['traced_frames'][1] += 3
+        row['cable']['running'] = 1
+        stop = dict(reason='frame-lead', state=row,
+                    cursor=dict(stage='before-step', frame=1154, round=32, targets=[2197, 2197],
+                                relative=196, battle=True, keys=copy.deepcopy(row['inputs']), next_side=1))
+        (self.path / 'omit-cable-stop.json').write_text(json.dumps(stop))
+        pins = {'tools/online_replay_snapshot.c':'c'*64, 'tools/online_replay_subject.c':'d'*64}
+        manifest = dict(before=TARGET.copy(), after=TARGET.copy(), source_hashes=pins.copy(),
+                        binary_hashes=dict(oracle='e'*64, subject='f'*64))
+        termination = dict(returncode=3, elapsed_seconds=1.5, binary_sha256='f'*64)
+        return pins, manifest, termination
+
+    @patch('tools.online_replay_compare.compare_game', return_value=1433)
+    def test_omitted_cable_stop_needs_all_controls_and_an_observed_bound(self, _logical):
+        pins, manifest, termination = self.stop_fixture()
+        result = accept_cable_stop(self.path, manifest, pins, termination)
+        self.assertEqual((result['first_divergent_frame'], result['completed_prefix_frames']), (1150, 4))
+        path = self.path / 'omit-cable-stop.json'
+        original = json.loads(path.read_text())
+        for mutate in (lambda s: s.update(reason='crash'),
+                       lambda s: s['cursor'].update(stage='check-targets'),
+                       lambda s: s['cursor'].update(frame=1150),
+                       lambda s: s['cursor'].update(targets=[1, 1]),
+                       lambda s: s['state']['samples'][1].__setitem__(5, 2199),
+                       lambda s: s['state']['inputs'][0].__setitem__(0, 42)):
+            changed = copy.deepcopy(original)
+            mutate(changed)
+            path.write_text(json.dumps(changed))
+            with self.assertRaises(Mismatch):
+                accept_cable_stop(self.path, manifest, pins, termination)
+        path.write_text(json.dumps(original))
+        for mutate in (lambda m: m.update(returncode=-9), lambda m: m.update(returncode=1),
+                       lambda m: m.update(binary_sha256='0'*64),
+                       lambda m: m.update(elapsed_seconds=float('nan')),
+                       lambda m: m.update(elapsed_seconds=180)):
+            changed = copy.deepcopy(termination)
+            mutate(changed)
+            with self.assertRaises(Mismatch):
+                accept_cable_stop(self.path, manifest, pins, changed)
+        manifest['source_hashes']['tools/online_replay_snapshot.c'] = '0'*64
+        with self.assertRaises(Mismatch):
+            accept_cable_stop(self.path, manifest, pins, termination)
+
+    @patch('tools.online_replay_compare.compare_game', return_value=1433)
+    def test_omission_partial_logs_and_self_agreement_never_pass(self, _logical):
+        pins, manifest, termination = self.stop_fixture()
+        for prefix in ([], self.rows[1151:1154], self.rows[1151:1152] * 4):
+            self.write('omit-cable.jsonl', prefix)
+            with self.assertRaises(Unreached):
+                accept_cable_stop(self.path, manifest, pins, termination)
+        self.write('omit-cable.jsonl', self.rows[1151:1155])
+        path = self.path / 'omit-cable-immediate.json'
+        original = json.loads(path.read_text())
+        for mutate in (lambda s: s['state']['cores'][0]['state'].update(sha256='b'*64),
+                       lambda s: s['cursor'].update(round=5),
+                       lambda s: [n.update(scheduled=True) for n in s['state']['cable']['nodes']]):
+            changed = copy.deepcopy(original)
+            mutate(changed)
+            path.write_text(json.dumps(changed))
+            with self.assertRaises(Mismatch):
+                accept_cable_stop(self.path, manifest, pins, termination)
+        path.write_text(json.dumps(original))
+        self.write('custom-1-1.jsonl', [])
+        with self.assertRaises(Mismatch):
+            accept_cable_stop(self.path, manifest, pins, termination)
+        self.stop_fixture()
+        changed = copy.deepcopy(self.rows)
+        changed[700]['cores'][0]['state']['sha256'] = 'b'*64
+        self.write('micro-a.jsonl', changed)
+        self.write('micro-b.jsonl', changed)
+        with self.assertRaisesRegex(Mismatch, 'original versus instruction executor'):
+            accept_cable_stop(self.path, manifest, pins, termination)
 
 
 if __name__ == '__main__':

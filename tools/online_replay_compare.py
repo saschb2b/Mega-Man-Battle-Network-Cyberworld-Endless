@@ -4,6 +4,7 @@ This file defines acceptance; restore code must not edit it to obtain a pass.
 No ROM, raw state, flash content or process address belongs in its evidence.
 """
 import json
+import math
 from pathlib import Path
 import re
 
@@ -254,3 +255,79 @@ def accept_mutation(original, mutation, path, cable_path=None, immediate_path=No
         require(any(a['flash'] != b['flash'] for a, b in zip(rows[frame]['cores'], changed[0]['cores'])),
                 'Flash mutation did not leave changed flash after restore')
     return dict(verdict='PASS', mutation=mutation, expected_failure=True, first_divergent_frame=differences[0])
+
+
+def read_cable_stop(path, rows, boundary):
+    try:
+        stop = json.loads(Path(path).read_text())
+    except (OSError, ValueError) as error:
+        raise Unreached('No complete cable omission stop observation') from error
+    members(stop, 'reason cursor state', 'cable stop')
+    require(stop['reason'] == 'frame-lead', 'Cable omission did not reach the executor bound')
+    row, cursor = stop['state'], stop['cursor']
+    validate_record(row)
+    members(cursor, 'stage frame round targets relative battle keys next_side', 'stop cursor')
+    frame = row['frame']
+    require(boundary < frame < boundary + max(HORIZONS), 'Cable stop has zero steps or an unbounded prefix')
+    require(cursor['stage'] == 'before-step' and cursor['frame'] == frame and type(cursor['frame']) is int,
+            'Wrong cable stop stage/frame')
+    require(integer(cursor['round'], 1, 4000000) and integer(cursor['next_side'], 0, 1), 'Wrong cable stop round/side')
+    relative = frame - ENTRY
+    require(type(cursor['battle']) is bool and cursor['battle'] and frame >= ENTRY and
+            integer(cursor['relative']) and cursor['relative'] == relative, 'Wrong cable stop script position')
+    require(words(cursor['targets'], 2) and cursor['targets'] == [f + relative + 1 for f in row['pair']['start_frames']],
+            'Wrong cable stop targets')
+    require(cursor['keys'] == row['inputs'] == rows[frame]['inputs'], 'Cable stop changed controller inputs')
+    require(all(row['pair'][name] == rows[frame]['pair'][name]
+                for name in ('frame', 'start_frames', 'entry_step', 'entry_frame')), 'Cable stop changed pair bookkeeping')
+    side = cursor['next_side']
+    lead = row['samples'][side][5] - row['pair']['start_frames'][side] - relative
+    require(lead == 4 and row['cable']['running'] == side, 'Observed core does not establish the four-frame lead bound')
+    require(all(traced <= sample[5] for traced, sample in zip(row['pair']['traced_frames'], row['samples'])),
+            'Cable stop observation cursor exceeds its core frame')
+    return stop
+
+
+def accept_cable_stop(directory, manifest, reviewed_sources, termination):
+    """A narrow expected failure, after independently accepting all controls."""
+    work = Path(directory)
+    verify_manifest(manifest, reviewed_sources)
+    required = ('tools/online_replay_snapshot.c', 'tools/online_replay_subject.c')
+    require(all(name in reviewed_sources for name in required), 'Cable omission subject lacks reviewed source pins')
+    members(termination, 'returncode elapsed_seconds binary_sha256', 'subject termination')
+    require(type(termination['returncode']) is int and termination['returncode'] == 3,
+            'Cable omission did not terminate at its dedicated bound')
+    elapsed = termination['elapsed_seconds']
+    require(type(elapsed) in (int, float) and math.isfinite(elapsed) and 0 < elapsed < 180,
+            'Cable omission termination was not bounded')
+    require(termination['binary_sha256'] == manifest['binary_hashes']['subject'], 'Cable omission executed another binary')
+    original, cable_path = work / 'micro-a.jsonl', work / 'micro-a-cable.json'
+    accept_observer(work / 'original-a-trace.csv', work / 'micro-a.csv', original, work / 'micro-b.jsonl',
+                    cable_path, work / 'micro-b-cable.json', work / 'baseline.jsonl')
+    accept_replays(original, work / 'noop.jsonl', work, cable_path)
+    rows = read_trace(original)
+    cable = read_cable(cable_path, rows)
+    immediate = read_cable(work / 'omit-cable-immediate.json', rows, exercised=False)
+    require(immediate['cursor'] == cable['cursor'], 'Cable omission changed the suspended cursor')
+    expected, actual = cable['state'], immediate['state']
+    require(all(actual[name] == expected[name] for name in expected if name != 'cable'),
+            'Cable omission immediate mismatch is outside cable state')
+    require(actual['cable'] != expected['cable'] and all(n['scheduled'] for n in expected['cable']['nodes']) and
+            not any(n['scheduled'] for n in actual['cable']['nodes']), 'Cable omission did not remove the original scheduled events')
+    frame = expected['frame']
+    stop = read_cable_stop(work / 'omit-cable-stop.json', rows, frame)
+    last = stop['state']['frame']
+    try:
+        prefix = read_trace(work / 'omit-cable.jsonl', frame + 1, last)
+    except Mismatch as error:
+        raise Unreached('Cable omission lacks its complete bounded prefix') from error
+    for row in prefix:
+        reference = rows[row['frame']]
+        require(row['inputs'] == reference['inputs'], 'Cable omission prefix changed controller inputs')
+        require(all(row['pair'][name] == reference['pair'][name]
+                    for name in ('frame', 'start_frames', 'entry_step', 'entry_frame')), 'Cable omission prefix changed script bookkeeping')
+    require(all(last_traced <= current <= sample[5] for last_traced, current, sample in
+                zip(prefix[-1]['pair']['traced_frames'], stop['state']['pair']['traced_frames'], stop['state']['samples'])),
+            'Cable omission stop shifted its observation cursor')
+    return dict(verdict='PASS', mutation='omit-cable', expected_failure=True, first_divergent_frame=frame,
+                completed_prefix_frames=len(prefix), bounded_stop_frame=last, bound='four-frame input lead')
