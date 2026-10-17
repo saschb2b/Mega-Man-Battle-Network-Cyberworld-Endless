@@ -55,7 +55,7 @@ bool backup_write_file(const char *path, const uint8_t *bytes, size_t n) {
 bool backup_progress_name(const char *name) {
 	static const char *const names[] = {
 		"profile.sav", "rivals.sav", "battle.sav", "run.sav", "run.state", "run.make", "run.area",
-		"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board"
+		"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board", "run.trade"
 	};
 	if (strncmp(name, "savedata/", 9)) return false;
 	for (size_t i = 0; i < sizeof names / sizeof *names; ++i)

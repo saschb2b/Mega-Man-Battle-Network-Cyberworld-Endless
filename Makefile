@@ -241,26 +241,27 @@ build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claim
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
 
+TRADE_RECORD_SRCS := src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
 TEST_TRANSFER_SRCS := tests/test_transfer.c src/launcher/mirror.c src/launcher/pick_saves.c src/launcher/pick_none.c src/launcher/pick_text.c \
-	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
 build/host/test_transfer: $(TEST_TRANSFER_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_DISCOVERY_SRCS := tests/test_discovery.c src/launcher/mirror.c src/launcher/pick_saves.c \
-	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
 build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE -DCW_DESKTOP $(if $(WERROR),-Werror) \
-		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
-	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
 build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 # Only the ROM-free comparators are retained from tiles.c in this test.
 build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h

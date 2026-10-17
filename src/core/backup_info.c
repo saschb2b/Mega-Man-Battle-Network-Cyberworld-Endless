@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "layer_make.h"
+#include "online_trade_record.h"
 #include "rom.h"
 #include "save.h"
 #include "save_format.h"
@@ -34,7 +35,7 @@ static bool run_format(uint32_t magic, uint32_t size) {
 	return sizes[format] && size == sizes[format];
 }
 
-typedef struct { BackupInfo info, manifest; int area; bool ok, have_manifest, have_area; } Read;
+typedef struct { BackupInfo info, manifest; int area; bool ok, have_manifest, have_area, have_trade; } Read;
 
 static void read_run(Read *r, const uint8_t *data, uint32_t size) {
 	BackupInfo *i = &r->info;
@@ -76,7 +77,10 @@ static void read_file(const char *name, const uint8_t *data, uint32_t size, void
 	if (!backup_progress_name(name)) return;
 	++r->info.files;
 	if (!strcmp(name, "savedata/run.state")) { r->info.has_state = size > 0; if (!size) r->ok = false; }
-	else {
+	else if (!strcmp(name, "savedata/run.trade")) {
+		r->have_trade = true;
+		if (!online_trade_record_read(data, size, NULL, NULL)) { r->ok = false; return; }
+	} else {
 		if (!good_blob(data, size)) { r->ok = false; return; }
 		read_summary(r, name, data, size);
 	}
@@ -105,6 +109,7 @@ bool backup_info(const uint8_t *bytes, size_t n, BackupInfo *info) {
 	memset(info, 0, sizeof *info);
 	info->status = BACKUP_DAMAGED;
 	if (!backup_walk(bytes, n, NULL, NULL) || !backup_walk(bytes, n, read_file, &r) || !r.ok || !r.info.has_profile) return false;
+	if (r.have_trade && (!r.info.has_run || !r.info.has_state)) return false;
 	/* CWE1 predates the emulator: CONTINUE rebuilds its layer fresh. */
 	if (r.info.has_run && !r.info.has_state && r.info.run_magic != 0x43574531u) return false;
 	if (r.info.has_run && r.have_area) {

@@ -218,8 +218,8 @@ build/host/test_online_trade_journal
 
 The lightweight transaction and receipt checks also run in `test_core`;
 the full fault sweep runs in the ordinary `make test` suite.
-Startup and save-writer gates, portable backup integration, stale-restore
-history, the private-core swap and live two-player confirmation remain
+Startup and save-writer gates, stale-restore history, the private-core
+swap and live two-player confirmation remain
 separate integration work below.
 
 ## Required before a swap can modify a checkpoint
@@ -274,9 +274,13 @@ destination first, and its fsync helper has no physical-storage
 acknowledgement. A platform cannot advertise safe trading until its
 transaction path and recovery have been exercised on its real storage.
 
-The portable checkpoint needs its opaque run identity, monotonic trade
-revision and applied receipts included in the `.cwsave` allowlist and
-manifest validation. Guest secrets remain device-local. Import and Undo
+The portable checkpoint now carries its opaque run identity, monotonic
+trade revision and applied receipts through `run.trade` in the `.cwsave`
+allowlist and manifest hash. The receipt checksum and full revision chain
+are validated before import, independently of the carrier checksum; a
+receipt without an active run and checkpoint is refused. Export, import
+and Undo preserve its bytes unchanged, including after ordinary offline
+progress. Guest secrets remain device-local. Import and Undo
 must not replay an already settled receipt into a different checkpoint;
 an old imported revision must be reconciled before another trade. Run
 seeds are reproducible and are not unique transaction identities.

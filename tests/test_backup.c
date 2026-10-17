@@ -13,6 +13,7 @@
 #include "backup_fixture.h"
 #include "backup_fixture_v2.h"
 #include "backup_internal.h"
+#include "online_trade_record.h"
 #include "save.h"
 #include "rom.h"
 #include "save_format.h"
@@ -694,6 +695,67 @@ static void test_pending(void) {
 	remove_tree(dir);
 }
 
+/* Receipts travel with a checkpoint unchanged; their own validation is
+ * separate from the carrier checksum and ordinary save-blob checksum. */
+static void test_trade_receipts(void) {
+	char base[80], from[96], to[96], path[160], other[160];
+	snprintf(base, sizeof base, "build/host/test-trade-transfer-%d", (int)getpid());
+	remove_tree(base); mkdir(base, 0755);
+	snprintf(from, sizeof from, "%s/from", base); mkdir(from, 0755);
+	snprintf(to, sizeof to, "%s/to", base); mkdir(to, 0755);
+	CHECK(backup_restore(from, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK, "trade: invented profile restored");
+	Run r = { .active = true, .seed = 17, .depth = 4, .biome = BIOME_CENTRAL };
+	snprintf(path, sizeof path, "%s/savedata/run.sav", from); blob_file(path, RUN_MAGIC, &r, sizeof r);
+	snprintf(path, sizeof path, "%s/savedata/run.state", from);
+	CHECK(backup_write_file(path, (const uint8_t *)"invented checkpoint", 19), "trade: invented checkpoint written");
+	OnlineTradeTerms terms = { .server = { 1 }, .transaction = { 2 },
+		.side = { { .identity = { 3 }, .run_id = { 5 }, .checkpoint = { 7 }, .chip = 1 },
+			{ .identity = { 4 }, .run_id = { 6 }, .checkpoint = { 8 }, .chip = 2 } } };
+	uint8_t initial[ONLINE_TRADE_RECORD_INITIAL], post[32] = { 9 };
+	CHECK(online_trade_record_new(terms.side[0].run_id, initial), "trade: initial receipt made");
+	size_t record_n, n = 0;
+	uint8_t *record = online_trade_record_append(initial, sizeof initial, &terms, 0, post, &record_n);
+	snprintf(path, sizeof path, "%s/savedata/run.trade", from);
+	CHECK(record && backup_write_file(path, record, record_n), "trade: settled receipt written");
+	free(record);
+	uint8_t *carrier = backup_pack(from, 1, &n);
+	BackupInfo info;
+	CHECK(carrier && backup_info(carrier, n, &info) && info.files == 4, "trade: custom receipt is valid progress, outside blob format");
+	if (!carrier) { remove_tree(base); return; }
+	CHECK(backup_restore(to, carrier, n, true) == BACKUP_OK, "trade: receipt-bearing checkpoint imported");
+	snprintf(other, sizeof other, "%s/savedata/run.trade", to);
+	CHECK(same_file(path, other), "trade: receipt travels byte for byte");
+	uint8_t *receipt = member(carrier, n, "savedata/run.trade");
+	CHECK(receipt != NULL, "trade: receipt present in carrier");
+	if (receipt) {
+		receipt[8] ^= 1; rechecksum(carrier, n);
+		CHECK(!backup_info(carrier, n, &info) && backup_restore(to, carrier, n, true) == BACKUP_DAMAGED,
+			"trade: malformed receipt refused even with valid outer carrier checksum");
+		CHECK(same_file(path, other), "trade: malformed import leaves current receipt untouched");
+		receipt[8] ^= 1; rechecksum(carrier, n);
+	}
+	free(carrier);
+	CHECK(backup_restore(to, backup_fixture, sizeof backup_fixture, true) == BACKUP_OK && backup_undo(to),
+		"trade: ordinary import and Undo retain whole receipt-bearing checkpoint");
+	CHECK(same_file(path, other), "trade: Undo restores exact receipt bytes");
+	snprintf(other, sizeof other, "%s/savedata/run.state", to);
+	CHECK(backup_write_file(other, (const uint8_t *)"later offline checkpoint", 24), "trade: ordinary gameplay progresses after settlement");
+	carrier = backup_pack(to, 2, &n);
+	CHECK(carrier && backup_info(carrier, n, &info), "trade: historic post-checkpoint digest permits later offline progress");
+	free(carrier);
+	CHECK(remove(other) == 0, "trade: state removed from synthetic fixture");
+	carrier = backup_pack(to, 3, &n);
+	CHECK(!carrier, "trade: receipt without its checkpoint cannot be exported");
+	free(carrier);
+	snprintf(other, sizeof other, "%s/savedata/run.state", from); CHECK(remove(other) == 0, "trade: source state removed");
+	r.active = false;
+	snprintf(other, sizeof other, "%s/savedata/run.sav", from); blob_file(other, RUN_MAGIC, &r, sizeof r);
+	carrier = backup_pack(from, 4, &n);
+	CHECK(!carrier, "trade: receipt without an active run cannot be exported");
+	free(carrier);
+	remove_tree(base);
+}
+
 int test_backup(void) {
 	failures = 0;
 	test_roundtrip();
@@ -710,5 +772,6 @@ int test_backup(void) {
 	test_replaced();
 	test_local_read_only();
 	test_pending();
+	test_trade_receipts();
 	return failures;
 }
