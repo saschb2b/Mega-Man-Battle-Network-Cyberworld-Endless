@@ -30,6 +30,7 @@
 #include "test_online_trade_inventory.h"
 #include "test_online_trade_terms.h"
 #include "test_online_trade_wire.h"
+#include "test_online_trade_journal.h"
 #include "chip_pool.h"
 #include "guardians.h"
 #include "launcher_roms.h"
@@ -5118,6 +5119,7 @@ int main(void) {
 	test_online_trade_inventory();
 	failures += test_online_trade_terms();
 	failures += test_online_trade_wire();
+	failures += test_online_trade_journal();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();

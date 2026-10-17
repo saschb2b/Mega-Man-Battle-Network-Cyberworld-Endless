@@ -217,7 +217,8 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/analytics/analytics.c src/analytics/analytics_text.c \
 	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
-	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c
+	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
+	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -304,7 +305,8 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+test: build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+	build/host/test_online_trade_journal
 	build/host/test_online_trade_capture
 	build/host/test_core
 	build/host/test_emu
@@ -419,6 +421,13 @@ LINT_TRADE_CAPTURE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_CAPTURE_TE
 build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
 	@mkdir -p $(@D)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
+
+TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c \
+	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
+build/host/test_online_trade_journal: $(TRADE_JOURNAL_TEST_SRCS) src/online/*.h src/core/sha256.h shared/online/trade.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_JOURNAL_TEST_MAIN -o $@ $(TRADE_JOURNAL_TEST_SRCS)
 
 TRADE_WIRE_TEST_SRCS := tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c src/online/online_trade_terms.c src/core/sha256.c
 build/host/test_online_trade_wire: $(TRADE_WIRE_TEST_SRCS) src/online/*.h shared/online/*.h

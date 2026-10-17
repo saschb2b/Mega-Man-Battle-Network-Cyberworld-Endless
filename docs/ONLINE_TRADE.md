@@ -172,6 +172,56 @@ digest. This format is the common contract for the client journal and
 upcoming wire codec. Persisted schemas are validated exactly; these
 components have not yet been enabled in a released trade service.
 
+## Implemented: isolated native client journal
+
+`online_trade_journal.[ch]` prepares a full copied checkpoint and its
+portable `run.trade` receipt in `trade.stage`. Immutable terms bind the
+source checksum; only `run.state` and an optional `profile.sav` may be
+replaced. The derived transfer manifest is removed and recreated on a
+later export. Preparation requires an existing valid run identity and
+revision; missing or damaged receipts never mint a replacement identity.
+Every staged file, directory and the PREPARED journal is flushed and
+read back before success. Recovery recertifies visible PREPARED files
+and the journal before permitting that promise to be sent again: a name
+visible after process death is not proof that a directory flush succeeded.
+
+The separate `online_trade_files.[ch]` backend checks POSIX file and
+directory `fsync`, refuses links, nested or unrecognized checkpoint files,
+and takes an exclusive process lock. Windows, browser and 3DS backends
+currently report unsupported. This is an isolated component; the game
+still advertises no safe trading capability.
+
+An exact server COMMITTED decision is written durably before installing
+the complete stage. Recovery finishes that installation or leaves it
+blocked; it never restores the old chip to play after a commit. State
+and receipt move together as a directory. `trade.previous` is dedicated
+to this transaction; the player's `savedata.old` Undo slot is untouched.
+The journal remains until the server acknowledges local APPLIED. Repeated
+commit and acknowledgement are harmless. Unknown decisions, altered
+terms and damaged stages remain blocked. Receipt chains describe settled
+trades, so a later ordinary checkpoint need not match an old receipt's
+post-content digest.
+
+The ROM-free suite injects an I/O refusal and process death at each of
+328 storage boundaries: 158 prepare, 80 commit/install, 32 acknowledgement
+and 58 PREPARED recertification boundaries. It also checks visible but
+unflushed preparation, write/read-back corruption, a damaged committed
+stage, missing/malformed receipts, strict file names and preservation of
+Undo. All 656 interruption cases passed with ASan/UBSan and `-Werror`.
+These are Linux process-death and injected I/O-failure tests, not physical
+power-cut evidence or certification of another platform's storage.
+
+```sh
+make WERROR=1 build/host/test_online_trade_journal
+build/host/test_online_trade_journal
+```
+
+The lightweight transaction and receipt checks also run in `test_core`;
+the full fault sweep runs in the ordinary `make test` suite.
+Startup and save-writer gates, portable backup integration, stale-restore
+history, the private-core swap and live two-player confirmation remain
+separate integration work below.
+
 ## Required before a swap can modify a checkpoint
 
 Eligibility is not a commit. The full transaction needs one immutable
@@ -209,8 +259,8 @@ show a pending recovery until the decision can be resolved; it must not
 claim a completed swap while the local checkpoint is still old.
 
 The transaction cannot use `save_write_blob` success as acknowledgement:
-that may only mean queued, and `save_queue_wait` does not report an I/O
-failure. A normal `save_checkpoint` independently queues many files.
+that may only mean queued. `save_write_failures` can detect an ordinary
+write failure after `save_queue_wait`, but does not promise durable storage. A normal `save_checkpoint` independently queues many files.
 Use a separate durable write/read-back path and stage the state with its
 receipt, so a crash cannot leave a new Pack with an old receipt or vice
 versa. The existing import's `savedata.old` is user-visible Undo and
