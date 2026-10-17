@@ -12,6 +12,7 @@
 #include "network.h"
 #include "platform.h"
 #include "saves.h"
+#include "title_recovery.h"
 
 /* SELECT, on the title and its menu: the controls screen (issue #37); on
  * the 3DS, whose buttons are the console's own, the anonymous statistics'
@@ -77,3 +78,9 @@ void title_access_hint(int x0, int y0, bool menu, bool pressed, bool confirm) {
 void title_access_network(void) { network_open(); }
 
 void title_access_offer(void) { analytics_ask_offer(); }
+
+void title_access_enter(void) { title_recovery_enter(); }
+void title_access_failed(void) { title_recovery_failed(); }
+bool title_access_blocked(void) { return title_recovery_active(); }
+bool title_access_recover(void) { return title_recovery_update(); }
+bool title_access_draw(void) { return title_recovery_draw(); }

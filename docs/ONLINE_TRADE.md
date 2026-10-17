@@ -325,6 +325,23 @@ unbound intent refuses direct and queued state writes without changing the
 checkpoint, refuses state loading without changing RAM, and leaves the
 separate boot cache usable.
 
+The title gives blocked saves their own recovery screen. An unfinished
+new start requires an explicit discard confirmation, defaulting to keeping
+the files; pending trades and unreadable saves offer recovery or Quit.
+A failed Continue returns to the title without silently starting a new
+run. The local Retry action does not yet contact a trade server.
+
+`tools/online_trade_recovery_proof.py` exercises real game input against
+disposable copies of a checkpoint: nine checks preserve the files through
+cancel, pending trade, damaged journal and interrupted import, restrict
+explicit discard to the unfinished run, and preserve a failed Continue.
+The pending record is a storage fixture with an unchanged staged state,
+not a completed native swap. Images and evidence stay under `.build/`:
+
+```sh
+python3 tools/online_trade_recovery_proof.py --checkpoint DATA_DIR --rom-dir ROM_DIR
+```
+
 ## Implemented: isolated pristine-state staging
 
 `online_trade_stage.[ch]` returns owned checkpoint bytes from an immutable

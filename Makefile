@@ -511,3 +511,8 @@ LINT_TRADE_STAGE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_STAGE_TEST_S
 build/lint/test_online_trade_stage: $(LINT_TRADE_STAGE_OBJS)
 	@mkdir -p $(@D)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
+
+build/host/online-trade-recovery-fixture: tools/online_trade_recovery_fixture.c $(TRADE_STORAGE_SRCS) src/online/*.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Isrc/online -Isrc/core -Ishared/online -o $@ tools/online_trade_recovery_fixture.c $(TRADE_STORAGE_SRCS)

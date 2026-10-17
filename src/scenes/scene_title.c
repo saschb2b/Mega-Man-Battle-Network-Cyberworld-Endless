@@ -126,6 +126,7 @@ static void enter(void) {
 	S.tex = tex;
 	++entries;
 	title_art_build();
+	title_access_enter();
 	S.has_save = save_exists();
 	Run saved = { 0 };
 	if (S.has_save && peek_run(&saved)) S.saved_depth = saved.depth;
@@ -143,7 +144,7 @@ static void enter(void) {
 	/* (a won run's summary to BN6's staff roll theme, the title's after:
 	 * the Nest's fall went from the exit pad to the title's own tune) */
 	audio_music(S.summary && title_won ? MUS_CREDITS : MUS_TITLE);
-	if (title_setup) {
+	if (title_setup && !title_access_blocked()) {
 		title_setup = false;
 		S.menu = 1;
 		setup_open();
@@ -153,7 +154,7 @@ static void enter(void) {
 	title_menu = false;
 	/* (the anonymous statistics' question, once: the first start where the
 	 * build can send, after the start's screens, issue #104) */
-	if (entries == 1) title_access_offer();
+	if (entries == 1 && !title_access_blocked()) title_access_offer();
 }
 
 static void jack_in(void);
@@ -482,15 +483,22 @@ static bool menu_choose(bool ok) {
 
 static void update(void) {
 	++S.t;
+	if (title_access_recover()) return;
 	saves_tick();
 	if (S.leaving) {
 		++S.leaving;
 		if (S.jack_v < 96) S.jack_v += 4;
 		S.jack_y += S.jack_v;
 		if (S.leaving > LEAVE_FRAMES) {
-			if (S.choice == 1 && load_run()) emu_resume_requested = true;
+			bool ok = S.choice == 1 ? load_run() : run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
+			if (!ok) {
+				S.leaving = 0;
+				title_access_failed();
+				audio_music(MUS_TITLE);
+				return;
+			}
+			if (S.choice == 1) emu_resume_requested = true;
 			else {
-				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
 				run_setup(S.net, S.folder, S.threat, S.helpers, S.cross);
 				meta_run_begun();
 				emu_start_in_town = true;
@@ -693,27 +701,7 @@ static void menu_draw(int x0, int y0, uint32_t text) {
 	if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 115 + S.cursor * 14, 2, 2, 0);
 }
 
-static void draw(void) {
-	fill_rect(0, 0, P.w, P.h, BLACK);
-	int x0 = P.core_x, y0 = P.core_y;
-	if (S.leaving > LEAVE_WHITE) {
-		/* into the net: the white fades to black */
-		int a = 255 - (S.leaving - LEAVE_WHITE) * 255 / (LEAVE_FRAMES - LEAVE_WHITE);
-		fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, a < 0 ? 0 : a));
-		return;
-	}
-	render();
-	SDL_Rect dst = { x0, y0, 240, 160 };
-	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
-	if (S.setup) { setup_draw(x0, y0); return; }
-
-	/* the copyright line: 8 OBJs of 32x32 along the bottom */
-	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
-	if (!S.confirm && !S.summary && !S.menu)
-		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
-	top_draw(x0, y0);
-
-	if (S.summary) { summary_draw(x0, y0); return; }
+static void progress_draw(int x0, int y0) {
 	/* a line above the copyright, the marks holding the top: the build
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the menu's CONTINUE names its own layer there;
@@ -727,6 +715,31 @@ static void draw(void) {
 			minifont_draw(x0 + CORE_W - 4 - minifont_width(v, 1), y0 + (S.menu ? 153 : 138), v, rgba(255, 230, 90, 255), 1);
 		}
 	}
+}
+
+static void draw(void) {
+	fill_rect(0, 0, P.w, P.h, BLACK);
+	int x0 = P.core_x, y0 = P.core_y;
+	if (S.leaving > LEAVE_WHITE) {
+		/* into the net: the white fades to black */
+		int a = 255 - (S.leaving - LEAVE_WHITE) * 255 / (LEAVE_FRAMES - LEAVE_WHITE);
+		fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, a < 0 ? 0 : a));
+		return;
+	}
+	render();
+	SDL_Rect dst = { x0, y0, 240, 160 };
+	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
+	if (title_access_draw()) return;
+	if (S.setup) { setup_draw(x0, y0); return; }
+
+	/* the copyright line: 8 OBJs of 32x32 along the bottom */
+	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
+	if (!S.confirm && !S.summary && !S.menu)
+		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
+	top_draw(x0, y0);
+
+	if (S.summary) { summary_draw(x0, y0); return; }
+	progress_draw(x0, y0);
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */

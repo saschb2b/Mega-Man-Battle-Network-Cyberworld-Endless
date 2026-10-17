@@ -7,5 +7,10 @@ bool title_access_keys(void);
 void title_access_offer(void);
 void title_access_hint(int x, int y, bool menu, bool pressed, bool confirm);
 void title_access_network(void);
+void title_access_enter(void);
+void title_access_failed(void);
+bool title_access_blocked(void);
+bool title_access_recover(void);
+bool title_access_draw(void);
 
 #endif
