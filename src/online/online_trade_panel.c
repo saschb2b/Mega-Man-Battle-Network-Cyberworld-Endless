@@ -29,7 +29,7 @@ static void chip_card(uint16_t entry, int x, const char *heading) {
 }
 
 void online_trade_panel_draw(const OnlineTradePanel *panel) {
-	if (!panel || panel->phase < 0 || panel->phase >= TRADE_PANEL_PHASES) return;
+	if (!panel || (unsigned)panel->phase >= TRADE_PANEL_PHASES) return;
 	fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, PET_EXIT);
 	fill_rect(P.core_x, P.core_y, EMU_W, 15, PET_GREEN);
 	text_draw(P.core_x + 6, P.core_y + 1, trade_panel_title, PET_WHITE, TEXT_LEFT);

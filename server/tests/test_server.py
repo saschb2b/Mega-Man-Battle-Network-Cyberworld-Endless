@@ -82,8 +82,14 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(welcome[1:5], other[1:5])
         self.assertNotEqual(welcome[5:9], other[5:9])
         await first.send(protocol.STATE.pack(protocol.SPEC["state"], 123, -234, 12, 7))
-        await asyncio.sleep(0.06)
-        message = await second.message(protocol.SPEC["snapshot"])
+        # A ticker snapshot can already be queued before STATE is handled.
+        # Observe the actual update instead of assuming host scheduling.
+        for _ in range(30):
+            message = await second.message(protocol.SPEC["snapshot"])
+            if message[1] == 1 and protocol.PEER.unpack(message[2:])[2:6] == (123, -234, 12, 7):
+                break
+        else:
+            self.fail("Peer movement was not delivered")
         self.assertEqual(message[1], 1)
         peer = protocol.PEER.unpack(message[2:])
         self.assertEqual(peer[0], struct.unpack("!I", welcome[5:9])[0])
