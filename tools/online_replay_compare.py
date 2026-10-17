@@ -10,6 +10,7 @@ import re
 from tools.online_frame_compare import Mismatch, compare_game
 
 TOTAL = 2822
+ENTRY = 958
 HORIZONS = (1, 4, 8)
 POINTS = ('custom', 'held-charge', 'before-release', 'after-damage', 'nonidle-cable', 'flash-change')
 MUTATIONS = ('omit-cable', 'omit-flash', 'credit', 'receive-word', 'event-delay')
@@ -120,7 +121,40 @@ def active(row):
     return all(s[2] > 0 and s[7] & 65535 == 0x0c04 for s in row['samples'])
 
 
-def select_points(rows):
+def read_cable(path, original, exercised=True):
+    try:
+        record = json.loads(Path(path).read_text())
+    except FileNotFoundError as error:
+        raise Unreached('No nonidle instruction-boundary observation') from error
+    except (OSError, ValueError) as error:
+        raise Mismatch('Malformed instruction-boundary observation') from error
+    members(record, 'cursor state', 'instruction boundary')
+    row, cursor = record['state'], record['cursor']
+    validate_record(row)
+    members(cursor, 'stage frame round targets relative battle keys', 'executor cursor')
+    require(cursor['stage'] == 'check-targets', 'Wrong suspended executor stage')
+    require(integer(cursor['frame']) and cursor['frame'] == row['frame'] and row['frame'] <= TOTAL - max(HORIZONS),
+            'Wrong suspended executor frame')
+    require(integer(cursor['round'], 1, 4000000), 'Wrong suspended executor round')
+    battle = row['frame'] >= ENTRY
+    relative = row['frame'] - ENTRY if battle else row['pair']['entry_frame']
+    require(type(cursor['battle']) is bool and cursor['battle'] == battle and
+            integer(cursor['relative']) and cursor['relative'] == relative, 'Wrong suspended script position')
+    require(words(cursor['targets'], 2) and cursor['targets'] == [f + relative + 1 for f in row['pair']['start_frames']],
+            'Wrong suspended frame targets')
+    require(cursor['keys'] == row['inputs'] == original[row['frame']]['inputs'], 'Wrong suspended input lookahead')
+    baseline_pair = original[row['frame']]['pair']
+    require(all(row['pair'][key] == baseline_pair[key] for key in ('frame', 'start_frames', 'entry_step', 'entry_frame')),
+            'Wrong suspended pair bookkeeping')
+    require(all(old <= current <= sample[5] for old, current, sample in
+                zip(baseline_pair['traced_frames'], row['pair']['traced_frames'], row['samples'])),
+            'Wrong suspended per-core observation cursor')
+    if exercised and not (active(row) and row['cable']['phase'] and any(n['scheduled'] for n in row['cable']['nodes'])):
+        raise Unreached('No active nonidle scheduled cable transfer at instruction boundary')
+    return record
+
+
+def select_points(rows, cable=None):
     """Choose from original evidence before subject execution, never its report."""
     require(len(rows) == TOTAL + 1, 'Original trace is incomplete')
     found = {}
@@ -138,6 +172,9 @@ def select_points(rows):
             if exercised and name not in found:
                 found[name] = frame
     missing = set(POINTS) - set(found)
+    if cable is not None:
+        found['nonidle-cable'] = cable['state']['frame']
+        missing.discard('nonidle-cable')
     if missing:
         raise Unreached('Original did not exercise: ' + ', '.join(sorted(missing)))
     return found
@@ -149,40 +186,59 @@ def compare_rows(reference, subject, label):
         require(expected == actual, f'{label}: first divergence at frame {expected["frame"]}')
 
 
-def accept_observer(original_csv, observer_csv, first, second):
+def accept_observer(original_csv, observer_csv, first, second, cable_first=None, cable_second=None, baseline=None):
     logical = compare_game(original_csv, observer_csv)
     a, b = read_trace(first), read_trace(second)
     compare_rows(a, b, 'original control')
-    return dict(verdict='PASS', original_active_timers=logical, full_records=len(a), points=select_points(a))
+    cable = read_cable(cable_first, a) if cable_first is not None else None
+    if cable is not None:
+        require(baseline is not None and cable_second is not None, 'Micro observer needs the controlled original full trace')
+        compare_rows(read_trace(baseline), a, 'original versus instruction executor')
+        require(cable == read_cable(cable_second, b), 'Original instruction boundary does not repeat')
+    return dict(verdict='PASS', original_active_timers=logical, full_records=len(a), points=select_points(a, cable))
 
 
-def accept_replays(original, noop, directory):
+def accept_replays(original, noop, directory, cable_path=None):
     rows = read_trace(original)
     compare_rows(rows, read_trace(noop), 'snapshot noop')
-    points, accepted = select_points(rows), []
+    cable = read_cable(cable_path, rows) if cable_path is not None else None
+    points, accepted = select_points(rows, cable), []
     for name, frame in points.items():
         for horizon in HORIZONS:
             for repeat in (1, 2):
                 label = f'{name}-{horizon}-{repeat}'
-                replay = read_trace(Path(directory) / f'{label}.jsonl', frame, frame + horizon)
+                first = frame
+                if name == 'nonidle-cable' and cable is not None:
+                    immediate = read_cable(Path(directory) / f'{label}-immediate.json', rows, exercised=False)
+                    require(immediate == cable, f'{label}: immediate instruction-boundary state/cursor differs')
+                    first += 1
+                replay = read_trace(Path(directory) / f'{label}.jsonl', first, frame + horizon)
                 # The first record is immediately after restore, before any CPU step.
-                compare_rows(rows[frame:frame + horizon + 1], replay, label)
+                compare_rows(rows[first:frame + horizon + 1], replay, label)
                 accepted.append(label)
     return dict(verdict='PASS', points=points, replay_cases=accepted, masks=[])
 
 
-def accept_mutation(original, mutation, path):
+def accept_mutation(original, mutation, path, cable_path=None, immediate_path=None):
     require(mutation in MUTATIONS, 'Unknown replay mutation')
     rows = read_trace(original)
     point = 'flash-change' if mutation == 'omit-flash' else 'nonidle-cable'
-    frame = select_points(rows)[point]
-    changed = read_trace(path, frame, frame + max(HORIZONS))
-    differences = [a['frame'] for a, b in zip(rows[frame:frame + max(HORIZONS) + 1], changed) if a != b]
+    cable = read_cable(cable_path, rows) if cable_path is not None else None
+    frame = select_points(rows, cable)[point]
+    if point == 'nonidle-cable' and cable is not None:
+        immediate = read_cable(immediate_path, rows, exercised=False)
+        require(immediate['cursor'] == cable['cursor'], 'Mutation changed suspended executor cursor')
+        changed = [immediate['state']] + read_trace(path, frame + 1, frame + max(HORIZONS))
+        expected = [cable['state']] + rows[frame + 1:frame + max(HORIZONS) + 1]
+    else:
+        changed = read_trace(path, frame, frame + max(HORIZONS))
+        expected = rows[frame:frame + max(HORIZONS) + 1]
+    differences = [a['frame'] for a, b in zip(expected, changed) if a != b]
     require(differences, f'{mutation}: mutation did not produce a divergence')
     # A changed input, frame or sample-only fabrication is not a state-restoration mutation.
-    for expected, actual in zip(rows[frame:frame + max(HORIZONS) + 1], changed):
-        require(expected['inputs'] == actual['inputs'], 'Mutation changed the controller script')
-    before, after = rows[frame]['cable'], changed[0]['cable']
+    for original_row, actual in zip(expected, changed):
+        require(original_row['inputs'] == actual['inputs'], 'Mutation changed the controller script')
+    before, after = expected[0]['cable'], changed[0]['cable']
     component_changed = {
         'omit-cable': before != after,
         'omit-flash': any(a['flash'] != b['flash'] for a, b in zip(rows[frame]['cores'], changed[0]['cores'])),

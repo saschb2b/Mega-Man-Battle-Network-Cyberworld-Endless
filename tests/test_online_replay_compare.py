@@ -5,10 +5,11 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.online_replay_compare import (HORIZONS, MUTATIONS, TARGET, TOTAL, Mismatch, Unreached,
-                                        accept_mutation, accept_replays, read_trace, select_points, verify_manifest)
+                                        accept_mutation, accept_observer, accept_replays, read_cable, read_trace, select_points, verify_manifest)
 
 
 def record(frame):
@@ -57,6 +58,14 @@ class ReplayComparatorTests(unittest.TestCase):
             for horizon in HORIZONS:
                 for repeat in (1, 2):
                     self.write(f'{name}-{horizon}-{repeat}.jsonl', self.rows[frame:frame + horizon + 1])
+
+    def cable_fixture(self):
+        row = copy.deepcopy(self.rows[25])
+        record = dict(state=row, cursor=dict(stage='check-targets', frame=25, round=4, targets=[1, 1],
+                                             relative=0, battle=False, keys=copy.deepcopy(row['inputs'])))
+        path = self.path / 'cable.json'
+        path.write_text(json.dumps(record))
+        return path, record
 
     def test_complete_control_and_all_replays_pass(self):
         self.replays()
@@ -144,6 +153,74 @@ class ReplayComparatorTests(unittest.TestCase):
             mutate(changed)
             with self.assertRaises(Mismatch):
                 verify_manifest(changed, pins)
+
+    def test_instruction_boundary_replay_requires_exact_cursor_and_immediate_state(self):
+        self.replays()
+        path, cable = self.cable_fixture()
+        for horizon in HORIZONS:
+            for repeat in (1, 2):
+                label = f'nonidle-cable-{horizon}-{repeat}'
+                (self.path / f'{label}-immediate.json').write_text(json.dumps(cable))
+                self.write(f'{label}.jsonl', self.rows[26:26+horizon])
+        self.assertEqual(len(accept_replays(self.original, self.original, self.path, path)['replay_cases']), 36)
+        target = self.path / 'nonidle-cable-8-2-immediate.json'
+        for mutate in (lambda c: c['cursor'].update(stage='frame-start'),
+                       lambda c: c['cursor'].update(round=0),
+                       lambda c: c['cursor'].update(round=5),
+                       lambda c: c['cursor'].update(targets=[2, 1]),
+                       lambda c: c['state']['cores'][0]['state'].update(sha256='f'*64)):
+            changed = copy.deepcopy(cable)
+            mutate(changed)
+            target.write_text(json.dumps(changed))
+            with self.assertRaises(Mismatch):
+                accept_replays(self.original, self.original, self.path, path)
+        target.unlink()
+        with self.assertRaises(Mismatch):
+            accept_replays(self.original, self.original, self.path, path)
+
+    def test_instruction_boundary_must_be_active_nonidle_and_scheduled(self):
+        path, cable = self.cable_fixture()
+        self.assertEqual(read_cable(path, self.rows), cable)
+        for mutate in (lambda c: c['state']['cable'].update(phase=0),
+                       lambda c: [n.update(scheduled=False) for n in c['state']['cable']['nodes']],
+                       lambda c: c['state']['samples'][0].__setitem__(7, 0x0804)):
+            changed = copy.deepcopy(cable)
+            mutate(changed)
+            path.write_text(json.dumps(changed))
+            with self.assertRaises(Unreached):
+                read_cable(path, self.rows)
+
+    def test_instruction_boundary_mutation_preserves_cursor_and_frame_continuation(self):
+        reference, cable = self.cable_fixture()
+        changed = copy.deepcopy(cable)
+        changed['state']['cable']['nodes'][0]['credit'] += 1
+        immediate = self.path / 'changed-immediate.json'
+        immediate.write_text(json.dumps(changed))
+        continuation = self.write('changed.jsonl', self.rows[26:34])
+        result = accept_mutation(self.original, 'credit', continuation, reference, immediate)
+        self.assertEqual(result['first_divergent_frame'], 25)
+        with self.assertRaises(Mismatch):
+            accept_mutation(self.original, 'event-delay', continuation, reference, immediate)
+        changed['cursor']['round'] += 1
+        immediate.write_text(json.dumps(changed))
+        with self.assertRaisesRegex(Mismatch, 'cursor'):
+            accept_mutation(self.original, 'credit', continuation, reference, immediate)
+
+    def test_repeating_micro_observer_must_match_controlled_original_full_state(self):
+        cable, _ = self.cable_fixture()
+        # Equal logical CSV alone must not excuse a common full-state error.
+        with patch('tools.online_replay_compare.compare_game', return_value=1433):
+            with self.assertRaisesRegex(Mismatch, 'controlled original'):
+                accept_observer('old.csv', 'new.csv', self.original, self.original, cable, cable)
+            self.assertEqual(accept_observer('old.csv', 'new.csv', self.original, self.original,
+                                            cable, cable, self.original)['verdict'], 'PASS')
+            for mutate in (lambda r: r['cores'][0]['state'].update(sha256='e'*64),
+                           lambda r: r['cable']['nodes'][0].update(credit=42)):
+                rows = copy.deepcopy(self.rows)
+                mutate(rows[700])
+                repeated = self.write('repeated.jsonl', rows)
+                with self.assertRaisesRegex(Mismatch, 'original versus instruction executor'):
+                    accept_observer('old.csv', 'new.csv', repeated, repeated, cable, cable, self.original)
 
 
 if __name__ == '__main__':
