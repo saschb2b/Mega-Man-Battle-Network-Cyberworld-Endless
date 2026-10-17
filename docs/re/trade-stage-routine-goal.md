@@ -83,7 +83,9 @@ fixture exercise the quantity boundaries within this ordinary BN6 scope.
 Compare the complete Pack, ownership and Library result against the
 original calls, not a subtraction formula. Verify all equipped entries
 and protected gameplay fields against the source. Restore returned bytes
-in a fresh private core, re-read them, then enter the original folder
+in a fresh private core and compare them with the separately reviewed
+[unchanged-source reload controls](trade-stage-reload.md), without any
+ignored audio bytes. Re-read inventory, then enter the original folder
 editor and compare its spare counts with the original-routine result's
 editor. The source files and a separately snapshotted live-core sentinel
 must remain unchanged.

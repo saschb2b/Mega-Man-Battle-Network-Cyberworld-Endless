@@ -6,6 +6,7 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools import online_trade_stage_compare as c
@@ -65,7 +66,7 @@ class StageComparatorTests(unittest.TestCase):
         for name in c.CASES:
             self.fixture(name)
             before, original, fields, complete = self.check_oracle(name)
-            result = c.accept_candidate(before, original, fields, complete, original, original, b'live', b'live')
+            result = c.accept_candidate(before, original, fields, complete, original, original, b'live', b'live', before)
             self.assertEqual(result['verdict'], 'PASS')
             self.assertEqual(result['oracle'], 'original-routines')
             self.assertEqual(result['masks'], [])
@@ -77,7 +78,7 @@ class StageComparatorTests(unittest.TestCase):
             candidate = bytearray(original)
             candidate[at:at + size] = before[at:at + size]
             with self.subTest(name=name), self.assertRaises(c.Mismatch):
-                c.accept_candidate(before, original, fields, complete, candidate, candidate, b'a', b'a')
+                c.accept_candidate(before, original, fields, complete, candidate, candidate, b'a', b'a', before)
 
     def test_code_count_folder_cpu_flash_and_unrelated_byte_faults_fail(self):
         self.fixture()
@@ -89,13 +90,13 @@ class StageComparatorTests(unittest.TestCase):
             candidate = bytearray(original)
             candidate[at] ^= 1
             with self.subTest(at=at), self.assertRaises(c.Mismatch):
-                c.accept_candidate(before, original, fields, complete, candidate, candidate, b'a', b'a')
+                c.accept_candidate(before, original, fields, complete, candidate, candidate, b'a', b'a', before)
         with self.assertRaises(c.Mismatch):
-            c.accept_candidate(before, original, fields, complete, before, before, b'a', b'a')
+            c.accept_candidate(before, original, fields, complete, before, before, b'a', b'a', before)
         with self.assertRaises(c.Mismatch):
-            c.accept_candidate(before, original, fields, complete, original, before, b'a', b'a')
+            c.accept_candidate(before, original, fields, complete, original, before, b'a', b'a', before)
         with self.assertRaises(c.Mismatch):
-            c.accept_candidate(before, original, fields, complete, original, original, b'a', b'b')
+            c.accept_candidate(before, original, fields, complete, original, original, b'a', b'b', before)
 
     def test_missing_truncated_wrong_target_or_nonrepeating_original_fails(self):
         self.fixture()
@@ -142,9 +143,9 @@ class StageComparatorTests(unittest.TestCase):
                 self.check_oracle()
 
     def test_manifest_requires_complete_nonmutation_and_build_pins(self):
-        pins = {'comparator': '1' * 64, 'oracle': '2' * 64}
+        pins = {'comparator': '1' * 64, 'oracle': '2' * 64, 'tools/online_trade_reload.c': c.RELOAD_SOURCE_SHA256}
         valid = dict(before=c.TARGET, after=c.TARGET, layout=c.LAYOUT, sources=pins,
-                     binaries=dict(oracle='3' * 64, candidate='4' * 64),
+                     binaries=dict(oracle='3' * 64, candidate='4' * 64, reload=c.RELOAD_BINARY_SHA256),
                      fixtures={name: '5' * 64 for name in c.CASES})
         c.verify_manifest(valid, pins)
         for field in valid:
@@ -155,6 +156,8 @@ class StageComparatorTests(unittest.TestCase):
         for mutate in (lambda m: m['after'].pop('state_sha256'),
                        lambda m: m['after'].update(state_sha256='f' * 64),
                        lambda m: m['binaries'].update(oracle='mGBA 0.10.5'),
+                       lambda m: m['binaries'].update(reload='f' * 64),
+                       lambda m: m['sources'].pop('tools/online_trade_reload.c'),
                        lambda m: m['fixtures'].pop('counter-wrap'),
                        lambda m: m['layout'].update(wram=0),
                        lambda m: m['sources'].update(comparator='f' * 64)):
@@ -180,15 +183,18 @@ class StageComparatorTests(unittest.TestCase):
             (self.root / destination / 'editor.counts').write_bytes(bytes(512 * 27))
         for name, data in {'source-after': self.states['before'], 'candidate': self.states['given'],
                            'reloaded': self.states['given'], 'live-before': self.states['before'],
-                           'live-after': self.states['before']}.items():
+                           'live-after': self.states['before'], 'reload-a': self.states['before'],
+                           'reload-b': self.states['before']}.items():
             (self.root / f'{name}.state').write_bytes(data)
         (self.root / 'candidate-editor.counts').write_bytes(bytes(512 * 27))
-        pins = {'comparator': '1' * 64}
+        pins = {'comparator': '1' * 64, 'tools/online_trade_reload.c': c.RELOAD_SOURCE_SHA256}
         manifest = dict(before=c.TARGET, after=c.TARGET, layout=c.LAYOUT, sources=pins,
-                        binaries=dict(oracle='2' * 64, candidate='3' * 64),
+                        binaries=dict(oracle='2' * 64, candidate='3' * 64, reload=c.RELOAD_BINARY_SHA256),
                         fixtures={name: c.digest(self.states['before']) for name in c.CASES})
+        patched = patch.dict(c.RELOAD_HASHES, {'first-code': c.digest(self.states['before'])})
+        patched.start(); self.addCleanup(patched.stop)
         self.assertEqual(c.accept_case(self.root, 'first-code', manifest, pins)['verdict'], 'PASS')
-        for name in ('source-after.state', 'live-after.state', 'candidate-editor.counts'):
+        for name in ('source-after.state', 'live-after.state', 'candidate-editor.counts', 'reload-a.state', 'reload-b.state'):
             path = self.root / name
             old = path.read_bytes()
             changed = bytearray(old)
@@ -197,6 +203,41 @@ class StageComparatorTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(c.Mismatch):
                 c.accept_case(self.root, 'first-code', manifest, pins)
             path.write_bytes(old)
+
+
+    def test_reload_controls_missing_differing_or_same_unpinned_bytes_are_unreached(self):
+        self.fixture()
+        first, second = self.root / 'reload-a.state', self.root / 'reload-b.state'
+        first.write_bytes(self.states['before'])
+        with self.assertRaises(c.Unreached):
+            c.reload_controls(first, second, 'first-code')
+        second.write_bytes(self.states['before'])
+        with self.assertRaises(c.Unreached):
+            c.reload_controls(first, second, 'first-code')
+        with patch.dict(c.RELOAD_HASHES, {'first-code': c.digest(self.states['before'])}):
+            self.assertEqual(c.reload_controls(first, second, 'first-code'), self.states['before'])
+            altered = bytearray(self.states['before']); altered[0x132] ^= 1
+            second.write_bytes(altered)
+            with self.assertRaises(c.Unreached):
+                c.reload_controls(first, second, 'first-code')
+            first.write_bytes(altered)
+            with self.assertRaises(c.Unreached):
+                c.reload_controls(first, second, 'first-code')
+
+    def test_reload_control_does_not_mask_audio_or_other_protected_bytes(self):
+        self.fixture()
+        before, original, fields, complete = self.check_oracle()
+        control, reloaded = bytearray(before), bytearray(original)
+        control[0x132] ^= 1; reloaded[0x132] ^= 1
+        self.assertEqual(c.accept_candidate(before, original, fields, complete, original, reloaded,
+                                          b'live', b'live', control)['verdict'], 'PASS')
+        for at in (0x132, 0x141, 32, c.offset(0x02001000), c.LAYOUT['core_bytes']):
+            broken = bytearray(reloaded); broken[at] ^= 2
+            with self.subTest(at=at), self.assertRaises(c.Mismatch):
+                c.accept_candidate(before, original, fields, complete, original, broken, b'a', b'a', control)
+        corrupted_file = bytearray(original); corrupted_file[0x132] ^= 1
+        with self.assertRaises(c.Mismatch):
+            c.accept_candidate(before, original, fields, complete, corrupted_file, reloaded, b'a', b'a', control)
 
 
 if __name__ == '__main__':

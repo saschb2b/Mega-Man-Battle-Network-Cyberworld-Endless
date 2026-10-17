@@ -32,6 +32,18 @@ CASES = {
 }
 
 
+# Independent unmodified-source reload controls, reviewed in
+# docs/re/trade-stage-reload.md. These are full-state pins, never masks.
+RELOAD_SOURCE_SHA256 = 'ed0b8ba29a4ef71bc1cbc19a75b930564b98ded427c313204edcbf28b2ab4377'
+RELOAD_BINARY_SHA256 = '7bf8c483defbdaa78a1fd267acd53bc6fb6ba9d7cb2ad62ca73e8021495b0717'
+RELOAD_HASHES = {
+    'first-code': '64389d911cc93b04d64c95b47506e6a8cbe932007bc8cfaac60531b0a6f6afb2',
+    'second-code': 'a734435a8976bb17fe0e8b1daa23405383fba82c9ac7c6fe54a9784aeda36cf8',
+    'counter-wrap': '0e32bac01d8ce6fe6fe7ab2fa9c19acd6beec15215c9d4693a35f7bf5cdbf183',
+    'incoming-98': 'ba7d6186aa59edd3fe88094295a45ebe4aaa0bf352d1672067cea17144d94b61',
+}
+
+
 class Mismatch(Exception):
     """Reached evidence disagrees."""
 
@@ -82,8 +94,10 @@ def verify_manifest(manifest, reviewed):
     require(type(reviewed) is dict and reviewed and manifest['sources'] == reviewed, 'Unreviewed source pins')
     for value in reviewed.values():
         require(type(value) is str and SHA256.fullmatch(value), 'Invalid source hash')
-    require(type(manifest['binaries']) is dict and set(manifest['binaries']) == {'oracle', 'candidate'},
+    require(type(manifest['binaries']) is dict and set(manifest['binaries']) == {'oracle', 'candidate', 'reload'},
             'Missing actual binary pins')
+    require(manifest['binaries']['reload'] == RELOAD_BINARY_SHA256 and
+            reviewed.get('tools/online_trade_reload.c') == RELOAD_SOURCE_SHA256, 'Unreviewed reload observer')
     for value in manifest['binaries'].values():
         require(type(value) is str and SHA256.fullmatch(value), 'Invalid binary hash')
     require(type(manifest['fixtures']) is dict and set(manifest['fixtures']) == set(CASES), 'Missing source fixture pins')
@@ -196,12 +210,21 @@ def oracle(first, second, case_name):
     return before, given, fields, complete
 
 
-def accept_candidate(before, original, fields, complete, candidate, reloaded, live_before, live_after):
+def reload_controls(first, second, case_name):
+    a, b = state(first), state(second)
+    if a != b or digest(a) != RELOAD_HASHES.get(case_name):
+        raise Unreached('Unmodified-source reload controls differ or changed from their pin')
+    return a
+
+
+def accept_candidate(before, original, fields, complete, candidate, reloaded, live_before, live_after, control):
     allowed = positions(fields.values())
     changes = differing(before, candidate)
     require(all(i in allowed for i in changes), 'Candidate changed a protected serialized byte')
     compare_regions(original, candidate, complete, 'Candidate differs from original inventory')
-    require(reloaded == candidate, 'Reloaded serialized state differs before execution')
+    compare_regions(before, control, complete, 'Unmodified-source reload changed inventory')
+    require(all(i in allowed for i in differing(control, reloaded)), 'Reload changed a protected serialized byte')
+    compare_regions(original, reloaded, complete, 'Reloaded inventory differs from original')
     require(live_before == live_after, 'Live Square sentinel changed')
     return dict(verdict='PASS', oracle='original-routines', changed_bytes=len(changes), masks=[])
 
@@ -224,9 +247,10 @@ def accept_case(directory, case_name, manifest, reviewed):
     before, original, fields, complete = oracle(root / 'original-a', root / 'original-b', case_name)
     require(digest(before) == manifest['fixtures'][case_name], 'Pinned source fixture changed')
     require(state(root / 'source-after.state') == before, 'Source checkpoint buffer/file changed')
+    control = reload_controls(root / 'reload-a.state', root / 'reload-b.state', case_name)
     result = accept_candidate(before, original, fields, complete, state(root / 'candidate.state'),
                               state(root / 'reloaded.state'), state(root / 'live-before.state'),
-                              state(root / 'live-after.state'))
+                              state(root / 'live-after.state'), control)
     counts = editor(root / 'original-a' / 'editor.counts')
     require(counts == editor(root / 'original-b' / 'editor.counts'), 'Original editor controls differ')
     require(counts == editor(root / 'candidate-editor.counts'), 'Reloaded candidate editor differs')

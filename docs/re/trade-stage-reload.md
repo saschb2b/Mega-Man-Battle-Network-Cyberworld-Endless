@@ -1,6 +1,7 @@
 # Staged trade: unchanged-source reload control
 
-Status: proposed harness correction, awaiting review. The candidate is
+Status: reviewed harness correction; comparator review precedes candidate
+acceptance. The candidate is
 not accepted. The original native peer Trade remains INCONCLUSIVE.
 
 The first candidate preserves every serialized source byte outside the
@@ -47,12 +48,16 @@ The field classification comes from the installed pinned mGBA
 `GBASerializedState` layout. Its [PSG serializer and deserializer](https://github.com/mgba-emu/mgba/blob/0.10.5/src/gb/audio.c)
 write duty indices, timing and the noise generator's state; the
 [GBA load/save path](https://github.com/mgba-emu/mgba/blob/0.10.5/src/gba/serialize.c)
-restores IO and audio separately. This establishes which fields changed,
+restores IO and audio separately. In `GBAAudioDeserialize`, the PSG is
+restored before the function writes sound registers through `GBAIOWrite`;
+those writes call `GBAudioRun`, advancing channel bookkeeping to the same
+current time. The independent Arena restore investigation found the same
+path ([replay notes](../ONLINE_REPLAY.md)). This establishes which fields changed,
 not a general authorization to ignore audio or assume every future
 normalization is harmless. The complete reproducible control is the
 proposed comparison authority.
 
-## Proposed acceptance correction
+## Reviewed acceptance correction
 
 Keep the original candidate-file check unchanged: exactly the source
 checkpoint outside the six observed inventory fields; complete Pack,
