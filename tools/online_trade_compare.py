@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROM_SHA1 = "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"
@@ -105,16 +106,25 @@ def compare_case(root: Path, case: dict, expected_state: tuple[int, int], bounda
     return result("PASS", "native counts, repeated control, whole RAM and snapshot lifetime agree")
 
 
+def digest(value: object) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
 def compare(root: Path, report: dict) -> dict:
     if (report.get("schema") != "online-trade-proof/1"
             or report.get("rom_sha1") != ROM_SHA1
             or report.get("mgba") != "0.10.5"
-            or len(report.get("state_sha256", "")) != 64):
+            or not all(digest(report.get(key)) for key in
+                       ("state_sha256", "probe_sha256", "mgba_library_sha256"))):
         return result("INCONCLUSIVE", "missing or wrong pinned target identity")
-    if report.get("input_hashes_before") != report.get("input_hashes_after"):
+    before, after = report.get("input_hashes_before", {}), report.get("input_hashes_after", {})
+    if any(not isinstance(hashes, dict) or not all(digest(hashes.get(key)) for key in ("rom", "state"))
+           for hashes in (before, after)):
+        return result("INCONCLUSIVE", "ROM and state nonmutation hashes are required")
+    if before["state"] != report["state_sha256"]:
+        return result("INCONCLUSIVE", "state identity differs from the observed input file")
+    if before != after:
         return result("FAIL", "a ROM, state, or existing save file changed")
-    if not report.get("input_hashes_before"):
-        return result("INCONCLUSIVE", "input-file nonmutation evidence is missing")
     results = {}
     for name, state in CASES.items():
         try:

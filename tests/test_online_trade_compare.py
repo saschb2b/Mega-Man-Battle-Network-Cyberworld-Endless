@@ -20,8 +20,9 @@ class TradeComparatorTest(unittest.TestCase):
         (self.root / "snapshot").write_bytes(b"invented immutable snapshot")
         self.report = {"schema": "online-trade-proof/1", "rom_sha1": ROM_SHA1,
                        "state_sha256": "a" * 64, "mgba": "0.10.5",
-                       "input_hashes_before": {"rom": "b" * 64},
-                       "input_hashes_after": {"rom": "b" * 64}, "cases": {}}
+                       "probe_sha256": "c" * 64, "mgba_library_sha256": "d" * 64,
+                       "input_hashes_before": {"rom": "b" * 64, "state": "a" * 64},
+                       "input_hashes_after": {"rom": "b" * 64, "state": "a" * 64}, "cases": {}}
         for name, (count, active) in CASES.items():
             lane = {"folder_count": count, "active_folder": active, "map_mode": 4,
                     "editor_mode": 40, "editor_state": [32, 4], "frames": 200,
@@ -37,6 +38,16 @@ class TradeComparatorTest(unittest.TestCase):
 
     def test_complete_control(self):
         self.assertEqual(self.verdict(), "PASS")
+
+    def test_target_and_state_nonmutation_are_required(self):
+        for key in ("state_sha256", "probe_sha256", "mgba_library_sha256"):
+            original = self.report[key]
+            self.report[key] = "z" * 64
+            self.assertEqual(self.verdict(), "INCONCLUSIVE")
+            self.report[key] = original
+        del self.report["input_hashes_before"]["state"]
+        del self.report["input_hashes_after"]["state"]
+        self.assertEqual(self.verdict(), "INCONCLUSIVE")
 
     def test_missing_or_unreached_case_is_inconclusive(self):
         for name in CASES:
