@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.online_frame_compare import (HASH_ALGORITHM, Mismatch, accept_case,
+from tools.online_frame_compare import (HASH_ALGORITHM, Mismatch, accept_case, accept_fault,
                                         compare_game, compare_replicas)  # noqa: E402
 
 
@@ -102,6 +102,7 @@ class ComparatorTests(unittest.TestCase):
                      delivered_inputs=5644, delay_ms=50, minimum_delivery_ms=50.01)
         path = self.root / 'case-transport.json'
         path.write_text(json.dumps(valid))
+        (self.root / 'case-inputs.jsonl').write_text(''.join(json.dumps(row) + '\n' for row in self.input_rows(2822)))
         # This unit isolates acceptance of the relay's measured metadata;
         # the independent game/hash comparisons have their own mutations above.
         with patch('tools.online_frame_compare.compare_game', return_value=3), patch(
@@ -121,6 +122,73 @@ class ComparatorTests(unittest.TestCase):
                     path.write_text(json.dumps(changed))
                     with self.assertRaises(Mismatch):
                         accept_case(self.reference, self.root, 'case', 50)
+
+    def input_rows(self, frames):
+        return [dict(owner=side, frame=frame, source_keys=2, delivered_keys=2, delivery_ms=50.01)
+                for side in (0, 1) for frame in range(frames)]
+
+    def fault_fixture(self, name):
+        rows = [dict(worker=side, frame=frame, hash='0123456789abcdef',
+                     hash_algorithm=HASH_ALGORITHM, samples=[[0, 0, 1, 0, 0, 0, 0, 0x0C04]] * 2)
+                for side in (0, 1) for frame in range(1402)]
+        corrupt = name == 'corruption'
+        if corrupt:
+            rows[-1]['hash'] = 'fedcba9876543210'
+        report = dict(status='desync' if corrupt else 'disconnected', fault_injected=True,
+                      fault_detection_ms=25, first_divergent_frame=1401 if corrupt else None,
+                      pids=[10, 11], exit_codes=[0, 0] if corrupt else [0, -9])
+        inputs = self.input_rows(1402)
+        if corrupt:
+            inputs[1400]['delivered_keys'] = 18
+        return rows, report, inputs
+
+    def save_fault(self, name, rows, report, inputs):
+        (self.root / f'{name}-replicas.jsonl').write_text(''.join(json.dumps(row) + '\n' for row in rows))
+        (self.root / f'{name}-transport.json').write_text(json.dumps(report))
+        (self.root / f'{name}-inputs.jsonl').write_text(''.join(json.dumps(row) + '\n' for row in inputs))
+
+    def test_fault_evidence_mutations(self):
+        for name in ('corruption', 'disconnect'):
+            with self.subTest(name=name):
+                values = self.fault_fixture(name)
+                self.save_fault(name, *values)
+                self.assertEqual(accept_fault(self.root, name)['verdict'], 'PASS')
+                for mutation in ('status', 'deadline', 'not-injected', 'no-evidence', 'early', 'different-first',
+                                 'empty-inputs', 'truncated-inputs', 'duplicate-input', 'not-active', 'invalid-delay', 'invalid-keys'):
+                    with self.subTest(mutation=mutation):
+                        rows, report, inputs = self.fault_fixture(name)
+                        if mutation == 'status':
+                            report['status'] = 'complete'
+                        elif mutation == 'deadline':
+                            report['fault_detection_ms'] = 5000
+                        elif mutation == 'not-injected':
+                            report['fault_injected'] = False
+                        elif mutation == 'early':
+                            rows = [row for row in rows if row['frame'] < 10]
+                        elif mutation == 'no-evidence':
+                            if name == 'corruption':
+                                inputs[1400]['delivered_keys'] = inputs[1400]['source_keys']
+                            else:
+                                report['exit_codes'] = [0, 0]
+                        elif mutation == 'empty-inputs':
+                            inputs = []
+                        elif mutation == 'truncated-inputs':
+                            inputs.pop()
+                        elif mutation == 'duplicate-input':
+                            inputs.append(inputs[-1])
+                        elif mutation == 'not-active':
+                            rows[-1]['samples'] = [[0] * 8, [0] * 8]
+                        elif mutation == 'invalid-delay':
+                            inputs[0]['delivery_ms'] = float('nan')
+                        elif mutation == 'invalid-keys':
+                            inputs[0]['source_keys'] = 1024
+                        elif name == 'corruption':
+                            report['first_divergent_frame'] = 1400
+                        else:
+                            rows[-1]['hash'] = 'fedcba9876543210'
+                        self.save_fault(name, rows, report, inputs)
+                        with self.assertRaises(Mismatch):
+                            accept_fault(self.root, name)
 
 
 if __name__ == '__main__':

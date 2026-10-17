@@ -4,6 +4,7 @@ Change only in a reviewed oracle commit, separate from the worker/relay.
 """
 import csv
 import json
+import math
 from pathlib import Path
 import re
 
@@ -54,7 +55,7 @@ def compare_game(reference, subject):
     return len(expected[0])
 
 
-def compare_replicas(path, frames=FRAME_COUNT):
+def read_replicas(path):
     records = [{}, {}]
     with Path(path).open() as stream:
         for line in stream:
@@ -71,6 +72,14 @@ def compare_replicas(path, frames=FRAME_COUNT):
                     for sample in samples):
                 raise Mismatch('Malformed replica observations')
             records[worker][frame] = (row['hash'], row['samples'])
+    for side in (0, 1):
+        if set(records[side]) != set(range(len(records[side]))):
+            raise Mismatch('Replica trace has a missing frame')
+    return records
+
+
+def compare_replicas(path, frames=FRAME_COUNT):
+    records = read_replicas(path)
     expected = set(range(frames))
     if any(set(rows) != expected for rows in records):
         raise Mismatch('Replica trace is incomplete')
@@ -78,6 +87,24 @@ def compare_replicas(path, frames=FRAME_COUNT):
         if records[0][frame] != records[1][frame]:
             raise Mismatch(f'Replicas first differ at simulation frame {frame}')
     return frames
+
+
+def read_inputs(path):
+    records = [[], []]
+    with Path(path).open() as stream:
+        for line in stream:
+            row = json.loads(line)
+            owner, frame = row.get('owner'), row.get('frame')
+            if type(owner) is not int or owner not in (0, 1) or type(frame) is not int or frame != len(records[owner]):
+                raise Mismatch('Delivered inputs are not unique contiguous owner prefixes')
+            if any(type(row.get(key)) is not int or not 0 <= row[key] <= 0x3FF
+                   for key in ('source_keys', 'delivered_keys')):
+                raise Mismatch('Invalid delivered controller word')
+            delay = row.get('delivery_ms')
+            if type(delay) not in (int, float) or not math.isfinite(delay) or not 0 <= delay < 5000:
+                raise Mismatch('Missing or invalid measured input delay')
+            records[owner].append(row)
+    return records
 
 
 def accept_case(reference, work, name, delay_ms):
@@ -90,10 +117,51 @@ def accept_case(reference, work, name, delay_ms):
         raise Mismatch(f'{name}: independent workers missing')
     if report.get('delivered_inputs') != FRAME_COUNT * 2:
         raise Mismatch(f'{name}: incomplete input stream')
+    inputs = read_inputs(work / f'{name}-inputs.jsonl')
+    if any(len(rows) != FRAME_COUNT for rows in inputs):
+        raise Mismatch(f'{name}: delivered input evidence is incomplete')
+    if any(row['source_keys'] != row['delivered_keys'] for rows in inputs for row in rows):
+        raise Mismatch(f'{name}: unrequested controller mutation')
+    measured_minimum = min(row['delivery_ms'] for rows in inputs for row in rows)
     minimum = report.get('minimum_delivery_ms')
-    if report.get('delay_ms') != delay_ms or type(minimum) not in (int, float) or not delay_ms <= minimum < 5000:
+    if report.get('delay_ms') != delay_ms or type(minimum) not in (int, float) or minimum != measured_minimum or not delay_ms <= minimum < 5000:
         raise Mismatch(f'{name}: configured delivery delay not measured')
     frames = compare_replicas(work / f'{name}-replicas.jsonl')
     active = [compare_game(reference, work / f'{name}-worker{side}.csv') for side in (0, 1)]
     return dict(case=name, verdict='PASS', replica_frames=frames,
                 active_frames_compared=active, delay_ms=delay_ms)
+
+
+def accept_fault(work, name):
+    """Fault acceptance requires the recorded input mutation/OS exit and trace."""
+    work = Path(work)
+    report = json.loads((work / f'{name}-transport.json').read_text())
+    expected = {'corruption': 'desync', 'disconnect': 'disconnected'}[name]
+    elapsed = report.get('fault_detection_ms')
+    if report.get('status') != expected or report.get('fault_injected') is not True or type(elapsed) not in (int, float) or not 0 <= elapsed < 5000:
+        raise Mismatch(f'{name}: missing bounded fault detection')
+    pids = report.get('pids', [])
+    if len(pids) != 2 or any(type(pid) is not int or pid <= 0 for pid in pids) or len(set(pids)) != 2:
+        raise Mismatch(f'{name}: independent workers missing')
+    records = read_replicas(work / f'{name}-replicas.jsonl')
+    common = sorted(set(records[0]) & set(records[1]))
+    if len(common) < 1400 or max(map(len, records)) >= FRAME_COUNT:
+        raise Mismatch(f'{name}: fault did not interrupt active play')
+    differences = [frame for frame in common if records[0][frame] != records[1][frame]]
+    deliveries = read_inputs(work / f'{name}-inputs.jsonl')
+    if any(len(deliveries[side]) < len(records[side ^ 1]) for side in (0, 1)):
+        raise Mismatch('Delivered input evidence does not cover consumed replica frames')
+    if any(not (sample[2] > 0 and sample[7] & 0xFFFF == ACTIVE_PHASE)
+           for side in (0, 1) for sample in records[side][common[-1]][1]):
+        raise Mismatch('Fault evidence does not reach active battle play')
+    changed = [row for rows in deliveries for row in rows if row['source_keys'] != row['delivered_keys']]
+    if name == 'corruption':
+        if len(changed) != 1 or changed[0]['owner'] != 0 or changed[0]['frame'] != 1400 or changed[0]['delivered_keys'] != changed[0]['source_keys'] ^ 16:
+            raise Mismatch('The promised controller corruption was not delivered')
+        if not differences or differences[0] < 1400 or differences[0] != report.get('first_divergent_frame'):
+            raise Mismatch('Corruption did not produce the reported first replica difference')
+    else:
+        if differences or changed or report.get('exit_codes') != [0, -9]:
+            raise Mismatch('Peer loss must be an actual killed worker without a preceding desync')
+    return dict(case=name, verdict='PASS', expected_failure=expected,
+                first_divergent_frame=differences[0] if differences else None, detection_ms=elapsed)
