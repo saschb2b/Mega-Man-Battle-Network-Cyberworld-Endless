@@ -14,8 +14,8 @@ dependency-free view of the current research, not evidence by itself.
 | Free space and write claims | [EMULATION.md](../EMULATION.md), `src/emu/free_space.h`, `claims.h` |
 | Existing virus differential | `tests/xdiff/`, `tools/xdiff.py`, [DEVTOOLS.md](../DEVTOOLS.md) |
 | Link and snapshot experiments | [ONLINE_LINK.md](../ONLINE_LINK.md) |
-| Current Arena frame-input investigation | The Arena goal/spec files added here with the comparator |
-| Trade inventory and recovery design | [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
+| Current Arena frame-input investigation | [Arena frame goal](arena-frame-goal.md), `tools/online_frame_compare.py` |
+| Trade inventory and recovery design | [Trade inventory goal](trade-inventory-goal.md), [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
 
 New work starts with a sentence naming the unit, observable, input/state
 coverage, original-game oracle and allowed differences. Pin its ROM hash

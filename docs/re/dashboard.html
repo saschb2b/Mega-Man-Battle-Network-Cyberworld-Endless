@@ -101,7 +101,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
 <script type="application/json" id="re-state">
 {
   "schema": "re-state/1",
-  "generated_at": "2026-10-17T22:29:32.147386+00:00",
+  "generated_at": "2026-10-17T22:42:28.791200+00:00",
   "generated_by": "Codex",
   "project": "Cyberworld Endless: online research",
   "target": {
@@ -120,50 +120,50 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     "legal": "Player-owned ROM stays read-only; saves and states stay local. Controlled test peers only. No Tango source."
   },
   "phase": {
-    "current": 0,
+    "current": 5,
     "unit": "arena-frame-input"
   },
   "stop_rule": [
     {
       "id": "specs",
       "met": false,
-      "evidence": "Acceptance and comparator are being prepared separately."
+      "evidence": "Reviewed goal/comparator committed; delayed subject is still being checked against the original."
     },
     {
       "id": "mutations",
       "met": false,
-      "evidence": "No new frame-input comparator result yet."
+      "evidence": "Comparator guard tests pass; complete real-input mutation runs are still pending."
     },
     {
       "id": "ledger",
-      "met": false,
-      "evidence": "Existing addresses remain in docs/ROM_DATA.md; new claims need repeatable evidence."
+      "met": true,
+      "evidence": "This Arena unit adds no ROM location; named existing fields stay in docs/ROM_DATA.md."
     },
     {
       "id": "masks",
-      "met": false,
-      "evidence": "No allowed differences proposed."
+      "met": true,
+      "evidence": "No masks or logical observation differences are allowed."
     },
     {
       "id": "ci",
       "met": false,
-      "evidence": "Target-free checks will be integrated with the new comparator."
+      "evidence": "Comparator commands are added to build.py test; current full-suite verification is pending."
     }
   ],
   "units": [
     {
       "id": "arena-frame-input",
       "name": "Frame-input Practice battle",
-      "phase": 0,
+      "phase": 5,
       "status": "active",
-      "note": "Specs first; previous serial-delay measurements remain a negative result."
+      "note": "Original repeats agree through 1,433 active timers. The delayed subject is not accepted yet; first timing differences are being corrected against the fixed oracle."
     },
     {
       "id": "trade-pack",
       "name": "Tradeable Pack snapshot",
-      "phase": 0,
+      "phase": 4,
       "status": "active",
-      "note": "Pure rules tests are separate from original-game ownership verification."
+      "note": "Reviewed six-scenario comparator committed. Native exploration reached first, second and Extra folders; full capture reader differential is pending."
     },
     {
       "id": "arena-rollback",
@@ -183,8 +183,8 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
       "settles_with": "Fresh original comparison at 0, 50, 100 and 150 ms with mutation checks."
     },
     {
-      "question": "Which equipped folders are counted in Pack ownership?",
-      "settles_with": "Original-game controlled folder/Pack observations before enabling a trade reader."
+      "question": "Does the immutable reader match every native folder and exact chip/code count?",
+      "settles_with": "Six original-editor scenarios, unchanged whole RAM and input files, snapshot lifetime challenge and deliberate reader mutations."
     }
   ],
   "decisions": [],
@@ -198,6 +198,10 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "at": "2026-10-17T22:29:32.147411+00:00",
       "note": "Adopted the pinned reverse-engineering workflow. No new oracle pass claimed."
+    },
+    {
+      "at": "2026-10-17T22:42:28.791200+00:00",
+      "note": "Reviewed Arena and trade inventory acceptance landed separately from implementations. No subject differential pass is claimed. The separate SQLite coordinator passes storage/retry/recovery tests, not ROM equivalence."
     }
   ]
 }

@@ -283,16 +283,28 @@ A public launch also needs the host's
 retention policy, named moderators, backup/restart checks and the remaining
 target checks in the server README.
 
-## Draft review milestone
+## Epic continuation
 
-`codex/online-net-square` stops at the monorepo, the deployed Net Square
-development service, checkpoint-safe visits and repeatable technical
-proofs. The whole-frame `network-desktop-alpha.png` and
+`codex/online-net-square` continues toward epic #120 from the monorepo,
+deployed Net Square development service, checkpoint-safe visits and
+repeatable technical proofs. The whole-frame `network-desktop-alpha.png` and
 `network-desktop-beta.png` in `docs/screenshots/` show two interactive
 Linux clients connected to that service; `network-pocket-nova.png` is
 from the physical handheld and `network-android.png` from the Android
 emulator running the release APK. They are gameplay captures, not mockups.
 
-Trade Central and the production Arena are not enabled. Complete delayed
-battles, rollback and the remaining physical-device checks are follow-up
-work; this milestone does not close epic #120 or publish a game release.
+The official server now stays first beside four custom entries, with
+selection and consent migrated by URL. `network-servers.png` and
+`network-servers-phone.png` capture controller and actual SDL touch
+navigation; `tools/online_network_proof.py` checks those paths. Rapid
+Inspect reopen requests receive a fresh response instead of waiting
+indefinitely behind the former card-specific throttle.
+
+Trade Central and the production Arena are not enabled. The
+[trade contract](ONLINE_TRADE.md) records implemented immutable eligibility
+and durable server decisions, and the client recovery still required.
+[Reviewed research goals](re/README.md) separately gate native inventory
+capture and delayed-input Practice battles against the original game.
+Home-PC entry, full trade integration, carried-loadout battles, rollback
+and remaining physical-device checks are ongoing work. This draft does
+not yet close epic #120 or publish a game release.
