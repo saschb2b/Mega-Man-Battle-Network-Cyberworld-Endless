@@ -161,3 +161,25 @@ prior art; no implementation was opened or copied. The features do not
 establish an algorithm or permission to reuse code. Our separate
 processes' measured serial stalls, recorded in ONLINE_LINK.md, motivate
 the proposed frame-level input design independently.
+
+
+## Trade inventory's original folder accounting (issue #120)
+
+**Verified by experiment on Gregar USA, 18 October 2026:** the native
+folder editor's Pack quantities exclude copies in both editable folders
+and in the borrowed ExtraFolder. Equipping the Extra slot through its
+native EQUIP-only menu does not release its chips as spares. Six controlled
+native-editor scenarios and the immutable runtime reader agree on every
+canonical chip/code count, with unchanged complete EWRAM/IWRAM samples.
+The [evidence note](re/trade-inventory-evidence.md) pins the target, library,
+probe and boot state and records all six caught mutations.
+
+The locator lead was the bn6f contributors' folder-menu and folder-copy
+paths in `asm32.s` and `asm36.s`, checked against the player's Gregar image
+with `tools/bn6f_match.py`. Their findings led to the controlled experiment;
+the running original establishes ownership semantics. A first borrowed
+fixture lacked its initialized runtime name and never reached a usable
+menu: that trial was inconclusive, then corrected by copying a runtime
+name. No target strings, disassembly or fixture state enter git. BN5
+availability and All * trading rules are project behavior, tested
+separately with invented records rather than attributed to original BN6.

@@ -297,7 +297,8 @@ build/host/test_online_link_ipc: tools/online_link_ipc_test.c tools/online_link_
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-o $@ tools/online_link_ipc_test.c tools/online_link_ipc_wire.c
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc
+test: build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc
+	build/host/test_online_trade_capture
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
@@ -363,3 +364,26 @@ build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
+
+# Trade inventory capture: synthetic RAM checks, then the opt-in native oracle.
+TRADE_CAPTURE_TEST_SRCS := tests/test_online_trade_capture.c src/online/online_trade_capture.c src/online/online_trade_inventory.c src/online/online_snapshot.c
+build/host/test_online_trade_capture: $(TRADE_CAPTURE_TEST_SRCS) src/online/*.h src/emu/*.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(TRADE_CAPTURE_TEST_SRCS)
+
+TRADE_PROBE ?= .build/online-trade-probe
+TRADE_CAPTURE_SOURCE ?= src/online/online_trade_capture.c
+TRADE_PROBE_SRCS := tools/online_trade_probe.c $(TRADE_CAPTURE_SOURCE) src/online/online_trade_inventory.c src/online/online_snapshot.c \
+	src/core/rom.c src/core/chips.c src/core/chip_pool.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c \
+	src/core/xchips_text.c src/core/data.c src/layer/text.c src/core/compat.c
+$(TRADE_PROBE): $(TRADE_PROBE_SRCS) src/online/*.h src/emu/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_PROBE_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
+
+LINT_TRADE_CAPTURE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_CAPTURE_TEST_SRCS))
+build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
+	@mkdir -p $(@D)
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm

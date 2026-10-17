@@ -1,8 +1,8 @@
 # Trade inventory reader: acceptance before implementation
 
-Status: acceptance and comparator recorded; original-game exploratory
-experiments reached all three folders. The runtime reader is not yet implemented. The immutable validator's synthetic tests are a
-separate, completed check and cannot pass this acceptance.
+Status: original-reader acceptance passed on 18 October 2026; see
+[the evidence note](trade-inventory-evidence.md). The immutable validator's
+synthetic tests remain a separate check and cannot pass this acceptance.
 
 ## Pinned target and goal
 

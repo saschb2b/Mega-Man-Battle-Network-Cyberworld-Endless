@@ -117,6 +117,14 @@
 #define BN6_PA_LIST_REF       0x080295B4u /* ... its one word (loaded at 0x08029556; the link battles' list, 0x0802BC60, its own word 0x080295B8) */
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
+/* All folder copies are included in map-side Pack counts, including the
+ * borrowed ExtraFolder. The native editor removes every folder's copies
+ * while open; tools/online_trade_proof.py verifies this on Gregar. */
+#define BN6_FOLDERS_MAX       3
+#define BN6_FOLDER_COUNT_FIELD 0x05       /* byte in the structure at BN6_TOOLKIT_STEPS; valid folder slots, 1-3 */
+#define BN6_FOLDER_KINDS      0x020018ECu /* high nibble per slot: 0 first editable, 1 second editable, 2 borrowed Extra */
+#define BN6_FOLDER_NAMES      0x02001850u /* three runtime names; the native GiveFolder initializes an Extra's name */
+#define BN6_FOLDER_NAME_BYTES 32
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
 
 #endif

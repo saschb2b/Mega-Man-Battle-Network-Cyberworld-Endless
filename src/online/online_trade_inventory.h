@@ -11,7 +11,7 @@
 
 #define ONLINE_TRADE_CODES 4
 #define ONLINE_TRADE_COUNT_MAX 99
-#define ONLINE_TRADE_EQUIPPED_MAX (3 * BN6_FOLDER_ENTRIES)
+#define ONLINE_TRADE_EQUIPPED_MAX (BN6_FOLDERS_MAX * BN6_FOLDER_ENTRIES)
 
 /* The caller derives these numbers from the local chip registry and ROM
  * accessors, never from a peer. A canonical chip has canonical_id == its

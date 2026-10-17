@@ -101,7 +101,7 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
 <script type="application/json" id="re-state">
 {
   "schema": "re-state/1",
-  "generated_at": "2026-10-17T22:42:28.791200+00:00",
+  "generated_at": "2026-10-17T22:51:47.847458+00:00",
   "generated_by": "Codex",
   "project": "Cyberworld Endless: online research",
   "target": {
@@ -161,9 +161,18 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "id": "trade-pack",
       "name": "Tradeable Pack snapshot",
-      "phase": 4,
-      "status": "active",
-      "note": "Reviewed six-scenario comparator committed. Native exploration reached first, second and Extra folders; full capture reader differential is pending."
+      "phase": 6,
+      "status": "passed",
+      "note": "Native editor: all six folder/active/boundary scenarios pass; six faults caught. Full EWRAM/IWRAM and owned snapshot lifetime agree. docs/re/trade-inventory-evidence.md",
+      "specs": {
+        "pass": 6,
+        "fail": 0,
+        "inconclusive": 0
+      },
+      "mutations": {
+        "caught": 6,
+        "total": 6
+      }
     },
     {
       "id": "arena-rollback",
@@ -181,10 +190,6 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "question": "Can delayed frame-input replicas finish a Practice fight identical to an original local cable pair?",
       "settles_with": "Fresh original comparison at 0, 50, 100 and 150 ms with mutation checks."
-    },
-    {
-      "question": "Does the immutable reader match every native folder and exact chip/code count?",
-      "settles_with": "Six original-editor scenarios, unchanged whole RAM and input files, snapshot lifetime challenge and deliberate reader mutations."
     }
   ],
   "decisions": [],
@@ -202,6 +207,14 @@ footer { margin-top: 16px; font-size: 12px; color: var(--muted); }
     {
       "at": "2026-10-17T22:42:28.791200+00:00",
       "note": "Reviewed Arena and trade inventory acceptance landed separately from implementations. No subject differential pass is claimed. The separate SQLite coordinator passes storage/retry/recovery tests, not ROM equivalence."
+    },
+    {
+      "at": "2026-10-17T22:51:47.847458+00:00",
+      "specs_pass": 6,
+      "specs_total": 6,
+      "mutations_caught": 6,
+      "mutations_total": 6,
+      "note": "Trade inventory reader accepted against the original editor, with no masks. Checkpoint mutation and durability remain separate work."
     }
   ]
 }

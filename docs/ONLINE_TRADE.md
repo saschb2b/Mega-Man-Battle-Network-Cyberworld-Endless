@@ -54,39 +54,53 @@ The four codes supplied are the unmodified record's codes. A malformed
 duplicate code is refused rather than choosing one of its count slots.
 
 The complete equipped list is an explicit prerequisite. `OnlineLoadout`
-currently snapshots only the first folder. The pure validator accepts
-30 to 90 entries so an engine reader can supply every folder whose
-copies the Pack counts; it subtracts matching copies across the whole
-list. It cannot prove that a caller supplied all of them. Before wiring
-the trade UI, verify the additional folders' ownership and borrowed
-ExtraFolder behavior from the original game's code and in a running
-checkpoint, then capture the correct complete list. No new engine reader
-or assumption about those folders is introduced here.
+still snapshots only the first folder; `online_trade_capture.[ch]` now
+prepares an owned `OnlineTradePrepared` containing that loadout, all
+1–3 folders, active slot, local chip metadata and helper capabilities.
+`online_trade_inventory_view` exposes a const view of that copy. It holds
+no live memory pointers, so subsequent emulator frames cannot change an
+offer. Capture is allowed only in map mode with a checkpoint supplied by
+the caller. It refuses the editor, battle, malformed pointers, folder
+counts/active slots and unsupported or ambiguous equipped codes. Failure
+clears the output, preventing a stale prepared offer from surviving.
 
-That original-game verification follows the repository's
-[reverse-engineering skill](../.claude/skills/reverse-engineering/SKILL.md):
-pin Gregar by hash, land the observable acceptance and mutations before
-the reader, then compare the pristine game's counted copies with the
-reader. The synthetic tests below prove the pure contract, not those
-original-game semantics.
+The first runtime catalogue uses `chip_pool_tier`: the run's playable
+Standard/Mega/Giga chips. DarkChips and other excluded records cannot be
+offered by this reader. This is a conservative trade scope, not a claim
+that those records never occur in a run. BN5-only entries require the
+local registry's playable record and the recipient's BN5 ROM.
 
-Existing evidence: [ROM_DATA.md](ROM_DATA.md), “The second screen's shops
-and traders”, records a real-game experiment in which the map's Pack
-counts included the first folder's four Cannons, the editor removed
-those copies, and closing it restored them. `director_folder.c` and
-`second_read.c` follow that result. `xchips_registry.h` and
-[MULTIROM.md](MULTIROM.md) define canonical names.
-[META.md](META.md#all--a-fourth-helper-4-october-2026-issue-18) documents
-the All * helper's code and Pack-slot changes. No ROM offset was added.
+**Verified on the pinned original Gregar ROM, 18 October 2026:** the
+native folder editor removes the copies in every available folder from
+the map-side Pack, including the borrowed ExtraFolder. Selecting each
+folder as active does not change the spare inventory. The reader matched
+every canonical ID/code count in six scenarios, including two editable
+folders, the actual Extra slot, different codes of one chip, zero spares
+and total quantity 99. Two native controls agreed; capture changed no
+byte of full EWRAM/IWRAM at the same 14–40 sampled frames per scenario,
+or either input file. Prepared bytes and eligibility survived a live
+Pack change. Six deliberate faults all failed the fixed comparator.
 
-The ROM-free test uses invented metadata. It checks multiple equipped
-folders, exact codes, underflow and overflow, BN5 absent/present,
-unavailable records, aliases, malformed codes, All * peers, every u16
-entry value, and byte-for-byte immutability of the input records:
+The [acceptance](re/trade-inventory-goal.md) and comparator landed in
+reviewed commits before the reader, following the repository's
+[reverse-engineering skill](../.claude/skills/reverse-engineering/SKILL.md).
+The [evidence note](re/trade-inventory-evidence.md) records hashes, scope,
+mutation results and limitations; [ROM_DATA.md](ROM_DATA.md) names the
+fields and re-verification command. This proves inventory preparation,
+not a durable checkpoint swap or live two-player trade.
+
+The ROM-free tests use invented metadata and RAM. They check exact
+codes, underflow/overflow, BN5 absent/present, unavailable records,
+aliases, All * peers, every u16 entry, malformed capture inputs and
+owned-copy lifetime. They do not stand in for original-game evidence:
 
 ```sh
-make WERROR=1 build/host/test_online_trade_inventory
+make WERROR=1 build/host/test_online_trade_inventory build/host/test_online_trade_capture
 build/host/test_online_trade_inventory
+build/host/test_online_trade_capture
+python3 tests/test_online_trade_compare.py
+# Player-owned ROM and an unmodified map-side boot state; evidence stays in .build:
+python3 tools/online_trade_proof.py --state PATH/boot-3.state --mutations
 ```
 
 ## Implemented: durable server decisions
