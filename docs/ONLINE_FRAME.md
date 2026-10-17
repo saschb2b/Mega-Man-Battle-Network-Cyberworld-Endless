@@ -122,7 +122,8 @@ This unit does not cover carried run loadouts, selected chips, forms,
 Souls, RNG-heavy attacks, rematches, transplanted ROM content, rollback,
 network jitter/reordering/loss recovery, physical-device budgets or
 production integration. The complete-state equality is between worker
-replicas; full subsystem-memory comparison against the original remains
-a separate next unit. The existing game's save guard is not exercised
+replicas. The subsequent [local snapshot experiment](ONLINE_REPLAY.md)
+compares complete serialized core and flash state against the original
+for a bounded six-point replay matrix. The existing game's save guard is not exercised
 by this standalone worker: its protection is read-only source files and
 memory-only flash, rather than an online visit followed by restoration.
