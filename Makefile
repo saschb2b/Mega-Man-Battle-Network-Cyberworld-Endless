@@ -476,3 +476,11 @@ build/host/test_online_trade_identity: $(TRADE_IDENTITY_TEST_SRCS) src/online/*.
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_IDENTITY_TEST_MAIN -o $@ $(TRADE_IDENTITY_TEST_SRCS)
+
+TRADE_RELOAD_PROBE ?= .build/online-trade-reload
+TRADE_RELOAD_SRCS := tools/online_trade_reload.c tools/online_trade_runtime.c src/core/rom.c src/core/data.c src/core/compat.c
+$(TRADE_RELOAD_PROBE): $(TRADE_RELOAD_SRCS) tools/online_trade_runtime.h src/emu/*.h
+	@mkdir -p $(dir $@)
+	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_RELOAD_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
