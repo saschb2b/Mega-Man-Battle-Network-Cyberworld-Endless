@@ -39,3 +39,17 @@ const int place_nfolk = (int)(sizeof place_folk / sizeof *place_folk);
 const char *const place_number_trader = "The Number Trader...|There's an \"Out of order\" sign on it.";
 
 const char *const place_order_closed = "That's your order for today!|Come back next time,Lan!";
+
+/* (a line of his own, then the buttons as BN6's box lists them; each line
+ * at most 22 characters, beside his face) */
+const char *const place_order_hello = "Which chip,Lan?";
+const char *const place_order_sorted[PLACE_SORT_KEYS][2] = {
+	{ "By ID!", "By ID,backwards!" },
+	{ "By ABCDE,A to Z!", "By ABCDE,Z to A!" },
+	{ "By Code,A to *!", "By Code,* to A!" },
+	{ "By Attack,high first!", "By Attack,low first!" },
+	{ "By Element!", "By Element,backwards!" },
+	{ "By No.,most first!", "By No.,fewest first!" },
+	{ "By MB,light first!", "By MB,heavy first!" },
+};
+const char *const place_order_buttons = "START:Sort L/R:Page\nSELECT:Flip B:Quit";

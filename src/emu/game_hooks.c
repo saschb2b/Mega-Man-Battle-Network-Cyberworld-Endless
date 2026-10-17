@@ -11,6 +11,7 @@
 #include "gamecall.h"
 #include "idle.h"
 #include "npc.h"
+#include "order_sort.h"
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
@@ -32,6 +33,7 @@ void game_hooks_install(void) {
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();
+	order_sort_install();
 	pet_text_install();
 	/* (BN5's Souls on the proxy form in BN6's battles wherever BN5's Navis
 	 * are, every battle of a run: the run's Souls reach them as each battle
