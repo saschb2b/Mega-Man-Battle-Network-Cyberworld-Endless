@@ -405,6 +405,8 @@ shopping and requests. If the save fails, Lan stays at the PC so you can
 retry. Back from NETWORK and leaving the Square return to that PC save.
 Before the first act, R keeps its usual jack-in.
 
+<img src="screenshots/network-pc.png" width="240" alt="Lan's PC between acts: Jack in, Network, and Cancel; Network saves here first.">
+
 The Square borrows MegaMan's setup from your last checkpoint. Choose
 **LEAVE SQUARE** from its Start menu to continue that checkpoint; with no saved
 run, leaving goes to the title. The visit does not advance or overwrite your
