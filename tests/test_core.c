@@ -28,6 +28,7 @@
 #include "backup.h"
 #include "test_backup.h"
 #include "test_online_trade_inventory.h"
+#include "test_online_trade_terms.h"
 #include "chip_pool.h"
 #include "guardians.h"
 #include "launcher_roms.h"
@@ -5114,6 +5115,7 @@ int main(void) {
 	test_qr();
 	failures += test_backup();
 	test_online_trade_inventory();
+	failures += test_online_trade_terms();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();

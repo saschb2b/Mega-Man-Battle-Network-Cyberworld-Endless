@@ -215,14 +215,15 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c \
-	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c
+	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
+	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
 $(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
 build/host/test_core: $(TEST_OBJS)
 	@mkdir -p build/host
 	$(CC_host) $(TEST_SAN) -o $@ $(TEST_OBJS) -lm
@@ -374,7 +375,7 @@ LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
 LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
 build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
@@ -397,6 +398,12 @@ $(TRADE_PROBE): $(TRADE_PROBE_SRCS) src/online/*.h src/emu/*.h
 	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_PROBE_SRCS) \
 		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
+
+TRADE_TERMS_TEST_SRCS := tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c
+build/host/test_online_trade_terms: $(TRADE_TERMS_TEST_SRCS) src/online/online_trade_terms.h src/core/sha256.h shared/online/trade.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_TERMS_TEST_MAIN -o $@ $(TRADE_TERMS_TEST_SRCS)
 
 LINT_TRADE_CAPTURE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_CAPTURE_TEST_SRCS))
 build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
