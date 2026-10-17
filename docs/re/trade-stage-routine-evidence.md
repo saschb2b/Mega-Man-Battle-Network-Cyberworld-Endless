@@ -25,6 +25,10 @@ python3 tools/online_trade_stage_proof.py \
 ```
 
 The checked run is `.build/trade-routine-controls-final/controls.json`.
+After moving the three inventory-call symbols from `bn6.h` into its
+specialized `bn6_chips.h`, the separate mechanical header/pin update was
+rechecked in `.build/trade-routine-controls-symbol-split/`: all four cases,
+their complete state hashes and the observer binary hash remain identical.
 All raw state, RAM, call records and counts stay local. The probe opens
 the ROM and boot state read-only and uses memory-backed flash. It first
 reaches the original map update, installs a recorded fixture and requires

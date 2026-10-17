@@ -92,6 +92,11 @@
 #define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
+/* Original inventory operations; native Trade completion remains unproven. */
+#define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
+#define BN6_TAKE_CHIPS        0x08021B93u /* remove (chip, code, count); returned through original CPU in trade routine proof */
+#define BN6_TRADE_APPLY       0x0812EB89u /* original chip Trade completion caller; located, full exchange not yet reached */
+
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */

@@ -24,8 +24,8 @@ REVIEWED = {
     "src/online/online_trade_inventory.h": "546bcecba8f9e891e03b05b177054d9766ade964f118268b7b0d00cdc1356bbd",
     "src/online/online_snapshot.c": "9a17dab9dc5bfac9b754c087200c0f60c171ffd0251f8a5048c43212492bb44a",
     "src/online/online_snapshot.h": "77e47a3d9b35147b650346273c6717e7110cfe3c8cfc1c314fbc8ec9b24ae29c",
-    "src/emu/bn6.h": "8c68f473974640a3d7de4ee7e19dce2b26939aa8e17e306b651d9b89d85b696b",
-    "src/emu/bn6_chips.h": "a575a92a81c6c19a7250be813a98150271ff428d68a5369f34f15aaa71006062",
+    "src/emu/bn6.h": "8681082989ce5520e8da66478acee46ea0dec403b68179b300ef3fd1a2f02036",
+    "src/emu/bn6_chips.h": "cb98fd2d2f2859c4ed5cbd0af3dd2fa9838bfb8b9b2c1504635ddb874f26e4ba",
     "src/emu/bn6_pet.h": "b3606cfe7fbc8e131befd04369f5ab9980333894f06692386443740fad3d65f1"
 }
 
