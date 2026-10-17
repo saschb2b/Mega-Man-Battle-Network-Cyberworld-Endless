@@ -33,6 +33,11 @@ SDL_Rect network_home_rect(int row) {
 	return (SDL_Rect){ (P.w - w) / 2, top[row], w, height[row] };
 }
 
+SDL_Rect network_server_arrow(int direction) {
+	SDL_Rect row = network_home_rect(NETWORK_ROW_SERVER);
+	return (SDL_Rect){ row.x + row.w - (direction < 0 ? 62 : 14), row.y + 2, 14, 14 };
+}
+
 static void button(SDL_Rect r, const char *label, bool selected) {
 	fill_rect(r.x, r.y, r.w, r.h, selected ? PET_GOLD : PET_LINE);
 	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 2, selected ? PET_NAVY : PET_SLOT);
@@ -62,7 +67,9 @@ static void home(void) {
 		else {
 			char count[24];
 			snprintf(count, sizeof count, "%u / %u", N.prefs.selected + 1, N.prefs.count);
-			words(r.x + r.w - 34, r.y + 4, count, PET_CYAN_HI);
+			words(r.x + r.w - 45, r.y + 4, count, PET_CYAN_HI);
+			button(network_server_arrow(-1), "<", false);
+			button(network_server_arrow(1), ">", false);
 			clipped(r.x + 5, r.y + 17, N.prefs.servers[N.prefs.selected], r.w - 10, PET_WHITE);
 		}
 	}

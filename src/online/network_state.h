@@ -18,6 +18,7 @@ typedef struct {
 extern NetworkState N;
 void network_draw(void);
 SDL_Rect network_home_rect(int row);
+SDL_Rect network_server_arrow(int direction);
 void network_edit_begin(bool name, bool adding);
 void network_edit_update(void);
 void network_edit_draw(void);

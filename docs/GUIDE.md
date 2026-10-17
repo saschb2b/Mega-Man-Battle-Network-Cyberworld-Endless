@@ -386,8 +386,8 @@ best depth.
 
 **NETWORK** opens the Net Square, a shared place to meet other Navis. Choose
 **NAME** to set your display name. The official server always comes first,
-labelled **OFFICIAL**; its address stays fixed. Left and Right on that row
-switch between saved addresses; **ADD A SERVER** keeps a custom address,
+labelled **OFFICIAL**; its address stays fixed. Left and Right, or the arrow
+buttons on that row, switch saved addresses; **ADD A SERVER** keeps a custom address,
 up to four alongside the official server. A edits a selected custom server. Type
 with a keyboard, tap the letters, or use the D-pad and A; L erases a letter,
 Start keeps the field, and B cancels.

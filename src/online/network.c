@@ -115,6 +115,31 @@ static void privacy_update(void) {
 	join();
 }
 
+static void server_step(int direction) {
+	N.prefs.selected = (unsigned)((int)N.prefs.selected + (int)N.prefs.count + direction) % N.prefs.count;
+	network_store();
+}
+
+static void home_tap(int x, int y) {
+	for (int i = 0; i < NETWORK_ROWS; ++i) {
+		SDL_Rect r = network_home_rect(i);
+		if (x < r.x || x >= r.x + r.w || y < r.y || y >= r.y + r.h) continue;
+		N.row = i;
+		N.note[0] = 0;
+		if (i == NETWORK_ROW_SERVER) {
+			for (int direction = -1; direction <= 1; direction += 2) {
+				SDL_Rect arrow = network_server_arrow(direction);
+				if (x >= arrow.x && x < arrow.x + arrow.w && y >= arrow.y && y < arrow.y + arrow.h) {
+					server_step(direction);
+					return;
+				}
+			}
+		}
+		choose();
+		return;
+	}
+}
+
 static void update(void) {
 	/* The virtual A button's lift belongs to the title that opened us. */
 	if (N.wait_touch) {
@@ -129,17 +154,9 @@ static void update(void) {
 	if (btn_repeat(BTN_UP)) { N.row = (N.row + NETWORK_ROWS - 1) % NETWORK_ROWS; N.note[0] = 0; }
 	if (btn_repeat(BTN_DOWN)) { N.row = (N.row + 1) % NETWORK_ROWS; N.note[0] = 0; }
 	int delta = btn_repeat(BTN_RIGHT) ? 1 : btn_repeat(BTN_LEFT) ? -1 : 0;
-	if (N.row == NETWORK_ROW_SERVER && delta) {
-		N.prefs.selected = (unsigned)((int)N.prefs.selected + (int)N.prefs.count + delta) % N.prefs.count;
-		network_store();
-	}
+	if (N.row == NETWORK_ROW_SERVER && delta) server_step(delta);
 	int x, y;
-	if (platform_tap(&x, &y)) {
-		for (int i = 0; i < NETWORK_ROWS; ++i) {
-			SDL_Rect r = network_home_rect(i);
-			if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { N.row = i; choose(); return; }
-		}
-	}
+	if (platform_tap(&x, &y)) { home_tap(x, y); return; }
 	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) choose();
 }
 
