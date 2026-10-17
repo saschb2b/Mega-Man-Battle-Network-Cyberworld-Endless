@@ -2330,6 +2330,8 @@ def main():
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_trade_compare.py')])
         if code == 0:
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_trade_stage_compare.py')])
+        if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
     if a.action == 'lint':

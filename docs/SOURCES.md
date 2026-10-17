@@ -183,3 +183,22 @@ menu: that trial was inconclusive, then corrected by copying a runtime
 name. No target strings, disassembly or fixture state enter git. BN5
 availability and All * trading rules are project behavior, tested
 separately with invented records rather than attributed to original BN6.
+
+## Trade's chip mutation routines (issue #120)
+
+**Verified at routine level, 18 October 2026:** the original chip removal
+and acquisition calls returned through the emulated CPU in two fresh
+Gregar controls with identical complete states and RAM. A new incoming
+chip changed its count, ownership mark, Library bit and acquisition-order
+stamp; the shared next-stamp counter also decremented. The locator leads
+were the bn6f contributors' chip routines in `asm/asm02.s` and their Trade
+caller in `data/dat33.s`, matched against Gregar by the local matcher.
+The [routine acceptance](re/trade-stage-routine-goal.md) keeps CPU/stack
+execution effects separate from the exact inventory fields a staged
+checkpoint may change. ROM_DATA.md records the locations and re-check.
+
+**Unreached:** a completed original two-player Network chip exchange.
+Three bounded connection variants stalled before completion, including
+a pristine Pack control. [The attempt record](re/trade-stage-link-attempts.md)
+retains that negative result. The routine-level result does not establish
+the original cable exchange, its save/menu completion or its recovery.

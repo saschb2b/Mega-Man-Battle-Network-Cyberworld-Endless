@@ -95,6 +95,8 @@
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
+#define BN6_PACK_ORDER        4           /* four u16 acquisition stamps, one per code slot */
+#define BN6_CHIP_ORDER_COUNTER 0x020065B4u /* u16 next acquisition stamp; original Give copies then decrements it */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/EMULATION.md) */
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */

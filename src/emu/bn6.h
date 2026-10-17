@@ -315,6 +315,8 @@
 #define BN6_TRADER_RESET      0x0804B0ADu /* bn6f sub_804A2E8: clears the trade's state and the submenu's */
 #define BN6_TRADER_PRIZE      0x0804CAC5u /* bn6f sub_804BD00: a prize from the map's pool, r0 its chip, r1 its code */
 #define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
+#define BN6_TAKE_CHIPS        0x08021B93u /* remove (chip, code, count); returned through original CPU in trade routine proof */
+#define BN6_TRADE_APPLY       0x0812EB89u /* original chip Trade completion caller; located, full exchange not yet reached */
 #define BN6_TAKE_BUGFRAGS     0x0803D09Du /* TakeBugfrags (count) */
 #define BN6_SAVE_GAME         0x0803F76Du /* bn6f sub_803F798: the game saved to the cartridge, as after every trade */
 #define BN6_FLAG_TRADER_HOWL  0xF6        /* EVENT_F6: the machine's howl, set by the trade's script; the machine clears it */

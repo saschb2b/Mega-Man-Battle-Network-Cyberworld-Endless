@@ -1,6 +1,6 @@
 # Staged chip swap: original-routine oracle acceptance
 
-Status: proposed fallback acceptance for review. No patch routine is
+Status: reviewed fallback acceptance. No patch routine is
 implemented. The [native peer exchange](trade-stage-link-attempts.md)
 remains INCONCLUSIVE and is a separate integration requirement.
 
@@ -70,6 +70,15 @@ calls**. The comparator enumerates those fields by named BN6 accessors
 and the pinned mGBA serialized-state layout; it does not permit the whole
 Pack, ownership table, Library block, CPU, stack or flash as a blanket
 mask. Every other byte, including extdata, stays unchanged.
+
+The reviewed addition after observing two original controls is the exact
+incoming code's 16-bit acquisition stamp and the shared 16-bit next-stamp
+counter (`BN6_PACK_ORDER`, `BN6_CHIP_ORDER_COUNTER`). Give copies that
+counter into the incoming slot and then decrements it. These are individual
+inventory fields, not an allowance for a larger Pack or metadata range.
+Require separate omission mutations for each. A counter-zero fixture
+must observe the original wrap behavior; a last-spare and incoming-98
+fixture exercise the quantity boundaries within this ordinary BN6 scope.
 
 Compare the complete Pack, ownership and Library result against the
 original calls, not a subtraction formula. Verify all equipped entries
