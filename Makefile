@@ -218,6 +218,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
 	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
+	tests/test_online_trade_authority.c src/online/online_trade_authority.c \
 	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
@@ -451,3 +452,9 @@ build/host/test_online_trade_wire: $(TRADE_WIRE_TEST_SRCS) src/online/*.h shared
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_WIRE_TEST_MAIN -o $@ $(TRADE_WIRE_TEST_SRCS)
+
+TRADE_AUTHORITY_TEST_SRCS := tests/test_online_trade_authority.c src/online/online_trade_authority.c src/online/online_trade_terms.c src/core/sha256.c
+build/host/test_online_trade_authority: $(TRADE_AUTHORITY_TEST_SRCS) src/online/*.h shared/online/*.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_AUTHORITY_TEST_MAIN -o $@ $(TRADE_AUTHORITY_TEST_SRCS)
