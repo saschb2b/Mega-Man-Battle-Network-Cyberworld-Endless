@@ -285,6 +285,30 @@ static void at_boundary(Operation op, unsigned at, bool death) {
 	erase(f.root);
 }
 
+static char source_stage_path[TRADE_PATH_MAX];
+static bool source_flush_seen;
+static bool fail_source_flush(const char *name) {
+	if (!strcmp(name, "before-file-flush") && !trade_files_kind(source_stage_path)) {
+		source_flush_seen = true;
+		return false;
+	}
+	return true;
+}
+
+static void source_is_durable(void) {
+	Fixture f;
+	CHECK(fixture(&f));
+	CHECK(trade_files_path(source_stage_path, f.root, "trade.stage"));
+	source_flush_seen = false;
+	trade_files_test_hook(fail_source_flush);
+	CHECK(!online_trade_journal_prepare(f.root, &f.terms, 0, &change, 1));
+	trade_files_test_hook(NULL);
+	CHECK(source_flush_seen);
+	CHECK(online_trade_journal_recover(f.root, NULL) == TRADE_JOURNAL_CLEAR);
+	unchanged(f.current, f.source);
+	erase(f.root);
+}
+
 static char pending_path[TRADE_PATH_MAX];
 static bool fail_final_prepare_flush(const char *name) {
 	return strcmp(name, "before-directory-flush") || trade_files_kind(pending_path) != 1;
@@ -379,7 +403,7 @@ int test_online_trade_journal(void) {
 	CHECK(trade_files_supported());
 	commit_and_retry(); abort_and_invalid_source(); malformed_storage(); record_integrity();
 #ifdef CW_TRADE_FILES_TEST
-	visible_is_not_durable(); damaged_committed_stage(); damaged_write_readback();
+	source_is_durable(); visible_is_not_durable(); damaged_committed_stage(); damaged_write_readback();
 	fault_sweep(PREPARE); fault_sweep(COMMIT); fault_sweep(ACK); fault_sweep(CERTIFY);
 #endif
 	printf("trade journal: %s\n", failures ? "FAILED" : "passed");

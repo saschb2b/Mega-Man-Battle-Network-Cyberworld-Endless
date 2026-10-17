@@ -74,6 +74,10 @@ static bool matches(const char *directory, const uint8_t expected[32]) {
 	return trade_files_hash(directory, false, hash) && !memcmp(hash, expected, 32);
 }
 
+static bool certified_matches(const char *directory, const uint8_t expected[32]) {
+	return trade_files_certify(directory) && matches(directory, expected);
+}
+
 static bool same_terms(const OnlineTradeTerms *a, const OnlineTradeTerms *b) {
 	uint8_t aa[ONLINE_TRADE_TERMS_BYTES], bb[ONLINE_TRADE_TERMS_BYTES];
 	return online_trade_terms_encode(a, aa) && online_trade_terms_encode(b, bb) && !memcmp(aa, bb, sizeof aa);
@@ -125,8 +129,9 @@ static OnlineTradeJournalState recover(const Paths *p, OnlineTradeJournal *journ
 	if (!matches(p->current, journal->source) || !matches(p->stage, journal->staged) || trade_files_kind(p->previous))
 		return TRADE_JOURNAL_BROKEN;
 	/* A process can see a renamed PREPARED journal whose final directory
-	 * flush failed. Visible bytes alone are not a durability promise. */
-	if (!trade_files_certify(p->stage) || !matches(p->stage, journal->staged) || !journal_write(p, journal))
+	 * flush failed. Both abort and commit need durable checkpoint files;
+	 * visible bytes alone are not a durability promise. */
+	if (!certified_matches(p->current, journal->source) || !certified_matches(p->stage, journal->staged) || !journal_write(p, journal))
 		return TRADE_JOURNAL_BROKEN;
 	return TRADE_JOURNAL_PREPARED;
 }
@@ -204,7 +209,7 @@ bool online_trade_journal_prepare(const char *root, const OnlineTradeTerms *term
 	bool ok = recover(&p, &journal) == TRADE_JOURNAL_CLEAR;
 	journal.terms = *terms; journal.side = side; journal.state = TRADE_JOURNAL_PREPARED;
 	memcpy(journal.source, terms->side[side].checkpoint, 32);
-	if (ok) ok = source_valid(&p, &terms->side[side]) && matches(p.current, journal.source) &&
+	if (ok) ok = source_valid(&p, &terms->side[side]) && certified_matches(p.current, journal.source) &&
 		write_stage(&p, &journal, replacement, count) && journal_write(&p, &journal);
 	trade_files_unlock(fd);
 	return ok;

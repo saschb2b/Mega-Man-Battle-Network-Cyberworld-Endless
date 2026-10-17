@@ -25,7 +25,7 @@ typedef struct {
 	size_t size;
 } OnlineTradeReplacement;
 
-/* True only once the full stage, receipt and PREPARED journal are flushed
+/* True only once source, full stage, receipt and PREPARED journal are flushed
  * and read back. Source remains untouched. A false return may still leave
  * a pending journal: recover before allowing any offline progress. */
 bool online_trade_journal_prepare(const char *root, const OnlineTradeTerms *terms, unsigned side,

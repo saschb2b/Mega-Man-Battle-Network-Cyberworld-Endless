@@ -180,8 +180,8 @@ source checksum; only `run.state` and an optional `profile.sav` may be
 replaced. The derived transfer manifest is removed and recreated on a
 later export. Preparation requires an existing valid run identity and
 revision; missing or damaged receipts never mint a replacement identity.
-Every staged file, directory and the PREPARED journal is flushed and
-read back before success. Recovery recertifies visible PREPARED files
+Source files, staged files, directories and the PREPARED journal are flushed and
+read back before success. Recovery recertifies source and visible PREPARED files
 and the journal before permitting that promise to be sent again: a name
 visible after process death is not proof that a directory flush succeeded.
 
@@ -203,11 +203,11 @@ trades, so a later ordinary checkpoint need not match an old receipt's
 post-content digest.
 
 The ROM-free suite injects an I/O refusal and process death at each of
-328 storage boundaries: 158 prepare, 80 commit/install, 32 acknowledgement
-and 58 PREPARED recertification boundaries. It also checks visible but
+368 storage boundaries: 172 prepare, 80 commit/install, 32 acknowledgement
+and 84 PREPARED recertification boundaries. It also checks visible but
 unflushed preparation, write/read-back corruption, a damaged committed
 stage, missing/malformed receipts, strict file names and preservation of
-Undo. All 656 interruption cases passed with ASan/UBSan and `-Werror`.
+Undo. All 736 interruption cases passed with ASan/UBSan and `-Werror`.
 These are Linux process-death and injected I/O-failure tests, not physical
 power-cut evidence or certification of another platform's storage.
 
