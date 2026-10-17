@@ -307,6 +307,17 @@ static void save_queue_checks(void) {
 	/* written at once, the same way */
 	uint8_t now[5] = { 62, 62, 62, 62, 62 };
 	CHECK(save_file_write(b, now, sizeof now) && file_is(b, 62, sizeof now), "a file written at once");
+	unsigned before = save_write_failures();
+	CHECK(!save_file_write(dir, now, sizeof now), "a directory cannot become a save");
+	CHECK(save_write_failures() != before, "a synchronous write failure is observable");
+	before = save_write_failures();
+	CHECK(save_queue_file(dir, filled(63, 10), 10), "a failing write can still be accepted by the queue");
+	save_queue_wait();
+	CHECK(save_write_failures() != before, "a worker failure is observable after wait");
+	before = save_write_failures();
+	CHECK(save_queue_file(a, filled(64, 10), 10), "a later write can recover");
+	save_queue_wait();
+	CHECK(save_write_failures() == before && file_is(a, 64, 10), "a successful group has no new failures");
 	save_queue_quit();
 	remove(a);
 	remove(b);

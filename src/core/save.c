@@ -42,14 +42,14 @@ static uint32_t checksum(const void *p, size_t n) {
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
 	/* (the saves beside a missing savedata/, not put back: no fresh one
 	 * over them, backup.h) */
-	if (backup_blocked()) return false;
+	if (backup_blocked()) { save_write_failed(); return false; }
 	char dir[600], file[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	cw_mkdir(dir);
 	save_path(file, sizeof file, name);
 	uint32_t hdr[3] = { magic, (uint32_t)n, checksum(data, n) };
 	uint8_t *bytes = malloc(sizeof hdr + n);
-	if (!bytes) return false;
+	if (!bytes) { save_write_failed(); return false; }
 	memcpy(bytes, hdr, sizeof hdr);
 	memcpy(bytes + sizeof hdr, data, n);
 	bool ok = save_queue_file(file, bytes, sizeof hdr + n);

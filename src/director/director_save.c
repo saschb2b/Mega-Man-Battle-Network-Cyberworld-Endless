@@ -105,7 +105,7 @@ void save_checkpoint(void) {
 	library_from_game();
 	programs_from_game();
 	save_run();
-	emu_save_state_queued(path);
+	if (!emu_save_state_queued(path)) save_write_failed();
 	int make = LAYER_MAKE;
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
 	save_write_blob("run.area", LAYER_AREA_MAGIC, &D.layer_tiles, sizeof D.layer_tiles);

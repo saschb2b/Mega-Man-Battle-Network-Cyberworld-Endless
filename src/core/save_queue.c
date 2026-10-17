@@ -9,16 +9,21 @@
 
 #include "compat.h"
 
+static SDL_atomic_t failures;
+
+unsigned save_write_failures(void) { return (unsigned)SDL_AtomicGet(&failures); }
+void save_write_failed(void) { SDL_AtomicAdd(&failures, 1); }
+
 bool save_file_write(const char *path, const void *data, size_t n) {
 	char tmp[620];
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "wb");
-	if (!f) return false;
+	if (!f) { save_write_failed(); return false; }
 	bool ok = fwrite(data, 1, n, f) == n;
 	ok = fflush(f) == 0 && ok;
 	ok = fclose(f) == 0 && ok;
 	ok = ok && cw_rename(tmp, path);
-	if (!ok) remove(tmp);
+	if (!ok) { remove(tmp); save_write_failed(); }
 	return ok;
 }
 
