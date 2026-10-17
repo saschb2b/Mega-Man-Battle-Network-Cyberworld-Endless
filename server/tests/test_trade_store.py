@@ -1,6 +1,7 @@
 """Trade decisions survive interruption without split or repeated commits."""
 
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import replace
 from pathlib import Path
 import sqlite3
@@ -148,7 +149,7 @@ class TradeStoreTests(unittest.TestCase):
             original.close()
             with self.subTest(mutation=mutation), self.assertRaisesRegex(TradeError, "schema"):
                 TradeStore(directory)
-            with sqlite3.connect(directory / "trades.sqlite3") as check:
+            with closing(sqlite3.connect(directory / "trades.sqlite3")) as check:
                 self.assertEqual(list(check.iterdump()), before)
 
     def test_recovery_refuses_damaged_history_before_releasing_any_run(self):
