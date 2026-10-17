@@ -1,7 +1,8 @@
 """Authenticated socket adapter for the isolated trade coordinator.
 
-Only the test service attaches this adapter today. Public presence v2 must
-not send these extension messages before a compatible client is negotiated.
+The service attaches this adapter only after a compatible client is negotiated.
+The production command line keeps trading disabled while client integration
+is being proved. Legacy presence v2 never receives extension messages.
 The presence owner supplies authenticated identities and calls disconnect
 in its connection's finally block. Durable decisions precede every reply.
 """
@@ -21,8 +22,9 @@ class TradeSession:
 
 
 class TradeEndpoint:
-    def __init__(self, store, capacity=256):
+    def __init__(self, store, capacity=256, enabled=True):
         self.lobby = TradeLobby(store, capacity)
+        self.enabled = enabled
         self.sessions = {}
         # Keep notifications in decision order, including when two peers
         # prepare concurrently. Slow clients have a bounded write deadline.
@@ -68,7 +70,7 @@ class TradeEndpoint:
                 pending = await self.lobby.connect(identity, name, channel)
                 session = TradeSession(identity, writer)
                 self.sessions[identity] = session
-                if not await self._send(session, wire.caps(self.lobby.store.server_identity, True)):
+                if not await self._send(session, wire.caps(self.lobby.store.server_identity, self.enabled)):
                     raise ConnectionError("Trade capability delivery failed")
                 if pending:
                     await self._decision(pending, only=identity)
@@ -83,6 +85,8 @@ class TradeEndpoint:
         async with self.lock:
             self._current(session)
             method, args = wire.read(data)
+            if not self.enabled and method not in ("status", "acknowledge", "cancel", "board"):
+                raise TradeError("New trades are disabled; pending trades can recover")
             result = await getattr(self.lobby, method)(session.identity, *args)
             if method == "board":
                 await self._send(session, wire.board(result))

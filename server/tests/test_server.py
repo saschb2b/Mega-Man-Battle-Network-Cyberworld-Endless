@@ -23,16 +23,18 @@ def masked(data, opcode=2):
 
 
 class Client:
-    async def open(self, port, name="Lan", **identity):
+    async def open(self, port, name="Lan", protocols=None, **identity):
         self.reader, self.writer = await asyncio.open_connection("127.0.0.1", port)
         key = base64.b64encode(b"0123456789abcdef").decode()
         self.writer.write(("GET /presence HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\n"
                            "Connection: Upgrade\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: " + key +
-                           "\r\nSec-WebSocket-Protocol: " + protocol.SPEC["subprotocol"] + "\r\n\r\n").encode())
+                           "\r\nSec-WebSocket-Protocol: " + (protocols or protocol.SPEC["subprotocol"]) + "\r\n\r\n").encode())
         response = await self.reader.readuntil(b"\r\n\r\n")
         assert response.startswith(b"HTTP/1.1 101")
         accept = base64.b64encode(hashlib.sha1((key + websocket.GUID).encode()).digest())
         assert accept in response
+        self.protocol = next(line.split(":", 1)[1].strip() for line in response.decode().split("\r\n")
+                             if line.lower().startswith("sec-websocket-protocol:"))
         await self.send(protocol.hello(name, **identity))
         return await self.receive()
 

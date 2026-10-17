@@ -1,10 +1,33 @@
 # Trade extension: fixed contract, not enabled on presence v2
 
 The live presence service still refuses these commands. The extension is
-being integrated with durable client storage before a new presence
-protocol enables it. `trade.h` and `trade.json` are identical constants;
+being integrated with durable client storage. `trade.h` and `trade.json` are identical constants;
 the server tests hold them together. Every integer is unsigned network
 byte order. No ROM, emulator state, complete folder or Pack travels here.
+
+## Compatible negotiation
+
+A client with complete trade support offers the WebSocket subprotocols
+`cyberworld.presence.v2.trade.v1,cyberworld.presence.v2`, in that order.
+An equipped server selects the first; a presence-only server selects the
+second. HELLO and WELCOME retain their exact v2 layouts in both cases.
+The client must verify the exact selected protocol; offering the extension
+does not mean it was accepted. No implicit reconnect or protocol guessing.
+
+Only a connection that negotiated the extension may send or receive its
+messages. The server sends WELCOME, then CAPS, then any unresolved decision
+owned by that authenticated guest and the channel's board. CAPS binds the
+persistent server identity before any decision can be trusted. Plain v2
+clients never receive extension messages, even on a server with trading.
+
+CAPS with enabled=0 disables new READY, OFFER, REQUEST and PREPARE messages
+while still allowing STATUS, CANCEL and ACK to settle existing transactions.
+Changing this setting never discards a committed decision. The server's
+default command line still refuses `trading=true`; negotiated attachment
+is exercised through the service API in integration tests until client
+checkpoint installation and recovery are complete.
+
+## Messages
 
 | ID | Direction | Payload after the one-byte kind |
 | --- | --- | --- |

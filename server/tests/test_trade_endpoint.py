@@ -17,36 +17,10 @@ from cyberworld_server.trade_store import ABORTED, COMMITTED, OFFERED, TradeErro
 
 
 class TradeTestServer(Server):
-    """Test-only attachment. Production v2 never sends trade extension bytes."""
+    """Only an explicit compatible subprotocol attaches the socket adapter."""
 
     def __init__(self, store, root):
-        super().__init__(capacity=4, player_cap=8, state_dir=root)
-        self.trades = TradeEndpoint(store, 8)
-        self.trade_sessions = {}
-
-    async def serve_player(self, reader, player):
-        session = await self.trades.connect(player.identity, player.name, player.channel, player.writer)
-        self.trade_sessions[player.id] = session
-        try:
-            await super().serve_player(reader, player)
-        finally:
-            await self.trades.disconnect(session)
-            self.trade_sessions.pop(player.id, None)
-
-    async def message(self, player, data, now):
-        try:
-            if data and data[0] >= wire.SPEC["caps"]:
-                await self.trades.message(self.trade_sessions[player.id], data)
-            else:
-                await super().message(player, data, now)
-        except TradeError as exc:
-            await self.notice(player, 20, str(exc))
-
-    async def switch_channel(self, player, requested):
-        channel = self.choose_channel(requested, player.id)
-        if channel:
-            await self.trades.move(self.trade_sessions[player.id], channel)
-        await super().switch_channel(player, requested)
+        super().__init__(capacity=4, player_cap=8, state_dir=root, trade_endpoint=TradeEndpoint(store, 8))
 
 
 class EndpointTests(unittest.IsolatedAsyncioTestCase):
@@ -76,7 +50,9 @@ class EndpointTests(unittest.IsolatedAsyncioTestCase):
     async def connect(self, number, channel=1):
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, f"Navi{number}", key=bytes((number,)) * 16, channel=channel)
+        welcome = await client.open(self.port, f"Navi{number}", key=bytes((number,)) * 16, channel=channel,
+                                    protocols=wire.SUBPROTOCOL + "," + protocol.SPEC["subprotocol"])
+        self.assertEqual(client.protocol, wire.SUBPROTOCOL)
         client.identity, client.number = welcome[14:30], number
         caps = await client.message(wire.SPEC["caps"])
         self.assertEqual(caps, wire.caps(self.store.server_identity, True))
@@ -328,6 +304,50 @@ class EndpointTests(unittest.IsolatedAsyncioTestCase):
         finally:
             await client.close()
             await server.close()
+
+    async def test_legacy_client_on_trade_server_gets_only_presence(self):
+        legacy = Client()
+        self.clients.append(legacy)
+        welcome = await legacy.open(self.port, "OldClient", key=b"o" * 16)
+        self.assertEqual(legacy.protocol, protocol.SPEC["subprotocol"])
+        player_id = struct.unpack("!I", welcome[5:9])[0]
+        self.assertNotIn(player_id, self.server.trade_sessions)
+        self.assertEqual((await legacy.receive())[0], protocol.SPEC["snapshot"])
+        await self.send(legacy, "board_request")
+        self.assertIn(b"Unknown", await legacy.message(protocol.SPEC["error"]))
+
+    async def test_new_client_offer_remains_compatible_with_presence_only_server(self):
+        server = Server()
+        client = Client()
+        try:
+            port = await server.start("127.0.0.1", 0)
+            await client.open(port, "Compatible", protocols=wire.SUBPROTOCOL + "," + protocol.SPEC["subprotocol"])
+            self.assertEqual(client.protocol, protocol.SPEC["subprotocol"])
+            self.assertEqual((await client.receive())[0], protocol.SPEC["snapshot"])
+            self.assertFalse(server.trade_sessions)
+        finally:
+            await client.close()
+            await server.close()
+
+    async def test_disabling_new_trades_keeps_committed_recovery_available(self):
+        _, _, committed = await self.commit()
+        terms, transaction = committed[1:191], committed[33:49]
+        await self.stop()
+        await self.start()
+        self.server.trades.enabled = False
+        recovered = Client()
+        self.clients.append(recovered)
+        await recovered.open(self.port, "Navi1", key=b"\1" * 16, protocols=wire.SUBPROTOCOL)
+        caps = await recovered.message(wire.SPEC["caps"])
+        self.assertEqual(caps, wire.caps(self.store.server_identity, False))
+        self.assertEqual((await recovered.message(wire.SPEC["decision"]))[1:191], terms)
+        await self.send(recovered, "ready", wire.READY.pack(b"1" * 16, 0, b"A" * 32, 0))
+        self.assertIn(b"disabled", await recovered.message(protocol.SPEC["notice"]))
+        await self.send(recovered, "status", transaction)
+        self.assertEqual((await recovered.message(wire.SPEC["decision"]))[-3:], bytes((COMMITTED, 3, 0)))
+        await self.send(recovered, "ack", transaction)
+        self.assertEqual((await recovered.message(wire.SPEC["decision"]))[-1], 1)
+        self.assertFalse(self.server.health()["rules"]["trading"])
 
 
 if __name__ == "__main__":

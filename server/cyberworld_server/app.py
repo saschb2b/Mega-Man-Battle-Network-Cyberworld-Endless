@@ -10,6 +10,8 @@ import time
 
 from . import protocol, websocket
 from .identity import IdentityStore
+from . import trade_protocol
+from .trade_store import TradeError
 
 LOG = logging.getLogger("cyberworld.server")
 
@@ -32,7 +34,8 @@ class Player:
 
 class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
-                 player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=()):
+                 player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
+                 trade_endpoint=None):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -51,6 +54,7 @@ class Server:
         self.next_id = 1
         self.connections = set()
         self.listener = self.ticker = None
+        self.trades, self.trade_sessions = trade_endpoint, {}
 
     def event(self, kind, **fields):
         entry = dict(event=kind, **fields)
@@ -91,7 +95,9 @@ class Server:
             return
         self.connections.add(task)
         try:
-            if not await websocket.upgrade(reader, writer, self.origins, self.health()):
+            protocols = (trade_protocol.SUBPROTOCOL, protocol.SPEC["subprotocol"]) if self.trades else None
+            selected = await websocket.upgrade(reader, writer, self.origins, self.health(), protocols)
+            if not selected:
                 return
             upgraded = True
             opcode, data = await asyncio.wait_for(websocket.receive(reader), 5)
@@ -114,6 +120,8 @@ class Server:
             self.players[player.id] = player
             self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, players=len(self.players))
             await self.welcome(player)
+            if selected == trade_protocol.SUBPROTOCOL:
+                self.trade_sessions[player.id] = await self.trades.connect(identity, name, channel, writer)
             await self.serve_player(reader, player)
         except protocol.ProtocolError as exc:
             self.event("reject", reason=str(exc), code=exc.code)
@@ -127,13 +135,22 @@ class Server:
         except (ConnectionError, asyncio.IncompleteReadError, asyncio.TimeoutError):
             pass
         finally:
-            if player:
-                self.players.pop(player.id, None)
-                self.event("leave", id=player.id, players=len(self.players))
-            writer.close()
-            with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
-                await asyncio.wait_for(writer.wait_closed(), 2)
-            self.connections.discard(task)
+            try:
+                if player:
+                    try:
+                        session = self.trade_sessions.pop(player.id, None)
+                        if session is not None:
+                            await self.trades.disconnect(session)
+                    finally:
+                        self.players.pop(player.id, None)
+                        self.event("leave", id=player.id, players=len(self.players))
+            finally:
+                writer.close()
+                try:
+                    with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
+                        await asyncio.wait_for(writer.wait_closed(), 2)
+                finally:
+                    self.connections.discard(task)
 
     async def serve_player(self, reader, player):
         tokens, previous = 40.0, time.monotonic()
@@ -153,7 +170,12 @@ class Server:
                 await self.message(player, data, now)
 
     async def message(self, player, data, now):
-        if data and data[0] == protocol.SPEC["state"]:
+        if data and data[0] >= trade_protocol.SPEC["caps"] and player.id in self.trade_sessions:
+            try:
+                await self.trades.message(self.trade_sessions[player.id], data)
+            except TradeError as exc:
+                await self.notice(player, 20, str(exc))
+        elif data and data[0] == protocol.SPEC["state"]:
             player.position = protocol.read_state(data)
             if self.event_log and now - player.last_log >= 1:
                 player.last_log = now
@@ -177,7 +199,7 @@ class Server:
         return {"status": "ok", "protocol": protocol.SPEC["version"], "name": self.name,
                 "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
                 "room_capacity": self.capacity, "channels": self.max_channels,
-                "rules": {"free_text": False, "trading": False, "arena": False}}
+                "rules": {"free_text": False, "trading": bool(self.trades and self.trades.enabled), "arena": False}}
 
     def choose_channel(self, requested, exclude=0):
         if requested > self.max_channels:
@@ -200,6 +222,12 @@ class Server:
         if not channel:
             await self.notice(player, 10, "Channel is full or unavailable")
             return
+        if player.id in self.trade_sessions:
+            try:
+                await self.trades.move(self.trade_sessions[player.id], channel)
+            except TradeError as exc:
+                await self.notice(player, 20, str(exc))
+                return
         player.channel = channel
         await self.welcome(player)
         self.event("channel", id=player.id, channel=channel)

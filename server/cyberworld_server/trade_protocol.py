@@ -14,6 +14,7 @@ try:
 except FileNotFoundError:
     _spec_text = (Path(__file__).resolve().parents[2] / "shared/online/trade.json").read_text()
 SPEC = json.loads(_spec_text)
+SUBPROTOCOL = "cyberworld.presence.v2.trade.v1"
 SIDE = struct.Struct("!16s16sI32sHB")
 READY = struct.Struct("!16sI32sB")
 LISTING = struct.Struct("!16s16sHHB")

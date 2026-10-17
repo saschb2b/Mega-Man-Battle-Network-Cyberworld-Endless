@@ -11,7 +11,7 @@ from .protocol import ProtocolError, SPEC
 GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 
-async def upgrade(reader, writer, origins, health=None):
+async def upgrade(reader, writer, origins, health=None, subprotocols=None):
     try:
         request = await asyncio.wait_for(reader.readuntil(b"\r\n\r\n"), 5)
         lines = request.decode("ascii").split("\r\n")
@@ -34,10 +34,12 @@ async def upgrade(reader, writer, origins, health=None):
         raise ProtocolError("Invalid WebSocket request") from exc
     if len(request) > 8192 or lines[0] != "GET /presence HTTP/1.1":
         raise ProtocolError("Use /presence")
+    offered = [part.strip() for part in headers.get("sec-websocket-protocol", "").split(",")]
+    selected = next((name for name in (subprotocols or (SPEC["subprotocol"],)) if name in offered), None)
     if (not valid_key or headers.get("upgrade", "").lower() != "websocket"
             or "upgrade" not in [part.strip() for part in headers.get("connection", "").lower().split(",")]
             or headers.get("sec-websocket-version") != "13"
-            or SPEC["subprotocol"] not in [part.strip() for part in headers.get("sec-websocket-protocol", "").split(",")]
+            or not selected
             or not headers.get("host")):
         raise ProtocolError("WebSocket version or subprotocol mismatch")
     if "origin" in headers and headers["origin"] not in origins:
@@ -45,9 +47,9 @@ async def upgrade(reader, writer, origins, health=None):
     accept = base64.b64encode(hashlib.sha1((key + GUID).encode()).digest()).decode()
     writer.write(("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\n"
                   "Connection: Upgrade\r\nSec-WebSocket-Accept: " + accept +
-                  "\r\nSec-WebSocket-Protocol: " + SPEC["subprotocol"] + "\r\n\r\n").encode())
+                  "\r\nSec-WebSocket-Protocol: " + selected + "\r\n\r\n").encode())
     await asyncio.wait_for(writer.drain(), 2)
-    return True
+    return selected
 
 
 def frame(data, opcode=2):

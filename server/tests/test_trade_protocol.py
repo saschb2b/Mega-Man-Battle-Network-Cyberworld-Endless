@@ -38,6 +38,9 @@ class TradeProtocolTests(unittest.TestCase):
         self.assertEqual(len(message), wire.SPEC["decision_bytes"])
         self.assertEqual(message[1:-3], terms)
         self.assertEqual(message[-3:], bytes(3))
+        negotiation = (ROOT / "shared/online/negotiation.h").read_text()
+        selected = re.search(r'#define ONLINE_TRADE_SUBPROTOCOL "([^"]+)"', negotiation)
+        self.assertEqual(selected.group(1), wire.SUBPROTOCOL)
 
     def test_fixed_c_and_python_confirmation_vector(self):
         vector = json.loads((ROOT / "shared/online/trade-vector.json").read_text())
