@@ -214,7 +214,8 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c \
-	src/analytics/analytics.c src/analytics/analytics_text.c
+	src/analytics/analytics.c src/analytics/analytics_text.c \
+	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -278,6 +279,12 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
+
+TRADE_INVENTORY_TEST_SRCS := tests/test_online_trade_inventory.c src/online/online_trade_inventory.c
+build/host/test_online_trade_inventory: $(TRADE_INVENTORY_TEST_SRCS) src/online/online_trade_inventory.h src/online/online_snapshot.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-DCW_TRADE_INVENTORY_TEST_MAIN $(addprefix -I,$(SRC_DIRS)) -o $@ $(TRADE_INVENTORY_TEST_SRCS)
 
 LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
 build/host/test_legacy: $(LEGACY_TEST_SRCS)

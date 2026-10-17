@@ -27,6 +27,7 @@
 #include "area_src.h"
 #include "backup.h"
 #include "test_backup.h"
+#include "test_online_trade_inventory.h"
 #include "chip_pool.h"
 #include "guardians.h"
 #include "launcher_roms.h"
@@ -5112,6 +5113,7 @@ int main(void) {
 	test_enemy_moved();
 	test_qr();
 	failures += test_backup();
+	test_online_trade_inventory();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();
