@@ -25,6 +25,10 @@ static SDL_Rect grid(void) {
 }
 
 void network_edit_begin(bool name, bool adding) {
+	if (!name && !adding && !N.prefs.selected) {
+		snprintf(N.note, sizeof N.note, "%s", network_word(NW_OFFICIAL_FIXED));
+		return;
+	}
 	N.view = name ? NETWORK_EDIT_NAME : NETWORK_EDIT_SERVER;
 	N.adding = adding;
 	N.key = 0;

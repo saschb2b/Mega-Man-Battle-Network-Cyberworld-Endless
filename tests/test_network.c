@@ -59,7 +59,9 @@ static void preferences(void) {
 		fclose(file);
 	}
 	CHECK(!network_prefs_read(directory, &after));
-	CHECK(after.count == 1 && after.consent == 0);
+	CHECK(after.count == 2 && after.consent == 0);
+	CHECK(!strcmp(after.servers[0], NETWORK_DEFAULT_URL));
+	CHECK(!strcmp(after.servers[1], "wss://other.example/presence"));
 	CHECK(!network_name_valid(" leading") && !network_name_valid("trailing "));
 	CHECK(!network_name_valid("<script>") && !network_name_valid("12345678901234567"));
 	CHECK(!network_url_valid("wss://user@host/presence"));
@@ -67,6 +69,60 @@ static void preferences(void) {
 	CHECK(!network_url_valid("wss://host/presence\nname=Changed"));
 	before.selected = before.count;
 	CHECK(!network_prefs_write(directory, &before));
+	remove(path);
+	rmdir(directory);
+}
+
+static void saved_servers(const char *path, const char *settings) {
+	FILE *file = fopen(path, "w");
+	CHECK(file != NULL);
+	if (!file) return;
+	fputs("identity=0123456789abcdef0123456789abcdef\n", file);
+	fputs(settings, file);
+	CHECK(!fclose(file));
+}
+
+static void server_migration(void) {
+	char directory[] = "/tmp/cyberworld-servers-XXXXXX", path[128];
+	CHECK(mkdtemp(directory) != NULL);
+	snprintf(path, sizeof path, "%s/network.ini", directory);
+	NetworkPrefs prefs, roundtrip;
+	/* Four custom slots from the old menu survive adding the fixed entry. */
+	saved_servers(path, "selected=2\nconsent=9\n"
+		"server=wss://one.example/presence\nserver=wss://two.example/presence\n"
+		"server=wss://three.example/presence\nserver=wss://four.example/presence\n");
+	CHECK(network_prefs_read(directory, &prefs));
+	CHECK(prefs.count == 5 && prefs.selected == 3 && prefs.consent == 18);
+	CHECK(!strcmp(prefs.servers[0], NETWORK_DEFAULT_URL));
+	CHECK(!strcmp(prefs.servers[1], "wss://one.example/presence"));
+	CHECK(!strcmp(prefs.servers[2], "wss://two.example/presence"));
+	CHECK(!strcmp(prefs.servers[3], "wss://three.example/presence"));
+	CHECK(!strcmp(prefs.servers[4], "wss://four.example/presence"));
+	CHECK(network_prefs_write(directory, &prefs));
+	CHECK(network_prefs_read(directory, &roundtrip));
+	CHECK(!memcmp(&prefs, &roundtrip, sizeof prefs));
+	/* Consent follows an existing official entry when it moves to first. */
+	saved_servers(path, "selected=1\nconsent=2\nserver=wss://one.example/presence\n"
+		"server=" NETWORK_DEFAULT_URL "\nserver=wss://two.example/presence\n");
+	CHECK(network_prefs_read(directory, &prefs));
+	CHECK(prefs.count == 3 && prefs.selected == 0 && prefs.consent == 1);
+	CHECK(!strcmp(prefs.servers[1], "wss://one.example/presence"));
+	CHECK(!strcmp(prefs.servers[2], "wss://two.example/presence"));
+	/* Duplicates collapse; an approved URL stays approved, not its index. */
+	saved_servers(path, "selected=2\nconsent=4\nserver=wss://one.example/presence\n"
+		"server=" NETWORK_DEFAULT_URL "\nserver=wss://one.example/presence\n");
+	CHECK(network_prefs_read(directory, &prefs));
+	CHECK(prefs.count == 2 && prefs.selected == 1 && prefs.consent == 2);
+	/* Rejecting a damaged slot does not discard another URL's own consent. */
+	saved_servers(path, "selected=1\nconsent=3\nserver=invalid\nserver=wss://two.example/presence\n");
+	CHECK(network_prefs_read(directory, &prefs));
+	CHECK(prefs.count == 2 && prefs.selected == 1 && prefs.consent == 2);
+	CHECK(!strcmp(prefs.servers[1], "wss://two.example/presence"));
+	/* Neither the editor nor a caller can persist a replacement official URL. */
+	snprintf(prefs.servers[0], NETWORK_URL, "wss://replacement.example/presence");
+	CHECK(!network_prefs_write(directory, &prefs));
+	CHECK(network_prefs_read(directory, &roundtrip));
+	CHECK(!strcmp(roundtrip.servers[0], NETWORK_DEFAULT_URL));
 	remove(path);
 	rmdir(directory);
 }
@@ -107,6 +163,7 @@ static void editor(void) {
 int main(void) {
 	identity_keys();
 	preferences();
+	server_migration();
 	editor();
 	if (!failures) puts("network: identity isolation, consent persistence and text input passed");
 	return failures ? 1 : 0;

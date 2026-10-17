@@ -5,13 +5,16 @@ const char *network_word(int word) {
 	case NW_TITLE: return "NETWORK";
 	case NW_NAME: return "Name";
 	case NW_SERVER: return "Server";
+	case NW_OFFICIAL: return "Official";
+	case NW_OFFICIAL_HELP: return "Left / Right: choose a server";
+	case NW_OFFICIAL_FIXED: return "The official server stays here. Use ADD A SERVER for another address.";
 	case NW_ADD: return "ADD A SERVER";
 	case NW_JOIN: return "JOIN SQUARE";
 	case NW_BACK: return "BACK";
 	case NW_SERVER_HELP: return "Left / Right: choose  A: edit";
 	case NW_SAVE_FAILED: return "Could not save Network settings. Check the data folder.";
 	case NW_RANDOM_FAILED: return "A private identity could not be created. Try again after restarting.";
-	case NW_FULL: return "Four servers saved. Edit a server to replace its address.";
+	case NW_FULL: return "Four custom servers saved. Edit a custom server to replace its address.";
 	case NW_NAME_INVALID: return "Use 1-16 letters, digits, spaces, _ or -. Start with a letter or digit.";
 	case NW_URL_INVALID: return "Use ws://host:port/presence or wss://host/presence.";
 	case NW_PRIVACY_TITLE: return "Join this server?";

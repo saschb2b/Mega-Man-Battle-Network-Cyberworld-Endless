@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define NETWORK_SERVERS 4
+#define NETWORK_SERVERS 5 /* the official server, then four custom addresses */
 #define NETWORK_URL 256
 #define NETWORK_NAME 17
 #define NETWORK_ID_BYTES 16

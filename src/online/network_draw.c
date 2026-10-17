@@ -56,7 +56,8 @@ static void home(void) {
 		SDL_Rect r = network_home_rect(i);
 		button(r, i < 2 ? "" : network_word(labels[i]), N.row == i);
 		if (i >= 2) continue;
-		words(r.x + 5, r.y + 4, network_word(labels[i]), PET_GOLD);
+		int label = i == NETWORK_ROW_SERVER && !N.prefs.selected ? NW_OFFICIAL : labels[i];
+		words(r.x + 5, r.y + 4, network_word(label), PET_GOLD);
 		if (!i) clipped(r.x + 49, r.y + 4, N.prefs.name, r.w - 54, PET_WHITE);
 		else {
 			char count[24];
@@ -65,7 +66,8 @@ static void home(void) {
 			clipped(r.x + 5, r.y + 17, N.prefs.servers[N.prefs.selected], r.w - 10, PET_WHITE);
 		}
 	}
-	const char *hint = N.row == NETWORK_ROW_SERVER ? network_word(NW_SERVER_HELP) : network_word(NW_MENU_HINT);
+	int help = N.prefs.selected ? NW_SERVER_HELP : NW_OFFICIAL_HELP;
+	const char *hint = N.row == NETWORK_ROW_SERVER ? network_word(help) : network_word(NW_MENU_HINT);
 	minifont_draw_centered(P.w / 2, P.h - 7, hint, PET_WHITE, 1);
 }
 

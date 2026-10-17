@@ -54,9 +54,30 @@ static void read_setting(NetworkPrefs *out, const char *key, const char *value, 
 	else if (!strcmp(key, "name") && network_name_valid(value)) snprintf(out->name, sizeof out->name, "%s", value);
 	else if (!strcmp(key, "selected")) out->selected = (unsigned)strtoul(value, NULL, 10);
 	else if (!strcmp(key, "consent")) out->consent = (unsigned)strtoul(value, NULL, 10) & ((1u << NETWORK_SERVERS) - 1u);
-	else if (!strcmp(key, "server") && out->count < NETWORK_SERVERS && network_url_valid(value)) {
-		snprintf(out->servers[out->count], NETWORK_URL, "%s", value);
+	else if (!strcmp(key, "server") && out->count < NETWORK_SERVERS) {
+		/* Keep rejected slots until migration so their consent cannot move. */
+		if (network_url_valid(value)) snprintf(out->servers[out->count], NETWORK_URL, "%s", value);
 		++out->count;
+	}
+}
+
+static void official_first(NetworkPrefs *out) {
+	NetworkPrefs saved = *out;
+	memset(out->servers, 0, sizeof out->servers);
+	snprintf(out->servers[0], NETWORK_URL, "%s", NETWORK_DEFAULT_URL);
+	out->count = 1;
+	out->selected = out->consent = 0;
+	for (unsigned i = 0; i < saved.count; ++i) {
+		const char *url = saved.servers[i];
+		if (!url[0]) continue;
+		unsigned slot = 0;
+		while (slot < out->count && strcmp(out->servers[slot], url)) ++slot;
+		if (slot == out->count) {
+			if (out->count == NETWORK_SERVERS) continue;
+			snprintf(out->servers[out->count++], NETWORK_URL, "%s", url);
+		}
+		if (saved.selected == i) out->selected = slot;
+		if (saved.consent & (1u << i)) out->consent |= 1u << slot;
 	}
 }
 
@@ -66,30 +87,23 @@ bool network_prefs_read(const char *directory, NetworkPrefs *out) {
 	char path[1100], line[512];
 	snprintf(path, sizeof path, "%s/network.ini", directory);
 	FILE *file = fopen(path, "r");
-	bool identity = false, invalid_server = false;
+	bool identity = false;
 	while (file && fgets(line, sizeof line, file)) {
 		char *end = strpbrk(line, "\r\n"), *equals = strchr(line, '=');
 		if (end) *end = 0;
 		if (!equals || line[0] == '#') continue;
 		*equals++ = 0;
-		if (!strcmp(line, "server") && !network_url_valid(equals)) invalid_server = true;
 		read_setting(out, line, equals, &identity);
 	}
 	if (file) fclose(file);
-	if (!out->count) {
-		snprintf(out->servers[0], NETWORK_URL, "%s", NETWORK_DEFAULT_URL);
-		out->count = 1;
-		out->consent = 0;
-	}
-	if (out->selected >= out->count) out->selected = 0;
-	/* A rejected slot must never transfer its permission to a later server. */
-	if (invalid_server) out->consent = 0;
+	official_first(out);
 	if (!identity) memset(out->identity, 0, sizeof out->identity);
 	return identity;
 }
 
 bool network_prefs_write(const char *directory, const NetworkPrefs *prefs) {
 	if (!network_name_valid(prefs->name) || !prefs->count || prefs->count > NETWORK_SERVERS || prefs->selected >= prefs->count) return false;
+	if (strcmp(prefs->servers[0], NETWORK_DEFAULT_URL)) return false;
 	for (unsigned i = 0; i < prefs->count; ++i) if (!network_url_valid(prefs->servers[i])) return false;
 	char path[1100], tmp[1110];
 	snprintf(path, sizeof path, "%s/network.ini", directory);
