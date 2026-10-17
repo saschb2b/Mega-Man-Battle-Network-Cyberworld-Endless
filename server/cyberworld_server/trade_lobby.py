@@ -48,7 +48,23 @@ class TradeLobby:
 
     async def _stored(self, method, *args):
         # SQLite flushing must not stall movement/pings on the event loop.
-        return await asyncio.to_thread(getattr(self.store, method), *args)
+        operation = asyncio.create_task(asyncio.to_thread(getattr(self.store, method), *args))
+        try:
+            return await asyncio.shield(operation)
+        except asyncio.CancelledError:
+            # A thread cannot be cancelled. Keep the surrounding lobby lock
+            # until its write settles, so disconnect cannot miss a late offer
+            # or commit. Repeated task cancellation must not release it early.
+            while not operation.done():
+                try:
+                    await asyncio.shield(operation)
+                except asyncio.CancelledError:
+                    continue
+                except Exception:
+                    break
+            if not operation.cancelled():
+                operation.exception()  # consume a failure before propagating cancellation
+            raise
 
     def _player(self, identity):
         player = self.players.get(identity)

@@ -4,6 +4,7 @@ import asyncio
 from dataclasses import replace
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 
 from test_server import ROOT
@@ -94,6 +95,48 @@ class LobbyTests(unittest.IsolatedAsyncioTestCase):
                                        self.lobby.request(self.b, self.a, 2, 1), return_exceptions=True)
         self.assertEqual(sum(isinstance(value, TradeError) for value in results), 1)
         self.assertEqual(self.store.db.execute("SELECT count(*) FROM trades").fetchone()[0], 1)
+
+    async def test_cancelled_create_settles_before_disconnect_or_other_callback(self):
+        await self.lobby.advertise(self.a, 1)
+        await self.lobby.advertise(self.b, 2)
+        entered, release, finished = (threading.Event() for _ in range(3))
+        create, written = self.store.create, []
+
+        def delayed_create(*args):
+            entered.set()
+            try:
+                if not release.wait(5):
+                    raise TimeoutError("Test did not release create")
+                written.append(create(*args))
+                return written[-1]
+            finally:
+                finished.set()
+
+        self.store.create = delayed_create
+        request = asyncio.create_task(self.lobby.request(self.a, self.b, 1, 2))
+        others = []
+        try:
+            self.assertTrue(await asyncio.to_thread(entered.wait, 2))
+            request.cancel()
+            await asyncio.sleep(0)
+            request.cancel()  # A second transport/shutdown cancellation must not release the lock.
+            others = [asyncio.create_task(self.lobby.board(self.b)),
+                      asyncio.create_task(self.lobby.disconnect(self.a))]
+            await asyncio.sleep(0)
+            await asyncio.sleep(0)
+            self.assertFalse(request.done())
+            self.assertTrue(self.lobby.lock.locked())
+            self.assertTrue(all(not task.done() for task in others))
+        finally:
+            release.set()
+            outcomes = await asyncio.gather(request, *others, return_exceptions=True)
+            self.assertTrue(await asyncio.to_thread(finished.wait, 2))
+        self.assertIsInstance(outcomes[0], asyncio.CancelledError)
+        self.assertEqual(outcomes[2].state, ABORTED)
+        self.assertNotIn(self.a, self.lobby.players)
+        self.assertEqual(self.store.status(written[0].transaction, self.b).state, ABORTED)
+        self.assertIsNone(self.store.pending(self.a))
+        self.assertIsNone(self.store.pending(self.b))
 
     async def test_all_star_and_malformed_claims_fail_before_reservation(self):
         star = replace(self.ca, all_star=True)
