@@ -385,6 +385,16 @@ build/host/online-replay-micro-observer: tools/online_replay_micro_observer.c to
 
 online-replay-micro-observer: build/host/online-replay-micro-observer
 
+ONLINE_REPLAY_SUBJECT_SRCS := tools/online_replay_subject.c tools/online_replay_snapshot.c tools/online_replay_execute.c $(ONLINE_REPLAY_COMMON_SRCS)
+build/host/online-replay-subject: $(ONLINE_REPLAY_SUBJECT_SRCS) tools/online_replay_snapshot.h tools/online_replay_execute.h tools/online_replay_observe.h tools/online_frame_pair_internal.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_REPLAY_SUBJECT_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-replay-subject: build/host/online-replay-subject
+.PHONY: online-replay-subject
+
 server:
 	python3 server/build.py
 
