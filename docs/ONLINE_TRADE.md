@@ -160,7 +160,14 @@ committed; it cannot undo a commit. Reconnection returns an unresolved
 committed decision. Each client must recapture its installed checkpoint
 revision before advertising again. Replaying an old acknowledgement does
 not erase that newer readiness. Database work runs off the presence event
-loop. The module has no public socket entry point yet.
+loop. The isolated `trade_endpoint.py` socket adapter validates channel,
+participant and exact binary payloads before passing them to the lobby.
+It collects ordered board batches and delivers them concurrently, so a
+slow socket does not delay another peer's board. Nine actual-socket tests
+cover lost delivery, both reconnect orders, repeated acknowledgements,
+malformed messages, cancellation and backpressure; the server suite has
+62 tests. The production presence-v2 service and CLI still do not expose
+trading.
 
 The confirmation digest is SHA-256 over `Cyberworld trade 1` followed by
 a zero byte, the 32-byte server identity, the 16-byte transaction ID, then
@@ -169,7 +176,13 @@ revision (4, network byte order), checkpoint SHA-256 (32), exact chip/code
 entry (2, network byte order), and rules (1: bit 0 BN5, bit 1 All *).
 State, prepared and applied masks are not terms and cannot change this
 digest. This format is the common contract for the client journal and
-upcoming wire codec. Persisted schemas are validated exactly; these
+client wire codec. `online_trade_authority.[ch]` binds capability records
+to the pending server and authenticated WELCOME identity. A new offer
+must match exact READY and have/want entries and can only open card
+review. Recovery requires the same 190-byte terms and an eligible local
+journal state; a fresh COMMITTED message or commit-to-abort transition
+is refused. These isolated checks do not enable runtime trading.
+Persisted schemas are validated exactly; these
 components have not yet been enabled in a released trade service.
 
 ## Implemented: isolated native client journal
@@ -251,6 +264,44 @@ cover history update, migration and first namespace creation, making
 808 storage interruption cases in the focused suite. An interrupted
 first namespace creation can remain blocked for inspection of its
 temporary file; it never silently replaces an installed namespace.
+
+## Implemented: isolated first-checkpoint identity lifecycle
+
+`online_trade_identity.[ch]` writes a durable `trade.newrun` intent with
+the new run's random identity and seed before ordinary checkpoint writes
+are allowed. After those writers stop and all queued saves finish without
+a new write failure, binding verifies the current active run, complete
+checkpoint content hash and acknowledged file/directory flushes. The
+bound marker precedes the durable history entry and checked initial
+`run.trade`; the marker is removed last. Storage operations share one
+explicit lock across identity and history updates.
+
+On restart, an unbound intent remains blocked: queue completion from a
+previous process cannot prove that its first checkpoint was complete.
+Only explicit discard/restart can remove that incomplete run, keeping
+the permanent profile and history. A bound intent finishes only with
+its certified checkpoint or an already installed matching initial
+receipt. Mismatched receipts, altered checkpoints, damaged markers and
+concurrent trade journals stay blocked. Explicit NEW GAME removes an
+abandoned run's receipt only after its new intent is durable. Legacy
+enrollment uses the stable namespace/seed mapping above.
+
+The focused identity suite injects 240 I/O refusals and 240 process
+deaths across intent, binding, legacy enrollment, discard and bound
+recovery. It also checks source certification failure, wrong run seeds,
+incomplete checkpoints, corrupted markers, traded legacy replay and a
+matching receipt after later offline progress. All pass with ASan/UBSan
+and `-Werror`; these are process/storage fault tests, not power-cut
+evidence. The ordinary `make test` suite runs them:
+
+```sh
+make WERROR=1 build/host/test_online_trade_identity
+build/host/test_online_trade_identity
+```
+
+These lifecycle APIs are not yet connected to startup, NEW GAME or save
+writers. Unsupported storage backends retain their offline behavior and
+must never advertise safe trade capability.
 
 ## Required before a swap can modify a checkpoint
 

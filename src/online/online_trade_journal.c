@@ -109,6 +109,9 @@ static OnlineTradeJournalState install(const Paths *p, OnlineTradeJournal *journ
 
 static OnlineTradeJournalState recover(const Paths *p, OnlineTradeJournal *journal) {
 	memset(journal, 0, sizeof *journal);
+	char identity[TRADE_PATH_MAX];
+	if (!trade_files_path(identity, p->root, "trade.newrun") || trade_files_kind(identity) ||
+		!trade_files_path(identity, p->root, "trade.newrun.tmp") || trade_files_kind(identity)) return TRADE_JOURNAL_BROKEN;
 	int pending = trade_files_kind(p->pending);
 	if (!pending) {
 		/* PREPARED is sent only after journal+directory flush succeeds.

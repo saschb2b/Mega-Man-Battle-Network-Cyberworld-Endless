@@ -219,6 +219,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
 	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
 	tests/test_online_trade_authority.c src/online/online_trade_authority.c \
+	tests/test_online_trade_identity.c src/online/online_trade_identity.c \
 	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
@@ -307,7 +308,8 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+test: build/host/test_online_trade_identity build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+	build/host/test_online_trade_identity
 	build/host/test_online_trade_journal
 	build/host/test_online_trade_capture
 	build/host/test_core
@@ -458,3 +460,9 @@ build/host/test_online_trade_authority: $(TRADE_AUTHORITY_TEST_SRCS) src/online/
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_AUTHORITY_TEST_MAIN -o $@ $(TRADE_AUTHORITY_TEST_SRCS)
+
+TRADE_IDENTITY_TEST_SRCS := tests/test_online_trade_identity.c src/online/online_trade_identity.c $(filter-out tests/test_online_trade_journal.c,$(TRADE_JOURNAL_TEST_SRCS))
+build/host/test_online_trade_identity: $(TRADE_IDENTITY_TEST_SRCS) src/online/*.h src/core/run.h src/core/save_format.h shared/online/trade.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_IDENTITY_TEST_MAIN -o $@ $(TRADE_IDENTITY_TEST_SRCS)

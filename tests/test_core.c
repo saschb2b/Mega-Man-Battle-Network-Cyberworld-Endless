@@ -31,6 +31,7 @@
 #include "test_online_trade_terms.h"
 #include "test_online_trade_wire.h"
 #include "test_online_trade_authority.h"
+#include "test_online_trade_identity.h"
 #include "test_online_trade_journal.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -5121,6 +5122,7 @@ int main(void) {
 	failures += test_online_trade_terms();
 	failures += test_online_trade_wire();
 	failures += test_online_trade_authority();
+	failures += test_online_trade_identity();
 	failures += test_online_trade_journal();
 	test_launcher();
 	test_bug_cause();

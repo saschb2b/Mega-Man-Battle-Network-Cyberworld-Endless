@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "online_trade_files.h"
+#include "online_trade_history_internal.h"
 #include "sha256.h"
 
 #define HISTORY_HEAD 28u
@@ -99,14 +100,19 @@ bool online_trade_history_create(const char *root, const uint8_t namespace_id[16
 	return ok;
 }
 
-OnlineTradeHistoryResult online_trade_history_namespace(const char *root, uint8_t out[16]) {
-	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
-	int lock = trade_files_lock(root);
-	if (lock < 0) return TRADE_HISTORY_IO;
+OnlineTradeHistoryResult online_trade_history_namespace_locked(const char *root, uint8_t out[16]) {
 	History h;
 	OnlineTradeHistoryResult result = read_history(root, &h);
 	if (result == TRADE_HISTORY_OK && out) memcpy(out, h.bytes + 8, 16);
 	free(h.bytes);
+	return result;
+}
+
+OnlineTradeHistoryResult online_trade_history_namespace(const char *root, uint8_t out[16]) {
+	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
+	int lock = trade_files_lock(root);
+	if (lock < 0) return TRADE_HISTORY_IO;
+	OnlineTradeHistoryResult result = online_trade_history_namespace_locked(root, out);
 	trade_files_unlock(lock);
 	return result;
 }
@@ -151,15 +157,24 @@ static bool remember(History *h, uint32_t seed, const uint8_t *record, size_t n,
 	return true;
 }
 
-static OnlineTradeHistoryResult record_operation(const char *root, uint32_t seed, const uint8_t *record, size_t n, bool write) {
-	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
-	int lock = trade_files_lock(root);
-	if (lock < 0) return TRADE_HISTORY_IO;
+static OnlineTradeHistoryResult record_locked(const char *root, uint32_t seed, const uint8_t *record, size_t n, bool write) {
 	History h;
 	OnlineTradeHistoryResult result = read_history(root, &h);
 	if (result == TRADE_HISTORY_OK) result = check_record(&h, seed, record, n);
 	if (result == TRADE_HISTORY_OK && write && (!remember(&h, seed, record, n, false) || !write_history(root, &h))) result = TRADE_HISTORY_IO;
 	free(h.bytes);
+	return result;
+}
+
+OnlineTradeHistoryResult online_trade_history_remember_locked(const char *root, uint32_t seed, const uint8_t *record, size_t n) {
+	return record_locked(root, seed, record, n, true);
+}
+
+static OnlineTradeHistoryResult record_operation(const char *root, uint32_t seed, const uint8_t *record, size_t n, bool write) {
+	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
+	int lock = trade_files_lock(root);
+	if (lock < 0) return TRADE_HISTORY_IO;
+	OnlineTradeHistoryResult result = record_locked(root, seed, record, n, write);
 	trade_files_unlock(lock);
 	return result;
 }
@@ -187,18 +202,23 @@ static OnlineTradeHistoryResult migrate(History *h, uint32_t seed, uint8_t initi
 	return TRADE_HISTORY_OK;
 }
 
-OnlineTradeHistoryResult online_trade_history_legacy(const char *root, uint32_t seed, uint8_t initial[ONLINE_TRADE_RECORD_INITIAL]) {
-	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
+OnlineTradeHistoryResult online_trade_history_legacy_locked(const char *root, uint32_t seed, uint8_t initial[ONLINE_TRADE_RECORD_INITIAL]) {
 	if (!initial) return TRADE_HISTORY_BROKEN;
 	memset(initial, 0, ONLINE_TRADE_RECORD_INITIAL);
-	int lock = trade_files_lock(root);
-	if (lock < 0) return TRADE_HISTORY_IO;
 	History h;
 	OnlineTradeHistoryResult result = read_history(root, &h);
 	if (result == TRADE_HISTORY_OK) result = migrate(&h, seed, initial);
 	if (result == TRADE_HISTORY_OK && !write_history(root, &h)) result = TRADE_HISTORY_IO;
 	if (result != TRADE_HISTORY_OK) memset(initial, 0, ONLINE_TRADE_RECORD_INITIAL);
 	free(h.bytes);
+	return result;
+}
+
+OnlineTradeHistoryResult online_trade_history_legacy(const char *root, uint32_t seed, uint8_t initial[ONLINE_TRADE_RECORD_INITIAL]) {
+	if (!trade_files_supported()) return TRADE_HISTORY_UNSUPPORTED;
+	int lock = trade_files_lock(root);
+	if (lock < 0) return TRADE_HISTORY_IO;
+	OnlineTradeHistoryResult result = online_trade_history_legacy_locked(root, seed, initial);
 	trade_files_unlock(lock);
 	return result;
 }
