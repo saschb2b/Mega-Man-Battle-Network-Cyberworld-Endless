@@ -17,5 +17,8 @@
   "listing_bytes": 37,
   "listings_max": 8,
   "rule_bn5": 1,
-  "rule_all_star": 2
+  "rule_all_star": 2,
+  "offered": 0,
+  "committed": 1,
+  "aborted": 2
 }
