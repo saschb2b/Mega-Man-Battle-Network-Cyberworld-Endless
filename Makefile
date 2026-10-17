@@ -354,7 +354,7 @@ build/host/online-link-bn6: $(ONLINE_BN6_LINK_SRCS) tools/online_link_script.h t
 online-link-bn6: build/host/online-link-bn6
 
 ONLINE_FRAME_SRCS := tools/online_frame_worker.c tools/online_frame_pair.c tools/online_frame_wire.c tools/online_link_script.c
-build/host/online-frame-worker: $(ONLINE_FRAME_SRCS) tools/online_frame_pair.h tools/online_frame_wire.h tools/online_link_script.h
+build/host/online-frame-worker: $(ONLINE_FRAME_SRCS) tools/online_frame_pair.h tools/online_frame_pair_internal.h tools/online_frame_wire.h tools/online_link_script.h
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_FRAME_SRCS) \
@@ -362,13 +362,22 @@ build/host/online-frame-worker: $(ONLINE_FRAME_SRCS) tools/online_frame_pair.h t
 
 online-frame: build/host/online-frame-worker
 
+ONLINE_REPLAY_COMMON_SRCS := tools/online_replay_observe.c tools/online_frame_pair.c tools/online_frame_wire.c tools/online_link_script.c src/core/sha256.c
+build/host/online-replay-observer: tools/online_replay_observer.c $(ONLINE_REPLAY_COMMON_SRCS) tools/online_replay_observe.h tools/online_frame_pair_internal.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include tools/online_replay_observer.c $(ONLINE_REPLAY_COMMON_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-replay-observer: build/host/online-replay-observer
+
 server:
 	python3 server/build.py
 
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: online-link online-link-bn6 online-frame server server-test
+.PHONY: online-link online-link-bn6 online-frame online-replay-observer server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)

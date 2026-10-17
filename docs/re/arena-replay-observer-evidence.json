@@ -1,0 +1,64 @@
+{
+  "local_evidence": ".build/online-replay/observer-9q_x8n69",
+  "target": {
+    "rom_sha256": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "boot_sha256": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6",
+    "linked_library_sha256": "5b02195c77b74ffa6622952706025bc7e5a77bd5d14d9306e0bbc84ab789f0cd"
+  },
+  "source_hashes": {
+    "tools/online_replay_observe.c": "5c4dce38d643a230340c0fb6f57e56fad182cf36aecca84ca39b0afbe6add8a0",
+    "tools/online_replay_observe.h": "0ce82f9e625ca9102344f3421eccfb69ce8913130c2c77430a8fc7d22b6ae9fe",
+    "tools/online_replay_observer.c": "8feacf9840b1829de311057144a4a31e5e3fc79ffcd4052945bb269f05fecc35",
+    "tools/online_frame_pair.c": "eb483a3a0dbe5d78a4717dbbcfa730b0e5438c0ce2fcf136f9cdce8bc0ec9ed4",
+    "tools/online_frame_pair_internal.h": "eb146b21b9b62b5bc5f6045c8ddd922dc57a8ff8359671ae6c9bf39f67750432",
+    "tools/online_frame_pair.h": "fa5fe070e4043ff130eba017ab53e4d74af3474588f2676f79b711c3108c6a71",
+    "tools/online_frame_wire.c": "c29d8d1ca06ccaa586e10939432710e77b8ce02d05e3dd0313cb8612b04097f2",
+    "tools/online_link_script.c": "bbca6b2079acc64f1fdd5b1f78fbca328f222b9df0fe9e358529d638c359eaf8",
+    "tools/online_replay_compare.py": "9b89430304a7cb17f238572ebc45dd45951705484aa56da99b068a23daed4bb4",
+    "tests/test_online_replay_compare.py": "9e70569579d4056ca8535bbfd17b6127b94f00914bb7be2085e8b743e50611d2",
+    "src/core/sha256.c": "a8501a17522241e931d01dcec699170373db50339a51c701c09abbf5a8b94b24",
+    "src/core/sha256.h": "d82bef532dd873452a24414e098a036c0d43b3661d68fea9a9f01dd7da44ad73",
+    "Makefile": "afa44298a1b7ee9c4f0281c8a65c5c188e8056d5c5442f318abe6ed5c5b5194a"
+  },
+  "binary_hashes": {
+    "build/host/online-link-bn6": "ca4a466465285a4b7221cebb37ca5d1ddbef2a03d9201217fc8abf031dc9bc0d",
+    "build/host/online-replay-observer": "37cd58ec9c098bf3efa88410e1030dd0addada6e3f240e766a71c9b4db271ae4"
+  },
+  "source_before": {
+    "rom": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "state": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6"
+  },
+  "full_control_records": 2823,
+  "original_active_timers": 1433,
+  "cable_phases": [
+    0
+  ],
+  "native_flash_change_frames": [
+    296,
+    297,
+    299,
+    300,
+    301,
+    302,
+    2737,
+    2738,
+    2739,
+    2740,
+    2741,
+    2742,
+    2743
+  ],
+  "verdict": "INCONCLUSIVE",
+  "unreached": "Original did not exercise: nonidle-cable",
+  "source_after": {
+    "rom": "572e113eeb53bb29cd9ff8acb9db265cfd48c5e509c8d0e6420b58e71e442cf2",
+    "state": "4b921c9cf48c22085605714797373114de206a32b8bba821606dc348f73f95b6"
+  },
+  "trace_sha256": {
+    "original-trace.csv": "4ae5b1ecc026a799951a0aae91e053522d97db053bcebe82545d9283e2b055f7",
+    "observer-a.csv": "508d32c23ab5526511dca2c87eb419cd6cff30b8d18a4ee9906ee0ae26ea8d32",
+    "observer-a.jsonl": "030a1976e81a4b730d378bf030da9dd465945b651779f980dec937f14ea761c0",
+    "observer-b.csv": "508d32c23ab5526511dca2c87eb419cd6cff30b8d18a4ee9906ee0ae26ea8d32",
+    "observer-b.jsonl": "030a1976e81a4b730d378bf030da9dd465945b651779f980dec937f14ea761c0"
+  }
+}

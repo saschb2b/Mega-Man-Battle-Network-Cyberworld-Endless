@@ -13,23 +13,8 @@
 #include <mgba-util/vfs.h>
 
 #include "online_frame_wire.h"
+#include "online_frame_pair_internal.h"
 #include "online_link_script.h"
-
-struct OnlineFramePair {
-	struct GBASIOLockstep cable;
-	struct GBASIOLockstepNode node[2];
-	struct mCore *core[2];
-	color_t video[2][240 * 160];
-	uint8_t *state[2];
-	size_t state_bytes[2];
-	int32_t credit[2];
-	unsigned waiting, transfers;
-	int running;
-	unsigned traced[2];
-	unsigned start_frame[2], frame;
-	unsigned entry_step, entry_frame;
-	FILE *trace;
-};
 
 static bool signal_peer(struct mLockstep *lock, unsigned mask) {
 	OnlineFramePair *p = lock->context;
