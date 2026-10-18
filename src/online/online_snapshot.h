@@ -27,4 +27,12 @@ typedef struct {
  * run-side record rather than BN6 RAM. False before the folder/pack exist. */
 bool online_snapshot_read(OnlineLoadout *out, unsigned souls);
 
+/* ... from another core's memory, a byte at a time (the Arena's reading
+ * of a checkpoint's state: arena_carry.c) */
+typedef struct {
+	uint8_t (*read8)(void *context, uint32_t address);
+	void *context;
+} OnlineMemory;
+bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsigned souls);
+
 #endif
