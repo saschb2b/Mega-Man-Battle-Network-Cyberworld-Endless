@@ -71,11 +71,11 @@ pattern, formats with a telegraph.
   rules each game installs BN5 into both pair cores from its own BN5 ROM,
   the same way (the game core's installs written down as it starts and
   made again in each pair core, their hash in the pair's), and MegaMan
-  fights with BN5's chips in his folder; his Souls stay home under either
-  rules until UNITE crosses the cable
+  fights with BN5's chips in his folder and his Souls, a Soul he unites
+  with carried by the pair to the other GBA
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)). Under BN6's rules he
-  leaves BN5's chips in his pack at home too and fights with a folder of
-  BN6's chips: Lan picks it among Folder1, Folder2 and the Extra Folder,
+  leaves his Souls and BN5's chips in his pack at home and fights with a
+  folder of BN6's chips: Lan picks it among Folder1, Folder2 and the Extra Folder,
   those holding BN5's chips named as staying home; where none fits,
   MegaMan says so before any challenge is sent
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
@@ -392,13 +392,17 @@ server:
   step: a run holds Folder1 alone (Not yet, below).
 - **A NetBattle by full rules** (the same day, a local server, two host
   builds each with BN5's ROM beside BN6's). "Full rules! Let's see if
-  Beta takes us on!" and "Full rules: BN5 chips too! Souls stay home.";
-  both games made their pairs with the same installs' record (1,735,251
-  bytes and 42 hooks) and the same ready hash; Alpha's MrkCan1 M took
+  Beta takes us on!" and "Full rules: Souls and BN5 chips too!"; both
+  games made their pairs with the same installs' record (1,913,709
+  bytes and 132 hooks) and the same ready hash; Alpha's MrkCan1 M took
   Beta from 100 to 30 on both screens and the battle went to its end with
-  every hash agreeing. A desync stopped both; a game whose installs
-  differed (one core made without BN5's families) stopped both before the
-  first frame ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
+  every hash agreeing. Alpha holding every Soul and a folder of
+  JustcOne: UNITE on the Custom screen lit KnightSoul, and on both
+  screens KnightMan's summon, Alpha in KnightSoul with his three turns and
+  his wrecking ball's hits, the battle to its end with every hash
+  agreeing. A desync stopped both; a game whose installs differed (one
+  core made without BN5's families) stopped both before the first frame
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -437,9 +441,10 @@ are in the history before 433865a8):
   under BN6's rules a MegaMan with BN5's chips in Folder1 has no folder
   that fits: MegaMan says to swap them out at home. The choice of folder
   waits for a run that hands out more folders.
-- **The Souls under full rules:** BN5's chips go between two games with
-  BN5's ROM, the Souls stay home; UNITE in a NetBattle needs its battle
-  state a core and the Soul chosen carried in BN6's link packets.
+- **The Souls under full rules beyond KnightSoul:** UNITE, a Soul's look
+  and its charged shot on both GBAs were seen with KnightSoul; the other
+  five Souls, Chaos Unison, ColonelSoul's button and BN5's mood are not
+  yet seen in a NetBattle.
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.

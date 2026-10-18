@@ -42,8 +42,9 @@ goes back to the title; the log says each step (`arena:` lines).
 | --- | --- | --- |
 | The pair | `src/online/arena_pair.c` | Two cores of the player's ROM: as it is under BN6's rules (no hook, no BN5 install: every client builds the same pair whatever ROMs each player has), with BN5's installs under full rules ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as the research harness had it; one frame of the pair, a hash of both cores |
 | The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what full rules put in each Arena core |
+| The Souls across | `src/online/arena_souls.c` | Under full rules, a Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
 | The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen. No state is kept or committed; it runs in slices behind a "connecting" picture |
-| A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by the battle's rules, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the rules' cores cannot carry it: under BN6's rules chips past BN6's id 0x13F (in the folder or the pack's extension) or on one of BN6's blank records (203-220, 291-300, 314: `BN6_CHIP_BLANK`, where BN5's chips are installed on a game with its ROM); under either rules a code past `*`, Souls (until full rules carry them: `ARENA_FULL_SOULS`), a max HP of 0 or past 9999. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
+| A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by the battle's rules, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the rules' cores cannot carry it: under BN6's rules chips past BN6's id 0x13F (in the folder or the pack's extension) or on one of BN6's blank records (203-220, 291-300, 314: `BN6_CHIP_BLANK`, where BN5's chips are installed on a game with its ROM); under BN6's rules Souls; under either a code past `*`, a max HP of 0 or past 9999. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
 | Keys | `src/online/arena_input.c` | Both players' keys by frame in a ring; each stream in order, a resent frame left, a gap or a frame past the ring refused |
 | The link | `src/online/arena_link.h`, `arena_link_local.c` | The interface below; the local stand-in |
 | The engine | `src/online/arena.c` | The way in, then the battle in lockstep, the hashes compared, the end |
@@ -154,13 +155,11 @@ game refuses rules it cannot fight by (`arena_format_ok`).
   Regular and TagChips, as the one the core's Folder1 holds).
 - **Full rules** (1): two games with BN5's ROM. BN5's chips go, in the
   folder and the pack's extension (every id of the chip registry, BN6's
-  blanks among them); both pair cores hold BN5's installs ([Full
-  rules](#full-rules), below). The Souls stay home for now
-  (`ARENA_FULL_SOULS` 0: their hooks keep a battle's state on the host,
-  and UNITE across the cable is not built), so a MegaMan who holds some
-  hears "Our Souls stay home." before "Full rules!
-  Let's see if Beta takes us on!", and the challenged game "Full rules:
-  BN5 chips too! Souls stay home." before its Yes.
+  blanks among them), and so do MegaMan's Souls: UNITE on the Custom
+  screen as in a run; both pair cores hold BN5's installs ([Full
+  rules](#full-rules), below). The challenger hears "Full rules! Let's
+  see if Beta takes us on!", the challenged game "Full rules: Souls and
+  BN5 chips too!" before its Yes.
 
 **The folder.** A run's MegaMan holds Folder1, Folder2 and the Extra
 Folder (BN6's names; the second's Regular and TagChips at NaviStats
@@ -223,8 +222,9 @@ same byte for byte. The installs are the game's own: as its core starts
 ROM copy and every hook they set is written down in their order
 (`src/emu/xinstall_log.h`: `xinstall_core`'s tracks, the moved objects,
 the Navis, the chips' code, the families, the sea and the obstacle
-strike, then the chip registry's `xchips_install`; measured 1,735,251
-bytes and 42 hooks). Under full rules the boot core and both pair cores
+strike, then the chip registry's `xchips_install` and the Souls'
+`soulproxy_install` and `soulunite_install`; measured 1,913,709 bytes and
+132 hooks, 1,735,251 and 42 of them before the Souls'). Under full rules the boot core and both pair cores
 take those bytes into their ROM copies before they start
 (`arena_core_new`), and each pair core takes the hooks on its own table
 (`hook_core`, after its state is loaded); the boot core meets none of
@@ -241,14 +241,17 @@ The hooks run on whichever core meets them, each reading and writing that
 core (`hook_read*`, `hook_write*`), the two cores' frames run by one
 thread an instruction at a time in turn. Each hook BN5's chips need is a
 function of the CPU's registers and its core's memory, with no host state
-but what its install read from the ROMs: the deck's sit-outs
+but what its install read from the ROMs (the Souls' too): the deck's sit-outs
 (`xchips_install.c`), BN5's green flash (`xchips_flash.c`), the moved
 families' and Navis' names, pre-steps and delete counts, the Dark Soul's
-region, the obstacle strike's test, the lava's and sea's panels. Two of
-those keep a value between two calls of theirs (`xsea.c`'s and
-`xpanels.c`'s way back through their stubs, a sea or lava panel's), which
-both cores could meet at the same instruction: it is kept one a core
-(`hook_slot`).
+region, the obstacle strike's test, the lava's and sea's panels, a
+Soul's look, life, powers, passives, chips and mood. What a hook keeps
+between two calls of its own (`xsea.c`'s and `xpanels.c`'s way back
+through their stubs, a sea or lava panel's; Chaos Unison's charge
+stepped, `soulchaos.c`), which both cores could meet at the same
+instruction, is kept one a core (`hook_slot`), and so are the Souls UNITE
+offers (`soulunite_held_core`: each pair core its own player's, from his
+carried MegaMan).
 
 Two games whose records differ (a game that took BN5 in after its core
 started, another build) cannot fight: the record's hash is part of the
@@ -258,24 +261,42 @@ battle"). A game whose core holds no record (BN5's ROM read but the
 core's installs refused) is told so at the way in ("BN5's installs are
 not in this game's core").
 
-The Souls are not carried yet. Their installs (`soulproxy_install`,
-`soulunite_install`) are left out of the record: UNITE keeps the run's
-Souls in host state (`soulunite_held`), one for the game's core, and its
-rule refuses a link battle (`unite_stands`); a Soul chosen on one GBA's
-Custom screen would have to reach the other's through BN6's link
-packets, whose turn record carries the form, not the Soul. That is the
-next step.
+**The Souls across the cable.** UNITE stands in the pair's link battles
+(`unite_stands`: a run's battles are never link ones, and the rule kept
+them out before the pair could carry a Soul). Its commit writes the
+turn's record (the proxy form, its chaos, its turns), which BN6's link
+carries to the other GBA as it carries a Cross, and the Soul in the
+Souls' block of the GBA whose player chose it, which BN6's link does
+not carry. Both GBAs number the sides alike (`BN6_BATTLE_SIDE`: the
+challenger's core 0, the other's 1, read on both pair cores), so the pair
+carries the Soul: as each frame of the pair ends, a Soul one core's
+player has committed (his side's `BN6_SOUL_NEXT`, its chaos, turns and
+ColonelSoul's chip, the Souls used) goes into the other core's same side
+(`arena_souls.c`), once a commit, before either GBA's turn takes it up;
+both GBAs then unite the same side with the same Soul (read on both
+cores: form 8, Soul 11, its used bit 0x800, from the same frame on). The
+Soul's sprite is drawn by the side its MegaMan stands on (`soullook.c`:
+the sprite selector's caller's r5 where it is a side's player, else
+MegaMan's own side, as before), so the other GBA draws him in his Soul
+too. The 52 differentials of the Souls and Chaos Unison
+(`build.py xdiff soul_* chaos_*`) pass with the change.
 
 **The proofs** (18 October 2026, the player's Gregar and Team Colonel
 ROMs). `--dev arena` with a checkpoint whose Folder1 is thirty MrkCan1 M
 (`--scene emu --dev folder=411`, then `--dev arena` on the same data
-folder): "full rules: BN5's installs in every core, 1735251 bytes and 42
-hooks", both cores at the Custom screen after 1,817 frames, side 0's
+folder): "full rules: BN5's installs in every core, 1913709 bytes and 132
+hooks (record 1efe82b0894607e2)", the same record a run's start makes,
+both cores at the Custom screen after 1,817 frames, side 0's
 folder `199b` (MrkCan1 M), the Custom screen showing MrkCan1 with BN5's
 picture and 70; picked and used, its marker locked on the other MegaMan
 and the cannon took him from 100 to 30, a second MrkCan1 the next turn
 deleted him ("MEGAMAN WIN!"): over at frame 1,502, result 1 and 2, 24
-hashes.
+hashes. With a checkpoint holding every Soul and a folder of thirty
+JustcOne J (`--dev souls=0x3F,folder=140`): A on the first JustcOne, OK,
+UP to the emblem's place, now UNITE, lit, A, then OK: KnightMan's
+summon, MegaMan in KnightSoul with his three turns; both pair cores read form 8 and Soul 11 on side 0, its used bit 0x800,
+from the same frame on, and the second core's picture showed the summon
+and side 0 in KnightSoul as well.
 
 Two clients on a local server (the harness of [the two-client
 proof](#the-two-client-proof), below, both games with BN5's ROM beside
@@ -283,25 +304,32 @@ BN6's, seed 120's Square, `arenahp=100`, the `chip` dev step's `chip 411
 M 30` making Alpha's Folder1 thirty MrkCan1 M): Alpha read Beta's card
 ("His PET holds BN5 chips too!"), chose Battle and said "Full rules!
 Let's see if Beta takes us on!"; Beta heard "Alpha's MegaMan wants a
-Practice NetBattle!" and "Full rules: BN5 chips too! Souls stay home.",
-and said Yes. Both games printed the same record (1,735,251 bytes, 42
-hooks, `61882f9dd9e7a4ce`), both pairs reached the Custom screen after
-1,817 frames with Alpha's folder `199b` (MrkCan1 M) on side 0, both sent
-the same ready hash (`35086b2562460eb1`) and the same hash at every 60th
+Practice NetBattle!" and "Full rules: Souls and BN5 chips too!", and said
+Yes. Both games printed the same record (1,913,709 bytes, 132 hooks,
+`1efe82b0894607e2`), both pairs reached the Custom screen after 1,817
+frames with Alpha's folder `199b` (MrkCan1 M) on side 0, both sent the
+same ready hash (`f5111e6c47a0e5b1`) and the same hash at every 60th
 frame (22 agreed). Alpha's MrkCan1, named on both screens, took Beta from
-100 to 30 on both; charged shots ended it, over at frame 1,333 on both,
-Alpha's result 1 and Beta's 2, both back in the Square. With both
-folders MrkCan1 (ready `e000d63d5380d5e0`, 38 hashes agreed, over at
-frame 2,311 by charged shots) Alpha used his while Beta stood a panel
-away and moved, and its marker wandered without a lock, the same on both
-games. The marker is BN5's code moved (the differential `chip_mrkcan1`
+100 to 30 on both; charged shots ended it, over at frame 1,336 on both,
+Alpha's result 1 and Beta's 2, both back in the Square. Alpha holding
+every Soul (`souls=0x3F`) and thirty JustcOne J (`chip 140 J 30`), Beta
+none: UNITE lit KnightSoul on Alpha's Custom screen, "arena: side 0's
+Soul 11 (its turns 3) carried to the other GBA" on both games, and on
+both screens KnightMan's summon, Alpha in KnightSoul with his three
+turns and his wrecking ball's hits (Beta from 100 to 98; Beta's charged
+shots took Alpha down), the same ready hash (`1a03915af762605a`)
+and 36 hashes agreeing to the end, over at frame 2,163, Beta's result 1
+and Alpha's 2. With both folders MrkCan1 (the build before the Souls':
+ready `e000d63d5380d5e0`, 38 hashes agreed, over at frame 2,311 by
+charged shots) Alpha used his while Beta stood a panel away and moved,
+and its marker wandered without a lock, the same on both games. The marker is BN5's code moved (the differential `chip_mrkcan1`
 passes, and with its foe a panel away as well, hit in both engines); a
-target that moves is not in a differential yet. With Beta's copy of Alpha's keys changed
-from frame 300 (`arenadesync=300`): both stopped, apart by frame 359.
-With Alpha's core made without BN5's families (`--dev nofamilies`: a
-record of 1,393,539 bytes and 25 hooks, `da093084ed4e2aa4`): the ready
-hashes differed and both stopped before the first frame ("the two games
-went apart before the battle").
+target that moves is not in a differential yet. With Beta's copy of
+Alpha's keys changed from frame 300 (`arenadesync=300`): both stopped,
+apart by frame 359. With Alpha's core made without BN5's families
+(`--dev nofamilies`: a record of 1,571,997 bytes and 115 hooks,
+`3cc9e56dc3808e94`): the ready hashes differed and both stopped before
+the first frame ("the two games went apart before the battle").
 
 ### The two-client proof
 
@@ -363,12 +391,12 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
   and 2 more (6 at least); a phase of up to a tick between the two
   games' clocks comes out of that margin, and stalls show on the
   picture after 20 ticks ("Waiting for the other PET").
-- The Souls under full rules ([Full rules](#full-rules), above): their
-  installs and hooks on both pair cores with a battle's state of their
-  own a core, UNITE in a link battle, and the Soul chosen carried across
-  the cable to the other GBA.
+- The Souls under full rules beyond KnightSoul's unison and its charged
+  shot ([Full rules](#full-rules), above): the other five, Chaos Unison
+  and ColonelSoul's button in a NetBattle, and BN5's mood across the
+  cable, each still to be seen on both GBAs.
 - A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
-  Practice) and its chip forfeit, forms and Souls (left home), the pack
+  Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the
   browser build compile the Arena out (`CW_ARENA`), Android and iOS build
   it but are untried.

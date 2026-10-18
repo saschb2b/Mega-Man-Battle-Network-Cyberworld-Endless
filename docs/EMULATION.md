@@ -89,7 +89,7 @@ patched, the instructions its hooks stand on, and every other hook's), a
 write or hook over another's bytes told on stderr (`CYBERWORLD_EMU_DEBUG`
 prints the count: "claims: 105 ranges of 5 writers ..., 0 over
 another's"). BN5's tracks' installs (`xinstall_core`) and the chip
-registry's (`xchips_install`) are written down as they are made too
+registry's (`xchips_install`) and the Souls' are written down as they are made too
 (`src/emu/xinstall_log.c`): every byte they write into the ROM copy and
 every hook they set, in their order, which the Arena's cores take under
 full rules (docs/ONLINE_ARENA.md, Full rules); not kept on the 3DS or in
@@ -696,7 +696,8 @@ function replacement), while BN6's code stays the ROM's.
   BN5's installs' hooks on tables of their own (`xinstall_log.c`) and
   step an instruction at a time in turn: what a hook keeps between two
   of its calls is kept one a core (`hook_slot`: `xsea.c`'s and
-  `xpanels.c`'s way back through their stubs).
+  `xpanels.c`'s way back through their stubs, `soulchaos.c`'s charge
+  stepped), and so are the Souls UNITE offers (`soulunite_held_core`).
 
 The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 
