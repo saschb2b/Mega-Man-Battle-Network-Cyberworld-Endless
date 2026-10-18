@@ -1,6 +1,10 @@
 # Stage a real project checkpoint: acceptance before implementation
 
-Status: proposed next unit, awaiting review. The
+Status: reviewed scope; original-code precondition reached and not met.
+The ordinary project installs the chip registry even without BN5. Its
+quantity lookup and relocated records need the separately reviewed
+[registry equivalence unit](trade-project-registry-goal.md) before this
+checkpoint acceptance can proceed. No candidate extension is accepted. The
 [pristine routine-level stage](trade-stage-evidence.md) is accepted within
 its envelope. Actual project saves are still refused. Nothing in this
 unit enables live offers, sends PREPARED or consumes a remote decision.
