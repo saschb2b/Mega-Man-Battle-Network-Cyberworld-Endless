@@ -301,7 +301,15 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire
+# the maps' Mystery Data lists as mapslot.c leaves them, in a made-up ROM's
+# tables (issue #122)
+TEST_MAPSLOT_SRCS := tests/test_mapslot.c src/map/mapslot.c src/map/lz.c src/emu/flags.c
+build/host/test_mapslot: $(TEST_MAPSLOT_SRCS) src/*/*.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_MAPSLOT_SRCS)
+
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire build/host/test_mapslot
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
@@ -313,6 +321,7 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_arena
 	build/host/test_legacy
 	build/host/test_online_frame_wire
+	build/host/test_mapslot
 .PHONY: test
 
 # Native transport runtime checks use the same platform sources as the game.

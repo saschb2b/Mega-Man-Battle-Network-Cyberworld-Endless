@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **A request pays once (issue #122, from Baine53).** An asker at home
+  paid a settled request again after Lan jacked in at his PC and back
+  out: the lab's man gave his 1000 zenny twice. BN6's jack-in rerolled
+  its own maps' Mystery Data and cleared their flags, some of which are
+  the run's: a request settled, the visit's order at AsterLand. Each
+  layer now leaves BN6's own Mystery Data out of the roll.
+
 ## 0.12.0 (2026-10-13)
 
 - **Saves move between systems (issue #114).** SAVES on the title writes
