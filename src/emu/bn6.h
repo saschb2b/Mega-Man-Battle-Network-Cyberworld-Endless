@@ -87,6 +87,9 @@
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
 #define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
+#define BN6_BATTLE_MODE       (BN6_BATTLE_STATE + 0x00) /* u8: BN6_BATTLE_ON while a battle runs, its Custom screen and its fight; BN6_BATTLE_GONE once a NetBattle has ended and left (the Arena, docs/ROM_DATA.md) */
+#define BN6_BATTLE_ON         0x04
+#define BN6_BATTLE_GONE       0x08
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */
 #define BN6_CUSTOM_HAND       (BN6_CUSTOM_SCREEN + 0x06) /* the chips it offers, the first of BN6_BATTLE_DECK */
