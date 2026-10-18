@@ -202,3 +202,23 @@ Three bounded connection variants stalled before completion, including
 a pristine Pack control. [The attempt record](re/trade-stage-link-attempts.md)
 retains that negative result. The routine-level result does not establish
 the original cable exchange, its save/menu completion or its recovery.
+
+
+## Practice: native folder and selected chip control (issue #120)
+
+**Verified by original-game experiment, 18 October 2026:** a native Cannon A
+acquisition and folder-editor exchange produce a nondefault legal folder;
+player 0 then selects that chip in Practice, consumes it and deals 40 damage
+before buster input. Two independently prepared fixtures, repeated complete
+native fights and a same-value RNG write omitted control agree exactly.
+The original without the selection fails the chip-use predicate. The
+[control evidence](ONLINE_CARRIED.md) states the hashes, observation boundary
+and unreached installer/network work.
+
+The locator leads were the bn6f contributors' native chip acquisition and
+folder-editor input handlers (`asm/asm02.s`, `asm/asm36.s`); the existing
+named Custom/deck/hand/object fields were re-verified in the running Gregar
+ROM. The first short wait through the editor's side slide ignored A, and
+an early battle A did not consume the chip: the retained control script
+waits for the observed native transitions. No copied disassembly, target
+assets or fixture files enter the repository.

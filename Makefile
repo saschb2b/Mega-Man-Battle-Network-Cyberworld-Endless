@@ -516,3 +516,21 @@ build/host/online-trade-recovery-fixture: tools/online_trade_recovery_fixture.c 
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -o $@ tools/online_trade_recovery_fixture.c $(TRADE_STORAGE_SRCS)
+
+# Original-game carried-chip controls only; no production Arena entry point.
+ONLINE_CARRIED_COMMON := tools/online_frame_pair.c tools/online_frame_wire.c tools/online_carried_read.c src/online/online_snapshot.c src/core/sha256.c
+ONLINE_CARRIED_NATIVE := tools/online_carried_native.c tools/online_link_script.c $(ONLINE_CARRIED_COMMON)
+ONLINE_CARRIED_OBSERVER := tools/online_carried_observer.c tools/online_carried_observe.c tools/online_carried_script.c tools/online_replay_observe.c $(ONLINE_CARRIED_COMMON)
+ONLINE_CARRIED_ORIGINAL := tools/online_link_bn6.c tools/online_carried_script.c tools/online_link_ipc.c tools/online_link_ipc_wire.c
+build/host/online-carried-native: $(ONLINE_CARRIED_NATIVE) tools/online_carried_read.h src/online/online_snapshot.h src/emu/*.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_NATIVE) /opt/mgba/host/lib/libmgba.a -lpthread -lm
+build/host/online-carried-observer: $(ONLINE_CARRIED_OBSERVER) tools/online_carried_script.h tools/online_carried_observe.h tools/online_carried_read.h src/emu/*.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_OBSERVER) /opt/mgba/host/lib/libmgba.a -lpthread -lm
+build/host/online-carried-original: $(ONLINE_CARRIED_ORIGINAL) tools/online_carried_script.h tools/online_link_script.h src/emu/*.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_ORIGINAL) /opt/mgba/host/lib/libmgba.a -lpthread -lm

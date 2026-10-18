@@ -221,3 +221,25 @@ is 1 for side 0's win and 2 for side 1's loss; their final global HP is
 result byte. Reproduce with `python3 build.py online-link --practice
 --rom /path/to/bn6g.gba`; [ONLINE_LINK.md](ONLINE_LINK.md) records the
 menu inputs and the experiment's scope.
+
+
+The carried-chip native control (18 October 2026,
+`tools/online_carried_control.py`; [ONLINE_CARRIED.md](ONLINE_CARRIED.md))
+re-verifies the existing Custom/deck/hand/object fields without adding
+addresses. Native `BN6_GIVE_CHIPS` gives ID 1 / code 0 / count 1, then the
+native folder editor exchanges slot 9's MiniBomb B for Cannon A. Two fresh
+preparations produce the same map state. In Practice, player 0's
+`BN6_CUSTOM_PICKED` becomes 1 and its first `BN6_CUSTOM_PICKS` entry is 0;
+that `BN6_BATTLE_DECK` slot held packed value 1 (Cannon A). After OK,
+`BN6_BATTLE_HAND` records ID 1 and power 40; `BN6_HAND_AT` advances from
+0 to 1 on use, and the opposing `BN6_T1_HP` falls from 100 to 60 before
+the first buster input. Both cores observe this global base hand, although
+the passive peer's own Custom picked count remains zero. Do not infer
+local-player ownership from the base hand address alone. The two object
+slots' order in this fixture differs from the starter fight: the observer
+retains their `BN6_T1_ALLIANCE` values and compares corresponding cores,
+instead of assuming slot zero is always the winning player. Every native
+video-frame observation, including both named RNG words, repeats exactly;
+the control without the initial chip selection fails the selection check.
+Reproduce using the command and pinned inputs in ONLINE_CARRIED.md. This
+establishes this original control, not a loadout installer or online visit.
