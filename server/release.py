@@ -11,6 +11,7 @@ import sys
 import zipfile
 
 from build import build, zip_entry
+from notices import collect, readme
 from smoke import smoke
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,9 +35,11 @@ def native(work):
     return work / "dist" / (name + (".exe" if os.name == "nt" else ""))
 
 
-def archive(executable, target, output):
+def archive(executable, target, output, work):
     output.mkdir(parents=True, exist_ok=True)
     destination = output / f"cyberworld-server-{target}.zip"
+    # (before the archive opens: a missing notice leaves no half-made zip)
+    notices, covered = collect(work) if target != "python" else ([], {})
     with zipfile.ZipFile(destination, "w") as bundle:
         zip_entry(bundle, executable.name, executable.read_bytes(), executable=True)
         for source in (ROOT / "LICENSE", ROOT / "server/README.md", ROOT / "server/server.example.ini"):
@@ -45,8 +48,10 @@ def archive(executable, target, output):
                     "protocol": json.loads((ROOT / "shared/online/protocol.json").read_text())["version"]}
         if target != "python":
             metadata["pyinstaller"] = importlib.metadata.version("pyinstaller")
-            for source in sorted((ROOT / "server/licenses").iterdir()):
-                zip_entry(bundle, "licenses/" + source.name, source.read_bytes())
+            # Generated from this build host's licence files, never committed.
+            for name, source, _ in notices:
+                zip_entry(bundle, "licenses/" + name, source.read_bytes())
+            zip_entry(bundle, "licenses/README.md", readme(notices, covered, target).encode())
             package = importlib.metadata.distribution("pyinstaller")
             notice = package.locate_file(next(path for path in package.files if str(path).endswith("/COPYING.txt")))
             zip_entry(bundle, "licenses/PyInstaller.txt", notice.read_bytes())
@@ -66,7 +71,7 @@ def main():
     work.mkdir(parents=True, exist_ok=True)
     executable = native(work) if args.native else build(work / "cyberworld-server.pyz")
     smoke(executable)
-    archive(executable, target, args.output)
+    archive(executable, target, args.output, work)
 
 
 if __name__ == "__main__":

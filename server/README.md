@@ -248,8 +248,15 @@ The release workflow builds six ROM-free server archives beside the game:
 | `cyberworld-server-macos-arm64.zip` | Apple Silicon Mac, macOS 15 or newer |
 
 Each archive includes the executable or zipapp, example INI, this guide,
-MIT license and `BUILD.json`. Native archives include their runtime notices
-and need no installed Python. The Docker recipe remains available for
+MIT license and `BUILD.json`. Native archives need no installed Python and
+carry the notices of what was frozen into them in `licenses/`, written at
+build time from the build host's own files (`server/notices.py`; none are
+committed): CPython's from the building interpreter's `LICENSE`, each
+native library frozen from outside that interpreter's install from its
+Debian or Ubuntu package's copyright file or the licence file beside it,
+and PyInstaller's from its wheel; `licenses/README.md` lists which file
+covers which library. A frozen library with no licence file on the build
+host fails the build. The Docker recipe remains available for
 containers. No new release has been published by this change. All five
 native server targets passed their packaging jobs in
 [CI run 38652295286](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38652295286):
