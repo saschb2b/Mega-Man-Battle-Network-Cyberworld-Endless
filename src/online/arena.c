@@ -2,11 +2,12 @@
  *
  * A key sampled at tick t is frame t + D's (D the link's delay); the
  * first D frames are released keys on both sides, on every client. Frame
- * N of the pair runs once both players' keys for N and the three after it
- * are in (arena_input.h), each core taking those of its own frame clock,
- * as the research found BN6's linked cores need (docs/ONLINE_FRAME.md).
- * A tick runs at most CATCH_UP frames, so a late peer's burst is taken up
- * over a few ticks rather than at once. */
+ * N of the pair is due at tick N, and runs once both players' keys for N
+ * and the three after it are in (arena_input.h), each core taking those
+ * of its own frame clock, as the research found BN6's linked cores need
+ * (docs/ONLINE_FRAME.md): a delay of three frames and the link's one-way
+ * latency never waits. A frame due whose keys have not come is a stall;
+ * the frames behind are caught up CATCH_UP a tick. */
 #include "arena.h"
 
 #include <inttypes.h>
@@ -145,15 +146,15 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (a->stage != ARENA_BATTLE) return a->stage;
 	ArenaLink *l = a->link;
 	l->tick(l);
-	uint32_t frame = a->tick++ + a->input.delay;
+	uint32_t now = a->tick++, frame = now + a->input.delay;
 	keys &= ARENA_KEYS_MASK;
 	if (arena_input_put(&a->input, l->side, frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
 		return fail(a, "my keys could not be sent");
 	if (!take_peer(a)) return fail(a, "the other player's keys came out of order");
 	const char *broken = l->broken(l);
 	if (broken) return fail(a, broken);
-	if (!arena_input_ready(&a->input)) { ++a->stalls; return a->stage; }
-	for (unsigned i = 0; i < CATCH_UP && a->stage == ARENA_BATTLE && arena_input_ready(&a->input); ++i) {
+	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; return a->stage; }
+	for (unsigned i = 0; i < CATCH_UP && a->stage == ARENA_BATTLE && a->input.next <= now && arena_input_ready(&a->input); ++i) {
 		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
 		arena_input_take(&a->input, frame_keys);
 		if (!arena_pair_step(a->pair, frame_keys, true)) return fail(a, "the cable between the two cores stuck");

@@ -41,7 +41,8 @@ typedef uint16_t (*ArenaPeerKeys)(void *context, uint32_t frame);
 typedef struct {
 	ArenaLink link;
 	unsigned latency;   /* ticks a message takes, one way */
-	uint32_t now;       /* ticks since the battle began */
+	uint32_t now;       /* the tick under way, 0 the battle's first */
+	bool started;       /* (its first tick begun) */
 	struct { uint32_t at, frame; uint16_t keys; } queue[ARENA_LOCAL_QUEUE];
 	uint32_t head, tail;
 	struct { uint32_t at, frame; uint64_t hash; } hashes[ARENA_LOCAL_HASHES];

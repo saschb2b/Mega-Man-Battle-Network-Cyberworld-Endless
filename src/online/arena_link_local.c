@@ -43,16 +43,18 @@ static bool local_poll_hash(ArenaLink *link, uint32_t frame, uint64_t *hash) {
 	return false;
 }
 
-/* the peer samples its keys for frame now + delay, and they set out */
+/* tick `now` begun: the peer samples its keys for frame now + delay, and
+ * they set out, there from tick now + latency on */
 static void local_tick(ArenaLink *link) {
 	ArenaLocalLink *l = of(link);
+	if (l->started) ++l->now;
+	l->started = true;
 	if (l->tail - l->head >= ARENA_LOCAL_QUEUE) { l->lost = true; return; }
 	uint32_t frame = l->now + l->link.delay;
 	uint32_t i = l->tail++ & (ARENA_LOCAL_QUEUE - 1);
 	l->queue[i].at = l->now + l->latency;
 	l->queue[i].frame = frame;
 	l->queue[i].keys = l->peer ? (uint16_t)(l->peer(l->peer_context, frame) & ARENA_KEYS_MASK) : 0;
-	++l->now;
 }
 
 static const char *local_broken(ArenaLink *link) {

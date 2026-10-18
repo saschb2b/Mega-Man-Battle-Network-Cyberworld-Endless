@@ -279,6 +279,13 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
 
+# the Arena's ROM-free parts: its keys' buffer, the local link, a carried MegaMan checked and written (issue #120)
+ARENA_TEST_SRCS := tests/test_arena.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c
+build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(ARENA_TEST_SRCS)
+
 LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
 build/host/test_legacy: $(LEGACY_TEST_SRCS)
 	@mkdir -p build/host
@@ -290,7 +297,7 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_frame_wire
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
@@ -299,6 +306,7 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_tiles_order
 	build/host/test_network
 	build/host/test_online
+	build/host/test_arena
 	build/host/test_legacy
 	build/host/test_online_frame_wire
 .PHONY: test
