@@ -87,6 +87,14 @@ int hook_drain(HookEvent *out, int max);
 /* From an answer hook: an event of this kind with the registers it has,
  * where only some calls are worth one (a routine every object runs). */
 void hook_post(const HookRegs *r, int kind);
+/* Cores attached at once: BN6's, and the differential's guest or the
+ * Arena's pair (src/online/arena_pair.c) or a test's */
+#define HOOK_CORES 3
+/* From a hook: its core's entry, 0 to HOOK_CORES - 1, for what a hook
+ * keeps between two of its calls (a way back through a stub): one a core,
+ * since two cores' hooks run an instruction at a time in turn there (the
+ * Arena's pair) */
+int hook_slot(void);
 /* From an answer hook: the CPU halted until the next interrupt it takes,
  * once the hooked instruction has run (a wait the game would spin through:
  * only where an interrupt will end it). */

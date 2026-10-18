@@ -24,7 +24,6 @@
 #define ARM_BX_R12   0xE12FFF1Cu
 #define QUEUE        256   /* a power of two */
 #define BUCKETS      256   /* a power of two: a hook's slot by its address's bits above the instruction's (find) */
-#define HOOK_CORES   3     /* cores attached at once: BN6's, the guest's (the differential's), a test's */
 
 typedef struct {
 	uint32_t addr, original;
@@ -101,6 +100,11 @@ static void enqueue(HookCore *c, uint32_t addr, int kind, const HookRegs *r) {
 }
 
 void hook_post(const HookRegs *r, int kind) { enqueue(running ? running : first, r->pc, kind, r); }
+
+int hook_slot(void) {
+	const HookCore *c = running ? running : first;
+	return c ? (int)(c - cores) : 0;
+}
 
 /* (as the BIOS's Halt: the CPU idle, its cycles skipped, until an enabled
  * interrupt is raised) */

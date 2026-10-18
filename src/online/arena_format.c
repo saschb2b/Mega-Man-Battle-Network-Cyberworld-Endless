@@ -18,6 +18,11 @@ bool arena_format_ok(unsigned format, uint8_t mine) {
 	return format == ONLINE_FORMAT_BN6 || (ARENA_FULL_RULES && format == ONLINE_FORMAT_FULL && (mine & ONLINE_ROMS_BN5));
 }
 
+bool arena_souls_home(const OnlineLoadout *l, unsigned format) {
+	/* (under either rules until full ones carry them: ARENA_FULL_SOULS) */
+	return l && l->souls && (format != ONLINE_FORMAT_FULL || !ARENA_FULL_SOULS);
+}
+
 /* (one of BN6's own chips: arena_loadout_check's rule) */
 static bool bn6_chip(unsigned id) { return id <= ARENA_BN6_CHIP_LAST && !BN6_CHIP_BLANK(id); }
 
@@ -48,9 +53,9 @@ void arena_format_carry(const OnlineLoadout *all, unsigned format, int k, Online
 	out->regular = all->regulars[k];
 	out->tag[0] = all->tags[k][0];
 	out->tag[1] = all->tags[k][1];
+	if (arena_souls_home(all, format)) out->souls = 0;
 	if (format == ONLINE_FORMAT_FULL) return;
 	/* (BN6's rules: what plain BN6 has not stays home) */
-	out->souls = 0;
 	for (unsigned id = 1; id < ONLINE_PACK_IDS; ++id)
 		if (!bn6_chip(id)) memset(out->pack[id], 0, sizeof out->pack[id]);
 }

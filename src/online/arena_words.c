@@ -11,8 +11,9 @@ static const char *rules_words(unsigned format) { return format == ONLINE_FORMAT
 
 const char *arena_sent_words(const char *name, unsigned format, bool souls_home) {
 	static char s[128];
-	snprintf(s, sizeof s, "%s%s! Let's see\nif %s\ntakes us on!", souls_home ? "Our Souls stay home:\nBN6 rules!|" : "",
-		souls_home ? "OK" : rules_words(format), name);
+	bool full = format == ONLINE_FORMAT_FULL;
+	const char *home = !souls_home ? "" : full ? "Our Souls stay home.|" : "Our Souls stay home:\nBN6 rules!|";
+	snprintf(s, sizeof s, "%s%s! Let's see\nif %s\ntakes us on!", home, souls_home && !full ? "OK" : rules_words(format), name);
 	return s;
 }
 
@@ -23,7 +24,7 @@ const char *arena_gone_words(void) { return "Huh? They're gone..."; }
 const char *arena_challenged_words(const char *name, unsigned format) {
 	static char s[160];
 	snprintf(s, sizeof s, "%s's\nMegaMan wants a\nPractice NetBattle!|%s:\n%s", name, rules_words(format),
-		format == ONLINE_FORMAT_FULL ? "Souls and BN5 chips\ntoo!" : "no Souls,and BN6\nchips only.");
+		format == ONLINE_FORMAT_FULL ? "BN5 chips too!\nSouls stay home." : "no Souls,and BN6\nchips only.");
 	return s;
 }
 

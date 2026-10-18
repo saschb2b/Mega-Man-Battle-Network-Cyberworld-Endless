@@ -11,6 +11,8 @@
 #include <SDL.h>
 
 #include "arena_carry.h"
+#include "arena_folder.h"
+#include "arena_format.h"
 #include "arena_view.h"
 #include "arena_pair.h"
 #include "arena_text.h"
@@ -21,7 +23,10 @@
 #include "emu.h"
 #include "gfx.h"
 #include "platform.h"
+#include "protocol.h"
 #include "rom.h"
+#include "xchips_install.h"
+#include "xinstall.h"
 
 #define DELAY_DEFAULT  6    /* frames of input delay: 100 ms */
 #define LAG_DEFAULT    3    /* the local link's one way: 50 ms */
@@ -56,6 +61,15 @@ static uint16_t pad_keys(void) {
 	return k;
 }
 
+/* The rules: full ones where BN5's ROM is read, its installs made on the
+ * game's core first as a run's start makes them (scene_emu.c, game_hooks.c),
+ * for the pair to take (xinstall_log.h); else BN6's */
+static unsigned rules(void) {
+	if (!ARENA_FULL_RULES || !XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE)) return ONLINE_FORMAT_BN6;
+	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
+	return xchips_install() ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6;
+}
+
 static void enter(void) {
 	S.over_t = S.stalled = 0;
 	unsigned delay = dev.arena_delay > 0 ? (unsigned)dev.arena_delay : DELAY_DEFAULT;
@@ -63,12 +77,19 @@ static void enter(void) {
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
 	/* (the run's MegaMan from its checkpoint where there is one; the
 	 * second player the game's start's) */
-	const OnlineLoadout *loadout[2] = { arena_carry_read(&S.carried) ? &S.carried : NULL, NULL };
+	unsigned format = rules();
+	const OnlineLoadout *loadout[2] = { NULL, NULL };
+	/* (the first folder the rules take, and what they leave out left home, as the Net Square's challenge carries him) */
+	static OnlineLoadout all;
+	if (arena_carry_read(&all)) {
+		arena_format_carry(&all, format, arena_folder_first(arena_folders_fitting(&all, format)), &S.carried);
+		loadout[0] = &S.carried;
+	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
 	if (loadout[0] && dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
-	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
-		loadout[0] ? "carried from the checkpoint" : "the game's start's");
-	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);
+	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s, rules %u\n", link->delay, lag,
+		loadout[0] ? "carried from the checkpoint" : "the game's start's", format);
+	S.arena = arena_new(R.data, ROM_SIZE, loadout, link, format);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 }

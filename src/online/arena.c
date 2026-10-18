@@ -46,11 +46,11 @@ static ArenaStage fail(Arena *a, const char *why) {
 	return a->stage = ARENA_FAILED;
 }
 
-Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link) {
+Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link, unsigned format) {
 	Arena *a = calloc(1, sizeof *a);
 	if (!a) return NULL;
 	a->link = link;
-	a->boot = arena_boot_new(rom, size, loadout);
+	a->boot = arena_boot_new(rom, size, loadout, format);
 	if (!a->boot) { free(a); return NULL; }
 	if (arena_boot_stage(a->boot) == ARENA_BOOT_FAILED) fail(a, arena_boot_error(a->boot));
 	return a;

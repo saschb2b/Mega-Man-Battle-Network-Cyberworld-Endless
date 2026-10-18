@@ -160,7 +160,7 @@ static bool mine_goes(unsigned *fits) {
 	char why[120];
 	uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX];
 	arena_format_carry(l, A.format, arena_folder_first(*fits), &carried);
-	if (arena_loadout_check(&carried, why, sizeof why) && arena_loadout_pack(&carried, bytes, sizeof bytes)) return true;
+	if (arena_loadout_check(&carried, A.format, why, sizeof why) && arena_loadout_pack(&carried, bytes, sizeof bytes)) return true;
 	printf("arena: our MegaMan can't go: %s\n", why);
 	talk_start(arena_cant_words(carried.souls != 0), FACE_MEGAMAN);
 	return false;
@@ -178,7 +178,7 @@ static void send_challenge(void) {
 	A.stage = SA_SENT;
 	A.since = SDL_GetTicks();
 	A.notice_serial = A.s.notice_serial;
-	talk_start(arena_sent_words(A.name, A.format, l && A.format == ONLINE_FORMAT_BN6 && l->souls), FACE_MEGAMAN);
+	talk_start(arena_sent_words(A.name, A.format, arena_souls_home(l, A.format)), FACE_MEGAMAN);
 	printf("arena: challenged %s (session %u), rules %u, folder %d\n", A.name, A.other, A.format, A.folder + 1);
 }
 
@@ -274,7 +274,7 @@ static void loadout_in(const uint8_t *data, size_t size) {
 	if (A.stage != SA_LOADOUT || !arena_wire_read_loadout(data, size, &match, &bytes, &n) || match != A.match) return;
 	char why[120];
 	if (!arena_loadout_unpack(bytes, n, &A.theirs, &A.theirs_carried, why, sizeof why) ||
-	    (A.theirs_carried && !arena_loadout_check(&A.theirs, why, sizeof why))) {
+	    (A.theirs_carried && !arena_loadout_check(&A.theirs, A.format, why, sizeof why))) {
 		char said[160];
 		snprintf(said, sizeof said, "the other MegaMan can't go: %s", why);
 		fail(said);
@@ -361,7 +361,7 @@ static void build(void) {
 	unsigned side = A.link.link.side;
 	loadout[side] = A.mine_carried ? &A.mine : NULL;
 	loadout[side ^ 1] = A.theirs_carried ? &A.theirs : NULL;
-	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link);
+	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link, A.format);
 	if (!A.arena) { fail("too little memory for the two PETs"); return; }
 	A.stage = SA_CONNECTING;
 }
