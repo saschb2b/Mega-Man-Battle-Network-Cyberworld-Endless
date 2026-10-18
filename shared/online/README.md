@@ -1,10 +1,10 @@
-# Net Square protocol v4
+# Net Square protocol v5
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v4`.
+`/presence` with subprotocol `cyberworld.presence.v5`.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
@@ -21,16 +21,18 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID |
 | CHANNEL (13) | client → server | u16 requested channel (0 chooses one); success sends a fresh WELCOME |
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
-| TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel), u32 reference (a proposal's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal) |
+| TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
 | ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000), u8 rules (a challenge's: 0 `format_bn6`, 1 `format_full`; ignored on the others, 0..1) |
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's), u8 the challenge's rules |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen |
+| OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
+| BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 32, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 9 and ARENA_STATE 29. The
+TRADE_STATE 32, ARENA 9, ARENA_STATE 29 and OFFER 5. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -98,7 +100,26 @@ mismatched step, either player leaving, or 300 seconds without a step
 cancels it for both. Each game applies its side at home; the server
 never sees a folder. NOTICE codes 15 (trading is off on this server),
 16 (that Navi is busy) and 17 (no longer here, or the trade is over)
-answer a TRADE that cannot be done.
+answer a TRADE that cannot be done. A session trades once: after its
+trade is done, a proposal, a take or a post by it or to it is answered
+NOTICE 21 (each game keeps one swap until it is home).
+
+The trade board: each player may have one offer up, a chip he has and
+the kind of chip he wants for it, a number the games name (anything, an
+element, a Mega); the server never reads a chip's element and checks
+only the number's range. A post replaces the last, at most one a second
+(NOTICE 22 otherwise); a BN5 chip is posted only by a game with BN5's
+ROM (NOTICE 19). The offer stays while its poster is in the channel: it
+goes when he takes it down, leaves the server or the channel, or trades.
+The server sends each player of the channel a BOARD whenever its offers
+change, and one after every WELCOME; an offer whose chip is BN5's is
+left out of the BOARD of a player whose game lacks BN5's ROM. TRADE 5
+takes an offer: the reference is the poster, the chip taken the one on
+the board (else NOTICE 20, that offer is gone), the pair's common ground
+and business as a proposal's; the trade begins answered, both chips
+named, and goes on as any (both accept, the server commits). The
+poster's game checks that the chip meets his want and cancels it
+otherwise.
 
 The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.

@@ -24,6 +24,10 @@ def trade(action, ref, give=(0, 0), get=(0, 0)):
     return protocol.TRADE.pack(SPEC["trade"], action, ref, give[0], give[1], get[0], get[1])
 
 
+def offer(chip=(0, 0), want=0):
+    return protocol.OFFER.pack(SPEC["offer"], chip[0], chip[1], want)
+
+
 def arena(action, ref, latency=0, rules=0):
     return protocol.ARENA.pack(SPEC["arena"], action, ref, latency, rules)
 
@@ -49,6 +53,20 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
 
     async def trade_state(self, client):
         return protocol.TRADE_STATE.unpack(await client.message(SPEC["trade_state"]))
+
+    async def board(self, client, count=None):
+        """The next BOARD (of `count` offers, where given) as (session, chip, code, want) tuples."""
+        for _ in range(20):
+            data = await client.message(SPEC["board"])
+            size = protocol.BOARD_ENTRY.size
+            self.assertEqual(len(data), 2 + data[1] * size)
+            entries = [protocol.BOARD_ENTRY.unpack_from(data, 2 + k * size) for k in range(data[1])]
+            if count is None or len(entries) == count:
+                return entries
+        raise AssertionError("No such board")
+
+    async def notice(self, client):
+        return struct.unpack("!H", (await client.message(SPEC["notice"]))[1:3])[0]
 
     async def arena_state(self, client):
         return protocol.ARENA_STATE.unpack(await client.message(SPEC["arena_state"]))
@@ -157,12 +175,64 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         done = await self.trade_state(c)
         self.assertEqual((done[1:4], done[5:]), ((5, trade_id, a_id), (450, 3, 411, 12)))
         # (a game with BN5 answering a BN6-only game's offer with BN5's chip: refused, the trade off)
-        await b.send(trade(1, c_id, (5, 2)))
+        d, d_id = await self.connect("Delta", bn5=True)
+        await b.send(trade(1, d_id, (5, 2)))
         trade_id = (await self.trade_state(b))[2]
-        await self.trade_state(c)
-        await c.send(trade(2, trade_id, (411, 12), (5, 2)))
-        self.assertEqual((await c.message(SPEC["notice"]))[:3], struct.pack("!BH", SPEC["notice"], 19))
+        await self.trade_state(d)
+        await d.send(trade(2, trade_id, (411, 12), (5, 2)))
+        self.assertEqual((await d.message(SPEC["notice"]))[:3], struct.pack("!BH", SPEC["notice"], 19))
         self.assertEqual((await self.trade_state(b))[1], 6)
+
+    async def test_an_offer_on_the_board_taken_trades_once(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta")
+        self.assertEqual(await self.board(b, 0), [])
+        await a.send(offer((5, 2), 1))
+        self.assertEqual(await self.board(a, 1), [(a_id, 5, 2, 1)])
+        self.assertEqual(await self.board(b, 1), [(a_id, 5, 2, 1)])
+        # (a chip not the one posted: the offer is gone for that taker)
+        await b.send(trade(5, a_id, (10, 0), (6, 2)))
+        self.assertEqual(await self.notice(b), 20)
+        await b.send(trade(5, a_id, (10, 0), (5, 2)))
+        taken_b, taken_a = await self.trade_state(b), await self.trade_state(a)
+        self.assertEqual((taken_b[1], taken_b[3], taken_b[5:]), (3, a_id, (10, 0, 5, 2)))
+        self.assertEqual((taken_a[1], taken_a[3], taken_a[5:]), (3, b_id, (5, 2, 10, 0)))
+        await a.send(trade(3, taken_a[2], (5, 2), (10, 0)))
+        self.assertEqual((await self.trade_state(a))[1], 4)
+        await b.send(trade(3, taken_b[2], (10, 0), (5, 2)))
+        self.assertEqual((await self.trade_state(a))[1], 5)
+        self.assertEqual((await self.trade_state(b))[1], 5)
+        self.assertEqual(await self.board(b, 0), [])
+        # (one trade a visit: no more posts, proposals or takes this session)
+        await asyncio.sleep(1.05)
+        await a.send(offer((7, 1), 0))
+        self.assertEqual(await self.notice(a), 21)
+        c, c_id = await self.connect("Gamma")
+        await c.send(trade(1, a_id, (8, 0)))
+        self.assertEqual(await self.notice(c), 21)
+        self.assertFalse(self.server.trades.offers)
+
+    async def test_offers_go_with_their_poster_and_by_the_pair_common_ground(self):
+        a, a_id = await self.connect("Alpha", bn5=True)
+        b, _ = await self.connect("Beta")
+        c, _ = await self.connect("Gamma", bn5=True)
+        await b.send(offer((411, 12), 0))
+        self.assertEqual(await self.notice(b), 19)
+        await a.send(offer((411, 12), 3))
+        self.assertEqual(await self.board(c, 1), [(a_id, 411, 12, 3)])
+        self.assertEqual(await self.board(b, 0), [])
+        await b.send(trade(5, a_id, (5, 2), (411, 12)))
+        self.assertEqual(await self.notice(b), 19)
+        # (a second post within the second: refused; then the offer changed)
+        await a.send(offer((5, 2), 0))
+        self.assertEqual(await self.notice(a), 22)
+        await asyncio.sleep(1.05)
+        await a.send(offer((5, 2), 9))
+        self.assertEqual(await self.board(b, 1), [(a_id, 5, 2, 9)])
+        await a.send(offer((SPEC["chip_last"] + 1, 0), 0))
+        self.assertEqual((await a.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
+        self.assertEqual(await self.board(b, 0), [])
+        self.assertFalse(self.server.trades.offers)
 
     async def test_arena_rules_full_only_between_two_games_with_bn5(self):
         a, _ = await self.connect("Alpha", bn5=True)

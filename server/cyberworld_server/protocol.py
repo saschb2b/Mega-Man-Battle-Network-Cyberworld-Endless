@@ -25,6 +25,8 @@ ARENA_STATE = struct.Struct("!BBII16sBBB")
 ARENA_INPUT = struct.Struct("!BIIB")
 ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
+OFFER = struct.Struct("!BHBB")
+BOARD_ENTRY = struct.Struct("!IHBB")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -128,17 +130,35 @@ def read_trade(data):
     if len(data) != TRADE.size or data[0] != SPEC["trade"]:
         raise ProtocolError("Malformed TRADE")
     _, action, ref, give, give_code, get, get_code = TRADE.unpack(data)
-    if not 1 <= action <= 4 or not ref:
+    if not 1 <= action <= 5 or not ref:
         raise ProtocolError("Invalid trade action")
-    if action in (1, 2, 3) and not chip_valid(give, give_code):
+    if action in (1, 2, 3, 5) and not chip_valid(give, give_code):
         raise ProtocolError("Invalid trade chip")
-    if action in (2, 3) and not chip_valid(get, get_code):
+    if action in (2, 3, 5) and not chip_valid(get, get_code):
         raise ProtocolError("Invalid trade chip")
     return action, ref, (give, give_code), (get, get_code)
 
 
 def trade_state(stage, trade_id, other, identity, mine, theirs):
     return TRADE_STATE.pack(SPEC["trade_state"], stage, trade_id, other, identity, mine[0], mine[1], theirs[0], theirs[1])
+
+
+def read_offer(data):
+    """OFFER: the chip a player has up on the board and the kind he wants
+    for it (0..want_last, the game's words: anything, an element, a kind);
+    all zeros take it down."""
+    if len(data) != OFFER.size or data[0] != SPEC["offer"]:
+        raise ProtocolError("Malformed OFFER")
+    _, chip, code, want = OFFER.unpack(data)
+    if (chip or code or want) and (not chip_valid(chip, code) or want > SPEC["want_last"]):
+        raise ProtocolError("Invalid offer")
+    return (chip, code), want
+
+
+def board(entries):
+    """BOARD: a channel's offers as one recipient may see them, (session, chip, want) each."""
+    return bytes((SPEC["board"], len(entries))) + b"".join(
+        BOARD_ENTRY.pack(player_id, chip[0], chip[1], want) for player_id, chip, want in entries)
 
 
 def read_arena(data):
