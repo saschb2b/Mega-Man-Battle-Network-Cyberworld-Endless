@@ -49,6 +49,7 @@ typedef struct {
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
 	int arena_delay; /* arenadelay=N: its input delay, N frames (3-60); 0 its own */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
+	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle) */
 } DevFlags;
 
 extern DevFlags dev;

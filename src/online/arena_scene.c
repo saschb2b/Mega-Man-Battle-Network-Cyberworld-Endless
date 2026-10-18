@@ -67,6 +67,8 @@ static void enter(void) {
 	/* (the run's MegaMan from its checkpoint where there is one; the
 	 * second player the game's start's) */
 	const OnlineLoadout *loadout[2] = { arena_carry_read(&S.carried) ? &S.carried : NULL, NULL };
+	/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
+	if (loadout[0] && dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
 	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's");
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);
