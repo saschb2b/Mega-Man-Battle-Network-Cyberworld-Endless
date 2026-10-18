@@ -35,12 +35,12 @@ the site.
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
 | Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
 | What the original games have, do and lack: the sources to look in first, how a claim is verified, what players taught us | [docs/SOURCES.md](docs/SOURCES.md) |
-| How reverse engineering is planned, proved and reported | [.claude/skills/reverse-engineering/SKILL.md](.claude/skills/reverse-engineering/SKILL.md); [docs/re/README.md](docs/re/README.md) and its [dashboard](docs/re/dashboard.html) |
+| How reverse engineering is planned, proved and reported | [.claude/skills/reverse-engineering/SKILL.md](.claude/skills/reverse-engineering/SKILL.md); [docs/re/README.md](docs/re/README.md), its [STATUS.md](docs/re/STATUS.md) and [dashboard](docs/re/dashboard.html) |
 | What the project has mapped of BN6 and BN5, written out for others: symbol files for debuggers, tables, how they stay in step; bn6f's functions located in Gregar and BN5, its names kept out of git | [docs/SYMBOLS.md](docs/SYMBOLS.md) |
 | Every line a character says (MegaMan, Lan, Mr.Prog, the shops, bystanders, guardians, townsfolk): how BN6's script talks, measured, and the rules | [docs/VOICE.md](docs/VOICE.md) |
 | Moving saves between systems: the `.cwsave` file, import, Undo, the automatic copy | [docs/SAVES.md](docs/SAVES.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md) |
-| Monorepo components and online Phase 0 proof (issue #120) | [docs/ONLINE.md](docs/ONLINE.md); server setup in [server/README.md](server/README.md); serial/state findings in [docs/ONLINE_LINK.md](docs/ONLINE_LINK.md) |
+| Monorepo components and online Phase 0 proof (issue #120) | [docs/ONLINE.md](docs/ONLINE.md); server setup in [server/README.md](server/README.md); the link cable and the Arena in [docs/ONLINE_LINK.md](docs/ONLINE_LINK.md) |
 
 ## Layout
 
@@ -176,23 +176,10 @@ the site.
 
 Use `.claude/skills/reverse-engineering/SKILL.md` before investigating a
 new ROM behavior, offset, hook, transplant, save format or emulated link.
-Pin the target and tools, name a falsifiable acceptance and oracle, then
-locate, understand, implement and prove one unit at a time. Keep the
-existing ledgers: addresses and re-verification in `docs/ROM_DATA.md`,
-claims and sources in `docs/SOURCES.md`, fidelity decisions in
-`docs/FIDELITY.md`. `docs/re/` holds goals and the human progress view,
-not a competing address map.
-
-Commit acceptance specs, comparator and allowed differences separately
-from the implementation; review them independently before using their
-verdict. A new implementation must pass a fresh original-game comparison
-and its comparator must catch deliberate faults. Record FAIL and
-INCONCLUSIVE as such, keep refuted approaches, and list unreached paths.
-Update the research dashboard from measured evidence at each iteration.
-The owner's authorized local multiplayer/link experiments use only local
-test peers and the player's own ROM; the skill's offline guidance does
-not prohibit this project's online feature or its private test relay.
-The existing restrictions on game assets and third-party source remain.
+Addresses stay in `docs/ROM_DATA.md` and claims in `docs/SOURCES.md`;
+`docs/re/` holds where the work stands (`ledger.json`, written out by
+`tools/re_status.py` as `STATUS.md` and the dashboard), not a second
+address map.
 
 ## Game design
 
