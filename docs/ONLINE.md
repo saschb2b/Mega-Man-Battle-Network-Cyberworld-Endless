@@ -13,7 +13,9 @@ built and what has been shown of it. The Arena has its own,
 
 The official server is `wss://cyberworld.saschb2b.com/presence`, deployed
 in Coolify from `deploy/coolify/` ([server/README.md](../server/README.md),
-Coolify deployment). No release has shipped the Square yet.
+Coolify deployment); it speaks protocol v3 with trading and the Arena on,
+built from this work's branch until it is merged. No release has shipped
+the Square yet.
 
 ## The design
 
@@ -173,6 +175,11 @@ server:
   battle to its end on both with every hash agreeing, a desync and a
   player leaving each stopping both, a declined challenge
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
+- **The official server.** Redeployed from `deploy/coolify/compose.yaml`
+  on the same state volume: `/health` says protocol 3, trading and the
+  Arena on, and a `cyberworld.presence.v3` upgrade is answered (101). No
+  game has visited it since; the transport's checks below were against
+  its v2.
 - **Builds and checks.** Host, aarch64, Windows, 3DS and browser builds
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
@@ -207,10 +214,10 @@ are in the history before 433865a8):
   its delay).
 - **In the browser:** a whole visit with the published server (the
   browser build builds; its online run here was before the gate).
-- **The official server:** its Coolify service pointed at
-  `deploy/coolify/compose.yaml` and redeployed with v3, `trading` and
-  `arena` on in its configuration; a host's retention policy, named
-  moderators and its backup and restart checks before a public launch.
+- **The official server:** a game's visit to it on v3; its Coolify
+  service following `dev` or `main` once this work is merged; a host's
+  retention policy, named moderators and its backup and restart checks
+  before a public launch.
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.
