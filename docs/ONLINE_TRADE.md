@@ -106,7 +106,7 @@ python3 tools/online_trade_proof.py --state PATH/boot-3.state --mutations
 ## Implemented: durable server decisions
 
 `server/cyberworld_server/trade_store.py` is a separately tested storage
-component, not yet exposed through the presence protocol. SQLite FULL
+component behind an explicitly negotiated socket adapter. SQLite FULL
 synchronous transactions hold both sides of each immutable offer. Each
 participant is identified by its server-specific public identity, opaque
 run identity, monotonic trade revision, checkpoint SHA-256 and one numeric
@@ -163,11 +163,27 @@ not erase that newer readiness. Database work runs off the presence event
 loop. The isolated `trade_endpoint.py` socket adapter validates channel,
 participant and exact binary payloads before passing them to the lobby.
 It collects ordered board batches and delivers them concurrently, so a
-slow socket does not delay another peer's board. Nine actual-socket tests
-cover lost delivery, both reconnect orders, repeated acknowledgements,
-malformed messages, cancellation and backpressure; the server suite has
-62 tests. The production presence-v2 service and CLI still do not expose
-trading.
+slow socket does not delay another peer's board. The 65-test server suite
+covers lost delivery, both reconnect orders, repeated acknowledgements,
+malformed messages, cancellation, backpressure and protocol isolation.
+An explicitly injected adapter negotiates `cyberworld.presence.v2.trade.v1`;
+legacy presence-v2 connections never receive trade messages. A disabled
+adapter still resolves pending commits. The public service and CLI keep
+trading disabled.
+
+The client now has an explicit `online_transport_start_trades` entry point.
+Every backend validates the selected protocol, with presence-only fallback.
+The worker copies validated events into a bounded inbox: CAPS follows
+WELCOME and precedes any board or decision, duplicate CAPS and overflow
+close the connection, and an unread decision is never overwritten. The
+frame owner still must bind server/guest authority and a certified journal
+before acting. Ordinary visits use the existing presence entry point.
+
+The real Linux transport passes 32 socket sessions, including compatible
+negotiation, legacy isolation/fallback, recovery-only capability, reordered
+or unnegotiated extensions and inbox overflow. Synthetic tests exercise
+copied event lifetime and outgoing command bounds. These checks enable no
+player trade or checkpoint write; live recovery integration remains next.
 
 The confirmation digest is SHA-256 over `Cyberworld trade 1` followed by
 a zero byte, the 32-byte server identity, the 16-byte transaction ID, then
@@ -402,7 +418,9 @@ receipt, so a crash cannot leave a new Pack with an old receipt or vice
 versa. The existing import's `savedata.old` is user-visible Undo and
 must not become the trade transaction's rollback slot.
 
-Directory and file durability must be tested per platform. The current
+Directory and file durability must be tested per platform. The
+[source-linked platform audit](re/trade-storage-platforms.md) records the
+Windows namespace, Apple full-flush, browser and SDMC requirements. The current
 browser `platform_persist` schedules IndexedDB persistence without an
 acknowledged completion; PREPARED and APPLIED must await a successful
 persistence callback. The 3DS's generic rename removes an existing

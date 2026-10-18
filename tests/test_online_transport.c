@@ -46,14 +46,19 @@ static bool exercise(const OnlineSnapshot *s, unsigned seen, unsigned *sent, boo
 }
 
 static bool session(const char *url, const char *mode, const uint8_t *identity) {
-	bool refuse = !strcmp(mode, "refuse"), cancel = !strcmp(mode, "cancel");
-	bool disconnect = !strcmp(mode, "disconnect"), peer = !strcmp(mode, "exchange");
+	bool refuse = !strcmp(mode, "refuse") || !strcmp(mode, "trade_refuse"), cancel = !strcmp(mode, "cancel");
+	bool trades = !strncmp(mode, "trade", 5), fallback = !strcmp(mode, "fallback");
+	bool want_caps = !strcmp(mode, "trade") || !strcmp(mode, "trade_disabled");
+	bool caps = false, board = false;
+	bool disconnect = !strcmp(mode, "disconnect") || !strcmp(mode, "trade_disconnect"), peer = !strcmp(mode, "exchange");
 	bool connected = false, passed = false;
 	unsigned seen = 0, sent = 0;
 	OnlineSnapshot snapshot = { 0 };
 	uint64_t maximum_poll = 0;
 	uint32_t started = SDL_GetTicks();
-	if (!online_transport_start(url, "TransportProbe", identity)) return false;
+	bool opened = trades || fallback ? online_transport_start_trades(url, "TransportProbe", identity) :
+		online_transport_start(url, "TransportProbe", identity);
+	if (!opened) return false;
 	while (SDL_GetTicks() - started < 12000) {
 		uint64_t before = SDL_GetPerformanceCounter();
 		online_transport_poll(123, -234, 12, 3);
@@ -63,6 +68,17 @@ static bool session(const char *url, const char *mode, const uint8_t *identity) 
 		if (snapshot.connected) {
 			connected = true;
 			if (refuse || cancel) break;
+			OnlineTradeMessage message;
+			while (!disconnect && online_transport_trade_receive(&message)) {
+				if (!want_caps) goto done;
+				if (message.kind == ONLINE_TRADE_CAPS) {
+					if (caps || message.value.caps.enabled != !strcmp(mode, "trade")) goto done;
+					caps = true;
+					const uint8_t request[] = {ONLINE_TRADE_BOARD_REQUEST};
+					if (!online_transport_trade_command(request, sizeof request)) goto done;
+				} else if (message.kind == ONLINE_TRADE_BOARD && caps && !message.value.board.count) board = true;
+				else goto done;
+			}
 			seen = observe(&snapshot, seen);
 			if (!disconnect && !exercise(&snapshot, seen, &sent, peer)) break;
 		}
@@ -73,9 +89,10 @@ static bool session(const char *url, const char *mode, const uint8_t *identity) 
 		}
 		unsigned needed = SEEN_CARD | SEEN_EVENT | SEEN_CHANNEL | SEEN_RETURN | (peer ? SEEN_PEER : 0);
 		if (!disconnect && !refuse && !cancel && (seen & needed) == needed &&
-		    SDL_GetTicks() - started >= 2500 && snapshot.position_serial >= 20) { passed = true; break; }
+		    SDL_GetTicks() - started >= 2500 && snapshot.position_serial >= 20 && (!want_caps || (caps && board))) { passed = true; break; }
 		SDL_Delay(2);
 	}
+done:;
 	uint32_t closing = SDL_GetTicks();
 	online_transport_end();
 	uint32_t close_ms = SDL_GetTicks() - closing;

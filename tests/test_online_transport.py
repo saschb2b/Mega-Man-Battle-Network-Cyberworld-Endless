@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "server"), str(ROOT / "server/tests")]
 from cyberworld_server import protocol, websocket
 from cyberworld_server.app import Server
+from cyberworld_server import trade_protocol
+from cyberworld_server.trade_endpoint import TradeEndpoint
+from cyberworld_server.trade_store import TradeStore
 from test_server import Client
 
 
@@ -85,6 +88,58 @@ async def normal_exchange(binary, report):
             await drain
         await peer.close()
         await server.close()
+
+
+async def negotiated_exchange(binary, report):
+    with tempfile.TemporaryDirectory(prefix="cw-transport-trades-") as directory:
+        root = Path(directory)
+        store = TradeStore(root)
+        store.recover()
+        server = Server(state_dir=root, trade_endpoint=TradeEndpoint(store))
+        port = await server.start("127.0.0.1", 0)
+        try:
+            url = f"ws://127.0.0.1:{port}/presence"
+            await run_probe(binary, url, "trade", report, "trade_capabilities_and_board")
+            await run_probe(binary, url, "public", report, "legacy_on_trade_server")
+            server.trades.enabled = False
+            await run_probe(binary, url, "trade_disabled", report, "recovery_only_capability")
+        finally:
+            await server.close()
+            store.close()
+    legacy = Server()
+    port = await legacy.start("127.0.0.1", 0)
+    try:
+        await run_probe(binary, f"ws://127.0.0.1:{port}/presence", "fallback", report, "trade_offer_legacy_fallback")
+    finally:
+        await legacy.close()
+
+
+async def extension_case(reader, writer, kind):
+    selected = await websocket.upgrade(reader, writer, (), subprotocols=(trade_protocol.SUBPROTOCOL, protocol.SPEC["subprotocol"]))
+    opcode, hello = await websocket.receive(reader)
+    assert opcode == 2 and hello[0] == protocol.SPEC["hello"]
+    welcome = protocol.WELCOME.pack(protocol.SPEC["welcome"], 120, 1, 20, 8, 1, b"t" * 16, 8)
+    caps = trade_protocol.caps(b"s" * 32, True)
+    if kind != "before_welcome":
+        writer.write(websocket.frame(welcome))
+        await writer.drain()
+        await asyncio.sleep(0.1)
+    if kind == "before_caps":
+        payloads = [trade_protocol.board([])]
+    elif kind == "duplicate_caps":
+        payloads = [caps, caps]
+    elif kind == "overflow":
+        payloads = [caps] + [trade_protocol.board([])] * 16
+    else:
+        payloads = [caps]
+    assert selected == (protocol.SPEC["subprotocol"] if kind == "unnegotiated" else trade_protocol.SUBPROTOCOL)
+    for payload in payloads:
+        writer.write(websocket.frame(payload))
+    await writer.drain()
+    async def wait_closed():
+        while await reader.read(8192):
+            pass
+    await asyncio.wait_for(wait_closed(), 5)
 
 
 async def disconnect(binary, report):
@@ -166,6 +221,12 @@ async def main(args):
     report = {"platform": platform.platform(), "machine": platform.machine(), "passed": False}
     try:
         await normal_exchange(binary, report)
+        await negotiated_exchange(binary, report)
+        for kind in ("before_welcome", "before_caps", "duplicate_caps", "overflow", "unnegotiated"):
+            async def handler(reader, writer, case=kind):
+                await extension_case(reader, writer, case)
+            mode = "disconnect" if kind == "unnegotiated" else "trade_refuse" if kind == "before_welcome" else "trade_disconnect"
+            await raw_server_case(binary, report, handler, "trade_" + kind, mode)
         await disconnect(binary, report)
         for label, frame in (("oversized", b"\x82\x7e\x02\x01" + bytes(513)),
                              ("text_message", websocket.frame(b"not binary", 1)),

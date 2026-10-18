@@ -16,9 +16,10 @@ dependency-free view of the current research, not evidence by itself.
 | Link and snapshot experiments | [ONLINE_LINK.md](../ONLINE_LINK.md) |
 | Accepted Arena frame-input experiment | [Arena frame goal](arena-frame-goal.md), [results and limits](../ONLINE_FRAME.md), `tools/online_frame_compare.py` |
 | Accepted local cable snapshot/replay | [Replay report](../ONLINE_REPLAY.md), [numeric evidence](arena-replay-evidence.json) |
-| Current carried-chip unit | [Next Arena goals](arena-next-goal.md) |
+| Current carried-chip unit | [Accepted native controls and remaining work](../ONLINE_CARRIED.md), [next Arena goals](arena-next-goal.md) |
 | Accepted trade inventory and recovery design | [Trade inventory goal](trade-inventory-goal.md), [inventory evidence](trade-inventory-evidence.md), [ONLINE_TRADE.md](../ONLINE_TRADE.md) |
-| Current checkpoint swap unit | [Native Trade and staged swap goal](trade-stage-goal.md) |
+| Current checkpoint swap unit | [Pristine-stage evidence](trade-stage-evidence.md), [project registry qualification](trade-project-registry-goal.md), [project checkpoint goal](trade-project-stage-goal.md) |
+| Platform storage requirements | [Contract audit and Windows API probe](trade-storage-platforms.md) |
 
 New work starts with a sentence naming the unit, observable, input/state
 coverage, original-game oracle and allowed differences. Pin its ROM hash

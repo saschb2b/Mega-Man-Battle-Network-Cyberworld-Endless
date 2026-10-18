@@ -7,11 +7,17 @@
 #include <stdint.h>
 
 #include "online_types.h"
+#include "online_trade_wire.h"
 
 /* URL must be ws(s)://host[:port]/presence. No implicit retry or fallback.
  * enabled remains true after a refusal, until end, so the online square
  * cannot accidentally become a normal run. */
 bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]);
+/* Explicit opt-in; legacy servers may select presence only. No trade is
+ * authorized by negotiation. The frame owner must bind CAPS and journal. */
+bool online_transport_start_trades(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]);
+bool online_transport_trade_receive(OnlineTradeMessage *out);
+bool online_transport_trade_command(const uint8_t *data, size_t size);
 bool online_transport_enabled(void);
 void online_transport_poll(int32_t x, int32_t y, int32_t z, uint8_t facing);
 void online_transport_snapshot(OnlineSnapshot *out);

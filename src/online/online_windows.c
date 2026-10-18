@@ -126,10 +126,11 @@ static bool start_read(void) {
 	return false;
 }
 
-static bool upgrade_request(void) {
-	wchar_t headers[128], protocol[64], actual[64];
-	if (!MultiByteToWideChar(CP_UTF8, 0, ONLINE_SUBPROTOCOL, -1, protocol, 64)) return false;
-	if (swprintf(headers, 128, L"Sec-WebSocket-Protocol: %ls\r\n", protocol) < 0) return false;
+static bool upgrade_request(OnlineNegotiation *selection) {
+	wchar_t headers[160], protocol[96], actual[96];
+	char selected[96];
+	if (!MultiByteToWideChar(CP_UTF8, 0, online_negotiation_offer(selection), -1, protocol, 96)) return false;
+	if (swprintf(headers, 160, L"Sec-WebSocket-Protocol: %ls\r\n", protocol) < 0) return false;
 	if (!http.option(win.request, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, NULL, 0)) return false;
 	DWORD redirect = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
 	if (!http.option(win.request, WINHTTP_OPTION_REDIRECT_POLICY, &redirect, sizeof redirect)) return false;
@@ -142,7 +143,8 @@ static bool upgrade_request(void) {
 	                WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX) || status != 101) return false;
 	size = sizeof actual;
 	if (!http.query(win.request, WINHTTP_QUERY_CUSTOM, L"Sec-WebSocket-Protocol", actual, &size, WINHTTP_NO_HEADER_INDEX) ||
-	    wcscmp(protocol, actual)) return false;
+	    !WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, actual, -1, selected, sizeof selected, NULL, NULL) ||
+	    !online_negotiation_accept(selection, selected)) return false;
 	win.socket = counted(http.upgrade(win.request, (DWORD_PTR)&win));
 	if (!win.socket) return false;
 	http.close(win.request);
@@ -150,7 +152,7 @@ static bool upgrade_request(void) {
 	return start_read();
 }
 
-bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t size) {
+bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *selection, char *error, size_t size) {
 	if (SDL_AtomicGet(&win.handles)) {
 		SDL_strlcpy(error, "Previous Windows connection is still closing", size);
 		return false;
@@ -180,7 +182,7 @@ bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 		win.connection = counted(http.connect(win.session, host, port, 0));
 	if (win.connection) win.request = counted(http.request(win.connection, L"GET", path, NULL,
 	                                  WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, secure ? WINHTTP_FLAG_SECURE : 0));
-	if (win.request && upgrade_request()) return true;
+	if (win.request && upgrade_request(selection)) return true;
 	SDL_strlcpy(error, "Windows WebSocket connection or TLS verification failed", size);
 	return false;
 }

@@ -220,7 +220,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/analytics/analytics.c src/analytics/analytics_text.c \
 	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
 	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
-	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c \
+	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_trade_inbox.c src/online/online_negotiation.c src/online/online_wire.c \
 	tests/test_online_trade_authority.c src/online/online_trade_authority.c \
 	tests/test_online_trade_identity.c src/online/online_trade_identity.c src/online/online_trade_admit.c src/online/online_trade_gate.c src/online/network_identity.c \
 	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
@@ -332,7 +332,8 @@ test: build/host/test_online_trade_stage build/host/test_online_trade_identity b
 # Native transport runtime checks use the same platform sources as the game.
 TRANSPORT_TEST_SRCS := tests/test_online_transport.c src/online/online_transport.c src/online/online_wire.c \
 	src/online/online_socket.c src/online/online_stream.c src/online/online_windows.c \
-	src/online/network_identity.c src/core/rom.c
+	src/online/network_identity.c src/core/rom.c src/online/online_negotiation.c \
+	src/online/online_trade_inbox.c src/online/online_trade_wire.c src/online/online_trade_terms.c src/core/sha256.c
 TRANSPORT_PROBE := $(OUT)/online-transport-probe$(if $(filter windows,$(TARGET)),.exe)
 $(TRANSPORT_PROBE): $(TRANSPORT_TEST_SRCS) src/online/*.h shared/online/protocol.h
 	@mkdir -p $(@D)
@@ -467,7 +468,7 @@ build/host/test_online_trade_journal: $(TRADE_JOURNAL_TEST_SRCS) src/online/*.h 
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_JOURNAL_TEST_MAIN -o $@ $(TRADE_JOURNAL_TEST_SRCS)
 
-TRADE_WIRE_TEST_SRCS := tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_wire.c src/online/online_trade_terms.c src/core/sha256.c
+TRADE_WIRE_TEST_SRCS := tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_trade_inbox.c src/online/online_negotiation.c src/online/online_wire.c src/online/online_trade_terms.c src/core/sha256.c
 build/host/test_online_trade_wire: $(TRADE_WIRE_TEST_SRCS) src/online/*.h shared/online/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \

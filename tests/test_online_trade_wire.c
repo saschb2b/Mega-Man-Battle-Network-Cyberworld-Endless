@@ -4,6 +4,9 @@
 #include <string.h>
 
 #include "online_trade_wire.h"
+#include "online_trade_inbox.h"
+#include "online_negotiation.h"
+#include "negotiation.h"
 
 static int failures;
 #define CHECK(value) do { if (!(value)) { fprintf(stderr, "trade wire line %d: %s\n", __LINE__, #value); ++failures; } } while (0)
@@ -123,8 +126,49 @@ static void untrusted_bytes(void) {
 	CHECK(!online_trade_wire_read(&message, NULL, 1));
 }
 
+static void inboxes(void) {
+	OnlineTradeInbox inbox = {0};
+	OnlineTradeMessage event = {0};
+	uint8_t caps[36] = {ONLINE_TRADE_CAPS, 0, 1, 7}, board[2] = {ONLINE_TRADE_BOARD, 0};
+	uint8_t command[54] = {ONLINE_TRADE_STATUS};
+	CHECK(!online_trade_inbox_push(&inbox, board, sizeof board));
+	CHECK(!online_trade_inbox_command(&inbox, command, 17));
+	CHECK(online_trade_inbox_push(&inbox, caps, sizeof caps));
+	CHECK(!online_trade_inbox_push(&inbox, caps, sizeof caps));
+	CHECK(online_trade_inbox_command(&inbox, command, 17));
+	CHECK(!online_trade_inbox_command(&inbox, command, 16));
+	command[0] = ONLINE_TRADE_READY;
+	CHECK(!online_trade_inbox_command(&inbox, command, sizeof command));
+	for (unsigned i = 1; i < ONLINE_TRADE_INBOX_SIZE; ++i)
+		CHECK(online_trade_inbox_push(&inbox, board, sizeof board));
+	CHECK(!online_trade_inbox_push(&inbox, board, sizeof board));
+	caps[3] = 0; /* The queued capability owns its bytes. */
+	CHECK(online_trade_inbox_pop(&inbox, &event) && event.kind == ONLINE_TRADE_CAPS && event.value.caps.server[0] == 7);
+	for (unsigned i = 1; i < ONLINE_TRADE_INBOX_SIZE; ++i)
+		CHECK(online_trade_inbox_pop(&inbox, &event) && event.kind == ONLINE_TRADE_BOARD);
+	CHECK(!online_trade_inbox_pop(&inbox, &event));
+	CHECK(online_trade_inbox_push(&inbox, board, sizeof board) && online_trade_inbox_pop(&inbox, &event));
+	memset(&inbox, 0, sizeof inbox); caps[3] = 7; caps[35] = 1;
+	CHECK(online_trade_inbox_push(&inbox, caps, sizeof caps));
+	CHECK(online_trade_inbox_command(&inbox, command, sizeof command));
+	command[0] = ONLINE_TRADE_DECISION;
+	CHECK(!online_trade_inbox_command(&inbox, command, sizeof command));
+}
+
+static void protocols(void) {
+	OnlineNegotiation selected = {0};
+	CHECK(!strcmp(online_negotiation_offer(&selected), ONLINE_SUBPROTOCOL));
+	CHECK(!online_negotiation_accept(&selected, ONLINE_TRADE_SUBPROTOCOL) && !selected.trades);
+	selected.offer_trades = true;
+	CHECK(!strcmp(online_negotiation_offer(&selected), ONLINE_TRADE_PROTOCOLS));
+	CHECK(online_negotiation_accept(&selected, ONLINE_TRADE_SUBPROTOCOL) && selected.trades);
+	CHECK(online_negotiation_accept(&selected, ONLINE_SUBPROTOCOL) && !selected.trades);
+	CHECK(!online_negotiation_accept(&selected, ONLINE_TRADE_PROTOCOLS) && !selected.trades);
+	CHECK(!online_negotiation_accept(&selected, NULL));
+}
+
 int test_online_trade_wire(void) {
-	capabilities(); listings(); decisions(); commands(); untrusted_bytes();
+	capabilities(); listings(); decisions(); commands(); untrusted_bytes(); inboxes(); protocols();
 	if (!failures) puts("Bounded trade messages reject malformed lengths, identities, states and chip codes");
 	return failures;
 }
