@@ -21,7 +21,6 @@
 #include "gfx.h"
 #include "meta.h"
 #include "online_visit.h"
-#include "net_layouts.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
@@ -287,7 +286,6 @@ static int run_option(const char *a, const char *v, Options *o) {
 	/* --marks HEX: the title's marks as if earned, for a capture */
 	else if (!strcmp(a, "--marks")) o->marks_spec = (int)strtol(v, NULL, 16);
 	else if (!strcmp(a, "--talk")) director_dev_talks = v;
-	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	else if (!strcmp(a, "--dev")) devtools_parse(v);
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;

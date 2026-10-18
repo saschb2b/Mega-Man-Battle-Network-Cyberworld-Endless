@@ -5,6 +5,7 @@
 #include "bn6.h"
 #include "bytes.h"
 #include "claims.h"
+#include "director.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
@@ -102,6 +103,7 @@ bool online_square_build(uint32_t seed, uint32_t player_id) {
 	/* Separated by half a panel, peers can see the other arrival without
 	 * changing how BN6 moves or collides with the map. */
 	x += (int)(player_id % 4u) * 16;
+	director_map_label("Net Square", "Net Square");
 	emu_warp(group, number, x, y, 3);
 	return true;
 }

@@ -4,7 +4,6 @@
  * and MegaMan's words, the act's card held over Lan's HP, the run saved
  * there, MegaMan at each portal, the portal taken, and the next layer's
  * arrival. */
-#include "director_gate.h"
 #include "director_home.h"
 
 #include <stdio.h>

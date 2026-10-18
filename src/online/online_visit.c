@@ -9,6 +9,7 @@
 #include "game.h"
 #include "loot.h"
 #include "navicust.h"
+#include "online_field.h"
 #include "online_scene.h"
 #include "online_snapshot.h"
 #include "online_transport.h"
@@ -95,8 +96,10 @@ static void come_home(VisitEnd why) {
 		scene_set(&scene_title);
 		return;
 	}
-	/* (put back after the resume too: it reads the run's side records) */
+	/* (put back after the resume too: it reads the run's side records;
+	 * and no CONTINUE's note: the gate says what happened) */
 	put_back();
+	cinema_reset();
 }
 
 /* Into the Square: the run's director stopped, the MegaMan carried read,
@@ -135,6 +138,8 @@ uint32_t online_visit_keys(uint32_t keys) {
 
 void online_visit_draw(void) {
 	if (V.stage == VISIT_AWAY) online_scene_draw();
+	/* (the gate's fields, over the game in Lan's HP) */
+	else online_field_draw();
 }
 
 void online_visit_leave(VisitEnd why) {

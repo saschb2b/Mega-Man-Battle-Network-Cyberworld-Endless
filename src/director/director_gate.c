@@ -14,15 +14,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bn6.h"
 #include "bn6_fields.h"
+#include "cinema.h"
 #include "debug.h"
 #include "devtools.h"
 #include "director_hold.h"
 #include "director_home.h"
 #include "director_save.h"
 #include "director_state.h"
-#include "emu.h"
 #include "flags.h"
 #include "game.h"
 #include "gate_words.h"
@@ -33,7 +32,6 @@
 #include "save_queue.h"
 #include "script_kit.h"
 #include "talk.h"
-#include "text.h"
 
 #define GO_WAIT 120   /* frames a Yes waits for MegaMan to be free to save */
 
@@ -59,7 +57,9 @@ static const char *server_host(char *out, size_t n) {
 }
 
 static bool store(void) {
-	bool ok = network_prefs_write(g_data_dir, &G.prefs);
+	/* (the local identity made with the first settings written) */
+	if (!G.identity) G.identity = network_identity(G.prefs.identity);
+	bool ok = G.identity && network_prefs_write(g_data_dir, &G.prefs);
 	if (!ok) fprintf(stderr, "gate: network.ini could not be written\n");
 	G.written = false;
 	return ok;
@@ -136,9 +136,10 @@ static void go(void) {
 	if (save_write_failures() != failures) { talk_start(gate_save_failed(), FACE_MEGAMAN); return; }
 	D.home_save_due = false;
 	D.saved_at = "Run saved at the Net Square's gate";
+	cinema_note("Run saved", 150);
 	const char *url = dev.online ? dev.online : G.prefs.servers[G.prefs.selected];
 	const char *name = dev.online_name ? dev.online_name : G.prefs.name;
-	if (!G.identity) G.identity = network_identity(G.prefs.identity) && store();
+	if (!G.identity) store();
 	uint8_t id[NETWORK_ID_BYTES];
 	if (!G.identity || !network_server_identity(G.prefs.identity, url, id)) { G.ended = VISIT_END_UNREACHABLE; return; }
 	if (!online_visit_begin(url, name, id)) G.ended = online_visit_ended();

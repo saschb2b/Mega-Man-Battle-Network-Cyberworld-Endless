@@ -44,6 +44,7 @@ static inline bool online_visit_away(void) { return online_visit_stage() == VISI
 /* After each frame of the core while a visit is on. */
 void online_visit_update(void);
 uint32_t online_visit_keys(uint32_t keys);
+/* The Square over the game, or the gate's field where one is open. */
 void online_visit_draw(void);
 /* Back to the gate's checkpoint (a reset chord, the Square's exit). */
 void online_visit_leave(VisitEnd why);

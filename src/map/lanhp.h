@@ -36,9 +36,8 @@ bool lanhp_keeper_say(const uint8_t *archive, int n);
 /* The gate's core flickering while a call is under way (each frame), else
  * lit. */
 void lanhp_gate_calling(bool on);
-/* Whether world (x, y) stands on the gate's core; and its middle. */
+/* Whether world (x, y) stands on the gate's core. */
 bool lanhp_on_gate(int x, int y);
-void lanhp_gate_spot(int *x, int *y);
 /* Where BN6's jack-in to Lan's HP sets MegaMan down (world units): on its
  * blue pad, the arrival. */
 void lanhp_arrival(int *x, int *y);

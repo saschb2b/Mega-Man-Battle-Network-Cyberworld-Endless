@@ -83,6 +83,9 @@ void director_draw_tent(void);
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);
 bool director_suspend(void);
+/* The map's name as BN6 shows it on entering, and the PET's PLACE: the
+ * run's (map_label) or, for the Net Square, its own. */
+void director_map_label(const char *name, const char *place);
 /* The PET's Save: a checkpoint where MegaMan stands, once he is free to
  * move on the map ("Run saved"). */
 void director_save_here(void);

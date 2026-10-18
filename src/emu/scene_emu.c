@@ -12,7 +12,6 @@
 #include "game.h"
 #include "game_hooks.h"
 #include "gfx.h"
-#include "online_field.h"
 #include "online_visit.h"
 #include "platform.h"
 #include "rom.h"
@@ -128,9 +127,13 @@ static void after_frame(void) {
  * tables the run has taken over. */
 static bool soft_reset(void) {
 	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
-	if ((keys_from_buttons() & chord) != chord) return false;
-	/* (in the Net Square: back to the gate's checkpoint, as Leave) */
-	if (online_visit_away()) { online_visit_leave(VISIT_END_LEFT); return true; }
+	static bool from_square;
+	if ((keys_from_buttons() & chord) != chord) { from_square = false; return false; }
+	/* (in the Net Square: back to the gate's checkpoint, as Leave; the
+	 * chord still held after it is no reset, and BN6 never sees it, whose
+	 * own soft reset it is) */
+	if (from_square) return true;
+	if (online_visit_away()) { online_visit_leave(VISIT_END_LEFT); from_square = true; return true; }
 	online_visit_shutdown();
 	emu_sync();
 	director_stop();
@@ -232,7 +235,7 @@ static void draw(void) {
 	director_draw_duel();
 	director_draw_tent();
 	devtools_draw();
-	online_field_draw();
+	online_visit_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };

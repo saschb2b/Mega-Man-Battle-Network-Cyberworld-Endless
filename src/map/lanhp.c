@@ -208,7 +208,6 @@ void lanhp_gate_calling(bool on) {
 
 bool lanhp_on_gate(int x, int y) { return abs(x - GATE_X) <= GATE_REACH && abs(y - GATE_Y) <= GATE_REACH; }
 
-void lanhp_gate_spot(int *x, int *y) { *x = GATE_X; *y = GATE_Y; }
 
 void lanhp_arrival(int *x, int *y) {
 	if (!read_spots()) { *x = *y = 0; return; }
