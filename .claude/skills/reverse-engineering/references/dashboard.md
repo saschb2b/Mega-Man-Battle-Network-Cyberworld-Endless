@@ -1,48 +1,60 @@
 ---
 type: Template
-title: Progress dashboard
-description: Give humans one offline HTML file that shows the goal, scope, unit progress, stop rule, ledger health, masks, open questions, and decisions, rewritten from the ledger and the last oracle run at the end of every iteration.
+title: Status page
+description: Give humans one page that says, in plain words, where each feature stands, what waits on a decision, what changed since the last update and what each experiment meant, written by a script from one hand-edited ledger at the end of every iteration.
 tags: [reverse-engineering, reporting, dashboard]
-generated: { by: claude-code/unversioned, at: 2026-10-17T18:00:00Z }
+generated: { by: claude-code/unversioned, at: 2026-10-18T12:00:00Z }
 sources:
   - id: skill-asset
-    resource: "scope:this skill's assets/dashboard.html and its re-state/1 state block, authored with the dashboard"
+    resource: "scope:this skill's assets/dashboard.html and its re-status/1 state, authored with the page"
+  - id: cwe-status
+    resource: https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/tools/re_status.py
 ---
+
+# Who reads it
+
+People who were not in the session: the owner deciding what comes next, a collaborator picking a feature up. They want to know what works, what is left and what waits on them, not the loop's internals. Write for them: plain words, whole sentences, dates as "18 Oct 2026", an unknown as a dash, and no number that adds up separate experiments.
 
 # Set it up in phase 0
 
-Copy `assets/dashboard.html` from this skill into the project, next to the [ledger](./ledger.md) (for example `docs/re/dashboard.html`). It is one file with no network access and no dependencies: open it in any browser, attach it, or publish it as it is. Replace the example in `<script type="application/json" id="re-state">` with the project's own state and drop `"example": true`. The page never needs editing beyond that block; a viewer can also load another state file with its picker or by dropping it on the page.
+Keep one hand-edited ledger of the status next to the project's other records (for example `docs/re/ledger.json`), and a small script that checks it and writes three files from it:
 
-# Rewrite the state every iteration
+- `state.json`, which the page reads (schema below);
+- a Markdown copy (`STATUS.md`) that a code host shows without running anything;
+- the page itself: `assets/dashboard.html` from this skill, with the state written into its `<script type="application/json" id="re-state">` block, so the page still shows when opened as a file, where a browser refuses to read `state.json`.
 
-At the end of phase 6 and before every report, rewrite the whole block:
+The page is never edited per project. Run the script's check in the project's tests, so a ledger edit without a rewrite fails. Cyberworld Endless's `tools/re_status.py` is a working example in the standard library alone.[^cwe-status]
 
-- Take every figure from a tool read: the last oracle run's verdicts and mutation results from the [differential](./differential.md), the claim counts from the ledger. Never estimate, round, or carry a number over from memory. Leave out what you do not know; the page shows a dash.
-- Set `generated_at` and `target.hash` on every write, and append one `history` entry per iteration.
-- Write `<` inside strings as `<`, so the block cannot close early.
+# Rewrite it every iteration
+
+At the end of phase 6 and before every report, edit the ledger and run the script:
+
+- Take every figure from a tool read: the last oracle run, the ledger of claims. Never estimate, round, or carry a number over from memory. Leave out what you do not know; the page shows a dash.
+- Set `updated`, and keep `previous` at the last update's date, so "since the last update" lists only what is new.
+- One experiment, one line: its result and what it means for the goal. Never total specs, passes or faults across experiments; each has its own scope.
+- Put a decision in `decisions` only while it waits on a person, with its options. When it is made, it becomes a change.
 - Put only your own names and numbers in it. No text, code, or assets from the target, by the same legal line as the repository.
 
 The page is a view, never a second source of truth. When it disagrees with the ledger or the oracle, they win and you rewrite the state.
 
-# Schema `re-state/1`
+# Schema `re-status/1`
+
+The ledger holds the same fields but `schema` (`re-ledger/1`), `written_by`, `since` (the script picks the changes after `previous` from its `changes`), and each feature's `state_text`. Dates are `YYYY-MM-DD`, or `null` where unknown.
 
 | Field | Holds |
 | --- | --- |
-| `schema` | `"re-state/1"` |
-| `generated_at`, `generated_by` | ISO 8601 time of the write, and the agent or person who wrote it |
-| `project` | The project's name |
-| `target` | `name`, `class` (a row of the [target profiles](./targets.md)), `build`, `hash`, `oracle` |
-| `goal` | `acceptance` (the phase 0 sentence), `non_goals` (list), `legal` |
-| `phase` | `current` (0 to 6) and `unit` (the unit in work) |
-| `stop_rule` | `{id, met, evidence}` for the ids `specs`, `mutations`, `ledger`, `masks`, `ci`; `evidence` names the run or file |
-| `units` | `{id, name, phase, status, specs: {pass, fail, inconclusive}, mutations: {caught, total}, attempts: {used, budget}, note}`; `status` is `planned`, `active`, `passed`, `failed`, `stalled`, or `blocked` |
-| `ledger` | `source` (the ledger's path) and the counts `verified`, `derived`, `assumed`, `open`, `refuted` |
-| `masks` | `{name, reason}` for every allowed difference |
-| `open_questions` | `{question, settles_with}` |
-| `decisions` | `{question, options, needed_by}`: what waits on a person |
-| `not_reached` | States, inputs, and code paths no spec exercised |
-| `history` | `{at, specs_pass, specs_total, mutations_caught, mutations_total, note}`, one per iteration |
+| `schema`, `written_by` | `"re-status/1"`, and what wrote the state |
+| `project`, `updated`, `previous` | The project's name; the dates of this update and the one before |
+| `features` | One per feature the work serves, in the user's words: `{name, state, state_text, now, left, updated, link}`. `state` is `planned`, `designed`, `proven` (in research, not built), `building`, `reworking`, `works`, `shipped` or `blocked`; `state_text` says it in words; `now` is what is true today, `left` what remains |
+| `decisions` | `{question, options, by}`: only what waits on a person; the section is left out when there are none |
+| `since` | `{date, what}`: the changes since `previous`, newest first |
+| `experiments` | `{feature, date, name, result, meaning, link}`: one line each, newest first |
+| `method` | `target` (the build and its hash), `oracle`, `rules` (list), `records` (`{what, where}`: the ledgers of addresses and claims); shown folded |
+| `glossary` | `{term, meaning}` for every word a newcomer would stop at |
+| `example` | `true` only in this skill's copy, which shows a banner |
 
-# What the page checks
+# What the page does
 
-The page lints the state it shows and lists what it finds: no `generated_at` or a stale one, a target not pinned by hash, a unit marked passed with failing or inconclusive specs or surviving breaks or no mutation record, a mask without a reason, a stop-rule item marked met without evidence or against the units' own figures, and every stop-rule item met while some unit has not passed. A finding means fix the state or the work. Never change the page's checks or labels to make one go away: the page is part of the oracle's reporting, and the builder does not edit the oracle.
+It reads `state.json` beside it, and falls back to its embedded copy, saying so, when that cannot be read. It shows the features first, then decisions (only when there are any), then the changes since the last update, the experiments one per line, the method folded, and the glossary. Every string is shown as text, never as markup; links go only to relative paths or https. It adds nothing up and checks nothing: the script refuses a ledger with a missing field, an unknown state or a malformed date, so the page never shows a half-written status.
+
+[^cwe-status]: Cyberworld Endless, `tools/re_status.py`: writes `docs/re/state.json`, `STATUS.md` and `dashboard.html` from `docs/re/ledger.json`; `--check` runs in `build.py test`.

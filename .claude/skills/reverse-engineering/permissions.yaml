@@ -3,7 +3,7 @@
 # when run. Edits the agent makes while following the guidance are the
 # agent's capability, not this artifact's.
 model: executable
-executes: true        # assets/dashboard.html renders its own JSON state in the viewer's browser
-network: none
+executes: true        # assets/dashboard.html renders its state in the viewer's browser
+network: none         # beyond reading state.json from its own folder
 shell: false
-filesystem_writes: false  # the page only reads its embedded state or a file the viewer picks
+filesystem_writes: false  # the page only reads state.json beside it or its embedded copy

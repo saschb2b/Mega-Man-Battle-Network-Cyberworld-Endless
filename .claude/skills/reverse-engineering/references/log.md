@@ -1,3 +1,8 @@
+## 2026-10-18
+
+- **Update**: Reworked the human view at the owner's request, as it was hard to read. assets/dashboard.html now opens with one row per feature in plain words (status, what is left, date), then decisions only when there are any, then the changes since the last update, one line per experiment with its meaning and no totals across experiments, unknowns as a dash, human dates, the method folded, and a glossary. A project script writes its state (schema re-status/1, replacing re-state/1) from one hand-edited ledger, with a Markdown copy; the page reads state.json and falls back to an embedded copy when opened as a file. dashboard.md rewritten to match, with Cyberworld Endless's tools/re_status.py as the example.
+- **Update**: SKILL.md, goal.md and targets.md no longer say to stay offline and single-player, which contradicted a project's own multiplayer: network work runs against servers the project runs and games the user owns; an original game's online service, anti-cheat and other people's accounts stay untouched.
+
 ## 2026-10-17
 
 - **Creation**: Added dashboard.md, the human view's guide and its re-state/1 schema, for the skill's new assets/dashboard.html (one offline file: goal and scope, units by status and phase, the stop rule with evidence, specs and breaks per unit, ledger claim states, masks, open questions, decisions, unreached paths, progress per iteration, and consistency checks over the state); linked from ledger-adjacent setup, the differential's figures, and the target profiles.

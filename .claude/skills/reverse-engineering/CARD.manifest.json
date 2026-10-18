@@ -1,19 +1,19 @@
 [
   {
     "path": "SKILL.md",
-    "sha256": "3730e66c461fb9bc30fef2b32b322e7820e4bc65c57bef4e75de30dceee31e3d"
+    "sha256": "2697eaff7a7a3253aed5226b8f6e0529d4645a187b77eecd430b37ad0c11178a"
   },
   {
     "path": "assets/dashboard.html",
-    "sha256": "24d9764b504f5555e2f7a501519d5ebb0e73a8b4cbfd1825905760b05c89d5c2"
+    "sha256": "571eee6e089ba8e0faecf33cf401328720192bf3ea0748bcff5c516c55c3ad69"
   },
   {
     "path": "permissions.yaml",
-    "sha256": "3a9eaa398112467c7b5332e98c1b2950507718ce940021193768b65daf0bae69"
+    "sha256": "b400355ad7b12d7b3ff80b20d0c7aeeef0fafc80308b81e0296f11bbb61e9806"
   },
   {
     "path": "references/dashboard.md",
-    "sha256": "5ffcc493d56ea60844cff7b6c387d2cf550507740c9088ae150d2e7216ea01bb"
+    "sha256": "65f3dcdcab68a050f807d0960b0fdbda1d3806dd6c92cc32b006a038a44945fb"
   },
   {
     "path": "references/differential.md",
@@ -21,7 +21,7 @@
   },
   {
     "path": "references/goal.md",
-    "sha256": "bf9942d47c4c2158f69ae91fc594d02619038574eecb7daad0b13f1d7dc2e8a9"
+    "sha256": "c5be1872f5dc5be78e05310e2e873be45bfd4076dc8e82bd2317d9e1f6592c65"
   },
   {
     "path": "references/harness.md",
@@ -33,7 +33,7 @@
   },
   {
     "path": "references/index.md",
-    "sha256": "639d094f1a38a398e6fbdce136b605a50ab3a2714658b34a094b4e57482ef702"
+    "sha256": "50352f4d37d514e045a09eb6dc418151e51e80e422b37912f090eb6e77ed5bbf"
   },
   {
     "path": "references/ledger.md",
@@ -45,7 +45,7 @@
   },
   {
     "path": "references/log.md",
-    "sha256": "593261bb4e01bcc7423f71710c936af36c659cf96ef18426dded4b69e7887357"
+    "sha256": "f969858ee833778321479b626d35dac36454fe226420c5804aa4ee14aac909fa"
   },
   {
     "path": "references/pitfalls.md",
@@ -53,7 +53,7 @@
   },
   {
     "path": "references/targets.md",
-    "sha256": "ce40847b46b5d20617e495a461e482726e1f6181b1d0ffd5b519eba7ebde54c6"
+    "sha256": "970284bdcafaec412521ec70e2b607f595e5a58171249fdefbb6ba7e4189a98a"
   },
   {
     "path": "references/worked-example.md",

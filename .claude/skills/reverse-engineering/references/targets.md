@@ -49,4 +49,4 @@ The phases never change between targets; only the instruments do. Identify the c
 - **Emulators are oracles only as accurate as themselves.** Confirm timing-sensitive behavior on a more accurate emulator or on hardware before you mask a difference as "the engine's".
 - **Relocating loaders and updates.** A PC or mobile target moves between launches and patches. Store offsets relative to their module, prefer byte signatures for anything you find, and refuse to run against an unpinned build.
 - **Threads.** A multithreaded target is deterministic only at its own sync points. Compare state at tick boundaries, not mid-step.
-- **Online services.** Work offline and single-player. Never touch anti-cheat, other players' sessions, or accounts you do not own.
+- **Online services.** Network work, a link cable over the internet or a multiplayer feature, runs against servers the project runs and copies of the game the user owns. Never touch an original game's online service, anti-cheat, other players' sessions, or accounts you do not own.
