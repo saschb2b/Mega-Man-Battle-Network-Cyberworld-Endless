@@ -4,10 +4,10 @@
  * BBS holds none of its requests in a run), its checks, and
  * BN6's Chip Trader, whose trade screen holds AsterLand's own prizes
  * (docs/ROM_DATA.md, Chip Traders), and home's shops (docs/HOME.md, piece
- * 6): the counter's Order Service and the SubChip seller beside it; in
- * from the town's warp 4. Its Number
- * Trader is off: its codes are no secret, and every run would take BN6's
- * prizes from it (docs/HOME.md, piece 10). */
+ * 6): the counter's Order Service (its list sorted as BN6's folder editor
+ * sorts, order_sort.c) and the SubChip seller beside it; in from the
+ * town's warp 4. Its Number Trader is off: its codes are no secret, and
+ * every run would take BN6's prizes from it (docs/HOME.md, piece 10). */
 #include "aster_land.h"
 
 #include <stdint.h>
@@ -16,6 +16,7 @@
 #include "indoors.h"
 #include "flags.h"
 #include "mapslot.h"
+#include "order_sort.h"
 #include "run.h"
 #include "shop.h"
 #include "town.h"
@@ -42,6 +43,7 @@ bool aster_land_install(void) {
 	indoors_dest(town, TOWN_DOOR, &x, &y, &face);   /* (in at its door) */
 	mapslot_indoors(1);
 	uint32_t list = indoors_take_over(ASTER_GROUP, ASTER_LAND, x, y, 1u << DOOR_OUT, MUSIC_SLOT, SONG);
+	order_sort_words();
 	mapslot_indoors(0);
 	if (!list) return false;
 	trader_home();
@@ -88,6 +90,7 @@ bool aster_land_board(int x, int y) { return in(board, x, y); }
 
 void aster_land_frame(void) {
 	indoors_shut(1u << DOOR_OUT);
+	order_sort_frame();
 	/* (an order made: the counter's word for the rest of the visit; looked
 	 * for a few times a second, the list being long) */
 	static int tick;
