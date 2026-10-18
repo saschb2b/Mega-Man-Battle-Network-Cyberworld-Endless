@@ -7,6 +7,8 @@
 #include <stdint.h>
 
 #include "guardian_objs.h"
+#include "mapslot.h"
+#include "net.h"
 #include "scripts.h"
 #include "shop.h"
 
@@ -77,6 +79,11 @@ void layer_objs_shops(const LayerObjs *o, bool saved);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);
+/* Sprite prop `p` as BN6's map objects (docs/LEVEL_DESIGN.md, Props):
+ * its pieces' 20-byte spawn records from record `n` of `recs` (`max` at
+ * most) at height `cz`, their sprites asked of `npcs`; the records' count
+ * after them, `n` where a sprite found no room (it is left out whole). */
+int layer_prop_objects(NpcList *npcs, const NetProp *p, int cz, uint8_t *recs, int n, int max);
 /* Set before layer_objs_install: this act's Net Dealer has already spoken,
  * so this one greets in a line. */
 extern bool layer_objs_dealer_again;

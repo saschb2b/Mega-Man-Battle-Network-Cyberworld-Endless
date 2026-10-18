@@ -405,7 +405,9 @@ the phrases and emotes asked for (`0x1480`-`0x148D`), the channel
 keeper's next and last (`0x148E`, `0x148F`), a peer's wave, mute and
 block (`0x1490`-`0x1492`), the way home (`0x1493`), Trade Central's
 options and the Navi picked (`0x1494`-`0x149F`), a NetBattle asked for
-and the Yes to one (`0x14A0`, `0x14A1`); docs/ONLINE.md.
+and the Yes to one (`0x14A0`, `0x14A1`); docs/ONLINE.md. Its life
+(`square_life.c`: the walkers, the log-in beam, the cheer, the greeter's
+and the referee's words) takes none.
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 

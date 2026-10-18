@@ -8,6 +8,8 @@
 
 /* As MegaMan arrives in the Square. */
 void trade_central_reset(void);
+/* The last player this game traded with there, NULL none. */
+const char *trade_central_last(void);
 /* After each frame there, with the snapshot shown (online_chat.c's). */
 void trade_central_frame(const OnlineSnapshot *s);
 

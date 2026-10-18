@@ -22,6 +22,7 @@
 #include "platform.h"
 #include "script_kit.h"
 #include "square_arena.h"
+#include "square_life.h"
 #include "square_words.h"
 #include "talk.h"
 #include "trade_central.h"
@@ -57,6 +58,7 @@ void online_chat_reset(void) {
 	memset(&C, 0, sizeof C);
 	C.on_exit = true;   /* (arrived beside it: it asks once he steps on it) */
 	trade_central_reset();
+	square_life_reset();
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 	flag_clear(BATTLE_FLAG);
 }
@@ -243,6 +245,7 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	cards();
 	keeper();
 	trade_central_frame(s);
+	square_life_frame(s);
 	bool busy = talk_busy() || emu_read8(BN6_CHATBOX);
 	if (busy) { C.open = C.open || talk_busy(); return false; }
 	/* (BN6's own talk with the keeper sets its flags too) */
@@ -265,13 +268,16 @@ uint32_t online_chat_keys(uint32_t keys) {
 		return 0;
 	}
 	if (btn_pressed(BTN_A)) {
-		int slot = online_square_peer_ahead(bn6_player_x(), bn6_player_y(), emu_read8(BN6_PLAYER_FACING) & 7);
+		int x = bn6_player_x(), y = bn6_player_y(), face = emu_read8(BN6_PLAYER_FACING) & 7;
+		int slot = online_square_peer_ahead(x, y, face);
 		if (slot >= 0 && (size_t)slot < C.s.peer_count) {
 			C.peer = C.s.peers[slot];
 			C.waiting = card_of(C.peer.id) ? 1 : CARD_WAIT;
 			if (!card_of(C.peer.id)) online_transport_inspect(C.peer.id);
 			return keys & ~(uint32_t)KEY_A;
 		}
+		/* (a walker, or a prop: the Square's own words) */
+		if (slot == -1 && square_life_talk(x, y, face)) return keys & ~(uint32_t)KEY_A;
 	}
 	return keys & ~(uint32_t)(KEY_L | KEY_R);
 }

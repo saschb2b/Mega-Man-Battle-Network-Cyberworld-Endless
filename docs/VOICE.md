@@ -341,6 +341,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | MegaMan and Lan coming home to Lan's HP after an act; MegaMan at its portals; the courier Mr.Prog there | `src/director/home_words.c` |
 | The Net Square's gate in Lan's HP: its keeper Mr.Prog, MegaMan before and after a visit | `src/director/gate_words.c` |
 | The Net Square: MegaMan's menu, another player's card, the channel keeper | `src/online/square_words.c` |
+| The Net Square's life: the greeter and the referee Mr.Progs, the walking GreenNavi and GirlNavi, the Board's posts, what a prop is | `src/online/square_life_words.c` |
 | Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
 | MegaMan on a Practice NetBattle in the Net Square: the challenge sent, the question a challenge asks, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |

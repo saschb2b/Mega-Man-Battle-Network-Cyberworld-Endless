@@ -69,19 +69,123 @@ version, another ROM, a name taken, a full Square, barred, removed, the
 connection lost.
 
 **The Square.** The server sends a seed; each game plans the same Square
-from it (`square_plan.c`): a plaza of ten panels a side and four wings
-off it, the arrival with the pad home, Trade Central, the Arena and the
-Board, in one of BN6's busy daylight nets (Central, Sky or Green Area;
-not Seaside, whose layers stand in another map's slot). The plan's hash
-and its generator version (`SQUARE_MAKE`, `SQUARE_HASH`) go in HELLO, so
-a server refuses a game that would build another Square. `online_square.c`
-builds it with the layers' map builder (`netmap_build`), places the
-welcome sign, the channel keeper, Trade Central's clerk at his desk, the
-Board's sign and the pad home, and gives the other players' MegaMen
-seven NPC scripts of BN6's own, moved from a 100 ms interpolation of the
-server's 20 Hz snapshots; their names stand over them. MegaMan walks as
-BN6 walks him. Each Square is a channel of eight; the keeper moves
-MegaMan to the next or the last.
+from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
+nets (Central, Sky or Green Area; not Seaside, whose layers stand in
+another map's slot). The plan's hash and its generator version
+(`SQUARE_MAKE`, `SQUARE_HASH`) go in HELLO, so a server refuses a game
+that would build another Square. `online_square.c` builds it with the
+layers' map builder (`netmap_build`) and gives the other players'
+MegaMen seven NPC scripts of BN6's own, moved from a 100 ms
+interpolation of the server's 20 Hz snapshots; their names stand over
+them. MegaMan walks as BN6 walks him. Each Square is a channel of eight;
+the keeper moves MegaMan to the next or the last.
+
+### The Square's design
+
+The owner asked for "a lively hub to gather and communicate", after the
+fan servers that build custom maps. The lens (the game-design skill):
+
+- **Experience**: fellowship and expression. The Square is a place to be
+  seen in and to linger, not a menu with floors.
+- **Dialectic: gather against go.** The plaza's landmark pulls players
+  together; each wing sends them off to do something with another
+  player (trade, battle, read what happened). Every spot is both a place
+  to stand together and a reason to be there.
+- **Loop layer**: the session between acts: arrive, see who is here, do
+  one thing together, read what happened, go home. Variety and
+  expression, never run power: nothing in the Square makes a run
+  stronger.
+- **Patterns**: a centrepiece to gather round (a "weenie"); systemic
+  barks, lines built from live facts; diegetic boards and signs; spots
+  that answer players together; variation by the server's seed inside
+  one skeleton.
+- **Inspiration**: the Open Net Battle and Hub OS community servers
+  (Navis on waypoint routes whose lines change, BBS boards, check text on
+  every object, welcome and guide Progs); BN2's and BN3's own Net
+  Squares (Mr.Progs, Navis chatting about what is going on, the BBS,
+  BN3's Under Square with Navis gathered round a statue); the Pokemon
+  Wi-Fi Plaza's and Club Penguin's dressed central rooms. These are
+  recalled from playing them, not checked in docs/SOURCES.md's sources;
+  nothing here copies them.
+
+### The layout
+
+A 36 x 36 grid, grown down the screen rather than across (its tile map
+184 x 92 to 184 x 94 entries of the 20477 the free space holds):
+
+| Place | Where | What stands there |
+| --- | --- | --- |
+| The plaza | 13 panels a side, in the middle | The landmark on its middle panel, the nine panels its base spreads over walled off (MegaMan walks round it, never onto its pedestal), four props round it in walled holes; cybertrees past its back rim, either side of the stage's stair; the channel keeper by the way in from the log-in plaza |
+| The log-in plaza (+x) | Off a walkway lined by two cybertrees | The pad home at its far end, the greeter Mr.Prog, the Board (a BBS) and the welcome sign past its back rim |
+| The stage (-y) | Up a stair two panels wide from the plaza's edge | Two braziers past its back rim; a place to stand and be seen |
+| Trade Central (-x) | Off a walkway | BN6's reception desk, its two clerks |
+| The Arena (+y) | A walk down the spectators' floor, which turns round before the ring | The ring up its own stair from that floor, the referee Mr.Prog at its foot |
+
+The landmark is the area's own first: Green's giant cybertree among
+cybertrees; in Central and Sky the Undernet's statue or the Graveyard's
+monument by the seed, ringed by braziers or cybertrees by the seed. By
+the seed too, a mirrored pair of cybertrees past the plaza's -x rim, or
+a row of three along the Arena's walk. Only Sky's maps have stairs to
+cut (Sky Area's, climbing towards grid -y, 32 high): there the stage and
+the ring stand raised as BN6's raised floors, by the layers' own rules
+(`net_height.c`: nothing within a panel of where a raised room is drawn,
+a panel up the screen). Central's and Green's maps have none, so their
+stage and ring are flat daises in the same places. The props are BN6's
+map objects through the layers' own pieces (`layer_prop_objects`), at
+the stage's height on its rim. Sprites: six of the twelve the loader
+takes, 0x4614 to 0x46BC of its 0x8800 bytes; NPCs: all sixteen BN6 runs.
+
+`tests/test_online.c` holds every floor panel reached from the arrival
+over 64 seeds, a step between heights only on a stair, each stair from
+ground floor up to raised floor, no floor where a raised room is drawn,
+every place and every walker's waypoint on the floor.
+
+### Its life
+
+`square_life.c`, its words in `square_life_words.c` (docs/VOICE.md):
+
+- **Two walkers**, a GreenNavi and a GirlNavi, puppets as the peers are,
+  walk the plan's routes (the GreenNavi round the plaza, four seconds at
+  each corner; the GirlNavi from Trade Central across the plaza, clear
+  of the landmark's ring, down the Arena's walk and back, six seconds at
+  either end), a world unit a frame, each leg along a grid axis (the
+  unit tests hold them on ground floor, through no hole). Their place is
+  a function of the wall clock (UTC seconds and the frames since), so
+  every client whose clock agrees shows them in the same place: two
+  clients' logs (with `CYBERWORLD_EMU_DEBUG`, their "walkers at clock"
+  lines) name the same positions at the same second. The server sends no
+  clock of its own and the wire is unchanged. A faces one: the walker
+  stops, turns to MegaMan and says a line built from what the client
+  knows: the Navis here by name, how many, the hour, the area, the last
+  Navi to log in, the last trade and NetBattle this game made; the
+  GirlNavi tells the Square's tips as gossip.
+- **A parade** every three minutes of the wall clock, thirty seconds
+  long (after the Pokemon Wi-Fi Plaza's spectacle and the fan servers'
+  parades): the walkers log out where they are and in on a loop three
+  panels round the landmark, BN6's beam where the first does and his
+  "Parade time!" over his head, and walk round it two panels apart
+  without stopping; then they log back in on their routes. Their talk
+  meanwhile is the parade's. Every client whose clock agrees sees the
+  same parade, and players who walk with it stand round the landmark,
+  where saying something together makes the Square cheer.
+- **BN6's log-in beam** (list 7's sprite 0, sound 0x76) where a Navi
+  logs in or out, one NPC for all, and the **greeter**'s word over his
+  head ("ALPHA LOGGED IN!"). His own words, and the **referee**'s (how
+  to ask for a NetBattle, the last one this game fought and how it went,
+  how many are watching), are rewritten as they change, as the keeper's
+  are.
+- **Check text**: A facing a prop says what it is; the Board's posts are
+  the channel, who is here, the last log-in, the last trade and battle,
+  and two tips; the sign names the channel.
+- **Together**: when two players say something or emote within four
+  seconds of each other round the landmark (three panels) or on the
+  stage, the walker nearer the landmark shows BN6's "!" (list 5's sprite
+  7), the other says "!!" and BN6's sparkle sounds; once in ten seconds,
+  each client from the events it sees.
+
+None of it takes an event flag: the walkers, beam and mark are puppets,
+their talk BN6's talk box from the host (`talk_start`), the Mr.Progs'
+words their own archives in the layer's scratch.
 
 **Talk.** Every exchange is BN6's chat box with its options, three to a
 box (`online_chat.c`, words in `square_words.c`): L for a phrase or an
@@ -93,9 +197,9 @@ the player's, kept by the server's public identity of the other.
 
 ## Trade Central
 
-A Mr.Prog at a desk in the north wing trades one spare chip (a copy past
-those in the run's three folders) for another player's
-(`trade_central.c`, words in `trade_words.c`):
+A Mr.Prog at a desk in the wing up-left of the plaza (-x) trades one
+spare chip (a copy past those in the run's three folders) for another
+player's (`trade_central.c`, words in `trade_words.c`):
 
 1. MegaMan picks a Navi in the channel and the chip he offers. The picker
    is BN6's own Order Service screen (`trade_order.c`): the shop's
@@ -175,6 +279,21 @@ server:
   battle to its end on both with every hash agreeing, a desync and a
   player leaving each stopping both, a declined challenge
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
+- **The Square's second plan and its life** (the same day, later). The
+  Square through real visits in all three areas (seeds 120, 121, 122:
+  Central with the statue, Sky with its stage and ring raised and
+  MegaMan walked up both stairs, Green with the giant cybertree); in two
+  games at once: the greeter's "ALPHA LOGGED IN!" over his head as the
+  second arrived, the Board's posts naming the channel, who was there and
+  the log-in, the referee's words, a walker spoken to (she stopped and
+  turned), both games' walkers at the same positions at the same clock
+  seconds, both games cheering at once when their players said Hello
+  round the statue (the "!" over the walker nearer it), Trade Central's
+  desk answering from its wing (to "no spare chips", the run having
+  none), and a Practice NetBattle asked for on the Arena's spectators'
+  floor, both cores agreeing frame by frame; and a run timed to a
+  parade, the two walkers marching round the statue past MegaMan, two
+  panels apart, at the positions the clock gives.
 - **The official server.** Redeployed from `deploy/coolify/compose.yaml`
   on the same state volume: `/health` says protocol 3, trading and the
   Arena on, and a `cyberworld.presence.v3` upgrade is answered (101). A

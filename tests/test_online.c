@@ -101,9 +101,80 @@ static void fuzz(void) {
 	}
 }
 
+static bool on_stair(const SquarePlan *p, int x, int y) {
+	for (int i = 0; i < p->nstairs; ++i)
+		if (x >= p->stairs[i].x && x < p->stairs[i].x + 2 && y >= p->stairs[i].y && y < p->stairs[i].y + 2) return true;
+	return false;
+}
+
+/* each stair climbs from ground floor to raised floor, and each raised
+ * room is drawn where no other floor is (a panel up the screen) */
+static void square_heights(const SquarePlan *p) {
+	for (int i = 0; i < p->nstairs; ++i) {
+		const Stair *st = &p->stairs[i];
+		assert(st->dir == STAIR_UP_NY);
+		for (int dx = 0; dx < 2; ++dx) {
+			assert(p->cell[st->y - 1][st->x + dx] == C_PATH && p->level[st->y - 1][st->x + dx]);
+			assert(p->cell[st->y + 2][st->x + dx] == C_PATH && !p->level[st->y + 2][st->x + dx]);
+		}
+	}
+	for (int y = 2; y < SQUARE_H; ++y)
+		for (int x = 2; x < SQUARE_W; ++x) {
+			if (p->cell[y][x] != C_PATH || !p->level[y][x]) continue;
+			for (int dy = -2; dy <= 0; ++dy)
+				for (int dx = -2; dx <= 0; ++dx) {
+					int ox = x + dx, oy = y + dy;
+					assert(!p->cell[oy][ox] || p->level[oy][ox] || on_stair(p, ox, oy));
+				}
+		}
+}
+
+/* every floor panel of plan `p` reached from the arrival, a step between
+ * heights only on a stair, and every place on the floor */
+static void square_reach(const SquarePlan *p) {
+	static uint8_t seen[SQUARE_H][SQUARE_W];
+	memset(seen, 0, sizeof seen);
+	static int stack[SQUARE_W * SQUARE_H][2];
+	int n = 0, reached = 0, floor = 0;
+	stack[n][0] = p->at[SQ_ARRIVE][0]; stack[n++][1] = p->at[SQ_ARRIVE][1];
+	seen[p->at[SQ_ARRIVE][1]][p->at[SQ_ARRIVE][0]] = 1;
+	while (n) {
+		--n;
+		int x = stack[n][0], y = stack[n][1];
+		++reached;
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= SQUARE_W || ny >= SQUARE_H || seen[ny][nx] || p->cell[ny][nx] != C_PATH) continue;
+			if (p->level[ny][nx] != p->level[y][x] && !on_stair(p, x, y) && !on_stair(p, nx, ny)) continue;
+			seen[ny][nx] = 1;
+			stack[n][0] = nx; stack[n++][1] = ny;
+		}
+	}
+	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p->cell[y][x] == C_PATH;
+	assert(reached == floor);
+	for (int k = 0; k < SQ_PLACES; ++k) assert(p->cell[p->at[k][1]][p->at[k][0]] != C_VOID);
+	/* each walker's legs, and the parade's, along a grid axis over
+	 * ground floor, none through a hole */
+	for (int w = 0; w <= SQUARE_WALKERS; ++w) {
+		int len = w < SQUARE_WALKERS ? p->route_len[w] : 4;
+		assert(len >= 2 && len <= SQUARE_ROUTE);
+		for (int k = 0; k < len; ++k) {
+			const int *a = w < SQUARE_WALKERS ? p->route[w][k] : p->parade[k];
+			const int *b = w < SQUARE_WALKERS ? p->route[w][(k + 1) % len] : p->parade[(k + 1) % len];
+			assert(a[0] == b[0] || a[1] == b[1]);
+			int steps = abs(b[0] - a[0]) + abs(b[1] - a[1]);
+			for (int i = 0; i <= steps; ++i) {
+				int x = a[0] + (b[0] - a[0]) * i / (steps ? steps : 1), y = a[1] + (b[1] - a[1]) * i / (steps ? steps : 1);
+				assert(p->cell[y][x] == C_PATH && !p->level[y][x]);
+			}
+		}
+	}
+}
+
 /* The Square's plan: the same for a seed on every client (its hash the
  * one protocol.json and the server hold), every floor panel reached from
- * the arrival, the pad home and the wings on the floor. */
+ * the arrival, its stage and ring up their stairs, over many seeds. */
 static void square(void) {
 	SquarePlan p, q;
 	square_plan(120, &p);
@@ -114,26 +185,13 @@ static void square(void) {
 			square_plan_hash(&p));
 		assert(0);
 	}
-	static uint8_t seen[SQUARE_H][SQUARE_W];
-	int stack[SQUARE_W * SQUARE_H][2], n = 0, reached = 0, floor = 0;
-	stack[n][0] = p.at[SQ_ARRIVE][0]; stack[n++][1] = p.at[SQ_ARRIVE][1];
-	seen[p.at[SQ_ARRIVE][1]][p.at[SQ_ARRIVE][0]] = 1;
-	while (n) {
-		--n;
-		int x = stack[n][0], y = stack[n][1];
-		++reached;
-		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
-			int nx = x + d[k][0], ny = y + d[k][1];
-			if (nx < 0 || ny < 0 || nx >= SQUARE_W || ny >= SQUARE_H || seen[ny][nx] || p.cell[ny][nx] != C_PATH) continue;
-			seen[ny][nx] = 1;
-			stack[n][0] = nx; stack[n++][1] = ny;
-		}
+	for (uint32_t seed = 0; seed < 64; ++seed) {
+		square_plan(seed, &q);
+		assert(q.area == 0 || q.area == 2 || q.area == 3);
+		assert(q.nstairs == SQUARE_STAIRS && q.nprops <= SQUARE_PROPS);
+		square_reach(&q);
+		square_heights(&q);
 	}
-	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p.cell[y][x] == C_PATH;
-	assert(reached == floor);
-	for (int k = 0; k < SQ_PLACES; ++k) assert(p.cell[p.at[k][1]][p.at[k][0]] != C_VOID);
-	for (uint32_t seed = 0; seed < 64; ++seed) { square_plan(seed, &q); assert(q.area == 0 || q.area == 2 || q.area == 3); }
 }
 
 int main(void) {

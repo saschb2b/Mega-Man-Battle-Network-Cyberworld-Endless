@@ -18,6 +18,9 @@
 
 /* the Battle choice offered at all in this build */
 bool square_arena_offered(void);
+/* The last battle fought from the Square in this game: 1 won, 2 lost, 3
+ * over otherwise, 0 none; `name` the other's. */
+unsigned square_arena_last(const char **name);
 /* As MegaMan arrives in the Square, and as he leaves it: any battle left */
 void square_arena_reset(void);
 void square_arena_end(void);
