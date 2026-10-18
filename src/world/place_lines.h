@@ -26,5 +26,13 @@ extern const int place_nfolk;
 extern const char *const place_number_trader;
 /* What AsterLand's clerk says once this visit's order is made. */
 extern const char *const place_order_closed;
+/* ... over his Order Service's list (order_sort.c, issue #124): as it opens
+ * in BN6's own order; how it is sorted, by each of BN6's seven keys (ID,
+ * ABCDE, Code, Attack, Element, No., MB) BN6's way and the other; and the
+ * buttons under it (a line break between its two lines) */
+#define PLACE_SORT_KEYS 7
+extern const char *const place_order_hello;
+extern const char *const place_order_sorted[PLACE_SORT_KEYS][2];
+extern const char *const place_order_buttons;
 
 #endif

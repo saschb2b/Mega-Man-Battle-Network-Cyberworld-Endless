@@ -501,8 +501,12 @@ run ended), Lan's classmate, the neighbor and the man from the lab speak
 of the run, and the crowd stands somewhere new at each visit. AsterLand
 and the Cyber Academy are open. At AsterLand's counter the Order Service
 sells any chip the Library holds, in your folder's codes, one order a
-visit; beside it the SubChip seller stocks the keys the act ahead asks
-for, and its Chip Trader trades as in BN6.
+visit. Its list sorts as the folder editor's does: START goes on to the
+next of BN6's seven sorts (ID, ABCDE, Code, Attack, Element, No. for the
+copies you hold, MB), SELECT turns the order around, and the clerk says
+which it is; the list opens in the last one again. Beside the counter the
+SubChip seller stocks the keys the act ahead asks for, and its Chip
+Trader trades as in BN6, START sorting your Pack there.
 
 At each visit three people post a request for the act ahead: the
 NetBattler at AsterLand's request board, the NetBattle club in class 6-1
@@ -524,6 +528,7 @@ along it is, and the ways on.
 <img src="screenshots/home-news.png" width="240" alt="Central Town at evening, after act 2: the plaza's Mr.Prog calls the news, HEATMAN'S COPY IS DELETED!">
 <img src="screenshots/home-request.png" width="240" alt="In AsterLand, the NetBattler at the request board: I need a Fire chip. Big NetBattle!">
 <img src="clips/home-visit.gif" width="195" alt="As a New 3DS shows it: Lan crosses Central Town at evening into AsterLand and orders a chip at its counter, each chip's card on the bottom screen">
+<img src="clips/home-sort.gif" width="240" alt="The Order Service's list sorted with START: by ABCDE, Code, Attack (SELECT, low first), Element, No., MB and ID, the clerk naming each">
 </p>
 
 <p align="center">

@@ -1114,6 +1114,12 @@ HOME_PAGED = '40:,' + '4:A,6:,' * 46 + '30:,'
 HOME_OUT = HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:,'
 HOME_ASTER = HOME_OUT + '0:place -156 -40 7,10:,62:UP+LEFT,160:,'
 HOME_COUNTER = '30:UP+RIGHT,124:UP+LEFT,10:UP+LEFT,6:,6:A,56:,6:A,46:,6:A,46:,6:A,46:,6:A,156:,'
+# (... and its list sorted, issue #124: a Library of every chip the Order
+# Service holds, as a long-time player's, the clerk's list from frame
+# 1600; START through BN6's seven keys, SELECT the other way at Attack and
+# at ID, a sort each 70 frames)
+HOME_SORT = ('0:flags 0x1E21 0x1F32 1,' + HOME_ASTER + HOME_COUNTER + '60:,' + '6:START,64:,' * 3 + '6:SELECT,64:,' +
+             '6:START,64:,' * 4 + '6:SELECT,90:')
 # (... or through the Cyber Academy's gate, the foyer's turnstile, the 1F
 # hallway's stairs and the 2F hallway's door into class 6-1, by frame 1484)
 HOME_ACADEMY = HOME_OUT + ''.join(f'0:place {p},10:,{n}:UP+LEFT,120:,' for p, n in
@@ -1175,6 +1181,9 @@ SCREENSHOTS = [
      [(1262, 'home-request')], {}),
     ('home-order', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000', '--input', HOME_ASTER + HOME_COUNTER + '6:DOWN,20:,6:DOWN,40:'],
      [(1680, 'home-order')], {}, '3ds'),
+    # (issue #124: the clerk's list by Attack, its strongest first)
+    ('home-sort', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000', '--input', HOME_SORT],
+     [(1876, 'home-sort')], {}),
     ('home-panel', ['--scene', 'home', '--run-depth', '4', '--seed', '3', '--setup', 'short,0,0,0', '--dev', 'job=2,jobstate=1', '--input', '600:,' + '6:A,94:,' * 8],
      [(1395, 'home-panel')], {}, '3ds'),
     # (issue #96: Lan's class 6-1, the NetBattle club's member and her challenge)
@@ -1634,6 +1643,9 @@ CLIPS = [
     # cards on the second screen)
     ('home-visit', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000'], {},
      HOME_OUT + '0:place -156 30 7,20:,122:UP+LEFT,160:,' + HOME_COUNTER + '6:DOWN,30:,6:DOWN,30:,6:DOWN,60:', 856, 1822, '3ds'),
+    # (issue #124: the clerk's list sorted, START through BN6's seven keys,
+    # SELECT the other way)
+    ('home-sort', ['--scene', 'town', '--seed', '2', '--run-depth', '7', '--dev', 'zenny=8000'], {}, HOME_SORT, 1610, 2330),
     # (issue #98: a walk round an Undernet layer's signature, the court of
     # identity-undernet, past its statue between braziers)
     ('identity', IDENTITY + ['--net-biome', '5', '--run-depth', '4', '--seed', '1'], {},
@@ -1671,7 +1683,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
-               'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12)}
+               'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12)}
 
 
 def clips(only=None):
@@ -1917,7 +1929,7 @@ def lint_files():
 
 
 # bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h')
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h')
 
 
 def lint_rom_data(update):

@@ -3,8 +3,9 @@
  * and code that name the chip records, their names and descriptions, the
  * pack's routines and its extension in RAM, the pseudo-chips' test and the
  * battle deck's deal (issue #82; docs/MULTIROM.md, The chip registry;
- * docs/ROM_DATA.md, The chip registry; src/emu/xchips_install.c); and a
- * chip record's fields. */
+ * docs/ROM_DATA.md, The chip registry; src/emu/xchips_install.c); a chip
+ * record's fields; and BN6's sorts of the chips, the folder editor's and the
+ * Chip Trader's (issue #124: the Order Service's, src/world/order_sort.c). */
 #ifndef CW_BN6_CHIPS_H
 #define CW_BN6_CHIPS_H
 
@@ -129,5 +130,27 @@
  * are installed when its ROM is there. A rule of BN6's alone, so two games
  * agree on it whatever ROMs each has (the Net Square's trades and Arena). */
 #define BN6_CHIP_BLANK(id) (((id) >= 203 && (id) <= 220) || ((id) >= 291 && (id) <= 300) || (id) == 314)
+
+/* BN6's sorts (bn6f sub_8120018, Gregar 0x08121DF4; the keys bn6f
+ * sub_811FE7C's): seven keys, ID, ABCDE, Code, Attack, Element, No., MB, each
+ * up or down, its ties by ID up either way; a key newly picked goes the way
+ * of its byte here XOR BN6_SORT_DOWN, picked again the other (bn6f
+ * sub_804AE04, the Chip Trader's SORT window) */
+#define BN6_SORT_MODES        0x030069A0u /* IWRAM data, a byte a key: 0, or BN6_SORT_DOWN (04 04 04 00 04 00 04 04: Attack and No. down) */
+#define BN6_SORT_DOWN         0x04        /* ... a sort's way down */
+#define BN6_SORT_ELEMENTS     0x08121D3Cu /* a chip's place in the Element sort, a byte by its ChipElement (bn6f byte_811FF60), BN6_SORT_ELEMENT_COUNT */
+#define BN6_SORT_ELEMENT_COUNT 12
+#define BN6_SORT_NO_POWER     5           /* the Attack sort's key for a chip whose power is not shown (bn6f sub_811FF80) */
+#define BN6_SORT_POWER_ODD    1           /* ... and for one of BN6_CHIP_EFFECT_FLAGS' BN6_SORT_ODD_FLAG */
+#define BN6_SORT_ODD_FLAG     0x10
+#define BN6_SORT_COMPUTED     999         /* ... a shown power past this one BN6 computes, a Navi chip's: */
+/* A Navi chip's power (BN6_NAVI_POWER_FIRST and up), by MegaMan's best
+ * time against the Navi (bn6f sub_8010C76, Gregar's as Falzar's) */
+#define BN6_NAVI_POWER_FIRST  1001
+#define BN6_NAVI_TIMES        0x020018C0u /* u16 frames a Navi, by power - BN6_NAVI_POWER_FIRST */
+#define BN6_NAVI_TIME_STEPS   0x08010CB8u /* BN6_NAVI_TIME_STEP_COUNT u32 times in BCD (0x1000 10 seconds): the first the time is not past, its step */
+#define BN6_NAVI_TIME_STEP_COUNT 10
+#define BN6_NAVI_POWERS       0x08020E54u /* u16 by step, BN6_NAVI_POWER_STEPS a Navi */
+#define BN6_NAVI_POWER_STEPS  11          /* ... a step a time and one past the last */
 
 #endif

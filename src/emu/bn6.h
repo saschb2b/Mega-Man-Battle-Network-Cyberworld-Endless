@@ -371,15 +371,7 @@
 #define BN6_MODE_GAME_OVER    0x14   /* BN6_TOOLKIT: its GAME OVER */
 #define BN6_MODE_SUBMENU      0x28   /* BN6_TOOLKIT: a PET screen (bn6f SubMenuControl), which BN6_SUBMENU's first byte names */
 #define BN6_MODE_SHOP         0x2C   /* BN6_TOOLKIT: a shop (bn6f ShopControl) */
-#define BN6_SHOP_STATE        0x02011C10u /* a shop's screen (bn6f ShopControl's state): */
-#define BN6_SHOP_ROW          (BN6_SHOP_STATE + 0x14) /* ... the cursor's row on the screen, u16 */
-#define BN6_SHOP_SCROLL       (BN6_SHOP_STATE + 0x18) /* ... the list's scroll, u16: the entry under the cursor is their sum */
-#define BN6_SHOP_DESC         (BN6_SHOP_STATE + 0x1C) /* ... its shop's entry in BN6_SHOP_DESCS, u32: +0 the currency, +8 its stock's offset in the shop data, +12 its entries */
-#define BN6_SHOP_ENTRY        8      /* a stock entry: +0 its kind (BN6_SHOP_KIND_*), +1 the stock, +2 its id u16, +4 a chip's code or a program's colour, +6 the price u16 */
-#define BN6_SHOP_LIST         0x02019A00u /* the screen's list of entries as shown (bn6f sub_8047B88): sorted, the hidden left out */
-#define BN6_SHOP_KIND_ITEM    1      /* BN6_SHOP_ENTRY's kind: a key item (HPMemory 0x70) */
-#define BN6_SHOP_KIND_CHIP    2      /* ... a chip in its code */
-#define BN6_SHOP_KIND_PROGRAM 3      /* ... a NaviCust program, its id program * 4 */
+/* (a shop's screen, its state and list: bn6_shop.h) */
 #define BN6_MODE_TRADER       0x34   /* BN6_TOOLKIT: the Chip Trader (bn6f ChipTraderControl) */
 #define BN6_MODE_MAIL         0x48   /* BN6_TOOLKIT: E-Mail on its own (bn6f HandleEmailMenu81279F8) */
 #define BN6_SUB_ENTER         0x00   /* BN6_GAMESTATE: a map being entered (bn6f EnterMap, which waits out a fade first) */
@@ -391,10 +383,11 @@
 #define BN6_CUSTOM_WINDOW     0x02035292u /* eStruct2035280 + 0x12: the Custom screen's window as it slides in, 0 (closed, or hidden by SELECT to see the field) to 0x78 open */
 
 #include "bn6_attacks.h"   /* the attack families, power attacks and charge times, as the engine grows them (issue #82) */
-#include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82) */
+#include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82), BN6's sorts (issue #124) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
 #include "bn6_navis.h"   /* the battle engine's Navis: their tables by AI index, the routines they name, their arm points (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
+#include "bn6_shop.h"   /* a shop's screen: its state and its list (issue #124) */
 #include "bn6_panels.h"   /* the battlefield's panels as the engine updates, draws and acts on them (issue #82) */
 #endif

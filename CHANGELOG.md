@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **The Order Service sorts (issue #124, from whitt-e).** AsterLand's
+  clerk listed every chip of the Library by ID alone, five a page, while
+  the folder editor and the Chip Trader beside him sort by seven keys.
+  START on his list now goes on to the next of the same seven (ID, ABCDE,
+  Code, Attack, Element, No., MB), each the way BN6 first sorts by it,
+  and SELECT turns it around; the cursor goes back to the top, BN6's
+  select sound plays and his box names the sort over the buttons ("By
+  Attack,high first!"). No. is how many of the chip, in its code, you
+  hold. The list opens in your last sort again. What an order costs and
+  gives is as before.
 - **A request pays once (issue #122, from Baine53).** An asker at home
   paid a settled request again after Lan jacked in at his PC and back
   out: the lab's man gave his 1000 zenny twice. BN6's jack-in rerolled
