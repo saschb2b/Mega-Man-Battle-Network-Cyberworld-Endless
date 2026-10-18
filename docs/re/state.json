@@ -26,10 +26,10 @@
     {
       "name": "Arena",
       "state": "proven",
-      "now": "Two linked cores per client with only inputs exchanged complete BN6's Practice at 0 to 150 ms; a complete snapshot of the pair replays exactly.",
-      "left": "The production pair in the game, a loadout installer for BN6's own content, and the server's challenge, accept, input and hash messages. Rollback after that.",
+      "now": "NetBattles from the Net Square between two games, each running both linked cores, only keys crossing the server, the pair hashed every 60 frames. Full rules for two games with BN5's ROM: BN5's installs written down as the game's core makes them and made again in both pair cores, BN5's chips and Souls carried; UNITE's Soul carried to the other GBA by the pair. Proven on two clients: MrkCan1 and KnightSoul on both screens with every hash agreeing.",
+      "left": "The other five Souls, Chaos Unison, ColonelSoul's button and BN5's mood in a NetBattle seen on both GBAs; a marker that wanders against a moving target checked against BN5; rollback.",
       "updated": "2026-10-18",
-      "link": "../ONLINE_LINK.md",
+      "link": "../ONLINE_ARENA.md",
       "state_text": "Proven in research, not built"
     }
   ],
@@ -50,6 +50,10 @@
     {
       "date": "2026-10-18",
       "what": "This status is written by tools/re_status.py from docs/re/ledger.json."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "Full rules: the Arena's pair holds BN5's installs (src/emu/xinstall_log.c) and carries a united Soul to the other GBA (src/online/arena_souls.c)."
     }
   ],
   "experiments": [
@@ -76,6 +80,22 @@
       "result": "Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice.",
       "meaning": "A run's chip fights natively; the installer for a whole loadout is still to build.",
       "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "BN5 in both pair cores, two clients",
+      "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
+      "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
+      "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "UNITE across the cable",
+      "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
+      "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
+      "link": "../ONLINE_ARENA.md#full-rules"
     },
     {
       "feature": "Net Square",
