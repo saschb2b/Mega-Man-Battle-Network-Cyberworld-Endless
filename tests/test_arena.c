@@ -1,13 +1,17 @@
 /* The Arena's ROM-free parts (issue #120): the keys' buffer and its
- * delay, the local link's latency, and a carried MegaMan checked and
- * written into a made-up core's memory. */
+ * delay, the local link's latency, a carried MegaMan checked and written
+ * into a made-up core's memory, the messages on the wire (as the server's
+ * protocol.py packs them) and two network links back to back. */
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "arena_input.h"
 #include "arena_link.h"
+#include "arena_link_net.h"
 #include "arena_loadout.h"
+#include "arena_wire.h"
 #include "bn6.h"
 
 static void buffer(void) {
@@ -191,11 +195,218 @@ static void install(void) {
 	assert(arena_loadout_install(&m, &l, NULL, 0) && !flag(BN6_FLAG_HEAT_CROSS) && !flag(BN6_FLAG_BEAST_OUT));
 }
 
+/* ---- the wire: the server's struct shapes (protocol.py), byte for byte ---- */
+
+static void wire(void) {
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	/* ARENA !BBIH: a challenge of session 0x01020304 at 40 ms; latency clamped, a zero ref refused */
+	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40) == ONLINE_ARENA_BYTES);
+	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40 };
+	assert(!memcmp(m, challenge, sizeof challenge));
+	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999) && m[6] == 0x13 && m[7] == 0x88);
+	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 5, 1, 0) && !arena_wire_action(m, 0, 1, 0));
+	/* ARENA_STATE !BBII16sBB: START, match 7, the other 9, side 1, delay 8 */
+	uint8_t st[ONLINE_ARENA_STATE_BYTES] = { 18, 3, 0, 0, 0, 7, 0, 0, 0, 9 };
+	memset(st + 10, 0xAB, ONLINE_IDENTITY_BYTES);
+	st[26] = 1;
+	st[27] = 8;
+	ArenaWireState s;
+	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_START && s.match == 7 && s.other == 9);
+	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB);
+	assert(!arena_wire_state(st, sizeof st - 1, &s));
+	st[1] = 5;
+	assert(!arena_wire_state(st, sizeof st, &s));
+	/* ARENA_INPUT !BIIB + n u16: keys from frame 0x100 */
+	const uint16_t keys[3] = { 0x0001, 0x0210, 0x03FF };
+	assert(arena_wire_input(m, sizeof m, 7, 0x100, keys, 3) == 16);
+	static const uint8_t input[] = { 20, 0, 0, 0, 7, 0, 0, 1, 0, 3, 0, 1, 2, 0x10, 3, 0xFF };
+	assert(!memcmp(m, input, sizeof input));
+	uint32_t match, frame;
+	uint16_t back[ONLINE_ARENA_INPUT_MAX];
+	unsigned count;
+	assert(arena_wire_read_input(m, 16, &match, &frame, back, &count) && match == 7 && frame == 0x100 && count == 3 && back[2] == 0x3FF);
+	assert(!arena_wire_read_input(m, 15, &match, &frame, back, &count));
+	assert(!arena_wire_input(m, sizeof m, 7, 0, keys, 0) && !arena_wire_input(m, sizeof m, 7, 0, keys, ONLINE_ARENA_INPUT_MAX + 1));
+	/* ARENA_HASH !BIIQ */
+	assert(arena_wire_hash(m, 7, 59, 0x0123456789ABCDEFull) == 17 && m[0] == 21 && m[9] == 0x01 && m[16] == 0xEF);
+	uint64_t h;
+	assert(arena_wire_read_hash(m, 17, &match, &frame, &h) && match == 7 && frame == 59 && h == 0x0123456789ABCDEFull);
+	/* ARENA_LOADOUT !BIH + bytes */
+	const uint8_t bytes[3] = { 1, 0, 0 };
+	assert(arena_wire_loadout(m, sizeof m, 7, bytes, 2) == 9 && m[0] == 19 && m[5] == 0 && m[6] == 2);
+	const uint8_t *got;
+	size_t n;
+	assert(arena_wire_read_loadout(m, 9, &match, &got, &n) && match == 7 && n == 2 && got[0] == 1);
+	assert(!arena_wire_read_loadout(m, 10, &match, &got, &n) && !arena_wire_loadout(m, sizeof m, 7, bytes, ONLINE_ARENA_LOADOUT_MAX + 1));
+}
+
+/* A carried MegaMan's bytes: back as he went, the pack left home; the
+ * game's start's in two bytes; bytes not one refused */
+static void loadout_bytes(void) {
+	OnlineLoadout l = starter(), back;
+	l.board[3 * 8 + 5] = 0x77;
+	l.grid[30] = 4;
+	uint8_t b[ONLINE_ARENA_LOADOUT_MAX];
+	bool carried;
+	char why[128];
+	size_t n = arena_loadout_pack(&l, b, sizeof b);
+	assert(n && n <= ONLINE_ARENA_LOADOUT_MAX);
+	assert(arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && carried);
+	assert(!memcmp(back.folder, l.folder, sizeof l.folder) && !memcmp(back.board, l.board, sizeof l.board));
+	assert(!memcmp(back.grid, l.grid, sizeof l.grid) && back.max_hp == 400 && back.hp == 400 && back.base_hp == 300);
+	assert(back.attack == 2 && back.crosses == 5 && back.beast == 1 && back.tag[1] == 0xFF);
+	assert(back.pack[5][0] == 0);   /* (the pack stays home) */
+	/* the same bytes again from what came: both games install the same MegaMan */
+	uint8_t again[ONLINE_ARENA_LOADOUT_MAX];
+	assert(arena_loadout_pack(&back, again, sizeof again) == n && !memcmp(again, b, n));
+	assert(arena_loadout_pack(NULL, b, sizeof b) == 2 && arena_loadout_unpack(b, 2, &back, &carried, NULL, 0) && !carried);
+	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(!arena_loadout_unpack(b, n - 1, &back, &carried, why, sizeof why) && strstr(why, "size"));
+	b[0] = 2;
+	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "version"));
+	/* the receiver's refusals are the local ones */
+	l.souls = 2;
+	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(arena_loadout_unpack(b, n, &back, &carried, NULL, 0) && !arena_loadout_check(&back, why, sizeof why) && strstr(why, "Souls"));
+	/* a NaviCust past what the message holds does not go */
+	l = starter();
+	memset(l.board, 1, sizeof l.board);
+	assert(!arena_loadout_pack(&l, b, sizeof b));
+}
+
+/* ---- two network links back to back, through a relay that takes `latency` ticks ---- */
+
+#define PIPE 2048
+typedef struct {
+	uint8_t data[PIPE][ARENA_INPUT_HEAD + 2 * ONLINE_ARENA_INPUT_MAX];
+	size_t size[PIPE];
+	uint32_t at[PIPE];
+	unsigned head, tail;
+	uint32_t now, latency;
+	bool full;   /* (an outbox with no room) */
+} Pipe;
+
+static bool pipe_send(void *context, const uint8_t *data, size_t size) {
+	Pipe *p = context;
+	if (p->full || p->tail - p->head == PIPE || size > sizeof p->data[0]) return false;
+	unsigned i = p->tail++ % PIPE;
+	memcpy(p->data[i], data, size);
+	p->size[i] = size;
+	p->at[i] = p->now + p->latency;
+	return true;
+}
+
+static void pipe_deliver(Pipe *p, ArenaNetLink *to) {
+	while (p->head != p->tail && p->at[p->head % PIPE] <= p->now) {
+		unsigned i = p->head++ % PIPE;
+		assert(arena_link_net_take(to, p->data[i], p->size[i]));
+	}
+}
+
+/* one side's tick as arena_tick runs it: its keys for frame f are
+ * f * (side + 3); every frame run sees both sides', in order; true where
+ * it stalled */
+static bool side_tick(ArenaNetLink *net, ArenaInput *in, unsigned side, uint32_t t) {
+	ArenaLink *l = &net->link;
+	l->tick(l);
+	uint32_t frame = t + in->delay;
+	uint16_t mine = (uint16_t)(frame * (side + 3) & ARENA_KEYS_MASK);
+	assert(arena_input_put(in, side, frame, mine) == ARENA_PUT_OK && l->send(l, frame, mine));
+	uint16_t keys;
+	while (l->poll(l, in->known[side ^ 1], &keys)) assert(arena_input_put(in, side ^ 1, in->known[side ^ 1], keys) == ARENA_PUT_OK);
+	assert(!l->broken(l));
+	uint16_t frame_keys[ARENA_LOOKAHEAD][2];
+	bool stalled = in->next <= t && !arena_input_ready(in);
+	for (unsigned k = 0; k < 2 && in->next <= t && arena_input_take(in, frame_keys); ++k) {
+		uint32_t n = in->next - 1;
+		for (unsigned p = 0; p < 2; ++p) assert(frame_keys[0][p] == (n < in->delay ? 0 : (uint16_t)(n * (p + 3) & ARENA_KEYS_MASK)));
+		if (n % 60 == 59) l->send_hash(l, n, 0x5000 + n);
+		uint64_t theirs;
+		if (n >= 120 && n % 60 == 59 && l->poll_hash(l, n - 60, &theirs)) assert(theirs == 0x5000 + n - 60);
+	}
+	return stalled;
+}
+
+/* both sides from the ready's exchange; side 0's ticks stalled */
+static unsigned play_net(unsigned delay, unsigned latency, unsigned ticks) {
+	ArenaNetLink net[2];
+	Pipe *pipes = calloc(2, sizeof *pipes);   /* (pipes[i]: side i's messages to the other) */
+	ArenaInput in[2];
+	unsigned stalls = 0;
+	for (unsigned side = 0; side < 2; ++side) {
+		pipes[side].latency = latency;
+		arena_link_net(&net[side], 77, side, delay, pipe_send, &pipes[side]);
+		arena_input_init(&in[side], net[side].link.delay);
+		assert(arena_link_net_ready(&net[side], 0xFEED));
+	}
+	uint64_t h;
+	assert(!arena_link_net_peer_ready(&net[0], &h));
+	for (uint32_t t = 0; t < ticks; ++t)
+		for (unsigned side = 0; side < 2; ++side) {
+			pipes[0].now = pipes[1].now = t;
+			pipe_deliver(&pipes[side ^ 1], &net[side]);
+			if (t >= latency) assert(arena_link_net_peer_ready(&net[side], &h) && h == 0xFEED);
+			if (side_tick(&net[side], &in[side], side, t) && side == 0) ++stalls;
+		}
+	/* the battle over on side 0's: side 1 spends the keys come, then the link breaks, saying so */
+	ArenaLink *l1 = &net[1].link;
+	arena_link_net_ended(&net[1]);
+	for (unsigned t = 0; t < ARENA_NET_GRACE; ++t) { l1->tick(l1); assert(!l1->broken(l1)); }
+	l1->tick(l1);
+	assert(l1->broken(l1) && strstr(l1->broken(l1), "left"));
+	free(pipes);
+	return stalls;
+}
+
+static void link_net(void) {
+	/* a delay past the lookahead and the one way never waits; one short
+	 * of it waits */
+	assert(play_net(6, 2, 900) == 0);
+	assert(play_net(6, 3, 300) == 0);
+	assert(play_net(ARENA_DELAY_MIN + 1, 0, 300) == 0);   /* (side 1 sends after side 0 has run its tick) */
+	assert(play_net(4, 4, 600) > 0);
+	/* another battle's message, a gap */
+	ArenaNetLink l;
+	Pipe *p = calloc(1, sizeof *p);
+	arena_link_net(&l, 5, 1, 6, pipe_send, p);
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	uint16_t keys[2] = { 1, 2 };
+	size_t n = arena_wire_input(m, sizeof m, 9, 6, keys, 2);
+	assert(!arena_link_net_take(&l, m, n) && !l.link.broken(&l.link));
+	n = arena_wire_input(m, sizeof m, 5, 7, keys, 2);
+	assert(arena_link_net_take(&l, m, n) && strstr(l.link.broken(&l.link), "order"));
+	/* my keys: in order, once each, a frame a message */
+	arena_link_net(&l, 5, 0, 6, pipe_send, p);
+	assert(l.link.send(&l.link, 6, 1) && !l.link.send(&l.link, 6, 1) && !l.link.send(&l.link, 8, 1));
+	assert(p->tail == 1 && p->size[0] == ARENA_INPUT_HEAD + 2);
+	/* ... the outbox full: kept, and sent together once it has room */
+	p->full = true;
+	for (uint32_t f = 7; f < 10; ++f) assert(l.link.send(&l.link, f, (uint16_t)f) && !l.link.broken(&l.link));
+	p->full = false;
+	assert(l.link.send(&l.link, 10, 10) && p->tail == 2 && p->size[1] == ARENA_INPUT_HEAD + 8);
+	uint32_t match, frame;
+	unsigned count;
+	uint16_t got[ONLINE_ARENA_INPUT_MAX];
+	assert(arena_wire_read_input(p->data[1], p->size[1], &match, &frame, got, &count) && frame == 7 && count == 4 && got[3] == 10);
+	/* ... and full for as many frames as a message holds: broken */
+	p->full = true;
+	for (uint32_t f = 11; f < 11 + ONLINE_ARENA_INPUT_MAX; ++f) assert(l.link.send(&l.link, f, 0));
+	assert(strstr(l.link.broken(&l.link), "sent"));
+	/* the connection gone: broken at once */
+	arena_link_net(&l, 5, 0, 6, pipe_send, p);
+	arena_link_net_lost(&l, "gone");
+	assert(!strcmp(l.link.broken(&l.link), "gone"));
+	free(p);
+}
+
 int main(void) {
 	buffer();
 	link_latency();
 	check();
 	install();
+	wire();
+	loadout_bytes();
+	link_net();
 	puts("test_arena: ok");
 	return 0;
 }

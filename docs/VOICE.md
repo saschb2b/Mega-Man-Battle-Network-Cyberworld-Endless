@@ -343,6 +343,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The Net Square: MegaMan's menu, another player's card, the channel keeper | `src/online/square_words.c` |
 | Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
+| MegaMan on a Practice NetBattle in the Net Square: the challenge sent, the question a challenge asks, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
 
 ## Before you commit a line
 

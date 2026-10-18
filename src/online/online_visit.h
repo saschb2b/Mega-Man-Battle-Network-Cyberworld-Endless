@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "online_snapshot.h"
 #include "online_types.h"
 
 typedef enum {
@@ -41,6 +42,11 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 VisitStage online_visit_stage(void);
 static inline bool online_visit_active(void) { return online_visit_stage() != VISIT_HOME; }
 static inline bool online_visit_away(void) { return online_visit_stage() == VISIT_AWAY; }
+/* A NetBattle from the Square under way (square_arena.h): the game's core
+ * held still, a frame of the battle with the pad's keys in its place, and
+ * online_visit_draw draws the battle's picture alone */
+bool online_visit_held(void);
+void online_visit_held_frame(uint32_t keys);
 /* After each frame of the core while a visit is on. */
 void online_visit_update(void);
 uint32_t online_visit_keys(uint32_t keys);
@@ -62,5 +68,8 @@ const char *online_visit_news(void);
 void online_visit_news_again(const char *words);
 /* The public card of the MegaMan carried (once in the Square). */
 void online_visit_profile(OnlineProfile *out);
+/* The MegaMan carried, as read at the gate (the Arena's loadout); NULL
+ * where none was read */
+const OnlineLoadout *online_visit_loadout(void);
 
 #endif

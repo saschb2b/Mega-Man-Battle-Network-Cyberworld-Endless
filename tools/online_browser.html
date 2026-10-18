@@ -12,7 +12,7 @@ pre { white-space: pre-wrap; font-size: 12px; }
 <label>Server <input id="endpoint" value="ws://127.0.0.1:8765/presence"></label>
 <label>Name <input id="name" value="Browser" maxlength="16"></label>
 <label>BN6 Gregar USA ROM <input id="rom" type="file" accept=".gba"></label>
-<button id="start" disabled>Connect and walk the test route</button>
+<button id="start" disabled>Start a run and step onto the gate</button>
 <p id="status" role="status">Loading the game build…</p>
 <canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Game"></canvas>
 <pre id="log"></pre>
@@ -36,10 +36,13 @@ startButton.onclick = async () => {
     try {
         Module.FS.mkdir('/rom'); Module.FS.mkdir('/visit');
         Module.FS.writeFile('/rom/bn6.gba', new Uint8Array(await file.arrayBuffer()));
-        statusLine.textContent = 'Running isolated test route. Reload to start another visit.';
+        statusLine.textContent = 'In the Net Square once the gate connects. Reload to start another visit.';
+        // (a run at home, through the gate's questions onto the gate, the
+        // server and name given by --dev: docs/ONLINE.md, Two games at once)
+        const dev = 'quiet,online=' + document.getElementById('endpoint').value + ',onlinename=' + document.getElementById('name').value;
         Module.callMain(['--rom-dir', '/rom', '--data-dir', '/visit', '--window', '--size', '720x480',
-            '--online', document.getElementById('endpoint').value, '--online-name', document.getElementById('name').value,
-            '--input', '180:,30:UP,45:,30:DOWN,45:,24:LEFT,45:,24:RIGHT,220:']);
+            '--scene', 'home', '--run-depth', '7', '--seed', '3', '--dev', dev,
+            '--input', '450:,4:A,60:,4:A,60:,4:A,60:,4:A,60:,1:place 16 72 3,120:,4:LEFT,30:,4:A,300:']);
     } catch (error) { statusLine.textContent = String(error); }
 };
 </script>

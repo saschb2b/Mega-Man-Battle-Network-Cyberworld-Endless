@@ -147,6 +147,8 @@ static bool soft_reset(void) {
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
+	/* (a NetBattle from the Net Square: the game's core holds still under it) */
+	if (online_visit_held()) { online_visit_held_frame(keys_from_buttons()); return; }
 	/* (the run's time: the statistics' minutes, save.h) */
 	if (!online_visit_away()) profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's
@@ -194,6 +196,7 @@ static void draw(void) {
 	emu_drawing = true;   /* (until the next update: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	if (!emu_ready()) return;
+	if (online_visit_held()) { online_visit_draw(); return; }
 	/* (on the 3DS in the canvas's order, so the copy onto it converts
 	 * nothing: mGBA's red and blue swapped here, where a computer's GPU
 	 * converts them) */

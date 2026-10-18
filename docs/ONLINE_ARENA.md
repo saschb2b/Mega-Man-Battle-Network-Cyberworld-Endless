@@ -1,4 +1,4 @@
-# The Arena's local engine
+# The Arena
 
 The Arena (epic #120) is a NetBattle of BN6's own between two players.
 Each client runs **both** linked BN6 cores, joined by mGBA's own cable
@@ -8,10 +8,12 @@ raw serial over a network stalls ([ONLINE_LINK.md](ONLINE_LINK.md)), while
 keys sent ahead by a few frames let BN6's Practice NetBattle finish
 identically at 0 to 150 ms one way.
 
-This page is the engine's first half: the pair, the way in, a carried
-MegaMan, lockstep play over a link with a local stand-in for the peer,
-and `--dev arena`. The network's link comes next, written against
-`ArenaLink` (below), over the presence server.
+This page is the engine (the pair, the way in, a carried MegaMan,
+lockstep play over a link, `--dev arena` with a local stand-in for the
+peer) and its network half: the link over the presence server, and the
+way in from the Net Square, where one player's MegaMan asks another's for
+a Practice NetBattle in BN6's own chat boxes ([From the Net
+Square](#from-the-net-square), below).
 
 ## Run it
 
@@ -41,6 +43,10 @@ goes back to the title; the log says each step (`arena:` lines).
 | The link | `src/online/arena_link.h`, `arena_link_local.c` | The interface below; the local stand-in |
 | The engine | `src/online/arena.c` | The way in, then the battle in lockstep, the hashes compared, the end |
 | The scene | `src/online/arena_scene.c`, `arena_text.c` | `--dev arena`'s scene, its words |
+| The picture | `src/online/arena_view.c` | My core's picture, the notes over it, the way in's bar and its slices at the frame's pace; both scenes' |
+| The wire | `src/online/arena_wire.c` | ARENA and its four messages packed and read as the server's `protocol.py` packs them; a carried MegaMan as bytes |
+| The network's link | `src/online/arena_link_net.c` | `ArenaLink` over the transport's fast outbox: keys, hashes, the ready, the peer's end |
+| From the Square | `src/online/square_arena.c`, `arena_words.c`, `online_mail.c` | The challenge, its question and answer, the battle with the Square's core held, the word after; MegaMan's lines; the inbox handed out by kind |
 
 ### Lockstep
 
@@ -106,11 +112,92 @@ carried (`arena: side 0: HP 300 ...` with `arenahp=300`), and the battle's
 picture showed 300 HP against the second player's 100. The pictures stay
 in `.build/`.
 
+## From the Net Square
+
+Facing another player's MegaMan, A reads his card and then offers
+`Battle`, `Wave` and `More...`, the second box `Mute`, `Block` and `Back`
+(three to a box, as BN6's chat box holds them). Battle sends ARENA's
+challenge and MegaMan says "Let's see if NAME takes us on!". The server
+answers the challenger WAITING and the other player CHALLENGED; his
+MegaMan asks, once no chat is open: "NAME's MegaMan wants a Practice
+NetBattle!", then "Take it,Lan?" with the cursor on No. Yes accepts; No,
+B, or a challenge from a player he has blocked declines (the challenger's
+MegaMan: "Aw... No NetBattle this time."). A MegaMan plain BN6 cannot
+carry (Souls, another game's chips, a NaviCust past what a message
+holds) does not go: MegaMan says so and no challenge or acceptance is
+sent. The 3DS and the browser build, which compile the Arena out
+(`CW_ARENA`), never offer Battle and decline a challenge.
+
+START gives each game its side of the cable (the challenger's 0) and the
+input delay. Each sends its MegaMan (ARENA_LOADOUT: the first folder, the
+NaviCust's placed programs and grid, max and base HP, the buster,
+Regular and TagChips, Crosses, Souls and Beast Out; the pack stays home)
+and builds the pair from both, its own as the other reads it, so that the
+two pairs are the same byte for byte; the other's is checked with the
+local refusals. The Square's core holds still meanwhile (the scene runs
+the battle's frames in its place: `online_visit_held`), its connection
+kept, MegaMan standing where he stood on the server's view.
+
+After the way in each game says it is ready with the pair's hash at the
+Custom screen (ARENA_HASH at frame 0xFFFFFFFF), and starts its ticks when
+the other's has come, so both start within the link's one way; a
+different hash there stops both before the first frame. My keys go a
+frame a message as each tick samples them (two frames a message, tried
+first, left the earlier side waiting half its ticks at a delay of 6:
+`ARENA_NET_FLUSH`); where the transport's outbox is full they wait and go
+together, eight a message at most, and a ninth breaks the link. The
+pair's hash every 60 frames goes too, and a difference stops the battle
+on both games with a plain word on the picture ("The NetBattle stopped:
+the two games went apart by frame N") and MegaMan's after it ("Whoa! The
+NetBattle broke off!").
+
+The battle's end is the cable's first's to tell the server (ARENA over),
+after its last keys; as is a stop both games see (the hashes apart),
+lest the server answer the second with a notice that the battle is over.
+A stop of one game alone (a link broken, the cable stuck, the reset
+chord: back to the gate) leaves it. The server's ENDED to the other
+game: its link spends the keys already come, the battle over on the same
+frame there as here, and breaks after `ARENA_NET_GRACE` ticks
+("the other player left the NetBattle"; MegaMan: "Huh? They're gone...").
+The connection lost breaks it at once. The result shows on the picture
+(A or B after half a second, or five seconds, goes back), then MegaMan
+says it in the Square where he stood ("Alright! We won,Lan!!", "Ugh...
+They got us." and "Next time,Lan!").
+
+### The two-client proof
+
+Two host binaries on this machine (`SDL_VIDEODRIVER=dummy
+SDL_AUDIODRIVER=dummy`), each with its own `--data-dir` and a
+`network.ini` naming a local server (`python3 server/build.py`, then
+`build/server/cyberworld-server.pyz --config` with a free port and its
+`state_dir` under `.build/`), BN6 alone in `--rom-dir`, `--scene home
+--run-depth 7 --seed 3 --dev quiet,arenahp=40` (`arenahp=N` makes each
+carried MegaMan's max HP N, so the battle is short). Beta starts first
+(session 1, arriving at -24,364), Alpha a second later; after the gate's
+steps Alpha is put beside Beta (`place -8 364 5`), reads his card (A
+three times) and picks Battle (A); Beta, 635 frames on, presses A, LEFT
+(to Yes: the question's options lie side by side) and A. Both then press
+RIGHT five times and A six times over (the Custom screen's OK) and fire
+charged shots (B held 110 frames). The harness stays in `.build/`.
+
+18 October 2026, the player's Gregar ROM, delay 6 (the server's least):
+
+| Run | Way in | Ready | Battle | Stalls (side 0 / 1) | Hashes | Result |
+| --- | --- | --- | --- | --- | --- | --- |
+| Two keys a message | 1,817 frames on both | the same hash `fd2fa7d630cf9080` on both | over at frame 1,271 | 636 / 0 | 21 agreed | 2 and 1 (Beta won) |
+| A key a message | the same | the same | over at frame 1,270 | 2 / 0 | 21 | 2 and 1 |
+| The same, three pairs of games at once | the same | the same | over at frame 1,070 | 0 / 131 | 17 | 2 and 1 |
+| `arenadesync=300` on Beta (Alpha's keys from frame 300 changed there) | the same | the same | stopped on both: apart by frame 359 (299 agreed) | | 5 | the stop's note, then MegaMan's word |
+| Alpha's reset chord mid-battle | the same | the same | Beta stopped at frame 309: the other player left | | | Alpha at the gate ("We're home,Lan!"), Beta in the Square ("Huh? They're gone...") |
+
+Both games printed the same hashes at every 60th frame. The two
+processes' wall clocks put their battles' start within 20 ms and their
+ends within 40 ms of each other (15 s of battle). Back in the Square,
+both MegaMen stood where they had stood, the loser's word and the
+winner's in their chat boxes.
+
 ## Not yet
 
-- The network's `ArenaLink`, the side and delay agreed between clients,
-  and the hashes compared across machines (here the local link echoes
-  them).
 - The battle's sound: the scene plays the player's core only where the
   game's own core has made its sound ring (`arena_pair_sound`).
 - The NaviCust's programs are written as the board; BN6 makes HP from
@@ -119,7 +206,12 @@ in `.build/`.
   are not yet checked one by one.
 - After the battle the engine stops once both cores have left it; the
   game's own way back to the Comm menu is not shown.
-- Rollback, rematches, Battle (not Practice) and its chip forfeit, forms
-  and Souls (refused), and any platform but the desktops: the 3DS and the
+- Over a real network: the server's delay is 3 frames, the one way
+  and 2 more (6 at least); a phase of up to a tick between the two
+  games' clocks comes out of that margin, and stalls show on the
+  picture after 20 ticks ("Waiting for the other PET").
+- A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
+  Practice) and its chip forfeit, forms and Souls (refused), the pack
+  (it stays home), and any platform but the desktops: the 3DS and the
   browser build compile the Arena out (`CW_ARENA`), Android and iOS build
   it but are untried.

@@ -384,6 +384,12 @@ whose keys come over a local link held back as a network's would be;
 link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
 says what runs, how to script a battle headless and what it measured.
 
+A battle from the Net Square between two games takes `arenahp=N` too
+(each game's own MegaMan, so both pairs stay the same), and
+`arenadesync=N` changes the other player's keys from frame N for a
+second on this game alone: the hashes' stop seen on both
+([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof).
+
 ## Dev menu: shorter test runs
 
 Hold **Select** and press **R**, in battle or on the net. The game holds still
