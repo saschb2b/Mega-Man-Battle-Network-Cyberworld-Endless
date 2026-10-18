@@ -12,7 +12,6 @@
 #include <sys/stat.h>
 
 #include "backup_internal.h"
-#include "online_trade_gate.h"
 #include "compat.h"
 #include "save_queue.h"
 
@@ -56,7 +55,7 @@ bool backup_write_file(const char *path, const uint8_t *bytes, size_t n) {
 bool backup_progress_name(const char *name) {
 	static const char *const names[] = {
 		"profile.sav", "rivals.sav", "battle.sav", "run.sav", "run.state", "run.make", "run.area",
-		"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board", "run.trade"
+		"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board"
 	};
 	if (strncmp(name, "savedata/", 9)) return false;
 	for (size_t i = 0; i < sizeof names / sizeof *names; ++i)
@@ -162,7 +161,6 @@ static bool finish(Pack *p, uint64_t stamp) {
 }
 
 uint8_t *backup_pack(const char *data_dir, uint64_t stamp, size_t *n) {
-	if (!online_trade_gate_transfer(data_dir)) return NULL;
 	save_queue_wait();   /* (the files a checkpoint queued, all written) */
 	Pack p = { .ok = true };
 	if (!grow(&p, BACKUP_HEAD)) return NULL;

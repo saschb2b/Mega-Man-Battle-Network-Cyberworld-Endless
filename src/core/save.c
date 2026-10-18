@@ -11,7 +11,6 @@
 #include "backup.h"
 #include "game.h"
 #include "loot.h"
-#include "online_trade_gate.h"
 #include "platform.h"
 #include "run.h"
 #include "save_blob.h"
@@ -43,14 +42,14 @@ static uint32_t checksum(const void *p, size_t n) {
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n) {
 	/* (the saves beside a missing savedata/, not put back: no fresh one
 	 * over them, backup.h) */
-	if (backup_blocked() || !online_trade_gate_playable()) { save_write_failed(); return false; }
+	if (backup_blocked()) return false;
 	char dir[600], file[600];
 	snprintf(dir, sizeof dir, "%s/savedata", g_data_dir);
 	cw_mkdir(dir);
 	save_path(file, sizeof file, name);
 	uint32_t hdr[3] = { magic, (uint32_t)n, checksum(data, n) };
 	uint8_t *bytes = malloc(sizeof hdr + n);
-	if (!bytes) { save_write_failed(); return false; }
+	if (!bytes) return false;
 	memcpy(bytes, hdr, sizeof hdr);
 	memcpy(bytes + sizeof hdr, data, n);
 	bool ok = save_queue_file(file, bytes, sizeof hdr + n);
@@ -64,7 +63,6 @@ bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t 
 }
 
 static bool read_blob(const char *name, uint32_t magic, void *data, size_t n, bool upto) {
-	if (backup_blocked() || !online_trade_gate_read(name)) return false;
 	char file[600];
 	save_queue_wait();
 	save_path(file, sizeof file, name);
@@ -86,7 +84,8 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
 void save_init(void) {
-	if (backup_recover(g_data_dir)) legacy_move_state();
+	backup_recover(g_data_dir);
+	legacy_move_state();
 	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
 	if (!profile.music_volume) profile.music_volume = 9;
 	if (!profile.sfx_volume) profile.sfx_volume = 9;
@@ -94,7 +93,6 @@ void save_init(void) {
 }
 
 bool save_exists(void) {
-	if (!online_trade_gate_read("run.sav") || backup_blocked()) return false;
 	Run tmp;
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) return true;
 	Run keep = run;
@@ -113,25 +111,7 @@ bool save_run(void) {
 	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
-bool save_checkpoint_begin(unsigned *failures_before) {
-	if (!failures_before || backup_blocked() || !online_trade_gate_playable()) { save_write_failed(); return false; }
-	*failures_before = save_write_failures();
-	/* The first complete checkpoint includes the current permanent
-	 * profile even if an earlier new-run profile write failed. */
-	if (online_trade_gate_state() == TRADE_GATE_NEW_RUN) profile_save();
-	return true;
-}
-
-bool save_checkpoint_end(unsigned failures_before) {
-	if (online_trade_gate_state() != TRADE_GATE_NEW_RUN) return true;
-	save_queue_wait();
-	bool ok = online_trade_gate_checkpoint(save_write_failures() == failures_before);
-	if (!ok) save_write_failed();
-	return ok;
-}
-
 bool peek_run(Run *out) {
-	if (!online_trade_gate_read("run.sav") || backup_blocked()) return false;
 	if (save_read_blob("run.sav", RUN_MAGIC, out, sizeof *out) && out->active) return true;
 	/* (an older format's, as CONTINUE would load it) */
 	Run keep = run;
@@ -155,7 +135,6 @@ static void load_battle(void) {
 }
 
 bool load_run(void) {
-	if (!online_trade_gate_read("run.sav") || backup_blocked()) return false;
 	Run tmp;
 	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); return true; }
 	if (!legacy_load_run()) return false;
@@ -165,28 +144,14 @@ bool load_run(void) {
 }
 
 void save_delete(void) {
+	char file[600];
 	save_queue_wait();   /* (a write still queued would bring the run back) */
-	if (!online_trade_gate_playable() || backup_blocked()) return;
-	if (!online_trade_gate_end_run()) save_write_failed();
-}
-
-bool save_can_visit(void) { return !backup_blocked() && online_trade_gate_transfer(g_data_dir); }
-bool save_playable(void) { return !backup_blocked() && online_trade_gate_playable(); }
-
-static bool new_run_previous;
-
-bool save_new_run_ready(void) {
-	save_queue_wait();
-	bool previous = save_exists();
-	if (backup_blocked() || !online_trade_gate_new_run(run.seed)) return false;
-	new_run_previous = previous;
-	return true;
-}
-
-bool save_abandon_previous(void) {
-	save_queue_wait();
-	if (backup_blocked() || !online_trade_gate_abandon_previous()) save_write_failed();
-	return new_run_previous;
+	save_path(file, sizeof file, "run.sav");
+	remove(file);
+	save_path(file, sizeof file, "battle.sav");
+	remove(file);
+	save_state_path(file, sizeof file);
+	remove(file);
 }
 
 void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }
@@ -212,10 +177,7 @@ int profile_codes_entered(void) {
 	return n;
 }
 
-bool run_new_varied(uint32_t seed) {
-	if (!online_trade_gate_playable() || backup_blocked()) return false;
-	save_queue_wait();
-	Run prior = run;
+void run_new_varied(uint32_t seed) {
 	run_new(seed);
 	/* (one retry left the same guardian a time in three: DiveMan guarded
 	 * two new runs running; and the same area: a playtester began in the
@@ -235,13 +197,11 @@ bool run_new_varied(uint32_t seed) {
 		first = run.boss_order[run.biome_order[0]];
 		area = run.biome_order[0];
 	}
-	if (!save_new_run_ready()) { run = prior; return false; }
 	profile.guardian_before = profile.first_guardian;
 	profile.area_before = profile.first_area;
 	profile.first_guardian = (uint8_t)(first + 1);
 	profile.first_area = (uint8_t)(area + 1);
 	profile_save();
-	return true;
 }
 
 void profile_record_run(void) {

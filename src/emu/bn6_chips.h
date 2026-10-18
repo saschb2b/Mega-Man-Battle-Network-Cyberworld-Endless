@@ -92,16 +92,9 @@
 #define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
-/* Original inventory operations; native Trade completion remains unproven. */
-#define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
-#define BN6_TAKE_CHIPS        0x08021B93u /* remove (chip, code, count); returned through original CPU in trade routine proof */
-#define BN6_TRADE_APPLY       0x0812EB89u /* original chip Trade completion caller; located, full exchange not yet reached */
-
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
-#define BN6_PACK_ORDER        4           /* four u16 acquisition stamps, one per code slot */
-#define BN6_CHIP_ORDER_COUNTER 0x020065B4u /* u16 next acquisition stamp; original Give copies then decrements it */
 #define BN6_PACK_EXT          0x02010CE0u /* the pack's extension, ids BN6_PACK_IDS-511, 12 bytes each to 0x020115E0: EWRAM BN6 leaves alone (docs/EMULATION.md) */
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
@@ -124,14 +117,6 @@
 #define BN6_PA_LIST_REF       0x080295B4u /* ... its one word (loaded at 0x08029556; the link battles' list, 0x0802BC60, its own word 0x080295B8) */
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
-/* All folder copies are included in map-side Pack counts, including the
- * borrowed ExtraFolder. The native editor removes every folder's copies
- * while open; tools/online_trade_proof.py verifies this on Gregar. */
-#define BN6_FOLDERS_MAX       3
-#define BN6_FOLDER_COUNT_FIELD 0x05       /* byte in the structure at BN6_TOOLKIT_STEPS; valid folder slots, 1-3 */
-#define BN6_FOLDER_KINDS      0x020018ECu /* high nibble per slot: 0 first editable, 1 second editable, 2 borrowed Extra */
-#define BN6_FOLDER_NAMES      0x02001850u /* three runtime names; the native GiveFolder initializes an Extra's name */
-#define BN6_FOLDER_NAME_BYTES 32          /* bytes reserved for each runtime folder name */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
 
 #endif

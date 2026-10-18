@@ -7,9 +7,8 @@
 #include <stdint.h>
 #include <SDL.h>
 
-#include "online_negotiation.h"
 
-bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *selection, char *error, size_t size);
+bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t size);
 bool online_socket_send(const uint8_t *data, size_t size);
 /* 0: no complete message yet; >0: message bytes; -1: disconnected/error. */
 int online_socket_receive(uint8_t *data, size_t size);

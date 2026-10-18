@@ -11,7 +11,6 @@ static struct {
 	EMSCRIPTEN_WEBSOCKET_T socket;
 	OnlineBrowserMessage received;
 	OnlineBrowserClosed closed;
-	OnlineNegotiation *selection;
 	uint8_t hello[52 + ONLINE_NAME_BYTES];
 	size_t hello_size;
 } browser;
@@ -30,7 +29,7 @@ static bool opened(int type, const EmscriptenWebSocketOpenEvent *event, void *us
 	if (event->socket != browser.socket) return true;
 	char protocol[64];
 	if (emscripten_websocket_get_protocol(browser.socket, protocol, sizeof protocol) != EMSCRIPTEN_RESULT_SUCCESS ||
-	    !online_negotiation_accept(browser.selection, protocol) || !online_browser_send(browser.hello, browser.hello_size)) browser.closed();
+	    strcmp(protocol, ONLINE_SUBPROTOCOL) || !online_browser_send(browser.hello, browser.hello_size)) browser.closed();
 	return true;
 }
 
@@ -55,17 +54,16 @@ static bool failed(int type, const EmscriptenWebSocketErrorEvent *event, void *u
 }
 
 bool online_browser_open(const char *url, const uint8_t *hello, size_t size,
-                         OnlineBrowserMessage on_message, OnlineBrowserClosed on_close, OnlineNegotiation *selection) {
+                         OnlineBrowserMessage on_message, OnlineBrowserClosed on_close) {
 	if (!emscripten_websocket_is_supported() || size > sizeof browser.hello) return false;
 	if (strncmp(url, "ws://", 5) && strncmp(url, "wss://", 6)) return false;
-	EmscriptenWebSocketCreateAttributes attributes = { .url = url, .protocols = online_negotiation_offer(selection), .createOnMainThread = true };
+	EmscriptenWebSocketCreateAttributes attributes = { .url = url, .protocols = ONLINE_SUBPROTOCOL, .createOnMainThread = true };
 	browser.socket = emscripten_websocket_new(&attributes);
 	if (browser.socket <= 0) { browser.socket = 0; return false; }
 	memcpy(browser.hello, hello, size);
 	browser.hello_size = size;
 	browser.received = on_message;
 	browser.closed = on_close;
-	browser.selection = selection;
 	emscripten_websocket_set_onopen_callback(browser.socket, NULL, opened);
 	emscripten_websocket_set_onmessage_callback(browser.socket, NULL, received);
 	emscripten_websocket_set_onerror_callback(browser.socket, NULL, failed);

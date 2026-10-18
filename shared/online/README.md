@@ -5,9 +5,6 @@ the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
 `/presence` with subprotocol `cyberworld.presence.v2`.
-The optional [trade subprotocol](TRADE.md#compatible-negotiation) adds
-explicitly negotiated messages while preserving these exact v2 layouts.
-Plain v2 connections never receive that extension.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |

@@ -4,7 +4,6 @@
 #include "compat.h"
 #include "platform.h"
 #include "save_queue.h"
-#include "online_trade_gate.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -371,7 +370,6 @@ static const char *vf_path(const char *path) {
 }
 
 bool emu_save_state(const char *path) {
-	if (!online_trade_gate_write(path)) return false;
 	wait_frame();
 	if (!core) return false;
 	/* written beside, then renamed over: a power cut keeps the old state */
@@ -397,7 +395,6 @@ bool emu_save_state(const char *path) {
  * written at once instead, as emu_save_state writes */
 #define STATE_EXTRA (160u * 1024u)   /* (past the core's state: its extdata, the game's flash save the largest) */
 bool emu_save_state_queued(const char *path) {
-	if (!online_trade_gate_write(path)) return false;
 	static size_t room;
 	wait_frame();
 	if (!core) return false;
@@ -421,7 +418,6 @@ bool emu_save_state_queued(const char *path) {
 }
 
 bool emu_load_state(const char *path) {
-	if (!online_trade_gate_load(path)) return false;
 	save_queue_wait();
 	wait_frame();
 	if (!core) return false;

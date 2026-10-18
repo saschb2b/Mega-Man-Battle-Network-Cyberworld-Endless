@@ -212,30 +212,6 @@ authorities require an explicit root-bundle update, never a validation bypass.
 See [the Phase 0 proof](../docs/ONLINE.md) and
 [the wire format](../shared/online/README.md).
 
-## Trade development checks
-
-Trading remains disabled in the public presence service and its configuration.
-The `trade_endpoint.py` adapter connects authenticated socket sessions
-to the durable coordinator only after explicit WebSocket subprotocol
-negotiation. The service API can attach it for integration testing; the
-default command line does not enable it. It sends a
-decision only after storage returns, keeps notification batches in order,
-and delivers each batch concurrently so one slow reader does not delay
-every other recipient. Connection cleanup settles an outstanding database
-write even when shutdown cancels the handler.
-
-`python3 build.py server-test` includes real socket cases for both
-confirmations, lost commit delivery, either reconnect order after restart,
-duplicate acknowledgements, changed channels, private participant checks,
-malformed messages and interrupted cleanup. A separate case verifies that
-the unmodified presence service still rejects trade messages. Old clients
-receive only v2 presence on an equipped server; a new client's protocol
-offer remains compatible with a presence-only server. Disabling new
-trades still permits pending decision recovery. These tests exercise the
-negotiated service attachment; client recovery and two-game checkpoint installation remain required before
-enabling the feature. [The transaction contract](../docs/ONLINE_TRADE.md)
-records that boundary and the storage evidence.
-
 ## Release packaging
 
 The release workflow builds six ROM-free server archives beside the game:

@@ -1126,9 +1126,6 @@ HP_PAGED = '600:,' + '6:A,94:,' * 6
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
 SIG_PAGED = '150:,' + '4:A,6:,' * 30 + '0:sig,'
 SCREENSHOTS = [
-    # Isolated trade presentation, visibly labelled; public trading stays off.
-    ('network-trade-review', [], [(300, 'network-trade-review')], {}),
-    ('network-trade-recovery', [], [(300, 'network-trade-recovery')], {}),
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
     # marks a profile can earn: a won short net, the endless Nest, the
@@ -1543,10 +1540,7 @@ def screenshots(only=None):
                 return code
             home = SAVES_HOME
             mounts = mounts + [(os.path.join(tmp, 'home'), SAVES_HOME)]
-        capture = ['build/host/cyberworld']
-        if name in ('network-trade-review', 'network-trade-recovery'):
-            capture = ['python3', 'tools/online_trade_panel_capture.py', '0' if name.endswith('review') else '4']
-        code = docker(*capture, '--headless', '--rom-dir', '/rom', '--data-dir', data,
+        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
                       *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
                       mounts=mounts, env=[('HOME', home)] if rom_screen or saves else ())
         for k, v in saved.items():
@@ -2054,7 +2048,7 @@ def lint_dead(update):
         links[target] = run.stdout
     ensure_image()
     test_bins = ' '.join('build/lint/' + name for name in
-                         ('test_core', 'test_emu', 'test_online_trade_capture', 'test_online_trade_stage', 'test_online_transport'))
+                         ('test_core', 'test_emu', 'test_online_transport'))
     test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                           ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
                            'sh', '-c', f'rm -f {test_bins} && '
@@ -2346,10 +2340,6 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_replay_compare.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_carried_compare.py')])
-        if code == 0:
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_trade_compare.py')])
-        if code == 0:
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_trade_stage_compare.py')])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)

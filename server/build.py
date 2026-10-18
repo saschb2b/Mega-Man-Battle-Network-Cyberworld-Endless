@@ -26,7 +26,6 @@ def build(output):
             for source in sorted((root / "server/cyberworld_server").glob("*.py")):
                 zip_entry(archive, "cyberworld_server/" + source.name, source.read_text(encoding="utf-8").encode())
             zip_entry(archive, "cyberworld_server/protocol.json", (root / "shared/online/protocol.json").read_bytes())
-            zip_entry(archive, "cyberworld_server/trade.json", (root / "shared/online/trade.json").read_bytes())
             zip_entry(archive, "LICENSE", (root / "LICENSE").read_bytes())
     output.chmod(0o755)
     for source in (root / "LICENSE", root / "server/README.md", root / "server/server.example.ini"):

@@ -9,11 +9,13 @@ RomLayout menu_pal
 RomLayout navicust_programs
 RomLayout text_pal
 RomLayout text_tiles
+bn6.h BN6_BATTLE_RESULT
 bn6.h BN6_CHAT_RUN_SCRIPT
 bn6.h BN6_DIALOGUE_LOCK
 bn6.h BN6_EVENT_FLAGS
 bn6.h BN6_FLAG_DIALOGUE_1719
 bn6.h BN6_FLAG_PLAYER_CAN_MOVE
+bn6.h BN6_GIVE_CHIPS
 bn6.h BN6_SAVE_GAME
 bn6.h BN6_TAKE_BUGFRAGS
 bn6.h BN6_TRADER_PRIZE

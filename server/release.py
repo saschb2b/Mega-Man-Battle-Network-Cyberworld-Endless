@@ -27,7 +27,6 @@ def native(work):
             "--name", name, "--distpath", str(work / "dist"), "--workpath", str(work / "work"),
             "--specpath", str(work), "--paths", str(ROOT / "server"),
             "--add-data", str(ROOT / "shared/online/protocol.json") + ":cyberworld_server",
-            "--add-data", str(ROOT / "shared/online/trade.json") + ":cyberworld_server",
             str(ROOT / "server/main.py")]
     environment = dict(os.environ, PYTHONHASHSEED="0", SOURCE_DATE_EPOCH="315532800",
                        PYINSTALLER_CONFIG_DIR=str(work / "cache"))

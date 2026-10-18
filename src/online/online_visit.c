@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "backup.h"
 #include "boot.h"
 #include "cinema.h"
 #include "director.h"
@@ -11,7 +12,6 @@
 #include "game_hooks.h"
 #include "loot.h"
 #include "navicust.h"
-#include "online_capture.h"
 #include "online_fresh.h"
 #include "online_scene.h"
 #include "online_transport.h"
@@ -45,7 +45,7 @@ static bool begin_error(char *error, size_t cap, const char *message) {
 
 bool online_visit_begin(const char *url, const char *name, const uint8_t identity[16], char *error, size_t cap) {
 	if (visit.active || visit.returning) return visit_error(error, cap, online_visit_open);
-	if (!save_can_visit()) return visit_error(error, cap, online_visit_recovery);
+	if (backup_blocked()) return visit_error(error, cap, online_visit_recovery);
 	emu_sync();
 	save_queue_wait();
 	visit.before = run;
@@ -137,7 +137,6 @@ bool online_visit_prepare(char *error, size_t cap) {
 	if (!ok || !online_snapshot_read(&visit.loadout, visit.checkpoint ? souls_held() : 0))
 		return visit_error(error, cap, online_visit_checkpoint_failed);
 	visit.ready = true;
-	online_capture_loadout(&visit.loadout, visit.checkpoint);
 	fprintf(stderr, "online: carried checkpoint=%s depth=%d hp=%u max_hp=%u souls=%u\n",
 		visit.checkpoint ? "yes" : "no", visit.checkpoint ? visit.saved.depth : 0,
 		visit.loadout.hp, visit.loadout.max_hp, visit.loadout.souls);

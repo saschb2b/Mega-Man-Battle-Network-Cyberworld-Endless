@@ -208,22 +208,13 @@ clean:
 # ROM-free unit tests (host only), with the address and undefined-behaviour
 # sanitizers
 TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
-TRADE_STORAGE_SRCS := src/online/online_trade_admit.c src/online/online_trade_gate.c src/online/online_trade_identity.c \
-	src/online/online_trade_history.c src/online/online_trade_journal.c src/online/online_trade_files.c \
-	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c src/online/network_identity.c
 TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c \
 	src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xchips_bn5.c src/emu/soulcode_bn5.c \
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c \
-	src/analytics/analytics.c src/analytics/analytics_text.c \
-	tests/test_online_trade_inventory.c src/online/online_trade_inventory.c \
-	tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c \
-	tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_trade_inbox.c src/online/online_negotiation.c src/online/online_wire.c \
-	tests/test_online_trade_authority.c src/online/online_trade_authority.c \
-	tests/test_online_trade_identity.c src/online/online_trade_identity.c src/online/online_trade_admit.c src/online/online_trade_gate.c src/online/network_identity.c \
-	tests/test_online_trade_journal.c src/online/online_trade_record.c src/online/online_trade_files.c src/online/online_trade_journal.c src/online/online_trade_history.c
+	src/analytics/analytics.c src/analytics/analytics_text.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -239,34 +230,33 @@ build/host/test_core: $(TEST_OBJS)
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c tests/test_online_trade_io.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c $(TRADE_STORAGE_SRCS)
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) tests/test_online_trade_io.h src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h src/online/*.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
 	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -Isrc/online -Ishared/online -isystem $(MGBA)/include \
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
 
-TRADE_RECORD_SRCS := $(TRADE_STORAGE_SRCS)
 TEST_TRANSFER_SRCS := tests/test_transfer.c src/launcher/mirror.c src/launcher/pick_saves.c src/launcher/pick_none.c src/launcher/pick_text.c \
-	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
 build/host/test_transfer: $(TEST_TRANSFER_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_DISCOVERY_SRCS := tests/test_discovery.c src/launcher/mirror.c src/launcher/pick_saves.c \
-	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
+	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
 build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE -DCW_DESKTOP $(if $(WERROR),-Werror) \
-		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
-	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c $(TRADE_RECORD_SRCS)
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
 build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
+		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 # Only the ROM-free comparators are retained from tiles.c in this test.
 build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h
@@ -289,12 +279,6 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
 
-TRADE_INVENTORY_TEST_SRCS := tests/test_online_trade_inventory.c src/online/online_trade_inventory.c
-build/host/test_online_trade_inventory: $(TRADE_INVENTORY_TEST_SRCS) src/online/online_trade_inventory.h src/online/online_snapshot.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		-DCW_TRADE_INVENTORY_TEST_MAIN $(addprefix -I,$(SRC_DIRS)) -o $@ $(TRADE_INVENTORY_TEST_SRCS)
-
 LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
 build/host/test_legacy: $(LEGACY_TEST_SRCS)
 	@mkdir -p build/host
@@ -311,11 +295,7 @@ build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_f
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_online_trade_stage build/host/test_online_trade_identity build/host/test_online_trade_journal build/host/test_online_trade_capture build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
-	build/host/test_online_trade_stage
-	build/host/test_online_trade_identity
-	build/host/test_online_trade_journal
-	build/host/test_online_trade_capture
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
@@ -332,8 +312,7 @@ test: build/host/test_online_trade_stage build/host/test_online_trade_identity b
 # Native transport runtime checks use the same platform sources as the game.
 TRANSPORT_TEST_SRCS := tests/test_online_transport.c src/online/online_transport.c src/online/online_wire.c \
 	src/online/online_socket.c src/online/online_stream.c src/online/online_windows.c \
-	src/online/network_identity.c src/core/rom.c src/online/online_negotiation.c \
-	src/online/online_trade_inbox.c src/online/online_trade_wire.c src/online/online_trade_terms.c src/core/sha256.c
+	src/online/network_identity.c src/core/rom.c
 TRANSPORT_PROBE := $(OUT)/online-transport-probe$(if $(filter windows,$(TARGET)),.exe)
 $(TRANSPORT_PROBE): $(TRANSPORT_TEST_SRCS) src/online/*.h shared/online/protocol.h
 	@mkdir -p $(@D)
@@ -424,104 +403,6 @@ build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 build/lint/test_online_transport: $(LINT_TRANSPORT_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(shell pkg-config --libs sdl2) -lpthread -lm
 
-# Trade inventory capture: synthetic RAM checks, then the opt-in native oracle.
-TRADE_CAPTURE_TEST_SRCS := tests/test_online_trade_capture.c src/online/online_trade_capture.c src/online/online_trade_inventory.c src/online/online_snapshot.c
-build/host/test_online_trade_capture: $(TRADE_CAPTURE_TEST_SRCS) src/online/*.h src/emu/*.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -o $@ $(TRADE_CAPTURE_TEST_SRCS)
-
-TRADE_PROBE ?= .build/online-trade-probe
-TRADE_CAPTURE_SOURCE ?= src/online/online_trade_capture.c
-TRADE_PROBE_SRCS := tools/online_trade_probe.c $(TRADE_CAPTURE_SOURCE) src/online/online_trade_inventory.c src/online/online_snapshot.c \
-	src/core/rom.c src/core/chips.c src/core/chip_pool.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c \
-	src/core/xchips_text.c src/core/data.c src/layer/text.c src/core/compat.c
-$(TRADE_PROBE): $(TRADE_PROBE_SRCS) src/online/*.h src/emu/*.h
-	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_PROBE_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
-
-TRADE_ROUTINE_PROBE ?= .build/online-trade-routines
-TRADE_ROUTINE_SRCS := tools/online_trade_routines.c tools/online_trade_runtime.c $(filter-out tools/online_trade_probe.c,$(TRADE_PROBE_SRCS))
-$(TRADE_ROUTINE_PROBE): $(TRADE_ROUTINE_SRCS) tools/online_trade_runtime.h src/online/*.h src/emu/*.h
-	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_ROUTINE_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
-
-TRADE_TERMS_TEST_SRCS := tests/test_online_trade_terms.c src/online/online_trade_terms.c src/core/sha256.c
-build/host/test_online_trade_terms: $(TRADE_TERMS_TEST_SRCS) src/online/online_trade_terms.h src/core/sha256.h shared/online/trade.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_TERMS_TEST_MAIN -o $@ $(TRADE_TERMS_TEST_SRCS)
-
-LINT_TRADE_CAPTURE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_CAPTURE_TEST_SRCS))
-build/lint/test_online_trade_capture: $(LINT_TRADE_CAPTURE_OBJS)
-	@mkdir -p $(@D)
-	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
-
-TRADE_JOURNAL_TEST_SRCS := tests/test_online_trade_journal.c src/online/online_trade_journal.c src/online/online_trade_files.c src/online/online_trade_history.c src/online/online_trade_identity.c \
-	src/online/online_trade_record.c src/online/online_trade_terms.c src/core/sha256.c
-build/host/test_online_trade_journal: $(TRADE_JOURNAL_TEST_SRCS) src/online/*.h src/core/sha256.h shared/online/trade.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_JOURNAL_TEST_MAIN -o $@ $(TRADE_JOURNAL_TEST_SRCS)
-
-TRADE_WIRE_TEST_SRCS := tests/test_online_trade_wire.c src/online/online_trade_wire.c src/online/online_trade_inbox.c src/online/online_negotiation.c src/online/online_wire.c src/online/online_trade_terms.c src/core/sha256.c
-build/host/test_online_trade_wire: $(TRADE_WIRE_TEST_SRCS) src/online/*.h shared/online/*.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_WIRE_TEST_MAIN -o $@ $(TRADE_WIRE_TEST_SRCS)
-
-TRADE_AUTHORITY_TEST_SRCS := tests/test_online_trade_authority.c src/online/online_trade_authority.c src/online/online_trade_terms.c src/core/sha256.c
-build/host/test_online_trade_authority: $(TRADE_AUTHORITY_TEST_SRCS) src/online/*.h shared/online/*.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_AUTHORITY_TEST_MAIN -o $@ $(TRADE_AUTHORITY_TEST_SRCS)
-
-TRADE_IDENTITY_TEST_SRCS := tests/test_online_trade_identity.c $(TRADE_STORAGE_SRCS)
-build/host/test_online_trade_identity: $(TRADE_IDENTITY_TEST_SRCS) src/online/*.h src/core/run.h src/core/save_format.h shared/online/trade.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -DCW_TRADE_FILES_TEST -DCW_TRADE_IDENTITY_TEST_MAIN -o $@ $(TRADE_IDENTITY_TEST_SRCS)
-
-TRADE_STAGE_PROBE ?= .build/online-trade-stage
-TRADE_STAGE_SOURCE ?= src/online/online_trade_stage.c
-TRADE_STAGE_PROBE_SOURCE ?= tools/online_trade_stage_probe.c
-TRADE_STAGE_PROBE_SRCS := $(TRADE_STAGE_PROBE_SOURCE) tools/online_trade_runtime.c $(TRADE_STAGE_SOURCE) \
-	src/online/online_trade_terms.c src/core/sha256.c $(filter-out tools/online_trade_probe.c,$(TRADE_PROBE_SRCS))
-$(TRADE_STAGE_PROBE): $(TRADE_STAGE_PROBE_SRCS) tools/online_trade_runtime.h src/online/*.h src/emu/*.h
-	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		-Itools -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_STAGE_PROBE_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
-
-TRADE_RELOAD_PROBE ?= .build/online-trade-reload
-TRADE_RELOAD_SRCS := tools/online_trade_reload.c tools/online_trade_runtime.c src/core/rom.c src/core/data.c src/core/compat.c
-$(TRADE_RELOAD_PROBE): $(TRADE_RELOAD_SRCS) tools/online_trade_runtime.h src/emu/*.h
-	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -DNDEBUG -D_DEFAULT_SOURCE -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_RELOAD_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -Wl,--gc-sections -lpthread -lm
-
-TRADE_STAGE_TEST_SRCS := tests/test_online_trade_stage.c src/online/online_trade_stage.c src/online/online_trade_capture.c \
-	src/online/online_trade_inventory.c src/online/online_trade_terms.c src/core/sha256.c
-build/host/test_online_trade_stage: $(TRADE_STAGE_TEST_SRCS) src/online/*.h src/emu/*.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O1 -g -D_DEFAULT_SOURCE $(TEST_SAN) -ffunction-sections -fdata-sections $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		-Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(TRADE_STAGE_TEST_SRCS) -Wl,--gc-sections
-
-LINT_TRADE_STAGE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRADE_STAGE_TEST_SRCS))
-build/lint/test_online_trade_stage: $(LINT_TRADE_STAGE_OBJS)
-	@mkdir -p $(@D)
-	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
-
-build/host/online-trade-recovery-fixture: tools/online_trade_recovery_fixture.c $(TRADE_STORAGE_SRCS) src/online/*.h
-	@mkdir -p build/host
-	$(CC_host) -std=c11 -O1 -g $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-Isrc/online -Isrc/core -Ishared/online -o $@ tools/online_trade_recovery_fixture.c $(TRADE_STORAGE_SRCS)
-
 # Original-game carried-chip controls only; no production Arena entry point.
 ONLINE_CARRIED_COMMON := tools/online_frame_pair.c tools/online_frame_wire.c tools/online_carried_read.c src/online/online_snapshot.c src/core/sha256.c
 ONLINE_CARRIED_NATIVE := tools/online_carried_native.c tools/online_link_script.c $(ONLINE_CARRIED_COMMON)
@@ -539,8 +420,3 @@ build/host/online-carried-original: $(ONLINE_CARRIED_ORIGINAL) tools/online_carr
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_ORIGINAL) /opt/mgba/host/lib/libmgba.a -lpthread -lm
-
-# API observations only: this does not certify trade storage durability.
-build/windows/online-storage-windows-probe.exe: tools/online_storage_windows_probe.c
-	@mkdir -p $(@D)
-	$(CC_windows) -std=c11 -O2 -g $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) -municode -o $@ $<

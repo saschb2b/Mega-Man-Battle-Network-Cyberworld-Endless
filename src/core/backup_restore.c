@@ -12,8 +12,6 @@
 #include <sys/stat.h>
 
 #include "compat.h"
-#include "online_trade_admit.h"
-#include "online_trade_gate.h"
 #include "save.h"
 #include "save_format.h"
 #include "save_queue.h"
@@ -120,7 +118,16 @@ static bool roll_back(const char *data_dir) {
 	return true;
 }
 
-static bool recover_swap(const char *dir, const char *old, const char *swap) {
+/* If power stopped between the final renames, or the folder they put in
+ * is not the one staged, the saves before the import come back. Called
+ * before anything reads the saves at a start, and after a failed install. */
+bool backup_recover(const char *data_dir) {
+	save_queue_wait();
+	char dir[1100], old[1100], undo[1100], stage[1100], swap[1100], pending[1100];
+	paths(data_dir, dir, old, undo);
+	snprintf(stage, sizeof stage, "%s/savedata.import", data_dir);
+	snprintf(swap, sizeof swap, "%s/savedata.swap", data_dir);
+	pending_path(data_dir, pending);
 	bool ok = true;
 	if (is_dir(swap)) {
 		if (!is_dir(dir) && is_dir(old) && !cw_rename(old, dir)) ok = false;
@@ -128,22 +135,6 @@ static bool recover_swap(const char *dir, const char *old, const char *swap) {
 		else if (!is_dir(old)) ok = cw_rename(swap, old);
 		else ok = false;
 	}
-	return ok;
-}
-
-/* If power stopped between the final renames, or the folder they put in
- * is not the one staged, the saves before the import come back. Called
- * before anything reads the saves at a start, and after a failed install. */
-bool backup_recover(const char *data_dir) {
-	save_queue_wait();
-	online_trade_gate_start(data_dir);
-	if (!online_trade_gate_transfer(data_dir)) { blocked = true; return false; }
-	char dir[1100], old[1100], undo[1100], stage[1100], swap[1100], pending[1100];
-	paths(data_dir, dir, old, undo);
-	snprintf(stage, sizeof stage, "%s/savedata.import", data_dir);
-	snprintf(swap, sizeof swap, "%s/savedata.swap", data_dir);
-	pending_path(data_dir, pending);
-	bool ok = recover_swap(dir, old, swap);
 	uint32_t hash = 0;
 	if (ok && pending_hash(data_dir, &hash) && !installed(data_dir, hash)) ok = roll_back(data_dir) || !is_dir(old);
 	if (ok && !is_dir(dir) && is_dir(old)) ok = cw_rename(old, dir);
@@ -156,7 +147,6 @@ bool backup_recover(const char *data_dir) {
 	}
 	/* (the saves beside a missing savedata/: no fresh one over them) */
 	blocked = !is_dir(dir) && (is_dir(old) || is_dir(swap) || is_dir(undo));
-	if (ok && !blocked && !online_trade_gate_admit(data_dir)) blocked = true;
 	return ok && !blocked;
 }
 
@@ -239,7 +229,7 @@ BackupStatus backup_restore(const char *data_dir, const uint8_t *bytes, size_t n
 	size_t sn = 0;
 	uint8_t *sb = u.ok ? backup_pack_dir(stage, &sn, &empty, &staged) : NULL;
 	free(sb);
-	bool ok = sb && online_trade_admit_check(data_dir, stage) && install(data_dir, stage, staged.hash) && online_trade_gate_admit(data_dir);
+	bool ok = sb && install(data_dir, stage, staged.hash);
 	if (!ok) {
 		backup_remove_dir(stage);
 		backup_recover(data_dir);
@@ -250,7 +240,6 @@ BackupStatus backup_restore(const char *data_dir, const uint8_t *bytes, size_t n
 bool backup_unpack(const char *data_dir, const uint8_t *bytes, size_t n) { return backup_restore(data_dir, bytes, n, true) == BACKUP_OK; }
 
 bool backup_can_undo(const char *data_dir) {
-	if (!online_trade_gate_transfer(data_dir)) return false;
 	save_queue_wait();
 	char path[1100];
 	snprintf(path, sizeof path, "%s/savedata.old", data_dir);
@@ -298,18 +287,16 @@ static bool keep_volumes(const char *dir, const char *old) {
 
 bool backup_undo(const char *data_dir) {
 	save_queue_wait();
-	if (!online_trade_gate_transfer(data_dir)) return false;
 	char dir[1100], old[1100], swap[1100];
 	snprintf(dir, sizeof dir, "%s/savedata", data_dir);
 	snprintf(old, sizeof old, "%s/savedata.old", data_dir);
 	snprintf(swap, sizeof swap, "%s/savedata.swap", data_dir);
 	if (!is_dir(dir) || !is_dir(old) || is_dir(swap)) return false;
-	if (!online_trade_admit_check(data_dir, old)) return false;
 	if (!keep_volumes(dir, old)) return false;
 	cw_fsync_dir(old);
 	if (!cw_rename(dir, swap)) return false;
 	if (!cw_rename(old, dir)) { cw_rename(swap, dir); return false; }
 	if (!cw_rename(swap, old)) { cw_rename(dir, old); cw_rename(swap, dir); return false; }
 	cw_fsync_dir(data_dir);
-	return online_trade_gate_admit(data_dir);
+	return true;
 }

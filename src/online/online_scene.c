@@ -6,7 +6,6 @@
 
 #include "bn6_fields.h"
 #include "gfx.h"
-#include "online_capture.h"
 #include "online_labels.h"
 #include "online_motion.h"
 #include "online_people.h"
@@ -35,7 +34,6 @@ void online_scene_start(void) {
 	memset(&shown, 0, sizeof shown);
 	disconnected_at = notice_at = notice_serial = 0;
 	online_motion_reset(); online_labels_reset(); online_ui_reset(); online_people_load();
-	online_capture_start();
 	OnlineProfile profile;
 	online_visit_profile(&profile);
 	if (!online_transport_profile(&profile)) fprintf(stderr, "online: public Navi card could not be queued\n");
@@ -55,7 +53,7 @@ bool online_scene_ready(void) { return built; }
 bool online_scene_arrived(void) { return arrived; }
 
 uint32_t online_scene_keys(uint32_t keys) {
-	return online_ui_open() || online_capture_preview() ? 0 : keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+	return online_ui_open() ? 0 : keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
 }
 
 static void trace_frame(void) {
@@ -92,9 +90,7 @@ void online_scene_update(void) {
 		if (!disconnected_at) disconnected_at = now;
 		if (btn_pressed(BTN_B) || now - disconnected_at >= 2000) { online_visit_return(); return; }
 	} else if (!snapshot.connected && btn_pressed(BTN_B)) { online_visit_return(); return; }
-	if (online_capture_preview()) {
-		if (btn_pressed(BTN_B)) { online_visit_return(); return; }
-	} else online_ui_update(&snapshot);
+	online_ui_update(&snapshot);
 	if (online_visit_transitioning()) return;
 	if (!built) {
 		if (!snapshot.connected || failed) return;
@@ -133,7 +129,6 @@ void online_scene_draw(void) {
 	fill_rect(x, y + EMU_H - 15, EMU_W, 15, rgba(9, 24, 42, 255));
 	text_draw(x + 4, y + EMU_H - 14, online_footer, WHITE, TEXT_LEFT);
 	online_ui_draw();
-	online_capture_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));
 		text_drawf(x + 4, y + 113, WHITE, TEXT_LEFT, "%.32s", snapshot.notice);

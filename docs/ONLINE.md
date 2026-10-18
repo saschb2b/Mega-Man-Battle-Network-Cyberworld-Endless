@@ -318,9 +318,6 @@ HP, leave the profile unchanged and create no checkpoint. The optional
 `CYBERWORLD_LOADOUT_TRACE` contains local numeric observations only.
 
 Trade Central and the production Arena are not enabled. The
-[trade contract](ONLINE_TRADE.md) records immutable eligibility, a native
-inventory capture accepted against six original editor scenarios, durable
-server decisions and the client recovery still required. The
 [delayed Practice experiment](ONLINE_FRAME.md) completes its four-delay
 matrix, with explicit two-core and observation limits.
 [Reviewed research goals](re/README.md) now gate native chip exchange,

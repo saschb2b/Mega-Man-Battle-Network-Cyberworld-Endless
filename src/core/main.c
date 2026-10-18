@@ -368,12 +368,6 @@ static void desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
 /* The first scene, and the run it starts on: --scene's ("town" a new run
  * from the town as NEW GAME starts one, "setup" the title's setup,
  * "summary" a made-up run's), --setup's run, --run-depth, --guardian */
-static const Scene *guarded_run_scene(const Scene *scene) {
-	if (scene != &scene_emu || save_new_run_ready()) return scene;
-	title_menu = true;
-	return &scene_title;
-}
-
 static void start_scene(const Options *o) {
 	audio_init();
 	/* "town": a new run from the town, as NEW GAME starts one */
@@ -422,7 +416,6 @@ static void start_scene(const Options *o) {
 		if (director_debug_biome >= 0 && director_debug_biome < BIOME_COUNT && p < 18) run.biome_order[p / 3] = (uint8_t)director_debug_biome;
 		if (o->guardian_navi > 0) run_debug_guardian(o->guardian_navi);
 	}
-	s = guarded_run_scene(s);
 	/* (later NEW GAMEs take the next seeds, so a session replays) */
 	title_seed = !o->seed ? 0 : !s || s == &scene_title ? o->seed : o->seed + 1;
 	if (town) emu_start_in_town = true;

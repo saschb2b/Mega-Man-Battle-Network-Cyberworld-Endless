@@ -6,7 +6,6 @@
 
 #include "online_stream.h"
 #include "protocol.h"
-#include "negotiation.h"
 #include "rom.h"
 
 #if !defined(_WIN32) && !defined(CW_IOS)
@@ -41,7 +40,7 @@ static bool url_host(const char *url, char *host, size_t size) {
 	return strlen(url) < 500;
 }
 
-static bool handshake_request(const char *host, char *expected, const OnlineNegotiation *selection) {
+static bool handshake_request(const char *host, char *expected) {
 	uint8_t random[16], digest[20];
 	char key[25], combined[80], hex[41], request[768];
 	if (!online_stream_random(random, sizeof random)) return false;
@@ -56,7 +55,7 @@ static bool handshake_request(const char *host, char *expected, const OnlineNego
 	int length = snprintf(request, sizeof request,
 	                      "GET /presence HTTP/1.1\r\nHost: %s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
 	                      "Sec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Protocol: %s\r\n\r\n",
-	                      host, key, online_negotiation_offer(selection));
+	                      host, key, ONLINE_SUBPROTOCOL);
 	return length > 0 && (size_t)length < sizeof request && online_stream_send((const uint8_t *)request, (size_t)length);
 }
 
@@ -72,7 +71,7 @@ static bool header_value(const char *response, const char *name, const char *val
 	return false;
 }
 
-static bool handshake_response(const char *expected, SDL_atomic_t *stop, OnlineNegotiation *selection) {
+static bool handshake_response(const char *expected, SDL_atomic_t *stop) {
 	char response[4096];
 	size_t used = 0;
 	uint32_t started = SDL_GetTicks();
@@ -84,16 +83,14 @@ static bool handshake_response(const char *expected, SDL_atomic_t *stop, OnlineN
 		if (strstr(response, "\r\n\r\n"))
 			return !strncmp(response, "HTTP/1.1 101 ", 13) &&
 			       header_value(response, "Sec-WebSocket-Accept", expected) &&
-			       online_negotiation_accept(selection,
-			           header_value(response, "Sec-WebSocket-Protocol", ONLINE_SUBPROTOCOL) ? ONLINE_SUBPROTOCOL :
-			           header_value(response, "Sec-WebSocket-Protocol", ONLINE_TRADE_SUBPROTOCOL) ? ONLINE_TRADE_SUBPROTOCOL : NULL) &&
+			       header_value(response, "Sec-WebSocket-Protocol", ONLINE_SUBPROTOCOL) &&
 			       header_value(response, "Upgrade", "websocket") && header_value(response, "Connection", "Upgrade");
 		SDL_Delay(2);
 	}
 	return false;
 }
 
-bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *selection, char *error, size_t size) {
+bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t size) {
 	char host[256], expected[29];
 	buffered = 0;
 	if (!url_host(url, host, sizeof host)) {
@@ -101,7 +98,7 @@ bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *
 		return false;
 	}
 	if (!online_stream_open(url, stop, error, size)) return false;
-	if (!handshake_request(host, expected, selection) || !handshake_response(expected, stop, selection)) {
+	if (!handshake_request(host, expected) || !handshake_response(expected, stop)) {
 		SDL_strlcpy(error, "WebSocket handshake failed", size);
 		return false;
 	}

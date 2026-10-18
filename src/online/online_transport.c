@@ -9,7 +9,6 @@
 #include "layer_make.h"
 #include "online_browser.h"
 #include "online_socket.h"
-#include "online_trade_inbox.h"
 #include "online_wire.h"
 #include "rom.h"
 
@@ -19,8 +18,6 @@ static struct {
 	SDL_mutex *mutex;
 	SDL_atomic_t stop;
 	OnlineSnapshot snapshot;
-	OnlineNegotiation selection;
-	OnlineTradeInbox inbox;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
 	uint8_t hello[80];
@@ -105,16 +102,6 @@ static bool enqueue(const uint8_t *data, size_t size) {
 	return room;
 }
 
-/* The worker validates and copies; only the frame owner can act on a
- * decision. An unnegotiated extension or a full inbox ends this session. */
-static bool receive_message(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
-	if (!size || data[0] < ONLINE_TRADE_CAPS) return online_wire_message(data, size, now, snapshot);
-	if (!snapshot->connected || !transport.selection.trades) return false;
-	if (transport.mutex) SDL_LockMutex(transport.mutex);
-	bool ok = online_trade_inbox_push(&transport.inbox, data, size);
-	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
-	return ok;
-}
 
 #ifndef __EMSCRIPTEN__
 static void connected_loop(OnlineSnapshot *snapshot) {
@@ -126,7 +113,7 @@ static void connected_loop(OnlineSnapshot *snapshot) {
 		if (got < 0) break;
 		if (got) {
 			last_receive = now;
-			if (!receive_message(data, (size_t)got, now, snapshot)) break;
+			if (!online_wire_message(data, (size_t)got, now, snapshot)) break;
 			publish(snapshot);
 		}
 		if (now - last_receive > (snapshot->connected ? 15000u : 5000u)) break;
@@ -155,7 +142,7 @@ static void browser_closed(void) {
 
 static void browser_received(const uint8_t *data, size_t size) {
 	transport.last_receive = SDL_GetTicks();
-	if (!receive_message(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
+	if (!online_wire_message(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
 }
 
 static void browser_poll(void) {
@@ -184,7 +171,7 @@ static void browser_poll(void) {
 static int worker(void *unused) {
 	(void)unused;
 	OnlineSnapshot snapshot = { 0 };
-	if (online_socket_open(transport.url, &transport.stop, &transport.selection, snapshot.error, sizeof snapshot.error) &&
+	if (online_socket_open(transport.url, &transport.stop, snapshot.error, sizeof snapshot.error) &&
 	    online_socket_send(transport.hello, transport.hello_size)) connected_loop(&snapshot);
 	if (!snapshot.error[0]) SDL_strlcpy(snapshot.error, "Disconnected from the square", sizeof snapshot.error);
 	snapshot.connected = false;
@@ -196,10 +183,9 @@ static int worker(void *unused) {
 }
 #endif
 
-static bool start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES], bool trades) {
+bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
 	online_transport_end();
 	transport.enabled = true;
-	transport.selection.offer_trades = trades;
 	if (!url || !name || !identity || strlen(url) >= sizeof transport.url || !build_hello(name, identity)) {
 		SDL_strlcpy(transport.snapshot.error, "Online needs BN6 and a 1-16 character name", sizeof transport.snapshot.error);
 		return false;
@@ -208,7 +194,7 @@ static bool start(const char *url, const char *name, const uint8_t identity[ONLI
 	SDL_strlcpy(transport.name, name, sizeof transport.name);
 #ifdef __EMSCRIPTEN__
 	transport.last_receive = SDL_GetTicks();
-	if (online_browser_open(url, transport.hello, transport.hello_size, browser_received, browser_closed, &transport.selection)) return true;
+	if (online_browser_open(url, transport.hello, transport.hello_size, browser_received, browser_closed)) return true;
 	SDL_strlcpy(transport.snapshot.error, "Could not open browser WebSocket", sizeof transport.snapshot.error);
 	return false;
 #else
@@ -218,28 +204,6 @@ static bool start(const char *url, const char *name, const uint8_t identity[ONLI
 	SDL_strlcpy(transport.snapshot.error, "Could not start online worker", sizeof transport.snapshot.error);
 	return false;
 #endif
-}
-
-bool online_transport_start(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
-	return start(url, name, identity, false);
-}
-
-bool online_transport_start_trades(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
-	return start(url, name, identity, true);
-}
-
-bool online_transport_trade_receive(OnlineTradeMessage *out) {
-	if (transport.mutex) SDL_LockMutex(transport.mutex);
-	bool ok = transport.snapshot.connected && online_trade_inbox_pop(&transport.inbox, out);
-	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
-	return ok;
-}
-
-bool online_transport_trade_command(const uint8_t *data, size_t size) {
-	if (transport.mutex) SDL_LockMutex(transport.mutex);
-	bool ok = transport.snapshot.connected && online_trade_inbox_command(&transport.inbox, data, size);
-	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
-	return ok && enqueue(data, size);
 }
 
 bool online_transport_enabled(void) { return transport.enabled; }

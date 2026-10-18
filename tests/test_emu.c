@@ -46,7 +46,6 @@
 #include "hook.h"
 #include "platform.h"
 #include "save_queue.h"
-#include "test_online_trade_io.h"
 #include "thumb_reloc.h"
 #include "xvirus_dispatch.h"
 
@@ -431,7 +430,6 @@ static void two_cores(void) {
 		rmdir(sdir);
 	}
 	cores_apart(g);
-	failures += test_online_trade_io();
 	emu_unhook(0x080000F8);
 	mCoreConfigDeinit(&g->config);
 	g->deinit(g);

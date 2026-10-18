@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "protocol.h"
-#include "negotiation.h"
 
 @interface CWOnlineSocket : NSObject <NSURLSessionWebSocketDelegate>
 @property(nonatomic, strong) NSLock *lock;
@@ -14,7 +13,6 @@
 @property(nonatomic, strong) NSURLSession *session;
 @property(nonatomic, strong) NSURLSessionWebSocketTask *task;
 @property(nonatomic) int state;
-@property(nonatomic) OnlineNegotiation selection;
 - (void)receive;
 - (void)finish;
 @end
@@ -49,9 +47,7 @@
 - (void)URLSession:(NSURLSession *)session webSocketTask:(NSURLSessionWebSocketTask *)task didOpenWithProtocol:(NSString *)protocol {
 	(void)session; (void)task;
 	[self.lock lock];
-	OnlineNegotiation selected = self.selection;
-	BOOL accepted = self.state == 0 && online_negotiation_accept(&selected, protocol.UTF8String);
-	self.selection = selected;
+	BOOL accepted = self.state == 0 && protocol && !strcmp(protocol.UTF8String, ONLINE_SUBPROTOCOL);
 	self.state = accepted ? 1 : -1;
 	[self.lock unlock];
 	if (accepted) [self receive];
@@ -81,13 +77,12 @@
 static CWOnlineSocket *connection;
 static SDL_atomic_t *cancelled;
 
-bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *selection, char *error, size_t size) {
+bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t size) {
 	@autoreleasepool {
 		online_socket_close();
 		NSURL *address = [NSURL URLWithString:[NSString stringWithUTF8String:url]];
 		if (!address || !([address.scheme isEqualToString:@"wss"] || [address.scheme isEqualToString:@"ws"])) return false;
 		connection = [CWOnlineSocket new];
-		connection.selection = *selection;
 		cancelled = stop;
 		NSURLSessionConfiguration *config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
 		config.timeoutIntervalForRequest = 7;
@@ -95,7 +90,7 @@ bool online_socket_open(const char *url, SDL_atomic_t *stop, OnlineNegotiation *
 		config.HTTPShouldSetCookies = NO;
 		config.URLCache = nil;
 		connection.session = [NSURLSession sessionWithConfiguration:config delegate:connection delegateQueue:nil];
-		NSArray<NSString *> *protocols = selection->offer_trades ? @[@ONLINE_TRADE_SUBPROTOCOL, @ONLINE_SUBPROTOCOL] : @[@ONLINE_SUBPROTOCOL];
+		NSArray<NSString *> *protocols = @[@ONLINE_SUBPROTOCOL];
 		connection.task = [connection.session webSocketTaskWithURL:address protocols:protocols];
 		connection.task.maximumMessageSize = ONLINE_MAX_MESSAGE;
 		[connection.task resume];
