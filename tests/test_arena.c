@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "arena_format.h"
 #include "arena_input.h"
 #include "arena_link.h"
 #include "arena_link_net.h"
@@ -205,20 +206,28 @@ static void install(void) {
 
 static void wire(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
-	/* ARENA !BBIH: a challenge of session 0x01020304 at 40 ms; latency clamped, a zero ref refused */
-	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40) == ONLINE_ARENA_BYTES);
-	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40 };
+	/* ARENA !BBIHB: a challenge of session 0x01020304 at 40 ms by BN6's rules; latency clamped, a zero ref
+	 * and rules past full refused */
+	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40, ONLINE_FORMAT_BN6) == ONLINE_ARENA_BYTES);
+	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40, 0 };
 	assert(!memcmp(m, challenge, sizeof challenge));
-	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999) && m[6] == 0x13 && m[7] == 0x88);
-	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 5, 1, 0) && !arena_wire_action(m, 0, 1, 0));
-	/* ARENA_STATE !BBII16sBB: START, match 7, the other 9, side 1, delay 8 */
+	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 1, 0, ONLINE_FORMAT_FULL) && m[8] == ONLINE_FORMAT_FULL);
+	assert(!arena_wire_action(m, ARENA_ACT_CHALLENGE, 1, 0, ONLINE_FORMAT_FULL + 1));
+	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999, 0) && m[6] == 0x13 && m[7] == 0x88);
+	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0, 0) && !arena_wire_action(m, 5, 1, 0, 0) && !arena_wire_action(m, 0, 1, 0, 0));
+	/* ARENA_STATE !BBII16sBBB: START, match 7, the other 9, side 1, delay 8, BN6's rules */
 	uint8_t st[ONLINE_ARENA_STATE_BYTES] = { 18, 3, 0, 0, 0, 7, 0, 0, 0, 9 };
 	memset(st + 10, 0xAB, ONLINE_IDENTITY_BYTES);
 	st[26] = 1;
 	st[27] = 8;
 	ArenaWireState s;
 	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_START && s.match == 7 && s.other == 9);
-	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB);
+	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && s.rules == ONLINE_FORMAT_BN6);
+	st[28] = ONLINE_FORMAT_FULL;
+	assert(arena_wire_state(st, sizeof st, &s) && s.rules == ONLINE_FORMAT_FULL);
+	st[28] = ONLINE_FORMAT_FULL + 1;
+	assert(!arena_wire_state(st, sizeof st, &s));
+	st[28] = 0;
 	assert(!arena_wire_state(st, sizeof st - 1, &s));
 	st[1] = 5;
 	assert(!arena_wire_state(st, sizeof st, &s));
@@ -405,7 +414,40 @@ static void link_net(void) {
 	free(p);
 }
 
+/* the pair's common ground: BN6's rules for any pair until full ones are
+ * built; each folder fits or not; the carried MegaMan's folder and what
+ * BN6's rules leave home */
+static void formats(void) {
+	assert(arena_format_for(0, 0) == ONLINE_FORMAT_BN6 && arena_format_for(ONLINE_ROMS_BN5, 0) == ONLINE_FORMAT_BN6);
+	assert(arena_format_for(ONLINE_ROMS_BN5, ONLINE_ROMS_BN5) == (ARENA_FULL_RULES ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6));
+	assert(arena_format_ok(ONLINE_FORMAT_BN6, 0) && !arena_format_ok(ONLINE_FORMAT_FULL, 0));
+	static OnlineLoadout l, out;
+	memset(&l, 0, sizeof l);
+	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
+		l.folders[0][i] = (uint16_t)(411 | 12u << 9);      /* BN5's MrkCan1 M */
+		l.folders[1][i] = (uint16_t)(1 + i);                 /* BN6's own, in A */
+	}
+	l.folders[0][3] = 5;
+	l.regulars[1] = 4; l.tags[1][0] = 2; l.tags[1][1] = 7;
+	l.souls = 0x21;
+	l.pack[411][0] = 3; l.pack[214][1] = 1; l.pack[5][2] = 2;
+	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 0) == ARENA_FOLDER_BN5);
+	assert(arena_folder_fit(&l, ONLINE_FORMAT_FULL, 0) == ARENA_FOLDER_FITS);
+	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 1) == ARENA_FOLDER_FITS);
+	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 2) == ARENA_FOLDER_EMPTY);
+	assert(arena_folders_fitting(&l, ONLINE_FORMAT_BN6) == 2u && arena_folders_fitting(&l, ONLINE_FORMAT_FULL) == 3u);
+	arena_format_carry(&l, ONLINE_FORMAT_BN6, 1, &out);
+	assert(!memcmp(out.folder, l.folders[1], sizeof out.folder) && out.regular == 4 && out.tag[0] == 2 && out.tag[1] == 7);
+	assert(!out.souls && !out.pack[411][0] && !out.pack[214][1] && out.pack[5][2] == 2);
+	char why[160];
+	out.max_hp = 100;
+	assert(arena_loadout_check(&out, why, sizeof why));
+	arena_format_carry(&l, ONLINE_FORMAT_FULL, 0, &out);
+	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
+}
+
 int main(void) {
+	formats();
 	buffer();
 	link_latency();
 	check();

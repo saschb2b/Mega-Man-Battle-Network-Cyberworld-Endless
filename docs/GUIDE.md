@@ -763,20 +763,25 @@ In the Square:
 - **L** has MegaMan say something or do an emote; everyone in your
   channel sees it over his head.
 - **A** facing another player's MegaMan shows his card (HP, act and
-  layer, Crosses and Souls) and lets you ask him for a NetBattle, wave,
-  mute or block him. Blocked players are gone from your Square.
-- **Battle** on his card asks for a Practice NetBattle of BN6's own. If
-  he takes it, you fight with your MegaMen as they are (folder, NaviCust,
-  HP, buster, Crosses), and win or lose you are back in the Square where
-  you stood; nothing is won or lost. A MegaMan with Souls or another
-  game's chips can't go, and the 3DS and the browser have no NetBattle.
+  layer, Crosses and Souls, and whether his game has BN5 where yours
+  differs) and lets you ask him for a NetBattle, wave, mute or block him.
+  Blocked players are gone from your Square.
+- **Battle** on his card asks for a Practice NetBattle of BN6's own, by
+  **BN6 rules**: both MegaMen are told before the battle. You fight with
+  your MegaMen as they are (NaviCust, HP, buster, Crosses) and a folder
+  of BN6's chips; Souls and BN5's chips stay home. Where you have more
+  than one folder that fits, or one holds BN5's chips, MegaMan asks which
+  goes. Win or lose you are back in the Square where you stood; nothing
+  is won or lost. The 3DS and the browser have no NetBattle.
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the
   Arena's ring tells how a NetBattle is asked for.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the
-  chips swap as you come home.
+  chips swap as you come home. BN5's chips trade between two players
+  whose games both have BN5's ROM; with anyone else the clerk offers
+  BN6's chips only, and says so.
 - **R**, or the pad you arrived by, takes you home.
 
 Talk to the gate's keeper to change your name or the server: the

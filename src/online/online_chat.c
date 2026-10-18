@@ -135,7 +135,7 @@ static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
 	ta_begin(t);
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id)), FACE_MEGAMAN, &first);
+	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), C.peer.roms & ONLINE_ROMS_BN5, online_transport_roms() & ONLINE_ROMS_BN5), FACE_MEGAMAN, &first);
 	ta_jump(t, 1);
 	const char *boxes[2][3] = {
 		{ arena_battle_option(), square_peer_option(0, muted), square_more() },
@@ -172,7 +172,7 @@ static void peer_talk(void) {
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
-	ta_pages(&t, square_peer_words(C.peer.name, card_of(C.peer.id)), FACE_MEGAMAN, &first);
+	ta_pages(&t, square_peer_words(C.peer.name, card_of(C.peer.id), C.peer.roms & ONLINE_ROMS_BN5, online_transport_roms() & ONLINE_ROMS_BN5), FACE_MEGAMAN, &first);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
 	const char *labels[SQUARE_PEER_OPTIONS];

@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v2`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v4`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -58,8 +58,11 @@ emotes only), and setting it refuses startup.
 
 ## Trade Central and the Arena
 
-A trade is one chip for one chip between two players of a channel, BN6's
-own chips alone (ids 1 to 319, codes A to Z and \*): one proposes with
+A trade is one chip for one chip between two players of a channel (ids
+1 to 511, codes A to Z and \*): BN6's own chips between any two, BN5's
+(past id 319, or on BN6's blank records) only between two players whose
+games both have BN5's ROM, as each HELLO says (shared/online/README.md);
+one proposes with
 a chip, the other answers with one, and the server commits only once both
 have accepted the very pair they were shown. It writes each commit as a
 line of `trades.jsonl` in the state directory (both public identities and
@@ -313,5 +316,6 @@ builds also fix the hash seed and build timestamp. Hosted runner images
 and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
-Keep the shared protocol in the same release as the game; v1 wire clients
-cannot enter a v2 server. Preserve the private state directory when upgrading.
+Keep the shared protocol in the same release as the game; a game of
+one protocol version cannot enter a server of another (v3 games and a v4
+server refuse each other). Preserve the private state directory when upgrading.

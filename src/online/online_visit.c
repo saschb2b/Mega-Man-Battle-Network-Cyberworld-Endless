@@ -83,7 +83,9 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
  * the gate; `away`: it came in the Square */
 static VisitEnd refusal(const OnlineSnapshot *s, bool away) {
 	switch (s->error_code) {
-	case 2: case 3: return VISIT_END_VERSION;
+	/* (15: BN5's identity not the one the server knows, which this game
+	 * checked as it read the ROM: the server's build is another) */
+	case 2: case 3: case 15: return VISIT_END_VERSION;
 	case 4: return VISIT_END_ROM;
 	case 5: return VISIT_END_NAME;
 	case 7: return VISIT_END_FULL;

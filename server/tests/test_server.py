@@ -98,6 +98,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(peer[1], welcome[14:30])
         self.assertEqual(peer[2:6], (123, -234, 12, 7))
         self.assertEqual(peer[6].rstrip(b"\0"), b"Lan")
+        self.assertEqual(peer[7], 0)        # (its ROMs besides BN6's: none)
         await first.close()
         self.clients.remove(first)
         for _ in range(20):
@@ -110,7 +111,8 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
     async def test_rejects_incompatible_identity(self):
         for identity, code in ((dict(version=protocol.SPEC["version"] + 1), 2), (dict(square_make=0), 3),
                                (dict(square_hash=protocol.SPEC["square_hash"] ^ 1), 3), (dict(rom_code="BAD!"), 4),
-                               (dict(rom_sha1="00" * 20), 4)):
+                               (dict(rom_sha1="00" * 20), 4), (dict(bn5=True, bn5_code="BRKP"), 15),
+                               (dict(bn5=True, bn5_sha1="00" * 20), 15)):
             client, response = await self.connect(**identity)
             self.assertEqual(response[:3], struct.pack("!BH", protocol.SPEC["error"], code))
             await client.close()
@@ -179,7 +181,7 @@ class ContractTests(unittest.TestCase):
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
                      "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
                      "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
-                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max"):
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "format_bn6", "format_full"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
@@ -193,6 +195,17 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(protocol.PROFILE.size, protocol.SPEC["profile_bytes"])
         self.assertEqual(protocol.PEER.size, protocol.SPEC["peer_bytes"])
         self.assertEqual(protocol.WELCOME.size, protocol.SPEC["welcome_bytes"])
+        self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
+        self.assertIn(f'#define ONLINE_SUBPROTOCOL "{protocol.SPEC["subprotocol"]}"', header)
+        # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
+        rom = (ROOT / "src/core/rom.c").read_text()
+        self.assertIn(f'"{protocol.SPEC["bn5_sha1"]}", "{protocol.SPEC["bn5_code"]}"', rom)
+        # (BN6's blank records, where BN5's chips are installed, as src/emu/bn6_chips.h names them)
+        chips = (ROOT / "src/emu/bn6_chips.h").read_text()
+        blank = re.search(r"#define BN6_CHIP_BLANK\(id\)\s+(.*)", chips)[1]
+        for low, high in protocol.SPEC["bn6_blank"]:
+            self.assertIn(str(low), blank)
+            self.assertIn(str(high), blank)
 
     def test_invalid_payloads(self):
         for data in (b"", b"\x03", protocol.STATE.pack(3, 0, 0, 0, 8)):

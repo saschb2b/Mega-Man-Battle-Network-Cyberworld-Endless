@@ -117,19 +117,63 @@ in `.build/`.
 Facing another player's MegaMan, A reads his card and then offers
 `Battle`, `Wave` and `More...`, the second box `Mute`, `Block` and `Back`
 (three to a box, as BN6's chat box holds them). Battle sends ARENA's
-challenge and MegaMan says "Let's see if NAME takes us on!". The server
-answers the challenger WAITING and the other player CHALLENGED; his
+challenge, naming its rules (Formats, below), and MegaMan says "BN6
+rules! Let's see if NAME takes us on!". The server answers the challenger
+WAITING and the other player CHALLENGED, each with the rules; his
 MegaMan asks, once no chat is open: "NAME's MegaMan wants a Practice
-NetBattle!", then "Take it,Lan?" with the cursor on No. Yes accepts; No,
-B, or a challenge from a player he has blocked declines (the challenger's
-MegaMan: "Aw... No NetBattle this time."). A MegaMan plain BN6 cannot
-carry (Souls, another game's chips, a NaviCust past what a message
-holds) does not go: MegaMan says so and no challenge or acceptance is
-sent. The 3DS and the browser build, which compile the Arena out
-(`CW_ARENA`), never offer Battle and decline a challenge.
+NetBattle!", "BN6 rules: no Souls,and BN6 chips only.", then "Take
+it,Lan?" with the cursor on No. Yes accepts; No, B, or a challenge from a
+player he has blocked declines (the challenger's MegaMan: "Aw... No
+NetBattle this time."). Before the challenge or the Yes goes, the folder
+MegaMan carries is asked where Lan has a choice (Formats). A MegaMan the
+rules leave nothing to carry, or one the last check refuses (a NaviCust
+past what a message holds), does not go: MegaMan says so and no
+challenge or acceptance is sent. The 3DS and the browser build, which
+compile the Arena out (`CW_ARENA`), never offer Battle and decline a
+challenge.
+
+### Formats
+
+Every NetBattle goes by the pair's common ground
+([ONLINE.md](ONLINE.md#battle-network-5-there-or-not-the-pairs-common-ground)):
+its rules are chosen by the challenger's game from both players' ROMs
+(each peer's in the SNAPSHOT, `arena_format_for`), carried in ARENA's
+challenge and every ARENA_STATE (`protocol.json`'s `format_bn6` 0 and
+`format_full` 1), and named by both MegaMen before the battle. The server
+refuses full rules unless both games have BN5's ROM (NOTICE 19), and a
+game refuses rules it cannot fight by (`arena_format_ok`).
+
+- **BN6 rules** (0): any pair. The pair cores are plain BN6. MegaMan's
+  Souls stay home, and so do BN5's chips in his pack; he fights with a
+  folder of BN6's own chips (`arena_format_carry`: the folder picked, its
+  Regular and TagChips, as the one the core's Folder1 holds).
+- **Full rules** (1): two games with BN5's ROM, BN5's chips and Souls
+  allowed. Not built yet: `ARENA_FULL_RULES` is 0, so `arena_format_for`
+  names BN6's for every pair. The next step installs BN5 into both pair
+  cores (the same install on both, so the pairs stay byte for byte the
+  same), turns `ARENA_FULL_RULES` on and lets `arena_loadout_check` take
+  what full rules allow; the format byte, the server's check, the words
+  ("Full rules: Souls and BN5 chips too!") and the folder question already
+  carry it.
+
+**The folder.** A run's MegaMan holds Folder1, Folder2 and the Extra
+Folder (BN6's names; the second's Regular and TagChips at NaviStats
++0x2F and +0x58, bn6f's NaviStats; the Extra Folder has none of its own
+here). `arena_folders_fitting` says which fit the rules (BN6's: none of
+BN5's chips, an empty folder never). Where more than one fits, or one
+stays home for BN5's chips, MegaMan asks in BN6's chat box
+(`arena_folder.c`, flags `0x14A1`-`0x14A4`): "Folder1 has BN5 chips. It
+stays home.", the Souls too where he holds some, then "BN6 rules,Lan.
+Which folder goes?" with the folders that fit; B sends nothing. Where
+MegaMan has one folder and it fits, it goes unasked. Where none fits:
+"Lan,every folder of ours has BN5 chips... BN6 rules won't take them.
+Let's swap them out at home first!" The carried MegaMan then passes
+`arena_loadout_check`, the same last guard on both games. A run holds
+Folder1 alone today (no run hands out Folder2 or the Extra Folder), so
+the choice shows only with the `folder` dev step (DEVTOOLS.md).
 
 START gives each game its side of the cable (the challenger's 0) and the
-input delay. Each sends its MegaMan (ARENA_LOADOUT: the first folder, the
+input delay. Each sends its MegaMan (ARENA_LOADOUT: the folder picked, the
 NaviCust's placed programs and grid, max and base HP, the buster,
 Regular and TagChips, Crosses, Souls and Beast Out; the pack stays home)
 and builds the pair from both, its own as the other reads it, so that the
@@ -196,6 +240,20 @@ ends within 40 ms of each other (15 s of battle). Back in the Square,
 both MegaMen stood where they had stood, the loser's word and the
 winner's in their chat boxes.
 
+**A mixed pair, BN6 rules** (the same day, protocol v4). Beta with BN5's
+ROM beside BN6's, Alpha with BN6's alone, both through the gate as above
+(seed 120's Square), each with Folder1 copied into Folder2 by the
+`folder 2` dev step and Beta's Folder1 given MrkCan1 M (`chip 411 M 1`)
+before it; `arenahp=40`. Alpha read Beta's card ("His PET holds BN5
+chips too!"), chose Battle, was asked "BN6 rules,Lan. Which folder
+goes?" between Folder1 and Folder2 and took Folder1 ("BN6 rules! Let's
+see if Beta takes us on!"). Beta heard "BN6 rules: no Souls,and BN6
+chips only.", said Yes, then "Folder1 has BN5 chips. It stays home." with
+Folder2 alone offered, and took it (`arena: we took Alpha's challenge,
+rules 0, folder 2`). The pair's hash at the Custom screen was the same on
+both (`fd2fa7d630cf9080`), the battle over at frame 1,568 with 26 hashes
+agreeing, Beta's MegaMan the winner, both back in the Square.
+
 ## Not yet
 
 - The battle's sound: the scene plays the player's core only where the
@@ -210,8 +268,10 @@ winner's in their chat boxes.
   and 2 more (6 at least); a phase of up to a tick between the two
   games' clocks comes out of that margin, and stalls show on the
   picture after 20 ticks ("Waiting for the other PET").
+- Full rules (Formats, above): BN5 in both pair cores, its chips and
+  Souls carried.
 - A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
-  Practice) and its chip forfeit, forms and Souls (refused), the pack
+  Practice) and its chip forfeit, forms and Souls (left home), the pack
   (it stays home), and any platform but the desktops: the 3DS and the
   browser build compile the Arena out (`CW_ARENA`), Android and iOS build
   it but are untried.

@@ -642,6 +642,13 @@ Identity), on the free panel nearest its anchor; play.py's state (with
 and in the world. The `identity-*` screenshots and the `identity` clip
 are made with it.
 
+The `folder` step (`--input`'s `0:folder 2`) copies MegaMan's first
+folder into Folder2 (its Regular chip and TagChips too) or, with 3, the
+Extra Folder, as a run that handed out more folders would hold them: no
+run does yet, and the Net Square's NetBattle asks which folder goes where
+more than one fits (docs/ONLINE_ARENA.md, Formats). Before a `chip` step,
+the copy keeps BN6's chips while the first folder takes the chip.
+
 The `chip` step (`--input`'s `0:chip 204 L 29`, play.py's `chip 204 L
 29`; issue #82) puts chip ID (1-511: BN6's, or one of BN5's in BN6's
 tables, docs/MULTIROM.md, The chip registry) in code CODE (a letter or

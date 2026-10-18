@@ -120,6 +120,9 @@
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
+#define BN6_NAVI_FOLDER2_REG  (BN6_NAVI_STATS + 0x2F) /* Folder2Reg: the second folder's Regular chip, its entry; 0xFF none (bn6f NaviStats) */
+#define BN6_NAVI_FOLDER2_TAG  (BN6_NAVI_STATS + 0x58) /* Folder2Tag1 and Tag2: its TagChips, their entries; 0xFF none */
+#define BN6_NAVI_FOLDER2_TAG2 (BN6_NAVI_STATS + 0x59)
 
 /* BN6's blank chip records below its last id, 0x13F (docs/ROM_DATA.md, the
  * chip records and the chip registry): no chip of BN6's, where BN5's chips

@@ -33,7 +33,7 @@ bool online_snapshot_read(OnlineLoadout *out, unsigned souls) {
 bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsigned souls) {
 	uint32_t folder = read32(m, BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	uint32_t pack = read32(m, BN6_TOOLKIT + BN6_TOOLKIT_PACK);
-	if (!out || (folder & 1u) || folder < BN6_EWRAM || folder > BN6_EWRAM_END - 2 * BN6_FOLDER_ENTRIES ||
+	if (!out || (folder & 1u) || folder < BN6_EWRAM || folder > BN6_EWRAM_END - 2 * ONLINE_FOLDERS * BN6_FOLDER_ENTRIES ||
 		pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY) return false;
 	memset(out, 0, sizeof *out);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) out->folder[i] = read16(m, folder + 2 * i);
@@ -55,6 +55,15 @@ bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsign
 	out->regular = m->read8(m->context, BN6_NAVI_FOLDER1_REG);
 	out->tag[0] = m->read8(m->context, BN6_NAVI_FOLDER1_TAG);
 	out->tag[1] = m->read8(m->context, BN6_NAVI_FOLDER1_TAG2);
+	for (unsigned k = 0; k < ONLINE_FOLDERS; ++k)
+		for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) out->folders[k][i] = read16(m, folder + 2 * (k * BN6_FOLDER_ENTRIES + i));
+	memset(out->regulars, 0xFF, sizeof out->regulars);
+	memset(out->tags, 0xFF, sizeof out->tags);
+	out->regulars[0] = out->regular;
+	out->tags[0][0] = out->tag[0]; out->tags[0][1] = out->tag[1];
+	out->regulars[1] = m->read8(m->context, BN6_NAVI_FOLDER2_REG);
+	out->tags[1][0] = m->read8(m->context, BN6_NAVI_FOLDER2_TAG);
+	out->tags[1][1] = m->read8(m->context, BN6_NAVI_FOLDER2_TAG2);
 	for (unsigned i = 0; i < 5; ++i)
 		if (snapshot_flag(m, BN6_FLAG_HEAT_CROSS + i)) out->crosses |= (uint8_t)(1u << i);
 	out->souls = (uint8_t)souls;

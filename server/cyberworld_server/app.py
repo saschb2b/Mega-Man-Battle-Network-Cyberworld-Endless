@@ -31,6 +31,7 @@ class Player:
     social_tokens: float = 2
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
+    roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's
 
 
 class Server:
@@ -151,7 +152,7 @@ class Server:
                 finally:
                     self.connections.discard(task)
 
-    def join(self, writer, name, key, requested):
+    def join(self, writer, name, key, requested, roms=0):
         identity = self.store.identity(key)
         self.store.refresh()
         if self.store.contains("bans", identity):
@@ -169,7 +170,7 @@ class Server:
         channel = self.choose_channel(requested or (old.channel if old else 0), old.id if old else 0)
         if not channel or len(self.players) - bool(old) >= self.player_cap:
             raise protocol.ProtocolError("Square or channel is full", 7)
-        player = Player(self.next_id, name, writer, identity, channel)
+        player = Player(self.next_id, name, writer, identity, channel, roms=roms)
         self.next_id = self.next_id % 0xffffffff + 1
         if old:
             del self.players[old.id]
@@ -178,7 +179,7 @@ class Server:
             self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
-        self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, players=len(self.players))
+        self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
         return player
 
     def drop(self, player, exc, close_code=1008):

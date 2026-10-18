@@ -29,20 +29,25 @@ static void welcome(OnlineSnapshot *out) {
 static void positions(void) {
 	OnlineSnapshot out = { 0 };
 	welcome(&out);
+	enum { ONE = 2 + ONLINE_PEER_BYTES };
 	uint8_t bytes[2 + ONLINE_PEER_BYTES * 2] = { ONLINE_SNAPSHOT, 1 };
 	online_put32(bytes + 2, 2); bytes[6] = 42;
 	online_put32(bytes + 22, (uint32_t)-500); online_put32(bytes + 26, 400);
 	bytes[34] = 7; memcpy(bytes + 35, "Player-2", 8);
-	assert(online_wire_message(bytes, 51, 100, &out));
+	assert(online_wire_message(bytes, ONE, 100, &out));
 	assert(out.peer_count == 1 && out.peers[0].x == -500 && out.peers[0].y == 400 && out.peers[0].identity[0] == 42);
-	for (size_t size = 0; size < 51; ++size) assert(!online_wire_message(bytes, size, 100, &out));
-	bytes[34] = 8; assert(!online_wire_message(bytes, 51, 100, &out)); bytes[34] = 7;
-	online_put32(bytes + 22, 8193); assert(!online_wire_message(bytes, 51, 100, &out));
+	assert(out.peers[0].roms == 0);
+	/* (his ROMs besides BN6's: BN5's bit, and no other) */
+	bytes[51] = ONLINE_ROMS_BN5; assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == ONLINE_ROMS_BN5);
+	bytes[51] = 2; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[51] = 0;
+	for (size_t size = 0; size < ONE; ++size) assert(!online_wire_message(bytes, size, 100, &out));
+	bytes[34] = 8; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[34] = 7;
+	online_put32(bytes + 22, 8193); assert(!online_wire_message(bytes, ONE, 100, &out));
 	online_put32(bytes + 22, 1);
-	bytes[1] = 2; memcpy(bytes + 51, bytes + 2, ONLINE_PEER_BYTES);
+	bytes[1] = 2; memcpy(bytes + ONE, bytes + 2, ONLINE_PEER_BYTES);
 	assert(!online_wire_message(bytes, sizeof bytes, 100, &out));
-	online_put32(bytes + 51, 3); assert(!online_wire_message(bytes, sizeof bytes, 100, &out));
-	bytes[55] = 43; assert(online_wire_message(bytes, sizeof bytes, 100, &out));
+	online_put32(bytes + ONE, 3); assert(!online_wire_message(bytes, sizeof bytes, 100, &out));
+	bytes[ONE + 4] = 43; assert(online_wire_message(bytes, sizeof bytes, 100, &out));
 	bytes[1] = 8; assert(!online_wire_message(bytes, sizeof bytes, 100, &out));
 }
 

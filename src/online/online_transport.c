@@ -49,31 +49,46 @@ static struct {
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
-	uint8_t hello[80];
+	uint8_t hello[ONLINE_HELLO_BYTES + ONLINE_NAME_BYTES];
 	struct { uint8_t data[ONLINE_PROFILE_BYTES + 1]; size_t size; } queue[16];
 	unsigned queue_read, queue_write;
 	size_t hello_size;
 	uint32_t last_send, last_ping, last_receive;
 } transport;
 
+/* a ROM's 40 hex digits as its 20 bytes */
+static void sha1_bytes(const char *hex, uint8_t *out) {
+	for (size_t i = 0; i < 20; ++i) {
+		char pair[3] = { hex[i * 2], hex[i * 2 + 1], 0 };
+		out[i] = (uint8_t)strtoul(pair, NULL, 16);
+	}
+}
+
+uint8_t online_transport_roms(void) { return XR[XROM_BN5_COLONEL_US].data ? ONLINE_ROMS_BN5 : 0; }
+
+/* HELLO (shared/online/README.md): BN6's identity, and BN5's where its ROM
+ * is read (zeros where not), the server's to check and to tell the others */
 static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
 	if (!R.layout || !R.layout->code || !R.layout->sha1 || !online_wire_name(name)) return false;
 	uint8_t *out = transport.hello;
+	memset(out, 0, sizeof transport.hello);
 	out[0] = ONLINE_HELLO;
 	online_put16(out + 1, ONLINE_PROTOCOL_VERSION);
 	online_put16(out + 3, SQUARE_MAKE);
 	online_put32(out + 5, SQUARE_HASH);
 	memcpy(out + 9, R.layout->code, 4);
-	for (size_t i = 0; i < 20; ++i) {
-		char pair[3] = { R.layout->sha1[i * 2], R.layout->sha1[i * 2 + 1], 0 };
-		out[13 + i] = (uint8_t)strtoul(pair, NULL, 16);
+	sha1_bytes(R.layout->sha1, out + 13);
+	const XRom *bn5 = &XR[XROM_BN5_COLONEL_US];
+	if (online_transport_roms() & ONLINE_ROMS_BN5) {
+		memcpy(out + 33, bn5->layout->code, 4);
+		sha1_bytes(bn5->layout->sha1, out + 37);
 	}
 	size_t length = strlen(name);
-	memcpy(out + 33, identity, ONLINE_IDENTITY_BYTES);
-	online_put16(out + 49, 0);
-	out[51] = (uint8_t)length;
-	memcpy(out + 52, name, length);
-	transport.hello_size = 52 + length;
+	memcpy(out + 57, identity, ONLINE_IDENTITY_BYTES);
+	online_put16(out + 73, 0);
+	out[75] = (uint8_t)length;
+	memcpy(out + ONLINE_HELLO_BYTES, name, length);
+	transport.hello_size = ONLINE_HELLO_BYTES + length;
 	return true;
 }
 

@@ -13,15 +13,15 @@ try:
 except FileNotFoundError:
     _spec_text = (Path(__file__).resolve().parents[2] / "shared/online/protocol.json").read_text()
 SPEC = json.loads(_spec_text)
-HELLO = struct.Struct("!BHHI4s20s16sHB")
+HELLO = struct.Struct("!BHHI4s20s4s20s16sHB")
 STATE = struct.Struct("!BiiiB")
-PEER = struct.Struct("!I16siiiB16s")
+PEER = struct.Struct("!I16siiiB16sB")
 PROFILE = struct.Struct("!HHBBBHHHBHI49s")
 WELCOME = struct.Struct("!BIIHBH16sH")
 TRADE = struct.Struct("!BBIHBHB")
 TRADE_STATE = struct.Struct("!BBII16sHBHB")
-ARENA = struct.Struct("!BBIH")
-ARENA_STATE = struct.Struct("!BBII16sBB")
+ARENA = struct.Struct("!BBIHB")
+ARENA_STATE = struct.Struct("!BBII16sBBB")
 ARENA_INPUT = struct.Struct("!BIIB")
 ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
@@ -37,9 +37,11 @@ class ProtocolError(Exception):
 
 
 def read_hello(data):
+    """HELLO checked: its name, guest key, channel and the ROMs its game has
+    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came)."""
     if len(data) < HELLO.size:
         raise ProtocolError("Expected HELLO")
-    kind, version, make, square_hash, rom, digest, key, channel, length = HELLO.unpack_from(data)
+    kind, version, make, square_hash, rom, digest, rom5, digest5, key, channel, length = HELLO.unpack_from(data)
     if kind != SPEC["hello"] or len(data) != HELLO.size + length:
         raise ProtocolError("Malformed HELLO")
     if version != SPEC["version"]:
@@ -48,20 +50,25 @@ def read_hello(data):
         raise ProtocolError("Square generation mismatch", 3)
     if rom != SPEC["rom_code"].encode() or digest.hex() != SPEC["rom_sha1"]:
         raise ProtocolError("BN6 identity mismatch", 4)
+    # (BN5's: none, all zeros, or Team Colonel's exactly as BN6's is checked)
+    bn5 = any(rom5) or any(digest5)
+    if bn5 and (rom5 != SPEC["bn5_code"].encode() or digest5.hex() != SPEC["bn5_sha1"]):
+        raise ProtocolError("BN5 identity mismatch", 15)
     if not any(key):
         raise ProtocolError("A random guest key is required", 9)
     name = data[HELLO.size:]
     if not re.fullmatch(rb"[A-Za-z0-9][A-Za-z0-9 _-]{0,15}", name):
         raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
-    return name.decode("ascii").rstrip(), key, channel
+    return name.decode("ascii").rstrip(), key, channel, SPEC["roms_bn5"] if bn5 else 0
 
 
-def hello(name, key=None, channel=0, **overrides):
+def hello(name, key=None, channel=0, bn5=False, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
+    rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
     return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
                       spec["square_hash"], spec["rom_code"].encode(),
-                      bytes.fromhex(spec["rom_sha1"]), key or secrets.token_bytes(16), channel, len(name)) + name
+                      bytes.fromhex(spec["rom_sha1"]), *rom5, key or secrets.token_bytes(16), channel, len(name)) + name
 
 
 def read_state(data):
@@ -77,7 +84,7 @@ def snapshot(players, recipient):
     room = players[recipient].channel
     peers = [player for player in players.values() if player.id != recipient and player.channel == room]
     data = bytes((SPEC["snapshot"], len(peers)))
-    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode()) for p in peers)
+    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms) for p in peers)
 
 
 def read_profile(data):
@@ -106,8 +113,15 @@ def error(exc):
 
 
 def chip_valid(chip, code):
-    """BN6's own chips by id and code (A..Z, * as 26); BN5's never trade."""
+    """A chip id of BN6's tables as a game with BN5 grows them (to 511) and
+    a code (A..Z, * as 26); whose chip it is, chip_bn5 says."""
     return 1 <= chip <= SPEC["chip_last"] and 0 <= code <= SPEC["code_last"]
+
+
+def chip_bn5(chip):
+    """A chip only a game with BN5's ROM holds: past BN6's own ids, or one of
+    BN6's blank records, where BN5's chips are installed (src/emu/bn6_chips.h)."""
+    return chip > SPEC["bn6_chip_last"] or any(low <= chip <= high for low, high in SPEC["bn6_blank"])
 
 
 def read_trade(data):
@@ -130,14 +144,14 @@ def trade_state(stage, trade_id, other, identity, mine, theirs):
 def read_arena(data):
     if len(data) != ARENA.size or data[0] != SPEC["arena"]:
         raise ProtocolError("Malformed ARENA")
-    _, action, ref, latency = ARENA.unpack(data)
-    if not 1 <= action <= 4 or not ref or latency > 5000:
+    _, action, ref, latency, rules = ARENA.unpack(data)
+    if not 1 <= action <= 4 or not ref or latency > 5000 or rules > SPEC["format_full"]:
         raise ProtocolError("Invalid arena action")
-    return action, ref, latency
+    return action, ref, latency, rules
 
 
-def arena_state(stage, match_id, other, identity, side=0, delay=0):
-    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay)
+def arena_state(stage, match_id, other, identity, side=0, delay=0, rules=0):
+    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay, rules)
 
 
 def arena_relay(data):

@@ -26,9 +26,24 @@ void online_trade_reset(void) { memset(&T, 0, sizeof T); }
 
 const TradeView *online_trade_view(void) { return &T; }
 
-/* (one of BN6's own chips: never a blank record, where BN5's are installed
- * on a game with its ROM and none on one without) */
-static bool chip_ok(TradeChip c) { return c.id >= 1 && c.id <= ONLINE_CHIP_LAST && !BN6_CHIP_BLANK(c.id) && c.code <= ONLINE_CODE_LAST; }
+static bool send(int action, uint32_t ref, TradeChip give, TradeChip get);
+
+/* a chip only a game with BN5's ROM holds: past BN6's 319, or on one of
+ * its blank records, where BN5's are installed (the server's rule too,
+ * protocol.json's bn6_blank) */
+static bool online_trade_bn5(unsigned id) { return id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id); }
+
+/* a chip this game holds: one of BN6's own, or one of BN5's (on BN6's blank
+ * records and past its 319, the server's rule too) where its ROM is read and
+ * the registry has it; in a code of its record's, where the core has them */
+static bool chip_ok(TradeChip c) {
+	if (c.id < 1 || c.id > ONLINE_CHIP_LAST || c.code > ONLINE_CODE_LAST) return false;
+	if (online_trade_bn5(c.id) && (!(online_transport_roms() & ONLINE_ROMS_BN5) || !chips_bn5(c.id))) return false;
+	const uint8_t *rec = chips_record(c.id);
+	for (unsigned s = 0; rec && s < 4; ++s)
+		if (rec[BN6_CHIP_CODES + s] == c.code) return true;
+	return !rec;
+}
 
 bool online_trade_mail(const uint8_t *data, size_t size) {
 	if (size != ONLINE_TRADE_STATE_BYTES || data[0] != ONLINE_TRADE_STATE || data[1] < TRADE_OFFERED || data[1] > TRADE_CANCELLED) return false;
@@ -36,7 +51,15 @@ bool online_trade_mail(const uint8_t *data, size_t size) {
 	memcpy(v.identity, data + 10, ONLINE_IDENTITY_BYTES);
 	v.mine = (TradeChip){ get16(data + 26), data[28] };
 	v.theirs = (TradeChip){ get16(data + 29), data[31] };
-	if ((v.mine.id && !chip_ok(v.mine)) || (v.theirs.id && !chip_ok(v.theirs))) return false;
+	if (v.mine.id > ONLINE_CHIP_LAST || v.theirs.id > ONLINE_CHIP_LAST) return false;
+	/* (a chip this game cannot hold, BN5's where its ROM is not read: the
+	 * trade called off, never kept; the server refuses such a pair too) */
+	if ((v.mine.id && !chip_ok(v.mine)) || (v.theirs.id && !chip_ok(v.theirs))) {
+		fprintf(stderr, "online: trade %u names a chip this game cannot hold (%u %u for %u %u): called off\n", v.id,
+			v.mine.id, v.mine.code, v.theirs.id, v.theirs.code);
+		if (v.stage != TRADE_DONE && v.stage != TRADE_CANCELLED) send(4, v.id, (TradeChip){ 0, 0 }, (TradeChip){ 0, 0 });
+		return true;
+	}
 	v.serial = T.serial + 1;
 	T = v;
 	return true;
@@ -65,10 +88,12 @@ bool online_trade_cancel(void) {
 
 /* ---- the Pack ---- */
 
+/* (ids from BN6_PACK_IDS in the pack's extension, where a game with BN5's
+ * ROM counts its chips: docs/EMULATION.md) */
 static uint32_t pack_entry(unsigned id) {
 	uint32_t pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
-	if (pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY || id >= BN6_PACK_IDS) return 0;
-	return pack + id * BN6_PACK_ENTRY;
+	if (pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY || id > ONLINE_CHIP_LAST) return 0;
+	return id < BN6_PACK_IDS ? pack + id * BN6_PACK_ENTRY : BN6_PACK_EXT + (id - BN6_PACK_IDS) * BN6_PACK_ENTRY;
 }
 
 /* how many copies of (id, code) MegaMan's three folders hold */
@@ -83,18 +108,21 @@ static int in_folders(TradeChip c) {
 	return n;
 }
 
-int online_trade_spares(TradeChip *out, uint8_t *count, int cap) {
+int online_trade_spares(TradeChip *out, uint8_t *count, int cap, bool bn5, int *held_back) {
 	int n = 0;
+	if (held_back) *held_back = 0;
 	for (unsigned id = 1; id <= ONLINE_CHIP_LAST && n < cap; ++id) {
 		const uint8_t *rec = chips_record((int)id);
 		uint32_t at = pack_entry(id);
-		if (!rec || !at || chips_bn5((int)id)) continue;
+		if (!rec || !at || (online_trade_bn5(id) && !chips_bn5((int)id))) continue;
 		for (unsigned s = 0; s < 4 && n < cap; ++s) {
 			uint8_t code = rec[BN6_CHIP_CODES + s], have = emu_read8(at + s);
 			if (code > ONLINE_CODE_LAST || !have) continue;
 			TradeChip c = { (uint16_t)id, code };
 			int spare = have - in_folders(c);
-			if (spare <= 0) continue;
+			if (spare <= 0 || !chip_ok(c)) continue;
+			/* (BN5's, for a partner whose game has not its ROM: kept back) */
+			if (online_trade_bn5(id) && !bn5) { if (held_back) ++*held_back; continue; }
 			out[n] = c;
 			count[n++] = (uint8_t)(spare > 99 ? 99 : spare);
 		}
@@ -166,10 +194,12 @@ const char *online_trade_settle(void) {
 		online_trade_settled();
 		return NULL;
 	}
+	int got_had = pack_count(get);
 	game_call_ret(BN6_TAKE_CHIPS, give.id, give.code, 1, NULL);
 	game_call_ret(BN6_GIVE_CHIPS, get.id, get.code, 1, NULL);
-	fprintf(stderr, "online: trade settled: %u %u given, %u %u got (the Pack's %d to %d)\n", give.id, give.code, get.id, get.code,
-		had, pack_count(give));
+	/* (ids from 320 count in the pack's extension: BN6's routines patched to, docs/EMULATION.md) */
+	fprintf(stderr, "online: trade settled: %u %u given, %u %u got (the Pack's %d to %d of the one, %d to %d of the other)\n",
+		give.id, give.code, get.id, get.code, had, pack_count(give), got_had, pack_count(get));
 	char gave[32], got[32];
 	chip_words(give, gave, sizeof gave);
 	chip_words(get, got, sizeof got);
