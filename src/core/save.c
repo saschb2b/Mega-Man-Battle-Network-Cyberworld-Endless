@@ -173,9 +173,20 @@ void save_delete(void) {
 bool save_can_visit(void) { return !backup_blocked() && online_trade_gate_transfer(g_data_dir); }
 bool save_playable(void) { return !backup_blocked() && online_trade_gate_playable(); }
 
+static bool new_run_previous;
+
 bool save_new_run_ready(void) {
 	save_queue_wait();
-	return !backup_blocked() && online_trade_gate_new_run(run.seed);
+	bool previous = save_exists();
+	if (backup_blocked() || !online_trade_gate_new_run(run.seed)) return false;
+	new_run_previous = previous;
+	return true;
+}
+
+bool save_abandon_previous(void) {
+	save_queue_wait();
+	if (backup_blocked() || !online_trade_gate_abandon_previous()) save_write_failed();
+	return new_run_previous;
 }
 
 void profile_save(void) { save_write_blob("profile.sav", PROFILE_MAGIC, &profile, sizeof profile); }

@@ -185,6 +185,10 @@ static void gate_lifecycle(void) {
 	CHECK(online_trade_gate_state() == TRADE_GATE_CLEAR && online_trade_gate_playable());
 	CHECK(online_trade_gate_new_run(17));
 	CHECK(online_trade_gate_state() == TRADE_GATE_NEW_RUN);
+	/* director_start_run abandons the old checkpoint after title NEW
+	 * GAME has reserved the new identity, before its first saved layer. */
+	CHECK(online_trade_gate_abandon_previous());
+	CHECK(online_trade_gate_state() == TRADE_GATE_NEW_RUN && kind(f.root, "trade.newrun") == 1);
 	CHECK(online_trade_gate_read("profile.sav") && !online_trade_gate_read("run.sav"));
 	CHECK(!online_trade_gate_transfer(f.root));
 	CHECK(!online_trade_gate_checkpoint(false) && online_trade_gate_state() == TRADE_GATE_NEW_RUN);
@@ -192,6 +196,7 @@ static void gate_lifecycle(void) {
 	CHECK(online_trade_gate_state() == TRADE_GATE_NEW_RUN);
 	CHECK(online_trade_gate_checkpoint(true));
 	CHECK(online_trade_gate_state() == TRADE_GATE_CLEAR && online_trade_gate_admit(f.root));
+	CHECK(kind(f.current, "run.trade") == 1 && kind(f.root, "trade.newrun") == 0);
 	CHECK(online_trade_history_missing(f.root, 17) == TRADE_HISTORY_STALE);
 	CHECK(online_trade_gate_end_run() && online_trade_gate_state() == TRADE_GATE_CLEAR);
 	CHECK(kind(f.current, "run.sav") == 0 && kind(f.current, "run.state") == 0 && kind(f.current, "run.trade") == 0);
@@ -206,12 +211,45 @@ static void gate_lifecycle(void) {
 	CHECK(!online_trade_gate_new_run(19));
 	CHECK(online_trade_gate_discard() && online_trade_gate_state() == TRADE_GATE_CLEAR);
 	bytes_match(f.current, "profile.sav", profile, sizeof profile);
+	/* Deliberate loss in the initial town still retires an unbound run. */
+	CHECK(online_trade_gate_new_run(19));
+	CHECK(online_trade_gate_end_run() && online_trade_gate_state() == TRADE_GATE_CLEAR);
+	CHECK(kind(f.root, "trade.newrun") == 0);
 	CHECK(put(f.root, "trade.pending", state, sizeof state));
 	CHECK(!online_trade_gate_recover() && online_trade_gate_state() == TRADE_GATE_BLOCKED);
 	CHECK(!online_trade_gate_transfer(f.root) && !online_trade_gate_discard());
 	CHECK(remove_file(f.root, "trade.pending") && online_trade_gate_recover());
 	CHECK(put(f.root, "trade.history", state, sizeof state));
 	CHECK(!online_trade_gate_recover() && online_trade_gate_state() == TRADE_GATE_BLOCKED);
+	erase(f.root);
+}
+
+
+static void gate_pending_copy(void) {
+	Fixture f;
+	CHECK(fixture(&f));
+	CHECK(online_trade_identity_intent(f.root, 17, fresh_id));
+	CHECK(online_trade_identity_bind(f.root, f.content));
+	OnlineTradeTerms terms = { .server = {1}, .transaction = {2}, .side = {
+		{.identity = {3}, .chip = 1}, {.identity = {4}, .run_id = {6}, .checkpoint = {8}, .chip = 2} } };
+	memcpy(terms.side[0].run_id, fresh_id, sizeof fresh_id);
+	CHECK(trade_files_hash(f.current, false, terms.side[0].checkpoint));
+	const OnlineTradeReplacement same = {"run.state", state, sizeof state};
+	CHECK(online_trade_journal_prepare(f.root, &terms, 0, &same, 1));
+	online_trade_gate_start(f.root);
+	CHECK(online_trade_gate_state() == TRADE_GATE_PENDING && !online_trade_gate_playable());
+	OnlineTradeJournal pending;
+	CHECK(!online_trade_gate_pending(NULL) && online_trade_gate_pending(&pending));
+	CHECK(pending.state == TRADE_JOURNAL_PREPARED && pending.side == 0);
+	CHECK(!memcmp(pending.source, terms.side[0].checkpoint, sizeof pending.source));
+	uint8_t expected[32], actual[32];
+	CHECK(online_trade_terms_digest(&terms, expected) && online_trade_terms_digest(&pending.terms, actual));
+	CHECK(!memcmp(expected, actual, sizeof expected));
+	pending.terms.transaction[0] ^= 1;
+	CHECK(online_trade_gate_pending(&pending));
+	CHECK(online_trade_terms_digest(&pending.terms, actual) && !memcmp(expected, actual, sizeof expected));
+	CHECK(online_trade_journal_decide(f.root, &terms, false) == TRADE_JOURNAL_CLEAR);
+	CHECK(online_trade_gate_recover() && !online_trade_gate_pending(&pending));
 	erase(f.root);
 }
 
@@ -356,7 +394,7 @@ static void installed_receipt_survives_progress(void) {
 
 int test_online_trade_identity(void) {
 	failures = 0;
-	intent_and_binding(); explicit_discard(); legacy_migration(); invalid_source(); gate_lifecycle();
+	intent_and_binding(); explicit_discard(); legacy_migration(); invalid_source(); gate_lifecycle(); gate_pending_copy();
 #ifdef CW_TRADE_FILES_TEST
 	recovery_must_certify(); installed_receipt_survives_progress();
 	for (Operation op = INTENT; op <= RECOVER; ++op) fault_sweep(op);

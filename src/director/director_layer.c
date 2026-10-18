@@ -429,8 +429,7 @@ bool director_start_run(void) {
 	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
-	bool abandoned = save_exists();
-	save_delete();
+	bool abandoned = save_abandon_previous();
 	/* the first layer, behind Lan's HP's portal, which the town's port
 	 * reaches (director_home.c) */
 	if (!new_layer(false)) return false;

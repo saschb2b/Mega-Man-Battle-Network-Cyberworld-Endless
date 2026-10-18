@@ -130,6 +130,10 @@ bool online_trade_gate_end_run(void) {
 	return true;
 }
 
+bool online_trade_gate_abandon_previous(void) {
+	return state == TRADE_GATE_NEW_RUN || online_trade_gate_end_run();
+}
+
 bool online_trade_gate_read(const char *name) {
 	if (!online_trade_gate_playable()) return false;
 	return state != TRADE_GATE_NEW_RUN || (name && (!strcmp(name, "profile.sav") || !strcmp(name, "rivals.sav")));

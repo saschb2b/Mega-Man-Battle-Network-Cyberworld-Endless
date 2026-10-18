@@ -157,6 +157,9 @@ void profile_played_frame(void);
 bool run_new_varied(uint32_t seed);
 /* After a direct developer start selected its run, before core play. */
 bool save_new_run_ready(void);
+/* Director NEW GAME startup: retire the old checkpoint while preserving
+ * the live first-save intent. Returns whether there was a run to abandon. */
+bool save_abandon_previous(void);
 bool save_can_visit(void);
 bool save_playable(void);
 void profile_record_run(void);

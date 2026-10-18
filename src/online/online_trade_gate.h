@@ -27,6 +27,9 @@ bool online_trade_gate_new_run(uint32_t seed);
  * keep the live core; do not claim a checkpoint or start an online visit. */
 bool online_trade_gate_checkpoint(bool writes_succeeded);
 bool online_trade_gate_discard(void);
+/* NEW GAME's director startup abandons the old checkpoint but must keep
+ * the live first-save intent. Unsupported storage retires the old files. */
+bool online_trade_gate_abandon_previous(void);
 /* Explicit completed/lost run only, queue drained. Retains durable
  * receipt history before removing the ended checkpoint and its receipt. */
 bool online_trade_gate_end_run(void);
