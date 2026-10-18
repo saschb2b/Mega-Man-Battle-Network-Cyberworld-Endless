@@ -378,45 +378,8 @@ Each start opens with the developer's boot screen and a note from MegaMan
 on where to report bugs and ideas: the project's GitHub page, with a QR
 code for a phone's camera. Any button skips them.
 
-On the title screen, press Start and choose **NEW GAME**, **CONTINUE**, or
-**NETWORK**. CONTINUE shows how deep your saved run is; the corner shows your
-best depth.
-
-<a id="network"></a>
-
-**NETWORK** opens the Net Square, a shared place to meet other Navis. Choose
-**NAME** to set your display name. The official server always comes first,
-labelled **OFFICIAL**; its address stays fixed. Left and Right, or the arrow
-buttons on that row, switch saved addresses; **ADD A SERVER** keeps a custom address,
-up to four alongside the official server. A edits a selected custom server. Type
-with a keyboard, tap the letters, or use the D-pad and A; L erases a letter,
-Start keeps the field, and B cancels.
-
-**JOIN SQUARE** asks before the first connection to each server. Other
-players see your name, movement and Navi setup; the server receives your
-network address and an identity specific to that server. Opening NETWORK
-alone does not connect. Your name, servers and private identity stay in
-`network.ini` beside the settings; the private identity itself is never
-sent. Your ROM and save remain on your device.
-
-Between acts, R at Lan's PC offers **JACK IN**, **NETWORK**, or **CANCEL**.
-NETWORK saves your current home progress and position first, including
-shopping and requests. If the save fails, Lan stays at the PC so you can
-retry. Back from NETWORK and leaving the Square return to that PC save.
-Before the first act, R keeps its usual jack-in.
-
-<img src="screenshots/network-pc.png" width="240" alt="Lan's PC between acts: Jack in, Network, and Cancel; Network saves here first.">
-
-The Square borrows MegaMan's setup from your last checkpoint. Without a saved
-run, you visit as a fresh MegaMan using the title's remembered starting folder,
-Cross and helpers, restricted to choices you have unlocked. This creates no
-run and gives no starting gifts or progress. Choose
-**LEAVE SQUARE** from its Start menu to continue that checkpoint; with no saved
-run, leaving goes to the title. The visit does not advance or overwrite your
-offline run. There are no battles or trades in this first version. A opens
-the list of Navis to inspect their setups, send a preset phrase or emote,
-or mute or block someone. Start also opens the Square menu. Community
-operators can host their own server; see the [server guide](../server/README.md).
+On the title screen, press Start and choose **NEW GAME** or **CONTINUE**.
+CONTINUE shows how deep your saved run is; the corner shows your best depth.
 
 In the net, the buttons are the Game Boy Advance's and BN6 plays as it always
 has. On a keyboard the layout is the one Capcom's PC version (the Legacy
