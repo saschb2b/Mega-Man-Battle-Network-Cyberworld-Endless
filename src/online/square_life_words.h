@@ -21,6 +21,7 @@ typedef struct {
 	const char *fought;     /* ... and fought a NetBattle with, NULL none */
 	int result;             /* that battle's: 1 won, 2 lost, else over */
 	bool arena;             /* this build offers NetBattles (not the 3DS's, the browser's) */
+	bool parade;            /* the walkers are on parade round the landmark */
 	unsigned turn;          /* which line this time */
 } SquareFacts;
 
@@ -35,7 +36,8 @@ const char *square_walker_words(int k, const SquareFacts *f);
 /* A prop checked: its LOOK_* (the Board's posts, the sign's words). */
 const char *square_check_words(int look, const SquareFacts *f);
 /* Over the ambient Navis' heads when MegaMen emote together at the
- * landmark or on the stage. */
+ * landmark or on the stage, and over the first as a parade begins. */
 const char *square_cheer_bark(void);
+const char *square_parade_bark(void);
 
 #endif

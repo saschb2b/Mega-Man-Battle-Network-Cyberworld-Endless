@@ -154,12 +154,14 @@ static void square_reach(const SquarePlan *p) {
 	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p->cell[y][x] == C_PATH;
 	assert(reached == floor);
 	for (int k = 0; k < SQ_PLACES; ++k) assert(p->cell[p->at[k][1]][p->at[k][0]] != C_VOID);
-	/* each walker's legs along a grid axis over ground floor, none
-	 * through a hole */
-	for (int w = 0; w < SQUARE_WALKERS; ++w) {
-		assert(p->route_len[w] >= 2 && p->route_len[w] <= SQUARE_ROUTE);
-		for (int k = 0; k < p->route_len[w]; ++k) {
-			const int *a = p->route[w][k], *b = p->route[w][(k + 1) % p->route_len[w]];
+	/* each walker's legs, and the parade's, along a grid axis over
+	 * ground floor, none through a hole */
+	for (int w = 0; w <= SQUARE_WALKERS; ++w) {
+		int len = w < SQUARE_WALKERS ? p->route_len[w] : 4;
+		assert(len >= 2 && len <= SQUARE_ROUTE);
+		for (int k = 0; k < len; ++k) {
+			const int *a = w < SQUARE_WALKERS ? p->route[w][k] : p->parade[k];
+			const int *b = w < SQUARE_WALKERS ? p->route[w][(k + 1) % len] : p->parade[(k + 1) % len];
 			assert(a[0] == b[0] || a[1] == b[1]);
 			int steps = abs(b[0] - a[0]) + abs(b[1] - a[1]);
 			for (int i = 0; i <= steps; ++i) {

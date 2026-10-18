@@ -751,7 +751,8 @@ monument or a giant cybertree, by the server), a stage up a stair, the
 log-in plaza with its board and the pad home, Trade Central, and the
 Arena's ring with room to watch from. In Sky Area's Square the stage and
 the ring stand raised. A greeter Mr.Prog calls out who logs in, two
-Navis stroll about and chat about who's here and what just happened,
+Navis stroll about and chat about who's here and what just happened
+(and every three minutes they parade round the landmark: walk with them),
 and A on a tree, the landmark, the sign or the board says what it is
 (the board lists who's here and the last trade and NetBattle). Say
 something or emote together with another player round the landmark or

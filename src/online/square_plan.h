@@ -18,7 +18,7 @@
  * SQUARE_HASH beside it is square_plan_hash of seed 120's plan, which the
  * unit tests hold the generator to. */
 #define SQUARE_MAKE 2
-#define SQUARE_HASH 0x51FB543Cu
+#define SQUARE_HASH 0x271555DCu
 
 #define SQUARE_W 36
 #define SQUARE_H 36
@@ -51,6 +51,7 @@ typedef struct {
 	 * walked round in order, each leg along a grid axis */
 	int route[SQUARE_WALKERS][SQUARE_ROUTE][3];
 	int route_len[SQUARE_WALKERS];
+	int parade[4][2];   /* the walkers' parade round the landmark: its corners, walked in order */
 } SquarePlan;
 
 /* The plan for server seed `seed`. */

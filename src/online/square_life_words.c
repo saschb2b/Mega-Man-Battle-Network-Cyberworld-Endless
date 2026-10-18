@@ -75,7 +75,16 @@ static int girl_lines(const char **out, char (*buf)[96], const SquareFacts *f) {
 	return n;
 }
 
+/* on parade: the parade comes first */
+static const char *parade_line(int k, const SquareFacts *f) {
+	static char s[96];
+	if (!k) return "Left,right! Left,right!\nCome on,join the\nparade!";
+	snprintf(s, sizeof s, "Parade time! Walk\nround the %s\nwith us!", landmark_name(f->landmark));
+	return s;
+}
+
 const char *square_walker_words(int k, const SquareFacts *f) {
+	if (f->parade) return parade_line(k, f);
 	static char buf[8][96];
 	const char *lines[8];
 	int n = k ? girl_lines(lines, buf, f) : green_lines(lines, buf, f);
@@ -113,3 +122,5 @@ const char *square_check_words(int look, const SquareFacts *f) {
 }
 
 const char *square_cheer_bark(void) { return "!!"; }
+
+const char *square_parade_bark(void) { return "Parade time!"; }

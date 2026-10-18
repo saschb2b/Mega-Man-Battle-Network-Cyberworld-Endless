@@ -123,6 +123,9 @@ static void places(SquarePlan *p) {
 	memcpy(p->route, routes, sizeof routes);
 	p->route_len[0] = 4;
 	p->route_len[1] = 8;
+	/* (the parade: three panels out from the landmark, inside its ring) */
+	static const int parade[4][2] = { { MID - 3, MID - 3 }, { MID + 3, MID - 3 }, { MID + 3, MID + 3 }, { MID - 3, MID + 3 } };
+	memcpy(p->parade, parade, sizeof parade);
 }
 
 void square_plan(uint32_t seed, SquarePlan *out) {
@@ -161,5 +164,6 @@ uint32_t square_plan_hash(const SquarePlan *p) {
 		h = mix_ints(h, (const int[4]){ p->props[i].kind, p->props[i].x, p->props[i].y, p->props[i].look }, 4);
 	h = mix_ints(h, &p->route[0][0][0], SQUARE_WALKERS * SQUARE_ROUTE * 3);
 	h = mix_ints(h, p->route_len, SQUARE_WALKERS);
+	h = mix_ints(h, &p->parade[0][0], 8);
 	return (h ^ (uint8_t)p->area) * 16777619u;
 }

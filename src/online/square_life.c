@@ -20,6 +20,9 @@
 #include "trade_central.h"
 
 #define WALKER_PHASE 977   /* frames the second walker's round runs behind the first's */
+#define PARADE_EVERY (180 * 60)   /* a parade every three minutes of the wall clock, */
+#define PARADE_LONG (30 * 60)     /* thirty seconds long, */
+#define PARADE_GAP 64             /* the walkers two panels apart */
 #define BEAM_FRAMES 48     /* BN6's log-in beam shown so long */
 #define BEAM_SOUND 0x76    /* ... and its sound (stage_npc.c's) */
 #define CHEER_SOUND 0x94   /* BN6's sparkle as something shows (stage_npc.c's SOUND_APPEAR) */
@@ -37,7 +40,9 @@ typedef struct { int x[SQUARE_ROUTE], y[SQUARE_ROUTE], len[SQUARE_ROUTE], pause[
 static struct {
 	bool ready;
 	OnlineSnapshot s;
-	Route route[SQUARE_WALKERS];
+	Route route[SQUARE_WALKERS], parade;
+	bool parading;
+	int hide_t;   /* frames the walkers stay hidden, logging in to or out of the parade */
 	int wx[SQUARE_WALKERS], wy[SQUARE_WALKERS], talking;
 	time_t second;
 	unsigned sub, frames, turn;
@@ -85,32 +90,36 @@ static int face_to(int dx, int dy) {
 	return best;
 }
 
-/* the plan's routes in world units, their pauses in frames */
+/* a loop of `n` panels' corners as a route in world units, its pauses in
+ * frames (seconds given, or none) */
+static void route_of(Route *r, const int (*at)[3], const int (*corners)[2], int n) {
+	r->period = 0;
+	r->n = n;
+	for (int i = 0; i < n; ++i) {
+		netmap_world(at ? at[i][0] : corners[i][0], at ? at[i][1] : corners[i][1], &r->x[i], &r->y[i]);
+		r->pause[i] = at ? at[i][2] * 60 : 0;
+	}
+	for (int i = 0; i < n; ++i) {
+		int j = (i + 1) % n;
+		r->len[i] = abs(r->x[j] - r->x[i]) + abs(r->y[j] - r->y[i]);
+		r->period += (uint32_t)(r->pause[i] + r->len[i]);
+	}
+}
+
+/* the plan's routes and its parade in world units */
 static void setup(void) {
 	const SquarePlan *p = online_square_plan();
-	for (int k = 0; k < SQUARE_WALKERS; ++k) {
-		Route *r = &L.route[k];
-		r->period = 0;
-		r->n = p->route_len[k];
-		for (int i = 0; i < r->n; ++i) {
-			netmap_world(p->route[k][i][0], p->route[k][i][1], &r->x[i], &r->y[i]);
-			r->pause[i] = p->route[k][i][2] * 60;
-		}
-		for (int i = 0; i < r->n; ++i) {
-			int j = (i + 1) % r->n;
-			r->len[i] = abs(r->x[j] - r->x[i]) + abs(r->y[j] - r->y[i]);
-			r->period += (uint32_t)(r->pause[i] + r->len[i]);
-		}
-	}
+	for (int k = 0; k < SQUARE_WALKERS; ++k) route_of(&L.route[k], (const int (*)[3])p->route[k], NULL, p->route_len[k]);
+	route_of(&L.parade, NULL, (const int (*)[2])p->parade, 4);
 	L.event_serial = L.s.event_serial;
 	L.ready = true;
 }
 
-/* walker k at frame t of the wall clock: standing at a waypoint facing the
- * next, then walking to it a world unit a frame */
-static void walker_at(int k, uint64_t t, int *x, int *y, int *anim) {
-	const Route *r = &L.route[k];
-	uint32_t ph = r->period ? (uint32_t)((t + (uint64_t)k * WALKER_PHASE) % r->period) : 0;
+static bool parade_on(uint64_t t) { return t % PARADE_EVERY < PARADE_LONG; }
+
+/* where on route `r` a walker is `ph` frames into its round: standing at a
+ * waypoint facing the next, then walking to it a world unit a frame */
+static void route_at(const Route *r, uint32_t ph, int *x, int *y, int *anim) {
 	*x = r->x[0]; *y = r->y[0]; *anim = 3;
 	for (int i = 0; i < r->n; ++i) {
 		int j = (i + 1) % r->n, dx = r->x[j] - r->x[i], dy = r->y[j] - r->y[i], face = face_to(dx, dy);
@@ -126,7 +135,39 @@ static void walker_at(int k, uint64_t t, int *x, int *y, int *anim) {
 	}
 }
 
+/* walker k at frame t of the wall clock: on his route, or in the parade,
+ * the second two panels behind the first */
+static void walker_at(int k, uint64_t t, int *x, int *y, int *anim) {
+	if (parade_on(t) && L.parade.period) {
+		uint32_t into = (uint32_t)(t % PARADE_EVERY), back = (uint32_t)k * PARADE_GAP % L.parade.period;
+		route_at(&L.parade, (into + L.parade.period - back) % L.parade.period, x, y, anim);
+		return;
+	}
+	const Route *r = &L.route[k];
+	route_at(r, r->period ? (uint32_t)((t + (uint64_t)k * WALKER_PHASE) % r->period) : 0, x, y, anim);
+}
+
+static void bark(const char *text, int x, int y, int z, int on);
+
+/* the parade begun or ended: the walkers log out where they were and in
+ * where they go (BN6's beam where the first does), the first's word as
+ * it begins */
+static void parade_turn(uint64_t t) {
+	bool on = parade_on(t);
+	if (on == L.parading) return;
+	L.parading = on;
+	if (L.frames <= 1) return;   /* (as MegaMan arrives: they are where they are) */
+	L.hide_t = BEAM_FRAMES;
+	int x, y, anim;
+	walker_at(0, t, &x, &y, &anim);
+	L.beam_want = 0;
+	L.beam[0] = x; L.beam[1] = y; L.beam[2] = 0;
+	if (on) bark(square_parade_bark(), x, y, 0, 0);
+}
+
 static void walkers(uint64_t t) {
+	parade_turn(t);
+	if (L.hide_t) --L.hide_t;
 	for (int k = 0; k < SQUARE_WALKERS; ++k) {
 		int x, y, anim;
 		if (L.talking == k && talk_busy()) {
@@ -138,7 +179,7 @@ static void walkers(uint64_t t) {
 			walker_at(k, t, &x, &y, &anim);
 		}
 		L.wx[k] = x; L.wy[k] = y;
-		online_square_actor(SQUARE_ACTOR_WALKER0 + k, true, anim, x, y, 0);
+		online_square_actor(SQUARE_ACTOR_WALKER0 + k, !L.hide_t, anim, x, y, 0);
 	}
 }
 
@@ -294,6 +335,7 @@ static void facts(SquareFacts *f) {
 	f->traded = trade_central_last();
 	f->result = (int)square_arena_last(&f->fought);
 	f->arena = square_arena_offered();
+	f->parade = L.parading;
 	f->turn = L.turn;
 }
 

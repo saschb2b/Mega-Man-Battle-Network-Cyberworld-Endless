@@ -159,6 +159,15 @@ every place and every walker's waypoint on the floor.
   knows: the Navis here by name, how many, the hour, the area, the last
   Navi to log in, the last trade and NetBattle this game made; the
   GirlNavi tells the Square's tips as gossip.
+- **A parade** every three minutes of the wall clock, thirty seconds
+  long (after the Pokemon Wi-Fi Plaza's spectacle and the fan servers'
+  parades): the walkers log out where they are and in on a loop three
+  panels round the landmark, BN6's beam where the first does and his
+  "Parade time!" over his head, and walk round it two panels apart
+  without stopping; then they log back in on their routes. Their talk
+  meanwhile is the parade's. Every client whose clock agrees sees the
+  same parade, and players who walk with it stand round the landmark,
+  where saying something together makes the Square cheer.
 - **BN6's log-in beam** (list 7's sprite 0, sound 0x76) where a Navi
   logs in or out, one NPC for all, and the **greeter**'s word over his
   head ("ALPHA LOGGED IN!"). His own words, and the **referee**'s (how
