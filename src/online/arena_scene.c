@@ -134,11 +134,35 @@ static void draw_core(const uint32_t *v) {
 	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
 }
 
+#define NOTE_LINES 4
+
+/* `text` broken at its spaces into lines as wide as the picture: how many */
+static int wrap(const char *text, char lines[NOTE_LINES][192]) {
+	int n = 0;
+	lines[0][0] = 0;
+	for (const char *p = text; *p && n < NOTE_LINES;) {
+		const char *end = p;
+		while (*end && *end != ' ') ++end;
+		char word[96];
+		snprintf(word, sizeof word, "%.*s", (int)(end - p), p);
+		char joined[192];
+		snprintf(joined, sizeof joined, "%s%s%s", lines[n], *lines[n] ? " " : "", word);
+		if (*lines[n] && text_width(joined) > ARENA_W - 8) {
+			if (++n == NOTE_LINES) break;
+			snprintf(lines[n], sizeof lines[n], "%s", word);
+		} else snprintf(lines[n], sizeof lines[n], "%s", joined);
+		p = *end ? end + 1 : end;
+	}
+	return n < NOTE_LINES ? n + 1 : n;
+}
+
 static void draw_note(const char *line, const char *second) {
-	int y = P.core_y + ARENA_H - (second ? 28 : 16);
-	fill_rect(P.core_x, y, ARENA_W, second ? 28 : 16, rgba(0, 0, 0, 200));
+	char lines[NOTE_LINES][192];
+	int n = second ? wrap(second, lines) : 0, h = 16 + 12 * n;
+	int y = P.core_y + ARENA_H - h;
+	fill_rect(P.core_x, y, ARENA_W, h, rgba(0, 0, 0, 200));
 	text_draw(P.w / 2, y + 3, line, WHITE, TEXT_CENTER);
-	if (second) text_draw(P.w / 2, y + 15, second, rgba(170, 200, 255, 255), TEXT_CENTER);
+	for (int i = 0; i < n; ++i) text_draw(P.w / 2, y + 15 + 12 * i, lines[i], rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
 static void draw_connecting(void) {
