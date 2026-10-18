@@ -360,6 +360,7 @@ static void start_scene(const Options *o) {
 	 * exit takes it (docs/HOME.md) */
 	bool home = !strcmp(o->start_scene, "home");
 	const Scene *s = town || home ? &scene_emu : scene_by_name(o->start_scene);
+	if (dev.arena) s = &scene_arena;   /* (--dev arena: src/online/arena_scene.c) */
 	int net = town ? RUN_SHORT : RUN_ENDLESS, folder = 0, threat = 0, helpers = 0, cross = 0;
 	if (o->setup_spec) {
 		net = !strncmp(o->setup_spec, "short", 5) ? RUN_SHORT : RUN_ENDLESS;

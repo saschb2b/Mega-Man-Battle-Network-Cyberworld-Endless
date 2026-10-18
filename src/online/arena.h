@@ -1,0 +1,54 @@
+/* The Arena (issue #120, docs/ONLINE_ARENA.md): a NetBattle of BN6's own
+ * between two players, each client running both linked cores and only
+ * the players' keys crossing between them (arena_link.h). This is its
+ * local engine: the way in (arena_boot.h), then the battle in lockstep,
+ * frame by frame as both players' keys come, its state hashed now and
+ * then and the hashes compared, a difference said and the battle stopped.
+ * Its scene is --dev arena's (arena_scene.c). */
+#ifndef CW_ARENA_H
+#define CW_ARENA_H
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "arena_link.h"
+
+#include "online_snapshot.h"
+
+#define ARENA_HASH_EVERY 60   /* frames of the pair between two hashes compared */
+
+typedef enum {
+	ARENA_CONNECTING,   /* the way in: arena_connect until it is done */
+	ARENA_BATTLE,       /* the battle: arena_tick once a tick */
+	ARENA_OVER,         /* back at the Comm menu: arena_result says how it went */
+	ARENA_FAILED,       /* (the reason: arena_error) */
+} ArenaStage;
+
+typedef struct Arena Arena;
+
+/* An Arena over `link` (mine: link->side), loadout[side] each side's
+ * MegaMan (NULL: the game's start's); NULL where memory ran out */
+Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link);
+void arena_free(Arena *a);
+/* Up to `frames` frames of the way in */
+ArenaStage arena_connect(Arena *a, unsigned frames);
+/* One tick of the battle with my keys: the link's messages, then the
+ * pair's frames whose keys have all come (none: a stall, counted) */
+ArenaStage arena_tick(Arena *a, uint16_t keys);
+ArenaStage arena_stage(const Arena *a);
+const char *arena_error(const Arena *a);
+/* the way in's progress, 0-100 */
+int arena_progress(const Arena *a);
+/* my core's picture (ARENA_W x ARENA_H), NULL before the battle */
+const uint32_t *arena_video(const Arena *a);
+/* side's core's battle phase (BN6_BATTLE_PHASE), 0 before the battle */
+unsigned arena_phase(const Arena *a, unsigned side);
+/* my result once OVER: 1 won, 2 lost (BN6_BATTLE_RESULT), 0 none */
+unsigned arena_result(const Arena *a);
+/* the ticks stalled, waiting for the peer's keys */
+uint32_t arena_stalls(const Arena *a);
+/* my core's sound into the game's */
+void arena_sound(Arena *a);
+
+#endif
