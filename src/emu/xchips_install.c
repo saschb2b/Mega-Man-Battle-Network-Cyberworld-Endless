@@ -13,6 +13,7 @@
 #include "rom.h"
 #include "xchips_code.h"
 #include "xchips_registry.h"
+#include "xinstall_log.h"
 #include "xchips_record.h"
 #include "xvirus_tx.h"
 
@@ -216,7 +217,7 @@ static void write_all(const uint8_t *img, uint32_t len) {
 	}
 }
 
-bool xchips_install(void) {
+static bool install(void) {
 	if (!emu_ready() || !R.data || !R.layout) return false;
 	/* (BN5's chips' moved code where its ROM is read: the families its moved chips' records name; again it does nothing) */
 	xchips_code_install();
@@ -247,4 +248,12 @@ bool xchips_install(void) {
 	chips_installed(true);
 	if (emu_debug_on()) fprintf(stderr, "chips: 512 records, names and art in the core's copy (%u bytes, BN5's %s)\n", (unsigned)len, rom5 ? "read" : "placeholders");
 	return true;
+}
+
+bool xchips_install(void) {
+	/* (written down for the Arena's cores as they are made: xinstall_log.h) */
+	xlog_begin();
+	bool ok = install();
+	xlog_end();
+	return ok;
 }

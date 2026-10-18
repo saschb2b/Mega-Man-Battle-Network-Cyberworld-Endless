@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "bn6.h"
+#include "protocol.h"
 
 #define CHIP_ID(e)   ((unsigned)(e) & 0x1FFu)   /* a folder entry: chip | code << 9 */
 #define CHIP_CODE(e) ((unsigned)(e) >> 9 & 0x1Fu)
@@ -15,16 +16,27 @@
 /* false, the reason said in `why` */
 #define REFUSE(...) ((why && n ? (void)snprintf(why, n, __VA_ARGS__) : (void)0), false)
 
-bool arena_loadout_check(const OnlineLoadout *l, char *why, size_t n) {
-	if (l->souls) return REFUSE("MegaMan holds Souls (mask %#x): BN5's, which plain BN6 cannot run", l->souls);
+/* a chip id `format`'s cores hold: under BN6's rules BN6's own (1 to
+ * ARENA_BN6_CHIP_LAST, its blanks left out); under full ones every id of
+ * the chip registry (BN5's chips in BN6's tables, its blanks and the
+ * pack's extension among them: the same in every game with BN5's ROM,
+ * docs/MULTIROM.md, The chip registry) */
+static bool chip_held(unsigned id, unsigned format) {
+	if (format == ONLINE_FORMAT_FULL) return id < ONLINE_PACK_IDS;
+	return id <= ARENA_BN6_CHIP_LAST && !BN6_CHIP_BLANK(id);
+}
+
+bool arena_loadout_check(const OnlineLoadout *l, unsigned format, char *why, size_t n) {
+	bool full = format == ONLINE_FORMAT_FULL;
+	if (l->souls && !full) return REFUSE("MegaMan holds Souls (mask %#x): BN5's, which plain BN6 cannot run", l->souls);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folder[i];
 		if (e == 0xFFFF || !CHIP_ID(e)) continue;
-		if (CHIP_ID(e) > ARENA_BN6_CHIP_LAST || BN6_CHIP_BLANK(CHIP_ID(e))) return REFUSE("the folder holds chip %u: another game's, which plain BN6 has not", CHIP_ID(e));
+		if (!chip_held(CHIP_ID(e), format)) return REFUSE("the folder holds chip %u: another game's, which plain BN6 has not", CHIP_ID(e));
 		if (CHIP_CODE(e) > CODE_STAR) return REFUSE("the folder holds a chip of code %u, which BN6 has not", CHIP_CODE(e));
 	}
 	for (unsigned id = 1; id < ONLINE_PACK_IDS; ++id)
-		for (unsigned k = 0; k < BN6_PACK_ENTRY && (id > ARENA_BN6_CHIP_LAST || BN6_CHIP_BLANK(id)); ++k)
+		for (unsigned k = 0; k < BN6_PACK_ENTRY && !chip_held(id, format); ++k)
 			if (l->pack[id][k]) return REFUSE("the pack holds chip %u: another game's, which plain BN6 has not", id);
 	if (!l->max_hp || l->max_hp > HP_MOST) return REFUSE("MegaMan's max HP (%u) is not one BN6 holds", l->max_hp);
 	return true;
@@ -47,14 +59,15 @@ static void write_flag(const ArenaMemory *m, unsigned flag, bool on) {
 	m->write8(m->context, at, on ? (uint8_t)(byte | bit) : (uint8_t)(byte & ~bit));
 }
 
-bool arena_loadout_install(const ArenaMemory *m, const OnlineLoadout *l, char *why, size_t n) {
-	if (!arena_loadout_check(l, why, n)) return false;
+bool arena_loadout_install(const ArenaMemory *m, const OnlineLoadout *l, unsigned format, char *why, size_t n) {
+	if (!arena_loadout_check(l, format, why, n)) return false;
 	uint32_t folder = m->read32(m->context, BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	uint32_t pack = m->read32(m->context, BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if ((folder & 1u) || folder < BN6_EWRAM || folder > BN6_EWRAM_END - 2 * BN6_FOLDER_ENTRIES ||
 		pack < BN6_EWRAM || pack > BN6_EWRAM_END - BN6_PACK_IDS * BN6_PACK_ENTRY)
 		return REFUSE("the core's folder is not where BN6 keeps it (%#x)", folder);
-	/* the first folder, and the pack's own ids (the extension is BN5's: refused above) */
+	/* the first folder, and the pack's own ids (its extension, BN5's chips' counts, is the pack's clear's at NEW GAME: a
+	 * carried pack is the folder's alone, arena_wire.h) */
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) write16(m, folder + 2 * i, l->folder[i]);
 	for (unsigned id = 0; id < BN6_PACK_IDS; ++id) write_bytes(m, pack + id * BN6_PACK_ENTRY, l->pack[id], BN6_PACK_ENTRY);
 	write_bytes(m, BN6_NAVICUST_PLACED, l->board, ONLINE_BOARD_BYTES);

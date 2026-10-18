@@ -1,11 +1,13 @@
 /* The Arena's way in (arena_boot.h).
  *
- * The boot core is the only one hooked: two hooks of the game's own call
- * (gamecall.c's: at cbGameState a queued routine runs in the update's
- * place, and returns into the free space past the game, where the second
- * hook goes back to the main loop) take MegaMan through the game's warp
- * routine as src/emu/boot.c does. The state it ends in holds RAM alone;
- * the pair's cores load it over a ROM no hook has touched. */
+ * The boot core has two hooks of its own: the game's own call (gamecall.c's:
+ * at cbGameState a queued routine runs in the update's place, and returns
+ * into the free space past the game, where the second hook goes back to
+ * the main loop) takes MegaMan through the game's warp routine as
+ * src/emu/boot.c does. The state it ends in holds RAM alone; the pair's
+ * cores load it over a ROM no hook of the boot's has touched (under full
+ * rules BN5's installed bytes in both, the boot's ROM's too, and BN5's
+ * hooks on the pair's alone: the boot meets none of them). */
 #include "arena_boot.h"
 
 #include <stdio.h>
@@ -18,6 +20,8 @@
 #include "bn6.h"
 #include "emu.h"
 #include "hook.h"
+#include "protocol.h"
+#include "xinstall_log.h"
 
 #if CW_ARENA
 
@@ -57,6 +61,7 @@ struct ArenaBoot {
 	ArenaBootStage stage;
 	const uint8_t *rom;
 	size_t rom_size;
+	unsigned format;        /* the rules (ONLINE_FORMAT_*): full ones put BN5's installs in every core (arena_pair.h) */
 	OnlineLoadout loadout[2];
 	bool carried[2];
 	struct mCore *core;     /* the boot core, until the pair is made */
@@ -153,7 +158,7 @@ static ArenaBootStage make_pair(ArenaBoot *b) {
 	for (unsigned side = 0; ok && side < 2; ++side) {
 		if (!b->carried[side]) continue;
 		ArenaMemory m = { core_read32, core_write8, b->core };
-		ok = arena_core_load(b->core, base, base_size) && arena_loadout_install(&m, &b->loadout[side], why, sizeof why) &&
+		ok = arena_core_load(b->core, base, base_size) && arena_loadout_install(&m, &b->loadout[side], b->format, why, sizeof why) &&
 			(state[side] = arena_core_save(b->core, &size[side])) != NULL;
 	}
 	arena_core_free(b->core);
@@ -161,7 +166,8 @@ static ArenaBootStage make_pair(ArenaBoot *b) {
 	if (ok) {
 		const uint8_t *from[2] = { state[0] ? state[0] : base, state[1] ? state[1] : base };
 		const size_t n[2] = { state[0] ? size[0] : base_size, state[1] ? size[1] : base_size };
-		b->pair = arena_pair_open(b->rom, b->rom_size, from, n);
+		const unsigned souls[2] = { b->carried[0] ? b->loadout[0].souls : 0u, b->carried[1] ? b->loadout[1].souls : 0u };
+		b->pair = arena_pair_open(b->rom, b->rom_size, from, n, b->format == ONLINE_FORMAT_FULL, souls);
 	}
 	free(base);
 	free(state[0]);
@@ -174,18 +180,24 @@ static ArenaBootStage make_pair(ArenaBoot *b) {
 
 /* ---- the course ---- */
 
-ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2]) {
+ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], unsigned format) {
 	ArenaBoot *b = calloc(1, sizeof *b);
 	if (!b) return NULL;
 	b->rom = rom;
 	b->rom_size = size;
+	b->format = format;
 	for (unsigned side = 0; side < 2; ++side) {
 		if (!loadout || !loadout[side]) continue;
 		b->loadout[side] = *loadout[side];
 		b->carried[side] = true;
-		if (!arena_loadout_check(loadout[side], b->error, sizeof b->error)) { b->stage = ARENA_BOOT_FAILED; return b; }
+		if (!arena_loadout_check(loadout[side], format, b->error, sizeof b->error)) { b->stage = ARENA_BOOT_FAILED; return b; }
 	}
-	b->core = arena_core_new(rom, size, b->video);
+	bool bn5 = format == ONLINE_FORMAT_FULL;
+	/* (full rules: BN5's installs as this game's core made them, which a game without them cannot give) */
+	if (bn5 && !xlog_hash()) { fail(b, "BN5's installs are not in this game's core"); return b; }
+	if (bn5) printf("arena: full rules: BN5's installs in every core, %zu bytes and %d hooks (record %016llx)\n", xlog_bytes(), xlog_hooks(),
+		(unsigned long long)xlog_hash());
+	b->core = arena_core_new(rom, size, b->video, bn5);
 	if (!b->core) { fail(b, "the boot core could not be made (too little memory?)"); return b; }
 	b->hooks = hook_core(b->core);
 	if (!b->hooks || !hook_on(b->hooks, BN6_OW_HOOK, state_update, b) || !hook_on(b->hooks, FREE_CALL_RETURN, returned, b))
@@ -269,8 +281,8 @@ ArenaPair *arena_boot_take(ArenaBoot *b) {
 
 struct ArenaBoot { ArenaBootStage stage; };
 
-ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2]) {
-	(void)rom; (void)size; (void)loadout;
+ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], unsigned format) {
+	(void)rom; (void)size; (void)loadout; (void)format;
 	ArenaBoot *b = calloc(1, sizeof *b);
 	if (b) b->stage = ARENA_BOOT_FAILED;
 	return b;

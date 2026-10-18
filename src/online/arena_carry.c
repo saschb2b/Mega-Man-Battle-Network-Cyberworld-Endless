@@ -44,7 +44,7 @@ bool arena_carry_read(OnlineLoadout *out) {
 	uint8_t *state = read_file(path, &size);
 	if (!state) return false;
 	static uint32_t video[ARENA_W * ARENA_H];
-	struct mCore *c = arena_core_new(R.data, ROM_SIZE, video);
+	struct mCore *c = arena_core_new(R.data, ROM_SIZE, video, false);
 	bool ok = c && arena_core_load(c, state, size);
 	free(state);
 	if (ok) {

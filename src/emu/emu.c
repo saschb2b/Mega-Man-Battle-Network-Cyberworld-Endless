@@ -4,6 +4,7 @@
 #include "compat.h"
 #include "platform.h"
 #include "save_queue.h"
+#include "xinstall_log.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -115,6 +116,7 @@ bool emu_hook(uint32_t addr, EmuHook fn, void *user) {
 	wait_frame();
 	bool ok = core && hook_add(addr, fn, user);
 	if (ok) claims_hook(addr);
+	if (ok) xlog_hook(addr, fn, user);
 	return ok;
 }
 
@@ -122,6 +124,7 @@ bool emu_hook_event(uint32_t addr, int kind) {
 	wait_frame();
 	bool ok = core && hook_add_event(addr, kind);
 	if (ok) claims_hook(addr);
+	if (ok) xlog_event(addr);
 	return ok;
 }
 
@@ -316,12 +319,15 @@ uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(co
 void emu_write8(uint32_t a, uint8_t v) {
 	wait_frame();
 	claims_note(a, 1);
+	xlog_write(a, &v, 1);
 	if (core) core->rawWrite8(core, a, -1, v);
 }
 
 void emu_write32(uint32_t a, uint32_t v) {
 	wait_frame();
 	claims_note(a, 4);
+	const uint8_t b[4] = { (uint8_t)v, (uint8_t)(v >> 8), (uint8_t)(v >> 16), (uint8_t)(v >> 24) };
+	xlog_write(a, b, sizeof b);
 	if (core) core->rawWrite32(core, a, -1, v);
 }
 
@@ -329,6 +335,7 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
 	wait_frame();
 	claims_note(a, (uint32_t)len);
+	xlog_write(a, data, len);
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
 

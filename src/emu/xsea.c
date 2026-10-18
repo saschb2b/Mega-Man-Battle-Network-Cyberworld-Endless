@@ -80,12 +80,14 @@ static HookAct sea_test(HookRegs *r, void *user) {
  * The marker is spawned through the stub (stub_make), which comes back to
  * the hooked instruction: that time it runs. */
 
-static struct { uint32_t at, sp; } back;
+typedef struct { uint32_t at, sp; } Back;
+static Back backs[HOOK_CORES];   /* (one a core: the Arena's two run an instruction at a time in turn) */
 
 static HookAct sea_hide(HookRegs *r, void *user) {
 	(void)user;
-	if (back.at == r->pc && back.sp == r->sp) {
-		back.at = 0;
+	Back *back = &backs[hook_slot()];
+	if (back->at == r->pc && back->sp == r->sp) {
+		back->at = 0;
 		return HOOK_CONTINUE;
 	}
 	uint32_t obj = r->r[5], bit = bit_of(obj);
@@ -94,8 +96,8 @@ static HookAct sea_hide(HookRegs *r, void *user) {
 	if (hook_read32(XSEA_MASK) & bit) {
 		hook_write8(obj, (uint8_t)(hook_read8(obj) & ~BN6_OBJ_VISIBLE));
 		if (marker) return HOOK_CONTINUE;
-		back.at = r->pc;
-		back.sp = r->sp;
+		back->at = r->pc;
+		back->sp = r->sp;
 		r->r[1] = hook_read32(obj + BN6_T1_COLLISION);
 		r->r[2] = at;
 		r->r[3] = r->pc | 1;

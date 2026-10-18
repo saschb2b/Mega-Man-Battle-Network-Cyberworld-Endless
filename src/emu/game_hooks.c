@@ -19,6 +19,7 @@
 #include "soulproxy.h"
 #include "soulunite.h"
 #include "xchips_install.h"
+#include "xinstall_log.h"
 
 void game_hooks_install(void) {
 	/* (BN6's chip tables grown, BN5's chips in them or their placeholders,
@@ -39,8 +40,11 @@ void game_hooks_install(void) {
 	 * proxy form for its own test, --dev soulproxy) */
 	bool souls = XR[XROM_BN5_COLONEL_US].data && !dev.nonavis && !dev.xnavicontrol;
 	if (dev.soulproxy || souls) {
+		/* (written down for the Arena's cores as they are made: xinstall_log.h) */
+		xlog_begin();
 		bool proxy = soulproxy_install(dev.proxybreak);
 		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
+		xlog_end();
 	}
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/MULTIROM.md) */
 	darkinvs_dev(dev.chipai);

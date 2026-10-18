@@ -53,11 +53,24 @@ _Static_assert(AT_UNITE_A + BN5_UNITE_A_SIZE <= AT_VENEERS && AT_VENEERS + THUMB
 	SOULS_AT + SOULS_USED <= FREE_PANELS, "the Souls' places past their room (free_space.h)");
 
 static int breaks;
-static unsigned held;   /* the run's Souls (soulunite_held), set between frames */
+/* the Souls held, a core's (hook_slot: BN6's the run's, soulunite_held; an Arena core's its player's, soulunite_held_core),
+ * set between frames; and whether UNITE stands in a link battle there (the Arena's) */
+static unsigned helds[HOOK_CORES];
+static bool linked[HOOK_CORES];
 static uint8_t kinds5[SOULS_BN5], flags5[SOULS_BN5];   /* BN5_SOUL_KINDS, BN5_SOUL_FLAGS, read from BN5's ROM */
 static uint32_t emblem_tiles, emblem_pals;   /* the emblem's art, as Gregar's words name it */
 
-void soulunite_held(unsigned souls) { held = souls & ((1u << TEAM_SOULS) - 1); }
+static unsigned held_now(void) { return helds[hook_slot()]; }
+
+void soulunite_held(unsigned souls) { helds[hook_slot()] = souls & ((1u << TEAM_SOULS) - 1); }
+
+bool soulunite_held_core(struct mCore *core, unsigned souls) {
+	int slot = hook_slot_of(core);
+	if (slot < 0) return false;
+	helds[slot] = souls & ((1u << TEAM_SOULS) - 1);
+	linked[slot] = helds[slot] != 0;   /* (none: the core let go, its entry as any other core's) */
+	return true;
+}
 
 bool soulunite_dev(unsigned souls, int unitebreak, int soulbreak, bool dark) {
 	if (souls && !(soulproxy_install(0) && soulunite_install(unitebreak, soulbreak))) return false;
@@ -84,12 +97,13 @@ static bool calm_enough(int side) {
 }
 
 /* UNITE could stand (BN5_UNITE_STAND): a Soul held (Double Soul learned
- * with it), MegaMan himself on this side, no link, not beasted out (one form
- * at a time), BN5's mood */
+ * with it), MegaMan himself on this side, no link but the Arena's (whose
+ * pair carries the Soul to the other GBA), not beasted out (one form at a
+ * time), BN5's mood */
 static bool unite_stands(int side) {
 	uint32_t settings = hook_read32(BN6_BATTLE_SETTINGS);
 	bool link = settings >= BUS && hook_read8(settings + BN6_SETTINGS_MODE) == BN6_BATTLE_LINK;
-	return held && !hook_read8(BN6_CUSTOM_NAVI) && !link && navi8(side, BN6_NAVI_FORM) < BN6_FORM_BEAST && calm_enough(side);
+	return held_now() && !hook_read8(BN6_CUSTOM_NAVI) && (!link || linked[hook_slot()]) && navi8(side, BN6_NAVI_FORM) < BN6_FORM_BEAST && calm_enough(side);
 }
 
 /* What element 0xB is, and the chip's window's art for it: UNITE's (BN5's,
@@ -117,7 +131,7 @@ static int lights(int side, int *chaos) {
 		if (kinds5[s - 1] + ((breaks & SOULUNITE_BREAK_KIND) ? 1 : 0) != kind) continue;
 		int k = flags5[s - 1] - BN5_FLAG_SOUL;
 		uint32_t bit = (1u << s) << (dark ? 16 : 0);
-		if (k < 0 || k >= TEAM_SOULS || !(held >> k & 1) || (hook_read32(soul_field(side, BN6_SOUL_USED)) & bit)) return 0;
+		if (k < 0 || k >= TEAM_SOULS || !(held_now() >> k & 1) || (hook_read32(soul_field(side, BN6_SOUL_USED)) & bit)) return 0;
 		*chaos = dark;
 		return s;
 	}
@@ -131,7 +145,7 @@ static int lights(int side, int *chaos) {
  * pick lights it: the lit test below answers so) */
 static HookAct stand(HookRegs *r, void *user) {
 	(void)user;
-	if (!held) return HOOK_CONTINUE;
+	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now();
 	if (soul_united(side)) hook_write8(soul_field(side, BN6_SOUL_SCREEN), 1);   /* (its end may come as this turn starts: soullife.c) */
 	bool beast = r->r[0] != 0, unite = unite_stands(side);
@@ -145,7 +159,7 @@ static HookAct stand(HookRegs *r, void *user) {
  * is united: no Beast Out from the proxy (it would give form 0x14) */
 static HookAct emblem_lit(HookRegs *r, void *user) {
 	(void)user;
-	if (!held) return HOOK_CONTINUE;
+	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now();
 	if (slot_of(side) != BN6_SLOT_UNITE && (!soul_united(side) || (breaks & SOULUNITE_BREAK_GREY))) return HOOK_CONTINUE;
 	r->r[0] = 0;
@@ -158,7 +172,7 @@ static HookAct emblem_lit(HookRegs *r, void *user) {
  * +5 the Soul, +6 its chaos, +7) */
 static HookAct unite_lit(HookRegs *r, void *user) {
 	(void)r, (void)user;
-	if (!held) return HOOK_CONTINUE;
+	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now(), chaos = 0, picks = hook_read8(BN6_CUSTOM_PICKED);
 	uint32_t el = BN6_CUSTOM_UNITE;
 	uint8_t stands = hook_read8(soul_field(side, BN6_SOUL_STANDS));
@@ -185,7 +199,7 @@ static HookAct unite_lit(HookRegs *r, void *user) {
  * while it is chosen, as while the emblem is (BN6's mode 0x48) */
 static HookAct emblem_a(HookRegs *r, void *user) {
 	(void)user;
-	if (!held || slot_of(side_now()) != BN6_SLOT_UNITE) return HOOK_CONTINUE;
+	if (!held_now() || slot_of(side_now()) != BN6_SLOT_UNITE) return HOOK_CONTINUE;
 	if (hook_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_STATE) == STATE_LIT) hook_write8(BN6_CUSTOM_EMBLEM_TAKEN, 1);
 	r->r[12] = AT_UNITE_A | 1;
 	return HOOK_JUMP;
@@ -197,7 +211,7 @@ static HookAct emblem_a(HookRegs *r, void *user) {
 static HookAct emblem_b(HookRegs *r, void *user) {
 	(void)user;
 	int picks = hook_read8(BN6_CUSTOM_PICKED);
-	if (!held || r->r[0] != BN6_ELEMENT_EMBLEM || r->r[4] != BN6_CUSTOM_UNITE || slot_of(side_now()) != BN6_SLOT_UNITE || !picks) return HOOK_CONTINUE;
+	if (!held_now() || r->r[0] != BN6_ELEMENT_EMBLEM || r->r[4] != BN6_CUSTOM_UNITE || slot_of(side_now()) != BN6_SLOT_UNITE || !picks) return HOOK_CONTINUE;
 	uint8_t given = hook_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_SLOT);
 	hook_write8(BN6_CUSTOM_PICKS + picks - 1, given);
 	uint32_t el = BN6_CUSTOM_ELEMENTS + (uint32_t)given * BN6_ELEMENT_SIZE;
@@ -216,7 +230,7 @@ static HookAct emblem_b(HookRegs *r, void *user) {
  * follows a type 2 pick's +4 in a link battle alone */
 static HookAct emblem_given(HookRegs *r, void *user) {
 	(void)user;
-	if (!held || hook_read32(r->sp) != BN6_CUSTOM_UNITE || slot_of(side_now()) != BN6_SLOT_UNITE) return HOOK_CONTINUE;
+	if (!held_now() || hook_read32(r->sp) != BN6_CUSTOM_UNITE || slot_of(side_now()) != BN6_SLOT_UNITE) return HOOK_CONTINUE;
 	r->r[0] = BN6_BATTLE_LINK;
 	return HOOK_CONTINUE;
 }
@@ -228,7 +242,7 @@ static HookAct emblem_given(HookRegs *r, void *user) {
 static HookAct emblem_commit(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t el = BN6_CUSTOM_UNITE;
-	if (!held || r->r[0] != el) return HOOK_CONTINUE;
+	if (!held_now() || r->r[0] != el) return HOOK_CONTINUE;
 	int side = side_now();
 	if (slot_of(side) != BN6_SLOT_UNITE || hook_read8(el + BN6_ELEMENT_STATE) != STATE_CHOSEN) return HOOK_CONTINUE;
 	int soul = hook_read8(el + BN6_ELEMENT_SOUL), chaos = hook_read8(el + BN6_ELEMENT_CHAOS) != 0;

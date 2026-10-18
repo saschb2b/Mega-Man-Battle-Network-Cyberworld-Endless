@@ -66,14 +66,19 @@ pattern, formats with a telegraph.
   the server refuses a BN5 chip between games that do not both have its
   ROM (NOTICE 19).
 - **The Arena.** A challenge names its rules: a format byte in ARENA and
-  ARENA_STATE, **BN6 rules** for any pair until full rules (BN5's chips
-  and Souls, BN5 installed into both pair cores) are built, and full rules
-  only between two games with BN5's ROM, which the server holds them to.
-  Under BN6's rules MegaMan leaves his Souls and BN5's chips in his pack
-  at home and fights with a folder of BN6's chips: Lan picks it among
-  Folder1, Folder2 and the Extra Folder, those holding BN5's chips named
-  as staying home; where none fits, MegaMan says so before any challenge
-  is sent ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
+  ARENA_STATE, **full rules** between two games with BN5's ROM, which the
+  server holds them to, and **BN6 rules** for any other pair. Under full
+  rules each game installs BN5 into both pair cores from its own BN5 ROM,
+  the same way (the game core's installs written down as it starts and
+  made again in each pair core, their hash in the pair's), and MegaMan
+  fights with BN5's chips in his folder and his Souls, a Soul he unites
+  with carried by the pair to the other GBA
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)). Under BN6's rules he
+  leaves his Souls and BN5's chips in his pack at home and fights with a
+  folder of BN6's chips: Lan picks it among Folder1, Folder2 and the Extra Folder,
+  those holding BN5's chips named as staying home; where none fits,
+  MegaMan says so before any challenge is sent
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
 - The Square is built from BN6's own nets (Central, Sky, Green), the same
   for every game whatever ROMs it has, and a card names Crosses and Souls
   from words of the game's own, never read from BN5's ROM.
@@ -389,6 +394,19 @@ server:
   chips sit out,Lan. Chips from our Pack stand in for them, like Cannon A
   for MrkCan1 M!", Folder1 carried, the log's two stand-ins, the battle
   to its end on both games with 25 hashes agreeing.
+- **A NetBattle by full rules** (the same day, a local server, two host
+  builds each with BN5's ROM beside BN6's). "Full rules! Let's see if
+  Beta takes us on!" and "Full rules: Souls and BN5 chips too!"; both
+  games made their pairs with the same installs' record (1,913,709
+  bytes and 132 hooks) and the same ready hash; Alpha's MrkCan1 M took
+  Beta from 100 to 30 on both screens and the battle went to its end with
+  every hash agreeing. Alpha holding every Soul and a folder of
+  JustcOne: UNITE on the Custom screen lit KnightSoul, and on both
+  screens KnightMan's summon, Alpha in KnightSoul with his three turns and
+  his wrecking ball's hits, the battle to its end with every hash
+  agreeing. A desync stopped both; a game whose installs differed (one
+  core made without BN5's families) stopped both before the first frame
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -429,9 +447,10 @@ are in the history before 433865a8):
   and quick, but the owner calls it friction to brainstorm again (a
   NetBattle folder of the PET's, BN6's Folder2 opened online, is the
   other way weighed).
-- **Full rules** for two games with BN5's ROM: BN5 installed into both
-  pair cores, their Souls and BN5's chips allowed; the format byte is on
-  the wire and held by the server, the rules still BN6's.
+- **The Souls under full rules beyond KnightSoul:** UNITE, a Soul's look
+  and its charged shot on both GBAs were seen with KnightSoul; the other
+  five Souls, Chaos Unison, ColonelSoul's button and BN5's mood are not
+  yet seen in a NetBattle.
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.

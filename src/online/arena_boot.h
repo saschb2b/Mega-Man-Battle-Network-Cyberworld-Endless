@@ -25,10 +25,12 @@ typedef enum {
 
 typedef struct ArenaBoot ArenaBoot;
 
-/* A way in for the ROM's bytes; loadout[side] the MegaMan written into
- * that side's core (NULL: the boot's own, the game's start), both checked
- * first (arena_loadout_check); NULL where memory ran out */
-ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2]);
+/* A way in for the ROM's bytes under `format`'s rules (ONLINE_FORMAT_*:
+ * full ones put BN5's installs in the boot core and the pair, arena_pair.h);
+ * loadout[side] the MegaMan written into that side's core (NULL: the
+ * boot's own, the game's start), both checked first by those rules
+ * (arena_loadout_check); NULL where memory ran out */
+ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], unsigned format);
 void arena_boot_free(ArenaBoot *boot);
 /* Up to `frames` frames of the way (a frame of the boot core, or of the pair) */
 ArenaBootStage arena_boot_run(ArenaBoot *boot, unsigned frames);

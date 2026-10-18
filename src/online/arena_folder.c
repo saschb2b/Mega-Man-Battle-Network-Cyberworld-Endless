@@ -92,7 +92,7 @@ bool arena_folder_ask(const OnlineLoadout *l, unsigned format, unsigned fits) {
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
-	ta_pages(&t, arena_folder_words(format, standins_said(l, format), format == ONLINE_FORMAT_BN6 && l->souls), FACE_MEGAMAN, &first);
+	ta_pages(&t, arena_folder_words(format, standins_said(l, format), arena_souls_home(l, format)), FACE_MEGAMAN, &first);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
 	const char *labels[ONLINE_FOLDERS];

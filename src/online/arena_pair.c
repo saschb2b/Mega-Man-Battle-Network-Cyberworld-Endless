@@ -26,7 +26,11 @@
 #include <mgba/internal/gba/sio/lockstep.h>
 #include <mgba-util/vfs.h>
 
+#include "arena_souls.h"
 #include "emu.h"
+#include "hook.h"
+#include "soulunite.h"
+#include "xinstall_log.h"
 
 /* instructions a frame of the pair may take, both cores' together: far
  * past a frame's (about 280,000 cycles each), short of a hang */
@@ -44,15 +48,18 @@ struct ArenaPair {
 	unsigned start[2], relative;   /* each core's frame at the anchor; the pair's frames since */
 	uint8_t *scratch;              /* a core's raw state, for the hash */
 	size_t scratch_size;
+	bool bn5;                      /* full rules: BN5's installs in both cores (arena_pair.h) */
+	ArenaSoulCarried carried[2];   /* (full rules: the Souls carried across, arena_souls.h) */
 };
 
-struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video) {
+struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, bool bn5) {
 	if (!rom || !size || size > EMU_ROM_SIZE) return NULL;
 	emu_log_quiet();
 	uint8_t *copy = malloc(EMU_ROM_SIZE);
 	if (!copy) return NULL;
 	memcpy(copy, rom, size);
 	memset(copy + size, 0xFF, EMU_ROM_SIZE - size);
+	if (bn5) xlog_apply(copy, EMU_ROM_SIZE);
 	struct VFile *vf = VFileMemChunk(copy, EMU_ROM_SIZE);
 	free(copy);
 	if (!vf) return NULL;
@@ -130,9 +137,17 @@ static bool attach(ArenaPair *p, unsigned side) {
 	return true;
 }
 
-ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2]) {
+/* full rules: BN5's hooks on the core's own table, after its state (a hook in RAM stands on what the state put there), and
+ * its player's Souls for UNITE */
+static bool installs(struct mCore *core, unsigned souls) {
+	return xlog_hook_core(core) && soulunite_held_core(core, souls);
+}
+
+ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], bool bn5,
+	const unsigned souls[2]) {
 	ArenaPair *p = calloc(1, sizeof *p);
 	if (!p) return NULL;
+	p->bn5 = bn5;
 	mLockstepInit(&p->cable.d);
 	GBASIOLockstepInit(&p->cable);
 	p->cable.d.context = p;
@@ -144,8 +159,9 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	p->cable.d.unload = unload_peer;
 	bool ok = true;
 	for (unsigned side = 0; ok && side < 2; ++side) {
-		p->core[side] = arena_core_new(rom, size, p->video[side]);
-		ok = p->core[side] && arena_core_load(p->core[side], state[side], state_size[side]) && attach(p, side);
+		p->core[side] = arena_core_new(rom, size, p->video[side], bn5);
+		ok = p->core[side] && arena_core_load(p->core[side], state[side], state_size[side]) &&
+			(!bn5 || installs(p->core[side], souls ? souls[side] : 0)) && attach(p, side);
 	}
 	if (ok) {
 		p->scratch_size = p->core[0]->stateSize(p->core[0]);
@@ -162,6 +178,10 @@ void arena_pair_close(ArenaPair *p) {
 		if (!p->core[side]) continue;
 		GBASIOSetDriver(&((struct GBA *)p->core[side]->board)->sio, NULL, SIO_MULTI);
 		if (p->node[side].p) GBASIOLockstepDetachNode(&p->cable, &p->node[side]);
+		if (p->bn5) {
+			soulunite_held_core(p->core[side], 0);
+			hook_detach(p->core[side]);
+		}
 		p->core[side]->deinit(p->core[side]);
 	}
 	free(p->scratch);
@@ -202,7 +222,11 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 			c->step(c);
 			if (phase != TRANSFER_IDLE && p->cable.d.transferActive == TRANSFER_IDLE) ++p->transfers;
 		}
-		if (both_crossed(p, target)) { ++p->relative; return true; }
+		if (both_crossed(p, target)) {
+			++p->relative;
+			if (p->bn5) arena_souls_carry(p->core, p->carried);
+			return true;
+		}
 	}
 	return false;
 }
@@ -254,6 +278,12 @@ uint64_t arena_pair_hash(ArenaPair *p) {
 		free(flash);
 	}
 	hash_cable(p, &hash);
+	/* (full rules: the installs both cores were made with, which their states do not hold) */
+	if (p->bn5) {
+		uint64_t made = xlog_hash();
+		hash_word(&hash, (uint32_t)made);
+		hash_word(&hash, (uint32_t)(made >> 32));
+	}
 	return hash ? hash : 1;
 }
 
@@ -274,12 +304,16 @@ void arena_pair_mute(ArenaPair *p) {
 
 #else   /* no Arena in this build (arena_pair.h, CW_ARENA) */
 
-struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video) { (void)rom; (void)size; (void)video; return NULL; }
+struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, bool bn5) {
+	(void)rom; (void)size; (void)video; (void)bn5;
+	return NULL;
+}
 void arena_core_free(struct mCore *core) { (void)core; }
 uint8_t *arena_core_save(struct mCore *core, size_t *size) { (void)core; *size = 0; return NULL; }
 bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size) { (void)core; (void)state; (void)size; return false; }
-ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2]) {
-	(void)rom; (void)size; (void)state; (void)state_size;
+ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], bool bn5,
+	const unsigned souls[2]) {
+	(void)rom; (void)size; (void)state; (void)state_size; (void)bn5; (void)souls;
 	return NULL;
 }
 void arena_pair_close(ArenaPair *pair) { (void)pair; }
