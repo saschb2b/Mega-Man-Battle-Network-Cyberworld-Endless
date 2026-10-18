@@ -291,7 +291,9 @@ server:
   round the statue (the "!" over the walker nearer it), Trade Central's
   desk answering from its wing (to "no spare chips", the run having
   none), and a Practice NetBattle asked for on the Arena's spectators'
-  floor, both cores agreeing frame by frame.
+  floor, both cores agreeing frame by frame; and a run timed to a
+  parade, the two walkers marching round the statue past MegaMan, two
+  panels apart, at the positions the clock gives.
 - **The official server.** Redeployed from `deploy/coolify/compose.yaml`
   on the same state volume: `/health` says protocol 3, trading and the
   Arena on, and a `cyberworld.presence.v3` upgrade is answered (101). No
