@@ -14,8 +14,8 @@ built and what has been shown of it. The Arena has its own,
 The official server is `wss://cyberworld.saschb2b.com/presence`, deployed
 in Coolify from `deploy/coolify/` ([server/README.md](../server/README.md),
 Coolify deployment); it speaks the protocol of the branch it was last
-deployed from (v3 until it is redeployed with v4, which a v3 game cannot
-join, nor a v4 game a v3 server), trading and the Arena on, until this
+deployed from (v4 until it is redeployed with v5, which a v4 game cannot
+join, nor a v5 game a v4 server), trading and the Arena on, until this
 work is merged. No release has shipped
 the Square yet.
 
@@ -89,7 +89,7 @@ pattern, formats with a telegraph.
 | --- | --- | --- |
 | The game's side | `src/online/`, the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v4](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v5](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -283,6 +283,54 @@ player's (`trade_central.c`, words in `trade_words.c`):
    routines count a chip past 319 in the pack's extension (docs/
    EMULATION.md), so a BN5 chip comes and goes as BN6's do.
 
+One trade a visit: a game keeps one swap until it is home
+(`trade.pending` holds one), so after a trade is done the clerk says
+"ONE TRADE A VISIT!" and the server refuses that session a second
+(NOTICE 21). Before this, a second trade in a visit overwrote the
+first's file: its partner got the chip, this game never gave it.
+
+### The trade board
+
+A trade needs two players at the desk at once and a blind first offer;
+in a channel of a few players, most visits never find out who wants
+what. The board says it: each player may put **one offer** up at the
+clerk, a spare he **has** (picked on the order screen as a trade's chip
+is) and what he **wants** for it, from a fixed list: anything, a Fire,
+Aqua, Elec, Wood, Sword, Wind, Break or Cursor chip (BN6's own icon
+element, `BN6_CHIP_ELEMENT`), or a Mega (`BN6_CHIP_LIBRARY_TYPE`). The
+clerk reads the channel's offers one a box ("Alpha HAS Cannon A! WANTS A
+FIRE CHIP!") with Answer it and Next offer under each, and MegaMan's own
+to post or take down; the Board in the log-in plaza lists them among its
+posts. Answering one lists only the spares that meet its want and the
+pair can both hold; the trade begins with both chips named (TRADE's
+take, protocol v5), and both say Deal as in any trade. The poster's
+game checks the chip against the want it posted and calls off one that
+is not (the server never reads a chip's element); MegaMan then says
+"Lan! Beta took our offer!" before the Deal. An offer lives on the
+server while its poster is in the channel: taken down, a channel
+changed, the server left or a trade done, it goes, and no offer is
+kept on disk (`trade.py`; `online_board.c` holds the board as last
+said, `trade_central.c` the clerk's chats, `trade_words.c` the words).
+Common ground holds: a game without BN5's ROM is never sent an offer
+whose chip is BN5's, never posts one, and is never answered with one.
+
+The design (the game-design skill): the dialectic is the Square's, **the
+run's integrity against the community's generosity**, and the board
+serves the session loop (arrive, see who's here, do one thing together,
+go home). Its patterns are a diegetic board and honest feedforward:
+what a player wants is said before anyone walks to the desk, so a trade
+starts from a match instead of a cold offer, and the Deal still shows
+the exact pair. A want is a **kind**, not a chip: a fixed list needs no
+free text (the audience has children in it) and many chips meet one
+want, so a small crowd still matches. One offer a player is a budget
+that keeps the board to eight lines and stops hoarding posts; offers
+that live only while their poster is there keep every answer one that
+can finish now (no asynchronous market, no appointment to keep). It
+stays one spare for one spare and no currency: there is no price to
+rise, and Giga chips are not on the list, so the board advertises
+variety, not power. One trade a visit follows from the swap kept at
+home, and fits the loop: a trade is the visit's one thing.
+
 ## The Arena
 
 Battle on a card sends a challenge; if the other player takes it, both
@@ -300,8 +348,8 @@ the lockstep and the two-client proof.
 
 ## The server and the wire
 
-Protocol v4 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v4`). The server refuses
+Protocol v5 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v5`). The server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of
 bounds and a full Square; it bounds every
@@ -342,6 +390,33 @@ server:
   line in `trades.jsonl`, `trade.pending` on both; one game settled on
   its way home, the other, closed in the Square, at its CONTINUE, each
   folder and pack as the trade said.
+- **The trade board** (19 October 2026, protocol v5, a local server, two
+  host builds each with BN5's ROM beside BN6's, `tools/play.py` from
+  `--scene home --run-depth 7 --seed 3 --dev quiet`; spares from the
+  `chip` dev step: Alpha Cannon A, Beta FireBrn1 F and Cannon B). Alpha
+  alone in the channel at the clerk: Offer a chip, Trade board, How it
+  works; "THE TRADE BOARD! NO OFFERS UP YET!", Post an offer, Cannon A on
+  the order screen, Fire chip from the wants, "IT'S UP! Cannon A FOR A
+  FIRE CHIP!". Beta at the Board: "Here now: Alpha", "Alpha has Cannon
+  A,wants a Fire chip."; at the clerk "1 OFFER UP!", "Alpha HAS Cannon A!
+  WANTS A FIRE CHIP!", Answer it, and the order screen listing FireBrn1 F
+  alone (Cannon B, his other spare, left off). Alpha heard "Lan! Beta took
+  our offer! FireBrn1 F for our Cannon A!", both said Deal, the server's
+  `trades.jsonl` held `[20,5]` for `[1,0]`, the clerk then said "YOU
+  TRADED ALREADY! ONE TRADE A VISIT!", and each game settled at home:
+  Alpha's "the Pack's 4 to 3 of the one, 0 to 1 of the other", "Lan!
+  FireBrn1 F is in our Pack now!", Beta's Cannon A. Then the pair's
+  common ground: Alpha back with MrkCan1 M (411, the pack's extension)
+  posted it from the clerk's chat-box list ("IT'S UP! MrkCan1 M FOR
+  ANYTHING!"), and Gamma, a third game with BN6's ROM alone (the
+  server's join line `"roms":0`), read the Board beside him: "Here now:
+  Alpha", "Trade board: no offers up.". Found on the way:
+  alone in a channel, the clerk's words were never written (his first
+  state's key was 0, the empty archive's), so the desk said nothing
+  until a second player came; fixed. The server's tests hold the rest:
+  a BN5 chip's offer kept from a game without BN5 and refused from one,
+  an offer gone with its poster, a take of a chip not the one posted,
+  the post's second, a session's second trade.
 - **A NetBattle between two games.** The challenge, the way in, the
   battle to its end on both with every hash agreeing, a desync and a
   player leaving each stopping both, a declined challenge

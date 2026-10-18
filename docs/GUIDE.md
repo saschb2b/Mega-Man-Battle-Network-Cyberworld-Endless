@@ -754,7 +754,8 @@ the ring stand raised. A greeter Mr.Prog calls out who logs in, two
 Navis stroll about and chat about who's here and what just happened
 (and every three minutes they parade round the landmark: walk with them),
 and A on a tree, the landmark, the sign or the board says what it is
-(the board lists who's here and the last trade and NetBattle). Say
+(the board lists who's here, the last trade and NetBattle, and the
+trade offers up). Say
 something or emote together with another player round the landmark or
 on the stage, and the Square cheers.
 
@@ -787,6 +788,14 @@ In the Square:
   chips swap as you come home. BN5's chips trade between two players
   whose games both have BN5's ROM; with anyone else the clerk offers
   BN6's chips only, and says so.
+- **The trade board**, at the same desk: put one spare up with what you
+  want for it (anything, a chip of an element, a Sword, Wind, Break or
+  Cursor chip, or a Mega), and everyone in your channel can read it,
+  there and on the log-in plaza's board, until you take it down, leave
+  or trade. To answer someone's offer, pick it at the desk and then one
+  of your spares that is what they want; you both see the pair and say
+  Deal, as in any trade. One trade a visit: the chip comes home with
+  you before the next.
 - **R**, or the pad you arrived by, takes you home.
 
 Talk to the gate's keeper to change your name or the server: the

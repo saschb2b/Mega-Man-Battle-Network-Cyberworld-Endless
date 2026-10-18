@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v4`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v5`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -70,7 +70,16 @@ the chips each gave) and tells both; each game applies its side when its
 player comes home. A step that does not match what the server holds, a
 player leaving or switching channel, or five minutes without progress
 ends a trade for both, and neither swaps. Games are trusted for what
-they hold; the log is what a host has to go on.
+they hold; the log is what a host has to go on. A session trades once:
+its game keeps one swap until its player is home.
+
+The trade board: each player may keep one offer up in his channel, a
+chip he has and a number for the kind he wants (the games' fixed list;
+the server never reads a chip), at most one post a second. It lasts
+while he is in the channel and until he trades; the server tells the
+channel's players its offers as they change, leaving a BN5 chip's offer
+out for a game without BN5's ROM, and keeps no offer on disk. Taking an
+offer starts a trade with both chips named, the poster's as posted.
 
 The Arena never sees a battle: each game runs both players' linked BN6
 cores. The server pairs a challenge with its answer, gives each player
@@ -317,5 +326,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v3 games and a v4
+one protocol version cannot enter a server of another (v4 games and a v5
 server refuse each other). Preserve the private state directory when upgrading.

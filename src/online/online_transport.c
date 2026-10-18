@@ -12,7 +12,7 @@
 #include "rom.h"
 #include "square_plan.h"
 
-/* Trade Central's and the Arena's messages (protocol.json): sent as soon as
+/* Trade Central's (its board's too) and the Arena's messages (protocol.json): sent as soon as
  * the worker's next pass, and taken in apart from the snapshot, each a u16
  * length and its bytes in a ring */
 #define RING 16384
@@ -36,7 +36,7 @@ static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
 }
 
 static bool mail(uint8_t kind) {
-	return kind == ONLINE_TRADE_STATE || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
+	return kind == ONLINE_TRADE_STATE || kind == ONLINE_BOARD || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
 		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH;
 }
 
@@ -317,7 +317,7 @@ bool online_transport_channel(uint16_t channel) {
 }
 
 bool online_transport_send(const uint8_t *data, size_t size) {
-	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
+	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
 		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH);
 	if (!transport.enabled || !ours) return false;
 #ifdef __EMSCRIPTEN__

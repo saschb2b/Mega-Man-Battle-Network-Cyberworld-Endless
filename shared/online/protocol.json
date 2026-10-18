@@ -1,12 +1,12 @@
 {
-  "version": 4,
+  "version": 5,
   "square_make": 2,
   "square_hash": 655709660,
   "rom_code": "BR5E",
   "rom_sha1": "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6",
   "bn5_code": "BRKE",
   "bn5_sha1": "5f472f78d8de2df01d5039e045c043cb40969a39",
-  "subprotocol": "cyberworld.presence.v4",
+  "subprotocol": "cyberworld.presence.v5",
   "max_players": 8,
   "name_bytes": 16,
   "max_message": 512,
@@ -39,6 +39,8 @@
   "arena_loadout": 19,
   "arena_input": 20,
   "arena_hash": 21,
+  "offer": 22,
+  "board": 23,
   "chip_last": 511,
   "bn6_chip_last": 319,
   "bn6_blank": [[203, 220], [291, 300], [314, 314]],
@@ -52,5 +54,8 @@
   "hello_bytes": 76,
   "roms_bn5": 1,
   "format_bn6": 0,
-  "format_full": 1
+  "format_full": 1,
+  "offer_bytes": 5,
+  "board_entry_bytes": 8,
+  "want_last": 9
 }

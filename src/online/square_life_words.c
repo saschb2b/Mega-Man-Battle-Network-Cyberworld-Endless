@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "net.h"
+#include "trade_words.h"
 
 static const char *area_name(int area) { return area == 2 ? "Sky" : area == 3 ? "Green" : "Central"; }
 
@@ -91,9 +92,9 @@ const char *square_walker_words(int k, const SquareFacts *f) {
 	return lines[f->turn % (unsigned)n];
 }
 
-/* the Board: a post a box, newest first */
+/* the Board: a post a box, newest first; the trade board's offers after */
 static const char *board(const SquareFacts *f) {
-	static char s[400];
+	static char s[720];
 	char list[64];
 	here(list, sizeof list, f);
 	int n = snprintf(s, sizeof s, "NET SQUARE BBS\nCHANNEL %u OF %u", f->channel, f->channels);
@@ -102,7 +103,11 @@ static const char *board(const SquareFacts *f) {
 	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|>%s logged in.", f->arrived);
 	if (f->traded) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade done with\n%s!", f->traded);
 	if (f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|>NetBattle vs\n%s: %s", f->fought, f->result == 1 ? "won!" : f->result == 2 ? "lost." : "over.");
-	snprintf(s + n, sizeof s - (size_t)n, "|>Tip: face a Navi\nand press A to\n%s.|>Tip: chips swap\nat Trade Central.", f->arena ? "wave or battle" : "wave");
+	for (int k = 0; k < f->nposts; ++k)
+		n += f->posts[k].name ? snprintf(s + n, sizeof s - (size_t)n, "|>%s has\n%s,wants\n%s.", f->posts[k].name, f->posts[k].chip, trade_want(f->posts[k].want))
+			: snprintf(s + n, sizeof s - (size_t)n, "|>Your offer:\n%s for\n%s.", f->posts[k].chip, trade_want(f->posts[k].want));
+	if (!f->nposts) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade board:\nno offers up.");
+	snprintf(s + n, sizeof s - (size_t)n, "|>Tip: face a Navi\nand press A to\n%s.|>Tip: post a chip\nat Trade Central.", f->arena ? "wave or battle" : "wave");
 	return s;
 }
 

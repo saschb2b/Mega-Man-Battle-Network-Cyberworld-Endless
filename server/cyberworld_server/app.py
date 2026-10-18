@@ -31,6 +31,7 @@ class Player:
     social_tokens: float = 2
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
+    offer_time: float = -1e9  # the board's last post, monotonic
     roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's
 
 
@@ -124,6 +125,7 @@ class Server:
                 raise protocol.ProtocolError("Expected binary HELLO")
             player = self.join(writer, *protocol.read_hello(data))
             await self.welcome(player)
+            await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
             await self.serve_player(reader, player)
         except protocol.ProtocolError as exc:
             self.event("reject", reason=str(exc), code=exc.code)
@@ -141,7 +143,8 @@ class Server:
                 # A replaced session has already handed its place on.
                 if player and self.players.get(player.id) is player:
                     del self.players[player.id]
-                    self.trades.left(player.id)
+                    self.trades.left(player)
+                    self.trades.done.discard(player.id)
                     self.arena.left(player.id)
                     self.event("leave", id=player.id, players=len(self.players))
             finally:
@@ -174,7 +177,8 @@ class Server:
         self.next_id = self.next_id % 0xffffffff + 1
         if old:
             del self.players[old.id]
-            self.trades.left(old.id)
+            self.trades.left(old)
+            self.trades.done.discard(old.id)
             self.arena.left(old.id)
             self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
@@ -237,6 +241,8 @@ class Server:
             await self.switch_channel(player, struct.unpack("!H", data[1:])[0])
         elif data and data[0] == protocol.SPEC["trade"]:
             await self.trades.handle(player, data)
+        elif data and data[0] == protocol.SPEC["offer"]:
+            await self.trades.offer(player, data)
         elif data and data[0] == protocol.SPEC["arena"]:
             await self.arena.handle(player, data)
         else:
@@ -269,10 +275,11 @@ class Server:
         if not channel:
             await self.notice(player, 10, "Channel is full or unavailable")
             return
-        self.trades.left(player.id)
+        self.trades.left(player)
         self.arena.left(player.id)
         player.channel = channel
         await self.welcome(player)
+        await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
         self.event("channel", id=player.id, channel=channel)
 
     async def inspect(self, player, target):

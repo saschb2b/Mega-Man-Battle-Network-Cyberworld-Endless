@@ -18,12 +18,12 @@ bool online_transport_profile(const OnlineProfile *profile);
 bool online_transport_inspect(uint32_t player_id);
 bool online_transport_social(uint8_t kind, uint8_t value);
 bool online_transport_channel(uint16_t channel);
-/* Trade Central's and the Arena's messages (TRADE, ARENA and its relayed
+/* Trade Central's and the Arena's messages (TRADE, OFFER, ARENA and its relayed
  * LOADOUT, INPUT and HASH; shared/online/README.md): sent within the
  * worker's next pass (about 2 ms), not a frame's queue; false where the
  * outbox is full or the kind is none of them. */
 bool online_transport_send(const uint8_t *data, size_t size);
-/* ... and theirs come in (TRADE_STATE, ARENA_STATE and the opponent's
+/* ... and theirs come in (TRADE_STATE, BOARD, ARENA_STATE and the opponent's
  * LOADOUT, INPUT and HASH): the next one's bytes into `out`, its size;
  * 0 none. */
 size_t online_transport_receive(uint8_t *out, size_t cap);
