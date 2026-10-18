@@ -79,7 +79,7 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| Code (routines, hooks, instructions) | 244 | 19 |
+| Code (routines, hooks, instructions) | 245 | 19 |
 | ROM data (tables, text, literals) | 257 | 158 |
 | ROM, code or data not told | 350 | 397 |
 | RAM (variables, structures) | 94 | 47 |
@@ -88,14 +88,14 @@ how to verify it.
 | Event flags | 25 | 3 |
 | Values of fields | 83 | 14 |
 | Constants, sizes and counts | 282 | 74 |
-| All | 1476 | 745 |
+| All | 1477 | 745 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 48 | 1 |
 | Shops and traders | 31 | 0 |
 | NaviCust | 17 | 1 |
-| Chips and folders | 279 | 218 |
+| Chips and folders | 280 | 218 |
 | Battle | 429 | 262 |
 | Text and fonts | 28 | 2 |
 | Sound | 9 | 2 |
