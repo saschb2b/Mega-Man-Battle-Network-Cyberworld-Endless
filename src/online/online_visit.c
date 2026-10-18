@@ -3,109 +3,178 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "backup.h"
-#include "boot.h"
 #include "cinema.h"
 #include "director.h"
 #include "emu.h"
 #include "game.h"
-#include "game_hooks.h"
 #include "loot.h"
 #include "navicust.h"
-#include "online_fresh.h"
 #include "online_scene.h"
+#include "online_snapshot.h"
 #include "online_transport.h"
-#include "online_visit_text.h"
+#include "platform.h"
 #include "run.h"
 #include "save.h"
-#include "save_queue.h"
 #include "souls.h"
 
+#define CALL_TIMEOUT_MS 20000   /* a server that never answers */
+
 static struct {
-	bool active, returning, checkpoint, ready, preserve, released;
-	Run before, saved;
-	LootMemory battle_before, battle_saved;
+	VisitStage stage;
+	VisitEnd ended;
+	uint32_t called_at;
+	/* (what the run held at the gate, put back as MegaMan comes home) */
+	Run run;
 	Profile profile;
 	uint32_t rng;
+	LootMemory battle;
 	OnlineLoadout loadout;
-} visit;
+	bool carried;
+} V;
 
-static bool visit_error(char *error, size_t cap, const char *message) {
-	if (error && cap) snprintf(error, cap, "%s", message);
-	return false;
-}
+VisitStage online_visit_stage(void) { return V.stage; }
 
-static bool begin_error(char *error, size_t cap, const char *message) {
-	run = visit.before;
-	profile = visit.profile;
-	rng_restore(visit.rng);
-	loot_memory_set(&visit.battle_before);
-	return visit_error(error, cap, message);
-}
-
-bool online_visit_begin(const char *url, const char *name, const uint8_t identity[16], char *error, size_t cap) {
-	if (visit.active || visit.returning) return visit_error(error, cap, online_visit_open);
-	if (backup_blocked()) return visit_error(error, cap, online_visit_recovery);
-	emu_sync();
-	save_queue_wait();
-	visit.before = run;
-	visit.profile = profile;
-	visit.rng = rng_state();
-	loot_memory(&visit.battle_before);
-	visit.checkpoint = load_run();
-	visit.saved = run;
-	loot_memory(&visit.battle_saved);
-	if (visit.checkpoint) {
-		char path[600];
-		save_state_path(path, sizeof path);
-		FILE *state = fopen(path, "rb");
-		if (!state) return begin_error(error, cap, online_visit_save_first);
-		fclose(state);
-	} else memset(&run, 0, sizeof run);
+bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
+	if (V.stage != VISIT_HOME) return false;
+	V.run = run;
+	V.profile = profile;
+	V.rng = rng_state();
+	loot_memory(&V.battle);
+	V.carried = false;
+	V.ended = VISIT_END_NONE;
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
-		return begin_error(error, cap, online_visit_connect_failed);
+		V.ended = VISIT_END_UNREACHABLE;
+		return false;
 	}
-	visit.active = true;
-	visit.ready = false;
-	visit.preserve = visit.released = false;
-	director_stop();
-	emu_resume_requested = emu_start_in_town = emu_start_at_home = false;
-	scene_set(&scene_emu);
+	V.stage = VISIT_CALLING;
+	V.called_at = SDL_GetTicks();
+	fprintf(stderr, "online: calling %s as %s\n", url, name);
 	return true;
 }
 
-bool online_visit_active(void) { return visit.active; }
-bool online_visit_preserves_checkpoint(void) { return visit.active || visit.returning || visit.preserve; }
-bool online_visit_transitioning(void) { return visit.returning; }
+/* What a server's refusal (its code, shared/online/protocol.json) means at
+ * the gate; `away`: it came in the Square */
+static VisitEnd refusal(const OnlineSnapshot *s, bool away) {
+	switch (s->error_code) {
+	case 2: case 3: return VISIT_END_VERSION;
+	case 4: return VISIT_END_ROM;
+	case 5: return VISIT_END_NAME;
+	case 7: return VISIT_END_FULL;
+	case 10: case 11: return VISIT_END_BARRED;
+	case 14: return VISIT_END_REMOVED;
+	default: return away ? VISIT_END_LOST : VISIT_END_UNREACHABLE;
+	}
+}
 
-uint32_t online_visit_run_keys(uint32_t keys) {
-	if (!visit.preserve) return keys;
-	if (!keys) visit.released = true;
-	if (!visit.released) return 0;
-	if (keys && director_arrived()) visit.preserve = false;
-	return keys;
+static void put_back(void) {
+	run = V.run;
+	profile = V.profile;
+	rng_restore(V.rng);
+	loot_memory_set(&V.battle);
+}
+
+/* The connection closed, and MegaMan back at the gate's checkpoint (from
+ * the Square: loaded again, the layer and home rebuilt as CONTINUE does) */
+static void come_home(VisitEnd why) {
+	bool away = V.stage == VISIT_AWAY;
+	online_scene_end();
+	online_transport_end();
+	V.stage = VISIT_HOME;
+	V.ended = why;
+	put_back();
+	fprintf(stderr, "online: visit ended (%d)\n", (int)why);
+	if (!away) return;
+	emu_sync();
+	cinema_reset();
+	if (!director_resume()) {
+		/* (the gate's checkpoint is still on disk: CONTINUE tries it again) */
+		fprintf(stderr, "online: the gate's checkpoint did not load; to the title\n");
+		director_stop();
+		title_menu = true;
+		scene_set(&scene_title);
+		return;
+	}
+	/* (put back after the resume too: it reads the run's side records) */
+	put_back();
+}
+
+/* Into the Square: the run's director stopped, the MegaMan carried read,
+ * the Square built into the running game and MegaMan warped there */
+static void go_away(const OnlineSnapshot *s) {
+	emu_sync();
+	V.carried = online_snapshot_read(&V.loadout, souls_held());
+	director_stop();
+	cinema_reset();
+	V.stage = VISIT_AWAY;
+	OnlineProfile card;
+	online_visit_profile(&card);
+	if (!online_scene_start(s->seed, s->player_id, &card)) come_home(VISIT_END_BROKEN);
+}
+
+void online_visit_update(void) {
+	if (V.stage == VISIT_HOME) return;
+	if (V.stage == VISIT_AWAY) {
+		VisitEnd why = online_scene_update();
+		if (why != VISIT_END_NONE) come_home(why);
+		return;
+	}
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	if (s.error[0]) come_home(refusal(&s, false));
+	else if (s.connected) go_away(&s);
+	else if (SDL_GetTicks() - V.called_at > CALL_TIMEOUT_MS) come_home(VISIT_END_UNREACHABLE);
+}
+
+uint32_t online_visit_keys(uint32_t keys) {
+	if (V.stage == VISIT_AWAY) return online_scene_keys(keys);
+	if (V.stage != VISIT_CALLING) return keys;
+	if (btn_pressed(BTN_B)) come_home(VISIT_END_CANCELLED);
+	return 0;
+}
+
+void online_visit_draw(void) {
+	if (V.stage == VISIT_AWAY) online_scene_draw();
+}
+
+void online_visit_leave(VisitEnd why) {
+	if (V.stage != VISIT_HOME) come_home(why);
+}
+
+VisitEnd online_visit_ended(void) {
+	VisitEnd why = V.ended;
+	V.ended = VISIT_END_NONE;
+	return why;
+}
+
+void online_visit_shutdown(void) {
+	if (V.stage == VISIT_HOME) return;
+	emu_sync();
+	online_scene_end();
+	online_transport_end();
+	put_back();
+	V.stage = VISIT_HOME;
 }
 
 static uint16_t bounded_depth(int depth) { return (uint16_t)(depth < 0 ? 0 : depth > UINT16_MAX ? UINT16_MAX : depth); }
 
 void online_visit_profile(OnlineProfile *out) {
 	memset(out, 0, sizeof *out);
-	if (!visit.ready) return;
-	const OnlineLoadout *navi = &visit.loadout;
+	if (!V.carried) return;
+	const OnlineLoadout *navi = &V.loadout;
 	out->hp = navi->hp; out->max_hp = navi->max_hp;
 	/* NaviStats stores each level less one; the public card shows 1-5. */
 	out->attack = navi->attack < 5 ? (uint8_t)(navi->attack + 1u) : 5;
 	out->speed = navi->speed < 5 ? (uint8_t)(navi->speed + 1u) : 5;
 	out->charge = navi->charge < 5 ? (uint8_t)(navi->charge + 1u) : 5;
 	out->souls = navi->souls; out->crosses = navi->crosses;
-	out->depth = visit.checkpoint ? bounded_depth(visit.saved.depth) : 0;
+	out->depth = bounded_depth(V.run.depth);
 	unsigned act = out->depth ? ((out->depth - 1u) % CYCLE_LAYERS) / 3u + 1u : 0;
 	/* The short net's second Nest at threat ten remains its fourth act. */
-	if (visit.saved.mode == RUN_SHORT && out->depth >= SHORT_LAYERS) act = (SHORT_LAYERS - 1u) / 3u + 1u;
+	if (V.run.mode == RUN_SHORT && out->depth >= SHORT_LAYERS) act = (SHORT_LAYERS - 1u) / 3u + 1u;
 	out->act = (uint8_t)act;
-	out->best_depth = bounded_depth(visit.profile.best_depth);
-	out->marks = visit.profile.marks;
+	out->best_depth = bounded_depth(V.profile.best_depth);
+	out->marks = V.profile.marks;
 	for (unsigned i = 0; i < ONLINE_BOARD_CELLS; ++i) {
 		unsigned slot = navi->grid[i];
 		if (!slot || slot > BN6_NAVICUST_SLOTS) continue;
@@ -114,91 +183,4 @@ void online_visit_profile(OnlineProfile *out) {
 		NaviShape shape;
 		if (variant && variant < 47 * 4 && navicust_shape((int)variant, &shape)) out->board[i] = shape.color;
 	}
-}
-
-bool online_visit_prepare(char *error, size_t cap) {
-	bool ok;
-	if (!visit.active) return visit_error(error, cap, online_visit_missing);
-	if (visit.checkpoint) {
-		char path[600];
-		save_state_path(path, sizeof path);
-		/* Reject an unreadable state: normal CONTINUE can instead restart
-		 * its layer, but a visit must borrow an existing MegaMan exactly. */
-		ok = emu_load_state(path);
-		if (ok) { game_hooks_after_boot(); ok = director_resume(); }
-	} else {
-		director_before_boot();
-		ok = emu_boot();
-		game_hooks_after_boot();
-		if (ok) online_fresh_prepare();
-	}
-	director_stop();
-	cinema_reset();
-	if (!ok || !online_snapshot_read(&visit.loadout, visit.checkpoint ? souls_held() : 0))
-		return visit_error(error, cap, online_visit_checkpoint_failed);
-	visit.ready = true;
-	fprintf(stderr, "online: carried checkpoint=%s depth=%d hp=%u max_hp=%u souls=%u\n",
-		visit.checkpoint ? "yes" : "no", visit.checkpoint ? visit.saved.depth : 0,
-		visit.loadout.hp, visit.loadout.max_hp, visit.loadout.souls);
-	online_scene_start();
-	return true;
-}
-
-static void restore_metadata(void) {
-	run = visit.checkpoint ? visit.saved : visit.before;
-	profile = visit.profile;
-	rng_restore(visit.rng);
-	loot_memory_set(visit.checkpoint ? &visit.battle_saved : &visit.battle_before);
-}
-
-void online_visit_return(void) {
-	if (!visit.active || visit.returning) return;
-	emu_sync();
-	director_stop();
-	online_scene_end();
-	restore_metadata();
-	visit.active = false;
-	visit.returning = true;
-	visit.ready = false;
-	cinema_reset();
-	emu_resume_requested = visit.checkpoint;
-	title_menu = true;
-	scene_set(visit.checkpoint ? &scene_emu : &scene_title);
-}
-
-void online_visit_returned(bool restored) {
-	if (!visit.returning) return;
-	visit.returning = false;
-	OnlineLoadout after;
-	bool same = restored && online_snapshot_read(&after, souls_held()) && !memcmp(&after, &visit.loadout, sizeof after);
-	restore_metadata();
-	visit.preserve = same;
-	visit.released = false;
-	if (!same) {
-		director_stop();
-		title_menu = true;
-		scene_set(&scene_title);
-	}
-	fprintf(stderr, "online: checkpoint return=%s carried=%s\n", restored ? "restored" : "failed; save unchanged", same ? "identical" : "changed");
-}
-
-void online_visit_left(void) {
-	if (visit.returning && !visit.checkpoint) {
-		visit.returning = false;
-		fprintf(stderr, "online: no checkpoint; returned to title\n");
-	} else if (visit.preserve && !visit.returning) {
-		/* A deliberate reset to title ends the borrowed checkpoint's
-		 * guard before a later NEW GAME can begin. */
-		restore_metadata();
-		visit.preserve = false;
-	}
-}
-
-void online_visit_shutdown(void) {
-	if (!online_visit_preserves_checkpoint()) return;
-	emu_sync();
-	director_stop();
-	online_scene_end();
-	restore_metadata();
-	visit.active = visit.returning = visit.ready = visit.preserve = false;
 }

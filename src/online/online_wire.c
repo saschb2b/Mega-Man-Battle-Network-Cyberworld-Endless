@@ -118,7 +118,10 @@ static bool read_status(const uint8_t *data, size_t size, OnlineSnapshot *snapsh
 		out[i - 3] = (char)data[i];
 	}
 	out[size - 3] = '\0';
-	if (data[0] == ONLINE_ERROR) return false;
+	if (data[0] == ONLINE_ERROR) {
+		snapshot->error_code = get16(data + 1);
+		return false;
+	}
 	++snapshot->notice_serial;
 	return true;
 }

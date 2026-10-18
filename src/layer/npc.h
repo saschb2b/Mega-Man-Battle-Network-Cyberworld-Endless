@@ -26,6 +26,10 @@ uint32_t npc_mark(int category, int index, int x, int y, int z, int anim, int go
 /* ... drawn on the floor at world (x, y), as npc_prop's pads. */
 uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gone_flag);
 
+/* ... a floor sprite whose animation follows the byte at *anim_at (the
+ * caller writes it between frames: a gate's still and swirling looks). */
+uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at);
+
 /* A standing NPC that talks with `script` of the text archive at `archive`,
  * and leaves once event flag `gone_flag` is set (-1: never); a `floor` one
  * (a pad) is drawn under MegaMan. */

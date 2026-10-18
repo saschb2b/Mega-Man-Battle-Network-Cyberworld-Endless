@@ -7,7 +7,6 @@
 #include "online_people.h"
 #include "online_text.h"
 #include "online_transport.h"
-#include "online_visit.h"
 #include "pixfont.h"
 #include "platform.h"
 
@@ -18,8 +17,11 @@ static OnlineSnapshot state;
 static OnlinePeer selected;
 static const char *feedback;
 static uint32_t requested_card;
+static bool leaving;
 
-void online_ui_reset(void) { page = choice = 0; feedback = NULL; memset(&state, 0, sizeof state); }
+void online_ui_reset(void) { page = choice = 0; feedback = NULL; leaving = false; memset(&state, 0, sizeof state); }
+
+bool online_ui_leaving(void) { return leaving; }
 bool online_ui_open(void) { return page != CLOSED; }
 
 static void open_card(void) {
@@ -39,7 +41,7 @@ static void card_input(void) {
 static void choose(void) {
 	if (page == MENU) {
 		static const int pages[] = { PLAYERS, PHRASES, EMOTES, CHANNELS };
-		if (choice == 4) { online_visit_return(); return; }
+		if (choice == 4) { leaving = true; page = CLOSED; return; }
 		page = pages[choice];
 		choice = 0;
 		channel = state.channel;

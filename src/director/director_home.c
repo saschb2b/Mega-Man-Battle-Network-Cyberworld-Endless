@@ -17,6 +17,7 @@
 #include "boss.h"
 #include "debug.h"
 #include "director.h"
+#include "director_gate.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "emu.h"
@@ -171,6 +172,7 @@ static bool home_install(void) {
 	if (ok) {
 		home_jobs_flags();
 		home_courier_visit();
+		home_gate_visit();
 	}
 	return ok;
 }

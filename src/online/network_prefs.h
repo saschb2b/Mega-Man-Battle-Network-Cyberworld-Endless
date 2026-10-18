@@ -17,6 +17,7 @@ typedef struct {
 	char servers[NETWORK_SERVERS][NETWORK_URL];
 	uint8_t identity[NETWORK_ID_BYTES];
 	unsigned count, selected, consent;
+	unsigned named;   /* the player chose the name (at the gate's keeper) */
 } NetworkPrefs;
 
 bool network_name_valid(const char *name);

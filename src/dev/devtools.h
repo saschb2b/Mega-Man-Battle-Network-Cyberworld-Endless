@@ -43,6 +43,8 @@ typedef struct {
 	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
 	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
 	int unitebreak; /* unitebreak=N: UNITE's rule broken, the differential's own test (soulunite.h, SOULUNITE_BREAK_*) */
+	const char *online;     /* online=URL: Lan's HP's gate goes to this server, the keeper's questions skipped (docs/ONLINE.md) */
+	const char *online_name; /* onlinename=NAME: ... as NAME */
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
 } DevFlags;
 

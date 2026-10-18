@@ -46,6 +46,7 @@ typedef struct {
 	uint32_t event_serial;
 	OnlineEvent events[ONLINE_EVENT_HISTORY];
 	uint32_t notice_serial;
+	uint16_t error_code;   /* the server's refusal (protocol.json's codes), 0 none */
 	char notice[100], error[128];
 } OnlineSnapshot;
 

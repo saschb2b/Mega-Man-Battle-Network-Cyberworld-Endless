@@ -154,6 +154,32 @@ uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gon
 	return idle_and_write(s, 10 + floor_place(s + 10, x, y, 0), gone_flag);
 }
 
+uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at) {
+	uint8_t s[48] = {
+		0x08,
+		0x25, (uint8_t)index, (uint8_t)(category * 4),
+		0x0A, 0x00,   /* no collision radius */
+		0x1F,
+		0x0E,         /* nothing to talk to */
+	};
+	int n = 8 + floor_place(s + 8, x, y, 0), loop = n;
+	/* (layer priority 2: the room's floor lines, BN6's second layer in
+	 * Lan's HP, drew over a big pad at 3; still under MegaMan, sorted after
+	 * him by its depth) */
+	s[n - 1] = 0x1A;
+	/* (its animation each frame from its own byte, which the caller
+	 * writes: BN6 starts an animation again only as it changes) */
+	s[n++] = 0x16; s[n++] = (uint8_t)anim;
+	s[n++] = 0x10; s[n++] = 0x01;
+	s[n++] = 0x02; int jump = n; n += 4;
+	uint32_t at = mapslot_alloc(s, n);
+	if (!at) return 0;
+	put32(s + jump, at + (uint32_t)loop);
+	emu_write(at, s, (size_t)n);
+	*anim_at = at + (uint32_t)loop + 1;
+	return at;
+}
+
 /* (behind: a navi behind a counter, drawn under the second layer that
  * draws the counter, its talk centre shifted by (sx, sy) towards the
  * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */

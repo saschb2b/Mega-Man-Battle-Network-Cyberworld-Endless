@@ -6,6 +6,8 @@
 void online_ui_reset(void);
 void online_ui_update(const OnlineSnapshot *snapshot);
 bool online_ui_open(void);
+/* The menu's Leave chosen. */
+bool online_ui_leaving(void);
 void online_ui_draw(void);
 
 #endif

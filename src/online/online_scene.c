@@ -13,20 +13,19 @@
 #include "online_text.h"
 #include "online_transport.h"
 #include "online_ui.h"
-#include "online_visit.h"
 #include "platform.h"
 
 static OnlineSnapshot snapshot;
 static OnlineSnapshot shown;
-static bool built, failed, arrived;
+static bool built, arrived;
 static unsigned frames;
 static int local_x, local_y, local_z;
 static uint8_t facing;
 static FILE *trace;
 static uint32_t disconnected_at, notice_at, notice_serial;
 
-void online_scene_start(void) {
-	built = failed = arrived = false;
+bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *card) {
+	built = arrived = false;
 	frames = 0;
 	local_x = local_y = local_z = 0;
 	facing = 3;
@@ -34,23 +33,20 @@ void online_scene_start(void) {
 	memset(&shown, 0, sizeof shown);
 	disconnected_at = notice_at = notice_serial = 0;
 	online_motion_reset(); online_labels_reset(); online_ui_reset(); online_people_load();
-	OnlineProfile profile;
-	online_visit_profile(&profile);
-	if (!online_transport_profile(&profile)) fprintf(stderr, "online: public Navi card could not be queued\n");
+	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
 	if (path && *path && !trace) fprintf(stderr, "online: cannot write trace %s\n", path);
+	built = online_square_build(seed, player);
+	if (built) fprintf(stderr, "online: square seed=%u hash=%u player=%u\n", seed, online_square_hash(), player);
+	else fprintf(stderr, "online: square could not be built\n");
+	return built;
 }
 
 void online_scene_end(void) {
 	if (trace) { fclose(trace); trace = NULL; }
-	online_transport_end();
 	built = arrived = false;
 }
-
-bool online_scene_enabled(void) { return online_transport_enabled(); }
-bool online_scene_ready(void) { return built; }
-bool online_scene_arrived(void) { return arrived; }
 
 uint32_t online_scene_keys(uint32_t keys) {
 	return online_ui_open() ? 0 : keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
@@ -82,26 +78,21 @@ static void trace_frame(void) {
 	fflush(trace);
 }
 
-void online_scene_update(void) {
+VisitEnd online_scene_update(void) {
+	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
 	uint32_t now = SDL_GetTicks();
 	if (snapshot.notice_serial != notice_serial) { notice_serial = snapshot.notice_serial; notice_at = now; }
-	if (snapshot.error[0] || failed) {
+	if (snapshot.error[0] || !snapshot.connected) {
 		if (!disconnected_at) disconnected_at = now;
-		if (btn_pressed(BTN_B) || now - disconnected_at >= 2000) { online_visit_return(); return; }
-	} else if (!snapshot.connected && btn_pressed(BTN_B)) { online_visit_return(); return; }
-	online_ui_update(&snapshot);
-	if (online_visit_transitioning()) return;
-	if (!built) {
-		if (!snapshot.connected || failed) return;
-		built = online_square_build(snapshot.seed, snapshot.player_id);
-		failed = !built;
-		if (built) fprintf(stderr, "online: square seed=%u hash=%u player=%u\n", snapshot.seed, online_square_hash(), snapshot.player_id);
-		else fprintf(stderr, "online: square could not be built\n");
-		return;
+		/* (the reason read a moment before the way home) */
+		if (now - disconnected_at >= 1500) return snapshot.error_code == 14 ? VISIT_END_REMOVED : VISIT_END_LOST;
+		return VISIT_END_NONE;
 	}
+	online_ui_update(&snapshot);
+	if (online_ui_leaving()) return VISIT_END_LEFT;
 	arrived = online_square_arrived();
-	if (!arrived) return;
+	if (!arrived) return VISIT_END_NONE;
 	++frames;
 	local_x = bn6_player_x(); local_y = bn6_player_y(); local_z = bn6_player_z();
 	facing = emu_read8(BN6_PLAYER_FACING) & 7u;
@@ -110,24 +101,13 @@ void online_scene_update(void) {
 	online_motion_update(&snapshot, now, &shown);
 	online_square_peers(&shown);
 	online_labels_update(&shown, now);
+	return VISIT_END_NONE;
 }
 
 void online_scene_draw(void) {
+	if (!built || !arrived) return;
 	int x = P.core_x, y = P.core_y;
-	fill_rect(x, y, EMU_W, 15, rgba(9, 24, 42, 220));
-	text_draw(x + 4, y + 1, online_title, WHITE, TEXT_LEFT);
-	if (snapshot.connected) text_drawf(x + EMU_W - 4, y + 1, WHITE, TEXT_RIGHT, "%u / %u", snapshot.channel, snapshot.channels);
-	if (failed || !snapshot.connected) {
-		const char *status = failed ? online_map_failed : snapshot.error[0] ? snapshot.error : online_connecting;
-		fill_rect(x, y + 62, EMU_W, 40, rgba(9, 24, 42, 230));
-		text_drawf(x + 4, y + 65, WHITE, TEXT_LEFT, "%.32s", status);
-		if (strlen(status) > 32) text_drawf(x + 4, y + 79, WHITE, TEXT_LEFT, "%.32s", status + 32);
-		text_draw(x + 4, y + 109, online_back, WHITE, TEXT_LEFT);
-		return;
-	}
 	online_labels_draw();
-	fill_rect(x, y + EMU_H - 15, EMU_W, 15, rgba(9, 24, 42, 255));
-	text_draw(x + 4, y + EMU_H - 14, online_footer, WHITE, TEXT_LEFT);
 	online_ui_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));

@@ -4,6 +4,7 @@
  * and MegaMan's words, the act's card held over Lan's HP, the run saved
  * there, MegaMan at each portal, the portal taken, and the next layer's
  * arrival. */
+#include "director_gate.h"
 #include "director_home.h"
 
 #include <stdio.h>
@@ -273,6 +274,7 @@ void home_update(void) {
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
 	home_courier_frame();
+	home_gate_frame();
 	home_places_frame(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER));
 	town_tint();
 	was_hp = hp;

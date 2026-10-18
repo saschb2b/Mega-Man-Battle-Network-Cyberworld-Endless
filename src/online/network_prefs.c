@@ -52,6 +52,7 @@ static bool read_identity(const char *value, uint8_t *out) {
 static void read_setting(NetworkPrefs *out, const char *key, const char *value, bool *identity) {
 	if (!strcmp(key, "identity")) *identity = read_identity(value, out->identity);
 	else if (!strcmp(key, "name") && network_name_valid(value)) snprintf(out->name, sizeof out->name, "%s", value);
+	else if (!strcmp(key, "named")) out->named = value[0] == '1';
 	else if (!strcmp(key, "selected")) out->selected = (unsigned)strtoul(value, NULL, 10);
 	else if (!strcmp(key, "consent")) out->consent = (unsigned)strtoul(value, NULL, 10) & ((1u << NETWORK_SERVERS) - 1u);
 	else if (!strcmp(key, "server") && out->count < NETWORK_SERVERS) {
@@ -113,9 +114,9 @@ bool network_prefs_write(const char *directory, const NetworkPrefs *prefs) {
 #if !defined(_WIN32) && !defined(__3DS__)
 	if (fchmod(fileno(file), 0600)) { fclose(file); remove(tmp); return false; }
 #endif
-	fputs("# Network settings. Connections begin only when JOIN is chosen.\nidentity=", file);
+	fputs("# The Net Square's settings (docs/ONLINE.md). A connection begins only at the gate in Lan's HP.\nidentity=", file);
 	for (unsigned i = 0; i < NETWORK_ID_BYTES; ++i) fprintf(file, "%02x", prefs->identity[i]);
-	fprintf(file, "\nname=%s\nselected=%u\nconsent=%u\n", prefs->name, prefs->selected, prefs->consent);
+	fprintf(file, "\nname=%s\nnamed=%u\nselected=%u\nconsent=%u\n", prefs->name, prefs->named ? 1u : 0u, prefs->selected, prefs->consent);
 	for (unsigned i = 0; i < prefs->count; ++i) fprintf(file, "server=%s\n", prefs->servers[i]);
 	bool ok = !ferror(file) && cw_fsync_file(file);
 	if (fclose(file)) ok = false;

@@ -4,10 +4,16 @@
 #include <string.h>
 
 const char online_title[] = "Net Square";
-const char online_map_failed[] = "The square could not be built.";
-const char online_connecting[] = "Connecting...";
+const char online_field_name_title[] = "YOUR NAME IN THE SQUARE";
+const char online_field_address_title[] = "SERVER ADDRESS";
+const char online_field_name_hint[] = "1-16 letters, digits, spaces, _ or -";
+const char online_field_address_hint[] = "host or host:port, as its owner gave it";
+const char online_field_bad_name[] = "Use 1-16 letters, digits, spaces, _ or -";
+const char online_field_bad_address[] = "That is not a server address";
+const char online_field_space[] = "SP";
+const char *const online_field_buttons[3] = { "ERASE", "OK", "BACK" };
+const char online_field_keys_hint[] = "A: type   L: erase   START: OK   B: back";
 const char online_waiting[] = "Waiting for another Navi...";
-const char online_footer[] = "A: Navis   START: Network";
 const char online_select_help[] = "A: Choose   B: Back";
 const char online_card_help[] = "A: Mute   R: Block   B: Back";
 const char online_card_wait[] = "Reading Navi card...";
@@ -20,8 +26,6 @@ const char online_channel_help[] = "LEFT/RIGHT: Channel   A: Join";
 const char online_muted[] = "Muted";
 const char online_blocked[] = "Blocked";
 const char online_saved[] = "Saved on this device";
-const char online_leaving[] = "Returning to your checkpoint...";
-const char online_back[] = "B: Return";
 
 const char *const online_menu[5] = { "Navis", "Quick phrases", "Emotes", "Channel", "Leave Square" };
 const char *const online_phrases[ONLINE_PHRASE_COUNT] = {

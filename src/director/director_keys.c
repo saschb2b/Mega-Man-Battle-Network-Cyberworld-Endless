@@ -12,6 +12,7 @@
 #include "briefing_words.h"
 #include "cinema.h"
 #include "director.h"
+#include "director_gate.h"
 #include "director_map.h"
 #include "director_home.h"
 #include "director_see.h"
@@ -411,6 +412,8 @@ static bool home_r(uint32_t *keys) {
 
 uint32_t director_keys(uint32_t keys) {
 	talk_only_update();
+	/* (a field of the Net Square's gate open over the game) */
+	if (home_gate_holds()) return 0;
 	/* (A's reach: BN6's own in the real world, its checks a cell deep;
 	 * the Net's map groups from 0x80, bn6f INTERNET_MAP_GROUP_START) */
 	if (D.active && on_map()) npc_reach(emu_read8(BN6_MAP_GROUP) >= 0x80);
