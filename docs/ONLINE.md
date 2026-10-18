@@ -13,8 +13,10 @@ built and what has been shown of it. The Arena has its own,
 
 The official server is `wss://cyberworld.saschb2b.com/presence`, deployed
 in Coolify from `deploy/coolify/` ([server/README.md](../server/README.md),
-Coolify deployment); it speaks protocol v3 with trading and the Arena on,
-built from this work's branch until it is merged. No release has shipped
+Coolify deployment); it speaks the protocol of the branch it was last
+deployed from (v3 until it is redeployed with v4, which a v3 game cannot
+join, nor a v4 game a v3 server), trading and the Arena on, until this
+work is merged. No release has shipped
 the Square yet.
 
 ## The design
@@ -29,29 +31,52 @@ MegaMan is. No menu screen of the project's own leads there: the world
 does, a gate in the room the run comes home to, in the manner of
 Warframe's Orbiter, with BN6's own chat boxes for every question.
 
-## Battle Network 5, there or not
+## Battle Network 5, there or not: the pair's common ground
 
 BN5's ROM is optional, so a Square holds players with it and without
 it, all in one channel: splitting them would halve a small crowd. What
-keeps them apart is a rule: **only plain BN6 crosses the wire.**
+two players do together goes by **their common ground**, the content
+both games hold, chosen up front and named, never a bare refusal. It is
+the formats of the games the players know, Pokémon's link rules and
+Hearthstone's Standard and Wild, where what both bring decides the rules
+and the rules are told before the battle begins (the owner's design also
+names BN6's link battles between Gregar and Falzar; assumed, not checked
+against [SOURCES.md](SOURCES.md)'s sources here). The game-design skill's
+dialectic is **one crowd against each player's own collection**; the
+pattern, formats with a telegraph.
 
+- **Each player's ROMs are on the wire.** HELLO carries BN5 Team
+  Colonel's identity (its game code and SHA-1, zeros without it), checked
+  by the server against `protocol.json` exactly as BN6's is; the server
+  keeps each player's ROMs and every SNAPSHOT peer says them (a flags
+  byte). Only identities and numbers cross: a game without BN5's ROM never
+  receives a byte of it, so a pair where one lacks it has to keep to BN6.
+- **A card says it.** Where the two games differ, MegaMan's reading of the
+  other's card ends with "His PET holds BN5 chips too!" or "His PET holds
+  BN6 chips only."
+- **Trade Central.** Between two games with BN5's ROM every chip of
+  either game's registry trades, BN5's too (its ids are the registry's,
+  fixed in `src/core/xchips_registry.c`, so they name the same chip on
+  every game with BN5); a mixed pair trades BN6's own chips alone. The
+  clerk lists only the Navis MegaMan has a spare for and only the spares
+  the pair can both hold, and says so ("THAT NAVI TRADES BN6 CHIPS!", or
+  that every spare is BN5's); each game refuses a chip it cannot hold
+  when an offer comes and at settling (BN5's ids, on BN6's blank records
+  203-220, 291-300 and 314 and past 319, where its ROM is not read), and
+  the server refuses a BN5 chip between games that do not both have its
+  ROM (NOTICE 19).
+- **The Arena.** A challenge names its rules: a format byte in ARENA and
+  ARENA_STATE, **BN6 rules** for any pair until full rules (BN5's chips
+  and Souls, BN5 installed into both pair cores) are built, and full rules
+  only between two games with BN5's ROM, which the server holds them to.
+  Under BN6's rules MegaMan leaves his Souls and BN5's chips in his pack
+  at home and fights with a folder of BN6's chips: Lan picks it among
+  Folder1, Folder2 and the Extra Folder, those holding BN5's chips named
+  as staying home; where none fits, MegaMan says so before any challenge
+  is sent ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
 - The Square is built from BN6's own nets (Central, Sky, Green), the same
-  for every game whatever ROMs it has.
-- A card names Crosses and Souls from words of the game's own, never
-  read from BN5's ROM.
-- Trade Central offers only BN6's own chips: the picker leaves out the
-  chips of BN5 a run holds, and a trade's chip is refused, by both games
-  and at settling, where it is past BN6's 319 or on one of BN6's blank
-  records (203-220, 291-300, 314: `BN6_CHIP_BLANK` in
-  `src/emu/bn6_chips.h`). BN5's chips are installed on those blank ids
-  in a game with BN5's ROM, so a rule that read the local registry
-  would let two games disagree; a rule of BN6's alone cannot.
-- The Arena runs two cores of plain BN6 on both games (no hook, no BN5
-  install), and a MegaMan carrying what plain BN6 has not (Souls,
-  another game's chips in the folder or the pack, by the same blank
-  records) is refused with MegaMan's word, on both sides by the same
-  check. The folder carried is the first one, so a run with BN5's chips
-  there sits NetBattles out until they leave it.
+  for every game whatever ROMs it has, and a card names Crosses and Souls
+  from words of the game's own, never read from BN5's ROM.
 
 ## Where things are
 
@@ -59,7 +84,7 @@ keeps them apart is a rule: **only plain BN6 crosses the wire.**
 | --- | --- | --- |
 | The game's side | `src/online/`, the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v3](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v4](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -214,8 +239,10 @@ words their own archives in the layer's scratch.
 **Talk.** Every exchange is BN6's chat box with its options, three to a
 box (`online_chat.c`, words in `square_words.c`): L for a phrase or an
 emote, A facing another MegaMan for his card (HP, act and layer,
-Crosses, Souls) and Battle, Wave, Mute, Block; R or the pad for home.
-The Square's flags are `0x1480`-`0x14A1`, its own while it lasts.
+Crosses, Souls, and BN5 where the two games differ) and Battle, Wave,
+Mute, Block; R or the pad for home. A talk's column of options takes up
+and down (`cinema_keys` lets the pad through while MegaMan is held).
+The Square's flags are `0x1480`-`0x14C3`, its own while it lasts.
 Phrases and emotes are fixed lists, never free text; mute and block are
 the player's, kept by the server's public identity of the other.
 
@@ -225,11 +252,17 @@ A Mr.Prog at a desk in the wing up-left of the plaza (-x) trades one
 spare chip (a copy past those in the run's three folders) for another
 player's (`trade_central.c`, words in `trade_words.c`):
 
-1. MegaMan picks a Navi in the channel and the chip he offers. The picker
-   is BN6's own Order Service screen (`trade_order.c`): the shop's
+1. MegaMan picks a Navi in the channel and the chip he offers, from
+   those the pair can both hold (above, the pair's common ground). The
+   picker is BN6's own Order Service screen (`trade_order.c`): the shop's
    descriptor pointed, while he is in the Square, at a copy of its text
    archive in the desk's words, its list the run's spares
-   ([ROM_DATA.md](ROM_DATA.md), the Order Service).
+   ([ROM_DATA.md](ROM_DATA.md), the Order Service). Where a spare is one
+   of BN5's past BN6's 319 (two games with BN5's ROM), the spares are a
+   list in the clerk's chat box instead, two to a box (flags
+   `0x14B0`-`0x14C3`, 20 at most): the order screen's list builder puts
+   each chip at its ID order plus 0x140 in a list of 640 entries, so one
+   past 319 would be written past its end.
 2. The other player's MegaMan hears the offer, goes to the desk and picks
    a chip back, or says no.
 3. Both see the pair and say Deal; the server commits the trade only
@@ -240,15 +273,19 @@ player's (`trade_central.c`, words in `trade_words.c`):
    home: on the way back from the Square, or at the next CONTINUE if the
    game was closed there. It runs BN6's own TakeChips and GiveChips on
    the gate's checkpoint (`online_trade_settle`), refuses a swap whose
-   chip is no longer spare, deletes the file before it saves, and MegaMan
-   says what came and went.
+   chip is no longer spare or one this game cannot hold, deletes the file
+   before it saves, and MegaMan says what came and went. BN6's own
+   routines count a chip past 319 in the pack's extension (docs/
+   EMULATION.md), so a BN5 chip comes and goes as BN6's do.
 
 ## The Arena
 
 Battle on a card sends a challenge; if the other player takes it, both
 games run BN6's Practice NetBattle on **two linked cores each**, the two
 MegaMen carried as they are (folder, NaviCust, HP, buster, Crosses), and
-only the players' keys cross the server. The Square's core holds still
+only the players' keys cross the server. The challenge names its rules
+and Lan picks the folder carried (above, the pair's common ground). The
+Square's core holds still
 meanwhile; after the battle each MegaMan stands where he stood and says
 how it went. A hash of the pair every 60 frames catches two games apart
 and stops both. Nothing is won or lost. The 3DS and the browser build
@@ -258,10 +295,11 @@ the lockstep and the two-client proof.
 
 ## The server and the wire
 
-Protocol v3 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v3`). The server refuses
+Protocol v4 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v4`). The server refuses
 another protocol version, another Square generator or hash, another ROM
-code or SHA-1, a name out of bounds and a full Square; it bounds every
+code or SHA-1 (BN6's, and BN5's where one is named), a name out of
+bounds and a full Square; it bounds every
 message, the players, pending handshakes, each client's traffic and its
 output, and relays the Arena's keys under a bucket of its own. Trading
 and the Arena each have their switch in its configuration
@@ -329,6 +367,24 @@ server:
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
   nothing new.
+- **The pair's common ground** (the same day, protocol v4, a local
+  server; two host builds, one with BN5's ROM beside BN6's or both). The
+  server's join lines naming each player's ROMs. Two games with BN5: one
+  offered MrkCan1 M (411, the pack's extension) from the clerk's chat-box
+  list, the other answered with WideSht1 L (204, a blank record) from the
+  order screen, both said Deal, `trades.jsonl` held `[411,12]` for
+  `[204,11]`, and each game's CONTINUE settled it: "the Pack's 2 to 1 of
+  the one, 0 to 1 of the other" (BN6's TakeChips and GiveChips on both
+  kinds of id), MegaMan's "Lan! MrkCan1 M is in our Pack now!". A mixed
+  pair: the game with BN5 asking the clerk about the other heard "THAT
+  NAVI TRADES BN6 CHIPS!", its BN5 spare kept back. A mixed pair's
+  NetBattle: the card's "His PET holds BN5 chips too!", the challenger's
+  "BN6 rules,Lan. Which folder goes?" (Folder1, Folder2), the challenged
+  game's "BN6 rules: no Souls,and BN6 chips only." before its Yes, then
+  "Folder1 has BN5 chips. It stays home." and Folder2 alone offered; the
+  battle to its end with Folder2 carried, 26 hashes agreeing, back in the
+  Square to "Alright! We won,Lan!!". Folder2 came from the `folder` dev
+  step: a run holds Folder1 alone (Not yet, below).
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -363,6 +419,13 @@ are in the history before 433865a8):
   once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks
   before a public launch.
+- **Folder2 and the Extra Folder in a run.** No run gives them yet, so
+  under BN6's rules a MegaMan with BN5's chips in Folder1 has no folder
+  that fits: MegaMan says to swap them out at home. The choice of folder
+  waits for a run that hands out more folders.
+- **Full rules** for two games with BN5's ROM: BN5 installed into both
+  pair cores, their Souls and BN5's chips allowed; the format byte is on
+  the wire and held by the server, the rules still BN6's.
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.

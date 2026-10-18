@@ -1,17 +1,17 @@
-# Net Square protocol v3
+# Net Square protocol v4
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v2`.
+`/presence` with subprotocol `cyberworld.presence.v4`.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
-| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1, 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
+| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1 (all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
-| SNAPSHOT (4) | server → client | u8 peer count, then 49 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name |
+| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; no other bit) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
 | PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged |
 | PROFILE (8) | client → server | 69-byte public profile, described below |
@@ -21,16 +21,16 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID |
 | CHANNEL (13) | client → server | u16 requested channel (0 chooses one); success sends a fresh WELCOME |
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
-| TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel), u32 reference (a proposal's target session ID, else the trade's ID), the chip given (u16 id 1..319, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal) |
+| TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel), u32 reference (a proposal's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
-| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000) |
-| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000), u8 rules (a challenge's: 0 `format_bn6`, 1 `format_full`; ignored on the others, 0..1) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's), u8 the challenge's rules |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen |
 
-HELLO's fixed prefix is 52 bytes, WELCOME is 32, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 8 and ARENA_STATE 28. The
+HELLO's fixed prefix is 76 bytes, WELCOME is 32, CARD is 90, TRADE 12,
+TRADE_STATE 32, ARENA 9 and ARENA_STATE 29. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -60,7 +60,12 @@ WELCOME's capacity is 1..8; at most seven peers are visible in a channel.
 The total player cap is configured separately, up to 256. Local block and
 mute refer to public identities rather than reusable session IDs.
 
-HELLO names a verified ROM identity, never supplies a ROM. No Capcom
+HELLO names verified ROM identities, never supplies a ROM: BN6's must
+be `protocol.json`'s `rom_code` and `rom_sha1` (ERROR 4), BN5's either
+all zeros or `bn5_code` and `bn5_sha1` (ERROR 15). The server keeps each
+player's ROMs and tells the others in SNAPSHOT; what a pair does
+together goes by what both have (docs/ONLINE.md, the pair's common
+ground). No Capcom
 graphics, audio, text, code or save bytes cross the protocol. Compatibility
 metadata is not anti-cheat attestation: a modified client can forge it.
 
@@ -79,7 +84,12 @@ local files when they change. `/health` reports configuration and occupancy with
 player names, public identities, private keys or IPs.
 
 Trade Central's trades are one chip for one chip between two players
-of a channel, neither busy in another trade or a battle. The proposer
+of a channel, neither busy in another trade or a battle. A chip is
+BN5's where its id is past `bn6_chip_last` (319) or on one of
+`bn6_blank`'s ranges (BN6's blank records, where a game with BN5's ROM
+installs BN5's chips); BN5's chips trade only between two players whose
+ROMs both have BN5's bit, else the server answers NOTICE 19 (a proposal
+refused, an answer ending the trade). The proposer
 names the chip given, the other answers with his, and the server
 commits only when both accepted the same pair as their TRADE_STATE
 showed it, sends done to both and appends the trade to its state
@@ -101,7 +111,9 @@ a leave, a decline or a dropped connection ends it for both, ARENA_STATE
 ended telling each. The relayed messages have a bucket of their own,
 150 deep and refilled at 120 a second. NOTICE codes 16 (that Navi is
 busy), 17 (no longer here, or the battle is over) and 18 (the Arena is
-closed on this server) answer an ARENA that cannot be done.
+closed on this server) answer an ARENA that cannot be done, and 19 a
+challenge to full rules where either game lacks BN5's ROM; a challenge's
+rules come back in every ARENA_STATE of its battle.
 
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's
