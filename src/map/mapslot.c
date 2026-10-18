@@ -15,7 +15,6 @@
 
 #include "bn6.h"
 #include "bytes.h"
-#include "claims.h"
 #include "emu.h"
 #include "flags.h"
 #include "lz.h"
@@ -255,24 +254,23 @@ static uint32_t mystery_slot(int group, int number) {
 	return 0;
 }
 
-/* `slot` given the layer's list at `md_at`, every other map an empty one.
- * BN6 rerolls every net map's green Mystery Data at each jack-in (bn6f
- * sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md), clearing their flags.
- * Untouched maps share the run's flags: one cleared JOB_SETTLED_FLAG,
- * letting an asker pay again (issue #122). Previously used maps must be
- * emptied too: their lists live in a layer half that will be overwritten.
- * Keep the null terminators: an empty list lets the roll reach later maps. */
+/* `slot` given the layer's list at `md_at`, and every other map BN6's roll
+ * reaches an empty one. BN6 rolls every net map's green Mystery Data again
+ * at each jack-in (bn6f sub_8033FDC calls sub_809F9DC, docs/ROM_DATA.md)
+ * and clears each one's flag. A map a layer left kept its list in the half
+ * a later layer has written over: a jack-in from home read one and crashed
+ * the game. And BN6's own maps' flags are the run's: a jack-in cleared
+ * JOB_SETTLED_FLAG, and an asker paid again (issue #122). So the walk is
+ * the roll's own, a group 0 skipped and each group's maps to their null.
+ * (An empty list, not none: the roll ends a group's maps at a null.) */
 static void mystery_none(uint32_t slot) {
 	static const uint8_t none[12] = { 0 };
-	claims_begin("map Mystery Data");
 	emu_write(NO_MYSTERY, none, sizeof none);
 	emu_write32(slot, NO_MYSTERY);
-	claims_end();
 }
 
 static void mystery_only(uint32_t slot, uint32_t md_at) {
 	static const uint8_t none[12] = { 0 };
-	claims_begin("map Mystery Data");
 	emu_write(NO_MYSTERY, none, sizeof none);
 	for (uint32_t a = BN6_MYSTERY_DATA; emu_read32(a) != 1; a += 8) {
 		if (!emu_read32(a)) continue;
@@ -280,7 +278,6 @@ static void mystery_only(uint32_t slot, uint32_t md_at) {
 			if (at != slot) emu_write32(at, NO_MYSTERY);
 	}
 	emu_write32(slot, md_at);
-	claims_end();
 }
 
 /* The map's Mystery Data (mapslot_install's, a net map's) */

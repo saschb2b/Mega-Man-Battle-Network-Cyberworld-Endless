@@ -258,8 +258,9 @@ build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
-# Synthetic map tables exercise the installer without the player's ROM.
-TEST_MAPSLOT_SRCS := tests/test_mapslot.c src/map/mapslot.c src/map/lz.c src/emu/flags.c src/emu/claims.c
+# the maps' Mystery Data lists as mapslot.c leaves them, in a made-up ROM's
+# tables (issue #122)
+TEST_MAPSLOT_SRCS := tests/test_mapslot.c src/map/mapslot.c src/map/lz.c src/emu/flags.c
 build/host/test_mapslot: $(TEST_MAPSLOT_SRCS) src/*/*.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
