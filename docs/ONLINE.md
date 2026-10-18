@@ -49,8 +49,9 @@ MegaMan as he is) and asks before going, the cursor on No; after that
 MegaMan asks "To the Net Square,Lan?" each time
 (`director_gate.c`, its words in `gate_words.c`; flags `0x1473`-`0x1476`,
 [EMULATION.md](EMULATION.md)). The keeper changes the name or the server:
-the official one, or another's address in BN6's own name field
-(`online_field.c`). Yes saves the run as a checkpoint at the gate
+the official one, or another's address, typed once in the one screen
+of the Square's own, a field with a keyboard on the pad and by touch and
+the system's where there is one (`online_field.c`, `text_input.c`). Yes saves the run as a checkpoint at the gate
 (`home_gate_save`), then the gate flickers while the server answers;
 B calls it off.
 
