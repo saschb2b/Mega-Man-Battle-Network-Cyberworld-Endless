@@ -33,13 +33,6 @@ diverged first at simulation frame 1,400 and stopped after 107.47 ms;
 the killed-peer case stopped after 0.57 ms. All source ROM and boot-state
 hashes remained unchanged.
 
-![Two complete Practice game frames from the 150 ms developer experiment](screenshots/online-frame-practice-150ms.png)
-
-These are both players' complete game pictures at simulation frame
-1,858 of the accepted 150 ms case, enlarged 2× without cropping. They
-show the standalone experiment, not a shipped Arena screen. The source
-PPM and composed PNG hashes are in the numerical evidence.
-
 ## Reproduce
 
 ```sh

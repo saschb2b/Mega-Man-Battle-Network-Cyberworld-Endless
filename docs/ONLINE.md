@@ -287,16 +287,11 @@ target checks in the server README.
 
 `codex/online-net-square` continues toward epic #120 from the monorepo,
 deployed Net Square development service, checkpoint-safe visits and
-repeatable technical proofs. The whole-frame `network-desktop-alpha.png` and
-`network-desktop-beta.png` in `docs/screenshots/` show two interactive
-Linux clients connected to that service; `network-pocket-nova.png` is
-from the physical handheld and `network-android.png` from the Android
-emulator running the release APK. They are gameplay captures, not mockups.
+repeatable technical proofs.
 
 The official server now stays first beside four custom entries, with
-selection and consent migrated by URL. `network-servers.png` and
-`network-servers-phone.png` capture controller and actual SDL touch
-navigation; `tools/online_network_proof.py` checks those paths. Rapid
+selection and consent migrated by URL. `tools/online_network_proof.py`
+checks its controller and SDL touch navigation. Rapid
 Inspect reopen requests receive a fresh response instead of waiting
 indefinitely behind the former card-specific throttle.
 
@@ -304,7 +299,7 @@ Between acts, R at Lan's PC opens Jack in / Network / Cancel. A visit
 waits for a fresh checkpoint; an observed write failure stays at the PC
 with a retry. `tools/online_pc_proof.py` passes 12 checks covering failure,
 retry, cancel, local-server visit, unchanged checkpoint return and ordinary
-jack-in. `network-pc.png` shows the actual game menu.
+jack-in.
 
 Without a checkpoint, the visitor uses the title's remembered, unlocked
 folder, Cross and helper choices. This serves the same run-integrity / social
