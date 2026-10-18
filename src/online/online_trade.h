@@ -22,6 +22,7 @@ typedef struct {
 	uint32_t id, other;          /* the trade's, the other player's session */
 	uint8_t identity[ONLINE_IDENTITY_BYTES];
 	TradeChip mine, theirs;      /* id 0: not chosen yet */
+	bool taken;                  /* begun answered: an offer on the board taken, by either */
 	uint32_t serial;             /* counts the stages said */
 } TradeView;
 
@@ -31,9 +32,16 @@ void online_trade_reset(void);
 bool online_trade_mail(const uint8_t *data, size_t size);
 const TradeView *online_trade_view(void);
 
+/* Whether this game holds `c`: one of BN6's own, or one of BN5's where
+ * its ROM is read; in a code of its record's. */
+bool online_trade_holds(TradeChip c);
+
 /* The wire (protocol.json's TRADE): to `other` with `give`; an answer
- * with `give` for `get` as shown; the pair accepted as shown; called off. */
+ * with `give` for `get` as shown; the pair accepted as shown; called off;
+ * the board's offer of `poster`, his `get`, taken with `give` (the trade
+ * comes back answered, both chips named). */
 bool online_trade_propose(uint32_t other, TradeChip give);
+bool online_trade_take(uint32_t poster, TradeChip give, TradeChip get);
 bool online_trade_answer(TradeChip give);
 bool online_trade_accept(void);
 bool online_trade_cancel(void);

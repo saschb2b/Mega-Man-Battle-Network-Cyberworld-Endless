@@ -8,10 +8,12 @@
 
 #include "bn6.h"
 #include "bn6_fields.h"
+#include "chips.h"
 #include "debug.h"
 #include "emu.h"
 #include "netmap.h"
 #include "npc.h"
+#include "online_board.h"
 #include "online_square.h"
 #include "square_arena.h"
 #include "square_life_words.h"
@@ -318,6 +320,25 @@ static void mark_frame(void) {
 	L.mark_sound = false;
 }
 
+/* the trade board's offers, the Square's names on them: MegaMan's own first */
+static void board_posts(SquareFacts *f, const OnlineSnapshot *s) {
+	const BoardOffer *all;
+	int n = online_board_offers(&all);
+	for (int pass = 0; pass < 2; ++pass)
+		for (int i = 0; i < n && f->nposts < 4; ++i) {
+			bool mine = all[i].player == s->player_id;
+			if (mine != !pass) continue;
+			const char *name = NULL;
+			for (size_t k = 0; !mine && k < s->peer_count; ++k) if (s->peers[k].id == all[i].player) name = s->peers[k].name;
+			if (!mine && !name) continue;
+			char chip[24];
+			chips_name(all[i].have.id, chip, sizeof chip);
+			snprintf(f->posts[f->nposts].chip, sizeof f->posts[0].chip, "%s %c", chip, all[i].have.code == 26 ? '*' : 'A' + all[i].have.code);
+			f->posts[f->nposts].name = name;
+			f->posts[f->nposts++].want = all[i].want;
+		}
+}
+
 static void facts(SquareFacts *f) {
 	memset(f, 0, sizeof *f);
 	const OnlineSnapshot *s = &L.s;
@@ -337,6 +358,7 @@ static void facts(SquareFacts *f) {
 	f->arena = square_arena_offered();
 	f->parade = L.parading;
 	f->turn = L.turn;
+	board_posts(f, s);
 }
 
 static bool prog_say(int who, const char *words) {

@@ -8,7 +8,7 @@
 
 /* The clerk, nothing under way: who he is, and his options (B: bye). */
 const char *trade_hello(void);
-extern const char *const trade_options[2];
+extern const char *const trade_options[3];
 const char *trade_how(void);
 const char *trade_bye(void);
 /* ... whom to trade with, a page of names. */
@@ -51,5 +51,32 @@ const char *trade_order_offer(void);
 const char *trade_order_said(void);
 /* At home, the swap given to the run. */
 const char *trade_settled(const char *gave, const char *got);
+
+/* The board (docs/ONLINE.md, Trade Central: the board). A want's words,
+ * "a Fire chip" (WANT_* of online_board.h, 0 "anything"). */
+const char *trade_want(int want);
+extern const char *const trade_want_options[10];
+/* The clerk on the board: how many offers are up; one offer, whose
+ * (`name`), the chip he has and what he wants; the options under it
+ * (answer, the next offer) and MegaMan's own (post one, take his down,
+ * never mind). */
+const char *trade_board_intro(int offers);
+const char *trade_board_offer(const char *name, const char *chip, int want);
+extern const char *const trade_board_options[2];
+const char *trade_board_mine(bool posted);
+const char *trade_board_leave(void);
+/* ... answering one: the order screen's word (the want), none of
+ * MegaMan's spares meeting it. */
+const char *trade_take_pick(int want);
+const char *trade_take_none(const char *name, int want);
+/* ... posting one: the chip, then the want; it's up; taken down. */
+const char *trade_post_pick(void);
+const char *trade_post_want(void);
+const char *trade_posted(const char *chip, int want);
+const char *trade_post_down(void);
+/* ... one trade a visit: MegaMan has his, to take home first. */
+const char *trade_traded(void);
+/* MegaMan as a Navi took the offer he posted: who, and what for what. */
+const char *trade_board_review(const char *name, const char *mine, const char *theirs);
 
 #endif

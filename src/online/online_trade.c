@@ -45,6 +45,8 @@ static bool chip_ok(TradeChip c) {
 	return !rec;
 }
 
+bool online_trade_holds(TradeChip c) { return chip_ok(c); }
+
 bool online_trade_mail(const uint8_t *data, size_t size) {
 	if (size != ONLINE_TRADE_STATE_BYTES || data[0] != ONLINE_TRADE_STATE || data[1] < TRADE_OFFERED || data[1] > TRADE_CANCELLED) return false;
 	TradeView v = { .stage = data[1], .id = get32(data + 2), .other = get32(data + 6) };
@@ -60,6 +62,8 @@ bool online_trade_mail(const uint8_t *data, size_t size) {
 		if (v.stage != TRADE_DONE && v.stage != TRADE_CANCELLED) send(4, v.id, (TradeChip){ 0, 0 }, (TradeChip){ 0, 0 });
 		return true;
 	}
+	/* (a trade first heard of answered began with the board's offer taken) */
+	v.taken = v.id == T.id ? T.taken : v.stage == TRADE_ANSWERED;
 	v.serial = T.serial + 1;
 	T = v;
 	return true;
@@ -74,6 +78,10 @@ static bool send(int action, uint32_t ref, TradeChip give, TradeChip get) {
 }
 
 bool online_trade_propose(uint32_t other, TradeChip give) { return chip_ok(give) && send(1, other, give, (TradeChip){ 0, 0 }); }
+
+bool online_trade_take(uint32_t poster, TradeChip give, TradeChip get) {
+	return chip_ok(give) && chip_ok(get) && send(5, poster, give, get);
+}
 
 bool online_trade_answer(TradeChip give) {
 	return T.stage == TRADE_OFFERED && chip_ok(give) && send(2, T.id, give, T.theirs);

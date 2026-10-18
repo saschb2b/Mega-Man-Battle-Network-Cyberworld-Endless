@@ -22,6 +22,12 @@ typedef struct {
 	int result;             /* that battle's: 1 won, 2 lost, else over */
 	bool arena;             /* this build offers NetBattles (not the 3DS's, the browser's) */
 	bool parade;            /* the walkers are on parade round the landmark */
+	struct {                /* Trade Central's board: the offers up (online_board.c) */
+		const char *name;   /* the poster, NULL MegaMan's own */
+		char chip[32];      /* the chip he has, "Cannon A" */
+		int want;           /* what he wants for it (WANT_*, trade_want's words) */
+	} posts[4];
+	int nposts;
 	unsigned turn;          /* which line this time */
 } SquareFacts;
 
