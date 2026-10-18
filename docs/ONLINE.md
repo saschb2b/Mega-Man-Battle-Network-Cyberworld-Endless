@@ -274,7 +274,7 @@ predict internet or handheld performance.
 | --- | --- | --- |
 | Transport | Versioned WebSocket server, native platform backends and browser WebSocket, bounded polling, ping/pong, TLS certificate/hostname verification | Measure and test the implemented backends on every target's real hardware; see the server README's verification matrix |
 | Players as NPCs | Sixteen native games, two full channels, interpolated NPC coordinates and identity labels | Hardware performance, adverse internet conditions and longer soak tests |
-| Link cable | Original Practice repeated; delayed frame inputs complete at 0/50/100/150 ms with 2,822 full replica frames and 1,433 original active timers agreeing; corruption and peer loss detected ([limits](ONLINE_FRAME.md)) | Two cores per client and three buffered frames; production integration, carried loadouts, rollback and hardware performance remain unproven |
+| Link cable | Original Practice repeated; delayed frame inputs complete at 0/50/100/150 ms with 2,822 full replica frames and 1,433 original active timers agreeing; corruption and peer loss detected ([limits](ONLINE_LINK.md)) | Two cores per client and three buffered frames; production integration, carried loadouts, rollback and hardware performance remain unproven |
 | Carried MegaMan | Actual checkpoint loadout borrowed and restored through map reconstruction; leave, disconnect and process shutdown preserve checkpoint files | Broader device and power-loss testing; no Arena result or trade mutation is enabled |
 | World from seed | Two game instances build identical geometry/tile hashes from server seed without sending assets | Final Square layout, generator-version migration and all platform determinism |
 
@@ -314,7 +314,7 @@ HP, leave the profile unchanged and create no checkpoint. The optional
 `CYBERWORLD_LOADOUT_TRACE` contains local numeric observations only.
 
 Trade Central and the production Arena are not enabled. The
-[delayed Practice experiment](ONLINE_FRAME.md) completes its four-delay
+[delayed Practice experiment](ONLINE_LINK.md) completes its four-delay
 matrix, with explicit two-core and observation limits.
 [Reviewed research goals](re/README.md) now gate native chip exchange,
 private checkpoint mutation and complete cable snapshot/replay. Full trade
