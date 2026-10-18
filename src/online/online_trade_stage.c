@@ -57,7 +57,7 @@ static bool envelope(const uint8_t *source, size_t size) {
 
 static bool folders_match(const State *state, const OnlineTradePrepared *prepared) {
 	uint32_t main = pointer(state, 0), context = pointer(state, BN6_TOOLKIT_STEPS);
-	const uint8_t *mode = ram(state, main, 1), *count = ram(state, context, BN6_FOLDER_COUNT_FIELD + 1);
+	const uint8_t *mode = ram(state, main, 1), *count = ram(state, context, BN6_FOLDER_COUNT_FIELD + sizeof(uint8_t));
 	if (!mode || *mode != BN6_MODE_GAME || *ram(state, BN6_GAMESTATE, 1) != BN6_MODE_GAME || !count ||
 		!prepared->folder_count || prepared->folder_count > BN6_FOLDERS_MAX ||
 		count[BN6_FOLDER_COUNT_FIELD] != prepared->folder_count ||
