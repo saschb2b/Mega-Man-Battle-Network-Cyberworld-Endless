@@ -33,14 +33,12 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         self.clients.append(client)
         return client, await client.open(self.port, name, **options)
 
-    async def test_stable_private_identity_and_duplicate_refusal(self):
+    async def test_stable_private_identity_across_reconnects(self):
         key = bytes(range(16))
         first, welcome = await self.connect(key=key)
         identity = welcome[14:30]
         self.assertEqual(len(welcome), 32)
         self.assertNotEqual(identity, key)
-        _, response = await self.connect("Copy", key=key)
-        self.assertEqual(response[:3], bytes((protocol.SPEC["error"], 0, 12)))
         await first.close()
         self.clients.remove(first)
         await asyncio.sleep(0.02)
@@ -111,6 +109,10 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         await self.server.moderation()
         self.assertEqual((await first.message(protocol.SPEC["error"]))[1:3], b"\x00\x0e")
         await asyncio.sleep(0.02)
+        _, refused = await self.connect(key=key)
+        self.assertEqual(refused[:3], bytes((protocol.SPEC["error"], 0, 14)))
+        self.assertIn(b"try again in 10 min", refused)
+        admin.perform("unkick", self.directory, identity)
         second, again = await self.connect(key=key)
         self.assertEqual(again[0], protocol.SPEC["welcome"])
         admin.perform("ban", self.directory, identity)

@@ -5,6 +5,7 @@ import contextlib
 import dataclasses
 import json
 import logging
+import math
 import struct
 import time
 
@@ -32,7 +33,8 @@ class Player:
 
 class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
-                 player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=()):
+                 player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
+                 pending_cap=16, handshake_timeout=5.0):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -46,10 +48,18 @@ class Server:
         self.store = IdentityStore(state_dir)
         self.whitelist = set(whitelist)
         self.last_moderation = 0
+        self.housekeeping = 1.0     # seconds between moderation checks and roster writes
         self.origins, self.event_log = origins, event_log
         self.players = {}
         self.next_id = 1
-        self.connections = set()
+        self.connections = set()    # every accepted socket's task, for shutdown
+        # Unfinished handshakes have a small cap and a deadline of their own:
+        # idle sockets are dropped and never hold a player's place.
+        self.pending = set()
+        self.pending_cap, self.handshake_timeout = pending_cap, handshake_timeout
+        self.roster_written = None
+        self.roster_task = None
+        self.roster_failed = False
         self.listener = self.ticker = None
 
     def event(self, kind, **fields):
@@ -76,7 +86,12 @@ class Server:
         for task in tasks:
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
-        self.store.roster({})
+        if self.roster_task:
+            await asyncio.gather(self.roster_task, return_exceptions=True)
+        try:
+            self.store.roster([])
+        except (OSError, ValueError) as exc:
+            LOG.error("Could not clear the local player roster: %s", exc)
         # Recent asyncio versions wait for accepted connections here too.
         # Cancel them first so shutdown cannot wait for idle players.
         if self.listener:
@@ -86,34 +101,23 @@ class Server:
         task = asyncio.current_task()
         player = None
         upgraded = False
-        if len(self.connections) >= self.player_cap + 32:
+        if len(self.pending) >= self.pending_cap:
             writer.close()
             return
         self.connections.add(task)
+        self.pending.add(task)
         try:
-            selected = await websocket.upgrade(reader, writer, self.origins, self.health())
-            if not selected:
-                return
-            upgraded = True
-            opcode, data = await asyncio.wait_for(websocket.receive(reader), 5)
+            try:
+                async with asyncio.timeout(self.handshake_timeout):
+                    if not await websocket.upgrade(reader, writer, self.origins, self.health()):
+                        return
+                    upgraded = True
+                    opcode, data = await websocket.receive(reader)
+            finally:
+                self.pending.discard(task)
             if opcode != 2:
                 raise protocol.ProtocolError("Expected binary HELLO")
-            name, key, requested = protocol.read_hello(data)
-            identity = self.store.identity(key)
-            self.store.reload()
-            if self.store.contains("bans", identity):
-                raise protocol.ProtocolError("This profile is banned", 10)
-            if self.whitelist and identity.hex() not in self.whitelist:
-                raise protocol.ProtocolError("This server uses an allowlist", 11)
-            if any(p.identity == identity for p in self.players.values()):
-                raise protocol.ProtocolError("This profile is already connected", 12)
-            channel = self.choose_channel(requested)
-            if not channel or len(self.players) >= self.player_cap:
-                raise protocol.ProtocolError("Square or channel is full", 7)
-            player = Player(self.next_id, name, writer, identity, channel)
-            self.next_id = self.next_id % 0xffffffff + 1
-            self.players[player.id] = player
-            self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, players=len(self.players))
+            player = self.join(writer, *protocol.read_hello(data))
             await self.welcome(player)
             await self.serve_player(reader, player)
         except protocol.ProtocolError as exc:
@@ -129,8 +133,9 @@ class Server:
             pass
         finally:
             try:
-                if player:
-                    self.players.pop(player.id, None)
+                # A replaced session has already handed its place on.
+                if player and self.players.get(player.id) is player:
+                    del self.players[player.id]
                     self.event("leave", id=player.id, players=len(self.players))
             finally:
                 writer.close()
@@ -139,6 +144,42 @@ class Server:
                         await asyncio.wait_for(writer.wait_closed(), 2)
                 finally:
                     self.connections.discard(task)
+
+    def join(self, writer, name, key, requested):
+        identity = self.store.identity(key)
+        self.store.refresh()
+        if self.store.contains("bans", identity):
+            raise protocol.ProtocolError("This profile is banned", 10)
+        if self.whitelist and identity.hex() not in self.whitelist:
+            raise protocol.ProtocolError("This server uses an allowlist", 11)
+        now = time.time()
+        kick = self.store.kick(identity, now)
+        if kick:
+            minutes = max(1, math.ceil((kick.get("expires", now) - now) / 60))
+            raise protocol.ProtocolError(f"Kicked by a moderator; try again in {minutes} min", 14)
+        # The same profile again (a reconnect after a drop the server has not
+        # noticed yet) takes over its old session, and by default its channel.
+        old = next((p for p in self.players.values() if p.identity == identity), None)
+        channel = self.choose_channel(requested or (old.channel if old else 0), old.id if old else 0)
+        if not channel or len(self.players) - bool(old) >= self.player_cap:
+            raise protocol.ProtocolError("Square or channel is full", 7)
+        player = Player(self.next_id, name, writer, identity, channel)
+        self.next_id = self.next_id % 0xffffffff + 1
+        if old:
+            del self.players[old.id]
+            self.event("replace", id=old.id, by=player.id, identity=identity.hex())
+            self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
+        self.players[player.id] = player
+        self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, players=len(self.players))
+        return player
+
+    def drop(self, player, exc, close_code=1008):
+        """Tell a session why it ends and close it, without waiting on its socket."""
+        if not player.writer.is_closing():
+            player.writer.write(websocket.frame(protocol.error(exc)))
+            reason = str(exc).encode("ascii")[:123]
+            player.writer.write(websocket.frame(struct.pack("!H", close_code) + reason, 8))
+        player.writer.close()
 
     async def serve_player(self, reader, player):
         tokens, previous = 40.0, time.monotonic()
@@ -236,27 +277,40 @@ class Server:
                 peer.writer.write(websocket.frame(event))
 
     async def moderation(self):
-        try:
-            self.store.reload()
-        except (ValueError, OSError) as exc:
-            LOG.error("Moderation reload failed; keeping last rules: %s", exc)
-            return
+        # Re-read only when moderation.json changed; a bad file keeps the last rules.
+        self.store.refresh()
+        now = time.time()
         for player in list(self.players.values()):
-            banned = self.store.contains("bans", player.identity)
-            if banned or self.store.kicked(player.identity, player.joined):
-                with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
-                    await websocket.send(player.writer, protocol.error(protocol.ProtocolError("Removed by a moderator", 14)))
-                player.writer.close()
+            kick = self.store.kick(player.identity, now)
+            if self.store.contains("bans", player.identity) or (kick and kick["time"] >= player.joined):
+                self.drop(player, protocol.ProtocolError("Removed by a moderator", 14))
+        self.save_roster()
+
+    def save_roster(self):
+        """Write the local roster when it changed: in a thread, one write at a time."""
+        roster = [{"id": p.id, "identity": p.identity.hex(), "name": p.name, "channel": p.channel}
+                  for p in self.players.values()]
+        if not self.store.directory or roster == self.roster_written:
+            return
+        if self.roster_task and not self.roster_task.done():
+            return
+        self.roster_task = asyncio.create_task(self.write_roster(roster))
+
+    async def write_roster(self, roster):
         try:
-            self.store.roster(self.players)
-        except OSError as exc:
-            LOG.error("Could not write local player roster: %s", exc)
+            await asyncio.to_thread(self.store.roster, roster)
+        except (OSError, ValueError) as exc:
+            if not self.roster_failed:
+                LOG.error("Could not write the local player roster: %s", exc)
+            self.roster_failed = True
+            return
+        self.roster_written, self.roster_failed = roster, False
 
     async def tick(self):
         while True:
             await asyncio.sleep(1 / self.tick_hz)
             now = time.monotonic()
-            if now - self.last_moderation >= 1:
+            if now - self.last_moderation >= self.housekeeping:
                 self.last_moderation = now
                 await self.moderation()
             for player in list(self.players.values()):

@@ -125,17 +125,20 @@ invalidates bans and players' local block lists. Do not publish it.
 There is no remote administration endpoint. Use the CLI with filesystem
 access to the state directory. The local roster supplies public IDs;
 private player keys are never retained. Commands take effect within a
-second. `ban`, `unban`, `mute`, `unmute` and `kick` are supported:
+second. `ban`, `unban`, `mute`, `unmute`, `kick` and `unkick` are supported:
 
 ```sh
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin list
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin mute --identity PUBLIC_ID --reason "Repeated disruption"
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin kick --identity PUBLIC_ID --minutes 30
 python3 server/admin.py unmute PUBLIC_ID --state-dir server-data
 ```
 
 In Coolify's container terminal, substitute `/data` and
-`/app/cyberworld-server.pyz`. A kick disconnects current sessions; a ban
-also refuses subsequent visits. Mutes persist and suppress phrases and
+`/app/cyberworld-server.pyz`. A kick disconnects the profile's sessions
+and refuses it for ten minutes, or `--minutes` (1 to 10080); then it ends
+by itself, `unkick` lifts it early, and the next moderation command prunes
+the kicks that ended. A ban refuses the profile until `unban`. Mutes persist and suppress phrases and
 emotes, while movement and Inspect remain available. An optional
 `whitelist` is a space-separated list of public IDs allowed to connect.
 Profiles remain anonymous: resetting a private key can evade a ban.
@@ -145,6 +148,23 @@ Back up the config and private state volume together, with access limited
 to moderators. Moderation updates use an atomic replace; concurrent local
 CLI edits are locked. There is no game save or ROM to back up on the
 server. Restore the same `identity.key` when restoring moderation lists.
+
+The server reads `moderation.json` again only when the file changes. If a
+hand edit leaves it unreadable, the running server keeps the last rules it
+read, logs the error once and goes on admitting players; the CLI refuses
+to edit a file it cannot read, and a server does not start with one. The
+roster `players.json` is rewritten, outside the network loop, only when a
+player joins, leaves or changes channel.
+
+## Connections
+
+Only joined players count against `player_cap`. At most 16 connections
+may be mid-handshake at once, each given five seconds for its HTTP Upgrade
+and HELLO together; further sockets are closed at once, so idle sockets
+cannot lock players out. A new connection with a profile that is already
+connected (a reconnect the server has not yet seen drop) replaces the old
+session: the old one receives ERROR 12 and a close frame saying why, and
+the new one takes its place and, unless it asks for another, its channel.
 
 ## TLS and privacy
 

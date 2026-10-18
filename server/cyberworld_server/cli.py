@@ -26,7 +26,7 @@ async def run(args):
     seed = args.seed if args.seed is not None else settings.getint("seed", 120)
     state_dir = args.state_dir or settings.get("state_dir", "server-data")
     if args.admin:
-        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason), indent=2))
+        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes), indent=2))
         return
     for option in ("free_text", "trading", "arena"):
         if settings.getboolean(option, False):
@@ -68,6 +68,7 @@ def main():
     parser.add_argument("--admin", choices=admin.ACTIONS, help="Local-only administrative action instead of starting the server")
     parser.add_argument("--identity", help="Public profile identity from --admin list")
     parser.add_argument("--reason", default="", help="Local moderation note, not sent to players")
+    parser.add_argument("--minutes", type=int, help="How long a kick refuses the profile (default 10)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     try:

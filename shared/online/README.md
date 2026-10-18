@@ -36,7 +36,8 @@ Phrase IDs are 0..7 and emote IDs 0..5. The client owns their localized
 words and visuals. No arbitrary chat text is accepted. NOTICE codes are
 10 channel unavailable, 11 muted, 12 social cooldown and 13 Inspect
 target unavailable. ERROR closes the connection; it includes version
-and identity mismatch, rate violation, duplicate profile and moderation.
+and identity mismatch, rate violation and moderation. ERROR 12 tells a
+session that a newer connection with the same profile replaced it.
 
 Names have 1..16 ASCII letters, digits, spaces, underscores or hyphens,
 starting with a letter or digit. Coordinates are bounded to ±8192 and
@@ -55,8 +56,9 @@ HELLO names a verified ROM identity, never supplies a ROM. No Capcom
 graphics, audio, text, code or save bytes cross the protocol. Compatibility
 metadata is not anti-cheat attestation: a modified client can forge it.
 
-The server allows its player cap plus 32 pending connections, five seconds for HTTP
-Upgrade and five for HELLO, a 15-second idle timeout, and a token bucket
+The server holds at most 16 unfinished handshakes, each given five
+seconds for the HTTP Upgrade and HELLO together; only joined players
+count against its player cap. It has a 15-second idle timeout and a token bucket
 of 40 messages replenished at 30 per second. A slow output buffer above
 8192 bytes is disconnected. WebSocket pings, pongs and close are handled;
 text, fragments, masking violations and oversized frames are rejected.
@@ -64,8 +66,8 @@ The client sends positions every 50 ms and pings every two seconds.
 Social events have a separate two-event burst with one token restored
 every two seconds. Profile updates are accepted at most once per second;
 Inspect is limited to four requests per second. Numeric payloads are
-validated even when throttled. Moderation reloads from private local
-files every second. `/health` reports configuration and occupancy without
+validated even when throttled. Moderation is read again from private
+local files when they change. `/health` reports configuration and occupancy without
 player names, public identities, private keys or IPs.
 
 Changing the wire shape bumps the protocol version. Changing the Square
