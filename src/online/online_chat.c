@@ -22,6 +22,7 @@
 #include "script_kit.h"
 #include "square_words.h"
 #include "talk.h"
+#include "trade_central.h"
 
 /* The Square's event flags (its own map's, free while MegaMan is there) */
 #define SAY_FLAG     0x1480   /* + phrase 0-7 */
@@ -52,6 +53,7 @@ static struct {
 void online_chat_reset(void) {
 	memset(&C, 0, sizeof C);
 	C.on_exit = true;   /* (arrived beside it: it asks once he steps on it) */
+	trade_central_reset();
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 }
 
@@ -199,6 +201,7 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	talk_update();
 	cards();
 	keeper();
+	trade_central_frame(s);
 	bool busy = talk_busy() || emu_read8(BN6_CHATBOX);
 	if (busy) { C.open = C.open || talk_busy(); return false; }
 	/* (BN6's own talk with the keeper sets its flags too) */

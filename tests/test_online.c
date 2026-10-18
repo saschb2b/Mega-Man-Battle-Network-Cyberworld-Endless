@@ -9,6 +9,7 @@
 #include "online_people.h"
 #include "online_wire.h"
 #include "platform.h"
+#include "square_plan.h"
 
 char g_data_dir[512];
 static unsigned persists;
@@ -100,11 +101,46 @@ static void fuzz(void) {
 	}
 }
 
+/* The Square's plan: the same for a seed on every client (its hash the
+ * one protocol.json and the server hold), every floor panel reached from
+ * the arrival, the pad home and the wings on the floor. */
+static void square(void) {
+	SquarePlan p, q;
+	square_plan(120, &p);
+	square_plan(120, &q);
+	assert(!memcmp(&p, &q, sizeof p));
+	if (square_plan_hash(&p) != SQUARE_HASH) {
+		fprintf(stderr, "the Square's plan changed: its hash is 0x%08Xu; set SQUARE_HASH (and protocol.json's square_hash) and bump SQUARE_MAKE\n",
+			square_plan_hash(&p));
+		assert(0);
+	}
+	static uint8_t seen[SQUARE_H][SQUARE_W];
+	int stack[SQUARE_W * SQUARE_H][2], n = 0, reached = 0, floor = 0;
+	stack[n][0] = p.at[SQ_ARRIVE][0]; stack[n++][1] = p.at[SQ_ARRIVE][1];
+	seen[p.at[SQ_ARRIVE][1]][p.at[SQ_ARRIVE][0]] = 1;
+	while (n) {
+		--n;
+		int x = stack[n][0], y = stack[n][1];
+		++reached;
+		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int k = 0; k < 4; ++k) {
+			int nx = x + d[k][0], ny = y + d[k][1];
+			if (nx < 0 || ny < 0 || nx >= SQUARE_W || ny >= SQUARE_H || seen[ny][nx] || p.cell[ny][nx] != C_PATH) continue;
+			seen[ny][nx] = 1;
+			stack[n][0] = nx; stack[n++][1] = ny;
+		}
+	}
+	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p.cell[y][x] == C_PATH;
+	assert(reached == floor);
+	for (int k = 0; k < SQ_PLACES; ++k) assert(p.cell[p.at[k][1]][p.at[k][0]] != C_VOID);
+	for (uint32_t seed = 0; seed < 64; ++seed) { square_plan(seed, &q); assert(q.area >= 0 && q.area < 4); }
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion and local moderation passed");
+	puts("Online protocol, malformed messages, motion, local moderation and the Square's plan passed");
 	return 0;
 }

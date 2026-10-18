@@ -112,6 +112,19 @@ void home_gate_visit(void) {
 
 bool home_gate_holds(void) { return online_field_shown(); }
 
+bool home_gate_save(void) {
+	save_queue_wait();
+	unsigned failures = save_write_failures();
+	D.checkpoint_here = true;
+	save_checkpoint();
+	D.checkpoint_here = false;
+	save_queue_wait();
+	if (save_write_failures() != failures) return false;
+	D.home_save_due = false;
+	D.saved_at = "Run saved at the Net Square's gate";
+	return true;
+}
+
 /* The run saved where MegaMan stands, and the visit begun */
 static void go(void) {
 	if (!hold_save_ok()) {
@@ -119,15 +132,7 @@ static void go(void) {
 		return;
 	}
 	G.going = 0;
-	save_queue_wait();
-	unsigned failures = save_write_failures();
-	D.checkpoint_here = true;
-	save_checkpoint();
-	D.checkpoint_here = false;
-	save_queue_wait();
-	if (save_write_failures() != failures) { talk_start(gate_save_failed(), FACE_MEGAMAN); return; }
-	D.home_save_due = false;
-	D.saved_at = "Run saved at the Net Square's gate";
+	if (!home_gate_save()) { talk_start(gate_save_failed(), FACE_MEGAMAN); return; }
 	cinema_note("Run saved", 150);
 	const char *url = dev.online ? dev.online : G.prefs.servers[G.prefs.selected];
 	const char *name = dev.online_name ? dev.online_name : G.prefs.name;
@@ -231,6 +236,9 @@ void home_gate_frame(void) {
 		if (!words || talk_start(words, face)) G.ended = VISIT_END_NONE;
 		return;
 	}
+	/* (a trade the visit made, the run's now: MegaMan's word on it) */
+	const char *traded = online_visit_news();
+	if (traded && !talk_start(traded, FACE_MEGAMAN)) online_visit_news_again(traded);
 	if (G.after != AFTER_NONE) { talk_closed(); return; }
 	if (G.going) { go(); return; }
 	keeper_chose();

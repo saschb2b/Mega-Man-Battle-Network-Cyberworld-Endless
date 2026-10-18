@@ -5,15 +5,18 @@
 #include <string.h>
 
 #include "bn6_fields.h"
+#include "cinema.h"
 #include "gfx.h"
 #include "online_chat.h"
 #include "online_labels.h"
+#include "online_mail.h"
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_square.h"
 #include "online_text.h"
 #include "online_transport.h"
 #include "platform.h"
+#include "trade_order.h"
 
 static OnlineSnapshot snapshot;
 static OnlineSnapshot shown;
@@ -38,12 +41,15 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	trace = path && *path ? fopen(path, "w") : NULL;
 	if (path && *path && !trace) fprintf(stderr, "online: cannot write trace %s\n", path);
 	built = online_square_build(seed, player);
+	/* (BN6's order screen in Trade Central's words while he is here) */
+	if (built && !trade_order_words(true)) fprintf(stderr, "online: the order screen keeps BN6's words\n");
 	if (built) fprintf(stderr, "online: square seed=%u hash=%u player=%u\n", seed, online_square_hash(), player);
 	else fprintf(stderr, "online: square could not be built\n");
 	return built;
 }
 
 void online_scene_end(void) {
+	trade_order_words(false);
 	if (trace) { fclose(trace); trace = NULL; }
 	built = arrived = false;
 }
@@ -90,6 +96,10 @@ static void unblocked(OnlineSnapshot *v) {
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
+	online_mail_frame();
+	/* (the director rests here: the cinema told when a screen of BN6's,
+	 * a shop, takes MegaMan off the map, so its keys reach it) */
+	cinema_on_map(emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME);
 	uint32_t now = SDL_GetTicks();
 	if (snapshot.notice_serial != notice_serial) { notice_serial = snapshot.notice_serial; notice_at = now; }
 	if (snapshot.error[0] || !snapshot.connected) {

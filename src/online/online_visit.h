@@ -53,6 +53,13 @@ VisitEnd online_visit_ended(void);
 /* The game closing or sent away mid-visit: the connection closed, the
  * gate's checkpoint left as it is. */
 void online_visit_shutdown(void);
+/* A CONTINUE's checkpoint loaded: a trade a visit committed and the run
+ * has not had yet (a crash on the way) given to it now. */
+void online_visit_resumed(void);
+/* MegaMan's word on a trade the run has just had, once (NULL none); and
+ * the same kept for a later frame where it could not be said. */
+const char *online_visit_news(void);
+void online_visit_news_again(const char *words);
 /* The public card of the MegaMan carried (once in the Square). */
 void online_visit_profile(OnlineProfile *out);
 

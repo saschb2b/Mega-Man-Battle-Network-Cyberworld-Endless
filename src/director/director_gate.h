@@ -18,6 +18,8 @@ void home_gate_visit(void);
 /* Each frame at home: the gate stepped on, its questions and the visit
  * they begin, the keeper's options, what is said after a visit. */
 void home_gate_frame(void);
+/* The run saved where MegaMan stands at home, the write confirmed. */
+bool home_gate_save(void);
 /* Whether the gate holds the pad (a text field open over the game). */
 bool home_gate_holds(void);
 

@@ -33,6 +33,9 @@
 #define SCRIPT_POSITION (SCRIPT_LOOP + 4)
 #define SQUARE_WRITER "online square"
 #define KEEPER_TEXT 1024
+#define DESK_SPRITE 0x78   /* list 7's reception desk, two robot clerks at it: Trade Central */
+#define DESK_ANIM 0        /* its one animation: the clerks at work */
+#define DESK_RADIUS 28     /* walked into and spoken to as far from its middle */
 #define TALK_ROOM SQUARE_TALK_ROOM   /* the Square's chats (online_chat.c), one archive at a time */
 #define OW_MAP_OBJECTS 0x0A4F24u   /* bn6f OverworldMapObjects (layer_objs.c's props) */
 #define EXIT_REACH 12
@@ -45,8 +48,9 @@ static const struct { int look; uint8_t id; int dx, dy, dz; } pieces[] = {
 static SquarePlan plan;
 static uint8_t cells[SQUARE_H][SQUARE_W];
 static int group, number;
-static uint32_t world_hash, keeper_text, talk_room;
+static uint32_t world_hash, keeper_text, talk_room, trade_text;
 static int exit_x, exit_y;
+static int fixture[2][3];   /* the keeper's and the desk's middles and reach, for A */
 static struct {
 	uint32_t script, id;
 	int x, y, z, moving;
@@ -118,10 +122,20 @@ static bool people(NpcList *npcs) {
 	keeper_text = mapslot_alloc(empty, KEEPER_TEXT);
 	talk_room = mapslot_alloc(empty, TALK_ROOM);
 	netmap_world(plan.at[SQ_KEEPER][0], plan.at[SQ_KEEPER][1], &x, &y);
+	fixture[0][0] = x; fixture[0][1] = y; fixture[0][2] = 16;
 	if (keeper_text && npc_need_sprite(npcs, 6, KEEPER_SPRITE)) {
 		uint32_t keeper = npc_talker(6, KEEPER_SPRITE, x, y, 0, KEEPER_FACE, keeper_text, 0, -1, false);
 		if (keeper) npcs->script[npcs->n++] = keeper;
 	}
+	/* Trade Central's desk in its wing, its clerks' words its own */
+	trade_text = mapslot_alloc(empty, KEEPER_TEXT);
+	netmap_world(plan.at[SQ_TRADE][0], plan.at[SQ_TRADE][1], &x, &y);
+	fixture[1][0] = x; fixture[1][1] = y; fixture[1][2] = DESK_RADIUS;
+	if (trade_text && npc_need_sprite(npcs, 7, DESK_SPRITE)) {
+		const NpcDesk d = { 7, DESK_SPRITE, x, y, DESK_ANIM, trade_text, 0, 0, 0, DESK_RADIUS };
+		uint32_t desk = npc_desk(&d);
+		if (desk) npcs->script[npcs->n++] = desk;
+	} else fprintf(stderr, "online: Trade Central's desk found no room for its sprite\n");
 	if (!npc_need_sprite(npcs, 6, PEER_SPRITE)) return false;
 	for (int i = 0; i < SQUARE_PEERS; ++i) {
 		actors[i].script = peer_script();
@@ -185,6 +199,12 @@ bool online_square_keeper_say(const uint8_t *archive, int n) {
 
 uint32_t online_square_talk_room(void) { return talk_room; }
 
+bool online_square_trade_say(const uint8_t *archive, int n) {
+	if (!trade_text || n <= 0 || n > KEEPER_TEXT) return false;
+	emu_write(trade_text, archive, (size_t)n);
+	return true;
+}
+
 bool online_square_on_exit(int x, int y) { return abs(x - exit_x) <= EXIT_REACH && abs(y - exit_y) <= EXIT_REACH; }
 
 static void peer_at(unsigned slot, const OnlinePeer *peer) {
@@ -223,6 +243,12 @@ void online_square_peers(const OnlineSnapshot *shown) {
 int online_square_peer_ahead(int x, int y, int face) {
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
+	/* (the Square's own people first: BN6 talks to them, a peer beside
+	 * them waits) */
+	for (int k = 0; k < 2; ++k) {
+		int fx = fixture[k][0] - (x + dx), fy = fixture[k][1] - (y + dy);
+		if (fx * fx + fy * fy <= fixture[k][2] * fixture[k][2]) return -1;
+	}
 	int best = -1, best_d = 24 * 24;
 	for (int i = 0; i < SQUARE_PEERS; ++i) {
 		if (!actors[i].visible) continue;

@@ -5,6 +5,7 @@
 
 #include "cinema.h"
 #include "director.h"
+#include "director_gate.h"
 #include "emu.h"
 #include "game.h"
 #include "loot.h"
@@ -12,6 +13,7 @@
 #include "online_field.h"
 #include "online_scene.h"
 #include "online_snapshot.h"
+#include "online_trade.h"
 #include "online_transport.h"
 #include "platform.h"
 #include "run.h"
@@ -31,7 +33,29 @@ static struct {
 	LootMemory battle;
 	OnlineLoadout loadout;
 	bool carried;
+	const char *news;     /* MegaMan's word on a trade settled, till said */
 } V;
+
+/* A trade the server committed, given to the run on the checkpoint just
+ * loaded, then saved there: the file kept till then goes first, so a crash
+ * between costs this side the trade, never makes a chip twice */
+static void settle(void) {
+	const char *words = online_trade_settle();
+	if (!words) return;
+	online_trade_settled();
+	if (!home_gate_save()) fprintf(stderr, "online: the checkpoint after the trade was not written\n");
+	V.news = words;
+}
+
+void online_visit_resumed(void) { settle(); }
+
+const char *online_visit_news(void) {
+	const char *n = V.news;
+	V.news = NULL;
+	return n;
+}
+
+void online_visit_news_again(const char *words) { V.news = words; }
 
 VisitStage online_visit_stage(void) { return V.stage; }
 
@@ -100,6 +124,7 @@ static void come_home(VisitEnd why) {
 	 * and no CONTINUE's note: the gate says what happened) */
 	put_back();
 	cinema_reset();
+	settle();
 }
 
 /* Into the Square: the run's director stopped, the MegaMan carried read,

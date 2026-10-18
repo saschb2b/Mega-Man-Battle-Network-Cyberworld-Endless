@@ -219,6 +219,21 @@ uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int an
 	return talker(category, index, x, y, z, anim, archive, script, -1, false, true, sx, sy);
 }
 
+uint32_t npc_desk(const NpcDesk *d) {
+	uint32_t a = d->archive;
+	uint8_t s[56] = {
+		0x08,
+		0x25, (uint8_t)d->index, (uint8_t)(d->category * 4),
+		0x16, (uint8_t)d->anim,
+		0x44, (uint8_t)d->script, (uint8_t)a, (uint8_t)(a >> 8), (uint8_t)(a >> 16), (uint8_t)(a >> 24),
+		0x14, (uint8_t)d->x, (uint8_t)(d->x >> 8), (uint8_t)d->y, (uint8_t)(d->y >> 8), 0, 0,
+		0x13,                                         /* (no turning: an object has no frames facing MegaMan) */
+		0x0C, (uint8_t)d->cx, (uint8_t)d->cy, 0,      /* its middle, where it is walked into and spoken to */
+		0x0A, (uint8_t)d->radius,
+	};
+	return idle_and_write(s, 26, -1);
+}
+
 uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script) {
 	/* walk `steps` one way, look about, walk back, look about; as the
 	 * game's own walkers do (bn6f byte_809F6EC): animations 1-7 stand

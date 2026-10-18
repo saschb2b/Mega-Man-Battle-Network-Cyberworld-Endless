@@ -40,6 +40,17 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * navis are. */
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
 
+/* ... a wide object (a desk) spoken to anywhere along it: sprite `index`
+ * of list `category` at world (x, y) playing `anim`, talking with `script`
+ * of `archive`; its middle (cx, cy) world units from where it stands,
+ * walked into within `radius` of that. */
+typedef struct {
+	int category, index, x, y, anim;
+	uint32_t archive;
+	int script, cx, cy, radius;
+} NpcDesk;
+uint32_t npc_desk(const NpcDesk *desk);
+
 /* A talker who paces `steps` along facing `face` (1, 3, 5, 7: +x, +y, -x,
  * -y) and back, looking about at each end. */
 uint32_t npc_walker(int category, int index, int x, int y, int face, int steps, uint32_t archive, int script);

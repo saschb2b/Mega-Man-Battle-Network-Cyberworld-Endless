@@ -92,6 +92,8 @@
 #define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
+#define BN6_TAKE_CHIPS        0x08021B93u /* TakeChips (chip, code, count): a settled Net Square trade's chip out of the Pack */
+
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */

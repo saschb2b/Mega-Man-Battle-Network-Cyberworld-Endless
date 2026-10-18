@@ -14,7 +14,7 @@ from . import protocol, websocket
 
 OFFERED, WAITING, ANSWERED, ACCEPTED, DONE, CANCELLED = range(1, 7)
 PROPOSE, ANSWER, ACCEPT, CANCEL = range(1, 5)
-TIMEOUT = 60          # seconds a trade may rest without progress
+TIMEOUT = 300         # seconds a trade may rest without progress: a walk to the desk and a chip picked
 NONE = (0, 0)
 
 

@@ -20,6 +20,8 @@ bool online_square_arrived(void);
 uint32_t online_square_hash(void);
 /* The channel keeper's words: a text archive (his talk its script 0). */
 bool online_square_keeper_say(const uint8_t *archive, int n);
+/* Trade Central's clerks' words (trade_central.c), as the keeper's. */
+bool online_square_trade_say(const uint8_t *archive, int n);
 /* Room for the Square's chats: a text archive of TALK_ROOM bytes. */
 uint32_t online_square_talk_room(void);
 #define SQUARE_TALK_ROOM 2048

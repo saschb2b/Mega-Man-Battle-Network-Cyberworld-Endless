@@ -78,7 +78,7 @@ static void enter(void) {
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
 		game_hooks_after_boot();
-		director_resume();
+		if (director_resume()) online_visit_resumed();
 	} else {
 		director_before_boot();
 		emu_boot();

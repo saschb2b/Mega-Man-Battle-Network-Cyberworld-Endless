@@ -462,6 +462,32 @@ int shop_order_install(void) {
 	return shop_order_left();
 }
 
+bool shop_order_list(const ShopItem *items, int n) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return false;
+	int slots = (int)emu_read32(desc(ORDER_SHOP) + 12);
+	for (int i = 0; i < slots; ++i) {
+		uint8_t e[8] = { 0 };
+		if (i < n) {
+			e[0] = 2; e[1] = items[i].stock;
+			e[2] = (uint8_t)items[i].id; e[3] = (uint8_t)(items[i].id >> 8);
+			e[4] = items[i].code;
+			e[6] = (uint8_t)items[i].price; e[7] = (uint8_t)(items[i].price >> 8);
+			/* (listed, and owned as the order checks it) */
+			flag_set(BN6_FLAG_LIBRARY + items[i].id);
+			emu_write8(marks + items[i].id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + items[i].id) ^ BN6_CHIP_KEY_XOR));
+		}
+		emu_write(order_entry(i, false), e, 8);
+	}
+	return true;
+}
+
+int shop_order_stock(int i) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
+	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || i < 0 || i >= (int)emu_read32(desc(ORDER_SHOP) + 12)) return -1;
+	return emu_read8(order_entry(i, false) + 1);
+}
+
 int shop_order_left(void) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;

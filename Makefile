@@ -273,8 +273,8 @@ build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \
 		-o $@ $(NETWORK_TEST_SRCS) $(shell pkg-config --libs sdl2) -lm
 
-ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/core/compat.c
-build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h
+ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/online/square_plan.c src/core/compat.c
+build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online/square_plan.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
