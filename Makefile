@@ -534,3 +534,8 @@ build/host/online-carried-original: $(ONLINE_CARRIED_ORIGINAL) tools/online_carr
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_ORIGINAL) /opt/mgba/host/lib/libmgba.a -lpthread -lm
+
+# API observations only: this does not certify trade storage durability.
+build/windows/online-storage-windows-probe.exe: tools/online_storage_windows_probe.c
+	@mkdir -p $(@D)
+	$(CC_windows) -std=c11 -O2 -g $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) -municode -o $@ $<
