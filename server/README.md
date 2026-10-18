@@ -1,10 +1,13 @@
-# Cyberworld Net Square server v1
+# Cyberworld Net Square server
 
 A separate, ROM-free component of the Cyberworld Endless monorepo.
 Python 3.11 or newer is its only runtime dependency. It relays presence,
-quick phrases and emotes, and public Inspect cards. Eight players fit in
-each channel; the default total cap of 64 creates eight channels. There
-are no accounts, e-mail addresses, trades, arbitrary chat or battle relay.
+quick phrases and emotes, and public Inspect cards; commits Trade
+Central's one-for-one chip trades; and pairs two players for the Arena
+and relays their keys between them. Eight players fit in each channel;
+the default total cap of 64 creates eight channels. There are no
+accounts, e-mail addresses, arbitrary chat or currency, and it never
+runs a game, holds a ROM or sees a save.
 
 ## Build and host locally
 
@@ -48,9 +51,30 @@ Mount a config read-only and pass `--config /path/server.ini` to customize
 it; container traffic needs `host = 0.0.0.0` inside the container.
 
 `GET /health` returns JSON with the configured name, message of the day,
-protocol, occupancy and limits. It contains no player identities. The
-`free_text`, `trading` and `arena` flags must remain false in server v1;
-attempting to enable an unimplemented feature refuses startup.
+protocol, occupancy, limits and rules. It contains no player identities.
+`trading` and `arena` (both on unless set `false`) open or close Trade
+Central and the Arena; `free_text` must stay false (quick phrases and
+emotes only), and setting it refuses startup.
+
+## Trade Central and the Arena
+
+A trade is one chip for one chip between two players of a channel, BN6's
+own chips alone (ids 1 to 319, codes A to Z and \*): one proposes with
+a chip, the other answers with one, and the server commits only once both
+have accepted the very pair they were shown. It writes each commit as a
+line of `trades.jsonl` in the state directory (both public identities and
+the chips each gave) and tells both; each game applies its side when its
+player comes home. A step that does not match what the server holds, a
+player leaving or switching channel, or five minutes without progress
+ends a trade for both, and neither swaps. Games are trusted for what
+they hold; the log is what a host has to go on.
+
+The Arena never sees a battle: each game runs both players' linked BN6
+cores. The server pairs a challenge with its answer, gives each player
+its side of the cable and an input delay from both latencies (6 to 30
+frames), then relays their loadouts, keys and state hashes to each other
+alone, in a rate bucket of their own (120 a second). A player leaving
+ends the battle for the other.
 
 ## Coolify deployment
 
@@ -231,7 +255,7 @@ platform tests must cover the remaining targets. The 3DS's bundled roots
 support the documented Let's Encrypt deployment; other certificate
 authorities require an explicit root-bundle update, never a validation bypass.
 
-See [the Phase 0 proof](../docs/ONLINE.md) and
+See [online play](../docs/ONLINE.md) and
 [the wire format](../shared/online/README.md).
 
 ## Release packaging
