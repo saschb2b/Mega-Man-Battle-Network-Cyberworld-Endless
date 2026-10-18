@@ -68,14 +68,16 @@ a negative DNS cache entry; TLS still verified the server hostname through
 the normal trust store. Network remains a development-branch feature and
 has not been included in a published game release.
 
-Use the Docker Compose build strategy in a Coolify Git resource with
-**Base Directory** `/` and **Docker Compose Location**
-`/server/compose.coolify.yaml`. Enable **Preserve repository during
-deployment** so the read-only configuration file remains available on the
-deployment host. Leave raw deployment and custom build/start commands off.
-Coolify passes the Base Directory as Compose's project directory; the
-build context `.` and bind source `./server/server.coolify.ini` are therefore
-relative to the repository root, even though the Compose file is in `server/`.
+The deployment's files are in [`deploy/coolify/`](../deploy/coolify):
+`compose.yaml` and the server's `server.ini`. Use the Docker Compose build
+strategy in a Coolify Git resource with **Base Directory** `/` and
+**Docker Compose Location** `/deploy/coolify/compose.yaml`. Enable
+**Preserve repository during deployment** so the read-only configuration
+file remains available on the deployment host. Leave raw deployment and
+custom build/start commands off. Coolify passes the Base Directory as
+Compose's project directory; the build context `.` and bind source
+`./deploy/coolify/server.ini` are therefore relative to the repository
+root, even though the Compose file is in `deploy/coolify/`.
 Give
 the `cyberworld` service the domain `https://cyberworld.saschb2b.com` and
 container port **8765**. Coolify's proxy terminates TLS and forwards
@@ -86,23 +88,23 @@ Do not publish container port 8765 directly to the internet.
 The compose file includes a health check, restart policy, read-only root
 filesystem, a private persistent `cyberworld-state` volume at `/data`, and
 bounded Docker logs. It runs as UID 10001. The read-only
-`server.coolify.ini` allows the published game's browser origin
+`deploy/coolify/server.ini` allows the published game's browser origin
 `https://saschb2b.github.io`; add another exact origin only when serving
 the game there. The process binds `0.0.0.0` inside the container.
 
 Local validation uses:
 
 ```sh
-docker compose --project-directory . -f server/compose.coolify.yaml config --quiet
-docker compose --project-directory . -f server/compose.coolify.yaml build
+docker compose --project-directory . -f deploy/coolify/compose.yaml config --quiet
+docker compose --project-directory . -f deploy/coolify/compose.yaml build
 ```
 
 Run these commands from the repository root. Omitting `--project-directory`
-changes relative-path resolution to the Compose file's `server/` directory.
+changes relative-path resolution to the Compose file's `deploy/coolify/` directory.
 Coolify's [Compose guide](https://coolify.io/docs/applications/builds/docker-compose)
 documents the Base Directory settings and repository preservation needed
 for file bind mounts. After loading the Compose definition, check that the
-configuration mount resolves to a file ending in `/server/server.coolify.ini`,
+configuration mount resolves to a file ending in `/deploy/coolify/server.ini`,
 the only writable persistent mount is `/data`, and the domain forwards to
 the service's internal port 8765. Do not add a host port mapping.
 

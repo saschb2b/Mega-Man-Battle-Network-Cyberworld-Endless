@@ -7,8 +7,9 @@ fixed quick phrases and emotes, and moderation. Trading and the Arena
 remain disabled. The selected official endpoint is
 `wss://cyberworld.saschb2b.com/presence`; hosting and operational checks
 are described in [the server README](../server/README.md).
-It is deployed in Coolify as a development service; this branch has not
-been released to players.
+It is deployed in Coolify as a development service, from the Compose file
+and configuration in `deploy/coolify/`; this branch has not been released
+to players.
 
 ## Repository boundaries
 
@@ -17,7 +18,7 @@ The repository builds three related components from one checkout:
 | Component | Sources | Build and checks |
 | --- | --- | --- |
 | Game client | `src/`, including `src/online/`; existing platform directories | `python3 build.py linux`, the existing platform commands, `test`, `lint` |
-| Presence server | `server/` | `python3 build.py server`, `server-test`; its own Dockerfile and CI job |
+| Presence server | `server/`; its Coolify deployment in `deploy/coolify/` | `python3 build.py server`, `server-test`; its own Dockerfile and CI workflow |
 | Wire contract | `shared/online/` | Server tests check the C constants, protocol version, generator version/hash and ROM identity against the client |
 
 The root `build.py`, `Makefile`, `tests/`, `tools/`, documentation and CI

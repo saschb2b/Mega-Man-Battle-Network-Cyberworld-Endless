@@ -1,4 +1,4 @@
-# Coolify Base Directory=/, Compose Location=/server/compose.coolify.yaml.
+# Coolify Base Directory=/, Compose Location=/deploy/coolify/compose.yaml.
 # Local commands must use --project-directory . from the repository root.
 # Preserve repository during deployment keeps the read-only config mount.
 # Coolify terminates HTTPS/WebSocket TLS.
@@ -14,7 +14,7 @@ services:
       - "8765"
     volumes:
       - cyberworld-state:/data
-      - ./server/server.coolify.ini:/app/server.ini:ro
+      - ./deploy/coolify/server.ini:/app/server.ini:ro
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=2).read()"]
       interval: 30s

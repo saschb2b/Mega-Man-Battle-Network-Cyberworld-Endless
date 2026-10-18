@@ -1,3 +1,6 @@
+# Only the server and its wire contract are built in. deploy/coolify/
+# (the Compose file and its server.ini) stays out: Coolify mounts that INI
+# read-only at run time.
 **
 !LICENSE
 !server/
