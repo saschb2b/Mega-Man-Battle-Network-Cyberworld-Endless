@@ -177,9 +177,11 @@ server:
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
 - **The official server.** Redeployed from `deploy/coolify/compose.yaml`
   on the same state volume: `/health` says protocol 3, trading and the
-  Arena on, and a `cyberworld.presence.v3` upgrade is answered (101). No
-  game has visited it since; the transport's checks below were against
-  its v2.
+  Arena on, and a `cyberworld.presence.v3` upgrade is answered (101). A
+  headless game went through the gate to it over TLS, built the Square
+  from its seed (120, Central Area) and came home by R to "We're
+  home,Lan!" (it is a test instance until a release ships online play).
+  The transport's checks below were against its v2.
 - **Builds and checks.** Host, aarch64, Windows, 3DS and browser builds
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
@@ -214,8 +216,8 @@ are in the history before 433865a8):
   its delay).
 - **In the browser:** a whole visit with the published server (the
   browser build builds; its online run here was before the gate).
-- **The official server:** a game's visit to it on v3; its Coolify
-  service following `dev` or `main` once this work is merged; a host's
+- **The official server:** its Coolify service following `dev` or `main`
+  once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks
   before a public launch.
 - **A pending trade across systems:** `trade.pending` stays beside the
