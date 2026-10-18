@@ -98,7 +98,6 @@ bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 		while (!SDL_AtomicGet(stop) && SDL_GetTicks() - started < 7000) {
 			[connection.lock lock];
 			int state = connection.state;
-			*selection = connection.selection;
 			[connection.lock unlock];
 			if (state == 1) return true;
 			if (state < 0) break;
