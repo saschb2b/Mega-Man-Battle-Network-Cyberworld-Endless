@@ -482,6 +482,14 @@ can be taken. The run's save holds the request (`RUN_MAGIC` "CWE9"; an
 older save continues with none). Not yet: the objects' comps as a busting
 errand.
 
+A request settled stays settled (issue #122, from Baine53): the lab's
+man paid his 1000 zenny again to a Lan who had jacked in and out. BN6's
+jack-in rolls the green Mystery Data of every net map it has and clears
+their flags, and four of Underground's are the run's: the lab's request
+taken, a request held, one settled, and the visit's order at AsterLand's
+counter. Each layer now points every map but its own at an empty list,
+BN6's own too (docs/ROM_DATA.md, Map takeover).
+
 After the first playtest of home (session 69, 5 October 2026), through
 the game-design lens: the vow is press on against prepare, a bonus with
 its drawback, and the playtester's bet broke both its terms. It was

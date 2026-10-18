@@ -94,7 +94,7 @@ another's"):
 | --- | --- | --- |
 | `+0x0000` | Warp record and warp list for direct warps | `gamecall.c` |
 | `+0x0100` | Where a game call's routine returns: a hook, which takes its r0 and r1 and goes back to the main loop (until issue #33 a stub of hand-written Thumb, with `0x0203FFF0`-`0x0203FFFB` past the game's EWRAM for its mark and results: free) | `gamecall.c` |
-| `+0x0180` | An empty Mystery Data list (12 zero bytes): every map a layer took and left points at it, as BN6 rolls every map's Mystery Data at each jack-in (docs/ROM_DATA.md, Map takeover); the rest to `+0x0200` free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | `mapslot.c` |
+| `+0x0180` | An empty Mystery Data list (12 zero bytes): every map but the layer's points at it, BN6's own too, as BN6 rolls every map's Mystery Data at each jack-in and clears their flags, some of them the run's (issue #122; docs/ROM_DATA.md, Map takeover); the rest to `+0x0200` free (the encounter roll's wrapper and trampoline until hooks took their place, issue #29) | `mapslot.c` |
 | `+0x0200`, `+0x0280` | Two battle records in turn: BattleSettings, `+0x20` its entity list (MegaMan's panel first, the foes, the field's objects) | `encounter.c` |
 | `+0x0300` | Free (the PET's input step until a hook on the game's own handler took its place, issue #33) | |
 | `+0x0400`-`+0x0640` | Rush's gaps (issue #14): the gap table from group 0x80 that the check's literals point at, a group's empty map list, the layer's group's maps, the layer's gap records, and handler 0x25's records (BN6's 13, then the layer's two) | `rush.c` |
