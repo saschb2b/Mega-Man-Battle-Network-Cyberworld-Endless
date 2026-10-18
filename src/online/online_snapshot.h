@@ -11,9 +11,10 @@
 #define ONLINE_PACK_IDS 512
 #define ONLINE_BOARD_BYTES (BN6_NAVICUST_SLOTS * 8)
 #define ONLINE_BOARD_CELLS 49
+#define ONLINE_FOLDERS 3   /* Folder 1, Folder 2 and the Extra folder: BN6_FOLDER_ENTRIES each, 0x3C apart */
 
 typedef struct {
-	uint16_t folder[BN6_FOLDER_ENTRIES];
+	uint16_t folder[BN6_FOLDER_ENTRIES];   /* the folder carried: the first, until arena_format_carry picks one */
 	uint8_t pack[ONLINE_PACK_IDS][BN6_PACK_ENTRY];
 	uint8_t board[ONLINE_BOARD_BYTES];
 	uint8_t grid[ONLINE_BOARD_CELLS];
@@ -21,6 +22,10 @@ typedef struct {
 	uint8_t attack, speed, charge;
 	uint8_t regular_mb, mega_limit, giga_limit, regular, tag[2];
 	uint8_t crosses, souls, beast;
+	/* all three folders as the run holds them, and each one's Regular and
+	 * TagChips (0xFF none; the Extra folder has none of its own) */
+	uint16_t folders[ONLINE_FOLDERS][BN6_FOLDER_ENTRIES];
+	uint8_t regulars[ONLINE_FOLDERS], tags[ONLINE_FOLDERS][2];
 } OnlineLoadout;
 
 /* Between emulator frames. The caller supplies souls_held(), which is a

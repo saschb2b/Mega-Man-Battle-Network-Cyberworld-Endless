@@ -28,5 +28,9 @@ bool online_transport_send(const uint8_t *data, size_t size);
  * 0 none. */
 size_t online_transport_receive(uint8_t *out, size_t cap);
 void online_transport_end(void);
+/* The ROMs this game has besides BN6's, as HELLO tells the server
+ * (ONLINE_ROMS_BN5 where BN5 Team Colonel's is read): the common ground's
+ * one side, each peer's roms the other */
+uint8_t online_transport_roms(void);
 
 #endif

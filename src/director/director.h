@@ -147,6 +147,12 @@ int director_dev_status(const char *spec);
  * is the pack's own): "203 L", "0x1C0 * 3". The entries written, 0 where it
  * names none or the game's folder is not there yet. */
 int director_dev_chip(const char *spec);
+/* The folder step ("0:folder 2"): MegaMan's first folder copied into
+ * folder K (2 Folder 2 with its Regular and TagChips, 3 the Extra folder),
+ * as a run that held more folders would (the Net Square's folder choice,
+ * docs/ONLINE_ARENA.md). False where K is neither or the folders are not
+ * there yet. */
+bool director_dev_folder(int k);
 /* The run saved with BN6 holding MegaMan by the mask's holds (director_hold.h's
  * HELD_*), which no save of the run writes: a CONTINUE's recovery tested */
 void director_dev_hold(unsigned mask);

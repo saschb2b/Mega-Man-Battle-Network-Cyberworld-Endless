@@ -153,6 +153,7 @@ static void desk(NpcList *npcs, const uint8_t *empty) {
 	trade_text = mapslot_alloc(empty, PROG_TEXT);
 	netmap_world(plan.at[SQ_TRADE][0], plan.at[SQ_TRADE][1], &x, &y);
 	fixture[SQUARE_PROGS][0] = x; fixture[SQUARE_PROGS][1] = y; fixture[SQUARE_PROGS][2] = DESK_RADIUS;
+	fprintf(stderr, "online: Trade Central's desk at %d,%d\n", x, y);
 	if (trade_text && npc_need_sprite(npcs, 7, DESK_SPRITE)) {
 		const NpcDesk d = { 7, DESK_SPRITE, x, y, DESK_ANIM, trade_text, 0, 0, 0, DESK_RADIUS };
 		uint32_t at = npc_desk(&d);

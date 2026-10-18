@@ -27,7 +27,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross, folder; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -54,7 +54,7 @@ static void parse_buttons(const char *s, InputStep *step) {
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
- * "xrecord ADDR", "chip ID CODE [N]", "cross F", "onehit"), into its step;
+ * "xrecord ADDR", "chip ID CODE [N]", "cross F", "folder K", "onehit"), into its step;
  * false where `tok` is none */
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
@@ -63,13 +63,14 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "xrecord ", 8)) snprintf(s->xrecord, sizeof s->xrecord, "%s", tok + 8);
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
+	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
 	else return false;
 	return true;
 }
 
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
-	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->sig || s->held ||
+	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
 		s->onehit;
 }
 
@@ -175,6 +176,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->xrecord[0]) director_dev_xrecord(s->xrecord);
 	if (s->status[0]) director_dev_status(s->status);
 	if (s->chip[0]) director_dev_chip(s->chip);
+	if (s->folder) director_dev_folder(s->folder);
 	if (s->cross) soulproxy_cross(s->cross);
 	if (s->sig) director_dev_signature();
 	if (s->held) director_dev_hold(s->hold);

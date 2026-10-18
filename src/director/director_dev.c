@@ -291,6 +291,23 @@ int director_dev_chip(const char *spec) {
 	return n;
 }
 
+bool director_dev_folder(int k) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if ((k != 2 && k != 3) || data < BN6_EWRAM || data + 3u * 2u * BN6_FOLDER_ENTRIES > BN6_EWRAM_END) {
+		printf("folder: %d is none (2 Folder 2, 3 the Extra folder), or the folders are not there\n", k);
+		return false;
+	}
+	for (uint32_t i = 0; i < 2u * BN6_FOLDER_ENTRIES; ++i)
+		emu_write8(data + (uint32_t)(k - 1) * 2u * BN6_FOLDER_ENTRIES + i, emu_read8(data + i));
+	if (k == 2) {
+		emu_write8(BN6_NAVI_FOLDER2_REG, emu_read8(BN6_NAVI_FOLDER1_REG));
+		emu_write8(BN6_NAVI_FOLDER2_TAG, emu_read8(BN6_NAVI_FOLDER1_TAG));
+		emu_write8(BN6_NAVI_FOLDER2_TAG2, emu_read8(BN6_NAVI_FOLDER1_TAG2));
+	}
+	printf("folder: the first folder copied into folder %d\n", k);
+	return true;
+}
+
 /* The battle step (a capture's "0:battle", play.py's battle): the layer's
  * next random battle at once, at the first moment MegaMan stands free on
  * its map (no chat, talk, scene or warp, no guardian's staging, challenge

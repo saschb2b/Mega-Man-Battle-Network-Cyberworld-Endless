@@ -155,7 +155,7 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
             snapshot = await client.message(protocol.SPEC["snapshot"])
             while snapshot[1] != 7:
                 snapshot = await client.message(protocol.SPEC["snapshot"])
-            self.assertEqual(len(snapshot), 2 + 7 * 49)
+            self.assertEqual(len(snapshot), 2 + 7 * protocol.SPEC["peer_bytes"])
         _, full = await self.connect("TooMany")
         self.assertEqual(full[:3], bytes((protocol.SPEC["error"], 0, 7)))
 

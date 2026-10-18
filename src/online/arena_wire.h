@@ -32,11 +32,14 @@ typedef struct {
 	uint32_t match, other;   /* the battle's id; the other player's session */
 	uint8_t identity[ONLINE_IDENTITY_BYTES];
 	uint8_t side, delay;     /* START's: my side of the cable, the frames of input delay */
+	uint8_t rules;           /* the rules the challenge named (ONLINE_FORMAT_*: arena_format.h) */
 } ArenaWireState;
 
 /* ARENA: `action` on `ref` (a challenge's target session, else the
- * battle's id), my latency in ms (clamped); its size, 0 where refused */
-size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms);
+ * battle's id), my latency in ms (clamped), the rules a challenge names
+ * (ONLINE_FORMAT_*; the server holds full ones to two games with BN5's
+ * ROM); its size, 0 where refused */
+size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms, unsigned rules);
 bool arena_wire_state(const uint8_t *data, size_t size, ArenaWireState *out);
 
 /* ARENA_INPUT: `count` (1..ONLINE_ARENA_INPUT_MAX) frames' keys from `frame` */

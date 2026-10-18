@@ -39,9 +39,11 @@ bool online_trade_accept(void);
 bool online_trade_cancel(void);
 
 /* MegaMan's spare chips in the running game: the Pack's copies past those
- * in his three folders, BN6's own chips alone (ids 1-319, none of BN5's);
- * at most `cap` into `out` (stock in `count`), how many. */
-int online_trade_spares(TradeChip *out, uint8_t *count, int cap);
+ * in his three folders (the pack's extension's too), the chips the pair
+ * can both hold: BN6's own, and BN5's where `bn5` (both games have its
+ * ROM); at most `cap` into `out` (stock in `count`), how many; BN5's kept
+ * back for want of `bn5` counted in `held_back`. */
+int online_trade_spares(TradeChip *out, uint8_t *count, int cap, bool bn5, int *held_back);
 
 /* A swap the server committed, written at once to the data folder
  * (trade.pending: what MegaMan gives and gets), there until the run has

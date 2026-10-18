@@ -49,7 +49,8 @@ static bool read_peers(const uint8_t *data, size_t size, uint32_t now, OnlineSna
 		peer->facing = in[32];
 		memcpy(peer->name, in + 33, ONLINE_NAME_BYTES);
 		peer->name[ONLINE_NAME_BYTES] = '\0';
-		if (!peer->id || peer->id == snapshot->player_id || peer->facing > 7 ||
+		peer->roms = in[49];
+		if ((peer->roms & ~ONLINE_ROMS_BN5) || !peer->id || peer->id == snapshot->player_id || peer->facing > 7 ||
 		    !online_wire_name(peer->name) || !identity_valid(peer->identity)) return false;
 		if (peer->x < -ONLINE_COORDINATE_LIMIT || peer->x > ONLINE_COORDINATE_LIMIT ||
 		    peer->y < -ONLINE_COORDINATE_LIMIT || peer->y > ONLINE_COORDINATE_LIMIT ||

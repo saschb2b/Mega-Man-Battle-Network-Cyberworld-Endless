@@ -18,7 +18,19 @@ const char *trade_who(void) { return "WHO'LL YOU TRADE\nWITH?"; }
 
 const char *trade_none_here(void) { return "HMM... NO OTHER\nNAVIS HERE RIGHT NOW!"; }
 
-const char *trade_pick(void) { return "PICK THE CHIP YOU'LL\nOFFER! SPARES ONLY!"; }
+const char *trade_pick(bool bn6_only) {
+	return bn6_only ? "PICK THE CHIP YOU'LL\nOFFER! THAT NAVI\nTRADES BN6 CHIPS!" : "PICK THE CHIP YOU'LL\nOFFER! SPARES ONLY!";
+}
+
+const char *trade_bn6_only(const char *name) {
+	static char s[128];
+	snprintf(s, sizeof s, "HMM... %s\nTRADES BN6 CHIPS\nONLY!|AND YOUR SPARES ARE\nALL BN5 CHIPS!", name);
+	return s;
+}
+
+const char *trade_bn5_spares(void) {
+	return "HMM... YOUR SPARES\nARE ALL BN5 CHIPS!|NO NAVI HERE\nTRADES THOSE!";
+}
 
 const char *trade_no_spares(void) { return "OH NO! NO SPARE CHIPS!\nYOUR FOLDERS HOLD\nTHEM ALL!"; }
 

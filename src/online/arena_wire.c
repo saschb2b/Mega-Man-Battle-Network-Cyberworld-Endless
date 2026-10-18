@@ -9,20 +9,22 @@ static void put32(uint8_t *o, uint32_t v) { put16(o, v >> 16); put16(o + 2, v & 
 static uint16_t get16(const uint8_t *i) { return (uint16_t)((unsigned)i[0] << 8 | i[1]); }
 static uint32_t get32(const uint8_t *i) { return (uint32_t)get16(i) << 16 | get16(i + 2); }
 
-size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms) {
-	if (action < ARENA_ACT_CHALLENGE || action > ARENA_ACT_OVER || !ref) return 0;
+size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms, unsigned rules) {
+	if (action < ARENA_ACT_CHALLENGE || action > ARENA_ACT_OVER || !ref || rules > ONLINE_FORMAT_FULL) return 0;
 	out[0] = ONLINE_ARENA;
 	out[1] = (uint8_t)action;
 	put32(out + 2, ref);
 	put16(out + 6, latency_ms > ARENA_LATENCY_MOST ? ARENA_LATENCY_MOST : latency_ms);
+	out[8] = (uint8_t)rules;
 	return ONLINE_ARENA_BYTES;
 }
 
 bool arena_wire_state(const uint8_t *data, size_t size, ArenaWireState *out) {
 	if (size != ONLINE_ARENA_STATE_BYTES || data[0] != ONLINE_ARENA_STATE) return false;
-	ArenaWireState s = { .stage = data[1], .match = get32(data + 2), .other = get32(data + 6), .side = data[26], .delay = data[27] };
+	ArenaWireState s = { .stage = data[1], .match = get32(data + 2), .other = get32(data + 6), .side = data[26], .delay = data[27],
+		.rules = data[28] };
 	memcpy(s.identity, data + 10, ONLINE_IDENTITY_BYTES);
-	if (s.stage < ARENA_WIRE_CHALLENGED || s.stage > ARENA_WIRE_ENDED || !s.match || s.side > 1) return false;
+	if (s.stage < ARENA_WIRE_CHALLENGED || s.stage > ARENA_WIRE_ENDED || !s.match || s.side > 1 || s.rules > ONLINE_FORMAT_FULL) return false;
 	*out = s;
 	return true;
 }

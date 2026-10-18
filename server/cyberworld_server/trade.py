@@ -67,6 +67,9 @@ class Trades:
         trade.time = time.monotonic()
         if action == CANCEL:
             self.end(trade)
+        elif action == ANSWER and not self.held_by_both(trade, give):
+            await self.server.notice(player, 19, "That chip needs BN5 on both games")
+            self.end(trade)
         elif action == ANSWER and player.id == trade.b and trade.chips[trade.b] is None and get == trade.chips[trade.a]:
             trade.chips[trade.b] = give
             for player_id in (trade.a, trade.b):
@@ -90,12 +93,20 @@ class Trades:
         if player.id in self.of or target.id in self.of or player.id in self.server.arena.of or target.id in self.server.arena.of:
             await self.server.notice(player, 16, "That Navi is busy")
             return
+        if protocol.chip_bn5(chip[0]) and not player.roms & target.roms & protocol.SPEC["roms_bn5"]:
+            await self.server.notice(player, 19, "That chip needs BN5 on both games")
+            return
         trade = Trade(self.next, player.id, target.id, chip)
         self.next = self.next % 0xffffffff + 1
         self.open[trade.id] = trade
         self.of[player.id] = self.of[target.id] = trade.id
         self.send(player.id, trade, WAITING)
         self.send(target.id, trade, OFFERED)
+
+    def held_by_both(self, trade, chip):
+        """BN6's own chips trade between any two games, BN5's only between two with its ROM."""
+        players = [self.server.players.get(p) for p in (trade.a, trade.b)]
+        return not protocol.chip_bn5(chip[0]) or all(p and p.roms & protocol.SPEC["roms_bn5"] for p in players)
 
     def commit(self, trade):
         players = self.server.players
