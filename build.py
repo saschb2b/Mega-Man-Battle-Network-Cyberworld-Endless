@@ -76,8 +76,11 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py server       build the ROM-free server zipapp
   python3 build.py server-run   run the built server (arguments follow)
   python3 build.py server-test  server/protocol tests, without game dependencies
-  python3 build.py online-proof build and run two game clients through the server
-  python3 build.py online-link  mGBA serial cable and state restoration probe
+  python3 build.py online-pair --rom PATH --state PATH
+                                BN6's Practice NetBattle on one linked pair of
+                                cores, a snapshot of the pair restored and
+                                replayed midway (docs/ONLINE_LINK.md; the ROM
+                                and a boot-3.state, both read-only)
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -2315,14 +2318,43 @@ def lint(update=False):
     return 0 if ok else 1
 
 
+def online_pair(rest):
+    """BN6's Practice on one linked pair of cores, with a snapshot restored
+    and replayed midway (tools/online_pair_run.c, docs/ONLINE_LINK.md)."""
+    ap = argparse.ArgumentParser(prog='build.py online-pair')
+    ap.add_argument('--rom', required=True, help="the player's BN6 Gregar USA ROM")
+    ap.add_argument('--state', required=True, help='a boot-3.state from a data folder')
+    ap.add_argument('--at', type=int, default=1150, help='the frame the snapshot is taken at')
+    ap.add_argument('--horizon', type=int, default=8, help='the frames replayed after the restore')
+    args = ap.parse_args(rest)
+    for path in (args.rom, args.state):
+        if not os.path.isfile(path):
+            ap.error(f'not a file: {path}')
+    ensure_image()
+    code = docker('make', 'online-pair', *(['WERROR=1'] if os.environ.get('CI') else []))
+    if code:
+        return code
+    out = os.path.join(ROOT, '.build', 'online-pair')
+    os.makedirs(out, exist_ok=True)
+    return docker('build/host/online-pair', '/pair/rom.gba', '/pair/boot.state', '/src/.build/online-pair/trace',
+                  str(args.at), str(args.horizon),
+                  mounts=[(os.path.abspath(args.rom), '/pair/rom.gba:ro'), (os.path.abspath(args.state), '/pair/boot.state:ro')])
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-proof', 'online-link'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
-    if a.action in ('server', 'server-run', 'server-test', 'online-proof', 'online-link'):
-        from tools.online_workspace import dispatch
-        sys.exit(dispatch(a.action, a.rest))
+    if a.action == 'server-test':
+        sys.exit(subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests', *a.rest], cwd=ROOT))
+    if a.action in ('server', 'server-run'):
+        code = subprocess.call([sys.executable, os.path.join(ROOT, 'server', 'build.py')], cwd=ROOT)
+        if code == 0 and a.action == 'server-run':
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'build', 'server', 'cyberworld-server.pyz'), *a.rest], cwd=ROOT)
+        sys.exit(code)
+    if a.action == 'online-pair':
+        sys.exit(online_pair(a.rest))
     if a.action == 'clean':
         shutil.rmtree(os.path.join(ROOT, 'build'), ignore_errors=True)
         return
@@ -2334,12 +2366,6 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
-        if code == 0:
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_frame_compare.py')])
-        if code == 0:
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_replay_compare.py')])
-        if code == 0:
-            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_carried_compare.py')])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)

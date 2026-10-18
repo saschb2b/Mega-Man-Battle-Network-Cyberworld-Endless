@@ -285,17 +285,12 @@ build/host/test_legacy: $(LEGACY_TEST_SRCS)
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -o $@ $(LEGACY_TEST_SRCS)
 
-build/host/test_online_link_ipc: tools/online_link_ipc_test.c tools/online_link_ipc_wire.c tools/online_link_ipc_wire.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
-		-o $@ tools/online_link_ipc_test.c tools/online_link_ipc_wire.c
-
 build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_frame_wire.c tools/online_frame_wire.h
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_link_ipc build/host/test_online_frame_wire
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_legacy build/host/test_online_frame_wire
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
@@ -305,7 +300,6 @@ test: build/host/test_core build/host/test_emu build/host/test_transfer build/ho
 	build/host/test_network
 	build/host/test_online
 	build/host/test_legacy
-	build/host/test_online_link_ipc
 	build/host/test_online_frame_wire
 .PHONY: test
 
@@ -324,60 +318,18 @@ comma := ,
 online-transport: $(TRANSPORT_PROBE)
 .PHONY: online-transport
 
-# The ROM-free serial-cable spike uses mGBA's Release ABI (NDEBUG).
-ONLINE_LINK_SRCS := tools/online_link_probe.c src/online/online_snapshot.c
-ONLINE_LINK_PROBE := $(OUT)/online-link-probe$(if $(filter windows,$(TARGET)),.exe)
-$(ONLINE_LINK_PROBE): $(ONLINE_LINK_SRCS) src/online/online_snapshot.h
-	@mkdir -p $(@D)
-	$(CC) $(filter-out -MMD -MP -Dmain=SDL_main,$(CFLAGS)) -DNDEBUG -o $@ $(ONLINE_LINK_SRCS) \
-		$(filter-out -mwindows -lSDL2main -lmingw32,$(LDLIBS)) $(if $(filter windows,$(TARGET)),-mconsole)
-
-online-link: $(ONLINE_LINK_PROBE)
-
-ONLINE_BN6_LINK_SRCS := tools/online_link_bn6.c tools/online_link_script.c tools/online_link_ipc.c tools/online_link_ipc_wire.c
-build/host/online-link-bn6: $(ONLINE_BN6_LINK_SRCS) tools/online_link_script.h tools/online_link_ipc.h tools/online_link_ipc_wire.h
+# The production Arena's base (docs/ONLINE_LINK.md): BN6's Practice on one
+# linked pair of cores, the input wire, and a complete snapshot of the pair.
+# Linux only, mGBA's Release library (NDEBUG) from the build image.
+ONLINE_PAIR_SRCS := tools/online_pair_run.c tools/online_frame_pair.c tools/online_frame_wire.c \
+	tools/online_link_script.c tools/online_replay_execute.c tools/online_replay_snapshot.c
+build/host/online-pair: $(ONLINE_PAIR_SRCS) $(wildcard tools/online_*.h)
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_BN6_LINK_SRCS) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_PAIR_SRCS) \
 		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
 
-online-link-bn6: build/host/online-link-bn6
-
-ONLINE_FRAME_SRCS := tools/online_frame_worker.c tools/online_frame_pair.c tools/online_frame_wire.c tools/online_link_script.c
-build/host/online-frame-worker: $(ONLINE_FRAME_SRCS) tools/online_frame_pair.h tools/online_frame_pair_internal.h tools/online_frame_wire.h tools/online_link_script.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_FRAME_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
-
-online-frame: build/host/online-frame-worker
-
-ONLINE_REPLAY_COMMON_SRCS := tools/online_replay_observe.c tools/online_frame_pair.c tools/online_frame_wire.c tools/online_link_script.c src/core/sha256.c
-build/host/online-replay-observer: tools/online_replay_observer.c $(ONLINE_REPLAY_COMMON_SRCS) tools/online_replay_observe.h tools/online_frame_pair_internal.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include tools/online_replay_observer.c $(ONLINE_REPLAY_COMMON_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
-
-online-replay-observer: build/host/online-replay-observer
-
-build/host/online-replay-micro-observer: tools/online_replay_micro_observer.c tools/online_replay_execute.c tools/online_replay_execute.h $(ONLINE_REPLAY_COMMON_SRCS) tools/online_replay_observe.h tools/online_frame_pair_internal.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include tools/online_replay_micro_observer.c tools/online_replay_execute.c $(ONLINE_REPLAY_COMMON_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
-
-online-replay-micro-observer: build/host/online-replay-micro-observer
-
-ONLINE_REPLAY_SUBJECT_SRCS := tools/online_replay_subject.c tools/online_replay_snapshot.c tools/online_replay_execute.c $(ONLINE_REPLAY_COMMON_SRCS)
-build/host/online-replay-subject: $(ONLINE_REPLAY_SUBJECT_SRCS) tools/online_replay_snapshot.h tools/online_replay_execute.h tools/online_replay_observe.h tools/online_frame_pair_internal.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_REPLAY_SUBJECT_SRCS) \
-		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
-
-online-replay-subject: build/host/online-replay-subject
-.PHONY: online-replay-subject
+online-pair: build/host/online-pair
 
 server:
 	python3 server/build.py
@@ -385,7 +337,7 @@ server:
 server-test:
 	python3 -m unittest discover -s server/tests
 
-.PHONY: online-link online-link-bn6 online-frame online-replay-observer online-replay-micro-observer server server-test
+.PHONY: online-pair server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
@@ -402,21 +354,3 @@ build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 
 build/lint/test_online_transport: $(LINT_TRANSPORT_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(shell pkg-config --libs sdl2) -lpthread -lm
-
-# Original-game carried-chip controls only; no production Arena entry point.
-ONLINE_CARRIED_COMMON := tools/online_frame_pair.c tools/online_frame_wire.c tools/online_carried_read.c src/online/online_snapshot.c src/core/sha256.c
-ONLINE_CARRIED_NATIVE := tools/online_carried_native.c tools/online_link_script.c $(ONLINE_CARRIED_COMMON)
-ONLINE_CARRIED_OBSERVER := tools/online_carried_observer.c tools/online_carried_observe.c tools/online_carried_script.c tools/online_replay_observe.c $(ONLINE_CARRIED_COMMON)
-ONLINE_CARRIED_ORIGINAL := tools/online_link_bn6.c tools/online_carried_script.c tools/online_link_ipc.c tools/online_link_ipc_wire.c
-build/host/online-carried-native: $(ONLINE_CARRIED_NATIVE) tools/online_carried_read.h src/online/online_snapshot.h src/emu/*.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_NATIVE) /opt/mgba/host/lib/libmgba.a -lpthread -lm
-build/host/online-carried-observer: $(ONLINE_CARRIED_OBSERVER) tools/online_carried_script.h tools/online_carried_observe.h tools/online_carried_read.h src/emu/*.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_OBSERVER) /opt/mgba/host/lib/libmgba.a -lpthread -lm
-build/host/online-carried-original: $(ONLINE_CARRIED_ORIGINAL) tools/online_carried_script.h tools/online_link_script.h src/emu/*.h
-	@mkdir -p $(@D)
-	$(CC_host) -std=c11 -O2 -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
-		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include -o $@ $(ONLINE_CARRIED_ORIGINAL) /opt/mgba/host/lib/libmgba.a -lpthread -lm

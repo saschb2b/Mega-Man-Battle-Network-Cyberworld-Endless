@@ -53,26 +53,6 @@ unsigned online_link_battle_frames(void) { return total_frames(battle, sizeof ba
 unsigned online_link_entry_frames(void) { return total_frames(entry, sizeof entry / sizeof *entry); }
 unsigned online_link_full_frames(void) { return online_link_entry_frames() + online_link_battle_frames(); }
 
-static void script_input(struct mCore *core, unsigned side, unsigned frame, const OnlineLinkInput *steps, unsigned count) {
-	uint32_t keys = 0;
-	for (unsigned i = 0; i < count; ++i) {
-		if (frame < steps[i].frames) { keys = steps[i].keys[side]; break; }
-		frame -= steps[i].frames;
-	}
-	core->setKeys(core, keys);
-}
-
-void online_link_battle_input(struct mCore *core, unsigned side, unsigned frame, void *context) {
-	(void)context;
-	script_input(core, side, frame, battle, sizeof battle / sizeof *battle);
-}
-
-void online_link_full_input(struct mCore *core, unsigned side, unsigned frame, void *context) {
-	unsigned before_battle = online_link_entry_frames();
-	if (frame < before_battle) script_input(core, side, frame, entry, sizeof entry / sizeof *entry);
-	else online_link_battle_input(core, side, frame - before_battle, context);
-}
-
 /* Logical observations only; core-local UI, key buffers and side differ. */
 void online_link_battle_sample(struct mCore *core, unsigned side, uint32_t out[8], void *context) {
 	(void)side; (void)context;
@@ -97,8 +77,4 @@ int online_link_battle_agrees(const uint32_t left[8], const uint32_t right[8]) {
 		left[2] > 0 && left[2] == right[2] && left[3] == 100 && right[3] == 100 &&
 		left[4] == right[4] && left[6] == right[6] && left[7] == right[7] &&
 		(left[6] & 0xFFFFu) == (BN6_SUBMENU_COMM << 8 | BN6_MODE_SUBMENU);
-}
-
-bool online_link_battle_active(const uint32_t left[8], const uint32_t right[8]) {
-	return left[2] > 0 && right[2] > 0 && (left[7] & 65535u) == 0x0C04u && (right[7] & 65535u) == 0x0C04u;
 }

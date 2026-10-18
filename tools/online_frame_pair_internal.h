@@ -7,8 +7,8 @@
 #include <mgba/core/core.h>
 #include <mgba/internal/gba/sio/lockstep.h>
 
-/* Experiment-only state shared with the separately pinned replay observer.
- * Pointers are live wiring, never snapshot data or a network format. */
+/* The pair's state, shared with its executor and its snapshot. Pointers are
+ * live wiring, never snapshot data or a network format. */
 struct OnlineFramePair {
 	struct GBASIOLockstep cable;
 	struct GBASIOLockstepNode node[2];

@@ -4,7 +4,6 @@
 #include "online_frame_pair_internal.h"
 #include "online_frame_wire.h"
 #include "online_link_script.h"
-#include "online_replay_observe.h"
 
 void online_replay_executor_init(OnlineReplayExecutor *e, OnlineFramePair *pair) {
 	memset(e, 0, sizeof *e);
@@ -84,18 +83,4 @@ bool online_replay_execute_frame(OnlineReplayExecutor *e, OnlineReplayStop stop,
 		if (!run_round(e)) return false;
 		if (stop && stop(e, context)) return true;
 	}
-}
-
-bool online_replay_write_boundary(OnlineReplayExecutor *e, FILE *out) {
-	if (!e->in_frame || !e->at_check || !e->round) return false;
-	fprintf(out, "{\"cursor\":{\"stage\":\"check-targets\",\"frame\":%u,\"round\":%u,"
-		"\"targets\":[%u,%u],\"relative\":%u,\"battle\":%s,\"keys\":[", e->pair->frame,
-		e->round, e->target[0], e->target[1], e->relative, e->battle ? "true" : "false");
-	for (unsigned ahead = 0; ahead < ONLINE_FRAME_LOOKAHEAD; ++ahead)
-		fprintf(out, "%s[%u,%u]", ahead ? "," : "", online_frame_script_key(e->pair->frame + ahead, 0),
-			online_frame_script_key(e->pair->frame + ahead, 1));
-	fputs("]},\"state\":", out);
-	if (!online_replay_observe(e->pair, out)) return false;
-	fputs("}\n", out);
-	return !ferror(out);
 }
