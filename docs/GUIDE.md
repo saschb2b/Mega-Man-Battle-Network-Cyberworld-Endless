@@ -746,6 +746,17 @@ no shop, no saves. Coming home puts MegaMan back on the gate, exactly as
 he was; closing the game in the Square does the same at the next
 CONTINUE. The one thing that comes home with you is a chip you traded.
 
+The Square is a plaza with a landmark in its middle (a statue, a
+monument or a giant cybertree, by the server), a stage up a stair, the
+log-in plaza with its board and the pad home, Trade Central, and the
+Arena's ring with room to watch from. In Sky Area's Square the stage and
+the ring stand raised. A greeter Mr.Prog calls out who logs in, two
+Navis stroll about and chat about who's here and what just happened,
+and A on a tree, the landmark, the sign or the board says what it is
+(the board lists who's here and the last trade and NetBattle). Say
+something or emote together with another player round the landmark or
+on the stage, and the Square cheers.
+
 In the Square:
 
 - **L** has MegaMan say something or do an emote; everyone in your
@@ -758,8 +769,9 @@ In the Square:
   HP, buster, Crosses), and win or lose you are back in the Square where
   you stood; nothing is won or lost. A MegaMan with Souls or another
   game's chips can't go, and the 3DS and the browser have no NetBattle.
-- **The Mr.Prog by the welcome sign** moves you to the next or last
-  channel; a channel holds eight players.
+- **The Mr.Prog by the way in from the log-in plaza** moves you to the
+  next or last channel; a channel holds eight players. The one by the
+  Arena's ring tells how a NetBattle is asked for.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the
