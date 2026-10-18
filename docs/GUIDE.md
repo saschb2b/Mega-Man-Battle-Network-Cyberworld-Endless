@@ -766,13 +766,16 @@ In the Square:
   layer, Crosses and Souls, and whether his game has BN5 where yours
   differs) and lets you ask him for a NetBattle, wave, mute or block him.
   Blocked players are gone from your Square.
-- **Battle** on his card asks for a Practice NetBattle of BN6's own, by
-  **BN6 rules**: both MegaMen are told before the battle. You fight with
-  your MegaMen as they are (NaviCust, HP, buster, Crosses) and a folder
-  of BN6's chips; Souls and BN5's chips stay home. Where you have more
-  than one folder that fits, or one holds BN5's chips, MegaMan asks which
-  goes. Win or lose you are back in the Square where you stood; nothing
-  is won or lost. The 3DS and the browser have no NetBattle.
+- **Battle** on his card asks for a Practice NetBattle of BN6's own;
+  both MegaMen are told its rules before the battle. You fight with your
+  MegaMen as they are (NaviCust, HP, buster, Crosses). When both your
+  games have BN5's ROM it is **full rules**: BN5's chips in your folder
+  go too. Otherwise it is **BN6 rules**: a folder of BN6's chips, and
+  BN5's chips stay home. Souls stay home under either rules for now.
+  Where you have more than one folder that fits, or one holds BN5's chips
+  under BN6 rules, MegaMan asks which goes. Win or lose you are back in
+  the Square where you stood; nothing is won or lost. The 3DS and the
+  browser have no NetBattle.
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the
   Arena's ring tells how a NetBattle is asked for.

@@ -344,7 +344,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The Net Square's life: the greeter and the referee Mr.Progs, the walking GreenNavi and GirlNavi, the Board's posts, what a prop is | `src/online/square_life_words.c` |
 | Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker, the clerk on a partner whose game trades BN6's chips only | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
-| MegaMan on a Practice NetBattle in the Net Square: the challenge sent and its rules, the question a challenge asks, the folder he carries and the ones left home, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
+| MegaMan on a Practice NetBattle in the Net Square: the challenge sent and its rules (BN6 rules or full rules, his Souls left home under either), the question a challenge asks, the folder he carries and the ones left home, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
 
 ## Before you commit a line
 

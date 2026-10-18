@@ -88,7 +88,12 @@ space it fills, BN6's own words and instructions it changes, RAM it keeps
 patched, the instructions its hooks stand on, and every other hook's), a
 write or hook over another's bytes told on stderr (`CYBERWORLD_EMU_DEBUG`
 prints the count: "claims: 105 ranges of 5 writers ..., 0 over
-another's"):
+another's"). BN5's tracks' installs (`xinstall_core`) and the chip
+registry's (`xchips_install`) are written down as they are made too
+(`src/emu/xinstall_log.c`): every byte they write into the ROM copy and
+every hook they set, in their order, which the Arena's cores take under
+full rules (docs/ONLINE_ARENA.md, Full rules); not kept on the 3DS or in
+the browser, which have no Arena:
 
 | Offset | Contents | Code |
 | --- | --- | --- |
@@ -686,7 +691,12 @@ function replacement), while BN6's code stays the ROM's.
   (`tests/test_emu.c`: one address hooked on both, each core's frames
   running its own hook alone, reading its own memory). Two
   cores' hooks run one core's frame at a time (the differential's
-  frames run on the thread BN6's do).
+  frames run on the thread BN6's do), but for the Arena's pair under
+  full rules (docs/ONLINE_ARENA.md, Full rules), whose two cores take
+  BN5's installs' hooks on tables of their own (`xinstall_log.c`) and
+  step an instruction at a time in turn: what a hook keeps between two
+  of its calls is kept one a core (`hook_slot`: `xsea.c`'s and
+  `xpanels.c`'s way back through their stubs).
 
 The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 
@@ -892,8 +902,13 @@ it reads them), the patch made again as the state is loaded, and bytes
 that read neither left alone. Last, the installers' claims through
 `emu.c`'s writes and hooks (`src/emu/claims.c`): an installer's bytes its
 own, another's write over them told, a write outside any installer
-nobody's, and a hook set on an installer's bytes told. `build.py test`
-runs it with the address and undefined-behaviour sanitizers, as CI does.
+nobody's, and a hook set on an installer's bytes told. Then the
+installs' record (`src/emu/xinstall_log.c`): its bytes in another core's
+ROM copy (the ROM's alone, the mirror's at its byte, RAM's and those
+outside the record left out), its hooks on that core's own table, each
+reading the core it runs on, its hash the same once it ends. `build.py
+test` runs it with the address and undefined-behaviour sanitizers, as CI
+does.
 
 ## Testing
 

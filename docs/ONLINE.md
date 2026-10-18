@@ -66,14 +66,19 @@ pattern, formats with a telegraph.
   the server refuses a BN5 chip between games that do not both have its
   ROM (NOTICE 19).
 - **The Arena.** A challenge names its rules: a format byte in ARENA and
-  ARENA_STATE, **BN6 rules** for any pair until full rules (BN5's chips
-  and Souls, BN5 installed into both pair cores) are built, and full rules
-  only between two games with BN5's ROM, which the server holds them to.
-  Under BN6's rules MegaMan leaves his Souls and BN5's chips in his pack
-  at home and fights with a folder of BN6's chips: Lan picks it among
-  Folder1, Folder2 and the Extra Folder, those holding BN5's chips named
-  as staying home; where none fits, MegaMan says so before any challenge
-  is sent ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
+  ARENA_STATE, **full rules** between two games with BN5's ROM, which the
+  server holds them to, and **BN6 rules** for any other pair. Under full
+  rules each game installs BN5 into both pair cores from its own BN5 ROM,
+  the same way (the game core's installs written down as it starts and
+  made again in each pair core, their hash in the pair's), and MegaMan
+  fights with BN5's chips in his folder; his Souls stay home under either
+  rules until UNITE crosses the cable
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)). Under BN6's rules he
+  leaves BN5's chips in his pack at home too and fights with a folder of
+  BN6's chips: Lan picks it among Folder1, Folder2 and the Extra Folder,
+  those holding BN5's chips named as staying home; where none fits,
+  MegaMan says so before any challenge is sent
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
 - The Square is built from BN6's own nets (Central, Sky, Green), the same
   for every game whatever ROMs it has, and a card names Crosses and Souls
   from words of the game's own, never read from BN5's ROM.
@@ -385,6 +390,15 @@ server:
   battle to its end with Folder2 carried, 26 hashes agreeing, back in the
   Square to "Alright! We won,Lan!!". Folder2 came from the `folder` dev
   step: a run holds Folder1 alone (Not yet, below).
+- **A NetBattle by full rules** (the same day, a local server, two host
+  builds each with BN5's ROM beside BN6's). "Full rules! Let's see if
+  Beta takes us on!" and "Full rules: BN5 chips too! Souls stay home.";
+  both games made their pairs with the same installs' record (1,735,251
+  bytes and 42 hooks) and the same ready hash; Alpha's MrkCan1 M took
+  Beta from 100 to 30 on both screens and the battle went to its end with
+  every hash agreeing. A desync stopped both; a game whose installs
+  differed (one core made without BN5's families) stopped both before the
+  first frame ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -423,9 +437,9 @@ are in the history before 433865a8):
   under BN6's rules a MegaMan with BN5's chips in Folder1 has no folder
   that fits: MegaMan says to swap them out at home. The choice of folder
   waits for a run that hands out more folders.
-- **Full rules** for two games with BN5's ROM: BN5 installed into both
-  pair cores, their Souls and BN5's chips allowed; the format byte is on
-  the wire and held by the server, the rules still BN6's.
+- **The Souls under full rules:** BN5's chips go between two games with
+  BN5's ROM, the Souls stay home; UNITE in a NetBattle needs its battle
+  state a core and the Soul chosen carried in BN6's link packets.
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.
