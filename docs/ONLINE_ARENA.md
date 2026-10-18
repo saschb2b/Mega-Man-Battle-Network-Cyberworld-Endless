@@ -394,7 +394,10 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
 - The Souls under full rules beyond KnightSoul's unison and its charged
   shot ([Full rules](#full-rules), above): the other five, Chaos Unison
   and ColonelSoul's button in a NetBattle, and BN5's mood across the
-  cable, each still to be seen on both GBAs.
+  cable, each still to be seen on both GBAs; and both players uniting in
+  one battle (the second GBA's Soul carried to the first was seen in the
+  logs, "side 1's Soul 11 (its turns 3) carried to the other GBA" on
+  both games with every hash agreeing, its pictures not yet).
 - A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
   Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the
