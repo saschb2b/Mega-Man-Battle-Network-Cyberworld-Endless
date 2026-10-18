@@ -277,6 +277,13 @@ Every package must pass `--help`, an isolated server process serving
 `/health` with the current protocol, and a local administration command.
 The smoke runs outside the checkout, so a missing bundled `protocol.json`
 fails before publication. Protocol/moderation tests run on every matrix OS.
+
+The five native builds are `.github/workflows/server-native.yml`, which a
+release runs on its tag and the Server workflow runs by hand (Run
+workflow). A push or pull request that touches `server/`, `shared/online/`
+or `deploy/` runs the Server workflow's Linux job instead: the tests on
+Python 3.11, the zipapp's process smoke and the Coolify image's build. CI's
+unit tests run the server suite on every change.
 Source zipapp entries have fixed ordering, times and permissions; native
 builds also fix the hash seed and build timestamp. Hosted runner images
 and system libraries can change, so native outputs are not promised to be
