@@ -19,6 +19,7 @@ void ta_got(TextArchive *t, const char *thing, bool *first);
 void ta_got_hp(TextArchive *t, int count, bool *first);
 void ta_got_chip(TextArchive *t, const char *chip, int code, bool *first);
 void ta_jump(TextArchive *t, int to);
+void ta_options(TextArchive *t, const char *const *labels, int n);
 void ta_choose(TextArchive *t, const int *scripts, int n, int b);
 void ta_end_or(TextArchive *t, int next);
 void chip_desc_line(char *out, size_t n, const char *name, int code, const char *desc);

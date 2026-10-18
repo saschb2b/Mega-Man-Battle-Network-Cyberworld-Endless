@@ -6,13 +6,13 @@
 
 #include "bn6_fields.h"
 #include "gfx.h"
+#include "online_chat.h"
 #include "online_labels.h"
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_square.h"
 #include "online_text.h"
 #include "online_transport.h"
-#include "online_ui.h"
 #include "platform.h"
 
 static OnlineSnapshot snapshot;
@@ -32,7 +32,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	memset(&snapshot, 0, sizeof snapshot);
 	memset(&shown, 0, sizeof shown);
 	disconnected_at = notice_at = notice_serial = 0;
-	online_motion_reset(); online_labels_reset(); online_ui_reset(); online_people_load();
+	online_motion_reset(); online_labels_reset(); online_chat_reset(); online_people_load();
 	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
@@ -49,7 +49,7 @@ void online_scene_end(void) {
 }
 
 uint32_t online_scene_keys(uint32_t keys) {
-	return online_ui_open() ? 0 : keys & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B);
+	return online_chat_keys(keys);
 }
 
 static void trace_frame(void) {
@@ -78,6 +78,15 @@ static void trace_frame(void) {
 	fflush(trace);
 }
 
+/* the players this one has blocked out of the view (their MegaMen, names
+ * and words) */
+static void unblocked(OnlineSnapshot *v) {
+	size_t n = 0;
+	for (size_t i = 0; i < v->peer_count; ++i)
+		if (!(online_people_flags(v->peers[i].identity) & ONLINE_BLOCKED)) v->peers[n++] = v->peers[i];
+	v->peer_count = n;
+}
+
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
@@ -89,8 +98,6 @@ VisitEnd online_scene_update(void) {
 		if (now - disconnected_at >= 1500) return snapshot.error_code == 14 ? VISIT_END_REMOVED : VISIT_END_LOST;
 		return VISIT_END_NONE;
 	}
-	online_ui_update(&snapshot);
-	if (online_ui_leaving()) return VISIT_END_LEFT;
 	arrived = online_square_arrived();
 	if (!arrived) return VISIT_END_NONE;
 	++frames;
@@ -99,7 +106,9 @@ VisitEnd online_scene_update(void) {
 	online_transport_poll(local_x, local_y, local_z, facing);
 	trace_frame();
 	online_motion_update(&snapshot, now, &shown);
+	unblocked(&shown);
 	online_square_peers(&shown);
+	if (online_chat_update(&shown)) return VISIT_END_LEFT;
 	online_labels_update(&shown, now);
 	return VISIT_END_NONE;
 }
@@ -108,7 +117,6 @@ void online_scene_draw(void) {
 	if (!built || !arrived) return;
 	int x = P.core_x, y = P.core_y;
 	online_labels_draw();
-	online_ui_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));
 		text_drawf(x + 4, y + 113, WHITE, TEXT_LEFT, "%.32s", snapshot.notice);

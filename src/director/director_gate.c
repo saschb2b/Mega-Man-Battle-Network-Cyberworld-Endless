@@ -79,15 +79,7 @@ static void keeper_words(void) {
 	ta_page(&t, FACE_PROG, gate_keeper_ask(), first);
 	ta_mugshot(&t, FACE_PROG);
 	ta_clear(&t);
-	static const uint8_t around[3] = { 0x21, 0x02, 0x10 };
-	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
-	for (int k = 0; k < GATE_OPTIONS; ++k) {
-		uint8_t opt[] = { 0xEB, 0x00, (uint8_t)(k * 0x11), around[k] };
-		ta_bytes(&t, opt, sizeof opt);
-		ta_bytes(&t, space, sizeof space);
-		ta_text(&t, gate_options[k]);
-		if (k + 1 < GATE_OPTIONS) ta_text(&t, "\n");
-	}
+	ta_options(&t, gate_options, GATE_OPTIONS);
 	/* (the options' scripts follow: talk is 0, they 1-3, B's 4) */
 	int pick[GATE_OPTIONS] = { talk + 1, talk + 2, talk + 3 };
 	ta_choose(&t, pick, GATE_OPTIONS, talk + 4);

@@ -42,8 +42,9 @@ void director_dev_reveal(void) {
 }
 
 void director_dev_place(int x, int y, int face) {
-	/* (a test's step: MegaMan put down at world (x, y), facing 0-7) */
-	if (!director_on_map()) return;
+	/* (a test's step: MegaMan put down at world (x, y), facing 0-7; on
+	 * any map, the Net Square's too, where the director rests) */
+	if (!on_map()) return;
 	emu_write32(BN6_PLAYER_X, (uint32_t)x << 16);
 	emu_write32(BN6_PLAYER_Y, (uint32_t)y << 16);
 	emu_write32(BN6_PLAYER_NEXT_X, (uint32_t)x << 16);

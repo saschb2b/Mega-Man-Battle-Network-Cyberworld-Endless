@@ -1,0 +1,33 @@
+/* What is said in the Net Square (square_words.c, docs/ONLINE.md,
+ * docs/VOICE.md): MegaMan to Lan, the channel keeper Mr.Prog, and MegaMan
+ * reading another player's MegaMan. The quick phrases and emotes
+ * themselves are the protocol's (online_text.c). */
+#ifndef CW_SQUARE_WORDS_H
+#define CW_SQUARE_WORDS_H
+
+#include "online_types.h"
+
+/* L: MegaMan's question and its two ways (say, emote). */
+const char *square_menu_question(void);
+extern const char *const square_menu_options[2];
+/* ... a page of phrases or emotes goes on with this. */
+const char *square_more(void);
+const char *square_back(void);
+/* R, or the pad home: MegaMan's question. */
+const char *square_home_question(void);
+/* A facing another player's MegaMan: who he is and his card (`card`
+ * NULL where it has not come), and the options for him, `muted` naming
+ * the second Unmute. */
+const char *square_peer_words(const char *name, const OnlineProfile *card);
+const char *square_peer_option(int k, bool muted);
+#define SQUARE_PEER_OPTIONS 3
+/* ... after a block. */
+const char *square_blocked_words(const char *name);
+/* The channel keeper: the channel MegaMan is in of `channels`, how many
+ * Navis stand in it, his question and his two options. */
+const char *square_keeper_words(unsigned channel, unsigned channels, unsigned navis);
+extern const char *const square_keeper_options[2];
+/* ... a channel's move asked for. */
+const char *square_keeper_moving(void);
+
+#endif

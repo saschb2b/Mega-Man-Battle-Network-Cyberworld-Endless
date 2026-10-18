@@ -144,6 +144,20 @@ void ta_choose(TextArchive *t, const int *scripts, int n, int b) {
 	ta_jump(t, b);
 }
 
+/* Options in a column, the cursor's up and down going round (ta_choose
+ * after them). */
+void ta_options(TextArchive *t, const char *const *labels, int n) {
+	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
+	for (int k = 0; k < n; ++k) {
+		int up = (k + n - 1) % n, down = (k + 1) % n;
+		uint8_t opt[] = { 0xEB, 0x00, (uint8_t)(k * 0x11), (uint8_t)(up << 4 | down) };
+		ta_bytes(t, opt, sizeof opt);
+		ta_bytes(t, space, sizeof space);
+		ta_text(t, labels[k]);
+		if (k + 1 < n) ta_text(t, "\n");
+	}
+}
+
 /* A script's end: the way on's question next, where there is one (`next`
  * its script), else the chat's end. */
 void ta_end_or(TextArchive *t, int next) {
