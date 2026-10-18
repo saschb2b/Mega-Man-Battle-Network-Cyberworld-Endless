@@ -118,7 +118,8 @@ static bool send_queued(void) {
 	return !size || send_message(data, size);
 }
 
-/* the outbox, all of it */
+#ifndef __EMSCRIPTEN__
+/* the outbox, all of it (the worker's: the browser sends at once) */
 static bool send_mail(void) {
 	uint8_t data[ONLINE_MAX_MESSAGE];
 	for (;;) {
@@ -129,6 +130,7 @@ static bool send_mail(void) {
 		if (!send_message(data, size)) return false;
 	}
 }
+#endif
 
 /* a message come in: Trade Central's and the Arena's to the inbox, the
  * rest into the snapshot (false: the connection is to end) */
