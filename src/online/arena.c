@@ -75,10 +75,8 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = arena_pair_core(a->pair, side);
 		uint32_t folder = c->rawRead32(c, BN6_TOOLKIT + BN6_TOOLKIT_CHIPS, -1);
-		printf("arena: side %u: HP %u, the folder's first chips %04x %04x %04x, the battle's %04x %04x %04x\n", side,
-			c->rawRead16(c, BN6_NAVI_MAX_HP, -1), c->rawRead16(c, folder, -1), c->rawRead16(c, folder + 2, -1),
-			c->rawRead16(c, folder + 4, -1), c->rawRead16(c, BN6_BATTLE_DECK, -1), c->rawRead16(c, BN6_BATTLE_DECK + 2, -1),
-			c->rawRead16(c, BN6_BATTLE_DECK + 4, -1));
+		printf("arena: side %u: HP %u, the folder's first chips %04x %04x %04x\n", side, c->rawRead16(c, BN6_NAVI_MAX_HP, -1),
+			c->rawRead16(c, folder, -1), c->rawRead16(c, folder + 2, -1), c->rawRead16(c, folder + 4, -1));
 	}
 	arena_boot_free(a->boot);
 	a->boot = NULL;

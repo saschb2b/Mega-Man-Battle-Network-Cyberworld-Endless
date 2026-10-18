@@ -103,6 +103,9 @@
 #define BN6_MODE_UNITE        0x24        /* BN6_CUSTOM_MODE: BN5's UNITE chosen (0x08027044 from the mode table 0x08026AA4), which no Gregar code sets */
 #define BN6_BATTLE_PLAYERS    (BN6_BATTLE_STATE + 0xD0) /* each side's player object, a word every BN6_BATTLE_PLAYER_STEP bytes (0x080103BC) */
 #define BN6_BATTLE_SIDE_NAVIS (BN6_BATTLE_STATE + 0x80) /* each side's four Navis' objects (0 none), 0x10 bytes a side (BN5's the same: 0x0810436C) */
+#define BN6_BATTLE_MODE       (BN6_BATTLE_STATE + 0x00) /* u8: BN6_BATTLE_ON while a battle runs, its Custom screen and its fight; BN6_BATTLE_GONE once a NetBattle has ended and left (the Arena, docs/ROM_DATA.md) */
+#define BN6_BATTLE_ON         0x04
+#define BN6_BATTLE_GONE       0x08
 #define BN6_T1_ANIM           0x10        /* an object's animation (CurAnim, u8: 0x0800F2B6 sets it) */
 #define BN6_T1_PARENT         0x4C        /* an object's parent (a charge glow's owner, BN5's the same: 0x080E0E46) */
 #define BN6_BATTLE_PLAYER_STEP 0x10       /* ... bytes from one side's to the next */

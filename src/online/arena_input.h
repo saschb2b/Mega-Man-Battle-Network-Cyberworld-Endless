@@ -41,7 +41,5 @@ ArenaPut arena_input_put(ArenaInput *in, unsigned player, uint32_t frame, uint16
 bool arena_input_ready(const ArenaInput *in);
 /* ... taken: out[k][player] the keys of frame next + k, and next moved on */
 bool arena_input_take(ArenaInput *in, uint16_t out[ARENA_LOOKAHEAD][2]);
-/* frames of the pair a tick could run now (0: waiting for the peer) */
-unsigned arena_input_runnable(const ArenaInput *in);
 
 #endif

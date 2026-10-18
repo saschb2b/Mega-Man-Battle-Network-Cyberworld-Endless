@@ -22,12 +22,12 @@ ArenaPut arena_input_put(ArenaInput *in, unsigned player, uint32_t frame, uint16
 	return ARENA_PUT_OK;
 }
 
-unsigned arena_input_runnable(const ArenaInput *in) {
+static unsigned runnable(const ArenaInput *in) {
 	uint32_t known = in->known[0] < in->known[1] ? in->known[0] : in->known[1];
 	return known >= in->next + ARENA_LOOKAHEAD ? known - (ARENA_LOOKAHEAD - 1) - in->next : 0;
 }
 
-bool arena_input_ready(const ArenaInput *in) { return arena_input_runnable(in) > 0; }
+bool arena_input_ready(const ArenaInput *in) { return runnable(in) > 0; }
 
 bool arena_input_take(ArenaInput *in, uint16_t out[ARENA_LOOKAHEAD][2]) {
 	if (!arena_input_ready(in)) return false;

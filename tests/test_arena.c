@@ -18,7 +18,7 @@ static void buffer(void) {
 	assert(in.delay == ARENA_DELAY_MAX);
 	arena_input_init(&in, 6);
 	/* the first D frames released on both sides: frame 0 needs 0-3, known */
-	assert(arena_input_ready(&in) && arena_input_runnable(&in) == 3);
+	assert(arena_input_ready(&in));
 	uint16_t keys[ARENA_LOOKAHEAD][2];
 	for (unsigned f = 0; f < 3; ++f) assert(arena_input_take(&in, keys) && keys[0][0] == 0 && keys[3][1] == 0);
 	assert(!arena_input_ready(&in) && !arena_input_take(&in, keys));
