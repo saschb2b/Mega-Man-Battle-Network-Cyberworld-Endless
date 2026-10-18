@@ -104,21 +104,74 @@ takes BN3's シークレットエリア.
 
 **Verified in the disassembly:** bn6f's `data/SpritePointersList.s`,
 `npcSpritePtrs[0x37]`, is MegaMan's overworld sprite (list 6). Its
-`include/bytecode/npc_script.inc` and `asm/npc.s` define the commands the
-Phase 0 room uses: `0x08`/`0x09` show/hide an active NPC, `0x14` gives its
-position, `0x16` selects its animation, `0x10` waits, and `0x02` jumps.
-`NPCCommand_set_animation` changes `AnimationSelect`; the NPC's update
-compares it with `AnimationSelectUpdate` before loading animation data.
-Writing the same animation again therefore keeps its cadence. The room
-uses the existing NPC scripts' noninteraction and no-collision commands,
-and never replaces the local player's movement.
+`include/bytecode/npc_script.inc` and `asm/npc.s` define the NPC commands
+a Square's other players are moved by: `0x08`/`0x09` show and hide an
+active NPC, `0x14` sets its position, `0x16` selects its animation, `0x10`
+waits and `0x02` jumps. `NPCCommand_set_animation` changes
+`AnimationSelect`, and the NPC's update compares it with
+`AnimationSelectUpdate` before it loads animation data, so writing the same
+animation again keeps its cadence.
 
-The spike's trace checks the resulting NPC pool against each received
-peer's position through the existing `BN6_NPC_X16`, `BN6_NPC_Y16` and
-`BN6_NPC_Z16` fields (docs/ROM_DATA.md, The game's structures read field by
-field). Its other players are NPCs controlled between emulator frames,
-not a claim that BN6's original multiplayer shares an overworld. The
-two-instance proof and its limits are recorded in docs/ONLINE.md.
+**Verified in the disassembly and in play** (15 October 2026): bn6f's
+`sub_300631C` projects an overworld point onto the screen from the
+camera's coordinates as `camera_doShakeEffect_80301e8` writes them
+(docs/ROM_DATA.md, Net Square name tags). Names drawn by it stay over their
+MegaMen as the camera scrolls.
+
+## Link battles (issue #120)
+
+**Verified by experiment** (15 October 2026): two plain Gregar cores linked
+by mGBA's SIO lockstep driver enter Single Battle, then Practice, from the
+PET's Comm menu and finish the battle with complementary results. The
+method and its limits are in [ONLINE_LINK.md](ONLINE_LINK.md).
+
+**Verified in the disassembly:** bn6f's
+`data/textscript/compressed/CompText86DA1B8.s` holds the Comm menu's
+Practice in scripts 17 and 25 and its Battle in 18 and 26. Its
+`eStruct200A008_setBattleResult` and `eStruct200A008_getBattleResult`
+write and read the byte at `BN6_BATTLE_RESULT`; in the linked battle it is
+1 for the winner and 2 for the loser.
+
+**Verified by experiment** (18 October 2026): a chip put in the folder by
+BN6's own means (a Cannon A acquired, then swapped in with the folder
+editor) is offered and used in a linked Practice battle: the first player
+selects it and deals its 40 damage before any buster shot
+([ONLINE_CARRIED.md](ONLINE_CARRIED.md)). The leads were bn6f's chip
+acquisition and folder-editor input handlers (`asm/asm02.s`,
+`asm/asm36.s`); the Custom screen's, the deck's and the hand's fields were
+checked again in Gregar. The folder editor ignores A while its side panel
+slides in.
+
+**Prior art, from its own documentation** (15 October 2026):
+[Tango](https://tango.n1gp.net/) offers rollback link play for every
+English and Japanese Battle Network game, with match replays and
+matchmaking by a shared link code. Only its site was read: no
+implementation was opened or copied, and the site establishes neither an
+algorithm nor a permission to reuse code.
+
+## Folders and chips, for trading (issue #120)
+
+**Verified by experiment on Gregar** (18 October 2026): the folder
+editor's Pack counts leave out the copies in both editable folders and in
+the ExtraFolder, and equipping the ExtraFolder from its EQUIP menu does
+not give its chips back to the Pack as spares. Six scenarios built in
+BN6's own folder editor agreed with a reader of the game's counts in RAM
+on every chip and code. The leads were bn6f's folder-menu and folder-copy
+paths (`asm32.s`, `asm36.s`), matched in Gregar by `tools/bn6f_match.py`.
+
+**Verified by experiment, the routines alone** (18 October 2026): BN6's
+chip removal and acquisition routines (bn6f's `asm/asm02.s`; their Trade
+caller in `data/dat33.s`; both matched in Gregar by
+`tools/bn6f_match.py`), run on the emulated CPU. A new incoming chip
+changes its count, its ownership mark, its Library bit and its
+acquisition-order stamp, and the shared next-stamp counter goes down by
+one. Their Gregar addresses and how to check them again were in
+docs/ROM_DATA.md at `7b4b8ef`, taken out with the trade code.
+
+**Not verified:** a whole two-player chip trade over BN6's own link. Three
+attempts stalled before one completed (`docs/re/trade-stage-link-attempts.md`
+at `7b4b8ef`), so the routines' result says nothing of the cable exchange,
+its save or its recovery.
 
 ## Learned from players
 
@@ -127,98 +180,3 @@ two-instance proof and its limits are recorded in docs/ONLINE.md.
 | A+B+Select+Start resets Gregar to its own title, escaping Cyberworld Endless's director | Mattwj, issue #113 | Yes: bn6f's `main_static_screen_fade_8000454` checks the four held low bits (`0x0F`) and a newly pressed one before reinitializing the toolkit and game. The local byte match locates the same function in Gregar. Reproduced with scripted input in the town; the core returned to Gregar's title while the Cyberworld scene stayed active. |
 | BN6 keeps DarkChips from the Japan-only Beast Link Gate: if one is in the folder it spends a BugFrag per use, and without BugFrags it is its base chip (DrkSword a Sword); an unused MegaMan line limits them in a folder | CybeastID, issue #64, 4 October 2026 | Yes, by the code and in play (issue #70's spike; docs/ROM_DATA.md, BN6's own DarkChips): five records in Gregar (DrkSword, DarkThnd, DrkRecov, DarkInvs, DarkPlus; ids 286-290) whose `DarkChipID` (+0x1F) every chip use reads (bn6f `sub_8010D58`); used with a BugFrag in hand it takes one at once, from the save and the battle's count, and the DarkChip runs; with none it is its base chip (Sword, Thunder, Recov10, Invisibl, Atk+10), seen for all five. The line is MegaMan's, in the folder editor's NAVIGATOR box ("You can use only 3 of the same DarkChips."), and comes only with BN6's DarkChip flag (effect flags 0x20), which no US record carries: seen with the flag set in the core's copy. What the account leaves out: each paid use also gives MegaMan the NaviCust's HP bug for the rest of that battle (DrkSword +2, DarkThnd +1, DrkRecov to 7, the most, DarkPlus +4, DarkInvs none); DarkPlus never joins the chip before it in the US version, so alone it does nothing at that price; DarkInvs is eight seconds untouchable while the game fights for MegaMan; the US version hides them from the pack, so its folder editor cannot take them in, and left their sort keys 0, by which the editor takes any two of them for one chip and lets one in for another past the three (found building them, issue #70); their icons are placeholders reading their id in hex (not kept, as this row first said) over the shared blank picture `0x086F3AF0`. bn6f `sub_800F4B2` spends a BugFrag for both the DarkChips and the Giga chips BugRSwrd's and BgDthThd's charged shots (`sub_8011E40`, `sub_8011E78`). The US text still names a "BeastLink Gate" (that it is not connected, bn6f `CompText86DA1B8`) and a Chip Gate; that the DarkChips came with it is the player's word, not verified |
 | Silence's music playing while ProtoMan dashes his X-shaped charge left him untouchable after it, attacks passing through him with no clank of armor or shield, for several turns; perhaps BN6's own | CybeastID, issue #55, 3 October 2026 | Yes, and BN6's own, in romlab on the plain ROM (docs/ROM_DATA.md, ProtoMan's cross): his cross's dash (bn6f `sub_80FCB64`) turns his collision region off at any contact and on again in each new column, and its end (bn6f `sub_80FCC4C`) does not turn it on. Silence's music strikes every enemy on the field with a zero-damage blind every few frames (bn6f `sub_80D43E8`), so a pulse after the last stroke's last column leaves him on no panel: 23 buster shots after it in his row, no damage. Silence only makes it likely: MegaMan standing where the last stroke ends does it too. It lasts until his next cross, which needs him at half his HP or less and MegaMan on the middle row's middle or front panel; off them, for the rest of the fight. Mended by a hook (docs/FIDELITY.md) |
-
-Net Square names use the overworld projection verified in bn6f
-`sub_300631C`, with the camera coordinates supplied by
-`camera_doShakeEffect_80301e8` (15 October 2026; docs/ROM_DATA.md).
-The lookup credits bn6f’s contributors; no disassembly or graphics are
-part of the client change.
-
-## Actual Practice NetBattle (issue #120)
-
-**Verified by experiment on 15 October 2026:** two plain Gregar ROM cores
-linked through the pinned mGBA SIO driver can enter Single Battle →
-Practice through the PET's Comm menu and finish with complementary win
-and loss results. `build.py online-link --practice --rom PATH` repeats the
-experiment. Every active battle-timer frame agrees on both MegaMen's HP
-and panel positions; the final result and return to Comm agree too.
-The exact starter-loadout input script and limits are in
-[ONLINE_LINK.md](ONLINE_LINK.md).
-
-The menu distinction was first checked in bn6f's
-`data/textscript/compressed/CompText86DA1B8.s`, scripts 17/25 (Practice)
-and 18/26 (Battle). Its contributors' `eStruct200A008_setBattleResult`
-and `eStruct200A008_getBattleResult` identify the byte the proof already
-reads as `BN6_BATTLE_RESULT`; the experiment observes 1 for the winner and
-2 for the loser. No disassembly, save, ROM bytes or extracted assets are
-included in the harness. No Tango implementation was consulted.
-
-**Verified in official product documentation, 15 October 2026:**
-[Tango's site](https://tango.n1gp.net/) advertises rollback play for every
-English and Japanese Battle Network game, automatic accurate match
-replays and shared-link-code matchmaking. This is documentation-only
-prior art; no implementation was opened or copied. The features do not
-establish an algorithm or permission to reuse code. Our separate
-processes' measured serial stalls, recorded in ONLINE_LINK.md, motivate
-the proposed frame-level input design independently.
-
-
-## Trade inventory's original folder accounting (issue #120)
-
-**Verified by experiment on Gregar USA, 18 October 2026:** the native
-folder editor's Pack quantities exclude copies in both editable folders
-and in the borrowed ExtraFolder. Equipping the Extra slot through its
-native EQUIP-only menu does not release its chips as spares. Six controlled
-native-editor scenarios and the immutable runtime reader agree on every
-canonical chip/code count, with unchanged complete EWRAM/IWRAM samples.
-The [evidence note](re/trade-inventory-evidence.md) pins the target, library,
-probe and boot state and records all six caught mutations.
-
-The locator lead was the bn6f contributors' folder-menu and folder-copy
-paths in `asm32.s` and `asm36.s`, checked against the player's Gregar image
-with `tools/bn6f_match.py`. Their findings led to the controlled experiment;
-the running original establishes ownership semantics. A first borrowed
-fixture lacked its initialized runtime name and never reached a usable
-menu: that trial was inconclusive, then corrected by copying a runtime
-name. No target strings, disassembly or fixture state enter git. BN5
-availability and All * trading rules are project behavior, tested
-separately with invented records rather than attributed to original BN6.
-
-## Trade's chip mutation routines (issue #120)
-
-**Verified at routine level, 18 October 2026:** the original chip removal
-and acquisition calls returned through the emulated CPU in two fresh
-Gregar controls with identical complete states and RAM. A new incoming
-chip changed its count, ownership mark, Library bit and acquisition-order
-stamp; the shared next-stamp counter also decremented. The locator leads
-were the bn6f contributors' chip routines in `asm/asm02.s` and their Trade
-caller in `data/dat33.s`, matched against Gregar by the local matcher.
-The [routine acceptance](re/trade-stage-routine-goal.md) keeps CPU/stack
-execution effects separate from the exact inventory fields a staged
-checkpoint may change. ROM_DATA.md records the locations and re-check.
-
-**Unreached:** a completed original two-player Network chip exchange.
-Three bounded connection variants stalled before completion, including
-a pristine Pack control. [The attempt record](re/trade-stage-link-attempts.md)
-retains that negative result. The routine-level result does not establish
-the original cable exchange, its save/menu completion or its recovery.
-
-
-## Practice: native folder and selected chip control (issue #120)
-
-**Verified by original-game experiment, 18 October 2026:** a native Cannon A
-acquisition and folder-editor exchange produce a nondefault legal folder;
-player 0 then selects that chip in Practice, consumes it and deals 40 damage
-before buster input. Two independently prepared fixtures, repeated complete
-native fights and a same-value RNG write omitted control agree exactly.
-The original without the selection fails the chip-use predicate. The
-[control evidence](ONLINE_CARRIED.md) states the hashes, observation boundary
-and unreached installer/network work.
-
-The locator leads were the bn6f contributors' native chip acquisition and
-folder-editor input handlers (`asm/asm02.s`, `asm/asm36.s`); the existing
-named Custom/deck/hand/object fields were re-verified in the running Gregar
-ROM. The first short wait through the editor's side slide ignored A, and
-an early battle A did not consume the chip: the retained control script
-waits for the observed native transitions. No copied disassembly, target
-assets or fixture files enter the repository.
