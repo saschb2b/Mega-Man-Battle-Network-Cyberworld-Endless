@@ -751,8 +751,13 @@ In the Square:
 - **L** has MegaMan say something or do an emote; everyone in your
   channel sees it over his head.
 - **A** facing another player's MegaMan shows his card (HP, act and
-  layer, Crosses and Souls) and lets you wave, mute or block him. Blocked
-  players are gone from your Square.
+  layer, Crosses and Souls) and lets you ask him for a NetBattle, wave,
+  mute or block him. Blocked players are gone from your Square.
+- **Battle** on his card asks for a Practice NetBattle of BN6's own. If
+  he takes it, you fight with your MegaMen as they are (folder, NaviCust,
+  HP, buster, Crosses), and win or lose you are back in the Square where
+  you stood; nothing is won or lost. A MegaMan with Souls or another
+  game's chips can't go, and the 3DS and the browser have no NetBattle.
 - **The Mr.Prog by the welcome sign** moves you to the next or last
   channel; a channel holds eight players.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare

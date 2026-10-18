@@ -1,323 +1,215 @@
-# Online development: monorepo and Net Square
+# Online: the Net Square
 
 [Epic #120](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/120)
-adds a social Net Square beside the run. Phase 1 provides the opt-in
-Network screen, checkpoint-safe visits, channels, public Navi cards,
-fixed quick phrases and emotes, and moderation. Trading and the Arena
-remain disabled. The selected official endpoint is
-`wss://cyberworld.saschb2b.com/presence`; hosting and operational checks
-are described in [the server README](../server/README.md).
-It is deployed in Coolify as a development service, from the Compose file
-and configuration in `deploy/coolify/`; this branch has not been released
-to players.
+puts other players' MegaMen beside the run: a **Net Square** of its own on
+a server, reached from a gate in Lan's HP, where MegaMen meet, say a
+phrase, read each other's cards, trade a spare chip at Trade Central and
+fight a Practice NetBattle of BN6's own. The players' side is in
+[GUIDE.md](GUIDE.md#online-the-net-square), the gate's piece of the home
+in [HOME.md](HOME.md#11-the-net-squares-gate); this page is how it is
+built and what has been shown of it. The Arena has its own,
+[ONLINE_ARENA.md](ONLINE_ARENA.md), and the cable research it rests on
+[ONLINE_LINK.md](ONLINE_LINK.md).
 
-## Repository boundaries
+The official server is `wss://cyberworld.saschb2b.com/presence`, deployed
+in Coolify from `deploy/coolify/` ([server/README.md](../server/README.md),
+Coolify deployment). No release has shipped the Square yet.
 
-The repository builds three related components from one checkout:
-
-| Component | Sources | Build and checks |
-| --- | --- | --- |
-| Game client | `src/`, including `src/online/`; existing platform directories | `python3 build.py linux`, the existing platform commands, `test`, `lint` |
-| Presence server | `server/`; its Coolify deployment in `deploy/coolify/` | `python3 build.py server`, `server-test`; its own Dockerfile and CI workflow |
-| Wire contract | `shared/online/` | Server tests check the C constants, protocol version, generator version/hash and ROM identity against the client |
-
-The root `build.py`, `Makefile`, `tests/`, `tools/`, documentation and CI
-coordinate the components. The existing client paths and output names
-are stable across the supported platforms. `build.py all` builds the
-server alongside the host and PortMaster clients; `build.py test` includes
-the server suite. The server builds and tests without SDL, mGBA, Docker,
-or a ROM. It is packaged as a Python zipapp requiring Python 3.11 or
-newer. Release CI packages native standalone server executables for Linux,
-Windows and macOS alongside the portable Python archive.
-
-The dependency direction is client → wire contract ← server. The server
-does not import game code, run an emulator, receive a save state, or read
-a ROM. Its Docker build copies only `server/`, `shared/online/` and the license.
-ROMs, saves and local proof output never enter a release.
-
-## Reproduce the two-game proof
-
-Use the normal Linux build dependencies and your own verified BN6 Gregar
-(USA) ROM. `CYBERWORLD_ROM_DIR` selects its folder, as with the other
-developer tools. The proof has no dependency on a public endpoint.
-
-```sh
-python3 build.py server-test
-python3 build.py online-link
-python3 build.py online-proof
-python3 tools/online_load_proof.py --clients 16
-python3 tools/online_bench.py
-```
-
-`online-proof` builds the game and server, creates two ordinary game
-checkpoints in new temporary data directories, then launches the built
-server on an available loopback port and two **actual game processes**.
-Each walks a different scripted route. It checks:
-
-- Both clients accepted the server's seed and built the same map hash.
-- Each client's local position and its remote peer's position changed.
-- Remote positions reached the actual BN6 NPC object pool, matching the
-  other game process's movement.
-- A departing player disappeared from the remaining client.
-- Start → Leave and a server disconnect both restored the carried
-  checkpoint through map reconstruction and the regular CONTINUE path.
-- Each restored folder, Pack, NaviCust, HP and powers record was identical
-  to the one borrowed at entry.
-- Every checkpoint file retained exactly the same SHA-256 before and
-  after the visits, including the forced disconnect.
-- Empty save folders returned to the title; missing and unreadable state
-  files were refused without changing the remaining checkpoint files.
-
-The proof retains logs, numerical JSONL traces, full-frame screenshots
-and `report.json` under a fresh `.build/online-proof/run-*/`. Failed runs
-retain their evidence and exit unsuccessfully. Saves and emulator states
-there are local only. `python3 tools/online_proof.py` repeats the test with
-the existing binaries; `--seed` exercises another server world.
-
-For two interactive windows, first build the client and server, then run
-these in three terminals. Use different data folders:
-
-```sh
-python3 build.py server-run --config server/server.example.ini
-```
-
-```sh
-build/linux/cyberworld --window --rom-dir "$CYBERWORLD_ROM_DIR" \
-  --data-dir .build/online-alpha --online ws://127.0.0.1:8765/presence --online-name Alpha
-```
-
-```sh
-build/linux/cyberworld --window --rom-dir "$CYBERWORLD_ROM_DIR" \
-  --data-dir .build/online-beta --online ws://127.0.0.1:8765/presence --online-name Beta
-```
-
-The developer command requires an explicit `--data-dir`; the Network
-screen uses the player's existing folder. Both borrow the saved run's
-MegaMan when a readable checkpoint exists. A player without one visits
-with the boot loadout. Ordinary direction buttons and B move MegaMan
-through BN6 itself. A opens the player list; Start opens Network options,
-including Leave. PET access and jacking out are disabled in the Square.
-Escape closes the game while preserving the checkpoint.
-Headless online clients run at wall-clock speed so they can interact;
-ordinary headless tests retain their existing fast execution.
-
-For a browser/native pair, build with `python3 build.py web`, allow
-`http://127.0.0.1:8088` in the server's `origins`, and serve the repository
-with `python3 -m http.server 8088 --bind 127.0.0.1`. Open
-`http://127.0.0.1:8088/tools/online_browser.html`, choose your local ROM,
-and connect while a native client is present. This developer harness reads
-the ROM into the tab's memory; it never uploads or persists it. It also
-keeps numerical movement evidence at `/online-trace.jsonl` in the tab's
-in-memory filesystem. It is not part of the published game site.
-
-## Design and implementation
+## The design
 
 The dialectic is **the run's integrity against the community's
-generosity**, from the epic and the repository's game-design skill.
-This social loop sits beside the run and follows *variety, not power*.
-The Square therefore has no healing, rewards, currency or encounters.
-The player chooses a name and server, gives server-specific consent,
-then borrows the checkpoint for a visit. The save remains authoritative;
-online RAM is never checkpointed. [ONLINE_LINK.md](ONLINE_LINK.md) describes
-the return and shutdown guards. Phase 2's trade policy remains undecided.
+generosity** (the game-design skill): the Square sits beside the run
+and gives variety, never power. It has no battles of the net, no heal, no
+shop, no reward and no save; a NetBattle there wins nothing and costs
+nothing. The one thing that comes home is a traded chip, one spare for
+one spare, which changes what a folder can hold, not how strong
+MegaMan is. No menu screen of the project's own leads there: the world
+does, a gate in the room the run comes home to, in the manner of
+Warframe's Orbiter, with BN6's own chat boxes for every question.
 
-The server sends only its seed and compatibility metadata. Each client
-makes a small room with the existing ROM-backed map builder; a
-seed-selected alcove and tile choices exercise deterministic construction.
-This is a Square generator prototype, not the final collection of rooms.
-It does not change `layer_generate`, `Run` or `RUN_MAGIC`.
+## Where things are
 
-The cross-platform proof exposed an existing tile-ordering difference:
-equal-frequency candidates relied on `qsort` retaining their preceding
-order, which glibc happened to do and WebAssembly's libc did not. The
-comparator now resolves ties by tile pair and pad, with a ROM-free test
-of all 720 permutations of six candidates. `LAYER_MAKE` is now 95 so a
-checkpoint made with the earlier tile choices rebuilds safely. The
-generation hash stays unchanged because `layer_generate` itself is unchanged.
-
-Other players are noninteracting NPCs with MegaMan's sprite. Eight
-reserved NPC scripts share one sprite entry, within the existing 16-NPC
-and 12-sprite limits. Existing NPC bytecode sets position, facing and
-standing/walking animation; no movement assistance is added to MegaMan.
-Movement renders from a bounded 100 ms interpolation history, while
-collision and local movement remain BN6's. Peer names and fixed social
-messages appear over their avatars. Source
-verification is in [SOURCES.md](SOURCES.md#net-squares-npc-movement-spike-issue-120).
-
-The binary protocol rejects a mismatched protocol version, `LAYER_MAKE`,
-generation hash, ROM code or ROM SHA-1. It limits names, positions, message
-size, connected players, pending handshakes, per-client traffic and output
-buffers. Each channel holds at most eight players; the default total cap
-of 64 provides eight channels. It relays position snapshots at 20 Hz.
-The private local guest secret derives a separate key for each server.
-Local mute/block choices use the server's stable public identity; hosts
-can ban, mute, kick or allowlist through a local administrative CLI.
-
-Inspect sends a bounded informational card: HP, buster levels, Souls,
-Crosses, depth/act, best depth, title marks and 49 NaviCust cell colors.
-Folder and Pack contents, saves and emulator states stay on the device.
-The server validates ranges but cannot prove a modified client's claims.
-
-## Evidence and remaining gates
-
-The numerical proof is repeatable with the commands above. The separate
-[link and carried-MegaMan report](ONLINE_LINK.md) gives the serial test,
-state size/timing and exact limits of that evidence.
-
-Measured on the Linux development host, 15 October 2026:
-
-- **Hosted WSS, two native games:** the Coolify server at
-  `cyberworld.saschb2b.com` passed with a trusted HTTPS certificate.
-  Both games built seed 120/hash 4132376369, moved reciprocally, and
-  produced 211 matching interpolated NPC samples. Median round trips
-  were 33/39 ms, maximum 49 ms. Both restored identical depth-three
-  loadouts through Leave; all 24 checkpoint files remained unchanged.
-  The test exposed and fixed curl negotiating HTTP/2 for a raw HTTP/1.1
-  WebSocket Upgrade: desktop and 3DS curl streams now request HTTP/1.1.
-- **Hosted browser and moderation:** a browser at the published
-  `https://saschb2b.github.io` origin negotiated protocol v2 and received
-  snapshots. Muting its temporary test identity through the container's
-  administrative CLI suppressed its phrase; unmuting restored it.
-  The same browser identity survived redeployment with the server's
-  persistent state volume retained; the temporary mute was removed.
-  This checks the deployed browser transport; the full browser game
-  proof below checks the emulator and generated world.
-- **Phase 1, two native games:** both borrowed real depth-three
-  checkpoints. Start → Leave and a server disconnect restored identical
-  carried records; all 12 checkpoint files per game were unchanged after
-  shutdown. All 191 measured peer NPC samples matched the interpolated
-  game coordinates. Empty, missing and corrupt checkpoint cases passed.
-- **Phase 1, sixteen native games:** two full eight-player channels,
-  at least 90 full-channel samples per game, 10,248 matching actual NPC
-  samples, and 192 unchanged checkpoint files. All sixteen restored their
-  carried loadouts after disconnect. Median local round trips were 1–2 ms.
-- **Phase 1, Chrome/WebAssembly and native:** the v2 subprotocol accepted
-  a maximum-length 16-character browser name. Both worlds had seed 120
-  and hash 4132376369. All 578 browser and 592 native measured NPC samples
-  matched interpolation; each traced movement that matched the other
-  process. Median local round trips were 4 ms browser and 2 ms native.
-- **Phase 1, social controls:** actual game instances exercised Inspect,
-  local block, a received quick phrase and emote, and a channel switch.
-  Both returned with their save files unchanged. A separate held-reset
-  regression kept the restored game active through 20 held chord frames;
-  a released and freshly pressed chord then reached the title normally.
-- **Phase 0, two native game processes:** seeds 120 and 121 passed. The latter's
-  map hash was 1199273041; both clients' median round trip was 1 ms and
-  maximum 2 ms. Actual NPC movement, peer departure, server shutdown and
-  all 12 checkpoint files per client were checked.
-- **Phase 0, Chrome/WebAssembly and native:** seed 120, map hash 4132376369 on
-  both. Browser median/max round trip 3/7 ms; native 2/3 ms. Both traced
-  moving NPC coordinates that matched the other process's local movement.
-- **Eight ROM-free wire clients for ten seconds:** 197 complete room
-  snapshots per client; median/max round trip 0/1 ms (millisecond clock).
-  Aggregate traffic was 39,038 application bytes/s or 40,692 bytes/s
-  including WebSocket framing, excluding TCP/IP and TLS. This measures
-  the bounded presence workload, not maximum network throughput or
-  eight running emulators. `tools/online_bench.py` repeats it.
-- **TLS refusal:** a local server's untrusted self-signed certificate was
-  rejected by the native game, with no plaintext fallback. System CA
-  trust plus hostname verification is the selected model; a valid
-  public certificate is needed for public hosting.
-
-Additional platform checks on 15 October 2026:
-
-- **Physical Pocket Nova / ROCKNIX:** the aarch64 game and a desktop peer
-  visited the public WSS server with identical seed 120/hash 4132376369.
-  All 189 handheld and 197 desktop NPC samples matched interpolation.
-  Handheld median/max RTT was 40/47 ms. The actual depth-29, 1,000-HP
-  checkpoint was borrowed into a temporary test directory, restored
-  identically after leaving, and all 13 installed files stayed unchanged.
-  An untrusted TLS fixture received a TLS handshake but no application
-  bytes; the game reported certificate failure and restored the checkpoint.
-  `tools/online_platform_rocknix.py` repeats the test through an existing
-  authenticated SSH control socket and removes its temporary launcher.
-- **Windows and macOS native networking:** the game's actual transport
-  sources passed on Windows Server 2022 x64 and macOS 15.7.9 ARM64 in
-  [CI run 38654155398](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/actions/runs/38654155398).
-  Each exercised real protocol exchange, reconnect, Inspect, emotes,
-  channels, disconnect, malformed server frames, cancellation, untrusted
-  TLS rejection and the public WSS endpoint. Public RTTs were 128–129 ms
-  from Windows and 126 ms from macOS. The probe reads no ROM, so full
-  game/checkpoint and device-specific behavior remain separate checks.
-- **Android 14 emulator, actual release APK:** joined the public WSS
-  server, moved through six observed positions, and produced 104 positioned
-  peer-NPC samples matching interpolation in the desktop game. All 12
-  Android checkpoint files and the desktop checkpoint stayed unchanged.
-  A self-signed local TLS server observed a ClientHello and a certificate
-  rejection alert, with no application bytes. This exposed and fixed an
-  Android partial-read mismatch during WebSocket handshakes, and a held
-  touch leaking from the title into the Network address editor.
-  `tools/online_platform_android.py` repeats this on a disposable emulator;
-  screenshots verify the touch menu, peer display and checkpoint return.
-
-The Pocket Nova was the only physical test device available. No physical
-iPhone/iPad, Android phone or New 3DS pass is implied by a build, native
-desktop runtime check or emulator result.
-
-Evidence stays under `.build/online-proof/`, `.build/online-load-proof/`,
-`.build/online-browser/`, `.build/online-browser-v2/`, `.build/online-social/`,
-`.build/online-reset-proof/`, `.build/online-bench/` and `.build/online-tls/`.
-Hosted proof records are in `.build/online-public/` and
-`.build/online-public-browser/`. Physical handheld results are in
-`.build/online-platform-rocknix/` and `.build/online-platform-nova/`;
-downloaded native transport reports are in `.build/online-transport-ci/`.
-Android APK evidence is in `.build/online-platform-android/`; actual
-Practice-battle and delayed-worker evidence is in `.build/online-battle/`.
-The public A record was independently
-verified as `204.168.144.168`; while the development machine's resolver
-retained its earlier NXDOMAIN, only the proof processes mapped that one
-hostname to the published address. The original URL, TLS SNI, certificate
-verification and browser origin stayed intact. Loopback timings do not
-predict internet or handheld performance.
-
-| Spike | Implemented experiment | Gate before a player release |
+| Part | Sources | Builds and checks |
 | --- | --- | --- |
-| Transport | Versioned WebSocket server, native platform backends and browser WebSocket, bounded polling, ping/pong, TLS certificate/hostname verification | Measure and test the implemented backends on every target's real hardware; see the server README's verification matrix |
-| Players as NPCs | Sixteen native games, two full channels, interpolated NPC coordinates and identity labels | Hardware performance, adverse internet conditions and longer soak tests |
-| Link cable | Original Practice repeated; delayed frame inputs complete at 0/50/100/150 ms with 2,822 full replica frames and 1,433 original active timers agreeing; corruption and peer loss detected ([limits](ONLINE_LINK.md)) | Two cores per client and three buffered frames; production integration, carried loadouts, rollback and hardware performance remain unproven |
-| Carried MegaMan | Actual checkpoint loadout borrowed and restored through map reconstruction; leave, disconnect and process shutdown preserve checkpoint files | Broader device and power-loss testing; no Arena result or trade mutation is enabled |
-| World from seed | Two game instances build identical geometry/tile hashes from server seed without sending assets | Final Square layout, generator-version migration and all platform determinism |
+| The game's side | `src/online/`, the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
+| The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
+| The wire | `shared/online/` ([protocol v3](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
-These results establish the tested presence and checkpoint paths and a
-local Practice battle experiment. They do not establish an internet Arena.
-A public launch also needs the host's
-retention policy, named moderators, backup/restart checks and the remaining
-target checks in the server README.
+The dependency runs client → wire ← server. The server imports no game
+code, runs no emulator, reads no ROM and never sees a save: chips are
+numbers to it, MegaMen bytes it bounds. Its Docker image copies only
+`server/`, `shared/online/` and the licence.
 
-## Epic continuation
+## A visit
 
-`codex/online-net-square` continues toward epic #120 from the monorepo,
-deployed Net Square development service, checkpoint-safe visits and
-repeatable technical proofs.
+**The gate.** In Lan's HP (`lanhp.c`) a white gate stands at the room's
+front, a Mr.Prog beside it. The first step on it asks for the name other
+players see, says what the server learns (the PET's address, that name,
+MegaMan as he is) and asks before going, the cursor on No; after that
+MegaMan asks "To the Net Square,Lan?" each time
+(`director_gate.c`, its words in `gate_words.c`; flags `0x1473`-`0x1476`,
+[EMULATION.md](EMULATION.md)). The keeper changes the name or the server:
+the official one, or another's address in BN6's own name field
+(`online_field.c`). Yes saves the run as a checkpoint at the gate
+(`home_gate_save`), then the gate flickers while the server answers;
+B calls it off.
 
-The official server now stays first beside four custom entries, with
-selection and consent migrated by URL. `tools/online_network_proof.py`
-checks its controller and SDL touch navigation. Rapid
-Inspect reopen requests receive a fresh response instead of waiting
-indefinitely behind the former card-specific throttle.
+**One core.** The visit runs on the game's own core
+(`online_visit.c`): the Square is built into the running BN6, the run's
+state (its `Run`, profile, RNG and loot) put aside, and the Square's RAM
+thrown away on the way home. Coming home puts the state back and
+`director_resume()` re-enters Lan's HP on the live core, MegaMan on the
+gate as he left it; nothing is booted again. A game closed in the Square
+continues from the gate's checkpoint, as any CONTINUE does. Every end has
+MegaMan's word for it at the gate: left, called off, no answer, another
+version, another ROM, a name taken, a full Square, barred, removed, the
+connection lost.
 
-Between acts, R at Lan's PC opens Jack in / Network / Cancel. A visit
-waits for a fresh checkpoint; an observed write failure stays at the PC
-with a retry. `tools/online_pc_proof.py` passes 12 checks covering failure,
-retry, cancel, local-server visit, unchanged checkpoint return and ordinary
-jack-in.
+**The Square.** The server sends a seed; each game plans the same Square
+from it (`square_plan.c`): a plaza of ten panels a side and four wings
+off it, the arrival with the pad home, Trade Central, the Arena and the
+Board, in one of BN6's busy daylight nets (Central, Sky or Green Area;
+not Seaside, whose layers stand in another map's slot). The plan's hash
+and its generator version (`SQUARE_MAKE`, `SQUARE_HASH`) go in HELLO, so
+a server refuses a game that would build another Square. `online_square.c`
+builds it with the layers' map builder (`netmap_build`), places the
+welcome sign, the channel keeper, Trade Central's clerk at his desk, the
+Board's sign and the pad home, and gives the other players' MegaMen
+seven NPC scripts of BN6's own, moved from a 100 ms interpolation of the
+server's 20 Hz snapshots; their names stand over them. MegaMan walks as
+BN6 walks him. Each Square is a channel of eight; the keeper moves
+MegaMan to the next or the last.
 
-Without a checkpoint, the visitor uses the title's remembered, unlocked
-folder, Cross and helper choices. This serves the same run-integrity / social
-expression tension: the social loop shows a starting loadout, using
-loadout-as-budget and variety rather than permanent power. It never creates
-a run, rolls a seed or grants the run's starting gift. The title and visit
-share one validator. `tools/online_fresh_proof.py` checks six real-game cases:
-Standard, Blade with Cross, Storm with All *, unlocked BeastOut, locked
-choices and invalid remembered values. All connect and return, keep fresh
-HP, leave the profile unchanged and create no checkpoint. The optional
-`CYBERWORLD_LOADOUT_TRACE` contains local numeric observations only.
+**Talk.** Every exchange is BN6's chat box with its options, three to a
+box (`online_chat.c`, words in `square_words.c`): L for a phrase or an
+emote, A facing another MegaMan for his card (HP, act and layer,
+Crosses, Souls) and Battle, Wave, Mute, Block; R or the pad for home.
+The Square's flags are `0x1480`-`0x14A1`, its own while it lasts.
+Phrases and emotes are fixed lists, never free text; mute and block are
+the player's, kept by the server's public identity of the other.
 
-Trade Central and the production Arena are not enabled. The
-[delayed Practice experiment](ONLINE_LINK.md) completes its four-delay
-matrix, with explicit two-core and observation limits.
-[Reviewed research goals](re/README.md) now gate native chip exchange,
-private checkpoint mutation and complete cable snapshot/replay. Full trade
-integration, carried-loadout battles, rollback and remaining physical-device
-checks are ongoing work. This draft does not yet close epic #120 or
-publish a game release.
+## Trade Central
+
+A Mr.Prog at a desk in the north wing trades one spare chip (a copy past
+those in the run's three folders) for another player's
+(`trade_central.c`, words in `trade_words.c`):
+
+1. MegaMan picks a Navi in the channel and the chip he offers. The picker
+   is BN6's own Order Service screen (`trade_order.c`): the shop's
+   descriptor pointed, while he is in the Square, at a copy of its text
+   archive in the desk's words, its list the run's spares
+   ([ROM_DATA.md](ROM_DATA.md), the Order Service).
+2. The other player's MegaMan hears the offer, goes to the desk and picks
+   a chip back, or says no.
+3. Both see the pair and say Deal; the server commits the trade only
+   when both accepted the same pair, and writes it to `trades.jsonl`
+   (`server/cyberworld_server/trade.py`). A stale or mismatched step,
+   a player gone, or five minutes without a step calls it off.
+4. Each game keeps the done trade in `trade.pending` and applies it at
+   home: on the way back from the Square, or at the next CONTINUE if the
+   game was closed there. It runs BN6's own TakeChips and GiveChips on
+   the gate's checkpoint (`online_trade_settle`), refuses a swap whose
+   chip is no longer spare, deletes the file before it saves, and MegaMan
+   says what came and went.
+
+## The Arena
+
+Battle on a card sends a challenge; if the other player takes it, both
+games run BN6's Practice NetBattle on **two linked cores each**, the two
+MegaMen carried as they are (folder, NaviCust, HP, buster, Crosses), and
+only the players' keys cross the server. The Square's core holds still
+meanwhile; after the battle each MegaMan stands where he stood and says
+how it went. A hash of the pair every 60 frames catches two games apart
+and stops both. Nothing is won or lost. The 3DS and the browser build
+compile it out (`CW_ARENA`): Battle is not offered there and a challenge
+is declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
+the lockstep and the two-client proof.
+
+## The server and the wire
+
+Protocol v3 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v3`). The server refuses
+another protocol version, another Square generator or hash, another ROM
+code or SHA-1, a name out of bounds and a full Square; it bounds every
+message, the players, pending handshakes, each client's traffic and its
+output, and relays the Arena's keys under a bucket of its own. Trading
+and the Arena each have their switch in its configuration
+(`trading`, `arena`). A player's identity is a key of the PET's own,
+derived per server from a local secret; moderators ban, mute, kick and
+allowlist through the server's command line. Hosting, TLS, backups and
+the platforms' transports are [server/README.md](../server/README.md)'s.
+
+## Two games at once
+
+[DEVTOOLS.md](DEVTOOLS.md#the-net-square-two-games-at-once) says how:
+a local server (`build.py server-run`), a `network.ini` per data folder or
+`--dev online=URL,onlinename=NAME`, and two `tools/play.py` sessions
+from `--scene home`; never the official server. A visit plays at the
+clock's pace even headless, so the two meet. `tools/online_browser.html`
+starts the browser build from home onto the gate, for a browser beside a
+native game (the server's `origins` allowing the page's). The Arena's own
+proof is in [ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof), the
+cable pair's tool (`build.py online-pair`) in
+[ONLINE_LINK.md](ONLINE_LINK.md).
+
+## What has been shown
+
+On this machine, 18 October 2026, the player's Gregar ROM, a local v3
+server:
+
+- **The gate and a visit.** The first step's questions (the name field,
+  what the server learns, MegaMan's question), the save at the gate, the
+  connection, the Square built and entered; the keeper's channel switch
+  (the server logged it), the L menu, a card read, R home and the pad
+  home, each back on the gate with MegaMan's word. The Square drawn in
+  Central, Sky and Green Area.
+- **A trade between two games.** Two `tools/play.py` sessions with spare
+  chips: an offer picked on the order screen, answered, both Deals, the
+  line in `trades.jsonl`, `trade.pending` on both; one game settled on
+  its way home, the other, closed in the Square, at its CONTINUE, each
+  folder and pack as the trade said.
+- **A NetBattle between two games.** The challenge, the way in, the
+  battle to its end on both with every hash agreeing, a desync and a
+  player leaving each stopping both, a declined challenge
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
+- **Builds and checks.** Host, aarch64, Windows, 3DS and browser builds
+  with `-Werror`; `build.py test` (the Square's plan and hash, the
+  Arena's wire and links) and the server's 36 tests; `build.py lint` with
+  nothing new.
+
+The transport itself was measured on 15 October 2026, before the gate
+replaced the first Network screen (those proof tools went with it; they
+are in the history before 433865a8):
+
+- **Hosted WSS:** two native games on the Coolify server with a trusted
+  certificate, median round trips 33 and 39 ms; a browser at the
+  published site's origin; moderation through the container's command
+  line; an identity kept across a redeploy.
+- **Many players:** sixteen native games in two full channels, 10,248
+  remote positions matching the interpolation; eight ROM-free wire
+  clients at about 40 KB/s together.
+- **Systems:** a Retroid Pocket Nova on ROCKNIX against the public server
+  (median 40 ms); Windows Server 2022 and macOS 15 running the transport's
+  sources in CI against the public server; the Android APK in an
+  emulator; an untrusted certificate refused on each, with no plaintext
+  fallback.
+
+## Not yet
+
+- **The Board and the weekly seed** (the epic's stretch): the Board's
+  wing stands with its sign, empty.
+- **A referee Mr.Prog** in the Arena's wing, rematches, and the Arena on
+  the 3DS and in the browser.
+- **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
+  a New 3DS, Android and iOS; the Arena over a real network rather than
+  one machine (the margin a phase between two games' ticks takes from
+  its delay).
+- **In the browser:** a whole visit with the published server (the
+  browser build builds; its online run here was before the gate).
+- **The official server:** its Coolify service pointed at
+  `deploy/coolify/compose.yaml` and redeployed with v3, `trading` and
+  `arena` on in its configuration; a host's retention policy, named
+  moderators and its backup and restart checks before a public launch.
+- **A pending trade across systems:** `trade.pending` stays beside the
+  saves, outside the `.cwsave` carrier; a save moved between a trade and
+  its settling leaves the swap on the system the trade was made on.

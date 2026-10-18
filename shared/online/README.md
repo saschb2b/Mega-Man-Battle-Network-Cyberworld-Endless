@@ -21,14 +21,16 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID |
 | CHANNEL (13) | client → server | u16 requested channel (0 chooses one); success sends a fresh WELCOME |
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
+| TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel), u32 reference (a proposal's target session ID, else the trade's ID), the chip given (u16 id 1..319, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal) |
+| TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
 | ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000) |
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen |
 
-HELLO's fixed prefix is 52 bytes, WELCOME is 32, CARD is 90, ARENA 8 and
-ARENA_STATE 28. The
+HELLO's fixed prefix is 52 bytes, WELCOME is 32, CARD is 90, TRADE 12,
+TRADE_STATE 32, ARENA 8 and ARENA_STATE 28. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -75,6 +77,18 @@ Inspect is limited to four requests per second. Numeric payloads are
 validated even when throttled. Moderation is read again from private
 local files when they change. `/health` reports configuration and occupancy without
 player names, public identities, private keys or IPs.
+
+Trade Central's trades are one chip for one chip between two players
+of a channel, neither busy in another trade or a battle. The proposer
+names the chip given, the other answers with his, and the server
+commits only when both accepted the same pair as their TRADE_STATE
+showed it, sends done to both and appends the trade to its state
+folder's `trades.jsonl` (identities and chips, no names). A stale or
+mismatched step, either player leaving, or 300 seconds without a step
+cancels it for both. Each game applies its side at home; the server
+never sees a folder. NOTICE codes 15 (trading is off on this server),
+16 (that Navi is busy) and 17 (no longer here, or the trade is over)
+answer a TRADE that cannot be done.
 
 The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.
