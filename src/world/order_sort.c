@@ -6,9 +6,9 @@
  * Element, No. and MB, each the way BN6 first sorts by it, and SELECT
  * turns it round, as BN6 does for a key picked twice; the cursor goes to
  * the top, BN6's sound plays and his box says the sort over the buttons.
- * No. is the copies of the entry, its chip in its code, MegaMan holds (the
- * folder's and the Pack's), as the second screen counts them. The sort is
- * the session's: his list opens in it again.
+ * No. is the copies of the entry, its chip in its code, MegaMan holds,
+ * the folder's among them. The sort is the session's: his list opens in it
+ * again.
  *
  * BN6 makes the list it shows from the entries it found as the screen
  * opened (BN6_SHOP_SOURCE), again at each BN6_SHOP_REDRAW: those are
@@ -16,7 +16,9 @@
  * list), its ties by ID; then the screen is sent back to its list through
  * BN6's own way back (BN6_SHOP_AT_AGAIN), which runs his list prompt, and
  * a hook on the chat has ours said in its place, there and wherever the
- * screen asks for it (his scripts 0 and 1). */
+ * screen asks for it (his scripts 0 and 1), in AsterLand alone: BN6's
+ * order screen opened anywhere else (the Net Square's Trade Central)
+ * keeps its own words. */
 #include "order_sort.h"
 
 #include <stdbool.h>
@@ -24,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "aster_land.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "chips.h"
@@ -38,10 +41,9 @@
 #define ORDER_DESC (BN6_SHOP_DESCS + SHOP_ORDER * 16u)   /* the Order Service's descriptor, as BN6_SHOP_DESC names it */
 #define CHAT_RUN (BN6_CHAT_RUN_SCRIPT & ~1u)
 #define CHAT_RUN_PUSH 0xB570   /* its first instruction: push {r4-r6,lr} */
-#define FACE_CLERK 0x33        /* his face in BN6's own box (docs/ROM_DATA.md, Home's shops) */
 #define SOUND_SORTED 0x81      /* bn6f SOUND_MENU_SELECT: BN6's SORT window's, as a key is picked */
 #define ROWS 0x140             /* the Order Service's entries at most (its descriptor's) */
-#define PACK_MOST 1024
+#define PACK_MOST 1024         /* the pack's entries read at most (a chip in a code each) */
 
 enum { SORT_ID, SORT_ABCDE, SORT_CODE, SORT_ATTACK, SORT_ELEMENT, SORT_NO, SORT_MB };
 
@@ -59,11 +61,13 @@ static int script_of(bool sound) {
 	return 1 + (key * 2 + flipped) * 2 + sound;
 }
 
-/* The chat begun: the Order Service's list prompt (its keeper's scripts 0
- * and 1, as the screen opens and after each line) is ours */
+/* The chat begun: the Order Service's list prompt at AsterLand's counter
+ * (its keeper's scripts 0 and 1, as the screen opens and after each line)
+ * is ours */
 static HookAct chat_run(HookRegs *r, void *user) {
 	(void)user;
-	if (!words || r->r[1] > 1 || hook_read8(hook_read32(BN6_TOOLKIT)) != BN6_MODE_SHOP) return HOOK_CONTINUE;
+	if (!words || r->r[1] > 1 || !aster_land_map(hook_read8(BN6_MAP_GROUP), hook_read8(BN6_MAP_NUMBER))) return HOOK_CONTINUE;
+	if (hook_read8(hook_read32(BN6_TOOLKIT)) != BN6_MODE_SHOP) return HOOK_CONTINUE;
 	if (hook_read32(BN6_SHOP_DESC) != ORDER_DESC || r->r[0] != hook_read32(BN6_SHOP_ARCHIVE)) return HOOK_CONTINUE;
 	r->r[0] = words;
 	r->r[1] = (uint32_t)say;
@@ -130,16 +134,15 @@ static uint32_t attack(const uint8_t *rec) {
 	return (uint32_t)(power > BN6_SORT_COMPUTED ? computed_power(power) : power);
 }
 
-/* MegaMan's copies of `entry` (chip | code << 9): the folder's and the Pack's */
-static uint16_t folder[BN6_FOLDER_ENTRIES], pack[PACK_MOST];
+/* MegaMan's copies of `entry` (chip | code << 9): the pack's count, which
+ * outside the folder editor holds the folder's copies too (second_read.c) */
+static uint16_t pack[PACK_MOST];
 static uint8_t pack_count[PACK_MOST];
 static int npack;
 static uint32_t held(uint16_t entry) {
-	uint32_t n = 0;
-	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) n += folder[i] == entry;
 	for (int i = 0; i < npack; ++i)
-		if (pack[i] == entry) n += pack_count[i];
-	return n;
+		if (pack[i] == entry) return pack_count[i];
+	return 0;
 }
 
 typedef struct {
@@ -162,10 +165,9 @@ static uint32_t key_of(const uint8_t *rec, int chip, int code) {
 	}
 }
 
-static bool down;   /* the sort under way: its key's values down, its ties by ID up either way */
 static int by_key(const void *a, const void *b) {
 	const Row *x = a, *y = b;
-	if (x->key != y->key) return (x->key < y->key) != down ? -1 : 1;
+	if (x->key != y->key) return x->key < y->key ? -1 : 1;
 	return x->tie < y->tie ? -1 : x->tie > y->tie;
 }
 
@@ -177,17 +179,18 @@ static void sort_list(void) {
 		for (uint32_t b = 0; b < BN6_SHOP_ENTRY; ++b) rows[n].e[b] = emu_read8(BN6_SHOP_SOURCE + BN6_SHOP_ENTRY * (uint32_t)n + b);
 		if (!rows[n].e[0]) break;
 	}
-	if (key == SORT_NO) {
-		director_folder_now(folder);
-		npack = director_pack_now(pack, pack_count, PACK_MOST);
-	}
+	if (key == SORT_NO) npack = director_pack_now(pack, pack_count, PACK_MOST);
+	/* (a key newly picked BN6 sorts the way of its byte XOR BN6_SORT_DOWN,
+	 * SELECT the other; down, the key's values inverted as BN6 inverts
+	 * them, its ties by ID up either way) */
+	bool down = !(emu_read8(BN6_SORT_MODES + (uint32_t)key) & BN6_SORT_DOWN) != flipped;
 	for (int i = 0; i < n; ++i) {
 		int chip = get16(rows[i].e + 2), code = rows[i].e[4];
 		const uint8_t *rec = chips_record(chip);
-		rows[i].key = rec ? key_of(rec, chip, code) : 0;
+		uint32_t k = rec ? key_of(rec, chip, code) : 0;
+		rows[i].key = down ? ~k : k;
 		rows[i].tie = rec ? (uint32_t)get16(rec + BN6_CHIP_ID_SORT) << 7 | (uint32_t)code : 0;
 	}
-	down = ((emu_read8(BN6_SORT_MODES + (uint32_t)key) ^ BN6_SORT_DOWN) == BN6_SORT_DOWN) != flipped;
 	qsort(rows, (size_t)n, sizeof *rows, by_key);
 	for (int i = 0; i < n; ++i) emu_write(BN6_SHOP_SOURCE + BN6_SHOP_ENTRY * (uint32_t)i, rows[i].e, BN6_SHOP_ENTRY);
 	emu_write8(BN6_SHOP_REDRAW, 0xFF);

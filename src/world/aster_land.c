@@ -4,11 +4,10 @@
  * BBS holds none of its requests in a run), its checks, and
  * BN6's Chip Trader, whose trade screen holds AsterLand's own prizes
  * (docs/ROM_DATA.md, Chip Traders), and home's shops (docs/HOME.md, piece
- * 6): the counter's Order Service (sorted as BN6's folder editor sorts,
- * order_sort.c) and the SubChip seller beside it; in
- * from the town's warp 4. Its Number
- * Trader is off: its codes are no secret, and every run would take BN6's
- * prizes from it (docs/HOME.md, piece 10). */
+ * 6): the counter's Order Service (its list sorted as BN6's folder editor
+ * sorts, order_sort.c) and the SubChip seller beside it; in from the
+ * town's warp 4. Its Number Trader is off: its codes are no secret, and
+ * every run would take BN6's prizes from it (docs/HOME.md, piece 10). */
 #include "aster_land.h"
 
 #include <stdint.h>
