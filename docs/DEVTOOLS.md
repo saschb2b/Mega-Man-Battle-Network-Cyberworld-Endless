@@ -348,6 +348,15 @@ Output: `.build/tour/tour_bXX.png`, the rooms of one area at 2x, four to a
 row. This is what the game itself draws: objects, NPCs, decoration and
 collision problems show up here that the atlas cannot show.
 
+## The Arena on one machine
+
+`--dev arena` starts on a Practice NetBattle of BN6's own between two
+linked cores (issue #120), you the first GBA and a script the second,
+whose keys come over a local link held back as a network's would be;
+`arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay, the
+link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
+says what runs, how to script a battle headless and what it measured.
+
 ## Dev menu: shorter test runs
 
 Hold **Select** and press **R**, in battle or on the net. The game holds still
