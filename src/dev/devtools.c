@@ -28,7 +28,7 @@
 #include "soulunite.h"
 #include "text.h"
 
-DevFlags dev = { .speed = 1, .duels = -1 };
+DevFlags dev = { .speed = 1, .duels = -1, .arena_lag = -1 };
 char devtools_shot[512];
 
 enum { I_GOD, I_ONEHIT, I_QUIET, I_SPEED, I_WIN, I_HEAL, I_ZENNY, I_NEXT, I_GUARDIAN, I_AREA, I_COUNT };
@@ -48,13 +48,14 @@ static bool dev_switch(const char *t) {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors },
-		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis },
+		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
+		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenadesync=", &dev.arena_desync },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }
@@ -78,6 +79,9 @@ void devtools_parse(const char *spec) {
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
+		/* (kept past this call: copies of their own) */
+		else if (!strncmp(t, "online=", 7)) { static char url[200]; snprintf(url, sizeof url, "%s", t + 7); dev.online = url; }
+		else if (!strncmp(t, "onlinename=", 11)) { static char name[17]; snprintf(name, sizeof name, "%s", t + 11); dev.online_name = name; }
 	}
 	if (dev.speed < 1) dev.speed = 1;
 	if (dev.speed > 8) dev.speed = 8;

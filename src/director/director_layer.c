@@ -101,7 +101,6 @@ static int label_archive(const char *label, uint8_t *out, int max) {
 }
 
 void map_label(void) {
-	static char last[16];
 	char name[16];
 	if (D.town) snprintf(name, sizeof name, "%s", home_place_name());
 	else if (run.side_kind == LAYER_UNDERNET) snprintf(name, sizeof name, "Undernet");
@@ -114,7 +113,11 @@ void map_label(void) {
 	char place[16];
 	if (D.town || run.side_kind != LAYER_NORMAL || run.biome == BIOME_NEST) snprintf(place, sizeof place, "%s", name);
 	else snprintf(place, sizeof place, "%s %d", guardian_area_short(run.biome), run.depth);
-	static char last_place[16];
+	director_map_label(name, place);
+}
+
+void director_map_label(const char *name, const char *place) {
+	static char last[16], last_place[16];
 	if (!strcmp(name, last) && !strcmp(place, last_place) && emu_read32(BN6_MAP_NAMES_PTR) == LABEL_AT &&
 		emu_read32(BN6_PET_MAP_NAMES_PTR) == PET_LABEL_AT) return;
 	snprintf(last, sizeof last, "%s", name);

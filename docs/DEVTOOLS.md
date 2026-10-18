@@ -348,6 +348,48 @@ Output: `.build/tour/tour_bXX.png`, the rooms of one area at 2x, four to a
 row. This is what the game itself draws: objects, NPCs, decoration and
 collision problems show up here that the atlas cannot show.
 
+## The Net Square: two games at once
+
+The Square needs a server: `python3 build.py server-run --config
+server/server.example.ini` runs one on `ws://127.0.0.1:8765/presence`
+(seed 120; another `seed` in the file gives another Square). A game's
+data folder points its gate at it with a `network.ini` of its own:
+
+```
+identity=0123456789abcdef0123456789abcdef
+name=Alpha
+named=1
+selected=1
+consent=2
+server=wss://cyberworld.saschb2b.com/presence
+server=ws://127.0.0.1:8765/presence
+```
+
+(the keeper's first-time questions answered: name chosen, the second
+server picked and consented to), or `--dev online=URL,onlinename=NAME`
+points the gate at a server and skips his questions for a session. Two
+`tools/play.py` sessions, each with its own folder and identity, then play
+it from `--scene home --run-depth 7`: `place 16 72 3` puts MegaMan on the
+gate, LEFT and A answer Yes; the log names the Square's area and arrival
+("online: square area 0, arrival at X,Y") and every visit's end and
+trade. A visit plays at the clock's pace even headless, so the two meet.
+Never point a test at the official server.
+
+## The Arena on one machine
+
+`--dev arena` starts on a Practice NetBattle of BN6's own between two
+linked cores (issue #120), you the first GBA and a script the second,
+whose keys come over a local link held back as a network's would be;
+`arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay, the
+link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
+says what runs, how to script a battle headless and what it measured.
+
+A battle from the Net Square between two games takes `arenahp=N` too
+(each game's own MegaMan, so both pairs stay the same), and
+`arenadesync=N` changes the other player's keys from frame N for a
+second on this game alone: the hashes' stop seen on both
+([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof).
+
 ## Dev menu: shorter test runs
 
 Hold **Select** and press **R**, in battle or on the net. The game holds still
@@ -599,6 +641,13 @@ Identity), on the free panel nearest its anchor; play.py's state (with
 `CYBERWORLD_STATE_POS`) names the signature and where it lies, in panels
 and in the world. The `identity-*` screenshots and the `identity` clip
 are made with it.
+
+The `folder` step (`--input`'s `0:folder 2`) copies MegaMan's first
+folder into Folder2 (its Regular chip and TagChips too) or, with 3, the
+Extra Folder, as a run that handed out more folders would hold them: no
+run does yet, and the Net Square's NetBattle asks which folder goes where
+more than one fits (docs/ONLINE_ARENA.md, Formats). Before a `chip` step,
+the copy keeps BN6's chips while the first folder takes the chip.
 
 The `chip` step (`--input`'s `0:chip 204 L 29`, play.py's `chip 204 L
 29`; issue #82) puts chip ID (1-511: BN6's, or one of BN5's in BN6's

@@ -26,6 +26,10 @@ uint32_t npc_mark(int category, int index, int x, int y, int z, int anim, int go
 /* ... drawn on the floor at world (x, y), as npc_prop's pads. */
 uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gone_flag);
 
+/* ... a floor sprite whose animation follows the byte at *anim_at (the
+ * caller writes it between frames: a gate's still and swirling looks). */
+uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at);
+
 /* A standing NPC that talks with `script` of the text archive at `archive`,
  * and leaves once event flag `gone_flag` is set (-1: never); a `floor` one
  * (a pad) is drawn under MegaMan. */
@@ -35,6 +39,17 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
  * (sx, sy) world units from where it stands, as the originals' counter
  * navis are. */
 uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int sx, int sy);
+
+/* ... a wide object (a desk) spoken to anywhere along it: sprite `index`
+ * of list `category` at world (x, y) playing `anim`, talking with `script`
+ * of `archive`; its middle (cx, cy) world units from where it stands,
+ * walked into within `radius` of that. */
+typedef struct {
+	int category, index, x, y, anim;
+	uint32_t archive;
+	int script, cx, cy, radius;
+} NpcDesk;
+uint32_t npc_desk(const NpcDesk *desk);
 
 /* A talker who paces `steps` along facing `face` (1, 3, 5, 7: +x, +y, -x,
  * -y) and back, looking about at each end. */

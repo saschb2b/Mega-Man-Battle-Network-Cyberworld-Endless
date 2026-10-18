@@ -128,41 +128,40 @@ static bool load_v8(void) {
 	return true;
 }
 
+static void old_route(uint32_t seed, int depth, int biome, int side, uint32_t layer_seed, const uint8_t *biomes) {
+	uint32_t keep = rng_state();
+	run_new(seed);   /* the new areas' guardians */
+	rng_restore(keep);
+	run.depth = depth;
+	run.biome = biome;
+	run.side_kind = side;
+	run.layer_seed = layer_seed;
+	memcpy(run.biome_order, biomes, sizeof run.biome_order);
+}
+
+/* Only the guardians this format held replace run_new's generated ones:
+ * CWE2 held eight, CWE3 sixteen. The records' byte layouts stay unchanged. */
+static void old_progress(const uint8_t *bosses, size_t count, int beaten, int deleted, int fragments, bool secret) {
+	memcpy(run.boss_order, bosses, count);
+	run.bosses_beaten = beaten;
+	run.viruses_deleted = deleted;
+	run.fragments = fragments;
+	run.secret_cleared = secret;
+}
+
 static bool load_v3(void) {
 	RunV3 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V3, &v, sizeof v) || !v.active) return false;
-	uint32_t keep = rng_state();
-	run_new(v.seed);   /* the new areas' guardians */
-	rng_restore(keep);
-	run.depth = v.depth;
-	run.biome = v.biome;
-	run.side_kind = v.side_kind;
-	run.layer_seed = v.layer_seed;
-	memcpy(run.biome_order, v.biome_order, sizeof run.biome_order);
-	memcpy(run.boss_order, v.boss_order, sizeof v.boss_order);
-	run.bosses_beaten = v.bosses_beaten;
-	run.viruses_deleted = v.viruses_deleted;
-	run.fragments = v.fragments;
-	run.secret_cleared = v.secret_cleared;
+	old_route(v.seed, v.depth, v.biome, v.side_kind, v.layer_seed, v.biome_order);
+	old_progress(v.boss_order, sizeof v.boss_order, v.bosses_beaten, v.viruses_deleted, v.fragments, v.secret_cleared);
 	return true;
 }
 
 static bool load_v2(void) {
 	RunV2 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V2, &v, sizeof v) || !v.active) return false;
-	uint32_t keep = rng_state();
-	run_new(v.seed);   /* the new areas' guardians */
-	rng_restore(keep);
-	run.depth = v.depth;
-	run.biome = v.biome;
-	run.side_kind = v.side_kind;
-	run.layer_seed = v.layer_seed;
-	memcpy(run.biome_order, v.biome_order, sizeof run.biome_order);
-	memcpy(run.boss_order, v.boss_order, sizeof v.boss_order);
-	run.bosses_beaten = v.bosses_beaten;
-	run.viruses_deleted = v.viruses_deleted;
-	run.fragments = v.fragments;
-	run.secret_cleared = v.secret_cleared;
+	old_route(v.seed, v.depth, v.biome, v.side_kind, v.layer_seed, v.biome_order);
+	old_progress(v.boss_order, sizeof v.boss_order, v.bosses_beaten, v.viruses_deleted, v.fragments, v.secret_cleared);
 	return true;
 }
 

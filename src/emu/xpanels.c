@@ -87,18 +87,21 @@ static bool lava_acts(const HookRegs *r) {
 	return true;
 }
 
-/* the hooked instruction the stub went back to, on the stack it left: it runs */
-static struct { uint32_t at, sp; } back;
+/* the hooked instruction the stub went back to, on the stack it left: it
+ * runs (one a core: the Arena's two run an instruction at a time in turn) */
+typedef struct { uint32_t at, sp; } Back;
+static Back backs[HOOK_CORES];
 
 static HookAct lava_site(HookRegs *r, void *user) {
 	(void)user;
-	if (back.at == r->pc && back.sp == r->sp) {
-		back.at = 0;
+	Back *back = &backs[hook_slot()];
+	if (back->at == r->pc && back->sp == r->sp) {
+		back->at = 0;
 		return HOOK_CONTINUE;
 	}
 	if (!lava_acts(r)) return HOOK_CONTINUE;
-	back.at = r->pc;
-	back.sp = r->sp;
+	back->at = r->pc;
+	back->sp = r->sp;
 	r->r[3] = r->pc | 1;
 	r->r[12] = XP_STUB | 1;
 	return HOOK_JUMP;

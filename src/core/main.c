@@ -20,7 +20,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "meta.h"
-#include "net_layouts.h"
+#include "online_visit.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
@@ -53,6 +53,7 @@ static const Scene *scene_by_name(const char *n) {
 static bool scene_given;
 
 static const Scene *first_scene(const Scene *s, bool headless) {
+	if (dev.arena) return &scene_arena;   /* (--dev arena: src/online/arena_scene.c) */
 	if (!s) s = &scene_title;
 	return s == &scene_title && !scene_given && !headless ? &scene_intro : s;
 }
@@ -165,7 +166,8 @@ static bool step(void) {
 		if ((SDL_GetPerformanceCounter() - t0) * 1000 < SDL_GetPerformanceFrequency()) SDL_Delay(1);
 		return true;
 	}
-	if (!loop.headless || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
+	/* (a Net Square visit at the clock's pace: headless clients meet there) */
+	if (!loop.headless || online_visit_active() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 		loop.acc += elapsed();
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
 		loop.acc -= 1.0 / 60.0;
@@ -285,7 +287,6 @@ static int run_option(const char *a, const char *v, Options *o) {
 	/* --marks HEX: the title's marks as if earned, for a capture */
 	else if (!strcmp(a, "--marks")) o->marks_spec = (int)strtol(v, NULL, 16);
 	else if (!strcmp(a, "--talk")) director_dev_talks = v;
-	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	else if (!strcmp(a, "--dev")) devtools_parse(v);
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;
@@ -471,7 +472,9 @@ static int frame_loop(const Options *o) {
 	emscripten_set_main_loop(web_frame, 0, 1);
 #else
 	while (!P.quit && !quit_signal && step()) {}
-	/* a run on a layer is kept where MegaMan stands */
+	/* a run on a layer is kept where MegaMan stands (a Net Square visit's
+	 * connection closed first: its gate's checkpoint stays) */
+	online_visit_shutdown();
 	if (current == &scene_emu) director_suspend();
 	cores_quit();
 #endif

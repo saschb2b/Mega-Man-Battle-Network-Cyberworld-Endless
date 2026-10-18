@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research status</title>
+<!--
+  Research status page (reverse-engineering skill). One file, no network
+  but its own folder, no dependencies. It reads state.json beside it; opened
+  as a file, where a browser refuses that, it shows the copy embedded below.
+  Do not edit the page per project: a script writes state.json and this
+  embedded copy from the project's ledger (schema: references/dashboard.md).
+-->
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #77756f;
+  --line: #e1e0d9; --border: rgba(11,11,11,0.10); --accent: #2a78d6; --wash: rgba(42,120,214,0.08);
+  --good: #0f7a0f; --wait: #9a6700; --bad: #c23030; --plain: #6b6a65;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a998f;
+    --line: #2c2c2a; --border: rgba(255,255,255,0.10); --accent: #5b9df0; --wash: rgba(91,157,240,0.10);
+    --good: #3fbf5a; --wait: #e0a526; --bad: #f0605a; --plain: #a3a299;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a998f;
+  --line: #2c2c2a; --border: rgba(255,255,255,0.10); --accent: #5b9df0; --wash: rgba(91,157,240,0.10);
+  --good: #3fbf5a; --wait: #e0a526; --bad: #f0605a; --plain: #a3a299;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
+h2 { font-size: 16px; margin: 32px 0 10px; font-weight: 650; }
+p { margin: 0 0 8px; }
+a { color: var(--accent); }
+.sub, .note { color: var(--ink-2); }
+.note { font-size: 13px; }
+.banner { background: var(--wash); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px 10px 0; border-top: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; font-size: 13px; border-top: 0; padding-top: 0; }
+td.date { white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+td.name { font-weight: 600; white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 600; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+.tone-good { color: var(--good); } .tone-progress { color: var(--accent); } .tone-wait { color: var(--wait); }
+.tone-bad { color: var(--bad); } .tone-plain { color: var(--plain); }
+ul.changes { margin: 0; padding-left: 20px; }
+ul.changes li { margin: 4px 0; }
+details { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 650; }
+details ul { padding-left: 20px; }
+dl.glossary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+dl.glossary dt { font-weight: 600; }
+dl.glossary dd { margin: 0; color: var(--ink-2); }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
+@media (max-width: 680px) {
+  table.stack thead { display: none; }
+  table.stack tr { display: block; border-top: 1px solid var(--line); padding: 10px 0; }
+  table.stack td { display: block; border: 0; padding: 2px 0; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-weight: 400; }
+  dl.glossary { grid-template-columns: 1fr; gap: 2px; }
+  dl.glossary dd { margin-bottom: 8px; }
+}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"><p class="sub">Loading the status…</p></main>
+<noscript><main><p>This page needs JavaScript. STATUS.md beside it holds the same status.</p></main></noscript>
+
+<script type="application/json" id="re-state">
+{
+  "schema": "re-status/1",
+  "written_by": "tools/re_status.py from docs/re/ledger.json",
+  "project": "Cyberworld Endless: online Net Squares (epic #120)",
+  "updated": "2026-10-18",
+  "previous": "2026-10-17",
+  "features": [
+    {
+      "name": "Net Square",
+      "state": "reworking",
+      "now": "Presence works: the server, the transports on every system, and a prototype Square where other players walk as NPCs.",
+      "left": "Move the way in to a gate in Lan's HP, rebuild the Square from BN6's own pieces, and make the people in it talkable.",
+      "updated": "2026-10-18",
+      "link": "../ONLINE.md",
+      "state_text": "Works, being reworked"
+    },
+    {
+      "name": "Trade",
+      "state": "designed",
+      "now": "Designed: counters at Trade Central in the Square, the server commits a trade, and the swap is applied after the visit returns, with BN6's own give and take chips.",
+      "left": "All of it: the counters, the server's commit, the swap in the live game, and a pending file that holds CONTINUE until the trade settles.",
+      "updated": "2026-10-18",
+      "link": null,
+      "state_text": "Designed, not built"
+    },
+    {
+      "name": "Arena",
+      "state": "proven",
+      "now": "NetBattles from the Net Square between two games, each running both linked cores, only keys crossing the server, the pair hashed every 60 frames. Full rules for two games with BN5's ROM: BN5's installs written down as the game's core makes them and made again in both pair cores, BN5's chips and Souls carried; UNITE's Soul carried to the other GBA by the pair. Proven on two clients: MrkCan1 and KnightSoul on both screens with every hash agreeing.",
+      "left": "The other five Souls, Chaos Unison, ColonelSoul's button and BN5's mood in a NetBattle seen on both GBAs; a marker that wanders against a moving target checked against BN5; rollback.",
+      "updated": "2026-10-18",
+      "link": "../ONLINE_ARENA.md",
+      "state_text": "Proven in research, not built"
+    }
+  ],
+  "decisions": [],
+  "since": [
+    {
+      "date": "2026-10-18",
+      "what": "The trade machinery and the save gate it put on every run came out of the game; Trade starts again from its design."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "The Arena research was trimmed to what the production Arena builds on: the linked pair, the input wire, the Practice script and the pair's snapshot. `build.py online-pair` runs them."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "The link cable's findings are one page, docs/ONLINE_LINK.md."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "This status is written by tools/re_status.py from docs/re/ledger.json."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "Full rules: the Arena's pair holds BN5's installs (src/emu/xinstall_log.c) and carries a united Soul to the other GBA (src/online/arena_souls.c)."
+    }
+  ],
+  "experiments": [
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "Inputs only, two cores per client",
+      "result": "Completes at 0, 50, 100 and 150 ms one-way delay, every battle timer as the original; a flipped input and a killed peer both stop the fight.",
+      "meaning": "The Arena's design: each client runs both games, only inputs travel.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "Snapshot of the pair",
+      "result": "Restored at six points and replayed 1, 4 and 8 frames, twice each: every replay exact; 863,016 bytes, 1.2 ms a restore on the desktop.",
+      "meaning": "Rollback is possible, but only with more than mGBA's own state save.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "A carried chip in the pair",
+      "result": "Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice.",
+      "meaning": "A run's chip fights natively; the installer for a whole loadout is still to build.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "BN5 in both pair cores, two clients",
+      "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
+      "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
+      "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "UNITE across the cable",
+      "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
+      "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
+      "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Two games through the hosted server",
+      "result": "The same room built from seed 120 on both; 211 peer positions matched; round trips 33 to 49 ms; both MegaMen back unchanged, all 24 checkpoint files unchanged.",
+      "meaning": "Presence over the public internet works, and a visit leaves the save alone.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Sixteen games, two full channels",
+      "result": "10,248 peer positions matched; every game's loadout back after a disconnect; 192 checkpoint files unchanged.",
+      "meaning": "A full room holds on one machine; not a measure of handhelds or a busy network.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Browser and native game together",
+      "result": "Both built the same room; 578 browser and 592 native peer positions matched.",
+      "meaning": "The browser build can share a Square with the native ones.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Retroid Pocket Nova on the public server",
+      "result": "Same room as a desktop peer; 189 handheld positions matched; round trips 40 to 47 ms; a 1,000 HP checkpoint back unchanged.",
+      "meaning": "The PortMaster build visits as the desktop does; the only physical handheld tried.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "ROM-free cable on every desktop and the Nova",
+      "result": "256 transfers and all 1,024 received words right on Linux, Windows x64, macOS ARM64 and the Nova.",
+      "meaning": "mGBA's lockstep cable links two cores on every system tried.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "Practice on one pair of cores",
+      "result": "BN6's Practice unpatched: 18,855 serial transfers, 100 to 0, both back at the menu, all 1,433 battle frames agreeing.",
+      "meaning": "BN6's own NetBattle runs on two linked cores without help.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "Serial words sent over a socket",
+      "result": "Completes at no delay; at 50, 100 and 150 ms only 95, 48 and 35 battle frames in a minute.",
+      "meaning": "The cable cannot be split across the network.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Trade",
+      "date": null,
+      "name": "Spare chips read from the Pack",
+      "result": "Six folder scenarios through BN6's own folder editor agreed with the reader; six planted faults caught.",
+      "meaning": "Which copies are spare (the Pack less every folder's copies) can be read exactly; the rule is kept at commit 7b4b8ef.",
+      "link": null
+    }
+  ],
+  "method": {
+    "target": "BN6 Gregar USA, SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, on mGBA 0.10.5 (docker/mgba.sh pins its source)",
+    "oracle": "The unpatched game on a fresh pair of cores from the same boot-3.state, run again for each experiment",
+    "rules": [
+      "The player's ROM is only read; saves, states and traces stay under .build/.",
+      "Network work runs against the project's own server and the developer's own games, never anyone else's service or account.",
+      "No masks: a difference between the original and ours is explained or it fails.",
+      "No Tango code is read or used."
+    ],
+    "records": [
+      {
+        "what": "ROM offsets and how to re-check them",
+        "where": "docs/ROM_DATA.md, src/emu/bn6*.h"
+      },
+      {
+        "what": "Claims about the games and their sources",
+        "where": "docs/SOURCES.md"
+      },
+      {
+        "what": "What is original, generated or adapted",
+        "where": "docs/FIDELITY.md"
+      },
+      {
+        "what": "The link cable and the Arena",
+        "where": "docs/ONLINE_LINK.md"
+      },
+      {
+        "what": "The Net Square, its server and transports",
+        "where": "docs/ONLINE.md, server/README.md"
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "Net Square",
+      "meaning": "The online place players visit between acts; other players walk in it as NPCs."
+    },
+    {
+      "term": "Lan's HP",
+      "meaning": "BN6's own homepage map, where MegaMan arrives after every act; the Square's gate is to stand there."
+    },
+    {
+      "term": "Trade Central",
+      "meaning": "The Square's counters where two players are to swap chips."
+    },
+    {
+      "term": "Arena",
+      "meaning": "NetBattles between players, BN6's own fights over the network."
+    },
+    {
+      "term": "Pair",
+      "meaning": "Two mGBA cores joined by an emulated link cable, both games running on one client."
+    },
+    {
+      "term": "Practice",
+      "meaning": "BN6's NetBattle choice that costs no chip; the fight every experiment scripts."
+    },
+    {
+      "term": "Delay-based",
+      "meaning": "Each frame waits until both players' inputs for it have arrived."
+    },
+    {
+      "term": "Rollback",
+      "meaning": "Run ahead on a guessed input, then rewind to a snapshot and replay when the real one arrives."
+    },
+    {
+      "term": "Snapshot",
+      "meaning": "Everything needed to resume the pair exactly: both cores, both flash saves, the cable."
+    },
+    {
+      "term": "Oracle",
+      "meaning": "The unchanged original, run the same way, that ours is compared against."
+    },
+    {
+      "term": "Planted fault",
+      "meaning": "A deliberate break, to show the comparison catches it."
+    },
+    {
+      "term": "boot-3.state",
+      "meaning": "The game's own state after boot, before a run changes anything; made on each machine, never committed."
+    }
+  ]
+}
+</script>
+
+<script>
+(() => {
+  "use strict";
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const TONES = { works: "good", shipped: "good", reworking: "progress", building: "progress",
+    proven: "wait", designed: "wait", planned: "plain", blocked: "bad" };
+  const DASH = "—";
+  const app = document.getElementById("app");
+
+  // Every string from the state is data: text nodes only, never markup.
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v != null && v !== false) n.setAttribute(k, String(v));
+    for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+    return n;
+  }
+  const text = (v) => (typeof v === "string" && v.trim() ? v : DASH);
+  function day(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    return m ? `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}` : DASH;
+  }
+  // Links only to relative paths or https pages: no other scheme, no script.
+  function link(label, href) {
+    if (typeof href !== "string" || !href.trim()) return label;
+    const scheme = /^\s*([a-z][a-z0-9+.-]*):/i.exec(href);
+    if (scheme && scheme[1].toLowerCase() !== "https") return label;
+    return el("a", { href }, label);
+  }
+  function td(label, cls, ...kids) { return el("td", { "data-label": label, class: cls }, ...kids); }
+  function table(head, rows) {
+    return el("table", { class: "stack" }, el("thead", {}, el("tr", {}, head.map((h) => el("th", { scope: "col" }, h)))), el("tbody", {}, rows));
+  }
+
+  function features(s) {
+    const rows = (s.features || []).map((f) => el("tr", {},
+      td(null, "name", link(text(f.name), f.link)),
+      td("Status", null, el("span", { class: "pill tone-" + (TONES[f.state] || "plain") }, el("i", { "aria-hidden": "true" }), text(f.state_text))),
+      td("Now", null, text(f.now)),
+      td("What is left", null, text(f.left)),
+      td("Updated", "date", day(f.updated))));
+    return [el("h2", {}, "Features"), table(["Feature", "Status", "Now", "What is left", "Updated"], rows)];
+  }
+
+  function decisions(s) {
+    const list = s.decisions || [];
+    if (!list.length) return [];
+    return [el("h2", {}, "Decisions needed"), el("ul", { class: "changes" }, list.map((d) => el("li", {},
+      el("strong", {}, text(d.question)), " ", (d.options || []).length ? "Options: " + d.options.join("; ") + "." : "",
+      d.by ? ` By ${day(d.by)}.` : "")))];
+  }
+
+  function since(s) {
+    const list = s.since || [];
+    const title = s.previous ? `Since the last update (${day(s.previous)})` : "Changes";
+    return [el("h2", {}, title), list.length
+      ? el("ul", { class: "changes" }, list.map((c) => el("li", {}, el("span", { class: "sub" }, day(c.date) + ": "), text(c.what))))
+      : el("p", { class: "sub" }, "Nothing has changed.")];
+  }
+
+  function experiments(s) {
+    const list = s.experiments || [];
+    if (!list.length) return [];
+    const rows = list.map((e) => el("tr", {},
+      td("Date", "date", day(e.date)),
+      td("Feature", "nowrap", text(e.feature)),
+      td("Experiment", null, link(text(e.name), e.link)),
+      td("Result", null, text(e.result)),
+      td("What it means", null, text(e.meaning))));
+    return [el("h2", {}, "Experiments"), el("p", { class: "note" }, "One line each, newest first. Each stands on its own: the numbers are not added up across experiments."),
+      table(["Date", "Feature", "Experiment", "Result", "What it means"], rows)];
+  }
+
+  function method(s) {
+    const m = s.method || {};
+    const kids = [el("summary", {}, "Method: what was run against what")];
+    const facts = [];
+    if (m.target) facts.push(el("li", {}, "Target: ", m.target));
+    if (m.oracle) facts.push(el("li", {}, "Compared against: ", m.oracle));
+    for (const r of m.rules || []) facts.push(el("li", {}, r));
+    if (facts.length) kids.push(el("ul", {}, facts));
+    if ((m.records || []).length) kids.push(table(["Record", "Where"], m.records.map((r) => el("tr", {},
+      td("Record", null, text(r.what)), td("Where", null, el("code", {}, text(r.where)))))));
+    return [el("details", {}, kids)];
+  }
+
+  function glossary(s) {
+    const list = s.glossary || [];
+    if (!list.length) return [];
+    return [el("h2", {}, "Glossary"), el("dl", { class: "glossary" }, list.map((g) => [el("dt", {}, text(g.term)), el("dd", {}, text(g.meaning))]))];
+  }
+
+  function render(s, source) {
+    document.title = (s.project ? s.project + ": " : "") + "status";
+    const parts = [
+      el("h1", {}, text(s.project)),
+      el("p", { class: "sub" }, "Updated " + day(s.updated) + ". ", el("span", { class: "note" }, source)),
+      s.example ? el("p", { class: "banner" }, "This is the skill's example. A project's status script replaces it with the project's own state.") : null,
+      ...features(s), ...decisions(s), ...since(s), ...experiments(s), ...method(s), ...glossary(s),
+      el("footer", {}, "Written by " + text(s.written_by) + ". STATUS.md beside this page holds the same.")];
+    app.replaceChildren(...parts.filter(Boolean));
+  }
+
+  function fail(message) {
+    app.replaceChildren(el("h1", {}, "Research status"), el("p", { class: "banner" }, message));
+  }
+
+  let embedded = null;
+  try { embedded = JSON.parse(document.getElementById("re-state").textContent); } catch (e) { embedded = null; }
+  const fallback = (why) => {
+    if (embedded && embedded.schema === "re-status/1") render(embedded, why + " Showing the copy embedded in this page.");
+    else fail(why + " This page has no readable copy of its own either: run the status script again.");
+  };
+  if (location.protocol === "file:") { fallback("Opened as a file, so state.json cannot be read."); return; }
+  fetch("state.json", { cache: "no-store" })
+    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then((s) => { if (s.schema !== "re-status/1") throw new Error("schema"); render(s, "Read from state.json."); })
+    .catch(() => fallback("state.json could not be read."));
+})();
+</script>
+</body>
+</html>

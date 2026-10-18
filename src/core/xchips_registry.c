@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6_chips.h"
+
 const XChipReg xreg_rows[] = {
 	{   1,   1, XREG_SAME },   /* Cannon */
 	{   2,   2, XREG_SAME },   /* HiCannon */
@@ -323,7 +325,7 @@ const XChipReg *xreg_named(int bn6) {
 bool xreg_free_id(int id) {
 	/* (BN6's blank records: docs/ROM_DATA.md, The chip registry; 365-367
 	 * too, the end of 350-368, whose 368 is BN6's pseudo-chips' bound) */
-	return (id >= 203 && id <= 220) || (id >= 291 && id <= 300) || id == 314 || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS);
+	return BN6_CHIP_BLANK(id) || (id >= 350 && id <= 367) || (id >= 411 && id < XREG_IDS);
 }
 
 static int bad(int i, char *why, size_t len, const char *what) {

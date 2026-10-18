@@ -1,0 +1,56 @@
+# The ROM-free presence server, on a push or pull request that touches it
+# (server/, its wire contract in shared/online/, its deployment in deploy/,
+# or these workflows): its tests on the oldest Python it supports, the
+# zipapp's real process smoke and the Coolify deployment's image, on Linux.
+# CI's unit tests (build.py test) run the same suite on every change, beside
+# the C client's contract. The five native builds run for a release
+# (release.yml) or by hand here (Run workflow).
+name: Server
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'server/**'
+      - 'shared/online/**'
+      - 'deploy/**'
+      - '.github/workflows/server.yml'
+      - '.github/workflows/server-native.yml'
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'shared/online/**'
+      - 'deploy/**'
+      - '.github/workflows/server.yml'
+      - '.github/workflows/server-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Server (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Server protocol and moderation tests
+        run: python -m unittest discover -s server/tests -v
+      - name: Python source bundle and real process smoke
+        run: python server/release.py
+      - name: Coolify deployment (Compose file and image)
+        run: |
+          docker compose --project-directory . -f deploy/coolify/compose.yaml config --quiet
+          docker compose --project-directory . -f deploy/coolify/compose.yaml build
+
+  native:
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/server-native.yml

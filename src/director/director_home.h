@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "director_courier.h"   /* (Lan's HP's courier, another part) */
+#include "director_gate.h"   /* (its Net Square gate, another) */
 #include "director_jobs.h"   /* (jobs at home, its other part) */
 #include "run.h"
 

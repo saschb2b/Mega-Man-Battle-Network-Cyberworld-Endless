@@ -43,7 +43,14 @@ typedef struct {
 	bool soulproxy; /* form 8 made HeatCross's copy as the core starts (soulproxy.h: the Souls' proxy form; its differential, tools/xproxy.py) */
 	int proxybreak; /* proxybreak=N: parts of it left out, the comparator's own test (soulproxy.h, SOULPROXY_BREAK_*) */
 	int unitebreak; /* unitebreak=N: UNITE's rule broken, the differential's own test (soulunite.h, SOULUNITE_BREAK_*) */
+	const char *online;     /* online=URL: Lan's HP's gate goes to this server, the keeper's questions skipped (docs/ONLINE.md) */
+	const char *online_name; /* onlinename=NAME: ... as NAME */
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
+	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
+	int arena_delay; /* arenadelay=N: its input delay, N frames (3-60); 0 its own */
+	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
+	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
+	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 
 extern DevFlags dev;

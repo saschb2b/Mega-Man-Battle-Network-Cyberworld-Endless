@@ -56,7 +56,7 @@ static bool done;
 static uint8_t phases[LEVEL_ROWS][4];   /* BN5_CHAOS_PHASES' rows */
 static int glow_number = -1;            /* list 0's number of BN5's dark charge glow (the Souls' copy), -1 none */
 static int dark_id = -1;                /* BN6's id of the Dark Soul (xnavi_bn6_id) */
-static uint32_t due;                    /* the object whose charge's state just stepped (BN6_CHAOS_DUE) */
+static uint32_t dues[HOOK_CORES];        /* the object whose charge's state just stepped (BN6_CHAOS_DUE), one a core (hook_slot) */
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 static bool chaos(int side) { return soul_united(side) && hook_read8(soul_field(side, BN6_SOUL_CHAOS)); }
@@ -88,7 +88,7 @@ static HookAct charge(HookRegs *r, void *user) {
 /* (BN6_CHAOS_DUE, r5 MegaMan) his charge's state is stepped this frame */
 static HookAct charge_due(HookRegs *r, void *user) {
 	(void)user;
-	due = r->r[5];
+	dues[hook_slot()] = r->r[5];
 	return HOOK_CONTINUE;
 }
 
@@ -96,8 +96,8 @@ static HookAct charge_due(HookRegs *r, void *user) {
  * the level, its phase 2, 1, 0 or 1 by the row's bounds; another charge starts it over */
 static HookAct phase(HookRegs *r, void *user) {
 	(void)user;
-	if (due != r->r[5]) return HOOK_CONTINUE;
-	due = 0;
+	if (dues[hook_slot()] != r->r[5]) return HOOK_CONTINUE;
+	dues[hook_slot()] = 0;
 	int side = side_of(r->r[5]);
 	if (!chaos(side)) return HOOK_CONTINUE;
 	uint32_t ai = r->r[4], cycle = soul_field(side, BN6_SOUL_CYCLE);

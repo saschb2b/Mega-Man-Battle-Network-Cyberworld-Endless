@@ -23,11 +23,21 @@
  * arrival until a portal is pointed) and its song; of people, the courier,
  * a Mr.Prog with BN6's "!!" over his head, who is there while
  * LANHP_COURIER_GONE_FLAG is clear, and says nothing until
- * lanhp_courier_say. False where the map's warp spots cannot be read. */
+ * lanhp_courier_say; the Net Square's gate and its keeper, who says
+ * nothing until lanhp_keeper_say. False where the map's warp spots cannot be read. */
 bool lanhp_install(void);
 /* The courier's words: a text archive's bytes (ta_build, his talk its
  * script 0), written over his last; false where they do not fit. */
 bool lanhp_courier_say(const uint8_t *archive, int n);
+/* The Net Square's gate (docs/HOME.md, piece 11): its keeper's words, a
+ * text archive's bytes (his talk its script 0), written over his last;
+ * false where they do not fit. */
+bool lanhp_keeper_say(const uint8_t *archive, int n);
+/* The gate's core flickering while a call is under way (each frame), else
+ * lit. */
+void lanhp_gate_calling(bool on);
+/* Whether world (x, y) stands on the gate's core. */
+bool lanhp_on_gate(int x, int y);
 /* Where BN6's jack-in to Lan's HP sets MegaMan down (world units): on its
  * blue pad, the arrival. */
 void lanhp_arrival(int *x, int *y);

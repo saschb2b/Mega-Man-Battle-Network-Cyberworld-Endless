@@ -70,5 +70,11 @@ int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]);
  * the copies left to order, -1 before the game has set up its data. */
 int shop_order_install(void);
 int shop_order_left(void);
+/* The Order Service's list in RAM as `items` alone (kind 2 chips, their
+ * stock and price), each listed and owned as its order checks: a picker
+ * on BN6's own screen for RAM that is thrown away after (the Net Square's
+ * Trade Central); and entry i's stock now (-1 none). */
+bool shop_order_list(const ShopItem *items, int n);
+int shop_order_stock(int i);
 
 #endif

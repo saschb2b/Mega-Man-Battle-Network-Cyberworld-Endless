@@ -35,6 +35,9 @@ import org.libsdl.app.SDLActivity;
  * the saves' copy written into that folder.
  */
 public class GameActivity extends SDLActivity {
+    /** Called by the game's networking worker through SDL's JNI environment. */
+    public OnlineStream onlineStream() { return new OnlineStream(); }
+
     /** Starts the launcher open (RomActivity's: the icon's ROMs shortcut). */
     static final String EXTRA_LAUNCHER = "launcher";
     static final int PICK_FOLDER = 1, PICK_FILES = 2;

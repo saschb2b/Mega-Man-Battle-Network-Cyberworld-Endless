@@ -93,6 +93,8 @@
 #define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
+#define BN6_TAKE_CHIPS        0x08021B93u /* TakeChips (chip, code, count): a settled Net Square trade's chip out of the Pack */
+
 /* The pack (eToolkit +0x4C, BN6_TOOLKIT_PACK) and its extension */
 #define BN6_PACK_IDS          320         /* the pack's ids (0x02002230 to 0x02003130; the key items' counts from 0x02003134) */
 #define BN6_PACK_ENTRY        12          /* a pack entry's bytes (CHIP_PACK_ENTRY): a count per code of the chip's record's four first */
@@ -119,6 +121,15 @@
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
+#define BN6_NAVI_FOLDER2_REG  (BN6_NAVI_STATS + 0x2F) /* Folder2Reg: the second folder's Regular chip, its entry; 0xFF none (bn6f NaviStats) */
+#define BN6_NAVI_FOLDER2_TAG  (BN6_NAVI_STATS + 0x58) /* Folder2Tag1 and Tag2: its TagChips, their entries; 0xFF none */
+#define BN6_NAVI_FOLDER2_TAG2 (BN6_NAVI_STATS + 0x59)
+
+/* BN6's blank chip records below its last id, 0x13F (docs/ROM_DATA.md, the
+ * chip records and the chip registry): no chip of BN6's, where BN5's chips
+ * are installed when its ROM is there. A rule of BN6's alone, so two games
+ * agree on it whatever ROMs each has (the Net Square's trades and Arena). */
+#define BN6_CHIP_BLANK(id) (((id) >= 203 && (id) <= 220) || ((id) >= 291 && (id) <= 300) || (id) == 314)
 
 /* BN6's sorts (bn6f sub_8120018, Gregar 0x08121DF4; the keys bn6f
  * sub_811FE7C's): seven keys, ID, ABCDE, Code, Attack, Element, No., MB, each

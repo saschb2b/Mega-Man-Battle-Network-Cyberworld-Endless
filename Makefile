@@ -46,7 +46,7 @@ GEN := $(OUT)/gen
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
@@ -85,7 +85,7 @@ MGBA_LICENSE := $(IOS_DEPS)/share/licenses/mGBA.txt
 IOS_FLAGS := -arch arm64 -isysroot $(shell xcrun --sdk $(IOS_SDK) --show-sdk-path) \
              $(if $(filter iphonesimulator,$(IOS_SDK)),-mios-simulator-version-min=14.0,-miphoneos-version-min=14.0)
 CFLAGS += $(IOS_FLAGS) -DCW_IOS $(patsubst -I%,-isystem %,$(shell $(IOS_DEPS)/bin/sdl2-config --cflags))
-OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o
+OBJS += $(OUT)/obj/core/ios.o $(OUT)/obj/core/ios_saves.o $(OUT)/obj/analytics/analytics_apple.o $(OUT)/obj/online/online_apple.o
 endif
 # the Flatpak (linux/flatpak/): the runtime's SDL2, the manifest's mGBA in /app
 ifeq ($(TARGET),flatpak)
@@ -116,7 +116,7 @@ endif
 # drives the frames, files kept in IndexedDB
 ifeq ($(TARGET),web)
 CFLAGS := $(filter-out -g,$(CFLAGS)) -sUSE_SDL=2 -DDISABLE_THREADING
-LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js \
+LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js -lwebsocket.js \
           -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sFORCE_FILESYSTEM=1 -sENVIRONMENT=web \
           -sEXPORTED_RUNTIME_METHODS=callMain,ccall,FS,IDBFS,addRunDependency,removeRunDependency -sEXPORT_NAME=Module \
           -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused,_cw_saves_open,_cw_saves_import
@@ -221,7 +221,7 @@ TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
 $(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -c -o $@ $<
 build/host/test_core: $(TEST_OBJS)
 	@mkdir -p build/host
 	$(CC_host) $(TEST_SAN) -o $@ $(TEST_OBJS) -lm
@@ -230,9 +230,9 @@ build/host/test_core: $(TEST_OBJS)
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
@@ -258,6 +258,49 @@ build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm
 
+# Only the ROM-free comparators are retained from tiles.c in this test.
+build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
+		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
+
+NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_identity.c \
+	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
+build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \
+		-o $@ $(NETWORK_TEST_SRCS) $(shell pkg-config --libs sdl2) -lm
+
+ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/online/square_plan.c src/core/compat.c
+build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online/square_plan.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)
+
+# the Arena's ROM-free parts: its keys' buffer, the local link, a carried MegaMan checked and written,
+# its messages on the wire and the network's link (issue #120)
+ARENA_TEST_SRCS := tests/test_arena.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
+	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c
+build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h \
+	src/online/arena_format.h \
+	src/online/arena_wire.h src/online/arena_link_net.h shared/online/protocol.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -Ishared/online -o $@ $(ARENA_TEST_SRCS)
+
+LEGACY_TEST_SRCS := tests/test_legacy.c src/core/save_legacy.c src/core/rng.c src/core/compat.c
+build/host/test_legacy: $(LEGACY_TEST_SRCS)
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -o $@ $(LEGACY_TEST_SRCS)
+
+build/host/test_online_frame_wire: tests/test_online_frame_wire.c tools/online_frame_wire.c tools/online_frame_wire.h
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
+		-Itools -o $@ tests/test_online_frame_wire.c tools/online_frame_wire.c
+
 # the maps' Mystery Data lists as mapslot.c leaves them, in a made-up ROM's
 # tables (issue #122)
 TEST_MAPSLOT_SRCS := tests/test_mapslot.c src/map/mapslot.c src/map/lz.c src/emu/flags.c
@@ -266,23 +309,69 @@ build/host/test_mapslot: $(TEST_MAPSLOT_SRCS) src/*/*.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_MAPSLOT_SRCS)
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_mapslot
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire build/host/test_mapslot
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
 	build/host/test_saves
+	build/host/test_tiles_order
+	build/host/test_network
+	build/host/test_online
+	build/host/test_arena
+	build/host/test_legacy
+	build/host/test_online_frame_wire
 	build/host/test_mapslot
 .PHONY: test
+
+# Native transport runtime checks use the same platform sources as the game.
+TRANSPORT_TEST_SRCS := tests/test_online_transport.c src/online/online_transport.c src/online/online_wire.c \
+	src/online/online_socket.c src/online/online_stream.c src/online/online_windows.c \
+	src/online/network_identity.c src/core/rom.c
+TRANSPORT_PROBE := $(OUT)/online-transport-probe$(if $(filter windows,$(TARGET)),.exe)
+$(TRANSPORT_PROBE): $(TRANSPORT_TEST_SRCS) src/online/*.h shared/online/protocol.h
+	@mkdir -p $(@D)
+	$(CC) $(filter-out -MMD -MP,$(CFLAGS)) -ffunction-sections -fdata-sections -o $@ $(TRANSPORT_TEST_SRCS) \
+		$(filter-out -mwindows,$(LDLIBS)) $(if $(filter macos,$(TARGET)),-Wl$(comma)-dead_strip,-Wl$(comma)--gc-sections) \
+		$(if $(filter windows,$(TARGET)),-mconsole)
+
+comma := ,
+online-transport: $(TRANSPORT_PROBE)
+.PHONY: online-transport
+
+# The production Arena's base (docs/ONLINE_LINK.md): BN6's Practice on one
+# linked pair of cores, the input wire, and a complete snapshot of the pair.
+# Linux only, mGBA's Release library (NDEBUG) from the build image.
+ONLINE_PAIR_SRCS := tools/online_pair_run.c tools/online_frame_pair.c tools/online_frame_wire.c \
+	tools/online_link_script.c tools/online_replay_execute.c tools/online_replay_snapshot.c
+build/host/online-pair: $(ONLINE_PAIR_SRCS) $(wildcard tools/online_*.h)
+	@mkdir -p $(@D)
+	$(CC_host) -std=c11 -O2 -g -DNDEBUG -D_DEFAULT_SOURCE $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		$(addprefix -I,$(SRC_DIRS)) -isystem /opt/mgba/host/include $(ONLINE_PAIR_SRCS) \
+		/opt/mgba/host/lib/libmgba.a -lpthread -lm -o $@
+
+online-pair: build/host/online-pair
+
+server:
+	python3 server/build.py
+
+server-test:
+	python3 -m unittest discover -s server/tests
+
+.PHONY: online-pair server server-test
 
 # the tests' link as build.py lint reads it: which of the game's functions
 # they reach (each source compiled on its own, so the linker names it)
 LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
 LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
+LINT_TRANSPORT_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRANSPORT_TEST_SRCS))
 build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
+
+build/lint/test_online_transport: $(LINT_TRANSPORT_OBJS)
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(shell pkg-config --libs sdl2) -lpthread -lm

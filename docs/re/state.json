@@ -1,0 +1,247 @@
+{
+  "schema": "re-status/1",
+  "written_by": "tools/re_status.py from docs/re/ledger.json",
+  "project": "Cyberworld Endless: online Net Squares (epic #120)",
+  "updated": "2026-10-18",
+  "previous": "2026-10-17",
+  "features": [
+    {
+      "name": "Net Square",
+      "state": "reworking",
+      "now": "Presence works: the server, the transports on every system, and a prototype Square where other players walk as NPCs.",
+      "left": "Move the way in to a gate in Lan's HP, rebuild the Square from BN6's own pieces, and make the people in it talkable.",
+      "updated": "2026-10-18",
+      "link": "../ONLINE.md",
+      "state_text": "Works, being reworked"
+    },
+    {
+      "name": "Trade",
+      "state": "designed",
+      "now": "Designed: counters at Trade Central in the Square, the server commits a trade, and the swap is applied after the visit returns, with BN6's own give and take chips.",
+      "left": "All of it: the counters, the server's commit, the swap in the live game, and a pending file that holds CONTINUE until the trade settles.",
+      "updated": "2026-10-18",
+      "link": null,
+      "state_text": "Designed, not built"
+    },
+    {
+      "name": "Arena",
+      "state": "proven",
+      "now": "NetBattles from the Net Square between two games, each running both linked cores, only keys crossing the server, the pair hashed every 60 frames. Full rules for two games with BN5's ROM: BN5's installs written down as the game's core makes them and made again in both pair cores, BN5's chips and Souls carried; UNITE's Soul carried to the other GBA by the pair. Proven on two clients: MrkCan1 and KnightSoul on both screens with every hash agreeing.",
+      "left": "The other five Souls, Chaos Unison, ColonelSoul's button and BN5's mood in a NetBattle seen on both GBAs; a marker that wanders against a moving target checked against BN5; rollback.",
+      "updated": "2026-10-18",
+      "link": "../ONLINE_ARENA.md",
+      "state_text": "Proven in research, not built"
+    }
+  ],
+  "decisions": [],
+  "since": [
+    {
+      "date": "2026-10-18",
+      "what": "The trade machinery and the save gate it put on every run came out of the game; Trade starts again from its design."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "The Arena research was trimmed to what the production Arena builds on: the linked pair, the input wire, the Practice script and the pair's snapshot. `build.py online-pair` runs them."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "The link cable's findings are one page, docs/ONLINE_LINK.md."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "This status is written by tools/re_status.py from docs/re/ledger.json."
+    },
+    {
+      "date": "2026-10-18",
+      "what": "Full rules: the Arena's pair holds BN5's installs (src/emu/xinstall_log.c) and carries a united Soul to the other GBA (src/online/arena_souls.c)."
+    }
+  ],
+  "experiments": [
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "Inputs only, two cores per client",
+      "result": "Completes at 0, 50, 100 and 150 ms one-way delay, every battle timer as the original; a flipped input and a killed peer both stop the fight.",
+      "meaning": "The Arena's design: each client runs both games, only inputs travel.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "Snapshot of the pair",
+      "result": "Restored at six points and replayed 1, 4 and 8 frames, twice each: every replay exact; 863,016 bytes, 1.2 ms a restore on the desktop.",
+      "meaning": "Rollback is possible, but only with more than mGBA's own state save.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "A carried chip in the pair",
+      "result": "Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice.",
+      "meaning": "A run's chip fights natively; the installer for a whole loadout is still to build.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "BN5 in both pair cores, two clients",
+      "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
+      "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
+      "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "UNITE across the cable",
+      "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
+      "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
+      "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Two games through the hosted server",
+      "result": "The same room built from seed 120 on both; 211 peer positions matched; round trips 33 to 49 ms; both MegaMen back unchanged, all 24 checkpoint files unchanged.",
+      "meaning": "Presence over the public internet works, and a visit leaves the save alone.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Sixteen games, two full channels",
+      "result": "10,248 peer positions matched; every game's loadout back after a disconnect; 192 checkpoint files unchanged.",
+      "meaning": "A full room holds on one machine; not a measure of handhelds or a busy network.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Browser and native game together",
+      "result": "Both built the same room; 578 browser and 592 native peer positions matched.",
+      "meaning": "The browser build can share a Square with the native ones.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-15",
+      "name": "Retroid Pocket Nova on the public server",
+      "result": "Same room as a desktop peer; 189 handheld positions matched; round trips 40 to 47 ms; a 1,000 HP checkpoint back unchanged.",
+      "meaning": "The PortMaster build visits as the desktop does; the only physical handheld tried.",
+      "link": "../ONLINE.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "ROM-free cable on every desktop and the Nova",
+      "result": "256 transfers and all 1,024 received words right on Linux, Windows x64, macOS ARM64 and the Nova.",
+      "meaning": "mGBA's lockstep cable links two cores on every system tried.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "Practice on one pair of cores",
+      "result": "BN6's Practice unpatched: 18,855 serial transfers, 100 to 0, both back at the menu, all 1,433 battle frames agreeing.",
+      "meaning": "BN6's own NetBattle runs on two linked cores without help.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "Serial words sent over a socket",
+      "result": "Completes at no delay; at 50, 100 and 150 ms only 95, 48 and 35 battle frames in a minute.",
+      "meaning": "The cable cannot be split across the network.",
+      "link": "../ONLINE_LINK.md"
+    },
+    {
+      "feature": "Trade",
+      "date": null,
+      "name": "Spare chips read from the Pack",
+      "result": "Six folder scenarios through BN6's own folder editor agreed with the reader; six planted faults caught.",
+      "meaning": "Which copies are spare (the Pack less every folder's copies) can be read exactly; the rule is kept at commit 7b4b8ef.",
+      "link": null
+    }
+  ],
+  "method": {
+    "target": "BN6 Gregar USA, SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, on mGBA 0.10.5 (docker/mgba.sh pins its source)",
+    "oracle": "The unpatched game on a fresh pair of cores from the same boot-3.state, run again for each experiment",
+    "rules": [
+      "The player's ROM is only read; saves, states and traces stay under .build/.",
+      "Network work runs against the project's own server and the developer's own games, never anyone else's service or account.",
+      "No masks: a difference between the original and ours is explained or it fails.",
+      "No Tango code is read or used."
+    ],
+    "records": [
+      {
+        "what": "ROM offsets and how to re-check them",
+        "where": "docs/ROM_DATA.md, src/emu/bn6*.h"
+      },
+      {
+        "what": "Claims about the games and their sources",
+        "where": "docs/SOURCES.md"
+      },
+      {
+        "what": "What is original, generated or adapted",
+        "where": "docs/FIDELITY.md"
+      },
+      {
+        "what": "The link cable and the Arena",
+        "where": "docs/ONLINE_LINK.md"
+      },
+      {
+        "what": "The Net Square, its server and transports",
+        "where": "docs/ONLINE.md, server/README.md"
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "Net Square",
+      "meaning": "The online place players visit between acts; other players walk in it as NPCs."
+    },
+    {
+      "term": "Lan's HP",
+      "meaning": "BN6's own homepage map, where MegaMan arrives after every act; the Square's gate is to stand there."
+    },
+    {
+      "term": "Trade Central",
+      "meaning": "The Square's counters where two players are to swap chips."
+    },
+    {
+      "term": "Arena",
+      "meaning": "NetBattles between players, BN6's own fights over the network."
+    },
+    {
+      "term": "Pair",
+      "meaning": "Two mGBA cores joined by an emulated link cable, both games running on one client."
+    },
+    {
+      "term": "Practice",
+      "meaning": "BN6's NetBattle choice that costs no chip; the fight every experiment scripts."
+    },
+    {
+      "term": "Delay-based",
+      "meaning": "Each frame waits until both players' inputs for it have arrived."
+    },
+    {
+      "term": "Rollback",
+      "meaning": "Run ahead on a guessed input, then rewind to a snapshot and replay when the real one arrives."
+    },
+    {
+      "term": "Snapshot",
+      "meaning": "Everything needed to resume the pair exactly: both cores, both flash saves, the cable."
+    },
+    {
+      "term": "Oracle",
+      "meaning": "The unchanged original, run the same way, that ours is compared against."
+    },
+    {
+      "term": "Planted fault",
+      "meaning": "A deliberate break, to show the comparison catches it."
+    },
+    {
+      "term": "boot-3.state",
+      "meaning": "The game's own state after boot, before a run changes anything; made on each machine, never committed."
+    }
+  ]
+}

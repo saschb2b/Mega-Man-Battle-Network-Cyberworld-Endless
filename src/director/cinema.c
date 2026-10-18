@@ -95,9 +95,9 @@ uint32_t cinema_keys(uint32_t keys) {
 	if (C.input == CINEMA_HOLD) return 0;
 	if (C.input == CINEMA_TALK) {
 		C.b_latch &= (keys & KEY_B) != 0;
-		/* (left and right too, for a question's Yes and No: MegaMan is held
-		 * while it runs, talk.c) */
-		return keys & (C.b_latch ? KEY_A : KEY_A | KEY_B | KEY_LEFT | KEY_RIGHT);
+		/* (the pad too, for a question's Yes and No and a column of options,
+		 * the Net Square's: MegaMan is held while it runs, talk.c) */
+		return keys & (C.b_latch ? KEY_A : KEY_A | KEY_B | KEY_LEFT | KEY_RIGHT | KEY_UP | KEY_DOWN);
 	}
 	if (C.input == CINEMA_WALK) return C.walk;
 	return keys;

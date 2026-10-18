@@ -1,0 +1,39 @@
+/* What is said at the Net Square's gate in Lan's HP (gate_words.c,
+ * docs/HOME.md piece 11, docs/ONLINE.md, docs/VOICE.md): its keeper, a
+ * Mr.Prog, and MegaMan. */
+#ifndef CW_GATE_WORDS_H
+#define CW_GATE_WORDS_H
+
+#include <stdbool.h>
+
+#include "online_visit.h"
+
+/* The keeper's options when talked to (ta_choose's three). */
+#define GATE_OPTIONS 3
+extern const char *const gate_options[GATE_OPTIONS];
+
+/* The keeper talked to: who he is, where the gate leads (`server` a host
+ * name, NULL the official Square), then his question over the options. */
+const char *gate_keeper_hello(const char *server);
+const char *gate_keeper_ask(void);
+/* ... and his answers: the gate set to the official Square; B. */
+const char *gate_keeper_official(void);
+const char *gate_keeper_bye(void);
+/* ... the gate set to `server` (a host name); the name `name` saved. */
+const char *gate_keeper_set(const char *server);
+const char *gate_keeper_named(const char *name);
+/* The gate stepped on with no name yet: the keeper asks for one. */
+const char *gate_keeper_name_first(void);
+/* The first time the gate leads to a server: what that server sees, and
+ * his question (talk_ask's). */
+const char *gate_keeper_privacy(void);
+const char *gate_keeper_privacy_question(void);
+/* MegaMan's question on the gate, the way known. */
+const char *gate_question(void);
+/* The checkpoint before a visit not written: MegaMan stays. */
+const char *gate_save_failed(void);
+/* How a visit ended (online_visit.h), said at the gate after it, and
+ * whose face says it (FACE_*); NULL nothing to say. */
+const char *gate_end_words(VisitEnd why, int *face);
+
+#endif

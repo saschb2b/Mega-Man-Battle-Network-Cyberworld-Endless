@@ -88,7 +88,12 @@ space it fills, BN6's own words and instructions it changes, RAM it keeps
 patched, the instructions its hooks stand on, and every other hook's), a
 write or hook over another's bytes told on stderr (`CYBERWORLD_EMU_DEBUG`
 prints the count: "claims: 105 ranges of 5 writers ..., 0 over
-another's"):
+another's"). BN5's tracks' installs (`xinstall_core`) and the chip
+registry's (`xchips_install`) and the Souls' are written down as they are made too
+(`src/emu/xinstall_log.c`): every byte they write into the ROM copy and
+every hook they set, in their order, which the Arena's cores take under
+full rules (docs/ONLINE_ARENA.md, Full rules); not kept on the 3DS or in
+the browser, which have no Arena:
 
 | Offset | Contents | Code |
 | --- | --- | --- |
@@ -106,7 +111,7 @@ another's"):
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
-| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
+| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), the Net Square gate keeper's (1536 bytes, written again as the player's Square settings change), the gate's NPC script (its animation byte the director writes) and its keeper's, his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
 | `+0x14C000`-`+0x150000` | Lan's house's and room's: their empty NPC lists and map scripts, their own warp lists (BN6's doors copied in), the room's jack-in table and the music list | `mapslot.c`, `lan_house.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 | `+0x152000`-`+0x153000` | The map-name label's archive: a copy of the game's with its 244 names pointed at where the run is ("Layer 12", "ACDC Town"); its other scripts (the PET's HP, zenny and BugFrags, 0xF0-0xF2) kept | `director_layer.c` |
@@ -396,7 +401,20 @@ set while Lan's HP's link on the left and down front is no way back,
 which sends their way-back marks off, piece 2; `0x1472` that the
 courier has been heard, which his words set and which sends his burst
 off, piece 2; `0x146B` that this visit's order was
-made at AsterLand's counter, piece 6).
+made at AsterLand's counter, piece 6; `0x1473` the Yes of the Net
+Square's gate's questions and `0x1474`-`0x1476` its keeper's options,
+the official Square, another server and the name, piece 11, which the
+director clears as each visit home begins). In the Net Square itself,
+whose RAM is thrown away on the way home, `0x1480`-`0x14C3` are its own:
+the phrases and emotes asked for (`0x1480`-`0x148D`), the channel
+keeper's next and last (`0x148E`, `0x148F`), a peer's wave, mute and
+block (`0x1490`-`0x1492`), the way home (`0x1493`), Trade Central's
+options and the Navi picked (`0x1494`-`0x149F`), a NetBattle asked for
+and the Yes to one (`0x14A0`, `0x14A1`), the folder a NetBattle carries
+(`0x14A2`-`0x14A4`), and the spare picked from the clerk's chat-box list
+(`0x14B0`-`0x14C3`); docs/ONLINE.md. Its life
+(`square_life.c`: the walkers, the log-in beam, the cheer, the greeter's
+and the referee's words) takes none.
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 
@@ -673,7 +691,13 @@ function replacement), while BN6's code stays the ROM's.
   (`tests/test_emu.c`: one address hooked on both, each core's frames
   running its own hook alone, reading its own memory). Two
   cores' hooks run one core's frame at a time (the differential's
-  frames run on the thread BN6's do).
+  frames run on the thread BN6's do), but for the Arena's pair under
+  full rules (docs/ONLINE_ARENA.md, Full rules), whose two cores take
+  BN5's installs' hooks on tables of their own (`xinstall_log.c`) and
+  step an instruction at a time in turn: what a hook keeps between two
+  of its calls is kept one a core (`hook_slot`: `xsea.c`'s and
+  `xpanels.c`'s way back through their stubs, `soulchaos.c`'s charge
+  stepped), and so are the Souls UNITE offers (`soulunite_held_core`).
 
 The hooks in use (`src/director/encounter.c`; docs/ROM_DATA.md):
 
@@ -879,8 +903,13 @@ it reads them), the patch made again as the state is loaded, and bytes
 that read neither left alone. Last, the installers' claims through
 `emu.c`'s writes and hooks (`src/emu/claims.c`): an installer's bytes its
 own, another's write over them told, a write outside any installer
-nobody's, and a hook set on an installer's bytes told. `build.py test`
-runs it with the address and undefined-behaviour sanitizers, as CI does.
+nobody's, and a hook set on an installer's bytes told. Then the
+installs' record (`src/emu/xinstall_log.c`): its bytes in another core's
+ROM copy (the ROM's alone, the mirror's at its byte, RAM's and those
+outside the record left out), its hooks on that core's own table, each
+reading the core it runs on, its hash the same once it ends. `build.py
+test` runs it with the address and undefined-behaviour sanitizers, as CI
+does.
 
 ## Testing
 

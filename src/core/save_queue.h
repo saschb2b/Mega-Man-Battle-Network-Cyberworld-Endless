@@ -25,5 +25,10 @@ void save_queue_quit(void);
 /* The bytes written to `path` now, beside it and then renamed over it
  * (the queue's own way, and the callers' where it takes nothing) */
 bool save_file_write(const char *path, const void *data, size_t n);
+/* Monotonic failure sequence, including the worker's writes. Wait before
+ * taking a baseline and after the group of files whose success matters. */
+unsigned save_write_failures(void);
+/* A caller could not produce a file to give the queue. */
+void save_write_failed(void);
 
 #endif

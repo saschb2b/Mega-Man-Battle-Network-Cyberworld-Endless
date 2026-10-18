@@ -73,6 +73,14 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 their walls and triggers, and the game
                                 warped through them, in .build/world
   python3 build.py test         ROM-free unit tests
+  python3 build.py server       build the ROM-free server zipapp
+  python3 build.py server-run   run the built server (arguments follow)
+  python3 build.py server-test  server/protocol tests, without game dependencies
+  python3 build.py online-pair --rom PATH --state PATH
+                                BN6's Practice NetBattle on one linked pair of
+                                cores, a snapshot of the pair restored and
+                                replayed midway (docs/ONLINE_LINK.md; the ROM
+                                and a boot-3.state, both read-only)
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -2012,7 +2020,7 @@ def lint_analyzer(update):
     from collections import Counter
     # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
     # line naming their function, so files' lines must not interleave)
-    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
               'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
@@ -2054,11 +2062,15 @@ def lint_dead(update):
                               f'{nm} -A -g --defined-only {out}/obj/*/*.o'], capture_output=True, text=True)
         links[target] = run.stdout
     ensure_image()
+    test_bins = ' '.join('build/lint/' + name for name in
+                         ('test_core', 'test_emu', 'test_online_transport'))
     test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                           ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
-                           'sh', '-c', f'rm -f build/lint/test_core build/lint/test_emu; '
-                           f'make -j{os.cpu_count() or 4} build/lint/test_core build/lint/test_emu 2>&1 >/dev/null; '
-                           'nm -A -g --defined-only build/lint/test/src/*/*.o'], capture_output=True, text=True)
+                           'sh', '-c', f'rm -f {test_bins} && '
+                           f'make -j{os.cpu_count() or 4} {test_bins} 2>&1 >/dev/null && '
+                           f'nm -A -g --defined-only build/lint/test/src/*/*.o {test_bins}'], capture_output=True, text=True)
+    if test.returncode:
+        sys.exit(f'the test links for build.py lint failed:\n{(test.stdout + test.stderr)[-1200:]}')
     links['tests'] = test.stdout
     reached, present = set(), set()
     for target, text in links.items():
@@ -2074,7 +2086,14 @@ def lint_dead(update):
         if not here:
             sys.exit(f'the {target} link for build.py lint gave nothing to read:\n{text[-600:]}')
         present |= here
-        reached |= here - dropped
+        if target == 'tests':
+            # A shared object can be dropped by one test and reached by
+            # another. The union of discarded sections loses that fact;
+            # the final executables say which public functions survive.
+            linked = set(re.findall(r'^build/lint/test_\w+:[0-9a-f]* T (\w+)$', text, re.MULTILINE))
+            reached |= {(f, n) for f, n in here if n in linked}
+        else:
+            reached |= here - dropped
     dead = Counter(f'{f}: {n}' for f, n in present - reached if n != 'main')
     return lint_compare('functions no build reaches', 'dead.txt',
                         'functions no build reaches (the host and handheld builds and the tests, build.py lint):\n'
@@ -2267,7 +2286,7 @@ def lint_headers():
         if first != f'#include "{own}"':
             bad.append(f'{os.path.relpath(c, ROOT)}: includes {first or "nothing"} before its own {own}')
     build('host')   # (its version.h)
-    script = ('for h in src/*/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP '
+    script = ('for h in src/*/*.h shared/online/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include -Wno-pragma-once-outside-header -x c "$h" 2>&1 | grep -q "error" && echo "$h"; done; true')
     out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
@@ -2311,22 +2330,58 @@ def lint(update=False):
     return 0 if ok else 1
 
 
+def online_pair(rest):
+    """BN6's Practice on one linked pair of cores, with a snapshot restored
+    and replayed midway (tools/online_pair_run.c, docs/ONLINE_LINK.md)."""
+    ap = argparse.ArgumentParser(prog='build.py online-pair')
+    ap.add_argument('--rom', required=True, help="the player's BN6 Gregar USA ROM")
+    ap.add_argument('--state', required=True, help='a boot-3.state from a data folder')
+    ap.add_argument('--at', type=int, default=1150, help='the frame the snapshot is taken at')
+    ap.add_argument('--horizon', type=int, default=8, help='the frames replayed after the restore')
+    args = ap.parse_args(rest)
+    for path in (args.rom, args.state):
+        if not os.path.isfile(path):
+            ap.error(f'not a file: {path}')
+    ensure_image()
+    code = docker('make', 'online-pair', *(['WERROR=1'] if os.environ.get('CI') else []))
+    if code:
+        return code
+    out = os.path.join(ROOT, '.build', 'online-pair')
+    os.makedirs(out, exist_ok=True)
+    return docker('build/host/online-pair', '/pair/rom.gba', '/pair/boot.state', '/src/.build/online-pair/trace',
+                  str(args.at), str(args.horizon),
+                  mounts=[(os.path.abspath(args.rom), '/pair/rom.gba:ro'), (os.path.abspath(args.state), '/pair/boot.state:ro')])
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
+    if a.action == 'server-test':
+        sys.exit(subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests', *a.rest], cwd=ROOT))
+    if a.action in ('server', 'server-run'):
+        code = subprocess.call([sys.executable, os.path.join(ROOT, 'server', 'build.py')], cwd=ROOT)
+        if code == 0 and a.action == 'server-run':
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'build', 'server', 'cyberworld-server.pyz'), *a.rest], cwd=ROOT)
+        sys.exit(code)
+    if a.action == 'online-pair':
+        sys.exit(online_pair(a.rest))
     if a.action == 'clean':
         shutil.rmtree(os.path.join(ROOT, 'build'), ignore_errors=True)
         return
     if a.action == 'test':
         ensure_image()
         code = docker('make', 'test', f'-j{os.cpu_count() or 4}', *(['WERROR=1'] if os.environ.get('CI') else []))
-        # (linux/steam/add-to-steam.py and the site's pages, on the host's Python)
+        # (linux/steam/add-to-steam.py, the site's pages and docs/re's status, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
+        if code == 0:   # docs/re's status in step with its ledger
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
+        if code == 0:
+            code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
     if a.action == 'lint':
         ensure_image()
@@ -2421,6 +2476,8 @@ def main():
         sys.exit(tiles(*rest[:1], baseline='--baseline' in a.rest))
     if a.action in ('all', 'host', 'shot'):
         build('host')
+    if a.action == 'all':
+        subprocess.run([sys.executable, os.path.join(ROOT, 'server', 'build.py')], check=True)
     if a.action == 'asan':
         build('asan')
     if a.action in ('all', 'device', 'package'):

@@ -42,8 +42,9 @@ void director_dev_reveal(void) {
 }
 
 void director_dev_place(int x, int y, int face) {
-	/* (a test's step: MegaMan put down at world (x, y), facing 0-7) */
-	if (!director_on_map()) return;
+	/* (a test's step: MegaMan put down at world (x, y), facing 0-7; on
+	 * any map, the Net Square's too, where the director rests) */
+	if (!on_map()) return;
 	emu_write32(BN6_PLAYER_X, (uint32_t)x << 16);
 	emu_write32(BN6_PLAYER_Y, (uint32_t)y << 16);
 	emu_write32(BN6_PLAYER_NEXT_X, (uint32_t)x << 16);
@@ -288,6 +289,23 @@ int director_dev_chip(const char *spec) {
 		/* (BN6 draws a chip in a code its record lacks blank in battle: no picture, no code, no effect) */
 		ci.ncodes && !strchr(ci.codes, letter) ? ": a code its record lacks, blank in battle" : "");
 	return n;
+}
+
+bool director_dev_folder(int k) {
+	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if ((k != 2 && k != 3) || data < BN6_EWRAM || data + 3u * 2u * BN6_FOLDER_ENTRIES > BN6_EWRAM_END) {
+		printf("folder: %d is none (2 Folder 2, 3 the Extra folder), or the folders are not there\n", k);
+		return false;
+	}
+	for (uint32_t i = 0; i < 2u * BN6_FOLDER_ENTRIES; ++i)
+		emu_write8(data + (uint32_t)(k - 1) * 2u * BN6_FOLDER_ENTRIES + i, emu_read8(data + i));
+	if (k == 2) {
+		emu_write8(BN6_NAVI_FOLDER2_REG, emu_read8(BN6_NAVI_FOLDER1_REG));
+		emu_write8(BN6_NAVI_FOLDER2_TAG, emu_read8(BN6_NAVI_FOLDER1_TAG));
+		emu_write8(BN6_NAVI_FOLDER2_TAG2, emu_read8(BN6_NAVI_FOLDER1_TAG2));
+	}
+	printf("folder: the first folder copied into folder %d\n", k);
+	return true;
 }
 
 /* The battle step (a capture's "0:battle", play.py's battle): the layer's

@@ -47,6 +47,7 @@
 #include "platform.h"
 #include "save_queue.h"
 #include "thumb_reloc.h"
+#include "xinstall_log.h"
 #include "xvirus_dispatch.h"
 
 /* (what src/emu/emu.c takes from the platform: nothing is shown or kept) */
@@ -247,6 +248,51 @@ static void cores_apart(struct mCore *g) {
 	CHECK(emu_read32(IWRAM) == 20, "BN6's hook after the guest's detach: %u", emu_read32(IWRAM));
 }
 
+/* ---- the installs' record (xinstall_log.h): the Arena's pair under full rules ---- */
+
+/* What emu.c's writes and hooks put in BN6's core while an install records,
+ * made again in a core of the ROM's bytes (as arena_pair.c makes its two):
+ * the ROM's bytes in its copy, RAM's and those outside the record left
+ * out; the hooks on its own table, each reading the core it runs on; the
+ * record's hash the same for the same installs */
+static void recorded_installs(const uint8_t *rom, uint32_t *video) {
+	static uint8_t copy[ROM_SIZE];
+	static const uint8_t b[4] = { 1, 2, 3, 4 };
+	uint32_t seen = 0;
+	xlog_reset();
+	emu_write8(0x08000700u, 0x11);
+	xlog_begin();
+	emu_write(0x08000710u, b, sizeof b);
+	emu_write32(0x08000714u, 0x08070605u);
+	emu_write8(0x0A000720u, 0x22);   /* (the ROM's mirror: its byte at 0x08000720) */
+	emu_write8(0x02000100u, 0x33);
+	CHECK(emu_hook(0x080000E8, marked, &seen), "a recorded hook at 0xE8");
+	xlog_end();
+	uint64_t h = xlog_hash();
+	CHECK(xlog_bytes() == 9 && xlog_hooks() == 1 && h, "the record: %zu bytes, %d hooks, hash %016llx", xlog_bytes(), xlog_hooks(),
+		(unsigned long long)h);
+	memcpy(copy, rom, ROM_SIZE);
+	xlog_apply(copy, ROM_SIZE);
+	CHECK(copy[0x710] == 1 && copy[0x717] == 8 && copy[0x720] == 0x22 && copy[0x700] == rom[0x700] && copy[0xE8] == rom[0xE8],
+		"the record's bytes in the copy: %02x %02x %02x, outside %02x, the hook's place %02x", copy[0x710], copy[0x717], copy[0x720],
+		copy[0x700], copy[0xE8]);
+	struct mCore *c = guest_core(copy, video);
+	CHECK(c && xlog_hook_core(c), "the record's hooks on a core of their own");
+	if (c) {
+		c->reset(c);
+		c->rawWrite32(c, 0x02000000, -1, 0xC3C3C3C3u);
+		guest_run(c, 1);
+		CHECK(seen == 0xC3C3C3C3u, "the recorded hook read %08x in the other core, not its C3C3C3C3", seen);
+		hook_detach(c);
+		mCoreConfigDeinit(&c->config);
+		c->deinit(c);
+	}
+	emu_unhook(0x080000E8);
+	CHECK(xlog_hash() == h, "the record's hash changed after it ended");
+	xlog_reset();
+	CHECK(!xlog_hash() && !xlog_bytes(), "the record forgotten");
+}
+
 /* ---- the saves' files written off the frame (save_queue.c) ---- */
 
 /* a file's bytes, or NULL (*n its length) */
@@ -307,6 +353,17 @@ static void save_queue_checks(void) {
 	/* written at once, the same way */
 	uint8_t now[5] = { 62, 62, 62, 62, 62 };
 	CHECK(save_file_write(b, now, sizeof now) && file_is(b, 62, sizeof now), "a file written at once");
+	unsigned before = save_write_failures();
+	CHECK(!save_file_write(dir, now, sizeof now), "a directory cannot become a save");
+	CHECK(save_write_failures() != before, "a synchronous write failure is observable");
+	before = save_write_failures();
+	CHECK(save_queue_file(dir, filled(63, 10), 10), "a failing write can still be accepted by the queue");
+	save_queue_wait();
+	CHECK(save_write_failures() != before, "a worker failure is observable after wait");
+	before = save_write_failures();
+	CHECK(save_queue_file(a, filled(64, 10), 10), "a later write can recover");
+	save_queue_wait();
+	CHECK(save_write_failures() == before && file_is(a, 64, 10), "a successful group has no new failures");
 	save_queue_quit();
 	remove(a);
 	remove(b);
@@ -419,6 +476,7 @@ static void two_cores(void) {
 		rmdir(sdir);
 	}
 	cores_apart(g);
+	recorded_installs(rom, video);
 	emu_unhook(0x080000F8);
 	mCoreConfigDeinit(&g->config);
 	g->deinit(g);

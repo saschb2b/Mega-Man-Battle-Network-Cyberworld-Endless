@@ -1,0 +1,22 @@
+# Only the server and its wire contract are built in. deploy/coolify/
+# (the Compose file and its server.ini) stays out: Coolify mounts that INI
+# read-only at run time.
+**
+!LICENSE
+!server/
+!server/**
+!shared/
+!shared/online/
+!shared/online/**
+**/__pycache__/
+**/*.pyc
+**/*.gba
+**/*.sav
+**/*.state
+server/server.ini
+server/*.jsonl
+**/server-data/**
+**/identity.key
+**/moderation.json
+**/moderation.lock
+**/players.json

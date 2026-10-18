@@ -171,6 +171,7 @@ static bool home_install(void) {
 	if (ok) {
 		home_jobs_flags();
 		home_courier_visit();
+		home_gate_visit();
 	}
 	return ok;
 }

@@ -22,12 +22,8 @@
 #ifdef HTTP_CURL
 
 #ifdef __3DS__
-#include <3ds/types.h>
-#include <3ds/result.h>
-#include <3ds/services/soc.h>
-#include <3ds/services/sslc.h>
+#include "network_3ds.h"
 #include <curl/curl.h>
-#include <malloc.h>
 
 #define CURL_DO(f) curl_##f
 #else
@@ -143,18 +139,10 @@ static int curl_once(const char *url, const char *agent, const char *body, SDL_a
  * has them already, start_3ds.c) and its SSL service, whose random bytes
  * mbedTLS draws from; taken at the first request, so a player who said no
  * never has them */
-#define SOC_SIZE 0x100000
-static bool soc_own, sslc_own, net_tried, net_up;
+static bool net_up;
 
 static bool net_3ds(void) {
-	if (net_tried) return net_up;
-	net_tried = true;
-	u32 *buf = memalign(0x1000, SOC_SIZE);
-	Result r = buf ? socInit(buf, SOC_SIZE) : -1;
-	soc_own = R_SUCCEEDED(r);
-	if (!soc_own) free(buf);
-	sslc_own = R_SUCCEEDED(sslcInit(0));
-	net_up = (soc_own || (buf && R_DESCRIPTION(r) == RD_ALREADY_INITIALIZED)) && sslc_own;
+	if (!net_up) net_up = network_3ds_begin();
 	return net_up;
 }
 #endif
@@ -176,7 +164,9 @@ bool analytics_http_post(const char *url, const char *agent, const char *body, S
 #endif
 	if (!begun) {
 		begun = true;
+#ifndef __3DS__
 		CURL_DO(global_init)(CURL_GLOBAL_DEFAULT);
+#endif
 	}
 	long code = 0;
 	int r = curl_once(url, agent, body, stop, roots, &code);
@@ -191,9 +181,8 @@ bool analytics_http_post(const char *url, const char *agent, const char *body, S
 
 void analytics_http_end(void) {
 #ifdef __3DS__
-	if (sslc_own) sslcExit();
-	if (soc_own) socExit();
-	sslc_own = soc_own = false;
+	if (net_up) network_3ds_end();
+	net_up = false;
 #endif
 }
 

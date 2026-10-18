@@ -173,34 +173,38 @@ static int xprops_objects(uint8_t *recs, int n, int max) {
 	return blockers_xprop(recs, n, max, cx, cy);
 }
 
+int layer_prop_objects(NpcList *npcs, const NetProp *p, int cz, uint8_t *recs, int n, int max) {
+	/* (its sprites first: a piece without its sprite would draw noise) */
+	bool loaded = true;
+	for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces; ++k)
+		if (prop_pieces[k].look == p->look) {
+			const uint8_t *e = R.data + OW_MAP_OBJECTS + prop_pieces[k].id * 16u;
+			loaded &= npc_need_sprite(npcs, e[0] / 4, e[1]);
+		}
+	if (emu_debug_on()) fprintf(stderr, "prop look %d at %d,%d%s%s\n", p->look, p->x, p->y, cz ? " (raised)" : "", loaded ? "" : " - no room for its sprite");
+	if (!loaded) return n;
+	int cx, cy;
+	netmap_world(p->x, p->y, &cx, &cy);   /* (the panel's centre, 16 in from its corner) */
+	for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces && n < max; ++k) {
+		if (prop_pieces[k].look != p->look) continue;
+		uint8_t *r = recs + n++ * 20;
+		memset(r, 0, 20);
+		r[0] = 5;   /* a map object, its handler looked up by its id */
+		put32(r + 4, (uint32_t)((int32_t)(cx - 16 + prop_pieces[k].dx) * 65536));
+		put32(r + 8, (uint32_t)((int32_t)(cy - 16 + prop_pieces[k].dy) * 65536));
+		put32(r + 12, (uint32_t)((int32_t)(cz + prop_pieces[k].dz) * 65536));
+		put32(r + 16, prop_pieces[k].id);
+	}
+	return n;
+}
+
 static uint32_t props_objects(NpcList *npcs) {
 	static uint8_t recs[(MAX_PROPS * 3 + 1 + RUSH_OBJECTS_MAX + MAX_BLOCKS + 1) * 20];
 	int n = 0;
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
 		if (p->kind != PROP_SPRITE) continue;
-		/* (its sprites first: a piece without its sprite would draw noise) */
-		bool loaded = true;
-		for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces; ++k)
-			if (prop_pieces[k].look == p->look) {
-				const uint8_t *e = R.data + OW_MAP_OBJECTS + prop_pieces[k].id * 16u;
-				loaded &= npc_need_sprite(npcs, e[0] / 4, e[1]);
-			}
-		if (emu_debug_on()) fprintf(stderr, "prop look %d at %d,%d%s%s\n", p->look, p->x, p->y, layer.cell[p->y][p->x] ? " (hole)" : "", loaded ? "" : " - no room for its sprite");
-		if (!loaded) continue;
-		int cx, cy;
-		netmap_world(p->x, p->y, &cx, &cy);   /* (the panel's centre, 16 in from its corner) */
-		int cz = layer.level[p->y][p->x] ? layer.rise : 0;
-		for (size_t k = 0; k < sizeof prop_pieces / sizeof *prop_pieces && n < MAX_PROPS * 3; ++k) {
-			if (prop_pieces[k].look != p->look) continue;
-			uint8_t *r = recs + n++ * 20;
-			memset(r, 0, 20);
-			r[0] = 5;   /* a map object, its handler looked up by its id */
-			put32(r + 4, (uint32_t)((int32_t)(cx - 16 + prop_pieces[k].dx) * 65536));
-			put32(r + 8, (uint32_t)((int32_t)(cy - 16 + prop_pieces[k].dy) * 65536));
-			put32(r + 12, (uint32_t)((int32_t)(cz + prop_pieces[k].dz) * 65536));
-			put32(r + 16, prop_pieces[k].id);
-		}
+		n = layer_prop_objects(npcs, p, layer.level[p->y][p->x] ? layer.rise : 0, recs, n, MAX_PROPS * 3);
 	}
 	n = xprops_objects(recs, n, MAX_PROPS * 3 + 1);
 	n = rush_objects(recs, n, MAX_PROPS * 3 + 1 + RUSH_OBJECTS_MAX);

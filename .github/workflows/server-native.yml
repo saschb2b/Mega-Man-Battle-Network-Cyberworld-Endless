@@ -1,0 +1,60 @@
+# The presence server's standalone builds, one per system it promises:
+# Linux x86-64 and ARM64, Windows x64, macOS Intel and Apple Silicon, each
+# frozen with the pinned PyInstaller on its own runner (PyInstaller does
+# not cross-compile), smoke-tested as a real process and uploaded as
+# server-TARGET; the Python zipapp is built beside Linux x86-64. A release
+# runs it (release.yml, on its tag); server.yml runs it by hand.
+name: Server native builds
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: The commit or tag to build (the caller's own by default)
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native server (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-22.04, architecture: x64, target: linux-x86_64}
+          - {runner: ubuntu-22.04-arm, architecture: arm64, target: linux-arm64}
+          - {runner: windows-2022, architecture: x64, target: windows-x64}
+          - {runner: macos-15-intel, architecture: x64, target: macos-x86_64}
+          - {runner: macos-15, architecture: arm64, target: macos-arm64}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13.16'
+          architecture: ${{ matrix.architecture }}
+          cache: pip
+          cache-dependency-path: server/requirements-build.txt
+      - name: Pinned server packaging tools
+        run: >-
+          python -m pip install --require-hashes --only-binary=:all: -r server/requirements-build.txt
+      - name: Server protocol and moderation tests
+        run: python -m unittest discover -s server/tests -v
+      # (its licences/ written from this runner's own licence files: server/notices.py)
+      - name: Native server and real process smoke
+        run: python server/release.py --native
+      - name: Python source bundle and real process smoke
+        if: matrix.target == 'linux-x86_64'
+        run: python server/release.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: server-${{ matrix.target }}
+          path: build/release/cyberworld-server-*.zip
+          if-no-files-found: error
+          retention-days: 14

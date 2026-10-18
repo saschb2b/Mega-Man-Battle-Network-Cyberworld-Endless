@@ -3,12 +3,18 @@
 
 #include "emu.h"
 #include "rom.h"
+#include "soulproxy.h"
+#include "soulunite.h"
 #include "xchips_code.h"
+#include "xchips_install.h"
+#include "xinstall_log.h"
 #include "xnavi_objects.h"
 #include "xsea.h"
 #include "xstrike.h"
 
 void xinstall_core(int families, int navis) {
+	/* (written down for the Arena's cores as they are made: xinstall_log.h) */
+	xlog_begin();
 	bool bn5 = emu_ready() && XR[XROM_BN5_COLONEL_US].data;
 	/* (BN5's engine objects moved once, before any install whose code runs one: the Navis', the chips' muzzle flashes, WuNote's
 	 * image) */
@@ -22,4 +28,15 @@ void xinstall_core(int families, int navis) {
 	/* (BN5's obstacle strike, a Navi Colonel's side's as ColonelSoul's: the Souls' moved code first, its soldier among it, which
 	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */
 	if (bn5 && navis == XNAVI_BN5) xstrike_install();
+	xlog_end();
+}
+
+bool xinstall_bn5(void) {
+	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
+	if (!xchips_install()) return false;
+	/* (the Souls' as game_hooks.c installs them, written down too) */
+	xlog_begin();
+	if (soulproxy_install(0)) soulunite_install(0, 0);
+	xlog_end();
+	return true;
 }

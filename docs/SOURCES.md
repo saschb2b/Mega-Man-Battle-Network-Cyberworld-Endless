@@ -100,6 +100,79 @@ pages searched for ディーラー, ショップ and 商人; the web for エグ�
 language (MMKB's, Wikipedia's and kamigame's area lists): the project's own
 takes BN3's シークレットエリア.
 
+## Net Square's NPC movement spike (issue #120)
+
+**Verified in the disassembly:** bn6f's `data/SpritePointersList.s`,
+`npcSpritePtrs[0x37]`, is MegaMan's overworld sprite (list 6). Its
+`include/bytecode/npc_script.inc` and `asm/npc.s` define the NPC commands
+a Square's other players are moved by: `0x08`/`0x09` show and hide an
+active NPC, `0x14` sets its position, `0x16` selects its animation, `0x10`
+waits and `0x02` jumps. `NPCCommand_set_animation` changes
+`AnimationSelect`, and the NPC's update compares it with
+`AnimationSelectUpdate` before it loads animation data, so writing the same
+animation again keeps its cadence.
+
+**Verified in the disassembly and in play** (15 October 2026): bn6f's
+`sub_300631C` projects an overworld point onto the screen from the
+camera's coordinates as `camera_doShakeEffect_80301e8` writes them
+(docs/ROM_DATA.md, Net Square name tags). Names drawn by it stay over their
+MegaMen as the camera scrolls.
+
+## Link battles (issue #120)
+
+**Verified by experiment** (15 October 2026): two plain Gregar cores linked
+by mGBA's SIO lockstep driver enter Single Battle, then Practice, from the
+PET's Comm menu and finish the battle with complementary results. The
+method and its limits are in [ONLINE_LINK.md](ONLINE_LINK.md).
+
+**Verified in the disassembly:** bn6f's
+`data/textscript/compressed/CompText86DA1B8.s` holds the Comm menu's
+Practice in scripts 17 and 25 and its Battle in 18 and 26. Its
+`eStruct200A008_setBattleResult` and `eStruct200A008_getBattleResult`
+write and read the byte at `BN6_BATTLE_RESULT`; in the linked battle it is
+1 for the winner and 2 for the loser.
+
+**Verified by experiment** (18 October 2026): a chip put in the folder by
+BN6's own means (a Cannon A acquired, then swapped in with the folder
+editor) is offered and used in a linked Practice battle: the first player
+selects it and deals its 40 damage before any buster shot
+([ONLINE_CARRIED.md](ONLINE_CARRIED.md)). The leads were bn6f's chip
+acquisition and folder-editor input handlers (`asm/asm02.s`,
+`asm/asm36.s`); the Custom screen's, the deck's and the hand's fields were
+checked again in Gregar. The folder editor ignores A while its side panel
+slides in.
+
+**Prior art, from its own documentation** (15 October 2026):
+[Tango](https://tango.n1gp.net/) offers rollback link play for every
+English and Japanese Battle Network game, with match replays and
+matchmaking by a shared link code. Only its site was read: no
+implementation was opened or copied, and the site establishes neither an
+algorithm nor a permission to reuse code.
+
+## Folders and chips, for trading (issue #120)
+
+**Verified by experiment on Gregar** (18 October 2026): the folder
+editor's Pack counts leave out the copies in both editable folders and in
+the ExtraFolder, and equipping the ExtraFolder from its EQUIP menu does
+not give its chips back to the Pack as spares. Six scenarios built in
+BN6's own folder editor agreed with a reader of the game's counts in RAM
+on every chip and code. The leads were bn6f's folder-menu and folder-copy
+paths (`asm32.s`, `asm36.s`), matched in Gregar by `tools/bn6f_match.py`.
+
+**Verified by experiment, the routines alone** (18 October 2026): BN6's
+chip removal and acquisition routines (bn6f's `asm/asm02.s`; their Trade
+caller in `data/dat33.s`; both matched in Gregar by
+`tools/bn6f_match.py`), run on the emulated CPU. A new incoming chip
+changes its count, its ownership mark, its Library bit and its
+acquisition-order stamp, and the shared next-stamp counter goes down by
+one. Their Gregar addresses and how to check them again were in
+docs/ROM_DATA.md at `7b4b8ef`, taken out with the trade code.
+
+**Not verified:** a whole two-player chip trade over BN6's own link. Three
+attempts stalled before one completed (`docs/re/trade-stage-link-attempts.md`
+at `7b4b8ef`), so the routines' result says nothing of the cable exchange,
+its save or its recovery.
+
 ## Learned from players
 
 | What | Who, where | Verified |

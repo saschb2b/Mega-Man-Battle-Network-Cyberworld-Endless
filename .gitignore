@@ -10,9 +10,19 @@ tools/romlab/romlab.bin
 *.sav
 *.srm
 *.ss
+*.state
 *.dat
 rom/
 savedata/
+network.ini
+network.ini.tmp
+network-people.ini
+network-people.ini.tmp
+
+# A host's private settings and optional evidence logs are not distribution files.
+/server/server.ini
+/server/*.jsonl
+/server-data/
 
 # the Android app's build (build.py android)
 android/.gradle/

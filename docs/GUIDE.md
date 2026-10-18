@@ -734,6 +734,80 @@ A file from a newer version of the game, a damaged one, or a run that
 needs BN5 where **BN5 Team Colonel (USA)** is missing (always on the 3DS)
 is refused, and your saves stay as they were.
 
+### Online: the Net Square
+
+Other players' MegaMen meet in a **Net Square**, a net of its own on a
+server. The way there is the great white gate at the front of Lan's HP,
+the room MegaMan comes home to after each act and where every run
+begins. Step on it: the first time, the Mr.Prog who keeps it asks for
+the name other players will see and says what the server learns (your
+PET's address, that name, and MegaMan as he is), and asks before you go,
+the cursor on **No**. After that MegaMan asks each time. Yes saves the
+run right there, and you go; the gate flickers while the server answers,
+and B calls it off.
+
+Nothing in the Square changes your run: no battles of the net, no heal,
+no shop, no saves. Coming home puts MegaMan back on the gate, exactly as
+he was; closing the game in the Square does the same at the next
+CONTINUE. The one thing that comes home with you is a chip you traded.
+
+The Square is a plaza with a landmark in its middle (a statue, a
+monument or a giant cybertree, by the server), a stage up a stair, the
+log-in plaza with its board and the pad home, Trade Central, and the
+Arena's ring with room to watch from. In Sky Area's Square the stage and
+the ring stand raised. A greeter Mr.Prog calls out who logs in, two
+Navis stroll about and chat about who's here and what just happened
+(and every three minutes they parade round the landmark: walk with them),
+and A on a tree, the landmark, the sign or the board says what it is
+(the board lists who's here, the last trade and NetBattle, and the
+trade offers up). Say
+something or emote together with another player round the landmark or
+on the stage, and the Square cheers.
+
+In the Square:
+
+- **L** has MegaMan say something or do an emote; everyone in your
+  channel sees it over his head.
+- **A** facing another player's MegaMan shows his card (HP, act and
+  layer, Crosses and Souls, and whether his game has BN5 where yours
+  differs) and lets you ask him for a NetBattle, wave, mute or block him.
+  Blocked players are gone from your Square.
+- **Battle** on his card asks for a Practice NetBattle of BN6's own;
+  both MegaMen are told its rules before the battle. You fight with your
+  MegaMen as they are (NaviCust, HP, buster, Crosses). When both your
+  games have BN5's ROM it is **full rules**: BN5's chips in your folder
+  go too, and so do your Souls (UNITE on the Custom screen as in a run;
+  the other player sees your Soul too). Otherwise it is **BN6 rules**:
+  Souls stay home, and each BN5 chip in your folder sits that battle out
+  while a BN6 chip from your Pack stands in for it (the closest one you
+  have spare, Cannon where you have none). MegaMan says which before the
+  challenge goes, and your folder itself never changes. Win or lose you
+  are back in the Square where you stood; nothing is won or lost. The
+  3DS and the browser have no NetBattle.
+- **The Mr.Prog by the way in from the log-in plaza** moves you to the
+  next or last channel; a channel holds eight players. The one by the
+  Arena's ring tells how a NetBattle is asked for.
+- **Trade Central**, a desk in a wing off the plaza, trades one of your spare
+  chips (copies beyond those in your folders) for another player's: pick
+  them, pick the chip, they pick one back, and when you both say yes the
+  chips swap as you come home. BN5's chips trade between two players
+  whose games both have BN5's ROM; with anyone else the clerk offers
+  BN6's chips only, and says so.
+- **The trade board**, at the same desk: put one spare up with what you
+  want for it (anything, a chip of an element, a Sword, Wind, Break or
+  Cursor chip, or a Mega), and everyone in your channel can read it,
+  there and on the log-in plaza's board, until you take it down, leave
+  or trade. To answer someone's offer, pick it at the desk and then one
+  of your spares that is what they want; you both see the pair and say
+  Deal, as in any trade. One trade a visit: the chip comes home with
+  you before the next.
+- **R**, or the pad you arrived by, takes you home.
+
+Talk to the gate's keeper to change your name or the server: the
+official Square, or another one's address (`host` or `host:port`, as its
+owner gives it). Anyone can run a server; [server/README.md](../server/README.md)
+says how.
+
 ## Screen
 
 The game's 240x160 picture is scaled by a whole number so it stays sharp: 5x

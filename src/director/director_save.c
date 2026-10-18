@@ -265,6 +265,10 @@ static bool resume_home(void) {
 
 bool director_resume(void) {
 	drop_events();
+	/* (a checkpoint resumed is saved already: a save asked for before it,
+	 * on the map a Net Square visit left, would write the new map's state) */
+	D.checkpoint = D.checkpoint_here = D.checkpoint_data = D.checkpoint_door = false;
+	D.home_save_due = false;
 	off_board_load();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";

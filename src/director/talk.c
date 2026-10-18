@@ -63,7 +63,8 @@ bool talk_ask(const char *boxes, int face, const char *question, int yes_flag) {
 	ta_begin(&a);
 	int no = ta_closing(&a), i = ta_script(&a);
 	bool first = true;
-	ta_pages(&a, boxes, face, &first);
+	/* (none: the question opens the box itself) */
+	if (*boxes) ta_pages(&a, boxes, face, &first);
 	/* (the cursor on No, as a vow's patch-up asks) */
 	ta_ask_in(&a, face, question, no, !first, true);
 	ta_flag_set(&a, yes_flag);

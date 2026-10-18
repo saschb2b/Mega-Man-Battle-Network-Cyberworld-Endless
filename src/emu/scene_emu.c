@@ -12,6 +12,7 @@
 #include "game.h"
 #include "game_hooks.h"
 #include "gfx.h"
+#include "online_visit.h"
 #include "platform.h"
 #include "rom.h"
 #include "save.h"
@@ -77,7 +78,7 @@ static void enter(void) {
 	if (emu_resume_requested) {
 		emu_resume_requested = false;
 		game_hooks_after_boot();
-		director_resume();
+		if (director_resume()) online_visit_resumed();
 	} else {
 		director_before_boot();
 		emu_boot();
@@ -91,16 +92,22 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	online_visit_shutdown();
 	audio_external(NULL);
 	platform_second_screen(NULL, NULL);
 }
 
 static uint32_t frame_keys(void) {
-	return director_keys(pet_keys(devtools_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons())));
+	uint32_t keys = autopilot_on() ? autopilot_keys() : keys_from_buttons();
+	/* (in the Net Square the run's own keys rest: docs/ONLINE.md) */
+	if (online_visit_away()) return online_visit_keys(keys);
+	return director_keys(pet_keys(devtools_keys(online_visit_keys(keys))));
 }
 
 /* What follows a frame of the game: the run's logic on it. */
 static void after_frame(void) {
+	online_visit_update();
+	if (online_visit_away()) { second_update(); emu_debug_frame(); return; }
 	director_see();
 	director_update();
 	director_hold_watch();
@@ -120,7 +127,14 @@ static void after_frame(void) {
  * tables the run has taken over. */
 static bool soft_reset(void) {
 	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
-	if ((keys_from_buttons() & chord) != chord) return false;
+	static bool from_square;
+	if ((keys_from_buttons() & chord) != chord) { from_square = false; return false; }
+	/* (in the Net Square: back to the gate's checkpoint, as Leave; the
+	 * chord still held after it is no reset, and BN6 never sees it, whose
+	 * own soft reset it is) */
+	if (from_square) return true;
+	if (online_visit_away()) { online_visit_leave(VISIT_END_LEFT); from_square = true; return true; }
+	online_visit_shutdown();
 	emu_sync();
 	director_stop();
 	cinema_reset();
@@ -133,8 +147,10 @@ static bool soft_reset(void) {
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
+	/* (a NetBattle from the Net Square: the game's core holds still under it) */
+	if (online_visit_held()) { online_visit_held_frame(keys_from_buttons()); return; }
 	/* (the run's time: the statistics' minutes, save.h) */
-	profile_played_frame();
+	if (!online_visit_away()) profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
 	platform_second_screen_draw();
@@ -180,6 +196,7 @@ static void draw(void) {
 	emu_drawing = true;   /* (until the next update: the second screen's too) */
 	fill_rect(0, 0, P.w, P.h, BLACK);
 	if (!emu_ready()) return;
+	if (online_visit_held()) { online_visit_draw(); return; }
 	/* (on the 3DS in the canvas's order, so the copy onto it converts
 	 * nothing: mGBA's red and blue swapped here, where a computer's GPU
 	 * converts them) */
@@ -197,7 +214,7 @@ static void draw(void) {
 	static uint32_t px[EMU_W * EMU_H];
 	const uint32_t *v = emu_video();
 	bool box = false;
-	int hour = director_town_tint(&box);
+	int hour = online_visit_away() ? 0 : director_town_tint(&box);
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
 #ifdef __3DS__
@@ -213,6 +230,7 @@ static void draw(void) {
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
+	if (online_visit_away()) { online_visit_draw(); return; }
 	cinema_draw();
 	director_draw_map();
 	director_draw_counts();
@@ -220,6 +238,7 @@ static void draw(void) {
 	director_draw_duel();
 	director_draw_tent();
 	devtools_draw();
+	online_visit_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };

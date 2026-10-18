@@ -45,6 +45,24 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define MARK_Z 46
 #define COURIER_TEXT 768   /* the bytes his words may take */
 
+/* The Net Square's gate (docs/HOME.md, piece 11; docs/ONLINE.md): BN6's
+ * great white teleporter (sprite list 7's 0x06: its core lit in animation
+ * 0, dark in 2) on the free floor at the room's front, the way out
+ * to other players; its keeper, a Mr.Prog (list 6's 61) beside it, facing
+ * the room, his words an archive of their own, which the director writes */
+#define GATE_SPRITE 0x06
+#define GATE_LIT 0
+#define GATE_DARK 2
+#define GATE_FLICKER 8     /* frames lit and dark while a call is under way */
+#define GATE_X 16
+#define GATE_Y 72
+#define GATE_REACH 14      /* MegaMan on its core: within this of its middle */
+#define KEEPER_X (-36)
+#define KEEPER_Y 76
+#define KEEPER_FACE 7      /* -y: towards the room */
+#define KEEPER_SPRITE 61
+#define KEEPER_TEXT 1536
+
 /* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
  * whose map objects 0xCB-0xCE show each link square its town's emblem
  * (animations 1-4), in its plain animation 0 instead, a ring on a cyan
@@ -74,6 +92,8 @@ static struct {
 	uint32_t warps;                       /* the HP's own warp list */
 	uint8_t jack_out[16];                 /* BN6's blue pad's entry: its jack-out */
 	uint32_t courier_text;                /* the courier's words' room, 0 none */
+	uint32_t keeper_text;                 /* the gate keeper's */
+	uint32_t gate_anim;                   /* the gate's animation byte, 0 none */
 } H;
 
 static bool read_spots(void) {
@@ -125,6 +145,19 @@ static void courier(NpcList *npcs) {
 	if (prog && mark) npcs->script[npcs->n++] = mark;
 }
 
+/* the gate and its keeper into `npcs`, his words' room cleared */
+static void gate(NpcList *npcs) {
+	static const uint8_t empty[KEEPER_TEXT] = { 2, 0, 0xE6 };
+	H.gate_anim = 0;
+	H.keeper_text = mapslot_alloc(empty, sizeof empty);
+	if (!H.keeper_text || !npc_need_sprite(npcs, 7, GATE_SPRITE) || !npc_need_sprite(npcs, 6, KEEPER_SPRITE)) return;
+	uint32_t pad = npc_floor_live(7, GATE_SPRITE, GATE_X, GATE_Y, GATE_LIT, &H.gate_anim);
+	uint32_t keeper = npc_talker(6, KEEPER_SPRITE, KEEPER_X, KEEPER_Y, 0, KEEPER_FACE, H.keeper_text, 0, -1, false);
+	if (pad) npcs->script[npcs->n++] = pad;
+	else H.gate_anim = 0;
+	if (keeper) npcs->script[npcs->n++] = keeper;
+}
+
 /* the ways back's marks into `npcs` */
 static void back_marks(NpcList *npcs) {
 	if (!npc_need_sprite(npcs, 7, LINK_MARKER)) return;
@@ -145,6 +178,7 @@ bool lanhp_install(void) {
 	npc_objects_sprites(&npcs);
 	mapslot_hp(true);
 	courier(&npcs);
+	gate(&npcs);
 	back_marks(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
@@ -159,6 +193,21 @@ bool lanhp_courier_say(const uint8_t *archive, int n) {
 	emu_write(H.courier_text, archive, (size_t)n);
 	return true;
 }
+
+bool lanhp_keeper_say(const uint8_t *archive, int n) {
+	if (!H.keeper_text || n <= 0 || n > KEEPER_TEXT) return false;
+	emu_write(H.keeper_text, archive, (size_t)n);
+	return true;
+}
+
+void lanhp_gate_calling(bool on) {
+	static unsigned t;
+	t = on ? t + 1 : 0;
+	if (H.gate_anim) emu_write8(H.gate_anim, on && t / GATE_FLICKER % 2 ? GATE_DARK : GATE_LIT);
+}
+
+bool lanhp_on_gate(int x, int y) { return abs(x - GATE_X) <= GATE_REACH && abs(y - GATE_Y) <= GATE_REACH; }
+
 
 void lanhp_arrival(int *x, int *y) {
 	if (!read_spots()) { *x = *y = 0; return; }
