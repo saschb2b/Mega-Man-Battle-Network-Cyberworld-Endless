@@ -405,7 +405,12 @@ server:
   `trades.jsonl` held `[20,5]` for `[1,0]`, the clerk then said "YOU
   TRADED ALREADY! ONE TRADE A VISIT!", and each game settled at home:
   Alpha's "the Pack's 4 to 3 of the one, 0 to 1 of the other", "Lan!
-  FireBrn1 F is in our Pack now!", Beta's Cannon A. Found on the way:
+  FireBrn1 F is in our Pack now!", Beta's Cannon A. Then the pair's
+  common ground: Alpha back with MrkCan1 M (411, the pack's extension)
+  posted it from the clerk's chat-box list ("IT'S UP! MrkCan1 M FOR
+  ANYTHING!"), and Gamma, a third game with BN6's ROM alone (the
+  server's join line `"roms":0`), read the Board beside him: "Here now:
+  Alpha", "Trade board: no offers up.". Found on the way:
   alone in a channel, the clerk's words were never written (his first
   state's key was 0, the empty archive's), so the desk said nothing
   until a second player came; fixed. The server's tests hold the rest:
