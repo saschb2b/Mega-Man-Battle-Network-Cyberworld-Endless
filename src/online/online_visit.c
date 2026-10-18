@@ -17,6 +17,7 @@
 #include "run.h"
 #include "save.h"
 #include "souls.h"
+#include "square_arena.h"
 
 #define CALL_TIMEOUT_MS 20000   /* a server that never answers */
 
@@ -136,8 +137,13 @@ uint32_t online_visit_keys(uint32_t keys) {
 	return 0;
 }
 
+bool online_visit_held(void) { return V.stage == VISIT_AWAY && square_arena_on(); }
+
+void online_visit_held_frame(uint32_t keys) { square_arena_frame(keys); }
+
 void online_visit_draw(void) {
-	if (V.stage == VISIT_AWAY) online_scene_draw();
+	if (online_visit_held()) square_arena_draw();
+	else if (V.stage == VISIT_AWAY) online_scene_draw();
 	/* (the gate's fields, over the game in Lan's HP) */
 	else online_field_draw();
 }
@@ -160,6 +166,8 @@ void online_visit_shutdown(void) {
 	put_back();
 	V.stage = VISIT_HOME;
 }
+
+const OnlineLoadout *online_visit_loadout(void) { return V.stage == VISIT_AWAY && V.carried ? &V.loadout : NULL; }
 
 static uint16_t bounded_depth(int depth) { return (uint16_t)(depth < 0 ? 0 : depth > UINT16_MAX ? UINT16_MAX : depth); }
 

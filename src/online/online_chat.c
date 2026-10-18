@@ -10,6 +10,7 @@
 
 #include <string.h>
 
+#include "arena_words.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "emu.h"
@@ -20,6 +21,7 @@
 #include "online_transport.h"
 #include "platform.h"
 #include "script_kit.h"
+#include "square_arena.h"
 #include "square_words.h"
 #include "talk.h"
 
@@ -32,6 +34,7 @@
 #define MUTE_FLAG    0x1491
 #define BLOCK_FLAG   0x1492
 #define HOME_FLAG    0x1493
+#define BATTLE_FLAG  0x14A0   /* (the Arena's, apart: square_arena.c) */
 #define FIRST_FLAG SAY_FLAG
 #define LAST_SQUARE_FLAG HOME_FLAG
 
@@ -53,6 +56,7 @@ void online_chat_reset(void) {
 	memset(&C, 0, sizeof C);
 	C.on_exit = true;   /* (arrived beside it: it asks once he steps on it) */
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
+	flag_clear(BATTLE_FLAG);
 }
 
 static const OnlineProfile *card_of(uint32_t id) {
@@ -120,11 +124,47 @@ static void menu(void) {
 	}
 }
 
+/* ... where the Arena is built, Battle first, in two boxes of three:
+ * [Battle][Wave][More...], then [Mute][Block][Back] (script 0 the card,
+ * 1 and 2 the boxes, 3-6 their flags, 7 the end) */
+static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
+	ta_begin(t);
+	ta_script(t);
+	bool first = true;
+	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id)), FACE_MEGAMAN, &first);
+	ta_jump(t, 1);
+	const char *boxes[2][3] = {
+		{ arena_battle_option(), square_peer_option(0, muted), square_more() },
+		{ square_peer_option(1, muted), square_peer_option(2, muted), square_back() },
+	};
+	static const int to[2][3] = { { 3, 4, 2 }, { 5, 6, 1 } };
+	for (int b = 0; b < 2; ++b) {
+		ta_script(t);
+		ta_mugshot(t, FACE_MEGAMAN);
+		ta_clear(t);
+		ta_options(t, boxes[b], 3);
+		ta_choose(t, to[b], 3, 7);
+	}
+	static const int flags[4] = { BATTLE_FLAG, WAVE_FLAG, MUTE_FLAG, BLOCK_FLAG };
+	for (int k = 0; k < 4; ++k) {
+		ta_script(t);
+		ta_flag_set(t, flags[k]);
+		ta_end(t);
+	}
+	ta_closing(t);
+	int n = ta_build(t, out);
+	if (n <= SQUARE_TALK_ROOM) {
+		emu_write(online_square_talk_room(), out, (size_t)n);
+		C.open = talk_script(online_square_talk_room(), 0);
+	}
+}
+
 /* A facing a peer: his card, then Wave, Mute or Unmute, Block */
 static void peer_talk(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	bool muted = online_people_flags(C.peer.identity) & ONLINE_MUTED;
+	if (square_arena_offered()) { peer_talk_arena(&t, out, muted); return; }
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
@@ -181,6 +221,7 @@ static bool chosen(void) {
 	bool home = false;
 	for (int k = 0; k < ONLINE_PHRASE_COUNT; ++k) if (flag_get(SAY_FLAG + k)) online_transport_social(0, (uint8_t)k);
 	for (int k = 0; k < ONLINE_EMOTE_COUNT; ++k) if (flag_get(EMOTE_FLAG + k)) online_transport_social(1, (uint8_t)k);
+	if (flag_get(BATTLE_FLAG)) { flag_clear(BATTLE_FLAG); square_arena_challenge(&C.peer, C.s.latency_ms); }
 	if (flag_get(WAVE_FLAG)) online_transport_social(1, WAVE);
 	if (flag_get(MUTE_FLAG)) online_people_toggle(C.peer.identity, ONLINE_MUTED);
 	if (flag_get(BLOCK_FLAG) && online_people_toggle(C.peer.identity, ONLINE_BLOCKED)) talk_start(square_blocked_words(C.peer.name), FACE_MEGAMAN);

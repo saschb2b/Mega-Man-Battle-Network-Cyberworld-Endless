@@ -8,12 +8,14 @@
 #include "gfx.h"
 #include "online_chat.h"
 #include "online_labels.h"
+#include "online_mail.h"
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_square.h"
 #include "online_text.h"
 #include "online_transport.h"
 #include "platform.h"
+#include "square_arena.h"
 
 static OnlineSnapshot snapshot;
 static OnlineSnapshot shown;
@@ -33,6 +35,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	memset(&shown, 0, sizeof shown);
 	disconnected_at = notice_at = notice_serial = 0;
 	online_motion_reset(); online_labels_reset(); online_chat_reset(); online_people_load();
+	square_arena_reset();
 	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
@@ -44,6 +47,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 }
 
 void online_scene_end(void) {
+	square_arena_end();
 	if (trace) { fclose(trace); trace = NULL; }
 	built = arrived = false;
 }
@@ -90,6 +94,7 @@ static void unblocked(OnlineSnapshot *v) {
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
+	online_mail_frame();
 	uint32_t now = SDL_GetTicks();
 	if (snapshot.notice_serial != notice_serial) { notice_serial = snapshot.notice_serial; notice_at = now; }
 	if (snapshot.error[0] || !snapshot.connected) {
@@ -109,6 +114,7 @@ VisitEnd online_scene_update(void) {
 	unblocked(&shown);
 	online_square_peers(&shown);
 	if (online_chat_update(&shown)) return VISIT_END_LEFT;
+	square_arena_update(&snapshot);
 	online_labels_update(&shown, now);
 	return VISIT_END_NONE;
 }
