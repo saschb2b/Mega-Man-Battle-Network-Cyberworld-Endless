@@ -154,8 +154,20 @@ static void square_reach(const SquarePlan *p) {
 	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p->cell[y][x] == C_PATH;
 	assert(reached == floor);
 	for (int k = 0; k < SQ_PLACES; ++k) assert(p->cell[p->at[k][1]][p->at[k][0]] != C_VOID);
-	for (int w = 0; w < SQUARE_WALKERS; ++w)
-		for (int k = 0; k < SQUARE_ROUTE; ++k) assert(p->cell[p->route[w][k][1]][p->route[w][k][0]] == C_PATH);
+	/* each walker's legs along a grid axis over ground floor, none
+	 * through a hole */
+	for (int w = 0; w < SQUARE_WALKERS; ++w) {
+		assert(p->route_len[w] >= 2 && p->route_len[w] <= SQUARE_ROUTE);
+		for (int k = 0; k < p->route_len[w]; ++k) {
+			const int *a = p->route[w][k], *b = p->route[w][(k + 1) % p->route_len[w]];
+			assert(a[0] == b[0] || a[1] == b[1]);
+			int steps = abs(b[0] - a[0]) + abs(b[1] - a[1]);
+			for (int i = 0; i <= steps; ++i) {
+				int x = a[0] + (b[0] - a[0]) * i / (steps ? steps : 1), y = a[1] + (b[1] - a[1]) * i / (steps ? steps : 1);
+				assert(p->cell[y][x] == C_PATH && !p->level[y][x]);
+			}
+		}
+	}
 }
 
 /* The Square's plan: the same for a seed on every client (its hash the

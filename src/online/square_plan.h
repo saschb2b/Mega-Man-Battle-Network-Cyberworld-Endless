@@ -18,15 +18,16 @@
  * SQUARE_HASH beside it is square_plan_hash of seed 120's plan, which the
  * unit tests hold the generator to. */
 #define SQUARE_MAKE 2
-#define SQUARE_HASH 0xFF0E6F94u
+#define SQUARE_HASH 0x51FB543Cu
 
 #define SQUARE_W 36
 #define SQUARE_H 36
 #define SQUARE_PROPS 24
 #define SQUARE_STAIRS 2
-/* The ambient Navis who walk the Square, and their routes' waypoints. */
+/* The ambient Navis who walk the Square, and their routes' waypoints at
+ * most. */
 #define SQUARE_WALKERS 2
-#define SQUARE_ROUTE 4
+#define SQUARE_ROUTE 8
 
 /* Its places (panel coordinates): where MegaMan arrives, the pad home, the
  * welcome sign's and the Board's fronts, the channel keeper, Trade
@@ -46,7 +47,10 @@ typedef struct {
 	int area;                           /* the net area whose tiles it wears (rom.h's net areas) */
 	int landmark;                       /* the centrepiece's LOOK_* */
 	int at[SQ_PLACES][2];
-	int route[SQUARE_WALKERS][SQUARE_ROUTE][2];   /* each walker's waypoints, walked round in order */
+	/* each walker's waypoints (x, y and the seconds he stands there),
+	 * walked round in order, each leg along a grid axis */
+	int route[SQUARE_WALKERS][SQUARE_ROUTE][3];
+	int route_len[SQUARE_WALKERS];
 } SquarePlan;
 
 /* The plan for server seed `seed`. */

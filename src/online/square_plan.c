@@ -63,7 +63,10 @@ static void floors(SquarePlan *p) {
 
 /* The landmark ringed by four props in holes round it, the area's own
  * first: Green's giant cybertree among cybertrees; elsewhere the statue or
- * the monument by the seed, braziers or cybertrees round it. */
+ * the monument by the seed, braziers or cybertrees round it. The
+ * landmark's base spreads over the panels round its own (the statue's
+ * pedestal, the giant cybertree's roots), so all nine are walled off:
+ * MegaMan walks round it, never onto it. */
 static void centrepiece(SquarePlan *p, uint32_t pick) {
 	int ring = LOOK_BRAZIER;
 	if (p->area == 3) { p->landmark = LOOK_GIANT_TREE; ring = LOOK_TREE; }
@@ -71,6 +74,8 @@ static void centrepiece(SquarePlan *p, uint32_t pick) {
 		p->landmark = pick & 1 ? LOOK_MONUMENT : LOOK_STATUE;
 		if (pick & 2) ring = LOOK_TREE;
 	}
+	for (int y = MID - 1; y <= MID + 1; ++y)
+		for (int x = MID - 1; x <= MID + 1; ++x) p->cell[y][x] = C_SOLID;
 	prop(p, p->landmark, MID, MID);
 	static const int round[4][2] = { { -2, -2 }, { 2, -2 }, { -2, 2 }, { 2, 2 } };
 	for (int k = 0; k < 4; ++k) prop(p, ring, MID + round[k][0], MID + round[k][1]);
@@ -108,11 +113,16 @@ static void places(SquarePlan *p) {
 	place(p, SQ_RING, 14, 27);
 	place(p, SQ_GREETER, 28, 20);
 	place(p, SQ_REFEREE, 17, 32);
-	static const int routes[SQUARE_WALKERS][SQUARE_ROUTE][2] = {
-		{ { 13, 13 }, { 21, 13 }, { 21, 21 }, { 13, 21 } },
-		{ { 6, 18 }, { 20, 18 }, { 20, 30 }, { 20, 18 } },
+	/* (round the plaza, standing at its corners; from Trade Central
+	 * across the plaza clear of the landmark's ring and down the Arena's
+	 * walk, standing at either end, and back the same way) */
+	static const int routes[SQUARE_WALKERS][SQUARE_ROUTE][3] = {
+		{ { 13, 13, 4 }, { 21, 13, 4 }, { 21, 21, 4 }, { 13, 21, 4 } },
+		{ { 6, 18, 6 }, { 12, 18, 0 }, { 12, 20, 0 }, { 20, 20, 0 }, { 20, 30, 6 }, { 20, 20, 0 }, { 12, 20, 0 }, { 12, 18, 0 } },
 	};
 	memcpy(p->route, routes, sizeof routes);
+	p->route_len[0] = 4;
+	p->route_len[1] = 8;
 }
 
 void square_plan(uint32_t seed, SquarePlan *out) {
@@ -149,6 +159,7 @@ uint32_t square_plan_hash(const SquarePlan *p) {
 	for (int i = 0; i < p->nstairs; ++i) h = mix_ints(h, (const int[3]){ p->stairs[i].x, p->stairs[i].y, p->stairs[i].dir }, 3);
 	for (int i = 0; i < p->nprops; ++i)
 		h = mix_ints(h, (const int[4]){ p->props[i].kind, p->props[i].x, p->props[i].y, p->props[i].look }, 4);
-	h = mix_ints(h, &p->route[0][0][0], SQUARE_WALKERS * SQUARE_ROUTE * 2);
+	h = mix_ints(h, &p->route[0][0][0], SQUARE_WALKERS * SQUARE_ROUTE * 3);
+	h = mix_ints(h, p->route_len, SQUARE_WALKERS);
 	return (h ^ (uint8_t)p->area) * 16777619u;
 }
