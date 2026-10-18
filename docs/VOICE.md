@@ -340,6 +340,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | Requests at home: the askers' offers, waits and pay, the board's post, MegaMan on a request in the Net and at home | `src/world/job_words.c` |
 | MegaMan and Lan coming home to Lan's HP after an act; MegaMan at its portals; the courier Mr.Prog there | `src/director/home_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
+| MegaMan on a Practice NetBattle in the Net Square: the challenge sent, the question a challenge asks, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
 
 ## Before you commit a line
 
