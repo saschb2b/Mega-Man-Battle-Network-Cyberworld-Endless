@@ -59,8 +59,9 @@ struct mCore *arena_pair_core(ArenaPair *pair, unsigned side);
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side);
 /* the cable's transfers so far */
 unsigned arena_pair_transfers(const ArenaPair *pair);
-/* the cores' sound: side's into the game's sound (where the game's own
- * core has made it a ring), the other's dropped */
+/* the cores' sound: side's into the game's sound (emu_audio_from), the
+ * other's dropped; or both dropped (the way in, unheard) */
 void arena_pair_sound(ArenaPair *pair, unsigned side);
+void arena_pair_mute(ArenaPair *pair);
 
 #endif

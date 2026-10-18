@@ -262,10 +262,14 @@ const uint32_t *arena_pair_video(const ArenaPair *p, unsigned side) { return p->
 unsigned arena_pair_transfers(const ArenaPair *p) { return p->transfers; }
 
 void arena_pair_sound(ArenaPair *p, unsigned side) {
-	struct mCore *c = p->core[side & 1];
-	if (emu_ready()) emu_audio_from(c);
-	else emu_audio_drop_from(c);
+	emu_audio_open();
+	emu_audio_from(p->core[side & 1]);
 	emu_audio_drop_from(p->core[(side & 1) ^ 1]);
+}
+
+void arena_pair_mute(ArenaPair *p) {
+	emu_audio_drop_from(p->core[0]);
+	emu_audio_drop_from(p->core[1]);
 }
 
 #else   /* no Arena in this build (arena_pair.h, CW_ARENA) */
@@ -286,5 +290,6 @@ struct mCore *arena_pair_core(ArenaPair *pair, unsigned side) { (void)pair; (voi
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
 unsigned arena_pair_transfers(const ArenaPair *pair) { (void)pair; return 0; }
 void arena_pair_sound(ArenaPair *pair, unsigned side) { (void)pair; (void)side; }
+void arena_pair_mute(ArenaPair *pair) { (void)pair; }
 
 #endif

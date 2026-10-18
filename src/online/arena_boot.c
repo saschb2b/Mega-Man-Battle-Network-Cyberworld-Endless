@@ -211,6 +211,7 @@ static bool boot_frame(ArenaBoot *b) {
 		if (s->act == ACT_WARP && b->in_step == 0) warp(b);
 		b->core->setKeys(b->core, s->keys);
 		b->core->runFrame(b->core);
+		emu_audio_drop_from(b->core);   /* (the way in is not heard) */
 		++b->done;
 	}
 	bool over = ++b->in_step >= s->frames || (s->act == ACT_WARP && b->call.called);
@@ -225,6 +226,7 @@ static bool entry_frame(ArenaBoot *b) {
 	if (b->in_step == 0) arena_pair_anchor(b->pair);
 	uint16_t keys[ARENA_LOOKAHEAD][2] = { { s->keys, s->keys } };
 	if (!arena_pair_step(b->pair, keys, false)) { fail(b, "the cable stopped in BN6's menus"); return false; }
+	arena_pair_mute(b->pair);
 	++b->done;
 	if (++b->in_step >= s->frames) { b->in_step = 0; ++b->step; }
 	return b->step < NSTEPS(entry_steps);

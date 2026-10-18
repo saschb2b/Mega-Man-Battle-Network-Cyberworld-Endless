@@ -72,11 +72,12 @@ static void enter(void) {
 	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's");
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);
-	if (emu_ready()) audio_external(emu_audio_read);
+	emu_audio_open();
+	audio_external(emu_audio_read);
 }
 
 static void leave(void) {
-	if (emu_ready()) audio_external(NULL);
+	audio_external(NULL);
 	arena_free(S.arena);
 	S.arena = NULL;
 	if (S.tex) SDL_DestroyTexture(S.tex);

@@ -53,6 +53,9 @@ void emu_audio_from(void *core);
 /* ... or its sound let go, for frames run ahead unseen */
 void emu_audio_drop_from(void *core);
 int emu_audio_out_rate(void);
+/* The ring the sound plays from, made where BN6's core has not made it (the
+ * Arena's cores, src/online/arena_pair.c, play through it with none) */
+void emu_audio_open(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */
 uint8_t emu_read8(uint32_t addr);

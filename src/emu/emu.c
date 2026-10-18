@@ -94,7 +94,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	core->loadSave(core, VFileMemChunk(NULL, 0));
 	core->setAudioBufferSize(core, 1024);
 	emu_audio_rate(out_rate);
-	ring_lock = SDL_CreateMutex();
+	emu_audio_open();
 	start_worker();
 #ifndef MINIMAL_CORE
 	/* (with the core on a thread of its own, its picture is drawn on one
@@ -181,6 +181,10 @@ void emu_audio_drop_from(void *other) {
 }
 
 int emu_audio_out_rate(void) { return out_rate; }
+
+void emu_audio_open(void) {
+	if (!ring_lock) ring_lock = SDL_CreateMutex();
+}
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;
