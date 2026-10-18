@@ -32,13 +32,18 @@ const char *arena_folder_name(int k) {
 	return names[k >= 0 && k < 3 ? k : 0];
 }
 
-const char *arena_folder_words(unsigned format, unsigned bn5, bool souls_home) {
-	static char s[200];
-	int n = 0;
-	for (int k = 0; k < 3; ++k)
-		if (bn5 >> k & 1) n += snprintf(s + n, sizeof s - (size_t)n, "%s has BN5\nchips. It stays\nhome.|", arena_folder_name(k));
+const char *arena_folder_words(unsigned format, const char *standins, bool souls_home) {
+	static char s[400];
+	int n = snprintf(s, sizeof s, "%s", standins ? standins : "");
 	if (souls_home) n += snprintf(s + n, sizeof s - (size_t)n, "Our Souls stay home\ntoo.|");
 	snprintf(s + n, sizeof s - (size_t)n, "%s,Lan.\nWhich folder goes?", rules_words(format));
+	return s;
+}
+
+const char *arena_standin_words(const char *folder, int n, const char *gone, const char *in) {
+	static char s[160];
+	if (n == 1) snprintf(s, sizeof s, "%s's %s\nsits out,Lan.|Our %s\nstands in for it!|", folder, gone, in);
+	else snprintf(s, sizeof s, "%s: %d BN5\nchips sit out,Lan.|Chips from our Pack\nstand in for them,|like %s\nfor %s!|", folder, n, in, gone);
 	return s;
 }
 

@@ -26,6 +26,10 @@ bool arena_folder_asked(const OnlineLoadout *l, unsigned format, unsigned fits);
 bool arena_folder_ask(const OnlineLoadout *l, unsigned format, unsigned fits);
 /* As its chat closes: the folder picked (0-2), -1 none; its flags cleared */
 int arena_folder_picked(void);
+/* The MegaMan carried into the NetBattle: arena_format_carry's, its folder's
+ * BN5 chips stood in for under BN6's rules (arena_standin.h), each said in
+ * the log where `say` */
+void arena_folder_carry(const OnlineLoadout *all, unsigned format, int k, OnlineLoadout *out, bool say);
 /* The questions' flags cleared, as MegaMan arrives in the Square */
 void arena_folder_reset(void);
 

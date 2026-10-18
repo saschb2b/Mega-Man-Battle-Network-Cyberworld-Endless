@@ -769,9 +769,10 @@ In the Square:
 - **Battle** on his card asks for a Practice NetBattle of BN6's own, by
   **BN6 rules**: both MegaMen are told before the battle. You fight with
   your MegaMen as they are (NaviCust, HP, buster, Crosses) and a folder
-  of BN6's chips; Souls and BN5's chips stay home. Where you have more
-  than one folder that fits, or one holds BN5's chips, MegaMan asks which
-  goes. Win or lose you are back in the Square where you stood; nothing
+  of BN6's chips; Souls stay home, and each BN5 chip in your folder sits
+  that battle out while a BN6 chip from your Pack stands in for it (the
+  closest one you have spare, Cannon where you have none). MegaMan says
+  which before the challenge goes, and your folder itself never changes. Win or lose you are back in the Square where you stood; nothing
   is won or lost. The 3DS and the browser have no NetBattle.
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the

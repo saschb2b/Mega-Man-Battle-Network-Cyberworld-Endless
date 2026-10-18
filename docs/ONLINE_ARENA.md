@@ -159,18 +159,27 @@ game refuses rules it cannot fight by (`arena_format_ok`).
 **The folder.** A run's MegaMan holds Folder1, Folder2 and the Extra
 Folder (BN6's names; the second's Regular and TagChips at NaviStats
 +0x2F and +0x58, bn6f's NaviStats; the Extra Folder has none of its own
-here). `arena_folders_fitting` says which fit the rules (BN6's: none of
-BN5's chips, an empty folder never). Where more than one fits, or one
-stays home for BN5's chips, MegaMan asks in BN6's chat box
-(`arena_folder.c`, flags `0x14A1`-`0x14A4`): "Folder1 has BN5 chips. It
-stays home.", the Souls too where he holds some, then "BN6 rules,Lan.
-Which folder goes?" with the folders that fit; B sends nothing. Where
-MegaMan has one folder and it fits, it goes unasked. Where none fits:
-"Lan,every folder of ours has BN5 chips... BN6 rules won't take them.
-Let's swap them out at home first!" The carried MegaMan then passes
-`arena_loadout_check`, the same last guard on both games. A run holds
-Folder1 alone today (no run hands out Folder2 or the Extra Folder), so
-the choice shows only with the `folder` dev step (DEVTOOLS.md).
+here). `arena_folders_fitting` says which can go (an empty folder never).
+A run holds Folder1 alone (no run hands out Folder2 or the Extra
+Folder), so under BN6's rules its BN5 chips **stand in**
+(`arena_standin.c`, the owner's decision of 18 October 2026, to be
+refined): for that battle alone each sits out of the carried copy and a
+chip of BN6's from the run's Pack takes its place, the same kind
+(standard, Mega, Giga) and element where the Pack has a spare past the
+folder's copies, its power the nearest, within BN6's folder rules (four
+of a chip, the run's Mega and Giga limits, one of each); BN6's first
+standard chip the folder has room for, Cannon, where it has none. A
+Regular or TagChip whose chip sat out is let go. The carrying game alone
+picks them (the other reads the folder as sent), each in the log
+(`arena: chip 411 code 12 sits out, chip 1 code 0 stands in`). Where a
+folder holds BN5's chips, or more than one can go, MegaMan asks in BN6's
+chat box (`arena_folder.c`, flags `0x14A1`-`0x14A4`): "Folder1: 2 BN5
+chips sit out,Lan. Chips from our Pack stand in for them, like Cannon A
+for MrkCan1 M!", the Souls left home where he holds some, then "BN6
+rules,Lan. Which folder goes?"; B sends nothing. Where MegaMan has one
+folder of BN6's chips alone, it goes unasked. The carried MegaMan then
+passes `arena_loadout_check`, the same last guard on both games. The
+other folders show only with the `folder` dev step (DEVTOOLS.md).
 
 START gives each game its side of the cable (the challenger's 0) and the
 input delay. Each sends its MegaMan (ARENA_LOADOUT: the folder picked, the

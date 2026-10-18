@@ -37,7 +37,7 @@ ArenaFolderFit arena_folder_fit(const OnlineLoadout *l, unsigned format, int k) 
 unsigned arena_folders_fitting(const OnlineLoadout *l, unsigned format) {
 	unsigned fits = 0;
 	for (int k = 0; k < ONLINE_FOLDERS; ++k)
-		if (arena_folder_fit(l, format, k) == ARENA_FOLDER_FITS) fits |= 1u << k;
+		if (arena_folder_fit(l, format, k) != ARENA_FOLDER_EMPTY) fits |= 1u << k;   /* (BN5's chips: their stand-ins, arena_standin.h) */
 	return fits;
 }
 

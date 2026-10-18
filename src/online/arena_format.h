@@ -6,7 +6,7 @@
  * the challenge names and the server holds both to. Under BN6's rules the
  * MegaMan carried leaves home what plain BN6 has not (his Souls, BN5's
  * chips in the pack) and fights with a folder of BN6's chips alone, the
- * one his player picks. ROM-free: the carried record only. */
+ * one his player picks, its BN5 chips stood in for (arena_standin.h). ROM-free: the carried record only. */
 #ifndef CW_ARENA_FORMAT_H
 #define CW_ARENA_FORMAT_H
 
@@ -32,10 +32,11 @@ bool arena_format_ok(unsigned format, uint8_t mine);
 typedef enum {
 	ARENA_FOLDER_FITS,
 	ARENA_FOLDER_EMPTY,   /* no folder there: not one of its 30 entries a chip */
-	ARENA_FOLDER_BN5,     /* it holds BN5's chips, which BN6's rules leave out */
+	ARENA_FOLDER_BN5,     /* it holds BN5's chips, which sit out under BN6's rules, stood in for (arena_standin.h) */
 } ArenaFolderFit;
 ArenaFolderFit arena_folder_fit(const OnlineLoadout *l, unsigned format, int k);
-/* ... the folders that fit, a bit each (bit k folder k) */
+/* ... the folders that can go, a bit each (bit k folder k): those holding
+ * BN5's chips too under BN6's rules, by their stand-ins */
 unsigned arena_folders_fitting(const OnlineLoadout *l, unsigned format);
 
 /* The MegaMan carried into a NetBattle under `format`: `all` with folder

@@ -435,7 +435,8 @@ static void formats(void) {
 	assert(arena_folder_fit(&l, ONLINE_FORMAT_FULL, 0) == ARENA_FOLDER_FITS);
 	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 1) == ARENA_FOLDER_FITS);
 	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 2) == ARENA_FOLDER_EMPTY);
-	assert(arena_folders_fitting(&l, ONLINE_FORMAT_BN6) == 2u && arena_folders_fitting(&l, ONLINE_FORMAT_FULL) == 3u);
+	/* (a folder of BN5's chips goes under BN6's rules too, by its stand-ins: arena_standin.h) */
+	assert(arena_folders_fitting(&l, ONLINE_FORMAT_BN6) == 3u && arena_folders_fitting(&l, ONLINE_FORMAT_FULL) == 3u);
 	arena_format_carry(&l, ONLINE_FORMAT_BN6, 1, &out);
 	assert(!memcmp(out.folder, l.folders[1], sizeof out.folder) && out.regular == 4 && out.tag[0] == 2 && out.tag[1] == 7);
 	assert(!out.souls && !out.pack[411][0] && !out.pack[214][1] && out.pack[5][2] == 2);

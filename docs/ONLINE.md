@@ -384,7 +384,11 @@ server:
   "Folder1 has BN5 chips. It stays home." and Folder2 alone offered; the
   battle to its end with Folder2 carried, 26 hashes agreeing, back in the
   Square to "Alright! We won,Lan!!". Folder2 came from the `folder` dev
-  step: a run holds Folder1 alone (Not yet, below).
+  step: a run holds Folder1 alone (Not yet, below). Then with Folder1
+  alone, two MrkCan1 M in it (the `chip` dev step): "Folder1: 2 BN5
+  chips sit out,Lan. Chips from our Pack stand in for them, like Cannon A
+  for MrkCan1 M!", Folder1 carried, the log's two stand-ins, the battle
+  to its end on both games with 25 hashes agreeing.
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -419,10 +423,12 @@ are in the history before 433865a8):
   once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks
   before a public launch.
-- **Folder2 and the Extra Folder in a run.** No run gives them yet, so
-  under BN6's rules a MegaMan with BN5's chips in Folder1 has no folder
-  that fits: MegaMan says to swap them out at home. The choice of folder
-  waits for a run that hands out more folders.
+- **BN5's chips in a mixed NetBattle: a design to refine.** A run has
+  Folder1 alone, so under BN6's rules its BN5 chips stand in for that
+  battle by chips of the Pack's (ONLINE_ARENA.md, The folder): honest
+  and quick, but the owner calls it friction to brainstorm again (a
+  NetBattle folder of the PET's, BN6's Folder2 opened online, is the
+  other way weighed).
 - **Full rules** for two games with BN5's ROM: BN5 installed into both
   pair cores, their Souls and BN5's chips allowed; the format byte is on
   the wire and held by the server, the rules still BN6's.

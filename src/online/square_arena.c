@@ -159,7 +159,7 @@ static bool mine_goes(unsigned *fits) {
 	static OnlineLoadout carried;
 	char why[120];
 	uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX];
-	arena_format_carry(l, A.format, arena_folder_first(*fits), &carried);
+	arena_folder_carry(l, A.format, arena_folder_first(*fits), &carried, false);
 	if (arena_loadout_check(&carried, why, sizeof why) && arena_loadout_pack(&carried, bytes, sizeof bytes)) return true;
 	printf("arena: our MegaMan can't go: %s\n", why);
 	talk_start(arena_cant_words(carried.souls != 0), FACE_MEGAMAN);
@@ -205,7 +205,7 @@ static void start(unsigned side, unsigned delay) {
 	static OnlineLoadout tried;
 	/* (the folder picked as the one he fights with, what the rules leave out left home) */
 	if (carried) {
-		arena_format_carry(carried, A.format, A.folder, &tried);
+		arena_folder_carry(carried, A.format, A.folder, &tried, true);
 		carried = &tried;
 	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, a test's short battle) */
