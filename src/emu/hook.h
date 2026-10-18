@@ -95,6 +95,8 @@ void hook_post(const HookRegs *r, int kind);
  * since two cores' hooks run an instruction at a time in turn there (the
  * Arena's pair) */
 int hook_slot(void);
+/* ... and a core's own, between frames (-1: none attached) */
+int hook_slot_of(struct mCore *core);
 /* From an answer hook: the CPU halted until the next interrupt it takes,
  * once the hooked instruction has run (a wait the game would spin through:
  * only where an interrupt will end it). */

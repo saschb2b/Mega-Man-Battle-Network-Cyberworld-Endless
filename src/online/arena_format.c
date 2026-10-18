@@ -19,8 +19,7 @@ bool arena_format_ok(unsigned format, uint8_t mine) {
 }
 
 bool arena_souls_home(const OnlineLoadout *l, unsigned format) {
-	/* (under either rules until full ones carry them: ARENA_FULL_SOULS) */
-	return l && l->souls && (format != ONLINE_FORMAT_FULL || !ARENA_FULL_SOULS);
+	return l && l->souls && format != ONLINE_FORMAT_FULL;
 }
 
 /* (one of BN6's own chips: arena_loadout_check's rule) */

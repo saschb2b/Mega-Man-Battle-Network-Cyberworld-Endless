@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 
-#include "arena_format.h"
 #include "bn6.h"
 #include "protocol.h"
 
@@ -29,8 +28,7 @@ static bool chip_held(unsigned id, unsigned format) {
 
 bool arena_loadout_check(const OnlineLoadout *l, unsigned format, char *why, size_t n) {
 	bool full = format == ONLINE_FORMAT_FULL;
-	if (l->souls && !(full && ARENA_FULL_SOULS)) return REFUSE("MegaMan holds Souls (mask %#x): BN5's, which %s cannot run", l->souls,
-		full ? "full rules do not carry yet" : "plain BN6");
+	if (l->souls && !full) return REFUSE("MegaMan holds Souls (mask %#x): BN5's, which plain BN6 cannot run", l->souls);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folder[i];
 		if (e == 0xFFFF || !CHIP_ID(e)) continue;

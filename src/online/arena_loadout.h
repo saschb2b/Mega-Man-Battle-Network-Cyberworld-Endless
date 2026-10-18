@@ -4,8 +4,8 @@
  * the first folder, the pack, the NaviCust's board, HP and the buster.
  * Under BN6's rules the Arena's cores are plain BN6, so a MegaMan who
  * holds what plain BN6 cannot run (another game's chips, the Souls) is
- * refused, with the reason; under full rules they hold BN5's chips too
- * (arena_pair.h). The rules decide, never this game's ROMs, so both games
+ * refused, with the reason; under full rules they hold BN5's chips and
+ * Souls too (arena_pair.h). The rules decide, never this game's ROMs, so both games
  * check a MegaMan alike. ROM-free: the core's memory through two calls. */
 #ifndef CW_ARENA_LOADOUT_H
 #define CW_ARENA_LOADOUT_H

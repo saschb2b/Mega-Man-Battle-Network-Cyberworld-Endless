@@ -17,9 +17,16 @@
 #ifndef CW_XINSTALL_H
 #define CW_XINSTALL_H
 
+#include <stdbool.h>
+
 #include "xnavi_install.h"
 #include "xvirus.h"
 
 void xinstall_core(int families, int navis);
+/* BN5's installs as a run's start makes them (scene_emu.c, game_hooks.c:
+ * every track, the chip registry, the Souls), on a core no run started
+ * (--dev arena's, whose pair takes them: xinstall_log.h); false where the
+ * chips' tables were not moved */
+bool xinstall_bn5(void);
 
 #endif

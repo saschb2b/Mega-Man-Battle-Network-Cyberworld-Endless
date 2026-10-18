@@ -1,7 +1,8 @@
 /* The tracks' installs written down as they are made on BN6's core
  * (issue #120, docs/ONLINE_ARENA.md, Full rules): every byte BN5's
  * installs write into the core's ROM copy (xinstall.h's tracks, the chip
- * registry, xchips_install.h) and every hook they set, in their order, so
+ * registry, xchips_install.h, the Souls' soulproxy.h and soulunite.h) and
+ * every hook they set, in their order, so
  * that the Arena's cores (src/online/arena_pair.c) get the same: the bytes
  * into each one's ROM copy before it starts, the hooks onto each one's own
  * table (hook_core). Two games with the same ROMs and the same build make

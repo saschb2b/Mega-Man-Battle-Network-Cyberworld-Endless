@@ -166,7 +166,8 @@ static ArenaBootStage make_pair(ArenaBoot *b) {
 	if (ok) {
 		const uint8_t *from[2] = { state[0] ? state[0] : base, state[1] ? state[1] : base };
 		const size_t n[2] = { state[0] ? size[0] : base_size, state[1] ? size[1] : base_size };
-		b->pair = arena_pair_open(b->rom, b->rom_size, from, n, b->format == ONLINE_FORMAT_FULL);
+		const unsigned souls[2] = { b->carried[0] ? b->loadout[0].souls : 0u, b->carried[1] ? b->loadout[1].souls : 0u };
+		b->pair = arena_pair_open(b->rom, b->rom_size, from, n, b->format == ONLINE_FORMAT_FULL, souls);
 	}
 	free(base);
 	free(state[0]);

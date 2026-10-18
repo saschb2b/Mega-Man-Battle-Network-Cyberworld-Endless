@@ -46,8 +46,11 @@ bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size);
 
 /* The pair: two cores of the ROM, each loaded with its state, then
  * linked; with BN5's installs where `bn5` (their bytes, and their hooks
- * on each core's own table); NULL where it could not be made */
-ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], bool bn5);
+ * on each core's own table), souls[side] that side's player's Souls for
+ * UNITE (NULL none), each Soul committed carried to the other core
+ * (arena_souls.h); NULL where it could not be made */
+ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], bool bn5,
+	const unsigned souls[2]);
 void arena_pair_close(ArenaPair *pair);
 /* Each core's frame counter as the clock's start: the next frame of the
  * pair is frame 0 of a stretch of keys (the entry's steps, the battle) */

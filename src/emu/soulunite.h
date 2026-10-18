@@ -61,6 +61,12 @@ bool soulunite_ready(void);
  * differential's from its spec. None (0) leaves BN6's Custom screen as it
  * is, byte for byte. */
 void soulunite_held(unsigned souls);
+/* ... a core of its own's (hook_core's: an Arena pair core, its player's
+ * Souls), UNITE standing there in a link battle too (the Soul carried to
+ * the other GBA by the pair: src/online/arena_souls.c); false where the
+ * core has no table of its own */
+struct mCore;
+bool soulunite_held_core(struct mCore *core, unsigned souls);
 /* The differential's Souls (src/dev/xdiff.c, a spec's souls6): where
  * `souls` names one, the proxy form and the Souls installed with the
  * spec's breaks (soulunite_install's), MegaMan holding them; each battle begun dark by BN5's

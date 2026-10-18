@@ -25,7 +25,6 @@
 #include "platform.h"
 #include "protocol.h"
 #include "rom.h"
-#include "xchips_install.h"
 #include "xinstall.h"
 
 #define DELAY_DEFAULT  6    /* frames of input delay: 100 ms */
@@ -66,8 +65,7 @@ static uint16_t pad_keys(void) {
  * for the pair to take (xinstall_log.h); else BN6's */
 static unsigned rules(void) {
 	if (!ARENA_FULL_RULES || !XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE)) return ONLINE_FORMAT_BN6;
-	xinstall_core(XVIRUS_FAMILIES, XNAVI_BN5);
-	return xchips_install() ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6;
+	return xinstall_bn5() ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6;
 }
 
 static void enter(void) {

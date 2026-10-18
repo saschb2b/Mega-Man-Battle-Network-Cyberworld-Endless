@@ -147,8 +147,8 @@ static void check(void) {
 	l.max_hp = 0;
 	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "HP"));
 	/* full rules: the rules byte decides, never the game's ROMs (no ROM here, as on either game): BN5's chips in the folder,
-	 * BN6's blanks the registry fills and the pack's extension go; the codes, HP and (until full rules carry them) the
-	 * Souls are held as BN6's rules hold them */
+	 * BN6's blanks the registry fills, the pack's extension and the Souls go; the codes and HP are held as BN6's rules hold
+	 * them */
 	l = starter();
 	l.folder[7] = (uint16_t)(411 | 12u << 9);   /* MrkCan1 M */
 	l.folder[8] = 205;                         /* WideSht2, a blank of BN6's */
@@ -160,8 +160,8 @@ static void check(void) {
 	assert(!arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why) && strstr(why, "code 27"));
 	l.folder[9] = 0xFFFF;
 	l.souls = 0x04;
-	assert(arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why) == ARENA_FULL_SOULS);
-	if (!ARENA_FULL_SOULS) assert(strstr(why, "Souls"));
+	assert(arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why));
+	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "Souls"));
 	l.souls = 0;
 	l.max_hp = 10000;
 	assert(!arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why) && strstr(why, "HP"));
@@ -462,9 +462,8 @@ static void formats(void) {
 	out.max_hp = 100;
 	assert(arena_loadout_check(&out, ONLINE_FORMAT_BN6, why, sizeof why));
 	arena_format_carry(&l, ONLINE_FORMAT_FULL, 0, &out);
-	assert(out.souls == (ARENA_FULL_SOULS ? 0x21 : 0) && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
-	assert(arena_souls_home(&l, ONLINE_FORMAT_BN6) && arena_souls_home(&l, ONLINE_FORMAT_FULL) == !ARENA_FULL_SOULS);
-	assert(!arena_souls_home(&out, ONLINE_FORMAT_BN6) || ARENA_FULL_SOULS);
+	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
+	assert(arena_souls_home(&l, ONLINE_FORMAT_BN6) && !arena_souls_home(&l, ONLINE_FORMAT_FULL));
 	/* (what full rules carry, both games check alike) */
 	out.max_hp = 100;
 	assert(arena_loadout_check(&out, ONLINE_FORMAT_FULL, why, sizeof why));

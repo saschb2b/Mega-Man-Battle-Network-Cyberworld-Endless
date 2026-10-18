@@ -106,6 +106,11 @@ int hook_slot(void) {
 	return c ? (int)(c - cores) : 0;
 }
 
+int hook_slot_of(struct mCore *core) {
+	const HookCore *c = core ? core_of(core->cpu) : NULL;
+	return c ? (int)(c - cores) : -1;
+}
+
 /* (as the BIOS's Halt: the CPU idle, its cycles skipped, until an enabled
  * interrupt is raised) */
 void hook_halt(void) { GBAHalt((struct GBA *)here()->board); }

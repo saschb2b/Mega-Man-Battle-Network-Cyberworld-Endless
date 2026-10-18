@@ -55,10 +55,18 @@ static bool a_soul(int soul) { return soul >= SOUL_FIRST && soul < SOUL_FIRST + 
 
 /* ---- the sprite and its palette ---- */
 
+/* the side whose MegaMan the sprite selector draws: its caller's r5 where that is a side's player (a link battle's other
+ * MegaMan, the Arena's), else MegaMan's own */
+static int drawn_side(uint32_t obj) {
+	for (uint32_t side = 0; obj && side < 2; ++side)
+		if (obj == hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP)) return (int)side;
+	return megaman_side();
+}
+
 /* (the sprite selector 0x0800FC9E's read of its table by the form, r1 the form, MegaMan's) the Soul's sprite in list 0 */
 static HookAct sprite_read(HookRegs *r, void *user) {
 	(void)user;
-	int soul = soul_of(megaman_side());
+	int soul = soul_of(drawn_side(r->r[5]));
 	if (r->r[1] != BN6_FORM_PROXY || !a_soul(soul)) return HOOK_CONTINUE;
 	int k = soul - SOUL_FIRST + ((breaks & SOULLOOK_BREAK_SPRITE) ? 1 : 0);
 	r->r[2] = (uint32_t)(SOUL_LIST0_FIRST + k % SOULS);
