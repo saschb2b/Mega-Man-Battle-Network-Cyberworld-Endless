@@ -348,6 +348,33 @@ Output: `.build/tour/tour_bXX.png`, the rooms of one area at 2x, four to a
 row. This is what the game itself draws: objects, NPCs, decoration and
 collision problems show up here that the atlas cannot show.
 
+## The Net Square: two games at once
+
+The Square needs a server: `python3 build.py server-run --config
+server/server.example.ini` runs one on `ws://127.0.0.1:8765/presence`
+(seed 120; another `seed` in the file gives another Square). A game's
+data folder points its gate at it with a `network.ini` of its own:
+
+```
+identity=0123456789abcdef0123456789abcdef
+name=Alpha
+named=1
+selected=1
+consent=2
+server=wss://cyberworld.saschb2b.com/presence
+server=ws://127.0.0.1:8765/presence
+```
+
+(the keeper's first-time questions answered: name chosen, the second
+server picked and consented to), or `--dev online=URL,onlinename=NAME`
+points the gate at a server and skips his questions for a session. Two
+`tools/play.py` sessions, each with its own folder and identity, then play
+it from `--scene home --run-depth 7`: `place 16 72 3` puts MegaMan on the
+gate, LEFT and A answer Yes; the log names the Square's area and arrival
+("online: square area 0, arrival at X,Y") and every visit's end and
+trade. A visit plays at the clock's pace even headless, so the two meet.
+Never point a test at the official server.
+
 ## The Arena on one machine
 
 `--dev arena` starts on a Practice NetBattle of BN6's own between two

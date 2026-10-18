@@ -106,7 +106,7 @@ another's"):
 | `+0x100000` | The town's tile map (LZ77, literal blocks) | `town.c` |
 | `+0x130000` | The town's coordinate data (walls, section 2, the jack-in cells, the checks) | `coords.c` |
 | `+0x140000`-`+0x148000` | The town's NPC scripts, text, lists, warps, objects, check table and map text archive, apart from the layers' | `mapslot.c` |
-| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
+| `+0x148000`-`+0x14C000` | Lan's HP's (docs/HOME.md): the courier's text archive (768 bytes, written again as what waits changes), the Net Square gate keeper's (1536 bytes, written again as the player's Square settings change), the gate's NPC script (its animation byte the director writes) and its keeper's, his and his mark's NPC scripts and the ways back's marks', its NPC list and empty map scripts, its own warp list (BN6's jack-out on its blue pad, the run's portals pointed by the director) and the map music list it adds to | `mapslot.c`, `lanhp.c` |
 | `+0x14C000`-`+0x150000` | Lan's house's and room's: their empty NPC lists and map scripts, their own warp lists (BN6's doors copied in), the room's jack-in table and the music list | `mapslot.c`, `lan_house.c` |
 | `+0x150000`-`+0x152000` | The director's conversations: one text archive, rewritten for each | `talk.c` |
 | `+0x152000`-`+0x153000` | The map-name label's archive: a copy of the game's with its 244 names pointed at where the run is ("Layer 12", "ACDC Town"); its other scripts (the PET's HP, zenny and BugFrags, 0xF0-0xF2) kept | `director_layer.c` |
@@ -396,7 +396,15 @@ set while Lan's HP's link on the left and down front is no way back,
 which sends their way-back marks off, piece 2; `0x1472` that the
 courier has been heard, which his words set and which sends his burst
 off, piece 2; `0x146B` that this visit's order was
-made at AsterLand's counter, piece 6).
+made at AsterLand's counter, piece 6; `0x1473` the Yes of the Net
+Square's gate's questions and `0x1474`-`0x1476` its keeper's options,
+the official Square, another server and the name, piece 11, which the
+director clears as each visit home begins). In the Net Square itself,
+whose RAM is thrown away on the way home, `0x1480`-`0x14A0` are its own:
+the phrases and emotes asked for (`0x1480`-`0x148D`), the channel
+keeper's next and last (`0x148E`, `0x148F`), a peer's wave, mute and
+block (`0x1490`-`0x1492`), the way home (`0x1493`), Trade Central's
+options and the Navi picked (`0x1494`-`0x14A0`); docs/ONLINE.md.
 CONTINUE loads the state and enters the map again, so the game reloads it
 from the current build's tables.
 

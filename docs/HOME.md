@@ -677,6 +677,63 @@ for navis on platforms, docs/ROM_DATA.md, Talking reach), and widened it
 read past every check a cell deep, the request board, the Chip Trader
 and all of Lan's room's. It is widened only in the Net now.
 
+### 11. The Net Square's gate
+
+Going online is a place in Lan's HP, not a menu (epic #120; the owner,
+PR #126: "no new menu screens where the world can do the job", and Lan's
+HP the place for it, after Warframe's Orbiter, whose stations route the
+player). It was the PC's third choice (Jack in / Network / Cancel) and a
+Network screen of its own; both are gone.
+
+**The station.** BN6's great white teleporter (sprite list 7's `0x06`,
+its core lit in animation 0 and dark in 2) stands on the free floor at
+the room's front (world 16, 72: the band from y 48 to 96 between the
+front link squares and the edge holds nothing of BN6's), drawn at layer
+priority 2 so the room's floor lines stay under it; its keeper, a
+Mr.Prog (list 6's 61), stands beside it facing the room. The blue pad
+docks, the pink pad and the links lead on and back, the gate leads out:
+one room, its stations each a way, as the Orbiter's are. Built in
+`src/map/lanhp.c` (the gate, its keeper) and `src/director/director_gate.c`
+(what they do), their words in `gate_words.c`.
+
+**Stepped on**, the gate asks first, in BN6's chat boxes:
+
+- the first time a server is used, the keeper says plainly what its
+  server sees (the PET's address, the player's name and MegaMan as he
+  is) and that nothing there changes the run, then asks "SO! GO
+  ONLINE?", the cursor on No;
+- with no name chosen yet, he asks for one first: the name field opens
+  over the game, then his question;
+- after that MegaMan asks "To the Net Square,Lan?" each time.
+
+A Yes saves the run where MegaMan stands (the write confirmed: a failed
+save keeps him home, "Huh? The save didn't go through..."), and the
+visit begins (`src/online/online_visit.c`): the gate's core flickers
+while the server answers, MegaMan held; B calls it off. The Square is
+built into the running game and MegaMan warped there; the way back loads
+the gate's checkpoint as CONTINUE does, no new boot, and he stands on the
+gate again, the gate asking anew only once he steps off it and on. What
+the visit ended in is said there: "We're home,Lan!", or the keeper's word
+on a server that did not answer, runs another version, is full, or turned
+the name down, never the server's own text; and a trade the visit made
+is the run's now (docs/ONLINE.md, Trade Central).
+
+**Talked to**, the keeper sets where the gate leads and the player's
+name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a field: host or
+host:port, `wss://` and `/presence` added), MY NAME. The two fields are
+the only screen of its own going online has (`src/online/online_field.c`,
+in the PET's colours, a keyboard on the pad and by touch, the system's
+own keyboard and paste where there is one). Settings live in the data
+folder's `network.ini`: the name and whether it was chosen, the servers
+(the official one first, then the last address typed), which one the
+gate leads to, each one's consent, and the private identity each
+server's public one is derived from.
+
+There is no going online without a run: a new run starts in Lan's HP, so
+a player with no run in progress starts one and walks to the gate.
+`--dev online=URL,onlinename=NAME` points the gate at a server for a test
+and skips the keeper's questions (docs/DEVTOOLS.md).
+
 ## What must not move home
 
 - **Power across runs.** Portals are the run's; pay is the run's; the

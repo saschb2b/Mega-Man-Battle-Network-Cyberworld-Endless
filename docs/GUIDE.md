@@ -729,6 +729,43 @@ A file from a newer version of the game, a damaged one, or a run that
 needs BN5 where **BN5 Team Colonel (USA)** is missing (always on the 3DS)
 is refused, and your saves stay as they were.
 
+### Online: the Net Square
+
+Other players' MegaMen meet in a **Net Square**, a net of its own on a
+server. The way there is the great white gate at the front of Lan's HP,
+the room MegaMan comes home to after each act and where every run
+begins. Step on it: the first time, the Mr.Prog who keeps it asks for
+the name other players will see and says what the server learns (your
+PET's address, that name, and MegaMan as he is), and asks before you go,
+the cursor on **No**. After that MegaMan asks each time. Yes saves the
+run right there, and you go; the gate flickers while the server answers,
+and B calls it off.
+
+Nothing in the Square changes your run: no battles of the net, no heal,
+no shop, no saves. Coming home puts MegaMan back on the gate, exactly as
+he was; closing the game in the Square does the same at the next
+CONTINUE. The one thing that comes home with you is a chip you traded.
+
+In the Square:
+
+- **L** has MegaMan say something or do an emote; everyone in your
+  channel sees it over his head.
+- **A** facing another player's MegaMan shows his card (HP, act and
+  layer, Crosses and Souls) and lets you wave, mute or block him. Blocked
+  players are gone from your Square.
+- **The Mr.Prog by the welcome sign** moves you to the next or last
+  channel; a channel holds eight players.
+- **Trade Central**, a desk in a wing off the plaza, trades one of your spare
+  chips (copies beyond those in your folders) for another player's: pick
+  them, pick the chip, they pick one back, and when you both say yes the
+  chips swap as you come home.
+- **R**, or the pad you arrived by, takes you home.
+
+Talk to the gate's keeper to change your name or the server: the
+official Square, or another one's address (`host` or `host:port`, as its
+owner gives it). Anyone can run a server; [server/README.md](../server/README.md)
+says how.
+
 ## Screen
 
 The game's 240x160 picture is scaled by a whole number so it stays sharp: 5x

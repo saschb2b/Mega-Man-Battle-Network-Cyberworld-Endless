@@ -339,6 +339,9 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The people of AsterLand and the Cyber Academy (the clerk, the NetBattle club), and the Number Trader's sign | `src/world/place_lines.c` |
 | Requests at home: the askers' offers, waits and pay, the board's post, MegaMan on a request in the Net and at home | `src/world/job_words.c` |
 | MegaMan and Lan coming home to Lan's HP after an act; MegaMan at its portals; the courier Mr.Prog there | `src/director/home_words.c` |
+| The Net Square's gate in Lan's HP: its keeper Mr.Prog, MegaMan before and after a visit | `src/director/gate_words.c` |
+| The Net Square: MegaMan's menu, another player's card, the channel keeper | `src/online/square_words.c` |
+| Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
 
 ## Before you commit a line
