@@ -18,6 +18,13 @@ STATE = struct.Struct("!BiiiB")
 PEER = struct.Struct("!I16siiiB16s")
 PROFILE = struct.Struct("!HHBBBHHHBHI49s")
 WELCOME = struct.Struct("!BIIHBH16sH")
+TRADE = struct.Struct("!BBIHBHB")
+TRADE_STATE = struct.Struct("!BBII16sHBHB")
+ARENA = struct.Struct("!BBIH")
+ARENA_STATE = struct.Struct("!BBII16sBB")
+ARENA_INPUT = struct.Struct("!BIIB")
+ARENA_HASH = struct.Struct("!BIIQ")
+ARENA_LOADOUT = struct.Struct("!BIH")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -32,13 +39,13 @@ class ProtocolError(Exception):
 def read_hello(data):
     if len(data) < HELLO.size:
         raise ProtocolError("Expected HELLO")
-    kind, version, make, layer_hash, rom, digest, key, channel, length = HELLO.unpack_from(data)
+    kind, version, make, square_hash, rom, digest, key, channel, length = HELLO.unpack_from(data)
     if kind != SPEC["hello"] or len(data) != HELLO.size + length:
         raise ProtocolError("Malformed HELLO")
     if version != SPEC["version"]:
         raise ProtocolError("Protocol version mismatch", 2)
-    if make != SPEC["layer_make"] or layer_hash != SPEC["layer_hash"]:
-        raise ProtocolError("Layer generation mismatch", 3)
+    if make != SPEC["square_make"] or square_hash != SPEC["square_hash"]:
+        raise ProtocolError("Square generation mismatch", 3)
     if rom != SPEC["rom_code"].encode() or digest.hex() != SPEC["rom_sha1"]:
         raise ProtocolError("BN6 identity mismatch", 4)
     if not any(key):
@@ -52,8 +59,8 @@ def read_hello(data):
 def hello(name, key=None, channel=0, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
-    return HELLO.pack(spec["hello"], spec["version"], spec["layer_make"],
-                      spec["layer_hash"], spec["rom_code"].encode(),
+    return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
+                      spec["square_hash"], spec["rom_code"].encode(),
                       bytes.fromhex(spec["rom_sha1"]), key or secrets.token_bytes(16), channel, len(name)) + name
 
 
@@ -96,3 +103,54 @@ def read_social(data):
 
 def error(exc):
     return struct.pack("!BH", SPEC["error"], exc.code) + str(exc).encode("ascii")[:96]
+
+
+def chip_valid(chip, code):
+    """BN6's own chips by id and code (A..Z, * as 26); BN5's never trade."""
+    return 1 <= chip <= SPEC["chip_last"] and 0 <= code <= SPEC["code_last"]
+
+
+def read_trade(data):
+    if len(data) != TRADE.size or data[0] != SPEC["trade"]:
+        raise ProtocolError("Malformed TRADE")
+    _, action, ref, give, give_code, get, get_code = TRADE.unpack(data)
+    if not 1 <= action <= 4 or not ref:
+        raise ProtocolError("Invalid trade action")
+    if action in (1, 2, 3) and not chip_valid(give, give_code):
+        raise ProtocolError("Invalid trade chip")
+    if action in (2, 3) and not chip_valid(get, get_code):
+        raise ProtocolError("Invalid trade chip")
+    return action, ref, (give, give_code), (get, get_code)
+
+
+def trade_state(stage, trade_id, other, identity, mine, theirs):
+    return TRADE_STATE.pack(SPEC["trade_state"], stage, trade_id, other, identity, mine[0], mine[1], theirs[0], theirs[1])
+
+
+def read_arena(data):
+    if len(data) != ARENA.size or data[0] != SPEC["arena"]:
+        raise ProtocolError("Malformed ARENA")
+    _, action, ref, latency = ARENA.unpack(data)
+    if not 1 <= action <= 4 or not ref or latency > 5000:
+        raise ProtocolError("Invalid arena action")
+    return action, ref, latency
+
+
+def arena_state(stage, match_id, other, identity, side=0, delay=0):
+    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay)
+
+
+def arena_relay(data):
+    """An arena message for the opponent: its match id, its shape checked."""
+    kind = data[0] if data else 0
+    if kind == SPEC["arena_input"] and len(data) >= ARENA_INPUT.size:
+        _, match, frame, count = ARENA_INPUT.unpack_from(data)
+        if 1 <= count <= SPEC["arena_input_max"] and len(data) == ARENA_INPUT.size + 2 * count:
+            return match
+    elif kind == SPEC["arena_hash"] and len(data) == ARENA_HASH.size:
+        return ARENA_HASH.unpack(data)[1]
+    elif kind == SPEC["arena_loadout"] and len(data) >= ARENA_LOADOUT.size:
+        _, match, length = ARENA_LOADOUT.unpack_from(data)
+        if 1 <= length <= SPEC["arena_loadout_max"] and len(data) == ARENA_LOADOUT.size + length:
+            return match
+    raise ProtocolError("Malformed arena relay")

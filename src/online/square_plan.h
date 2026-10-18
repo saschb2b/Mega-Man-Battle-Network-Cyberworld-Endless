@@ -15,7 +15,7 @@
  * SQUARE_HASH beside it is square_plan_hash of seed 120's plan, which the
  * unit tests hold the generator to. */
 #define SQUARE_MAKE 1
-#define SQUARE_HASH 0u
+#define SQUARE_HASH 0x868CD1A7u
 
 #define SQUARE_W 28
 #define SQUARE_H 28

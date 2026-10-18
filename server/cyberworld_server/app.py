@@ -10,6 +10,8 @@ import struct
 import time
 
 from . import protocol, websocket
+from .arena import Arena
+from .trade import Trades
 from .identity import IdentityStore
 
 LOG = logging.getLogger("cyberworld.server")
@@ -34,7 +36,7 @@ class Player:
 class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
                  player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
-                 pending_cap=16, handshake_timeout=5.0):
+                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -61,6 +63,8 @@ class Server:
         self.roster_task = None
         self.roster_failed = False
         self.listener = self.ticker = None
+        self.trading, self.arena_on = trading, arena
+        self.trades, self.arena = Trades(self), Arena(self)
 
     def event(self, kind, **fields):
         entry = dict(event=kind, **fields)
@@ -136,6 +140,8 @@ class Server:
                 # A replaced session has already handed its place on.
                 if player and self.players.get(player.id) is player:
                     del self.players[player.id]
+                    self.trades.left(player.id)
+                    self.arena.left(player.id)
                     self.event("leave", id=player.id, players=len(self.players))
             finally:
                 writer.close()
@@ -167,6 +173,8 @@ class Server:
         self.next_id = self.next_id % 0xffffffff + 1
         if old:
             del self.players[old.id]
+            self.trades.left(old.id)
+            self.arena.left(old.id)
             self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
@@ -182,12 +190,22 @@ class Server:
         player.writer.close()
 
     async def serve_player(self, reader, player):
-        tokens, previous = 40.0, time.monotonic()
+        # (the Arena's keys come 60 times a second: a bucket of their own)
+        tokens, relay, previous = 40.0, 150.0, time.monotonic()
+        relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"])
         while True:
             opcode, data = await asyncio.wait_for(websocket.receive(reader), 15)
             now = time.monotonic()
-            tokens = min(40, tokens + (now - previous) * 30) - 1
-            previous = now
+            elapsed, previous = now - previous, now
+            if opcode == 2 and data and data[0] in relayed:
+                relay = min(150, relay + elapsed * 120) - 1
+                tokens = min(40, tokens + elapsed * 30)
+                if relay < 0:
+                    raise protocol.ProtocolError("Message rate exceeded", 8)
+                self.arena.relay(player, data)
+                continue
+            tokens = min(40, tokens + elapsed * 30) - 1
+            relay = min(150, relay + elapsed * 120)
             if tokens < 0:
                 raise protocol.ProtocolError("Message rate exceeded", 8)
             if opcode == 8:
@@ -216,6 +234,10 @@ class Server:
             await self.social(player, data, now)
         elif len(data) == 3 and data[0] == protocol.SPEC["channel"]:
             await self.switch_channel(player, struct.unpack("!H", data[1:])[0])
+        elif data and data[0] == protocol.SPEC["trade"]:
+            await self.trades.handle(player, data)
+        elif data and data[0] == protocol.SPEC["arena"]:
+            await self.arena.handle(player, data)
         else:
             raise protocol.ProtocolError("Unknown or out-of-order message")
 
@@ -223,7 +245,7 @@ class Server:
         return {"status": "ok", "protocol": protocol.SPEC["version"], "name": self.name,
                 "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
                 "room_capacity": self.capacity, "channels": self.max_channels,
-                "rules": {"free_text": False, "trading": False, "arena": False}}
+                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on}}
 
     def choose_channel(self, requested, exclude=0):
         if requested > self.max_channels:
@@ -246,6 +268,8 @@ class Server:
         if not channel:
             await self.notice(player, 10, "Channel is full or unavailable")
             return
+        self.trades.left(player.id)
+        self.arena.left(player.id)
         player.channel = channel
         await self.welcome(player)
         self.event("channel", id=player.id, channel=channel)
@@ -313,6 +337,8 @@ class Server:
             if now - self.last_moderation >= self.housekeeping:
                 self.last_moderation = now
                 await self.moderation()
+                self.trades.expire(now)
+                self.arena.expire(now)
             for player in list(self.players.values()):
                 if player.writer.is_closing():
                     continue

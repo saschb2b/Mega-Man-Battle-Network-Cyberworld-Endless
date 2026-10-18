@@ -28,9 +28,8 @@ async def run(args):
     if args.admin:
         print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes), indent=2))
         return
-    for option in ("free_text", "trading", "arena"):
-        if settings.getboolean(option, False):
-            raise ValueError(option + " is unavailable in server v1")
+    if settings.getboolean("free_text", False):
+        raise ValueError("free_text is unavailable: quick phrases and emotes only")
     tls = None
     cert, key = settings.get("tls_certificate"), settings.get("tls_key")
     if bool(cert) != bool(key):
@@ -45,7 +44,8 @@ async def run(args):
                         tuple(settings.get("origins", "").split()), events,
                         player_cap=settings.getint("player_cap", 64), state_dir=state_dir,
                         name=settings.get("name", "Cyberworld Endless"), motd=settings.get("motd", "Welcome to the Net Square"),
-                        whitelist=tuple(public_id(value) for value in settings.get("whitelist", "").split()))
+                        whitelist=tuple(public_id(value) for value in settings.get("whitelist", "").split()),
+                        trading=settings.getboolean("trading", True), arena=settings.getboolean("arena", True))
         await server.start(host, port, tls)
         stop = asyncio.Event()
         for sig in (signal.SIGINT, signal.SIGTERM):
@@ -58,7 +58,7 @@ async def run(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Cyberworld Endless Net Square server v1 (ROM-free)")
+    parser = argparse.ArgumentParser(description="Cyberworld Endless Net Square server (ROM-free)")
     parser.add_argument("--config")
     parser.add_argument("--host")
     parser.add_argument("--port", type=int)

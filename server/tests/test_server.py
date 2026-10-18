@@ -108,8 +108,8 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.server.players), 1)
 
     async def test_rejects_incompatible_identity(self):
-        for identity, code in ((dict(version=protocol.SPEC["version"] + 1), 2), (dict(layer_make=0), 3),
-                               (dict(layer_hash=0), 3), (dict(rom_code="BAD!"), 4),
+        for identity, code in ((dict(version=protocol.SPEC["version"] + 1), 2), (dict(square_make=0), 3),
+                               (dict(square_hash=protocol.SPEC["square_hash"] ^ 1), 3), (dict(rom_code="BAD!"), 4),
                                (dict(rom_sha1="00" * 20), 4)):
             client, response = await self.connect(**identity)
             self.assertEqual(response[:3], struct.pack("!BH", protocol.SPEC["error"], code))
@@ -163,7 +163,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         reader, writer = await asyncio.open_connection("127.0.0.1", self.port)
         writer.write(b"GET /presence HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
                      b"Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: MDEyMzQ1Njc4OWFiY2RlZg==\r\n"
-                     b"Sec-WebSocket-Protocol: cyberworld.presence.v2\r\nOrigin: https://untrusted.invalid\r\n\r\n")
+                     b"Sec-WebSocket-Protocol: " + protocol.SPEC["subprotocol"].encode() + b"\r\nOrigin: https://untrusted.invalid\r\n\r\n")
         await writer.drain()
         self.assertTrue((await reader.read()).startswith(b"HTTP/1.1 400"))
         self.assertFalse(self.server.players)
@@ -177,13 +177,19 @@ class ContractTests(unittest.TestCase):
         for name in ("hello", "welcome", "state", "snapshot", "error", "ping", "pong",
                      "max_players", "name_bytes", "max_message", "coordinate_limit", "profile", "inspect", "card",
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
-                     "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes"):
+                     "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
+                     "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
-        make = (ROOT / "src/net/layer_make.h").read_text()
-        self.assertEqual(int(re.search(r"#define LAYER_MAKE (\d+)", make)[1]), protocol.SPEC["layer_make"])
-        self.assertEqual(int(re.search(r"#define LAYER_MAKE_HASH (0x\w+)u", make)[1], 16), protocol.SPEC["layer_hash"])
+        plan = (ROOT / "src/online/square_plan.h").read_text()
+        self.assertEqual(int(re.search(r"#define SQUARE_MAKE (\d+)", plan)[1]), protocol.SPEC["square_make"])
+        self.assertEqual(int(re.search(r"#define SQUARE_HASH (0x\w+)u", plan)[1], 16), protocol.SPEC["square_hash"])
+        self.assertEqual(protocol.TRADE.size, protocol.SPEC["trade_bytes"])
+        self.assertEqual(protocol.TRADE_STATE.size, protocol.SPEC["trade_state_bytes"])
+        self.assertEqual(protocol.ARENA.size, protocol.SPEC["arena_bytes"])
+        self.assertEqual(protocol.ARENA_STATE.size, protocol.SPEC["arena_state_bytes"])
         self.assertEqual(protocol.PROFILE.size, protocol.SPEC["profile_bytes"])
         self.assertEqual(protocol.PEER.size, protocol.SPEC["peer_bytes"])
         self.assertEqual(protocol.WELCOME.size, protocol.SPEC["welcome_bytes"])

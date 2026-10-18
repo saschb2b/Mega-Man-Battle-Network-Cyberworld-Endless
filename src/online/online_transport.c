@@ -6,13 +6,42 @@
 
 #include <SDL.h>
 
-#include "layer_make.h"
 #include "online_browser.h"
 #include "online_socket.h"
 #include "online_wire.h"
 #include "rom.h"
+#include "square_plan.h"
+
+/* Trade Central's and the Arena's messages (protocol.json): sent as soon as
+ * the worker's next pass, and taken in apart from the snapshot, each a u16
+ * length and its bytes in a ring */
+#define RING 16384
+typedef struct { uint8_t b[RING]; unsigned head, tail; } Ring;
+
+static bool ring_put(Ring *r, const uint8_t *data, size_t size) {
+	if (!size || size > ONLINE_MAX_MESSAGE || RING - (r->head - r->tail) < size + 2) return false;
+	uint8_t len[2] = { (uint8_t)(size >> 8), (uint8_t)size };
+	for (size_t i = 0; i < 2; ++i) r->b[r->head++ % RING] = len[i];
+	for (size_t i = 0; i < size; ++i) r->b[r->head++ % RING] = data[i];
+	return true;
+}
+
+static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
+	if (r->head == r->tail) return 0;
+	size_t size = (size_t)r->b[r->tail % RING] << 8 | r->b[(r->tail + 1) % RING];
+	if (size > cap) { r->tail += 2 + (unsigned)size; return 0; }
+	r->tail += 2;
+	for (size_t i = 0; i < size; ++i) out[i] = r->b[r->tail++ % RING];
+	return size;
+}
+
+static bool mail(uint8_t kind) {
+	return kind == ONLINE_TRADE_STATE || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
+		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH;
+}
 
 static struct {
+	Ring outbox, inbox;
 	bool enabled;
 	SDL_Thread *thread;
 	SDL_mutex *mutex;
@@ -32,8 +61,8 @@ static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY
 	uint8_t *out = transport.hello;
 	out[0] = ONLINE_HELLO;
 	online_put16(out + 1, ONLINE_PROTOCOL_VERSION);
-	online_put16(out + 3, LAYER_MAKE);
-	online_put32(out + 5, LAYER_MAKE_HASH);
+	online_put16(out + 3, SQUARE_MAKE);
+	online_put32(out + 5, SQUARE_HASH);
 	memcpy(out + 9, R.layout->code, 4);
 	for (size_t i = 0; i < 20; ++i) {
 		char pair[3] = { R.layout->sha1[i * 2], R.layout->sha1[i * 2 + 1], 0 };
@@ -89,6 +118,29 @@ static bool send_queued(void) {
 	return !size || send_message(data, size);
 }
 
+/* the outbox, all of it */
+static bool send_mail(void) {
+	uint8_t data[ONLINE_MAX_MESSAGE];
+	for (;;) {
+		if (transport.mutex) SDL_LockMutex(transport.mutex);
+		size_t size = ring_take(&transport.outbox, data, sizeof data);
+		if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+		if (!size) return true;
+		if (!send_message(data, size)) return false;
+	}
+}
+
+/* a message come in: Trade Central's and the Arena's to the inbox, the
+ * rest into the snapshot (false: the connection is to end) */
+static bool take_in(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
+	if (!size || !mail(data[0])) return online_wire_message(data, size, now, snapshot);
+	if (!snapshot->connected) return false;
+	if (transport.mutex) SDL_LockMutex(transport.mutex);
+	bool room = ring_put(&transport.inbox, data, size);
+	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+	return room;
+}
+
 static bool enqueue(const uint8_t *data, size_t size) {
 	if (!transport.enabled || size > sizeof transport.queue[0].data) return false;
 	if (transport.mutex) SDL_LockMutex(transport.mutex);
@@ -113,10 +165,11 @@ static void connected_loop(OnlineSnapshot *snapshot) {
 		if (got < 0) break;
 		if (got) {
 			last_receive = now;
-			if (!online_wire_message(data, (size_t)got, now, snapshot)) break;
+			if (!take_in(data, (size_t)got, now, snapshot)) break;
 			publish(snapshot);
 		}
 		if (now - last_receive > (snapshot->connected ? 15000u : 5000u)) break;
+		if (snapshot->connected && !send_mail()) break;
 		if (snapshot->connected && now - last_send >= 50) {
 			last_send = now;
 			if (!send_position() || !send_queued()) break;
@@ -142,7 +195,7 @@ static void browser_closed(void) {
 
 static void browser_received(const uint8_t *data, size_t size) {
 	transport.last_receive = SDL_GetTicks();
-	if (!online_wire_message(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
+	if (!take_in(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
 }
 
 static void browser_poll(void) {
@@ -244,6 +297,30 @@ bool online_transport_channel(uint16_t channel) {
 	uint8_t data[3] = { ONLINE_CHANNEL };
 	online_put16(data + 1, channel);
 	return enqueue(data, sizeof data);
+}
+
+bool online_transport_send(const uint8_t *data, size_t size) {
+	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
+		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH);
+	if (!transport.enabled || !ours) return false;
+#ifdef __EMSCRIPTEN__
+	return online_browser_send(data, size);
+#else
+	SDL_LockMutex(transport.mutex);
+	bool room = ring_put(&transport.outbox, data, size);
+	SDL_UnlockMutex(transport.mutex);
+	return room;
+#endif
+}
+
+size_t online_transport_receive(uint8_t *out, size_t cap) {
+#ifdef __EMSCRIPTEN__
+	if (transport.enabled) browser_poll();
+#endif
+	if (transport.mutex) SDL_LockMutex(transport.mutex);
+	size_t size = ring_take(&transport.inbox, out, cap);
+	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+	return size;
 }
 
 void online_transport_end(void) {
