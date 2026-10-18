@@ -2361,11 +2361,13 @@ def main():
     if a.action == 'test':
         ensure_image()
         code = docker('make', 'test', f'-j{os.cpu_count() or 4}', *(['WERROR=1'] if os.environ.get('CI') else []))
-        # (linux/steam/add-to-steam.py and the site's pages, on the host's Python)
+        # (linux/steam/add-to-steam.py, the site's pages and docs/re's status, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
+        if code == 0:   # docs/re's status in step with its ledger
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
