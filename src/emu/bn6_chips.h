@@ -121,4 +121,10 @@
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */
 
+/* BN6's blank chip records below its last id, 0x13F (docs/ROM_DATA.md, the
+ * chip records and the chip registry): no chip of BN6's, where BN5's chips
+ * are installed when its ROM is there. A rule of BN6's alone, so two games
+ * agree on it whatever ROMs each has (the Net Square's trades and Arena). */
+#define BN6_CHIP_BLANK(id) (((id) >= 203 && (id) <= 220) || ((id) >= 291 && (id) <= 300) || (id) == 314)
+
 #endif

@@ -29,6 +29,30 @@ MegaMan is. No menu screen of the project's own leads there: the world
 does, a gate in the room the run comes home to, in the manner of
 Warframe's Orbiter, with BN6's own chat boxes for every question.
 
+## Battle Network 5, there or not
+
+BN5's ROM is optional, so a Square holds players with it and without
+it, all in one channel: splitting them would halve a small crowd. What
+keeps them apart is a rule: **only plain BN6 crosses the wire.**
+
+- The Square is built from BN6's own nets (Central, Sky, Green), the same
+  for every game whatever ROMs it has.
+- A card names Crosses and Souls from words of the game's own, never
+  read from BN5's ROM.
+- Trade Central offers only BN6's own chips: the picker leaves out the
+  chips of BN5 a run holds, and a trade's chip is refused, by both games
+  and at settling, where it is past BN6's 319 or on one of BN6's blank
+  records (203-220, 291-300, 314: `BN6_CHIP_BLANK` in
+  `src/emu/bn6_chips.h`). BN5's chips are installed on those blank ids
+  in a game with BN5's ROM, so a rule that read the local registry
+  would let two games disagree; a rule of BN6's alone cannot.
+- The Arena runs two cores of plain BN6 on both games (no hook, no BN5
+  install), and a MegaMan carrying what plain BN6 has not (Souls,
+  another game's chips in the folder or the pack, by the same blank
+  records) is refused with MegaMan's word, on both sides by the same
+  check. The folder carried is the first one, so a run with BN5's chips
+  there sits NetBattles out until they leave it.
+
 ## Where things are
 
 | Part | Sources | Builds and checks |

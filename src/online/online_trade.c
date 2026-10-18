@@ -26,7 +26,9 @@ void online_trade_reset(void) { memset(&T, 0, sizeof T); }
 
 const TradeView *online_trade_view(void) { return &T; }
 
-static bool chip_ok(TradeChip c) { return c.id >= 1 && c.id <= ONLINE_CHIP_LAST && c.code <= ONLINE_CODE_LAST; }
+/* (one of BN6's own chips: never a blank record, where BN5's are installed
+ * on a game with its ROM and none on one without) */
+static bool chip_ok(TradeChip c) { return c.id >= 1 && c.id <= ONLINE_CHIP_LAST && !BN6_CHIP_BLANK(c.id) && c.code <= ONLINE_CODE_LAST; }
 
 bool online_trade_mail(const uint8_t *data, size_t size) {
 	if (size != ONLINE_TRADE_STATE_BYTES || data[0] != ONLINE_TRADE_STATE || data[1] < TRADE_OFFERED || data[1] > TRADE_CANCELLED) return false;

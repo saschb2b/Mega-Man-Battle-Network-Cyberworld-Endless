@@ -20,11 +20,11 @@ bool arena_loadout_check(const OnlineLoadout *l, char *why, size_t n) {
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folder[i];
 		if (e == 0xFFFF || !CHIP_ID(e)) continue;
-		if (CHIP_ID(e) > ARENA_BN6_CHIP_LAST) return REFUSE("the folder holds chip %u: another game's, which plain BN6 has not", CHIP_ID(e));
+		if (CHIP_ID(e) > ARENA_BN6_CHIP_LAST || BN6_CHIP_BLANK(CHIP_ID(e))) return REFUSE("the folder holds chip %u: another game's, which plain BN6 has not", CHIP_ID(e));
 		if (CHIP_CODE(e) > CODE_STAR) return REFUSE("the folder holds a chip of code %u, which BN6 has not", CHIP_CODE(e));
 	}
-	for (unsigned id = ARENA_BN6_CHIP_LAST + 1; id < ONLINE_PACK_IDS; ++id)
-		for (unsigned k = 0; k < BN6_PACK_ENTRY; ++k)
+	for (unsigned id = 1; id < ONLINE_PACK_IDS; ++id)
+		for (unsigned k = 0; k < BN6_PACK_ENTRY && (id > ARENA_BN6_CHIP_LAST || BN6_CHIP_BLANK(id)); ++k)
 			if (l->pack[id][k]) return REFUSE("the pack holds chip %u: another game's, which plain BN6 has not", id);
 	if (!l->max_hp || l->max_hp > HP_MOST) return REFUSE("MegaMan's max HP (%u) is not one BN6 holds", l->max_hp);
 	return true;

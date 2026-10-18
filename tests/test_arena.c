@@ -129,6 +129,12 @@ static void check(void) {
 	l.folder[7] = (uint16_t)(ARENA_BN6_CHIP_LAST + 1);
 	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "chip 320"));
 	l = starter();
+	l.folder[7] = 205;   /* (a blank record of BN6's: a BN5 chip on a game with BN5's ROM) */
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "chip 205"));
+	l = starter();
+	l.pack[314][0] = 1;
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "pack holds chip 314"));
+	l = starter();
 	l.folder[7] = 0xFFFF;   /* (an empty entry is no chip) */
 	assert(arena_loadout_check(&l, NULL, 0));
 	l.folder[8] = (uint16_t)(1 | 27u << 9);
