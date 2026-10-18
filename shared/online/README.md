@@ -1,4 +1,4 @@
-# Net Square protocol v2
+# Net Square protocol v3
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
@@ -8,7 +8,7 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
-| HELLO (1) | client → server, first | u16 protocol, u16 LAYER_MAKE, u32 LAYER_MAKE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1, 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
+| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1, 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
 | SNAPSHOT (4) | server → client | u8 peer count, then 49 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name |
@@ -21,8 +21,14 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID |
 | CHANNEL (13) | client → server | u16 requested channel (0 chooses one); success sends a fresh WELCOME |
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
+| ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
+| ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen |
 
-HELLO's fixed prefix is 52 bytes, WELCOME is 32, and CARD is 90. The
+HELLO's fixed prefix is 52 bytes, WELCOME is 32, CARD is 90, ARENA 8 and
+ARENA_STATE 28. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -70,7 +76,22 @@ validated even when throttled. Moderation is read again from private
 local files when they change. `/health` reports configuration and occupancy without
 player names, public identities, private keys or IPs.
 
-Changing the wire shape bumps the protocol version. Changing the Square
-generator must also change the compatible protocol version until it has
-its own generator-version field. The run's `LAYER_MAKE` keeps its existing
-meaning; the spike does not change the layouts of saved runs.
+The Arena's messages are relayed only between the two players of a
+started battle, and only in its shape; the server never sees a battle.
+Each game runs both players' linked BN6 cores and only their keys cross
+(docs/ONLINE_ARENA.md): START gives each its side of the cable and the
+input delay, from both players' latencies (`server/cyberworld_server/arena.py`).
+A challenge waits 30 seconds for its answer. One player of a battle
+sends ARENA's over (the cable's first, as the battle ends on its cores);
+a leave, a decline or a dropped connection ends it for both, ARENA_STATE
+ended telling each. The relayed messages have a bucket of their own,
+150 deep and refilled at 120 a second. NOTICE codes 16 (that Navi is
+busy), 17 (no longer here, or the battle is over) and 18 (the Arena is
+closed on this server) answer an ARENA that cannot be done.
+
+Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
+and SQUARE_HASH are the Square generator's own version and its plan's
+hash (`src/online/square_plan.h`), checked by the server against
+`protocol.json`'s `square_make` and `square_hash`: a change to what a seed
+makes bumps SQUARE_MAKE, not the protocol. The run's `LAYER_MAKE` keeps
+its own meaning and no longer crosses the wire.
