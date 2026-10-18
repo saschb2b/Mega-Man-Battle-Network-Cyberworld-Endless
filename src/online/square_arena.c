@@ -74,7 +74,15 @@ static struct {
 	char why[160];
 } A;
 
+/* the last battle this game fought from the Square, for its referee */
+static struct { unsigned result; char name[ONLINE_NAME_BYTES + 1]; } last;
+
 bool square_arena_offered(void) { return CW_ARENA; }
+
+unsigned square_arena_last(const char **name) {
+	*name = last.result ? last.name : NULL;
+	return last.result;
+}
 
 static bool out(void *context, const uint8_t *data, size_t size) {
 	(void)context;
@@ -331,6 +339,8 @@ static void battle(uint32_t keys) {
 		act(ARENA_ACT_OVER, A.match);
 	}
 	A.ended = true;
+	last.result = result == 1 || result == 2 ? result : 3;
+	snprintf(last.name, sizeof last.name, "%s", A.name);
 	say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
 	A.stage = SA_OVER;
 	A.over_t = 0;

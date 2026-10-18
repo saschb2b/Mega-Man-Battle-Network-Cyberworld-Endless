@@ -7,9 +7,10 @@
 #include "online_people.h"
 #include "online_text.h"
 #include "pixfont.h"
+#include "square_life.h"
 #include "platform.h"
 
-static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase; } labels[ONLINE_MAX_PLAYERS];
+static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase; } labels[ONLINE_MAX_PLAYERS + 1];
 static unsigned count;
 
 void online_labels_reset(void) { count = 0; }
@@ -49,6 +50,14 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	labels[count].name[0] = '\0';
 	labels[count].phrase = phrase_for(shown, shown->player_id, now);
 	++count;
+	/* (a word over one of the Square's own: the greeter's, a walker's) */
+	const char *bark;
+	int x, y, z;
+	if (count < sizeof labels / sizeof *labels && square_life_bark(&bark, &x, &y, &z)) {
+		label_at(x, y, z, camera);
+		labels[count].name[0] = '\0';
+		labels[count++].phrase = bark;
+	}
 }
 
 void online_labels_draw(void) {

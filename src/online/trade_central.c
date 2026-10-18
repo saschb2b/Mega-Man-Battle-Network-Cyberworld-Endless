@@ -47,6 +47,11 @@ static struct {
 	int nlisted;
 } C;
 
+/* the last player this game traded with, for the Square's talk */
+static char last_partner[ONLINE_NAME_BYTES + 1];
+
+const char *trade_central_last(void) { return last_partner[0] ? last_partner : NULL; }
+
 void trade_central_reset(void) {
 	memset(&C, 0, sizeof C);
 	online_trade_reset();
@@ -182,6 +187,7 @@ static void news(void) {
 		flag_clear(DEAL_FLAG);
 		said = C.reviewing = talk_ask(trade_review(name_of(v->other), mine, theirs), FACE_MEGAMAN, trade_deal_question(), DEAL_FLAG);
 	} else if (v->stage == TRADE_DONE) {
+		snprintf(last_partner, sizeof last_partner, "%s", name_of(v->other));
 		/* (kept on disk first: the run takes it at home, or at CONTINUE) */
 		if (!online_trade_keep(v)) fprintf(stderr, "online: the trade could not be kept; it is lost\n");
 		said = talk_start(trade_done(theirs), FACE_MEGAMAN);
