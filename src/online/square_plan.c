@@ -2,9 +2,10 @@
 
 #include <string.h>
 
-/* The areas a Square wears (rom.c's net areas: Central, Seaside, Sky and
- * Green Area, BN6's busy daylight nets), one picked by the seed */
-static const int areas[] = { 0, 1, 2, 3 };
+/* The areas a Square wears (rom.c's net areas: Central, Sky and Green
+ * Area, BN6's busy daylight nets), one picked by the seed; not Seaside,
+ * whose layers stand in another map's slot (rom.c's host) */
+static const int areas[] = { 0, 2, 3 };
 
 static void floor_box(SquarePlan *p, int x0, int y0, int x1, int y1) {
 	for (int y = y0; y <= y1; ++y)

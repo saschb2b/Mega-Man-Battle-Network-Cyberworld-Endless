@@ -133,7 +133,7 @@ static void square(void) {
 	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p.cell[y][x] == C_PATH;
 	assert(reached == floor);
 	for (int k = 0; k < SQ_PLACES; ++k) assert(p.cell[p.at[k][1]][p.at[k][0]] != C_VOID);
-	for (uint32_t seed = 0; seed < 64; ++seed) { square_plan(seed, &q); assert(q.area >= 0 && q.area < 4); }
+	for (uint32_t seed = 0; seed < 64; ++seed) { square_plan(seed, &q); assert(q.area == 0 || q.area == 2 || q.area == 3); }
 }
 
 int main(void) {
