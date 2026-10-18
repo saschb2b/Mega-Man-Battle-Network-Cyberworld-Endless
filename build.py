@@ -2053,11 +2053,15 @@ def lint_dead(update):
                               f'{nm} -A -g --defined-only {out}/obj/*/*.o'], capture_output=True, text=True)
         links[target] = run.stdout
     ensure_image()
+    test_bins = ' '.join('build/lint/' + name for name in
+                         ('test_core', 'test_emu', 'test_online_trade_capture', 'test_online_trade_stage', 'test_online_transport'))
     test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
                           ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
-                           'sh', '-c', f'rm -f build/lint/test_core build/lint/test_emu build/lint/test_online_trade_capture build/lint/test_online_trade_stage; '
-                           f'make -j{os.cpu_count() or 4} build/lint/test_core build/lint/test_emu build/lint/test_online_trade_capture build/lint/test_online_trade_stage 2>&1 >/dev/null; '
-                           'nm -A -g --defined-only build/lint/test/src/*/*.o'], capture_output=True, text=True)
+                           'sh', '-c', f'rm -f {test_bins} && '
+                           f'make -j{os.cpu_count() or 4} {test_bins} 2>&1 >/dev/null && '
+                           f'nm -A -g --defined-only build/lint/test/src/*/*.o {test_bins}'], capture_output=True, text=True)
+    if test.returncode:
+        sys.exit(f'the test links for build.py lint failed:\n{(test.stdout + test.stderr)[-1200:]}')
     links['tests'] = test.stdout
     reached, present = set(), set()
     for target, text in links.items():
@@ -2073,7 +2077,14 @@ def lint_dead(update):
         if not here:
             sys.exit(f'the {target} link for build.py lint gave nothing to read:\n{text[-600:]}')
         present |= here
-        reached |= here - dropped
+        if target == 'tests':
+            # A shared object can be dropped by one test and reached by
+            # another. The union of discarded sections loses that fact;
+            # the final executables say which public functions survive.
+            linked = set(re.findall(r'^build/lint/test_\w+:[0-9a-f]* T (\w+)$', text, re.MULTILINE))
+            reached |= {(f, n) for f, n in here if n in linked}
+        else:
+            reached |= here - dropped
     dead = Counter(f'{f}: {n}' for f, n in present - reached if n != 'main')
     return lint_compare('functions no build reaches', 'dead.txt',
                         'functions no build reaches (the host and handheld builds and the tests, build.py lint):\n'
@@ -2333,6 +2344,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_frame_compare.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_replay_compare.py')])
+        if code == 0:
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_carried_compare.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_online_trade_compare.py')])
         if code == 0:

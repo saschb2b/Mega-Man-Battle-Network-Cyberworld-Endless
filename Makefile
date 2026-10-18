@@ -411,6 +411,7 @@ server-test:
 # they reach (each source compiled on its own, so the linker names it)
 LINT_TEST_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_SRCS))
 LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
+LINT_TRANSPORT_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRANSPORT_TEST_SRCS))
 build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
@@ -418,6 +419,9 @@ build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
+
+build/lint/test_online_transport: $(LINT_TRANSPORT_OBJS)
+	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections $(shell pkg-config --libs sdl2) -lpthread -lm
 
 # Trade inventory capture: synthetic RAM checks, then the opt-in native oracle.
 TRADE_CAPTURE_TEST_SRCS := tests/test_online_trade_capture.c src/online/online_trade_capture.c src/online/online_trade_inventory.c src/online/online_snapshot.c
