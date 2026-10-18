@@ -87,15 +87,15 @@ how to verify it.
 | Fields of structures | 138 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 83 | 14 |
-| Constants, sizes and counts | 282 | 74 |
-| All | 1477 | 745 |
+| Constants, sizes and counts | 283 | 74 |
+| All | 1478 | 745 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | PET, mail and key items | 48 | 1 |
 | Shops and traders | 31 | 0 |
 | NaviCust | 17 | 1 |
-| Chips and folders | 280 | 218 |
+| Chips and folders | 281 | 218 |
 | Battle | 429 | 262 |
 | Text and fonts | 28 | 2 |
 | Sound | 9 | 2 |
