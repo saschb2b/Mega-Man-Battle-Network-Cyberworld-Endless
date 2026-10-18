@@ -35,7 +35,7 @@ struct Arena {
 	uint32_t tick, stalls, hashes;
 	Hashed pending[PENDING];
 	unsigned npending;
-	bool fought;
+	bool fought, apart;
 	unsigned result;
 	char error[160];
 };
@@ -120,6 +120,7 @@ static void compare_hashes(Arena *a) {
 		if (theirs != a->pending[i].hash) {
 			char why[96];
 			snprintf(why, sizeof why, "the two games went apart by frame %" PRIu32, a->pending[i].frame);
+			a->apart = true;
 			fail(a, why);
 			return;
 		}
@@ -187,7 +188,10 @@ unsigned arena_phase(const Arena *a, unsigned side) {
 }
 
 unsigned arena_result(const Arena *a) { return a->result; }
+bool arena_apart(const Arena *a) { return a->apart; }
 uint32_t arena_stalls(const Arena *a) { return a->stalls; }
+
+uint64_t arena_hash(Arena *a) { return a->pair ? arena_pair_hash(a->pair) : 0; }
 
 void arena_sound(Arena *a) {
 	if (a->pair) arena_pair_sound(a->pair, a->link->side);

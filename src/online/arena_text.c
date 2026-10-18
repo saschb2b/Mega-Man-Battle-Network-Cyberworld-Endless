@@ -9,3 +9,4 @@ const char arena_lost[] = "You lost the NetBattle.";
 const char arena_ended[] = "The NetBattle is over.";
 const char arena_stopped[] = "The NetBattle stopped:";
 const char arena_back[] = "A: back to the title";
+const char arena_back_square[] = "A: back to the Square";

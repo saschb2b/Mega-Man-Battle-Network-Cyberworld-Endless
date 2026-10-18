@@ -46,9 +46,15 @@ const uint32_t *arena_video(const Arena *a);
 unsigned arena_phase(const Arena *a, unsigned side);
 /* my result once OVER: 1 won, 2 lost (BN6_BATTLE_RESULT), 0 none */
 unsigned arena_result(const Arena *a);
+/* FAILED because the two pairs' hashes differed (both clients see it) */
+bool arena_apart(const Arena *a);
 /* the ticks stalled, waiting for the peer's keys */
 uint32_t arena_stalls(const Arena *a);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
+/* the pair's hash now (both cores' states, the cable's numbers), 0 before
+ * the battle: the same on both clients at the Custom screen, before the
+ * first frame (the network's link says it as its ready) */
+uint64_t arena_hash(Arena *a);
 
 #endif
