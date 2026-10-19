@@ -384,6 +384,14 @@ whose keys come over a local link held back as a network's would be;
 link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
 says what runs, how to script a battle headless and what it measured.
 
+`arenaroll=W` makes it roll back: the pair's snapshot kept before each
+frame and every W frames (1 to 30) the last W run again from the first's,
+the battle going on from there, each time compared with the state run
+straight (`arena: frame N: core ...'s state apart` where not), and every
+60th frame the game's hash said without the sound's fields (`the game's
+hash`), which a run with `arenaroll=0` says too, for the two to be
+compared ([ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback).
+
 A battle from the Net Square between two games takes `arenahp=N` too
 (each game's own MegaMan, so both pairs stay the same), and
 `arenadesync=N` changes the other player's keys from frame N for a

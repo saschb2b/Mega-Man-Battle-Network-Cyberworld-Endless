@@ -26,6 +26,7 @@
 #define PAIR_FRAMES  600    /* the pair: ten seconds of the battle */
 #define DEPTH        8      /* the rollback timed and checked: eight frames back */
 #define CHECK_EVERY  50     /* frames between two of them */
+#define LOADS        100    /* loads timed alone after them */
 #define SLICE        20     /* frames a tick, so the screen shows the way */
 #define BOOT_SLICE   64
 #define FRAME_MS     (1000.0 / 60.0)
@@ -107,8 +108,8 @@ static void one_frames(unsigned n) {
 
 static void one_said(void) {
 	char s[64];
-	snprintf(s, sizeof s, "1 CORE %zuKB", B.one_size / 1024);
-	say(s, "the game's core alone (from power-on, not a battle): its state %zu bytes", B.one_size);
+	snprintf(s, sizeof s, "1 CORE %uKB", (unsigned)(B.one_size / 1024));
+	say(s, "the game's core alone (from power-on, not a battle): its state %u bytes", (unsigned)B.one_size);
 	snprintf(s, sizeof s, " SAVE %.2f/%.2f LOAD %.2f/%.2f", mean(&B.one_save), B.one_save.worst, mean(&B.one_load), B.one_load.worst);
 	say(s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a frame %.3f ms (worst %.3f), over %u frames",
 		mean(&B.one_save), B.one_save.worst, mean(&B.one_load), B.one_load.worst, mean(&B.one_step), B.one_step.worst, B.one_save.n);
@@ -150,10 +151,12 @@ static bool pair_open(void) {
 /* a rollback of DEPTH frames, its time and whether the pair comes back to
  * the same state as run straight */
 static void pair_rollback(void) {
-	uint64_t straight = arena_pair_hash(B.pair), t = now();
+	uint64_t straight = arena_pair_hash(B.pair);
 	arena_pair_save(B.pair, B.straight);
 	unsigned from = B.frame + 1 - DEPTH;
+	uint64_t t = now();
 	if (!arena_pair_load(B.pair, B.ring[from % DEPTH])) { B.why = "the pair took no snapshot"; return; }
+	count(&B.load, t);
 	for (unsigned f = from; f <= B.frame; ++f) {
 		arena_pair_save(B.pair, B.ring[f % DEPTH]);
 		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])B.keys[f % DEPTH], true)) { B.why = "the cable stuck"; return; }
@@ -176,12 +179,14 @@ static void pair_frames(unsigned n) {
 		t = now();
 		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])keys, true)) { B.why = "the cable stuck"; return; }
 		count(&B.step, t);
-		/* (a rollback of one each frame: the snapshot put back, the frame run again) */
-		t = now();
-		if (!arena_pair_load(B.pair, snap)) { B.why = "the pair took no snapshot"; return; }
-		count(&B.load, t);
-		arena_pair_step(B.pair, (const uint16_t (*)[2])keys, true);
+		/* (the frames between two rollbacks run straight, no load among them: what a rollback must come back to) */
 		if (B.frame >= DEPTH && B.frame % CHECK_EVERY == 0) pair_rollback();
+	}
+	/* (then loads alone timed, the pass's state let go after them) */
+	for (unsigned i = 0; B.frame == PAIR_FRAMES && !B.why && i < LOADS; ++i) {
+		uint64_t t = now();
+		if (!arena_pair_load(B.pair, B.ring[i % DEPTH])) { B.why = "the pair took no snapshot"; return; }
+		count(&B.load, t);
 	}
 }
 
@@ -197,9 +202,10 @@ static void pair_said(void) {
 	bool full = B.format == ONLINE_FORMAT_FULL;
 	const char *rules = full ? "full rules: BN5's installs and hooks in both cores" : "BN6's rules";
 	char s[64];
-	snprintf(s, sizeof s, "PAIR SNAP %zuKB (+%zuB)", all / 1024, all - 2 * core);
-	say(full ? NULL : s, "the pair (%s, a Practice NetBattle, %u frames of scripted keys): a core's state %zu bytes, the snapshot %zu "
-		"(%zu of the cable's, the pair's own and what the hooks keep)", rules, B.step.n, core, all, all - 2 * core);
+	snprintf(s, sizeof s, "PAIR SNAP %uKB (+%uB)", (unsigned)(all / 1024), (unsigned)(all - 2 * core));
+	say(full ? NULL : s, "the pair (%s, a Practice NetBattle, %u frames of scripted keys): a core's state %u bytes, the snapshot %u "
+		"(%u of the cable's, the pair's own and what the hooks keep)", rules, B.step.n, (unsigned)core, (unsigned)all,
+		(unsigned)(all - 2 * core));
 	snprintf(s, sizeof s, " SAVE %.2f/%.2f LOAD %.2f/%.2f", mean(&B.save), B.save.worst, mean(&B.load), B.load.worst);
 	say(full ? NULL : s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a pair frame %.3f ms (worst %.3f)", mean(&B.save),
 		B.save.worst, mean(&B.load), B.load.worst, mean(&B.step), B.step.worst);
