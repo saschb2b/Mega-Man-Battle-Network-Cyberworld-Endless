@@ -28,11 +28,17 @@ bool arena_sync_hold(ArenaSync *s) {
 	for (unsigned i = 0; i < s->n; ++i)
 		if (s->lag[i] < least) least = s->lag[i];
 	if (least <= (int)arena_sync_target(s)) return false;
-	/* (held: my clock a tick later, so the lags already seen a tick less by it) */
-	for (unsigned i = 0; i < s->n; ++i) --s->lag[i];
+	arena_sync_shift(s);
+	--s->shifted;
 	s->since = 0;
 	++s->held;
 	return true;
+}
+
+void arena_sync_shift(ArenaSync *s) {
+	/* (my clock a tick later, so the lags already seen a tick less by it) */
+	for (unsigned i = 0; i < s->n; ++i) --s->lag[i];
+	++s->shifted;
 }
 
 void arena_pings_note(ArenaPings *p, uint32_t rtt_ms, uint32_t now_ms) {

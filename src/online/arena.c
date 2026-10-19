@@ -7,9 +7,12 @@
  * of its own frame clock, as the research found BN6's linked cores need
  * (docs/ONLINE_FRAME.md): a delay of three frames and the link's one-way
  * latency never waits. A frame due whose keys have not come is a stall;
- * the frames behind are caught up CATCH_UP a tick. The game that leads
- * holds a tick now and then, spread out, until it no longer does
- * (arena_sync.h): a stall is then a game truly fallen behind. */
+ * the frames behind are caught up CATCH_UP a tick. In the battle a stall
+ * moves my clock instead: the tick after it samples nothing and runs the
+ * frame that waited, so a wait shows one frame twice and never skips one;
+ * and the game that leads holds a tick now and then, spread out, until it
+ * no longer does (arena_sync.h): a stall is then a game truly fallen
+ * behind. */
 #include "arena.h"
 
 #include <inttypes.h>
@@ -45,6 +48,7 @@ struct Arena {
 	uint32_t tick, stalls, hashes;
 	uint32_t ticks, uneven;    /* the battle's ticks, and those that ran no frame or more than one */
 	uint32_t settled;          /* ... of them, once the clocks have settled (past SETTLED frames) */
+	bool owed;                 /* a stall last tick: this one holds my clock and runs the frame that waited */
 	Hashed pending[PENDING];
 	unsigned npending;
 	bool fought, apart;
@@ -171,9 +175,12 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	ArenaLink *l = a->link;
 	l->tick(l);
 	++a->ticks;
-	/* (the leading game's tick held: nothing sampled, no frame run, my clock a tick later) */
-	bool held = arena_sync_hold(&a->sync);
-	if (held) printf("arena: a tick held at frame %" PRIu32 ", the other's keys' lag past %u\n", a->input.next, arena_sync_target(&a->sync));
+	/* (my clock held a tick, nothing sampled: after a stall, or the leading game's) */
+	bool held = a->owed;
+	if (held) arena_sync_shift(&a->sync);
+	else if ((held = arena_sync_hold(&a->sync)))
+		printf("arena: a tick held at frame %" PRIu32 ", the other's keys' lag past %u\n", a->input.next, arena_sync_target(&a->sync));
+	a->owed = false;
 	uint32_t now = a->tick - 1;
 	if (!held && a->tick + a->input.delay < a->input.next + LEAD) {
 		uint32_t frame = (now = a->tick++) + a->input.delay;
@@ -185,9 +192,8 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	const char *broken = l->broken(l);
 	if (broken) return fail(a, broken);
 	bool settled = a->input.next >= SETTLED;
-	if (held) { ++a->uneven; a->settled += settled; return a->stage; }
-	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; ++a->uneven; a->settled += settled; return a->stage; }
 	uint32_t ran = a->input.next;
+	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; a->owed = true; }
 	for (unsigned i = 0; i < CATCH_UP && a->stage == ARENA_BATTLE && a->input.next <= now && arena_input_ready(&a->input); ++i) {
 		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
 		arena_input_take(&a->input, frame_keys);
@@ -200,7 +206,6 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 }
 
 void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
-uint32_t arena_held(const Arena *a) { return a->sync.held; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }

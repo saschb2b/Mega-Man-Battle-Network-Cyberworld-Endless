@@ -39,7 +39,6 @@
 #include "arena.h"
 #include "arena_folder.h"
 #include "arena_link_net.h"
-#include "arena_sync.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_view.h"

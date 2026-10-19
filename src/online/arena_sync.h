@@ -13,8 +13,9 @@
  * least lag over the last second is past that, it holds a tick (neither
  * samples nor runs a frame), one at most every ARENA_SYNC_SPREAD ticks,
  * until it is not. No message changes: each game judges by the keys it
- * gets and the round trip its transport measures. ROM-free:
- * tests/test_arena.c. */
+ * gets and the round trip its transport measures. A game that waited
+ * for a key holds its clock the tick after (arena.c), which moves it the
+ * same way (arena_sync_shift). ROM-free: tests/test_arena.c. */
 #ifndef CW_ARENA_SYNC_H
 #define CW_ARENA_SYNC_H
 
@@ -33,6 +34,7 @@ typedef struct {
 	uint32_t rtt_ms;                  /* my least round trip to the server seen, 0 none */
 	unsigned since;                   /* ticks since the last held */
 	uint32_t held;                    /* ticks held in all */
+	uint32_t shifted;                 /* ticks my clock was held after a stall */
 } ArenaSync;
 
 void arena_sync_init(ArenaSync *s);
@@ -45,6 +47,8 @@ void arena_sync_arrived(ArenaSync *s, int32_t lag);
 unsigned arena_sync_target(const ArenaSync *s);
 /* a tick begun: true where it is held (my clock waits a tick) */
 bool arena_sync_hold(ArenaSync *s);
+/* my clock held a tick for another reason (a stall's): the lags seen a tick less by it */
+void arena_sync_shift(ArenaSync *s);
 
 /* The round trips the transport measured in the Square, for the delay the
  * server picks (ARENA's latency field, unchanged on the wire): kept one a
