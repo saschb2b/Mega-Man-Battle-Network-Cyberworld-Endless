@@ -12,6 +12,7 @@
 #include "arena_link.h"
 #include "arena_link_net.h"
 #include "arena_loadout.h"
+#include "arena_sync.h"
 #include "arena_wire.h"
 #include "bn6.h"
 
@@ -395,6 +396,88 @@ static unsigned play_net(unsigned delay, unsigned latency, unsigned ticks) {
 	return stalls;
 }
 
+/* Two games' clocks, the second started `offset` ticks after the first (so
+ * the first leads), each `half[i]` ticks from the server, which passes the
+ * keys on at once; each game's sync told its round trip to the server;
+ * ticks of wall time run, each game holding as its sync says. Returns the
+ * holds of each, and in `late` the keys that came after their frame was
+ * due, from the fifth second on */
+typedef struct { uint32_t holds[2], late, last_hold[2]; } SyncRun;
+
+static SyncRun sync_run(unsigned offset, const unsigned half[2], unsigned delay, unsigned ticks) {
+	enum { QUEUE = 512 };
+	ArenaSync sync[2];
+	uint32_t clock[2] = { 0, 0 };   /* ticks sampled: each game's next tick */
+	struct { uint32_t at, frame; } q[2][QUEUE];
+	unsigned head[2] = { 0, 0 }, tail[2] = { 0, 0 };
+	SyncRun r = { { 0, 0 }, 0, { 0, 0 } };
+	for (unsigned i = 0; i < 2; ++i) {
+		arena_sync_init(&sync[i]);
+		arena_sync_rtt(&sync[i], (uint32_t)(2 * half[i] * 1000 / 60));
+	}
+	for (uint32_t w = 0; w < ticks; ++w) {
+		for (unsigned i = 0; i < 2; ++i) {
+			if (i == 1 && w < offset) continue;
+			if (arena_sync_hold(&sync[i])) {
+				assert(!r.holds[i] || w - r.last_hold[i] >= ARENA_SYNC_SPREAD);
+				++r.holds[i];
+				r.last_hold[i] = w;
+			} else {
+				unsigned k = tail[i]++ % QUEUE;
+				q[i][k].at = w + half[0] + half[1];
+				q[i][k].frame = clock[i]++ + delay;
+			}
+			/* the other's keys come: their lag, and whether they came in time (frame - 3 not yet due) */
+			unsigned o = i ^ 1;
+			while (head[o] != tail[o] && q[o][head[o] % QUEUE].at <= w) {
+				uint32_t frame = q[o][head[o]++ % QUEUE].frame;
+				int32_t now = (int32_t)clock[i] - 1;
+				arena_sync_arrived(&sync[i], now - (int32_t)(frame - delay));
+				if (w > 300 && (int32_t)frame - 3 < now) ++r.late;
+			}
+		}
+	}
+	return r;
+}
+
+static void sync(void) {
+	/* the target: the round trip's ticks and one */
+	ArenaSync s;
+	arena_sync_init(&s);
+	arena_sync_rtt(&s, 100);
+	arena_sync_rtt(&s, 0);
+	arena_sync_rtt(&s, 120);
+	assert(s.rtt_ms == 100 && arena_sync_target(&s) == 7);
+	/* no hold before a second's keys are judged, nor without a round trip */
+	ArenaSync none;
+	arena_sync_init(&none);
+	for (int i = 0; i < 200; ++i) { arena_sync_arrived(&none, 40); assert(!arena_sync_hold(&none)); }
+	/* the game whose ready came last leads by the one way (here four ticks, each 2 from the server) and
+	 * at the server's delay (3, a tick, the round trip) its keys came late: it holds, spread out, until
+	 * its lag is its round trip and a tick, then never again; the other never holds; nothing is late */
+	const unsigned even[2] = { 2, 2 };
+	SyncRun r = sync_run(4, even, 3 + 1 + 4, 1800);
+	assert(r.holds[0] == 3 && r.holds[1] == 0 && r.last_hold[0] < 300 && r.late == 0);
+	/* asymmetric halves (the server nearer the first): each holds its lag at its own round trip */
+	const unsigned uneven[2] = { 1, 3 };
+	r = sync_run(4, uneven, 3 + 1 + 6, 1800);
+	assert(r.holds[0] == 5 && r.holds[1] == 0 && r.late == 0);
+	/* clocks already even: nobody holds */
+	r = sync_run(0, even, 3 + 1 + 4, 1800);
+	assert(r.holds[0] == 0 && r.holds[1] == 0 && r.late == 0);
+	/* the round trips said for the delay: mean and twice the spread, one a ping */
+	ArenaPings p;
+	memset(&p, 0, sizeof p);
+	assert(arena_pings_latency(&p) == 0);
+	arena_pings_note(&p, 50, 1000);
+	arena_pings_note(&p, 90, 1500);   /* (within the same ping: not kept) */
+	assert(p.n == 1 && arena_pings_latency(&p) == 50);
+	arena_pings_note(&p, 70, 3000);
+	assert(p.n == 2 && arena_pings_latency(&p) == 80);   /* 60 and twice 10 */
+	for (uint32_t t = 5000; t < 40000; t += 2000) arena_pings_note(&p, 60, t);
+	assert(p.n == ARENA_SYNC_PINGS && arena_pings_latency(&p) == 60);
+}
+
 static void link_net(void) {
 	/* a delay past the lookahead and the one way never waits; one short
 	 * of it waits */
@@ -482,6 +565,7 @@ int main(void) {
 	wire();
 	loadout_bytes();
 	link_net();
+	sync();
 	puts("test_arena: ok");
 	return 0;
 }

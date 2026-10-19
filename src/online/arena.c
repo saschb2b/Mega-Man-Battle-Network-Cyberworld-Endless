@@ -7,7 +7,12 @@
  * of its own frame clock, as the research found BN6's linked cores need
  * (docs/ONLINE_FRAME.md): a delay of three frames and the link's one-way
  * latency never waits. A frame due whose keys have not come is a stall;
- * the frames behind are caught up CATCH_UP a tick. */
+ * the frames behind are caught up CATCH_UP a tick. In the battle a stall
+ * moves my clock instead: the tick after it samples nothing and runs the
+ * frame that waited, so a wait shows one frame twice and never skips one;
+ * and the game that leads holds a tick now and then, spread out, until it
+ * no longer does (arena_sync.h): a stall is then a game truly fallen
+ * behind. */
 #include "arena.h"
 
 #include <inttypes.h>
@@ -19,6 +24,8 @@
 
 #include "arena_boot.h"
 #include "arena_pair.h"
+#include "arena_roll.h"
+#include "arena_sync.h"
 #include "bn6.h"
 
 #define CATCH_UP 2       /* frames of the pair a tick may run */
@@ -28,6 +35,7 @@
  * the ring (ARENA_RING) and stopping it four seconds on */
 #define LEAD     (ARENA_RING / 2)
 #define PENDING  8       /* my hashes waiting for the peer's */
+#define SETTLED  300     /* frames of the battle after which the clocks have settled (arena_sync.h): its uneven ticks counted apart */
 
 typedef struct { uint32_t frame; uint64_t hash; } Hashed;
 
@@ -37,7 +45,13 @@ struct Arena {
 	ArenaBoot *boot;
 	ArenaPair *pair;
 	ArenaInput input;
+	ArenaSync sync;
 	uint32_t tick, stalls, hashes;
+	uint32_t ticks, uneven;    /* the battle's ticks, and those that ran no frame or more than one */
+	uint32_t settled;          /* ... of them, once the clocks have settled (past SETTLED frames) */
+	bool owed;                 /* a stall last tick: this one holds my clock and runs the frame that waited */
+	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
+	ArenaRoll *roll;
 	Hashed pending[PENDING];
 	unsigned npending;
 	bool fought, apart;
@@ -55,6 +69,7 @@ Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2
 	Arena *a = calloc(1, sizeof *a);
 	if (!a) return NULL;
 	a->link = link;
+	a->roll_window = -1;
 	a->boot = arena_boot_new(rom, size, loadout, format);
 	if (!a->boot) { free(a); return NULL; }
 	if (arena_boot_stage(a->boot) == ARENA_BOOT_FAILED) fail(a, arena_boot_error(a->boot));
@@ -64,6 +79,7 @@ Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2
 void arena_free(Arena *a) {
 	if (!a) return;
 	arena_boot_free(a->boot);
+	arena_roll_free(a->roll);
 	arena_pair_close(a->pair);
 	if (a->link && a->link->close) a->link->close(a->link);
 	free(a);
@@ -86,6 +102,8 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	arena_boot_free(a->boot);
 	a->boot = NULL;
 	arena_input_init(&a->input, a->link->delay);
+	arena_sync_init(&a->sync);
+	if (a->roll_window > 0 && !(a->roll = arena_roll_new(a->pair, (unsigned)a->roll_window))) return fail(a, "no room for the rollback's snapshots");
 	return a->stage = ARENA_BATTLE;
 }
 
@@ -101,8 +119,11 @@ static bool at_comm(struct mCore *c) {
 static bool take_peer(Arena *a) {
 	unsigned peer = a->link->side ^ 1;
 	uint16_t keys;
-	while (a->link->poll(a->link, a->input.known[peer], &keys))
+	while (a->link->poll(a->link, a->input.known[peer], &keys)) {
+		/* (its lag: my tick now, less the tick the other game sampled it on) */
+		arena_sync_arrived(&a->sync, (int32_t)(a->tick - 1 - (a->input.known[peer] - a->input.delay)));
 		if (arena_input_put(&a->input, peer, a->input.known[peer], keys) != ARENA_PUT_OK) return false;
+	}
 	return true;
 }
 
@@ -118,6 +139,7 @@ static void compare_hashes(Arena *a) {
 		}
 		a->pending[a->npending++] = (Hashed){ frame, h };
 		printf("arena: frame %" PRIu32 " hash %016" PRIx64 "\n", frame, h);
+		if (a->roll_window >= 0) printf("arena: frame %" PRIu32 " the game's hash %016" PRIx64 "\n", frame, arena_pair_hash_game(a->pair));
 	}
 	for (unsigned i = 0; i < a->npending;) {
 		uint64_t theirs;
@@ -149,8 +171,9 @@ static void watch_end(Arena *a) {
 	if (!a->fought || !battle_gone(mine) || !battle_gone(theirs)) return;
 	a->result = mine->rawRead8(mine, BN6_BATTLE_RESULT, -1);
 	printf("arena: over at frame %" PRIu32 ": result %u and the other's %u (1 won, 2 lost), %" PRIu32 " ticks stalled, %" PRIu32
-		" hashes agreed, %u cable transfers\n", a->input.next, a->result, theirs->rawRead8(theirs, BN6_BATTLE_RESULT, -1),
-		a->stalls, a->hashes, arena_pair_transfers(a->pair));
+		" held, %" PRIu32 " of %" PRIu32 " uneven (%" PRIu32 " after frame %u), %" PRIu32 " hashes agreed, %u cable transfers\n",
+		a->input.next, a->result, theirs->rawRead8(theirs, BN6_BATTLE_RESULT, -1), a->stalls, a->sync.held, a->uneven, a->ticks,
+		a->settled, SETTLED, a->hashes, arena_pair_transfers(a->pair));
 	a->stage = ARENA_OVER;
 }
 
@@ -158,8 +181,15 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (a->stage != ARENA_BATTLE) return a->stage;
 	ArenaLink *l = a->link;
 	l->tick(l);
+	++a->ticks;
+	/* (my clock held a tick, nothing sampled: after a stall, or the leading game's) */
+	bool held = a->owed;
+	if (held) arena_sync_shift(&a->sync);
+	else if ((held = arena_sync_hold(&a->sync)))
+		printf("arena: a tick held at frame %" PRIu32 ", the other's keys' lag past %u\n", a->input.next, arena_sync_target(&a->sync));
+	a->owed = false;
 	uint32_t now = a->tick - 1;
-	if (a->tick + a->input.delay < a->input.next + LEAD) {
+	if (!held && a->tick + a->input.delay < a->input.next + LEAD) {
 		uint32_t frame = (now = a->tick++) + a->input.delay;
 		keys &= ARENA_KEYS_MASK;
 		if (arena_input_put(&a->input, l->side, frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
@@ -168,16 +198,25 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (!take_peer(a)) return fail(a, "the other player's keys came out of order");
 	const char *broken = l->broken(l);
 	if (broken) return fail(a, broken);
-	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; return a->stage; }
+	bool settled = a->input.next >= SETTLED;
+	uint32_t ran = a->input.next;
+	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; a->owed = true; }
 	for (unsigned i = 0; i < CATCH_UP && a->stage == ARENA_BATTLE && a->input.next <= now && arena_input_ready(&a->input); ++i) {
 		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
+		uint32_t frame = a->input.next;
 		arena_input_take(&a->input, frame_keys);
-		if (!arena_pair_step(a->pair, frame_keys, true)) return fail(a, "the cable between the two cores stuck");
+		if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[2])frame_keys);
+		if (!arena_pair_step(a->pair, frame_keys, true) || (a->roll && !arena_roll_after(a->roll, frame)))
+			return fail(a, "the cable between the two cores stuck");
 		compare_hashes(a);
 		if (a->stage == ARENA_BATTLE) watch_end(a);
 	}
+	if (a->input.next - ran != 1) { ++a->uneven; a->settled += settled; }
 	return a->stage;
 }
+
+void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
+void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }

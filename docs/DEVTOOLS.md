@@ -384,11 +384,39 @@ whose keys come over a local link held back as a network's would be;
 link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
 says what runs, how to script a battle headless and what it measured.
 
+`arenaroll=W` makes it roll back: the pair's snapshot kept before each
+frame and every W frames (1 to 30) the last W run again from the first's,
+the battle going on from there, each time compared with the state run
+straight (`arena: frame N: core ...'s state apart` where not), and every
+60th frame the game's hash said without the sound's fields (`the game's
+hash`), which a run with `arenaroll=0` says too, for the two to be
+compared ([ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback).
+
 A battle from the Net Square between two games takes `arenahp=N` too
 (each game's own MegaMan, so both pairs stay the same), and
 `arenadesync=N` changes the other player's keys from frame N for a
 second on this game alone: the hashes' stop seen on both
 ([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof).
+
+`--dev rollbench` measures what a rollback of the Arena would cost on the
+machine it runs on (issue #128), on the player's ROM, and says it on the
+screen and in the output (`rollbench:` lines; log.txt on a handheld): the
+game's core alone from power-on (every build), then, where the Arena is
+built, the pair at a Practice NetBattle under BN6's rules for 600 frames
+of scripted keys on both sides: a core's state and the pair's snapshot
+in bytes, their save and load and a pair frame's emulation (mean and
+worst), a rollback of eight frames timed, whether it came back to the
+same state as the frames run straight, and the largest rollback window a
+frame holds with a quarter of it kept for the rest, with the one way it
+covers at delays 1, 2 and 3. A or B quits; a headless run ends by
+itself. The 3DS and the browser, which compile the Arena out, measure the
+core alone and say so. [ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback, has
+its numbers on this machine and the Retroid Pocket Nova:
+
+```sh
+python3 build.py shot --dev rollbench --frames 20000      # here
+SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./cyberworld.aarch64 --headless --frames 20000 --rom-dir ROMS --data-dir /tmp/rb --dev rollbench   # a handheld, over SSH
+```
 
 ## Dev menu: shorter test runs
 

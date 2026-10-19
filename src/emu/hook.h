@@ -22,6 +22,7 @@
 #define CW_HOOK_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 struct mCore;
@@ -97,6 +98,16 @@ void hook_post(const HookRegs *r, int kind);
 int hook_slot(void);
 /* ... and a core's own, between frames (-1: none attached) */
 int hook_slot_of(struct mCore *core);
+/* What hooks keep between two of their calls, one a core: an array of
+ * HOOK_CORES entries of `each` bytes indexed by hook_slot, named once as
+ * its hooks are installed (the same array again is no second), so that a
+ * rollback puts a core's back with its state (docs/ONLINE_ARENA.md,
+ * Rollback); false where the table of them is full */
+bool hook_keep_slots(void *array, size_t each);
+/* the bytes a core's entries take in all, and them copied out or back */
+size_t hook_kept_size(void);
+void hook_kept_save(int slot, void *out);
+void hook_kept_load(int slot, const void *in);
 /* From an answer hook: the CPU halted until the next interrupt it takes,
  * once the hooked instruction has run (a wait the game would spin through:
  * only where an interrupt will end it). */

@@ -334,6 +334,7 @@ static bool image_own(uint32_t image, uint8_t *was, uint32_t len, uint32_t crc) 
 }
 
 void xpanels_install(int xrom) {
+	hook_keep_slots(backs, sizeof *backs);   /* (a rollback's: docs/ONLINE_ARENA.md) */
 	static bool done;
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;

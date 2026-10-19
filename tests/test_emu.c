@@ -907,6 +907,28 @@ static void kept_ram(void) {
  * emu_write's, emu_write32's and emu_write8's bytes the installer's that
  * writes them, another's over them told, a write outside any installer
  * nobody's, and a hook set on an installer's bytes told */
+/* What hooks keep a core between calls, named once, copied out and back by slot */
+static void kept_slots(void) {
+	static uint32_t ways[HOOK_CORES][2];
+	static uint8_t dues[HOOK_CORES];
+	size_t before = hook_kept_size();
+	CHECK(hook_keep_slots(ways, sizeof *ways) && hook_keep_slots(dues, sizeof *dues) && hook_keep_slots(ways, sizeof *ways),
+		"the kept arrays named");
+	CHECK(hook_kept_size() == before + 9, "a core's kept bytes: %zu", hook_kept_size() - before);
+	ways[1][0] = 0x080000F8;
+	ways[1][1] = 0x03007F00;
+	dues[1] = 7;
+	ways[2][0] = 5;
+	uint8_t snap[64];
+	hook_kept_save(1, snap);
+	ways[1][0] = dues[1] = 0;
+	ways[1][1] = 1;
+	hook_kept_load(1, snap);
+	CHECK(ways[1][0] == 0x080000F8 && ways[1][1] == 0x03007F00 && dues[1] == 7 && ways[2][0] == 5, "slot 1's put back, slot 2's left");
+	hook_kept_load(HOOK_CORES, snap);   /* (no such slot: nothing) */
+	CHECK(ways[2][0] == 5, "a slot past the table touches nothing");
+}
+
 static void claimed_writes(void) {
 	static const uint8_t b[16] = { 0 };
 	int sits = 0;
@@ -1026,8 +1048,9 @@ int main(void) {
 	dispatch_run();
 	kept_ram();
 	claimed_writes();
+	kept_slots();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
 	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
-		"the second-level dispatch's code, RAM kept patched but in its states, the installers' writes claimed\n");
+		"the second-level dispatch's code, RAM kept patched but in its states, the installers' writes claimed, what hooks keep a core put back\n");
 	return 0;
 }
