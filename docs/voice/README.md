@@ -118,7 +118,7 @@ The main session publishes it as one artifact, kept at one link:
 - `capabilities`: `{"db": {}, "user": {}}` on the first publish (omit them
   on a republish, which keeps them).
 
-The dashboard's link: _to be added when it is first published._
+The dashboard: <https://claude.ai/artifact/7E4BBymZPVigHxxr1Y5a64> (private to the owner; republished to the same link after every voice pass).
 
 ### What it stores
 
