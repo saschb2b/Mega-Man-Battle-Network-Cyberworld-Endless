@@ -89,7 +89,7 @@ pattern, formats with a telegraph.
 | --- | --- | --- |
 | The game's side | `src/online/`, the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v6](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v7](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -487,10 +487,36 @@ compile it out (`CW_ARENA`): Battle is not offered there and a challenge
 is declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
 the lockstep and the two-client proof.
 
+### The stands
+
+[Issue #128](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/128),
+the owner's decision of 19 October 2026: the Arena's wing has stands. A
+NetBattle in the channel is **watched for real** by a game that can build
+its pair (the Arena built there, and BN5's ROM for a battle by full
+rules: the pair's common ground again): the referee by the ring asks
+"WANNA WATCH?", and Yes turns the screen to the battle, its two cores
+built and run here from both players' keys as the server hands them on,
+a second and a half behind them, from the battle's first frame however
+late the spectator came (he catches up faster than real time). R shows
+the other GBA's side, L cheers, B goes back to where MegaMan stood. The
+spectator checks the players' hashes and stops, saying so, where they
+disagree. Every game, the 3DS and the browser among them, gets **the
+report**: the referee calls the channel's battle (who fights whom, each
+MegaMan's HP, the last chip each used, how many watch, the winner and
+the cheers) and the Board posts it, from what the cable's first game
+reads off its own pair and sends now and then. A phrase or emote said
+while a battle is on is a cheer, held from the two players until their
+battle is over; the referee then tells them. The stands give nothing
+toward a run. How it is built, and its design: [ONLINE_ARENA.md, The
+stands](ONLINE_ARENA.md#the-stands); the wire (protocol v7: STANDS,
+ARENA_STATUS, WATCH and the server's three WATCH messages):
+[shared/online/README.md](../shared/online/README.md).
+
 ## The server and the wire
 
-Protocol v6 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v6`). The server refuses
+Protocol v7 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v7`; v7 added the
+stands, below). The server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of
 bounds and a full Square; it bounds every
@@ -678,6 +704,23 @@ server:
   bout and then 1 to 1. A No (B) turned the other's Yes down at once
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
 
+- **The stands** (20 October 2026, issue #128, protocol v7, a local
+  server, three host builds: two players and a spectator). A Practice
+  NetBattle watched from the referee's "WANNA WATCH?" to its end on the
+  third game: its pair built there agreeing with the players' ready, 41
+  hashes checked against the players' 41, the end at the same frame
+  (2,506) on all three; a spectator who came 28 seconds late caught up
+  from 1,686 frames behind and watched it live to its end, 41 hashes
+  checked; a battle by full rules watched to its end by a game with
+  BN5's ROM, its pair made with the players' installs' record, 51 hashes
+  checked; a spectator whose copy of the keys was changed stopped by
+  itself, saying so, while the players fought on. Three cheers from the
+  stands, held from the players, on the Board and in the referee's word
+  to the winner after. A battle by full rules called by the referee on a
+  game without BN5's ROM, the report alone; the browser build, which has
+  no Arena, given the same report live (HP, MiniBomb used)
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-three-game-proof)).
+
 - **Android and Windows** (19 October 2026, protocol v5, a local server
   with seed 120, then the deployed test server once each; issue #129).
   *Android*: the release APK (`build.py android`) in the emulator
@@ -834,8 +877,14 @@ are in the history before 433865a8):
   played to its end here; the 3DS's and the browser's dives are untried.
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
-- **The Arena on the 3DS and in the browser**; rollback and the stands
-  (issue #128).
+- **The Arena on the 3DS and in the browser**; rollback (issue #128).
+  There, the stands are the report alone (seen in the browser; the 3DS's
+  untried).
+- **The stands, what is left:** watching on Android, iOS and the
+  handhelds (built, untried), a catch-up's pace in a window and on a
+  handheld (measured headless only), a machine too slow to catch up (in
+  the code, not seen), and the report's chips past one a hand
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#not-yet)).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
   a New 3DS, an Android device (the emulator's visit, trade and
   NetBattle above) and iOS, macOS and Windows itself (Wine's above); the

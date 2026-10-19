@@ -51,8 +51,11 @@ const char *square_referee_words(const SquareFacts *f) {
 	if (!f->arena) return "THIS IS THE ARENA!|SORRY! NO NETBATTLES\nFROM THIS PET!";
 	int n = snprintf(s, sizeof s, "THIS IS THE ARENA!");
 	/* (the ring's one tip until a bout; after one, the last bout and the count) */
-	if (!f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|FACE A NAVI AND\nPRESS A. PICK\nBATTLE!|NO NETBATTLES\nYET! WHO'S FIRST?");
-	else if (f->result == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT: YOU\nBEAT %s!\nWHAT A MATCH!", f->fought);
+	if (!f->fought) {
+		n += snprintf(s + n, sizeof s - (size_t)n, "|FACE A NAVI AND\nPRESS A. PICK\nBATTLE!");
+		/* (none yet where the channel's first is on: the stands' words say it) */
+		if (!f->battle_on) n += snprintf(s + n, sizeof s - (size_t)n, "|NO NETBATTLES\nYET! WHO'S FIRST?");
+	} else if (f->result == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT: YOU\nBEAT %s!\nWHAT A MATCH!", f->fought);
 	else if (f->result == 2) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT:\n%s BEAT\nYOU! NEXT TIME!", f->fought);
 	else n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT WITH\n%s!\nWHAT A BOUT!", f->fought);
 	if (f->fought) n += tally(s + n, sizeof s - (size_t)n, f);

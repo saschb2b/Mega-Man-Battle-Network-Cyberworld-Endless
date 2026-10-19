@@ -1,7 +1,8 @@
 /* The Arena's ROM-free parts (issue #120): the keys' buffer and its
  * delay, the local link's latency, a carried MegaMan checked and written
  * into a made-up core's memory, the messages on the wire (as the server's
- * protocol.py packs them) and two network links back to back. */
+ * protocol.py packs them) and two network links back to back; the
+ * stands' messages, a watched battle's keys and its report (issue #128). */
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,9 @@
 #include "arena_sync.h"
 #include "arena_wire.h"
 #include "bn6.h"
+#include "stands_report.h"
+#include "stands_wire.h"
+#include "watch_keys.h"
 
 static void buffer(void) {
 	ArenaInput in;
@@ -556,6 +560,88 @@ static void formats(void) {
 	assert(arena_loadout_check(&out, ONLINE_FORMAT_FULL, why, sizeof why));
 }
 
+/* the stands (issue #128): their messages as the server's protocol.py packs them */
+static void stands(void) {
+	ArenaReport r = { .hp = { 80, 0 }, .max_hp = { 100, 100 }, .chip = { 54, 1 }, .used = { 2, 1 }, .winner = 1 };
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	assert(stands_wire_status(m, 7, &r) == ONLINE_ARENA_STATUS_BYTES && m[0] == ONLINE_ARENA_STATUS && m[4] == 7);
+	assert(m[5] == 0 && m[6] == 80 && m[8] == 100 && m[14] == 54 && m[17] == 2 && m[19] == 1);
+	ArenaReport bad = r;
+	bad.hp[1] = 101;
+	assert(!stands_wire_status(m, 7, &bad) && !stands_wire_status(m, 0, &r));
+	bad = r;
+	bad.chip[0] = ONLINE_CHIP_LAST + 1;
+	assert(!stands_wire_status(m, 7, &bad));
+	assert(stands_wire_watch(m, WATCH_ACT_WATCH, 9) == ONLINE_WATCH_BYTES && m[0] == ONLINE_WATCH && m[1] == 1 && m[5] == 9);
+	assert(!stands_wire_watch(m, 3, 9) && !stands_wire_watch(m, WATCH_ACT_STOP, 0));
+	/* STANDS: one battle on, its report */
+	uint8_t s[2 + ONLINE_STANDS_ENTRY_BYTES] = { ONLINE_STANDS, 1 };
+	uint8_t *e = s + 2;
+	e[3] = 7; e[7] = 1; e[11] = 2;
+	memcpy(e + 12, "Alpha", 5);
+	memcpy(e + 28, "Beta", 4);
+	e[44] = ONLINE_FORMAT_BN6; e[45] = STANDS_FIGHTING; e[46] = 2; e[47] = 3;
+	e[49] = 80; e[51] = 100; e[53] = 20; e[55] = 100; e[57] = 54; e[59] = 1; e[60] = 2; e[61] = 1;
+	StandsEntry got[ONLINE_STANDS_MAX];
+	assert(stands_wire_read(s, sizeof s, got) == 1 && got[0].match == 7 && got[0].side[0] == 1 && got[0].side[1] == 2);
+	assert(!strcmp(got[0].name[0], "Alpha") && !strcmp(got[0].name[1], "Beta") && got[0].watchers == 2 && got[0].cheers == 3);
+	assert(got[0].report.hp[0] == 80 && got[0].report.hp[1] == 20 && got[0].report.chip[0] == 54 && got[0].report.used[0] == 2);
+	assert(stands_wire_read(s, sizeof s - 1, got) < 0);
+	e[45] = 9;
+	assert(stands_wire_read(s, sizeof s, got) < 0);
+	/* WATCH_STATE, WATCH_KEYS, WATCH_RELAY */
+	uint8_t st[ONLINE_WATCH_STATE_BYTES] = { ONLINE_WATCH_STATE, WATCH_ON, 0, 0, 0, 7, 0, 0, 0, 1, 0, 0, 0, 2, ONLINE_FORMAT_FULL, 6 };
+	WatchState w;
+	assert(stands_wire_state(st, sizeof st, &w) && w.match == 7 && w.side[1] == 2 && w.rules == ONLINE_FORMAT_FULL && w.delay == 6);
+	st[1] = 3;
+	assert(!stands_wire_state(st, sizeof st, &w));
+	uint8_t k[ONLINE_WATCH_KEYS_HEAD + 4] = { ONLINE_WATCH_KEYS, 0, 0, 0, 7, 1, 0, 0, 0, 6, 0, 2, 0x01, 0x02, 0x03, 0xFF };
+	uint32_t match, first;
+	unsigned side, count;
+	const uint8_t *keys;
+	assert(stands_wire_keys(k, sizeof k, &match, &side, &first, &keys, &count) && match == 7 && side == 1 && first == 6 && count == 2);
+	assert(!stands_wire_keys(k, sizeof k - 1, &match, &side, &first, &keys, &count));
+	uint8_t hashed[2 + ARENA_HASH_BYTES] = { ONLINE_WATCH_RELAY, 0 };
+	assert(arena_wire_hash(hashed + 2, 7, 59, 0x1234));
+	const uint8_t *inner;
+	size_t n;
+	assert(stands_wire_relay(hashed, sizeof hashed, &side, &inner, &n) && side == 0 && n == ARENA_HASH_BYTES && inner[0] == ONLINE_ARENA_HASH);
+	hashed[2] = ONLINE_ARENA_INPUT;
+	assert(!stands_wire_relay(hashed, sizeof hashed, &side, &inner, &n));
+}
+
+/* a watched battle's keys: from the first frame, a stretch known left, a gap refused */
+static void watch_keys(void) {
+	WatchKeys w = { 0 };
+	uint8_t be[2 * 300];
+	for (unsigned i = 0; i < 300; ++i) { be[2 * i] = (uint8_t)(i >> 8 | 0xFC); be[2 * i + 1] = (uint8_t)i; }
+	assert(watch_keys_put(&w, 0, 0, be, 6) && watch_keys_runnable(&w) == 0);
+	assert(watch_keys_put(&w, 1, 0, be, 4) && watch_keys_runnable(&w) == 1);
+	assert(!watch_keys_put(&w, 1, 5, be, 1));   /* (frame 4 missing) */
+	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 3);
+	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 297);
+	uint16_t out[ARENA_LOOKAHEAD][2];
+	watch_keys_take(&w, 4, out);
+	/* (the keys' ten bits: the top six of the byte pair dropped) */
+	assert(out[0][0] == 4 && out[0][1] == 2 && out[3][0] == 7 && out[3][1] == 5);
+	watch_keys_free(&w);
+	assert(!w.known[0] && !w.keys[0]);
+}
+
+/* the report off the player objects: a chip counted as it gives way under a chip's action, a charged shot not */
+static void report(void) {
+	ArenaReport r = { 0 };
+	ReportSeen seen = { 0 };
+	stands_report_side(&r, &seen, 0, 100, 100, 0x08, 54);
+	stands_report_side(&r, &seen, 0, 100, 100, 0x12, 0xFFFF);
+	assert(r.used[0] == 1 && r.chip[0] == 54);
+	stands_report_side(&r, &seen, 0, 100, 100, 0x08, 0xFFFF);
+	stands_report_side(&r, &seen, 0, 100, 100, 0x16, 0xFFFF);
+	assert(r.used[0] == 1);
+	stands_report_side(&r, &seen, 1, 120, 100, 0x08, 1);
+	assert(r.hp[1] == 100 && r.max_hp[1] == 100 && !r.used[1]);
+}
+
 int main(void) {
 	formats();
 	buffer();
@@ -566,6 +652,9 @@ int main(void) {
 	loadout_bytes();
 	link_net();
 	sync();
+	stands();
+	watch_keys();
+	report();
 	puts("test_arena: ok");
 	return 0;
 }

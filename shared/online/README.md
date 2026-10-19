@@ -1,10 +1,10 @@
-# Net Square protocol v6
+# Net Square protocol v7
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v6`.
+`/presence` with subprotocol `cyberworld.presence.v7`.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
@@ -32,9 +32,17 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
 | WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
+| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 rules, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second) |
+| ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
+| WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
+| WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 rules, u8 input delay |
+| WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
+| WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side, u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 9, ARENA_STATE 29, OFFER 5 and WEEK_POST 17. The
+TRADE_STATE 32, ARENA 9, ARENA_STATE 29, OFFER 5, WEEK_POST 17,
+ARENA_STATUS 20, WATCH 6 and WATCH_STATE 16; a STANDS entry is 63 and
+WATCH_KEYS's head 12. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -152,6 +160,32 @@ busy), 17 (no longer here, or the battle is over) and 18 (the Arena is
 closed on this server) answer an ARENA that cannot be done, and 19 a
 challenge to full rules where either game lacks BN5's ROM; a challenge's
 rules come back in every ARENA_STATE of its battle.
+
+The stands (protocol v7, docs/ONLINE_ARENA.md, The stands): every
+started battle's loadouts, ready, installs' record, the cable's first's
+hashes every 60 frames and both players' keys from frame 0 are kept
+while it runs (the frames before a side's first keys, its input delay's,
+as released keys; 72,000 frames a side at most, past which and at a
+missing frame the battle is no longer watched) and a minute after it. A
+player of the channel who is in no battle asks to watch with WATCH; the
+server answers WATCH_STATE watching, then hands on both MegaMen, the
+record and the ready (WATCH_RELAY), the keys (WATCH_KEYS, the side
+behind first) and the hashes once both sides' keys are past them, at
+most 2 KB a tick (20 a second) and only while the spectator's output is
+under 4 KB; where the battle is over and all is sent, WATCH_STATE over.
+NOTICE 17 (that battle is over), 16 (a player of it, or busy in a
+battle), 18 (the Arena closed), 19 (full rules need BN5's ROM on the
+spectator's game too) and 27 (the stands are full: `watch_most`, 6)
+answer a WATCH that cannot be done. A spectator is busy: a challenge to
+him is answered NOTICE 16. STANDS goes to every player of a channel as a
+battle begins or ends, and at most once a second as watchers, cheers or
+the report change, and after every WELCOME; the two players of a battle
+under way are told once it is over. A phrase or emote of the channel's
+(SOCIAL) while a battle is on counts as a cheer for it, and its EVENT is
+held from the battle's two players: they hear nothing of the stands until
+their battle is over. ARENA_STATUS is taken from the cable's first player
+of a started battle, at most twice a second but for the one naming the
+winner. Nothing a spectator sends reaches the battle.
 
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's

@@ -23,6 +23,7 @@ typedef struct {
 	unsigned won, lost;     /* the bouts with him in a row, that one among them */
 	bool arena;             /* this build offers NetBattles (not the 3DS's, the browser's) */
 	bool parade;            /* the walkers are on parade round the landmark */
+	bool battle_on;         /* a NetBattle under way in the channel (the stands: square_watch.h) */
 	struct {                /* Trade Central's board: the offers up (online_board.c) */
 		const char *name;   /* the poster, NULL MegaMan's own */
 		char chip[32];      /* the chip he has, "Cannon A" */
