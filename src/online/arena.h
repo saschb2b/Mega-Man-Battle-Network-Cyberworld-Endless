@@ -61,6 +61,12 @@ void arena_rtt(Arena *a, uint32_t ms);
  * and every 60th frame the game's hash said (without the sound's fields),
  * which a run that rolls back must say alike; 0 the hash alone */
 void arena_rollback(Arena *a, int window);
+/* The rollback window, before the way in is done (docs/ONLINE_ARENA.md,
+ * Rollback): up to `window` frames run on a guess of the other player's
+ * keys and rolled back where it was wrong (0: the delay alone, a frame
+ * run once its keys have all come); -1, as it starts, what a frame of the
+ * pair costs here affords (arena_window.h) */
+void arena_window(Arena *a, int window);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before

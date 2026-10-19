@@ -39,6 +39,9 @@ const char *arena_boot_error(const ArenaBoot *boot);
 /* frames run so far, and roughly how many in all (for a progress bar) */
 unsigned arena_boot_done(const ArenaBoot *boot);
 unsigned arena_boot_total(void);
+/* a frame of the pair through the menus, its mean or its worst, in ms:
+ * what a frame costs this system now (the rollback window it affords) */
+double arena_boot_frame_ms(const ArenaBoot *boot, bool worst);
 /* the pair, once READY: the caller's from then on */
 ArenaPair *arena_boot_take(ArenaBoot *boot);
 

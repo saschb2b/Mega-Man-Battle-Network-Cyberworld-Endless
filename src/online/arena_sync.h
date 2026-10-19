@@ -63,4 +63,22 @@ typedef struct {
 void arena_pings_note(ArenaPings *p, uint32_t rtt_ms, uint32_t now_ms);
 uint32_t arena_pings_latency(const ArenaPings *p);
 
+/* The rollback window (issue #128, docs/ONLINE_ARENA.md, Rollback): the
+ * frames a tick can run again after one snapshot loaded, and the new one,
+ * each saved, within three quarters of a 60th of a second (a quarter kept
+ * for the drawing, the picture's present and the system), from a battle
+ * frame of the pair's mean cost here and a tenth more; ARENA_WINDOW_MOST
+ * at most. The way in's frames, BN6's menus, cost less: a battle's is
+ * taken as ARENA_MENUS_TO_BATTLE of theirs (measured: 0.65 ms and 1.0
+ * here, docs/ONLINE_ARENA.md) */
+#define ARENA_WINDOW_MOST  10   /* frames rolled back at most: past them a guess shows too long */
+#define ARENA_WINDOW_FIRST 4    /* ... where no frame was measured here yet */
+#define ARENA_MENUS_TO_BATTLE 1.6
+unsigned arena_window_for(double frame_ms);
+/* The latency a game says in its challenge or Yes (ARENA's, protocol v8):
+ * its round trip with its jitter, less what its rollback window covers.
+ * The server's delay is the lockstep's frame, the tick a key waits to be
+ * taken, and the longer of the two said (arena.py's delay_for) */
+uint32_t arena_ask_ms(uint32_t latency_ms, unsigned window);
+
 #endif

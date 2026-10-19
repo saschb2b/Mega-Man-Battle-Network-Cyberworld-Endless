@@ -39,12 +39,28 @@ static struct {
 	int over_t, stalled;
 } S;
 
+/* arenabusy's second player, by the frame's number alone (what the game
+ * shows never asked, so that a run that rolls back and one that does not
+ * hand him the same keys): every four seconds the cursor taken right to
+ * OK and OK pressed (the Custom screen's, where it is open), between them
+ * a step, a shot or the buster held a few frames at a time */
+static uint16_t busy_keys(uint32_t frame) {
+	unsigned t = frame % 240;
+	if (t < 60) return t % 12 < 4 ? KEY_RIGHT : 0;
+	if (t < 64) return KEY_A;
+	static const uint16_t moves[8] = { 0, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, 0, KEY_B, KEY_B };
+	uint32_t x = (frame / 6) * 2654435761u;
+	x ^= x >> 13;
+	return moves[(x * 2246822519u) >> 29];
+}
+
 /* The second player: idle in the battle; at the Custom screen, the
  * cursor taken right to OK and OK pressed, again every 160 frames until
  * the screen closes (the starter folder's five chips, then OK: the
  * research's script, tools/online_link_script.c) */
 static uint16_t peer_keys(void *context, uint32_t frame) {
 	(void)context;
+	if (dev.arena_busy) return busy_keys(frame);
 	if (!S.arena || arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return 0;
 	unsigned t = frame % 160;
 	if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
@@ -91,6 +107,7 @@ static void enter(void) {
 	/* (the local link's round trip: its one way there and back) */
 	if (S.arena) arena_rtt(S.arena, lag * 2 * 1000 / 60);
 	if (S.arena && dev.arena_roll >= 0) arena_rollback(S.arena, dev.arena_roll);
+	if (S.arena) arena_window(S.arena, dev.arena_window);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 }

@@ -58,3 +58,16 @@ uint32_t arena_pings_latency(const ArenaPings *p) {
 	double said = mean + 2 * sqrt(squares / p->n);
 	return said > 5000 ? 5000 : (uint32_t)ceil(said);
 }
+
+unsigned arena_window_for(double frame_ms) {
+	const double budget = TICK_MS * 0.75, load = 0.1, save = 0.05;
+	double per = frame_ms * 1.1 + save;
+	if (!(frame_ms > 0) || budget <= load + 2 * per) return 0;
+	double w = floor((budget - load) / per) - 1;
+	return w >= ARENA_WINDOW_MOST ? ARENA_WINDOW_MOST : (unsigned)w;
+}
+
+uint32_t arena_ask_ms(uint32_t latency_ms, unsigned window) {
+	uint32_t covered = (uint32_t)(window * TICK_MS);
+	return latency_ms > covered ? latency_ms - covered : 0;
+}
