@@ -145,9 +145,13 @@ static int lights(int side, int *chaos) {
  * pick lights it: the lit test below answers so) */
 static HookAct stand(HookRegs *r, void *user) {
 	(void)user;
+	/* (a screen opened with a Soul united: its end may come as this turn starts, soullife.c. Every side's, both players'
+	 * in the Arena's link battle, whose two screens open together: the other GBA's player's Soul ends on this GBA too,
+	 * at the same turn, though this GBA's own player holds none) */
+	for (int s = 0; s < 2; ++s)
+		if (soul_united(s)) hook_write8(soul_field(s, BN6_SOUL_SCREEN), 1);
 	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now();
-	if (soul_united(side)) hook_write8(soul_field(side, BN6_SOUL_SCREEN), 1);   /* (its end may come as this turn starts: soullife.c) */
 	bool beast = r->r[0] != 0, unite = unite_stands(side);
 	hook_write8(soul_field(side, BN6_SOUL_STANDS), (uint8_t)((unite ? BN6_STANDS_UNITE : 0) | (beast ? BN6_STANDS_BEAST : 0)));
 	slot_be(side, unite && !beast ? BN6_SLOT_UNITE : BN6_SLOT_EMBLEM);
