@@ -483,6 +483,39 @@ server:
   core made without BN5's families) stopped both before the first frame
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
 
+- **Android and Windows** (19 October 2026, protocol v5, a local server
+  with seed 120, then the deployed test server once each; issue #129).
+  *Android*: the release APK (`build.py android`) in the emulator
+  (Android 14, x86-64), BN6's ROM given through the ROMs screen's folder
+  picker; NEW GAME, the jack-in at Lan's PC and the touch D-pad to the
+  gate's keeper: Another server, `ws://10.0.2.2:8929/presence` typed
+  with Android's keyboard, "DONE! IT LEADS TO 10.0.2.2:8929!". On the
+  gate "WAIT,WAIT! FIRST, YOUR NAME,PLEASE!", the name field, the
+  keeper's question, Yes, and the Square, a host build's MegaMan
+  ("Linux") standing in it and each game showing the other's name; the
+  D-pad walking there, his card ("HP 100 of 100. Act 3,layer 7!", "His
+  PET holds BN5 chips too!"), a Wave ("o/" over MegaMan's head), R and
+  Yes home to "We're home,Lan!". Then the keeper's Official Square, his
+  questions again for that server, the deployed server over TLS (its
+  `/health` counting the one player) and home again. Found on the way:
+  the name and address fields were cut off at both sides on a phone held
+  upright (the menu canvas is 160 across there and the field 240), and
+  Android's keyboard covered their lower half. Fixed: the field asks for
+  a canvas 240 across (`platform_own_wide`) and stands in the upper part
+  of an upright screen, whole above the keyboard, its keys answering
+  taps ("GOT IT! HELLO, Droid!").
+  *Windows*: the .exe (`build.py windows`) under Wine 10 headless, its
+  data folder's `network.ini` naming the local server: the gate, the
+  Square built from seed 120 with the host build's hash (3354384409), R
+  and Yes home to "We're home,Lan!", through WinHTTP's WebSocket.
+  Then the deployed server over TLS (WinHTTP's own): the same Square and
+  hash, and home again. Its first try failed, "Windows WebSocket
+  connection or TLS verification failed": Wine's root store was empty
+  because the test's Wine prefix had never been written (its container
+  ended before wineserver saved the registry, so no crypto provider was
+  registered). A prefix made with `wineboot -u` and saved with
+  `wineserver -w` fixed it; the game's code was not at fault.
+
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
 are in the history before 433865a8):
@@ -507,9 +540,11 @@ are in the history before 433865a8):
 - **A referee Mr.Prog** in the Arena's wing, rematches, and the Arena on
   the 3DS and in the browser.
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
-  a New 3DS, Android and iOS; the Arena over a real network rather than
-  one machine (the margin a phase between two games' ticks takes from
-  its delay).
+  a New 3DS, an Android device (the emulator's visit above) and iOS,
+  macOS and Windows itself (Wine's above); a trade and a NetBattle on
+  Android and Windows; the Arena over a real network rather than one
+  machine (the margin a phase between two games' ticks takes from its
+  delay).
 - **In the browser:** a whole visit with the published server (the
   browser build builds; its online run here was before the gate).
 - **The official server:** its Coolify service following `dev` or `main`
