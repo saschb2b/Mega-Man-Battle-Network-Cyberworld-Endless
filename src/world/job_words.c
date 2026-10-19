@@ -122,7 +122,7 @@ const char *job_due_words(const Job *job) {
 	if (job->kind == JOB_BRING)
 		snprintf(w, sizeof w, "@M Lan,the NetBattler wants %s chip!|@M One from our Pack. %s", an_element(job->need), where[k] + 3);
 	else if (job->state == JOB_DONE) snprintf(w, sizeof w, "@M Lan,%s's reward is waiting!|%s", who[k], where[k]);
-	else snprintf(w, sizeof w, "@M We didn't finish %s's request...|@M Let's tell them. Then we can take another!", who[k]);
+	else snprintf(w, sizeof w, "@M We didn't finish %s's request...|@M Let's tell them.", who[k]);
 	return w;
 }
 

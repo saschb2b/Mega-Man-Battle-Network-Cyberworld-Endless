@@ -802,9 +802,9 @@ long. BN6 itself gives BeastOut by its story.
   run with it, Dad calls
   as the run begins, in Lan's room: he has unlocked it, MegaMan tamed the
   beast at the Nest before (the milestone, said as the run's world knows
-  it), just don't let it take over; all of it the first time a profile
-  brings it (`profile.beast`), MegaMan's "And the CybeastButton's
-  unlocked!" and Lan's "Our trump card. Alright!" after. At the Graveyard
+  it), just don't let it take over; the first time a profile brings it
+  (`profile.beast`), and nothing after: a power is told once, by whoever
+  gave it (docs/VOICE.md, What nobody says). At the Graveyard
   the Nest still calls to the Cybeast in him, and Lan answers that he has
   kept it in check all along: nothing is unlocked (in every run since
   issue #109). Where an area's battles

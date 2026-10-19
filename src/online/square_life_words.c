@@ -64,14 +64,14 @@ static int green_lines(const char **out, char (*buf)[96], const SquareFacts *f) 
 	return n;
 }
 
-/* GirlNavi's talk: she gushes, and tells the Square's tips as gossip */
+/* GirlNavi's talk: she gushes, and tells one of the Square's tips as
+ * gossip (docs/VOICE.md, What nobody says: a bystander's one tip) */
 static int girl_lines(const char **out, char (*buf)[96], const SquareFacts *f) {
 	int n = 0;
 	if (f->navis > 2) { snprintf(buf[n], 96, "%u Navis! It's\nsooo lively!", f->navis); out[n] = buf[n]; ++n; }
 	if (f->arrived) { snprintf(buf[n], 96, "Ooh,%s just\ngot here! Sooo cool!", f->arrived); out[n] = buf[n]; ++n; }
 	snprintf(buf[n], 96, "Did you know? Navis\ncheer together by\nthe %s!", landmark_name(f->landmark)); out[n] = buf[n]; ++n;
 	out[n++] = "Up on the stage,\neveryone sees you!\nSo fun!";
-	out[n++] = "The clerks swap\nchips at Trade\nCentral!";
 	if (f->navis <= 1) out[n++] = "Nobody's here...\nHow lonely!";
 	return n;
 }
@@ -107,7 +107,7 @@ static const char *board(const SquareFacts *f) {
 		n += f->posts[k].name ? snprintf(s + n, sizeof s - (size_t)n, "|>%s has\n%s,wants\n%s.", f->posts[k].name, f->posts[k].chip, trade_want(f->posts[k].want))
 			: snprintf(s + n, sizeof s - (size_t)n, "|>Your offer:\n%s for\n%s.", f->posts[k].chip, trade_want(f->posts[k].want));
 	if (!f->nposts) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade board:\nno offers up.");
-	snprintf(s + n, sizeof s - (size_t)n, "|>Tip: face a Navi\nand press A to\n%s.|>Tip: post a chip\nat Trade Central.", f->arena ? "wave or battle" : "wave");
+	snprintf(s + n, sizeof s - (size_t)n, "|>Tip: post a chip\nat Trade Central.");
 	return s;
 }
 

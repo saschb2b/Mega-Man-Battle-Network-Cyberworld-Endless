@@ -125,14 +125,21 @@ bool home_gate_save(void) {
 	return true;
 }
 
+/* The checkpoint not written: told in the game's note, as "Run saved" is,
+ * and MegaMan stays home */
+static void stay(void) {
+	cinema_note("Run not saved", 150);
+	talk_start(gate_save_failed(), FACE_MEGAMAN);
+}
+
 /* The run saved where MegaMan stands, and the visit begun */
 static void go(void) {
 	if (!hold_save_ok()) {
-		if (++G.going > GO_WAIT) { G.going = 0; talk_start(gate_save_failed(), FACE_MEGAMAN); }
+		if (++G.going > GO_WAIT) { G.going = 0; stay(); }
 		return;
 	}
 	G.going = 0;
-	if (!home_gate_save()) { talk_start(gate_save_failed(), FACE_MEGAMAN); return; }
+	if (!home_gate_save()) { stay(); return; }
 	cinema_note("Run saved", 150);
 	const char *url = dev.online ? dev.online : G.prefs.servers[G.prefs.selected];
 	const char *name = dev.online_name ? dev.online_name : G.prefs.name;
