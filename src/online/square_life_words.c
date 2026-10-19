@@ -38,15 +38,34 @@ const char *square_greeter_bark(const char *name, bool in) {
 	return s;
 }
 
+/* the bouts with the last one in a row, as the referee keeps count */
+static int tally(char *s, size_t n, const SquareFacts *f) {
+	if (f->won + f->lost < 2) return 0;
+	if (f->won == f->lost) return snprintf(s, n, "|%u TO %u! ALL EVEN,\nALL EVEN!", f->won, f->lost);
+	if (f->won > f->lost) return snprintf(s, n, "|THAT'S %u TO %u.\nYOU LEAD!", f->won, f->lost);
+	return snprintf(s, n, "|THAT'S %u TO %u.\n%s\nLEADS!", f->lost, f->won, f->fought);
+}
+
 const char *square_referee_words(const SquareFacts *f) {
 	static char s[240];
 	if (!f->arena) return "THIS IS THE ARENA!|SORRY! NO NETBATTLES\nFROM THIS PET!";
-	int n = snprintf(s, sizeof s, "THIS IS THE ARENA!|FACE A NAVI AND\nPRESS A. PICK\nBATTLE!");
-	if (f->fought && f->result == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST TIME YOU\nBEAT %s!\nWHAT A MATCH!", f->fought);
-	else if (f->fought && f->result == 2) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST TIME %s\nWON! TRY AGAIN!", f->fought);
-	else if (f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|YOUR MATCH WITH\n%s ENDED.\nANOTHER ONE?", f->fought);
-	else n += snprintf(s + n, sizeof s - (size_t)n, "|NO NETBATTLES\nYET! WHO'S FIRST?");
+	int n = snprintf(s, sizeof s, "THIS IS THE ARENA!");
+	/* (the ring's one tip until a bout; after one, the last bout and the count) */
+	if (!f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|FACE A NAVI AND\nPRESS A. PICK\nBATTLE!|NO NETBATTLES\nYET! WHO'S FIRST?");
+	else if (f->result == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT: YOU\nBEAT %s!\nWHAT A MATCH!", f->fought);
+	else if (f->result == 2) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT:\n%s BEAT\nYOU! NEXT TIME!", f->fought);
+	else n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT WITH\n%s!\nWHAT A BOUT!", f->fought);
+	if (f->fought) n += tally(s + n, sizeof s - (size_t)n, f);
 	if (f->navis > 1) snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS HERE.\nPLENTY TO WATCH!", f->navis);
+	return s;
+}
+
+const char *square_referee_bark(int result, const char *name) {
+	static char s[48];
+	if (result == 1) return "YOU WIN!";
+	if (result != 2) return "WHAT A BOUT!";
+	snprintf(s, sizeof s, "%s WINS!", name);
+	for (char *c = s; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 	return s;
 }
 
