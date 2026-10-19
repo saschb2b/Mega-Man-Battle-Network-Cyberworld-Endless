@@ -308,6 +308,51 @@ Check for these before committing a line:
 - **Hedging and politeness padding:** "it seems that", "you might want
   to". BN6's people say it straight.
 
+## What nobody says
+
+The owner, 19 October 2026: lines that explain a mechanic, state the
+obvious or know the game is a game break the world, as "press START to
+save" does in any RPG. A line that does not need to be said is cut, not
+rewritten. Measured in BN6's own script (bn6f's 963 text scripts, Falzar's
+US text; counted, never copied): its 477 goal lines (where to go next,
+MegaMan's in the real world and Lan's in the Net, about 8 words) explain
+no mechanic at all; field chat never says save, continue, game over,
+level, stats or "player"; a button is named once, at its first use, by
+whoever needs it; battle systems are taught in a tutorial battle that
+forces them, new powers by whoever gave them, upgrades by mail, strategy
+on the BBS.
+
+1. **Nobody knows the game is a game.** No one says save, continue, game
+   over, a run, a checkpoint, level up or stats. BN6's one exception is
+   the PET: MegaMan offers to save "what happened today" at bedtime, as a
+   Yes or No. A save the run needs is the PET's, never a character's line.
+2. **A button is named once.** Whoever needs it says it at its first use
+   (BN6: MegaMan at the first RoboDog, R to jack in; Lan at the Aquarium,
+   L to call him), never again, never by a bystander. Menu legends ("B
+   BUTTON:BACK") stay in the menu's own text, as BN6's shop legends do.
+3. **Nobody explains BN6.** Warp pads, jacking in and out, the Pack, the
+   folder, the Custom Screen, HP, Zenny, chips, codes, Program Advances,
+   Mystery Data: the audience knows them (BN6 explains them once, in its
+   opening hours, or never). Only what the run adds may be taught.
+4. **What the run adds is taught where BN6 teaches.** A system: by mail
+   from whoever provides it (BN6's NaviCust Support Center, the Aquarium
+   Director's TagChip mail). A power: once, by whoever gave it. A place's
+   own rule: by a Mr.Prog posted there, once, with a reason in the world.
+   Strategy: on the BBS, in its posters' voices.
+5. **MegaMan never coaches.** He reacts, worries, jokes, senses and says
+   where to go, with feeling (VOICE's cast). He does not explain what the
+   screen shows or how a system works, outside a tutorial battle.
+6. **The goal line explains nothing.** Who, where and why, about eight
+   words, never past two dozen.
+7. **Bystanders never tutor.** At most one tip each, as their own
+   experience or a rumor, in their own voice.
+8. **Words of the world.** Virus busting, NetBattle, deleted, jack in and
+   out, the Net. Never die, level up, stats, game over (BN6 has "Game
+   Over" once, as a villain's taunt).
+
+The catalog flags the mechanical tells (`meta`, `button`, `rule-talk`,
+`screen-talk`; docs/voice/README.md); the rest is judgment, line by line.
+
 ## Where the lines live
 
 Every line lives in a words file beside the code that decides when it is

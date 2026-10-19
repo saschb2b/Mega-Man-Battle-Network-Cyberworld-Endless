@@ -198,10 +198,14 @@ FLAGS = {
     'direction-hyphen': 'a direction with a hyphen ("down-left"): directions are words, "to the lower left"',
     'the-net': '"the net" without its capital: BN6 writes the Net',
     'spelling': 'a name not written as BN6 writes it',
+    'meta': 'a meta word (saving, game over, a run, checkpoint, level up, stats): nobody in BN6 knows the game is a game',
+    'button': 'a button or control named: BN6 names one once, at its first use, by whoever needs it',
 }
 GLUE = re.compile(r'\b(however|additionally|therefore|in order to|currently|furthermore|moreover|thus|hence|consequently|nevertheless)\b', re.I)
 RULE_TALK = re.compile(r'\b(this layer|this run|the player\'?s?|per run)\b', re.I)
 HEDGE = re.compile(r'\b(it seems that|it seems like|you might want to|you may want to|it appears that|perhaps you)\b', re.I)
+META = re.compile(r"\b(sav(?:e|es|ed|ing)\b(?! up)(?! (?:dad|him|her|them|us|the net|it)\b)|save point|game over|levels? up|leveled up|stats\b|EXP\b|checkpoints?|retry|reload|respawn|this run|a run\b|the run\b|your run|our run|every run|new run)", re.I)
+BUTTON = re.compile(r"\b(?:press|hold|tap|push)\s+(?:the\s+)?(?:A|B|L|R|START|SELECT|UP|DOWN|LEFT|RIGHT)\b|\b(?:A|B|L|R|START|SELECT) (?:Button|BUTTON)\b|\bbuttons?\b", re.I)
 SCREEN_TALK = re.compile(r'\b(you can see|on the screen|on screen|the screen shows)\b', re.I)
 DIRECTION = re.compile(r'\b(up|down|upper|lower)-(left|right)\b', re.I)
 THE_NET = re.compile(r'\bthe net\b(?![\w-])')
@@ -865,7 +869,7 @@ def flag_box(speaker, text, widths, wrapped):
     m = re.search(r'(?<![.!?] )(?<!^)\b(which|whose)\b', bare)
     if m:
         out.append(('summary', m.group(0)))
-    for code, pat in (('glue', GLUE), ('rule-talk', RULE_TALK), ('hedge', HEDGE), ('screen-talk', SCREEN_TALK),
+    for code, pat in (('glue', GLUE), ('rule-talk', RULE_TALK), ('meta', META), ('button', BUTTON), ('hedge', HEDGE), ('screen-talk', SCREEN_TALK),
                       ('direction-hyphen', DIRECTION), ('the-net', THE_NET)):
         m = pat.search(bare)
         if m:
