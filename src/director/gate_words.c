@@ -46,14 +46,14 @@ const char *gate_keeper_name_first(void) { return "WAIT,WAIT! FIRST,\nYOUR NAME,
 const char *gate_keeper_privacy(void) {
 	return "NAVIS FROM OTHER\nPETS MEET THERE!|"
 		"ITS SERVER SEES YOUR\nADDRESS AND NAME,|"
-		"AND MEGAMAN,TOO!\nYOUR RUN STAYS SAFE!";
+		"AND MEGAMAN,TOO!";
 }
 
 const char *gate_keeper_privacy_question(void) { return "SO! GO ONLINE?\n"; }
 
 const char *gate_question(void) { return "To the Net Square,\nLan?\n"; }
 
-const char *gate_save_failed(void) { return "Huh? The save didn't\ngo through...|Let's stay home for\nnow,Lan."; }
+const char *gate_save_failed(void) { return "Let's stay home for\nnow,Lan."; }
 
 const char *gate_end_words(VisitEnd why, int *face) {
 	*face = FACE_PROG;

@@ -28,7 +28,7 @@ const PlaceFolk place_folk[] = {
 	{ ASTER_GROUP, ASTER_LAND, { 60, -20, FACE_NW, 5, 0x40,
 		"Ooh... Look at these rare chips!|...And look at these prices! *gulp*" }, 0 },
 	{ ACADEMY_GROUP, ACADEMY_CLASS_6_1, { -148, 2, FACE_NE, 5, 0x3B,
-		"Lan! Welcome to the club!|Tip of the day! Match your codes!|Same code,and you can send more chips!" }, 0, JOB_CLUB + 1 },
+		"Lan! Welcome to the club!" }, 0, JOB_CLUB + 1 },
 	{ ACADEMY_GROUP, ACADEMY_CLASS_6_1, { -130, -2, FACE_SW, 5, 0x42,
 		"My Navi lost to a Mettaur again...|*sigh* Don't tell anyone,OK?" }, 0 },
 	{ ACADEMY_GROUP, ACADEMY_HALL_1F, { -150, -42, FACE_SE, 5, 0x37,

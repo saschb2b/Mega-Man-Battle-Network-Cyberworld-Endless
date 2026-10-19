@@ -4,7 +4,6 @@
  * data on him; ProtoMan's netbattle terms; the split's question. Who they
  * are, guardians.c. */
 #include <stdio.h>
-#include <string.h>
 
 #include "guardians.h"
 #include "rivals.h"
@@ -102,9 +101,11 @@ const char *guardian_tip(int navi) {
 	}
 }
 
+/* (MegaMan's battle data on him is Dad's mail's: recited here before the
+ * choice, it was MegaMan coaching, docs/VOICE.md, What nobody says) */
 int guardian_netbattle_terms(char *out, size_t n) {
 	return snprintf(out, n, "Enough,MegaMan. No more racing.|Chaud says you're ready. Face me.|"
-		"@M %s|@M If he deletes us,our dive's over!|@L We can still run if it goes bad.", guardian_tip(11));
+		"@M If he deletes us,our dive's over!|@L We can still run if it goes bad.");
 }
 
 /* (a first meeting's hint: the net's gossip, which lives in that world and
@@ -334,14 +335,6 @@ static const char *answer(const Rival *r, const char *name) {
 	return said;
 }
 
-/* From battle data, when to strike: the last of MegaMan's words in the
- * guardian's tip (NULL for none). */
-static const char *strike_when(int navi) {
-	const char *tip = guardian_known(navi) ? guardian_tip(navi) : NULL, *when = NULL;
-	for (const char *p = tip; p && (p = strstr(p, "|@M ")) != NULL; p += 4) when = p + 4;
-	return when;
-}
-
 const char *guardian_intro(int navi, int version, int biome) {
 	static char buf[800];
 	const Rival *r = rival(navi);
@@ -358,11 +351,8 @@ const char *guardian_intro(int navi, int version, int biome) {
 	if (biome == BIOME_NEST) ADD("The Nest built me from all your battles!|");
 	ADD("%s", greeting(navi, version, r));
 	ADD("%s", answer(r, name));
-	/* and when to strike, just before the fight: the briefing on his layer
-	 * came ten minutes before a playtester's fight, who asked for it again
-	 * at the arena */
-	const char *when = strike_when(navi);
-	if (when && *when) ADD("|@M Lan,remember... %c%s", *when >= 'A' && *when <= 'Z' ? *when - 'A' + 'a' : *when, when + 1);
+	/* (no word on when to strike: MegaMan never coaches, and his battle
+	 * data is Dad's mail's, docs/VOICE.md, What nobody says) */
 	ADD("|@L Battle routine,set!|@M Execute!!");
 	#undef ADD
 	return buf;
@@ -389,9 +379,9 @@ const char *guardian_soul_words(int navi, int kind, bool held, const char *chip,
 	}
 	int k = snprintf(s, sizeof s, "MegaMan got:\n%s's\nSoul!!", name);
 	/* (BN5's Soul Unison in BN6's battles, every one of them, docs/MULTIROM.md,
-	 * One net: the last chip picked of its kind given up for UNITE) */
-	if (profile.soul_taught) k += snprintf(s + k, sizeof s - (size_t)k, "|@M His Soul,Lan! It's with us every battle.");
-	else {
+	 * One net: the last chip picked of its kind given up for UNITE), said
+	 * the first time; after it, the narration alone */
+	if (!profile.soul_taught) {
 		k += snprintf(s + k, sizeof s - (size_t)k, "|@M %s's Soul is in me,Lan!|@M It's with us every battle now.", name);
 		if (chip[0] && k < (int)sizeof s) k += snprintf(s + k, sizeof s - (size_t)k, "|@M Pick %s chip last,like %s.", kinds[kind], chip);
 		else if (k < (int)sizeof s) k += snprintf(s + k, sizeof s - (size_t)k, "|@M Pick %s chip last.", kinds[kind]);

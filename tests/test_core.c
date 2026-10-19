@@ -1349,8 +1349,8 @@ static void test_talk(void) {
 			run.cross = (uint8_t)cross;
 		}
 	}
-	/* (ProtoMan's tip behind MegaMan's first words, whole: a longer one
-	 * lost its last clause to ta_pages' buffer in a capture) */
+	/* (ProtoMan's terms, whole: a longer one lost its last clause to
+	 * ta_pages' buffer in a capture) */
 	char terms[GUARDIAN_TERMS_MAX];
 	CHECK(guardian_netbattle_terms(terms, sizeof terms) < (int)sizeof terms, "the netbattle's terms are cut: \"%s\"", terms);
 	check_talk("the netbattle's terms", terms);
@@ -1443,7 +1443,7 @@ static void test_home_words(void) {
 		char what[80];
 		snprintf(what, sizeof what, "home again at clock %d", clock);
 		check_talk(what, home_back_words(clock));
-		for (int first = 0; first <= 1; ++first) check_talk(what, home_hp_status("to the upper right", first, clock));
+		check_talk(what, home_hp_status("to the upper right", clock));
 		for (int b = 0; b < BIOME_COUNT; ++b)
 			for (int taught = 0; taught <= 1; ++taught) check_talk(what, home_back_portal_words(b, taught, clock));
 	}
@@ -2234,37 +2234,22 @@ static void test_navicust(void) {
 	CHECK(navicust_fits_free(grid, parts, 1, &white, 4, 4), "with the white Spin the white pair stands upright at an end");
 	navicust_set_spins(0x3F);
 	CHECK(!navicust_fits_free(grid, parts, 1, &pink, 4, 4), "a second pink pair would touch the first");
-	/* the bug words: none, one light, several */
+	/* the bug words: none, one light, several; what each does, and why,
+	 * BN6's own, unsaid (the voice sweep, docs/voice/sweep/net.md) */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
-	CHECK(!*navicust_bug_words(bugs, false, NULL), "words for no bug");
+	CHECK(!*navicust_bug_words(bugs), "words for no bug");
 	bugs[9] = 1;
-	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false, NULL));
+	CHECK(strstr(navicust_bug_words(bugs), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs));
 	bugs[9] = 2;
-	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false, NULL));
+	CHECK(strstr(navicust_bug_words(bugs), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs));
 	bugs[7] = 5;
 	bugs[11] = 1;
-	const char *w = navicust_bug_words(bugs, false, NULL);
-	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad Buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
-	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
-	/* (the cause where the board shows it, in place of the rules) */
-	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line! Those go anywhere else.");
-	CHECK(strstr(w, "HP+100 is a plus part") && !strstr(w, "Bugs come from"), "a placement bug names its cause: %s", w);
+	const char *w = navicust_bug_words(bugs);
+	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad Buster bug") && !strstr(w, "command line") && !strstr(w, "PET"), "several bugs: %s", w);
+	check_talk("navicust_bug_words", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
-	CHECK(!strstr(navicust_bug_words(bugs, false, NULL), "command line"), "a colours' bug alone names itself");
-	CHECK(strstr(navicust_bug_words(bugs, true, NULL), "the RUN says OK...|@M But our NaviCust") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true, NULL));
-	check_talk("navicust_bug_words", navicust_bug_words(bugs, true, NULL));
-	/* which programs turn: those whose colour's Spin is held */
-	navicust_set_spins(0);
-	/* (none held: nothing said, BN6's own rule unexplained to its players) */
-	CHECK(!*navicust_turn_words(0), "no Spin, no word: %s", navicust_turn_words(0));
-	navicust_set_spins(1u << 2);
-	CHECK(strstr(navicust_turn_words(0), "turn pink programs") && strstr(navicust_turn_words(0), "That's the Spin"), "the pink Spin: %s", navicust_turn_words(0));
-	navicust_set_spins(0x3F & ~(1u << 5));
-	CHECK(strstr(navicust_turn_words(0), "white, yellow, pink, red and blue programs") != NULL, "five Spins: %s", navicust_turn_words(0));
-	check_talk("navicust_turn_words five", navicust_turn_words(0));
-	navicust_set_spins(0x3F);
-	CHECK(!strstr(navicust_turn_words(0), "only"), "all six: %s", navicust_turn_words(0));
+	CHECK(!strcmp(navicust_bug_words(bugs), "@M Lan,our NaviCust has a bug!"), "a colours' bug alone, said: %s", navicust_bug_words(bugs));
 }
 
 /* Every layout an area draws builds as planned: one that never fits the
@@ -4030,7 +4015,8 @@ static void test_beast(void) {
 		char what[64];
 		snprintf(what, sizeof what, "a run's start with BeastOut, %s, %s", k & 1 ? "taught" : "first", k & 2 ? "Dad's call before" : "alone");
 		check_talk(what, words);
-		CHECK(strstr(words, "CybeastButton") != NULL, "%s: no word of it: \"%s\"", what, words);
+		/* (told once, by Dad who unlocked it: docs/VOICE.md, What nobody says) */
+		CHECK(!strstr(words, "CybeastButton") == !!(k & 1), "%s: %s word of it: \"%s\"", what, k & 1 ? "a" : "no", words);
 		CHECK(!!strstr(words, "@D Lan,it's Dad. I've unlocked") == (k == 0), "%s: Dad's call: \"%s\"", what, words);
 	}
 	run.helpers = 0;
@@ -4652,10 +4638,8 @@ static void super_words(void) {
 		for (int f = 0; f < 3; ++f) {
 			snprintf(what, sizeof what, "super_defeat(%d, %d)", navi, forms[k][f]);
 			check_talk(what, super_defeat(navi, forms[k][f]));
-			for (int first = 0; first < 2; ++first) {
-				snprintf(what, sizeof what, "super_reward_words(%d, %d, %d)", navi, forms[k][f], first);
-				check_talk(what, super_reward_words(navi, forms[k][f], first));
-			}
+			snprintf(what, sizeof what, "super_reward_words(%d, %d)", navi, forms[k][f]);
+			check_talk(what, super_reward_words(navi, forms[k][f]));
 			/* (the card's lines, as long as a guardian's at most) */
 			const char *top, *sub;
 			super_card(navi, forms[k][f], k ? 3 * CYCLE_LAYERS : 8, &top, &sub);

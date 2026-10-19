@@ -38,7 +38,6 @@ typedef struct {
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	bool fragment_due;     /* ... once a talk can start */
 	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
-	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
 	unsigned choices_due;  /* the layer's choices taken (EV_CHOICE), acted on once the chat box closes */
@@ -97,7 +96,7 @@ typedef struct {
 	int free_x, free_y;    /* MegaMan's last place clear of every NPC */
 	int wedged;            /* frames he has pushed, unmoving, against an NPC he stands inside */
 	int last_x, last_y;    /* where he stood the frame before */
-	bool port_told;        /* MegaMan has said where the way on is at home (the town's port, Lan's HP's pink pad) and how to jack in or out */
+	bool port_told;        /* MegaMan has said where the way on is at home (the town's port and how to jack in, Lan's HP's pink pad) */
 	bool errands_told;     /* ... and, this visit, what the town holds besides: requests posted, AsterLand's order */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
 	bool more_told;        /* ... and, at a second L, what else the layer holds */
@@ -126,7 +125,6 @@ typedef struct {
 	uint32_t board;        /* ... the board they were read with (board_hash) */
 	int board_size;        /* ... and its ExpMemry */
 	bool bugs_known;       /* ... read on this layer */
-	int programs_seen;     /* ... with the programs in the PET, counted since */
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */

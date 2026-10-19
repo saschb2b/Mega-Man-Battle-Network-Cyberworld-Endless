@@ -600,8 +600,8 @@ the HP he had there: a free retry (session 64). The owner's call: the run
 saves at the arena's door, "as other bigger RPGs normally do it".
 
 - **The pattern** is the save point before the boss: the run commits at
-  the point of no return ("Once we're in, there's no running from a
-  guardian!"), and a retry starts from there, with the HP and chips
+  the point of no return (no running from a guardian, as from BN6's story
+  bosses, unsaid), and a retry starts from there, with the HP and chips
   MegaMan walked in with, never better.
 - **When**: the frame MegaMan steps into the arena, before the staging
   takes him (the staging waits that one frame). "Run saved" shows; a
@@ -802,9 +802,9 @@ long. BN6 itself gives BeastOut by its story.
   run with it, Dad calls
   as the run begins, in Lan's room: he has unlocked it, MegaMan tamed the
   beast at the Nest before (the milestone, said as the run's world knows
-  it), just don't let it take over; all of it the first time a profile
-  brings it (`profile.beast`), MegaMan's "And the CybeastButton's
-  unlocked!" and Lan's "Our trump card. Alright!" after. At the Graveyard
+  it), just don't let it take over; the first time a profile brings it
+  (`profile.beast`), and nothing after: a power is told once, by whoever
+  gave it (docs/VOICE.md, What nobody says). At the Graveyard
   the Nest still calls to the Cybeast in him, and Lan answers that he has
   kept it in check all along: nothing is unlocked (in every run since
   issue #109). Where an area's battles
@@ -1428,10 +1428,13 @@ the area's pool has one (`run_new`: a guardian met before is rolled
 again, eight times at most), so a veteran still meets new ones (a
 playtester who had met eight of seventeen met two new ones in every
 sample run). Its gain is said where it
-happens: a first win's Guardian Data talk adds "And his battle data,
-Lan. Next time, we'll know how he fights!", and a run lost to a guardian
-at the first meeting closes on Lan's "We've got his battle data now!", so
-a death to something new leaves something for the next run.
+happens: a first win over one of BN6's guardians brings Dad's mail with
+the battle data ("Lan,mail from Dad! Our battle data on DiveMan!"; for
+none does anyone explain what it is for:
+the briefing simply knows him next time, docs/VOICE.md, What nobody
+says), and a run lost to a guardian at the first meeting closes on Lan's
+"We've got his battle data now!", so a death to something new leaves
+something for the next run.
 
 ## The title's marks
 

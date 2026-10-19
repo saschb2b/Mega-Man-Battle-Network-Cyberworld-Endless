@@ -26,7 +26,6 @@ extern Seen seen;
 
 bool md_on_map(int k);
 bool md_known(int k, bool taken);
-bool counts_any(void);
 bool lock_shut(int k);
 void l_taken(void);
 

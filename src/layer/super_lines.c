@@ -5,8 +5,8 @@
  * cast). Unmarked boxes are the boss's own. */
 #include "super_lines.h"
 
+#include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "run.h"
 #include "super_boss.h"
@@ -37,21 +37,11 @@ static const char *beast_meeting(const Rival *r) {
 	return "@B GRRRRAAAAH!!|@M It's back,Lan... and stronger.|@M It copied our last battle!|@L Then we'll beat it again!";
 }
 
-/* From battle data, how to fight him: the last of MegaMan's words in the
- * tip, said again just before the fight (as a guardian's) */
-static const char *strike_when(int navi) {
-	const char *tip = super_tip(navi), *when = NULL;
-	for (const char *p = tip; p && (p = strstr(p, "|@M ")) != NULL; p += 4) when = p + 4;
-	return when;
-}
-
+/* (no word on how to fight him before the call: MegaMan never coaches, as
+ * a guardian's meeting has none, docs/VOICE.md, What nobody says) */
 const char *super_intro(int navi, int version, const Rival *r) {
 	static char buf[640];
-	int k = snprintf(buf, sizeof buf, "%s", navi == SUPER_BASS ? bass_meeting(version, r) : beast_meeting(r));
-	const char *when = fought(r) ? strike_when(navi) : NULL;
-	if (when && k < (int)sizeof buf)
-		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M Lan,remember... %c%s", *when >= 'A' && *when <= 'Z' ? *when - 'A' + 'a' : *when, when + 1);
-	if (k < (int)sizeof buf) snprintf(buf + k, sizeof buf - (size_t)k, "|@L Battle routine,set!|@M Execute!!");
+	snprintf(buf, sizeof buf, "%s|@L Battle routine,set!|@M Execute!!", navi == SUPER_BASS ? bass_meeting(version, r) : beast_meeting(r));
 	return buf;
 }
 
@@ -101,13 +91,11 @@ void super_card(int navi, int version, int depth, const char **top, const char *
 	*sub = version == SUPER_BASS_BX ? "The beast's power is his" : version == SUPER_BASS_SP ? "Stronger with every copy" : "Not a copy";
 }
 
-const char *super_reward_words(int navi, int version, bool first) {
-	static char buf[320];
-	const char *what = navi == SUPER_CYBEAST ? "@M The Cybeast's data,Lan!|@M There's a GigaChip in it!"
+/* (no word on the battle data it holds: the tip is simply there next time,
+ * and MegaMan never explains it, docs/VOICE.md, What nobody says) */
+const char *super_reward_words(int navi, int version) {
+	return navi == SUPER_CYBEAST ? "@M The Cybeast's data,Lan!|@M There's a GigaChip in it!"
 		: version == SUPER_BASS_BX ? "@M Some of the beast's power...|@M He left it behind,Lan!"
 		: version == SUPER_BASS_SP ? "@M He dropped data again,Lan!|@M Another GigaChip!"
 		: "@M Bass dropped this as he went...|@M Lan,it's GigaChip data!";
-	snprintf(buf, sizeof buf, "%s%s", what, !first ? "" : navi == SUPER_CYBEAST ? "|@M And its battle data!|@M Next time,we'll know how it fights!"
-		: "|@M And his battle data,Lan!|@M Next time,we'll know how he fights!");
-	return buf;
 }
