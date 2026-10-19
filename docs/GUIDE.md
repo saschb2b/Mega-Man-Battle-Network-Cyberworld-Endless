@@ -782,11 +782,17 @@ In the Square:
   while a BN6 chip from your Pack stands in for it (the closest one you
   have spare, Cannon where you have none). MegaMan says which before the
   challenge goes, and your folder itself never changes. Win or lose you
-  are back in the Square where you stood; nothing is won or lost. The
-  3DS and the browser have no NetBattle.
+  are back in the Square where you stood; nothing is won or lost.
+  MegaMan then asks whether to go again with the same player, the cursor
+  on No: when you both say Yes, you fight again at once by the same rules
+  with the same folder (asked again only if it no longer fits). No, B, or
+  no Yes from the other player within half a minute, and you stay in the
+  Square. The 3DS and the browser have no NetBattle.
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the
-  Arena's ring tells how a NetBattle is asked for.
+  Arena's ring tells how a NetBattle is asked for; once you have fought,
+  he calls each bout as you come back, tells who beat whom last, and
+  keeps the count while you go again with the same player.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the
