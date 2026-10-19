@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v5`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v6`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -163,12 +163,14 @@ invalidates bans and players' local block lists. Do not publish it.
 There is no remote administration endpoint. Use the CLI with filesystem
 access to the state directory. The local roster supplies public IDs;
 private player keys are never retained. Commands take effect within a
-second. `ban`, `unban`, `mute`, `unmute`, `kick` and `unkick` are supported:
+second. `ban`, `unban`, `mute`, `unmute`, `kick`, `unkick`, `hide` and
+`unhide` are supported:
 
 ```sh
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin list
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin mute --identity PUBLIC_ID --reason "Repeated disruption"
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin kick --identity PUBLIC_ID --minutes 30
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin hide --identity PUBLIC_ID --week 2963
 python3 server/admin.py unmute PUBLIC_ID --state-dir server-data
 ```
 
@@ -181,6 +183,18 @@ emotes, while movement and Inspect remain available. An optional
 `whitelist` is a space-separated list of public IDs allowed to connect.
 Profiles remain anonymous: resetting a private key can evade a ban.
 An allowlist is available where a host needs stricter admission.
+`hide` takes a profile's entry off the week's Board (docs/ONLINE.md, The
+week's net) for the week `--week` names, this week where none, and
+refuses that profile's posts for that week; `unhide` puts it back.
+
+The week's net: every Monday 00:00 UTC the server begins a week (its
+number counts weeks from Monday 5 January 1970) whose seed is derived
+from `identity.key` and the week's number, so each server has its own
+week, the same across restarts. Its Board keeps one entry per profile and
+week, the best a game reported, appended to `weeks.jsonl` in the state
+directory (public identities, names, layers, minutes; no keys) and read
+back at the start. Back it up with the rest of the state, or the Board
+starts the week empty.
 
 Back up the config and private state volume together, with access limited
 to moderators. Moderation updates use an atomic replace; concurrent local
@@ -326,5 +340,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v4 games and a v5
+one protocol version cannot enter a server of another (v5 games and a v6
 server refuse each other). Preserve the private state directory when upgrading.

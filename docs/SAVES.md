@@ -76,6 +76,7 @@ The file holds only the progress files under `savedata/`:
 | `rivals.sav`, `battle.sav` | The rival's and the guardians' records |
 | `run.sav`, `run.state` | The current run and its emulator checkpoint |
 | `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board` | The checkpoint's generation version, area and the rest of the run's data |
+| `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
 
 ROMs, boot states and any other file are never packed. Controls, keys,
@@ -84,6 +85,40 @@ stay on each device, as do SAVES' own files (below). The two volumes are
 stored inside `Profile`, so an export sets them to fixed values and
 recomputes the profile's checksum, and an import or an Undo keeps the
 receiving device's: a change of volume is not a change of the saves.
+
+### The weekly slot
+
+A dive of the Net Square's week (docs/ONLINE.md, The week's net; issue
+#127) is a run of its own beside the normal one, and the owner's rule is
+that it never touches the run in progress. It is a second save slot in
+the same folder: while a dive is played, `save_path` (`src/core/save.c`)
+puts every progress file after `weekly-` (`weekly-profile.sav`,
+`weekly-run.sav`, `weekly-run.state` and the rest of the list above),
+and `weekly.sav` (`src/core/weekly.h`, magic `CWW1`, 28 bytes,
+`save_layout.h` holding its layout) records the dive in the slot (its
+week and seed, unfinished or not), a dive's end waiting to be posted
+and the deepest layer of the week's dives (the summary's "This week").
+The normal slot's files are not written while a dive is played: a
+playtest hashed all twelve before a dive began and after it ended, the
+game closed mid-dive and continued in between, and each came back the
+same. The title always goes back to the normal slot (its CONTINUE is the
+normal run's); a dive goes on from the Square's greeter.
+
+A flat prefix rather than a folder `savedata/weekly/`: the carrier, its
+staged install, Undo and recovery all move one flat `savedata/` whole,
+so a prefix keeps every one of them as it was. `RUN_MAGIC` and the
+profile's size are the same in both slots; the slot's profile is a
+`Profile` like the other.
+
+The carrier takes the slot's files by their names (`backup_progress_name`:
+`weekly.sav`, and `weekly-` before one of the normal slot's names, no
+other), so an export holds both slots and an import puts both back, Undo
+and recovery as before. The summary and the manifest are the normal
+slot's alone: runs, best and the run's layer are the normal run's, and
+the dive's checkpoint is no part of `has_state`. `tests/test_backup.c`
+(`test_weekly_slot`) packs a folder with both slots, unpacks it into a
+fresh one and finds every file the same, and refuses a name like
+`weekly-evil.sav`.
 
 ## Carrier and manifest
 

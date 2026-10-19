@@ -23,6 +23,7 @@ typedef struct {
 	uint8_t r_act, r_won;
 	uint16_t r_minutes;
 	uint32_t r_hash;     /* its summary's hash (weekly_hash), never 0 */
+	uint16_t b_week, b_depth;   /* the deepest layer a dive of week b_week reached, posted or not (the summary's) */
 } WeeklyRecord;
 
 /* The record as weekly.sav holds it (read once, again after the title). */

@@ -158,9 +158,12 @@ void weekly_ended(bool won) {
 		W.r_hash = weekly_hash(W.seed, depth, act, W.r_won, minutes, run.bosses_beaten, run.viruses_deleted);
 		W.pending = 1;
 	}
+	if (W.b_week != W.week) W.b_depth = 0;
+	W.b_week = W.week;
+	if (depth > W.b_depth) W.b_depth = (uint16_t)depth;
 	W.running = 0;
 	record_write();
-	title_dive = W.r_depth;
+	title_dive = W.b_depth;
 	fprintf(stderr, "weekly: the dive of week %u ended on layer %d%s\n", W.week, depth, won ? ", won" : "");
 	weekly_leave();
 }

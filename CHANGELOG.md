@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **The week's deep net (issue #127).** Every Monday each Net Square
+  server opens a net of its own for the week, the same for everyone who
+  dives it. The greeter Mr.Prog by the board in the log-in plaza posts it
+  and offers the dive; it begins at home from a standard start (the short
+  net, the Standard folder, threat 0, no helpers, nothing your runs
+  unlocked) in a save slot of its own, so your run in progress waits
+  untouched and the title's CONTINUE stays with it. Your next visit posts
+  how deep the dive got, and the board lists the week's eight deepest as
+  reported, your own best and last week's three. Talk to the greeter
+  again to go on with an unfinished dive or start it over. Protocol v6:
+  a v5 game and a v6 server refuse each other. Server hosts: the week's
+  Board is kept in `weeks.jsonl` beside `identity.key`, and `--admin
+  hide` takes an entry down.
 - **The Order Service sorts (issue #124, from whitt-e).** AsterLand's
   clerk listed every chip of the Library by ID alone, five a page, while
   the folder editor and the Chip Trader beside him sort by seven keys.

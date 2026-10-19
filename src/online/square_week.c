@@ -46,7 +46,9 @@ static void post(void) {
 	const WeekBoard *b = online_week_board();
 	bool refused = Q.s.notice_serial != Q.sent_notice && Q.s.notice_code >= NOTICE_FIRST && Q.s.notice_code <= NOTICE_LAST;
 	if (b->serial != Q.sent_board || refused) {
-		if (!refused) Q.posted = r->r_depth;
+		/* (the greeter names it where it is the Board's now: a shallower
+		 * dive than the week's best leaves the best up) */
+		if (!refused && b->mine.depth == r->r_depth && b->week == r->r_week) Q.posted = r->r_depth;
 		fprintf(stderr, "online: the week's dive to layer %u %s\n", r->r_depth, refused ? "refused" : "posted");
 		weekly_posted();
 	}

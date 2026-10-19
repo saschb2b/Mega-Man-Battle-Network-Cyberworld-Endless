@@ -140,7 +140,7 @@ _Static_assert(offsetof(Job, code) == 7, "Job.code save offset changed");
 _Static_assert(offsetof(Job, pay) == 8, "Job.pay save offset changed");
 _Static_assert(offsetof(Job, depth) == 10, "Job.depth save offset changed");
 
-_Static_assert(sizeof(WeeklyRecord) == 24, "WeeklyRecord save size changed");
+_Static_assert(sizeof(WeeklyRecord) == 28, "WeeklyRecord save size changed");
 _Static_assert(offsetof(WeeklyRecord, week) == 0, "WeeklyRecord.week save offset changed");
 _Static_assert(offsetof(WeeklyRecord, running) == 2, "WeeklyRecord.running save offset changed");
 _Static_assert(offsetof(WeeklyRecord, pending) == 3, "WeeklyRecord.pending save offset changed");
@@ -152,5 +152,7 @@ _Static_assert(offsetof(WeeklyRecord, r_act) == 16, "WeeklyRecord.r_act save off
 _Static_assert(offsetof(WeeklyRecord, r_won) == 17, "WeeklyRecord.r_won save offset changed");
 _Static_assert(offsetof(WeeklyRecord, r_minutes) == 18, "WeeklyRecord.r_minutes save offset changed");
 _Static_assert(offsetof(WeeklyRecord, r_hash) == 20, "WeeklyRecord.r_hash save offset changed");
+_Static_assert(offsetof(WeeklyRecord, b_week) == 24, "WeeklyRecord.b_week save offset changed");
+_Static_assert(offsetof(WeeklyRecord, b_depth) == 26, "WeeklyRecord.b_depth save offset changed");
 
 #endif
