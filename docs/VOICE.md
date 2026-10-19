@@ -346,6 +346,24 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The title's summary of a run | `src/scenes/title_lines.c` |
 | MegaMan on a Practice NetBattle in the Net Square: the challenge sent and its rules (BN6 rules, his Souls left home, or full rules), the question a challenge asks, the folder he carries and the ones left home, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
 
+## The voice review
+
+Every line of the words files is read into `docs/voice/catalog.json`
+(`tools/voice_catalog.py`, kept in step by `build.py lint`) with its
+speaker, its boxes as the chat box pages them, the comments around it and
+the flags of this page's checks a machine can make. The owner reads it on
+the review dashboard, gives each line a verdict (OK, Change, Cut), a note
+and a wording, and leaves directions for everyone, one speaker or one
+area. Claude reads them back in a voice pass, rewrites here and marks
+them applied: docs/voice/README.md says how.
+
+### Directions from the owner
+
+Standing directions from the dashboard land here, in the owner's words
+with the date, and outrank the rest of this page where they differ.
+
+(None yet.)
+
 ## Before you commit a line
 
 1. Read it aloud as the character. If it sounds like a manual or a news
@@ -356,3 +374,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 4. Look at it in the game (`--talk`, docs/DEVTOOLS.md): BN6's box is three
    lines of about twenty characters. A box that pages on for one word is
    too long.
+5. Run `python3 tools/voice_catalog.py` and read the flags of the lines you
+   touched in `docs/voice/catalog.json` (their codes in its `flags`):
+   fix each, or know why it stands. Commit the catalog with the line;
+   `build.py lint` fails while it is stale.
