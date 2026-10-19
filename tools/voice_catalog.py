@@ -1094,7 +1094,7 @@ def conversation_title(c, name):
     for text in (c.get('comment'), c.get('header')):
         if not text or text.startswith(('...', '(')):
             continue
-        first = re.split(r':\s|;\s|\.\s| \(| — ', text, maxsplit=1)[0].strip(' .,')
+        first = re.split(r':\s|;\s|\.\s| \(| — ', text, maxsplit=1)[0].strip(' .,-')
         if not 6 <= len(first) <= 90:
             continue
         if re.match(r'(What )?(its|their|his|her|the same|same|as above)\b', first, re.I):

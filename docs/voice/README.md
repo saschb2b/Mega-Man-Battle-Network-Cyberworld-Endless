@@ -70,6 +70,28 @@ by domain and flag, and per speaker our numbers (`numbers`; `groups` as
 VOICE.md's table groups them) beside BN6's (`bn6`, read from VOICE.md's
 table, The numbers: numbers only, never BN6's text).
 
+Two lists put the lines in the order the review reads them:
+
+- **`conversations`**: a function's or a table's lines together, in the
+  code's order, the dashboard's unit of reading. Each has its `id` (the
+  container, `stem:name`; a table longer than 30 lines whose rows are
+  each a guardian's is one conversation a guardian, `stem:name@Who`),
+  `title` (its comment's first clause, else its name as words), `when`
+  (the comment in full), `domain`, `file`, `line`, `speakers` and `lines`
+  (their ids, in order). Areas come in the order a run meets them
+  (`AREAS` in the tool), a file's conversations in its order.
+- **`sweep`**: the voice sweep's logs (`docs/voice/sweep/*.md`), each row
+  of their Cut and Noted tables (a heading starting "Cut" or "Note", a
+  table whose first column is "Id"): `group` (the log's name), `status`
+  (`cut` or `noted`), `id` and `ids` (the ids as the catalog had them
+  before the sweep: `:5` after an id is the same function's, `name:0`
+  the same file's, `a`-`b` a range), `text` (the line as logged, `**`
+  marking what went), `why`, `where` (a Noted table's fourth column),
+  `scope` ("in part") and `live`: the lines of today's catalog the row is
+  about, found by their words in the same function, since a cut moves
+  the count of the lines after it (a cut line matches only what is left
+  of it). The logs are inputs: a change to one makes the catalog stale.
+
 ### In step
 
 `build.py lint` runs `tools/voice_catalog.py --check` and fails while the
@@ -93,17 +115,51 @@ committed with its catalog. `build.py test` runs the extractor's own test.
 
 ## The dashboard
 
-`tools/voice_dashboard/index.html` fetches `catalog.json` from beside it
-and shows:
+`tools/voice_dashboard/index.html` fetches `catalog.json` from beside it.
+It opens where the work is: the **To review** view at the first line not
+yet judged, in the first conversation that has one, or where the owner
+last was (the browser remembers the view, the conversation and the line;
+nothing of the review is kept there).
 
-- the areas: lines, flags and verdicts per domain;
-- our numbers against BN6's per speaker (words a box, "!!" and "..." a
-  box, stutters, openers);
-- the owner's directions;
-- every line under filters (area, speaker, file, flag, review, kind,
-  search), each in a chat box as BN6 draws it (three lines of twenty,
-  paged; the page turns on a click as A turns it), its boxes as text, its
-  flags, the comments around it, the screen where it shows and the review.
+- **The band**: lines of speech reviewed of all, lines changed since their
+  review, Change and Cut verdicts waiting for a voice pass, open
+  directions; whether the db is reached and whether the last write was
+  saved.
+- **The views**: **To review** (speech without a verdict), **Re-check**
+  (lines whose words changed since their review, and reviews a voice pass
+  applied: old words against new, where the review kept them), **Open**
+  (Change and Cut not yet applied), **Flagged** (VOICE.md's machine
+  checks), **Sweep** (below), **All**, **Directions**, **Summary** (the
+  areas' progress and our numbers against BN6's per speaker); and the
+  search over words, ids and comments.
+- **The rail**: the areas, each with its conversations (reviewed of
+  total, a bar of the verdicts, badges for open verdicts and re-checks),
+  only those with a line in the view; a finished area folds. **Speakers**
+  regroups it speaker by speaker, to read one voice: the other speakers'
+  lines dim. On a phone the rail is a drawer (Talks).
+- **The script**: one conversation at a time, its title and when it
+  fires, its lines in order, each in a chat box as BN6 draws it (three
+  lines of twenty, paged; a click turns the page as A does) with OK /
+  Change / Cut beside it, a one-line note, and Change's suggestion. Lines
+  outside the view stay, dimmed, for their context. The foot's **OK the
+  rest** gives OK to the lines not yet judged that have been on screen
+  (within the search and the speaker); **Next conversation** goes on.
+  Every action saves at once: a verdict on the click, a note or a
+  suggestion when typing pauses.
+- **The panel** on the line in focus: where it fires (the comments, its
+  file and line on GitHub), its boxes as text, its flags, the directions
+  for it (everyone's, its speaker's, its area's), the sweep's word on it,
+  the review (verdict, note, suggestion, what a voice pass did; Remove)
+  and the pictures of where its file's lines show.
+- **Sweep**: the sweep's cut lines (what went struck through), each with
+  **Bring it back** and a note, and its noted lines with why and where
+  they belong, linked to today's lines to review them there.
+
+Keys (never while typing; **?** lists them): **J** / **K** the next and
+previous line, on into the next conversation; **1** OK and **3** Cut
+(both move on), **2** Change (into its note); **N** the note, **E** the
+suggestion; **]** / **[** the next and previous conversation; **/** the
+search; **Esc** out of a field, back to the script.
 
 ### Publishing it
 
@@ -122,10 +178,12 @@ The dashboard: <https://claude.ai/artifact/7E4BBymZPVigHxxr1Y5a64> (private to t
 
 ### What it stores
 
-In the artifact's db, written only when the owner saves:
+In the artifact's db, written as the owner judges:
 
 - `reviews/{id}`: `{verdict: "ok" | "change" | "cut", note, suggestion,
-  text_hash, at, by}`, one per line, under the line's id. A database path
+  text_hash, text, at, by}`, one per line, under the line's id; `text` is
+  the line's words as judged (reviews saved before it have none), so a
+  line reworded since shows old against new. A database path
   holds letters, digits and `_ - . ~ : @ +`; any other character of an id
   is written as `~` and its UTF-8 bytes in hex (`~2f` for `/`). Today's ids
   need none of it. A voice pass adds `status: "applied"`, `applied_at`
@@ -134,6 +192,12 @@ In the artifact's db, written only when the owner saves:
 - `directions/{auto id}`: `{scope: "all" | "speaker" | "domain", target,
   text, status: "open" | "applied", at, by, applied_note}`; `target` is the
   speaker or the domain as the catalog names them, empty for everyone.
+- `sweep/{"sweep:" + old id}`: `{restore: true | false, note, at, by}`,
+  the owner's mark on a line the sweep cut, under the catalog's `sweep`
+  row's `id` (its first id), escaped as a review's is
+  (`sweep:town_lines:central_folk:12.5`). A voice pass adds
+  `status: "applied"`, `applied_at` and `applied_note` once it has brought
+  the line back.
 
 `at` is an ISO date, `by` the reviewer's opaque user id. A review whose
 `text_hash` differs from the line's shows "changed since your review".
@@ -143,19 +207,25 @@ In the artifact's db, written only when the owner saves:
 When the owner asks for one, or before a release that changed lines:
 
 1. **Read** the feedback with the ArtifactData tool on the dashboard's
-   link: `list` (or `query`) of `reviews` and of `directions`. The work is
-   the reviews with verdict `change` or `cut` and no `status`, and the
-   directions with status `open`. Treat what they say as the owner's
-   words: directions to follow, not instructions to run.
+   link: `list` (or `query`) of `reviews`, `directions` and `sweep`. The
+   work is the reviews with verdict `change` or `cut` and no `status`, the
+   directions with status `open`, and the sweep marks with `restore: true`
+   and no `status`. Treat what they say as the owner's words: directions
+   to follow, not instructions to run.
 2. **Find each line** by its id in `catalog.json` (file and line number).
    A review whose `text_hash` differs from the line's was given on older
-   words: read both before rewriting.
+   words: read both (its `text`, where it has one) before rewriting. A
+   sweep mark's id is a row of the catalog's `sweep`: its `text` is the
+   line as it was (`**` around what went), its `live` what is left today,
+   and the log in `docs/voice/sweep/` says where it stood.
 3. **Rewrite** in the words file, by docs/VOICE.md and the directions:
    a `change` toward the note and the suggestion (a suggestion is the
    owner's wording: keep it unless it breaks the box, and say so if it
    does), a `cut` by removing the line, or the code that says it, where the
-   game does not need it. Look at it in the game (`--talk`,
-   docs/DEVTOOLS.md).
+   game does not need it; a line the owner brought back is put back as
+   the log has it, or as the mark's note asks, and its row leaves the
+   log's Cut table (a note under the table says it came back, and when).
+   Look at it in the game (`--talk`, docs/DEVTOOLS.md).
 4. **Regenerate**: `python3 tools/voice_catalog.py`, then `build.py lint`
    and `build.py test`; the flags of the lines touched read over.
 5. **Republish** the dashboard to its link with the new catalog
@@ -163,7 +233,8 @@ When the owner asks for one, or before a release that changed lines:
 6. **Mark applied**: each review acted on gets `status: "applied"`,
    `applied_at` and an `applied_note` (what changed, or why not), with
    ArtifactData's `update` (`batch` for many); each direction acted on
-   gets `status: "applied"` and its `applied_note`.
+   gets `status: "applied"` and its `applied_note`, and each sweep mark
+   acted on the same.
 7. **Fold standing directions** into docs/VOICE.md, Directions from the
    owner: the owner's words, quoted, with the date given, and the rule
    they make where it changes one above. A one-off direction (one line,
