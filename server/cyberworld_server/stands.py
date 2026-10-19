@@ -213,6 +213,8 @@ class Stands:
                 for player_id in list(book.watchers):
                     self.stop(player_id)
                 del self.books[book.match.id]
+                # (the channel's last battle stays in its STANDS: its report, not its keys)
+                book.keys, book.hashes, book.loadout = [bytearray(), bytearray()], [], [None, None]
         wall = time.monotonic()
         for channel, urgent in list(self.dirty.items()):
             if urgent or wall - self.sent.get(channel, -1e9) >= STANDS_EVERY:

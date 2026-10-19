@@ -713,7 +713,8 @@ server:
   itself, saying so, while the players fought on. Three cheers from the
   stands, held from the players, on the Board and in the referee's word
   to the winner after. A battle by full rules called by the referee on a
-  game without BN5's ROM, the report alone
+  game without BN5's ROM, the report alone; the browser build, which has
+  no Arena, given the same report live (HP, MiniBomb used)
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-three-game-proof)).
 
 - **Android and Windows** (19 October 2026, protocol v5, a local server

@@ -741,6 +741,15 @@ battle stood at its Custom screen until the players' frames ran out (the
 scripted keys under full rules did not reach OK), so its end was not
 seen there; its report and the end's are the same path as BN6 rules'.
 
+The browser build, where the Arena is compiled out (`CW_ARENA` 0):
+`tools/online_browser.html`'s probe served beside a local v7 server
+allowing its origin, in headless Chrome (agent-browser), its MegaMan put
+before the referee and A pressed through his pages while two host builds
+fought (to frame 2,918, 48 hashes agreeing): "SORRY! NO NETBATTLES FROM
+THIS PET!", then "A NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 150 HP!",
+later "ALPHA HAS 120", "ALPHA USED MINIBOMB!" and "ALPHA HAS 10 HP!" as
+the cable's first's reports came, and no question.
+
 ## Not yet
 
 - The battle's sound: the scene plays the player's core only where the
