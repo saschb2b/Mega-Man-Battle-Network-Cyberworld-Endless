@@ -23,7 +23,7 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
-| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000), u8 rules (a challenge's: 0 `format_bn6`, 1 `format_full`; ignored on the others, 0..1) |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter: the mean and twice the spread of its last pings), u8 rules (a challenge's: 0 `format_bn6`, 1 `format_full`; ignored on the others, 0..1) |
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's), u8 the challenge's rules |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
@@ -149,7 +149,8 @@ The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.
 Each game runs both players' linked BN6 cores and only their keys cross
 (docs/ONLINE_ARENA.md): START gives each its side of the cable and the
-input delay, from both players' latencies (`server/cyberworld_server/arena.py`).
+input delay, from both players' latencies: the lockstep's 3 frames, a tick, then the longer latency in frames
+(`server/cyberworld_server/arena.py`, docs/ONLINE_ARENA.md's Smoothed delay).
 A challenge waits 30 seconds for its answer. One player of a battle
 sends ARENA's over (the cable's first, as the battle ends on its cores);
 a leave, a decline or a dropped connection ends it for both, ARENA_STATE

@@ -54,6 +54,7 @@ static bool scene_given;
 
 static const Scene *first_scene(const Scene *s, bool headless) {
 	if (dev.arena) return &scene_arena;   /* (--dev arena: src/online/arena_scene.c) */
+	if (dev.rollbench) return &scene_rollbench;   /* (--dev rollbench: src/dev/rollbench.c) */
 	if (!s) s = &scene_title;
 	return s == &scene_title && !scene_given && !headless ? &scene_intro : s;
 }

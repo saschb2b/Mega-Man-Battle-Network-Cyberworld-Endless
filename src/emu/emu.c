@@ -444,3 +444,23 @@ bool emu_load_state(const char *path) {
 	}
 	return ok;
 }
+
+/* The core's raw state in memory, no file and no flash save: what a
+ * rollback would keep a frame (--dev rollbench, src/dev/rollbench.c) */
+size_t emu_state_size(void) {
+	wait_frame();
+	return core ? core->stateSize(core) : 0;
+}
+
+bool emu_state_save(void *state) {
+	wait_frame();
+	return core && core->saveState(core, state);
+}
+
+bool emu_state_load(const void *state) {
+	wait_frame();
+	if (!core || !core->loadState(core, state)) return false;
+	hook_reapply();
+	keep_put(false);
+	return true;
+}

@@ -70,6 +70,9 @@ bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], b
  * and under full rules the installs' record they were made with: two
  * clients whose pairs agree have the same; 0 where it failed */
 uint64_t arena_pair_hash(ArenaPair *pair);
+/* ... but for the sound's fields, which a state loaded leaves otherwise
+ * than run straight (arena_pair_snap_diff): what a rollback must agree on */
+uint64_t arena_pair_hash_game(ArenaPair *pair);
 /* The installs' record its cores were made with (xinstall_log.h's hash): 0
  * under BN6's rules */
 uint64_t arena_pair_record(const ArenaPair *pair);
@@ -78,6 +81,30 @@ struct mCore *arena_pair_core(ArenaPair *pair, unsigned side);
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side);
 /* the cable's transfers so far */
 unsigned arena_pair_transfers(const ArenaPair *pair);
+
+/* A snapshot of the pair, all a rollback puts back (docs/ONLINE_ARENA.md,
+ * Rollback): both cores' raw states and what no core's state holds, the
+ * cable's lockstep (its numbers, each node's own and its event's place in
+ * its core's timing), each GBA's registers as they read and what else it
+ * keeps outside its state (the SIO's words, mGBA's idle loop detection),
+ * the pair's scheduling and frame clock, the Souls carried and, under full
+ * rules, what BN5's hooks keep between their calls (hook_keep_slots). Not
+ * the flash saves (a battle writes none). */
+typedef struct ArenaPairSnap ArenaPairSnap;
+/* room for one snapshot of `pair`; NULL where memory ran out */
+ArenaPairSnap *arena_pair_snap_new(ArenaPair *pair);
+void arena_pair_snap_free(ArenaPairSnap *snap);
+/* the bytes one holds: both cores' states, then the pair's own */
+size_t arena_pair_snap_bytes(const ArenaPairSnap *snap);
+size_t arena_pair_snap_core_bytes(const ArenaPairSnap *snap);
+/* the pair, between two of its frames, into `snap`; and back */
+bool arena_pair_save(ArenaPair *pair, ArenaPairSnap *snap);
+bool arena_pair_load(ArenaPair *pair, const ArenaPairSnap *snap);
+/* Where two snapshots differ outside the sound's fields (which mGBA's lazy
+ * PSG leaves otherwise after a load than run straight): the stretches of
+ * the game's state apart, and said in the output where `say` (a rollback
+ * that came back apart at `frame`: --dev rollbench); 0 the same */
+unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, unsigned frame, bool say);
 /* the cores' sound: side's into the game's sound (emu_audio_from), the
  * other's dropped; or both dropped (the way in, unheard) */
 void arena_pair_sound(ArenaPair *pair, unsigned side);

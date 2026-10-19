@@ -619,7 +619,9 @@ server:
   both games with every hash agreeing (17 and 25). The game whose ticks
   ran ahead waited on the other's keys for about one frame in eight (137
   of 1,080 frames, then 127 of 1,540), where one machine's runs waited on
-  none: the margin issue #128's rollback is for.
+  none: what issue #128's smoothed delay is for (ONLINE_ARENA.md, Smoothed
+  delay: through a local relay at that delay, 16 to 24 waits in 100 frames
+  before, none after the first five seconds since).
 - **The browser** (the same day, issue #129). `tools/online_browser.html`
   served from the repository, a local v5 server allowing its origin and a
   native game in the Square: the browser build went through the gate,
@@ -886,8 +888,8 @@ are in the history before 433865a8):
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
   a New 3DS, an Android device (the emulator's visit, trade and
   NetBattle above) and iOS, macOS and Windows itself (Wine's above); the
-  Arena's stalls over a real network, about one frame in eight on the
-  leading game (issue #128); a phone's app sent to the background
+  Arena's smoothed delay over a real network (issue #128: measured
+  through a local relay, not yet on the deployed server); a phone's app sent to the background
   mid-battle, which the lead's cap should now wait out (ONLINE_ARENA.md,
   Lockstep), untried.
 - **In the browser with the published server:** the official server

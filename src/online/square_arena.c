@@ -90,6 +90,7 @@ static struct {
 	unsigned format;          /* the rules it is fought by (ONLINE_FORMAT_*), the challenge's */
 	int folder;               /* the folder carried, 0-2 */
 	OnlineSnapshot s;
+	ArenaPings pings;         /* the round trips measured, for the delay asked for (arena_sync.h) */
 	uint32_t notice_serial;
 	ArenaNetLink link;
 	Arena *arena;
@@ -219,7 +220,7 @@ void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 	A.format = arena_format_for(online_transport_roms(), peer->roms);
 	unsigned fits;
 	if (!mine_goes(&fits)) return;
-	A.latency = latency_ms;
+	A.latency = A.pings.n ? arena_pings_latency(&A.pings) : latency_ms;
 	A.other = peer->id;
 	A.match = 0;
 	A.ended = false;
@@ -471,7 +472,9 @@ static void folder_picked(void) {
 
 void square_arena_update(const OnlineSnapshot *s) {
 	A.s = *s;
-	A.latency = s->latency_ms;
+	/* (the latency said in a challenge or a Yes: the round trip with its jitter) */
+	arena_pings_note(&A.pings, s->latency_ms, SDL_GetTicks());
+	A.latency = A.pings.n ? arena_pings_latency(&A.pings) : s->latency_ms;
 	bool open = talk_busy() || emu_read8(BN6_CHATBOX);
 	/* (a challenge the server refused with a notice: the target busy or gone) */
 	if (A.stage == SA_SENT && (s->notice_serial != A.notice_serial || SDL_GetTicks() - A.since > SENT_WAIT_MS)) A.stage = SA_IDLE;
@@ -555,8 +558,9 @@ static void bouts(unsigned result) {
 	snprintf(again.name, sizeof again.name, "%s", A.name);
 }
 
-static void battle(uint32_t keys) {
+static void battle(uint32_t keys, uint32_t rtt_ms) {
 	uint32_t stalls = arena_stalls(A.arena);
+	arena_rtt(A.arena, rtt_ms);
 	ArenaStage stage = arena_tick(A.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
 	arena_sound(A.arena);
 	arena_report_frame(A.arena);
@@ -606,7 +610,7 @@ void square_arena_frame(uint32_t keys) {
 		break;
 	case SA_CONNECTING: connecting(); break;
 	case SA_READY: ready(); break;
-	case SA_BATTLE: battle(keys); break;
+	case SA_BATTLE: battle(keys, s.latency_ms); break;
 	case SA_OVER:
 		if (++A.over_t >= OVER_TICKS || (A.over_t >= OVER_HELD && (btn_pressed(BTN_A) || btn_pressed(BTN_B)))) back();
 		break;

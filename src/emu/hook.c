@@ -111,6 +111,39 @@ int hook_slot_of(struct mCore *core) {
 	return c ? (int)(c - cores) : -1;
 }
 
+/* ---- what hooks keep a core between calls, for a rollback ---- */
+
+#define KEPT_MAX 8
+static struct { uint8_t *array; size_t each; } kept[KEPT_MAX];
+static unsigned nkept;
+
+bool hook_keep_slots(void *array, size_t each) {
+	for (unsigned i = 0; i < nkept; ++i)
+		if (kept[i].array == array) return true;
+	if (nkept == KEPT_MAX || !array || !each) return false;
+	kept[nkept].array = array;
+	kept[nkept++].each = each;
+	return true;
+}
+
+size_t hook_kept_size(void) {
+	size_t n = 0;
+	for (unsigned i = 0; i < nkept; ++i) n += kept[i].each;
+	return n;
+}
+
+void hook_kept_save(int slot, void *out) {
+	if (slot < 0 || slot >= HOOK_CORES) return;
+	uint8_t *at = out;
+	for (unsigned i = 0; i < nkept; at += kept[i].each, ++i) memcpy(at, kept[i].array + (size_t)slot * kept[i].each, kept[i].each);
+}
+
+void hook_kept_load(int slot, const void *in) {
+	if (slot < 0 || slot >= HOOK_CORES) return;
+	const uint8_t *at = in;
+	for (unsigned i = 0; i < nkept; at += kept[i].each, ++i) memcpy(kept[i].array + (size_t)slot * kept[i].each, at, kept[i].each);
+}
+
 /* (as the BIOS's Halt: the CPU idle, its cycles skipped, until an enabled
  * interrupt is raised) */
 void hook_halt(void) { GBAHalt((struct GBA *)here()->board); }
