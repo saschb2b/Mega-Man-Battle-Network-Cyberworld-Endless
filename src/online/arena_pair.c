@@ -287,6 +287,8 @@ uint64_t arena_pair_hash(ArenaPair *p) {
 	return hash ? hash : 1;
 }
 
+uint64_t arena_pair_record(const ArenaPair *p) { return p->bn5 ? xlog_hash() : 0; }
+
 struct mCore *arena_pair_core(ArenaPair *p, unsigned side) { return p->core[side & 1]; }
 const uint32_t *arena_pair_video(const ArenaPair *p, unsigned side) { return p->video[side & 1]; }
 unsigned arena_pair_transfers(const ArenaPair *p) { return p->transfers; }
@@ -320,6 +322,7 @@ void arena_pair_close(ArenaPair *pair) { (void)pair; }
 void arena_pair_anchor(ArenaPair *pair) { (void)pair; }
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) { (void)pair; (void)keys; (void)own_clock; return false; }
 uint64_t arena_pair_hash(ArenaPair *pair) { (void)pair; return 0; }
+uint64_t arena_pair_record(const ArenaPair *pair) { (void)pair; return 0; }
 struct mCore *arena_pair_core(ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
 unsigned arena_pair_transfers(const ArenaPair *pair) { (void)pair; return 0; }

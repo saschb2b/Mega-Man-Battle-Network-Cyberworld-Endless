@@ -498,6 +498,19 @@ server:
   agreeing. A desync stopped both; a game whose installs differed (one
   core made without BN5's families) stopped both before the first frame
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
+- **Every Soul in a NetBattle** (19 October 2026, issue #130, the same
+  harness). Each of the six Souls united by the challenger, then two at
+  once (ShadowSoul and TomahawkSoul, NumberSoul and ToadSoul, KnightSoul
+  and ColonelSoul, the second player's at the second Custom screen): the
+  Soul's Navi summoned and MegaMan in the Soul on both screens, its
+  charged shot (ScreenDivide, the slash, the dice bomb, the swing over a
+  field of grass, the wrecking ball, the paralysing notes) hitting on
+  both, every hash agreeing. Chaos Unison (ColonelSoul's DrkSonic,
+  NumberSoul's) and ColonelSoul's button (its Cannon fired as his
+  charged shot) too, once two things only one GBA had written were
+  carried or marked on both: the Soul's end and the button's chip.
+  The ready apart because BN5's installs differ now says so on both
+  games ("Huh? Our PETs don't match on BN5...").
 
 - **Android and Windows** (19 October 2026, protocol v5, a local server
   with seed 120, then the deployed test server once each; issue #129).
@@ -573,10 +586,10 @@ are in the history before 433865a8):
   and quick, but the owner calls it friction to brainstorm again (a
   NetBattle folder of the PET's, BN6's Folder2 opened online, is the
   other way weighed).
-- **The Souls under full rules beyond KnightSoul:** UNITE, a Soul's look
-  and its charged shot on both GBAs were seen with KnightSoul; the other
-  five Souls, Chaos Unison, ColonelSoul's button and BN5's mood are not
-  yet seen in a NetBattle.
+- **The Souls under full rules, what is left:** a failed Chaos Unison
+  (the Dark Soul on the other side) and BN5's DarkChips offered to a
+  worried MegaMan are not yet seen in a NetBattle, nor the passives one
+  by one on the other GBA ([ONLINE_ARENA.md](ONLINE_ARENA.md#not-yet)).
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.

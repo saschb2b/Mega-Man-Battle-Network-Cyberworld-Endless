@@ -57,5 +57,8 @@ void arena_sound(Arena *a);
  * the battle: the same on both clients at the Custom screen, before the
  * first frame (the network's link says it as its ready) */
 uint64_t arena_hash(Arena *a);
+/* the installs' record the pair's cores were made with (arena_pair_record):
+ * 0 under BN6's rules, or before the pair is built */
+uint64_t arena_record(const Arena *a);
 
 #endif
