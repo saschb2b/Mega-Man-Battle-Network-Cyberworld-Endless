@@ -279,11 +279,11 @@ static int layer_song(int tiles, int song) {
 }
 
 /* The layer's own flags, cleared as a layer begins: what has been told on
- * it (L, the dealer, the vendor, a heal, Chaud's call, Rush's gap) and
+ * it (L, the dealer, the vendor, a heal, Chaud's call) and
  * what its gates gave. */
 static void layer_flags_clear(void) {
 	static const int flags[] = { LAYER_TOLD_FLAG, LAYER_DEALER_TOLD_FLAG, LAYER_VENDOR_TOLD_FLAG, LAYER_HEAL_TOLD_FLAG, LAYER_VAULT_FLAG,
-		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_RUSH_TOLD_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG, LAYER_DARK_TAKEN_FLAG };
+		LAYER_OFFICIAL_FLAG, LAYER_DUEL_CALLED_FLAG, LAYER_PCODE_FLAG, LAYER_NUMBER_SEALED_FLAG, LAYER_DARK_TAKEN_FLAG };
 	for (unsigned k = 0; k < sizeof flags / sizeof *flags; ++k) flag_clear(flags[k]);
 }
 

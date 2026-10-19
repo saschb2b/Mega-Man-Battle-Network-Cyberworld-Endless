@@ -1,8 +1,7 @@
-/* MegaMan's lessons (lesson_words.c), for the director's other parts. */
+/* MegaMan's word on R in the town (lesson_words.c), for the director's other parts. */
 #ifndef CW_LESSON_WORDS_H
 #define CW_LESSON_WORDS_H
 
-void rush_hint(void);
 /* how near the port R was pressed (port_words); home's port is Lan's PC
  * (docs/HOME.md): R in his house or room off it, and L in the home town
  * (`way` the way to Lan's front door) and in AsterLand and the Academy

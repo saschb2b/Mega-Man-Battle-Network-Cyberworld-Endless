@@ -1,0 +1,1527 @@
+<title>Cyberworld Voice Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap">
+<style>
+/* Cyberworld Endless's voice review (docs/voice/README.md): every line of
+ * the words files, read from docs/voice/catalog.json beside this page, with
+ * the owner's verdicts, directions and sweep marks kept in the artifact's db.
+ * Layout: a PET band with the progress and the views; then a rail of
+ * conversations (area or speaker), one conversation as a script of BN6 chat
+ * boxes with its verdicts inline, and a panel on the focused line. The
+ * chat box is the one loud element. Colours from the project site's PET
+ * (web/assets/site.css), fonts its own Silkscreen and Pixelify Sans, with a
+ * plain face for reading. */
+:root {
+	--bg: #e8f0eb;
+	--surface: #f8fbf9;
+	--surface-2: #dde9e2;
+	--ink: #22302b;
+	--muted: #56675f;
+	--line: #bfd1c7;
+	--band: #007b31;
+	--band-ink: #f7fff7;
+	--band-soft: #0f8f40;
+	--accent: #08708c;
+	--accent-soft: #d2ecf3;
+	--box: #f7fff7;
+	--box-ink: #423939;
+	--box-edge: #214a52;
+	--box-rim: #42c6e7;
+	--box-over: #ffe58a;
+	--ph: #ffd610;
+	--ph-ink: #3a3030;
+	--ok: #1b7a43;
+	--change: #9d5c00;
+	--cut: #b3302a;
+	--on-verdict: #f8fbf9;
+	--flag: #7d5200;
+	--flag-soft: #fdefc4;
+	--del: #f6d3cf;
+	--ins: #cfeedd;
+	--spk-megaman: #2367cc;
+	--spk-lan: #d06f00;
+	--spk-prog: #a88300;
+	--spk-dad: #4a7b42;
+	--spk-chaud: #b8322a;
+	--spk-navi: #078a57;
+	--spk-other: #66756f;
+	--focus: #08708c;
+	--shade: rgba(16, 32, 28, 0.45);
+	--caps: "Silkscreen", "Pixelify Sans", ui-monospace, monospace;
+	--pixel: "Pixelify Sans", "Silkscreen", ui-monospace, monospace;
+	--text: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+	--mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+	--r: 4px;
+	--top-h: 104px;
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #0d2125;
+		--surface: #132c31;
+		--surface-2: #1a3a40;
+		--ink: #e2f0ea;
+		--muted: #9bb2aa;
+		--line: #2a4a50;
+		--band: #0a5a2c;
+		--band-ink: #eafff1;
+		--band-soft: #127238;
+		--accent: #63d2ee;
+		--accent-soft: #1b4450;
+		--box: #e9f4ed;
+		--box-ink: #2c2525;
+		--box-edge: #42c6e7;
+		--box-rim: #214a52;
+		--box-over: #ffe58a;
+		--ph: #ffd610;
+		--ph-ink: #3a3030;
+		--ok: #52cf8b;
+		--change: #f2a843;
+		--cut: #ff7e70;
+		--on-verdict: #0d2125;
+		--flag: #ffd27a;
+		--flag-soft: #3a3116;
+		--del: #5a2622;
+		--ins: #1d4a33;
+		--spk-megaman: #6aa5ff;
+		--spk-lan: #ffa040;
+		--spk-prog: #ffd84a;
+		--spk-dad: #8cc782;
+		--spk-chaud: #ff7e70;
+		--spk-navi: #3fdc9a;
+		--spk-other: #a3b4ad;
+		--focus: #63d2ee;
+		--shade: rgba(0, 0, 0, 0.6);
+		color-scheme: dark;
+	}
+}
+:root[data-theme="dark"] {
+	--bg: #0d2125;
+	--surface: #132c31;
+	--surface-2: #1a3a40;
+	--ink: #e2f0ea;
+	--muted: #9bb2aa;
+	--line: #2a4a50;
+	--band: #0a5a2c;
+	--band-ink: #eafff1;
+	--band-soft: #127238;
+	--accent: #63d2ee;
+	--accent-soft: #1b4450;
+	--box: #e9f4ed;
+	--box-ink: #2c2525;
+	--box-edge: #42c6e7;
+	--box-rim: #214a52;
+	--box-over: #ffe58a;
+	--ph: #ffd610;
+	--ph-ink: #3a3030;
+	--ok: #52cf8b;
+	--change: #f2a843;
+	--cut: #ff7e70;
+	--on-verdict: #0d2125;
+	--flag: #ffd27a;
+	--flag-soft: #3a3116;
+	--del: #5a2622;
+	--ins: #1d4a33;
+	--spk-megaman: #6aa5ff;
+	--spk-lan: #ffa040;
+	--spk-prog: #ffd84a;
+	--spk-dad: #8cc782;
+	--spk-chaud: #ff7e70;
+	--spk-navi: #3fdc9a;
+	--spk-other: #a3b4ad;
+	--focus: #63d2ee;
+	--shade: rgba(0, 0, 0, 0.6);
+	color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--text); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.tabnum { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); font-size: 0.84em; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.err { color: var(--cut); }
+.v-ok { color: var(--ok); } .v-change { color: var(--change); } .v-cut { color: var(--cut); }
+kbd { font: 500 0.72rem var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--surface); color: var(--ink); }
+select, input[type=search], input[type=text], textarea {
+	background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 5px 8px; min-width: 0; max-width: 100%;
+}
+textarea { width: 100%; resize: vertical; min-height: 2.6em; }
+.btn { border: 2px solid var(--box-edge); background: var(--surface); border-radius: var(--r); padding: 4px 11px; cursor: pointer; font: 400 0.7rem var(--caps); letter-spacing: 0.05em; }
+.btn.primary { background: var(--box-edge); color: var(--box); }
+.btn.quiet { border-color: var(--line); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.pill { display: inline-block; padding: 0 7px; border-radius: 999px; font-size: 0.74rem; border: 1px solid var(--line); white-space: nowrap; line-height: 1.6; }
+.pill.open, .pill.change { border-color: var(--change); color: var(--change); }
+.pill.cut { border-color: var(--cut); color: var(--cut); }
+.pill.applied, .pill.ok { border-color: var(--ok); color: var(--ok); }
+.pill.recheck { border-color: var(--accent); color: var(--accent); }
+.chip { display: inline-block; font-size: 0.74rem; padding: 0 7px; border-radius: 3px; background: var(--surface-2); color: var(--ink); white-space: nowrap; line-height: 1.7; }
+.chip.flag { background: var(--flag-soft); color: var(--flag); font-family: var(--mono); font-size: 0.7rem; }
+.plate { display: inline-block; font: 400 0.64rem var(--caps); letter-spacing: 0.06em; padding: 2px 7px; border-radius: 3px; color: var(--box); background: var(--spk-other); }
+.s-megaman { background: var(--spk-megaman); } .s-lan { background: var(--spk-lan); } .s-prog { background: var(--spk-prog); color: var(--box-ink); }
+.s-dad { background: var(--spk-dad); } .s-chaud { background: var(--spk-chaud); } .s-navi { background: var(--spk-navi); }
+.meter { display: flex; height: 6px; width: 100%; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+.meter i { display: block; height: 100%; }
+.m-ok { background: var(--ok); } .m-change { background: var(--change); } .m-cut { background: var(--cut); }
+
+/* ---- the PET band: progress and views ---- */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; }
+.band { background: var(--band); color: var(--band-ink); border-bottom: 3px solid var(--box-edge); }
+.band-in { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 8px 16px; max-width: 1640px; margin: 0 auto; }
+.band h1 { font: 400 1.05rem/1.2 var(--caps); letter-spacing: 0.04em; white-space: nowrap; }
+.prog { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 0.86rem; }
+.prog .meter { width: 140px; height: 8px; background: var(--band-soft); }
+.prog b { font: 500 0.98rem var(--mono); font-variant-numeric: tabular-nums; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.82rem; }
+.stats b { font: 500 0.9rem var(--mono); font-variant-numeric: tabular-nums; }
+.band .end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.db-state, .save-state { font: 400 0.64rem var(--caps); letter-spacing: 0.06em; padding: 2px 7px; border: 2px solid currentColor; border-radius: var(--r); white-space: nowrap; }
+.save-state:empty { display: none; }
+.save-state.failed { background: var(--cut); border-color: var(--cut); color: var(--on-verdict); }
+.band button.icon { border: 2px solid currentColor; background: transparent; color: inherit; border-radius: var(--r); font: 400 0.7rem var(--caps); padding: 2px 8px; cursor: pointer; }
+.views { background: var(--surface); border-bottom: 1px solid var(--line); }
+.views-in { display: flex; align-items: center; gap: 4px 10px; padding: 6px 16px; max-width: 1640px; margin: 0 auto; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; min-width: 0; flex: 1 1 auto; scrollbar-width: thin; }
+.tab { border: 0; background: transparent; border-radius: var(--r); padding: 5px 9px; cursor: pointer; white-space: nowrap; font: 400 0.68rem var(--caps); letter-spacing: 0.05em; color: var(--muted); }
+.tab .n { font: 500 0.72rem var(--mono); margin-left: 4px; }
+.tab[aria-selected="true"] { background: var(--box-edge); color: var(--box); }
+.tab:hover:not([aria-selected="true"]) { background: var(--surface-2); color: var(--ink); }
+.views input[type=search] { width: 220px; flex: 0 1 220px; }
+#rail-toggle { display: none; }
+
+/* ---- the three columns ---- */
+.app { display: grid; grid-template-columns: 290px minmax(0, 1fr) 340px; gap: 0 18px; padding-inline: 16px; padding-block: 14px 40px; max-width: 1640px; margin: 0 auto; align-items: start; }
+.app.panel-off { grid-template-columns: 290px minmax(0, 1fr); }
+.app.panel-off #panel { display: none; }
+.app.page { grid-template-columns: minmax(0, 1fr); }
+.app.page #rail, .app.page #script, .app.page #panel { display: none; }
+.app:not(.page) #page { display: none; }
+#rail, #panel { position: sticky; top: calc(var(--top-h) + 10px); max-height: calc(100vh - var(--top-h) - 20px); overflow: auto; overscroll-behavior: contain; }
+@media (max-width: 1240px) {
+	.app, .app.panel-off { grid-template-columns: 270px minmax(0, 1fr); }
+	#panel { grid-column: 2; position: static; max-height: none; overflow: visible; margin-top: 14px; }
+}
+@media (max-width: 860px) {
+	.top { position: static; }
+	.app, .app.panel-off { grid-template-columns: minmax(0, 1fr); }
+	#panel { grid-column: 1; }
+	#rail { position: fixed; z-index: 40; top: 0; bottom: 0; left: 0; width: min(88vw, 340px); max-height: none; background: var(--bg);
+		padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px); border-right: 3px solid var(--box-edge);
+		transform: translateX(-105%); visibility: hidden; transition: transform 0.18s ease, visibility 0.18s; }
+	body.drawer #rail { transform: none; visibility: visible; }
+	#rail-toggle { display: inline-block; }
+	.views-in { flex-wrap: wrap; }
+	.views input[type=search] { order: 3; width: 100%; flex: 1 1 100%; }
+	.tabs { flex: 1 1 0; }
+	.band .prog .meter { width: 90px; }
+}
+@media (prefers-reduced-motion: reduce) { #rail { transition: none; } }
+.shade { position: fixed; inset: 0; background: var(--shade); z-index: 35; }
+
+/* ---- the rail ---- */
+.rail-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.seg { display: inline-flex; border: 2px solid var(--box-edge); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 3px 9px; cursor: pointer; font: 400 0.64rem var(--caps); letter-spacing: 0.05em; }
+.seg button[aria-pressed="true"] { background: var(--box-edge); color: var(--box); }
+.rail-head .close { margin-left: auto; display: none; }
+@media (max-width: 860px) { .rail-head .close { display: inline-block; } }
+.tree { display: grid; gap: 6px; }
+.grp > button.gh { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 2px 6px; align-items: center; border: 0; background: transparent; cursor: pointer; padding: 4px 4px; text-align: left; border-radius: var(--r); }
+.grp > button.gh:hover { background: var(--surface-2); }
+.gh .tw { font: 400 0.7rem var(--mono); color: var(--muted); }
+.gh .name { font: 400 0.7rem/1.3 var(--caps); letter-spacing: 0.05em; overflow-wrap: anywhere; }
+.gh .count { font: 500 0.72rem var(--mono); color: var(--muted); }
+.gh .meter { grid-column: 2 / -1; height: 4px; }
+.convs { list-style: none; margin: 2px 0 6px; padding: 0 0 0 10px; display: grid; gap: 1px; border-left: 2px solid var(--line); margin-left: 9px; }
+.conv { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1px 8px; border: 0; background: transparent; text-align: left; padding: 4px 6px; border-radius: var(--r); cursor: pointer; font-size: 0.84rem; line-height: 1.3; }
+.conv:hover { background: var(--surface-2); }
+.conv[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.conv .t { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.conv.done .t { color: var(--muted); }
+.conv.fold .t { font-size: 0.78rem; color: var(--accent); }
+.conv .c { font: 500 0.7rem var(--mono); color: var(--muted); white-space: nowrap; }
+.conv .b { grid-column: 1 / -1; display: flex; gap: 4px; align-items: center; }
+.conv .b .meter { flex: 1 1 auto; height: 3px; }
+.conv .b .pill { font-size: 0.66rem; line-height: 1.4; padding: 0 5px; }
+.rail-empty { padding: 14px 6px; color: var(--muted); font-size: 0.9rem; }
+
+/* ---- the script ---- */
+#script { min-width: 0; }
+.sc-head { display: grid; gap: 6px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.8rem; color: var(--muted); }
+.crumbs .area { font: 400 0.64rem var(--caps); letter-spacing: 0.06em; }
+.sc-head h2 { font: 600 1.35rem/1.25 var(--pixel); }
+.sc-head .when { max-width: 75ch; color: var(--muted); font-size: 0.9rem; }
+.sc-head .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 0.82rem; }
+.sc-head .meta .tools { margin-left: auto; display: flex; gap: 6px; }
+.beats { display: grid; gap: 4px; }
+.beat { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 8px 18px; padding: 12px 12px; border: 2px solid transparent; border-radius: 6px; scroll-margin-top: calc(var(--top-h) + 16px); scroll-margin-bottom: 80px; }
+.beat:hover { background: var(--surface); }
+.beat.focus { border-color: var(--accent); background: var(--surface); }
+.beat.dim { opacity: 0.48; }
+.beat.dim:hover, .beat.dim.focus { opacity: 1; }
+.beat:focus { outline: none; }
+.beat:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 640px) { .beat { grid-template-columns: minmax(0, 1fr); padding: 10px 6px; } }
+.say { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.say .who { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.chat { position: relative; background: var(--box); color: var(--box-ink); border: 3px solid var(--box-edge); border-radius: 6px;
+	box-shadow: inset 0 0 0 2px var(--box-rim); padding: 9px 13px 11px; font: 400 18px/1.45 var(--pixel); cursor: pointer; user-select: text;
+	min-height: calc(3 * 1.45em + 20px); width: min(100%, 300px); }
+.chat .ln { display: block; white-space: pre; min-height: 1.45em; overflow: hidden; text-overflow: clip; }
+.chat .ln.over { background: linear-gradient(transparent 62%, var(--box-over) 62%); }
+.chat .arrow { position: absolute; right: 9px; bottom: 7px; width: 0; height: 0; border: 6px solid transparent; border-top: 7px solid var(--box-edge); border-bottom: 0; }
+@media (prefers-reduced-motion: no-preference) { .chat .arrow { animation: bob 0.9s steps(2) infinite; } }
+@keyframes bob { 50% { transform: translateY(2px); } }
+.ph { display: inline-block; background: var(--ph); color: var(--ph-ink); border-radius: 3px; padding: 0 3px; font: 600 0.72em/1.4 var(--mono); vertical-align: 1px; }
+.pager { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--muted); }
+.pager button { border: 1px solid var(--line); background: var(--surface); border-radius: 3px; padding: 0 8px; cursor: pointer; line-height: 1.6; }
+.pager button:disabled { opacity: 0.4; cursor: default; }
+.judge { display: grid; gap: 7px; align-content: start; min-width: 0; }
+.jrow { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.verdicts { display: inline-flex; gap: 4px; }
+.vbtn { border: 2px solid var(--line); background: var(--surface); border-radius: var(--r); padding: 3px 10px; cursor: pointer; font: 400 0.68rem var(--caps); letter-spacing: 0.05em; display: inline-flex; gap: 6px; align-items: center; }
+.vbtn .k { font: 500 0.66rem var(--mono); color: var(--muted); }
+.vbtn:disabled { cursor: default; opacity: 0.55; }
+.vbtn[data-v="ok"][aria-pressed="true"] { border-color: var(--ok); background: var(--ok); color: var(--on-verdict); }
+.vbtn[data-v="change"][aria-pressed="true"] { border-color: var(--change); background: var(--change); color: var(--on-verdict); }
+.vbtn[data-v="cut"][aria-pressed="true"] { border-color: var(--cut); background: var(--cut); color: var(--on-verdict); }
+.vbtn[aria-pressed="true"] .k { color: inherit; opacity: 0.8; }
+.beat .note { width: 100%; }
+.beat textarea.sugg { font: 1rem var(--pixel); }
+.beat .status { font-size: 0.76rem; color: var(--muted); min-height: 1.1em; }
+.beat .lid { font: 400 0.7rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.was { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--r) var(--r) 0; padding: 6px 10px; font-size: 0.86rem; display: grid; gap: 3px; }
+.was .lbl { font: 400 0.6rem var(--caps); letter-spacing: 0.06em; color: var(--accent); }
+.diff { white-space: pre-wrap; overflow-wrap: anywhere; }
+.diff del { background: var(--del); text-decoration: line-through; }
+.diff ins { background: var(--ins); text-decoration: none; }
+.diff .sep { color: var(--muted); padding: 0 2px; }
+.sc-foot { position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)); margin-top: 10px;
+	background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: 0 -6px 12px -10px var(--shade); }
+.sc-foot .hint { font-size: 0.8rem; color: var(--muted); }
+.sc-foot .next { margin-left: auto; }
+.empty { padding: 30px 16px; text-align: center; color: var(--muted); display: grid; gap: 10px; justify-items: center; }
+.empty h2 { font: 600 1.2rem var(--pixel); color: var(--ink); }
+.notice { padding: 10px 14px; border: 2px dashed var(--line); border-radius: var(--r); font-size: 0.9rem; }
+
+/* ---- the panel ---- */
+#panel { min-width: 0; }
+.pn { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.pn h3 { font: 400 0.64rem var(--caps); letter-spacing: 0.06em; color: var(--muted); margin-bottom: 4px; }
+.pn section { display: grid; gap: 4px; min-width: 0; }
+.pn p { overflow-wrap: anywhere; }
+.pn .head { display: flex; align-items: center; gap: 8px; }
+.pn .head .lid { font: 500 0.78rem var(--mono); overflow-wrap: anywhere; min-width: 0; }
+.pn .head button { margin-left: auto; }
+.boxes { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 0.88rem; }
+.boxes li { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 6px; }
+.boxes .w { font: 400 0.58rem/1.9 var(--caps); letter-spacing: 0.05em; color: var(--muted); overflow-wrap: anywhere; }
+.boxes .x { white-space: pre-wrap; overflow-wrap: anywhere; }
+.flags { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+.flags li { font-size: 0.8rem; background: var(--flag-soft); color: var(--ink); border-radius: 3px; padding: 3px 8px; }
+.flags li b { font: 500 0.76rem var(--mono); color: var(--flag); margin-right: 6px; }
+.dirs { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.dirs li { font-size: 0.86rem; border-left: 3px solid var(--change); padding: 2px 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dirs li.applied { border-left-color: var(--ok); color: var(--muted); }
+.dirs .sc { font-size: 0.72rem; color: var(--muted); display: block; white-space: normal; }
+.hist { display: grid; gap: 4px; font-size: 0.86rem; }
+.hist .q { white-space: pre-wrap; overflow-wrap: anywhere; border-left: 3px solid var(--line); padding-left: 8px; }
+.shots { display: flex; flex-wrap: wrap; gap: 8px; }
+.shots a { display: block; width: 140px; max-width: 100%; }
+.shots img { display: block; width: 140px; max-width: 100%; aspect-ratio: 3 / 2; object-fit: cover; image-rendering: pixelated; border: 2px solid var(--box-edge); border-radius: 3px; background: var(--surface-2); }
+
+/* ---- the pages: sweep, directions, summary ---- */
+#page { display: grid; gap: 20px; min-width: 0; max-width: 1180px; width: 100%; margin: 0 auto; }
+#page h2 { font: 400 0.95rem/1.3 var(--caps); letter-spacing: 0.06em; }
+#page h3 { font: 600 1.05rem var(--pixel); margin: 6px 0 4px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
+.lede { max-width: 72ch; color: var(--muted); }
+.bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.cards { display: grid; gap: 10px; }
+.sw { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px); gap: 8px 18px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.sw.back { border-color: var(--ok); box-shadow: inset 4px 0 0 var(--ok); }
+@media (max-width: 760px) { .sw { grid-template-columns: minmax(0, 1fr); } }
+.sw .said { display: grid; gap: 4px; min-width: 0; }
+.sw .ids { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font: 400 0.74rem var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+.sw .txt { font: 1rem/1.45 var(--pixel); white-space: pre-wrap; overflow-wrap: anywhere; }
+.sw .txt mark { background: var(--del); color: inherit; text-decoration: line-through; text-decoration-color: var(--cut); }
+.sw .txt .sep { color: var(--muted); }
+.sw .why { font-size: 0.88rem; overflow-wrap: anywhere; }
+.sw .why b { font: 400 0.6rem var(--caps); letter-spacing: 0.05em; color: var(--muted); margin-right: 6px; }
+.sw .act { display: grid; gap: 6px; align-content: start; }
+.switch { display: inline-flex; align-items: center; gap: 8px; border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 12px 3px 4px; cursor: pointer; font: 400 0.66rem var(--caps); letter-spacing: 0.05em; justify-self: start; }
+.switch i { width: 26px; height: 16px; border-radius: 999px; background: var(--surface-2); position: relative; border: 1px solid var(--line); }
+.switch i::after { content: ""; position: absolute; top: 1px; left: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--muted); transition: left 0.12s; }
+.switch[aria-pressed="true"] { border-color: var(--ok); color: var(--ok); }
+.switch[aria-pressed="true"] i { background: var(--ok); }
+.switch[aria-pressed="true"] i::after { left: 11px; background: var(--on-verdict); }
+.switch:disabled { cursor: default; opacity: 0.55; }
+.livelinks { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 0.82rem; }
+.linkish { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
+.scroll-x { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 400 0.66rem var(--caps); letter-spacing: 0.06em; color: var(--muted); white-space: nowrap; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.pick { cursor: pointer; }
+tr.pick:hover td { background: var(--surface-2); }
+td .meter { min-width: 90px; height: 8px; }
+.stack { display: grid; gap: 20px; min-width: 0; }
+.stack > *, #page > * { min-width: 0; }
+.totals { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 10px; font-size: 0.9rem; }
+.totals b { font: 500 1.1rem var(--mono); font-variant-numeric: tabular-nums; }
+#numbers tr.first td { border-bottom: 0; padding-bottom: 2px; }
+#numbers tr.openers td { padding-top: 0; }
+.dumb { position: relative; height: 14px; min-width: 110px; }
+.dumb .track { position: absolute; left: 0; right: 0; top: 6px; height: 2px; background: var(--line); }
+.dumb .span { position: absolute; top: 6px; height: 2px; background: var(--muted); }
+.dumb .dot { position: absolute; top: 2px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; }
+.dumb .ours { background: var(--accent); }
+.dumb .bn6 { background: var(--surface); border: 2px solid var(--ink); }
+.legend { display: flex; gap: 14px; font-size: 0.8rem; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.legend .l-ours::before { background: var(--accent); }
+.legend .l-bn6::before { border: 2px solid var(--ink); width: 7px; height: 7px; }
+.drift { color: var(--change); font-weight: 700; }
+.dir-list { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+.dir { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+.dir p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.dir .meta { grid-column: 1 / -1; font-size: 0.8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.dir.applied p { color: var(--muted); }
+.dir-form { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 10px; align-items: start; }
+.dir-form .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dir-form textarea { grid-column: 1 / -1; }
+@media (max-width: 560px) { .dir-form { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- the keys ---- */
+.overlay { position: fixed; inset: 0; z-index: 60; background: var(--shade); display: grid; place-items: center; padding: 16px; }
+.keys { background: var(--surface); border: 3px solid var(--box-edge); border-radius: 6px; padding: 16px 18px; width: min(100%, 460px); max-height: 90vh; overflow: auto; display: grid; gap: 10px; }
+.keys h2 { font: 400 0.9rem var(--caps); letter-spacing: 0.05em; }
+.keys dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; margin: 0; font-size: 0.9rem; }
+.keys dt { text-align: right; white-space: nowrap; }
+.keys dd { margin: 0; }
+</style>
+
+<header class="top" id="top">
+	<div class="band">
+		<div class="band-in">
+			<h1>Voice Review</h1>
+			<div class="prog" id="prog" title="Lines of speech reviewed"><span class="meter" id="prog-meter"></span><span><b id="prog-n">0</b> / <span id="prog-of">0</span> reviewed</span></div>
+			<div class="stats" id="stats"></div>
+			<div class="end">
+				<span class="save-state" id="save-state" aria-live="polite"></span>
+				<span class="db-state" id="db-state" title="Where your reviews go">CONNECTING</span>
+				<button class="icon" type="button" id="help-btn" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</button>
+			</div>
+		</div>
+	</div>
+	<nav class="views" aria-label="Views">
+		<div class="views-in">
+			<button class="btn quiet" type="button" id="rail-toggle" aria-controls="rail" aria-expanded="false">Talks</button>
+			<div class="tabs" role="tablist" id="tabs"></div>
+			<input type="search" id="q" placeholder="Search words, ids" aria-label="Search the lines">
+		</div>
+	</nav>
+</header>
+
+<div class="app" id="app">
+	<aside id="rail" aria-label="Conversations">
+		<div class="rail-head">
+			<div class="seg" role="group" aria-label="Group the conversations by">
+				<button type="button" id="rail-area" aria-pressed="true">Areas</button>
+				<button type="button" id="rail-speaker" aria-pressed="false">Speakers</button>
+			</div>
+			<button class="btn quiet close" type="button" id="rail-close">Close</button>
+		</div>
+		<div class="tree" id="tree"><div class="rail-empty">Reading the catalog...</div></div>
+	</aside>
+	<main id="script" aria-live="off"><div class="empty">Reading the catalog...</div></main>
+	<aside id="panel" aria-label="The line in focus"></aside>
+	<section id="page" aria-live="polite"></section>
+</div>
+<div class="overlay" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="help-h">
+	<div class="keys">
+		<h2 id="help-h">Keys</h2>
+		<dl>
+			<dt><kbd>J</kbd> <kbd>K</kbd></dt><dd>Next and previous line (past the last, the next conversation)</dd>
+			<dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>OK, Change, Cut. OK and Cut move on; Change opens the note</dd>
+			<dt><kbd>N</kbd></dt><dd>Write a note on the line</dd>
+			<dt><kbd>E</kbd></dt><dd>Write the wording you want (the suggestion)</dd>
+			<dt><kbd>]</kbd> <kbd>[</kbd></dt><dd>Next and previous conversation</dd>
+			<dt><kbd>/</kbd></dt><dd>Search</dd>
+			<dt><kbd>Esc</kbd></dt><dd>Leave a text field, back to the script</dd>
+			<dt><kbd>?</kbd></dt><dd>These keys</dd>
+		</dl>
+		<p class="small muted">Keys never fire while you type. Everything saves as you go: a verdict at once, a note when you pause. Click a chat box to turn its page, as A does.</p>
+		<button class="btn primary" type="button" id="help-close">Close</button>
+	</div>
+</div>
+
+<script>
+(() => {
+	'use strict';
+	const REPO = 'https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/dev/';
+	const $ = (id) => document.getElementById(id);
+	const el = (tag, props, ...kids) => {
+		const n = document.createElement(tag);
+		if (props) for (const [k, v] of Object.entries(props)) {
+			if (v == null || v === false) continue;
+			if (k === 'class') n.className = v;
+			else if (k === 'text') n.textContent = v;
+			else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+			else n.setAttribute(k, v === true ? '' : v);
+		}
+		for (const k of kids.flat(Infinity)) if (k != null && k !== false) n.append(k.nodeType ? k : String(k));
+		return n;
+	};
+	/* a node's children replaced, the nulls of a condition left out */
+	const put = (n, ...kids) => n.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));
+	const store = {
+		get(k, d) { try { const v = localStorage.getItem('voice-review2:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+		set(k, v) { try { localStorage.setItem('voice-review2:' + k, JSON.stringify(v)); } catch (e) { /* (a private window) */ } },
+	};
+
+	/* A line's id as a db document id: the path grammar holds letters,
+	 * digits and _ - . ~ : @ + ; anything else becomes ~ and its UTF-8
+	 * bytes in hex (so ~ itself is ~7e). docs/voice/README.md says the same. */
+	function docId(id) {
+		let out = '';
+		for (const ch of id) {
+			if (/[A-Za-z0-9_\-.:@+]/.test(ch)) out += ch;
+			else for (const b of new TextEncoder().encode(ch)) out += '~' + b.toString(16).padStart(2, '0');
+		}
+		return out === '.' || out === '..' ? '~2e' : out;
+	}
+
+	const VERDICTS = [['ok', 'OK', '1'], ['change', 'Change', '2'], ['cut', 'Cut', '3']];
+	const S = {
+		cat: null, lines: [], byId: new Map(), byDoc: new Map(), convs: [], convById: new Map(), convOf: new Map(),
+		reviews: new Map(), directions: [], marks: new Map(), sweepOf: new Map(),
+		db: null, me: null, readOnly: true, connected: false, reviewsIn: false,
+		tab: store.get('tab', 'review'), railMode: store.get('rail', 'area'), speaker: store.get('speaker', ''),
+		conv: store.get('conv', ''), focus: store.get('line', ''), q: '',
+		autoPick: !store.get('conv', ''), seen: new Set(), rows: new Map(), showDone: new Set(),
+		collapsed: new Set(store.get('collapsed', [])), opened: new Set(store.get('opened', [])),
+		panelOff: store.get('panel-off', false), sweepShow: store.get('sweep-show', 'cut'),
+	};
+
+	/* ---- what a line is to the review ---- */
+	const rev = (l) => S.reviews.get(l.doc) || null;
+	const speech = (l) => l.kind === 'speech';
+	const appliedOf = (l) => { const r = rev(l); return !!(r && r.status === 'applied'); };
+	const staleOf = (l) => { const r = rev(l); return !!(r && r.status !== 'applied' && r.text_hash && r.text_hash !== l.text_hash); };
+	const recheckOf = (l) => appliedOf(l) || staleOf(l);
+	const openOf = (l) => { const r = rev(l); return !!(r && (r.verdict === 'change' || r.verdict === 'cut') && r.status !== 'applied'); };
+	const todo = (l) => speech(l) && !rev(l);
+	const TABS = [
+		['review', 'To review', todo],
+		['recheck', 'Re-check', recheckOf],
+		['open', 'Open', openOf],
+		['flagged', 'Flagged', (l) => l.flags.length > 0],
+		['sweep', 'Sweep', null],
+		['all', 'All', () => true],
+		['directions', 'Directions', null],
+		['summary', 'Summary', null],
+	];
+	const tabTest = () => (TABS.find((t) => t[0] === S.tab) || TABS[0])[2];
+	const isPage = () => !tabTest();
+	function hay(l) {
+		if (l.hay) return l.hay;
+		const c = S.cat.containers[l.key] || {};
+		return (l.hay = (l.text + ' ' + l.id + ' ' + (l.who || '') + ' ' + l.speakers.join(' ') + ' ' + (l.note || '') + ' ' + (c.comment || '') + ' ' + (c.header || '')).toLowerCase());
+	}
+	/* in the view before the rail's speaker: the tab's own test and the search */
+	function baseView(l) {
+		const t = tabTest();
+		if (t && !t(l)) return false;
+		return !S.q || hay(l).includes(S.q);
+	}
+	const inView = (l) => baseView(l) && !(S.railMode === 'speaker' && S.speaker && !l.speakers.includes(S.speaker));
+	/* what "OK the rest" may judge: unjudged speech on screen, within the
+	 * search and the rail's speaker (lines dimmed by them are left alone) */
+	const restOf = (l) => todo(l) && S.seen.has(l.id) && (!S.q || hay(l).includes(S.q)) && !(S.railMode === 'speaker' && S.speaker && !l.speakers.includes(S.speaker));
+
+	function speakerClass(s) {
+		if (s === 'MegaMan') return 's-megaman';
+		if (s === 'Lan') return 's-lan';
+		if (s === 'Mr.Prog') return 's-prog';
+		if (s === 'Dad') return 's-dad';
+		if (s === 'Chaud' || s === 'ProtoMan') return 's-chaud';
+		if (['Guardian', 'Bystander', 'HeelNavi', 'Shop Navi', 'Bass'].includes(s)) return 's-navi';
+		return '';
+	}
+	const plate = (s, who) => el('span', { class: 'plate ' + speakerClass(s), text: (who || s).toUpperCase() });
+	const when = (iso) => { try { return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return iso || ''; } };
+	const plain = (t) => String(t || '').replace(/(^|\|)@[A-Z] /g, '$1');
+
+	/* text with {placeholders} as chips */
+	function rich(text) {
+		const frag = document.createDocumentFragment();
+		let at = 0;
+		for (const m of text.matchAll(/\{([^{}]+)\}/g)) {
+			if (m.index > at) frag.append(text.slice(at, m.index));
+			frag.append(el('span', { class: 'ph', text: m[1] }));
+			at = m.index + m[0].length;
+		}
+		if (at < text.length) frag.append(text.slice(at));
+		return frag;
+	}
+	const width = (s) => s.replace(/\{[^}]+\}/g, '12345678').length;
+
+	/* a word diff (old -> new) for a line changed since its review */
+	function diff(a, b) {
+		const split = (t) => plain(t).match(/\|| ?[^\s|]+|\s+/g) || [];
+		const A = split(a), B = split(b), n = A.length, m = B.length;
+		if (n * m > 60000) return null;
+		const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+		for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = A[i] === B[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+		const out = el('span', { class: 'diff' });
+		const put = (kind, t) => {
+			const node = t === '|' ? el('span', { class: 'sep', text: ' | ' }) : rich(t);
+			out.append(kind === '=' ? node : el(kind === '-' ? 'del' : 'ins', null, node));
+		};
+		let i = 0, j = 0;
+		while (i < n && j < m) {
+			if (A[i] === B[j]) { put('=', A[i]); i++; j++; }
+			else if (dp[i + 1][j] >= dp[i][j + 1]) put('-', A[i++]);
+			else put('+', B[j++]);
+		}
+		while (i < n) put('-', A[i++]);
+		while (j < m) put('+', B[j++]);
+		return out;
+	}
+
+	/* ---- the catalog ---- */
+	async function loadCatalog() {
+		let cat;
+		try {
+			const res = await fetch('catalog.json', { cache: 'no-cache' });
+			if (!res.ok) throw new Error('HTTP ' + res.status);
+			cat = await res.json();
+		} catch (e) {
+			$('script').replaceChildren(el('div', { class: 'notice' },
+				'catalog.json did not load (' + e.message + '). It is published beside this page from docs/voice/catalog.json; ',
+				'run python3 tools/voice_catalog.py and publish both again (docs/voice/README.md).'));
+			$('tree').replaceChildren();
+			return;
+		}
+		S.cat = cat;
+		S.lines = cat.lines.map((l, i) => Object.assign({ i, doc: docId(l.id), key: l.id.split(':')[0] + ':' + l.container }, l));
+		for (const l of S.lines) { S.byId.set(l.id, l); S.byDoc.set(l.doc, l); }
+		S.convs = (cat.conversations || []).map((c, i) => Object.assign({ i, lineObjs: c.lines.map((id) => S.byId.get(id)).filter(Boolean) }, c));
+		if (!S.convs.length) {   // (a catalog before conversations: one a container)
+			const m = new Map();
+			for (const l of S.lines) { if (!m.has(l.key)) m.set(l.key, { id: l.key, title: l.container, when: '', domain: l.domain, file: l.file, lineObjs: [] }); m.get(l.key).lineObjs.push(l); }
+			S.convs = [...m.values()].map((c, i) => Object.assign(c, { i, speakers: [...new Set(c.lineObjs.flatMap((l) => l.speakers))] }));
+		}
+		for (const c of S.convs) { S.convById.set(c.id, c); for (const l of c.lineObjs) S.convOf.set(l.id, c); }
+		for (const row of cat.sweep || []) for (const id of row.live || []) { if (!S.sweepOf.has(id)) S.sweepOf.set(id, []); S.sweepOf.get(id).push(row); }
+		if (!S.convById.has(S.conv)) { S.conv = ''; S.autoPick = true; }
+		if (S.autoPick) pickStart();
+		renderAll();
+		reveal();
+	}
+
+	/* the focused line on screen, where it is not the conversation's first */
+	function reveal() {
+		const row = S.rows.get(S.focus);
+		if (row && row.node.previousElementSibling) row.node.scrollIntoView({ block: 'center' });
+	}
+
+	/* where work resumes: the first conversation with a line to review, at
+	 * that line (or, after a reload, where the owner last was) */
+	function pickStart(from) {
+		const start = from ? Math.max(0, S.convs.indexOf(from)) : 0;
+		const order = S.convs.slice(start).concat(S.convs.slice(0, start));
+		const c = order.find((x) => x.lineObjs.some(todo)) || S.convs[0];
+		if (!c) return;
+		S.conv = c.id;
+		S.focus = (c.lineObjs.find(todo) || c.lineObjs[0]).id;
+	}
+
+	/* ---- the counts ---- */
+	function counts() {
+		const n = { speech: 0, reviewed: 0, review: 0, recheck: 0, open: 0, flagged: 0, change: 0, cut: 0 };
+		for (const l of S.lines) {
+			if (speech(l)) { n.speech++; if (rev(l)) n.reviewed++; else n.review++; }
+			if (recheckOf(l)) n.recheck++;
+			if (openOf(l)) { n.open++; n[rev(l).verdict]++; }
+			if (l.flags.length) n.flagged++;
+		}
+		n.sweep = (S.cat.sweep || []).filter((r) => r.status === 'cut').length;
+		n.back = [...S.marks.values()].filter((m) => m.restore).length;
+		n.directions = S.directions.filter((d) => d.status !== 'applied').length;
+		return n;
+	}
+
+	function renderTop() {
+		if (!S.cat) return;
+		const n = counts();
+		$('prog-n').textContent = n.reviewed;
+		$('prog-of').textContent = n.speech;
+		$('prog-meter').replaceChildren(el('i', { class: 'm-ok', style: 'width:' + (100 * n.reviewed / Math.max(1, n.speech)).toFixed(1) + '%' }));
+		$('stats').replaceChildren(
+			el('span', { title: 'Lines whose words changed since your review, or that a voice pass rewrote' }, el('b', { text: n.recheck }), ' changed since review'),
+			el('span', { title: 'Your Change and Cut verdicts not yet acted on in a voice pass' }, el('b', { text: n.change }), ' to change, ', el('b', { text: n.cut }), ' to cut'),
+			el('span', { title: 'Directions not yet applied' }, el('b', { text: n.directions }), ' open directions'));
+		const label = { review: n.review, recheck: n.recheck, open: n.open, flagged: n.flagged, sweep: n.sweep, all: S.lines.length, directions: n.directions, summary: null };
+		$('tabs').replaceChildren(...TABS.map(([id, name]) => el('button', {
+			class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(S.tab === id), 'data-tab': id,
+			onclick: () => setTab(id),
+		}, name, label[id] != null ? el('span', { class: 'n', text: label[id] }) : null)));
+	}
+
+	function setTab(id) {
+		S.tab = id; store.set('tab', id);
+		S.autoPick = false;
+		const c = S.convById.get(S.conv);
+		if (!isPage() && (!c || !c.lineObjs.some(inView))) {
+			const first = S.convs.find((x) => x.lineObjs.some(inView));
+			if (first) { S.conv = first.id; S.focus = first.lineObjs.find(inView).id; }
+		}
+		renderAll();
+		window.scrollTo({ top: 0 });
+	}
+
+	function renderAll() {
+		if (!S.cat) return;
+		const app = $('app');
+		app.classList.toggle('page', isPage());
+		app.classList.toggle('panel-off', S.panelOff);
+		renderTop();
+		if (isPage()) { renderPage(); return; }
+		renderRail();
+		renderScript();
+	}
+
+	/* ---- the rail: areas (or speakers) and their conversations ---- */
+	function stats(c, test) {
+		const s = { view: 0, speech: 0, reviewed: 0, open: 0, recheck: 0, ok: 0, change: 0, cut: 0, total: c.lineObjs.length };
+		for (const l of c.lineObjs) {
+			if (test && !test(l)) continue;
+			if (baseView(l)) s.view++;
+			if (speech(l)) { s.speech++; const r = rev(l); if (r) { s.reviewed++; if (s[r.verdict] != null) s[r.verdict]++; } }
+			if (openOf(l)) s.open++;
+			if (recheckOf(l)) s.recheck++;
+		}
+		return s;
+	}
+	const done = (s) => s.speech > 0 && s.reviewed === s.speech && !s.open && !s.recheck;
+	const meter = (s) => {
+		const of = Math.max(1, s.speech), pc = (x) => (100 * x / of).toFixed(1) + '%';
+		return el('span', { class: 'meter', 'aria-hidden': 'true' }, el('i', { class: 'm-ok', style: 'width:' + pc(s.ok) }),
+			el('i', { class: 'm-change', style: 'width:' + pc(s.change) }), el('i', { class: 'm-cut', style: 'width:' + pc(s.cut) }));
+	};
+
+	function convButton(c, s, speaker) {
+		const cur = c.id === S.conv && (S.railMode !== 'speaker' || speaker === S.speaker);
+		return el('li', null, el('button', {
+			class: 'conv' + (done(s) ? ' done' : ''), type: 'button', 'aria-current': cur ? 'true' : null,
+			title: c.title + (c.when && c.when !== c.title ? ': ' + c.when : ''),
+			onclick: () => openConv(c, null, speaker),
+		}, el('span', { class: 't', text: c.title }),
+		el('span', { class: 'c', text: s.speech ? s.reviewed + '/' + s.speech : s.total + ' screen' }),
+		el('span', { class: 'b' }, meter(s), s.open ? el('span', { class: 'pill open', text: s.open + ' open' }) : null,
+			s.recheck ? el('span', { class: 'pill recheck', text: s.recheck + ' re-check' }) : null)));
+	}
+
+	function group(key, name, convItems, total) {
+		const fin = done(total);
+		const shut = S.collapsed.has(key) || (fin && !S.opened.has(key) && !convItems.some((x) => x[0].id === S.conv));
+		const g = el('div', { class: 'grp' });
+		g.append(el('button', { class: 'gh', type: 'button', 'aria-expanded': String(!shut), onclick: () => {
+			if (shut) { S.collapsed.delete(key); S.opened.add(key); } else { S.collapsed.add(key); S.opened.delete(key); }
+			store.set('collapsed', [...S.collapsed]); store.set('opened', [...S.opened]);
+			renderRail();
+		} }, el('span', { class: 'tw', text: shut ? '+' : '-' }), el('span', { class: 'name', text: name }),
+		el('span', { class: 'count', text: total.speech ? total.reviewed + '/' + total.speech : String(total.total) }), meter(total)));
+		if (shut) return g;
+		/* the finished conversations fold under one line, the open one aside */
+		const left = convItems.filter(([c, s]) => !done(s) || c.id === S.conv);
+		const finished = convItems.filter((x) => !left.includes(x));
+		const showFin = S.showDone.has(key) || !left.length;
+		const list = el('ul', { class: 'convs' }, (showFin ? convItems : left).map(([c, s, sp]) => convButton(c, s, sp)));
+		if (finished.length && left.length) list.append(el('li', null, el('button', { class: 'conv fold', type: 'button', 'aria-expanded': String(showFin),
+			onclick: () => { if (showFin) S.showDone.delete(key); else S.showDone.add(key); renderRail(); } },
+		el('span', { class: 't', text: (showFin ? 'Fold ' : '') + finished.length + ' finished' }))));
+		g.append(list);
+		return g;
+	}
+
+	function sum(list) {
+		const t = { view: 0, speech: 0, reviewed: 0, open: 0, recheck: 0, ok: 0, change: 0, cut: 0, total: 0 };
+		for (const s of list) for (const k of Object.keys(t)) t[k] += s[k];
+		return t;
+	}
+
+	function renderRail() {
+		$('rail-area').setAttribute('aria-pressed', String(S.railMode === 'area'));
+		$('rail-speaker').setAttribute('aria-pressed', String(S.railMode === 'speaker'));
+		const out = [];
+		if (S.railMode === 'speaker') {
+			const bySpeaker = new Map();
+			for (const l of S.lines) for (const s of l.speakers) bySpeaker.set(s, (bySpeaker.get(s) || 0) + 1);
+			for (const [sp] of [...bySpeaker.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) {
+				const test = (l) => l.speakers.includes(sp);
+				const items = [];
+				for (const c of S.convs) {
+					if (!c.speakers.includes(sp)) continue;
+					const s = stats(c, test);
+					if (s.view) items.push([c, s, sp]);
+				}
+				if (items.length) out.push(group('speaker:' + sp, sp, items, sum(items.map((x) => x[1]))));
+			}
+		} else {
+			const byArea = new Map();
+			for (const c of S.convs) {
+				const s = stats(c);
+				if (!s.view && c.id !== S.conv) continue;   // (the one open stays, judged or not)
+				if (!byArea.has(c.domain)) byArea.set(c.domain, []);
+				byArea.get(c.domain).push([c, s]);
+			}
+			for (const [area, items] of byArea) out.push(group('area:' + area, area, items, sum(items.map((x) => x[1]))));
+		}
+		$('tree').replaceChildren(...(out.length ? out : [el('div', { class: 'rail-empty', text: S.q ? 'No line here holds "' + S.q + '".' : 'Nothing in this view.' })]));
+		const cur = $('tree').querySelector('[aria-current="true"]');
+		if (cur && !S.railScrolled) { cur.scrollIntoView({ block: 'center' }); S.railScrolled = true; }
+	}
+
+	function openConv(c, lineId, speaker) {
+		S.autoPick = false;
+		S.conv = c.id;
+		if (S.railMode === 'speaker' && speaker !== undefined) { S.speaker = speaker || ''; store.set('speaker', S.speaker); }
+		const first = c.lineObjs.find(inView) || c.lineObjs[0];
+		S.focus = lineId || (first && first.id) || '';
+		store.set('conv', S.conv); store.set('line', S.focus);
+		document.body.classList.remove('drawer');
+		$('rail-toggle').setAttribute('aria-expanded', 'false');
+		renderRail();
+		renderScript();
+		const row = S.rows.get(S.focus);
+		if (row) row.node.scrollIntoView({ block: 'center' });
+		else window.scrollTo({ top: 0 });
+	}
+
+	/* the next (or previous) conversation with a line in the view */
+	function stepConv(d) {
+		const i = S.convs.findIndex((c) => c.id === S.conv);
+		for (let k = 1; k <= S.convs.length; k++) {
+			const c = S.convs[(i + d * k + S.convs.length * k) % S.convs.length];
+			if (c.lineObjs.some(inView)) { openConv(c, d < 0 ? (c.lineObjs.filter(inView).pop() || {}).id : null); return true; }
+		}
+		return false;
+	}
+
+	/* ---- the script: one conversation ---- */
+	const seenObs = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+		let more = false;
+		for (const e of entries) if (e.isIntersecting) { const id = e.target.dataset.id; if (!S.seen.has(id)) { S.seen.add(id); more = true; } }
+		if (more) renderFoot();
+	}, { threshold: 0.6 }) : null;
+
+	function renderScript() {
+		const box = $('script');
+		if (seenObs) seenObs.disconnect();
+		S.rows = new Map();
+		const c = S.convById.get(S.conv);
+		if (!c) {
+			box.replaceChildren(emptyState());
+			renderPanel();
+			return;
+		}
+		const file = S.cat.files[c.file] || {};
+		const speakers = c.speakers || [];
+		const s = stats(c);
+		const head = el('header', { class: 'sc-head' },
+			el('div', { class: 'crumbs' }, el('span', { class: 'area', text: c.domain }),
+				el('a', { href: REPO + c.file + '#L' + (c.line || c.lineObjs[0].line), target: '_blank', rel: 'noopener', class: 'mono', text: c.file.replace(/^src\//, '') + ':' + (c.line || c.lineObjs[0].line) }),
+				el('span', { class: 'mono', text: c.id })),
+			el('h2', { text: c.title }),
+			c.when && c.when !== c.title ? el('p', { class: 'when', text: c.when }) : (file.comment ? el('p', { class: 'when', text: file.comment }) : null),
+			el('div', { class: 'meta' }, speakers.map((sp) => plate(sp)),
+				el('span', { class: 'muted', text: s.speech ? s.reviewed + ' of ' + s.speech + ' lines of speech reviewed' : c.lineObjs.length + " lines of a screen's words" }),
+				el('span', { class: 'tools' }, el('button', { class: 'btn quiet', type: 'button', text: S.panelOff ? 'Show details' : 'Hide details',
+					onclick: () => { S.panelOff = !S.panelOff; store.set('panel-off', S.panelOff); renderAll(); } }))));
+		const beats = el('div', { class: 'beats' });
+		for (const l of c.lineObjs) {
+			const row = lineRow(l);
+			S.rows.set(l.id, row);
+			beats.append(row.node);
+			if (seenObs) seenObs.observe(row.chatBox); else S.seen.add(l.id);
+		}
+		const foot = el('div', { class: 'sc-foot', id: 'foot' });
+		box.replaceChildren(head, beats, foot);
+		applyView();
+		if (!S.rows.has(S.focus)) S.focus = (c.lineObjs.find(inView) || c.lineObjs[0]).id;
+		focusLine(S.focus, false);
+		renderFoot();
+	}
+
+	function emptyState() {
+		const n = counts();
+		const msg = S.tab === 'review' && !n.review ? ['Every line of speech is reviewed.', n.recheck ? n.recheck + ' changed since your review: see Re-check.' : 'Re-check shows lines that change after your review.']
+			: ['Nothing in this view.', S.q ? 'Clear the search, or pick another view.' : 'Pick another view above.'];
+		return el('div', { class: 'empty' }, el('h2', { text: msg[0] }), el('p', { text: msg[1] }),
+			S.tab === 'review' && n.recheck ? el('button', { class: 'btn primary', type: 'button', text: 'Re-check', onclick: () => setTab('recheck') }) : null);
+	}
+
+	function applyView() {
+		for (const [id, row] of S.rows) row.node.classList.toggle('dim', !inView(S.byId.get(id)));
+	}
+
+	function renderFoot() {
+		const foot = $('foot');
+		const c = S.convById.get(S.conv);
+		if (!foot || !c) return;
+		const rest = c.lineObjs.filter(restOf);
+		const unseen = c.lineObjs.filter((l) => todo(l) && !S.seen.has(l.id)).length;
+		const okRest = el('button', { class: 'btn primary', type: 'button', disabled: S.readOnly || !rest.length || S.bulk ? true : null,
+			title: 'OK each line of speech here you have seen and not judged', onclick: () => okTheRest(rest) }, 'OK the rest (' + rest.length + ')');
+		const later = S.convs.slice(S.convs.indexOf(c) + 1).some((x) => x.lineObjs.some(inView)) || S.convs.slice(0, S.convs.indexOf(c)).some((x) => x.lineObjs.some(inView));
+		foot.replaceChildren(okRest,
+			el('span', { class: 'hint', text: S.bulk ? S.bulk : unseen ? unseen + ' not yet on screen' : rest.length ? 'Only lines you have seen' : 'Every line here judged' }),
+			el('button', { class: 'btn next', type: 'button', disabled: later ? null : true, onclick: () => stepConv(1) }, 'Next conversation ', el('kbd', { text: ']' })));
+	}
+
+	async function okTheRest(list) {
+		if (S.readOnly || !list.length) return;
+		S.bulk = 'Saving ' + list.length + '...';
+		renderFoot();
+		let failed = 0;
+		for (let i = 0; i < list.length; i += 3) {
+			const res = await Promise.all(list.slice(i, i + 3).map((l) => S.rows.get(l.id) ? S.rows.get(l.id).judge('ok', { quiet: true }) : Promise.resolve(false)));
+			failed += res.filter((x) => !x).length;
+		}
+		S.bulk = failed ? failed + ' not saved: try again' : '';
+		renderFoot();
+	}
+
+	/* a chat box: the line's pages, box by box, one page at a time */
+	function chat(l) {
+		const pages = [];
+		l.boxes.forEach((b, bi) => (b.pages.length ? b.pages : [[]]).forEach((p, pi) => pages.push({ b, bi, p, pi, of: b.pages.length })));
+		let at = 0;
+		const who = el('div', { class: 'who' });
+		const win = el('div', { class: 'chat', role: 'button', tabindex: '0', 'aria-label': 'Chat box; press to turn the page' });
+		const label = el('span');
+		const prev = el('button', { type: 'button', text: '<', 'aria-label': 'Previous page' });
+		const next = el('button', { type: 'button', text: '>', 'aria-label': 'Next page' });
+		const show = () => {
+			const pg = pages[at];
+			put(who, plate(pg.b.speaker, pg.b.speaker === 'Guardian' && l.who ? l.who : null),
+				l.fragment ? el('span', { class: 'chip', title: 'A piece the code joins to others', text: 'piece' }) : null,
+				l.continues ? el('span', { class: 'chip', title: 'Follows boxes the code put before it', text: 'continues' }) : null,
+				l.kind === 'screen' ? el('span', { class: 'chip', text: 'screen' }) : null);
+			const rows = pg.p.length ? pg.p : [''];
+			win.replaceChildren(...rows.map((t) => el('span', { class: 'ln' + (width(t) > 20 ? ' over' : ''), title: width(t) > 20 ? 'Past twenty characters: the game cuts or wraps it' : null }, rich(t))));
+			for (let k = rows.length; k < 3; k++) win.append(el('span', { class: 'ln' }));
+			if (at < pages.length - 1) win.append(el('span', { class: 'arrow', 'aria-hidden': 'true' }));
+			label.textContent = 'Box ' + (pg.bi + 1) + '/' + l.boxes.length + (pg.of > 1 ? ', page ' + (pg.pi + 1) + '/' + pg.of : '');
+			prev.disabled = at === 0; next.disabled = at === pages.length - 1;
+		};
+		const step = (d) => { at = (at + d + pages.length) % pages.length; show(); };
+		win.addEventListener('click', () => step(1));
+		win.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); step(1); } });
+		prev.addEventListener('click', () => step(-1));
+		next.addEventListener('click', () => step(1));
+		show();
+		const pager = el('div', { class: 'pager' }, prev, label, next);
+		return { node: el('div', { class: 'say' }, who, win, pages.length > 1 ? pager : el('div', { class: 'pager' }, label)), box: win };
+	}
+
+	/* ---- a line in the script: its box, its verdict, its note ---- */
+	function lineRow(l) {
+		const say = chat(l);
+		const local = { verdict: '', note: '', suggestion: '', dirty: false };
+		const sync = () => { const r = rev(l); local.verdict = r ? r.verdict : ''; local.note = (r && r.note) || ''; local.suggestion = (r && r.suggestion) || ''; };
+		sync();
+		const btns = VERDICTS.map(([v, name, k]) => el('button', { class: 'vbtn', type: 'button', 'data-v': v, 'aria-pressed': 'false',
+			title: name + ' (' + k + ')', onclick: (e) => { e.stopPropagation(); focusLine(l.id, false); judge(v, { advance: false }); } }, name, el('span', { class: 'k', text: k })));
+		const state = el('span', { class: 'jstate' });
+		const note = el('input', { type: 'text', class: 'note', id: 'note-' + l.i, placeholder: 'Note: what is wrong, or right', 'aria-label': 'Note on ' + l.id, autocomplete: 'off' });
+		const sugg = el('textarea', { class: 'sugg', id: 'sugg-' + l.i, rows: '2', placeholder: 'The wording you want (| starts a new box)', 'aria-label': 'Suggested wording for ' + l.id, hidden: true });
+		const status = el('div', { class: 'status' });
+		const was = el('div', { class: 'was', hidden: true });
+		const flags = l.flags.length ? el('span', { class: 'jrow' }, l.flags.map((f) => el('span', { class: 'chip flag', title: S.cat.flags[f] || f, text: f }))) : null;
+		let timer = 0;
+		const node = el('article', { class: 'beat', tabindex: '-1', 'data-id': l.id },
+			say.node,
+			el('div', { class: 'judge' },
+				el('div', { class: 'jrow' }, el('span', { class: 'verdicts', role: 'group', 'aria-label': 'Verdict' }, btns), state),
+				was, note, sugg, flags,
+				el('div', { class: 'jrow' }, el('span', { class: 'lid', text: l.id }), status)));
+		say.box.dataset.id = l.id;
+		node.addEventListener('click', (e) => { if (!e.target.closest('input, textarea, button, a, .chat')) focusLine(l.id, false); });
+		node.addEventListener('focusin', () => { if (S.focus !== l.id) focusLine(l.id, false, true); });
+
+		const payload = () => ({ verdict: local.verdict, note: local.note.trim(), suggestion: local.suggestion.trim(),
+			text_hash: l.text_hash, text: l.text, at: new Date().toISOString(), by: S.me || '' });
+		async function save() {
+			clearTimeout(timer);
+			if (!local.verdict) { status.textContent = 'Choose OK, Change or Cut to keep this note.'; return false; }
+			status.textContent = 'Saving...';
+			const res = await write('reviews', l.doc, payload());
+			local.dirty = false;
+			if (res.ok) { status.textContent = 'Saved'; setTimeout(() => { if (status.textContent === 'Saved') status.textContent = ''; }, 1600); }
+			else status.replaceChildren(el('span', { class: 'err', text: failText(res.err) }));
+			return res.ok;
+		}
+		function judge(v, opt) {
+			if (S.readOnly) return Promise.resolve(false);
+			local.verdict = v;
+			if (v === 'change') sugg.hidden = false;
+			paint();
+			const p = save();
+			if (opt && opt.advance) move(1, true);
+			return p;
+		}
+		const typed = (k, n) => () => {
+			local[k] = n.value; local.dirty = true;
+			clearTimeout(timer);
+			if (!local.verdict) { status.textContent = 'Choose OK, Change or Cut to keep this note.'; return; }
+			status.textContent = 'Not saved yet';
+			timer = setTimeout(save, 800);
+		};
+		note.addEventListener('input', typed('note', note));
+		sugg.addEventListener('input', typed('suggestion', sugg));
+		for (const n of [note, sugg]) n.addEventListener('blur', () => { if (local.dirty && local.verdict) save(); });
+
+		function paint() {
+			const r = rev(l);
+			for (const b of btns) { b.setAttribute('aria-pressed', String(b.dataset.v === local.verdict)); b.disabled = S.readOnly; }
+			note.disabled = sugg.disabled = S.readOnly;
+			put(state, 
+				appliedOf(l) ? el('span', { class: 'pill applied', text: 'applied' }) : null,
+				staleOf(l) ? el('span', { class: 'pill recheck', text: 'changed since your review' }) : null,
+				openOf(l) ? el('span', { class: 'pill open', text: 'waiting for a voice pass' }) : null);
+			if (r && recheckOf(l)) {
+				const d = r.text ? diff(r.text, l.text) : null;
+				put(was, 
+					el('span', { class: 'lbl', text: appliedOf(l) ? 'Applied ' + when(r.applied_at || r.at) + (r.applied_note ? ': ' + r.applied_note : '') : 'Changed since your review of ' + when(r.at) }),
+					d || el('span', { class: 'muted', text: r.text ? 'The words changed.' : 'The words you judged were not kept (a review from before the page kept them): your note says what you saw.' }),
+					el('span', { class: 'small muted', text: 'Judge it again: a new verdict replaces the old one.' }));
+				was.hidden = false;
+			} else was.hidden = true;
+			if (S.readOnly && !r) { status.textContent = S.db ? 'You can read reviews here, not write them.' : 'Reviews save on claude.ai.'; status.dataset.ro = '1'; }
+			else if (status.dataset.ro) { status.textContent = ''; delete status.dataset.ro; }
+		}
+		function update() {
+			const typing = document.activeElement === note || document.activeElement === sugg;
+			if (!local.dirty && !typing) { sync(); note.value = local.note; sugg.value = local.suggestion; }
+			sugg.hidden = !(local.verdict === 'change' || local.suggestion || !sugg.hidden && typing);
+			paint();
+		}
+		update();
+		return { node, chatBox: say.box, update, judge, note, sugg,
+			openSugg() { sugg.hidden = false; sugg.focus(); } };
+	}
+
+	function focusLine(id, scroll, keepInput) {
+		if (!S.rows.has(id)) return;
+		const old = S.rows.get(S.focus);
+		if (old) old.node.classList.remove('focus');
+		S.focus = id;
+		store.set('line', id);
+		const row = S.rows.get(id);
+		row.node.classList.add('focus');
+		const act = document.activeElement;
+		if (!keepInput && (!act || act === document.body || ($('script').contains(act) && !row.node.contains(act)))) row.node.focus({ preventScroll: true });
+		if (scroll) row.node.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+		renderPanel();
+	}
+
+	/* J/K: the next line in the view (any line where none is), on past the
+	 * conversation's end to the next one */
+	function move(d, afterJudge) {
+		const c = S.convById.get(S.conv);
+		if (!c) return;
+		const ids = c.lineObjs.map((l) => l.id);
+		let i = ids.indexOf(S.focus);
+		const want = (l) => afterJudge && S.tab === 'all' ? todo(l) : inView(l);
+		const anyIn = c.lineObjs.some(want);
+		for (i += d; i >= 0 && i < ids.length; i += d) {
+			if (!anyIn || want(S.byId.get(ids[i]))) { focusLine(ids[i], true); return; }
+		}
+		if (d > 0 && afterJudge && c.lineObjs.some((l) => l.id !== S.focus && inView(l))) return;   // (the rest of this one first)
+		stepConv(d);
+	}
+
+	/* ---- the panel: the focused line's context ---- */
+	function renderPanel() {
+		const box = $('panel');
+		const l = S.byId.get(S.focus);
+		if (!l || S.panelOff) { box.replaceChildren(); return; }
+		const c = S.cat.containers[l.key] || {};
+		const file = S.cat.files[l.file] || {};
+		const sec = (title, ...kids) => el('section', null, el('h3', { text: title }), kids);
+		const where = [];
+		if (c.comment) where.push(el('p', { text: c.comment }));
+		if (c.header && c.header !== c.comment) where.push(el('p', { class: 'muted', text: c.header }));
+		if (l.note && l.note !== c.comment) where.push(el('p', null, el('b', { text: 'Beside it: ' }), l.note));
+		if (!where.length && file.comment) where.push(el('p', { class: 'muted', text: file.comment }));
+		const flagCodes = new Map();
+		for (const b of l.boxes) for (const f of b.flags || []) if (!flagCodes.has(f.code)) flagCodes.set(f.code, f.at);
+		for (const f of l.flags) if (!flagCodes.has(f)) flagCodes.set(f, '');
+		const dirs = S.directions.filter((d) => d.scope === 'all' || (d.scope === 'speaker' && l.speakers.includes(d.target)) || (d.scope === 'domain' && d.target === l.domain))
+			.sort((a, b) => (a.status === 'applied') - (b.status === 'applied'));
+		const r = rev(l);
+		const sweepRows = S.sweepOf.get(l.id) || [];
+		const shots = (file.shows || []).map((p) => el('a', { href: REPO + 'docs/' + p, target: '_blank', rel: 'noopener', title: p },
+			el('img', { src: p, alt: 'The game where these lines show (' + p + ')', loading: 'lazy', onerror: (e) => { e.target.replaceWith(el('span', { class: 'chip', text: p.split('/').pop() })); } })));
+		let confirm = false;
+		const clear = !r || S.readOnly ? null : el('button', { class: 'btn quiet', type: 'button', text: 'Remove review', onclick: async (e) => {
+			if (!confirm) { confirm = true; e.target.textContent = 'Click again to remove'; setTimeout(() => { confirm = false; e.target.textContent = 'Remove review'; }, 4000); return; }
+			e.target.disabled = true;
+			const res = await write('reviews', l.doc, null);
+			if (!res.ok) e.target.replaceWith(el('span', { class: 'err small', text: failText(res.err) }));
+		} });
+		box.replaceChildren(el('div', { class: 'pn' },
+			el('div', { class: 'head' }, el('span', { class: 'lid', text: l.id }),
+				el('button', { class: 'btn quiet', type: 'button', text: 'Hide', onclick: () => { S.panelOff = true; store.set('panel-off', true); renderAll(); } })),
+			sec('Where it fires', where, el('a', { href: REPO + l.file + '#L' + l.line, target: '_blank', rel: 'noopener', class: 'mono', text: l.file + ':' + l.line }),
+				l.who ? el('p', { class: 'small muted', text: 'Belongs to ' + l.who }) : null),
+			sec('Its boxes', el('ul', { class: 'boxes' }, l.boxes.map((b) => el('li', null, el('span', { class: 'w', text: b.speaker }), el('span', { class: 'x' }, rich(b.text)))))),
+			flagCodes.size ? sec('Flags', el('ul', { class: 'flags' }, [...flagCodes].map(([code, at]) =>
+				el('li', null, el('b', { text: code }), S.cat.flags[code] || '', at ? el('span', { class: 'muted' }, ' (' + at + ')') : null)))) : null,
+			sec('Directions for it', dirs.length ? el('ul', { class: 'dirs' }, dirs.map((d) => el('li', { class: d.status === 'applied' ? 'applied' : '' },
+				el('span', { class: 'sc', text: (d.scope === 'all' ? 'Everyone' : d.target) + (d.status === 'applied' ? ', applied' : '') }), d.text)))
+				: el('p', { class: 'small muted' }, 'None yet. ', el('button', { class: 'linkish', type: 'button', text: 'Add one', onclick: () => setTab('directions') }), '.')),
+			sweepRows.length ? sec('In the sweep', sweepRows.map((row) => el('p', { class: 'small' }, el('b', { text: (row.status === 'cut' ? 'Cut in part' : 'Noted') + ' (' + row.group + '): ' }), row.why, row.where ? ' ' + row.where : ''))) : null,
+			sec('Your review', r ? el('div', { class: 'hist' },
+				el('p', null, el('span', { class: 'pill ' + r.verdict, text: r.verdict === 'ok' ? 'OK' : r.verdict }), ' ', when(r.at), r.by && r.by === S.me ? ', you' : ''),
+				r.note ? el('p', { class: 'q', text: r.note }) : null,
+				r.suggestion ? el('p', { class: 'q' }, el('b', { text: 'Wanted: ' }), r.suggestion) : null,
+				r.status === 'applied' ? el('p', { class: 'v-ok' }, 'Applied ' + when(r.applied_at || r.at) + (r.applied_note ? ': ' + r.applied_note : '')) : null,
+				clear) : el('p', { class: 'small muted', text: 'Not reviewed yet.' })),
+			shots.length ? sec('Where it shows', el('div', { class: 'shots' }, shots)) : null));
+	}
+
+	/* ---- the db's writes: one at a time a document, the last one wins ---- */
+	const queue = new Map();
+	let pending = 0, lastFail = null;
+	function failText(err) {
+		const code = err && err.code;
+		if (code === 'invalid_argument' || code === 'not_granted' || code === 'revoked') return 'Not saved: this view may not write here.';
+		if (code === 'quota_exceeded') return 'Not saved: the database is full. Ask Claude to prune applied reviews.';
+		if (code === 'offline') return 'Not saved: reviews save on claude.ai.';
+		return 'Not saved (' + (code || 'error') + '): try again in a moment.';
+	}
+	function saveState() {
+		const n = $('save-state');
+		n.classList.toggle('failed', !!lastFail && !pending);
+		n.textContent = pending ? 'SAVING' : lastFail ? 'NOT SAVED' : S.saved ? 'SAVED' : '';
+		n.title = lastFail && !pending ? failText(lastFail) : '';
+	}
+	const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+	async function attempt(fn) {
+		for (let k = 0; ; k++) {
+			try { return await fn(); } catch (err) {
+				const code = err && err.code;
+				if (code === 'resource_exhausted' && k < 3) { await sleep(1000 * 2 ** k); continue; }
+				if (code === 'unavailable' && k < 1) { await sleep(300 + Math.random() * 600); continue; }
+				throw err;
+			}
+		}
+	}
+	function write(col, doc, data) {
+		if (!S.db) return Promise.resolve({ ok: false, err: { code: 'offline' } });
+		return new Promise((resolve) => {
+			const key = col + '/' + doc;
+			let q = queue.get(key);
+			if (!q) queue.set(key, q = { busy: false, next: null });
+			if (q.next) { q.next.data = data; q.next.waiters.push(resolve); }
+			else q.next = { data, waiters: [resolve] };
+			pump(col, doc, q);
+		});
+	}
+	async function pump(col, doc, q) {
+		if (q.busy) return;
+		q.busy = true;
+		while (q.next) {
+			const { data, waiters } = q.next;
+			q.next = null;
+			pending++; saveState();
+			let res;
+			try {
+				const ref = S.db.collection(col).doc(doc);
+				await attempt(() => data === null ? ref.delete() : ref.set(data));
+				res = { ok: true };
+				lastFail = null; S.saved = true;
+			} catch (err) {
+				res = { ok: false, err };
+				lastFail = err;
+				if (err && (err.code === 'revoked' || err.code === 'not_granted')) setReadOnly(true, 'READ ONLY');
+			}
+			pending--; saveState();
+			for (const w of waiters) w(res);
+		}
+		q.busy = false;
+	}
+
+	function setReadOnly(on, label) {
+		S.readOnly = on;
+		$('db-state').textContent = label;
+		for (const row of S.rows.values()) row.update();
+		if (isPage()) renderPage(); else renderFoot();
+	}
+
+	/* ---- the pages ---- */
+	function renderPage() {
+		const page = $('page');
+		if (S.tab === 'sweep') page.replaceChildren(...sweepPage());
+		else if (S.tab === 'directions') page.replaceChildren(...directionsPage());
+		else page.replaceChildren(...summaryPage());
+	}
+
+	function goLine(id) {
+		const c = S.convOf.get(id);
+		if (!c) return;
+		S.tab = 'all'; store.set('tab', 'all');
+		S.autoPick = false; S.railScrolled = false;
+		S.conv = c.id; S.focus = id;
+		renderAll();
+		const row = S.rows.get(id);
+		if (row) row.node.scrollIntoView({ block: 'center' });
+	}
+
+	/* the sweep's text: | between boxes, **what went** struck */
+	function sweptText(t) {
+		const out = el('div', { class: 'txt' });
+		const parts = t.split(/(\*\*[^*]+\*\*|\|)/);
+		for (const p of parts) {
+			if (!p) continue;
+			if (p === '|') out.append(el('span', { class: 'sep', text: ' | ' }));
+			else if (p.startsWith('**')) out.append(el('mark', { title: 'What the sweep cut' }, rich(p.slice(2, -2).replace(/\|/g, ' | '))));
+			else out.append(rich(p));
+		}
+		return out;
+	}
+
+	function liveLinks(row) {
+		const links = (row.live || []).filter((id) => S.byId.has(id));
+		if (!links.length) {
+			const c = S.convById.get(row.id.split(':').slice(0, 2).join(':'));
+			return c ? el('div', { class: 'livelinks' }, el('span', { class: 'muted', text: row.status === 'cut' ? 'Gone whole.' : 'Not found by its words.' }),
+				el('button', { class: 'linkish', type: 'button', text: 'Open ' + c.title, onclick: () => openFrom(c) })) : el('div', { class: 'livelinks muted', text: 'Gone whole, with its function.' });
+		}
+		return el('div', { class: 'livelinks' }, el('span', { class: 'muted', text: row.status === 'cut' ? 'What is left:' : 'Today:' }),
+			links.slice(0, 6).map((id) => {
+				const l = S.byId.get(id), r = rev(l);
+				return el('span', null, el('button', { class: 'linkish', type: 'button', text: id.split(':').slice(1).join(':'), title: plain(l.text), onclick: () => goLine(id) }),
+					r ? ' ' : null, r ? el('span', { class: 'pill ' + (recheckOf(l) ? 'recheck' : r.verdict), text: recheckOf(l) ? 're-check' : r.verdict === 'ok' ? 'OK' : r.verdict }) : null);
+			}), links.length > 6 ? el('span', { class: 'muted', text: '+' + (links.length - 6) + ' more' }) : null);
+	}
+	function openFrom(c) { S.tab = 'all'; store.set('tab', 'all'); S.railScrolled = false; S.conv = c.id; S.focus = c.lineObjs[0].id; renderAll(); }
+
+	function sweepCard(row) {
+		const key = docId('sweep:' + row.id);
+		const mark = S.marks.get(key) || {};
+		const ids = el('div', { class: 'ids' }, el('span', { class: 'chip', text: row.group }), row.ids.join(', '), row.scope ? el('span', { text: row.scope }) : null);
+		const said = el('div', { class: 'said' }, ids, sweptText(row.text),
+			el('p', { class: 'why' }, el('b', { text: row.status === 'cut' ? 'Why' : 'Needs' }), row.why),
+			row.where ? el('p', { class: 'why' }, el('b', { text: 'Where BN6 would put it' }), row.where) : null,
+			liveLinks(row));
+		if (row.status !== 'cut') return el('article', { class: 'sw' }, said, el('div', { class: 'act' },
+			(row.live || []).length ? el('button', { class: 'btn', type: 'button', text: 'Review it', onclick: () => goLine(row.live[0]) }) : null));
+		const local = { restore: !!mark.restore, note: mark.note || '' };
+		const status = el('span', { class: 'small muted' });
+		const note = el('input', { type: 'text', id: 'sw-' + key, placeholder: 'Why bring it back, or how', value: local.note, disabled: S.readOnly ? true : null, 'aria-label': 'Note on bringing back ' + row.id });
+		const card = el('article', { class: 'sw' + (local.restore ? ' back' : '') });
+		const save = async () => {
+			status.textContent = 'Saving...';
+			const res = await write('sweep', key, { restore: local.restore, note: local.note.trim(), at: new Date().toISOString(), by: S.me || '' });
+			status.replaceChildren(res.ok ? 'Saved' : el('span', { class: 'err', text: failText(res.err) }));
+		};
+		const sw = el('button', { class: 'switch', type: 'button', 'aria-pressed': String(local.restore), disabled: S.readOnly ? true : null,
+			onclick: () => { local.restore = !local.restore; sw.setAttribute('aria-pressed', String(local.restore)); card.classList.toggle('back', local.restore); save(); } },
+		el('i', { 'aria-hidden': 'true' }), 'Bring it back');
+		let timer = 0;
+		note.addEventListener('input', () => { local.note = note.value; status.textContent = 'Not saved yet'; clearTimeout(timer); timer = setTimeout(save, 800); });
+		card.append(said, el('div', { class: 'act' }, sw, note, status, mark.at ? el('span', { class: 'small muted', text: 'Marked ' + when(mark.at) }) : null));
+		return card;
+	}
+
+	function sweepPage() {
+		const rows = S.cat.sweep || [];
+		const cut = rows.filter((r) => r.status === 'cut'), noted = rows.filter((r) => r.status !== 'cut');
+		const back = cut.filter((r) => (S.marks.get(docId('sweep:' + r.id)) || {}).restore);
+		const show = S.sweepShow;
+		const pick = (v, t) => el('button', { type: 'button', 'aria-pressed': String(show === v), onclick: () => { S.sweepShow = v; store.set('sweep-show', v); renderPage(); } }, t);
+		const groups = [...new Set(rows.map((r) => r.group))];
+		const q = S.q;
+		const match = (r) => !q || (r.text + ' ' + r.ids.join(' ') + ' ' + r.why + ' ' + (r.where || '')).toLowerCase().includes(q);
+		const list = (show === 'noted' ? noted : show === 'back' ? back : cut).filter(match);
+		const out = [
+			el('div', { class: 'panel' }, el('h2', { text: 'The sweep' }),
+				el('p', { class: 'lede' }, 'On 19 October the sweep cut what nobody needs to say (docs/VOICE.md, What nobody says) and noted what should move to a better place. ',
+					'Bring back any cut line you want kept: the next voice pass restores it, with your note. Noted lines wait for a rewrite; review them where they live.'),
+				el('div', { class: 'bar', style: 'margin-top:10px' },
+					el('span', { class: 'seg', role: 'group', 'aria-label': 'Show' }, pick('cut', 'Cut (' + cut.length + ')'), pick('back', 'Brought back (' + back.length + ')'), pick('noted', 'Noted (' + noted.length + ')')),
+					el('span', { class: 'small muted', text: groups.map((g) => g + ': ' + rows.filter((r) => r.group === g && r.status === 'cut').length + ' cut').join(', ') })),
+				S.readOnly ? el('p', { class: 'small muted', style: 'margin-top:8px', text: S.db ? 'You can read the marks here, not change them.' : 'Marks save on claude.ai.' }) : null),
+		];
+		for (const g of groups) {
+			const mine = list.filter((r) => r.group === g);
+			if (!mine.length) continue;
+			out.push(el('section', { class: 'cards' }, el('h3', { text: groupName(g) + ' (' + mine.length + ')' }), mine.map(sweepCard)));
+		}
+		if (out.length === 1) out.push(el('div', { class: 'empty', text: show === 'back' ? 'Nothing brought back yet.' : 'Nothing here.' }));
+		return out;
+	}
+	const groupName = (g) => ({ net: 'The net and the run', story: 'The story and its people', home: 'Home and online' })[g] || g;
+
+	function directionsPage() {
+		const dirs = [...S.directions].sort((a, b) => (a.status === 'applied') - (b.status === 'applied') || String(b.at).localeCompare(String(a.at)));
+		const list = el('ul', { class: 'dir-list' });
+		if (!dirs.length) list.append(el('li', { class: 'muted small' }, S.db ? 'No directions yet. Write the first below: who it is for, and what you want.' : 'Directions appear here once the page can reach its database.'));
+		for (const d of dirs) {
+			const scope = d.scope === 'speaker' ? 'Speaker: ' + d.target : d.scope === 'domain' ? 'Area: ' + d.target : 'Everyone';
+			const applied = d.status === 'applied';
+			const toggle = S.readOnly ? null : el('button', { class: 'btn quiet', type: 'button', text: applied ? 'Reopen' : 'Mark applied',
+				onclick: async (e) => {
+					e.target.disabled = true;
+					try { await attempt(() => S.db.collection('directions').doc(d.id).update({ status: applied ? 'open' : 'applied' })); }
+					catch (err) { e.target.replaceWith(el('span', { class: 'err small', text: failText(err) })); }
+				} });
+			list.append(el('li', { class: 'dir' + (applied ? ' applied' : '') }, el('p', { text: d.text }),
+				el('div', null, el('span', { class: 'pill ' + (applied ? 'applied' : 'open'), text: applied ? 'applied' : 'open' })),
+				el('div', { class: 'meta' }, el('span', { class: 'chip', text: scope }), el('span', { text: when(d.at) + (d.by && d.by === S.me ? ' · you' : '') }),
+					d.applied_note ? el('span', { text: 'Applied: ' + d.applied_note }) : null, toggle)));
+		}
+		const count = (key) => { const m = new Map(); for (const l of S.lines) for (const v of [].concat(l[key])) m.set(v, (m.get(v) || 0) + 1); return [...m.keys()].sort(); };
+		const scope = el('select', { id: 'dir-scope', 'aria-label': 'Who the direction is for' },
+			el('option', { value: 'all', text: 'Everyone' }), el('option', { value: 'speaker', text: 'One speaker' }), el('option', { value: 'domain', text: 'One area' }));
+		const target = el('select', { id: 'dir-target', 'aria-label': 'Which speaker or area', disabled: true });
+		const fill = () => {
+			const vals = scope.value === 'speaker' ? count('speakers') : scope.value === 'domain' ? count('domain') : [];
+			target.replaceChildren(...vals.map((v) => el('option', { value: v, text: v })));
+			target.disabled = S.readOnly || scope.value === 'all';
+		};
+		scope.addEventListener('change', fill);
+		const text = el('textarea', { id: 'dir-text', rows: '2', placeholder: 'Mr.Prog: fewer exclamations. Lan teases back more.', 'aria-label': 'The direction' });
+		const msg = el('span', { class: 'small' });
+		const add = el('button', { class: 'btn primary', type: 'submit', id: 'dir-add', text: 'Add direction' });
+		const form = el('form', { class: 'dir-form', autocomplete: 'off' }, el('div', { class: 'row' }, scope, target), el('div', { class: 'row' }, add, msg), text);
+		for (const n of [scope, text, add]) n.disabled = S.readOnly;
+		fill();
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const t = text.value.trim();
+			if (!t) { msg.textContent = 'Write the direction first.'; return; }
+			if (!S.db || S.readOnly) return;
+			add.disabled = true; msg.textContent = 'Saving...';
+			try {
+				await attempt(() => S.db.collection('directions').add({ scope: scope.value, target: scope.value === 'all' ? '' : target.value, text: t, status: 'open',
+					at: new Date().toISOString(), by: S.me || '', applied_note: '' }));
+				text.value = ''; text.blur();
+				renderPage();   // (the list with it, as the db's snapshot brings it)
+				return;
+			} catch (err) { msg.replaceChildren(el('span', { class: 'err', text: failText(err) })); }
+			add.disabled = S.readOnly;
+		});
+		return [el('div', { class: 'panel' }, el('h2', { text: 'Directions' }),
+			el('p', { class: 'lede', style: 'margin:4px 0 12px' }, 'Standing guidance for every line, one speaker or one area, such as "Mr.Prog: fewer exclamations". Each line shows the ones that apply to it. The ones that hold become rules in docs/VOICE.md, in your words with the date.'),
+			list, form)];
+	}
+
+	function summaryPage() {
+		const n = counts();
+		const by = new Map();
+		for (const l of S.lines) {
+			const d = by.get(l.domain) || { lines: 0, speech: 0, reviewed: 0, flagged: 0, ok: 0, change: 0, cut: 0, recheck: 0, open: 0 };
+			d.lines++;
+			if (l.flags.length) d.flagged++;
+			if (speech(l)) { d.speech++; const r = rev(l); if (r) { d.reviewed++; if (d[r.verdict] != null) d[r.verdict]++; } }
+			if (recheckOf(l)) d.recheck++;
+			if (openOf(l)) d.open++;
+			by.set(l.domain, d);
+		}
+		const order = [...new Set(S.convs.map((c) => c.domain))];
+		const orphans = [...S.reviews.keys()].filter((k) => !S.byDoc.has(k)).length;
+		const areas = el('table', null, el('thead', null, el('tr', null, ['Area', 'Speech', 'Reviewed', 'Verdicts', 'Re-check', 'Open', 'Flagged'].map((h, i) => el('th', { class: i && i !== 3 ? 'n' : '', text: h })))),
+			el('tbody', null, order.filter((a) => by.has(a)).map((a) => {
+				const d = by.get(a);
+				const of = Math.max(1, d.speech), pc = (x) => (100 * x / of).toFixed(1) + '%';
+				const tr = el('tr', { class: 'pick', tabindex: '0', title: 'Open ' + a },
+					el('td', { text: a }), el('td', { class: 'n', text: d.speech || '-' }), el('td', { class: 'n', text: d.speech ? d.reviewed : '-' }),
+					el('td', null, el('span', { class: 'meter', 'aria-label': d.ok + ' OK, ' + d.change + ' change, ' + d.cut + ' cut' },
+						el('i', { class: 'm-ok', style: 'width:' + pc(d.ok) }), el('i', { class: 'm-change', style: 'width:' + pc(d.change) }), el('i', { class: 'm-cut', style: 'width:' + pc(d.cut) }))),
+					el('td', { class: 'n', text: d.recheck || '' }), el('td', { class: 'n', text: d.open || '' }), el('td', { class: 'n', text: d.flagged || '' }));
+				const go = () => { const c = S.convs.find((x) => x.domain === a); if (c) openFrom(c); };
+				tr.addEventListener('click', go);
+				tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+				return tr;
+			})));
+		return [
+			el('section', { class: 'stack', 'aria-label': 'Summary' },
+				el('div', null, el('h2', { text: 'Areas', style: 'margin-bottom:8px' }), el('div', { class: 'panel' },
+					el('div', { class: 'totals' },
+						el('span', null, el('b', { text: S.cat.summary.lines }), ' lines'), el('span', null, el('b', { text: n.speech }), ' of speech'),
+						el('span', null, el('b', { text: n.reviewed }), ' reviewed'), el('span', { class: 'v-change' }, el('b', { text: n.change }), ' to change'),
+						el('span', { class: 'v-cut' }, el('b', { text: n.cut }), ' to cut'), el('span', null, el('b', { text: n.recheck }), ' changed since review'),
+						el('span', null, el('b', { text: S.cat.summary.flagged }), ' flagged'), el('span', null, el('b', { text: n.back }), ' of ' + n.sweep + ' sweep cuts brought back'),
+						orphans ? el('span', { class: 'muted', title: 'Reviews whose line is no longer in the catalog: a voice pass removed or moved it' }, el('b', { text: orphans }), ' reviews of lines gone') : null),
+					el('div', { class: 'scroll-x' }, areas), el('p', { class: 'small muted', style: 'margin-top:8px', text: 'Click an area to read it.' }))),
+				el('div', null, el('h2', { text: "Our numbers against BN6's", style: 'margin-bottom:8px' }), numbersPanel())),
+		];
+	}
+
+	function numbersPanel() {
+		const s = S.cat.summary, max = 12;
+		const off = (a, b) => b && Math.abs(a - b) / b > 0.5;
+		const num = (a, b) => el('td', { class: 'n' + (off(a, b) ? ' drift' : '') }, String(a), el('span', { class: 'muted' }, ' / ' + b));
+		const rows = Object.entries(s.bn6).flatMap(([who, bn]) => {
+			const o = s.groups[who];
+			if (!o) return [el('tr', null, el('td', { text: who }), el('td', { class: 'n muted', text: '0', colspan: '5' }))];
+			const lo = Math.min(o.words_per_box, bn.words_per_box), hi = Math.max(o.words_per_box, bn.words_per_box);
+			const x = (v) => (100 * Math.min(v, max) / max) + '%';
+			const navis = who === 'Navis (bosses, bystanders)';
+			return [el('tr', { class: 'first' },
+				el('td', null, plate(navis ? 'Bystander' : who, navis ? 'Navis' : who)),
+				el('td', { class: 'n', text: o.boxes }),
+				el('td', null,
+					el('div', { class: 'dumb', title: 'ours ' + o.words_per_box + ', BN6 ' + bn.words_per_box + ' (scale 0-12 words)' },
+						el('span', { class: 'track' }), el('span', { class: 'span', style: 'left:' + x(lo) + ';width:calc(' + x(hi) + ' - ' + x(lo) + ')' }),
+						el('span', { class: 'dot bn6', style: 'left:' + x(bn.words_per_box) }), el('span', { class: 'dot ours', style: 'left:' + x(o.words_per_box) })),
+					el('span', { class: 'small tabnum' + (off(o.words_per_box, bn.words_per_box) ? ' drift' : '') }, o.words_per_box + ' / ' + bn.words_per_box)),
+				num(o.bangs_per_box, bn.bangs_per_box),
+				num(o.dots_per_box, bn.dots_per_box),
+				el('td', { class: 'small' }, o.stutters, el('span', { class: 'muted' }, ' / ' + bn.stutters))),
+			el('tr', { class: 'openers' }, el('td', { colspan: '6', class: 'small' },
+				el('span', { class: 'muted', text: 'Openers: ' }), o.openers.slice(0, 5).join(', '), el('span', { class: 'muted', text: '  /  BN6: ' + bn.openers })))];
+		});
+		const pc = (v) => Math.round(v * 100) + '%';
+		return el('div', { class: 'panel' },
+			el('div', { class: 'scroll-x' }, el('table', { id: 'numbers' }, el('thead', null, el('tr', null, ['Speaker', 'Boxes', 'Words a box', '"!!" a box', '"..." a box', 'Stutters'].map((h, i) => el('th', { class: i === 1 || i === 3 || i === 4 ? 'n' : '', text: h })))), el('tbody', null, rows))),
+			el('div', { class: 'legend' }, el('span', { class: 'l-ours', text: 'ours' }), el('span', { class: 'l-bn6', text: "BN6's script (docs/VOICE.md, numbers only)" }), el('span', { text: 'bold: more than half off BN6\'s' })),
+			el('details', { style: 'margin-top:10px' }, el('summary', { class: 'small', text: 'Every speaker of ours' }),
+				el('div', { class: 'scroll-x' }, el('table', null, el('thead', null, el('tr', null, ['Speaker', 'Boxes', 'Words', '"!!"', '"..."', 'Ends "!"', 'Ends "?"', 'Openers'].map((h, i) => el('th', { class: i && i < 7 ? 'n' : '', text: h })))),
+					el('tbody', null, Object.entries(s.numbers).sort((a, b) => b[1].boxes - a[1].boxes).map(([who, o]) =>
+						el('tr', null, el('td', { text: who }), el('td', { class: 'n', text: o.boxes }), el('td', { class: 'n', text: o.words_per_box }),
+							el('td', { class: 'n', text: o.bangs_per_box }), el('td', { class: 'n', text: o.dots_per_box }),
+							el('td', { class: 'n', text: pc(o.end_bang) }), el('td', { class: 'n', text: pc(o.end_ask) }),
+							el('td', { class: 'small', text: o.openers.join(', ') }))))))));
+	}
+
+	/* ---- the db: subscribe once to each collection ---- */
+	function refresh() {
+		renderTop();
+		if (isPage()) { if (!typing(document.activeElement) || !$('page').contains(document.activeElement)) renderPage(); return; }
+		for (const row of S.rows.values()) row.update();
+		applyView();
+		renderRail();
+		renderFoot();
+		renderPanel();
+	}
+	async function connect() {
+		const claude = window.claude;
+		if (!claude || typeof claude.use !== 'function') { setReadOnly(true, 'READ ONLY'); return; }
+		const [db, user] = await Promise.all([claude.use('db').catch(() => null), claude.use('user').catch(() => null)]);
+		if (!db) { setReadOnly(true, 'READ ONLY'); return; }
+		S.db = db;
+		let canWrite = null;
+		if (user) {
+			try { S.me = await user.id(); } catch (e) { S.me = null; }
+			try { canWrite = await user.can('data.write'); } catch (e) { canWrite = null; }
+		}
+		setReadOnly(canWrite === false, canWrite === false ? 'READ ONLY' : 'CONNECTED');
+		db.collection('reviews').onSnapshot((snap) => {
+			S.reviews = new Map(snap.docs.filter((d) => d.exists).map((d) => [d.id, d.data()]));
+			const first = !S.reviewsIn;
+			S.reviewsIn = true;
+			if (first && S.cat && S.tab === 'review') {
+				const c = S.convById.get(S.conv);
+				if (S.autoPick || (c && !c.lineObjs.some(todo))) { pickStart(S.autoPick ? null : c); S.railScrolled = false; renderAll(); return; }
+			}
+			if (S.cat) refresh();
+		}, (err) => { $('db-state').textContent = 'REVIEWS LOST (' + err.code + ')'; });
+		db.collection('directions').onSnapshot((snap) => {
+			S.directions = snap.docs.filter((d) => d.exists).map((d) => Object.assign({ id: d.id }, d.data()));
+			if (S.cat) refresh();
+		}, (err) => { $('db-state').textContent = 'DIRECTIONS LOST (' + err.code + ')'; });
+		db.collection('sweep').onSnapshot((snap) => {
+			S.marks = new Map(snap.docs.filter((d) => d.exists).map((d) => [d.id, d.data()]));
+			if (S.cat) refresh();
+		}, () => { /* (the sweep's marks are optional) */ });
+	}
+
+	/* ---- keys ---- */
+	const typing = (t) => t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+	function help(on) {
+		$('help').hidden = !on;
+		if (on) $('help-close').focus();
+	}
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			if (!$('help').hidden) { help(false); return; }
+			if (document.body.classList.contains('drawer')) { document.body.classList.remove('drawer'); return; }
+			if (typing(e.target)) {
+				e.preventDefault();
+				e.target.blur();
+				const row = S.rows.get(S.focus);
+				if (row) row.node.focus({ preventScroll: true });
+			}
+			return;
+		}
+		if (typing(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
+		if (e.key === '?') { e.preventDefault(); help($('help').hidden); return; }
+		if (e.key === '/') { e.preventDefault(); $('q').focus(); return; }
+		if (!$('help').hidden || isPage() || !S.cat) return;
+		const row = S.rows.get(S.focus);
+		const k = e.key.toLowerCase();
+		if (k === 'j') { e.preventDefault(); move(1); }
+		else if (k === 'k') { e.preventDefault(); move(-1); }
+		else if (e.key === ']') { e.preventDefault(); stepConv(1); }
+		else if (e.key === '[') { e.preventDefault(); stepConv(-1); }
+		else if (row && (e.key === '1' || e.key === '3')) { e.preventDefault(); row.judge(e.key === '1' ? 'ok' : 'cut', { advance: true }); }
+		else if (row && e.key === '2') { e.preventDefault(); row.judge('change'); row.note.focus(); }
+		else if (row && k === 'n' && !S.readOnly) { e.preventDefault(); row.note.focus(); }
+		else if (row && k === 'e' && !S.readOnly) { e.preventDefault(); row.openSugg(); }
+	});
+	$('help-btn').addEventListener('click', () => help(true));
+	$('help-close').addEventListener('click', () => help(false));
+	$('help').addEventListener('click', (e) => { if (e.target === $('help')) help(false); });
+
+	/* ---- the rail's controls, the drawer, the search ---- */
+	const setRail = (m) => { S.railMode = m; store.set('rail', m); if (m === 'area') S.speaker = ''; S.railScrolled = false; renderAll(); };
+	$('rail-area').addEventListener('click', () => setRail('area'));
+	$('rail-speaker').addEventListener('click', () => setRail('speaker'));
+	const drawer = (on) => {
+		document.body.classList.toggle('drawer', on);
+		$('rail-toggle').setAttribute('aria-expanded', String(on));
+		const shade = document.querySelector('.shade');
+		if (on && !shade) document.body.append(el('div', { class: 'shade', onclick: () => drawer(false) }));
+		if (!on && shade) shade.remove();
+		if (on) { const cur = $('tree').querySelector('[aria-current="true"]'); if (cur) cur.scrollIntoView({ block: 'center' }); }
+	};
+	$('rail-toggle').addEventListener('click', () => { if (isPage()) setTab('review'); drawer(!document.body.classList.contains('drawer')); });
+	$('rail-close').addEventListener('click', () => drawer(false));
+	new MutationObserver(() => { if (!document.body.classList.contains('drawer')) { const s = document.querySelector('.shade'); if (s) s.remove(); } })
+		.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+	let qTimer = 0;
+	$('q').addEventListener('input', () => {
+		clearTimeout(qTimer);
+		qTimer = setTimeout(() => {
+			S.q = $('q').value.trim().toLowerCase();
+			if (isPage()) { renderPage(); return; }
+			const c = S.convById.get(S.conv);
+			if (S.q && (!c || !c.lineObjs.some(inView))) {
+				const first = S.convs.find((x) => x.lineObjs.some(inView));
+				if (first) { S.conv = first.id; S.focus = first.lineObjs.find(inView).id; renderScript(); }
+			}
+			applyView(); renderRail(); renderFoot();
+		}, 180);
+	});
+	if ('ResizeObserver' in window) new ResizeObserver(() => document.documentElement.style.setProperty('--top-h', $('top').offsetHeight + 'px')).observe($('top'));
+
+	loadCatalog().then(connect);
+})();
+</script>

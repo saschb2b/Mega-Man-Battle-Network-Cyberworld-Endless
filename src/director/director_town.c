@@ -102,7 +102,7 @@ const char *home_status(void) {
 	int far, at = place_here();
 	const char *way = home_way(&far);
 	if (home_in_hp()) {
-		const char *words = home_hp_status(way, !D.port_told, run.clock);
+		const char *words = home_hp_status(way, run.clock);
 		D.port_told = true;
 		return home_jobs_status(words);
 	}

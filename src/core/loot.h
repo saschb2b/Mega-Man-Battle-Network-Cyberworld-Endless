@@ -45,11 +45,6 @@ extern int loot_older_share;
  * ROM is read; true where the layer's battles take the older net's
  * records so */
 bool loot_layer_nets(int biome, int tiles);
-/* The virus families (a bit each, by BN6's AI index) the area's plain
- * random battles can hold at `depth` (a territory's own records where
- * loot_territory names one; the deep's both nets'); no random numbers
- * drawn. */
-uint64_t loot_families_here(int depth, int biome);
 /* When BN6's virus family `family` first meets MegaMan on the net: 0 the
  * surface areas, 1 the Undernet, 2 the Graveyard and the Underground (3
  * never); and the highest a battle at `depth` may hold (BN6's rule:

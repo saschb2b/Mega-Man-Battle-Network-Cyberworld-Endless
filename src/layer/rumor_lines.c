@@ -3,7 +3,7 @@
  * its table and picked for the chips the folder holds (a recipe told by a
  * friend: Sword, WideSwrd and LongSwrd in one code); or a word on a secret
  * the profile has not found yet, which never gives its answer away (that a
- * compression code exists, not the code). Every line is true. */
+ * Spin hides down deep, not where). Every line is true. */
 #include "rumor_lines.h"
 
 #include <stdio.h>
@@ -127,14 +127,13 @@ static const char *pa_line(uint32_t seed) {
 	return line;
 }
 
-/* ---- Secrets: each said only while the profile has yet to find it ---- */
+/* ---- Secrets: each said only while the profile has yet to find it ----
+ * (BN6's own compression codes, and its buttons, a bystander never
+ * teaches: the voice sweep, docs/voice/sweep/net.md) */
 static const char *secret_line(uint32_t seed) {
-	const char *say[5];
+	const char *say[4];
 	int n = 0;
 	int depth = run.depth;
-	if (!profile_codes_entered() && depth >= 2)
-		say[n++] = "Did you hear? NaviCust programs can shrink!|Hold RIGHT on one and press a secret pattern!|"
-			"Nobody I know has it,though...";
 	if (meta_spins() != 0x3F && depth >= 2 && depth <= 8)
 		say[n++] = "I heard a blue Mystery Data down deep hides a Spin!|A color nobody's found yet! A new one every dive!";
 	if (rival_clearance() == 0 && depth >= 2)
@@ -144,7 +143,7 @@ static const char *secret_line(uint32_t seed) {
 	if (depth >= 4 && pacing_loop(depth) == 0 && layer_area_hides(run.biome))
 		say[n++] = "I swear a Navi walked off a walkway's end!|Right over nothing! Some floor here can't be seen!";
 	if (!profile.reg_taught && pacing_loop(depth) == 0 && !is_boss_depth(depth))
-		say[n++] = "Every layer before a guardian hides a RegUp,off the path!|More Reg memory,a bigger Regular Chip!";
+		say[n++] = "Every layer before a guardian hides a RegUp,off the path!";
 	return n ? say[seed % (uint32_t)n] : NULL;
 }
 
