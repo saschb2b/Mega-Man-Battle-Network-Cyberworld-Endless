@@ -70,6 +70,9 @@ bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], b
  * and under full rules the installs' record they were made with: two
  * clients whose pairs agree have the same; 0 where it failed */
 uint64_t arena_pair_hash(ArenaPair *pair);
+/* ... but for the sound's fields, which a state loaded leaves otherwise
+ * than run straight (arena_pair_snap_diff): what a rollback must agree on */
+uint64_t arena_pair_hash_game(ArenaPair *pair);
 /* The installs' record its cores were made with (xinstall_log.h's hash): 0
  * under BN6's rules */
 uint64_t arena_pair_record(const ArenaPair *pair);
@@ -82,9 +85,11 @@ unsigned arena_pair_transfers(const ArenaPair *pair);
 /* A snapshot of the pair, all a rollback puts back (docs/ONLINE_ARENA.md,
  * Rollback): both cores' raw states and what no core's state holds, the
  * cable's lockstep (its numbers, each node's own and its event's place in
- * its core's timing), the pair's scheduling and frame clock and the Souls
- * carried. Not the flash saves (a battle writes none) nor, under full
- * rules, what BN5's hooks keep between their calls (hook_slot). */
+ * its core's timing), each GBA's registers as they read and what else it
+ * keeps outside its state (the SIO's words, mGBA's idle loop detection),
+ * the pair's scheduling and frame clock, the Souls carried and, under full
+ * rules, what BN5's hooks keep between their calls (hook_keep_slots). Not
+ * the flash saves (a battle writes none). */
 typedef struct ArenaPairSnap ArenaPairSnap;
 /* room for one snapshot of `pair`; NULL where memory ran out */
 ArenaPairSnap *arena_pair_snap_new(ArenaPair *pair);

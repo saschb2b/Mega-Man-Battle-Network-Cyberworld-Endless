@@ -51,6 +51,7 @@ typedef struct {
 	int arena_delay; /* arenadelay=N: its input delay, N frames (3-60); 0 its own */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
 	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
+	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

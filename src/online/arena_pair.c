@@ -39,6 +39,12 @@
  * past a frame's (about 280,000 cycles each), short of a hang */
 #define STEP_LIMIT 4000000u
 #define STATE_FLAGS (SAVESTATE_SAVEDATA | SAVESTATE_RTC)
+/* the sound's fields in mGBA's state: the PSG's and the FIFOs', and the samples rendered, which its lazy PSG leaves
+ * otherwise after a load than run straight (docs/ONLINE_ARENA.md, Rollback) */
+#define SOUND_AT    offsetof(struct GBASerializedState, audio)
+#define SOUND_END   (SOUND_AT + sizeof ((struct GBASerializedState *)0)->audio)
+#define SAMPLES_AT  offsetof(struct GBASerializedState, samples)
+#define SAMPLES_END (offsetof(struct GBASerializedState, currentSamples) + sizeof ((struct GBASerializedState *)0)->currentSamples)
 
 struct ArenaPair {
 	struct GBASIOLockstep cable;
@@ -271,12 +277,16 @@ static void hash_cable(ArenaPair *p, uint64_t *hash) {
 	}
 }
 
-uint64_t arena_pair_hash(ArenaPair *p) {
+static uint64_t pair_hash(ArenaPair *p, bool sound) {
 	uint64_t hash = UINT64_C(14695981039346656037);
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = p->core[side];
 		memset(p->scratch, 0, p->scratch_size);
 		if (c->stateSize(c) != p->scratch_size || !c->saveState(c, p->scratch)) return 0;
+		if (!sound && p->scratch_size >= SAMPLES_END) {
+			memset(p->scratch + SOUND_AT, 0, SOUND_END - SOUND_AT);
+			memset(p->scratch + SAMPLES_AT, 0, SAMPLES_END - SAMPLES_AT);
+		}
 		hash_bytes(&hash, p->scratch, p->scratch_size);
 		void *flash = NULL;
 		size_t size = c->savedataClone(c, &flash);
@@ -294,6 +304,9 @@ uint64_t arena_pair_hash(ArenaPair *p) {
 	return hash ? hash : 1;
 }
 
+uint64_t arena_pair_hash(ArenaPair *p) { return pair_hash(p, true); }
+uint64_t arena_pair_hash_game(ArenaPair *p) { return pair_hash(p, false); }
+
 uint64_t arena_pair_record(const ArenaPair *p) { return p->bn5 ? xlog_hash() : 0; }
 
 /* ---- the snapshot (arena_pair.h): what a rollback puts back ---- */
@@ -303,6 +316,47 @@ typedef struct {
 	int mode;
 	bool normal_so, finished, scheduled;
 } NodeSnap;
+
+/* what a core's GBA keeps outside its state, which its next instructions
+ * read: mGBA's idle loop detection, the open bus, a DMA under way, an
+ * interrupt sprung (a state loaded leaves them as they were before it) */
+typedef struct {
+	uint32_t bus, idle_loop, last_jump;
+	int performing_dma, spring_irq, idle_step, idle_failures;
+	bool halt_pending, cpu_blocked, early_exit;
+	int32_t cached[16];
+	bool tainted[16];
+	uint16_t io[512];          /* the registers as they read: a state keeps what a read gives and loads it through a write */
+	uint16_t sio_rcnt, sio_siocnt;
+} GbaSnap;
+
+static void gba_save(const struct GBA *g, GbaSnap *s) {
+	*s = (GbaSnap){ g->bus, g->idleLoop, g->lastJump, g->performingDMA, g->springIRQ, g->idleDetectionStep, g->idleDetectionFailures,
+		g->haltPending, g->cpuBlocked, g->earlyExit, { 0 }, { 0 } };
+	memcpy(s->cached, g->cachedRegisters, sizeof s->cached);
+	memcpy(s->tainted, g->taintedRegisters, sizeof s->tainted);
+	memcpy(s->io, g->memory.io, sizeof s->io);
+	s->sio_rcnt = g->sio.rcnt;
+	s->sio_siocnt = g->sio.siocnt;
+}
+
+static void gba_load(struct GBA *g, const GbaSnap *s) {
+	g->bus = s->bus;
+	g->idleLoop = s->idle_loop;
+	g->lastJump = s->last_jump;
+	g->performingDMA = s->performing_dma;
+	g->springIRQ = s->spring_irq;
+	g->idleDetectionStep = s->idle_step;
+	g->idleDetectionFailures = s->idle_failures;
+	g->haltPending = s->halt_pending;
+	g->cpuBlocked = s->cpu_blocked;
+	g->earlyExit = s->early_exit;
+	memcpy(g->cachedRegisters, s->cached, sizeof s->cached);
+	memcpy(g->taintedRegisters, s->tainted, sizeof s->tainted);
+	memcpy(g->memory.io, s->io, sizeof s->io);
+	g->sio.rcnt = s->sio_rcnt;
+	g->sio.siocnt = s->sio_siocnt;
+}
 
 struct ArenaPairSnap {
 	uint8_t *core[2];
@@ -316,6 +370,7 @@ struct ArenaPairSnap {
 	uint16_t multi_recv[MAX_GBAS];
 	uint32_t normal_recv[MAX_GBAS];
 	NodeSnap node[2];
+	GbaSnap gba[2];
 	/* the pair's scheduling, frame clock and Souls carried */
 	int32_t credit[2];
 	unsigned waiting, transfers, start[2], relative;
@@ -352,6 +407,7 @@ bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
 		s->node[side] = (NodeSnap){ n->nextEvent, n->eventDiff, scheduled ? mTimingUntil(timing, &n->event) : 0, (int)n->mode,
 			n->normalSO, n->transferFinished, scheduled };
 		if (s->kept_size) hook_kept_save(hook_slot_of(c), s->kept[side]);
+		gba_save(c->board, &s->gba[side]);
 	}
 	s->attached = p->cable.d.attached;
 	s->active = p->cable.d.transferActive;
@@ -378,6 +434,7 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 		struct mCore *c = p->core[side];
 		if (c->stateSize(c) != s->core_size || !c->loadState(c, s->core[side])) return false;
 		if (s->kept_size) hook_kept_load(hook_slot_of(c), s->kept[side]);
+		gba_load(c->board, &s->gba[side]);
 	}
 	p->cable.d.attached = s->attached;
 	p->cable.d.transferActive = s->active;
@@ -408,14 +465,8 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 	return true;
 }
 
-/* a byte of the sound's in mGBA's state: the PSG's and the FIFOs' fields and
- * the samples rendered, which its lazy PSG leaves otherwise after a load
- * than run straight (docs/ONLINE_ARENA.md, Rollback) */
-static bool sound_byte(size_t i) {
-	size_t audio = offsetof(struct GBASerializedState, audio), samples = offsetof(struct GBASerializedState, samples);
-	size_t rendered = offsetof(struct GBASerializedState, currentSamples) + sizeof ((struct GBASerializedState *)0)->currentSamples;
-	return (i >= audio && i < audio + sizeof ((struct GBASerializedState *)0)->audio) || (i >= samples && i < rendered);
-}
+/* a byte of the sound's in mGBA's state (SOUND_AT) */
+static bool sound_byte(size_t i) { return (i >= SOUND_AT && i < SOUND_END) || (i >= SAMPLES_AT && i < SAMPLES_END); }
 
 unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, unsigned frame, bool say) {
 	unsigned game = 0;
@@ -428,7 +479,7 @@ unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, un
 			while (end + 2 < a->core_size && (x[end + 1] != y[end + 1] || x[end + 2] != y[end + 2])) ++end;
 			bool sound = sound_byte(i) && sound_byte(end);
 			if (!sound && game++ < 12 && say)
-				printf("arena: frame %u: core %u's state apart at 0x%05zx-0x%05zx\n", frame, side, i, end);
+				printf("arena: frame %u: core %u's state apart at 0x%05x-0x%05x\n", frame, side, (unsigned)i, (unsigned)end);
 			i = end;
 		}
 	}
@@ -479,6 +530,7 @@ void arena_pair_anchor(ArenaPair *pair) { (void)pair; }
 void arena_pair_begin(ArenaPair *pair) { (void)pair; }
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) { (void)pair; (void)keys; (void)own_clock; return false; }
 uint64_t arena_pair_hash(ArenaPair *pair) { (void)pair; return 0; }
+uint64_t arena_pair_hash_game(ArenaPair *pair) { (void)pair; return 0; }
 uint64_t arena_pair_record(const ArenaPair *pair) { (void)pair; return 0; }
 struct mCore *arena_pair_core(ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }

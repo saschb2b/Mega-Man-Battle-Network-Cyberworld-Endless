@@ -90,6 +90,7 @@ static void enter(void) {
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link, format);
 	/* (the local link's round trip: its one way there and back) */
 	if (S.arena) arena_rtt(S.arena, lag * 2 * 1000 / 60);
+	if (S.arena && dev.arena_roll >= 0) arena_rollback(S.arena, dev.arena_roll);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 }

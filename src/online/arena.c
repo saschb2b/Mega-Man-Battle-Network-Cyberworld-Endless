@@ -24,6 +24,7 @@
 
 #include "arena_boot.h"
 #include "arena_pair.h"
+#include "arena_roll.h"
 #include "arena_sync.h"
 #include "bn6.h"
 
@@ -49,6 +50,8 @@ struct Arena {
 	uint32_t ticks, uneven;    /* the battle's ticks, and those that ran no frame or more than one */
 	uint32_t settled;          /* ... of them, once the clocks have settled (past SETTLED frames) */
 	bool owed;                 /* a stall last tick: this one holds my clock and runs the frame that waited */
+	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
+	ArenaRoll *roll;
 	Hashed pending[PENDING];
 	unsigned npending;
 	bool fought, apart;
@@ -66,6 +69,7 @@ Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2
 	Arena *a = calloc(1, sizeof *a);
 	if (!a) return NULL;
 	a->link = link;
+	a->roll_window = -1;
 	a->boot = arena_boot_new(rom, size, loadout, format);
 	if (!a->boot) { free(a); return NULL; }
 	if (arena_boot_stage(a->boot) == ARENA_BOOT_FAILED) fail(a, arena_boot_error(a->boot));
@@ -75,6 +79,7 @@ Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2
 void arena_free(Arena *a) {
 	if (!a) return;
 	arena_boot_free(a->boot);
+	arena_roll_free(a->roll);
 	arena_pair_close(a->pair);
 	if (a->link && a->link->close) a->link->close(a->link);
 	free(a);
@@ -98,6 +103,7 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	a->boot = NULL;
 	arena_input_init(&a->input, a->link->delay);
 	arena_sync_init(&a->sync);
+	if (a->roll_window > 0 && !(a->roll = arena_roll_new(a->pair, (unsigned)a->roll_window))) return fail(a, "no room for the rollback's snapshots");
 	return a->stage = ARENA_BATTLE;
 }
 
@@ -133,6 +139,7 @@ static void compare_hashes(Arena *a) {
 		}
 		a->pending[a->npending++] = (Hashed){ frame, h };
 		printf("arena: frame %" PRIu32 " hash %016" PRIx64 "\n", frame, h);
+		if (a->roll_window >= 0) printf("arena: frame %" PRIu32 " the game's hash %016" PRIx64 "\n", frame, arena_pair_hash_game(a->pair));
 	}
 	for (unsigned i = 0; i < a->npending;) {
 		uint64_t theirs;
@@ -196,8 +203,11 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (a->input.next <= now && !arena_input_ready(&a->input)) { ++a->stalls; a->owed = true; }
 	for (unsigned i = 0; i < CATCH_UP && a->stage == ARENA_BATTLE && a->input.next <= now && arena_input_ready(&a->input); ++i) {
 		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
+		uint32_t frame = a->input.next;
 		arena_input_take(&a->input, frame_keys);
-		if (!arena_pair_step(a->pair, frame_keys, true)) return fail(a, "the cable between the two cores stuck");
+		if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[2])frame_keys);
+		if (!arena_pair_step(a->pair, frame_keys, true) || (a->roll && !arena_roll_after(a->roll, frame)))
+			return fail(a, "the cable between the two cores stuck");
 		compare_hashes(a);
 		if (a->stage == ARENA_BATTLE) watch_end(a);
 	}
@@ -206,6 +216,7 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 }
 
 void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
+void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }

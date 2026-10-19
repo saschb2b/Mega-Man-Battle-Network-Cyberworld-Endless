@@ -56,6 +56,11 @@ uint32_t arena_stalls(const Arena *a);
  * time (the local link's: twice its one way), for the time sync that runs
  * the leading game a little slower (arena_sync.h) */
 void arena_rtt(Arena *a, uint32_t ms);
+/* --dev arena's rollback tried, before the way in is done (arena_roll.h):
+ * `window` frames rolled back every `window`, the game's state checked;
+ * and every 60th frame the game's hash said (without the sound's fields),
+ * which a run that rolls back must say alike; 0 the hash alone */
+void arena_rollback(Arena *a, int window);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before
