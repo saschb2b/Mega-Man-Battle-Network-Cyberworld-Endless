@@ -54,6 +54,12 @@ const char *arena_no_folder_words(bool bn5) {
 
 const char *arena_challenged_question(void) { return "Take it,Lan?\n"; }
 
+const char *arena_again_question(const char *name) {
+	static char s[48];
+	snprintf(s, sizeof s, "Again with\n%s?\n", name);
+	return s;
+}
+
 const char *arena_cant_words(bool souls) {
 	return souls ? "Lan,our Souls can't\ngo in a NetBattle..." : "Lan,some chips in\nour Folder can't go\ninto a NetBattle...";
 }

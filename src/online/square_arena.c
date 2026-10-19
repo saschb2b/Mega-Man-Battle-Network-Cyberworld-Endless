@@ -17,7 +17,18 @@
  * BN6's chips: where more than one of his three fits, Lan picks it in
  * BN6's chat box, the others named as not fitting; where none does,
  * MegaMan says why. The carried MegaMan is then checked as before, the
- * same check on both games. */
+ * same check on both games.
+ *
+ * A battle with a result is offered again (docs/ONLINE_ARENA.md,
+ * Rematches): back in the Square, MegaMan says how it went and asks Lan
+ * whether to go again with the same player, the cursor on No. A Yes sends
+ * the same challenge again, quietly, by the last battle's rules; the other
+ * game takes a challenge from that player at once where its player said
+ * Yes too (his question still open: it waits for the answer), turns it
+ * down where he said No, and asks as ever once the rematch's time is out.
+ * The folder carried is the last battle's, asked only where it no longer
+ * fits. Both Yeses at once cross on the server, which turns the second
+ * challenge down as busy: the first is taken. */
 #include "square_arena.h"
 
 #include <stdio.h>
@@ -51,6 +62,7 @@
 #define OVER_TICKS      300      /* the result shown before the Square */
 #define OVER_HELD       30       /* ... at least, before A goes back */
 #define STALL_SHOWN     20
+#define AGAIN_MS        45000    /* a rematch's answer kept, from the battle's end */
 
 typedef enum {
 	SA_IDLE,
@@ -60,6 +72,8 @@ typedef enum {
 	SA_ASKING,      /* challenged: the question to ask once no chat is open */
 	SA_ASKED,       /* ... open */
 	SA_ACCEPTED,    /* Yes said: START awaited */
+	SA_AGAIN,       /* back after a result: the rematch to ask once no chat is open */
+	SA_AGAIN_ASKED, /* ... open */
 	SA_LOADOUT,     /* START: the other's MegaMan awaited (from here the Square holds) */
 	SA_CONNECTING,  /* the way in */
 	SA_READY,       /* the other's ready awaited */
@@ -87,14 +101,27 @@ static struct {
 } A;
 
 /* the last battle this game fought from the Square, for its referee */
-static struct { unsigned result; char name[ONLINE_NAME_BYTES + 1]; } last;
+static struct { SquareBout bout; uint32_t other; char name[ONLINE_NAME_BYTES + 1]; } last;
+
+/* the rematch: the last battle's other player, rules and folder, Lan's
+ * answer, and a challenge of his come before it */
+enum { AGAIN_UNSAID, AGAIN_YES, AGAIN_NO };
+static struct {
+	uint32_t other, since, held;
+	char name[ONLINE_NAME_BYTES + 1];
+	unsigned format;
+	int folder, answer;
+} again;
 
 bool square_arena_offered(void) { return CW_ARENA; }
 
-unsigned square_arena_last(const char **name) {
-	*name = last.result ? last.name : NULL;
-	return last.result;
+const SquareBout *square_arena_last(void) {
+	last.bout.name = last.bout.result ? last.name : NULL;
+	return &last.bout;
 }
+
+/* a rematch's answer still kept */
+static bool again_on(void) { return again.other && SDL_GetTicks() - again.since < AGAIN_MS; }
 
 static bool out(void *context, const uint8_t *data, size_t size) {
 	(void)context;
@@ -116,11 +143,13 @@ static void drop_arena(void) {
 void square_arena_reset(void) {
 	drop_arena();
 	memset(&A, 0, sizeof A);
+	memset(&again, 0, sizeof again);
 	arena_folder_reset();
 }
 
 void square_arena_end(void) {
 	if (A.match && !A.ended && A.stage != SA_IDLE) act(ARENA_ACT_LEAVE, A.match);
+	if (again.held) act(ARENA_ACT_LEAVE, again.held);
 	square_arena_reset();
 }
 
@@ -172,15 +201,18 @@ static bool folder_question(unsigned fits) {
 	return arena_folder_asked(l, A.format, fits) && arena_folder_ask(l, A.format, fits);
 }
 
-static void send_challenge(void) {
+/* (a rematch's quietly: nothing changed since the last) */
+static void challenge_sent(bool quiet) {
 	const OnlineLoadout *l = online_visit_loadout();
 	act(ARENA_ACT_CHALLENGE, A.other);
 	A.stage = SA_SENT;
 	A.since = SDL_GetTicks();
 	A.notice_serial = A.s.notice_serial;
-	talk_start(arena_sent_words(A.name, A.format, arena_souls_home(l, A.format)), FACE_MEGAMAN);
+	if (!quiet) talk_start(arena_sent_words(A.name, A.format, arena_souls_home(l, A.format)), FACE_MEGAMAN);
 	printf("arena: challenged %s (session %u), rules %u, folder %d\n", A.name, A.other, A.format, A.folder + 1);
 }
+
+static void send_challenge(void) { challenge_sent(false); }
 
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 	if (!CW_ARENA || A.stage != SA_IDLE) return;
@@ -200,6 +232,8 @@ void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 
 /* START: my MegaMan sent, and kept as the other reads him */
 static void start(unsigned side, unsigned delay) {
+	/* (a rematch's answer spent: the next is asked after this battle's result) */
+	memset(&again, 0, sizeof again);
 	arena_link_net(&A.link, A.match, side, delay, out, NULL);
 	const OnlineLoadout *carried = online_visit_loadout();
 	static OnlineLoadout tried;
@@ -230,7 +264,11 @@ static bool apart(void);
 static void ended(void) {
 	A.ended = true;
 	switch (A.stage) {
-	case SA_SENT: case SA_WAITING: say(arena_declined_words()); A.stage = SA_IDLE; break;
+	case SA_SENT: case SA_WAITING:
+		printf("arena: %s turned the challenge down (match %u)\n", A.name, A.match);
+		say(arena_declined_words());
+		A.stage = SA_IDLE;
+		break;
 	case SA_ASKING: A.stage = SA_IDLE; break;
 	case SA_ACCEPTED: say(arena_gone_words()); A.stage = SA_IDLE; break;
 	/* (gone once his ready came apart from ours: the stop he saw, his to tell the server as the cable's first) */
@@ -248,7 +286,68 @@ static const char *name_of(uint32_t id) {
 	return NULL;
 }
 
+static void accept(void);
+
+/* the folder carried again: the last battle's where it still fits; false
+ * where MegaMan can't go (he says why) or Lan is asked */
+static bool again_folder(void) {
+	unsigned fits;
+	if (!mine_goes(&fits)) return false;
+	bool same = fits >> again.folder & 1;
+	A.folder = same ? again.folder : arena_folder_first(fits);
+	if (!same && folder_question(fits)) { A.stage = SA_FOLDER; return false; }
+	return true;
+}
+
+/* the rematch's battle, as the last one's other player and rules */
+static void again_as(bool challenger) {
+	A.other = again.other;
+	A.format = again.format;
+	A.challenger = challenger;
+	A.ended = false;
+	snprintf(A.name, sizeof A.name, "%s", again.name);
+}
+
+/* his challenge taken at once, both having said Yes */
+static void again_take(uint32_t match) {
+	A.stage = SA_IDLE;
+	again_as(false);
+	A.match = match;
+	printf("arena: %s's rematch taken (match %u)\n", A.name, match);
+	if (again_folder()) accept();
+	else if (A.stage != SA_FOLDER) { act(ARENA_ACT_LEAVE, match); A.ended = true; }
+}
+
+/* Lan's Yes, no challenge of his come: ours sent */
+static void again_send(void) {
+	A.stage = SA_IDLE;
+	again_as(true);
+	A.match = 0;
+	if (again_folder()) challenge_sent(true);
+}
+
+/* a challenge from the last battle's other player while the rematch's
+ * answer is kept: taken, turned down, or held for Lan's; false where it
+ * is a challenge as ever */
+static bool again_in(const ArenaWireState *s) {
+	if (!again_on() || s->other != again.other || s->rules != again.format) return false;
+	if (again.answer == AGAIN_NO) {
+		act(ARENA_ACT_LEAVE, s->match);
+		printf("arena: %s's rematch turned down (match %u)\n", again.name, s->match);
+		return true;
+	}
+	/* (both Yeses crossed: his came first, ours the server turns down as busy) */
+	if (again.answer == AGAIN_YES && (A.stage == SA_IDLE || A.stage == SA_SENT)) { again_take(s->match); return true; }
+	if (A.stage != SA_OVER && A.stage != SA_AGAIN && A.stage != SA_AGAIN_ASKED) return false;
+	again.held = s->match;
+	printf("arena: %s asks for a rematch (match %u)\n", again.name, s->match);
+	return true;
+}
+
 static void state_in(const ArenaWireState *s) {
+	if (s->stage == ARENA_WIRE_CHALLENGED && again_in(s)) return;
+	/* (a held rematch ended: the other left, or its time on the server ran out) */
+	if (s->stage == ARENA_WIRE_ENDED && again.held && s->match == again.held) { again.held = 0; return; }
 	if (s->stage == ARENA_WIRE_CHALLENGED) {
 		const char *name = name_of(s->other);
 		bool blocked = online_people_flags(s->identity) & ONLINE_BLOCKED;
@@ -332,6 +431,28 @@ static void answered(void) {
 	accept();
 }
 
+/* Lan's answer to the rematch, as its chat closes */
+static void again_answered(void) {
+	bool yes = arena_folder_challenge_yes();
+	uint32_t held = again.held;
+	again.held = 0;
+	again.answer = yes ? AGAIN_YES : AGAIN_NO;
+	A.stage = SA_IDLE;
+	printf("arena: a rematch with %s: %s\n", again.name, yes ? "yes" : "no");
+	if (!yes) { if (held) act(ARENA_ACT_LEAVE, held); return; }
+	if (held) again_take(held);
+	else again_send();
+}
+
+/* back after a result: the rematch asked, MegaMan's word on the battle
+ * first, where the other is still here */
+static void again_ask(void) {
+	if (!name_of(again.other)) { A.stage = SA_IDLE; return; }
+	if (!arena_folder_again(A.said ? A.said : "", again.name)) return;
+	A.said = NULL;
+	A.stage = SA_AGAIN_ASKED;
+}
+
 /* the folder picked, as its chat closes: the challenge sent, or the Yes */
 static void folder_picked(void) {
 	int k = arena_folder_picked();
@@ -353,6 +474,8 @@ void square_arena_update(const OnlineSnapshot *s) {
 	/* (a challenge the server refused with a notice: the target busy or gone) */
 	if (A.stage == SA_SENT && (s->notice_serial != A.notice_serial || SDL_GetTicks() - A.since > SENT_WAIT_MS)) A.stage = SA_IDLE;
 	if (A.stage == SA_ASKED && !open) answered();
+	else if (A.stage == SA_AGAIN_ASKED && !open) again_answered();
+	else if (A.stage == SA_AGAIN && !open) again_ask();
 	else if (A.stage == SA_FOLDER && !open) folder_picked();
 	else if (A.stage == SA_ASKING && !open) {
 		if (arena_folder_challenge(A.name, A.format)) A.stage = SA_ASKED;
@@ -411,6 +534,25 @@ static void ready(void) {
 	A.stage = SA_BATTLE;
 }
 
+/* a result: the referee's tally, the bouts with one player in a row, and
+ * the rematch's answer to come */
+static void bouts(unsigned result) {
+	SquareBout *b = &last.bout;
+	if (last.other != A.other || strcmp(last.name, A.name)) b->won = b->lost = 0;
+	b->result = result == 1 || result == 2 ? result : 3;
+	b->won += result == 1;
+	b->lost += result == 2;
+	++b->bouts;
+	last.other = A.other;
+	snprintf(last.name, sizeof last.name, "%s", A.name);
+	memset(&again, 0, sizeof again);
+	again.other = A.other;
+	again.since = SDL_GetTicks();
+	again.format = A.format;
+	again.folder = A.folder;
+	snprintf(again.name, sizeof again.name, "%s", A.name);
+}
+
 static void battle(uint32_t keys) {
 	uint32_t stalls = arena_stalls(A.arena);
 	ArenaStage stage = arena_tick(A.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
@@ -430,18 +572,18 @@ static void battle(uint32_t keys) {
 		act(ARENA_ACT_OVER, A.match);
 	}
 	A.ended = true;
-	last.result = result == 1 || result == 2 ? result : 3;
-	snprintf(last.name, sizeof last.name, "%s", A.name);
+	bouts(result);
 	say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
 	A.stage = SA_OVER;
 	A.over_t = 0;
 }
 
-/* back on the Square's map, where MegaMan stood */
+/* back on the Square's map, where MegaMan stood: the rematch asked after
+ * a result */
 static void back(void) {
 	drop_arena();
 	arena_view_free();
-	A.stage = SA_IDLE;
+	A.stage = !A.why[0] && again.other == A.other && again.answer == AGAIN_UNSAID ? SA_AGAIN : SA_IDLE;
 	A.match = 0;
 	printf("arena: back in the Square\n");
 }
