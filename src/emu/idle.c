@@ -12,6 +12,7 @@
 
 #include "bn6.h"
 #include "emu.h"
+#include "hook.h"
 
 #define IO_DISPSTAT 0x04000004u   /* bit 0 in VBlank, bit 3 its interrupt on */
 #define IO_IE       0x04000200u   /* bit 0 VBlank */
@@ -30,4 +31,9 @@ void idle_install(void) {
 	if (done) return;
 	done = true;
 	emu_hook(BN6_AWAIT_FRAME_LOOP, await_frame, NULL);
+}
+
+bool idle_on(struct mCore *core) {
+	HookCore *c = hook_core(core);
+	return c && hook_on(c, BN6_AWAIT_FRAME_LOOP, await_frame, NULL);
 }

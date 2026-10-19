@@ -88,7 +88,7 @@ static bool lava_acts(const HookRegs *r) {
 }
 
 /* the hooked instruction the stub went back to, on the stack it left: it
- * runs (one a core: the Arena's two run an instruction at a time in turn) */
+ * runs (one a core: the Arena's two run in turn, a run loop at a time) */
 typedef struct { uint32_t at, sp; } Back;
 static Back backs[HOOK_CORES];
 

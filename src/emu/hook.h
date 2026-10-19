@@ -93,7 +93,7 @@ void hook_post(const HookRegs *r, int kind);
 #define HOOK_CORES 3
 /* From a hook: its core's entry, 0 to HOOK_CORES - 1, for what a hook
  * keeps between two of its calls (a way back through a stub): one a core,
- * since two cores' hooks run an instruction at a time in turn there (the
+ * since two cores' hooks run in turn there, a run loop at a time (the
  * Arena's pair) */
 int hook_slot(void);
 /* ... and a core's own, between frames (-1: none attached) */
