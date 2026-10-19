@@ -52,3 +52,14 @@ rolls pick from lost an entry.
 | `guardian_lines:guardian_soul_words:4`, `:5`, `:6` | `\|@M Pick {a Fire} chip last,like {HeatSht}.` / `\|@M Pick {a Fire} chip last.` / `\|@M Then UNITE! Once a battle.` | How BN5's Soul Unison works in BN6's Custom Screen, the run's own; said once, at the first Soul | Rule 4: a system by mail from whoever provides it (as BN6's NaviCust Support Center mails), or a power by whoever gave it; not MegaMan explaining the screen (rule 5) |
 | `guardian_lines:guardian_soul_words:7` | `\|@M A Soul or a Cross,though. Not both!` | The run's rule that a Soul and a Cross are not worn together, said once a profile | As above: the Soul mail; the second screen's card says it too |
 | `pet_text:cross_words:0`, `:1` | Dad's report: " and HeatCross.\fIn it,fire chips +50,Buster +1.\fAqua attacks do double to it,and break it." | What the brought Cross gives and fears (a playtester chose by weakness alone; three met EraseCross's erase unexplained) | Rule 3: BN6's own Cross rules, taught in BN6's own Cross tutorials. A menu outside the fiction: the setup screen where the Cross is chosen, in its own plain style |
+
+## Seen beside them, in the other sweeps' files
+
+Left to those sweeps, named here because they say what this group's cuts
+took out: `board_words.c`'s TagChip lesson (MegaMan, after Chaud's first
+clearance: "Press SELECT in the Folder's EDIT,then pick Choose Tag...",
+seen in a capture of a veteran profile) teaches the same BN6 system the
+cut boxes did; `briefing_words.c` recites the guardians' tips on arrival,
+now their only spoken place; `layer_words.c`'s `duel_terms` says the
+race's stake as the netbattle's does ("If they delete us,the dive's
+over.").
