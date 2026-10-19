@@ -114,7 +114,7 @@ OVERRIDES = [
     (r'^pet_text:(report_text|records_text|where_text|codes_known|codes_text|install_descriptions|install_mails\.subjects)\b', 'Screen', 'screen'),
     (r'^pet_text:bbs_posts\b', 'Bystander', None),
     (r'^pet_text:(mail_body|cross_words)\b', 'Dad', None),
-    (r':[\w.]*(options|buttons|labels?|titles?|hints?|menu|names?)\b[\w.]*:', None, 'screen'),
+    (r':[\w.]*(options|buttons|labels?|titles?|hints?|names?)\b[\w.]*:', None, 'screen'),
 ]
 
 # Files whose words are no chat box's (the PET's mails and BBS have screens
@@ -382,30 +382,40 @@ class Frame:
         self.callee, self.args, self.pending, self.face = callee, [at], [], None
 
 
+NOT_NAMES = KEYWORDS | {'true', 'false', 'NULL', 'int', 'unsigned', 'char', 'const', 'size_t', 'bool'}
+
+
 def arg_name(toks):
     """A placeholder's name from its argument's tokens: the last identifier
     at the expression's own level (guardian(navi)->name -> name), casts and
-    brackets aside."""
-    level, best = 0, None
+    brackets aside; of a ternary, its first branch's name, else its
+    second's, else its condition's (stands ? "" : "|...", -> stands)."""
+    level, q, c = 0, None, None
     for k, t in enumerate(toks):
         if t.text in ('(', '['):
             level += 1
         elif t.text in (')', ']'):
             level -= 1
-        elif level == 0 and t.kind == 'id' and t.text not in KEYWORDS:
-            if k + 1 < len(toks) and toks[k + 1].text == '?':
-                continue   # (a ternary's condition)
+        elif level == 0 and t.text == '?' and q is None:
+            q = k
+        elif level == 0 and t.text == ':' and q is not None and c is None:
+            c = k
+    if q is not None and c is not None:
+        return expr_name(toks[q + 1:c]) or expr_name(toks[c + 1:]) or expr_name(toks[:q])
+    return expr_name(toks)
+
+
+def expr_name(toks):
+    level, best = 0, None
+    for t in toks:
+        if t.text in ('(', '['):
+            level += 1
+        elif t.text in (')', ']'):
+            level -= 1
+        elif level == 0 and t.kind == 'id' and t.text not in NOT_NAMES:
             best = t.text
-            if k + 1 < len(toks) and toks[k + 1].text == '?':
-                break
-        elif level == 0 and t.text == '?':
-            # cond ? a : b -> the first branch's name
-            rest = arg_name(toks[k + 1:])
-            return rest or best
-        elif level == 0 and t.text == ':':
-            break
     if best is None:
-        ids = [t.text for t in toks if t.kind == 'id' and t.text not in KEYWORDS and t.text not in ('int', 'unsigned', 'char', 'const', 'size_t')]
+        ids = [t.text for t in toks if t.kind == 'id' and t.text not in NOT_NAMES]
         best = ids[-1] if ids else None
     return best
 
