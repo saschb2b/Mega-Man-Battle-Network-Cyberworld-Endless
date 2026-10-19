@@ -378,7 +378,11 @@ What the proposal left open, decided the same way:
    profile and is let go at the next dive: the critique's "no opportunity
    cost" and "power creep" both stay out, and the comparison stays fair.
    Its end opens nothing (`meta_run_quiet`) and counts in no record of
-   the normal runs.
+   the normal runs. Nor does a dive trade: on one, Trade Central's clerk
+   says "DIVERS DON'T TRADE! SAME NET,SAME CHIPS FOR ALL!", MegaMan's
+   board offer is taken down and an offer that comes in is called off
+   unheard of (`trade_central.c`), so every dive plays the standard
+   setup's chips and no swap can land in the other slot.
 2. **How an unfinished dive goes on.** In the world, as it began: the
    greeter offers it again (Keep diving, Start over, Not now; B is Not
    now). The title's CONTINUE stays the normal run's, so the title keeps
@@ -826,10 +830,8 @@ are in the history before 433865a8):
   same net; the Board does not tell them apart yet. A dive's summary hash
   is a format check, not evidence. A dive won (the Nest) has not been
   played to its end here; the 3DS's and the browser's dives are untried.
-  A trade made in the Square during a dive and kept by a game closed
-  there settles at the next CONTINUE, which is the normal run's
-  (`trade.pending` is one file beside both slots); a visit ended at the
-  pad settles it into the dive as it should.
+  A diver's game calls off an offer made to it, but the other game
+  hears only "The trade's off": the snapshot does not say who is diving.
 - **The Arena on the 3DS and in the browser**; rollback and the stands
   (issue #128).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,

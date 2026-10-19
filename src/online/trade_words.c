@@ -167,6 +167,8 @@ const char *trade_post_down(void) { return "OKAY! YOUR OFFER'S\nDOWN!"; }
 
 const char *trade_traded(void) { return "YOU TRADED ALREADY!|ONE TRADE A VISIT!\nTAKE IT HOME FIRST!"; }
 
+const char *trade_diving(void) { return "YOU'RE ON THIS\nWEEK'S DIVE!|DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!"; }
+
 const char *trade_board_review(const char *name, const char *mine, const char *theirs) {
 	static char s[200];
 	snprintf(s, sizeof s, "Lan! %s took\nour offer!|%s for our\n%s!", name, theirs, mine);

@@ -18,7 +18,10 @@
  * screen listing only those), and puts MegaMan's own up (a spare, then
  * the want from a list) or takes it down. A taken offer comes back
  * answered, both chips named: the poster's game checks the want before
- * its Deal. One trade a visit: the run keeps one swap until it is home. */
+ * its Deal. One trade a visit: the run keeps one swap until it is home.
+ * None on the week's dive (weekly.h): every diver keeps the standard
+ * setup's chips, the clerk says so and an offer that comes in is called
+ * off unheard of. */
 #include "trade_central.h"
 
 #include <stdio.h>
@@ -36,6 +39,7 @@
 #include "shop.h"
 #include "talk.h"
 #include "trade_words.h"
+#include "weekly.h"
 
 /* Trade Central's event flags (the Square's own map: its RAM is thrown away) */
 #define OFFER_FLAG 0x1494   /* the clerk's "Offer a chip" */
@@ -67,6 +71,7 @@ static struct {
 	bool listing;               /* the chat box's list open, not the order screen */
 	bool wanting;               /* the wants' list open, a post's second step */
 	bool traded;                /* a trade done this visit: one a visit */
+	bool closed;                /* on the week's dive: MegaMan's board offer taken down */
 	int mode;                   /* PICK_* */
 	int chosen;                 /* the chip picked on the order screen, -1 none yet */
 	uint32_t partner;
@@ -132,7 +137,8 @@ static void clerk(void) {
 	const TradeView *v = online_trade_view();
 	/* (the top bit set: never 0, so the first words are written alone in
 	 * the channel too, not the desk's empty archive) */
-	uint32_t now = 1u << 31 | (uint32_t)v->stage << 24 | (v->serial & 0xFFFF) << 8 | (uint32_t)C.s.peer_count << 1 | C.traded;
+	bool diving = weekly_on();
+	uint32_t now = 1u << 31 | (uint32_t)v->stage << 24 | (v->serial & 0xFFFF) << 8 | (uint32_t)C.s.peer_count << 1 | (C.traded || diving);
 	if (now == C.clerk || emu_read8(BN6_CHATBOX)) return;
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
@@ -141,6 +147,11 @@ static void clerk(void) {
 	int n = 3, flags[3] = { OFFER_FLAG, BOARD_FLAG, -1 };
 	ta_begin(&t);
 	bool first = true;
+	if (diving) {
+		ta_say(&t, FACE_PROG, trade_diving());
+		if (online_square_trade_say(out, ta_build(&t, out))) C.clerk = now;
+		return;
+	}
 	if (v->stage == TRADE_OFFERED) {
 		ta_script(&t);
 		chip_words(v->theirs, chip, sizeof chip);
@@ -399,7 +410,9 @@ static void news(void) {
 	chip_words(v->mine, mine, sizeof mine);
 	chip_words(v->theirs, theirs, sizeof theirs);
 	bool said = true;
-	if (v->stage == TRADE_OFFERED) said = talk_start(trade_heard(name_of(v->other), theirs), FACE_MEGAMAN);
+	/* (one called off unheard of: only its end, should it have been done) */
+	if (v->id == C.hushed && v->stage != TRADE_DONE) said = true;
+	else if (v->stage == TRADE_OFFERED) said = talk_start(trade_heard(name_of(v->other), theirs), FACE_MEGAMAN);
 	else if (v->stage == TRADE_ANSWERED && unwanted(v)) {
 		fprintf(stderr, "online: an answer to our board offer with %u %u, not its want: called off\n", v->theirs.id, v->theirs.code);
 		C.hushed = v->id;
@@ -449,6 +462,12 @@ static void chosen(void) {
 
 void trade_central_frame(const OnlineSnapshot *s) {
 	C.s = *s;
+	/* (on the week's dive, from the moment it starts: nothing trades) */
+	if (weekly_on()) {
+		if (!C.closed) C.closed = online_board_clear();
+		uint32_t id = online_trade_view()->id;
+		if (id != C.hushed && online_trade_cancel()) C.hushed = id;
+	}
 	clerk();
 	if (C.picking) watch();
 	bool shop = emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_SHOP;
