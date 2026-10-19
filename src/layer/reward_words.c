@@ -20,11 +20,9 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
  * 2026: the reward's words were far too many) */
 static int draft_take(TextArchive *t, int program, int color, int fit_flag, int taken_flag, int next) {
 	/* (every time: a returning playtester, told once runs before, left
-	 * one off the board for two acts; and whether L and R turn it, which
-	 * a playtester looked for here) */
-	char install[200];
-	const char *turns = navicust_color_turns(color);
-	snprintf(install, sizeof install, "Let's install it!%s%s", *turns ? "\n" : "", turns);
+	 * one off the board for two acts; which Spin turns it, and L and R,
+	 * are BN6's own, unsaid: the voice sweep, docs/voice/sweep/net.md) */
+	static const char install[] = "Let's install it!";
 	int fits = -1;
 	if (fit_flag) {
 		fits = ta_script(t);
@@ -197,7 +195,6 @@ int ta_gate_reward(TextArchive *t, const char *navi, int chip, const char *chip_
 	first = false;
 	ta_give_chip(t, chip, code, 1);
 	ta_got_chip(t, chip_name, code, &first);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 	ta_end(t);
 	return i;
 }
@@ -235,7 +232,6 @@ static int pick_three(TextArchive *t, int flag, const ScriptsVault *v, const cha
 		bool first = false;
 		ta_give_chip(t, v->chip[k], v->code[k], 1);
 		ta_got_chip(t, v->name[k], v->code[k], &first);
-		ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 		ta_flag_set(t, flag);
 		ta_end(t);
 	}
@@ -306,8 +302,8 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 	first = true;
 	ta_give_chip(t, g->chip, g->code, 1);
 	ta_got_chip(t, g->chip_name, g->code, &first);
-	/* (a new chip goes to the pack, as in BN6: the folder is the player's) */
-	ta_page(t, FACE_PROG, "IT'S IN YOUR PACK!\nADD IT TO YOUR\nFOLDER IN THE PET!", false);
+	/* (a new chip goes to the pack, as in BN6: the folder is the player's,
+	 * and BN6's own, unsaid) */
 	ta_flag_set(t, g->flag);
 	ta_end(t);
 	int programmed = ta_script(t);
@@ -320,7 +316,6 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 	ta_program_name(t, g->program);
 	ta_text(t, "\"!!");
 	ta_wait(t);
-	ta_page(t, FACE_PROG, "TO INSTALL IT,OPEN\nMEGAMAN IN THE PET,\nTHEN NAVICUST!", false);
 	ta_flag_set(t, g->flag);
 	ta_end(t);
 
@@ -335,8 +330,7 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 	bool extras = g->head_start || g->comfort;
 	if (g->brief) ta_pages(t, extras ? "YOU'RE BACK,MEGAMAN!" : "YOU'RE BACK,MEGAMAN!|PICK YOUR GIFT!",
 		FACE_PROG, &first);
-	else ta_pages(t, "HELLO,MEGAMAN!|I'M DR.HIKARI'S DIVE SUPPORT PROGRAM!|"
-		"EVERY DIVE STARTS FROM SCRATCH...|SO HERE'S A GIFT!", FACE_PROG, &first);
+	else ta_pages(t, "HELLO,MEGAMAN!|I'M DR.HIKARI'S DIVE SUPPORT PROGRAM!|SO HERE'S A GIFT!", FACE_PROG, &first);
 	if (g->head_start) {
 		/* the head-start helper (docs/META.md) */
 		ta_page(t, FACE_PROG, "A HEAD START? SURE!\nTAKE THESE FIRST!", false);

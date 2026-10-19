@@ -34,6 +34,13 @@ and a summary: per file, domain and speaker the counts, and per speaker
 our numbers beside BN6's from VOICE.md's table (The numbers): words a box,
 "!!" and "..." a box, stutters, openers. Numbers only of BN6.
 
+For the review's page it writes the lines' order too: `conversations`, a
+function's or table's lines together with a title from its comment, in
+the order a run meets the areas (AREAS), and `sweep`, the voice sweep's
+logs (docs/voice/sweep/*.md) read row by row, each row's lines found in
+today's catalog by their words. The logs are inputs: a change to one makes
+the catalog stale as a words file does.
+
   python3 tools/voice_catalog.py          write docs/voice/catalog.json
   python3 tools/voice_catalog.py --check  write nothing: fail when the file
                                           differs from what it would write
@@ -1058,6 +1065,197 @@ def guardian_names():
         return {int(n): name for n, name in re.findall(r'\[(\d+)\]\s*=\s*\{\s*"(\w+)"', f.read())}
 
 
+# ---- the review's order: conversations, and the sweep's logs ----
+
+# The areas in the order a run meets them, for the review's rail; an area
+# not named here follows, by name.
+AREAS = ['Title', 'The town', 'AsterLand and the Academy', 'Requests', "Lan's HP and the gate", 'Briefing',
+         'The story', 'Layers: dealers and finds', 'Layers: services', 'Layers: rewards', 'Layers: locks',
+         'Bystanders', 'Guardians', 'Super bosses', 'Chaud and ProtoMan', 'NaviCust', 'DarkChips', 'Powers',
+         'Lessons', 'Where the nets meet', 'The PET', 'Net Square', 'Trade Central', 'Arena',
+         'The second screen', 'The ROMs screen', 'SAVES', 'Statistics', 'Other']
+# A table longer than this whose rows are a guardian's each (`who`) is a
+# conversation a guardian.
+SPLIT = 30
+SWEEP = 'docs/voice/sweep'
+
+
+def readable(name):
+    """A function's or table's name as words: ta_heal.hello -> Heal: hello."""
+    parts = [re.sub(r'^ta_', '', p).replace('_', ' ').strip() for p in name.split('.')]
+    text = ': '.join(p for p in parts if p)
+    return text[:1].upper() + text[1:]
+
+
+def conversation_title(c, name):
+    """A conversation's title: the first clause of its comment (in the .c,
+    else its header) where it reads as one, after its name as words where
+    the clause leans on the code around it ("Its people")."""
+    for text in (c.get('comment'), c.get('header')):
+        if not text or text.startswith(('...', '(')):
+            continue
+        first = re.split(r':\s|;\s|\.\s| \(| — ', text, maxsplit=1)[0].strip(' .,-')
+        if not 6 <= len(first) <= 90:
+            continue
+        if re.match(r'(What )?(its|their|his|her|the same|same|as above)\b', first, re.I):
+            return f'{readable(name)}: {first[:1].lower()}{first[1:]}'
+        return first[:1].upper() + first[1:]
+    return readable(name)
+
+
+def conversations(entries, containers):
+    """The lines as the review reads them: a function's or a table's lines
+    together, in the code's order (a long table of guardians' rows, a
+    guardian's together), the areas in AREAS' order, a file's in DOMAINS'
+    order and then by its lines."""
+    sizes = Counter(f"{e['id'].split(':')[0]}:{e['container']}" for e in entries)
+    convs = {}
+    for e in entries:
+        key = f"{e['id'].split(':')[0]}:{e['container']}"
+        split = sizes[key] > SPLIT and e.get('who')
+        cid = f"{key}@{e['who']}" if split else key
+        c = convs.get(cid)
+        if c is None:
+            meta = containers.get(key, {})
+            title = conversation_title(meta, e['container'])
+            c = convs[cid] = {'id': cid, 'container': key, 'title': f"{e['who']}: {title}" if split else title,
+                              'when': meta.get('comment') or meta.get('header') or '', 'domain': e['domain'],
+                              'file': e['file'], 'line': e['line'], 'speakers': [], 'lines': []}
+        c['lines'].append(e['id'])
+        c['line'] = min(c['line'], e['line'])
+        for s in e['speakers']:
+            if s not in c['speakers']:
+                c['speakers'].append(s)
+    stems = list(DOMAINS)
+
+    def order(c):
+        d, stem = c['domain'], c['container'].split(':')[0]
+        return (AREAS.index(d) if d in AREAS else len(AREAS), d,
+                stems.index(stem) if stem in stems else len(stems), stem, c['line'], c['id'])
+    return sorted(convs.values(), key=order)
+
+
+def table_cells(row):
+    """A Markdown table's row as its cells (`\\|` is a | of the cell's)."""
+    s = row.strip()
+    s = s[1:] if s.startswith('|') else s
+    s = s[:-1] if s.endswith('|') and not s.endswith('\\|') else s
+    cells, cur, i = [], '', 0
+    while i < len(s):
+        if s.startswith('\\|', i):
+            cur, i = cur + '|', i + 2
+        elif s[i] == '|':
+            cells.append(cur.strip())
+            cur, i = '', i + 1
+        else:
+            cur, i = cur + s[i], i + 1
+    cells.append(cur.strip())
+    return cells
+
+
+def sweep_ids(cell):
+    """The ids a log's cell names: `a:b:1`, then `:2` (the same function's),
+    `c:0` (the same file's) or `case29.0` (a range's end, `a:b:case1.0`-`case29.0`)."""
+    ids = []
+    for tok in re.findall(r'`([^`]+)`', cell):
+        if ids and tok.startswith(':'):
+            tok = ids[-1].rsplit(':', 1)[0] + tok
+        elif ids and tok.count(':') == 1:
+            tok = ids[-1].split(':', 1)[0] + ':' + tok
+        elif ids and ':' not in tok:
+            tok = ids[-1].rsplit(':', 1)[0] + ':' + tok
+        if tok.count(':') == 2 and tok not in ids:
+            ids.append(tok)
+    return ids, '`-`' in cell
+
+
+def plain_words(text):
+    text = re.sub(r'\{[^{}]*\}|@[A-Z]\b|\*\*|`', ' ', text.replace('|', ' '))
+    return re.findall(r"[a-z0-9']+", text.lower())
+
+
+def sweep_live(row, by_container):
+    """The lines of today's catalog a log's row is about. The logs' ids are
+    the catalog's before the sweep, and a cut moves the count of the lines
+    after it, so each id's own function is searched for the words logged:
+    the line with the same words first, else the closest; a cut line
+    matches only what is left of it (a cut in part)."""
+    ids, cut = row['ids'], row['status'] == 'cut'
+    if row.get('range'):
+        return [e['id'] for e in by_container.get(ids[0].rsplit(':', 1)[0], [])]
+    segments = row['text'].split(' / ')
+    if len(ids) == 1 or len(segments) != len(ids):
+        segments = [row['text']] * len(ids)
+    live = []
+    for old, seg in zip(ids, segments):
+        want = Counter(plain_words(seg))
+        best, score = None, 0.0
+        for e in by_container.get(old.rsplit(':', 1)[0], []):
+            have = Counter(plain_words(e['text']))
+            if e['id'] in live or not have or not want or (cut and sum(have.values()) < 3):
+                continue
+            common = sum((want & have).values())
+            if want == have:
+                s = 2.0
+            elif cut:
+                s = common / sum(have.values())
+            else:
+                s = common / min(sum(want.values()), sum(have.values()))
+            s += 0.001 * (e['id'] == old)
+            if s > score:
+                best, score = e, s
+        if best and score >= (0.8 if cut else 0.6):
+            live.append(best['id'])
+    return live
+
+
+def sweep(entries):
+    """The voice sweep's logs (docs/voice/sweep/*.md), their Cut and Noted
+    tables read row by row: the group (the log's name), the ids as the
+    catalog had them, the line as it was, why (and where, a Noted table's
+    fourth column), and the lines it is about today (`live`), for the
+    review's Sweep view."""
+    by_container = {}
+    for e in entries:
+        by_container.setdefault(e['id'].rsplit(':', 1)[0], []).append(e)
+    rows = []
+    for path in sorted(glob.glob(os.path.join(ROOT, SWEEP, '*.md'))):
+        group = os.path.splitext(os.path.basename(path))[0]
+        status, header = None, None
+        with open(path, encoding='utf-8') as f:
+            for raw in f:
+                line = raw.rstrip('\n')
+                if line.startswith('## '):
+                    head = line[3:].strip().lower()
+                    status = 'cut' if head.startswith('cut') else 'noted' if head.startswith('note') else None
+                    header = None
+                    continue
+                if not line.startswith('|'):
+                    header = None
+                    continue
+                cells = table_cells(line)
+                if header is None:
+                    header = cells if cells[0].lower() == 'id' else []
+                    continue
+                if not status or not header or set(''.join(cells)) <= set('-: '):
+                    continue
+                ids, rng = sweep_ids(cells[0])
+                if not ids or len(cells) < 3:
+                    continue
+                row = {'group': group, 'status': status, 'id': ids[0], 'ids': ids,
+                       'text': cells[1].replace('`', ''), 'why': cells[2]}
+                if len(cells) > 3 and cells[3]:
+                    row['where'] = cells[3]
+                if rng:
+                    row['range'] = True
+                rest = re.sub(r'`[^`]*`', '', cells[0]).strip(' ,-')
+                if re.sub(r'\W|and', '', rest):
+                    row['scope'] = rest
+                row['live'] = sweep_live(row, by_container)
+                rows.append(row)
+    return rows
+
+
 def catalog():
     guardians = guardian_names()
     entries, files, containers = [], {}, {}
@@ -1093,6 +1291,8 @@ def catalog():
         'flags': FLAGS,
         'files': files,
         'containers': containers,
+        'conversations': conversations(entries, containers),
+        'sweep': sweep(entries),
         'summary': {
             'lines': len(entries), 'speech': sum(e['kind'] == 'speech' for e in entries),
             'boxes': sum(len(e['boxes']) for e in entries if e['kind'] == 'speech'),
@@ -1109,10 +1309,12 @@ def render(cat):
     of its own (its keys sorted), so that a reworded line is one line of
     the diff."""
     cat = dict(cat)
-    lines = cat.pop('lines')
-    head = json.dumps(cat, indent=1, sort_keys=True, ensure_ascii=False)
-    body = ',\n'.join('  ' + json.dumps(e, sort_keys=True, ensure_ascii=False, separators=(',', ':')) for e in lines)
-    return head[:-2] + ',\n "lines": [\n' + body + '\n ]\n}\n'
+    lists = [(k, cat.pop(k)) for k in ('conversations', 'sweep', 'lines') if k in cat]
+    head = json.dumps(cat, indent=1, sort_keys=True, ensure_ascii=False)[:-2]
+    for k, items in lists:
+        body = ',\n'.join('  ' + json.dumps(e, sort_keys=True, ensure_ascii=False, separators=(',', ':')) for e in items)
+        head += f',\n "{k}": [\n' + body + '\n ]'
+    return head + '\n}\n'
 
 
 def main():

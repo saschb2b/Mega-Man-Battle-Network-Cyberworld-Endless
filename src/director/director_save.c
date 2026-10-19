@@ -318,7 +318,6 @@ bool director_resume(void) {
 			flag_clear(LAYER_VAULT_FLAG);
 			flag_clear(LAYER_OFFICIAL_FLAG);
 			flag_clear(LAYER_DUEL_CALLED_FLAG);
-			flag_clear(LAYER_RUSH_TOLD_FLAG);
 			flag_clear(LAYER_PCODE_FLAG);
 			flag_clear(LAYER_NUMBER_SEALED_FLAG);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }

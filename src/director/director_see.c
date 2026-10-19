@@ -104,8 +104,6 @@ static void see_counts(void) {
 	seen.counts_a = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
 }
 
-/* (any Mystery Data MegaMan knows of on the layer: the counters show) */
-bool counts_any(void) { return seen.md_known[0] + seen.md_known[1] + seen.md_known[2] > 0; }
 
 /* Whether the layer's lock k (a Link Navi obstacle, a security cube, a
  * skull or number door: layer.block[k]) still stands: its present flag,

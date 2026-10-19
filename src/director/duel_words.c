@@ -85,9 +85,10 @@ void verdict_words(char *out, int size, const DuelVerdict *v) {
 	/* (what his respect opens: docs/RIVAL.md) */
 	if (v->after > v->before && v->after == 1) {
 		ADD("@C You've earned my first clearance,Lan.|@C The official Chip Orders are open to you now.|");
-		/* (and the TagChip system, for good: issue #51) */
-		ADD("@C And a NetBattler's trick. The TagChip system.|@C Tag two chips with SELECT in your Folder's EDIT.|"
-			"@C They'll come to your hand together.|@C As long as they total under 60 MB.|");
+		/* (and the TagChip system, for good: issue #51; BN6's own, so
+		 * named and not explained, its button with it, docs/VOICE.md, What
+		 * nobody says) */
+		ADD("@C And a NetBattler's trick. The TagChip system.|");
 	}
 	else if (v->after > v->before) ADD("@C My full clearance,Lan.|@C Every official gate opens for you now.|");
 	ADD("@C That's %d-%d between us.", profile.duel_won, profile.duel_lost);

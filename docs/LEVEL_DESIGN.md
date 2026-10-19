@@ -1014,10 +1014,9 @@ a layer gives it what its own maps do.
 - **The key:** RushFood, sold by the Net Dealer where the act holds gaps
   from his layer on (one for each gap, and as many more as the longest
   needs held), at 300 zenny in act 1 and 100 more an act (BN6's seller asks
-  3000). The dealer names the gap, and MegaMan names it when he first
-  comes near its stand: what calls Rush and how many he needs, or, with
-  enough held, to press A at the edge (BN6 answers A without them with a
-  sound alone).
+  3000). The dealer names the gap and its width; how Rush comes is BN6's
+  own, unsaid (MegaMan's lesson at its stand went in the voice sweep of
+  19 October 2026, docs/voice/sweep/net.md).
 
 Over the tests' 300 layers, 40 hold a gap, 55 panels in all (the act's
 budget shared with more kinds of piece since: 62 and 91 before the
@@ -1240,18 +1239,17 @@ A player meets each set piece without a manual, the lock and its key said
 together:
 
 - **At the piece:** a Link Navi obstacle, a cube and the Undernet's doors
-  name themselves and their key at A; Rush's bones are named when MegaMan
-  first comes near (`rush_hint`); an invisible path has its navi.
+  name themselves and their key at A; an invisible path has its navi.
 - **From the dealer:** he names each key on his list and where its lock
   lies (`dealer_keys`: the Unlocker, RushFood, the WWW-ID).
 - **From L** (`status_words`): on a layer's first L, MegaMan senses its set
   pieces with its services ("I sense a Net Dealer, purple Mystery Data and
-  bone panels here!"), and the first time a profile meets a kind he says
-  what it is and what opens it (`piece_lessons`, `profile.pieces_taught`),
-  as he explains the map's violet marks once. Never an invisible path.
+  bone panels here!"); what each is and what opens it is BN6's own or the
+  piece's at A (his lessons on them and on the map's violet marks went in
+  the voice sweep, docs/voice/sweep/net.md). Never an invisible path.
   Where he senses Mystery Data behind a lock, he says where the lock
-  stands, as he does ProtoMan and the heal ("The cube's straight down,
-  far off, though the way there winds: the violet mark on the map.").
+  stands, as he does ProtoMan and the heal ("The cube's straight down,far
+  off!").
 - **On the map** (`map_locks`, SELECT's and the 3DS's bottom screen): every
   lock still shut, an obstacle, a cube or a door, is an Event mark as the
   gates are, a ring until its panel is seen, gone once it opens; the data

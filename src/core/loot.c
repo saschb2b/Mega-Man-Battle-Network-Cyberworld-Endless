@@ -377,37 +377,9 @@ int loot_deep[2] = { -1, -1 };
 int loot_older_share;
 bool loot_visitors_always;
 
-/* (at every version the act's battles can aim for, and no roll: a roll
- * here, as MegaMan's status named the area's viruses, moved the run's
- * next random numbers whenever L was pressed in acts 3 and 5) */
-static uint64_t bn6_families_here(int depth, int biome) {
-	uint64_t in = 0;
-	int lo, hi;
-	pacing_virus_versions(depth, false, &lo, &hi);
-	for (int v = lo; v <= hi; ++v) {
-		const Formation *list;
-		static int8_t fit[MAX_FIT];
-		int n = fielded(depth, biome, v, &list, fit);
-		for (int i = 0; i < n && i < MAX_FIT; ++i)
-			if (fit[i] >= 0) in |= families_of(&list[i]);
-	}
-	int thirds, other = shares_with(biome, &thirds);
-	if (other >= 0) in |= bn6_families_here(depth, other);
-	return in;
-}
-
-/* (a territory's its own records'; the deep's both nets') */
-uint64_t loot_families_here(int depth, int biome) {
-	if (loot_deep[0] < 0 && loot_territory >= 0) return xterritory_families(depth, loot_territory, NULL);
-	uint64_t in = bn6_families_here(depth, biome);
-	for (int k = 0; k < 2; ++k)
-		if (loot_deep[k] >= 0) in |= xterritory_families(depth, loot_deep[k], NULL);
-	return in;
-}
-
 /* What each virus family the area's plain random battles can hold at
  * `depth` is weak to, as they field it (a bit per ELEM_* in weak[family]):
- * loot_families_here's battles, each at its version. */
+ * the area's plain random battles, each at its version. */
 static void bn6_weak_kinds(int depth, int biome, uint16_t weak[64]) {
 	int lo, hi;
 	pacing_virus_versions(depth, false, &lo, &hi);

@@ -125,12 +125,15 @@ beat: ProtoMan in battle, his own AI and his attacks.
   EMULATION.md): his attacks
   stay his 1800 HP version's, some ten times a guardian's damage a
   second, and at the band's top (1000) a playtester's act-3 MegaMan, 460
-  HP and chips of 120 at most, ran after one hand (session 50). MegaMan
-  says how he fights as the netbattle is offered: his shield and what
-  gets past it (chips that lock on, Navi chips), the panels he lights
-  before he dashes in to slash, and the one panel, MegaMan's own, that
-  stands for a WideSword down its whole column (a playtester asked for
-  his tells, then met the cross, a diagonal, a row and that one panel).
+  HP and chips of 120 at most, ran after one hand (session 50). His tells
+  (his shield and what gets past it, the panels he lights before he
+  dashes in to slash, the one panel, MegaMan's own, that stands for a
+  WideSword down its whole column: a playtester asked for them, then met
+  the cross, a diagonal, a row and that one panel) are MegaMan's battle
+  data on ProtoMan's copy, in Dad's mail once it has been fought; MegaMan
+  no longer recites them as the netbattle is offered (the voice sweep of
+  19 October 2026: MegaMan never coaches, docs/VOICE.md, What nobody
+  says; docs/voice/sweep/story.md).
 - **A real fight.** BN6 deletes MegaMan in a netbattle as anywhere: its
   GAME OVER starts inside the battle, as he falls (tried: the battle
   options' bit 0x08 is a link battle, which waits for a partner; bit
@@ -167,7 +170,8 @@ himself. Beat him, and my full clearance is yours.").
   ProtoMan, the last in a netbattle with him. We have 1."
 - **Level one also brings the TagChip system** (issue #51, docs/META.md):
   BN6's TagChip key item in every run after, the folder EDIT's "Choose
-  TagChip"; Chaud says so with the clearance.
+  TagChip"; Chaud says so with the clearance, naming it, not explaining
+  BN6's own system or its button (docs/VOICE.md, What nobody says).
 - **Level one: an official Chip Order.** Three standard chips the Library
   holds (held in any run), as BN6's Chip Order orders only chips seen,
   one to take, in the folder's codes where they come in them: its
