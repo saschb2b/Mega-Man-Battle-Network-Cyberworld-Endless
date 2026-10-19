@@ -1349,8 +1349,8 @@ static void test_talk(void) {
 			run.cross = (uint8_t)cross;
 		}
 	}
-	/* (ProtoMan's tip behind MegaMan's first words, whole: a longer one
-	 * lost its last clause to ta_pages' buffer in a capture) */
+	/* (ProtoMan's terms, whole: a longer one lost its last clause to
+	 * ta_pages' buffer in a capture) */
 	char terms[GUARDIAN_TERMS_MAX];
 	CHECK(guardian_netbattle_terms(terms, sizeof terms) < (int)sizeof terms, "the netbattle's terms are cut: \"%s\"", terms);
 	check_talk("the netbattle's terms", terms);
@@ -4652,10 +4652,8 @@ static void super_words(void) {
 		for (int f = 0; f < 3; ++f) {
 			snprintf(what, sizeof what, "super_defeat(%d, %d)", navi, forms[k][f]);
 			check_talk(what, super_defeat(navi, forms[k][f]));
-			for (int first = 0; first < 2; ++first) {
-				snprintf(what, sizeof what, "super_reward_words(%d, %d, %d)", navi, forms[k][f], first);
-				check_talk(what, super_reward_words(navi, forms[k][f], first));
-			}
+			snprintf(what, sizeof what, "super_reward_words(%d, %d)", navi, forms[k][f]);
+			check_talk(what, super_reward_words(navi, forms[k][f]));
 			/* (the card's lines, as long as a guardian's at most) */
 			const char *top, *sub;
 			super_card(navi, forms[k][f], k ? 3 * CYCLE_LAYERS : 8, &top, &sub);

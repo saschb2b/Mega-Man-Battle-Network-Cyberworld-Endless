@@ -1428,10 +1428,13 @@ the area's pool has one (`run_new`: a guardian met before is rolled
 again, eight times at most), so a veteran still meets new ones (a
 playtester who had met eight of seventeen met two new ones in every
 sample run). Its gain is said where it
-happens: a first win's Guardian Data talk adds "And his battle data,
-Lan. Next time, we'll know how he fights!", and a run lost to a guardian
-at the first meeting closes on Lan's "We've got his battle data now!", so
-a death to something new leaves something for the next run.
+happens: a first win over one of BN6's guardians brings Dad's mail with
+the battle data ("Lan,mail from Dad! Our battle data on DiveMan!"; for
+none does anyone explain what it is for:
+the briefing simply knows him next time, docs/VOICE.md, What nobody
+says), and a run lost to a guardian at the first meeting closes on Lan's
+"We've got his battle data now!", so a death to something new leaves
+something for the next run.
 
 ## The title's marks
 
