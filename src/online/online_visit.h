@@ -33,6 +33,7 @@ typedef enum {
 	VISIT_END_REMOVED,       /* a moderator removed MegaMan */
 	VISIT_END_LOST,          /* the connection dropped in the Square */
 	VISIT_END_BROKEN,        /* the Square could not be built */
+	VISIT_END_DIVE,          /* home to dive the week's net (square_week.h): no gate after */
 } VisitEnd;
 
 /* The visit to server `url` as `name`, with this server's identity: the

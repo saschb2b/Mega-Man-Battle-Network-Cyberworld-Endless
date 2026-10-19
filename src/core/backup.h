@@ -16,6 +16,10 @@
 #define BACKUP_MAX (16u << 20)
 #define BACKUP_MANIFEST "savedata/transfer.manifest"
 #define BACKUP_FORMAT 2
+/* Every progress file of a save slot in savedata/, by its name: the
+ * normal slot's, and the week's net's each after "weekly-" (weekly.h) */
+#define SAVE_PROGRESS_NAMES 13
+extern const char *const save_progress_names[SAVE_PROGRESS_NAMES];
 
 typedef enum {
 	BACKUP_OK, BACKUP_DAMAGED, BACKUP_NEWER_FORMAT, BACKUP_NEWER_BUILD,

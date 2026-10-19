@@ -1,15 +1,15 @@
-# Net Square protocol v5
+# Net Square protocol v6
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v5`.
+`/presence` with subprotocol `cyberworld.presence.v6`.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
 | HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1 (all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
-| WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count |
+| WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
 | SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; no other bit) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
@@ -30,9 +30,11 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with (0 under BN6's rules), so that a ready apart is told by its cause (a game that sends none is told the plain stop) |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
+| WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
+| WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
 
-HELLO's fixed prefix is 76 bytes, WELCOME is 32, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 9, ARENA_STATE 29 and OFFER 5. The
+HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
+TRADE_STATE 32, ARENA 9, ARENA_STATE 29, OFFER 5 and WEEK_POST 17. The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -120,6 +122,20 @@ and business as a proposal's; the trade begins answered, both chips
 named, and goes on as any (both accept, the server commits). The
 poster's game checks that the chip meets his want and cancels it
 otherwise.
+
+The week's net (docs/ONLINE.md): every Monday 00:00 UTC a server
+begins a week; its seed is the first four bytes of HMAC-SHA256(the
+server's identity secret, "week" and the week's number as a u32), 1
+where those are 0, so each server has its own. A WEEK_POST is taken
+when its week is this one or the last, its seed that week's, its layer,
+act and flags as above and its hash not zero; else NOTICE 23 (that
+week's net is closed), 24 (not that week's net), 25 (the dive does not
+add up) or 26 (a moderator took that week's post down). The server keeps
+one entry per public identity and week, the best (deeper, then won,
+then fewer minutes, then the earlier post), and answers every post with
+a WEEK_BOARD, to every player where the Board changed. A WEEK_BOARD
+follows every WELCOME. Entries are claims for display: the server checks
+only their shape, and nothing is given for one.
 
 The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.

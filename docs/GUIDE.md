@@ -759,8 +759,8 @@ the ring stand raised. A greeter Mr.Prog calls out who logs in, two
 Navis stroll about and chat about who's here and what just happened
 (and every three minutes they parade round the landmark: walk with them),
 and A on a tree, the landmark, the sign or the board says what it is
-(the board lists who's here, the last trade and NetBattle, and the
-trade offers up). Say
+(the board lists who's here, the last trade and NetBattle, the
+trade offers up and this week's deep net). Say
 something or emote together with another player round the landmark or
 on the stage, and the Square cheers.
 
@@ -807,6 +807,21 @@ In the Square:
   of your spares that is what they want; you both see the pair and say
   Deal, as in any trade. One trade a visit: the chip comes home with
   you before the next.
+- **The week's deep net**: the greeter Mr.Prog in the log-in plaza posts
+  a net that changes every Monday (00:00 UTC). Everyone on that server
+  dives the same net that week, from the same start: the short net, the
+  Standard folder, threat 0, no helpers and no Cross, and nothing your
+  other runs unlocked. Say Yes to him (the cursor starts on No) and
+  MegaMan heads home and the dive begins in Lan's room, as a new game
+  does. Your run in progress waits in its own save, untouched: the
+  title's CONTINUE is always that run, and when the dive ends, won or
+  deleted, you are back with it. To go on with an unfinished dive, visit
+  the Square again and talk to the greeter: Keep diving, Start over or Not
+  now. How deep you got is posted on the board at your next visit to the
+  Square: the week's eight deepest dives, your own best and its place,
+  and last week's three. Dive as often as you like; your best counts.
+  The board says the layers are as players report them, and nothing is
+  won for one. A dive unlocks nothing and counts in none of your records.
 - **R**, or the pad you arrived by, takes you home.
 
 Talk to the gate's keeper to change your name or the server: the

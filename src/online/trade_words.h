@@ -76,6 +76,8 @@ const char *trade_posted(const char *chip, int want);
 const char *trade_post_down(void);
 /* ... one trade a visit: MegaMan has his, to take home first. */
 const char *trade_traded(void);
+/* ... and to a Navi on the week's dive: no trades till it ends. */
+const char *trade_diving(void);
 /* MegaMan as a Navi took the offer he posted: who, and what for what. */
 const char *trade_board_review(const char *name, const char *mine, const char *theirs);
 

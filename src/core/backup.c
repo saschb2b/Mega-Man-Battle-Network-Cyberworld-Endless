@@ -52,14 +52,20 @@ bool backup_write_file(const char *path, const uint8_t *bytes, size_t n) {
 	return ok;
 }
 
+const char *const save_progress_names[SAVE_PROGRESS_NAMES] = {
+	"profile.sav", "rivals.sav", "battle.sav", "run.sav", "run.state", "run.make", "run.area",
+	"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board"
+};
+
+/* (the normal slot's files, the week's net's beside them after "weekly-",
+ * and weekly.sav, its record: weekly.h, docs/SAVES.md) */
 bool backup_progress_name(const char *name) {
-	static const char *const names[] = {
-		"profile.sav", "rivals.sav", "battle.sav", "run.sav", "run.state", "run.make", "run.area",
-		"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board"
-	};
 	if (strncmp(name, "savedata/", 9)) return false;
-	for (size_t i = 0; i < sizeof names / sizeof *names; ++i)
-		if (!strcmp(name + 9, names[i])) return true;
+	const char *file = name + 9;
+	if (!strcmp(file, "weekly.sav")) return true;
+	if (!strncmp(file, "weekly-", 7)) file += 7;
+	for (size_t i = 0; i < SAVE_PROGRESS_NAMES; ++i)
+		if (!strcmp(file, save_progress_names[i])) return true;
 	return false;
 }
 

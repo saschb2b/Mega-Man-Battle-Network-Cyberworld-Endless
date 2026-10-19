@@ -1436,6 +1436,23 @@ says), and a run lost to a guardian at the first meeting closes on Lan's
 "We've got his battle data now!", so a death to something new leaves
 something for the next run.
 
+## The week's net and the meta layer (19 October 2026, issue #127)
+
+A dive of the Net Square's week (docs/ONLINE.md, The week's net) is a
+run in a save slot of its own, and the meta layer stays out of it both
+ways. It starts from a standard profile made from the player's: his
+settings and what MegaMan has told him carry over (tips are not said
+twice), and nothing a run earns does: no threat rungs, folders, Cross
+starts, BeastOut, Spins, programs found, compression codes, rival
+clearance or title marks; its setup is the short net's standard one
+(Standard folder, threat 0, no helpers, no Cross). Its end opens
+nothing (`meta_run_quiet`), counts in none of the normal runs' records
+and is posted to the Board instead. The reasoning: the dive is the same
+contest for everyone that week (the Square's dialectic, the run's
+integrity against the community's generosity), and the meta layer's
+stance, variety and not power, holds both ways: a dive can't be farmed
+for unlocks, and unlocks can't win a dive.
+
 ## The title's marks
 
 BN6 draws marks over its title for what a save has done: its ending, its

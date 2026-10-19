@@ -25,8 +25,22 @@ _Static_assert(sizeof(Run) == 112, "Run changed: old saves no longer read as the
 
 Profile profile;
 
+/* (the week's net's slot, weekly.h: its files beside the others in
+ * savedata/, each name after "weekly-", so the carrier, its staged install
+ * and Undo keep one flat folder; weekly.sav, the slot's own record, is
+ * the normal slot's) */
+static bool slot_weekly;
+
+void save_slot(bool weekly) {
+	save_queue_wait();   /* (a write queued for the other slot, written first) */
+	slot_weekly = weekly;
+}
+
+bool save_slot_weekly(void) { return slot_weekly; }
+
 void save_path(char *out, size_t n, const char *name) {
-	snprintf(out, n, "%s/savedata/%s", g_data_dir, name);
+	bool own = slot_weekly && strncmp(name, "weekly", 6) != 0;
+	snprintf(out, n, "%s/savedata/%s%s", g_data_dir, own ? "weekly-" : "", name);
 }
 
 static uint32_t checksum(const void *p, size_t n) {
@@ -83,10 +97,14 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 
 void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
+void profile_load(void) {
+	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
+}
+
 void save_init(void) {
 	backup_recover(g_data_dir);
 	legacy_move_state();
-	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
+	profile_load();
 	if (!profile.music_volume) profile.music_volume = 9;
 	if (!profile.sfx_volume) profile.sfx_volume = 9;
 	audio_set_volume(profile.music_volume - 1, profile.sfx_volume - 1);

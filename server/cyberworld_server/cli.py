@@ -26,7 +26,7 @@ async def run(args):
     seed = args.seed if args.seed is not None else settings.getint("seed", 120)
     state_dir = args.state_dir or settings.get("state_dir", "server-data")
     if args.admin:
-        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes), indent=2))
+        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes, args.week), indent=2))
         return
     if settings.getboolean("free_text", False):
         raise ValueError("free_text is unavailable: quick phrases and emotes only")
@@ -69,6 +69,7 @@ def main():
     parser.add_argument("--identity", help="Public profile identity from --admin list")
     parser.add_argument("--reason", default="", help="Local moderation note, not sent to players")
     parser.add_argument("--minutes", type=int, help="How long a kick refuses the profile (default 10)")
+    parser.add_argument("--week", type=int, help="With --admin hide: the week whose Board entry is taken down (default this week)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     try:

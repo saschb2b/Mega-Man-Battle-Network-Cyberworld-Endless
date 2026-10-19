@@ -12,6 +12,7 @@ import time
 from . import protocol, websocket
 from .arena import Arena
 from .trade import Trades
+from .week import Weeks
 from .identity import IdentityStore
 
 LOG = logging.getLogger("cyberworld.server")
@@ -67,6 +68,7 @@ class Server:
         self.listener = self.ticker = None
         self.trading, self.arena_on = trading, arena
         self.trades, self.arena = Trades(self), Arena(self)
+        self.weeks = Weeks(self)
 
     def event(self, kind, **fields):
         entry = dict(event=kind, **fields)
@@ -126,6 +128,7 @@ class Server:
             player = self.join(writer, *protocol.read_hello(data))
             await self.welcome(player)
             await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
+            await self.weeks.send(player)
             await self.serve_player(reader, player)
         except protocol.ProtocolError as exc:
             self.event("reject", reason=str(exc), code=exc.code)
@@ -245,6 +248,8 @@ class Server:
             await self.trades.offer(player, data)
         elif data and data[0] == protocol.SPEC["arena"]:
             await self.arena.handle(player, data)
+        elif data and data[0] == protocol.SPEC["week_post"]:
+            await self.weeks.handle(player, data)
         else:
             raise protocol.ProtocolError("Unknown or out-of-order message")
 
@@ -264,8 +269,10 @@ class Server:
         return 0
 
     async def welcome(self, player):
+        week, week_seed = self.weeks.current()
         await websocket.send(player.writer, protocol.WELCOME.pack(protocol.SPEC["welcome"], self.seed,
-                             player.id, self.tick_hz, self.capacity, player.channel, player.identity, self.max_channels))
+                             player.id, self.tick_hz, self.capacity, player.channel, player.identity, self.max_channels,
+                             week_seed, week))
 
     async def notice(self, player, code, text):
         await websocket.send(player.writer, struct.pack("!BH", protocol.SPEC["notice"], code) + text.encode("ascii")[:96])

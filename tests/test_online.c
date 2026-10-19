@@ -7,22 +7,36 @@
 
 #include "online_motion.h"
 #include "online_people.h"
+#include "online_transport.h"
+#include "online_week.h"
 #include "online_wire.h"
 #include "platform.h"
 #include "square_life_words.h"
 #include "square_plan.h"
+#include "square_week_words.h"
 
 char g_data_dir[512];
 static unsigned persists;
 void platform_persist(void) { ++persists; }
+/* (the week's post, online_week.c: what would go to the server) */
+static uint8_t sent[64];
+static size_t sent_size;
+bool online_transport_send(const uint8_t *data, size_t size) {
+	sent_size = size < sizeof sent ? size : sizeof sent;
+	memcpy(sent, data, sent_size);
+	return true;
+}
 
 static void welcome(OnlineSnapshot *out) {
-	uint8_t bytes[32] = { ONLINE_WELCOME };
+	uint8_t bytes[ONLINE_WELCOME_BYTES] = { ONLINE_WELCOME };
 	online_put32(bytes + 1, 120); online_put32(bytes + 5, 1);
 	online_put16(bytes + 9, 20); bytes[11] = 8;
 	online_put16(bytes + 12, 1); bytes[14] = 99; online_put16(bytes + 30, 8);
+	/* (protocol v6: the week's net, its seed and number) */
+	online_put32(bytes + 32, 0xF521FE36u); online_put16(bytes + 36, 2963);
 	assert(online_wire_message(bytes, sizeof bytes, 100, out));
 	assert(out->connected && out->channel == 1 && out->channels == 8 && out->identity[0] == 99);
+	assert(out->week_seed == 0xF521FE36u && out->week == 2963);
 	for (size_t size = 0; size < sizeof bytes; ++size) assert(!online_wire_message(bytes, size, 100, out));
 	bytes[11] = 9; assert(!online_wire_message(bytes, sizeof bytes, 100, out));
 }
@@ -224,11 +238,41 @@ static void referee(void) {
 	assert(!strcmp(square_referee_bark(3, "Alpha"), "WHAT A BOUT!"));
 }
 
+/* the week's net (issue #127): WEEK_BOARD read and refused where it is
+ * malformed, a post's bytes, the Board's words and its dates */
+static void week(void) {
+	uint8_t m[6 + 4 * ONLINE_WEEK_ENTRY_BYTES] = { ONLINE_WEEK_BOARD };
+	online_put16(m + 1, 2963); m[3] = 2; m[4] = 1; m[5] = 2;
+	uint8_t *e = m + 6;
+	static const char *const names[4] = { "Beta", "Gamma", "Beta", "Alpha" };
+	static const int depths[4] = { 5, 10, 5, 7 };
+	for (int k = 0; k < 4; ++k, e += ONLINE_WEEK_ENTRY_BYTES) {
+		memcpy(e, names[k], strlen(names[k]));
+		online_put16(e + 16, (uint16_t)depths[k]); e[18] = (uint8_t)((depths[k] - 1) / 3 + 1 > 4 ? 4 : (depths[k] - 1) / 3 + 1);
+		e[19] = depths[k] == 10; online_put16(e + 20, 40);
+	}
+	online_week_reset();
+	assert(online_week_mail(m, sizeof m));
+	const WeekBoard *b = online_week_board();
+	assert(b->serial == 1 && b->week == 2963 && b->place == 2 && b->ntop == 2 && b->nlast == 1);
+	assert(!strcmp(b->top[0].name, "Gamma") && b->top[0].won && b->mine.depth == 5 && !strcmp(b->last[0].name, "Alpha"));
+	const char *s = square_week_board(b, 2963);
+	assert(strstr(s, "Oct 19-Oct 25") && strstr(s, "1.Gamma:10!\n2.Beta:5") && strstr(s, "layer 5,#2") && strstr(s, "1.Alpha:7"));
+	assert(!online_week_mail(m, sizeof m - 1));
+	m[3] = 9; assert(!online_week_mail(m, sizeof m)); m[3] = 2;
+	online_put16(m + 6 + ONLINE_WEEK_ENTRY_BYTES + 16, 11); assert(!online_week_mail(m, sizeof m));
+	assert(online_week_board()->serial == 1);
+	/* (a week across a month's end, and a post's bytes) */
+	assert(strstr(square_week_post(WEEK_OFFER_NEW, 2965, 0), "NOV 2-NOV 8"));
+	assert(online_week_post(2963, 0xF521FE36u, 5, 2, false, 12, 0x1234) && sent_size == ONLINE_WEEK_POST_BYTES);
+	assert(sent[0] == ONLINE_WEEK_POST && sent[1] == 0x0B && sent[2] == 0x93 && sent[8] == 5 && sent[9] == 2 && sent[10] == 0 && sent[12] == 12);
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan and the referee passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee and the week's net passed");
 	return 0;
 }

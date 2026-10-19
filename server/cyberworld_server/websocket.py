@@ -81,4 +81,8 @@ async def receive(reader):
 
 async def send(writer, data, opcode=2):
     writer.write(frame(data, opcode))
-    await asyncio.wait_for(writer.drain(), 2)
+    # (a timeout's context, not wait_for: Python 3.11's wait_for can swallow
+    # a cancellation that lands as the drain finishes, so a shutdown would
+    # wait on a player whose welcome was still being sent)
+    async with asyncio.timeout(2):
+        await writer.drain()

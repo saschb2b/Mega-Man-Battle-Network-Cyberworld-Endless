@@ -18,6 +18,7 @@
 #include "platform.h"
 #include "square_arena.h"
 #include "trade_order.h"
+#include "square_week.h"
 
 static OnlineSnapshot snapshot;
 static OnlineSnapshot shown;
@@ -121,7 +122,7 @@ VisitEnd online_scene_update(void) {
 	online_motion_update(&snapshot, now, &shown);
 	unblocked(&shown);
 	online_square_peers(&shown);
-	if (online_chat_update(&shown)) return VISIT_END_LEFT;
+	if (online_chat_update(&shown)) return square_week_leaving() ? VISIT_END_DIVE : VISIT_END_LEFT;
 	square_arena_update(&snapshot);
 	online_labels_update(&shown, now);
 	return VISIT_END_NONE;

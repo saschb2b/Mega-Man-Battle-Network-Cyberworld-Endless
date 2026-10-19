@@ -20,6 +20,7 @@
 #include "save.h"
 #include "souls.h"
 #include "square_arena.h"
+#include "square_week.h"
 
 #define CALL_TIMEOUT_MS 20000   /* a server that never answers */
 
@@ -115,6 +116,15 @@ static void come_home(VisitEnd why) {
 	if (!away) return;
 	emu_sync();
 	cinema_reset();
+	/* (the week's net: the gate's checkpoint stays the normal run's, and
+	 * the dive begins, or goes on, in its own slot; weekly.h) */
+	if (why == VISIT_END_DIVE) {
+		director_stop();
+		V.ended = VISIT_END_NONE;
+		if (square_week_dive()) return;
+		fprintf(stderr, "online: the dive did not begin; back to the gate\n");
+		V.ended = VISIT_END_BROKEN;
+	}
 	if (!director_resume()) {
 		/* (the gate's checkpoint is still on disk: CONTINUE tries it again) */
 		fprintf(stderr, "online: the gate's checkpoint did not load; to the title\n");

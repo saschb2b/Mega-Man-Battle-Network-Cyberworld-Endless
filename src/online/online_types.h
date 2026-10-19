@@ -47,7 +47,12 @@ typedef struct {
 	uint32_t event_serial;
 	OnlineEvent events[ONLINE_EVENT_HISTORY];
 	uint32_t notice_serial;
+	uint16_t notice_code;  /* the last NOTICE's reason (protocol.json's codes) */
 	uint16_t error_code;   /* the server's refusal (protocol.json's codes), 0 none */
+	/* the server's week's net (WELCOME, protocol v6): its seed and number
+	 * (weeks since Monday 5 January 1970), 0 none */
+	uint32_t week_seed;
+	uint16_t week;
 	char notice[100], error[128];
 } OnlineSnapshot;
 

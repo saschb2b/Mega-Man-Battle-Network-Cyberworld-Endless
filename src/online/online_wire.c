@@ -104,6 +104,7 @@ static bool read_welcome(const uint8_t *data, size_t size, OnlineSnapshot *snaps
 	    !channel || channel > channels || channels > 256 || !identity_valid(data + 14)) return false;
 	if (snapshot->connected && (id != snapshot->player_id || memcmp(snapshot->identity, data + 14, ONLINE_IDENTITY_BYTES))) return false;
 	snapshot->seed = get32(data + 1); snapshot->player_id = id;
+	snapshot->week_seed = get32(data + 32); snapshot->week = get16(data + 36);
 	snapshot->channel = channel; snapshot->channels = channels;
 	memcpy(snapshot->identity, data + 14, ONLINE_IDENTITY_BYTES);
 	snapshot->peer_count = 0;
@@ -123,6 +124,7 @@ static bool read_status(const uint8_t *data, size_t size, OnlineSnapshot *snapsh
 		snapshot->error_code = get16(data + 1);
 		return false;
 	}
+	snapshot->notice_code = get16(data + 1);
 	++snapshot->notice_serial;
 	return true;
 }

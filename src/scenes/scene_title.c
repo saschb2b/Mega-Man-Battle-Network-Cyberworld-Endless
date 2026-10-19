@@ -23,7 +23,6 @@
 #include "minifont.h"
 #include "platform.h"
 #include "rom.h"
-#include "run.h"
 #include "meta.h"
 #include "powers.h"
 #include "save.h"
@@ -32,6 +31,7 @@
 #include "text.h"
 
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
+#include "weekly.h"
 
 #define T (R.layout->title)
 #define BLINK 32         /* PRESS START: 32 frames on, 32 off */
@@ -289,7 +289,7 @@ static void enter(void) {
 	S.tex = tex;
 	++entries;
 	if (!logo_ready) logo_ready = build_logo();
-	S.has_save = save_exists();
+	S.has_save = weekly_normal_saved();   /* (the normal run's slot after a dive, weekly.h) */
 	Run saved = { 0 };
 	if (S.has_save && peek_run(&saved)) S.saved_depth = saved.depth;
 	S.saved_home = S.saved_depth && emu_saved_home(saved.seed, saved.depth);
@@ -860,15 +860,15 @@ static void summary_draw(int x0, int y0) {
 	text_drawf(rx, y0 + 52, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
 	text_draw(lx, y0 + 64, "Navis deleted", WHITE, TEXT_LEFT);
 	text_drawf(rx, y0 + 64, WHITE, TEXT_RIGHT, "%d", run.bosses_beaten);
-	/* the Library, and what the run added to it (docs/META.md) */
+	/* the Library and what the run added (docs/META.md); a dive's none, its week's best below */
 	text_draw(lx, y0 + 76, "Library", WHITE, TEXT_LEFT);
-	int lib = meta_library_count(-1), added = meta_library_new();
+	int lib = meta_library_count(-1), added = title_dive ? 0 : meta_library_new();
 	if (added) text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d (+%d)", lib, added);
 	else text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d", lib);
-	if (title_new_best) text_draw(lx, y0 + 89, "New best!", gold, TEXT_LEFT);
+	if (title_new_best && !title_dive) text_draw(lx, y0 + 89, "New best!", gold, TEXT_LEFT);
 	else {
-		text_draw(lx, y0 + 89, "Best", gold, TEXT_LEFT);
-		text_drawf(rx, y0 + 89, gold, TEXT_RIGHT, "Layer %d", profile.best_depth);
+		text_draw(lx, y0 + 89, title_dive ? "This week" : "Best", gold, TEXT_LEFT);
+		text_drawf(rx, y0 + 89, gold, TEXT_RIGHT, "Layer %d", title_dive ? title_dive : profile.best_depth);
 	}
 	/* what the run opened for the next (docs/META.md): three lines
 	 * where it opened three, the lines above drawn closer (a won run
@@ -897,7 +897,7 @@ static void summary_draw(int x0, int y0) {
 	/* ... else the closest goal */
 	int y = y0 + (n >= 3 ? 124 : 129);
 	for (int i = 0; i < n; ++i, y += 12) text_drawf(x, y, gold, TEXT_CENTER, "Unlocked: %s", open[i]);
-	const char *next = meta_next_goal();
+	const char *next = title_dive ? NULL : meta_next_goal();
 	if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
 }
 

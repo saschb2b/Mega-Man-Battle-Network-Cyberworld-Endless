@@ -20,6 +20,7 @@
 #include "save_queue.h"
 #include "layer_make.h"
 #include "version.h"
+#include "weekly.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -155,6 +156,65 @@ static void test_roundtrip(void) {
 	CHECK(backup_local_info(to, &again) && again.hash == info.hash, "backup: the saves unpacked are the saves packed");
 	free(b);
 	remove_tree(base);
+}
+
+/* The week's net's slot (weekly.h, issue #127): its files beside the
+ * normal run's, after "weekly-", and weekly.sav, carried and put back
+ * byte for byte; the summary is the normal run's, never the dive's */
+static void test_weekly_slot(void) {
+	char base[64], from[96], to[96], path[256], other[256];
+	snprintf(base, sizeof base, "build/host/test-weekly-%d", (int)getpid());
+	remove_tree(base);
+	snprintf(from, sizeof from, "%s/from", base);
+	snprintf(to, sizeof to, "%s/to", base);
+	mkdir(base, 0755);
+	mkdir(from, 0755);
+	mkdir(to, 0755);
+	snprintf(path, sizeof path, "%s/savedata", from);
+	mkdir(path, 0755);
+	int prof[16] = { 12, 9, 0, 0, 0, 0, 0, 4, 5 }, dive_prof[16] = { 0, 0, 0, 0, 0, 0, 0, 4, 5 };
+	int runbuf[28] = { 1, 7, 4 }, dive[28] = { 1, 0x5eed, 6 };
+	WeeklyRecord w = { .week = 2963, .running = 1, .seed = 0x5eed, .r_week = 2962, .r_depth = 3, .r_act = 1, .pending = 1, .r_hash = 9 };
+	static const char *const names[] = { "profile.sav", "run.sav", "weekly.sav", "weekly-profile.sav", "weekly-run.sav", "weekly-run.state", "run.state" };
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[0]);
+	blob_file(path, PROFILE_MAGIC, prof, sizeof prof);
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[1]);
+	blob_file(path, RUN_MAGIC, runbuf, sizeof runbuf);
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[2]);
+	blob_file(path, WEEKLY_MAGIC, &w, sizeof w);
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[3]);
+	blob_file(path, PROFILE_MAGIC, dive_prof, sizeof dive_prof);
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[4]);
+	blob_file(path, RUN_MAGIC, dive, sizeof dive);
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[5]);
+	FILE *f = fopen(path, "wb");
+	if (f) { fputs("synthetic dive checkpoint", f); fclose(f); }
+	snprintf(path, sizeof path, "%s/savedata/%s", from, names[6]);
+	f = fopen(path, "wb");
+	if (f) { fputs("synthetic run checkpoint", f); fclose(f); }
+	size_t n = 0;
+	uint8_t *b = backup_pack(from, 1700000000u, &n);
+	BackupInfo info;
+	CHECK(b && backup_info(b, n, &info), "weekly: packed and read back");
+	if (!b) return;
+	CHECK(info.files == 7 && info.runs == 12 && info.run_depth == 4, "weekly: %d files, the normal run's summary (runs %d, layer %d)",
+		info.files, info.runs, info.run_depth);
+	CHECK(backup_unpack(to, b, n), "weekly: unpacked into a fresh folder");
+	for (size_t i = 0; i < sizeof names / sizeof *names; ++i) {
+		snprintf(path, sizeof path, "%s/savedata/%s", from, names[i]);
+		snprintf(other, sizeof other, "%s/savedata/%s", to, names[i]);
+		/* (the profile's volumes are the receiving device's: the rest the same) */
+		if (i != 0 && i != 3) CHECK(same_file(path, other), "weekly: %s comes back as it was", names[i]);
+	}
+	free(b);
+	remove_tree(base);
+	static const char *const strangers[] = { "savedata/weekly-evil.sav", "savedata/weekly-weekly.sav", "savedata/weekly-", "savedata/weeklyrun.sav" };
+	for (size_t i = 0; i < sizeof strangers / sizeof *strangers; ++i) {
+		char name[300];
+		snprintf(name, sizeof name, "%s", strangers[i]);
+		CHECK(!backup_progress_name(name), "weekly: an unrecognised name refused: %s", strangers[i]);
+	}
+	CHECK(backup_progress_name("savedata/weekly-run.dark") && backup_progress_name("savedata/weekly.sav"), "weekly: the slot's names carried");
 }
 
 /* Find a member in the synthetic carriers without using the writer. */
@@ -710,5 +770,6 @@ int test_backup(void) {
 	test_replaced();
 	test_local_read_only();
 	test_pending();
+	test_weekly_slot();
 	return failures;
 }

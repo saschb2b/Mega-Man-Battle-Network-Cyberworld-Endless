@@ -4,5 +4,6 @@
 
 #define RUN_MAGIC 0x43574539u /* "CWE9": the request taken at home */
 #define PROFILE_MAGIC 0x43575032u
+#define WEEKLY_MAGIC 0x43575731u  /* "CWW1": weekly.sav, the week's net (weekly.h) */
 
 #endif
