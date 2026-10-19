@@ -1261,13 +1261,17 @@
   },
   "trade_words:trade_board_review": {
    "header": "MegaMan as a Navi took the offer he posted: who, and what for what.",
-   "line": 170
+   "line": 172
   },
   "trade_words:trade_bye": {
    "line": 16
   },
   "trade_words:trade_deal_question": {
    "line": 68
+  },
+  "trade_words:trade_diving": {
+   "header": "... and to a Navi on the week's dive: no trades till it ends.",
+   "line": 170
   },
   "trade_words:trade_done": {
    "line": 70
@@ -1718,7 +1722,7 @@
    "comment": "",
    "domain": "Trade Central",
    "kind": "speech",
-   "lines": 69,
+   "lines": 70,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "trade_words"
@@ -1872,7 +1876,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1878,
+  "boxes": 1880,
   "domains": {
    "Arena": {
     "files": [
@@ -2104,8 +2108,8 @@
      "src/online/trade_words.c"
     ],
     "flagged": 9,
-    "lines": 69,
-    "speech": 51
+    "lines": 70,
+    "speech": 52
    },
    "Where the nets meet": {
     "files": [
@@ -2210,7 +2214,7 @@
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 139,
+    "boxes": 141,
     "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
@@ -2224,7 +2228,7 @@
      "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.7
+    "words_per_box": 5.8
    },
    "Navis (bosses, bystanders)": {
     "bangs_per_box": 0.02,
@@ -2246,7 +2250,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1438,
+  "lines": 1439,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2400,7 +2404,7 @@
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 139,
+    "boxes": 141,
     "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
@@ -2414,7 +2418,7 @@
      "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.7
+    "words_per_box": 5.8
    },
    "Narration": {
     "bangs_per_box": 0.22,
@@ -2493,7 +2497,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1096
+  "speech": 1097
  },
  "version": 1,
  "conversations": [
@@ -2793,7 +2797,8 @@
   {"container":"trade_words:trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_posted","line":162,"lines":["trade_words:trade_posted:0"],"speakers":["Mr.Prog"],"title":"Trade posted","when":""},
   {"container":"trade_words:trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_down","line":166,"lines":["trade_words:trade_post_down:0"],"speakers":["Mr.Prog"],"title":"Trade post down","when":""},
   {"container":"trade_words:trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_traded","line":168,"lines":["trade_words:trade_traded:0"],"speakers":["Mr.Prog"],"title":"Trade traded","when":"... one trade a visit: MegaMan has his, to take home first."},
-  {"container":"trade_words:trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_review","line":172,"lines":["trade_words:trade_board_review:0"],"speakers":["MegaMan"],"title":"MegaMan as a Navi took the offer he posted","when":"MegaMan as a Navi took the offer he posted: who, and what for what."},
+  {"container":"trade_words:trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_diving","line":170,"lines":["trade_words:trade_diving:0"],"speakers":["Mr.Prog"],"title":"Trade diving","when":"... and to a Navi on the week's dive: no trades till it ends."},
+  {"container":"trade_words:trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_review","line":174,"lines":["trade_words:trade_board_review:0"],"speakers":["MegaMan"],"title":"MegaMan as a Navi took the offer he posted","when":"MegaMan as a Navi took the offer he posted: who, and what for what."},
   {"container":"arena_words:rules_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:rules_words","line":10,"lines":["arena_words:rules_words:0","arena_words:rules_words:1"],"speakers":["MegaMan"],"title":"The rules, as MegaMan names them","when":"the rules, as MegaMan names them"},
   {"container":"arena_words:arena_sent_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_sent_words","line":14,"lines":["arena_words:arena_sent_words:0","arena_words:arena_sent_words:1"],"speakers":["MegaMan"],"title":"A challenge sent to `name` by `format`'s rules","when":"A challenge sent to `name` by `format`'s rules (ONLINE_FORMAT_*), named (`souls_home`: under BN6's, his Souls left home); the answer No, or the battle gone before it began"},
   {"container":"arena_words:arena_declined_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_declined_words","line":19,"lines":["arena_words:arena_declined_words:0"],"speakers":["MegaMan"],"title":"Arena declined words","when":""},
@@ -4169,7 +4174,8 @@
   {"boxes":[{"pages":[["IT'S UP! {chip}","FOR {want_caps}!"]],"speaker":"Mr.Prog","text":"IT'S UP! {chip}\nFOR {want_caps}!"}],"container":"trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_posted:0","kind":"speech","line":162,"placeholders":[{"name":"chip","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"IT'S UP! {chip}\nFOR {want_caps}!","text_hash":"1bcc92d1489a"},
   {"boxes":[{"pages":[["OKAY! YOUR OFFER'S","DOWN!"]],"speaker":"Mr.Prog","text":"OKAY! YOUR OFFER'S\nDOWN!"}],"container":"trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_down:0","kind":"speech","line":166,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OKAY! YOUR OFFER'S\nDOWN!","text_hash":"6d9fa68b31cc"},
   {"boxes":[{"pages":[["YOU TRADED ALREADY!"]],"speaker":"Mr.Prog","text":"YOU TRADED ALREADY!"},{"pages":[["ONE TRADE A VISIT!","TAKE IT HOME FIRST!"]],"speaker":"Mr.Prog","text":"ONE TRADE A VISIT!\nTAKE IT HOME FIRST!"}],"container":"trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_traded:0","kind":"speech","line":168,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU TRADED ALREADY!|ONE TRADE A VISIT!\nTAKE IT HOME FIRST!","text_hash":"33bb1973a3fc"},
-  {"boxes":[{"pages":[["Lan! {name} took","our offer!"]],"speaker":"MegaMan","text":"Lan! {name} took\nour offer!"},{"pages":[["{theirs} for our","{mine}!"]],"speaker":"MegaMan","text":"{theirs} for our\n{mine}!"}],"container":"trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_review:0","kind":"speech","line":172,"placeholders":[{"name":"name","spec":"%s"},{"name":"theirs","spec":"%s"},{"name":"mine","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} took\nour offer!|{theirs} for our\n{mine}!","text_hash":"9c76e4380ea0"},
+  {"boxes":[{"pages":[["YOU'RE ON THIS","WEEK'S DIVE!"]],"speaker":"Mr.Prog","text":"YOU'RE ON THIS\nWEEK'S DIVE!"},{"pages":[["DIVERS DON'T TRADE!","SAME NET,SAME","CHIPS FOR ALL!"]],"speaker":"Mr.Prog","text":"DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!"}],"container":"trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_diving:0","kind":"speech","line":170,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU'RE ON THIS\nWEEK'S DIVE!|DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!","text_hash":"0f2468db9d3e"},
+  {"boxes":[{"pages":[["Lan! {name} took","our offer!"]],"speaker":"MegaMan","text":"Lan! {name} took\nour offer!"},{"pages":[["{theirs} for our","{mine}!"]],"speaker":"MegaMan","text":"{theirs} for our\n{mine}!"}],"container":"trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_review:0","kind":"speech","line":174,"placeholders":[{"name":"name","spec":"%s"},{"name":"theirs","spec":"%s"},{"name":"mine","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} took\nour offer!|{theirs} for our\n{mine}!","text_hash":"9c76e4380ea0"},
   {"boxes":[{"pages":[["UNDO IMPORT"]],"speaker":"Screen","text":"UNDO IMPORT"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_UNDO.0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"UNDO IMPORT","text_hash":"5a5279471f4f"},
   {"boxes":[{"pages":[["AUTO-COPY: ON"]],"speaker":"Screen","text":"AUTO-COPY: ON"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_AUTO.0","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"AUTO-COPY: ON","text_hash":"040bf2c628ce"},
   {"boxes":[{"pages":[["AUTO-COPY: OFF"]],"speaker":"Screen","text":"AUTO-COPY: OFF"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_AUTO.1","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"AUTO-COPY: OFF","text_hash":"c03af0833d41"},
