@@ -9,6 +9,7 @@
 #include "online_people.h"
 #include "online_wire.h"
 #include "platform.h"
+#include "square_life_words.h"
 #include "square_plan.h"
 
 char g_data_dir[512];
@@ -199,11 +200,35 @@ static void square(void) {
 	}
 }
 
+/* the referee by the ring (issue #128): the ring's tip until a bout, then
+ * who beat whom, and the count from a rematch on */
+static void referee(void) {
+	SquareFacts f;
+	memset(&f, 0, sizeof f);
+	f.arena = true;
+	f.navis = 1;
+	assert(strstr(square_referee_words(&f), "WHO'S FIRST?") && strstr(square_referee_words(&f), "PICK"));
+	f.fought = "Alpha";
+	f.result = 1; f.won = 1;
+	const char *s = square_referee_words(&f);
+	assert(strstr(s, "LAST BOUT: YOU\nBEAT Alpha!") && !strstr(s, "PICK") && !strstr(s, " TO "));
+	f.won = 2; f.lost = 1;
+	assert(strstr(square_referee_words(&f), "THAT'S 2 TO 1.\nYOU LEAD!"));
+	f.result = 2; f.won = 1; f.lost = 2;
+	s = square_referee_words(&f);
+	assert(strstr(s, "LAST BOUT:\nAlpha BEAT\nYOU!") && strstr(s, "THAT'S 2 TO 1.\nAlpha\nLEADS!"));
+	f.won = 2; f.lost = 2;
+	assert(strstr(square_referee_words(&f), "2 TO 2! ALL EVEN"));
+	assert(!strcmp(square_referee_bark(1, "Alpha"), "YOU WIN!"));
+	assert(!strcmp(square_referee_bark(2, "Alpha"), "ALPHA WINS!"));
+	assert(!strcmp(square_referee_bark(3, "Alpha"), "WHAT A BOUT!"));
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation and the Square's plan passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan and the referee passed");
 	return 0;
 }

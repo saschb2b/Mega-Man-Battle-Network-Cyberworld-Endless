@@ -451,6 +451,9 @@
 0802C114 BN5_CHIP_AI_ENTER
 0802C12A darkinvs_leave
 0802C938 BN5_DARK_AFTER
+0802C95E navistats_0x18
+0802C966 bn5_darkchips_after
+0802C974 bn5_darkchips_after.table
 0802C978 darkcirc_0x54_one_hundred_more
 0802CA68 BN5_DARK_AFTER_END
 0802CCA4 bn5_darkinvs_bn6_2
