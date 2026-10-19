@@ -190,8 +190,8 @@ quiet,arenahp=60`, Alpha's challenge, both OKing the Custom screen and
 firing charged shots to the end. Before is `origin/dev`'s build and
 server. The leading game is the one that waited (which one leads depends
 on whose ready came last); after, the other waited on none in any
-battle, before it did in two rematches. Each run fought a rematch too
-(the scripts go on pressing), given where it ended in time.
+battle, before it did in two rematches. Each run fought a rematch as
+well (the scripts go on pressing), listed where it ended before the run.
 
 | Each way, game to server | Build | Delay | The leading game's waits | Per 100 frames | After frame 300 | Hashes |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -229,10 +229,10 @@ player's ROM wherever the game runs and says what a rollback costs there:
 the game's core alone from power-on (every build; the 3DS and the browser,
 which compile the Arena out, stop there and say so), then the pair through
 the way in to a Practice NetBattle under BN6's rules and 600 frames of
-scripted keys on both sides, then again under full rules where BN5's ROM
-is read (its installs made on the game's core first, as a run's start
-makes them) (the Custom screen's OK, then steps, shots and
-the buster from a number of the frame). Each frame it saves the pair's
+scripted keys on both sides (the Custom screen's OK, then steps, shots and
+the buster from a number of the frame), then again under full rules where
+BN5's ROM is read (its installs made on the game's core first, as a run's
+start makes them). Each frame it saves the pair's
 snapshot, runs the frame, loads the snapshot and runs the frame again (a
 rollback of one: the load timed); every 50th frame it rolls back eight
 frames, runs them again (each saved, as a rollback would) and compares the
@@ -284,7 +284,7 @@ What the numbers say:
 ### What a rollback must put back
 
 Everything outside the two cores' states that the pair's next frames
-read, as of 20 October 2026:
+read, as of 19 October 2026:
 
 | State | Where | Put back | How |
 | --- | --- | --- | --- |
