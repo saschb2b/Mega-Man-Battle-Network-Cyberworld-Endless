@@ -13,6 +13,7 @@
 #include "arena_carry.h"
 #include "arena_folder.h"
 #include "arena_format.h"
+#include "arena_report.h"
 #include "arena_view.h"
 #include "arena_pair.h"
 #include "arena_text.h"
@@ -104,6 +105,8 @@ static void enter(void) {
 	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s, rules %u\n", link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's", format);
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link, format);
+	/* (the stands' report read as the Square's battles read it, said in the log at the end) */
+	arena_report_begin(1);
 	/* (the local link's round trip: its one way there and back) */
 	if (S.arena) arena_rtt(S.arena, lag * 2 * 1000 / 60);
 	if (S.arena && dev.arena_roll >= 0) arena_rollback(S.arena, dev.arena_roll);
@@ -132,6 +135,8 @@ static void update(void) {
 		uint32_t stalls = arena_stalls(S.arena);
 		arena_tick(S.arena, pad_keys());
 		arena_sound(S.arena);
+		arena_report_frame(S.arena);
+		if (arena_stage(S.arena) == ARENA_OVER) arena_report_end(arena_result(S.arena));
 		S.stalled = arena_stalls(S.arena) != stalls ? S.stalled + 1 : 0;
 		break;
 	}

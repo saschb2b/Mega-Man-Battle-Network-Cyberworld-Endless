@@ -181,7 +181,10 @@ class ContractTests(unittest.TestCase):
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
                      "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
                      "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
-                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "format_bn6", "format_full"):
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "format_bn6", "format_full",
+                     "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
+                     "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
+                     "watch_most"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
@@ -196,6 +199,15 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(protocol.PEER.size, protocol.SPEC["peer_bytes"])
         self.assertEqual(protocol.WELCOME.size, protocol.SPEC["welcome_bytes"])
         self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
+        # (the stands, protocol v7)
+        self.assertEqual(protocol.STANDS_ENTRY.size, protocol.SPEC["stands_entry_bytes"])
+        self.assertEqual(protocol.ARENA_STATUS.size, protocol.SPEC["arena_status_bytes"])
+        self.assertEqual(protocol.WATCH.size, protocol.SPEC["watch_bytes"])
+        self.assertEqual(protocol.WATCH_STATE.size, protocol.SPEC["watch_state_bytes"])
+        self.assertEqual(protocol.WATCH_KEYS.size, protocol.SPEC["watch_keys_head"])
+        self.assertLessEqual(2 + protocol.SPEC["stands_max"] * protocol.STANDS_ENTRY.size, protocol.SPEC["max_message"])
+        self.assertLessEqual(protocol.WATCH_KEYS.size + 2 * protocol.SPEC["watch_keys_max"], protocol.SPEC["max_message"])
+        self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
         self.assertIn(f'#define ONLINE_SUBPROTOCOL "{protocol.SPEC["subprotocol"]}"', header)
         # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
         rom = (ROOT / "src/core/rom.c").read_text()

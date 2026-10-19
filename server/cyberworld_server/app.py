@@ -11,6 +11,7 @@ import time
 
 from . import protocol, websocket
 from .arena import Arena
+from .stands import Stands
 from .trade import Trades
 from .week import Weeks
 from .identity import IdentityStore
@@ -69,6 +70,7 @@ class Server:
         self.trading, self.arena_on = trading, arena
         self.trades, self.arena = Trades(self), Arena(self)
         self.weeks = Weeks(self)
+        self.stands = Stands(self)
 
     def event(self, kind, **fields):
         entry = dict(event=kind, **fields)
@@ -129,6 +131,7 @@ class Server:
             await self.welcome(player)
             await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
             await self.weeks.send(player)
+            self.stands.send_to(player)
             await self.serve_player(reader, player)
         except protocol.ProtocolError as exc:
             self.event("reject", reason=str(exc), code=exc.code)
@@ -149,6 +152,7 @@ class Server:
                     self.trades.left(player)
                     self.trades.done.discard(player.id)
                     self.arena.left(player.id)
+                    self.stands.left(player)
                     self.event("leave", id=player.id, players=len(self.players))
             finally:
                 writer.close()
@@ -183,6 +187,7 @@ class Server:
             self.trades.left(old)
             self.trades.done.discard(old.id)
             self.arena.left(old.id)
+            self.stands.left(old)
             self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
@@ -250,6 +255,10 @@ class Server:
             await self.arena.handle(player, data)
         elif data and data[0] == protocol.SPEC["week_post"]:
             await self.weeks.handle(player, data)
+        elif data and data[0] == protocol.SPEC["arena_status"]:
+            self.stands.status(player, data)
+        elif data and data[0] == protocol.SPEC["watch"]:
+            await self.stands.watch(player, data)
         else:
             raise protocol.ProtocolError("Unknown or out-of-order message")
 
@@ -284,9 +293,11 @@ class Server:
             return
         self.trades.left(player)
         self.arena.left(player.id)
+        self.stands.left(player)
         player.channel = channel
         await self.welcome(player)
         await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
+        self.stands.send_to(player)
         self.event("channel", id=player.id, channel=channel)
 
     async def inspect(self, player, target):
@@ -311,8 +322,10 @@ class Server:
             return
         player.social_tokens -= 1
         event = struct.pack("!BIBB", protocol.SPEC["event"], player.id, kind, choice)
+        self.stands.cheer(player)
+        # (the two players of a battle under way hear nothing of the stands until it is over)
         for peer in list(self.players.values()):
-            if peer.channel == player.channel and not peer.writer.is_closing():
+            if peer.channel == player.channel and not peer.writer.is_closing() and not self.stands.fighting(peer.id):
                 peer.writer.write(websocket.frame(event))
 
     async def moderation(self):
@@ -354,6 +367,7 @@ class Server:
                 await self.moderation()
                 self.trades.expire(now)
                 self.arena.expire(now)
+            self.stands.pump(now)
             for player in list(self.players.values()):
                 if player.writer.is_closing():
                     continue

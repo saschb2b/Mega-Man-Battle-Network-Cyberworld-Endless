@@ -390,6 +390,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The Net Square's week's net (issue #127): the greeter Mr.Prog's post on it and his offer (a new dive, the unfinished one, a trade to take home first, MegaMan on one), his word as MegaMan goes, and the Board's dives as reported | `src/online/square_week_words.c` |
 | Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker, the clerk on a partner whose game trades BN6's chips only; the trade board (the wants, the clerk reading the offers, a post, an answer, one trade a visit, MegaMan as his own offer is taken) | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
+| The stands in the Net Square (issue #128): the referee Mr.Prog calling the channel's NetBattle (who fights whom, the HP, the last chips, who watches, the winner, the cheers) and his "WANNA WATCH?", the Board's posts on it; the watching screen's heading, keys and end | `src/online/stands_words.c`, `src/online/stands_text.c` |
 | MegaMan on a Practice NetBattle in the Net Square: the challenge sent and its rules (BN6 rules, his Souls left home, or full rules), the question a challenge asks, the folder he carries and the ones left home, a MegaMan who can't go, the word after the battle and the rematch asked with it | `src/online/arena_words.c` |
 
 ## The voice review

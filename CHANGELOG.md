@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **The stands (issue #128).** A NetBattle in the Net Square can be
+  watched. The referee Mr.Prog by the Arena's ring calls the battle on in
+  your channel (who fights whom, their HP, the last chips they used, how
+  many watch, the winner) and, where your game can show it, asks whether
+  to watch: the screen turns to the battle itself, a moment behind the
+  players and from its first frame however late you came. R shows the
+  other side, L cheers, B goes back. Cheers reach the players after
+  their battle, from the referee. Full-rules battles are shown on games
+  with BN5's ROM; the 3DS, the browser and anyone else get the
+  referee's call and the board's post. Protocol v7: a v6 game and a v7
+  server refuse each other.
 - **The week's deep net (issue #127).** Every Monday each Net Square
   server opens a net of its own for the week, the same for everyone who
   dives it. The greeter Mr.Prog by the board in the log-in plaza posts it

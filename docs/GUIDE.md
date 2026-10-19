@@ -792,7 +792,14 @@ In the Square:
   next or last channel; a channel holds eight players. The one by the
   Arena's ring tells how a NetBattle is asked for; once you have fought,
   he calls each bout as you come back, tells who beat whom last, and
-  keeps the count while you go again with the same player.
+  keeps the count while you go again with the same player. While two
+  others fight he calls their NetBattle too (their HP, the last chips
+  they used, the winner), and where your game can show it he asks
+  whether to watch: you see the battle itself, a moment behind, from
+  its start however late you came. **R** shows the other side, **L**
+  cheers, **B** takes you back. The players hear the cheers after their
+  battle. A battle by full rules is shown only on a game with BN5's ROM;
+  the 3DS and the browser get the referee's call and the board's post.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the

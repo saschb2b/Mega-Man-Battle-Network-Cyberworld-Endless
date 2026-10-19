@@ -396,7 +396,14 @@ A battle from the Net Square between two games takes `arenahp=N` too
 (each game's own MegaMan, so both pairs stay the same), and
 `arenadesync=N` changes the other player's keys from frame N for a
 second on this game alone: the hashes' stop seen on both
-([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof).
+([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof). On a game
+watching a battle from the stands, `arenadesync=N` changes the cable's
+first's keys from frame N in its own copy: its watching stops at the
+next hash, the players' battle goes on (ONLINE_ARENA.md, The stands).
+`--dev arena` prints the stands' report at the end ("arena: the report:
+HP ... chips ... winner"), as the cable's first sends it from the Square.
+The Square's Mr.Progs' places are in the log ("online: Mr.Prog 2 at
+-428,44", the referee), for a harness's `place`.
 
 `--dev rollbench` measures what a rollback of the Arena would cost on the
 machine it runs on (issue #128), on the player's ROM, and says it on the

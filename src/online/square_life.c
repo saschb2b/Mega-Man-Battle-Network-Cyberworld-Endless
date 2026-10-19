@@ -16,6 +16,7 @@
 #include "online_board.h"
 #include "online_square.h"
 #include "square_arena.h"
+#include "square_watch.h"
 #include "square_life_words.h"
 #include "square_week.h"
 #include "talk.h"
@@ -376,16 +377,9 @@ static void facts(SquareFacts *f) {
 	f->lost = b->lost;
 	f->arena = square_arena_offered();
 	f->parade = L.parading;
+	f->battle_on = square_watch_live();
 	f->turn = L.turn;
 	board_posts(f, s);
-}
-
-static bool prog_say(int who, const char *words) {
-	static TextArchive t;
-	static uint8_t out[TEXT_ARCHIVE_MAX];
-	ta_begin(&t);
-	ta_say(&t, FACE_PROG, words);
-	return online_square_prog_say(who, out, ta_build(&t, out));
 }
 
 /* (what the words were made of, to write them again as it changes) */
@@ -401,9 +395,10 @@ static void progs(void) {
 	SquareFacts f;
 	facts(&f);
 	uint32_t g = name_hash(f.arrived, f.navis | f.channel << 8) ^ square_week_said() * 2654435761u;
-	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8 | (f.won + f.lost) << 10);
+	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8 | (f.won + f.lost) << 10) ^ square_watch_said();
 	if (g + 1 != L.greeter_said && square_week_greeter(square_greeter_words(&f))) L.greeter_said = g + 1;
-	if (r + 1 != L.referee_said && prog_say(SQUARE_PROG_REFEREE, square_referee_words(&f))) L.referee_said = r + 1;
+	/* (the channel's NetBattle and the question to watch it after his own words: square_watch.c) */
+	if (r + 1 != L.referee_said && square_watch_referee(square_referee_words(&f))) L.referee_said = r + 1;
 }
 
 void square_life_frame(const OnlineSnapshot *s) {
@@ -457,8 +452,9 @@ bool square_life_talk(int x, int y, int face) {
 	int look = prop_ahead(x, y, face);
 	if (look == LOOK_BBS) {
 		/* (the Board's posts, the week's net's after them: square_week.c) */
-		static char posts[1400];
-		snprintf(posts, sizeof posts, "%s|%s", square_check_words(look, &f), square_week_board_words());
+		static char posts[1800];
+		const char *stands = square_watch_board();
+		snprintf(posts, sizeof posts, "%s|%s%s%s", square_check_words(look, &f), stands, *stands ? "|" : "", square_week_board_words());
 		return talk_start(posts, FACE_NONE);
 	}
 	return look >= 0 && talk_start(square_check_words(look, &f), FACE_NONE);

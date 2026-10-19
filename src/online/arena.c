@@ -347,6 +347,8 @@ unsigned arena_result(const Arena *a) { return a->result; }
 bool arena_apart(const Arena *a) { return a->apart; }
 uint32_t arena_stalls(const Arena *a) { return a->stalls; }
 
+struct mCore *arena_core(const Arena *a, unsigned side) { return core(a, side & 1u); }
+
 uint64_t arena_hash(Arena *a) { return a->pair ? arena_pair_hash(a->pair) : 0; }
 uint64_t arena_record(const Arena *a) { return a->pair ? arena_pair_record(a->pair) : 0; }
 
