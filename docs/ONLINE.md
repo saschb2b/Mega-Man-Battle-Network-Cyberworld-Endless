@@ -709,6 +709,8 @@ server:
   hashes checked against the players' 41, the end at the same frame
   (2,506) on all three; a spectator who came 28 seconds late caught up
   from 1,686 frames behind and watched it live to its end, 41 hashes
+  checked; a battle by full rules watched to its end by a game with
+  BN5's ROM, its pair made with the players' installs' record, 51 hashes
   checked; a spectator whose copy of the keys was changed stopped by
   itself, saying so, while the players fought on. Three cheers from the
   stands, held from the players, on the Board and in the referee's word
@@ -874,7 +876,13 @@ are in the history before 433865a8):
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
 - **The Arena on the 3DS and in the browser**; rollback (issue #128).
-  There, the stands are the report alone.
+  There, the stands are the report alone (seen in the browser; the 3DS's
+  untried).
+- **The stands, what is left:** watching on Android, iOS and the
+  handhelds (built, untried), a catch-up's pace in a window and on a
+  handheld (measured headless only), a machine too slow to catch up (in
+  the code, not seen), and the report's chips past one a hand
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#not-yet)).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
   a New 3DS, an Android device (the emulator's visit, trade and
   NetBattle above) and iOS, macOS and Windows itself (Wine's above); the

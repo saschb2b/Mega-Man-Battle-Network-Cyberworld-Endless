@@ -736,10 +736,13 @@ A battle by full rules (Alpha and Beta with Team Colonel's ROM beside
 BN6's, Gamma with BN6's alone): Gamma's referee called it, "A
 NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 150 HP! BETA HAS 150!", and
 asked nothing; the server refuses a WATCH from a game without BN5's ROM
-for such a battle (NOTICE 19, `server/tests/test_stands.py`). That
-battle stood at its Custom screen until the players' frames ran out (the
-scripted keys under full rules did not reach OK), so its end was not
-seen there; its report and the end's are the same path as BN6 rules'.
+for such a battle (NOTICE 19, `server/tests/test_stands.py`). Watched
+instead by Gamma with Team Colonel's ROM beside BN6's (the same three
+games, Gamma asking 1,368 frames into the battle): his pair made with
+the same installs' record as the players' (1,913,709 bytes and 132
+hooks, `1efe82b0894607e2`) and their ready (`7eaaa466008086ab`), caught
+up at frame 1,592, the battle over at frame 3,080 on all three, 51
+hashes checked against the players' 51.
 
 The browser build, where the Arena is compiled out (`CW_ARENA` 0):
 `tools/online_browser.html`'s probe served beside a local v7 server
@@ -780,9 +783,7 @@ the cable's first's reports came, and no question.
   NetBattle.
 - The stands ([The stands](#the-stands)): watching on Android and iOS
   (built, untried), and a catch-up's pace in a window and on a handheld
-  (measured headless, eight frames a tick); a full-rules battle watched
-  to its end by a game with BN5's ROM (its way in and ready are full
-  rules' as a player's; untried end to end); a spectator too slow to
+  (measured headless, eight frames a tick); a spectator too slow to
   catch up (the refusal and the referee leaving that battle out are in
   the code, not seen); the report's chips past one a hand.
 - Battle (not Practice) and its chip forfeit, the pack
