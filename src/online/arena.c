@@ -22,6 +22,11 @@
 #include "bn6.h"
 
 #define CATCH_UP 2       /* frames of the pair a tick may run */
+/* frames my keys may run past the pair's next one: past it a tick samples
+ * none and waits, so the other game held still (its app sent to the
+ * background, its window dragged) stalls the battle rather than filling
+ * the ring (ARENA_RING) and stopping it four seconds on */
+#define LEAD     (ARENA_RING / 2)
 #define PENDING  8       /* my hashes waiting for the peer's */
 
 typedef struct { uint32_t frame; uint64_t hash; } Hashed;
@@ -153,10 +158,13 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (a->stage != ARENA_BATTLE) return a->stage;
 	ArenaLink *l = a->link;
 	l->tick(l);
-	uint32_t now = a->tick++, frame = now + a->input.delay;
-	keys &= ARENA_KEYS_MASK;
-	if (arena_input_put(&a->input, l->side, frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
-		return fail(a, "my keys could not be sent");
+	uint32_t now = a->tick - 1;
+	if (a->tick + a->input.delay < a->input.next + LEAD) {
+		uint32_t frame = (now = a->tick++) + a->input.delay;
+		keys &= ARENA_KEYS_MASK;
+		if (arena_input_put(&a->input, l->side, frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
+			return fail(a, "my keys could not be sent");
+	}
 	if (!take_peer(a)) return fail(a, "the other player's keys came out of order");
 	const char *broken = l->broken(l);
 	if (broken) return fail(a, broken);
