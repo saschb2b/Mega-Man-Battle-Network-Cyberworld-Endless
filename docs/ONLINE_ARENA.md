@@ -265,10 +265,18 @@ carried MegaMan).
 Two games whose records differ (a game that took BN5 in after its core
 started, another build) cannot fight: the record's hash is part of the
 pair's (`arena_pair_hash`), so the ready at the Custom screen differs and
-both stop before the first frame ("the two games went apart before the
-battle"). A game whose core holds no record (BN5's ROM read but the
-core's installs refused) is told so at the way in ("BN5's installs are
-not in this game's core").
+both stop before the first frame. Each game sends its record's hash just
+before its ready (ARENA_HASH at frame 0xFFFFFFFE, `arena_link_net_record`;
+the server relays it as any hash), so a ready apart whose records differ
+says so on both games: "the two games installed BN5 apart (one took BN5
+in after it started, or another build)" on the picture, then MegaMan's
+"Huh? Our PETs don't match on BN5..." and "Lan,let's reboot the PET and
+try again!"; a ready apart with the same records (or from a game that
+sends none) keeps "the two games went apart before the battle". A game
+whose other player left after his ready came apart from ours tells the
+same cause, not "the other player left". A game whose core holds no
+record (BN5's ROM read but the core's installs refused) is told so at
+the way in ("BN5's installs are not in this game's core").
 
 **The Souls across the cable.** UNITE stands in the pair's link battles
 (`unite_stands`: a run's battles are never link ones, and the rule kept
@@ -289,6 +297,45 @@ the sprite selector's caller's r5 where it is a side's player, else
 MegaMan's own side, as before), so the other GBA draws him in his Soul
 too. The 52 differentials of the Souls and Chaos Unison
 (`build.py xdiff soul_* chaos_*`) pass with the change.
+
+**What only one GBA writes** (issue #130). The Souls' block holds a few
+things a GBA writes for its own player alone, as its own Custom screen
+opens or closes; a pair holds both GBAs, so each was looked at for
+whether the other GBA reads it (both pair cores' blocks compared every
+frame through whole battles, a check kept out of the build):
+
+- **The Soul's end.** The Custom screen's stand hook marked a screen
+  opened with the Soul on (`BN6_SOUL_SCREEN`, which the end waits for)
+  for its own player only, so the other GBA never ended his Soul: seen
+  with ColonelSoul (`--dev arena`), side 0's Soul 0 on its own GBA and still 7 on the
+  other's after the turn its three turns ran out. The hook now marks it
+  for every side with a Soul on, before it asks whether this GBA's own
+  player holds any (`soulunite.c`'s stand): in a link battle both
+  players' screens open together. Seen since: the Soul gone on both GBAs
+  at the same turn (a frame apart, as their cores run) and on both
+  screens.
+- **ColonelSoul's button.** The chip his OK keeps in the button
+  (`BN6_SOUL_NEXT_CHIP`, `soulcolonel.c`) is his own GBA's alone, and BN6's
+  link knows no button; the turn's start makes his charged shot the chip
+  shot where it holds one, ScreenDivide where not, on each GBA from its
+  own block. Seen without the carry (`--dev arena`): his GBA's block held
+  MiniBomb (54), the other's 0, and from the turn's start his chip 54 on
+  his own GBA and 0 on the other's, so his own screen showed the bomb
+  thrown while the other GBA ran ScreenDivide: the two GBAs' battles
+  apart, though both clients' pairs, alike, hashed the same. The pair
+  now carries it as it carries a Soul, wherever it differs ("arena: side
+  0's ColonelSoul chip 1 carried to the other GBA", then 0 at a screen
+  with no chip).
+- **BN5's mood** (`BN6_SOUL_MOOD`, its opening mark, the stand's and
+  the slot's bytes): each GBA opens its own player's as its own Custom
+  screen opens and reads it for him alone (UNITE's stand, the worried
+  rule's DarkChips at the hand's end, `soulmood.c` and `soulunite.c`);
+  the other side's stays 0 there and is never read (BN5's writers write
+  nothing at 0). What it decides crosses as BN6's link carries a pick,
+  and as the pair carries a Soul. A DarkChip used darkens its user on
+  both GBAs (`soulmood_chip_used`, run where the chip is used, on both).
+  Seen: side 0's mood 0x9E on its own GBA, side 1's 0x3A (worried) on
+  its own, the rest of the block the same on both through the battle.
 
 **The proofs** (18 October 2026, the player's Gregar and Team Colonel
 ROMs). `--dev arena` with a checkpoint whose Folder1 is thirty MrkCan1 M
@@ -332,13 +379,43 @@ and Alpha's 2. With both folders MrkCan1 (the build before the Souls':
 ready `e000d63d5380d5e0`, 38 hashes agreed, over at frame 2,311 by
 charged shots) Alpha used his while Beta stood a panel away and moved,
 and its marker wandered without a lock, the same on both games. The marker is BN5's code moved (the differential `chip_mrkcan1`
-passes, and with its foe a panel away as well, hit in both engines); a
-target that moves is not in a differential yet. With Beta's copy of
+passes, and with its foe a panel away as well, hit in both engines).
+Against a target that moves, `chip_mrkcan1_moving` (19 October 2026:
+BN5's Handi free, teleporting from (6,2) to (4,1) as the mark comes up)
+plays the same in both engines: the mark, its lock on Handi's new panel
+and the cannon's 70 at the same frame, the hit a counter in both; it is
+held to its recorded FAIL at t75, Full Synchro's own object each
+engine draws its own way (no other difference, `--survey`). So BN6's
+moved code does what BN5's does with a target that moves; the
+NetBattle's wandering marker, the same on both games, was not put
+right, for nothing in it differs from BN5's yet seen. With Beta's copy of
 Alpha's keys changed from frame 300 (`arenadesync=300`): both stopped,
 apart by frame 359. With Alpha's core made without BN5's families
 (`--dev nofamilies`: a record of 1,571,997 bytes and 115 hooks,
 `3cc9e56dc3808e94`): the ready hashes differed and both stopped before
-the first frame ("the two games went apart before the battle").
+the first frame ("the two games went apart before the battle"; since
+issue #130 "the two games installed BN5 apart", on both games, 19
+October 2026).
+
+**Every Soul, both players, Chaos Unison and ColonelSoul's button**
+(19 October 2026, issue #130, the two-client harness above with
+`souls=0x3F` and `arenahp=300` on both games, each Folder1 thirty of a
+Soul's chip by the `chip` step: RockCube, Invisibl, BusterUp, Boomer,
+BblWrap, JustcOne). The same record (`1efe82b0894607e2`) and every hash
+agreeing on both games in each run:
+
+| Run | Alpha (side 0) | Beta (side 1) | Seen on both screens | Hashes |
+| --- | --- | --- | --- | --- |
+| Each Soul alone | ColonelSoul, ShadowSoul, NumberSoul, TomahawkSoul, ToadSoul at the first screen | Cannon A | the summon (the Soul's Navi over MegaMan, on the other GBA from the other side), MegaMan in the Soul, its three turns; ScreenDivide's 50 a hit (ColonelSoul won at frame 2,668), the slash, the dice bomb, the whole field grass and the swing, the notes' 30 and their paralysis | 45, 57, 56, 57, 57 |
+| Both uniting | ShadowSoul, NumberSoul, KnightSoul at the first screen | TomahawkSoul, ToadSoul, ColonelSoul at the second | both Souls at once, each GBA carrying its own player's ("side 1's Soul 10 (its turns 3) carried"), the second summon on the first player's screen | 74 each |
+| ColonelSoul's button | ColonelSoul (three RockCubes in a folder of Cannon A), a Cannon put in the button at the second screen | Cannon A | the Cannon fired as his charged shot (Beta 250 to 210), ScreenDivide the turn after (no chip), the Soul ended at the fourth turn's start on both | 94 |
+| Chaos Unison | ColonelSoul by a DrkSonic, NumberSoul by a DarkPlus (thirty of it) | Cannon A | the Chaos picture and the summon, the Soul in its dark palette, one turn; ColonelSoul's charged B its DrkSonic on Beta's screen | 67, 67 |
+
+Each run's Souls' blocks were compared between the two pair cores every
+frame (a check kept out of the build): the same but for each GBA's own
+player's mood, stand and slot (above) and a frame's lag as the two cores
+take a commit or a turn in turn; the Soul's end and the button's chip
+apart until the two fixes above.
 
 ### The two-client proof
 
@@ -400,13 +477,18 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
   and 2 more (6 at least); a phase of up to a tick between the two
   games' clocks comes out of that margin, and stalls show on the
   picture after 20 ticks ("Waiting for the other PET").
-- The Souls under full rules beyond KnightSoul's unison and its charged
-  shot ([Full rules](#full-rules), above): the other five, Chaos Unison
-  and ColonelSoul's button in a NetBattle, and BN5's mood across the
-  cable, each still to be seen on both GBAs; and both players uniting in
-  one battle (the second GBA's Soul carried to the first was seen in the
-  logs, "side 1's Soul 11 (its turns 3) carried to the other GBA" on
-  both games with every hash agreeing, its pictures not yet).
+- The Souls under full rules ([Full rules](#full-rules), above): every
+  Soul, both players uniting, Chaos Unison and ColonelSoul's button were
+  seen on both GBAs (issue #130). Not yet: a failed Chaos Unison (the
+  Dark Soul on the other player's side), Chaos Unison's attack timed
+  for each of the other four Souls, the passives one by one on the
+  other GBA (ShadowSoul's FloatShoe, ToadSoul's sea, NumberSoul's hand
+  of ten), a Soul's chip charge, and BN5's DarkChips offered at the
+  hand's end to a worried MegaMan in a NetBattle (the Pack stays home).
+- MrkCan1's marker against another MegaMan who steps while it sweeps:
+  BN6's moved code does what BN5's does against a teleporting virus
+  (`chip_mrkcan1_moving`), but no differential has a MegaMan as its
+  target, so BN5's own link battle with a moving MegaMan is not compared.
 - A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
   Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the
