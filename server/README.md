@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v7`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v8`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -355,5 +355,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v6 games and a v7
+one protocol version cannot enter a server of another (v7 games and a v8
 server refuse each other). Preserve the private state directory when upgrading.
