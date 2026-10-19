@@ -2,7 +2,9 @@
  * picker speaks the desk's words, not AsterLand's ordering (docs/ONLINE.md;
  * the Order Service's text archive in docs/ROM_DATA.md): its archive is
  * read from the player's ROM, its prompts (scripts 0 and 1), its question (5),
- * its supplier's call (6), MegaMan's word after (7), the way out (2, 3)
+ * its supplier's call (6), MegaMan's word after (7) and Lan's in its
+ * place (20, where BN6's own checks at 7's head send it: seen on a host
+ * build's second visit, "I bought a new chip!"), the way out (2, 3)
  * written again round BN6's own commands (the chip's name and code, the
  * Yes and No), and the shop's descriptor pointed at the copy while
  * MegaMan is in the Square; put back as he leaves. */
@@ -23,6 +25,8 @@
 
 #define DESC_TEXT (BN6_SHOP_DESCS + SHOP_ORDER * 16u + 4u)   /* the Order Service's text archive, u32 */
 #define ROOM 4096
+#define SAID 7           /* MegaMan's word after the Yes */
+#define SAID_LAN 20      /* Lan's, which SAID's checks jump to: said as SAID's, without them */
 
 static uint32_t original;
 
@@ -56,20 +60,28 @@ static int script(int i, const uint8_t *s, int len, uint8_t *o) {
 		o[n++] = 0xE7; o[n++] = 0; o[n++] = 0xEE; o[n++] = 0xFF; o[n++] = 0; o[n++] = 0; return n;
 	case 6: n = head(o, FACE_PROG); n += text(o + n, trade_order_ready());
 		o[n++] = 0xE7; o[n++] = 0; o[n++] = 0xEE; o[n++] = 0xFF; o[n++] = 0; o[n++] = 0; return n;
-	case 2: case 5: case 7: {
+	case 2: case 5: case SAID: case SAID_LAN: {
 		/* (its jumps first, BN6's own checks; then our words, then its
 		 * commands from the chip's name or the line before its Yes and No
-		 * on) */
+		 * on; SAID_LAN is given SAID's script and keeps none of its jumps,
+		 * which lead back to it) */
 		int j = 0;
 		while (j + 1 < len && !(s[j] == 0xFC && s[j + 1] == 0x06)) ++j;
-		memcpy(o, s, (size_t)j);
-		n = j + head(o + j, i == 5 ? FACE_PROG : FACE_MEGAMAN);
+		int keep = i == SAID_LAN ? 0 : j;
+		memcpy(o, s, (size_t)keep);
+		n = keep + head(o + keep, i == 5 ? FACE_PROG : FACE_MEGAMAN);
 		n += text(o + n, i == 2 ? trade_order_leave() : i == 5 ? trade_order_offer() : trade_order_said());
 		t = tail(s, len, i == 2 ? 0xE9 : 0xAA, j + 10, o + n);
 		return t < 0 ? 0 : n + t;
 	}
 	default: return 0;
 	}
+}
+
+/* script `i`'s start in an archive of `count`, its end in *end */
+static int span(const uint8_t *arc, int count, int alen, int i, int *end) {
+	*end = i + 1 < count ? (arc[2 * i + 2] | arc[2 * i + 3] << 8) : alen;
+	return arc[2 * i] | arc[2 * i + 1] << 8;
 }
 
 bool trade_order_words(bool on) {
@@ -90,10 +102,10 @@ bool trade_order_words(bool on) {
 	int n = 4 + 2 * count;
 	bool ok = count > 7 && n < ROOM;
 	for (int i = 0; ok && i < count; ++i) {
-		int a = arc[2 * i] | arc[2 * i + 1] << 8, b = i + 1 < count ? (arc[2 * i + 2] | arc[2 * i + 3] << 8) : alen;
-		if (a > b || b > alen || n + 300 + (b - a) > ROOM) { ok = false; break; }
+		int b, a = span(arc, count, alen, i, &b), fb, fa = span(arc, count, alen, i == SAID_LAN ? SAID : i, &fb);
+		if (a > b || b > alen || fa > fb || fb > alen || n + 300 + (b - a) > ROOM) { ok = false; break; }
 		put16(out + 4 + 2 * i, (uint16_t)(n - 4));
-		int k = script(i, arc + a, b - a, out + n);
+		int k = script(i, arc + fa, fb - fa, out + n);
 		if (!k) { memcpy(out + n, arc + a, (size_t)(b - a)); k = b - a; }
 		n += k;
 	}
