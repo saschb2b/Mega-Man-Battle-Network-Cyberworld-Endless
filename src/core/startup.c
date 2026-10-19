@@ -21,6 +21,38 @@
 #ifdef CW_IOS
 #include "ios.h"
 #endif
+#ifdef __ANDROID__
+#include <android/log.h>
+#include <pthread.h>
+#include <unistd.h>
+
+static int output_pipe[2];
+
+/* (Android throws an app's stdout and stderr away: a thread hands them on
+ * to logcat a line at a time) */
+static void *output_pump(void *arg) {
+	(void)arg;
+	FILE *in = fdopen(output_pipe[0], "r");
+	char line[1024];
+	while (in && fgets(line, sizeof line, in)) {
+		size_t n = strlen(line);
+		if (n && line[n - 1] == '\n') line[n - 1] = 0;
+		__android_log_write(ANDROID_LOG_INFO, "Cyberworld", line);
+	}
+	return NULL;
+}
+#endif
+
+void startup_output(void) {
+#ifdef __ANDROID__
+	pthread_t pump;
+	if (pipe(output_pipe) != 0) return;
+	setvbuf(stderr, NULL, _IOLBF, 0);
+	dup2(output_pipe[1], 1);
+	dup2(output_pipe[1], 2);
+	if (pthread_create(&pump, NULL, output_pump, NULL) == 0) pthread_detach(pump);
+#endif
+}
 
 /* mkdir -p */
 static void make_dirs(const char *path) {

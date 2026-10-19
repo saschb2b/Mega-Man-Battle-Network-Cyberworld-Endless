@@ -497,6 +497,7 @@ int main(int argc, char **argv) {
 	int code = parse_args(argc, argv, &o);
 	if (code >= 0) return code;
 	setvbuf(stdout, NULL, _IOLBF, 0);
+	startup_output();
 #ifdef __3DS__
 	start_3ds(o.data_dir_given);
 #endif
