@@ -250,6 +250,7 @@ static ArenaBootStage at_custom(ArenaBoot *b) {
 		if (c->rawRead8(c, BN6_BATTLE_PHASE, -1) != BN6_PHASE_CUSTOM) return fail(b, "the Practice battle's Custom screen did not open");
 	}
 	arena_pair_anchor(b->pair);
+	arena_pair_begin(b->pair);
 	return b->stage = ARENA_BOOT_READY;
 }
 

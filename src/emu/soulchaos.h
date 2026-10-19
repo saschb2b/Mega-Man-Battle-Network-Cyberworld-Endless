@@ -33,8 +33,15 @@ bool soulchaos_install(int breaks);
 /* The chip AI's lists of `side` where the battle gave it none
  * (BN6_DARK_LISTS): its folder's chips BN5's have, the most of a chip
  * first; what a failed Chaos Unison's Dark Soul and BN5's DarkInvs play
- * (darkinvs.h). From a hook. */
+ * (darkinvs.h). None in a link battle: this GBA holds only its own
+ * player's folder, and the Arena's pair gives both sides' lists as the
+ * battle begins (arena_souls.h), as BN5's link exchange carries them.
+ * From a hook. */
 void soulchaos_lists_fill(int side);
+/* A list's chips (SOULCHAOS_LIST_CHIPS, 0xFFFF past them) as that fill
+ * makes them from a folder's BN6_FOLDER_ENTRIES entries; how many */
+#define SOULCHAOS_LIST_CHIPS 0x2A
+int soulchaos_list_make(const uint16_t folder[], uint16_t chips[SOULCHAOS_LIST_CHIPS]);
 /* The Thumb address of BN5's chaos power attack `bn5_id` (0x31-0x3A, a
  * Soul's loadout's sixth), 0 for another or where it is not installed */
 uint32_t soulchaos_power(int bn5_id);

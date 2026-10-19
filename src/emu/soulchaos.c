@@ -37,7 +37,7 @@
 #define LEVEL_CHARGES 5          /* a chaos power's charge times by the level (BN5_CHAOS_LEVEL_TOP + 1) */
 #define NONE 0xFFu
 #define FOLDER_BYTES 0x3Cu       /* a folder's bytes (eToolkit +0x48's folders) */
-#define LIST_CHIPS 0x2A          /* a chip list's chips (xnavi_dark.h's XNAVI_DARK_CHIPS) */
+#define LIST_CHIPS SOULCHAOS_LIST_CHIPS   /* a chip list's chips (xnavi_dark.h's XNAVI_DARK_CHIPS) */
 #define PLAYERS_ROW 0x10u        /* BattleState +0x80's objects, a side's row (BN5's 0x08104376) */
 #define PLAYERS_OF_SIDE 4
 
@@ -212,17 +212,12 @@ static HookAct glow_anim(HookRegs *r, void *user) {
 
 /* ---- the failure's Dark Soul ---- */
 
-/* the chip lists of `side` where the battle gave it none: the folder's chips BN5's have (the registry's rows: the chip AI
- * reads BN5's bytes of their records, xnavi_dark.c), the most of a chip first, the folder's order between equals */
-void soulchaos_lists_fill(int side) {
-	uint32_t list = BN6_DARK_LISTS + (uint32_t)side * BN5_DARK_LIST_SIZE;
-	if (hook_read32(list + BN5_DARK_LIST_COUNT)) return;
-	uint32_t folder = hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS) + FOLDER_BYTES * hook_read8(BN6_NAVI_FOLDER);
+int soulchaos_list_make(const uint16_t folder[], uint16_t chips[SOULCHAOS_LIST_CHIPS]) {
 	uint16_t ids[BN6_FOLDER_ENTRIES];
 	uint8_t count[BN6_FOLDER_ENTRIES];
 	int n = 0;
 	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
-		uint16_t id = hook_read16(folder + 2 * i) & 0x1FFu;
+		uint16_t id = folder[i] & 0x1FFu;
 		if (!id || (!xreg_at(id) && !xreg_named(id))) continue;
 		int k = 0;
 		while (k < n && ids[k] != id) ++k;
@@ -234,8 +229,23 @@ void soulchaos_lists_fill(int side) {
 			uint16_t t = ids[b]; ids[b] = ids[b - 1]; ids[b - 1] = t;
 			uint8_t c = count[b]; count[b] = count[b - 1]; count[b - 1] = c;
 		}
-	for (int k = 0; k < LIST_CHIPS; ++k) hook_write16(list + 2u * (uint32_t)k, k < n ? ids[k] : 0xFFFF);
-	hook_write32(list + BN5_DARK_LIST_COUNT, (uint32_t)(n < LIST_CHIPS ? n : LIST_CHIPS));
+	for (int k = 0; k < LIST_CHIPS; ++k) chips[k] = k < n ? ids[k] : 0xFFFF;
+	return n < LIST_CHIPS ? n : LIST_CHIPS;
+}
+
+/* the chip lists of `side` where the battle gave it none: the folder's chips BN5's have (the registry's rows: the chip AI
+ * reads BN5's bytes of their records, xnavi_dark.c), the most of a chip first, the folder's order between equals; none in a
+ * link battle, whose lists the Arena's pair gave (this GBA's folder is its own player's alone) */
+void soulchaos_lists_fill(int side) {
+	uint32_t list = BN6_DARK_LISTS + (uint32_t)side * BN5_DARK_LIST_SIZE, settings = hook_read32(BN6_BATTLE_SETTINGS);
+	if (hook_read32(list + BN5_DARK_LIST_COUNT)) return;
+	if (settings >= BUS && hook_read8(settings + BN6_SETTINGS_MODE) == BN6_BATTLE_LINK) return;
+	uint32_t at = hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS) + FOLDER_BYTES * hook_read8(BN6_NAVI_FOLDER);
+	uint16_t folder[BN6_FOLDER_ENTRIES], chips[LIST_CHIPS];
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) folder[i] = hook_read16(at + 2 * i);
+	int n = soulchaos_list_make(folder, chips);
+	for (int k = 0; k < LIST_CHIPS; ++k) hook_write16(list + 2u * (uint32_t)k, chips[k]);
+	hook_write32(list + BN5_DARK_LIST_COUNT, (uint32_t)n);
 }
 
 /* (CHAOS_OUT_STUB, r0 MegaMan's side) BN5's 0x0810436C: a Dark Soul already out on the other side ended (its AIData +0x88 0),

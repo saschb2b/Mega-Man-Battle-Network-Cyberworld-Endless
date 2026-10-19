@@ -8,7 +8,9 @@
  * core's block, his side's fields, once a commit, before either GBA's turn
  * takes it up; so does the chip ColonelSoul's button took at his OK
  * (soulcolonel.c), which only his own GBA writes. Both clients' pairs do
- * the same at the same frame. (BN5's mood each GBA keeps for its own
+ * the same at the same frame. As the battle begins it gives both GBAs
+ * each side's chip list for a Dark Soul, which each GBA can make only for
+ * its own player (soulchaos.h). (BN5's mood each GBA keeps for its own
  * player alone, as its own Custom screen opens, and reads for him alone:
  * UNITE's stand, the worried rule's DarkChips. A Soul's end the stand's
  * hook marks for both sides, soulunite.c.) */
@@ -29,5 +31,12 @@ typedef struct {
 /* A frame's end: each core's committed Soul, where it is new, and its
  * ColonelSoul's chip, where it differs, into the other's */
 void arena_souls_carry(struct mCore *core[2], ArenaSoulCarried carried[2]);
+/* As the battle begins (both cores at its first Custom screen): each
+ * side's chip list for a Dark Soul (BN6_DARK_LISTS: a failed Chaos
+ * Unison's, BN5's DarkInvs's), made from that side's folder on its own
+ * player's GBA, into both cores, as BN5's link exchange carries each
+ * player's list at the battle's setup; a GBA knows only its own player's
+ * folder, and in a link battle fills none (soulchaos.h) */
+void arena_souls_lists(struct mCore *core[2]);
 
 #endif
