@@ -55,6 +55,10 @@ void arena_pair_close(ArenaPair *pair);
 /* Each core's frame counter as the clock's start: the next frame of the
  * pair is frame 0 of a stretch of keys (the entry's steps, the battle) */
 void arena_pair_anchor(ArenaPair *pair);
+/* The battle begun, both cores at its first Custom screen: under full
+ * rules what BN5's link exchange carries at a battle's setup and BN6's
+ * does not, given to both (arena_souls_lists) */
+void arena_pair_begin(ArenaPair *pair);
 /* One frame of the pair: each core run to its next frame, the cable's
  * transfers between. `own_clock` false: both cores hold keys[0] for the
  * frame (the entry's scripted steps); true: each takes the keys of its

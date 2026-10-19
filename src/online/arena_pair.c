@@ -193,6 +193,10 @@ void arena_pair_anchor(ArenaPair *p) {
 	p->relative = 0;
 }
 
+void arena_pair_begin(ArenaPair *p) {
+	if (p->bn5) arena_souls_lists(p->core);
+}
+
 static bool both_crossed(ArenaPair *p, const unsigned target[2]) {
 	return p->core[0]->frameCounter(p->core[0]) >= target[0] && p->core[1]->frameCounter(p->core[1]) >= target[1];
 }
@@ -320,6 +324,7 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 }
 void arena_pair_close(ArenaPair *pair) { (void)pair; }
 void arena_pair_anchor(ArenaPair *pair) { (void)pair; }
+void arena_pair_begin(ArenaPair *pair) { (void)pair; }
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) { (void)pair; (void)keys; (void)own_clock; return false; }
 uint64_t arena_pair_hash(ArenaPair *pair) { (void)pair; return 0; }
 uint64_t arena_pair_record(const ArenaPair *pair) { (void)pair; return 0; }
