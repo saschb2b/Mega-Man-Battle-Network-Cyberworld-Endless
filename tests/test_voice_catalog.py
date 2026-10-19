@@ -141,10 +141,35 @@ def main():
     check([len(p) for p in pages] == [2, 2] if len(lines) == 4 else len(pages) == (len(lines) + 2) // 3, f'pages: {pages}')
     lines, _ = vc.wrap('{name} waits!', {'name': 8})
     check(lines == ['{name} waits!'], f'a placeholder at its width: {lines}')
+    # conversations: a function's lines together, in order, its comment's
+    # first clause the title (or its name as words)
+    convs = {c['id']: c for c in vc.conversations(list(by.values()), {f'demo_words:{k}': v for k, v in r.containers.items()})}
+    check(convs['demo_words:far_words']['lines'] == ['demo_words:far_words:0', 'demo_words:far_words:1'], f'a conversation\'s lines: {convs.get("demo_words:far_words")}')
+    check(convs['demo_words:far_words']['title'] == "MegaMan's word on a place", f'its title: {convs["demo_words:far_words"]["title"]!r}')
+    check(convs['demo_words:rows']['title'] == 'The rows', f'a table\'s title: {convs["demo_words:rows"]["title"]!r}')
+    check(vc.readable('ta_heal.hello') == 'Heal: hello', f'a name as words: {vc.readable("ta_heal.hello")!r}')
+    # the sweep's logs: a table's cells (\| is the cell's), ids named
+    # relative to the one before, ranges
+    check(vc.table_cells(r'| `a:b:1` | One\|@M Two | why |') == ['`a:b:1`', 'One|@M Two', 'why'], 'a log\'s cells')
+    check(vc.sweep_ids('`a:b:4`, `:5` (and `c:0`)') == (['a:b:4', 'a:b:5', 'a:c:0'], False), f'relative ids: {vc.sweep_ids("`a:b:4`, `:5` (and `c:0`)")}')
+    check(vc.sweep_ids('`a:b:case1.0`-`case9.0` (9)') == (['a:b:case1.0', 'a:b:case9.0'], True), 'a range')
+    # a noted line found by its words where a cut before it moved its count;
+    # a cut line only by what is left of it
+    today = [{'id': 'w:f:0', 'text': '@M Hello there,Lan!'}, {'id': 'w:f:1', 'text': '@M Pick {kinds} chip last.'},
+             {'id': 'w:f:2', 'text': '@M Then UNITE! Once a battle.'}]
+    groups = {'w:f': today}
+    check(vc.sweep_live({'status': 'noted', 'ids': ['w:f:2', 'w:f:3'], 'text': 'Pick {a Fire} chip last. / Then UNITE! Once a battle.'}, groups)
+          == ['w:f:1', 'w:f:2'], 'a noted line followed past a cut before it')
+    check(vc.sweep_live({'status': 'cut', 'ids': ['w:f:0'], 'text': 'Hello there,Lan!|**Press R to jack in!**'}, groups) == ['w:f:0'],
+          'a cut in part: what is left of it')
+    check(vc.sweep_live({'status': 'cut', 'ids': ['w:f:3'], 'text': 'Our trump card. Alright!'}, groups) == [], 'a line cut whole: nothing')
     # the catalog renders the same twice (deterministic)
     cat = vc.catalog()
     check(vc.render(cat) == vc.render(vc.catalog()), 'the catalog is deterministic')
     check(len({e['id'] for e in cat['lines']}) == len(cat['lines']), 'ids are unique')
+    seen = [i for c in cat['conversations'] for i in c['lines']]
+    check(sorted(seen) == sorted(e['id'] for e in cat['lines']), 'every line in one conversation')
+    check(all(r['status'] in ('cut', 'noted') and r['ids'] and r['text'] for r in cat['sweep']), 'the sweep\'s rows read')
     print(f'voice catalog: {failed} failed')
     return 1 if failed else 0
 
