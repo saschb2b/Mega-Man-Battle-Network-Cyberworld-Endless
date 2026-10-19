@@ -336,6 +336,23 @@ frame through whole battles, a check kept out of the build):
   both GBAs (`soulmood_chip_used`, run where the chip is used, on both).
   Seen: side 0's mood 0x9E on its own GBA, side 1's 0x3A (worried) on
   its own, the rest of the block the same on both through the battle.
+- **The Dark Soul's chip lists** (`BN6_DARK_LISTS`, what a failed Chaos
+  Unison's Dark Soul and BN5's DarkInvs play, `soulchaos.c`). Each GBA
+  made a side's list, as the Dark Soul or DarkInvs came, from its own
+  player's folder, so the other GBA made it from the wrong one. BN5 makes
+  each player's from his own save and its link exchange carries it at
+  the battle's setup (`BN5_DARK_LISTS`, `0x08009B92`); BN6's link carries
+  none. Seen (`--dev arena`, NumberSoul by DarkPlus, B released 70 frames
+  into its charge, past phase 2): side 0's list DarkPlus (0x122) on his
+  own GBA, Cannon (1, the other player's) on the other; then the Dark
+  Soul at (6,2) on one and (6,1) on the other and MegaMan's HP 294 on one
+  and 254 on the other: the two GBAs' battles apart, both clients' pairs
+  alike. The pair now makes each side's list on its own player's GBA as
+  both cores reach the first Custom screen and writes it into both
+  (`arena_souls_lists`: "arena: side 0's chips for a Dark Soul, 1 of its
+  folder's, on both GBAs"), and in a link battle the hook fills none
+  (`soulchaos_lists_fill`). The two GBAs the same since, through the Dark
+  Soul's stay.
 
 **The proofs** (18 October 2026, the player's Gregar and Team Colonel
 ROMs). `--dev arena` with a checkpoint whose Folder1 is thirty MrkCan1 M
@@ -417,6 +434,51 @@ player's mood, stand and slot (above) and a frame's lag as the two cores
 take a commit or a turn in turn; the Soul's end and the button's chip
 apart until the two fixes above.
 
+**What was left of them** (19 October 2026, issue #130, the same harness;
+a full-rules `--dev arena` where named). Each run's two pair cores were
+compared every frame, now wider (a check kept out of the build): the
+battle's objects, both MegaMen's objects, AI data and collision data,
+the panels, the Souls' block and the Dark Soul's lists, the same on both
+but for each GBA's drawing of its own mirrored field (a MegaMan's +0x20,
++0x9A to +0x9F, +0xA3 and +0xA5), each GBA's own player's mood, stand and
+slot, and a frame's lag; every hash agreed on both games.
+
+| Run | Alpha (side 0) | Beta (side 1) | Seen on both screens | Hashes |
+| --- | --- | --- | --- | --- |
+| A failed Chaos Unison | NumberSoul by DarkPlus, B released 70 frames into its charge | Cannon A | the failure's flash, Alpha out of the Soul, the Dark Soul at the back of Beta's area firing at Alpha (300 to 243); before the lists' fix above, the two GBAs apart | 67 |
+| Chaos Unison's attacks | ShadowSoul by DarkInvs, TomahawkSoul by DrkLance, KnightSoul by DarkDril, ToadSoul by DarkWide (thirty of each), B held 45 frames | Cannon A | DarkInvs: Alpha under BN5's chip AI, his LongSwrd, MegEnBom and HiCannon taking Beta from 300 to 14; DrkLance: the lances up Beta's back column, Beta at the front untouched, Alpha healing on his Soul's grass; DarkDril: Beta 300 to 200; DarkWide: Beta deleted from 300, over at frame 1,365 | 35, 67, 67, 23 |
+| The passives | ShadowSoul, ToadSoul at the first screen | Cannon A | ShadowSoul's FloatShoe (his collision flags' 0x20, `BN6_OBJ_FLOATS`) and ToadSoul's flag (his AI data +0x48's 0x20) set as each unites, on both cores at the same frame; TomahawkSoul's grass above | 57, 57 |
+| NumberSoul's hand of ten (`--dev arena`) | NumberSoul (BusterUp in fifteen of thirty), its second screen's two rows of five: the second row's first two picked, OK | the script's | CrakShot from the second row as "CrakShot 60+10", its 70 taking the second player from 100 to 30, then the BusterUp beside it; over at frame 3,883 | 64 |
+| A Soul's chip charge | KnightSoul (thirty JustcOne J, two picked, the second given up for UNITE), A held 130 frames in its turn | Cannon A | "JustcOne440", the chip charged and doubled, Beta deleted; over at frame 1,507. ToadSoul's (BblWrap, a barrier: no number to see) the same on both GBAs | 25, 64 |
+| BN5's DarkChips, worried | thirty Cannon A, the first four DarkDril D; his mood held worried on his own GBA once the opening set it (a step kept out of the build, as `--dev worried` holds it on the game's core) | Cannon A | the first screen none of them; the second dealt DarkDril at the hand's end, its fifth, the cursor on it and the screen dimmed as BN5's; picked, OK, used: "DarkDril 100" named and the drill on both screens, Alpha dark (his emotion window), the third screen dealing the next DarkDril at its end | 81, 65 |
+| MrkCan1 against a MegaMan who steps | thirty MrkCan1 M, used each turn | stepping up and down every 32 frames | the mark locked on Beta and the cannon took him from 300 to 230 | 64 |
+
+The Pack stays home in a NetBattle, so what a worried MegaMan is offered
+is the carried folder's: its BN5 DarkChips are shelved as in a run's
+battle and one comes to the hand's end while he worries or is dark
+(`soulmood.c`'s worried rule, on his own GBA's Custom screen; the pick
+crosses as any). His mood opens calm in a NetBattle, both MegaMen at
+full HP (the opening's rule makes him worried at a quarter of his HP or
+less), and hits lower it as BN5's do. A DarkChip used there takes its
+own after-effect, as in a run's battle. BN5's dispatcher of them
+(`0x0802C938`) gives the HP bug a step in its place where the battle
+state's bit 0x40 is set (`0x0802C95E`, through `0x080090E8`), which
+`soulmood.c` reads as BN5's link battle's; BN6's twin bit (`0x0800A8F8`
+through `0x0802E09A`) is clear in the Arena's NetBattles, read on both
+cores through the worried run, so nothing there asks for BN5's other
+rule (what sets BN5's bit in its own NetBattles is not yet read:
+docs/ROM_DATA.md, BN5's DarkChips' after-effects).
+
+MrkCan1: BN5's own link battle, MegaMan against MegaMan, is out of the
+differential's reach (it runs one guest core, no cable). Its nearest is
+`chip_mrkcan1_darksoul`: the Dark Soul, MegaMan's body under BN5's chip
+AI, steps at t39 and t76 while the mark sweeps from t32 to t84, and
+neither engine's mark locks or hits, frame for frame (PASS over 600
+frames). So BN6's moved code does what BN5's does against a target that
+steps; in a NetBattle it has locked on a stepping MegaMan (above) and
+wandered without a lock (the earlier run), the same on both games each
+time.
+
 ### The two-client proof
 
 Two host binaries on this machine (`SDL_VIDEODRIVER=dummy
@@ -480,18 +542,17 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
   deployed server (19 October 2026, docs/ONLINE.md): delay 7, two
   full-rules battles to their end with every hash agreeing, the leading
   game waiting about one frame in eight (issue #128).
-- The Souls under full rules ([Full rules](#full-rules), above): every
-  Soul, both players uniting, Chaos Unison and ColonelSoul's button were
-  seen on both GBAs (issue #130). Not yet: a failed Chaos Unison (the
-  Dark Soul on the other player's side), Chaos Unison's attack timed
-  for each of the other four Souls, the passives one by one on the
-  other GBA (ShadowSoul's FloatShoe, ToadSoul's sea, NumberSoul's hand
-  of ten), a Soul's chip charge, and BN5's DarkChips offered at the
-  hand's end to a worried MegaMan in a NetBattle (the Pack stays home).
-- MrkCan1's marker against another MegaMan who steps while it sweeps:
-  BN6's moved code does what BN5's does against a teleporting virus
-  (`chip_mrkcan1_moving`), but no differential has a MegaMan as its
-  target, so BN5's own link battle with a moving MegaMan is not compared.
+- The Souls under full rules ([Full rules](#full-rules), above): all of
+  issue #130's seen on both GBAs. Not yet: a NetBattle in which a
+  MegaMan grows worried by hits alone (the runs held his mood worried),
+  ToadSoul's flag on BN5's sea and FloatShoe over a cracked panel (a
+  NetBattle's field has neither; both flags were read set on both GBAs),
+  and BN5's after-effect rule for a DarkChip where its battle's bit 0x40
+  is set, if BN5's own NetBattles set it.
+- BN5's own link battle as a reference: the differential runs one guest
+  core and no cable, so MrkCan1 against a stepping MegaMan is compared
+  against the Dark Soul (`chip_mrkcan1_darksoul`), not against BN5's
+  NetBattle.
 - A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
   Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the

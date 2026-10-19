@@ -511,6 +511,21 @@ server:
   carried or marked on both: the Soul's end and the button's chip.
   The ready apart because BN5's installs differ now says so on both
   games ("Huh? Our PETs don't match on BN5...").
+- **The rest of the Souls in a NetBattle** (19 October 2026, issue #130,
+  the same harness and a full-rules `--dev arena`). A failed Chaos
+  Unison: the Dark Soul at the back of the other player's area firing at
+  the one who failed, on both screens, once each side's chip list for it
+  is made on its own player's GBA and given to both as the battle begins
+  (before, the other GBA made it from the wrong folder and the two GBAs'
+  battles went apart, both clients' hashes agreeing). Chaos Unison's
+  attack for the other four Souls (DarkInvs, DrkLance, DarkDril,
+  DarkWide); ShadowSoul's FloatShoe and ToadSoul's flag set on both
+  GBAs as each unites; NumberSoul's hand of ten, a CrakShot from its
+  second row dealt with its +10; KnightSoul's chip charge (JustcOne
+  doubled to 440); a worried MegaMan offered DarkDril at the hand's end,
+  picked and used, dark on both; MrkCan1 locking on a MegaMan who steps.
+  Every hash agreeing, and the two GBAs of each pair the same, frame by
+  frame ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)).
 
 - **Android and Windows** (19 October 2026, protocol v5, a local server
   with seed 120, then the deployed test server once each; issue #129).
@@ -586,10 +601,11 @@ are in the history before 433865a8):
   and quick, but the owner calls it friction to brainstorm again (a
   NetBattle folder of the PET's, BN6's Folder2 opened online, is the
   other way weighed).
-- **The Souls under full rules, what is left:** a failed Chaos Unison
-  (the Dark Soul on the other side) and BN5's DarkChips offered to a
-  worried MegaMan are not yet seen in a NetBattle, nor the passives one
-  by one on the other GBA ([ONLINE_ARENA.md](ONLINE_ARENA.md#not-yet)).
+- **The Souls under full rules, what is left:** a MegaMan worried by
+  hits alone in a NetBattle, ToadSoul's flag and FloatShoe on panels a
+  NetBattle's field lacks, and BN5's own NetBattle as a reference for
+  MrkCan1 and for a DarkChip's after-effect
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#not-yet)).
 - **A pending trade across systems:** `trade.pending` stays beside the
   saves, outside the `.cwsave` carrier; a save moved between a trade and
   its settling leaves the swap on the system the trade was made on.
