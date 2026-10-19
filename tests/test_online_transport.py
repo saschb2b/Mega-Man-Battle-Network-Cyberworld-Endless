@@ -135,7 +135,7 @@ async def malicious(reader, writer, frame):
     await websocket.upgrade(reader, writer, ())
     opcode, hello = await websocket.receive(reader)
     assert opcode == 2 and hello[0] == protocol.SPEC["hello"]
-    writer.write(websocket.frame(protocol.WELCOME.pack(protocol.SPEC["welcome"], 120, 1, 20, 8, 1, b"t" * 16, 8)))
+    writer.write(websocket.frame(protocol.WELCOME.pack(protocol.SPEC["welcome"], 120, 1, 20, 8, 1, b"t" * 16, 8, 0x5EED, 2963)))
     await writer.drain()
     await asyncio.sleep(0.1)
     writer.write(frame)
