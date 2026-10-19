@@ -138,6 +138,39 @@ challenge or acceptance is sent. The 3DS and the browser build, which
 compile the Arena out (`CW_ARENA`), never offer Battle and decline a
 challenge.
 
+### Rematches and the referee
+
+A battle with a result (issue #128) is offered again. Back in the
+Square, MegaMan's word on it ("Alright! We won,Lan!!") goes on to
+"Again with NAME?", the cursor on No, once no chat is open and while
+NAME is still in the Square. Nothing is won or lost, so the question is
+the whole cost: the default lets either player go (the Square's pull
+between staying together and moving on), and both must say Yes.
+
+No new message: a rematch is ARENA's challenge again, by the last
+battle's rules, answered at once. Lan's Yes sends it quietly (nothing
+changed, so MegaMan names no rules); the other game takes a challenge
+from that player by those rules at once where its player said Yes too,
+turns it down at once where he said No (or B), and, his question still
+open or the result still on the picture, holds it for the answer. Both
+Yeses at once cross on the server, which turns the second challenge down
+as busy; the first is taken (`again_in`, `square_arena.c`). The folder
+carried is the last battle's, asked again only where it no longer fits.
+An answer is kept 45 seconds from the battle's end (`AGAIN_MS`); a
+challenge then is an ordinary one, asked as ever. A Yes nobody answers
+ends as any challenge does, after the server's 30 seconds ("Aw... No
+NetBattle this time."). A battle stopped (a desync, a leave) offers none.
+An older build, which knows no rematch, sees an ordinary challenge.
+
+The referee Mr.Prog by the ring keeps what this game saw: before any
+bout he tells how a NetBattle is asked for; after one, who beat whom
+("LAST BOUT: YOU BEAT ALPHA!", "LAST BOUT: ALPHA BEAT YOU!") and, from a
+second bout with the same player on, the count ("THAT'S 2 TO 1. YOU
+LEAD!", "1 TO 1! ALL EVEN,ALL EVEN!"). As MegaMan comes back he calls
+the bout over his head ("YOU WIN!", "ALPHA WINS!"), as the greeter calls
+a log-in. A new opponent starts the count again; it is this game's
+alone, kept while the game runs.
+
 ### Formats
 
 Every NetBattle goes by the pair's common ground
@@ -463,6 +496,23 @@ rules 0, folder 2`). The pair's hash at the Custom screen was the same on
 both (`fd2fa7d630cf9080`), the battle over at frame 1,568 with 26 hashes
 agreeing, Beta's MegaMan the winner, both back in the Square.
 
+**A rematch** (19 October 2026, issue #128, protocol v5 unchanged). Two
+BN6 games, `arenahp=10`, the harness above: Alpha challenged, Beta took
+it, and the battle was over at frame 848 (Alpha won, 14 hashes
+agreeing). Back in the Square each referee called it ("YOU WIN!" on
+Alpha's game, "ALPHA WINS!" on Beta's) and each MegaMan asked "Again
+with NAME?", the cursor on No. Beta's LEFT and A said Yes and sent the
+challenge; Alpha's question was still open, so his game held it
+(`arena: Beta asks for a rematch (match 2)`) until his RIGHT and A said
+Yes, and took it at once. The second battle's pair hash at the Custom
+screen was the first's (`8dc89c5dad9af3e7`: the same rules and folders),
+and it was over at frame 1,328 (Beta won, 22 hashes agreeing; all 36 the
+same on both games). The referees then called it 1 to 1 on both. Declined:
+the same first battle, then Beta's B on the question (No); Alpha's Yes
+came after it, and Beta's game turned his challenge down at once (`arena:
+Alpha's rematch turned down`), Alpha's MegaMan saying "Aw... No NetBattle
+this time.".
+
 ## Not yet
 
 - The battle's sound: the scene plays the player's core only where the
@@ -492,8 +542,7 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
   BN6's moved code does what BN5's does against a teleporting virus
   (`chip_mrkcan1_moving`), but no differential has a MegaMan as its
   target, so BN5's own link battle with a moving MegaMan is not compared.
-- A referee Mr.Prog in the Square's Arena wing, rematches, Battle (not
-  Practice) and its chip forfeit, the pack
+- Battle (not Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the
   browser build compile the Arena out (`CW_ARENA`), Android and iOS build
   it but are untried.

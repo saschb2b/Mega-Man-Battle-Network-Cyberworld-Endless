@@ -20,6 +20,7 @@ typedef struct {
 	const char *traded;     /* the last player this game traded with, NULL none */
 	const char *fought;     /* ... and fought a NetBattle with, NULL none */
 	int result;             /* that battle's: 1 won, 2 lost, else over */
+	unsigned won, lost;     /* the bouts with him in a row, that one among them */
 	bool arena;             /* this build offers NetBattles (not the 3DS's, the browser's) */
 	bool parade;            /* the walkers are on parade round the landmark */
 	struct {                /* Trade Central's board: the offers up (online_board.c) */
@@ -35,8 +36,11 @@ typedef struct {
  * logs in (`in`) or out. */
 const char *square_greeter_words(const SquareFacts *f);
 const char *square_greeter_bark(const char *name, bool in);
-/* The referee by the Arena's ring. */
+/* The referee by the Arena's ring, and his call over his head as a
+ * battle of this game's ends (`result` 1 won, 2 lost, else over; `name`
+ * the other's). */
 const char *square_referee_words(const SquareFacts *f);
+const char *square_referee_bark(int result, const char *name);
 /* Walker `k` (0 a GreenNavi, 1 a GirlNavi) spoken to. */
 const char *square_walker_words(int k, const SquareFacts *f);
 /* A prop checked: its LOOK_* (the Board's posts, the sign's words). */

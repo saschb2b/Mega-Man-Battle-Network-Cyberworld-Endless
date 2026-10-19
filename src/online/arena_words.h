@@ -1,7 +1,8 @@
 /* What MegaMan says of the Arena in the Net Square (arena_words.c,
  * square_arena.c, docs/VOICE.md): the Battle choice for another player's
  * MegaMan, a challenge sent and answered, the question a challenge asks,
- * a MegaMan who cannot go, and the word back in the Square. */
+ * a MegaMan who cannot go, and the word back in the Square, a rematch
+ * asked with it. */
 #ifndef CW_ARENA_WORDS_H
 #define CW_ARENA_WORDS_H
 
@@ -29,6 +30,8 @@ const char *arena_folder_words(unsigned format, const char *standins, bool souls
 const char *arena_standin_words(const char *folder, int n, const char *gone, const char *in);
 const char *arena_no_folder_words(bool bn5);
 const char *arena_challenged_question(void);
+/* Back in the Square after a result: another with `name`? (its end a '\n') */
+const char *arena_again_question(const char *name);
 /* Our MegaMan can't go into a plain BN6 NetBattle: `souls` his Souls, else another game's chips (the
  * last guard, after the rules left them home) */
 const char *arena_cant_words(bool souls);

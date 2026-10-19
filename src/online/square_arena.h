@@ -5,8 +5,10 @@
  * Square's map into the Arena's two linked cores over the network's link
  * (arena_link_net.h). The Square's core holds still meanwhile, its
  * connection kept, MegaMan standing where he stood on the server's view;
- * after the battle he is back there, and says how it went. Not offered
- * where the Arena is not built (CW_ARENA: the 3DS, the browser). */
+ * after the battle he is back there, and says how it went. A battle with a
+ * result asks Lan for another with the same player (the cursor on No):
+ * both games' Yes, the same rules and folder, and they go again. Not
+ * offered where the Arena is not built (CW_ARENA: the 3DS, the browser). */
 #ifndef CW_SQUARE_ARENA_H
 #define CW_SQUARE_ARENA_H
 
@@ -18,9 +20,15 @@
 
 /* the Battle choice offered at all in this build */
 bool square_arena_offered(void);
-/* The last battle fought from the Square in this game: 1 won, 2 lost, 3
- * over otherwise, 0 none; `name` the other's. */
-unsigned square_arena_last(const char **name);
+/* The last battle fought from the Square in this game, as its referee
+ * tells it. */
+typedef struct {
+	unsigned result;      /* 1 won, 2 lost, 3 over otherwise, 0 none */
+	const char *name;     /* the other's, NULL none */
+	unsigned won, lost;   /* the bouts with him in a row, this one among them */
+	unsigned bouts;       /* every battle fought from the Square (a new one changes it) */
+} SquareBout;
+const SquareBout *square_arena_last(void);
 /* As MegaMan arrives in the Square, and as he leaves it: any battle left */
 void square_arena_reset(void);
 void square_arena_end(void);

@@ -225,9 +225,11 @@ every place and every walker's waypoint on the floor.
 - **BN6's log-in beam** (list 7's sprite 0, sound 0x76) where a Navi
   logs in or out, one NPC for all, and the **greeter**'s word over his
   head ("ALPHA LOGGED IN!"). His own words, and the **referee**'s (how
-  to ask for a NetBattle, the last one this game fought and how it went,
-  how many are watching), are rewritten as they change, as the keeper's
-  are.
+  to ask for a NetBattle until this game has fought one; then who beat
+  whom in the last bout and, from a rematch on, the count with that
+  player; how many are watching), are rewritten as they change, as the
+  keeper's are. The referee calls each bout over his head as MegaMan
+  comes back ("YOU WIN!", "ALPHA WINS!").
 - **Check text**: A facing a prop says what it is; the Board's posts are
   the channel, who is here, the last log-in, the last trade and battle,
   the trade board's offers and a tip (Trade Central); the sign names the
@@ -340,9 +342,13 @@ MegaMen carried as they are (folder, NaviCust, HP, buster, Crosses), and
 only the players' keys cross the server. The challenge names its rules
 and Lan picks the folder carried (above, the pair's common ground). The
 Square's core holds still
-meanwhile; after the battle each MegaMan stands where he stood and says
-how it went. A hash of the pair every 60 frames catches two games apart
-and stops both. Nothing is won or lost. The 3DS and the browser build
+meanwhile; after the battle each MegaMan stands where he stood, says
+how it went and asks Lan whether to go again with the same player (the
+cursor on No): when both say Yes they fight again by the same rules and
+folders, over the same ARENA messages (a challenge answered at once). The
+referee by the ring calls the bout and keeps the count. A hash of the
+pair every 60 frames catches two games apart and stops both. Nothing is
+won or lost. The 3DS and the browser build
 compile it out (`CW_ARENA`): Battle is not offered there and a challenge
 is declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
 the lockstep and the two-client proof.
@@ -512,6 +518,13 @@ server:
   carried or marked on both: the Soul's end and the button's chip.
   The ready apart because BN5's installs differ now says so on both
   games ("Huh? Our PETs don't match on BN5...").
+- **A rematch** (19 October 2026, issue #128, a local server, two host
+  binaries). After a battle both MegaMen asked "Again with NAME?"; both
+  Yeses started the second battle over the same challenge (the second
+  game's question held it until its Yes), with the first battle's pair
+  hash, to its end, all 36 hashes agreeing; the referees called each
+  bout and then 1 to 1. A No (B) turned the other's Yes down at once
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof)).
 
 - **Android and Windows** (19 October 2026, protocol v5, a local server
   with seed 120, then the deployed test server once each; issue #129).
@@ -567,8 +580,8 @@ are in the history before 433865a8):
 
 - **The Board and the weekly seed** (the epic's stretch): the Board's
   wing stands with its sign, empty.
-- **A referee Mr.Prog** in the Arena's wing, rematches, and the Arena on
-  the 3DS and in the browser.
+- **The Arena on the 3DS and in the browser**; rollback and the stands
+  (issue #128).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
   a New 3DS, an Android device (the emulator's visit above) and iOS,
   macOS and Windows itself (Wine's above); a trade and a NetBattle on

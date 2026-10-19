@@ -60,6 +60,7 @@ static struct {
 	struct { uint32_t id; unsigned at; } cheer[ONLINE_MAX_PLAYERS];
 	unsigned cheered_at;
 	uint32_t greeter_said, referee_said;
+	unsigned bouts;   /* the battles fought from the Square the referee has called */
 } L;
 
 void square_life_reset(void) {
@@ -114,6 +115,7 @@ static void setup(void) {
 	for (int k = 0; k < SQUARE_WALKERS; ++k) route_of(&L.route[k], (const int (*)[3])p->route[k], NULL, p->route_len[k]);
 	route_of(&L.parade, NULL, (const int (*)[2])p->parade, 4);
 	L.event_serial = L.s.event_serial;
+	L.bouts = square_arena_last()->bouts;
 	L.ready = true;
 }
 
@@ -203,6 +205,18 @@ static void logged(const char *name, bool in, int x, int y, int z) {
 	netmap_world(p->at[SQ_GREETER][0], p->at[SQ_GREETER][1], &gx, &gy);
 	bark(square_greeter_bark(name, in), gx, gy, 0, -1);
 	if (in) snprintf(L.arrived, sizeof L.arrived, "%s", name);
+}
+
+/* a battle of this game's over, MegaMan back: the referee's call on it */
+static void bout_called(void) {
+	const SquareBout *b = square_arena_last();
+	if (b->bouts == L.bouts) return;
+	L.bouts = b->bouts;
+	const SquarePlan *p = online_square_plan();
+	int rx, ry;
+	netmap_world(p->at[SQ_REFEREE][0], p->at[SQ_REFEREE][1], &rx, &ry);
+	bark(square_referee_bark((int)b->result, b->name), rx, ry, 0, -1);
+	printf("square: the referee calls bout %u: %s (%u-%u)\n", b->bouts, L.bark, b->won, b->lost);
 }
 
 static bool still_here(const OnlineSnapshot *s, uint32_t id) {
@@ -354,7 +368,11 @@ static void facts(SquareFacts *f) {
 	f->landmark = p->landmark;
 	f->arrived = L.arrived[0] ? L.arrived : NULL;
 	f->traded = trade_central_last();
-	f->result = (int)square_arena_last(&f->fought);
+	const SquareBout *b = square_arena_last();
+	f->result = (int)b->result;
+	f->fought = b->name;
+	f->won = b->won;
+	f->lost = b->lost;
 	f->arena = square_arena_offered();
 	f->parade = L.parading;
 	f->turn = L.turn;
@@ -382,7 +400,7 @@ static void progs(void) {
 	SquareFacts f;
 	facts(&f);
 	uint32_t g = name_hash(f.arrived, f.navis | f.channel << 8);
-	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8);
+	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8 | (f.won + f.lost) << 10);
 	if (g + 1 != L.greeter_said && prog_say(SQUARE_PROG_GREETER, square_greeter_words(&f))) L.greeter_said = g + 1;
 	if (r + 1 != L.referee_said && prog_say(SQUARE_PROG_REFEREE, square_referee_words(&f))) L.referee_said = r + 1;
 }
@@ -396,6 +414,7 @@ void square_life_frame(const OnlineSnapshot *s) {
 	if (emu_debug_on() && t % 600 == 0)
 		fprintf(stderr, "online: walkers at clock %llu: %d,%d and %d,%d\n", (unsigned long long)(t / 60), L.wx[0], L.wy[0], L.wx[1], L.wy[1]);
 	arrivals(s);
+	bout_called();
 	beam_frame();
 	emotes(s);
 	mark_frame();
