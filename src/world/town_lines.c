@@ -26,8 +26,7 @@ static const Folk central_folk[] = {
 	{ 18, 290, FACE_SW, 5, 0x39, "My,my... Aren't the flowers lovely here?" },
 	{ -146, -184, FACE_SE, 5, 0x3A, "Oh dear... The road to the Expo Site is closed.|And I so wanted to see the pavilions!" },
 	{ 132, 180, FACE_SE, 5, 0x2D, "Phew! Long day at the lab...|Nothing beats a nice walk!", 10 },
-	{ -12, -164, FACE_NE, 5, 0x31, "Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!|"
-		"Three chips in the right order make a new one!", 10 },
+	{ -12, -164, FACE_NE, 5, 0x31, "Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!", 10 },
 };
 
 /* What its checks (triggers 0xF0 + n, in front of each thing) say: the
@@ -57,7 +56,7 @@ static const Folk acdc_folk[] = {
 	{ -196, -20, FACE_SE, 5, 0x2B, "Meet you at the squirrel!|Last one there's a Mettaur!" },
 	{ -180, -4, FACE_NW, 5, 0x34, "Lan! All the way from Central Town?|The squirrel's port goes to the Endless Net too!" },
 	{ -204, -4, FACE_NE, 5, 0x37, "Squirrel! Squirrel!" },
-	{ -180, -44, FACE_SE, 7, 0x0F, "WELCOME! I'M THE PARK'S PORT GUIDE!|PRESS R BY THE SQUIRREL TO JACK IN!" },
+	{ -180, -44, FACE_SE, 7, 0x0F, "WELCOME! I'M THE PARK'S PORT GUIDE!" },
 	{ -188, -92, FACE_NE, 5, 0x2D, "Higsby's got rare chips... but those prices!|They say his rarest never leave the back room!" },
 	{ 4, -132, FACE_SW, 5, 0x30, "The Metroline goes right to Central Town. So handy!" },
 	{ 252, -28, FACE_SW, 5, 0x2E, "That's the Ayanokoji mansion!|They say there's a whole garden inside!" },
@@ -83,7 +82,7 @@ static const char *const acdc_checks[16] = {
 /* Its people, on the plaza's height (they stand at 0): by the fountain,
  * the fish shop, the way down to the aquarium. */
 static const Folk seaside_folk[] = {
-	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port,you know.|Press R beside it to jack in!" },
+	{ -60, -44, FACE_SW, 5, 0x31, "The mermaid fountain has a port,you know." },
 	{ -44, -108, FACE_SW, 5, 0x36, "They say the mermaid's port goes to a new Net!|Ahh,the sea air! I wanna dive in!" },
 	{ -92, -156, FACE_NW, 5, 0x2C, "Fish sticks,fresh from the sea!|I buy a dozen every Sunday!" },
 	{ -132, -150, FACE_NW, 5, 0x2E, "The Aquarium's Net copied itself overnight!|Grandpa says it's Dr.Wily...|He says that about everything!" },
@@ -107,7 +106,7 @@ static const char *const seaside_checks[16] = {
 /* Its people, on the ground at 0: by the knight statue, up the paths to
  * the flower shop and the Judge Tree, round the pond. */
 static const Folk green_folk[] = {
-	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port,you know.|Press R beside it to jack in!" },
+	{ -60, -156, FACE_SE, 5, 0x31, "The knight statue has a port,you know." },
 	{ -20, -268, FACE_SW, 5, 0x36, "The flower shop's roses are in full bloom!|Take a peek before you dive in!" },
 	{ -196, -172, FACE_SE, 5, 0x2C, "My friend says the right buttons shrink NaviCust programs!|But he won't tell me which ones! Hmph!" },
 	{ -180, -236, FACE_NW, 5, 0x2E, "The JudgeTree was here long before the town.|They say its roots reach all the way into the Net!" },
@@ -134,11 +133,11 @@ static const char *const green_checks[16] = {
 
 /* A run that brought BeastOut (issue #99): Dad's word that the PET's
  * CybeastButton is unlocked from the start, as the Cybeast's fall would
- * have had him unlock it (issue #109), all of it the first time
- * (`called`: Dad on the line already), MegaMan's reminder after */
-static const char *beast_words(bool taught, bool called) {
+ * have had him unlock it (issue #109), the first time a profile brings it
+ * (`called`: Dad on the line already); a power is told once, by whoever
+ * gave it (docs/VOICE.md, What nobody says) */
+static const char *beast_words(bool called) {
 	static char words[240];
-	if (taught) return "|@M And the CybeastButton's unlocked!|@L Our trump card. Alright!";
 	snprintf(words, sizeof words, "|@D %s I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|"
 		"@D Just don't let it take over,OK?|@M Leave it to me,Dad!", called ? "One more thing." : "Lan,it's Dad.");
 	return words;
@@ -146,7 +145,7 @@ static const char *beast_words(bool taught, bool called) {
 
 /* What Lan and MegaMan say as a run begins: on the first dive ever, Dad's
  * call about the Endless Net; after that, a word about the last one; and
- * with BeastOut brought, Dad's word on it. */
+ * with BeastOut brought the first time, Dad's word on it. */
 const char *town_intro(const char *arrival) {
 	static char buf[900];
 	int k = 0;
@@ -199,7 +198,7 @@ const char *town_intro(const char *arrival) {
 		default: ADD("%s|@M Let's find out,Lan!|@M To the PC!", again); break;
 		}
 	}
-	if (run_beast_start()) ADD("%s", beast_words(profile.beast & BEAST_TAUGHT, called) + (k ? 0 : 1));
+	if (run_beast_start() && !(profile.beast & BEAST_TAUGHT)) ADD("%s", beast_words(called) + (k ? 0 : 1));
 	#undef ADD
 	return buf;
 }

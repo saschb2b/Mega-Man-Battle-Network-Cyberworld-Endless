@@ -1443,7 +1443,7 @@ static void test_home_words(void) {
 		char what[80];
 		snprintf(what, sizeof what, "home again at clock %d", clock);
 		check_talk(what, home_back_words(clock));
-		for (int first = 0; first <= 1; ++first) check_talk(what, home_hp_status("to the upper right", first, clock));
+		check_talk(what, home_hp_status("to the upper right", clock));
 		for (int b = 0; b < BIOME_COUNT; ++b)
 			for (int taught = 0; taught <= 1; ++taught) check_talk(what, home_back_portal_words(b, taught, clock));
 	}
@@ -4030,7 +4030,8 @@ static void test_beast(void) {
 		char what[64];
 		snprintf(what, sizeof what, "a run's start with BeastOut, %s, %s", k & 1 ? "taught" : "first", k & 2 ? "Dad's call before" : "alone");
 		check_talk(what, words);
-		CHECK(strstr(words, "CybeastButton") != NULL, "%s: no word of it: \"%s\"", what, words);
+		/* (told once, by Dad who unlocked it: docs/VOICE.md, What nobody says) */
+		CHECK(!strstr(words, "CybeastButton") == !!(k & 1), "%s: %s word of it: \"%s\"", what, k & 1 ? "a" : "no", words);
 		CHECK(!!strstr(words, "@D Lan,it's Dad. I've unlocked") == (k == 0), "%s: Dad's call: \"%s\"", what, words);
 	}
 	run.helpers = 0;

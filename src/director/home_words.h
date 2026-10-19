@@ -31,9 +31,10 @@ const char *home_aster_words(const char *words);
 /* L's words in Lan's house `words`, then where its front door is (`door`
  * from Lan, way_to's word). */
 const char *home_door_words(const char *words, const char *door);
-/* L in Lan's HP: the pink pad `way` from MegaMan, the first time how to
- * jack out, and how far the Net's clock has run (`clock` its notches). */
-const char *home_hp_status(const char *way, bool first, int clock);
+/* L in Lan's HP: the pink pad `way` from MegaMan, and how far the Net's
+ * clock has run (`clock` its notches); R, BN6's jack-out, unsaid
+ * (docs/VOICE.md, What nobody says). */
+const char *home_hp_status(const char *way, int clock);
 /* MegaMan beside an older portal (docs/HOME.md, going back): where it
  * leads (an area won, so named) and its price on the Net's clock, all of
  * it until `taught`. */
