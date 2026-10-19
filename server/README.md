@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v6`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v7`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -87,6 +87,20 @@ its side of the cable and an input delay from both latencies (6 to 30
 frames), then relays their loadouts, keys and state hashes to each other
 alone, in a rate bucket of their own (120 a second). A player leaving
 ends the battle for the other.
+
+The stands (`stands.py`, issue #128): every started battle's loadouts,
+ready, the cable's first's hashes and both players' keys from the first
+frame are kept in memory while it runs (20 minutes of keys at most, about
+290 KB a battle) and a minute after it, for its spectators. A player of
+the channel who asks to watch is sent all of it, at most 2 KB a tick and
+only while his output is under 4 KB, so a spectator who came late catches
+up without the players' relay ever waiting on him; six watch a battle at
+most. Each channel is told its battles (STANDS) as they begin and end and
+at most once a second as they change: who fights whom, how many watch and
+cheer, and the cable's first game's report (each MegaMan's HP, the last
+chip each used, the winner). A phrase or emote of the channel's during a
+battle counts as a cheer and is held from its two players; nothing a
+spectator sends reaches the battle.
 
 ## Coolify deployment
 
@@ -340,5 +354,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v5 games and a v6
+one protocol version cannot enter a server of another (v6 games and a v7
 server refuse each other). Preserve the private state directory when upgrading.

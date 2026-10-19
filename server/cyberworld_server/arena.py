@@ -50,6 +50,7 @@ class Arena:
                                                                  match.rules)))
 
     def end(self, match, told=()):
+        self.server.stands.end(match)
         self.matches.pop(match.id, None)
         for player_id in (match.a, match.b):
             self.of.pop(player_id, None)
@@ -75,6 +76,7 @@ class Arena:
             self.send(match.a, match, START, 0, delay)
             self.send(match.b, match, START, 1, delay)
             self.server.event("arena", match=match.id, a=match.a, b=match.b, delay=delay)
+            self.server.stands.begin(match, delay)
         else:
             # (a leave, a decline, or the battle over on one side: both told)
             self.end(match)
@@ -84,7 +86,8 @@ class Arena:
         if not target or target.id == player.id or target.channel != player.channel:
             await self.server.notice(player, 17, "That Navi is no longer here")
             return
-        if player.id in self.of or target.id in self.of or player.id in self.server.trades.of or target.id in self.server.trades.of:
+        if player.id in self.of or target.id in self.of or player.id in self.server.trades.of or target.id in self.server.trades.of \
+                or self.server.stands.busy(player.id) or self.server.stands.busy(target.id):
             await self.server.notice(player, 16, "That Navi is busy")
             return
         # (the rules the challenge names: BN6's for any pair, full ones, BN5's
@@ -106,6 +109,7 @@ class Arena:
         other = self.server.players.get(match.other(player.id))
         if other and not other.writer.is_closing():
             other.writer.write(websocket.frame(data))
+        self.server.stands.record(match, player.id, data)
 
     def left(self, player_id):
         match = self.matches.get(self.of.get(player_id, 0))

@@ -27,6 +27,12 @@ ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
 OFFER = struct.Struct("!BHBB")
 BOARD_ENTRY = struct.Struct("!IHBB")
+# (the stands, protocol v7: docs/ONLINE_ARENA.md, The stands)
+ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
+STANDS_ENTRY = struct.Struct("!III16s16sBBBBHHHHHHBBB")
+WATCH = struct.Struct("!BBI")
+WATCH_STATE = struct.Struct("!BBIIIBB")
+WATCH_KEYS = struct.Struct("!BIBIH")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -188,3 +194,43 @@ def arena_relay(data):
         if 1 <= length <= SPEC["arena_loadout_max"] and len(data) == ARENA_LOADOUT.size + length:
             return match
     raise ProtocolError("Malformed arena relay")
+
+
+def read_arena_status(data):
+    """ARENA_STATUS: a battle's report as its cable's first game reads both
+    cores (HP, the last chip each side used and how many, the winner)."""
+    if len(data) != ARENA_STATUS.size or data[0] != SPEC["arena_status"]:
+        raise ProtocolError("Malformed ARENA_STATUS")
+    _, match, hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner = ARENA_STATUS.unpack(data)
+    if not match or not 0 <= hp0 <= max0 <= 9999 or not 0 <= hp1 <= max1 <= 9999 or winner > 2 \
+            or chip0 > SPEC["chip_last"] or chip1 > SPEC["chip_last"]:
+        raise ProtocolError("Invalid arena status")
+    return match, (hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner)
+
+
+def read_watch(data):
+    """WATCH: 1 watch a battle of the channel, 2 stop watching it."""
+    if len(data) != WATCH.size or data[0] != SPEC["watch"]:
+        raise ProtocolError("Malformed WATCH")
+    _, action, match = WATCH.unpack(data)
+    if action not in (1, 2) or not match:
+        raise ProtocolError("Invalid watch action")
+    return action, match
+
+
+def watch_state(stage, match, side0, side1, rules, delay):
+    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, rules, delay)
+
+
+def watch_relay(side, data):
+    return bytes((SPEC["watch_relay"], side)) + data
+
+
+def watch_keys(match, side, first, keys):
+    """WATCH_KEYS: `keys` (the u16 big-endian bytes of len(keys) // 2 frames) from frame `first`."""
+    return WATCH_KEYS.pack(SPEC["watch_keys"], match, side, first, len(keys) // 2) + keys
+
+
+def stands(entries):
+    """STANDS: a channel's NetBattles, each a tuple in STANDS_ENTRY's order."""
+    return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
