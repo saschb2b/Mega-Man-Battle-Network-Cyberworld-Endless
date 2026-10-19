@@ -192,6 +192,7 @@ bool arena_apart(const Arena *a) { return a->apart; }
 uint32_t arena_stalls(const Arena *a) { return a->stalls; }
 
 uint64_t arena_hash(Arena *a) { return a->pair ? arena_pair_hash(a->pair) : 0; }
+uint64_t arena_record(const Arena *a) { return a->pair ? arena_pair_record(a->pair) : 0; }
 
 void arena_sound(Arena *a) {
 	if (a->pair) arena_pair_sound(a->pair, a->link->side);

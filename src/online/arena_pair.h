@@ -66,6 +66,9 @@ bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], b
  * and under full rules the installs' record they were made with: two
  * clients whose pairs agree have the same; 0 where it failed */
 uint64_t arena_pair_hash(ArenaPair *pair);
+/* The installs' record its cores were made with (xinstall_log.h's hash): 0
+ * under BN6's rules */
+uint64_t arena_pair_record(const ArenaPair *pair);
 /* side's core, and its picture (ARENA_W x ARENA_H, mGBA's colour order) */
 struct mCore *arena_pair_core(ArenaPair *pair, unsigned side);
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side);

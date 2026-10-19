@@ -225,13 +225,18 @@ static void start(unsigned side, unsigned delay) {
 
 /* the server said the battle is over for us (the other left, declined,
  * or finished) */
+static bool apart(void);
+
 static void ended(void) {
 	A.ended = true;
 	switch (A.stage) {
 	case SA_SENT: case SA_WAITING: say(arena_declined_words()); A.stage = SA_IDLE; break;
 	case SA_ASKING: A.stage = SA_IDLE; break;
 	case SA_ACCEPTED: say(arena_gone_words()); A.stage = SA_IDLE; break;
-	case SA_LOADOUT: case SA_CONNECTING: case SA_READY: fail("the other player left"); say(arena_gone_words()); break;
+	/* (gone once his ready came apart from ours: the stop he saw, his to tell the server as the cable's first) */
+	case SA_READY: if (apart()) break;
+	/* fall through */
+	case SA_LOADOUT: case SA_CONNECTING: fail("the other player left"); say(arena_gone_words()); break;
 	/* (its keys already come are spent first: arena_link_net.h) */
 	case SA_BATTLE: arena_link_net_ended(&A.link); break;
 	default: break;
@@ -366,6 +371,19 @@ static void build(void) {
 	A.stage = SA_CONNECTING;
 }
 
+/* the other's ready come and apart from ours: both stopped before the first frame, told by its cause where the
+ * installs' records say it (BN5's installs made otherwise: a game that took BN5 in after its core started, or another
+ * build); false where it has not come or agrees */
+static bool apart(void) {
+	uint64_t theirs, record;
+	if (!arena_link_net_peer_ready(&A.link, &theirs) || theirs == arena_hash(A.arena)) return false;
+	bool installs = arena_link_net_peer_record(&A.link, &record) && record != arena_record(A.arena);
+	fail_as(installs ? "the two games installed BN5 apart (one took BN5 in after it started, or another build)" :
+		"the two games went apart before the battle", true);
+	if (installs) say(arena_installs_apart_words());
+	return true;
+}
+
 static void connecting(void) {
 	arena_view_connect(A.arena);
 	ArenaStage stage = arena_stage(A.arena);
@@ -373,7 +391,11 @@ static void connecting(void) {
 	if (stage != ARENA_BATTLE) return;
 	uint64_t hash = arena_hash(A.arena);
 	printf("arena: ready, the pair's hash %016llx\n", (unsigned long long)hash);
-	if (!arena_link_net_ready(&A.link, hash)) { fail("our PET's ready could not be sent"); return; }
+	/* (the installs' record first: a ready apart is then told by its cause where the records are) */
+	if (!arena_link_net_record(&A.link, arena_record(A.arena)) || !arena_link_net_ready(&A.link, hash)) {
+		fail("our PET's ready could not be sent");
+		return;
+	}
 	A.stage = SA_READY;
 	A.since = SDL_GetTicks();
 }
@@ -384,7 +406,7 @@ static void ready(void) {
 		if (SDL_GetTicks() - A.since > READY_WAIT_MS) fail("the other PET never got ready");
 		return;
 	}
-	if (theirs != arena_hash(A.arena)) { fail_as("the two games went apart before the battle", true); return; }
+	if (apart()) return;
 	printf("arena: both ready, the battle begins\n");
 	A.stage = SA_BATTLE;
 }
