@@ -82,6 +82,11 @@ bool emu_save_state(const char *path);
 /* As emu_save_state, its file written by the save queue (save_queue.h) */
 bool emu_save_state_queued(const char *path);
 bool emu_load_state(const char *path);
+/* ... and the core's raw state in memory (emu_state_size bytes, 0 without a
+ * core), no file and no flash save: a rollback's (--dev rollbench) */
+size_t emu_state_size(void);
+bool emu_state_save(void *state);
+bool emu_state_load(const void *state);
 
 /* RAM the engine keeps patched, where the game copies code into it from a
  * ROM image the engine patched the same way (IWRAM's routines, copied as

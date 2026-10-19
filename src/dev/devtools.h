@@ -46,6 +46,7 @@ typedef struct {
 	const char *online;     /* online=URL: Lan's HP's gate goes to this server, the keeper's questions skipped (docs/ONLINE.md) */
 	const char *online_name; /* onlinename=NAME: ... as NAME */
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
+	bool rollbench; /* the start is the rollback's measurement: the game's core, then the Arena's pair (src/dev/rollbench.h, issue #128) */
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
 	int arena_delay; /* arenadelay=N: its input delay, N frames (3-60); 0 its own */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */

@@ -16,6 +16,8 @@
 
 #if CW_ARENA
 
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,6 +25,7 @@
 #include <mgba/core/core.h>
 #include <mgba/core/serialize.h>
 #include <mgba/internal/gba/gba.h>
+#include <mgba/internal/gba/serialize.h>
 #include <mgba/internal/gba/sio/lockstep.h>
 #include <mgba-util/vfs.h>
 
@@ -293,6 +296,141 @@ uint64_t arena_pair_hash(ArenaPair *p) {
 
 uint64_t arena_pair_record(const ArenaPair *p) { return p->bn5 ? xlog_hash() : 0; }
 
+/* ---- the snapshot (arena_pair.h): what a rollback puts back ---- */
+
+typedef struct {
+	int32_t next_event, event_diff, until;
+	int mode;
+	bool normal_so, finished, scheduled;
+} NodeSnap;
+
+struct ArenaPairSnap {
+	uint8_t *core[2];
+	size_t core_size;
+	/* the cable's own (mLockstep and GBASIOLockstep), which no core's state holds */
+	int attached, multi, normal;
+	enum mLockstepPhase active;
+	int32_t transfer_cycles;
+	uint16_t multi_recv[MAX_GBAS];
+	uint32_t normal_recv[MAX_GBAS];
+	NodeSnap node[2];
+	/* the pair's scheduling, frame clock and Souls carried */
+	int32_t credit[2];
+	unsigned waiting, transfers, start[2], relative;
+	int running;
+	ArenaSoulCarried carried[2];
+};
+
+ArenaPairSnap *arena_pair_snap_new(ArenaPair *p) {
+	size_t core_size = p->core[0]->stateSize(p->core[0]);
+	ArenaPairSnap *s = calloc(1, sizeof *s + 2 * core_size);
+	if (!s) return NULL;
+	s->core_size = core_size;
+	s->core[0] = (uint8_t *)(s + 1);
+	s->core[1] = s->core[0] + core_size;
+	return s;
+}
+
+void arena_pair_snap_free(ArenaPairSnap *s) { free(s); }
+size_t arena_pair_snap_bytes(const ArenaPairSnap *s) { return 2 * s->core_size + sizeof *s - 2 * sizeof s->core - sizeof s->core_size; }
+size_t arena_pair_snap_core_bytes(const ArenaPairSnap *s) { return s->core_size; }
+
+bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
+	for (unsigned side = 0; side < 2; ++side) {
+		struct mCore *c = p->core[side];
+		if (c->stateSize(c) != s->core_size || !c->saveState(c, s->core[side])) return false;
+		struct GBASIOLockstepNode *n = &p->node[side];
+		struct mTiming *timing = &((struct GBA *)c->board)->timing;
+		bool scheduled = mTimingIsScheduled(timing, &n->event);
+		s->node[side] = (NodeSnap){ n->nextEvent, n->eventDiff, scheduled ? mTimingUntil(timing, &n->event) : 0, (int)n->mode,
+			n->normalSO, n->transferFinished, scheduled };
+	}
+	s->attached = p->cable.d.attached;
+	s->active = p->cable.d.transferActive;
+	s->transfer_cycles = p->cable.d.transferCycles;
+	s->multi = p->cable.attachedMulti;
+	s->normal = p->cable.attachedNormal;
+	memcpy(s->multi_recv, p->cable.multiRecv, sizeof s->multi_recv);
+	memcpy(s->normal_recv, p->cable.normalRecv, sizeof s->normal_recv);
+	memcpy(s->credit, p->credit, sizeof s->credit);
+	s->waiting = p->waiting;
+	s->transfers = p->transfers;
+	s->running = p->running;
+	memcpy(s->start, p->start, sizeof s->start);
+	s->relative = p->relative;
+	memcpy(s->carried, p->carried, sizeof s->carried);
+	return true;
+}
+
+/* (a core's state loaded clears its timing, the cable's event with it, and
+ * writes its SIO registers through the cable, which may start a transfer:
+ * so both cores first, then the cable's own and its events put back) */
+bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
+	for (unsigned side = 0; side < 2; ++side) {
+		struct mCore *c = p->core[side];
+		if (c->stateSize(c) != s->core_size || !c->loadState(c, s->core[side])) return false;
+	}
+	p->cable.d.attached = s->attached;
+	p->cable.d.transferActive = s->active;
+	p->cable.d.transferCycles = s->transfer_cycles;
+	p->cable.attachedMulti = s->multi;
+	p->cable.attachedNormal = s->normal;
+	memcpy(p->cable.multiRecv, s->multi_recv, sizeof s->multi_recv);
+	memcpy(p->cable.normalRecv, s->normal_recv, sizeof s->normal_recv);
+	for (unsigned side = 0; side < 2; ++side) {
+		struct GBASIOLockstepNode *n = &p->node[side];
+		struct mTiming *timing = &((struct GBA *)p->core[side]->board)->timing;
+		const NodeSnap *ns = &s->node[side];
+		n->nextEvent = ns->next_event;
+		n->eventDiff = ns->event_diff;
+		n->mode = (enum GBASIOMode)ns->mode;
+		n->normalSO = ns->normal_so;
+		n->transferFinished = ns->finished;
+		if (mTimingIsScheduled(timing, &n->event)) mTimingDeschedule(timing, &n->event);
+		if (ns->scheduled) mTimingSchedule(timing, &n->event, ns->until);
+	}
+	memcpy(p->credit, s->credit, sizeof p->credit);
+	p->waiting = s->waiting;
+	p->transfers = s->transfers;
+	p->running = s->running;
+	memcpy(p->start, s->start, sizeof p->start);
+	p->relative = s->relative;
+	memcpy(p->carried, s->carried, sizeof p->carried);
+	return true;
+}
+
+/* a byte of the sound's in mGBA's state: the PSG's and the FIFOs' fields and
+ * the samples rendered, which its lazy PSG leaves otherwise after a load
+ * than run straight (docs/ONLINE_ARENA.md, Rollback) */
+static bool sound_byte(size_t i) {
+	size_t audio = offsetof(struct GBASerializedState, audio), samples = offsetof(struct GBASerializedState, samples);
+	size_t rendered = offsetof(struct GBASerializedState, currentSamples) + sizeof ((struct GBASerializedState *)0)->currentSamples;
+	return (i >= audio && i < audio + sizeof ((struct GBASerializedState *)0)->audio) || (i >= samples && i < rendered);
+}
+
+unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, unsigned frame, bool say) {
+	unsigned game = 0;
+	for (unsigned side = 0; side < 2; ++side) {
+		/* (each stretch of bytes apart, as offsets in mGBA's state: its serialize.h names them) */
+		const uint8_t *x = a->core[side], *y = b->core[side];
+		for (size_t i = 0; i < a->core_size; ++i) {
+			if (x[i] == y[i]) continue;
+			size_t end = i;
+			while (end + 2 < a->core_size && (x[end + 1] != y[end + 1] || x[end + 2] != y[end + 2])) ++end;
+			bool sound = sound_byte(i) && sound_byte(end);
+			if (!sound && game++ < 12 && say)
+				printf("arena: frame %u: core %u's state apart at 0x%05zx-0x%05zx\n", frame, side, i, end);
+			i = end;
+		}
+	}
+	size_t own = offsetof(ArenaPairSnap, attached);
+	if (memcmp((const uint8_t *)a + own, (const uint8_t *)b + own, sizeof *a - own)) {
+		if (say) printf("arena: frame %u: the cable's or the pair's own apart\n", frame);
+		++game;
+	}
+	return game;
+}
+
 struct mCore *arena_pair_core(ArenaPair *p, unsigned side) { return p->core[side & 1]; }
 const uint32_t *arena_pair_video(const ArenaPair *p, unsigned side) { return p->video[side & 1]; }
 unsigned arena_pair_transfers(const ArenaPair *p) { return p->transfers; }
@@ -333,5 +471,12 @@ const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)p
 unsigned arena_pair_transfers(const ArenaPair *pair) { (void)pair; return 0; }
 void arena_pair_sound(ArenaPair *pair, unsigned side) { (void)pair; (void)side; }
 void arena_pair_mute(ArenaPair *pair) { (void)pair; }
+ArenaPairSnap *arena_pair_snap_new(ArenaPair *pair) { (void)pair; return NULL; }
+void arena_pair_snap_free(ArenaPairSnap *snap) { (void)snap; }
+size_t arena_pair_snap_bytes(const ArenaPairSnap *snap) { (void)snap; return 0; }
+size_t arena_pair_snap_core_bytes(const ArenaPairSnap *snap) { (void)snap; return 0; }
+bool arena_pair_save(ArenaPair *pair, ArenaPairSnap *snap) { (void)pair; (void)snap; return false; }
+bool arena_pair_load(ArenaPair *pair, const ArenaPairSnap *snap) { (void)pair; (void)snap; return false; }
+unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, unsigned frame, bool say) { (void)a; (void)b; (void)frame; (void)say; return 0; }
 
 #endif
