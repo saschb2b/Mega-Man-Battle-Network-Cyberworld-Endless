@@ -65,3 +65,7 @@ const char *arena_lost_words(void) { return "Ugh... They got us.|Next time,Lan!"
 const char *arena_over_words(void) { return "Phew... Good battle!"; }
 
 const char *arena_stopped_words(void) { return "Whoa! The NetBattle\nbroke off!"; }
+
+const char *arena_installs_apart_words(void) {
+	return "Huh? Our PETs don't\nmatch on BN5...|Lan,let's reboot\nthe PET and try\nagain!";
+}

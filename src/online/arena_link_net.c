@@ -89,6 +89,7 @@ ArenaLink *arena_link_net(ArenaNetLink *l, uint32_t match, unsigned side, unsign
 
 static void keep_hash(ArenaNetLink *l, uint32_t frame, uint64_t hash) {
 	if (frame == ARENA_NET_READY) { l->peer_ready = true; l->peer_ready_hash = hash; return; }
+	if (frame == ARENA_NET_RECORD) { l->peer_recorded = true; l->peer_record = hash; return; }
 	if (l->nhashes == ARENA_NET_HASHES) {
 		memmove(l->hashes, l->hashes + 1, sizeof l->hashes - sizeof *l->hashes);
 		--l->nhashes;
@@ -126,6 +127,16 @@ bool arena_link_net_ready(ArenaNetLink *l, uint64_t hash) {
 bool arena_link_net_peer_ready(const ArenaNetLink *l, uint64_t *hash) {
 	if (l->peer_ready) *hash = l->peer_ready_hash;
 	return l->peer_ready;
+}
+
+bool arena_link_net_record(ArenaNetLink *l, uint64_t record) {
+	uint8_t data[ARENA_HASH_BYTES];
+	return arena_wire_hash(data, l->match, ARENA_NET_RECORD, record) && l->out(l->context, data, sizeof data);
+}
+
+bool arena_link_net_peer_record(const ArenaNetLink *l, uint64_t *record) {
+	if (l->peer_recorded) *record = l->peer_record;
+	return l->peer_recorded;
 }
 
 void arena_link_net_ended(ArenaNetLink *l) { l->ended = true; }

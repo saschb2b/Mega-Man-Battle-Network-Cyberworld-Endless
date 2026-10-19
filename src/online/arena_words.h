@@ -37,5 +37,7 @@ const char *arena_won_words(void);
 const char *arena_lost_words(void);
 const char *arena_over_words(void);
 const char *arena_stopped_words(void);
+/* ... stopped before it began, the two games' BN5 installs apart */
+const char *arena_installs_apart_words(void);
 
 #endif

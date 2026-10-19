@@ -67,6 +67,10 @@
   "arena_words:arena_gone_words": {
    "line": 21
   },
+  "arena_words:arena_installs_apart_words": {
+   "header": "... stopped before it began, the two games' BN5 installs apart",
+   "line": 69
+  },
   "arena_words:arena_lost_words": {
    "line": 63
   },
@@ -1676,7 +1680,7 @@
    "comment": "",
    "domain": "Arena",
    "kind": "speech",
-   "lines": 23,
+   "lines": 24,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "arena_words"
@@ -1864,7 +1868,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2054,
+  "boxes": 2056,
   "domains": {
    "Arena": {
     "files": [
@@ -1872,8 +1876,8 @@
      "src/online/arena_words.c"
     ],
     "flagged": 4,
-    "lines": 32,
-    "speech": 22
+    "lines": 33,
+    "speech": 23
    },
    "AsterLand and the Academy": {
     "files": [
@@ -2174,7 +2178,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 803,
+    "boxes": 805,
     "dots_per_box": 0.19,
     "end_ask": 0.04,
     "end_bang": 0.53,
@@ -2182,8 +2186,8 @@
     "openers": [
      "The",
      "His",
-     "A",
      "Lan",
+     "A",
      "He",
      "It's"
     ],
@@ -2229,7 +2233,7 @@
     "words_per_box": 5.8
    }
   },
-  "lines": 1505,
+  "lines": 1506,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2364,7 +2368,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 803,
+    "boxes": 805,
     "dots_per_box": 0.19,
     "end_ask": 0.04,
     "end_bang": 0.53,
@@ -2372,8 +2376,8 @@
     "openers": [
      "The",
      "His",
-     "A",
      "Lan",
+     "A",
      "He",
      "It's"
     ],
@@ -2476,7 +2480,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1163
+  "speech": 1164
  },
  "version": 1,
  "lines": [
@@ -3491,6 +3495,7 @@
   {"boxes":[{"pages":[["Ugh... They got us."]],"speaker":"MegaMan","text":"Ugh... They got us."},{"pages":[["Next time,Lan!"]],"speaker":"MegaMan","text":"Next time,Lan!"}],"container":"arena_lost_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_lost_words:0","kind":"speech","line":63,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Ugh... They got us.|Next time,Lan!","text_hash":"f2d601ba3c97"},
   {"boxes":[{"pages":[["Phew... Good battle!"]],"speaker":"MegaMan","text":"Phew... Good battle!"}],"container":"arena_over_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_over_words:0","kind":"speech","line":65,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Phew... Good battle!","text_hash":"06dc2a18b173"},
   {"boxes":[{"pages":[["Whoa! The NetBattle","broke off!"]],"speaker":"MegaMan","text":"Whoa! The NetBattle\nbroke off!"}],"container":"arena_stopped_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_stopped_words:0","kind":"speech","line":67,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The NetBattle\nbroke off!","text_hash":"532acf598915"},
+  {"boxes":[{"pages":[["Huh? Our PETs don't","match on BN5..."]],"speaker":"MegaMan","text":"Huh? Our PETs don't\nmatch on BN5..."},{"pages":[["Lan,let's reboot","the PET and try","again!"]],"speaker":"MegaMan","text":"Lan,let's reboot\nthe PET and try\nagain!"}],"container":"arena_installs_apart_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_installs_apart_words:0","kind":"speech","line":70,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? Our PETs don't\nmatch on BN5...|Lan,let's reboot\nthe PET and try\nagain!","text_hash":"57464ed0afb8"},
   {"boxes":[{"pages":[["Hello!"]],"speaker":"Players","text":"Hello!"}],"container":"online_phrases","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_phrases:0","kind":"speech","line":4,"speaker":"Players","speakers":["Players"],"text":"Hello!","text_hash":"69342c5c39e5"},
   {"boxes":[{"pages":[["Nice build!"]],"speaker":"Players","text":"Nice build!"}],"container":"online_phrases","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_phrases:1","kind":"speech","line":4,"speaker":"Players","speakers":["Players"],"text":"Nice build!","text_hash":"36a76e523ff6"},
   {"boxes":[{"pages":[["Good luck!"]],"speaker":"Players","text":"Good luck!"}],"container":"online_phrases","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_phrases:2","kind":"speech","line":4,"speaker":"Players","speakers":["Players"],"text":"Good luck!","text_hash":"8e30d6aac813"},

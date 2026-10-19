@@ -371,15 +371,18 @@ static unsigned play_net(unsigned delay, unsigned latency, unsigned ticks) {
 		pipes[side].latency = latency;
 		arena_link_net(&net[side], 77, side, delay, pipe_send, &pipes[side]);
 		arena_input_init(&in[side], net[side].link.delay);
+		/* (the installs' record first, side 1's another: told apart from the ready's hash, kept beside it) */
+		assert(arena_link_net_record(&net[side], side ? 0xB5B5 : 0xB5));
 		assert(arena_link_net_ready(&net[side], 0xFEED));
 	}
 	uint64_t h;
-	assert(!arena_link_net_peer_ready(&net[0], &h));
+	assert(!arena_link_net_peer_ready(&net[0], &h) && !arena_link_net_peer_record(&net[0], &h));
 	for (uint32_t t = 0; t < ticks; ++t)
 		for (unsigned side = 0; side < 2; ++side) {
 			pipes[0].now = pipes[1].now = t;
 			pipe_deliver(&pipes[side ^ 1], &net[side]);
 			if (t >= latency) assert(arena_link_net_peer_ready(&net[side], &h) && h == 0xFEED);
+			if (t >= latency) assert(arena_link_net_peer_record(&net[side], &h) && h == (side ? 0xB5u : 0xB5B5u));
 			if (side_tick(&net[side], &in[side], side, t) && side == 0) ++stalls;
 		}
 	/* the battle over on side 0's: side 1 spends the keys come, then the link breaks, saying so */

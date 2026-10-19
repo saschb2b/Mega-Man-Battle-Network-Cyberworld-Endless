@@ -1,0 +1,82 @@
+{
+ "about": "MrkCan1 against a target that moves (issue #130): BN5's Handi V1 (BN5's 0x13, BN6's 0x206) free at (6,2), every draw of BN6's replayed from BN5's (rng=replay), its teleports as handi_v1 has them (to (4,1) at t46), MegaMan with a folder of MrkCan1 M in both games, BN5's chip 12 by BN5's own code and the registry's 411 by the same code moved, the first Custom screen's chip picked and OK, used at t30 as the target is about to move: its mark's sweep, its lock or none, and its shot against a foe that leaves its panel, every difference of BN6's play from BN5's fails it (docs/ONLINE_ARENA.md, Full rules). Its shot's sparks are MegaMan's, as chip_mrkcan1's.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "13@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "buster": "0:0:0",
+ "folder5": [
+  "180C"
+ ],
+ "folder6": [
+  "199B"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "megaman_types": [
+  "T4:0x04"
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 75,
+  "why": "MrkCan1's own code moved plays as BN5's against a target that moves: Handi teleported from (6,2) to (4,1) at t46 in both, the mark up at t58, its lock on Handi's new panel and the cannon's hit at t74 for 70 (80 to 10) in both, and the hit a counter in both (MegaMan's mood Full Synchro from t74, his palette 4 from t75, in both); what differs from t75 is the first kind's object of type 0 spawned at panel 00 at t75 and gone at t473, where Handi's reticle hits MegaMan and ends his Full Synchro (mood 0xF5) in both: Full Synchro's own object, each engine's, its flags (+0x00, 0x13 and 0x17) and its sprite (+0xA8's bytes, its data +0xAC-+0xB4) apart from its first frame: neither the chip's code; --survey: nothing else differs, unmasked, in the 600 frames"
+ }
+}
