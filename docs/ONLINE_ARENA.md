@@ -49,6 +49,7 @@ goes back to the title; the log says each step (`arena:` lines).
 | The time sync | `src/online/arena_sync.c` | The leading game's tick held now and then, spread out, by the lag of the other's keys against its own round trip; the round trips kept in the Square for the delay asked for ([Smoothed delay](#smoothed-delay), below) |
 | The snapshot | `src/online/arena_pair.c` | The pair's state for a rollback, both cores and what no core's state holds (`arena_pair_save`, `arena_pair_load`), and where two differ ([Rollback](#rollback), below) |
 | The measurement | `src/dev/rollbench.c` | `--dev rollbench`: what a rollback would cost on the machine it runs on |
+| The rollback tried | `src/online/arena_roll.c` | `--dev arena,arenaroll=W`: whole battles rolled back W frames every W against the local stand-in, the game's state checked each time |
 | The link | `src/online/arena_link.h`, `arena_link_local.c` | The interface below; the local stand-in |
 | The engine | `src/online/arena.c` | The way in, then the battle in lockstep, the hashes compared, the end |
 | The scene | `src/online/arena_scene.c`, `arena_text.c` | `--dev arena`'s scene, its words |
