@@ -2234,37 +2234,22 @@ static void test_navicust(void) {
 	CHECK(navicust_fits_free(grid, parts, 1, &white, 4, 4), "with the white Spin the white pair stands upright at an end");
 	navicust_set_spins(0x3F);
 	CHECK(!navicust_fits_free(grid, parts, 1, &pink, 4, 4), "a second pink pair would touch the first");
-	/* the bug words: none, one light, several */
+	/* the bug words: none, one light, several; what each does, and why,
+	 * BN6's own, unsaid (the voice sweep, docs/voice/sweep/net.md) */
 	uint8_t bugs[NAVICUST_BUGS] = { 0 };
-	CHECK(!*navicust_bug_words(bugs, false, NULL), "words for no bug");
+	CHECK(!*navicust_bug_words(bugs), "words for no bug");
 	bugs[9] = 1;
-	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs, false, NULL));
+	CHECK(strstr(navicust_bug_words(bugs), "A light HP bug") != NULL, "a light HP bug: %s", navicust_bug_words(bugs));
 	bugs[9] = 2;
-	CHECK(strstr(navicust_bug_words(bugs, false, NULL), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs, false, NULL));
+	CHECK(strstr(navicust_bug_words(bugs), "An HP bug") != NULL, "an HP bug: %s", navicust_bug_words(bugs));
 	bugs[7] = 5;
 	bugs[11] = 1;
-	const char *w = navicust_bug_words(bugs, false, NULL);
-	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad Buster bug") && strstr(w, "Five colors"), "several bugs: %s", w);
-	CHECK(strstr(w, "command line") != NULL, "a placement bug says where to look: %s", w);
-	/* (the cause where the board shows it, in place of the rules) */
-	w = navicust_bug_words(bugs, false, "HP+100 is a plus part on the command line! Those go anywhere else.");
-	CHECK(strstr(w, "HP+100 is a plus part") && !strstr(w, "Bugs come from"), "a placement bug names its cause: %s", w);
+	const char *w = navicust_bug_words(bugs);
+	CHECK(strstr(w, "has bugs!") && strstr(w, "A bad Buster bug") && !strstr(w, "command line") && !strstr(w, "PET"), "several bugs: %s", w);
+	check_talk("navicust_bug_words", w);
 	memset(bugs, 0, sizeof bugs);
 	bugs[11] = 1;
-	CHECK(!strstr(navicust_bug_words(bugs, false, NULL), "command line"), "a colours' bug alone names itself");
-	CHECK(strstr(navicust_bug_words(bugs, true, NULL), "the RUN says OK...|@M But our NaviCust") != NULL, "after a RUN, its OK answered: %s", navicust_bug_words(bugs, true, NULL));
-	check_talk("navicust_bug_words", navicust_bug_words(bugs, true, NULL));
-	/* which programs turn: those whose colour's Spin is held */
-	navicust_set_spins(0);
-	/* (none held: nothing said, BN6's own rule unexplained to its players) */
-	CHECK(!*navicust_turn_words(0), "no Spin, no word: %s", navicust_turn_words(0));
-	navicust_set_spins(1u << 2);
-	CHECK(strstr(navicust_turn_words(0), "turn pink programs") && strstr(navicust_turn_words(0), "That's the Spin"), "the pink Spin: %s", navicust_turn_words(0));
-	navicust_set_spins(0x3F & ~(1u << 5));
-	CHECK(strstr(navicust_turn_words(0), "white, yellow, pink, red and blue programs") != NULL, "five Spins: %s", navicust_turn_words(0));
-	check_talk("navicust_turn_words five", navicust_turn_words(0));
-	navicust_set_spins(0x3F);
-	CHECK(!strstr(navicust_turn_words(0), "only"), "all six: %s", navicust_turn_words(0));
+	CHECK(!strcmp(navicust_bug_words(bugs), "@M Lan,our NaviCust has a bug!"), "a colours' bug alone, said: %s", navicust_bug_words(bugs));
 }
 
 /* Every layout an area draws builds as planned: one that never fits the

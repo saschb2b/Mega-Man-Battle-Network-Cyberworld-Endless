@@ -369,7 +369,7 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | MegaMan on the NaviCust: programs off the board, no room, compression, Reg memory | `src/director/board_words.c`, `src/layer/navicust_words.c` (what each program does, which turn, its bugs) |
 | MegaMan on DarkChips: a price paid, a DarkChip run as its base chip | `src/director/dark_words.c` |
 | Where the nets meet (an older net's area fought our way, the first visitor, the deep); after a CONTINUE without BN5's ROM, its chips and Souls that wait for it | `src/director/nets_words.c` |
-| One-time lessons: the Pack, Rush's bones, a battlefield's Mystery Data, R in the town | `src/director/lesson_words.c` |
+| R in the town away from the port: where the PC is | `src/director/lesson_words.c` |
 | A Cross won, one the run can't carry, the Graveyard's call to the beast, Dad's CybeastButton after the Cybeast | `src/director/powers_words.c` |
 | The PET: mails, BBS, records, the Library's words | `src/director/pet_text.c` |
 | The guardians: meeting, rematch, revenge, defeat, their tips, rumors, Souls | `src/layer/guardian_lines.c` |

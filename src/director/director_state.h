@@ -38,7 +38,6 @@ typedef struct {
 	bool gate_due;         /* ... and won: his SP chip is given once a talk can start */
 	bool fragment_due;     /* ... once a talk can start */
 	bool spin_due;         /* the run's Spin picked up: MegaMan says what it does once a talk can start */
-	int fragments_told;    /* ScrtData L's briefing (or MegaMan at one) last counted */
 	bool in_battle;        /* a battle is on */
 	bool record_known;     /* the battle's record (D.rolled) is known */
 	unsigned choices_due;  /* the layer's choices taken (EV_CHOICE), acted on once the chat box closes */
@@ -126,7 +125,6 @@ typedef struct {
 	uint32_t board;        /* ... the board they were read with (board_hash) */
 	int board_size;        /* ... and its ExpMemry */
 	bool bugs_known;       /* ... read on this layer */
-	int programs_seen;     /* ... with the programs in the PET, counted since */
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */

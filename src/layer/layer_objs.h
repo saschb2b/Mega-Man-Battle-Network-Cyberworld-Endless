@@ -39,8 +39,8 @@
 /* Chaud's call on a duel layer was made (a CONTINUE does not make it
  * again). */
 #define LAYER_DUEL_CALLED_FLAG 0x1457
-/* MegaMan has named the layer's Rush gap (issue #14). */
-#define LAYER_RUSH_TOLD_FLAG   0x1464   /* (0x1458-0x145F: the obstacles' and cubes' present flags, issue #42, and another game's prop's) */
+/* (0x1458-0x145F: the obstacles' and cubes' present flags, issue #42, and
+ * another game's prop's; 0x1464 free since Rush's gap's word went) */
 /* A navi of the layer has told its security cube's P-Code (issue #45). */
 #define LAYER_PCODE_FLAG       0x1465
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
