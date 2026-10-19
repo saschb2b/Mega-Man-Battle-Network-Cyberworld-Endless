@@ -148,7 +148,7 @@ static int safe_top(void) {
 
 /* A screen of its own (platform_own_taps): its taps and the mouse's, files
  * dropped on the window, and its own back */
-static bool own_taps;
+static bool own_taps, own_wide;
 static int tap_x = -1, tap_y = -1, point_x = -1, point_y = -1;
 static char dropped[1024];
 #ifndef __EMSCRIPTEN__
@@ -184,9 +184,10 @@ static void game_canvas(void) {
 
 /* ... and a screen of its own's, a menu's: whole scales alone, the
  * largest that leaves it 240 x 160 or more, or 160 x 240 on a screen held
- * upright, where the picture's 240 across made a phone's letters small */
+ * upright, where the picture's 240 across made a phone's letters small
+ * (but where it is 240 across: platform_own_wide) */
 static void menu_canvas(void) {
-	bool upright = P.screen_h > P.screen_w;
+	bool upright = P.screen_h > P.screen_w && !own_wide;
 	int sx = P.screen_w / (upright ? CORE_H : CORE_W), sy = P.screen_h / (upright ? CORE_W : CORE_H);
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
@@ -292,6 +293,7 @@ void platform_own_taps(bool on) {
 #endif
 }
 
+void platform_own_wide(bool on) { own_wide = on; }
 bool platform_tap(int *x, int *y) {
 	if (tap_x < 0) return false;
 	*x = tap_x;

@@ -443,6 +443,22 @@ server:
   from its seed (120, Central Area) and came home by R to "We're
   home,Lan!" (it is a test instance until a release ships online play).
   The transport's checks below were against its v2.
+- **A NetBattle across a real network** (19 October 2026, issue #129).
+  Two host builds, each with BN5's ROM beside BN6's, met on the deployed
+  server (protocol v5) and fought two Practice NetBattles by full rules
+  through it: the server gave a delay of 7 frames from their latencies,
+  both pairs made the same ready hash, and each battle went to its end on
+  both games with every hash agreeing (17 and 25). The game whose ticks
+  ran ahead waited on the other's keys for about one frame in eight (137
+  of 1,080 frames, then 127 of 1,540), where one machine's runs waited on
+  none: the margin issue #128's rollback is for.
+- **The browser** (the same day, issue #129). `tools/online_browser.html`
+  served from the repository, a local v5 server allowing its origin and a
+  native game in the Square: the browser build went through the gate,
+  saw the native game's MegaMan and his name, and R took it home to
+  "We're home,Lan!". It could not before: its HELLO's buffer was still
+  v3's 52 bytes, and v4's HELLO is 76, so it never opened its WebSocket
+  (`online_browser.c`, now sized by `ONLINE_HELLO_BYTES`).
 - **Builds and checks.** Host, aarch64, Windows, 3DS and browser builds
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
@@ -496,6 +512,39 @@ server:
   The ready apart because BN5's installs differ now says so on both
   games ("Huh? Our PETs don't match on BN5...").
 
+- **Android and Windows** (19 October 2026, protocol v5, a local server
+  with seed 120, then the deployed test server once each; issue #129).
+  *Android*: the release APK (`build.py android`) in the emulator
+  (Android 14, x86-64), BN6's ROM given through the ROMs screen's folder
+  picker; NEW GAME, the jack-in at Lan's PC and the touch D-pad to the
+  gate's keeper: Another server, `ws://10.0.2.2:8929/presence` typed
+  with Android's keyboard, "DONE! IT LEADS TO 10.0.2.2:8929!". On the
+  gate "WAIT,WAIT! FIRST, YOUR NAME,PLEASE!", the name field, the
+  keeper's question, Yes, and the Square, a host build's MegaMan
+  ("Linux") standing in it and each game showing the other's name; the
+  D-pad walking there, his card ("HP 100 of 100. Act 3,layer 7!", "His
+  PET holds BN5 chips too!"), a Wave ("o/" over MegaMan's head), R and
+  Yes home to "We're home,Lan!". Then the keeper's Official Square, his
+  questions again for that server, the deployed server over TLS (its
+  `/health` counting the one player) and home again. Found on the way:
+  the name and address fields were cut off at both sides on a phone held
+  upright (the menu canvas is 160 across there and the field 240), and
+  Android's keyboard covered their lower half. Fixed: the field asks for
+  a canvas 240 across (`platform_own_wide`) and stands in the upper part
+  of an upright screen, whole above the keyboard, its keys answering
+  taps ("GOT IT! HELLO, Droid!").
+  *Windows*: the .exe (`build.py windows`) under Wine 10 headless, its
+  data folder's `network.ini` naming the local server: the gate, the
+  Square built from seed 120 with the host build's hash (3354384409), R
+  and Yes home to "We're home,Lan!", through WinHTTP's WebSocket.
+  Then the deployed server over TLS (WinHTTP's own): the same Square and
+  hash, and home again. Its first try failed, "Windows WebSocket
+  connection or TLS verification failed": Wine's root store was empty
+  because the test's Wine prefix had never been written (its container
+  ended before wineserver saved the registry, so no crypto provider was
+  registered). A prefix made with `wineboot -u` and saved with
+  `wineserver -w` fixed it; the game's code was not at fault.
+
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
 are in the history before 433865a8):
@@ -520,11 +569,13 @@ are in the history before 433865a8):
 - **A referee Mr.Prog** in the Arena's wing, rematches, and the Arena on
   the 3DS and in the browser.
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
-  a New 3DS, Android and iOS; the Arena over a real network rather than
-  one machine (the margin a phase between two games' ticks takes from
-  its delay).
-- **In the browser:** a whole visit with the published server (the
-  browser build builds; its online run here was before the gate).
+  a New 3DS, an Android device (the emulator's visit above) and iOS,
+  macOS and Windows itself (Wine's above); a trade and a NetBattle on
+  Android and Windows (issue #129); the Arena's stalls over a real
+  network, about one frame in eight on the leading game (issue #128).
+- **In the browser with the published server:** the official server
+  allows the site's origin alone, so the browser's visit was checked
+  against a local one; a trade and the trade board there are untried.
 - **The official server:** its Coolify service following `dev` or `main`
   once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks

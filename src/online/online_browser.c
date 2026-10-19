@@ -11,7 +11,7 @@ static struct {
 	EMSCRIPTEN_WEBSOCKET_T socket;
 	OnlineBrowserMessage received;
 	OnlineBrowserClosed closed;
-	uint8_t hello[52 + ONLINE_NAME_BYTES];
+	uint8_t hello[ONLINE_HELLO_BYTES + ONLINE_NAME_BYTES];
 	size_t hello_size;
 } browser;
 
