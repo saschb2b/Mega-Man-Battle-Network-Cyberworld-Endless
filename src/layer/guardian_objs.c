@@ -106,7 +106,7 @@ static void meeting(GuardianStage *g) {
  * time, is Dad's mail's, said once the data is taken (mail_words: the two
  * said it twice, the owner found the reward's words far too many) */
 static const char *data_says(const GuardianStage *g) {
-	if (super_boss(g->navi)) return super_reward_words(g->navi, g->version, !guardian_known(g->navi));
+	if (super_boss(g->navi)) return super_reward_words(g->navi, g->version);
 	return reward_power(g->navi);
 }
 
