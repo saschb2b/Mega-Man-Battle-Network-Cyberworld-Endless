@@ -399,7 +399,10 @@ agreeing, Beta's MegaMan the winner, both back in the Square.
 - Over a real network: the server's delay is 3 frames, the one way
   and 2 more (6 at least); a phase of up to a tick between the two
   games' clocks comes out of that margin, and stalls show on the
-  picture after 20 ticks ("Waiting for the other PET").
+  picture after 20 ticks ("Waiting for the other PET"). Measured on the
+  deployed server (19 October 2026, docs/ONLINE.md): delay 7, two
+  full-rules battles to their end with every hash agreeing, the leading
+  game waiting about one frame in eight (issue #128).
 - The Souls under full rules beyond KnightSoul's unison and its charged
   shot ([Full rules](#full-rules), above): the other five, Chaos Unison
   and ColonelSoul's button in a NetBattle, and BN5's mood across the

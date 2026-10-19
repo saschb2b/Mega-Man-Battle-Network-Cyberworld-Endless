@@ -443,6 +443,22 @@ server:
   from its seed (120, Central Area) and came home by R to "We're
   home,Lan!" (it is a test instance until a release ships online play).
   The transport's checks below were against its v2.
+- **A NetBattle across a real network** (19 October 2026, issue #129).
+  Two host builds, each with BN5's ROM beside BN6's, met on the deployed
+  server (protocol v5) and fought two Practice NetBattles by full rules
+  through it: the server gave a delay of 7 frames from their latencies,
+  both pairs made the same ready hash, and each battle went to its end on
+  both games with every hash agreeing (17 and 25). The game whose ticks
+  ran ahead waited on the other's keys for about one frame in eight (137
+  of 1,080 frames, then 127 of 1,540), where one machine's runs waited on
+  none: the margin issue #128's rollback is for.
+- **The browser** (the same day, issue #129). `tools/online_browser.html`
+  served from the repository, a local v5 server allowing its origin and a
+  native game in the Square: the browser build went through the gate,
+  saw the native game's MegaMan and his name, and R took it home to
+  "We're home,Lan!". It could not before: its HELLO's buffer was still
+  v3's 52 bytes, and v4's HELLO is 76, so it never opened its WebSocket
+  (`online_browser.c`, now sized by `ONLINE_HELLO_BYTES`).
 - **Builds and checks.** Host, aarch64, Windows, 3DS and browser builds
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
@@ -507,11 +523,11 @@ are in the history before 433865a8):
 - **A referee Mr.Prog** in the Arena's wing, rematches, and the Arena on
   the 3DS and in the browser.
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
-  a New 3DS, Android and iOS; the Arena over a real network rather than
-  one machine (the margin a phase between two games' ticks takes from
-  its delay).
-- **In the browser:** a whole visit with the published server (the
-  browser build builds; its online run here was before the gate).
+  a New 3DS, Android and iOS (issue #129); the Arena's stalls over a real
+  network, about one frame in eight on the leading game (issue #128).
+- **In the browser with the published server:** the official server
+  allows the site's origin alone, so the browser's visit was checked
+  against a local one; a trade and the trade board there are untried.
 - **The official server:** its Coolify service following `dev` or `main`
   once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks
