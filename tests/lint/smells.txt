@@ -7,7 +7,7 @@
 #   duplicate: blocks of 10 lines or more repeated between two files (or in one): one function for both
 # fix one, then build.py lint --update
 duplicate src/gfx/gfx.c src/layer/text.c 21
-includes src/director/director.c 35
+includes src/director/director.c 34
 includes src/director/director_layer.c 33
 includes src/layer/layer_objs.c 25
 nesting src/audio/audio.c:mix 6

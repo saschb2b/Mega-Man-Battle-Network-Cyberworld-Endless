@@ -83,10 +83,8 @@ int navicust_skip_frags(int depth);
  * the second and fourth acts' guardians of the first cycle. */
 bool navicust_expmemry(int depth);
 /* MegaMan's words for the bug counts (one per type, as the game keeps
- * them): speaker-marked boxes for talk_start; "" for none. `after_run`:
- * said after the NaviCust's RUN, whose "OK" they answer; `cause`: why,
- * as navicust_bug_cause has it, or NULL for the rules in general. */
-const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run, const char *cause);
+ * them): speaker-marked boxes for talk_start; "" for none. */
+const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS]);
 /* A program on BN6's board: its name, kind (0 a program part, 1 a plus
  * part, as its record has them) and colour (1-6). */
 typedef struct { const char *name; int kind, color; } NaviPart;
@@ -104,13 +102,6 @@ const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID]
  * playtester's Guardian Data program fitted only after he moved two, and
  * nothing had said so.) */
 bool navicust_fits_free(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID], const NaviPart *parts, int n, const NaviShape *shape, int w, int h);
-/* Which programs L and R turn, in MegaMan's words (one sentence): those of
- * the colours whose Spins are held (navicust_set_spins); for `variant`
- * (program * 4 + v, 0 for any), whether that one turns. */
-const char *navicust_turn_words(int variant);
-/* The same for a program of colour c (1-6): whether L and R turn it, by
- * the Spins held; "" for none. */
-const char *navicust_color_turns(int c);
 /* Colour `c`'s name (1-6: white, yellow, pink, red, blue, green), "" for
  * none. */
 const char *navicust_color_name(int c);

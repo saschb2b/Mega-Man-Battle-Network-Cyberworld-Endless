@@ -139,7 +139,9 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 	int i = ta_script(t);
 	/* (the price named before the bargain, the whole of it a profile's
 	 * first time: docs/META.md, issue #65; when it comes, said every time:
-	 * a returning playtester heard only "when I'm hurt badly", session 68.
+	 * a returning playtester heard only "when I'm hurt badly", session 68;
+	 * BN5's own worried rule and its dark battle unsaid, and the Pack's
+	 * EDIT after the take: the voice sweep, docs/voice/sweep/net.md.
 	 * One by BN5's rule: BN5's worried rule deals it into his hand in our
 	 * battles too, and one used makes him dark for that battle, as BN5's
 	 * do: docs/MULTIROM.md, One net. DarkPlus and DarkInvs say what they
@@ -150,9 +152,9 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 	char words[720];
 	if (first)
 		snprintf(words, sizeof words, "L-Lan... That flame is dark data!|There's a DarkChip in it. %s!%s%s|It only comes when I'm worried.|"
-			"At a quarter HP,or hit again and again!|It's real power... But it eats at me.|Use one,and I go dark for that battle.|"
+			"It's real power... But it eats at me.|"
 			"And each battle I use one in...|...takes %d max HP,for this whole dive!", chip, bar, does, DARK_PRICE);
-	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s%s|It comes when I'm worried,at a quarter HP.|"
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!%s%s|"
 		"Each battle I use one in takes %d max HP,for the dive.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
@@ -164,7 +166,6 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nTo use it,pick PET,\nFolder,then EDIT.\nIt'll come when I'm\nworried. At a price.", false);
 	ta_end(t);
 	return i;
 }
@@ -174,7 +175,8 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 	int i = ta_script(t);
 	/* (all of it a profile's first BN6 flame: what it does, the BugFrag it
 	 * burns, the NaviCust's bug for the battle, its base chip, the max HP;
-	 * the rule every time after, as BN5's flame says its own) */
+	 * the price every time after, as BN5's flame says its own: the rule
+	 * once, docs/voice/sweep/net.md) */
 	char words[720];
 	const char *an = strchr("AEIOU", d->base[0]) && d->base[0] ? "an" : "a";
 	if (d->first)
@@ -182,8 +184,7 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 			"Each use burns one of our BugFrags...|...for %s!|Then it bugs me,like a NaviCust bug.|For the rest of that battle!|"
 			"No BugFrags? Then it's only %s %s.|And each battle it runs in...|...takes %d max HP,for this whole dive!",
 			d->chip, d->does, an, d->base, DARK_PRICE);
-	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|Each use burns a BugFrag...|...for %s.|"
-		"Then it bugs me for the battle.|No BugFrags? Then it's %s %s.|Each battle it runs in takes %d max HP,for the dive.", d->chip, d->does, an, d->base,
+	else snprintf(words, sizeof words, "A flame of darkness,Lan!|A DarkChip's inside. %s!|Each battle it runs in takes %d max HP,for the dive.", d->chip,
 		DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
@@ -194,7 +195,6 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", d->chip);
 	ta_page(t, FACE_NONE, got, false);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nTo use it,pick PET,\nFolder,then EDIT.\nThree DarkChips max\nin a Folder,though.", false);
 	ta_end(t);
 	return i;
 }
@@ -306,7 +306,6 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
 	first = false;
 	ta_give_chip(t, chip, code, 1);
 	ta_got_chip(t, chip_name, code, &first);
-	ta_page(t, FACE_MEGAMAN, "It's in our Pack!\nLet's add it to our\nFolder,Lan!", false);
 	ta_end(t);
 	return i;
 }

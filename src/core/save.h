@@ -22,7 +22,7 @@ typedef struct {
 	 * profile reads them as 0) */
 	uint8_t first_guardian;   /* the last new run's act 1 guardian, navi + 1 */
 	uint8_t navicust_taught;  /* a Guardian Data's draft has said how the NaviCust's board works */
-	uint8_t marks_taught;     /* the map's violet marks and its counters L has explained (MARK_*) */
+	uint8_t marks_taught;     /* the map's violet marks and its counters L had explained (MARK_*); unread since the voice sweep of 19 October 2026 */
 	/* the meta layer (docs/META.md): the highest threat rung open to a new
 	 * run, the starting folders unlocked (a bit each), short nets won */
 	uint8_t threat_open;
@@ -42,9 +42,9 @@ typedef struct {
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
 	uint8_t area_before, guardian_before;   /* the run before the last one's first area and guardian (+ 1) */
-	/* the virus families MegaMan has battled in any run, a bit each: the
-	 * PET's battle data on them, which his warnings read (a guardian's is
-	 * its rivals.sav record) */
+	/* (unused: the virus families MegaMan had battled in any run, which his
+	 * warnings read; strategy is the BBS's, and the warnings went in the
+	 * voice sweep of 19 October 2026; kept for the profile's layout) */
 	uint32_t families_fought[2];
 	uint8_t gem_taught;       /* (unused: the battlefield's Mystery Data is BN6's own, unexplained for its players; kept for the profile's layout) */
 	/* the NaviCust's Spins found in the net, a bit per colour 1-6 (bit
@@ -62,7 +62,7 @@ typedef struct {
 	uint32_t duel_run;
 	uint16_t duel_depth;
 	uint8_t duel_beat;
-	uint8_t pieces_taught;    /* the set pieces L has explained (SENSED_*, briefing_words.c; issue #48) */
+	uint8_t pieces_taught;    /* the set pieces L had explained (SENSED_*, briefing_words.c; issue #48); unread since the voice sweep */
 	/* the NaviCust programs whose compression code was entered in any run,
 	 * a bit each (issue #50: Dad's Compression mail lists them), and how
 	 * many that mail showed when last marked NEW */
@@ -125,8 +125,6 @@ static inline int rival_clearance(void) { return profile.duel_won >= 3 ? 2 : pro
 
 /* Whether MegaMan has battled virus family `fam` in any run; noted as a
  * battle with it ends. */
-bool profile_family_fought(int fam);
-void profile_family_note(int fam);
 /* Whether NaviCust program `program`'s compression code has been entered
  * in any run, and how many have (issue #50); noted as the NaviCust
  * compresses it. */

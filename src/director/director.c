@@ -36,7 +36,6 @@
 #include "game.h"
 #include "gamecall.h"
 #include "guardians.h"
-#include "lesson_words.h"
 #include "loot.h"
 #include "meta.h"
 #include "nets_words.h"
@@ -48,7 +47,7 @@
 #include "talk.h"
 
 static void win_run(void);
-static void gate_and_rush_words(void);
+static void gate_words(void);
 
 #define REROLL_FRAMES 300  /* the next battle's enemies are re-rolled this often */
 DirectorState D;
@@ -315,7 +314,7 @@ void drop_events(void) {
 }
 
 static void words_due(void) {
-	gate_and_rush_words();
+	gate_words();
 	nets_words_due();
 	dark_flame_watch();
 	/* (the run's DarkChips: in the Pack, BN6's power as the BugFrags held
@@ -328,10 +327,9 @@ static void words_due(void) {
 	home_jobs_words();
 }
 
-/* The Navi gate's SP chip, given; Rush's gap, named. */
-static void gate_and_rush_words(void) {
+/* The Navi gate's SP chip, given. */
+static void gate_words(void) {
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
-	rush_hint();
 }
 
 /* MegaMan deleted: the game plays its GAME OVER, then the run ends; true
@@ -450,12 +448,6 @@ static void after_battle(void) {
 	runlog_battle_end(won, (int)emu_read32(BN6_BATTLE_TIMER));
 	/* (a request's battles: a guardian's counts for none) */
 	if (!boss_fighting()) home_jobs_battle_end(won, emu_read16(BN6_NAVI_HP), -1);
-	/* the PET's battle data on the viruses just fought */
-	if (!boss_fighting()) {
-		for (int i = 0; i < D.next.nfoes; ++i)
-			if (D.next.foes[i].kind == FOE_VIRUS) profile_family_note(D.next.foes[i].family);
-		profile_save();
-	}
 	if (emu_debug_on() && won) {
 		int r = emu_read16(BN6_BATTLE_REWARD);
 		if (r >> 14 == 0 && r != 0xFFFF) {
@@ -537,10 +529,7 @@ static void talks_due(void) {
 	mail_update();
 	rival_update();
 	words_due();
-	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) {
-		D.fragment_due = false;
-		D.fragments_told = run.fragments;
-	}
+	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) D.fragment_due = false;
 }
 
 /* The arrival's cards and MegaMan's words after them, as one beat; Chaud's

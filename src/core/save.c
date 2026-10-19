@@ -166,8 +166,6 @@ void profile_played_frame(void) {
 	++profile.played_frames;
 }
 
-bool profile_family_fought(int fam) { return fam >= 0 && fam < 64 && (profile.families_fought[fam >> 5] >> (fam & 31) & 1); }
-void profile_family_note(int fam) { if (fam >= 0 && fam < 64) profile.families_fought[fam >> 5] |= 1u << (fam & 31); }
 
 bool profile_code_entered(int program) { return program > 0 && program < 64 && (profile.codes_entered[program >> 3] >> (program & 7) & 1); }
 void profile_code_note(int program) { if (program > 0 && program < 64) profile.codes_entered[program >> 3] |= (uint8_t)(1u << (program & 7)); }

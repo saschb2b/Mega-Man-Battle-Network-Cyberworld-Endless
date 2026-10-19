@@ -600,8 +600,8 @@ the HP he had there: a free retry (session 64). The owner's call: the run
 saves at the arena's door, "as other bigger RPGs normally do it".
 
 - **The pattern** is the save point before the boss: the run commits at
-  the point of no return ("Once we're in, there's no running from a
-  guardian!"), and a retry starts from there, with the HP and chips
+  the point of no return (no running from a guardian, as from BN6's story
+  bosses, unsaid), and a retry starts from there, with the HP and chips
   MegaMan walked in with, never better.
 - **When**: the frame MegaMan steps into the arena, before the staging
   takes him (the staging waits that one frame). "Run saved" shows; a
