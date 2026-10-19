@@ -307,6 +307,8 @@ typedef struct {
 struct ArenaPairSnap {
 	uint8_t *core[2];
 	size_t core_size;
+	uint8_t *kept[2];      /* full rules: what BN5's hooks keep each core between calls (hook_keep_slots) */
+	size_t kept_size;
 	/* the cable's own (mLockstep and GBASIOLockstep), which no core's state holds */
 	int attached, multi, normal;
 	enum mLockstepPhase active;
@@ -322,17 +324,22 @@ struct ArenaPairSnap {
 };
 
 ArenaPairSnap *arena_pair_snap_new(ArenaPair *p) {
-	size_t core_size = p->core[0]->stateSize(p->core[0]);
-	ArenaPairSnap *s = calloc(1, sizeof *s + 2 * core_size);
+	size_t core_size = p->core[0]->stateSize(p->core[0]), kept_size = p->bn5 ? hook_kept_size() : 0;
+	ArenaPairSnap *s = calloc(1, sizeof *s + 2 * (core_size + kept_size));
 	if (!s) return NULL;
 	s->core_size = core_size;
+	s->kept_size = kept_size;
 	s->core[0] = (uint8_t *)(s + 1);
 	s->core[1] = s->core[0] + core_size;
+	s->kept[0] = s->core[1] + core_size;
+	s->kept[1] = s->kept[0] + kept_size;
 	return s;
 }
 
 void arena_pair_snap_free(ArenaPairSnap *s) { free(s); }
-size_t arena_pair_snap_bytes(const ArenaPairSnap *s) { return 2 * s->core_size + sizeof *s - 2 * sizeof s->core - sizeof s->core_size; }
+size_t arena_pair_snap_bytes(const ArenaPairSnap *s) {
+	return 2 * (s->core_size + s->kept_size) + sizeof *s - offsetof(ArenaPairSnap, attached);
+}
 size_t arena_pair_snap_core_bytes(const ArenaPairSnap *s) { return s->core_size; }
 
 bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
@@ -344,6 +351,7 @@ bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
 		bool scheduled = mTimingIsScheduled(timing, &n->event);
 		s->node[side] = (NodeSnap){ n->nextEvent, n->eventDiff, scheduled ? mTimingUntil(timing, &n->event) : 0, (int)n->mode,
 			n->normalSO, n->transferFinished, scheduled };
+		if (s->kept_size) hook_kept_save(hook_slot_of(c), s->kept[side]);
 	}
 	s->attached = p->cable.d.attached;
 	s->active = p->cable.d.transferActive;
@@ -369,6 +377,7 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = p->core[side];
 		if (c->stateSize(c) != s->core_size || !c->loadState(c, s->core[side])) return false;
+		if (s->kept_size) hook_kept_load(hook_slot_of(c), s->kept[side]);
 	}
 	p->cable.d.attached = s->attached;
 	p->cable.d.transferActive = s->active;
@@ -428,6 +437,11 @@ unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, un
 		if (say) printf("arena: frame %u: the cable's or the pair's own apart\n", frame);
 		++game;
 	}
+	for (unsigned side = 0; side < 2; ++side)
+		if (a->kept_size && memcmp(a->kept[side], b->kept[side], a->kept_size)) {
+			if (say) printf("arena: frame %u: what core %u's hooks keep apart\n", frame, side);
+			++game;
+		}
 	return game;
 }
 
