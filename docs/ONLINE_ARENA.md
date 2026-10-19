@@ -53,6 +53,7 @@ goes back to the title; the log says each step (`arena:` lines).
 | The wire | `src/online/arena_wire.c` | ARENA and its four messages packed and read as the server's `protocol.py` packs them; a carried MegaMan as bytes |
 | The network's link | `src/online/arena_link_net.c` | `ArenaLink` over the transport's fast outbox: keys, hashes, the ready, the peer's end |
 | From the Square | `src/online/square_arena.c`, `arena_words.c`, `online_mail.c` | The challenge, its question and answer, the battle with the Square's core held, the word after; MegaMan's lines; the inbox handed out by kind |
+| The stands | `src/online/arena_watch.c`, `watch_keys.c`, `square_watch.c`, `arena_report.c`, `stands_report.c`, `stands_wire.c`, `online_stands.c`, `stands_words.c`, `stands_text.c` | A battle watched: its pair built and run from both players' keys; the referee's offer and the watching screen; the report the cable's first sends and the channel's battles as the server tells them ([The stands](#the-stands), below) |
 
 ### Lockstep
 
@@ -583,6 +584,163 @@ came after it, and Beta's game turned his challenge down at once (`arena:
 Alpha's rematch turned down`), Alpha's MegaMan saying "Aw... No NetBattle
 this time.".
 
+## The stands
+
+The owner's decision on issue #128 (19 October 2026): a NetBattle in the
+Square is watched both ways. A game that can build the battle's pair
+**watches it for real**, the same two cores run from the players' keys a
+second or two behind them; every game, one that cannot watch among them
+(the 3DS, the browser, a game without BN5's ROM before a battle by full
+rules, a machine too slow to catch up), gets **the report**: each
+MegaMan's HP, the last chip each used and the winner, from the referee by
+the ring and on the Board.
+
+The design (the game-design skill): the Square's dialectic, **gather
+against go**, and the session loop (arrive, see who is here, do one thing
+together, read what happened, go home). Watching is the one thing to do
+together that needs no partner of one's own: it shows other players'
+folders and plays (learning by watching, social proof), a diegetic
+spectacle in the Arena's wing, the referee its barker. The patterns:
+spectating as presence (the stands fill: "2 NAVIS WATCHING!"), cheers
+that reach the players afterwards rather than during (a crowd felt, never
+a coach), and a report for everyone so no system is left at the door. The
+stands feed nothing into a run: no reward, no power, and nothing a
+spectator sends reaches the battle.
+
+### Watching
+
+The server writes down every started battle as it relays it
+(`server/cyberworld_server/stands.py`): both MegaMen (ARENA_LOADOUT), the
+installs' record and the ready (ARENA_HASH at 0xFFFFFFFE and 0xFFFFFFFF),
+the cable's first's hash every 60 frames, and both players' keys from
+frame 0 (a side's first keys come at its input delay's frame, the frames
+before released keys on every game). A player of the channel who asks
+(WATCH) is sent the battle's setup (WATCH_STATE: the two sessions, the
+rules, the delay), then the players' messages (WATCH_RELAY) and every key
+from the first frame (WATCH_KEYS, 240 frames a message at most), at most
+2 KB a tick and only while his output is under 4 KB, so a spectator who
+came late catches up without the players' relay ever waiting on him. A
+gap in a side's keys, or a battle past 20 minutes, stops its watching;
+the battle itself goes on.
+
+The spectator's game (`src/online/arena_watch.c`) builds the same pair a
+player's does (`arena_boot`, both carried MegaMen as their bytes came, by
+the battle's rules; under full rules BN5's installs from its own record,
+so only a game with BN5's ROM is offered a full-rules battle, the pair's
+common ground). At the Custom screen its pair's hash must be the players'
+ready, or it stops ("the two PETs here came out apart from theirs";
+"this PET's BN5 is not theirs" where the installs' records differ). Then
+it runs the pair as `arena.c` does, frame N once both sides' keys for N
+and the three frames after it are in (`watch_keys.c` keeps the whole
+battle's keys, about 240 bytes a second), each core on its own frame
+clock. More than 110 frames behind the frames whose keys it has (BEHIND_KEPT and
+BEHIND_LEAST), it catches up, silent: as many frames a tick as 12 ms allow (eight
+a tick headless, so a capture's frames are the same on every machine),
+until it is 90 behind; from there it runs one a tick with the watched
+side's sound, and within 20 it waits. So it stays a second and a half
+behind and rarely stalls; the keys' end (the battle over) runs the rest
+as fast. Catching up that
+gains nothing in ten seconds gives up ("this PET is too slow to catch
+up"), and the referee does not offer that battle again: the next one.
+Every 60 frames its pair's hash is checked against the cable's first's
+for the same frame; a difference stops the watching ("the games went
+apart by frame N"). The keys spent once the server has said the battle
+is over, without both cores out of it, end it as broken off.
+
+In the Square (`src/online/square_watch.c`, its words in
+`stands_words.c` and `stands_text.c`): the referee's archive is his
+words, then the channel's battle as the report says it, then, where this
+game can watch it, "WANNA WATCH?" with the cursor on Yes. Yes sets the
+Square's flag `0x14C4`; as the chat closes the game sends WATCH and, on
+WATCH_STATE, holds the Square's core as a battle of its own does
+(`online_visit_held`): the screen is the pair's picture, the cable's
+first's side (its heading and keys shown four seconds: "WATCHING ALPHA VS
+BETA", "R: other side  L: cheer  B: leave"; "Catching up..." while far
+behind). R shows the other GBA's picture, L sends the Square's Cheer
+emote, B leaves at once; the end shows "ALPHA won the NetBattle." until A
+or B, or five seconds, and MegaMan is back where he stood. A spectator is
+busy for the server: a challenge to him is refused (NOTICE 16), and his
+game sends nothing of the battle.
+
+### The report and the cheers
+
+The cable's first game reads both MegaMen off its pair's first core each
+tick (`arena_report.c`; `stands_report.c` the reading, ROM-free): each
+side's player object (`BN6_BATTLE_PLAYERS`, the same on both GBAs, which
+number the sides alike), its HP and max HP (`BN6_T1_HP`, `BN6_T1_MAX_HP`),
+and a chip counted as used where his action turns to a chip's
+(`BN6_T1_ACTION` 0x12-0x16) and the chip he uses next (`BN6_T1_CHIP`, the
+hand's first) gives way the same frame: seen in `--dev arena` (MiniBomb,
+54, picked and used: the field 0x36 until the action's 0x12, 0xFFFF
+from that frame; a charged shot's action is 0x16 with no chip, not
+counted). It sends what changed every 30 frames at most (ARENA_STATUS)
+and the winner as the battle ends, before ARENA's over; `--dev arena`
+prints it at the end ("arena: the report: HP 100/100 and 0/100, chips 1
+and 0 (last 54 and 0), winner 1"). It only reads.
+
+The server tells each channel its battles (STANDS) as they begin and end
+and at most once a second as they change: who fights whom, the rules,
+how many watch and cheer, the report. The referee says it in BN6's
+Mr.Prog voice ("A NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 40 HP!
+BETA HAS 20!", "ALPHA USED MINIBOMB!", "2 NAVIS WATCHING!", then "ALPHA
+BEAT BETA! WHAT A BOUT!" and the cheers), and the Board posts it
+(">NetBattle now! Alpha vs Beta", ">Alpha beat Beta! 3 cheers."). A
+chip of BN5's is named only by a game with BN5's ROM; another leaves its
+line out.
+
+A phrase or emote said in the channel while a battle is on is a cheer:
+the server counts it for the battle and holds its EVENT from the battle's
+two players, and STANDS too until their battle is over. Back in the
+Square, the referee tells them: "THE STANDS CHEERED FOR YOU! 3 CHEERS!".
+A spectator cheers with L while he watches, or with the phrase chat in
+the Square as anyone does.
+
+### The three-game proof
+
+20 October 2026, the player's Gregar ROM (and Team Colonel's where
+named), protocol v7, a local server with seed 120's Square, three host
+binaries headless (`SDL_VIDEODRIVER=dummy`), each with its own data
+folder and `network.ini`, from `--scene home --run-depth 7 --seed 3`, the
+harness of [the two-client proof](#the-two-client-proof) grown to three
+(kept in `.build/`): Beta placed at 28,404 and Alpha beside him; Alpha
+challenges, Beta says Yes, both pick a chip and OK and fire charged
+shots, `arenahp=150`; Gamma, BN6's ROM alone, walks to the referee
+(at -428,44: MegaMan at -428,28 facing him) and presses A through his
+pages.
+
+| Run | Gamma came in | Gamma's pair | Caught up | The battle's end | Hashes |
+| --- | --- | --- | --- | --- | --- |
+| Watched from the way in | as the players' pairs reached their Custom screen | the players' ready (`0f5e9abea55dced4`) | from 708 frames behind to 90 at frame 773 | frame 2,506 on all three, Alpha's win (the cable's first's result 1) | 41 agreed between the players, 41 checked by Gamma |
+| The same, an earlier build | the same | the same | from 785 to 90 at frame 863 | frame 2,915 on all three | 48 and 48 |
+| A spectator late | 28 seconds into the battle | the same | from 1,686 frames behind to 90 at frame 2,028, live after | frame 2,506 on all three | 41 and 41 |
+| Gamma's copy changed (`arenadesync=1200` on Gamma) | at the way in | the same | at frame 841 | Gamma stopped at frame 1,260 ("the games went apart by frame 1259"), the players fought on to 2,506 | 41 agreed between the players |
+
+On Gamma's screen: the referee's "A NETBATTLE'S ON! ALPHA VS BETA!",
+"WANNA WATCH?" with the cursor on Yes, "TO THE STANDS! ENJOY THE BOUT!",
+then the battle's Custom screen with "WATCHING Alpha VS Beta" and
+"Catching up...", the battle with its keys shown four seconds, R turning
+the picture to Beta's GBA and back (the HP in the corner each player's
+own), and "Alpha won the NetBattle." at the end; back in the Square on
+the referee's panel. The players stalled 0 to 6 ticks a battle, as
+without a spectator, but for one run while the machine built other
+targets for other work (402 ticks on Beta's game, the spectator's own
+pace unchanged). Gamma's three L's while watching came back as three
+cheers: the Board's "Alpha beat Beta! 3 cheers." and, to Alpha at the
+referee after his battle, "LAST BOUT: YOU BEAT Beta!", then "THE STANDS
+CHEERED FOR YOU! 3 CHEERS!" (the server holds a cheer's EVENT from the
+two players while they fight: `server/tests/test_stands.py`). Alpha's
+report, where his MiniBomb came up: HP 10 of 150 and 0 of 150, MiniBomb
+(54) used once, the winner Alpha.
+
+A battle by full rules (Alpha and Beta with Team Colonel's ROM beside
+BN6's, Gamma with BN6's alone): Gamma's referee called it, "A
+NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 150 HP! BETA HAS 150!", and
+asked nothing; the server refuses a WATCH from a game without BN5's ROM
+for such a battle (NOTICE 19, `server/tests/test_stands.py`). That
+battle stood at its Custom screen until the players' frames ran out (the
+scripted keys under full rules did not reach OK), so its end was not
+seen there; its report and the end's are the same path as BN6 rules'.
+
 ## Not yet
 
 - The battle's sound: the scene plays the player's core only where the
@@ -611,6 +769,13 @@ this time.".
   core and no cable, so MrkCan1 against a stepping MegaMan is compared
   against the Dark Soul (`chip_mrkcan1_darksoul`), not against BN5's
   NetBattle.
+- The stands ([The stands](#the-stands)): watching on Android and iOS
+  (built, untried), and a catch-up's pace in a window and on a handheld
+  (measured headless, eight frames a tick); a full-rules battle watched
+  to its end by a game with BN5's ROM (its way in and ready are full
+  rules' as a player's; untried end to end); a spectator too slow to
+  catch up (the refusal and the referee leaving that battle out are in
+  the code, not seen); the report's chips past one a hand.
 - Battle (not Practice) and its chip forfeit, the pack
   (it stays home), and any platform but the desktops: the 3DS and the
   browser build compile the Arena out (`CW_ARENA`), Android and iOS build

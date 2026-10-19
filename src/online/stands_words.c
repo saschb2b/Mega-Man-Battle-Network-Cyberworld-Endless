@@ -24,14 +24,15 @@ static int live_words(char *s, size_t n, const StandsBout *b) {
 	return k;
 }
 
-/* the last battle over: who won, the cheers */
+/* the last battle over: who won, the cheers (this game's own: the cheers
+ * alone, the referee's own words having called the bout) */
 static int last_words(char *s, size_t n, const StandsBout *b) {
+	if (b->mine) return b->cheers ? snprintf(s, n, "|THE STANDS CHEERED\nFOR YOU! %u CHEERS!", b->cheers) : 0;
 	char a[20], z[20];
 	caps(b->name[b->winner == 2], a, sizeof a);
 	caps(b->name[b->winner != 2], z, sizeof z);
 	int k = b->winner ? snprintf(s, n, "|%s BEAT\n%s!\nWHAT A BOUT!", a, z) : snprintf(s, n, "|%s VS\n%s...\nIT BROKE OFF!", a, z);
-	if (b->cheers && b->mine) k += snprintf(s + k, n - (size_t)k, "|THE STANDS CHEERED\nFOR YOU! %u CHEERS!", b->cheers);
-	else if (b->cheers) k += snprintf(s + k, n - (size_t)k, "|%u CHEERS FROM\nTHE STANDS!", b->cheers);
+	if (b->cheers) k += snprintf(s + k, n - (size_t)k, "|%u CHEERS FROM\nTHE STANDS!", b->cheers);
 	return k;
 }
 

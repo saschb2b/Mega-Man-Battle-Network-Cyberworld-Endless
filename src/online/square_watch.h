@@ -29,6 +29,8 @@ void square_watch_update(const OnlineSnapshot *s);
  * written. square_watch_said changes whenever what he says would. */
 bool square_watch_referee(const char *words);
 uint32_t square_watch_said(void);
+/* A NetBattle under way in the channel, as the server last said */
+bool square_watch_live(void);
 /* The Board's posts on the channel's battles ("" none) */
 const char *square_watch_board(void);
 /* Watching (the Square's core held): a frame of it, and its picture */

@@ -377,6 +377,7 @@ static void facts(SquareFacts *f) {
 	f->lost = b->lost;
 	f->arena = square_arena_offered();
 	f->parade = L.parading;
+	f->battle_on = square_watch_live();
 	f->turn = L.turn;
 	board_posts(f, s);
 }

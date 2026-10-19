@@ -154,6 +154,8 @@ bool square_watch_referee(const char *words) {
 	return online_square_prog_say(SQUARE_PROG_REFEREE, out, ta_build(&t, out));
 }
 
+bool square_watch_live(void) { return entry(true) != NULL; }
+
 const char *square_watch_board(void) { return words_of(stands_board_words); }
 
 /* the referee's Yes: the server asked for the battle he named */

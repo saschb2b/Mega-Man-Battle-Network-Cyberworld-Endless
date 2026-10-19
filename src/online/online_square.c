@@ -140,6 +140,7 @@ static void progs(NpcList *npcs, const uint8_t *empty) {
 		int gx = plan.at[prog_at[k]][0], gy = plan.at[prog_at[k]][1], x, y;
 		netmap_world(gx, gy, &x, &y);
 		fixture[k][0] = x; fixture[k][1] = y; fixture[k][2] = 16;
+		fprintf(stderr, "online: Mr.Prog %d at %d,%d\n", k, x, y);
 		prog_text[k] = mapslot_alloc(empty, PROG_TEXT);
 		if (!prog_text[k] || !sprite) continue;
 		uint32_t prog = npc_talker(6, PROG_SPRITE, x, y, level_z(gx, gy), prog_face[k], prog_text[k], 0, -1, false);

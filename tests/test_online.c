@@ -222,6 +222,11 @@ static void referee(void) {
 	f.arena = true;
 	f.navis = 1;
 	assert(strstr(square_referee_words(&f), "WHO'S FIRST?") && strstr(square_referee_words(&f), "PICK"));
+	/* (another pair's NetBattle on in the channel: no "none yet", and no last bout of this game's) */
+	f.battle_on = true;
+	const char *on = square_referee_words(&f);
+	assert(strstr(on, "PICK") && !strstr(on, "WHO'S FIRST?") && !strstr(on, "LAST BOUT"));
+	f.battle_on = false;
 	f.fought = "Alpha";
 	f.result = 1; f.won = 1;
 	const char *s = square_referee_words(&f);

@@ -22,7 +22,7 @@ void arena_report_begin(uint32_t match) {
 	Q.match = match;
 }
 
-static void send(void) {
+static void report_send(void) {
 	uint8_t m[ONLINE_ARENA_STATUS_BYTES];
 	if (!stands_wire_status(m, Q.match, &Q.now) || !online_transport_send(m, sizeof m)) return;
 	Q.sent = Q.now;
@@ -40,13 +40,13 @@ void arena_report_frame(const Arena *a) {
 			(uint16_t)c->rawRead16(c, o + BN6_T1_MAX_HP, -1), (uint8_t)c->rawRead8(c, o + BN6_T1_ACTION, -1),
 			(uint16_t)c->rawRead16(c, o + BN6_T1_CHIP, -1));
 	}
-	if (Q.frames - Q.sent_at >= REPORT_EVERY && memcmp(&Q.now, &Q.sent, sizeof Q.now)) send();
+	if (Q.frames - Q.sent_at >= REPORT_EVERY && memcmp(&Q.now, &Q.sent, sizeof Q.now)) report_send();
 }
 
 void arena_report_end(unsigned result) {
 	if (!Q.match) return;
 	Q.now.winner = result == 1 ? 1 : result == 2 ? 2 : 0;
-	if (Q.now.winner) send();
+	if (Q.now.winner) report_send();
 	printf("arena: the report: HP %u/%u and %u/%u, chips %u and %u (last %u and %u), winner %u\n", Q.now.hp[0], Q.now.max_hp[0],
 		Q.now.hp[1], Q.now.max_hp[1], Q.now.used[0], Q.now.used[1], Q.now.chip[0], Q.now.chip[1], Q.now.winner);
 	Q.match = 0;

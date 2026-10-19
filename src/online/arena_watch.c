@@ -4,8 +4,8 @@
  * keys for N and the three frames after it are known, each core taking
  * those of its own frame clock. A spectator's keys come all at once where
  * he came in late, so it runs as many frames a tick as the frame's time
- * allows while it is more than LAG frames behind the keys known, then one
- * a tick, and waits within NEAR of them. Catching up that gains nothing in
+ * allows while it is more than BEHIND_KEPT frames behind the keys known, then one
+ * a tick, and waits within BEHIND_LEAST of them. Catching up that gains nothing in
  * TRY_TICKS ticks gives up: this machine cannot run the pair fast enough. */
 #include "arena_watch.h"
 
@@ -22,11 +22,12 @@
 #include "arena_pair.h"
 #include "arena_wire.h"
 #include "bn6.h"
+#include "devtools.h"
 
-#define LAG            90    /* frames behind the keys known it keeps: a second and a half */
-#define NEAR           20    /* ... nearer than this, it waits for more */
+#define BEHIND_KEPT            90    /* frames behind the keys known it keeps: a second and a half */
+#define BEHIND_LEAST           20    /* ... nearer than this, it waits for more */
 #define FAST_MS        12    /* a tick's time for catching up, in a window */
-#define FAST_HEADLESS  4     /* ... frames a tick without one (a capture's frames the same on every machine) */
+#define FAST_HEADLESS  8     /* ... frames a tick without one (a capture's frames the same on every machine) */
 #define SLICE          8     /* the way in's frames between two looks at the clock */
 #define SLICE_MS       14
 #define HEADLESS_SLICE 64
@@ -71,7 +72,7 @@ struct ArenaWatch {
 	uint64_t pair_ready;
 	WatchKeys keys;
 	Hashes hashes;
-	uint32_t next, checked, fast_ticks, fast_from;
+	uint32_t next, checked, fast_ticks, fast_from, fast_at;
 	unsigned result;
 	char error[160];
 };
@@ -141,7 +142,25 @@ void arena_watch_relayed(ArenaWatch *w, unsigned side, const uint8_t *message, s
 	else if (arena_wire_read_hash(message, n, &match, &frame, &hash) && match == w->match) hash_in(w, side, frame, hash);
 }
 
+/* (arenadesync=N on a spectator: the cable's first's keys from frame N for
+ * a second turned to other directions and buttons here, as a spectator's
+ * copy gone wrong: the hashes' stop tested) */
+#define DESYNC_FRAMES 60
+#define DESYNC_KEYS   0x33u
+static const uint8_t *desynced(unsigned side, uint32_t first, const uint8_t *be, unsigned count, uint8_t *out) {
+	uint32_t at = (uint32_t)dev.arena_desync;
+	if (dev.arena_desync <= 0 || side || first + count <= at || first >= at + DESYNC_FRAMES) return be;
+	memcpy(out, be, 2u * count);
+	for (unsigned i = 0; i < count; ++i)
+		if (first + i >= at && first + i < at + DESYNC_FRAMES) out[2 * i + 1] ^= DESYNC_KEYS;
+	if (first <= at) printf("watch: (arenadesync) the first side's keys from frame %u changed here\n", at);
+	return out;
+}
+
 void arena_watch_keys(ArenaWatch *w, unsigned side, uint32_t first, const uint8_t *be, unsigned count) {
+	uint8_t changed[2 * ONLINE_WATCH_KEYS_MAX];
+	if (count > ONLINE_WATCH_KEYS_MAX) return;
+	be = desynced(side, first, be, count, changed);
 	if (w->stage != WATCHING_FAILED && !watch_keys_put(&w->keys, side, first, be, count)) fail(w, "the players' keys came apart");
 }
 
@@ -218,16 +237,24 @@ static bool step(ArenaWatch *w) {
 }
 
 /* frames to run this tick: all that time allows where far behind (or the
- * keys have ended), one where near, none within NEAR */
+ * keys have ended), one where near, none within BEHIND_LEAST */
 static void run(ArenaWatch *w, bool headless) {
 	uint32_t runnable = watch_keys_runnable(&w->keys);
 	uint32_t behind = runnable > w->next ? runnable - w->next : 0;
 	if (!behind && w->ended) { fail(w, "the NetBattle broke off"); return; }
-	bool fast = w->ended || behind > LAG + NEAR;
-	if (fast && !w->fast) { w->fast_ticks = 0; w->fast_from = behind; }
-	w->fast = fast || (w->fast && behind > LAG);
+	bool fast = w->ended || behind > BEHIND_KEPT + BEHIND_LEAST;
+	if (fast && !w->fast) {
+		w->fast_ticks = 0;
+		w->fast_from = behind;
+		w->fast_at = w->next;
+		printf("watch: catching up from frame %" PRIu32 ", %" PRIu32 " frames behind the keys\n", w->next, behind);
+	}
+	bool was = w->fast;
+	w->fast = fast || (w->fast && behind > BEHIND_KEPT);
+	if (was && !w->fast) printf("watch: caught up at frame %" PRIu32 " (%" PRIu32 " frames run since frame %" PRIu32 "), %" PRIu32 " behind\n",
+		w->next, w->next - w->fast_at, w->fast_at, behind);
 	if (!w->fast) {
-		if (behind >= NEAR) step(w);
+		if (behind >= BEHIND_LEAST) step(w);
 		return;
 	}
 	if (!w->ended && ++w->fast_ticks >= TRY_TICKS) {
@@ -237,7 +264,7 @@ static void run(ArenaWatch *w, bool headless) {
 	}
 	arena_pair_mute(w->pair);
 	uint64_t start = SDL_GetPerformanceCounter(), budget = SDL_GetPerformanceFrequency() * FAST_MS / 1000;
-	for (unsigned n = 0; w->next < runnable && (w->ended || runnable - w->next > LAG); ++n) {
+	for (unsigned n = 0; w->next < runnable && (w->ended || runnable - w->next > BEHIND_KEPT); ++n) {
 		if (headless ? n >= FAST_HEADLESS : SDL_GetPerformanceCounter() - start >= budget) break;
 		if (!step(w)) break;
 	}
