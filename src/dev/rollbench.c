@@ -31,7 +31,8 @@
 #define BOOT_SLICE   64
 #define FRAME_MS     (1000.0 / 60.0)
 #define HEADROOM     0.25   /* of a frame, kept for the rest: drawing, the picture's present, the system */
-#define LINES        16
+#define LINES        11
+#define LINE_H       12     /* the screen's lines: the font's height and a gap */
 
 typedef struct { double sum, worst; unsigned n; } Stat;
 
@@ -108,13 +109,10 @@ static void one_frames(unsigned n) {
 
 static void one_said(void) {
 	char s[64];
-	snprintf(s, sizeof s, "1 CORE %uKB", (unsigned)(B.one_size / 1024));
+	snprintf(s, sizeof s, "CORE %uKB FRAME %.2fMS", (unsigned)(B.one_size / 1024), mean(&B.one_step));
 	say(s, "the game's core alone (from power-on, not a battle): its state %u bytes", (unsigned)B.one_size);
-	snprintf(s, sizeof s, " SAVE %.2f/%.2f LOAD %.2f/%.2f", mean(&B.one_save), B.one_save.worst, mean(&B.one_load), B.one_load.worst);
-	say(s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a frame %.3f ms (worst %.3f), over %u frames",
+	say(NULL, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a frame %.3f ms (worst %.3f), over %u frames",
 		mean(&B.one_save), B.one_save.worst, mean(&B.one_load), B.one_load.worst, mean(&B.one_step), B.one_step.worst, B.one_save.n);
-	snprintf(s, sizeof s, " FRAME %.2f/%.2f MS", mean(&B.one_step), B.one_step.worst);
-	show(s);
 }
 
 /* ---- the pair (CW_ARENA) ---- */
@@ -202,33 +200,33 @@ static void pair_said(void) {
 	bool full = B.format == ONLINE_FORMAT_FULL;
 	const char *rules = full ? "full rules: BN5's installs and hooks in both cores" : "BN6's rules";
 	char s[64];
-	snprintf(s, sizeof s, "PAIR SNAP %uKB (+%uB)", (unsigned)(all / 1024), (unsigned)(all - 2 * core));
+	snprintf(s, sizeof s, "PAIR SNAPSHOT %uKB", (unsigned)(all / 1024));
 	say(full ? NULL : s, "the pair (%s, a Practice NetBattle, %u frames of scripted keys): a core's state %u bytes, the snapshot %u "
 		"(%u of the cable's, the pair's own and what the hooks keep)", rules, B.step.n, (unsigned)core, (unsigned)all,
 		(unsigned)(all - 2 * core));
-	snprintf(s, sizeof s, " SAVE %.2f/%.2f LOAD %.2f/%.2f", mean(&B.save), B.save.worst, mean(&B.load), B.load.worst);
+	snprintf(s, sizeof s, " SAVE %.2f LOAD %.2f MS", mean(&B.save), mean(&B.load));
 	say(full ? NULL : s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a pair frame %.3f ms (worst %.3f)", mean(&B.save),
 		B.save.worst, mean(&B.load), B.load.worst, mean(&B.step), B.step.worst);
-	snprintf(s, sizeof s, "%sFRAME %.2f/%.2f BACK%u %.1f/%.1f", full ? "FULL " : " ", mean(&B.step), B.step.worst, DEPTH, mean(&B.back),
-		B.back.worst);
+	snprintf(s, sizeof s, "%sFRAME %.2f MS BACK%u %.1f", full ? "FULL " : " ", mean(&B.step), DEPTH, mean(&B.back));
 	say(s, "  a rollback of %u frames %.3f ms (worst %.3f); %u checked: the game's state the same in %u, the whole state (the "
 		"sound's too) in %u", DEPTH, mean(&B.back), B.back.worst, B.checks, B.game, B.agreed);
-	snprintf(s, sizeof s, "%sCHECKS %u: GAME %u SAME, ALL %u", full ? "FULL " : " ", B.checks, B.game, B.agreed);
+	snprintf(s, sizeof s, "%sGAME THE SAME %u/%u", full ? "FULL " : " ", B.game, B.checks);
 	show(s);
 	double budget = FRAME_MS * (1.0 - HEADROOM);
 	int w = window(budget, mean(&B.load), mean(&B.step), mean(&B.save));
 	int worst = window(budget, B.load.worst, B.step.worst, B.save.worst);
-	snprintf(s, sizeof s, "%sWINDOW %d (WORST %d) FRAMES", full ? "FULL " : "", w, worst);
+	snprintf(s, sizeof s, "%sWINDOW %d (WORST %d)", full ? "FULL " : "", w, worst);
 	say(s, "a tick's budget %.1f ms (%.0f%% of a frame kept for the rest): a window of %d frames at the means, %d at the worst",
 		budget, HEADROOM * 100, w, worst);
 	/* (at delay D the pair's frame needs the peer's keys 3 frames on, so 3 - D of them are guessed even with
 	 * no latency: a window W covers a one way of W + D - 3 frames) */
 	for (int d = 1; d <= 3; ++d) {
 		int frames = w + d - 3;
-		snprintf(s, sizeof s, " DELAY %d: ONE WAY %d F %.0f MS", d, frames, frames * FRAME_MS);
-		say(full ? NULL : s, "  delay %d: covers a one way of %d frames (%.0f ms; %d at the worst)", d, frames, frames * FRAME_MS,
-			worst + d - 3);
+		say(NULL, "  delay %d: covers a one way of %d frames (%.0f ms; %d at the worst)", d, frames, frames * FRAME_MS, worst + d - 3);
 	}
+	/* (the one way each delay covers, on one line) */
+	snprintf(s, sizeof s, " D1 %.0f D2 %.0f D3 %.0f MS", (w - 2) * FRAME_MS, (w - 1) * FRAME_MS, w * FRAME_MS);
+	if (!full) show(s);
 }
 
 /* the pair's snapshots and stats let go, for the next pass */
@@ -322,7 +320,7 @@ static void update(void) {
 static void draw(void) {
 	fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 255));
 	int x = P.core_x + 4, y = P.core_y + 4;
-	for (int i = 0; i < B.nlines; ++i) text_draw(x, y + 9 * i, B.lines[i], i ? WHITE : rgba(170, 200, 255, 255), TEXT_LEFT);
+	for (int i = 0; i < B.nlines; ++i) text_draw(x, y + LINE_H * i, B.lines[i], i ? WHITE : rgba(170, 200, 255, 255), TEXT_LEFT);
 	if (B.stage != DONE) {
 		unsigned total = B.stage == ONE ? ONE_FRAMES : B.stage == PAIR ? PAIR_FRAMES : 0;
 		if (total) text_drawf(x, P.core_y + ARENA_H - 12, WHITE, TEXT_LEFT, "%s %u/%u", B.stage == ONE ? "CORE" : "PAIR", B.frame, total);
