@@ -2127,6 +2127,14 @@ def lint_symbols():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'symbols.py'), '--check']) == 0
 
 
+def lint_voice():
+    """docs/voice/catalog.json as tools/voice_catalog.py writes it from the
+    words files: every line the voice review's dashboard shows, in step
+    with the code (docs/voice/README.md)."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'voice_catalog.py'), '--check']) == 0
+
+
 # ---- the code's smells (AGENTS.md, Code structure) ----
 
 SMELL_LINES = {'.c': 1000, '.m': 1000, '.h': 400}   # a file past this many lines holds more than one thing
@@ -2322,6 +2330,7 @@ def lint(update=False):
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
     ok = lint_symbols() and ok
+    ok = lint_voice() and ok
     ok = lint_complexity(update) and ok
     ok = lint_smells(update) and ok
     ok = lint_headers() and ok
@@ -2380,6 +2389,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         if code == 0:   # docs/re's status in step with its ledger
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
+        if code == 0:   # the voice catalog's reading of C (tools/voice_catalog.py)
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_voice_catalog.py')])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
