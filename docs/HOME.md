@@ -756,7 +756,9 @@ name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a field: host or
 host:port, `wss://` and `/presence` added), MY NAME. The two fields are
 the only screen of its own going online has (`src/online/online_field.c`,
 in the PET's colours, a keyboard on the pad and by touch, the system's
-own keyboard and paste where there is one). Settings live in the data
+own keyboard and paste where there is one; on a phone held upright the
+field stands whole in the screen's upper part, above the system's
+keyboard). Settings live in the data
 folder's `network.ini`: the name and whether it was chosen, the servers
 (the official one first, then the last address typed), which one the
 gate leads to, each one's consent, and the private identity each
