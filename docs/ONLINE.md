@@ -212,7 +212,7 @@ every place and every walker's waypoint on the floor.
   stops, turns to MegaMan and says a line built from what the client
   knows: the Navis here by name, how many, the hour, the area, the last
   Navi to log in, the last trade and NetBattle this game made; the
-  GirlNavi tells the Square's tips as gossip.
+  GirlNavi tells one of the Square's tips as gossip (where Navis cheer).
 - **A parade** every three minutes of the wall clock, thirty seconds
   long (after the Pokemon Wi-Fi Plaza's spectacle and the fan servers'
   parades): the walkers log out where they are and in on a loop three
@@ -232,7 +232,8 @@ every place and every walker's waypoint on the floor.
   comes back ("YOU WIN!", "ALPHA WINS!").
 - **Check text**: A facing a prop says what it is; the Board's posts are
   the channel, who is here, the last log-in, the last trade and battle,
-  and two tips; the sign names the channel.
+  the trade board's offers and a tip (Trade Central); the sign names the
+  channel.
 - **Together**: when two players say something or emote within four
   seconds of each other round the landmark (three panels) or on the
   stage, the walker nearer the landmark shows BN6's "!" (list 5's sprite

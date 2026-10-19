@@ -740,7 +740,8 @@ one room, its stations each a way, as the Orbiter's are. Built in
 - after that MegaMan asks "To the Net Square,Lan?" each time.
 
 A Yes saves the run where MegaMan stands (the write confirmed: a failed
-save keeps him home, "Huh? The save didn't go through..."), and the
+save keeps him home, the game's note "Run not saved" and MegaMan's "Let's
+stay home for now,Lan.", no character naming a save), and the
 visit begins (`src/online/online_visit.c`): the gate's core flickers
 while the server answers, MegaMan held; B calls it off. The Square is
 built into the running game and MegaMan warped there; the way back loads

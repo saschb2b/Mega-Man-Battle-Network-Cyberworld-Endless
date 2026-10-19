@@ -95,10 +95,9 @@ static const char *clock_feel(int clock) {
 		clock == 1 ? "|@M The Net's had a little time to copy." : "";
 }
 
-const char *home_hp_status(const char *way, bool first, int clock) {
+const char *home_hp_status(const char *way, int clock) {
 	static char words[200];
-	if (first) snprintf(words, sizeof words, "@M The pink pad's %s,Lan!|@M Or press R,and I'll jack out.%s", way, clock_feel(clock));
-	else snprintf(words, sizeof words, "@M The pink pad's %s,Lan!%s", way, clock_feel(clock));
+	snprintf(words, sizeof words, "@M The pink pad's %s,Lan!%s", way, clock_feel(clock));
 	return words;
 }
 

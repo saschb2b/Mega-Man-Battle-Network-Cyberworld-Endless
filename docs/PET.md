@@ -39,8 +39,9 @@ again on each layer, read and never marked NEW:
   many of the seventeen he has met, the best layer and the Nest's wins.
 - **Compression**, from the first compression code entered in any run:
   each code entered, a line each, the program as the NaviCust lists it and
-  its ten buttons five and five ("Custom1  LBBRB AALRR"), after how to
-  enter one; NEW with each new code (docs/META.md).
+  its ten buttons five and five ("Custom1  LBBRB AALRR"); not how to
+  enter one, BN6's own, which the player has just done; NEW with each new
+  code (docs/META.md).
 - **Endless Net** (from NetBBS): netizens' threads about the net, more as
   the profile goes deeper, NEW with each new post (docs/META.md, Rumors).
 

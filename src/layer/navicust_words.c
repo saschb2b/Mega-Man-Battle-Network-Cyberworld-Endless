@@ -1,6 +1,6 @@
 /* What MegaMan says of the NaviCust (docs/NAVICUST.md, docs/VOICE.md):
- * what each program does, which programs L and R turn, the board's bugs
- * and why they came. The NaviCust itself, navicust.c. */
+ * what each program does, the board's bugs and why they came (the second
+ * screen's). The NaviCust itself, navicust.c. */
 #include <stdio.h>
 #include <string.h>
 
@@ -48,31 +48,6 @@ static const char *const abouts[] = {
 
 const char *navicust_about(int program) {
 	return navicust_in_pool(program) && program > 0 && program < (int)(sizeof abouts / sizeof *abouts) ? abouts[program] : NULL;
-}
-
-const char *navicust_color_turns(int c) {
-	static char buf[120];
-	if (c < 1 || c > 6) return "";
-	if (navicust_spins() >> (c - 1) & 1) snprintf(buf, sizeof buf, "Our %s Spin lets L and R turn it!", navicust_color_name(c));
-	else buf[0] = '\0';   /* (none held: BN6's own rule, unexplained to its players) */
-	return buf;
-}
-
-const char *navicust_turn_words(int variant) {
-	static char buf[160];
-	int c = 0, held = 0;
-	if (variant > 0 && variant < 47 * 4 && R.data && R.layout && R.layout->navicust_programs)
-		c = R.data[R.layout->navicust_programs + (uint32_t)variant * 16 + 3];
-	if (c >= 1 && c <= 6) return navicust_color_turns(c);
-	for (int k = 1; k <= 6; ++k) held += navicust_spins() >> (k - 1) & 1;
-	if (!held) return "";
-	if (held == 6) return "L and R turn any program as we place it!";
-	int k = snprintf(buf, sizeof buf, "L and R turn "), n = 0;
-	for (int i = 1; i <= 6; ++i)
-		if (navicust_spins() >> (i - 1) & 1)
-			k += snprintf(buf + k, sizeof buf - (size_t)k, "%s%s", n++ == 0 ? "" : n == held ? " and " : ", ", navicust_color_name(i));
-	snprintf(buf + k, sizeof buf - (size_t)k, " programs.\n%s we hold!", held == 1 ? "That's the Spin" : "Those are the Spins");
-	return buf;
 }
 
 /* (BN6's compile, bn6f sub_813BBD4: a program's shape lands at its
@@ -134,59 +109,26 @@ const char *navicust_bug_cause(const uint8_t grid[NAVICUST_GRID * NAVICUST_GRID]
 	return said ? buf : NULL;
 }
 
-const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS], bool after_run, const char *cause) {
+const char *navicust_bug_words(const uint8_t counts[NAVICUST_BUGS]) {
 	/* the game's bug types (its compile counts one per violation; the
-	 * level is the count, up to 3) and what each does, in MegaMan's words */
+	 * level is the count, up to 3), named as MegaMan feels them; what each
+	 * does and which rule made it are BN6's own, unsaid (the voice sweep,
+	 * docs/voice/sweep/net.md), and the colours' count has no name */
 	static const char *const name[NAVICUST_BUGS] = {
 		[1] = "moving", [2] = "emotion", [3] = "panel", [4] = "Custom", [5] = "encounter", [6] = "reward",
 		[7] = "Buster", [9] = "HP",
 	};
-	/* (the named ones a box of their own after the bug's name; the colours'
-	 * capitalised as said) */
-	static const char *const effect[NAVICUST_BUGS] = {
-		[1] = "Every step slides me as far as I can go",
-		[2] = "My mood will swing in battle",
-		[3] = "Panels may crack under me as I move",
-		[4] = "I'll get fewer chips as a battle goes on",
-		[5] = "More viruses will find us",
-		[6] = "Battles will pay Zenny,not chips",
-		[7] = "My Buster may misfire",
-		[9] = "I'll lose HP in battle,faster with every hit",
-		[11] = "five colors! Each battle will start with something odd",
-		[12] = "six colors! Each battle will start with something odd,for longer",
-	};
-	static char buf[800];
+	static char buf[400];
 	int k = 0, n = 0;
-	for (int t = 1; t < NAVICUST_BUGS; ++t) n += counts[t] && effect[t];
+	for (int t = 1; t < NAVICUST_BUGS; ++t) n += counts[t] && (name[t] || t == 11 || t == 12);
 	if (!n) return "";
-	/* (after the RUN: its "OK! RUN complete!" and "Good job, Lan!" are the
-	 * game's whatever the board, and a playtester read them as clean) */
-	k += snprintf(buf + k, sizeof buf - (size_t)k, "@M Lan,%s has %s!", after_run ? "the RUN says OK...|@M But our NaviCust" : "our NaviCust",
-		n == 1 ? "a bug" : "bugs");
-	for (int t = 1; t < NAVICUST_BUGS && k < (int)sizeof buf - 160; ++t) {
-		if (!counts[t] || !effect[t]) continue;
-		if (!name[t]) {
-			k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %c%s!", effect[t][0] - 'a' + 'A', effect[t] + 1);
-			continue;
-		}
+	k += snprintf(buf + k, sizeof buf - (size_t)k, "@M Lan,our NaviCust has %s!", n == 1 ? "a bug" : "bugs");
+	for (int t = 1; t < NAVICUST_BUGS && k < (int)sizeof buf - 40; ++t) {
+		if (!counts[t] || !name[t]) continue;
 		int level = counts[t] > 3 ? 3 : counts[t];
 		bool vowel = strchr("aeiouAEIOU", name[t][0]) || name[t][0] == 'H';   /* ("an HP bug") */
 		const char *article = level == 1 ? "A light" : level == 3 ? "A bad" : vowel ? "An" : "A";
-		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s %s bug!|@M %s.", article, name[t], effect[t]);
+		k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s %s bug!", article, name[t]);
 	}
-	/* (where to look, from the game's rules: a playtester told only what a
-	 * bug did, of a program he had pushed over the edge, found the board
-	 * looking clean again; the colours' count names itself) */
-	bool placed = false;
-	for (int t = 1; t < 11; ++t) placed |= counts[t] && effect[t];
-	/* (and where it can be read from the board, what: a playtester told
-	 * the four rules looked for the one he had broken) */
-	if (placed && cause && k < (int)sizeof buf - 320) k += snprintf(buf + k, sizeof buf - (size_t)k, "|@M %s", cause);
-	else if (placed && k < (int)sizeof buf - 220)
-		k += snprintf(buf + k, sizeof buf - (size_t)k,
-			"|@M Bugs come from going off the board,or off the command line.|"
-			"@M Or a plus part on it,or same colors side by side.");
-	if (k < (int)sizeof buf - 200)
-		snprintf(buf + k, sizeof buf - (size_t)k, "|@M We can fix it in the PET,or live with it.|@M %s", navicust_turn_words(0));
 	return buf;
 }

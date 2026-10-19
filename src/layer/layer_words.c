@@ -30,16 +30,18 @@ const char *netbattle_later_words(void) {
  * one weak to none, the hardest hit, and the viruses' weakness besides
  * where the list has a chip of it (an element-less guardian's act is
  * answered for its viruses). ElementMan's element changes as he fights,
- * so none answers him for long. */
-static void dealer_word(char *word, size_t n, const DealerTalk *d, const char *brought, const char *lands) {
+ * so none answers him for long. One tip, a seller's: how a chip lands and
+ * a Navi's armor are strategy, the BBS's (the voice sweep,
+ * docs/voice/sweep/net.md). */
+static void dealer_word(char *word, size_t n, const DealerTalk *d, const char *brought) {
 	int navi = d->navi, counter = d->counter, nstock = d->nstock;
 	const ShopItem *stock = d->stock;
 	bool weak = counter > 0 && guardian_weakness(navi) > 0, listed = false;
 	for (int i = 0; i < nstock; ++i)
 		if (stock[i].kind == 2 && counter > 0 && chip_hits_with(stock[i].id) == counter && (i == 0 || !weak)) listed = true;
 	if (weak && listed) {
-		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.%s%s", guardian(navi)->name,
-			elem_name(counter), brought, lands);
+		snprintf(word, n, "|Word is,%s can't stand %s chips!|My pick's first on the list.%s", guardian(navi)->name,
+			elem_name(counter), brought);
 		return;
 	}
 	/* (a weakness he found no chip of, as a few layers' rolls of Cursor
@@ -49,28 +51,19 @@ static void dealer_word(char *word, size_t n, const DealerTalk *d, const char *b
 			"first on the list.%s", guardian(navi)->name, elem_name(counter), brought);
 		return;
 	}
-	/* (KnightMan's armor turns every blow but while he swings or leaps: a
-	 * playtester learned it over three Custom screens, session 68) */
-	bool knight = guardian_older(navi) && guardian_older_ai(navi) == BN5_NAVI_KNIGHTMAN;
-	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard%s! My pick's first on the list.", guardian(navi)->name,
-		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" :
-		knight ? "has no weak element.|His armor blocks all,but not when he swings or leaps" : "has no weak element",
-		knight ? ",then" : "");
+	int k = snprintf(word, n, "|Word is,%s %s.|Hit hard! My pick's first on the list.", guardian(navi)->name,
+		navi == GUARDIAN_ELEMENTMAN ? "changes his element as he fights" : "has no weak element");
 	if (listed && k > 0 && (size_t)k < n)
 		snprintf(word + k, n - (size_t)k, "|The viruses here hate %s chips! I've got one!", elem_name(counter));
 }
 
-/* (Rush's gap, and how many RushFood call him there: he comes for as many
- * as its panels and eats one, which only MegaMan said, at its bones; a
- * playtester would have bought one of three, session 64) */
+/* (Rush's gap, and how wide: as many RushFood as its panels call him, BN6's
+ * own rule, unsaid; a playtester would have bought one of three, session
+ * 64, and the width says how many) */
 static void dealer_rush(char *s, size_t n) {
 	int hold = layer.ngaps ? layer.gap[0].len : shop_rush_need(run.depth);
 	const char *where = layer.ngaps ? "on this layer" : "deeper in";
-	/* (why as many as its panels, said: "He comes when you hold 2 RushFood.
-	 * He eats one." read as a riddle, session 70) */
-	if (hold > 1)
-		snprintf(s, n, "|And there's a gap %s,%d panels wide!|Rush comes when you hold a RushFood|for each panel. He eats just one!|"
-			"It's on my list,too!", where, hold);
+	if (hold > 1) snprintf(s, n, "|And there's a gap %s,%d panels wide!|It's on my list,too!", where, hold);
 	else snprintf(s, n, "|And there's a gap %s!|Rush bridges it for a RushFood. I've got some!", where);
 }
 
@@ -91,23 +84,19 @@ static void dealer_keys(char *hello, size_t n, const DealerTalk *d) {
 	}
 }
 
-/* What a Spin does, and that it stays: the first also how they are
- * found, one deeper in each dive. */
+/* A Spin found, and that it stays: the first also how they are found, one
+ * deeper in each dive. What a Spin does, and L and R, are BN6's own,
+ * unsaid (the voice sweep, docs/voice/sweep/net.md). */
 int spin_words(TextArchive *text, int colour, bool first) {
 	static char words[400];
 	const char *c = meta_spin_name(colour);
 	int held = 0;
 	for (int k = 0; k < 6; ++k) held += meta_spins() >> k & 1;
 	if (first)
-		snprintf(words, sizeof words, "Lan,look! A Spin for %s programs!|Now we can turn %s programs on the NaviCust!|"
-			"Hold one,then press L or R.|And it stays with us,in every dive!|Each dive hides one more,deeper in.|"
-			"A color we don't have yet!", c, c);
-	else if (held >= 5)
-		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|That's all six! Every program turns now!|"
-			"In every dive!", c);
-	else
-		snprintf(words, sizeof words, "A Spin for %s programs,Lan!|%c%s programs turn with L and R now!|"
-			"In every dive from here on!", c, c[0] - 'a' + 'A', c + 1);
+		snprintf(words, sizeof words, "Lan,look! A Spin for %s programs!|And it stays with us,in every dive!|"
+			"Each dive hides one more,deeper in.|A color we don't have yet!", c);
+	else if (held >= 5) snprintf(words, sizeof words, "A Spin for %s programs,Lan!|That's all six!|In every dive!", c);
+	else snprintf(words, sizeof words, "A Spin for %s programs,Lan!|In every dive from here on!", c);
 	return ta_say(text, FACE_MEGAMAN, words);
 }
 
@@ -121,10 +110,6 @@ ShopWords dealer_words(const DealerTalk *d) {
 	/* (a box each made seven before his list, session 73: the count rides
 	 * on the pick's box, the greeting is one) */
 	const char *brought = nstock && stock[0].stock == 1 ? " Just the one!" : " I brought two!";
-	/* (how his pick lands, where it is not straight ahead: AquaNdl2 missed
-	 * a hopping BlastMan two times in three) */
-	const char *lands = nstock && stock[0].kind == 2 && chip_family(stock[0].id) == 50
-		? "|Its needles drop a moment late.|So fire when he stops!" : "";
 	/* (nor does he deny the bystanders' rumor: a playtester heard it
 	 * two platforms before his "No word yet") */
 	/* (a super boss never met: no word on the net, only its fear; docs/
@@ -136,7 +121,7 @@ ShopWords dealer_words(const DealerTalk *d) {
 		snprintf(word, sizeof word, "|Nobody's come back from the end of %s!|There's talk on the Net... "
 			"But I don't sell talk!|Ask me again deeper in!", guardian_area_in_text(run.biome, LAYER_NORMAL));
 	else if (navi > 0)
-		dealer_word(word, sizeof word, d, brought, lands);
+		dealer_word(word, sizeof word, d, brought);
 	/* (and that his chips come in the folder's codes, loot_fit_code) */
 	snprintf(hello, sizeof hello, "%s%s", run.depth <= 3
 		? run.codes[0] ? "Welcome! Chips for sale!|In your Folder's codes,when I can!"
@@ -160,8 +145,7 @@ ShopWords vendor_words(char names[][16], int n) {
 	if (n == 1) snprintf(again, sizeof again, "|I hear you've used %s before!|So I brought it along!", names[0]);
 	else if (n == 2)
 		snprintf(again, sizeof again, "|I hear you've used %s and %s!|So I brought them along!", names[0], names[1]);
-	snprintf(hello, sizeof hello, "NaviCust programs!|Fresh from my workbench!%s|Install them in the PET.|Pick MegaMan,then NaviCust!",
-		again);
+	snprintf(hello, sizeof hello, "NaviCust programs!|Fresh from my workbench!%s", again);
 	return (ShopWords){ hello, "More programs? Take a look!", "Sold out!|Every program I brought is yours!" };
 }
 
@@ -170,13 +154,14 @@ ShopWords vendor_words(char names[][16], int n) {
  * hundredths, cut), and the rung's rule; the squad (`foes` viruses) and the
  * stake said before the choice (a playtester took it at 100 HP, nothing
  * saying it was a real fight; and the two are old rivals, not strangers);
- * the first duel (`met` none before) says who he is */
+ * the first duel (`met` none before) says who he is. To heal first goes
+ * unsaid, and the stake is noted (the voice sweep,
+ * docs/voice/sweep/net.md). */
 void duel_terms(char *terms, size_t n, int met, int foes, int frames, int rung) {
 	static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
 	int f = frames, sec = f / 60, cs = (f % 60) * 100 / 60;
 	int nf = foes >= 1 && foes <= 4 ? foes : 3;
-	snprintf(terms, n, "%sI busted %s here in %d:%02d.%02d.|Beat that%s.|"
-		"@M Real viruses,Lan!|@M If they delete us,the dive's over.|@M Let's heal up first if we're hurt.",
+	snprintf(terms, n, "%sI busted %s here in %d:%02d.%02d.|Beat that%s.|@M Real viruses,Lan!|@M If they delete us,the dive's over.",
 		met ? "Back again,MegaMan? Chaud's watching.|" :
 		"MegaMan... So it's you,diving the Endless Net.|The Nest copies Navis,they say.|I'm no copy.|Chaud wants to see your skill.|",
 		count[nf], sec / 60, sec % 60, cs, rung == 1 ? " without taking a hit" : "");

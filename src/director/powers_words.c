@@ -33,14 +33,13 @@ const char *powers_reward_words(int navi, bool cross, bool beast) {
 		if (!brought) ADD("%sMegaMan got:\n\"%s\"!!|@M %s", k ? "|" : "", powers_cross_name(navi), cross_feel(navi));
 		else if (run.cross == navi) ADD("%s@M %s's Cross data... We already brought his Cross!", k ? "|" : "", guardian(navi)->name);
 		/* (said as the net's fact, not a rule's: "One Cross a run!" put
-		 * the game's word in MegaMan's mouth; a first win opens its start
-		 * for good, said here, where a playtester read "won't fit" as
-		 * lost, and found the start in the setup; and said as settled,
-		 * the brought one kept: "It won't fit beside our SlashCross" read
-		 * to a playtester as an offer to swap, which never came, session
-		 * 64) */
-		else ADD("%s@M %s's Cross data... We carry just one,Lan.|@M So we keep our %s.%s", k ? "|" : "",
-			guardian(navi)->name, brought, profile.crosses_open >> navi & 1 ? "" : "|@M Next dive,we can start with his Cross!");
+		 * the game's word in MegaMan's mouth; and said as settled, the
+		 * brought one kept: "It won't fit beside our SlashCross" read to a
+		 * playtester as an offer to swap, which never came, session 64.
+		 * That a first win opens its start for the next dive is the
+		 * setup's to show, never MegaMan's: the voice sweep,
+		 * docs/voice/sweep/net.md) */
+		else ADD("%s@M %s's Cross data... We carry just one,Lan.|@M So we keep our %s.", k ? "|" : "", guardian(navi)->name, brought);
 	}
 	/* (the Nest's call, and Lan's word, no unlocking: the beast stirs
 	 * here, and its power comes once MegaMan has beaten it at the Nest,

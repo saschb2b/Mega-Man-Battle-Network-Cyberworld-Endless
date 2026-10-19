@@ -3,8 +3,6 @@
 #ifndef CW_SUPER_LINES_H
 #define CW_SUPER_LINES_H
 
-#include <stdbool.h>
-
 #include "rivals.h"
 
 /* Their meeting, by their record `r` and the form `version` they come in
@@ -13,17 +11,15 @@
 const char *super_intro(int navi, int version, const Rival *r);
 /* Their last word, beaten. */
 const char *super_defeat(int navi, int version);
-/* MegaMan's battle data on them, once fought in any run (guardian_tip's,
- * its last box when to strike). */
+/* MegaMan's battle data on them, once fought in any run (guardian_tip's). */
 const char *super_tip(int navi);
 /* A bystander's word where one waits, never his name (docs/META.md, what
  * MegaMan knows): what the net feels of him; NULL for none. */
 const char *super_rumor(int navi);
 /* What their data says as it is taken: its head ("MegaMan downloaded
- * ...") and MegaMan's words on it, the first time a profile takes it
- * (`first`) or after. */
+ * ...") and MegaMan's words on it. */
 const char *super_reward_head(int navi);
-const char *super_reward_words(int navi, int version, bool first);
+const char *super_reward_words(int navi, int version);
 /* Their title card's lines (the words beside the name, as a guardian's
  * epithet): the top line and the line under the name, at `depth` (the Net
  * the Cybeast ends) */

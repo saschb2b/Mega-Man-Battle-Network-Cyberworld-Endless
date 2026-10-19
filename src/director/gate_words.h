@@ -30,7 +30,9 @@ const char *gate_keeper_privacy(void);
 const char *gate_keeper_privacy_question(void);
 /* MegaMan's question on the gate, the way known. */
 const char *gate_question(void);
-/* The checkpoint before a visit not written: MegaMan stays. */
+/* The checkpoint before a visit not written: MegaMan stays (the game's
+ * own note says why, never a character: docs/VOICE.md, What nobody
+ * says). */
 const char *gate_save_failed(void);
 /* How a visit ended (online_visit.h), said at the gate after it, and
  * whose face says it (FACE_*); NULL nothing to say. */
