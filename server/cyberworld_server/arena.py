@@ -14,12 +14,21 @@ CHALLENGED, WAITING, START, ENDED = range(1, 5)
 CHALLENGE, ACCEPT, LEAVE, OVER = range(1, 5)
 PENDING = 30          # seconds a challenge waits for its answer
 FRAME_MS = 1000 / 60
+LOCKSTEP = 3          # frames the linked cores need: one crosses into its next up to two before its partner
+TAKEN = 1             # the tick a key waits on its way in to be taken
+LEAST = 5             # (and a frame to spare, on a LAN too)
+MOST = 30
 
 
 def delay_for(latency_a, latency_b):
-    """Frames of input delay: three of the cores' own, then the one-way trip."""
-    one_way = max(latency_a, latency_b) / 2
-    return max(6, min(30, 3 + math.ceil(one_way / FRAME_MS) + 2))
+    """Frames of input delay fitted to the pair (issue #128): the lockstep's
+    three, the tick a key waits to be taken, then the longer of the two round
+    trips the games report, each with its jitter (docs/ONLINE_ARENA.md,
+    Smoothed delay). A key goes through the server, half a round trip of
+    each game's; the games' time sync holds each one's keys' lag at its own
+    round trip, so the delay covers the longer of the two."""
+    trip = max(latency_a, latency_b)
+    return max(LEAST, min(MOST, LOCKSTEP + TAKEN + math.ceil(trip / FRAME_MS)))
 
 
 class Match:
