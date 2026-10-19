@@ -23,6 +23,7 @@
 #include "script_kit.h"
 #include "square_arena.h"
 #include "square_life.h"
+#include "square_week.h"
 #include "square_words.h"
 #include "talk.h"
 #include "trade_central.h"
@@ -36,6 +37,7 @@
 #define MUTE_FLAG    0x1491
 #define BLOCK_FLAG   0x1492
 #define HOME_FLAG    0x1493
+#define DIVE_FLAG    SQUARE_DIVE_FLAG   /* the greeter's dive (square_week.h): 0x14AF */
 #define BATTLE_FLAG  0x14A0   /* (the Arena's, apart: square_arena.c) */
 #define FIRST_FLAG SAY_FLAG
 #define LAST_SQUARE_FLAG HOME_FLAG
@@ -59,8 +61,10 @@ void online_chat_reset(void) {
 	C.on_exit = true;   /* (arrived beside it: it asks once he steps on it) */
 	trade_central_reset();
 	square_life_reset();
+	square_week_reset();
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 	flag_clear(BATTLE_FLAG);
+	flag_clear(DIVE_FLAG);
 }
 
 static const OnlineProfile *card_of(uint32_t id) {
@@ -233,7 +237,11 @@ static bool chosen(void) {
 		unsigned step = flag_get(NEXT_FLAG) ? 1u : C.s.channels - 1u;
 		online_transport_channel((uint16_t)((C.s.channel - 1u + step) % C.s.channels + 1u));
 	}
-	if (C.home && flag_get(HOME_FLAG)) home = true;
+	/* (the greeter's Yes to the week's net: home to dive, square_week.c;
+	 * the way home's flag beside it, his "Start over") */
+	if (flag_get(DIVE_FLAG)) { square_week_choose(flag_get(SQUARE_DIVE_OVER_FLAG)); home = true; }
+	else if (C.home && flag_get(HOME_FLAG)) home = true;
+	flag_clear(DIVE_FLAG);
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 	C.home = false;
 	return home;
@@ -245,6 +253,7 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	cards();
 	keeper();
 	trade_central_frame(s);
+	square_week_frame(s);
 	square_life_frame(s);
 	bool busy = talk_busy() || emu_read8(BN6_CHATBOX);
 	if (busy) { C.open = C.open || talk_busy(); return false; }

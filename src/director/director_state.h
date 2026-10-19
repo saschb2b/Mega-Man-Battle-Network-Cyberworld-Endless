@@ -140,6 +140,9 @@ int main_mode(void);
 bool on_map(void);
 int key_item(int id);
 void end_run(void);
+/* The short net won: its Nest's guardian fell and MegaMan stepped on its
+ * exit (director_end.c, as end_run) */
+void win_run(void);
 void drop_events(void);
 
 #endif

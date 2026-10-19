@@ -133,6 +133,12 @@ int profile_codes_entered(void);
 void profile_code_note(int program);
 
 void save_init(void);
+/* The slot the run's files are in (weekly.h): the week's net's, or the
+ * normal one's (false); every save and load after goes to it. */
+void save_slot(bool weekly);
+bool save_slot_weekly(void);
+/* The slot's profile read into `profile` (zero where there is none). */
+void profile_load(void);
 bool save_exists(void);
 bool save_run(void);
 bool load_run(void);

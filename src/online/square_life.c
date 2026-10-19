@@ -17,6 +17,7 @@
 #include "online_square.h"
 #include "square_arena.h"
 #include "square_life_words.h"
+#include "square_week.h"
 #include "talk.h"
 #include "text.h"
 #include "trade_central.h"
@@ -399,9 +400,9 @@ static void progs(void) {
 	if (emu_read8(BN6_CHATBOX)) return;
 	SquareFacts f;
 	facts(&f);
-	uint32_t g = name_hash(f.arrived, f.navis | f.channel << 8);
+	uint32_t g = name_hash(f.arrived, f.navis | f.channel << 8) ^ square_week_said() * 2654435761u;
 	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8 | (f.won + f.lost) << 10);
-	if (g + 1 != L.greeter_said && prog_say(SQUARE_PROG_GREETER, square_greeter_words(&f))) L.greeter_said = g + 1;
+	if (g + 1 != L.greeter_said && square_week_greeter(square_greeter_words(&f))) L.greeter_said = g + 1;
 	if (r + 1 != L.referee_said && prog_say(SQUARE_PROG_REFEREE, square_referee_words(&f))) L.referee_said = r + 1;
 }
 
@@ -454,6 +455,12 @@ bool square_life_talk(int x, int y, int face) {
 		return talk_start(square_walker_words(k, &f), k ? FACE_TECH : FACE_GREEN_NAVI);
 	}
 	int look = prop_ahead(x, y, face);
+	if (look == LOOK_BBS) {
+		/* (the Board's posts, the week's net's after them: square_week.c) */
+		static char posts[1400];
+		snprintf(posts, sizeof posts, "%s|%s", square_check_words(look, &f), square_week_board_words());
+		return talk_start(posts, FACE_NONE);
+	}
 	return look >= 0 && talk_start(square_check_words(look, &f), FACE_NONE);
 }
 

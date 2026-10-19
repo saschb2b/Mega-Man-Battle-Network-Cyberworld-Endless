@@ -9,6 +9,7 @@
 #include "save.h"
 #include "rivals.h"
 #include "loot.h"
+#include "weekly.h"
 
 _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save scalar widths differ");
 
@@ -138,5 +139,18 @@ _Static_assert(offsetof(Job, pay_kind) == 6, "Job.pay_kind save offset changed")
 _Static_assert(offsetof(Job, code) == 7, "Job.code save offset changed");
 _Static_assert(offsetof(Job, pay) == 8, "Job.pay save offset changed");
 _Static_assert(offsetof(Job, depth) == 10, "Job.depth save offset changed");
+
+_Static_assert(sizeof(WeeklyRecord) == 24, "WeeklyRecord save size changed");
+_Static_assert(offsetof(WeeklyRecord, week) == 0, "WeeklyRecord.week save offset changed");
+_Static_assert(offsetof(WeeklyRecord, running) == 2, "WeeklyRecord.running save offset changed");
+_Static_assert(offsetof(WeeklyRecord, pending) == 3, "WeeklyRecord.pending save offset changed");
+_Static_assert(offsetof(WeeklyRecord, seed) == 4, "WeeklyRecord.seed save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_week) == 8, "WeeklyRecord.r_week save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_depth) == 10, "WeeklyRecord.r_depth save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_seed) == 12, "WeeklyRecord.r_seed save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_act) == 16, "WeeklyRecord.r_act save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_won) == 17, "WeeklyRecord.r_won save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_minutes) == 18, "WeeklyRecord.r_minutes save offset changed");
+_Static_assert(offsetof(WeeklyRecord, r_hash) == 20, "WeeklyRecord.r_hash save offset changed");
 
 #endif

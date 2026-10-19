@@ -76,6 +76,9 @@ static void read_file(const char *name, const uint8_t *data, uint32_t size, void
 	if (!backup_progress_name(name)) return;
 	++r->info.files;
 	if (!strcmp(name, "savedata/run.state")) { r->info.has_state = size > 0; if (!size) r->ok = false; }
+	/* (the week's net's checkpoint, weekly.h: no part of the summary, which
+	 * is the normal run's) */
+	else if (!strcmp(name, "savedata/weekly-run.state")) { if (!size) r->ok = false; }
 	else {
 		if (!good_blob(data, size)) { r->ok = false; return; }
 		read_summary(r, name, data, size);

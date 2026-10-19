@@ -354,6 +354,11 @@ void meta_run_over(bool won) {
 
 uint16_t meta_marks_new(void) { return marks_new; }
 
+void meta_run_quiet(void) {
+	nsaid = 0;
+	marks_new = 0;
+}
+
 int meta_unlocked(const char **out, int max) {
 	int n = nsaid < max ? nsaid : max;
 	for (int i = 0; i < n; ++i) out[i] = said[i];

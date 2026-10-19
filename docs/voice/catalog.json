@@ -1050,6 +1050,26 @@
    "comment": "the bouts with the last one in a row, as the referee keeps count",
    "line": 42
   },
+  "square_week_words:square_week_again_options": {
+   "line": 6
+  },
+  "square_week_words:square_week_board": {
+   "comment": "the Board's boxes: a heading, then the dives three to a box",
+   "header": "The Board's posts of the week's net: its dates, its deepest dives as reported, MegaMan's own, last week's three.",
+   "line": 67
+  },
+  "square_week_words:square_week_off": {
+   "header": "... and his word as MegaMan goes to dive",
+   "line": 60
+  },
+  "square_week_words:square_week_post": {
+   "header": "The greeter's post on the week's net (pages, '|' between boxes), after his welcome; `posted` the layer of MegaMan's dive the Board just took (0 none).",
+   "line": 32
+  },
+  "square_week_words:square_week_question": {
+   "header": "... his question where he asks one (its end a '\\n'): Yes/No for a new dive, NULL where there is none or the options ask",
+   "line": 58
+  },
   "square_words:square_blocked_words": {
    "header": "... after a block.",
    "line": 57
@@ -1676,6 +1696,15 @@
    "speaker": "Bystander",
    "stem": "square_life_words"
   },
+  "src/online/square_week_words.c": {
+   "comment": "",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 14,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "square_week_words"
+  },
   "src/online/square_words.c": {
    "comment": "",
    "domain": "Net Square",
@@ -1843,7 +1872,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1866,
+  "boxes": 1878,
   "domains": {
    "Arena": {
     "files": [
@@ -1970,6 +1999,14 @@
     "flagged": 14,
     "lines": 87,
     "speech": 75
+   },
+   "Other": {
+    "files": [
+     "src/online/square_week_words.c"
+    ],
+    "flagged": 0,
+    "lines": 14,
+    "speech": 11
    },
    "Powers": {
     "files": [
@@ -2154,7 +2191,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 684,
+    "boxes": 687,
     "dots_per_box": 0.22,
     "end_ask": 0.05,
     "end_bang": 0.54,
@@ -2167,17 +2204,17 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 171",
+    "stutters": "1 box in 172",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 131,
-    "dots_per_box": 0.07,
+    "boxes": 139,
+    "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
-    "end_dots": 0.02,
+    "end_dots": 0.01,
     "openers": [
      "THE",
      "NET",
@@ -2187,7 +2224,7 @@
      "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.6
+    "words_per_box": 5.7
    },
    "Navis (bosses, bystanders)": {
     "bangs_per_box": 0.02,
@@ -2209,7 +2246,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1424,
+  "lines": 1438,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2344,7 +2381,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 684,
+    "boxes": 687,
     "dots_per_box": 0.22,
     "end_ask": 0.05,
     "end_bang": 0.54,
@@ -2357,17 +2394,17 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 171",
+    "stutters": "1 box in 172",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 131,
-    "dots_per_box": 0.07,
+    "boxes": 139,
+    "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
-    "end_dots": 0.02,
+    "end_dots": 0.01,
     "openers": [
      "THE",
      "NET",
@@ -2377,7 +2414,7 @@
      "A"
     ],
     "stutters": "never",
-    "words_per_box": 5.6
+    "words_per_box": 5.7
    },
    "Narration": {
     "bangs_per_box": 0.22,
@@ -2456,7 +2493,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1085
+  "speech": 1096
  },
  "version": 1,
  "conversations": [
@@ -2858,7 +2895,12 @@
   {"container":"analytics_text:words","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:words","line":10,"lines":["analytics_text:words:1","analytics_text:words:2","analytics_text:words:3","analytics_text:words:9","analytics_text:words:10","analytics_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in AnalyticsWord's order, its name beside each)"},
   {"container":"analytics_text:analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_later","line":25,"lines":["analytics_text:analytics_later:0"],"speakers":["Screen"],"title":"Under the question","when":"Under the question: where it is changed later, `select` the button that opens it on the device used last (\"SELECT\", \"R\", \"Minus\")"},
   {"container":"analytics_text:analytics_keys","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_keys","line":28,"lines":["analytics_text:analytics_keys:0"],"speakers":["Screen"],"title":"The keys' line under it","when":"The keys' line under it: \"J: choose K: no\" at the first start, where B answers no; \"K: back\" asked again, where B leaves the answer be"},
-  {"container":"analytics_text:analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_setting_note","line":32,"lines":["analytics_text:analytics_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the statistics line","when":"settings.ini's lines before the statistics line: what it is"}
+  {"container":"analytics_text:analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_setting_note","line":32,"lines":["analytics_text:analytics_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the statistics line","when":"settings.ini's lines before the statistics line: what it is"},
+  {"container":"square_week_words:square_week_again_options","domain":"Other","file":"src/online/square_week_words.c","id":"square_week_words:square_week_again_options","line":6,"lines":["square_week_words:square_week_again_options:0","square_week_words:square_week_again_options:1","square_week_words:square_week_again_options:2"],"speakers":["MegaMan"],"title":"Square week again options","when":""},
+  {"container":"square_week_words:square_week_post","domain":"Other","file":"src/online/square_week_words.c","id":"square_week_words:square_week_post","line":37,"lines":["square_week_words:square_week_post:0","square_week_words:square_week_post:caseWEEK_OFFER_NEW.0","square_week_words:square_week_post:caseWEEK_OFFER_AGAIN.0","square_week_words:square_week_post:caseWEEK_OFFER_ON.0","square_week_words:square_week_post:caseWEEK_OFFER_TRADE.0"],"speakers":["Mr.Prog"],"title":"The greeter's post on the week's net","when":"The greeter's post on the week's net (pages, '|' between boxes), after his welcome; `posted` the layer of MegaMan's dive the Board just took (0 none)."},
+  {"container":"square_week_words:square_week_question","domain":"Other","file":"src/online/square_week_words.c","id":"square_week_words:square_week_question","line":58,"lines":["square_week_words:square_week_question:0"],"speakers":["Mr.Prog"],"title":"Square week question","when":"... his question where he asks one (its end a '\\n'): Yes/No for a new dive, NULL where there is none or the options ask"},
+  {"container":"square_week_words:square_week_off","domain":"Other","file":"src/online/square_week_words.c","id":"square_week_words:square_week_off","line":60,"lines":["square_week_words:square_week_off:0"],"speakers":["Mr.Prog"],"title":"Square week off","when":"... and his word as MegaMan goes to dive"},
+  {"container":"square_week_words:square_week_board","domain":"Other","file":"src/online/square_week_words.c","id":"square_week_words:square_week_board","line":71,"lines":["square_week_words:square_week_board:0","square_week_words:square_week_board:1","square_week_words:square_week_board:2","square_week_words:square_week_board:3"],"speakers":["MegaMan"],"title":"The Board's boxes","when":"the Board's boxes: a heading, then the dives three to a box"}
  ],
  "sweep": [
   {"group":"home","id":"town_lines:central_folk:12.5","ids":["town_lines:central_folk:12.5"],"live":["town_lines:central_folk:12.5"],"status":"cut","text":"Ack! I'm late for the Academy's NetBattle club!|Everyone's hunting for Program Advances!|**Three chips in the right order make a new one!**","why":"3: a bystander explains Program Advances; the gossip stays"},
@@ -4028,6 +4070,20 @@
   {"boxes":[{"pages":[["A brazier.","Its flame flickers."]],"speaker":"Bystander","text":"A brazier.\nIts flame flickers."}],"container":"square_check_words","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_check_words:caseLOOK_BRAZIER.0","kind":"speech","line":143,"speaker":"Bystander","speakers":["Bystander"],"text":"A brazier.\nIts flame flickers.","text_hash":"71023201fa1a"},
   {"boxes":[{"pages":[["A cybertree."]],"speaker":"Bystander","text":"A cybertree."}],"container":"square_check_words","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_check_words:casedefault.0","kind":"speech","line":144,"speaker":"Bystander","speakers":["Bystander"],"text":"A cybertree.","text_hash":"ff6d66b1f80c"},
   {"boxes":[{"pages":[["Parade time!"]],"speaker":"Bystander","text":"Parade time!"}],"container":"square_parade_bark","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_parade_bark:0","kind":"speech","line":150,"speaker":"Bystander","speakers":["Bystander"],"text":"Parade time!","text_hash":"668e785abdbe"},
+  {"boxes":[{"pages":[["Keep diving"]],"speaker":"MegaMan","text":"Keep diving"}],"container":"square_week_again_options","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_again_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Keep diving","text_hash":"87475f552013"},
+  {"boxes":[{"pages":[["Start over"]],"speaker":"MegaMan","text":"Start over"}],"container":"square_week_again_options","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_again_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Start over","text_hash":"51dd91dc98a9"},
+  {"boxes":[{"pages":[["Not now"]],"speaker":"MegaMan","text":"Not now"}],"container":"square_week_again_options","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_again_options:2","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Not now","text_hash":"e45714907316"},
+  {"boxes":[{"pages":[["YOUR DIVE TO","LAYER {posted} IS UP ON","THE BOARD!"]],"speaker":"Mr.Prog","text":"YOUR DIVE TO\nLAYER {posted} IS UP ON\nTHE BOARD!"}],"container":"square_week_post","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_post:0","kind":"speech","line":37,"placeholders":[{"name":"posted","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOUR DIVE TO\nLAYER {posted} IS UP ON\nTHE BOARD!|","text_hash":"bf40e97a3aeb"},
+  {"boxes":[{"pages":[["THE NET SHIFTED!","THIS WEEK'S DEEP","NET IS OPEN!"]],"speaker":"Mr.Prog","text":"THE NET SHIFTED!\nTHIS WEEK'S DEEP\nNET IS OPEN!"},{"pages":[["{when}.","EVERY NAVI DIVES","THE SAME NET!"]],"speaker":"Mr.Prog","text":"{when}.\nEVERY NAVI DIVES\nTHE SAME NET!"}],"container":"square_week_post","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_post:caseWEEK_OFFER_NEW.0","kind":"speech","line":40,"placeholders":[{"name":"when","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE NET SHIFTED!\nTHIS WEEK'S DEEP\nNET IS OPEN!|{when}.\nEVERY NAVI DIVES\nTHE SAME NET!","text_hash":"d4733c79d2da"},
+  {"boxes":[{"pages":[["YOUR DIVE INTO","THE DEEP NET","ISN'T OVER!"]],"speaker":"Mr.Prog","text":"YOUR DIVE INTO\nTHE DEEP NET\nISN'T OVER!"}],"container":"square_week_post","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_post:caseWEEK_OFFER_AGAIN.0","kind":"speech","line":43,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOUR DIVE INTO\nTHE DEEP NET\nISN'T OVER!","text_hash":"98b344350a8d"},
+  {"boxes":[{"pages":[["YOU'RE ON THIS","WEEK'S DIVE!","GO DEEP!"]],"speaker":"Mr.Prog","text":"YOU'RE ON THIS\nWEEK'S DIVE!\nGO DEEP!"}],"container":"square_week_post","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_post:caseWEEK_OFFER_ON.0","kind":"speech","line":46,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU'RE ON THIS\nWEEK'S DIVE!\nGO DEEP!","text_hash":"1efc24551ce7"},
+  {"boxes":[{"pages":[["THE DEEP NET'S","OPEN! TAKE YOUR","TRADE HOME FIRST!"]],"speaker":"Mr.Prog","text":"THE DEEP NET'S\nOPEN! TAKE YOUR\nTRADE HOME FIRST!"}],"container":"square_week_post","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_post:caseWEEK_OFFER_TRADE.0","kind":"speech","line":49,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE DEEP NET'S\nOPEN! TAKE YOUR\nTRADE HOME FIRST!","text_hash":"a6c8bfb47415"},
+  {"boxes":[{"pages":[["DIVE IN NOW?"]],"speaker":"Mr.Prog","text":"DIVE IN NOW?\n"}],"container":"square_week_question","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_question:0","kind":"speech","line":58,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DIVE IN NOW?\n","text_hash":"a5b3d646df97"},
+  {"boxes":[{"pages":[["OFF YOU GO!","HEAD HOME AND","JACK IN!"]],"speaker":"Mr.Prog","text":"OFF YOU GO!\nHEAD HOME AND\nJACK IN!"}],"container":"square_week_off","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_off:0","kind":"speech","line":60,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OFF YOU GO!\nHEAD HOME AND\nJACK IN!","text_hash":"fa1a5e56ce4f"},
+  {"boxes":[{"pages":[[">DEEP NET,{when}","Deepest layers,as","Navis report them."]],"speaker":"MegaMan","text":">DEEP NET,{when}\nDeepest layers,as\nNavis report them."}],"container":"square_week_board","domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:0","kind":"speech","line":71,"placeholders":[{"name":"when","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":">DEEP NET,{when}\nDeepest layers,as\nNavis report them.","text_hash":"81bc30445879"},
+  {"boxes":[{"pages":[[">No dives yet.","Be the first!"]],"speaker":"MegaMan","text":">No dives yet.\nBe the first!"}],"container":"square_week_board","continues":true,"domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:1","kind":"speech","line":72,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|>No dives yet.\nBe the first!","text_hash":"f62c5326d72f"},
+  {"boxes":[{"pages":[[">Your best is","layer {depth},#{place}!"]],"speaker":"MegaMan","text":">Your best is\nlayer {depth},#{place}!"}],"container":"square_week_board","continues":true,"domain":"Other","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:2","kind":"speech","line":77,"placeholders":[{"name":"depth","spec":"%u"},{"name":"place","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|>Your best is\nlayer {depth},#{place}!","text_hash":"e3150710670f"},
+  {"boxes":[{"pages":[[">Last week's best"]],"speaker":"MegaMan","text":">Last week's best"}],"container":"square_week_board","continues":true,"domain":"Other","file":"src/online/square_week_words.c","flags":[],"fragment":true,"id":"square_week_words:square_week_board:3","kind":"speech","line":79,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|>Last week's best","text_hash":"ece935dcfea9"},
   {"boxes":[{"pages":[["Say something"]],"speaker":"MegaMan","text":"Say something"}],"container":"square_menu_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Say something","text_hash":"9b19e8713ee8"},
   {"boxes":[{"pages":[["Do an emote"]],"speaker":"MegaMan","text":"Do an emote"}],"container":"square_menu_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Do an emote","text_hash":"3822e4efb2f4"},
   {"boxes":[{"pages":[["Next channel"]],"speaker":"MegaMan","text":"Next channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:0","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next channel","text_hash":"68b4bd365ca5"},

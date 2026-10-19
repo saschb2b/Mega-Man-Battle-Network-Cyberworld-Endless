@@ -109,6 +109,9 @@ void meta_run_begun(void);
 /* At a run's end, won or lost: the profile's unlocks from what the run and
  * the ones before it did, and the summary's lines for them. */
 void meta_run_over(bool won);
+/* ... a dive of the week's net's end instead (weekly.h): nothing opened,
+ * nothing said */
+void meta_run_quiet(void);
 /* The marks the run just over earned (MARK_* bits): the title shows them
  * arriving. */
 uint16_t meta_marks_new(void);

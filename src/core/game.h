@@ -51,6 +51,7 @@ extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */
 extern bool title_new_best;         /* ... deeper than any run before */
 extern bool title_won;              /* ... the run was won: the short net's Nest fell */
+extern int title_dive;              /* ... a dive of the week's net: its best layer this week (weekly.c), 0 none */
 extern uint32_t title_seed;         /* NEW GAME's seed when not 0 (--seed on the title: a session replays) */
 
 
