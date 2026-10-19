@@ -31,9 +31,11 @@ static struct {
 	const char *note;
 } F;
 
-/* the panel's top left: 240 x 160 in the middle of the canvas */
+/* the panel's top left: 240 x 160 in the middle of the canvas, or on a
+ * screen held upright in its upper part, clear of the system's keyboard,
+ * which rises over the lower part */
 static int left(void) { return (P.w - 240) / 2; }
-static int top(void) { return (P.h - 160) / 2; }
+static int top(void) { return (P.h - 160) / (P.h > P.w ? 4 : 2); }
 
 static bool back(void) {
 	F.note = NULL;
@@ -47,6 +49,7 @@ void online_field_open(FieldKind kind, const char *initial) {
 	F.kind = kind;
 	snprintf(F.text, sizeof F.text, "%s", initial ? initial : "");
 	text_input_begin(F.text, kind == FIELD_NAME ? NETWORK_NAME : sizeof F.text);
+	platform_own_wide(true);
 	platform_own_taps(true);
 	platform_on_back(back);
 }
@@ -56,6 +59,7 @@ bool online_field_shown(void) { return F.shown; }
 static int finish(int result) {
 	text_input_end();
 	platform_own_taps(false);
+	platform_own_wide(false);
 	platform_on_back(NULL);
 	F.shown = false;
 	audio_sfx(result == FIELD_DONE ? SFX_SELECT : SFX_CANCEL);
