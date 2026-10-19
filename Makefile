@@ -283,10 +283,12 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online
 # the Arena's ROM-free parts: its keys' buffer, the local link, a carried MegaMan checked and written,
 # its messages on the wire and the network's link (issue #120)
 ARENA_TEST_SRCS := tests/test_arena.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
-	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c
+	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c src/online/stands_wire.c src/online/stands_report.c \
+	src/online/watch_keys.c
 build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h \
 	src/online/arena_format.h \
-	src/online/arena_wire.h src/online/arena_link_net.h shared/online/protocol.h
+	src/online/arena_wire.h src/online/arena_link_net.h shared/online/protocol.h src/online/stands_wire.h src/online/stands_report.h \
+	src/online/watch_keys.h
 	@mkdir -p $(@D)
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -Ishared/online -o $@ $(ARENA_TEST_SRCS)

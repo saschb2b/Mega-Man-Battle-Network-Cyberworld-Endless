@@ -20,6 +20,7 @@
 #include "save.h"
 #include "souls.h"
 #include "square_arena.h"
+#include "square_watch.h"
 #include "square_week.h"
 
 #define CALL_TIMEOUT_MS 20000   /* a server that never answers */
@@ -174,12 +175,17 @@ uint32_t online_visit_keys(uint32_t keys) {
 	return 0;
 }
 
-bool online_visit_held(void) { return V.stage == VISIT_AWAY && square_arena_on(); }
+bool online_visit_held(void) { return V.stage == VISIT_AWAY && (square_arena_on() || square_watch_on()); }
 
-void online_visit_held_frame(uint32_t keys) { square_arena_frame(keys); }
+/* (a battle of this game's, or one watched from the stands) */
+void online_visit_held_frame(uint32_t keys) {
+	if (square_arena_on()) square_arena_frame(keys);
+	else square_watch_frame(keys);
+}
 
 void online_visit_draw(void) {
-	if (online_visit_held()) square_arena_draw();
+	if (online_visit_held() && square_arena_on()) square_arena_draw();
+	else if (online_visit_held()) square_watch_draw();
 	else if (V.stage == VISIT_AWAY) online_scene_draw();
 	/* (the gate's fields, over the game in Lan's HP) */
 	else online_field_draw();

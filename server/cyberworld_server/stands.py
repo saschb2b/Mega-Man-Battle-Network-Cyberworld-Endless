@@ -30,6 +30,7 @@ PACE = 4096              # ... (the server drops a client whose output passes 81
 STATUS_EVERY = 0.5       # seconds between two reports taken from a battle
 STANDS_EVERY = 1.0       # seconds between two STANDS a channel, but for a battle begun or ended
 KEPT = 60                # seconds a battle over is kept for its spectators still catching up
+FIRST_MOST = 60          # a side's first keys come at its input delay's frame, a second at most (ARENA_DELAY_MAX)
 
 
 class Book:
@@ -121,6 +122,10 @@ class Stands:
     def keys_in(self, book, side, data):
         _, _, first, count = protocol.ARENA_INPUT.unpack_from(data)
         known = book.frames(side)
+        if not known and first <= FIRST_MOST:
+            # (a side's first keys are its delay's frame's: the frames before are released keys on every game)
+            book.keys[side] += bytes(2 * first)
+            known = first
         if first > known or known + count > MOST_FRAMES:
             # (a frame missing, or a battle past what is kept: its spectators stop where they are)
             book.broken = True

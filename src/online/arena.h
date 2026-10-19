@@ -16,6 +16,8 @@
 
 #include "online_snapshot.h"
 
+struct mCore;
+
 #define ARENA_HASH_EVERY 60   /* frames of the pair between two hashes compared */
 
 typedef enum {
@@ -51,6 +53,8 @@ unsigned arena_result(const Arena *a);
 bool arena_apart(const Arena *a);
 /* the ticks stalled, waiting for the peer's keys */
 uint32_t arena_stalls(const Arena *a);
+/* side's core of the pair, NULL before the battle (the stands' report reads the first: arena_report.h) */
+struct mCore *arena_core(const Arena *a, unsigned side);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before

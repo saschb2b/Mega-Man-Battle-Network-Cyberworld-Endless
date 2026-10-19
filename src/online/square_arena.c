@@ -36,11 +36,11 @@
 
 #include <SDL.h>
 
-#include "arena.h"
 #include "arena_folder.h"
 #include "arena_link_net.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
+#include "arena_report.h"
 #include "arena_view.h"
 #include "arena_wire.h"
 #include "arena_words.h"
@@ -251,6 +251,8 @@ static void start(unsigned side, unsigned delay) {
 	A.stage = SA_LOADOUT;
 	A.since = SDL_GetTicks();
 	A.theirs_in = false;
+	/* (the stands' report is the cable's first's to send: arena_report.h) */
+	if (side == 0) arena_report_begin(A.match);
 	printf("arena: match %u starts: side %u, delay %u frames, rules %u, folder %d\n", A.match, A.link.link.side, A.link.link.delay,
 		A.format, A.folder + 1);
 	if (!size || !online_transport_send(m, size) || !arena_loadout_unpack(bytes, n, &A.mine, &A.mine_carried, A.why, sizeof A.why))
@@ -557,6 +559,7 @@ static void battle(uint32_t keys) {
 	uint32_t stalls = arena_stalls(A.arena);
 	ArenaStage stage = arena_tick(A.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
 	arena_sound(A.arena);
+	arena_report_frame(A.arena);
 	A.stalled = arena_stalls(A.arena) != stalls ? A.stalled + 1 : 0;
 	if (stage == ARENA_FAILED) {
 		/* (the other gone, his keys spent: the link broke; else the games went apart, or the cable stuck) */
@@ -569,6 +572,7 @@ static void battle(uint32_t keys) {
 	unsigned result = arena_result(A.arena);
 	if (A.link.link.side == 0 && !A.ended) {
 		arena_link_net_flush(&A.link);
+		arena_report_end(result);
 		act(ARENA_ACT_OVER, A.match);
 	}
 	A.ended = true;

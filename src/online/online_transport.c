@@ -12,10 +12,16 @@
 #include "rom.h"
 #include "square_plan.h"
 
-/* Trade Central's (its board's too) and the Arena's messages (protocol.json): sent as soon as
- * the worker's next pass, and taken in apart from the snapshot, each a u16
- * length and its bytes in a ring */
+/* Trade Central's (its board's too), the Arena's and the stands' messages (protocol.json): sent
+ * as soon as the worker's next pass, and taken in apart from the snapshot, each a u16
+ * length and its bytes in a ring; where the Arena is built, room for a watched battle's
+ * keys as a spectator who came late catches up (the server's 2 KB a tick, the game's
+ * frame held up a few ticks by the way in) */
+#if defined(__3DS__) || defined(__EMSCRIPTEN__)
 #define RING 16384
+#else
+#define RING 65536
+#endif
 typedef struct { uint8_t b[RING]; unsigned head, tail; } Ring;
 
 static bool ring_put(Ring *r, const uint8_t *data, size_t size) {
@@ -37,7 +43,8 @@ static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
 
 static bool mail(uint8_t kind) {
 	return kind == ONLINE_TRADE_STATE || kind == ONLINE_BOARD || kind == ONLINE_WEEK_BOARD || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
-		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH;
+		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH || kind == ONLINE_STANDS || kind == ONLINE_WATCH_STATE ||
+		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS;
 }
 
 static struct {
@@ -318,7 +325,7 @@ bool online_transport_channel(uint16_t channel) {
 
 bool online_transport_send(const uint8_t *data, size_t size) {
 	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_WEEK_POST || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
-		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH);
+		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH);
 	if (!transport.enabled || !ours) return false;
 #ifdef __EMSCRIPTEN__
 	return online_browser_send(data, size);

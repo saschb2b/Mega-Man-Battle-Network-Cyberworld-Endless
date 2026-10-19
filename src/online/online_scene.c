@@ -17,6 +17,7 @@
 #include "online_transport.h"
 #include "platform.h"
 #include "square_arena.h"
+#include "square_watch.h"
 #include "trade_order.h"
 #include "square_week.h"
 
@@ -39,6 +40,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	disconnected_at = notice_at = notice_serial = 0;
 	online_motion_reset(); online_labels_reset(); online_chat_reset(); online_people_load();
 	square_arena_reset();
+	square_watch_reset();
 	if (!online_transport_profile(card)) fprintf(stderr, "online: public Navi card could not be queued\n");
 	const char *path = getenv("CYBERWORLD_ONLINE_TRACE");
 	trace = path && *path ? fopen(path, "w") : NULL;
@@ -54,6 +56,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 void online_scene_end(void) {
 	trade_order_words(false);
 	square_arena_end();
+	square_watch_end();
 	if (trace) { fclose(trace); trace = NULL; }
 	built = arrived = false;
 }
@@ -124,6 +127,7 @@ VisitEnd online_scene_update(void) {
 	online_square_peers(&shown);
 	if (online_chat_update(&shown)) return square_week_leaving() ? VISIT_END_DIVE : VISIT_END_LEFT;
 	square_arena_update(&snapshot);
+	square_watch_update(&snapshot);
 	online_labels_update(&shown, now);
 	return VISIT_END_NONE;
 }

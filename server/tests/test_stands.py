@@ -115,7 +115,8 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await a.send(hashed(match, 0xFFFFFFFF, 0xABCD))
         await b.send(hashed(match, 0xFFFFFFFF, 0xABCD))
         # (1,600 frames before the spectator comes, at the relay's pace: he catches up from the first)
-        for first in range(0, 1600, 8):
+        # (each side's first keys at the delay's frame, 8 here: the frames before released keys)
+        for first in range(8, 1600, 8):
             await a.send(keys(match, first, [first + k for k in range(8)]))
             await b.send(keys(match, first, [first + k + 1 for k in range(8)]))
             if first % 120 == 56:
@@ -126,8 +127,8 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await c.send(watch(1, match))
         relays, got, states = await self.receive_all(c, lambda r, g, s: len(g[0]) >= 1600 and len(g[1]) >= 1600)
         self.assertEqual(states[0][1:6], (1, match, a_id, b_id, 0))
-        self.assertEqual(got[0], [k for k in range(1600)])
-        self.assertEqual(got[1], [k + 1 for k in range(1600)])
+        self.assertEqual(got[0], [0] * 8 + [k for k in range(8, 1600)])
+        self.assertEqual(got[1], [0] * 8 + [k + 1 for k in range(8, 1600)])
         sides = sorted((side, data[0]) for side, data in relays[:5])
         self.assertEqual(sides, [(0, SPEC["arena_loadout"]), (0, SPEC["arena_hash"]), (0, SPEC["arena_hash"]),
                                  (1, SPEC["arena_loadout"]), (1, SPEC["arena_hash"])])
