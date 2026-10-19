@@ -1,0 +1,78 @@
+{
+ "about": "MrkCan1 against a MegaMan who steps (issue #130): the Dark Soul (BN5's 0x18D, BN6's 0x1DC), MegaMan's own body under BN5's chip AI, spawned at (5,2) with no chips in its list, so it steps (the step, family 0x10) and fires the Navis' buster as darksoul_v1 has it, every draw of BN6's replayed from BN5's (rng=replay); MegaMan with a folder of MrkCan1 M in both games, BN5's chip 12 by BN5's own code and the registry's 411 by the same code moved, the first Custom screen's chip picked and OK, used at t30 while the Dark Soul steps, MegaMan kept from harm (safe): its mark's sweep, its lock or none, and its shot against a MegaMan's body that leaves its panel. BN5's own link battle, MegaMan against MegaMan, is out of the differential's reach (one guest core, no cable): the Dark Soul is the moving MegaMan both engines have in a battle of one player. Every difference of BN6's play from BN5's fails it (docs/ONLINE_ARENA.md, Full rules).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "18D@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 600,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1,
+ "buster": "0:0:0",
+ "folder5": [
+  "180C"
+ ],
+ "folder6": [
+  "199B"
+ ],
+ "cust5": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "sprites": "bytes",
+ "megaman_types": [
+  "T4:0x04"
+ ]
+}
