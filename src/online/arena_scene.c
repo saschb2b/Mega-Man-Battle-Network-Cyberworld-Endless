@@ -88,6 +88,8 @@ static void enter(void) {
 	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s, rules %u\n", link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's", format);
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link, format);
+	/* (the local link's round trip: its one way there and back) */
+	if (S.arena) arena_rtt(S.arena, lag * 2 * 1000 / 60);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 }
