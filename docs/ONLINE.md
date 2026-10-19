@@ -764,6 +764,42 @@ server:
   cleared by the `flags` dev step at the desk: "We'll offer "FireBrn1
   F"!" in MegaMan's box. Why the flag was clear on that visit is not
   known yet.
+- **The week's net** (19 October 2026, protocol v6, a local server, the
+  Linux build in two `tools/play.py` sessions, Alpha from `--scene home
+  --run-depth 7 --seed 3`, Beta from `--run-depth 4 --seed 4`, both with
+  `--dev quiet,online=...`). Alpha at the greeter: his welcome, "THE NET
+  SHIFTED! THIS WEEK'S DEEP NET IS OPEN!", "OCT 19-OCT 25. EVERY NAVI
+  DIVES THE SAME NET!", "DIVE IN NOW?" with the cursor on No; Yes, "OFF
+  YOU GO! HEAD HOME AND JACK IN!", the visit's end (12) and the log's
+  "a dive of week 2963 begun (seed f521fe36)", MegaMan in Lan's room with
+  Dad's call; the dev menu's "Depth 1 seed 4112645686", the server's
+  week's seed. The normal run's twelve files, hashed after the gate's
+  save, unchanged while the dive was played to layer 4 (the dev menu's
+  Next layer) and the game was closed there. Opened again: the title's
+  CONTINUE "Home", the normal run at the gate; at the greeter "YOUR DIVE
+  INTO THE DEEP NET ISN'T OVER!" and Keep diving, Start over, Not now;
+  Keep diving took the dive up on layer 4 (RoboDog Comp). On layer 5,
+  MegaMan deleted in a battle; the log's "the dive of week 2963 ended on
+  layer 5", the title's summary, the title's CONTINUE again the normal
+  run's ("Home"), its files hashed before the dive taken up unchanged.
+  The next visit: "the week's dive to layer 5 posted", `weeks.jsonl`'s
+  line (week 2963, layer 5, act 2, two minutes), and the greeter's "YOUR
+  DIVE TO LAYER 5 IS UP ON THE BOARD!". Beta, a second game, at the
+  Board: after its channel's posts, the week's heading with "Oct 19-Oct
+  25" and "1.Alpha:5". A second dive from the greeter's new offer ended on
+  layer 3, the normal run's files unchanged again; on the final build two
+  more, to layer 3 and then layer 2, the second's summary "Reached Layer
+  2" and "This week Layer 3", the next visit's post of the first ("the
+  week's dive to layer 3 posted", the Board's best for Alpha still 5,
+  and the greeter's word on it rightly left out). The saves
+  of that data folder, both slots, packed by the game's own carrier code
+  (`backup_pack`, 22 files) and installed into a fresh folder
+  (`backup_restore`, status OK): every file the same but `profile.sav`,
+  whose volumes are the receiving device's, as designed. Found on the
+  way: the greeter's first flag was Trade Central's (`0x1494`, the clerk
+  answered); the dive's flag is the Square's one left free, `0x14AF`. The
+  transport took no WEEK_POST until it was named among its own messages.
+  An autopilot run (15000 frames, seed 1) ended as runs do.
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -790,6 +826,10 @@ are in the history before 433865a8):
   same net; the Board does not tell them apart yet. A dive's summary hash
   is a format check, not evidence. A dive won (the Nest) has not been
   played to its end here; the 3DS's and the browser's dives are untried.
+  A trade made in the Square during a dive and kept by a game closed
+  there settles at the next CONTINUE, which is the normal run's
+  (`trade.pending` is one file beside both slots); a visit ended at the
+  pad settles it into the dive as it should.
 - **The Arena on the 3DS and in the browser**; rollback and the stands
   (issue #128).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
