@@ -171,7 +171,12 @@ To try it in the emulator, push copies of the ROMs into its storage, for
 instance `adb push bn6g.gba /sdcard/Download/ROMs/`, then choose
 Download/ROMs; `adb logcat -s Cyberworld SDL/APP` shows each look (`looked in
 ROMs: 3 .gba, kept 3, refused [Falzar.gba: BN6 Cybeast Falzar, not Gregar]`)
-and the game's own line, `BN5 found: ...`. A reinstall's saves: play
+and the game's own line, `BN5 found: ...`. The game's standard output and
+errors, which Android throws away for an app, go to logcat a line at a
+time under `Cyberworld` too (`startup_output`): the Net Square's
+`online:` lines, the Arena's `arena:` hashes and stalls, and with
+`frame_log = on` in `settings.ini` a line a second of its frames. A
+reinstall's saves: play
 until the game saves, check that
 `/sdcard/Download/ROMs/cyberworld-endless.cwsave` is there, `adb uninstall
 io.github.saschb2b.cyberworldendless`, install the APK again and choose the

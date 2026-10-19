@@ -20,6 +20,10 @@
 #define IOS false
 #endif
 
+/* Where the game's own output goes: on Android, whose apps' stdout and
+ * stderr go nowhere, to logcat under "Cyberworld" (the online lines, the
+ * Arena's hashes and stalls, frame_log's); elsewhere where it went */
+void startup_output(void);
 /* The ROMs read, said at the start */
 void say_roms(void);
 void data_dir_setup(bool given);

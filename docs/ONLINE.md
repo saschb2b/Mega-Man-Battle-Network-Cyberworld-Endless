@@ -573,6 +573,66 @@ server:
   ended before wineserver saved the registry, so no crypto provider was
   registered). A prefix made with `wineboot -u` and saved with
   `wineserver -w` fixed it; the game's code was not at fault.
+- **A trade and a NetBattle on Android and Windows** (19 October 2026,
+  protocol v5, a local server with seed 120, issue #129), each against a
+  host build ("Linux", BN6's and BN5's ROMs) in `tools/play.py`; each
+  game with BN6's ROM alone, so a mixed pair, its run made by a host
+  build with spares from the `chip` dev step (FireBrn1 F, Cannon B) and
+  saved at the gate, then copied into its data folder (Android's with
+  adb as root). The Square's places were read from a third host build's
+  view of its peers.
+  *Android*: the release APK in the emulator (Android 14, x86-64, KVM,
+  its GPU in software). The trade board: Linux posted Cannon A for a Fire
+  chip; Droid walked to Trade Central by the touch D-pad, "THE TRADE
+  BOARD! 1 OFFER UP!", "Linux HAS Cannon A! WANTS A FIRE CHIP!", Answer
+  it, the order screen listing FireBrn1 F alone (Cannon B left off),
+  "Lan! Droid took our offer!" on the host, both Deals, `[20,5]` for
+  `[1,0]` in `trades.jsonl`, then the clerk's "YOU TRADED ALREADY!".
+  The app, closed in the Square (reinstalled), settled at its CONTINUE
+  ("Lan! Cannon A is in our Pack now!", the Pack's 2 to 1 of the one, 2
+  to 3 of the other), the host build on its way home (4 to 3, 0 to 1,
+  "Lan! FireBrn1 F is in our Pack now!"). A Practice NetBattle by BN6
+  rules ("His PET holds BN6 chips only."), delay 6: the same ready hash
+  on both (`919efa43fb0d0db9`), the battle to its end at frame 2,809 with
+  all 46 hashes the same, Droid the winner. Through the battle the
+  emulator's game played 59-61 frames a second, both pair cores in each
+  (a frame's update 3.8 ms, 4.5 at most, its longest frame 11.3 ms); the
+  emulator's software GPU showed 51-59 of them (its present 14 ms), a
+  phone's shows them all. Droid, ahead, waited on the host's keys 219
+  ticks of 2,809 (one in 13); the host none.
+  *Windows*: the .exe under Wine 10 in a window (Xvfb, the keyboard by
+  xdotool). Linux offered Cannon A from the clerk's Offer a chip; Win
+  heard "Lan! Linux offers us Cannon A!", walked to the desk, Offer one
+  back, FireBrn1 F, both Deals (`[1,0]` for `[20,5]`), and each settled
+  on its way home (Win's "Lan! Cannon A is in our Pack now!", 2 to 1 and
+  2 to 3; the host's 3 to 2 and 1 to 2). The NetBattle by BN6 rules,
+  delay 6: the same ready hash, the battle to its end at frame 2,781 with
+  all 46 hashes the same, Linux the winner; 60 frames shown and played a
+  second through it (update 4.5 ms, 5.5 at most, the longest frame 11.9
+  ms), the way in's five seconds down to 29 shown a second while the pair
+  cores boot (its longest frame 110 ms). Win waited 717 ticks, 600 of
+  them the ten seconds the host build was held still mid-battle on
+  purpose; the challenger gone before the battle began left Win's
+  "Huh? They're gone...".
+  Found and fixed on the way: Android threw the game's own output away,
+  so none of the online, Arena or frame lines could be read there; it
+  now goes to logcat (`startup_output`, android/README.md). And a game
+  held still for four seconds mid-battle (the host build between
+  `tools/play.py` batches; a phone's app sent to the background) stopped
+  the battle on both, twice on Android: "my keys could not be sent" and
+  "the other player's keys came out of order"; the waiting game now
+  stops sampling keys 128 frames ahead and waits
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#lockstep)), which the Windows
+  battle above survived. And on the host build's second visit in one
+  process its Offer a chip's order screen said BN6's own "I bought a new
+  chip! "Cannon A"!!" in Lan's box where the desk's "We'll offer" belongs
+  (a word only: the trade settled 3 to 2). The Order Service's script 7,
+  MegaMan's word after the Yes, begins with BN6's `EF 00` on flag `0x171D`
+  (`BN6_FLAG_NAVI_IN_PET`) and goes to script 20, Lan's, where it is
+  clear; `trade_order.c` now says script 20 as its 7. Seen with the flag
+  cleared by the `flags` dev step at the desk: "We'll offer "FireBrn1
+  F"!" in MegaMan's box. Why the flag was clear on that visit is not
+  known yet.
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -598,10 +658,12 @@ are in the history before 433865a8):
 - **The Arena on the 3DS and in the browser**; rollback and the stands
   (issue #128).
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
-  a New 3DS, an Android device (the emulator's visit above) and iOS,
-  macOS and Windows itself (Wine's above); a trade and a NetBattle on
-  Android and Windows (issue #129); the Arena's stalls over a real
-  network, about one frame in eight on the leading game (issue #128).
+  a New 3DS, an Android device (the emulator's visit, trade and
+  NetBattle above) and iOS, macOS and Windows itself (Wine's above); the
+  Arena's stalls over a real network, about one frame in eight on the
+  leading game (issue #128); a phone's app sent to the background
+  mid-battle, which the lead's cap should now wait out (ONLINE_ARENA.md,
+  Lockstep), untried.
 - **In the browser with the published server:** the official server
   allows the site's origin alone, so the browser's visit was checked
   against a local one; a trade and the trade board there are untried.

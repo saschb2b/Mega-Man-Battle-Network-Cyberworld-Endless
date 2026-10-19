@@ -66,7 +66,15 @@ research found BN6 needs. So a delay of 3 frames plus the link's one-way
 latency never waits; a shorter one waits, once, as many ticks as it falls
 short, and stays that far behind. A tick catches up two frames at most.
 Once the cable is idle (the menus after the battle) a core can run four
-frames ahead of its partner; it then waits for it.
+frames ahead of its partner; it then waits for it. My keys run at most
+128 frames (half `ARENA_RING`) past the pair's next frame: past that a
+tick samples none and waits, so the other game held still for seconds
+(its app sent to the background, its window dragged) stalls the battle on
+both and it goes on when that game does. Before this (issue #129, 19
+October 2026), the waiting game kept sampling a key a tick, filled its
+256-frame ring about four seconds after the other stopped, and stopped
+the battle with "my keys could not be sent"; the other, on its return,
+with "the other player's keys came out of order".
 
 Every 60 frames of the pair, the pair's hash (FNV-1a over both cores'
 whole states, their flash and the cable's numbers) is sent over the
