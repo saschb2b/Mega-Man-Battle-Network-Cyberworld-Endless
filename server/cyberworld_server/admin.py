@@ -7,9 +7,10 @@ import os
 from pathlib import Path
 import time
 
+from .week import week_of
 from .identity import KICK_MINUTES, kick_expires, prune_kicks, public_id, read_json, write_json
 
-ACTIONS = ("list", "ban", "unban", "mute", "unmute", "kick", "unkick")
+ACTIONS = ("list", "ban", "unban", "mute", "unmute", "kick", "unkick", "hide", "unhide")
 KICK_MAX_MINUTES = 7 * 24 * 60
 
 
@@ -30,12 +31,14 @@ def locked(directory):
         yield
 
 
-def perform(action, directory, identity=None, reason="", minutes=None):
+def perform(action, directory, identity=None, reason="", minutes=None, week=None):
     directory = Path(directory)
     if not (directory / "identity.key").is_file():
         raise ValueError("Use the running server's private state directory")
     if minutes is not None and action != "kick":
         raise ValueError("--minutes applies only to kick")
+    if week is not None and action != "hide":
+        raise ValueError("--week applies only to hide")
     if action == "list":
         return {"roster": read_json(directory / "players.json", {}),
                 "moderation": prune_kicks(read_json(directory / "moderation.json", {}), time.time())}
@@ -49,9 +52,9 @@ def perform(action, directory, identity=None, reason="", minutes=None):
         raise ValueError(f"A kick lasts 1 to {KICK_MAX_MINUTES} minutes; ban for longer")
     with locked(directory):
         now = time.time()
-        rules = read_json(directory / "moderation.json", {"bans": {}, "mutes": {}, "kicks": {}})
+        rules = read_json(directory / "moderation.json", {"bans": {}, "mutes": {}, "kicks": {}, "hidden": {}})
         prune_kicks(rules, now)
-        target = {"ban": "bans", "mute": "mutes", "kick": "kicks"}[action.removeprefix("un")]
+        target = {"ban": "bans", "mute": "mutes", "kick": "kicks", "hide": "hidden"}[action.removeprefix("un")]
         entries = rules.setdefault(target, {})
         if action.startswith("un"):
             entries.pop(identity, None)
@@ -59,12 +62,18 @@ def perform(action, directory, identity=None, reason="", minutes=None):
             entries[identity] = {"time": now, "reason": reason}
             if action == "kick":
                 entries[identity]["expires"] = now + minutes * 60
+            if action == "hide":
+                # (one week's entry of this identity off the Board, and its
+                # posts for that week refused: the current week by default)
+                entries[identity]["week"] = week_of(now) if week is None else week
         if len(entries) > 4096:
             raise ValueError("Moderation list is full (4096 entries)")
         write_json(directory / "moderation.json", rules)
     result = {"action": action, "identity": identity, "applies_within_seconds": 1}
     if action == "kick":
         result["expires"] = kick_expires(entries[identity])
+    if action == "hide":
+        result["week"] = entries[identity]["week"]
     return result
 
 
@@ -75,8 +84,9 @@ def main():
     parser.add_argument("--state-dir", required=True)
     parser.add_argument("--reason", default="")
     parser.add_argument("--minutes", type=int, help=f"How long a kick refuses the profile (default {KICK_MINUTES})")
+    parser.add_argument("--week", type=int, help="The week whose Board entry hide takes down (default this week)")
     args = parser.parse_args()
     try:
-        print(json.dumps(perform(args.action, args.state_dir, args.identity, args.reason, args.minutes), indent=2))
+        print(json.dumps(perform(args.action, args.state_dir, args.identity, args.reason, args.minutes, args.week), indent=2))
     except (ValueError, OSError) as exc:
         parser.exit(1, str(exc) + "\n")

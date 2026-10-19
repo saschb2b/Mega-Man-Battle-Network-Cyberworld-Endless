@@ -11,7 +11,7 @@ import tempfile
 import time
 
 MAX_STATE_BYTES = 1024 * 1024
-MODERATION = ("bans", "mutes", "kicks")
+MODERATION = ("bans", "mutes", "kicks", "hidden")   # (hidden: a week's Board entry taken down, week.py)
 KICK_MINUTES = 10
 LOG = logging.getLogger("cyberworld.server")
 _UNSET = object()
@@ -76,6 +76,8 @@ def checked_rules(rules):
                 raise ValueError("Invalid moderation entry")
             if not isinstance(entry.get("expires", 0), (float, int)):
                 raise ValueError("Invalid kick expiry")
+            if not isinstance(entry.get("week", 0), int):
+                raise ValueError("Invalid hidden entry's week")
     return rules
 
 

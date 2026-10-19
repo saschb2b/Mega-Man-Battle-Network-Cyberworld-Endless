@@ -9,7 +9,7 @@ import time
 import unittest
 
 from test_server import Client, protocol
-from cyberworld_server import admin
+from cyberworld_server import admin, protocol
 from cyberworld_server.app import Server
 from cyberworld_server.identity import IdentityStore, public_id
 
@@ -37,7 +37,7 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         key = bytes(range(16))
         first, welcome = await self.connect(key=key)
         identity = welcome[14:30]
-        self.assertEqual(len(welcome), 32)
+        self.assertEqual(len(welcome), protocol.SPEC["welcome_bytes"])
         self.assertNotEqual(identity, key)
         await first.close()
         self.clients.remove(first)
