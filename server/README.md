@@ -49,17 +49,14 @@ later is named here first, by their GitHub name, with the date.
   phrases or emotes; walking and cards stay), a kick (out for 10 minutes
   to 7 days), a Board entry hidden, and last a ban (out until lifted).
 
-### Reporting someone
+### Blocking, and no reports
 
-To stop seeing someone at once, block him from his card; that needs no
-moderator. To report him, open an issue on the project's
-[GitHub page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new)
-titled "Net Square report", with the name he showed, the channel, when
-(with your time zone, or in UTC) and what happened; a screenshot helps.
-Issues are public: say only what the report needs, and never post your
-`network.ini` or its `identity` line. A moderator finds the name's public
-identity in the players' log, which is kept 14 days, so report within
-two weeks.
+The Square has no free text, so there is little to report: the one
+thing a player writes himself is his name. To stop seeing someone, block
+him from his card; that needs no moderator and works at once. The
+moderator acts on what he sees himself (a name on the Board or in the
+roster, a dive the net could not have given) and keeps no log of who came
+under which name.
 
 ### What is kept, and for how long
 
@@ -75,8 +72,8 @@ it nowhere.
 | --- | --- | --- | --- |
 | The server's secret, `identity.key` | 32 random bytes, nothing of yours | your public identity and the week's net stay the same across restarts | the server's life |
 | The roster, `players.json` | public identity, name and channel of each player connected | moderators see who is on | while you are connected |
-| The players' log, `logs/` | when you came, under which name and public identity, in which channel | to match a reported name with its public identity | 14 days |
-| The trades' log, `trades.jsonl` | each trade: when, both public identities, the chip each gave | what moderators go on when a trade is reported | 14 days |
+| The players' log, `logs/` | when you came, under which name and public identity, in which channel | a host who takes reports can match a name with its identity | not kept on the official server (`log_days = 0`) |
+| The trades' log, `trades.jsonl` | each trade: when, both public identities, the chip each gave | what a moderator checks when a game trades chips it should not have | 14 days |
 | The Board, `weeks.jsonl` | your best dive of a week: public identity, name, layer, act, minutes | the Board shows this week and the last | 2 weeks |
 | Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
 | The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
@@ -100,17 +97,18 @@ you up by anything else. Two ways:
   identity. What the old one left goes by itself within the times above,
   and the backups 14 days after that. Blocks other players made of the
   old identity, and a ban, stay with it.
-- **On request:** open an issue as for a report, titled "Net Square:
-  remove my data", with the names you used and roughly when, so the
-  moderator can find your public identity in the players' log (within
-  its 14 days). He runs `forget` ([Identity and
-  moderation](#identity-and-moderation)), which takes your identity out
-  of the trades' log (your side of each trade; the other player's stays),
-  the Board, the players' log and any kick or hidden Board entry, and
-  restarts the server. A ban or a mute stays while it lasts. The backups
-  are not edited: they age out within 14 days. Past the players' log's
-  14 days the server holds nothing of yours to remove anyway, but a ban
-  or a mute and the backups' copies.
+- **On request:** open an issue on the project's
+  [GitHub page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new)
+  titled "Net Square: remove my data", with the name your dives show on
+  the Board (never your `network.ini` or its `identity` line). The
+  moderator finds your public identity there and runs `forget`
+  ([Identity and moderation](#identity-and-moderation)), which takes it
+  out of the trades' log (your side of each trade; the other player's
+  stays), the Board and any kick or hidden Board entry, and restarts the
+  server. A ban or a mute stays while it lasts. The backups are not
+  edited: they age out within 14 days. Without a dive on the Board the
+  server has no name to find you by, and what you left goes by itself
+  within the times above.
 
 ## Build and host locally
 
@@ -352,8 +350,8 @@ published:
    as in step 7 (the server's key kept); the week's Board is as it was.
 9. The backup: **Terminal**, container `backup`: `ls -l /backups` has
    today's archive. The `cyberworld` container's **Logs** show the join
-   and the leave without a name or a public identity; `ls /data/logs`
-   in its terminal shows today's players' log.
+   and the leave without a name or a public identity, and `/data/logs`
+   holds no players' log (`log_days = 0`).
 10. Write the result down: docs/ONLINE.md's line on the official server
     (it follows `main`, the protocol it speaks) and this section's dates.
 

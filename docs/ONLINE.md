@@ -18,8 +18,8 @@ Coolify deployment); it speaks the protocol of the branch it was last
 deployed from (a game of another protocol version cannot join it, nor a
 newer game an older server), trading and the Arena on, until this work
 is merged. No release has shipped
-the Square yet. Its policy (who runs and moderates it, the rules, how to
-report someone, what it keeps and for how long, how to be removed) is
+the Square yet. Its policy (who runs and moderates it, the rules,
+blocking, what it keeps and for how long, how to be removed) is
 [server/README.md's The official server](../server/README.md#the-official-server),
 summed up in [The official server](#the-official-server) below.
 
@@ -745,11 +745,11 @@ the platforms' transports are [server/README.md](../server/README.md)'s.
 moderator, as a hobby server with no guarantees; its policy is
 [server/README.md, The official server](../server/README.md#the-official-server).
 Fixed phrases and emotes only; a player blocks another from his card,
-and a moderator mutes, kicks, hides a Board entry or bans. A report is
-an issue on the project's GitHub page, within the players' log's two
-weeks. The server has no accounts and writes no IP address: a public identity derived
-from the game's per-server token, in the players' log (who came under
-which name) and the trades' log for 14 days, the Board for 2 weeks, bans
+and a moderator mutes, kicks, hides a Board entry or bans on what he sees
+himself; with no free text there are no reports. The server has no
+accounts and writes no IP address: a public identity derived
+from the game's per-server token, in the trades' log for 14 days (no
+players' log on the official server: `log_days = 0`), the Board for 2 weeks, bans
 and mutes until lifted, and daily backups of its key, moderation and
 Board for 14 days (`server.ini`'s `trade_days`, `board_weeks`,
 `log_days`, `backup_days`), each pruned by the server itself
