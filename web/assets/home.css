@@ -65,6 +65,23 @@
 	.theater .sound { left: 21px; bottom: 21px; font-size: 0.8rem; }
 }
 
+/* ---- the Net Square: the way there and what players do together, six
+ * screens each with BN6's text box under it, three across; the NetPass's
+ * rule in a panel under them ---- */
+.square { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 20px; }
+.spot { display: flex; flex-direction: column; }
+.spot .frame img, .spot .frame video, .pass .frame video { image-rendering: pixelated; }
+.spot .note { flex: 1; margin-top: 10px; font-size: 1rem; line-height: 1.45; }
+.pass { display: grid; grid-template-columns: minmax(0, 390px) minmax(0, 1fr); align-items: center; gap: 18px 26px; margin-top: 34px; }
+.pass h3 { margin: 0 0 10px; }
+.pass p { margin: 0; font-size: 1.05rem; line-height: 1.45; color: #d6f4ff; }
+.pass .systems { list-style: none; display: grid; gap: 8px; margin: 14px 0; padding: 0; }
+.pass .systems li { display: flex; align-items: center; gap: 8px; font: 700 0.8rem/1.25 var(--caps); text-transform: uppercase; color: var(--white); text-shadow: var(--edge); }
+.pass .more { font-size: 0.95rem; }
+.pass a { color: var(--gold); }
+@media (max-width: 900px) { .square { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .square, .pass { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---- one run, as one picture (after Stone Librande's one-page designs):
  * the net's spine runs down the middle, MegaMan's way from Lan's room to
  * the Nest; what happens on the way branches off it, left and right in
@@ -112,7 +129,7 @@
 .stop .frame img, .stop .frame video { image-rendering: pixelated; }
 .stop.tall .frame video { aspect-ratio: 416 / 512; }
 .stop .note { margin-top: 10px; font-size: 1.05rem; }
-.stop h3 { margin: 0 0 2px; font: 700 1rem/1.3 var(--caps); letter-spacing: 0.04em; text-transform: uppercase; color: #10364a; }
+.stop h3, .spot h3 { margin: 0 0 2px; font: 700 1rem/1.3 var(--caps); letter-spacing: 0.04em; text-transform: uppercase; color: #10364a; }
 /* where on the way: a pill on the screen's corner by the spine */
 .stop .depth { position: absolute; top: -15px; z-index: 2; }
 .stop:nth-child(odd) .depth { right: -12px; }

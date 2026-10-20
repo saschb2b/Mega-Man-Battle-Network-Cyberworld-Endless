@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>よくある質問：ROM、対応機種、ランについて｜Cyberworld Endless</title>
-<meta name="description" content="ロックマンエグゼ6（北米版）のローグライク Cyberworld Endless についての質問：必要なROM、遊べる機種、ランの流れ、ゲームの動かし方。">
+<title>よくある質問：ROM、オンライン、対応機種、ランについて｜Cyberworld Endless</title>
+<meta name="description" content="ロックマンエグゼ6（北米版）のローグライク Cyberworld Endless についての質問：必要なROM、オンラインの遊び方、NetPass、ネットバトル、遊べる機種、ランの流れ、ゲームの動かし方。">
 <link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/faq/">
 <link rel="alternate" hreflang="en" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/faq/">
 <link rel="alternate" hreflang="ja" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/faq/">
@@ -41,6 +41,7 @@
 	<div class="wrap">
 		<a class="brand" href="../"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="サイト">
+			<a class="opt" href="../#online">オンライン</a>
 			<a class="opt" href="../#game">ゲーム</a>
 			<a href="../download/" data-umami-event="go-download" data-umami-event-from="nav">ダウンロード</a>
 			<a href="../play/" data-umami-event="go-play" data-umami-event-from="nav">プレイ</a>
@@ -52,7 +53,7 @@
 </header>
 
 <main class="wrap">
-	<div class="band"><h1>よくある質問</h1><span class="hint">新着 <b id="new">19</b></span></div>
+	<div class="band"><h1>よくある質問</h1><span class="hint">新着 <b id="new">23</b></span></div>
 
 	<!-- the English page's letters (faq/index.html), in Japanese: the same ids and order -->
 	<div class="mailbox">
@@ -60,7 +61,11 @@
 			<ul class="menu mails">
 				<li><a class="row" href="#rom"><i class="icon i-mail" aria-hidden="true"></i><span>どのROMが必要？</span></a></li>
 				<li><a class="row" href="#bn5"><i class="icon i-mail" aria-hidden="true"></i><span>エグゼ5も使える？</span></a></li>
+				<li><a class="row" href="#online"><i class="icon i-mail" aria-hidden="true"></i><span>オンラインで遊ぶには？</span></a></li>
 				<li><a class="row" href="#netpass"><i class="icon i-mail" aria-hidden="true"></i><span>NetPass（ネットパス）とは？</span></a></li>
+				<li><a class="row" href="#netbattle"><i class="icon i-mail" aria-hidden="true"></i><span>ネットバトルのしくみは？</span></a></li>
+				<li><a class="row" href="#deepnet"><i class="icon i-mail" aria-hidden="true"></i><span>今週のディープネットとは？</span></a></li>
+				<li><a class="row" href="#server"><i class="icon i-mail" aria-hidden="true"></i><span>サーバーは何を残す？</span></a></li>
 				<li><a class="row" href="#why-rom"><i class="icon i-mail" aria-hidden="true"></i><span>なぜゲームが入っていないの？</span></a></li>
 				<li><a class="row" href="#upload"><i class="icon i-mail" aria-hidden="true"></i><span>ブラウザ版はROMをアップロードする？</span></a></li>
 				<li><a class="row" href="#statistics"><i class="icon i-mail" aria-hidden="true"></i><span>ゲームは何か送信する？</span></a></li>
@@ -95,9 +100,21 @@
 				<span class="who">差出人：ガイド</span>
 				<div class="textbox">
 					<h2>エグゼ5も使える？</h2>
-					<p>持っていれば使えます。北米版『Mega Man Battle Network 5: Team Colonel』（ロックマンエグゼ5 チーム オブ カーネルの北米版）の、改造していないROMを、BN6のROMと同じフォルダに置いてください（SHA-1 <code>5f472f78d8de2df01d5039e045c043cb40969a39</code>）。するとエグゼ5のネットのエリアのうち6つが、似ているエグゼ6のエリアの代わりに、それぞれ約半分のランで現れます：セントラルエリアの代わりに秋原エリア、グリーンエリアの代わりにオラン島エリア、スカイエリアの代わりに科学省エリア、シーサイドエリアの代わりにエンドエリア、ウラインターネットの代わりにエグゼ5のウラインターネット、グレイブヤードの代わりにネビュラホールエリア。タイル、音楽、バトルの背景、通りすがりの人々もエグゼ5のものです。ランダムバトルはエグゼ5のバトルを、エグゼ6のエンジンで戦います。ランのクロスやチップはすべて使えます。2つ目のアクトからはバトルの4回に1回、もう一方のネットのウイルスが1体まじり、ウラインターネットとグレイブヤードのアクトでは両方のネットのバトルが出ます。ショップとミステリーデータのチップの半分はエグゼ5のもので、エグゼ5のダークチップも見つかります。約半分のランでは、エグゼ5のナビがそのエリアのガーディアンになり、ウラインターネットとグレイブヤードのアクトでは両方のゲームのナビからガーディアンが選ばれます。どれもエグゼ6のエンジンで戦います。倒すとそのナビのソウルが手に入り、それからのすべてのバトルでロックマンはソウルユニゾンできます。</p>
-					<p>見つかると、起動時にタイトル画面の右上に<q>BN5 found</q>と出ます。BN6だけなら今までどおりです。Linux、macOS、Windows、Steam Deck、PortMaster対応の携帯ゲーム機、Android、iPhone、iPadで使えます。最初の起動で両方のROMがあるフォルダを選ぶか、あとからBN5をそのフォルダに置いてください。PC、Mac、スマホ、タブレットでは、タイトルでRを押すとROMの画面が開き、BN5のスロットから選べます。ブラウザでは<a href="../play/">プレイのページ</a>でBN6と一緒に選ぶか、あとから追加します。New 3DSでは、BN6のROMと同じフォルダか、ゲームがBN6のROMを探すフォルダのどれかに置いてください。</p>
+					<p>持っていれば使えます。北米版『Mega Man Battle Network 5: Team Colonel』（ロックマンエグゼ5 チーム オブ カーネルの北米版）の、改造していないROMを、BN6のROMと同じフォルダに置いてください（SHA-1 <code>5f472f78d8de2df01d5039e045c043cb40969a39</code>）。するとエグゼ5のネットのエリアのうち6つが、似ているエグゼ6のエリアの代わりに、それぞれ約半分のランで現れます：セントラルエリアの代わりに秋原エリア、グリーンエリアの代わりにオラン島エリア、スカイエリアの代わりに科学省エリア、シーサイドエリアの代わりにエンドエリア、ウラインターネットの代わりにエグゼ5のウラインターネット、グレイブヤードの代わりにネビュラホールエリア。タイル、音楽、通りすがりの人々もエグゼ5のものです。バトルはエグゼ5のものを、エグゼ6のエンジンで戦い、ランのクロスやチップはすべて使えます。2つ目のアクトからは2つのネットのウイルスとチップが出会い、エグゼ5のダークチップも見つかります。約半分のランでは、エグゼ5のナビがそのエリアのガーディアンに。倒すとそのナビのソウルが手に入り、それからのすべてのバトルでソウルユニゾンできます。</p>
+					<p>オンラインでは、<a href="#netpass">NetPass</a>がそろいます：ネットバトル、トレード、今週のディープネット。</p>
+					<p>見つかると、起動時にタイトル画面の右上に<q>BN5 found</q>と出ます。PC、Mac、スマホ、タブレットでは、タイトルでRを押すとROMの画面が開き、BN5のスロットから選べます。ブラウザでは<a href="../play/">プレイのページ</a>でBN6と一緒に選びます。携帯ゲーム機とNew 3DSでは、BN6のROMの横に置いてください。</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#what-you-need">ガイド：必要なもの（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/MULTIROM.md">MULTIROM：ほかのゲームのROM（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="online">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>オンラインで遊ぶには？</h2>
+					<p>熱斗のHPのゲートからです。ランが始まる場所で、幕ごとにロックマンが帰ってくる場所でもあります。ゲートに乗って「はい」を選ぶと、ランはその場でセーブされ、ロックマンはサーバー上のネットスクエアにログインします。1チャンネル8人までのプレイヤーが集まる広場です。最初の訪問では、ほかのプレイヤーに見える名前をたずね、サーバーが知ることを説明します。Rか、来たときのワープパネルで、ゲートの上に帰れます。ランは出たときのままです。</p>
+					<p>スクエアでは、Lでフレーズやエモート。決まったリストから選ぶだけで、自由入力はありません。ほかのロックマンに向かってAを押すと、そのカード（HP、幕、クロス、ソウル）と、Battle、Wave、Mute、Blockが出ます。トレードセンターでは、あまったチップをほかのプレイヤーのチップと1枚ずつ交換でき、その掲示板には各プレイヤーの出すチップとほしいものが並びます。アリーナのリングのそばのレフェリーが、チャンネルのネットバトルをすべて実況します。スクエアでランが強くなることはありません。持ち帰れるのは、トレードしたチップだけです。</p>
+					<p>すべての機種がオンラインに対応しています。ブラウザも。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#going-online">ガイド：オンラインへ（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#in-the-square">スクエアで（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#trades">トレード（英語）</a></p>
 				</div>
 			</article>
 
@@ -105,10 +122,40 @@
 				<span class="who">差出人：ガイド</span>
 				<div class="textbox">
 					<h2>NetPass（ネットパス）とは？</h2>
-					<p>ネットスクエアに入るためのパスです。ネットスクエアはサーバー上の広場で、プレイヤーたちのロックマンが集まります。熱斗のホームページのゲートから行けます。NetPassはPETのだいじなものです：<b>KeyItem</b>を開き、<b>NetPass</b>でAを押してください（PETが開かないネットスクエアではSTARTボタン）。ゲートで出かける前と、ネットスクエアにいるあいだは2つ目の画面（3DSの下画面、Android携帯ゲーム機の2つ目のディスプレイ）にも表示されます。</p>
-					<p>スタンプは4つです。<b>Square</b>はだれでも持っています：歩く、フレーズやエモート、応援、カード、レフェリーの実況、掲示板、トレードの募集を読むこと、今週のランキング。<b>Arena</b>（ネットバトルとその観戦）、<b>Trade</b>（チップトレードとトレード掲示板）、<b>DeepNet</b>（今週のディープネットへのダイブ）には、このバージョンがオンラインで対応するすべてのゲームが必要です：北米版『Mega Man Battle Network 6: Cybeast Gregar』と北米版『Mega Man Battle Network 5: Team Colonel』（ロックマンエグゼ5 チーム オブ カーネルの北米版）。BN5のROMをBN6のROMのそばに置けば4つすべてそろい、次に行ったときに受付のミスタープログがスタンプを押してくれます。</p>
-					<p>ブラウザ版でもネットバトルができます。New 3DSにはネットバトルがありません：2台のGBAを動かすと、1フレームの時間の1.5倍ほどかかるためです。BN5があればトレードとダイブはできます。のちのバージョンがほかのゲームにオンラインで対応したときは、そのゲームが必要なスタンプは、そのゲームを足すまでまた空きになります。そのことはリリースノートとこのサイトで前もってお知らせします。</p>
-					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#online-the-net-square">ガイド：オンライン、ネットスクエア（英語）</a> · <a href="#bn5">エグゼ5も使える？</a></p>
+					<p>あなたのゲームがオンラインで開けるものを、4つのスタンプで示すパスです。<b>Square</b>はだれでも持っています。北米版BN6『Cybeast Gregar』だけで、歩く、フレーズやエモート、応援、カード、レフェリーの実況、掲示板、トレードの募集を読むこと、今週のランキング。<b>Arena</b>（ネットバトルとその観戦）、<b>Trade</b>（トレードとトレード掲示板）、<b>DeepNet</b>（今週のダイブ）には、このバージョンがオンラインで対応するすべてのゲームが必要です：北米版BN6『Cybeast Gregar』と北米版BN5『Team Colonel』。BN5のROMをBN6の横に置けば、次の訪問で案内役のプログラムくんが4つすべてスタンプしてくれます。</p>
+					<p>PETのだいじなものです：<b>KeyItem</b>を開き、<b>NetPass</b>でA。PETが開かないスクエアではSTART。ゲートで出かける前にも表示されます。のちのバージョンがほかのゲームにオンラインで対応したときは、そのゲームが必要なスタンプは、そのゲームを足すまでまた空きになります。そのことはリリースノートとこのサイトで前もってお知らせします。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#the-netpass">ガイド：NetPass（英語）</a> · <a href="#bn5">エグゼ5も使える？</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="netbattle">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>ネットバトルのしくみは？</h2>
+					<p>おたがいのパスにArenaのスタンプがあれば、相手のカードのBattleで、練習のネットバトルを申しこめます。ロックマンはそのまま：HP、ナビカス、バスター、クロス、フォルダのエグゼ5のチップ、そしてソウル。カスタム画面のUNITEでソウルユニゾンすれば、相手にもそのソウルが見えます。勝っても負けても、得るものも失うものもありません。終わるとロックマンが、同じ相手ともう一度やるかたずねます。</p>
+					<p>ロールバックで動きます：それぞれのゲームがすぐに先へ進み、相手のボタンを予想して、本当の入力が予想とちがえば、そのフレームを巻き戻してやり直します。回線が良ければ、入力遅延は2フレームです。チャンネルのほかのプレイヤーも、Arenaのスタンプがあれば、観客席から最初のフレームから観戦して応援できます。</p>
+					<p>ネットバトルができるのは、PC、スマホとタブレット、PortMaster対応の携帯ゲーム機、Steam Deck、そしてブラウザ。New 3DSではできません：ふたり分のGBAを動かすと、1フレームの時間の1.5倍かかるためです。それでも、レフェリーがチャンネルのバトルを実況してくれます。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#netbattles">ガイド：ネットバトル（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#watching">観戦（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="deepnet">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>今週のディープネットとは？</h2>
+					<p>1週間、サーバーの全員に共通のネットです。毎週月曜の0時（UTC）に、各サーバーが新しいネットを開きます。ログイン広場の案内役のプログラムくんが、DeepNetのスタンプがあるパスにすすめてくれて、ダイブは熱斗の部屋から、全員同じスタートで始まります：短いネット、Standardフォルダ、脅威度0、助っ人なし、ランで開いたものもなし。</p>
+					<p>進行中のランは別のセーブで待っていて、タイトルのCONTINUEはそのランのままです。次の訪問で、どこまで潜ったかが掲示板に載ります。今週いちばん深い8つのダイブ（プレイヤーの報告どおり）、自分のベスト、先週の3つ。何度でもダイブできて、数えるのはベストだけ。ダイブで開くものはありません。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#the-weeks-deepnet">ガイド：今週のディープネット（英語）</a></p>
+				</div>
+			</article>
+
+			<article class="mail" id="server">
+				<span class="who">差出人：ガイド</span>
+				<div class="textbox">
+					<h2>サーバーは何を残す？</h2>
+					<p>公式サーバーは、アカウントもメールアドレスも求めず、ROMやセーブを見ることもありません。いるあいだに見えるのは、ゲームが接続してくるアドレス、選んだ名前、ロックマンの位置とカードです。サーバーでのあなたのIDは、ゲームがそのサーバーのためだけに作る鍵です。残すのは、だれが入って出たかのログ（アドレスなし）、成立したトレード、今週のディープネットの掲示板で、どれもそのIDと名前によります。どのくらい残すかは、サーバーのREADMEにあります。</p>
+					<p>ネットスクエアはだれでも立てられます：サーバーは小さなプログラムで、Linux、Windows、macOS用のビルドとDockerイメージがあります。そのアドレスをゲートのプログラムくんに伝えれば、そこへ行けます。</p>
+					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md#the-official-server">サーバー：TLSとプライバシー（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/server/README.md">サーバーを立てる（英語）</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#servers">ガイド：サーバー（英語）</a></p>
 				</div>
 			</article>
 
@@ -145,7 +192,7 @@
 				<span class="who">差出人：ガイド</span>
 				<div class="textbox">
 					<h2>どこで遊べる？</h2>
-					<p>PortMaster対応の携帯ゲーム機（AmberELEC、ArkOS、Knulli、muOS、ROCKNIXなど。Retroid NovaとRetroid Pocket Flip 2で開発）、Steam Deck、x86-64のLinux PC（Flatpak、AppImage、.deb）、Windows 10・11（インストーラーかzip）、Mac（macOS 11以降）、Androidのスマホ・タブレット・携帯ゲーム機（APK）、iPhone・iPad（iOS 14以降、SideStoreかAltStore Classic経由）、New 3DS（FBIがQRコードからインストールするHOMEメニューのタイトル、またはHomebrew Launcher）、そしてブラウザ。スマホのブラウザでも遊べます。</p>
+					<p>PortMaster対応の携帯ゲーム機（AmberELEC、ArkOS、Knulli、muOS、ROCKNIXなど。Retroid NovaとRetroid Pocket Flip 2で開発）、Steam Deck、x86-64のLinux PC（Flatpak、AppImage、.deb）、Windows 10・11（インストーラーかzip）、Mac（macOS 11以降）、Androidのスマホ・タブレット・携帯ゲーム機（APK）、iPhone・iPad（iOS 14以降、SideStoreかAltStore Classic経由）、New 3DS（FBIがQRコードからインストールするHOMEメニューのタイトル、またはHomebrew Launcher）、そしてブラウザ。スマホのブラウザでも遊べます。どれもオンラインに対応し、ネットバトルはNew 3DS以外のすべてでできます。</p>
 					<p>タッチ画面では、ゲームが自前の十字キーとボタンを親指に合う大きさで画面のまわりに描き、大きさと位置を変えるMENUボタンも付きます。コントローラーかキーボードを使うと、それらは消えます。</p>
 					<p class="more"><a href="../download/">ダウンロード</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#install">ガイド：インストール（英語）</a></p>
 				</div>
@@ -166,8 +213,8 @@
 				<span class="who">差出人：ガイド</span>
 				<div class="textbox">
 					<h2>ランとは？</h2>
-					<p>ランは町から始まります。セントラルタウン、秋原町、シーサイドタウン、グリーンタウンのどれかです。銅像か噴水まで歩いてRを押すと、ロックマンが最初のレイヤーへプラグインします。ネットは毎回新しく、エグゼ6のエリアのどれかの風景で作られます。出口のワープを見つけると、ひとつ深いレイヤーへ。道中では、そのエリアのウイルスが待ち受けます。</p>
-					<p>3レイヤーで1幕。各幕の終わりには、ガーディアンのナビが待っています。倒すと現れるガーディアンデータが、次の行き先をたずねます：次の幕の2つのエリアで、それぞれガーディアンの名前つきです。</p>
+					<p>ランは家の、熱斗の部屋から始まります。PCの前でRを押すと、熱斗がロックマンを熱斗のHPへプラグイン。そのワープパネルの先が、毎回新しいネットです。エグゼ6のエリアのどれかの風景で作られています。出口のワープを見つけると、ひとつ深いレイヤーへ。道中では、そのエリアのウイルスが待ち受けます。</p>
+					<p>3レイヤーで1幕。各幕の終わりには、ガーディアンのナビが待っています。そのガーディアンデータでロックマンは熱斗のHPへ帰り、そこで2つのポータルが次の幕のエリアへ通じます。それぞれのガーディアンの気配つきです。階段を下りて玄関を出れば、ランのことを覚えているセントラルタウンです。</p>
 					<p>ランは短いネットです。3幕のあと、レイヤー10の電脳獣の巣へ。そこを落とせばランクリアです。クリアするとエンドレスネットが開きます：1〜4幕は表のネットと、物語に出てくる電脳やホームページ、5幕はウラインターネット、6幕はグレイブヤード、レイヤー19が巣で、そこでは電脳獣グレイガそのものが待っています。そしてまた最初から、さらに強く。シークレットエリアをクリアすると、その金色のゲートの奥でフォルテが待っています。</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#a-run">ガイド：ラン（英語）</a></p>
 				</div>
@@ -238,7 +285,7 @@
 				<div class="textbox">
 					<h2>エグゼ6のものと、新しいものは？</h2>
 					<p><b>エグゼ6そのもの</b>（あなたのROMから動くもの）：バトルとウイルス、チップとバスティングレベル、PET、ショップとトレーダー、ガーディアンのボス戦、スプライト、顔グラフィック、テキストの表示、音楽。</p>
-					<p><b>エンジンが組み立てるもの</b>（ゲームのデータ形式で）：各レイヤーのレイアウト、床（そのエリアの元のマップから学んだタイル）、壁、どこに何が立つか。<b>ランのために書かれたもの</b>：エンドレスネットの物語、人々のセリフ、ランのまとめ。どれも英語です。</p>
+					<p><b>エンジンが組み立てるもの</b>（ゲームのデータ形式で）：各レイヤーのレイアウト、床（そのエリアの元のマップから学んだタイル）、壁、どこに何が立つか。<b>ランのために書かれたもの</b>：エンドレスネットの物語、人々のセリフ、ランのまとめ。どれも英語です。<b>オンライン</b>：同じようにエグゼ6のネットから組み立てるネットスクエアと、ゲームを動かすことのないそのサーバー。</p>
 					<p class="more"><a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/FIDELITY.md">FIDELITY：どの部分が誰のものか（英語）</a></p>
 				</div>
 			</article>

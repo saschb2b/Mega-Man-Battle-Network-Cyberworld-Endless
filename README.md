@@ -1,8 +1,8 @@
 <h1 align="center">Mega Man Battle Network: Cyberworld Endless</h1>
 
 <p align="center">
-<b>A roguelike for Mega Man Battle Network 6.</b><br>
-Jack MegaMan into a net that is generated anew every run, and see how deep he gets.
+<b>A roguelike for Mega Man Battle Network 6, now online.</b><br>
+Jack MegaMan into a net that is new every run, and meet other players' MegaMen in the Net Square.
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions">Discussions</a>
 </p>
 
-<p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
+<p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク、オンライン対応。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
 
 <p align="center">
 <a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.13.0 trailer, 39 seconds with sound: eight players' games in one Net Square, joined by lines of light, under 8 operators a channel. Watch the 0.13.0 trailer"></a>
@@ -26,7 +26,28 @@ Jack MegaMan into a net that is generated anew every run, and see how deep he ge
 <p align="center">
 Everything you see and hear is BN6 itself, running from your own ROM:
 its battles, chips, PET, shops and music. Cyberworld Endless builds the net
-around it, one layer at a time, and keeps the run going.
+around it, one layer at a time, keeps the run going, and links players' games in a Net Square.
+</p>
+
+<h2 align="center">The Net Square</h2>
+
+<table align="center">
+<tr>
+<td align="center" width="33%"><img src="docs/clips/online-square.gif" width="250" alt="In a Net Square of eight players, MegaMan picks Hello! from L's phrases, and Hello! and Nice build! pop up over the MegaMen round the landmark"><br><b>Meet</b><br><sub>Eight players a channel. Phrases and emotes from a fixed list, never free text.</sub></td>
+<td align="center" width="33%"><img src="docs/clips/online-trade.gif" width="250" alt="Trade Central's chip trade: FireBrn1 F for MrkCan1 M, Deal!, waiting on Beta, then the two chips' cards cross and land: Traded!"><br><b>Trade</b><br><sub>One spare chip for one at Trade Central, BN5's too. Its board says who wants what.</sub></td>
+<td align="center" width="33%"><img src="docs/clips/online-battle.gif" width="250" alt="A NetBattle between two players' MegaMen, charged shots both ways, from one player's side"><br><b>NetBattle</b><br><sub>Your MegaMen as they are, Souls and all, with rollback: 2 frames of input delay on a good connection.</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="docs/screenshots/online-stands.png" width="250" alt="Watching Kei VS Mira from the stands: R the other side, L cheer, B leave"><br><b>Watch</b><br><sub>The referee calls every battle in the channel. Watch from the stands, and cheer.</sub></td>
+<td align="center"><img src="docs/screenshots/online-deepnet.png" width="250" alt="The Net Square's Board: the week's DeepNet, 1. Mira: 10!, 2. Dex: 9, 3. Rio: 8"><br><b>The week's DeepNet</b><br><sub>Every Monday each server opens one net for everyone. The Board ranks the deepest dives.</sub></td>
+<td align="center"><img src="docs/screenshots/online-netpass.png" width="250" alt="The NetPass, a full pass: Lan and MegaMan, the Square, Arena, Trade and DeepNet stamps, BN6 and BN5 in"><br><b>The NetPass</b><br><sub>The Square is everyone's. NetBattles, trades and the DeepNet take BN5 beside BN6.</sub></td>
+</tr>
+</table>
+
+<p align="center">
+The way there is the gate in Lan's HP, where every run begins and comes home. Nothing in the Square makes a run stronger;
+the one thing that comes home is a chip you traded. Every system goes online, NetBattles everywhere but the New 3DS,
+and anyone can <a href="server/README.md">host a server</a>. <a href="docs/GUIDE.md#online-the-net-square">Online, in the guide</a>.
 </p>
 
 <h2 align="center">One run</h2>
@@ -53,17 +74,13 @@ nineteen layers down through the Undernet and the Graveyard to the Cybeast's den
 
 <p align="center">
 Each one is laid out in the style of one of BN6's areas, and holds the set pieces BN6's own maps do:
-purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, and these.
+purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, teleport pads, floor drawn as void, and these.
 </p>
 
 <table align="center">
 <tr>
 <td align="center" width="50%"><img src="docs/clips/rush.gif" width="380" alt="At a gap with bones over it, MegaMan throws two RushFood: two Rushes beam in, eat and lie across the gap, and MegaMan runs over them to an island holding a blue Mystery Data"><br><b>Rush's gaps</b><br><sub>RushFood from the Net Dealer, and Rush bridges the way to an island.</sub></td>
 <td align="center" width="50%"><img src="docs/clips/obstacle.gif" width="380" alt="A cybertree blocks a walkway in Green Area. MegaMan: We carry HeatMan's Cross data. Let's ask him to burn it! HeatMan: Leave it to me! The tree is gone, and MegaMan walks on"><br><b>Link Navi obstacles</b><br><sub>The run's Crosses clear them, as Gregar's Link Navis do.</sub></td>
-</tr>
-<tr>
-<td align="center"><img src="docs/clips/teleport.gif" width="380" alt="MegaMan steps onto a gem pad in Green Area and beams up; the camera scrolls across the void to an island, where he beams down, walks to its blue Mystery Data and gets AuraHed1 B"><br><b>Teleport pairs</b><br><sub>A gem beams MegaMan to a long detour's end, or to an island of its own.</sub></td>
-<td align="center"><img src="docs/clips/hidden.gif" width="380" alt="MegaMan walks off the edge of a Seaside platform across what looks like empty void to a lonely pad, and opens its Mystery Data: RegUP3"><br><b>Invisible paths</b><br><sub>Floor drawn as void, out to a lonely pad. A Navi nearby saw it.</sub></td>
 </tr>
 </table>
 
@@ -87,10 +104,9 @@ purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, an
 </table>
 
 <p align="center">
-Put <i>Team Colonel (USA)</i> beside your BN6 ROM, and BN5's net areas turn up in runs
-in its own tiles, music and bystanders, their battles BN5's own, fought in BN6's engine,
-where its viruses and chips meet BN6's from the second act. Its Navis guard some acts:
-beat one for his Soul, and UNITE with it in every battle after.
+Put <i>Team Colonel (USA)</i> beside your BN6 ROM, and BN5's areas, viruses, chips and Navis join the runs,
+in its own tiles, music and bystanders, fought in BN6's engine. Beat one of its Navis for his Soul,
+and UNITE with it in every battle after. Online, it fills your NetPass.
 </p>
 
 <h2 align="center">Runs leave options, not power</h2>
@@ -113,33 +129,36 @@ beat one for his Soul, and UNITE with it in every battle after.
 </tr>
 </table>
 
-| On | Get | How |
-| --- | --- | --- |
-| **A browser**, a phone's too | nothing: [play here](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](docs/GUIDE.md#in-a-browser) |
-| **Windows** 10 or 11 | the installer, or the zip | [On Windows](docs/GUIDE.md#on-windows) |
-| **macOS** 11 or newer | the `.dmg` | [On a Mac](docs/GUIDE.md#on-a-mac) |
-| **Linux** | the AppImage, Flatpak, `.deb` or `.tar.gz` | [On a Linux PC](docs/GUIDE.md#on-a-linux-pc) |
-| **Steam Deck** | the Flatpak | [On a Steam Deck](docs/GUIDE.md#on-a-steam-deck) |
-| **Android** 5 or newer | the `.apk` | [On Android](docs/GUIDE.md#on-android) |
-| **iPhone and iPad**, iOS 14 or newer | through SideStore or AltStore Classic | [On an iPhone or iPad](docs/GUIDE.md#on-an-iphone-or-ipad) |
-| **Handhelds** with PortMaster | the PortMaster zip | [On a PortMaster handheld](docs/GUIDE.md#on-a-portmaster-handheld) |
-| **New 3DS** | the `.cia`, or the `.3dsx` | [On a New 3DS](docs/GUIDE.md#on-a-new-3ds) |
+| On | Get | Online | How |
+| --- | --- | --- | --- |
+| **A browser**, a phone's too | nothing: [play here](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | all of it | [In a browser](docs/GUIDE.md#in-a-browser) |
+| **Windows** 10 or 11 | the installer, or the zip | all of it | [On Windows](docs/GUIDE.md#on-windows) |
+| **macOS** 11 or newer | the `.dmg` | all of it | [On a Mac](docs/GUIDE.md#on-a-mac) |
+| **Linux** | the AppImage, Flatpak, `.deb` or `.tar.gz` | all of it | [On a Linux PC](docs/GUIDE.md#on-a-linux-pc) |
+| **Steam Deck** | the Flatpak | all of it | [On a Steam Deck](docs/GUIDE.md#on-a-steam-deck) |
+| **Android** 5 or newer | the `.apk` | all of it | [On Android](docs/GUIDE.md#on-android) |
+| **iPhone and iPad**, iOS 14 or newer | through SideStore or AltStore Classic | all of it | [On an iPhone or iPad](docs/GUIDE.md#on-an-iphone-or-ipad) |
+| **Handhelds** with PortMaster | the PortMaster zip | all of it | [On a PortMaster handheld](docs/GUIDE.md#on-a-portmaster-handheld) |
+| **New 3DS** | the `.cia`, or the `.3dsx` | all but NetBattles | [On a New 3DS](docs/GUIDE.md#on-a-new-3ds) |
 
 Every file is on the [releases page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest);
 the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/download/) leads with your system.
 
 > [!IMPORTANT]
 > **You need your own ROM:** *Mega Man Battle Network 6: Cybeast Gregar (USA)*, unmodified.
-> *Battle Network 5: Team Colonel (USA)* beside it is optional. No download and no page contains
-> Capcom data; without the ROM there is no game. [What the game checks](docs/GUIDE.md#what-you-need).
+> *Battle Network 5: Team Colonel (USA)* beside it is optional; online, it fills the NetPass (NetBattles,
+> trades, the week's DeepNet). No download and no page contains Capcom data; without the ROM there is
+> no game. [What the game checks](docs/GUIDE.md#what-you-need).
 
 <p align="center">
-<a href="docs/GUIDE.md"><b>The player's guide</b></a>: the install on each system, the controls, a run in full, saving, the screen and the statistics<br>
+<a href="docs/GUIDE.md"><b>The player's guide</b></a>: the install on each system, the controls, a run in full, saving, online play, the screen and the statistics<br>
 <a href="CHANGELOG.md">Changelog</a>
 &nbsp;·&nbsp;
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues">Report a bug</a>
 &nbsp;·&nbsp;
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases.atom">Release feed</a>
+&nbsp;·&nbsp;
+<a href="server/README.md">Host a Net Square</a>
 &nbsp;·&nbsp;
 <a href="AGENTS.md">For developers</a>
 &nbsp;·&nbsp;

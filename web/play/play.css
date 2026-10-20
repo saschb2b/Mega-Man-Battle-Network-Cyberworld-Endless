@@ -112,6 +112,8 @@ body.touch-play #canvas {
 .hints { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 10px 0 0; font: 700 0.7rem/1.4 var(--caps); color: var(--pet-dim); text-transform: uppercase; }
 .hints span { display: inline-flex; align-items: center; gap: 5px; }
 @media (pointer: coarse) { .hints, .menu-btn kbd, .menu-foot { display: none; } }
+/* (a window as narrow as a phone's, a mouse's: the band's MENU without its key, so it stays in the band) */
+@media (max-width: 420px) { .menu-btn kbd { display: none; } }
 
 /* the two cartridges, as the game's launcher draws them (src/launcher/):
  * an open spot until the ROM is in, then the cartridge, its label in its

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike</title>
-<meta name="description" content="A free roguelike on Mega Man Battle Network 6: a new net every run, played by the game itself. Play in the browser, on PC, Mac, Linux, Android, iPhone, Steam Deck or 3DS.">
+<title>Cyberworld Endless · a Mega Man Battle Network 6 roguelike, online</title>
+<meta name="description" content="A free roguelike on Mega Man Battle Network 6: a new net every run, played by the game itself from your own ROM, and a Net Square online to meet, trade and NetBattle. Play in the browser, on PC, Mac, Linux, Android, iPhone, Steam Deck or 3DS.">
 <link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
 <link rel="alternate" hreflang="en" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
 <link rel="alternate" hreflang="ja" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">
@@ -14,8 +14,8 @@
 <meta property="og:locale:alternate" content="ja_JP">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
-<meta property="og:title" content="Cyberworld Endless · a Mega Man Battle Network 6 roguelike">
-<meta property="og:description" content="Every run builds a new net in the style of BN6's areas, and the game itself runs it: its battles, chips, PET and music, from your own ROM.">
+<meta property="og:title" content="Cyberworld Endless · a Mega Man Battle Network 6 roguelike, online">
+<meta property="og:description" content="A new net every run, played by BN6 itself from your own ROM. And now it connects: meet other players' MegaMen in the Net Square, trade with them and NetBattle them.">
 <meta property="og:image" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
@@ -44,14 +44,15 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
  "name": "Cyberworld Endless",
  "alternateName": "Mega Man Battle Network: Cyberworld Endless",
  "url": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/",
- "description": "A roguelike on Mega Man Battle Network 6: every run builds a new net in the style of BN6's areas, and the game itself, running from the player's own ROM, plays it: its battles, chips, PET, shops and music.",
+ "description": "A roguelike on Mega Man Battle Network 6: every run builds a new net in the style of BN6's areas, and the game itself, running from the player's own ROM, plays it: its battles, chips, PET, shops and music. Online, players meet in a Net Square, trade chips, NetBattle and watch each other's NetBattles, and dive the same net each week.",
  "image": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png",
  "screenshot": [
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-square.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-battle.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-trade.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/net.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/battle.png",
-  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/act-card.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/guardian.png",
-  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/undernet.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/setup.png"
  ],
  "genre": [
@@ -64,12 +65,16 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
   "Linux",
   "Steam Deck",
   "Android",
+  "iOS",
   "Nintendo 3DS",
   "Web browser"
  ],
  "operatingSystem": "Windows 10 and 11, macOS 11 and newer, Linux, Android 5 and newer, iOS 14 and newer, Nintendo New 3DS, web browsers",
  "applicationCategory": "Game",
- "playMode": "SinglePlayer",
+ "playMode": [
+  "SinglePlayer",
+  "MultiPlayer"
+ ],
  "isAccessibleForFree": true,
  "offers": {
   "@type": "Offer",
@@ -115,6 +120,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 	<div class="wrap">
 		<a class="brand" href="./"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="Site">
+			<a class="opt" href="#online">Online</a>
 			<a class="opt" href="#game">Game</a>
 			<a href="download/" data-umami-event="go-download" data-umami-event-from="nav">Download</a>
 			<a href="play/" data-umami-event="go-play" data-umami-event-from="nav">Play</a>
@@ -135,12 +141,96 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 			</figure>
 			<div class="bar">
 				<div class="intro">
-					<h1>A roguelike on Mega Man Battle Network 6</h1>
-					<p class="pitch">Every run builds a new net in the style of BN6's areas, and the game itself runs it.</p>
+					<h1>Mega Man Battle Network 6, as a roguelike</h1>
+					<p class="pitch">A new net every run, played by BN6 itself from your own ROM. And now it connects: meet other players' MegaMen in the Net Square, trade with them and NetBattle them.</p>
 				</div>
 				<div class="actions">
 					<a class="exit" href="play/" data-umami-event="go-play" data-umami-event-from="hero">Jack in</a>
 					<a class="plate" href="download/" data-umami-event="go-download" data-umami-event-from="hero"><i class="icon i-get" aria-hidden="true"></i>Download</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="online" aria-labelledby="online-title">
+		<div class="wrap">
+			<div class="band"><h2 id="online-title">Net Square</h2><span class="hint">Online, <b>8</b> a channel</span></div>
+			<!-- online play (docs/GUIDE.md, Online: the Net Square): the way
+			     there, then what players do together, each a screen and BN6's
+			     text box; the NetPass's rule under them -->
+			<ul class="square">
+				<li class="spot">
+					<figure class="frame">
+						<img src="shots/online-gate.png" width="240" height="160" loading="lazy" alt="MegaMan on the white gate in Lan's HP: To the Net Square, Lan? Yes or No, the NetPass's four stamps across the top">
+					</figure>
+					<div class="note textbox">
+						<h3>Through the gate</h3>
+						<p>Lan's HP, where every run begins and comes home, has a gate to a Net Square on a server. Your run waits at the gate, and only a chip you trade comes home with you.</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/online-square.png" width="240" height="160"
+							aria-label="In a Net Square of eight players, MegaMan picks Hello! from L's phrases, and Hello! and Nice build! pop up over the MegaMen round the landmark"><source src="clips/online-square.webm" type="video/webm"><source src="clips/online-square.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>Meet</h3>
+						<p>Phrases and emotes from a fixed list, never free text. Say one together round the landmark, and the Square cheers.</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/online-trade.png" width="240" height="160"
+							aria-label="Trade Central's chip trade: FireBrn1 F for MrkCan1 M, Deal!, waiting on Beta, then the two chips' cards cross and land: Traded!"><source src="clips/online-trade.webm" type="video/webm"><source src="clips/online-trade.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>Trade</h3>
+						<p>One spare chip for one at Trade Central, BN5's too, or an offer on its board with what you want for it.</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="clips/online-battle.png" width="240" height="160"
+							aria-label="A NetBattle between two players' MegaMen, charged shots both ways, from one player's side"><source src="clips/online-battle.webm" type="video/webm"><source src="clips/online-battle.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>NetBattle</h3>
+						<p>MegaMen as they are: folder, NaviCust, Crosses and Souls. Rollback keeps it to 2 frames of input delay on a good connection.</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<img src="shots/online-stands.png" width="240" height="160" loading="lazy" alt="Watching Kei VS Mira from the stands: R the other side, L cheer, B leave">
+					</figure>
+					<div class="note textbox">
+						<h3>Watch</h3>
+						<p>The referee calls every battle in the channel. Watch one from the stands, from its first frame, and cheer.</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<img src="shots/online-deepnet.png" width="240" height="160" loading="lazy" alt="The Net Square's Board: the week's DeepNet, 1. Mira: 10!, 2. Dex: 9, 3. Rio: 8">
+					</figure>
+					<div class="note textbox">
+						<h3>The week's DeepNet</h3>
+						<p>Every Monday each server opens one net, the same for all, from the same start. The Board ranks the deepest dives.</p>
+					</div>
+				</li>
+			</ul>
+
+			<div class="panel pass">
+				<figure class="frame">
+					<video class="clip" muted loop playsinline preload="none" poster="clips/online-netpass.png" width="240" height="160"
+						aria-label="The greeter Mr.Prog: Hold still! Stamp, stamp, stamp! The NetPass opens and its Arena, Trade and DeepNet stamps land: 4 of 4, Full pass"><source src="clips/online-netpass.webm" type="video/webm"><source src="clips/online-netpass.mp4" type="video/mp4"></video>
+				</figure>
+				<div class="text">
+					<h3 class="label">The NetPass</h3>
+					<p>The Square is everyone's: BN6 Cybeast Gregar (USA) is all it takes. NetBattles, trades and the DeepNet need the full set, BN5 Team Colonel (USA) beside it, and the greeter stamps your pass.</p>
+					<ul class="systems" aria-label="Online on each system">
+						<li><i class="icon i-pc" aria-hidden="true"></i>Computers, phones, handhelds, the browser: all of it</li>
+						<li><i class="icon i-3ds" aria-hidden="true"></i>New 3DS: all but NetBattles</li>
+					</ul>
+					<p class="more">Anyone can host a server. <a href="faq/#online">How to go online</a> · <a href="faq/#server">What a server keeps</a></p>
 				</div>
 			</div>
 		</div>
@@ -170,7 +260,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 					</figure>
 					<div class="note textbox">
 						<h3>A new net every run</h3>
-						<p>Three layers an act, each in the style of one of BN6's areas: its viruses, Mystery Data, Net Dealers and Mr.Progs.</p>
+						<p>Three layers an act, each in the style of one of BN6's areas, with its viruses, Mystery Data, Net Dealers and Mr.Progs.</p>
 					</div>
 				</li>
 				<li class="stop">
@@ -181,7 +271,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 					</figure>
 					<div class="note textbox">
 						<h3>BN6's own battles</h3>
-						<p>Its random battles, chips and Custom screen, run by the game itself. They grow with the depth, not the area.</p>
+						<p>Run by the game itself, and growing with the depth, not the area.</p>
 					</div>
 				</li>
 				<li class="stop">
@@ -203,7 +293,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 					</figure>
 					<div class="note textbox">
 						<h3>A guardian ends each act</h3>
-						<p>A copied Navi in his arena; the Net Dealer stocks a chip that answers him. His data: HP, his chip, his Cross.</p>
+						<p>A copied Navi in his arena, and a chip at the Net Dealer that answers him. His data: HP, his chip, his Cross.</p>
 					</div>
 				</li>
 				<li class="stop home tall">
@@ -214,7 +304,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 					</figure>
 					<div class="note textbox">
 						<h3>Home between acts</h3>
-						<p>Central Town remembers the run. AsterLand orders any chip the Library holds, and three people post a request.</p>
+						<p>Central Town remembers the run. AsterLand orders any chip the Library holds, three people post a request, and Lan's HP has the gate to the Net Square.</p>
 					</div>
 				</li>
 				<li class="stop gold">
@@ -257,7 +347,7 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 							aria-label="MegaMan walks BN5's ACDC Area until a battle starts, and fights BN5's CanGard in BN6's battle engine"><source src="clips/bn5-battle.webm" type="video/webm"><source src="clips/bn5-battle.mp4" type="video/mp4"></video>
 						</figure>
 					</div>
-					<p>Put <i>Team Colonel (USA)</i> beside BN6, and BN5's areas turn up in runs, their battles BN5's own, fought in BN6's engine, where its viruses and chips meet BN6's from the second act. Its Navis guard some acts: beat one for his Soul, and UNITE with it in every battle after.</p>
+					<p>Put <i>Team Colonel (USA)</i> beside BN6, and BN5's areas, viruses, chips and Navis join the runs, fought in BN6's engine. Beat one of its Navis for his Soul, and UNITE with it in every battle after. Online, it fills your NetPass.</p>
 				</article>
 				<article class="panel">
 					<h3 class="label">Runs leave options</h3>
@@ -287,7 +377,8 @@ if (/^#(play|download|downloads)$/.test(location.hash)) location.replace('downlo
 					<li><i class="icon i-handheld" aria-hidden="true"></i>PortMaster</li>
 					<li><i class="icon i-3ds" aria-hidden="true"></i>New 3DS</li>
 				</ul>
-				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>. None contains game data.
+				<p class="rom">Every build needs your own Mega Man Battle Network 6: Cybeast Gregar (USA) <code>.gba</code>, and every one goes online.
+					BN5 Team Colonel (USA) beside it is optional: it fills the NetPass. None contains game data.
 					<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">Every download</a> · <a href="faq/">FAQ</a> ·
 					<a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md" data-umami-event="outbound" data-umami-event-to="guide">Player's guide</a></p>
 			</div>
