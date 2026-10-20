@@ -254,14 +254,17 @@ static void hush(OnlineSnapshot *snapshot, uint32_t now, uint32_t last_receive) 
 /* the session until it ends: the ticks it was last heard from */
 static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 	uint32_t last_send = 0, last_ping = 0, last_receive = SDL_GetTicks();
-	while (!SDL_AtomicGet(&transport.stop)) {
+	for (;;) {
 		uint8_t data[ONLINE_MAX_MESSAGE];
-		/* (leaving: the goodbye, so the server frees the place at once) */
+		/* (leaving: the goodbye, so the server frees the place at once;
+		 * asked for before the stop, so it is sent even where the stop
+		 * came first: a slow system's end waits only so long) */
 		if (SDL_AtomicGet(&transport.bye)) {
 			data[0] = ONLINE_BYE;
 			if (snapshot->connected) online_socket_send(data, 1);
 			break;
 		}
+		if (SDL_AtomicGet(&transport.stop)) break;
 		int got = online_socket_receive(data, sizeof data);
 		uint32_t now = SDL_GetTicks();
 		if (got == -2) SDL_strlcpy(snapshot->error, "The server broke the WebSocket protocol", sizeof snapshot->error);
@@ -541,7 +544,7 @@ void online_transport_end(void) {
 	if (transport.thread) {
 		SDL_AtomicSet(&transport.bye, 1);
 		uint32_t started = SDL_GetTicks();
-		while (!SDL_AtomicGet(&transport.done) && linked() && SDL_GetTicks() - started < 300) SDL_Delay(1);
+		while (!SDL_AtomicGet(&transport.done) && linked() && SDL_GetTicks() - started < 1000) SDL_Delay(1);
 	}
 	SDL_AtomicSet(&transport.stop, 1);
 	if (transport.thread) SDL_WaitThread(transport.thread, NULL);
