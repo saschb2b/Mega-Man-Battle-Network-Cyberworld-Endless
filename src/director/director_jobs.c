@@ -128,9 +128,17 @@ void home_jobs_battle_end(bool won, int hp, int frames) {
 		fprintf(stderr, "jobs: battle %s, %d HP lost, %d frames: %d of %d\n", won ? "won" : "left", J.hp_before - hp, frames, run.job.got, run.job.need);
 }
 
+/* (the run's economy's counts, runlog.h: each Mystery Data opened, and
+ * what it held, as the layer is left or the run ends) */
+void home_jobs_md_counted(void) {
+	for (int k = 0; k < D.objs.nmd; ++k)
+		if (flag_get(MAPSLOT_MD_FLAG + k)) runlog_md_opened(D.objs.md_find[k]);
+}
+
 void home_jobs_layer_left(void) {
 	int opened = 0;
 	for (int k = 0; k < D.objs.nmd; ++k) opened += flag_get(MAPSLOT_MD_FLAG + k);
+	home_jobs_md_counted();
 	if (live() && jobs_layer_left(&run.job, D.objs.nmd, opened)) J.words = job_done_words(run.job.asker);
 	J.healed = J.beaten = false;
 }

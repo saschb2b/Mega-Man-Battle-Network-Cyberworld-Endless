@@ -4686,8 +4686,9 @@ static void test_super_bosses(void) {
 static void test_economy(void) {
 	const EconPlan *was = econ_plan;
 	Run run_was = run;
+	CHECK(econ_plan == &econ_opening, "the opening plan is the game's (the owner's yes, issue #154)");
 	for (int l = 0; l < ECON_LEVERS; ++l) {
-		EconCurve c = econ_proposed.lever[l];
+		EconCurve c = econ_opening.lever[l];
 		CHECK(c.floor >= 0 && c.floor < 1, "the proposal's lever %d starts under today's (%.2f)", l, c.floor);
 		CHECK(econ_curve(c, 0) == c.floor && econ_curve(c, 1) == 1, "lever %d: its floor at the first act, today's at the last", l);
 		double last = econ_curve(c, 0), step = 1;
@@ -4699,11 +4700,11 @@ static void test_economy(void) {
 			last = v;
 		}
 		CHECK(econ_curve(c, -1) == c.floor && econ_curve(c, 2) == 1, "lever %d: held to its floor and to today's outside the net", l);
-		CHECK(econ_curve(econ_today.lever[l], 0) == 1, "today's lever %d is flat at 1", l);
+		CHECK(econ_curve(econ_flat.lever[l], 0) == 1, "today's lever %d is flat at 1", l);
 	}
 	EconCurve line = { 0.5, 0 };
 	CHECK(econ_curve(line, 0.5) > 0.749 && econ_curve(line, 0.5) < 0.751, "a bend of 0 is a straight line");
-	CHECK(econ_proposed.lever[ECON_LEVER_LEAN].floor == 0, "the proposal's first act leans no find to the folder's codes");
+	CHECK(econ_opening.lever[ECON_LEVER_LEAN].floor == 0, "the proposal's first act leans no find to the folder's codes");
 	/* the way through a net: the endless net's acts over its sixth, the
 	 * short net's over its third; a Nest and later cycles all the way */
 	run.mode = RUN_ENDLESS;
@@ -4712,7 +4713,7 @@ static void test_economy(void) {
 	run.mode = RUN_SHORT;
 	CHECK(econ_x(4) == 0.5 && econ_x(7) == 1 && econ_x(SHORT_LAYERS) == 1, "the short net: act 2 halfway, act 3 and its Nest at 1");
 	/* today's: every lever 1, every number as it was, no draw */
-	econ_plan = &econ_today;
+	econ_plan = &econ_flat;
 	for (int depth = 1; depth <= 40; ++depth)
 		for (int l = 0; l < ECON_LEVERS; ++l) {
 			rng_seed(7);
@@ -4721,7 +4722,7 @@ static void test_economy(void) {
 			CHECK(rng_state() == before, "today's plan draws nothing (lever %d, layer %d)", l, depth);
 		}
 	/* the proposal's: scaled and kept by its share */
-	econ_plan = &econ_proposed;
+	econ_plan = &econ_opening;
 	run.mode = RUN_ENDLESS;
 	CHECK(econ_scale(4, ECON_LEVER_MD, 1) == 2 && econ_scale(4, ECON_LEVER_MD, 16) == 4, "the proposal: half the green data on act 1, all on act 6");
 	int kept = 0;
@@ -4731,23 +4732,40 @@ static void test_economy(void) {
 	CHECK(kept > 4000 * (share - 0.04) && kept < 4000 * (share + 0.04), "the proposal keeps act 1's chips by its share (%d of 4000)", kept);
 	rng_seed(11);
 	for (int i = 0; i < 100; ++i) CHECK(!econ_keep(ECON_LEVER_LEAN, 2), "the proposal leans nothing on act 1");
+	/* (a hook's share by a hash: the same for the same battle, none on act
+	 * 1, about its share on act 3, all of it on the flat plan; no draw) */
+	int leaned = 0;
+	bool none1 = true, same = true;
+	uint32_t before_hash = rng_state();
+	for (uint32_t h = 0; h < 4000; ++h) {
+		none1 &= !econ_keep_by(ECON_LEVER_LEAN, 2, h * 2654435761u);
+		bool a = econ_keep_by(ECON_LEVER_LEAN, 8, h * 2654435761u);
+		same &= a == econ_keep_by(ECON_LEVER_LEAN, 8, h * 2654435761u);
+		leaned += a;
+	}
+	double lean3 = econ_factor(ECON_LEVER_LEAN, 8);
+	CHECK(none1 && same && leaned > 4000 * (lean3 - 0.05) && leaned < 4000 * (lean3 + 0.05) && rng_state() == before_hash,
+		"the hook's lean by a hash: none on act 1, its share on act 3 (%d of 4000), the same each time, no draw", leaned);
+	econ_plan = &econ_flat;
+	CHECK(econ_keep_by(ECON_LEVER_LEAN, 2, 12345), "the flat plan leans every hook's entry");
+	econ_plan = &econ_opening;
 	/* the bands hold their plans' own numbers: a fifth either side, on
 	 * either net (the short net's three acts and its Nest) */
 	for (int p = 0; p < 2; ++p)
 		for (int m = 0; m < ECON_METRICS; ++m)
 			for (int a = 0; a < ECON_ACTS; ++a)
 				for (int brief = 0; brief < 2; ++brief) {
-					EconBand b = econ_band(p ? &econ_proposed : &econ_today, brief, m, a);
+					EconBand b = econ_band(p ? &econ_opening : &econ_flat, brief, m, a);
 					bool none = brief && a > 2 && a < ECON_ACTS - 1;
 					CHECK(none ? b.hi == 0 : b.lo > 0 && b.lo < b.hi && b.hi < b.lo * 1.6, "plan %d net %d metric %d act %d: a band around its number",
 						p, brief, m, a);
 				}
-	EconBand today1 = econ_band(&econ_today, false, ECON_CHIPS, 0), after1 = econ_band(&econ_proposed, false, ECON_CHIPS, 0);
-	EconBand today6 = econ_band(&econ_today, false, ECON_CHIPS, 5), after6 = econ_band(&econ_proposed, false, ECON_CHIPS, 5);
+	EconBand today1 = econ_band(&econ_flat, false, ECON_CHIPS, 0), after1 = econ_band(&econ_opening, false, ECON_CHIPS, 0);
+	EconBand today6 = econ_band(&econ_flat, false, ECON_CHIPS, 5), after6 = econ_band(&econ_opening, false, ECON_CHIPS, 5);
 	/* (measured numbers: the same within a few in a hundred) */
 	CHECK(after1.hi < today1.hi * 0.9 && after6.lo > today6.lo * 0.97 && after6.lo < today6.lo * 1.03,
 		"the proposal's first act hands out fewer chips, its sixth as many");
-	EconBand short3 = econ_band(&econ_proposed, true, ECON_CHIPS, 2), today3 = econ_band(&econ_today, true, ECON_CHIPS, 2);
+	EconBand short3 = econ_band(&econ_opening, true, ECON_CHIPS, 2), today3 = econ_band(&econ_flat, true, ECON_CHIPS, 2);
 	CHECK(short3.lo > today3.lo * 0.97 && short3.lo < today3.lo * 1.03, "the proposal opens the short net by its third act");
 	CHECK(econ_bust_weight(ECON_BUST_S) > 0 && econ_bust_weight(0) == 0 && econ_bust_weight(ECON_BUST_S + 1) == 0, "the busting mix: 1-10 and S");
 	CHECK(!econ_chip_good(ECON_GOOD_TIER - 1) && econ_chip_good(ECON_GOOD_TIER), "a good chip: tier %d up", ECON_GOOD_TIER);
@@ -4894,7 +4912,7 @@ static void test_analytics(void) {
 	CHECK(analytics_here() && analytics_unasked(), "statistics: a player's first start asks");
 	analytics_run_start();
 	analytics_guardian(1, ANALYTICS_WON, 50, 200, 3000);
-	analytics_run_end(false, "HeatMan");
+	analytics_run_end(false, "HeatMan", NULL);
 	CHECK(stats_posts == 0, "statistics: nothing is sent before the answer (%d sent)", stats_posts);
 	/* yes: kept in settings.ini beside what was there, the start's view sent */
 	analytics_answer(true);
@@ -4929,11 +4947,21 @@ static void test_analytics(void) {
 	analytics_guardian(1, ANALYTICS_LOST, 0, 200, 0);
 	CHECK(stats_posts == 4 && strstr(stats_sent[3], "\"result\":\"lost\"") && !strstr(stats_sent[3], "\"hp\"") && !strstr(stats_sent[3], "\"seconds\""),
 		"statistics: a guardian's win over MegaMan, no HP or time (%s)", stats_sent[3]);
-	analytics_run_end(false, "HeatMan");
+	/* (the economy's counts, the run's and its first act's) */
+	AnalyticsEconomy econ = { .seed = run.seed };
+	analytics_count_chip(&econ, true, true);
+	analytics_count_chip(&econ, false, false);
+	analytics_count_md(&econ, true);
+	analytics_count_zenny(&econ, 500, true);
+	analytics_count_zenny(&econ, 1200, false);
+	analytics_count_zenny(&econ, -5, false);
+	analytics_run_end(false, "HeatMan", &econ);
+	CHECK(strstr(stats_sent[4], "\"chips\":2,\"good\":1,\"md\":1,\"zenny\":1700,\"chips1\":1,\"good1\":1,\"md1\":1,\"zenny1\":500"),
+		"statistics: run-end counts the run's economy, its first act's beside it (%s)", stats_sent[4]);
 	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"run-end\",\"data\":{\"won\":false,\"layer\":7,\"area\":\"") &&
 		strstr(stats_sent[4], "\"by\":\"HeatMan\"") && strstr(stats_sent[4], "\"minutes\":42") && strstr(stats_sent[4], "\"net\":\"short\""),
 		"statistics: run-end names how far, by whom and how long (%s)", stats_sent[4]);
-	analytics_run_end(true, NULL);
+	analytics_run_end(true, NULL, NULL);
 	CHECK(stats_posts == 6 && strstr(stats_sent[5], "\"won\":true") && !strstr(stats_sent[5], "\"by\""), "statistics: a won run names no one (%s)", stats_sent[5]);
 	for (int i = 0; i < 6; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
 	/* no: kept, what waits dropped, nothing more sent */

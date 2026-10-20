@@ -381,6 +381,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	}
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
 		out->md_colour[out->nmd++] = (uint8_t)m->type;
 	}
 }
