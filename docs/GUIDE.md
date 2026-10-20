@@ -856,7 +856,9 @@ In the Square:
 Talk to the gate's keeper to change your name or the server: the
 official Square, or another one's address (`host` or `host:port`, as its
 owner gives it). Anyone can run a server; [server/README.md](../server/README.md)
-says how.
+says how. The official Square's rules, who moderates it, how to report
+someone, what it keeps and for how long, and how to have your data
+removed are in [its policy](../server/README.md#the-official-server).
 
 ## Screen
 

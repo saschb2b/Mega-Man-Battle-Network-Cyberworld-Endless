@@ -9,6 +9,109 @@ the default total cap of 64 creates eight channels. There are no
 accounts, e-mail addresses, arbitrary chat or currency, and it never
 runs a game, holds a ROM or sees a save.
 
+## The official server
+
+`wss://cyberworld.saschb2b.com/presence` is the Net Square the game's
+gate offers first. This is its policy. Anyone can run a server of their own
+(the rest of this page); its host sets its rules.
+
+### Who runs it
+
+Saschb2b, who makes Cyberworld Endless, runs it on his own server. It
+is a hobby server with no guarantees: no company behind it, and no
+promise that it is up, that it is fast, that what it keeps survives, or
+that it is still there tomorrow. It can go down for an update, a fault
+or for good without notice. Your run never depends on it: nothing in the
+Square changes your run but a chip you traded.
+
+### Moderators
+
+Saschb2b is its moderator. A moderator is whoever is given the server's
+command line (its container's terminal in Coolify); anyone given it
+later is named here first, by their GitHub name, with the date.
+
+### The rules
+
+- **Fixed phrases only.** Players speak in the game's quick phrases and
+  emotes, which the server passes on and never stores. There is no free
+  text, and the server refuses to start with it on.
+- **Names.** You choose the name others see: up to 16 letters, digits,
+  spaces, `-` and `_`. Any player can block another from his card, which
+  hides that MegaMan and his name from the blocker's Square; a moderator
+  takes a name off the week's Board (`hide`) and removes a player whose
+  name breaks these rules.
+- **What gets a player muted, kicked or banned:** a name meant to
+  offend, or to pass for Saschb2b or a moderator; phrases or emotes sent
+  to flood a channel or to follow and pester someone; a modified game
+  (a dive on the Board it could not have made, chips traded that it does
+  not have, NetBattles broken on purpose); coming back with a new key
+  after a ban. A moderator picks the least that stops it: a mute (no
+  phrases or emotes; walking and cards stay), a kick (out for 10 minutes
+  to 7 days), a Board entry hidden, and last a ban (out until lifted).
+
+### Reporting someone
+
+To stop seeing someone at once, block him from his card; that needs no
+moderator. To report him, open an issue on the project's
+[GitHub page](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new)
+titled "Net Square report", with the name he showed, the channel, when
+(with your time zone, or in UTC) and what happened; a screenshot helps.
+Issues are public: say only what the report needs, and never post your
+`network.ini` or its `identity` line. A moderator finds the name's public
+identity in the players' log, which is kept 14 days, so report within
+two weeks.
+
+### What is kept, and for how long
+
+The server has no accounts. Your game makes a random key on your device
+(`network.ini`'s `identity`) and sends the server a token made from it
+for this server's address, never the key itself. The server turns that
+token into a public identity with a secret of its own: a number that
+means nothing on another server and cannot be turned back into your key.
+It sees your connection's IP address, as every server must, and writes
+it nowhere.
+
+| What | What it holds | Why | Kept |
+| --- | --- | --- | --- |
+| The server's secret, `identity.key` | 32 random bytes, nothing of yours | your public identity and the week's net stay the same across restarts | the server's life |
+| The roster, `players.json` | public identity, name and channel of each player connected | moderators see who is on | while you are connected |
+| The players' log, `logs/` | when you came, under which name and public identity, in which channel | to match a reported name with its public identity | 14 days |
+| The trades' log, `trades.jsonl` | each trade: when, both public identities, the chip each gave | what moderators go on when a trade is reported | 14 days |
+| The Board, `weeks.jsonl` | your best dive of a week: public identity, name, layer, act, minutes | the Board shows this week and the last | 2 weeks |
+| Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
+| The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
+| Backups | the server's secret, moderation and the Board | to bring the server back after a fault | 14 days |
+
+Everything else stays in memory and goes when you leave or the server
+restarts: where you walk, your card, the phrases you send, your trade
+offers, trades in progress, and your NetBattles' inputs (the stands keep
+a battle's for a minute after it ends). The server prunes each record
+itself, at its start and every hour. These are the official server's
+settings ([What the state keeps](#what-the-state-keeps)); another server
+may keep more or less.
+
+### Removing your data
+
+The server knows you only by your public identity, so it cannot look
+you up by anything else. Two ways:
+
+- **Yourself:** stop visiting, or delete `network.ini` from your data
+  folder: the gate asks your name again and you have a new key, so a new
+  identity. What the old one left goes by itself within the times above,
+  and the backups 14 days after that. Blocks other players made of the
+  old identity, and a ban, stay with it.
+- **On request:** open an issue as for a report, titled "Net Square:
+  remove my data", with the names you used and roughly when, so the
+  moderator can find your public identity in the players' log (within
+  its 14 days). He runs `forget` ([Identity and
+  moderation](#identity-and-moderation)), which takes your identity out
+  of the trades' log (your side of each trade; the other player's stays),
+  the Board, the players' log and any kick or hidden Board entry, and
+  restarts the server. A ban or a mute stays while it lasts. The backups
+  are not edited: they age out within 14 days. Past the players' log's
+  14 days the server holds nothing of yours to remove anyway, but a ban
+  or a mute and the backups' copies.
+
 ## Build and host locally
 
 From the repository root:
@@ -75,7 +178,8 @@ to 511, codes A to Z and \*, BN5's among them); one proposes with a
 chip, the other answers with one, and the server commits only once both
 have accepted the very pair they were shown. It writes each commit as a
 line of `trades.jsonl` in the state directory (both public identities
-and the chips each gave) and tells both; each game applies its side when
+and the chips each gave), kept `trade_days` days ([What is kept, and for
+how long](#what-is-kept-and-for-how-long)), and tells both; each game applies its side when
 its player comes home. A step that does not match what the server holds,
 a player leaving or switching channel, or five minutes without progress
 ends a trade for both, and neither swaps. Games are trusted for what
@@ -150,12 +254,30 @@ WebSocket upgrades; no certificate is stored in the app container. Point
 the domain's DNS record to the Coolify host before enabling its certificate.
 Do not publish container port 8765 directly to the internet.
 
-The compose file includes a health check, restart policy, read-only root
-filesystem, a private persistent `cyberworld-state` volume at `/data`, and
-bounded Docker logs. It runs as UID 10001. The read-only
-`deploy/coolify/server.ini` allows the published game's browser origin
-`https://saschb2b.github.io`; add another exact origin only when serving
-the game there. The process binds `0.0.0.0` inside the container.
+The compose file has two services from the same image, each running as
+UID 10001 on a read-only root filesystem with every capability dropped:
+
+- `cyberworld`, the server: its private persistent `cyberworld-state`
+  volume at `/data`, and the backups read-only at `/backups` for a
+  restore from its terminal. Docker restarts it when it exits, and after
+  a reboot of the host, unless it was stopped (`unless-stopped`); its
+  health check asks `/health` every 30 seconds and calls it unhealthy
+  after three misses. Docker does not restart an unhealthy container:
+  Coolify shows it, and its Restart does. Its log (Coolify's Logs) keeps
+  three files of 5 MB, the oldest written over, and names no player
+  ([What is kept](#what-is-kept-and-for-how-long)).
+- `backup`, the state's daily archive ([Backups and
+  restores](#backups-and-restores)): the state read-only at `/data`, its
+  own volume `cyberworld-backups` at `/backups`, no port and no domain.
+  It restarts as the server does, its health check is unhealthy once
+  the newest archive is more than 26 hours old, and its log keeps two
+  files of 1 MB.
+
+The read-only `deploy/coolify/server.ini` is mounted into both. It
+allows the published game's browser origin `https://saschb2b.github.io`
+(add another exact origin only when serving the game there) and sets
+the official server's retention. The server binds `0.0.0.0` inside its
+container.
 
 Local validation uses:
 
@@ -170,15 +292,76 @@ Coolify's [Compose guide](https://coolify.io/docs/applications/builds/docker-com
 documents the Base Directory settings and repository preservation needed
 for file bind mounts. After loading the Compose definition, check that the
 configuration mount resolves to a file ending in `/deploy/coolify/server.ini`,
-the only writable persistent mount is `/data`, and the domain forwards to
-the service's internal port 8765. Do not add a host port mapping.
+the server's only writable persistent mount is `/data` and the backup
+service's `/backups`, and the domain forwards to the `cyberworld`
+service's internal port 8765. Do not add a host port mapping.
 
 After deployment, verify HTTPS `/health`, a native client and a browser
 client through `/presence`, then test a moderator action and a restart
-with the same identity. The local and device checks in the platform table
+with the same identity ([At a release](#at-a-release-the-official-server-follows-main)
+lists the steps). The local and device checks in the platform table
 remain necessary; a healthy HTTP endpoint alone proves no gameplay.
 
-## Identity, moderation and backups
+## At a release: the official server follows main
+
+Until a release ships online play, the official server is a test
+instance that follows `dev`. From the release that ships it (0.13.0) on,
+it follows `main`, which moves only at releases, so the server always
+speaks the protocol of the newest release's games. The owner does these
+steps in Coolify (project Gaming, environment production, application
+cyberworld-net-square); nothing here changes the live server by itself.
+
+Before the tag:
+
+1. Deploy `dev` once with this compose file, so the `backup` service and
+   its `cyberworld-backups` volume exist; it is healthy within two
+   minutes, its first archive made.
+2. **Servers ›** the Coolify host **› Proxy**: check the proxy's
+   configuration has no access log (Traefik's `--accesslog`). If it has
+   one, it keeps every visitor's IP address: turn it off, or add it to
+   [What is kept](#what-is-kept-and-for-how-long) with its retention.
+
+On release day, once `vX.Y.Z` is tagged on `main` and the release is
+published:
+
+1. An archive to come back to: **Terminal**, container `backup`:
+   `python3 /app/cyberworld-server.pyz --config /app/server.ini --state-dir /data --backup /backups --once`.
+2. **Configuration › Source** (the Git source): Branch `dev` → `main`,
+   Save. Check Base Directory `/`, Docker Compose Location
+   `/deploy/coolify/compose.yaml` and **Preserve repository during
+   deployment** on.
+3. **Reload Compose File**, then check the services: `cyberworld` with
+   the domain `https://cyberworld.saschb2b.com` and port 8765, `backup`
+   with none; the storages `cyberworld-state` at `/data` (read-only in
+   `backup`) and `cyberworld-backups` at `/backups` (read-only in
+   `cyberworld`).
+4. **Redeploy**, and wait until both containers are healthy.
+5. `curl -s https://cyberworld.saschb2b.com/health`: `"status":"ok"`,
+   `"protocol"` the release's (`version` in
+   [`shared/online/protocol.json`](../shared/online/protocol.json): 9
+   for 0.13.0), `"trading":true` and `"arena":true`.
+6. A game of the release through the gate into the Square; `/health`
+   counts it in `"players"`.
+7. A moderator action: **Terminal**, container `cyberworld`:
+   `python3 /app/cyberworld-server.pyz --state-dir /data --admin list`
+   shows that game's name and public identity; `--admin mute --identity
+   ID --reason "Release check"`, and the game's next phrase is refused;
+   `--admin unmute --identity ID`.
+8. A restart: **Restart**; `/health` is ok again, the game goes back in
+   through the gate, and `--admin list` shows the same public identity
+   as in step 7 (the server's key kept); the week's Board is as it was.
+9. The backup: **Terminal**, container `backup`: `ls -l /backups` has
+   today's archive. The `cyberworld` container's **Logs** show the join
+   and the leave without a name or a public identity; `ls /data/logs`
+   in its terminal shows today's players' log.
+10. Write the result down: docs/ONLINE.md's line on the official server
+    (it follows `main`, the protocol it speaks) and this section's dates.
+
+Where a step fails, **Deployments** has the last good deployment to
+redeploy (or set the branch back to `dev`), and a `--restore` of step
+1's archive puts the state back ([Backups and restores](#backups-and-restores)).
+
+## Identity and moderation
 
 Clients keep a random private guest key on the device and derive a separate
 token for each server address; the original key is never sent. The server
@@ -190,24 +373,27 @@ directory across upgrades: losing the salt changes public identities and
 invalidates bans and players' local block lists. Do not publish it.
 
 There is no remote administration endpoint. Use the CLI with filesystem
-access to the state directory. The local roster supplies public IDs;
-private player keys are never retained. Commands take effect within a
-second. `ban`, `unban`, `mute`, `unmute`, `kick`, `unkick`, `hide` and
-`unhide` are supported:
+access to the state directory. The local roster supplies public IDs of
+the players connected now, the players' log those of the last `log_days`
+days; private player keys are never retained. Commands take effect within a
+second. `ban`, `unban`, `mute`, `unmute`, `kick`, `unkick`, `hide`,
+`unhide` and `forget` are supported:
 
 ```sh
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin list
+grep -h '"name":"NAME"' server-data/logs/players-*.jsonl
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin mute --identity PUBLIC_ID --reason "Repeated disruption"
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin kick --identity PUBLIC_ID --minutes 30
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin hide --identity PUBLIC_ID --week 2963
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin forget --identity PUBLIC_ID
 python3 server/admin.py unmute PUBLIC_ID --state-dir server-data
 ```
 
 In Coolify's container terminal, substitute `/data` and
 `/app/cyberworld-server.pyz`. A kick disconnects the profile's sessions
 and refuses it for ten minutes, or `--minutes` (1 to 10080); then it ends
-by itself, `unkick` lifts it early, and the next moderation command prunes
-the kicks that ended. A ban refuses the profile until `unban`. Mutes persist and suppress phrases and
+by itself, `unkick` lifts it early, and the server's retention pass
+prunes the kicks that ended. A ban refuses the profile until `unban`. Mutes persist and suppress phrases and
 emotes, while movement and Inspect remain available. An optional
 `whitelist` is a space-separated list of public IDs allowed to connect.
 Profiles remain anonymous: resetting a private key can evade a ban.
@@ -215,6 +401,11 @@ An allowlist is available where a host needs stricter admission.
 `hide` takes a profile's entry off the week's Board (docs/ONLINE.md, The
 week's net) for the week `--week` names, this week where none, and
 refuses that profile's posts for that week; `unhide` puts it back.
+`forget` answers a player's request to be removed: it takes the public
+identity out of the trades' log (its side of each trade blanked, the
+other player's kept), the Board's log, the players' log and its kick or
+hidden entry. A ban or a mute stays while it lasts. The running server
+reads the Board only as it starts: restart it after a `forget`.
 
 The week's net: every Monday 00:00 UTC the server begins a week (its
 number counts weeks from Monday 5 January 1970) whose seed is derived
@@ -222,20 +413,95 @@ from `identity.key` and the week's number, so each server has its own
 week, the same across restarts. Its Board keeps one entry per profile and
 week, the best a game with the full set reported, appended to `weeks.jsonl` in the state
 directory (public identities, names, layers, minutes; no keys) and read
-back at the start. Back it up with the rest of the state, or the Board
-starts the week empty.
+back at the start, pruned to `board_weeks` weeks. It is in the backups,
+or a restored server's Board would start the week empty.
 
-Back up the config and private state volume together, with access limited
-to moderators. Moderation updates use an atomic replace; concurrent local
-CLI edits are locked. There is no game save or ROM to back up on the
-server. Restore the same `identity.key` when restoring moderation lists.
+Moderation updates use an atomic replace. Every write of the state's
+files (moderation, the trades' and the Board's logs, the players' log, a
+retention pass, a restore) holds the state directory's lock,
+`moderation.lock`, so local CLI edits and the running server never meet
+in a half-written file. There is no game save or ROM on the server.
 
 The server reads `moderation.json` again only when the file changes. If a
 hand edit leaves it unreadable, the running server keeps the last rules it
 read, logs the error once and goes on admitting players; the CLI refuses
-to edit a file it cannot read, and a server does not start with one. The
+to edit a file it cannot read, the retention pass leaves it as it is, and
+a server does not start with one. The
 roster `players.json` is rewritten, outside the network loop, only when a
 player joins, leaves or changes channel.
+
+### What the state keeps
+
+The retention's numbers are keys of the INI's `[server]` section, at
+these defaults, and a pass of the server prunes each thing to them at its
+start and every hour (`retention.py`):
+
+| Key | Default | What it bounds |
+| --- | --- | --- |
+| `trade_days` | 14 | `trades.jsonl`, the trades committed; 0 writes none |
+| `board_weeks` | 2 | `weeks.jsonl`, the Board's weeks: at least 2, this one and the last, which the Board shows; with them go the entries `hide` hid |
+| `log_days` | 14 | `logs/players-YYYY-MM-DD.jsonl`, the players' log, a file a UTC day; 0 writes none |
+| `backup_days` | 14 | the archives `--backup` keeps |
+
+The players' log holds each event that names a player (a join, a
+session replaced) with its time. The console's log (stdout, a
+container's log) has the same events without the name and the public
+identity: session numbers, channels, counts, trades' and battles'
+numbers and refusals, never a name, a public identity or an IP.
+`identity.key` and the bans and mutes stay until the host or a moderator
+removes them; `players.json` holds the players connected now and is
+emptied when the server stops. Everything else is in memory alone.
+
+## Backups and restores
+
+`--backup DIR` archives the state directory into `DIR` in the first hour
+of each UTC day that has no archive yet, as
+`cyberworld-state-YYYYMMDD-HHMMSS.tar.gz` (UTC), deletes the archives
+older than `backup_days`, and looks again every hour; a failure is
+logged and tried again a minute later. `--once` makes one archive now
+and exits. An archive holds `identity.key`, `moderation.json` and
+`weeks.jsonl`: what the server needs to come back as it was, its
+identities, bans and Board. The trades' and the players' logs and the
+roster are left out: they are kept for moderation alone and go with their
+days. It reads the state under the state's lock, shared, so it never holds
+half a moderator's edit, and works from a read-only mount of the state.
+
+```sh
+python3 build/server/cyberworld-server.pyz --state-dir server-data --backup server-backups --once
+python3 build/server/cyberworld-server.pyz --state-dir server-data --restore server-backups/cyberworld-state-20261020-001500.tar.gz
+```
+
+`--restore ARCHIVE` checks the archive (regular files, a server's 32-byte
+`identity.key`; anything else in it is never extracted), writes its files
+into the state directory whole, and removes those of the three it lacks,
+which were not there when it was made. The trades' and the players' logs
+stay as they are. The server reads the key and the Board only as it
+starts: restart it after a restore.
+
+In Coolify the `backup` service of `deploy/coolify/compose.yaml` runs
+`--backup /backups` beside the server, so the official server's backups
+need nothing set in Coolify. Both volumes live on the Coolify host: the
+backups cover a moderator's mistake, a bad deploy or a lost file, not the
+loss of the host. A copy off the host is the owner's to make (`docker cp`
+from the backup container on the host), and is deleted after
+`backup_days` like the others.
+
+To restore the official server:
+
+1. In Coolify, open the application's **Terminal** and choose the
+   `cyberworld` container (the server, not `backup`).
+2. `ls -l /backups` lists the archives; pick the one to go back to.
+3. Run `python3 /app/cyberworld-server.pyz --state-dir /data --restore /backups/cyberworld-state-YYYYMMDD-HHMMSS.tar.gz`.
+   It prints the files it restored.
+4. Press **Restart** for the application.
+5. Check `https://cyberworld.saschb2b.com/health` says `"status":"ok"`,
+   and `python3 /app/cyberworld-server.pyz --state-dir /data --admin list`
+   shows the moderation lists the archive held.
+
+Restored this way locally with Docker Compose (20 October 2026): the
+stack up, an archive made, the state's key, moderation and Board changed
+and removed, restored from the server's terminal and the server
+restarted, every file the same bytes as before and the server healthy.
 
 ## Connections
 
@@ -263,15 +529,20 @@ browser. The origin check is not player authentication.
 
 The host sees connecting IPs at the network layer, display names and
 positions and the numeric public card (HP, buster stats, Souls, Crosses,
-depth, best depth, title marks and colored NaviCust board). Default logs
-contain joins, public IDs, names, channels, leaves and refusals, not IPs
-or private player files. `--event-log FILE`
-optionally writes JSONL evidence; choose your own rotation/retention.
-Sampled positions are logged only with that explicit evidence option.
+depth, best depth, title marks and colored NaviCust board). The console's
+log has joins, channels, leaves and refusals by session number; public
+IDs and names go to the players' log alone, kept `log_days` days
+([What the state keeps](#what-the-state-keeps)); neither has IPs or
+private player files. `--event-log FILE` optionally writes JSONL
+evidence, names and public IDs included, which the server does not
+prune: choose your own rotation and retention, and say so in your
+policy. Sampled positions are logged only with that explicit evidence
+option; the official server does not use it.
 The world is reconstructed from its seed.
 
-The official hosting policy and named moderators must be published before
-a general-availability release. The server can validate ranges and compatibility, but a
+The official server's hosting policy and moderators are [The official
+server](#the-official-server); a host of another server writes his own.
+The server can validate ranges and compatibility, but a
 modified client can claim another HP or board; Inspect is informational.
 
 ## Client platform status

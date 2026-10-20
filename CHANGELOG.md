@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **The official Net Square's policy (issue #132).** Who runs and
+  moderates it (Saschb2b), its rules, how to report someone, what it
+  keeps and for how long, and how to have your data removed, in
+  [server/README.md, The official server](server/README.md#the-official-server).
+  Server hosts: the server prunes what it keeps by itself, at its start
+  and every hour: the trades' log after 14 days, the Board after 2 weeks,
+  kicks once they end; `trade_days`, `board_weeks` and `log_days` in
+  `server.ini`. Players' names and public identities go to a players'
+  log of their own, a file a day kept 14 days, and no longer to the
+  console's log. `--admin forget` takes a player out of every record but
+  a ban or a mute. `--backup DIR` archives the server's key, moderation
+  and Board once a day, keeping `backup_days` (14), and `--restore`
+  puts one back; the Coolify deployment runs the backup as a second
+  service.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a
