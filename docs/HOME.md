@@ -568,7 +568,7 @@ visit, at its price, the sure thing found sooner. As built
 the screen opened are sorted between frames by BN6's own keys, the
 screen makes its list again from them, BN6's own way back to the list
 runs his prompt, and a hook on the chat has ours said in its place, in
-AsterLand alone (BN6's order screen elsewhere keeps its own words). BN6
+AsterLand alone, the one place the engine opens BN6's order screen. BN6
 finds an order's entry by its chip and code, never by its place in the
 list, so a sorted list orders and marks sold out what it shows.
 

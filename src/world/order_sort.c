@@ -16,9 +16,9 @@
  * list), its ties by ID; then the screen is sent back to its list through
  * BN6's own way back (BN6_SHOP_AT_AGAIN), which runs his list prompt, and
  * a hook on the chat has ours said in its place, there and wherever the
- * screen asks for it (his scripts 0 and 1), in AsterLand alone: BN6's
- * order screen opened anywhere else (the Net Square's Trade Central)
- * keeps its own words. */
+ * screen asks for it (his scripts 0 and 1), in AsterLand alone, the one
+ * place the engine opens BN6's order screen (Trade Central's picker is a
+ * screen of its own since issue #145). */
 #include "order_sort.h"
 
 #include <stdbool.h>
