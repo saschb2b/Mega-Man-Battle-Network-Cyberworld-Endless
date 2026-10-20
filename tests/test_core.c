@@ -24,6 +24,8 @@
 #include "rom.h"
 #include "run.h"
 #include "analytics.h"
+#include "analytics_online.h"
+#include "online_visit.h"
 #include "area_src.h"
 #include "backup.h"
 #include "test_backup.h"
@@ -4900,6 +4902,112 @@ static void test_analytics(void) {
 	rmdir(base);
 }
 
+/* Online play's statistics (issue #156, analytics_online.h): each event's
+ * shape, each visit's end its own word, nothing sent without the yes, and
+ * nothing in any of them but the keys named here: no name, identity,
+ * address or anything typed can go, as none is taken */
+static bool stats_keys_only(const char *json, const char *const *keys, int n) {
+	const char *d = strstr(json, "\"data\":{");
+	if (!d) return false;
+	for (const char *k = strchr(d + 7, '"'); k; ) {
+		const char *end = strchr(k + 1, '"');
+		if (!end || end[1] != ':') return false;
+		bool known = false;
+		for (int i = 0; i < n; ++i)
+			if ((size_t)(end - k - 1) == strlen(keys[i]) && !strncmp(k + 1, keys[i], (size_t)(end - k - 1))) known = true;
+		if (!known) return false;
+		/* (the next key: past this member's value, a string's quotes skipped) */
+		const char *v = end + 2;
+		if (*v == '"') v = strchr(v + 1, '"') + 1;
+		v += strcspn(v, ",}");
+		if (*v == '}') break;
+		k = strchr(v, '"');
+	}
+	return true;
+}
+
+static void test_analytics_online(void) {
+	static const char *const allowed[] = { "system", "pass", "ended", "minutes", "official", "result", "side", "delay", "window",
+		"rollbacks", "deepest", "stalls", "worst_tick_ms", "seconds", "board", "layer", "act", "won" };
+	const int nallowed = (int)(sizeof allowed / sizeof *allowed);
+	char base[64], settings[128];
+	snprintf(base, sizeof base, "build/host/test-online-stats-%d", (int)getpid());
+	mkdir(base, 0755);
+	snprintf(settings, sizeof settings, "%s/settings.ini", base);
+	/* a test's yes, sending to its own address (statsurl from test_analytics) */
+	CHECK(analytics_dev("statistics=on") && analytics_dev("statsurl=http://127.0.0.1:9/api/send"), "online statistics: a test's yes");
+	stats_begin(settings, false, "0.11.0");
+	stats_posts = 0;
+	analytics_visit(VISIT_END_LEFT, true, 754, true);
+	CHECK(stats_posts == 1 && strstr(stats_sent[0], "\"url\":\"/linux\"") &&
+		strstr(stats_sent[0], "\"name\":\"online-visit\",\"data\":{\"system\":\"linux\",\"pass\":\"full\",\"ended\":\"left\",\"minutes\":13,\"official\":true}"),
+		"online statistics: online-visit names the system, the NetPass, the end, the minutes and the official server (%s)", stats_sent[0]);
+	analytics_visit(VISIT_END_UNREACHABLE, false, -1, false);
+	CHECK(stats_posts == 2 && strstr(stats_sent[1], "\"pass\":\"square\",\"ended\":\"no answer\",\"official\":false}") &&
+		!strstr(stats_sent[1], "\"minutes\""), "online statistics: a visit that never got to the Square, no minutes (%s)", stats_sent[1]);
+	/* every end its own word; a game closed in the Square "closed" */
+	char ends[VISIT_END_DIVE + 1][48];
+	for (int e = 0; e <= VISIT_END_DIVE; ++e) {
+		stats_posts = 0;
+		analytics_visit(e, true, 60, false);
+		const char *w = strstr(stats_sent[0], "\"ended\":\"");
+		snprintf(ends[e], sizeof ends[e], "%.*s", w ? (int)strcspn(w + 9, "\"") : 0, w ? w + 9 : "");
+		CHECK(stats_posts == 1 && ends[e][0], "online statistics: the visit's end %d has a word", e);
+		for (int o = 0; o < e; ++o) CHECK(strcmp(ends[e], ends[o]), "online statistics: ends %d and %d both say \"%s\"", e, o, ends[e]);
+	}
+	CHECK(!strcmp(ends[VISIT_END_NONE], "closed") && !strcmp(ends[VISIT_END_VERSION], "another version") &&
+		!strcmp(ends[VISIT_END_ROM], "another ROM") && !strcmp(ends[VISIT_END_FULL], "full") && !strcmp(ends[VISIT_END_BARRED], "barred") &&
+		!strcmp(ends[VISIT_END_REMOVED], "removed") && !strcmp(ends[VISIT_END_LOST], "lost"), "online statistics: the ends' words");
+	/* a NetBattle's end and its network's numbers */
+	stats_posts = 0;
+	AnalyticsBattle b = { ANALYTICS_BATTLE_WON, 1, 4, 3, 39, 2, 5, 7.6, 1731 };
+	analytics_netbattle(&b);
+	CHECK(stats_posts == 1 && strstr(stats_sent[0], "\"name\":\"netbattle\",\"data\":{\"system\":\"linux\",\"result\":\"won\",\"side\":1,"
+		"\"delay\":4,\"window\":3,\"rollbacks\":39,\"deepest\":2,\"stalls\":5,\"worst_tick_ms\":8,\"seconds\":29}"),
+		"online statistics: netbattle names the end, the delay, the window, the rollbacks, the worst tick and the stalls (%s)", stats_sent[0]);
+	static const char *const results[] = { "won", "lost", "over", "disconnected", "apart", "stopped", "left" };
+	for (int h = ANALYTICS_BATTLE_WON; h <= ANALYTICS_BATTLE_LEFT; ++h) {
+		char want[32];
+		b = (AnalyticsBattle){ h, 0, 2, 0, 0, 0, 0, 0, 0 };
+		analytics_netbattle(&b);
+		snprintf(want, sizeof want, "\"result\":\"%s\"", results[h]);
+		CHECK(strstr(stats_sent[stats_posts - 1], want) && !strstr(stats_sent[stats_posts - 1], "\"seconds\""),
+			"online statistics: a NetBattle %s (%s)", results[h], stats_sent[stats_posts - 1]);
+	}
+	/* a trade, a battle watched, a dive posted */
+	stats_posts = 0;
+	analytics_trade(true);
+	analytics_watch(ANALYTICS_WATCH_LEFT, 42);
+	analytics_watch(ANALYTICS_WATCH_SLOW, 3);
+	analytics_dive_post(17, 3, false);
+	CHECK(stats_posts == 4 && strstr(stats_sent[0], "\"name\":\"online-trade\",\"data\":{\"board\":true}") &&
+		strstr(stats_sent[1], "\"name\":\"online-watch\",\"data\":{\"ended\":\"left\",\"seconds\":42}") &&
+		strstr(stats_sent[2], "\"ended\":\"too slow\"") &&
+		strstr(stats_sent[3], "\"name\":\"deepnet-post\",\"data\":{\"layer\":17,\"act\":3,\"won\":false}"),
+		"online statistics: online-trade, online-watch and deepnet-post (%s %s %s)", stats_sent[0], stats_sent[1], stats_sent[3]);
+	/* nothing but the keys named, every payload within its size */
+	analytics_visit(VISIT_END_LEFT, true, 60, true);
+	b = (AnalyticsBattle){ ANALYTICS_BATTLE_APART, 0, 30, 16, 1 << 30, 1 << 30, 1 << 30, 1e9, 1 << 30 };
+	analytics_netbattle(&b);
+	for (int i = 0; i < stats_posts; ++i) {
+		CHECK(stats_keys_only(stats_sent[i], allowed, nallowed), "online statistics: payload %d holds only the keys named (%s)", i, stats_sent[i]);
+		CHECK(!strstr(stats_sent[i], "wss://") && !strstr(stats_sent[i], "identity") && strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200,
+			"online statistics: payload %d names no address or identity, well within its size", i);
+	}
+	/* a no: nothing sent */
+	CHECK(analytics_dev("statistics=off"), "online statistics: a test's no");
+	stats_begin(settings, false, "0.11.0");
+	stats_posts = 0;
+	analytics_visit(VISIT_END_LEFT, true, 60, true);
+	analytics_netbattle(&b);
+	analytics_trade(false);
+	analytics_watch(ANALYTICS_WATCH_END, 60);
+	analytics_dive_post(1, 1, false);
+	CHECK(stats_posts == 0, "online statistics: after a no, nothing is sent (%d)", stats_posts);
+	remove(settings);
+	rmdir(base);
+}
+
 /* The nets' meeting (issue #82, docs/MULTIROM.md, One net): a family's
  * role by its placements; the visitors' gate, one battle in each four, the
  * same at every reroll; the rules that keep visitors out; a visitor's
@@ -5112,6 +5220,7 @@ int main(void) {
 	test_rom_pages();
 	test_super_bosses();
 	test_analytics();
+	test_analytics_online();
 	test_visitors();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");

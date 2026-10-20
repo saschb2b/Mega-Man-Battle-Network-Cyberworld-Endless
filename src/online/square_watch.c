@@ -15,7 +15,7 @@
 
 #include <SDL.h>
 
-#include "arena_pair.h"
+#include "analytics_online.h"
 #include "arena_view.h"
 #include "arena_watch.h"
 #include "bn6.h"
@@ -47,6 +47,7 @@ typedef enum { W_IDLE, W_ASKED, W_ON, W_DONE } Stage;
 static struct {
 	Stage stage;
 	uint32_t match, since, notice_serial;
+	uint32_t watched_at;       /* the battle's way in begun, for the statistics' seconds */
 	uint32_t refused;          /* a battle this machine could not keep up with: not offered again */
 	char name[2][ONLINE_NAME_BYTES + 1];
 	unsigned view;
@@ -187,6 +188,7 @@ static void started(const WatchState *st) {
 	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
 	W.stage = W_ON;
+	W.watched_at = SDL_GetTicks();
 	W.view = 0;
 	W.shown_t = 0;
 	W.over_said = false;
@@ -226,7 +228,9 @@ void square_watch_mail(const uint8_t *data, size_t size) {
 
 bool square_watch_on(void) { return W.stage == W_ON || W.stage == W_DONE; }
 
-static void done(const char *why) {
+/* (`how` the statistics' end, analytics_online.h) */
+static void done(const char *why, int how) {
+	analytics_watch(how, (int)((SDL_GetTicks() - W.watched_at) / 1000));
 	snprintf(W.why, sizeof W.why, "%s", why ? why : "");
 	if (!W.over_said) send_watch(WATCH_ACT_STOP, W.match);
 	W.stage = W_DONE;
@@ -241,18 +245,19 @@ static void back(void) {
 }
 
 static void watching(void) {
-	if (btn_pressed(BTN_B)) { done(NULL); back(); return; }
+	if (btn_pressed(BTN_B)) { done(NULL, ANALYTICS_WATCH_LEFT); back(); return; }
 	if (btn_pressed(BTN_R)) W.view ^= 1u;
 	if (btn_pressed(BTN_L)) online_transport_social(1, EMOTE_CHEER);
 	arena_watch_show(W.w, W.view);
 	WatchingStage stage = arena_watch_tick(W.w, P.headless);
 	arena_watch_sound(W.w, W.view);
 	if (arena_watch_video(W.w, W.view)) ++W.shown_t;
-	if (stage == WATCHING_OVER) done(NULL);
+	if (stage == WATCHING_OVER) done(NULL, ANALYTICS_WATCH_END);
 	else if (stage == WATCHING_FAILED) {
 		const char *why = arena_watch_error(W.w);
-		if (strstr(why, "too slow")) W.refused = W.match;
-		done(why);
+		bool slow = strstr(why, "too slow") != NULL;
+		if (slow) W.refused = W.match;
+		done(why, slow ? ANALYTICS_WATCH_SLOW : ANALYTICS_WATCH_FAILED);
 	}
 }
 
@@ -261,7 +266,7 @@ void square_watch_frame(uint32_t keys) {
 	online_mail_frame();
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
-	if ((s.error[0] || !s.connected) && W.stage == W_ON) done("the connection to the Square was lost");
+	if ((s.error[0] || !s.connected) && W.stage == W_ON) done("the connection to the Square was lost", ANALYTICS_WATCH_LOST);
 	if (W.stage == W_ON) watching();
 	else if (W.stage == W_DONE && (++W.over_t >= OVER_TICKS || (W.over_t >= OVER_HELD && (btn_pressed(BTN_A) || btn_pressed(BTN_B)))))
 		back();

@@ -34,10 +34,10 @@
 
 #include <SDL.h>
 
+#include "analytics_online.h"
 #include "arena_folder.h"
 #include "arena_link_net.h"
 #include "arena_loadout.h"
-#include "arena_pair.h"
 #include "arena_report.h"
 #include "arena_view.h"
 #include "arena_wire.h"
@@ -94,6 +94,7 @@ static struct {
 	OnlineLoadout mine, theirs;
 	bool mine_carried, theirs_carried, theirs_in;
 	int over_t, stalled;
+	bool counted;             /* the battle's end told to the statistics */
 	const char *said;         /* MegaMan's word, once back in the Square */
 	char why[160];
 } A;
@@ -144,6 +145,18 @@ static void act(unsigned action, uint32_t ref) {
 
 static void say(const char *words) { A.said = words; }
 
+/* The statistics' NetBattle (analytics_online.h), once a battle whose pair
+ * was built: how it ended and the network's numbers the Arena kept */
+static void counted(int how) {
+	if (!A.arena || A.counted) return;
+	A.counted = true;
+	ArenaNumbers n;
+	arena_numbers(A.arena, &n);
+	AnalyticsBattle b = { how, (int)A.link.link.side, (int)n.delay, (int)n.window, (int)n.rollbacks, (int)n.deepest,
+		(int)n.stalls, n.worst_tick_ms, (int)n.frames };
+	analytics_netbattle(&b);
+}
+
 static void drop_arena(void) {
 	arena_free(A.arena);
 	A.arena = NULL;
@@ -157,6 +170,7 @@ void square_arena_reset(void) {
 }
 
 void square_arena_end(void) {
+	if (A.stage == SA_BATTLE) counted(ANALYTICS_BATTLE_LEFT);
 	if (A.match && !A.ended && A.stage != SA_IDLE) act(ARENA_ACT_LEAVE, A.match);
 	if (again.held) act(ARENA_ACT_LEAVE, again.held);
 	square_arena_reset();
@@ -501,6 +515,7 @@ static void build(void) {
 	loadout[side ^ 1] = A.theirs_carried ? &A.theirs : NULL;
 	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link);
 	if (!A.arena) { fail("too little memory for the two PETs"); return; }
+	A.counted = false;
 	arena_window(A.arena, dev.arena_window);
 	A.stage = SA_CONNECTING;
 }
@@ -514,6 +529,7 @@ static bool apart(void) {
 	bool installs = arena_link_net_peer_record(&A.link, &record) && record != arena_record(A.arena);
 	fail_as(installs ? "the two games installed BN5 apart (one took BN5 in after it started, or another build)" :
 		"the two games went apart before the battle", true);
+	counted(ANALYTICS_BATTLE_APART);
 	if (installs) say(arena_installs_apart_words());
 	return true;
 }
@@ -575,6 +591,7 @@ static void battle(uint32_t keys, uint32_t rtt_ms) {
 	if (stage == ARENA_FAILED) {
 		/* (the other gone, his keys spent: the link broke; else the games went apart, or the cable stuck) */
 		bool left = A.ended && A.link.broken[0];
+		counted(arena_apart(A.arena) ? ANALYTICS_BATTLE_APART : A.link.broken[0] ? ANALYTICS_BATTLE_DISCONNECTED : ANALYTICS_BATTLE_STOPPED);
 		fail_as(arena_error(A.arena), arena_apart(A.arena));
 		if (left) say(arena_gone_words());
 		return;
@@ -587,6 +604,7 @@ static void battle(uint32_t keys, uint32_t rtt_ms) {
 		act(ARENA_ACT_OVER, A.match);
 	}
 	A.ended = true;
+	counted(result == 1 ? ANALYTICS_BATTLE_WON : result == 2 ? ANALYTICS_BATTLE_LOST : ANALYTICS_BATTLE_OVER);
 	bouts(result);
 	say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
 	A.stage = SA_OVER;
