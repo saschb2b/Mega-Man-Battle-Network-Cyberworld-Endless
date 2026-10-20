@@ -16,9 +16,9 @@
 #include <SDL.h>
 
 #include "analytics_online.h"
+#include "arena_pair.h"
 #include "arena_view.h"
 #include "arena_watch.h"
-#include "bn6.h"
 #include "chips.h"
 #include "emu.h"
 #include "flags.h"
