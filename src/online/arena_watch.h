@@ -45,6 +45,8 @@ const char *arena_watch_error(const ArenaWatch *w);
 /* the way in's progress (0-100); far behind the keys known, catching up */
 int arena_watch_progress(const ArenaWatch *w);
 bool arena_watch_catching_up(const ArenaWatch *w);
+/* the side shown, whose picture the next ticks draw (the other's is not) */
+void arena_watch_show(ArenaWatch *w, unsigned side);
 /* side's core's picture, NULL before the battle; its sound into the game's */
 const uint32_t *arena_watch_video(const ArenaWatch *w, unsigned side);
 void arena_watch_sound(ArenaWatch *w, unsigned side);

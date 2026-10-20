@@ -26,8 +26,8 @@ extern const char *const netpass_stamp_captions[STAMP_COUNT];
 extern const char netpass_cart_in[];
 extern const char netpass_cart_open[];
 /* the line beside the cartridges: what the game still out (`name`, its
- * title) stamps; every game in; every game in on a system without the
- * Arena (the 3DS, the browser) */
+ * title) stamps; every game in; every game in on a system whose NetBattles
+ * are not offered (the New 3DS: square_arena_offered) */
 const char *netpass_missing_words(const char *name);
 extern const char netpass_complete[];
 extern const char netpass_complete_no_ring[];

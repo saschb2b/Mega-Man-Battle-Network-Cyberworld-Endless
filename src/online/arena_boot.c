@@ -25,8 +25,6 @@
 #include "protocol.h"
 #include "xinstall_log.h"
 
-#if CW_ARENA
-
 #define CALL_FRAMES 120   /* frames a game call may wait for the game's own mode (gamecall.c) */
 #define SEASIDE_1   0x91  /* the boot's warp: Seaside Area 1, as boot.c's */
 
@@ -289,40 +287,8 @@ double arena_boot_frame_ms(const ArenaBoot *b, bool worst) {
 	return worst ? b->pair_worst : b->pair_frames ? b->pair_ms / b->pair_frames : 0;
 }
 
-#else   /* no Arena in this build (arena_pair.h, CW_ARENA) */
-
-struct ArenaBoot { ArenaBootStage stage; };
-double arena_boot_frame_ms(const ArenaBoot *b, bool worst) { (void)b; (void)worst; return 0; }
-
-ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2]) {
-	(void)rom; (void)size; (void)loadout;
-	ArenaBoot *b = calloc(1, sizeof *b);
-	if (b) b->stage = ARENA_BOOT_FAILED;
-	return b;
-}
-void arena_boot_free(ArenaBoot *b) { free(b); }
-ArenaBootStage arena_boot_run(ArenaBoot *b, unsigned frames) { (void)frames; return b->stage; }
-unsigned arena_boot_total(void) { return 1; }
-ArenaPair *arena_boot_take(ArenaBoot *b) { (void)b; return NULL; }
-
-#endif
-
 ArenaBootStage arena_boot_stage(const ArenaBoot *b) { return b->stage; }
 
-const char *arena_boot_error(const ArenaBoot *b) {
-#if CW_ARENA
-	return b->error;
-#else
-	(void)b;
-	return "This build has no Arena.";
-#endif
-}
+const char *arena_boot_error(const ArenaBoot *b) { return b->error; }
 
-unsigned arena_boot_done(const ArenaBoot *b) {
-#if CW_ARENA
-	return b->done;
-#else
-	(void)b;
-	return 0;
-#endif
-}
+unsigned arena_boot_done(const ArenaBoot *b) { return b->done; }

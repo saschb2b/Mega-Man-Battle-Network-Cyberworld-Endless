@@ -66,6 +66,7 @@ struct ArenaWatch {
 	uint8_t loadout[2][ONLINE_ARENA_LOADOUT_MAX];
 	size_t loadout_n[2];
 	bool loadout_in[2], record_in, ready_in, ended, fought, fast;
+	unsigned shown;   /* the side whose picture is drawn (arena_watch_show) */
 	uint64_t record, ready;
 	ArenaBoot *boot;
 	ArenaPair *pair;
@@ -253,6 +254,7 @@ static void run(ArenaWatch *w, bool headless) {
 	w->fast = fast || (w->fast && behind > BEHIND_KEPT);
 	if (was && !w->fast) printf("watch: caught up at frame %" PRIu32 " (%" PRIu32 " frames run since frame %" PRIu32 "), %" PRIu32 " behind\n",
 		w->next, w->next - w->fast_at, w->fast_at, behind);
+	arena_pair_draw(w->pair, 1u << w->shown);
 	if (!w->fast) {
 		if (behind >= BEHIND_LEAST) step(w);
 		return;
@@ -266,6 +268,8 @@ static void run(ArenaWatch *w, bool headless) {
 	uint64_t start = SDL_GetPerformanceCounter(), budget = SDL_GetPerformanceFrequency() * FAST_MS / 1000;
 	for (unsigned n = 0; w->next < runnable && (w->ended || runnable - w->next > BEHIND_KEPT); ++n) {
 		if (headless ? n >= FAST_HEADLESS : SDL_GetPerformanceCounter() - start >= budget) break;
+		/* (a tick's first frame drawn alone: "Catching up..." shows over it) */
+		if (n == 1) arena_pair_draw(w->pair, 0);
 		if (!step(w)) break;
 	}
 }
@@ -290,6 +294,8 @@ int arena_watch_progress(const ArenaWatch *w) {
 }
 
 bool arena_watch_catching_up(const ArenaWatch *w) { return w->stage == WATCHING_ON && w->fast && !w->ended; }
+
+void arena_watch_show(ArenaWatch *w, unsigned side) { w->shown = side & 1u; }
 
 const uint32_t *arena_watch_video(const ArenaWatch *w, unsigned side) { return w->pair ? arena_pair_video(w->pair, side & 1u) : NULL; }
 

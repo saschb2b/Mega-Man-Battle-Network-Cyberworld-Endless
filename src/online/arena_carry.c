@@ -37,7 +37,7 @@ static uint8_t *read_file(const char *path, size_t *size) {
 
 bool arena_carry_read(OnlineLoadout *out) {
 	Run saved;
-	if (!CW_ARENA || !R.data || !peek_run(&saved)) return false;
+	if (!R.data || !peek_run(&saved)) return false;
 	char path[600];
 	save_state_path(path, sizeof path);
 	size_t size;

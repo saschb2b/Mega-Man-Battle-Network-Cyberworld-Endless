@@ -27,6 +27,7 @@
 #include "protocol.h"
 #include "rom.h"
 #include "xinstall.h"
+#include "xinstall_log.h"
 
 #define DELAY_DEFAULT  6    /* frames of input delay: 100 ms */
 #define LAG_DEFAULT    3    /* the local link's one way: 50 ms */
@@ -70,6 +71,8 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 
 /* the player's buttons as the GBA's keys, bit for bit */
 static uint16_t pad_keys(void) {
+	static uint32_t tick;
+	if (dev.arena_both) return S.arena ? arena_bot_keys(S.arena, 0, tick++) : 0;
 	static const int buttons[10] = { BTN_A, BTN_B, BTN_SELECT, BTN_START, BTN_RIGHT, BTN_LEFT, BTN_UP, BTN_DOWN, BTN_R, BTN_L };
 	uint16_t k = 0;
 	for (int i = 0; i < 10; ++i)
@@ -82,7 +85,8 @@ static uint16_t pad_keys(void) {
  * pair to take (xinstall_log.h); without BN5's ROM the way in stops,
  * saying so */
 static void installs(void) {
-	if (!XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE) || !xinstall_bn5())
+	/* (made once: --dev rollbench,arena made them before) */
+	if (!XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE) || (!xlog_hash() && !xinstall_bn5()))
 		printf("arena: BN5's installs not made: a NetBattle needs BN5's ROM beside BN6's\n");
 }
 
@@ -123,6 +127,12 @@ static void leave(void) {
 	arena_view_free();
 }
 
+/* the battle over: the title, or the game's end (quitend) */
+static void done(void) {
+	if (dev.quit_end) P.quit = true;
+	else scene_set(&scene_title);
+}
+
 static bool reset_chord(void) {
 	const uint32_t chord = BTN_A | BTN_B | BTN_SELECT | BTN_START;
 	return (P.held & chord) == chord;
@@ -142,10 +152,10 @@ static void update(void) {
 		break;
 	}
 	case ARENA_OVER:
-		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) scene_set(&scene_title);
+		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();
 		break;
 	case ARENA_FAILED:
-		if (btn_pressed(BTN_A) || btn_pressed(BTN_B)) scene_set(&scene_title);
+		if (dev.quit_end || btn_pressed(BTN_A) || btn_pressed(BTN_B)) done();
 		break;
 	}
 }

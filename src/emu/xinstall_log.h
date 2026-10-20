@@ -11,8 +11,7 @@
  * The record is the ROM's alone: what an install writes into RAM is kept
  * patched by the core (emu_keep) where the game copies it from a ROM image
  * the install patched as well, so a core started on the record's ROM has
- * it. Event hooks are the director's and are left out; so is the record
- * where there is no Arena (the 3DS and the browser: arena_pair.h). */
+ * it. Event hooks are the director's and are left out. */
 #ifndef CW_XINSTALL_LOG_H
 #define CW_XINSTALL_LOG_H
 

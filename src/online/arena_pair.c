@@ -21,8 +21,6 @@
 #endif
 #include "arena_pair.h"
 
-#if CW_ARENA
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,28 +60,81 @@ struct ArenaPair {
 	int32_t credit[2];
 	unsigned waiting, asleep, transfers;   /* the first waits for these; these sleep, their cycles used */
 	int running;
+	unsigned drawn;                /* the sides whose picture is drawn (arena_pair_draw) */
 	unsigned start[2], relative;   /* each core's frame at the anchor; the pair's frames since */
 	uint8_t *scratch;              /* a core's raw state, for the hash */
 	size_t scratch_size;
 	ArenaSoulCarried carried[2];   /* (the Souls carried across, arena_souls.h) */
 };
 
-struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, bool bn5) {
-	if (!rom || !size || size > EMU_ROM_SIZE) return NULL;
-	emu_log_quiet();
+/* A core's ROM copy: its bytes, BN5's installed in them where `bn5` */
+static uint8_t *rom_copy(const uint8_t *rom, size_t size, bool bn5) {
 	uint8_t *copy = malloc(EMU_ROM_SIZE);
 	if (!copy) return NULL;
 	memcpy(copy, rom, size);
 	memset(copy + size, 0xFF, EMU_ROM_SIZE - size);
 	if (bn5) xlog_apply(copy, EMU_ROM_SIZE);
+	return copy;
+}
+
+#ifdef __3DS__
+/* (on the 3DS the core maps its ROM as it is and patches it in place,
+ * mGBA's FIXED_ROM_BUFFER (emu.c): the Arena's cores, whose ROMs are the
+ * same bytes with the same hooks at the same places, share one copy, 16 MB
+ * of a 96 MB heap where two would be 32 (docs/ONLINE_ARENA.md, The New
+ * 3DS). The boot core takes it first and lets it go before the pair's are
+ * made, so its own hooks and writes leave with it.) */
+static struct {
+	uint8_t *bytes;
+	const uint8_t *from;
+	bool bn5;
+	unsigned users;
+	struct mCore *core[HOOK_CORES];
+} shared;
+
+static struct VFile *rom_file(const uint8_t *rom, size_t size, bool bn5) {
+	if (!shared.users) {
+		free(shared.bytes);
+		if (!(shared.bytes = rom_copy(rom, size, bn5))) return NULL;
+		shared.from = rom;
+		shared.bn5 = bn5;
+	} else if (shared.from != rom || shared.bn5 != bn5) return NULL;
+	return VFileFromMemory(shared.bytes, EMU_ROM_SIZE);
+}
+
+/* a core that maps the copy, or one that no longer does: the copy let go
+ * with its last (core NULL: one never made) */
+static void rom_user(struct mCore *core, bool joins) {
+	for (unsigned i = 0; core && i < HOOK_CORES; ++i) {
+		if (shared.core[i] != (joins ? NULL : core)) continue;
+		shared.core[i] = joins ? core : NULL;
+		shared.users += joins ? 1 : -1u;
+		break;
+	}
+	if (!shared.users) { free(shared.bytes); shared.bytes = NULL; }
+}
+#else
+static struct VFile *rom_file(const uint8_t *rom, size_t size, bool bn5) {
+	uint8_t *copy = rom_copy(rom, size, bn5);
+	if (!copy) return NULL;
 	struct VFile *vf = VFileMemChunk(copy, EMU_ROM_SIZE);
 	free(copy);
-	if (!vf) return NULL;
+	return vf;
+}
+static void rom_user(struct mCore *core, bool joins) { (void)core; (void)joins; }
+#endif
+
+struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, bool bn5) {
+	if (!rom || !size || size > EMU_ROM_SIZE) return NULL;
+	emu_log_quiet();
+	struct VFile *vf = rom_file(rom, size, bn5);
+	if (!vf) { rom_user(NULL, false); return NULL; }
 	struct mCore *c = mCoreFindVF(vf);
-	if (!c || !c->init(c)) { vf->close(vf); return NULL; }
+	if (!c || !c->init(c)) { vf->close(vf); rom_user(NULL, false); return NULL; }
+	rom_user(c, true);
 	mCoreInitConfig(c, NULL);
 	c->setVideoBuffer(c, (color_t *)video, ARENA_W);
-	if (!c->loadROM(c, vf)) { c->deinit(c); return NULL; }
+	if (!c->loadROM(c, vf)) { arena_core_free(c); return NULL; }
 	/* (the game's save prompts write here only: never a player's file) */
 	c->loadSave(c, VFileMemChunk(NULL, 0));
 	c->setAudioBufferSize(c, 1024);
@@ -94,7 +145,9 @@ struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, b
 }
 
 void arena_core_free(struct mCore *core) {
-	if (core) core->deinit(core);
+	if (!core) return;
+	core->deinit(core);
+	rom_user(core, false);
 }
 
 uint8_t *arena_core_save(struct mCore *core, size_t *size) {
@@ -187,9 +240,12 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 		ok = (p->scratch = malloc(p->scratch_size)) != NULL;
 	}
 	if (!ok) { arena_pair_close(p); return NULL; }
+	p->drawn = 3;
 	arena_pair_anchor(p);
 	return p;
 }
+
+void arena_pair_draw(ArenaPair *p, unsigned sides) { p->drawn = sides & 3u; }
 
 void arena_pair_close(ArenaPair *p) {
 	if (!p) return;
@@ -199,7 +255,7 @@ void arena_pair_close(ArenaPair *p) {
 		if (p->node[side].p) GBASIOLockstepDetachNode(&p->cable, &p->node[side]);
 		soulunite_held_core(p->core[side], 0);
 		hook_detach(p->core[side]);
-		p->core[side]->deinit(p->core[side]);
+		arena_core_free(p->core[side]);
 	}
 	free(p->scratch);
 	free(p);
@@ -235,6 +291,9 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 	for (unsigned side = 0; side < 2; ++side) {
 		target[side] = p->start[side] + p->relative + 1;
 		p->core[side]->setKeys(p->core[side], keys[0][side]);
+		/* (a picture not drawn: mGBA's frame skip for this frame, from its
+		 * start to its VBlank; the game's state the same either way) */
+		((struct GBA *)p->core[side]->board)->video.frameskipCounter = (p->drawn >> side) & 1u ? 0 : 1;
 	}
 	for (unsigned limit = 0; limit < STEP_LIMIT; ++limit) {
 		unsigned ahead[2];
@@ -523,38 +582,3 @@ void arena_pair_mute(ArenaPair *p) {
 	emu_audio_drop_from(p->core[0]);
 	emu_audio_drop_from(p->core[1]);
 }
-
-#else   /* no Arena in this build (arena_pair.h, CW_ARENA) */
-
-struct mCore *arena_core_new(const uint8_t *rom, size_t size, uint32_t *video, bool bn5) {
-	(void)rom; (void)size; (void)video; (void)bn5;
-	return NULL;
-}
-void arena_core_free(struct mCore *core) { (void)core; }
-uint8_t *arena_core_save(struct mCore *core, size_t *size) { (void)core; *size = 0; return NULL; }
-bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size) { (void)core; (void)state; (void)size; return false; }
-ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2]) {
-	(void)rom; (void)size; (void)state; (void)state_size; (void)souls;
-	return NULL;
-}
-void arena_pair_close(ArenaPair *pair) { (void)pair; }
-void arena_pair_anchor(ArenaPair *pair) { (void)pair; }
-void arena_pair_begin(ArenaPair *pair) { (void)pair; }
-bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) { (void)pair; (void)keys; (void)own_clock; return false; }
-uint64_t arena_pair_hash(ArenaPair *pair) { (void)pair; return 0; }
-uint64_t arena_pair_hash_whole(ArenaPair *pair) { (void)pair; return 0; }
-uint64_t arena_pair_record(const ArenaPair *pair) { (void)pair; return 0; }
-struct mCore *arena_pair_core(ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
-const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
-unsigned arena_pair_transfers(const ArenaPair *pair) { (void)pair; return 0; }
-void arena_pair_sound(ArenaPair *pair, unsigned side) { (void)pair; (void)side; }
-void arena_pair_mute(ArenaPair *pair) { (void)pair; }
-ArenaPairSnap *arena_pair_snap_new(ArenaPair *pair) { (void)pair; return NULL; }
-void arena_pair_snap_free(ArenaPairSnap *snap) { (void)snap; }
-size_t arena_pair_snap_bytes(const ArenaPairSnap *snap) { (void)snap; return 0; }
-size_t arena_pair_snap_core_bytes(const ArenaPairSnap *snap) { (void)snap; return 0; }
-bool arena_pair_save(ArenaPair *pair, ArenaPairSnap *snap) { (void)pair; (void)snap; return false; }
-bool arena_pair_load(ArenaPair *pair, const ArenaPairSnap *snap) { (void)pair; (void)snap; return false; }
-unsigned arena_pair_snap_diff(const ArenaPairSnap *a, const ArenaPairSnap *b, unsigned frame, bool say) { (void)a; (void)b; (void)frame; (void)say; return 0; }
-
-#endif

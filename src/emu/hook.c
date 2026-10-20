@@ -228,13 +228,26 @@ void hook_detach(struct mCore *core) {
 	memset(c, 0, sizeof *c);
 }
 
+/* (cores that share one ROM copy, the 3DS's Arena cores (arena_pair.c),
+ * meet each other's BKPTs there: the instruction under one is the hook's
+ * original that put it) */
+static uint32_t original_of(const HookCore *c, const Hook *h, uint32_t now) {
+	if (now != (h->arm ? ARM_BKPT : THUMB_BKPT)) return now;
+	for (int i = 0; i < HOOK_CORES; ++i) {
+		HookCore *o = &cores[i];
+		const Hook *there = o != c && o->cpu ? find(o, h->addr) : NULL;
+		if (there && there->live && there->arm == h->arm) return there->original;
+	}
+	return now;
+}
+
 static void put_bkpt(HookCore *c, Hook *h) {
 	struct mCore *core = c->core;
 	if (h->arm) {
-		h->original = core->rawRead32(core, h->addr, -1);
+		h->original = original_of(c, h, core->rawRead32(core, h->addr, -1));
 		core->rawWrite32(core, h->addr, -1, ARM_BKPT);
 	} else {
-		h->original = (uint16_t)core->rawRead16(core, h->addr, -1);
+		h->original = original_of(c, h, (uint16_t)core->rawRead16(core, h->addr, -1));
 		core->rawWrite16(core, h->addr, -1, (uint16_t)THUMB_BKPT);
 	}
 }

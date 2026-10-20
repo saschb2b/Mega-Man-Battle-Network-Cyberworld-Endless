@@ -14,14 +14,10 @@
 
 /* Trade Central's (its board's too), the Arena's and the stands' messages (protocol.json): sent
  * as soon as the worker's next pass, and taken in apart from the snapshot, each a u16
- * length and its bytes in a ring; where the Arena is built, room for a watched battle's
- * keys as a spectator who came late catches up (the server's 2 KB a tick, the game's
- * frame held up a few ticks by the way in) */
-#if defined(__3DS__) || defined(__EMSCRIPTEN__)
-#define RING 16384
-#else
+ * length and its bytes in a ring, with room for a watched battle's keys as a spectator
+ * who came late catches up (the server's 2 KB a tick, the game's frame held up a few
+ * ticks by the way in) */
 #define RING 65536
-#endif
 typedef struct { uint8_t b[RING]; unsigned head, tail; } Ring;
 
 static bool ring_put(Ring *r, const uint8_t *data, size_t size) {

@@ -17,10 +17,13 @@
 
 #include "arena_input.h"
 
-/* (the Arena runs two cores beside the game's: not on the 3DS, whose heap
- * has no room for them, nor yet in the browser, whose build has no threads
- * and a frame budget a second core would break) */
-#if defined(__3DS__) || defined(__EMSCRIPTEN__)
+/* (the Arena's code is built on every system, and its NetBattles and
+ * watching are offered where a frame of the pair fits a 60th of a second:
+ * every system but the New 3DS, where one takes 25.8 ms with my GBA's
+ * picture and 20.7 with none, two GBAs on one ARM11 core (--dev
+ * rollbench; docs/ONLINE_ARENA.md, The New 3DS). There the pair's two
+ * cores share one ROM copy, and --dev rollbench and --dev arena run.) */
+#ifdef __3DS__
 #define CW_ARENA 0
 #else
 #define CW_ARENA 1
@@ -65,6 +68,10 @@ void arena_pair_begin(ArenaPair *pair);
  * A core ARENA_LOOKAHEAD frames ahead waits for its partner. False where
  * the cable stuck: the frame not done in STEP_LIMIT run loops. */
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock);
+/* The sides whose picture the next frames draw (bit 0 the first GBA's,
+ * bit 1 the second's; both as the pair opens): a picture nobody sees is
+ * a fifth of a core's frame saved, the game's state the same */
+void arena_pair_draw(ArenaPair *pair, unsigned sides);
 /* A hash of both cores' state, their flash saves and the cable's, and
  * under full rules the installs' record they were made with: two clients
  * (and a spectator) whose pairs agree have the same, whether either rolled
