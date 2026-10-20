@@ -24,6 +24,13 @@ from . import websocket
 # seconds from the server's notice covers the game's whole window.
 HOLD = 40.0
 
+# A stalled link (a Wi-Fi gap the sockets survive) lets the game's positions
+# through at once when it clears, 20 a second of it: positions have a bucket
+# this deep of their own (app.py's serve_player), ten seconds' worth, so the
+# backlog is no flood, and the game sends fewer while it hears nothing
+# (online_transport.c). Each only replaces the last.
+BACKLOG = 200
+
 
 class Holds:
     def __init__(self, server, seconds=HOLD):

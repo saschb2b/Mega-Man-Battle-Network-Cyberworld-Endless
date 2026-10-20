@@ -148,6 +148,13 @@ VisitEnd online_scene_wait(void) {
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
+	/* (back on a resume: what was under way ended before the new session's
+	 * mail is read, a trade it offers among it) */
+	bool up = !snapshot.error[0] && snapshot.connected && !snapshot.quiet && !snapshot.reconnecting;
+	if (up && snapshot.resumes != resumes_seen) {
+		VisitEnd why = resumed();
+		if (why != VISIT_END_NONE) return why;
+	}
 	online_mail_frame();
 	/* (the director rests here: the cinema told when a screen of BN6's,
 	 * a shop, takes MegaMan off the map, so its keys reach it) */
@@ -166,10 +173,6 @@ VisitEnd online_scene_update(void) {
 		/* (the reason read a moment before the way home) */
 		if (now - disconnected_at >= 1500) return online_visit_refusal(&snapshot, true);
 		return VISIT_END_NONE;
-	}
-	if (snapshot.resumes != resumes_seen) {
-		VisitEnd why = resumed();
-		if (why != VISIT_END_NONE) return why;
 	}
 	arrived = online_square_arrived();
 	if (!arrived) return VISIT_END_NONE;

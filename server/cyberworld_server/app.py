@@ -11,7 +11,7 @@ import time
 
 from . import protocol, websocket
 from .arena import Arena
-from .holds import Holds
+from .holds import BACKLOG, Holds
 from .stands import Stands
 from .trade import Trades
 from .week import Weeks, week_of
@@ -230,7 +230,9 @@ class Server:
                 self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
-        self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
+        # (a place taken back is the same visit: its "resume", holds.py, not a join)
+        if not player.resumed:
+            self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
         return player
 
     def drop(self, player, exc, close_code=1008):
@@ -245,11 +247,24 @@ class Server:
     async def serve_player(self, reader, player):
         # (the Arena's keys come 60 times a second: a bucket of their own)
         tokens, relay, previous = 40.0, 150.0, time.monotonic()
+        moves = float(BACKLOG)
         relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"])
         while True:
             opcode, data = await asyncio.wait_for(websocket.receive(reader), 15)
             now = time.monotonic()
             elapsed, previous = now - previous, now
+            # (positions a bucket of their own, deep enough for the backlog a
+            # stalled link lets through at once, refilled whatever comes:
+            # holds.py, BACKLOG)
+            moves = min(BACKLOG, moves + elapsed * 25)
+            if opcode == 2 and data and data[0] == protocol.SPEC["state"]:
+                moves -= 1
+                tokens = min(40, tokens + elapsed * 30)
+                relay = min(150, relay + elapsed * 120)
+                if moves < 0:
+                    raise protocol.ProtocolError("Message rate exceeded", 8)
+                await self.message(player, data, now)
+                continue
             if opcode == 2 and data and data[0] in relayed:
                 relay = min(150, relay + elapsed * 120) - 1
                 tokens = min(40, tokens + elapsed * 30)

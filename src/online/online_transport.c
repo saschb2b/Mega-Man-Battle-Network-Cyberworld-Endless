@@ -72,6 +72,12 @@ static struct {
 	bool dialing;                /* (the browser's: a socket open, a try's or the visit's) */
 } transport;
 
+/* how often MegaMan's place is sent: 20 times a second, twice a second
+ * once nothing has been heard for 400 ms, so a stalled link's backlog,
+ * let through at once as it clears, stays small (the server's own bucket
+ * for it: server/cyberworld_server/holds.py, BACKLOG) */
+static uint32_t send_every(uint32_t now, uint32_t last_receive) { return now - last_receive > 400 ? 500u : 50u; }
+
 /* the wait before try `tries` (0 the first): 0.5, 1, 2, then 4 seconds */
 static uint32_t retry_wait(unsigned tries) {
 	uint32_t wait = RETRY_FIRST_MS << (tries < 3 ? tries : 3);
@@ -194,6 +200,14 @@ static bool take_in(const uint8_t *data, size_t size, uint32_t now, OnlineSnapsh
 		bool ok = online_wire_message(data, size, now, snapshot);
 		/* (an unreadable message, not the network: never tried again) */
 		if (!ok && !snapshot->error[0]) SDL_strlcpy(snapshot->error, "The server sent an unreadable message", sizeof snapshot->error);
+		/* (a resume's WELCOME: what came in from the last session and was not
+		 * taken yet is set aside, the server having ended it all at the drop;
+		 * the new session's own follows) */
+		if (ok && data[0] == ONLINE_WELCOME && snapshot->reconnecting) {
+			if (transport.mutex) SDL_LockMutex(transport.mutex);
+			transport.inbox.tail = transport.inbox.head;
+			if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+		}
 		/* (a resume done: its WELCOME, then the peers as they stand) */
 		if (ok && data[0] == ONLINE_SNAPSHOT && snapshot->reconnecting) {
 			snapshot->reconnecting = snapshot->quiet = false;
@@ -260,7 +274,7 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 		hush(snapshot, now, last_receive);
 		if (now - last_receive > (snapshot->connected ? DEAD_MS : DEAD_CALLING_MS)) break;
 		if (snapshot->connected && !send_mail()) break;
-		if (snapshot->connected && now - last_send >= 50) {
+		if (snapshot->connected && now - last_send >= send_every(now, last_receive)) {
 			last_send = now;
 			if (!send_position() || !send_queued()) break;
 		}
@@ -352,7 +366,7 @@ static void browser_poll(void) {
 		return;
 	}
 	if (!s->connected) return;
-	if (now - transport.last_send >= 50) {
+	if (now - transport.last_send >= send_every(now, transport.last_receive)) {
 		transport.last_send = now;
 		if (!send_position() || !send_queued()) browser_closed();
 	}
@@ -398,6 +412,10 @@ static int worker(void *unused) {
 		if (leaving() || !resumable(&snapshot)) break;
 		uint32_t now = SDL_GetTicks();
 		if (!snapshot.reconnecting) reconnecting(&snapshot, snapshot.quiet ? snapshot.lost_at : now);
+		/* (what was waiting to go is the last session's: dropped with it) */
+		SDL_LockMutex(transport.mutex);
+		transport.outbox.tail = transport.outbox.head;
+		SDL_UnlockMutex(transport.mutex);
 		publish(&snapshot);
 		if (now - snapshot.lost_at >= ONLINE_RECONNECT_MS) break;
 		fprintf(stderr, "online: the link dropped%s%s; trying again\n", why[0] ? ": " : "", why);
@@ -490,11 +508,13 @@ bool online_transport_send(const uint8_t *data, size_t size) {
 	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_WEEK_POST || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
 		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH);
 	if (!transport.enabled || !ours) return false;
+	/* (a link down: nothing kept for the next session, which the server
+	 * began afresh, what was under way ended at the drop; issue #153) */
 #ifdef __EMSCRIPTEN__
-	return online_browser_send(data, size);
+	return transport.snapshot.connected && online_browser_send(data, size);
 #else
 	SDL_LockMutex(transport.mutex);
-	bool room = ring_put(&transport.outbox, data, size);
+	bool room = transport.snapshot.connected && ring_put(&transport.outbox, data, size);
 	SDL_UnlockMutex(transport.mutex);
 	return room;
 #endif

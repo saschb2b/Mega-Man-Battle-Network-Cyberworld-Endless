@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "server"))
 
 from cyberworld_server import admin, protocol
 from cyberworld_server.app import Server
-from test_server import Client
+from test_server import Client, masked
 from test_play import arena, trade
 
 SPEC = protocol.SPEC
@@ -203,6 +203,30 @@ class HoldTests(unittest.IsolatedAsyncioTestCase):
         await until(lambda: a_id in server.holds.until)
         admin.perform("ban", Path(self.dir.name), first[14:30].hex())
         await until(lambda: a_id not in server.players)
+
+    async def test_a_stalled_links_backlog_of_positions_is_no_flood(self):
+        server = await self.start()
+        a, first = await self.connect("Alpha")
+        a_id = struct.unpack("!I", first[5:9])[0]
+        # (five seconds of positions let through at once, as a stall clears)
+        a.writer.write(b"".join(masked(protocol.STATE.pack(SPEC["state"], k, 0, 0, 0)) for k in range(100)))
+        await a.writer.drain()
+        await until(lambda: server.players[a_id].position == (99, 0, 0, 0))
+        await a.send(bytes((SPEC["ping"],)) + b"1234")
+        self.assertEqual(await a.message(SPEC["pong"]), bytes((SPEC["pong"],)) + b"1234")
+
+    async def test_positions_among_a_netbattles_keys_never_run_dry(self):
+        # (a battle's keys 60 a second between the positions' 20: the
+        # positions' bucket refilled by the time between any two messages)
+        server = await self.start()
+        a, first = await self.connect("Alpha")
+        a_id = struct.unpack("!I", first[5:9])[0]
+        for k in range(300):
+            await a.send(protocol.ARENA_INPUT.pack(SPEC["arena_input"], 1, k, 1) + b"\0\0")
+            if k % 3 == 0:
+                await a.send(protocol.STATE.pack(SPEC["state"], k, 0, 0, 0))
+            await asyncio.sleep(1 / 60)
+        await until(lambda: server.players[a_id].position == (297, 0, 0, 0))
 
     async def test_maintenance_turns_every_game_away_with_its_line(self):
         with self.assertRaises(ValueError):
