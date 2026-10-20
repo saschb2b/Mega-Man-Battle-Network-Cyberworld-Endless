@@ -1,6 +1,25 @@
-"""0.13.0's trailer, Cyberworld Endless connects: the online Net Square.
+"""0.13.0's trailer, Cyberworld Endless connects: the online Net Square,
+in the manner of an online game's launch trailer rather than the last two
+trailers' advert and liberation mission. Linking: several players' games
+on screen at once, each a window in its operator's colour with his name,
+channel and ping, joined by lines of light whose packets carry the cuts
+(a window opens as a packet from the last one reaches it). The words are
+the Square's own: each step's pill, its headline in a speech bubble
+pointing at the game, the phrases as chat bubbles; a HUD over the top
+(connecting, the channel, the operators here, the ping) and the Square's
+log at the bottom. The arc: two players logging in and saying hello; the
+gate in Lan's HP; the NetPass's stamps; meeting, trading, a NetBattle from
+both sides, the stands; the week's DeepNet; two, four, then eight games;
+the logo and a friend to bring.
 
-(the footage's scenes first; the look below)
+Its shots are whole frames of the game running from the developer's ROMs,
+BN6's and BN5 Team Colonel's beside it, at a whole scale (3x, 2x, 1x):
+games in a Square of their own on a local server, several at once
+(tools/trailer_online.py), each scripted by the wall clock. Everything
+else is drawn here; its music is v0_13_0_music.py's, an original piece in
+the manner of BN6's "Surge of Power!".
+
+    python3 build.py linux && python3 build.py server && python3 tools/trailer.py 0.13.0 [--keep]
 """
 import math
 import os
@@ -364,7 +383,8 @@ class Win:
             for i in range(4):
                 h = 4 + 3 * i
                 on = i < 2 + (fr // 9 + self.ping) % 3
-                d.rectangle([right - 30 + 8 * i, hb[3] - 6 - h, right - 25 + 8 * i, hb[3] - 6], fill=INK if on else lerp(color, INK, 0.45))
+                d.rectangle([right - 30 + 8 * i, hb[3] - 6 - h, right - 25 + 8 * i, hb[3] - 6],
+                            fill=INK if on else lerp(color, INK, 0.45))
             d.text((right - 40, (hb[1] + hb[3]) // 2 + 1), info, font=fm, fill=INK, anchor='rm')
         # the picture: rows coming in, a scan line at each re-tune, a
         # collapse to a line as it closes
@@ -673,20 +693,22 @@ def windows():
 COL_R = 836        # (the words' column beside a game on the left)
 COL_L = 48         # (... and beside one on the right)
 WORDS = [
-    Words(F(2), F(3), '01 · GO ONLINE', 'TAKE THE GATE', "A GATE IN LAN'S HP, BETWEEN ACTS", COL_R, 96, 400, OPS['Kei'], 'left'),
+    Words(F(2), F(3), None, 'TAKE THE GATE', "A GATE IN LAN'S HP, BETWEEN ACTS", COL_R, 96, 400, OPS['Kei'], 'left'),
     Words(F(3), F(4), None, 'CONNECTING...', "THE OFFICIAL SERVER, OR ANYONE'S", COL_R, 96, 400, OPS['Kei'], 'left'),
     Words(F(4), F(5), None, 'LOGGED IN!', 'THE NET SQUARE, CHANNEL 1', COL_R, 96, 400, OPS['Kei'], 'left'),
-    Words(F(5), F(6), '02 · THE NETPASS', 'EVERY STAMP', 'SQUARE · ARENA · TRADE · DEEPNET', COL_R, 96, 400, GOLD, 'left'),
+    Words(F(5), F(6), None, 'EVERY STAMP', 'SQUARE · ARENA · TRADE · DEEPNET', COL_R, 96, 400, GOLD, 'left'),
     Words(F(6), F(7), None, 'FULL PASS!', 'BN6 CYBEAST GREGAR + BN5 TEAM COLONEL (USA)', COL_R, 96, 400, GOLD, 'left'),
-    Words(F(7), F(8), '03 · MEET', 'SAY HELLO', 'PHRASES, EMOTES, CARDS: 8 OPERATORS A CHANNEL', COL_L, 96, 410, OPS['Mira'], 'right'),
+    Words(F(7), F(8), None, 'SAY HELLO', 'PHRASES, EMOTES, CARDS: 8 OPERATORS A CHANNEL', COL_L, 96, 410, OPS['Mira'],
+          'right'),
     Words(F(8), F(9), None, 'THE SQUARE CHEERS', 'SAY SOMETHING TOGETHER BY ITS LANDMARK', COL_L, 96, 410, OPS['Mira'], 'right'),
-    Words(F(9), F(10), '04 · TRADE', 'SWAP A SPARE', "ONE CHIP FOR ONE, BN5'S CHIPS TOO", COL_R, 96, 400, OPS['Rio'], 'left'),
+    Words(F(9), F(10), None, 'SWAP A SPARE', "ONE CHIP FOR ONE, BN5'S CHIPS TOO", COL_R, 96, 400, OPS['Rio'], 'left'),
     Words(F(10), F(11), None, 'DEAL!', 'THE CHIP COMES HOME WITH YOU', COL_R, 96, 400, OPS['Rio'], 'left'),
     Words(F(11), F(13), '05 · NETBATTLE', 'NETBATTLE A FRIEND', 'ROLLBACK: 2 FRAMES OF INPUT DELAY ON A GOOD LINK', 102, 44,
           1000, OPS['Kei'], 'above', size=50),
-    Words(F(13), F(14), '06 · WATCH', 'FROM THE STANDS', 'L CHEERS, R SHOWS THE OTHER SIDE', COL_L, 96, 410, OPS['Dex'], 'right'),
-    Words(F(14), F(15), None, 'THE REFEREE CALLS IT', 'EVERY BOUT IN YOUR CHANNEL, AND ITS CHEERS', COL_L, 96, 410, OPS['Dex'], 'right'),
-    Words(F(15), F(16), '07 · DIVE', "THE WEEK'S DEEP NET", 'EVERY MONDAY A NEW NET, THE SAME FOR EVERY DIVER', COL_R, 96, 400,
+    Words(F(13), F(14), None, 'FROM THE STANDS', 'L CHEERS, R SHOWS THE OTHER SIDE', COL_L, 96, 410, OPS['Dex'], 'right'),
+    Words(F(14), F(15), None, 'THE REFEREE CALLS IT', 'EVERY BOUT IN YOUR CHANNEL, AND ITS CHEERS', COL_L, 96, 410,
+          OPS['Dex'], 'right'),
+    Words(F(15), F(16), None, "THE WEEK'S DEEP NET", 'EVERY MONDAY A NEW NET, THE SAME FOR EVERY DIVER', COL_R, 96, 400,
           OPS['Nova'], 'left'),
     Words(F(16), F(17), None, 'HOW DEEP?', 'THE BOARD KEEPS THE DEEPEST, AS REPORTED', COL_R, 96, 400, OPS['Nova'], 'left'),
     Words(F(17), F(18), None, 'ONE SQUARE, EVERY SYSTEM', 'NETBATTLES ON COMPUTERS, PHONES, HANDHELDS AND THE BROWSER', 102, 24,
@@ -714,7 +736,7 @@ LOG = Log([
     (F(7), 'Dex', 'logged in'), (F(7, 2), 'Rio', 'Nice build!'), (F(8), '', 'the Square cheers!'),
     (F(9), 'Kei', 'offers FireBrn1 F'), (F(9, 2), 'Beta', 'offers MrkCan1 M'), (F(10, 2), '', 'traded: FireBrn1 F for MrkCan1 M'),
     (F(11), 'Kei', 'challenges Mira'), (F(11, 2), '', 'NetBattle: Kei vs Mira'), (F(12), '', 'rollback on, delay 2 frames'),
-    (F(13), 'Dex', 'watches Kei vs Mira'), (F(13, 2), 'Dex', 'cheers!'), (F(14), '', 'Mira beat Kei! 3 cheers'),
+    (F(13), 'Dex', 'watches Kei vs Mira'), (F(13, 2), 'Dex', 'cheers!'), (F(14), '', 'the referee calls it: 3 cheers'),
     (F(15), '', "the week's Deep Net is open"), (F(16), 'Mira', 'dove to layer 10!'),
     (F(17), 'Sora', 'logged in'), (F(17, 2), 'Tomo', 'o/'), (F(18), 'Juno', '* * *'), (F(18, 2), 'Rio', 'o/'),
     (F(19), 'Nova', 'Hello!'), (F(19, 2), 'Dex', 'Nice build!'), (F(20), 'Mira', 'o/'), (F(20, 2), 'Kei', 'See you!'),

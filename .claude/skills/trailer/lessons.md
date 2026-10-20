@@ -93,7 +93,7 @@ What went wrong on the way: BN6's chat types slowly and a press mid-typing
 only finishes the line, so the phrase menu needs its question paged,
 then Say something, then the phrase, about 7.5 seconds a phrase; a
 `place` while a chat is open is ignored (MegaMen stayed at the arrival);
-`--dev online` skips MegaMen's gate question, so the gate's shot needs a
+`--dev online` skips MegaMan's gate question, so the gate's shot needs a
 `network.ini` instead; the hook's first footage frame was the gate's
 flat yellow flash (start where the Square is drawn); captions under a
 headline ran into the chat bubbles below them; an overlay caption on the
