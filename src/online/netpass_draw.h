@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 
+#include "gfx.h"
 #include "netpass.h"
 
 #define NETPASS_W 240
@@ -25,6 +26,12 @@ typedef struct {
 	bool into;                /* drawn into memory (the second screen: gfx_draw_into) */
 	int t;                    /* frames, for what moves (an open slot's dashes) */
 } NetPassView;
+
+/* The PET screen's parts, Trade Central's screens' too (trade_screen_draw.c):
+ * a panel, `fill` inside a 1-pixel `edge`, its corners cut; the screen's
+ * ground, the PET's dark blue under a dotted grid */
+void netpass_panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge);
+void netpass_ground(int x, int y, int w, int h);
 
 /* The view of this game's pass as it stands */
 void netpass_view_now(NetPassView *v);

@@ -98,6 +98,7 @@ DOMAINS = {
     'online_text': ('Net Square', 'Screen', 'screen'),
     'netpass_text': ('The NetPass', 'Screen', 'screen'),
     'trade_words': ('Trade Central', 'MegaMan', 'speech'),
+    'trade_screen_text': ('Trade Central', 'Screen', 'screen'),
     'arena_words': ('Arena', 'MegaMan', 'speech'),
     'arena_text': ('Arena', 'Screen', 'screen'),
     'stands_words': ('Arena', 'Bystander', 'speech'),
