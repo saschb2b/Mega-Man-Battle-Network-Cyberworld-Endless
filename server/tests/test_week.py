@@ -38,8 +38,8 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         self.clients = []
 
     async def start(self):
-        self.server = Server(seed=7, capacity=8, player_cap=16, state_dir=self.dir.name)
-        self.server.weeks.clock = lambda: self.now
+        # (the test's clock from the start: weeks.jsonl is pruned to its weeks as it is read)
+        self.server = Server(seed=7, capacity=8, player_cap=16, state_dir=self.dir.name, clock=lambda: self.now)
         self.port = await self.server.start("127.0.0.1", 0)
 
     async def asyncTearDown(self):

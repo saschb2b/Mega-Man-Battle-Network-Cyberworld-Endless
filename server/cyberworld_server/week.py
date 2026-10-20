@@ -12,7 +12,10 @@ summary hash. The server checks only that it is plausible: the week is
 this one or the last, the seed is that week's, the layer and act are
 within the short net's structure, a win only on its last layer. It keeps
 one entry per identity and week, the best, and appends each improvement
-to its state folder's `weeks.jsonl`, read back at the start. Entries are
+to its state folder's `weeks.jsonl`, read back at the start. The file
+keeps `board_weeks` weeks (retention.py: this one and the last, which the
+Board shows), each identity's best in each, and is pruned to them at the
+start and by the retention's pass. Entries are
 claims ("reported" on the Board): a modified game can post any layer,
 and nothing is given for one. Moderators hide an entry (`--admin hide`):
 moderation.json's `hidden` list, its week named, which also refuses that
@@ -25,17 +28,18 @@ post from a game without it refused with NOTICE notice_pass."""
 import asyncio
 import hashlib
 import hmac
-import json
 import logging
-import os
 import struct
 import time
 
 from . import protocol, websocket
+from .identity import append_log, rewrite_log
 
 LOG = logging.getLogger("cyberworld.server")
 SPEC = protocol.SPEC
 WEEK = 7 * 24 * 3600
+BOARD_LOG = "weeks.jsonl"
+FIELDS = ("week", "identity", "name", "depth", "act", "won", "minutes", "time")
 POST = struct.Struct("!BHIHBBHI")
 ENTRY = struct.Struct("!16sHBBH")
 BOARD_HEAD = struct.Struct("!BHBBB")
@@ -74,6 +78,25 @@ def post(week, seed, depth, act, won, minutes, summary):
     return POST.pack(SPEC["week_post"], week, seed, depth, act, WON if won else 0, minutes, summary)
 
 
+def compact(directory, first_week, forget=None):
+    """weeks.jsonl as each identity's best entry in each week from
+    `first_week` on, `forget`'s none, in the order they were posted: the
+    entries kept and how many lines went."""
+    def keep(entries):
+        best = {}
+        for at, entry in enumerate(entries):
+            try:
+                key = (int(entry["week"]), str(entry["identity"]))
+                if not all(field in entry for field in FIELDS) or key[0] < first_week or key[1] == forget:
+                    continue
+                if key not in best or better(entry, best[key][1]):
+                    best[key] = (at, entry)
+            except (KeyError, TypeError, ValueError):
+                continue
+        return [entry for _, entry in sorted(best.values(), key=lambda kept: kept[0])]
+    return rewrite_log(directory, BOARD_LOG, keep)
+
+
 class Weeks:
     def __init__(self, server, clock=time.time):
         self.server = server
@@ -82,25 +105,17 @@ class Weeks:
         self.write_task = None
         self.load()
 
-    @property
-    def path(self):
-        directory = self.server.store.directory
-        return os.path.join(directory, "weeks.jsonl") if directory else None
+    def first_kept(self):
+        """The first week weeks.jsonl keeps (retention.py's board_weeks)."""
+        return week_of(self.clock()) - self.server.retention.board_weeks + 1
 
     def load(self):
-        """The kept entries, from weeks.jsonl (the weeks before the last
-        are let go at the next post)."""
-        if not self.path or not os.path.exists(self.path):
-            return
-        with open(self.path, encoding="utf-8") as log:
-            for line in log:
-                try:
-                    entry = json.loads(line)
-                    key = (int(entry["week"]), str(entry["identity"]))
-                except (ValueError, KeyError, TypeError):
-                    continue
-                if key not in self.best or better(entry, self.best[key]):
-                    self.best[key] = entry
+        """The kept entries, from weeks.jsonl, the file pruned to them (the
+        weeks before the last leave memory at the next post)."""
+        directory = self.server.store.directory
+        if directory:
+            for entry in compact(directory, self.first_kept())[0]:
+                self.best[(int(entry["week"]), str(entry["identity"]))] = entry
 
     def seed(self, week):
         """The week's seed: this server's own, never 0 (a game's "none")."""
@@ -179,16 +194,13 @@ class Weeks:
         self.best[key] = entry
         self.prune()
         self.server.event("week_post", id=player.id, week=entry["week"], depth=entry["depth"], won=entry["won"])
-        if self.path:
-            self.write_task = asyncio.create_task(asyncio.to_thread(self.write, dict(entry, flags=None)))
+        directory = self.server.store.directory
+        if directory:
+            kept = {field: value for field, value in entry.items() if field != "flags"}
+            self.write_task = asyncio.create_task(asyncio.to_thread(append_log, directory, BOARD_LOG, kept))
         self.broadcast()
 
     def prune(self):
         week = week_of(self.clock())
         for key in [key for key in self.best if key[0] < week - 1]:
             del self.best[key]
-
-    def write(self, entry):
-        entry.pop("flags", None)
-        with open(self.path, "a", encoding="utf-8") as log:
-            log.write(json.dumps(entry, separators=(",", ":"), sort_keys=True) + "\n")

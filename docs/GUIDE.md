@@ -906,9 +906,11 @@ The official server asks for no account and no e-mail. It sees the
 address your game connects from, the name you chose, where MegaMan
 stands and his public card while you are there; your identity on it is
 a key your game makes for that server alone. It keeps its trades and
-the week's board, by that identity and your name, and its log of who
-joined and left, without addresses. How long it keeps what is in
-[server/README.md](../server/README.md#the-official-server).
+the week's board, by that identity and your name, and no log of who came
+and went. There is no free text, so there is nothing to report: block a
+name from his card. Its rules, who moderates it, how long it keeps what
+and how to have your data removed are in
+[its policy](../server/README.md#the-official-server).
 
 ## Screen
 

@@ -222,7 +222,9 @@ static bool install_square(uint32_t seed) {
 	group = R.layout->net_area[plan.area].group;
 	number = R.layout->net_area[plan.area].number;
 	if (!mapslot_install(group, number, &npcs, NULL, 0)) return false;
-	return mapslot_music(group, number, R.layout->net_area[plan.area].song);
+	/* (the Square's own music, whatever area it stands in: BN6's Navi
+	 * Customizer theme, the owner's pick, docs/ONLINE.md) */
+	return mapslot_music(group, number, BN6_SONG_NAVI_CUSTOMIZER);
 }
 
 bool online_square_build(uint32_t seed, uint32_t player_id) {

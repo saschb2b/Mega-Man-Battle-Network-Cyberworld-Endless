@@ -18,7 +18,10 @@ Coolify deployment); it speaks the protocol of the branch it was last
 deployed from (a game of another protocol version cannot join it, nor a
 newer game an older server), trading and the Arena on, until this work
 is merged. No release has shipped
-the Square yet.
+the Square yet. Its policy (who runs and moderates it, the rules,
+blocking, what it keeps and for how long, how to be removed) is
+[server/README.md's The official server](../server/README.md#the-official-server),
+summed up in [The official server](#the-official-server) below.
 
 ## The design
 
@@ -254,7 +257,9 @@ connection lost.
 **The Square.** The server sends a seed; each game plans the same Square
 from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
 nets (Central, Sky or Green Area; not Seaside, whose layers stand in
-another map's slot). The plan's hash and its generator version
+another map's slot). Whatever the area, the Square plays its own music:
+BN6's Navi Customizer theme (song 0x1E, `BN6_SONG_NAVI_CUSTOMIZER`, the
+owner's pick, 20 October 2026), not the area's. The plan's hash and its generator version
 (`SQUARE_MAKE`, `SQUARE_HASH`) go in HELLO, so a server refuses a game
 that would build another Square. `online_square.c` builds it with the
 layers' map builder (`netmap_build`) and gives the other players'
@@ -736,6 +741,26 @@ allowlist through the server's command line, and take a week's Board
 entry down (`hide`). Hosting, TLS, backups and
 the platforms' transports are [server/README.md](../server/README.md)'s.
 
+### The official server
+
+`wss://cyberworld.saschb2b.com/presence`, run by Saschb2b, who is its
+moderator, as a hobby server with no guarantees; its policy is
+[server/README.md, The official server](../server/README.md#the-official-server).
+Fixed phrases and emotes only; a player blocks another from his card,
+and a moderator mutes, kicks, hides a Board entry or bans on what he sees
+himself; with no free text there are no reports. The server has no
+accounts and writes no IP address: a public identity derived
+from the game's per-server token, in the trades' log for 14 days (no
+players' log on the official server: `log_days = 0`), the Board for 2 weeks, bans
+and mutes until lifted, and daily backups of its key, moderation and
+Board for 14 days (`server.ini`'s `trade_days`, `board_weeks`,
+`log_days`, `backup_days`), each pruned by the server itself
+(`retention.py`) and by its backup service (`backup.py`, a second
+service of `deploy/coolify/compose.yaml`). The console's log names no
+player. `--admin forget` answers a request to be removed. It follows
+`dev` until the release that ships online play, then `main`
+([server/README.md, At a release](../server/README.md#at-a-release-the-official-server-follows-main)).
+
 ## Two games at once
 
 [DEVTOOLS.md](DEVTOOLS.md#the-net-square-two-games-at-once) says how:
@@ -1205,10 +1230,13 @@ are in the history before 433865a8):
 - **In the browser with the published server:** the official server
   allows the site's origin alone, so the browser's visit was checked
   against a local one; a trade and the trade board there are untried.
-- **The official server:** its Coolify service following `dev` or `main`
-  once this work is merged; a trade and a NetBattle through it; a host's
-  retention policy, named moderators and its backup and restart checks
-  before a public launch.
+- **The official server:** its policy, moderator and retention are
+  published and its pruning and backups are in the server, tried locally
+  (a Compose stack's archive restored byte for byte, 20 October 2026);
+  on the Coolify service itself the backup service, a restore, the
+  proxy's access log and the switch from `dev` to `main` at the release
+  are the owner's ([server/README.md, At a release](../server/README.md#at-a-release-the-official-server-follows-main)),
+  untried; a trade and a NetBattle through it.
 - **The Souls under full rules, what is left:** a MegaMan worried by
   hits alone in a NetBattle, ToadSoul's flag and FloatShoe on panels a
   NetBattle's field lacks, and BN5's own NetBattle as a reference for

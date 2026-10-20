@@ -2,7 +2,8 @@
 # Local commands must use --project-directory . from the repository root.
 # Preserve repository during deployment keeps the read-only config mount.
 # Coolify terminates HTTPS/WebSocket TLS.
-# Set the service's domain to https://cyberworld.saschb2b.com and port to 8765.
+# Set the cyberworld service's domain to https://cyberworld.saschb2b.com and
+# port to 8765. The backup service has no domain and no port.
 services:
   cyberworld:
     build:
@@ -14,6 +15,8 @@ services:
       - "8765"
     volumes:
       - cyberworld-state:/data
+      # (read-only: a restore is run from this container's terminal, server/README.md)
+      - cyberworld-backups:/backups:ro
       - ./deploy/coolify/server.ini:/app/server.ini:ro
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=2).read()"]
@@ -34,5 +37,39 @@ services:
         max-size: "5m"
         max-file: "3"
 
+  # The state's daily archive (server/cyberworld_server/backup.py): the key,
+  # the moderation lists and the Board, kept server.ini's backup_days. It
+  # reads the state read-only and writes only its own volume.
+  backup:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    command: ["--config", "/app/server.ini", "--state-dir", "/data", "--backup", "/backups"]
+    volumes:
+      - cyberworld-state:/data:ro
+      - cyberworld-backups:/backups
+      - ./deploy/coolify/server.ini:/app/server.ini:ro
+    healthcheck:
+      # (unhealthy once the newest archive is more than 26 hours old)
+      test: ["CMD", "python3", "-c", "import glob, os, sys, time; found = glob.glob('/backups/cyberworld-state-*.tar.gz'); sys.exit(not found or time.time() - max(map(os.path.getmtime, found)) > 26 * 3600)"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 2m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    logging:
+      driver: json-file
+      options:
+        max-size: "1m"
+        max-file: "2"
+
 volumes:
   cyberworld-state:
+  cyberworld-backups:
