@@ -86,7 +86,7 @@ const char *gate_end_words(VisitEnd why, int *face) {
 	switch (why) {
 	case VISIT_END_LEFT: *face = FACE_MEGAMAN; return "We're home,Lan!";
 	case VISIT_END_UNREACHABLE: return "HMM... NO ANSWER\nFROM THAT SERVER!|MAYBE IT'S DOWN,OR\nITS ADDRESS IS OFF!";
-	case VISIT_END_VERSION: return "OH! A NEWER VERSION\nIS OUT!|UPDATE AT THE GAME'S\nDOWNLOAD PAGE!";
+	case VISIT_END_VERSION: return "OH! A NEWER VERSION\nIS OUT!|UPDATE YOUR PET AT\nTHE DOWNLOAD PAGE!";
 	case VISIT_END_OLD_SERVER: return "HMM! THAT SQUARE'S\nSERVER IS BEHIND!|ITS HOST HAS TO\nUPDATE IT FIRST!";
 	case VISIT_END_MAINTENANCE: return maintenance(online_visit_end_note());
 	case VISIT_END_ROM: return "THAT SQUARE IS SET\nFOR OTHER GAME DATA!";

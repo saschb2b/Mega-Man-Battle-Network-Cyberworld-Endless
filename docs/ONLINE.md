@@ -349,7 +349,7 @@ SAYS, UNTIL 14:00 UTC" rather than "no answer"; a visit whose link
 dropped as the server went down for it comes home with the same word.
 A game newer than its server is answered ERROR 17, and the keeper says
 the server is behind; an older game hears "A NEWER VERSION IS OUT!" and
-"UPDATE AT THE GAME'S DOWNLOAD PAGE!".
+"UPDATE YOUR PET AT THE DOWNLOAD PAGE!".
 
 **The Square.** The server sends a seed; each game plans the same Square
 from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
