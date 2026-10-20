@@ -41,6 +41,18 @@
 
 static const SDL_Color none = { 0, 0, 0, 0 };
 
+/* drawn into memory (the second screen) this draw: the engine's pixel
+ * letters are a texture's, so words there are the small font's */
+static bool into_memory;
+
+/* a word in the engine's pixel letters, `shade` under them; the small
+ * font's capitals where the pass is drawn into memory */
+static void word(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int align) {
+	if (!into_memory) { pixfont_draw(x, y, s, c, shade, align, 1); return; }
+	int w = minifont_width(s, 1);
+	minifont_draw(align == PIXFONT_CENTER ? x - w / 2 : align == PIXFONT_RIGHT ? x - w : x, y + 1, s, c, 1);
+}
+
 /* a label's colours by the game's slot: its top and foot and its light stripe (launcher_art.c's) */
 static SDL_Color label_color(int game, int part) {
 	static const SDL_Color c[2][3] = {
@@ -192,7 +204,7 @@ static void card(int x, int y, const NetPassView *v) {
 static void seal(int cx, int cy, int r, bool held, int landed) {
 	if (!held) {
 		ring(cx, cy, r, PET_DIM, true);
-		pixfont_draw(cx + 1, cy - 3, "?", PET_DIM, none, PIXFONT_CENTER, 1);
+		word(cx + 1, cy - 3, "?", PET_DIM, none, PIXFONT_CENTER);
 		return;
 	}
 	/* (landing: larger for a few frames, as a stamp pressed down) */
@@ -211,7 +223,7 @@ static void stamp_cell(int x, int y, int s, const NetPassView *v) {
 	panel(x, y, CELL_W, CELL_H, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
 	int cx = x + CELL_W / 2;
 	seal(cx, y + 13, 10, held, v->landing == s ? v->landing_t : -1);
-	pixfont_draw(cx, y + 25, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER, 1);
+	word(cx, y + 25, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
 	minifont_draw_centered(cx, y + 34, netpass_stamp_captions[s], held ? PET_CYAN_HI : PET_DIM, 1);
 }
 
@@ -232,7 +244,7 @@ static void cartridge(int x, int y, int g) {
 	fill_rect(x + 5, y + 6, CART_W - 10, 7, label_color(g, 0));
 	fill_rect(x + 5, y + 13, CART_W - 10, 6, label_color(g, 1));
 	fill_rect(x + 5, y + 8, CART_W - 10, 1, label_color(g, 2));
-	pixfont_draw(x + CART_W / 2, y + 9, game ? game->label : "", PET_WHITE, INK, PIXFONT_CENTER, 1);
+	word(x + CART_W / 2, y + 9, game ? game->label : "", PET_WHITE, INK, PIXFONT_CENTER);
 	/* (the connector's slot under it) */
 	fill_rect(x + 6, y + CART_H - 4, CART_W - 12, 2, OUTLINE);
 }
@@ -253,7 +265,7 @@ static void open_slot(int x, int y, int g, int t) {
 		if ((i + phase) % 5 < 3) dash[n++] = (SDL_Rect){ px, py, 1, 1 };
 	}
 	fill_rects(dash, n, PET_CYAN);
-	pixfont_draw(x + CART_W / 2, y + 9, game ? game->label : "", PET_DIM, none, PIXFONT_CENTER, 1);
+	word(x + CART_W / 2, y + 9, game ? game->label : "", PET_DIM, none, PIXFONT_CENTER);
 }
 
 /* the tray: each game's slot, in or open, and the PET's line beside them */
@@ -285,6 +297,7 @@ void netpass_view_now(NetPassView *v) {
 }
 
 void netpass_draw(int x, int y, const NetPassView *v) {
+	into_memory = v->into;
 	ground(x, y, NETPASS_W, NETPASS_H);
 	header(x, y, v);
 	card(x + CARD_X, y + CARD_Y, v);
@@ -294,6 +307,7 @@ void netpass_draw(int x, int y, const NetPassView *v) {
 }
 
 void netpass_draw_strip(int x, int y, const NetPassView *v) {
+	into_memory = v->into;
 	ground(x, y, NETPASS_W, NETPASS_STRIP_H);
 	header(x, y, v);
 	int w = (NETPASS_W - 8 - 3 * 3) / STAMP_COUNT;
@@ -302,6 +316,6 @@ void netpass_draw_strip(int x, int y, const NetPassView *v) {
 		bool held = v->held[s];
 		panel(cx, cy, w, NETPASS_STRIP_H - HEAD_H - 4, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
 		seal(cx + w / 2, cy + 11, 8, held, v->landing == s ? v->landing_t : -1);
-		pixfont_draw(cx + w / 2, cy + 22, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER, 1);
+		word(cx + w / 2, cy + 22, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
 	}
 }

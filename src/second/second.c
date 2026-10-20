@@ -184,6 +184,7 @@ bool second_draw(int w, int h) {
 	if (panel == PANEL_NETPASS) {
 		/* (the frame without the run's strip, the pass in its body as the PET's KeyItem shows it) */
 		SDL_Rect r = second_frame_rest(w, h, "NETPASS", "NET SQUARE");
+		fill_rect(r.x, r.y, r.w, r.h, PET_EXIT);
 		NetPassView v;
 		netpass_view_now(&v);
 		v.into = true;
