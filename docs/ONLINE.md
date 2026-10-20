@@ -747,7 +747,7 @@ moderator, as a hobby server with no guarantees; its policy is
 Fixed phrases and emotes only; a player blocks another from his card,
 and a moderator mutes, kicks, hides a Board entry or bans. A report is
 an issue on the project's GitHub page, within the players' log's two
-weeks. It keeps no account and no IP address: a public identity derived
+weeks. The server has no accounts and writes no IP address: a public identity derived
 from the game's per-server token, in the players' log (who came under
 which name) and the trades' log for 14 days, the Board for 2 weeks, bans
 and mutes until lifted, and daily backups of its key, moderation and
