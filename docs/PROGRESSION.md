@@ -433,6 +433,22 @@ offers one of three (two HPMemory, a ★3 chip, a NaviCust program). If the
 last run ended before the first guardian, he gives an HPMemory first
 (`Profile.last_depth`, which took the place of an unused field).
 
+### The economy (issue #154)
+
+What a run finds opens act by act (docs/ECONOMY.md, `src/core/economy.c`):
+the first act lays half the green Mystery Data, a green data keeps its
+chip six times in ten (zenny in its place), the plain finds (green and
+blue data, a dealer's shelf, a request) hold a quarter of the good chips'
+weight and fewer extra rich data, finds hold half the zenny (a guardian's
+chip-entry zenny too) and none leans to the folder's codes; each opens on
+a logarithm to what it was by the endless net's sixth act (the short
+net's third), never past it. Act 1 gives about 9.5 chips and 2,630 zenny
+where it gave 12 and 3,550: at its dealer a run has 930 zenny, the
+answer's two copies or the HPMemory. The far detour's rich data, purple
+data, Servers' prizes, the gift, the Guardian Data, the dealer's answer
+and BN6's own battle rewards are as they were. The traders pick a
+prize's code as BN6 does, three in four one the pack lacks.
+
 ### Risk the player chooses
 
 - The Server challenge never appears on layer 1 and fights the next act's
@@ -529,7 +545,15 @@ Fixed on the way:
 - `tests/test_core.c` checks the acts, bands, versions, area tiers, guardian
   choice and heals without a ROM.
 - `runlog.txt` in the data folder records every battle (area, foes, their
-  HP, MegaMan's HP before and after) and where each run ended.
+  HP, MegaMan's HP before and after, the zenny on hand, a win's busting
+  level and reward) and where each run ended.
+- `python3 build.py economy` measures what a run hands out, act by act:
+  chips, good chips, codes, zenny against what there is to buy, Mystery
+  Data (docs/ECONOMY.md, docs/DEVTOOLS.md), the flat plan (before issue
+  #154) beside the opening one in play, each against its bands on the
+  endless net and the short one. It reports 0 of the plan in play's
+  outside them; a change to drops, prices or Mystery Data runs it as a
+  change to battles runs the pacing report.
 
 ## Where it is decided
 
@@ -544,7 +568,7 @@ Fixed on the way:
 | The layer's nets: a territory, the deep, the older net's chips | `src/core/loot.c` (`loot_layer_nets`, `loot_random_battle`), `src/core/visitors.c` (`nets_battle_area`) |
 | Visitors: the gate, the roles, the band | `src/core/visitors.c`, `src/core/visitor_families.c` |
 | Guardian version | `src/core/loot.c` (`make_boss`); BN5's guardians' `src/layer/xguardian.c` (`xguardian_version`, `xguardian_encounter`) and their places `src/core/run.c` (`run_xguardian_at`) |
-| Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
+| Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices); the economy's plans and their curves `src/core/economy.c` (docs/ECONOMY.md) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
 | `src/director/director_layer.c` (roll_encounter), `src/director/director.c` (act_on_choices) | `src/director/director.c` |
 | Guardian rewards, the start gift | `src/layer/scripts.c`, `src/layer/guardian_objs.c`, `src/director/powers.c` |

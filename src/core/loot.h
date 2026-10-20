@@ -62,6 +62,14 @@ int roll_chip(int depth, int bonus_tier, char *code);
 /* A chip of `tier` (chip_pool.h) from BN6's pool, or the older net's its
  * share of the time (loot_older_share); -1 without a ROM */
 int loot_pool_pick(int tier);
+/* What a layer's Mystery Data of quality `param` (NetObj's: 0 green, 1
+ * and 2 blue) holds at `depth`, by the run's threat and folder codes: a
+ * chip (its id in `value`, its code), zenny or BugFrags (how many), or an
+ * HPMemory (blue, from the second act on). layer_objs.c writes it in the
+ * game's form; the economy report (docs/ECONOMY.md) tallies it. */
+enum { LOOT_FIND_CHIP, LOOT_FIND_ZENNY, LOOT_FIND_BUGFRAGS, LOOT_FIND_HP_MEMORY };
+typedef struct { int kind, value; char code; } LootFind;
+LootFind loot_mystery_roll(int param, int depth);
 /* An in-battle Mystery Data's four rewards, the game's encoding (bits
  * 14-15: 0 chip, 1 zenny, 3 BugFrags; a chip's id in bits 0-8, its code
  * in 9-13), one of which the game gives where it survives the battle
@@ -72,6 +80,11 @@ void loot_gem_rewards(int depth, uint16_t out[4]);
  * and a panel is free (a test's, --dev gem). */
 void loot_add_gem(Encounter *e);
 int chip_price(int id);
+/* The zenny a guardian's own battle pays where its reward row names his
+ * Navi chip (his chip comes with his Guardian Data): an Unlocker's price
+ * in his act (shop.c, add_keys), so busting him well pays the act's lock;
+ * by the plan's zenny (economy.h) */
+int loot_guardian_zenny(int depth);
 /* A reward chip's code, leaned to the folder's (docs/META.md): where it
  * rolled a letter and has one of the codes the folder holds most, that one,
  * always or half the time; a * stays a *. */

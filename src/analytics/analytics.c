@@ -288,6 +288,24 @@ static void setup_json(Json *j) {
 	json_member(j, "helpers", helpers);
 }
 
+void analytics_count_chip(AnalyticsEconomy *e, bool good, bool act1) {
+	++e->chips;
+	e->good += good;
+	e->chips1 += act1;
+	e->good1 += good && act1;
+}
+
+void analytics_count_md(AnalyticsEconomy *e, bool act1) {
+	++e->md;
+	e->md1 += act1;
+}
+
+void analytics_count_zenny(AnalyticsEconomy *e, int zenny, bool act1) {
+	if (zenny <= 0) return;
+	e->zenny += (uint32_t)zenny;
+	if (act1) e->zenny1 += (uint32_t)zenny;
+}
+
 void analytics_run_start(void) {
 	if (!sends()) return;
 	char out[ANALYTICS_PAYLOAD];
@@ -322,7 +340,7 @@ static const char *area_name(void) {
 	return guardian_area_name(b);
 }
 
-void analytics_run_end(bool won, const char *by) {
+void analytics_run_end(bool won, const char *by, const AnalyticsEconomy *e) {
 	if (!sends()) return;
 	char out[ANALYTICS_PAYLOAD];
 	Json j;
@@ -335,6 +353,17 @@ void analytics_run_end(bool won, const char *by) {
 	 * profile_played_frame) */
 	if (profile.played_run == run.seed && profile.played_frames) json_int(&j, "minutes", (int)((profile.played_frames + 1800) / 3600));
 	setup_json(&j);
+	/* (the economy's counts: the run's, then its first act's) */
+	static const AnalyticsEconomy none;
+	if (!e) e = &none;
+	json_int(&j, "chips", e->chips);
+	json_int(&j, "good", e->good);
+	json_int(&j, "md", e->md);
+	json_int(&j, "zenny", (int)e->zenny);
+	json_int(&j, "chips1", e->chips1);
+	json_int(&j, "good1", e->good1);
+	json_int(&j, "md1", e->md1);
+	json_int(&j, "zenny1", (int)e->zenny1);
 	payload_send(&j, true, false);
 }
 

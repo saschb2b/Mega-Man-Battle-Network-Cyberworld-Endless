@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /* Where they go: the game's own website on the owner's Umami (its reports
  * apart from the site's), the host its events name (it need not resolve),
@@ -93,9 +94,25 @@ void analytics_run_start(void);
  * and its most, the battle's frames (0 unknown) */
 enum { ANALYTICS_WON, ANALYTICS_LOST, ANALYTICS_LEFT };
 void analytics_guardian(int navi, int result, int hp, int max_hp, int frames);
+/* The run's economy, counted as it goes whatever the answer (docs/
+ * ECONOMY.md, the guard; the run log keeps them, runlog.h): the chips
+ * found (a battle's reward, a Mystery Data's, a Guardian Data's) and the
+ * good among them (3 stars or more, a Mega or a Giga), the Mystery Data
+ * opened and the zenny they and the battles paid, in the whole run and in
+ * its first act. Numbers only, nothing of the player. */
+typedef struct {
+	uint32_t seed;
+	uint16_t chips, good, md, chips1, good1, md1;
+	uint32_t zenny, zenny1;
+} AnalyticsEconomy;
+/* A chip found (`good` one), a Mystery Data opened, zenny earned, on the
+ * run's first act (`act1`) or past it */
+void analytics_count_chip(AnalyticsEconomy *e, bool good, bool act1);
+void analytics_count_md(AnalyticsEconomy *e, bool act1);
+void analytics_count_zenny(AnalyticsEconomy *e, int zenny, bool act1);
 /* ... a run over: won, or lost and `by` whom ("viruses", a guardian's
- * name, "ProtoMan") */
-void analytics_run_end(bool won, const char *by);
+ * name, "ProtoMan"), and its economy's counts (`e`, NULL none) */
+void analytics_run_end(bool won, const char *by, const AnalyticsEconomy *e);
 
 /* A payload's most bytes, and the system's queue of them (its lock held
  * round each call): ANALYTICS_QUEUE at most wait, more are dropped, never

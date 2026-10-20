@@ -18,8 +18,11 @@ void home_jobs_flag(int flag);
 void home_jobs_battle_start(void);
 void home_jobs_battle_frame(void);
 void home_jobs_battle_end(bool won, int hp, int frames);
-/* A layer left: its Mystery Data opened or not. */
+/* A layer left: its Mystery Data opened or not (and counted, below). */
 void home_jobs_layer_left(void);
+/* The layer's Mystery Data opened, and what they held, into the run's
+ * economy's counts (runlog.h): as it is left, or the run ends on it */
+void home_jobs_md_counted(void);
 /* Each frame on a layer: a Mr.Prog's patch, the guardian's fall. */
 void home_jobs_watch(void);
 /* MegaMan's word on the job, once a word can be said. */
