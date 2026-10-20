@@ -396,23 +396,18 @@ and the trade board's offers still read; the server refuses that game a
 trade, a post and an answer (NOTICE 28).
 
 1. MegaMan picks a Navi in the channel whose pass holds the Trade stamp
-   (the clerk lists no other) and the chip he offers. The picker is
-   BN6's own Order Service screen (`trade_order.c`): the shop's
-   descriptor pointed, while he is in the Square, at a copy of its text
-   archive in the desk's words, its list the run's spares
-   ([ROM_DATA.md](ROM_DATA.md), the Order Service). Where a spare is one
-   of BN5's past BN6's 319, the spares are a list in the clerk's chat
-   box instead, two to a box (flags
-   `0x14B0`-`0x14C3`, 20 at most): the order screen's list builder puts
-   each chip at its ID order plus 0x140 in a list of 640 entries, so one
-   past 319 would be written past its end.
+   (the clerk lists no other) and the chip he offers, on the **spares
+   list** (below).
 2. The other player's MegaMan hears the offer, goes to the desk and picks
-   a chip back, or says no.
-3. Both see the pair and say Deal; the server commits the trade only
-   when both accepted the same pair, and writes it to `trades.jsonl`
-   (`server/cyberworld_server/trade.py`). A stale or mismatched step,
-   a player gone, or five minutes without a step calls it off.
-4. Each game keeps the done trade in `trade.pending` and applies it at
+   a chip back on the same list (its note says what the offer is), or
+   says no.
+3. Both see the pair on the **chip trade** (below) and say Deal!; the
+   server commits the trade only when both accepted the same pair, and
+   writes it to `trades.jsonl` (`server/cyberworld_server/trade.py`). A
+   stale or mismatched step, a player gone, or five minutes without a
+   step calls it off.
+4. Each game keeps the done trade in `trade.pending` the moment the
+   server says it is done, wherever MegaMan stands, and applies it at
    home: on the way back from the Square, or at the next CONTINUE if the
    game was closed there. It runs BN6's own TakeChips and GiveChips on
    the gate's checkpoint (`online_trade_settle`), refuses a swap whose
@@ -427,12 +422,70 @@ One trade a visit: a game keeps one swap until it is home
 (NOTICE 21). Before this, a second trade in a visit overwrote the
 first's file: its partner got the chip, this game never gave it.
 
+### The two screens
+
+[Issue #145](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/145),
+the owner's model the Mega Man Battle Network Legacy Collection's trade
+screens: the trade was told in chat boxes, and the exchange itself, one
+that can't be undone, was never shown. Two PET screens of our own now
+show it, drawn by the engine over the game's picture as the NetPass is
+(`trade_screen.c` their course, `trade_screen_draw.c` their picture in
+the NetPass's colours and parts, `trade_screen_text.c` their PET text,
+`trade_list.c` the list's rows, sorts and filter; the game held under
+them, no key reaching the core, their closing A or B kept from BN6 till
+it is let go). The clerk's chat boxes stay for the talk around them
+(hello, whom, the board, the wants), MegaMan's words in `trade_words.c`.
+
+- **The spares list**, used wherever a chip is picked: an offer to a
+  Navi ("Offer a chip"), one back to his ("Offer one back", its note
+  "Alpha offers FireBrn1 F"), an answer to a board offer ("Answer an
+  offer", only the spares that meet its want, its note "Spares that fit:
+  a Fire chip") and a post ("Post an offer"). On the left a card of the
+  chip under the cursor: its picture and palette, name, code, element
+  icon, power and description, read from the player's ROM as it is drawn
+  (`second_art.c`'s readers, the chip registry's for BN5's chips, so
+  nothing of Capcom's is kept in a file); on the right MegaMan's spares
+  (copies past those his three folders hold), each row its icon, name,
+  code and count, the cursor's lit, six at a time with a scroll bar.
+  UP and DOWN move (round at the ends), LEFT and RIGHT a page, START
+  sorts by BN6's folder editor's first three keys, ID, ABCDE and Code
+  (the record's IDSortPos and AlphabetSortPos; the session keeps the
+  sort), A picks, B goes back. It replaces BN6's Order Service screen
+  (`trade_order.c`, gone) and the chat box's list it fell back on for a
+  BN5 chip past BN6's 319, whose list builder would have written past
+  its end; the screen lists any id the registry has.
+- **The chip trade** ("Chip trade", "With Beta"): both cards, You and
+  Them, the arrows between them, and No deal and Deal!, the cursor on No
+  deal as "Deal,Lan?" had it on No; B is No deal. After Deal! the cards
+  hold, "Waiting on Beta..." under them and the arrows pulsing, B calling
+  it off; when the server commits, the cards cross (MegaMan's over the
+  top, the other's under it, 40 frames) and land with BN6's jingle
+  (`SFX_GOT`, as the NetPass's full pass lands), "Traded!", and A closes
+  it; MegaMan then says "Deal! FireBrn1 F is ours once we're home!" as
+  before. Called off by the other player or the server meanwhile, it
+  closes and MegaMan says the trade's off. MegaMan's own answer or take
+  opens it at once; an answer to his offer, or his board offer taken,
+  first has his word ("Lan! Beta answered us!", "Lan! Alpha took our
+  offer!"), wherever he stands.
+
+The design (the game-design skill, interface): an exchange that can't be
+undone gets a screen that shows exactly what changes hands (error
+prevention, honest feedforward), with the friction matched to the
+stakes: one deliberate press past a default on the safe side, not a
+hold or a second question. The list makes the spares visible before
+anyone is asked (what is mine to offer, and what fits a want), so the
+board's answer is a choice among what fits rather than a guess. The
+swap is the session loop's payoff, juiced only as far as the state stays
+legible: the cards move, the sound plays once, and what landed is framed
+in gold. A second sort answers the same request AsterLand's Order
+Service answered (issue #124): ID, ABCDE and Code are BN6's own keys.
+
 ### The trade board
 
 A trade needs two players at the desk at once and a blind first offer;
 in a channel of a few players, most visits never find out who wants
 what. The board says it: each player may put **one offer** up at the
-clerk, a spare he **has** (picked on the order screen as a trade's chip
+clerk, a spare he **has** (picked on the spares list as a trade's chip
 is) and what he **wants** for it, from a fixed list: anything, a Fire,
 Aqua, Elec, Wood, Sword, Wind, Break or Cursor chip (BN6's own icon
 element, `BN6_CHIP_ELEMENT`), or a Mega (`BN6_CHIP_LIBRARY_TYPE`). The
@@ -1030,6 +1083,38 @@ server:
   states, the second screen's NETPASS panel in the Square, and the pass
   at 240x160, at 640x480 and on a phone held upright (1080x1920, the
   touch controls under it) captured headless.
+- **Trade Central's two screens** (20 October 2026, issue #145, a local
+  v9 server, the Linux build in `tools/play.py`, Alpha and Beta each with
+  BN5's ROM beside BN6's, `--scene home --run-depth 7`, spares from the
+  `chip` dev step). Alpha at the clerk, Offer a chip, Beta: the spares
+  list "Offer a chip", "To Beta", Cannon A and FireBrn1 F with their
+  counts and Cannon's card; FireBrn1 F picked, "SENT!". Beta heard the
+  offer, answered at the desk with Offer one back: the list "Offer one
+  back", its note "ALPHA OFFERS FIREBRN1 F", MrkCan1 M (411, BN5's)
+  picked, and the chip trade at once, You MrkCan1 M, Them FireBrn1 F, the
+  cursor on No deal. Alpha heard "Lan! Beta answered us!", then the same
+  pair the other way round; Alpha's Deal! ("Waiting on Beta...", B to call
+  it off), Beta's Deal!, the cards crossed on both and landed,
+  "Traded!"; `trades.jsonl` `[20,5]` for `[411,12]`, `trade.pending` on
+  both the moment it was done, then "Deal! FireBrn1 F is ours once we're
+  home!" and each game settled on its way home (the Pack's 2 to 1 and 0
+  to 1 on each). The board, the next visits: Beta posted MrkCan1 M from
+  the list ("Post an offer", "Trade board") for a Fire chip; Alpha, with
+  FireBrn2 S given, read "Beta HAS MrkCan1 M! WANTS A FIRE CHIP!",
+  Answer it: the list "Answer an offer", "SPARES THAT FIT: A FIRE CHIP",
+  FireBrn1 F and FireBrn2 S alone (Cannon A and MrkCan1 M left off);
+  FireBrn2 S taken, Alpha's chip trade at once, Beta's after "Lan! Alpha
+  took our offer!", Beta's Deal! first this time, the swap on both,
+  `[21,18]` for `[411,12]`, both settled at home. The screens captured
+  headless with the `trade` dev step (docs/DEVTOOLS.md) at 240x160,
+  640x480 and a phone held upright, BN6's FireBrn1 F and BN5's MrkCan1 M
+  on the cards, every sort and the swap's frames. And the game font's
+  narrow glyphs: BN6's l, i, j, r, I, 1, !, :, ; and the brackets stand in
+  their 8-pixel cells with blank columns on their left, which the
+  engine's letters, drawn at their advance, read as a gap before them
+  ("Team Co lone l's ROM" on the NetPass); each now starts one column in,
+  as the round letters do (`gfx.c`), seen on the pass with BN6's ROM
+  alone.
 
 **NetBattles in the browser** (20 October 2026, a local v9 server,
 headless Chrome, the harness in `.build/`): two browser tabs fought a
@@ -1077,6 +1162,16 @@ are in the history before 433865a8):
   controls' A and B close it). A trade's settling at home and a
   WEEK_POST refused for the stamp were not played again here (the
   server's tests hold the refusal).
+- **Trade Central's screens, what is left** (issue #145): seen headless
+  on the host and Linux builds, keys from `tools/play.py`, and on a
+  phone's screen headless the touch controls' D-pad and A picking a chip,
+  A on No deal and B declining (`--taps`); on the 3DS, Android, iOS, the
+  browser and the handhelds they are built, untried. The spares list has
+  no touch of its own on its rows. A trade called off by
+  the other player while the list is up for an answer is found only when
+  the answer is sent (the server's NOTICE, and MegaMan's "The trade's
+  off"). The second screen shows the NETPASS panel meanwhile, not the
+  chips.
 - **The Arena on the New 3DS:** measured, not offered
   ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)): a pair frame 25.8 ms
   with its picture, 20.7 without, two GBAs on one ARM11 core. What is

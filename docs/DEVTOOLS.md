@@ -390,6 +390,22 @@ python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "300:,0:net
 python3 build.py shot --scene emu --run-depth 2 --frames 560 --input "300:,0:netpass stamp" --shot-range 300:500:/src/.build/np/stamp
 ```
 
+Trade Central's two screens (docs/ONLINE.md, The two screens) open in a
+run, out of the Square, with the dev step `trade`: `trade list` lists
+the run's spares (the `chip` step gives some, each one written over the
+folder's first entry, so the one before stays a spare), `trade list 1`
+those that meet a want (online_board.h's numbers, 1 a Fire chip), and
+`trade deal 20 5 411 12` shows the chip trade of FireBrn1 F for MrkCan1
+M, `trade swap` then swapping its cards as a done trade does. The other
+player is "Beta"; nothing is sent, and what is chosen is printed
+("trade preview: picked 411 12"):
+
+```bash
+CHIPS="250:,0:chip 1 A 1,0:chip 20 F 1,0:chip 411 M 1,0:chip 413 E 1"
+python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "$CHIPS,0:trade list,30:,3:START,30:" --shot "300:/src/.build/tc/list.bmp"
+python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "$CHIPS,0:trade deal 20 5 411 12,30:,3:RIGHT,20:,3:A,30:,0:trade swap,60:" --shot-range 250:400:/src/.build/tc/deal
+```
+
 The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
 data folder whose `network.ini` names a server and its consent (above),
 the arrival's chats paged, `0:place 16 72 3` and a step off and on.

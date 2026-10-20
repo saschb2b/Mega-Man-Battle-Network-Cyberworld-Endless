@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Trade Central shows the trade (issue #145).** Two screens of their
+  own, after the Legacy Collection's: the spares list, where every chip
+  for a trade is picked (an offer, one back, a board offer's answer, a
+  post), a card of the chip under the cursor (its picture, code, element,
+  damage and description from your ROM, BN5's chips too) beside your
+  spares with their codes and counts, START sorting by ID, ABCDE or Code;
+  answering a board offer lists only the spares that fit its want. And
+  the chip trade: both chips, You and Them, No deal and Deal!, the cursor
+  on No deal; once both say Deal! the cards swap places with BN6's
+  jingle. They replace BN6's Order Service screen and "Deal,Lan?". The
+  game font's narrow letters no longer stand apart ("Colonel's" on the
+  NetPass).
 - **NetBattles in the browser.** The browser build battles in the Net
   Square as the other systems do, rollback and watching from the stands
   included, against another browser or a game on a computer. The
