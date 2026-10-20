@@ -259,6 +259,13 @@ sets the band's centre in `economy.c` with the before and after in its
 commit. The run log's `bust` and `reward` (below) check its battles
 against the game.
 
+`--economy-plan proposed` on the game's binary plays a game under the
+proposal's plan (`build.py shot`, `tools/play.py start NAME --
+--economy-plan proposed`), to feel it before deciding: its layers lay and
+hold what the report's proposal column measures. A dev's look only, in
+a data folder of its own: a run saved under one plan and continued under
+the other makes its layer again otherwise.
+
 ## Run log
 
 Every battle and every finished run is appended to `runlog.txt` in the data

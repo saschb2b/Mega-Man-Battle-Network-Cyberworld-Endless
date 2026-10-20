@@ -408,6 +408,8 @@ zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
    plan in play becomes the proposal's (`econ_plan`) and its bands with
    it. A change that moves a number on purpose sets its band's centre in
    the same commit, with the report's before and after in its message.
+   `--economy-plan proposed` plays a game under the proposal before the
+   decision (docs/DEVTOOLS.md).
 2. **The curves' tests.** `tests/test_core.c`'s `test_economy`: every
    proposed curve starts at its floor, ends at 1, rises ever more slowly
    and never past today's; today's plan is 1 everywhere and draws no random
