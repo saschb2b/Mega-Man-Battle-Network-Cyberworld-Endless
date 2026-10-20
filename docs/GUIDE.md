@@ -1008,7 +1008,10 @@ site and the browser version and serves them on `http://localhost:8080`;
 `python3 build.py screenshots` retakes the screenshots in
 `docs/screenshots` from scripted headless runs, and `python3 build.py clips`
 records the site's short videos (WebM and MP4, `docs/clips`, and a GIF of
-the README's clips) the same way. `python3 build.py release`
+the README's clips) the same way. Those of online play (`online-*`) need
+other players, so they come from several games at once in a Square of their
+own on a local server (`tools/online_pictures.py`: the Linux build and the
+server, built first; `--keep` reuses the scenes captured). `python3 build.py release`
 writes the release files to `build/release/`, each named for its system:
 `cyberworld-endless-portmaster.zip` for PortMaster; for Linux the
 AppImage (with its `.zsync` for updates), the `.deb` and the tar.gz; and
