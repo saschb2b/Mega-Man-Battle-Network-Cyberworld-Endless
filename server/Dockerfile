@@ -7,7 +7,9 @@ RUN python3 server/build.py --output /dist/cyberworld-server.pyz
 
 FROM python:3.12-slim
 RUN useradd --system --uid 10001 --no-create-home cyberworld
-RUN mkdir -p /data && chown 10001:10001 /data && chmod 700 /data
+# (/backups: an empty named volume mounted there takes this owner, for
+# deploy/coolify/compose.yaml's backup service)
+RUN mkdir -p /data /backups && chown 10001:10001 /data /backups && chmod 700 /data /backups
 COPY --from=build /dist/ /app/
 USER 10001
 EXPOSE 8765

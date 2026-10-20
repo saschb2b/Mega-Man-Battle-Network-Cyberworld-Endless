@@ -1,34 +1,22 @@
-"""Local-only moderation. Filesystem access to the private state is authority."""
+"""Local-only moderation. Filesystem access to the private state is authority.
+
+`forget` answers a player's request to be removed (server/README.md, The
+official server): his public identity out of every record that names it,
+but a ban or a mute, which stays while it lasts."""
 
 import argparse
-import contextlib
 import json
-import os
 from pathlib import Path
 import time
 
-from .week import week_of
-from .identity import KICK_MINUTES, kick_expires, prune_kicks, public_id, read_json, write_json
+from .week import compact, week_of
+from .identity import (KICK_MINUTES, kick_expires, prune_kicks, prune_moderation, public_id, read_json,
+                       state_lock, write_json)
+from .retention import PlayersLog
+from .trade import prune_log
 
-ACTIONS = ("list", "ban", "unban", "mute", "unmute", "kick", "unkick", "hide", "unhide")
+ACTIONS = ("list", "ban", "unban", "mute", "unmute", "kick", "unkick", "hide", "unhide", "forget")
 KICK_MAX_MINUTES = 7 * 24 * 60
-
-
-@contextlib.contextmanager
-def locked(directory):
-    descriptor = os.open(directory / "moderation.lock", os.O_RDWR | os.O_CREAT, 0o600)
-    with os.fdopen(descriptor, "r+b") as stream:
-        if os.name == "nt":
-            import msvcrt
-            if not stream.read(1):
-                stream.write(b"0")
-                stream.flush()
-            stream.seek(0)
-            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
-        else:
-            import fcntl
-            fcntl.flock(stream, fcntl.LOCK_EX)
-        yield
 
 
 def perform(action, directory, identity=None, reason="", minutes=None, week=None):
@@ -45,12 +33,14 @@ def perform(action, directory, identity=None, reason="", minutes=None, week=None
     if not identity:
         raise ValueError("An identity from the local player roster is required")
     identity = public_id(identity)
+    if action == "forget":
+        return forget(directory, identity)
     if len(reason) > 160 or any(ord(c) < 32 for c in reason):
         raise ValueError("Reason must be at most 160 characters with no control characters")
     minutes = KICK_MINUTES if minutes is None else minutes
     if not 1 <= minutes <= KICK_MAX_MINUTES:
         raise ValueError(f"A kick lasts 1 to {KICK_MAX_MINUTES} minutes; ban for longer")
-    with locked(directory):
+    with state_lock(directory):
         now = time.time()
         rules = read_json(directory / "moderation.json", {"bans": {}, "mutes": {}, "kicks": {}, "hidden": {}})
         prune_kicks(rules, now)
@@ -75,6 +65,20 @@ def perform(action, directory, identity=None, reason="", minutes=None, week=None
     if action == "hide":
         result["week"] = entries[identity]["week"]
     return result
+
+
+def forget(directory, identity):
+    """A public identity taken out of the trades' log (its side of each
+    trade blanked, the other's kept), the Board's log, the players' logs
+    and moderation.json's kicks and hidden entries. The running server
+    shows its entries on this week's Board until it restarts; the backups
+    hold them until they age out."""
+    _, trades = prune_log(directory, 0, forget=identity)
+    _, board = compact(directory, 0, forget=identity)
+    logs = PlayersLog(directory).forget(identity)
+    moderation = prune_moderation(directory, time.time(), forget=identity)
+    return {"action": "forget", "identity": identity, "trades": trades, "board": board, "logs": logs,
+            "moderation": moderation, "then": "restart the server, which reads the Board only as it starts"}
 
 
 def main():

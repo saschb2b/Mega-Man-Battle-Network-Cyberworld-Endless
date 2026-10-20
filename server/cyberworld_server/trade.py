@@ -15,20 +15,43 @@ trades. Taking one starts a trade with both chips named, the poster's
 the one on the board; his game checks the want before its Deal. A
 session trades once: its game keeps one swap until it is home. The board
 is every game's to read: a game without BN5's ROM is sent its offers but
-BN5's chips, which it could not name."""
+BN5's chips, which it could not name.
+
+Each commit is a line of the state directory's `trades.jsonl` (the time,
+both public identities and the chips each gave), kept `trade_days` days
+(retention.py) for a moderator to go on."""
 
 import asyncio
-import json
-import os
 import time
 
 from . import protocol, websocket
+from .identity import append_log, rewrite_log
 
 OFFERED, WAITING, ANSWERED, ACCEPTED, DONE, CANCELLED = range(1, 7)
 PROPOSE, ANSWER, ACCEPT, CANCEL, TAKE = range(1, 6)
 OFFER_WAIT = 1.0      # seconds between a player's posts on the board
 TIMEOUT = 300         # seconds a trade may rest without progress: a walk to the desk and a chip picked
 NONE = (0, 0)
+LOG = "trades.jsonl"
+
+
+def prune_log(directory, cutoff, forget=None):
+    """trades.jsonl without the trades committed before `cutoff` (seconds
+    since 1970), and with `forget`'s identity blanked in those kept (the
+    other side's record stays): the lines dropped and the sides blanked."""
+    blanked = []
+
+    def keep(entries):
+        kept = []
+        for entry in entries:
+            if not isinstance(entry.get("time"), (int, float)) or entry["time"] < cutoff:
+                continue
+            sides = [side for side in ("a", "b") if forget and entry.get(side) == forget]
+            entry.update({side: "" for side in sides})
+            blanked.extend(sides)
+            kept.append(entry)
+        return kept
+    return rewrite_log(directory, LOG, keep)[1], len(blanked)
 
 
 class Trade:
@@ -196,13 +219,8 @@ class Trades:
         self.done.update((trade.a, trade.b))
         if trade.a in players:
             self.withdraw((trade.a, trade.b), players[trade.a].channel)
-        if self.server.store.directory:
-            self.log_task = asyncio.create_task(asyncio.to_thread(self.write_log, entry))
-
-    def write_log(self, entry):
-        path = os.path.join(self.server.store.directory, "trades.jsonl")
-        with open(path, "a", encoding="utf-8") as log:
-            log.write(json.dumps(entry, separators=(",", ":")) + "\n")
+        if self.server.store.directory and self.server.retention.trade_days:
+            self.log_task = asyncio.create_task(asyncio.to_thread(append_log, self.server.store.directory, LOG, entry))
 
     def left(self, player):
         """A player gone from his channel (left the server, replaced, or changed channel)."""
