@@ -6,7 +6,7 @@
   Square is everyone's, and NetBattles, trades and the week's deep net
   need every game this version supports online, BN6 Cybeast Gregar (USA)
   and BN5 Team Colonel (USA). A NetPass key item in the PET shows it: A
-  on it opens the pass, with its four stamps (Square, Arena, Trade,
+  on it opens the pass (START in the Square), with its four stamps (Square, Arena, Trade,
   DeepNet) and the cartridges that earn them. It shows at the gate
   before you go too, and on the second screen in the Square. With BN6
   alone you hold the Square stamp: walking, phrases, cheering, cards, the

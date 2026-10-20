@@ -167,7 +167,7 @@ and the new stamps land one by one, each with a white flash and BN6's
 item jingle (sound `0x73`), then the header turns to "★ Full pass" with
 BN6's sound `0x95`. Both sounds are BN6's own, read from the player's
 ROM and played by the engine's MP2K mixer over the game (`audio_sfx`),
-not by the core. A or B closes it once the stamping is done. It happens
+not by the core. A or B while the stamps land lands them all at once; A or B after closes it. It happens
 once: the most stamps the game has seen is kept in a small file of its
 own in the data folder, `netpass.ini` (`stamps=4`), never in the run's
 save: the pass follows the player's ROMs, not a run. A game with BN6's
@@ -989,6 +989,38 @@ server:
   answered); the dive's flag is the Square's one left free, `0x14AF`. The
   transport took no WEEK_POST until it was named among its own messages.
   An autopilot run (15000 frames, seed 1) ended as runs do.
+- **The NetPass** (20 October 2026, issue #131, protocol v9, a local
+  server, the Linux build in `tools/play.py`: Alpha and Gamma with BN5's
+  ROM beside BN6's, Beta with BN6's alone, `--scene home --run-depth 7`).
+  The server's join lines named the ROMs (`"roms":1`, `"roms":0`). Beta
+  in the Square: START opened the Square pass ("1 of 4", the BN5 slot
+  open, "Team Colonel's ROM stamps Arena, Trade and DeepNet"); the
+  referee said "NO ARENA STAMP ON YOUR NETPASS!", the clerk "HMM... NO
+  TRADE STAMP ON YOUR NETPASS!", the greeter "THIS WEEK'S DEEP NET IS
+  OPEN!" and "BUT YOUR NETPASS HAS NO DEEPNET STAMP! SORRY!" with no
+  question. Alpha's first visit: the greeter's "WHOA! YOUR NETPASS HAS
+  ROOM FOR EVERY STAMP NOW!", the pass with Arena, Trade and DeepNet
+  landing one by one, then "★ Full pass", and `netpass.ini` saying
+  `stamps=4`; Alpha's and Gamma's next visits had no moment. Alpha
+  reading Beta's card: "His NetPass has just the Square stamp." and Wave,
+  Mute, Block, no Battle; Gamma reading Alpha's: Battle first. Gamma's
+  challenge, Alpha's Yes, and a NetBattle by full rules (`arenahp=12`)
+  to its end at frame 4,944 on both: the same installs' record
+  (1,913,709 bytes, 132 hooks) and ready hash, all 82 hashes agreeing,
+  rollback on (window 9, delay 2; 469 and 515 rollbacks), Gamma the
+  winner. Then a trade between the two: the clerk listing Gamma alone,
+  Alpha's spares Cannon A and MrkCan1 M (411, BN5's, in the clerk's
+  list), MrkCan1 M offered, Gamma's Cannon A back from the order screen,
+  both Deals, `trades.jsonl`'s `[411,12]` for `[1,0]` and
+  `trade.pending` on both. A ROM-free client with BN6's identity alone,
+  at the same server, was answered NOTICE 28 ("That needs the full
+  NetPass") to an ARENA challenge, a TRADE proposal, an OFFER post and a
+  WATCH. In a run (seed 7, `--run-depth 2`): the PET's KeyItem listed
+  NetPass with its description, A opened the pass, B closed it back to
+  the KeyItem screen. The gate's strip over MegaMan's question in both
+  states, the second screen's NETPASS panel in the Square, and the pass
+  at 240x160, at 640x480 and on a phone held upright (1080x1920, the
+  touch controls under it) captured headless.
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
@@ -1021,10 +1053,10 @@ are in the history before 433865a8):
   handhelds it is built, untried. A pass's stamp moment plays on the
   next visit after BN5's ROM is added, but a game that loses BN5's ROM
   and gets it back does not see it again (`netpass.ini` keeps the most
-  stamps seen). The server's NOTICE 28 was checked by its tests, not
-  forced from a modified game against a running server. The pass is
-  read as the screen shows; touch has no button of its own on it (the
-  touch controls' A and B close it).
+  stamps seen). Touch has no button of its own on the pass (the touch
+  controls' A and B close it). A trade's settling at home and a
+  WEEK_POST refused for the stamp were not played again here (the
+  server's tests hold the refusal).
 - **The Arena on the 3DS and in the browser** (rollback runs wherever the
   Arena does). There, the stands are the report alone (seen in the
   browser; the 3DS's untried).
