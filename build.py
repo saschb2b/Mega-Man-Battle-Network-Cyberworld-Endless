@@ -1612,7 +1612,6 @@ CLIPS = [
     ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1200, 1470),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
-    ('jackin', ['--scene', 'title'], {}, '120:,4:START,60:,4:A,200:', 110, 222),
     # (the areas walked, layer 1 by the weak autopilot past MegaMan's words;
     # on BN6's ROM alone, but acdc-bn5, with BN5's beside it: docs/MULTIROM.md)
     ('sky', AREA_WALK + ['--net-biome', '2', '--seed', '2'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 620),
@@ -1695,7 +1694,7 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
-               'online-square': (None, 15), 'online-netpass': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12)}
+               'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12)}
 
 
 def clips(only=None):
