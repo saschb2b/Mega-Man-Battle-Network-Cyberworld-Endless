@@ -29,7 +29,6 @@
 #include "square_words.h"
 #include "talk.h"
 #include "trade_central.h"
-#include "trade_screen.h"
 
 /* The Square's event flags (its own map's, free while MegaMan is there) */
 #define SAY_FLAG     0x1480   /* + phrase 0-7 */
@@ -275,8 +274,7 @@ bool online_chat_update(const OnlineSnapshot *s) {
 }
 
 uint32_t online_chat_keys(uint32_t keys) {
-	/* (Trade Central's screens, or the NetPass, up over the Square: the game held under it) */
-	if (trade_screen_update()) return 0;
+	/* (the NetPass up over the Square: the game held under it) */
 	if (netpass_screen_update()) return 0;
 	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT);
 	keys &= ~(uint32_t)(KEY_START | KEY_SELECT);

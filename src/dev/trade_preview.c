@@ -1,10 +1,9 @@
-/* trade_preview.h. */
-#include "trade_preview.h"
-
+/* Trade Central's screens in a run, for a capture (devtools.h). */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "devtools.h"
 #include "online_board.h"
 #include "trade_central.h"
 #include "trade_screen.h"

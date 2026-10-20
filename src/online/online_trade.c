@@ -10,6 +10,7 @@
 #include "game.h"
 #include "gamecall.h"
 #include "online_transport.h"
+#include "trade_list.h"
 #include "trade_words.h"
 
 #define FOLDERS 3        /* Folder1, Folder2 and the ExtraFolder: 30 entries each, 0x3C apart */
@@ -126,10 +127,10 @@ int online_trade_spares(TradeChip *out, uint8_t *count, int cap) {
 			uint8_t code = rec[BN6_CHIP_CODES + s], have = emu_read8(at + s);
 			if (code > ONLINE_CODE_LAST || !have) continue;
 			TradeChip c = { (uint16_t)id, code };
-			int spare = have - in_folders(c);
-			if (spare <= 0 || !chip_ok(c)) continue;
+			int spare = trade_list_spare(have, in_folders(c));
+			if (!spare || !chip_ok(c)) continue;
 			out[n] = c;
-			count[n++] = (uint8_t)(spare > 99 ? 99 : spare);
+			count[n++] = (uint8_t)spare;
 		}
 	}
 	return n;

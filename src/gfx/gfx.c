@@ -593,6 +593,15 @@ int text_code(unsigned char ch) {
 	}
 }
 
+/* a glyph's first drawn column in its 8-pixel cell (8: none) */
+static int glyph_left(const uint8_t *g) {
+	int minx = 8;
+	for (int i = 0; i < 64; ++i)
+		for (int k = 0; k < 2; ++k)
+			if ((k ? g[i] >> 4 : g[i] & 15) && 2 * (i % 4) + k < minx) minx = 2 * (i % 4) + k;
+	return minx;
+}
+
 static void build_font(void) {
 	/* Atlas of 16x16 cells indexed by byte 0-127 (1-5 are version marks,
 	 * 32-127 ASCII). Fill is white so it can be tinted; shade stays dark. */
@@ -608,11 +617,7 @@ static void build_font(void) {
 		 * its left, BN6's l, i and ! three: drawn at their advance, those
 		 * read as a gap before it, "Co lone l's" (issue #145); each glyph
 		 * starts one column in, as the round letters do) */
-		int minx = 8;
-		for (int i = 0; i < 64; ++i)
-			for (int k = 0; k < 2; ++k)
-				if ((k ? g[i] >> 4 : g[i] & 15) && 2 * (i % 4) + k < minx) minx = 2 * (i % 4) + k;
-		int shift = minx > 1 && minx < 8 ? minx - 1 : 0;
+		int minx = glyph_left(g), shift = minx > 1 && minx < 8 ? minx - 1 : 0;
 		int maxx = 0;
 		for (int half = 0; half < 2; ++half) {
 			for (int py = 0; py < 8; ++py) {

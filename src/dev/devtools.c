@@ -27,7 +27,6 @@
 #include "souls.h"
 #include "soulunite.h"
 #include "text.h"
-#include "trade_preview.h"
 
 DevFlags dev = { .speed = 1, .duels = -1, .arena_lag = -1, .arena_roll = -1, .arena_window = -1 };
 char devtools_shot[512];

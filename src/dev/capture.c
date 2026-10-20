@@ -20,7 +20,6 @@
 #include "flags.h"
 #include "game.h"
 #include "netpass_screen.h"
-#include "trade_preview.h"
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"

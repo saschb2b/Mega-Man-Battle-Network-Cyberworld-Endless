@@ -60,6 +60,8 @@ void online_scene_end(void) {
 }
 
 uint32_t online_scene_keys(uint32_t keys) {
+	/* (Trade Central's screens up over the Square: the game held under them) */
+	if (trade_screen_update()) return 0;
 	return online_chat_keys(keys);
 }
 
