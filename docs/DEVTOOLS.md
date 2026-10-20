@@ -379,6 +379,21 @@ BN6's in each game's `--rom-dir`; a game with BN6's alone tries the
 Square stamp's side, the referee's and the clerk's word on a missing
 stamp among it. Never point a test at the official server.
 
+The NetPass (docs/ONLINE.md, The NetPass) opens over any screen with the
+dev step `netpass` (`0:netpass` in a shot's `--input`, `netpass` in
+`tools/play.py`), and its stamp moment with `netpass stamp`, which also
+writes the data folder's `netpass.ini` as the greeter does. A folder of
+BN6's ROM alone (`CYBERWORLD_ROM_DIR` naming one) gives the Square pass:
+
+```bash
+python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "300:,0:netpass" --shot "360:/src/.build/np/full.bmp"
+python3 build.py shot --scene emu --run-depth 2 --frames 560 --input "300:,0:netpass stamp" --shot-range 300:500:/src/.build/np/stamp
+```
+
+The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
+data folder whose `network.ini` names a server and its consent (above),
+the arrival's chats paged, `0:place 16 72 3` and a step off and on.
+
 ## The Arena on one machine
 
 `--dev arena` starts on a Practice NetBattle of BN6's own between two

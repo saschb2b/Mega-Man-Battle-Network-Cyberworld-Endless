@@ -767,7 +767,7 @@ whole Square but NetBattles, trades and the dive. On the 3DS and in the
 browser, which have no NetBattle, a full pass trades and dives.
 
 Open the pass from the PET: **KeyItem**, then A on **NetPass**; A or B
-closes it. It also shows across the top of the screen while MegaMan asks
+closes it. In the Square, where the PET stays shut, **START** opens it. It also shows across the top of the screen while MegaMan asks
 about going to the Square at the gate, and on a second screen (the 3DS's
 bottom screen, an Android handheld's second display) while you are in
 the Square. The first visit with a full pass, the greeter Mr.Prog stamps

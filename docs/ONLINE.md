@@ -49,9 +49,9 @@ one entry there: the stamps that need it go back to open until a player
 has it in, which the release notes and the site announce ahead.
 
 The **NetPass** shows it, and is the one place that names which game
-earns which stamp: a key item in Lan's PET, a strip at the gate and a
-panel on the second screen. Characters speak only of stamps, never of
-ROMs.
+earns which stamp: a key item in Lan's PET (START in the Square), a strip
+at the gate and a panel on the second screen. Characters speak only of
+stamps, never of ROMs.
 
 ### Why
 
@@ -125,9 +125,14 @@ is yours." once the set is complete.
 It shows in three places:
 
 - **In the PET**, as a key item (`0x4A`, among the ids BN6 leaves
-  nameless that the run's own items use), always shown, in a run and in
-  the Square. A on it opens the pass over the KeyItem screen; A or B
-  closes it ([PET.md](PET.md#keyitem-what-the-profile-holds)).
+  nameless that the run's own items use), always shown. In a run A on it
+  opens the pass over the KeyItem screen; A or B closes it, the game's
+  keys held meanwhile and its closing button kept from BN6 until it is let
+  go ([PET.md](PET.md#the-netpass)). **In the Square, START** opens it:
+  BN6's PET stays shut there (`online_chat.c` takes START, as before),
+  since what its screens change is the Square's RAM, thrown away on the
+  way home, so START, the PET's own button, is the nearest clean way to
+  the same screen (`netpass_screen.c`).
 - **At the gate** in Lan's HP: while MegaMan asks "To the Net
   Square,Lan?", a strip over the top of the screen shows the pass's level
   and its four stamps, so the player sees what the visit opens before
@@ -145,25 +150,40 @@ card only where both games hold the Arena stamp, and "WANNA WATCH?" is
 not asked without it. Trade Central's clerk tells a game without the
 Trade stamp that it has none, and lists only Navis whose pass holds one;
 the board's offers still read. The greeter offers the week's DeepNet dive
-only to a full pass. A card names no game's chips any more: "His PET
-holds BN5 chips too!" and "His PET holds BN6 chips only." went with the
-common ground.
+only to a full pass; to the rest "THIS WEEK'S DEEP NET IS OPEN!" and "BUT
+YOUR NETPASS HAS NO DEEPNET STAMP! SORRY!", and a dive's end waits to be
+posted until a visit with the stamp. A card names no game's chips any
+more: "His PET holds BN5 chips too!" and "His PET holds BN6 chips only."
+went with the common ground; MegaMan reading a card whose pass is not
+full says "His NetPass has just the Square stamp.", which is why Battle
+is not among its options.
 
 ### The stamp moment
 
-The first visit to the Square after the pass becomes full, the greeter
-stamps the new stamps one by one, each with a jingle of BN6's own played
-through the game, then says "★ Full pass". It happens once: the most
-stamps the game has seen is kept in a small file of its own in the data
-folder, `netpass.ini`, not in the run's save: the pass follows the
-player's ROMs, not a run.
+The first visit to the Square after the pass becomes full, once MegaMan
+is free on the map, the greeter says "WHOA! YOUR NETPASS HAS ROOM FOR
+EVERY STAMP NOW!" and "HOLD STILL! STAMP,STAMP,STAMP!"; the pass opens
+and the new stamps land one by one, each with a white flash and BN6's
+item jingle (sound `0x73`), then the header turns to "★ Full pass" with
+BN6's sound `0x95`. Both sounds are BN6's own, read from the player's
+ROM and played by the engine's MP2K mixer over the game (`audio_sfx`),
+not by the core. A or B closes it once the stamping is done. It happens
+once: the most stamps the game has seen is kept in a small file of its
+own in the data folder, `netpass.ini` (`stamps=4`), never in the run's
+save: the pass follows the player's ROMs, not a run. A game with BN6's
+ROM alone has no moment (its one stamp is every game's).
 
 ### The 3DS and the browser
 
 They build no Arena (`CW_ARENA`). The pass is the same there: its stamps
 follow the ROMs, as the server's rule does, so with BN5's ROM they trade
-and dive. Battle and Watch are not offered there, as before, and the
-pass's PET text says the ring needs another system.
+and dive, and the Arena stamp shows held. Battle and Watch are not
+offered there, as before (the referee: "SORRY! NO NETBATTLES FROM THIS
+PET!"), and the pass's PET text says so in place of the whole Net's:
+"Every game in! NetBattles need a PC or a phone." The second screen's
+panel draws the pass's words in the engine's small font, its pixel
+letters being a texture's, which a picture drawn into memory (the 3DS's
+bottom screen) cannot use.
 
 ### On the wire
 
@@ -994,7 +1014,17 @@ are in the history before 433865a8):
   end here; the 3DS's and the browser's dives are untried.
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
-- **The NetPass, what is left:** (to be filled)
+- **The NetPass, what is left:** seen headless on the host and Linux
+  builds only (the KeyItem's A in a run, START in the Square, the gate's
+  strip, the second screen's panel, the stamp moment, the referee, the
+  clerk, the greeter); on the 3DS, Android, iOS, the browser and the
+  handhelds it is built, untried. A pass's stamp moment plays on the
+  next visit after BN5's ROM is added, but a game that loses BN5's ROM
+  and gets it back does not see it again (`netpass.ini` keeps the most
+  stamps seen). The server's NOTICE 28 was checked by its tests, not
+  forced from a modified game against a running server. The pass is
+  read as the screen shows; touch has no button of its own on it (the
+  touch controls' A and B close it).
 - **The Arena on the 3DS and in the browser** (rollback runs wherever the
   Arena does). There, the stands are the report alone (seen in the
   browser; the 3DS's untried).

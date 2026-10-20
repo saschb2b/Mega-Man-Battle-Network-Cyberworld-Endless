@@ -599,7 +599,7 @@ Folder (BN6's names; the second's Regular and TagChips at NaviStats
 +0x2F and +0x58, bn6f's NaviStats; the Extra Folder has none of its own
 here). `arena_folders_fitting` says which can go: each that holds a chip
 (`arena_folder_holds`). Where more than one can, MegaMan asks in BN6's
-chat box, "Lan,which folder goes?" (`arena_folder.c`, flags
+chat box, "Which folder goes,Lan?" (`arena_folder.c`, flags
 `0x14A1`-`0x14A4`); B sends nothing. Where one can, it goes unasked. A
 run holds Folder1 alone (no run hands out Folder2 or the Extra Folder),
 so the question shows only with the `folder` dev step (DEVTOOLS.md). The

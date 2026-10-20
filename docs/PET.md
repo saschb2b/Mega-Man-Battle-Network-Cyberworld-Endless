@@ -75,7 +75,7 @@ three open the golden gate) and four of the profile's, in the ids
 | NaviCode | once a guardian has been deleted twice (the Navi gates' code, docs/META.md) | whose codes MegaMan holds, two by name, and that each opens its gate |
 | DarkPass | once the Secret Area has been cleared in any run | that the dark way to the Undernet is open |
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
-| NetPass | always, in a run and in the Net Square | what the player's games open online, as stamps; A opens the pass |
+| NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
 
 The Spins show with BN6's own words, those the profile has found in the
 net, one a run (docs/META.md): each lets a held NaviCust program of its
@@ -95,12 +95,16 @@ not move under it.
 
 BN6 itself opens a screen from A on a key item (bn6f's `sub_8128BF0`,
 for key item `0x40`), so a key item that opens one is BN6's own way. The
-engine
-reads the KeyItem screen's cursor to know which item A was pressed on:
-the PET screen's state at `0x02009A30` (+0x0D the column, +0x20 the row,
-+0x24 the scroll) and the list of held items at `0x0201BF00`, two bytes
-an entry, the entry under the cursor at (scroll + row) * 2 + column
-([ROM_DATA.md](ROM_DATA.md), the PET).
+engine reads the KeyItem screen's cursor to know which item A was
+pressed on (`pet_key_item` in `pet.c`, no hook): the PET screen's state
+at `0x02009A30` while it takes input (+0x01 and +0x02 both 4), +0x0D the
+column, +0x20 the row, +0x24 the scroll, and the list of held items at
+`0x0201BF00`, two bytes an entry, the entry under the cursor at
+(scroll + row) * 2 + column ([ROM_DATA.md](ROM_DATA.md), the KeyItem
+screen's cursor). A on any item but `0x40` does nothing in BN6, so the A
+that opens the pass is also kept from the game. In the Net Square BN6's
+PET stays shut (its screens would change the Square's RAM, thrown away
+on the way home); START opens the same pass there.
 
 ## How the entries are taken over
 

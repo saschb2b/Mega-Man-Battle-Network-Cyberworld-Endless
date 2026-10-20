@@ -25,9 +25,9 @@ const char *arena_folder_name(int k) {
 	return names[k >= 0 && k < 3 ? k : 0];
 }
 
-const char *arena_folder_words(void) { return "Lan,which folder\ngoes?"; }
+const char *arena_folder_words(void) { return "Which folder goes,\nLan?"; }
 
-const char *arena_no_folder_words(void) { return "Lan,we have no folder\nfor a NetBattle..."; }
+const char *arena_no_folder_words(void) { return "Lan,we have no\nfolder for a\nNetBattle..."; }
 
 const char *arena_challenged_question(void) { return "Take it,Lan?\n"; }
 
