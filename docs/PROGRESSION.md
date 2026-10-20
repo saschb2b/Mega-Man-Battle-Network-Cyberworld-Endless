@@ -529,7 +529,14 @@ Fixed on the way:
 - `tests/test_core.c` checks the acts, bands, versions, area tiers, guardian
   choice and heals without a ROM.
 - `runlog.txt` in the data folder records every battle (area, foes, their
-  HP, MegaMan's HP before and after) and where each run ended.
+  HP, MegaMan's HP before and after, the zenny on hand, a win's busting
+  level and reward) and where each run ended.
+- `python3 build.py economy` measures what a run hands out, act by act:
+  chips, good chips, codes, zenny against what there is to buy, Mystery
+  Data (docs/ECONOMY.md, docs/DEVTOOLS.md), today's and the proposal's
+  side by side, today's against its bands. It reports 0 outside them
+  now; a change to drops, prices or Mystery Data runs it as a change to
+  battles runs the pacing report.
 
 ## Where it is decided
 
@@ -544,7 +551,7 @@ Fixed on the way:
 | The layer's nets: a territory, the deep, the older net's chips | `src/core/loot.c` (`loot_layer_nets`, `loot_random_battle`), `src/core/visitors.c` (`nets_battle_area`) |
 | Visitors: the gate, the roles, the band | `src/core/visitors.c`, `src/core/visitor_families.c` |
 | Guardian version | `src/core/loot.c` (`make_boss`); BN5's guardians' `src/layer/xguardian.c` (`xguardian_version`, `xguardian_encounter`) and their places `src/core/run.c` (`run_xguardian_at`) |
-| Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices) |
+| Chip rarity and prices | `src/core/loot.c` (`roll_chip`, prices); the economy's plans and their curves `src/core/economy.c` (docs/ECONOMY.md) |
 | Services and Mystery Data per layer | `src/net/net_gen.c`, `src/layer/layer_objs.c` |
 | `src/director/director_layer.c` (roll_encounter), `src/director/director.c` (act_on_choices) | `src/director/director.c` |
 | Guardian rewards, the start gift | `src/layer/scripts.c`, `src/layer/guardian_objs.c`, `src/director/powers.c` |

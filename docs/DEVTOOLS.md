@@ -2,8 +2,9 @@
 
 Tools for checking generated layers and a run's difficulty without playing
 it out: the atlas and the tour look over every area at once, the pacing
-report checks every act's battles and guardians, the run log records real
-runs, and the dev menu shortens a run on the handheld.
+report checks every act's battles and guardians, the economy report what
+a run hands out, the run log records real runs, and the dev menu shortens
+a run on the handheld.
 
 ## Atlas: every layer drawn
 
@@ -219,6 +220,44 @@ Output: `.build/pacing.txt`. It needs the ROM, and prints how many
 battles and guardians were past their band, the territories' included;
 after a change to the bands, the areas or the encounter code, that number
 should stay 0.
+
+## Economy report: what a run hands out
+
+```bash
+python3 build.py economy [RUNS]
+```
+
+Plays many runs (300 by default; `--economy PATH[:RUNS]` on the binary)
+of the endless net's first cycle and of the short net without running the
+game (`src/dev/economy_report.c`, docs/ECONOMY.md, issue #154), under
+today's plan and the proposal's (`src/core/economy.c`). The layers,
+their Mystery Data and what each holds, the dealers' and vendor's stock,
+the Servers' prizes, the guardians' Guardian Data and the requests' pay
+are the engine's own code's; each random battle's reward is BN6's, from
+its reward rows by its busting table read from the ROM, at an assumed
+mix of busting levels and one to three battles a layer (the header says
+every assumption). It prints, per act:
+
+- today's and the proposal's chips gained, good chips' share, Mystery
+  Data laid, zenny earned and codes held (the most chips of one letter
+  with the \*s, median run), each against its plan's band, `!` past it,
+  and the zenny earned against what the act's answer and HPMemory cost;
+- the same for the short net, unflagged;
+- where each act's chips and zenny come from (battles, the field's
+  Mystery Data, the layers', the guardian) and what is offered (dealers,
+  Servers, requests, traders, gates), for each plan;
+- the chips gained by tier, the strong ones, those that fit the folder's
+  codes, Megas and Gigas; and by layer the Mystery Data laid (green, blue,
+  purple), chips gained, codes held and zenny earned so far;
+- the proposal's curves by act on either net, and BN6's busting table's
+  pay: a battle's chip share and zenny with every battle at one level.
+
+Output: `.build/economy.txt`, in a few seconds. It needs the ROM, and
+prints how many numbers of the plan in play are past their band: 0 now;
+a change to drops, prices, Mystery Data or the dealers keeps it 0, or
+sets the band's centre in `economy.c` with the before and after in its
+commit. The run log's `bust` and `reward` (below) check its battles
+against the game.
 
 ## Run log
 
