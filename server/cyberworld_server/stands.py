@@ -9,10 +9,12 @@ battle's setup and then all of it, from the first frame, a little a tick
 his game builds the same pair and runs it from the keys, behind the
 players. Nothing a spectator sends reaches the battle, and a slow
 spectator only falls behind: the players' relay never waits on him.
+Watching takes the full set as fighting does (protocol.full_set; NOTICE
+notice_pass otherwise).
 
 Every game of the channel, a game that cannot watch among them, is told
-the channel's battles in STANDS: who fights whom, by which rules, how many
-watch and cheer, and the report the cable's first game sends now and then
+the channel's battles in STANDS: who fights whom, how many watch and
+cheer, and the report the cable's first game sends now and then
 (ARENA_STATUS: each MegaMan's HP, the last chip each used and how many,
 the winner). The two players hear nothing of the stands while they fight:
 a phrase or emote of the channel's is held from them (app.Server.social),
@@ -57,7 +59,7 @@ class Book:
     def entry(self):
         hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner = self.status
         return (self.match.id, self.match.a, self.match.b, self.names[0].encode()[:16], self.names[1].encode()[:16],
-                self.match.rules, self.stage, min(255, len(self.watchers)), min(255, self.cheers),
+                self.stage, min(255, len(self.watchers)), min(255, self.cheers),
                 hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner)
 
 
@@ -166,18 +168,20 @@ class Stands:
 
     async def watch(self, player, data):
         action, match_id = protocol.read_watch(data)
+        # (a stop is never refused: only watching takes the full set)
         if action == 2:
             self.stop(player.id)
             return
-        book = self.books.get(match_id)
         if not self.server.arena_on:
             await self.server.notice(player, 18, "The Arena is closed on this server")
-        elif not book or book.over_time is not None or book.broken or book.channel != player.channel:
+            return
+        if await self.server.without_pass(player):
+            return
+        book = self.books.get(match_id)
+        if not book or book.over_time is not None or book.broken or book.channel != player.channel:
             await self.server.notice(player, 17, "That battle is over")
         elif player.id in (book.match.a, book.match.b) or player.id in self.server.arena.of:
             await self.server.notice(player, 16, "That Navi is busy")
-        elif book.match.rules == protocol.SPEC["format_full"] and not player.roms & protocol.SPEC["roms_bn5"]:
-            await self.server.notice(player, 19, "Those rules need BN5 on both games")
         elif len(book.watchers) >= protocol.SPEC["watch_most"] and player.id not in book.watchers:
             await self.server.notice(player, 27, "The stands are full")
         else:
@@ -228,7 +232,7 @@ class Stands:
         budget = BUDGET if writer.transport.get_write_buffer_size() < PACE else 0
         if not cursor.setup:
             cursor.setup = True
-            out.append(protocol.watch_state(WATCH_ON, book.match.id, book.match.a, book.match.b, book.match.rules, book.delay))
+            out.append(protocol.watch_state(WATCH_ON, book.match.id, book.match.a, book.match.b, book.delay))
         for name, kept in (("loadout", book.loadout), ("record", book.record), ("ready", book.ready)):
             for side in (0, 1):
                 if kept[side] and (name, side) not in cursor.relayed:
@@ -257,7 +261,7 @@ class Stands:
             while cursor.hashes < len(book.hashes):
                 out.append(protocol.watch_relay(0, book.hashes[cursor.hashes][1]))
                 cursor.hashes += 1
-            out.append(protocol.watch_state(WATCH_OVER, book.match.id, book.match.a, book.match.b, book.match.rules, book.delay))
+            out.append(protocol.watch_state(WATCH_OVER, book.match.id, book.match.a, book.match.b, book.delay))
         for message in out:
             writer.write(websocket.frame(message))
         if done or book.broken:

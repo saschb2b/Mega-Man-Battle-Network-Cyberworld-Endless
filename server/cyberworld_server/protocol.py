@@ -20,8 +20,8 @@ PROFILE = struct.Struct("!HHBBBHHHBHI49s")
 WELCOME = struct.Struct("!BIIHBH16sHIH")
 TRADE = struct.Struct("!BBIHBHB")
 TRADE_STATE = struct.Struct("!BBII16sHBHB")
-ARENA = struct.Struct("!BBIHB")
-ARENA_STATE = struct.Struct("!BBII16sBBB")
+ARENA = struct.Struct("!BBIH")
+ARENA_STATE = struct.Struct("!BBII16sBB")
 ARENA_INPUT = struct.Struct("!BIIB")
 ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
@@ -29,9 +29,9 @@ OFFER = struct.Struct("!BHBB")
 BOARD_ENTRY = struct.Struct("!IHBB")
 # (the stands, protocol v7: docs/ONLINE_ARENA.md, The stands)
 ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
-STANDS_ENTRY = struct.Struct("!III16s16sBBBBHHHHHHBBB")
+STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBB")
 WATCH = struct.Struct("!BBI")
-WATCH_STATE = struct.Struct("!BBIIIBB")
+WATCH_STATE = struct.Struct("!BBIIIB")
 WATCH_KEYS = struct.Struct("!BIBIH")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
@@ -68,6 +68,16 @@ def read_hello(data):
     if not re.fullmatch(rb"[A-Za-z0-9][A-Za-z0-9 _-]{0,15}", name):
         raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
     return name.decode("ascii").rstrip(), key, channel, SPEC["roms_bn5"] if bn5 else 0
+
+
+def full_set(roms):
+    """Whether a session's ROMs (HELLO's bits, as read_hello keeps them) are
+    the full set: every bit of protocol.json's roms_full, BN5 Team Colonel's
+    today (BN6's identity every session has). The Square is every game's;
+    the Arena, Trade Central and the week's posts take the full set, and
+    refuse a session without it with NOTICE notice_pass (docs/ONLINE.md,
+    The NetPass)."""
+    return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
 
 
 def hello(name, key=None, channel=0, bn5=False, **overrides):
@@ -170,14 +180,14 @@ def board(entries):
 def read_arena(data):
     if len(data) != ARENA.size or data[0] != SPEC["arena"]:
         raise ProtocolError("Malformed ARENA")
-    _, action, ref, latency, rules = ARENA.unpack(data)
-    if not 1 <= action <= 4 or not ref or latency > 5000 or rules > SPEC["format_full"]:
+    _, action, ref, latency = ARENA.unpack(data)
+    if not 1 <= action <= 4 or not ref or latency > 5000:
         raise ProtocolError("Invalid arena action")
-    return action, ref, latency, rules
+    return action, ref, latency
 
 
-def arena_state(stage, match_id, other, identity, side=0, delay=0, rules=0):
-    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay, rules)
+def arena_state(stage, match_id, other, identity, side=0, delay=0):
+    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay)
 
 
 def arena_relay(data):
@@ -218,8 +228,8 @@ def read_watch(data):
     return action, match
 
 
-def watch_state(stage, match, side0, side1, rules, delay):
-    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, rules, delay)
+def watch_state(stage, match, side0, side1, delay):
+    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, delay)
 
 
 def watch_relay(side, data):

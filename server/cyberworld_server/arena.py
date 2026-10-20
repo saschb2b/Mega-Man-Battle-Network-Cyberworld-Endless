@@ -3,7 +3,10 @@
 Each game runs both players' linked BN6 cores itself; the server pairs
 the two, chooses which is the cable's first side and the input delay from
 their latencies, and relays their loadouts, keys by frame and state hashes
-to each other. It never sees a battle: the games compare their hashes."""
+to each other. It never sees a battle: the games compare their hashes.
+Every battle is by full rules, between two games with the full set
+(protocol v9, protocol.full_set): a challenge from or to a game without
+it, or an answer from one, is refused with NOTICE notice_pass."""
 
 import math
 import time
@@ -34,8 +37,8 @@ def delay_for(latency_a, latency_b):
 
 
 class Match:
-    def __init__(self, match_id, a, b, latency, rules=0):
-        self.id, self.a, self.b, self.rules = match_id, a, b, rules
+    def __init__(self, match_id, a, b, latency):
+        self.id, self.a, self.b = match_id, a, b
         self.latency = {a: latency, b: 0}
         self.started = False
         self.time = time.monotonic()
@@ -57,8 +60,7 @@ class Arena:
             return
         other = self.server.players.get(match.other(player_id))
         identity = other.identity if other else bytes(16)
-        player.writer.write(websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay,
-                                                                 match.rules)))
+        player.writer.write(websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay)))
 
     def end(self, match, told=()):
         self.server.stands.end(match)
@@ -69,12 +71,15 @@ class Arena:
                 self.send(player_id, match, ENDED)
 
     async def handle(self, player, data):
-        action, ref, latency, rules = protocol.read_arena(data)
+        action, ref, latency = protocol.read_arena(data)
         if not self.server.arena_on:
             await self.server.notice(player, 18, "The Arena is closed on this server")
             return
+        # (a leave or an over only ends a battle: never refused)
+        if action in (CHALLENGE, ACCEPT) and await self.server.without_pass(player):
+            return
         if action == CHALLENGE:
-            await self.challenge(player, ref, latency, rules)
+            await self.challenge(player, ref, latency)
             return
         match = self.matches.get(ref)
         if not match or player.id not in (match.a, match.b):
@@ -92,21 +97,18 @@ class Arena:
             # (a leave, a decline, or the battle over on one side: both told)
             self.end(match)
 
-    async def challenge(self, player, target_id, latency, rules=0):
+    async def challenge(self, player, target_id, latency):
         target = self.server.players.get(target_id)
         if not target or target.id == player.id or target.channel != player.channel:
             await self.server.notice(player, 17, "That Navi is no longer here")
+            return
+        if await self.server.without_pass(player, target):
             return
         if player.id in self.of or target.id in self.of or player.id in self.server.trades.of or target.id in self.server.trades.of \
                 or self.server.stands.busy(player.id) or self.server.stands.busy(target.id):
             await self.server.notice(player, 16, "That Navi is busy")
             return
-        # (the rules the challenge names: BN6's for any pair, full ones, BN5's
-        # chips and Souls, only where both games have BN5's ROM)
-        if rules == protocol.SPEC["format_full"] and not player.roms & target.roms & protocol.SPEC["roms_bn5"]:
-            await self.server.notice(player, 19, "Those rules need BN5 on both games")
-            return
-        match = Match(self.next, player.id, target.id, latency, rules)
+        match = Match(self.next, player.id, target.id, latency)
         self.next = self.next % 0xffffffff + 1
         self.matches[match.id] = match
         self.of[player.id] = self.of[target.id] = match.id

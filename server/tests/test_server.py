@@ -181,7 +181,7 @@ class ContractTests(unittest.TestCase):
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
                      "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
                      "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
-                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "format_bn6", "format_full",
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_full", "notice_pass",
                      "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
                      "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
                      "watch_most"):
@@ -209,6 +209,14 @@ class ContractTests(unittest.TestCase):
         self.assertLessEqual(protocol.WATCH_KEYS.size + 2 * protocol.SPEC["watch_keys_max"], protocol.SPEC["max_message"])
         self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
         self.assertIn(f'#define ONLINE_SUBPROTOCOL "{protocol.SPEC["subprotocol"]}"', header)
+        # (protocol v9: the pairs' rules gone with mixed pairs, the full set a session's ROMs)
+        for gone in ("format_bn6", "format_full"):
+            self.assertNotIn(gone, protocol.SPEC)
+            self.assertNotIn("ONLINE_" + gone.upper(), header)
+        # (every bit of the full set one a HELLO can carry: read_hello learns a new game's before roms_full names it)
+        self.assertEqual(protocol.SPEC["roms_full"] & ~protocol.SPEC["roms_bn5"], 0)
+        self.assertTrue(protocol.full_set(protocol.SPEC["roms_full"]))
+        self.assertFalse(protocol.full_set(0))
         # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
         rom = (ROOT / "src/core/rom.c").read_text()
         self.assertIn(f'"{protocol.SPEC["bn5_sha1"]}", "{protocol.SPEC["bn5_code"]}"', rom)

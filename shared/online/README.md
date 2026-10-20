@@ -1,10 +1,10 @@
-# Net Square protocol v8
+# Net Square protocol v9
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v8`.
+`/presence` with subprotocol `cyberworld.presence.v9`.
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
@@ -23,26 +23,26 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
-| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8), u8 rules (a challenge's: 0 `format_bn6`, 1 `format_full`; ignored on the others, 0..1) |
-| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's), u8 the challenge's rules |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
-| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with (0 under BN6's rules), so that a ready apart is told by its cause (a game that sends none is told the plain stop) |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
 | WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
-| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 rules, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second) |
+| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 62 bytes a battle of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
-| WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 rules, u8 input delay |
+| WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay |
 | WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
 | WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side, u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 9, ARENA_STATE 29, OFFER 5, WEEK_POST 17,
-ARENA_STATUS 20, WATCH 6 and WATCH_STATE 16; a STANDS entry is 63 and
-WATCH_KEYS's head 12. The
+TRADE_STATE 32, ARENA 8, ARENA_STATE 28, OFFER 5, WEEK_POST 17,
+ARENA_STATUS 20, WATCH 6 and WATCH_STATE 15; a STANDS entry is 62 and
+WATCH_KEYS's head 12 (each count with its type byte). The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -75,11 +75,29 @@ mute refer to public identities rather than reusable session IDs.
 HELLO names verified ROM identities, never supplies a ROM: BN6's must
 be `protocol.json`'s `rom_code` and `rom_sha1` (ERROR 4), BN5's either
 all zeros or `bn5_code` and `bn5_sha1` (ERROR 15). The server keeps each
-player's ROMs and tells the others in SNAPSHOT; what a pair does
-together goes by what both have (docs/ONLINE.md, the pair's common
-ground). No Capcom
-graphics, audio, text, code or save bytes cross the protocol. Compatibility
-metadata is not anti-cheat attestation: a modified client can forge it.
+session's ROMs as bits (`roms_bn5`) and tells the others in SNAPSHOT. No
+Capcom graphics, audio, text, code or save bytes cross the protocol.
+Compatibility metadata is not anti-cheat attestation: a modified client
+can forge it.
+
+The Net Square is every game's; the Arena, Trade Central and the week's
+posts need the full set (protocol v9; docs/ONLINE.md, The NetPass).
+Walking, phrases and emotes, Inspect, channels, STANDS, BOARD and
+WEEK_BOARD go to every session. A challenge or an answer (ARENA 1 and
+2), a WATCH, a proposal, an answer or a take (TRADE 1, 2 and 5), an
+OFFER post and a WEEK_POST need the full set: every bit of `roms_full`
+in the session's ROMs, the games this build supports for online play
+(`roms_full` is 1 today, BN5's bit; BN6's identity every session has).
+A session without it is answered NOTICE 28 (`notice_pass`), and so is
+one whose challenge, proposal or take aims at such a session; the server
+refuses before anything changes. A leave or an over (ARENA 3 and 4), a
+trade's accept or cancel, a WATCH stop and an OFFER take-down are never
+refused. Two games of the full set have the same chips and the same
+rules, so the server keeps no rules per battle and checks no chip
+against a pair. A game added to the set brings its identity to HELLO and
+its bit to `roms_full`, in a new protocol version. NOTICE 19 (a BN5 chip
+or full rules outside a mixed pair's common ground, protocols v4 to v8)
+is retired: nothing sends it.
 
 The server holds at most 16 unfinished handshakes, each given five
 seconds for the HTTP Upgrade and HELLO together; only joined players
@@ -96,16 +114,12 @@ local files when they change. `/health` reports configuration and occupancy with
 player names, public identities, private keys or IPs.
 
 Trade Central's trades are one chip for one chip between two players
-of a channel, neither busy in another trade or a battle. A chip is
-BN5's where its id is past `bn6_chip_last` (319) or on one of
-`bn6_blank`'s ranges (BN6's blank records, where a game with BN5's ROM
-installs BN5's chips); BN5's chips trade only between two players whose
-ROMs both have BN5's bit, else the server answers NOTICE 19 (a proposal
-refused, an answer ending the trade). The proposer
-names the chip given, the other answers with his, and the server
-commits only when both accepted the same pair as their TRADE_STATE
-showed it, sends done to both and appends the trade to its state
-folder's `trades.jsonl` (identities and chips, no names). A stale or
+of a channel, both with the full set (NOTICE 28 otherwise), neither busy
+in another trade or a battle. The proposer names the chip given, the
+other answers with his, and the server commits only when both accepted
+the same pair as their TRADE_STATE showed it, sends done to both and
+appends the trade to its state folder's `trades.jsonl` (identities and
+chips, no names). A stale or
 mismatched step, either player leaving, or 300 seconds without a step
 cancels it for both. Each game applies its side at home; the server
 never sees a folder. NOTICE codes 15 (trading is off on this server),
@@ -118,16 +132,19 @@ The trade board: each player may have one offer up, a chip he has and
 the kind of chip he wants for it, a number the games name (anything, an
 element, a Mega); the server never reads a chip's element and checks
 only the number's range. A post replaces the last, at most one a second
-(NOTICE 22 otherwise); a BN5 chip is posted only by a game with BN5's
-ROM (NOTICE 19). The offer stays while its poster is in the channel: it
-goes when he takes it down, leaves the server or the channel, or trades.
-The server sends each player of the channel a BOARD whenever its offers
-change, and one after every WELCOME; an offer whose chip is BN5's is
-left out of the BOARD of a player whose game lacks BN5's ROM. TRADE 5
-takes an offer: the reference is the poster, the chip taken the one on
-the board (else NOTICE 20, that offer is gone), the pair's common ground
-and business as a proposal's; the trade begins answered, both chips
-named, and goes on as any (both accept, the server commits). The
+(NOTICE 22 otherwise), and only a game with the full set posts (NOTICE
+28). The offer stays while its poster is in the channel: it goes when
+he takes it down, leaves the server or the channel, or trades. The
+server sends each player of the channel a BOARD whenever its offers
+change, and one after every WELCOME, a game without the full set among
+them. A chip is BN5's where its id is past `bn6_chip_last` (319) or on
+one of `bn6_blank`'s ranges (BN6's blank records, where a game with
+BN5's ROM installs BN5's chips); an offer whose chip is BN5's is left
+out of the BOARD of a player whose game lacks BN5's ROM, which could
+not name it. TRADE 5 takes an offer: the reference is the poster, the
+chip taken the one on the board (else NOTICE 20, that offer is gone),
+the pass and business as a proposal's; the trade begins answered, both
+chips named, and goes on as any (both accept, the server commits). The
 poster's game checks that the chip meets his want and cancels it
 otherwise.
 
@@ -156,10 +173,12 @@ sends ARENA's over (the cable's first, as the battle ends on its cores);
 a leave, a decline or a dropped connection ends it for both, ARENA_STATE
 ended telling each. The relayed messages have a bucket of their own,
 150 deep and refilled at 120 a second. NOTICE codes 16 (that Navi is
-busy), 17 (no longer here, or the battle is over) and 18 (the Arena is
-closed on this server) answer an ARENA that cannot be done, and 19 a
-challenge to full rules where either game lacks BN5's ROM; a challenge's
-rules come back in every ARENA_STATE of its battle.
+busy), 17 (no longer here, or the battle is over), 18 (the Arena is
+closed on this server) and 28 (a challenge from or to a game without the
+full set, or an answer from one) answer an ARENA that cannot be done.
+Every battle is by full rules, BN5's chips and Souls among them
+(docs/ONLINE_ARENA.md): v9's ARENA, ARENA_STATE, STANDS and WATCH_STATE
+carry no rules byte.
 
 The stands (protocol v7, docs/ONLINE_ARENA.md, The stands): every
 started battle's loadouts, ready, installs' record, the cable's first's
@@ -174,12 +193,12 @@ behind first) and the hashes once both sides' keys are past them, at
 most 2 KB a tick (20 a second) and only while the spectator's output is
 under 4 KB; where the battle is over and all is sent, WATCH_STATE over.
 NOTICE 17 (that battle is over), 16 (a player of it, or busy in a
-battle), 18 (the Arena closed), 19 (full rules need BN5's ROM on the
-spectator's game too) and 27 (the stands are full: `watch_most`, 6)
-answer a WATCH that cannot be done. A spectator is busy: a challenge to
-him is answered NOTICE 16. STANDS goes to every player of a channel as a
-battle begins or ends, and at most once a second as watchers, cheers or
-the report change, and after every WELCOME; the two players of a battle
+battle), 18 (the Arena closed), 28 (a spectator without the full set)
+and 27 (the stands are full: `watch_most`, 6) answer a WATCH that cannot
+be done. A spectator is busy: a challenge to him is answered NOTICE 16.
+STANDS goes to every player of a channel, a game without the full set
+among them, as a battle begins or ends, and at most once a second as
+watchers, cheers or the report change, and after every WELCOME; the two players of a battle
 under way are told once it is over. A phrase or emote of the channel's
 (SOCIAL) while a battle is on counts as a cheer for it, and its EVENT is
 held from the battle's two players: they hear nothing of the stands until

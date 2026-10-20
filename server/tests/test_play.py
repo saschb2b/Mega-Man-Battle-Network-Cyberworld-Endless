@@ -28,8 +28,8 @@ def offer(chip=(0, 0), want=0):
     return protocol.OFFER.pack(SPEC["offer"], chip[0], chip[1], want)
 
 
-def arena(action, ref, latency=0, rules=0):
-    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency, rules)
+def arena(action, ref, latency=0):
+    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency)
 
 
 class PlayTests(unittest.IsolatedAsyncioTestCase):
@@ -45,10 +45,11 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, bn5=False):
+    async def connect(self, name, full=True):
+        """A game in the channel: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=bn5)
+        welcome = await client.open(self.port, name, bn5=full)
         return client, struct.unpack("!I", welcome[5:9])[0]
 
     async def trade_state(self, client):
@@ -70,6 +71,16 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
 
     async def arena_state(self, client):
         return protocol.ARENA_STATE.unpack(await client.message(SPEC["arena_state"]))
+
+    async def no_notice(self, client):
+        """A PING answered with no NOTICE before its PONG: what was sent before it was taken."""
+        await client.send(bytes((SPEC["ping"],)) + b"\0\0\0\1")
+        for _ in range(100):
+            message = await client.receive()
+            self.assertNotEqual(message[0], SPEC["notice"])
+            if message[0] == SPEC["pong"]:
+                return
+        raise AssertionError("No PONG")
 
     async def test_trade_commits_only_the_pair_both_saw(self):
         a, a_id = await self.connect("Alpha")
@@ -106,7 +117,7 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.trade_state(b))[1], 6)
         self.assertFalse(self.server.trades.open)
 
-    async def test_bn5_chips_and_leaving_players_never_trade(self):
+    async def test_chips_past_the_tables_and_leaving_players_never_trade(self):
         a, _ = await self.connect("Alpha")
         b, b_id = await self.connect("Beta")
         await a.send(trade(1, b_id, (SPEC["chip_last"] + 1, 0)))
@@ -131,8 +142,8 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         b, b_id = await self.connect("Beta")
         c, _ = await self.connect("Gamma")
         await a.send(arena(1, b_id, 40))
-        _, stage, match_id, other, _, _, _, rules = await self.arena_state(a)
-        self.assertEqual((stage, other, rules), (2, b_id, SPEC["format_bn6"]))
+        _, stage, match_id, other, _, _, _ = await self.arena_state(a)
+        self.assertEqual((stage, other), (2, b_id))
         self.assertEqual((await self.arena_state(b))[1:4], (1, match_id, a_id))
         await b.send(arena(2, match_id, 100))
         start_a, start_b = await self.arena_state(a), await self.arena_state(b)
@@ -156,32 +167,51 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.1)
         self.assertIn(c, self.clients)
 
-    async def test_bn5_chips_trade_only_between_two_games_with_bn5(self):
-        a, a_id = await self.connect("Alpha", bn5=True)
-        b, b_id = await self.connect("Beta")
-        c, c_id = await self.connect("Gamma", bn5=True)
-        for chip in (411, 214, SPEC["chip_last"]):     # (past BN6's ids, one of its blank records, the last)
-            await a.send(trade(1, b_id, (chip, 12)))
-            self.assertEqual((await a.message(SPEC["notice"]))[:3], struct.pack("!BH", SPEC["notice"], 19))
-        self.assertFalse(self.server.trades.open)
+    async def test_bn5_chips_trade_between_two_full_sets(self):
+        a, a_id = await self.connect("Alpha")
+        c, c_id = await self.connect("Gamma")
         await a.send(trade(1, c_id, (411, 12)))
         trade_id = (await self.trade_state(a))[2]
         self.assertEqual((await self.trade_state(c))[5:], (0, 0, 411, 12))
-        await c.send(trade(2, trade_id, (450, 3), (411, 12)))
+        await c.send(trade(2, trade_id, (214, 3), (411, 12)))     # (past BN6's ids; one of its blank records)
         self.assertEqual((await self.trade_state(a))[1:2] + (await self.trade_state(c))[1:2], (3, 3))
-        await a.send(trade(3, trade_id, (411, 12), (450, 3)))
+        await a.send(trade(3, trade_id, (411, 12), (214, 3)))
         await self.trade_state(a)
-        await c.send(trade(3, trade_id, (450, 3), (411, 12)))
+        await c.send(trade(3, trade_id, (214, 3), (411, 12)))
         done = await self.trade_state(c)
-        self.assertEqual((done[1:4], done[5:]), ((5, trade_id, a_id), (450, 3, 411, 12)))
-        # (a game with BN5 answering a BN6-only game's offer with BN5's chip: refused, the trade off)
-        d, d_id = await self.connect("Delta", bn5=True)
-        await b.send(trade(1, d_id, (5, 2)))
-        trade_id = (await self.trade_state(b))[2]
-        await self.trade_state(d)
-        await d.send(trade(2, trade_id, (411, 12), (5, 2)))
-        self.assertEqual((await d.message(SPEC["notice"]))[:3], struct.pack("!BH", SPEC["notice"], 19))
-        self.assertEqual((await self.trade_state(b))[1], 6)
+        self.assertEqual((done[1:4], done[5:]), ((5, trade_id, a_id), (214, 3, 411, 12)))
+
+    async def test_trade_central_needs_the_full_set(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta", full=False)
+        c, c_id = await self.connect("Gamma")
+        # (from a game without it: a proposal, a take, a post; to one: a proposal, a take of its offer)
+        await b.send(trade(1, a_id, (5, 2)))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await a.send(trade(1, b_id, (5, 2)))
+        self.assertEqual(await self.notice(a), SPEC["notice_pass"])
+        self.assertFalse(self.server.trades.open)
+        await c.send(offer((5, 2), 0))
+        self.assertEqual(await self.board(b, 1), [(c_id, 5, 2, 0)])     # (the board is every game's to read)
+        await b.send(trade(5, c_id, (10, 0), (5, 2)))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await b.send(offer((5, 2), 0))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        self.assertNotIn(b_id, self.server.trades.offers)
+        await b.send(offer())       # (a take-down: never refused)
+        await self.no_notice(b)
+        self.server.trades.offers[b_id] = ((7, 1), 0)    # (an offer of a game without it, as no wire puts one up)
+        await a.send(trade(5, b_id, (10, 0), (7, 1)))
+        self.assertEqual(await self.notice(a), SPEC["notice_pass"])
+        self.assertFalse(self.server.trades.open)
+        # (an answer from a game without it: refused before it touches the trade, which goes on)
+        await a.send(trade(1, c_id, (5, 2)))
+        trade_id = (await self.trade_state(a))[2]
+        await self.trade_state(c)
+        await b.send(trade(2, trade_id, (10, 0), (5, 2)))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await c.send(trade(2, trade_id, (10, 0), (5, 2)))
+        self.assertEqual((await self.trade_state(a))[1], 3)
 
     async def test_an_offer_on_the_board_taken_trades_once(self):
         a, a_id = await self.connect("Alpha")
@@ -212,17 +242,13 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await self.notice(c), 21)
         self.assertFalse(self.server.trades.offers)
 
-    async def test_offers_go_with_their_poster_and_by_the_pair_common_ground(self):
-        a, a_id = await self.connect("Alpha", bn5=True)
-        b, _ = await self.connect("Beta")
-        c, _ = await self.connect("Gamma", bn5=True)
-        await b.send(offer((411, 12), 0))
-        self.assertEqual(await self.notice(b), 19)
+    async def test_offers_go_with_their_poster_and_bn5_chips_where_they_can_be_named(self):
+        a, a_id = await self.connect("Alpha")
+        b, _ = await self.connect("Beta", full=False)
+        c, _ = await self.connect("Gamma")
         await a.send(offer((411, 12), 3))
         self.assertEqual(await self.board(c, 1), [(a_id, 411, 12, 3)])
-        self.assertEqual(await self.board(b, 0), [])
-        await b.send(trade(5, a_id, (5, 2), (411, 12)))
-        self.assertEqual(await self.notice(b), 19)
+        self.assertEqual(await self.board(b, 0), [])     # (BN5's chip left out for a game without its ROM)
         # (a second post within the second: refused; then the offer changed)
         await a.send(offer((5, 2), 0))
         self.assertEqual(await self.notice(a), 22)
@@ -234,21 +260,29 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(await self.board(b, 0), [])
         self.assertFalse(self.server.trades.offers)
 
-    async def test_arena_rules_full_only_between_two_games_with_bn5(self):
-        a, _ = await self.connect("Alpha", bn5=True)
-        _, b_id = await self.connect("Beta")
-        c, c_id = await self.connect("Gamma", bn5=True)
-        await a.send(arena(1, b_id, 0, SPEC["format_full"]))
-        self.assertEqual((await a.message(SPEC["notice"]))[:3], struct.pack("!BH", SPEC["notice"], 19))
+    async def test_the_arena_needs_the_full_set(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta", full=False)
+        c, c_id = await self.connect("Gamma")
+        # (a challenge from a game without it, and to one)
+        await b.send(arena(1, a_id, 0))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await a.send(arena(1, b_id, 0))
+        self.assertEqual(await self.notice(a), SPEC["notice_pass"])
         self.assertFalse(self.server.arena.matches)
-        await a.send(arena(1, c_id, 0, SPEC["format_full"]))
-        self.assertEqual((await self.arena_state(a))[-1], SPEC["format_full"])
-        challenged = await self.arena_state(c)
-        self.assertEqual((challenged[1], challenged[-1]), (1, SPEC["format_full"]))
-        await c.send(arena(2, challenged[2], 0))
-        start = await self.arena_state(c)
-        self.assertEqual((start[1], start[-1]), (3, SPEC["format_full"]))
-        await a.send(arena(1, c_id, 0, 2))
+        # (an answer from one: refused before the battle is looked at; a leave never is)
+        await a.send(arena(1, c_id, 0))
+        match_id = (await self.arena_state(a))[2]
+        self.assertEqual((await self.arena_state(c))[1:3], (1, match_id))
+        await b.send(arena(2, match_id, 0))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await b.send(arena(3, match_id))
+        self.assertEqual(await self.notice(b), 17)
+        self.assertFalse(self.server.arena.matches[match_id].started)
+        await c.send(arena(2, match_id, 0))
+        self.assertEqual((await self.arena_state(c))[1], 3)
+        # (v8's ARENA, a rules byte at its end: malformed)
+        await a.send(arena(1, c_id, 0) + b"\1")
         self.assertEqual((await a.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
 
     def test_delay_covers_the_trip(self):

@@ -48,10 +48,11 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name):
+    async def connect(self, name, full=True):
+        """A game: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, key=name.encode().ljust(16, b"k"))
+        welcome = await client.open(self.port, name, key=name.encode().ljust(16, b"k"), bn5=full)
         seed, number = struct.unpack("!IH", welcome[32:38])
         return client, seed, number
 
@@ -121,6 +122,21 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.board(a))[4], [("Alpha", 4, 2, 0, 9)])
         await a.send(bytes((SPEC["week_post"], 0)))
         self.assertEqual((await a.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
+
+    async def test_posting_needs_the_full_set_and_the_board_is_every_games(self):
+        a, seed, number = await self.connect("Alpha")
+        b, _, _ = await self.connect("Beta", full=False)
+        await self.board(a)
+        await self.board(b)
+        await a.send(week.post(number, seed, 5, 2, False, 40, 0x1234))
+        self.assertEqual((await self.board(a))[3], [("Alpha", 5, 2, 0, 40)])
+        self.assertEqual((await self.board(b))[3], [("Alpha", 5, 2, 0, 40)])
+        await b.send(week.post(number, seed, 7, 3, False, 30, 0x99))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        self.assertEqual(len(self.server.weeks.best), 1)
+        # (a malformed post is malformed before it is refused)
+        await b.send(bytes((SPEC["week_post"], 0)))
+        self.assertEqual((await b.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
 
     async def test_a_moderator_hides_an_entry(self):
         a, seed, number = await self.connect("Alpha")

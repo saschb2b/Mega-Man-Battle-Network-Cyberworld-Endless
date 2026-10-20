@@ -34,7 +34,7 @@ class Player:
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
-    roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's
+    roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's (protocol.full_set)
 
 
 class Server:
@@ -285,6 +285,15 @@ class Server:
 
     async def notice(self, player, code, text):
         await websocket.send(player.writer, struct.pack("!BH", protocol.SPEC["notice"], code) + text.encode("ascii")[:96])
+
+    async def without_pass(self, player, *others):
+        """Whether the asker or a player his message aims at lacks the full set
+        (protocol.full_set), the asker told with NOTICE notice_pass: the
+        Arena, Trade Central and the week's posts need it, the Square not."""
+        if all(protocol.full_set(p.roms) for p in (player, *others)):
+            return False
+        await self.notice(player, protocol.SPEC["notice_pass"], "That needs the full NetPass")
+        return True
 
     async def switch_channel(self, player, requested):
         channel = self.choose_channel(requested, player.id)
