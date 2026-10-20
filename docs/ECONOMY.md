@@ -27,9 +27,9 @@ yes ([Decisions](#decisions-for-the-owner)).
   five chips of one code with the \*s: a whole hand.
 - **Deeper, the economy is already rich, and should stay so.** By act 6 a
   run has earned 44,000 zenny against 23,000 for the acts' answers and
-  HPMemory, holds 24 chips of one code, and half its finds are good. The
-  owner's complaint is the early run, so the proposal leaves the sixth act
-  as it is: no power creep, and nothing a later act gains.
+  HPMemory, holds 24 chips of one code, and seven in ten of its finds are
+  good. The owner's complaint is the early run, so the proposal leaves the
+  sixth act as it is: no power creep, and nothing a later act gains.
 - **The proposal:** five levers, each a curve from a floor at the first
   act to today's at the net's last, on a logarithm (fastest opening early):
   fewer green Mystery Data (half on act 1), a green data's chip kept 60%
