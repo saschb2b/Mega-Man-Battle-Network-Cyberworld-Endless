@@ -4,7 +4,10 @@
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v9`.
+`/presence` with subprotocol `cyberworld.presence.v10`. The server also
+accepts another version's `cyberworld.presence.vN` (echoing it), so that
+a game of another version can say its HELLO and hear ERROR 2 or 17, which
+side is behind, rather than a refused upgrade (v10).
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |

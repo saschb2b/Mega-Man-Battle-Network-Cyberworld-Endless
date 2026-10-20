@@ -138,7 +138,11 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
 The subprotocol is `cyberworld.presence.v10`; incompatible clients receive
-an explicit refusal rather than being admitted to a different world.
+an explicit refusal rather than being admitted to a different world. A
+game offering another version's `cyberworld.presence.vN` is let through
+the upgrade so its HELLO can be answered with which side is behind (ERROR
+2, the game older, or 17, the server older), which its gate says; before
+v10 it was refused at the upgrade and could only say "no answer".
 
 ## Container
 

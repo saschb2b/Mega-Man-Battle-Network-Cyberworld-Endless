@@ -349,7 +349,12 @@ SAYS, UNTIL 14:00 UTC" rather than "no answer"; a visit whose link
 dropped as the server went down for it comes home with the same word.
 A game newer than its server is answered ERROR 17, and the keeper says
 the server is behind; an older game hears "A NEWER VERSION IS OUT!" and
-"UPDATE YOUR PET AT THE DOWNLOAD PAGE!".
+"UPDATE YOUR PET AT THE DOWNLOAD PAGE!". Before v10 neither could happen:
+the WebSocket's subprotocol names the version, and the server refused
+another at the upgrade, so a game of another version only ever heard "no
+answer". The server now lets another version's subprotocol through to its
+HELLO (seen with a copy of the server speaking v11: the keeper's two
+boxes, and the server's log "Protocol version mismatch", code 2).
 
 **The Square.** The server sends a seed; each game plans the same Square
 from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
