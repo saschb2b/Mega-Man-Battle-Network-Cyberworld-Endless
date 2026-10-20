@@ -1,7 +1,7 @@
 /* A NetBattle watched from the stands (arena_watch.h).
  *
  * The pair runs as a player's does (arena.c): frame N once both players'
- * keys for N and the three frames after it are known, each core taking
+ * keys for N and the frame after it are known (ARENA_LOOKAHEAD), each core taking
  * those of its own frame clock. A spectator's keys come all at once where
  * he came in late, so it runs as many frames a tick as the frame's time
  * allows while it is more than BEHIND_KEPT frames behind the keys known, then one

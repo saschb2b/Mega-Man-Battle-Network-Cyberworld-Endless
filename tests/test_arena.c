@@ -647,14 +647,14 @@ static void watch_keys(void) {
 	uint8_t be[2 * 300];
 	for (unsigned i = 0; i < 300; ++i) { be[2 * i] = (uint8_t)(i >> 8 | 0xFC); be[2 * i + 1] = (uint8_t)i; }
 	assert(watch_keys_put(&w, 0, 0, be, 6) && watch_keys_runnable(&w) == 0);
-	assert(watch_keys_put(&w, 1, 0, be, 4) && watch_keys_runnable(&w) == 1);
+	assert(watch_keys_put(&w, 1, 0, be, 4) && watch_keys_runnable(&w) == 3);
 	assert(!watch_keys_put(&w, 1, 5, be, 1));   /* (frame 4 missing) */
-	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 3);
-	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 297);
+	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 5);
+	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 299);
 	uint16_t out[ARENA_LOOKAHEAD][2];
 	watch_keys_take(&w, 4, out);
 	/* (the keys' ten bits: the top six of the byte pair dropped) */
-	assert(out[0][0] == 4 && out[0][1] == 2 && out[3][0] == 7 && out[3][1] == 5);
+	assert(out[0][0] == 4 && out[0][1] == 2 && out[1][0] == 5 && out[1][1] == 3);
 	watch_keys_free(&w);
 	assert(!w.known[0] && !w.keys[0]);
 }

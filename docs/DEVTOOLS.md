@@ -380,17 +380,30 @@ Never point a test at the official server.
 `--dev arena` starts on a Practice NetBattle of BN6's own between two
 linked cores (issue #120), you the first GBA and a script the second,
 whose keys come over a local link held back as a network's would be;
-`arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay, the
-link's one way and the carried MegaMan's HP. [ONLINE_ARENA.md](ONLINE_ARENA.md)
+`arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay (1 to
+60), the link's one way and the carried MegaMan's HP. `arenawindow=W`
+sets the rollback window (0: the delay alone, a frame run once its keys
+have all come; without it, what a frame costs here affords, as a Net
+Square battle picks it), and `arenabusy` makes the second player step,
+shoot and OK the Custom screen by the frame's number alone, so a run that
+rolls back and one that does not hand him the same keys: with
+`arenadelay=1,arenalag=4` every frame's other keys are a guess, and the
+game's hashes must be those of `arenawindow=0,arenalag=0`. In a Net
+Square battle `arenawindow=W` sets the window too and asks with it, and
+`arenadelay=N` asks the server for N frames. [ONLINE_ARENA.md](ONLINE_ARENA.md)
 says what runs, how to script a battle headless and what it measured.
 
-`arenaroll=W` makes it roll back: the pair's snapshot kept before each
+`arenaroll=W` makes it roll back on purpose (the window then none of its
+own): the pair's snapshot kept before each
 frame and every W frames (1 to 30) the last W run again from the first's,
 the battle going on from there, each time compared with the state run
 straight (`arena: frame N: core ...'s state apart` where not), and every
-60th frame the game's hash said without the sound's fields (`the game's
-hash`), which a run with `arenaroll=0` says too, for the two to be
-compared ([ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback).
+60th frame the game's hash said (`the game's hash`, the pair's hash,
+which leaves the sound's fields out), which a run with `arenaroll=0` says
+too, for the two to be compared ([ONLINE_ARENA.md](ONLINE_ARENA.md),
+Rollback). A battle's end says its rollbacks: `arena: window W, delay D:
+N rollbacks, F frames run again, M the most at once; a frame of the pair
+... ms, a tick at worst ... ms, K past a 60th`.
 
 A battle from the Net Square between two games takes `arenahp=N` too
 (each game's own MegaMan, so both pairs stay the same), and
@@ -405,7 +418,7 @@ HP ... chips ... winner"), as the cable's first sends it from the Square.
 The Square's Mr.Progs' places are in the log ("online: Mr.Prog 2 at
 -428,44", the referee), for a harness's `place`.
 
-`--dev rollbench` measures what a rollback of the Arena would cost on the
+`--dev rollbench` measures what a rollback of the Arena costs on the
 machine it runs on (issue #128), on the player's ROM, and says it on the
 screen and in the output (`rollbench:` lines; log.txt on a handheld): the
 game's core alone from power-on (every build), then, where the Arena is
@@ -414,8 +427,11 @@ of scripted keys on both sides: a core's state and the pair's snapshot
 in bytes, their save and load and a pair frame's emulation (mean and
 worst), a rollback of eight frames timed, whether it came back to the
 same state as the frames run straight, and the largest rollback window a
-frame holds with a quarter of it kept for the rest, with the one way it
-covers at delays 1, 2 and 3. A or B quits; a headless run ends by
+frame holds with a quarter of it kept for the rest, with the lag of the
+other's keys it covers at delays 1, 2 and 3, then the way in's frames
+timed and the window the Arena picks from them and from the battle's;
+the battle's frame cost is kept in the data folder (`arena.ini`) for the
+delay the next challenge asks. A or B quits; a headless run ends by
 itself. The 3DS and the browser, which compile the Arena out, measure the
 core alone and say so. [ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback, has
 its numbers on this machine and the Retroid Pocket Nova:

@@ -877,9 +877,16 @@ are in the history before 433865a8):
   played to its end here; the 3DS's and the browser's dives are untried.
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
-- **The Arena on the 3DS and in the browser**; rollback (issue #128).
-  There, the stands are the report alone (seen in the browser; the 3DS's
-  untried).
+- **The Arena on the 3DS and in the browser** (rollback runs wherever the
+  Arena does). There, the stands are the report alone (seen in the
+  browser; the 3DS's untried).
+- **Rollback, what is left** (issue #128, ONLINE_ARENA.md, Rollback): a
+  NetBattle with rollback between two devices and through the deployed
+  server (protocol v8 there once it is redeployed), on Android, iOS,
+  Windows and macOS (built, untried; the Nova measured headless); a first
+  NetBattle on a system asks with a window of 4 until a battle has kept
+  its frame's cost; the stands' report counts the chips shown, a guess's
+  among them; the guess is the other's last keys held, nothing smarter.
 - **The stands, what is left:** watching on Android, iOS and the
   handhelds (built, untried), a catch-up's pace in a window and on a
   handheld (measured headless only), a machine too slow to catch up (in
@@ -888,8 +895,8 @@ are in the history before 433865a8):
 - **On hardware:** the gate, a visit and a trade on the Nova, the Flip 2,
   a New 3DS, an Android device (the emulator's visit, trade and
   NetBattle above) and iOS, macOS and Windows itself (Wine's above); the
-  Arena's smoothed delay over a real network (issue #128: measured
-  through a local relay, not yet on the deployed server); a phone's app sent to the background
+  Arena's smoothed delay and rollback over a real network (issue #128:
+  measured through a local relay, not yet on the deployed server); a phone's app sent to the background
   mid-battle, which the lead's cap should now wait out (ONLINE_ARENA.md,
   Lockstep), untried.
 - **In the browser with the published server:** the official server
