@@ -251,6 +251,21 @@ class BackupTests(unittest.TestCase):
         self.assertTrue(path.exists())
         self.assertEqual(len(list(self.backups.iterdir())), 15)
 
+    def test_a_failed_backup_is_tried_again_a_minute_later(self):
+        (self.state / "identity.key").unlink()
+        waits = []
+
+        def sleep(seconds):
+            waits.append(seconds)
+            if len(waits) == 1:
+                (self.state / "identity.key").write_bytes(bytes(range(32)))
+            else:
+                raise StopIteration
+        with self.assertLogs("cyberworld.server", "ERROR"), self.assertRaises(StopIteration):
+            backup.run(self.state, self.backups, 14, clock=lambda: NOW, sleep=sleep)
+        self.assertEqual(waits, [backup.RETRY, backup.LOOK])
+        self.assertEqual(len(list(self.backups.iterdir())), 1)
+
     def test_a_restore_puts_the_state_back_as_it_was(self):
         before = self.files()
         path = backup.archive(self.state, self.backups, NOW)

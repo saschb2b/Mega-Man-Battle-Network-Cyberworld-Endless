@@ -28,6 +28,7 @@ FILES = ("identity.key", "moderation.json", "weeks.jsonl")
 NAME = re.compile(r"cyberworld-state-(\d{8})-(\d{6})\.tar\.gz")
 MAX_FILE = 64 * 1024 * 1024
 LOOK = 3600             # seconds between looks for a day without its archive
+RETRY = 60              # seconds before another try after a failure (the server not started yet)
 DAY = 24 * 3600
 LOG = logging.getLogger("cyberworld.server")
 
@@ -104,9 +105,9 @@ def run(state_dir, backup_dir, days, once=False, clock=time.time, sleep=time.sle
     """With `once`, an archive now (its path). Otherwise, forever: an
     archive the first hour of each UTC day it is not there, and those past
     `days` days pruned, looked at every hour; a failure is logged and
-    tried again the next hour."""
+    tried again a minute later."""
     while True:
-        now = clock()
+        now, wait = clock(), LOOK
         try:
             if once or due(backup_dir, now):
                 path = archive(state_dir, backup_dir, now)
@@ -117,9 +118,10 @@ def run(state_dir, backup_dir, days, once=False, clock=time.time, sleep=time.sle
             if once:
                 raise
             LOG.error("The backup failed: %s", exc)
+            wait = RETRY
         if once:
             return path
-        sleep(LOOK)
+        sleep(wait)
 
 
 def read(archive_path):
