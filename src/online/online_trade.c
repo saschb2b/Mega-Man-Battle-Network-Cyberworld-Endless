@@ -25,6 +25,12 @@ static void put32(uint8_t *p, uint32_t v) { put16(p, v >> 16); put16(p + 2, v); 
 
 void online_trade_reset(void) { memset(&T, 0, sizeof T); }
 
+void online_trade_lost(void) {
+	if (T.stage == TRADE_NONE || T.stage == TRADE_DONE || T.stage == TRADE_CANCELLED) return;
+	T.stage = TRADE_CANCELLED;
+	++T.serial;
+}
+
 const TradeView *online_trade_view(void) { return &T; }
 
 static bool send(int action, uint32_t ref, TradeChip give, TradeChip get);
@@ -55,6 +61,9 @@ bool online_trade_mail(const uint8_t *data, size_t size) {
 	v.mine = (TradeChip){ get16(data + 26), data[28] };
 	v.theirs = (TradeChip){ get16(data + 29), data[31] };
 	if (v.mine.id > ONLINE_CHIP_LAST || v.theirs.id > ONLINE_CHIP_LAST) return false;
+	/* (the trade's end said again to a place taken back after a dropped
+	 * link, where this game had it already: set aside, issue #153) */
+	if (v.id == T.id && v.stage == T.stage) return true;
 	/* (a chip this game cannot hold, one the registry has not: the trade
 	 * called off, never kept) */
 	if ((v.mine.id && !chip_ok(v.mine)) || (v.theirs.id && !chip_ok(v.theirs))) {

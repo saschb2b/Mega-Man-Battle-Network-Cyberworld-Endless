@@ -15,6 +15,12 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 void online_scene_end(void);
 /* After a frame of the core: VISIT_END_NONE while the visit goes on. */
 VisitEnd online_scene_update(void);
+/* The link quiet or dropped (issue #153, online_transport.h): the core held
+ * still while online_scene_wait runs in its frames' place, till the link is
+ * back (VISIT_END_NONE, and the Square goes on), refused or given up (its
+ * end; B gives up) */
+bool online_scene_waiting(void);
+VisitEnd online_scene_wait(void);
 void online_scene_draw(void);
 uint32_t online_scene_keys(uint32_t keys);
 

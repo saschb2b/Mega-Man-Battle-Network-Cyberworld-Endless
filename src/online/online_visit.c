@@ -37,6 +37,7 @@ static struct {
 	OnlineLoadout loadout;
 	bool carried;
 	const char *news;     /* MegaMan's word on a trade settled, till said */
+	char note[ONLINE_MAINTENANCE_BYTES + 1];   /* the server's line with the end (maintenance) */
 } V;
 
 /* A trade the server committed, given to the run on the checkpoint just
@@ -70,6 +71,7 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 	loot_memory(&V.battle);
 	V.carried = false;
 	V.ended = VISIT_END_NONE;
+	V.note[0] = 0;
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
 		V.ended = VISIT_END_UNREACHABLE;
@@ -83,16 +85,21 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 
 /* What a server's refusal (its code, shared/online/protocol.json) means at
  * the gate; `away`: it came in the Square */
-static VisitEnd refusal(const OnlineSnapshot *s, bool away) {
+VisitEnd online_visit_refusal(const OnlineSnapshot *s, bool away) {
 	switch (s->error_code) {
-	/* (15: BN5's identity not the one the server knows, which this game
-	 * checked as it read the ROM: the server's build is another) */
+	/* (2 and 3: the game older than the server; 15: BN5's identity not the
+	 * one the server knows, which this game checked as it read the ROM: the
+	 * server's build is another) */
 	case 2: case 3: case 15: return VISIT_END_VERSION;
 	case 4: return VISIT_END_ROM;
 	case 5: return VISIT_END_NAME;
 	case 7: return VISIT_END_FULL;
 	case 10: case 11: return VISIT_END_BARRED;
 	case 14: return VISIT_END_REMOVED;
+	case ONLINE_ERROR_SERVER_OLDER: return VISIT_END_OLD_SERVER;
+	case ONLINE_ERROR_MAINTENANCE:
+		SDL_strlcpy(V.note, s->error, sizeof V.note);
+		return VISIT_END_MAINTENANCE;
 	default: return away ? VISIT_END_LOST : VISIT_END_UNREACHABLE;
 	}
 }
@@ -163,9 +170,16 @@ void online_visit_update(void) {
 	}
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
-	if (s.error[0]) come_home(refusal(&s, false));
+	if (s.error[0]) come_home(online_visit_refusal(&s, false));
 	else if (s.connected) go_away(&s);
 	else if (SDL_GetTicks() - V.called_at > CALL_TIMEOUT_MS) come_home(VISIT_END_UNREACHABLE);
+}
+
+bool online_visit_waiting(void) { return V.stage == VISIT_AWAY && online_scene_waiting(); }
+
+void online_visit_wait_frame(void) {
+	VisitEnd why = online_scene_wait();
+	if (why != VISIT_END_NONE) come_home(why);
 }
 
 uint32_t online_visit_keys(uint32_t keys) {
@@ -200,6 +214,8 @@ VisitEnd online_visit_ended(void) {
 	V.ended = VISIT_END_NONE;
 	return why;
 }
+
+const char *online_visit_end_note(void) { return V.note; }
 
 void online_visit_shutdown(void) {
 	if (V.stage == VISIT_HOME) return;
