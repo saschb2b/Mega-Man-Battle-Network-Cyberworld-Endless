@@ -27,8 +27,8 @@ typedef enum {
 
 typedef struct ArenaWatch ArenaWatch;
 
-/* A battle by `format`'s rules (ONLINE_FORMAT_*); NULL where memory ran out */
-ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, unsigned format, uint32_t match);
+/* A battle, by full rules as every one; NULL where memory ran out */
+ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match);
 void arena_watch_free(ArenaWatch *w);
 /* What the server hands on: a player's MegaMen (ARENA_LOADOUT's bytes),
  * the cable's first's hashes (the installs' record, the ready, every 60

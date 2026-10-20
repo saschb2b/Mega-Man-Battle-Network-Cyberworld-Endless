@@ -156,48 +156,28 @@ static OnlineLoadout starter(void) {
 static void check(void) {
 	char why[128];
 	OnlineLoadout l = starter();
-	assert(arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why));
-	l.souls = 0x04;
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "Souls"));
-	l = starter();
-	l.folder[7] = (uint16_t)(ARENA_BN6_CHIP_LAST + 1);
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "chip 320"));
-	l = starter();
-	l.folder[7] = 205;   /* (a blank record of BN6's: a BN5 chip on a game with BN5's ROM) */
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "chip 205"));
-	l = starter();
-	l.pack[314][0] = 1;
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "pack holds chip 314"));
-	l = starter();
+	assert(arena_loadout_check(&l, why, sizeof why));
 	l.folder[7] = 0xFFFF;   /* (an empty entry is no chip) */
-	assert(arena_loadout_check(&l, ONLINE_FORMAT_BN6, NULL, 0));
+	assert(arena_loadout_check(&l, NULL, 0));
 	l.folder[8] = (uint16_t)(1 | 27u << 9);
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "code 27"));
-	l = starter();
-	l.pack[BN6_PACK_IDS + 3][2] = 1;
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "pack"));
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "code 27"));
 	l = starter();
 	l.max_hp = 0;
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "HP"));
-	/* full rules: the rules byte decides, never the game's ROMs (no ROM here, as on either game): BN5's chips in the folder,
-	 * BN6's blanks the registry fills, the pack's extension and the Souls go; the codes and HP are held as BN6's rules hold
-	 * them */
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "HP"));
+	/* full rules, every NetBattle's (no ROM here, as on either game): BN5's chips in the folder, BN6's blanks the registry
+	 * fills, the pack's extension and the Souls go; the codes and HP are held as BN6 holds them */
 	l = starter();
 	l.folder[7] = (uint16_t)(411 | 12u << 9);   /* MrkCan1 M */
 	l.folder[8] = 205;                         /* WideSht2, a blank of BN6's */
 	l.pack[411][0] = 2;
 	l.pack[511][3] = 1;
-	assert(arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why));
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "chip 411"));
-	l.folder[9] = (uint16_t)(411 | 27u << 9);
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why) && strstr(why, "code 27"));
-	l.folder[9] = 0xFFFF;
 	l.souls = 0x04;
-	assert(arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why));
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "Souls"));
-	l.souls = 0;
+	assert(arena_loadout_check(&l, why, sizeof why));
+	l.folder[9] = (uint16_t)(411 | 27u << 9);
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "code 27"));
+	l.folder[9] = 0xFFFF;
 	l.max_hp = 10000;
-	assert(!arena_loadout_check(&l, ONLINE_FORMAT_FULL, why, sizeof why) && strstr(why, "HP"));
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "HP"));
 }
 
 /* ---- a made-up core: EWRAM in an array ---- */
@@ -234,13 +214,13 @@ static void install(void) {
 	/* the folder and pack not where BN6 keeps them: refused, nothing written */
 	memset(ewram, 0xEE, sizeof ewram);
 	put32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS, 0);
-	assert(!arena_loadout_install(&m, &l, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "folder"));
+	assert(!arena_loadout_install(&m, &l, why, sizeof why) && strstr(why, "folder"));
 	put32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS, 0x02002178u);
 	put32(BN6_TOOLKIT + BN6_TOOLKIT_PACK, 0x02002230u);
-	l.souls = 1;
-	assert(!arena_loadout_install(&m, &l, ONLINE_FORMAT_BN6, why, sizeof why) && at16(0x02002178u) == 0xEEEE);
+	l.folder[8] = (uint16_t)(1 | 27u << 9);
+	assert(!arena_loadout_install(&m, &l, why, sizeof why) && at16(0x02002178u) == 0xEEEE);
 	l = starter();
-	assert(arena_loadout_install(&m, &l, ONLINE_FORMAT_BN6, why, sizeof why) && !outside);
+	assert(arena_loadout_install(&m, &l, why, sizeof why) && !outside);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) assert(at16(0x02002178u + 2 * i) == l.folder[i]);
 	assert(at(0x02002230u + 5 * BN6_PACK_ENTRY) == 3 && at(0x02002230u + 6 * BN6_PACK_ENTRY) == 0);
 	assert(at(BN6_PACK_EXT) == 0xEE);   /* (the extension is BN5's: left as it was) */
@@ -251,35 +231,27 @@ static void install(void) {
 	assert(flag(BN6_FLAG_HEAT_CROSS) && !flag(BN6_FLAG_HEAT_CROSS + 1) && flag(BN6_FLAG_HEAT_CROSS + 2) && flag(BN6_FLAG_BEAST_OUT));
 	l.crosses = 0;
 	l.beast = 0;
-	assert(arena_loadout_install(&m, &l, ONLINE_FORMAT_BN6, NULL, 0) && !flag(BN6_FLAG_HEAT_CROSS) && !flag(BN6_FLAG_BEAST_OUT));
+	assert(arena_loadout_install(&m, &l, NULL, 0) && !flag(BN6_FLAG_HEAT_CROSS) && !flag(BN6_FLAG_BEAST_OUT));
 }
 
 /* ---- the wire: the server's struct shapes (protocol.py), byte for byte ---- */
 
 static void wire(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
-	/* ARENA !BBIHB: a challenge of session 0x01020304 at 40 ms by BN6's rules; latency clamped, a zero ref
-	 * and rules past full refused */
-	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40, ONLINE_FORMAT_BN6) == ONLINE_ARENA_BYTES);
-	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40, 0 };
+	/* ARENA !BBIH (v9: no rules byte): a challenge of session 0x01020304 at 40 ms; latency clamped, a zero ref refused */
+	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40) == ONLINE_ARENA_BYTES && ONLINE_ARENA_BYTES == 8);
+	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40 };
 	assert(!memcmp(m, challenge, sizeof challenge));
-	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 1, 0, ONLINE_FORMAT_FULL) && m[8] == ONLINE_FORMAT_FULL);
-	assert(!arena_wire_action(m, ARENA_ACT_CHALLENGE, 1, 0, ONLINE_FORMAT_FULL + 1));
-	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999, 0) && m[6] == 0x13 && m[7] == 0x88);
-	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0, 0) && !arena_wire_action(m, 5, 1, 0, 0) && !arena_wire_action(m, 0, 1, 0, 0));
-	/* ARENA_STATE !BBII16sBBB: START, match 7, the other 9, side 1, delay 8, BN6's rules */
+	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999) && m[6] == 0x13 && m[7] == 0x88);
+	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 5, 1, 0) && !arena_wire_action(m, 0, 1, 0));
+	/* ARENA_STATE !BBII16sBB: START, match 7, the other 9, side 1, delay 8 */
 	uint8_t st[ONLINE_ARENA_STATE_BYTES] = { 18, 3, 0, 0, 0, 7, 0, 0, 0, 9 };
 	memset(st + 10, 0xAB, ONLINE_IDENTITY_BYTES);
 	st[26] = 1;
 	st[27] = 8;
 	ArenaWireState s;
 	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_START && s.match == 7 && s.other == 9);
-	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && s.rules == ONLINE_FORMAT_BN6);
-	st[28] = ONLINE_FORMAT_FULL;
-	assert(arena_wire_state(st, sizeof st, &s) && s.rules == ONLINE_FORMAT_FULL);
-	st[28] = ONLINE_FORMAT_FULL + 1;
-	assert(!arena_wire_state(st, sizeof st, &s));
-	st[28] = 0;
+	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && ONLINE_ARENA_STATE_BYTES == 28);
 	assert(!arena_wire_state(st, sizeof st - 1, &s));
 	st[1] = 5;
 	assert(!arena_wire_state(st, sizeof st, &s));
@@ -332,9 +304,9 @@ static void loadout_bytes(void) {
 	b[0] = 2;
 	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "version"));
 	/* the receiver's refusals are the local ones */
-	l.souls = 2;
+	l.folder[8] = (uint16_t)(1 | 27u << 9);
 	n = arena_loadout_pack(&l, b, sizeof b);
-	assert(arena_loadout_unpack(b, n, &back, &carried, NULL, 0) && !arena_loadout_check(&back, ONLINE_FORMAT_BN6, why, sizeof why) && strstr(why, "Souls"));
+	assert(arena_loadout_unpack(b, n, &back, &carried, NULL, 0) && !arena_loadout_check(&back, why, sizeof why) && strstr(why, "code 27"));
 	/* a NaviCust past what the message holds does not go */
 	l = starter();
 	memset(l.board, 1, sizeof l.board);
@@ -554,13 +526,9 @@ static void link_net(void) {
 	free(p);
 }
 
-/* the pair's common ground: BN6's rules for any pair until full ones are
- * built; each folder fits or not; the carried MegaMan's folder and what
- * BN6's rules leave home */
+/* the folders that hold chips, and the carried MegaMan's folder (every
+ * NetBattle by full rules: his Souls and BN5's chips go) */
 static void formats(void) {
-	assert(arena_format_for(0, 0) == ONLINE_FORMAT_BN6 && arena_format_for(ONLINE_ROMS_BN5, 0) == ONLINE_FORMAT_BN6);
-	assert(arena_format_for(ONLINE_ROMS_BN5, ONLINE_ROMS_BN5) == (ARENA_FULL_RULES ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6));
-	assert(arena_format_ok(ONLINE_FORMAT_BN6, 0) && !arena_format_ok(ONLINE_FORMAT_FULL, 0));
 	static OnlineLoadout l, out;
 	memset(&l, 0, sizeof l);
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
@@ -571,24 +539,17 @@ static void formats(void) {
 	l.regulars[1] = 4; l.tags[1][0] = 2; l.tags[1][1] = 7;
 	l.souls = 0x21;
 	l.pack[411][0] = 3; l.pack[214][1] = 1; l.pack[5][2] = 2;
-	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 0) == ARENA_FOLDER_BN5);
-	assert(arena_folder_fit(&l, ONLINE_FORMAT_FULL, 0) == ARENA_FOLDER_FITS);
-	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 1) == ARENA_FOLDER_FITS);
-	assert(arena_folder_fit(&l, ONLINE_FORMAT_BN6, 2) == ARENA_FOLDER_EMPTY);
-	/* (a folder of BN5's chips goes under BN6's rules too, by its stand-ins: arena_standin.h) */
-	assert(arena_folders_fitting(&l, ONLINE_FORMAT_BN6) == 3u && arena_folders_fitting(&l, ONLINE_FORMAT_FULL) == 3u);
-	arena_format_carry(&l, ONLINE_FORMAT_BN6, 1, &out);
+	assert(arena_folder_holds(&l, 0) && arena_folder_holds(&l, 1) && !arena_folder_holds(&l, 2) && !arena_folder_holds(&l, 3));
+	assert(arena_folders_fitting(&l) == 3u);
+	arena_format_carry(&l, 1, &out);
 	assert(!memcmp(out.folder, l.folders[1], sizeof out.folder) && out.regular == 4 && out.tag[0] == 2 && out.tag[1] == 7);
-	assert(!out.souls && !out.pack[411][0] && !out.pack[214][1] && out.pack[5][2] == 2);
+	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.pack[214][1] == 1 && out.pack[5][2] == 2);
+	arena_format_carry(&l, 0, &out);
+	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
+	/* (what full rules carry, both games check alike) */
 	char why[160];
 	out.max_hp = 100;
-	assert(arena_loadout_check(&out, ONLINE_FORMAT_BN6, why, sizeof why));
-	arena_format_carry(&l, ONLINE_FORMAT_FULL, 0, &out);
-	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.folder[0] == (411 | 12u << 9));
-	assert(arena_souls_home(&l, ONLINE_FORMAT_BN6) && !arena_souls_home(&l, ONLINE_FORMAT_FULL));
-	/* (what full rules carry, both games check alike) */
-	out.max_hp = 100;
-	assert(arena_loadout_check(&out, ONLINE_FORMAT_FULL, why, sizeof why));
+	assert(arena_loadout_check(&out, why, sizeof why));
 }
 
 /* the stands (issue #128): their messages as the server's protocol.py packs them */
@@ -611,19 +572,19 @@ static void stands(void) {
 	e[3] = 7; e[7] = 1; e[11] = 2;
 	memcpy(e + 12, "Alpha", 5);
 	memcpy(e + 28, "Beta", 4);
-	e[44] = ONLINE_FORMAT_BN6; e[45] = STANDS_FIGHTING; e[46] = 2; e[47] = 3;
-	e[49] = 80; e[51] = 100; e[53] = 20; e[55] = 100; e[57] = 54; e[59] = 1; e[60] = 2; e[61] = 1;
+	e[44] = STANDS_FIGHTING; e[45] = 2; e[46] = 3;
+	e[48] = 80; e[50] = 100; e[52] = 20; e[54] = 100; e[56] = 54; e[58] = 1; e[59] = 2; e[60] = 1;
 	StandsEntry got[ONLINE_STANDS_MAX];
 	assert(stands_wire_read(s, sizeof s, got) == 1 && got[0].match == 7 && got[0].side[0] == 1 && got[0].side[1] == 2);
 	assert(!strcmp(got[0].name[0], "Alpha") && !strcmp(got[0].name[1], "Beta") && got[0].watchers == 2 && got[0].cheers == 3);
 	assert(got[0].report.hp[0] == 80 && got[0].report.hp[1] == 20 && got[0].report.chip[0] == 54 && got[0].report.used[0] == 2);
 	assert(stands_wire_read(s, sizeof s - 1, got) < 0);
-	e[45] = 9;
+	e[44] = 9;
 	assert(stands_wire_read(s, sizeof s, got) < 0);
 	/* WATCH_STATE, WATCH_KEYS, WATCH_RELAY */
-	uint8_t st[ONLINE_WATCH_STATE_BYTES] = { ONLINE_WATCH_STATE, WATCH_ON, 0, 0, 0, 7, 0, 0, 0, 1, 0, 0, 0, 2, ONLINE_FORMAT_FULL, 6 };
+	uint8_t st[ONLINE_WATCH_STATE_BYTES] = { ONLINE_WATCH_STATE, WATCH_ON, 0, 0, 0, 7, 0, 0, 0, 1, 0, 0, 0, 2, 6 };
 	WatchState w;
-	assert(stands_wire_state(st, sizeof st, &w) && w.match == 7 && w.side[1] == 2 && w.rules == ONLINE_FORMAT_FULL && w.delay == 6);
+	assert(stands_wire_state(st, sizeof st, &w) && w.match == 7 && w.side[1] == 2 && w.delay == 6);
 	st[1] = 3;
 	assert(!stands_wire_state(st, sizeof st, &w));
 	uint8_t k[ONLINE_WATCH_KEYS_HEAD + 4] = { ONLINE_WATCH_KEYS, 0, 0, 0, 7, 1, 0, 0, 0, 6, 0, 2, 0x01, 0x02, 0x03, 0xFF };

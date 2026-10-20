@@ -27,7 +27,7 @@ static void names(char *out, size_t n, unsigned mask, const char *const *all, in
 	}
 }
 
-const char *square_peer_words(const char *name, const OnlineProfile *card, bool bn5_his, bool bn5_mine) {
+const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full) {
 	static const char *const crosses[] = { "Heat", "Elec", "Slash", "Erase", "Charge" };
 	static const char *const souls[] = { "Colonel", "Shadow", "Number", "Tomahawk", "Knight", "Toad" };
 	static char s[400];
@@ -43,9 +43,8 @@ const char *square_peer_words(const char *name, const OnlineProfile *card, bool 
 		names(list, sizeof list, card->souls, souls, 6);
 		n += snprintf(s + n, sizeof s - (size_t)n, "|And %sSoul!", list);
 	}
-	/* (the pair's common ground: what trades and NetBattles go by) */
-	if (bn5_his) snprintf(s + n, sizeof s - (size_t)n, "|His PET holds BN5\nchips too!");
-	else if (bn5_mine) snprintf(s + n, sizeof s - (size_t)n, "|His PET holds BN6\nchips only.");
+	/* (why Battle and trades are not offered with him: his NetPass, in stamps) */
+	if (!pass_full) snprintf(s + n, sizeof s - (size_t)n, "|His NetPass has\njust the Square\nstamp.");
 	return s;
 }
 

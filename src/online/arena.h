@@ -31,10 +31,10 @@ typedef enum {
 
 typedef struct Arena Arena;
 
-/* An Arena over `link` (mine: link->side) by `format`'s rules
- * (ONLINE_FORMAT_*, arena_format.h), loadout[side] each side's MegaMan
+/* An Arena over `link` (mine: link->side) by full rules (arena_boot.h),
+ * loadout[side] each side's MegaMan
  * (NULL: the game's start's); NULL where memory ran out */
-Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link, unsigned format);
+Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link);
 void arena_free(Arena *a);
 /* Up to `frames` frames of the way in */
 ArenaStage arena_connect(Arena *a, unsigned frames);

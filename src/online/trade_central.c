@@ -5,11 +5,11 @@
  * lists MegaMan's spare chips at no price (the Square's RAM is thrown away
  * on the way home; the chip ordered is the one whose stock fell). An offer
  * that comes in is MegaMan's news wherever he stands, answered at the
- * desk the same way. Each pair trades on its common ground: BN6's own
- * chips between any two games, BN5's too between two with its ROM (each
- * peer's ROMs the server's word, online_trade.c's rule on each chip); the
- * Navis listed are those MegaMan has a spare for, the clerk saying so
- * plainly where none fits. Once both chips are known MegaMan asks "Deal,Lan?",
+ * desk the same way. Trades need the NetPass's Trade stamp on both games
+ * (netpass.h, issue #131): without it the clerk says so and offers
+ * nothing; with it he lists the Navis whose pass has it too (each peer's
+ * ROMs the server's word, which refuses the rest with NOTICE 28), and
+ * every spare chip, BN5's too. Once both chips are known MegaMan asks "Deal,Lan?",
  * the cursor on No; the server commits when both said yes, and the swap
  * is kept on disk until the run has it at home (online_trade.c).
  *
@@ -31,6 +31,7 @@
 #include "chips.h"
 #include "emu.h"
 #include "flags.h"
+#include "netpass.h"
 #include "online_board.h"
 #include "online_square.h"
 #include "online_trade.h"
@@ -137,8 +138,8 @@ static void clerk(void) {
 	const TradeView *v = online_trade_view();
 	/* (the top bit set: never 0, so the first words are written alone in
 	 * the channel too, not the desk's empty archive) */
-	bool diving = weekly_on();
-	uint32_t now = 1u << 31 | (uint32_t)v->stage << 24 | (v->serial & 0xFFFF) << 8 | (uint32_t)C.s.peer_count << 1 | (C.traded || diving);
+	bool diving = weekly_on(), stamp = netpass_has(STAMP_TRADE);
+	uint32_t now = 1u << 31 | (uint32_t)v->stage << 24 | (v->serial & 0xFFFF) << 8 | (uint32_t)C.s.peer_count << 1 | (C.traded || diving || !stamp);
 	if (now == C.clerk || emu_read8(BN6_CHATBOX)) return;
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
@@ -147,8 +148,8 @@ static void clerk(void) {
 	int n = 3, flags[3] = { OFFER_FLAG, BOARD_FLAG, -1 };
 	ta_begin(&t);
 	bool first = true;
-	if (diving) {
-		ta_say(&t, FACE_PROG, trade_diving());
+	if (diving || !stamp) {
+		ta_say(&t, FACE_PROG, stamp ? trade_diving() : trade_no_stamp());
 		if (online_square_trade_say(out, ta_build(&t, out))) C.clerk = now;
 		return;
 	}
@@ -189,12 +190,6 @@ static void clerk(void) {
 	}
 }
 
-/* whether both games have BN5's ROM: its chips trade between them */
-static bool both_bn5(uint32_t id) {
-	if (!(online_transport_roms() & ONLINE_ROMS_BN5)) return false;
-	for (size_t i = 0; i < C.s.peer_count; ++i) if (C.s.peers[i].id == id) return C.s.peers[i].roms & ONLINE_ROMS_BN5;
-	return false;
-}
 
 /* a page of two choices at a time, More going on, the first page with
  * `words` (labels[i] jumps to script `pick` + i) */
@@ -214,17 +209,17 @@ static void pages(TextArchive *t, const char *words, const char *const *labels, 
 	}
 }
 
-/* whom to trade with: the channel's Navis MegaMan has a spare for (BN6's
- * own for any, BN5's for a game with its ROM too), two a page, More going on */
+/* whom to trade with: the channel's Navis whose NetPass has the Trade
+ * stamp, where MegaMan has a spare, two a page, More going on */
 static void who(void) {
 	if (!C.s.peer_count) { talk_start(trade_none_here(), FACE_PROG); return; }
 	static TradeChip spares[SPARES];
 	static uint8_t count[SPARES];
-	int held = 0, bn6 = online_trade_spares(spares, count, SPARES, false, &held);
+	if (!online_trade_spares(spares, count, SPARES)) { talk_start(trade_no_spares(), FACE_PROG); return; }
 	C.nwho = 0;
 	for (size_t i = 0; i < C.s.peer_count; ++i)
-		if (bn6 || (held && both_bn5(C.s.peers[i].id))) C.who[C.nwho++] = C.s.peers[i].id;
-	if (!C.nwho) { talk_start(held ? trade_bn5_spares() : trade_no_spares(), FACE_PROG); return; }
+		if (netpass_peer_full(C.s.peers[i].roms)) C.who[C.nwho++] = C.s.peers[i].id;
+	if (!C.nwho) { talk_start(trade_none_stamped(), FACE_PROG); return; }
 	static TextArchive t;
 	const char *labels[SQUARE_PEERS] = { 0 };
 	int n = C.nwho, pick = (n + 1) / 2;
@@ -264,38 +259,34 @@ static void list_spares(const char *words) {
 }
 
 /* the clerk's word over the order screen, by what the chip is for */
-static const char *pick_words(int want, bool held) {
+static const char *pick_words(int want) {
 	if (C.mode == PICK_POST) return trade_post_pick();
 	if (C.mode == PICK_TAKE) return trade_take_pick(want);
-	return trade_pick(held);
+	return trade_pick();
 }
 
 /* the chip for `partner` (0: one to put up on the board), of the kind
- * `want` (-1 any): BN6's order screen, MegaMan's spares the pair can both
- * hold listed at no price (BN5's kept back from a game without its ROM,
- * the clerk saying so) */
+ * `want` (-1 any): BN6's order screen, MegaMan's spares listed at no
+ * price */
 static void pick(uint32_t partner, int want) {
 	uint8_t count[SPARES];
-	int held = 0;
-	bool bn5 = partner ? both_bn5(partner) : (online_transport_roms() & ONLINE_ROMS_BN5) != 0;
-	int all = online_trade_spares(C.listed, count, SPARES, bn5, &held);
+	int all = online_trade_spares(C.listed, count, SPARES);
 	C.nlisted = 0;
 	for (int i = 0; i < all; ++i)
 		if (want < 0 || online_board_meets(want, C.listed[i])) C.listed[C.nlisted++] = C.listed[i];
 	C.chosen = -1;
 	if (!C.nlisted && all) { talk_start(trade_take_none(name_of(partner), want), FACE_PROG); return; }
-	if (!C.nlisted && held) { talk_start(trade_bn6_only(name_of(partner)), FACE_PROG); return; }
 	ShopItem items[SPARES];
 	/* (one each: a chip picked shows sold out after) */
 	for (int i = 0; i < C.nlisted; ++i) items[i] = (ShopItem){ 2, 1, C.listed[i].id, C.listed[i].code, 0 };
 	bool past = false;
 	for (int i = 0; i < C.nlisted; ++i) past |= C.listed[i].id >= BN6_PACK_IDS;
-	if (C.nlisted && past) { list_spares(pick_words(want, false)); return; }
+	if (C.nlisted && past) { list_spares(pick_words(want)); return; }
 	if (!C.nlisted || !shop_order_list(items, C.nlisted)) { talk_start(trade_no_spares(), FACE_PROG); return; }
 	for (int i = 0; i < C.nlisted; ++i) C.stock[i] = 1;
 	static TextArchive t;
 	ta_begin(&t);
-	ta_counter(&t, SHOP_ORDER, FACE_PROG, pick_words(want, held > 0), -1, NULL);
+	ta_counter(&t, SHOP_ORDER, FACE_PROG, pick_words(want), -1, NULL);
 	C.picking = run(&t);
 }
 

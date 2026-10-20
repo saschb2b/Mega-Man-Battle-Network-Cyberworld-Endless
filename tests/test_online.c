@@ -221,6 +221,10 @@ static void referee(void) {
 	memset(&f, 0, sizeof f);
 	f.arena = true;
 	f.navis = 1;
+	/* (no Arena stamp on this game's NetPass, issue #131: the stamp named, never a ROM, no tip) */
+	const char *closed = square_referee_words(&f);
+	assert(strstr(closed, "NO ARENA STAMP ON\nYOUR NETPASS!") && !strstr(closed, "PICK") && !strstr(closed, "BN5"));
+	f.stamp = true;
 	assert(strstr(square_referee_words(&f), "WHO'S FIRST?") && strstr(square_referee_words(&f), "PICK"));
 	/* (another pair's NetBattle on in the channel: no "none yet", and no last bout of this game's) */
 	f.battle_on = true;
@@ -241,6 +245,9 @@ static void referee(void) {
 	assert(!strcmp(square_referee_bark(1, "Alpha"), "YOU WIN!"));
 	assert(!strcmp(square_referee_bark(2, "Alpha"), "ALPHA WINS!"));
 	assert(!strcmp(square_referee_bark(3, "Alpha"), "WHAT A BOUT!"));
+	/* (the Arena not built here, the stamp held: the PET's word) */
+	f.arena = false;
+	assert(strstr(square_referee_words(&f), "NO NETBATTLES\nFROM THIS PET!"));
 }
 
 /* the week's net (issue #127): WEEK_BOARD read and refused where it is

@@ -61,7 +61,7 @@ struct ArenaWatch {
 	WatchingStage stage;
 	const uint8_t *rom;
 	size_t size;
-	unsigned format;
+
 	uint32_t match;
 	uint8_t loadout[2][ONLINE_ARENA_LOADOUT_MAX];
 	size_t loadout_n[2];
@@ -84,13 +84,13 @@ static WatchingStage fail(ArenaWatch *w, const char *why) {
 	return w->stage = WATCHING_FAILED;
 }
 
-ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, unsigned format, uint32_t match) {
+ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match) {
 	ArenaWatch *w = calloc(1, sizeof *w);
 	if (!w) return NULL;
 	w->match = match;
 	w->rom = rom;
 	w->size = size;
-	w->format = format;
+
 	return w;
 }
 
@@ -175,10 +175,10 @@ static void build(ArenaWatch *w) {
 		if (!arena_loadout_unpack(w->loadout[side], w->loadout_n[side], &l[side], &is, why, sizeof why)) { fail(w, why); return; }
 		carried[side] = is ? &l[side] : NULL;
 	}
-	w->boot = arena_boot_new(w->rom, w->size, carried, w->format);
+	w->boot = arena_boot_new(w->rom, w->size, carried);
 	if (!w->boot) { fail(w, "too little memory for the two PETs"); return; }
 	if (arena_boot_stage(w->boot) == ARENA_BOOT_FAILED) { fail(w, arena_boot_error(w->boot)); return; }
-	printf("watch: both MegaMen in, the way in begins (rules %u)\n", w->format);
+	printf("watch: both MegaMen in, the way in begins\n");
 	w->stage = WATCHING_IN;
 }
 

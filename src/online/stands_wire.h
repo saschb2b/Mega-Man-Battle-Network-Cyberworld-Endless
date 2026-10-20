@@ -28,7 +28,7 @@ enum { STANDS_WAY_IN = 1, STANDS_FIGHTING, STANDS_OVER, STANDS_STOPPED };
 typedef struct {
 	uint32_t match, side[2];                  /* the battle; the cable's first and second players' sessions */
 	char name[2][ONLINE_NAME_BYTES + 1];
-	uint8_t rules, stage, watchers, cheers;
+	uint8_t stage, watchers, cheers;
 	ArenaReport report;
 } StandsEntry;
 
@@ -39,7 +39,7 @@ enum { WATCH_ON = 1, WATCH_OVER };
 typedef struct {
 	uint8_t stage;
 	uint32_t match, side[2];
-	uint8_t rules, delay;
+	uint8_t delay;
 } WatchState;
 
 /* STANDS: its entries into out (ONLINE_STANDS_MAX at most), how many; -1 malformed */

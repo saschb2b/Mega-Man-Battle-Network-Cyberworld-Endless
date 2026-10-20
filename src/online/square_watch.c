@@ -4,7 +4,7 @@
  * (never under an open chat box: square_life.c). His question sets the
  * Square's flag WATCH_FLAG; as the chat closes the game asks the server
  * to watch the battle he named. The server answers WATCH_STATE with the
- * battle's sides, rules and delay, then hands on both MegaMen, the
+ * battle's sides and delay, then hands on both MegaMen, the
  * players' ready and hashes, and every key from the first frame; the
  * pair is built and run here (arena_watch.c). A battle this machine was
  * too slow to catch up with is not offered again: the next one is. */
@@ -15,7 +15,6 @@
 
 #include <SDL.h>
 
-#include "arena_format.h"
 #include "arena_pair.h"
 #include "arena_view.h"
 #include "arena_watch.h"
@@ -24,6 +23,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "gfx.h"
+#include "netpass.h"
 #include "online_mail.h"
 #include "online_square.h"
 #include "online_stands.h"
@@ -49,7 +49,7 @@ static struct {
 	uint32_t match, since, notice_serial;
 	uint32_t refused;          /* a battle this machine could not keep up with: not offered again */
 	char name[2][ONLINE_NAME_BYTES + 1];
-	unsigned rules, view;
+	unsigned view;
 	ArenaWatch *w;
 	OnlineSnapshot s;
 	int over_t, shown_t;
@@ -91,9 +91,9 @@ static const StandsEntry *entry(bool on) {
 
 static bool mine(const StandsEntry *e) { return e->side[0] == W.s.player_id || e->side[1] == W.s.player_id; }
 
-/* this game can watch it: the Arena built here, the rules its ROMs fight by, not its own battle */
+/* this game can watch it: the Arena built here, the NetPass's Arena stamp, not its own battle */
 static bool can_watch(const StandsEntry *e) {
-	return CW_ARENA && e && !mine(e) && e->match != W.refused && W.stage == W_IDLE && arena_format_ok(e->rules, online_transport_roms());
+	return CW_ARENA && e && !mine(e) && e->match != W.refused && W.stage == W_IDLE && netpass_has(STAMP_ARENA);
 }
 
 /* a chip's name where this game can name it (a BN5 chip only with BN5's ROM), else NULL */
@@ -163,13 +163,12 @@ static void ask(void) {
 	const StandsEntry *e = entry(true);
 	if (!can_watch(e)) return;
 	W.match = e->match;
-	W.rules = e->rules;
 	for (int side = 0; side < 2; ++side) snprintf(W.name[side], sizeof W.name[side], "%s", e->name[side]);
 	W.stage = W_ASKED;
 	W.since = SDL_GetTicks();
 	W.notice_serial = W.s.notice_serial;
 	send_watch(WATCH_ACT_WATCH, W.match);
-	printf("watch: asked to watch %s vs %s (match %u, rules %u)\n", W.name[0], W.name[1], W.match, W.rules);
+	printf("watch: asked to watch %s vs %s (match %u)\n", W.name[0], W.name[1], W.match);
 }
 
 void square_watch_update(const OnlineSnapshot *s) {
@@ -185,14 +184,14 @@ void square_watch_update(const OnlineSnapshot *s) {
 
 static void started(const WatchState *st) {
 	if (W.stage != W_ASKED || st->match != W.match) return;
-	W.w = arena_watch_new(R.data, ROM_SIZE, st->rules, st->match);
+	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
 	W.stage = W_ON;
 	W.view = 0;
 	W.shown_t = 0;
 	W.over_said = false;
 	W.why[0] = 0;
-	printf("watch: watching match %u, sides %u and %u, rules %u, delay %u\n", st->match, st->side[0], st->side[1], st->rules, st->delay);
+	printf("watch: watching match %u, sides %u and %u, delay %u\n", st->match, st->side[0], st->side[1], st->delay);
 }
 
 static void relayed(const uint8_t *data, size_t size) {

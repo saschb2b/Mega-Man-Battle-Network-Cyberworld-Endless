@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "netpass.h"
 #include "online_square.h"
 #include "online_text.h"
 #include "online_trade.h"
@@ -34,7 +35,8 @@ void square_week_reset(void) {
  * the server answers it, or at once where its week is past taking */
 static void post(void) {
 	const WeeklyRecord *r = weekly_record();
-	if (!r->pending || !Q.s.week) return;
+	/* (kept till a visit with the DeepNet stamp: the server refuses the rest, NOTICE 28) */
+	if (!r->pending || !Q.s.week || !netpass_has(STAMP_DEEPNET)) return;
 	if (!Q.sent) {
 		if ((unsigned)r->r_week + 1u < Q.s.week || r->r_week > Q.s.week) { weekly_posted(); return; }
 		const WeekBoard *b = online_week_board();
@@ -63,6 +65,7 @@ WeekOffer square_week_offer(void) {
 	uint16_t week = Q.s.week;
 	if (!week || !Q.s.week_seed) return WEEK_OFFER_NONE;
 	if (weekly_on()) return WEEK_OFFER_ON;
+	if (!netpass_has(STAMP_DEEPNET)) return WEEK_OFFER_STAMP;
 	TradeChip give, get;
 	if (online_trade_pending(&give, &get)) return WEEK_OFFER_TRADE;
 	const WeeklyRecord *r = weekly_record();

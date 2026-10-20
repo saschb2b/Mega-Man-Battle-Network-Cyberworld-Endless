@@ -22,6 +22,7 @@ typedef struct {
 	int result;             /* that battle's: 1 won, 2 lost, else over */
 	unsigned won, lost;     /* the bouts with him in a row, that one among them */
 	bool arena;             /* this build offers NetBattles (not the 3DS's, the browser's) */
+	bool stamp;             /* ... and this game's NetPass holds the Arena stamp (netpass.h) */
 	bool parade;            /* the walkers are on parade round the landmark */
 	bool battle_on;         /* a NetBattle under way in the channel (the stands: square_watch.h) */
 	struct {                /* Trade Central's board: the offers up (online_board.c) */

@@ -10,19 +10,18 @@
  * Side 0 tells the server the battle is over; a failure or a leave tells
  * it too, unless the server has already said it is.
  *
- * Each battle is fought by the pair's common ground (arena_format.h): the
- * challenge names its rules, BN6's for a pair where either game lacks
- * BN5's ROM, and both MegaMen say them. Under BN6's rules a MegaMan leaves
- * home his Souls and BN5's chips in his pack, and fights with a folder of
- * BN6's chips: where more than one of his three fits, Lan picks it in
- * BN6's chat box, the others named as not fitting; where none does,
- * MegaMan says why. The carried MegaMan is then checked as before, the
+ * Every battle is fought by full rules (issue #131): both games hold the
+ * NetPass's Arena stamp (netpass.h), so Battle is offered only where both
+ * do, and a challenge from a game without it is declined (the server
+ * refuses it first, NOTICE 28). Where more than one of MegaMan's three
+ * folders holds chips, Lan picks the one carried in BN6's chat box; where
+ * none does, MegaMan says so. The carried MegaMan is then checked, the
  * same check on both games.
  *
  * A battle with a result is offered again (docs/ONLINE_ARENA.md,
  * Rematches): back in the Square, MegaMan says how it went and asks Lan
  * whether to go again with the same player, the cursor on No. A Yes sends
- * the same challenge again, quietly, by the last battle's rules; the other
+ * the same challenge again, quietly; the other
  * game takes a challenge from that player at once where its player said
  * Yes too (his question still open: it waits for the answer), turns it
  * down where he said No, and asks as ever once the rematch's time is out.
@@ -47,6 +46,7 @@
 #include "bn6.h"
 #include "devtools.h"
 #include "emu.h"
+#include "netpass.h"
 #include "online_mail.h"
 #include "online_people.h"
 #include "online_transport.h"
@@ -87,7 +87,6 @@ static struct {
 	char name[ONLINE_NAME_BYTES + 1];
 	bool ended;               /* the server has said this battle is over */
 	bool challenger;          /* this game challenged (the folder asked before the challenge) */
-	unsigned format;          /* the rules it is fought by (ONLINE_FORMAT_*), the challenge's */
 	int folder;               /* the folder carried, 0-2 */
 	OnlineSnapshot s;
 	ArenaPings pings;         /* the round trips measured, for the delay asked for (arena_sync.h) */
@@ -104,17 +103,18 @@ static struct {
 /* the last battle this game fought from the Square, for its referee */
 static struct { SquareBout bout; uint32_t other; char name[ONLINE_NAME_BYTES + 1]; } last;
 
-/* the rematch: the last battle's other player, rules and folder, Lan's
- * answer, and a challenge of his come before it */
+/* the rematch: the last battle's other player and folder, Lan's answer,
+ * and a challenge of his come before it */
 enum { AGAIN_UNSAID, AGAIN_YES, AGAIN_NO };
 static struct {
 	uint32_t other, since, held;
 	char name[ONLINE_NAME_BYTES + 1];
-	unsigned format;
 	int folder, answer;
 } again;
 
-bool square_arena_offered(void) { return CW_ARENA; }
+bool square_arena_built(void) { return CW_ARENA; }
+
+bool square_arena_offered(uint8_t peer_roms) { return CW_ARENA && netpass_has(STAMP_ARENA) && netpass_peer_full(peer_roms); }
 
 const SquareBout *square_arena_last(void) {
 	last.bout.name = last.bout.result ? last.name : NULL;
@@ -141,7 +141,7 @@ static uint32_t asked(void) {
 
 static void act(unsigned action, uint32_t ref) {
 	uint8_t m[ONLINE_ARENA_BYTES];
-	if (arena_wire_action(m, action, ref, asked(), A.format)) online_transport_send(m, sizeof m);
+	if (arena_wire_action(m, action, ref, asked())) online_transport_send(m, sizeof m);
 }
 
 static void say(const char *words) { A.said = words; }
@@ -181,53 +181,45 @@ static void fail_as(const char *why, bool both) {
 
 static void fail(const char *why) { fail_as(why, false); }
 
-/* my MegaMan can go by A.format's rules with some folder (the game's
- * start's where none was carried), `fits` the folders that can; else
- * MegaMan says why. The carried MegaMan checked as the other game will. */
+/* my MegaMan can go with some folder (the game's start's where none was
+ * carried), `fits` the folders that can; else MegaMan says why. The
+ * carried MegaMan checked as the other game will. */
 static bool mine_goes(unsigned *fits) {
 	const OnlineLoadout *l = online_visit_loadout();
-	*fits = l ? arena_folders_fitting(l, A.format) : 1u;
+	*fits = l ? arena_folders_fitting(l) : 1u;
 	if (!l) return true;
-	printf("arena: rules %u, the folders that fit them %#x\n", A.format, *fits);
+	printf("arena: the folders that hold chips %#x\n", *fits);
 	if (!*fits) {
-		unsigned bn5 = 0;
-		for (int k = 0; k < ONLINE_FOLDERS; ++k) bn5 |= (arena_folder_fit(l, A.format, k) == ARENA_FOLDER_BN5) << k;
-		printf("arena: no folder of ours fits rules %u (folders with BN5's chips: %#x)\n", A.format, bn5);
-		talk_start(arena_no_folder_words(bn5 != 0), FACE_MEGAMAN);
+		talk_start(arena_no_folder_words(), FACE_MEGAMAN);
 		return false;
 	}
 	static OnlineLoadout carried;
 	char why[120];
 	uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX];
-	arena_folder_carry(l, A.format, arena_folder_first(*fits), &carried, false);
-	if (arena_loadout_check(&carried, A.format, why, sizeof why) && arena_loadout_pack(&carried, bytes, sizeof bytes)) return true;
+	arena_format_carry(l, arena_folder_first(*fits), &carried);
+	if (arena_loadout_check(&carried, why, sizeof why) && arena_loadout_pack(&carried, bytes, sizeof bytes)) return true;
 	printf("arena: our MegaMan can't go: %s\n", why);
-	talk_start(arena_cant_words(carried.souls != 0), FACE_MEGAMAN);
+	talk_start(arena_cant_words(), FACE_MEGAMAN);
 	return false;
 }
 
-/* the folder to carry asked, where Lan has a choice or one stays home */
-static bool folder_question(unsigned fits) {
-	const OnlineLoadout *l = online_visit_loadout();
-	return arena_folder_asked(l, A.format, fits) && arena_folder_ask(l, A.format, fits);
-}
+/* the folder to carry asked, where Lan has a choice */
+static bool folder_question(unsigned fits) { return arena_folder_asked(fits) && arena_folder_ask(fits); }
 
 /* (a rematch's quietly: nothing changed since the last) */
 static void challenge_sent(bool quiet) {
-	const OnlineLoadout *l = online_visit_loadout();
 	act(ARENA_ACT_CHALLENGE, A.other);
 	A.stage = SA_SENT;
 	A.since = SDL_GetTicks();
 	A.notice_serial = A.s.notice_serial;
-	if (!quiet) talk_start(arena_sent_words(A.name, A.format, arena_souls_home(l, A.format)), FACE_MEGAMAN);
-	printf("arena: challenged %s (session %u), rules %u, folder %d\n", A.name, A.other, A.format, A.folder + 1);
+	if (!quiet) talk_start(arena_sent_words(A.name), FACE_MEGAMAN);
+	printf("arena: challenged %s (session %u), folder %d\n", A.name, A.other, A.folder + 1);
 }
 
 static void send_challenge(void) { challenge_sent(false); }
 
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
-	if (!CW_ARENA || A.stage != SA_IDLE) return;
-	A.format = arena_format_for(online_transport_roms(), peer->roms);
+	if (!square_arena_offered(peer->roms) || A.stage != SA_IDLE) return;
 	unsigned fits;
 	if (!mine_goes(&fits)) return;
 	A.latency = A.pings.n ? arena_pings_latency(&A.pings) : latency_ms;
@@ -248,9 +240,9 @@ static void start(unsigned side, unsigned delay) {
 	arena_link_net(&A.link, A.match, side, delay, out, NULL);
 	const OnlineLoadout *carried = online_visit_loadout();
 	static OnlineLoadout tried;
-	/* (the folder picked as the one he fights with, what the rules leave out left home) */
+	/* (the folder picked as the one he fights with) */
 	if (carried) {
-		arena_folder_carry(carried, A.format, A.folder, &tried, true);
+		arena_format_carry(carried, A.folder, &tried);
 		carried = &tried;
 	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, a test's short battle) */
@@ -264,8 +256,7 @@ static void start(unsigned side, unsigned delay) {
 	A.theirs_in = false;
 	/* (the stands' report is the cable's first's to send: arena_report.h) */
 	if (side == 0) arena_report_begin(A.match);
-	printf("arena: match %u starts: side %u, delay %u frames, rules %u, folder %d\n", A.match, A.link.link.side, A.link.link.delay,
-		A.format, A.folder + 1);
+	printf("arena: match %u starts: side %u, delay %u frames, folder %d\n", A.match, A.link.link.side, A.link.link.delay, A.folder + 1);
 	if (!size || !online_transport_send(m, size) || !arena_loadout_unpack(bytes, n, &A.mine, &A.mine_carried, A.why, sizeof A.why))
 		fail("our MegaMan could not be sent");
 }
@@ -312,10 +303,9 @@ static bool again_folder(void) {
 	return true;
 }
 
-/* the rematch's battle, as the last one's other player and rules */
+/* the rematch's battle, as the last one's other player */
 static void again_as(bool challenger) {
 	A.other = again.other;
-	A.format = again.format;
 	A.challenger = challenger;
 	A.ended = false;
 	snprintf(A.name, sizeof A.name, "%s", again.name);
@@ -343,7 +333,7 @@ static void again_send(void) {
  * answer is kept: taken, turned down, or held for Lan's; false where it
  * is a challenge as ever */
 static bool again_in(const ArenaWireState *s) {
-	if (!again_on() || s->other != again.other || s->rules != again.format) return false;
+	if (!again_on() || s->other != again.other) return false;
 	if (again.answer == AGAIN_NO) {
 		act(ARENA_ACT_LEAVE, s->match);
 		printf("arena: %s's rematch turned down (match %u)\n", again.name, s->match);
@@ -364,18 +354,16 @@ static void state_in(const ArenaWireState *s) {
 	if (s->stage == ARENA_WIRE_CHALLENGED) {
 		const char *name = name_of(s->other);
 		bool blocked = online_people_flags(s->identity) & ONLINE_BLOCKED;
-		/* (rules this game cannot fight by, full ones without BN5's ROM: the server's
-		 * refusal first, ours too) */
-		bool rules = arena_format_ok(s->rules, online_transport_roms());
-		if (!CW_ARENA || A.stage != SA_IDLE || blocked || !name || !rules) { act(ARENA_ACT_LEAVE, s->match); return; }
+		/* (a game without the Arena stamp: the server's refusal first, ours too) */
+		bool stamp = netpass_has(STAMP_ARENA);
+		if (!CW_ARENA || A.stage != SA_IDLE || blocked || !name || !stamp) { act(ARENA_ACT_LEAVE, s->match); return; }
 		A.match = s->match;
 		A.other = s->other;
 		A.ended = false;
 		A.challenger = false;
-		A.format = s->rules;
 		snprintf(A.name, sizeof A.name, "%s", name);
 		A.stage = SA_ASKING;
-		printf("arena: %s challenged us (match %u, rules %u)\n", name, s->match, s->rules);
+		printf("arena: %s challenged us (match %u)\n", name, s->match);
 		return;
 	}
 	if (s->stage == ARENA_WIRE_WAITING && A.stage == SA_SENT && s->other == A.other) { A.match = s->match; A.stage = SA_WAITING; return; }
@@ -391,7 +379,7 @@ static void loadout_in(const uint8_t *data, size_t size) {
 	if (A.stage != SA_LOADOUT || !arena_wire_read_loadout(data, size, &match, &bytes, &n) || match != A.match) return;
 	char why[120];
 	if (!arena_loadout_unpack(bytes, n, &A.theirs, &A.theirs_carried, why, sizeof why) ||
-	    (A.theirs_carried && !arena_loadout_check(&A.theirs, A.format, why, sizeof why))) {
+	    (A.theirs_carried && !arena_loadout_check(&A.theirs, why, sizeof why))) {
 		char said[160];
 		snprintf(said, sizeof said, "the other MegaMan can't go: %s", why);
 		fail(said);
@@ -430,7 +418,7 @@ void square_arena_mail(const uint8_t *data, size_t size) {
 static void accept(void) {
 	act(ARENA_ACT_ACCEPT, A.match);
 	A.stage = SA_ACCEPTED;
-	printf("arena: we took %s's challenge, rules %u, folder %d\n", A.name, A.format, A.folder + 1);
+	printf("arena: we took %s's challenge, folder %d\n", A.name, A.folder + 1);
 }
 
 /* the challenged player's answer, as its chat closes */
@@ -493,7 +481,7 @@ void square_arena_update(const OnlineSnapshot *s) {
 	else if (A.stage == SA_AGAIN && !open) again_ask();
 	else if (A.stage == SA_FOLDER && !open) folder_picked();
 	else if (A.stage == SA_ASKING && !open) {
-		if (arena_folder_challenge(A.name, A.format)) A.stage = SA_ASKED;
+		if (arena_folder_challenge(A.name)) A.stage = SA_ASKED;
 	} else if (A.said && !open && A.stage == SA_IDLE && talk_start(A.said, FACE_MEGAMAN)) A.said = NULL;
 }
 
@@ -504,7 +492,7 @@ static void build(void) {
 	unsigned side = A.link.link.side;
 	loadout[side] = A.mine_carried ? &A.mine : NULL;
 	loadout[side ^ 1] = A.theirs_carried ? &A.theirs : NULL;
-	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link, A.format);
+	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link);
 	if (!A.arena) { fail("too little memory for the two PETs"); return; }
 	arena_window(A.arena, dev.arena_window);
 	A.stage = SA_CONNECTING;
@@ -564,7 +552,6 @@ static void bouts(unsigned result) {
 	memset(&again, 0, sizeof again);
 	again.other = A.other;
 	again.since = SDL_GetTicks();
-	again.format = A.format;
 	again.folder = A.folder;
 	snprintf(again.name, sizeof again.name, "%s", A.name);
 }

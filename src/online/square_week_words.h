@@ -18,6 +18,7 @@ typedef enum {
 	WEEK_OFFER_AGAIN,      /* MegaMan's unfinished dive, to keep on with or begin again */
 	WEEK_OFFER_ON,         /* MegaMan is on his dive now */
 	WEEK_OFFER_TRADE,      /* a trade waits to go home first */
+	WEEK_OFFER_STAMP,      /* no DeepNet stamp on this game's NetPass (netpass.h) */
 } WeekOffer;
 
 enum { WEEK_AGAIN_OPTIONS = 3 };

@@ -31,6 +31,8 @@ bool netpass_full(void) {
 
 bool netpass_has(NetStamp stamp) { return stamp == STAMP_SQUARE || (stamp < STAMP_COUNT && netpass_full()); }
 
+bool netpass_peer_full(uint8_t roms) { return (roms & ONLINE_ROMS_FULL) == ONLINE_ROMS_FULL; }
+
 int netpass_held(void) {
 	int n = 0;
 	for (int s = 0; s < STAMP_COUNT; ++s) n += netpass_has((NetStamp)s);
