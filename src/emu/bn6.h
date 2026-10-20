@@ -86,6 +86,7 @@
 #define BN6_BATTLE_RESULT     0x0200A009u /* last battle: 1 won */
 #define BN6_BATTLE_STATE      0x02034880u /* the battle's state (docs/ROM_DATA.md): */
 #define BN6_BATTLE_SIDE       (BN6_BATTLE_STATE + 0x0D) /* u8: MegaMan's side, his battle NaviStats' (0x08026874 reads it so) */
+#define BN6_BATTLE_BUSTING    (BN6_BATTLE_STATE + 0x1E) /* u8: the busting level, 1-10 and 11 for S, which the reward pick takes (bn6f sub_802C8FA; docs/ROM_DATA.md, Battle rewards) */
 #define BN6_BATTLE_PHASE      (BN6_BATTLE_STATE + 0x01) /* 8 while the Custom screen is open (and slides out), 0x0C from BATTLE START! on (the pause too) */
 #define BN6_PHASE_CUSTOM      0x08        /* BN6_BATTLE_PHASE: the Custom screen open */
 #define BN6_CUSTOM_SCREEN     0x020364C0u /* the Custom screen's state: */

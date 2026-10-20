@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 95
-#define LAYER_MAKE_HASH 0x9f0624e1u
+#define LAYER_MAKE 96   /* (96: the opening economy, issue #154: fewer green Mystery Data early, and what they hold) */
+#define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

@@ -952,7 +952,7 @@ project page's:
 | The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, the browser...), the version and the screen's size |
 | A run begins | its setup (net, folder, Cross, threat, helpers), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
-| A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, and its setup |
+| A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |
 
 Never sent: names, accounts, an ID of you, your install or your device,
 the ROMs or their hashes, file paths, saves or controls. Umami sets no

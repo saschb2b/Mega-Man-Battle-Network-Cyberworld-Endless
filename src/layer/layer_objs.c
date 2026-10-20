@@ -66,53 +66,24 @@ bool layer_objs_dark_first;
 #define SPECIAL_FROM    9    /* place in the cycle from which a Chip Trader may be a Special */
 #define SPECIAL_CHANCE  40   /* % of those */
 
-#define HP_MEMORY_CHANCE 15   /* % of the rich Mystery Data from the second act on */
-
 /* The game's 8-byte Mystery Data content: kind 1 chip (code, id), 3 zenny,
- * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md). True for
- * an HPMemory, which the game keeps in blue Mystery Data. */
+ * 4 item, 5 BugFrags (tested in the game; see docs/ROM_DATA.md), as
+ * loot_mystery_roll rolls it (loot.h). True for an HPMemory, which the
+ * game keeps in blue Mystery Data. */
 static bool mystery_content(const NetObj *o, uint8_t out[8]) {
-	int roll = rng_range(0, 99);
-	char code = '*';
-	int kind = 3, value = 100;
-	/* (none on a trip back: the run's HPMemory lie where it goes on,
-	 * docs/HOME.md) */
-	if (o->param == 2 && run.depth >= 4 && run.side_kind != LAYER_BACK && rng_range(0, 99) < HP_MEMORY_CHANCE) {
+	LootFind f = loot_mystery_roll(o->param, run.depth);
+	if (f.kind == LOOT_FIND_HP_MEMORY) {
 		const uint8_t c[8] = { 4, 0x20, 0xFF, 0xFF, SCRIPTS_HP_MEMORY, 0, 0, 0 };
 		for (int i = 0; i < 8; ++i) out[i] = c[i];
 		return true;
 	}
-	/* (threat 6, docs/META.md: a chip where zenny would be) */
-	bool chips_only = run.threat >= 6;
-	int bonus = -1;   /* a chip's bonus tier (roll_chip), -1 for none */
-	if (o->param == 0) {
-		if (roll < 50 || (chips_only && roll < 85)) bonus = 0;
-		else if (roll < 85) value = (100 + rng_range(0, 8) * 50) * (1 + run.depth / 6);
-		else { kind = 5; value = rng_range(3, 8); }
-	} else if (o->param == 1) {
-		if (roll < 60 || chips_only) bonus = 1;
-		else value = 800 + run.depth * 60;
-	} else bonus = 3;
-	if (bonus >= 0) {
-		kind = 1;
-		value = roll_chip(run.depth, bonus, &code);
-		/* half the time a chip that comes in the folder's codes, in one of
-		 * them: rolled again, eight times at most, for one (smart loot, as
-		 * Diablo 3 leans a drop to its finder); the other half as it rolls.
-		 * Leaning only the code, where the chip had one, a Blade folder's
-		 * (S, L) finds came in its codes two times in seven (docs/META.md) */
-		if (run.codes[0] && rng_range(0, 1)) {
-			for (int t = 0; t < 8 && !loot_folder_code(value, false); ++t) value = roll_chip(run.depth, bonus, &code);
-			char c = loot_folder_code(value, false);
-			if (c) code = c;
-		}
-	}
+	int kind = f.kind == LOOT_FIND_CHIP ? 1 : f.kind == LOOT_FIND_BUGFRAGS ? 5 : 3;
 	out[0] = (uint8_t)kind;
 	out[1] = 0x20;
 	out[2] = 0xFF;
-	out[3] = (uint8_t)(kind == 1 ? (code == '*' ? 26 : code - 'A') : 0xFF);
-	out[4] = (uint8_t)value;
-	out[5] = (uint8_t)(value >> 8);
+	out[3] = (uint8_t)(kind == 1 ? (f.code == '*' ? 26 : f.code - 'A') : 0xFF);
+	out[4] = (uint8_t)f.value;
+	out[5] = (uint8_t)(f.value >> 8);
 	out[6] = out[7] = 0;
 	return false;
 }
@@ -410,6 +381,7 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	}
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
 		out->md_colour[out->nmd++] = (uint8_t)m->type;
 	}
 }

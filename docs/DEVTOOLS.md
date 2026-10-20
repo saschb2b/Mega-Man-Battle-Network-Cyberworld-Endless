@@ -2,8 +2,9 @@
 
 Tools for checking generated layers and a run's difficulty without playing
 it out: the atlas and the tour look over every area at once, the pacing
-report checks every act's battles and guardians, the run log records real
-runs, and the dev menu shortens a run on the handheld.
+report checks every act's battles and guardians, the economy report what
+a run hands out, the run log records real runs, and the dev menu shortens
+a run on the handheld.
 
 ## Atlas: every layer drawn
 
@@ -220,14 +221,64 @@ battles and guardians were past their band, the territories' included;
 after a change to the bands, the areas or the encounter code, that number
 should stay 0.
 
+## Economy report: what a run hands out
+
+```bash
+python3 build.py economy [RUNS]
+```
+
+Plays many runs (300 by default; `--economy PATH[:RUNS]` on the binary)
+of the endless net's first cycle and of the short net without running the
+game (`src/dev/economy_report.c`, docs/ECONOMY.md, issue #154), under
+today's plan and the proposal's (`src/core/economy.c`). The layers,
+their Mystery Data and what each holds, the dealers' and vendor's stock,
+the Servers' prizes, the guardians' Guardian Data and the requests' pay
+are the engine's own code's; each random battle's reward is BN6's, from
+its reward rows by its busting table read from the ROM, at an assumed
+mix of busting levels and one to three battles a layer (the header says
+every assumption). It prints, per act:
+
+- today's and the proposal's chips gained, good chips' share, Mystery
+  Data laid, zenny earned and codes held (the most chips of one letter
+  with the \*s, median run), each against its plan's band, `!` past it,
+  and the zenny earned against what the act's answer and HPMemory cost;
+- the same for the short net, unflagged;
+- where each act's chips and zenny come from (battles, the field's
+  Mystery Data, the layers', the guardian) and what is offered (dealers,
+  Servers, requests, traders, gates), for each plan;
+- the chips gained by tier, the strong ones, those that fit the folder's
+  codes, Megas and Gigas; and by layer the Mystery Data laid (green, blue,
+  purple), chips gained, codes held and zenny earned so far;
+- the proposal's curves by act on either net, and BN6's busting table's
+  pay: a battle's chip share and zenny with every battle at one level.
+
+Output: `.build/economy.txt`, in a few seconds. It needs the ROM, and
+prints how many numbers of the plan in play are past their band: 0 now;
+a change to drops, prices, Mystery Data or the dealers keeps it 0, or
+sets the band's centre in `economy.c` with the before and after in its
+commit. The run log's `bust` and `reward` (below) check its battles
+against the game.
+
+`--economy-plan flat` on the game's binary plays a game under the flat
+plan, the rolls as they were before issue #154 (`build.py shot`,
+`tools/play.py start NAME -- --economy-plan flat`), to set beside the
+opening plan in play: its layers lay and hold what the report's before
+column measures. A dev's look only, in a data folder of its own: a run
+saved under one plan and continued under the other makes its layer again
+otherwise.
+
 ## Run log
 
 Every battle and every finished run is appended to `runlog.txt` in the data
 folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
 area, what kind of battle (`battle`, `challenge`, `duel` for ProtoMan's,
-`guardian`), MegaMan's HP and max HP before, each foe as
-family.version, the foes' HP together, and MegaMan's HP after (or
-"deleted"). One of BN5's records fought in BN6's engine (a territory's,
+`guardian`), MegaMan's HP and max HP before, the zenny and BugFrags on
+hand (`z 1850 bf 3`), each foe as family.version, the foes' HP together,
+and MegaMan's HP after (or "deleted"); a won battle's busting level, 1
+to 10 and 11 for S, and the reward BN6 picked by it, in the game's
+encoding (`-> won hp 200 bust 9 reward 43e8`: zenny, 1000; bits 14-15 0
+a chip, its code in bits 9-13; docs/ROM_DATA.md, Battle rewards), which
+the economy report's battle drops are checked against. One of BN5's records fought in BN6's engine (a territory's,
 the deep's: docs/MULTIROM.md, One net) has `x` and its address in BN5's
 ROM after MegaMan's HP (`... battle hp 300/300 x811DDD0 v35.0 v35.0 foehp
 160 -> won hp 220`: BN6's AI indexes, BN5's families moved into the
@@ -241,7 +292,11 @@ number before its end (`unite 9`, NumberMan's; `unite 11c`, KnightMan's
 Chaos Unison). Until issue #82's last round a battle in BN5's engine had
 `guest`, its record and BN5's enemy ids instead (docs/MULTIROM.md, Guest
 battles). A last
-line gives where the run ended (`run over`, or `run won`). Past 512 KB
+line gives where the run ended (`run over`, or `run won`) and its
+economy's counts: the chips found and the good among them, the Mystery
+Data opened and the zenny earned, then the same for its first act
+(`chips 11 good 3 md 9 zenny 4210 (act 1: 6 2 7 1830)`; the anonymous
+statistics' run-end event carries them, src/analytics/). Past 512 KB
 the log moves to `runlog.old`. Collected from real runs, it shows where
 runs are lost. The same moments give the anonymous statistics their
 guardian and run-end events (src/analytics/, docs/GUIDE.md's Anonymous

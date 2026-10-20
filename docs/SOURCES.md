@@ -173,6 +173,18 @@ attempts stalled before one completed (`docs/re/trade-stage-link-attempts.md`
 at `7b4b8ef`), so the routines' result says nothing of the cable exchange,
 its save or its recovery.
 
+## The Chip Trader's codes (issue #154)
+
+**Verified in the disassembly and the ROM** (21 October 2026): bn6f's
+`sub_804BF18` (`asm/asm03_2.s`, its comment "75% new code 25% old code")
+picks a trader prize's code among its record's codes, weighing those the
+pack holds none of (`GetChipCountOfCode` 0) against those it holds by
+the two bytes of `byte_804B068`, `C0 40`. In Gregar the routine stands at
+`0x0804CCDC` (`tools/bn6f_match.py`'s map, by its bytes) and its literal at
+`0x0804CD50` names `0x0804BE2C`, whose two bytes read `C0 40`: three in
+four a code the pack lacks. The project's traders follow it since issue
+#154 (docs/ECONOMY.md, docs/ROM_DATA.md's Chip Traders).
+
 ## Learned from players
 
 | What | Who, where | Verified |
