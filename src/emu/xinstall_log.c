@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __3DS__
+#include "devtools.h"
+#endif
 
 #define BUS      0x08000000u
 #define ROM_BUS  0x02000000u   /* the ROM's span on the bus, mirrored at 0x0A and 0x0C (its wait states) */
@@ -26,6 +29,18 @@ static struct {
 	uint64_t hash;          /* 0: to be made */
 } L;
 
+/* (kept where the Arena's cores read it: every system that offers
+ * NetBattles; on the New 3DS, which offers none, its 2 MB stay out of a
+ * run's heap but for --dev rollbench and --dev arena, which run the pair
+ * there: src/online/arena_pair.h, CW_ARENA) */
+static bool kept(void) {
+#ifdef __3DS__
+	return dev.rollbench || dev.arena;
+#else
+	return true;
+#endif
+}
+
 void xlog_begin(void) { ++L.depth; }
 void xlog_end(void) { if (L.depth > 0) --L.depth; }
 
@@ -41,7 +56,7 @@ static bool grow(void **p, size_t *cap, size_t need, size_t unit) {
 }
 
 void xlog_write(uint32_t at, const void *data, size_t len) {
-	if (!L.depth || !len || L.failed) return;
+	if (!L.depth || !len || L.failed || !kept()) return;
 	/* (the ROM's alone: xinstall_log.h) */
 	if (at < BUS || at >= BUS + 3 * ROM_BUS) return;
 	at = BUS + (at - BUS) % ROM_BUS;
@@ -62,7 +77,7 @@ void xlog_write(uint32_t at, const void *data, size_t len) {
 }
 
 void xlog_hook(uint32_t at, EmuHook fn, void *user) {
-	if (!L.depth) return;
+	if (!L.depth || !kept()) return;
 	L.hash = 0;
 	if (L.nhooks == HOOK_MAX) { L.failed = true; return; }
 	L.hooks[L.nhooks++] = (Logged){ at, fn, user };

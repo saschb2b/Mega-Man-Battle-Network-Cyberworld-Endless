@@ -132,7 +132,9 @@ static bool out(void *context, const uint8_t *data, size_t size) {
 static uint32_t asked(void) {
 	if (dev.arena_delay > 0) return dev.arena_delay > 2 ? (uint32_t)((dev.arena_delay - 2) * 1000 / 60) : 0;
 	unsigned window = dev.arena_window >= 0 ? (unsigned)dev.arena_window : arena_window_kept();
-	return arena_ask_ms(A.latency, window);
+	uint32_t ms = arena_ask_ms(A.latency, window);
+	printf("arena: asking with %u ms: the round trips' %u ms less a window of %u\n", (unsigned)ms, (unsigned)A.latency, window);
+	return ms;
 }
 
 static void act(unsigned action, uint32_t ref) {

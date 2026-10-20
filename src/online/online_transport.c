@@ -57,6 +57,7 @@ static struct {
 	unsigned queue_read, queue_write;
 	size_t hello_size;
 	uint32_t last_send, last_ping, last_receive;
+	uint32_t last_poll, hitch;   /* (the browser's: its last poll, and the longest gap between two since the last ping) */
 } transport;
 
 /* a ROM's 40 hex digits as its 20 bytes */
@@ -213,14 +214,30 @@ static void browser_closed(void) {
 	online_browser_close();
 }
 
+/* (a frame of the page longer than this between a ping and its answer:
+ * the round trip says the frame, not the network) */
+#define BROWSER_HITCH_MS 50
+
+static void browser_hitch(uint32_t now) {
+	if (transport.last_poll && now - transport.last_poll > transport.hitch) transport.hitch = now - transport.last_poll;
+}
+
 static void browser_received(const uint8_t *data, size_t size) {
 	transport.last_receive = SDL_GetTicks();
+	uint32_t latency = transport.snapshot.latency_ms;
 	if (!take_in(data, size, transport.last_receive, &transport.snapshot)) browser_closed();
+	/* (the page's one thread takes the answer in after its frame: a ping
+	 * that spanned a long one, the Square built at the arrival among them,
+	 * is left out of the round trips a NetBattle's delay is asked by) */
+	browser_hitch(transport.last_receive);
+	if (size && data[0] == ONLINE_PONG && transport.hitch > BROWSER_HITCH_MS) transport.snapshot.latency_ms = latency;
 }
 
 static void browser_poll(void) {
 	if (transport.snapshot.error[0]) return;
 	uint32_t now = SDL_GetTicks();
+	browser_hitch(now);
+	transport.last_poll = now;
 	if (now - transport.last_receive > (transport.snapshot.connected ? 15000u : 7000u)) {
 		browser_closed();
 		return;
@@ -233,6 +250,7 @@ static void browser_poll(void) {
 	if (now - transport.last_ping >= 2000) {
 		uint8_t data[5] = { ONLINE_PING };
 		transport.last_ping = now;
+		transport.hitch = 0;
 		online_put32(data + 1, now);
 		if (!send_message(data, sizeof data)) browser_closed();
 	}
