@@ -389,7 +389,11 @@ the players sent. A battle's frame count differs before and after (3,249
 and 2,588 frames at 20 ms) as the scripts' keys land at other frames
 with another delay. A capture of Alpha's game with rollback on (delay 2,
 window 9) shows the Custom screen and charged shots taking Beta from 150
-to 90, 80, 60, 40 and 20, as without.
+to 90, 80, 60, 40 and 20, as without. The hashes still catch two games
+apart: with Beta's copy of Alpha's keys changed from frame 1,200
+(`arenadesync=1200` on Beta, delay 2, window 9), both stopped at frame
+1,267, "the two games went apart by frame 1259", and Gamma's watching
+ended with the battle.
 
 **On the Nova** (the final build, headless, `--dev arena,arenabusy`
 with delay 1 and the local link's lag making every frame's other keys a
