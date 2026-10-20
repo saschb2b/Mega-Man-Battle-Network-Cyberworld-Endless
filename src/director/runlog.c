@@ -19,7 +19,7 @@
 
 static struct {
 	bool open;
-	char line[256];
+	char line[320];
 	int len;
 	int guardian;    /* the open battle's guardian (navi), 0 none */
 	bool duel;       /* ... or ProtoMan's duel */
@@ -45,8 +45,10 @@ static void append(const char *line) {
 }
 
 void runlog_battle_start(const Encounter *e, const char *kind) {
-	int n = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d %s hp %d/%d", (unsigned)run.seed, run.depth,
-		run.biome, kind, megaman_hp(), megaman_max());
+	/* (the zenny and BugFrags on hand: the economy's course over a run,
+	 * docs/ECONOMY.md) */
+	int n = snprintf(L.line, sizeof L.line, "seed %08x depth %d area %d %s hp %d/%d z %u bf %u", (unsigned)run.seed, run.depth,
+		run.biome, kind, megaman_hp(), megaman_max(), (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	L.guardian = 0;
 	L.duel = !strcmp(kind, "duel");
 	/* (an older net's record fought in BN6's engine: "x" and its address
@@ -92,7 +94,12 @@ static void guardian_over(int result, int frames) {
 void runlog_battle_end(bool won, int frames) {
 	if (!L.open) return;
 	L.open = false;
-	snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> %s hp %d", won ? "won" : "left", megaman_hp());
+	/* (a win's busting level and the reward it picked, BN6's encoding:
+	 * docs/ECONOMY.md's battle drops) */
+	if (won)
+		snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> won hp %d bust %d reward %04x", megaman_hp(), emu_read8(BN6_BATTLE_BUSTING),
+			emu_read16(BN6_BATTLE_REWARD));
+	else snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> left hp %d", megaman_hp());
 	append(L.line);
 	guardian_over(won ? ANALYTICS_WON : ANALYTICS_LEFT, frames);
 }

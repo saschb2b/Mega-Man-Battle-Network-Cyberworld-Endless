@@ -225,9 +225,13 @@ should stay 0.
 Every battle and every finished run is appended to `runlog.txt` in the data
 folder (`src/director/runlog.c`), on the handheld too: the seed, depth,
 area, what kind of battle (`battle`, `challenge`, `duel` for ProtoMan's,
-`guardian`), MegaMan's HP and max HP before, each foe as
-family.version, the foes' HP together, and MegaMan's HP after (or
-"deleted"). One of BN5's records fought in BN6's engine (a territory's,
+`guardian`), MegaMan's HP and max HP before, the zenny and BugFrags on
+hand (`z 1850 bf 3`), each foe as family.version, the foes' HP together,
+and MegaMan's HP after (or "deleted"); a won battle's busting level, 1
+to 10 and 11 for S, and the reward BN6 picked by it, in the game's
+encoding (`-> won hp 200 bust 9 reward 43e8`: zenny, 1000; bits 14-15 0
+a chip, its code in bits 9-13; docs/ROM_DATA.md, Battle rewards), which
+the economy report's battle drops are checked against. One of BN5's records fought in BN6's engine (a territory's,
 the deep's: docs/MULTIROM.md, One net) has `x` and its address in BN5's
 ROM after MegaMan's HP (`... battle hp 300/300 x811DDD0 v35.0 v35.0 foehp
 160 -> won hp 220`: BN6's AI indexes, BN5's families moved into the
