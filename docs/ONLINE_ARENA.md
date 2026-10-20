@@ -22,14 +22,14 @@ python3 build.py run -- --dev arena                       # a window: you are th
 python3 build.py shot --dev arena --frames 2400 --input "80:,4:RIGHT,8:,4:RIGHT,8:,4:RIGHT,8:,4:RIGHT,8:,4:RIGHT,8:,4:A,200:,110:B,30:,..." --shot 600:/src/.build/arena.bmp
 ```
 
-`--dev arena` starts on the Arena instead of the title, by full rules
-where BN5's ROM is read (its installs made on the game's core first, as
-a run's start makes them), else by BN6's; the run's MegaMan is carried
-from the data folder's checkpoint as the rules take him (the first
-folder that fits). The player is the
-cable's first GBA from the keyboard or pad; the second is a script: on
-the Custom screen it takes the cursor to OK and presses it, in the battle
-it stands still. Its keys come over the local link, held back as a
+`--dev arena` starts on the Arena instead of the title, by full rules as
+every NetBattle is: BN5's installs made on the game's core first, as a
+run's start makes them, so it needs BN5's ROM beside BN6's (without it
+the way in stops, saying so). The run's MegaMan is carried from the data
+folder's checkpoint with the first folder that holds chips. The player
+is the cable's first GBA from the keyboard or pad; the second is a
+script: on the Custom screen it takes the cursor to OK and presses it, in
+the battle it stands still. Its keys come over the local link, held back as a
 network would hold them. `arenadelay=N` sets the input delay in frames
 (default 6, 1-60), `arenalag=N` the local link's one way in ticks
 (default 3, 50 ms), `arenawindow=W` the rollback window (0: the delay
@@ -44,11 +44,11 @@ goes back to the title; the log says each step (`arena:` lines).
 
 | Part | File | What it does |
 | --- | --- | --- |
-| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM: as it is under BN6's rules (no hook, no BN5 install: every client builds the same pair whatever ROMs each player has), with BN5's installs under full rules ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores |
-| The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what full rules put in each Arena core |
-| The Souls across | `src/online/arena_souls.c` | Under full rules, a Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
+| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM with BN5's installs, full rules being every NetBattle's ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores |
+| The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what goes in each Arena core |
+| The Souls across | `src/online/arena_souls.c` | A Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
 | The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen. No state is kept or committed; it runs in slices behind a "connecting" picture |
-| A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by the battle's rules, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the rules' cores cannot carry it: under BN6's rules chips past BN6's id 0x13F (in the folder or the pack's extension) or on one of BN6's blank records (203-220, 291-300, 314: `BN6_CHIP_BLANK`, where BN5's chips are installed on a game with its ROM); under BN6's rules Souls; under either a code past `*`, a max HP of 0 or past 9999. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
+| A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by what the pair's cores hold, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the cores cannot carry it: a chip id past the chip registry, a code past `*`, a max HP of 0 or past 9999. Before v9 BN6's rules refused BN5's chips and the Souls too. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
 | Keys | `src/online/arena_input.c` | Both players' keys by frame in a ring; each stream in order, a resent frame left, a gap or a frame past the ring refused; for a frame run on a guess the other's keys not yet come held as his last, and the first frame a key that came otherwise reached |
 | The time sync | `src/online/arena_sync.c` | The leading game's tick held now and then, spread out, by the lag of the other's keys against its own round trip; the round trips kept in the Square for the delay asked for ([Smoothed delay](#smoothed-delay), below); the rollback window a frame's cost affords and the latency asked for less what it covers ([Rollback](#rollback)) |
 | The window kept | `src/online/arena_window.c` | What a battle frame of the pair costs on this system, kept in the data folder (`arena.ini`, never in a `.cwsave`), for the delay the next challenge or Yes asks for |
@@ -524,21 +524,22 @@ arena,arenabusy` at delay 1 ended on frame 5221 with the same report
 
 Facing another player's MegaMan, A reads his card and then offers
 `Battle`, `Wave` and `More...`, the second box `Mute`, `Block` and `Back`
-(three to a box, as BN6's chat box holds them). Battle sends ARENA's
-challenge, naming its rules (Formats, below), and MegaMan says "BN6
-rules! Let's see if NAME takes us on!". The server answers the challenger
-WAITING and the other player CHALLENGED, each with the rules; his
-MegaMan asks, once no chat is open: "NAME's MegaMan wants a Practice
-NetBattle!", "BN6 rules: no Souls,and BN6 chips only.", then "Take
-it,Lan?" with the cursor on No. Yes accepts; No, B, or a challenge from a
-player he has blocked declines (the challenger's MegaMan: "Aw... No
-NetBattle this time."). Before the challenge or the Yes goes, the folder
-MegaMan carries is asked where Lan has a choice (Formats). A MegaMan the
-rules leave nothing to carry, or one the last check refuses (a NaviCust
-past what a message holds), does not go: MegaMan says so and no
-challenge or acceptance is sent. The 3DS and the browser build, which
-compile the Arena out (`CW_ARENA`), never offer Battle and decline a
-challenge.
+(three to a box, as BN6's chat box holds them); Battle only where both
+games' NetPasses hold the Arena stamp, the full set of ROMs
+([ONLINE.md](ONLINE.md#the-netpass)). Battle sends ARENA's challenge, and
+MegaMan says "OK! Let's see if NAME takes us on!". The server answers the
+challenger WAITING and the other player CHALLENGED; his MegaMan asks,
+once no chat is open: "NAME's MegaMan wants a Practice NetBattle!", then
+"Take it,Lan?" with the cursor on No. Yes accepts; No, B, or a challenge
+from a player he has blocked declines (the challenger's MegaMan: "Aw...
+No NetBattle this time."). Before the challenge or the Yes goes, the
+folder MegaMan carries is asked where Lan has a choice (below). A
+MegaMan with no folder that holds chips, or one the last check refuses
+(a NaviCust past what a message holds), does not go: MegaMan says so and
+no challenge or acceptance is sent. The server refuses a challenge or an
+accept from a game without the full set, and a challenge aimed at one
+(NOTICE 28). The 3DS and the browser build, which compile the Arena out
+(`CW_ARENA`), never offer Battle and decline a challenge.
 
 ### Rematches and the referee
 
@@ -549,10 +550,9 @@ NAME is still in the Square. Nothing is won or lost, so the question is
 the whole cost: the default lets either player go (the Square's pull
 between staying together and moving on), and both must say Yes.
 
-No new message: a rematch is ARENA's challenge again, by the last
-battle's rules, answered at once. Lan's Yes sends it quietly (nothing
-changed, so MegaMan names no rules); the other game takes a challenge
-from that player by those rules at once where its player said Yes too,
+No new message: a rematch is ARENA's challenge again, answered at once.
+Lan's Yes sends it quietly; the other game takes a challenge from that
+player at once where its player said Yes too,
 turns it down at once where he said No (or B), and, his question still
 open or the result still on the picture, holds it for the answer. Both
 Yeses at once cross on the server, which turns the second challenge down
@@ -573,53 +573,39 @@ the bout over his head ("YOU WIN!", "ALPHA WINS!"), as the greeter calls
 a log-in. A new opponent starts the count again; it is this game's
 alone, kept while the game runs.
 
-### Formats
+### One rule: full rules
 
-Every NetBattle goes by the pair's common ground
-([ONLINE.md](ONLINE.md#battle-network-5-there-or-not-the-pairs-common-ground)):
-its rules are chosen by the challenger's game from both players' ROMs
-(each peer's in the SNAPSHOT, `arena_format_for`), carried in ARENA's
-challenge and every ARENA_STATE (`protocol.json`'s `format_bn6` 0 and
-`format_full` 1), and named by both MegaMen before the battle. The server
-refuses full rules unless both games have BN5's ROM (NOTICE 19), and a
-game refuses rules it cannot fight by (`arena_format_ok`).
+Every NetBattle is by full rules since protocol v9 (issue #131): both
+games hold the NetPass's Arena stamp, which takes the full set of ROMs
+([ONLINE.md](ONLINE.md#the-netpass)), so BN5's chips go, in the folder
+and in the pack's extension (every id of the chip registry, BN6's blanks
+among them), and so do MegaMan's Souls: UNITE on the Custom screen as in
+a run. Both pair cores of each game hold BN5's installs ([Full
+rules](#full-rules), below). Nothing on the wire names the rules: v9
+took the rules byte out of ARENA, ARENA_STATE, STANDS and WATCH_STATE,
+and the server holds the pair to the full set instead (NOTICE 28).
 
-- **BN6 rules** (0): any pair. The pair cores are plain BN6. MegaMan's
-  Souls stay home, and so do BN5's chips in his pack; he fights with a
-  folder of BN6's own chips (`arena_format_carry`: the folder picked, its
-  Regular and TagChips, as the one the core's Folder1 holds).
-- **Full rules** (1): two games with BN5's ROM. BN5's chips go, in the
-  folder and the pack's extension (every id of the chip registry, BN6's
-  blanks among them), and so do MegaMan's Souls: UNITE on the Custom
-  screen as in a run; both pair cores hold BN5's installs ([Full
-  rules](#full-rules), below). The challenger hears "Full rules! Let's
-  see if Beta takes us on!", the challenged game "Full rules: Souls and
-  BN5 chips too!" before its Yes.
+From protocol v4 to v8 a challenge named one of two formats, chosen from
+both players' ROMs: **full rules** between two games with BN5's ROM, and
+**BN6 rules** for any other pair, plain BN6 cores in which the Souls
+stayed home and each BN5 chip of the folder was stood in for by the
+Pack's nearest BN6 chip for that battle (`arena_standin.c`, the owner's
+interim decision of 18 October 2026). The server refused full rules
+otherwise (NOTICE 19). v9 has no mixed pairs, so BN6 rules, the
+stand-ins and NOTICE 19 went with them.
 
 **The folder.** A run's MegaMan holds Folder1, Folder2 and the Extra
 Folder (BN6's names; the second's Regular and TagChips at NaviStats
 +0x2F and +0x58, bn6f's NaviStats; the Extra Folder has none of its own
-here). `arena_folders_fitting` says which can go (an empty folder never).
-A run holds Folder1 alone (no run hands out Folder2 or the Extra
-Folder), so under BN6's rules its BN5 chips **stand in**
-(`arena_standin.c`, the owner's decision of 18 October 2026, to be
-refined): for that battle alone each sits out of the carried copy and a
-chip of BN6's from the run's Pack takes its place, the same kind
-(standard, Mega, Giga) and element where the Pack has a spare past the
-folder's copies, its power the nearest, within BN6's folder rules (four
-of a chip, the run's Mega and Giga limits, one of each); BN6's first
-standard chip the folder has room for, Cannon, where it has none. A
-Regular or TagChip whose chip sat out is let go. The carrying game alone
-picks them (the other reads the folder as sent), each in the log
-(`arena: chip 411 code 12 sits out, chip 1 code 0 stands in`). Where a
-folder holds BN5's chips, or more than one can go, MegaMan asks in BN6's
-chat box (`arena_folder.c`, flags `0x14A1`-`0x14A4`): "Folder1: 2 BN5
-chips sit out,Lan. Chips from our Pack stand in for them, like Cannon A
-for MrkCan1 M!", the Souls left home where he holds some, then "BN6
-rules,Lan. Which folder goes?"; B sends nothing. Where MegaMan has one
-folder of BN6's chips alone, it goes unasked. The carried MegaMan then
-passes `arena_loadout_check`, the same last guard on both games. The
-other folders show only with the `folder` dev step (DEVTOOLS.md).
+here). `arena_folders_fitting` says which can go: each that holds a chip
+(`arena_folder_holds`). Where more than one can, MegaMan asks in BN6's
+chat box, "Lan,which folder goes?" (`arena_folder.c`, flags
+`0x14A1`-`0x14A4`); B sends nothing. Where one can, it goes unasked. A
+run holds Folder1 alone (no run hands out Folder2 or the Extra Folder),
+so the question shows only with the `folder` dev step (DEVTOOLS.md). The
+carried MegaMan (`arena_format_carry`: the folder picked, its Regular and
+TagChips, as the one the core's Folder1 holds) then passes
+`arena_loadout_check`, the same last guard on both games.
 
 START gives each game its side of the cable (the challenger's 0) and the
 input delay. Each sends its MegaMan (ARENA_LOADOUT: the folder picked, the
@@ -668,7 +654,7 @@ ROM copy and every hook they set is written down in their order
 the Navis, the chips' code, the families, the sea and the obstacle
 strike, then the chip registry's `xchips_install` and the Souls'
 `soulproxy_install` and `soulunite_install`; measured 1,913,709 bytes and
-132 hooks, 1,735,251 and 42 of them before the Souls'). Under full rules the boot core and both pair cores
+132 hooks, 1,735,251 and 42 of them before the Souls'). In every NetBattle the boot core and both pair cores
 take those bytes into their ROM copies before they start
 (`arena_core_new`), and each pair core takes the hooks on its own table
 (`hook_core`, after its state is loaded); the boot core meets none of
@@ -705,7 +691,8 @@ before its ready (ARENA_HASH at frame 0xFFFFFFFE, `arena_link_net_record`;
 the server relays it as any hash), so a ready apart whose records differ
 says so on both games: "the two games installed BN5 apart (one took BN5
 in after it started, or another build)" on the picture, then MegaMan's
-"Huh? Our PETs don't match on BN5..." and "Lan,let's reboot the PET and
+"Huh? Our PETs don't match..." (before v9 "...on BN5...": since, no
+character names a game) and "Lan,let's reboot the PET and
 try again!"; a ready apart with the same records (or from a game that
 sends none) keeps "the two games went apart before the battle". A game
 whose other player left after his ready came apart from ours tells the
@@ -920,7 +907,8 @@ Two host binaries on this machine (`SDL_VIDEODRIVER=dummy
 SDL_AUDIODRIVER=dummy`), each with its own `--data-dir` and a
 `network.ini` naming a local server (`python3 server/build.py`, then
 `build/server/cyberworld-server.pyz --config` with a free port and its
-`state_dir` under `.build/`), BN6 alone in `--rom-dir`, `--scene home
+`state_dir` under `.build/`), BN6 alone in `--rom-dir` (before v9; since
+v9 BN5's ROM beside it, or no Battle is offered), `--scene home
 --run-depth 7 --seed 3 --dev quiet,arenahp=40` (`arenahp=N` makes each
 carried MegaMan's max HP N, so the battle is short). Beta starts first
 (session 1, arriving at -24,364), Alpha a second later; after the gate's
@@ -946,19 +934,12 @@ ends within 40 ms of each other (15 s of battle). Back in the Square,
 both MegaMen stood where they had stood, the loser's word and the
 winner's in their chat boxes.
 
-**A mixed pair, BN6 rules** (the same day, protocol v4). Beta with BN5's
-ROM beside BN6's, Alpha with BN6's alone, both through the gate as above
-(seed 120's Square), each with Folder1 copied into Folder2 by the
-`folder 2` dev step and Beta's Folder1 given MrkCan1 M (`chip 411 M 1`)
-before it; `arenahp=40`. Alpha read Beta's card ("His PET holds BN5
-chips too!"), chose Battle, was asked "BN6 rules,Lan. Which folder
-goes?" between Folder1 and Folder2 and took Folder1 ("BN6 rules! Let's
-see if Beta takes us on!"). Beta heard "BN6 rules: no Souls,and BN6
-chips only.", said Yes, then "Folder1 has BN5 chips. It stays home." with
-Folder2 alone offered, and took it (`arena: we took Alpha's challenge,
-rules 0, folder 2`). The pair's hash at the Custom screen was the same on
-both (`fd2fa7d630cf9080`), the battle over at frame 1,568 with 26 hashes
-agreeing, Beta's MegaMan the winner, both back in the Square.
+**A mixed pair, BN6 rules, before v9** (the same day, protocol v4).
+Beta with BN5's ROM beside BN6's, Alpha with BN6's alone, each with
+Folder1 copied into Folder2 (the `folder 2` dev step) and Beta's Folder1
+given MrkCan1 M: both named BN6 rules, Beta's Folder1 stayed home and
+Folder2 went, and the battle was over at frame 1,568 with 26 hashes
+agreeing. v9 offers no NetBattle to a game without BN5's ROM.
 
 **A rematch** (19 October 2026, issue #128, protocol v5 unchanged). Two
 BN6 games, `arenahp=10`, the harness above: Alpha challenged, Beta took
@@ -980,11 +961,11 @@ this time.".
 ## The stands
 
 The owner's decision on issue #128 (19 October 2026): a NetBattle in the
-Square is watched both ways. A game that can build the battle's pair
-**watches it for real**, the same two cores run from the players' keys a
-second or two behind them; every game, one that cannot watch among them
-(the 3DS, the browser, a game without BN5's ROM before a battle by full
-rules, a machine too slow to catch up), gets **the report**: each
+Square is watched both ways. A game with the NetPass's Arena stamp that
+can build the battle's pair **watches it for real**, the same two cores
+run from the players' keys a second or two behind them; every game, one
+that cannot watch among them (the 3DS, the browser, a game without the
+Arena stamp, a machine too slow to catch up), gets **the report**: each
 MegaMan's HP, the last chip each used and the winner, from the referee by
 the ring and on the Board.
 
@@ -1008,8 +989,8 @@ installs' record and the ready (ARENA_HASH at 0xFFFFFFFE and 0xFFFFFFFF),
 the cable's first's hash every 60 frames, and both players' keys from
 frame 0 (a side's first keys come at its input delay's frame, the frames
 before released keys on every game). A player of the channel who asks
-(WATCH) is sent the battle's setup (WATCH_STATE: the two sessions, the
-rules, the delay), then the players' messages (WATCH_RELAY) and every key
+(WATCH) is sent the battle's setup (WATCH_STATE: the two sessions and the
+delay; v9 dropped the rules, every battle being by full rules), then the players' messages (WATCH_RELAY) and every key
 from the first frame (WATCH_KEYS, 240 frames a message at most), at most
 2 KB a tick and only while his output is under 4 KB, so a spectator who
 came late catches up without the players' relay ever waiting on him. A
@@ -1017,10 +998,10 @@ gap in a side's keys, or a battle past 20 minutes, stops its watching;
 the battle itself goes on.
 
 The spectator's game (`src/online/arena_watch.c`) builds the same pair a
-player's does (`arena_boot`, both carried MegaMen as their bytes came, by
-the battle's rules; under full rules BN5's installs from its own record,
-so only a game with BN5's ROM is offered a full-rules battle, the pair's
-common ground). At the Custom screen its pair's hash must be the players'
+player's does (`arena_boot`, both carried MegaMen as their bytes came,
+BN5's installs from its own record), so only a game with the Arena stamp
+is offered a battle to watch, and the server refuses a WATCH from one
+without the full set (NOTICE 28). At the Custom screen its pair's hash must be the players'
 ready, or it stops ("the two PETs here came out apart from theirs";
 "this PET's BN5 is not theirs" where the installs' records differ). Then
 it runs the pair as `arena.c` does, frame N once both sides' keys for N
@@ -1043,7 +1024,9 @@ is over, without both cores out of it, end it as broken off.
 In the Square (`src/online/square_watch.c`, its words in
 `stands_words.c` and `stands_text.c`): the referee's archive is his
 words, then the channel's battle as the report says it, then, where this
-game can watch it, "WANNA WATCH?" with the cursor on Yes. Yes sets the
+game can watch it, "WANNA WATCH?" with the cursor on Yes. To a game
+without the Arena stamp he says "NO ARENA STAMP ON YOUR NETPASS!", calls
+the battle all the same and asks nothing. Yes sets the
 Square's flag `0x14C4`; as the chat closes the game sends WATCH and, on
 WATCH_STATE, holds the Square's core as a battle of its own does
 (`online_visit_held`): the screen is the pair's picture, the cable's
@@ -1073,8 +1056,8 @@ prints it at the end ("arena: the report: HP 100/100 and 0/100, chips 1
 and 0 (last 54 and 0), winner 1"). It only reads.
 
 The server tells each channel its battles (STANDS) as they begin and end
-and at most once a second as they change: who fights whom, the rules,
-how many watch and cheer, the report. The referee says it in BN6's
+and at most once a second as they change: who fights whom, how many
+watch and cheer, the report. The referee says it in BN6's
 Mr.Prog voice ("A NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 40 HP!
 BETA HAS 20!", "ALPHA USED MINIBOMB!", "2 NAVIS WATCHING!", then "ALPHA
 BEAT BETA! WHAT A BOUT!" and the cheers), and the Board posts it
@@ -1100,7 +1083,10 @@ harness of [the two-client proof](#the-two-client-proof) grown to three
 challenges, Beta says Yes, both pick a chip and OK and fire charged
 shots, `arenahp=150`; Gamma, BN6's ROM alone, walks to the referee
 (at -428,44: MegaMan at -428,28 facing him) and presses A through his
-pages.
+pages. These runs were before v9: the players' battles in the table were
+by BN6 rules, which Gamma could watch with BN6's ROM alone. Under v9
+every battle is by full rules and Gamma would get the report alone, as
+in the full-rules run below.
 
 | Run | Gamma came in | Gamma's pair | Caught up | The battle's end | Hashes |
 | --- | --- | --- | --- | --- | --- |
@@ -1129,8 +1115,9 @@ report, where his MiniBomb came up: HP 10 of 150 and 0 of 150, MiniBomb
 A battle by full rules (Alpha and Beta with Team Colonel's ROM beside
 BN6's, Gamma with BN6's alone): Gamma's referee called it, "A
 NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 150 HP! BETA HAS 150!", and
-asked nothing; the server refuses a WATCH from a game without BN5's ROM
-for such a battle (NOTICE 19, `server/tests/test_stands.py`). Watched
+asked nothing; the server refused a WATCH from a game without BN5's ROM
+for such a battle (NOTICE 19 then; under v9 NOTICE 28 refuses any WATCH
+from a game without the full set, `server/tests/test_stands.py`). Watched
 instead by Gamma with Team Colonel's ROM beside BN6's (the same three
 games, Gamma asking 1,368 frames into the battle): his pair made with
 the same installs' record as the players' (1,913,709 bytes and 132
@@ -1166,8 +1153,8 @@ the cable's first's reports came, and no question.
   picture after 20 ticks ("Waiting for the other PET").
 - Rollback ([Rollback](#rollback)): on in every battle, measured through
   a local relay and on the Nova headless; not yet a NetBattle between two
-  devices or through the deployed server (which runs v7 until it is
-  redeployed), nor on Android, iOS, Windows or macOS. A first NetBattle on
+  devices or through the deployed server (which runs an older protocol
+  until it is redeployed with v9), nor on Android, iOS, Windows or macOS. A first NetBattle on
   a system asks with a window of 4 before its frame's cost is kept.
   Mispredictions are guessed as the last keys held:
   a press seen late shows as the other MegaMan's step snapping back.
@@ -1182,6 +1169,9 @@ the cable's first's reports came, and no question.
   core and no cable, so MrkCan1 against a stepping MegaMan is compared
   against the Dark Soul (`chip_mrkcan1_darksoul`), not against BN5's
   NetBattle.
+- The NetPass's rule in the Arena ([One rule](#one-rule-full-rules)):
+  every proof above with a game without BN5's ROM in it predates v9;
+  what v9's rule was seen doing between games: (to be filled).
 - The stands ([The stands](#the-stands)): watching on Android and iOS
   (built, untried), and a catch-up's pace in a window and on a handheld
   (measured headless, eight frames a tick); a spectator too slow to

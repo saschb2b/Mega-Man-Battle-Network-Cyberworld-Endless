@@ -4,7 +4,8 @@
 puts other players' MegaMen beside the run: a **Net Square** of its own on
 a server, reached from a gate in Lan's HP, where MegaMen meet, say a
 phrase, read each other's cards, trade a spare chip at Trade Central and
-fight a Practice NetBattle of BN6's own. The players' side is in
+fight a Practice NetBattle of BN6's own (those two with the NetPass's
+full set of ROMs, below). The players' side is in
 [GUIDE.md](GUIDE.md#online-the-net-square), the gate's piece of the home
 in [HOME.md](HOME.md#11-the-net-squares-gate); this page is how it is
 built and what has been shown of it. The Arena has its own,
@@ -14,9 +15,9 @@ built and what has been shown of it. The Arena has its own,
 The official server is `wss://cyberworld.saschb2b.com/presence`, deployed
 in Coolify from `deploy/coolify/` ([server/README.md](../server/README.md),
 Coolify deployment); it speaks the protocol of the branch it was last
-deployed from (v4 until it is redeployed with v5, which a v4 game cannot
-join, nor a v5 game a v4 server), trading and the Arena on, until this
-work is merged. No release has shipped
+deployed from (a game of another protocol version cannot join it, nor a
+newer game an older server), trading and the Arena on, until this work
+is merged. No release has shipped
 the Square yet.
 
 ## The design
@@ -31,65 +32,167 @@ MegaMan is. No menu screen of the project's own leads there: the world
 does, a gate in the room the run comes home to, in the manner of
 Warframe's Orbiter, with BN6's own chat boxes for every question.
 
-## Battle Network 5, there or not: the pair's common ground
+## The NetPass
 
-BN5's ROM is optional, so a Square holds players with it and without
-it, all in one channel: splitting them would halve a small crowd. What
-two players do together goes by **their common ground**, the content
-both games hold, chosen up front and named, never a bare refusal. It is
-the formats of the games the players know, Pokémon's link rules and
-Hearthstone's Standard and Wild, where what both bring decides the rules
-and the rules are told before the battle begins (the owner's design also
-names BN6's link battles between Gregar and Falzar; assumed, not checked
-against [SOURCES.md](SOURCES.md)'s sources here). The game-design skill's
-dialectic is **one crowd against each player's own collection**; the
-pattern, formats with a telegraph.
+[Issue #131](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/131),
+the owner's decision of 20 October 2026: **the full set for what's at
+stake**. The Net Square is open to every game: walking, phrases and
+emotes, cheering, another MegaMan's card, the referee's report of the
+channel's battles, the Board and its posts, the trade board's offers to
+read and the week's ranking. Three things need **the full set**, every
+ROM this build supports for online play: the Arena (a NetBattle, and
+watching one), Trade Central (a trade, and posting or answering a trade
+board offer) and the week's DeepNet dive (the greeter's offer and the
+dive's post to the Board). The set is BN6's ROM and BN5 Team Colonel's
+today, defined once in a table (`src/online/netpass.c`). A future game is
+one entry there: the stamps that need it go back to open until a player
+has it in, which the release notes and the site announce ahead.
 
-- **Each player's ROMs are on the wire.** HELLO carries BN5 Team
-  Colonel's identity (its game code and SHA-1, zeros without it), checked
-  by the server against `protocol.json` exactly as BN6's is; the server
-  keeps each player's ROMs and every SNAPSHOT peer says them (a flags
-  byte). Only identities and numbers cross: a game without BN5's ROM never
-  receives a byte of it, so a pair where one lacks it has to keep to BN6.
-- **A card says it.** Where the two games differ, MegaMan's reading of the
-  other's card ends with "His PET holds BN5 chips too!" or "His PET holds
-  BN6 chips only."
-- **Trade Central.** Between two games with BN5's ROM every chip of
-  either game's registry trades, BN5's too (its ids are the registry's,
-  fixed in `src/core/xchips_registry.c`, so they name the same chip on
-  every game with BN5); a mixed pair trades BN6's own chips alone. The
-  clerk lists only the Navis MegaMan has a spare for and only the spares
-  the pair can both hold, and says so ("THAT NAVI TRADES BN6 CHIPS!", or
-  that every spare is BN5's); each game refuses a chip it cannot hold
-  when an offer comes and at settling (BN5's ids, on BN6's blank records
-  203-220, 291-300 and 314 and past 319, where its ROM is not read), and
-  the server refuses a BN5 chip between games that do not both have its
-  ROM (NOTICE 19).
-- **The Arena.** A challenge names its rules: a format byte in ARENA and
-  ARENA_STATE, **full rules** between two games with BN5's ROM, which the
-  server holds them to, and **BN6 rules** for any other pair. Under full
-  rules each game installs BN5 into both pair cores from its own BN5 ROM,
-  the same way (the game core's installs written down as it starts and
-  made again in each pair core, their hash in the pair's), and MegaMan
-  fights with BN5's chips in his folder and his Souls, a Soul he unites
-  with carried by the pair to the other GBA
-  ([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)). Under BN6's rules he
-  leaves his Souls and BN5's chips in his pack at home and fights with a
-  folder of BN6's chips: Lan picks it among Folder1, Folder2 and the Extra Folder,
-  those holding BN5's chips named as staying home; where none fits,
-  MegaMan says so before any challenge is sent
-  ([ONLINE_ARENA.md](ONLINE_ARENA.md#formats)).
-- The Square is built from BN6's own nets (Central, Sky, Green), the same
-  for every game whatever ROMs it has, and a card names Crosses and Souls
-  from words of the game's own, never read from BN5's ROM.
+The **NetPass** shows it, and is the one place that names which game
+earns which stamp: a key item in Lan's PET, a strip at the gate and a
+panel on the second screen. Characters speak only of stamps, never of
+ROMs.
+
+### Why
+
+From protocol v4 to v8, BN5's ROM was optional and what two players did
+together went by **their common ground**: a card said where the two
+PETs differed, a pair where one game lacked BN5's ROM traded BN6's chips
+alone, and a NetBattle between them went by **BN6 rules**, the Souls left
+home and each BN5 chip in the folder stood in for by the Pack's nearest
+BN6 chip (`arena_standin.c`); two games with BN5's ROM fought by **full
+rules**. The owner's brainstorm on the stand-ins (issue #131) weighed
+ways to ease the mixed NetBattle (the stand-ins, a NetBattle folder, a
+loaner folder, stand-ins the player picks) and chose none of them: no
+mixed pairs at all.
+
+Through the game-design skill:
+
+- **Dialectic:** one crowd against each player's own collection, as the
+  common ground served. The Square stays one crowd for every game; what
+  touches a collection (a chip traded, a folder fought with, a dive's
+  depth posted) happens where every collection is whole.
+- **The critique:** the common ground was **complexity over depth**. Two
+  formats, stand-ins, the chips a pair could both hold and the clerk's
+  word on a partner's game were rules to learn that gave the player no
+  decision to make, and they doubled with every optional game: a second
+  one beside BN5 would have made four common grounds where there were
+  two.
+- **Patterns:** **error prevention** over a good explanation (the mixed
+  case never happens, so nothing has to be said about it); a diegetic
+  object in the PET rather than a menu of the project's own; **honest
+  feedforward** (the gate shows what this visit opens before the Yes); a
+  set completed once, with a ceremony (the stamp moment, below).
+- **Loop layer:** the session between acts, as the Square's: the pass is
+  read at the gate, as a visit begins. It completes once, at the meta
+  loop's pace (a ROM added), and changes nothing in a run.
+- **What it does not do:** gate the whole hub. A Square for the full set
+  alone would empty a small crowd, and each new game would lock out,
+  after the fact, players who were in.
+
+**The data** (Umami, 6-20 October 2026, run-start events with the
+statistics on): 46 of 53 sessions of release builds had BN5's ROM (87%),
+68 of 84 across all builds (81%). The rule costs about one player in
+eight NetBattles and trades; that player keeps the Square.
+
+### The stamps
+
+| Stamp | On the pass | Opens | Needs |
+| --- | --- | --- | --- |
+| Square | meet,cheer | Walking, phrases and emotes, cheering, cards, the referee's report, the Board and its posts, the trade board's offers to read, the week's ranking | BN6's ROM, every game's |
+| Arena | NetBattle | Asking for and taking a Practice NetBattle, a rematch, watching one in the stands | The full set |
+| Trade | chip swap | A trade at Trade Central, posting or answering a trade board offer | The full set |
+| DeepNet | the Board | The week's DeepNet dive: the greeter's offer, the dive's post to the Board | The full set |
+
+`netpass_has` answers for a stamp, `netpass_full` for the set
+(`netpass.h`). A pass holds 1 of 4 stamps or 4 of 4: the three that need
+the set come together.
+
+### The pass
+
+A 240x160 screen in the project's own pixel art, in the PET's colours
+(`tools/site_art.py`'s palette): a green header bar, "NetPass", with the
+pass's level on its right ("Square pass", or "★ Full pass" in gold); an
+operator card on the left with MegaMan's face, drawn from the player's
+own ROM as the screen opens (never stored), "Lan", "MegaMan" and a stamp
+bar ("1 of 4", "4 of 4"); the four stamps in a 2x2 grid, a gold stamp
+with a check where held, a dashed empty one with "?" where not; and a
+bottom panel with the cartridge slots, BN6 in and BN5 in or open
+(dashed), beside one line of PET text: "Team Colonel's ROM stamps Arena,
+Trade and DeepNet" while BN5's is missing, "Every game in. The whole Net
+is yours." once the set is complete.
+
+It shows in three places:
+
+- **In the PET**, as a key item (`0x4A`, among the ids BN6 leaves
+  nameless that the run's own items use), always shown, in a run and in
+  the Square. A on it opens the pass over the KeyItem screen; A or B
+  closes it ([PET.md](PET.md#keyitem-what-the-profile-holds)).
+- **At the gate** in Lan's HP: while MegaMan asks "To the Net
+  Square,Lan?", a strip over the top of the screen shows the pass's level
+  and its four stamps, so the player sees what the visit opens before
+  saying Yes ([HOME.md](HOME.md#11-the-net-squares-gate)).
+- **On the second screen** (the 3DS's bottom screen, Android's second
+  display) while MegaMan is in the Square: a NETPASS panel with the pass
+  drawn on it.
+
+### What characters say
+
+They speak of stamps. The referee by the ring, to a game without the
+Arena stamp, says "NO ARENA STAMP ON YOUR NETPASS!" in BN6's Mr.Prog
+voice, and still calls the channel's battles; Battle is offered on a
+card only where both games hold the Arena stamp, and "WANNA WATCH?" is
+not asked without it. Trade Central's clerk tells a game without the
+Trade stamp that it has none, and lists only Navis whose pass holds one;
+the board's offers still read. The greeter offers the week's DeepNet dive
+only to a full pass. A card names no game's chips any more: "His PET
+holds BN5 chips too!" and "His PET holds BN6 chips only." went with the
+common ground.
+
+### The stamp moment
+
+The first visit to the Square after the pass becomes full, the greeter
+stamps the new stamps one by one, each with a jingle of BN6's own played
+through the game, then says "★ Full pass". It happens once: the most
+stamps the game has seen is kept in a small file of its own in the data
+folder, `netpass.ini`, not in the run's save: the pass follows the
+player's ROMs, not a run.
+
+### The 3DS and the browser
+
+They build no Arena (`CW_ARENA`). The pass is the same there: its stamps
+follow the ROMs, as the server's rule does, so with BN5's ROM they trade
+and dive. Battle and Watch are not offered there, as before, and the
+pass's PET text says the ring needs another system.
+
+### On the wire
+
+Protocol v9 holds the rule on the server. HELLO has carried BN5's
+identity since v4 (its game code and SHA-1, zeros without it, checked
+against `protocol.json` as BN6's is), and every SNAPSHOT peer says each
+player's ROMs (a flags byte). The server refuses, with NOTICE 28
+(`notice_pass`), a challenge, an accept, a trade's propose, answer or
+take, a board post, a WATCH and a WEEK_POST from a session whose HELLO
+lacks the full set (`roms_full`), and a challenge or a trade aimed at
+one. NOTICE 19, which refused a BN5 chip or full rules between games
+that did not both have BN5's ROM, is retired. v9 also drops the rules
+byte from ARENA, ARENA_STATE, STANDS and WATCH_STATE: every NetBattle is
+by full rules. The trade board still leaves an offer whose chip is BN5's
+out of the BOARD sent to a game without BN5's ROM, which could not name
+the chip; that game reads the rest. Only identities and numbers cross:
+a game without BN5's ROM never receives a byte of it.
+
+The Square itself is built from BN6's own nets (Central, Sky, Green), the
+same for every game whatever ROMs it has, and a card names Crosses and
+Souls from words of the game's own, never read from BN5's ROM.
 
 ## Where things are
 
 | Part | Sources | Builds and checks |
 | --- | --- | --- |
-| The game's side | `src/online/`, the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
+| The game's side | `src/online/` (the NetPass's set and stamps in `netpass.c`), the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v7](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v9](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -247,8 +350,8 @@ words their own archives in the layer's scratch.
 **Talk.** Every exchange is BN6's chat box with its options, three to a
 box (`online_chat.c`, words in `square_words.c`): L for a phrase or an
 emote, A facing another MegaMan for his card (HP, act and layer,
-Crosses, Souls, and BN5 where the two games differ) and Battle, Wave,
-Mute, Block; R or the pad for home. A talk's column of options takes up
+Crosses, Souls) and Battle (where both passes hold the Arena stamp),
+Wave, Mute, Block; R or the pad for home. A talk's column of options takes up
 and down (`cinema_keys` lets the pad through while MegaMan is held).
 The Square's flags are `0x1480`-`0x14C3`, its own while it lasts.
 Phrases and emotes are fixed lists, never free text; mute and block are
@@ -258,16 +361,22 @@ the player's, kept by the server's public identity of the other.
 
 A Mr.Prog at a desk in the wing up-left of the plaza (-x) trades one
 spare chip (a copy past those in the run's three folders) for another
-player's (`trade_central.c`, words in `trade_words.c`):
+player's (`trade_central.c`, words in `trade_words.c`). Both games hold
+the NetPass's Trade stamp (above), so every chip of either game's
+registry trades, BN5's too: its ids are the registry's, fixed in
+`src/core/xchips_registry.c`, so they name the same chip on every game
+with BN5's ROM. To a game without the stamp the clerk says it has none,
+and the trade board's offers still read; the server refuses that game a
+trade, a post and an answer (NOTICE 28).
 
-1. MegaMan picks a Navi in the channel and the chip he offers, from
-   those the pair can both hold (above, the pair's common ground). The
-   picker is BN6's own Order Service screen (`trade_order.c`): the shop's
+1. MegaMan picks a Navi in the channel whose pass holds the Trade stamp
+   (the clerk lists no other) and the chip he offers. The picker is
+   BN6's own Order Service screen (`trade_order.c`): the shop's
    descriptor pointed, while he is in the Square, at a copy of its text
    archive in the desk's words, its list the run's spares
    ([ROM_DATA.md](ROM_DATA.md), the Order Service). Where a spare is one
-   of BN5's past BN6's 319 (two games with BN5's ROM), the spares are a
-   list in the clerk's chat box instead, two to a box (flags
+   of BN5's past BN6's 319, the spares are a list in the clerk's chat
+   box instead, two to a box (flags
    `0x14B0`-`0x14C3`, 20 at most): the order screen's list builder puts
    each chip at its ID order plus 0x140 in a list of 640 entries, so one
    past 319 would be written past its end.
@@ -304,8 +413,7 @@ element, `BN6_CHIP_ELEMENT`), or a Mega (`BN6_CHIP_LIBRARY_TYPE`). The
 clerk reads the channel's offers one a box ("Alpha HAS Cannon A! WANTS A
 FIRE CHIP!") with Answer it and Next offer under each, and MegaMan's own
 to post or take down; the Board in the log-in plaza lists them among its
-posts. Answering one lists only the spares that meet its want and the
-pair can both hold; the trade begins with both chips named (TRADE's
+posts. Answering one lists only the spares that meet its want; the trade begins with both chips named (TRADE's
 take, protocol v5), and both say Deal as in any trade. The poster's
 game checks the chip against the want it posted and calls off one that
 is not (the server never reads a chip's element); MegaMan then says
@@ -314,8 +422,10 @@ server while its poster is in the channel: taken down, a channel
 changed, the server left or a trade done, it goes, and no offer is
 kept on disk (`trade.py`; `online_board.c` holds the board as last
 said, `trade_central.c` the clerk's chats, `trade_words.c` the words).
-Common ground holds: a game without BN5's ROM is never sent an offer
-whose chip is BN5's, never posts one, and is never answered with one.
+Posting and answering take the Trade stamp; reading does not. A game
+without it reads the clerk's list and the Board's, and the server refuses
+its post or answer (NOTICE 28). It is never sent an offer whose chip is
+BN5's, which it could not name, and reads the rest.
 
 The design (the game-design skill): the dialectic is the Square's, **the
 run's integrity against the community's generosity**, and the board
@@ -344,6 +454,10 @@ they say they got. The owner approved the proposal on 19 October 2026
 likes, depths posted as "reported") and decided one thing while it was
 built: **a dive keeps a save slot of its own**, so the run in progress
 is never touched, and the player goes back to it when the dive ends.
+Diving takes the NetPass's DeepNet stamp (above); the Board's ranking
+reads on every game. Every diver has BN5's ROM, so the areas a game with
+it dresses in BN5's (`run_dress`, by the seed and the ROMs present) are
+the same on every dive.
 
 ### Its design
 
@@ -435,8 +549,8 @@ given for one, so the Board says "as reported".
   slot first (`weekly_normal_saved`), so its CONTINUE is the normal
   run's whether the dive ended, was reset or the game was closed.
 - **The greeter** (`src/online/square_week.c`, words in
-  `square_week_words.c`): his archive is his welcome, then the week's
-  post: the net shifted, this week's deep net open, its dates, every Navi
+  `square_week_words.c`): his archive is his welcome, then, to a pass
+  with the DeepNet stamp, the week's post: the net shifted, this week's deep net open, its dates, every Navi
   dives the same net, and "DIVE IN NOW?" (Yes/No, the cursor on No). With
   an unfinished dive of this week, "YOUR DIVE INTO THE DEEP NET ISN'T
   OVER!" and Keep diving, Start over, Not now. On a dive, he wishes
@@ -446,6 +560,8 @@ given for one, so the Board says "as reported".
   home's `0x1493` beside it for Start over); the visit ends
   (`VISIT_END_DIVE`) without the gate's resume, and the dive begins or
   goes on. The normal run's gate checkpoint stays as the gate wrote it.
+  A game without the stamp is offered no dive, and the server refuses its
+  WEEK_POST (NOTICE 28).
 - **The post**: a dive's end (`weekly_ended`, after the run's records
   and saves are done in its slot) keeps its layer, act, won, minutes and
   hash, the better of two of the same week. The next visit sends it as
@@ -470,21 +586,27 @@ turn, and a moderator's hide.
 
 ## The Arena
 
-Battle on a card sends a challenge; if the other player takes it, both
+Battle on a card, offered where both games' passes hold the Arena stamp
+(above), sends a challenge; if the other player takes it, both
 games run BN6's Practice NetBattle on **two linked cores each**, the two
-MegaMen carried as they are (folder, NaviCust, HP, buster, Crosses), and
-only the players' keys cross the server. The challenge names its rules
-and Lan picks the folder carried (above, the pair's common ground). The
+MegaMen carried as they are (folder, NaviCust, HP, buster, Crosses,
+Souls), and only the players' keys cross the server. Every NetBattle is
+by **full rules** since v9: BN5's installs in both pair cores of each
+game, the installs' record compared, BN5's chips in the folder and a
+Soul MegaMan unites with carried to the other GBA
+([ONLINE_ARENA.md](ONLINE_ARENA.md#full-rules)). Where more than one of
+Folder1, Folder2 and the Extra Folder holds chips, Lan picks the one
+carried ([ONLINE_ARENA.md](ONLINE_ARENA.md#one-rule-full-rules)). The
 Square's core holds still
 meanwhile; after the battle each MegaMan stands where he stood, says
 how it went and asks Lan whether to go again with the same player (the
-cursor on No): when both say Yes they fight again by the same rules and
+cursor on No): when both say Yes they fight again with the same
 folders, over the same ARENA messages (a challenge answered at once). The
 referee by the ring calls the bout and keeps the count. A hash of the
 pair every 60 frames catches two games apart and stops both. Nothing is
-won or lost. The 3DS and the browser build
-compile it out (`CW_ARENA`): Battle is not offered there and a challenge
-is declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
+won or lost. The 3DS and the browser build compile it out (`CW_ARENA`):
+Battle is not offered there, whatever the pass, and a challenge is
+declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
 the lockstep and the two-client proof.
 
 ### The stands
@@ -492,16 +614,15 @@ the lockstep and the two-client proof.
 [Issue #128](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/128),
 the owner's decision of 19 October 2026: the Arena's wing has stands. A
 NetBattle in the channel is **watched for real** by a game that can build
-its pair (the Arena built there, and BN5's ROM for a battle by full
-rules: the pair's common ground again): the referee by the ring asks
-"WANNA WATCH?", and Yes turns the screen to the battle, its two cores
-built and run here from both players' keys as the server hands them on,
+its pair (the Arena built there, and the Arena stamp on its pass): the
+referee by the ring asks "WANNA WATCH?", and Yes turns the screen to the
+battle, its two cores built and run here from both players' keys as the server hands them on,
 a second and a half behind them, from the battle's first frame however
 late the spectator came (he catches up faster than real time). R shows
 the other GBA's side, L cheers, B goes back to where MegaMan stood. The
 spectator checks the players' hashes and stops, saying so, where they
-disagree. Every game, the 3DS and the browser among them, gets **the
-report**: the referee calls the channel's battle (who fights whom, each
+disagree. Every game, the 3DS, the browser and a game without the Arena
+stamp among them, gets **the report**: the referee calls the channel's battle (who fights whom, each
 MegaMan's HP, the last chip each used, how many watch, the winner and
 the cheers) and the Board posts it, from what the cable's first game
 reads off its own pair and sends now and then. A phrase or emote said
@@ -509,17 +630,23 @@ while a battle is on is a cheer, held from the two players until their
 battle is over; the referee then tells them. The stands give nothing
 toward a run. How it is built, and its design: [ONLINE_ARENA.md, The
 stands](ONLINE_ARENA.md#the-stands); the wire (protocol v7: STANDS,
-ARENA_STATUS, WATCH and the server's three WATCH messages):
+ARENA_STATUS, WATCH and the server's three WATCH messages; v9 took the
+rules byte out of STANDS and WATCH_STATE and refuses a WATCH from a game
+without the full set, NOTICE 28):
 [shared/online/README.md](../shared/online/README.md).
 
 ## The server and the wire
 
-Protocol v7 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v7`; v7 added the
-stands, below). The server refuses
+Protocol v9 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v9`; v7 added the
+stands, v8 the latency each game asks for with rollback on, v9 the
+NetPass's rule, above). The server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of
-bounds and a full Square; it bounds every
+bounds and a full Square; it refuses what needs the full set from a
+session without it (NOTICE 28: a challenge, an accept, a trade's steps,
+a board post, a WATCH, a WEEK_POST, and a challenge or a trade aimed at
+such a session); it bounds every
 message, the players, pending handshakes, each client's traffic and its
 output, and relays the Arena's keys under a bucket of its own. Trading
 and the Arena each have their switch in its configuration
@@ -573,8 +700,9 @@ server:
   `trades.jsonl` held `[20,5]` for `[1,0]`, the clerk then said "YOU
   TRADED ALREADY! ONE TRADE A VISIT!", and each game settled at home:
   Alpha's "the Pack's 4 to 3 of the one, 0 to 1 of the other", "Lan!
-  FireBrn1 F is in our Pack now!", Beta's Cannon A. Then the pair's
-  common ground: Alpha back with MrkCan1 M (411, the pack's extension)
+  FireBrn1 F is in our Pack now!", Beta's Cannon A. Then a BN5 chip's
+  offer, which a game without BN5's ROM is not sent (so since v9 too):
+  Alpha back with MrkCan1 M (411, the pack's extension)
   posted it from the clerk's chat-box list ("IT'S UP! MrkCan1 M FOR
   ANYTHING!"), and Gamma, a third game with BN6's ROM alone (the
   server's join line `"roms":0`), read the Board beside him: "Here now:
@@ -633,28 +761,19 @@ server:
   with `-Werror`; `build.py test` (the Square's plan and hash, the
   Arena's wire and links) and the server's 36 tests; `build.py lint` with
   nothing new.
-- **The pair's common ground** (the same day, protocol v4, a local
-  server; two host builds, one with BN5's ROM beside BN6's or both). The
-  server's join lines naming each player's ROMs. Two games with BN5: one
-  offered MrkCan1 M (411, the pack's extension) from the clerk's chat-box
-  list, the other answered with WideSht1 L (204, a blank record) from the
-  order screen, both said Deal, `trades.jsonl` held `[411,12]` for
-  `[204,11]`, and each game's CONTINUE settled it: "the Pack's 2 to 1 of
-  the one, 0 to 1 of the other" (BN6's TakeChips and GiveChips on both
-  kinds of id), MegaMan's "Lan! MrkCan1 M is in our Pack now!". A mixed
-  pair: the game with BN5 asking the clerk about the other heard "THAT
-  NAVI TRADES BN6 CHIPS!", its BN5 spare kept back. A mixed pair's
-  NetBattle: the card's "His PET holds BN5 chips too!", the challenger's
-  "BN6 rules,Lan. Which folder goes?" (Folder1, Folder2), the challenged
-  game's "BN6 rules: no Souls,and BN6 chips only." before its Yes, then
-  "Folder1 has BN5 chips. It stays home." and Folder2 alone offered; the
-  battle to its end with Folder2 carried, 26 hashes agreeing, back in the
-  Square to "Alright! We won,Lan!!". Folder2 came from the `folder` dev
-  step: a run holds Folder1 alone (Not yet, below). Then with Folder1
-  alone, two MrkCan1 M in it (the `chip` dev step): "Folder1: 2 BN5
-  chips sit out,Lan. Chips from our Pack stand in for them, like Cannon A
-  for MrkCan1 M!", Folder1 carried, the log's two stand-ins, the battle
-  to its end on both games with 25 hashes agreeing.
+- **The pair's common ground, before v9** (the same day, protocol v4, a
+  local server; two host builds, one with BN5's ROM beside BN6's or
+  both). Two games with BN5: one offered MrkCan1 M (411, the pack's
+  extension) from the clerk's chat-box list, the other answered with
+  WideSht1 L (204, a blank record) from the order screen, both said Deal,
+  `trades.jsonl` held `[411,12]` for `[204,11]`, and each game's CONTINUE
+  settled it: "the Pack's 2 to 1 of the one, 0 to 1 of the other" (BN6's
+  TakeChips and GiveChips on both kinds of id), MegaMan's "Lan! MrkCan1 M
+  is in our Pack now!". Mixed pairs, which v9 no longer allows (issue
+  #131, The NetPass above): the clerk's "THAT NAVI TRADES BN6 CHIPS!"; a
+  NetBattle by BN6 rules with Folder2 carried (26 hashes agreeing), and
+  one with Folder1's two MrkCan1 M stood in for by Pack chips (25). v9
+  removed BN6 rules and the stand-ins with them.
 - **A NetBattle by full rules** (the same day, a local server, two host
   builds each with BN5's ROM beside BN6's). "Full rules! Let's see if
   Beta takes us on!" and "Full rules: Souls and BN5 chips too!"; both
@@ -756,7 +875,8 @@ server:
 - **A trade and a NetBattle on Android and Windows** (19 October 2026,
   protocol v5, a local server with seed 120, issue #129), each against a
   host build ("Linux", BN6's and BN5's ROMs) in `tools/play.py`; each
-  game with BN6's ROM alone, so a mixed pair, its run made by a host
+  game with BN6's ROM alone, so a mixed pair (before v9, which leaves
+  such a game the Square and no trade or NetBattle), its run made by a host
   build with spares from the `chip` dev step (FireBrn1 F, Cannon B) and
   saved at the gate, then copied into its data folder (Android's with
   adb as root). The Square's places were read from a third host build's
@@ -869,20 +989,18 @@ are in the history before 433865a8):
 
 ## Not yet
 
-- **The week's net, what is left:** a game with BN5's ROM dresses some
-  areas of the week's net with BN5's (`run_dress`, by the seed and the
-  ROMs present), so a dive with BN5 and one without are not quite the
-  same net; the Board does not tell them apart yet. A dive's summary hash
-  is a format check, not evidence. A dive won (the Nest) has not been
-  played to its end here; the 3DS's and the browser's dives are untried.
+- **The week's net, what is left:** a dive's summary hash is a format
+  check, not evidence. A dive won (the Nest) has not been played to its
+  end here; the 3DS's and the browser's dives are untried.
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
+- **The NetPass, what is left:** (to be filled)
 - **The Arena on the 3DS and in the browser** (rollback runs wherever the
   Arena does). There, the stands are the report alone (seen in the
   browser; the 3DS's untried).
 - **Rollback, what is left** (issue #128, ONLINE_ARENA.md, Rollback): a
   NetBattle with rollback between two devices and through the deployed
-  server (protocol v8 there once it is redeployed), on Android, iOS,
+  server (protocol v9 there once it is redeployed), on Android, iOS,
   Windows and macOS (built, untried; the Nova measured headless); a first
   NetBattle on a system asks with a window of 4 until a battle has kept
   its frame's cost; the guess is the other's last keys held, nothing
@@ -906,12 +1024,6 @@ are in the history before 433865a8):
   once this work is merged; a trade and a NetBattle through it; a host's
   retention policy, named moderators and its backup and restart checks
   before a public launch.
-- **BN5's chips in a mixed NetBattle: a design to refine.** A run has
-  Folder1 alone, so under BN6's rules its BN5 chips stand in for that
-  battle by chips of the Pack's (ONLINE_ARENA.md, The folder): honest
-  and quick, but the owner calls it friction to brainstorm again (a
-  NetBattle folder of the PET's, BN6's Folder2 opened online, is the
-  other way weighed).
 - **The Souls under full rules, what is left:** a MegaMan worried by
   hits alone in a NetBattle, ToadSoul's flag and FloatShoe on panels a
   NetBattle's field lacks, and BN5's own NetBattle as a reference for

@@ -373,12 +373,18 @@ it from `--scene home --run-depth 7`: `place 16 72 3` puts MegaMan on the
 gate, LEFT and A answer Yes; the log names the Square's area and arrival
 ("online: square area 0, arrival at X,Y") and every visit's end and
 trade. A visit plays at the clock's pace even headless, so the two meet.
-Never point a test at the official server.
+A trade, a NetBattle, watching one and the week's dive take the
+NetPass's full set (docs/ONLINE.md, The NetPass): BN5's ROM beside
+BN6's in each game's `--rom-dir`; a game with BN6's alone tries the
+Square stamp's side, the referee's and the clerk's word on a missing
+stamp among it. Never point a test at the official server.
 
 ## The Arena on one machine
 
 `--dev arena` starts on a Practice NetBattle of BN6's own between two
-linked cores (issue #120), you the first GBA and a script the second,
+linked cores (issue #120), by full rules as every NetBattle is, so with
+BN5's ROM beside BN6's (without it the way in stops, saying so); you the
+first GBA and a script the second,
 whose keys come over a local link held back as a network's would be;
 `arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay (1 to
 60), the link's one way and the carried MegaMan's HP. `arenawindow=W`
@@ -696,9 +702,10 @@ are made with it.
 The `folder` step (`--input`'s `0:folder 2`) copies MegaMan's first
 folder into Folder2 (its Regular chip and TagChips too) or, with 3, the
 Extra Folder, as a run that handed out more folders would hold them: no
-run does yet, and the Net Square's NetBattle asks which folder goes where
-more than one fits (docs/ONLINE_ARENA.md, Formats). Before a `chip` step,
-the copy keeps BN6's chips while the first folder takes the chip.
+run does yet, and the Net Square's NetBattle asks which folder goes
+where more than one holds chips (docs/ONLINE_ARENA.md, One rule: full
+rules). Before a `chip` step, the copy keeps BN6's chips while the first
+folder takes the chip.
 
 The `chip` step (`--input`'s `0:chip 204 L 29`, play.py's `chip 204 L
 29`; issue #82) puts chip ID (1-511: BN6's, or one of BN5's in BN6's

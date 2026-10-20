@@ -751,6 +751,30 @@ no shop, no saves. Coming home puts MegaMan back on the gate, exactly as
 he was; closing the game in the Square does the same at the next
 CONTINUE. The one thing that comes home with you is a chip you traded.
 
+**The NetPass** shows what your games open online, as four stamps:
+
+| Stamp | What it opens | What it needs |
+| --- | --- | --- |
+| **Square** | Walking, phrases and emotes, cheering, cards, the referee's calls, the board and its posts, reading the trade offers, the week's ranking | BN6, so everyone has it |
+| **Arena** | NetBattles, and watching them | The full set |
+| **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set |
+| **DeepNet** | The week's deep net dive | The full set |
+
+The full set is every game this version supports online: BN6 Cybeast
+Gregar (USA) and BN5 Team Colonel (USA). With BN5's ROM beside BN6's, all
+four stamps are yours; with BN6's alone you hold the Square stamp: the
+whole Square but NetBattles, trades and the dive. On the 3DS and in the
+browser, which have no NetBattle, a full pass trades and dives.
+
+Open the pass from the PET: **KeyItem**, then A on **NetPass**; A or B
+closes it. It also shows across the top of the screen while MegaMan asks
+about going to the Square at the gate, and on a second screen (the 3DS's
+bottom screen, an Android handheld's second display) while you are in
+the Square. The first visit with a full pass, the greeter Mr.Prog stamps
+it. If a later version supports another game online, the stamps that
+need it open again until you add that game; the release notes and this
+site say so ahead of time.
+
 The Square is a plaza with a landmark in its middle (a statue, a
 monument or a giant cybertree, by the server), a stage up a stair, the
 log-in plaza with its board and the pad home, Trade Central, and the
@@ -769,25 +793,20 @@ In the Square:
 - **L** has MegaMan say something or do an emote; everyone in your
   channel sees it over his head.
 - **A** facing another player's MegaMan shows his card (HP, act and
-  layer, Crosses and Souls, and whether his game has BN5 where yours
-  differs) and lets you ask him for a NetBattle, wave, mute or block him.
-  Blocked players are gone from your Square.
-- **Battle** on his card asks for a Practice NetBattle of BN6's own;
-  both MegaMen are told its rules before the battle. You fight with your
-  MegaMen as they are (NaviCust, HP, buster, Crosses). When both your
-  games have BN5's ROM it is **full rules**: BN5's chips in your folder
-  go too, and so do your Souls (UNITE on the Custom screen as in a run;
-  the other player sees your Soul too). Otherwise it is **BN6 rules**:
-  Souls stay home, and each BN5 chip in your folder sits that battle out
-  while a BN6 chip from your Pack stands in for it (the closest one you
-  have spare, Cannon where you have none). MegaMan says which before the
-  challenge goes, and your folder itself never changes. Win or lose you
-  are back in the Square where you stood; nothing is won or lost.
-  MegaMan then asks whether to go again with the same player, the cursor
-  on No: when you both say Yes, you fight again at once by the same rules
-  with the same folder (asked again only if it no longer fits). No, B, or
-  no Yes from the other player within half a minute, and you stay in the
-  Square. The 3DS and the browser have no NetBattle.
+  layer, Crosses and Souls) and lets you ask him for a NetBattle, wave,
+  mute or block him. Blocked players are gone from your Square.
+- **Battle** on his card, there when you both have the Arena stamp, asks
+  for a Practice NetBattle of BN6's own. You fight with your MegaMen as
+  they are (NaviCust, HP, buster, Crosses, BN5's chips in your folder)
+  and with your Souls: UNITE on the Custom screen as in a run, and the
+  other player sees your Soul too. Where more than one of your folders
+  holds chips, MegaMan asks which goes. Win or lose you are back in the
+  Square where you stood; nothing is won or lost. MegaMan then asks
+  whether to go again with the same player, the cursor on No: when you
+  both say Yes, you fight again at once with the same folder (asked
+  again only if it no longer fits). No, B, or no Yes from the other
+  player within half a minute, and you stay in the Square. The 3DS and
+  the browser have no NetBattle.
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the
   Arena's ring tells how a NetBattle is asked for; once you have fought,
@@ -798,14 +817,13 @@ In the Square:
   whether to watch: you see the battle itself, a moment behind, from
   its start however late you came. **R** shows the other side, **L**
   cheers, **B** takes you back. The players hear the cheers after their
-  battle. A battle by full rules is shown only on a game with BN5's ROM;
-  the 3DS and the browser get the referee's call and the board's post.
+  battle. Watching takes the Arena stamp; without it, and on the 3DS and
+  in the browser, you get the referee's call and the board's post.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the
-  chips swap as you come home. BN5's chips trade between two players
-  whose games both have BN5's ROM; with anyone else the clerk offers
-  BN6's chips only, and says so.
+  chips swap as you come home. Trading takes the Trade stamp, on both
+  sides, and BN5's chips trade like BN6's.
 - **The trade board**, at the same desk: put one spare up with what you
   want for it (anything, a chip of an element, a Sword, Wind, Break or
   Cursor chip, or a Mega), and everyone in your channel can read it,
@@ -813,9 +831,10 @@ In the Square:
   or trade. To answer someone's offer, pick it at the desk and then one
   of your spares that is what they want; you both see the pair and say
   Deal, as in any trade. One trade a visit: the chip comes home with
-  you before the next.
-- **The week's deep net**: the greeter Mr.Prog in the log-in plaza posts
-  a net that changes every Monday (00:00 UTC). Everyone on that server
+  you before the next. Anyone can read the offers; posting and
+  answering take the Trade stamp.
+- **The week's deep net**: with the DeepNet stamp, the greeter Mr.Prog
+  in the log-in plaza posts a net that changes every Monday (00:00 UTC). Everyone on that server
   dives the same net that week, from the same start: the short net, the
   Standard folder, threat 0, no helpers and no Cross, and nothing your
   other runs unlocked. Say Yes to him (the cursor starts on No) and
@@ -828,7 +847,8 @@ In the Square:
   Square: the week's eight deepest dives, your own best and its place,
   and last week's three. Dive as often as you like; your best counts.
   The board says the layers are as players report them, and nothing is
-  won for one. A dive unlocks nothing and counts in none of your records.
+  won for one; everyone can read it. A dive unlocks nothing and counts in
+  none of your records.
 - **R**, or the pad you arrived by, takes you home.
 
 Talk to the gate's keeper to change your name or the server: the
