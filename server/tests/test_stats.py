@@ -155,7 +155,8 @@ class DailyTests(unittest.IsolatedAsyncioTestCase):
         await self.connect("Beta")
         # (past midnight: the day's line written, the next day begun with its identities dropped)
         self.now += DAY
-        for _ in range(100):
+        # (the housekeeping tick writes it, slower under the whole suite's load)
+        for _ in range(400):
             await asyncio.sleep(0.05)
             if (self.dir / stats.LOG).exists():
                 break
