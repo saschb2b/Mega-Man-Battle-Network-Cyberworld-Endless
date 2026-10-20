@@ -230,6 +230,18 @@ class HoldTests(unittest.IsolatedAsyncioTestCase):
             await asyncio.sleep(1 / 60)
         await until(lambda: server.players[a_id].position == (297, 0, 0, 0))
 
+    async def test_another_versions_game_hears_which_side_is_behind(self):
+        # (its own subprotocol let in, so its HELLO's version is answered)
+        await self.start()
+        for version, code in ((SPEC["version"] - 1, 2), (SPEC["version"] + 1, SPEC["error_server_older"])):
+            client = Client()
+            self.clients.append(client)
+            refused = await client.open(self.port, "Alpha", protocols=f"cyberworld.presence.v{version}", version=version)
+            self.assertEqual(client.protocol, f"cyberworld.presence.v{version}")
+            self.assertEqual(refused[:3], struct.pack("!BH", SPEC["error"], code))
+        self.assertEqual(self.server.daily.today["versions"], {str(SPEC["version"] - 1): 1, str(SPEC["version"] + 1): 1})
+        self.assertFalse(self.server.players)
+
     async def test_maintenance_turns_every_game_away_with_its_line(self):
         with self.assertRaises(ValueError):
             Server(maintenance="x" * (SPEC["maintenance_bytes"] + 1))

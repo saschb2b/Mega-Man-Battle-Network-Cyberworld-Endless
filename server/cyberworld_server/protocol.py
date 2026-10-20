@@ -49,18 +49,22 @@ def read_hello(data):
     (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came)
     and whether it takes back a place held (the channel's hello_resume bit,
     protocol v10: a game come back after its link dropped, holds.py)."""
+    # (which side is behind, so the game can say where the newer one is: the
+    # version read first, as another version's HELLO may be shaped otherwise; v10)
+    version = hello_version(data)
+    if version is not None and version != SPEC["version"]:
+        if version > SPEC["version"]:
+            raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+        raise ProtocolError("Protocol version mismatch", 2)
     if len(data) < HELLO.size:
         raise ProtocolError("Expected HELLO")
     kind, version, make, square_hash, rom, digest, rom5, digest5, key, channel, length = HELLO.unpack_from(data)
     if kind != SPEC["hello"] or len(data) != HELLO.size + length:
         raise ProtocolError("Malformed HELLO")
-    # (which side is behind, so the game can say where the newer one is: v10)
-    if version != SPEC["version"] or make != SPEC["square_make"]:
-        newer = (version, make) > (SPEC["version"], SPEC["square_make"])
-        if newer:
-            raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
-        raise ProtocolError("Protocol version mismatch" if version != SPEC["version"] else "Square generation mismatch",
-                            2 if version != SPEC["version"] else 3)
+    if make > SPEC["square_make"]:
+        raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+    if make != SPEC["square_make"]:
+        raise ProtocolError("Square generation mismatch", 3)
     if square_hash != SPEC["square_hash"]:
         raise ProtocolError("Square generation mismatch", 3)
     if rom != SPEC["rom_code"].encode() or digest.hex() != SPEC["rom_sha1"]:
