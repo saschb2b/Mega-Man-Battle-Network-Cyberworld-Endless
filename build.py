@@ -1810,6 +1810,8 @@ def online_pictures(kind, rest):
     if names and not any(n.startswith('online-') for n in names):
         return 0
     build('linux')
+    if kind == 'screenshots' and (not names or 'online-browser' in names):
+        build('web')   # (the browser's picture: the site's player, tools/online_browser_picture.py)
     if subprocess.call([sys.executable, os.path.join(ROOT, 'server', 'build.py')], cwd=ROOT):
         return 1
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
