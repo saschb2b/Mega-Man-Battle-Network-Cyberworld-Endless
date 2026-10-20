@@ -92,9 +92,12 @@ class Arena:
             self.send(match.a, match, START, 0, delay)
             self.send(match.b, match, START, 1, delay)
             self.server.event("arena", match=match.id, a=match.a, b=match.b, delay=delay)
+            self.server.daily.count("battles_started")
             self.server.stands.begin(match, delay)
         else:
             # (a leave, a decline, or the battle over on one side: both told)
+            if action == OVER and match.started:
+                self.server.daily.count("battles_finished")
             self.end(match)
 
     async def challenge(self, player, target_id, latency):

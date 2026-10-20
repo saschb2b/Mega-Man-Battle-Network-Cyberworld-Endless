@@ -18,6 +18,9 @@ else that names a player goes by itself:
 - `players.json`, the roster: the players connected now, rewritten as
   they come and go and emptied when the server stops.
 
+`stats.jsonl`, the daily totals (stats.py), names no player: a line a UTC
+day, `stats_days` days.
+
 A pass prunes them at the start and every hour, in a thread, under the
 state directory's lock (identity.state_lock). Backups (backup.py) keep
 `backup_days` days of the key, the moderation lists and the Board."""
@@ -29,12 +32,14 @@ import re
 import time
 
 from .identity import append_log, prune_moderation, rewrite_log, state_lock
+from . import stats
 from .trade import prune_log
 from .week import compact
 
 DAY = 24 * 3600
 PASS = 3600             # seconds between the retention's passes
-LIMITS = {"trade_days": (0, 365), "board_weeks": (2, 520), "log_days": (0, 365), "backup_days": (1, 365)}
+LIMITS = {"trade_days": (0, 365), "board_weeks": (2, 520), "log_days": (0, 365), "backup_days": (1, 365),
+          "stats_days": (0, 3650)}
 PERSONAL = ("identity", "name")     # an event's fields the players' log keeps and the console's does not
 
 
@@ -45,6 +50,7 @@ class Retention:
     board_weeks: int = 2
     log_days: int = 14
     backup_days: int = 14
+    stats_days: int = 365
 
     def __post_init__(self):
         for field, (low, high) in LIMITS.items():
@@ -122,5 +128,6 @@ def apply(directory, policy, now, week):
     gone = {"trades": prune_log(directory, now - policy.trade_days * DAY)[0],
             "board": compact(directory, first_week)[1],
             "moderation": prune_moderation(directory, now, first_week),
-            "logs": PlayersLog(directory, policy.log_days).prune(now)}
+            "logs": PlayersLog(directory, policy.log_days).prune(now),
+            "stats": stats.prune(directory, now, policy.stats_days)}
     return {kind: count for kind, count in gone.items() if count}

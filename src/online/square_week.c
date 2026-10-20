@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics_online.h"
 #include "netpass.h"
 #include "online_square.h"
 #include "online_text.h"
@@ -51,6 +52,7 @@ static void post(void) {
 		/* (the greeter names it where it is the Board's now: a shallower
 		 * dive than the week's best leaves the best up) */
 		if (!refused && b->mine.depth == r->r_depth && b->week == r->r_week) Q.posted = r->r_depth;
+		if (!refused) analytics_dive_post(r->r_depth, r->r_act, r->r_won);
 		fprintf(stderr, "online: the week's dive to layer %u %s\n", r->r_depth, refused ? "refused" : "posted");
 		weekly_posted();
 	}

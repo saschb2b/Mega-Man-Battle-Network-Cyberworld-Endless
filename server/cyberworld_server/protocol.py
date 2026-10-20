@@ -78,6 +78,14 @@ def read_hello(data):
     return name.decode("ascii").rstrip(), key, channel & ~SPEC["hello_resume"], SPEC["roms_bn5"] if bn5 else 0, resume
 
 
+def hello_version(data):
+    """The protocol version a HELLO says, before it is checked (the daily
+    totals count the versions that came: stats.py); None where it is none."""
+    if len(data) < 3 or data[0] != SPEC["hello"]:
+        return None
+    return struct.unpack_from("!H", data, 1)[0]
+
+
 def full_set(roms):
     """Whether a session's ROMs (HELLO's bits, as read_hello keeps them) are
     the full set: every bit of protocol.json's roms_full, BN5 Team Colonel's

@@ -220,6 +220,7 @@ class Trades:
                  "b": players[trade.b].identity.hex() if trade.b in players else "",
                  "a_gave": list(trade.chips[trade.a]), "b_gave": list(trade.chips[trade.b])}
         self.server.event("trade", trade=trade.id, a=trade.a, b=trade.b)
+        self.server.daily.count("trades")
         self.end(trade, DONE)
         self.done.update((trade.a, trade.b))
         if trade.a in players:

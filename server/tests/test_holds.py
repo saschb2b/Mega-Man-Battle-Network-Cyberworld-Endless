@@ -85,6 +85,8 @@ class HoldTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(server.holds.held(server.players[a_id]))
         self.assertEqual(await self.peers(b), [a_id])
         self.assertEqual(len(server.players), 2)
+        # (the same visit: not one more of the day's joins, stats.py)
+        self.assertEqual(server.daily.today["joins"], 2)
 
     async def test_the_hold_ends_and_a_goodbye_frees_at_once(self):
         server = await self.start(hold=0.3)

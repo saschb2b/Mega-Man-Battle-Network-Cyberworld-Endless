@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics_online.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "chips.h"
@@ -403,6 +404,7 @@ static void settled(void) {
 	C.kept = v->id;
 	snprintf(last_partner, sizeof last_partner, "%s", name_of(v->other));
 	if (!online_trade_keep(v)) fprintf(stderr, "online: the trade could not be kept; it is lost\n");
+	analytics_trade(v->taken);
 	C.traded = true;
 	C.took = 0;
 	trade_screen_swap();
