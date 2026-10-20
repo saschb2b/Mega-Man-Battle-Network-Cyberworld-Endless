@@ -10,7 +10,7 @@ a use of its own.
 | --- | --- |
 | ChipFolder, SubChip, Library, MegaMan | BN6's own |
 | E-Mail | BN6's screen: Dad's mails, the dive and the records first, then the battle data on each guardian met |
-| KeyItem | BN6's screen: the profile's own items beside the run's |
+| KeyItem | BN6's screen: the profile's own items beside the run's; A on the NetPass opens the pass |
 | Comm | BN6's grey and buzz, as without a link cable |
 | Save | Saves the run where MegaMan stands |
 | PLACE | The area beside the layer ("JudgeTree 14") |
@@ -67,19 +67,44 @@ the subject and how many of the list's mails are new (issue #83).
 ## KeyItem: what the profile holds
 
 BN6's list shows the run's items (ScrtData, with a description of our own:
-three open the golden gate) and three of the profile's, in ids BN6 leaves
-nameless:
+three open the golden gate) and four of the profile's, in the ids
+`0x47`-`0x4F` BN6 leaves nameless:
 
 | Item | Shown | Says |
 | --- | --- | --- |
 | NaviCode | once a guardian has been deleted twice (the Navi gates' code, docs/META.md) | whose codes MegaMan holds, two by name, and that each opens its gate |
 | DarkPass | once the Secret Area has been cleared in any run | that the dark way to the Undernet is open |
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
+| NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
 
 The Spins show with BN6's own words, those the profile has found in the
 net, one a run (docs/META.md): each lets a held NaviCust program of its
 colour turn with L and R. The descriptions that count are made again on
 each layer.
+
+### The NetPass
+
+The NetPass (`0x4A`, after NaviCode `0x47`, DarkPass `0x48` and LibCard
+`0x49`) is the one key item that opens a screen: the pass of
+[ONLINE.md](ONLINE.md#the-netpass), its four stamps (Square, Arena,
+Trade, DeepNet), the cartridge slots of the games that earn them and a
+line of PET text, drawn by the engine in the project's own pixel art
+over the KeyItem screen. A on it opens the pass; A or B closes it. The
+game's keys are held from the core while it is up, so BN6's list does
+not move under it.
+
+BN6 itself opens a screen from A on a key item (bn6f's `sub_8128BF0`,
+for key item `0x40`), so a key item that opens one is BN6's own way. The
+engine reads the KeyItem screen's cursor to know which item A was
+pressed on (`pet_key_item` in `pet.c`, no hook): the PET screen's state
+at `0x02009A30` while it takes input (+0x01 and +0x02 both 4), +0x0D the
+column, +0x20 the row, +0x24 the scroll, and the list of held items at
+`0x0201BF00`, two bytes an entry, the entry under the cursor at
+(scroll + row) * 2 + column ([ROM_DATA.md](ROM_DATA.md), the KeyItem
+screen's cursor). A on any item but `0x40` does nothing in BN6, so the A
+that opens the pass is also kept from the game. In the Net Square BN6's
+PET stays shut (its screens would change the Square's RAM, thrown away
+on the way home); START opens the same pass there.
 
 ## How the entries are taken over
 

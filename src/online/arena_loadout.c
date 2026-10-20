@@ -16,28 +16,19 @@
 /* false, the reason said in `why` */
 #define REFUSE(...) ((why && n ? (void)snprintf(why, n, __VA_ARGS__) : (void)0), false)
 
-/* a chip id `format`'s cores hold: under BN6's rules BN6's own (1 to
- * ARENA_BN6_CHIP_LAST, its blanks left out); under full ones every id of
- * the chip registry (BN5's chips in BN6's tables, its blanks and the
- * pack's extension among them: the same in every game with BN5's ROM,
- * docs/MULTIROM.md, The chip registry) */
-static bool chip_held(unsigned id, unsigned format) {
-	if (format == ONLINE_FORMAT_FULL) return id < ONLINE_PACK_IDS;
-	return id <= ARENA_BN6_CHIP_LAST && !BN6_CHIP_BLANK(id);
-}
+/* a chip id the cores hold: every id of the chip registry (BN5's chips
+ * in BN6's tables, its blanks and the pack's extension among them: the
+ * same in every game with BN5's ROM, docs/MULTIROM.md, The chip
+ * registry) */
+static bool chip_held(unsigned id) { return id < ONLINE_PACK_IDS; }
 
-bool arena_loadout_check(const OnlineLoadout *l, unsigned format, char *why, size_t n) {
-	bool full = format == ONLINE_FORMAT_FULL;
-	if (l->souls && !full) return REFUSE("MegaMan holds Souls (mask %#x): BN5's, which plain BN6 cannot run", l->souls);
+bool arena_loadout_check(const OnlineLoadout *l, char *why, size_t n) {
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folder[i];
 		if (e == 0xFFFF || !CHIP_ID(e)) continue;
-		if (!chip_held(CHIP_ID(e), format)) return REFUSE("the folder holds chip %u: another game's, which plain BN6 has not", CHIP_ID(e));
+		if (!chip_held(CHIP_ID(e))) return REFUSE("the folder holds chip %u, past the chip registry", CHIP_ID(e));
 		if (CHIP_CODE(e) > CODE_STAR) return REFUSE("the folder holds a chip of code %u, which BN6 has not", CHIP_CODE(e));
 	}
-	for (unsigned id = 1; id < ONLINE_PACK_IDS; ++id)
-		for (unsigned k = 0; k < BN6_PACK_ENTRY && !chip_held(id, format); ++k)
-			if (l->pack[id][k]) return REFUSE("the pack holds chip %u: another game's, which plain BN6 has not", id);
 	if (!l->max_hp || l->max_hp > HP_MOST) return REFUSE("MegaMan's max HP (%u) is not one BN6 holds", l->max_hp);
 	return true;
 }
@@ -59,8 +50,8 @@ static void write_flag(const ArenaMemory *m, unsigned flag, bool on) {
 	m->write8(m->context, at, on ? (uint8_t)(byte | bit) : (uint8_t)(byte & ~bit));
 }
 
-bool arena_loadout_install(const ArenaMemory *m, const OnlineLoadout *l, unsigned format, char *why, size_t n) {
-	if (!arena_loadout_check(l, format, why, n)) return false;
+bool arena_loadout_install(const ArenaMemory *m, const OnlineLoadout *l, char *why, size_t n) {
+	if (!arena_loadout_check(l, why, n)) return false;
 	uint32_t folder = m->read32(m->context, BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
 	uint32_t pack = m->read32(m->context, BN6_TOOLKIT + BN6_TOOLKIT_PACK);
 	if ((folder & 1u) || folder < BN6_EWRAM || folder > BN6_EWRAM_END - 2 * BN6_FOLDER_ENTRIES ||

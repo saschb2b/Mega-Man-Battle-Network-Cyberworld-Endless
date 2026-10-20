@@ -385,13 +385,14 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | Requests at home: the askers' offers, waits and pay, the board's post, MegaMan on a request in the Net and at home | `src/world/job_words.c` |
 | MegaMan and Lan coming home to Lan's HP after an act; MegaMan at its portals; the courier Mr.Prog there | `src/director/home_words.c` |
 | The Net Square's gate in Lan's HP: its keeper Mr.Prog, MegaMan before and after a visit | `src/director/gate_words.c` |
-| The Net Square: MegaMan's menu, another player's card (with what his PET holds beside BN6's chips), the channel keeper | `src/online/square_words.c` |
+| The Net Square: MegaMan's menu, another player's card, the channel keeper | `src/online/square_words.c` |
 | The Net Square's life: the greeter and the referee Mr.Progs (the referee's call on a bout and its count), the walking GreenNavi and GirlNavi, the Board's posts (the trade board's offers among them), what a prop is | `src/online/square_life_words.c` |
 | The Net Square's week's net (issue #127): the greeter Mr.Prog's post on it and his offer (a new dive, the unfinished one, a trade to take home first, MegaMan on one), his word as MegaMan goes, and the Board's dives as reported | `src/online/square_week_words.c` |
-| Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker, the clerk on a partner whose game trades BN6's chips only; the trade board (the wants, the clerk reading the offers, a post, an answer, one trade a visit, MegaMan as his own offer is taken) | `src/online/trade_words.c` |
+| Trade Central: its clerk, MegaMan on a trade, BN6's order screen as its picker; the trade board (the wants, the clerk reading the offers, a post, an answer, one trade a visit, MegaMan as his own offer is taken) | `src/online/trade_words.c` |
 | The title's summary of a run | `src/scenes/title_lines.c` |
+| The NetPass (issue #131): the pass's PET text, its level, stamps and captions, the cartridge line that names the game a stamp needs (the one place a game is named); the stamp lines are in the words of the referee (`square_life_words.c`), the clerk (`trade_words.c`), the greeter (`square_week_words.c`, `square_words.c`'s stamp moment) and MegaMan's card (`square_words.c`) | `src/online/netpass_text.c` |
 | The stands in the Net Square (issue #128): the referee Mr.Prog calling the channel's NetBattle (who fights whom, the HP, the last chips, who watches, the winner, the cheers) and his "WANNA WATCH?", the Board's posts on it; the watching screen's heading, keys and end | `src/online/stands_words.c`, `src/online/stands_text.c` |
-| MegaMan on a Practice NetBattle in the Net Square: the challenge sent and its rules (BN6 rules, his Souls left home, or full rules), the question a challenge asks, the folder he carries and the ones left home, a MegaMan who can't go, the word after the battle and the rematch asked with it | `src/online/arena_words.c` |
+| MegaMan on a Practice NetBattle in the Net Square: the challenge sent, the question a challenge asks, the folder he carries, a MegaMan who can't go, the word after the battle and the rematch asked with it | `src/online/arena_words.c` |
 
 ## The voice review
 

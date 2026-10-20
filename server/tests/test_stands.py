@@ -13,13 +13,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cyberworld_server import protocol
 from cyberworld_server.app import Server
+from cyberworld_server.arena import delay_for
 from test_server import Client
 
 SPEC = protocol.SPEC
 
 
-def arena(action, ref, latency=0, rules=0):
-    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency, rules)
+def arena(action, ref, latency=0):
+    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency)
 
 
 def keys(match, first, values):
@@ -61,16 +62,17 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, bn5=False):
+    async def connect(self, name, full=True):
+        """A game in the channel: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=bn5)
+        welcome = await client.open(self.port, name, bn5=full)
         return client, struct.unpack("!I", welcome[5:9])[0]
 
-    async def battle(self, rules=0, bn5=False):
-        a, a_id = await self.connect("Alpha", bn5)
-        b, b_id = await self.connect("Beta", bn5)
-        await a.send(arena(1, b_id, 40, rules))
+    async def battle(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta")
+        await a.send(arena(1, b_id, 40))
         match = protocol.ARENA_STATE.unpack(await a.message(SPEC["arena_state"]))[2]
         await b.message(SPEC["arena_state"])
         await b.send(arena(2, match, 40))
@@ -126,7 +128,7 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.2)
         await c.send(watch(1, match))
         relays, got, states = await self.receive_all(c, lambda r, g, s: len(g[0]) >= 1600 and len(g[1]) >= 1600)
-        self.assertEqual(states[0][1:6], (1, match, a_id, b_id, 0))
+        self.assertEqual(states[0][1:6], (1, match, a_id, b_id, delay_for(40, 40)))
         self.assertEqual(got[0], [0] * 8 + [k for k in range(8, 1600)])
         self.assertEqual(got[1], [0] * 8 + [k + 1 for k in range(8, 1600)])
         sides = sorted((side, data[0]) for side, data in relays[:5])
@@ -141,16 +143,26 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await a.send(arena(4, match))
         relays, got, states = await self.receive_all(c, lambda r, g, s: s and s[-1][1] == 2, 1600)
         self.assertEqual((got[0], got[1]), ([7] * 8, [9] * 8))
-        over = await self.stands_until(c, lambda e: e and e[-1][6] == 3)
-        self.assertEqual(over[-1][9:], (40, 100, 0, 100, 1, 5, 1, 2, 1))
+        over = await self.stands_until(c, lambda e: e and e[-1][5] == 3)
+        self.assertEqual(over[-1][8:], (40, 100, 0, 100, 1, 5, 1, 2, 1))
         self.assertFalse(self.server.stands.watching)
 
-    async def test_full_rules_are_watched_only_by_a_game_with_bn5(self):
-        a, b, a_id, b_id, match = await self.battle(rules=SPEC["format_full"], bn5=True)
-        c, _ = await self.connect("Gamma")
+    async def test_watching_needs_the_full_set_and_the_stands_are_every_games(self):
+        a, b, a_id, b_id, match = await self.battle()
+        c, _ = await self.connect("Gamma", full=False)
+        entries = await self.stands_until(c, lambda e: e and e[0][0] == match)
+        self.assertEqual((entries[0][1:3], entries[0][5]), ((a_id, b_id), 1))
         await c.send(watch(1, match))
-        self.assertEqual(struct.unpack("!H", (await c.message(SPEC["notice"]))[1:3])[0], 19)
-        d, _ = await self.connect("Delta", bn5=True)
+        self.assertEqual(struct.unpack("!H", (await c.message(SPEC["notice"]))[1:3])[0], SPEC["notice_pass"])
+        self.assertFalse(self.server.stands.watching)
+        await c.send(watch(2, match))       # (a stop: never refused)
+        await c.send(bytes((SPEC["ping"],)) + b"\0\0\0\1")
+        for _ in range(100):
+            message = await c.receive()
+            self.assertNotEqual(message[0], SPEC["notice"])
+            if message[0] == SPEC["pong"]:
+                break
+        d, _ = await self.connect("Delta")
         await d.send(watch(1, match))
         self.assertEqual(protocol.WATCH_STATE.unpack(await d.message(SPEC["watch_state"]))[1], 1)
 
@@ -161,8 +173,8 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await c.message(SPEC["watch_state"])
         await c.send(bytes((SPEC["social"], 1, 1)))
         self.assertEqual(struct.unpack("!I", (await c.message(SPEC["event"]))[1:5])[0], c_id)
-        entries = await self.stands_until(c, lambda e: e and e[0][8] == 1)
-        self.assertEqual(entries[0][7], 1)    # (one watching)
+        entries = await self.stands_until(c, lambda e: e and e[0][7] == 1)
+        self.assertEqual(entries[0][6], 1)    # (one watching)
         # (the players heard nothing: their next messages are no EVENT)
         await a.send(arena(4, match))
         for client in (a, b):

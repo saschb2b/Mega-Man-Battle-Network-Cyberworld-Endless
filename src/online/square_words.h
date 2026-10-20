@@ -9,6 +9,9 @@
 
 /* L: MegaMan's question and its two ways (say, emote). */
 const char *square_menu_question(void);
+/* The greeter's word before he stamps a NetPass just come full (the
+ * stamp moment, netpass_screen.h) */
+const char *square_greeter_stamp_words(void);
 extern const char *const square_menu_options[2];
 /* ... a page of phrases or emotes goes on with this. */
 const char *square_more(void);
@@ -16,10 +19,10 @@ const char *square_back(void);
 /* R, or the pad home: MegaMan's question. */
 const char *square_home_question(void);
 /* A facing another player's MegaMan: who he is and his card (`card`
- * NULL where it has not come), what his PET holds beside BN6's where
- * the two games differ (`bn5_his`, `bn5_mine`: BN5's ROM in his game, in
- * ours), and the options for him, `muted` naming the second Unmute. */
-const char *square_peer_words(const char *name, const OnlineProfile *card, bool bn5_his, bool bn5_mine);
+ * NULL where it has not come), his NetPass where it is not full
+ * (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted`
+ * naming the second Unmute. */
+const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full);
 const char *square_peer_option(int k, bool muted);
 #define SQUARE_PEER_OPTIONS 3
 /* ... after a block. */

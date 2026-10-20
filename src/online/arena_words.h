@@ -10,37 +10,30 @@
 
 /* The peer menu's choice */
 const char *arena_battle_option(void);
-/* A challenge sent to `name` by `format`'s rules (ONLINE_FORMAT_*), named
- * (`souls_home`: under BN6's, his Souls left home); the answer No, or the
- * battle gone before it began */
-const char *arena_sent_words(const char *name, unsigned format, bool souls_home);
+/* A challenge sent to `name`; the answer No, or the battle gone before it
+ * began */
+const char *arena_sent_words(const char *name);
 const char *arena_declined_words(void);
 const char *arena_gone_words(void);
-/* Challenged by `name` to `format`'s rules, named: the boxes, then the
- * question (its end a '\n') */
-const char *arena_challenged_words(const char *name, unsigned format);
+/* Challenged by `name`: the boxes, then the question (its end a '\n') */
+const char *arena_challenged_words(const char *name);
 /* The folder to carry: folder k's name as BN6 names it; MegaMan's words
- * before the choice (`standins` first, the folders' BN5 chips that sit
- * out, arena_standin_words; `souls_home` his Souls left home); no folder
- * fits (`bn5`: every one holds BN5's chips) */
+ * before the choice; no folder holds a chip */
 const char *arena_folder_name(int k);
-const char *arena_folder_words(unsigned format, const char *standins, bool souls_home);
-/* ... a folder's BN5 chips sitting out under BN6's rules: `n` of them,
- * the first `gone` and the chip of the Pack's standing in for it, `in` */
-const char *arena_standin_words(const char *folder, int n, const char *gone, const char *in);
-const char *arena_no_folder_words(bool bn5);
+const char *arena_folder_words(void);
+const char *arena_no_folder_words(void);
 const char *arena_challenged_question(void);
 /* Back in the Square after a result: another with `name`? (its end a '\n') */
 const char *arena_again_question(const char *name);
-/* Our MegaMan can't go into a plain BN6 NetBattle: `souls` his Souls, else another game's chips (the
- * last guard, after the rules left them home) */
-const char *arena_cant_words(bool souls);
+/* Our MegaMan can't go into a NetBattle: a chip or a number no pair core
+ * holds (the last guard, arena_loadout_check) */
+const char *arena_cant_words(void);
 /* Back in the Square: won, lost, over with no result, stopped */
 const char *arena_won_words(void);
 const char *arena_lost_words(void);
 const char *arena_over_words(void);
 const char *arena_stopped_words(void);
-/* ... stopped before it began, the two games' BN5 installs apart */
+/* ... stopped before it began, the two games' installs apart */
 const char *arena_installs_apart_words(void);
 
 #endif

@@ -31,13 +31,13 @@ int stands_wire_read(const uint8_t *data, size_t size, StandsEntry out[ONLINE_ST
 	if (size < 2 || data[0] != ONLINE_STANDS || data[1] > ONLINE_STANDS_MAX || size != 2u + data[1] * (size_t)ONLINE_STANDS_ENTRY_BYTES) return -1;
 	for (int k = 0; k < data[1]; ++k) {
 		const uint8_t *e = data + 2 + k * ONLINE_STANDS_ENTRY_BYTES;
-		StandsEntry s = { .match = get32(e), .side = { get32(e + 4), get32(e + 8) }, .rules = e[44], .stage = e[45], .watchers = e[46],
-			.cheers = e[47], .report = report_get(e + 48) };
+		StandsEntry s = { .match = get32(e), .side = { get32(e + 4), get32(e + 8) }, .stage = e[44], .watchers = e[45], .cheers = e[46],
+			.report = report_get(e + 47) };
 		for (int side = 0; side < 2; ++side) {
 			memcpy(s.name[side], e + 12 + 16 * side, ONLINE_NAME_BYTES);
 			s.name[side][ONLINE_NAME_BYTES] = 0;
 		}
-		if (!s.match || s.rules > ONLINE_FORMAT_FULL || s.stage < STANDS_WAY_IN || s.stage > STANDS_STOPPED || !report_ok(&s.report)) return -1;
+		if (!s.match || s.stage < STANDS_WAY_IN || s.stage > STANDS_STOPPED || !report_ok(&s.report)) return -1;
 		out[k] = s;
 	}
 	return data[1];
@@ -61,9 +61,8 @@ size_t stands_wire_watch(uint8_t out[ONLINE_WATCH_BYTES], unsigned action, uint3
 
 bool stands_wire_state(const uint8_t *data, size_t size, WatchState *out) {
 	if (size != ONLINE_WATCH_STATE_BYTES || data[0] != ONLINE_WATCH_STATE) return false;
-	WatchState s = { .stage = data[1], .match = get32(data + 2), .side = { get32(data + 6), get32(data + 10) }, .rules = data[14],
-		.delay = data[15] };
-	if ((s.stage != WATCH_ON && s.stage != WATCH_OVER) || !s.match || s.rules > ONLINE_FORMAT_FULL) return false;
+	WatchState s = { .stage = data[1], .match = get32(data + 2), .side = { get32(data + 6), get32(data + 10) }, .delay = data[14] };
+	if ((s.stage != WATCH_ON && s.stage != WATCH_OVER) || !s.match) return false;
 	*out = s;
 	return true;
 }

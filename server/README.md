@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v8`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v9`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -58,17 +58,26 @@ emotes only), and setting it refuses startup.
 
 ## Trade Central and the Arena
 
-A trade is one chip for one chip between two players of a channel (ids
-1 to 511, codes A to Z and \*): BN6's own chips between any two, BN5's
-(past id 319, or on BN6's blank records) only between two players whose
-games both have BN5's ROM, as each HELLO says (shared/online/README.md);
-one proposes with
-a chip, the other answers with one, and the server commits only once both
+The Net Square is open to every game: walking, phrases and emotes,
+Inspect cards, the trade board's offers, the Arena's stands and the
+week's Board. Trading, posting an offer, NetBattles, watching one and
+posting a week's dive need the full set: every game the build supports
+for online play, BN6 and BN5 Team Colonel today, as each HELLO's ROM
+identities say (`roms_full` in `shared/online/protocol.json`). The
+server refuses those to a game without the full set, and a challenge or
+a trade aimed at one, with NOTICE 28 before anything changes; the game
+tells its player through its NetPass (docs/ONLINE.md, The NetPass).
+Between two games of the full set there are no per-pair rules: every
+chip trades and every battle is by full rules.
+
+A trade is one chip for one chip between two players of a channel (ids 1
+to 511, codes A to Z and \*, BN5's among them); one proposes with a
+chip, the other answers with one, and the server commits only once both
 have accepted the very pair they were shown. It writes each commit as a
-line of `trades.jsonl` in the state directory (both public identities and
-the chips each gave) and tells both; each game applies its side when its
-player comes home. A step that does not match what the server holds, a
-player leaving or switching channel, or five minutes without progress
+line of `trades.jsonl` in the state directory (both public identities
+and the chips each gave) and tells both; each game applies its side when
+its player comes home. A step that does not match what the server holds,
+a player leaving or switching channel, or five minutes without progress
 ends a trade for both, and neither swaps. Games are trusted for what
 they hold; the log is what a host has to go on. A session trades once:
 its game keeps one swap until its player is home.
@@ -78,31 +87,35 @@ chip he has and a number for the kind he wants (the games' fixed list;
 the server never reads a chip), at most one post a second. It lasts
 while he is in the channel and until he trades; the server tells the
 channel's players its offers as they change, leaving a BN5 chip's offer
-out for a game without BN5's ROM, and keeps no offer on disk. Taking an
+(past id 319, or on BN6's blank records) out for a game without BN5's
+ROM, which could not name it, and keeps no offer on disk. Taking an
 offer starts a trade with both chips named, the poster's as posted.
 
 The Arena never sees a battle: each game runs both players' linked BN6
-cores. The server pairs a challenge with its answer, gives each player
-its side of the cable and an input delay fitted to both games' latencies
-(2 to 30 frames: the lockstep's frame, a tick, the longer latency, each a
-round trip with its jitter less what its rollback window covers;
-docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then relays their loadouts, keys and state hashes to each other
-alone, in a rate bucket of their own (120 a second). A player leaving
-ends the battle for the other.
+cores, by full rules (BN5's chips and Souls among them), and the server
+keeps no rules per battle. The server pairs a challenge with its answer,
+gives each player its side of the cable and an input delay fitted to
+both games' latencies (2 to 30 frames: the lockstep's frame, a tick, the
+longer latency, each a round trip with its jitter less what its rollback
+window covers; docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then
+relays their loadouts, keys and state hashes to each other alone, in a
+rate bucket of their own (120 a second). A player leaving ends the
+battle for the other.
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first
-frame are kept in memory while it runs (20 minutes of keys at most, about
-290 KB a battle) and a minute after it, for its spectators. A player of
-the channel who asks to watch is sent all of it, at most 2 KB a tick and
-only while his output is under 4 KB, so a spectator who came late catches
-up without the players' relay ever waiting on him; six watch a battle at
-most. Each channel is told its battles (STANDS) as they begin and end and
-at most once a second as they change: who fights whom, how many watch and
-cheer, and the cable's first game's report (each MegaMan's HP, the last
-chip each used, the winner). A phrase or emote of the channel's during a
-battle counts as a cheer and is held from its two players; nothing a
-spectator sends reaches the battle.
+frame are kept in memory while it runs (20 minutes of keys at most,
+about 290 KB a battle) and a minute after it, for its spectators. A
+player of the channel with the full set who asks to watch is sent all of
+it, at most 2 KB a tick and only while his output is under 4 KB, so a
+spectator who came late catches up without the players' relay ever
+waiting on him; six watch a battle at most. Each channel, every game in
+it, is told its battles (STANDS) as they begin and end and at most once
+a second as they change: who fights whom, how many watch and cheer, and
+the cable's first game's report (each MegaMan's HP, the last chip each
+used, the winner). A phrase or emote of the channel's during a battle
+counts as a cheer and is held from its two players; nothing a spectator
+sends reaches the battle.
 
 ## Coolify deployment
 
@@ -207,7 +220,7 @@ The week's net: every Monday 00:00 UTC the server begins a week (its
 number counts weeks from Monday 5 January 1970) whose seed is derived
 from `identity.key` and the week's number, so each server has its own
 week, the same across restarts. Its Board keeps one entry per profile and
-week, the best a game reported, appended to `weeks.jsonl` in the state
+week, the best a game with the full set reported, appended to `weeks.jsonl` in the state
 directory (public identities, names, layers, minutes; no keys) and read
 back at the start. Back it up with the rest of the state, or the Board
 starts the week empty.
@@ -356,5 +369,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v7 games and a v8
+one protocol version cannot enter a server of another (v8 games and a v9
 server refuse each other). Preserve the private state directory when upgrading.

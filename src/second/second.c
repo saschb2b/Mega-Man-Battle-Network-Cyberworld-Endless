@@ -2,9 +2,9 @@
  * (docs/ROM_DATA.md, the second screen's contexts), and the panel drawn
  * for it in the PET's frame (issue #72): the map on a layer, as Operate
  * Shooting Star keeps it up, the folder, the battle, the NaviCustomizer,
- * MegaMan's status, the Library, a mail's sender, and the PET at home in
- * the town and on the PET's other screens; second_read.c reads each one's
- * facts. */
+ * MegaMan's status, the Library, a mail's sender, the PET at home in the
+ * town and on the PET's other screens, and the NetPass in the Net Square;
+ * second_read.c reads each one's facts. */
 #include "second.h"
 
 #include <stdio.h>
@@ -14,6 +14,8 @@
 #include "director.h"
 #include "emu.h"
 #include "guardians.h"
+#include "netpass_draw.h"
+#include "online_visit.h"
 #include "platform.h"
 #include "run.h"
 #include "second_battle.h"
@@ -30,7 +32,8 @@
 SecondState S2;
 
 /* What the second screen draws: a panel, which several screens may share */
-typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_MAIL, PANEL_SHOP, PANEL_TRADER } Panel;
+typedef enum { PANEL_DARK, PANEL_MAP, PANEL_FOLDER, PANEL_BATTLE, PANEL_NAVICUST, PANEL_HOME, PANEL_STATUS, PANEL_LIBRARY, PANEL_MAIL, PANEL_SHOP, PANEL_TRADER,
+	PANEL_NETPASS } Panel;
 static Panel panel;
 static int panel_since;
 
@@ -52,6 +55,8 @@ static SecondContext pet_screen(int screen) {
 }
 
 static SecondContext context_now(void) {
+	/* (the Net Square: its pass, the run put aside meanwhile) */
+	if (online_visit_away()) return SECOND_SQUARE;
 	bool home = director_in_town() || director_in_hp();
 	if (!director_on_layer() && !home) return SECOND_DARK;
 	switch (emu_read8(emu_read32(BN6_TOOLKIT))) {
@@ -85,6 +90,7 @@ static Panel panel_for(SecondContext c) {
 	case SECOND_PET: case SECOND_KEYITEM: case SECOND_SUBCHIP: case SECOND_COMM: case SECOND_SAVE: return PANEL_HOME;
 	case SECOND_DARK: return PANEL_DARK;
 	case SECOND_BATTLE: return PANEL_BATTLE;
+	case SECOND_SQUARE: return PANEL_NETPASS;
 	default: break;
 	}
 	return S2.town ? PANEL_HOME : PANEL_MAP;
@@ -175,6 +181,16 @@ bool second_draw(int w, int h) {
 	drawn_panel = panel;
 	drawn = S2;
 	if (panel == PANEL_DARK) return false;
+	if (panel == PANEL_NETPASS) {
+		/* (the frame without the run's strip, the pass in its body as the PET's KeyItem shows it) */
+		SDL_Rect r = second_frame_rest(w, h, "NETPASS", "NET SQUARE");
+		fill_rect(r.x, r.y, r.w, r.h, PET_EXIT);
+		NetPassView v;
+		netpass_view_now(&v);
+		v.into = true;
+		netpass_draw(r.x + (r.w - NETPASS_W) / 2, r.y + (r.h > NETPASS_H ? (r.h - NETPASS_H) / 2 : 0), &v);
+		return true;
+	}
 	SDL_Rect body = frame(w, h);
 	if (panel == PANEL_FOLDER) second_folder_draw(body);
 	else if (panel == PANEL_BATTLE) second_battle_draw(body);

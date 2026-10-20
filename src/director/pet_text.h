@@ -6,6 +6,10 @@
 #ifndef CW_PET_TEXT_H
 #define CW_PET_TEXT_H
 
+/* The NetPass's key item (docs/PET.md): one of the ids BN6 leaves
+ * nameless; A on it opens the pass (pet.h) */
+#define PET_ITEM_NETPASS 0x4A
+
 /* The archives, once on the core's ROM copy (the key items' names and
  * descriptions, the mails' senders, subjects and bodies). */
 void pet_text_install(void);

@@ -16,7 +16,11 @@ to its state folder's `weeks.jsonl`, read back at the start. Entries are
 claims ("reported" on the Board): a modified game can post any layer,
 and nothing is given for one. Moderators hide an entry (`--admin hide`):
 moderation.json's `hidden` list, its week named, which also refuses that
-identity's posts for that week."""
+identity's posts for that week.
+
+The Board is every game's to read (a WEEK_BOARD after every WELCOME);
+posting a dive takes the full set (protocol v9, protocol.full_set), a
+post from a game without it refused with NOTICE notice_pass."""
 
 import asyncio
 import hashlib
@@ -160,6 +164,8 @@ class Weeks:
 
     async def handle(self, player, data):
         entry = read_post(data)
+        if await self.server.without_pass(player):
+            return
         identity = player.identity.hex()
         refused = self.refusal(entry, identity)
         if refused:

@@ -48,6 +48,9 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
 	case WEEK_OFFER_TRADE:
 		snprintf(s + n, sizeof s - (size_t)n, "THE DEEP NET'S\nOPEN! TAKE YOUR\nTRADE HOME FIRST!");
 		break;
+	case WEEK_OFFER_STAMP:
+		snprintf(s + n, sizeof s - (size_t)n, "THIS WEEK'S DEEP\nNET IS OPEN!|BUT YOUR NETPASS\nHAS NO DEEPNET\nSTAMP! SORRY!");
+		break;
 	default:
 		if (n) s[n - 1] = 0; else s[0] = 0;
 		break;

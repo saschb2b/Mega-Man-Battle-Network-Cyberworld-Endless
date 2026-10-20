@@ -373,12 +373,33 @@ it from `--scene home --run-depth 7`: `place 16 72 3` puts MegaMan on the
 gate, LEFT and A answer Yes; the log names the Square's area and arrival
 ("online: square area 0, arrival at X,Y") and every visit's end and
 trade. A visit plays at the clock's pace even headless, so the two meet.
-Never point a test at the official server.
+A trade, a NetBattle, watching one and the week's dive take the
+NetPass's full set (docs/ONLINE.md, The NetPass): BN5's ROM beside
+BN6's in each game's `--rom-dir`; a game with BN6's alone tries the
+Square stamp's side, the referee's and the clerk's word on a missing
+stamp among it. Never point a test at the official server.
+
+The NetPass (docs/ONLINE.md, The NetPass) opens over any screen with the
+dev step `netpass` (`0:netpass` in a shot's `--input`, `netpass` in
+`tools/play.py`), and its stamp moment with `netpass stamp`, which also
+writes the data folder's `netpass.ini` as the greeter does. A folder of
+BN6's ROM alone (`CYBERWORLD_ROM_DIR` naming one) gives the Square pass:
+
+```bash
+python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "300:,0:netpass" --shot "360:/src/.build/np/full.bmp"
+python3 build.py shot --scene emu --run-depth 2 --frames 560 --input "300:,0:netpass stamp" --shot-range 300:500:/src/.build/np/stamp
+```
+
+The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
+data folder whose `network.ini` names a server and its consent (above),
+the arrival's chats paged, `0:place 16 72 3` and a step off and on.
 
 ## The Arena on one machine
 
 `--dev arena` starts on a Practice NetBattle of BN6's own between two
-linked cores (issue #120), you the first GBA and a script the second,
+linked cores (issue #120), by full rules as every NetBattle is, so with
+BN5's ROM beside BN6's (without it the way in stops, saying so); you the
+first GBA and a script the second,
 whose keys come over a local link held back as a network's would be;
 `arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay (1 to
 60), the link's one way and the carried MegaMan's HP. `arenawindow=W`
@@ -422,7 +443,7 @@ The Square's Mr.Progs' places are in the log ("online: Mr.Prog 2 at
 machine it runs on (issue #128), on the player's ROM, and says it on the
 screen and in the output (`rollbench:` lines; log.txt on a handheld): the
 game's core alone from power-on (every build), then, where the Arena is
-built, the pair at a Practice NetBattle under BN6's rules for 600 frames
+built and BN5's ROM beside BN6's, the pair at a Practice NetBattle under full rules (every NetBattle's since v9; without BN5's ROM it says so and measures the core alone) for 600 frames
 of scripted keys on both sides: a core's state and the pair's snapshot
 in bytes, their save and load and a pair frame's emulation (mean and
 worst), a rollback of eight frames timed, whether it came back to the
@@ -696,9 +717,10 @@ are made with it.
 The `folder` step (`--input`'s `0:folder 2`) copies MegaMan's first
 folder into Folder2 (its Regular chip and TagChips too) or, with 3, the
 Extra Folder, as a run that handed out more folders would hold them: no
-run does yet, and the Net Square's NetBattle asks which folder goes where
-more than one fits (docs/ONLINE_ARENA.md, Formats). Before a `chip` step,
-the copy keeps BN6's chips while the first folder takes the chip.
+run does yet, and the Net Square's NetBattle asks which folder goes
+where more than one holds chips (docs/ONLINE_ARENA.md, One rule: full
+rules). Before a `chip` step, the copy keeps BN6's chips while the first
+folder takes the chip.
 
 The `chip` step (`--input`'s `0:chip 204 L 29`, play.py's `chip 204 L
 29`; issue #82) puts chip ID (1-511: BN6's, or one of BN5's in BN6's

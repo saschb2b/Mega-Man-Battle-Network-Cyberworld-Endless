@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **The NetPass (issue #131).** Online play goes by one rule: the Net
+  Square is everyone's, and NetBattles, trades and the week's deep net
+  need every game this version supports online, BN6 Cybeast Gregar (USA)
+  and BN5 Team Colonel (USA). A NetPass key item in the PET shows it: A
+  on it opens the pass (START in the Square), with its four stamps (Square, Arena, Trade,
+  DeepNet) and the cartridges that earn them. It shows at the gate
+  before you go too, and on the second screen in the Square. With BN6
+  alone you hold the Square stamp: walking, phrases, cheering, cards, the
+  referee's calls, the board, the trade offers to read and the week's
+  ranking. The first visit with a full pass, the greeter stamps it. Every
+  NetBattle is now by full rules, BN5's chips and Souls in it; BN6 rules,
+  the Pack's stand-ins for BN5 chips and the clerk's BN6-chips-only
+  trades went with the mixed pairs that needed them. The 3DS and the
+  browser still have no NetBattle; with BN5 they trade and dive.
+  Protocol v9: a v8 game and a v9 server refuse each other.
 - **Rollback in NetBattles (issue #128).** A NetBattle answers your
   presses sooner: 2 frames of input delay on a good connection, where it
   was 8 to 11. Each game runs the battle at once, guessing the other
@@ -20,9 +35,9 @@
   to watch: the screen turns to the battle itself, a moment behind the
   players and from its first frame however late you came. R shows the
   other side, L cheers, B goes back. Cheers reach the players after
-  their battle, from the referee. Full-rules battles are shown on games
-  with BN5's ROM; the 3DS, the browser and anyone else get the
-  referee's call and the board's post. Protocol v7: a v6 game and a v7
+  their battle, from the referee. A game with the NetPass's Arena stamp
+  watches; the 3DS, the browser and anyone else get the referee's call
+  and the board's post. Protocol v7: a v6 game and a v7
   server refuse each other.
 - **The week's deep net (issue #127).** Every Monday each Net Square
   server opens a net of its own for the week, the same for everyone who

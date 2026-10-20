@@ -14,14 +14,11 @@ const char *trade_bye(void);
 /* ... whom to trade with, a page of names. */
 const char *trade_who(void);
 const char *trade_none_here(void);
-/* ... the chip MegaMan offers, on BN6's order screen after this
- * (`bn6_only`: BN5's spares kept back, the partner's game without its ROM). */
-const char *trade_pick(bool bn6_only);
+/* ... no other Navi here with the Trade stamp on his NetPass */
+const char *trade_none_stamped(void);
+/* ... the chip MegaMan offers, on BN6's order screen after this. */
+const char *trade_pick(void);
 const char *trade_no_spares(void);
-/* ... no spare fits: `name`'s game trades BN6's chips alone (no BN5 ROM)
- * and MegaMan's are all BN5's; or no Navi here trades BN5's, and his are. */
-const char *trade_bn6_only(const char *name);
-const char *trade_bn5_spares(void);
 const char *trade_sent(const char *name);
 /* ... an offer to MegaMan: who and what, and the options. */
 const char *trade_offered(const char *name, const char *chip);
@@ -78,6 +75,8 @@ const char *trade_post_down(void);
 const char *trade_traded(void);
 /* ... and to a Navi on the week's dive: no trades till it ends. */
 const char *trade_diving(void);
+/* ... and to a NetPass without the Trade stamp (netpass.h). */
+const char *trade_no_stamp(void);
 /* MegaMan as a Navi took the offer he posted: who, and what for what. */
 const char *trade_board_review(const char *name, const char *mine, const char *theirs);
 

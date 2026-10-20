@@ -77,12 +77,13 @@ static uint16_t pad_keys(void) {
 	return k;
 }
 
-/* The rules: full ones where BN5's ROM is read, its installs made on the
- * game's core first as a run's start makes them (scene_emu.c, game_hooks.c),
- * for the pair to take (xinstall_log.h); else BN6's */
-static unsigned rules(void) {
-	if (!ARENA_FULL_RULES || !XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE)) return ONLINE_FORMAT_BN6;
-	return xinstall_bn5() ? ONLINE_FORMAT_FULL : ONLINE_FORMAT_BN6;
+/* Full rules, every NetBattle's: BN5's installs made on the game's core
+ * first as a run's start makes them (scene_emu.c, game_hooks.c), for the
+ * pair to take (xinstall_log.h); without BN5's ROM the way in stops,
+ * saying so */
+static void installs(void) {
+	if (!XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE) || !xinstall_bn5())
+		printf("arena: BN5's installs not made: a NetBattle needs BN5's ROM beside BN6's\n");
 }
 
 static void enter(void) {
@@ -92,19 +93,19 @@ static void enter(void) {
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
 	/* (the run's MegaMan from its checkpoint where there is one; the
 	 * second player the game's start's) */
-	unsigned format = rules();
+	installs();
 	const OnlineLoadout *loadout[2] = { NULL, NULL };
-	/* (the first folder the rules take, and what they leave out left home, as the Net Square's challenge carries him) */
+	/* (the first folder that holds chips, as the Net Square's challenge carries him) */
 	static OnlineLoadout all;
 	if (arena_carry_read(&all)) {
-		arena_format_carry(&all, format, arena_folder_first(arena_folders_fitting(&all, format)), &S.carried);
+		arena_format_carry(&all, arena_folder_first(arena_folders_fitting(&all)), &S.carried);
 		loadout[0] = &S.carried;
 	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
 	if (loadout[0] && dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
-	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s, rules %u\n", link->delay, lag,
-		loadout[0] ? "carried from the checkpoint" : "the game's start's", format);
-	S.arena = arena_new(R.data, ROM_SIZE, loadout, link, format);
+	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
+		loadout[0] ? "carried from the checkpoint" : "the game's start's");
+	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);
 	/* (the stands' report read as the Square's battles read it, said in the log at the end) */
 	arena_report_begin(1);
 	/* (the local link's round trip: its one way there and back) */

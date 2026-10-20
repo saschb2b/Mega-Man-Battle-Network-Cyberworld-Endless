@@ -6,7 +6,11 @@
 
 #include "bn6.h"
 #include "director.h"
+#include "director_gate.h"
 #include "emu.h"
+#include "netpass_screen.h"
+#include "pet_text.h"
+#include "platform.h"
 #include "rom.h"
 
 /* A Save under way: the PET closing, then the checkpoint. */
@@ -59,7 +63,30 @@ void pet_update(void) {
 	}
 }
 
+int pet_key_item(void) {
+	if (emu_read8(emu_read32(BN6_TOOLKIT)) != BN6_MODE_SUBMENU) return -1;
+	uint32_t m = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SUBMENU);
+	if (m < BN6_EWRAM || m >= BN6_EWRAM_END || emu_read8(m) != BN6_SUBMENU_KEYITEM) return -1;
+	if (emu_read8(m + BN6_SUBMENU_STATE) != 4 || emu_read8(m + BN6_SUBMENU_STEP) != 4) return -1;
+	unsigned count = emu_read16(m + BN6_KEYITEM_COUNT);
+	unsigned at = (emu_read16(m + BN6_KEYITEM_SCROLL) + emu_read16(m + BN6_KEYITEM_ROW)) * 2u + emu_read8(m + BN6_KEYITEM_COLUMN);
+	if (!count || at >= count || at >= 0x6F) return -1;
+	return emu_read8(BN6_KEYITEM_LIST + 2 * at);
+}
+
+void pet_draw(void) {
+	if (home_gate_asking()) netpass_screen_strip();
+	netpass_screen_draw();
+}
+
 uint32_t pet_keys(uint32_t keys) {
+	/* (the NetPass up: the game held under it) */
+	if (netpass_screen_update()) return 0;
+	/* (A on the NetPass, newly pressed and come to the game: the pass opens over the KeyItem screen) */
+	if (!saving && (keys & KEY_A) && btn_pressed(BTN_A) && !netpass_screen_shown() && pet_key_item() == PET_ITEM_NETPASS) {
+		netpass_screen_open();
+		return keys & ~(uint32_t)KEY_A;
+	}
 	if (!saving) return keys;
 	/* (B, pressed and let go, till the PET has closed) */
 	++saving;

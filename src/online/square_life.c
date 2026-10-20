@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "emu.h"
 #include "netmap.h"
+#include "netpass.h"
 #include "npc.h"
 #include "online_board.h"
 #include "online_square.h"
@@ -375,7 +376,8 @@ static void facts(SquareFacts *f) {
 	f->fought = b->name;
 	f->won = b->won;
 	f->lost = b->lost;
-	f->arena = square_arena_offered();
+	f->arena = square_arena_built();
+	f->stamp = netpass_has(STAMP_ARENA);
 	f->parade = L.parading;
 	f->battle_on = square_watch_live();
 	f->turn = L.turn;

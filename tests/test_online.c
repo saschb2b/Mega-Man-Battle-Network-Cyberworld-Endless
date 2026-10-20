@@ -5,17 +5,24 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "netpass.h"
+#include "netpass_text.h"
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_transport.h"
 #include "online_week.h"
 #include "online_wire.h"
 #include "platform.h"
+#include "rom.h"
 #include "square_life_words.h"
 #include "square_plan.h"
 #include "square_week_words.h"
+#include "square_words.h"
+#include "trade_words.h"
 
 char g_data_dir[512];
+/* (the extra ROMs read: none until the NetPass's test puts one in, rom.c's) */
+XRom XR[XROM_COUNT];
 static unsigned persists;
 void platform_persist(void) { ++persists; }
 /* (the week's post, online_week.c: what would go to the server) */
@@ -221,6 +228,10 @@ static void referee(void) {
 	memset(&f, 0, sizeof f);
 	f.arena = true;
 	f.navis = 1;
+	/* (no Arena stamp on this game's NetPass, issue #131: the stamp named, never a ROM, no tip) */
+	const char *closed = square_referee_words(&f);
+	assert(strstr(closed, "NO ARENA STAMP ON\nYOUR NETPASS!") && !strstr(closed, "PICK") && !strstr(closed, "BN5"));
+	f.stamp = true;
 	assert(strstr(square_referee_words(&f), "WHO'S FIRST?") && strstr(square_referee_words(&f), "PICK"));
 	/* (another pair's NetBattle on in the channel: no "none yet", and no last bout of this game's) */
 	f.battle_on = true;
@@ -241,6 +252,35 @@ static void referee(void) {
 	assert(!strcmp(square_referee_bark(1, "Alpha"), "YOU WIN!"));
 	assert(!strcmp(square_referee_bark(2, "Alpha"), "ALPHA WINS!"));
 	assert(!strcmp(square_referee_bark(3, "Alpha"), "WHAT A BOUT!"));
+	/* (the Arena not built here, the stamp held: the PET's word) */
+	f.arena = false;
+	assert(strstr(square_referee_words(&f), "NO NETBATTLES\nFROM THIS PET!"));
+}
+
+/* the NetPass (issue #131): the set, the stamps by the ROMs read, a peer's
+ * by its SNAPSHOT bits; the words that name a game are the pass's alone,
+ * the characters' name stamps */
+static void netpass(void) {
+	assert(netpass_games() == 2 && !strcmp(netpass_game(0)->label, "BN6") && !strcmp(netpass_game(1)->label, "BN5"));
+	assert(netpass_game(1)->bit == ONLINE_ROMS_BN5 && !netpass_game(2));
+	/* (BN6's ROM alone: the Square's stamp) */
+	assert(netpass_game_in(0) && !netpass_game_in(1) && !netpass_full());
+	assert(netpass_has(STAMP_SQUARE) && !netpass_has(STAMP_ARENA) && !netpass_has(STAMP_TRADE) && !netpass_has(STAMP_DEEPNET));
+	/* (BN5's beside it: every stamp) */
+	static uint8_t bn5;
+	XR[XROM_BN5_COLONEL_US].data = &bn5;
+	assert(netpass_full() && netpass_has(STAMP_ARENA) && netpass_has(STAMP_TRADE) && netpass_has(STAMP_DEEPNET));
+	XR[XROM_BN5_COLONEL_US].data = NULL;
+	/* (another game's pass, by the bits every full set needs: protocol.json's roms_full) */
+	assert(!netpass_peer_full(0) && netpass_peer_full(ONLINE_ROMS_BN5) && netpass_peer_full(ONLINE_ROMS_FULL));
+	assert(!strcmp(netpass_missing_words(netpass_game(1)->name), "Team Colonel's ROM stamps Arena, Trade and DeepNet"));
+	/* (characters: stamps, never a game) */
+	const char *said[] = { trade_no_stamp(), trade_none_stamped(), square_greeter_stamp_words(),
+		square_peer_words("Alpha", NULL, false), square_week_post(WEEK_OFFER_STAMP, 2965, 0) };
+	for (size_t i = 0; i < sizeof said / sizeof *said; ++i) assert(!strstr(said[i], "BN5") && !strstr(said[i], "BN6") && !strstr(said[i], "ROM"));
+	assert(strstr(trade_no_stamp(), "NO TRADE\nSTAMP") && strstr(square_week_post(WEEK_OFFER_STAMP, 2965, 0), "NO DEEPNET\nSTAMP"));
+	OnlineProfile card = { .hp = 80, .max_hp = 100, .act = 1, .depth = 2 };
+	assert(!strstr(square_peer_words("Alpha", &card, true), "NetPass") && strstr(square_peer_words("Alpha", &card, false), "just the Square"));
 }
 
 /* the week's net (issue #127): WEEK_BOARD read and refused where it is
@@ -276,8 +316,8 @@ static void week(void) {
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee and the week's net passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net and the NetPass passed");
 	return 0;
 }

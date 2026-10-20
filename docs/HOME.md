@@ -739,6 +739,16 @@ one room, its stations each a way, as the Orbiter's are. Built in
   over the game, then his question;
 - after that MegaMan asks "To the Net Square,Lan?" each time.
 
+While he asks, the NetPass's stamps show in a strip over the top of the
+screen: the pass's level ("Square pass", or "★ Full pass") and its four
+stamps, Square, Arena, Trade and DeepNet, each held or open (issue #131,
+docs/ONLINE.md, The NetPass). The player sees what this visit opens
+before saying Yes: with BN6's ROM alone the Square, with BN5's beside it
+NetBattles, trades and the week's dive too. It is the pass Lan's PET
+opens (docs/PET.md, The NetPass), the honest feedforward of the
+game-design skill: no character says which game earns a stamp, and the
+strip asks nothing of its own.
+
 A Yes saves the run where MegaMan stands (the write confirmed: a failed
 save keeps him home, the game's note "Run not saved" and MegaMan's "Let's
 stay home for now,Lan.", no character naming a save), and the

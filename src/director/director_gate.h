@@ -22,5 +22,8 @@ void home_gate_frame(void);
 bool home_gate_save(void);
 /* Whether the gate holds the pad (a text field open over the game). */
 bool home_gate_holds(void);
+/* Whether MegaMan's question at the gate is open ("To the Net Square,
+ * Lan?"): the NetPass's strip shows over the game meanwhile */
+bool home_gate_asking(void);
 
 #endif

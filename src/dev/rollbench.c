@@ -12,7 +12,6 @@
 #include <mgba/core/core.h>
 
 #include "arena_boot.h"
-#include "arena_format.h"
 #include "arena_pair.h"
 #include "arena_sync.h"
 #include "arena_window.h"
@@ -48,7 +47,7 @@ static struct {
 	Stat one_save, one_load, one_step;
 	ArenaBoot *boot;
 	ArenaPair *pair;
-	unsigned format;     /* the pass's rules: BN6's, then full ones where BN5's ROM is read */
+
 	ArenaPairSnap *ring[DEPTH], *straight, *again;
 	uint16_t keys[DEPTH][ARENA_LOOKAHEAD][2];
 	Stat save, load, step, back;
@@ -200,25 +199,23 @@ static int window(double budget, double load, double step, double save) {
 
 static void pair_said(void) {
 	size_t core = arena_pair_snap_core_bytes(B.ring[0]), all = arena_pair_snap_bytes(B.ring[0]);
-	bool full = B.format == ONLINE_FORMAT_FULL;
-	const char *rules = full ? "full rules: BN5's installs and hooks in both cores" : "BN6's rules";
 	char s[64];
 	snprintf(s, sizeof s, "PAIR SNAPSHOT %uKB", (unsigned)(all / 1024));
-	say(full ? NULL : s, "the pair (%s, a Practice NetBattle, %u frames of scripted keys): a core's state %u bytes, the snapshot %u "
-		"(%u of the cable's, the pair's own and what the hooks keep)", rules, B.step.n, (unsigned)core, (unsigned)all,
-		(unsigned)(all - 2 * core));
+	say(s, "the pair (full rules: BN5's installs and hooks in both cores, a Practice NetBattle, %u frames of scripted keys): a "
+		"core's state %u bytes, the snapshot %u (%u of the cable's, the pair's own and what the hooks keep)", B.step.n,
+		(unsigned)core, (unsigned)all, (unsigned)(all - 2 * core));
 	snprintf(s, sizeof s, " SAVE %.2f LOAD %.2f MS", mean(&B.save), mean(&B.load));
-	say(full ? NULL : s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a pair frame %.3f ms (worst %.3f)", mean(&B.save),
+	say(s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a pair frame %.3f ms (worst %.3f)", mean(&B.save),
 		B.save.worst, mean(&B.load), B.load.worst, mean(&B.step), B.step.worst);
-	snprintf(s, sizeof s, "%sFRAME %.2f MS BACK%u %.1f", full ? "FULL " : " ", mean(&B.step), DEPTH, mean(&B.back));
+	snprintf(s, sizeof s, " FRAME %.2f MS BACK%u %.1f", mean(&B.step), DEPTH, mean(&B.back));
 	say(s, "  a rollback of %u frames %.3f ms (worst %.3f); %u checked: the game's state the same in %u, the whole state (the "
 		"sound's too) in %u", DEPTH, mean(&B.back), B.back.worst, B.checks, B.game, B.agreed);
-	snprintf(s, sizeof s, "%sGAME THE SAME %u/%u", full ? "FULL " : " ", B.game, B.checks);
+	snprintf(s, sizeof s, " GAME THE SAME %u/%u", B.game, B.checks);
 	show(s);
 	double budget = FRAME_MS * (1.0 - HEADROOM);
 	int w = window(budget, mean(&B.load), mean(&B.step), mean(&B.save));
 	int worst = window(budget, B.load.worst, B.step.worst, B.save.worst);
-	snprintf(s, sizeof s, "%sWINDOW %d (WORST %d)", full ? "FULL " : "", w, worst);
+	snprintf(s, sizeof s, "WINDOW %d (WORST %d)", w, worst);
 	say(s, "a tick's budget %.1f ms (%.0f%% of a frame kept for the rest): a window of %d frames at the means, %d at the worst",
 		budget, HEADROOM * 100, w, worst);
 	/* (at delay D the pair's frame needs the peer's keys a frame on (arena_input.h): a window W covers a lag of
@@ -231,9 +228,9 @@ static void pair_said(void) {
 	say(NULL, "  the way in's frames %.3f ms (worst %.3f): the Arena's window %u from them, %u from the battle's", B.menus, B.menus_worst,
 		arena_window_for(B.menus * ARENA_MENUS_TO_BATTLE), arena_window_for(mean(&B.step)));
 	snprintf(s, sizeof s, " D1 %.0f D2 %.0f D3 %.0f MS", w * FRAME_MS, (w + 1) * FRAME_MS, (w + 2) * FRAME_MS);
-	if (!full) show(s);
+	show(s);
 	/* (what a frame costs here, kept for the window the next challenge asks by: the battle's) */
-	if (!full) arena_window_keep(mean(&B.step));
+	arena_window_keep(mean(&B.step));
 }
 
 /* the pair's snapshots and stats let go, for the next pass */
@@ -251,26 +248,22 @@ static void pair_close(void) {
 	B.checks = B.agreed = B.game = 0;
 }
 
-/* a pass of the pair by `format`'s rules: its way in begun */
-static void pair_begin(unsigned format) {
+/* the pair by full rules, every NetBattle's: BN5's installs made on the game's core first, as a run's start makes
+ * them (the record the pair's cores take), then its way in begun; false where they could not be */
+static bool pair_begin(void) {
+	if (!XR[XROM_BN5_COLONEL_US].data) {
+		say("NEEDS BN5'S ROM", "a NetBattle's pair needs BN5's ROM beside BN6's: the game's core alone");
+		return false;
+	}
+	if (!emu_init(R.data, ROM_SIZE) || !xinstall_bn5()) {
+		say(NULL, "BN5's installs refused on the game's core, the pair not measured");
+		return false;
+	}
 	const OnlineLoadout *loadout[2] = { NULL, NULL };
-	B.format = format;
-	B.boot = arena_boot_new(R.data, ROM_SIZE, loadout, format);
+	B.boot = arena_boot_new(R.data, ROM_SIZE, loadout);
 	if (!B.boot) B.why = "no memory for the pair";
 	B.stage = BOOT;
 	B.frame = 0;
-}
-
-/* full rules next where BN5's ROM is read: its installs made on the game's core first, as a run's start makes them
- * (the record the pair's cores take) */
-static bool full_next(void) {
-	if (!ARENA_FULL_RULES || B.format == ONLINE_FORMAT_FULL || !XR[XROM_BN5_COLONEL_US].data) return false;
-	if (!emu_init(R.data, ROM_SIZE) || !xinstall_bn5()) {
-		say(NULL, "full rules: BN5's installs refused on the game's core, not measured");
-		return false;
-	}
-	pair_close();
-	pair_begin(ONLINE_FORMAT_FULL);
 	return true;
 }
 
@@ -304,7 +297,7 @@ static void update(void) {
 			finish();
 			return;
 		}
-		pair_begin(ONLINE_FORMAT_BN6);
+		if (!pair_begin()) finish();
 		return;
 	}
 	if (B.stage == BOOT) {
@@ -323,7 +316,7 @@ static void update(void) {
 	pair_frames(SLICE);
 	if (B.why || B.frame < PAIR_FRAMES) return;
 	pair_said();
-	if (!full_next()) finish();
+	finish();
 }
 
 static void draw(void) {
