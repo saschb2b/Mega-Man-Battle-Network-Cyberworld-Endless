@@ -78,6 +78,8 @@ struct Arena {
 	uint32_t rollbacks, again, deepest;   /* the rollbacks, the frames they ran again, the most at once */
 	double cost, worst;        /* the pair's frames timed, ms */
 	uint32_t costed;
+	double tick_worst;         /* a tick of the battle's longest, ms */
+	uint32_t late;             /* ticks longer than a 60th of a second */
 	Hashed pending[PENDING];
 	unsigned npending;
 	bool fought, apart;
@@ -265,8 +267,9 @@ static void over(Arena *a, uint32_t frame, const Ran *r) {
 		frame, a->result, r->result[1], a->stalls, a->sync.held, a->uneven, a->ticks, a->settled, SETTLE, a->hashes,
 		arena_pair_transfers(a->pair));
 	printf("arena: window %u, delay %u: %" PRIu32 " rollbacks, %" PRIu32 " frames run again, %" PRIu32
-		" the most at once; a frame of the pair %.2f ms (the worst %.2f)\n", a->window, a->input.delay, a->rollbacks, a->again,
-		a->deepest, a->costed ? a->cost / a->costed : 0, a->worst);
+		" the most at once; a frame of the pair %.2f ms (the worst %.2f), a tick at worst %.2f ms, %" PRIu32 " past a 60th\n",
+		a->window, a->input.delay, a->rollbacks, a->again,
+		a->deepest, a->costed ? a->cost / a->costed : 0, a->worst, a->tick_worst, a->late);
 	/* (what a frame costs here, kept for the window the next challenge asks by) */
 	if (a->costed) arena_window_keep(a->cost / a->costed);
 	a->stage = ARENA_OVER;
@@ -296,8 +299,7 @@ static bool hold(Arena *a) {
 	return held;
 }
 
-ArenaStage arena_tick(Arena *a, uint16_t keys) {
-	if (a->stage != ARENA_BATTLE) return a->stage;
+static ArenaStage tick(Arena *a, uint16_t keys) {
 	ArenaLink *l = a->link;
 	l->tick(l);
 	++a->ticks;
@@ -321,6 +323,16 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	settle(a);
 	if (a->input.next - ran != 1) { ++a->uneven; a->settled += settled; }
 	return a->stage;
+}
+
+ArenaStage arena_tick(Arena *a, uint16_t keys) {
+	if (a->stage != ARENA_BATTLE) return a->stage;
+	uint64_t t = SDL_GetPerformanceCounter();
+	ArenaStage s = tick(a, keys);
+	double ms = (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	if (ms > a->tick_worst) a->tick_worst = ms;
+	a->late += ms > 1000.0 / 60;
+	return s;
 }
 
 void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
