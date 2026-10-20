@@ -433,6 +433,22 @@ offers one of three (two HPMemory, a ★3 chip, a NaviCust program). If the
 last run ended before the first guardian, he gives an HPMemory first
 (`Profile.last_depth`, which took the place of an unused field).
 
+### The economy (issue #154)
+
+What a run finds opens act by act (docs/ECONOMY.md, `src/core/economy.c`):
+the first act lays half the green Mystery Data, a green data keeps its
+chip six times in ten (zenny in its place), the plain finds (green and
+blue data, a dealer's shelf, a request) hold a quarter of the good chips'
+weight and fewer extra rich data, finds hold half the zenny (a guardian's
+chip-entry zenny too) and none leans to the folder's codes; each opens on
+a logarithm to what it was by the endless net's sixth act (the short
+net's third), never past it. Act 1 gives about 9.5 chips and 2,630 zenny
+where it gave 12 and 3,550: at its dealer a run has 930 zenny, the
+answer's two copies or the HPMemory. The far detour's rich data, purple
+data, Servers' prizes, the gift, the Guardian Data, the dealer's answer
+and BN6's own battle rewards are as they were. The traders pick a
+prize's code as BN6 does, three in four one the pack lacks.
+
 ### Risk the player chooses
 
 - The Server challenge never appears on layer 1 and fights the next act's
@@ -533,10 +549,11 @@ Fixed on the way:
   level and reward) and where each run ended.
 - `python3 build.py economy` measures what a run hands out, act by act:
   chips, good chips, codes, zenny against what there is to buy, Mystery
-  Data (docs/ECONOMY.md, docs/DEVTOOLS.md), today's and the proposal's
-  side by side, today's against its bands. It reports 0 outside them
-  now; a change to drops, prices or Mystery Data runs it as a change to
-  battles runs the pacing report.
+  Data (docs/ECONOMY.md, docs/DEVTOOLS.md), the flat plan (before issue
+  #154) beside the opening one in play, each against its bands on the
+  endless net and the short one. It reports 0 of the plan in play's
+  outside them; a change to drops, prices or Mystery Data runs it as a
+  change to battles runs the pacing report.
 
 ## Where it is decided
 

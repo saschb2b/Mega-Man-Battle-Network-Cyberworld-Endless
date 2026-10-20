@@ -259,12 +259,13 @@ sets the band's centre in `economy.c` with the before and after in its
 commit. The run log's `bust` and `reward` (below) check its battles
 against the game.
 
-`--economy-plan proposed` on the game's binary plays a game under the
-proposal's plan (`build.py shot`, `tools/play.py start NAME --
---economy-plan proposed`), to feel it before deciding: its layers lay and
-hold what the report's proposal column measures. A dev's look only, in
-a data folder of its own: a run saved under one plan and continued under
-the other makes its layer again otherwise.
+`--economy-plan flat` on the game's binary plays a game under the flat
+plan, the rolls as they were before issue #154 (`build.py shot`,
+`tools/play.py start NAME -- --economy-plan flat`), to set beside the
+opening plan in play: its layers lay and hold what the report's before
+column measures. A dev's look only, in a data folder of its own: a run
+saved under one plan and continued under the other makes its layer again
+otherwise.
 
 ## Run log
 
@@ -291,7 +292,11 @@ number before its end (`unite 9`, NumberMan's; `unite 11c`, KnightMan's
 Chaos Unison). Until issue #82's last round a battle in BN5's engine had
 `guest`, its record and BN5's enemy ids instead (docs/MULTIROM.md, Guest
 battles). A last
-line gives where the run ended (`run over`, or `run won`). Past 512 KB
+line gives where the run ended (`run over`, or `run won`) and its
+economy's counts: the chips found and the good among them, the Mystery
+Data opened and the zenny earned, then the same for its first act
+(`chips 11 good 3 md 9 zenny 4210 (act 1: 6 2 7 1830)`; the anonymous
+statistics' run-end event carries them, src/analytics/). Past 512 KB
 the log moves to `runlog.old`. Collected from real runs, it shows where
 runs are lost. The same moments give the anonymous statistics their
 guardian and run-end events (src/analytics/, docs/GUIDE.md's Anonymous
