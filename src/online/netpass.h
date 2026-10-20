@@ -32,8 +32,7 @@ bool netpass_full(void);
 /* a stamp this game's pass holds: the Square's always, the rest with the
  * full pass */
 bool netpass_has(NetStamp stamp);
-/* the stamps held, 1 to STAMP_COUNT */
-int netpass_held(void);
+
 /* another game's pass full, by its ROMs as SNAPSHOT says them */
 bool netpass_peer_full(uint8_t roms);
 

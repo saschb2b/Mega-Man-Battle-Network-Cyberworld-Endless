@@ -7,7 +7,7 @@
 
 #define CHIP_ID(e) ((unsigned)(e) & 0x1FFu)   /* a folder entry: chip | code << 9 */
 
-bool arena_folder_holds(const OnlineLoadout *l, int k) {
+static bool folder_holds(const OnlineLoadout *l, int k) {
 	if (!l || k < 0 || k >= ONLINE_FOLDERS) return false;
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		uint16_t e = l->folders[k][i];
@@ -19,7 +19,7 @@ bool arena_folder_holds(const OnlineLoadout *l, int k) {
 unsigned arena_folders_fitting(const OnlineLoadout *l) {
 	unsigned fits = 0;
 	for (int k = 0; k < ONLINE_FOLDERS; ++k)
-		if (arena_folder_holds(l, k)) fits |= 1u << k;
+		if (folder_holds(l, k)) fits |= 1u << k;
 	return fits;
 }
 

@@ -539,8 +539,11 @@ static void formats(void) {
 	l.regulars[1] = 4; l.tags[1][0] = 2; l.tags[1][1] = 7;
 	l.souls = 0x21;
 	l.pack[411][0] = 3; l.pack[214][1] = 1; l.pack[5][2] = 2;
-	assert(arena_folder_holds(&l, 0) && arena_folder_holds(&l, 1) && !arena_folder_holds(&l, 2) && !arena_folder_holds(&l, 3));
 	assert(arena_folders_fitting(&l) == 3u);
+	l.folders[1][0] = 0xFFFF;
+	for (unsigned i = 1; i < BN6_FOLDER_ENTRIES; ++i) l.folders[1][i] = 0;
+	assert(arena_folders_fitting(&l) == 1u);
+	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i) l.folders[1][i] = (uint16_t)(1 + i);
 	arena_format_carry(&l, 1, &out);
 	assert(!memcmp(out.folder, l.folders[1], sizeof out.folder) && out.regular == 4 && out.tag[0] == 2 && out.tag[1] == 7);
 	assert(out.souls == 0x21 && out.pack[411][0] == 3 && out.pack[214][1] == 1 && out.pack[5][2] == 2);

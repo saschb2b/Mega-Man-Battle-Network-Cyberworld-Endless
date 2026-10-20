@@ -12,10 +12,9 @@
 
 #include "online_snapshot.h"
 
-/* Whether folder `k` (0 Folder 1, 1 Folder 2, 2 the Extra folder) of `l`
- * holds a chip: one of its 30 entries */
-bool arena_folder_holds(const OnlineLoadout *l, int k);
-/* ... the folders that can go, a bit each (bit k folder k) */
+/* The folders of `l` that can go, a bit each (bit k folder k: 0 Folder 1,
+ * 1 Folder 2, 2 the Extra folder): those that hold a chip in one of
+ * their 30 entries */
 unsigned arena_folders_fitting(const OnlineLoadout *l);
 
 /* The MegaMan carried into a NetBattle: `all` with folder `k` (its Regular
