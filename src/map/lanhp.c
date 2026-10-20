@@ -75,14 +75,20 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define FIRST_BACK 3        /* home's HOME_WAYS: the older portals after the ways */
 #define BACK_DARK_FLAG 0x1470   /* + k - FIRST_BACK: set while portal k is no way back */
 
-/* A link square's marker draws in front of its trigger cells, BN6's own
- * and ours alike: MegaMan seen on a marker's middle stood 14 units short
- * of its cells' middle in x and 12 past it in y, outside them, and A from
- * the marker's front corner reached none of them (session 73). A link's
- * zone for the checks and the questions takes in its marker: its cells,
+/* A portal draws in front of its trigger cells, BN6's own and ours alike.
+ * MegaMan seen on a link marker's middle stood 14 units short of its
+ * cells' middle in x and 12 past it in y, outside them, and A from the
+ * marker's front corner reached none of them (session 73). The pink pad
+ * is BN6's own art over BN6's own cells (x 192 to 223, y -32 to -1), and
+ * BN6's trigger stops short of their front corner on the line
+ * x - y = 201 (walked in from the front at x 194 to 200: it fired at y -7,
+ * -5, -3 and -1, v0.12.0 the same): MegaMan seen on its pink middle,
+ * at 194, 0 or 186, 6, stood outside it, and a playtester stood there in
+ * four runs and never warped (session 74). A portal's zone for the checks,
+ * the questions and the pink pad's step takes in its art: its cells,
  * stretched as far towards the screen's front (-x, +y). */
-#define LINK_FRONT_X 14
-#define LINK_FRONT_Y 12
+#define FRONT_X 14
+#define FRONT_Y 12
 
 static struct {
 	bool read;
@@ -268,8 +274,15 @@ void lanhp_portal_spot(int k, int *x, int *y) {
 int lanhp_portal_near(int x, int y, int reach) {
 	if (!read_spots()) return -1;
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
-		int e = portal_entry[k], fx = e >= FIRST_LINK ? LINK_FRONT_X : 0, fy = e >= FIRST_LINK ? LINK_FRONT_Y : 0;
-		if (x >= H.x0[e] - reach - fx && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach + fy) return k;
+		int e = portal_entry[k];
+		if (x >= H.x0[e] - reach - FRONT_X && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach + FRONT_Y) return k;
 	}
 	return -1;
+}
+
+bool lanhp_pad_take(int x, int y) {
+	int e = portal_entry[0];
+	if (lanhp_portal_near(x, y, 0) != 0 || flag_get(BN6_FLAG_WARP_OFF + e) || emu_read8(BN6_WARP_PENDING)) return false;
+	emu_warp_link(e);
+	return true;
 }
