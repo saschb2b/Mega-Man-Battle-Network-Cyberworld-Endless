@@ -83,9 +83,10 @@ offer starts a trade with both chips named, the poster's as posted.
 
 The Arena never sees a battle: each game runs both players' linked BN6
 cores. The server pairs a challenge with its answer, gives each player
-its side of the cable and an input delay fitted to both games' round
-trips with their jitter (5 to 30 frames: the lockstep's 3, a tick, the
-longer round trip; docs/ONLINE_ARENA.md, Smoothed delay), then relays their loadouts, keys and state hashes to each other
+its side of the cable and an input delay fitted to both games' latencies
+(2 to 30 frames: the lockstep's frame, a tick, the longer latency, each a
+round trip with its jitter less what its rollback window covers;
+docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then relays their loadouts, keys and state hashes to each other
 alone, in a rate bucket of their own (120 a second). A player leaving
 ends the battle for the other.
 
