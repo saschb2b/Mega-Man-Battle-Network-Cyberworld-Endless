@@ -35,11 +35,15 @@ typedef enum {
 	VISIT_END_BROKEN,        /* the Square could not be built */
 	VISIT_END_DIVE,          /* home to dive the week's net (square_week.h): no gate after */
 } VisitEnd;
+/* (VISIT_END_NONE as a visit's end, to the statistics: the game closed, or
+ * sent away, in it) */
 
 /* The visit to server `url` as `name`, with this server's identity: the
  * connection opened, MegaMan held at the gate until it answers. The
- * caller has saved the run's checkpoint where MegaMan stands. */
-bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]);
+ * caller has saved the run's checkpoint where MegaMan stands. `official`:
+ * the gate's official server, which the statistics name as a flag alone
+ * (analytics_online.h) */
+bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES], bool official);
 VisitStage online_visit_stage(void);
 static inline bool online_visit_active(void) { return online_visit_stage() != VISIT_HOME; }
 static inline bool online_visit_away(void) { return online_visit_stage() == VISIT_AWAY; }

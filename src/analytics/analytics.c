@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics_payload.h"
 #include "analytics_text.h"
 #include "compat.h"
 #include "guardians.h"
@@ -150,14 +151,6 @@ void analytics_answer(bool yes) {
 
 /* ---- the payloads ---- */
 
-/* JSON written into a buffer: members after the first get their comma;
- * what does not fit makes the whole payload unsent */
-typedef struct {
-	char *s;
-	size_t n, len;
-	bool first, full;
-} Json;
-
 static void json_putn(Json *j, const char *t, size_t k) {
 	if (j->full || j->len + k >= j->n) { j->full = true; return; }
 	memcpy(j->s + j->len, t, k);
@@ -190,16 +183,16 @@ static void json_key(Json *j, const char *k) {
 	json_put(j, ":");
 }
 
-static void json_member(Json *j, const char *k, const char *v) { json_key(j, k); json_string(j, v); }
+void json_member(Json *j, const char *k, const char *v) { json_key(j, k); json_string(j, v); }
 
-static void json_int(Json *j, const char *k, int v) {
+void json_int(Json *j, const char *k, int v) {
 	char b[16] = "";
 	snprintf(b, sizeof b, "%d", v);
 	json_key(j, k);
 	json_put(j, b);
 }
 
-static void json_bool(Json *j, const char *k, bool v) { json_key(j, k); json_put(j, v ? "true" : "false"); }
+void json_bool(Json *j, const char *k, bool v) { json_key(j, k); json_put(j, v ? "true" : "false"); }
 
 static void json_open(Json *j, const char *k) {
 	if (k) json_key(j, k);
@@ -262,6 +255,12 @@ static void check(void) {
 }
 
 bool analytics_checking(void) { return A.check; }
+
+/* (analytics_payload.h: the other files' events, written the same way) */
+bool analytics_sends(void) { return sends(); }
+const char *analytics_system(void) { return A.path + 1; }
+void analytics_event_begin(Json *j, char *out, size_t n, const char *name) { payload_begin(j, out, n, A.path, name); }
+void analytics_event_send(Json *j) { payload_send(j, true, false); }
 
 /* ---- the events ---- */
 

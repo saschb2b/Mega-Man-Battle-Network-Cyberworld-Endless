@@ -393,6 +393,10 @@ unsigned arena_result(const Arena *a) { return a->result; }
 bool arena_apart(const Arena *a) { return a->apart; }
 uint32_t arena_stalls(const Arena *a) { return a->stalls; }
 
+void arena_numbers(const Arena *a, ArenaNumbers *out) {
+	*out = (ArenaNumbers){ a->input.delay, a->window, a->rollbacks, a->deepest, a->stalls, a->done, a->tick_worst };
+}
+
 const ArenaReading *arena_reading(const Arena *a) { return a->read ? &a->reading : NULL; }
 
 uint64_t arena_hash(Arena *a) { return a->pair ? arena_pair_hash(a->pair) : 0; }

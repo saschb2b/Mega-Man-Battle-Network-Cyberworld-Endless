@@ -190,6 +190,7 @@ class Stands:
             self.watching[player.id] = match_id
             self.dirty[book.channel] = True
             self.server.event("watch", id=player.id, match=match_id)
+            self.server.daily.count("watched")
 
     def stop(self, player_id):
         book = self.books.get(self.watching.pop(player_id, 0))

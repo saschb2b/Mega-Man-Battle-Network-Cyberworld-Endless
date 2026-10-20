@@ -11,7 +11,15 @@ from .protocol import ProtocolError, SPEC
 GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 
-async def upgrade(reader, writer, origins, health=None, subprotocols=None):
+def page(writer, value):
+    body = json.dumps(value, separators=(",", ":")).encode()
+    writer.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: no-store\r\n"
+                  "Connection: close\r\nContent-Length: " + str(len(body)) + "\r\n\r\n").encode() + body)
+
+
+async def upgrade(reader, writer, origins, health=None, subprotocols=None, stats=None):
+    """The WebSocket's handshake, or GET /health's JSON (`health`) and
+    GET /stats's (`stats()`, the daily totals: stats.py), then False."""
     try:
         request = await asyncio.wait_for(reader.readuntil(b"\r\n\r\n"), 5)
         lines = request.decode("ascii").split("\r\n")
@@ -22,10 +30,10 @@ async def upgrade(reader, writer, origins, health=None, subprotocols=None):
             if key in headers:
                 raise ValueError("Duplicate header")
             headers[key] = value.strip()
-        if lines[0] == "GET /health HTTP/1.1" and health is not None:
-            body = json.dumps(health, separators=(",", ":")).encode()
-            writer.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nCache-Control: no-store\r\n"
-                          "Connection: close\r\nContent-Length: " + str(len(body)) + "\r\n\r\n").encode() + body)
+        served = health if lines[0] == "GET /health HTTP/1.1" else \
+            stats() if lines[0] == "GET /stats HTTP/1.1" and stats is not None else None
+        if served is not None:
+            page(writer, served)
             await asyncio.wait_for(writer.drain(), 2)
             return False
         key = headers.get("sec-websocket-key", "")

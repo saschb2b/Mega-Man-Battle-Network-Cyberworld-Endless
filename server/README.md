@@ -77,12 +77,14 @@ it nowhere.
 | The Board, `weeks.jsonl` | your best dive of a week: public identity, name, layer, act, minutes | the Board shows this week and the last | 2 weeks |
 | Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
 | The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
+| The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
 | Backups | the server's secret, moderation and the Board | to bring the server back after a fault | 14 days |
 
 Everything else stays in memory and goes when you leave or the server
 restarts: where you walk, your card, the phrases you send, your trade
 offers, trades in progress, and your NetBattles' inputs (the stands keep
-a battle's for a minute after it ends). The server prunes each record
+a battle's for a minute after it ends). That you came today is counted
+for the day's totals, then forgotten at the day's end. The server prunes each record
 itself, at its start and every hour. These are the official server's
 settings ([What the state keeps](#what-the-state-keeps)); another server
 may keep more or less.
@@ -153,6 +155,8 @@ it; container traffic needs `host = 0.0.0.0` inside the container.
 
 `GET /health` returns JSON with the configured name, message of the day,
 protocol, occupancy, limits and rules. It contains no player identities.
+`GET /stats` returns the daily totals: today so far and the last 30 days
+([The daily totals](#the-daily-totals)).
 `trading` and `arena` (both on unless set `false`) open or close Trade
 Central and the Arena; `free_text` must stay false (quick phrases and
 emotes only), and setting it refuses startup.
@@ -440,6 +444,7 @@ start and every hour (`retention.py`):
 | `board_weeks` | 2 | `weeks.jsonl`, the Board's weeks: at least 2, this one and the last, which the Board shows; with them go the entries `hide` hid |
 | `log_days` | 14 | `logs/players-YYYY-MM-DD.jsonl`, the players' log, a file a UTC day; 0 writes none |
 | `backup_days` | 14 | the archives `--backup` keeps |
+| `stats_days` | 365 | `stats.jsonl`, the daily totals, a line a UTC day ([The daily totals](#the-daily-totals)); 0 writes none |
 
 The players' log holds each event that names a player (a join, a
 session replaced) with its time. The console's log (stdout, a
@@ -449,6 +454,31 @@ numbers and refusals, never a name, a public identity or an IP.
 `identity.key` and the bans and mutes stay until the host or a moderator
 removes them; `players.json` holds the players connected now and is
 emptied when the server stops. Everything else is in memory alone.
+
+### The daily totals
+
+Each UTC day the server counts, with no personal data (`stats.py`):
+
+| Field | What it counts |
+| --- | --- |
+| `joins` | sessions that joined |
+| `identities` | different public identities among them: a number only. The identities are a set in memory for the day, dropped at its end and never written or served; a restart the same day starts the set afresh, so a player seen before and after it counts twice |
+| `peak` | the most players online at once |
+| `trades` | trades committed |
+| `battles_started`, `battles_finished` | NetBattles begun, and those whose end the cable's first game told (a battle left or broken is begun and not finished) |
+| `watched` | battles watched from the stands |
+| `dives` | the week's dives posted to the Board |
+| `versions` | HELLOs by the protocol version they carry, those of another version refused (16 versions apart, the rest as `other`) |
+| `passes` | joins by the NetPass: `full` (BN6's and BN5's ROMs) or `square` (BN6's alone) |
+
+HELLO names no system, so the server counts none by system; the game's
+own statistics do, where the player said yes ([GUIDE.md, Anonymous
+statistics](../docs/GUIDE.md#anonymous-statistics)). A day is written once,
+as a line of `stats.jsonl` in the state directory, when the next begins or
+as the server stops; a restart the same day takes that line up again and
+writes it over. The retention's pass keeps `stats_days` days. `GET /stats`
+returns `{"today": {...}, "days": [...]}`, today so far and up to 30 days
+before it, oldest first, the same fields with `day` (`YYYY-MM-DD`).
 
 ## Backups and restores
 
