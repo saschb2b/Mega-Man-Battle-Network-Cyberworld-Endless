@@ -8,6 +8,10 @@ const char *const square_keeper_options[2] = { "Next channel", "Last channel" };
 
 const char *square_menu_question(void) { return "What'll we do,Lan?"; }
 
+const char *square_greeter_stamp_words(void) {
+	return "WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!";
+}
+
 const char *square_more(void) { return "More..."; }
 
 const char *square_back(void) { return "Back"; }

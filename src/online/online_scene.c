@@ -15,6 +15,7 @@
 #include "online_square.h"
 #include "online_text.h"
 #include "online_transport.h"
+#include "netpass_screen.h"
 #include "platform.h"
 #include "square_arena.h"
 #include "square_watch.h"
@@ -136,6 +137,8 @@ void online_scene_draw(void) {
 	if (!built || !arrived) return;
 	int x = P.core_x, y = P.core_y;
 	online_labels_draw();
+	/* (the NetPass over it all, START's: online_chat.c) */
+	netpass_screen_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));
 		text_drawf(x + 4, y + 113, WHITE, TEXT_LEFT, "%.32s", snapshot.notice);

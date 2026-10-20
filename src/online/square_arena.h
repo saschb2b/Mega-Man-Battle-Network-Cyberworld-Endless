@@ -20,10 +20,9 @@
 
 /* the Arena built in this game (CW_ARENA: not the 3DS's, the browser's) */
 bool square_arena_built(void);
-/* the Battle choice offered on the card of a peer whose ROMs are
- * `peer_roms` (SNAPSHOT's): the Arena built here, and both games' NetPass
- * with its Arena stamp (netpass.h) */
-bool square_arena_offered(uint8_t peer_roms);
+/* the Battle choice offered at all in this build; on a card, where both
+ * games' NetPass holds its Arena stamp too (online_chat.c, netpass.h) */
+bool square_arena_offered(void);
 /* The last battle fought from the Square in this game, as its referee
  * tells it. */
 typedef struct {

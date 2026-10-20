@@ -37,6 +37,7 @@ typedef struct {
 /* The greeter in the log-in plaza, and his word over his head as a Navi
  * logs in (`in`) or out. */
 const char *square_greeter_words(const SquareFacts *f);
+
 const char *square_greeter_bark(const char *name, bool in);
 /* The referee by the Arena's ring, and his call over his head as a
  * battle of this game's ends (`result` 1 won, 2 lost, else over; `name`

@@ -8,8 +8,8 @@
 
 /* the full set: every game this build supports for online play */
 static const NetPassGame set[] = {
-	{ "BN6", 0, -1 },
-	{ "BN5", ONLINE_ROMS_BN5, XROM_BN5_COLONEL_US },
+	{ "BN6", "Cybeast Gregar", 0, -1 },
+	{ "BN5", "Team Colonel", ONLINE_ROMS_BN5, XROM_BN5_COLONEL_US },
 };
 #define SET_GAMES ((int)(sizeof set / sizeof *set))
 

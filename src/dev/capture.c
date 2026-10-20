@@ -19,6 +19,7 @@
 #include "director_hold.h"
 #include "flags.h"
 #include "game.h"
+#include "netpass_screen.h"
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"
@@ -27,7 +28,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross, folder; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24]; int place[3], flags[3], cross, folder, netpass; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -64,6 +65,9 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
+	/* (the NetPass opened over the game, or its stamp moment: netpass_screen.h) */
+	else if (!strcmp(tok, "netpass")) s->netpass = 1;
+	else if (!strcmp(tok, "netpass stamp")) s->netpass = 2;
 	else return false;
 	return true;
 }
@@ -71,7 +75,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit;
+		s->onehit || s->netpass;
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -182,6 +186,8 @@ static void emu_steps(const InputStep *s) {
 	if (s->held) director_dev_hold(s->hold);
 	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
 	if (s->onehit) devtools_parse("onehit");
+	if (s->netpass == 1) netpass_screen_open();
+	if (s->netpass == 2) netpass_stamp_begin();
 }
 
 /* The steps of no frames at the script's position: pictures, states. */

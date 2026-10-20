@@ -239,6 +239,7 @@ static void draw(void) {
 	director_draw_tent();
 	devtools_draw();
 	online_visit_draw();
+	pet_draw();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };

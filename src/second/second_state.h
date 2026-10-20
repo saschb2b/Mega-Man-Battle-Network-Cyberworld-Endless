@@ -29,6 +29,7 @@ typedef enum {
 	SECOND_SHOP,         /* a shop */
 	SECOND_TRADER,       /* the Chip Trader */
 	SECOND_OTHER,        /* a screen of BN6's not named here */
+	SECOND_SQUARE,       /* the Net Square: the NetPass (docs/ONLINE.md, The NetPass) */
 	SECOND_CONTEXTS
 } SecondContext;
 

@@ -31,6 +31,7 @@ const char *square_greeter_words(const SquareFacts *f) {
 	return s;
 }
 
+
 const char *square_greeter_bark(const char *name, bool in) {
 	static char s[48];
 	snprintf(s, sizeof s, in ? "%s LOGGED IN!" : "%s LOGGED OUT!", name);

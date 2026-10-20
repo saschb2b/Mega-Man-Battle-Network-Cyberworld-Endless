@@ -57,6 +57,12 @@
 #define BN6_SUBMENU_EDIT      0x20   /* ... the folder editor (bn6f sub_8133200) */
 #define BN6_SUBMENU_NAVICUST  0x24   /* ... the NaviCustomizer (bn6f sub_81356D4) */
 #define BN6_SUBMENU_STATE     0x01   /* the PET screen's state: its course, 0 while it is set up, then 4 open and 8 closing (the Library's and E-Mail's jump tables) */
+#define BN6_SUBMENU_STEP      0x02   /* ... its step while open: the KeyItem screen's 0 fading in, 4 taking input, 8 leaving (bn6f sub_81287B4's jump table) */
+#define BN6_KEYITEM_COLUMN    0x0D   /* the KeyItem screen's state: the cursor's column (0, 1) */
+#define BN6_KEYITEM_COUNT     0x1E   /* ... the items listed, u16 */
+#define BN6_KEYITEM_ROW       0x20   /* ... the cursor's row on the screen, u16 */
+#define BN6_KEYITEM_SCROLL    0x24   /* ... the list's scroll, u16: the entry under the cursor is (scroll + row) * 2 + column */
+#define BN6_KEYITEM_LIST      0x0201BF00u /* the items listed, 2 bytes an entry: the item, its count (bn6f eTextScript201BF00, sub_81289C4) */
 #define BN6_EDIT_SIDE         0x03   /* the folder editor's state: the side, BN6_EDIT_PACK the pack's, 0 the folder's */
 #define BN6_EDIT_PACK         0x04
 #define BN6_EDIT_ROW          0x20   /* ... the cursor's row on the screen (0-6) */

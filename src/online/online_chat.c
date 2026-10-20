@@ -16,6 +16,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "netpass.h"
+#include "netpass_screen.h"
 #include "online_people.h"
 #include "online_square.h"
 #include "online_text.h"
@@ -53,6 +54,7 @@ static struct {
 	OnlinePeer peer;          /* the one being talked to */
 	int waiting;              /* frames a peer's talk has waited for his card */
 	bool home, open;          /* the question home asked; a chat of ours open */
+	int stamp;                /* the stamp moment: 1 the greeter's word open, 2 the pass up (netpass_screen.h) */
 	unsigned keeper_said;     /* channel, channels and navis the keeper's words name, packed */
 	bool on_exit;
 } C;
@@ -173,7 +175,7 @@ static void peer_talk(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	bool muted = online_people_flags(C.peer.identity) & ONLINE_MUTED;
-	if (square_arena_offered(C.peer.roms)) { peer_talk_arena(&t, out, muted); return; }
+	if (square_arena_offered() && netpass_has(STAMP_ARENA) && netpass_peer_full(C.peer.roms)) { peer_talk_arena(&t, out, muted); return; }
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
@@ -261,6 +263,9 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	/* (BN6's own talk with the keeper sets its flags too) */
 	if (chosen()) return true;
 	C.open = false;
+	/* (the stamp moment, once MegaMan is free: the greeter's word, then the pass with its new stamps landing) */
+	if (C.stamp == 1) { C.stamp = 2; netpass_stamp_begin(); return false; }
+	if (!C.stamp && netpass_stamp_due() && talk_start(square_greeter_stamp_words(), FACE_PROG)) { C.stamp = 1; return false; }
 	if (C.waiting && (card_of(C.peer.id) || --C.waiting <= 0)) { C.waiting = 0; peer_talk(); return false; }
 	bool on = online_square_on_exit(bn6_player_x(), bn6_player_y());
 	if (on && !C.on_exit && talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;
@@ -269,8 +274,12 @@ bool online_chat_update(const OnlineSnapshot *s) {
 }
 
 uint32_t online_chat_keys(uint32_t keys) {
+	/* (the NetPass up over the Square: the game held under it) */
+	if (netpass_screen_update()) return 0;
 	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT);
 	keys &= ~(uint32_t)(KEY_START | KEY_SELECT);
+	/* (START, the PET's button: the NetPass, BN6's PET staying shut in the Square, whose RAM goes) */
+	if (btn_pressed(BTN_START)) { netpass_screen_open(); return 0; }
 	if (btn_pressed(BTN_L)) { menu(); return 0; }
 	if (btn_pressed(BTN_R)) {
 		flag_clear(HOME_FLAG);

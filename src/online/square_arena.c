@@ -11,9 +11,8 @@
  * it too, unless the server has already said it is.
  *
  * Every battle is fought by full rules (issue #131): both games hold the
- * NetPass's Arena stamp (netpass.h), so Battle is offered only where both
- * do, and a challenge from a game without it is declined (the server
- * refuses it first, NOTICE 28). Where more than one of MegaMan's three
+ * NetPass's Arena stamp (netpass.h), Battle offered only where both do
+ * (online_chat.c), the server refusing the rest (NOTICE 28). Where more than one of MegaMan's three
  * folders holds chips, Lan picks the one carried in BN6's chat box; where
  * none does, MegaMan says so. The carried MegaMan is then checked, the
  * same check on both games.
@@ -46,7 +45,6 @@
 #include "bn6.h"
 #include "devtools.h"
 #include "emu.h"
-#include "netpass.h"
 #include "online_mail.h"
 #include "online_people.h"
 #include "online_transport.h"
@@ -114,7 +112,7 @@ static struct {
 
 bool square_arena_built(void) { return CW_ARENA; }
 
-bool square_arena_offered(uint8_t peer_roms) { return CW_ARENA && netpass_has(STAMP_ARENA) && netpass_peer_full(peer_roms); }
+bool square_arena_offered(void) { return CW_ARENA; }
 
 const SquareBout *square_arena_last(void) {
 	last.bout.name = last.bout.result ? last.name : NULL;
@@ -219,7 +217,7 @@ static void challenge_sent(bool quiet) {
 static void send_challenge(void) { challenge_sent(false); }
 
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
-	if (!square_arena_offered(peer->roms) || A.stage != SA_IDLE) return;
+	if (!CW_ARENA || A.stage != SA_IDLE) return;
 	unsigned fits;
 	if (!mine_goes(&fits)) return;
 	A.latency = A.pings.n ? arena_pings_latency(&A.pings) : latency_ms;
@@ -354,9 +352,8 @@ static void state_in(const ArenaWireState *s) {
 	if (s->stage == ARENA_WIRE_CHALLENGED) {
 		const char *name = name_of(s->other);
 		bool blocked = online_people_flags(s->identity) & ONLINE_BLOCKED;
-		/* (a game without the Arena stamp: the server's refusal first, ours too) */
-		bool stamp = netpass_has(STAMP_ARENA);
-		if (!CW_ARENA || A.stage != SA_IDLE || blocked || !name || !stamp) { act(ARENA_ACT_LEAVE, s->match); return; }
+		/* (a game without the NetPass's Arena stamp is never challenged: the server's NOTICE 28) */
+		if (!CW_ARENA || A.stage != SA_IDLE || blocked || !name) { act(ARENA_ACT_LEAVE, s->match); return; }
 		A.match = s->match;
 		A.other = s->other;
 		A.ended = false;

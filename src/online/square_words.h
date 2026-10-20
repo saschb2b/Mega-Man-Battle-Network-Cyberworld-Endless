@@ -9,6 +9,9 @@
 
 /* L: MegaMan's question and its two ways (say, emote). */
 const char *square_menu_question(void);
+/* The greeter's word before he stamps a NetPass just come full (the
+ * stamp moment, netpass_screen.h) */
+const char *square_greeter_stamp_words(void);
 extern const char *const square_menu_options[2];
 /* ... a page of phrases or emotes goes on with this. */
 const char *square_more(void);

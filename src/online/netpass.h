@@ -12,11 +12,12 @@
 
 typedef enum { STAMP_SQUARE, STAMP_ARENA, STAMP_TRADE, STAMP_DEEPNET, STAMP_COUNT } NetStamp;
 
-/* A game of the set: its cartridge's label, its bit in HELLO's ROMs
- * (ONLINE_ROMS_*; 0 for BN6's, which every game has) and the extra ROM it
- * is (rom.h's XRomId; -1 for BN6's own) */
+/* A game of the set: its cartridge's label and its title as the pass's
+ * PET text names it, its bit in HELLO's ROMs (ONLINE_ROMS_*; 0 for BN6's,
+ * which every game has) and the extra ROM it is (rom.h's XRomId; -1 for
+ * BN6's own) */
 typedef struct {
-	const char *label;
+	const char *label, *name;
 	uint8_t bit;
 	int xrom;
 } NetPassGame;

@@ -112,6 +112,8 @@ void home_gate_visit(void) {
 
 bool home_gate_holds(void) { return online_field_shown(); }
 
+bool home_gate_asking(void) { return home_in_hp() && G.after == AFTER_GO; }
+
 bool home_gate_save(void) {
 	save_queue_wait();
 	unsigned failures = save_write_failures();
