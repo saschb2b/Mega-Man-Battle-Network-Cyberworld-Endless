@@ -279,6 +279,7 @@
 #define BN6_MAP_SCRIPTS       0x08034670u /* (on enter, continuous) per-map map script lists */
 #define BN6_ENTER_GROUP       0x0803093Cu /* EnterMap_InternetMapGroupJumptable: per-group map loaders */
 #define BN6_OBJ_SPAWNERS      0x0803483Cu /* InternetSpawnMapObjectJumptable: per-group spawn routines */
+#define BN6_SONG_NAVI_CUSTOMIZER 0x1E      /* the NaviCust screen's theme (bn6f's SONG_NAVI_CUSTOMIZER, played at 0x08137590): the Net Square's music */
 #define BN6_MAP_MUSIC         0x080360E4u /* per chapter (GameState+7): (group, per-map song bytes) entries of 8 bytes, ending 0xFF */
 #define BN6_MAP_MUSIC_LISTS   3           /* its lists, one a chapter */
 #define BN6_MYSTERY_DATA      0x080A484Cu /* InternetMysteryDataMapGroupEntries: (group, per-map lists), ends with 1 */

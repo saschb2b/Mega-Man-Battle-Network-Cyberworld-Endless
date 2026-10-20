@@ -257,7 +257,9 @@ connection lost.
 **The Square.** The server sends a seed; each game plans the same Square
 from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
 nets (Central, Sky or Green Area; not Seaside, whose layers stand in
-another map's slot). The plan's hash and its generator version
+another map's slot). Whatever the area, the Square plays its own music:
+BN6's Navi Customizer theme (song 0x1E, `BN6_SONG_NAVI_CUSTOMIZER`, the
+owner's pick, 20 October 2026), not the area's. The plan's hash and its generator version
 (`SQUARE_MAKE`, `SQUARE_HASH`) go in HELLO, so a server refuses a game
 that would build another Square. `online_square.c` builds it with the
 layers' map builder (`netmap_build`) and gives the other players'
