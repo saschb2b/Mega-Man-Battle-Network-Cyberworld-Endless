@@ -4731,16 +4731,22 @@ static void test_economy(void) {
 	CHECK(kept > 4000 * (share - 0.04) && kept < 4000 * (share + 0.04), "the proposal keeps act 1's chips by its share (%d of 4000)", kept);
 	rng_seed(11);
 	for (int i = 0; i < 100; ++i) CHECK(!econ_keep(ECON_LEVER_LEAN, 2), "the proposal leans nothing on act 1");
-	/* the bands hold their plans' own numbers: a fifth either side */
+	/* the bands hold their plans' own numbers: a fifth either side, on
+	 * either net (the short net's three acts and its Nest) */
 	for (int p = 0; p < 2; ++p)
 		for (int m = 0; m < ECON_METRICS; ++m)
-			for (int a = 0; a < ECON_ACTS; ++a) {
-				EconBand b = econ_band(p ? &econ_proposed : &econ_today, m, a);
-				CHECK(b.lo > 0 && b.lo < b.hi && b.hi < b.lo * 1.6, "plan %d metric %d act %d: a band around its number", p, m, a);
-			}
-	EconBand today1 = econ_band(&econ_today, ECON_CHIPS, 0), after1 = econ_band(&econ_proposed, ECON_CHIPS, 0);
-	EconBand today6 = econ_band(&econ_today, ECON_CHIPS, 5), after6 = econ_band(&econ_proposed, ECON_CHIPS, 5);
+			for (int a = 0; a < ECON_ACTS; ++a)
+				for (int brief = 0; brief < 2; ++brief) {
+					EconBand b = econ_band(p ? &econ_proposed : &econ_today, brief, m, a);
+					bool none = brief && a > 2 && a < ECON_ACTS - 1;
+					CHECK(none ? b.hi == 0 : b.lo > 0 && b.lo < b.hi && b.hi < b.lo * 1.6, "plan %d net %d metric %d act %d: a band around its number",
+						p, brief, m, a);
+				}
+	EconBand today1 = econ_band(&econ_today, false, ECON_CHIPS, 0), after1 = econ_band(&econ_proposed, false, ECON_CHIPS, 0);
+	EconBand today6 = econ_band(&econ_today, false, ECON_CHIPS, 5), after6 = econ_band(&econ_proposed, false, ECON_CHIPS, 5);
 	CHECK(after1.hi < today1.hi && after6.lo == today6.lo, "the proposal's first act hands out fewer chips, its sixth as many");
+	EconBand short3 = econ_band(&econ_proposed, true, ECON_CHIPS, 2), today3 = econ_band(&econ_today, true, ECON_CHIPS, 2);
+	CHECK(short3.lo == today3.lo, "the proposal opens the short net by its third act");
 	CHECK(econ_bust_weight(ECON_BUST_S) > 0 && econ_bust_weight(0) == 0 && econ_bust_weight(ECON_BUST_S + 1) == 0, "the busting mix: 1-10 and S");
 	CHECK(!econ_chip_good(ECON_GOOD_TIER - 1) && econ_chip_good(ECON_GOOD_TIER), "a good chip: tier %d up", ECON_GOOD_TIER);
 	econ_plan = was;

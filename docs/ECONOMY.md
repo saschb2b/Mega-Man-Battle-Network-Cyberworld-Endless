@@ -115,7 +115,11 @@ god` 90,000; with `--dev god,onehit` 20,000) won 110 random battles:
 The autopilot opens no Mystery Data and buys nothing, so it checks the
 battles' half; the Mystery Data are `layer_generate`'s and
 `loot_mystery_roll`'s own, as the layers in play are (`LAYER_MAKE_HASH`
-unchanged).
+unchanged). The proposal's levers run in play too: twelve one-hit
+autopilot runs with `--economy-plan proposed` reached acts 4 and 5, and
+their guardians' chip-entry zenny was the curve's to the zenny (240 in
+act 1, 525, 865, 1,246, 1,659 against today's 600 to 1,800), BN6's own
+rows' zenny (1,000, 2,000, 3,000) as before.
 
 ## Before: what a run hands out today
 
@@ -153,8 +157,9 @@ green and 3-4 blue.
 - *Codes:* finds lean to the folder's codes three ways (a Mystery Data's
   chip rolled again for one half the time, a battle row's second entries,
   and every dealer's, trader's, request's, gift's, vault's and Server's
-  chip in them), so 63% of act 1's finds fit the starting folder and five
-  of one code are there by the first guardian. BN6's own Chip Trader does
+  chip in them), so 63% of act 1's finds fit the starting folder: the
+  median run holds three chips of one code (with the \*s) by layer 2,
+  five by layer 3, ten by layer 8, and its first \* by layer 3. BN6's own Chip Trader does
   the opposite: it gives a code the pack holds none of three times in four
   (below).
 - *Zenny:* by the act's dealer (layer 2) a run has 1,460 zenny, almost the
@@ -346,7 +351,9 @@ copies and its price cap, in the folder's codes: convenience paid for).
 | 6 | 15.8 → 15.8 | 70% → 70% | 22.6 → 22.6 | 10,760 → 10,720 | 24 → 19 | 55% → 55% | 44,190 → 41,430 / 22,800 |
 
 At the act's dealer (layer 2), a run had 1,460 zenny against his 1,600 and
-has 970: the answer or the HPMemory. The short net (a new run's) follows
+has 970: the answer or the HPMemory. Three chips of one code come by
+layer 3 rather than 2, five by layer 6 rather than 3; a layer keeps its
+far detour's rich data (1.06 rich a layer on act 1, from 1.26). The short net (a new run's) follows
 its own curve, open by its third act: act 1 as above (8.9 chips, 2,670
 zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
 
@@ -400,10 +407,11 @@ zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
 ## The guard
 
 1. **The report with bands.** `python3 build.py economy` prints both
-   plans and flags (`!`) any act's chips, good share, Mystery Data, zenny
-   or codes held a fifth past its plan's measured number
-   (`econ_band`, `src/core/economy.c`); it prints how many of the plan in
-   play's are outside, 0 now. Run it wherever drops, prices, Mystery Data,
+   plans on both nets and flags (`!`) any act's chips, good share,
+   Mystery Data, zenny or codes held a fifth past its plan's measured
+   number (`econ_band`, `src/core/economy.c`: the endless net's six acts
+   and Nest, the short net's three and Nest); it prints how many of the
+   plan in play's are outside, 0 now. Run it wherever drops, prices, Mystery Data,
    the dealers' stock or the levers change; when the owner says yes, the
    plan in play becomes the proposal's (`econ_plan`) and its bands with
    it. A change that moves a number on purpose sets its band's centre in

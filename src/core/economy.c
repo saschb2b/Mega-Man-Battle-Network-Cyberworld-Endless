@@ -76,9 +76,29 @@ static const double centre[2][ECON_METRICS][ECON_ACTS] = {
 	},
 };
 
-EconBand econ_band(const EconPlan *plan, int metric, int act) {
+/* ... and the short net's (a new run's): its three acts and its Nest */
+static const double centre_short[2][ECON_METRICS][4] = {
+	{   /* today's */
+		[ECON_CHIPS] = { 12.2, 11.4, 14.7, 4.6 },
+		[ECON_GOOD] = { 26.4, 31.2, 38.3, 41.7 },
+		[ECON_MD] = { 14.8, 15.1, 20.3, 6.6 },
+		[ECON_ZENNY] = { 3550, 4360, 6880, 4130 },
+		[ECON_CODES] = { 5, 8, 12, 13 },
+	},
+	{   /* the proposal's */
+		[ECON_CHIPS] = { 8.9, 9.8, 14.7, 4.6 },
+		[ECON_GOOD] = { 24.7, 29.9, 38.1, 41.9 },
+		[ECON_MD] = { 11.6, 13.5, 20.3, 6.6 },
+		[ECON_ZENNY] = { 2670, 4060, 6870, 4150 },
+		[ECON_CODES] = { 3, 5, 9, 10 },
+	},
+};
+
+EconBand econ_band(const EconPlan *plan, bool short_net, int metric, int act) {
 	if (metric < 0 || metric >= ECON_METRICS || act < 0 || act >= ECON_ACTS) return (EconBand){ 0, 0 };
-	double v = centre[plan == &econ_proposed][metric][act];
+	int p = plan == &econ_proposed;
+	if (short_net && act > 2 && act < ECON_ACTS - 1) return (EconBand){ 0, 0 };
+	double v = short_net ? centre_short[p][metric][act > 2 ? 3 : act] : centre[p][metric][act];
 	return (EconBand){ v * (1 - BAND_SLACK), v * (1 + BAND_SLACK) };
 }
 

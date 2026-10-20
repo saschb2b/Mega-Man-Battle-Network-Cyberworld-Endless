@@ -73,7 +73,7 @@ enum { FROM_BATTLE, FROM_GEM, FROM_GUARDIAN };
  * far and what the act's dealer asks for its answer and HPMemory so far */
 typedef struct {
 	LayerTally t[LAYERS];
-	int together[RUNS_MAX][LAYERS], earned[RUNS_MAX][LAYERS], wanted[RUNS_MAX][LAYERS];
+	int together[RUNS_MAX][LAYERS], stars[RUNS_MAX][LAYERS], earned[RUNS_MAX][LAYERS], wanted[RUNS_MAX][LAYERS];
 } Measure;
 
 static Measure M[PLANS], S[PLANS];   /* the endless net's, the short net's */
@@ -337,6 +337,7 @@ static void one_layer(Measure *m, int r, int depth, int *fragments) {
 	int top = 0;
 	for (int c = 0; c < 26; ++c) if (codes_held[c] > top) top = codes_held[c];
 	m->together[r][depth - 1] = top + codes_held[26];
+	m->stars[r][depth - 1] = codes_held[26];
 	m->earned[r][depth - 1] = zenny_run;
 	m->wanted[r][depth - 1] = wanted_run;
 }
@@ -395,56 +396,41 @@ static void act_metrics(Measure *m, int act, double v[ECON_METRICS]) {
 	v[ECON_CODES] = median_at(m->together, last - 1);
 }
 
-/* The before-and-after table: each act's numbers under both plans, each
- * against its own plan's bands (! outside); the plan in play's count */
-static int compare_table(FILE *out) {
+/* The before-and-after table of a net (the endless net's six acts and
+ * its Nest, `ms` its two plans' measures, or the short net's three and
+ * its Nest): each act's numbers under both plans, each against its own
+ * plan's bands (! outside); how many of the plan in play's are outside */
+static int compare_table(FILE *out, Measure *ms, bool short_net) {
 	static const char *const names[ECON_METRICS] = { "chips", "good%", "MD", "zenny", "codes" };
-	int flagged = 0;
-	fprintf(out, "\nBy act, today -> the proposal (per run, the act's layers together; codes: the most chips gained in one letter\n"
+	static const int endless[] = { 0, 1, 2, 3, 4, 5, ECON_ACTS - 1 }, brief[] = { 0, 1, 2, ECON_ACTS - 1 };
+	const int *acts = short_net ? brief : endless;
+	int nacts = short_net ? 4 : 7, flagged = 0;
+	net_layers = short_net ? SHORT_LAYERS : LAYERS;
+	if (short_net) fprintf(out, "\nThe short net (a new run's: layers 1-%d, its Nest the last), today -> the proposal, as above:\nact  ", SHORT_LAYERS);
+	else fprintf(out, "\nBy act, today -> the proposal (per run, the act's layers together; codes: the most chips gained in one letter\n"
 		"with the *s at the act's end, median run; ! outside its plan's band, economy.h):\nact  ");
 	for (int k = 0; k < ECON_METRICS; ++k) fprintf(out, " %17s", names[k]);
 	fprintf(out, "   earned/wanted so far (median)\n");
-	for (int a = 0; a < ECON_ACTS; ++a) {
-		int first, last;
-		act_range(a, &first, &last);
-		double v[PLANS][ECON_METRICS];
-		for (int p = 0; p < PLANS; ++p) act_metrics(&M[p], a, v[p]);
-		fprintf(out, "%-4s ", act_names[a]);
-		for (int k = 0; k < ECON_METRICS; ++k) {
-			bool out_of[PLANS];
-			for (int p = 0; p < PLANS; ++p) {
-				EconBand b = econ_band(plans[p], k, a);
-				out_of[p] = v[p][k] < b.lo || v[p][k] > b.hi;
-			}
-			flagged += out_of[0];
-			fprintf(out, " %7.1f%s->%7.1f%s", v[0][k], out_of[0] ? "!" : " ", v[1][k], out_of[1] ? "!" : " ");
-		}
-		fprintf(out, "   %6d/%-6d -> %6d/%d\n", median_at(M[0].earned, last - 1), median_at(M[0].wanted, last - 1),
-			median_at(M[1].earned, last - 1), median_at(M[1].wanted, last - 1));
-	}
-	return flagged;
-}
-
-/* The short net (a new run's: docs/META.md), its three acts and its Nest,
- * both plans, unflagged: the proposal's curves open it by its third act */
-static void short_table(FILE *out) {
-	static const char *const names[ECON_METRICS] = { "chips", "good%", "MD", "zenny", "codes" };
-	static const int acts[] = { 0, 1, 2, ECON_ACTS - 1 };
-	fprintf(out, "\nThe short net (layers 1-%d, its Nest the last), today -> the proposal, as above\nact  ", SHORT_LAYERS);
-	for (int k = 0; k < ECON_METRICS; ++k) fprintf(out, " %17s", names[k]);
-	fprintf(out, "   earned/wanted so far (median)\n");
-	net_layers = SHORT_LAYERS;
-	for (unsigned i = 0; i < sizeof acts / sizeof *acts; ++i) {
+	for (int i = 0; i < nacts; ++i) {
 		int first, last;
 		act_range(acts[i], &first, &last);
 		double v[PLANS][ECON_METRICS];
-		for (int p = 0; p < PLANS; ++p) act_metrics(&S[p], acts[i], v[p]);
+		for (int p = 0; p < PLANS; ++p) act_metrics(&ms[p], acts[i], v[p]);
 		fprintf(out, "%-4s ", act_names[acts[i]]);
-		for (int k = 0; k < ECON_METRICS; ++k) fprintf(out, " %7.1f  ->%7.1f ", v[0][k], v[1][k]);
-		fprintf(out, "   %6d/%-6d -> %6d/%d\n", median_at(S[0].earned, last - 1), median_at(S[0].wanted, last - 1),
-			median_at(S[1].earned, last - 1), median_at(S[1].wanted, last - 1));
+		for (int k = 0; k < ECON_METRICS; ++k) {
+			bool out_of[PLANS];
+			for (int p = 0; p < PLANS; ++p) {
+				EconBand band = econ_band(plans[p], short_net, k, acts[i]);
+				out_of[p] = v[p][k] < band.lo || v[p][k] > band.hi;
+			}
+			flagged += plans[0] == econ_plan ? out_of[0] : out_of[1];
+			fprintf(out, " %7.1f%s->%7.1f%s", v[0][k], out_of[0] ? "!" : " ", v[1][k], out_of[1] ? "!" : " ");
+		}
+		fprintf(out, "   %6d/%-6d -> %6d/%d\n", median_at(ms[0].earned, last - 1), median_at(ms[0].wanted, last - 1),
+			median_at(ms[1].earned, last - 1), median_at(ms[1].wanted, last - 1));
 	}
 	net_layers = LAYERS;
+	return flagged;
 }
 
 /* Where the chips and zenny come from, by act */
@@ -484,18 +470,19 @@ static void rarity_table(FILE *out) {
 	}
 }
 
-/* By layer: the Mystery Data laid and what they held, the codes held and
- * the zenny earned so far (median run), both plans */
+/* By layer: the Mystery Data laid (the rich among the blue), the chips
+ * gained, the codes held and the *s among them, the zenny earned so far
+ * (median run), both plans */
 static void layers_table(FILE *out) {
-	fprintf(out, "\nBy layer (per run), today -> the proposal: Mystery Data laid (green / blue / purple), chips gained, the codes held\n"
-		"(the most in one letter with the *s, median run), the zenny earned so far (median run)\n"
-		"layer   green          blue           purple      chips           codes      zenny so far\n");
+	fprintf(out, "\nBy layer (per run), today -> the proposal: Mystery Data laid (green / blue, rich of them / purple), chips gained, the\n"
+		"codes held (the most in one letter with the *s) and the *s, the zenny earned so far (median run)\n"
+		"layer   green          blue           rich           purple      chips           codes      *s         zenny so far\n");
 	for (int d = 1; d <= LAYERS; ++d) {
 		const LayerTally *t = &M[0].t[d - 1], *u = &M[1].t[d - 1];
-		fprintf(out, "%5d   %4.2f -> %4.2f   %4.2f -> %4.2f   %4.2f -> %4.2f  %5.2f -> %5.2f   %2d -> %2d   %6d -> %6d\n", d, t->md[0] / runs,
-			u->md[0] / runs, (t->md[1] + t->md[2]) / runs, (u->md[1] + u->md[2]) / runs, t->md[3] / runs, u->md[3] / runs, t->chips / runs,
-			u->chips / runs, median_at(M[0].together, d - 1), median_at(M[1].together, d - 1), median_at(M[0].earned, d - 1),
-			median_at(M[1].earned, d - 1));
+		fprintf(out, "%5d   %4.2f -> %4.2f   %4.2f -> %4.2f   %4.2f -> %4.2f   %4.2f -> %4.2f  %5.2f -> %5.2f   %2d -> %2d   %2d -> %2d   %6d -> %6d\n",
+			d, t->md[0] / runs, u->md[0] / runs, (t->md[1] + t->md[2]) / runs, (u->md[1] + u->md[2]) / runs, t->md[2] / runs, u->md[2] / runs,
+			t->md[3] / runs, u->md[3] / runs, t->chips / runs, u->chips / runs, median_at(M[0].together, d - 1), median_at(M[1].together, d - 1),
+			median_at(M[0].stars, d - 1), median_at(M[1].stars, d - 1), median_at(M[0].earned, d - 1), median_at(M[1].earned, d - 1));
 	}
 }
 
@@ -562,8 +549,7 @@ int economy_report_run(const char *spec) {
 		"levels by an assumed mix (econ_bust_weight), %d%% of them at low HP, a battle's Mystery Data kept %d%% of the time.\n"
 		"The plan in play: %s.\n", runs, run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',
 		run.codes[2] ? 'A' + run.codes[2] - 1 : '-', ECON_BATTLES_LEAST, ECON_BATTLES_MOST, LOW_HP_SHARE, GEM_KEPT, econ_plan->name);
-	int flagged = compare_table(out);
-	short_table(out);
+	int flagged = compare_table(out, M, false) + compare_table(out, S, true);
 	sources_table(out, &M[0], "today");
 	sources_table(out, &M[1], "the proposal");
 	rarity_table(out);

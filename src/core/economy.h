@@ -59,11 +59,12 @@ bool econ_keep(int lever, int depth);
 
 /* The bands the economy report holds the plan in play to, per run, an
  * act's layers together (the codes: the most chips gained in one letter
- * with the *s, at the act's end) */
+ * with the *s, at the act's end), on the endless net or the short one
+ * (its acts 0-2 and its Nest, 6) */
 enum { ECON_CHIPS, ECON_GOOD, ECON_MD, ECON_ZENNY, ECON_CODES, ECON_METRICS };
 typedef struct { double lo, hi; } EconBand;
 /* Metric `metric`'s band at act `act` (0-5, 6 the Nest) for `plan` */
-EconBand econ_band(const EconPlan *plan, int metric, int act);
+EconBand econ_band(const EconPlan *plan, bool short_net, int metric, int act);
 
 /* The report's assumptions: the mix of busting levels a battle is won at
  * (1-10, 11 for S), a level's weight; the random battles a layer (rng);
