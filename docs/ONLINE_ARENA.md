@@ -512,9 +512,13 @@ read:
 | The hashes pending, the counters, the link, the time sync | `arena.c`, `arena_link_net.c`, `arena_sync.c` | no | not the pair's state |
 | Each core's sound out (blip buffers) and picture | `arena_pair.c` | no | output: the frames run again are heard not at all (`arena_pair_mute`), the last one's picture shown |
 
-The stands' report (`arena_report.c`) reads the first core as it is
-shown, so a chip used on a guess that a rollback took back may count in
-the referee's tally; the winner is the settled result.
+The stands' report reads the battle as it settles, never a guess: each
+frame run notes both MegaMen as the first core has them (`note`, again
+where a rollback runs it again), and the report takes the last frame
+whose keys are all known (`arena_reading`). A battle of `--dev
+arena,arenabusy` at delay 1 ended on frame 5221 with the same report
+(HP 75/100 and 0/100, winner 1) and the same hashes with no guess (lag
+0, window 0) as with 778 rollbacks (lag 3, window 6; lag 5, window 8).
 
 ## From the Net Square
 
@@ -1053,8 +1057,9 @@ game sends nothing of the battle.
 
 ### The report and the cheers
 
-The cable's first game reads both MegaMen off its pair's first core each
-tick (`arena_report.c`; `stands_report.c` the reading, ROM-free): each
+The cable's first game reads both MegaMen off its pair's first core at
+the last settled frame each tick (`arena_reading` in `arena.c`, the
+report in `arena_report.c`; `stands_report.c` the reading, ROM-free): each
 side's player object (`BN6_BATTLE_PLAYERS`, the same on both GBAs, which
 number the sides alike), its HP and max HP (`BN6_T1_HP`, `BN6_T1_MAX_HP`),
 and a chip counted as used where his action turns to a chip's
@@ -1163,9 +1168,8 @@ the cable's first's reports came, and no question.
   a local relay and on the Nova headless; not yet a NetBattle between two
   devices or through the deployed server (which runs v7 until it is
   redeployed), nor on Android, iOS, Windows or macOS. A first NetBattle on
-  a system asks with a window of 4 before its frame's cost is kept. The
-  stands' report counts what is shown, a guess's chip that a rollback
-  took back among it. Mispredictions are guessed as the last keys held:
+  a system asks with a window of 4 before its frame's cost is kept.
+  Mispredictions are guessed as the last keys held:
   a press seen late shows as the other MegaMan's step snapping back.
 - The Souls under full rules ([Full rules](#full-rules), above): all of
   issue #130's seen on both GBAs. Not yet: a NetBattle in which a

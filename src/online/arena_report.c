@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <mgba/core/core.h>
-
-#include "bn6.h"
 #include "online_transport.h"
 
 #define REPORT_EVERY 30            /* frames between two reports at most */
@@ -30,16 +27,11 @@ static void report_send(void) {
 }
 
 void arena_report_frame(const Arena *a) {
-	struct mCore *c = a ? arena_core(a, 0) : NULL;
-	if (!Q.match || !c) return;
+	const ArenaReading *r = a ? arena_reading(a) : NULL;
+	if (!Q.match || !r) return;
 	++Q.frames;
-	for (unsigned side = 0; side < 2; ++side) {
-		uint32_t o = c->rawRead32(c, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, -1);
-		if (o < BN6_EWRAM || o >= BN6_EWRAM_END - BN6_T1_SIZE) continue;
-		stands_report_side(&Q.now, &Q.seen, side, (uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1),
-			(uint16_t)c->rawRead16(c, o + BN6_T1_MAX_HP, -1), (uint8_t)c->rawRead8(c, o + BN6_T1_ACTION, -1),
-			(uint16_t)c->rawRead16(c, o + BN6_T1_CHIP, -1));
-	}
+	for (unsigned side = 0; side < 2; ++side)
+		if (r->seen[side]) stands_report_side(&Q.now, &Q.seen, side, r->hp[side], r->max_hp[side], r->action[side], r->chip[side]);
 	if (Q.frames - Q.sent_at >= REPORT_EVERY && memcmp(&Q.now, &Q.sent, sizeof Q.now)) report_send();
 }
 

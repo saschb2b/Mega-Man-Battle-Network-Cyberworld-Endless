@@ -55,6 +55,7 @@ typedef struct {
 	uint64_t hash;      /* the pair's, at every ARENA_HASH_EVERY-th frame */
 	bool fight, gone;   /* my core's battle under way; both cores' gone, back at the Comm menu */
 	uint8_t result[2];  /* mine and the other's (BN6_BATTLE_RESULT) */
+	ArenaReading reading;   /* both MegaMen as the cable's first core has them */
 } Ran;
 
 struct Arena {
@@ -82,6 +83,8 @@ struct Arena {
 	uint32_t late;             /* ticks longer than a 60th of a second */
 	Hashed pending[PENDING];
 	unsigned npending;
+	ArenaReading reading;      /* the last settled frame's, for the stands' report */
+	bool read;                 /* ... once one is */
 	bool fought, apart;
 	unsigned result;
 	char error[160];
@@ -181,6 +184,20 @@ static bool battle_gone(struct mCore *c) {
 	return c->rawRead8(c, BN6_BATTLE_RESULT, -1) && c->rawRead8(c, BN6_BATTLE_MODE, -1) == BN6_BATTLE_GONE && at_comm(c);
 }
 
+/* both MegaMen as core `c` has them (each side's player object, BN6_BATTLE_PLAYERS) */
+static void read_sides(struct mCore *c, ArenaReading *out) {
+	memset(out, 0, sizeof *out);
+	for (unsigned side = 0; side < 2; ++side) {
+		uint32_t o = c->rawRead32(c, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, -1);
+		if (o < BN6_EWRAM || o >= BN6_EWRAM_END - BN6_T1_SIZE) continue;
+		out->seen[side] = true;
+		out->hp[side] = (uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1);
+		out->max_hp[side] = (uint16_t)c->rawRead16(c, o + BN6_T1_MAX_HP, -1);
+		out->action[side] = (uint8_t)c->rawRead8(c, o + BN6_T1_ACTION, -1);
+		out->chip[side] = (uint16_t)c->rawRead16(c, o + BN6_T1_CHIP, -1);
+	}
+}
+
 /* what frame `frame` left, noted as it ran */
 static void note(Arena *a, uint32_t frame) {
 	Ran *r = &a->ran[frame % LOG];
@@ -190,6 +207,7 @@ static void note(Arena *a, uint32_t frame) {
 	r->result[0] = mine->rawRead8(mine, BN6_BATTLE_RESULT, -1);
 	r->result[1] = theirs->rawRead8(theirs, BN6_BATTLE_RESULT, -1);
 	r->hash = (frame + 1) % ARENA_HASH_EVERY == 0 ? arena_pair_hash(a->pair) : 0;
+	read_sides(arena_pair_core(a->pair, 0), &r->reading);
 }
 
 /* the pair's next frame: its snapshot kept where it runs on a guess, its
@@ -282,6 +300,8 @@ static void settle(Arena *a) {
 	if (until > a->input.next) until = a->input.next;
 	for (; a->done < until && a->stage == ARENA_BATTLE; ++a->done) {
 		const Ran *r = &a->ran[a->done % LOG];
+		a->reading = r->reading;
+		a->read = true;
 		if ((a->done + 1) % ARENA_HASH_EVERY == 0) hash_out(a, a->done, r->hash);
 		if (r->fight) a->fought = true;
 		if (a->fought && r->gone) over(a, a->done + 1, r);
@@ -359,7 +379,7 @@ unsigned arena_result(const Arena *a) { return a->result; }
 bool arena_apart(const Arena *a) { return a->apart; }
 uint32_t arena_stalls(const Arena *a) { return a->stalls; }
 
-struct mCore *arena_core(const Arena *a, unsigned side) { return core(a, side & 1u); }
+const ArenaReading *arena_reading(const Arena *a) { return a->read ? &a->reading : NULL; }
 
 uint64_t arena_hash(Arena *a) { return a->pair ? arena_pair_hash(a->pair) : 0; }
 uint64_t arena_record(const Arena *a) { return a->pair ? arena_pair_record(a->pair) : 0; }

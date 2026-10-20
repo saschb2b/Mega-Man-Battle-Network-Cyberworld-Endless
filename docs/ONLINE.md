@@ -885,8 +885,8 @@ are in the history before 433865a8):
   server (protocol v8 there once it is redeployed), on Android, iOS,
   Windows and macOS (built, untried; the Nova measured headless); a first
   NetBattle on a system asks with a window of 4 until a battle has kept
-  its frame's cost; the stands' report counts the chips shown, a guess's
-  among them; the guess is the other's last keys held, nothing smarter.
+  its frame's cost; the guess is the other's last keys held, nothing
+  smarter.
 - **The stands, what is left:** watching on Android, iOS and the
   handhelds (built, untried), a catch-up's pace in a window and on a
   handheld (measured headless only), a machine too slow to catch up (in
