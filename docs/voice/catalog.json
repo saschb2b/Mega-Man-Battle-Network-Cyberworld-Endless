@@ -218,50 +218,53 @@
   },
   "gate_words:gate_end_words": {
    "header": "How a visit ended (online_visit.h), said at the gate after it, and whose face says it (FACE_*); NULL nothing to say.",
-   "line": 58
+   "line": 84
   },
   "gate_words:gate_keeper_ask": {
-   "line": 24
+   "line": 25
   },
   "gate_words:gate_keeper_bye": {
-   "line": 28
+   "line": 29
   },
   "gate_words:gate_keeper_hello": {
    "header": "The keeper talked to: who he is, where the gate leads (`server` a host name, NULL the official Square), then his question over the options.",
-   "line": 15
+   "line": 16
   },
   "gate_words:gate_keeper_name_first": {
    "header": "The gate stepped on with no name yet: the keeper asks for one.",
-   "line": 44
+   "line": 45
   },
   "gate_words:gate_keeper_named": {
-   "line": 38
+   "line": 39
   },
   "gate_words:gate_keeper_official": {
    "header": "... and his answers: the gate set to the official Square; B.",
-   "line": 26
+   "line": 27
   },
   "gate_words:gate_keeper_privacy": {
    "header": "The first time the gate leads to a server: what that server sees, and his question (talk_ask's).",
-   "line": 46
+   "line": 47
   },
   "gate_words:gate_keeper_privacy_question": {
-   "line": 52
+   "line": 53
   },
   "gate_words:gate_keeper_set": {
    "header": "... the gate set to `server` (a host name); the name `name` saved.",
-   "line": 30
+   "line": 31
   },
   "gate_words:gate_options": {
-   "line": 7
+   "line": 8
   },
   "gate_words:gate_question": {
    "header": "MegaMan's question on the gate, the way known.",
-   "line": 54
+   "line": 55
   },
   "gate_words:gate_save_failed": {
    "header": "The checkpoint before a visit not written: MegaMan stays (the game's own note says why, never a character: docs/VOICE.md, What nobody says).",
-   "line": 56
+   "line": 57
+  },
+  "gate_words:maintenance": {
+   "line": 62
   },
   "guardian_lines:answer": {
    "comment": "MegaMan answers now and then, never over a first meeting (after a loss the record in it: \"I'm ready this time!\" before every rematch read as a loop to a playtester two down against CircusMan).",
@@ -763,6 +766,27 @@
   "powers_words:powers_reward_words": {
    "comment": "The words after guardian `navi`'s battle: his Cross where it is new to the run (`cross`), as the run holds Crosses; the Cybeast's waking (`beast`)",
    "line": 26
+  },
+  "reconnect_text:reconnect_text_back": {
+   "line": 9
+  },
+  "reconnect_text:reconnect_text_kept": {
+   "header": "under it: what the wait keeps",
+   "line": 10
+  },
+  "reconnect_text:reconnect_text_key_home": {
+   "header": "its key",
+   "line": 11
+  },
+  "reconnect_text:reconnect_text_lost": {
+   "header": "the heading's slot: the link lost, and back",
+   "line": 8
+  },
+  "reconnect_text:reconnect_text_title": {
+   "line": 7
+  },
+  "reconnect_text:reconnect_text_trying.words": {
+   "line": 14
   },
   "reward_words:draft_menu": {
    "comment": "The draft: one box, the BugFrags of none in it, then the programs in a column with their colours (ts_option: its number and those above and below it), each to its branch (`take`), B to `skip`. Its script. A box each said what BN6's programs do: seventeen boxes from the data to the pick, which the owner found far too many (6 October 2026).",
@@ -1527,7 +1551,7 @@
    "comment": "",
    "domain": "Lan's HP and the gate",
    "kind": "speech",
-   "lines": 25,
+   "lines": 29,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "gate_words"
@@ -1761,6 +1785,15 @@
    "speaker": "Screen",
    "stem": "online_text"
   },
+  "src/online/reconnect_text.c": {
+   "comment": "reconnect_text.h. The PET's own text, in its plain style (docs/VOICE.md: menus and labels keep theirs), as the NetPass's and the trade screens'.",
+   "domain": "Net Square",
+   "kind": "screen",
+   "lines": 8,
+   "shows": [],
+   "speaker": "Screen",
+   "stem": "reconnect_text"
+  },
   "src/online/square_life_words.c": {
    "comment": "",
    "domain": "Net Square",
@@ -1973,7 +2006,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1868,
+  "boxes": 1876,
   "domains": {
    "Arena": {
     "files": [
@@ -2041,8 +2074,8 @@
      "src/director/home_words.c"
     ],
     "flagged": 2,
-    "lines": 92,
-    "speech": 84
+    "lines": 96,
+    "speech": 88
    },
    "Layers: dealers and finds": {
     "files": [
@@ -2096,12 +2129,13 @@
    "Net Square": {
     "files": [
      "src/online/online_text.c",
+     "src/online/reconnect_text.c",
      "src/online/square_life_words.c",
      "src/online/square_week_words.c",
      "src/online/square_words.c"
     ],
     "flagged": 14,
-    "lines": 104,
+    "lines": 112,
     "speech": 89
    },
    "Powers": {
@@ -2296,9 +2330,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 666,
+    "boxes": 668,
     "dots_per_box": 0.22,
-    "end_ask": 0.05,
+    "end_ask": 0.04,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2309,24 +2343,24 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 166",
+    "stutters": "1 box in 167",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 150,
-    "dots_per_box": 0.07,
+    "boxes": 156,
+    "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
     "end_dots": 0.01,
     "openers": [
      "THE",
+     "HMM",
      "NET",
      "THIS",
      "A",
-     "HELLO",
-     "HMM"
+     "HELLO"
     ],
     "stutters": "never",
     "words_per_box": 5.7
@@ -2351,7 +2385,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1466,
+  "lines": 1478,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2486,9 +2520,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 666,
+    "boxes": 668,
     "dots_per_box": 0.22,
-    "end_ask": 0.05,
+    "end_ask": 0.04,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2499,24 +2533,24 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 166",
+    "stutters": "1 box in 167",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 150,
-    "dots_per_box": 0.07,
+    "boxes": 156,
+    "dots_per_box": 0.06,
     "end_ask": 0.05,
     "end_bang": 0.92,
     "end_dots": 0.01,
     "openers": [
      "THE",
+     "HMM",
      "NET",
      "THIS",
      "A",
-     "HELLO",
-     "HMM"
+     "HELLO"
     ],
     "stutters": "never",
     "words_per_box": 5.7
@@ -2598,7 +2632,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1090
+  "speech": 1094
  },
  "version": 1,
  "conversations": [
@@ -2659,19 +2693,20 @@
   {"container":"home_words:home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.paid_by","line":168,"lines":["home_words:home_courier_words.paid_by:0","home_words:home_courier_words.paid_by:1","home_words:home_courier_words.paid_by:2"],"speakers":["Mr.Prog"],"title":"Home courier words: paid by","when":""},
   {"container":"home_words:home_courier_words.places","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.places","line":170,"lines":["home_words:home_courier_words.places:1"],"speakers":["Mr.Prog"],"title":"Home courier words: places","when":""},
   {"container":"home_words:home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words","line":176,"lines":["home_words:home_courier_words:0","home_words:home_courier_words:1","home_words:home_courier_words:2","home_words:home_courier_words:3","home_words:home_courier_words:4","home_words:home_courier_words:5"],"speakers":["Mr.Prog"],"title":"The courier in Lan's HP","when":"The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the new requests posted (bit k asker k), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none."},
-  {"container":"gate_words:gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_options","line":7,"lines":["gate_words:gate_options:0","gate_words:gate_options:1","gate_words:gate_options:2"],"speakers":["MegaMan"],"title":"Gate options","when":""},
-  {"container":"gate_words:gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_hello","line":19,"lines":["gate_words:gate_keeper_hello:0","gate_words:gate_keeper_hello:1"],"speakers":["Mr.Prog"],"title":"The keeper talked to","when":"The keeper talked to: who he is, where the gate leads (`server` a host name, NULL the official Square), then his question over the options."},
-  {"container":"gate_words:gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_ask","line":24,"lines":["gate_words:gate_keeper_ask:0"],"speakers":["Mr.Prog"],"title":"Gate keeper ask","when":""},
-  {"container":"gate_words:gate_keeper_official","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_official","line":26,"lines":["gate_words:gate_keeper_official:0"],"speakers":["Mr.Prog"],"title":"Gate keeper official","when":"... and his answers: the gate set to the official Square; B."},
-  {"container":"gate_words:gate_keeper_bye","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_bye","line":28,"lines":["gate_words:gate_keeper_bye:0"],"speakers":["Mr.Prog"],"title":"Gate keeper bye","when":""},
-  {"container":"gate_words:gate_keeper_set","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_set","line":34,"lines":["gate_words:gate_keeper_set:0"],"speakers":["Mr.Prog"],"title":"Gate keeper set","when":"... the gate set to `server` (a host name); the name `name` saved."},
-  {"container":"gate_words:gate_keeper_named","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_named","line":40,"lines":["gate_words:gate_keeper_named:0"],"speakers":["Mr.Prog"],"title":"Gate keeper named","when":""},
-  {"container":"gate_words:gate_keeper_name_first","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_name_first","line":44,"lines":["gate_words:gate_keeper_name_first:0"],"speakers":["Mr.Prog"],"title":"The gate stepped on with no name yet","when":"The gate stepped on with no name yet: the keeper asks for one."},
-  {"container":"gate_words:gate_keeper_privacy","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_privacy","line":47,"lines":["gate_words:gate_keeper_privacy:0"],"speakers":["Mr.Prog"],"title":"The first time the gate leads to a server","when":"The first time the gate leads to a server: what that server sees, and his question (talk_ask's)."},
-  {"container":"gate_words:gate_keeper_privacy_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_privacy_question","line":52,"lines":["gate_words:gate_keeper_privacy_question:0"],"speakers":["Mr.Prog"],"title":"Gate keeper privacy question","when":""},
-  {"container":"gate_words:gate_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_question","line":54,"lines":["gate_words:gate_question:0"],"speakers":["MegaMan"],"title":"MegaMan's question on the gate, the way known","when":"MegaMan's question on the gate, the way known."},
-  {"container":"gate_words:gate_save_failed","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_save_failed","line":56,"lines":["gate_words:gate_save_failed:0"],"speakers":["MegaMan"],"title":"The checkpoint before a visit not written","when":"The checkpoint before a visit not written: MegaMan stays (the game's own note says why, never a character: docs/VOICE.md, What nobody says)."},
-  {"container":"gate_words:gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_end_words","line":61,"lines":["gate_words:gate_end_words:caseVISIT_END_LEFT.0","gate_words:gate_end_words:caseVISIT_END_UNREACHABLE.0","gate_words:gate_end_words:caseVISIT_END_VERSION.0","gate_words:gate_end_words:caseVISIT_END_ROM.0","gate_words:gate_end_words:caseVISIT_END_NAME.0","gate_words:gate_end_words:caseVISIT_END_FULL.0","gate_words:gate_end_words:caseVISIT_END_BARRED.0","gate_words:gate_end_words:caseVISIT_END_REMOVED.0","gate_words:gate_end_words:caseVISIT_END_LOST.0","gate_words:gate_end_words:caseVISIT_END_BROKEN.0"],"speakers":["MegaMan","Mr.Prog"],"title":"How a visit ended","when":"How a visit ended (online_visit.h), said at the gate after it, and whose face says it (FACE_*); NULL nothing to say."},
+  {"container":"gate_words:gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_options","line":8,"lines":["gate_words:gate_options:0","gate_words:gate_options:1","gate_words:gate_options:2"],"speakers":["MegaMan"],"title":"Gate options","when":""},
+  {"container":"gate_words:gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_hello","line":20,"lines":["gate_words:gate_keeper_hello:0","gate_words:gate_keeper_hello:1"],"speakers":["Mr.Prog"],"title":"The keeper talked to","when":"The keeper talked to: who he is, where the gate leads (`server` a host name, NULL the official Square), then his question over the options."},
+  {"container":"gate_words:gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_ask","line":25,"lines":["gate_words:gate_keeper_ask:0"],"speakers":["Mr.Prog"],"title":"Gate keeper ask","when":""},
+  {"container":"gate_words:gate_keeper_official","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_official","line":27,"lines":["gate_words:gate_keeper_official:0"],"speakers":["Mr.Prog"],"title":"Gate keeper official","when":"... and his answers: the gate set to the official Square; B."},
+  {"container":"gate_words:gate_keeper_bye","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_bye","line":29,"lines":["gate_words:gate_keeper_bye:0"],"speakers":["Mr.Prog"],"title":"Gate keeper bye","when":""},
+  {"container":"gate_words:gate_keeper_set","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_set","line":35,"lines":["gate_words:gate_keeper_set:0"],"speakers":["Mr.Prog"],"title":"Gate keeper set","when":"... the gate set to `server` (a host name); the name `name` saved."},
+  {"container":"gate_words:gate_keeper_named","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_named","line":41,"lines":["gate_words:gate_keeper_named:0"],"speakers":["Mr.Prog"],"title":"Gate keeper named","when":""},
+  {"container":"gate_words:gate_keeper_name_first","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_name_first","line":45,"lines":["gate_words:gate_keeper_name_first:0"],"speakers":["Mr.Prog"],"title":"The gate stepped on with no name yet","when":"The gate stepped on with no name yet: the keeper asks for one."},
+  {"container":"gate_words:gate_keeper_privacy","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_privacy","line":48,"lines":["gate_words:gate_keeper_privacy:0"],"speakers":["Mr.Prog"],"title":"The first time the gate leads to a server","when":"The first time the gate leads to a server: what that server sees, and his question (talk_ask's)."},
+  {"container":"gate_words:gate_keeper_privacy_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_privacy_question","line":53,"lines":["gate_words:gate_keeper_privacy_question:0"],"speakers":["Mr.Prog"],"title":"Gate keeper privacy question","when":""},
+  {"container":"gate_words:gate_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_question","line":55,"lines":["gate_words:gate_question:0"],"speakers":["MegaMan"],"title":"MegaMan's question on the gate, the way known","when":"MegaMan's question on the gate, the way known."},
+  {"container":"gate_words:gate_save_failed","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_save_failed","line":57,"lines":["gate_words:gate_save_failed:0"],"speakers":["MegaMan"],"title":"The checkpoint before a visit not written","when":"The checkpoint before a visit not written: MegaMan stays (the game's own note says why, never a character: docs/VOICE.md, What nobody says)."},
+  {"container":"gate_words:maintenance","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:maintenance","line":66,"lines":["gate_words:maintenance:0","gate_words:maintenance:1"],"speakers":["Mr.Prog"],"title":"Maintenance","when":""},
+  {"container":"gate_words:gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_end_words","line":87,"lines":["gate_words:gate_end_words:caseVISIT_END_LEFT.0","gate_words:gate_end_words:caseVISIT_END_UNREACHABLE.0","gate_words:gate_end_words:caseVISIT_END_VERSION.0","gate_words:gate_end_words:caseVISIT_END_OLD_SERVER.0","gate_words:gate_end_words:caseVISIT_END_ROM.0","gate_words:gate_end_words:caseVISIT_END_NAME.0","gate_words:gate_end_words:caseVISIT_END_FULL.0","gate_words:gate_end_words:caseVISIT_END_BARRED.0","gate_words:gate_end_words:caseVISIT_END_REMOVED.0","gate_words:gate_end_words:caseVISIT_END_LOST.0","gate_words:gate_end_words:caseVISIT_END_BROKEN.0","gate_words:gate_end_words:caseVISIT_END_MOVED.0"],"speakers":["MegaMan","Mr.Prog"],"title":"How a visit ended","when":"How a visit ended (online_visit.h), said at the gate after it, and whose face says it (FACE_*); NULL nothing to say."},
   {"container":"briefing_words:spot_where.dist","domain":"Briefing","file":"src/director/briefing_words.c","id":"briefing_words:spot_where.dist","line":35,"lines":["briefing_words:spot_where.dist:0","briefing_words:spot_where.dist:1","briefing_words:spot_where.dist:2"],"speakers":["MegaMan"],"title":"Spot where: dist","when":""},
   {"container":"briefing_words:spot_where","domain":"Briefing","file":"src/director/briefing_words.c","id":"briefing_words:spot_where","line":39,"lines":["briefing_words:spot_where:0"],"speakers":["MegaMan"],"title":"Spot where","when":""},
   {"container":"briefing_words:guardian_words","domain":"Briefing","file":"src/director/briefing_words.c","id":"briefing_words:guardian_words","line":66,"lines":["briefing_words:guardian_words:0","briefing_words:guardian_words:1","briefing_words:guardian_words:2","briefing_words:guardian_words:3","briefing_words:guardian_words:4","briefing_words:guardian_words:5","briefing_words:guardian_words:6"],"speakers":["MegaMan"],"title":"MegaMan's words on the layer's guardian, on arriving","when":"MegaMan's words on the layer's guardian, on arriving: who he is and how he fights once they have fought him, in any run (the tip, strategy, is kept here for BN5's guardians and the super bosses, whom no mail of Dad's covers; noted for the BBS, docs/voice/sweep/net.md); before that only hearsay or a strong signal, as naming him would spend the first fight's discovery (and how could he know?). The yellow panels and EraseCross's bug are BN6's own, unsaid (the voice sweep). Appended to `buf` at `k`; the new length."},
@@ -2860,6 +2895,12 @@
   {"container":"online_text:online_field_bad_name","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_field_bad_name","line":13,"lines":["online_text:online_field_bad_name:0"],"speakers":["Screen"],"title":"Online field bad name","when":""},
   {"container":"online_text:online_field_bad_address","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_field_bad_address","line":14,"lines":["online_text:online_field_bad_address:0"],"speakers":["Screen"],"title":"Online field bad address","when":""},
   {"container":"online_text:online_field_keys_hint","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_field_keys_hint","line":17,"lines":["online_text:online_field_keys_hint:0"],"speakers":["Screen"],"title":"Online field keys hint","when":""},
+  {"container":"reconnect_text:reconnect_text_title","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_title","line":7,"lines":["reconnect_text:reconnect_text_title:0"],"speakers":["Screen"],"title":"Reconnect text title","when":""},
+  {"container":"reconnect_text:reconnect_text_lost","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_lost","line":8,"lines":["reconnect_text:reconnect_text_lost:0"],"speakers":["Screen"],"title":"The heading's slot","when":"the heading's slot: the link lost, and back"},
+  {"container":"reconnect_text:reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_back","line":9,"lines":["reconnect_text:reconnect_text_back:0"],"speakers":["Screen"],"title":"Reconnect text back","when":""},
+  {"container":"reconnect_text:reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_kept","line":10,"lines":["reconnect_text:reconnect_text_kept:0"],"speakers":["Screen"],"title":"Under it","when":"under it: what the wait keeps"},
+  {"container":"reconnect_text:reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_key_home","line":11,"lines":["reconnect_text:reconnect_text_key_home:0"],"speakers":["Screen"],"title":"Reconnect text key home: its key","when":"its key"},
+  {"container":"reconnect_text:reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_trying.words","line":14,"lines":["reconnect_text:reconnect_text_trying.words:1","reconnect_text:reconnect_text_trying.words:2","reconnect_text:reconnect_text_trying.words:3"],"speakers":["Screen"],"title":"Reconnect text trying: words","when":""},
   {"container":"trade_words:trade_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_options","line":6,"lines":["trade_words:trade_options:0","trade_words:trade_options:1","trade_words:trade_options:2"],"speakers":["MegaMan"],"title":"Trade options","when":""},
   {"container":"trade_words:trade_offer_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_offer_options","line":7,"lines":["trade_words:trade_offer_options:0","trade_words:trade_offer_options:1"],"speakers":["MegaMan"],"title":"Trade offer options","when":""},
   {"container":"trade_words:trade_wait_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_wait_options","line":8,"lines":["trade_words:trade_wait_options:0","trade_words:trade_wait_options:1"],"speakers":["MegaMan"],"title":"Trade wait options","when":""},
@@ -3038,7 +3079,7 @@
   {"group":"home","id":"place_lines:place_folk:4.2.5","ids":["place_lines:place_folk:4.2.5"],"live":["place_lines:place_folk:4.2.5"],"status":"cut","text":"Lan! Welcome to the club!|**Tip of the day! Match your codes!|Same code,and you can send more chips!**","why":"3, 7: a classmate explains chip codes on the Custom Screen"},
   {"group":"home","id":"square_life_words:girl_lines:4","ids":["square_life_words:girl_lines:4"],"live":[],"status":"cut","text":"**The clerks swap chips at Trade Central!**","why":"7: the GirlNavi's third tip; Trade Central's clerk and the Board's tip tell it. She keeps one (where Navis cheer); `girl_lines:5` becomes `:4`"},
   {"group":"home","id":"square_life_words:board:12","ids":["square_life_words:board:12","square_life_words:board:13"],"live":["square_life_words:board:12"],"status":"cut","text":"**>Tip: face a Navi and press A to wave or battle.**|>Tip: post a chip at Trade Central.","why":"2, 3: A to talk is BN6's, and the referee tells the Arena; the Trade Central tip stays"},
-  {"group":"home","id":"gate_words:gate_end_words:caseVISIT_END_VERSION.0","ids":["gate_words:gate_end_words:caseVISIT_END_VERSION.0"],"live":["gate_words:gate_end_words:caseVISIT_END_VERSION.0"],"status":"noted","text":"OH NO! THAT SQUARE IS ANOTHER VERSION!|BOTH SIDES NEED THE SAME ONE!","where":"The keeper still, in the Net's words, no \"version\" (1)","why":"The server runs another build; update one side"},
+  {"group":"home","id":"gate_words:gate_end_words:caseVISIT_END_VERSION.0","ids":["gate_words:gate_end_words:caseVISIT_END_VERSION.0"],"live":[],"status":"noted","text":"OH NO! THAT SQUARE IS ANOTHER VERSION!|BOTH SIDES NEED THE SAME ONE!","where":"The keeper still, in the Net's words, no \"version\" (1)","why":"The server runs another build; update one side"},
   {"group":"home","id":"gate_words:gate_end_words:caseVISIT_END_ROM.0","ids":["gate_words:gate_end_words:caseVISIT_END_ROM.0"],"live":["gate_words:gate_end_words:caseVISIT_END_ROM.0"],"status":"noted","text":"THAT SQUARE IS SET FOR OTHER GAME DATA!","where":"The keeper, without \"game data\" (1)","why":"The server is for another ROM"},
   {"group":"home","id":"home_words:home_back_portal_words:0","ids":["home_words:home_back_portal_words:0"],"live":["home_words:home_back_portal_words:0"],"status":"noted","text":"This link leads back to {area}!|We could stock up there,Lan.|But the Net's clock keeps running...|Each trip back,the guardians ahead get tougher!","where":"A system the run adds: Dad's mail, once (4); MegaMan keeps a worried word before his question (5)","why":"A trip back costs a notch on the Net's clock"},
   {"group":"home","id":"home_words:home_port_words:4","ids":["home_words:home_port_words:4"],"live":["home_words:home_port_words:4"],"status":"noted","text":"A dark way leads down here...|It's sealed. Clearing the Secret Area would open it.","where":"Its first box is MegaMan's; the condition is a rule (5): Dad's mail or the BBS","why":"How the sealed way opens"},
@@ -3354,31 +3395,35 @@
   {"boxes":[{"pages":[["Yes!! See ya,Chaud!"]],"speaker":"Chaud","text":"Yes!! See ya,Chaud!"}],"container":"verdict_words","domain":"Chaud and ProtoMan","file":"src/director/duel_words.c","flags":[],"id":"duel_words:verdict_words:7","kind":"speech","line":102,"note":"(Lan answers a win too: a playtester's first, after five losses, met silence where every loss had had his \"Next time, Chaud!\")","speaker":"Chaud","speakers":["Chaud"],"text":"Yes!! See ya,Chaud!","text_hash":"7656067d453b"},
   {"boxes":[{"pages":[["Lan! The official","gate here opens for","us now!"]],"speaker":"MegaMan","text":"Lan! The official gate here opens for us now!"}],"container":"verdict_words","continues":true,"domain":"Chaud and ProtoMan","file":"src/director/duel_words.c","flags":[],"id":"duel_words:verdict_words:8","kind":"speech","line":104,"note":"(the gate beside the duel, opened to its winner)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|@M Lan! The official gate here opens for us now!","text_hash":"4998850088f5"},
   {"boxes":[{"pages":[["Grr... Next","time,Chaud!"]],"speaker":"Lan","text":"Grr... Next time,Chaud!"}],"container":"verdict_words","continues":true,"domain":"Chaud and ProtoMan","file":"src/director/duel_words.c","flags":[],"id":"duel_words:verdict_words:9","kind":"speech","line":106,"note":"(Lan answers a loss, as he took the duel: Chaud had the last word)","speaker":"Lan","speakers":["Lan"],"text":"|@L Grr... Next time,Chaud!","text_hash":"b95698bbb0aa"},
-  {"boxes":[{"pages":[["Official Square"]],"speaker":"MegaMan","text":"Official Square"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:0","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Official Square","text_hash":"f01cc387e209"},
-  {"boxes":[{"pages":[["Another server"]],"speaker":"MegaMan","text":"Another server"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:1","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Another server","text_hash":"413a495c7b34"},
-  {"boxes":[{"pages":[["My name"]],"speaker":"MegaMan","text":"My name"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:2","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"My name","text_hash":"a8f40df7087b"},
-  {"boxes":[{"pages":[["HELLO! I KEEP THE","NET SQUARE GATE!"]],"speaker":"Mr.Prog","text":"HELLO! I KEEP THE\nNET SQUARE GATE!"},{"pages":[["IT LEADS TO","{host}!"]],"speaker":"Mr.Prog","text":"IT LEADS TO\n{host}!"}],"container":"gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_hello:0","kind":"speech","line":19,"placeholders":[{"name":"host","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO\n{host}!","text_hash":"e38b4edc3643"},
-  {"boxes":[{"pages":[["HELLO! I KEEP THE","NET SQUARE GATE!"]],"speaker":"Mr.Prog","text":"HELLO! I KEEP THE\nNET SQUARE GATE!"},{"pages":[["IT LEADS TO THE","OFFICIAL SQUARE!"]],"speaker":"Mr.Prog","text":"IT LEADS TO THE\nOFFICIAL SQUARE!"}],"container":"gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_hello:1","kind":"speech","line":20,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO THE\nOFFICIAL SQUARE!","text_hash":"033e1eca6270"},
-  {"boxes":[{"pages":[["WHAT CAN I DO?"]],"speaker":"Mr.Prog","text":"WHAT CAN I DO?"}],"container":"gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_ask:0","kind":"speech","line":24,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHAT CAN I DO?","text_hash":"84969c3b7ee7"},
-  {"boxes":[{"pages":[["DONE! IT LEADS TO","THE OFFICIAL SQUARE!"]],"speaker":"Mr.Prog","text":"DONE! IT LEADS TO\nTHE OFFICIAL SQUARE!"}],"container":"gate_keeper_official","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_official:0","kind":"speech","line":26,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DONE! IT LEADS TO\nTHE OFFICIAL SQUARE!","text_hash":"413ebe9d070a"},
-  {"boxes":[{"pages":[["COME BACK ANYTIME!"]],"speaker":"Mr.Prog","text":"COME BACK ANYTIME!"}],"container":"gate_keeper_bye","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_bye:0","kind":"speech","line":28,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"COME BACK ANYTIME!","text_hash":"1e5e667c4aef"},
-  {"boxes":[{"pages":[["DONE! IT LEADS TO","{host}!"]],"speaker":"Mr.Prog","text":"DONE! IT LEADS TO\n{host}!"}],"container":"gate_keeper_set","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_set:0","kind":"speech","line":34,"placeholders":[{"name":"host","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DONE! IT LEADS TO\n{host}!","text_hash":"5479456c0698"},
-  {"boxes":[{"pages":[["GOT IT! HELLO,","{name}!"]],"speaker":"Mr.Prog","text":"GOT IT! HELLO,\n{name}!"}],"container":"gate_keeper_named","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_named:0","kind":"speech","line":40,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"GOT IT! HELLO,\n{name}!","text_hash":"f7f6d3713910"},
-  {"boxes":[{"pages":[["WAIT,WAIT! FIRST,","YOUR NAME,PLEASE!"]],"speaker":"Mr.Prog","text":"WAIT,WAIT! FIRST,\nYOUR NAME,PLEASE!"}],"container":"gate_keeper_name_first","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_name_first:0","kind":"speech","line":44,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WAIT,WAIT! FIRST,\nYOUR NAME,PLEASE!","text_hash":"6696f0985383"},
-  {"boxes":[{"pages":[["NAVIS FROM OTHER","PETS MEET THERE!"]],"speaker":"Mr.Prog","text":"NAVIS FROM OTHER\nPETS MEET THERE!"},{"pages":[["ITS SERVER SEES YOUR","ADDRESS AND NAME,"]],"speaker":"Mr.Prog","text":"ITS SERVER SEES YOUR\nADDRESS AND NAME,"},{"pages":[["AND MEGAMAN,TOO!"]],"speaker":"Mr.Prog","text":"AND MEGAMAN,TOO!"}],"container":"gate_keeper_privacy","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_privacy:0","kind":"speech","line":47,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NAVIS FROM OTHER\nPETS MEET THERE!|ITS SERVER SEES YOUR\nADDRESS AND NAME,|AND MEGAMAN,TOO!","text_hash":"ecaa3f86c3d5"},
-  {"boxes":[{"pages":[["SO! GO ONLINE?"]],"speaker":"Mr.Prog","text":"SO! GO ONLINE?\n"}],"container":"gate_keeper_privacy_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_privacy_question:0","kind":"speech","line":52,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SO! GO ONLINE?\n","text_hash":"953ed0113052"},
-  {"boxes":[{"pages":[["To the Net Square,","Lan?"]],"speaker":"MegaMan","text":"To the Net Square,\nLan?\n"}],"container":"gate_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_question:0","kind":"speech","line":54,"speaker":"MegaMan","speakers":["MegaMan"],"text":"To the Net Square,\nLan?\n","text_hash":"d4e1cd08c2f9"},
-  {"boxes":[{"pages":[["Let's stay home for","now,Lan."]],"speaker":"MegaMan","text":"Let's stay home for\nnow,Lan."}],"container":"gate_save_failed","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_save_failed:0","kind":"speech","line":56,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let's stay home for\nnow,Lan.","text_hash":"bed1cb8068a3"},
-  {"boxes":[{"pages":[["We're home,Lan!"]],"speaker":"MegaMan","text":"We're home,Lan!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_LEFT.0","kind":"speech","line":61,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We're home,Lan!","text_hash":"ef86a5c60ab4"},
-  {"boxes":[{"pages":[["HMM... NO ANSWER","FROM THAT SERVER!"]],"speaker":"Mr.Prog","text":"HMM... NO ANSWER\nFROM THAT SERVER!"},{"pages":[["MAYBE IT'S DOWN,OR","ITS ADDRESS IS OFF!"]],"speaker":"Mr.Prog","text":"MAYBE IT'S DOWN,OR\nITS ADDRESS IS OFF!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_UNREACHABLE.0","kind":"speech","line":62,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... NO ANSWER\nFROM THAT SERVER!|MAYBE IT'S DOWN,OR\nITS ADDRESS IS OFF!","text_hash":"d31fdd2bd69e"},
-  {"boxes":[{"pages":[["OH NO! THAT SQUARE","IS ANOTHER VERSION!"]],"speaker":"Mr.Prog","text":"OH NO! THAT SQUARE\nIS ANOTHER VERSION!"},{"pages":[["BOTH SIDES NEED THE","SAME ONE!"]],"speaker":"Mr.Prog","text":"BOTH SIDES NEED THE\nSAME ONE!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_VERSION.0","kind":"speech","line":63,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH NO! THAT SQUARE\nIS ANOTHER VERSION!|BOTH SIDES NEED THE\nSAME ONE!","text_hash":"3290e25f4946"},
-  {"boxes":[{"pages":[["THAT SQUARE IS SET","FOR OTHER GAME DATA!"]],"speaker":"Mr.Prog","text":"THAT SQUARE IS SET\nFOR OTHER GAME DATA!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_ROM.0","kind":"speech","line":64,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT SQUARE IS SET\nFOR OTHER GAME DATA!","text_hash":"4eabbd6bac30"},
-  {"boxes":[{"pages":[["THE SQUARE TURNED","YOUR NAME DOWN!"]],"speaker":"Mr.Prog","text":"THE SQUARE TURNED\nYOUR NAME DOWN!"},{"pages":[["TRY ANOTHER ONE!"]],"speaker":"Mr.Prog","text":"TRY ANOTHER ONE!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_NAME.0","kind":"speech","line":65,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE SQUARE TURNED\nYOUR NAME DOWN!|TRY ANOTHER ONE!","text_hash":"6f87c1f65491"},
-  {"boxes":[{"pages":[["OH NO,OH NO! THAT","SQUARE IS FULL UP!"]],"speaker":"Mr.Prog","text":"OH NO,OH NO! THAT\nSQUARE IS FULL UP!"},{"pages":[["TRY AGAIN LATER!"]],"speaker":"Mr.Prog","text":"TRY AGAIN LATER!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_FULL.0","kind":"speech","line":66,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH NO,OH NO! THAT\nSQUARE IS FULL UP!|TRY AGAIN LATER!","text_hash":"852587baccbd"},
-  {"boxes":[{"pages":[["THAT SQUARE STAYS","SHUT FOR YOU..."]],"speaker":"Mr.Prog","text":"THAT SQUARE STAYS\nSHUT FOR YOU..."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_BARRED.0","kind":"speech","line":67,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT SQUARE STAYS\nSHUT FOR YOU...","text_hash":"be5766dc981b"},
-  {"boxes":[{"pages":[["A SQUARE MODERATOR","SENT YOU HOME!"]],"speaker":"Mr.Prog","text":"A SQUARE MODERATOR\nSENT YOU HOME!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_REMOVED.0","kind":"speech","line":68,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A SQUARE MODERATOR\nSENT YOU HOME!","text_hash":"d97c103ad1ed"},
-  {"boxes":[{"pages":[["Whoa! The link to","the Square broke!"]],"speaker":"MegaMan","text":"Whoa! The link to\nthe Square broke!"},{"pages":[["We're back home,Lan."]],"speaker":"MegaMan","text":"We're back home,Lan."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_LOST.0","kind":"speech","line":69,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The link to\nthe Square broke!|We're back home,Lan.","text_hash":"c8aa3653a371"},
-  {"boxes":[{"pages":[["Huh? The Square","wouldn't load..."]],"speaker":"MegaMan","text":"Huh? The Square\nwouldn't load..."},{"pages":[["We're back home,Lan."]],"speaker":"MegaMan","text":"We're back home,Lan."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_BROKEN.0","kind":"speech","line":70,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? The Square\nwouldn't load...|We're back home,Lan.","text_hash":"7b54b92c37f9"},
+  {"boxes":[{"pages":[["Official Square"]],"speaker":"MegaMan","text":"Official Square"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:0","kind":"screen","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Official Square","text_hash":"f01cc387e209"},
+  {"boxes":[{"pages":[["Another server"]],"speaker":"MegaMan","text":"Another server"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:1","kind":"screen","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Another server","text_hash":"413a495c7b34"},
+  {"boxes":[{"pages":[["My name"]],"speaker":"MegaMan","text":"My name"}],"container":"gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_options:2","kind":"screen","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"My name","text_hash":"a8f40df7087b"},
+  {"boxes":[{"pages":[["HELLO! I KEEP THE","NET SQUARE GATE!"]],"speaker":"Mr.Prog","text":"HELLO! I KEEP THE\nNET SQUARE GATE!"},{"pages":[["IT LEADS TO","{host}!"]],"speaker":"Mr.Prog","text":"IT LEADS TO\n{host}!"}],"container":"gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_hello:0","kind":"speech","line":20,"placeholders":[{"name":"host","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO\n{host}!","text_hash":"e38b4edc3643"},
+  {"boxes":[{"pages":[["HELLO! I KEEP THE","NET SQUARE GATE!"]],"speaker":"Mr.Prog","text":"HELLO! I KEEP THE\nNET SQUARE GATE!"},{"pages":[["IT LEADS TO THE","OFFICIAL SQUARE!"]],"speaker":"Mr.Prog","text":"IT LEADS TO THE\nOFFICIAL SQUARE!"}],"container":"gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_hello:1","kind":"speech","line":21,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO THE\nOFFICIAL SQUARE!","text_hash":"033e1eca6270"},
+  {"boxes":[{"pages":[["WHAT CAN I DO?"]],"speaker":"Mr.Prog","text":"WHAT CAN I DO?"}],"container":"gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_ask:0","kind":"speech","line":25,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHAT CAN I DO?","text_hash":"84969c3b7ee7"},
+  {"boxes":[{"pages":[["DONE! IT LEADS TO","THE OFFICIAL SQUARE!"]],"speaker":"Mr.Prog","text":"DONE! IT LEADS TO\nTHE OFFICIAL SQUARE!"}],"container":"gate_keeper_official","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_official:0","kind":"speech","line":27,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DONE! IT LEADS TO\nTHE OFFICIAL SQUARE!","text_hash":"413ebe9d070a"},
+  {"boxes":[{"pages":[["COME BACK ANYTIME!"]],"speaker":"Mr.Prog","text":"COME BACK ANYTIME!"}],"container":"gate_keeper_bye","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_bye:0","kind":"speech","line":29,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"COME BACK ANYTIME!","text_hash":"1e5e667c4aef"},
+  {"boxes":[{"pages":[["DONE! IT LEADS TO","{host}!"]],"speaker":"Mr.Prog","text":"DONE! IT LEADS TO\n{host}!"}],"container":"gate_keeper_set","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_set:0","kind":"speech","line":35,"placeholders":[{"name":"host","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DONE! IT LEADS TO\n{host}!","text_hash":"5479456c0698"},
+  {"boxes":[{"pages":[["GOT IT! HELLO,","{name}!"]],"speaker":"Mr.Prog","text":"GOT IT! HELLO,\n{name}!"}],"container":"gate_keeper_named","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_named:0","kind":"speech","line":41,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"GOT IT! HELLO,\n{name}!","text_hash":"f7f6d3713910"},
+  {"boxes":[{"pages":[["WAIT,WAIT! FIRST,","YOUR NAME,PLEASE!"]],"speaker":"Mr.Prog","text":"WAIT,WAIT! FIRST,\nYOUR NAME,PLEASE!"}],"container":"gate_keeper_name_first","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_name_first:0","kind":"speech","line":45,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WAIT,WAIT! FIRST,\nYOUR NAME,PLEASE!","text_hash":"6696f0985383"},
+  {"boxes":[{"pages":[["NAVIS FROM OTHER","PETS MEET THERE!"]],"speaker":"Mr.Prog","text":"NAVIS FROM OTHER\nPETS MEET THERE!"},{"pages":[["ITS SERVER SEES YOUR","ADDRESS AND NAME,"]],"speaker":"Mr.Prog","text":"ITS SERVER SEES YOUR\nADDRESS AND NAME,"},{"pages":[["AND MEGAMAN,TOO!"]],"speaker":"Mr.Prog","text":"AND MEGAMAN,TOO!"}],"container":"gate_keeper_privacy","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_privacy:0","kind":"speech","line":48,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NAVIS FROM OTHER\nPETS MEET THERE!|ITS SERVER SEES YOUR\nADDRESS AND NAME,|AND MEGAMAN,TOO!","text_hash":"ecaa3f86c3d5"},
+  {"boxes":[{"pages":[["SO! GO ONLINE?"]],"speaker":"Mr.Prog","text":"SO! GO ONLINE?\n"}],"container":"gate_keeper_privacy_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_keeper_privacy_question:0","kind":"speech","line":53,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SO! GO ONLINE?\n","text_hash":"953ed0113052"},
+  {"boxes":[{"pages":[["To the Net Square,","Lan?"]],"speaker":"MegaMan","text":"To the Net Square,\nLan?\n"}],"container":"gate_question","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_question:0","kind":"speech","line":55,"speaker":"MegaMan","speakers":["MegaMan"],"text":"To the Net Square,\nLan?\n","text_hash":"d4e1cd08c2f9"},
+  {"boxes":[{"pages":[["Let's stay home for","now,Lan."]],"speaker":"MegaMan","text":"Let's stay home for\nnow,Lan."}],"container":"gate_save_failed","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_save_failed:0","kind":"speech","line":57,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let's stay home for\nnow,Lan.","text_hash":"bed1cb8068a3"},
+  {"boxes":[{"pages":[["SORRY! THE SQUARE'S","UNDER MAINTENANCE!"]],"speaker":"Mr.Prog","text":"SORRY! THE SQUARE'S\nUNDER MAINTENANCE!"},{"pages":[["COME BACK LATER!"]],"speaker":"Mr.Prog","text":"COME BACK LATER!"}],"container":"maintenance","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:maintenance:0","kind":"speech","line":66,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SORRY! THE SQUARE'S\nUNDER MAINTENANCE!|COME BACK LATER!","text_hash":"93c117ccec77"},
+  {"boxes":[{"pages":[["SORRY! THE SQUARE'S","UNDER MAINTENANCE!"]],"speaker":"Mr.Prog","text":"SORRY! THE SQUARE'S\nUNDER MAINTENANCE!"},{"pages":[["THE SIGN ON IT SAYS,"]],"speaker":"Mr.Prog","text":"THE SIGN ON IT SAYS,"}],"container":"maintenance","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:maintenance:1","kind":"speech","line":67,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SORRY! THE SQUARE'S\nUNDER MAINTENANCE!|THE SIGN ON IT SAYS,","text_hash":"891095716a8a"},
+  {"boxes":[{"pages":[["We're home,Lan!"]],"speaker":"MegaMan","text":"We're home,Lan!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_LEFT.0","kind":"speech","line":87,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We're home,Lan!","text_hash":"ef86a5c60ab4"},
+  {"boxes":[{"pages":[["HMM... NO ANSWER","FROM THAT SERVER!"]],"speaker":"Mr.Prog","text":"HMM... NO ANSWER\nFROM THAT SERVER!"},{"pages":[["MAYBE IT'S DOWN,OR","ITS ADDRESS IS OFF!"]],"speaker":"Mr.Prog","text":"MAYBE IT'S DOWN,OR\nITS ADDRESS IS OFF!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_UNREACHABLE.0","kind":"speech","line":88,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... NO ANSWER\nFROM THAT SERVER!|MAYBE IT'S DOWN,OR\nITS ADDRESS IS OFF!","text_hash":"d31fdd2bd69e"},
+  {"boxes":[{"pages":[["OH! A NEWER VERSION","IS OUT!"]],"speaker":"Mr.Prog","text":"OH! A NEWER VERSION\nIS OUT!"},{"pages":[["UPDATE AT THE GAME'S","DOWNLOAD PAGE!"]],"speaker":"Mr.Prog","text":"UPDATE AT THE GAME'S\nDOWNLOAD PAGE!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_VERSION.0","kind":"speech","line":89,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH! A NEWER VERSION\nIS OUT!|UPDATE AT THE GAME'S\nDOWNLOAD PAGE!","text_hash":"4213dc6376f2"},
+  {"boxes":[{"pages":[["HMM! THAT SQUARE'S","SERVER IS BEHIND!"]],"speaker":"Mr.Prog","text":"HMM! THAT SQUARE'S\nSERVER IS BEHIND!"},{"pages":[["ITS HOST HAS TO","UPDATE IT FIRST!"]],"speaker":"Mr.Prog","text":"ITS HOST HAS TO\nUPDATE IT FIRST!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_OLD_SERVER.0","kind":"speech","line":90,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM! THAT SQUARE'S\nSERVER IS BEHIND!|ITS HOST HAS TO\nUPDATE IT FIRST!","text_hash":"c0b05bee71db"},
+  {"boxes":[{"pages":[["THAT SQUARE IS SET","FOR OTHER GAME DATA!"]],"speaker":"Mr.Prog","text":"THAT SQUARE IS SET\nFOR OTHER GAME DATA!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_ROM.0","kind":"speech","line":92,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT SQUARE IS SET\nFOR OTHER GAME DATA!","text_hash":"4eabbd6bac30"},
+  {"boxes":[{"pages":[["THE SQUARE TURNED","YOUR NAME DOWN!"]],"speaker":"Mr.Prog","text":"THE SQUARE TURNED\nYOUR NAME DOWN!"},{"pages":[["TRY ANOTHER ONE!"]],"speaker":"Mr.Prog","text":"TRY ANOTHER ONE!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_NAME.0","kind":"speech","line":93,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE SQUARE TURNED\nYOUR NAME DOWN!|TRY ANOTHER ONE!","text_hash":"6f87c1f65491"},
+  {"boxes":[{"pages":[["OH NO,OH NO! THAT","SQUARE IS FULL UP!"]],"speaker":"Mr.Prog","text":"OH NO,OH NO! THAT\nSQUARE IS FULL UP!"},{"pages":[["TRY AGAIN LATER!"]],"speaker":"Mr.Prog","text":"TRY AGAIN LATER!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_FULL.0","kind":"speech","line":94,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH NO,OH NO! THAT\nSQUARE IS FULL UP!|TRY AGAIN LATER!","text_hash":"852587baccbd"},
+  {"boxes":[{"pages":[["THAT SQUARE STAYS","SHUT FOR YOU..."]],"speaker":"Mr.Prog","text":"THAT SQUARE STAYS\nSHUT FOR YOU..."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_BARRED.0","kind":"speech","line":95,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT SQUARE STAYS\nSHUT FOR YOU...","text_hash":"be5766dc981b"},
+  {"boxes":[{"pages":[["A SQUARE MODERATOR","SENT YOU HOME!"]],"speaker":"Mr.Prog","text":"A SQUARE MODERATOR\nSENT YOU HOME!"}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_REMOVED.0","kind":"speech","line":96,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A SQUARE MODERATOR\nSENT YOU HOME!","text_hash":"d97c103ad1ed"},
+  {"boxes":[{"pages":[["Whoa! The link to","the Square broke!"]],"speaker":"MegaMan","text":"Whoa! The link to\nthe Square broke!"},{"pages":[["We're back home,Lan."]],"speaker":"MegaMan","text":"We're back home,Lan."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_LOST.0","kind":"speech","line":97,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The link to\nthe Square broke!|We're back home,Lan.","text_hash":"c8aa3653a371"},
+  {"boxes":[{"pages":[["Huh? The Square","wouldn't load..."]],"speaker":"MegaMan","text":"Huh? The Square\nwouldn't load..."},{"pages":[["We're back home,Lan."]],"speaker":"MegaMan","text":"We're back home,Lan."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_BROKEN.0","kind":"speech","line":98,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? The Square\nwouldn't load...|We're back home,Lan.","text_hash":"7b54b92c37f9"},
+  {"boxes":[{"pages":[["Whoa! The whole","Square changed!"]],"speaker":"MegaMan","text":"Whoa! The whole\nSquare changed!"},{"pages":[["We're back home,Lan."]],"speaker":"MegaMan","text":"We're back home,Lan."}],"container":"gate_end_words","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","flags":[],"id":"gate_words:gate_end_words:caseVISIT_END_MOVED.0","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The whole\nSquare changed!|We're back home,Lan.","text_hash":"bcbf81d890c0"},
   {"boxes":[{"pages":[["The guardian"]],"speaker":"MegaMan","text":"The guardian"}],"container":"home_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_words:0","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The guardian","text_hash":"f92ffe8c7329"},
   {"boxes":[{"pages":[["Lan... The Net's","rebuilding."]],"speaker":"MegaMan","text":"Lan... The Net's rebuilding."},{"pages":[["Then we dive again!","Ready,MegaMan?"]],"speaker":"Lan","text":"Then we dive again! Ready,MegaMan?"}],"container":"home_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_words:1","kind":"speech","line":19,"note":"(acts cleared in this cycle, the Nest's 0)","speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan... The Net's rebuilding.|@L Then we dive again! Ready,MegaMan?","text_hash":"43c5722d394f"},
   {"boxes":[{"pages":[["Phew... {who}'s","deleted,Lan."]],"speaker":"MegaMan","text":"Phew... {who}'s deleted,Lan."},{"pages":[["The Nest is next."]],"speaker":"MegaMan","text":"The Nest is next."},{"pages":[["Then we get ready.","Together!"]],"speaker":"Lan","text":"Then we get ready. Together!"}],"container":"home_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_words:2","kind":"speech","line":21,"note":"(acts cleared in this cycle, the Nest's 0)","placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Phew... {who}'s deleted,Lan.|@M The Nest is next.|@L Then we get ready. Together!","text_hash":"bd20204b7773"},
@@ -4137,6 +4182,14 @@
   {"boxes":[{"pages":[["Use 1-16 letters,","digits, spaces, _ or","-"]],"speaker":"Screen","text":"Use 1-16 letters, digits, spaces, _ or -"}],"container":"online_field_bad_name","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_field_bad_name:0","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"Use 1-16 letters, digits, spaces, _ or -","text_hash":"f0975cae4810"},
   {"boxes":[{"pages":[["That is not a server","address"]],"speaker":"Screen","text":"That is not a server address"}],"container":"online_field_bad_address","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_field_bad_address:0","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"That is not a server address","text_hash":"c349750d95e0"},
   {"boxes":[{"pages":[["A: type L: erase","START: OK B: back"]],"speaker":"Screen","text":"A: type   L: erase   START: OK   B: back"}],"container":"online_field_keys_hint","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_field_keys_hint:0","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"A: type   L: erase   START: OK   B: back","text_hash":"5d5ce9e5a6f9"},
+  {"boxes":[{"pages":[["Net Square"]],"speaker":"Screen","text":"Net Square"}],"container":"reconnect_text_title","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_title:0","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Net Square","text_hash":"e450dedaa053"},
+  {"boxes":[{"pages":[["Link lost"]],"speaker":"Screen","text":"Link lost"}],"container":"reconnect_text_lost","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_lost:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Link lost","text_hash":"15da001d41cc"},
+  {"boxes":[{"pages":[["Back online!"]],"speaker":"Screen","text":"Back online!"}],"container":"reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_back:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"Back online!","text_hash":"4ef775fe2235"},
+  {"boxes":[{"pages":[["YOUR SPOT IN THE","SQUARE IS KEPT"]],"speaker":"Screen","text":"YOUR SPOT IN THE SQUARE IS KEPT"}],"container":"reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_kept:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"YOUR SPOT IN THE SQUARE IS KEPT","text_hash":"4abb8d50490b"},
+  {"boxes":[{"pages":[["GO HOME"]],"speaker":"Screen","text":"GO HOME"}],"container":"reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_key_home:0","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"GO HOME","text_hash":"64812fe8b3a7"},
+  {"boxes":[{"pages":[["Reconnecting."]],"speaker":"Screen","text":"Reconnecting."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:1","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting.","text_hash":"b4ffa33dbba5"},
+  {"boxes":[{"pages":[["Reconnecting.."]],"speaker":"Screen","text":"Reconnecting.."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:2","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting..","text_hash":"992c8edaac73"},
+  {"boxes":[{"pages":[["Reconnecting..."]],"speaker":"Screen","text":"Reconnecting..."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:3","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting...","text_hash":"9cc98dbd8db4"},
   {"boxes":[{"pages":[["big tree"]],"speaker":"Bystander","text":"big tree"}],"container":"landmark_name","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"fragment":true,"id":"square_life_words:landmark_name:0","kind":"screen","line":12,"speaker":"Bystander","speakers":["Bystander"],"text":"big tree","text_hash":"1164f6e0ab24"},
   {"boxes":[{"pages":[["HELLO! WELCOME,","WELCOME!"]],"speaker":"Mr.Prog","text":"HELLO! WELCOME,\nWELCOME!"}],"container":"square_greeter_words","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_greeter_words:0","kind":"speech","line":27,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! WELCOME,\nWELCOME!","text_hash":"34f6abfad1ce"},
   {"boxes":[{"pages":[["{arrived} JUST","LOGGED IN!"]],"speaker":"Mr.Prog","text":"{arrived} JUST\nLOGGED IN!"}],"container":"square_greeter_words","continues":true,"domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_greeter_words:1","kind":"speech","line":28,"placeholders":[{"name":"arrived","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"|{arrived} JUST\nLOGGED IN!","text_hash":"fa47943fc8d7"},
