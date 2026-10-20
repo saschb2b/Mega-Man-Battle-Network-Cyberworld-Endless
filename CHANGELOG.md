@@ -33,6 +33,18 @@
   archives the server's key, moderation and Board once a day, keeping
   `backup_days` (14), and `--restore` puts one back; the Coolify
   deployment runs the backup as a second service.
+- **Online statistics (issue #156).** With the anonymous statistics on,
+  the game also tells how a visit to a Net Square ended (and its minutes,
+  the NetPass, and whether the server was the official one, never its
+  address), a NetBattle's network numbers (delay, rollback window,
+  rollbacks and the deepest, the worst tick, the stalls) and how it
+  ended, and that a trade was done, a battle watched or a dive posted;
+  never a name, an identity or anything typed (docs/GUIDE.md, Anonymous
+  statistics). Server hosts: the server counts each UTC day's joins,
+  different players (a number: the day's identities are dropped at its
+  end), the most online at once, trades, NetBattles, battles watched,
+  dives and HELLOs by version, with no names, in `stats.jsonl` for
+  `stats_days` (365) and at `GET /stats`.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a

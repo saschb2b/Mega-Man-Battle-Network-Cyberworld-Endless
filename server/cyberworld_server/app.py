@@ -16,6 +16,7 @@ from .trade import Trades
 from .week import Weeks, week_of
 from .identity import IdentityStore
 from . import retention
+from .stats import Daily
 
 LOG = logging.getLogger("cyberworld.server")
 
@@ -78,6 +79,9 @@ class Server:
         self.trades, self.arena = Trades(self), Arena(self)
         self.weeks = Weeks(self, clock)
         self.stands = Stands(self)
+        # (the day's totals, no personal data: stats.py)
+        self.daily = Daily(state_dir, self.retention.stats_days, clock)
+        self.daily_task = None
 
     def event(self, kind, **fields):
         """An event in the console's log; one that names a player (a public
@@ -117,6 +121,10 @@ class Server:
             await asyncio.gather(self.roster_task, return_exceptions=True)
         if self.retention_task:
             await asyncio.gather(self.retention_task, return_exceptions=True)
+        # (the day so far written as the server stops, after a day's end still being written)
+        if self.daily_task:
+            await asyncio.gather(self.daily_task, return_exceptions=True)
+        await self.write_day(self.daily.snapshot())
         try:
             self.store.roster([])
         except (OSError, ValueError) as exc:
@@ -138,7 +146,7 @@ class Server:
         try:
             try:
                 async with asyncio.timeout(self.handshake_timeout):
-                    if not await websocket.upgrade(reader, writer, self.origins, self.health()):
+                    if not await websocket.upgrade(reader, writer, self.origins, self.health(), stats=self.daily.public):
                         return
                     upgraded = True
                     opcode, data = await websocket.receive(reader)
@@ -146,6 +154,9 @@ class Server:
                 self.pending.discard(task)
             if opcode != 2:
                 raise protocol.ProtocolError("Expected binary HELLO")
+            version = protocol.hello_version(data)
+            if version is not None:
+                self.daily.hello(version)
             player = self.join(writer, *protocol.read_hello(data))
             await self.welcome(player)
             await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
@@ -210,6 +221,7 @@ class Server:
             self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
+        self.daily.join(identity, len(self.players), protocol.full_set(roms))
         self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
         return player
 
@@ -407,6 +419,18 @@ class Server:
             self.event("retention", **gone)
         return gone
 
+    def day(self):
+        """A UTC day ended: its totals written, in a thread, as the next begins."""
+        ended = self.daily.rollover()
+        if ended:
+            self.daily_task = asyncio.create_task(self.write_day(ended))
+
+    async def write_day(self, entry):
+        try:
+            await asyncio.to_thread(self.daily.write, entry)
+        except (OSError, ValueError) as exc:
+            LOG.error("Could not write the day's totals: %s", exc)
+
     async def tick(self):
         while True:
             await asyncio.sleep(1 / self.tick_hz)
@@ -415,6 +439,7 @@ class Server:
                 self.last_moderation = now
                 await self.moderation()
                 self.keep(now)
+                self.day()
                 self.trades.expire(now)
                 self.arena.expire(now)
             self.stands.pump(now)

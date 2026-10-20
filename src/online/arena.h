@@ -55,6 +55,16 @@ unsigned arena_result(const Arena *a);
 bool arena_apart(const Arena *a);
 /* the ticks stalled, waiting for the peer's keys */
 uint32_t arena_stalls(const Arena *a);
+/* the battle's network as counted, for the statistics' NetBattle
+ * (analytics_online.h): the delay and the window, the rollbacks and the
+ * most frames at once, the ticks stalled, a tick's longest, the frames
+ * settled */
+typedef struct {
+	unsigned delay, window;
+	uint32_t rollbacks, deepest, stalls, frames;
+	double worst_tick_ms;
+} ArenaNumbers;
+void arena_numbers(const Arena *a, ArenaNumbers *out);
 /* what the stands' report reads of the battle (arena_report.h): each
  * side's MegaMan as the cable's first core has him, at the last frame whose
  * keys are all known, so a frame run on a guess and rolled back is never
