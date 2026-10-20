@@ -37,7 +37,7 @@ static void band(int x, int y, int w, const char *right, SDL_Color c) {
 
 /* a signal's four bars from (x, y), lit one more each quarter second and
  * dark again: the PET searching */
-static void signal(int x, int y, uint32_t t) {
+static void searching(int x, int y, uint32_t t) {
 	int lit = (int)(t / 250 % 5);
 	for (int b = 0; b < 4; ++b) {
 		int h = 5 + b * 4, bx = x + b * 6;
@@ -74,7 +74,7 @@ void reconnect_draw(int x, int y, const ReconnectView *v) {
 	netpass_panel(px - 1, py - 1, PANEL_W + 2, PANEL_H + 2, PET_EXIT, PET_CYAN);
 	netpass_ground(px, py, PANEL_W, PANEL_H);
 	band(px, py, PANEL_W, reconnect_text_lost, PET_CYAN_HI);
-	signal(px + 10, py + HEAD_H + 8, v->t);
+	searching(px + 10, py + HEAD_H + 8, v->t);
 	text_draw(px + 42, py + HEAD_H + 7, reconnect_text_trying((int)(v->t / 400 % 4)), PET_WHITE, TEXT_LEFT);
 	minifont_draw(px + 42, py + HEAD_H + 23, reconnect_text_kept, PET_DIM, 1);
 	if (v->elapsed >= BAR_AFTER_MS) time_left(px + 10, py + HEAD_H + 38, PANEL_W - 20, v);

@@ -221,7 +221,7 @@ Souls from words of the game's own, never read from BN5's ROM.
 | --- | --- | --- |
 | The game's side | `src/online/` (the NetPass's set and stamps in `netpass.c`), the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v9](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v10](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -250,9 +250,106 @@ thrown away on the way home. Coming home puts the state back and
 `director_resume()` re-enters Lan's HP on the live core, MegaMan on the
 gate as he left it; nothing is booted again. A game closed in the Square
 continues from the gate's checkpoint, as any CONTINUE does. Every end has
-MegaMan's word for it at the gate: left, called off, no answer, another
-version, another ROM, a name taken, a full Square, barred, removed, the
-connection lost.
+a word for it at the gate: left, called off, no answer, a newer version
+out (the keeper names the game's download page), a server older than the
+game, another ROM, a name taken, a full Square, barred, removed, the
+Square under maintenance (with the host's line), the connection lost (a
+dropped link that did not come back, or B on its wait), another Square
+after a dropped link came back (a server restarted with another seed).
+
+### A dropped link
+
+[Issue #153](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/153),
+the owner, 21 October 2026: "I just had a slight internet hiccup and got
+jacked out. A small wait time with me proceeding online would feel
+better." A link that drops in the Square no longer sends MegaMan home.
+
+**The design** (the game-design skill, interface: guidance and feedback,
+transitions). The dialectic is the Square's own, gather against go: a
+hiccup is neither the player's choice to go nor the server's to send him,
+so it should cost neither the place he stood in nor the people round him.
+The patterns: a wait over the frozen world rather than a screen of its
+own (the player sees where he will be put back; a short load's spinner
+over the world, McBride-Charpentier); the time left only past a few
+seconds, as a load's bar is; an emergency exit always shown (B home), so
+being held is never helplessness (Nielsen's user control and freedom);
+the return said in a moment, a band and not a dialog, as a player on a bad
+link may see it often (the frequency budget of transitions). Loop layer:
+the session between acts; nothing of a run changes.
+
+**The game** (`online_transport.c`, `online_scene.c`, `online_visit.c`,
+the screen `reconnect_draw.c` and its PET text `reconnect_text.c`). Once
+the server has welcomed the visit:
+
+- a link that has said nothing for 2.5 seconds (`ONLINE_QUIET_MS`;
+  snapshots come 20 times a second, PONGs every two) is **quiet**: the
+  game's core holds still (`online_visit_waiting`, in the frame's place,
+  as a NetBattle holds it), and the wait is drawn over the Square, dimmed:
+  a PET panel in the NetPass's colours, "Net Square" with "Link lost" in
+  its slot, a signal searching, "Reconnecting...", "YOUR SPOT IN THE SQUARE
+  IS KEPT", from five seconds on a bar of the time left, and B "GO HOME".
+  A link that speaks again within its limit goes on with nothing lost:
+  "Back online!" a moment in the band, and play goes on;
+- a link silent past 8 seconds, closed, or broken **without the
+  server's ERROR** is given up and tried again: a new socket and a
+  resume's HELLO (the channel MegaMan stood in, protocol v10's resume
+  bit), after 0.5, 1, 2, then every 4 seconds, for 30 seconds from the
+  moment it went quiet or dropped (`ONLINE_RECONNECT_MS`: long enough for a
+  phone's Wi-Fi to come back or hand over to its mobile data, short
+  enough that nobody waits on a player who is not coming back). Every
+  system the same: a worker's thread on the desktops, the handhelds,
+  Android, iOS, Windows and the 3DS (their sockets' own timeouts bound a
+  try, 5 to 7 seconds), and the browser's WebSocket from its frame's poll,
+  no wait on the frame;
+- the resume is done at its WELCOME and the first SNAPSHOT after it: the
+  same Square (the seed the Square was built from) and MegaMan where he
+  stood, his card sent again, and what came in from the last session and
+  was not yet read set aside. A WELCOME with another seed (a server
+  restarted with another) ends the visit, MegaMan's "Whoa! The whole
+  Square changed!"; a refusal (another version, full, barred,
+  maintenance) ends it with its word, as at the gate; past the 30
+  seconds, "Whoa! The link to the Square broke!", as before. B on the
+  wait gives up at once, the same word;
+- what was under way ends as on any leave: a NetBattle stops without a
+  result ("the connection to the Square was lost", then the Square, held
+  under the wait if the link is still down), watching stops, the Arena's
+  question and Trade Central's trade are over (the server's word on the
+  trade comes again with the resume: below; on a new session, a server
+  restarted, the game calls an unfinished trade off itself). Nothing
+  meant for the old session is sent on the new one;
+- leaving with the link up says goodbye (BYE), so the server frees the
+  place at once.
+
+While the link is quiet the game sends its place twice a second rather
+than twenty times, so what a stalled link lets through at once when it
+clears stays small.
+
+**The server** (`server/cyberworld_server/holds.py`). A session that
+ends without a goodbye (BYE or a WebSocket close), its socket gone or
+silent for 15 seconds, keeps its place for **40 seconds**: its slot in
+its channel, its session ID, and its MegaMan standing where he stood in
+the others' snapshots, so nobody sees him leave and come back. Forty: the
+game's 30 seconds of tries, the last try's handshake, and the server
+noticing a drop sooner than the game (a reset) or later (its 15 seconds of
+silence). A resume's HELLO from the same identity takes the place back
+(the same session ID and channel; the "resume" in the server's log, not a
+"join" nor one of the day's joins), and the session's last trade end,
+done or off, is said again to it: a trade committed as the link dropped
+still comes home. A trade, a challenge or a battle aimed at a place held
+is answered "That Navi is busy". A goodbye, a refusal or a moderator's
+removal frees the place at once; a new visit from the gate (a HELLO
+without the resume bit) gives it up and arrives anew. Positions have a
+bucket of their own, 200 deep, so a stalled link's backlog is no flood.
+
+**Maintenance.** `maintenance = until 14:00 UTC` (or any line of up to
+40 printable characters) in `server.ini` turns every game away with ERROR
+16 and that line, and `/health` says it (`"maintenance"`): the gate's
+keeper says "SORRY! THE SQUARE'S UNDER MAINTENANCE!" and "THE SIGN ON IT
+SAYS, UNTIL 14:00 UTC" rather than "no answer"; a visit whose link
+dropped as the server went down for it comes home with the same word.
+A game newer than its server is answered ERROR 17, and the keeper says
+the server is behind; an older game hears "A NEWER VERSION IS OUT!" and
+"UPDATE AT THE GAME'S DOWNLOAD PAGE!".
 
 **The Square.** The server sends a seed; each game plans the same Square
 from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
@@ -722,10 +819,12 @@ without the full set, NOTICE 28):
 
 ## The server and the wire
 
-Protocol v9 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v9`; v7 added the
+Protocol v10 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v10`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
-NetPass's rule, above). The server refuses
+NetPass's rule, above, v10 a dropped link's place held and taken back,
+BYE, maintenance and which side is behind: A dropped link, above). The
+server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of
 bounds and a full Square; it refuses what needs the full set from a
@@ -1142,6 +1241,49 @@ server:
   as the round letters do (`gfx.c`), seen on the pass with BN6's ROM
   alone.
 
+- **A dropped link** (21 October 2026, issue #153, protocol v10, a
+  local server, the host build in two `tools/play.py` sessions, Alpha
+  through `tools/link_relay.py` (a TCP relay that holds every byte for N
+  seconds, `cut N`, or closes every link and refuses new ones, `close N`),
+  Beta straight to the server with `CYBERWORLD_ONLINE_TRACE`; both ROMs).
+  A five-second **cut**: Alpha's wait from 2.5 seconds, then "Back
+  online!" on the same session; the server saw no drop, and Beta's trace
+  had Alpha in all of its 120 frames over those 14 seconds. A five-second
+  **close**: the server held Alpha's place ("hold"), his tries were
+  refused for five seconds, then "resume" with the same session ID and
+  channel, and Beta's trace had Alpha in every one of its 150 frames. A
+  forty-second cut: the wait's bar ran down to 0 and Alpha came home to
+  "Whoa! The link to the Square broke!"; the server held the place from
+  its 15 seconds of silence and let it go 40 seconds later, Beta seeing
+  Alpha stand there 55 seconds in all, then leave. B on the wait: home at
+  once, the same word. The server restarted (twice) under two games in
+  the Square: both back in the same Square (seed 120) on new sessions.
+  The server restarted with `maintenance = until 14:00 UTC`: Alpha's
+  tries refused, home to the keeper's "SORRY! THE SQUARE'S UNDER
+  MAINTENANCE!". A NetBattle (Beta's game taking it and playing by itself,
+  `arenaboth`), Alpha's link closed 14 seconds in: "The NetBattle
+  stopped: the connection to the Square was lost" on Alpha, the wait,
+  the resume; "the other player left the NetBattle" and "Huh? They're
+  gone..." on Beta, both back in the Square, fine after. A trade offered
+  to Alpha by a ROM-free client (Gamma), Alpha's link closed with the offer
+  open: Gamma told the trade was off at once and never saw Alpha leave;
+  Alpha's resume brought the server's word on it, "Aw... The trade's
+  off." Found on the way and fixed: a stall's backlog of positions, let
+  through at once, tripped the server's rate limit (now a bucket of their
+  own, and fewer sent while nothing is heard); the new bucket refilled only
+  between two positions, so a NetBattle's keys drained it (refilled by
+  any message now); and a trade offered on the new session was called off
+  by the resume when its mail was read first (the resume is taken up
+  before the new session's mail, and the last session's unread mail set
+  aside). The wait captured at 240x160 and on a phone held upright
+  (1080x1920, the touch controls under it) with the `reconnect` dev step
+  (docs/DEVTOOLS.md). The server's tests (`server/tests/test_holds.py`)
+  hold the rest: the place held and taken back, its end, a goodbye, a
+  resume with nothing held, a new visit while held, a trade off and said
+  again, a trade committed as the link dropped coming home, one trade a
+  visit across it, a NetBattle ended for the other, a challenge to a place
+  held refused, a moderator freeing one, a stall's backlog, maintenance.
+
 **NetBattles in the browser** (20 October 2026, a local v9 server,
 headless Chrome, the harness in `.build/`): two browser tabs fought a
 full-rules NetBattle to its end, 28 hashes agreeing, one tab rolling
@@ -1171,6 +1313,18 @@ are in the history before 433865a8):
   fallback.
 
 ## Not yet
+
+- **A dropped link, what is left** (issue #153): played on the host
+  build only, through a local relay; the browser's tries (its WebSocket
+  from the frame's poll), Android, iOS, Windows and the 3DS are built and
+  untried, and so is a real network's hiccup (a Wi-Fi handover, a phone
+  sent to the background past 15 seconds). A trade committed as the link
+  dropped is held by the server's tests, not played between two games. A
+  game that gives up (past 30 seconds, or B) cannot say goodbye: the
+  others see its MegaMan stand until the server's hold ends (up to 55
+  seconds after a stall). A NetBattle's own stall handling is unchanged: a
+  link silent past 8 seconds now ends one (15 before). The planned
+  restart's countdown and drain (the issue's ideas 1 and 2) are later.
 
 - **The week's net, what is left:** a dive's summary hash is a format
   check, not evidence. A dive won (the Nest) has not been played to its

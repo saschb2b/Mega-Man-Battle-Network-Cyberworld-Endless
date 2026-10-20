@@ -45,6 +45,22 @@
   end), the most online at once, trades, NetBattles, battles watched,
   dives and HELLOs by version, with no names, in `stats.jsonl` for
   `stats_days` (365) and at `GET /stats`.
+- **A dropped connection no longer sends you home (issue #153).** When
+  the Net Square stops answering, the game holds still where MegaMan
+  stands and shows **Reconnecting...** over the Square while it tries
+  again, for up to 30 seconds; the server keeps your spot meanwhile, so
+  the others see your MegaMan stay put, and you play on as soon as the
+  link is back. B goes home at once. A NetBattle under way ends with no
+  result and a trade not yet done is off, as on any leave; a trade you
+  both agreed to still comes home. The gate also says when a newer
+  version is out (and to get it from the download page), when the
+  Square's server is the older one, and when the Square is under
+  maintenance, with the host's line. Server hosts: protocol v10; a
+  dropped player's place is held for 40 seconds (`hold` and `resume` in
+  the log; a resume is not a new join), and `maintenance = until 14:00
+  UTC` in `server.ini` turns games away with that line (server/README.md,
+  A dropped link and Maintenance). `tools/link_relay.py` drops a test
+  link on cue.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a

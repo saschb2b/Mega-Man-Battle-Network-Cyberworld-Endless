@@ -461,6 +461,26 @@ python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "$CHIPS,0:t
 python3 build.py shot --scene emu --run-depth 2 --frames 420 --input "$CHIPS,0:trade deal 20 5 411 12,30:,3:RIGHT,20:,3:A,30:,0:trade swap,60:" --shot-range 250:400:/src/.build/tc/deal
 ```
 
+A dropped link (docs/ONLINE.md, A dropped link) is tried with
+`tools/link_relay.py` between a game and a local server: `--listen 8931
+--to 127.0.0.1:8930 --control 8932`, the game's gate at
+`ws://127.0.0.1:8931/presence`, and a line on the control port (`echo
+"cut 5" | nc 127.0.0.1 8932`): `cut N` holds every byte both ways for N
+seconds (a stall: the sockets survive), `close N` closes every link and
+refuses new ones for N seconds (a drop: the server sees it at once),
+`status` says what is in force. A second game straight to the server, run
+with `CYBERWORLD_ONLINE_TRACE=FILE`, writes the peers it sees every sixth
+frame, which says whether it ever lost sight of the first. Its wait is
+drawn over any screen, for a capture, by the dev step `reconnect N` (as
+if the link went N seconds ago: the time left shows past five), `reconnect
+back` (the moment it is back) and `reconnect off`; nothing is held or
+sent:
+
+```bash
+python3 build.py shot --scene emu --run-depth 2 --frames 700 --input "300:,0:reconnect 12,300:" --shot "560:/src/.build/rc/240.bmp"
+python3 build.py shot --scene emu --run-depth 2 --frames 700 --touch --size 1080x1920 --dpi 420 --input "300:,0:reconnect 12,300:" --screen-shot "560:/src/.build/rc/phone.bmp"
+```
+
 The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
 data folder whose `network.ini` names a server and its consent (above),
 the arrival's chats paged, `0:place 16 72 3` and a step off and on.

@@ -137,7 +137,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v9`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v10`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -540,6 +540,43 @@ cannot lock players out. A new connection with a profile that is already
 connected (a reconnect the server has not yet seen drop) replaces the old
 session: the old one receives ERROR 12 and a close frame saying why, and
 the new one takes its place and, unless it asks for another, its channel.
+
+### A dropped link: the place held
+
+A player whose link drops without a goodbye (the game says BYE when it
+leaves, at the pad or as it closes) keeps his place for **40 seconds**
+(`holds.py`, protocol v10): his slot in his channel, which counts
+against the room and the cap, his session ID, and his MegaMan standing
+where he stood in the other players' Square. The server notices a drop
+at once where the socket closes, or after 15 seconds of silence. What he
+had under way ends at once, as on any leave: a trade not committed is
+off for both, a NetBattle ends for the other, watching stops, his board
+offer comes down. His game tries again for 30 seconds from the moment
+its link went quiet or dropped, with a resume's HELLO: the same place,
+session ID and channel, the other players told nothing, and the trade's
+last word (done or off) said again in case the link lost it. Forty
+seconds cover the game's 30, its last try's handshake, and a drop the
+server notices before the game does. The log says `hold`, then `resume`
+or `leave`; a resume is the same visit, neither a `join` nor one of the
+day's joins. A refusal, a moderator's removal or a goodbye frees the
+place at once; so does a new visit of the same profile from the gate,
+which arrives anew. Positions have a token bucket of their own (200 deep,
+25 a second) beside the 40 of the rest, so the backlog a stalled link
+lets through at once as it clears is not taken for a flood.
+
+### Maintenance
+
+`maintenance` in `server.ini` closes the Square: set it to a line of up
+to 40 printable characters (`maintenance = until 14:00 UTC`) and restart,
+and every game that comes is turned away with ERROR 16 and that line,
+which its gate's keeper reads out ("SORRY! THE SQUARE'S UNDER
+MAINTENANCE!", "THE SIGN ON IT SAYS, UNTIL 14:00 UTC") rather than "no
+answer"; `/health` carries it as `"maintenance"` (and the hold as
+`"hold_seconds"`). Players in the Square when the server goes down for it
+come home with the same word as their tries meet it. Empty or absent:
+open. A game newer than the server (its protocol or its Square
+generator) is answered ERROR 17, and its gate says the server is behind;
+an older game is answered ERROR 2 or 3 and told a newer version is out.
 
 ## TLS and privacy
 
