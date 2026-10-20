@@ -13,12 +13,13 @@ const EconPlan econ_today = { "today", {
 	[ECON_LEVER_ZENNY] = { 1, 2 }, [ECON_LEVER_LEAN] = { 1, 2 },
 } };
 /* The proposal (docs/ECONOMY.md, the curves): the first act's green
- * Mystery Data at 60%, its chips at 70%, its good chips' weight at 40%,
- * its zenny at 60% and none of its finds leaned to the folder's codes,
- * each opening on the same bend to today's by the net's last act */
+ * Mystery Data at half, their chips kept at 60%, the good chips' weight
+ * in its plain finds at a quarter, its zenny at half and none of its
+ * finds leaned to the folder's codes, each opening on the same bend to
+ * today's by the net's last act */
 const EconPlan econ_proposed = { "proposed", {
 	[ECON_LEVER_MD] = { 0.5, 2 }, [ECON_LEVER_CHIPS] = { 0.6, 2 }, [ECON_LEVER_GOOD] = { 0.25, 2 },
-	[ECON_LEVER_ZENNY] = { 0.4, 2 }, [ECON_LEVER_LEAN] = { 0, 2 },
+	[ECON_LEVER_ZENNY] = { 0.5, 2 }, [ECON_LEVER_LEAN] = { 0, 2 },
 } };
 const EconPlan *econ_plan = &econ_today;
 
@@ -68,11 +69,11 @@ static const double centre[2][ECON_METRICS][ECON_ACTS] = {
 		[ECON_CODES] = { 5, 8, 11, 15, 20, 24, 26 },
 	},
 	{   /* the proposal's */
-		[ECON_CHIPS] = { 8.7, 9.1, 12.0, 12.4, 17.1, 15.8, 5.4 },
-		[ECON_GOOD] = { 24.9, 29.8, 34.3, 43.9, 55.7, 70.1, 68.9 },
+		[ECON_CHIPS] = { 9.5, 9.4, 12.5, 12.9, 17.1, 15.7, 5.4 },
+		[ECON_GOOD] = { 23.7, 29.0, 34.5, 43.8, 56.9, 70.6, 69.2 },
 		[ECON_MD] = { 11.6, 12.6, 17.9, 18.2, 24.7, 22.6, 7.6 },
-		[ECON_ZENNY] = { 2710, 3650, 6050, 7250, 10860, 10720, 5390 },
-		[ECON_CODES] = { 3, 5, 7, 10, 15, 19, 21 },
+		[ECON_ZENNY] = { 2630, 3580, 5900, 7060, 10740, 10730, 5370 },
+		[ECON_CODES] = { 3, 5, 8, 11, 15, 19, 21 },
 	},
 };
 
@@ -86,10 +87,10 @@ static const double centre_short[2][ECON_METRICS][4] = {
 		[ECON_CODES] = { 5, 8, 12, 13 },
 	},
 	{   /* the proposal's */
-		[ECON_CHIPS] = { 8.9, 9.8, 14.7, 4.6 },
-		[ECON_GOOD] = { 24.7, 29.9, 38.1, 41.9 },
+		[ECON_CHIPS] = { 9.6, 10.0, 14.7, 4.6 },
+		[ECON_GOOD] = { 23.4, 30.2, 38.1, 41.9 },
 		[ECON_MD] = { 11.6, 13.5, 20.3, 6.6 },
-		[ECON_ZENNY] = { 2670, 4060, 6870, 4150 },
+		[ECON_ZENNY] = { 2650, 3980, 6860, 4150 },
 		[ECON_CODES] = { 3, 5, 9, 10 },
 	},
 };

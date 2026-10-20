@@ -32,14 +32,14 @@ yes ([Decisions](#decisions-for-the-owner)).
   as it is: no power creep, and nothing a later act gains.
 - **The proposal:** five levers, each a curve from a floor at the first
   act to today's at the net's last, on a logarithm (fastest opening early):
-  fewer green Mystery Data (half on act 1), fewer chips in a plain data
-  (60%), fewer good chips in the plain finds and fewer extra rich data
-  (a quarter of their weight), less zenny in a find (40%), and **no find
-  leaned to the folder's codes in act 1**. Act 1 then gives **8.7 chips,
-  2,700 zenny, 11.6 Mystery Data, three chips of one code by the
+  fewer green Mystery Data (half on act 1), a green data's chip kept 60%
+  of the time, fewer good chips in the plain finds and fewer extra rich
+  data (a quarter of their weight), half the zenny in a find, and **no
+  find leaned to the folder's codes in act 1**. Act 1 then gives **9.5
+  chips, 2,630 zenny, 11.6 Mystery Data, three chips of one code by the
   guardian**, and opens to today's by act 6. BN6's own battle drops and
   busting levels are untouched, so skill pays a larger share of the early
-  chips (37% against 28%).
+  chips (34% against 28%).
 - **The guard:** `python3 build.py economy` measures both plans and holds
   the plan in play to bands a fifth either side of its own numbers (0
   outside now); the curves have ROM-free tests; the run log now keeps
@@ -117,9 +117,9 @@ battles' half; the Mystery Data are `layer_generate`'s and
 `loot_mystery_roll`'s own, as the layers in play are (`LAYER_MAKE_HASH`
 unchanged). The proposal's levers run in play too: twelve one-hit
 autopilot runs with `--economy-plan proposed` reached acts 4 and 5, and
-their guardians' chip-entry zenny was the curve's to the zenny (240 in
-act 1, 525, 865, 1,246, 1,659 against today's 600 to 1,800), BN6's own
-rows' zenny (1,000, 2,000, 3,000) as before.
+their guardians' chip-entry zenny was the zenny curve's share of today's
+600 to 1,800 to the zenny, act by act (300, 588, 921, 1,288, 1,683),
+BN6's own rows' zenny (1,000, 2,000, 3,000, 6,000) as before.
 
 ## Before: what a run hands out today
 
@@ -143,15 +143,15 @@ guardian his Navi chip, five HPMemory and 1,260 zenny; the requests offer
 (9,700 zenny with the HPMemory), a Server's prize in about one run in
 five (91% good; half the acts after), a Chip Trader in three runs in
 four, and the start gift's choice of a 3-star chip, two HPMemory or a
-program. A layer lays 2.6
-green Mystery Data, 2 blue (1.3 of them rich: the far detour's and three
-in ten besides) and a purple one in four on its second layer; deeper, 3-4
-green and 3-4 blue.
+program. A layer lays 2.6 green Mystery Data, 2 blue (1.3 of them rich:
+the far detour's and three in ten besides) and a purple one in four on
+its second layer; deeper, 3-4 green and 3-4 blue.
 
 **What it says.**
 
-- *Chips:* about four a layer from the first, a folder's worth (30) by the
-  end of act 2; Mystery Data give two in three of them.
+- *Chips:* about four a layer from the first, 24 by the end of act 2 and
+  a folder's worth (30) early in act 3; Mystery Data give two in three of
+  them.
 - *Good chips:* a quarter in act 1, three of them, one the guardian's
   Mega; the rich data at a detour's end give most of the rest.
 - *Codes:* finds lean to the folder's codes three ways (a Mystery Data's
@@ -159,9 +159,9 @@ green and 3-4 blue.
   and every dealer's, trader's, request's, gift's, vault's and Server's
   chip in them), so 63% of act 1's finds fit the starting folder: the
   median run holds three chips of one code (with the \*s) by layer 2,
-  five by layer 3, ten by layer 8, and its first \* by layer 3. BN6's own Chip Trader does
-  the opposite: it gives a code the pack holds none of three times in four
-  (below).
+  five by layer 3, ten by layer 8, and its first \* by layer 3. BN6's own
+  Chip Trader does the opposite: it gives a code the pack holds none of
+  three times in four (below).
 - *Zenny:* by the act's dealer (layer 2) a run has 1,460 zenny, almost the
   1,600 his answer and HPMemory cost; the guardian's 1,260 then pays act
   2's before it begins, and the surplus grows every act.
@@ -177,9 +177,10 @@ green and 3-4 blue.
   in 16 pair 4, 10 pair 3 or 4, S (11, verified in the run log with
   one-hit kills) pair 4. The rows put zenny low and chips high: at act 1
   level 4 pays no chip and 103 zenny, level 8 a chip 62% of the time, S
-  88% (the report's skill table). A guardian's row pays big zenny at low
-  levels and his chip at high ones. *This is BN6's skill economy, and the
-  proposal keeps it whole.*
+  88% (the report's skill table). A guardian's row holds zenny and his
+  Navi chip, whose entries the engine pays as his act's zenny (his
+  Guardian Data gives the chip): the run logs saw 600, 1,000 and 2,000 in
+  act 1. *This is BN6's skill economy, and the proposal keeps it whole.*
 - **The Chip Trader spreads codes** (verified in bn6f, Falzar's
   addresses: `sub_804BF18` picks a code the pack holds none of with weight
   0xC0 against 0x40 at `byte_804B068`, its comment "75% new code 25% old
@@ -307,7 +308,7 @@ multiplication (`rolls_of` in `layer_objs.c`).
   rich data and the dealer's answer stay certain.
 - **What it does not touch** (the owner's standing decisions): BN6's
   battle drops and busting table (skill pays, as BN6's; its share of act
-  1's chips rises from 28% to 37%); the guardians' HPMemory and the
+  1's chips rises from 28% to 34%); the guardians' HPMemory and the
   heals (growth and difficulty pacing, docs/PROGRESSION.md); the buster
   (NaviCust-only); DarkChips; the meta (variety, not power); prices.
 
@@ -328,9 +329,9 @@ for the proposal's (tested): no act hands out more than today's.
 | Lever | Where | Today | F | Act 1 | 2 | 3 | 4 | 5 | 6 | Short net 1 / 2 / 3 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Green Mystery Data | `place_data` (net_gen.c): their count | 2-4 a layer, +1 deeper | 0.50 | 0.50 | 0.65 | 0.77 | 0.86 | 0.93 | 1 | 0.50 / 0.82 / 1 |
-| A data's chip | `loot_mystery_roll`: a green or blue data's chip kept, else its zenny | green 50%, blue 60% | 0.60 | 0.60 | 0.72 | 0.81 | 0.89 | 0.95 | 1 | 0.60 / 0.85 / 1 |
+| A green data's chip | `loot_mystery_roll`: kept by the share, else the data's zenny; a blue one keeps its odds | 50% of green data | 0.60 | 0.60 | 0.72 | 0.81 | 0.89 | 0.95 | 1 | 0.60 / 0.85 / 1 |
 | Good chips | `roll_chip`: tiers 2-4's weight in the plain finds (green and blue data, a dealer's shelf, a request's chip); `place_data`: the extra rich data's 30% | as rolled | 0.25 | 0.25 | 0.48 | 0.65 | 0.79 | 0.90 | 1 | 0.25 / 0.72 / 1 |
-| Zenny | `loot_mystery_roll`: a data's zenny; `loot_guardian_zenny`: a guardian's chip entry | 100-500 green, 800+ blue, 600+ guardian | 0.40 | 0.40 | 0.58 | 0.72 | 0.83 | 0.92 | 1 | 0.40 / 0.78 / 1 |
+| Zenny | `loot_mystery_roll`: a data's zenny; `loot_guardian_zenny`: a guardian's chip entry | 100-500 green, 800+ blue, 600+ guardian | 0.50 | 0.50 | 0.65 | 0.77 | 0.86 | 0.93 | 1 | 0.50 / 0.82 / 1 |
 | Lean to the folder's codes | `loot_mystery_roll`'s second roll; the battle rows' second entries | half the data, every row | 0 | 0 | 0.31 | 0.54 | 0.72 | 0.87 | 1 | 0 / 0.63 / 1 |
 
 Kept whole: the far detour's rich data, purple data, a Server's prize, a
@@ -343,33 +344,38 @@ copies and its price cap, in the folder's codes: convenience paid for).
 
 | Act | Chips | Good | Mystery Data | Zenny | Codes held | Fit | Earned / wanted so far |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 12.2 → **8.7** | 26% → 25% (3.2 → **2.2** chips) | 14.8 → **11.6** | 3,550 → **2,710** | 5 → **3** | 63% → **33%** | 3,480 → 2,640 / 1,600 |
-| 2 | 11.4 → 9.1 | 31% → 30% | 15.1 → 12.6 | 4,350 → 3,650 | 8 → 5 | 51% → 34% | 7,850 → 6,260 / 3,800 |
-| 3 | 14.7 → 12.0 | 38% → 34% | 20.3 → 17.9 | 6,880 → 6,050 | 11 → 7 | 56% → 42% | 14,920 → 12,140 / 7,400 |
-| 4 | 13.9 → 12.4 | 46% → 44% | 19.5 → 18.2 | 7,900 → 7,250 | 15 → 10 | 56% → 48% | 22,400 → 19,520 / 11,400 |
-| 5 | 17.8 → 17.1 | 57% → 56% | 24.7 → 24.7 | 10,890 → 10,860 | 20 → 15 | 56% → 52% | 33,210 → 30,690 / 16,800 |
-| 6 | 15.8 → 15.8 | 70% → 70% | 22.6 → 22.6 | 10,760 → 10,720 | 24 → 19 | 55% → 55% | 44,190 → 41,430 / 22,800 |
+| 1 | 12.2 → **9.5** | 26% → 24% (3.2 → **2.2** chips) | 14.8 → **11.6** | 3,550 → **2,630** | 5 → **3** | 63% → **34%** | 3,480 → 2,630 / 1,600 |
+| 2 | 11.4 → 9.4 | 31% → 29% | 15.1 → 12.6 | 4,350 → 3,580 | 8 → 5 | 51% → 34% | 7,850 → 6,220 / 3,800 |
+| 3 | 14.7 → 12.5 | 38% → 35% | 20.3 → 17.9 | 6,880 → 5,900 | 11 → 8 | 56% → 40% | 14,920 → 11,870 / 7,400 |
+| 4 | 13.9 → 12.9 | 46% → 44% | 19.5 → 18.2 | 7,900 → 7,060 | 15 → 11 | 56% → 48% | 22,400 → 18,880 / 11,400 |
+| 5 | 17.8 → 17.1 | 57% → 57% | 24.7 → 24.7 | 10,890 → 10,740 | 20 → 15 | 56% → 52% | 33,210 → 30,160 / 16,800 |
+| 6 | 15.8 → 15.7 | 70% → 71% | 22.6 → 22.6 | 10,760 → 10,730 | 24 → 19 | 55% → 55% | 44,190 → 40,620 / 22,800 |
 
 At the act's dealer (layer 2), a run had 1,460 zenny against his 1,600 and
-has 970: the answer or the HPMemory. Three chips of one code come by
-layer 3 rather than 2, five by layer 6 rather than 3; a layer keeps its
-far detour's rich data (1.06 rich a layer on act 1, from 1.26). The short net (a new run's) follows
-its own curve, open by its third act: act 1 as above (8.9 chips, 2,670
-zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
+has 930: the answer's two copies or the HPMemory. Three chips of one code
+come by layer 3 rather than 2, five by layer 6 rather than 3; a layer
+keeps its far detour's rich data (1.06 rich a layer on act 1, from
+1.26). The short net (a new run's) follows its own curve, open by its
+third act: act 1 as above (9.6 chips, 2,650 zenny, codes 3), act 2 10.0
+chips and 3,980 zenny, act 3 today's.
 
 ### What it costs
 
 - **A starved first act.** Act 1 keeps about three chips a layer (one
   from a battle), the gift's choice, a dealer whose answer costs 400 a
-  copy, and 970 zenny at his counter. The answer was built to beat the
+  copy, and 930 zenny at his counter. The answer was built to beat the
   first guardian beside the starting folder (docs/PROGRESSION.md,
-  Growth); the proposal leaves it, the gift and the heals as they are. Its risk is the run that finds little and then has
-  to choose at the dealer: the act card names the guardian before, so the
-  choice is informed. Watch the first guardian's win rate in the
-  statistics before and after.
-- **Fewer Mystery Data** make a layer's corners emptier. The proposal
-  takes green data out rather than leaving duds (a playtester's gem of
-  zenny "read as no find at all", loot.c), and keeps every blue one.
+  Growth); the proposal leaves it, the gift and the heals as they are.
+  Its risk is the run that finds little and then has to choose at the
+  dealer: the act card names the guardian before, so the choice is
+  informed. Watch the first guardian's win rate in the statistics before
+  and after.
+- **Fewer and plainer Mystery Data** make a layer's corners emptier. The
+  proposal takes half the green data out, and four in ten of the chips
+  the rest held become zenny, half of today's (50-250 on act 1); a
+  playtester's battle data of zenny "read as no find at all" (loot.c), so
+  the count falls more than the content. Every blue data stays, its odds whole but for
+  the good chips' weight in the plain blue ones.
 - **Codes left to chance early** make the first folders patchier: three
   of one code by the guardian rather than five. That is the point for
   trading, and BN6's own trader still answers it (three chips for one,
@@ -411,10 +417,10 @@ zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
    Mystery Data, zenny or codes held a fifth past its plan's measured
    number (`econ_band`, `src/core/economy.c`: the endless net's six acts
    and Nest, the short net's three and Nest); it prints how many of the
-   plan in play's are outside, 0 now. Run it wherever drops, prices, Mystery Data,
-   the dealers' stock or the levers change; when the owner says yes, the
-   plan in play becomes the proposal's (`econ_plan`) and its bands with
-   it. A change that moves a number on purpose sets its band's centre in
+   plan in play's are outside, 0 now. Run it wherever drops, prices,
+   Mystery Data, the dealers' stock or the levers change; when the owner
+   says yes, the plan in play becomes the proposal's (`econ_plan`) and
+   its bands with it. A change that moves a number on purpose sets its band's centre in
    the same commit, with the report's before and after in its message.
    `--economy-plan proposed` plays a game under the proposal before the
    decision (docs/DEVTOOLS.md).
@@ -447,8 +453,8 @@ zenny, codes 3), act 2 9.8 chips and 4,060 zenny, act 3 today's.
 
 1. **The proposal's shape:** a scarce first act opening on a logarithm to
    today's by the net's last act, nothing above today's anywhere. Yes, or
-   other floors (the table's `F`: green data 0.5, chips 0.6, good chips
-   0.25, zenny 0.4, lean 0)?
+   other floors (the table's `F`: green data 0.5, a green data's chip 0.6,
+   good chips 0.25, zenny 0.5, lean 0)?
 2. **The short net:** open by its own third act (proposed: a new run's
    arc is whole), or follow the endless net's acts (scarcer for longer)?
 3. **The codes:** no lean in act 1 for the free finds (proposed), the

@@ -27,9 +27,10 @@
  * soon it opens (the logarithm's bend; near 0 a straight line) */
 typedef struct { double floor, bend; } EconCurve;
 /* The levers a plan's curves move: the green Mystery Data a layer lays
- * (net_gen.c), the chip in a green or blue one, kept or zenny in its place
- * (loot_mystery_roll), the good chips' weight in a roll (roll_chip), the
- * zenny a find holds, the finds leaned to the folder's codes */
+ * (net_gen.c), the chip in a green one, kept or zenny in its place
+ * (loot_mystery_roll), the good chips' weight in a plain find's roll
+ * (roll_chip) and the extra rich data (net_gen.c), the zenny a find
+ * holds, the finds leaned to the folder's codes */
 enum { ECON_LEVER_MD, ECON_LEVER_CHIPS, ECON_LEVER_GOOD, ECON_LEVER_ZENNY, ECON_LEVER_LEAN, ECON_LEVERS };
 typedef struct {
 	const char *name;

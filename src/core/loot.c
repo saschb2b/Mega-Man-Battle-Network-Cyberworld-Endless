@@ -693,9 +693,9 @@ LootFind loot_mystery_roll(int param, int depth) {
 		if (roll < 60 || chips_only) bonus = 1;
 		else f.value = md_zenny(1, depth);
 	} else bonus = 3;
-	/* (the plan's chips: a green or blue data's chip kept by its share,
-	 * else its zenny in its place; economy.h) */
-	if (bonus >= 0 && param < 2 && !chips_only && !econ_keep(ECON_LEVER_CHIPS, depth)) {
+	/* (the plan's chips: a green data's chip kept by its share, else its
+	 * zenny in its place; a blue one keeps its odds: economy.h) */
+	if (bonus >= 0 && param == 0 && !chips_only && !econ_keep(ECON_LEVER_CHIPS, depth)) {
 		bonus = -1;
 		f.value = md_zenny(param, depth);
 	}

@@ -4744,9 +4744,11 @@ static void test_economy(void) {
 				}
 	EconBand today1 = econ_band(&econ_today, false, ECON_CHIPS, 0), after1 = econ_band(&econ_proposed, false, ECON_CHIPS, 0);
 	EconBand today6 = econ_band(&econ_today, false, ECON_CHIPS, 5), after6 = econ_band(&econ_proposed, false, ECON_CHIPS, 5);
-	CHECK(after1.hi < today1.hi && after6.lo == today6.lo, "the proposal's first act hands out fewer chips, its sixth as many");
+	/* (measured numbers: the same within a few in a hundred) */
+	CHECK(after1.hi < today1.hi * 0.9 && after6.lo > today6.lo * 0.97 && after6.lo < today6.lo * 1.03,
+		"the proposal's first act hands out fewer chips, its sixth as many");
 	EconBand short3 = econ_band(&econ_proposed, true, ECON_CHIPS, 2), today3 = econ_band(&econ_today, true, ECON_CHIPS, 2);
-	CHECK(short3.lo == today3.lo, "the proposal opens the short net by its third act");
+	CHECK(short3.lo > today3.lo * 0.97 && short3.lo < today3.lo * 1.03, "the proposal opens the short net by its third act");
 	CHECK(econ_bust_weight(ECON_BUST_S) > 0 && econ_bust_weight(0) == 0 && econ_bust_weight(ECON_BUST_S + 1) == 0, "the busting mix: 1-10 and S");
 	CHECK(!econ_chip_good(ECON_GOOD_TIER - 1) && econ_chip_good(ECON_GOOD_TIER), "a good chip: tier %d up", ECON_GOOD_TIER);
 	econ_plan = was;
