@@ -178,10 +178,7 @@ void emu_encounter_started(uint32_t settings) {
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
  * add_keys), so busting him well pays the act's lock. */
-static int encounter_boss_zenny(void) {
-	int act = pacing_act(run.depth) + 7 * pacing_loop(run.depth), z = 100 * (6 + 3 * act);
-	return z > 0x3FFF ? 0x3FFF : z;
-}
+static int encounter_boss_zenny(void) { return loot_guardian_zenny(run.depth); }
 
 static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_zenny()); }
 

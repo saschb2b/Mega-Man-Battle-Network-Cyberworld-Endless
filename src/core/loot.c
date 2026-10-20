@@ -5,8 +5,10 @@
 #include "data.h"
 #include "chip_pool.h"
 #include "chips.h"
+#include "economy.h"
 #include "formations.h"
 #include "game.h"
+#include "net.h"
 #include "pacing.h"
 #include "run.h"
 #include "rom.h"
@@ -639,6 +641,11 @@ int roll_chip(int depth, int bonus_tier, char *code) {
 	int w[CHIP_TIERS] = { 60 - p * 3, 30, 6 + p * 2, p > 5 ? p : 0, p > 12 ? (p - 12) / 2 : 0 };
 	if (w[0] < 8) w[0] = 8;
 	for (int b = 0; b < bonus_tier; ++b) { w[0] /= 2; w[3] += 6; w[2] += 6; w[4] += p > 8 ? 2 : 0; }
+	/* (the plan's good chips: their tiers weighed by its share in the
+	 * plain finds, the green and blue data, a dealer's shelf, a request's
+	 * chip; a prize keeps its odds, the rich data's, a Server's, a vault's,
+	 * a purple data's: economy.h) */
+	for (int t = ECON_GOOD_TIER; t < CHIP_TIERS && bonus_tier <= 1; ++t) w[t] = econ_scale(w[t], ECON_LEVER_GOOD, depth);
 	int total = w[0] + w[1] + w[2] + w[3] + w[4];
 	int roll = rng_range(0, total - 1), tier = 0;
 	while (tier < CHIP_TIERS - 1 && roll >= w[tier]) roll -= w[tier++];
@@ -656,6 +663,58 @@ int roll_chip(int depth, int bonus_tier, char *code) {
 	chip_info(id, &ci);
 	*code = ci.ncodes ? ci.codes[rng_range(0, ci.ncodes - 1)] : '*';
 	return id;
+}
+
+#define HP_MEMORY_CHANCE 15   /* % of the rich Mystery Data from the second act on */
+
+/* The zenny a green (0) or blue (1) Mystery Data holds in place of a chip */
+static int md_zenny(int param, int depth) {
+	return param == 0 ? (100 + rng_range(0, 8) * 50) * (1 + depth / 6) : 800 + depth * 60;
+}
+
+LootFind loot_mystery_roll(int param, int depth) {
+	int roll = rng_range(0, 99);
+	LootFind f = { LOOT_FIND_ZENNY, 100, '*' };
+	/* (none on a trip back: the run's HPMemory lie where it goes on,
+	 * docs/HOME.md) */
+	if (param == 2 && depth >= 4 && run.side_kind != LAYER_BACK && rng_range(0, 99) < HP_MEMORY_CHANCE) {
+		f.kind = LOOT_FIND_HP_MEMORY;
+		f.value = 1;
+		return f;
+	}
+	/* (threat 6, docs/META.md: a chip where zenny would be) */
+	bool chips_only = run.threat >= 6;
+	int bonus = -1;   /* a chip's bonus tier (roll_chip), -1 for none */
+	if (param == 0) {
+		if (roll < 50 || (chips_only && roll < 85)) bonus = 0;
+		else if (roll < 85) f.value = md_zenny(0, depth);
+		else { f.kind = LOOT_FIND_BUGFRAGS; f.value = rng_range(3, 8); }
+	} else if (param == 1) {
+		if (roll < 60 || chips_only) bonus = 1;
+		else f.value = md_zenny(1, depth);
+	} else bonus = 3;
+	/* (the plan's chips: a green or blue data's chip kept by its share,
+	 * else its zenny in its place; economy.h) */
+	if (bonus >= 0 && param < 2 && !chips_only && !econ_keep(ECON_LEVER_CHIPS, depth)) {
+		bonus = -1;
+		f.value = md_zenny(param, depth);
+	}
+	if (bonus >= 0) {
+		f.kind = LOOT_FIND_CHIP;
+		f.value = roll_chip(depth, bonus, &f.code);
+		/* half the time a chip that comes in the folder's codes, in one of
+		 * them: rolled again, eight times at most, for one (smart loot, as
+		 * Diablo 3 leans a drop to its finder); the other half as it rolls.
+		 * Leaning only the code, where the chip had one, a Blade folder's
+		 * (S, L) finds came in its codes two times in seven (docs/META.md) */
+		if (run.codes[0] && rng_range(0, 1) && econ_keep(ECON_LEVER_LEAN, depth)) {
+			for (int t = 0; t < 8 && !loot_folder_code(f.value, false); ++t) f.value = roll_chip(depth, bonus, &f.code);
+			char c = loot_folder_code(f.value, false);
+			if (c) f.code = c;
+		}
+	}
+	if (f.kind == LOOT_FIND_ZENNY) f.value = econ_scale(f.value, ECON_LEVER_ZENNY, depth);
+	return f;
 }
 
 /* (the folder's codes: run.codes, read as each layer is made) */
@@ -714,6 +773,11 @@ void loot_folder_codes(const uint16_t *folder, int n, uint8_t out[3]) {
 		out[k] = (uint8_t)(best < 0 ? 0 : best + 1);
 		if (best >= 0) count[best] = 0;
 	}
+}
+
+int loot_guardian_zenny(int depth) {
+	int act = pacing_act(depth) + 7 * pacing_loop(depth), z = econ_scale(100 * (6 + 3 * act), ECON_LEVER_ZENNY, depth);
+	return z > 0x3FFF ? 0x3FFF : z;
 }
 
 int chip_price(int id) {

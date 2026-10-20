@@ -32,6 +32,7 @@
 #include "launcher_roms.h"
 #include "launcher_text.h"
 #include "home_words.h"
+#include "economy.h"
 #include "jobs.h"
 #include "loot.h"
 #include "meta.h"
@@ -4676,6 +4677,76 @@ static void test_super_bosses(void) {
 	run = run_was;
 }
 
+/* The economy's plans (economy.c, docs/ECONOMY.md, issue #154): a curve
+ * starts at its floor, ends at 1 and rises ever more slowly between (a
+ * logarithm's: the run opens fastest early); no plan hands out more than
+ * today's anywhere (no power creep); today's leaves every roll as it was
+ * and draws nothing more; the way through a net by act, on the endless
+ * net and the short one; and each band holds its plan's own numbers. */
+static void test_economy(void) {
+	const EconPlan *was = econ_plan;
+	Run run_was = run;
+	for (int l = 0; l < ECON_LEVERS; ++l) {
+		EconCurve c = econ_proposed.lever[l];
+		CHECK(c.floor >= 0 && c.floor < 1, "the proposal's lever %d starts under today's (%.2f)", l, c.floor);
+		CHECK(econ_curve(c, 0) == c.floor && econ_curve(c, 1) == 1, "lever %d: its floor at the first act, today's at the last", l);
+		double last = econ_curve(c, 0), step = 1;
+		for (int k = 1; k <= 20; ++k) {
+			double v = econ_curve(c, k / 20.0);
+			CHECK(v > last && v <= 1, "lever %d rises to today's and never past it (x %.2f: %.3f)", l, k / 20.0, v);
+			CHECK(v - last <= step + 1e-9, "lever %d opens fastest early (x %.2f)", l, k / 20.0);
+			step = v - last;
+			last = v;
+		}
+		CHECK(econ_curve(c, -1) == c.floor && econ_curve(c, 2) == 1, "lever %d: held to its floor and to today's outside the net", l);
+		CHECK(econ_curve(econ_today.lever[l], 0) == 1, "today's lever %d is flat at 1", l);
+	}
+	EconCurve line = { 0.5, 0 };
+	CHECK(econ_curve(line, 0.5) > 0.749 && econ_curve(line, 0.5) < 0.751, "a bend of 0 is a straight line");
+	CHECK(econ_proposed.lever[ECON_LEVER_LEAN].floor == 0, "the proposal's first act leans no find to the folder's codes");
+	/* the way through a net: the endless net's acts over its sixth, the
+	 * short net's over its third; a Nest and later cycles all the way */
+	run.mode = RUN_ENDLESS;
+	CHECK(econ_x(1) == 0 && econ_x(3) == 0 && econ_x(4) > 0.19 && econ_x(4) < 0.21, "the endless net: act 1 at 0, act 2 a fifth");
+	CHECK(econ_x(16) == 1 && econ_x(19) == 1 && econ_x(20) == 1, "the endless net: its sixth act, Nest and next cycle at 1");
+	run.mode = RUN_SHORT;
+	CHECK(econ_x(4) == 0.5 && econ_x(7) == 1 && econ_x(SHORT_LAYERS) == 1, "the short net: act 2 halfway, act 3 and its Nest at 1");
+	/* today's: every lever 1, every number as it was, no draw */
+	econ_plan = &econ_today;
+	for (int depth = 1; depth <= 40; ++depth)
+		for (int l = 0; l < ECON_LEVERS; ++l) {
+			rng_seed(7);
+			uint32_t before = rng_state();
+			CHECK(econ_factor(l, depth) == 1 && econ_scale(37, l, depth) == 37 && econ_keep(l, depth), "today's plan keeps lever %d", l);
+			CHECK(rng_state() == before, "today's plan draws nothing (lever %d, layer %d)", l, depth);
+		}
+	/* the proposal's: scaled and kept by its share */
+	econ_plan = &econ_proposed;
+	run.mode = RUN_ENDLESS;
+	CHECK(econ_scale(4, ECON_LEVER_MD, 1) == 2 && econ_scale(4, ECON_LEVER_MD, 16) == 4, "the proposal: half the green data on act 1, all on act 6");
+	int kept = 0;
+	rng_seed(11);
+	for (int i = 0; i < 4000; ++i) kept += econ_keep(ECON_LEVER_CHIPS, 1);
+	double share = econ_factor(ECON_LEVER_CHIPS, 1);
+	CHECK(kept > 4000 * (share - 0.04) && kept < 4000 * (share + 0.04), "the proposal keeps act 1's chips by its share (%d of 4000)", kept);
+	rng_seed(11);
+	for (int i = 0; i < 100; ++i) CHECK(!econ_keep(ECON_LEVER_LEAN, 2), "the proposal leans nothing on act 1");
+	/* the bands hold their plans' own numbers: a fifth either side */
+	for (int p = 0; p < 2; ++p)
+		for (int m = 0; m < ECON_METRICS; ++m)
+			for (int a = 0; a < ECON_ACTS; ++a) {
+				EconBand b = econ_band(p ? &econ_proposed : &econ_today, m, a);
+				CHECK(b.lo > 0 && b.lo < b.hi && b.hi < b.lo * 1.6, "plan %d metric %d act %d: a band around its number", p, m, a);
+			}
+	EconBand today1 = econ_band(&econ_today, ECON_CHIPS, 0), after1 = econ_band(&econ_proposed, ECON_CHIPS, 0);
+	EconBand today6 = econ_band(&econ_today, ECON_CHIPS, 5), after6 = econ_band(&econ_proposed, ECON_CHIPS, 5);
+	CHECK(after1.hi < today1.hi && after6.lo == today6.lo, "the proposal's first act hands out fewer chips, its sixth as many");
+	CHECK(econ_bust_weight(ECON_BUST_S) > 0 && econ_bust_weight(0) == 0 && econ_bust_weight(ECON_BUST_S + 1) == 0, "the busting mix: 1-10 and S");
+	CHECK(!econ_chip_good(ECON_GOOD_TIER - 1) && econ_chip_good(ECON_GOOD_TIER), "a good chip: tier %d up", ECON_GOOD_TIER);
+	econ_plan = was;
+	run = run_was;
+}
+
 /* Requests at home (jobs.c, docs/HOME.md piece 5): the visit's three, a
  * kind each asker posts and none twice, the same at a CONTINUE; pay by
  * the act; each kind's course, and when one is due. */
@@ -5055,6 +5126,7 @@ static void test_visitors(void) {
 int main(void) {
 	test_sha1();
 	test_jobs();
+	test_economy();
 	test_home_words();
 	test_lz77();
 	test_generation();

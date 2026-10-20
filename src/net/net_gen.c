@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "economy.h"
 #include "game.h"
 #include "net_arena.h"
 #include "net_detours.h"
@@ -822,8 +823,9 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		NetObj *o = far ? ng_add_obj(OBJ_MYSTERY, end.x, end.y) : PLACE(OBJ_MYSTERY);
 		if (!far) ++*next;
 		/* (the best three times in ten besides: what the old roll gave the
-		 * rich data, about as much in all) */
-		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < 30 ? 2 : 1;
+		 * rich data, about as much in all; by the plan's share of good
+		 * chips, economy.h, the farthest detour's kept whole) */
+		if (o) o->param = k == 0 && far && end.d >= DETOUR_FAR ? 2 : rng_range(0, 99) < econ_scale(30, ECON_LEVER_GOOD, depth) ? 2 : 1;
 	}
 	static int dx[256], dy[256];
 	int nde = dead_ends(dx, dy, 256), di = 0;
@@ -831,7 +833,8 @@ static void place_data(int depth, int kind, int biome, int size, const int *orde
 		int j = rng_range(0, i), tx = dx[i], ty = dy[i];
 		dx[i] = dx[j]; dy[i] = dy[j]; dx[j] = tx; dy[j] = ty;
 	}
-	int md = ng_npcs_for(2 + rng_range(0, 2) + size);
+	/* (as many as the plan's share: economy.h) */
+	int md = ng_npcs_for(econ_scale(2 + rng_range(0, 2) + size, ECON_LEVER_MD, depth));
 	for (int k = 0; k < md; ++k) {
 		bool got = false;
 		if (rng_range(0, 99) < 70)
