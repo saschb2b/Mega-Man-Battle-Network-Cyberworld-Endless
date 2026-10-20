@@ -186,6 +186,7 @@ class Weeks:
         if refused:
             await self.server.notice(player, *refused)
             return
+        self.server.daily.count("dives")
         entry.update(identity=identity, name=player.name, time=self.clock())
         key = (entry["week"], identity)
         if key in self.best and not better(entry, self.best[key]):
