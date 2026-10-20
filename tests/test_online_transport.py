@@ -33,7 +33,8 @@ class ObservedServer(Server):
 
     async def welcome(self, player):
         await super().welcome(player)
-        if self.disconnect:
+        # (the link cut without a word: the probe tries again and takes its place back, protocol v10)
+        if self.disconnect and not player.resumed:
             asyncio.get_running_loop().call_later(0.4, player.writer.close)
 
     async def message(self, player, data, now):
@@ -76,6 +77,12 @@ async def normal_exchange(binary, report):
     drain = asyncio.create_task(drain_peer(peer))
     try:
         await run_probe(binary, f"ws://127.0.0.1:{port}/presence", "exchange", report, "exchange")
+        # (each session left with its goodbye: no place held, protocol v10)
+        for _ in range(100):
+            if not any(p.name == "TransportProbe" for p in server.players.values()):
+                break
+            await asyncio.sleep(0.02)
+        assert not server.holds.until and not any(p.name == "TransportProbe" for p in server.players.values())
         wanted = {protocol.SPEC[k] for k in ("state", "profile", "inspect", "social", "channel", "ping")}
         assert wanted <= server.messages and server.positions >= 40
         report["exchange"]["positions_verified"] = server.positions
@@ -93,11 +100,12 @@ async def disconnect(binary, report):
     port = await server.start("127.0.0.1", 0)
     try:
         await run_probe(binary, f"ws://127.0.0.1:{port}/presence", "disconnect", report, "disconnect")
+        assert len(server.holds.until) == 0, "a resume left a place held"
     finally:
         await server.close()
 
 
-async def raw_server_case(binary, report, handler, label, mode="disconnect", tls=None):
+async def raw_server_case(binary, report, handler, label, mode="malformed", tls=None):
     connections = set()
     errors = []
 

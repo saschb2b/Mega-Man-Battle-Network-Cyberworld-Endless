@@ -43,12 +43,21 @@ static bool mail(uint8_t kind) {
 		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS;
 }
 
+/* A dropped link (issue #153, online_transport.h): a link welcomed and then
+ * silent this long is given up (snapshots come 20 times a second, PONGs every
+ * two), and tried again after a wait that doubles from the first to the
+ * most; an unwelcomed one (a try's handshake, the gate's call) waits less */
+#define DEAD_MS 8000
+#define DEAD_CALLING_MS 5000
+#define RETRY_FIRST_MS 500
+#define RETRY_MOST_MS 4000
+
 static struct {
 	Ring outbox, inbox;
 	bool enabled;
 	SDL_Thread *thread;
 	SDL_mutex *mutex;
-	SDL_atomic_t stop;
+	SDL_atomic_t stop, bye, done;
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
@@ -58,7 +67,34 @@ static struct {
 	size_t hello_size;
 	uint32_t last_send, last_ping, last_receive;
 	uint32_t last_poll, hitch;   /* (the browser's: its last poll, and the longest gap between two since the last ping) */
+	uint32_t retry_at;           /* (the browser's: its next try, a link dropped) */
+	unsigned tries;
+	bool dialing;                /* (the browser's: a socket open, a try's or the visit's) */
 } transport;
+
+/* the wait before try `tries` (0 the first): 0.5, 1, 2, then 4 seconds */
+static uint32_t retry_wait(unsigned tries) {
+	uint32_t wait = RETRY_FIRST_MS << (tries < 3 ? tries : 3);
+	return wait < RETRY_MOST_MS ? wait : RETRY_MOST_MS;
+}
+
+/* HELLO as a resume: the channel MegaMan stood in, the resume bit set, so
+ * the server gives back the place it held (protocol v10) */
+static void hello_resume(uint16_t channel) {
+	online_put16(transport.hello + 73, (uint16_t)(channel | ONLINE_HELLO_RESUME));
+}
+
+/* the link ended without a word from the server (no ERROR, nothing
+ * unreadable) after it welcomed this game: tried again */
+static bool resumable(const OnlineSnapshot *s) { return s->player_id && !s->error[0]; }
+
+/* the link gone quiet or dropped at `lost_at`: the snapshot says it is
+ * being tried again */
+static void reconnecting(OnlineSnapshot *s, uint32_t lost_at) {
+	s->connected = false;
+	s->quiet = s->reconnecting = true;
+	s->lost_at = lost_at;
+}
 
 /* a ROM's 40 hex digits as its 20 bytes */
 static void sha1_bytes(const char *hex, uint8_t *out) {
@@ -154,11 +190,25 @@ static bool send_mail(void) {
 /* a message come in: Trade Central's and the Arena's to the inbox, the
  * rest into the snapshot (false: the connection is to end) */
 static bool take_in(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
-	if (!size || !mail(data[0])) return online_wire_message(data, size, now, snapshot);
-	if (!snapshot->connected) return false;
+	if (!size || !mail(data[0])) {
+		bool ok = online_wire_message(data, size, now, snapshot);
+		/* (an unreadable message, not the network: never tried again) */
+		if (!ok && !snapshot->error[0]) SDL_strlcpy(snapshot->error, "The server sent an unreadable message", sizeof snapshot->error);
+		/* (a resume done: its WELCOME, then the peers as they stand) */
+		if (ok && data[0] == ONLINE_SNAPSHOT && snapshot->reconnecting) {
+			snapshot->reconnecting = snapshot->quiet = false;
+			++snapshot->resumes;
+		}
+		return ok;
+	}
+	if (!snapshot->connected) {
+		SDL_strlcpy(snapshot->error, "The server sent a message out of order", sizeof snapshot->error);
+		return false;
+	}
 	if (transport.mutex) SDL_LockMutex(transport.mutex);
 	bool room = ring_put(&transport.inbox, data, size);
 	if (transport.mutex) SDL_UnlockMutex(transport.mutex);
+	if (!room) SDL_strlcpy(snapshot->error, "The server sent more than this game could take in", sizeof snapshot->error);
 	return room;
 }
 
@@ -177,19 +227,38 @@ static bool enqueue(const uint8_t *data, size_t size) {
 
 
 #ifndef __EMSCRIPTEN__
-static void connected_loop(OnlineSnapshot *snapshot) {
+/* the link quiet past ONLINE_QUIET_MS, or heard again: told (not while a
+ * resume is under way, which is quiet till it is done) */
+static void hush(OnlineSnapshot *snapshot, uint32_t now, uint32_t last_receive) {
+	bool quiet = snapshot->connected && now - last_receive > ONLINE_QUIET_MS;
+	if (snapshot->reconnecting || quiet == snapshot->quiet) return;
+	snapshot->quiet = quiet;
+	if (quiet) snapshot->lost_at = last_receive;
+	publish(snapshot);
+}
+
+/* the session until it ends: the ticks it was last heard from */
+static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 	uint32_t last_send = 0, last_ping = 0, last_receive = SDL_GetTicks();
 	while (!SDL_AtomicGet(&transport.stop)) {
 		uint8_t data[ONLINE_MAX_MESSAGE];
+		/* (leaving: the goodbye, so the server frees the place at once) */
+		if (SDL_AtomicGet(&transport.bye)) {
+			data[0] = ONLINE_BYE;
+			if (snapshot->connected) online_socket_send(data, 1);
+			break;
+		}
 		int got = online_socket_receive(data, sizeof data);
 		uint32_t now = SDL_GetTicks();
+		if (got == -2) SDL_strlcpy(snapshot->error, "The server broke the WebSocket protocol", sizeof snapshot->error);
 		if (got < 0) break;
 		if (got) {
 			last_receive = now;
 			if (!take_in(data, (size_t)got, now, snapshot)) break;
 			publish(snapshot);
 		}
-		if (now - last_receive > (snapshot->connected ? 15000u : 5000u)) break;
+		hush(snapshot, now, last_receive);
+		if (now - last_receive > (snapshot->connected ? DEAD_MS : DEAD_CALLING_MS)) break;
 		if (snapshot->connected && !send_mail()) break;
 		if (snapshot->connected && now - last_send >= 50) {
 			last_send = now;
@@ -203,15 +272,40 @@ static void connected_loop(OnlineSnapshot *snapshot) {
 		}
 		SDL_Delay(2);
 	}
+	return last_receive;
 }
 
 #else
 
+/* the socket closed, broken or given up: a link welcomed and dropped
+ * without a word is tried again (online_transport.h), the rest end */
 static void browser_closed(void) {
-	transport.snapshot.connected = false;
-	transport.snapshot.peer_count = 0;
-	if (!transport.snapshot.error[0]) SDL_strlcpy(transport.snapshot.error, "Disconnected from the square", sizeof transport.snapshot.error);
 	online_browser_close();
+	transport.dialing = false;
+	OnlineSnapshot *s = &transport.snapshot;
+	uint32_t now = SDL_GetTicks();
+	if (resumable(s) && !s->reconnecting) {
+		reconnecting(s, s->quiet ? s->lost_at : now);
+		transport.tries = 0;
+	}
+	if (resumable(s) && now - s->lost_at < ONLINE_RECONNECT_MS) {
+		transport.retry_at = now + retry_wait(transport.tries++);
+		return;
+	}
+	s->connected = false;
+	s->peer_count = 0;
+	if (!s->error[0]) SDL_strlcpy(s->error, "Disconnected from the square", sizeof s->error);
+}
+
+static void browser_received(const uint8_t *data, size_t size);
+
+/* the next try, its time come: a resume's HELLO on a new socket */
+static void browser_retry(uint32_t now) {
+	if (transport.dialing || (int32_t)(now - transport.retry_at) < 0) return;
+	hello_resume(transport.snapshot.channel);
+	transport.last_receive = now;
+	transport.dialing = online_browser_open(transport.url, transport.hello, transport.hello_size, browser_received, browser_closed);
+	if (!transport.dialing) browser_closed();
 }
 
 /* (a frame of the page longer than this between a ping and its answer:
@@ -234,15 +328,30 @@ static void browser_received(const uint8_t *data, size_t size) {
 }
 
 static void browser_poll(void) {
-	if (transport.snapshot.error[0]) return;
+	OnlineSnapshot *s = &transport.snapshot;
+	if (s->error[0]) return;
 	uint32_t now = SDL_GetTicks();
+	/* (the page held up past a second, a tab in the background: the time
+	 * it was away is not the link's) */
+	if (transport.last_poll && now - transport.last_poll > 1000) transport.last_receive = now;
 	browser_hitch(now);
 	transport.last_poll = now;
-	if (now - transport.last_receive > (transport.snapshot.connected ? 15000u : 7000u)) {
+	/* (between a dropped link's tries: the next one, or given up) */
+	if (!transport.dialing) {
+		if (now - s->lost_at >= ONLINE_RECONNECT_MS) browser_closed();
+		else browser_retry(now);
+		return;
+	}
+	bool quiet = s->connected && now - transport.last_receive > ONLINE_QUIET_MS;
+	if (!s->reconnecting && quiet != s->quiet) {
+		s->quiet = quiet;
+		if (quiet) s->lost_at = transport.last_receive;
+	}
+	if (now - transport.last_receive > (s->connected ? DEAD_MS : 7000u)) {
 		browser_closed();
 		return;
 	}
-	if (!transport.snapshot.connected) return;
+	if (!s->connected) return;
 	if (now - transport.last_send >= 50) {
 		transport.last_send = now;
 		if (!send_position() || !send_queued()) browser_closed();
@@ -259,18 +368,57 @@ static void browser_poll(void) {
 #endif
 
 #ifndef __EMSCRIPTEN__
+static bool leaving(void) { return SDL_AtomicGet(&transport.stop) || SDL_AtomicGet(&transport.bye); }
+
+/* the wait before the next try, `wait` and no later than the window's
+ * end: false where the game is leaving meanwhile */
+static bool rest(uint32_t lost_at, uint32_t wait) {
+	uint32_t until = SDL_GetTicks() + wait, last = lost_at + ONLINE_RECONNECT_MS;
+	if ((int32_t)(until - last) > 0) until = last;
+	while ((int32_t)(SDL_GetTicks() - until) < 0) {
+		if (leaving()) return false;
+		SDL_Delay(10);
+	}
+	return true;
+}
+
+/* the session, and where its link drops without a word, its tries again
+ * (online_transport.h); the snapshot's error once it is over */
 static int worker(void *unused) {
 	(void)unused;
 	OnlineSnapshot snapshot = { 0 };
-	if (online_socket_open(transport.url, &transport.stop, snapshot.error, sizeof snapshot.error) &&
-	    online_socket_send(transport.hello, transport.hello_size)) connected_loop(&snapshot);
-	if (!snapshot.error[0]) SDL_strlcpy(snapshot.error, "Disconnected from the square", sizeof snapshot.error);
+	char why[128];
+	unsigned tries = 0;
+	for (;;) {
+		why[0] = '\0';
+		if (online_socket_open(transport.url, &transport.stop, why, sizeof why) &&
+		    online_socket_send(transport.hello, transport.hello_size)) connected_loop(&snapshot);
+		online_socket_close();
+		if (!snapshot.reconnecting) tries = 0;
+		if (leaving() || !resumable(&snapshot)) break;
+		uint32_t now = SDL_GetTicks();
+		if (!snapshot.reconnecting) reconnecting(&snapshot, snapshot.quiet ? snapshot.lost_at : now);
+		publish(&snapshot);
+		if (now - snapshot.lost_at >= ONLINE_RECONNECT_MS) break;
+		fprintf(stderr, "online: the link dropped%s%s; trying again\n", why[0] ? ": " : "", why);
+		if (!rest(snapshot.lost_at, retry_wait(tries++))) break;
+		hello_resume(snapshot.channel);
+	}
+	if (!snapshot.error[0]) SDL_strlcpy(snapshot.error, why[0] ? why : "Disconnected from the square", sizeof snapshot.error);
 	snapshot.connected = false;
 	snapshot.peer_count = 0;
 	publish(&snapshot);
-	if (!SDL_AtomicGet(&transport.stop)) fprintf(stderr, "online: %s\n", snapshot.error);
-	online_socket_close();
+	if (!leaving()) fprintf(stderr, "online: %s\n", snapshot.error);
+	SDL_AtomicSet(&transport.done, 1);
 	return 0;
+}
+
+/* the worker's link up, as last published */
+static bool linked(void) {
+	SDL_LockMutex(transport.mutex);
+	bool up = transport.snapshot.connected;
+	SDL_UnlockMutex(transport.mutex);
+	return up;
 }
 #endif
 
@@ -285,7 +433,8 @@ bool online_transport_start(const char *url, const char *name, const uint8_t ide
 	SDL_strlcpy(transport.name, name, sizeof transport.name);
 #ifdef __EMSCRIPTEN__
 	transport.last_receive = SDL_GetTicks();
-	if (online_browser_open(url, transport.hello, transport.hello_size, browser_received, browser_closed)) return true;
+	transport.dialing = online_browser_open(url, transport.hello, transport.hello_size, browser_received, browser_closed);
+	if (transport.dialing) return true;
 	SDL_strlcpy(transport.snapshot.error, "Could not open browser WebSocket", sizeof transport.snapshot.error);
 	return false;
 #else
@@ -362,9 +511,18 @@ size_t online_transport_receive(uint8_t *out, size_t cap) {
 }
 
 void online_transport_end(void) {
+	/* (leaving with the link up: BYE first, so the server frees the place
+	 * at once rather than holding it for a return; protocol v10) */
 #ifdef __EMSCRIPTEN__
+	uint8_t bye = ONLINE_BYE;
+	if (transport.snapshot.connected) online_browser_send(&bye, 1);
 	online_browser_close();
 #else
+	if (transport.thread) {
+		SDL_AtomicSet(&transport.bye, 1);
+		uint32_t started = SDL_GetTicks();
+		while (!SDL_AtomicGet(&transport.done) && linked() && SDL_GetTicks() - started < 300) SDL_Delay(1);
+	}
 	SDL_AtomicSet(&transport.stop, 1);
 	if (transport.thread) SDL_WaitThread(transport.thread, NULL);
 	if (transport.mutex) SDL_DestroyMutex(transport.mutex);
