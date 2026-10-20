@@ -535,6 +535,9 @@ class Words:
             if self.side == 'above':
                 # (one line under the bubble, over the games)
                 fc, crow = fit(self.caption, SEMI, 25, self.width, 1, least=16)
+                tw = fc.getlength(crow[0])
+                box = Image.new('L', (round(tw) + 24, 36), round(200 * a))
+                im.paste(INK, (self.x - 8, round(top + bh + 4)), box)
                 d.text((self.x + 4, top + bh + 8), crow[0], font=fc, fill=lerp(INK, SOFT, a))
                 return
             fc, crow = fit(self.caption, SEMI, 25, self.width, 3, least=15)
@@ -626,8 +629,8 @@ def windows():
         return w
 
     # the hook: Kei logs in, Mira after him, and they say hello
-    kei = add('Kei', 2, *TWO[0], [(0, 'meet-kei', 36, 1), (F(1), 'meet-kei', KEI_HELLO, 1)], -10, F(2), ping=29)
-    mira = add('Mira', 2, *TWO[1], [(F(0, 1), 'meet-mira', 34, 1), (F(1), 'meet-mira', MIRA_HELLO, 1)], F(0, 1) + 2,
+    kei = add('Kei', 2, *TWO[0], [(0, 'meet-kei', 38, 1), (F(1), 'meet-kei', KEI_HELLO, 1)], -10, F(2), ping=29)
+    mira = add('Mira', 2, *TWO[1], [(F(0, 1), 'meet-mira', 38, 1), (F(1), 'meet-mira', MIRA_HELLO, 1)], F(0, 1) + 2,
                F(2), src=kei.anchor, ping=36)
     # going online, the NetPass's stamps on the beats, Full pass on the bar
     gate = add('Kei', 3, *L3, [(F(2), 'gate-kei', 34, 1), (F(3) + 18, 'gate-kei', 104, 0), (F(4), 'gate-kei', 111, 1),
@@ -688,6 +691,8 @@ WORDS = [
     Words(F(16), F(17), None, 'HOW DEEP?', 'THE BOARD KEEPS THE DEEPEST, AS REPORTED', COL_R, 96, 400, OPS['Nova'], 'left'),
     Words(F(17), F(18), None, 'ONE SQUARE, EVERY SYSTEM', 'NETBATTLES ON COMPUTERS, PHONES, HANDHELDS AND THE BROWSER', 102, 24,
           1000, OPS['Kei'], 'above', size=50),
+    Words(F(18) + 6, F(19), None, 'SERVERS ANYONE CAN HOST', 'ROM-FREE: ONE PYTHON FILE, OR DOCKER', 300, 262, 760,
+          OPS['Rio'], 'above', size=50),
     Words(F(19), F(20), None, '8 OPERATORS A CHANNEL', '', 94, 20, 1000, OPS['Juno'], 'above', size=48),
     Words(F(20), F(21), None, 'SEE YOU IN THE SQUARE', '', 94, 20, 1000, OPS['Tomo'], 'above', size=48),
 ]
@@ -765,6 +770,19 @@ class Ending:
             part.putalpha(part.getchannel('A').point(lambda v: int(v * a)))
             im.paste(part, ((W - lg.width) // 2, 66), part)
         bubble(im, 'BRING A FRIEND.', (W // 2 - 190, 400), 'above', k - 14, 76, 760, 1, color=OPS['Mira'])
+        # you and a friend, linked, a packet each way on the beat
+        if k >= 24:
+            a, b = (W // 2 - 330, 568), (W // 2 + 330, 568)
+            f = font(GOTHIC, 22)
+            for (x, y), who, c in ((a, 'YOU', OPS['Kei']), (b, 'A FRIEND', OPS['Mira'])):
+                d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=c)
+                d.text((x + (-20 if x < W // 2 else 20), y), who, font=f, fill=c, anchor='rm' if x < W // 2 else 'lm')
+            d.line([(a[0] + 14, a[1]), (b[0] - 14, b[1])], fill=lerp(LINK, INK, 0.5), width=2)
+            beat = (fr - F(21)) // 12
+            t = ((fr - F(21)) % 12) / 12
+            pa, pb = (a[0] + 14, a[1]), (b[0] - 14, b[1])
+            packet(im, pa if beat % 2 else pb, pb if beat % 2 else pa, ease(t * 1.3),
+                   OPS['Kei'] if beat % 2 else OPS['Mira'], trail=0.3, size=5)
         j = fr - F(22)
         if j >= 0:
             f = font(SEMI, 30)
@@ -874,11 +892,15 @@ def connecting(im, fr, w):
     """Bar 3's wait while the server answers: the gate's flicker held under
     a ring of packets going round."""
     k = fr - (F(3) + 18)
-    if not 0 <= k < F(4) - (F(3) + 18):
+    if not 0 <= k < F(4) + 5 - (F(3) + 18):
+        return
+    if fr >= F(4):
+        # (the Square scanned in from the top as the wait ends)
+        line = round(w.ph * (fr - F(4)) / 5) + 2 * w.s
+        im.paste(INK, (w.x, w.y + line, w.x + w.pw, w.y + w.ph))
         return
     cx, cy = w.x + w.pw // 2, w.y + w.ph // 2
-    plate = Image.new('RGB', (w.pw, w.ph), INK)
-    im.paste(plate, (w.x, w.y), Image.new('L', (w.pw, w.ph), 150))
+    im.paste(INK, (w.x, w.y, w.x + w.pw, w.y + w.ph))
     d = ImageDraw.Draw(im)
     r = 70
     d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=lerp(LINK, INK, 0.6), width=3)
