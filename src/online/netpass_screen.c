@@ -19,6 +19,7 @@
 
 static struct {
 	bool shown, stamping;
+	bool letting_go;     /* closed, its A or B still held: kept from the game (BN6 would take it as a new press) */
 	int t;
 	int from;            /* the stamping: the stamps already seen (the Square's at least) */
 	int end;             /* ... the frame the full pass shows */
@@ -93,13 +94,18 @@ static void stamping(void) {
 }
 
 bool netpass_screen_update(void) {
-	if (!N.shown) return false;
+	if (!N.shown) {
+		if (N.letting_go && btn_held(BTN_A | BTN_B)) return true;
+		N.letting_go = false;
+		return false;
+	}
 	++N.t;
 	N.view.t = N.t;
 	if (N.stamping && N.t <= N.end) stamping();
 	bool done = N.t > 1 && (!N.stamping || N.t >= N.end + HELD_AT_END);
 	if (done && (btn_pressed(BTN_A) || btn_pressed(BTN_B))) {
 		N.shown = false;
+		N.letting_go = true;
 		audio_sfx(SFX_DESC_CLOSE);
 	}
 	return true;
