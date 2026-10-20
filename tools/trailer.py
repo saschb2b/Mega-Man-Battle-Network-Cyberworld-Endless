@@ -182,6 +182,8 @@ def main():
     WORK = os.path.join(ROOT, '.build', 'trailer-' + cut.VERSION)
     os.makedirs(WORK, exist_ok=True)
     capture_all(cut.scenes(), '--keep' in args, cut.BN6_ONLY)
+    if hasattr(cut, 'footage'):
+        cut.footage('--keep' in args)   # (a cut's own runs: 0.13.0's games in a Square, tools/trailer_online.py)
     if '--footage' in args:
         return
     trailer_music.render(os.path.join(WORK, 'music.wav'), trailers.music(cut.VERSION))

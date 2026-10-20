@@ -49,3 +49,57 @@ feels it transforms with updates rather than just grows over time".
 
 Devices now used up: the liberation field, typed briefing words,
 panel-flip cuts, the monitor with side readouts, violet glitch.
+
+## 0.13.0: Cyberworld Endless connects (2026-10-20), `tools/trailers/v0_13_0.py`
+
+The owner: "a cool new trailer... The trailer should surely focus on the
+online part. Cyberworld Endless connects", the way online shown first,
+then the NetPass, then each thing to do there, with BN6's "Surge of
+Power!" (a recording, kept in `.build/`) as the music's inspiration and
+MMO launch trailers as the model (issue #132's brief: a hook readable
+without sound in five seconds, the place full of people, escalation, a
+call to action).
+
+What was made: 39 seconds, 23 bars at 150 (a bar 48 frames). Linking:
+several players' games on screen at once, each a window in its
+operator's colour with his name, channel and ping, joined by lines of
+light whose packets carry the cuts (a window opens as a packet from the
+last one reaches it, traces its frame, scans its picture in; it closes
+into a line). The words are the Square's own manner: a step's pill
+("01 · GO ONLINE" to "07 · DIVE"), its headline in a white speech bubble
+whose tail points at the game, the phrases as chat bubbles with the
+speaker's name. A HUD over the top (ONLINE or CONNECTING, the channel,
+eight operator pips, a ping line) and the Square's log at the bottom,
+MMO chat. The arc: two games logging in and saying hello under
+CYBERWORLD ENDLESS / CONNECTS; the gate, CONNECTING, the log-in beam; the
+NetPass's stamps on the music's three stamp beats; meet, trade, a
+NetBattle from both sides, the stands and the referee; the week's DeepNet
+on the Board with the field gone dark; two, four, eight games; the logo,
+BRING A FRIEND., YOU and A FRIEND linked, the address. The music: BN6's
+song 0x16 (matched to the recording by tempo and chroma), its habits in F
+minor at 150, the two squares as two players calling and answering, the
+idle one running the 32nd-note arpeggio, joined in octaves at the climax.
+
+New footage: the release pictures' runs are single games, so
+`tools/trailer_online.py` runs a local server and up to eight headless
+Linux builds at once against it, each with its own data folder, name and
+script; a cut's `online_scenes()` lists them and `footage(keep)` takes
+them (the kit calls it after `scenes()`). Scripts go by the wall clock
+(`Visit.at(seconds)`), since a visit plays at the clock's pace and games
+start seconds apart. Trade Central's screens came from the `trade` dev
+step, the Board's entries from a seeded `weeks.jsonl`.
+
+What went wrong on the way: BN6's chat types slowly and a press mid-typing
+only finishes the line, so the phrase menu needs its question paged,
+then Say something, then the phrase, about 7.5 seconds a phrase; a
+`place` while a chat is open is ignored (MegaMen stayed at the arrival);
+`--dev online` skips MegaMan's gate question, so the gate's shot needs a
+`network.ini` instead; the hook's first footage frame was the gate's
+flat yellow flash (start where the Square is drawn); captions under a
+headline ran into the chat bubbles below them; an overlay caption on the
+games needs a plate. Which player wins a scripted NetBattle changes with
+the run, so the words name no winner.
+
+Devices now used up: windows joined by links with packets carrying the
+cuts, speech-bubble headlines, the numbered step pills, the operator
+HUD and chat log, the multiplying wall of games.
