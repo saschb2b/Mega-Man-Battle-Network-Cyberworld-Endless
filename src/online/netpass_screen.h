@@ -6,8 +6,8 @@
  * the first visit to the Square after the pass became full, the new
  * stamps landing one by one, each with BN6's own jingle, then the full
  * pass. The most stamps seen in the Square is kept in the data folder's
- * netpass.ini, never in the run's save. A or B closes it (the stamping
- * done). */
+ * netpass.ini, never in the run's save. A or B closes it; while the
+ * stamps land, it lands them all at once. */
 #ifndef CW_NETPASS_SCREEN_H
 #define CW_NETPASS_SCREEN_H
 

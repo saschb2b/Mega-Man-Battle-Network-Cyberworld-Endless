@@ -102,6 +102,12 @@ bool netpass_screen_update(void) {
 	++N.t;
 	N.view.t = N.t;
 	if (N.stamping && N.t <= N.end) stamping();
+	/* (A or B while the stamps land: all of them at once, the full pass's sound, the time the player's) */
+	if (N.stamping && N.t > 1 && N.t < N.end && (btn_pressed(BTN_A) || btn_pressed(BTN_B))) {
+		for (int s = 0; s < STAMP_COUNT; ++s) N.view.held[s] = true;
+		N.t = N.end;
+		stamping();
+	}
 	bool done = N.t > 1 && (!N.stamping || N.t >= N.end + HELD_AT_END);
 	if (done && (btn_pressed(BTN_A) || btn_pressed(BTN_B))) {
 		N.shown = false;
