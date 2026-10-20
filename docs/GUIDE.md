@@ -812,7 +812,9 @@ DeepNet.
   whole channel to see. Phrases come from a fixed list: there is no free
   text, and no one can type at you. Say something or emote together with
   another player round the landmark or on the stage, and the Square
-  cheers.
+  cheers. **Look around** has MegaMan say which way Trade Central and
+  the Arena are from where you stand: both are off the plaza, Trade
+  Central to its upper left and the Arena to its lower left.
 - **A** facing another player's MegaMan shows his card (HP, act and
   layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.

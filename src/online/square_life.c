@@ -10,6 +10,7 @@
 #include "bn6_fields.h"
 #include "chips.h"
 #include "debug.h"
+#include "director_way.h"
 #include "emu.h"
 #include "netmap.h"
 #include "netpass.h"
@@ -460,6 +461,28 @@ bool square_life_talk(int x, int y, int face) {
 		return talk_start(posts, FACE_NONE);
 	}
 	return look >= 0 && talk_start(square_check_words(look, &f), FACE_NONE);
+}
+
+/* which part of the Square world (x, y) is in: the plaza, Trade Central's
+ * wing (its floor and walkway, grid -x), the Arena's (its walk, floor and
+ * ring, grid +y), or another (the stage, the log-in plaza) */
+static int part_of(int x, int y) {
+	const SquarePlan *p = online_square_plan();
+	int gx, gy, mid = p->at[SQ_CENTER][0];
+	if (!netmap_panel(x, y, &gx, &gy)) return SQUARE_IN_OTHER;
+	if (abs(gx - mid) <= SQUARE_PLAZA_HALF && abs(gy - p->at[SQ_CENTER][1]) <= SQUARE_PLAZA_HALF) return SQUARE_IN_PLAZA;
+	if (gx < mid - SQUARE_PLAZA_HALF) return SQUARE_IN_TRADE;
+	if (gy > p->at[SQ_CENTER][1] + SQUARE_PLAZA_HALF) return SQUARE_IN_ARENA;
+	return SQUARE_IN_OTHER;
+}
+
+bool square_life_look(void) {
+	if (!L.ready) return false;
+	const SquarePlan *p = online_square_plan();
+	int cx, cy, far;
+	netmap_world(p->at[SQ_CENTER][0], p->at[SQ_CENTER][1], &cx, &cy);
+	const char *way = way_to(cx, cy, &far);
+	return talk_start(square_look_words(part_of(bn6_player_x(), bn6_player_y()), p->landmark, way), FACE_MEGAMAN);
 }
 
 bool square_life_bark(const char **text, int *x, int *y, int *z) {

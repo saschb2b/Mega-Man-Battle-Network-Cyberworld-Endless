@@ -48,6 +48,14 @@ const char *square_referee_bark(int result, const char *name);
 const char *square_walker_words(int k, const SquareFacts *f);
 /* A prop checked: its LOOK_* (the Board's posts, the sign's words). */
 const char *square_check_words(int look, const SquareFacts *f);
+/* L's Look around (square_life_look): where Trade Central and the Arena
+ * lie, MegaMan in the plaza (`where` SQUARE_IN_PLAZA), in either wing, or
+ * elsewhere, and from outside the plaza which way its landmark (`look`,
+ * a LOOK_*) is (`way`, director_way.c's words: "to the upper left"). The
+ * wings stand off the plaza the same way in every Square (square_plan.c):
+ * Trade Central to its upper left, the Arena to its lower left. */
+enum { SQUARE_IN_PLAZA, SQUARE_IN_TRADE, SQUARE_IN_ARENA, SQUARE_IN_OTHER };
+const char *square_look_words(int where, int look, const char *way);
 /* Over the ambient Navis' heads when MegaMen emote together at the
  * landmark or on the stage, and over the first as a parade begins. */
 const char *square_cheer_bark(void);

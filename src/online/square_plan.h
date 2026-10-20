@@ -22,6 +22,8 @@
 
 #define SQUARE_W 36
 #define SQUARE_H 36
+/* The plaza's panels out from its middle (SQ_CENTER), each way: 13 a side */
+#define SQUARE_PLAZA_HALF 6
 #define SQUARE_PROPS 24
 #define SQUARE_STAIRS 2
 /* The ambient Navis who walk the Square, and their routes' waypoints at

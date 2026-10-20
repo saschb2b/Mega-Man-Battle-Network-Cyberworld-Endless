@@ -39,6 +39,7 @@
 #define MUTE_FLAG    0x1491
 #define BLOCK_FLAG   0x1492
 #define HOME_FLAG    0x1493
+#define LOOK_FLAG    0x14C5   /* L's Look around (after square_watch.c's 0x14C4: Trade Central clears 0x1494-0x149F) */
 #define DIVE_FLAG    SQUARE_DIVE_FLAG   /* the greeter's dive (square_week.h): 0x14AF */
 #define BATTLE_FLAG  0x14A0   /* (the Arena's, apart: square_arena.c) */
 #define FIRST_FLAG SAY_FLAG
@@ -68,6 +69,7 @@ void online_chat_reset(void) {
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 	flag_clear(BATTLE_FLAG);
 	flag_clear(DIVE_FLAG);
+	flag_clear(LOOK_FLAG);
 }
 
 static const OnlineProfile *card_of(uint32_t id) {
@@ -93,22 +95,23 @@ static void cards(void) {
 }
 
 /* L's chat into the Square's talk room: the question, then pages of two
- * phrases or emotes, each with More (or Back to the first) */
+ * phrases or emotes, each with More (or Back to the first), or a look
+ * around (square_life_look) */
 #define SAY_PAGES 4
 #define EMOTE_PAGES 3
 static void menu(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	enum { TOP, SAY = 1, EMOTE = SAY + SAY_PAGES, PHRASE = EMOTE + EMOTE_PAGES, DO = PHRASE + ONLINE_PHRASE_COUNT,
-		END = DO + ONLINE_EMOTE_COUNT };
+		LOOK = DO + ONLINE_EMOTE_COUNT, END };
 	ta_begin(&t);
 	ta_script(&t);
 	ta_page(&t, FACE_MEGAMAN, square_menu_question(), true);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
-	ta_options(&t, square_menu_options, 2);
-	int top[2] = { SAY, EMOTE };
-	ta_choose(&t, top, 2, END);
+	ta_options(&t, square_menu_options, SQUARE_MENU_OPTIONS);
+	int top[SQUARE_MENU_OPTIONS] = { SAY, EMOTE, LOOK };
+	ta_choose(&t, top, SQUARE_MENU_OPTIONS, END);
 	for (int kind = 0; kind < 2; ++kind) {
 		int pages = kind ? EMOTE_PAGES : SAY_PAGES, first = kind ? EMOTE : SAY, item = kind ? DO : PHRASE;
 		const char *const *names = kind ? online_emotes : online_phrases;
@@ -127,6 +130,9 @@ static void menu(void) {
 		ta_flag_set(&t, k < ONLINE_PHRASE_COUNT ? SAY_FLAG + k : EMOTE_FLAG + k - ONLINE_PHRASE_COUNT);
 		ta_end(&t);
 	}
+	ta_script(&t);
+	ta_flag_set(&t, LOOK_FLAG);
+	ta_end(&t);
 	ta_closing(&t);
 	int n = ta_build(&t, out);
 	if (n <= SQUARE_TALK_ROOM) {
@@ -234,6 +240,7 @@ static bool chosen(void) {
 	for (int k = 0; k < ONLINE_EMOTE_COUNT; ++k) if (flag_get(EMOTE_FLAG + k)) online_transport_social(1, (uint8_t)k);
 	if (flag_get(BATTLE_FLAG)) { flag_clear(BATTLE_FLAG); square_arena_challenge(&C.peer, C.s.latency_ms); }
 	if (flag_get(WAVE_FLAG)) online_transport_social(1, WAVE);
+	if (flag_get(LOOK_FLAG)) { flag_clear(LOOK_FLAG); square_life_look(); }
 	if (flag_get(MUTE_FLAG)) online_people_toggle(C.peer.identity, ONLINE_MUTED);
 	if (flag_get(BLOCK_FLAG) && online_people_toggle(C.peer.identity, ONLINE_BLOCKED)) talk_start(square_blocked_words(C.peer.name), FACE_MEGAMAN);
 	if (C.s.channels > 1 && (flag_get(NEXT_FLAG) || flag_get(LAST_FLAG))) {

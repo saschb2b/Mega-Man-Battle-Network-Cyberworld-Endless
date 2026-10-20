@@ -19,6 +19,10 @@ void square_life_frame(const OnlineSnapshot *s);
 /* A pressed by MegaMan at world (x, y) facing `face` (0-7), no peer nor
  * Mr.Prog ahead: a walker's or a prop's words; true where one spoke. */
 bool square_life_talk(int x, int y, int face);
+/* L's Look around chosen: MegaMan says where Trade Central and the Arena
+ * lie from where he stands (square_look_words); false where no talk
+ * began. */
+bool square_life_look(void);
 /* A word over someone's head this frame (world x, y, z); false none. */
 bool square_life_bark(const char **text, int *x, int *y, int *z);
 
