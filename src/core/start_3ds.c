@@ -132,7 +132,8 @@ void start_3ds(bool data_dir_given) {
 		R_SUCCEEDED(sysm) ? "on" : "refused", third ? "free for the game" : probe ? "ran nothing" : "refused");
 	if (__3dslink_host.s_addr) {
 		u32 *soc = memalign(0x1000, 0x100000);
-		if (soc && socInit(soc, 0x100000) == 0) link3dsStdio();
+		/* (a line at a time, as log.txt: what a run that stops said reaches 3dslink) */
+		if (soc && socInit(soc, 0x100000) == 0 && link3dsStdio() >= 0) setvbuf(stdout, NULL, _IOLBF, 0);
 	}
 	if (!data_dir_given) snprintf(g_data_dir, sizeof g_data_dir, "sdmc:/3ds/cyberworld-endless");
 	snprintf(rom_3ds, sizeof rom_3ds, "%s/rom", g_data_dir);
@@ -220,7 +221,8 @@ bool start_3ds_rom(const char *rom_dir, char *msg, size_t n) {
 		return found;
 	}
 	bool rom_ok = false;
-	const char *places[] = { rom_3ds, "sdmc:/roms/gba", "sdmc:/roms", "sdmc:/gba" };
+	/* (the game's own folder's too where --data-dir gave another, a test's over 3dslink) */
+	const char *places[] = { rom_3ds, "sdmc:/3ds/cyberworld-endless/rom", "sdmc:/roms/gba", "sdmc:/roms", "sdmc:/gba" };
 	char first[512] = "", close[512] = "";
 	for (size_t i = 0; !rom_ok && i < sizeof places / sizeof *places; ++i) {
 		rom_ok = rom_find(places[i], msg, n);

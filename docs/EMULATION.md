@@ -92,8 +92,9 @@ another's"). BN5's tracks' installs (`xinstall_core`) and the chip
 registry's (`xchips_install`) and the Souls' are written down as they are made too
 (`src/emu/xinstall_log.c`): every byte they write into the ROM copy and
 every hook they set, in their order, which the Arena's cores take under
-full rules (docs/ONLINE_ARENA.md, Full rules); not kept on the 3DS or in
-the browser, which have no Arena:
+full rules (docs/ONLINE_ARENA.md, Full rules), on every system that
+offers NetBattles; not in a New 3DS's runs, which offer none (there for
+`--dev rollbench` and `--dev arena` alone, about 2 MB):
 
 | Offset | Contents | Code |
 | --- | --- | --- |

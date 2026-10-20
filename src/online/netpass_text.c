@@ -27,4 +27,4 @@ const char *netpass_missing_words(const char *name) {
 }
 
 const char netpass_complete[] = "Every game in. The whole Net is yours.";
-const char netpass_complete_no_ring[] = "Every game in! NetBattles need a PC or a phone.";
+const char netpass_complete_no_ring[] = "Every game in! No NetBattles on this PET.";

@@ -1,8 +1,7 @@
 /* --dev rollbench (issue #128, docs/ONLINE_ARENA.md, Rollback): what a
  * rollback of the Arena would cost on this machine, measured on the
- * player's ROM. The game's core alone first (every build), then, where the
- * Arena is built (CW_ARENA), the pair at a Practice NetBattle's battle
- * under BN6's rules, scripted keys on both sides: the snapshot's size,
+ * player's ROM. The game's core alone first, then the pair at a Practice
+ * NetBattle's battle by full rules, scripted keys on both sides: the snapshot's size,
  * its save and load, a pair frame's emulation, a rollback of eight frames
  * timed and its hash checked against the frames run straight, and from
  * them the largest rollback window a 60th of a second holds at delays 1,

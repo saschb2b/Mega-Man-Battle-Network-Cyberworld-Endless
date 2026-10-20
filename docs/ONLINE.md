@@ -173,14 +173,20 @@ own in the data folder, `netpass.ini` (`stamps=4`), never in the run's
 save: the pass follows the player's ROMs, not a run. A game with BN6's
 ROM alone has no moment (its one stamp is every game's).
 
-### The 3DS and the browser
+### Every system, and the New 3DS
 
-They build no Arena (`CW_ARENA`). The pass is the same there: its stamps
-follow the ROMs, as the server's rule does, so with BN5's ROM they trade
-and dive, and the Arena stamp shows held. Battle and Watch are not
-offered there, as before (the referee: "SORRY! NO NETBATTLES FROM THIS
-PET!"), and the pass's PET text says so in place of the whole Net's:
-"Every game in! NetBattles need a PC or a phone." The second screen's
+The owner's aim (20 October 2026): every stamp earnable on every system.
+The browser now battles as the desktops and phones do, its pass and its
+stamps theirs ([ONLINE_ARENA.md](ONLINE_ARENA.md#in-the-browser)). The
+New 3DS builds the Arena but offers no NetBattle and no watching
+(`CW_ARENA`, `square_arena_offered`): a frame of the battle's two GBAs
+takes 25.8 ms there against a 60th of a second's 16.7, measured on the
+device ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)). The pass is the
+same there: its stamps follow the ROMs, as the server's rule does, so
+with BN5's ROM it trades and dives, and the Arena stamp shows held.
+Battle and Watch are not offered (the referee: "SORRY! NO NETBATTLES FROM
+THIS PET!"), and the pass's PET text says so in place of the whole Net's:
+"Every game in! No NetBattles on this PET." The second screen's
 panel draws the pass's words in the engine's small font, its pixel
 letters being a texture's, which a picture drawn into memory (the 3DS's
 bottom screen) cannot use.
@@ -624,9 +630,10 @@ cursor on No): when both say Yes they fight again with the same
 folders, over the same ARENA messages (a challenge answered at once). The
 referee by the ring calls the bout and keeps the count. A hash of the
 pair every 60 frames catches two games apart and stops both. Nothing is
-won or lost. The 3DS and the browser build compile it out (`CW_ARENA`):
-Battle is not offered there, whatever the pass, and a challenge is
-declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
+won or lost. It runs on every system but the New 3DS, the browser
+among them; the New 3DS builds it but does not offer it (`CW_ARENA`: a
+frame of the pair takes half again a 60th of a second there): Battle is
+not offered there, whatever the pass, and a challenge is declined. [ONLINE_ARENA.md](ONLINE_ARENA.md) has the engine, the wire,
 the lockstep and the two-client proof.
 
 ### The stands
@@ -641,8 +648,8 @@ a second and a half behind them, from the battle's first frame however
 late the spectator came (he catches up faster than real time). R shows
 the other GBA's side, L cheers, B goes back to where MegaMan stood. The
 spectator checks the players' hashes and stops, saying so, where they
-disagree. Every game, the 3DS, the browser and a game without the Arena
-stamp among them, gets **the report**: the referee calls the channel's battle (who fights whom, each
+disagree. Every game, the New 3DS and a game without the Arena stamp
+among them, gets **the report**: the referee calls the channel's battle (who fights whom, each
 MegaMan's HP, the last chip each used, how many watch, the winner and
 the cheers) and the Board posts it, from what the cable's first game
 reads off its own pair and sends now and then. A phrase or emote said
@@ -684,7 +691,9 @@ a local server (`build.py server-run`), a `network.ini` per data folder or
 from `--scene home`; never the official server. A visit plays at the
 clock's pace even headless, so the two meet. `tools/online_browser.html`
 starts the browser build from home onto the gate, for a browser beside a
-native game (the server's `origins` allowing the page's). The Arena's own
+native game (the server's `origins` allowing the page's), with BN5's ROM
+too where chosen (the full pass: a NetBattle, `--dev arenaboth` making a
+game take a challenge and play it by itself). The Arena's own
 proof is in [ONLINE_ARENA.md](ONLINE_ARENA.md#the-two-client-proof), the
 cable pair's tool (`build.py online-pair`) in
 [ONLINE_LINK.md](ONLINE_LINK.md).
@@ -1022,6 +1031,17 @@ server:
   at 240x160, at 640x480 and on a phone held upright (1080x1920, the
   touch controls under it) captured headless.
 
+**NetBattles in the browser** (20 October 2026, a local v9 server,
+headless Chrome, the harness in `.build/`): two browser tabs fought a
+full-rules NetBattle to its end, 28 hashes agreeing, one tab rolling
+back 39 times; a tab against the host build, the same; and a tab
+watched two host builds' battle from the stands, catching up from its
+first frame and checking all 60 of their hashes
+([ONLINE_ARENA.md](ONLINE_ARENA.md#in-the-browser)). The New 3DS ran
+`--dev rollbench` and a battle playing itself over 3dslink: its pair
+frame is past a 60th of a second, so it offers none
+([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)).
+
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
 are in the history before 433865a8):
@@ -1057,9 +1077,17 @@ are in the history before 433865a8):
   controls' A and B close it). A trade's settling at home and a
   WEEK_POST refused for the stamp were not played again here (the
   server's tests hold the refusal).
-- **The Arena on the 3DS and in the browser** (rollback runs wherever the
-  Arena does). There, the stands are the report alone (seen in the
-  browser; the 3DS's untried).
+- **The Arena on the New 3DS:** measured, not offered
+  ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)): a pair frame 25.8 ms
+  with its picture, 20.7 without, two GBAs on one ARM11 core. What is
+  left is the two cores on two CPU cores at once, the third core taking
+  one, which needs a cable driver of our own whose scheduling is the same
+  however the threads interleave (a new pair hash on every system, a
+  protocol version), and even then a frame is at the edge of a tick:
+  10.4 ms a core and 5 for the picture. The stands there are the report
+  alone. A NetBattle in the browser was seen against another browser and
+  a native game through a local server; against the deployed server and
+  a phone's or a handheld's game, untried.
 - **Rollback, what is left** (issue #128, ONLINE_ARENA.md, Rollback): a
   NetBattle with rollback between two devices and through the deployed
   server (protocol v9 there once it is redeployed), on Android, iOS,

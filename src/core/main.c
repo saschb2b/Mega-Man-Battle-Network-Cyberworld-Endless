@@ -53,8 +53,8 @@ static const Scene *scene_by_name(const char *n) {
 static bool scene_given;
 
 static const Scene *first_scene(const Scene *s, bool headless) {
+	if (dev.rollbench) return &scene_rollbench;   /* (--dev rollbench: src/dev/rollbench.c; with arena, the Arena's after it) */
 	if (dev.arena) return &scene_arena;   /* (--dev arena: src/online/arena_scene.c) */
-	if (dev.rollbench) return &scene_rollbench;   /* (--dev rollbench: src/dev/rollbench.c) */
 	if (!s) s = &scene_title;
 	return s == &scene_title && !scene_given && !headless ? &scene_intro : s;
 }

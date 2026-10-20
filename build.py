@@ -173,11 +173,22 @@ def docs_rom_mounts(bn5=False):
     return [(rom_dir, '/rom:ro')]
 
 
+DOCKER_RUNS = [0]
+
+
+def docker_run():
+    """A container's start, `docker run`; with CYBERWORLD_DOCKER_NAME=NAME each
+    one named NAME-PID-N, so work side by side tells its own containers from
+    another's."""
+    args = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + ['run']
+    if os.environ.get('CYBERWORLD_DOCKER_NAME'):
+        DOCKER_RUNS[0] += 1
+        args += ['--name', f"{os.environ['CYBERWORLD_DOCKER_NAME']}-{os.getpid()}-{DOCKER_RUNS[0]}"]
+    return args
+
+
 def docker(*cmd, mounts=(), image=IMAGE, env=()):
-    args = ['docker']
-    if CONTEXT:
-        args += ['--context', CONTEXT]
-    args += ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
+    args = docker_run() + ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
     for host, guest in mounts:
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
@@ -1743,8 +1754,8 @@ def clips(only=None):
                             (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale={w if dual else 2 * w}:{h if dual else 2 * h}:flags=neighbor,split[a][b];'
                             '[a]palettegen=max_colors=128:stats_mode=full[p];[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
         for enc in encodes:
-            cmd = ['docker'] + (['--context', CONTEXT] if CONTEXT else []) + [
-                'run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
+            cmd = docker_run() + [
+                '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
                 FFMPEG_IMAGE, *enc]
             if subprocess.call(cmd):
                 return 1
@@ -1963,8 +1974,8 @@ def lint_rom_data(update):
 
 def lizard(*args):
     """lizard over src/ in the build image (its output)."""
-    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                         ['run', '--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', *args, 'src'],
+    out = subprocess.run(docker_run() +
+                         ['--rm', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE, 'lizard', *args, 'src'],
                          capture_output=True, text=True)
     if out.returncode not in (0, 1) or not out.stdout:
         sys.exit('lizard failed in the build image: one made before it came in? docker rmi cyberworld-build, then again\n'
@@ -2026,8 +2037,8 @@ def lint_analyzer(update):
               'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
               'cat "$out"/*')
     build('host')   # (its version.h)
-    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                         ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+    out = subprocess.run(docker_run() +
+                         ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
                           'sh', '-c', script], capture_output=True, text=True).stdout
     found, fn = Counter(), '?'
     for line in out.splitlines():
@@ -2055,8 +2066,8 @@ def lint_dead(update):
         ensure_image(image)
         out = f'build/lint/{target}'
         # (linked afresh each time: the linker's list is the report)
-        run = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                             ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', image,
+        run = subprocess.run(docker_run() +
+                             ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', image,
                               'sh', '-c', f'rm -f {out}/{binary}; make TARGET={target} OUT={out} VERSION=lint -j{os.cpu_count() or 4} '
                               f'"{extra[0]}" "{extra[1]}" {out}/{binary} 2>&1 >/dev/null; '
                               f'{nm} -A -g --defined-only {out}/obj/*/*.o'], capture_output=True, text=True)
@@ -2064,8 +2075,8 @@ def lint_dead(update):
     ensure_image()
     test_bins = ' '.join('build/lint/' + name for name in
                          ('test_core', 'test_emu', 'test_online_transport'))
-    test = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                          ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+    test = subprocess.run(docker_run() +
+                          ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
                            'sh', '-c', f'rm -f {test_bins} && '
                            f'make -j{os.cpu_count() or 4} {test_bins} 2>&1 >/dev/null && '
                            f'nm -A -g --defined-only build/lint/test/src/*/*.o {test_bins}'], capture_output=True, text=True)
@@ -2297,8 +2308,8 @@ def lint_headers():
     script = ('for h in src/*/*.h shared/online/*.h; do gcc -std=c11 -fsyntax-only -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include -Wno-pragma-once-outside-header -x c "$h" 2>&1 | grep -q "error" && echo "$h"; done; true')
-    out = subprocess.run(['docker'] + (['--context', CONTEXT] if CONTEXT else []) +
-                         ['run', '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
+    out = subprocess.run(docker_run() +
+                         ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
                           'sh', '-c', script], capture_output=True, text=True).stdout
     bad += [f'{h}: does not compile on its own' for h in out.split()]
     for b in bad:

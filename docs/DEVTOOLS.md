@@ -409,7 +409,14 @@ Square battle picks it), and `arenabusy` makes the second player step,
 shoot and OK the Custom screen by the frame's number alone, so a run that
 rolls back and one that does not hand him the same keys: with
 `arenadelay=1,arenalag=4` every frame's other keys are a guess, and the
-game's hashes must be those of `arenawindow=0,arenalag=0`. In a Net
+game's hashes must be those of `arenawindow=0,arenalag=0`. `arenaboth`
+makes the first player a script too (the Custom screen's OK, then
+charged shots from where he stands), so the battle plays itself on a
+device with no hands on it; in the Net Square it takes a challenge at
+once (Lan's Yes, the first folder that fits) and plays the battle the
+same way, for a browser tab or a device against another game. `quitend`
+quits the game once `--dev rollbench` and `--dev arena` are done (a run
+sent over 3dslink gives the Homebrew Launcher back). In a Net
 Square battle `arenawindow=W` sets the window too and asks with it, and
 `arenadelay=N` asks the server for N frames. [ONLINE_ARENA.md](ONLINE_ARENA.md)
 says what runs, how to script a battle headless and what it measured.
@@ -452,14 +459,21 @@ frame holds with a quarter of it kept for the rest, with the lag of the
 other's keys it covers at delays 1, 2 and 3, then the way in's frames
 timed and the window the Arena picks from them and from the battle's;
 the battle's frame cost is kept in the data folder (`arena.ini`) for the
-delay the next challenge asks. A or B quits; a headless run ends by
-itself. The 3DS and the browser, which compile the Arena out, measure the
-core alone and say so. [ONLINE_ARENA.md](ONLINE_ARENA.md), Rollback, has
-its numbers on this machine and the Retroid Pocket Nova:
+delay the next challenge asks. A pair frame is timed three ways: with my
+GBA's picture drawn (a battle's frame), with none (a frame a rollback
+runs again) and with both; the window counts the frames run again at the
+second. On the 3DS it says the heap and the linear heap with the pair
+made. A or B quits; a headless run ends by itself; with `arena` too
+(`--dev rollbench,arena`) the Arena's battle follows on the same core,
+and `quitend` ends the game after it. [ONLINE_ARENA.md](ONLINE_ARENA.md),
+Rollback, has its numbers on this machine, the Retroid Pocket Nova, the
+browser and the New 3DS:
 
 ```sh
 python3 build.py shot --dev rollbench --frames 20000      # here
 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./cyberworld.aarch64 --headless --frames 20000 --rom-dir ROMS --data-dir /tmp/rb --dev rollbench   # a handheld, over SSH
+3dslink -a 3DS-ADDRESS -s build/3ds/cyberworld-endless.3dsx -- --data-dir sdmc:/3ds/cyberworld-endless/test \
+    --dev statistics=off,rollbench,arena,arenaboth,arenabusy,arenadelay=1,arenalag=4,quitend   # a New 3DS: both, its output back
 ```
 
 ## Dev menu: shorter test runs

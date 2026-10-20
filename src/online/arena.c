@@ -37,6 +37,7 @@
 #include "arena_sync.h"
 #include "arena_window.h"
 #include "bn6.h"
+#include "emu.h"
 
 #define CATCH_UP 2       /* frames of the pair a tick may run */
 /* frames my keys may run past the pair's next one: past it a tick samples
@@ -139,6 +140,7 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	if (s == ARENA_BOOT_FAILED) return fail(a, arena_boot_error(a->boot));
 	if (s != ARENA_BOOT_READY) return a->stage;
 	a->pair = arena_boot_take(a->boot);
+	arena_pair_draw(a->pair, 1u << a->link->side);   /* (my GBA's picture alone: the one shown) */
 	printf("arena: both cores at the Custom screen after %u frames, %u cable transfers; delay %u frames\n",
 		arena_boot_done(a->boot), arena_pair_transfers(a->pair), a->link->delay);
 	for (unsigned side = 0; side < 2; ++side) {
@@ -238,8 +240,11 @@ static bool roll_back(Arena *a) {
 	arena_input_rewind(&a->input, from);
 	if (from >= until) return true;
 	if (!a->window || from < a->done || !arena_pair_load(a->pair, a->snap[from % a->window])) return false;
-	while (a->input.next < until)
+	while (a->input.next < until) {
+		/* (no picture but the last frame's, the one shown) */
+		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << a->link->side : 0);
 		if (!run_frame(a)) return false;
+	}
 	arena_pair_mute(a->pair);
 	++a->rollbacks;
 	a->again += until - from;
@@ -353,6 +358,15 @@ ArenaStage arena_tick(Arena *a, uint16_t keys) {
 	if (ms > a->tick_worst) a->tick_worst = ms;
 	a->late += ms > 1000.0 / 60;
 	return s;
+}
+
+uint16_t arena_bot_keys(const Arena *a, unsigned side, uint32_t tick) {
+	if (arena_phase(a, side) == BN6_PHASE_CUSTOM) {
+		unsigned t = tick % 160;
+		if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
+		return t >= 100 && t < 104 ? KEY_A : 0;
+	}
+	return tick % 120 < 100u + 4 * side ? KEY_B : 0;   /* (the second lets go a little later: one of them wins) */
 }
 
 void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
