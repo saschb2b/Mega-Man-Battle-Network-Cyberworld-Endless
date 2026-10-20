@@ -908,7 +908,7 @@ stands and his public card while you are there; your identity on it is
 a key your game makes for that server alone. It keeps its trades and
 the week's board, by that identity and your name, and its log of who
 joined and left, without addresses. How long it keeps what is in
-[server/README.md](../server/README.md#tls-and-privacy).
+[server/README.md](../server/README.md#the-official-server).
 
 ## Screen
 

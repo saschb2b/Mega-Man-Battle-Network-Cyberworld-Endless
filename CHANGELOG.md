@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Online Net Squares (epic #120).** Cyberworld Endless connects. Lan's
+  HP, where every run begins and comes home between acts, has a gate to a
+  Net Square on a server: other players' MegaMen in one place, eight
+  operators a channel. Meet them with the Square's phrases and emotes (no
+  free text), trade one chip for one at Trade Central or post an offer on
+  its board, NetBattle each other with the MegaMan your run built (his
+  folder, NaviCust, Crosses and Souls), watch a battle from the stands,
+  and dive the week's DeepNet, the same net for everyone, ranked on its
+  Board. Your run waits at the gate; a chip you trade comes home with
+  you. The NetPass in your PET shows what is open to you: the Square is
+  everyone's; NetBattles, trades and the DeepNet need BN6 Cybeast Gregar
+  (USA) and BN5 Team Colonel (USA). Every system goes online, the browser
+  and the New 3DS too; NetBattles run everywhere but the New 3DS. The
+  official server is Saschb2b's at cyberworld.saschb2b.com, and the
+  server is ROM-free Python anyone can host (server/README.md). The
+  0.13.0 trailer, "Cyberworld Endless connects", shows it.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a
