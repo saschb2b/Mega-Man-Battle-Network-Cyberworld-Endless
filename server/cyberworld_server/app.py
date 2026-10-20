@@ -13,8 +13,9 @@ from . import protocol, websocket
 from .arena import Arena
 from .stands import Stands
 from .trade import Trades
-from .week import Weeks
+from .week import Weeks, week_of
 from .identity import IdentityStore
+from . import retention
 
 LOG = logging.getLogger("cyberworld.server")
 
@@ -40,7 +41,7 @@ class Player:
 class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
                  player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
-                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False):
+                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -52,6 +53,12 @@ class Server:
         self.max_channels = (player_cap + capacity - 1) // capacity
         self.name, self.motd = name[:64], motd[:160]
         self.store = IdentityStore(state_dir)
+        # (how long the state directory keeps each thing: retention.py)
+        self.retention = policy or retention.Retention()
+        self.players_log = retention.PlayersLog(state_dir, self.retention.log_days)
+        self.players_log_failed = False
+        self.retention_time = None      # the last pass, monotonic
+        self.retention_task = None
         self.whitelist = set(whitelist)
         self.last_moderation = 0
         self.housekeeping = 1.0     # seconds between moderation checks and roster writes
@@ -69,12 +76,22 @@ class Server:
         self.listener = self.ticker = None
         self.trading, self.arena_on = trading, arena
         self.trades, self.arena = Trades(self), Arena(self)
-        self.weeks = Weeks(self)
+        self.weeks = Weeks(self, clock)
         self.stands = Stands(self)
 
     def event(self, kind, **fields):
+        """An event in the console's log; one that names a player (a public
+        identity or a name) goes whole to the players' log alone."""
         entry = dict(event=kind, **fields)
-        LOG.info("%s", json.dumps(entry, separators=(",", ":")))
+        LOG.info("%s", retention.console(entry))
+        if retention.personal(entry):
+            try:
+                self.players_log.write(entry, time.time())
+                self.players_log_failed = False
+            except OSError as exc:
+                if not self.players_log_failed:
+                    LOG.error("Could not write the players' log: %s", exc)
+                self.players_log_failed = True
         if self.event_log:
             self.event_log.write(json.dumps(dict(time=time.time(), **entry)) + "\n")
             self.event_log.flush()
@@ -98,6 +115,8 @@ class Server:
         await asyncio.gather(*tasks, return_exceptions=True)
         if self.roster_task:
             await asyncio.gather(self.roster_task, return_exceptions=True)
+        if self.retention_task:
+            await asyncio.gather(self.retention_task, return_exceptions=True)
         try:
             self.store.roster([])
         except (OSError, ValueError) as exc:
@@ -367,6 +386,27 @@ class Server:
             return
         self.roster_written, self.roster_failed = roster, False
 
+    def keep(self, now):
+        """The retention's pass (retention.py): within a second of the start,
+        then every hour, one at a time, in a thread."""
+        if not self.store.directory or (self.retention_task and not self.retention_task.done()):
+            return
+        if self.retention_time is not None and now - self.retention_time < retention.PASS:
+            return
+        self.retention_time = now
+        self.retention_task = asyncio.create_task(self.retain())
+
+    async def retain(self):
+        now = self.weeks.clock()
+        try:
+            gone = await asyncio.to_thread(retention.apply, self.store.directory, self.retention, now, week_of(now))
+        except (OSError, ValueError) as exc:
+            LOG.error("The retention's pass failed: %s", exc)
+            return {}
+        if gone:
+            self.event("retention", **gone)
+        return gone
+
     async def tick(self):
         while True:
             await asyncio.sleep(1 / self.tick_hz)
@@ -374,6 +414,7 @@ class Server:
             if now - self.last_moderation >= self.housekeeping:
                 self.last_moderation = now
                 await self.moderation()
+                self.keep(now)
                 self.trades.expire(now)
                 self.arena.expire(now)
             self.stands.pump(now)

@@ -1,5 +1,6 @@
 """Private local server state: a salted public identity and moderation rules."""
 
+import contextlib
 import hashlib
 import hmac
 import json
@@ -17,13 +18,42 @@ LOG = logging.getLogger("cyberworld.server")
 _UNSET = object()
 
 
+@contextlib.contextmanager
+def state_lock(directory):
+    """The state directory's lock (its file `moderation.lock`): held by every
+    write of moderation.json, by the trades' and the Board's logs as they
+    are appended or pruned, and by a backup or a restore, so a moderator's
+    command never meets a half-written file. One process or several."""
+    descriptor = os.open(Path(directory) / "moderation.lock", os.O_RDWR | os.O_CREAT, 0o600)
+    with os.fdopen(descriptor, "r+b") as stream:
+        if os.name == "nt":
+            import msvcrt
+            if not stream.read(1):
+                stream.write(b"0")
+                stream.flush()
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(stream, fcntl.LOCK_EX)
+        yield
+
+
 def write_json(path, value, durable=True):
     encoded = json.dumps(value, indent=2, sort_keys=True) + "\n"
     if len(encoded) > MAX_STATE_BYTES:
         raise ValueError("Server state exceeds 1 MiB")
+    write_text(path, encoded, durable)
+
+
+def write_text(path, encoded, durable=True):
+    """Replace a state file whole (text, or bytes): a temporary file beside
+    it, readable by its owner alone, then a rename."""
+    path = Path(path)
     descriptor, temporary = tempfile.mkstemp(prefix=".server-", dir=path.parent)
     try:
-        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+        with os.fdopen(descriptor, "wb" if isinstance(encoded, bytes) else "w",
+                       encoding=None if isinstance(encoded, bytes) else "utf-8") as stream:
             stream.write(encoded)
             stream.flush()
             if durable:
@@ -32,6 +62,39 @@ def write_json(path, value, durable=True):
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def append_log(directory, name, entry):
+    """One entry appended to a JSONL log of the state directory, under its lock."""
+    with state_lock(directory):
+        with open(Path(directory) / name, "a", encoding="utf-8") as log:
+            log.write(json.dumps(entry, separators=(",", ":"), sort_keys=True) + "\n")
+
+
+def rewrite_log(directory, name, edit):
+    """A JSONL log of the state directory rewritten under its lock: `edit`
+    takes its entries (a line that is not a JSON object is dropped) and
+    returns those to keep, changed or not. The file is replaced only where
+    that changed it. Returns the entries kept and how many lines went."""
+    path = Path(directory) / name
+    with state_lock(directory):
+        try:
+            with path.open("r", encoding="utf-8") as log:
+                lines = log.read().splitlines()
+        except FileNotFoundError:
+            return [], 0
+        entries = []
+        for line in lines:
+            try:
+                entry = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(entry, dict):
+                entries.append(entry)
+        kept = edit([dict(entry) for entry in entries])
+        if kept != entries or len(entries) != len(lines):
+            write_text(path, "".join(json.dumps(entry, separators=(",", ":"), sort_keys=True) + "\n" for entry in kept))
+        return kept, len(lines) - len(kept)
 
 
 def read_json(path, default):
@@ -91,6 +154,35 @@ def prune_kicks(rules, now):
     for identity in [identity for identity, entry in kicks.items() if kick_expires(entry) <= now]:
         del kicks[identity]
     return rules
+
+
+def prune_moderation(directory, now, first_week=None, forget=None):
+    """moderation.json without the kicks that ended and the Board entries
+    hidden for a week before `first_week` (weeks.jsonl keeps none of them),
+    and without `forget`'s kick and hidden entry (a ban or a mute stays
+    while it lasts): how many entries went. A file that will not load is
+    left as it is; the server keeps its last good rules and says so."""
+    path = Path(directory) / "moderation.json"
+    with state_lock(directory):
+        if not path.exists():
+            return 0
+        try:
+            rules = checked_rules(read_json(path, {}))
+        except (OSError, ValueError):
+            return 0
+        count = sum(len(rules[action]) for action in MODERATION)
+        prune_kicks(rules, now)
+        hidden = rules["hidden"]
+        for identity in [identity for identity, entry in hidden.items()
+                         if first_week is not None and entry.get("week", 0) < first_week]:
+            del hidden[identity]
+        if forget:
+            rules["kicks"].pop(forget, None)
+            hidden.pop(forget, None)
+        gone = count - sum(len(rules[action]) for action in MODERATION)
+        if gone:
+            write_json(path, rules)
+        return gone
 
 
 class IdentityStore:
