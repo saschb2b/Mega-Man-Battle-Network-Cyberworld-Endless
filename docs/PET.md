@@ -77,6 +77,12 @@ three open the golden gate) and four of the profile's, in the ids
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
 | NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
 
+The profile's four are given on each layer as it begins, and at home
+wherever the game's state lacks them (`pet_text_items`, from `pet.c`'s
+frame): a NEW GAME's PET, and the week's dive's, held only the PET in
+Lan's room and Lan's HP until the first layer, so the NetPass the
+greeter had just stamped was nowhere in KeyItem (session 74).
+
 The Spins show with BN6's own words, those the profile has found in the
 net, one a run (docs/META.md): each lets a held NaviCust program of its
 colour turn with L and R. The descriptions that count are made again on
