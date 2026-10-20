@@ -1612,7 +1612,6 @@ CLIPS = [
     ('guardian', RUN_7, {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 1200, 1470),
     ('undernet', ['--scene', 'emu', '--net-biome', '5', '--run-depth', '15', '--seed', '3', '--dev', 'quiet'], {},
      '150:,70:RIGHT,50:UP,70:LEFT,50:DOWN,100:', 150, 480),
-    ('jackin', ['--scene', 'title'], {}, '120:,4:START,60:,4:A,200:', 110, 222),
     # (the areas walked, layer 1 by the weak autopilot past MegaMan's words;
     # on BN6's ROM alone, but acdc-bn5, with BN5's beside it: docs/MULTIROM.md)
     ('sky', AREA_WALK + ['--net-biome', '2', '--seed', '2'], {'CYBERWORLD_AUTOPILOT': 'weak'}, None, 300, 620),
@@ -1694,7 +1693,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
-               'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12)}
+               'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
+               'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12)}
 
 
 def clips(only=None):
@@ -1739,33 +1739,58 @@ def clips(only=None):
                 im.save(os.path.join(out, f'{name}.png'), optimize=True)
             im.save(os.path.join(tmp, 'png', f'{n:05d}.png'))
             n += 1
-        # 4x with whole pixels (and the colour planes' 2x2 blocks inside them; two screens 2x)
-        w, h = im.size
-        big = f'{2 * w}:{2 * h}' if dual else f'{4 * w}:{4 * h}'
-        common = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png',
-                  '-vf', f'scale={big}:flags=neighbor', '-an']
-        encodes = [common + ['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
-                   common + ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                             f'/out/{name}.mp4']]
-        # (the GIF from the same frames: 2x with whole pixels, its palette the clip's own colours)
-        if name in README_GIFS:
-            secs, fps = README_GIFS[name]
-            encodes.append(['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png', '-vf',
-                            (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale={w if dual else 2 * w}:{h if dual else 2 * h}:flags=neighbor,split[a][b];'
-                            '[a]palettegen=max_colors=128:stats_mode=full[p];[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
-        for enc in encodes:
-            cmd = docker_run() + [
-                '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
-                FFMPEG_IMAGE, *enc]
-            if subprocess.call(cmd):
-                return 1
-        exts = ('webm', 'mp4', 'gif') if name in README_GIFS else ('webm', 'mp4')
-        sizes = ', '.join(f'{ext} {os.path.getsize(os.path.join(out, name + "." + ext)) // 1024} KB' for ext in exts)
-        print(f'clip {name}: {n} frames, {sizes}')
+        if encode_clip(name, tmp, out, n, im.size, dual):
+            return 1
+    return 0
+
+
+def encode_clip(name, tmp, out, n, size, dual=False):
+    """docs/clips/NAME.webm and .mp4 from the n frames in tmp/png
+    (00000.png on), 30 a second, 4x with whole pixels (and the colour
+    planes' 2x2 blocks inside them; two screens 2x), and NAME.gif, 2x (two
+    screens 1x), where README_GIFS names it: nonzero if ffmpeg failed."""
+    w, h = size
+    big = f'{2 * w}:{2 * h}' if dual else f'{4 * w}:{4 * h}'
+    common = ['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png',
+              '-vf', f'scale={big}:flags=neighbor', '-an']
+    encodes = [common + ['-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '36', '-row-mt', '1', '-pix_fmt', 'yuv420p', f'/out/{name}.webm'],
+               common + ['-c:v', 'libx264', '-crf', '24', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+                         f'/out/{name}.mp4']]
+    # (the GIF from the same frames: 2x with whole pixels, its palette the clip's own colours)
+    if name in README_GIFS:
+        secs, fps = README_GIFS[name]
+        encodes.append(['-y', '-loglevel', 'error', '-framerate', '30', '-i', '/work/png/%05d.png', '-vf',
+                        (f'trim=duration={secs},' if secs else '') + f'fps={fps},scale={w if dual else 2 * w}:{h if dual else 2 * h}:flags=neighbor,split[a][b];'
+                        '[a]palettegen=max_colors=128:stats_mode=full[p];[b][p]paletteuse=dither=none', f'/out/{name}.gif'])
+    for enc in encodes:
+        cmd = docker_run() + [
+            '--rm', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg', '-v', f'{tmp}:/work', '-v', f'{out}:/out',
+            FFMPEG_IMAGE, *enc]
+        if subprocess.call(cmd):
+            return 1
+    exts = ('webm', 'mp4', 'gif') if name in README_GIFS else ('webm', 'mp4')
+    sizes = ', '.join(f'{ext} {os.path.getsize(os.path.join(out, name + "." + ext)) // 1024} KB' for ext in exts)
+    print(f'clip {name}: {n} frames, {sizes}')
     return 0
 
 
 FLATPAK_ID = 'io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless'
+
+
+def online_pictures(kind, rest):
+    """The pictures of online play (tools/online_pictures.py), where none or
+    one of them is named: games in a Square of their own on a local server,
+    the Linux build and the server made first. --keep: the scenes already
+    captured."""
+    names = [n for n in rest if not n.startswith('--')]
+    if names and not any(n.startswith('online-') for n in names):
+        return 0
+    build('linux')
+    if subprocess.call([sys.executable, os.path.join(ROOT, 'server', 'build.py')], cwd=ROOT):
+        return 1
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    import online_pictures as pictures
+    return pictures.main(rest, kinds=(kind,), encode=encode_clip)
 
 
 def flatpak():
@@ -2464,12 +2489,13 @@ def main():
         windows_release()
         web_release()
         return
-    if a.action == 'clips':
-        build('host')
-        sys.exit(clips(a.rest or None))
-    if a.action == 'screenshots':
-        build('host')
-        sys.exit(screenshots(a.rest or None))
+    if a.action in ('clips', 'screenshots'):
+        names = [n for n in a.rest if not n.startswith('--')]
+        code = 0
+        if not names or any(not n.startswith('online-') for n in names):
+            build('host')
+            code = (clips if a.action == 'clips' else screenshots)(names or None)
+        sys.exit(code or online_pictures(a.action, a.rest))
     if a.action == 'xdiff':
         # (local only: both ROMs; the tool builds the host binary and runs it once a spec)
         sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xdiff.py'), *a.rest]))

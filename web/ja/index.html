@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cyberworld Endless｜ロックマンエグゼ6のローグライク（非公式ファンゲーム）</title>
-<meta name="description" content="ロックマンエグゼ6（北米版『Mega Man Battle Network 6』）で遊ぶ、無料のローグライク。プレイのたびに新しく生まれる電脳世界を、ゲーム本体がそのまま動かします。ブラウザ、Windows、Mac、Linux、Android、iPhone、Steam Deck、New 3DSで。">
+<title>Cyberworld Endless｜ロックマンエグゼ6のローグライク、オンライン対応（非公式ファンゲーム）</title>
+<meta name="description" content="ロックマンエグゼ6（北米版『Mega Man Battle Network 6』）で遊ぶ、無料のローグライク。プレイのたびに新しく生まれる電脳世界を、あなたのROMで動くゲーム本体がそのまま動かします。オンラインのネットスクエアでは、出会い、トレード、ネットバトル。ブラウザ、Windows、Mac、Linux、Android、iPhone、Steam Deck、New 3DSで。">
 <link rel="canonical" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">
 <link rel="alternate" hreflang="en" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/">
 <link rel="alternate" hreflang="ja" href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">
@@ -14,8 +14,8 @@
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">
-<meta property="og:title" content="Cyberworld Endless｜ロックマンエグゼ6のローグライク">
-<meta property="og:description" content="プレイのたびにエグゼ6のエリア風のネットが新しく生まれ、ゲーム本体がそれを動かします。バトル、チップ、PET、音楽まで、あなたのROMから。">
+<meta property="og:title" content="Cyberworld Endless｜ロックマンエグゼ6のローグライク、オンライン対応">
+<meta property="og:description" content="プレイのたびに新しいネットが生まれ、あなたのROMで動くエグゼ6本体がそれを動かします。そして今、オンラインへ。ネットスクエアでほかのプレイヤーのロックマンと出会い、トレードし、ネットバトル。">
 <meta property="og:image" content="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
@@ -39,14 +39,15 @@
  "name": "Cyberworld Endless",
  "alternateName": ["サイバーワールド・エンドレス", "Mega Man Battle Network: Cyberworld Endless"],
  "url": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/",
- "description": "ロックマンエグゼ6（北米版『Mega Man Battle Network 6』）のローグライク。プレイのたびにエグゼ6のエリア風のネットが新しく生まれ、プレイヤー自身のROMで動くゲーム本体が、そのバトル、チップ、PET、ショップ、音楽を動かします。",
+ "description": "ロックマンエグゼ6（北米版『Mega Man Battle Network 6』）のローグライク。プレイのたびにエグゼ6のエリア風のネットが新しく生まれ、プレイヤー自身のROMで動くゲーム本体が、そのバトル、チップ、PET、ショップ、音楽を動かします。オンラインでは、ネットスクエアでプレイヤーが出会い、チップをトレードし、ネットバトルとその観戦、毎週同じネットへのダイブを楽しめます。",
  "image": "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.png",
  "screenshot": [
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-square.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-battle.png",
+  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/online-trade.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/net.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/battle.png",
-  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/act-card.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/guardian.png",
-  "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/undernet.png",
   "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/shots/setup.png"
  ],
  "genre": [
@@ -59,12 +60,16 @@
   "Linux",
   "Steam Deck",
   "Android",
+  "iOS",
   "Nintendo 3DS",
   "Webブラウザ"
  ],
  "operatingSystem": "Windows 10・11、macOS 11以降、Linux、Android 5以降、iOS 14以降、New ニンテンドー3DS、Webブラウザ",
  "applicationCategory": "Game",
- "playMode": "SinglePlayer",
+ "playMode": [
+  "SinglePlayer",
+  "MultiPlayer"
+ ],
  "isAccessibleForFree": true,
  "offers": {
   "@type": "Offer",
@@ -111,6 +116,7 @@
 	<div class="wrap">
 		<a class="brand" href="./"><i class="dot" aria-hidden="true"></i><span>Cyberworld Endless</span></a>
 		<nav aria-label="サイト">
+			<a class="opt" href="#online">オンライン</a>
 			<a class="opt" href="#game">ゲーム</a>
 			<a href="download/" data-umami-event="go-download" data-umami-event-from="nav">ダウンロード</a>
 			<a href="play/" data-umami-event="go-play" data-umami-event-from="nav">プレイ</a>
@@ -132,12 +138,94 @@
 			<div class="bar">
 				<div class="intro">
 					<h1>ロックマンエグゼ6のローグライク</h1>
-					<p class="pitch">プレイのたびに、エグゼ6のエリア風のネットが新しく生まれ、ゲーム本体がそれを動かします。</p>
+					<p class="pitch">プレイのたびに新しいネットが生まれ、あなたのROMで動くエグゼ6本体がそれを動かします。そして今、オンラインへ。ネットスクエアでほかのプレイヤーのロックマンと出会い、トレードし、ネットバトル。</p>
 					<p class="need">北米版『Mega Man Battle Network 6』のROMで動きます。日本版のROMには、まだ対応していません。ゲーム内の文章は英語です。</p>
 				</div>
 				<div class="actions">
 					<a class="exit" href="play/" data-umami-event="go-play" data-umami-event-from="hero">プラグイン</a>
 					<a class="plate" href="download/" data-umami-event="go-download" data-umami-event-from="hero"><i class="icon i-get" aria-hidden="true"></i>ダウンロード</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="online" aria-labelledby="online-title">
+		<div class="wrap">
+			<div class="band"><h2 id="online-title">ネットスクエア</h2><span class="hint">オンライン、1チャンネル<b>8</b>人</span></div>
+			<!-- the English page's Net Square (index.html), in Japanese: the same screens and clips -->
+			<ul class="square">
+				<li class="spot">
+					<figure class="frame">
+						<img src="../shots/online-gate.png" width="240" height="160" loading="lazy" alt="熱斗のHPの白いゲートに立つロックマン：「To the Net Square, Lan?」（ネットスクエアに行く？）はい・いいえ。上にNetPassの4つのスタンプ">
+					</figure>
+					<div class="note textbox">
+						<h3>ゲートをくぐって</h3>
+						<p>ランが始まり、幕ごとに帰ってくる熱斗のHPに、サーバー上のネットスクエアへのゲートがあります。ランはゲートで待ち、持ち帰るのはトレードしたチップだけです。</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="../clips/online-square.png" width="240" height="160"
+							aria-label="8人が集まるネットスクエアで、ロックマンがLボタンのフレーズから「Hello!」を選ぶ。ランドマークのまわりのロックマンたちの上に「Hello!」「Nice build!」が出る"><source src="../clips/online-square.webm" type="video/webm"><source src="../clips/online-square.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>出会う</h3>
+						<p>話せるのは決まったフレーズとエモートだけ。自由入力はありません。ランドマークのまわりでいっしょに言えば、スクエアが盛り上がります。</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="../clips/online-trade.png" width="240" height="160"
+							aria-label="トレードセンターのチップトレード：画面の英語名でFireBrn1 FとMrkCan1 M、「Deal!」、相手を待って、2枚のチップのカードが入れ替わる：「Traded!」"><source src="../clips/online-trade.webm" type="video/webm"><source src="../clips/online-trade.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>トレード</h3>
+						<p>トレードセンターで、あまったチップを1枚ずつ交換。エグゼ5のチップも。ほしいものを書いて、掲示板にオファーを出すこともできます。</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<video class="clip" muted loop playsinline preload="none" poster="../clips/online-battle.png" width="240" height="160"
+							aria-label="ふたりのプレイヤーのロックマンのネットバトル。チャージショットを撃ち合う、片方のプレイヤーの画面"><source src="../clips/online-battle.webm" type="video/webm"><source src="../clips/online-battle.mp4" type="video/mp4"></video>
+					</figure>
+					<div class="note textbox">
+						<h3>ネットバトル</h3>
+						<p>ロックマンはそのまま。フォルダ、ナビカス、クロス、ソウルも。ロールバックで、回線が良ければ入力遅延は2フレームです。</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<img src="../shots/online-stands.png" width="240" height="160" loading="lazy" alt="観客席から見るKei 対 Mira：Rで相手側、Lで応援、Bで退席">
+					</figure>
+					<div class="note textbox">
+						<h3>観戦</h3>
+						<p>チャンネルのバトルは、すべてレフェリーが実況。観客席から最初のフレームから観戦して、応援もできます。</p>
+					</div>
+				</li>
+				<li class="spot">
+					<figure class="frame">
+						<img src="../shots/online-deepnet.png" width="240" height="160" loading="lazy" alt="ネットスクエアの掲示板：今週のディープネット。1位 Mira：10!、2位 Dex：9、3位 Rio：8">
+					</figure>
+					<div class="note textbox">
+						<h3>今週のディープネット</h3>
+						<p>毎週月曜、各サーバーが全員共通のネットをひとつ開きます。スタートも全員同じ。掲示板に、いちばん深いダイブが並びます。</p>
+					</div>
+				</li>
+			</ul>
+
+			<div class="panel pass">
+				<figure class="frame">
+					<video class="clip" muted loop playsinline preload="none" poster="../clips/online-netpass.png" width="240" height="160"
+						aria-label="案内役のプログラムくん：「Hold still! Stamp, stamp, stamp!」。NetPassが開き、Arena、Trade、DeepNetのスタンプが押される：4 of 4、Full pass"><source src="../clips/online-netpass.webm" type="video/webm"><source src="../clips/online-netpass.mp4" type="video/mp4"></video>
+				</figure>
+				<div class="text">
+					<h3 class="label">NetPass</h3>
+					<p>スクエアはだれでも入れます。必要なのは北米版BN6『Cybeast Gregar』だけ。ネットバトル、トレード、ディープネットには、セットがそろっていること、つまりその横に北米版BN5『Team Colonel』が必要です。案内役のプログラムくんが、パスにスタンプを押してくれます。</p>
+					<ul class="systems" aria-label="システムごとのオンライン">
+						<li><i class="icon i-pc" aria-hidden="true"></i>PC、スマホ、携帯ゲーム機、ブラウザ：すべて</li>
+						<li><i class="icon i-3ds" aria-hidden="true"></i>New 3DS：ネットバトル以外すべて</li>
+					</ul>
+					<p class="more">サーバーはだれでも立てられます。<a href="faq/#online">オンラインの遊び方</a> · <a href="faq/#server">サーバーが残すもの</a></p>
 				</div>
 			</div>
 		</div>
@@ -177,7 +265,7 @@
 					</figure>
 					<div class="note textbox">
 						<h3>エグゼ6そのもののバトル</h3>
-						<p>ランダムエンカウントも、バトルチップも、カスタム画面も、ゲーム本体が動かします。敵はエリアではなく、深さとともに強くなります。</p>
+						<p>ゲーム本体が動かすバトル。敵はエリアではなく、深さとともに強くなります。</p>
 					</div>
 				</li>
 				<li class="stop">
@@ -210,7 +298,7 @@
 					</figure>
 					<div class="note textbox">
 						<h3>幕のあいだは家へ</h3>
-						<p>セントラルタウンはランのことを覚えています。アスタランドではライブラリにあるチップを注文でき、3人が依頼を出しています。</p>
+						<p>セントラルタウンはランのことを覚えています。アスタランドではライブラリにあるチップを注文でき、3人が依頼を出しています。熱斗のHPには、ネットスクエアへのゲートも。</p>
 					</div>
 				</li>
 				<li class="stop gold">
@@ -253,7 +341,7 @@
 							aria-label="エグゼ5の秋原エリアを歩くとバトルが始まり、エグゼ6のバトルエンジンでエグゼ5のウイルスと戦う"><source src="../clips/bn5-battle.webm" type="video/webm"><source src="../clips/bn5-battle.mp4" type="video/mp4"></video>
 						</figure>
 					</div>
-					<p>北米版の<i>Team Colonel</i>（エグゼ5 チーム オブ カーネル）をBN6の横に置くと、エグゼ5のエリアがランに現れ、そのエグゼ5のバトルをエグゼ6のエンジンで戦います。2つ目のアクトからは、エグゼ5とエグゼ6のウイルスやチップが出会います。エグゼ5のナビがアクトを守ることもあり、倒せばそのソウルが手に入り、それからのすべてのバトルでソウルユニゾンできます。</p>
+					<p>北米版の<i>Team Colonel</i>（エグゼ5 チーム オブ カーネル）をBN6の横に置くと、エグゼ5のエリア、ウイルス、チップ、ナビがランに加わり、エグゼ6のエンジンで戦います。エグゼ5のナビを倒せばソウルが手に入り、それからのすべてのバトルでソウルユニゾン。オンラインでは、NetPassがそろいます。</p>
 				</article>
 				<article class="panel">
 					<h3 class="label">ランが残すのは選択肢</h3>
@@ -283,7 +371,7 @@
 					<li><i class="icon i-handheld" aria-hidden="true"></i>PortMaster</li>
 					<li><i class="icon i-3ds" aria-hidden="true"></i>New 3DS</li>
 				</ul>
-				<p class="rom">どのビルドにも、ご自身の北米版『Mega Man Battle Network 6: Cybeast Gregar』の<code>.gba</code>が必要です。日本版『ロックマンエグゼ6 電脳獣グレイガ』やアドバンスドコレクションのデータには、まだ対応していません。ゲーム内の文章は英語です。ダウンロードにゲームのデータは含まれていません。<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">すべてのダウンロード</a> · <a href="faq/">FAQ</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md" data-umami-event="outbound" data-umami-event-to="guide">プレイヤーズガイド（英語）</a></p>
+				<p class="rom">どのビルドにも、ご自身の北米版『Mega Man Battle Network 6: Cybeast Gregar』の<code>.gba</code>が必要です。日本版『ロックマンエグゼ6 電脳獣グレイガ』やアドバンスドコレクションのデータには、まだ対応していません。ゲーム内の文章は英語です。どのビルドもオンラインに対応。北米版BN5『Team Colonel』を横に置くのは任意で、置けばNetPassがそろいます。ダウンロードにゲームのデータは含まれていません。<a href="download/" data-umami-event="go-download" data-umami-event-from="get-list">すべてのダウンロード</a> · <a href="faq/">FAQ</a> · <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md" data-umami-event="outbound" data-umami-event-to="guide">プレイヤーズガイド（英語）</a></p>
 			</div>
 		</div>
 	</section>

@@ -2,13 +2,13 @@
 
 The [README](../README.md) shows the game on one page. This guide holds the
 rest: what you need, the install on each system, the controls, a run in
-full, saving, the screen, the anonymous statistics, troubleshooting and
-building the game yourself.
+full, saving, online play in the Net Square, the screen, the anonymous
+statistics, troubleshooting and building the game yourself.
 
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Moving saves between devices](#moving-saves-between-devices) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -39,7 +39,8 @@ building the game yourself.
   second act BN5's viruses and BN6's meet in battles, the Undernet's and
   the Graveyard's acts draw on both, half the chips their shops and
   Mystery Data hold are BN5's, which the Library counts apart, and its
-  flames of darkness hold BN5's DarkChips. A note in
+  flames of darkness hold BN5's DarkChips. Online, it completes the
+  [NetPass](#the-netpass): NetBattles, trades and the week's DeepNet. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
   iPhones and iPads, a New 3DS and in the browser. Added later, it
@@ -737,127 +738,178 @@ is refused, and your saves stay as they were.
 ### Online: the Net Square
 
 Other players' MegaMen meet in a **Net Square**, a net of its own on a
-server. The way there is the great white gate at the front of Lan's HP,
-the room MegaMan comes home to after each act and where every run
-begins. Step on it: the first time, the Mr.Prog who keeps it asks for
-the name other players will see and says what the server learns (your
-PET's address, that name, and MegaMan as he is), and asks before you go,
+server: up to eight in a channel, who walk, say a phrase, read each
+other's cards, trade a spare chip, NetBattle and watch each other's
+NetBattles, and dive the same net each week. Every system goes online,
+the browser too. Nothing there changes your run: no battles of the net,
+no heal, no shop, no saves. The one thing that comes home is a chip you
+traded.
+
+<p align="center">
+<img src="screenshots/online-square.png" width="240" alt="Eight players' MegaMen round the Net Square's landmark, their names over them, Hello! and Nice build! in bubbles">
+<img src="screenshots/online-trade.png" width="240" alt="Trade Central's chip trade: You and Them, each chip's card, and Deal! lit">
+<img src="screenshots/online-battle.png" width="240" alt="A NetBattle between two players' MegaMen in the Net Square's Arena">
+</p>
+
+#### Going online
+
+The way there is the great white gate at the front of Lan's HP, where
+every run begins after the jack-in and where MegaMan comes home after
+each act. Step on it. The first time, the Mr.Prog who keeps it asks for
+the name other players will see, says what the server learns (your
+PET's address, that name, and MegaMan as he is) and asks before you go,
 the cursor on **No**. After that MegaMan asks each time. Yes saves the
 run right there, and you go; the gate flickers while the server answers,
 and B calls it off.
 
-Nothing in the Square changes your run: no battles of the net, no heal,
-no shop, no saves. Coming home puts MegaMan back on the gate, exactly as
-he was; closing the game in the Square does the same at the next
-CONTINUE. The one thing that comes home with you is a chip you traded.
+**R**, or the pad you arrived by, takes you home. MegaMan is back on the
+gate exactly as he left it; if the game was closed in the Square, the
+next CONTINUE puts him there.
 
-**The NetPass** shows what your games open online, as four stamps:
+The keeper changes your name or the server: the official Square, or
+another one's address (`host` or `host:port`, as its owner gives it).
+He also moves you to the next or the last channel.
+
+#### The NetPass
+
+The NetPass says what your games open online, as four stamps:
 
 | Stamp | What it opens | What it needs |
 | --- | --- | --- |
-| **Square** | Walking, phrases and emotes, cheering, cards, the referee's calls, the board and its posts, reading the trade offers, the week's ranking | BN6, so everyone has it |
+| **Square** | Walking, phrases and emotes, cheering, cards, the referee's calls, the board and its posts, reading the trade offers, the week's ranking | BN6 Cybeast Gregar (USA): everyone has it |
 | **Arena** | NetBattles, and watching them | The full set |
 | **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set |
-| **DeepNet** | The week's deep net dive | The full set |
+| **DeepNet** | The week's DeepNet dive | The full set |
 
 The full set is every game this version supports online: BN6 Cybeast
-Gregar (USA) and BN5 Team Colonel (USA). With BN5's ROM beside BN6's, all
-four stamps are yours; with BN6's alone you hold the Square stamp: the
-whole Square but NetBattles, trades and the dive. In the browser a full
-pass battles too. On the New 3DS, which cannot run a NetBattle's two GBAs
-fast enough, a full pass trades and dives, and the pass says so.
+Gregar (USA) and BN5 Team Colonel (USA). With BN5's ROM beside BN6's,
+all four stamps are yours, and the greeter Mr.Prog stamps them on your
+next visit. With BN6's alone you hold the Square stamp: the whole Square
+but NetBattles, trades and the dive. If a later version supports another
+game online, the stamps that need it open again until you add that game;
+the release notes and the project's site say so ahead of time.
 
-Open the pass from the PET: **KeyItem**, then A on **NetPass**; A or B
-closes it. In the Square, where the PET stays shut, **START** opens it. It also shows across the top of the screen while MegaMan asks
-about going to the Square at the gate, and on a second screen (the 3DS's
-bottom screen, an Android handheld's second display) while you are in
-the Square. The first visit with a full pass, the greeter Mr.Prog stamps
-it. If a later version supports another game online, the stamps that
-need it open again until you add that game; the release notes and this
-site say so ahead of time.
+It is a key item: **KeyItem** in the PET, then A on **NetPass**; A or B
+closes it. In the Square, where the PET stays shut, **START** opens it.
+It also shows across the top of the screen while MegaMan asks about
+going, and on a second screen (the 3DS's bottom screen, an Android
+handheld's second display) while you are in the Square.
 
-The Square is a plaza with a landmark in its middle (a statue, a
-monument or a giant cybertree, by the server), a stage up a stair, the
-log-in plaza with its board and the pad home, Trade Central, and the
-Arena's ring with room to watch from. In Sky Area's Square the stage and
-the ring stand raised. A greeter Mr.Prog calls out who logs in, two
-Navis stroll about and chat about who's here and what just happened
-(and every three minutes they parade round the landmark: walk with them),
-and A on a tree, the landmark, the sign or the board says what it is
-(the board lists who's here, the last trade and NetBattle, the
-trade offers up and this week's deep net). Say
-something or emote together with another player round the landmark or
-on the stage, and the Square cheers.
+#### In the Square
 
-In the Square:
+A plaza with a landmark in its middle (a statue, a monument or a giant
+cybertree, by the server), a stage up a stair, the log-in plaza with its
+board and the pad home, Trade Central, and the Arena's ring with room to
+watch from. A greeter Mr.Prog calls out who logs in, two Navis stroll
+about and chat about who's here and what just happened, and every three
+minutes they parade round the landmark: walk with them. A on a tree, the
+landmark, the sign or the board says what it is; the board lists who's
+here, the last trade and NetBattle, the trade offers up and this week's
+DeepNet.
 
-- **L** has MegaMan say something or do an emote; everyone in your
-  channel sees it over his head.
+- **L** has MegaMan say a phrase or do an emote, over his head for the
+  whole channel to see. Phrases come from a fixed list: there is no free
+  text, and no one can type at you. Say something or emote together with
+  another player round the landmark or on the stage, and the Square
+  cheers.
 - **A** facing another player's MegaMan shows his card (HP, act and
-  layer, Crosses and Souls) and lets you ask him for a NetBattle, wave,
+  layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.
-- **Battle** on his card, there when you both have the Arena stamp, asks
-  for a Practice NetBattle of BN6's own. You fight with your MegaMen as
-  they are (NaviCust, HP, buster, Crosses, BN5's chips in your folder)
-  and with your Souls: UNITE on the Custom screen as in a run, and the
-  other player sees your Soul too. Where more than one of your folders
-  holds chips, MegaMan asks which goes. Win or lose you are back in the
-  Square where you stood; nothing is won or lost. MegaMan then asks
-  whether to go again with the same player, the cursor on No: when you
-  both say Yes, you fight again at once with the same folder (asked
-  again only if it no longer fits). No, B, or no Yes from the other
-  player within half a minute, and you stay in the Square. The browser
-  battles as the other systems do; the New 3DS has no NetBattle (its
-  two GBAs take half again a frame's time there).
-- **The Mr.Prog by the way in from the log-in plaza** moves you to the
-  next or last channel; a channel holds eight players. The one by the
-  Arena's ring tells how a NetBattle is asked for; once you have fought,
-  he calls each bout as you come back, tells who beat whom last, and
-  keeps the count while you go again with the same player. While two
-  others fight he calls their NetBattle too (their HP, the last chips
-  they used, the winner), and where your game can show it he asks
-  whether to watch: you see the battle itself, a moment behind, from
-  its start however late you came. **R** shows the other side, **L**
-  cheers, **B** takes you back. The players hear the cheers after their
-  battle. Watching takes the Arena stamp; without it, and on the New
-  3DS, you get the referee's call and the board's post.
-- **Trade Central**, a desk in a wing off the plaza, trades one of your spare
-  chips (copies beyond those in your folders) for another player's: pick
-  them, pick the chip, they pick one back, and when you both say yes the
-  chips swap as you come home. Trading takes the Trade stamp, on both
-  sides, and BN5's chips trade like BN6's.
-- **The trade board**, at the same desk: put one spare up with what you
-  want for it (anything, a chip of an element, a Sword, Wind, Break or
-  Cursor chip, or a Mega), and everyone in your channel can read it,
-  there and on the log-in plaza's board, until you take it down, leave
-  or trade. To answer someone's offer, pick it at the desk and then one
-  of your spares that is what they want; you both see the pair and say
-  Deal, as in any trade. One trade a visit: the chip comes home with
-  you before the next. Anyone can read the offers; posting and
-  answering take the Trade stamp.
-- **The week's deep net**: with the DeepNet stamp, the greeter Mr.Prog
-  in the log-in plaza posts a net that changes every Monday (00:00 UTC). Everyone on that server
-  dives the same net that week, from the same start: the short net, the
-  Standard folder, threat 0, no helpers and no Cross, and nothing your
-  other runs unlocked. Say Yes to him (the cursor starts on No) and
-  MegaMan heads home and the dive begins in Lan's room, as a new game
-  does. Your run in progress waits in its own save, untouched: the
-  title's CONTINUE is always that run, and when the dive ends, won or
-  deleted, you are back with it. To go on with an unfinished dive, visit
-  the Square again and talk to the greeter: Keep diving, Start over or Not
-  now. How deep you got is posted on the board at your next visit to the
-  Square: the week's eight deepest dives, your own best and its place,
-  and last week's three. Dive as often as you like; your best counts.
-  The board says the layers are as players report them, and nothing is
-  won for one; everyone can read it. A dive unlocks nothing and counts in
-  none of your records.
-- **R**, or the pad you arrived by, takes you home.
 
-Talk to the gate's keeper to change your name or the server: the
-official Square, or another one's address (`host` or `host:port`, as its
-owner gives it). Anyone can run a server; [server/README.md](../server/README.md)
-says how. The official Square's rules, who moderates it, blocking, what
-it keeps and for how long, and how to have your data removed are in
+#### Trades
+
+**Trade Central**, a desk in a wing off the plaza, trades one of your
+spare chips (copies beyond those in your folders) for another player's.
+Pick the player, then your chip on the spares list, each chip's card
+beside it; he picks one back, and the chip trade shows both. When you
+both say **Deal!**, the cards swap, and the chips change hands as you
+come home. BN5's chips trade like BN6's. One trade a visit: the chip
+comes home with you before the next.
+
+**The trade board**, at the same desk: put one spare up with what you
+want for it (anything, a chip of an element, a Sword, Wind, Break or
+Cursor chip, or a Mega), and everyone in your channel reads it, there
+and on the log-in plaza's board, until you take it down, leave or trade.
+To answer an offer, pick it at the desk: the list shows only your spares
+that fit its want. Reading the offers is everyone's; trading, posting
+and answering take the Trade stamp, on both sides.
+
+#### NetBattles
+
+**Battle** on a player's card, there when you both hold the Arena
+stamp, asks him for a Practice NetBattle. You fight with your MegaMen as
+they are (HP, NaviCust, buster, Crosses, BN5's chips in your folder) and
+with your Souls: UNITE on the Custom screen as in a run, and the other
+player sees your Soul too. Where more than one of your folders holds
+chips, MegaMan asks which goes. Win or lose, you are back in the Square
+where you stood, and nothing is won or lost. MegaMan then asks whether
+to go again with the same player, the cursor on **No**: when you both
+say Yes, you fight again at once. No, B, or no Yes from the other within
+half a minute, and you stay in the Square.
+
+The battle answers your presses with rollback: each game runs it at
+once, guessing the other player's buttons, and when his real presses
+come in otherwise it rewinds the frames that guessed wrong and plays
+them again. On a good connection that is 2 frames of input delay. Each
+system measures how far it can rewind, and asks the server for the
+delay its connection still needs.
+
+NetBattles run on computers, phones and tablets, PortMaster handhelds,
+the Steam Deck and in the browser. The New 3DS has none: running both
+players' GBAs takes it half again a frame's time. There a full pass
+trades and dives, and the pass says so.
+
+#### Watching
+
+The Mr.Prog by the Arena's ring tells how a NetBattle is asked for.
+Once you have fought, he calls each bout as you come back and keeps the
+count while you go again with the same player. While two others fight he
+calls their NetBattle too (their HP, the last chips they used, the
+winner), and with the Arena stamp he asks whether to watch: you see the
+battle itself, a moment behind the players, from its start however late
+you came. **R** shows the other side, **L** cheers, **B** takes you
+back. The players hear the cheers from him after their battle. Without
+the stamp, and on the New 3DS, you get his calls and the board's post.
+
+#### The week's DeepNet
+
+Every Monday (00:00 UTC) each server opens a net of its own for the
+week, and everyone on that server who dives it dives the same net, from
+the same start: the short net, the Standard folder, threat 0, no helpers
+and no Cross, nothing your other runs unlocked. The greeter Mr.Prog in
+the log-in plaza offers it to a pass with the DeepNet stamp; say Yes
+(the cursor starts on No), and the dive begins in Lan's room, as a new
+game does.
+
+Your run in progress waits in its own save, untouched: the title's
+CONTINUE is always that run, and when the dive ends, won or deleted, you
+are back with it. To go on with an unfinished dive, visit the Square
+and talk to the greeter: Keep diving, Start over or Not now. Divers
+don't trade.
+
+How deep you got goes up on the board at your next visit: the week's
+eight deepest dives, your own best and its place, and last week's
+three. Dive as often as you like; your best counts. The board says the
+layers are as players report them, and nothing is won for one. A dive
+unlocks nothing and counts in none of your records.
+
+#### Servers
+
+Anyone can run a Net Square: the server is a small program of its own,
+in Python, with ready builds for Linux, Windows and macOS and a Docker
+image, and it never needs a ROM or sees a save
+([server/README.md](../server/README.md) says how). Each server has its
+own channels, moderators and week's DeepNet. Give its address to the
+gate's keeper to go there.
+
+The official server asks for no account and no e-mail. It sees the
+address your game connects from, the name you chose, where MegaMan
+stands and his public card while you are there; your identity on it is
+a key your game makes for that server alone. It keeps its trades and
+the week's board, by that identity and your name, and no log of who came
+and went. There is no free text, so there is nothing to report: block a
+name from his card. Its rules, who moderates it, how long it keeps what
+and how to have your data removed are in
 [its policy](../server/README.md#the-official-server).
 
 ## Screen
@@ -958,7 +1010,10 @@ site and the browser version and serves them on `http://localhost:8080`;
 `python3 build.py screenshots` retakes the screenshots in
 `docs/screenshots` from scripted headless runs, and `python3 build.py clips`
 records the site's short videos (WebM and MP4, `docs/clips`, and a GIF of
-the README's clips) the same way. `python3 build.py release`
+the README's clips) the same way. Those of online play (`online-*`) need
+other players, so they come from several games at once in a Square of their
+own on a local server (`tools/online_pictures.py`: the Linux build and the
+server, built first; `--keep` reuses the scenes captured). `python3 build.py release`
 writes the release files to `build/release/`, each named for its system:
 `cyberworld-endless-portmaster.zip` for PortMaster; for Linux the
 AppImage (with its `.zsync` for updates), the `.deb` and the tar.gz; and

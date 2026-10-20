@@ -2,20 +2,37 @@
 
 ## Unreleased
 
+- **Online Net Squares (epic #120).** Cyberworld Endless connects. Lan's
+  HP, where every run begins and comes home between acts, has a gate to a
+  Net Square on a server: other players' MegaMen in one place, eight
+  operators a channel. Meet them with the Square's phrases and emotes (no
+  free text), trade one chip for one at Trade Central or post an offer on
+  its board, NetBattle each other with the MegaMan your run built (his
+  folder, NaviCust, Crosses and Souls), watch a battle from the stands,
+  and dive the week's DeepNet, the same net for everyone, ranked on its
+  Board. Your run waits at the gate; a chip you trade comes home with
+  you. The NetPass in your PET shows what is open to you: the Square is
+  everyone's; NetBattles, trades and the DeepNet need BN6 Cybeast Gregar
+  (USA) and BN5 Team Colonel (USA). Every system goes online, the browser
+  and the New 3DS too; NetBattles run everywhere but the New 3DS. The
+  official server is Saschb2b's at cyberworld.saschb2b.com, and the
+  server is ROM-free Python anyone can host (server/README.md). The
+  0.13.0 trailer, "Cyberworld Endless connects", shows it.
 - **The official Net Square's policy (issue #132).** Who runs and
-  moderates it (Saschb2b), its rules, how to report someone, what it
-  keeps and for how long, and how to have your data removed, in
+  moderates it (Saschb2b), its rules, blocking (with phrases only, there
+  are no reports), what it keeps and for how long, and how to have your
+  data removed, in
   [server/README.md, The official server](server/README.md#the-official-server).
   Server hosts: the server prunes what it keeps by itself, at its start
   and every hour: the trades' log after 14 days, the Board after 2 weeks,
-  kicks once they end; `trade_days`, `board_weeks` and `log_days` in
-  `server.ini`. Players' names and public identities go to a players'
-  log of their own, a file a day kept 14 days, and no longer to the
-  console's log. `--admin forget` takes a player out of every record but
-  a ban or a mute. `--backup DIR` archives the server's key, moderation
-  and Board once a day, keeping `backup_days` (14), and `--restore`
-  puts one back; the Coolify deployment runs the backup as a second
-  service.
+  kicks once they end (`trade_days`, `board_weeks` in `server.ini`).
+  Players' names and public identities no longer reach the console's log;
+  a host may keep them in a players' log of their own (`log_days`, 14 by
+  default; 0 on the official server, which keeps none). `--admin forget`
+  takes a player out of every record but a ban or a mute. `--backup DIR`
+  archives the server's key, moderation and Board once a day, keeping
+  `backup_days` (14), and `--restore` puts one back; the Coolify
+  deployment runs the backup as a second service.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a
