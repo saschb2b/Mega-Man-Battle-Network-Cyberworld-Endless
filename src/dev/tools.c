@@ -29,8 +29,9 @@ bool tools_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--xdiff")) xdiff_spec = v;
 	else if (!strcmp(a, "--xrecords")) xrecords_spec = v;
 	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
-	/* (a game under the proposal's plan, to play it: docs/ECONOMY.md) */
-	else if (!strcmp(a, "--economy-plan")) econ_plan = !strcmp(v, "proposed") ? &econ_proposed : &econ_today;
+	/* (a game under the flat plan, the rolls before issue #154, beside
+	 * the opening one in play: docs/ECONOMY.md) */
+	else if (!strcmp(a, "--economy-plan")) econ_plan = !strcmp(v, "flat") ? &econ_flat : &econ_opening;
 	else return false;
 	return true;
 }

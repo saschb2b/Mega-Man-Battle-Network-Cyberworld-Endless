@@ -1,7 +1,8 @@
 /* The economy report (docs/ECONOMY.md, docs/DEVTOOLS.md, issue #154): what
  * a run hands out, layer by layer and act by act, over many runs' seeds,
- * from the ROM without the game, under today's plan and the proposal's
- * (economy.h). Two kinds of number, said apart:
+ * from the ROM without the game, under the flat plan (the rolls before
+ * the issue) and the opening one in play (economy.h). Two kinds of
+ * number, said apart:
  *
  * - the engine's, simulated with its own code: each layer as
  *   layer_generate makes it (its Mystery Data, dealers, Servers, traders,
@@ -77,7 +78,7 @@ typedef struct {
 } Measure;
 
 static Measure M[PLANS], S[PLANS];   /* the endless net's, the short net's */
-static const EconPlan *const plans[PLANS] = { &econ_today, &econ_proposed };
+static const EconPlan *const plans[PLANS] = { &econ_flat, &econ_opening };
 static int runs;
 static int codes_held[CODES];
 static int zenny_run, wanted_run;
@@ -135,7 +136,8 @@ static uint16_t reward_pick(const Encounter *e, int bust, bool guardian, int dep
 	int chip = v & 0x1FF, code = v >> 9 & 0x1F;
 	if (guardian && (chip_family(chip) == CHIP_FAMILY_NAVI || xguardian_navi_chip(chip))) return (uint16_t)(1 << 14 | loot_guardian_zenny(depth));
 	char c = code >= 26 ? '*' : (char)('A' + code);
-	if ((k & 1) && econ_keep(ECON_LEVER_LEAN, depth)) c = loot_fit_code(chip, c, true);
+	if ((k & 1) && econ_keep_by(ECON_LEVER_LEAN, depth, run.layer_seed ^ (uint32_t)id * 2654435761u ^ (uint32_t)k * 40503u))
+		c = loot_fit_code(chip, c, true);
 	return (uint16_t)(chip | (c == '*' ? 26 : c - 'A') << 9);
 }
 
@@ -354,11 +356,12 @@ static void one_run(Measure *m, int r) {
 
 /* Every run of a net of `layers` under `plan` */
 static void measure(Measure *m, const EconPlan *plan, int layers) {
+	const EconPlan *was = econ_plan;
 	econ_plan = plan;
 	net_layers = layers;
 	memset(m->t, 0, sizeof m->t);
 	for (int r = 0; r < runs; ++r) one_run(m, r);
-	econ_plan = &econ_today;
+	econ_plan = was;
 	net_layers = LAYERS;
 }
 
@@ -406,8 +409,8 @@ static int compare_table(FILE *out, Measure *ms, bool short_net) {
 	const int *acts = short_net ? brief : endless;
 	int nacts = short_net ? 4 : 7, flagged = 0;
 	net_layers = short_net ? SHORT_LAYERS : LAYERS;
-	if (short_net) fprintf(out, "\nThe short net (a new run's: layers 1-%d, its Nest the last), today -> the proposal, as above:\nact  ", SHORT_LAYERS);
-	else fprintf(out, "\nBy act, today -> the proposal (per run, the act's layers together; codes: the most chips gained in one letter\n"
+	if (short_net) fprintf(out, "\nThe short net (a new run's: layers 1-%d, its Nest the last), before (flat) -> now (opening), as above:\nact  ", SHORT_LAYERS);
+	else fprintf(out, "\nBy act, before (flat) -> now (opening) (per run, the act's layers together; codes: the most chips gained in one letter\n"
 		"with the *s at the act's end, median run; ! outside its plan's band, economy.h):\nact  ");
 	for (int k = 0; k < ECON_METRICS; ++k) fprintf(out, " %17s", names[k]);
 	fprintf(out, "   earned/wanted so far (median)\n");
@@ -454,7 +457,7 @@ static void sources_table(FILE *out, const Measure *m, const char *name) {
 /* Rarity: the chips gained by tier, and how many fit the folder's codes */
 static void rarity_table(FILE *out) {
 	fprintf(out, "\nThe chips gained by tier (chip_pool.h: 0 common, 1 uncommon, 2 rare standard, 3 rarer or Mega, 4 Mega 5-star\n"
-		"or Giga), %% of the act's, today -> the proposal; good = tier %d or more; strong = a straight hit of %d or more; fit = in\n"
+		"or Giga), %% of the act's, before (flat) -> now (opening); good = tier %d or more; strong = a straight hit of %d or more; fit = in\n"
 		"one of the folder's codes or *\n"
 		"act   tier0      tier1      tier2      tier3      tier4      strong%%    fit%%       mega        giga\n", ECON_GOOD_TIER,
 		ECON_STRONG_POWER);
@@ -474,7 +477,7 @@ static void rarity_table(FILE *out) {
  * gained, the codes held and the *s among them, the zenny earned so far
  * (median run), both plans */
 static void layers_table(FILE *out) {
-	fprintf(out, "\nBy layer (per run), today -> the proposal: Mystery Data laid (green / blue, rich of them / purple), chips gained, the\n"
+	fprintf(out, "\nBy layer (per run), before (flat) -> now (opening): Mystery Data laid (green / blue, rich of them / purple), chips gained, the\n"
 		"codes held (the most in one letter with the *s) and the *s, the zenny earned so far (median run)\n"
 		"layer   green          blue           rich           purple      chips           codes      *s         zenny so far\n");
 	for (int d = 1; d <= LAYERS; ++d) {
@@ -486,18 +489,18 @@ static void layers_table(FILE *out) {
 	}
 }
 
-/* The proposal's curves: each lever's share by act, on the endless net
+/* The opening plan's curves: each lever's share by act, on the endless net
  * and the short one */
 static void curves_table(FILE *out) {
 	static const char *const levers[ECON_LEVERS] = { "green MD", "MD chips", "good weight", "zenny", "lean" };
-	fprintf(out, "\nThe proposal's curves (economy.c: floor + (1 - floor) ln(1 + bend x) / ln(1 + bend), x the act over the net's\n"
-		"last before its Nest): each lever's share of today's by act, the endless net | the short net\nlever        floor bend ");
+	fprintf(out, "\nThe opening plan's curves, in play (economy.c: floor + (1 - floor) ln(1 + bend x) / ln(1 + bend), x the act over the net's\n"
+		"last before its Nest): each lever's share of the flat plan's by act, the endless net | the short net\nlever        floor bend ");
 	for (int a = 0; a < 6; ++a) fprintf(out, "  act %d", a + 1);
 	fprintf(out, " |");
 	for (int a = 0; a < 3; ++a) fprintf(out, "  act %d", a + 1);
 	fprintf(out, "\n");
 	for (int l = 0; l < ECON_LEVERS; ++l) {
-		EconCurve c = econ_proposed.lever[l];
+		EconCurve c = econ_opening.lever[l];
 		fprintf(out, "%-12s %4.2f %4.1f ", levers[l], c.floor, c.bend);
 		for (int a = 0; a < 6; ++a) fprintf(out, "  %5.2f", econ_curve(c, a / 5.0));
 		fprintf(out, " |");
@@ -506,11 +509,11 @@ static void curves_table(FILE *out) {
 	}
 }
 
-/* BN6's own skill table: a battle's reward at each busting level, today's
- * plan, acts 1 and 4 (the rows' chip share and zenny a battle) */
+/* BN6's own skill table: a battle's reward at each busting level, the
+ * plan in play, acts 1 and 4 (the rows' chip share and zenny a battle) */
 static void skill_table(FILE *out) {
 	static const int levels[] = { 4, 6, 8, 10, ECON_BUST_S };
-	fprintf(out, "\nBusting level pays (BN6's table, today's plan): a battle's chip %% and zenny, every battle at one level\nact ");
+	fprintf(out, "\nBusting level pays (BN6's table, the plan in play): a battle's chip %% and zenny, every battle at one level\nact ");
 	for (unsigned k = 0; k < sizeof levels / sizeof *levels; ++k) fprintf(out, "   level %-2s     ", levels[k] == ECON_BUST_S ? "S" : "");
 	fprintf(out, "\n");
 	int keep = runs;
@@ -520,7 +523,7 @@ static void skill_table(FILE *out) {
 		fprintf(out, "%-4d", a + 1);
 		for (unsigned k = 0; k < sizeof levels / sizeof *levels; ++k) {
 			bust_fixed = levels[k];
-			measure(&probe, &econ_today, LAYERS);
+			measure(&probe, econ_plan, LAYERS);
 			LayerTally s = act_sum(&probe, a);
 			fprintf(out, "  %3d: %3.0f%% %4.0f", levels[k], s.battles ? 100 * s.bt_chip / s.battles : 0, s.battles ? s.bt_zenny / s.battles : 0);
 		}
@@ -550,8 +553,8 @@ int economy_report_run(const char *spec) {
 		"The plan in play: %s.\n", runs, run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-',
 		run.codes[2] ? 'A' + run.codes[2] - 1 : '-', ECON_BATTLES_LEAST, ECON_BATTLES_MOST, LOW_HP_SHARE, GEM_KEPT, econ_plan->name);
 	int flagged = compare_table(out, M, false) + compare_table(out, S, true);
-	sources_table(out, &M[0], "today");
-	sources_table(out, &M[1], "the proposal");
+	sources_table(out, &M[0], "before (flat)");
+	sources_table(out, &M[1], "now (opening)");
 	rarity_table(out);
 	layers_table(out);
 	curves_table(out);
