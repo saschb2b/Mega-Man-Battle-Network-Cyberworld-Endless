@@ -443,7 +443,7 @@ The Square's Mr.Progs' places are in the log ("online: Mr.Prog 2 at
 machine it runs on (issue #128), on the player's ROM, and says it on the
 screen and in the output (`rollbench:` lines; log.txt on a handheld): the
 game's core alone from power-on (every build), then, where the Arena is
-built, the pair at a Practice NetBattle under BN6's rules for 600 frames
+built and BN5's ROM beside BN6's, the pair at a Practice NetBattle under full rules (every NetBattle's since v9; without BN5's ROM it says so and measures the core alone) for 600 frames
 of scripted keys on both sides: a core's state and the pair's snapshot
 in bytes, their save and load and a pair frame's emulation (mean and
 worst), a rollback of eight frames timed, whether it came back to the
