@@ -34,7 +34,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v7`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v8`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world.
 
 ## Container
@@ -83,9 +83,10 @@ offer starts a trade with both chips named, the poster's as posted.
 
 The Arena never sees a battle: each game runs both players' linked BN6
 cores. The server pairs a challenge with its answer, gives each player
-its side of the cable and an input delay fitted to both games' round
-trips with their jitter (5 to 30 frames: the lockstep's 3, a tick, the
-longer round trip; docs/ONLINE_ARENA.md, Smoothed delay), then relays their loadouts, keys and state hashes to each other
+its side of the cable and an input delay fitted to both games' latencies
+(2 to 30 frames: the lockstep's frame, a tick, the longer latency, each a
+round trip with its jitter less what its rollback window covers;
+docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then relays their loadouts, keys and state hashes to each other
 alone, in a rate bucket of their own (120 a second). A player leaving
 ends the battle for the other.
 
@@ -355,5 +356,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v6 games and a v7
+one protocol version cannot enter a server of another (v7 games and a v8
 server refuse each other). Preserve the private state directory when upgrading.

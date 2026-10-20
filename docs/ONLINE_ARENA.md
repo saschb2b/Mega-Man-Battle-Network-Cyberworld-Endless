@@ -31,8 +31,12 @@ cable's first GBA from the keyboard or pad; the second is a script: on
 the Custom screen it takes the cursor to OK and presses it, in the battle
 it stands still. Its keys come over the local link, held back as a
 network would hold them. `arenadelay=N` sets the input delay in frames
-(default 6, 3-60), `arenalag=N` the local link's one way in ticks
-(default 3, 50 ms), and `arenahp=N` makes the carried MegaMan's HP N
+(default 6, 1-60), `arenalag=N` the local link's one way in ticks
+(default 3, 50 ms), `arenawindow=W` the rollback window (0: the delay
+alone; without it, what a frame costs here affords: [Rollback](#rollback)),
+`arenabusy` makes the second player step, shoot and OK the Custom screen
+by the frame's number alone (a run that rolls back and one that does not
+hand him the same keys), and `arenahp=N` makes the carried MegaMan's HP N
 (the installer seen in the battle). The battle's end, or A+B+SELECT+START,
 goes back to the title; the log says each step (`arena:` lines).
 
@@ -40,18 +44,19 @@ goes back to the title; the log says each step (`arena:` lines).
 
 | Part | File | What it does |
 | --- | --- | --- |
-| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM: as it is under BN6's rules (no hook, no BN5 install: every client builds the same pair whatever ROMs each player has), with BN5's installs under full rules ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as the research harness had it; one frame of the pair, a hash of both cores |
+| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM: as it is under BN6's rules (no hook, no BN5 install: every client builds the same pair whatever ROMs each player has), with BN5's installs under full rules ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores |
 | The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what full rules put in each Arena core |
 | The Souls across | `src/online/arena_souls.c` | Under full rules, a Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
 | The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen. No state is kept or committed; it runs in slices behind a "connecting" picture |
 | A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by the battle's rules, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the rules' cores cannot carry it: under BN6's rules chips past BN6's id 0x13F (in the folder or the pack's extension) or on one of BN6's blank records (203-220, 291-300, 314: `BN6_CHIP_BLANK`, where BN5's chips are installed on a game with its ROM); under BN6's rules Souls; under either a code past `*`, a max HP of 0 or past 9999. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
-| Keys | `src/online/arena_input.c` | Both players' keys by frame in a ring; each stream in order, a resent frame left, a gap or a frame past the ring refused |
-| The time sync | `src/online/arena_sync.c` | The leading game's tick held now and then, spread out, by the lag of the other's keys against its own round trip; the round trips kept in the Square for the delay asked for ([Smoothed delay](#smoothed-delay), below) |
+| Keys | `src/online/arena_input.c` | Both players' keys by frame in a ring; each stream in order, a resent frame left, a gap or a frame past the ring refused; for a frame run on a guess the other's keys not yet come held as his last, and the first frame a key that came otherwise reached |
+| The time sync | `src/online/arena_sync.c` | The leading game's tick held now and then, spread out, by the lag of the other's keys against its own round trip; the round trips kept in the Square for the delay asked for ([Smoothed delay](#smoothed-delay), below); the rollback window a frame's cost affords and the latency asked for less what it covers ([Rollback](#rollback)) |
+| The window kept | `src/online/arena_window.c` | What a battle frame of the pair costs on this system, kept in the data folder (`arena.ini`, never in a `.cwsave`), for the delay the next challenge or Yes asks for |
 | The snapshot | `src/online/arena_pair.c` | The pair's state for a rollback, both cores and what no core's state holds (`arena_pair_save`, `arena_pair_load`), and where two differ ([Rollback](#rollback), below) |
-| The measurement | `src/dev/rollbench.c` | `--dev rollbench`: what a rollback would cost on the machine it runs on |
+| The measurement | `src/dev/rollbench.c` | `--dev rollbench`: what a rollback costs on the machine it runs on, and the window the Arena picks there |
 | The rollback tried | `src/online/arena_roll.c` | `--dev arena,arenaroll=W`: whole battles rolled back W frames every W against the local stand-in, the game's state checked each time |
 | The link | `src/online/arena_link.h`, `arena_link_local.c` | The interface below; the local stand-in |
-| The engine | `src/online/arena.c` | The way in, then the battle in lockstep, the hashes compared, the end |
+| The engine | `src/online/arena.c` | The way in, then the battle: each frame at its tick, on a guess within the rollback window, rolled back where a guess was wrong; the hashes and the end taken up on frames whose keys are all known |
 | The scene | `src/online/arena_scene.c`, `arena_text.c` | `--dev arena`'s scene, its words |
 | The picture | `src/online/arena_view.c` | My core's picture, the notes over it, the way in's bar and its slices at the frame's pace; both scenes' |
 | The wire | `src/online/arena_wire.c` | ARENA and its four messages packed and read as the server's `protocol.py` packs them; a carried MegaMan as bytes |
@@ -63,19 +68,23 @@ goes back to the title; the log says each step (`arena:` lines).
 
 A key sampled at tick *t* (a 60th of a second) is frame *t + D*'s, *D*
 the link's delay; the first *D* frames are released keys on both sides,
-on every client. Frame *N* of the pair is due at tick *N* and runs once
-both players' keys for *N* and the three frames after it are known: a
-linked core can cross into its next frame up to two frames before its
-partner, and each core takes the keys of its own frame clock, as the
-research found BN6 needs. So a delay of 3 frames plus the link's one-way
-latency never waits; a shorter one waits, once, as many ticks as it falls
-short, and stays that far behind. A frame that waits moves the game's
+on every client. Frame *N* of the pair is due at tick *N* and needs both
+players' keys for *N* and the frame after it: a linked core crosses into
+its next frame a little before its partner (the two run within a few
+thousand cycles of each other, [Rollback](#rollback); the research's
+harness, an instruction at a time in turn, let one run two frames
+ahead, and a frame needed the three after it), and each core takes the
+keys of its own frame clock. With a rollback window *W* the frame runs at
+its tick while at most *W* frames have run on a guess of the other
+player's keys ([Rollback](#rollback)); with none it runs once all its
+keys are known, so a delay of 1 frame plus the link's one-way latency
+never waits. A frame that may not run waits, once, as many ticks as it
+falls short, and stays that far behind. A frame that waits moves the game's
 clock (issue #128): the tick after it samples no key and runs that frame,
 so a wait shows one frame twice and never skips one; the game that leads
 holds a tick now and then until it does not ([Smoothed
 delay](#smoothed-delay), below). A tick catches up two frames at most.
-Once the cable is idle (the menus after the battle) a core can run four
-frames ahead of its partner; it then waits for it. My keys run at most
+A core as far ahead as the keys go waits for its partner. My keys run at most
 128 frames (half `ARENA_RING`) past the pair's next frame: past that a
 tick samples none and waits, so the other game held still for seconds
 (its app sent to the background, its window dragged) stalls the battle on
@@ -85,9 +94,11 @@ October 2026), the waiting game kept sampling a key a tick, filled its
 the battle with "my keys could not be sent"; the other, on its return,
 with "the other player's keys came out of order".
 
-Every 60 frames of the pair, the pair's hash (FNV-1a over both cores'
-whole states, their flash and the cable's numbers) is sent over the
-link and the peer's for the same frame compared; a difference stops the
+Every 60 frames of the pair, once both players' keys for that frame are
+known, the pair's hash after it (FNV-1a over both cores' states but the
+sound's lazily kept fields, their flash and the cable's numbers:
+`arena_pair_hash`) is sent over the link and the peer's for the same
+frame compared; a difference stops the
 battle and says at which frame (`arena: stopped at frame N: the two
 games went apart`). Each hash is also printed: two runs of the same keys
 print the same.
@@ -105,7 +116,7 @@ struct ArenaLink {
 	const char *(*broken)(ArenaLink *link);                             /* the link gone: its reason, else NULL */
 	void (*close)(ArenaLink *link);
 	unsigned side;    /* my player: 0 the cable's first GBA, 1 the second */
-	unsigned delay;   /* D: frames from a key's sampling to its frame (3-60) */
+	unsigned delay;   /* D: frames from a key's sampling to its frame (1-60) */
 };
 ```
 
@@ -174,11 +185,13 @@ each game's.
   transport measures in the Square (one a ping, every two seconds, the
   last eight) and says their mean and twice their spread as ARENA's
   latency, in milliseconds as before (`arena_pings_latency`). The server
-  (`delay_for`) gives the lockstep's 3 frames, a tick for a key to be
+  (`delay_for`) gave the lockstep's 3 frames, a tick for a key to be
   taken, then the longer of the two latencies in frames: 5 at least, 30
-  at most (0 and 0 give 5, 20 and 10 give 6, 40 and 100 give 10). Since
+  at most (0 and 0 gave 5, 20 and 10 gave 6, 40 and 100 gave 10). Since
   each game holds its lag at its own round trip, the longer covers both.
-  An older game says one ping, without its jitter.
+  An older game says one ping, without its jitter. (Protocol v8 makes the
+  lockstep a frame and has each game say its latency less what its
+  rollback window covers: [Rollback](#rollback).)
 
 A game that truly falls behind still waits as before, and its picture
 says so after 20 ticks ("Waiting for the other PET"); the 128-frame cap
@@ -216,13 +229,185 @@ measured on the deployed server or between two devices.
 
 ## Rollback
 
-Issue #128's second step (the owner's decision of 19 October 2026): a
-short rollback, a delay of about 3 frames and a few frames rolled back,
-planned for every system the Arena runs on, measured on the weakest
-first, its delay and window tunable. Nothing of it runs in a battle yet;
-the owner decides after the devices' numbers. What it would serve is the
-same as the smoothed delay's: a NetBattle that answers the player's own
-presses sooner.
+Issue #128's second step (the owner's decisions of 19 and 20 October
+2026): rollback on every system the Arena runs on, measured on the
+weakest first, its window and delay tuned per system; the pair made
+cheaper first, then measured again on the Nova, then turned on. It runs
+in every NetBattle now. Each frame of the pair runs at its tick; the
+other player's keys not yet come are guessed (his last held), the pair's
+snapshot kept before each frame that runs on a guess, and a key that
+comes otherwise than guessed puts the pair back before the first frame
+that read it and runs the frames since again, unheard, to where they
+were. On a link the window covers, the input delay is 2 frames (the
+smoothed delay's 8 to 11 on the same links). It serves what the smoothed
+delay served: a NetBattle that answers the player's own presses.
+
+### A cheaper pair frame
+
+Before, a pair frame cost 2.8 ms here and 3.7 ms on the Nova, so the
+Nova could roll back 2 frames at the means and 1 at the worst (the
+measurement below). The cost was the pair's emulation. Two levers,
+measured one at a time with `--dev rollbench` (this machine: Intel Core
+Ultra X7 358H, the host build; the Nova: ROCKNIX, aarch64, the PortMaster
+build headless over SSH in a scratch folder), a pair frame's mean and
+worst under BN6's rules (full rules within a tenth of a millisecond):
+
+| The pair's stepping | This machine | The Nova | The window a tick holds on the Nova (means / worst) |
+| --- | --- | --- | --- |
+| Before: the cores an instruction at a time in turn (the research harness's) | 2.78 / 3.29 ms | 3.72 / 4.13 ms | 2 / 1 |
+| Whole run loops under mGBA's lockstep credits | 1.27 / 1.75 ms | 1.70 / 1.82 ms | 6 / 5 |
+| ... and both cores halted at BN6's wait for a frame | 0.82 to 0.97 / 1.1 to 1.4 ms (with the machine's other work) | 1.05 / 1.30 ms | 10 / 8 |
+
+- **Run loops** (`arena_pair_step`). The research stepped each core one
+  instruction and then the other, through mGBA's `step`: a function call,
+  an event check and the frame counters read for every instruction, and
+  the two cores apart by whatever their instructions cost (a core could
+  run two frames ahead of its partner). Now each core runs mGBA's run
+  loop (its instructions up to its next event) and the cable's own
+  credits pace them, as mGBA's frontend paces its two threads
+  (`src/platform/qt/MultiplayerController.cpp`): the first GBA posts the
+  cycles it ran, the second runs until it has used them and then sleeps
+  until more are posted, and the first sleeps while a transfer waits for
+  the second. A frame begins in an event, where a run loop ends, so each
+  core still takes its own frame's keys. The two stay within a few
+  thousand cycles: a core is never more than one frame ahead of its
+  partner (measured through way ins and whole battles), so a frame needs
+  the keys of the one after it, not the three after it
+  (`ARENA_LOOKAHEAD` 2), and the least delay is 1, not 3.
+- **The idle halt** (`idle_on`). Both pair cores take the game's own
+  core's hook on BN6's wait for a frame (`src/emu/idle.c`), on their own
+  hook tables, under both rules: half of a battle's cycles were that
+  loop. With an instruction at a time it did not work (a halted core ran
+  to its VBlank in one step, past the cable's waits: "the cable stopped
+  in BN6's menus"); with run loops it does.
+- **Kept deterministic.** Every client and spectator runs the same
+  scheduling, so their pairs stay alike; the snapshot keeps who sleeps.
+  Whole battles by `--dev arena,arenaroll=W` (W = 1, 6, 8), under BN6's
+  rules and full rules: every battle over at frame 2,738 as run
+  straight, all 45 of the game's hashes the same; rollbench's 11
+  rollbacks of 8 exact for the game on both machines; the same battle on
+  the Nova and here (`--dev arena,arenabusy`, below) gives the same 40
+  hashes. The pair's hashes changed with the scheduling (and so did the
+  ready's), one more reason for protocol v8.
+- A profiler was not to be had here (the kernel's `perf_event_paranoid`
+  is 4, and stays so); the levers came from reading the stepping loop and
+  mGBA's run functions. A pair frame now costs about two of the game's
+  own core's (0.37 to 0.43 ms here, 0.68 on the Nova).
+
+### The battle (`arena.c`)
+
+- **A frame at its tick.** Frame *N* runs at tick *N* while fewer than
+  the window's *W* frames have run on a guess (`arena_input_ready`); the
+  other player's keys not yet come for *N* and the frame after it are
+  his last known, held (`arena_input_take`), the same guess for a frame
+  every time it runs until it is made anew. The pair's snapshot is saved
+  before each frame that runs on a guess, in a ring of *W*
+  (`ArenaPairSnap`, 797 KB each).
+- **A wrong guess** (`arena_input_put` marks the first key that came
+  otherwise): the snapshot before the first frame that read it is loaded,
+  the guesses made anew from what is known, and the frames since run again
+  (`roll_back`); their sound is dropped (`arena_pair_mute`), the picture is
+  the last frame's.
+- **What only the keys' truth decides.** What a frame left (the pair's
+  hash at every 60th, the battle under way, both cores gone back to the
+  Comm menu, the results) is noted as it runs (and again where it runs
+  again), and taken up only once both players' keys for it and the frame
+  after are known (`settle`): the hash sent and compared, the battle's
+  end. So two players and a spectator, who runs the pair straight from
+  the relayed keys, agree frame for frame.
+- **The hash** leaves out the sound's lazily kept PSG fields
+  (`arena_pair_hash`; below), on every game since v8: a state loaded and
+  run again is not byte-equal there to the same frames run straight.
+- A frame that may not run (*W* on a guess already) waits as before, and
+  the clock moves as the smoothed delay has it; the time sync still holds
+  the leading game. `--dev arena` takes the same engine with its local
+  link (`arenawindow=W`, `arenabusy`); `arenaroll=W`, the rollback tried,
+  runs with no window of its own.
+- At the battle's end the game says its rollbacks: `arena: window 7,
+  delay 2: 93 rollbacks, 300 frames run again, 5 the most at once; a
+  frame of the pair 1.61 ms (the worst 2.31), a tick at worst 9.63 ms, 0
+  past a 60th`.
+
+### The window and the delay, per system
+
+- **The window** is the battle's own: the way in times its pair frames
+  (BN6's menus, about two thirds of a battle frame's cost: 0.66 against
+  0.94 ms here, 0.81 against 1.05 on the Nova), and `arena_window_for`
+  takes a battle's as 1.6 of them: the frames a tick can run again after
+  one load, and the new one, each saved, within three quarters of a 60th
+  of a second, at a tenth over the frame's cost, 10 at most
+  (`ARENA_WINDOW_MOST`: past it a guess shows too long). This machine
+  gets 9 or 10, the Nova 7 (rollbench: "the Arena's window 7 from them, 9
+  from the battle's"). A battle times its frames and keeps their mean in
+  the data folder (`arena.ini`, `frame_us`; `--dev rollbench` keeps its
+  own too), the system's, never carried in a `.cwsave`.
+- **The delay asked for** (protocol v8): a challenge or a Yes says the
+  game's latency as before (its round trips in the Square, their mean and
+  twice their spread) less what its kept window covers (`arena_ask_ms`:
+  *W* frames of it; 4 where nothing is kept yet, a first NetBattle). The
+  server's `delay_for` gives the lockstep's frame, the tick a key waits
+  to be taken, and the longer latency of the two in frames: 2 at least,
+  30 at most. So the pair's delay is the larger of the two games' needs:
+  a fast desktop near the server asks for 2, a slower system or a long
+  link for more, and a frame's keys come late by at most the window of
+  the game that asked for the most.
+- **Overrides:** `--dev arenawindow=W` sets the window (0: the delay
+  alone, a frame run once its keys have all come; it also asks with that
+  window), `--dev arenadelay=N` asks for N frames (in `--dev arena`, its
+  delay).
+- Systems: the desktops, Android and iOS build the Arena and its
+  rollback; the 3DS and the browser compile the Arena out (`CW_ARENA`),
+  so neither battles nor rolls back there.
+
+### Measured
+
+**Through a local server** (20 October 2026, this machine): three host
+builds, #143's three-game harness (Alpha challenges Beta, both pick a
+chip, OK and fire charged shots with a step between them, `arenahp=150`;
+Gamma, BN6's ROM alone, asks the referee and watches from the way in)
+behind #142's relay, which holds each chunk back a set time and a random
+part, in order, each way between a game and the server (`.build/`, not
+committed). Before is `origin/dev` (ca33edef, v7: the delay alone);
+after this build (v8). Two runs went side by side, so the frames cost
+more than alone (1.4 to 1.6 ms). Per game, Alpha (the cable's first) and
+Beta:
+
+| Each way | Build | Delay | Window | Rollbacks, deepest | Waits per 100 frames | Worst tick | Hashes agreed | Gamma |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 20 ms and up to 8 | before | 8 | | | 0, 0.03 | | 54, 54 | 54 checked |
+| | after | 2 | 7, 7 | 93 (2.2 a second), 5; 98, 2 | 0, 0 | 9.6, 6.1 ms | 43, 43 | 43 checked |
+| 40 ms and up to 15 | before | 11 | | | 0.09, 0 | | 53, 54 | 54 |
+| | after, a first battle (window 4 asked) | 5 | 7, 7 | 93, 4; 96, 2 | 0, 0 | 10.4, 6.8 ms | 42, 42 | 43 |
+| | after, a frame's cost kept (1.0 ms: 9 asked) | 2 | 8, 8 | 93, 5; 96, 8 | 0, 0 | 12.7, 14.3 ms | 42, 42 | 42 |
+| 20 ms and up to 40 | before | 11 | | | 0, 0.09 | | 53, 53 | 54 |
+| | after, a first battle | 6 | 7, 7 | 92, 4; 13, 2 | 0, 0 | 8.6, 5.1 ms | 42, 42 | 43 |
+| 20 ms and up to 8, full rules (all three with BN5's ROM) | after | 2 | 8, 8 | 101, 3; 104, 3 | 0, 0 | 8.0, 9.7 ms | 53, 54 | 54 |
+
+No tick past a 60th of a second in any battle; every battle ran to its
+end (Alpha's win), the spectator's straight run agreeing with every hash
+the players sent. A battle's frame count differs before and after (3,249
+and 2,588 frames at 20 ms) as the scripts' keys land at other frames
+with another delay. A capture of Alpha's game with rollback on (delay 2,
+window 9) shows the Custom screen and charged shots taking Beta from 150
+to 90, 80, 60, 40 and 20, as without. The hashes still catch two games
+apart: with Beta's copy of Alpha's keys changed from frame 1,200
+(`arenadesync=1200` on Beta, delay 2, window 9), both stopped at frame
+1,267, "the two games went apart by frame 1259", and Gamma's watching
+ended with the battle.
+
+**On the Nova** (the final build, headless, `--dev arena,arenabusy`
+with delay 1 and the local link's lag making every frame's other keys a
+guess, the window its own):
+
+| Run | Window | Rollbacks, frames run again, deepest | A pair frame | Worst tick | Game hashes |
+| --- | --- | --- | --- | --- | --- |
+| BN6's rules, lag 4 ticks | 7 | 360, 1,440, 4 | 1.13 ms (the worst 1.39) | 7.5 ms | 40, the same as this machine's run and as the delay alone |
+| BN6's rules, lag 7 | 7 | 360, 2,520, 7 | 1.13 ms (1.41) | 11.4 ms | the same |
+| Full rules, lag 5 | 7 | 360, 1,800, 5 | 1.15 ms (1.64) | 9.0 ms | the same as this machine's full-rules run |
+| The delay alone (`arenawindow=0`, lag 0) | 0 | none | 1.14 ms (1.43) | 2.3 ms | the same |
+
+No tick past a 60th there either: a rollback of 7 frames fits the Nova's
+tick with room.
 
 ### The measurement: `--dev rollbench`
 
@@ -242,50 +427,47 @@ it times a hundred loads alone. From the means (and the worst) it gives
 the largest window a tick holds: one load, then each frame resimulated and
 the new one, each run and saved, within three quarters of a 60th of a
 second (a quarter kept for the drawing, the picture's present and the
-system). At delay *D* the pair's frame needs the other player's keys three
-frames on, so 3 − *D* of them are guessed even with no latency: a window
-*W* covers a one way of *W* + *D* − 3 frames.
+system). At delay *D* the pair's frame needs the other player's keys a
+frame on: a window *W* covers a lag of his keys of *W* + *D* − 1 frames.
+It says the way in's frames too, the window the Arena would pick from
+them and from the battle's, and keeps the battle's cost for the delay
+the next challenge asks.
 
-| | This machine (Intel Core Ultra X7 358H, the host build in the build image) | Retroid Pocket Nova (ROCKNIX, aarch64, the PortMaster build, headless over SSH; two runs alike) |
-| --- | --- | --- |
-| One core's state (mGBA's, raw) | 397,312 bytes | 397,312 bytes |
-| The pair's snapshot | 797,040 bytes under BN6's rules (both cores, then 2,416 of the cable's, the pair's own and each GBA's outside its state, its registers as they read the most); 797,080 under full rules (40 more: what BN5's hooks keep, 20 a core) | the same |
-| The game's core alone: save, load, a frame (mean / worst) | 0.008 / 0.24 ms, 0.011 / 0.06 ms, 0.40 / 0.81 ms | 0.007 / 0.10 ms, 0.012 / 0.06 ms, 0.69 / 1.6 ms |
-| The pair: save, load | 0.035 / 0.16 ms, 0.042 / 0.06 ms | 0.027 / 0.05 ms, 0.049 / 0.08 ms |
-| A pair frame, BN6's rules / full rules | 2.93 / 3.5 ms, 2.94 / 3.6 ms | 3.69 / 4.1 ms, 3.70 / 4.1 ms |
-| A rollback of 8 frames, BN6's rules / full rules | 23.8 / 25.1 ms, 24.5 / 27.0 ms | 30.0 / 32.0 ms, 30.1 / 32.1 ms |
-| Came back the same (11 rollbacks of 8, each rules) | the game's state 11 of 11; every byte 0 of 11 (the sound's, below) | the same |
-| The window a tick holds (means / worst) | 3 / 2 frames | 2 / 1 frames, both rules |
-| One way covered at delay 1, 2, 3 (means) | 1, 2, 3 frames (17, 33, 50 ms) | 0, 1, 2 frames (0, 17, 33 ms); at the worst −1, 0, 1 |
+| | This machine, before (19 October) | After | The Nova, before | After |
+| --- | --- | --- | --- | --- |
+| One core's state (mGBA's, raw) | 397,312 bytes | the same | the same | the same |
+| The pair's snapshot | 797,040 bytes under BN6's rules (both cores, then 2,416 of the cable's, the pair's own and each GBA's outside its state, its registers as they read the most); 797,080 under full rules (40 more: what BN5's hooks keep, 20 a core) | the same | the same | the same |
+| The game's core alone: a frame (mean / worst) | 0.40 / 0.81 ms | 0.43 / 0.87 ms | 0.69 / 1.6 ms | 0.68 / 1.6 ms |
+| The pair: save, load | 0.035, 0.042 ms | 0.04 to 0.05, 0.05 ms | 0.027, 0.049 ms | 0.027, 0.048 ms |
+| A pair frame, BN6's rules / full rules | 2.93 / 3.5 ms, 2.94 / 3.6 ms | 0.94 / 1.35 ms, 0.97 / 1.41 ms | 3.69 / 4.1 ms, 3.70 / 4.1 ms | 1.05 / 1.30 ms, 1.06 / 1.31 ms |
+| The way in's pair frames | | 0.67 / 1.6 ms | | 0.81 / 2.9 ms |
+| A rollback of 8 frames | 23.8 / 25.1 ms | 7.9 / 9.0 ms | 30.0 / 32.0 ms | 8.7 / 9.9 ms |
+| Came back the same (11 rollbacks of 8, each rules) | the game's state 11 of 11; every byte 0 of 11 (the sound's, below) | the same | the same | the same |
+| The window a tick holds (means / worst) | 3 / 2 | 11 / 7 | 2 / 1 | 10 / 8 |
+| The window the Arena picks (from the way in / the battle's) | | 9 / 10 | | 7 / 9 |
 
 What the numbers say:
 
 - **The snapshot is cheap everywhere**: about 0.05 ms to save or load the
   whole pair (800 KB) on the Nova, and the size is no problem for any
-  system that runs the pair (a ring of eight is 6.4 MB). BN5's hooks under
+  system that runs the pair (a ring of ten is 8 MB). BN5's hooks under
   full rules cost the pair's frame next to nothing.
-- **The pair's emulation is the cost**: a pair frame takes 3.7 ms on the
-  Nova where one core alone takes 0.7, because the pair steps its two cores
-  an instruction at a time in turn (`arena_pair_step`, the cable's
-  scheduling as the research had it), and neither halts at BN6's wait for
-  a frame as the game's own core does (`idle.c`: a third less of its time).
-  At that cost the Nova holds a window of 2 at the means and 1 at the
-  worst: B's shape (delay 3, window 6) does not fit yet. A pair frame near
-  two single cores' (about 1.4 ms on the Nova) would hold about 7. (An
-  earlier cut of the measurement loaded the snapshot before every frame,
-  which put back mGBA's idle loop detection each time and made the frames
-  look faster, 2.8 ms; the straight path above has no loads, as a battle's.)
+- **The pair's emulation was the cost**, and is now about two single
+  cores' ([A cheaper pair frame](#a-cheaper-pair-frame)). (An earlier cut
+  of the measurement loaded the snapshot before every frame, which put
+  back mGBA's idle loop detection each time and made the frames look
+  faster; the straight path has no loads, as a battle's.)
 - **The restore is exact for the game, not for the sound's bytes**: the
   game's state (CPU, RAM, IO, video, timers, DMA, the cable's and the
   pair's own) came back byte for byte in every rollback, on both machines,
-  and so did whole battles (below). mGBA 0.10's PSG keeps channels 1 to 4
-  up to date lazily, and a state loaded and run is not byte-equal in their
+  and so did whole battles. mGBA 0.10's PSG keeps channels 1 to 4 up to
+  date lazily, and a state loaded and run is not byte-equal in their
   timing fields and the samples rendered (`GBASerializedState`'s `audio`
   and `samples`, offsets 0x130 to 0x17B and 0x390 to 0x3CF) to the same
-  frames run straight. The game never reads them back, but the pair's hash
-  (`arena_pair_hash`) takes the whole state, so the game that rolled back
-  would disagree with one that did not; `arena_pair_hash_game` leaves them
-  out, and `arena_pair_snap_diff` says which bytes differ.
+  frames run straight. The game never reads them back, so the pair's hash
+  leaves them out (`arena_pair_hash`; `arena_pair_hash_whole` takes them,
+  rollbench's "whole state"), and `arena_pair_snap_diff` says which bytes
+  differ.
 - **What mGBA's state leaves out.** A state holds each register as a read
   gives it and loads it through a write, and keeps no copy of the SIO's
   own control word: loaded, `SIOMLT_SEND` (the word a GBA sends down the
@@ -296,69 +478,47 @@ What the numbers say:
   SIO's words, and mGBA's idle loop detection, the open bus and a DMA under
   way, and puts them back after the state (`arena_pair_load`).
 
-**Whole battles rolled back** (20 October 2026, `--dev
-arena,arenaroll=W`, the script of [Run it](#run-it) with steps between the
-shots, `arena_roll.c`): the pair's snapshot kept before each frame, and
-every W frames the last W rolled back and run again from the first's,
-the battle going on from there, as a rollback over a wrong guess would.
-Under BN6's rules (BN6's ROM alone) and under full rules (both ROMs),
-W = 1, 6 and 8: every battle over at frame 2,313 as run straight, all 38
-of the game's hashes (`the game's hash` lines, every 60th frame) the same
-as the straight run's, no rollback apart. Before the registers and the
-SIO's words were kept, each of them came apart at the first frame.
+**Whole battles rolled back** (`--dev arena,arenaroll=W`, the script of
+[Run it](#run-it) with steps between the shots, `arena_roll.c`): the
+pair's snapshot kept before each frame, and every W frames the last W
+rolled back and run again from the first's, the battle going on from
+there. Under BN6's rules and under full rules, W = 1, 6 and 8: every
+battle over at the frame run straight, all of the game's hashes the same
+(20 October: 2,313 frames and 38 hashes with the old stepping; 2,738 and
+45 with run loops and the halt). Before the registers and the SIO's
+words were kept, each of them came apart at the first frame.
 
-### What a rollback must put back
+### What a rollback puts back
 
 Everything outside the two cores' states that the pair's next frames
-read, as of 19 October 2026:
+read:
 
 | State | Where | Put back | How |
 | --- | --- | --- | --- |
 | Both cores: CPU, RAM, IO, video, timers, DMA | mGBA's state | yes | `arena_pair_save` / `arena_pair_load`: each core's raw state (no flash, no PNG); exact, measured |
 | Each GBA's registers as they read, the SIO's control words (`rcnt`, `siocnt`), mGBA's idle loop detection, the open bus, a DMA under way, an interrupt sprung | `struct GBA`, outside its state | yes | in the snapshot (`GbaSnap`), put back after the state: a state loads each register through a write (`SIOMLT_SEND`, the SIO's busy bit came back otherwise) |
-| The sound's PSG timing and rendered samples | mGBA's state | as a load leaves them | not byte-exact (above): a rollback build hashes the game's state without them, in one build for both games, or brings the PSG up to date before each save |
+| The sound's PSG timing and rendered samples | mGBA's state | as a load leaves them | not byte-exact (above): the pair's hash leaves them out on every game since v8 |
 | The flash saves | each core's save data | no | a Practice NetBattle writes none (assumed: not yet checked byte for byte); the hash reads them |
 | The cable's lockstep: `mLockstep`'s attached, transfer phase and cycles; `GBASIOLockstep`'s attached counts and both receive buffers | `ArenaPair.cable` | yes | in the snapshot. A core's state loaded writes its SIO registers through the cable (SIOCNT's start bit can begin a transfer), so the cable is put back after both cores |
 | Each node's next event, event difference, SO line, mode, finished flag, and its event's place in its core's timing | `ArenaPair.node` | yes | in the snapshot; a core's state loaded clears its timing (`mTimingClear`), and the node's event is scheduled again where it stood |
-| The pair's scheduling: each side's cycle credit, who waits, who runs, the transfers counted | `ArenaPair` | yes | in the snapshot (the transfers are in the hash) |
+| The pair's scheduling: each side's cycle credit, who waits, who sleeps, who runs, the transfers counted | `ArenaPair` | yes | in the snapshot and the hash |
 | The pair's frame clock: each core's frame at the anchor, the pair's frames since | `ArenaPair.start`, `relative` | yes | in the snapshot; each core's own frame counter is in its state |
 | The Souls carried (full rules) | `ArenaPair.carried` | yes | in the snapshot |
 | The Dark Soul's chip lists (full rules) | both cores' RAM | yes | written before the battle's first frame, in the cores' states |
-| What BN5's hooks keep between two calls, one a core: `xsea.c`'s and `xpanels.c`'s way back through their stubs, `soulchaos.c`'s charge stepped (full rules) | static arrays by `hook_slot` | yes | each named as its hooks install (`hook_keep_slots`), a core's entries saved and loaded by its slot with its state (20 bytes a core); every other hook is a function of the registers and its core's memory and what its install read from the ROMs. Measured: full rules' rollbacks exact for the game, 11 of 11 |
-| UNITE's Souls offered (`soulunite_held_core`), BN5's installed bytes and hooks | each core's slot, ROM copy and hook table | not needed | made as the pair opens, the same through the battle |
-| The keys (`ArenaInput`) | `arena.c` | not rolled back | the keys come are the truth; a rollback guesses the other's keys not yet come (his last) for the frames that need them, and rewinds `next` with the snapshot |
-| The hashes pending, the battle's end seen (`fought`, `result`), the counters | `arena.c` | no | to run on confirmed frames only |
-| The link, the time sync | `arena_link_net.c`, `arena_sync.c` | no | not the pair's state |
-| Each core's sound out (blip buffers) and picture | `arena_pair.c` | no | output: the frames run again are heard not at all (`emu_audio_drop_from`), the last one's picture shown |
+| What BN5's hooks keep between two calls, one a core: `xsea.c`'s and `xpanels.c`'s way back through their stubs, `soulchaos.c`'s charge stepped (full rules) | static arrays by `hook_slot` | yes | each named as its hooks install (`hook_keep_slots`), a core's entries saved and loaded by its slot with its state (20 bytes a core); every other hook (the idle halt among them) is a function of the registers and its core's memory and what its install read from the ROMs. Measured: full rules' rollbacks exact for the game |
+| UNITE's Souls offered (`soulunite_held_core`), BN5's installed bytes and hooks, the idle hook | each core's slot, ROM copy and hook table | not needed | made as the pair opens, the same through the battle |
+| The keys (`ArenaInput`) | `arena_input.c` | not rolled back | the keys come are the truth; the other's not yet come are guessed (his last held) as a frame needs them, and a key that came otherwise rewinds `next` to the first frame that read it, the guesses made anew |
+| What a frame left (its hash, the battle's end, the results) | `arena.c` | rewritten | noted as each frame runs, again where it runs again, taken up only once its keys are all known |
+| The hashes pending, the counters, the link, the time sync | `arena.c`, `arena_link_net.c`, `arena_sync.c` | no | not the pair's state |
+| Each core's sound out (blip buffers) and picture | `arena_pair.c` | no | output: the frames run again are heard not at all (`arena_pair_mute`), the last one's picture shown |
 
-### The plan
-
-1. A faster pair frame: the pair's cores halted at BN6's wait for a frame
-   as the game's own is (`idle.c`), and each core run in longer stretches
-   while the cable is idle (no transfer under way) instead of an
-   instruction at a time, checked the differential's way (the same hashes
-   at every frame), then rollbench again on the Nova. This decides B's
-   window more than anything else measured.
-2. The pair's hash without the sound's fields, in one build for both
-   games (it changes the ready's hash, so two builds apart cannot fight).
-3. The engine: a ring of W + 1 snapshots, the other's missing keys
-   guessed, a rollback on a wrong guess, hashes and the end on confirmed
-   frames (`arena_roll.c` already rolls back a set window in `--dev
-   arena`, its game's hashes the same as without).
-4. The delay and window tuned per system from rollbench's numbers, the
-   desktops first.
-
-Run it on the weakest system first. On a PortMaster handheld, over SSH
-with the port's folder and ROMs where they are (a scratch folder for the
-binary and a throwaway data folder; never the port's `savedata/`):
-
-```sh
-SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ./cyberworld.aarch64 --headless --frames 20000 \
-  --rom-dir /storage/roms/ports/cyberworld/rom --data-dir /storage/cwtest/data --dev rollbench
-```
-
-or with the port's launcher: `--dev rollbench` added to its command line,
-the numbers on the screen and in `log.txt`.
+The stands' report reads the battle as it settles, never a guess: each
+frame run notes both MegaMen as the first core has them (`note`, again
+where a rollback runs it again), and the report takes the last frame
+whose keys are all known (`arena_reading`). A battle of `--dev
+arena,arenabusy` at delay 1 ended on frame 5221 with the same report
+(HP 75/100 and 0/100, winner 1) and the same hashes with no guess (lag
+0, window 0) as with 778 rollbacks (lag 3, window 6; lag 5, window 8).
 
 ## From the Net Square
 
@@ -864,7 +1024,7 @@ common ground). At the Custom screen its pair's hash must be the players'
 ready, or it stops ("the two PETs here came out apart from theirs";
 "this PET's BN5 is not theirs" where the installs' records differ). Then
 it runs the pair as `arena.c` does, frame N once both sides' keys for N
-and the three frames after it are in (`watch_keys.c` keeps the whole
+and the frame after it are in (`watch_keys.c` keeps the whole
 battle's keys, about 240 bytes a second), each core on its own frame
 clock. More than 110 frames behind the frames whose keys it has (BEHIND_KEPT and
 BEHIND_LEAST), it catches up, silent: as many frames a tick as 12 ms allow (eight
@@ -897,8 +1057,9 @@ game sends nothing of the battle.
 
 ### The report and the cheers
 
-The cable's first game reads both MegaMen off its pair's first core each
-tick (`arena_report.c`; `stands_report.c` the reading, ROM-free): each
+The cable's first game reads both MegaMen off its pair's first core at
+the last settled frame each tick (`arena_reading` in `arena.c`, the
+report in `arena_report.c`; `stands_report.c` the reading, ROM-free): each
 side's player object (`BN6_BATTLE_PLAYERS`, the same on both GBAs, which
 number the sides alike), its HP and max HP (`BN6_T1_HP`, `BN6_T1_MAX_HP`),
 and a chip counted as used where his action turns to a chip's
@@ -1003,7 +1164,13 @@ the cable's first's reports came, and no question.
   through a local relay ([Smoothed delay](#smoothed-delay)), not yet on
   the deployed server nor between two devices; stalls still show on the
   picture after 20 ticks ("Waiting for the other PET").
-- Rollback ([Rollback](#rollback)): measured, not built.
+- Rollback ([Rollback](#rollback)): on in every battle, measured through
+  a local relay and on the Nova headless; not yet a NetBattle between two
+  devices or through the deployed server (which runs v7 until it is
+  redeployed), nor on Android, iOS, Windows or macOS. A first NetBattle on
+  a system asks with a window of 4 before its frame's cost is kept.
+  Mispredictions are guessed as the last keys held:
+  a press seen late shows as the other MegaMan's step snapping back.
 - The Souls under full rules ([Full rules](#full-rules), above): all of
   issue #130's seen on both GBAs. Not yet: a NetBattle in which a
   MegaMan grows worried by hits alone (the runs held his mood worried),

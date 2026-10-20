@@ -603,7 +603,9 @@ other frame, not, over autopilot runs: a walked layer, battles, the town.
   interrupt to wake a halted CPU. A hook (`src/emu/idle.c`) halts the CPU
   there while the VBlank interrupt is on, which ends the halt where the
   flag would have ended the loop: the autopilot's logs and run logs are
-  the same line for line, at about 30% less of the core's time.
+  the same line for line, at about 30% less of the core's time. The
+  Arena's two cores take the same hook on their own tables (`idle_on`),
+  run a run loop at a time (docs/ONLINE_ARENA.md, Rollback).
 - **What is left** is spread out: on a layer the hottest routine is
   bn6f `checkOWObjectInteractions` (`0x080037F4`, a sixth of the busy
   cycles, each object's interaction area against the others'); BN6's

@@ -14,6 +14,8 @@
 #include "arena_boot.h"
 #include "arena_format.h"
 #include "arena_pair.h"
+#include "arena_sync.h"
+#include "arena_window.h"
 #include "bn6.h"
 #include "emu.h"
 #include "gfx.h"
@@ -50,6 +52,7 @@ static struct {
 	ArenaPairSnap *ring[DEPTH], *straight, *again;
 	uint16_t keys[DEPTH][ARENA_LOOKAHEAD][2];
 	Stat save, load, step, back;
+	double menus, menus_worst;   /* the way in's frames of the pair, timed (arena_boot_frame_ms) */
 	unsigned checks, agreed, game;
 	char lines[LINES][64];
 	int nlines;
@@ -149,7 +152,7 @@ static bool pair_open(void) {
 /* a rollback of DEPTH frames, its time and whether the pair comes back to
  * the same state as run straight */
 static void pair_rollback(void) {
-	uint64_t straight = arena_pair_hash(B.pair);
+	uint64_t straight = arena_pair_hash_whole(B.pair);
 	arena_pair_save(B.pair, B.straight);
 	unsigned from = B.frame + 1 - DEPTH;
 	uint64_t t = now();
@@ -161,7 +164,7 @@ static void pair_rollback(void) {
 	}
 	count(&B.back, t);
 	++B.checks;
-	if (arena_pair_hash(B.pair) == straight) ++B.agreed;
+	if (arena_pair_hash_whole(B.pair) == straight) ++B.agreed;
 	arena_pair_save(B.pair, B.again);
 	if (!arena_pair_snap_diff(B.straight, B.again, B.frame, true)) ++B.game;
 }
@@ -218,15 +221,19 @@ static void pair_said(void) {
 	snprintf(s, sizeof s, "%sWINDOW %d (WORST %d)", full ? "FULL " : "", w, worst);
 	say(s, "a tick's budget %.1f ms (%.0f%% of a frame kept for the rest): a window of %d frames at the means, %d at the worst",
 		budget, HEADROOM * 100, w, worst);
-	/* (at delay D the pair's frame needs the peer's keys 3 frames on, so 3 - D of them are guessed even with
-	 * no latency: a window W covers a one way of W + D - 3 frames) */
+	/* (at delay D the pair's frame needs the peer's keys a frame on (arena_input.h): a window W covers a lag of
+	 * the other's keys of W + D - 1 frames) */
 	for (int d = 1; d <= 3; ++d) {
-		int frames = w + d - 3;
-		say(NULL, "  delay %d: covers a one way of %d frames (%.0f ms; %d at the worst)", d, frames, frames * FRAME_MS, worst + d - 3);
+		int frames = w + d - 1;
+		say(NULL, "  delay %d: covers a lag of %d frames (%.0f ms; %d at the worst)", d, frames, frames * FRAME_MS, worst + d - 1);
 	}
-	/* (the one way each delay covers, on one line) */
-	snprintf(s, sizeof s, " D1 %.0f D2 %.0f D3 %.0f MS", (w - 2) * FRAME_MS, (w - 1) * FRAME_MS, w * FRAME_MS);
+	/* (what the Arena picks here, from the way in's frames and from the battle's, arena_window_for) */
+	say(NULL, "  the way in's frames %.3f ms (worst %.3f): the Arena's window %u from them, %u from the battle's", B.menus, B.menus_worst,
+		arena_window_for(B.menus * ARENA_MENUS_TO_BATTLE), arena_window_for(mean(&B.step)));
+	snprintf(s, sizeof s, " D1 %.0f D2 %.0f D3 %.0f MS", w * FRAME_MS, (w + 1) * FRAME_MS, (w + 2) * FRAME_MS);
 	if (!full) show(s);
+	/* (what a frame costs here, kept for the window the next challenge asks by: the battle's) */
+	if (!full) arena_window_keep(mean(&B.step));
 }
 
 /* the pair's snapshots and stats let go, for the next pass */
@@ -305,6 +312,8 @@ static void update(void) {
 		if (s == ARENA_BOOT_FAILED) B.why = arena_boot_error(B.boot);
 		if (s != ARENA_BOOT_READY) return;
 		B.pair = arena_boot_take(B.boot);
+		B.menus = arena_boot_frame_ms(B.boot, false);
+		B.menus_worst = arena_boot_frame_ms(B.boot, true);
 		arena_boot_free(B.boot);
 		B.boot = NULL;
 		if (!pair_open()) B.why = "no memory for the snapshots";

@@ -1,12 +1,19 @@
 /* The Arena's pair (arena_pair.h): two BN6 cores on mGBA's cable.
  *
- * The cable is mGBA's local lockstep, its scheduling in our hands as the
- * research harness had it (tools/online_link_bn6.c, docs/ONLINE_LINK.md):
- * the cores step an instruction at a time in turn, the first held while it
- * waits for its partner, each side's cycles credited to the other. A frame
- * of the pair ends once both cores have crossed into their next frame; a
- * core that crossed first runs on with the keys of its own next frame,
- * which is why a frame needs the keys of the three after it. */
+ * The cable is mGBA's local lockstep, its scheduling in our hands as mGBA's
+ * own frontend has it with a thread a core (issue #128, docs/ONLINE_ARENA.md,
+ * Rollback): each core runs whole run loops (its instructions up to its next
+ * event), the first posting the cycles it ran to the second, which runs
+ * until it has used them and then sleeps until the first posts more; the
+ * first waits while a transfer needs the second. So the two keep within a
+ * few thousand cycles of each other (the research harness, docs/
+ * ONLINE_LINK.md, stepped them an instruction at a time in turn, and a
+ * core could run two frames ahead of its partner). Both halt at BN6's wait
+ * for a frame as the game's own core does (idle.h), which skips the cycles
+ * the game would have spun through. A frame of the pair ends once both
+ * cores have crossed into their next frame; a core that crossed first runs
+ * on with the keys of its own next frame, which is why a frame needs the
+ * keys of the one after it. */
 #ifndef NDEBUG
 /* (the lockstep structures as the Release mGBA every target links lays
  * them out: their debug fields are left out under NDEBUG) */
@@ -32,12 +39,13 @@
 #include "arena_souls.h"
 #include "emu.h"
 #include "hook.h"
+#include "idle.h"
 #include "soulunite.h"
 #include "xinstall_log.h"
 
-/* instructions a frame of the pair may take, both cores' together: far
- * past a frame's (about 280,000 cycles each), short of a hang */
-#define STEP_LIMIT 4000000u
+/* run loops a frame of the pair may take, both cores' together: far past
+ * a frame's (2,514 at most through a way in and a battle), short of a hang */
+#define STEP_LIMIT 100000u
 #define STATE_FLAGS (SAVESTATE_SAVEDATA | SAVESTATE_RTC)
 /* the sound's fields in mGBA's state: the PSG's and the FIFOs', and the samples rendered, which its lazy PSG leaves
  * otherwise after a load than run straight (docs/ONLINE_ARENA.md, Rollback) */
@@ -52,7 +60,7 @@ struct ArenaPair {
 	struct mCore *core[2];
 	uint32_t video[2][ARENA_W * ARENA_H];
 	int32_t credit[2];
-	unsigned waiting, transfers;
+	unsigned waiting, asleep, transfers;   /* the first waits for these; these sleep, their cycles used */
 	int running;
 	unsigned start[2], relative;   /* each core's frame at the anchor; the pair's frames since */
 	uint8_t *scratch;              /* a core's raw state, for the hash */
@@ -124,12 +132,17 @@ static bool wait_peer(struct mLockstep *lock, unsigned mask) {
 	((ArenaPair *)lock->context)->waiting = mask;
 	return true;
 }
+/* (the first posting cycles wakes the second, which sleeps once it has
+ * used them: mGBA's own frontend's way, src/platform/qt/MultiplayerController.cpp) */
 static void add_cycles(struct mLockstep *lock, int id, int32_t cycles) {
-	((ArenaPair *)lock->context)->credit[id == 0 ? 1 : id] += cycles;
+	ArenaPair *p = lock->context;
+	p->credit[id == 0 ? 1 : id] += cycles;
+	if (id == 0) p->asleep &= ~2u;
 }
 static int32_t use_cycles(struct mLockstep *lock, int id, int32_t cycles) {
 	ArenaPair *p = lock->context;
 	p->credit[id] -= cycles;
+	if (p->credit[id] <= 0) p->asleep |= 1u << (unsigned)id;
 	return p->credit[id];
 }
 static int32_t unused_cycles(struct mLockstep *lock, int id) {
@@ -170,7 +183,7 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	for (unsigned side = 0; ok && side < 2; ++side) {
 		p->core[side] = arena_core_new(rom, size, p->video[side], bn5);
 		ok = p->core[side] && arena_core_load(p->core[side], state[side], state_size[side]) &&
-			(!bn5 || installs(p->core[side], souls ? souls[side] : 0)) && attach(p, side);
+			(!bn5 || installs(p->core[side], souls ? souls[side] : 0)) && idle_on(p->core[side]) && attach(p, side);
 	}
 	if (ok) {
 		p->scratch_size = p->core[0]->stateSize(p->core[0]);
@@ -187,10 +200,8 @@ void arena_pair_close(ArenaPair *p) {
 		if (!p->core[side]) continue;
 		GBASIOSetDriver(&((struct GBA *)p->core[side]->board)->sio, NULL, SIO_MULTI);
 		if (p->node[side].p) GBASIOLockstepDetachNode(&p->cable, &p->node[side]);
-		if (p->bn5) {
-			soulunite_held_core(p->core[side], 0);
-			hook_detach(p->core[side]);
-		}
+		if (p->bn5) soulunite_held_core(p->core[side], 0);
+		hook_detach(p->core[side]);
 		p->core[side]->deinit(p->core[side]);
 	}
 	free(p->scratch);
@@ -210,6 +221,18 @@ static bool both_crossed(ArenaPair *p, const unsigned target[2]) {
 	return p->core[0]->frameCounter(p->core[0]) >= target[0] && p->core[1]->frameCounter(p->core[1]) >= target[1];
 }
 
+/* which core runs next (-1: neither, the cable stuck): the second while
+ * it has the first's cycles to use, then the first unless it waits for
+ * the second; a core as far ahead as the keys go waits for its partner,
+ * but the second runs on where the first waits for it, on the last keys
+ * it has */
+static int next_side(const ArenaPair *p, const unsigned ahead[2], bool own_clock) {
+	bool held[2] = { own_clock && ahead[0] >= ARENA_LOOKAHEAD, own_clock && ahead[1] >= ARENA_LOOKAHEAD && !p->waiting };
+	if (!(p->asleep & 2u) && !held[1]) return 1;
+	if (!p->waiting && !held[0]) return 0;
+	return -1;
+}
+
 bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) {
 	unsigned target[2];
 	for (unsigned side = 0; side < 2; ++side) {
@@ -217,24 +240,17 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 		p->core[side]->setKeys(p->core[side], keys[0][side]);
 	}
 	for (unsigned limit = 0; limit < STEP_LIMIT; ++limit) {
-		for (unsigned side = 0; side < 2; ++side) {
-			struct mCore *c = p->core[side];
-			if (!side && p->waiting) continue;
-			p->running = (int)side;
-			enum mLockstepPhase phase = p->cable.d.transferActive;
-			if (own_clock) {
-				/* (a core past the pair's frame takes its own frame's keys;
-				 * one as far ahead as the keys go waits for its partner, as
-				 * it can once the cable is idle (the menus after a battle):
-				 * the second core alone runs on where the first waits for it,
-				 * on the last keys it has) */
-				unsigned ahead = c->frameCounter(c) - p->start[side] - p->relative;
-				if (ahead >= ARENA_LOOKAHEAD && !(side && p->waiting)) continue;
-				c->setKeys(c, keys[ahead < ARENA_LOOKAHEAD ? ahead : ARENA_LOOKAHEAD - 1][side]);
-			}
-			c->step(c);
-			if (phase != TRANSFER_IDLE && p->cable.d.transferActive == TRANSFER_IDLE) ++p->transfers;
-		}
+		unsigned ahead[2];
+		for (unsigned side = 0; side < 2; ++side) ahead[side] = p->core[side]->frameCounter(p->core[side]) - p->start[side] - p->relative;
+		int side = next_side(p, ahead, own_clock);
+		if (side < 0) return false;
+		struct mCore *c = p->core[side];
+		/* (a core past the pair's frame takes its own frame's keys: a frame begins in an event, where a run loop ends) */
+		if (own_clock) c->setKeys(c, keys[ahead[side] < ARENA_LOOKAHEAD ? ahead[side] : ARENA_LOOKAHEAD - 1][side]);
+		p->running = side;
+		enum mLockstepPhase phase = p->cable.d.transferActive;
+		c->runLoop(c);
+		if (phase != TRANSFER_IDLE && p->cable.d.transferActive == TRANSFER_IDLE) ++p->transfers;
 		if (both_crossed(p, target)) {
 			++p->relative;
 			if (p->bn5) arena_souls_carry(p->core, p->carried);
@@ -261,7 +277,7 @@ static void hash_word(uint64_t *hash, uint32_t word) {
 static void hash_cable(ArenaPair *p, uint64_t *hash) {
 	const uint32_t fields[] = { (uint32_t)p->cable.d.attached, (uint32_t)p->cable.d.transferActive,
 		(uint32_t)p->cable.d.transferCycles, (uint32_t)p->cable.attachedMulti, (uint32_t)p->cable.attachedNormal,
-		p->waiting, p->transfers, (uint32_t)p->running };
+		p->waiting, p->asleep, p->transfers, (uint32_t)p->running };
 	for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hash_word(hash, fields[i]);
 	for (unsigned i = 0; i < 4; ++i) {
 		hash_word(hash, p->cable.multiRecv[i]);
@@ -304,8 +320,8 @@ static uint64_t pair_hash(ArenaPair *p, bool sound) {
 	return hash ? hash : 1;
 }
 
-uint64_t arena_pair_hash(ArenaPair *p) { return pair_hash(p, true); }
-uint64_t arena_pair_hash_game(ArenaPair *p) { return pair_hash(p, false); }
+uint64_t arena_pair_hash(ArenaPair *p) { return pair_hash(p, false); }
+uint64_t arena_pair_hash_whole(ArenaPair *p) { return pair_hash(p, true); }
 
 uint64_t arena_pair_record(const ArenaPair *p) { return p->bn5 ? xlog_hash() : 0; }
 
@@ -373,7 +389,7 @@ struct ArenaPairSnap {
 	GbaSnap gba[2];
 	/* the pair's scheduling, frame clock and Souls carried */
 	int32_t credit[2];
-	unsigned waiting, transfers, start[2], relative;
+	unsigned waiting, asleep, transfers, start[2], relative;
 	int running;
 	ArenaSoulCarried carried[2];
 };
@@ -418,6 +434,7 @@ bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
 	memcpy(s->normal_recv, p->cable.normalRecv, sizeof s->normal_recv);
 	memcpy(s->credit, p->credit, sizeof s->credit);
 	s->waiting = p->waiting;
+	s->asleep = p->asleep;
 	s->transfers = p->transfers;
 	s->running = p->running;
 	memcpy(s->start, p->start, sizeof s->start);
@@ -457,6 +474,7 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 	}
 	memcpy(p->credit, s->credit, sizeof p->credit);
 	p->waiting = s->waiting;
+	p->asleep = s->asleep;
 	p->transfers = s->transfers;
 	p->running = s->running;
 	memcpy(p->start, s->start, sizeof p->start);
@@ -530,7 +548,7 @@ void arena_pair_anchor(ArenaPair *pair) { (void)pair; }
 void arena_pair_begin(ArenaPair *pair) { (void)pair; }
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) { (void)pair; (void)keys; (void)own_clock; return false; }
 uint64_t arena_pair_hash(ArenaPair *pair) { (void)pair; return 0; }
-uint64_t arena_pair_hash_game(ArenaPair *pair) { (void)pair; return 0; }
+uint64_t arena_pair_hash_whole(ArenaPair *pair) { (void)pair; return 0; }
 uint64_t arena_pair_record(const ArenaPair *pair) { (void)pair; return 0; }
 struct mCore *arena_pair_core(ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }
 const uint32_t *arena_pair_video(const ArenaPair *pair, unsigned side) { (void)pair; (void)side; return NULL; }

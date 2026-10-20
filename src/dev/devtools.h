@@ -48,7 +48,9 @@ typedef struct {
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
 	bool rollbench; /* the start is the rollback's measurement: the game's core, then the Arena's pair (src/dev/rollbench.h, issue #128) */
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
-	int arena_delay; /* arenadelay=N: its input delay, N frames (3-60); 0 its own */
+	bool arena_busy; /* arenabusy: --dev arena's second player steps, shoots and OKs the Custom screen by the frame's number alone (the rollback's guesses tried) */
+	int arena_delay; /* arenadelay=N: its input delay, N frames (1-60), and the delay a Net Square challenge or Yes asks for; 0 its own */
+	int arena_window; /* arenawindow=N: the Arena rolls back N frames at most (0: the delay alone); -1 what a frame costs here affords (arena.h, issue #128) */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
 	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
 	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */

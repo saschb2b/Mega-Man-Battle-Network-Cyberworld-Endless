@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Rollback in NetBattles (issue #128).** A NetBattle answers your
+  presses sooner: 2 frames of input delay on a good connection, where it
+  was 8 to 11. Each game runs the battle at once, guessing the other
+  player's buttons as the last ones he held; when his real presses come
+  in otherwise, it rewinds the frames that guessed wrong and plays them
+  again. Running both GBAs got three times cheaper for it, so even the
+  Retroid Pocket Nova rewinds up to 7 frames within a frame's time. Each
+  system measures what it can rewind and asks the server for the delay
+  its connection still needs; the longer of the two players' needs is the
+  battle's. Spectators in the stands see the same battle. Protocol v8: a
+  v7 game and a v8 server refuse each other.
 - **The stands (issue #128).** A NetBattle in the Net Square can be
   watched. The referee Mr.Prog by the Arena's ring calls the battle on in
   your channel (who fights whom, their HP, the last chips they used, how

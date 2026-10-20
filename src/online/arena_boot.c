@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <SDL.h>
+
 #include <mgba/core/core.h>
 
 #include "arena_loadout.h"
@@ -69,6 +71,8 @@ struct ArenaBoot {
 	uint32_t video[ARENA_W * ARENA_H];
 	ArenaPair *pair;
 	unsigned step, in_step, done;
+	double pair_ms, pair_worst;   /* the pair's frames through the menus, timed */
+	unsigned pair_frames;
 	struct { bool queued, called; uint32_t lr, kept[8]; } call;
 	char error[160];
 };
@@ -237,7 +241,12 @@ static bool entry_frame(ArenaBoot *b) {
 	const Step *s = &entry_steps[b->step];
 	if (b->in_step == 0) arena_pair_anchor(b->pair);
 	uint16_t keys[ARENA_LOOKAHEAD][2] = { { s->keys, s->keys } };
+	uint64_t t = SDL_GetPerformanceCounter();
 	if (!arena_pair_step(b->pair, keys, false)) { fail(b, "the cable stopped in BN6's menus"); return false; }
+	double ms = (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	b->pair_ms += ms;
+	if (ms > b->pair_worst) b->pair_worst = ms;
+	++b->pair_frames;
 	arena_pair_mute(b->pair);
 	++b->done;
 	if (++b->in_step >= s->frames) { b->in_step = 0; ++b->step; }
@@ -278,9 +287,14 @@ ArenaPair *arena_boot_take(ArenaBoot *b) {
 	return p;
 }
 
+double arena_boot_frame_ms(const ArenaBoot *b, bool worst) {
+	return worst ? b->pair_worst : b->pair_frames ? b->pair_ms / b->pair_frames : 0;
+}
+
 #else   /* no Arena in this build (arena_pair.h, CW_ARENA) */
 
 struct ArenaBoot { ArenaBootStage stage; };
+double arena_boot_frame_ms(const ArenaBoot *b, bool worst) { (void)b; (void)worst; return 0; }
 
 ArenaBoot *arena_boot_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], unsigned format) {
 	(void)rom; (void)size; (void)loadout; (void)format;

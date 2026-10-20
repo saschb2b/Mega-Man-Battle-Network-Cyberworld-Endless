@@ -81,7 +81,7 @@ static HookAct sea_test(HookRegs *r, void *user) {
  * the hooked instruction: that time it runs. */
 
 typedef struct { uint32_t at, sp; } Back;
-static Back backs[HOOK_CORES];   /* (one a core: the Arena's two run an instruction at a time in turn) */
+static Back backs[HOOK_CORES];   /* (one a core: the Arena's two run in turn, a run loop at a time) */
 
 static HookAct sea_hide(HookRegs *r, void *user) {
 	(void)user;

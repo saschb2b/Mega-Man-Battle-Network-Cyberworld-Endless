@@ -27,24 +27,52 @@ static void buffer(void) {
 	arena_input_init(&in, 1000);
 	assert(in.delay == ARENA_DELAY_MAX);
 	arena_input_init(&in, 6);
-	/* the first D frames released on both sides: frame 0 needs 0-3, known */
-	assert(arena_input_ready(&in));
+	/* the first D frames released on both sides: frame 0 needs 0 and 1, known */
+	assert(arena_input_ready(&in, 0));
 	uint16_t keys[ARENA_LOOKAHEAD][2];
-	for (unsigned f = 0; f < 3; ++f) assert(arena_input_take(&in, keys) && keys[0][0] == 0 && keys[3][1] == 0);
-	assert(!arena_input_ready(&in) && !arena_input_take(&in, keys));
+	for (unsigned f = 0; f < 5; ++f) assert(arena_input_take(&in, 0, keys) && keys[0][0] == 0 && keys[1][1] == 0);
+	assert(!arena_input_ready(&in, 0) && !arena_input_take(&in, 0, keys));
 	/* each stream in order: a resent frame left alone, a gap refused */
 	assert(arena_input_put(&in, 0, 6, 0xFFFF) == ARENA_PUT_OK);
 	assert(arena_input_put(&in, 0, 6, 1) == ARENA_PUT_OLD);
 	assert(arena_input_put(&in, 0, 8, 1) == ARENA_PUT_GAP);
 	assert(arena_input_put(&in, 2, 6, 1) == ARENA_PUT_GAP);
-	assert(!arena_input_ready(&in));   /* (the peer's frame 6 not yet in) */
+	assert(!arena_input_ready(&in, 0));   /* (the peer's frame 6 not yet in) */
 	assert(arena_input_put(&in, 1, 6, 0x10) == ARENA_PUT_OK);
-	assert(arena_input_take(&in, keys));
-	/* frame 3's keys, and the three after: frame 6 is the fourth, masked to ten buttons */
-	assert(keys[0][0] == 0 && keys[3][0] == ARENA_KEYS_MASK && keys[3][1] == 0x10 && in.next == 4);
+	assert(arena_input_take(&in, 0, keys));
+	/* frame 5's keys, and the one after: frame 6, masked to ten buttons */
+	assert(keys[0][0] == 0 && keys[1][0] == ARENA_KEYS_MASK && keys[1][1] == 0x10 && in.next == 6);
 	/* no further ahead than the ring holds */
 	for (uint32_t f = 7; f < in.next + ARENA_RING; ++f) assert(arena_input_put(&in, 0, f, (uint16_t)f) == ARENA_PUT_OK);
 	assert(arena_input_put(&in, 0, in.next + ARENA_RING, 1) == ARENA_PUT_FULL);
+}
+
+/* A rollback window (issue #128): frames run before the other's keys
+ * come, each guessed as his last held; one that comes otherwise says the
+ * first frame that read it, and the frames from there take what is known */
+static void guesses(void) {
+	ArenaInput in;
+	arena_input_init(&in, 1);
+	uint16_t keys[ARENA_LOOKAHEAD][2];
+	/* frame 0 needs frame 1's keys: mine sampled, his not yet come */
+	assert(arena_input_put(&in, 0, 1, 5) == ARENA_PUT_OK);
+	assert(!arena_input_ready(&in, 0) && arena_input_ready(&in, 3));
+	assert(arena_input_take(&in, 3, keys) && keys[1][0] == 5 && keys[1][1] == 0);
+	assert(arena_input_put(&in, 0, 2, 6) == ARENA_PUT_OK && arena_input_take(&in, 3, keys));
+	assert(arena_input_put(&in, 0, 3, 7) == ARENA_PUT_OK && arena_input_take(&in, 3, keys));
+	/* three frames on guesses: as many as the window */
+	assert(arena_input_put(&in, 0, 4, 8) == ARENA_PUT_OK && !arena_input_ready(&in, 3) && arena_input_settled(&in) == 0);
+	/* his frame 1 as guessed: nothing to roll back, frame 0 settled */
+	assert(arena_input_put(&in, 1, 1, 0) == ARENA_PUT_OK && arena_input_wrong(&in) == ARENA_NO_FRAME && arena_input_settled(&in) == 1);
+	/* his frame 2 otherwise: frames 1 and 2 read it, back to frame 1 */
+	assert(arena_input_put(&in, 1, 2, 9) == ARENA_PUT_OK && arena_input_wrong(&in) == 1);
+	arena_input_rewind(&in, arena_input_wrong(&in));
+	assert(in.next == 1 && arena_input_wrong(&in) == ARENA_NO_FRAME);
+	/* run again: frame 1 with his frame 2 as it came, frame 2 with his 3 guessed anew, held from it */
+	assert(arena_input_take(&in, 3, keys) && keys[0][0] == 5 && keys[0][1] == 0 && keys[1][0] == 6 && keys[1][1] == 9);
+	assert(arena_input_take(&in, 3, keys) && keys[1][0] == 7 && keys[1][1] == 9 && in.next == 3);
+	/* his frame 3 as the new guess: nothing wrong */
+	assert(arena_input_put(&in, 1, 3, 9) == ARENA_PUT_OK && arena_input_wrong(&in) == ARENA_NO_FRAME && arena_input_settled(&in) == 3);
 }
 
 static uint16_t counting_peer(void *context, uint32_t frame) {
@@ -73,8 +101,8 @@ static unsigned play(unsigned delay, unsigned latency, unsigned ticks, unsigned 
 		assert(!link->broken(link));
 		/* (as arena_tick: frame N due at tick N) */
 		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
-		if (in.next <= t && !arena_input_ready(&in)) ++stalls;
-		for (unsigned k = 0; k < 2 && in.next <= t && arena_input_take(&in, frame_keys); ++k) {
+		if (in.next <= t && !arena_input_ready(&in, 0)) ++stalls;
+		for (unsigned k = 0; k < 2 && in.next <= t && arena_input_take(&in, 0, frame_keys); ++k) {
 			uint32_t n = in.next - 1;
 			assert(frame_keys[0][0] == (n < in.delay ? 0 : (uint16_t)(n - in.delay)));
 			if (n % 60 == 0) link->send_hash(link, n, 0x1234 + n);
@@ -96,7 +124,7 @@ static void link_latency(void) {
 	assert(play(ARENA_DELAY_MIN, 0, 600, &ran) == 0 && ran == 600);
 	/* one that does not waits as many ticks as it falls short, once, and
 	 * stays that far behind */
-	assert(play(6, 5, 600, &ran) == 2 && ran == 598);
+	assert(play(6, 7, 600, &ran) == 2 && ran == 598);
 	/* the peer's keys never arrive early: none before its latency */
 	ArenaLocalLink local;
 	ArenaLink *link = arena_link_local(&local, 6, 4, NULL, NULL);
@@ -355,8 +383,8 @@ static bool side_tick(ArenaNetLink *net, ArenaInput *in, unsigned side, uint32_t
 	while (l->poll(l, in->known[side ^ 1], &keys)) assert(arena_input_put(in, side ^ 1, in->known[side ^ 1], keys) == ARENA_PUT_OK);
 	assert(!l->broken(l));
 	uint16_t frame_keys[ARENA_LOOKAHEAD][2];
-	bool stalled = in->next <= t && !arena_input_ready(in);
-	for (unsigned k = 0; k < 2 && in->next <= t && arena_input_take(in, frame_keys); ++k) {
+	bool stalled = in->next <= t && !arena_input_ready(in, 0);
+	for (unsigned k = 0; k < 2 && in->next <= t && arena_input_take(in, 0, frame_keys); ++k) {
 		uint32_t n = in->next - 1;
 		for (unsigned p = 0; p < 2; ++p) assert(frame_keys[0][p] == (n < in->delay ? 0 : (uint16_t)(n * (p + 3) & ARENA_KEYS_MASK)));
 		if (n % 60 == 59) l->send_hash(l, n, 0x5000 + n);
@@ -480,6 +508,9 @@ static void sync(void) {
 	assert(p.n == 2 && arena_pings_latency(&p) == 80);   /* 60 and twice 10 */
 	for (uint32_t t = 5000; t < 40000; t += 2000) arena_pings_note(&p, 60, t);
 	assert(p.n == ARENA_SYNC_PINGS && arena_pings_latency(&p) == 60);
+	/* the window a frame's cost affords (the Nova's 1.07 ms a battle frame: 9; this machine's 0.9: 10, the most), and the latency said less what it covers */
+	assert(arena_window_for(1.07) == 9 && arena_window_for(0.9) == ARENA_WINDOW_MOST && arena_window_for(6.0) == 0 && arena_window_for(0) == 0);
+	assert(arena_ask_ms(100, 0) == 100 && arena_ask_ms(100, 4) == 34 && arena_ask_ms(60, 4) == 0);
 }
 
 static void link_net(void) {
@@ -616,14 +647,14 @@ static void watch_keys(void) {
 	uint8_t be[2 * 300];
 	for (unsigned i = 0; i < 300; ++i) { be[2 * i] = (uint8_t)(i >> 8 | 0xFC); be[2 * i + 1] = (uint8_t)i; }
 	assert(watch_keys_put(&w, 0, 0, be, 6) && watch_keys_runnable(&w) == 0);
-	assert(watch_keys_put(&w, 1, 0, be, 4) && watch_keys_runnable(&w) == 1);
+	assert(watch_keys_put(&w, 1, 0, be, 4) && watch_keys_runnable(&w) == 3);
 	assert(!watch_keys_put(&w, 1, 5, be, 1));   /* (frame 4 missing) */
-	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 3);
-	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 297);
+	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 5);
+	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 299);
 	uint16_t out[ARENA_LOOKAHEAD][2];
 	watch_keys_take(&w, 4, out);
 	/* (the keys' ten bits: the top six of the byte pair dropped) */
-	assert(out[0][0] == 4 && out[0][1] == 2 && out[3][0] == 7 && out[3][1] == 5);
+	assert(out[0][0] == 4 && out[0][1] == 2 && out[1][0] == 5 && out[1][1] == 3);
 	watch_keys_free(&w);
 	assert(!w.known[0] && !w.keys[0]);
 }
@@ -645,6 +676,7 @@ static void report(void) {
 int main(void) {
 	formats();
 	buffer();
+	guesses();
 	link_latency();
 	check();
 	install();

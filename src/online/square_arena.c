@@ -129,9 +129,19 @@ static bool out(void *context, const uint8_t *data, size_t size) {
 	return online_transport_send(data, size);
 }
 
+/* the latency a challenge or a Yes says (protocol v8): the round trip with
+ * its jitter, less what this system's rollback window covers (the frame's
+ * cost kept here, arena_window.h); arenawindow=N's window, or arenadelay=N
+ * asking for that delay (the server's: two frames and the latency's) */
+static uint32_t asked(void) {
+	if (dev.arena_delay > 0) return dev.arena_delay > 2 ? (uint32_t)((dev.arena_delay - 2) * 1000 / 60) : 0;
+	unsigned window = dev.arena_window >= 0 ? (unsigned)dev.arena_window : arena_window_kept();
+	return arena_ask_ms(A.latency, window);
+}
+
 static void act(unsigned action, uint32_t ref) {
 	uint8_t m[ONLINE_ARENA_BYTES];
-	if (arena_wire_action(m, action, ref, A.latency, A.format)) online_transport_send(m, sizeof m);
+	if (arena_wire_action(m, action, ref, asked(), A.format)) online_transport_send(m, sizeof m);
 }
 
 static void say(const char *words) { A.said = words; }
@@ -496,6 +506,7 @@ static void build(void) {
 	loadout[side ^ 1] = A.theirs_carried ? &A.theirs : NULL;
 	A.arena = arena_new(R.data, ROM_SIZE, loadout, &A.link.link, A.format);
 	if (!A.arena) { fail("too little memory for the two PETs"); return; }
+	arena_window(A.arena, dev.arena_window);
 	A.stage = SA_CONNECTING;
 }
 

@@ -64,15 +64,17 @@ void arena_pair_begin(ArenaPair *pair);
  * frame (the entry's scripted steps); true: each takes the keys of its
  * own frame clock, keys[k] k frames ahead of the pair's (the battle).
  * A core ARENA_LOOKAHEAD frames ahead waits for its partner. False where
- * the cable stuck: the frame not done in STEP_LIMIT instructions. */
+ * the cable stuck: the frame not done in STEP_LIMIT run loops. */
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock);
-/* A hash of both cores' whole state, their flash saves and the cable's,
- * and under full rules the installs' record they were made with: two
- * clients whose pairs agree have the same; 0 where it failed */
+/* A hash of both cores' state, their flash saves and the cable's, and
+ * under full rules the installs' record they were made with: two clients
+ * (and a spectator) whose pairs agree have the same, whether either rolled
+ * back or not; 0 where it failed. It leaves out the sound's fields, which
+ * a state loaded leaves otherwise than run straight (arena_pair_snap_diff;
+ * docs/ONLINE_ARENA.md, Rollback) */
 uint64_t arena_pair_hash(ArenaPair *pair);
-/* ... but for the sound's fields, which a state loaded leaves otherwise
- * than run straight (arena_pair_snap_diff): what a rollback must agree on */
-uint64_t arena_pair_hash_game(ArenaPair *pair);
+/* ... with the sound's fields too: the whole state (--dev rollbench) */
+uint64_t arena_pair_hash_whole(ArenaPair *pair);
 /* The installs' record its cores were made with (xinstall_log.h's hash): 0
  * under BN6's rules */
 uint64_t arena_pair_record(const ArenaPair *pair);

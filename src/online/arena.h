@@ -14,6 +14,7 @@
 
 #include "arena_link.h"
 #include "arena_sync.h"   /* (the round trips kept for the delay asked for: arena_pings_*) */
+#include "arena_window.h" /* (the window this system affords, kept for the delay asked for) */
 
 #include "online_snapshot.h"
 
@@ -54,8 +55,17 @@ unsigned arena_result(const Arena *a);
 bool arena_apart(const Arena *a);
 /* the ticks stalled, waiting for the peer's keys */
 uint32_t arena_stalls(const Arena *a);
-/* side's core of the pair, NULL before the battle (the stands' report reads the first: arena_report.h) */
-struct mCore *arena_core(const Arena *a, unsigned side);
+/* what the stands' report reads of the battle (arena_report.h): each
+ * side's MegaMan as the cable's first core has him, at the last frame whose
+ * keys are all known, so a frame run on a guess and rolled back is never
+ * reported */
+typedef struct {
+	bool seen[2];               /* the side's player object read */
+	uint16_t hp[2], max_hp[2], chip[2];
+	uint8_t action[2];
+} ArenaReading;
+/* NULL before the battle's first frame is settled */
+const ArenaReading *arena_reading(const Arena *a);
 /* my round trip to the server as the transport measures it, a tick at a
  * time (the local link's: twice its one way), for the time sync that runs
  * the leading game a little slower (arena_sync.h) */
@@ -65,6 +75,12 @@ void arena_rtt(Arena *a, uint32_t ms);
  * and every 60th frame the game's hash said (without the sound's fields),
  * which a run that rolls back must say alike; 0 the hash alone */
 void arena_rollback(Arena *a, int window);
+/* The rollback window, before the way in is done (docs/ONLINE_ARENA.md,
+ * Rollback): up to `window` frames run on a guess of the other player's
+ * keys and rolled back where it was wrong (0: the delay alone, a frame
+ * run once its keys have all come); -1, as it starts, what a frame of the
+ * pair costs here affords (arena_window.h) */
+void arena_window(Arena *a, int window);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before

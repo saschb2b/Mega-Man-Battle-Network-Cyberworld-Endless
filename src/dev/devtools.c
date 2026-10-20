@@ -28,7 +28,7 @@
 #include "soulunite.h"
 #include "text.h"
 
-DevFlags dev = { .speed = 1, .duels = -1, .arena_lag = -1, .arena_roll = -1 };
+DevFlags dev = { .speed = 1, .duels = -1, .arena_lag = -1, .arena_roll = -1, .arena_window = -1 };
 char devtools_shot[512];
 
 enum { I_GOD, I_ONEHIT, I_QUIET, I_SPEED, I_WIN, I_HEAL, I_ZENNY, I_NEXT, I_GUARDIAN, I_AREA, I_COUNT };
@@ -48,7 +48,7 @@ static bool dev_switch(const char *t) {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors },
-		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena },
+		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
 		{ "rollbench", &dev.rollbench },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
@@ -57,7 +57,7 @@ static bool dev_switch(const char *t) {
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenadesync=", &dev.arena_desync },
-		{ "arenaroll=", &dev.arena_roll },
+		{ "arenaroll=", &dev.arena_roll }, { "arenawindow=", &dev.arena_window },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }
