@@ -763,8 +763,9 @@ CONTINUE. The one thing that comes home with you is a chip you traded.
 The full set is every game this version supports online: BN6 Cybeast
 Gregar (USA) and BN5 Team Colonel (USA). With BN5's ROM beside BN6's, all
 four stamps are yours; with BN6's alone you hold the Square stamp: the
-whole Square but NetBattles, trades and the dive. On the 3DS and in the
-browser, which have no NetBattle, a full pass trades and dives.
+whole Square but NetBattles, trades and the dive. In the browser a full
+pass battles too. On the New 3DS, which cannot run a NetBattle's two GBAs
+fast enough, a full pass trades and dives, and the pass says so.
 
 Open the pass from the PET: **KeyItem**, then A on **NetPass**; A or B
 closes it. In the Square, where the PET stays shut, **START** opens it. It also shows across the top of the screen while MegaMan asks
@@ -805,8 +806,9 @@ In the Square:
   whether to go again with the same player, the cursor on No: when you
   both say Yes, you fight again at once with the same folder (asked
   again only if it no longer fits). No, B, or no Yes from the other
-  player within half a minute, and you stay in the Square. The 3DS and
-  the browser have no NetBattle.
+  player within half a minute, and you stay in the Square. The browser
+  battles as the other systems do; the New 3DS has no NetBattle (its
+  two GBAs take half again a frame's time there).
 - **The Mr.Prog by the way in from the log-in plaza** moves you to the
   next or last channel; a channel holds eight players. The one by the
   Arena's ring tells how a NetBattle is asked for; once you have fought,
@@ -817,8 +819,8 @@ In the Square:
   whether to watch: you see the battle itself, a moment behind, from
   its start however late you came. **R** shows the other side, **L**
   cheers, **B** takes you back. The players hear the cheers after their
-  battle. Watching takes the Arena stamp; without it, and on the 3DS and
-  in the browser, you get the referee's call and the board's post.
+  battle. Watching takes the Arena stamp; without it, and on the New
+  3DS, you get the referee's call and the board's post.
 - **Trade Central**, a desk in a wing off the plaza, trades one of your spare
   chips (copies beyond those in your folders) for another player's: pick
   them, pick the chip, they pick one back, and when you both say yes the

@@ -110,8 +110,6 @@ static struct {
 	int folder, answer;
 } again;
 
-bool square_arena_built(void) { return CW_ARENA; }
-
 bool square_arena_offered(void) { return CW_ARENA; }
 
 const SquareBout *square_arena_last(void) {
@@ -134,7 +132,9 @@ static bool out(void *context, const uint8_t *data, size_t size) {
 static uint32_t asked(void) {
 	if (dev.arena_delay > 0) return dev.arena_delay > 2 ? (uint32_t)((dev.arena_delay - 2) * 1000 / 60) : 0;
 	unsigned window = dev.arena_window >= 0 ? (unsigned)dev.arena_window : arena_window_kept();
-	return arena_ask_ms(A.latency, window);
+	uint32_t ms = arena_ask_ms(A.latency, window);
+	printf("arena: asking with %u ms: the round trips' %u ms less a window of %u\n", (unsigned)ms, (unsigned)A.latency, window);
+	return ms;
 }
 
 static void act(unsigned action, uint32_t ref) {
@@ -429,6 +429,15 @@ static void answered(void) {
 	accept();
 }
 
+/* --dev arenaboth: Lan's Yes at once, the first folder that fits (a
+ * NetBattle that plays itself on a device or in a browser, arena.h) */
+static void bot_yes(void) {
+	unsigned fits = 0;
+	if (A.ended || !mine_goes(&fits)) { act(ARENA_ACT_LEAVE, A.match); A.ended = true; A.stage = SA_IDLE; return; }
+	A.folder = arena_folder_first(fits);
+	accept();
+}
+
 /* Lan's answer to the rematch, as its chat closes */
 static void again_answered(void) {
 	bool yes = arena_folder_challenge_yes();
@@ -478,7 +487,8 @@ void square_arena_update(const OnlineSnapshot *s) {
 	else if (A.stage == SA_AGAIN && !open) again_ask();
 	else if (A.stage == SA_FOLDER && !open) folder_picked();
 	else if (A.stage == SA_ASKING && !open) {
-		if (arena_folder_challenge(A.name)) A.stage = SA_ASKED;
+		if (dev.arena_both) bot_yes();
+		else if (arena_folder_challenge(A.name)) A.stage = SA_ASKED;
 	} else if (A.said && !open && A.stage == SA_IDLE && talk_start(A.said, FACE_MEGAMAN)) A.said = NULL;
 }
 
@@ -554,6 +564,8 @@ static void bouts(unsigned result) {
 }
 
 static void battle(uint32_t keys, uint32_t rtt_ms) {
+	static uint32_t tick;
+	if (dev.arena_both) keys = arena_bot_keys(A.arena, A.link.link.side, tick++);
 	uint32_t stalls = arena_stalls(A.arena);
 	arena_rtt(A.arena, rtt_ms);
 	ArenaStage stage = arena_tick(A.arena, (uint16_t)(keys & ARENA_KEYS_MASK));

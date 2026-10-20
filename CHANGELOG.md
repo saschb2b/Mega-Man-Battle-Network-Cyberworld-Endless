@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **NetBattles in the browser.** The browser build battles in the Net
+  Square as the other systems do, rollback and watching from the stands
+  included, against another browser or a game on a computer. The
+  New 3DS was measured too: running a NetBattle's two GBAs there takes
+  about 26 ms a frame, half again the 16.7 a frame has, so it stays
+  without NetBattles, its pass saying so, and the referee still calls the
+  channel's battles to it.
 - **The NetPass (issue #131).** Online play goes by one rule: the Net
   Square is everyone's, and NetBattles, trades and the week's deep net
   need every game this version supports online, BN6 Cybeast Gregar (USA)
@@ -14,8 +21,8 @@
   ranking. The first visit with a full pass, the greeter stamps it. Every
   NetBattle is now by full rules, BN5's chips and Souls in it; BN6 rules,
   the Pack's stand-ins for BN5 chips and the clerk's BN6-chips-only
-  trades went with the mixed pairs that needed them. The 3DS and the
-  browser still have no NetBattle; with BN5 they trade and dive.
+  trades went with the mixed pairs that needed them. The New 3DS still
+  has no NetBattle; with BN5 it trades and dives.
   Protocol v9: a v8 game and a v9 server refuse each other.
 - **Rollback in NetBattles (issue #128).** A NetBattle answers your
   presses sooner: 2 frames of input delay on a good connection, where it
@@ -36,7 +43,7 @@
   players and from its first frame however late you came. R shows the
   other side, L cheers, B goes back. Cheers reach the players after
   their battle, from the referee. A game with the NetPass's Arena stamp
-  watches; the 3DS, the browser and anyone else get the referee's call
+  watches; the New 3DS and anyone else get the referee's call
   and the board's post. Protocol v7: a v6 game and a v7
   server refuse each other.
 - **The week's deep net (issue #127).** Every Monday each Net Square

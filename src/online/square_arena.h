@@ -8,7 +8,8 @@
  * after the battle he is back there, and says how it went. A battle with a
  * result asks Lan for another with the same player (the cursor on No):
  * both games' Yes, the same rules and folder, and they go again. Not
- * offered where the Arena is not built (CW_ARENA: the 3DS, the browser). */
+ * offered where a frame of the pair does not fit a 60th of a second
+ * (CW_ARENA: the New 3DS). */
 #ifndef CW_SQUARE_ARENA_H
 #define CW_SQUARE_ARENA_H
 
@@ -18,10 +19,9 @@
 
 #include "online_types.h"
 
-/* the Arena built in this game (CW_ARENA: not the 3DS's, the browser's) */
-bool square_arena_built(void);
-/* the Battle choice offered at all in this build; on a card, where both
- * games' NetPass holds its Arena stamp too (online_chat.c, netpass.h) */
+/* the Battle choice and watching offered at all on this system (CW_ARENA:
+ * not the New 3DS's); on a card, where both games' NetPass holds its Arena
+ * stamp too (online_chat.c, netpass.h) */
 bool square_arena_offered(void);
 /* The last battle fought from the Square in this game, as its referee
  * tells it. */

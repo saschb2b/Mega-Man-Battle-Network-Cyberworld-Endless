@@ -22,12 +22,23 @@
 #include "protocol.h"
 #include "rom.h"
 #include "xinstall.h"
+#include "xinstall_log.h"
+#include "devtools.h"
+#include "game.h"
+
+#ifdef __3DS__
+#include <3ds/types.h>
+#include <3ds/allocator/linear.h>
+
+#include "start_3ds.h"
+#endif
 
 #define ONE_FRAMES   300    /* the game's core alone: from power-on, through its start */
 #define PAIR_FRAMES  600    /* the pair: ten seconds of the battle */
 #define DEPTH        8      /* the rollback timed and checked: eight frames back */
 #define CHECK_EVERY  50     /* frames between two of them */
 #define LOADS        100    /* loads timed alone after them */
+#define BOTH         60     /* frames timed with both GBAs' pictures drawn, after them */
 #define SLICE        20     /* frames a tick, so the screen shows the way */
 #define BOOT_SLICE   64
 #define FRAME_MS     (1000.0 / 60.0)
@@ -50,7 +61,7 @@ static struct {
 
 	ArenaPairSnap *ring[DEPTH], *straight, *again;
 	uint16_t keys[DEPTH][ARENA_LOOKAHEAD][2];
-	Stat save, load, step, back;
+	Stat save, load, step, back, resim, both;   /* (step: my GBA's picture drawn, as a battle; resim: none, a frame run again) */
 	double menus, menus_worst;   /* the way in's frames of the pair, timed (arena_boot_frame_ms) */
 	unsigned checks, agreed, game;
 	char lines[LINES][64];
@@ -87,6 +98,17 @@ static void show(const char *screen) {
 	if (B.nlines < LINES) snprintf(B.lines[B.nlines++], sizeof B.lines[0], "%s", screen);
 }
 
+/* the 3DS's heap and linear heap, where the pair's memory is short first */
+static void heap_said(const char *when) {
+#ifdef __3DS__
+	char heap[120];
+	start_3ds_heap(heap, sizeof heap);
+	say(NULL, "%s: %s; the linear heap %lu KB free", when, heap, (unsigned long)(linearSpaceFree() / 1024));
+#else
+	(void)when;
+#endif
+}
+
 /* ---- the game's core alone (every build) ---- */
 
 static void one_frames(unsigned n) {
@@ -117,7 +139,7 @@ static void one_said(void) {
 		mean(&B.one_save), B.one_save.worst, mean(&B.one_load), B.one_load.worst, mean(&B.one_step), B.one_step.worst, B.one_save.n);
 }
 
-/* ---- the pair (CW_ARENA) ---- */
+/* ---- the pair ---- */
 
 /* each side's keys for a frame: at the Custom screen the cursor to OK and
  * OK (the --dev arena peer's script); in the battle a step, a shot or the
@@ -143,6 +165,7 @@ static void pair_keys(uint32_t frame, uint16_t keys[ARENA_LOOKAHEAD][2]) {
 }
 
 static bool pair_open(void) {
+	arena_pair_draw(B.pair, 1);
 	for (unsigned i = 0; i < DEPTH; ++i)
 		if (!(B.ring[i] = arena_pair_snap_new(B.pair))) return false;
 	return (B.straight = arena_pair_snap_new(B.pair)) && (B.again = arena_pair_snap_new(B.pair));
@@ -158,8 +181,12 @@ static void pair_rollback(void) {
 	if (!arena_pair_load(B.pair, B.ring[from % DEPTH])) { B.why = "the pair took no snapshot"; return; }
 	count(&B.load, t);
 	for (unsigned f = from; f <= B.frame; ++f) {
+		/* (as a battle's rollback: no picture but the last frame's) */
+		arena_pair_draw(B.pair, f == B.frame ? 1 : 0);
 		arena_pair_save(B.pair, B.ring[f % DEPTH]);
+		uint64_t one = now();
 		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])B.keys[f % DEPTH], true)) { B.why = "the cable stuck"; return; }
+		if (f != B.frame) count(&B.resim, one);
 	}
 	count(&B.back, t);
 	++B.checks;
@@ -182,19 +209,29 @@ static void pair_frames(unsigned n) {
 		/* (the frames between two rollbacks run straight, no load among them: what a rollback must come back to) */
 		if (B.frame >= DEPTH && B.frame % CHECK_EVERY == 0) pair_rollback();
 	}
-	/* (then loads alone timed, the pass's state let go after them) */
-	for (unsigned i = 0; B.frame == PAIR_FRAMES && !B.why && i < LOADS; ++i) {
+	/* (then frames with both pictures drawn, and loads alone timed, the pass's state let go after them) */
+	if (B.frame < PAIR_FRAMES || B.why) return;
+	arena_pair_draw(B.pair, 3);
+	for (unsigned i = 0; i < BOTH && !B.why; ++i) {
+		uint16_t keys[ARENA_LOOKAHEAD][2];
+		pair_keys(B.frame + i, keys);
+		uint64_t t = now();
+		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])keys, true)) B.why = "the cable stuck";
+		count(&B.both, t);
+	}
+	for (unsigned i = 0; !B.why && i < LOADS; ++i) {
 		uint64_t t = now();
 		if (!arena_pair_load(B.pair, B.ring[i % DEPTH])) { B.why = "the pair took no snapshot"; return; }
 		count(&B.load, t);
 	}
 }
 
-/* frames a tick holds after one load: each resimulated one saved, then the new one */
-static int window(double budget, double load, double step, double save) {
-	double per = step + save;
-	if (per <= 0 || budget <= load + per) return 0;
-	return (int)((budget - load) / per) - 1;
+/* frames a tick holds after one load: each resimulated one saved and run
+ * with no picture, then the new one with its picture */
+static int window(double budget, double load, double again, double step, double save) {
+	double left = budget - load - step - save;
+	if (again + save <= 0 || left <= 0) return 0;
+	return (int)(left / (again + save));
 }
 
 static void pair_said(void) {
@@ -207,14 +244,16 @@ static void pair_said(void) {
 	snprintf(s, sizeof s, " SAVE %.2f LOAD %.2f MS", mean(&B.save), mean(&B.load));
 	say(s, "  save %.3f ms (worst %.3f), load %.3f ms (worst %.3f), a pair frame %.3f ms (worst %.3f)", mean(&B.save),
 		B.save.worst, mean(&B.load), B.load.worst, mean(&B.step), B.step.worst);
+	say(NULL, "  a pair frame with my GBA's picture %.3f ms (worst %.3f), with none (run again) %.3f (worst %.3f), with both %.3f "
+		"(worst %.3f)", mean(&B.step), B.step.worst, mean(&B.resim), B.resim.worst, mean(&B.both), B.both.worst);
 	snprintf(s, sizeof s, " FRAME %.2f MS BACK%u %.1f", mean(&B.step), DEPTH, mean(&B.back));
 	say(s, "  a rollback of %u frames %.3f ms (worst %.3f); %u checked: the game's state the same in %u, the whole state (the "
 		"sound's too) in %u", DEPTH, mean(&B.back), B.back.worst, B.checks, B.game, B.agreed);
 	snprintf(s, sizeof s, " GAME THE SAME %u/%u", B.game, B.checks);
 	show(s);
 	double budget = FRAME_MS * (1.0 - HEADROOM);
-	int w = window(budget, mean(&B.load), mean(&B.step), mean(&B.save));
-	int worst = window(budget, B.load.worst, B.step.worst, B.save.worst);
+	int w = window(budget, mean(&B.load), mean(&B.resim), mean(&B.step), mean(&B.save));
+	int worst = window(budget, B.load.worst, B.resim.worst, B.step.worst, B.save.worst);
 	snprintf(s, sizeof s, "WINDOW %d (WORST %d)", w, worst);
 	say(s, "a tick's budget %.1f ms (%.0f%% of a frame kept for the rest): a window of %d frames at the means, %d at the worst",
 		budget, HEADROOM * 100, w, worst);
@@ -245,6 +284,8 @@ static void pair_close(void) {
 	memset(&B.load, 0, sizeof B.load);
 	memset(&B.step, 0, sizeof B.step);
 	memset(&B.back, 0, sizeof B.back);
+	memset(&B.resim, 0, sizeof B.resim);
+	memset(&B.both, 0, sizeof B.both);
 	B.checks = B.agreed = B.game = 0;
 }
 
@@ -255,10 +296,11 @@ static bool pair_begin(void) {
 		say("NEEDS BN5'S ROM", "a NetBattle's pair needs BN5's ROM beside BN6's: the game's core alone");
 		return false;
 	}
-	if (!emu_init(R.data, ROM_SIZE) || !xinstall_bn5()) {
+	if (!emu_init(R.data, ROM_SIZE) || (!xlog_hash() && !xinstall_bn5())) {
 		say(NULL, "BN5's installs refused on the game's core, the pair not measured");
 		return false;
 	}
+	heap_said("BN5's installs made on the game's core");
 	const OnlineLoadout *loadout[2] = { NULL, NULL };
 	B.boot = arena_boot_new(R.data, ROM_SIZE, loadout);
 	if (!B.boot) B.why = "no memory for the pair";
@@ -279,7 +321,9 @@ static void enter(void) {
 static void finish(void) {
 	if (B.why) say(B.why, "stopped: %s", B.why);
 	B.stage = DONE;
-	if (P.headless) P.quit = true;
+	/* (--dev rollbench,arena: the Arena's battle next, on what was measured here) */
+	if (dev.arena) scene_set(&scene_arena);
+	else if (P.headless || dev.quit_end) P.quit = true;
 }
 
 static void update(void) {
@@ -292,11 +336,6 @@ static void update(void) {
 		one_frames(SLICE);
 		if (B.why || B.frame < ONE_FRAMES) return;
 		one_said();
-		if (!CW_ARENA) {
-			say("NO ARENA IN THIS BUILD", "the Arena is not in this build (CW_ARENA): the game's core alone");
-			finish();
-			return;
-		}
 		if (!pair_begin()) finish();
 		return;
 	}
@@ -310,6 +349,7 @@ static void update(void) {
 		arena_boot_free(B.boot);
 		B.boot = NULL;
 		if (!pair_open()) B.why = "no memory for the snapshots";
+		heap_said("the pair and its snapshots made");
 		B.stage = PAIR;
 		return;
 	}

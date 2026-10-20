@@ -282,7 +282,7 @@ static void tray(int x, int y, const NetPassView *v) {
 		if (in) check(wx + 3, y + 37, c);
 		minifont_draw(wx + (in ? 8 : 0), y + 35, word, c, 1);
 	}
-	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_built() ? netpass_complete : netpass_complete_no_ring;
+	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
 	int tx = cx + 2, tw = x + NETPASS_W - 8 - 5 - tx;
 	second_wrapped(line, tx, y + 4, tw, 3, missing ? PET_WHITE : PET_GOLD);
 }

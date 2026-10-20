@@ -140,6 +140,15 @@ What differs from the other builds:
   evenly (`C3D_FRAME_SYNCDRAW`); on the main core, as where the third
   core is refused, it does not, as a frame takes longer than a refresh
   there.
+- **NetBattles** are not offered on the 3DS: a NetBattle runs both
+  players' GBAs on each system, and two GBAs on one ARM11 core take
+  25.8 ms a frame with the picture (20.7 without) against a 60th of a
+  second's 16.7. The Net Square, its cards, the referee's calls of the
+  channel's battles, trades and the week's dive work as elsewhere, and
+  the NetPass says why the ring stays closed. The Arena's code is built
+  (its two cores share one ROM copy, 16 MB of the heap), so `--dev
+  rollbench` and `--dev arena` measure it on the device
+  (docs/ONLINE_ARENA.md, The New 3DS).
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.
@@ -182,7 +191,14 @@ What differs from the other builds:
   CONTINUE on one of its layers; and BN5's ROM taken away: the PET says
   "BN5 not found beside BN6", and a run continued goes on in BN6's tiles.
 - **3dslink** (`/opt/devkitpro/tools/bin/3dslink -a 3DS-ADDRESS FILE.3dsx`,
-  Y in the Homebrew Launcher) sends the build and shows its output here.
+  Y in the Homebrew Launcher) sends the build and shows its output here
+  (`-s`, a line at a time). Arguments follow `--`: `--data-dir
+  sdmc:/3ds/cyberworld-endless/test` keeps a test's files apart (the
+  ROMs are still found in the game's own folder), and `--dev
+  statistics=off,rollbench,arena,arenaboth,arenabusy,arenadelay=1,arenalag=4,quitend`
+  measures the Arena's pair, plays a battle by itself and quits back to
+  the launcher, so one Y covers it. The netloader takes one connection:
+  a probe of its port ends its wait.
 - Luma3DS keeps crash dumps in `sdmc:/luma/dumps/arm11/`: registers at 40
   bytes in, then the code and the stack; `arm-none-eabi-addr2line -f -e
   build/3ds/cyberworld-endless.elf ADDRESS` in the image names the place.

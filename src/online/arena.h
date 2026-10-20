@@ -70,6 +70,11 @@ const ArenaReading *arena_reading(const Arena *a);
  * time (the local link's: twice its one way), for the time sync that runs
  * the leading game a little slower (arena_sync.h) */
 void arena_rtt(Arena *a, uint32_t ms);
+/* --dev arenaboth's player on `side`, by the tick: the Custom screen's
+ * OK (the cursor taken right to it), in the battle charged shots from
+ * where he stands (B held 100 frames, the second GBA 104, let go): a NetBattle that plays
+ * itself, on a device or between browsers */
+uint16_t arena_bot_keys(const Arena *a, unsigned side, uint32_t tick);
 /* --dev arena's rollback tried, before the way in is done (arena_roll.h):
  * `window` frames rolled back every `window`, the game's state checked;
  * and every 60th frame the game's hash said (without the sound's fields),

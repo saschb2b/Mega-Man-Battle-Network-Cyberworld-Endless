@@ -376,7 +376,7 @@ static void facts(SquareFacts *f) {
 	f->fought = b->name;
 	f->won = b->won;
 	f->lost = b->lost;
-	f->arena = square_arena_built();
+	f->arena = square_arena_offered();
 	f->stamp = netpass_has(STAMP_ARENA);
 	f->parade = L.parading;
 	f->battle_on = square_watch_live();

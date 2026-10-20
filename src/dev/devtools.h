@@ -49,6 +49,8 @@ typedef struct {
 	bool rollbench; /* the start is the rollback's measurement: the game's core, then the Arena's pair (src/dev/rollbench.h, issue #128) */
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
 	bool arena_busy; /* arenabusy: --dev arena's second player steps, shoots and OKs the Custom screen by the frame's number alone (the rollback's guesses tried) */
+	bool arena_both; /* arenaboth: its first player a script too, the Custom screen's OK and charged shots; in the Net Square, Lan's Yes to a challenge at once and his keys the same script (a battle that plays itself, arena.h) */
+	bool quit_end;  /* quitend: the game quits once --dev rollbench and --dev arena are done (a run sent to a device, 3dslink's netloader back) */
 	int arena_delay; /* arenadelay=N: its input delay, N frames (1-60), and the delay a Net Square challenge or Yes asks for; 0 its own */
 	int arena_window; /* arenawindow=N: the Arena rolls back N frames at most (0: the delay alone); -1 what a frame costs here affords (arena.h, issue #128) */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
