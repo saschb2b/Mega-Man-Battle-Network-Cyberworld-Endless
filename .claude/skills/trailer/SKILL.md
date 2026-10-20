@@ -24,6 +24,7 @@ theme for the music, BN5's Liberation Missions for the look).
 | Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner) |
 | Which is current | `CURRENT` and `VERSIONS` in `tools/trailers/__init__.py` |
 | The shared kit: capture, `from_shots`, `from_clips`, `shot`, encode, the play poster | `tools/trailer.py` |
+| Online footage: a local server and several headless games at once in its Square, each with its data folder, name and script | `tools/trailer_online.py` (a cut's `online_scenes()` and `footage(keep)`) |
 | The Game Boy Advance's sound: squares, wave, noise, Direct Sound, MP2K's echo | `tools/trailer_music.py` |
 | Helpers for this skill | `scripts/song_habits.py`, `scripts/music_check.py`, `scripts/sheets.py` |
 
@@ -103,6 +104,12 @@ for byte the same: hash `music.wav` of each version before and after.
   and `from_clips(NAME)`. Add your own runs where none shows a moment.
   BN6-only scenes go in `BN6_ONLY`: they run with BN6's ROM alone, as most
   players have it.
+- Several players at once (the Net Square, a trade, a NetBattle, the
+  stands): `tools/trailer_online.py` starts a local server and up to
+  eight Linux builds against it (`build.py linux`, `build.py server`),
+  their scripts by the wall clock, since a visit plays at the clock's
+  pace (0.13.0's `Visit`). A cut that has them gives `footage(keep)`,
+  which the kit calls after `scenes()`.
 - `--footage` captures eight runs at once (each run's environment goes to
   its container, so autopilot and plain runs mix freely). `--keep`
   reuses what is there; delete one scene's folder to retake it.
