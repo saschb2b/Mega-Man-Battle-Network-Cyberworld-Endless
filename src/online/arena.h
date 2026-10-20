@@ -14,6 +14,7 @@
 
 #include "arena_link.h"
 #include "arena_sync.h"   /* (the round trips kept for the delay asked for: arena_pings_*) */
+#include "arena_window.h" /* (the window this system affords, kept for the delay asked for) */
 
 #include "online_snapshot.h"
 

@@ -42,7 +42,6 @@
 #include "arena_pair.h"
 #include "arena_report.h"
 #include "arena_view.h"
-#include "arena_window.h"
 #include "arena_wire.h"
 #include "arena_words.h"
 #include "bn6.h"
