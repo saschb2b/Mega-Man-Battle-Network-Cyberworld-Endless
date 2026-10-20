@@ -19,7 +19,7 @@
 #include "platform.h"
 #include "square_arena.h"
 #include "square_watch.h"
-#include "trade_order.h"
+#include "trade_screen.h"
 #include "square_week.h"
 
 static OnlineSnapshot snapshot;
@@ -47,15 +47,12 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	trace = path && *path ? fopen(path, "w") : NULL;
 	if (path && *path && !trace) fprintf(stderr, "online: cannot write trace %s\n", path);
 	built = online_square_build(seed, player);
-	/* (BN6's order screen in Trade Central's words while he is here) */
-	if (built && !trade_order_words(true)) fprintf(stderr, "online: the order screen keeps BN6's words\n");
 	if (built) fprintf(stderr, "online: square seed=%u hash=%u player=%u\n", seed, online_square_hash(), player);
 	else fprintf(stderr, "online: square could not be built\n");
 	return built;
 }
 
 void online_scene_end(void) {
-	trade_order_words(false);
 	square_arena_end();
 	square_watch_end();
 	if (trace) { fclose(trace); trace = NULL; }
@@ -137,7 +134,8 @@ void online_scene_draw(void) {
 	if (!built || !arrived) return;
 	int x = P.core_x, y = P.core_y;
 	online_labels_draw();
-	/* (the NetPass over it all, START's: online_chat.c) */
+	/* (Trade Central's screens, and the NetPass over it all, START's: online_chat.c) */
+	trade_screen_draw();
 	netpass_screen_draw();
 	if (notice_at && SDL_GetTicks() - notice_at < 4000) {
 		fill_rect(x, y + 112, EMU_W, 28, rgba(9, 24, 42, 240));

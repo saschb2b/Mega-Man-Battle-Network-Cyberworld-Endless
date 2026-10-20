@@ -604,17 +604,26 @@ static void build_font(void) {
 		int cell = ch;
 		if (code < 0) { font_w[ch] = 4; continue; }
 		const uint8_t *g = R.data + FONT_BASE + code * 64;
+		/* (a narrow glyph stands in its 8-pixel cell with blank columns on
+		 * its left, BN6's l, i and ! three: drawn at their advance, those
+		 * read as a gap before it, "Co lone l's" (issue #145); each glyph
+		 * starts one column in, as the round letters do) */
+		int minx = 8;
+		for (int i = 0; i < 64; ++i)
+			for (int k = 0; k < 2; ++k)
+				if ((k ? g[i] >> 4 : g[i] & 15) && 2 * (i % 4) + k < minx) minx = 2 * (i % 4) + k;
+		int shift = minx > 1 && minx < 8 ? minx - 1 : 0;
 		int maxx = 0;
 		for (int half = 0; half < 2; ++half) {
 			for (int py = 0; py < 8; ++py) {
-				for (int x = 0; x < 8; ++x) {
+				for (int x = shift; x < 8; ++x) {
 					uint8_t v = g[half * 32 + py * 4 + x / 2];
 					int ci = (x & 1) ? v >> 4 : v & 15;
 					if (!ci) continue;
 					int y = half * 8 + py - FONT_TOP;
 					if (y < 0 || y >= 16) continue;
-					px[y * 16 * 128 + cell * 16 + x] = ci == 1 ? 0xFFFFFFFFu : 0xFF182040u;
-					if (x + 1 > maxx) maxx = x + 1;
+					px[y * 16 * 128 + cell * 16 + x - shift] = ci == 1 ? 0xFFFFFFFFu : 0xFF182040u;
+					if (x - shift + 1 > maxx) maxx = x - shift + 1;
 				}
 			}
 		}

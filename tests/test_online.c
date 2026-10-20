@@ -18,6 +18,8 @@
 #include "square_plan.h"
 #include "square_week_words.h"
 #include "square_words.h"
+#include "trade_list.h"
+#include "trade_screen_text.h"
 #include "trade_words.h"
 
 char g_data_dir[512];
@@ -283,6 +285,44 @@ static void netpass(void) {
 	assert(!strstr(square_peer_words("Alpha", &card, true), "NetPass") && strstr(square_peer_words("Alpha", &card, false), "just the Square"));
 }
 
+/* a made-up want for the spares list's filter: 1 the even ids, 2 code A */
+static bool meets(int want, TradeChip c) { return want == 0 || (want == 1 && !(c.id & 1)) || (want == 2 && c.code == 0); }
+
+/* Trade Central's spares list (issue #145): spares only (the copies past
+ * the folders'), a board offer's want, BN6's three sorts with their ties,
+ * and the list's words */
+static void spares_list(void) {
+	assert(trade_list_spare(3, 1) == 2 && trade_list_spare(2, 2) == 0 && trade_list_spare(1, 3) == 0 && trade_list_spare(150, 0) == TRADE_COUNT_MOST);
+	/* (Cannon A, its id order 1; AirShot *, 9; a BN5 chip past 319 on its own id; one of none) */
+	TradeRow all[] = {
+		{ { 411, 12 }, 1, 411, 50 }, { { 1, 0 }, 2, 1, 30 }, { { 9, 26 }, 1, 9, 10 }, { { 1, 2 }, 1, 1, 30 }, { { 20, 5 }, 0, 20, 5 },
+		{ { 300, 0 }, 3, 300, 40 },
+	};
+	TradeRow out[8];
+	int n = trade_list_filter(all, 6, -1, meets, out);
+	/* (a row of no spare never listed) */
+	assert(n == 5);
+	for (int i = 0; i < n; ++i) assert(out[i].count > 0 && out[i].chip.id != 20);
+	trade_list_sort(out, n, TRADE_SORT_ID);
+	assert(out[0].chip.id == 1 && out[0].chip.code == 0 && out[1].chip.id == 1 && out[1].chip.code == 2 && out[2].chip.id == 9 && out[3].chip.id == 300 && out[4].chip.id == 411);
+	trade_list_sort(out, n, TRADE_SORT_ABCDE);
+	assert(out[0].chip.id == 9 && out[1].chip.id == 1 && out[1].chip.code == 0 && out[2].chip.code == 2 && out[3].chip.id == 300 && out[4].chip.id == 411);
+	/* (Code: A to Z, then *; A's ties by ID) */
+	trade_list_sort(out, n, TRADE_SORT_CODE);
+	assert(out[0].chip.id == 1 && out[1].chip.id == 300 && out[2].chip.code == 2 && out[3].chip.id == 411 && out[4].chip.code == 26);
+	assert(trade_list_next_key(TRADE_SORT_ID) == TRADE_SORT_ABCDE && trade_list_next_key(TRADE_SORT_CODE) == TRADE_SORT_ID);
+	/* (a want: only the spares that meet it, none where none does) */
+	n = trade_list_filter(all, 6, 1, meets, out);
+	assert(n == 1 && out[0].chip.id == 300);
+	n = trade_list_filter(all, 6, 2, meets, out);
+	assert(n == 2 && out[0].chip.id == 1 && out[1].chip.id == 300);
+	assert(trade_list_filter(all, 6, 3, meets, out) == 0 && trade_list_filter(all, 6, 1, NULL, out) == 0);
+	/* (the screen's words: what is listed, and for whom) */
+	assert(strstr(trade_text_list_note(TRADE_FOR_TAKE, 1, "Alpha", ""), "a Fire chip"));
+	assert(strstr(trade_text_list_note(TRADE_FOR_ANSWER, -1, "Alpha", "Cannon A"), "Alpha offers Cannon A"));
+	assert(!strcmp(trade_text_list_for(TRADE_FOR_POST, NULL), "Trade board") && !strcmp(trade_text_list_for(TRADE_FOR_OFFER, "Beta"), "To Beta"));
+}
+
 /* the week's net (issue #127): WEEK_BOARD read and refused where it is
  * malformed, a post's bytes, the Board's words and its dates */
 static void week(void) {
@@ -316,8 +356,8 @@ static void week(void) {
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
-	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass();
+	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net and the NetPass passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass and Trade Central's spares list passed");
 	return 0;
 }

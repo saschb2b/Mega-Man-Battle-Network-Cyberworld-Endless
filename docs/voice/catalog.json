@@ -1300,42 +1300,78 @@
   "town_words:news_words": {
    "line": 51
   },
+  "trade_screen_text:trade_text_deal": {
+   "line": 45
+  },
+  "trade_screen_text:trade_text_deal_title": {
+   "header": "The chip trade: its heading, the slot beside it, the two cards' labels",
+   "line": 34
+  },
+  "trade_screen_text:trade_text_deal_with": {
+   "line": 36
+  },
+  "trade_screen_text:trade_text_home": {
+   "line": 57
+  },
+  "trade_screen_text:trade_text_key_call_off": {
+   "line": 47
+  },
+  "trade_screen_text:trade_text_list_for": {
+   "line": 12
+  },
+  "trade_screen_text:trade_text_list_note": {
+   "header": "... the note under it: what is listed (every spare, or those that meet `want`, WANT_* of online_board.h, -1 none), or for an answer what `partner` offers (`theirs`, the chip's name and code)",
+   "line": 22
+  },
+  "trade_screen_text:trade_text_list_title.titles": {
+   "line": 8
+  },
+  "trade_screen_text:trade_text_no_deal": {
+   "header": "... its two buttons (the cursor starts on No deal), its keys",
+   "line": 44
+  },
+  "trade_screen_text:trade_text_traded": {
+   "line": 56
+  },
+  "trade_screen_text:trade_text_waiting": {
+   "header": "... waiting on the other's Deal, and done",
+   "line": 50
+  },
+  "trade_words:trade_answered": {
+   "line": 54
+  },
   "trade_words:trade_board_intro": {
    "header": "The clerk on the board: how many offers are up; one offer, whose (`name`), the chip he has and what he wants; the options under it (answer, the next offer) and MegaMan's own (post one, take his down, never mind).",
-   "line": 119
+   "line": 103
   },
   "trade_words:trade_board_leave": {
-   "line": 136
+   "line": 120
   },
   "trade_words:trade_board_mine": {
-   "line": 134
+   "line": 118
   },
   "trade_words:trade_board_offer": {
-   "line": 126
+   "line": 110
   },
   "trade_words:trade_board_options": {
-   "line": 132
+   "line": 116
   },
-  "trade_words:trade_board_review": {
-   "header": "MegaMan as a Navi took the offer he posted: who, and what for what.",
-   "line": 166
+  "trade_words:trade_board_taken": {
+   "line": 60
   },
   "trade_words:trade_bye": {
    "line": 16
   },
-  "trade_words:trade_deal_question": {
-   "line": 62
-  },
   "trade_words:trade_diving": {
    "header": "... and to a Navi on the week's dive: no trades till it ends.",
-   "line": 164
+   "line": 140
   },
   "trade_words:trade_done": {
-   "line": 64
+   "line": 66
   },
   "trade_words:trade_heard": {
-   "header": "MegaMan as it goes: an offer come in, both chips to say yes to (the question, talk_ask's), a deal made, a trade off.",
-   "line": 50
+   "header": "MegaMan as it goes: an offer come in; an answer to his, or his board offer taken (the chip trade's screen after it, trade_screen.h); a deal made, after its cards swapped; a trade off.",
+   "line": 48
   },
   "trade_words:trade_hello": {
    "header": "The clerk, nothing under way: who he is, and his options (B: bye).",
@@ -1345,11 +1381,12 @@
    "line": 12
   },
   "trade_words:trade_no_spares": {
-   "line": 30
+   "header": "... MegaMan without a spare (the spares list's chips, trade_screen.h).",
+   "line": 28
   },
   "trade_words:trade_no_stamp": {
    "header": "... and to a NetPass without the Trade stamp (netpass.h).",
-   "line": 26
+   "line": 24
   },
   "trade_words:trade_none_here": {
    "line": 20
@@ -1359,94 +1396,53 @@
    "line": 22
   },
   "trade_words:trade_off": {
-   "line": 70
+   "line": 72
   },
   "trade_words:trade_offer_options": {
    "line": 7
   },
   "trade_words:trade_offered": {
    "header": "... an offer to MegaMan: who and what, and the options.",
-   "line": 38
+   "line": 36
   },
   "trade_words:trade_options": {
    "line": 6
   },
-  "trade_words:trade_order_after": {
-   "line": 84
-  },
-  "trade_words:trade_order_all": {
-   "line": 86
-  },
-  "trade_words:trade_order_back": {
-   "line": 80
-  },
-  "trade_words:trade_order_leave": {
-   "line": 90
-  },
-  "trade_words:trade_order_offer": {
-   "line": 92
-  },
-  "trade_words:trade_order_once": {
-   "line": 88
-  },
-  "trade_words:trade_order_prompt": {
-   "header": "BN6's order screen as Trade Central's picker (trade_order.c): its prompt, the way back, the offer readied; MegaMan's question on leaving it (BN6's Yes and No follow); the clerk's question and MegaMan's word, each before the chip's name in quotes (its line break theirs).",
-   "line": 78
-  },
-  "trade_words:trade_order_ready": {
-   "line": 82
-  },
-  "trade_words:trade_order_said": {
-   "line": 94
-  },
-  "trade_words:trade_pick": {
-   "header": "... the chip MegaMan offers, on BN6's order screen after this.",
-   "line": 24
-  },
   "trade_words:trade_post_down": {
-   "line": 160
-  },
-  "trade_words:trade_post_pick": {
-   "header": "... posting one: the chip, then the want; it's up; taken down.",
-   "line": 150
+   "line": 136
   },
   "trade_words:trade_post_want": {
-   "line": 152
+   "header": "... posting one: the want for the chip picked; it's up; taken down.",
+   "line": 128
   },
   "trade_words:trade_posted": {
-   "line": 154
-  },
-  "trade_words:trade_review": {
-   "line": 56
+   "line": 130
   },
   "trade_words:trade_sent": {
-   "line": 32
+   "line": 30
   },
   "trade_words:trade_settled": {
    "header": "At home, the swap given to the run.",
-   "line": 72
+   "line": 74
   },
   "trade_words:trade_take_none": {
-   "line": 144
-  },
-  "trade_words:trade_take_pick": {
-   "header": "... answering one: the order screen's word (the want), none of MegaMan's spares meeting it.",
-   "line": 138
+   "header": "... answering one: none of MegaMan's spares meeting its want.",
+   "line": 122
   },
   "trade_words:trade_traded": {
    "header": "... one trade a visit: MegaMan has his, to take home first.",
-   "line": 162
+   "line": 138
   },
   "trade_words:trade_wait_options": {
    "line": 8
   },
   "trade_words:trade_waiting": {
    "header": "... waiting on the other player, and the options.",
-   "line": 44
+   "line": 42
   },
   "trade_words:trade_want_options": {
    "comment": "(the list a post's want is picked from)",
-   "line": 104
+   "line": 88
   },
   "trade_words:trade_who": {
    "header": "... whom to trade with, a page of names.",
@@ -1454,7 +1450,7 @@
   },
   "trade_words:wants": {
    "comment": "---- the board ----",
-   "line": 98
+   "line": 82
   },
   "xchips_text:xchips_text_desc": {
    "header": "Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)",
@@ -1810,11 +1806,20 @@
    "speaker": "Bystander",
    "stem": "stands_words"
   },
+  "src/online/trade_screen_text.c": {
+   "comment": "",
+   "domain": "Trade Central",
+   "kind": "screen",
+   "lines": 17,
+   "shows": [],
+   "speaker": "Screen",
+   "stem": "trade_screen_text"
+  },
   "src/online/trade_words.c": {
    "comment": "",
    "domain": "Trade Central",
    "kind": "speech",
-   "lines": 69,
+   "lines": 56,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "trade_words"
@@ -1968,7 +1973,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1883,
+  "boxes": 1868,
   "domains": {
    "Arena": {
     "files": [
@@ -2200,11 +2205,12 @@
    },
    "Trade Central": {
     "files": [
+     "src/online/trade_screen_text.c",
      "src/online/trade_words.c"
     ],
-    "flagged": 9,
-    "lines": 69,
-    "speech": 51
+    "flagged": 7,
+    "lines": 73,
+    "speech": 38
    },
    "Where the nets meet": {
     "files": [
@@ -2215,12 +2221,12 @@
     "speech": 7
    }
   },
-  "flagged": 119,
+  "flagged": 117,
   "flags": {
    "beats": 4,
    "box-words": 4,
-   "button": 5,
-   "colon": 33,
+   "button": 3,
+   "colon": 31,
    "line-long": 15,
    "long-speech": 51,
    "pages": 14,
@@ -2290,7 +2296,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 670,
+    "boxes": 666,
     "dots_per_box": 0.22,
     "end_ask": 0.05,
     "end_bang": 0.54,
@@ -2303,14 +2309,14 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 168",
+    "stutters": "1 box in 166",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 157,
-    "dots_per_box": 0.06,
+    "boxes": 150,
+    "dots_per_box": 0.07,
     "end_ask": 0.05,
     "end_bang": 0.92,
     "end_dots": 0.01,
@@ -2345,7 +2351,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1462,
+  "lines": 1466,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2480,7 +2486,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 670,
+    "boxes": 666,
     "dots_per_box": 0.22,
     "end_ask": 0.05,
     "end_bang": 0.54,
@@ -2493,14 +2499,14 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 168",
+    "stutters": "1 box in 166",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
     "bangs_per_box": 0.0,
     "bn6": "Mr.Prog",
-    "boxes": 157,
-    "dots_per_box": 0.06,
+    "boxes": 150,
+    "dots_per_box": 0.07,
     "end_ask": 0.05,
     "end_bang": 0.92,
     "end_dots": 0.01,
@@ -2592,7 +2598,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1103
+  "speech": 1090
  },
  "version": 1,
  "conversations": [
@@ -2863,43 +2869,41 @@
   {"container":"trade_words:trade_who","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_who","line":18,"lines":["trade_words:trade_who:0"],"speakers":["Mr.Prog"],"title":"Trade who","when":"... whom to trade with, a page of names."},
   {"container":"trade_words:trade_none_here","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_none_here","line":20,"lines":["trade_words:trade_none_here:0"],"speakers":["Mr.Prog"],"title":"Trade none here","when":""},
   {"container":"trade_words:trade_none_stamped","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_none_stamped","line":22,"lines":["trade_words:trade_none_stamped:0"],"speakers":["Mr.Prog"],"title":"Trade none stamped","when":"... no other Navi here with the Trade stamp on his NetPass"},
-  {"container":"trade_words:trade_pick","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_pick","line":24,"lines":["trade_words:trade_pick:0"],"speakers":["Mr.Prog"],"title":"Trade pick","when":"... the chip MegaMan offers, on BN6's order screen after this."},
-  {"container":"trade_words:trade_no_stamp","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_no_stamp","line":27,"lines":["trade_words:trade_no_stamp:0"],"speakers":["Mr.Prog"],"title":"Trade no stamp","when":"... and to a NetPass without the Trade stamp (netpass.h)."},
-  {"container":"trade_words:trade_no_spares","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_no_spares","line":30,"lines":["trade_words:trade_no_spares:0"],"speakers":["Mr.Prog"],"title":"Trade no spares","when":""},
-  {"container":"trade_words:trade_sent","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_sent","line":34,"lines":["trade_words:trade_sent:0"],"speakers":["Mr.Prog"],"title":"Trade sent","when":""},
-  {"container":"trade_words:trade_offered","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_offered","line":40,"lines":["trade_words:trade_offered:0"],"speakers":["Mr.Prog"],"title":"Trade offered","when":"... an offer to MegaMan: who and what, and the options."},
-  {"container":"trade_words:trade_waiting","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_waiting","line":46,"lines":["trade_words:trade_waiting:0"],"speakers":["Mr.Prog"],"title":"Trade waiting","when":"... waiting on the other player, and the options."},
-  {"container":"trade_words:trade_heard","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_heard","line":52,"lines":["trade_words:trade_heard:0"],"speakers":["MegaMan"],"title":"MegaMan as it goes","when":"MegaMan as it goes: an offer come in, both chips to say yes to (the question, talk_ask's), a deal made, a trade off."},
-  {"container":"trade_words:trade_review","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_review","line":58,"lines":["trade_words:trade_review:0"],"speakers":["MegaMan"],"title":"Trade review","when":""},
-  {"container":"trade_words:trade_deal_question","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_deal_question","line":62,"lines":["trade_words:trade_deal_question:0"],"speakers":["MegaMan"],"title":"Trade deal question","when":""},
-  {"container":"trade_words:trade_done","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_done","line":66,"lines":["trade_words:trade_done:0"],"speakers":["MegaMan"],"title":"Trade done","when":""},
-  {"container":"trade_words:trade_off","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_off","line":70,"lines":["trade_words:trade_off:0"],"speakers":["MegaMan"],"title":"Trade off","when":""},
-  {"container":"trade_words:trade_settled","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_settled","line":74,"lines":["trade_words:trade_settled:0"],"speakers":["MegaMan"],"title":"At home, the swap given to the run","when":"At home, the swap given to the run."},
-  {"container":"trade_words:trade_order_prompt","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_prompt","line":78,"lines":["trade_words:trade_order_prompt:0"],"speakers":["Mr.Prog"],"title":"BN6's order screen as Trade Central's picker","when":"BN6's order screen as Trade Central's picker (trade_order.c): its prompt, the way back, the offer readied; MegaMan's question on leaving it (BN6's Yes and No follow); the clerk's question and MegaMan's word, each before the chip's name in quotes (its line break theirs)."},
-  {"container":"trade_words:trade_order_back","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_back","line":80,"lines":["trade_words:trade_order_back:0"],"speakers":["Mr.Prog"],"title":"Trade order back","when":""},
-  {"container":"trade_words:trade_order_ready","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_ready","line":82,"lines":["trade_words:trade_order_ready:0"],"speakers":["Mr.Prog"],"title":"Trade order ready","when":""},
-  {"container":"trade_words:trade_order_after","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_after","line":84,"lines":["trade_words:trade_order_after:0"],"speakers":["Mr.Prog"],"title":"Trade order after","when":""},
-  {"container":"trade_words:trade_order_all","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_all","line":86,"lines":["trade_words:trade_order_all:0"],"speakers":["Mr.Prog"],"title":"Trade order all","when":""},
-  {"container":"trade_words:trade_order_once","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_once","line":88,"lines":["trade_words:trade_order_once:0"],"speakers":["Mr.Prog"],"title":"Trade order once","when":""},
-  {"container":"trade_words:trade_order_leave","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_leave","line":90,"lines":["trade_words:trade_order_leave:0"],"speakers":["MegaMan"],"title":"Trade order leave","when":""},
-  {"container":"trade_words:trade_order_offer","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_offer","line":92,"lines":["trade_words:trade_order_offer:0"],"speakers":["Mr.Prog"],"title":"Trade order offer","when":""},
-  {"container":"trade_words:trade_order_said","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_order_said","line":94,"lines":["trade_words:trade_order_said:0"],"speakers":["MegaMan"],"title":"Trade order said","when":""},
-  {"container":"trade_words:wants","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:wants","line":99,"lines":["trade_words:wants:1","trade_words:wants:2","trade_words:wants:3","trade_words:wants:4","trade_words:wants:5","trade_words:wants:6","trade_words:wants:7","trade_words:wants:8","trade_words:wants:9"],"speakers":["MegaMan"],"title":"The board","when":"---- the board ----"},
-  {"container":"trade_words:trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_want_options","line":105,"lines":["trade_words:trade_want_options:1","trade_words:trade_want_options:2","trade_words:trade_want_options:3","trade_words:trade_want_options:4","trade_words:trade_want_options:5","trade_words:trade_want_options:6","trade_words:trade_want_options:7","trade_words:trade_want_options:8","trade_words:trade_want_options:9"],"speakers":["MegaMan"],"title":"Trade want options","when":"(the list a post's want is picked from)"},
-  {"container":"trade_words:trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_intro","line":121,"lines":["trade_words:trade_board_intro:0","trade_words:trade_board_intro:1"],"speakers":["Mr.Prog"],"title":"The clerk on the board","when":"The clerk on the board: how many offers are up; one offer, whose (`name`), the chip he has and what he wants; the options under it (answer, the next offer) and MegaMan's own (post one, take his down, never mind)."},
-  {"container":"trade_words:trade_board_offer","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_offer","line":128,"lines":["trade_words:trade_board_offer:0"],"speakers":["Mr.Prog"],"title":"Trade board offer","when":""},
-  {"container":"trade_words:trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_options","line":132,"lines":["trade_words:trade_board_options:0","trade_words:trade_board_options:1"],"speakers":["MegaMan"],"title":"Trade board options","when":""},
-  {"container":"trade_words:trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_mine","line":134,"lines":["trade_words:trade_board_mine:0","trade_words:trade_board_mine:1"],"speakers":["MegaMan"],"title":"Trade board mine","when":""},
-  {"container":"trade_words:trade_board_leave","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_leave","line":136,"lines":["trade_words:trade_board_leave:0"],"speakers":["MegaMan"],"title":"Trade board leave","when":""},
-  {"container":"trade_words:trade_take_pick","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_take_pick","line":140,"lines":["trade_words:trade_take_pick:0"],"speakers":["Mr.Prog"],"title":"Trade take pick","when":"... answering one: the order screen's word (the want), none of MegaMan's spares meeting it."},
-  {"container":"trade_words:trade_take_none","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_take_none","line":146,"lines":["trade_words:trade_take_none:0"],"speakers":["Mr.Prog"],"title":"Trade take none","when":""},
-  {"container":"trade_words:trade_post_pick","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_pick","line":150,"lines":["trade_words:trade_post_pick:0"],"speakers":["Mr.Prog"],"title":"Trade post pick","when":"... posting one: the chip, then the want; it's up; taken down."},
-  {"container":"trade_words:trade_post_want","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_want","line":152,"lines":["trade_words:trade_post_want:0"],"speakers":["Mr.Prog"],"title":"Trade post want","when":""},
-  {"container":"trade_words:trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_posted","line":156,"lines":["trade_words:trade_posted:0"],"speakers":["Mr.Prog"],"title":"Trade posted","when":""},
-  {"container":"trade_words:trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_down","line":160,"lines":["trade_words:trade_post_down:0"],"speakers":["Mr.Prog"],"title":"Trade post down","when":""},
-  {"container":"trade_words:trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_traded","line":162,"lines":["trade_words:trade_traded:0"],"speakers":["Mr.Prog"],"title":"Trade traded","when":"... one trade a visit: MegaMan has his, to take home first."},
-  {"container":"trade_words:trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_diving","line":164,"lines":["trade_words:trade_diving:0"],"speakers":["Mr.Prog"],"title":"Trade diving","when":"... and to a Navi on the week's dive: no trades till it ends."},
-  {"container":"trade_words:trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_review","line":168,"lines":["trade_words:trade_board_review:0"],"speakers":["MegaMan"],"title":"MegaMan as a Navi took the offer he posted","when":"MegaMan as a Navi took the offer he posted: who, and what for what."},
+  {"container":"trade_words:trade_no_stamp","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_no_stamp","line":25,"lines":["trade_words:trade_no_stamp:0"],"speakers":["Mr.Prog"],"title":"Trade no stamp","when":"... and to a NetPass without the Trade stamp (netpass.h)."},
+  {"container":"trade_words:trade_no_spares","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_no_spares","line":28,"lines":["trade_words:trade_no_spares:0"],"speakers":["Mr.Prog"],"title":"Trade no spares","when":"... MegaMan without a spare (the spares list's chips, trade_screen.h)."},
+  {"container":"trade_words:trade_sent","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_sent","line":32,"lines":["trade_words:trade_sent:0"],"speakers":["Mr.Prog"],"title":"Trade sent","when":""},
+  {"container":"trade_words:trade_offered","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_offered","line":38,"lines":["trade_words:trade_offered:0"],"speakers":["Mr.Prog"],"title":"Trade offered","when":"... an offer to MegaMan: who and what, and the options."},
+  {"container":"trade_words:trade_waiting","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_waiting","line":44,"lines":["trade_words:trade_waiting:0"],"speakers":["Mr.Prog"],"title":"Trade waiting","when":"... waiting on the other player, and the options."},
+  {"container":"trade_words:trade_heard","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_heard","line":50,"lines":["trade_words:trade_heard:0"],"speakers":["MegaMan"],"title":"MegaMan as it goes","when":"MegaMan as it goes: an offer come in; an answer to his, or his board offer taken (the chip trade's screen after it, trade_screen.h); a deal made, after its cards swapped; a trade off."},
+  {"container":"trade_words:trade_answered","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_answered","line":56,"lines":["trade_words:trade_answered:0"],"speakers":["MegaMan"],"title":"Trade answered","when":""},
+  {"container":"trade_words:trade_board_taken","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_taken","line":62,"lines":["trade_words:trade_board_taken:0"],"speakers":["MegaMan"],"title":"Trade board taken","when":""},
+  {"container":"trade_words:trade_done","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_done","line":68,"lines":["trade_words:trade_done:0"],"speakers":["MegaMan"],"title":"Trade done","when":""},
+  {"container":"trade_words:trade_off","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_off","line":72,"lines":["trade_words:trade_off:0"],"speakers":["MegaMan"],"title":"Trade off","when":""},
+  {"container":"trade_words:trade_settled","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_settled","line":76,"lines":["trade_words:trade_settled:0"],"speakers":["MegaMan"],"title":"At home, the swap given to the run","when":"At home, the swap given to the run."},
+  {"container":"trade_words:wants","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:wants","line":83,"lines":["trade_words:wants:1","trade_words:wants:2","trade_words:wants:3","trade_words:wants:4","trade_words:wants:5","trade_words:wants:6","trade_words:wants:7","trade_words:wants:8","trade_words:wants:9"],"speakers":["MegaMan"],"title":"The board","when":"---- the board ----"},
+  {"container":"trade_words:trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_want_options","line":89,"lines":["trade_words:trade_want_options:1","trade_words:trade_want_options:2","trade_words:trade_want_options:3","trade_words:trade_want_options:4","trade_words:trade_want_options:5","trade_words:trade_want_options:6","trade_words:trade_want_options:7","trade_words:trade_want_options:8","trade_words:trade_want_options:9"],"speakers":["MegaMan"],"title":"Trade want options","when":"(the list a post's want is picked from)"},
+  {"container":"trade_words:trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_intro","line":105,"lines":["trade_words:trade_board_intro:0","trade_words:trade_board_intro:1"],"speakers":["Mr.Prog"],"title":"The clerk on the board","when":"The clerk on the board: how many offers are up; one offer, whose (`name`), the chip he has and what he wants; the options under it (answer, the next offer) and MegaMan's own (post one, take his down, never mind)."},
+  {"container":"trade_words:trade_board_offer","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_offer","line":112,"lines":["trade_words:trade_board_offer:0"],"speakers":["Mr.Prog"],"title":"Trade board offer","when":""},
+  {"container":"trade_words:trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_options","line":116,"lines":["trade_words:trade_board_options:0","trade_words:trade_board_options:1"],"speakers":["MegaMan"],"title":"Trade board options","when":""},
+  {"container":"trade_words:trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_mine","line":118,"lines":["trade_words:trade_board_mine:0","trade_words:trade_board_mine:1"],"speakers":["MegaMan"],"title":"Trade board mine","when":""},
+  {"container":"trade_words:trade_board_leave","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_board_leave","line":120,"lines":["trade_words:trade_board_leave:0"],"speakers":["MegaMan"],"title":"Trade board leave","when":""},
+  {"container":"trade_words:trade_take_none","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_take_none","line":124,"lines":["trade_words:trade_take_none:0"],"speakers":["Mr.Prog"],"title":"Trade take none","when":"... answering one: none of MegaMan's spares meeting its want."},
+  {"container":"trade_words:trade_post_want","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_want","line":128,"lines":["trade_words:trade_post_want:0"],"speakers":["Mr.Prog"],"title":"Trade post want","when":"... posting one: the want for the chip picked; it's up; taken down."},
+  {"container":"trade_words:trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_posted","line":132,"lines":["trade_words:trade_posted:0"],"speakers":["Mr.Prog"],"title":"Trade posted","when":""},
+  {"container":"trade_words:trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_post_down","line":136,"lines":["trade_words:trade_post_down:0"],"speakers":["Mr.Prog"],"title":"Trade post down","when":""},
+  {"container":"trade_words:trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_traded","line":138,"lines":["trade_words:trade_traded:0"],"speakers":["Mr.Prog"],"title":"Trade traded","when":"... one trade a visit: MegaMan has his, to take home first."},
+  {"container":"trade_words:trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_diving","line":140,"lines":["trade_words:trade_diving:0"],"speakers":["Mr.Prog"],"title":"Trade diving","when":"... and to a Navi on the week's dive: no trades till it ends."},
+  {"container":"trade_screen_text:trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_title.titles","line":8,"lines":["trade_screen_text:trade_text_list_title.titles:0","trade_screen_text:trade_text_list_title.titles:1","trade_screen_text:trade_text_list_title.titles:2","trade_screen_text:trade_text_list_title.titles:3"],"speakers":["Screen"],"title":"Trade text list title: titles","when":""},
+  {"container":"trade_screen_text:trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_for","line":14,"lines":["trade_screen_text:trade_text_list_for:0","trade_screen_text:trade_text_list_for:1"],"speakers":["Screen"],"title":"Trade text list for","when":""},
+  {"container":"trade_screen_text:trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_note","line":24,"lines":["trade_screen_text:trade_text_list_note:0","trade_screen_text:trade_text_list_note:1","trade_screen_text:trade_text_list_note:2"],"speakers":["Screen"],"title":"Trade text list note","when":"... the note under it: what is listed (every spare, or those that meet `want`, WANT_* of online_board.h, -1 none), or for an answer what `partner` offers (`theirs`, the chip's name and code)"},
+  {"container":"trade_screen_text:trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_title","line":34,"lines":["trade_screen_text:trade_text_deal_title:0"],"speakers":["Screen"],"title":"The chip trade","when":"The chip trade: its heading, the slot beside it, the two cards' labels"},
+  {"container":"trade_screen_text:trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_with","line":38,"lines":["trade_screen_text:trade_text_deal_with:0"],"speakers":["Screen"],"title":"Trade text deal with","when":""},
+  {"container":"trade_screen_text:trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_no_deal","line":44,"lines":["trade_screen_text:trade_text_no_deal:0"],"speakers":["Screen"],"title":"Trade text no deal","when":"... its two buttons (the cursor starts on No deal), its keys"},
+  {"container":"trade_screen_text:trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal","line":45,"lines":["trade_screen_text:trade_text_deal:0"],"speakers":["Screen"],"title":"Trade text deal","when":""},
+  {"container":"trade_screen_text:trade_text_key_call_off","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_key_call_off","line":47,"lines":["trade_screen_text:trade_text_key_call_off:0"],"speakers":["Screen"],"title":"Trade text key call off","when":""},
+  {"container":"trade_screen_text:trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_waiting","line":52,"lines":["trade_screen_text:trade_text_waiting:0"],"speakers":["Screen"],"title":"Trade text waiting","when":"... waiting on the other's Deal, and done"},
+  {"container":"trade_screen_text:trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_traded","line":56,"lines":["trade_screen_text:trade_text_traded:0"],"speakers":["Screen"],"title":"Trade text traded","when":""},
+  {"container":"trade_screen_text:trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_home","line":57,"lines":["trade_screen_text:trade_text_home:0"],"speakers":["Screen"],"title":"Trade text home","when":""},
   {"container":"arena_words:arena_sent_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_sent_words","line":9,"lines":["arena_words:arena_sent_words:0"],"speakers":["MegaMan"],"title":"A challenge sent to `name`","when":"A challenge sent to `name`; the answer No, or the battle gone before it began"},
   {"container":"arena_words:arena_declined_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_declined_words","line":13,"lines":["arena_words:arena_declined_words:0"],"speakers":["MegaMan"],"title":"Arena declined words","when":""},
   {"container":"arena_words:arena_gone_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_gone_words","line":15,"lines":["arena_words:arena_gone_words:0"],"speakers":["MegaMan"],"title":"Arena gone words","when":""},
@@ -4244,6 +4248,23 @@
   {"boxes":[{"pages":[[">NetBattle now!","{name} vs {name}"]],"speaker":"Narration","text":">NetBattle now!\n{name} vs {name}"}],"container":"stands_board_words","domain":"Arena","file":"src/online/stands_words.c","flags":[],"fragment":true,"id":"stands_words:stands_board_words:0","kind":"speech","line":57,"placeholders":[{"name":"name","spec":"%s"},{"name":"name","spec":"%s"}],"speaker":"Narration","speakers":["Narration"],"text":">NetBattle now!\n{name} vs {name}","text_hash":"9518490b2628"},
   {"boxes":[{"pages":[[">{name} {hp} HP,","{name} {hp} HP."]],"speaker":"Narration","text":">{name} {hp} HP,\n{name} {hp} HP."}],"container":"stands_board_words","continues":true,"domain":"Arena","file":"src/online/stands_words.c","flags":[],"id":"stands_words:stands_board_words:1","kind":"speech","line":59,"placeholders":[{"name":"name","spec":"%s"},{"name":"hp","spec":"%u"},{"name":"name","spec":"%s"},{"name":"hp","spec":"%u"}],"speaker":"Narration","speakers":["Narration"],"text":"|>{name} {hp} HP,\n{name} {hp} HP.","text_hash":"c95025d6447d"},
   {"boxes":[{"pages":[[">{name} beat","{name}!","{cheers} cheers."]],"speaker":"Narration","text":">{name} beat\n{name}!\n{cheers} cheers."}],"container":"stands_board_words","domain":"Arena","file":"src/online/stands_words.c","flags":[],"id":"stands_words:stands_board_words:2","kind":"speech","line":64,"note":"(a box of its own after the battle on's)","placeholders":[{"name":"name","spec":"%s"},{"name":"name","spec":"%s"},{"name":"cheers","spec":"%u"}],"speaker":"Narration","speakers":["Narration"],"text":">{name} beat\n{name}!\n{cheers} cheers.","text_hash":"05b83fd01cba"},
+  {"boxes":[{"pages":[["Offer a chip"]],"speaker":"Screen","text":"Offer a chip"}],"container":"trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_title.titles:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Offer a chip","text_hash":"c94fb33483c0"},
+  {"boxes":[{"pages":[["Offer one back"]],"speaker":"Screen","text":"Offer one back"}],"container":"trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_title.titles:1","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Offer one back","text_hash":"c7325b83d33c"},
+  {"boxes":[{"pages":[["Answer an offer"]],"speaker":"Screen","text":"Answer an offer"}],"container":"trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_title.titles:2","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Answer an offer","text_hash":"5b33b303b3c0"},
+  {"boxes":[{"pages":[["Post an offer"]],"speaker":"Screen","text":"Post an offer"}],"container":"trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_title.titles:3","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Post an offer","text_hash":"ded882b2150f"},
+  {"boxes":[{"pages":[["Trade board"]],"speaker":"Screen","text":"Trade board"}],"container":"trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_for:0","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Trade board","text_hash":"e69de031b802"},
+  {"boxes":[{"pages":[["To {partner}"]],"speaker":"Screen","text":"To {partner}"}],"container":"trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_for:1","kind":"screen","line":15,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"To {partner}","text_hash":"268dbe2b2edf"},
+  {"boxes":[{"pages":[["{partner} offers","{theirs}"]],"speaker":"Screen","text":"{partner} offers {theirs}"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:0","kind":"screen","line":24,"placeholders":[{"name":"partner","spec":"%s"},{"name":"theirs","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{partner} offers {theirs}","text_hash":"aa2ded745d09"},
+  {"boxes":[{"pages":[["Spares that fit:","{trade_want}"]],"speaker":"Screen","text":"Spares that fit: {trade_want}"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:1","kind":"screen","line":25,"placeholders":[{"name":"trade_want","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Spares that fit: {trade_want}","text_hash":"dfb5767e0147"},
+  {"boxes":[{"pages":[["Spares: the copies","your folders don't","hold"]],"speaker":"Screen","text":"Spares: the copies your folders don't hold"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:2","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"Spares: the copies your folders don't hold","text_hash":"d067c65b7fdd"},
+  {"boxes":[{"pages":[["Chip trade"]],"speaker":"Screen","text":"Chip trade"}],"container":"trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_title:0","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"Chip trade","text_hash":"f78edf56bf5d"},
+  {"boxes":[{"pages":[["With {partner}"]],"speaker":"Screen","text":"With {partner}"}],"container":"trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_with:0","kind":"screen","line":38,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"With {partner}","text_hash":"bdccbae2c456"},
+  {"boxes":[{"pages":[["No deal"]],"speaker":"Screen","text":"No deal"}],"container":"trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_no_deal:0","kind":"screen","line":44,"speaker":"Screen","speakers":["Screen"],"text":"No deal","text_hash":"af8502d2fabd"},
+  {"boxes":[{"pages":[["Deal!"]],"speaker":"Screen","text":"Deal!"}],"container":"trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal:0","kind":"screen","line":45,"speaker":"Screen","speakers":["Screen"],"text":"Deal!","text_hash":"8636d76f5a37"},
+  {"boxes":[{"pages":[["CALL IT OFF"]],"speaker":"Screen","text":"CALL IT OFF"}],"container":"trade_text_key_call_off","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_key_call_off:0","kind":"screen","line":47,"speaker":"Screen","speakers":["Screen"],"text":"CALL IT OFF","text_hash":"cf9a3c5bf2e1"},
+  {"boxes":[{"pages":[["Waiting on","{partner}..."]],"speaker":"Screen","text":"Waiting on {partner}..."}],"container":"trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_waiting:0","kind":"screen","line":52,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Waiting on {partner}...","text_hash":"33a74eaddafa"},
+  {"boxes":[{"pages":[["Traded!"]],"speaker":"Screen","text":"Traded!"}],"container":"trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_traded:0","kind":"screen","line":56,"speaker":"Screen","speakers":["Screen"],"text":"Traded!","text_hash":"7ce0af01c7e6"},
+  {"boxes":[{"pages":[["Yours once you're","home"]],"speaker":"Screen","text":"Yours once you're home"}],"container":"trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_home:0","kind":"screen","line":57,"speaker":"Screen","speakers":["Screen"],"text":"Yours once you're home","text_hash":"4055fa7172ad"},
   {"boxes":[{"pages":[["Offer a chip"]],"speaker":"MegaMan","text":"Offer a chip"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Offer a chip","text_hash":"c94fb33483c0"},
   {"boxes":[{"pages":[["Trade board"]],"speaker":"MegaMan","text":"Trade board"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Trade board","text_hash":"e69de031b802"},
   {"boxes":[{"pages":[["How it works"]],"speaker":"MegaMan","text":"How it works"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:2","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"How it works","text_hash":"1dd6a17cb403"},
@@ -4257,62 +4278,49 @@
   {"boxes":[{"pages":[["WHO'LL YOU TRADE","WITH?"]],"speaker":"Mr.Prog","text":"WHO'LL YOU TRADE\nWITH?"}],"container":"trade_who","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_who:0","kind":"speech","line":18,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHO'LL YOU TRADE\nWITH?","text_hash":"5d6effaee74b"},
   {"boxes":[{"flags":[{"at":"NAVIS HERE RIGHT NOW!","code":"line-long"}],"pages":[["HMM... NO OTHER","NAVIS HERE RIGHT","NOW!"]],"speaker":"Mr.Prog","text":"HMM... NO OTHER\nNAVIS HERE RIGHT NOW!"}],"container":"trade_none_here","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_none_here:0","kind":"speech","line":20,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... NO OTHER\nNAVIS HERE RIGHT NOW!","text_hash":"a47417a8c06b"},
   {"boxes":[{"pages":[["HMM... NO NAVI HERE","HAS A TRADE STAMP","RIGHT NOW!"]],"speaker":"Mr.Prog","text":"HMM... NO NAVI HERE\nHAS A TRADE STAMP\nRIGHT NOW!"}],"container":"trade_none_stamped","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_none_stamped:0","kind":"speech","line":22,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... NO NAVI HERE\nHAS A TRADE STAMP\nRIGHT NOW!","text_hash":"25f75fb02287"},
-  {"boxes":[{"pages":[["PICK THE CHIP YOU'LL","OFFER! SPARES ONLY!"]],"speaker":"Mr.Prog","text":"PICK THE CHIP YOU'LL\nOFFER! SPARES ONLY!"}],"container":"trade_pick","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_pick:0","kind":"speech","line":24,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"PICK THE CHIP YOU'LL\nOFFER! SPARES ONLY!","text_hash":"453b1ed78464"},
-  {"boxes":[{"pages":[["WELCOME TO","TRADE CENTRAL!"]],"speaker":"Mr.Prog","text":"WELCOME TO\nTRADE CENTRAL!"},{"pages":[["HMM... NO TRADE","STAMP ON YOUR","NETPASS!"]],"speaker":"Mr.Prog","text":"HMM... NO TRADE\nSTAMP ON YOUR\nNETPASS!"},{"pages":[["SORRY! I CAN'T SWAP","CHIPS WITHOUT ONE!"]],"speaker":"Mr.Prog","text":"SORRY! I CAN'T SWAP\nCHIPS WITHOUT ONE!"}],"container":"trade_no_stamp","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_no_stamp:0","kind":"speech","line":27,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO\nTRADE CENTRAL!|HMM... NO TRADE\nSTAMP ON YOUR\nNETPASS!|SORRY! I CAN'T SWAP\nCHIPS WITHOUT ONE!","text_hash":"93bd8da474f5"},
-  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"OH NO! NO SPARE CHIPS!","code":"line-long"},{"at":"3 sentences","code":"beats"}],"pages":[["OH NO! NO SPARE","CHIPS!"],["YOUR FOLDERS HOLD","THEM ALL!"]],"speaker":"Mr.Prog","text":"OH NO! NO SPARE CHIPS!\nYOUR FOLDERS HOLD\nTHEM ALL!"}],"container":"trade_no_spares","domain":"Trade Central","file":"src/online/trade_words.c","flags":["beats","line-long","pages"],"id":"trade_words:trade_no_spares:0","kind":"speech","line":30,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH NO! NO SPARE CHIPS!\nYOUR FOLDERS HOLD\nTHEM ALL!","text_hash":"9ce6f52a5ecb"},
-  {"boxes":[{"pages":[["SENT! LET'S SEE WHAT","{name} SAYS!"]],"speaker":"Mr.Prog","text":"SENT! LET'S SEE WHAT\n{name} SAYS!"}],"container":"trade_sent","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_sent:0","kind":"speech","line":34,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SENT! LET'S SEE WHAT\n{name} SAYS!","text_hash":"e211cf7303c9"},
-  {"boxes":[{"pages":[["{name} OFFERS","{chip}!"]],"speaker":"Mr.Prog","text":"{name} OFFERS\n{chip}!"}],"container":"trade_offered","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_offered:0","kind":"speech","line":40,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{name} OFFERS\n{chip}!","text_hash":"61118d61b010"},
-  {"boxes":[{"pages":[["STILL WAITING ON","{name}!"]],"speaker":"Mr.Prog","text":"STILL WAITING ON\n{name}!"}],"container":"trade_waiting","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_waiting:0","kind":"speech","line":46,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"STILL WAITING ON\n{name}!","text_hash":"23c59b6c8138"},
-  {"boxes":[{"pages":[["Lan! {name} offers","us {chip}!"]],"speaker":"MegaMan","text":"Lan! {name} offers\nus {chip}!"},{"pages":[["Let's answer at","Trade Central!"]],"speaker":"MegaMan","text":"Let's answer at\nTrade Central!"}],"container":"trade_heard","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_heard:0","kind":"speech","line":52,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} offers\nus {chip}!|Let's answer at\nTrade Central!","text_hash":"cf3beb5b960d"},
-  {"boxes":[{"pages":[["{name} gives us","{theirs}..."]],"speaker":"MegaMan","text":"{name} gives us\n{theirs}..."},{"pages":[["for our {mine}!"]],"speaker":"MegaMan","text":"for our {mine}!"}],"container":"trade_review","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_review:0","kind":"speech","line":58,"placeholders":[{"name":"name","spec":"%s"},{"name":"theirs","spec":"%s"},{"name":"mine","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name} gives us\n{theirs}...|for our {mine}!","text_hash":"748d20f504b6"},
-  {"boxes":[{"pages":[["Deal,Lan?"]],"speaker":"MegaMan","text":"Deal,Lan?\n"}],"container":"trade_deal_question","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_deal_question:0","kind":"speech","line":62,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Deal,Lan?\n","text_hash":"9f8654c15eac"},
-  {"boxes":[{"flags":[{"at":"is ours once we're home!","code":"line-long"}],"pages":[["Deal! {chip}","is ours once we're","home!"]],"speaker":"MegaMan","text":"Deal! {chip}\nis ours once we're home!"}],"container":"trade_done","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_done:0","kind":"speech","line":66,"placeholders":[{"name":"chip","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Deal! {chip}\nis ours once we're home!","text_hash":"fc6c13d41f8d"},
-  {"boxes":[{"pages":[["Aw... The trade's","off."]],"speaker":"MegaMan","text":"Aw... The trade's off."}],"container":"trade_off","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_off:0","kind":"speech","line":70,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aw... The trade's off.","text_hash":"984d26812c54"},
-  {"boxes":[{"pages":[["Lan! {got} is in","our Pack now!"]],"speaker":"MegaMan","text":"Lan! {got} is in\nour Pack now!"},{"pages":[["{gave} went to its","new home."]],"speaker":"MegaMan","text":"{gave} went to its\nnew home."}],"container":"trade_settled","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_settled:0","kind":"speech","line":74,"placeholders":[{"name":"got","spec":"%s"},{"name":"gave","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {got} is in\nour Pack now!|{gave} went to its\nnew home.","text_hash":"ffaa2ca69d83"},
-  {"boxes":[{"flags":[{"at":":","code":"colon"},{"at":"B BUTTON","code":"button"}],"pages":[["WHICH CHIP WILL YOU","OFFER?","B BUTTON:BACK"]],"speaker":"Mr.Prog","text":"WHICH CHIP WILL YOU\nOFFER?\nB BUTTON:BACK"}],"container":"trade_order_prompt","domain":"Trade Central","file":"src/online/trade_words.c","flags":["button","colon"],"fragment":true,"id":"trade_words:trade_order_prompt:0","kind":"speech","line":78,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHICH CHIP WILL YOU\nOFFER?\nB BUTTON:BACK","text_hash":"1ad69403fc46"},
-  {"boxes":[{"pages":[["BACK TO THE DESK!"]],"speaker":"Mr.Prog","text":"BACK TO THE DESK!"}],"container":"trade_order_back","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_order_back:0","kind":"speech","line":80,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"BACK TO THE DESK!","text_hash":"a5da3c08415a"},
-  {"boxes":[{"pages":[["GOT IT! YOUR OFFER","IS ON ITS WAY!"]],"speaker":"Mr.Prog","text":"GOT IT! YOUR OFFER\nIS ON ITS WAY!"}],"container":"trade_order_ready","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_order_ready:0","kind":"speech","line":82,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"GOT IT! YOUR OFFER\nIS ON ITS WAY!","text_hash":"52e53f0bcb74"},
-  {"boxes":[{"flags":[{"at":":","code":"colon"},{"at":"B BUTTON","code":"button"}],"pages":[["THAT'S YOUR OFFER!","B BUTTON:BACK"]],"speaker":"Mr.Prog","text":"THAT'S YOUR OFFER!\nB BUTTON:BACK"}],"container":"trade_order_after","domain":"Trade Central","file":"src/online/trade_words.c","flags":["button","colon"],"fragment":true,"id":"trade_words:trade_order_after:0","kind":"speech","line":84,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S YOUR OFFER!\nB BUTTON:BACK","text_hash":"2f1c3c0c8edd"},
-  {"boxes":[{"pages":[["THAT'S ALL YOUR","SPARES!"]],"speaker":"Mr.Prog","text":"THAT'S ALL YOUR\nSPARES!"}],"container":"trade_order_all","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_order_all:0","kind":"speech","line":86,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S ALL YOUR\nSPARES!","text_hash":"928a80d8a961"},
-  {"boxes":[{"pages":[["THAT ONE'S PICKED","ALREADY!"]],"speaker":"Mr.Prog","text":"THAT ONE'S PICKED\nALREADY!"}],"container":"trade_order_once","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_order_once:0","kind":"speech","line":88,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT ONE'S PICKED\nALREADY!","text_hash":"04cf211ad279"},
-  {"boxes":[{"pages":[["Back to the desk,","Lan?"]],"speaker":"MegaMan","text":"Back to the desk,\nLan?"}],"container":"trade_order_leave","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_order_leave:0","kind":"speech","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Back to the desk,\nLan?","text_hash":"1713a2e1ab1c"},
-  {"boxes":[{"pages":[["YOU'LL OFFER"]],"speaker":"Mr.Prog","text":"YOU'LL OFFER\n"}],"container":"trade_order_offer","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_order_offer:0","kind":"speech","line":92,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU'LL OFFER\n","text_hash":"d41bbb2cd4c0"},
-  {"boxes":[{"pages":[["We'll offer"]],"speaker":"MegaMan","text":"We'll offer\n"}],"container":"trade_order_said","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_order_said:0","kind":"speech","line":94,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We'll offer\n","text_hash":"b5b27cb03ff6"},
-  {"boxes":[{"pages":[["a Fire chip"]],"speaker":"MegaMan","text":"a Fire chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:1","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Fire chip","text_hash":"d9208846d46a"},
-  {"boxes":[{"pages":[["an Aqua chip"]],"speaker":"MegaMan","text":"an Aqua chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:2","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"an Aqua chip","text_hash":"cf4c89a4774c"},
-  {"boxes":[{"pages":[["an Elec chip"]],"speaker":"MegaMan","text":"an Elec chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:3","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"an Elec chip","text_hash":"88b569fc95b1"},
-  {"boxes":[{"pages":[["a Wood chip"]],"speaker":"MegaMan","text":"a Wood chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:4","kind":"speech","line":99,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Wood chip","text_hash":"5e10b84b149b"},
-  {"boxes":[{"pages":[["a Sword chip"]],"speaker":"MegaMan","text":"a Sword chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:5","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Sword chip","text_hash":"02ea77da84b4"},
-  {"boxes":[{"pages":[["a Wind chip"]],"speaker":"MegaMan","text":"a Wind chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:6","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Wind chip","text_hash":"59096af832ba"},
-  {"boxes":[{"pages":[["a Break chip"]],"speaker":"MegaMan","text":"a Break chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:7","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Break chip","text_hash":"e42ada61e94a"},
-  {"boxes":[{"pages":[["a Cursor chip"]],"speaker":"MegaMan","text":"a Cursor chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:8","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Cursor chip","text_hash":"c7abf1efe0a9"},
-  {"boxes":[{"pages":[["a Mega chip"]],"speaker":"MegaMan","text":"a Mega chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:9","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Mega chip","text_hash":"dbb8c09453dc"},
-  {"boxes":[{"pages":[["Fire chip"]],"speaker":"MegaMan","text":"Fire chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:1","kind":"screen","line":105,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Fire chip","text_hash":"8a3da88d2e85"},
-  {"boxes":[{"pages":[["Aqua chip"]],"speaker":"MegaMan","text":"Aqua chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:2","kind":"screen","line":105,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aqua chip","text_hash":"bae35d9a15dd"},
-  {"boxes":[{"pages":[["Elec chip"]],"speaker":"MegaMan","text":"Elec chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:3","kind":"screen","line":105,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Elec chip","text_hash":"38f8c7b0100e"},
-  {"boxes":[{"pages":[["Wood chip"]],"speaker":"MegaMan","text":"Wood chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:4","kind":"screen","line":105,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Wood chip","text_hash":"88ea7c33d40d"},
-  {"boxes":[{"pages":[["Sword chip"]],"speaker":"MegaMan","text":"Sword chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:5","kind":"screen","line":106,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sword chip","text_hash":"c0ee1855de68"},
-  {"boxes":[{"pages":[["Wind chip"]],"speaker":"MegaMan","text":"Wind chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:6","kind":"screen","line":106,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Wind chip","text_hash":"ced71a25dd6d"},
-  {"boxes":[{"pages":[["Break chip"]],"speaker":"MegaMan","text":"Break chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:7","kind":"screen","line":106,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Break chip","text_hash":"1f9fc181243b"},
-  {"boxes":[{"pages":[["Cursor chip"]],"speaker":"MegaMan","text":"Cursor chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:8","kind":"screen","line":106,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Cursor chip","text_hash":"a51e899e157d"},
-  {"boxes":[{"pages":[["Mega chip"]],"speaker":"MegaMan","text":"Mega chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:9","kind":"screen","line":106,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Mega chip","text_hash":"9256e0364b2a"},
-  {"boxes":[{"pages":[["THE TRADE BOARD!","NO OFFERS UP YET!"]],"speaker":"Mr.Prog","text":"THE TRADE BOARD!\nNO OFFERS UP YET!"}],"container":"trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_intro:0","kind":"speech","line":121,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE TRADE BOARD!\nNO OFFERS UP YET!","text_hash":"e933a7d1e597"},
-  {"boxes":[{"flags":[{"at":"{offers} OFFER{offers} UP!","code":"line-long"}],"pages":[["THE TRADE BOARD!","{offers}","OFFER{offers} UP!"]],"speaker":"Mr.Prog","text":"THE TRADE BOARD!\n{offers} OFFER{offers} UP!"}],"container":"trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_board_intro:1","kind":"speech","line":122,"placeholders":[{"name":"offers","spec":"%d"},{"name":"offers","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE TRADE BOARD!\n{offers} OFFER{offers} UP!","text_hash":"1c5603c542d2"},
-  {"boxes":[{"pages":[["{name} HAS","{chip}!","WANTS {want_caps}!"]],"speaker":"Mr.Prog","text":"{name} HAS\n{chip}!\nWANTS {want_caps}!"}],"container":"trade_board_offer","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_offer:0","kind":"speech","line":128,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{name} HAS\n{chip}!\nWANTS {want_caps}!","text_hash":"5933b77b9899"},
-  {"boxes":[{"pages":[["Answer it"]],"speaker":"MegaMan","text":"Answer it"}],"container":"trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_options:0","kind":"screen","line":132,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Answer it","text_hash":"465e08237443"},
-  {"boxes":[{"pages":[["Next offer"]],"speaker":"MegaMan","text":"Next offer"}],"container":"trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_options:1","kind":"screen","line":132,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next offer","text_hash":"a28b5c9c6e90"},
-  {"boxes":[{"pages":[["Take mine down"]],"speaker":"MegaMan","text":"Take mine down"}],"container":"trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_mine:0","kind":"speech","line":134,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Take mine down","text_hash":"5a487913038f"},
-  {"boxes":[{"pages":[["Post an offer"]],"speaker":"MegaMan","text":"Post an offer"}],"container":"trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_mine:1","kind":"speech","line":134,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Post an offer","text_hash":"ded882b2150f"},
-  {"boxes":[{"pages":[["Never mind"]],"speaker":"MegaMan","text":"Never mind"}],"container":"trade_board_leave","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_leave:0","kind":"speech","line":136,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Never mind","text_hash":"ddef74aaebba"},
-  {"boxes":[{"pages":[["PICK A SPARE! THEY","WANT {want_caps}!"]],"speaker":"Mr.Prog","text":"PICK A SPARE! THEY\nWANT {want_caps}!"}],"container":"trade_take_pick","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_take_pick:0","kind":"speech","line":140,"placeholders":[{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"PICK A SPARE! THEY\nWANT {want_caps}!","text_hash":"547002c09de1"},
-  {"boxes":[{"flags":[{"at":"HMM... {name} WANTS","code":"line-long"}],"pages":[["HMM... {name}","WANTS","{want_caps}!"]],"speaker":"Mr.Prog","text":"HMM... {name} WANTS\n{want_caps}!"},{"pages":[["NO SPARE OF YOURS","FITS THAT!"]],"speaker":"Mr.Prog","text":"NO SPARE OF YOURS\nFITS THAT!"}],"container":"trade_take_none","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_take_none:0","kind":"speech","line":146,"placeholders":[{"name":"name","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... {name} WANTS\n{want_caps}!|NO SPARE OF YOURS\nFITS THAT!","text_hash":"80100950f92b"},
-  {"boxes":[{"pages":[["PICK THE SPARE TO","PUT UP!"]],"speaker":"Mr.Prog","text":"PICK THE SPARE TO\nPUT UP!"}],"container":"trade_post_pick","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_pick:0","kind":"speech","line":150,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"PICK THE SPARE TO\nPUT UP!","text_hash":"7f7fc01bb9e6"},
-  {"boxes":[{"pages":[["AND WHAT DO YOU","WANT FOR IT?"]],"speaker":"Mr.Prog","text":"AND WHAT DO YOU\nWANT FOR IT?"}],"container":"trade_post_want","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_want:0","kind":"speech","line":152,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AND WHAT DO YOU\nWANT FOR IT?","text_hash":"a587c96b8f9e"},
-  {"boxes":[{"pages":[["IT'S UP! {chip}","FOR {want_caps}!"]],"speaker":"Mr.Prog","text":"IT'S UP! {chip}\nFOR {want_caps}!"}],"container":"trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_posted:0","kind":"speech","line":156,"placeholders":[{"name":"chip","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"IT'S UP! {chip}\nFOR {want_caps}!","text_hash":"1bcc92d1489a"},
-  {"boxes":[{"pages":[["OKAY! YOUR OFFER'S","DOWN!"]],"speaker":"Mr.Prog","text":"OKAY! YOUR OFFER'S\nDOWN!"}],"container":"trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_down:0","kind":"speech","line":160,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OKAY! YOUR OFFER'S\nDOWN!","text_hash":"6d9fa68b31cc"},
-  {"boxes":[{"pages":[["YOU TRADED ALREADY!"]],"speaker":"Mr.Prog","text":"YOU TRADED ALREADY!"},{"pages":[["ONE TRADE A VISIT!","TAKE IT HOME FIRST!"]],"speaker":"Mr.Prog","text":"ONE TRADE A VISIT!\nTAKE IT HOME FIRST!"}],"container":"trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_traded:0","kind":"speech","line":162,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU TRADED ALREADY!|ONE TRADE A VISIT!\nTAKE IT HOME FIRST!","text_hash":"33bb1973a3fc"},
-  {"boxes":[{"pages":[["YOU'RE ON THIS","WEEK'S DIVE!"]],"speaker":"Mr.Prog","text":"YOU'RE ON THIS\nWEEK'S DIVE!"},{"pages":[["DIVERS DON'T TRADE!","SAME NET,SAME","CHIPS FOR ALL!"]],"speaker":"Mr.Prog","text":"DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!"}],"container":"trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_diving:0","kind":"speech","line":164,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU'RE ON THIS\nWEEK'S DIVE!|DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!","text_hash":"0f2468db9d3e"},
-  {"boxes":[{"pages":[["Lan! {name} took","our offer!"]],"speaker":"MegaMan","text":"Lan! {name} took\nour offer!"},{"pages":[["{theirs} for our","{mine}!"]],"speaker":"MegaMan","text":"{theirs} for our\n{mine}!"}],"container":"trade_board_review","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_review:0","kind":"speech","line":168,"placeholders":[{"name":"name","spec":"%s"},{"name":"theirs","spec":"%s"},{"name":"mine","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} took\nour offer!|{theirs} for our\n{mine}!","text_hash":"9c76e4380ea0"},
+  {"boxes":[{"pages":[["WELCOME TO","TRADE CENTRAL!"]],"speaker":"Mr.Prog","text":"WELCOME TO\nTRADE CENTRAL!"},{"pages":[["HMM... NO TRADE","STAMP ON YOUR","NETPASS!"]],"speaker":"Mr.Prog","text":"HMM... NO TRADE\nSTAMP ON YOUR\nNETPASS!"},{"pages":[["SORRY! I CAN'T SWAP","CHIPS WITHOUT ONE!"]],"speaker":"Mr.Prog","text":"SORRY! I CAN'T SWAP\nCHIPS WITHOUT ONE!"}],"container":"trade_no_stamp","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_no_stamp:0","kind":"speech","line":25,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO\nTRADE CENTRAL!|HMM... NO TRADE\nSTAMP ON YOUR\nNETPASS!|SORRY! I CAN'T SWAP\nCHIPS WITHOUT ONE!","text_hash":"93bd8da474f5"},
+  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"OH NO! NO SPARE CHIPS!","code":"line-long"},{"at":"3 sentences","code":"beats"}],"pages":[["OH NO! NO SPARE","CHIPS!"],["YOUR FOLDERS HOLD","THEM ALL!"]],"speaker":"Mr.Prog","text":"OH NO! NO SPARE CHIPS!\nYOUR FOLDERS HOLD\nTHEM ALL!"}],"container":"trade_no_spares","domain":"Trade Central","file":"src/online/trade_words.c","flags":["beats","line-long","pages"],"id":"trade_words:trade_no_spares:0","kind":"speech","line":28,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH NO! NO SPARE CHIPS!\nYOUR FOLDERS HOLD\nTHEM ALL!","text_hash":"9ce6f52a5ecb"},
+  {"boxes":[{"pages":[["SENT! LET'S SEE WHAT","{name} SAYS!"]],"speaker":"Mr.Prog","text":"SENT! LET'S SEE WHAT\n{name} SAYS!"}],"container":"trade_sent","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_sent:0","kind":"speech","line":32,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SENT! LET'S SEE WHAT\n{name} SAYS!","text_hash":"e211cf7303c9"},
+  {"boxes":[{"pages":[["{name} OFFERS","{chip}!"]],"speaker":"Mr.Prog","text":"{name} OFFERS\n{chip}!"}],"container":"trade_offered","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_offered:0","kind":"speech","line":38,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{name} OFFERS\n{chip}!","text_hash":"61118d61b010"},
+  {"boxes":[{"pages":[["STILL WAITING ON","{name}!"]],"speaker":"Mr.Prog","text":"STILL WAITING ON\n{name}!"}],"container":"trade_waiting","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_waiting:0","kind":"speech","line":44,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"STILL WAITING ON\n{name}!","text_hash":"23c59b6c8138"},
+  {"boxes":[{"pages":[["Lan! {name} offers","us {chip}!"]],"speaker":"MegaMan","text":"Lan! {name} offers\nus {chip}!"},{"pages":[["Let's answer at","Trade Central!"]],"speaker":"MegaMan","text":"Let's answer at\nTrade Central!"}],"container":"trade_heard","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_heard:0","kind":"speech","line":50,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} offers\nus {chip}!|Let's answer at\nTrade Central!","text_hash":"cf3beb5b960d"},
+  {"boxes":[{"pages":[["Lan! {name}","answered us!"]],"speaker":"MegaMan","text":"Lan! {name}\nanswered us!"}],"container":"trade_answered","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_answered:0","kind":"speech","line":56,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name}\nanswered us!","text_hash":"63ebb3cd0621"},
+  {"boxes":[{"pages":[["Lan! {name} took","our offer!"]],"speaker":"MegaMan","text":"Lan! {name} took\nour offer!"}],"container":"trade_board_taken","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_taken:0","kind":"speech","line":62,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {name} took\nour offer!","text_hash":"666a9fdc6894"},
+  {"boxes":[{"flags":[{"at":"is ours once we're home!","code":"line-long"}],"pages":[["Deal! {chip}","is ours once we're","home!"]],"speaker":"MegaMan","text":"Deal! {chip}\nis ours once we're home!"}],"container":"trade_done","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_done:0","kind":"speech","line":68,"placeholders":[{"name":"chip","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Deal! {chip}\nis ours once we're home!","text_hash":"fc6c13d41f8d"},
+  {"boxes":[{"pages":[["Aw... The trade's","off."]],"speaker":"MegaMan","text":"Aw... The trade's off."}],"container":"trade_off","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_off:0","kind":"speech","line":72,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aw... The trade's off.","text_hash":"984d26812c54"},
+  {"boxes":[{"pages":[["Lan! {got} is in","our Pack now!"]],"speaker":"MegaMan","text":"Lan! {got} is in\nour Pack now!"},{"pages":[["{gave} went to its","new home."]],"speaker":"MegaMan","text":"{gave} went to its\nnew home."}],"container":"trade_settled","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_settled:0","kind":"speech","line":76,"placeholders":[{"name":"got","spec":"%s"},{"name":"gave","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! {got} is in\nour Pack now!|{gave} went to its\nnew home.","text_hash":"ffaa2ca69d83"},
+  {"boxes":[{"pages":[["a Fire chip"]],"speaker":"MegaMan","text":"a Fire chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:1","kind":"speech","line":83,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Fire chip","text_hash":"d9208846d46a"},
+  {"boxes":[{"pages":[["an Aqua chip"]],"speaker":"MegaMan","text":"an Aqua chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:2","kind":"speech","line":83,"speaker":"MegaMan","speakers":["MegaMan"],"text":"an Aqua chip","text_hash":"cf4c89a4774c"},
+  {"boxes":[{"pages":[["an Elec chip"]],"speaker":"MegaMan","text":"an Elec chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:3","kind":"speech","line":83,"speaker":"MegaMan","speakers":["MegaMan"],"text":"an Elec chip","text_hash":"88b569fc95b1"},
+  {"boxes":[{"pages":[["a Wood chip"]],"speaker":"MegaMan","text":"a Wood chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:4","kind":"speech","line":83,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Wood chip","text_hash":"5e10b84b149b"},
+  {"boxes":[{"pages":[["a Sword chip"]],"speaker":"MegaMan","text":"a Sword chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:5","kind":"speech","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Sword chip","text_hash":"02ea77da84b4"},
+  {"boxes":[{"pages":[["a Wind chip"]],"speaker":"MegaMan","text":"a Wind chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:6","kind":"speech","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Wind chip","text_hash":"59096af832ba"},
+  {"boxes":[{"pages":[["a Break chip"]],"speaker":"MegaMan","text":"a Break chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:7","kind":"speech","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Break chip","text_hash":"e42ada61e94a"},
+  {"boxes":[{"pages":[["a Cursor chip"]],"speaker":"MegaMan","text":"a Cursor chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:8","kind":"speech","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Cursor chip","text_hash":"c7abf1efe0a9"},
+  {"boxes":[{"pages":[["a Mega chip"]],"speaker":"MegaMan","text":"a Mega chip"}],"container":"wants","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:wants:9","kind":"speech","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a Mega chip","text_hash":"dbb8c09453dc"},
+  {"boxes":[{"pages":[["Fire chip"]],"speaker":"MegaMan","text":"Fire chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:1","kind":"screen","line":89,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Fire chip","text_hash":"8a3da88d2e85"},
+  {"boxes":[{"pages":[["Aqua chip"]],"speaker":"MegaMan","text":"Aqua chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:2","kind":"screen","line":89,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aqua chip","text_hash":"bae35d9a15dd"},
+  {"boxes":[{"pages":[["Elec chip"]],"speaker":"MegaMan","text":"Elec chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:3","kind":"screen","line":89,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Elec chip","text_hash":"38f8c7b0100e"},
+  {"boxes":[{"pages":[["Wood chip"]],"speaker":"MegaMan","text":"Wood chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:4","kind":"screen","line":89,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Wood chip","text_hash":"88ea7c33d40d"},
+  {"boxes":[{"pages":[["Sword chip"]],"speaker":"MegaMan","text":"Sword chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:5","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Sword chip","text_hash":"c0ee1855de68"},
+  {"boxes":[{"pages":[["Wind chip"]],"speaker":"MegaMan","text":"Wind chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:6","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Wind chip","text_hash":"ced71a25dd6d"},
+  {"boxes":[{"pages":[["Break chip"]],"speaker":"MegaMan","text":"Break chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:7","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Break chip","text_hash":"1f9fc181243b"},
+  {"boxes":[{"pages":[["Cursor chip"]],"speaker":"MegaMan","text":"Cursor chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:8","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Cursor chip","text_hash":"a51e899e157d"},
+  {"boxes":[{"pages":[["Mega chip"]],"speaker":"MegaMan","text":"Mega chip"}],"container":"trade_want_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_want_options:9","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Mega chip","text_hash":"9256e0364b2a"},
+  {"boxes":[{"pages":[["THE TRADE BOARD!","NO OFFERS UP YET!"]],"speaker":"Mr.Prog","text":"THE TRADE BOARD!\nNO OFFERS UP YET!"}],"container":"trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_intro:0","kind":"speech","line":105,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE TRADE BOARD!\nNO OFFERS UP YET!","text_hash":"e933a7d1e597"},
+  {"boxes":[{"flags":[{"at":"{offers} OFFER{offers} UP!","code":"line-long"}],"pages":[["THE TRADE BOARD!","{offers}","OFFER{offers} UP!"]],"speaker":"Mr.Prog","text":"THE TRADE BOARD!\n{offers} OFFER{offers} UP!"}],"container":"trade_board_intro","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_board_intro:1","kind":"speech","line":106,"placeholders":[{"name":"offers","spec":"%d"},{"name":"offers","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE TRADE BOARD!\n{offers} OFFER{offers} UP!","text_hash":"1c5603c542d2"},
+  {"boxes":[{"pages":[["{name} HAS","{chip}!","WANTS {want_caps}!"]],"speaker":"Mr.Prog","text":"{name} HAS\n{chip}!\nWANTS {want_caps}!"}],"container":"trade_board_offer","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_offer:0","kind":"speech","line":112,"placeholders":[{"name":"name","spec":"%s"},{"name":"chip","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{name} HAS\n{chip}!\nWANTS {want_caps}!","text_hash":"5933b77b9899"},
+  {"boxes":[{"pages":[["Answer it"]],"speaker":"MegaMan","text":"Answer it"}],"container":"trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_options:0","kind":"screen","line":116,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Answer it","text_hash":"465e08237443"},
+  {"boxes":[{"pages":[["Next offer"]],"speaker":"MegaMan","text":"Next offer"}],"container":"trade_board_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_board_options:1","kind":"screen","line":116,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next offer","text_hash":"a28b5c9c6e90"},
+  {"boxes":[{"pages":[["Take mine down"]],"speaker":"MegaMan","text":"Take mine down"}],"container":"trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_mine:0","kind":"speech","line":118,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Take mine down","text_hash":"5a487913038f"},
+  {"boxes":[{"pages":[["Post an offer"]],"speaker":"MegaMan","text":"Post an offer"}],"container":"trade_board_mine","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_mine:1","kind":"speech","line":118,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Post an offer","text_hash":"ded882b2150f"},
+  {"boxes":[{"pages":[["Never mind"]],"speaker":"MegaMan","text":"Never mind"}],"container":"trade_board_leave","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"fragment":true,"id":"trade_words:trade_board_leave:0","kind":"speech","line":120,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Never mind","text_hash":"ddef74aaebba"},
+  {"boxes":[{"flags":[{"at":"HMM... {name} WANTS","code":"line-long"}],"pages":[["HMM... {name}","WANTS","{want_caps}!"]],"speaker":"Mr.Prog","text":"HMM... {name} WANTS\n{want_caps}!"},{"pages":[["NO SPARE OF YOURS","FITS THAT!"]],"speaker":"Mr.Prog","text":"NO SPARE OF YOURS\nFITS THAT!"}],"container":"trade_take_none","domain":"Trade Central","file":"src/online/trade_words.c","flags":["line-long"],"id":"trade_words:trade_take_none:0","kind":"speech","line":124,"placeholders":[{"name":"name","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HMM... {name} WANTS\n{want_caps}!|NO SPARE OF YOURS\nFITS THAT!","text_hash":"80100950f92b"},
+  {"boxes":[{"pages":[["AND WHAT DO YOU","WANT FOR IT?"]],"speaker":"Mr.Prog","text":"AND WHAT DO YOU\nWANT FOR IT?"}],"container":"trade_post_want","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_want:0","kind":"speech","line":128,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AND WHAT DO YOU\nWANT FOR IT?","text_hash":"a587c96b8f9e"},
+  {"boxes":[{"pages":[["IT'S UP! {chip}","FOR {want_caps}!"]],"speaker":"Mr.Prog","text":"IT'S UP! {chip}\nFOR {want_caps}!"}],"container":"trade_posted","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_posted:0","kind":"speech","line":132,"placeholders":[{"name":"chip","spec":"%s"},{"name":"want_caps","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"IT'S UP! {chip}\nFOR {want_caps}!","text_hash":"1bcc92d1489a"},
+  {"boxes":[{"pages":[["OKAY! YOUR OFFER'S","DOWN!"]],"speaker":"Mr.Prog","text":"OKAY! YOUR OFFER'S\nDOWN!"}],"container":"trade_post_down","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_post_down:0","kind":"speech","line":136,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OKAY! YOUR OFFER'S\nDOWN!","text_hash":"6d9fa68b31cc"},
+  {"boxes":[{"pages":[["YOU TRADED ALREADY!"]],"speaker":"Mr.Prog","text":"YOU TRADED ALREADY!"},{"pages":[["ONE TRADE A VISIT!","TAKE IT HOME FIRST!"]],"speaker":"Mr.Prog","text":"ONE TRADE A VISIT!\nTAKE IT HOME FIRST!"}],"container":"trade_traded","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_traded:0","kind":"speech","line":138,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU TRADED ALREADY!|ONE TRADE A VISIT!\nTAKE IT HOME FIRST!","text_hash":"33bb1973a3fc"},
+  {"boxes":[{"pages":[["YOU'RE ON THIS","WEEK'S DIVE!"]],"speaker":"Mr.Prog","text":"YOU'RE ON THIS\nWEEK'S DIVE!"},{"pages":[["DIVERS DON'T TRADE!","SAME NET,SAME","CHIPS FOR ALL!"]],"speaker":"Mr.Prog","text":"DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!"}],"container":"trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_diving:0","kind":"speech","line":140,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU'RE ON THIS\nWEEK'S DIVE!|DIVERS DON'T TRADE!\nSAME NET,SAME\nCHIPS FOR ALL!","text_hash":"0f2468db9d3e"},
   {"boxes":[{"pages":[["UNDO IMPORT"]],"speaker":"Screen","text":"UNDO IMPORT"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_UNDO.0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"UNDO IMPORT","text_hash":"5a5279471f4f"},
   {"boxes":[{"pages":[["AUTO-COPY: ON"]],"speaker":"Screen","text":"AUTO-COPY: ON"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_AUTO.0","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"AUTO-COPY: ON","text_hash":"040bf2c628ce"},
   {"boxes":[{"pages":[["AUTO-COPY: OFF"]],"speaker":"Screen","text":"AUTO-COPY: OFF"}],"container":"saves_label","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_label:caseSAVES_AUTO.1","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"AUTO-COPY: OFF","text_hash":"c03af0833d41"},

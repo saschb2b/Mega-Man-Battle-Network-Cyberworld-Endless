@@ -63,8 +63,7 @@ static SDL_Color label_color(int game, int part) {
 	return game >= 0 && game < 2 ? c[game][part] : other[part];
 }
 
-/* a panel: `fill` inside a 1-pixel `edge`, its corners cut */
-static void panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge) {
+void netpass_panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge) {
 	fill_rect(x + 1, y, w - 2, h, edge);
 	fill_rect(x, y + 1, w, h - 2, edge);
 	fill_rect(x + 1, y + 1, w - 2, h - 2, fill);
@@ -126,8 +125,7 @@ static void star(int x, int y, SDL_Color c, SDL_Color edge) {
 	fill_rects(px, n, c);
 }
 
-/* the screen's ground: the PET's dark blue under a dotted grid */
-static void ground(int x, int y, int w, int h) {
+void netpass_ground(int x, int y, int w, int h) {
 	fill_rect(x, y, w, h, PET_EXIT);
 	SDL_Rect dots[1024];
 	int n = 0;
@@ -170,7 +168,7 @@ static int held_count(const NetPassView *v) {
 
 /* the operator card: the face, Lan and MegaMan, the stamps' bar */
 static void card(int x, int y, const NetPassView *v) {
-	panel(x, y, CARD_W, CARD_H, PET_SLOT, PET_CYAN);
+	netpass_panel(x, y, CARD_W, CARD_H, PET_SLOT, PET_CYAN);
 	fill_rect(x + 2, y + 1, CARD_W - 4, 1, rgba(33, 123, 132, 255));
 	face(x + 5, y + 5, v->into);
 	int cx = x + 51;
@@ -220,7 +218,7 @@ static void seal(int cx, int cy, int r, bool held, int landed) {
 
 static void stamp_cell(int x, int y, int s, const NetPassView *v) {
 	bool held = v->held[s];
-	panel(x, y, CELL_W, CELL_H, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
+	netpass_panel(x, y, CELL_W, CELL_H, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
 	int cx = x + CELL_W / 2;
 	seal(cx, y + 13, 10, held, v->landing == s ? v->landing_t : -1);
 	word(cx, y + 25, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
@@ -270,7 +268,7 @@ static void open_slot(int x, int y, int g, int t) {
 
 /* the tray: each game's slot, in or open, and the PET's line beside them */
 static void tray(int x, int y, const NetPassView *v) {
-	panel(x, y, NETPASS_W - 8, TRAY_H, rgba(8, 41, 62, 255), PET_SLOT_EDGE);
+	netpass_panel(x, y, NETPASS_W - 8, TRAY_H, rgba(8, 41, 62, 255), PET_SLOT_EDGE);
 	int games = netpass_games(), cx = x + 5;
 	const NetPassGame *missing = NULL;
 	for (int g = 0; g < games; ++g, cx += CART_W + 4) {
@@ -298,7 +296,7 @@ void netpass_view_now(NetPassView *v) {
 
 void netpass_draw(int x, int y, const NetPassView *v) {
 	into_memory = v->into;
-	ground(x, y, NETPASS_W, NETPASS_H);
+	netpass_ground(x, y, NETPASS_W, NETPASS_H);
 	header(x, y, v);
 	card(x + CARD_X, y + CARD_Y, v);
 	for (int s = 0; s < STAMP_COUNT; ++s)
@@ -308,13 +306,13 @@ void netpass_draw(int x, int y, const NetPassView *v) {
 
 void netpass_draw_strip(int x, int y, const NetPassView *v) {
 	into_memory = v->into;
-	ground(x, y, NETPASS_W, NETPASS_STRIP_H);
+	netpass_ground(x, y, NETPASS_W, NETPASS_STRIP_H);
 	header(x, y, v);
 	int w = (NETPASS_W - 8 - 3 * 3) / STAMP_COUNT;
 	for (int s = 0; s < STAMP_COUNT; ++s) {
 		int cx = x + 4 + s * (w + 3), cy = y + HEAD_H + 2;
 		bool held = v->held[s];
-		panel(cx, cy, w, NETPASS_STRIP_H - HEAD_H - 4, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
+		netpass_panel(cx, cy, w, NETPASS_STRIP_H - HEAD_H - 4, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
 		seal(cx + w / 2, cy + 11, 8, held, v->landing == s ? v->landing_t : -1);
 		word(cx + w / 2, cy + 22, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
 	}
