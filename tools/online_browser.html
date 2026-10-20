@@ -12,6 +12,7 @@ pre { white-space: pre-wrap; font-size: 12px; }
 <label>Server <input id="endpoint" value="ws://127.0.0.1:8765/presence"></label>
 <label>Name <input id="name" value="Browser" maxlength="16"></label>
 <label>BN6 Gregar USA ROM <input id="rom" type="file" accept=".gba"></label>
+<label>BN5 Team Colonel USA ROM, for the full NetPass (NetBattles, trades, the dive) <input id="bn5" type="file" accept=".gba"></label>
 <button id="start" disabled>Start a run and step onto the gate</button>
 <p id="status" role="status">Loading the game build…</p>
 <canvas id="canvas" width="720" height="480" tabindex="0" aria-label="Game"></canvas>
@@ -36,6 +37,8 @@ startButton.onclick = async () => {
     try {
         Module.FS.mkdir('/rom'); Module.FS.mkdir('/visit');
         Module.FS.writeFile('/rom/bn6.gba', new Uint8Array(await file.arrayBuffer()));
+        const bn5 = document.getElementById('bn5').files[0];
+        if (bn5) Module.FS.writeFile('/rom/bn5.gba', new Uint8Array(await bn5.arrayBuffer()));
         statusLine.textContent = 'In the Net Square once the gate connects. Reload to start another visit.';
         // (a run at home, through the gate's questions onto the gate, the
         // server and name given by --dev: docs/ONLINE.md, Two games at once)

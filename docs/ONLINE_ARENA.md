@@ -37,14 +37,18 @@ alone; without it, what a frame costs here affords: [Rollback](#rollback)),
 `arenabusy` makes the second player step, shoot and OK the Custom screen
 by the frame's number alone (a run that rolls back and one that does not
 hand him the same keys), and `arenahp=N` makes the carried MegaMan's HP N
-(the installer seen in the battle). The battle's end, or A+B+SELECT+START,
-goes back to the title; the log says each step (`arena:` lines).
+(the installer seen in the battle). `arenaboth` makes the first player
+a script too (the Custom screen's OK, then charged shots), so the battle
+plays itself on a device; `quitend` ends the game after it (and after
+`--dev rollbench`, which `--dev rollbench,arena` runs first), for a run
+sent over 3dslink. The battle's end, or A+B+SELECT+START, goes back to
+the title; the log says each step (`arena:` lines).
 
 ## What runs
 
 | Part | File | What it does |
 | --- | --- | --- |
-| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM with BN5's installs, full rules being every NetBattle's ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores |
+| The pair | `src/online/arena_pair.c` | Two cores of the player's ROM with BN5's installs, full rules being every NetBattle's ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores; the picture drawn for the side shown alone (`arena_pair_draw`); on the 3DS one ROM copy for both cores ([The New 3DS](#the-new-3ds)) |
 | The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what goes in each Arena core |
 | The Souls across | `src/online/arena_souls.c` | A Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
 | The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen. No state is kept or committed; it runs in slices behind a "connecting" picture |
@@ -355,9 +359,17 @@ worst under BN6's rules (full rules within a tenth of a millisecond):
   alone, a frame run once its keys have all come; it also asks with that
   window), `--dev arenadelay=N` asks for N frames (in `--dev arena`, its
   delay).
-- Systems: the desktops, Android and iOS build the Arena and its
-  rollback; the 3DS and the browser compile the Arena out (`CW_ARENA`),
-  so neither battles nor rolls back there.
+- Systems: the desktops, Android, iOS and the browser battle and roll
+  back ([In the browser](#in-the-browser), below). The New 3DS builds the
+  Arena (`--dev rollbench` and `--dev arena` run there) but offers no
+  NetBattle and no watching (`CW_ARENA` 0): a pair frame takes half again
+  a 60th of a second there ([The New 3DS](#the-new-3ds)).
+- **The picture** is drawn for the side shown alone (`arena_pair_draw`,
+  mGBA's frame skip for the other core: the game's state the same either
+  way), and a rollback's frames run again draw none but the last; a
+  spectator draws the side he looks at, and while catching up a tick's
+  first frame alone. Here a pair frame took 0.94 ms with both pictures,
+  0.79 with mine and 0.70 with none (rollbench, 20 October 2026).
 
 ### Measured
 
@@ -409,12 +421,130 @@ guess, the window its own):
 No tick past a 60th there either: a rollback of 7 frames fits the Nova's
 tick with room.
 
+### In the browser
+
+The browser build battles since 20 October 2026 (the owner's aim: every
+stamp earnable on every system). Nothing in the Arena needed a thread:
+the pair runs its two cores one run loop at a time as everywhere, the
+way in in slices of the tick, and the battle a tick a frame of the page
+(`emscripten_set_main_loop`, at most two game frames a tick); the
+transport sends the Arena's messages over the browser's WebSocket at
+once and takes them in from its callbacks between frames, the inbox's
+ring as large as the native one's (64 KB, a spectator's keys catching
+up). WebAssembly's memory grows for the cores (each takes mGBA's 32 MB
+ROM copy once a hook patches it). The window comes from the page's own
+frame cost as on every system: the way in's frames 1.15 to 1.19 ms in
+headless Chrome, so 4 frames; a battle's frame about 2.0 to 2.5 ms,
+kept in the page's data folder for the next challenge's ask.
+
+**Measured** (20 October 2026, this machine): a local v9 server (seed
+120), the worktree served on 127.0.0.1 with the developer's ROMs for the
+page (`/.dev/rom.gba`, `/.dev/bn5.gba`), headless Chrome (agent-browser,
+one browser a player, so each page is shown and its frames run), each
+page the browser build from home through the gate with both ROMs, `--dev
+quiet,arenaboth,arenahp=60`: Alpha challenges Beta, Beta says Yes, both
+fight by `arenaboth`'s script (the harness in `.build/`, not committed).
+
+| Pair | Delay | Window (Alpha, Beta) | Rollbacks, deepest | A pair frame | Worst tick | Past a 60th | Over | Hashes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Two browsers | 2 | 4, 4 | 39, 1 deep (Alpha); 0 (Beta) | 2.40, 2.46 ms (worst 4.0) | 7.0, 5.0 ms | 0, 0 | frame 1,731 on both, Alpha's win | 28 agreed, the same on both |
+| A browser (Alpha) against the host build headless (Beta), before the ping fix below | 8 | 5 and 4 (two runs), 8 | 0 | 2.21 and 2.04 ms (browser), 1.37 and 1.49 (native) | 4.0 and 3.37 ms | 0 | frames 1,734 and 1,736 on both, the browser's win | 28 agreed, the same on both, each run |
+| The same, after it | 2 | 3, 7 | 39, 2 deep, 51 frames run again (browser); 0 (native) | 2.76 ms (worst 11.0), 1.66 (6.8) | 11.0, 6.8 ms | 0 | frame 1,730 on both, the browser's win | 28 agreed, the same on both |
+
+Both pairs were made with the same installs' record as a native game's
+(1,913,709 bytes, 132 hooks, `1efe82b0894607e2`), and the two browsers'
+ready was `15974d28b169e19e`. A capture of the browser's picture
+mid-battle against the native game shows the Custom screen and both
+MegaMen charging, the HP 27 then 6 on both sides (`.build/`).
+
+**The page's pings.** The first mixed runs got delay 8: the browser
+asked with 146 and 162 ms of round trips, the native game with 2 or 3.
+Its pings, timed on the page's one thread, take their answer in after
+the frame they came during, and the first one after the arrival spanned
+the Square's building: 193 ms, then 2 to 5 ms each, but one such ping
+among the last eight makes their mean and twice their spread 150 ms for
+16 seconds. A ping whose answer came after a frame of the page longer
+than 50 ms is now left out (`online_transport.c`, the browser's), and
+the same challenge asks with 6 ms: delay 2.
+
+**Watching from a browser** (the same day): two host builds headless
+fought (Alpha challenged, Beta took it, both by `arenaboth`,
+`arenahp=150`, delay 2); a browser tab (Gamma, both ROMs) went to the
+referee and said Yes to "WANNA WATCH?". Its pair agreed with the
+players' ready at the Custom screen (`f6ed42d99ad29baa`); it caught up
+from frame 0, 2,052 frames behind the keys, to 90 behind at frame 2,259,
+showed the battle (a capture: the Custom screen, both MegaMen charging,
+29 HP each), and the battle was over at frame 3,651 on all three, the
+browser's 60 hashes checked against the players' 60.
+
+### The New 3DS
+
+Measured on a New 3DS (20 October 2026, the Homebrew Launcher's
+netloader, `3dslink -s` with `--dev
+statistics=off,rollbench,arena,arenaboth,arenabusy,arenadelay=1,arenalag=4,quitend`,
+a data folder of its own beside the game's, both ROMs on the SD card):
+
+| | The New 3DS | This machine |
+| --- | --- | --- |
+| The game's core alone, from power-on (its thread on the third core, waited for) | 15.98 ms a frame (worst 41.0); save 1.18 ms, load 1.60 | 0.40 ms |
+| The pair's snapshot: save, load | 3.11 ms (worst 7.70), 4.40 ms (worst 5.10) | 0.03, 0.04 ms |
+| A pair frame with my GBA's picture / none / both | 25.79 / 20.71 / 32.55 ms (worst 31.7 / 24.8 / 34.5) | 0.79 / 0.70 / 0.94 ms |
+| A rollback of 8 frames | 200.2 ms (worst 224.2); the game's state the same in 11 of 11 | 5.95 ms |
+| The way in's pair frames | 22.5 ms (worst 65.9) | 0.64 ms |
+| The window a tick holds (means / worst), the Arena's | 0 / 0, 0 | 16 / 9, 9 or 10 |
+| The heap with the pair and ten snapshots made | 62,542 KB in use, 63,867 KB at most of 98,304 (BN6's ROM, BN5's, the game's core with BN5's installs, the pair's shared ROM copy and the snapshots); the linear heap 9,341 KB free of 14,404 | |
+
+Then `--dev arena`'s battle there, playing itself (`arenaboth`), delay 1,
+the local link's lag 4, the window its own (0): over at frame 3,404 with
+56 hashes agreed, a pair frame 29.1 ms (worst 35.2), a tick at worst
+53.9 ms, 3,403 of 3,408 ticks past a 60th: the battle played at about
+34 frames a second.
+
+- **Memory fits.** The two pair cores share one ROM copy on the 3DS
+  (`arena_core_new`): mGBA's 3DS build (FIXED_ROM_BUFFER) maps a core's
+  ROM as it is and patches it in place, and both cores take the same
+  bytes and the same hooks at the same places; a hook put where another
+  core's BKPT already stands takes that hook's original
+  (`hook.c`, `original_of`). The boot core takes the copy first and lets
+  it go before the pair is made. With it the pair and ten snapshots
+  leave about 33 MB of the 96 MB heap free. The record of BN5's
+  installs is kept on the 3DS only for these two dev tools, so a run's
+  heap is spared its 2 MB.
+- **Time does not.** Two GBAs on one ARM11 core at 804 MHz take 20.7 ms
+  a frame with no picture, about 10.4 a core (the game's own core takes
+  11 ms a frame in play, docs/EMULATION.md), and my GBA's picture 5 ms
+  more: past a 60th of a second before any rollback, so the window is 0
+  and even the delay alone runs the battle at about 34 frames a second,
+  slowing the other player with it (his game waits for my keys). A
+  smaller window, the delay alone, one picture or none, and the Square's
+  core held (it already is, and costs no time) were each measured or
+  weighed: none brings a frame under 16.7 ms.
+- **What is left: the two GBAs on two CPU cores.** The New 3DS's third
+  core, where the game's own core runs and which is idle while the
+  Square's core is held, could run one GBA while the main core runs the
+  other. mGBA's cable cannot be split so as it stands: the second GBA's
+  next cable event is scheduled from the cycles it has left
+  (`_GBASIOLockstepNodeProcessEvents`, `useCycles`), and both read the
+  cable's transfer state directly, so two threads leave the cores'
+  timing (their next events, in the state and the hash) as their
+  interleaving fell, and the pair's hash apart from a desktop's. It
+  needs a cable driver of our own whose scheduling is the same however
+  the threads interleave (the first GBA's cycles posted in chunks, the
+  cable's writes held back until the partner reaches them), a new pair
+  hash on every system and a protocol version. Even then a frame is at
+  the edge: 10.4 ms a core and 5 for the picture on one of them, 15.4 of
+  the tick's 16.7 before the threads meet and the frame is shown.
+
+The 3DS so builds the Arena and offers neither NetBattles nor watching;
+its NetPass holds the Arena stamp with BN5's ROM, as the server's rule
+has it, and says "Every game in! No NetBattles on this PET."
+(docs/ONLINE.md, The NetPass).
+
 ### The measurement: `--dev rollbench`
 
 `--dev rollbench` (`src/dev/rollbench.c`, DEVTOOLS.md) runs on the
 player's ROM wherever the game runs and says what a rollback costs there:
-the game's core alone from power-on (every build; the 3DS and the browser,
-which compile the Arena out, stop there and say so), then the pair through
+the game's core alone from power-on, then the pair through
 the way in to a Practice NetBattle under BN6's rules and 600 frames of
 scripted keys on both sides (the Custom screen's OK, then steps, shots and
 the buster from a number of the frame), then again under full rules where
@@ -538,8 +668,9 @@ MegaMan with no folder that holds chips, or one the last check refuses
 (a NaviCust past what a message holds), does not go: MegaMan says so and
 no challenge or acceptance is sent. The server refuses a challenge or an
 accept from a game without the full set, and a challenge aimed at one
-(NOTICE 28). The 3DS and the browser build, which compile the Arena out
-(`CW_ARENA`), never offer Battle and decline a challenge.
+(NOTICE 28). The New 3DS, which builds the Arena but cannot run its
+pair in time (`CW_ARENA` 0), never offers Battle and declines a
+challenge.
 
 ### Rematches and the referee
 
@@ -964,8 +1095,8 @@ The owner's decision on issue #128 (19 October 2026): a NetBattle in the
 Square is watched both ways. A game with the NetPass's Arena stamp that
 can build the battle's pair **watches it for real**, the same two cores
 run from the players' keys a second or two behind them; every game, one
-that cannot watch among them (the 3DS, the browser, a game without the
-Arena stamp, a machine too slow to catch up), gets **the report**: each
+that cannot watch among them (the New 3DS, a game without the Arena
+stamp, a machine too slow to catch up), gets **the report**: each
 MegaMan's HP, the last chip each used and the winner, from the referee by
 the ring and on the Board.
 
@@ -1125,7 +1256,8 @@ hooks, `1efe82b0894607e2`) and their ready (`7eaaa466008086ab`), caught
 up at frame 1,592, the battle over at frame 3,080 on all three, 51
 hashes checked against the players' 51.
 
-The browser build, where the Arena is compiled out (`CW_ARENA` 0):
+The browser build before 20 October 2026, when the Arena was compiled
+out there (`CW_ARENA` 0):
 `tools/online_browser.html`'s probe served beside a local v7 server
 allowing its origin, in headless Chrome (agent-browser), its MegaMan put
 before the referee and A pressed through his pages while two host builds
@@ -1178,6 +1310,14 @@ the cable's first's reports came, and no question.
   catch up (the refusal and the referee leaving that battle out are in
   the code, not seen); the report's chips past one a hand.
 - Battle (not Practice) and its chip forfeit, the pack
-  (it stays home), and any platform but the desktops: the 3DS and the
-  browser build compile the Arena out (`CW_ARENA`), Android and iOS build
-  it but are untried.
+  (it stays home), and Android and iOS, which build the Arena but are
+  untried. The browser battles (seen against another browser and a native
+  game through a local server); the New 3DS builds the Arena but cannot
+  run its pair in time ([The New 3DS](#the-new-3ds)): two CPU cores for
+  the two GBAs is the way left, and needs a cable driver of our own.
+- The browser: a NetBattle seen against another browser and against a
+  native game through a local server, in headless Chrome; not yet in a
+  browser with a screen, on a phone's browser, against the deployed
+  server, or with a tab sent to the background mid-battle (its frames
+  stop there, and the other game waits as for a phone sent to the
+  background).
