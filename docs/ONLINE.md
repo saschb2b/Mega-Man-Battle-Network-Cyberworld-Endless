@@ -1268,7 +1268,11 @@ server:
   to Alpha by a ROM-free client (Gamma), Alpha's link closed with the offer
   open: Gamma told the trade was off at once and never saw Alpha leave;
   Alpha's resume brought the server's word on it, "Aw... The trade's
-  off." Found on the way and fixed: a stall's backlog of positions, let
+  off." The browser build (`tools/online_browser.html` in headless
+  Chrome, its gate at the relay, the server allowing the page's origin):
+  a five-second close showed the wait and took the held place back (the
+  same session, "resume"); a 45-second one came home after its 30
+  seconds. Found on the way and fixed: a stall's backlog of positions, let
   through at once, tripped the server's rate limit (now a bucket of their
   own, and fewer sent while nothing is heard); the new bucket refilled only
   between two positions, so a NetBattle's keys drained it (refilled by
@@ -1315,9 +1319,8 @@ are in the history before 433865a8):
 ## Not yet
 
 - **A dropped link, what is left** (issue #153): played on the host
-  build only, through a local relay; the browser's tries (its WebSocket
-  from the frame's poll), Android, iOS, Windows and the 3DS are built and
-  untried, and so is a real network's hiccup (a Wi-Fi handover, a phone
+  build and in the browser, through a local relay; Android, iOS, Windows
+  and the 3DS are built and untried, and so is a real network's hiccup (a Wi-Fi handover, a phone
   sent to the background past 15 seconds). A trade committed as the link
   dropped is held by the server's tests, not played between two games. A
   game that gives up (past 30 seconds, or B) cannot say goodbye: the
