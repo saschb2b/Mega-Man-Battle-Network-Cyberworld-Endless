@@ -84,11 +84,11 @@ how to verify it.
 | ROM, code or data not told | 355 | 399 |
 | RAM (variables, structures) | 98 | 47 |
 | I/O registers | 3 | 0 |
-| Fields of structures | 144 | 33 |
+| Fields of structures | 145 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 83 | 14 |
 | Constants, sizes and counts | 300 | 74 |
-| All | 1511 | 748 |
+| All | 1512 | 748 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
@@ -96,7 +96,7 @@ how to verify it.
 | Shops and traders | 37 | 0 |
 | NaviCust | 18 | 1 |
 | Chips and folders | 284 | 221 |
-| Battle | 437 | 262 |
+| Battle | 438 | 262 |
 | Text and fonts | 28 | 2 |
 | Sound | 10 | 2 |
 | Maps and the overworld | 119 | 20 |

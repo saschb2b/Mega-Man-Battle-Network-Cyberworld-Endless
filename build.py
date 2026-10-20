@@ -55,6 +55,9 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 (docs/DEVTOOLS.md)
   python3 build.py pacing       every act's battles and guardians against
                                 their bands, in .build/pacing.txt
+  python3 build.py economy [RUNS]  what a run hands out by act (chips, good
+                                chips, codes, zenny, Mystery Data) against
+                                their bands, in .build/economy.txt
   python3 build.py xdiff [SPEC ...] [--mutations]
                                 the differential (issue #82): a family moved
                                 into BN6's engine against its own game's
@@ -2400,7 +2403,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -2508,6 +2511,14 @@ def main():
         os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
                         '--pacing', '/src/.build/pacing.txt', mounts=[(rom_dir, '/rom:ro')]))
+    if a.action == 'economy':
+        # (local only: the ROM; what a run hands out by act against its bands, docs/ECONOMY.md; RUNS after the action)
+        build('host')
+        rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+        os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
+        runs = next((r for r in a.rest if r.isdigit()), '300')
+        sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                        '--economy', f'/src/.build/economy.txt:{runs}', mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'town':
         build('host')
         sys.exit(town(*a.rest[:1]))

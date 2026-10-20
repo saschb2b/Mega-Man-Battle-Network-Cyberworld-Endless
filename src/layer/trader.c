@@ -38,11 +38,14 @@ static int pool_for(TraderKind kind, int depth) {
 	return p < 4 ? POOL_COMMON : p < 9 ? POOL_WIDE : p < 14 ? POOL_RARE : POOL_STRONG;
 }
 
-/* the prizes of the pool whose entry is at ROM offset `from` in the
- * folder's codes */
-static void fit_codes(uint32_t from);
-/* ... and with the older net's catalogue beside them, half of each
- * rarity's, at FREE_TRADER_LIST; false where none of it was written */
+/* The prizes of the pool whose entry is at ROM offset `from` with the
+ * older net's catalogue beside them, half of each rarity's, at
+ * FREE_TRADER_LIST; false where none of it was written. Every prize
+ * keeps its record's codes: BN6's own pick (bn6f sub_804BF18, Gregar
+ * 0x0804CCDC, its weights 0xC0 and 0x40 at 0x0804BE2C) gives a code the
+ * pack holds none of three times in four, which spreads a run's codes
+ * as BN6 spreads them (docs/ECONOMY.md: the folder's codes, which the
+ * traders gave until issue #154, made every run's finds alike) */
 static bool both_nets(uint32_t from);
 
 void trader_install(int group, int number, TraderKind kind, int depth) {
@@ -55,7 +58,6 @@ void trader_install(int group, int number, TraderKind kind, int depth) {
 	/* (on the older net's areas and in the deep, half its prizes the older
 	 * net's: docs/MULTIROM.md, One net) */
 	if (loot_older_share > 0 && both_nets(from)) put32(pool + 4, FREE_TRADER_LIST);
-	else fit_codes(from);
 	emu_write(BN6_TRADER_POOLS + 12u * LAYER_ENTRY, pool, sizeof pool);
 	uint8_t kinds[8] = { 0 };
 	put32(kinds, key);
@@ -69,9 +71,8 @@ void trader_install(int group, int number, TraderKind kind, int depth) {
 }
 
 void trader_home(void) {
-	/* (AsterLand's own pool, its first entry, as BN6 has it, its prizes in
-	 * the folder's codes as a layer's are) */
-	fit_codes((BN6_TRADER_POOLS & 0x1FFFFFF) + 12u * POOL_COMMON);
+	/* (AsterLand's own pool, its first entry, as BN6 has it, its codes
+	 * BN6's pick's as a layer's are) */
 	static const uint8_t modes[2] = { 0, 64 };
 	emu_write(BN6_TRADER_MODES, modes, sizeof modes);
 }
@@ -79,24 +80,20 @@ void trader_home(void) {
 #define REC 6   /* a list's record: the chip (u16), four codes ending 0xFF */
 #define LIST_MAX ((int)((FREE_TRADER_LIST_END - FREE_TRADER_LIST) / REC) - 1)
 
-/* Chip `id`'s record in a list, in the folder's code where it has one,
- * else its record's codes (`fit`: the code loot_folder_code gave, 0 none) */
-static void record_of(int id, char fit, const uint8_t codes[4], uint8_t rec[REC]) {
+/* Chip `id`'s record in a list, its record's codes */
+static void record_of(int id, const uint8_t codes[4], uint8_t rec[REC]) {
 	put16(rec, (uint16_t)id);
 	memcpy(rec + 2, codes, 4);
-	if (fit) { rec[2] = (uint8_t)(fit == '*' ? 26 : fit - 'A'); rec[3] = rec[4] = rec[5] = 0xFF; }
 }
 
 /* The pool at `from`'s list: its records (ROM offset, from the file) to
- * `*end`, how many of them come in the folder's codes */
-static uint32_t list_of(uint32_t from, uint32_t *end, int *fit) {
+ * `*end` */
+static uint32_t list_of(uint32_t from, uint32_t *end) {
 	uint32_t list = rom_u32(from + 4);
-	*fit = 0;
 	*end = 0;
 	if (!rom_is_ptr(list)) return 0;
 	uint32_t start = rom_off(list), e = start;
-	for (; e + REC <= ROM_SIZE && rom_u16(e); e += REC)
-		if (loot_folder_code(rom_u16(e) & 0x1FF, true)) ++*fit;
+	while (e + REC <= ROM_SIZE && rom_u16(e)) e += REC;
 	*end = e;
 	return start;
 }
@@ -104,16 +101,14 @@ static uint32_t list_of(uint32_t from, uint32_t *end, int *fit) {
 /* The older net's catalogue of rarity `rarity` (chip_pool.h: the chips of
  * the registry that play, no DarkChip; a chip both nets have by name in
  * both halves, as each net has it), `want` of them at random, their
- * records into `out` (the folder's codes alone where `only_fit`); how
- * many */
-static int older_of(int rarity, int want, bool only_fit, uint8_t *out) {
+ * records into `out`; how many */
+static int older_of(int rarity, int want, uint8_t *out) {
 	static short ids[XREG_IDS];
 	int n = 0;
 	for (int i = 0; i < xreg_count; ++i) {
 		int id = xreg_rows[i].bn6;
 		const uint8_t *c = chips_record(id);
 		if (xreg_rows[i].how == XREG_DARK || xreg_rows[i].how == XREG_PA || !c || c[5] != rarity || chip_pool_tier(id) < 0) continue;
-		if (only_fit && !loot_folder_code(id, true)) continue;
 		bool again = false;
 		for (int k = 0; k < n && !again; ++k) again = ids[k] == id;
 		if (!again) ids[n++] = (short)id;
@@ -123,65 +118,29 @@ static int older_of(int rarity, int want, bool only_fit, uint8_t *out) {
 		int j = rng_range(m, n - 1);
 		short t = ids[m]; ids[m] = ids[j]; ids[j] = t;
 		const uint8_t *c = chips_record(ids[m]);
-		record_of(ids[m], loot_folder_code(ids[m], true), c, out + REC * m);
+		record_of(ids[m], c, out + REC * m);
 	}
 	return m;
 }
 
 static bool both_nets(uint32_t from) {
 	uint32_t end;
-	int fit;
-	uint32_t start = list_of(from, &end, &fit);
+	uint32_t start = list_of(from, &end);
 	if (!start || !chips_from_bn5()) return false;
 	static uint8_t list[(LIST_MAX + 1) * REC];
-	bool only_fit = fit >= 12;
 	int n = 0, by[5] = { 0 };
-	/* (BN6's pool's records first, fitted as fit_codes fits them) */
+	/* (BN6's pool's records first) */
 	for (uint32_t r = start; r < end && n < LIST_MAX / 2; r += REC) {
 		int id = rom_u16(r) & 0x1FF;
-		char c = loot_folder_code(id, true);
-		if (only_fit && !c) continue;
-		record_of(id, c, R.data + r + 2, list + REC * n++);
+		record_of(id, R.data + r + 2, list + REC * n++);
 		const uint8_t *rec = chips_record(id);
 		if (rec && rec[5] < 5) ++by[rec[5]];
 	}
 	int six = n;
-	for (int rarity = 0; rarity < 5; ++rarity) n += older_of(rarity, by[rarity], only_fit, list + REC * n);
+	for (int rarity = 0; rarity < 5; ++rarity) n += older_of(rarity, by[rarity], list + REC * n);
 	put16(list + REC * n, 0);
 	emu_write(FREE_TRADER_LIST, list, (size_t)(REC * n + 2));
-	if (emu_debug_on()) fprintf(stderr, "trader: %d of BN6's chips and %d of the older net's%s\n", six, n - six, only_fit ? ", the folder's codes only" : "");
+	if (emu_debug_on()) fprintf(stderr, "trader: %d of BN6's chips and %d of the older net's\n", six, n - six);
 	return true;
 }
 
-static void fit_codes(uint32_t from) {
-	/* its prizes in the folder's codes, or a * where the chip has one and
-	 * none of them: a trade turns three chips the folder cannot play into
-	 * one it can (BN6's own pick, sub_804BF18, takes a code the pack lacks
-	 * three times in four; a Blade run traded three Recov10 for TrplShot V).
-	 * And only the chips that come in them, where a dozen of the pool do (a
-	 * playtester's two trades gave SumnBlk2 H and GunDelS2 E beside a
-	 * folder of S and *: neither chip comes in them). The list's records
-	 * (u16 chip, four codes ending 0xFF, a 0 chip ending the list) are
-	 * rewritten in the core's copy from the file's own, the fitting ones
-	 * first and the list ended after them, so each run's folder sets them. */
-	uint32_t list = rom_u32(from + 4);
-	if (rom_is_ptr(list)) {
-		uint32_t start = rom_off(list), end = start;
-		int fit = 0;
-		for (; end + 6 <= ROM_SIZE && rom_u16(end); end += 6)
-			if (loot_folder_code(rom_u16(end) & 0x1FF, true)) ++fit;
-		bool only_fit = fit >= 12;
-		uint32_t w = start;
-		for (uint32_t r = start; r < end; r += 6) {
-			char c = loot_folder_code(rom_u16(r) & 0x1FF, true);
-			if (only_fit && !c) continue;
-			uint8_t rec[6];
-			memcpy(rec, R.data + r, sizeof rec);
-			if (c) { rec[2] = (uint8_t)(c == '*' ? 26 : c - 'A'); rec[3] = rec[4] = rec[5] = 0xFF; }
-			emu_write(0x08000000u + w, rec, sizeof rec);
-			w += 6;
-		}
-		if (w < end) { static const uint8_t none[2] = { 0, 0 }; emu_write(0x08000000u + w, none, sizeof none); }
-		if (emu_debug_on()) fprintf(stderr, "trader: %d of %d chips in the folder's codes%s\n", fit, (int)((end - start) / 6), only_fit ? ", only they" : "");
-	}
-}

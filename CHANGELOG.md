@@ -102,6 +102,26 @@
   a v5 game and a v6 server refuse each other. Server hosts: the week's
   Board is kept in `weeks.jsonl` beside `identity.key`, and `--admin
   hide` takes an entry down.
+- **A leaner first act that opens up as you go deeper (issue #154).**
+  The first act used to hand out about twelve chips, many in your
+  folder's codes, and more zenny than its dealer's answer chip and
+  HPMemory cost together, so there was little left to want or to trade.
+  Now the first act lays half the green Mystery Data, a green data holds
+  a chip less often and zenny in its place, the plain finds (green and
+  blue data, a dealer's shelf, a request) hold fewer 3-star, Mega and
+  Giga chips, finds hold half the zenny, and no find leans to your
+  folder's codes. Each of these opens on a curve, act by act, back to
+  what it was by the sixth act (the short net's third), never past it.
+  Act 1 now gives about nine chips and 2,600 zenny: at its dealer you
+  buy the answer's two copies or the HPMemory, not both. A blue data at
+  a detour's end stays the layer's prize, and BN6's own battle rewards
+  are untouched, so a high busting level pays as it did. The Chip and
+  BugFrag Traders now pick a prize's code as BN6 does, three times in
+  four one you hold none of, rather than your folder's: your codes are
+  your run's own, and worth a trade at Trade Central. A layer saved
+  before this update starts afresh at a CONTINUE. Where you said yes to
+  the anonymous statistics, a run's end also counts its chips, good
+  chips, Mystery Data opened and zenny earned (docs/GUIDE.md).
 - **The Order Service sorts (issue #124, from whitt-e).** AsterLand's
   clerk listed every chip of the Library by ID alone, five a page, while
   the folder editor and the Chip Trader beside him sort by seven keys.

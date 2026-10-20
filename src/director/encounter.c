@@ -13,6 +13,7 @@
 #include "bytes.h"
 #include "darkbn6.h"
 #include "data.h"
+#include "economy.h"
 #include "emu.h"
 #include "events.h"
 #include "loot.h"
@@ -178,10 +179,7 @@ void emu_encounter_started(uint32_t settings) {
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,
  * add_keys), so busting him well pays the act's lock. */
-static int encounter_boss_zenny(void) {
-	int act = pacing_act(run.depth) + 7 * pacing_loop(run.depth), z = 100 * (6 + 3 * act);
-	return z > 0x3FFF ? 0x3FFF : z;
-}
+static int encounter_boss_zenny(void) { return loot_guardian_zenny(run.depth); }
 
 static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_zenny()); }
 
@@ -193,13 +191,15 @@ static uint16_t boss_zenny(void) { return (uint16_t)(1 << 14 | encounter_boss_ze
  * second of each, rewritten from the row's own in the core's copy (the
  * player's ROM's, or a moved family's as its install wrote it: data.h's
  * enemy_drop), comes in one of the folder's codes where the chip does, so
- * a chip reward leans half the time, as Mystery Data's; a Navi's chip, in
+ * a chip reward leans half the time, as Mystery Data's, by the plan's
+ * share of leaned finds (economy.h: none on the first act), decided by a
+ * hash of the layer, the enemy and the entry; a Navi's chip, in
  * either entry, in its * off the folder's codes, and in his own guardian's
  * battle zenny (boss_on); with the All * helper every chip in *. The row
  * written is the one the results read, in BN6's rows or their grown copy
  * once other games' families are installed (xvirus.h). (From a hook: the
- * rows and the run's codes are only read, and loot_fit_code rolls nothing
- * when always.) */
+ * rows and the run's codes are only read, loot_fit_code rolls nothing
+ * when always, and the plan's share takes a hash, not a draw.) */
 static void lean_row(int id) {
 	uint32_t row = id > 0 ? xvirus_drop_row(id) : 0;
 	if (!row) return;
@@ -213,7 +213,8 @@ static void lean_row(int id) {
 			continue;
 		}
 		char c = code >= 26 || run_all_star() ? '*' : (char)('A' + code);   /* (every chip in * with All *) */
-		if (k & 1) c = loot_fit_code(chip, c, true);
+		if ((k & 1) && econ_keep_by(ECON_LEVER_LEAN, run.depth, run.layer_seed ^ (uint32_t)id * 2654435761u ^ k * 40503u))
+			c = loot_fit_code(chip, c, true);
 		/* (a Navi's chip in its * where the folder holds not its letter,
 		 * as his Guardian Data gives it, from both entries of a pair: a
 		 * Blade folder's guardian dropped ChrgeMan C, and with the second

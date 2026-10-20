@@ -116,6 +116,7 @@ void save_checkpoint(void) {
 	dark_save();
 	souls_save();
 	off_board_save();
+	runlog_tally_save();
 }
 
 bool director_can_suspend(void) {
@@ -276,6 +277,7 @@ bool director_resume(void) {
 	act_note_read();
 	dark_load(run.seed);
 	souls_load(run.seed);
+	runlog_tally_load(run.seed);
 	/* the layer's tables live in the ROM copy, which a state does not hold */
 	if (!new_layer(false)) return false;
 	/* (saved at home: the town's too, the layer behind its port) */

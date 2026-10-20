@@ -413,6 +413,7 @@ bool director_start_run(void) {
 	drop_events();
 	dark_new_run(run.seed);
 	souls_new_run(run.seed);
+	runlog_tally_begin(run.seed);
 	/* a new run leaves the last one behind: CONTINUE is for runs that
 	 * have reached the net (one left so is no deletion to speak of) */
 	off_board_forget();

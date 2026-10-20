@@ -18,7 +18,7 @@
 #define BACKUP_FORMAT 2
 /* Every progress file of a save slot in savedata/, by its name: the
  * normal slot's, and the week's net's each after "weekly-" (weekly.h) */
-#define SAVE_PROGRESS_NAMES 13
+#define SAVE_PROGRESS_NAMES 14
 extern const char *const save_progress_names[SAVE_PROGRESS_NAMES];
 
 typedef enum {

@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "director_folder.h"
+#include "director_jobs.h"
 #include "game.h"
 #include "guardians.h"
 #include "meta.h"
@@ -31,6 +32,7 @@ void end_run(void) {
 	profile.last_won = 0;
 	/* (a request held: its asker's word at the next run, job_words.c) */
 	profile.last_job = run.job.kind != JOB_NONE ? (uint8_t)(run.job.asker + 1) : 0;
+	home_jobs_md_counted();
 	runlog_run_end(false);
 	library_from_game();
 	programs_from_game();
@@ -58,6 +60,7 @@ void win_run(void) {
 	profile.last_lost_to = 0;
 	profile.last_won = 1;
 	profile.last_job = 0;
+	home_jobs_md_counted();
 	runlog_run_end(true);
 	library_from_game();
 	programs_from_game();
