@@ -762,9 +762,15 @@ on a server that did not answer, runs another version, is full, or turned
 the name down, never the server's own text; and a trade the visit made
 is the run's now (docs/ONLINE.md, Trade Central).
 
-**Talked to**, the keeper sets where the gate leads and the player's
-name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a field: host or
-host:port, `wss://` and `/presence` added), MY NAME. The two fields are
+**Talked to**, the keeper says where the gate leads, as a place ("IT
+LEADS TO THE OFFICIAL SQUARE!", or "TO ANOTHER SERVER'S SQUARE!", never
+its address, `--dev online`'s server counted), and sets where it leads
+and the player's name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a
+field: host or host:port, `wss://` and `/presence` added), MY NAME. The
+cursor starts on the first, so OFFICIAL SQUARE asks before it changes
+the gate ("THE OFFICIAL SQUARE INSTEAD?", the cursor on No) and says it
+leads there already where it does: one A too many while paging his
+words had switched the server unasked (session 74). The two fields are
 the only screen of its own going online has (`src/online/online_field.c`,
 in the PET's colours, a keyboard on the pad and by touch, the system's
 own keyboard and paste where there is one; on a phone held upright the

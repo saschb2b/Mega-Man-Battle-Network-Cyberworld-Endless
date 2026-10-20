@@ -12,15 +12,22 @@
 #define GATE_OPTIONS 3
 extern const char *const gate_options[GATE_OPTIONS];
 
-/* The keeper talked to: who he is, where the gate leads (`server` a host
- * name, NULL the official Square), then his question over the options. */
-const char *gate_keeper_hello(const char *server);
+/* The keeper talked to: who he is, where the gate leads (the official
+ * Square or another server's, never its address), then his question over
+ * the options. */
+const char *gate_keeper_hello(bool official);
 const char *gate_keeper_ask(void);
+/* ... the official Square picked while the gate leads elsewhere: his
+ * question first (talk_ask's, the cursor on No); while it leads there
+ * already, his word on it */
+const char *gate_keeper_official_ask(void);
+const char *gate_keeper_official_question(void);
+const char *gate_keeper_official_already(void);
 /* ... and his answers: the gate set to the official Square; B. */
 const char *gate_keeper_official(void);
 const char *gate_keeper_bye(void);
-/* ... the gate set to `server` (a host name); the name `name` saved. */
-const char *gate_keeper_set(const char *server);
+/* ... the gate set to another server's address; the name `name` saved. */
+const char *gate_keeper_set(void);
 const char *gate_keeper_named(const char *name);
 /* The gate stepped on with no name yet: the keeper asks for one. */
 const char *gate_keeper_name_first(void);

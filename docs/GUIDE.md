@@ -766,8 +766,9 @@ and B calls it off.
 gate exactly as he left it; if the game was closed in the Square, the
 next CONTINUE puts him there.
 
-The keeper changes your name or the server: the official Square, or
-another one's address (`host` or `host:port`, as its owner gives it).
+The keeper changes your name or the server: the official Square (he
+asks first, the cursor on **No**), or another one's address (`host` or
+`host:port`, as its owner gives it).
 He also moves you to the next or the last channel.
 
 #### The NetPass
