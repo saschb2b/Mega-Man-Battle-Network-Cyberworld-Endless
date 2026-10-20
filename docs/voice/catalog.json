@@ -355,7 +355,7 @@
    "line": 121
   },
   "home_words:home_courier_words": {
-   "header": "The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the new requests posted (bit k asker k), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none.",
+   "header": "The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the requests posted (bit k asker k), new after an act, simply up at the run's first visit (`first`), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none.",
    "line": 165
   },
   "home_words:home_courier_words.paid_by": {
@@ -1550,7 +1550,7 @@
    "comment": "home_words.h. Coming home after an act: MegaMan's relief and Lan's answer, one beat a box (docs/VOICE.md), by how far the run has come; Lan's HP's portals and what MegaMan says of them.",
    "domain": "Lan's HP and the gate",
    "kind": "speech",
-   "lines": 67,
+   "lines": 69,
    "shows": [
     "screenshots/home-back.png",
     "screenshots/home-courier.png"
@@ -1987,7 +1987,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1884,
+  "boxes": 1886,
   "domains": {
    "Arena": {
     "files": [
@@ -2055,8 +2055,8 @@
      "src/director/home_words.c"
     ],
     "flagged": 2,
-    "lines": 95,
-    "speech": 87
+    "lines": 97,
+    "speech": 89
    },
    "Layers: dealers and finds": {
     "files": [
@@ -2365,7 +2365,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1475,
+  "lines": 1477,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2612,7 +2612,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1098
+  "speech": 1100
  },
  "version": 1,
  "conversations": [
@@ -2672,7 +2672,7 @@
   {"container":"home_words:home_hp_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_hp_words","line":154,"lines":["home_words:home_hp_words:0","home_words:home_hp_words:1"],"speakers":["MegaMan"],"title":"MegaMan in Lan's HP the run's first time there","when":"MegaMan in Lan's HP the run's first time there: what it is, or, to a profile `taught` that, a word."},
   {"container":"home_words:home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.paid_by","line":168,"lines":["home_words:home_courier_words.paid_by:0","home_words:home_courier_words.paid_by:1","home_words:home_courier_words.paid_by:2"],"speakers":["Mr.Prog"],"title":"Home courier words: paid by","when":""},
   {"container":"home_words:home_courier_words.places","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words.places","line":170,"lines":["home_words:home_courier_words.places:1"],"speakers":["Mr.Prog"],"title":"Home courier words: places","when":""},
-  {"container":"home_words:home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words","line":176,"lines":["home_words:home_courier_words:0","home_words:home_courier_words:1","home_words:home_courier_words:2","home_words:home_courier_words:3","home_words:home_courier_words:4","home_words:home_courier_words:5"],"speakers":["Mr.Prog"],"title":"The courier in Lan's HP","when":"The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the new requests posted (bit k asker k), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none."},
+  {"container":"home_words:home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","id":"home_words:home_courier_words","line":176,"lines":["home_words:home_courier_words:0","home_words:home_courier_words:1","home_words:home_courier_words:2","home_words:home_courier_words:3","home_words:home_courier_words:4","home_words:home_courier_words:5","home_words:home_courier_words:6","home_words:home_courier_words:7"],"speakers":["Mr.Prog"],"title":"The courier in Lan's HP","when":"The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable first, a box each: the pay waiting with asker `reward` (jobs.h, -1 none), else the places of the requests posted (bit k asker k), new after an act, simply up at the run's first visit (`first`), and what AsterLand's SubChip seller has in stock: `unlockers` Unlockers, RushFood, a WWW-ID. \"\" for none."},
   {"container":"gate_words:gate_options","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_options","line":7,"lines":["gate_words:gate_options:0","gate_words:gate_options:1","gate_words:gate_options:2"],"speakers":["MegaMan"],"title":"Gate options","when":""},
   {"container":"gate_words:gate_keeper_hello","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_hello","line":11,"lines":["gate_words:gate_keeper_hello:0","gate_words:gate_keeper_hello:1"],"speakers":["Mr.Prog"],"title":"The keeper talked to","when":"The keeper talked to: who he is, where the gate leads (the official Square or another server's, never its address), then his question over the options."},
   {"container":"gate_words:gate_keeper_ask","domain":"Lan's HP and the gate","file":"src/director/gate_words.c","id":"gate_words:gate_keeper_ask","line":15,"lines":["gate_words:gate_keeper_ask:0"],"speakers":["Mr.Prog"],"title":"Gate keeper ask","when":""},
@@ -3462,11 +3462,13 @@
   {"boxes":[{"pages":[["THE MAN FROM THE LAB","OUT IN TOWN!"]],"speaker":"Mr.Prog","text":"THE MAN FROM THE LAB\nOUT IN TOWN!"}],"container":"home_courier_words.paid_by","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words.paid_by:2","kind":"speech","line":169,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE MAN FROM THE LAB\nOUT IN TOWN!","text_hash":"5b0e012017c8"},
   {"boxes":[{"pages":[["THE ACADEMY"]],"speaker":"Mr.Prog","text":"THE ACADEMY"}],"container":"home_courier_words.places","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words.places:1","kind":"speech","line":170,"note":"(a homepage's helper relaying the town's posts and AsterLand's stock: where each waits, never what the Net ahead holds)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THE ACADEMY","text_hash":"fea5c9dff6f0"},
   {"boxes":[{"pages":[["REWARD WAITING!","{paid_by}"]],"speaker":"Mr.Prog","text":"REWARD WAITING!\n{paid_by}"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:0","kind":"speech","line":176,"placeholders":[{"name":"paid_by","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REWARD WAITING!\n{paid_by}","text_hash":"d49120373fc0"},
-  {"boxes":[{"pages":[["NEW REQUESTS POSTED!"]],"speaker":"Mr.Prog","text":"NEW REQUESTS POSTED!\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:1","kind":"speech","line":179,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUESTS POSTED!\n","text_hash":"50ac52b8be3e"},
-  {"boxes":[{"pages":[["NEW REQUEST POSTED!","AT"]],"speaker":"Mr.Prog","text":"NEW REQUEST POSTED!\nAT "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:2","kind":"speech","line":179,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUEST POSTED!\nAT ","text_hash":"96441ba2d0c9"},
-  {"boxes":[{"pages":[["AN UNLOCKER"]],"speaker":"Mr.Prog","text":"AN UNLOCKER"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:3","kind":"speech","line":184,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AN UNLOCKER","text_hash":"ec5a018f8091"},
-  {"boxes":[{"pages":[["A WWW-ID"]],"speaker":"Mr.Prog","text":"A WWW-ID"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:4","kind":"speech","line":186,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A WWW-ID","text_hash":"74d37e848e02"},
-  {"boxes":[{"pages":[["{k}ASTERLAND","HAS"]],"speaker":"Mr.Prog","text":"{k}ASTERLAND HAS "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:5","kind":"speech","line":188,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{k}ASTERLAND HAS ","text_hash":"e89021ffad33"},
+  {"boxes":[{"pages":[["REQUESTS ARE UP AT"]],"speaker":"Mr.Prog","text":"REQUESTS ARE UP AT\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:1","kind":"speech","line":181,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"REQUESTS ARE UP AT\n","text_hash":"6bc4583ae489"},
+  {"boxes":[{"pages":[["A REQUEST IS UP AT"]],"speaker":"Mr.Prog","text":"A REQUEST IS UP AT\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:2","kind":"speech","line":181,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A REQUEST IS UP AT\n","text_hash":"39f58be0c5e4"},
+  {"boxes":[{"pages":[["NEW REQUESTS POSTED!"]],"speaker":"Mr.Prog","text":"NEW REQUESTS POSTED!\n"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"id":"home_words:home_courier_words:3","kind":"speech","line":182,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUESTS POSTED!\n","text_hash":"50ac52b8be3e"},
+  {"boxes":[{"pages":[["NEW REQUEST POSTED!","AT"]],"speaker":"Mr.Prog","text":"NEW REQUEST POSTED!\nAT "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:4","kind":"speech","line":182,"note":"(at a run's first visit nothing is new yet: a player heard \"NEW REQUESTS POSTED!\" before he had done a thing, session 74)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NEW REQUEST POSTED!\nAT ","text_hash":"96441ba2d0c9"},
+  {"boxes":[{"pages":[["AN UNLOCKER"]],"speaker":"Mr.Prog","text":"AN UNLOCKER"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:5","kind":"speech","line":187,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AN UNLOCKER","text_hash":"ec5a018f8091"},
+  {"boxes":[{"pages":[["A WWW-ID"]],"speaker":"Mr.Prog","text":"A WWW-ID"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:6","kind":"speech","line":189,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A WWW-ID","text_hash":"74d37e848e02"},
+  {"boxes":[{"pages":[["{k}ASTERLAND","HAS"]],"speaker":"Mr.Prog","text":"{k}ASTERLAND HAS "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:7","kind":"speech","line":191,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{k}ASTERLAND HAS ","text_hash":"e89021ffad33"},
   {"boxes":[{"pages":[["The PC's","{way},Lan!"]],"speaker":"MegaMan","text":"The PC's {way},Lan!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:0","kind":"speech","line":17,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M The PC's {way},Lan!","text_hash":"6cb408c207ed"},
   {"boxes":[{"pages":[["Your room's","{way},Lan!"]],"speaker":"MegaMan","text":"Your room's {way},Lan!"},{"pages":[["The PC's up there!"]],"speaker":"MegaMan","text":"The PC's up there!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:1","kind":"speech","line":19,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Your room's {way},Lan!|@M The PC's up there!","text_hash":"8ddf140263b5"},
   {"boxes":[{"pages":[["Home's {way},Lan!"]],"speaker":"MegaMan","text":"Home's {way},Lan!"},{"pages":[["The PC's up in your","room!"]],"speaker":"MegaMan","text":"The PC's up in your room!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:2","kind":"speech","line":21,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Home's {way},Lan!|@M The PC's up in your room!","text_hash":"8227a47c0f7e"},
