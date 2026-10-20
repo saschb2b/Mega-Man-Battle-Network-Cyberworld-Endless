@@ -762,7 +762,8 @@ the cursor on **No**. After that MegaMan asks each time. Yes saves the
 run right there, and you go; the gate flickers while the server answers,
 and B calls it off.
 
-**R**, or the pad you arrived by, takes you home. MegaMan is back on the
+**R**, or the pad you arrived by (step on it, or A facing it), takes you
+home. MegaMan is back on the
 gate exactly as he left it; if the game was closed in the Square, the
 next CONTINUE puts him there.
 

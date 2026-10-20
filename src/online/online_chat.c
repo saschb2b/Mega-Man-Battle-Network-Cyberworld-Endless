@@ -302,6 +302,12 @@ uint32_t online_chat_keys(uint32_t keys) {
 			if (!card_of(C.peer.id)) online_transport_inspect(C.peer.id);
 			return keys & ~(uint32_t)KEY_A;
 		}
+		/* (the pad home, as R and a step onto it ask: session 74 pressed A on it and nothing came) */
+		if (slot == -1 && online_square_exit_ahead(x, y, face)) {
+			flag_clear(HOME_FLAG);
+			if (talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;
+			return keys & ~(uint32_t)KEY_A;
+		}
 		/* (a walker, or a prop: the Square's own words) */
 		if (slot == -1 && square_life_talk(x, y, face)) return keys & ~(uint32_t)KEY_A;
 	}

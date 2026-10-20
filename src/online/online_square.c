@@ -42,6 +42,13 @@
 #define DESK_RADIUS 28     /* walked into and spoken to as far from its middle */
 #define TALK_ROOM SQUARE_TALK_ROOM   /* the Square's chats (online_chat.c), one archive at a time */
 #define EXIT_REACH 12
+/* The pad home draws in front of its middle, as Lan's HP's portals draw
+ * in front of their cells (lanhp_portal_near): a player stood on it as
+ * drawn, 21 units towards the screen's front (-x, +y) of its middle,
+ * outside a zone of 12 each way, and nothing asked (session 74). Its zone
+ * takes in its art, stretched as far towards the front as theirs. */
+#define EXIT_FRONT_X 14
+#define EXIT_FRONT_Y 12
 #define FIXTURES (SQUARE_PROGS + 1)  /* the Mr.Progs and the desk, for A */
 
 /* the ambient actors' sprites (list, number): GreenNavi and GirlNavi
@@ -270,7 +277,22 @@ bool online_square_trade_say(const uint8_t *archive, int n) {
 	return true;
 }
 
-bool online_square_on_exit(int x, int y) { return abs(x - exit_x) <= EXIT_REACH && abs(y - exit_y) <= EXIT_REACH; }
+static bool near_exit(int x, int y, int reach) {
+	return x >= exit_x - EXIT_REACH - reach - EXIT_FRONT_X && x <= exit_x + EXIT_REACH + reach &&
+		y >= exit_y - EXIT_REACH - reach && y <= exit_y + EXIT_REACH + reach + EXIT_FRONT_Y;
+}
+
+bool online_square_on_exit(int x, int y) { return near_exit(x, y, 0); }
+
+bool online_square_exit_ahead(int x, int y, int face) {
+	/* (BN6's own probe for A, then two and three times as far: the pad is
+	 * flat, and MegaMan checks it from its edge) */
+	int dx, dy;
+	npc_probe(face, &dx, &dy);
+	for (int m = 0; m <= 3; ++m)
+		if (near_exit(x + dx * m, y + dy * m, 2)) return true;
+	return false;
+}
 
 static void peer_at(unsigned slot, const OnlinePeer *peer) {
 	uint32_t at = actors[slot].script;

@@ -382,7 +382,10 @@ words their own archives in the layer's scratch.
 box (`online_chat.c`, words in `square_words.c`): L for a phrase, an
 emote or a look around, A facing another MegaMan for his card (HP, act and layer,
 Crosses, Souls) and Battle (where both passes hold the Arena stamp),
-Wave, Mute, Block; R or the pad for home. A talk's column of options takes up
+Wave, Mute, Block; R or the pad for home, stepped on as drawn or A on
+it (its zone its middle stretched towards the screen's front, as Lan's
+HP's portals are: a player stood on its front 21 units from its middle
+and nothing asked, session 74). A talk's column of options takes up
 and down (`cinema_keys` lets the pad through while MegaMan is held).
 The Square's flags are `0x1480`-`0x14C5`, its own while it lasts.
 
