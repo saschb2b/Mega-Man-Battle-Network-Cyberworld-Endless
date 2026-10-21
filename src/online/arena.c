@@ -351,8 +351,9 @@ static bool hold(Arena *a) {
 	bool held = a->owed;
 	if (held) arena_sync_shift(&a->sync);
 	else if ((held = arena_sync_hold(&a->sync, quiet(a))))
-		printf("arena: a tick held at frame %" PRIu32 " (%s), the other's keys' lag past %s\n", a->input.next,
-			quiet(a) ? "quiet" : "a quiet one waited for too long", a->sync.peer_known ? "his" : "my round trip's");
+		printf("arena: a tick held at frame %" PRIu32 " (%s), the other's keys' lag past %s %d\n", a->input.next,
+			quiet(a) ? "quiet" : "a quiet one waited for too long", a->sync.peer_known ? "his of mine," : "my round trip's,",
+			a->sync.peer_known ? a->sync.peer_lag : (int)arena_sync_target(&a->sync));
 	a->owed = false;
 	return held;
 }
