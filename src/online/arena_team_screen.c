@@ -21,7 +21,7 @@ struct TeamScreen {
 	unsigned side;           /* his side's GBA there */
 	bool open;               /* a turn under way, his OK not yet pressed */
 	uint8_t mode;            /* BN6_CUSTOM_MODE the frame before */
-	double ms, worst, copy;
+	double ms, worst, copy, copy_worst;
 	unsigned frames, copies;
 };
 
@@ -62,7 +62,9 @@ bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsi
 	/* (the Custom screen's phase at its first step: BN6 sets the screen up anew the next frame, its hand dealt from the deck) */
 	c->rawWrite8(c, BN6_BATTLE_STEP, -1, 0);
 	arena_pair_anchor(s->pair);
-	s->copy += since(t);
+	double took = since(t);
+	s->copy += took;
+	if (took > s->copy_worst) s->copy_worst = took;
 	++s->copies;
 	s->open = true;
 	s->mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1);
@@ -104,4 +106,4 @@ void team_screen_close(TeamScreen *s) { s->open = false; }
 const uint32_t *team_screen_video(const TeamScreen *s) { return arena_pair_video(s->pair, s->side); }
 bool team_screen_open_now(const TeamScreen *s) { return s && s->open; }
 double team_screen_ms(const TeamScreen *s, bool worst) { return worst ? s->worst : s->frames ? s->ms / s->frames : 0; }
-double team_screen_copy_ms(const TeamScreen *s) { return s->copies ? s->copy / s->copies : 0; }
+double team_screen_copy_ms(const TeamScreen *s, bool worst) { return worst ? s->copy_worst : s->copies ? s->copy / s->copies : 0; }

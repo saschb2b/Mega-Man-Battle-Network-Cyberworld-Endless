@@ -1987,11 +1987,11 @@ ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
   Picks that have not come by the time the next turn opens are dropped,
   his hand left as it was.
 
-His client's cost (the host build, this machine): a frame of his screen
-1.37 to 1.41 ms (the worst 1.74), the pair's copy into it 0.12 to 0.15
-ms a turn, making it once some 160 ms (the battle's worst tick, 7 to 8
-ms without it): a client that makes it at the way in pays nothing in
-the battle.
+His client's cost (the host build, this machine; the numbers below): a
+frame of his screen about a pair's frame, the turn's copy 0.14 ms to
+some 20 ms, making it once some 155 ms (the battle's worst tick, 7 to 8
+ms without it): a client that makes it at the way in pays that outside
+the battle. A deleted partner has no turn.
 
 ### The partner's seat: his HP box and the four told apart
 
@@ -2008,28 +2008,45 @@ on his partner's) has his HP under him as BN6 gives the enemies theirs.
 ### Proved: the partners' own folders and screens
 
 The player's Gregar ROM and Team Colonel's, a fresh data folder each,
-`--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1,quitend`, both
+`--dev arena,arenaboth,arena2v2=1,teamhp=500,arenadelay=1,quitend`, both
 partners' clients stood in for on the machine (their screens' keys a
-script by the frame: the cursor right and A every 20 frames), 22
-October 2026:
+script by the frame: the cursor right and A every 20 frames), side 0's
+lead tapping R every 600 frames in the fight so that the Custom screen
+opens again once its gauge is full (three turns; with `teamhp=150` the
+partners are deleted before the second), 22 October 2026:
 
 | Run | End | Hashes | The two GBAs | His picks |
 | --- | --- | --- | --- | --- |
-| `arenalag=4` (135 rollbacks, 540 frames run again) | over at frame 1606, side 0 won | 26, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 1,315 iterations, 0 apart | side 0's partner 3 (BusterUp, Sword and an Atk+10 merged into it), side 1's 4, each at his OK, set at the close and taken by both GBAs |
-| `arenalag=4,arenaroll=8` | over at 1602 | all 26 the same as the delay alone's (`arenawindow=0`) | 1,312, 0 apart; 200 rollbacks of 8 frames, the game's state the same after all 200 | as above |
-| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 1606 | 26 (the local link echoes them) | apart from iteration 201 (1,115 of 1,315) | |
+| `arenalag=4` (291 rollbacks, 1,164 frames run again) | over at frame 3426, side 0 won | 57, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 2,725 iterations, 0 apart | three turns each: side 0's partner 7 chips (3, 2, 2: BusterUp, Sword and an Atk+10 merged into it the first), side 1's 11, each at his OK, set as his side's screen closed, taken by both GBAs at the same iteration |
+| `arenalag=4,arenaroll=8` | over at 3426 | all 57 the same as the delay alone's (`arenawindow=0`) | 2,720, 0 apart; 428 rollbacks of 8 frames, the game's state the same after all 428 | as above |
+| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 3806 | 63 (the local link echoes them) | apart from iteration 201 (2,160 of 2,725) | |
 
-Side 0's partner uses his own chips at iterations 177 and 201, side 1's
-at 429 and 829, each hand's chip up next moving while his lead's stays.
-A NetBattle without the flag is the battle it was:
+Each partner's hand's chip up next moves from his own picks alone:
+side 0's at iterations 177 and 201, 1372 and 1404, 2167 and 2647, side
+1's at 429, 829, 1384, 1784 and 2419, both back to 0 at 1039 and 1994 as
+their picks of the next turn go in. With `teamhp=150` (one turn each):
+1,314 iterations 0 apart, 30 hashes the same with 173 rollbacks and
+with none, `arenaroll=8` 230 of 230, the mutation apart from iteration
+201. A NetBattle without the flag is the battle it was:
 `--dev arena,arenaboth,arenalag=4,arenadelay=1` over at frame 2690, the
-last hash `86d2f837337a1494`. Captured (`teamseat=2` and `3`, kept out
-of the repository): BN6's own Custom screen on each partner's client
-with his own deck (side 0's: BusterUp *, Sword S, Cannon B, Atk+10 *,
-MiniBomb L, where his lead's GBA offers a Cannon A first; side 1's:
-WhiCapsl *, Sword S and three chips of code D), his picks in BN6's
-column as he takes them, his OK; in the fight his HP box (150), the four
-marks, his lead's HP under his lead, and his own chips' icons over him.
+last hash `86d2f837337a1494`.
+
+His client's screen: a frame 1.3 to 1.5 ms (the worst 2.1); the pair's
+copy into it 0.14 ms at the first turn and some 20 ms at the later ones
+(the worst 31: a frame or two of his own screen held as a turn begins,
+not yet looked into); made once at the first turn, some 155 ms (the
+battle's worst tick then, 3 past a 60th in a battle).
+
+Captured (`teamseat=2` and `3`, the pictures kept out of the
+repository): BN6's own Custom screen on each partner's client with his
+own deck (side 0's: BusterUp *, Sword S, Cannon B, Atk+10 *, MiniBomb L,
+where his lead's GBA offers a Cannon A first; side 1's: WhiCapsl *,
+Sword S and three chips of code D), his picks in BN6's column as he
+takes them, his OK and BN6's "Sending chip data..." after it; his second
+turn opening on the chips he left (Cannon B and MiniBomb L first, then
+Cannon A, Sword S and an L chip), as BN6 keeps the chips not taken at
+the deck's front; in the fight his HP box (150), the four marks, his
+lead's HP under his lead, and his own chips' icons over him.
 
 ### Four streams over the network (design, not built)
 

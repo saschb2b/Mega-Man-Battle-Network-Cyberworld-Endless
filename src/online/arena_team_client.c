@@ -78,11 +78,18 @@ static void closed_first(Client *c) {
 	team_screen_close(c->screen);
 }
 
+/* whether side's partner is on the field: his object there, HP left */
+static bool standing(struct mCore *gba, unsigned side) {
+	uint32_t o = (uint32_t)gba->rawRead32(gba, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER, -1);
+	return o >= BN6_EWRAM && o < BN6_EWRAM_END && gba->rawRead16(gba, o + BN6_T1_HP, -1);
+}
+
 uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 	unsigned side = (player - 2) & 1u;
 	Client *c = &clients[side];
 	struct mCore *gba = arena_core(a, side);
-	bool custom = gba && gba->rawRead8(gba, BN6_BATTLE_PHASE, -1) == BN6_PHASE_CUSTOM;
+	/* (a partner deleted has no turn) */
+	bool custom = gba && gba->rawRead8(gba, BN6_BATTLE_PHASE, -1) == BN6_PHASE_CUSTOM && standing(gba, side);
 	/* (his screen made once, from the pair as it is at a Custom screen) */
 	if (custom && !c->screen) c->screen = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
 	if (!custom || !c->screen) {
@@ -122,8 +129,9 @@ void team_client_report(void) {
 	for (unsigned s = 0; s < SIDES; ++s) {
 		const Client *c = &clients[s];
 		if (!c->screen) continue;
-		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms), "
-			"OK pressed %u times, %u times his side's closed first; a frame of it %.2f ms (the worst %.2f)\n", s, c->opened,
-			team_screen_copy_ms(c->screen), c->oks, c->closed_first, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true));
+		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms, "
+			"the worst %.2f), OK pressed %u times, %u times his side's closed first; a frame of it %.2f ms (the worst %.2f)\n", s,
+			c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true), c->oks, c->closed_first,
+			team_screen_ms(c->screen, false), team_screen_ms(c->screen, true));
 	}
 }

@@ -64,10 +64,12 @@ static uint16_t busy_keys(uint32_t frame) {
 }
 
 /* --dev arena2v2: on the Custom screen a lead first takes the chip under
- * the cursor, so that his hand holds one and his partner's is dealt it
- * (arena_team_navi.h), before the script takes the cursor to OK */
+ * the cursor, so that his hand holds one, before the script takes the
+ * cursor to OK; in the fight side 0's lead taps R every 600 frames, which
+ * opens the next turn's Custom screen once the gauge is full */
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
-	if (dev.arena_2v2 <= 0 || !S.arena || arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return keys;
+	if (dev.arena_2v2 <= 0 || !S.arena) return keys;
+	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 

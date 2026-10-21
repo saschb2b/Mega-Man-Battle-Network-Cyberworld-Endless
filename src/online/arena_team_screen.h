@@ -48,6 +48,6 @@ const uint32_t *team_screen_video(const TeamScreen *s);
 bool team_screen_open_now(const TeamScreen *s);
 /* what a frame of it costs here, mean and worst, ms; and a turn's copy of the pair */
 double team_screen_ms(const TeamScreen *s, bool worst);
-double team_screen_copy_ms(const TeamScreen *s);
+double team_screen_copy_ms(const TeamScreen *s, bool worst);
 
 #endif
