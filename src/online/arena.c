@@ -77,6 +77,7 @@ struct Arena {
 	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
 	ArenaRoll *roll;
 	unsigned players;          /* arena_players: the streams asked for (0 two) */
+	int show;                  /* arena_show: the GBA whose picture is drawn and shown, -1 mine */
 	int window_asked;          /* arena_window: the rollback window set, -1 this system's own */
 	unsigned window;           /* frames that may run on a guess: 0 the delay alone */
 	ArenaPairSnap *snap[ARENA_WINDOW_MOST];   /* the pair before each frame that ran on a guess, by frame % window */
@@ -101,6 +102,9 @@ struct Arena {
 	char error[160];
 };
 
+/* the GBA whose picture is drawn and shown: mine, or the one arena_show names */
+static unsigned shown(const Arena *a) { return a->show >= 0 ? (unsigned)a->show & 1u : a->link->side; }
+
 static ArenaStage fail(Arena *a, const char *why) {
 	snprintf(a->error, sizeof a->error, "%s", why);
 	printf("arena: stopped at frame %" PRIu32 ": %s\n", a->input.next, a->error);
@@ -113,6 +117,7 @@ Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2
 	a->link = link;
 	a->roll_window = -1;
 	a->window_asked = -1;
+	a->show = -1;
 	a->boot = arena_boot_new(rom, size, loadout);
 	if (!a->boot) { free(a); return NULL; }
 	if (arena_boot_stage(a->boot) == ARENA_BOOT_FAILED) fail(a, arena_boot_error(a->boot));
@@ -150,7 +155,7 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	if (s == ARENA_BOOT_FAILED) return fail(a, arena_boot_error(a->boot));
 	if (s != ARENA_BOOT_READY) return a->stage;
 	a->pair = arena_boot_take(a->boot);
-	arena_pair_draw(a->pair, 1u << a->link->side);   /* (my GBA's picture alone: the one shown) */
+	arena_pair_draw(a->pair, 1u << shown(a));   /* (my GBA's picture alone: the one shown) */
 	printf("arena: both cores at the Custom screen after %u frames, %u cable transfers; delay %u frames\n",
 		arena_boot_done(a->boot), arena_pair_transfers(a->pair), a->link->delay);
 	for (unsigned side = 0; side < 2; ++side) {
@@ -268,7 +273,7 @@ static bool roll_back(Arena *a) {
 	emu_audio_rewind(a->ran[from % LOG].sound);
 	while (a->input.next < until) {
 		/* (no picture but the last frame's, the one shown) */
-		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << a->link->side : 0);
+		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << shown(a) : 0);
 		if (!run_frame(a)) return false;
 	}
 	a->shaken = a->ticks;
@@ -434,6 +439,7 @@ void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
 void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 void arena_window(Arena *a, int window) { a->window_asked = window; }
 void arena_players(Arena *a, unsigned players) { a->players = players; }
+void arena_show(Arena *a, int side) { a->show = side; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }
@@ -444,7 +450,7 @@ int arena_progress(const Arena *a) {
 	return done >= total ? 99 : (int)(done * 100 / total);
 }
 
-const uint32_t *arena_video(const Arena *a) { return a->pair ? arena_pair_video(a->pair, a->link->side) : NULL; }
+const uint32_t *arena_video(const Arena *a) { return a->pair ? arena_pair_video(a->pair, shown(a)) : NULL; }
 
 unsigned arena_phase(const Arena *a, unsigned side) {
 	struct mCore *c = core(a, side);

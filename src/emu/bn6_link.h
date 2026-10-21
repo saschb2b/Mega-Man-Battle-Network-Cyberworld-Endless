@@ -22,5 +22,17 @@
 #define BN6_AI_UP             0x26        /* ... let go this iteration, */
 #define BN6_AI_LAST           0x28        /* ... and the last iteration's held (bn6f's JoypadReleased) */
 #define BN6_KEYS_VALID        0xFC00u
+/* A Navi's battle NaviStats (BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE a side): every reader and writer takes its side's */
+#define BN6_NAVI_STATS_ADDR   0x08013682u /* r0 the side: its battle NaviStats' address in r0, eBattleNaviStats0 in r1, by mov pc,lr, no push
+                                             (bn6f GetBattleNaviStatsAddr) */
+#define BN6_NAVI_BY_OBJECT    0x08013754u /* the five routines that call it with the side of the object in r5 (its BN6_T1_ALLIANCE) and
+                                             read or write a field r1 bytes in: set a byte, set a halfword, get a byte, the same again, get
+                                             a halfword (bn6f's *_AllianceFromBattleObject), to: */
+#define BN6_NAVI_BY_OBJECT_END 0x0801379Eu /* ... the last one's end */
+#define BN6_NS_BASE_HP        0x3E        /* u16, a NaviStats' fields from its start: MaxBaseHP, */
+#define BN6_NS_CUR_HP         0x40        /* ... CurHP (a MegaMan's object takes it as he is set up, bn6f sub_80141C8), */
+#define BN6_NS_MAX_HP         0x42        /* ... and MaxHP */
+#define BN6_SPAWN_COMMON      0x08003278u /* every kind's spawn (BN6_SPAWN_1 and the rest): r0 the kind, r5 the object that spawns */
+#define BN6_SPAWN_MADE        0x080032BEu /* ... the new object in r5, its words taken (its first store, of its index) */
 
 #endif

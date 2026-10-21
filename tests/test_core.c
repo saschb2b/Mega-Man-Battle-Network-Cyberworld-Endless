@@ -3578,7 +3578,7 @@ static void test_free_space(void) {
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
 		{ "--dev arena2v2's list", RAM_TEAM, RAM_TEAM_END }, { "--dev arena2v2's partners' keys", RAM_TEAM_RING, RAM_TEAM_RING_END },
-		{ "spare, persistent", RAM_TEAM_RING_END, RAM_PERSISTENT_END },
+		{ "--dev arena2v2's partner's NaviStats", RAM_TEAM_NAVI, RAM_TEAM_NAVI_END }, { "spare, persistent", RAM_TEAM_NAVI_END, RAM_PERSISTENT_END },
 		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
@@ -3587,6 +3587,8 @@ static void test_free_space(void) {
 		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
 	};
 	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
+	CHECK(RAM_TEAM_NAVI + BN6_BATTLE_NAVI_SIZE == RAM_TEAM_NAVI_END, "BN6's RAM: the partner's NaviStats %08x-%08x, a side's %u bytes",
+		(unsigned)RAM_TEAM_NAVI, (unsigned)RAM_TEAM_NAVI_END, (unsigned)BN6_BATTLE_NAVI_SIZE);
 	CHECK(BN6_PACK_EXT == RAM_PACK_EXT && BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS) == RAM_PACK_EXT_END,
 		"BN6's RAM: the pack's extension %08x-%08x", (unsigned)BN6_PACK_EXT, (unsigned)(BN6_PACK_EXT + 12u * (CHIPS_IDS - BN6_PACK_IDS)));
 	CHECK(BN6_DISPATCH_SIDE == RAM_DISPATCH_SIDE && BN6_DISPATCH_SIDE + XV_DISPATCH_KINDS * BN6_DISPATCH_SIDE_STEP == RAM_COLONEL,

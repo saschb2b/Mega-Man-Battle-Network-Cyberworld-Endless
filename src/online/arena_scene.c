@@ -134,6 +134,7 @@ static void enter(void) {
 	if (S.arena && dev.arena_roll >= 0) arena_rollback(S.arena, dev.arena_roll);
 	if (S.arena) arena_window(S.arena, dev.arena_window);
 	if (S.arena && dev.arena_2v2 > 0) arena_players(S.arena, ARENA_PLAYERS);
+	if (S.arena && dev.arena_other) arena_show(S.arena, 1);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 	/* (the way in's panel opened as the Square's opens) */

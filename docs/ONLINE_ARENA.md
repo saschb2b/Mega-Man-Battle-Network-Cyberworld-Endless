@@ -1614,6 +1614,83 @@ On the first GBA's screen side 1's MegaMen carry their own HP under
 them (89 and 51 at the battle's frame 600); a GBA's own partner has no
 label.
 
+### The partner's own NaviStats
+
+BN6 keeps one battle NaviStats a side (`BN6_BATTLE_NAVI`, `0x64` bytes:
+HP, the buster's levels, abilities, mood, form), and every reader and
+writer goes through one routine with a side (`BN6_NAVI_STATS_ADDR`). Five
+routines take that side from the object in r5 (`BN6_NAVI_BY_OBJECT`:
+330 calls in bn6f, a MegaMan's HP as he is set up, his forms,
+his mood); the rest pass a side (the HP box, the Custom screen, the
+battle's end) and stay the side's lead's. `src/online/arena_team_navi.c`
+answers the five by object (21 October 2026):
+
+- **His record**, `RAM_TEAM_NAVI`: side 0's partner's own battle
+  NaviStats, a copy of his side's made as the battle spawns its field,
+  his own max HP in it where `teamhp=N` gives one (as his own loadout
+  will).
+- **By object**: an answering hook at `BN6_NAVI_STATS_ADDR` returns his
+  record where the ask comes from one of the five (its return address)
+  and r5 is his object, or one he spawned, or one they spawned in turn:
+  every spawn (`BN6_SPAWN_COMMON`, r5 the spawner) marks the object it
+  makes (`BN6_SPAWN_MADE`) his or not, for each of the three kinds' 32
+  slots. The marks are kept a core between calls (`hook_keep_slots`), so a
+  rollback puts them back; the record is core RAM, in the pair's hash.
+
+Proved with `--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1`:
+
+| Run | End | Hashes | The two GBAs |
+| --- | --- | --- | --- |
+| `arenalag=4` (107 rollbacks) | over at frame 2690 | 44, all the same as `arenalag=0`'s (0 rollbacks) | 2,399 iterations, 0 apart |
+| `arenalag=4,arenaroll=8` | over at 2686 | all 44 the same as the delay alone's (`arenawindow=0`) | 2,396, 0 apart; 335 rollbacks of 8 frames, the game's state the same after all 335 |
+| `teamhp=-150` (his record on the second GBA alone) | over at 2690 | | apart from iteration 1 (2,399 of 2,399) |
+| `arena2v2=1` alone (his record his side's copy) | over at 2690 | | 0 apart; all 194 hits as without the hook, iteration for iteration |
+
+Side 0's partner is set up with 150 HP from his record while his lead
+keeps 100: the field's poison takes him from iteration 62, side 1's
+partner's charged shot from 100 to 90 at iteration 407 while his lead,
+whom nothing hits, stays at 100, and he is deleted at iteration 1035
+(at 685 with his side's 100). The second GBA's screen (`arenaother`)
+shows his own HP under him, 144 at the battle's frame 300 and 27 at
+frame 1050, his lead's 100 beside it; the first GBA's shows side 1's
+two, each his own. The record answered about 60,000 asks a battle, all
+of them his own object's: of the 34 objects marked his (his buster's
+shots and their effects) none asked by object in these battles, so an
+attack's inheriting his record is built and its marks counted, but not
+yet seen to matter (a chip of his own will be the test).
+
+Not built: **side 1's partner's record.** Two records are `0xC8` bytes;
+the RAM BN6 leaves alone (docs/EMULATION.md, BN6's RAM) has `0x70` left
+past the partners' rings, room for one. Side 1's partner keeps his
+side's until a second room is found (a survey of BN6's RAM in a
+NetBattle, from the way in to the result, for some `0x200` bytes: his
+record and both partners' hands, `0x50` each, step 3). The HP box on a
+partner's own GBA (BN6 draws its lead's) and a partner's own loadout
+(his NaviCust's programs, his Cross) wait on his own GBA's screen and
+the wire.
+
+### A partner's own hand and Custom screen (design)
+
+- **The hand**: BN6 keeps one a side, `0x50` bytes at `0x020349C0`
+  (`getBattleHandAddr_8010018`, 20 call sites in bn6f;
+  `getCurChipInBattleHand_8010004`, 7), most called with the side of the
+  object in r5. The same answer by object as the NaviStats': a hook on
+  the address routine returning the partner's own hand for him and his
+  marks. Needs a record's room each.
+- **His chips**: he draws from his own folder, which crosses as his
+  loadout does today (`arena_format.c`), installed in his GBA's core as
+  his side's lead's is; the deck's deal (`BN6_DECK_DEALT`) dealt again
+  for him, both GBAs alike.
+- **His Custom screen**: BN6's opens on each GBA for its lead (BattleState
+  +0x0D). His is ours, drawn over his own client's picture while BN6's is
+  open on his side's GBA (`BN6_PHASE_CUSTOM`), his picks crossing as keys
+  of his stream (the cursor and A), the screen run from them by the pair
+  on every client alike; at its close (a moment both GBAs agree on, the
+  battle's phase back to the fight) his picks are written into his hand
+  on both cores at the same iteration, as the rings' keys are.
+- **His HP**: his own GBA's HP box drawn from his object, not his lead's,
+  by our own label over the picture or BN6's box read from his record.
+
 ### Four streams over the network (design, not built)
 
 Not on the wire yet (another branch changes the server and the wire):

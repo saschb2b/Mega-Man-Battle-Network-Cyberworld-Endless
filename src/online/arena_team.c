@@ -9,6 +9,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_input.h"
+#include "arena_team_navi.h"
 #include "bn6.h"
 #include "darkinvs.h"
 #include "devtools.h"
@@ -61,6 +62,8 @@ static HookAct spawn(HookRegs *r, void *user) {
 	r->r[0] = RAM_TEAM;
 	/* (the rings emptied with the battle: the count starts again at 0, RAM_TEAM_TICK cleared with the battle's RAM) */
 	for (uint32_t a = RAM_TEAM_RING; a < RAM_TEAM_RING_END; a += 4) hook_write32(a, 0);
+	/* (side 0's partner's own NaviStats, from his side's as the battle set them up) */
+	arena_team_navi_begin();
 	return HOOK_CONTINUE;
 }
 
@@ -114,7 +117,7 @@ static uint32_t digest(int slot, uint32_t tick) {
 				if (k) T->partner[slot][tick][side] = panel;
 			}
 		}
-	return fnv(fnv(h, hook_read32(BN6_RNG_PRIMARY)), hook_read32(BN6_BATTLE_TIMER));
+	return arena_team_navi_digest(fnv(fnv(h, hook_read32(BN6_RNG_PRIMARY)), hook_read32(BN6_BATTLE_TIMER)));
 }
 
 /* a side's partner's keys for the loop's iteration `tick`, from the ring
@@ -170,11 +173,12 @@ bool arena_team_hooks(struct mCore *core, unsigned side) {
 	}
 	if (!T) return false;
 	HookCore *c = hook_core(core);
-	bool ok = c && hook_on(c, BN6_SPAWN_ENTITIES, spawn, NULL) && hook_on(c, BN6_KEY_COPY, keys, NULL);
+	bool ok = c && hook_on(c, BN6_SPAWN_ENTITIES, spawn, NULL) && hook_on(c, BN6_KEY_COPY, keys, NULL) &&
+		arena_team_navi_hooks(c, side, hook_slot_of(core));
 	/* (under full rules BN5's chip AI gives side 0's player a block of its own: the first MegaMan's alone) */
 	darkinvs_two_a_side(true);
 	T->slot[side] = hook_slot_of(core);
-	if (!ok) printf("arena2v2: the hooks at %08X and %08X not taken on side %u's core\n", BN6_SPAWN_ENTITIES, BN6_KEY_COPY, side);
+	if (!ok) printf("arena2v2: the hooks (%08X, %08X, the NaviStats') not all taken on side %u's core\n", BN6_SPAWN_ENTITIES, BN6_KEY_COPY, side);
 	return ok;
 }
 
@@ -203,6 +207,7 @@ bool arena_team_report(void) {
 	printf("arena2v2: iterations %u and %u, compared %u, differing %u (first %u); side 0's partner moved %u times\n",
 		(unsigned)T->last[a], (unsigned)T->last[b], (unsigned)n, (unsigned)differing, (unsigned)first, (unsigned)moved);
 	report_keys(a, b, n);
+	arena_team_navi_report();
 	for (unsigned g = 0; g < SIDES && n; ++g) {
 		int s = g ? b : a;
 		const uint16_t *hp = T->hp[s][n];

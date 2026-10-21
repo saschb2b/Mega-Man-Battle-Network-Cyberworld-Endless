@@ -85,7 +85,9 @@
 #define RAM_TEAM            0x02011730u   /* --dev arena2v2's list of what the Practice NetBattle spawns (arena_team.c, epic #167), to: */
 #define RAM_TEAM_END        0x02011750u   /* ... then: */
 #define RAM_TEAM_RING       0x02011750u   /* ... the partners' keys queued by the battle loop's iteration, 8 a side (arena_team.c), to: */
-#define RAM_TEAM_RING_END   0x02011790u   /* ... then spare, persistent, to: */
+#define RAM_TEAM_RING_END   0x02011790u   /* ... then: */
+#define RAM_TEAM_NAVI       0x02011790u   /* ... side 0's partner's own battle NaviStats, BN6_BATTLE_NAVI_SIZE (arena_team_navi.c), to: */
+#define RAM_TEAM_NAVI_END   0x020117F4u   /* ... then spare, persistent, to: */
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
 /* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
  * else of BN6's reads or writes 0x0203FB50 on */
