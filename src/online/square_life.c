@@ -421,11 +421,31 @@ void square_life_frame(const OnlineSnapshot *s) {
 	if (L.bark_t) --L.bark_t;
 }
 
+/* The Board stands in the void past the log-in plaza's back rim, its art
+ * 24 units lower (its piece's dz, layer_objs.c), so it shows over the
+ * floor before the rim: a player stood there facing it and A read nothing
+ * (session 74). MegaMan near where it shows, facing back towards it (up,
+ * up and to the right, right: grid -y), reads it. */
+#define BOARD_DROP 24
+#define BOARD_NEAR 32
+static bool board_before(const SquarePlan *p, int x, int y, int face) {
+	if (face > 2) return false;
+	for (int i = 0; i < p->nprops; ++i) {
+		if (p->props[i].look != LOOK_BBS) continue;
+		int bx, by;
+		netmap_world(p->props[i].x, p->props[i].y, &bx, &by);
+		/* (24 units down the screen: as far -x as +y) */
+		if (abs(x - (bx - BOARD_DROP)) <= BOARD_NEAR && abs(y - (by + BOARD_DROP)) <= BOARD_NEAR) return true;
+	}
+	return false;
+}
+
 /* the prop MegaMan faces: on the panel ahead of him, along his probe
  * (BN6's own, 8 units long) 20 and 40 units on; the landmark on any
- * panel of its base */
+ * panel of its base; the Board where it shows */
 static int prop_ahead(int x, int y, int face) {
 	const SquarePlan *p = online_square_plan();
+	if (board_before(p, x, y, face)) return LOOK_BBS;
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
 	double d = sqrt((double)dx * dx + (double)dy * dy);

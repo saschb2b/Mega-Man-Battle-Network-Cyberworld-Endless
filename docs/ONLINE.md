@@ -364,7 +364,10 @@ every place and every walker's waypoint on the floor.
   player; how many are watching), are rewritten as they change, as the
   keeper's are. The referee calls each bout over his head as MegaMan
   comes back ("YOU WIN!", "ALPHA WINS!").
-- **Check text**: A facing a prop says what it is; the Board's posts are
+- **Check text**: A facing a prop says what it is (the Board also where
+  its art shows, over the floor before the rim it stands past: its piece
+  is drawn 24 units lower, and a player facing it there read nothing,
+  session 74); the Board's posts are
   the channel, who is here, the last log-in, the last trade and battle,
   the trade board's offers and a tip (Trade Central); the sign names the
   channel.
