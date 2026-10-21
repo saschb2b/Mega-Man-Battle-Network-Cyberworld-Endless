@@ -208,6 +208,8 @@ bool online_visit_held(void) { return V.stage == VISIT_AWAY && (square_arena_on(
 void online_visit_held_frame(uint32_t keys) {
 	if (square_arena_on()) square_arena_frame(keys);
 	else square_watch_frame(keys);
+	/* (a Team NetBattle's next bout, or the others' bout watched) */
+	square_arena_held_frame();
 }
 
 void online_visit_draw(void) {

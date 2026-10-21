@@ -44,8 +44,23 @@ void square_arena_mail(const uint8_t *data, size_t size);
  * challenge, which MegaMan says in the chat box (or the card shows), the
  * corner's notice not shown */
 bool square_arena_notice(uint32_t serial, uint16_t code);
-/* After each frame in the Square: the question asked, the word said */
+/* After each frame in the Square: the question asked, the word said (a
+ * Team NetBattle's too, square_team.h; as reset and end take the team's) */
 void square_arena_update(const OnlineSnapshot *s);
+/* After each frame of a battle or a watch held over the Square: a Team
+ * NetBattle's next bout gone into, the others' bout watched */
+void square_arena_held_frame(void);
+/* Team NetBattles (square_team.h): a bout of a team match gone into (its
+ * ARENA battle's id, the other fighter, the HP my MegaMan carries, 0
+ * whole), false where something is still under way here; the team
+ * challenge's own state dropped once the match begins; nothing on the
+ * picture or asked; my MegaMan's HP at the last battle's end */
+bool square_arena_bout(uint32_t bout, uint32_t other, const char *name, uint16_t carry);
+/* A player's name by his session, as the Square last listed him (NULL gone) */
+const char *square_arena_name_of(uint32_t id);
+void square_arena_team_begun(void);
+bool square_arena_idle(void);
+uint16_t square_arena_last_hp(void);
 /* The battle under way (the Square's core held still): a frame of it
  * with the pad's keys, and its picture, instead of the Square's */
 bool square_arena_on(void);

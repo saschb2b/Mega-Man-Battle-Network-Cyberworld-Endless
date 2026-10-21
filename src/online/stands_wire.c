@@ -32,7 +32,7 @@ int stands_wire_read(const uint8_t *data, size_t size, StandsEntry out[ONLINE_ST
 	for (int k = 0; k < data[1]; ++k) {
 		const uint8_t *e = data + 2 + k * ONLINE_STANDS_ENTRY_BYTES;
 		StandsEntry s = { .match = get32(e), .side = { get32(e + 4), get32(e + 8) }, .stage = e[44], .watchers = e[45], .cheers = e[46],
-			.report = report_get(e + 47) };
+			.report = report_get(e + 47), .bout = e[62] };
 		for (int side = 0; side < 2; ++side) {
 			memcpy(s.name[side], e + 12 + 16 * side, ONLINE_NAME_BYTES);
 			s.name[side][ONLINE_NAME_BYTES] = 0;

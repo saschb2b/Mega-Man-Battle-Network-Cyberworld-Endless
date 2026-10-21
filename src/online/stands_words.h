@@ -18,6 +18,7 @@ typedef struct {
 	unsigned watchers, cheers;
 	int winner;            /* 0 none (broke off, or not over), 1 or 2 the side */
 	bool mine;             /* this game fought it */
+	unsigned bout;         /* a Team NetBattle's bout, its number; 0 a lone battle */
 } StandsBout;
 
 /* The referee on the battle on (`live`) and the last one over (`last`),

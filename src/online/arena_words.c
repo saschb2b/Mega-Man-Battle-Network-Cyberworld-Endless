@@ -57,6 +57,85 @@ const char *arena_over_words(void) { return "Phew... Good battle!"; }
 
 const char *arena_stopped_words(void) { return "Whoa! The NetBattle\nbroke off!"; }
 
+const char *arena_team_option(bool partner) { return partner ? "Split up" : "Team up"; }
+
+const char *arena_team_sent_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Let's see if\n%s\nteams up with us!", name);
+	return s;
+}
+
+const char *arena_team_asked_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "%s wants\nto team up\nwith us!", name);
+	return s;
+}
+
+const char *arena_team_asked_question(void) { return "Team up,Lan?\n"; }
+
+const char *arena_team_formed_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Alright! We're a\nteam with\n%s!", name);
+	return s;
+}
+
+const char *arena_team_declined_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Aw... %s\nwon't team up\nthis time.", name);
+	return s;
+}
+
+const char *arena_team_split_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "OK... Our team\nwith %s\nsplit up.", name);
+	return s;
+}
+
+const char *arena_team_have_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Lan,we're with\n%s\nalready!", name);
+	return s;
+}
+
+const char *arena_team_lone_words(const char *name, bool we_teamed) {
+	static char s[96];
+	if (we_teamed) snprintf(s, sizeof s, "Huh? %s\nhas no partner...", name);
+	else snprintf(s, sizeof s, "Huh? %s's\non a team...|We'd need a\npartner too,Lan.", name);
+	return s;
+}
+
+const char *arena_team_partner_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Huh? %s's\non our team,Lan!", name);
+	return s;
+}
+
+const char *arena_team_challenged_words(const char *name) {
+	static char s[160];
+	snprintf(s, sizeof s, "%s's team\nwants a Team\nNetBattle!", name);
+	return s;
+}
+
+const char *arena_team_order_words(void) { return "Who goes first,\nLan?"; }
+
+const char *arena_team_order_us(void) { return "We do"; }
+
+const char *arena_team_first_words(bool we_lead, const char *ours, const char *theirs) {
+	static char s[128];
+	if (we_lead) snprintf(s, sizeof s, "We're up first,\nLan!|Against\n%s!", theirs);
+	else snprintf(s, sizeof s, "%s goes\nfirst!|Go get 'em,\n%s!", ours, ours);
+	return s;
+}
+
+const char *arena_team_over_words(unsigned result) {
+	switch (result) {
+	case 1: return "Alright!! Our team\nwon,Lan!!";
+	case 2: return "Aw... Our team\nlost.|We'll get 'em\nnext time!";
+	case 4: return "Phew... Both teams\nwent down at once!";
+	default: return "Whoa! The Team\nNetBattle broke off!";
+	}
+}
+
 const char *arena_installs_apart_words(void) {
 	return "Huh? Our PETs don't\nmatch...|Lan,let's reboot\nthe PET and try\nagain!";
 }

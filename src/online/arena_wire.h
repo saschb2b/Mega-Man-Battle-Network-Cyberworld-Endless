@@ -25,7 +25,7 @@ enum { ARENA_WIRE_CHALLENGED = 1, ARENA_WIRE_WAITING, ARENA_WIRE_START, ARENA_WI
 #define ARENA_INPUT_HEAD 10        /* ARENA_INPUT before its keys */
 #define ARENA_HASH_BYTES 17
 #define ARENA_LOADOUT_HEAD 7
-#define ARENA_LOADOUT_VERSION 1
+#define ARENA_LOADOUT_VERSION 2     /* (v12: the HP he goes in with, a Team NetBattle's winner's left from his last bout) */
 
 typedef struct {
 	uint8_t stage;
@@ -50,6 +50,27 @@ bool arena_wire_read_hash(const uint8_t *data, size_t size, uint32_t *match, uin
 /* ARENA_LOADOUT around `n` bytes (1..ONLINE_ARENA_LOADOUT_MAX) */
 size_t arena_wire_loadout(uint8_t *out, size_t cap, uint32_t match, const uint8_t *bytes, size_t n);
 bool arena_wire_read_loadout(const uint8_t *data, size_t size, uint32_t *match, const uint8_t **bytes, size_t *n);
+
+/* TEAM (protocol v12, epic #167): its actions; TEAM_STATE's stages and
+ * its result (the recipient's team's) */
+enum { TEAM_ACT_PROPOSE = 1, TEAM_ACT_ANSWER, TEAM_ACT_SPLIT, TEAM_ACT_ORDER };
+enum { TEAM_ASKED = 1, TEAM_WAITING, TEAM_FORMED, TEAM_SPLIT_UP, TEAM_MATCH, TEAM_ORDERED, TEAM_BOUT, TEAM_FIGHT, TEAM_OVER };
+enum { TEAM_WON = 1, TEAM_LOST, TEAM_BROKE_OFF, TEAM_DRAWN };
+
+typedef struct {
+	uint8_t stage;
+	uint32_t partner;        /* my partner (asked: the one who asks; waiting: the one asked) */
+	uint32_t match, bout;    /* the team match, its bout under way (an ARENA battle's id) */
+	uint32_t players[4];     /* my team's two, then theirs, each MegaMan up now first (before the order: captain first) */
+	uint8_t left[2];         /* MegaMen standing: ours, theirs */
+	uint8_t number, result;  /* the bout called; OVER's result */
+	uint16_t hp;             /* the staying MegaMan's HP, as the last bout's report left it (0 whole) */
+} TeamWireState;
+
+/* TEAM: `action` on `ref` (a player's session; the lead's for the order;
+ * 0 for a split), `value` an answer's yes; its size, 0 where refused */
+size_t arena_wire_team(uint8_t out[ONLINE_TEAM_BYTES], unsigned action, uint32_t ref, bool value);
+bool arena_wire_team_state(const uint8_t *data, size_t size, TeamWireState *out);
 
 /* A carried MegaMan as bytes (NULL: the game's start's MegaMan): the
  * first folder, the NaviCust's placed programs and grid, HP, the buster,

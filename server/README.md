@@ -137,7 +137,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v11`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v12`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world. A
 game offering another version's `cyberworld.presence.vN` is let through
 the upgrade so its HELLO can be answered with which side is behind (ERROR
@@ -211,6 +211,18 @@ window covers; docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then
 relays their loadouts, keys and state hashes to each other alone, in a
 rate bucket of their own (120 a second). A player leaving ends the
 battle for the other.
+
+Team NetBattles (`teams.py`, protocol v12, epic #167): two players of a
+channel team up (one asks, the other answers; a team lasts until one
+splits it or leaves), and a challenge between players of two teams
+begins a relay instead of a battle. Each team's captain names its lead,
+blind (30 seconds, then he leads himself); each bout is an Arena battle
+whose two fighters both say they are ready before it starts; the
+winner (the cable's first's report) stays, the loser's partner comes in,
+and the team with no MegaMan standing loses. A leave or a drop breaks the
+match off for both teams. The server keeps teams and matches in memory
+only and writes `team`, `team_match`, `team_bout` and `team_over` events
+to the log; nothing is kept for a player.
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first

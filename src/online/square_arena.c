@@ -47,7 +47,6 @@
 
 #include "analytics_online.h"
 #include "arena_folder.h"
-#include "arena_link_net.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_report.h"
@@ -62,6 +61,7 @@
 #include "online_visit.h"
 #include "rom.h"
 #include "square_arena_state.h"
+#include "square_team.h"
 #include "talk.h"
 #include "text.h"
 
@@ -106,7 +106,8 @@ static void act(unsigned action, uint32_t ref) {
 	if (arena_wire_action(m, action, ref, asked())) online_transport_send(m, sizeof m);
 }
 
-static void say(const char *words) { SA.said = words; }
+/* (a team bout's word is the team's, said at the match's end: square_team.c) */
+static void say(const char *words) { if (!SA.team) SA.said = words; }
 
 /* The statistics' NetBattle (analytics_online.h), once a battle whose pair
  * was built: how it ended and the network's numbers the Arena kept */
@@ -130,12 +131,14 @@ void square_arena_reset(void) {
 	memset(&SA, 0, sizeof SA);
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
 	arena_folder_reset();
+	square_team_reset();
 }
 
 void square_arena_end(void) {
 	if (SA.stage == SA_BATTLE) counted(ANALYTICS_BATTLE_LEFT);
 	if (SA.match && !SA.ended && SA.stage != SA_IDLE) act(ARENA_ACT_LEAVE, SA.match);
 	if (SA_AGAIN.held) act(ARENA_ACT_LEAVE, SA_AGAIN.held);
+	square_team_end();
 	square_arena_reset();
 }
 
@@ -208,6 +211,7 @@ void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 	SA.match = 0;
 	SA.ended = false;
 	SA.challenger = true;
+	SA.team = false;
 	snprintf(SA.name, sizeof SA.name, "%s", peer->name);
 	SA.folder = arena_folder_first(fits);
 	if (folder_question(fits)) { SA.stage = SA_FOLDER; return; }
@@ -231,6 +235,8 @@ static void start(unsigned side, unsigned delay) {
 	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, a test's short battle) */
 	if (carried && dev.arena_hp > 0) tried.max_hp = tried.base_hp = (uint16_t)dev.arena_hp;
+	/* (a NetBattle begins whole; a Team NetBattle's winner goes on with what he has left) */
+	if (carried) tried.hp = SA.team && SA.carry && SA.carry < tried.max_hp ? SA.carry : tried.max_hp;
 	uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX], m[ARENA_LOADOUT_HEAD + ONLINE_ARENA_LOADOUT_MAX];
 	size_t n = arena_loadout_pack(carried, bytes, sizeof bytes);
 	SA.why[0] = 0;
@@ -240,7 +246,8 @@ static void start(unsigned side, unsigned delay) {
 	SA.theirs_in = false;
 	/* (the stands' report is the cable's first's to send: arena_report.h) */
 	if (side == 0) arena_report_begin(SA.match);
-	printf("arena: match %u starts: side %u, delay %u frames, folder %d\n", SA.match, SA.link.link.side, SA.link.link.delay, SA.folder + 1);
+	printf("arena: match %u starts: side %u, delay %u frames, folder %d%s\n", SA.match, SA.link.link.side, SA.link.link.delay, SA.folder + 1,
+		SA.team ? ", a Team NetBattle's bout" : "");
 	/* (into the way in's panel: from a rematch's card, or from the Square) */
 	SA.card.up = false;
 	SA.t = 0;
@@ -364,6 +371,7 @@ static void state_in(const ArenaWireState *s) {
 		SA.other = s->other;
 		SA.ended = false;
 		SA.challenger = false;
+		SA.team = false;
 		snprintf(SA.name, sizeof SA.name, "%s", name);
 		SA.stage = SA_ASKING;
 		printf("arena: %s challenged us (match %u)\n", name, s->match);
@@ -464,13 +472,20 @@ static void folder_picked(void) {
  * busy, no longer here, the Arena closed, the NetPass's stamp): MegaMan
  * says so in the chat box, the corner's notice left unshown
  * (square_arena_notice) */
-static bool refusal(uint16_t code) { return code == 16 || code == 17 || code == 18 || code == ONLINE_NOTICE_PASS; }
+static bool refusal(uint16_t code) { return code == 16 || code == 17 || code == 18 || code == ONLINE_NOTICE_PASS || code == ONLINE_NOTICE_TEAM; }
+
+/* NOTICE 29: our partner himself, or a team and a lone Navi */
+static const char *team_refusal(void) {
+	uint32_t partner = square_team_partner();
+	return partner == SA.other ? arena_team_partner_words(SA.name) : arena_team_lone_words(SA.name, partner != 0);
+}
 
 static void refused(uint16_t code) {
 	SA.stage = SA_IDLE;
 	printf("arena: the challenge to %s refused (notice %u)\n", SA.name, (unsigned)code);
 	say(code == 16 ? arena_busy_words(SA.name) : code == 17 ? arena_not_here_words(SA.name) : code == 18 ? arena_closed_words() :
-		code == ONLINE_NOTICE_PASS ? arena_no_stamp_words() : arena_declined_words());
+		code == ONLINE_NOTICE_PASS ? arena_no_stamp_words() :
+		code == ONLINE_NOTICE_TEAM ? team_refusal() : arena_declined_words());
 }
 
 bool square_arena_notice(uint32_t serial, uint16_t code) { return (SA.stage == SA_SENT && refusal(code)) || serial == SA.quiet_notice; }
@@ -504,8 +519,15 @@ void square_arena_update(const OnlineSnapshot *s) {
 	else if (SA.stage == SA_FOLDER && !open) folder_picked();
 	else if (SA.stage == SA_ASKING && !open) {
 		if (dev.arena_both) bot_yes();
-		else if (arena_folder_challenge(SA.name)) SA.stage = SA_ASKED;
+		else if (arena_folder_challenge(SA.name, square_team_partner() != 0)) SA.stage = SA_ASKED;
 	} else if (SA.said && !open && SA.stage == SA_IDLE && talk_start(SA.said, FACE_MEGAMAN)) SA.said = NULL;
+	square_team_update(s, false);
+}
+
+void square_arena_held_frame(void) {
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	square_team_update(&s, true);
 }
 
 bool square_arena_on(void) { return SA.stage >= SA_LOADOUT || SA.card.up; }
@@ -630,9 +652,40 @@ static void battle(uint32_t keys, uint32_t rtt_ms) {
 	SA.ended = true;
 	counted(result == 1 ? ANALYTICS_BATTLE_WON : result == 2 ? ANALYTICS_BATTLE_LOST : ANALYTICS_BATTLE_OVER);
 	bouts(result);
-	say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
+	/* (a team bout: the team's word is said at the match's end, square_team.c) */
+	if (!SA.team) say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
 	SA.stage = SA_OVER;
-	square_card_up(result == 1 || result == 2 ? result : 3, square_arena_name_of(SA.other) ? ARENA_ASK_OPEN : ARENA_ASK_NONE);
+	square_card_up(result == 1 || result == 2 ? result : 3, square_arena_name_of(SA.other) && !SA.team ? ARENA_ASK_OPEN : ARENA_ASK_NONE);
+	SA.hp_left = SA.card.tally.hp[SA.link.link.side & 1u];
+	printf("arena: our MegaMan has %u HP left\n", SA.hp_left);
+}
+
+bool square_arena_idle(void) { return SA.stage == SA_IDLE && !SA.card.up; }
+
+uint16_t square_arena_last_hp(void) { return SA.hp_left; }
+
+void square_arena_team_begun(void) {
+	if (SA.stage == SA_SENT || SA.stage == SA_WAITING || SA.stage == SA_ACCEPTED) SA.stage = SA_IDLE;
+	SA.match = 0;
+	SA.ended = true;
+}
+
+bool square_arena_bout(uint32_t bout, uint32_t other, const char *name, uint16_t carry) {
+	if (!CW_ARENA || !square_arena_idle()) return false;
+	unsigned fits;
+	if (!mine_goes(&fits)) { act(ARENA_ACT_LEAVE, bout); return true; }
+	SA.match = bout;
+	SA.other = other;
+	SA.ended = false;
+	SA.challenger = false;
+	SA.team = true;
+	SA.carry = carry;
+	snprintf(SA.name, sizeof SA.name, "%s", name);
+	/* (the folder the last bout carried where it still fits, else the first: no question mid-match) */
+	SA.folder = fits >> SA_AGAIN.folder & 1 ? SA_AGAIN.folder : arena_folder_first(fits);
+	printf("arena: into %s's team bout (match %u), %u HP carried\n", name, bout, (unsigned)carry);
+	accept();
+	return true;
 }
 
 /* back on the Square's map, where MegaMan stood: the card closed, a

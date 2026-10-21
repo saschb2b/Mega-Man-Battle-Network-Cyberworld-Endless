@@ -27,6 +27,25 @@ bool arena_wire_state(const uint8_t *data, size_t size, ArenaWireState *out) {
 	return true;
 }
 
+size_t arena_wire_team(uint8_t out[ONLINE_TEAM_BYTES], unsigned action, uint32_t ref, bool value) {
+	if (action < TEAM_ACT_PROPOSE || action > TEAM_ACT_ORDER || (!ref && action != TEAM_ACT_SPLIT)) return 0;
+	out[0] = ONLINE_TEAM;
+	out[1] = (uint8_t)action;
+	put32(out + 2, ref);
+	out[6] = value;
+	return ONLINE_TEAM_BYTES;
+}
+
+bool arena_wire_team_state(const uint8_t *data, size_t size, TeamWireState *out) {
+	if (size != ONLINE_TEAM_STATE_BYTES || data[0] != ONLINE_TEAM_STATE) return false;
+	TeamWireState s = { .stage = data[1], .partner = get32(data + 2), .match = get32(data + 6), .bout = get32(data + 10),
+		.left = { data[30], data[31] }, .number = data[32], .result = data[33], .hp = get16(data + 34) };
+	for (int k = 0; k < 4; ++k) s.players[k] = get32(data + 14 + 4 * k);
+	if (s.stage < TEAM_ASKED || s.stage > TEAM_OVER || s.result > TEAM_DRAWN || s.left[0] > 2 || s.left[1] > 2) return false;
+	*out = s;
+	return true;
+}
+
 size_t arena_wire_input(uint8_t *out, size_t cap, uint32_t match, uint32_t frame, const uint16_t *keys, unsigned count) {
 	size_t size = ARENA_INPUT_HEAD + 2u * count;
 	if (!match || !count || count > ONLINE_ARENA_INPUT_MAX || cap < size) return 0;
@@ -96,6 +115,7 @@ bool arena_wire_read_loadout(const uint8_t *data, size_t size, uint32_t *match, 
 #define SLOT_BYTES 8
 #define HEAD_BYTES (3 + 2 * BN6_FOLDER_ENTRIES)   /* the version, carried, the folder and the count of programs */
 #define TAIL_BYTES 12
+#define HP_BYTES 6    /* max HP, base HP, and HP (v2) */
 
 size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	if (cap < 2) return 0;
@@ -105,7 +125,7 @@ size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	unsigned placed = 0;
 	for (unsigned s = 0; s < BN6_NAVICUST_SLOTS; ++s)
 		for (unsigned k = 0; k < SLOT_BYTES; ++k) if (l->board[s * SLOT_BYTES + k]) { ++placed; break; }
-	size_t size = HEAD_BYTES + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + 4 + TAIL_BYTES;
+	size_t size = HEAD_BYTES + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES;
 	if (size > cap || size > ONLINE_ARENA_LOADOUT_MAX) return 0;
 	uint8_t *o = out + 2;
 	for (unsigned i = 0; i < BN6_FOLDER_ENTRIES; ++i, o += 2) put16(o, l->folder[i]);
@@ -123,7 +143,8 @@ size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	o += ONLINE_BOARD_CELLS;
 	put16(o, l->max_hp);
 	put16(o + 2, l->base_hp);
-	o += 4;
+	put16(o + 4, l->hp);
+	o += HP_BYTES;
 	const uint8_t tail[TAIL_BYTES] = { l->attack, l->speed, l->charge, l->regular_mb, l->mega_limit, l->giga_limit,
 		l->regular, l->tag[0], l->tag[1], l->crosses, l->souls, l->beast };
 	memcpy(o, tail, TAIL_BYTES);
@@ -142,7 +163,7 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	const uint8_t *i = in + 2;
 	for (unsigned k = 0; k < BN6_FOLDER_ENTRIES; ++k, i += 2) out->folder[k] = get16(i);
 	unsigned placed = *i++;
-	if (n != head + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + 4 + TAIL_BYTES) return BAD("the other PET's MegaMan came in the wrong size");
+	if (n != head + placed * (1 + SLOT_BYTES) + ONLINE_BOARD_CELLS + HP_BYTES + TAIL_BYTES) return BAD("the other PET's MegaMan came in the wrong size");
 	for (unsigned k = 0; k < placed; ++k, i += 1 + SLOT_BYTES) {
 		if (i[0] >= BN6_NAVICUST_SLOTS) return BAD("the other PET's NaviCust has a program out of its list");
 		memcpy(out->board + i[0] * SLOT_BYTES, i + 1, SLOT_BYTES);
@@ -151,9 +172,11 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	for (unsigned k = 0; k < ONLINE_BOARD_CELLS; ++k)
 		if (out->grid[k] > BN6_NAVICUST_SLOTS) return BAD("the other PET's NaviCust grid names a program it has not");
 	i += ONLINE_BOARD_CELLS;
-	out->hp = out->max_hp = get16(i);
+	out->max_hp = get16(i);
 	out->base_hp = get16(i + 2);
-	i += 4;
+	out->hp = get16(i + 4);
+	if (!out->hp || out->hp > out->max_hp) return BAD("the other PET's MegaMan came with HP past his max");
+	i += HP_BYTES;
 	out->attack = i[0]; out->speed = i[1]; out->charge = i[2];
 	out->regular_mb = i[3]; out->mega_limit = i[4]; out->giga_limit = i[5];
 	out->regular = i[6]; out->tag[0] = i[7]; out->tag[1] = i[8];

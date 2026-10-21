@@ -256,6 +256,24 @@ static void wire(void) {
 	assert(!arena_wire_state(st, sizeof st - 1, &s));
 	st[1] = 5;
 	assert(!arena_wire_state(st, sizeof st, &s));
+	/* TEAM !BBIB (v12): a team asked of session 0x01020304; a split takes no session, the rest one */
+	assert(arena_wire_team(m, TEAM_ACT_PROPOSE, 0x01020304u, false) == ONLINE_TEAM_BYTES && ONLINE_TEAM_BYTES == 7);
+	static const uint8_t team[] = { 33, 1, 1, 2, 3, 4, 0 };
+	assert(!memcmp(m, team, sizeof team));
+	assert(arena_wire_team(m, TEAM_ACT_ANSWER, 5, true) && m[6] == 1);
+	assert(arena_wire_team(m, TEAM_ACT_SPLIT, 0, false) && !arena_wire_team(m, TEAM_ACT_ORDER, 0, false) && !arena_wire_team(m, 5, 1, false));
+	/* TEAM_STATE !BBIII4IBBBBH: a bout called, the stayer's HP 29 */
+	uint8_t ts[ONLINE_TEAM_STATE_BYTES] = { 34, TEAM_BOUT, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3 };
+	for (int k = 0; k < 4; ++k) ts[17 + 4 * k] = (uint8_t)(k + 1);
+	ts[30] = 1; ts[31] = 2; ts[32] = 2; ts[34] = 0; ts[35] = 29;
+	TeamWireState t;
+	assert(arena_wire_team_state(ts, sizeof ts, &t) && t.stage == TEAM_BOUT && t.partner == 2 && t.match == 1 && t.bout == 3);
+	assert(t.players[0] == 1 && t.players[3] == 4 && t.left[0] == 1 && t.left[1] == 2 && t.number == 2 && t.hp == 29);
+	assert(ONLINE_TEAM_STATE_BYTES == 36 && !arena_wire_team_state(ts, sizeof ts - 1, &t));
+	ts[30] = 3;
+	assert(!arena_wire_team_state(ts, sizeof ts, &t));
+	ts[30] = 1; ts[1] = 10;
+	assert(!arena_wire_team_state(ts, sizeof ts, &t));
 	/* ARENA_INPUT !BIIB + n u16: keys from frame 0x100 */
 	const uint16_t keys[3] = { 0x0001, 0x0210, 0x03FF };
 	assert(arena_wire_input(m, sizeof m, 7, 0x100, keys, 3) == 16);
@@ -293,7 +311,8 @@ static void loadout_bytes(void) {
 	assert(n && n <= ONLINE_ARENA_LOADOUT_MAX);
 	assert(arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && carried);
 	assert(!memcmp(back.folder, l.folder, sizeof l.folder) && !memcmp(back.board, l.board, sizeof l.board));
-	assert(!memcmp(back.grid, l.grid, sizeof l.grid) && back.max_hp == 400 && back.hp == 400 && back.base_hp == 300);
+	/* (v2: the HP he goes in with, a Team NetBattle's winner's left from his last bout) */
+	assert(!memcmp(back.grid, l.grid, sizeof l.grid) && back.max_hp == 400 && back.hp == 40 && back.base_hp == 300);
 	assert(back.attack == 2 && back.crosses == 5 && back.beast == 1 && back.tag[1] == 0xFF);
 	assert(back.pack[5][0] == 0);   /* (the pack stays home) */
 	/* the same bytes again from what came: both games install the same MegaMan */
@@ -302,8 +321,16 @@ static void loadout_bytes(void) {
 	assert(arena_loadout_pack(NULL, b, sizeof b) == 2 && arena_loadout_unpack(b, 2, &back, &carried, NULL, 0) && !carried);
 	n = arena_loadout_pack(&l, b, sizeof b);
 	assert(!arena_loadout_unpack(b, n - 1, &back, &carried, why, sizeof why) && strstr(why, "size"));
-	b[0] = 2;
+	b[0] = 1;
 	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "version"));
+	/* HP past his max, or none, does not come */
+	l.hp = 401;
+	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "HP"));
+	l.hp = 0;
+	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "HP"));
+	l.hp = 400;
 	/* the receiver's refusals are the local ones */
 	l.folder[8] = (uint16_t)(1 | 27u << 9);
 	n = arena_loadout_pack(&l, b, sizeof b);
@@ -612,10 +639,12 @@ static void stands(void) {
 	memcpy(e + 28, "Beta", 4);
 	e[44] = STANDS_FIGHTING; e[45] = 2; e[46] = 3;
 	e[48] = 80; e[50] = 100; e[52] = 20; e[54] = 100; e[56] = 54; e[58] = 1; e[59] = 2; e[60] = 1;
+	e[62] = 2;   /* (v12: a Team NetBattle's bout 2) */
 	StandsEntry got[ONLINE_STANDS_MAX];
 	assert(stands_wire_read(s, sizeof s, got) == 1 && got[0].match == 7 && got[0].side[0] == 1 && got[0].side[1] == 2);
 	assert(!strcmp(got[0].name[0], "Alpha") && !strcmp(got[0].name[1], "Beta") && got[0].watchers == 2 && got[0].cheers == 3);
 	assert(got[0].report.hp[0] == 80 && got[0].report.hp[1] == 20 && got[0].report.chip[0] == 54 && got[0].report.used[0] == 2);
+	assert(got[0].bout == 2 && ONLINE_STANDS_ENTRY_BYTES == 63);
 	assert(stands_wire_read(s, sizeof s - 1, got) < 0);
 	e[44] = 9;
 	assert(stands_wire_read(s, sizeof s, got) < 0);

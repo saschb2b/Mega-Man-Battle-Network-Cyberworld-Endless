@@ -29,7 +29,10 @@ OFFER = struct.Struct("!BHBB")
 BOARD_ENTRY = struct.Struct("!IHBB")
 # (the stands, protocol v7: docs/ONLINE_ARENA.md, The stands)
 ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
-STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBB")
+STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBBB")
+# (Team NetBattles, protocol v12: teams.py)
+TEAM = struct.Struct("!BBIB")
+TEAM_STATE = struct.Struct("!BBIII4IBBBBH")
 WATCH = struct.Struct("!BBI")
 WATCH_STATE = struct.Struct("!BBIIIB")
 WATCH_KEYS = struct.Struct("!BIBIH")
@@ -247,6 +250,20 @@ def read_arena_status(data):
             or chip0 > SPEC["chip_last"] or chip1 > SPEC["chip_last"]:
         raise ProtocolError("Invalid arena status")
     return match, (hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner)
+
+
+def read_team(data):
+    """TEAM: 1 ask a player to team up, 2 answer one (value 1 yes), 3 split the team (or take an ask back), 4 the order (the lead)."""
+    if len(data) != TEAM.size or data[0] != SPEC["team"]:
+        raise ProtocolError("Malformed TEAM")
+    _, action, ref, value = TEAM.unpack(data)
+    if not 1 <= action <= 4 or value > 1 or (action != 3 and not ref):
+        raise ProtocolError("Invalid team action")
+    return action, ref, value
+
+
+def team_state(stage, partner, match, bout, players, left, number, result, hp):
+    return TEAM_STATE.pack(SPEC["team_state"], stage, partner, match, bout, *players, left[0], left[1], number, result, hp)
 
 
 def read_watch(data):
