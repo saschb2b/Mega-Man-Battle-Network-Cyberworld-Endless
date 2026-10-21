@@ -7,12 +7,14 @@
 
 #include "online_types.h"
 
-/* L: MegaMan's question and its two ways (say, emote). */
+/* L: MegaMan's question and its three ways (say, emote, look around:
+ * square_look_words). */
 const char *square_menu_question(void);
 /* The greeter's word before he stamps a NetPass just come full (the
  * stamp moment, netpass_screen.h) */
 const char *square_greeter_stamp_words(void);
-extern const char *const square_menu_options[2];
+#define SQUARE_MENU_OPTIONS 3
+extern const char *const square_menu_options[SQUARE_MENU_OPTIONS];
 /* ... a page of phrases or emotes goes on with this. */
 const char *square_more(void);
 const char *square_back(void);

@@ -157,6 +157,12 @@
   layer. And at the wall beside the corridor to it, the arrow and L no
   longer point at the pad through the wall: they lead into the corridor
   first.
+- **Home remembers a quit.** A new game after a run you quit before its
+  first save opened with "Dad's backup got me home safe last time.", as
+  if MegaMan had been deleted; it now reads as a dive left unfinished,
+  and Dad's backup comes up only after a deletion. On a brand-new run
+  the courier in Lan's HP says the town's requests are up, not "NEW
+  REQUESTS POSTED!" before you have done a thing.
 
 ## 0.12.0 (2026-10-13)
 

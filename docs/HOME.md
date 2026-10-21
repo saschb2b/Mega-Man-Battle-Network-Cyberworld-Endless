@@ -274,7 +274,9 @@ shows BN6's sprite of it). Talked to, he names what waits and where in a
 Mr.Prog's capitals, the most valuable first, a box each (`home_words.c`):
 a finished request's pay with its asker ("REWARD WAITING! THE NETBATTLE
 CLUB,THE ACADEMY!"), else the new requests posted while none is held, by
-place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"), then the
+place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"; at the
+run's first visit, before its first layer, when nothing is new yet,
+"REQUESTS ARE UP AT ASTERLAND,THE ACADEMY AND TOWN!", session 74), then the
 keys AsterLand's SubChip seller stocked ("ASTERLAND HAS UNLOCKERS!"). He
 relays the town's posts and the shop's stock, never the Net ahead. What
 the visit holds is fixed as it begins, from the run's state, so a
@@ -422,7 +424,13 @@ As built (issue #94): the town is Central Town at its original width,
 the same plan every run (`CYBERWORLD_TOWN_STYLE` and `_VARIANT` still
 pick another for a test). A run begins in Lan's room, at the top of its
 stairs where BN6 sets him down; the run's words play there, and R at his
-PC jacks MegaMan in to Lan's HP (`lan_house.c`). BN6's own jack-in from
+PC jacks MegaMan in to Lan's HP (`lan_house.c`). Those words remember how
+the last run went (`town_lines.c`): one left unfinished ("We never
+finished that last dive..."), whether a saved run was started over or a
+run was quit before its first save (the profile's `run_open`, set as a
+run begins and cleared as it ends; session 74 heard "Dad's backup got me
+home safe last time." after a plain quit), and Dad's backup only after a
+deletion. BN6's own jack-in from
 the PC (destination 1) runs a line of its story's that turns Lan back
 ("Lan,let's check out the town first!"), so the room's table goes
 through the town's destination with Lan's plain "Jack in!". The house
@@ -770,9 +778,15 @@ on a server that did not answer, runs another version, is full, or turned
 the name down, never the server's own text; and a trade the visit made
 is the run's now (docs/ONLINE.md, Trade Central).
 
-**Talked to**, the keeper sets where the gate leads and the player's
-name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a field: host or
-host:port, `wss://` and `/presence` added), MY NAME. The two fields are
+**Talked to**, the keeper says where the gate leads, as a place ("IT
+LEADS TO THE OFFICIAL SQUARE!", or "TO ANOTHER SERVER'S SQUARE!", never
+its address, `--dev online`'s server counted), and sets where it leads
+and the player's name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a
+field: host or host:port, `wss://` and `/presence` added), MY NAME. The
+cursor starts on the first, so OFFICIAL SQUARE asks before it changes
+the gate ("THE OFFICIAL SQUARE INSTEAD?", the cursor on No) and says it
+leads there already where it does: one A too many while paging his
+words had switched the server unasked (session 74). The two fields are
 the only screen of its own going online has (`src/online/online_field.c`,
 in the PET's colours, a keyboard on the pad and by touch, the system's
 own keyboard and paste where there is one; on a phone held upright the

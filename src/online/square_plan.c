@@ -8,9 +8,9 @@
 static const int areas[] = { 0, 2, 3 };
 
 /* The plaza (13 panels a side) and its middle, where the landmark stands */
-#define PLAZA0 11
-#define PLAZA1 23
 #define MID 17
+#define PLAZA0 (MID - SQUARE_PLAZA_HALF)
+#define PLAZA1 (MID + SQUARE_PLAZA_HALF)
 
 static void floor_box(SquarePlan *p, int x0, int y0, int x1, int y1) {
 	for (int y = y0; y <= y1; ++y)

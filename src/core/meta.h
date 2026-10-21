@@ -106,6 +106,9 @@ bool meta_setup_has_choice(void);
  * (a folder earned in a run that never reached one was announced late, as
  * if the run after had opened it). */
 void meta_run_begun(void);
+/* Whether the run begun before this one never ended (Profile.run_open as
+ * this one began): quit before any save, or left for a new one. */
+bool meta_run_was_open(void);
 /* At a run's end, won or lost: the profile's unlocks from what the run and
  * the ones before it did, and the summary's lines for them. */
 void meta_run_over(bool won);
