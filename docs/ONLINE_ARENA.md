@@ -1266,6 +1266,30 @@ THIS PET!", then "A NETBATTLE'S ON! ALPHA VS BETA!", "ALPHA HAS 150 HP!",
 later "ALPHA HAS 120", "ALPHA USED MINIBOMB!" and "ALPHA HAS 10 HP!" as
 the cable's first's reports came, and no question.
 
+## Two MegaMen a side
+
+A spike of epic #167, research only: `--dev rollbench,arena2v2`
+(`src/online/arena_team.c`) runs the pair's Practice NetBattle with two
+MegaMen a side in BN6's own engine. A hook at the battle's spawn
+(`BN6_SPAWN_ENTITIES`) trades a NetBattle's list for one of four MegaMen; a
+hook at the battle loop's copy of the sides' keys (`BN6_KEY_COPY`, side 0's
+call) counts the loop's iterations in the core's RAM (`RAM_TEAM_TICK`) and
+writes the partners' keys, scripted by that count, into their AI data.
+
+The rule it proves: a partner's keys go in by the battle's iteration, which
+both GBAs count alike, never by a core's frame counter, which runs a frame
+or two apart on the two GBAs at the same iteration (what the feasibility
+study took for a skew inside BN6). With it the two GBAs' battles agree at
+every iteration (`arena2v2=1`: 489 compared, 0 apart, 11 rollbacks of 8
+frames coming back the same); one key flipped on the second GBA alone parts
+them (`arena2v2=165`: 325 apart from iteration 165, the partner on another
+panel). Under full rules BN5's chip AI gave both of side 0's MegaMen its one
+block of AI data (`RAM_PLAYER_AI`), so the flag keeps it the first's
+(`darkinvs_two_a_side`). The research notes, with the harness's whole
+battle and its fields compared byte by byte, are kept out of the repository
+(`.build/research/battles/engine-2v2.md`); a partner shares his side's hand,
+NaviStats and Custom screen, and four key streams have no wire yet.
+
 ## Not yet
 
 - The battle's sound: the scene plays the player's core only where the

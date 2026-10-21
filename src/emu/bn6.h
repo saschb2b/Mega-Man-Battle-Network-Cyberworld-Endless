@@ -387,6 +387,7 @@
 #include "bn6_attacks.h"   /* the attack families, power attacks and charge times, as the engine grows them (issue #82) */
 #include "bn6_chips.h"   /* the chip tables grown and moved, the pack's extension (issue #82), BN6's sorts (issue #124) */
 #include "bn6_families.h"   /* the battle engine's tables a virus family is found through (issue #82) */
+#include "bn6_link.h"   /* the link battle's keys into a player, the Practice NetBattle's list (epic #167) */
 #include "bn6_forms.h"   /* MegaMan's forms: the tables by form, the code that reads it, a Cross chosen (issue #82) */
 #include "bn6_navis.h"   /* the battle engine's Navis: their tables by AI index, the routines they name, their arm points (issue #82) */
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */

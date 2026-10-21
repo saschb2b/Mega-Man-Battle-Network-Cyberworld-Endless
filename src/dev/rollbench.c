@@ -14,6 +14,7 @@
 #include "arena_boot.h"
 #include "arena_pair.h"
 #include "arena_sync.h"
+#include "arena_team.h"
 #include "arena_window.h"
 #include "bn6.h"
 #include "emu.h"
@@ -320,6 +321,8 @@ static void enter(void) {
 
 static void finish(void) {
 	if (B.why) say(B.why, "stopped: %s", B.why);
+	/* (--dev rollbench,arena2v2: the two GBAs' battles compared, iteration by iteration) */
+	if (dev.arena_2v2 > 0) show(arena_team_report() ? "2V2 THE SAME" : "2V2 APART");
 	B.stage = DONE;
 	/* (--dev rollbench,arena: the Arena's battle next, on what was measured here) */
 	if (dev.arena) scene_set(&scene_arena);

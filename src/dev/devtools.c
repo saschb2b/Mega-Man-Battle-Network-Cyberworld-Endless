@@ -57,7 +57,7 @@ static bool dev_switch(const char *t) {
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenadesync=", &dev.arena_desync },
-		{ "arenaroll=", &dev.arena_roll }, { "arenawindow=", &dev.arena_window },
+		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "arenawindow=", &dev.arena_window },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }

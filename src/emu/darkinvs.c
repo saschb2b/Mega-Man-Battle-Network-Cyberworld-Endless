@@ -28,6 +28,7 @@
 #define DEV_FRAMES 600                               /* (... for DarkInvs's 600 frames) */
 
 static bool dev_on;
+static bool two_a_side;   /* (--dev arena2v2: darkinvs_two_a_side) */
 static uint32_t last_timer;
 static bool entered;
 
@@ -51,11 +52,20 @@ static HookAct arm_chaos(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
+/* another MegaMan in play holds the block already: --dev arena2v2's two a side (epic #167's spike), the block its first's,
+ * whose AI data BN6's key copy (BN6_KEY_COPY) writes, the partner keeping BN6's own */
+static bool block_taken(uint32_t me) {
+	for (uint32_t o = BN6_T1_OBJECTS; o < BN6_T1_OBJECTS + BN6_T1_COUNT * BN6_T1_SIZE; o += BN6_T1_SIZE)
+		if (o != me && (hook_read8(o + BN6_T1_IN_PLAY) & 1) && hook_read32(o + BN6_T1_AI_DATA) == RAM_PLAYER_AI) return true;
+	return false;
+}
+
 /* his AI data moved into BN5's 0x140 bytes (BN6's 0x100: the chip AI keeps its state past them, BN6_DARK_AI's reason), its
  * pool's place kept */
 static void adopt(uint32_t me) {
 	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
 	if (ai == RAM_PLAYER_AI || ai < BN6_EWRAM || ai >= BN6_EWRAM_END) return;
+	if (two_a_side && block_taken(me)) return;
 	for (uint32_t k = 0; k < BN5_AI_DATA_SIZE; k += 4) hook_write32(RAM_PLAYER_AI + k, k < BN6_AI_DATA_SIZE ? hook_read32(ai + k) : 0);
 	hook_write32(POOL_AT, ai);
 	hook_write32(me + BN6_T1_AI_DATA, RAM_PLAYER_AI);
@@ -196,6 +206,7 @@ static HookAct idle(HookRegs *r, void *user) {
 }
 
 void darkinvs_dev(bool on) { dev_on = on; }
+void darkinvs_two_a_side(bool on) { two_a_side = on; }
 
 bool darkinvs_install(void) {
 	uint32_t m = machine();

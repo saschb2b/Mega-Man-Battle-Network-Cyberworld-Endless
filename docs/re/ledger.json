@@ -156,6 +156,14 @@
       "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
       "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
       "link": "../ONLINE_ARENA.md#full-rules"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-21",
+      "name": "Two MegaMen a side (epic #167's spike)",
+      "result": "With a side's second MegaMan's keys written at the battle loop's key copy (0x08012DFC) by the loop's iteration, both GBAs' battles agree at every iteration: the research harness over a whole battle (every T1, T3 and T4 object, AI data, NaviStats, hand and random number compared; nothing apart beyond BN6's own 1v1's fields) and the pair under --dev rollbench,arena2v2 (489 iterations, 0 apart, 11 rollbacks the same); one key flipped on one GBA parts them (325 apart). The feasibility study's one-frame skew was its harness: every mode it ran was mode 1, which scheduled the partner by each core's own frame counter, a frame or two apart at the same iteration.",
+      "meaning": "BN6's engine runs two MegaMen a side alike on both GBAs; a partner's keys must enter by the battle's iteration. Under full rules BN5's chip AI gave both of side 0's MegaMen one AI data block, which the flag keeps to the first.",
+      "link": "../ONLINE_ARENA.md#two-megamen-a-side"
     }
   ],
   "method": {
