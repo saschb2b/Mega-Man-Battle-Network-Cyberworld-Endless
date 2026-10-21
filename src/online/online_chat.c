@@ -1,6 +1,9 @@
 /* online_chat.h. The Net Square's chats (docs/ONLINE.md), all in BN6's own
  * chat boxes: L asks MegaMan to say something or do an emote (the
- * protocol's quick phrases and emotes, a page of two at a time); A facing
+ * protocol's quick phrases and emotes, a page of two at a time), L held
+ * with a direction sends one of four favourite emotes at once
+ * (square_emote.h), and L's More asks to look around or to quiet everyone
+ * else's; A facing
  * another player's MegaMan reads his card, and waves, mutes or blocks him;
  * R, or the pad home, asks to head home; the channel keeper moves MegaMan
  * to the next or last channel. Each option's script sets an event flag of
@@ -23,6 +26,7 @@
 #include "platform.h"
 #include "script_kit.h"
 #include "square_arena.h"
+#include "square_emote.h"
 #include "square_team.h"
 #include "square_life.h"
 #include "square_week.h"
@@ -33,6 +37,8 @@
 /* The Square's event flags (its own map's, free while MegaMan is there) */
 #define SAY_FLAG     0x1480   /* + phrase 0-7 */
 #define EMOTE_FLAG   0x1488   /* + emote 0-5 */
+#define EMOTE_FLAG2  0x14CA   /* + emote 6-11 (issue #176) */
+#define QUIET_FLAG   0x14D0   /* L's Quiet please or Let them talk (issue #176) */
 #define NEXT_FLAG    0x148E
 #define LAST_FLAG    0x148F
 #define WAVE_FLAG    0x1490
@@ -48,6 +54,7 @@
 
 #define CARD_WAIT 60     /* frames A waits for a peer's card */
 #define WAVE 0           /* the protocol's emote "Wave" */
+#define EMOTES_LOW 6     /* the emotes of EMOTE_FLAG's; the rest EMOTE_FLAG2's */
 
 static struct {
 	OnlineSnapshot s;
@@ -60,6 +67,7 @@ static struct {
 	unsigned keeper_said;     /* channel, channels and navis the keeper's words name, packed */
 	bool on_exit;
 	bool card_open;           /* a peer's card open in the chat box (online_chat_card_open) */
+	bool l_held, l_used;      /* L down, and a favourite sent with it (its release opens no menu) */
 } C;
 
 void online_chat_reset(void) {
@@ -73,6 +81,9 @@ void online_chat_reset(void) {
 	flag_clear(TEAM_FLAG);
 	flag_clear(DIVE_FLAG);
 	flag_clear(LOOK_FLAG);
+	flag_clear(QUIET_FLAG);
+	for (int k = EMOTES_LOW; k < ONLINE_EMOTE_COUNT; ++k) flag_clear(EMOTE_FLAG2 + k - EMOTES_LOW);
+	square_emote_reset();
 }
 
 static const OnlineProfile *card_of(uint32_t id) {
@@ -101,24 +112,27 @@ static void cards(void) {
 	}
 }
 
+static int emote_flag(int k) { return k < EMOTES_LOW ? EMOTE_FLAG + k : EMOTE_FLAG2 + k - EMOTES_LOW; }
+
 /* L's chat into the Square's talk room: the question, then pages of two
- * phrases or emotes, each with More (or Back to the first), or a look
- * around (square_life_look) */
-#define SAY_PAGES 4
-#define EMOTE_PAGES 3
+ * phrases or emotes, each with More (or Back to the first); More's look
+ * around (square_life_look) and the quiet (square_emote.h) */
+#define SAY_PAGES (ONLINE_PHRASE_COUNT / 2)
+#define EMOTE_PAGES (ONLINE_EMOTE_COUNT / 2)
 static void menu(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
-	enum { TOP, SAY = 1, EMOTE = SAY + SAY_PAGES, PHRASE = EMOTE + EMOTE_PAGES, DO = PHRASE + ONLINE_PHRASE_COUNT,
-		LOOK = DO + ONLINE_EMOTE_COUNT, END };
+	enum { TOP, SAY = 1, EMOTE = SAY + SAY_PAGES, MORE = EMOTE + EMOTE_PAGES, PHRASE, DO = PHRASE + ONLINE_PHRASE_COUNT,
+		LOOK = DO + ONLINE_EMOTE_COUNT, QUIET, END };
 	ta_begin(&t);
 	ta_script(&t);
 	ta_page(&t, FACE_MEGAMAN, square_menu_question(), true);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
-	ta_options(&t, square_menu_options, SQUARE_MENU_OPTIONS);
-	int top[SQUARE_MENU_OPTIONS] = { SAY, EMOTE, LOOK };
-	ta_choose(&t, top, SQUARE_MENU_OPTIONS, END);
+	const char *top_labels[3] = { square_menu_options[0], square_menu_options[1], square_more() };
+	ta_options(&t, top_labels, 3);
+	int top[3] = { SAY, EMOTE, MORE };
+	ta_choose(&t, top, 3, END);
 	for (int kind = 0; kind < 2; ++kind) {
 		int pages = kind ? EMOTE_PAGES : SAY_PAGES, first = kind ? EMOTE : SAY, item = kind ? DO : PHRASE;
 		const char *const *names = kind ? online_emotes : online_phrases;
@@ -132,13 +146,24 @@ static void menu(void) {
 			ta_choose(&t, to, 3, END);
 		}
 	}
+	/* (More: Look around, the quiet, Back) */
+	ta_script(&t);
+	ta_mugshot(&t, FACE_MEGAMAN);
+	ta_clear(&t);
+	const char *more[3] = { square_menu_options[2], square_quiet_option(square_emote_quiet()), square_back() };
+	ta_options(&t, more, 3);
+	int to_more[3] = { LOOK, QUIET, TOP };
+	ta_choose(&t, to_more, 3, END);
 	for (int k = 0; k < ONLINE_PHRASE_COUNT + ONLINE_EMOTE_COUNT; ++k) {
 		ta_script(&t);
-		ta_flag_set(&t, k < ONLINE_PHRASE_COUNT ? SAY_FLAG + k : EMOTE_FLAG + k - ONLINE_PHRASE_COUNT);
+		ta_flag_set(&t, k < ONLINE_PHRASE_COUNT ? SAY_FLAG + k : emote_flag(k - ONLINE_PHRASE_COUNT));
 		ta_end(&t);
 	}
 	ta_script(&t);
 	ta_flag_set(&t, LOOK_FLAG);
+	ta_end(&t);
+	ta_script(&t);
+	ta_flag_set(&t, QUIET_FLAG);
 	ta_end(&t);
 	ta_closing(&t);
 	int n = ta_build(&t, out);
@@ -245,15 +270,26 @@ static void keeper(void) {
 	if (online_square_keeper_say(out, ta_build(&t, out))) C.keeper_said = said;
 }
 
+/* the session of the MegaMan this one faces, near enough to talk to, 0
+ * none: an emote's aim */
+static uint32_t facing_peer(void) {
+	int slot = online_square_peer_ahead(bn6_player_x(), bn6_player_y(), emu_read8(BN6_PLAYER_FACING) & 7);
+	return slot >= 0 && (size_t)slot < C.s.peer_count ? C.s.peers[slot].id : 0;
+}
+
 /* the flags of the chat just closed, acted on; true: MegaMan heads home */
 static bool chosen(void) {
 	bool home = false;
-	for (int k = 0; k < ONLINE_PHRASE_COUNT; ++k) if (flag_get(SAY_FLAG + k)) online_transport_social(0, (uint8_t)k);
-	for (int k = 0; k < ONLINE_EMOTE_COUNT; ++k) if (flag_get(EMOTE_FLAG + k)) online_transport_social(1, (uint8_t)k);
+	uint32_t now = SDL_GetTicks();
+	for (int k = 0; k < ONLINE_PHRASE_COUNT; ++k) if (flag_get(SAY_FLAG + k)) square_emote_say(k, now);
+	for (int k = 0; k < ONLINE_EMOTE_COUNT; ++k)
+		if (flag_get(emote_flag(k))) { flag_clear(emote_flag(k)); square_emote_send(k, facing_peer(), now); }
 	if (flag_get(BATTLE_FLAG)) { flag_clear(BATTLE_FLAG); square_arena_challenge(&C.peer, C.s.latency_ms); }
 	if (flag_get(TEAM_FLAG)) { flag_clear(TEAM_FLAG); square_team_chosen(&C.peer); }
-	if (flag_get(WAVE_FLAG)) online_transport_social(1, WAVE);
+	/* (the card's Wave: at him) */
+	if (flag_get(WAVE_FLAG)) square_emote_send(WAVE, C.peer.id, now);
 	if (flag_get(LOOK_FLAG)) { flag_clear(LOOK_FLAG); square_life_look(); }
+	if (flag_get(QUIET_FLAG)) { flag_clear(QUIET_FLAG); square_emote_set_quiet(!square_emote_quiet()); }
 	if (flag_get(MUTE_FLAG)) online_people_toggle(C.peer.identity, ONLINE_MUTED);
 	if (flag_get(BLOCK_FLAG) && online_people_toggle(C.peer.identity, ONLINE_BLOCKED)) talk_start(square_blocked_words(C.peer.name), FACE_MEGAMAN);
 	if (C.s.channels > 1 && (flag_get(NEXT_FLAG) || flag_get(LAST_FLAG))) {
@@ -294,14 +330,34 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	return false;
 }
 
+/* L down: a direction sends its favourite emote (MegaMan stands while L
+ * is held); L let go without one opens L's chat */
+static uint32_t held_l(uint32_t keys) {
+	static const uint32_t ways[4] = { BTN_UP, BTN_RIGHT, BTN_DOWN, BTN_LEFT };
+	for (int k = 0; k < 4; ++k)
+		if (btn_pressed(ways[k])) {
+			C.l_used = true;
+			square_emote_send(square_emote_favourite(k), facing_peer(), SDL_GetTicks());
+		}
+	if (!btn_held(BTN_L)) {
+		C.l_held = false;
+		if (!C.l_used) menu();
+		return 0;
+	}
+	return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_A | KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT);
+}
+
 uint32_t online_chat_keys(uint32_t keys) {
 	/* (the NetPass up over the Square: the game held under it) */
 	if (netpass_screen_update()) return 0;
-	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT);
+	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) { C.l_held = false; return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT); }
 	keys &= ~(uint32_t)(KEY_START | KEY_SELECT);
+	/* (MegaMan's own emote under way: he stands still, as BN6 holds him for its own) */
+	if (square_emote_busy()) return 0;
 	/* (START, the PET's button: the NetPass, BN6's PET staying shut in the Square, whose RAM goes) */
 	if (btn_pressed(BTN_START)) { netpass_screen_open(); return 0; }
-	if (btn_pressed(BTN_L)) { menu(); return 0; }
+	if (btn_pressed(BTN_L)) { C.l_held = true; C.l_used = false; }
+	if (C.l_held) return held_l(keys);
 	if (btn_pressed(BTN_R)) {
 		flag_clear(HOME_FLAG);
 		if (talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;

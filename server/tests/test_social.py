@@ -84,17 +84,87 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         await second.send(bytes((protocol.SPEC["inspect"],)) + welcome[5:9])
         self.assertEqual((await second.message(protocol.SPEC["notice"]))[1:3], b"\x00\x0d")
 
+    @staticmethod
+    def social(kind, choice, target=0):
+        return struct.pack("!BBBI", protocol.SPEC["social"], kind, choice, target)
+
     async def test_quick_phrases_and_emotes_are_bounded_and_rate_limited(self):
         first, welcome = await self.connect()
         second, _ = await self.connect("Two")
-        await first.send(bytes((protocol.SPEC["social"], 0, 7)))
+        await first.send(self.social(0, 7))
         event = await second.message(protocol.SPEC["event"])
-        self.assertEqual(event, bytes((protocol.SPEC["event"],)) + welcome[5:9] + b"\x00\x07")
-        await first.send(bytes((protocol.SPEC["social"], 1, 5)))
-        await first.send(bytes((protocol.SPEC["social"], 0, 0)))
+        self.assertEqual(len(event), protocol.SPEC["event_bytes"])
+        self.assertEqual(event[:7], bytes((protocol.SPEC["event"],)) + welcome[5:9] + b"\x00\x07")
+        self.assertEqual(event[7:12], bytes(5))   # (aimed at nobody, no flags)
+        # (a burst of social_burst, then one back a second: v14, issue #176)
+        for _ in range(protocol.SPEC["social_burst"] - 1):
+            await first.send(self.social(1, 5))
+        await first.send(self.social(0, 0))
         self.assertEqual((await first.message(protocol.SPEC["notice"]))[1:3], b"\x00\x0c")
-        await first.send(bytes((protocol.SPEC["social"], 0, 8)))
+        await first.send(self.social(0, 8))
         self.assertEqual((await first.message(protocol.SPEC["error"]))[0], protocol.SPEC["error"])
+
+    async def test_every_emote_id_and_only_warm_ones_aimed(self):
+        first, welcome = await self.connect()
+        second, second_welcome = await self.connect("Two")
+        for choice in range(protocol.SPEC["emote_count"]):
+            self.server.players[struct.unpack("!I", welcome[5:9])[0]].social_tokens = 3
+            await first.send(self.social(1, choice))
+            self.assertEqual((await second.message(protocol.SPEC["event"]))[6], choice)
+        # (Laugh, id 2, is never aimed: it could taunt)
+        await first.send(self.social(1, 2, struct.unpack("!I", second_welcome[5:9])[0]))
+        self.assertEqual((await first.message(protocol.SPEC["error"]))[0], protocol.SPEC["error"])
+
+    async def test_beat_lies_ahead_on_the_servers_step(self):
+        first, _ = await self.connect()
+        second, _ = await self.connect("Two")
+        await first.send(self.social(1, 1))
+        event = await second.message(protocol.SPEC["event"])
+        beat = struct.unpack("!H", event[12:14])[0]
+        self.assertGreaterEqual(beat, protocol.SPEC["beat_lead_ms"] - 5)
+        self.assertLessEqual(beat, protocol.SPEC["beat_lead_ms"] + protocol.SPEC["beat_ms"] + 5)
+        # (the beat itself is a whole step of the server's clock)
+        rules = self.server.social_rules
+        for now in (10.0, 10.123, 10.249, 11.5):
+            ahead = rules.beat(1, now)
+            self.assertEqual(round(now * 1000 + ahead) % protocol.SPEC["beat_ms"], 0)
+            self.assertGreaterEqual(ahead, protocol.SPEC["beat_lead_ms"])
+
+    async def test_wave_answered_and_the_cap_on_one_target(self):
+        first, welcome = await self.connect()
+        second, second_welcome = await self.connect("Two")
+        one, two = (struct.unpack("!I", w[5:9])[0] for w in (welcome, second_welcome))
+        # a wave aimed at Two: both see it aimed
+        await first.send(self.social(1, 0, two))
+        event = await second.message(protocol.SPEC["event"])
+        self.assertEqual(struct.unpack("!I", event[7:11])[0], two)
+        self.assertEqual(event[11], 0)
+        await first.message(protocol.SPEC["event"])
+        # Two waves back within five seconds: answered, to both
+        await second.send(self.social(1, 0, one))
+        answer = await first.message(protocol.SPEC["event"])
+        self.assertEqual(struct.unpack("!I", answer[1:5])[0], two)
+        self.assertEqual(answer[11], protocol.SPEC["event_answered"])
+        await second.message(protocol.SPEC["event"])
+        # unanswered, One's aimed waves past the cap are shown to him alone
+        for k in range(protocol.SPEC["aim_cap"] + 1):
+            self.server.players[one].social_tokens = 3
+            await first.send(self.social(1, 5, two))
+            self.assertEqual((await first.message(protocol.SPEC["event"]))[6], 5)
+        for k in range(protocol.SPEC["aim_cap"]):
+            await second.message(protocol.SPEC["event"])
+        await first.send(self.social(0, 1))
+        self.assertEqual((await second.message(protocol.SPEC["event"]))[5:7], b"\x00\x01")
+        await first.message(protocol.SPEC["event"])
+        # an answer long after counts for nothing
+        self.server.social_rules.aims[(one, two)] = [time.monotonic() - 10]
+        await second.send(self.social(1, 0, one))
+        late = await first.message(protocol.SPEC["event"])
+        self.assertEqual((struct.unpack("!I", late[7:11])[0], late[11]), (one, 0))
+        # aimed at nobody there: to all, aimed at none
+        self.server.players[two].social_tokens = 3
+        await second.send(self.social(1, 1, 0xdead))
+        self.assertEqual(struct.unpack("!I", (await first.message(protocol.SPEC["event"]))[7:11])[0], 0)
 
     async def test_admin_mute_kick_ban_and_persistence(self):
         key = b"m" * 16
@@ -102,7 +172,7 @@ class SocialTests(unittest.IsolatedAsyncioTestCase):
         identity = welcome[14:30].hex()
         admin.perform("mute", self.directory, identity, "Test moderation")
         await self.server.moderation()
-        await first.send(bytes((protocol.SPEC["social"], 0, 0)))
+        await first.send(self.social(0, 0))
         self.assertEqual((await first.message(protocol.SPEC["notice"]))[1:3], b"\x00\x0b")
         admin.perform("unmute", self.directory, identity)
         admin.perform("kick", self.directory, identity)

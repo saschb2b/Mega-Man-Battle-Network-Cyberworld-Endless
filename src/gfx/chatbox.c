@@ -18,7 +18,8 @@ static void span(int x0, int x1, int y, SDL_Color c) {
 	if (x1 >= x0) fill_rect(x0, y, x1 - x0 + 1, 1, c);
 }
 
-void chatbox_frame(int x, int y, int w, int h) {
+/* the box's rows alone: its line, band and page, the corners rounded */
+static void rows(int x, int y, int w, int h) {
 	int r = x + w - 1;
 	/* by rows from the nearer edge: the line's, the band's and the page's
 	 * insets from the sides (-1 none), which round the corners */
@@ -31,6 +32,13 @@ void chatbox_frame(int x, int y, int w, int h) {
 		if (band >= 0) span(x + band, r - band, y + i, BAND);
 		if (page >= 0) span(x + page, r - page, y + i, PAGE);
 	}
+}
+
+void chatbox_bubble(int x, int y, int w, int h) { rows(x, y, w, h); }
+
+void chatbox_frame(int x, int y, int w, int h) {
+	int r = x + w - 1;
+	rows(x, y, w, h);
 	/* the tab: its left side slopes, its band runs into the box's, whose
 	 * top-right corner it squares */
 	span(r - 48, r - 2, y - 4, LINE);
@@ -76,6 +84,13 @@ static void build(void) {
 	font = SDL_CreateTextureFromSurface(P.renderer, s);
 	SDL_SetTextureBlendMode(font, SDL_BLENDMODE_BLEND);
 	SDL_FreeSurface(s);
+}
+
+int chatbox_text_width(const char *s) {
+	if (!font) build();
+	int w = 0;
+	for (; *s; ++s) if ((unsigned char)*s < 128) w += widths[(unsigned char)*s];
+	return w;
 }
 
 int chatbox_text(int x, int y, const char *s, int n) {

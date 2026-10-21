@@ -94,10 +94,14 @@ static void cards_and_events(void) {
 	for (size_t size = 1; size < sizeof card; ++size) assert(!online_wire_message(card, size, 100, &out));
 	card[89] = 7; assert(!online_wire_message(card, sizeof card, 100, &out));
 	profile.hp = 301; assert(!online_wire_profile(encoded, &profile));
-	uint8_t event[7] = { ONLINE_EVENT, 0, 0, 0, 2, 1, 5 };
+	/* (v14: aimed at player 9, answered, its beat 250 ms on; half the round trip of 40 ms before it came) */
+	uint8_t event[ONLINE_EVENT_BYTES] = { ONLINE_EVENT, 0, 0, 0, 2, 1, 5, 0, 0, 0, 9, ONLINE_EVENT_ANSWERED, 0, 250 };
+	out.latency_ms = 40;
 	assert(online_wire_message(event, sizeof event, 100, &out));
 	assert(out.events[1].player_id == 2 && out.events[1].value == 5);
-	event[6] = 6; assert(!online_wire_message(event, sizeof event, 100, &out));
+	assert(out.events[1].target == 9 && out.events[1].flags == ONLINE_EVENT_ANSWERED && out.events[1].start == 100 + 250 - 20);
+	for (size_t size = 1; size < sizeof event; ++size) assert(!online_wire_message(event, size, 100, &out));
+	event[6] = ONLINE_EMOTE_COUNT; assert(!online_wire_message(event, sizeof event, 100, &out));
 	uint8_t notice[] = { ONLINE_NOTICE, 0, 12, 'W', 'a', 'i', 't' };
 	assert(online_wire_message(notice, sizeof notice, 100, &out) && out.connected && !strcmp(out.notice, "Wait"));
 	notice[3] = '\n'; assert(!online_wire_message(notice, sizeof notice, 100, &out));

@@ -271,7 +271,7 @@ static void back(void) {
 static void watching(void) {
 	if (btn_pressed(BTN_B)) { done(NULL, ANALYTICS_WATCH_LEFT); back(); return; }
 	if (btn_pressed(BTN_R)) W.view ^= 1u;
-	if (btn_pressed(BTN_L)) online_transport_social(1, EMOTE_CHEER);
+	if (btn_pressed(BTN_L)) online_transport_social(1, EMOTE_CHEER, 0);
 	arena_watch_show(W.w, W.view);
 	WatchingStage stage = arena_watch_tick(W.w, P.headless);
 	arena_watch_sound(W.w, W.view);

@@ -18,6 +18,10 @@ typedef struct {
 	uint8_t identity[NETWORK_ID_BYTES];
 	unsigned count, selected, consent;
 	unsigned named;   /* the player chose the name (at the gate's keeper) */
+	unsigned quiet;   /* everyone else's phrases and emotes hidden in the Square (square_emote.h) */
+	/* L held with up, right, down or left: the emote sent, each 1 + its id
+	 * (0 the default; square_emote.c) */
+	uint8_t favourites[4];
 } NetworkPrefs;
 
 bool network_name_valid(const char *name);

@@ -304,6 +304,8 @@ static void peer_at(unsigned slot, const OnlinePeer *peer) {
 	else if (actors[slot].moving) --actors[slot].moving;
 	emu_write8(at + SCRIPT_ANIM, (uint8_t)(peer->facing + (actors[slot].moving ? 8 : 0)));
 	position(at, peer->x, peer->y, peer->z);
+	/* (a sound asked for last frame has played: the loop again) */
+	if (actors[slot].sound) { put_jump(at, at + SCRIPT_LOOP); actors[slot].sound = 0; }
 	actors[slot].id = peer->id;
 	actors[slot].x = peer->x;
 	actors[slot].y = peer->y;
@@ -323,15 +325,26 @@ void online_square_actor(int k, bool visible, int anim, int x, int y, int z) {
 	a->visible = visible; a->anim = anim; a->x = x; a->y = y; a->z = z;
 }
 
+static void puppet_sound(Puppet *a, int sound) {
+	claims_begin(SQUARE_WRITER);
+	emu_write8(a->script + SCRIPT_SOUND + 1, (uint8_t)sound);
+	emu_write8(a->script + SCRIPT_SOUND + 2, (uint8_t)(sound >> 8));
+	put_jump(a->script, a->script + SCRIPT_SOUND);
+	claims_end();
+	a->sound = sound;
+}
+
 void online_square_actor_sound(int k, int sound) {
 	if (k < 0 || k >= SQUARE_ACTORS || !extras[k].script) return;
-	uint32_t at = extras[k].script;
+	puppet_sound(&extras[k], sound);
+}
+
+void online_square_peer_pose(unsigned slot, int anim, int sound) {
+	if (slot >= SQUARE_PEERS || !actors[slot].script || !actors[slot].visible) return;
 	claims_begin(SQUARE_WRITER);
-	emu_write8(at + SCRIPT_SOUND + 1, (uint8_t)sound);
-	emu_write8(at + SCRIPT_SOUND + 2, (uint8_t)(sound >> 8));
-	put_jump(at, at + SCRIPT_SOUND);
+	emu_write8(actors[slot].script + SCRIPT_ANIM, (uint8_t)anim);
 	claims_end();
-	extras[k].sound = sound;
+	if (sound > 0) puppet_sound(&actors[slot], sound);
 }
 
 int online_square_actor_ahead(int x, int y, int face) {

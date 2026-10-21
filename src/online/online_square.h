@@ -45,6 +45,11 @@ void online_square_peers(const OnlineSnapshot *shown);
  * with A; -1 none, -2 one of the Square's own (a Mr.Prog, the desk: BN6
  * talks to them). */
 int online_square_peer_ahead(int x, int y, int face);
+/* After online_square_peers: the peer in `slot` shown in BN6's animation
+ * `anim` of his MegaMan over his walk this frame (an emote performed,
+ * square_emote.c; he stands where he stands), and BN6's sound `sound`
+ * played from him once (0 none). */
+void online_square_peer_pose(unsigned slot, int anim, int sound);
 /* The ambient actors (square_life.c moves them): the two walkers, BN6's
  * log-in beam and the "!" over a head, each shown or hidden in animation
  * `anim` at world (x, y, z) from the next frame; a sound (BN6's id)

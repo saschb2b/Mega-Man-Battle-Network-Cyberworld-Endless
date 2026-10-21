@@ -175,7 +175,7 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         c, c_id = await self.connect("Gamma")
         await c.send(watch(1, match))
         await c.message(SPEC["watch_state"])
-        await c.send(bytes((SPEC["social"], 1, 1)))
+        await c.send(bytes((SPEC["social"], 1, 1)) + bytes(4))
         self.assertEqual(struct.unpack("!I", (await c.message(SPEC["event"]))[1:5])[0], c_id)
         entries = await self.stands_until(c, lambda e: e and e[0][7] == 1)
         self.assertEqual(entries[0][6], 1)    # (one watching)

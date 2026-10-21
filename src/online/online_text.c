@@ -3,8 +3,11 @@
 const char *const online_phrases[ONLINE_PHRASE_COUNT] = {
 	"Hello!", "Nice build!", "Good luck!", "Thanks!", "Let's explore!", "Great job!", "One moment!", "See you!",
 };
-const char *const online_emotes[ONLINE_EMOTE_COUNT] = { "Wave", "Cheer", "Laugh", "Surprised", "Thinking", "Bow" };
-const char *const online_emote_glyphs[ONLINE_EMOTE_COUNT] = { "o/", "* * *", "^_^", "!", "...", "(_ _)" };
+const char *const online_emotes[ONLINE_EMOTE_COUNT] = {
+	"Wave", "Cheer", "Laugh", "Surprised", "Thinking", "Bow", "Got it!", "Buster", "Phew...", "I'm beat", "Spin", "Zapped",
+};
+/* (MegaMan's pose carries the rest: square_emote.c) */
+const char *const online_emote_captions[ONLINE_EMOTE_COUNT] = { [2] = "Haha!", [4] = "Hmm..." };
 
 const char online_field_name_title[] = "YOUR NAME IN THE SQUARE";
 const char online_field_address_title[] = "SERVER ADDRESS";

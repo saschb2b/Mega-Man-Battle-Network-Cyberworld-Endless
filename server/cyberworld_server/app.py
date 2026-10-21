@@ -12,6 +12,7 @@ import time
 from . import protocol, websocket
 from .arena import Arena
 from .holds import BACKLOG, Holds
+from .social import Social
 from .stands import Stands
 from .teams import Teams
 from .trade import Trades
@@ -34,7 +35,7 @@ class Player:
     last_log: float = 0
     joined: float = dataclasses.field(default_factory=time.time)
     profile: bytes = protocol.DEFAULT_PROFILE
-    social_tokens: float = 2
+    social_tokens: float = protocol.SPEC["social_burst"]
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
@@ -85,6 +86,7 @@ class Server:
         self.trades, self.arena = Trades(self), Arena(self)
         self.weeks = Weeks(self, clock)
         self.stands = Stands(self)
+        self.social_rules = Social(self)
         self.teams = Teams(self)
         # (the day's totals, no personal data: stats.py)
         self.daily = Daily(state_dir, self.retention.stats_days, clock)
@@ -238,6 +240,7 @@ class Server:
             self.arena.left(old.id)
             self.teams.left(old.id)
             self.stands.left(old)
+            self.social_rules.left(old.id)
             if player.resumed:
                 self.holds.take_back(old, player)
             else:
@@ -382,6 +385,7 @@ class Server:
         self.arena.left(player.id)
         self.teams.left(player.id)
         self.stands.left(player)
+        self.social_rules.left(player.id)
         player.channel = channel
         await self.welcome(player)
         await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
@@ -399,17 +403,22 @@ class Server:
         await websocket.send(player.writer, struct.pack("!BI16s", protocol.SPEC["card"], peer.id, peer.identity) + peer.profile)
 
     async def social(self, player, data, now):
-        kind, choice = protocol.read_social(data)
+        kind, choice, target = protocol.read_social(data)
         if self.store.contains("mutes", player.identity):
             await self.notice(player, 11, "This profile is muted")
             return
-        player.social_tokens = min(2, player.social_tokens + (now - player.social_time) / 2)
-        player.social_time = now
-        if player.social_tokens < 1:
+        if not self.social_rules.allow(player, now):
             await self.notice(player, 12, "Please wait before sending another phrase or emote")
             return
-        player.social_tokens -= 1
-        event = struct.pack("!BIBB", protocol.SPEC["event"], player.id, kind, choice)
+        # (aimed at a MegaMan of the channel, or at all where he is gone: social.py)
+        aimed = self.players.get(target)
+        if not aimed or aimed is player or aimed.channel != player.channel:
+            target = 0
+        flags, shadow = self.social_rules.aim(player.id, target, now) if target else (0, False)
+        event = protocol.event(player.id, kind, choice, target, flags, self.social_rules.beat(player.channel, now))
+        if shadow:
+            player.writer.write(websocket.frame(event))
+            return
         self.stands.cheer(player)
         # (the two players of a battle under way hear nothing of the stands until it is over)
         for peer in list(self.players.values()):

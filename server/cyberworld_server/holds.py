@@ -48,6 +48,7 @@ class Holds:
         server.arena.left(player.id)
         server.teams.left(player.id)
         server.stands.left(player)
+        server.social_rules.left(player.id)
         if goodbye or not self.seconds or player.refused:
             self.free(player)
             return

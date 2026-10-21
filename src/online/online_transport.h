@@ -33,7 +33,9 @@ void online_transport_poll(int32_t x, int32_t y, int32_t z, uint8_t facing);
 void online_transport_snapshot(OnlineSnapshot *out);
 bool online_transport_profile(const OnlineProfile *profile);
 bool online_transport_inspect(uint32_t player_id);
-bool online_transport_social(uint8_t kind, uint8_t value);
+/* A phrase (kind 0) or an emote (1), an emote aimed at player `target`
+ * (0 none; ONLINE_EMOTE_AIMED's alone) */
+bool online_transport_social(uint8_t kind, uint8_t value, uint32_t target);
 bool online_transport_channel(uint16_t channel);
 /* Trade Central's and the Arena's messages (TRADE, OFFER, ARENA and its relayed
  * LOADOUT, INPUT and HASH; shared/online/README.md): sent within the

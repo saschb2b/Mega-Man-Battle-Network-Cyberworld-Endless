@@ -23,7 +23,11 @@ bool square_life_talk(int x, int y, int face);
  * lie from where he stands (square_look_words); false where no talk
  * began. */
 bool square_life_look(void);
-/* A word over someone's head this frame (world x, y, z); false none. */
-bool square_life_bark(const char **text, int *x, int *y, int *z);
+/* A word over someone's head this frame (world x, y, z): `k` 0 a walker's
+ * or a Mr.Prog's, 1 the greeter's call on a big cheer; false none. */
+bool square_life_bark(int k, const char **text, int *x, int *y, int *z);
+/* BN6's "!!" over world (x, y, z) a moment, and BN6's sound `sound` (0
+ * none): an answered wave's, a Surprised emote's (square_emote.c). */
+void square_life_mark(int x, int y, int z, int sound);
 
 #endif
