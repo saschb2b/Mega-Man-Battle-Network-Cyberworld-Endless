@@ -63,7 +63,7 @@ static HookAct spawn(HookRegs *r, void *user) {
 	r->r[0] = RAM_TEAM;
 	/* (the rings emptied with the battle: the count starts again at 0, RAM_TEAM_TICK cleared with the battle's RAM) */
 	for (uint32_t a = RAM_TEAM_RING; a < RAM_TEAM_RING_END; a += 4) hook_write32(a, 0);
-	/* (side 0's partner's own NaviStats, from his side's as the battle set them up) */
+	/* (each partner's own NaviStats and hand, from his side's as the battle set them up) */
 	arena_team_navi_begin();
 	return HOOK_CONTINUE;
 }

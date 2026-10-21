@@ -1762,6 +1762,15 @@ the shape for a 2v2 between four games, each running the pair.
 
 ## Not yet
 
+- Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
+  four streams over the server (designed, the wire unchanged); a
+  partner's own folder, Custom screen and HP box on his own GBA (his
+  hand is dealt his lead's chips); his own loadout in his record (his
+  NaviCust's programs, his Cross); an attack of his seen asking his
+  record by object (built, none asked yet); and the full-rules audit of
+  what is keyed by a side's player: the Souls, BN5's mood, the DarkChips,
+  the chip AI's state past BN6's AI data on a partner, BN5's Navis'
+  targets.
 - The battle's sound: the scene plays the player's core only where the
   game's own core has made its sound ring (`arena_pair_sound`).
 - The NaviCust's programs are written as the board; BN6 makes HP from

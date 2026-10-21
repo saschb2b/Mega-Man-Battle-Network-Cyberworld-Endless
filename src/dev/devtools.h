@@ -61,7 +61,7 @@ typedef struct {
 	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
 	                   from iteration N */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
-	int team_hp;    /* teamhp=N: under arena2v2 side 0's partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
+	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
 	                   GBA alone, a mutation that must part the two */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
