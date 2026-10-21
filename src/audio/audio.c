@@ -515,9 +515,29 @@ static AudioSource external; /* the embedded game, when it plays */
 
 void audio_external(AudioSource src) { external = src; }
 
+/* the effects playing (players 1-4), heard over the embedded game's sound */
+static bool effects_on(void) {
+	for (int p = 1; p < NUM_PLAYERS; ++p) if (players[p].on) return true;
+	for (int i = 0; i < MAX_CHANS; ++i) if (chans[i].on && chans[i].player) return true;
+	return false;
+}
+
 static void mix_out(int16_t *out, int frames) {
-	if (external) external(out, frames);
-	else render(out, frames);
+	if (!external) { render(out, frames); return; }
+	external(out, frames);
+	/* (a PET screen's sounds over the held game: the Arena's way in and its card, the NetPass, Trade Central;
+	 * the engine's music is never playing then) */
+	if (!effects_on()) return;
+	static int16_t fx[4096 * 2];
+	for (int done = 0; done < frames;) {
+		int n = frames - done < 4096 ? frames - done : 4096;
+		render(fx, n);
+		for (int i = 0; i < n * 2; ++i) {
+			int v = out[done * 2 + i] + fx[i];
+			out[done * 2 + i] = (int16_t)(v > 32767 ? 32767 : v < -32768 ? -32768 : v);
+		}
+		done += n;
+	}
 }
 
 static void callback(void *ud, Uint8 *stream, int len) {

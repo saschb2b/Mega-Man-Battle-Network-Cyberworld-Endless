@@ -15,6 +15,13 @@ const char *arena_battle_option(void);
 const char *arena_sent_words(const char *name);
 const char *arena_declined_words(void);
 const char *arena_gone_words(void);
+/* ... refused by the server: `name` busy (in a NetBattle, watching one, at
+ * Trade Central), no longer here, the Arena closed on this server, his
+ * NetPass or ours without the Arena's stamp */
+const char *arena_busy_words(const char *name);
+const char *arena_not_here_words(const char *name);
+const char *arena_closed_words(void);
+const char *arena_no_stamp_words(void);
 /* Challenged by `name`: the boxes, then the question (its end a '\n') */
 const char *arena_challenged_words(const char *name);
 /* The folder to carry: folder k's name as BN6 names it; MegaMan's words
@@ -23,12 +30,11 @@ const char *arena_folder_name(int k);
 const char *arena_folder_words(void);
 const char *arena_no_folder_words(void);
 const char *arena_challenged_question(void);
-/* Back in the Square after a result: another with `name`? (its end a '\n') */
-const char *arena_again_question(const char *name);
 /* Our MegaMan can't go into a NetBattle: a chip or a number no pair core
  * holds (the last guard, arena_loadout_check) */
 const char *arena_cant_words(void);
-/* Back in the Square: won, lost, over with no result, stopped */
+/* Back in the Square (the rematch is asked on the result card,
+ * arena_card.h): won, lost, over with no result, stopped */
 const char *arena_won_words(void);
 const char *arena_lost_words(void);
 const char *arena_over_words(void);

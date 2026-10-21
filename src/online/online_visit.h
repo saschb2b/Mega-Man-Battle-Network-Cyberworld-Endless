@@ -91,5 +91,7 @@ void online_visit_profile(OnlineProfile *out);
 /* The MegaMan carried, as read at the gate (the Arena's loadout); NULL
  * where none was read */
 const OnlineLoadout *online_visit_loadout(void);
+/* The name this game goes by in the Square (the visit's) */
+const char *online_visit_name(void);
 
 #endif

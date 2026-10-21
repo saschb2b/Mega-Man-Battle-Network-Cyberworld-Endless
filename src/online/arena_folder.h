@@ -16,10 +16,6 @@
  * where a chat is open. As it closes: Yes said. */
 bool arena_folder_challenge(const char *name);
 bool arena_folder_challenge_yes(void);
-/* Back in the Square after a result: `said` (MegaMan's word on it, ""
- * none), then whether to go again with `name` (the cursor on No); false
- * where a chat is open. As it closes: arena_folder_challenge_yes. */
-bool arena_folder_again(const char *said, const char *name);
 /* The first folder of `fits` (a bit a folder), 0 where none */
 int arena_folder_first(unsigned fits);
 /* Whether Lan is asked: more than one folder of `fits` */

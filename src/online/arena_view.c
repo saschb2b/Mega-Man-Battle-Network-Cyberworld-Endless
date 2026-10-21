@@ -8,12 +8,18 @@
 #include "arena_pair.h"
 #include "arena_text.h"
 #include "gfx.h"
+#include "pixfont.h"
 #include "platform.h"
+#include "second_frame.h"
 
 #define HEADLESS_SLICE 64   /* the way in's frames a tick without a window (a capture's frames stay the same on every machine) */
 #define SLICE          8
 #define SLICE_MS       14   /* the way in's time a tick in a window */
 #define NOTE_LINES     4
+#define BADGE_W        12
+#define BADGE_H        11
+#define PLATE_Y        17   /* the plate's top: under BN6's label of the other MegaMan */
+#define PLATE_H        11
 
 static SDL_Texture *tex;
 
@@ -77,21 +83,37 @@ void arena_view_note(const char *line, const char *second) {
 	for (int i = 0; i < n; ++i) text_draw(P.w / 2, y + 15 + 12 * i, lines[i], rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
-void arena_view_connecting(int progress) {
-	int cx = P.w / 2, y = P.core_y + 52;
-	text_draw(cx, y, arena_title, rgba(170, 200, 255, 255), TEXT_CENTER);
-	text_draw(cx, y + 16, arena_connecting, WHITE, TEXT_CENTER);
-	int w = 160, done = w * progress / 100;
-	fill_rect(cx - w / 2, y + 36, w, 6, rgba(40, 60, 90, 255));
-	fill_rect(cx - w / 2, y + 36, done, 6, rgba(120, 200, 255, 255));
-}
-
 void arena_view_clear(void) { fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 255)); }
 
-void arena_view_result(unsigned result, bool to_square) {
-	arena_view_note(result == 1 ? arena_won : result == 2 ? arena_lost : arena_ended, to_square ? arena_back_square : arena_back);
+/* the badge from (x, y): three bars rising, as many lit as the link is steady */
+static void badge(int x, int y, ArenaLinkState link, uint32_t t) {
+	int lit = link == ARENA_LINK_STEADY ? 3 : link == ARENA_LINK_ROLLING ? 2 : 1;
+	SDL_Color on = link == ARENA_LINK_STEADY ? PET_LINE : link == ARENA_LINK_ROLLING ? PET_GOLD : rgba(255, 82, 66, 255);
+	if (link == ARENA_LINK_STALLED && t / 15 % 2) on = PET_DIM;
+	fill_rect(x, y, BADGE_W, BADGE_H, rgba(0, 49, 74, 200));
+	for (int k = 0; k < 3; ++k) {
+		int h = 3 + 2 * k;
+		fill_rect(x + 2 + k * 3, y + BADGE_H - 2 - h, 2, h, k < lit ? on : PET_SLOT);
+	}
 }
 
-void arena_view_stopped(const char *why) { arena_view_note(arena_stopped, why); }
+void arena_view_over(const char *name, bool custom, ArenaLinkState link, uint32_t t) {
+	int right = P.core_x + ARENA_W - 2;
+	if (!custom) { badge(right - BADGE_W, P.core_y + 2, link, t); return; }
+	/* (below BN6's own label of the other MegaMan, at the Custom screen's top right) */
+	int y = P.core_y + PLATE_Y, w = pixfont_width(name, 1) + 8, x = right - BADGE_W - 2 - w;
+	fill_rect(x, y, w, PLATE_H, rgba(0, 49, 74, 220));
+	fill_rect(x, y + PLATE_H - 1, w, 1, PET_CYAN);
+	pixfont_draw(x + 4, y + 2, name, PET_WHITE, rgba(0, 49, 74, 255), PIXFONT_LEFT, 1);
+	badge(right - BADGE_W, y, link, t);
+}
 
-void arena_view_waiting(void) { arena_view_note(arena_waiting, NULL); }
+void arena_view_stall(const char *name, uint32_t left, uint32_t total, bool way_out) {
+	int h = way_out ? 30 : 22, y = P.core_y + ARENA_H - h;
+	fill_rect(P.core_x, y, ARENA_W, h, rgba(0, 0, 0, 200));
+	text_draw(P.w / 2, y + 2, arena_waiting_for(name), WHITE, TEXT_CENTER);
+	int bw = 120, bx = P.w / 2 - bw / 2;
+	fill_rect(bx, y + 16, bw, 3, PET_SLOT);
+	if (total) fill_rect(bx, y + 16, (int)((uint64_t)bw * left / total), 3, PET_CYAN_HI);
+	if (way_out) pixfont_draw(P.w / 2, y + 21, arena_leave_key, PET_GOLD, rgba(0, 49, 74, 255), PIXFONT_CENTER, 1);
+}

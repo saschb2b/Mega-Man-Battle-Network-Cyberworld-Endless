@@ -19,7 +19,7 @@ typedef struct {
 	const char *arrived;    /* the last Navi to log in while MegaMan was here, NULL none */
 	const char *traded;     /* the last player this game traded with, NULL none */
 	const char *fought;     /* ... and fought a NetBattle with, NULL none */
-	int result;             /* that battle's: 1 won, 2 lost, else over */
+	int result;             /* that battle's: 1 won, 2 lost, 4 broken off, else over */
 	unsigned won, lost;     /* the bouts with him in a row, that one among them */
 	bool arena;             /* this system offers NetBattles (not the New 3DS: square_arena_offered) */
 	bool stamp;             /* ... and this game's NetPass holds the Arena stamp (netpass.h) */
@@ -40,7 +40,7 @@ const char *square_greeter_words(const SquareFacts *f);
 
 const char *square_greeter_bark(const char *name, bool in);
 /* The referee by the Arena's ring, and his call over his head as a
- * battle of this game's ends (`result` 1 won, 2 lost, else over; `name`
+ * battle of this game's ends (`result` 1 won, 2 lost, 4 broken off, else over; `name`
  * the other's). */
 const char *square_referee_words(const SquareFacts *f);
 const char *square_referee_bark(int result, const char *name);

@@ -2,14 +2,17 @@
  * this machine. The player is the cable's first GBA, from the keyboard or
  * pad; the second is a script over the local link (arena_link_local),
  * its keys held back `arenalag` ticks as a network would hold them. The
- * player's core's picture shows whole at the window's scale; the battle's
- * end, or the reset chord, goes back to the title. */
+ * player's core's picture shows whole at the window's scale, the way in
+ * and the result on the Square's PET screens (arena_card.h), the battle
+ * with the Square's plate, badge and stall note (arena_view.h); the
+ * card's A, or the reset chord, goes back to the title. */
 #include "arena.h"
 
 #include <stdio.h>
 
 #include <SDL.h>
 
+#include "arena_card.h"
 #include "arena_carry.h"
 #include "arena_folder.h"
 #include "arena_format.h"
@@ -32,13 +35,17 @@
 #define DELAY_DEFAULT  6    /* frames of input delay: 100 ms */
 #define LAG_DEFAULT    3    /* the local link's one way: 50 ms */
 #define OVER_TICKS     300  /* the result shown before the title */
-#define STALL_SHOWN    20   /* ticks waiting for the peer before it is said */
+#define FADE           12   /* frames of a fade, as the Square's (square_arena.c) */
+#define STALL_NOTE     60   /* ticks waiting for the peer before it is said */
+#define STALL_END      1800
 
 static struct {
 	Arena *arena;
 	ArenaLocalLink local;
 	OnlineLoadout carried;
-	int over_t, stalled;
+	int over_t;
+	uint32_t t;            /* frames of the screen shown: the panel, the battle, the card */
+	ArenaStage was;
 } S;
 
 /* arenabusy's second player, by the frame's number alone (what the game
@@ -91,7 +98,9 @@ static void installs(void) {
 }
 
 static void enter(void) {
-	S.over_t = S.stalled = 0;
+	S.over_t = 0;
+	S.t = 0;
+	S.was = ARENA_CONNECTING;
 	unsigned delay = dev.arena_delay > 0 ? (unsigned)dev.arena_delay : DELAY_DEFAULT;
 	unsigned lag = dev.arena_lag >= 0 ? (unsigned)dev.arena_lag : LAG_DEFAULT;
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
@@ -140,17 +149,17 @@ static bool reset_chord(void) {
 
 static void update(void) {
 	if (!S.arena || reset_chord()) { scene_set(&scene_title); return; }
-	switch (arena_stage(S.arena)) {
+	ArenaStage stage = arena_stage(S.arena);
+	if (stage != S.was) { S.was = stage; S.t = 0; }
+	++S.t;
+	switch (stage) {
 	case ARENA_CONNECTING: arena_view_connect(S.arena); break;
-	case ARENA_BATTLE: {
-		uint32_t stalls = arena_stalls(S.arena);
+	case ARENA_BATTLE:
 		arena_tick(S.arena, pad_keys());
 		arena_sound(S.arena);
 		arena_report_frame(S.arena);
 		if (arena_stage(S.arena) == ARENA_OVER) arena_report_end(arena_result(S.arena));
-		S.stalled = arena_stalls(S.arena) != stalls ? S.stalled + 1 : 0;
 		break;
-	}
 	case ARENA_OVER:
 		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();
 		break;
@@ -160,20 +169,43 @@ static void update(void) {
 	}
 }
 
+/* the result card: the battle's tally (the player the cable's first), or the stop's line */
+static void card(ArenaStage stage) {
+	ArenaTally t;
+	arena_tally(S.arena, &t);
+	ArenaCardView c = { .name = arena_other, .t = S.t, .tally = t.seen, .frames = t.fought };
+	if (stage == ARENA_FAILED) {
+		c.result = arena_video(S.arena) ? 4 : 5;
+		c.why = arena_stop_line(arena_apart(S.arena) ? ARENA_STOP_APART : ARENA_STOP_ERROR, arena_other);
+	} else c.result = arena_result(S.arena) == 1 || arena_result(S.arena) == 2 ? arena_result(S.arena) : 3;
+	for (unsigned k = 0; k < 2; ++k) {
+		c.hp[k] = t.hp[k];
+		c.max_hp[k] = t.max_hp[k];
+		c.used[k] = t.used[k];
+	}
+	arena_card_result(&c);
+	arena_card_fade(255 - (int)S.t * 255 / FADE, false);
+}
+
 static void draw(void) {
 	arena_view_clear();
 	if (!S.arena) return;
 	ArenaStage stage = arena_stage(S.arena);
 	const uint32_t *v = arena_video(S.arena);
-	if (stage == ARENA_CONNECTING || (stage == ARENA_FAILED && !v)) {
-		if (stage == ARENA_CONNECTING) arena_view_connecting(arena_progress(S.arena));
-		else arena_view_stopped(arena_error(S.arena));
+	if (stage == ARENA_CONNECTING) {
+		ArenaWayView w = { .name = { arena_you, arena_other }, .known = { true, true }, .t = S.t,
+			.wait = { ARENA_SIDE_LINKING, ARENA_SIDE_LINKING }, .progress = arena_progress(S.arena) };
+		w.loadout[0] = S.carried.max_hp ? &S.carried : NULL;
+		arena_card_way(&w);
+		arena_card_fade(255 - (int)S.t * 255 / FADE, true);
 		return;
 	}
-	if (v) arena_view_core(v);
-	if (stage == ARENA_OVER) arena_view_result(arena_result(S.arena), false);
-	else if (stage == ARENA_FAILED) arena_view_stopped(arena_error(S.arena));
-	else if (S.stalled >= STALL_SHOWN) arena_view_waiting();
+	if (stage != ARENA_BATTLE || !v) { card(stage); return; }
+	arena_view_core(v);
+	arena_view_over(arena_other, arena_phase(S.arena, 0) == BN6_PHASE_CUSTOM, arena_link_state(S.arena), S.t);
+	uint32_t waited = arena_waited(S.arena);
+	if (waited >= STALL_NOTE) arena_view_stall(arena_other, waited < STALL_END ? STALL_END - waited : 0, STALL_END - STALL_NOTE, false);
+	arena_card_fade(255 - (int)S.t * 255 / FADE, true);
 }
 
 const Scene scene_arena = { "arena", enter, update, draw, leave };
