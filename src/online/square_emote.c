@@ -63,7 +63,7 @@ static const int default_favourites[4] = { 0, 1, 5, 2 };
 #define ANSWER_Z (-16)  /* ... between two MegaMen, over both */
 
 typedef struct { uint32_t id, target, start; uint8_t emote, flags; } Pending;
-typedef struct { uint32_t id, until; uint8_t emote; bool gap, sound; } Act;
+typedef struct { uint32_t id, until, target; uint8_t emote; bool gap, sound; } Act;
 
 static struct {
 	uint32_t event_serial, credit, credit_at, invited, invited_until, local_until;
@@ -218,7 +218,7 @@ static void begin(const OnlineSnapshot *s, const Pending *p, uint32_t now) {
 	Act *a = act_of(p->id);
 	if (!a) return;
 	bool again = a->id && now < a->until && poses[a->emote].anim == poses[p->emote].anim;
-	*a = (Act){ p->id, now + poses[p->emote].frames * 1000u / 60u, p->emote, again, true };
+	*a = (Act){ p->id, now + poses[p->emote].frames * 1000u / 60u, p->target, p->emote, again, true };
 	int x, y, tx, ty;
 	if ((p->flags & ONLINE_EVENT_ANSWERED) && where(s, p->id, &x, &y) && where(s, p->target, &tx, &ty))
 		square_life_mark((x + tx) / 2, (y + ty) / 2, ANSWER_Z, BN6_SOUND_APPEAR);
@@ -245,7 +245,7 @@ static void perform(const OnlineSnapshot *s, uint32_t now) {
 		const Pose *p = &poses[a->emote];
 		if (a->gap) { a->gap = false; continue; }
 		int x, y, slot = -1;
-		bool want = a->sound && !sounded && where(s, a->id, &x, &y) && (a->id == s->player_id || on_screen(x, y));
+		bool want = a->sound && !sounded && where(s, a->id, &x, &y) && (a->id == s->player_id || a->target == s->player_id || on_screen(x, y));
 		int into = (int)(now + (uint32_t)p->frames * 1000u / 60u - a->until) * 60 / 1000;
 		if (a->id == s->player_id) {
 			int facing = emu_read8(BN6_PLAYER_FACING) & 7;

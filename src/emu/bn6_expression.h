@@ -26,8 +26,10 @@
 #define BN6_OW_ANIM_PANTING     0x42   /* BN6_OW_MEGAMAN: on one knee, heaving (4 frames looping) */
 #define BN6_OW_ANIM_LEAP        0x43   /* BN6_OW_MEGAMAN: in mid-leap (1 frame) */
 #define BN6_OW_ANIM_PONDER      0x44   /* BN6_OW_MEGAMAN: crouched, looking about (3 frames, 9 long) */
-/* (four-way animations, + 0-3: BN6's facings 1, 3, 5 and 7, the grid's
- * four directions, read off the Square's captures, issue #176) */
+/* (four-way animations, + 0-3: the player's facing / 2, his facings 1, 3,
+ * 5 and 7 the grid's +x, +y, -x and -y (BN6_TALK_PROBES); facing 5's
+ * 0x35 seen pointing -x in the Square's captures, issue #176, the others
+ * assumed in that order) */
 
 /* The NPC script's hop in place, as BN6's excited bystanders do it (bn6f
  * npc_initHopMovement_809e8fc): the shadow left on the floor, the hop, the
@@ -48,7 +50,7 @@
 #define BN6_MUGSHOT_BLINK       1      /* BN6_TEXT_MUGSHOT: ... blinking, the mouth shut (a face's pause between words) */
 #define BN6_MUGSHOT_TALK        2      /* BN6_TEXT_MUGSHOT: ... the mouth moving while letters print, blinking between */
 #define BN6_MUGSHOT_EYES_SHUT   3      /* BN6_TEXT_MUGSHOT: ... eyes shut, Lan's face (0x00) alone has it */
-#define BN6_TEXT_PLAYER         0xF8   /* text command: F8 01 n MegaMan's (or Lan's) animation n, F8 03 waits for its end, F8 04 the one before */
+#define BN6_TEXT_PLAYER         0xF8   /* text command: F8 00 holds him, F8 01 n his animation n, F8 02 lets go, F8 03 waits for its end, F8 04 the one before the last F8 01 (each F8 01 keeps the one it replaces); run with no text printed, no chat box opens (issue #176) */
 #define BN6_TEXT_SOUND          0xFD   /* text command: FD 00 then a u16 sound, played without opening the box */
 
 /* The battle's burst over a fighter (sprite list 5's 0x07, plain) */
