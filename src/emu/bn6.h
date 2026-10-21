@@ -393,4 +393,5 @@
 #include "bn6_pet.h"   /* the PET: its menu, its screens' state, KeyItem's and E-Mail's words */
 #include "bn6_shop.h"   /* a shop's screen: its state and its list (issue #124) */
 #include "bn6_panels.h"   /* the battlefield's panels as the engine updates, draws and acts on them (issue #82) */
+#include "bn6_expression.h"   /* a character's mood: MegaMan's overworld poses, the hop, the chat box's face, the "!!" burst, map objects, sounds */
 #endif
