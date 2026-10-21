@@ -2259,7 +2259,10 @@ the shape for a 2v2 between four games, each running the pair.
   Program Advance and a chip of computed power in his hand (his hand
   takes a computed chip's power as 0), WhiCapsl's and Uninstll's marks;
   the screen copy's cost at the later turns (some 20 ms where the first
-  is 0.14); an attack of his seen asking his record by object (built,
+  is 0.14); the leads' wait for a partner over the network (built by
+  the stream's pick messages and BN6's cable; its limit's 60 seconds the
+  owner's to confirm), and the copy's later loads seen at up to 97 ms
+  after a long wait; an attack of his seen asking his record by object (built,
   none asked yet); and from the full-rules audit ([What a partner meets
   under full rules](#what-a-partner-meets-under-full-rules)) the Chaos
   Unison's hooks and BN5's DarkChips' mood rule by object, the green

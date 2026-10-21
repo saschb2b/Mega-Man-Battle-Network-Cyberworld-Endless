@@ -212,6 +212,14 @@
       "result": "A lone core loaded from his side's GBA at a Custom screen shows Lan's 'Communication error' within frames; a plain copy of the pair (both GBAs on their own cable, no hook) copied in each turn, his deck written into BN6_BATTLE_DECK and BN6_BATTLE_STEP put back to 0, has BN6 set its Custom screen up anew with his chips (BusterUp, Sword, Cannon, Atk+10, MiniBomb where his lead's offers a Cannon A first) and take his keys by its own rules; OK takes BN6_CUSTOM_MODE to 0x08 with his picks read (3 and 4). His picks crossed as pick messages in his stream and went into his hand on both GBAs at the same iteration: 1,315 iterations 0 apart with 135 rollbacks and with none, all 26 hashes the same; arenaroll=8 200 of 200 the same, its 26 hashes the delay alone's; his hand a chip short on the second GBA alone parts them from iteration 201. A frame of his screen 1.37 to 1.41 ms, a turn's copy 0.12 to 0.15 ms, making it once 160 ms. The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
       "meaning": "A partner needs no GBA of his own in the pair: BN6's own Custom screen runs on his client alone, and the battle stays deterministic because only his picks cross.",
       "link": "../ONLINE_ARENA.md#a-partners-own-custom-screen"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: the leads wait for their partners",
+      "result": "BN6's link battle closes its Custom screen once both GBAs' packets (bn6f sub_800B3A2, 0x0800B3A2: the mark 0x56789123, the hand, the NaviStats, the Cross's record) have come over the cable, checked each frame of mode 0x14 at 0x08026DEC; holding a side's packet back until its partner's picks are in makes both GBAs wait by BN6's own cable (the other shows BN6's Cstmzing... over the held side). A partner 10 s slow each turn: 3,035 iterations 0 apart, 91 hashes the same with 482 rollbacks and with none, arenaroll=8 683 of 683; a partner who never picks is ended by his client's send at 3,480 frames held, a client gone quiet by the pair's own limit at 3,600 (216 hashes the same with and without rollbacks). The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
+      "meaning": "A partner can be waited for without any clock: the hold is read in the side's GBA's RAM and crosses by BN6's own link, so every client and spectator agrees on the moment the screen closes.",
+      "link": "../ONLINE_ARENA.md#the-leads-wait-for-their-partners"
     }
   ],
   "method": {
