@@ -737,8 +737,11 @@ already as much of the new sound is skipped, so the sound stays on its
 timeline. Every system that plays the battle's sound takes it (the ring
 is `emu.c`'s). The ring holds about 21 ms on a desktop (1,024 samples),
 so a rollback of a frame or so is replaced whole and a deeper one in part;
-a few frames more of the ring in battle would cover more (not done). Not
-yet heard on a device: headless runs check that the game is the same
+a few frames more of the ring in battle would cover more (not done: it
+would put the battle's sound further behind its picture, a call for the
+owner). `tests/test_emu.c` holds the ring's marks to it (a mark cut back
+to, what was heard skipped, the timeline kept, with a guest core's tone).
+Not yet heard on a device: headless runs check that the game is the same
 (below), not how it sounds.
 
 **The battles, before and after** (this machine, the host build headless,
