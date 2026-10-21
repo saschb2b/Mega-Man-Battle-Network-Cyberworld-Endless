@@ -24,6 +24,8 @@ typedef struct {
 } Kept;
 static Kept kept[HOOK_CORES];
 static int second_slot = -1;   /* the second GBA's core's slot: teamhp's mutation (negative) there alone */
+/* each partner's own loadout's numbers, the same on every client (arena_team_navi_loadout) */
+static struct { bool given; uint16_t max_hp, base_hp; uint8_t attack, speed, charge; } own[SIDES];
 /* the records' answers by the asker (a partner's own object, one of each kind he spawned) and the objects marked a
  * partner's, every core's, a rollback's frames run again among them: what the output says */
 static uint32_t answered[SIDES][1 + KINDS], hands[SIDES][1 + KINDS], marked;
@@ -134,9 +136,31 @@ void arena_team_navi_begin(void) {
 		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
 		/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
 		for (unsigned i = 0; i < HAND_SIZE; ++i) hook_write8(hand(side) + i, hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i));
+		/* (his own loadout's HP and buster, as the Arena carries a lead's: BN6 copies a side's battle NaviStats from his menu's) */
+		if (own[side].given) {
+			if (own[side].max_hp) {
+				hook_write16(to + BN6_NS_BASE_HP, own[side].base_hp);
+				hook_write16(to + BN6_NS_CUR_HP, own[side].max_hp);
+				hook_write16(to + BN6_NS_MAX_HP, own[side].max_hp);
+			}
+			hook_write8(to + BN6_NS_ATTACK, own[side].attack);
+			hook_write8(to + BN6_NS_SPEED, own[side].speed);
+			hook_write8(to + BN6_NS_CHARGE, own[side].charge);
+		}
 		if (hp > 0)
 			for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) hook_write16(to + f, (uint16_t)hp);
 	}
+}
+
+void arena_team_navi_loadout(unsigned side, uint16_t max_hp, uint16_t base_hp, const uint8_t buster[3]) {
+	side &= 1u;
+	own[side].given = buster != NULL;
+	if (!buster) return;
+	own[side].max_hp = max_hp;
+	own[side].base_hp = base_hp;
+	own[side].attack = buster[0];
+	own[side].speed = buster[1];
+	own[side].charge = buster[2];
 }
 
 uint32_t arena_team_navi_hand(unsigned side) {

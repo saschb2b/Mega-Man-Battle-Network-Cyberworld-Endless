@@ -2005,6 +2005,30 @@ seat plus one, his own side's in cyan, the other's in gold), and the
 ally BN6 leaves unlabelled (a lead's partner on the lead's GBA, the lead
 on his partner's) has his HP under him as BN6 gives the enemies theirs.
 
+### His loadout in his record
+
+A partner's record (his battle NaviStats, above) is his side's as the
+battle spawns its field, then his own loadout's numbers where one is
+given (`arena_team_navi_loadout`): his max HP and base HP, and his
+buster's Attack, Speed and Charge, written where BN6 keeps them in a
+NaviStats (`BN6_NS_ATTACK`, `BN6_NS_SPEED`, `BN6_NS_CHARGE`, as the menu's
+`BN6_NAVI_ATTACK` ones; a battle reads its copy's), so that the asks
+answered by object for him and his shots read his. Under the dev flag
+side 0's partner carries the run's MegaMan with the next folder that
+holds chips after his lead's, where the data folder has a checkpoint;
+`teambuster=N` gives both partners Attack N. Seen with
+`teamhp=500,teambuster=5`: each partner's charged shot takes 50 from the
+other partner (450 to 400 at iteration 407, 440 to 390 at 477) where it
+took 10 without it, the leads' shots still 10; 2,454 iterations 0 apart,
+52 hashes the same with 266 rollbacks and with none.
+
+Not his yet: his NaviCust's programs past HP and the buster (BN6 makes
+a NaviStats' abilities from the board in its menus, bn6f
+applyNavicustPrograms_813C684, which no core runs for him: a core of his
+own client running it from his board would give numbers every client
+must get alike, so they would cross with his loadout), and his Cross
+(below, Not yet).
+
 ### Proved: the partners' own folders and screens
 
 The player's Gregar ROM and Team Colonel's, a fresh data folder each,

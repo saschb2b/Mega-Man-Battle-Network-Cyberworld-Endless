@@ -558,7 +558,8 @@ screen). `teamseat=N` shows seat N's screen (0 and 1 the GBAs' players,
 2 and 3 side 0's and side 1's partners: his side's GBA, his own Custom
 screen while it is open, his HP box), and `teampick=-1` writes each
 partner's picks into his hand a chip short on the second GBA alone, the
-picks' mutation. `teamhp=N` gives each partner his own
+picks' mutation; `teambuster=N` (1-5) gives both partners' records their
+buster's Attack N, as their own loadouts would. `teamhp=N` gives each partner his own
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side

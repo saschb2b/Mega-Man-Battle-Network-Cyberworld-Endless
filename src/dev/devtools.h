@@ -68,6 +68,8 @@ typedef struct {
 	                   side 1's partners (his side's GBA, his own Custom screen and HP box over it; arena_team_view.h) */
 	int team_pick;  /* teampick=-1: under arena2v2 the second GBA writes each partner's picks into his hand one chip short, a
 	                   mutation that must part the two (arena_team_custom.h) */
+	int team_buster; /* teambuster=N (1-5): under arena2v2 both partners' records with their buster's Attack N, as their own
+	                    loadouts would give it (arena_team_navi.h) */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

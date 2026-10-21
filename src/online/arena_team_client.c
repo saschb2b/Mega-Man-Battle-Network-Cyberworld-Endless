@@ -10,6 +10,7 @@
 #include "arena_pair.h"
 #include "arena_team.h"
 #include "arena_team_custom.h"
+#include "arena_team_navi.h"
 #include "arena_team_screen.h"
 #include "arena_team_view.h"
 #include "arena_view.h"
@@ -34,8 +35,12 @@ static Client clients[SIDES];
 static unsigned seat(void) { return dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
 
 void team_client_begin(Arena *a, const OnlineLoadout *all) {
-	arena_team_custom_folder(0, NULL, 0, NULL);
-	arena_team_custom_folder(1, NULL, 0, NULL);
+	/* (teambuster=N: both partners' buster at Attack N, their HP their sides', the loadout's numbers seen in the battle) */
+	const uint8_t buster[3] = { (uint8_t)(dev.team_buster - 1), 0, 0 };
+	for (unsigned side = 0; side < SIDES; ++side) {
+		arena_team_custom_folder(side, NULL, 0, NULL);
+		arena_team_navi_loadout(side, 0, 0, dev.team_buster > 0 && dev.team_buster <= 5 ? buster : NULL);
+	}
 	unsigned fits = all ? arena_folders_fitting(all) : 0;
 	/* (the folder after the one his lead carries: arena_scene's, the first that holds chips) */
 	for (int k = 0, first = -1; k < ONLINE_FOLDERS; ++k) {
@@ -44,6 +49,8 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 		OnlineLoadout own;
 		arena_format_carry(all, k, &own);
 		arena_team_custom_folder(0, own.folder, own.regular, own.tag);
+		const uint8_t his[3] = { own.attack, own.speed, own.charge };
+		arena_team_navi_loadout(0, own.max_hp, own.base_hp, his);
 		printf("arena2v2: side 0's partner carries the run's folder %d, his lead folder %d\n", k + 1, first + 1);
 		break;
 	}

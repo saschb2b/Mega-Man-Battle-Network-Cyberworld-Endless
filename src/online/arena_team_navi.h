@@ -28,6 +28,11 @@ bool arena_team_navi_hooks(struct HookCore *core, unsigned side, int slot);
 /* from the spawn's hook, as the field is spawned: the rooms taken, the
  * records made from their sides', the core's marks cleared */
 void arena_team_navi_begin(void);
+/* side's partner's own loadout's numbers, before the battle (the same on
+ * every client): his max HP and base HP, his buster's Attack, Speed and
+ * Charge (levels less one, as a NaviStats keeps them); max_hp 0: his HP
+ * his side's; buster NULL: all his side's, as his record is copied */
+void arena_team_navi_loadout(unsigned side, uint16_t max_hp, uint16_t base_hp, const uint8_t buster[3]);
 /* side's partner's own hand in the core's RAM (BN6_HAND_SIZE bytes), from
  * a hook; 0 where his room is not taken */
 uint32_t arena_team_navi_hand(unsigned side);

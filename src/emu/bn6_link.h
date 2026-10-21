@@ -29,6 +29,9 @@
                                              read or write a field r1 bytes in: set a byte, set a halfword, get a byte, the same again, get
                                              a halfword (bn6f's *_AllianceFromBattleObject), to: */
 #define BN6_NAVI_BY_OBJECT_END 0x0801379Eu /* ... the last one's end */
+#define BN6_NS_ATTACK         0x01        /* u8, a NaviStats' buster: Attack, Speed and Charge, levels less one (bn6.h's BN6_NAVI_ATTACK's, */
+#define BN6_NS_SPEED          0x02        /* ... the menu's NaviStats laid out alike; a battle reads its copy's: a shot's damage Attack + 1, */
+#define BN6_NS_CHARGE         0x03        /* ... bn6f sub_801265A) */
 #define BN6_NS_BASE_HP        0x3E        /* u16, a NaviStats' fields from its start: MaxBaseHP, */
 #define BN6_NS_CUR_HP         0x40        /* ... CurHP (a MegaMan's object takes it as he is set up, bn6f sub_80141C8), */
 #define BN6_NS_MAX_HP         0x42        /* ... and MaxHP */
