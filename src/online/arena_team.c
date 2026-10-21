@@ -82,14 +82,14 @@ uint16_t arena_team_script(unsigned player, uint32_t frame) {
 		/* side 0's partner: up to row 1 (column 1), charged shots along it */
 		unsigned t = frame % 480;
 		if (t < 4 || (t >= 16 && t < 20)) return KEY_UP;
-		if (t >= 340 && t < 344) return KEY_A;   /* (a chip of his own hand, standing) */
+		if (t >= 330 && t < 380) return t % 8 < 2 ? KEY_A : 0;   /* (a chip of his own hand: A tapped till he is free to use it) */
 		return (t >= 40 && t < 150) || (t >= 200 && t < 310) ? KEY_B : 0;
 	}
 	if (player == 3) {
 		/* side 1's partner: charged shots along row 1 (column 6), a step down and back between */
 		unsigned t = (frame + 100) % 400;
 		if (t >= 300 && t < 304) return KEY_DOWN;
-		if (t >= 280 && t < 284) return KEY_A;
+		if (t >= 266 && t < 298) return t % 8 < 2 ? KEY_A : 0;
 		if (t >= 340 && t < 344) return KEY_UP;
 		return t < 110 || (t >= 150 && t < 260) ? KEY_B : 0;
 	}

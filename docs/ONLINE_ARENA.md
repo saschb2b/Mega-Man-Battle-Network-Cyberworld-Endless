@@ -1583,7 +1583,9 @@ The partners are players of the Arena's like the two GBAs' (21 October
   them.
 
 Proved with BN5's ROM beside BN6's (full rules), delay 1, a fresh data
-folder, `--dev arena,arenaboth,arena2v2=1,quitend`:
+folder, `--dev arena,arenaboth,arena2v2=1,quitend` (with the partners'
+script as it was at the streams' commit, before the records, the hands
+and their chips):
 
 | Run | End | Hashes | The two GBAs | Partners' keys |
 | --- | --- | --- | --- | --- |
@@ -1651,35 +1653,36 @@ five by object (21 October 2026):
   core between calls (`hook_keep_slots`), so a rollback puts them back;
   the records are core RAM, in the pair's hash.
 
-Proved with `--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1`:
+Proved with `--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1`
+(the partners' records and hands as committed, the partners tapping A):
 
 | Run | End | Hashes | The two GBAs |
 | --- | --- | --- | --- |
-| `arenalag=4` (107 rollbacks) | over at frame 2690 | 44, all the same as `arenalag=0`'s (0 rollbacks) | 2,399 iterations, 0 apart |
+| `arenalag=4` (221 rollbacks, 884 frames run again) | over at frame 2690 | 44, all the same as `arenalag=0`'s (0 rollbacks) | 2,399 iterations, 0 apart |
 | `arenalag=4,arenaroll=8` | over at 2686 | all 44 the same as the delay alone's (`arenawindow=0`) | 2,396, 0 apart; 335 rollbacks of 8 frames, the game's state the same after all 335 |
 | `teamhp=-150` (the records' HP on the second GBA alone) | over at 2690 | | apart from iteration 1 (2,399 of 2,399) |
-| `arena2v2=1` alone (the records their sides' copies) | over at 2690 | | 0 apart; all 194 hits as without the hooks, iteration for iteration |
 | `--dev rollbench,arena2v2=1,teamhp=150` | 600 frames | | 489, 0 apart; rollbacks of 8: 11 of 11 the game's state the same |
 
-Both partners are set up with 150 HP from their records while their
-leads keep 100: the field's poison takes both from iteration 62; side
-1's partner's charged shot takes side 0's from 100 to 90 at iteration
-407, and side 0's partner's takes side 1's from 90 to 80 at 477, while
-side 0's player, whom nothing hits, stays at 100 and side 1's falls by
-his own hits alone (100 to 90 at 184, 132 left on his partner then);
-side 0's partner is deleted at iteration 895 and side 1's at 965 (at
-685 and 636 with their sides' 100). Each GBA's screen shows its enemies'
-own HP under them: on the first, side 1's player 100 to 67 and his
-partner 144, 123, 101, 70, 38, 17 at the battle's frames 300 to 1050;
-on the second (`arenaother`), side 0's player 100 throughout and his
-partner 144 to 7. The records answered about 60,000 asks each a battle,
-all of them the partners' own objects': of the 64 objects marked
-theirs (their buster's shots and their effects) none asked by object in
-these battles, so an attack's inheriting his record is built and its
-marks counted, but not yet seen to matter (a chip of his own will be the
-test). The HP box on a partner's own GBA (BN6 draws its lead's) and a
-partner's own loadout (his NaviCust's programs, his Cross) wait on his
-own GBA's screen and the wire.
+With the records their sides' copies (`arena2v2=1` alone, before the
+partners took chips) the battle's 194 changes of HP were those without
+the hooks, iteration for iteration. Both partners are set up with 150 HP
+from their records while their leads keep 100: the field's poison takes
+both from iteration 62; side 1's partner's charged shot takes side 0's
+from 100 to 90 at iteration 407 and his Cannon from 84 to 43 at 454,
+while side 0's player, whom nothing hits, stays at 100 and side 1's
+falls by his own hits alone (100 to 90 at 184, 132 left on his partner
+then); side 0's partner is deleted at iteration 685 and side 1's at
+1035. Each GBA's screen shows its enemies' own HP under them: on the
+first, side 1's player 100 to 67 and his partner 144, 123, 101 at the
+battle's frames 300 to 600; on the second (`arenaother`), side 0's
+player 100 throughout and his partner 144 to 37 by frame 700. The
+records answered some 40,000 to 80,000 asks each a battle, all of them
+the partners' own objects': of the 64 to 86 objects marked theirs
+(their buster's shots, their Cannons and the effects) none asked by
+object, so an attack's inheriting his record is built and its marks
+counted, but not yet seen to matter. The HP box on a partner's own GBA
+(BN6 draws its lead's) and a partner's own loadout (his NaviCust's
+programs, his Cross) wait on his own GBA's screen and the wire.
 
 ### The partners' own hands
 
@@ -1697,18 +1700,24 @@ first chip up next; the comparison kept a core for a rollback): his own
 Custom screen is to come. Under the flag a lead takes the chip under the
 cursor before the script's OK, so that a hand holds one (Cannon).
 
-Measured with the runs above: the hands answered about 7,000 asks each a
-battle, all his own object's; each GBA's screen draws the chip's icon over
-both of its side's MegaMen, the partner's from his own hand, and "Cannon
-40" at its foot; the GBAs agree at every iteration, the hashes are the same
-with and without rollbacks, and with the hands their leads' copies the
-battle's 272 changes of HP are those with the hook switched off (a
-debug run).
-Not seen: a chip used. A partner's A at an idle moment fires no chip in
-these runs, and neither did a lead's A at an idle moment (a debug run
-with the lead's A scripted): why A fires no chip in this scripted
-Arena battle under full rules is the next thing to find, before a
-chip's use from a partner's own hand can be proved.
+Measured with the runs above (the partners tapping A a few times a
+cycle until they are free to use a chip): side 0's partner uses his
+Cannon at iteration 177 and side 1's at 429, each one's own hand's chip
+up next going from 0 to 1 while his lead's stays at 0 (each lead still
+holds his Cannon, "Cannon 40" still at the foot of his GBA's screen);
+side 1's partner's Cannon takes side 0's partner from 84 to 43 at
+iteration 454 (40 and the poison's 1). On both screens the chip's icon
+is drawn over each partner from his own hand and leaves him as he uses
+it, his lead's staying; the second GBA's (`arenaother`) shows side 1's
+partner firing it from the left and side 0's partner's own HP under him
+falling 85, 52, 40. The hands answered some 5,000 to 9,000 asks each a
+battle, all the partners' own objects'; the GBAs agree at every
+iteration; with 221 rollbacks and with none all 44 hashes the same,
+`arenaroll=8` 335 of 335 the same. Before the partners tapped A (one
+press each, which met them busy), the hands as their leads' copies left
+the battle's 272 changes of HP as with the hook switched off (a debug
+run). Not yet: a partner's own folder and Custom screen (below): his
+hand is his lead's chips, his own to use.
 
 ### A partner's own Custom screen (design)
 
