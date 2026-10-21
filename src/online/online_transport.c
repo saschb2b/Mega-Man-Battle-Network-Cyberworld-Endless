@@ -264,7 +264,14 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			 * HELLO went first, and a resume the server took before its
 			 * WELCOME reached the game would otherwise be held) */
 			data[0] = ONLINE_BYE;
-			online_socket_send(data, 1);
+			/* (then the server's close, its answer to it, before the
+			 * socket goes: a socket closed at once can be reset with the
+			 * goodbye still unread, as Windows' are; half a second at
+			 * most, as the game is leaving) */
+			if (online_socket_send(data, 1))
+				for (uint32_t started = SDL_GetTicks(); online_socket_receive(data, sizeof data) >= 0 &&
+				                                        SDL_GetTicks() - started < 500;)
+					SDL_Delay(2);
 			break;
 		}
 		if (SDL_AtomicGet(&transport.stop)) break;

@@ -82,7 +82,8 @@ async def normal_exchange(binary, report):
             if not any(p.name == "TransportProbe" for p in server.players.values()):
                 break
             await asyncio.sleep(0.02)
-        assert not server.holds.until and not any(p.name == "TransportProbe" for p in server.players.values())
+        assert not server.holds.until and not any(p.name == "TransportProbe" for p in server.players.values()), \
+            f"held {server.holds.until} players {[(p.id, p.name, p.resumed) for p in server.players.values()]}"
         wanted = {protocol.SPEC[k] for k in ("state", "profile", "inspect", "social", "channel", "ping")}
         assert wanted <= server.messages and server.positions >= 40
         report["exchange"]["positions_verified"] = server.positions
