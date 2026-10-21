@@ -130,6 +130,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-10-21",
       "what": "--dev arena2v2: each partner's own battle NaviStats and hand (src/online/arena_team_navi.c), answered by object, kept in two effect slots taken in BN6's own pool; teamhp=N and arenaother for their proof."
+    },
+    {
+      "date": "2026-10-21",
+      "what": "The bout's seed and the kept pair (src/online/arena_boot.c's BOUT_STEP, arena_keep, arena_new_bout; --dev arena's arenaseed=N and arenaagain=N); protocol v13 keeps a pair of players' sides for their rematch."
     }
   ],
   "experiments": [
@@ -156,6 +160,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "With BN6's battle NaviStats routine (0x08013682) and hand routine (0x08010018) answered by object for asks that pass the object in r5, each partner reads and writes his own record and hand, kept in two effect slots taken in BN6's pool (0x02036710): given 150 max HP both partners are set up with 150 while their leads keep 100, hits take each from his own; each partner uses the Cannon of his own hand (his chip up next 0 to 1, his lead's staying at 0, the icon leaving him alone), side 1's taking side 0's from 84 to 43; both GBAs agree at all 2,399 iterations, with 221 rollbacks and without them all 44 hashes the same, arenaroll=8 335 of 335 the same; the records on one GBA alone part them from iteration 1.",
       "meaning": "BN6's one NaviStats and one hand a side are answered by object without touching its code, the room taken from BN6's own object pool, since the RAM the project has free holds one record.",
       "link": "../ONLINE_ARENA.md#the-partners-own-navistats"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-21",
+      "name": "A rematch in a second: BN6's random numbers at a link battle's start",
+      "result": "Both random words (0x020013F0, 0x02001120) read on both GBAs of the pair a frame at a time through the way in's last two steps: alike on the two GBAs all the way, stepped as on a map until Practice's last confirm; 19 frames after that press the battle draws the first word once and keeps it, 71 frames on puts it back as its opening ends, and the folders are shuffled from the second the frame after. Both words written from a seed at the start of that step change both GBAs' first hands (seed 7: 1636 2448 2448 0201 0605; seed 8: 0236 3459 34af 009a 0236; none: 0001 34c0 0236 0201 2447) and every one of the battle's 44 hashes; the pair kept at that step and gone into again with seed 8 deals seed 8's hands and gives its 44 hashes byte for byte, 244 frames of the pair instead of 1,817.",
+      "meaning": "A rematch needs no new way in: the pair kept where the bout's seed goes in, and the seed (the battle's ID, known to both players and every spectator) makes each bout its own.",
+      "link": "../ONLINE_ARENA.md#a-rematch-in-a-second"
     },
     {
       "feature": "Arena",

@@ -177,6 +177,6 @@ void arena_card_fade(int alpha, bool white) {
 }
 
 void arena_card_cue(ArenaCue cue) {
-	static const Sfx sfx[] = { SFX_DESC_OPEN, SFX_DESC_CLOSE, SFX_CHIP_CURSOR, SFX_CHIP_SELECT, SFX_CANCEL, SFX_ITEM, SFX_ENCOUNTER };
+	static const Sfx sfx[] = { SFX_DESC_OPEN, SFX_DESC_CLOSE, SFX_CHIP_CURSOR, SFX_CHIP_SELECT, SFX_CANCEL, SFX_ITEM, SFX_ENCOUNTER, SFX_REVEAL };
 	if ((unsigned)cue < sizeof sfx / sizeof *sfx) audio_sfx(sfx[cue]);
 }

@@ -17,5 +17,11 @@ bool online_chat_update(const OnlineSnapshot *s);
 /* The pad's keys before BN6 takes them: L, R and A on a peer opening a
  * chat, START and SELECT kept from BN6's PET. */
 uint32_t online_chat_keys(uint32_t keys);
+/* A player's card as it came (INSPECT, each peer's asked once), NULL not
+ * yet: the question of his challenge reads it (epic #167, P5) */
+const OnlineProfile *online_chat_card(uint32_t id);
+/* The player whose card is open in the chat box, 0 none: the link's bars
+ * shown beside it (square_ask.h) */
+uint32_t online_chat_card_open(void);
 
 #endif

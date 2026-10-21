@@ -7,11 +7,42 @@
 #include "online_people.h"
 #include "online_text.h"
 #include "pixfont.h"
+#include "square_arena.h"
+#include "square_ask.h"
 #include "square_life.h"
 #include "platform.h"
 
-static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase; } labels[ONLINE_MAX_PLAYERS + 1];
+/* (a mark over a name, epic #167: what he is busy with, or his challenge
+ * to this game waiting) */
+enum { MARK_NONE, MARK_BATTLE, MARK_WATCH, MARK_TRADE, MARK_ASKS };
+
+static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase; uint8_t mark; } labels[ONLINE_MAX_PLAYERS + 1];
 static unsigned count;
+static const OnlineSnapshot *drawn;   /* the snapshot shown, for the open challenge's strip (square_ask.h) */
+static uint32_t drawn_at;
+
+/* The marks, the project's own 7x7 pictures a row a byte (bit 6 the
+ * leftmost): crossed blades in a NetBattle, an eye watching one, a chip at
+ * a trade, and "!" over a player whose challenge waits for Lan */
+static const uint8_t mark_rows[5][7] = {
+	{ 0 },
+	{ 0x41, 0x22, 0x14, 0x08, 0x14, 0x2A, 0x41 },
+	{ 0x00, 0x1C, 0x22, 0x49, 0x22, 0x1C, 0x00 },
+	{ 0x3E, 0x22, 0x2A, 0x22, 0x3E, 0x14, 0x14 },
+	{ 0x08, 0x08, 0x08, 0x08, 0x00, 0x08, 0x00 },
+};
+
+static void mark_draw(int x, int y, uint8_t mark, uint32_t now) {
+	SDL_Color colour[5] = { WHITE, rgba(255, 120, 66, 255), rgba(107, 222, 255, 255), rgba(115, 222, 99, 255), rgba(255, 214, 16, 255) };
+	SDL_Color c = colour[mark];
+	/* (a bout under way pulses, the world showing it; a challenge waiting blinks) */
+	if (mark == MARK_BATTLE && now / 250 % 2) c = rgba(255, 214, 16, 255);
+	if (mark == MARK_ASKS && now / 400 % 2) return;
+	fill_rect(P.core_x + x - 6, P.core_y + y, 11, 11, rgba(9, 24, 42, 210));
+	for (int r = 0; r < 7; ++r)
+		for (int k = 0; k < 7; ++k)
+			if (mark_rows[mark][r] >> (6 - k) & 1) fill_rect(P.core_x + x - 4 + k, P.core_y + y + 2 + r, 1, 1, c);
+}
 
 void online_labels_reset(void) { count = 0; }
 
@@ -33,6 +64,8 @@ static void label_at(int x, int y, int z, const int camera[3]) {
 
 void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	count = 0;
+	drawn = shown;
+	drawn_at = now;
 	if (!shown->connected) return;
 	uint32_t at = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
 	if (at < BN6_EWRAM || at > BN6_EWRAM_END - 80) return;
@@ -44,11 +77,13 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 		memcpy(labels[count].name, peer->name, sizeof peer->name);
 		unsigned flags = online_people_flags(peer->identity);
 		labels[count].phrase = flags & (ONLINE_MUTED | ONLINE_BLOCKED) ? NULL : phrase_for(shown, peer->id, now);
+		labels[count].mark = peer->id == square_arena_asking() ? MARK_ASKS : peer->busy;
 		++count;
 	}
 	label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera);
 	labels[count].name[0] = '\0';
 	labels[count].phrase = phrase_for(shown, shown->player_id, now);
+	labels[count].mark = MARK_NONE;
 	++count;
 	/* (a word over one of the Square's own: the greeter's, a walker's) */
 	const char *bark;
@@ -56,6 +91,7 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	if (count < sizeof labels / sizeof *labels && square_life_bark(&bark, &x, &y, &z)) {
 		label_at(x, y, z, camera);
 		labels[count].name[0] = '\0';
+		labels[count].mark = MARK_NONE;
 		labels[count++].phrase = bark;
 	}
 }
@@ -71,5 +107,7 @@ void online_labels_draw(void) {
 		if (x > EMU_W - w / 2 - 2) x = EMU_W - w / 2 - 2;
 		fill_rect(P.core_x + x - w / 2 - 2, P.core_y + y - 1, w + 4, 11, rgba(9, 24, 42, 210));
 		pixfont_draw(P.core_x + x, P.core_y + y, text, WHITE, BLACK, PIXFONT_CENTER, 1);
+		if (labels[i].mark && labels[i].mark <= MARK_ASKS) mark_draw(x, y - 13, labels[i].mark, drawn_at);
 	}
+	if (drawn) square_ask_draw(drawn, drawn_at);
 }

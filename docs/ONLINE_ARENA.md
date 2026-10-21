@@ -61,7 +61,7 @@ queue, a stop's card.
 | The pair | `src/online/arena_pair.c` | Two cores of the player's ROM with BN5's installs, full rules being every NetBattle's ([Full rules](#full-rules), below); flash saves in memory, the cable's scheduling as mGBA's own frontend has it (whole run loops, the second core on the first's cycles) and both cores halted at BN6's wait for a frame ([Rollback](#rollback)); one frame of the pair, a hash of both cores; the picture drawn for the side shown alone (`arena_pair_draw`); on the 3DS one ROM copy for both cores ([The New 3DS](#the-new-3ds)) |
 | The installs' record | `src/emu/xinstall_log.c` | Every byte BN5's installs write into the game's own core's ROM copy and every hook they set, in their order, as the core starts: what goes in each Arena core |
 | The Souls across | `src/online/arena_souls.c` | A Soul one core's player committed carried into the other core's Souls' block as the pair's frame ends: BN6's link carries the form, not the Soul |
-| The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen. No state is kept or committed; it runs in slices behind a "connecting" picture |
+| The way in | `src/online/arena_boot.c` | One core boots as `src/emu/boot.c` does (NEW GAME, the game's warp through its own call, hooked on that core alone); each side's MegaMan is written into a copy of its state; then the pair, on the cable, goes through BN6's menus (PET, Comm, Link Cable, NetBattle, Single Battle, Practice) with the research's scripted keys to the Custom screen; as Practice's last confirm is pressed the bout's seed goes into BN6's random words on both GBAs, and the pair is kept there, in memory, for a rematch to go in from ([A rematch in a second](#a-rematch-in-a-second)). No state is written or committed; it runs in slices behind a "connecting" picture |
 | A carried MegaMan | `src/online/arena_loadout.c`, `arena_carry.c` | The `OnlineLoadout` (`online_snapshot.h`) written into BN6's own RAM through `bn6.h`'s names: the first folder, the pack's own ids, the NaviCust's board, HP (full) and base HP, the buster, Regular and TagChips, the Crosses' and Beast Out's flags. Checked by what the pair's cores hold, never by the game's own ROMs, so both games check a MegaMan alike. Refused, with the reason, where the cores cannot carry it: a chip id past the chip registry, a code past `*`, a max HP of 0 or past 9999. Before v9 BN6's rules refused BN5's chips and the Souls too. `arena_carry.c` reads the data folder's checkpoint, its `run.state` loaded into a plain core that never runs |
 | Keys | `src/online/arena_input.c` | Both players' keys by frame in a ring; each stream in order, a resent frame left, a gap or a frame past the ring refused; for a frame run on a guess the other's keys not yet come held as his last, and the first frame a key that came otherwise reached |
 | The time sync | `src/online/arena_sync.c` | The leading game's tick held now and then, spread out, by the lag of the other's keys against the other's lag of its own (protocol v11's notes; before the first, its own round trip), on a tick nobody sees; the round trips kept in the Square for the delay asked for ([Smoothed delay](#smoothed-delay), below); the rollback window a frame's cost affords and the latency asked for less what it covers ([Rollback](#rollback)) |
@@ -926,12 +926,12 @@ challenge from that player and shows it, takes it at once where its
 player says Yes (or said it first), and turns it down where he said No
 or closed the card. Both Yeses at once cross on the server, which turns
 the second challenge down as busy; the first is taken (`again_in`,
-`square_arena.c`). Both Yes: straight from the card into the next way in
-(the last pair given back first), the panel showing the set's score. The
-folder carried is the last battle's, asked in the Square only where it
-no longer fits. A Yes nobody answers ends as any challenge does, after
-the server's 30 seconds. A battle stopped offers none. An older build,
-which knows no rematch on a card, sees an ordinary challenge.
+`square_arena.c`). Both Yes: straight from the card into the next bout,
+gone into from the last bout's pair as it began (protocol v13: [A rematch
+in a second](#a-rematch-in-a-second), below), the panel showing the set's
+score. The folder carried is the last battle's, asked in the Square only
+where it no longer fits. A Yes nobody answers ends as any challenge does,
+after the server's 30 seconds. A battle stopped offers none.
 
 The referee Mr.Prog by the ring keeps what this game saw: before any
 bout he tells how a NetBattle is asked for; after one, who beat whom
@@ -958,6 +958,167 @@ the stop at twenty ("Alpha's PET stopped answering.", BROKE OFF), Alpha
 "Beta left the NetBattle."; with B pressed (Alpha's process stopped):
 Beta left at 648 ticks ("We left the NetBattle."); both referees "BROKE
 OFF! NO CALL!" with the count 0 - 0.
+
+### A rematch in a second
+
+Issue #167's third step. The lens (the game-design skill's transitions
+and its frequency budget): a first bout with a player is rare and may
+carry its ceremony, the panel's way in of a few seconds; a rematch is the
+Square's inner loop ("one more") and must be near-instant, or staying
+costs more than leaving. Before, both Yeses replayed the whole way in:
+the boot core from power-on and both GBAs scripted through BN6's menus,
+1,817 frames, about five seconds on a desktop. Now a rematch goes into
+its battle in about a quarter of a second of work, the hands and the
+battle its own.
+
+**Where BN6's random numbers are at a battle's start** (the
+reverse-engineering skill: located, understood, implemented, proved). The
+two words are `BN6_RNG_PRIMARY` and `BN6_RNG_SECONDARY` (docs/ROM_DATA.md,
+BN5's random numbers: BN6's at `0x020013F0` and `0x02001120`). Read on
+both GBAs of the pair a frame at a time through the way in's last two
+steps (a probe in `entry_frame`, not kept): both words are the same on
+the two GBAs all through the way in, each stepped as on a map, until
+Practice's last confirm. 19 frames after that press is done the battle
+draws the first word once and keeps it; 71 frames on it puts the kept
+value back as its opening ends and both folders are shuffled from the
+second word the frame after (the first hands appear in
+`BN6_BATTLE_DECK`); from there the first word moves only as the battle
+draws. So the bout's seed goes in at the start of that step
+(`BOUT_STEP`, `arena_boot.c`): both words written on both GBAs from it,
+each mixed and kept off the step's shortest cycles (`battle_rng_word`, as
+BN5's guest battles do), the same on the two GBAs as the way in leaves
+them. Nothing before it reads them for the battle.
+
+**The bout's seed is its battle ID**, which both players and every
+spectator know (START, WATCH_STATE): no new message carries it, and each
+bout, the first among them, deals its own hands (seed 0, `--dev arena`'s
+own, writes nothing, so its battles are as before). **The pair is kept
+where the seed goes in**: `arena_boot_keep` saves the pair's snapshot
+(both cores and what no core's state holds, the rollback's
+`ArenaPairSnap`) on that step's first frame, before the seed; the
+battle's end leaves the pair and the snapshot to `arena_keep`, and a
+rematch's `arena_new_bout` goes in from them (`arena_boot_again`): the
+snapshot loaded into the same two cores, the new bout's seed written, the
+press and the battle's opening run, 244 frames of the pair, not 1,817,
+to the same Custom screen a whole way in with that seed reaches.
+
+**What the kept pair carries, and what it must not.** It is gone into
+only for the same two MegaMen on the same sides: both carried MegaMen's
+bytes as the wire packs them (`arena_loadout_pack`: the folder, the
+NaviCust, the HP carried among them, a Team bout's included) are its key,
+and anything else (another folder picked, a carried HP that changed,
+the sides swapped) goes the whole way, the kept pair freed first. The
+server keeps the sides of a pair of players' last battle for their next
+(protocol v13: a rematch's challenger may be either), so both games go
+in from their kept pairs. What the snapshot holds is a rollback's (What a
+rollback puts back, above); the flash saves it leaves out, as a battle
+writes none (a whole way in's ready and a kept pair's agree, below, which
+they would not if it did). The stands keep nothing: a spectator builds
+the pair the whole way, with the same seed, catching up from the
+battle's first frame as ever, so his ready is the check that the kept
+pair and the whole way agree.
+
+**The proofs.** `--dev arena,arenaboth,arenalag=4,arenadelay=1`:
+
+| Run | The first hands (each GBA's first five) | The battle | Its 44 hashes |
+| --- | --- | --- | --- |
+| no seed (as before) | `0001 34c0 0236 0201 2447` on both | over at frame 2,690 | the last `86d2f837337a1494`, as before this change |
+| `arenaseed=7`, the whole way | `1636 2448 2448 0201 0605` on both | over at frame 2,690 (the script fights with the buster alone) | the last `7f529eb93f607b8e`: every one of the 44 apart from no seed's |
+| `arenaseed=8`, the whole way | `0236 3459 34af 009a 0236` on both | over at frame 2,690 | the last `c2f08435ce33c6d4` |
+| `arenaseed=7,arenaagain=1`: bout 1 the whole way, bout 2 (seed 8) from the kept pair | bout 2 `0236 3459 34af 009a 0236`, seed 8's | both over at frame 2,690 | bout 1 seed 7's 44, bout 2 seed 8's 44, byte for byte; bout 2 ready 4 ticks (192 ms here) after bout 1 ended |
+
+`arenaseed=N` sets the local bout's seed and `arenaagain=N` fights N
+bouts more, each from the kept pair with the seed one more
+(docs/DEVTOOLS.md).
+
+Between games (21 October 2026, protocol v13, the player's Gregar ROM and
+Team Colonel's in each game's `--rom-dir`, a local server with seed 120's
+Square, three host builds headless from `--scene home --run-depth 7
+--seed 3`, driven by remote play from a harness that reads each game's
+log, kept in `.build/`): Alpha and Beta with `--dev
+quiet,arenahp=10,arenaboth`, Gamma with `quiet`. Alpha challenged Beta;
+match 1 (seed 1) went the whole way in on both: the ready
+`a653ab54a0e16600` on both, both GBAs dealt `34b8 24a3 0605 0201 34c0`,
+over at frame 530 with 8 hashes agreeing, Alpha's win. Both said Yes on
+the card (Set 1 - 0); match 2 (seed 2), its sides the last match's, went
+in from the kept pair on both games ("the way in again from the last
+bout's pair"): both ready 7 and 14 frames after START (headless, 64
+frames of the pair a tick), the ready `6a61e6f60b956964` on both, both
+GBAs dealt `0001 2447 0605 2448 0001`. Gamma asked the referee to watch
+match 2 and built its pair the whole way with seed 2: his pair agreed
+with the players' ready at the Custom screen, caught up from 593 frames
+behind at frame 569, and the battle was over at frame 1,319 on all three,
+Beta's win; the players' 21 hashes the same list on both games (the last
+`70f0f35710d27130`), all 21 checked by Gamma. Both cards read Set 1 - 1,
+Gamma's end "Beta won the NetBattle.". The mutation (`arenaseedoff=1` on
+Beta, his seed one more than the match, the same harness): match 1's
+ready `a653ab54a0e16600` on Alpha (seed 1) and `6a61e6f60b956964` on Beta
+(seed 2, the very ready of match 2 above: a pair's ready is its two
+MegaMen and its seed), and both stopped before the first frame ("the two
+games went apart before the battle").
+
+### The Square before a NetBattle
+
+Issue #167's fourth step: what a player sees of the Arena while he walks
+the Square, before anyone commits. The lens: the session loop (arrive,
+see who is here, do one thing together), the Square's pull between
+gathering and going, and telegraphs that tell the truth: who is free,
+what a challenge is doing, how good the link is, with nothing in a
+character's mouth about delay (docs/VOICE.md).
+
+- **Busy marks** (P1). A small mark of the project's own drawing over a
+  player's name: crossed blades in a NetBattle (his own, or a bout of his
+  team match), an eye watching one, a chip at a trade; nothing over a
+  player who is free or whose challenge is only asked. The server says it
+  in SNAPSHOT (protocol v13), so a challenge to a busy player (NOTICE 16,
+  "Huh? NAME's busy right now...") is mostly not made.
+- **The bout in the world** (P20). The two fighters' blades pulse
+  between red and gold while the bout runs, and the referee calls it over
+  his head ("ALPHA VS BETA!"), again every ten seconds while it lasts
+  (`bout_on`, `square_life.c`), as he calls a log-in's greeting and a
+  bout's end.
+- **A challenge open, seen and called off** (P3). The challenger's game
+  shows a strip at the picture's top while his challenge is open: "Ringing
+  NAME's PET..." with a mark going to and fro until the other reads the
+  question, then "NAME is reading it..." over a bar running down his 30
+  seconds, the link's bars at its end and "A on NAME: call it off". On
+  that player's card Battle reads `Call off`: the challenge ends for both
+  (ARENA's leave) and MegaMan says "OK. We'll leave NAME be for now.";
+  Battle on anyone else meanwhile is MegaMan's "Lan,we already asked
+  NAME!", not silence.
+- **The challenged's PET rings, and his clock starts when he sees the
+  question** (P4). As CHALLENGED comes his PET rings (BN6's effect `0x7E`,
+  `ARENA_CUE_RING`; which effect BN6 rings with for a call is not yet
+  checked) and a blinking "!" stands over the challenger's name on his
+  screen alone. The question still waits for any chat box to close; as it
+  opens his game tells the server (ARENA 5, `arena_seen`), which counts the
+  30 seconds from then and tells the challenger, whose strip starts
+  running down. A challenge never seen ends after 60 seconds.
+- **The challenger's card in the question** (P5). Before "Take it,Lan?"
+  MegaMan reads the challenger's card as A on his MegaMan reads it (his HP,
+  act and layer, Crosses, Souls; never the folder), from the card the game
+  already asked for (`square_card_facts`).
+- **The link before committing** (P6). Bars, never a number (the owner's
+  word): each game says its round trip in its PING (protocol v13), the
+  server puts each player's bars in SNAPSHOT (three under 100 ms, two under
+  200, else one), and a game shows the fewer of his and its own, the longer
+  round trip deciding a battle's delay: at the top right while his card is
+  open in the chat box, while his challenge's question is, and on the
+  challenger's strip (`square_ask.c`, drawn in the battle badge's look,
+  `arena_view_bars`).
+
+Seen (21 October 2026, the harness of [A rematch in a
+second](#a-rematch-in-a-second), headless captures): Alpha's A on Beta
+(the card, its bars at the top right), Battle, and the strip: "Ringing
+Beta's PET..." with its mark sweeping, then, as Beta's question opened
+(the server's SEEN), "Beta is reading it..." over the bar running down;
+on Beta's screen the "!" blinking over Alpha's name, "Alpha's MegaMan
+wants a Practice NetBattle!", "HP 100 of 100. Act 3,layer 7!" and "Take
+it,Lan?". Alpha's A on Beta again: `Call off` in Battle's place, "OK.
+We'll leave Beta be for now.", the strip gone on Alpha's screen and the
+"!" on Beta's. In the rematch's run, Gamma by the referee read "ALPHA VS
+BETA!" over his head as match 1 began and, beside the two, the crossed
+blades over both their names, pulsing.
 
 ### One rule: full rules
 
@@ -2001,10 +2162,18 @@ the shape for a 2v2 between four games, each running the pair.
 - After the battle the engine stops once both cores have left it; the
   game's own way back to the Comm menu is not shown (the result card
   rises from BN6's fade instead).
-- Issue #167's later steps: a rematch in about a second (the pair taken
-  back to the battle's start), busy marks over MegaMen in the Square, a
-  pending challenge seen and called off, a PET ring for the challenged,
-  the link's quality before committing, and the netcode's quick wins.
+- Issue #167's third and fourth steps ([A rematch in a
+  second](#a-rematch-in-a-second), [The Square before a
+  NetBattle](#the-square-before-a-netbattle)): seen through a local
+  server on one machine; not yet over a real network or on a handheld.
+  Which sound BN6's PET rings with for a call is not yet checked (the
+  ring is BN6's effect `0x7E` for now); a question opened under another
+  screen (the NetPass's stamp moment) is told seen as it opens. A
+  spectator goes the whole way in for a rematch (his pair kept from the
+  bout before would do, untried); a Team bout keeps no pair for the next
+  (its MegaMen differ). The challenged player's game still waits for a
+  chat box to close before the question (the research's "opens over
+  reading" not done).
   The panel and the card on a handheld's screen and in the browser are
   drawn by the same code but seen headless only; the screens' sounds are
   BN6's own effects mixed over the held game's sound (`audio.c`), not yet

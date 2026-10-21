@@ -36,8 +36,17 @@ const SquareBout *square_arena_last(void);
 /* As MegaMan arrives in the Square, and as he leaves it: any battle left */
 void square_arena_reset(void);
 void square_arena_end(void);
-/* Battle chosen for `peer`, my latency in ms */
+/* Battle chosen for `peer`, my latency in ms; on the player our open
+ * challenge asks, Call off; on another, MegaMan says we already asked */
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms);
+/* The challenge this game has open, as the Square shows it (square_ask.h,
+ * protocol v13): the one asked, his name, the ms since his question came
+ * up on his screen (0 not yet); false none (or a rematch's, on the card) */
+bool square_arena_open(uint32_t *other, const char **name, uint32_t *seen_ms);
+/* ... asking `id` (his card's Call off) */
+bool square_arena_open_to(uint32_t id);
+/* The player whose challenge to this game waits for Lan's answer, 0 none */
+uint32_t square_arena_asking(void);
 /* An Arena message come in (ARENA_STATE and the relayed three) */
 void square_arena_mail(const uint8_t *data, size_t size);
 /* A NOTICE come (its serial and code): true where it refuses this game's

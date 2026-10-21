@@ -17,6 +17,8 @@ typedef struct {
 	uint8_t facing;
 	char name[ONLINE_NAME_BYTES + 1];
 	uint8_t roms;   /* the ROMs his game has besides BN6's: ONLINE_ROMS_BN5 (BN5 Team Colonel's), the server's word */
+	uint8_t busy;   /* what he is busy with (v13): 0 free, ONLINE_BUSY_BATTLE, ONLINE_BUSY_WATCH, ONLINE_BUSY_TRADE, the server's word */
+	uint8_t link;   /* his link's bars as his PING said his round trip (v13): 0 unknown, 1-3 */
 } OnlinePeer;
 
 typedef struct {

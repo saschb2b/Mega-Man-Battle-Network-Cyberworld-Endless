@@ -208,6 +208,7 @@ void online_scene_draw(void) {
 		return;
 	}
 	if (!arrived) return;
+	/* (the names and marks over heads, an open challenge's strip and the link beside a card: online_labels.h) */
 	online_labels_draw();
 	/* (Trade Central's screens, and the NetPass over it all, START's: online_chat.c) */
 	trade_screen_draw();
