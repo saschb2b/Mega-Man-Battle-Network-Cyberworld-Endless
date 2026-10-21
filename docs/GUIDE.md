@@ -868,10 +868,21 @@ they are (HP, NaviCust, buster, Crosses, BN5's chips in your folder) and
 with your Souls: UNITE on the Custom screen as in a run, and the other
 player sees your Soul too. Where more than one of your folders holds
 chips, MegaMan asks which goes. Win or lose, you are back in the Square
-where you stood, and nothing is won or lost. MegaMan then asks whether
-to go again with the same player, the cursor on **No**: when you both
-say Yes, you fight again at once. No, B, or no Yes from the other within
-half a minute, and you stay in the Square.
+where you stood, and nothing is won or lost. The result card asks
+whether to go again with the same player, the cursor on **No**: when you
+both say Yes, you are back on the Custom screen in about a second, with
+new hands, and the set's score keeps counting. No, B, or no Yes from the
+other within half a minute, and you stay in the Square.
+
+Before you ask, the Square shows who is free: a small mark over a
+player's name says he is in a NetBattle, watching one, or at a trade,
+and three bars beside his card show the link between you (bars only;
+more is better). Once you ask, a strip at the top of your screen shows
+his PET ringing, then his half minute to answer running down once he
+reads your challenge; **Call off** on his card takes it back. When
+someone asks you, your PET rings, a "!" stands over his name, and
+MegaMan reads you his card before asking whether to take it; your half
+minute starts only when the question is up.
 
 **Team up** on a player's card asks him to be your partner; **Split up**
 on your partner's card ends it. A Battle between two teams is a Team
