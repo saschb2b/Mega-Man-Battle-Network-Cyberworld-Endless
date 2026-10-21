@@ -93,11 +93,8 @@ class Teams:
         player.writer.write(websocket.frame(protocol.team_state(stage, partner, match_id, bout, ids, left, number, result, hp)))
 
     def busy(self, player_id):
-        """In a team match (a bout's or waiting for one): a challenge, a trade or a watch of his own refused."""
+        """In a team match (a bout's or waiting for one): a challenge, a trade or a team ask to or from him refused."""
         return player_id in self.in_match
-
-    def team_of(self, player_id):
-        return self.of.get(player_id)
 
     # -- teams --
 

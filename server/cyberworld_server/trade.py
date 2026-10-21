@@ -145,8 +145,9 @@ class Trades:
         if await self.server.without_pass(player, target):
             return False
         # (a Navi whose link dropped, his place held: busy till he is back, holds.py)
+        # (a player of a team match too, between his bouts: teams.py)
         if player.id in self.of or target.id in self.of or player.id in self.server.arena.of or target.id in self.server.arena.of \
-                or self.server.holds.held(target):
+                or self.server.teams.busy(player.id) or self.server.teams.busy(target.id) or self.server.holds.held(target):
             await self.server.notice(player, 16, "That Navi is busy")
             return False
         if player.id in self.done or target.id in self.done:

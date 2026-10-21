@@ -216,6 +216,9 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         other, _ = await self.connect("Epsilon")
         await other.send(arena(1, b[1], 20))
         self.assertEqual(await self.notice(other), 16)
+        # (nor a trade with a player of a team match, waiting for his bout)
+        await other.send(protocol.TRADE.pack(SPEC["trade"], 1, a[1], 1, 0, 0, 0))
+        self.assertEqual(await self.notice(other), 16)
         # (both teams out in one bout: drawn)
         called, side = await self.bout(b, c)
         first = b if side == 0 else c
