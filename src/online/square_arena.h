@@ -43,8 +43,9 @@ void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms);
  * protocol v13): the one asked, his name, the ms since his question came
  * up on his screen (0 not yet); false none (or a rematch's, on the card) */
 bool square_arena_open(uint32_t *other, const char **name, uint32_t *seen_ms);
-/* ... asking `id` (his card's Call off) */
-bool square_arena_open_to(uint32_t id);
+/* ... the card's first option for player `id`: Battle, or Call off where
+ * our challenge to him is open */
+const char *square_arena_option(uint32_t id);
 /* The player whose challenge to this game waits for Lan's answer, 0 none */
 uint32_t square_arena_asking(void);
 /* An Arena message come in (ARENA_STATE and the relayed three) */

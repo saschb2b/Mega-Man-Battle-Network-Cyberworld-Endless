@@ -223,8 +223,8 @@ static void begin(const OnlineSnapshot *s, const Pending *p, uint32_t now) {
 	if ((p->flags & ONLINE_EVENT_ANSWERED) && where(s, p->id, &x, &y) && where(s, p->target, &tx, &ty))
 		square_life_mark((x + tx) / 2, (y + ty) / 2, ANSWER_Z, BN6_SOUND_APPEAR);
 	else if (poses[p->emote].burst && where(s, p->id, &x, &y)) square_life_mark(x, y, BURST_Z, 0);
-	if (emu_debug_on()) fprintf(stderr, "online: player %u performs emote %d (%s)%s%s at %llu ms\n", p->id, p->emote, online_emotes[p->emote],
-		p->target ? " aimed" : "", p->flags & ONLINE_EVENT_ANSWERED ? ", an answer" : "", (unsigned long long)wall_ms());
+	if (emu_debug_on()) fprintf(stderr, "online: player %u performs emote %d (%s)%s%s at %llu ms (ticks %u)\n", p->id, p->emote, online_emotes[p->emote],
+		p->target ? " aimed" : "", p->flags & ONLINE_EVENT_ANSWERED ? ", an answer" : "", (unsigned long long)wall_ms(), now);
 }
 
 /* the animation of pose `p` for a MegaMan facing `facing`, `into` frames
@@ -254,6 +254,7 @@ static void perform(const OnlineSnapshot *s, uint32_t now) {
 			const OnlinePeer *peer = peer_of(s, a->id, &slot);
 			if (peer) online_square_peer_pose((unsigned)slot, pose_anim(p, peer->facing, into), want ? p->sound : 0);
 		}
+		if (want && emu_debug_on()) fprintf(stderr, "online: emote %d's sound %#x from player %u\n", a->emote, p->sound, a->id);
 		sounded |= want;
 		a->sound = false;
 	}

@@ -11,8 +11,9 @@
 
 /* As MegaMan arrives in the Square. */
 void online_chat_reset(void);
-/* After each frame there, with the snapshot shown: true once the player
- * chose to head home. */
+/* After each frame there, with the snapshot shown (the peers placed by
+ * online_square_peers: the emotes' poses written over them): true once
+ * the player chose to head home. */
 bool online_chat_update(const OnlineSnapshot *s);
 /* The pad's keys before BN6 takes them: L, R and A on a peer opening a
  * chat, START and SELECT kept from BN6's PET. */

@@ -13,7 +13,6 @@
 
 #include <string.h>
 
-#include "arena_words.h"
 #include "bn6_fields.h"
 #include "emu.h"
 #include "flags.h"
@@ -183,7 +182,7 @@ static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
 	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms)), FACE_MEGAMAN, &first);
 	ta_jump(t, 1);
 	/* (our challenge to him open: Call off in Battle's place, protocol v13) */
-	const char *battle = square_arena_open_to(C.peer.id) ? arena_call_off_option() : arena_battle_option();
+	const char *battle = square_arena_option(C.peer.id);
 	const char *boxes[3][3] = {
 		{ battle, square_team_option(&C.peer), square_more() },
 		{ square_peer_option(0, muted), square_peer_option(1, muted), square_more() },
@@ -304,6 +303,8 @@ static bool chosen(void) {
 
 bool online_chat_update(const OnlineSnapshot *s) {
 	C.s = *s;
+	/* (the emotes on their beat, over the peers just placed: square_emote.h) */
+	square_emote_frame(s, SDL_GetTicks());
 	talk_update();
 	cards();
 	keeper();
