@@ -195,7 +195,7 @@ static void perform_local(const Pose *p, int anim, uint32_t now) {
 /* the wall clock in ms, for the debug log: games on one machine compared
  * (their emotes on one beat) */
 static unsigned long long wall_ms(void) {
-#ifdef TIME_UTC
+#if defined(__linux__) && !defined(__ANDROID__) && defined(TIME_UTC)   /* (the desktops' harness alone) */
 	struct timespec ts;
 	if (timespec_get(&ts, TIME_UTC)) return (unsigned long long)ts.tv_sec * 1000u + (unsigned long long)ts.tv_nsec / 1000000u;
 #endif

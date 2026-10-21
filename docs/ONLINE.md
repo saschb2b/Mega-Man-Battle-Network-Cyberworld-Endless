@@ -1462,6 +1462,38 @@ first frame and checking all 60 of their hashes
 frame is past a 60th of a second, so it offers none
 ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)).
 
+**The emotes** (22 October 2026, issue #176, protocol v14, the player's
+Gregar ROM and Team Colonel's, a local server with seed 120's Square,
+three to five host builds headless at once from `--scene home
+--run-depth 7 --seed 3`, scripted by the wall clock as
+`tools/trailer_online.py` runs a trailer's games, the dev step `emote K`
+beside the player's keys; the harness and its pictures kept in
+`.build/`):
+
+- **Every emote on every screen.** Beta played the twelve, three seconds
+  apart: Alpha's and Gamma's games each began all twelve on Beta's
+  puppet and played its sound (their logs name each emote and its BN6
+  sound id), and Beta's own MegaMan played each through `F8 01` with no
+  chat box, his own facing and animation back after it (Spin's last step
+  his own facing: `F8 04` would have turned him). Contact sheets of each
+  emote's frames, on a peer and on MegaMan himself, are the issue's.
+- **In step.** Each emote began within 15 ms of the wall clock on every
+  game that showed it (four games, nine emotes); five MegaMen pressing
+  Cheer over 200 ms began on three beats a quarter second apart.
+- **Wave and wave back.** Alpha's Wave at Beta, faced: on Beta's screen
+  the hand over Alpha's name; Beta's L and up answered it two seconds
+  later, and all four games played the answer's "!!" between the two and
+  BN6's sparkle. Alpha's next Wave and Bow at Beta, unanswered, reached
+  everyone; his third reached Alpha alone (the cap).
+- **The burst and the quiet.** Gamma's five favourites in 1.3 seconds
+  sent four (three at once, one a second after), all seen; Delta's L,
+  More, Quiet please hid everyone's emotes from then on (none begun on
+  his game, none sounded).
+- **The Square's answer.** Two MegaMen round the landmark: the walker's
+  "!!"; then five within a second: the Square cheered for 2, 3, 4 and 5
+  in turn (the walker's cheer and BN6's pops from three, the greeter's
+  call from four).
+
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
 are in the history before 433865a8):
@@ -1480,6 +1512,19 @@ are in the history before 433865a8):
   fallback.
 
 ## Not yet
+
+- **The emotes, what is left** (issue #176): the mapping is proposed for
+  the owner to adjust (Emotes, above), and its sounds were picked by
+  their names and BN6's uses, unheard: a listen on a device. Seen
+  headless on the host build only (the Windows and browser builds made,
+  not played); touch's L held with the D-pad, Android, iOS, the 3DS and
+  the handhelds untried.
+  The leap (0x43) waits on BN6's hop (`22 11 60 DC 21`) run on a puppet,
+  whose loop sets its place every frame. A game whose chat box is open
+  at its own emote's beat skips the pose there (the others show it, and
+  he may walk meanwhile). Emotes earned from a
+  run's milestones and chip stickers (Have, Want, Fave) are the issue's
+  Later.
 
 - **A dropped link, what is left** (issue #153): played on the host
   build and in the browser, through a local relay; Android, iOS, Windows
