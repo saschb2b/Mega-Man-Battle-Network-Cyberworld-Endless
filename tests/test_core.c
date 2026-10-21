@@ -3577,11 +3577,12 @@ static void test_free_space(void) {
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
-		{ "spare, persistent", RAM_PLAYER_AI_END, RAM_PERSISTENT_END },
+		{ "--dev arena2v2's list", RAM_TEAM, RAM_TEAM_END }, { "spare, persistent", RAM_TEAM_END, RAM_PERSISTENT_END },
 		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
-		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_BATTLE_SPARE },
+		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_TEAM_TICK },
+		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_BATTLE_SPARE },
 		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
 	};
 	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
@@ -3595,7 +3596,7 @@ static void test_free_space(void) {
 		"BN6's RAM: the chip AI's lists at %08x, two sides, then Colonel's sides' bits, the Dark Soul's AI data", (unsigned)RAM_DARK_LISTS);
 	CHECK(XSEA_MASK == RAM_SEA && XSEA_MARKERS + 32u * 4u <= XSEA_RAM_END && XSEA_RAM_END <= RAM_DARK_LISTS,
 		"BN6's RAM: the sea's submerge at %08x-%08x", (unsigned)RAM_SEA, (unsigned)XSEA_RAM_END);
-	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_BATTLE_SPARE && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
+	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_TEAM_TICK && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
 		"BN6's RAM: the Souls' state at %08x, %#x bytes", (unsigned)BN6_SOULS, (unsigned)BN6_SOULS_SIZE);
 }
 

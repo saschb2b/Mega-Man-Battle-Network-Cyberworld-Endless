@@ -79,29 +79,29 @@ how to verify it.
 
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| Code (routines, hooks, instructions) | 245 | 19 |
+| Code (routines, hooks, instructions) | 247 | 19 |
 | ROM data (tables, text, literals) | 258 | 159 |
-| ROM, code or data not told | 355 | 399 |
-| RAM (variables, structures) | 98 | 47 |
+| ROM, code or data not told | 357 | 399 |
+| RAM (variables, structures) | 99 | 47 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 145 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 83 | 14 |
-| Constants, sizes and counts | 300 | 74 |
-| All | 1512 | 748 |
+| Constants, sizes and counts | 310 | 74 |
+| All | 1527 | 748 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| PET, mail and key items | 49 | 1 |
+| PET, mail and key items | 51 | 1 |
 | Shops and traders | 37 | 0 |
 | NaviCust | 18 | 1 |
 | Chips and folders | 284 | 221 |
-| Battle | 438 | 262 |
+| Battle | 443 | 262 |
 | Text and fonts | 28 | 2 |
 | Sound | 10 | 2 |
 | Maps and the overworld | 119 | 20 |
 | Events and progress | 36 | 12 |
-| Engine core | 493 | 227 |
+| Engine core | 501 | 227 |
 
 <!-- end of what tools/symbols.py writes -->
 
