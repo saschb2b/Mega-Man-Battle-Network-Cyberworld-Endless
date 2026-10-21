@@ -2049,15 +2049,21 @@ partners use none of it):
   (Side 1's player in a 1v1 NetBattle meets the same reset with his AI
   data moved into side 0's block, read and not seen: left to a task of
   its own.)
+- **Fixed: the green flash's count.** BN5's DarkPlus's green flash keeps
+  its frames a side (`XC_FLASH`), counted down in the player's timers,
+  which a partner runs too: twice as fast. The count now skips the
+  object in a side's partner's place (`xchips_flash.c`; no other battle
+  has one there). It still tints both MegaMen of the side. Neither fix
+  is seen in a battle yet (the stood-in partners use neither chip); both
+  leave a NetBattle without the flag and the 2v2 runs above as they were,
+  hash for hash.
 - **Misbehaves, written down:** the Chaos Unison's hooks
   (`soulchaos.c`: charge, phase, release, the counter's test) take the
   side by r5's alliance, so a partner's charge steps his lead's unison
   and his counter is taken from him (to fix: act for the side's player
   alone); BN5's DarkChips' mood rule (`soulmood.c`) zeroes his lead's
   mood and lays the after-effect on his lead (to fix: his NaviStats by
-  object, as BN6's own asks are answered); the green flash's frames
-  (`xchips_flash.c`, a u16 a side) count down once for each MegaMan of
-  the side, twice as fast.
+  object, as BN6's own asks are answered).
 - **Shares his lead's:** a Soul's chip powers (`soulchips.c`: the
   charge, the double damage, KnightSoul's guard, ShadowSoul's sword) and
   his hits' mood by alliance; BN5's Navis and five chips of BN5's
@@ -2174,8 +2180,8 @@ the shape for a 2v2 between four games, each running the pair.
   is 0.14); an attack of his seen asking his record by object (built,
   none asked yet); and from the full-rules audit ([What a partner meets
   under full rules](#what-a-partner-meets-under-full-rules)) the Chaos
-  Unison's hooks, BN5's DarkChips' mood rule and the green flash's count
-  by object, a Soul's chip powers his own, BN5's Navis' and chips'
+  Unison's hooks and BN5's DarkChips' mood rule by object, the green
+  flash a MegaMan's own, a Soul's chip powers his own, BN5's Navis' and chips'
   targets among four.
 - Team NetBattles ([Team NetBattles](#team-netbattles)): teams of three
   (6 of a channel's 8); a heal on a carried HP, which the relay starts
