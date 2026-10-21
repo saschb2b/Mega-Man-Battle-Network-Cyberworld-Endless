@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.0 (2026-10-21)
 
 - **Online Net Squares (epic #120).** Cyberworld Endless connects. Lan's
   HP, where every run begins and comes home between acts, has a gate to a
