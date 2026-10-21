@@ -482,7 +482,9 @@ static void sync(void) {
 	assert(p.n == ARENA_SYNC_PINGS && arena_pings_latency(&p) == 60);
 	/* the window a frame's cost affords (the Nova's 1.07 ms a battle frame: 9; this machine's 0.9: 10, the most), and the latency said less what it covers */
 	assert(arena_window_for(1.07) == 9 && arena_window_for(0.9) == ARENA_WINDOW_MOST && arena_window_for(6.0) == 0 && arena_window_for(0) == 0);
-	assert(arena_ask_ms(100, 0) == 100 && arena_ask_ms(100, 4) == 34 && arena_ask_ms(60, 4) == 0);
+	/* (the window but a frame: the tick a key waits to be taken, issue #167) */
+	assert(arena_ask_ms(100, 0) == 117 && arena_ask_ms(100, 4) == 50 && arena_ask_ms(60, 4) == 10 && arena_ask_ms(50, 4) == 0);
+	assert(arena_ask_ms(0, 1) == 0 && arena_ask_ms(16, 1) == 16 && arena_ask_ms(0, 0) == 17);
 }
 
 static void link_net(void) {

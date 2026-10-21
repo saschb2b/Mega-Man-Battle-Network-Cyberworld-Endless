@@ -76,9 +76,11 @@ uint32_t arena_pings_latency(const ArenaPings *p);
 #define ARENA_MENUS_TO_BATTLE 1.6
 unsigned arena_window_for(double frame_ms);
 /* The latency a game says in its challenge or Yes (ARENA's, protocol v8):
- * its round trip with its jitter, less what its rollback window covers.
- * The server's delay is the lockstep's frame, the tick a key waits to be
- * taken, and the longer of the two said (arena.py's delay_for) */
+ * its round trip with its jitter, less what its rollback window covers but
+ * a frame, the tick a key waits to be taken (a game with no window says a
+ * frame more for it). The server's delay is the lockstep's frame and the
+ * longer of the two said (arena.py's delay_for): 1 where both windows
+ * cover the trip (issue #167; 2 before, the server adding that tick) */
 uint32_t arena_ask_ms(uint32_t latency_ms, unsigned window);
 
 #endif

@@ -68,6 +68,9 @@ unsigned arena_window_for(double frame_ms) {
 }
 
 uint32_t arena_ask_ms(uint32_t latency_ms, unsigned window) {
-	uint32_t covered = (uint32_t)(window * TICK_MS);
-	return latency_ms > covered ? latency_ms - covered : 0;
+	/* (the window's frames but one: that one is the tick a key waits to be
+	 * taken, which the server once added for every pair; no window, a
+	 * frame more asked for it) */
+	double ask = latency_ms - ((double)window - 1) * TICK_MS;
+	return ask > 0 ? (uint32_t)ceil(ask) : 0;
 }
