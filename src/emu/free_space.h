@@ -81,7 +81,9 @@
 #define RAM_PACK_EXT        0x02010CE0u   /* the chip pack's extension, ids 320-511 (BN6_PACK_EXT; xchips_install.c), to: */
 #define RAM_PACK_EXT_END    0x020115E0u   /* ... then: */
 #define RAM_PLAYER_AI       0x020115E0u   /* MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place (darkinvs.c), to: */
-#define RAM_PLAYER_AI_END   0x02011730u   /* ... then spare, persistent, to: */
+#define RAM_PLAYER_AI_END   0x02011730u   /* ... then: */
+#define RAM_TEAM            0x02011730u   /* --dev arena2v2's list of what the Practice NetBattle spawns (arena_team.c, epic #167), to: */
+#define RAM_TEAM_END        0x02011750u   /* ... then spare, persistent, to: */
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
 /* Per battle: the battle's setup clears 0x0203CDA8-0x0203FFFF, and nothing
  * else of BN6's reads or writes 0x0203FB50 on */
@@ -94,7 +96,8 @@
 #define RAM_DISPATCH_SIDE   0x0203FF00u   /* the second-level dispatch's side tables (BN6_DISPATCH_SIDE; xvirus_dispatch.c), to: */
 #define RAM_COLONEL         0x0203FF60u   /* BN5's Colonel's table moved (BN6_COLONEL_TABLE; xnavi_install.c), to: */
 #define RAM_SOULS           0x0203FF70u   /* kept for the Souls' state and BN5's mood (the Souls' track), to: */
-#define RAM_BATTLE_SPARE    0x0203FFF0u   /* spare (the game call's old mark, unused since issue #33), to: */
+#define RAM_TEAM_TICK       0x0203FFF0u   /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c), to: */
+#define RAM_BATTLE_SPARE    0x0203FFF4u   /* spare (the game call's old mark, unused since issue #33), to: */
 #define RAM_BATTLE_END      0x02040000u
 
 #endif
