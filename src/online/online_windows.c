@@ -201,7 +201,11 @@ bool online_socket_send(const uint8_t *data, size_t size) {
 int online_socket_receive(uint8_t *data, size_t size) {
 	if (SDL_AtomicGet(&win.failed)) return -1;
 	if (!SDL_AtomicGet(&win.read_ready)) return 0;
-	if (win.received_type != WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE || !win.received_size || win.received_size > size) return -1;
+	if (win.received_type == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return -1;
+	/* (a text message, an empty one, or one past the wire's bound, which
+	 * WinHTTP hands over as a fragment: the server broke the protocol, as
+	 * online_socket.c says of the same frames, and is never tried again) */
+	if (win.received_type != WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE || !win.received_size || win.received_size > size) return -2;
 	int count = (int)win.received_size;
 	memcpy(data, win.received, (size_t)count);
 	start_read();
