@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Two MegaMen a side, research behind `--dev arena2v2` (epic #167).**
+  Each partner picks his chips on BN6's own Custom screen from his own
+  deck, on a copy of the battle his own game keeps, and only his picks
+  cross to the others; they go into his own hand on both GBAs at once.
+  The leads' Custom screen waits for a partner still picking, by BN6's
+  own link wait (the other side sees BN6's "Cstmzing..." over the side
+  that waits); a quiet sign tells a lead his partner is still picking
+  and a partner that his lead is ready, and after 60 seconds the
+  partner's picks are taken as they stand. A partner's seat shows his
+  own HP box, and each MegaMan is marked by his seat. Not yet a mode to
+  play: it needs the wire's four seats (docs/ONLINE_ARENA.md, Two
+  MegaMen a side).
+
 - **Team NetBattles (epic #167).** Two players team up in the Net
   Square: Team up on a player's card asks him, his MegaMan asks Lan, and
   Split up on your partner's card ends it. A Battle between two teams is

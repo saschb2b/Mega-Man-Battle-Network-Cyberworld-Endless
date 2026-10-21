@@ -26,7 +26,8 @@ typedef struct {
 	bool turn;                        /* his side's GBA's Custom screen open, his own set up for it */
 	uint16_t out[TEAM_CUSTOM_PICKS];  /* his pick messages to go out, one a frame */
 	unsigned queued, sent;
-	unsigned opened, oks, closed_first;
+	unsigned opened, oks, closed_first, at_limit;
+	unsigned frames;                  /* his turn's frames so far */
 } Client;
 
 static Client clients[SIDES];
@@ -54,7 +55,7 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 		printf("arena2v2: side 0's partner carries the run's folder %d, his lead folder %d\n", k + 1, first + 1);
 		break;
 	}
-	if (seat() >= 2) arena_show(a, (int)arena_team_view_side(seat()));
+	if (seat()) arena_show(a, (int)arena_team_view_side(seat()));
 }
 
 void team_client_free(void) {
@@ -108,13 +109,28 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 		unsigned n = arena_team_custom_deck(gba, side, deck);
 		c->turn = n && team_screen_open(c->screen, arena_pair_of(a), deck, n);
 		c->queued = c->sent = 0;
+		c->frames = 0;
 		c->opened += c->turn;
 	}
 	if (c->sent < c->queued) return c->out[c->sent++];
 	if (!c->turn) return arena_team_script(player, frame);
 	uint8_t picks[TEAM_CUSTOM_PICKS];
 	unsigned n;
-	if (team_screen_frame(c->screen, screen_keys(frame), picks, &n)) {
+	/* (his lead held for him near TEAM_WAIT_LIMIT: the picks he has go out, in time to be his; teamslow=-1, a client gone
+	 * quiet, sends none, and the pair's own limit ends the wait) */
+	bool gone = !side && dev.team_slow < 0;
+	if (!gone && team_screen_open_now(c->screen) && arena_team_custom_waited(gba, side) + TEAM_WAIT_SAY >= TEAM_WAIT_LIMIT) {
+		n = team_screen_picks(c->screen, picks);
+		++c->at_limit;
+		printf("arena2v2: side %u's partner's client: %u frames held for him, his %u picks so far sent before the wait's limit\n", side,
+			arena_team_custom_waited(gba, side), n);
+		say(c, picks, n);
+		team_screen_close(c->screen);
+		return c->out[c->sent++];
+	}
+	/* (teamslow=N: side 0's partner's hands off his screen for its first N frames, a slow partner) */
+	bool idle = gone || (!side && dev.team_slow > 0 && c->frames++ < (unsigned)dev.team_slow);
+	if (team_screen_frame(c->screen, idle ? 0 : screen_keys(frame), picks, &n)) {
 		++c->oks;
 		say(c, picks, n);
 		return c->out[c->sent++];
@@ -137,8 +153,8 @@ void team_client_report(void) {
 		const Client *c = &clients[s];
 		if (!c->screen) continue;
 		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms, "
-			"the worst %.2f), OK pressed %u times, %u times his side's closed first; a frame of it %.2f ms (the worst %.2f)\n", s,
-			c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true), c->oks, c->closed_first,
-			team_screen_ms(c->screen, false), team_screen_ms(c->screen, true));
+			"the worst %.2f), OK pressed %u times, %u times his side's closed first, %u times sent at the wait's limit; a frame of "
+			"it %.2f ms (the worst %.2f)\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
+			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true));
 	}
 }

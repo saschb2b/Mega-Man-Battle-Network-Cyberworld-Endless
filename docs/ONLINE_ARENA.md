@@ -1969,8 +1969,9 @@ ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
   (`BN6_CUSTOM_PICKS`), and sends them in his stream as pick messages,
   one a frame (`TEAM_PICK`: bit 15 set, the count, the index, the slot;
   past the GBA's ten buttons, so a partner's stream keeps its sixteen
-  bits, `ARENA_PARTNER_MASK`). Where his side's GBA's screen closes
-  before his OK, his client sends the picks he has so far.
+  bits, `ARENA_PARTNER_MASK`). Since the leads wait for him (below), his
+  side's GBA's screen closes before his OK only at the wait's limit,
+  when his client sends the picks he has so far.
 - **Into his hand**: the pair takes a pick message as it samples his
   side's GBA's frame, as his keys are taken. Once that GBA's screen has
   closed and his picks are in (or as they come in after it), they are set
@@ -1984,14 +1985,93 @@ ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
   picks are set at a frame of his side's GBA, so the other GBA could pass
   that iteration first; four on, as his keys go in, both are behind it.
   While his side's GBA's screen is open his battle keys go in released.
-  Picks that have not come by the time the next turn opens are dropped,
-  his hand left as it was.
+  His picks are never dropped: the leads wait for them (below).
 
 His client's cost (the host build, this machine; the numbers below): a
 frame of his screen about a pair's frame, the turn's copy 0.14 ms to
 some 20 ms, making it once some 155 ms (the battle's worst tick, 7 to 8
 ms without it): a client that makes it at the way in pays that outside
 the battle. A deleted partner has no turn.
+
+### The leads wait for their partners
+
+The owner's call (22 October 2026): the leads' Custom screen waits for
+a slow partner, his picks never dropped; a sign tells each partner his
+lead is ready, and each lead that his partner still picks; and an
+absent partner cannot hold the others forever.
+
+The game-design lens first. The dialectic is mine against ours again:
+each player's turn is his own, but the battle goes on for all four
+only together, so the wait must read as a teammate taking his time,
+never as a fault. The loop layer is the battle's turn (pick, wait, fight)
+inside the session's "one thing together". The patterns: *telegraph
+honestly* (the wait is shown where it is, and by whom), *presence over
+pressure* (a quiet sign that someone is there and busy; no countdown, no
+nagging, no word of explanation: the players know BN6's Custom screen),
+*diegetic first* (BN6's own way of showing a GBA still picking before
+any sign of ours), and *respect the player's time* (a generous limit
+past which the idle one cannot hold three others: 60 seconds, the figure
+the epic's research found players' communities use for a turn).
+
+**How BN6 waits, and where the hold goes.** In a link battle each GBA,
+as its lead's OK has slid the window out, sends its packet (bn6f
+sub_800B3A2, `BN6_LINK_SEND`: the mark `0x56789123` at `0x0203CBE0`, the
+hand its OK built, its battle NaviStats, its Cross's record) and waits in
+mode `0x14` (`BN6_CUSTOM_WAIT`, sub_8026DC4) until both sides' packets
+have come with that mark (`0x0203F4A0` and `0x0203F5A0`, which every GBA
+receives, checked each frame at `BN6_CUSTOM_WAIT_LOOP`); then the screen
+closes on both. While it waits, the other GBA shows "Cstmzing..."
+blinking over the side still picking (seen in the pair's captures). So the hold is the packet: a
+side's GBA keeps its packet back while its partner picks
+(`arena_team_wait.c`: its send skipped at `BN6_LINK_SEND`'s entry and
+owed, then sent from `BN6_CUSTOM_WAIT_LOOP` once his picks are in). Both
+GBAs then wait by BN6's own cable, so the moment the screen closes is
+the cable's, one moment every client and spectator agrees on; the hold
+itself is read in that GBA's RAM (his turn's state, which the pair
+writes from his stream as it samples that GBA's frames), never a clock.
+The lead's OK is answered as BN6 answers it: the window slides out and
+the battlefield shows, as when he waits for the other lead.
+
+**The signs.** On the other side's GBA, BN6's own "Cstmzing..." blinks
+over the side held for its partner, as over a lead still picking: no
+drawing of ours. On a lead's own GBA, whose partner stands on his own
+half where BN6 shows nothing, a quiet plate of ours under the name
+plate: his partner's seat (`P3`, `P4`) and three dots, one lit in turn,
+while his partner picks (`arena_team_view.c`, `sign`). On the partner's
+own screen, the same plate with his lead's seat and a tick once his
+lead has pressed OK and waits for him. No words, no count.
+
+**The limit.** A side's GBA held for its partner counts its frames
+(`RAM_TEAM_CUSTOM`, the pair's); his own client sends the picks he has
+two seconds before the limit (`TEAM_WAIT_SAY`, 120 frames), and at the
+limit the pair takes his picks as they stand, none where none came, and
+the screen closes (`TEAM_WAIT_LIMIT`: 3,600 of that GBA's frames, 60
+seconds, counted only while his lead waits for him). Nothing is shown
+before it. The number is the owner's to confirm.
+
+Proved (`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend`, both
+ROMs, fresh data folders, 22 October 2026):
+
+| Run | End | The two GBAs, the hashes | The wait |
+| --- | --- | --- | --- |
+| `teamhp=500,teamslow=600,arenalag=4` (side 0's partner's hands off his screen 10 seconds each turn; 482 rollbacks) | over at frame 5463 (3426 without him slow) | 3,035 iterations, 0 apart; all 91 hashes the same as `arenalag=0,arenawindow=8`'s, two clients' worth of schedules, as a spectator's would be | side 0's GBA held its packet 592 frames at most in a turn, side 1's 14 at most; his picks taken each turn, never dropped |
+| ... `arenaroll=8` | over at 5471 | 3,035, 0 apart; 683 rollbacks of 8 frames, the game's state the same after all 683; its 91 hashes the delay alone's | as above |
+| `teamhp=150,teamslow=99999,arenalag=4` (a partner who never picks) | over at 12770 | 3,119, 0 apart | his client sends the picks he has (none) at 3,480 frames held, both turns; the screen goes on |
+| `teamhp=150,teamslow=-1,arenalag=4` (a client gone quiet, sending nothing) | over at 13010 | 3,155, 0 apart; all 216 hashes the same as `arenalag=0,arenawindow=8`'s | the pair's own limit at 3,600 frames held, both turns: his picks none |
+| `teamhp=500,arenalag=4` (no one slow) | over at 3426 | 2,703, 0 apart | each side held 9 to 14 frames: a partner's OK comes a few frames after his lead's |
+
+The mutation of these runs is the picks' (`teampick=-1`, the table
+below: apart from iteration 190): the hold itself cannot part the GBAs,
+since it crosses by BN6's cable; held wrongly it would change the
+battle on both alike. A NetBattle without the flag is the battle it was
+(over at frame 2690, last hash `86d2f837337a1494`).
+
+Captured (`teamslow=600`, kept out of the repository): side 0's lead's
+screen with his window slid out after his OK, the battlefield and his
+partner's sign (`P3` and its dots) under the name plate; side 1's lead's
+screen with BN6's own "Cstmzing..." blinking over side 0 for the ten
+seconds; side 0's partner's own screen, BN6's Custom screen with his
+deck still untouched, and his lead's sign (`P1` and a tick).
 
 ### The partner's seat: his HP box and the four told apart
 
@@ -2101,21 +2181,23 @@ partners' clients stood in for on the machine (their screens' keys a
 script by the frame: the cursor right and A every 20 frames), side 0's
 lead tapping R every 600 frames in the fight so that the Custom screen
 opens again once its gauge is full (three turns; with `teamhp=150` the
-partners are deleted before the second), 22 October 2026:
+partners are deleted before the second), 22 October 2026, with the leads
+waiting for their partners (below):
 
 | Run | End | Hashes | The two GBAs | His picks |
 | --- | --- | --- | --- | --- |
-| `arenalag=4` (291 rollbacks, 1,164 frames run again) | over at frame 3426, side 0 won | 57, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 2,725 iterations, 0 apart | three turns each: side 0's partner 7 chips (3, 2, 2: BusterUp, Sword and an Atk+10 merged into it the first), side 1's 11, each at his OK, set as his side's screen closed, taken by both GBAs at the same iteration |
-| `arenalag=4,arenaroll=8` | over at 3426 | all 57 the same as the delay alone's (`arenawindow=0`) | 2,720, 0 apart; 428 rollbacks of 8 frames, the game's state the same after all 428 | as above |
-| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 3806 | 63 (the local link echoes them) | apart from iteration 201 (2,160 of 2,725) | |
+| `arenalag=4` (287 rollbacks, 1,148 frames run again) | over at frame 3426, side 0 won | 57, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 2,703 iterations, 0 apart | three turns each: side 0's partner 7 chips (3, 2, 2: BusterUp, Sword and an Atk+10 merged into it the first), side 1's 11, each at his OK, set as his side's screen closed, taken by both GBAs at the same iteration |
+| `arenalag=4,arenaroll=8` | over at 3426 | all 57 the same as the delay alone's (`arenawindow=0`) | 2,696, 0 apart; 428 rollbacks of 8 frames, the game's state the same after all 428 | as above |
+| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 3828 | 63 (the local link echoes them) | apart from iteration 190 (2,149 of 2,703) | |
 
 Each partner's hand's chip up next moves from his own picks alone:
-side 0's at iterations 177 and 201, 1372 and 1404, 2167 and 2647, side
-1's at 429, 829, 1384, 1784 and 2419, both back to 0 at 1039 and 1994 as
-their picks of the next turn go in. With `teamhp=150` (one turn each):
-1,314 iterations 0 apart, 30 hashes the same with 173 rollbacks and
-with none, `arenaroll=8` 230 of 230, the mutation apart from iteration
-201. A NetBattle without the flag is the battle it was:
+side 0's at iterations 166 and 190, 1361 and 1393, 2145 and 2625, side
+1's at 418, 818, 1373, 1773 and 2397, both back to 0 at 1028 and 1983 as
+their picks of the next turn go in. (Before the wait, the same runs:
+2,725 iterations, 57 hashes, the chips 11 iterations later; with
+`teamhp=150`, one turn each, 1,314 iterations 0 apart, 30 hashes the
+same with 173 rollbacks and with none, `arenaroll=8` 230 of 230.) A
+NetBattle without the flag is the battle it was:
 `--dev arena,arenaboth,arenalag=4,arenadelay=1` over at frame 2690, the
 last hash `86d2f837337a1494`.
 

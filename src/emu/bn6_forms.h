@@ -243,6 +243,13 @@
                                              phase's handler 0x08009338), its hand dealt from BN6_BATTLE_DECK and its chips' icons loaded */
 #define BN6_MODE_OK           0x08        /* BN6_CUSTOM_MODE: OK pressed, the picks kept (the mode table 0x08026AA4's 0x08026BF4); then 0x14
                                              while a link battle waits for the other GBA, "Cstmzing..." (measured: the pair's Practice NetBattle) */
+#define BN6_MODE_WAIT         0x14        /* BN6_CUSTOM_MODE: OK pressed in a link battle, waiting for both GBAs' packets (BN6_CUSTOM_WAIT) */
+#define BN6_CUSTOM_WAIT       0x08026DC4u /* mode 0x14's routine (bn6f sub_8026DC4): its first frame sends this GBA's packet (BN6_LINK_SEND), */
+#define BN6_CUSTOM_WAIT_LOOP  0x08026DECu /* ... then each frame ldr r0,=0x56789123; bl 0x0800B46C: both sides' packets come with that mark
+                                             (0x0203F4A0 side 0's, 0x0203F5A0 side 1's, every GBA receiving both), and the screen closes */
+#define BN6_CUSTOM_WAIT_END   0x08026E4Cu /* ... its end (the next routine's start) */
+#define BN6_LINK_SEND         0x0800B3A2u /* bn6f sub_800B3A2, called from BN6_CUSTOM_WAIT alone: this GBA's packet at 0x0203CBE0 (the mark
+                                             0x56789123, its hand built at OK, its battle NaviStats, its Cross's record) set out on the cable */
 #define BN6_COLL_MOOD_LOSS    0x8E        /* u16 the mood a hit takes from the struck (BN5's +0x86: 0x0801A24C, 0x0801701C) */
 #define BN6_COLL_MOOD_GAIN    0x90        /* u16 the mood it gives the attacker (BN5's +0x88), BN6_HIT_COUNTER for a counter (BN6 reads it for that alone) */
 #define BN6_HIT_COUNTER       0x8000      /* BN6_COLL_MOOD_GAIN: a counter hit (both games' lit 0x8000 at 0x0801A524, 0x08017308) */

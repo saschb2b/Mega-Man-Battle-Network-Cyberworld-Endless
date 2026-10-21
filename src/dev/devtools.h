@@ -68,6 +68,9 @@ typedef struct {
 	                   side 1's partners (his side's GBA, his own Custom screen and HP box over it; arena_team_view.h) */
 	int team_pick;  /* teampick=-1: under arena2v2 the second GBA writes each partner's picks into his hand one chip short, a
 	                   mutation that must part the two (arena_team_custom.h) */
+	int team_slow;  /* teamslow=N: under arena2v2 side 0's partner's stood-in client keeps its hands off his Custom screen for
+	                   the first N frames of each turn: a slow partner, whom the leads wait for (arena_team_wait.h); -1 a
+	                   client gone quiet, which never picks nor sends, so the wait's limit ends it */
 	int team_buster; /* teambuster=N (1-5): under arena2v2 both partners' records with their buster's Attack N, as their own
 	                    loadouts would give it (arena_team_navi.h) */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */

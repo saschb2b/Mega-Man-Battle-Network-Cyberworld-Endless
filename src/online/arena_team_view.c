@@ -5,6 +5,8 @@
 
 #include <mgba/core/core.h>
 
+#include "arena_pair.h"
+#include "arena_team_custom.h"
 #include "bn6.h"
 #include "gfx.h"
 #include "pixfont.h"
@@ -24,6 +26,9 @@
 #define HP_H         16
 #define TAG_X        20   /* a seat's mark from his panel's middle, left of BN6's HP label under him and a line up */
 #define TAG_UP       9
+#define SIGN_Y       30   /* the team's sign: under the Square's name plate (arena_view.h), at the picture's right */
+#define SIGN_H       11
+#define DOT_FRAMES   20   /* a dot of the three lit this long, then the next */
 
 static const SDL_Color shade = { 0, 24, 41, 255 };
 
@@ -76,11 +81,35 @@ static void marks(struct mCore *c, unsigned view, unsigned own) {
 		}
 }
 
+/* The team's sign on the Custom screen, quiet, no words: on a partner's
+ * screen his lead's seat and a tick once his lead has pressed OK and
+ * waits for him; on a lead's, his partner's seat and three dots, one lit
+ * in turn, while his partner picks */
+static void sign(struct mCore *c, unsigned side, unsigned seat) {
+	static unsigned shown;   /* (the sign's own frames, for its dots: a drawing's count, no game state) */
+	bool partner = seat >= 2;
+	if (partner ? !arena_team_custom_lead_waits(c, side) : !arena_team_custom_picking(c, side)) return;
+	uint32_t o = megaman(c, side, 1);
+	if (!partner && (o < BN6_EWRAM || o >= BN6_EWRAM_END || !rd16(c, o + BN6_T1_HP))) return;
+	char tag[8];
+	snprintf(tag, sizeof tag, "P%u", partner ? side + 1 : side + 3);
+	int w = pixfont_width(tag, 1) + 4 + (partner ? pixfont_width(PIXFONT_CHECK, 1) : 3 * 4) + 6;
+	int x = P.core_x + ARENA_W - 2 - w, y = P.core_y + SIGN_Y;
+	fill_rect(x, y, w, SIGN_H, rgba(0, 49, 74, 220));
+	fill_rect(x, y + SIGN_H - 1, w, 1, PET_CYAN);
+	pixfont_draw(x + 3, y + 2, tag, PET_CYAN_HI, shade, PIXFONT_LEFT, 1);
+	int after = x + 3 + pixfont_width(tag, 1) + 4;
+	if (partner) { pixfont_draw(after, y + 2, PIXFONT_CHECK, PET_GOLD, shade, PIXFONT_LEFT, 1); return; }
+	unsigned lit = ++shown / DOT_FRAMES % 3;
+	for (unsigned k = 0; k < 3; ++k) fill_rect(after + 4 * (int)k, y + 6, 2, 2, k == lit ? PET_WHITE : PET_DIM);
+}
+
 void arena_team_view(struct mCore *c, unsigned seat) {
 	if (!c || seat > 3) return;
 	unsigned side = arena_team_view_side(seat);
 	bool open = rd8(c, BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, partner = seat >= 2;
 	uint32_t own = megaman(c, side, partner);
 	if (partner && own >= BN6_EWRAM && own < BN6_EWRAM_END) hp_box(rd16(c, own + BN6_T1_HP), open);
-	if (!open) marks(c, side, seat);
+	if (open) sign(c, side, seat);
+	else marks(c, side, seat);
 }

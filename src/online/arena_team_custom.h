@@ -27,6 +27,13 @@
 struct mCore;
 
 #define TEAM_CUSTOM_PICKS 5   /* the chips picked at most */
+/* The leads wait for their partners (the owner's call, 22 October 2026):
+ * a side's GBA holds its Custom screen's packet back while its partner
+ * picks (arena_team_wait.h), so that BN6's own link waits on both GBAs;
+ * past this many of that GBA's frames held, his picks are taken as they
+ * stand (none, where none came) and the battle goes on: 60 seconds */
+#define TEAM_WAIT_LIMIT   3600u
+#define TEAM_WAIT_SAY     120u  /* ... his own client sends the picks he has this many frames before it, to be in time */
 /* A pick message in a partner's stream (past the GBA's buttons): pick
  * `index` of `count` (count 0: none picked), the slot of the hand his
  * screen dealt; a frame of his stream holding one carries no keys */
@@ -54,6 +61,19 @@ void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool short_on
 /* side's partner's deck as `core` holds it: its entries in the order drawn,
  * how many (his own client's screen deals from it); 0 before it is dealt */
 unsigned arena_team_custom_deck(struct mCore *core, unsigned side, uint16_t out[30]);
+
+/* From a hook, on the core of side's GBA: whether it holds its packet
+ * for its partner now (dealt, his turn open and his picks not in, he on
+ * the field); and whether it owes the packet, held back */
+bool arena_team_custom_holds(unsigned side);
+void arena_team_custom_owe(unsigned side, bool owed);
+bool arena_team_custom_owed(unsigned side);
+/* As `core` (side's GBA's) holds it: the frames it has held for its
+ * partner this turn, whether it holds now (his lead has pressed OK and
+ * waits), whether he is still picking */
+unsigned arena_team_custom_waited(struct mCore *core, unsigned side);
+bool arena_team_custom_lead_waits(struct mCore *core, unsigned side);
+bool arena_team_custom_picking(struct mCore *core, unsigned side);
 
 /* the partners' folders folded into the pair's hash */
 uint64_t arena_team_custom_hash(uint64_t h);
