@@ -36,8 +36,10 @@ network would hold them. `arenadelay=N` sets the input delay in frames
 alone; without it, what a frame costs here affords: [Rollback](#rollback)),
 `arenabusy` makes the second player step, shoot and OK the Custom screen
 by the frame's number alone (a run that rolls back and one that does not
-hand him the same keys), and `arenahp=N` makes the carried MegaMan's HP N
-(the installer seen in the battle). `arenaboth` makes the first player
+hand him the same keys), `arenahp=N` makes the carried MegaMan's HP N
+(the installer seen in the battle), and `arenacarry=N` sends him in with
+N HP of his max, as a Team NetBattle's winner goes on ([Team
+NetBattles](#team-netbattles)). `arenaboth` makes the first player
 a script too (the Custom screen's OK, then charged shots), so the battle
 plays itself on a device; `quitend` ends the game after it (and after
 `--dev rollbench`, which `--dev rollbench,arena` runs first), for a run
