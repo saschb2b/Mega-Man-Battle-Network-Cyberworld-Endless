@@ -127,11 +127,12 @@ static bool out(void *context, const uint8_t *data, size_t size) {
 }
 
 /* the latency a challenge or a Yes says (protocol v8): the round trip with
- * its jitter, less what this system's rollback window covers (the frame's
- * cost kept here, arena_window.h); arenawindow=N's window, or arenadelay=N
- * asking for that delay (the server's: two frames and the latency's) */
+ * its jitter, less what this system's rollback window covers but a frame
+ * (the frame's cost kept here, arena_window.h); arenawindow=N's window, or
+ * arenadelay=N asking for that delay (the server's: a frame and the
+ * latency's, issue #167) */
 static uint32_t asked(void) {
-	if (dev.arena_delay > 0) return dev.arena_delay > 2 ? (uint32_t)((dev.arena_delay - 2) * 1000 / 60) : 0;
+	if (dev.arena_delay > 0) return dev.arena_delay > 1 ? (uint32_t)((dev.arena_delay - 1) * 1000 / 60) : 0;
 	unsigned window = dev.arena_window >= 0 ? (unsigned)dev.arena_window : arena_window_kept();
 	uint32_t ms = arena_ask_ms(A.latency, window);
 	printf("arena: asking with %u ms: the round trips' %u ms less a window of %u\n", (unsigned)ms, (unsigned)A.latency, window);

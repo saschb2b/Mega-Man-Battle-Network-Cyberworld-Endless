@@ -18,22 +18,24 @@ CHALLENGE, ACCEPT, LEAVE, OVER = range(1, 5)
 PENDING = 30          # seconds a challenge waits for its answer
 FRAME_MS = 1000 / 60
 LOCKSTEP = 1          # frames the linked cores need: one crosses into its next a little before its partner (v8; 3 before)
-TAKEN = 1             # the tick a key waits on its way in to be taken
-LEAST = LOCKSTEP + TAKEN
+LEAST = LOCKSTEP      # (2 before issue #167: a tick for a key to be taken, which a rollback window covers as well)
 MOST = 30
 
 
 def delay_for(latency_a, latency_b):
     """Frames of input delay fitted to the pair (issue #128): the lockstep's
-    frame, the tick a key waits to be taken, then the longer of the two
-    latencies the games report: each its round trip with its jitter, less
-    what its rollback window covers (protocol v8; docs/ONLINE_ARENA.md,
-    Smoothed delay and Rollback). A key goes through the server, half a
-    round trip of each game's; the games' time sync holds each one's keys'
-    lag at its own round trip, so the delay covers the longer of the two,
-    and a game that rolls back W frames covers W of it itself."""
+    frame, then the longer of the two latencies the games report: each its
+    round trip with its jitter, less what its rollback window covers but a
+    frame (protocol v8; docs/ONLINE_ARENA.md, Smoothed delay and Rollback).
+    A key goes through the server, half a round trip of each game's; the
+    games' time sync holds each one's keys' lag at its own round trip, so
+    the delay covers the longer of the two, and a game that rolls back W
+    frames covers W - 1 of it itself and the tick a key waits to be taken
+    (issue #167: before, the server added that tick for every pair, so the
+    least was 2 where a window covered the whole trip; a game without a
+    window says a frame more for it)."""
     trip = max(latency_a, latency_b)
-    return max(LEAST, min(MOST, LOCKSTEP + TAKEN + math.ceil(trip / FRAME_MS)))
+    return max(LEAST, min(MOST, LOCKSTEP + math.ceil(trip / FRAME_MS)))
 
 
 class Match:

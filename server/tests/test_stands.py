@@ -123,6 +123,8 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
             await b.send(keys(match, first, [first + k + 1 for k in range(8)]))
             if first % 120 == 56:
                 await a.send(hashed(match, first + 3, first))
+            if first % 120 == 16:       # (a lag note for the other's time sync, v11: never the stands')
+                await a.send(hashed(match, 0xFFFFFFFD, 3))
             await asyncio.sleep(0.012)
         await a.send(keys(match, 0, [0] * 8))       # (a resent message: left as it was)
         await asyncio.sleep(0.2)
@@ -131,6 +133,8 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(states[0][1:6], (1, match, a_id, b_id, delay_for(40, 40)))
         self.assertEqual(got[0], [0] * 8 + [k for k in range(8, 1600)])
         self.assertEqual(got[1], [0] * 8 + [k + 1 for k in range(8, 1600)])
+        kept = [protocol.ARENA_HASH.unpack(data)[2] for side, data in relays[5:] if data[0] == SPEC["arena_hash"]]
+        self.assertEqual(kept[:3], [59, 179, 299])
         sides = sorted((side, data[0]) for side, data in relays[:5])
         self.assertEqual(sides, [(0, SPEC["arena_loadout"]), (0, SPEC["arena_hash"]), (0, SPEC["arena_hash"]),
                                  (1, SPEC["arena_loadout"]), (1, SPEC["arena_hash"])])

@@ -88,4 +88,8 @@ void online_stream_close(void) {
 	(*env)->DeleteGlobalRef(env, stream);
 	stream = NULL;
 }
+/* (the stream is not one the worker can wait on here: looked at every
+ * millisecond, a key sent at the next look; online_socket.h) */
+void online_stream_wait(uint32_t ms) { SDL_Delay(ms ? 1 : 0); }
+void online_stream_wake(void) {}
 #endif

@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- **Snappier NetBattles (epic #167, the netcode's quick wins).** Where
+  both games' rollback windows cover the trip, a NetBattle's input delay
+  is 1 frame instead of 2: every press, step and chip of your own a frame
+  sooner. No key waits in the network thread any more (it rested 2 ms
+  between looks; now it wakes when a key is put to go out or one comes
+  in, and uses less CPU), and every client socket asks for no Nagle where
+  the system lets it. The other player's sounds stay whole when a guess
+  of his keys is corrected: the frames run again replace the sound not yet
+  heard instead of going silent. The time sync splits its waits evenly
+  between the two games, so a player on the worse link no longer sees the
+  deeper corrections, and holds them where nobody sees them: on the
+  Custom screen or while your keys rest. Protocol v11 (the Arena's lag
+  notes): a server and its games update together. A server host: the
+  Arena's delay comes from `delay_for` as before, now 1 at least
+  (docs/ONLINE_ARENA.md, Quicker on the wire).
+
 ## 0.13.0 (2026-10-21)
 
 - **Online Net Squares (epic #120).** Cyberworld Endless connects. Lan's

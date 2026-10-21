@@ -17,5 +17,14 @@ bool online_socket_send(const uint8_t *data, size_t size);
  * both). */
 int online_socket_receive(uint8_t *data, size_t size);
 void online_socket_close(void);
+/* The worker's rest between two looks at the link (issue #167): until a
+ * message may have come in, online_socket_wake was called, or `ms` have
+ * passed, never a spin. Where the system tells the worker of a message
+ * (curl's socket polled, WinHTTP's and NSURLSession's completions) it
+ * wakes at once; Android's and the 3DS's streams are looked at every
+ * millisecond. */
+void online_socket_wait(uint32_t ms);
+/* From any thread: the worker's rest ended, a message waiting to go */
+void online_socket_wake(void);
 
 #endif

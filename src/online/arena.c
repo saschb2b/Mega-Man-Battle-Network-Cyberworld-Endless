@@ -57,6 +57,7 @@ typedef struct {
 	bool fight, gone;   /* my core's battle under way; both cores' gone, back at the Comm menu */
 	uint8_t result[2];  /* mine and the other's (BN6_BATTLE_RESULT) */
 	ArenaReading reading;   /* both MegaMen as the cable's first core has them */
+	uint64_t sound;         /* the sound ring's mark before it (emu_audio_mark): a rollback's sound goes back to it */
 } Ran;
 
 struct Arena {
@@ -70,6 +71,8 @@ struct Arena {
 	uint32_t ticks, uneven;    /* the battle's ticks, and those that ran no frame or more than one */
 	uint32_t settled;          /* ... of them, once the clocks have settled (past SETTLE frames) */
 	bool owed;                 /* a stall last tick: this one holds my clock and runs the frame that waited */
+	uint16_t last_keys;        /* my keys the tick before ... */
+	uint32_t idle;             /* ... the same for this many ticks: a hold then is not seen (arena_sync.h) */
 	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
 	ArenaRoll *roll;
 	int window_asked;          /* arena_window: the rollback window set, -1 this system's own */
@@ -220,6 +223,7 @@ static bool run_frame(Arena *a) {
 	uint16_t keys[ARENA_LOOKAHEAD][2];
 	if (!arena_input_take(&a->input, a->window, keys)) return false;
 	if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[2])keys);
+	uint64_t sound = emu_audio_mark();
 	uint64_t t = SDL_GetPerformanceCounter();
 	if (!arena_pair_step(a->pair, (const uint16_t (*)[2])keys, true)) return false;
 	double ms = (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -228,24 +232,32 @@ static bool run_frame(Arena *a) {
 	++a->costed;
 	if (a->roll && !arena_roll_after(a->roll, frame)) return false;
 	note(a, frame);
+	/* (my GBA's sound a frame at a time, each frame's place in the ring kept) */
+	arena_pair_sound(a->pair, a->link->side);
+	a->ran[frame % LOG].sound = sound;
 	return true;
 }
 
 /* a key come otherwise than guessed: the pair back before the first frame
- * that read it, and the frames since run again, unheard, with what is
- * known now; false where the pair could not be (a snapshot or the cable) */
+ * that read it, and the frames since run again with what is known now,
+ * their sound in place of the guess's where it is not yet heard (issue
+ * #167: unheard before, the other's attacks losing their starts); false
+ * where the pair could not be (a snapshot or the cable) */
 static bool roll_back(Arena *a) {
 	uint32_t from = arena_input_wrong(&a->input), until = a->input.next;
 	if (from == ARENA_NO_FRAME) return true;
 	arena_input_rewind(&a->input, from);
 	if (from >= until) return true;
 	if (!a->window || from < a->done || !arena_pair_load(a->pair, a->snap[from % a->window])) return false;
+	/* (the guess's sound from the first frame run again: what is not yet
+	 * heard cut, and what was heard skipped in the sound run again) */
+	arena_pair_mute(a->pair);
+	emu_audio_rewind(a->ran[from % LOG].sound);
 	while (a->input.next < until) {
 		/* (no picture but the last frame's, the one shown) */
 		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << a->link->side : 0);
 		if (!run_frame(a)) return false;
 	}
-	arena_pair_mute(a->pair);
 	++a->rollbacks;
 	a->again += until - from;
 	if (until - from > a->deepest) a->deepest = until - from;
@@ -293,6 +305,10 @@ static void over(Arena *a, uint32_t frame, const Ran *r) {
 		" the most at once; a frame of the pair %.2f ms (the worst %.2f), a tick at worst %.2f ms, %" PRIu32 " past a 60th\n",
 		a->window, a->input.delay, a->rollbacks, a->again,
 		a->deepest, a->costed ? a->cost / a->costed : 0, a->worst, a->tick_worst, a->late);
+	int lag = 0;
+	arena_sync_least(&a->sync, &lag);
+	printf("arena: the other's keys' least lag %d ticks, his of mine %d as he last said it%s\n", lag, a->sync.peer_lag,
+		a->sync.peer_known ? "" : " (none said)");
 	/* (what a frame costs here, kept for the window the next challenge asks by) */
 	if (a->costed) arena_window_keep(a->cost / a->costed);
 	a->stage = ARENA_OVER;
@@ -314,12 +330,30 @@ static void settle(Arena *a) {
 	hashes_in(a);
 }
 
+/* the time sync's notes: mine to the other once a second, his taken
+ * (protocol v11; a link without them, the local one, keeps the old rule) */
+static void lag_notes(Arena *a) {
+	ArenaLink *l = a->link;
+	int lag;
+	if (l->poll_lag && l->poll_lag(l, &lag)) arena_sync_peer(&a->sync, lag);
+	if (l->send_lag && a->ticks % ARENA_SYNC_NOTE == 0 && arena_sync_least(&a->sync, &lag)) l->send_lag(l, lag);
+}
+
+/* a hold now would not be seen: my GBA on the Custom screen, or my keys
+ * unchanged half a second (issue #167) */
+#define IDLE_TICKS 30
+static bool quiet(const Arena *a) {
+	return a->idle >= IDLE_TICKS || arena_phase(a, a->link->side) == BN6_PHASE_CUSTOM;
+}
+
 /* my clock held this tick, nothing sampled: after a stall, or the leading game's */
 static bool hold(Arena *a) {
 	bool held = a->owed;
 	if (held) arena_sync_shift(&a->sync);
-	else if ((held = arena_sync_hold(&a->sync)))
-		printf("arena: a tick held at frame %" PRIu32 ", the other's keys' lag past %u\n", a->input.next, arena_sync_target(&a->sync));
+	else if ((held = arena_sync_hold(&a->sync, quiet(a))))
+		printf("arena: a tick held at frame %" PRIu32 " (%s), the other's keys' lag past %s %d\n", a->input.next,
+			quiet(a) ? "quiet" : "a quiet one waited for too long", a->sync.peer_known ? "his of mine," : "my round trip's,",
+			a->sync.peer_known ? a->sync.peer_lag : (int)arena_sync_target(&a->sync));
 	a->owed = false;
 	return held;
 }
@@ -328,6 +362,9 @@ static ArenaStage tick(Arena *a, uint16_t keys) {
 	ArenaLink *l = a->link;
 	l->tick(l);
 	++a->ticks;
+	a->idle = (keys & ARENA_KEYS_MASK) == a->last_keys ? a->idle + 1 : 0;
+	a->last_keys = keys & ARENA_KEYS_MASK;
+	lag_notes(a);
 	bool held = hold(a);
 	uint32_t now = a->tick - 1;
 	if (!held && a->tick + a->input.delay < a->input.next + LEAD) {

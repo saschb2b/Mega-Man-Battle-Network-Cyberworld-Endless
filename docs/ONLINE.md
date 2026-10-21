@@ -221,7 +221,7 @@ Souls from words of the game's own, never read from BN5's ROM.
 | --- | --- | --- |
 | The game's side | `src/online/` (the NetPass's set and stamps in `netpass.c`), the gate in `src/director/director_gate.c` and `src/map/lanhp.c` | `build.py` and every target; `build.py test` (`tests/test_online.c`: the Square's plan and hash, `tests/test_arena.c`), `build.py lint` |
 | The server | `server/`, its deployment in `deploy/coolify/` | `build.py server`, `build.py server-test`; its own Dockerfile and CI workflow |
-| The wire | `shared/online/` ([protocol v10](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
+| The wire | `shared/online/` ([protocol v11](../shared/online/README.md)) | The server's tests hold its codecs, the C constants, the Square's generator version and hash and the ROM's identity to the client's |
 
 The dependency runs client → wire ← server. The server imports no game
 code, runs no emulator, reads no ROM and never sees a save: chips are
@@ -848,11 +848,13 @@ without the full set, NOTICE 28):
 
 ## The server and the wire
 
-Protocol v10 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v10`; v7 added the
+Protocol v11 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v11`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
-BYE, maintenance and which side is behind: A dropped link, above). The
+BYE, maintenance and which side is behind: A dropped link, above; v11
+the Arena's lag notes, by which the time sync splits the waits evenly:
+docs/ONLINE_ARENA.md, Quicker on the wire). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of

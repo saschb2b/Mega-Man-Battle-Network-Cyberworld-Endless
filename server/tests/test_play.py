@@ -286,12 +286,15 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await a.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
 
     def test_delay_covers_the_trip(self):
-        # (the lockstep's frame, the tick a key waits, the longer latency said: 2 at least, 30 at most;
-        # a game that rolls back says its round trip less what its window covers, protocol v8)
-        self.assertEqual(delay_for(0, 0), 2)
-        self.assertEqual(delay_for(20, 10), 4)
-        self.assertEqual(delay_for(40, 100), 8)
+        # (the lockstep's frame, the longer latency said: 1 at least, 30 at most; a game that rolls
+        # back says its round trip less what its window covers but a frame, protocol v8 and issue #167)
+        self.assertEqual(delay_for(0, 0), 1)
+        self.assertEqual(delay_for(20, 10), 3)
+        self.assertEqual(delay_for(40, 100), 7)
         self.assertEqual(delay_for(4000, 0), 30)
+        # (a game whose window covers its trip asks for 0: the floor 1, where the server once gave 2;
+        # past the window's edge the delay is what it was, the window's frame said back by the game)
+        self.assertEqual(delay_for(16, 0), 2)
 
 
 if __name__ == "__main__":
