@@ -11,9 +11,11 @@
 #include "director_folder.h"
 #include "director_home.h"
 #include "director_state.h"
+#include "gamecall.h"
 #include "jobs.h"
 #include "net_route.h"
 #include "netmap.h"
+#include "pad_art.h"
 #include "save.h"
 #include "talk.h"
 #include "town.h"
@@ -179,6 +181,19 @@ void push_arrow(void) {
 	if (++pushed != 40 || cinema_arrow_on()) return;
 	goal_way();
 	cinema_arrow(way_dir, 150);
+}
+
+/* MegaMan standing on the exit pad as drawn, where BN6's trigger cells
+ * (coords.c, PAD_REACH) end short of it: his feet in front of its ring's
+ * left half, his sprite over it (session 75: 150 frames there, and
+ * nothing warped). The pad's warp, as its trigger takes it, once he
+ * stands still on it as drawn (walked past, its cells decide alone),
+ * while it is open (a guardian's shuts it: exit_flag). */
+void exit_pad_step(void) {
+	PadArt art = { D.objs.exit_x, D.objs.exit_y, PAD_RING_ACROSS, PAD_RING_DOWN };
+	if (D.warping || D.dir_held || emu_read8(BN6_PLAYER_STATE) || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || boss_cinematic()) return;
+	if (emu_read8(BN6_WARP_PENDING) || flag_get(BN6_FLAG_WARP_OFF + 1) || !pad_art_on(&art, bn6_player_x(), bn6_player_y(), 0)) return;
+	emu_warp_link(1);
 }
 
 /* As the layer's map closes (SELECT let go): the way-on arrow, as after

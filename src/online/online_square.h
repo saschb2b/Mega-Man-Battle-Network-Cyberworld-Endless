@@ -33,8 +33,8 @@ bool online_square_trade_say(const uint8_t *archive, int n);
 /* Room for the Square's chats: a text archive of TALK_ROOM bytes. */
 uint32_t online_square_talk_room(void);
 #define SQUARE_TALK_ROOM 2048
-/* Whether world (x, y) stands on the pad home, as drawn (its middle,
- * stretched towards the screen's front as Lan's HP's portals are). */
+/* Whether world (x, y) stands on the pad home as drawn (pad_art.h, as
+ * every pad). */
 bool online_square_on_exit(int x, int y);
 /* Whether MegaMan at (x, y) facing `face` (0-7) checks the pad home with
  * A: on it, or from its edge (lanhp_portal_ahead's way). */

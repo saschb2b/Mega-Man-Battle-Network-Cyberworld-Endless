@@ -17,6 +17,8 @@ bool hurt_now(void);
 bool heal_spent(void);
 void goal_way(void);
 void push_arrow(void);
+/* MegaMan standing still on the exit pad as drawn: its warp (pad_art.h). */
+void exit_pad_step(void);
 void arrow_update(void);
 
 #endif
