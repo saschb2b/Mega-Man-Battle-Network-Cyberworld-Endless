@@ -10,7 +10,11 @@
 
 bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t size);
 bool online_socket_send(const uint8_t *data, size_t size);
-/* 0: no complete message yet; >0: message bytes; -1: disconnected/error. */
+/* 0: no complete message yet; >0: message bytes; -1: disconnected or
+ * closed; -2: the server broke the WebSocket protocol (never tried again,
+ * online_transport.h; Windows' WinHTTP says it of what it hands over, a
+ * text message, an empty one or one too long; the browser's says -1 for
+ * both). */
 int online_socket_receive(uint8_t *data, size_t size);
 void online_socket_close(void);
 

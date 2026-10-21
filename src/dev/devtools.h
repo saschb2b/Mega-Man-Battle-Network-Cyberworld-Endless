@@ -91,5 +91,11 @@ bool trade_preview_on(void);
 /* While one is up: its frame, the game's keys none */
 uint32_t trade_preview_keys(uint32_t keys);
 void trade_preview_draw(void);
+/* The wait for a dropped link over the game (reconnect_preview.c, issue
+ * #153), as `--input`'s "reconnect SECONDS" shows it: as if the link went
+ * SECONDS ago (the time left past five), "reconnect back" the moment it is
+ * back, "reconnect off" gone. Nothing is sent or held. */
+void reconnect_preview(const char *spec);
+void reconnect_preview_draw(void);
 
 #endif

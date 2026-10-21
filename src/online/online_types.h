@@ -53,6 +53,11 @@ typedef struct {
 	 * (weeks since Monday 5 January 1970), 0 none */
 	uint32_t week_seed;
 	uint16_t week;
+	/* the link (issue #153, online_transport.h): quiet a while, or dropped
+	 * and being tried again (lost_at: the ticks it went quiet or dropped);
+	 * resumes counts the times a resume's WELCOME and first SNAPSHOT came */
+	bool quiet, reconnecting;
+	uint32_t lost_at, resumes;
 	char notice[100], error[128];
 } OnlineSnapshot;
 

@@ -31,9 +31,12 @@ typedef enum {
 	VISIT_END_FULL,          /* every channel full */
 	VISIT_END_BARRED,        /* banned, or not on the server's allowlist */
 	VISIT_END_REMOVED,       /* a moderator removed MegaMan */
-	VISIT_END_LOST,          /* the connection dropped in the Square */
+	VISIT_END_LOST,          /* the connection dropped in the Square, and did not come back (or B on the wait) */
 	VISIT_END_BROKEN,        /* the Square could not be built */
 	VISIT_END_DIVE,          /* home to dive the week's net (square_week.h): no gate after */
+	VISIT_END_MAINTENANCE,   /* the server is under maintenance (its line: online_visit_end_note) */
+	VISIT_END_OLD_SERVER,    /* the server runs an older version than the game */
+	VISIT_END_MOVED,         /* back after a dropped link, to another Square (a server restarted with another seed) */
 } VisitEnd;
 /* (VISIT_END_NONE as a visit's end, to the statistics: the game closed, or
  * sent away, in it) */
@@ -54,6 +57,15 @@ bool online_visit_held(void);
 void online_visit_held_frame(uint32_t keys);
 /* After each frame of the core while a visit is on. */
 void online_visit_update(void);
+/* The link to the Square quiet or dropped and being tried again (issue
+ * #153, online_transport.h): the game's core held still and the wait drawn
+ * over the Square; online_visit_wait_frame each frame in the core's place
+ * (B gives up, home at once) */
+bool online_visit_waiting(void);
+void online_visit_wait_frame(void);
+/* What a server's refusal (its ERROR's code) means: `away`, it came in the
+ * Square (a link lost there, else no answer) */
+VisitEnd online_visit_refusal(const OnlineSnapshot *s, bool away);
 uint32_t online_visit_keys(uint32_t keys);
 /* The Square over the game, or the gate's field where one is open. */
 void online_visit_draw(void);
@@ -61,6 +73,9 @@ void online_visit_draw(void);
 void online_visit_leave(VisitEnd why);
 /* How the last visit ended, once: VISIT_END_NONE after. */
 VisitEnd online_visit_ended(void);
+/* ... and the server's line with it, where it gave one (a maintenance's
+ * "until 14:00 UTC"), "" none */
+const char *online_visit_end_note(void);
 /* The game closing or sent away mid-visit: the connection closed, the
  * gate's checkpoint left as it is. */
 void online_visit_shutdown(void);

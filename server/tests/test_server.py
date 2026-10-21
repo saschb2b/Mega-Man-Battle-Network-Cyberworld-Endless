@@ -57,8 +57,23 @@ class Client:
         raise AssertionError("Message not received")
 
     async def close(self):
+        """Leaving as the game does at the pad: BYE (protocol v10), then the
+        socket closed; the place is freed at once."""
+        if not self.writer.is_closing():
+            try:
+                self.writer.write(masked(bytes((protocol.SPEC["bye"],))))
+                await self.writer.drain()
+            except ConnectionError:
+                pass
+        await self.drop()
+
+    async def drop(self):
+        """The link gone without a word: the server holds the place (holds.py)."""
         self.writer.close()
-        await self.writer.wait_closed()
+        try:
+            await self.writer.wait_closed()
+        except ConnectionError:
+            pass
 
 
 class ServerTests(unittest.IsolatedAsyncioTestCase):
@@ -109,7 +124,9 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(self.server.players), 1)
 
     async def test_rejects_incompatible_identity(self):
-        for identity, code in ((dict(version=protocol.SPEC["version"] + 1), 2), (dict(square_make=0), 3),
+        # (v10: a game newer than the server told apart from an older one, so it says where the newer one is)
+        for identity, code in ((dict(version=protocol.SPEC["version"] - 1), 2), (dict(version=protocol.SPEC["version"] + 1), 17),
+                               (dict(square_make=protocol.SPEC["square_make"] + 1), 17), (dict(square_make=0), 3),
                                (dict(square_hash=protocol.SPEC["square_hash"] ^ 1), 3), (dict(rom_code="BAD!"), 4),
                                (dict(rom_sha1="00" * 20), 4), (dict(bn5=True, bn5_code="BRKP"), 15),
                                (dict(bn5=True, bn5_sha1="00" * 20), 15)):
@@ -184,7 +201,7 @@ class ContractTests(unittest.TestCase):
                      "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_full", "notice_pass",
                      "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
                      "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
-                     "watch_most"):
+                     "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)

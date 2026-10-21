@@ -28,6 +28,9 @@ typedef struct {
 
 /* As MegaMan arrives in the Square: no trade. */
 void online_trade_reset(void);
+/* Back from a dropped link on a new session (a server restarted, issue
+ * #153): the trade under way off, as the server never knew of it. */
+void online_trade_lost(void);
 /* A TRADE_STATE message come in; false where it is malformed. */
 bool online_trade_mail(const uint8_t *data, size_t size);
 const TradeView *online_trade_view(void);

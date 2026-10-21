@@ -1,12 +1,12 @@
 {
-  "version": 9,
+  "version": 10,
   "square_make": 2,
   "square_hash": 655709660,
   "rom_code": "BR5E",
   "rom_sha1": "89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6",
   "bn5_code": "BRKE",
   "bn5_sha1": "5f472f78d8de2df01d5039e045c043cb40969a39",
-  "subprotocol": "cyberworld.presence.v9",
+  "subprotocol": "cyberworld.presence.v10",
   "max_players": 8,
   "name_bytes": 16,
   "max_message": 512,
@@ -79,5 +79,10 @@
   "watch_state_bytes": 15,
   "watch_keys_head": 12,
   "watch_keys_max": 240,
-  "watch_most": 6
+  "watch_most": 6,
+  "bye": 32,
+  "hello_resume": 32768,
+  "error_maintenance": 16,
+  "error_server_older": 17,
+  "maintenance_bytes": 40
 }

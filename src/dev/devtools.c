@@ -273,6 +273,7 @@ static void line(int x, int y, bool sel, const char *label, const char *value) {
 void devtools_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
 	trade_preview_draw();
+	reconnect_preview_draw();
 	if (M.toast_t > 0) {
 		fill_rect(x0 + 4, y0 + CORE_H - 20, text_width(M.toast) + 8, 14, rgba(0, 0, 0, 180));
 		text_draw(x0 + 8, y0 + CORE_H - 19, M.toast, WHITE, TEXT_LEFT);

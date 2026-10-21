@@ -5054,8 +5054,8 @@ static void test_analytics_online(void) {
 	CHECK(stats_posts == 2 && strstr(stats_sent[1], "\"pass\":\"square\",\"ended\":\"no answer\",\"official\":false}") &&
 		!strstr(stats_sent[1], "\"minutes\""), "online statistics: a visit that never got to the Square, no minutes (%s)", stats_sent[1]);
 	/* every end its own word; a game closed in the Square "closed" */
-	char ends[VISIT_END_DIVE + 1][48];
-	for (int e = 0; e <= VISIT_END_DIVE; ++e) {
+	char ends[VISIT_END_MOVED + 1][48];
+	for (int e = 0; e <= VISIT_END_MOVED; ++e) {
 		stats_posts = 0;
 		analytics_visit(e, true, 60, false);
 		const char *w = strstr(stats_sent[0], "\"ended\":\"");
