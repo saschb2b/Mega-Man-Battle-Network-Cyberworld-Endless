@@ -6,6 +6,8 @@
 #ifndef CW_PET_TEXT_H
 #define CW_PET_TEXT_H
 
+#include <stdbool.h>
+
 /* The NetPass's key item (docs/PET.md): one of the ids BN6 leaves
  * nameless; A on it opens the pass (pet.h) */
 #define PET_ITEM_NETPASS 0x4A
@@ -13,8 +15,15 @@
 /* The archives, once on the core's ROM copy (the key items' names and
  * descriptions, the mails' senders, subjects and bodies). */
 void pet_text_install(void);
-/* On a layer: the descriptions that count (the codes, the Library) made
- * again, the profile's key items given, and a mail delivered for each
+/* The descriptions that count (the codes, the Library) made again and the
+ * profile's key items given (the NaviCodes, the DarkPass, the LibCard, the
+ * NetPass): on a layer as part of pet_text_refresh, at home wherever the
+ * game's state lacks them (pet.c), where a NEW GAME's PET held only the PET
+ * until the first layer (session 74). */
+void pet_text_items(void);
+/* Whether the game's state holds them (the NetPass's count). */
+bool pet_text_items_held(void);
+/* On a layer: pet_text_items, and a mail delivered for each
  * guardian MegaMan has battle data on and the list lacks. Returns the navi
  * of a mail delivered now (the last), 0 for none. */
 int pet_text_refresh(void);

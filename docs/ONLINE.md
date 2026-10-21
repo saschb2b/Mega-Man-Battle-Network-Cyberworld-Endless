@@ -466,7 +466,10 @@ every place and every walker's waypoint on the floor.
   player; how many are watching), are rewritten as they change, as the
   keeper's are. The referee calls each bout over his head as MegaMan
   comes back ("YOU WIN!", "ALPHA WINS!").
-- **Check text**: A facing a prop says what it is; the Board's posts are
+- **Check text**: A facing a prop says what it is (the Board also where
+  its art shows, over the floor before the rim it stands past: its piece
+  is drawn 24 units lower, and a player facing it there read nothing,
+  session 74); the Board's posts are
   the channel, who is here, the last log-in, the last trade and battle,
   the trade board's offers and a tip (Trade Central); the sign names the
   channel.
@@ -481,12 +484,33 @@ their talk BN6's talk box from the host (`talk_start`), the Mr.Progs'
 words their own archives in the layer's scratch.
 
 **Talk.** Every exchange is BN6's chat box with its options, three to a
-box (`online_chat.c`, words in `square_words.c`): L for a phrase or an
-emote, A facing another MegaMan for his card (HP, act and layer,
+box (`online_chat.c`, words in `square_words.c`): L for a phrase, an
+emote or a look around, A facing another MegaMan for his card (HP, act and layer,
 Crosses, Souls) and Battle (where both passes hold the Arena stamp),
-Wave, Mute, Block; R or the pad for home. A talk's column of options takes up
+Wave, Mute, Block; R or the pad for home, stepped on as drawn or A on
+it (its zone its middle stretched towards the screen's front, as Lan's
+HP's portals are: a player stood on its front 21 units from its middle
+and nothing asked, session 74). A talk's column of options takes up
 and down (`cinema_keys` lets the pad through while MegaMan is held).
-The Square's flags are `0x1480`-`0x14C3`, its own while it lasts.
+The Square's flags are `0x1480`-`0x14C5`, its own while it lasts.
+
+**Finding the wings.** A player ran round an empty Square for ten calls
+and found the greeter, the keeper, a walker and the props, but neither
+Trade Central's clerks nor the referee (session 74): the wings stand
+eight panels or more off the plaza, past what the screen shows of it.
+Both stand in every Square (the layout is the same for every seed, only
+its props vary), so the way to them is signposted, BN6's way and the
+layers' (the game-design skill: signposts over waypoints, by the
+landmark everyone sees, words that agree with the map). L's third
+option, **Look around**, has MegaMan say where they lie from where he
+stands (`square_life_look`, words in `square_life_words.c`): in the
+plaza, "Trade Central's to the upper left,Lan!" and "The Arena's to the
+lower left!"; anywhere else, which way the landmark is first (as L's
+way on a layer, `way_to`), then each wing past it, or "right here" in
+its own. The wings stand off the plaza the same way in every Square, so
+these words hold for every seed. The greeter's welcome ends on the same
+signpost: "TRADE CENTRAL AND THE ARENA ARE PAST THE STATUE!" (the
+landmark's name). No map: the Square has no SELECT screen of its own.
 Phrases and emotes are fixed lists, never free text; mute and block are
 the player's, kept by the server's public identity of the other.
 

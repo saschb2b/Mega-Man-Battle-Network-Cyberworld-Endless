@@ -406,7 +406,7 @@ made at AsterLand's counter, piece 6; `0x1473` the Yes of the Net
 Square's gate's questions and `0x1474`-`0x1476` its keeper's options,
 the official Square, another server and the name, piece 11, which the
 director clears as each visit home begins). In the Net Square itself,
-whose RAM is thrown away on the way home, `0x1480`-`0x14C4` are its own:
+whose RAM is thrown away on the way home, `0x1480`-`0x14C5` are its own:
 the phrases and emotes asked for (`0x1480`-`0x148D`), the channel
 keeper's next and last (`0x148E`, `0x148F`), a peer's wave, mute and
 block (`0x1490`-`0x1492`), the way home (`0x1493`), Trade Central's
@@ -416,7 +416,8 @@ and the Yes to one (`0x14A0`, `0x14A1`), the folder a NetBattle carries
 with the way home's `0x1493` set beside it, the unfinished dive begun
 again; issue #127), the spare picked from the clerk's chat-box list
 (`0x14B0`-`0x14C3`), and the referee's Yes to watching a NetBattle from
-the stands (`0x14C4`, issue #128); docs/ONLINE.md. Its life
+the stands (`0x14C4`, issue #128), and L's Look around (`0x14C5`);
+docs/ONLINE.md. Its life
 (`square_life.c`: the walkers, the log-in beam, the cheer, the greeter's
 and the referee's words) takes none.
 CONTINUE loads the state and enters the map again, so the game reloads it

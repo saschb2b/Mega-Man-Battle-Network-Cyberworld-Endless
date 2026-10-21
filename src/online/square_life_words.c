@@ -23,11 +23,16 @@ static void here(char *out, size_t n, const SquareFacts *f) {
 }
 
 const char *square_greeter_words(const SquareFacts *f) {
-	static char s[200];
+	static char s[240];
 	int n = snprintf(s, sizeof s, "HELLO! WELCOME,\nWELCOME!");
 	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|%s JUST\nLOGGED IN!", f->arrived);
-	if (f->navis <= 1) snprintf(s + n, sizeof s - (size_t)n, "|IT'S QUIET NOW.\nFRIENDS LOG IN\nRIGHT HERE!");
-	else snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS ARE ON\nCHANNEL %u!", f->navis, f->channel);
+	if (f->navis <= 1) n += snprintf(s + n, sizeof s - (size_t)n, "|IT'S QUIET NOW.\nFRIENDS LOG IN\nRIGHT HERE!");
+	else n += snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS ARE ON\nCHANNEL %u!", f->navis, f->channel);
+	/* (the wings by the landmark everyone sees: session 74 found neither) */
+	char mark[16];
+	snprintf(mark, sizeof mark, "%s", landmark_name(f->landmark));
+	for (char *c = mark; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
+	snprintf(s + n, sizeof s - (size_t)n, "|TRADE CENTRAL AND\nTHE ARENA ARE PAST\nTHE %s!", mark);
 	return s;
 }
 
@@ -142,12 +147,30 @@ const char *square_check_words(int look, const SquareFacts *f) {
 	case LOOK_SIGN:
 		snprintf(s, sizeof s, "\"WELCOME TO THE\nNET SQUARE!\nCHANNEL %u\"", f->channel);
 		return s;
-	case LOOK_STATUE: return "A big Navi statue.\nNavis meet up\nround it.";
+	/* (the Undernet's statue is a beast's, not a Navi's, as a player
+	 * saw: named as MegaMan can tell it, session 74) */
+	case LOOK_STATUE: return "Whoa... A statue of\nsome huge beast!|Navis meet up\nround it.";
 	case LOOK_MONUMENT: return "An old monument.\nNavis meet up\nin front of it.";
 	case LOOK_GIANT_TREE: return "A giant cybertree.\nIts leaves hum\nsoftly.";
 	case LOOK_BRAZIER: return "A brazier.\nIts flame flickers.";
 	default: return "A cybertree.";
 	}
+}
+
+/* (a player ran round an empty Square for ten calls and found neither
+ * Trade Central's clerk nor the referee, session 74: L names the way, as
+ * L does on a layer, by the landmark everyone can see) */
+const char *square_look_words(int where, int look, const char *way) {
+	static char s[240];
+	const char *mark = landmark_name(look);
+	if (where == SQUARE_IN_PLAZA) return "Trade Central's to the upper left,Lan!|The Arena's to the lower left!";
+	if (where == SQUARE_IN_TRADE)
+		snprintf(s, sizeof s, "Trade Central's right here,Lan!|The %s's %s.|The Arena's past it,to the lower left!", mark, way);
+	else if (where == SQUARE_IN_ARENA)
+		snprintf(s, sizeof s, "The Arena's right here,Lan!|The %s's %s.|Trade Central's past it,to the upper left!", mark, way);
+	else
+		snprintf(s, sizeof s, "The %s's %s,Lan!|Trade Central's past it,to the upper left!|The Arena's past it,to the lower left!", mark, way);
+	return s;
 }
 
 const char *square_cheer_bark(void) { return "!!"; }

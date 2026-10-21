@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-const char *const square_menu_options[2] = { "Say something", "Do an emote" };
+const char *const square_menu_options[SQUARE_MENU_OPTIONS] = { "Say something", "Do an emote", "Look around" };
 const char *const square_keeper_options[2] = { "Next channel", "Last channel" };
 
 const char *square_menu_question(void) { return "What'll we do,Lan?"; }

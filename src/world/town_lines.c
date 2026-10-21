@@ -192,7 +192,10 @@ const char *town_intro(const char *arrival) {
 			else ADD("@M Ready,Lan? Our best is layer %d!|@L This time we'll go even deeper!", profile.best_depth);
 			break;
 		case 1:
-			if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!");
+			/* (Dad's backup only after a deletion: a won run's end is no
+			 * rescue) */
+			if (profile.last_won) ADD("%s|@M Let's find out,Lan!|@M To the PC!", again);
+			else if (nest_goal) ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!");
 			else ADD("@M Dad's backup got me home safe last time.|@L Alright! Let's beat layer %d today!", profile.best_depth);
 			break;
 		default: ADD("%s|@M Let's find out,Lan!|@M To the PC!", again); break;

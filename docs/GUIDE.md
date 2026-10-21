@@ -762,12 +762,14 @@ the cursor on **No**. After that MegaMan asks each time. Yes saves the
 run right there, and you go; the gate flickers while the server answers,
 and B calls it off.
 
-**R**, or the pad you arrived by, takes you home. MegaMan is back on the
+**R**, or the pad you arrived by (step on it, or A facing it), takes you
+home. MegaMan is back on the
 gate exactly as he left it; if the game was closed in the Square, the
 next CONTINUE puts him there.
 
-The keeper changes your name or the server: the official Square, or
-another one's address (`host` or `host:port`, as its owner gives it).
+The keeper changes your name or the server: the official Square (he
+asks first, the cursor on **No**), or another one's address (`host` or
+`host:port`, as its owner gives it).
 He also moves you to the next or the last channel.
 
 #### If your connection drops
@@ -833,7 +835,9 @@ DeepNet.
   whole channel to see. Phrases come from a fixed list: there is no free
   text, and no one can type at you. Say something or emote together with
   another player round the landmark or on the stage, and the Square
-  cheers.
+  cheers. **Look around** has MegaMan say which way Trade Central and
+  the Arena are from where you stand: both are off the plaza, Trade
+  Central to its upper left and the Arena to its lower left.
 - **A** facing another player's MegaMan shows his card (HP, act and
   layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.

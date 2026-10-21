@@ -7,34 +7,25 @@
 
 const char *const gate_options[GATE_OPTIONS] = { "Official Square", "Another server", "My name" };
 
-static void capitals(char *out, size_t n, const char *s) {
-	size_t i = 0;
-	for (; s[i] && i + 1 < n; ++i) out[i] = s[i] >= 'a' && s[i] <= 'z' ? (char)(s[i] - 32) : s[i];
-	out[i] = 0;
-}
-
-const char *gate_keeper_hello(const char *server) {
-	static char s[160];
-	char host[20];
-	capitals(host, sizeof host, server ? server : "");
-	if (server) snprintf(s, sizeof s, "HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO\n%s!", host);
-	else snprintf(s, sizeof s, "HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO THE\nOFFICIAL SQUARE!");
-	return s;
+const char *gate_keeper_hello(bool official) {
+	/* (where the gate leads as a place, never its address) */
+	if (official) return "HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO THE\nOFFICIAL SQUARE!";
+	return "HELLO! I KEEP THE\nNET SQUARE GATE!|IT LEADS TO ANOTHER\nSERVER'S SQUARE!";
 }
 
 const char *gate_keeper_ask(void) { return "WHAT CAN I DO?"; }
+
+const char *gate_keeper_official_ask(void) { return "HMM? THE OFFICIAL\nSQUARE INSTEAD?"; }
+
+const char *gate_keeper_official_question(void) { return "SWITCH IT?\n"; }
+
+const char *gate_keeper_official_already(void) { return "IT LEADS THERE\nALREADY!"; }
 
 const char *gate_keeper_official(void) { return "DONE! IT LEADS TO\nTHE OFFICIAL SQUARE!"; }
 
 const char *gate_keeper_bye(void) { return "COME BACK ANYTIME!"; }
 
-const char *gate_keeper_set(const char *server) {
-	static char s[120];
-	char host[20];
-	capitals(host, sizeof host, server);
-	snprintf(s, sizeof s, "DONE! IT LEADS TO\n%s!", host);
-	return s;
-}
+const char *gate_keeper_set(void) { return "DONE! IT LEADS TO\nTHAT SERVER NOW!"; }
 
 const char *gate_keeper_named(const char *name) {
 	static char s[80];

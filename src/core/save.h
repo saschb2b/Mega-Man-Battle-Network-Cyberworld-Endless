@@ -37,7 +37,13 @@ typedef struct {
 	 * how many it held as the current run began */
 	uint8_t library[40];
 	uint16_t library_start;
-	uint8_t last_town;        /* (unused since Central Town is home, docs/HOME.md: the last new run's town, style + 1) */
+	/* RUN_OPEN while a run begun has not ended (meta_run_begun sets it,
+	 * profile_record_run clears it), so a NEW GAME after a quit before any
+	 * save reads as a run abandoned, not one MegaMan was deleted in
+	 * (session 74). The byte was last_town, the last new run's town (style
+	 * + 1, small values), unused since Central Town is home: RUN_OPEN is a
+	 * value it never held. */
+	uint8_t run_open;
 	uint8_t programs_found[8];   /* NaviCust programs MegaMan has had in any run, a bit each (docs/NAVICUST.md, 7) */
 	uint32_t library_run;     /* the run library_start was counted for (its seed) */
 	uint8_t setup_new;        /* the setup's rows with an option the last summary announced (SETUP_NEW_*, meta.h) */
@@ -113,6 +119,7 @@ typedef struct {
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
+#define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };
 
 enum { MARK_SERVER = 1, MARK_WARP = 2, MARK_GATE = 4, MARK_NAVI_GATE = 8, MARK_VAULT = 16, MARK_COUNTS = 32 /* the Mystery Data counters */ };

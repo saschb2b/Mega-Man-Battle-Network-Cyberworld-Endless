@@ -10,6 +10,7 @@
 #include "bn6_fields.h"
 #include "chips.h"
 #include "debug.h"
+#include "director_way.h"
 #include "emu.h"
 #include "netmap.h"
 #include "netpass.h"
@@ -420,11 +421,31 @@ void square_life_frame(const OnlineSnapshot *s) {
 	if (L.bark_t) --L.bark_t;
 }
 
+/* The Board stands in the void past the log-in plaza's back rim, its art
+ * 24 units lower (its piece's dz, layer_objs.c), so it shows over the
+ * floor before the rim: a player stood there facing it and A read nothing
+ * (session 74). MegaMan near where it shows, facing back towards it (up,
+ * up and to the right, right: grid -y), reads it. */
+#define BOARD_DROP 24
+#define BOARD_NEAR 32
+static bool board_before(const SquarePlan *p, int x, int y, int face) {
+	if (face > 2) return false;
+	for (int i = 0; i < p->nprops; ++i) {
+		if (p->props[i].look != LOOK_BBS) continue;
+		int bx, by;
+		netmap_world(p->props[i].x, p->props[i].y, &bx, &by);
+		/* (24 units down the screen: as far -x as +y) */
+		if (abs(x - (bx - BOARD_DROP)) <= BOARD_NEAR && abs(y - (by + BOARD_DROP)) <= BOARD_NEAR) return true;
+	}
+	return false;
+}
+
 /* the prop MegaMan faces: on the panel ahead of him, along his probe
  * (BN6's own, 8 units long) 20 and 40 units on; the landmark on any
- * panel of its base */
+ * panel of its base; the Board where it shows */
 static int prop_ahead(int x, int y, int face) {
 	const SquarePlan *p = online_square_plan();
+	if (board_before(p, x, y, face)) return LOOK_BBS;
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
 	double d = sqrt((double)dx * dx + (double)dy * dy);
@@ -460,6 +481,28 @@ bool square_life_talk(int x, int y, int face) {
 		return talk_start(posts, FACE_NONE);
 	}
 	return look >= 0 && talk_start(square_check_words(look, &f), FACE_NONE);
+}
+
+/* which part of the Square world (x, y) is in: the plaza, Trade Central's
+ * wing (its floor and walkway, grid -x), the Arena's (its walk, floor and
+ * ring, grid +y), or another (the stage, the log-in plaza) */
+static int part_of(int x, int y) {
+	const SquarePlan *p = online_square_plan();
+	int gx, gy, mid = p->at[SQ_CENTER][0];
+	if (!netmap_panel(x, y, &gx, &gy)) return SQUARE_IN_OTHER;
+	if (abs(gx - mid) <= SQUARE_PLAZA_HALF && abs(gy - p->at[SQ_CENTER][1]) <= SQUARE_PLAZA_HALF) return SQUARE_IN_PLAZA;
+	if (gx < mid - SQUARE_PLAZA_HALF) return SQUARE_IN_TRADE;
+	if (gy > p->at[SQ_CENTER][1] + SQUARE_PLAZA_HALF) return SQUARE_IN_ARENA;
+	return SQUARE_IN_OTHER;
+}
+
+bool square_life_look(void) {
+	if (!L.ready) return false;
+	const SquarePlan *p = online_square_plan();
+	int cx, cy, far;
+	netmap_world(p->at[SQ_CENTER][0], p->at[SQ_CENTER][1], &cx, &cy);
+	const char *way = way_to(cx, cy, &far);
+	return talk_start(square_look_words(part_of(bn6_player_x(), bn6_player_y()), p->landmark, way), FACE_MEGAMAN);
 }
 
 bool square_life_bark(const char **text, int *x, int *y, int *z) {

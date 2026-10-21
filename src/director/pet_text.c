@@ -533,14 +533,25 @@ void pet_text_install(void) {
 	install_mails();
 }
 
-int pet_text_refresh(void) {
+bool pet_text_items_held(void) {
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	/* (no toolkit to read: nothing to give either) */
+	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return true;
+	return emu_read8(items + (uint32_t)ITEM_NETPASS) != 0;
+}
+
+void pet_text_items(void) {
 	install_descriptions();
-	install_mails();
 	int codes = codes_known(NULL, 0);
 	item_set(ITEM_CODES, codes > 99 ? 99 : codes);
 	item_set(ITEM_PASS, meta_dark_way_open() ? 1 : 0);
 	item_set(ITEM_LIBRARY, 1);
 	item_set(ITEM_NETPASS, 1);
+}
+
+int pet_text_refresh(void) {
+	pet_text_items();
+	install_mails();
 	int got = 0;
 	for (int m = 1; m <= 18; ++m)
 		if (mail_of(m) && guardian_known(m) && mail_deliver(m)) got = m;

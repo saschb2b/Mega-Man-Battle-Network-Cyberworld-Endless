@@ -51,6 +51,12 @@ void pet_install(void) {
 }
 
 void pet_update(void) {
+	/* at home, where a layer's refresh (director.c) never runs: the
+	 * profile's key items wherever the game's state lacks them (a NEW
+	 * GAME's, the week's dive's), so KeyItem holds the NetPass before the
+	 * first layer (session 74) */
+	if ((director_in_town() || director_in_hp()) && emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME && !pet_text_items_held())
+		pet_text_items();
 	if (emu_read8(BN6_PET_MENU_TAKEN) == 7) {
 		emu_write8(BN6_PET_MENU_TAKEN, 0);
 		saving = 1;

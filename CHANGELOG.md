@@ -166,6 +166,19 @@
   its own maps' Mystery Data and cleared their flags, some of which are
   the run's: a request settled, the visit's order at AsterLand. Each
   layer now leaves BN6's own Mystery Data out of the roll.
+- **The pink pad in Lan's HP takes you on from where it is drawn.**
+  BN6's own trigger for the pad sits behind its picture, so MegaMan could
+  stand on its pink middle and go nowhere: a playtester did so in four
+  runs. Stepping onto the pad as drawn now takes you to the act's first
+  layer. And at the wall beside the corridor to it, the arrow and L no
+  longer point at the pad through the wall: they lead into the corridor
+  first.
+- **Home remembers a quit.** A new game after a run you quit before its
+  first save opened with "Dad's backup got me home safe last time.", as
+  if MegaMan had been deleted; it now reads as a dive left unfinished,
+  and Dad's backup comes up only after a deletion. On a brand-new run
+  the courier in Lan's HP says the town's requests are up, not "NEW
+  REQUESTS POSTED!" before you have done a thing.
 
 ## 0.12.0 (2026-10-13)
 

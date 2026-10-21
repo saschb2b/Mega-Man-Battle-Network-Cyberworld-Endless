@@ -162,7 +162,7 @@ static size_t name_list(char *w, size_t size, size_t k, const char *const *names
 	return k < size ? k : size - 1;
 }
 
-const char *home_courier_words(int reward, unsigned posted, int unlockers, bool rush_food, bool www_id) {
+const char *home_courier_words(int reward, unsigned posted, bool first, int unlockers, bool rush_food, bool www_id) {
 	/* (a homepage's helper relaying the town's posts and AsterLand's stock:
 	 * where each waits, never what the Net ahead holds) */
 	static const char *const paid_by[JOB_ASKERS] = { "THE NETBATTLER,\nASTERLAND!", "THE NETBATTLE CLUB,\nTHE ACADEMY!",
@@ -176,7 +176,10 @@ const char *home_courier_words(int reward, unsigned posted, int unlockers, bool 
 	if (reward >= 0 && reward < JOB_ASKERS) k = (size_t)snprintf(w, sizeof w, "REWARD WAITING!\n%s", paid_by[reward]);
 	else if (posted) {
 		for (int a = 0; a < JOB_ASKERS; ++a) if (posted >> a & 1) names[n++] = places[a];
-		k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "NEW REQUESTS POSTED!\n" : "NEW REQUEST POSTED!\nAT ");
+		/* (at a run's first visit nothing is new yet: a player heard
+		 * "NEW REQUESTS POSTED!" before he had done a thing, session 74) */
+		if (first) k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "REQUESTS ARE UP AT\n" : "A REQUEST IS UP AT\n");
+		else k = (size_t)snprintf(w, sizeof w, "%s", n > 1 ? "NEW REQUESTS POSTED!\n" : "NEW REQUEST POSTED!\nAT ");
 		k = name_list(w, sizeof w, k, names, n);
 		k += (size_t)snprintf(w + k, sizeof w - k, "!");
 	}

@@ -81,7 +81,8 @@ void home_courier_frame(void) {
 	bool keys = w & WAITS_KEYS, first = true;
 	ta_begin(&t);
 	ta_script(&t);
-	ta_pages(&t, home_courier_words(w & WAITS_REWARD ? C.reward : -1, w & WAITS_REQUESTS ? C.posted : 0u, keys ? C.unlockers : 0,
+	/* (the run's first visit, before its first layer: run.depth as the askers' own, director_jobs.c) */
+	ta_pages(&t, home_courier_words(w & WAITS_REWARD ? C.reward : -1, w & WAITS_REQUESTS ? C.posted : 0u, run.depth <= 1, keys ? C.unlockers : 0,
 		keys && C.rush_food, keys && C.www_id), FACE_PROG, &first);
 	/* (heard, his "!!" goes; new words bring it back as he is met again) */
 	ta_flag_set(&t, LANHP_COURIER_TOLD_FLAG);

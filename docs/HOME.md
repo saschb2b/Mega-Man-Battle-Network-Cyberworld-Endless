@@ -255,8 +255,11 @@ shows the PET at home there. The way from the blue pad to the pink pad
 runs up a corridor whose mouth (x 119, open from y -24 to -4) a walk
 straight from the blue pad meets a few units off its line; a playtester
 pushed at its lip for sixteen calls, the arrow pointing at the pad
-through the wall (session 69). L still says where the pad lies, and the
-arrow leads onto the corridor's line first; at home too, pushing a while
+through the wall (session 69). The arrow leads onto the corridor's line
+first, and L names that first stretch, as the town's way does: from the
+wall beside the mouth too, where MegaMan stops at its x, and where the
+arrow had pointed at the pad through the wall and L said "straight up"
+(session 74, eight calls pushing there); at home too, pushing a while
 where the pad goes nowhere brings the arrow, as on a layer.
 
 The courier (issue #108): playtests jacked out only when told to, and the
@@ -271,7 +274,9 @@ shows BN6's sprite of it). Talked to, he names what waits and where in a
 Mr.Prog's capitals, the most valuable first, a box each (`home_words.c`):
 a finished request's pay with its asker ("REWARD WAITING! THE NETBATTLE
 CLUB,THE ACADEMY!"), else the new requests posted while none is held, by
-place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"), then the
+place ("NEW REQUESTS POSTED! ASTERLAND,THE ACADEMY AND TOWN!"; at the
+run's first visit, before its first layer, when nothing is new yet,
+"REQUESTS ARE UP AT ASTERLAND,THE ACADEMY AND TOWN!", session 74), then the
 keys AsterLand's SubChip seller stocked ("ASTERLAND HAS UNLOCKERS!"). He
 relays the town's posts and the shop's stock, never the Net ahead. What
 the visit holds is fixed as it begins, from the run's state, so a
@@ -312,12 +317,17 @@ through a link asks too, "Go this way,Lan?" after what MegaMan reads
 through it, its warp held off as a way back's (`lanhp_lit`): a
 playtester leaving a way back's pad stepped onto the link beside it on
 his way to the pink pad, and it chose his act unasked (session 73). The
-pink pad, the act's own way at the corridor's end, warps as BN6's does.
-A link marker draws in front of its link's trigger cells, BN6's own as
-ours (MegaMan seen on a marker's middle stood 14 units short of the
-cells' middle in x and 12 past it in y, outside them), so a link's zone
-for the checks and the questions is its cells stretched as far towards
-the screen's front (`lanhp_portal_near`). Its name stays
+pink pad, the act's own way at the corridor's end, warps by BN6's own
+warp, unasked. A portal draws in front of its trigger cells, BN6's own
+as ours: MegaMan seen on a link marker's middle stood 14 units short of
+the cells' middle in x and 12 past it in y, outside them; and BN6's
+trigger for the pink pad stops short of its cells' front corner, on the
+line x - y = 201 (docs/ROM_DATA.md, Lan's HP), so MegaMan on its pink
+middle, at 194, 0, stood outside it, and a playtester stood there in
+four runs without a warp (session 74; v0.12.0 the same). A portal's
+zone for the checks and the questions is its cells stretched as far
+towards the screen's front (`lanhp_portal_near`), and on the pink pad's
+the director takes BN6's warp itself (`lanhp_pad_take`). Its name stays
 in MegaMan's words and on the second screen, whose home panel lists each
 way as On or Back (the ways back were left out of it before: it looked
 them up by the ways' own portals).
@@ -414,7 +424,13 @@ As built (issue #94): the town is Central Town at its original width,
 the same plan every run (`CYBERWORLD_TOWN_STYLE` and `_VARIANT` still
 pick another for a test). A run begins in Lan's room, at the top of its
 stairs where BN6 sets him down; the run's words play there, and R at his
-PC jacks MegaMan in to Lan's HP (`lan_house.c`). BN6's own jack-in from
+PC jacks MegaMan in to Lan's HP (`lan_house.c`). Those words remember how
+the last run went (`town_lines.c`): one left unfinished ("We never
+finished that last dive..."), whether a saved run was started over or a
+run was quit before its first save (the profile's `run_open`, set as a
+run begins and cleared as it ends; session 74 heard "Dad's backup got me
+home safe last time." after a plain quit), and Dad's backup only after a
+deletion. BN6's own jack-in from
 the PC (destination 1) runs a line of its story's that turns Lan back
 ("Lan,let's check out the town first!"), so the room's table goes
 through the town's destination with Lan's plain "Jack in!". The house
@@ -762,9 +778,15 @@ on a server that did not answer, runs another version, is full, or turned
 the name down, never the server's own text; and a trade the visit made
 is the run's now (docs/ONLINE.md, Trade Central).
 
-**Talked to**, the keeper sets where the gate leads and the player's
-name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a field: host or
-host:port, `wss://` and `/presence` added), MY NAME. The two fields are
+**Talked to**, the keeper says where the gate leads, as a place ("IT
+LEADS TO THE OFFICIAL SQUARE!", or "TO ANOTHER SERVER'S SQUARE!", never
+its address, `--dev online`'s server counted), and sets where it leads
+and the player's name: OFFICIAL SQUARE, ANOTHER SERVER (its address in a
+field: host or host:port, `wss://` and `/presence` added), MY NAME. The
+cursor starts on the first, so OFFICIAL SQUARE asks before it changes
+the gate ("THE OFFICIAL SQUARE INSTEAD?", the cursor on No) and says it
+leads there already where it does: one A too many while paging his
+words had switched the server unasked (session 74). The two fields are
 the only screen of its own going online has (`src/online/online_field.c`,
 in the PET's colours, a keyboard on the pad and by touch, the system's
 own keyboard and paste where there is one; on a phone held upright the

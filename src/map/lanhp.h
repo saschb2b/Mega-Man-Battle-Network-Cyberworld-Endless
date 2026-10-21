@@ -58,7 +58,12 @@ int lanhp_portal_ahead(int x, int y, int face);
 /* Portal `k`'s spot: the middle of its cells (world units). */
 void lanhp_portal_spot(int k, int *x, int *y);
 /* The portal whose spot holds world (x, y), or lies within `reach` world
- * units of it; -1 none. */
+ * units of it; -1 none. A portal's spot is its cells and the art drawn in
+ * front of them, towards the screen's front. */
 int lanhp_portal_near(int x, int y, int reach);
+/* MegaMan at world (x, y) on the pink pad as it is drawn, where BN6's own
+ * trigger, behind the art, may not reach: its warp taken as the trigger
+ * takes it, while it is lit and no warp is under way; whether it was. */
+bool lanhp_pad_take(int x, int y);
 
 #endif
