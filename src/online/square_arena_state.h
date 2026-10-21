@@ -20,7 +20,7 @@
 #define FADE            12       /* frames of a fade: the panel and the battle from white, the card from black and to it */
 #define STALL_NOTE      60       /* ticks waiting on the other's keys before the note names whose */
 #define STALL_OFFER     600      /* ... before B leaves (a press meant for the Buster before) */
-#define STALL_END       1800     /* ... before the battle stops by itself, broken off */
+#define STALL_END       1200     /* ... before the battle stops by itself, broken off */
 #define AGAIN_MS        45000    /* a rematch's answer kept, from the battle's end: the card's time */
 
 typedef enum {
@@ -54,6 +54,7 @@ typedef struct {
 	OnlineLoadout mine, theirs;
 	bool mine_carried, theirs_carried, theirs_in;
 	uint32_t t;               /* frames of the screen shown: the panel, the battle, the card */
+	uint32_t ticks;           /* the battle's, for arenafreeze */
 	bool counted;             /* the battle's end told to the statistics */
 	const char *said;         /* MegaMan's word, once back in the Square */
 	char why[160];            /* a stop's cause, for the log */

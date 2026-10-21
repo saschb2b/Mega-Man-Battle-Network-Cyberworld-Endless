@@ -2076,7 +2076,7 @@
      "src/online/stands_text.c",
      "src/online/stands_words.c"
     ],
-    "flagged": 1,
+    "flagged": 0,
     "lines": 68,
     "speech": 31
    },
@@ -2316,13 +2316,13 @@
     "speech": 7
    }
   },
-  "flagged": 118,
+  "flagged": 117,
   "flags": {
    "beats": 4,
    "box-words": 4,
    "button": 3,
    "colon": 31,
-   "line-long": 16,
+   "line-long": 15,
    "long-speech": 51,
    "pages": 14,
    "prog-caps": 1,
@@ -4252,7 +4252,7 @@
   {"boxes":[{"pages":[["Aw... No NetBattle","this time."]],"speaker":"MegaMan","text":"Aw... No NetBattle\nthis time."}],"container":"arena_declined_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_declined_words:0","kind":"speech","line":13,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aw... No NetBattle\nthis time.","text_hash":"74ce7a210cf1"},
   {"boxes":[{"pages":[["Huh? They're gone..."]],"speaker":"MegaMan","text":"Huh? They're gone..."}],"container":"arena_gone_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_gone_words:0","kind":"speech","line":15,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? They're gone...","text_hash":"cb9f91c2cc93"},
   {"boxes":[{"pages":[["Huh? {name}'s","busy right now..."]],"speaker":"MegaMan","text":"Huh? {name}'s\nbusy right now..."},{"pages":[["Let's ask again","later,Lan."]],"speaker":"MegaMan","text":"Let's ask again\nlater,Lan."}],"container":"arena_busy_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_busy_words:0","kind":"speech","line":19,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? {name}'s\nbusy right now...|Let's ask again\nlater,Lan.","text_hash":"d7233ad2092a"},
-  {"boxes":[{"flags":[{"at":"isn't here anymore...","code":"line-long"}],"pages":[["Huh? {name}","isn't here","anymore..."]],"speaker":"MegaMan","text":"Huh? {name}\nisn't here anymore..."}],"container":"arena_not_here_words","domain":"Arena","file":"src/online/arena_words.c","flags":["line-long"],"id":"arena_words:arena_not_here_words:0","kind":"speech","line":25,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? {name}\nisn't here anymore...","text_hash":"f63f7b0e43b5"},
+  {"boxes":[{"pages":[["Huh? {name}","isn't here","anymore..."]],"speaker":"MegaMan","text":"Huh? {name}\nisn't here\nanymore..."}],"container":"arena_not_here_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_not_here_words:0","kind":"speech","line":25,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? {name}\nisn't here\nanymore...","text_hash":"aa5335bd3aee"},
   {"boxes":[{"pages":[["Aw... No NetBattles","on this Square."]],"speaker":"MegaMan","text":"Aw... No NetBattles\non this Square."}],"container":"arena_closed_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_closed_words:0","kind":"speech","line":29,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Aw... No NetBattles\non this Square.","text_hash":"bda54d39460a"},
   {"boxes":[{"pages":[["Hmm... The Arena","won't let that","NetBattle through."]],"speaker":"MegaMan","text":"Hmm... The Arena\nwon't let that\nNetBattle through."}],"container":"arena_no_stamp_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_no_stamp_words:0","kind":"speech","line":31,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Hmm... The Arena\nwon't let that\nNetBattle through.","text_hash":"515a080e5279"},
   {"boxes":[{"pages":[["{name}'s","MegaMan wants a","Practice NetBattle!"]],"speaker":"MegaMan","text":"{name}'s\nMegaMan wants a\nPractice NetBattle!"}],"container":"arena_challenged_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_challenged_words:0","kind":"speech","line":35,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name}'s\nMegaMan wants a\nPractice NetBattle!","text_hash":"980d25b9f193"},

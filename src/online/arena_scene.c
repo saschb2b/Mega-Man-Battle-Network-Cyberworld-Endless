@@ -37,7 +37,7 @@
 #define OVER_TICKS     300  /* the result shown before the title */
 #define FADE           12   /* frames of a fade, as the Square's (square_arena.c) */
 #define STALL_NOTE     60   /* ticks waiting for the peer before it is said */
-#define STALL_END      1800
+#define STALL_END      1200
 
 static struct {
 	Arena *arena;

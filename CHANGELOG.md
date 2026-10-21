@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+- **NetBattles from the ask to the result (epic #167, steps 1 and 2).**
+  The way in is a PET Network panel instead of a black screen: both
+  players, each MegaMan's HP, Crosses and Souls as carried, your set's
+  score with this player, and whose PET is still on its way. On the
+  Custom screen the other player's name sits on a small plate, and a
+  link badge (bars only, no numbers) shows the link steady, correcting a
+  guess, or waiting. A wait past a second names whose PET it waits for,
+  offers B to leave after ten seconds and ends by itself at twenty. The
+  battle ends on a result card instead of two lines on black: win or
+  lose, the time, the HP each of you has left, the chips each used, the
+  set's score, and the rematch asked right there, the other player's
+  answer shown as it comes ("NAME wants another!"); two Yeses go straight
+  into the next way in. A refused challenge (busy, gone, no stamp) is
+  MegaMan's word in the chat box, no longer a notice in the corner; a
+  stop is the PET's word on the card, never a frame number, and a bout
+  that broke off counts neither won nor lost (the referee: "BROKE OFF! NO
+  CALL!"). Short fades and BN6's own sounds take you in and out
+  (docs/ONLINE_ARENA.md, The way in, the battle and the result).
+
 ## 0.13.0 (2026-10-21)
 
 - **Online Net Squares (epic #120).** Cyberworld Endless connects. Lan's

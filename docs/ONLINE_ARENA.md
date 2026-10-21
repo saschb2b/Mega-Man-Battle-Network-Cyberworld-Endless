@@ -41,8 +41,16 @@ hand him the same keys), and `arenahp=N` makes the carried MegaMan's HP N
 a script too (the Custom screen's OK, then charged shots), so the battle
 plays itself on a device; `quitend` ends the game after it (and after
 `--dev rollbench`, which `--dev rollbench,arena` runs first), for a run
-sent over 3dslink. The battle's end, or A+B+SELECT+START, goes back to
-the title; the log says each step (`arena:` lines).
+sent over 3dslink. The scene shows the Square's screens (the way in's
+panel, the name plate and the link's badge, a stall's note, the result
+card: [The way in, the battle and the result](#the-way-in-the-battle-and-the-result)),
+the players named "You" and "2nd GBA"; the card's A, or
+A+B+SELECT+START, goes back to the title; the log says each step
+(`arena:` lines). The badge's three states are seen with `arenabusy`
+and `arenadelay=1,arenalag=5` (rolling back) and with
+`arenadelay=1,arenalag=110,arenawindow=0` (a stall at the battle's start,
+the note after a second); `arenalag=200` overflows the local link's
+queue, a stop's card.
 
 ## What runs
 
@@ -198,8 +206,9 @@ each game's.
   rollback window covers: [Rollback](#rollback).)
 
 A game that truly falls behind still waits as before, and its picture
-says so after 20 ticks ("Waiting for the other PET"); the 128-frame cap
-on its keys still holds.
+says so (the link's badge, then after a second a note naming whose PET
+it waits for: [The way in, the battle and the result](#the-way-in-the-battle-and-the-result));
+the 128-frame cap on its keys still holds.
 
 **Measured** (19 October 2026, this machine): two host builds through a
 local server behind a relay that holds each chunk back, in order, a set
@@ -672,37 +681,119 @@ accept from a game without the full set, and a challenge aimed at one
 pair in time (`CW_ARENA` 0), never offers Battle and declines a
 challenge.
 
+### The way in, the battle and the result
+
+Issue #167's first two steps: the NetBattle told on PET screens from the
+first word to the last, nothing added to BN6's own Custom screen wait
+("Cstmzing."), its turn banner or its win banner. The design's lens is the
+Square's pull between staying for one more bout and moving on, with
+nothing at stake: staying is made cheap, leaving clean.
+
+**Refusals.** A challenge the server turns down is said by MegaMan in the
+chat box, never the corner's notice: the target busy (NOTICE 16: in a
+NetBattle, watching one, at Trade Central, his place held) "Huh? NAME's
+busy right now...", no longer here (17) "Huh? NAME isn't here
+anymore...", the Arena closed on the server (18), a NetPass without the
+Arena's stamp (28) (`square_arena_notice` keeps the notice out of the
+corner, `refused`). A refusal that comes while the Square is held (a
+rematch's challenge sent from the card) shows on the card, and never in
+the corner afterwards.
+
+**The way in** (`arena_card_way`, `square_card.c`): from white into a
+PET Network panel in the project's PET frame (`second_frame.h`'s colours
+and slots, drawn here, never taken from the ROM): NETBATTLE and
+Practice in the band; a plate for each player with his name, his
+MegaMan's HP, his Crosses and Souls as carried (the other's once his
+MegaMan has come); under each plate whose wait it is: "Sending..." while
+the other's MegaMan is on its way, my PET's bar as it links, "Linking..."
+blinking on the other's side until his ready comes, "Ready!" on each that
+is; and the set's score with this player ("Set 1 - 0") from the second
+bout on. The panel opens with BN6's window sound and goes into the Custom
+screen through white with its encounter sound (`arena_card_cue`).
+
+**The battle** (`arena_view_over`, `arena_view_stall`): on the Custom
+screen only, the other's name on a small plate under BN6's own label of
+the other MegaMan (both are "MegaMan" there), the engine's small letters,
+gone once the turn starts. Beside it, and at the top right corner once
+the Custom screen closes, the link's badge: bars only, no number (the
+owner's decision, 21 October 2026): three green bars steady, two gold
+bars where a guess was undone or a moment waited in the last second
+(`ARENA_LINK_SHAKY`), one red bar blinking while the battle waits on the
+other's keys (`ARENA_LINK_STALL`, ten ticks in a row; `arena_link_state`).
+A wait past a second (`STALL_NOTE`) names whose PET it waits for
+("Waiting for NAME's PET...") over a bar that runs down to its end; past
+ten seconds (`STALL_OFFER`) "B: leave the NetBattle" is offered (B
+before that may be meant for the Buster); at twenty (`STALL_END`) the
+battle stops by itself ("NAME's PET stopped answering."). A server that
+drops a silent game's link first ends it sooner ("NAME left the
+NetBattle.").
+
+**The result** (`arena_card_result`): after BN6's own banner and fade,
+a card rises from black: WIN, LOSE or OVER, "VS NAME", the HP each side
+has left and the chips each used (counted as the stands' report counts
+them, from the frames whose keys are all known: `arena_tally`), the time
+fought (BN6's fight, the Custom screen left out) and the set's score. No
+Busting Level, no reward: those are a virus battle's. A stop shows on
+the card too, in the PET's words, the cause in the log alone: BROKE OFF
+for a bout begun ("NAME left the NetBattle.", "Communication error! The
+two PETs saw the battle apart.", "We left the NetBattle."), STOPPED for
+one that never began ("NAME's PET never got ready.", "NAME's MegaMan never
+came."); MegaMan's word follows in the Square. A broken-off bout is
+counted neither won nor lost: the referee calls it ("BROKE OFF! NO
+CALL!"), the Board says "broke off.", and the set's score stays. A stop's
+card goes back by itself after ten seconds; A or B before.
+
 ### Rematches and the referee
 
-A battle with a result (issue #128) is offered again. Back in the
-Square, MegaMan's word on it ("Alright! We won,Lan!!") goes on to
-"Again with NAME?", the cursor on No, once no chat is open and while
-NAME is still in the Square. Nothing is won or lost, so the question is
-the whole cost: the default lets either player go (the Square's pull
-between staying together and moving on), and both must say Yes.
+A battle with a result (issue #128) is offered again on its card (issue
+#167): "Again with NAME?", Yes and No side by side with the cursor on
+No, while NAME is still in the Square. Nothing is won or lost, so the
+question is the whole cost: the default lets either player go (the
+Square's pull between staying together and moving on), and both must
+say Yes. Each sees the other's answer as it comes: "NAME wants another!"
+once his Yes is in, "Waiting for NAME..." under one's own, "No rematch
+with NAME." where he said No or left. B, or A on No, goes back to the
+Square; the card's answer is kept 45 seconds from the battle's end
+(`AGAIN_MS`), then it goes back by itself.
 
 No new message: a rematch is ARENA's challenge again, answered at once.
-Lan's Yes sends it quietly; the other game takes a challenge from that
-player at once where its player said Yes too,
-turns it down at once where he said No (or B), and, his question still
-open or the result still on the picture, holds it for the answer. Both
-Yeses at once cross on the server, which turns the second challenge down
-as busy; the first is taken (`again_in`, `square_arena.c`). The folder
-carried is the last battle's, asked again only where it no longer fits.
-An answer is kept 45 seconds from the battle's end (`AGAIN_MS`); a
-challenge then is an ordinary one, asked as ever. A Yes nobody answers
-ends as any challenge does, after the server's 30 seconds ("Aw... No
-NetBattle this time."). A battle stopped (a desync, a leave) offers none.
-An older build, which knows no rematch, sees an ordinary challenge.
+Lan's Yes sends it quietly; the other game, its card still up, holds a
+challenge from that player and shows it, takes it at once where its
+player says Yes (or said it first), and turns it down where he said No
+or closed the card. Both Yeses at once cross on the server, which turns
+the second challenge down as busy; the first is taken (`again_in`,
+`square_arena.c`). Both Yes: straight from the card into the next way in
+(the last pair given back first), the panel showing the set's score. The
+folder carried is the last battle's, asked in the Square only where it
+no longer fits. A Yes nobody answers ends as any challenge does, after
+the server's 30 seconds. A battle stopped offers none. An older build,
+which knows no rematch on a card, sees an ordinary challenge.
 
 The referee Mr.Prog by the ring keeps what this game saw: before any
 bout he tells how a NetBattle is asked for; after one, who beat whom
-("LAST BOUT: YOU BEAT ALPHA!", "LAST BOUT: ALPHA BEAT YOU!") and, from a
-second bout with the same player on, the count ("THAT'S 2 TO 1. YOU
-LEAD!", "1 TO 1! ALL EVEN,ALL EVEN!"). As MegaMan comes back he calls
-the bout over his head ("YOU WIN!", "ALPHA WINS!"), as the greeter calls
-a log-in. A new opponent starts the count again; it is this game's
-alone, kept while the game runs.
+("LAST BOUT: YOU BEAT ALPHA!", "LAST BOUT: ALPHA BEAT YOU!", a bout
+broken off "LAST BOUT WITH ALPHA BROKE OFF!") and, from a second bout
+with the same player on, the count ("THAT'S 2 TO 1. YOU LEAD!", "1 TO
+1! ALL EVEN,ALL EVEN!"). As MegaMan comes back he calls the bout over
+his head ("YOU WIN!", "ALPHA WINS!", "BROKE OFF! NO CALL!"), as the
+greeter calls a log-in. A new opponent starts the count again; it is
+this game's alone, kept while the game runs.
+
+**Seen** (21 October 2026, two host builds through a local server, BN6
+and BN5 in both, `--dev quiet,arenahp=10,arenaboth`): Alpha challenged,
+the panel, the battle (over at frame 529, 8 hashes agreeing), both
+cards; Beta's Yes on his, Alpha's card showing "Beta wants another!",
+Alpha's Yes took the held challenge (`Beta's rematch taken (match 2)`),
+the second way in (the same pair hash at the Custom screen) with "Set
+1 - 0" on its panel, the second battle over at frame 1,323 (22 hashes
+agreeing), the cards at 1 - 1; then Alpha's Yes and Beta's B: Alpha's
+card "Waiting for Beta..." then "No rematch with Beta.", the referees
+calling bout 2. A game held still mid-battle (`arenafreeze=400` on
+Alpha, its link kept): Beta's note from a second, "B: leave" from ten,
+the stop at twenty ("Alpha's PET stopped answering.", BROKE OFF), Alpha
+"Beta left the NetBattle."; with B pressed (Alpha's process stopped):
+Beta left at 648 ticks ("We left the NetBattle."); both referees "BROKE
+OFF! NO CALL!" with the count 0 - 0.
 
 ### One rule: full rules
 
@@ -757,8 +848,9 @@ first, left the earlier side waiting half its ticks at a delay of 6:
 `ARENA_NET_FLUSH`); where the transport's outbox is full they wait and go
 together, eight a message at most, and a ninth breaks the link. The
 pair's hash every 60 frames goes too, and a difference stops the battle
-on both games with a plain word on the picture ("The NetBattle stopped:
-the two games went apart by frame N") and MegaMan's after it ("Whoa! The
+on both games, the log saying at which frame ("the two games went apart
+by frame N"), the result card in the PET's words ("Communication error!
+The two PETs saw the battle apart.") and MegaMan's after it ("Whoa! The
 NetBattle broke off!").
 
 The battle's end is the cable's first's to tell the server (ARENA over),
@@ -1275,14 +1367,23 @@ the cable's first's reports came, and no question.
   was put back to 100), but the other programs' effects in a NetBattle
   are not yet checked one by one.
 - After the battle the engine stops once both cores have left it; the
-  game's own way back to the Comm menu is not shown.
+  game's own way back to the Comm menu is not shown (the result card
+  rises from BN6's fade instead).
+- Issue #167's later steps: a rematch in about a second (the pair taken
+  back to the battle's start), busy marks over MegaMen in the Square, a
+  pending challenge seen and called off, a PET ring for the challenged,
+  the link's quality before committing, and the netcode's quick wins.
+  The panel and the card on a handheld's screen and in the browser are
+  drawn by the same code but seen headless only; the screens' sounds are
+  BN6's own effects mixed over the held game's sound (`audio.c`), not yet
+  heard on a device.
 - Over a real network: measured on the deployed server (19 October 2026,
   docs/ONLINE.md) before the smoothed delay: delay 7, two full-rules
   battles to their end with every hash agreeing, the leading game waiting
   about one frame in eight (issue #128). The smoothed delay is measured
   through a local relay ([Smoothed delay](#smoothed-delay)), not yet on
-  the deployed server nor between two devices; stalls still show on the
-  picture after 20 ticks ("Waiting for the other PET").
+  the deployed server nor between two devices; a stall shows as the
+  link's badge and, past a second, a note naming whose PET it waits for.
 - Rollback ([Rollback](#rollback)): on in every battle, measured through
   a local relay and on the Nova headless; not yet a NetBattle between two
   devices or through the deployed server (which runs an older protocol

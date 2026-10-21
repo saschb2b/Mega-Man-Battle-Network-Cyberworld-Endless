@@ -22,7 +22,7 @@ const char *arena_busy_words(const char *name) {
 
 const char *arena_not_here_words(const char *name) {
 	static char s[96];
-	snprintf(s, sizeof s, "Huh? %s\nisn't here anymore...", name);
+	snprintf(s, sizeof s, "Huh? %s\nisn't here\nanymore...", name);
 	return s;
 }
 

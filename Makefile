@@ -286,8 +286,8 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online
 # its messages on the wire and the network's link (issue #120)
 ARENA_TEST_SRCS := tests/test_arena.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
 	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c src/online/arena_sync.c \
-	src/online/stands_wire.c src/online/stands_report.c src/online/watch_keys.c
-build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h \
+	src/online/stands_wire.c src/online/stands_report.c src/online/watch_keys.c src/online/arena_text.c
+build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_text.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h \
 	src/online/arena_format.h src/online/arena_sync.h \
 	src/online/arena_wire.h src/online/arena_link_net.h shared/online/protocol.h src/online/stands_wire.h src/online/stands_report.h \
 	src/online/watch_keys.h

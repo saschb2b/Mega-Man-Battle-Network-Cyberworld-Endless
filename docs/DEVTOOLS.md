@@ -528,7 +528,11 @@ A battle from the Net Square between two games takes `arenahp=N` too
 (each game's own MegaMan, so both pairs stay the same), and
 `arenadesync=N` changes the other player's keys from frame N for a
 second on this game alone: the hashes' stop seen on both
-([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof). On a game
+([ONLINE_ARENA.md](ONLINE_ARENA.md), The two-client proof), and
+`arenafreeze=N` holds its battle still from its tick N for 40 seconds,
+its link to the Square kept, as an app sent to the background: the
+other game's stall note, its way out and its end seen
+([ONLINE_ARENA.md](ONLINE_ARENA.md), The battle's screen). On a game
 watching a battle from the stands, `arenadesync=N` changes the cable's
 first's keys from frame N in its own copy: its watching stops at the
 next hash, the players' battle goes on (ONLINE_ARENA.md, The stands).

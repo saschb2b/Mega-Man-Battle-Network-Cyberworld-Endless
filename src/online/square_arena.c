@@ -558,6 +558,7 @@ static void ready(void) {
 	if (apart()) return;
 	printf("arena: both ready, the battle begins\n");
 	SA.stage = SA_BATTLE;
+	SA.ticks = 0;
 	/* (from the panel into the Custom screen, through white) */
 	SA.t = 0;
 	arena_card_cue(ARENA_CUE_BATTLE);
@@ -593,8 +594,13 @@ static bool stalled_out(void) {
 	return true;
 }
 
+/* arenafreeze=N: the battle held still on this side from its tick N, its link kept */
+#define FREEZE_TICKS 2400
+static bool frozen(uint32_t tick) { return dev.arena_freeze > 0 && tick >= (uint32_t)dev.arena_freeze && tick < (uint32_t)dev.arena_freeze + FREEZE_TICKS; }
+
 static void battle(uint32_t keys, uint32_t rtt_ms) {
 	static uint32_t tick;
+	if (frozen(++SA.ticks)) return;
 	if (dev.arena_both) keys = arena_bot_keys(SA.arena, SA.link.link.side, tick++);
 	arena_rtt(SA.arena, rtt_ms);
 	ArenaStage stage = arena_tick(SA.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
