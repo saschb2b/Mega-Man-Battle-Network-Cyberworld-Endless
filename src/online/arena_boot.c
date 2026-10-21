@@ -265,20 +265,21 @@ static void stir(ArenaBoot *b) {
 }
 
 /* the bout begins: the pair kept as it stands for a rematch (the way in
- * again from here, arena_boot_again), then stirred */
-static bool bout(ArenaBoot *b) {
+ * again from here, arena_boot_again; where memory is short, none kept and
+ * a rematch goes the whole way), then stirred */
+static void bout(ArenaBoot *b) {
 	if (b->keep && !b->kept && (!(b->kept = arena_pair_snap_new(b->pair)) || !arena_pair_save(b->pair, b->kept))) {
-		fail(b, "no room to keep the two PETs for a rematch");
-		return false;
+		printf("arena: no room to keep the two PETs for a rematch: a rematch goes the whole way in\n");
+		arena_pair_snap_free(b->kept);
+		b->kept = NULL;
 	}
 	stir(b);
-	return true;
 }
 
 /* a frame of the pair through the menus, both cores holding the step's keys */
 static bool entry_frame(ArenaBoot *b) {
 	const Step *s = &entry_steps[b->step];
-	if (b->in_step == 0 && b->step == BOUT_STEP && !bout(b)) return false;
+	if (b->in_step == 0 && b->step == BOUT_STEP) bout(b);
 	if (b->in_step == 0) arena_pair_anchor(b->pair);
 	uint16_t keys[ARENA_LOOKAHEAD][2] = { { s->keys, s->keys } };
 	uint64_t t = SDL_GetPerformanceCounter();
