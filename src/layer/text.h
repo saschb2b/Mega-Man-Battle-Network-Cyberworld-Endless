@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define TEXT_MAX_SCRIPTS 32
+#define TEXT_MAX_SCRIPTS 48   /* (the Net Square's L chat takes 35: its twelve emotes, issue #176) */
 #define TEXT_MAX_BYTES 4096
 
 typedef struct {

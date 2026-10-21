@@ -270,12 +270,8 @@ static void keeper(void) {
 	if (online_square_keeper_say(out, ta_build(&t, out))) C.keeper_said = said;
 }
 
-/* the session of the MegaMan this one faces, near enough to talk to, 0
- * none: an emote's aim */
-static uint32_t facing_peer(void) {
-	int slot = online_square_peer_ahead(bn6_player_x(), bn6_player_y(), emu_read8(BN6_PLAYER_FACING) & 7);
-	return slot >= 0 && (size_t)slot < C.s.peer_count ? C.s.peers[slot].id : 0;
-}
+/* the session of the MegaMan this one faces, 0 none: an emote's aim */
+static uint32_t facing_peer(void) { return square_emote_faced(&C.s); }
 
 /* the flags of the chat just closed, acted on; true: MegaMan heads home */
 static bool chosen(void) {
@@ -330,6 +326,8 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	return false;
 }
 
+bool online_chat_emote(int emote) { return square_emote_send(emote, facing_peer(), SDL_GetTicks()); }
+
 /* L down: a direction sends its favourite emote (MegaMan stands while L
  * is held); L let go without one opens L's chat */
 static uint32_t held_l(uint32_t keys) {
@@ -350,10 +348,17 @@ static uint32_t held_l(uint32_t keys) {
 uint32_t online_chat_keys(uint32_t keys) {
 	/* (the NetPass up over the Square: the game held under it) */
 	if (netpass_screen_update()) return 0;
+	/* (MegaMan's own emote under way, its script BN6's chat box's: he
+	 * stands still, as BN6 holds him for its own; a favourite still goes,
+	 * L's chat waits) */
+	if (square_emote_busy()) {
+		if (btn_pressed(BTN_L)) C.l_held = true;
+		C.l_used |= C.l_held;
+		if (C.l_held) held_l(keys);
+		return 0;
+	}
 	if (talk_busy() || emu_read8(BN6_CHATBOX) || C.waiting) { C.l_held = false; return keys & ~(uint32_t)(KEY_L | KEY_R | KEY_START | KEY_SELECT); }
 	keys &= ~(uint32_t)(KEY_START | KEY_SELECT);
-	/* (MegaMan's own emote under way: he stands still, as BN6 holds him for its own) */
-	if (square_emote_busy()) return 0;
 	/* (START, the PET's button: the NetPass, BN6's PET staying shut in the Square, whose RAM goes) */
 	if (btn_pressed(BTN_START)) { netpass_screen_open(); return 0; }
 	if (btn_pressed(BTN_L)) { C.l_held = true; C.l_used = false; }

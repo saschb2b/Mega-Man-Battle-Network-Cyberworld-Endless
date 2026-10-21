@@ -831,13 +831,22 @@ landmark, the sign or the board says what it is; the board lists who's
 here, the last trade and NetBattle, the trade offers up and this week's
 DeepNet.
 
-- **L** has MegaMan say a phrase or do an emote, over his head for the
-  whole channel to see. Phrases come from a fixed list: there is no free
-  text, and no one can type at you. Say something or emote together with
-  another player round the landmark or on the stage, and the Square
-  cheers. **Look around** has MegaMan say which way Trade Central and
-  the Arena are from where you stand: both are off the plaza, Trade
-  Central to its upper left and the Arena to its lower left.
+- **L** has MegaMan say a phrase over his head, or do an emote: he
+  performs it himself, with BN6's own poses and sounds, the same on
+  every screen. Phrases and emotes come from fixed lists: there is no
+  free text, and no one can type at you. **Hold L and press a direction**
+  for one of four at once: up Wave, right Cheer, down Bow, left Laugh
+  (`network.ini`'s `favourites=0,1,5,2`, the emotes in L's list counted
+  from 0, changes them). A Wave, Cheer or Bow facing another MegaMan is
+  aimed at him; a hand blinks over the name of a player who waved at
+  you, and your next one answers him: within five seconds, a "!!" and a
+  sparkle between you on every screen. Emote together with other
+  players round the landmark or on the stage, and the Square cheers,
+  the louder the more join. L's **More** holds **Look around**, where
+  MegaMan says which way Trade Central and the Arena are from where you
+  stand (both off the plaza, Trade Central to its upper left and the
+  Arena to its lower left), and **Quiet please**, which hides everyone
+  else's phrases and emotes until **Let them talk**.
 - **A** facing another player's MegaMan shows his card (HP, act and
   layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.

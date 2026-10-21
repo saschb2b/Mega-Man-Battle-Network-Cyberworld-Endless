@@ -29,6 +29,9 @@ const char *square_emote_caption(uint32_t id, uint32_t now);
 /* The player whose emote aimed at MegaMan waits for an answer, 0 none:
  * the next emote that can be aimed answers him. */
 uint32_t square_emote_invited(uint32_t now);
+/* The MegaMan this one faces, the nearest within about three panels in a
+ * cone of his facing (BN6's talk probe's way), 0 none: an emote's aim. */
+uint32_t square_emote_faced(const OnlineSnapshot *s);
 /* Emote `emote` sent, aimed at player `facing` (0 none) where it can be,
  * at the one who aimed at MegaMan first; phrase `phrase` said. False
  * where the burst is spent (one comes back a second). */

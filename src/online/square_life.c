@@ -35,6 +35,7 @@
 #define CHEER_SOUND BN6_SOUND_APPEAR   /* BN6's sparkle as something shows (stage_npc.c's SOUND_APPEAR) */
 #define MARK_Z 46          /* the "!" over a Navi's head (lanhp.c's courier's) */
 #define MARK_FRAMES 120
+#define BURST_FRAMES 20    /* ... at a point (square_life_mark): BN6's burst plays 18 frames, its last not held */
 #define BARK_FRAMES 180    /* a word over a head shown so long */
 #define TOGETHER 240       /* emotes this close count as together */
 #define CHEER_REST 600     /* the Square answers once in so long */
@@ -356,7 +357,7 @@ static void noted(uint32_t id) {
 void square_life_mark(int x, int y, int z, int sound) {
 	L.mark_on = -1;
 	L.mark_at[0] = x; L.mark_at[1] = y; L.mark_at[2] = z;
-	L.mark_t = MARK_FRAMES;
+	L.mark_t = BURST_FRAMES;
 	L.mark_anim ^= 2;
 	L.mark_sound = sound;
 }
