@@ -33,6 +33,9 @@ uint32_t square_watch_said(void);
 bool square_watch_live(void);
 /* The Board's posts on the channel's battles ("" none) */
 const char *square_watch_board(void);
+/* A Team NetBattle's bout of the others (square_team.h): asked to watch
+ * at once, no referee; false where this game cannot watch now */
+bool square_watch_team(uint32_t match);
 /* Watching (the Square's core held): a frame of it, and its picture */
 bool square_watch_on(void);
 void square_watch_frame(uint32_t keys);

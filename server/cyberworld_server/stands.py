@@ -52,6 +52,7 @@ class Book:
         self.stage = WAY_IN
         self.over_time = None
         self.watchers = {}                # player id -> Cursor
+        self.bout = 0                     # a Team NetBattle's bout, its number (teams.py); 0 a lone battle
 
     def frames(self, side):
         return len(self.keys[side]) // 2
@@ -60,7 +61,7 @@ class Book:
         hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner = self.status
         return (self.match.id, self.match.a, self.match.b, self.names[0].encode()[:16], self.names[1].encode()[:16],
                 self.stage, min(255, len(self.watchers)), min(255, self.cheers),
-                hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner)
+                hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner, min(255, self.bout))
 
 
 class Cursor:
@@ -89,7 +90,9 @@ class Stands:
         a, b = players.get(match.a), players.get(match.b)
         if not a or not b:
             return
-        self.books[match.id] = Book(match, a.channel, (a.name, b.name), delay)
+        book = self.books[match.id] = Book(match, a.channel, (a.name, b.name), delay)
+        team = self.server.teams.matches.get(getattr(match, "team", 0))
+        book.bout = team.number if team else 0
         self.dirty[a.channel] = True
 
     def end(self, match):

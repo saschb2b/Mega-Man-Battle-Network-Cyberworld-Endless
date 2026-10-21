@@ -30,6 +30,7 @@ typedef struct {
 	char name[2][ONLINE_NAME_BYTES + 1];
 	uint8_t stage, watchers, cheers;
 	ArenaReport report;
+	uint8_t bout;                             /* a Team NetBattle's bout (protocol v12), 0 a lone battle */
 } StandsEntry;
 
 /* WATCH's actions, WATCH_STATE's stages */

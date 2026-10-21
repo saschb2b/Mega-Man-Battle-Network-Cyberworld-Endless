@@ -22,6 +22,7 @@
 #define STALL_OFFER     600      /* ... before B leaves (a press meant for the Buster before) */
 #define STALL_END       1200     /* ... before the battle stops by itself, broken off */
 #define AGAIN_MS        45000    /* a rematch's answer kept, from the battle's end: the card's time */
+#define TEAM_CARD_TICKS 360      /* a Team NetBattle's bout's card, the match going on, before the next bout */
 
 typedef enum {
 	SA_IDLE,
@@ -59,6 +60,9 @@ typedef struct {
 	const char *said;         /* MegaMan's word, once back in the Square */
 	char why[160];            /* a stop's cause, for the log */
 	ArenaStop stop;           /* ... its PET line on the card */
+	bool team;                /* a Team NetBattle's bout (square_team.h): no rematch, the team's card */
+	uint16_t carry;           /* ... the HP my MegaMan goes in with, 0 whole */
+	uint16_t hp_left;         /* my MegaMan's HP at the last battle's end */
 	/* the result card, up from the battle's end (or a stop) until it
 	 * closes: the rematch asked on it, Lan's cursor, the other's answer */
 	struct {
@@ -87,10 +91,9 @@ typedef struct {
 } SquareArenaAgain;
 extern SquareArenaAgain SA_AGAIN;
 
-/* square_arena.c's, for the card: a player's name by his session (NULL
- * gone from the Square); back on the Square's map, the card closed; the
+/* square_arena.c's, for the card (a player's name by his session is
+ * square_arena.h's): back on the Square's map, the card closed; the
  * rematch's challenge of his taken, or ours sent */
-const char *square_arena_name_of(uint32_t id);
 void square_arena_back(void);
 void square_arena_again_take(uint32_t match);
 void square_arena_again_send(void);

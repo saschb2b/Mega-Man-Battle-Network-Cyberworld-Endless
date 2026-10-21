@@ -148,7 +148,7 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         relays, got, states = await self.receive_all(c, lambda r, g, s: s and s[-1][1] == 2, 1600)
         self.assertEqual((got[0], got[1]), ([7] * 8, [9] * 8))
         over = await self.stands_until(c, lambda e: e and e[-1][5] == 3)
-        self.assertEqual(over[-1][8:], (40, 100, 0, 100, 1, 5, 1, 2, 1))
+        self.assertEqual(over[-1][8:], (40, 100, 0, 100, 1, 5, 1, 2, 1, 0))   # (the last: no team bout, v12)
         self.assertFalse(self.server.stands.watching)
 
     async def test_watching_needs_the_full_set_and_the_stands_are_every_games(self):

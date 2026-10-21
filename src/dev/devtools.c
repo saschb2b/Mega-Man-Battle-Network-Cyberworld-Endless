@@ -56,7 +56,7 @@ static bool dev_switch(const char *t) {
 		{ "job=", &dev.job }, { "jobstate=", &dev.job_state }, { "zenny=", &dev.zenny },
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
-		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenadesync=", &dev.arena_desync },
+		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "arenafreeze=", &dev.arena_freeze },
 	};

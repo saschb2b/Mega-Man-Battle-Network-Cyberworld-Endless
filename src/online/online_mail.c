@@ -7,6 +7,7 @@
 #include "online_week.h"
 #include "online_transport.h"
 #include "square_arena.h"
+#include "square_team.h"
 #include "square_watch.h"
 
 void online_mail_frame(void) {
@@ -24,6 +25,7 @@ void online_mail_frame(void) {
 		case ONLINE_STANDS: case ONLINE_WATCH_STATE: case ONLINE_WATCH_RELAY: case ONLINE_WATCH_KEYS:
 			square_watch_mail(m, n);
 			break;
+		case ONLINE_TEAM_STATE: square_team_mail(m, n); break;
 		default: break;
 		}
 		if (!ok) fprintf(stderr, "online: a malformed message of kind %u set aside\n", m[0]);

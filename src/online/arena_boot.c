@@ -249,11 +249,34 @@ static bool entry_frame(ArenaBoot *b) {
 	return b->step < NSTEPS(entry_steps);
 }
 
+/* A MegaMan carried with less than his max HP (a Team NetBattle's winner,
+ * docs/ONLINE_ARENA.md, Team NetBattles): his battle object's HP on both
+ * GBAs as the first Custom screen opens. BN6 makes HP whole from the
+ * NaviStats in its menus on the way in, so it is written here, where the
+ * battle has made its objects, and read back from both; false where a
+ * core has not that side's object */
+static bool carried_hp(ArenaBoot *b) {
+	for (unsigned side = 0; side < 2; ++side) {
+		const OnlineLoadout *l = &b->loadout[side];
+		if (!b->carried[side] || !l->hp || l->hp >= l->max_hp) continue;
+		for (unsigned k = 0; k < 2; ++k) {
+			struct mCore *c = arena_pair_core(b->pair, k);
+			uint32_t o = c->rawRead32(c, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, -1);
+			if (o < BN6_EWRAM || o >= BN6_EWRAM_END - BN6_T1_SIZE) return false;
+			c->rawWrite16(c, o + BN6_T1_HP, -1, l->hp);
+			if ((uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1) != l->hp) return false;
+		}
+		printf("arena: side %u goes in with %u of %u HP, written on both GBAs\n", side, l->hp, l->max_hp);
+	}
+	return true;
+}
+
 static ArenaBootStage at_custom(ArenaBoot *b) {
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = arena_pair_core(b->pair, side);
 		if (c->rawRead8(c, BN6_BATTLE_PHASE, -1) != BN6_PHASE_CUSTOM) return fail(b, "the Practice battle's Custom screen did not open");
 	}
+	if (!carried_hp(b)) return fail(b, "a MegaMan's HP could not be carried into the battle");
 	arena_pair_anchor(b->pair);
 	arena_pair_begin(b->pair);
 	return b->stage = ARENA_BOOT_READY;

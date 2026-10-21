@@ -493,7 +493,9 @@ BN5's ROM beside BN6's (without it the way in stops, saying so); you the
 first GBA and a script the second,
 whose keys come over a local link held back as a network's would be;
 `arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay (1 to
-60), the link's one way and the carried MegaMan's HP. `arenawindow=W`
+60), the link's one way and the carried MegaMan's HP; `arenacarry=N`
+sends him in with N HP of his max, written on both GBAs at the Custom
+screen as a Team NetBattle's winner's is. `arenawindow=W`
 sets the rollback window (0: the delay alone, a frame run once its keys
 have all come; without it, what a frame costs here affords, as a Net
 Square battle picks it), and `arenabusy` makes the second player step,

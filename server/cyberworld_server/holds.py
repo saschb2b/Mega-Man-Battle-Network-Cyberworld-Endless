@@ -46,6 +46,7 @@ class Holds:
         server = self.server
         server.trades.left(player)
         server.arena.left(player.id)
+        server.teams.left(player.id)
         server.stands.left(player)
         if goodbye or not self.seconds or player.refused:
             self.free(player)

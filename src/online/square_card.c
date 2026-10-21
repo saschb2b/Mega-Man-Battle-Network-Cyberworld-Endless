@@ -15,6 +15,7 @@
 #include "bn6.h"
 #include "online_visit.h"
 #include "platform.h"
+#include "square_team.h"
 
 /* the card up from the battle's end (or a stop), from black */
 void square_card_up(unsigned result, ArenaAsk ask) {
@@ -68,9 +69,10 @@ void square_card_frame(void) {
 		SA.card.closing = 1;
 		arena_card_cue(ARENA_CUE_CLOSE);
 	}
-	/* (its time: a rematch's answer kept, a stop's card a while) */
+	/* (its time: a rematch's answer kept, a stop's card a while, a team bout's until the next is called) */
 	bool asked = SA.card.ask != ARENA_ASK_NONE || SA.card.theirs != ARENA_THEIRS_UNSAID;
-	if (!SA.card.closing && SA.t >= (asked ? AGAIN_MS * 60u / 1000 : OVER_TICKS)) SA.card.closing = 1;
+	uint32_t shown = asked ? AGAIN_MS * 60u / 1000 : SA.team && square_team_on() ? TEAM_CARD_TICKS : OVER_TICKS;
+	if (!SA.card.closing && SA.t >= shown) SA.card.closing = 1;
 }
 
 bool square_card_leave(void) { return SA.arena && arena_waited(SA.arena) >= STALL_OFFER && btn_pressed(BTN_B); }
@@ -89,6 +91,7 @@ static void way_in(void) {
 	v.set = SA_LAST.other == SA.other && !strcmp(SA_LAST.name, SA.name) && b->won + b->lost > 0;
 	v.won = b->won;
 	v.lost = b->lost;
+	v.team = SA.team;
 	arena_card_way(&v);
 	arena_card_fade(255 - (int)SA.t * 255 / FADE, true);
 }
@@ -106,9 +109,19 @@ static void card(void) {
 		v.used[k] = t->used[me ^ k];
 	}
 	const SquareBout *b = &SA_LAST.bout;
-	v.set = SA.card.result != 5 && b->won + b->lost > 0;
+	v.set = SA.card.result != 5 && b->won + b->lost > 0 && !SA.team;
 	v.won = b->won;
 	v.lost = b->lost;
+	SquareTeamCard team;
+	square_team_card(&team);
+	if (SA.team && team.on) {
+		v.team = true;
+		v.standing[0] = team.standing[0];
+		v.standing[1] = team.standing[1];
+		v.next[0] = team.next[0];
+		v.next[1] = team.next[1];
+		v.team_result = team.result;
+	}
 	arena_card_result(&v);
 	arena_card_fade(SA.card.closing ? SA.card.closing * 255 / FADE : 255 - (int)SA.t * 255 / FADE, false);
 }

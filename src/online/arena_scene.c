@@ -136,6 +136,8 @@ static void enter(void) {
 	}
 	/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
 	if (loadout[0] && dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
+	/* (a NetBattle begins whole; arenacarry=N: with N HP, as a Team NetBattle's winner goes on) */
+	S.carried.hp = dev.arena_carry > 0 && dev.arena_carry < S.carried.max_hp ? (uint16_t)dev.arena_carry : S.carried.max_hp;
 	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's");
 	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);

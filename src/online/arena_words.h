@@ -42,4 +42,33 @@ const char *arena_stopped_words(void);
 /* ... stopped before it began, the two games' installs apart */
 const char *arena_installs_apart_words(void);
 
+/* Team NetBattles (epic #167, square_team.c): the card's choice (a team
+ * asked for, or split with `partner` himself); a team asked of `name`,
+ * asked by him (the boxes, then the question), formed, turned down,
+ * split; one asked while we have a partner */
+const char *arena_team_option(bool partner);
+const char *arena_team_sent_words(const char *name);
+const char *arena_team_asked_words(const char *name);
+const char *arena_team_asked_question(void);
+const char *arena_team_formed_words(const char *name);
+const char *arena_team_declined_words(const char *name);
+const char *arena_team_split_words(const char *name);
+const char *arena_team_have_words(const char *name);
+/* ... a team asked of `name`, who is on one already (NOTICE 29) */
+const char *arena_team_taken_words(const char *name);
+/* A Battle refused for teams (NOTICE 29): `name` alone and we a team, or
+ * the other way round, or `name` our own partner; a team challenge asked
+ * of us (the boxes) */
+const char *arena_team_lone_words(const char *name, bool we_teamed);
+const char *arena_team_partner_words(const char *name);
+const char *arena_team_challenged_words(const char *name);
+/* The order, the captain's: the question and the first choice (us; the
+ * second is the partner's name); the order shown, our MegaMan up first or
+ * `ours`, against `theirs` */
+const char *arena_team_order_words(void);
+const char *arena_team_order_us(void);
+const char *arena_team_first_words(bool we_lead, const char *ours, const char *theirs);
+/* The match over, back in the Square: TEAM_WON, TEAM_LOST, TEAM_BROKE_OFF, TEAM_DRAWN */
+const char *arena_team_over_words(unsigned result);
+
 #endif

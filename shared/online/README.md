@@ -1,10 +1,10 @@
-# Net Square protocol v11
+# Net Square protocol v12
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v11`. The server also
+`/presence` with subprotocol `cyberworld.presence.v12`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -28,24 +28,26 @@ side is behind, rather than a refused upgrade (v10).
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
 | ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8) |
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
-| ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
+| ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/ONLINE_ARENA.md, Quicker on the wire), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
 | WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
-| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 62 bytes a battle of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second) |
+| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
 | WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay |
 | WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
 | WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side, u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
 | BYE (32) | client → server, last | nothing: the game leaves (the pad, R and home, the game closed), so its place is freed at once; a WebSocket close says the same |
+| TEAM (33) | client → server | u8 action (1 ask a player to team up, 2 answer one, 3 split the team or take an ask back, 4 the order), u32 reference (the player asked, the one who asked, 0 for a split, the lead's session for the order), u8 value (an answer's 1 yes; else 0) |
+| TEAM_STATE (34) | server → client | u8 stage (1 asked, 2 waiting, 3 formed, 4 split, 5 a match begun, 6 the order shown, 7 a bout called, 8 the bout started, 9 the match over), u32 the partner's session (asked: the asker; waiting: the one asked; split: the other), u32 the team match's ID, u32 the bout under way (its ARENA battle ID, 0 none), four u32 sessions: the recipient's team's two, then the other's, each team's MegaMan up now first (before the order: its captain first), u8 MegaMen standing of the recipient's team, u8 of the other, u8 the bout's number, u8 the result (the match over: 1 won, 2 lost, 3 broken off, 4 drawn; else 0), u16 the staying MegaMan's HP as the last bout's report left it (0 none) |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
 TRADE_STATE 32, ARENA 8, ARENA_STATE 28, OFFER 5, WEEK_POST 17,
-ARENA_STATUS 20, WATCH 6 and WATCH_STATE 15; a STANDS entry is 62 and
+ARENA_STATUS 20, WATCH 6, WATCH_STATE 15, TEAM 7 and TEAM_STATE 36; a STANDS entry is 63 (62 before v12) and
 WATCH_KEYS's head 12 (each count with its type byte). The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
@@ -109,7 +111,9 @@ rules, so the server keeps no rules per battle and checks no chip
 against a pair. A game added to the set brings its identity to HELLO and
 its bit to `roms_full`, in a new protocol version. NOTICE 19 (a BN5 chip
 or full rules outside a mixed pair's common ground, protocols v4 to v8)
-is retired: nothing sends it.
+is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
+challenge between a team and a lone Navi, or within one team, and an ask
+to team up where either is on a team already.
 
 A dropped link (protocol v10, issue #153; docs/ONLINE.md, A dropped
 link). A session that ends without a goodbye (BYE or a WebSocket
@@ -216,6 +220,39 @@ full set, or an answer from one) answer an ARENA that cannot be done.
 Every battle is by full rules, BN5's chips and Souls among them
 (docs/ONLINE_ARENA.md): v9's ARENA, ARENA_STATE, STANDS and WATCH_STATE
 carry no rules byte.
+
+Team NetBattles (protocol v12, epic #167; docs/ONLINE_ARENA.md, Team
+NetBattles; `server/cyberworld_server/teams.py`): a relay of two teams of
+two. TEAM 1 asks a player of the channel to team up (he is told stage
+asked, the asker waiting); 2 answers it within 30 seconds (formed to
+both, or split to the asker); either one's 3, his leaving the channel or
+the server, or a dropped link split the team (split to the other). The
+one who asked is the team's captain. A challenge (ARENA 1) between
+players of two teams is a team challenge, all four free (NOTICE 16
+otherwise); one between a team's player and a lone one, or two of one
+team, is refused with NOTICE 29 (`notice_team`). The team challenge's
+accept begins the match instead of a battle: its ARENA battle ends with
+no ARENA_STATE ended, and all four are told stage 5. Each captain sends
+TEAM 4 with his lead (his own session or his partner's); the server
+shows nothing until both are in (or 30 seconds have passed, a captain
+who has not picked leading himself), then tells all four stage 6 and
+calls the first bout. A bout is an ARENA battle between the two teams'
+MegaMen up (stage 7, its ID in TEAM_STATE): each of its two fighters
+sends ARENA 2 when his game is ready, and START goes to both once both
+have; stage 8 tells all four it started, and the two others' games
+watch it (WATCH). As it ends (ARENA 4 from the cable's first) its
+winner is the cable's first's report (ARENA_STATUS's winner): the
+loser's team's next MegaMan comes in, both where it has none; a team
+with no MegaMan standing ends the match (stage 9, each told his team's
+result, a draw where both ran out in one bout). A bout that ends any
+other way (a leave, a drop, a decline, 30 seconds without both
+fighters ready) ends the match broken off for both teams (stage 9,
+result 3). The staying MegaMan's game carries the HP he has left in his
+ARENA_LOADOUT (v2), and both games write it into the battle as it
+starts (the pair's hash at ready covers it). A player in a team match is
+busy: a challenge, a trade or a team ask to him is answered NOTICE 16.
+STANDS's last byte names a team bout's number for the referee and the
+Board. The server keeps teams and matches in memory only.
 
 The stands (protocol v7, docs/ONLINE_ARENA.md, The stands): every
 started battle's loadouts, ready, installs' record, the cable's first's

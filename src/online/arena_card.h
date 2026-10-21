@@ -27,6 +27,7 @@ typedef struct {
 	bool set;                         /* bouts with him before this one: the score shown */
 	unsigned won, lost;
 	uint32_t t;                       /* the panel's frames, for its blink */
+	bool team;                        /* a Team NetBattle's bout: the band says so */
 } ArenaWayView;
 void arena_card_way(const ArenaWayView *v);
 
@@ -54,6 +55,12 @@ typedef struct {
 	ArenaTheirs theirs;
 	bool square;               /* back to the Net Square, else to the title */
 	uint32_t t;
+	/* a Team NetBattle's bout (epic #167): the MegaMen standing, ours
+	 * first, the next bout's two (NULL: over), the match's end (0 not yet) */
+	bool team;
+	unsigned standing[2];
+	const char *next[2];
+	unsigned team_result;
 } ArenaCardView;
 void arena_card_result(const ArenaCardView *v);
 
