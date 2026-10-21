@@ -1144,6 +1144,20 @@ TOWN_PLAZA = HOME_OUT + '0:place 160 -120 4,40:'
 # from frame 1200)
 HP_7 = ['--scene', 'home', '--run-depth', '7', '--seed', '3']
 HP_PAGED = '600:,' + '6:A,94:,' * 6
+# 0.13.0's notes. (the Net Square's gate the first time, issue #132:
+# MegaMan stepped onto it, the keeper's words paged, Lan typed on his
+# name screen, START, then his word on what the server sees and his
+# question, the cursor on No)
+GATE_NAME = ('4:RIGHT,6:,' * 11 + '4:A,10:,4:DOWN,6:,4:DOWN,6:,' + '4:LEFT,6:,' * 9 + '4:A,10:,4:DOWN,6:,4:RIGHT,6:,'
+             '4:A,20:,6:START,60:,')
+GATE_KEEPER = HP_PAGED + '0:place 16 80 3,20:,8:UP,40:,6:A,60:,6:A,60:,' + GATE_NAME + '6:A,74:,' * 5 + '120:'
+# (Trade Central's spares list out of the Square, issue #145: the trade
+# dev step in seed 3's run at depth 2, nine spares given by the chip step,
+# BN5's MrkCan1 and MrkCan3 among them, both ROMs in (the full set's);
+# the cursor down the list, each chip's card beside it, START through
+# the sorts)
+TRADE_SPARES = ('250:,' + ''.join(f'0:chip {c} 1,' for c in ('1 A', '20 F', '72 S', '89 G', '121 D', '154 L', '227 H', '411 M', '413 E')) +
+                '0:trade list,50:,' + '4:DOWN,36:,' * 4 + '4:START,56:,' * 2 + '4:DOWN,46:,' + '4:DOWN,30:,' * 5 + '4:START,60:')
 # (issue #98's identity: a layer's arrival words paged, then the sig dev
 # step puts MegaMan in the room the layer is remembered by)
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
@@ -1481,6 +1495,10 @@ SCREENSHOTS = [
     # layer walked by the weak autopilot, the layer's map on the bottom one)
     ('3ds-bn5', ['--scene', 'emu', '--net-biome', 'x0', '--seed', '4', '--dev', 'quiet'],
      [(760, '3ds-bn5')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
+    # 0.13.0's notes. (the gate's keeper the first time: what the server
+    # sees, and his question)
+    ('gate-keeper', HP_7 + ['--input', GATE_KEEPER],
+     [(1930, 'gate-keeper'), (2140, 'gate-consent')], {}),
 ]
 
 
@@ -1685,6 +1703,8 @@ CLIPS = [
     # MegaMan worries, the game fighting KnightMan for him, grey)
     ('bn5-one-net', ONE_NET + ['--dev', 'quiet,god,souls=2,folder=71'], {}, ONE_SOUL, 504, 1190),
     ('bn5-darkinvs', ONE_NET + ['--dev', 'quiet,worried,hp=999/200'], {}, ONE_DARKINVS, 1240, 1950),
+    # (0.13.0's: Trade Central's spares list, issue #145, with BN5's ROM)
+    ('trade-spares', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], {}, TRADE_SPARES, 252, 860),
 ]
 
 
@@ -1697,7 +1717,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'intro': (None, 15), 'two-screens': (None, 12), 'home-visit': (None, 12), 'identity': (4, 12),
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
-               'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12)}
+               'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
+               'online-netpass': (None, 15), 'trade-spares': (None, 15)}
 
 
 def clips(only=None):
@@ -1723,7 +1744,7 @@ def clips(only=None):
             extra += ['--second-shot-range', f'{first}:{last}:/src/.build/clips/s']
         code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/clips/data',
                       *args, *extra, '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/clips/f',
-                      mounts=docs_rom_mounts(bn5='bn5' in name))
+                      mounts=docs_rom_mounts(bn5='bn5' in name or name.startswith('trade-')))
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -1789,6 +1810,8 @@ def online_pictures(kind, rest):
     if names and not any(n.startswith('online-') for n in names):
         return 0
     build('linux')
+    if kind == 'screenshots' and (not names or 'online-browser' in names):
+        build('web')   # (the browser's picture: the site's player, tools/online_browser_picture.py)
     if subprocess.call([sys.executable, os.path.join(ROOT, 'server', 'build.py')], cwd=ROOT):
         return 1
     sys.path.insert(0, os.path.join(ROOT, 'tools'))

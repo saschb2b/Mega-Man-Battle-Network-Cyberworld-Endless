@@ -13,6 +13,9 @@ picture is one whole frame of one player's game, a clip a run of them,
 every second frame at 30 a second as build.py's clips are; a retake's
 frames may fall a frame or two apart, the games keeping the clock's pace.
 
+One more is the browser's (online-browser): the site's player in headless
+Chrome beside a game on this machine, tools/online_browser_picture.py.
+
     python3 build.py screenshots online-square ...   (build.py makes the Linux build and the server first)
     python3 build.py clips online-battle ...
     python3 tools/online_pictures.py [--keep] [NAME ...]   (both kinds; --keep: the footage already captured)
@@ -42,6 +45,10 @@ SHOTS = {
     'online-battle': ('battle', 'kei', 400),    # a NetBattle, Kei's side
     'online-stands': ('battle', 'dex', 480),    # Dex in the stands watching it, the referee's keys under it
 }
+
+# docs/screenshots/NAME.png of the browser, by tools/online_browser_picture.py
+# (agent-browser's Chrome, the browser build; build.py makes the browser build too)
+BROWSER = ('online-browser',)
 
 # docs/clips/NAME.*: (scene, game, first sample, last sample, poster sample)
 CLIPS = {
@@ -100,13 +107,19 @@ def main(argv, kinds=('screenshots', 'clips'), keep=None, encode=None):
     of them where none is named; `encode` build.py's encode_clip)."""
     keep = '--keep' in argv if keep is None else keep
     names = [a for a in argv if not a.startswith('--')]
-    pool = (SHOTS if 'screenshots' in kinds else {}).keys() | (CLIPS if 'clips' in kinds else {}).keys()
+    pool = (SHOTS.keys() | set(BROWSER) if 'screenshots' in kinds else set()) | (CLIPS if 'clips' in kinds else {}).keys()
     names = sorted(n for n in pool if not names or n in names)
-    if not names:
-        return 0
-    footage(names, keep)
-    code = screenshots(names) if 'screenshots' in kinds else 0
-    return code or (clips(names, encode) if 'clips' in kinds else 0)
+    scenes = [n for n in names if n not in BROWSER]
+    if scenes:
+        footage(scenes, keep)
+    code = screenshots(scenes) if 'screenshots' in kinds else 0
+    if not code and any(n in BROWSER for n in names):
+        if shutil.which('agent-browser'):
+            import online_browser_picture
+            code = online_browser_picture.main()
+        else:
+            print('online-browser skipped: it needs agent-browser (npm i -g agent-browser)')
+    return code or (clips(scenes, encode) if 'clips' in kinds and scenes else 0)
 
 
 if __name__ == '__main__':

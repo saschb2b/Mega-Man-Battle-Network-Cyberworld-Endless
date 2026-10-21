@@ -155,10 +155,11 @@ class DailyTests(unittest.IsolatedAsyncioTestCase):
         await self.connect("Beta")
         # (past midnight: the day's line written, the next day begun with its identities dropped)
         self.now += DAY
-        # (the housekeeping tick writes it, slower under the whole suite's load)
+        # (the housekeeping tick writes it, slower under the whole suite's load;
+        # the file is made empty a moment before its line goes in)
         for _ in range(400):
             await asyncio.sleep(0.05)
-            if (self.dir / stats.LOG).exists():
+            if (self.dir / stats.LOG).exists() and (self.dir / stats.LOG).read_text().strip():
                 break
         days = [json.loads(line) for line in (self.dir / stats.LOG).read_text().splitlines()]
         self.assertEqual([(d["day"], d["joins"], d["identities"], d["peak"]) for d in days], [("2026-10-22", 2, 2, 2)])
