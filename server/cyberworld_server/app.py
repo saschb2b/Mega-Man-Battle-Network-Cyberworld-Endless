@@ -13,6 +13,7 @@ from . import protocol, websocket
 from .arena import Arena
 from .holds import BACKLOG, Holds
 from .stands import Stands
+from .teams import Teams
 from .trade import Trades
 from .week import Weeks, week_of
 from .identity import IdentityStore
@@ -83,6 +84,7 @@ class Server:
         self.trades, self.arena = Trades(self), Arena(self)
         self.weeks = Weeks(self, clock)
         self.stands = Stands(self)
+        self.teams = Teams(self)
         # (the day's totals, no personal data: stats.py)
         self.daily = Daily(state_dir, self.retention.stats_days, clock)
         self.daily_task = None
@@ -233,6 +235,7 @@ class Server:
             del self.players[old.id]
             self.trades.left(old)
             self.arena.left(old.id)
+            self.teams.left(old.id)
             self.stands.left(old)
             if player.resumed:
                 self.holds.take_back(old, player)
@@ -329,6 +332,8 @@ class Server:
             self.stands.status(player, data)
         elif data and data[0] == protocol.SPEC["watch"]:
             await self.stands.watch(player, data)
+        elif data and data[0] == protocol.SPEC["team"]:
+            await self.teams.handle(player, data)
         else:
             raise protocol.ProtocolError("Unknown or out-of-order message")
 
@@ -373,6 +378,7 @@ class Server:
             return
         self.trades.left(player)
         self.arena.left(player.id)
+        self.teams.left(player.id)
         self.stands.left(player)
         player.channel = channel
         await self.welcome(player)
@@ -483,6 +489,7 @@ class Server:
                 self.day()
                 self.trades.expire(now)
                 self.arena.expire(now)
+                self.teams.expire(now)
             self.holds.expire(now)
             self.stands.pump(now)
             for player in list(self.players.values()):

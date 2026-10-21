@@ -55,6 +55,7 @@ typedef struct {
 	int arena_window; /* arenawindow=N: the Arena rolls back N frames at most (0: the delay alone); -1 what a frame costs here affords (arena.h, issue #128) */
 	int arena_lag;  /* arenalag=N: its local link's one way, N ticks; -1 its own */
 	int arena_hp;   /* arenahp=N: the carried MegaMan's max HP made N there (the installer seen in the battle; a Net Square battle's too) */
+	int arena_carry; /* arenacarry=N: --dev arena's carried MegaMan goes in with N HP of his max, as a Team NetBattle's winner does (written on both GBAs at the Custom screen) */
 	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */
 	int arena_freeze; /* arenafreeze=N: a Net Square battle held still on this side from its tick N for 40 seconds, its link kept (an app sent to the background): the other's stall note, its way out and its end seen */
 	int arena_2v2;  /* arena2v2=N (epic #167's spike): the pair's Practice NetBattle with two MegaMen a side, the partners' keys

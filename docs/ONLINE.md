@@ -846,6 +846,27 @@ rules byte out of STANDS and WATCH_STATE and refuses a WATCH from a game
 without the full set, NOTICE 28):
 [shared/online/README.md](../shared/online/README.md).
 
+### Team NetBattles
+
+Epic #167, the owner's decision of 21 October 2026: a relay of two teams
+of two. `Team up` on another player's card asks him to team up (his
+MegaMan asks Lan, the cursor on No); `Split up` on the partner's card
+ends it, as leaving does. A Battle between players of two teams is a
+team challenge; its Yes asks each team's captain (the one who asked to
+team up) who goes first, blind, and shows all four the order once both
+are in. Each bout is the Arena's NetBattle as above: the winner stays on
+with the HP he has left (carried in his MegaMan's bytes and written into
+the battle on both GBAs as it reaches the Custom screen, so the pair's
+hash covers it), the loser's partner comes in, and the team whose
+MegaMen are both deleted is out. Whoever waits watches the bout from the
+stands, unasked. The result card shows the MegaMen standing and who is
+next, and at the end the team's result; a leave or a dropped link breaks
+the match off for both teams, with no result. Nothing is won or lost.
+How it is built, its design and the four-game proof: [ONLINE_ARENA.md,
+Team NetBattles](ONLINE_ARENA.md#team-netbattles); the wire (protocol
+v12: TEAM, TEAM_STATE, STANDS's bout byte, a carried HP, NOTICE 29):
+[shared/online/README.md](../shared/online/README.md).
+
 ## The server and the wire
 
 Protocol v11 ([shared/online/README.md](../shared/online/README.md))

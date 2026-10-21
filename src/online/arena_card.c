@@ -73,7 +73,9 @@ static void plate(int x, int y, const char *name, const OnlineLoadout *l, bool k
 	text_draw(x + PLATE_W / 2, y + 2, name, PET_WHITE, TEXT_CENTER);
 	if (!known) return;
 	char hp[16];
-	snprintf(hp, sizeof hp, "%u", l ? (unsigned)l->max_hp : 100u);
+	/* (a Team NetBattle's winner goes on with what he has left: his HP of his max) */
+	if (l && l->hp && l->hp < l->max_hp) snprintf(hp, sizeof hp, "%u/%u", (unsigned)l->hp, (unsigned)l->max_hp);
+	else snprintf(hp, sizeof hp, "%u", l ? (unsigned)l->max_hp : 100u);
 	text_draw(x + 5, y + 18, arena_hp, PET_GOLD, TEXT_LEFT);
 	text_draw(x + PLATE_W - 5, y + 18, hp, PET_WHITE, TEXT_RIGHT);
 	small_row(x + 5, y + 34, PLATE_W - 8, arena_cross, arena_crosses_named(l ? l->crosses : 0));
@@ -82,7 +84,7 @@ static void plate(int x, int y, const char *name, const OnlineLoadout *l, bool k
 
 void arena_card_way(const ArenaWayView *v) {
 	int x = P.core_x, y = P.core_y;
-	frame(x, y, arena_practice);
+	frame(x, y, v->team ? arena_team : arena_practice);
 	int py = y + BODY_Y + 4;
 	for (int side = 0; side < 2; ++side) {
 		int px = x + 8 + side * (PLATE_W + 20);
@@ -143,9 +145,18 @@ static void rematch(int x, int y, const ArenaCardView *v) {
 		text_draw(x + 8, y + 14, line, v->theirs == ARENA_THEIRS_YES ? PET_GOLD : PET_CYAN_HI, TEXT_LEFT);
 }
 
+/* a team bout's foot: the MegaMen standing and who is next, or the match's end */
+static void team_foot(int x, int y, const ArenaCardView *v) {
+	second_slot(x + 8, y - 1, W - 16, 28);
+	text_draw(x + 13, y, arena_standing, PET_GOLD, TEXT_LEFT);
+	text_draw(x + W - 13, y, arena_score(v->standing[0], v->standing[1]), PET_WHITE, TEXT_RIGHT);
+	if (v->team_result) text_draw(x + W / 2, y + 13, arena_team_end(v->team_result), v->team_result == 1 ? PET_GOLD : PET_CYAN_HI, TEXT_CENTER);
+	else if (v->next[0] && v->next[1]) text_draw(x + W / 2, y + 13, arena_team_next(v->next[0], v->next[1]), PET_CYAN_HI, TEXT_CENTER);
+}
+
 void arena_card_result(const ArenaCardView *v) {
 	int x = P.core_x, y = P.core_y;
-	frame(x, y, arena_practice);
+	frame(x, y, v->team ? arena_team : arena_practice);
 	static const char *const head[6] = { arena_ended, arena_won, arena_lost, arena_ended, arena_broke, arena_stopped };
 	const char *h = head[v->result <= 5 ? v->result : 0];
 	int by = y + BODY_Y + 2;
@@ -153,7 +164,8 @@ void arena_card_result(const ArenaCardView *v) {
 	text_draw(x + W - 10, by + 9, arena_vs_name(v->name), PET_CYAN_HI, TEXT_RIGHT);
 	if (v->why) second_wrapped(v->why, x + 10, by + 30, W - 20, 4, PET_WHITE);
 	else if (v->tally) rows(x, by + 26, v);
-	if (v->ask != ARENA_ASK_NONE || v->theirs != ARENA_THEIRS_UNSAID) rematch(x, y + H - 44, v);
+	if (v->team) team_foot(x, y + H - 46, v);
+	else if (v->ask != ARENA_ASK_NONE || v->theirs != ARENA_THEIRS_UNSAID) rematch(x, y + H - 44, v);
 	const char *keys = v->ask == ARENA_ASK_OPEN ? arena_keys_ask : v->square ? arena_keys_back : arena_back;
 	if (v->ask != ARENA_ASK_SENT) pixfont_draw(x + W / 2, y + H - 14, keys, PET_DIM, INK, PIXFONT_CENTER, 1);
 }

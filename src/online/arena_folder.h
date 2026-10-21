@@ -14,7 +14,7 @@
 
 /* Challenged by `name`: the question opened (the cursor on No); false
  * where a chat is open. As it closes: Yes said. */
-bool arena_folder_challenge(const char *name);
+bool arena_folder_challenge(const char *name, bool team);
 bool arena_folder_challenge_yes(void);
 /* The first folder of `fits` (a bit a folder), 0 where none */
 int arena_folder_first(unsigned fits);

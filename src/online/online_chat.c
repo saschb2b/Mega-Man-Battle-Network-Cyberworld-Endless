@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "arena_words.h"
-#include "bn6.h"
 #include "bn6_fields.h"
 #include "emu.h"
 #include "flags.h"
@@ -24,6 +23,7 @@
 #include "platform.h"
 #include "script_kit.h"
 #include "square_arena.h"
+#include "square_team.h"
 #include "square_life.h"
 #include "square_week.h"
 #include "square_words.h"
@@ -42,6 +42,7 @@
 #define LOOK_FLAG    0x14C5   /* L's Look around (after square_watch.c's 0x14C4: Trade Central clears 0x1494-0x149F) */
 #define DIVE_FLAG    SQUARE_DIVE_FLAG   /* the greeter's dive (square_week.h): 0x14AF */
 #define BATTLE_FLAG  0x14A0   /* (the Arena's, apart: square_arena.c) */
+#define TEAM_FLAG    0x14C9   /* "Team up" or "Split up" (square_team.c's own are 0x14C6-0x14C8) */
 #define FIRST_FLAG SAY_FLAG
 #define LAST_SQUARE_FLAG HOME_FLAG
 
@@ -68,6 +69,7 @@ void online_chat_reset(void) {
 	square_week_reset();
 	for (int f = FIRST_FLAG; f <= LAST_SQUARE_FLAG; ++f) flag_clear(f);
 	flag_clear(BATTLE_FLAG);
+	flag_clear(TEAM_FLAG);
 	flag_clear(DIVE_FLAG);
 	flag_clear(LOOK_FLAG);
 }
@@ -141,29 +143,31 @@ static void menu(void) {
 	}
 }
 
-/* ... where the Arena is built, Battle first, in two boxes of three:
- * [Battle][Wave][More...], then [Mute][Block][Back] (script 0 the card,
- * 1 and 2 the boxes, 3-6 their flags, 7 the end) */
+/* ... where the Arena is built, Battle and Team up first, in three boxes:
+ * [Battle][Team up][More...], [Wave][Mute][More...], then [Block][Back]
+ * (script 0 the card, 1-3 the boxes, 4-8 their flags, 9 the end) */
 static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
 	ta_begin(t);
 	ta_script(t);
 	bool first = true;
 	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms)), FACE_MEGAMAN, &first);
 	ta_jump(t, 1);
-	const char *boxes[2][3] = {
-		{ arena_battle_option(), square_peer_option(0, muted), square_more() },
-		{ square_peer_option(1, muted), square_peer_option(2, muted), square_back() },
+	const char *boxes[3][3] = {
+		{ arena_battle_option(), square_team_option(&C.peer), square_more() },
+		{ square_peer_option(0, muted), square_peer_option(1, muted), square_more() },
+		{ square_peer_option(2, muted), square_back(), NULL },
 	};
-	static const int to[2][3] = { { 3, 4, 2 }, { 5, 6, 1 } };
-	for (int b = 0; b < 2; ++b) {
+	static const int to[3][3] = { { 4, 5, 2 }, { 6, 7, 3 }, { 8, 1, 0 } };
+	static const int counts[3] = { 3, 3, 2 };
+	for (int b = 0; b < 3; ++b) {
 		ta_script(t);
 		ta_mugshot(t, FACE_MEGAMAN);
 		ta_clear(t);
-		ta_options(t, boxes[b], 3);
-		ta_choose(t, to[b], 3, 7);
+		ta_options(t, boxes[b], counts[b]);
+		ta_choose(t, to[b], counts[b], 9);
 	}
-	static const int flags[4] = { BATTLE_FLAG, WAVE_FLAG, MUTE_FLAG, BLOCK_FLAG };
-	for (int k = 0; k < 4; ++k) {
+	static const int flags[5] = { BATTLE_FLAG, TEAM_FLAG, WAVE_FLAG, MUTE_FLAG, BLOCK_FLAG };
+	for (int k = 0; k < 5; ++k) {
 		ta_script(t);
 		ta_flag_set(t, flags[k]);
 		ta_end(t);
@@ -239,6 +243,7 @@ static bool chosen(void) {
 	for (int k = 0; k < ONLINE_PHRASE_COUNT; ++k) if (flag_get(SAY_FLAG + k)) online_transport_social(0, (uint8_t)k);
 	for (int k = 0; k < ONLINE_EMOTE_COUNT; ++k) if (flag_get(EMOTE_FLAG + k)) online_transport_social(1, (uint8_t)k);
 	if (flag_get(BATTLE_FLAG)) { flag_clear(BATTLE_FLAG); square_arena_challenge(&C.peer, C.s.latency_ms); }
+	if (flag_get(TEAM_FLAG)) { flag_clear(TEAM_FLAG); square_team_chosen(&C.peer); }
 	if (flag_get(WAVE_FLAG)) online_transport_social(1, WAVE);
 	if (flag_get(LOOK_FLAG)) { flag_clear(LOOK_FLAG); square_life_look(); }
 	if (flag_get(MUTE_FLAG)) online_people_toggle(C.peer.identity, ONLINE_MUTED);

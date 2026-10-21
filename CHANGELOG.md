@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Team NetBattles (epic #167).** Two players team up in the Net
+  Square: Team up on a player's card asks him, his MegaMan asks Lan, and
+  Split up on your partner's card ends it. A Battle between two teams is
+  a relay: each team's captain (the one who asked to team up) picks who
+  goes first without seeing the other team's pick, then both orders are
+  shown. The leads fight a NetBattle as ever; the winner stays on with
+  the HP he has left, the loser's partner comes in, and a team is out
+  when both its MegaMen are deleted. Whoever waits, and whoever is out,
+  watches the bout from the stands on their own. Between bouts the
+  result card shows the MegaMen standing and who is next; at the end,
+  the team's result. A leave or a dropped link mid-match breaks it off
+  for both teams, with no result; nothing is won or lost. The referee
+  calls a team's bouts. Protocol v12 (TEAM and TEAM_STATE, a carried HP,
+  STANDS's bout): a server and its games update together
+  (docs/ONLINE_ARENA.md, Team NetBattles).
 - **NetBattles from the ask to the result (epic #167, steps 1 and 2).**
   The way in is a PET Network panel instead of a black screen: both
   players, each MegaMan's HP, Crosses and Souls as carried, your set's

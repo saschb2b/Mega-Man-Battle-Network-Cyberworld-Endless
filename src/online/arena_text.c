@@ -17,7 +17,16 @@ const char arena_yes[] = "Yes", arena_no[] = "No";
 const char arena_keys_ask[] = "A: choose  B: back to the Square", arena_keys_back[] = "A: back to the Square";
 const char arena_back[] = "A: back to the title", arena_leave_key[] = "B: leave the NetBattle";
 
+/* a Team NetBattle's */
+const char arena_team[] = "Team", arena_standing[] = "Standing";
+
+const char *arena_team_end(unsigned result) {
+	static const char *const ends[5] = { "TEAM OVER", "TEAM WIN!", "TEAM LOSE", "TEAM BROKE OFF", "TEAM DRAW" };
+	return ends[result <= 4 ? result : 0];
+}
+
 /* (each line in a buffer of its own: a screen draws one as it gets the next) */
+const char *arena_team_next(const char *ours, const char *theirs) { static char s[64]; snprintf(s, sizeof s, "Next: %s vs %s", ours, theirs); return s; }
 const char *arena_vs_name(const char *name) { static char s[48]; snprintf(s, sizeof s, "VS %s", name); return s; }
 const char *arena_score(unsigned won, unsigned lost) { static char s[24]; snprintf(s, sizeof s, "%u - %u", won, lost); return s; }
 

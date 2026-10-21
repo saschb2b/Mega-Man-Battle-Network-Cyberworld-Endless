@@ -40,7 +40,7 @@ static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
 static bool mail(uint8_t kind) {
 	return kind == ONLINE_TRADE_STATE || kind == ONLINE_BOARD || kind == ONLINE_WEEK_BOARD || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
 		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH || kind == ONLINE_STANDS || kind == ONLINE_WATCH_STATE ||
-		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS;
+		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS || kind == ONLINE_TEAM_STATE;
 }
 
 /* A dropped link (issue #153, online_transport.h): a link welcomed and then
@@ -526,7 +526,7 @@ bool online_transport_channel(uint16_t channel) {
 
 bool online_transport_send(const uint8_t *data, size_t size) {
 	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_WEEK_POST || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
-		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH);
+		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH || data[0] == ONLINE_TEAM);
 	if (!transport.enabled || !ours) return false;
 	/* (a link down: nothing kept for the next session, which the server
 	 * began afresh, what was under way ended at the drop; issue #153) */

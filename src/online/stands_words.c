@@ -16,7 +16,7 @@ static int live_words(char *s, size_t n, const StandsBout *b) {
 	char a[20], z[20], chip[24];
 	caps(b->name[0], a, sizeof a);
 	caps(b->name[1], z, sizeof z);
-	int k = snprintf(s, n, "|A NETBATTLE'S ON!\n%s VS\n%s!", a, z);
+	int k = b->bout ? snprintf(s, n, "|TEAM NETBATTLE!\nBOUT %u!|%s VS\n%s!", b->bout, a, z) : snprintf(s, n, "|A NETBATTLE'S ON!\n%s VS\n%s!", a, z);
 	if (b->report) k += snprintf(s + k, n - (size_t)k, "|%s HAS %u HP!\n%s HAS %u!", a, b->hp[0], z, b->hp[1]);
 	for (int side = 0; side < 2; ++side)
 		if (b->chip[side]) k += snprintf(s + k, n - (size_t)k, "|%s USED\n%s!", side ? z : a, caps(b->chip[side], chip, sizeof chip));
@@ -54,7 +54,8 @@ const char *stands_board_words(const StandsBout *live, const StandsBout *last) {
 	int k = 0;
 	s[0] = 0;
 	if (live) {
-		k += snprintf(s + k, sizeof s - (size_t)k, ">NetBattle now!\n%s vs %s", live->name[0], live->name[1]);
+		k += live->bout ? snprintf(s + k, sizeof s - (size_t)k, ">Team NetBattle,\nbout %u!\n%s vs %s", live->bout, live->name[0], live->name[1]) :
+			snprintf(s + k, sizeof s - (size_t)k, ">NetBattle now!\n%s vs %s", live->name[0], live->name[1]);
 		if (live->report)
 			k += snprintf(s + k, sizeof s - (size_t)k, "|>%s %u HP,\n%s %u HP.", live->name[0], live->hp[0], live->name[1], live->hp[1]);
 	}

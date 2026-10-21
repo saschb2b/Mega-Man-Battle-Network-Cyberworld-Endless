@@ -118,6 +118,7 @@ static void bout_of(const StandsEntry *e, StandsBout *b, char chips[2][24]) {
 	b->cheers = e->cheers;
 	b->winner = e->stage == STANDS_OVER ? e->report.winner : 0;
 	b->mine = mine(e);
+	b->bout = e->bout;
 }
 
 /* the stands' words for the referee or the Board */
@@ -183,8 +184,31 @@ void square_watch_update(const OnlineSnapshot *s) {
 	if (W.stage == W_ASKED && (s->notice_serial != W.notice_serial || SDL_GetTicks() - W.since > ASK_WAIT_MS)) W.stage = W_IDLE;
 }
 
+bool square_watch_team(uint32_t match) {
+	if (!CW_ARENA || W.stage != W_IDLE || !netpass_has(STAMP_ARENA) || match == W.refused) return false;
+	W.match = match;
+	W.name[0][0] = W.name[1][0] = 0;
+	W.stage = W_ASKED;
+	W.since = SDL_GetTicks();
+	W.notice_serial = W.s.notice_serial;
+	send_watch(WATCH_ACT_WATCH, W.match);
+	printf("watch: a team bout to watch (match %u)\n", match);
+	return true;
+}
+
+/* the two players' names from the Square's peers where none were kept (a team bout's) */
+static void names_of(const WatchState *st) {
+	for (int side = 0; side < 2; ++side) {
+		if (W.name[side][0]) continue;
+		const char *n = NULL;
+		for (size_t k = 0; k < W.s.peer_count && !n; ++k) if (W.s.peers[k].id == st->side[side]) n = W.s.peers[k].name;
+		snprintf(W.name[side], sizeof W.name[side], "%s", n ? n : "?");
+	}
+}
+
 static void started(const WatchState *st) {
 	if (W.stage != W_ASKED || st->match != W.match) return;
+	names_of(st);
 	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
 	W.stage = W_ON;
