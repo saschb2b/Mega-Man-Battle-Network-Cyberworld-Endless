@@ -127,6 +127,8 @@ static void enter(void) {
 	if (S.arena) arena_window(S.arena, dev.arena_window);
 	emu_audio_open();
 	audio_external(emu_audio_read);
+	/* (the way in's panel opened as the Square's opens) */
+	arena_card_cue(ARENA_CUE_OPEN);
 }
 
 static void leave(void) {
@@ -150,7 +152,11 @@ static bool reset_chord(void) {
 static void update(void) {
 	if (!S.arena || reset_chord()) { scene_set(&scene_title); return; }
 	ArenaStage stage = arena_stage(S.arena);
-	if (stage != S.was) { S.was = stage; S.t = 0; }
+	if (stage != S.was) {
+		S.was = stage;
+		S.t = 0;
+		arena_card_cue(stage == ARENA_BATTLE ? ARENA_CUE_BATTLE : ARENA_CUE_OPEN);
+	}
 	++S.t;
 	switch (stage) {
 	case ARENA_CONNECTING: arena_view_connect(S.arena); break;

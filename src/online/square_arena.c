@@ -369,6 +369,8 @@ static void state_in(const ArenaWireState *s) {
 		return;
 	}
 	if (s->stage == ARENA_WIRE_WAITING && SA.stage == SA_SENT && s->other == SA.other) { SA.match = s->match; SA.stage = SA_WAITING; return; }
+	/* (a challenge of ours no longer wanted: a rematch's Yes taken back by closing the card before the server's word) */
+	if (s->stage == ARENA_WIRE_WAITING) { act(ARENA_ACT_LEAVE, s->match); return; }
 	if (s->match != SA.match) return;
 	if (s->stage == ARENA_WIRE_START && (SA.stage == SA_WAITING || SA.stage == SA_ACCEPTED)) start(s->side, s->delay);
 	else if (s->stage == ARENA_WIRE_ENDED) ended();
@@ -576,6 +578,8 @@ static void bouts(unsigned result) {
 	SA_LAST.other = SA.other;
 	snprintf(SA_LAST.name, sizeof SA_LAST.name, "%s", SA.name);
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
+	/* (a bout broken off offers no rematch: his next challenge is asked as ever) */
+	if (result == 4) return;
 	SA_AGAIN.other = SA.other;
 	SA_AGAIN.since = SDL_GetTicks();
 	SA_AGAIN.folder = SA.folder;
