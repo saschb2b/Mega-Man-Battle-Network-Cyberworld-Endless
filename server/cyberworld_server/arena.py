@@ -20,9 +20,10 @@ import time
 
 from . import protocol, websocket
 
-CHALLENGED, WAITING, START, ENDED = range(1, 5)
-CHALLENGE, ACCEPT, LEAVE, OVER = range(1, 5)
-PENDING = 30          # seconds a challenge waits for its answer
+CHALLENGED, WAITING, START, ENDED, SEEN = range(1, 6)
+CHALLENGE, ACCEPT, LEAVE, OVER, SHOWN = range(1, 6)
+PENDING = 30          # seconds a challenge waits for its answer, from its question shown (v13)
+PENDING_UNSEEN = protocol.SPEC["pending_unseen"]   # ... before it is shown (a chat open on the other's screen)
 FRAME_MS = 1000 / 60
 LOCKSTEP = 1          # frames the linked cores need: one crosses into its next a little before its partner (v8; 3 before)
 LEAST = LOCKSTEP      # (2 before issue #167: a tick for a key to be taken, which a rollback window covers as well)
@@ -46,14 +47,18 @@ def delay_for(latency_a, latency_b):
 
 
 class Match:
-    def __init__(self, match_id, a, b, latency, team=0, teamed=False):
+    def __init__(self, match_id, a, b, latency, team=0, teamed=False, challenger=None):
+        # (a the cable's first side, b the second: the challenger first, but
+        # for a rematch, which keeps the last battle's sides, v13)
         self.id, self.a, self.b = match_id, a, b
-        self.latency = {a: latency, b: 0}
+        self.challenger = challenger or a
+        self.latency = {self.challenger: latency, self.other(self.challenger): 0}
         self.started = False
         self.finished = False   # over, from the cable's first (not a leave)
         self.team = team        # a team match's bout: its id (teams.py), both fighters' accepts before START
         self.teamed = teamed    # a team challenge: its Yes begins a team match, not a battle
         self.ready = set()
+        self.seen = bool(team)  # its question shown to the challenged (v13); a bout has none
         self.time = time.monotonic()
 
     def other(self, player_id):
@@ -66,6 +71,10 @@ class Arena:
         self.matches = {}
         self.of = {}
         self.next = 1
+        # the cable's first of the last battle each pair of players started
+        # (v13): a rematch keeps the sides, so that both games go into it
+        # from the pair they kept (docs/ONLINE_ARENA.md, A rematch in a second)
+        self.sides = {}
 
     def send(self, player_id, match, stage, side=0, delay=0):
         player = self.server.players.get(player_id)
@@ -88,6 +97,8 @@ class Arena:
 
     def start(self, match):
         match.started = True
+        if not match.team and not match.teamed:
+            self.sides[frozenset((match.a, match.b))] = match.a
         delay = delay_for(match.latency[match.a], match.latency[match.b])
         self.send(match.a, match, START, 0, delay)
         self.send(match.b, match, START, 1, delay)
@@ -120,20 +131,28 @@ class Arena:
         if not match or player.id not in (match.a, match.b):
             await self.server.notice(player, 17, "That battle is over")
             return
+        if action == SHOWN:
+            # (the question on the challenged's screen: his 30 seconds from
+            # now, and the challenger told, his wait's strip draining, v13)
+            if not match.started and not match.seen and player.id != match.challenger:
+                match.seen = True
+                match.time = time.monotonic()
+                self.send(match.challenger, match, SEEN)
+            return
         if action == ACCEPT and match.team and not match.started:
             # (a bout: each fighter ready, the other's START waits for both)
             match.latency[player.id] = latency
             match.ready.add(player.id)
             if len(match.ready) == 2:
                 self.start(match)
-        elif action == ACCEPT and player.id == match.b and not match.started and match.teamed:
+        elif action == ACCEPT and player.id != match.challenger and not match.started and match.teamed:
             # (a team challenge taken: the team match begins, teams.py; this Match was only its ask)
             if not self.server.teams.partners_free(match.a, match.b):
                 self.end(match)
                 return
             self.end(match, told=(match.a, match.b))
             self.server.teams.begin(match.a, match.b)
-        elif action == ACCEPT and player.id == match.b and not match.started:
+        elif action == ACCEPT and player.id != match.challenger and not match.started:
             match.latency[player.id] = latency
             self.start(match)
         else:
@@ -163,7 +182,11 @@ class Arena:
         if teamed and not teams.partners_free(player.id, target.id):
             await self.server.notice(player, 16, "That Navi is busy")
             return
-        match = Match(self.next, player.id, target.id, latency, teamed=teamed)
+        # (a rematch keeps the last battle's sides: the challenged the cable's first where he was)
+        a, b = player.id, target.id
+        if not teamed and self.sides.get(frozenset((a, b))) == b:
+            a, b = b, a
+        match = Match(self.next, a, b, latency, teamed=teamed, challenger=player.id)
         self.next = self.next % 0xffffffff + 1
         self.matches[match.id] = match
         self.of[player.id] = self.of[target.id] = match.id
@@ -183,8 +206,10 @@ class Arena:
         match = self.matches.get(self.of.get(player_id, 0))
         if match:
             self.end(match, told=(player_id,))
+        for pair in [pair for pair in self.sides if player_id in pair]:
+            del self.sides[pair]
 
     def expire(self, now):
         for match in list(self.matches.values()):
-            if not match.started and now - match.time > PENDING:
+            if not match.started and now - match.time > (PENDING if match.seen else PENDING_UNSEEN):
                 self.end(match)
