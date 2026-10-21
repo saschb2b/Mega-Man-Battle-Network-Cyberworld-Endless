@@ -1,14 +1,17 @@
-# Net Square protocol v9
+# Net Square protocol v10
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v9`.
+`/presence` with subprotocol `cyberworld.presence.v10`. The server also
+accepts another version's `cyberworld.presence.vN` (echoing it), so that
+a game of another version can say its HELLO and hear ERROR 2 or 17, which
+side is behind, rather than a refused upgrade (v10).
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
-| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1 (all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one), u8 name length, name bytes |
+| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1 (all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
 | SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; no other bit) |
@@ -38,6 +41,7 @@ unfragmented binary WebSocket frames, at most 512 payload bytes, on
 | WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay |
 | WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
 | WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side, u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
+| BYE (32) | client → server, last | nothing: the game leaves (the pad, R and home, the game closed), so its place is freed at once; a WebSocket close says the same |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
 TRADE_STATE 32, ARENA 8, ARENA_STATE 28, OFFER 5, WEEK_POST 17,
@@ -58,6 +62,14 @@ words and visuals. No arbitrary chat text is accepted. NOTICE codes are
 target unavailable. ERROR closes the connection; it includes version
 and identity mismatch, rate violation and moderation. ERROR 12 tells a
 session that a newer connection with the same profile replaced it.
+ERROR 2 (another protocol) and 3 (another Square generator) now say the
+game is the older side (v10): a game newer than the server, by its
+protocol or its SQUARE_MAKE, is answered ERROR 17
+(`error_server_older`), so each says where the newer one is. ERROR 16
+(`error_maintenance`) turns every HELLO away while the server's
+`server.ini` names a maintenance line; its text is that line (at most
+`maintenance_bytes`, 40, printable ASCII: "until 14:00 UTC"), which the
+gate shows, and `/health` carries it as `maintenance`.
 
 Names have 1..16 ASCII letters, digits, spaces, underscores or hyphens,
 starting with a letter or digit. Coordinates are bounded to ±8192 and
@@ -99,13 +111,38 @@ its bit to `roms_full`, in a new protocol version. NOTICE 19 (a BN5 chip
 or full rules outside a mixed pair's common ground, protocols v4 to v8)
 is retired: nothing sends it.
 
+A dropped link (protocol v10, issue #153; docs/ONLINE.md, A dropped
+link). A session that ends without a goodbye (BYE or a WebSocket
+close), its socket gone or silent for 15 seconds, keeps its place for 40
+seconds (`server/cyberworld_server/holds.py`): its slot in its channel,
+its session ID and its MegaMan, standing where he stood, in the others'
+SNAPSHOTs; a trade, a challenge or a battle aimed at it meanwhile is
+answered NOTICE 16. What it had under way ends at once, as on any leave:
+a trade not committed is cancelled for both, a battle ends for the other
+(ARENA_STATE ended), watching stops, its board offer is taken down. A
+HELLO from the same identity with the resume bit takes the place back:
+the WELCOME names the same session ID and channel (where the old session
+is not yet known to be gone, it is told ERROR 12), the session's last
+trade end (done or cancelled) is sent again after it, as the link may
+have lost it (a game sets aside a TRADE_STATE it has already had), and
+nobody else is told anything. One trade a visit holds across it. A HELLO
+with the resume bit and no place held (a server restarted, the hold
+over) joins its requested channel as any HELLO does; one without the bit
+while a place is held is a new visit: the place is given up and the
+session arrives anew. A refusal, a moderator's removal or a goodbye
+frees the place at once. The game tries again for 30 seconds from the
+moment its link went quiet or dropped (src/online/online_transport.h).
+
 The server holds at most 16 unfinished handshakes, each given five
 seconds for the HTTP Upgrade and HELLO together; only joined players
 count against its player cap. It has a 15-second idle timeout and a token bucket
-of 40 messages replenished at 30 per second. A slow output buffer above
+of 40 messages replenished at 30 per second; STATE has a bucket of its
+own, 200 deep and refilled at 25 a second, so a stalled link's backlog of
+positions, let through at once as it clears, is no flood (v10). A slow output buffer above
 8192 bytes is disconnected. WebSocket pings, pongs and close are handled;
 text, fragments, masking violations and oversized frames are rejected.
-The client sends positions every 50 ms and pings every two seconds.
+The client sends positions every 50 ms (every 500 ms once it has heard
+nothing for 400 ms) and pings every two seconds.
 Social events have a separate two-event burst with one token restored
 every two seconds. Profile updates are accepted at most once per second;
 Inspect is limited to four requests per second. Numeric payloads are

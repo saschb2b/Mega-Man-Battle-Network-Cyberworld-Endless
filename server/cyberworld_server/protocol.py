@@ -45,16 +45,27 @@ class ProtocolError(Exception):
 
 
 def read_hello(data):
-    """HELLO checked: its name, guest key, channel and the ROMs its game has
-    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came)."""
+    """HELLO checked: its name, guest key, channel, the ROMs its game has
+    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came)
+    and whether it takes back a place held (the channel's hello_resume bit,
+    protocol v10: a game come back after its link dropped, holds.py)."""
+    # (which side is behind, so the game can say where the newer one is: the
+    # version read first, as another version's HELLO may be shaped otherwise; v10)
+    version = hello_version(data)
+    if version is not None and version != SPEC["version"]:
+        if version > SPEC["version"]:
+            raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+        raise ProtocolError("Protocol version mismatch", 2)
     if len(data) < HELLO.size:
         raise ProtocolError("Expected HELLO")
     kind, version, make, square_hash, rom, digest, rom5, digest5, key, channel, length = HELLO.unpack_from(data)
     if kind != SPEC["hello"] or len(data) != HELLO.size + length:
         raise ProtocolError("Malformed HELLO")
-    if version != SPEC["version"]:
-        raise ProtocolError("Protocol version mismatch", 2)
-    if make != SPEC["square_make"] or square_hash != SPEC["square_hash"]:
+    if make > SPEC["square_make"]:
+        raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+    if make != SPEC["square_make"]:
+        raise ProtocolError("Square generation mismatch", 3)
+    if square_hash != SPEC["square_hash"]:
         raise ProtocolError("Square generation mismatch", 3)
     if rom != SPEC["rom_code"].encode() or digest.hex() != SPEC["rom_sha1"]:
         raise ProtocolError("BN6 identity mismatch", 4)
@@ -67,7 +78,8 @@ def read_hello(data):
     name = data[HELLO.size:]
     if not re.fullmatch(rb"[A-Za-z0-9][A-Za-z0-9 _-]{0,15}", name):
         raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
-    return name.decode("ascii").rstrip(), key, channel, SPEC["roms_bn5"] if bn5 else 0
+    resume = bool(channel & SPEC["hello_resume"])
+    return name.decode("ascii").rstrip(), key, channel & ~SPEC["hello_resume"], SPEC["roms_bn5"] if bn5 else 0, resume
 
 
 def hello_version(data):
@@ -88,13 +100,24 @@ def full_set(roms):
     return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
 
 
-def hello(name, key=None, channel=0, bn5=False, **overrides):
+def hello(name, key=None, channel=0, bn5=False, resume=False, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
     rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
+    channel |= spec["hello_resume"] if resume else 0
     return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
                       spec["square_hash"], spec["rom_code"].encode(),
                       bytes.fromhex(spec["rom_sha1"]), *rom5, key or secrets.token_bytes(16), channel, len(name)) + name
+
+
+def maintenance_line(text):
+    """server.ini's maintenance: the host's line ("until 14:00 UTC"), printable
+    ASCII, at most maintenance_bytes, sent as ERROR error_maintenance's reason
+    to every game that comes (a game says it at the gate); empty: open."""
+    text = " ".join((text or "").split())
+    if len(text) > SPEC["maintenance_bytes"] or not all(32 <= ord(c) < 127 for c in text):
+        raise ValueError(f"maintenance is at most {SPEC['maintenance_bytes']} printable ASCII characters")
+    return text
 
 
 def read_state(data):

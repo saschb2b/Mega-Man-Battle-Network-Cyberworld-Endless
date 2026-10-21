@@ -120,22 +120,27 @@ static bool frame_send(const uint8_t *data, size_t size, uint8_t opcode) {
 
 bool online_socket_send(const uint8_t *data, size_t size) { return frame_send(data, size, 2); }
 
+/* (a frame against RFC 6455 or the wire's bounds: the server's fault, not
+ * the network's, so never tried again; online_socket.h) */
+#define BROKEN (-2)
+
 static int take_frame(uint8_t *data, size_t size) {
 	if (buffered < 2) return 0;
 	uint8_t opcode = incoming[0] & 15;
 	size_t length = incoming[1] & 127, offset = 2;
-	if (!(incoming[0] & 0x80) || (incoming[0] & 0x70) || (incoming[1] & 0x80) || length == 127) return -1;
-	if (opcode != 2 && opcode != 8 && opcode != 9 && opcode != 10) return -1;
-	if (opcode >= 8 && length > 125) return -1;
+	if (!(incoming[0] & 0x80) || (incoming[0] & 0x70) || (incoming[1] & 0x80) || length == 127) return BROKEN;
+	if (opcode != 2 && opcode != 8 && opcode != 9 && opcode != 10) return BROKEN;
+	if (opcode >= 8 && length > 125) return BROKEN;
 	if (length == 126) {
 		if (buffered < 4) return 0;
 		length = (size_t)incoming[2] * 256 + incoming[3];
 		offset = 4;
-		if (length < 126) return -1;
+		if (length < 126) return BROKEN;
 	}
-	if (length > size || length > ONLINE_MAX_MESSAGE) return -1;
+	if (length > size || length > ONLINE_MAX_MESSAGE) return BROKEN;
 	if (buffered < offset + length) return 0;
-	if (opcode == 8 || (opcode == 2 && !length)) return -1;
+	if (opcode == 2 && !length) return BROKEN;
+	if (opcode == 8) return -1;
 	if (opcode == 9 && !frame_send(incoming + offset, length, 10)) return -1;
 	memcpy(data, incoming + offset, length);
 	buffered -= offset + length;
@@ -146,7 +151,7 @@ static int take_frame(uint8_t *data, size_t size) {
 int online_socket_receive(uint8_t *data, size_t size) {
 	int complete = take_frame(data, size);
 	if (complete) return complete;
-	if (buffered == sizeof incoming) return -1;
+	if (buffered == sizeof incoming) return BROKEN;
 	int got = online_stream_receive(incoming + buffered, sizeof incoming - buffered);
 	if (got < 0) return -1;
 	buffered += (size_t)got;

@@ -11,6 +11,7 @@ import time
 
 from . import protocol, websocket
 from .arena import Arena
+from .holds import BACKLOG, Holds
 from .stands import Stands
 from .trade import Trades
 from .week import Weeks, week_of
@@ -37,12 +38,15 @@ class Player:
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
     roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's (protocol.full_set)
+    refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
+    resumed: bool = False     # a place held taken back by this session (holds.py)
 
 
 class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
                  player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
-                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time):
+                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time,
+                 maintenance="", hold=None):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -82,6 +86,9 @@ class Server:
         # (the day's totals, no personal data: stats.py)
         self.daily = Daily(state_dir, self.retention.stats_days, clock)
         self.daily_task = None
+        # (issue #153: a dropped link's place held; server.ini's maintenance line)
+        self.holds = Holds(self) if hold is None else Holds(self, hold)
+        self.maintenance = protocol.maintenance_line(maintenance)
 
     def event(self, kind, **fields):
         """An event in the console's log; one that names a player (a public
@@ -138,6 +145,7 @@ class Server:
         task = asyncio.current_task()
         player = None
         upgraded = False
+        goodbye = False
         if len(self.pending) >= self.pending_cap:
             writer.close()
             return
@@ -159,11 +167,16 @@ class Server:
                 self.daily.hello(version)
             player = self.join(writer, *protocol.read_hello(data))
             await self.welcome(player)
+            if player.resumed:
+                await self.holds.resumed(player)
             await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
             await self.weeks.send(player)
             self.stands.send_to(player)
             await self.serve_player(reader, player)
+            goodbye = True
         except protocol.ProtocolError as exc:
+            if player:
+                player.refused = True
             self.event("reject", reason=str(exc), code=exc.code)
             with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
                 if upgraded:
@@ -174,16 +187,15 @@ class Server:
                     await asyncio.wait_for(writer.drain(), 2)
         except (ConnectionError, asyncio.IncompleteReadError, asyncio.TimeoutError):
             pass
+        except asyncio.CancelledError:
+            goodbye = True      # (the server closing: no place to hold)
+            raise
         finally:
             try:
-                # A replaced session has already handed its place on.
+                # A replaced session has already handed its place on; one
+                # that dropped without a goodbye keeps it a while (holds.py).
                 if player and self.players.get(player.id) is player:
-                    del self.players[player.id]
-                    self.trades.left(player)
-                    self.trades.done.discard(player.id)
-                    self.arena.left(player.id)
-                    self.stands.left(player)
-                    self.event("leave", id=player.id, players=len(self.players))
+                    self.holds.gone(player, goodbye)
             finally:
                 writer.close()
                 try:
@@ -192,7 +204,9 @@ class Server:
                 finally:
                     self.connections.discard(task)
 
-    def join(self, writer, name, key, requested, roms=0):
+    def join(self, writer, name, key, requested, roms=0, resume=False):
+        if self.maintenance:
+            raise protocol.ProtocolError(self.maintenance, protocol.SPEC["error_maintenance"])
         identity = self.store.identity(key)
         self.store.refresh()
         if self.store.contains("bans", identity):
@@ -207,26 +221,36 @@ class Server:
         # The same profile again (a reconnect after a drop the server has not
         # noticed yet) takes over its old session, and by default its channel.
         old = next((p for p in self.players.values() if p.identity == identity), None)
-        channel = self.choose_channel(requested or (old.channel if old else 0), old.id if old else 0)
+        # (a resume takes its own place back, held or not yet noticed gone: holds.py)
+        channel = old.channel if old and resume else \
+            self.choose_channel(requested or (old.channel if old else 0), old.id if old else 0)
         if not channel or len(self.players) - bool(old) >= self.player_cap:
             raise protocol.ProtocolError("Square or channel is full", 7)
-        player = Player(self.next_id, name, writer, identity, channel, roms=roms)
-        self.next_id = self.next_id % 0xffffffff + 1
+        player = Player(self.next_id, name, writer, identity, channel, roms=roms, resumed=bool(old and resume))
+        if not player.resumed:
+            self.next_id = self.next_id % 0xffffffff + 1
         if old:
             del self.players[old.id]
             self.trades.left(old)
-            self.trades.done.discard(old.id)
             self.arena.left(old.id)
             self.stands.left(old)
-            self.event("replace", id=old.id, by=player.id, identity=identity.hex())
+            if player.resumed:
+                self.holds.take_back(old, player)
+            else:
+                self.holds.forget(old)
+                self.event("replace", id=old.id, by=player.id, identity=identity.hex())
             self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
         self.players[player.id] = player
-        self.daily.join(identity, len(self.players), protocol.full_set(roms))
-        self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
+        # (a place taken back is the same visit: its "resume", holds.py, neither
+        # a join nor one of the day's joins)
+        if not player.resumed:
+            self.daily.join(identity, len(self.players), protocol.full_set(roms))
+            self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
         return player
 
     def drop(self, player, exc, close_code=1008):
         """Tell a session why it ends and close it, without waiting on its socket."""
+        player.refused = True
         if not player.writer.is_closing():
             player.writer.write(websocket.frame(protocol.error(exc)))
             reason = str(exc).encode("ascii")[:123]
@@ -236,11 +260,24 @@ class Server:
     async def serve_player(self, reader, player):
         # (the Arena's keys come 60 times a second: a bucket of their own)
         tokens, relay, previous = 40.0, 150.0, time.monotonic()
+        moves = float(BACKLOG)
         relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"])
         while True:
             opcode, data = await asyncio.wait_for(websocket.receive(reader), 15)
             now = time.monotonic()
             elapsed, previous = now - previous, now
+            # (positions a bucket of their own, deep enough for the backlog a
+            # stalled link lets through at once, refilled whatever comes:
+            # holds.py, BACKLOG)
+            moves = min(BACKLOG, moves + elapsed * 25)
+            if opcode == 2 and data and data[0] == protocol.SPEC["state"]:
+                moves -= 1
+                tokens = min(40, tokens + elapsed * 30)
+                relay = min(150, relay + elapsed * 120)
+                if moves < 0:
+                    raise protocol.ProtocolError("Message rate exceeded", 8)
+                await self.message(player, data, now)
+                continue
             if opcode == 2 and data and data[0] in relayed:
                 relay = min(150, relay + elapsed * 120) - 1
                 tokens = min(40, tokens + elapsed * 30)
@@ -252,8 +289,10 @@ class Server:
             relay = min(150, relay + elapsed * 120)
             if tokens < 0:
                 raise protocol.ProtocolError("Message rate exceeded", 8)
-            if opcode == 8:
-                await websocket.send(player.writer, struct.pack("!H", 1000), 8)
+            if opcode == 8 or (opcode == 2 and data == bytes((protocol.SPEC["bye"],))):
+                # (a goodbye, BYE or a close: the place freed at once, holds.py)
+                with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
+                    await websocket.send(player.writer, struct.pack("!H", 1000), 8)
                 return
             if opcode == 9:
                 await websocket.send(player.writer, data, 10)
@@ -297,7 +336,8 @@ class Server:
         return {"status": "ok", "protocol": protocol.SPEC["version"], "name": self.name,
                 "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
                 "room_capacity": self.capacity, "channels": self.max_channels,
-                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on}}
+                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on},
+                "maintenance": self.maintenance or None, "hold_seconds": self.holds.seconds}
 
     def choose_channel(self, requested, exclude=0):
         if requested > self.max_channels:
@@ -376,6 +416,7 @@ class Server:
             kick = self.store.kick(player.identity, now)
             if self.store.contains("bans", player.identity) or (kick and kick["time"] >= player.joined):
                 self.drop(player, protocol.ProtocolError("Removed by a moderator", 14))
+                self.holds.removed(player)
         self.save_roster()
 
     def save_roster(self):
@@ -442,6 +483,7 @@ class Server:
                 self.day()
                 self.trades.expire(now)
                 self.arena.expire(now)
+            self.holds.expire(now)
             self.stands.pump(now)
             for player in list(self.players.values()):
                 if player.writer.is_closing():

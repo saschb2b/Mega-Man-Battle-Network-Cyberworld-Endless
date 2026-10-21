@@ -24,6 +24,11 @@ static const char *visit_end(int ended) {
 	case VISIT_END_LOST: return "lost";
 	case VISIT_END_BROKEN: return "not built";
 	case VISIT_END_DIVE: return "dive";
+	/* (issue #153: the server under maintenance, older than the game, or
+	 * another Square after a dropped link came back) */
+	case VISIT_END_MAINTENANCE: return "maintenance";
+	case VISIT_END_OLD_SERVER: return "older server";
+	case VISIT_END_MOVED: return "another Square";
 	default: return "closed";
 	}
 }
