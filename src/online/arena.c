@@ -57,6 +57,7 @@ typedef struct {
 	bool fight, gone;   /* my core's battle under way; both cores' gone, back at the Comm menu */
 	uint8_t result[2];  /* mine and the other's (BN6_BATTLE_RESULT) */
 	ArenaReading reading;   /* both MegaMen as the cable's first core has them */
+	uint64_t sound;         /* the sound ring's mark before it (emu_audio_mark): a rollback's sound goes back to it */
 } Ran;
 
 struct Arena {
@@ -220,6 +221,7 @@ static bool run_frame(Arena *a) {
 	uint16_t keys[ARENA_LOOKAHEAD][2];
 	if (!arena_input_take(&a->input, a->window, keys)) return false;
 	if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[2])keys);
+	uint64_t sound = emu_audio_mark();
 	uint64_t t = SDL_GetPerformanceCounter();
 	if (!arena_pair_step(a->pair, (const uint16_t (*)[2])keys, true)) return false;
 	double ms = (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -228,24 +230,32 @@ static bool run_frame(Arena *a) {
 	++a->costed;
 	if (a->roll && !arena_roll_after(a->roll, frame)) return false;
 	note(a, frame);
+	/* (my GBA's sound a frame at a time, each frame's place in the ring kept) */
+	arena_pair_sound(a->pair, a->link->side);
+	a->ran[frame % LOG].sound = sound;
 	return true;
 }
 
 /* a key come otherwise than guessed: the pair back before the first frame
- * that read it, and the frames since run again, unheard, with what is
- * known now; false where the pair could not be (a snapshot or the cable) */
+ * that read it, and the frames since run again with what is known now,
+ * their sound in place of the guess's where it is not yet heard (issue
+ * #167: unheard before, the other's attacks losing their starts); false
+ * where the pair could not be (a snapshot or the cable) */
 static bool roll_back(Arena *a) {
 	uint32_t from = arena_input_wrong(&a->input), until = a->input.next;
 	if (from == ARENA_NO_FRAME) return true;
 	arena_input_rewind(&a->input, from);
 	if (from >= until) return true;
 	if (!a->window || from < a->done || !arena_pair_load(a->pair, a->snap[from % a->window])) return false;
+	/* (the guess's sound from the first frame run again: what is not yet
+	 * heard cut, and what was heard skipped in the sound run again) */
+	arena_pair_mute(a->pair);
+	emu_audio_rewind(a->ran[from % LOG].sound);
 	while (a->input.next < until) {
 		/* (no picture but the last frame's, the one shown) */
 		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << a->link->side : 0);
 		if (!run_frame(a)) return false;
 	}
-	arena_pair_mute(a->pair);
 	++a->rollbacks;
 	a->again += until - from;
 	if (until - from > a->deepest) a->deepest = until - from;

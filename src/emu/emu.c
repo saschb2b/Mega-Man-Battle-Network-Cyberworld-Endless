@@ -42,6 +42,10 @@ static int out_rate = 48000;
 static int16_t ring[RING * 2];
 static int ring_r, ring_w;
 static SDL_mutex *ring_lock;
+/* the ring's place on the sound's timeline (emu_audio_mark): samples written
+ * and played since the start, and those of a rollback's sound still to be
+ * skipped, as they were played already (issue #167) */
+static uint64_t ring_written, ring_played, ring_debt;
 
 static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va_list a) {
 	(void)l; (void)c; (void)lv; (void)f; (void)a;
@@ -151,17 +155,23 @@ static void pull_audio_from(struct mCore *c) {
 		blip_read_samples(r, tmp + 1, got, 1);
 		SDL_LockMutex(ring_lock);
 		for (int i = 0; i < got; ++i) {
+			if (ring_debt) { --ring_debt; continue; }   /* (heard already, before a rollback: emu_audio_rewind) */
 			int next = (ring_w + 1) % RING;
 			if (next == ring_r) break; /* full: drop the rest */
 			ring[ring_w * 2] = tmp[i * 2];
 			ring[ring_w * 2 + 1] = tmp[i * 2 + 1];
 			ring_w = next;
+			++ring_written;
 		}
 		SDL_UnlockMutex(ring_lock);
 	}
 	SDL_LockMutex(ring_lock);
 	int fill = (ring_w - ring_r + RING) % RING;
-	if (fill > LAT_MAX) { ring_r = (ring_w - LAT_TARGET + RING) % RING; fill = LAT_TARGET; }
+	if (fill > LAT_MAX) {
+		ring_played += (uint64_t)(fill - LAT_TARGET);
+		ring_r = (ring_w - LAT_TARGET + RING) % RING;
+		fill = LAT_TARGET;
+	}
 	SDL_UnlockMutex(ring_lock);
 	double adj = 1.0 - 0.02 * (fill - LAT_TARGET) / LAT_TARGET;
 	if (adj < 0.97) adj = 0.97;
@@ -174,6 +184,30 @@ static void pull_audio(void) { pull_audio_from(core); }
 
 void emu_audio_from(void *other) {
 	if (other && ring_lock) pull_audio_from(other);
+}
+
+uint64_t emu_audio_mark(void) {
+	if (!ring_lock) return 0;
+	SDL_LockMutex(ring_lock);
+	uint64_t mark = ring_written;
+	SDL_UnlockMutex(ring_lock);
+	return mark;
+}
+
+void emu_audio_rewind(uint64_t mark) {
+	if (!ring_lock) return;
+	SDL_LockMutex(ring_lock);
+	if (mark >= ring_played && mark < ring_written) {
+		/* (none of it heard yet: cut, the next written in its place) */
+		ring_w = (int)(((uint64_t)ring_w + RING - (ring_written - mark)) % RING);
+		ring_written = mark;
+	} else if (mark < ring_played) {
+		/* (some heard: the rest cut, and as much of the next written skipped) */
+		ring_debt += ring_played - mark;
+		ring_w = ring_r;
+		ring_written = ring_played;
+	}
+	SDL_UnlockMutex(ring_lock);
 }
 
 void emu_audio_drop_from(void *other) {
@@ -306,6 +340,7 @@ int emu_audio_read(int16_t *out, int frames) {
 		ring_r = (ring_r + 1) % RING;
 		++n;
 	}
+	ring_played += (uint64_t)n;
 	if (ring_lock) SDL_UnlockMutex(ring_lock);
 	memset(out + n * 2, 0, (size_t)(frames - n) * 4);
 	return n;

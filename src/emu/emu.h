@@ -52,6 +52,13 @@ const uint32_t *emu_video(void);
 void emu_audio_from(void *core);
 /* ... or its sound let go, for frames run ahead unseen */
 void emu_audio_drop_from(void *core);
+/* The ring's place on the sound's timeline: the samples written into it so
+ * far (issue #167, the Arena's rollback), and the ring cut back to such a
+ * mark: what is not yet played after it replaced by what is written next,
+ * and where some was played already, as much of what is written next
+ * skipped, so that the sound stays on its timeline */
+uint64_t emu_audio_mark(void);
+void emu_audio_rewind(uint64_t mark);
 int emu_audio_out_rate(void);
 /* The ring the sound plays from, made where BN6's core has not made it (the
  * Arena's cores, src/online/arena_pair.c, play through it with none) */
