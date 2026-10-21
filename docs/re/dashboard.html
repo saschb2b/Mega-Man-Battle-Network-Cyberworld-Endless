@@ -115,7 +115,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "Two MegaMen a side",
       "state": "building",
       "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object (him and what he spawns) at BN6's two address routines, kept in two effect slots taken in BN6's own pool. Each partner picks his chips on BN6's own Custom screen, on a plain copy of the pair his own client keeps, from his own deck (dealt by the pair from his side's GBA's random number); only his picks cross, in his stream, and go into his hand on both GBAs at the same iteration. His HP box and the four MegaMen's marks on his seat's screen.",
-      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); his NaviCust's programs and his Cross in his record; the full-rules audit of what is keyed by a side's player (the Souls, BN5's mood, the DarkChips, the chip AI past BN6's AI data, BN5's Navis' targets).",
+      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md), a partner's pick messages and loadout among them; his NaviCust's programs past HP and the buster, and his Cross (BN6's crossing controller crosses each side's player alone); Program Advances and his own hand size in his hand; from the full-rules audit, the Chaos Unison's hooks, BN5's DarkChips' mood rule and a Soul's chip powers by object, BN5's Navis' and chips' targets among four.",
       "updated": "2026-10-22",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side",
       "state_text": "Being built"
@@ -126,6 +126,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-10-22",
       "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "--dev arena2v2: a partner's record takes his loadout's HP and buster (teambuster=N); the full-rules audit of what a partner meets (docs/ONLINE_ARENA.md), DarkInvs left out for a MegaMan without BN5's AI block (src/emu/darkinvs.c) and BN5's green flash counted by a side's player alone (src/emu/xchips_flash.c)."
     },
     {
       "date": "2026-10-21",
