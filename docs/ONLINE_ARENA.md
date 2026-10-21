@@ -2029,6 +2029,61 @@ own client running it from his board would give numbers every client
 must get alike, so they would cross with his loadout), and his Cross
 (below, Not yet).
 
+### What a partner meets under full rules
+
+Every NetBattle runs BN5's installs on both GBAs (the Souls with their
+mood, ColonelSoul's button and the Chaos Unison, DarkInvs's machine,
+BN5's chips and Navis, the green flash), recorded by `xinstall_log.c`
+and hooked on the pair's cores. What of it is keyed by a side's player
+rather than by object, and what a partner meets there (read in the code,
+22 October 2026; none of it seen in a battle yet, since the stood-in
+partners use none of it):
+
+- **Fixed: DarkInvs on a partner.** BN5's chip AI keeps its state past
+  BN6's 0x100 bytes of AI data, so a MegaMan under it needs BN5's 0x140
+  (`RAM_PLAYER_AI`, side 0's player's under the flag). A partner using
+  DarkInvs kept BN6's block, and the chip AI's reset cleared 0x40 bytes
+  from +0xF0, 0x30 of them in the next AI data of BN6's pool. Under the
+  flag a MegaMan whose AI data is not that block is now left out of the
+  chip AI (`darkinvs.c`, `held_short`): his DarkInvs does nothing.
+  (Side 1's player in a 1v1 NetBattle meets the same reset with his AI
+  data moved into side 0's block, read and not seen: left to a task of
+  its own.)
+- **Misbehaves, written down:** the Chaos Unison's hooks
+  (`soulchaos.c`: charge, phase, release, the counter's test) take the
+  side by r5's alliance, so a partner's charge steps his lead's unison
+  and his counter is taken from him (to fix: act for the side's player
+  alone); BN5's DarkChips' mood rule (`soulmood.c`) zeroes his lead's
+  mood and lays the after-effect on his lead (to fix: his NaviStats by
+  object, as BN6's own asks are answered); the green flash's frames
+  (`xchips_flash.c`, a u16 a side) count down once for each MegaMan of
+  the side, twice as fast.
+- **Shares his lead's:** a Soul's chip powers (`soulchips.c`: the
+  charge, the double damage, KnightSoul's guard, ShadowSoul's sword) and
+  his hits' mood by alliance; BN5's Navis and five chips of BN5's
+  (ShadowMan, NumberMan, TomahawkMan, HeatMan's; ZSaber, Katana,
+  MoonBld, CustSwrd, DarkCirc) find their target through BN6's
+  side-player getter (`0x080103BC`), so they only ever take a lead; the
+  Dark Soul's lists are built from the lead's folder (`arena_souls.c`).
+- **Leaves him out:** UNITE, ColonelSoul's button and a Soul's life
+  (`soulunite.c`, `soulcolonel.c`, `soullife.c`: the side's player or
+  this GBA's side), the Souls' form-gated powers (`soulpower.c`,
+  `soulpassive.c`, `soulproxy.c`: his form is never the proxy), a united
+  Soul carried to the other GBA (the lead's alone). His own Custom screen
+  is a plain copy with no hook, so it offers him no UNITE either. BN6's
+  own DarkChips' rule (`darkbn6.c`) is a run's, not on the pair.
+- **A Cross leaves him as he is** (read in bn6f, not seen): BN6's
+  crossing controller (`0x020367F0`, bn6f dword_20367F0 and its modes
+  sub_801486C, sub_80148CC, sub_8014A00) keeps an entry a side (+8 and
+  +0x18: the pending form at +4, the side's player's object at +8) and
+  flags that object alone to cross (its AI data +0x44 bit 0x4000000,
+  sub_802DCDE); his object reads the pending form by its alliance
+  (sub_801595E from sub_8014A38) only once it crosses, which it never
+  does. His own Cross would need an entry of his own, or his object
+  flagged beside his lead's with his own pending record answered by
+  object at `0x0801595E` and the controller's wait (sub_8014A00, both
+  sides' objects done) taught to wait for him.
+
 ### Proved: the partners' own folders and screens
 
 The player's Gregar ROM and Team Colonel's, a fresh data folder each,
@@ -2099,14 +2154,22 @@ the shape for a 2v2 between four games, each running the pair.
 ## Not yet
 
 - Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
-  four streams over the server (designed, the wire unchanged); a
-  partner's own folder, Custom screen and HP box on his own GBA (his
-  hand is dealt his lead's chips); his own loadout in his record (his
-  NaviCust's programs, his Cross); an attack of his seen asking his
-  record by object (built, none asked yet); and the full-rules audit of
-  what is keyed by a side's player: the Souls, BN5's mood, the DarkChips,
-  the chip AI's state past BN6's AI data on a partner, BN5's Navis'
-  targets.
+  four streams over the server (designed, the wire unchanged), a
+  partner's pick messages and his loadout among what crosses; his
+  NaviCust's programs past HP and the buster, and his Cross (his own
+  Crosses on his screen copy's flags, his choice crossing as his picks
+  do, his own pending record answered by object at `0x0801595E`, and
+  BN6's crossing run on his object: none built); his screen's hand size
+  from his own Custom programs (BN6's five, his lead's, for now), a
+  Program Advance and a chip of computed power in his hand (his hand
+  takes a computed chip's power as 0), WhiCapsl's and Uninstll's marks;
+  the screen copy's cost at the later turns (some 20 ms where the first
+  is 0.14); an attack of his seen asking his record by object (built,
+  none asked yet); and from the full-rules audit ([What a partner meets
+  under full rules](#what-a-partner-meets-under-full-rules)) the Chaos
+  Unison's hooks, BN5's DarkChips' mood rule and the green flash's count
+  by object, a Soul's chip powers his own, BN5's Navis' and chips'
+  targets among four.
 - Team NetBattles ([Team NetBattles](#team-netbattles)): teams of three
   (6 of a channel's 8); a heal on a carried HP, which the relay starts
   without (watch whether anchors sweep); partners' fixed phrases to each

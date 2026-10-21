@@ -79,15 +79,21 @@ static HookAct init(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+/* (--dev arena2v2: a MegaMan whose AI data stays BN6's 0x100 bytes, the block taken by side 0's player: a partner, or side
+ * 1's player, is left out of BN5's chip AI, whose state past BN6's 0x100 would land in the next AI data of BN6's pool) */
+static bool held_short(uint32_t me) { return two_a_side && hook_read32(me + BN6_T1_AI_DATA) != RAM_PLAYER_AI; }
+
 /* BN5's 0x0802C03E: the chip AI's state cleared */
 static void reset(uint32_t me) {
 	adopt(me);
+	if (held_short(me)) return;
 	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
 	for (uint32_t k = 0; k < 0x40; k += 4) hook_write32(ai + BN5_CHIP_AI_STATE + k, 0);
 }
 
 void darkinvs_enter(uint32_t me, uint16_t frames) {
 	reset(me);
+	if (held_short(me)) return;
 	/* (BN5's 0x0802C114 with the time: under way, the time, the flag) */
 	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
 	hook_write16(ai + BN5_AI_UNDER_TIME, frames);

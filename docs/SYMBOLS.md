@@ -87,8 +87,8 @@ how to verify it.
 | Fields of structures | 146 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 85 | 14 |
-| Constants, sizes and counts | 321 | 74 |
-| All | 1556 | 748 |
+| Constants, sizes and counts | 324 | 74 |
+| All | 1559 | 748 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
@@ -101,7 +101,7 @@ how to verify it.
 | Sound | 10 | 2 |
 | Maps and the overworld | 119 | 20 |
 | Events and progress | 36 | 12 |
-| Engine core | 516 | 227 |
+| Engine core | 519 | 227 |
 
 <!-- end of what tools/symbols.py writes -->
 
