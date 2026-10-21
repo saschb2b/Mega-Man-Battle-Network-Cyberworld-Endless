@@ -1960,7 +1960,7 @@ ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
   (`BN6_BATTLE_STEP`): the next frame BN6 sets its Custom screen up anew
   from his deck (bn6f sub_8026840: his hand dealt, its icons loaded) and
   runs it on his keys, by its own rules (the same code or the same chip,
-  five at most, Atk+ chips, the emblem); the other GBA there holds still
+  five at most, Atk+ chips); the other GBA there holds still
   at its own. His client shows that copy's picture while his side's
   GBA's screen is open, the battle behind it the battle's own as the turn
   began.
@@ -2112,9 +2112,13 @@ last hash `86d2f837337a1494`.
 
 His client's screen: a frame 1.3 to 1.5 ms (the worst 2.1); the pair's
 copy into it 0.14 ms at the first turn and some 20 ms at the later ones
-(the worst 31: a frame or two of his own screen held as a turn begins,
-not yet looked into); made once at the first turn, some 155 ms (the
-battle's worst tick then, 3 past a 60th in a battle).
+(the worst 31: a frame or two of his own screen held as a turn begins).
+Timed apart: the pair's save 0.05 to 0.08 ms every turn, its load into
+the copy 0.08 ms at the first and 17 to 19 ms at the later ones, inside
+mGBA's state load (not yet looked into). Made once at the first turn,
+some 155 ms (the battle's worst tick then, 3 past a 60th in a battle).
+His screen offers no Cross and no Beast Out (their flags cleared on the
+copy's GBA), since his own Cross is not built.
 
 Captured (`teamseat=2` and `3`, the pictures kept out of the
 repository): BN6's own Custom screen on each partner's client with his

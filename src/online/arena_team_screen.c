@@ -13,7 +13,8 @@
 #include "bn6.h"
 #include "emu.h"
 
-#define NONE16 0xFFFFu
+#define NONE16  0xFFFFu
+#define CROSSES 5   /* Gregar's, their flags from BN6_FLAG_HEAT_CROSS on */
 
 struct TeamScreen {
 	ArenaPair *pair;         /* the plain copy, both GBAs on their own cable */
@@ -59,6 +60,12 @@ bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsi
 	if (!arena_pair_save(pair, s->snap) || !arena_pair_load(s->pair, s->snap)) return false;
 	struct mCore *c = arena_pair_core(s->pair, s->side);
 	for (unsigned i = 0; i < BN6_DECK_SIZE; ++i) c->rawWrite16(c, BN6_BATTLE_DECK + 2 * i, -1, (uint16_t)(i < n ? deck[i] : NONE16));
+	/* (his lead's Crosses and Beast Out off there: his own Cross is not his yet, so his screen offers none) */
+	for (unsigned f = BN6_FLAG_BEAST_OUT; f < BN6_FLAG_HEAT_CROSS + CROSSES; ++f) {
+		uint32_t at = BN6_EVENT_FLAGS + f / 8;
+		if (f == BN6_FLAG_BEAST_OUT || f >= BN6_FLAG_HEAT_CROSS)
+			c->rawWrite8(c, at, -1, (uint8_t)(c->rawRead8(c, at, -1) & ~(0x80u >> (f & 7))));
+	}
 	/* (the Custom screen's phase at its first step: BN6 sets the screen up anew the next frame, its hand dealt from the deck) */
 	c->rawWrite8(c, BN6_BATTLE_STEP, -1, 0);
 	arena_pair_anchor(s->pair);
