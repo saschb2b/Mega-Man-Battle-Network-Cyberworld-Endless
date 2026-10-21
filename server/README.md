@@ -344,7 +344,7 @@ published:
 4. **Redeploy**, and wait until both containers are healthy.
 5. `curl -s https://cyberworld.saschb2b.com/health`: `"status":"ok"`,
    `"protocol"` the release's (`version` in
-   [`shared/online/protocol.json`](../shared/online/protocol.json): 9
+   [`shared/online/protocol.json`](../shared/online/protocol.json): 10
    for 0.13.0), `"trading":true` and `"arena":true`.
 6. A game of the release through the gate into the Square; `/health`
    counts it in `"players"`.
@@ -709,5 +709,5 @@ and system libraries can change, so native outputs are not promised to be
 byte-identical across runner updates. Release checksums cover every archive.
 
 Keep the shared protocol in the same release as the game; a game of
-one protocol version cannot enter a server of another (v8 games and a v9
+one protocol version cannot enter a server of another (v9 games and a v10
 server refuse each other). Preserve the private state directory when upgrading.
