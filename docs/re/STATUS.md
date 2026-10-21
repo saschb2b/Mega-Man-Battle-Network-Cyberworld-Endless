@@ -1,20 +1,17 @@
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 18 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
+Updated 21 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
 | [Net Square](../ONLINE.md) | Works, being reworked | Presence works: the server, the transports on every system, and a prototype Square where other players walk as NPCs. | Move the way in to a gate in Lan's HP, rebuild the Square from BN6's own pieces, and make the people in it talkable. | 18 Oct 2026 |
 | Trade | Designed, not built | Designed: counters at Trade Central in the Square, the server commits a trade, and the swap is applied after the visit returns, with BN6's own give and take chips. | All of it: the counters, the server's commit, the swap in the live game, and a pending file that holds CONTINUE until the trade settles. | 18 Oct 2026 |
 | [Arena](../ONLINE_ARENA.md) | Proven in research, not built | NetBattles from the Net Square between two games, each running both linked cores, only keys crossing the server, the pair hashed every 60 frames. Full rules for two games with BN5's ROM: BN5's installs written down as the game's core makes them and made again in both pair cores, BN5's chips and Souls carried; UNITE's Soul carried to the other GBA by the pair. Proven on two clients: MrkCan1 and KnightSoul on both screens with every hash agreeing. | The other five Souls, Chaos Unison, ColonelSoul's button and BN5's mood in a NetBattle seen on both GBAs; a marker that wanders against a moving target checked against BN5; rollback. | 18 Oct 2026 |
+| [Two MegaMen a side](../ONLINE_ARENA.md#two-megamen-a-side) | Being built | Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each MegaMan's HP is his own object's. | The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); the partner's own NaviStats (RAM for two records not yet found free), his own hand and Custom screen, his HP label on his own GBA. | 21 Oct 2026 |
 
-## Since the last update (17 Oct 2026)
+## Since the last update (18 Oct 2026)
 
-- 18 Oct 2026: The trade machinery and the save gate it put on every run came out of the game; Trade starts again from its design.
-- 18 Oct 2026: The Arena research was trimmed to what the production Arena builds on: the linked pair, the input wire, the Practice script and the pair's snapshot. `build.py online-pair` runs them.
-- 18 Oct 2026: The link cable's findings are one page, docs/ONLINE_LINK.md.
-- 18 Oct 2026: This status is written by tools/re_status.py from docs/re/ledger.json.
-- 18 Oct 2026: Full rules: the Arena's pair holds BN5's installs (src/emu/xinstall_log.c) and carries a united Soul to the other GBA (src/online/arena_souls.c).
+- 21 Oct 2026: --dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c).
 
 ## Experiments
 
@@ -23,6 +20,7 @@ One line each, newest first; each stands on its own.
 | Date | Feature | Experiment | Result | What it means |
 | --- | --- | --- | --- | --- |
 | 21 Oct 2026 | Arena | [Two MegaMen a side (epic #167's spike)](../ONLINE_ARENA.md#two-megamen-a-side) | With a side's second MegaMan's keys written at the battle loop's key copy (0x08012DFC) by the loop's iteration, both GBAs' battles agree at every iteration: the research harness over a whole battle (every T1, T3 and T4 object, AI data, NaviStats, hand and random number compared; nothing apart beyond BN6's own 1v1's fields) and the pair under --dev rollbench,arena2v2 (489 iterations, 0 apart, 11 rollbacks the same); one key flipped on one GBA parts them (325 apart). The feasibility study's one-frame skew was its harness: every mode it ran was mode 1, which scheduled the partner by each core's own frame counter, a frame or two apart at the same iteration. | BN6's engine runs two MegaMen a side alike on both GBAs; a partner's keys must enter by the battle's iteration. Under full rules BN5's chip AI gave both of side 0's MegaMen one AI data block, which the flag keeps to the first. |
+| 21 Oct 2026 | Arena | [Two MegaMen a side: the partners as streams](../ONLINE_ARENA.md#four-streams) | --dev arena,arenaboth,arena2v2=1 at delay 1: with 107 rollbacks (lag 4, window 8) and with none (lag 0) the battle ends at frame 2690 with all 44 hashes the same; the GBAs agree at all 2,399 iterations, 0 of the partners' takes late; arenaroll=8 rolls back 335 times, the game's state the same each time, its 44 hashes the delay alone's; a key flipped on the second GBA at iteration 300 parts the GBAs at 2,100 iterations. A NetBattle without the flag ends as before (frame 2690, 86d2f837337a1494). | A partner's keys can cross a network as a stream of their own and enter BN6 at the battle's iteration on both GBAs; rollback covers them since the rings are core RAM. |
 | 18 Oct 2026 | Arena | [Inputs only, two cores per client](../ONLINE_LINK.md) | Completes at 0, 50, 100 and 150 ms one-way delay, every battle timer as the original; a flipped input and a killed peer both stop the fight. | The Arena's design: each client runs both games, only inputs travel. |
 | 18 Oct 2026 | Arena | [Snapshot of the pair](../ONLINE_LINK.md) | Restored at six points and replayed 1, 4 and 8 frames, twice each: every replay exact; 863,016 bytes, 1.2 ms a restore on the desktop. | Rollback is possible, but only with more than mGBA's own state save. |
 | 18 Oct 2026 | Arena | [A carried chip in the pair](../ONLINE_LINK.md) | Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice. | A run's chip fights natively; the installer for a whole loadout is still to build. |

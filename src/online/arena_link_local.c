@@ -14,15 +14,17 @@ static bool local_send(ArenaLink *link, uint32_t frame, uint16_t keys) {
 	return true;
 }
 
-static bool local_poll(ArenaLink *link, uint32_t frame, uint16_t *keys) {
+static bool local_poll_player(ArenaLink *link, unsigned player, uint32_t frame, uint16_t *keys) {
 	ArenaLocalLink *l = of(link);
-	if (l->head == l->tail) return false;
-	uint32_t i = l->head & (ARENA_LOCAL_QUEUE - 1);
-	if (l->queue[i].at > l->now || l->queue[i].frame != frame) return false;
-	*keys = l->queue[i].keys;
-	++l->head;
+	if (player >= ARENA_PLAYERS || l->head[player] == l->tail[player]) return false;
+	uint32_t i = l->head[player] & (ARENA_LOCAL_QUEUE - 1);
+	if (l->queue[player][i].at > l->now || l->queue[player][i].frame != frame) return false;
+	*keys = l->queue[player][i].keys;
+	++l->head[player];
 	return true;
 }
+
+static bool local_poll(ArenaLink *link, uint32_t frame, uint16_t *keys) { return local_poll_player(link, 1, frame, keys); }
 
 static void local_send_hash(ArenaLink *link, uint32_t frame, uint64_t hash) {
 	ArenaLocalLink *l = of(link);
@@ -43,18 +45,24 @@ static bool local_poll_hash(ArenaLink *link, uint32_t frame, uint64_t *hash) {
 	return false;
 }
 
-/* tick `now` begun: the peer samples its keys for frame now + delay, and
- * they set out, there from tick now + latency on */
+/* a remote player's keys for `frame` set out, there from tick now + latency on */
+static void local_queue(ArenaLocalLink *l, unsigned player, uint32_t frame, uint16_t keys) {
+	if (l->tail[player] - l->head[player] >= ARENA_LOCAL_QUEUE) { l->lost = true; return; }
+	uint32_t i = l->tail[player]++ & (ARENA_LOCAL_QUEUE - 1);
+	l->queue[player][i].at = l->now + l->latency;
+	l->queue[player][i].frame = frame;
+	l->queue[player][i].keys = keys & ARENA_KEYS_MASK;
+}
+
+/* tick `now` begun: the peer (and the partners, where they play) sample
+ * their keys for frame now + delay, and they set out */
 static void local_tick(ArenaLink *link) {
 	ArenaLocalLink *l = of(link);
 	if (l->started) ++l->now;
 	l->started = true;
-	if (l->tail - l->head >= ARENA_LOCAL_QUEUE) { l->lost = true; return; }
 	uint32_t frame = l->now + l->link.delay;
-	uint32_t i = l->tail++ & (ARENA_LOCAL_QUEUE - 1);
-	l->queue[i].at = l->now + l->latency;
-	l->queue[i].frame = frame;
-	l->queue[i].keys = l->peer ? (uint16_t)(l->peer(l->peer_context, frame) & ARENA_KEYS_MASK) : 0;
+	local_queue(l, 1, frame, l->peer ? l->peer(l->peer_context, frame) : 0);
+	for (unsigned p = 2; l->partners && p < ARENA_PLAYERS; ++p) local_queue(l, p, frame, l->partners(l->partners_context, p, frame));
 }
 
 static const char *local_broken(ArenaLink *link) {
@@ -68,9 +76,15 @@ ArenaLink *arena_link_local(ArenaLocalLink *l, unsigned delay, unsigned latency,
 	if (delay < ARENA_DELAY_MIN) delay = ARENA_DELAY_MIN;
 	if (delay > ARENA_DELAY_MAX) delay = ARENA_DELAY_MAX;
 	l->link = (ArenaLink){ local_send, local_poll, local_send_hash, local_poll_hash, local_tick, local_broken, local_close, 0, delay };
+	l->link.poll_player = local_poll_player;
 	l->latency = latency;
 	l->peer = peer;
 	l->peer_context = context;
 	l->sent = delay;
 	return &l->link;
+}
+
+void arena_link_local_partners(ArenaLocalLink *l, ArenaPartnerKeys partners, void *context) {
+	l->partners = partners;
+	l->partners_context = context;
 }

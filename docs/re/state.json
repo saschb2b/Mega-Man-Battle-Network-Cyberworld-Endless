@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-18",
-  "previous": "2026-10-17",
+  "updated": "2026-10-21",
+  "previous": "2026-10-18",
   "features": [
     {
       "name": "Net Square",
@@ -31,29 +31,22 @@
       "updated": "2026-10-18",
       "link": "../ONLINE_ARENA.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "Two MegaMen a side",
+      "state": "building",
+      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each MegaMan's HP is his own object's.",
+      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); the partner's own NaviStats (RAM for two records not yet found free), his own hand and Custom screen, his HP label on his own GBA.",
+      "updated": "2026-10-21",
+      "link": "../ONLINE_ARENA.md#two-megamen-a-side",
+      "state_text": "Being built"
     }
   ],
   "decisions": [],
   "since": [
     {
-      "date": "2026-10-18",
-      "what": "The trade machinery and the save gate it put on every run came out of the game; Trade starts again from its design."
-    },
-    {
-      "date": "2026-10-18",
-      "what": "The Arena research was trimmed to what the production Arena builds on: the linked pair, the input wire, the Practice script and the pair's snapshot. `build.py online-pair` runs them."
-    },
-    {
-      "date": "2026-10-18",
-      "what": "The link cable's findings are one page, docs/ONLINE_LINK.md."
-    },
-    {
-      "date": "2026-10-18",
-      "what": "This status is written by tools/re_status.py from docs/re/ledger.json."
-    },
-    {
-      "date": "2026-10-18",
-      "what": "Full rules: the Arena's pair holds BN5's installs (src/emu/xinstall_log.c) and carries a united Soul to the other GBA (src/online/arena_souls.c)."
+      "date": "2026-10-21",
+      "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
     }
   ],
   "experiments": [
@@ -64,6 +57,14 @@
       "result": "With a side's second MegaMan's keys written at the battle loop's key copy (0x08012DFC) by the loop's iteration, both GBAs' battles agree at every iteration: the research harness over a whole battle (every T1, T3 and T4 object, AI data, NaviStats, hand and random number compared; nothing apart beyond BN6's own 1v1's fields) and the pair under --dev rollbench,arena2v2 (489 iterations, 0 apart, 11 rollbacks the same); one key flipped on one GBA parts them (325 apart). The feasibility study's one-frame skew was its harness: every mode it ran was mode 1, which scheduled the partner by each core's own frame counter, a frame or two apart at the same iteration.",
       "meaning": "BN6's engine runs two MegaMen a side alike on both GBAs; a partner's keys must enter by the battle's iteration. Under full rules BN5's chip AI gave both of side 0's MegaMen one AI data block, which the flag keeps to the first.",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-21",
+      "name": "Two MegaMen a side: the partners as streams",
+      "result": "--dev arena,arenaboth,arena2v2=1 at delay 1: with 107 rollbacks (lag 4, window 8) and with none (lag 0) the battle ends at frame 2690 with all 44 hashes the same; the GBAs agree at all 2,399 iterations, 0 of the partners' takes late; arenaroll=8 rolls back 335 times, the game's state the same each time, its 44 hashes the delay alone's; a key flipped on the second GBA at iteration 300 parts the GBAs at 2,100 iterations. A NetBattle without the flag ends as before (frame 2690, 86d2f837337a1494).",
+      "meaning": "A partner's keys can cross a network as a stream of their own and enter BN6 at the battle's iteration on both GBAs; rollback covers them since the rings are core RAM.",
+      "link": "../ONLINE_ARENA.md#four-streams"
     },
     {
       "feature": "Arena",

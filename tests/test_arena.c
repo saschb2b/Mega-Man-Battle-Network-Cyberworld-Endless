@@ -30,7 +30,7 @@ static void buffer(void) {
 	arena_input_init(&in, 6);
 	/* the first D frames released on both sides: frame 0 needs 0 and 1, known */
 	assert(arena_input_ready(&in, 0));
-	uint16_t keys[ARENA_LOOKAHEAD][2];
+	uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	for (unsigned f = 0; f < 5; ++f) assert(arena_input_take(&in, 0, keys) && keys[0][0] == 0 && keys[1][1] == 0);
 	assert(!arena_input_ready(&in, 0) && !arena_input_take(&in, 0, keys));
 	/* each stream in order: a resent frame left alone, a gap refused */
@@ -54,7 +54,7 @@ static void buffer(void) {
 static void guesses(void) {
 	ArenaInput in;
 	arena_input_init(&in, 1);
-	uint16_t keys[ARENA_LOOKAHEAD][2];
+	uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	/* frame 0 needs frame 1's keys: mine sampled, his not yet come */
 	assert(arena_input_put(&in, 0, 1, 5) == ARENA_PUT_OK);
 	assert(!arena_input_ready(&in, 0) && arena_input_ready(&in, 3));
@@ -74,6 +74,58 @@ static void guesses(void) {
 	assert(arena_input_take(&in, 3, keys) && keys[1][0] == 7 && keys[1][1] == 9 && in.next == 3);
 	/* his frame 3 as the new guess: nothing wrong */
 	assert(arena_input_put(&in, 1, 3, 9) == ARENA_PUT_OK && arena_input_wrong(&in) == ARENA_NO_FRAME && arena_input_settled(&in) == 3);
+}
+
+/* Four streams (--dev arena2v2: each side's partner, players 2 and 3):
+ * a frame settles once every stream is known for it and the one after,
+ * the partners' guessed and rolled back as the other player's are; two
+ * streams leave the partners' columns released */
+static void four_streams(void) {
+	ArenaInput in;
+	uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
+	arena_input_init(&in, 1);
+	assert(in.players == 2 && arena_input_put(&in, 2, 1, 1) == ARENA_PUT_GAP);
+	arena_input_players(&in, 9);
+	assert(in.players == ARENA_PLAYERS && arena_input_put(&in, 4, 1, 1) == ARENA_PUT_GAP);
+	/* frame 0 runs on guesses: frame 1's keys mine alone */
+	assert(arena_input_put(&in, 0, 1, 5) == ARENA_PUT_OK && !arena_input_ready(&in, 0) && arena_input_take(&in, 2, keys));
+	assert(keys[1][0] == 5 && keys[1][1] == 0 && keys[1][2] == 0 && keys[1][3] == 0);
+	/* the peer's and one partner's frame 1 as guessed: still not settled, the other partner's not in */
+	assert(arena_input_put(&in, 1, 1, 0) == ARENA_PUT_OK && arena_input_put(&in, 2, 1, 0) == ARENA_PUT_OK);
+	assert(arena_input_settled(&in) == 0 && arena_input_wrong(&in) == ARENA_NO_FRAME);
+	/* side 1's partner's frame 1 otherwise than guessed: back to frame 0, then settled */
+	assert(arena_input_put(&in, 3, 1, 0x002) == ARENA_PUT_OK && arena_input_wrong(&in) == 0 && arena_input_settled(&in) == 1);
+	arena_input_rewind(&in, arena_input_wrong(&in));
+	assert(in.next == 0 && arena_input_take(&in, 2, keys) && keys[1][3] == 0x002 && keys[1][0] == 5);
+	/* frame 1 on a guess: side 1's partner held, side 0's released */
+	assert(arena_input_take(&in, 2, keys) && keys[1][3] == 0x002 && keys[1][2] == 0 && in.next == 2);
+	/* two streams: the partners' columns released whatever the ring held */
+	arena_input_init(&in, 1);
+	in.keys[1][2] = in.keys[1][3] = 0x123;
+	assert(arena_input_take(&in, 1, keys) && keys[1][2] == 0 && keys[1][3] == 0);
+}
+
+/* The local link with the partners on it: each stream after the latency,
+ * by the frame as the peer's; without them, poll_player finds none */
+static uint16_t partner_script(void *context, unsigned player, uint32_t frame) {
+	(void)context;
+	return (uint16_t)(frame * player);
+}
+
+static void local_partners(void) {
+	ArenaLocalLink local;
+	ArenaLink *link = arena_link_local(&local, 2, 1, NULL, NULL);
+	uint16_t keys;
+	link->tick(link);
+	link->tick(link);   /* (tick 1: tick 0's messages there) */
+	assert(link->poll(link, 2, &keys) && !link->poll_player(link, 2, 2, &keys));
+	link = arena_link_local(&local, 2, 1, NULL, NULL);
+	arena_link_local_partners(&local, partner_script, NULL);
+	link->tick(link);
+	assert(!link->poll_player(link, 2, 2, &keys));
+	link->tick(link);
+	assert(link->poll_player(link, 2, 2, &keys) && keys == 4 && link->poll_player(link, 3, 2, &keys) && keys == 6);
+	assert(!link->poll_player(link, 3, 3, &keys) && link->poll(link, 2, &keys) && keys == 0 && !link->broken(link));
 }
 
 static uint16_t counting_peer(void *context, uint32_t frame) {
@@ -101,7 +153,7 @@ static unsigned play(unsigned delay, unsigned latency, unsigned ticks, unsigned 
 		}
 		assert(!link->broken(link));
 		/* (as arena_tick: frame N due at tick N) */
-		uint16_t frame_keys[ARENA_LOOKAHEAD][2];
+		uint16_t frame_keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 		if (in.next <= t && !arena_input_ready(&in, 0)) ++stalls;
 		for (unsigned k = 0; k < 2 && in.next <= t && arena_input_take(&in, 0, frame_keys); ++k) {
 			uint32_t n = in.next - 1;
@@ -355,7 +407,7 @@ static bool side_tick(ArenaNetLink *net, ArenaInput *in, unsigned side, uint32_t
 	uint16_t keys;
 	while (l->poll(l, in->known[side ^ 1], &keys)) assert(arena_input_put(in, side ^ 1, in->known[side ^ 1], keys) == ARENA_PUT_OK);
 	assert(!l->broken(l));
-	uint16_t frame_keys[ARENA_LOOKAHEAD][2];
+	uint16_t frame_keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	bool stalled = in->next <= t && !arena_input_ready(in, 0);
 	for (unsigned k = 0; k < 2 && in->next <= t && arena_input_take(in, 0, frame_keys); ++k) {
 		uint32_t n = in->next - 1;
@@ -694,6 +746,8 @@ int main(void) {
 	formats();
 	buffer();
 	guesses();
+	four_streams();
+	local_partners();
 	link_latency();
 	check();
 	install();

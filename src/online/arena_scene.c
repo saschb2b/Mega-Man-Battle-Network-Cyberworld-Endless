@@ -17,8 +17,8 @@
 #include "arena_folder.h"
 #include "arena_format.h"
 #include "arena_report.h"
+#include "arena_team.h"
 #include "arena_view.h"
-#include "arena_pair.h"
 #include "arena_text.h"
 #include "game.h"
 #include "audio.h"
@@ -76,6 +76,12 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 	return t >= 100 && t < 104 ? KEY_A : 0;
 }
 
+/* --dev arena2v2's partners, players 2 and 3: arena_team's script, by the frame's number alone */
+static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
+	(void)context;
+	return arena_team_script(player, frame);
+}
+
 /* the player's buttons as the GBA's keys, bit for bit */
 static uint16_t pad_keys(void) {
 	static uint32_t tick;
@@ -104,6 +110,8 @@ static void enter(void) {
 	unsigned delay = dev.arena_delay > 0 ? (unsigned)dev.arena_delay : DELAY_DEFAULT;
 	unsigned lag = dev.arena_lag >= 0 ? (unsigned)dev.arena_lag : LAG_DEFAULT;
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
+	/* (--dev arena2v2: both partners on the local link too, a stream each) */
+	if (dev.arena_2v2 > 0) arena_link_local_partners(&S.local, partner_keys, NULL);
 	/* (the run's MegaMan from its checkpoint where there is one; the
 	 * second player the game's start's) */
 	installs();
@@ -125,6 +133,7 @@ static void enter(void) {
 	if (S.arena) arena_rtt(S.arena, lag * 2 * 1000 / 60);
 	if (S.arena && dev.arena_roll >= 0) arena_rollback(S.arena, dev.arena_roll);
 	if (S.arena) arena_window(S.arena, dev.arena_window);
+	if (S.arena && dev.arena_2v2 > 0) arena_players(S.arena, ARENA_PLAYERS);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 	/* (the way in's panel opened as the Square's opens) */
@@ -165,6 +174,8 @@ static void update(void) {
 		arena_sound(S.arena);
 		arena_report_frame(S.arena);
 		if (arena_stage(S.arena) == ARENA_OVER) arena_report_end(arena_result(S.arena));
+		/* (--dev arena2v2: the two GBAs' battles compared, iteration by iteration) */
+		if (arena_stage(S.arena) != ARENA_BATTLE && dev.arena_2v2 > 0) arena_team_report();
 		break;
 	case ARENA_OVER:
 		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();

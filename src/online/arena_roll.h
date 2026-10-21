@@ -22,8 +22,10 @@ typedef struct ArenaRoll ArenaRoll;
 ArenaRoll *arena_roll_new(ArenaPair *pair, unsigned window);
 /* its count said (the rollbacks, and those that came back to the same game state), and let go */
 void arena_roll_free(ArenaRoll *roll);
-/* frame `frame` of the pair about to run with `keys`: its snapshot and keys kept */
-bool arena_roll_before(ArenaRoll *roll, uint32_t frame, const uint16_t keys[ARENA_LOOKAHEAD][2]);
+/* ... said alone, once (the battle over, the game ending before it is let go: quitend) */
+void arena_roll_say(ArenaRoll *roll);
+/* frame `frame` of the pair about to run with `keys` (every stream's): its snapshot and keys kept */
+bool arena_roll_before(ArenaRoll *roll, uint32_t frame, const uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS]);
 /* ... and run: every `window` frames those rolled back and run again; false where the cable stuck */
 bool arena_roll_after(ArenaRoll *roll, uint32_t frame);
 

@@ -61,7 +61,7 @@ static struct {
 	ArenaPair *pair;
 
 	ArenaPairSnap *ring[DEPTH], *straight, *again;
-	uint16_t keys[DEPTH][ARENA_LOOKAHEAD][2];
+	uint16_t keys[DEPTH][ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	Stat save, load, step, back, resim, both;   /* (step: my GBA's picture drawn, as a battle; resim: none, a frame run again) */
 	double menus, menus_worst;   /* the way in's frames of the pair, timed (arena_boot_frame_ms) */
 	unsigned checks, agreed, game;
@@ -157,11 +157,15 @@ static uint16_t script(unsigned side, uint32_t frame, unsigned phase) {
 	return moves[(x * 2246822519u) >> 29];
 }
 
-static void pair_keys(uint32_t frame, uint16_t keys[ARENA_LOOKAHEAD][2]) {
+/* (--dev arena2v2: the partners' streams too, arena_team's script) */
+static void pair_keys(uint32_t frame, uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS]) {
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = arena_pair_core(B.pair, side);
 		unsigned phase = c->rawRead8(c, BN6_BATTLE_PHASE, -1);
-		for (unsigned k = 0; k < ARENA_LOOKAHEAD; ++k) keys[k][side] = script(side, frame + k, phase);
+		for (unsigned k = 0; k < ARENA_LOOKAHEAD; ++k) {
+			keys[k][side] = script(side, frame + k, phase);
+			keys[k][2 + side] = dev.arena_2v2 > 0 ? arena_team_script(2 + side, frame + k) : 0;
+		}
 	}
 }
 
@@ -186,7 +190,7 @@ static void pair_rollback(void) {
 		arena_pair_draw(B.pair, f == B.frame ? 1 : 0);
 		arena_pair_save(B.pair, B.ring[f % DEPTH]);
 		uint64_t one = now();
-		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])B.keys[f % DEPTH], true)) { B.why = "the cable stuck"; return; }
+		if (!arena_pair_step_all(B.pair, (const uint16_t (*)[ARENA_PLAYERS])B.keys[f % DEPTH])) { B.why = "the cable stuck"; return; }
 		if (f != B.frame) count(&B.resim, one);
 	}
 	count(&B.back, t);
@@ -199,13 +203,13 @@ static void pair_rollback(void) {
 static void pair_frames(unsigned n) {
 	for (unsigned i = 0; i < n && B.frame < PAIR_FRAMES && !B.why; ++i, ++B.frame) {
 		ArenaPairSnap *snap = B.ring[B.frame % DEPTH];
-		uint16_t (*keys)[2] = B.keys[B.frame % DEPTH];
+		uint16_t (*keys)[ARENA_PLAYERS] = B.keys[B.frame % DEPTH];
 		pair_keys(B.frame, keys);
 		uint64_t t = now();
 		if (!arena_pair_save(B.pair, snap)) { B.why = "the pair gave no snapshot"; return; }
 		count(&B.save, t);
 		t = now();
-		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])keys, true)) { B.why = "the cable stuck"; return; }
+		if (!arena_pair_step_all(B.pair, (const uint16_t (*)[ARENA_PLAYERS])keys)) { B.why = "the cable stuck"; return; }
 		count(&B.step, t);
 		/* (the frames between two rollbacks run straight, no load among them: what a rollback must come back to) */
 		if (B.frame >= DEPTH && B.frame % CHECK_EVERY == 0) pair_rollback();
@@ -214,10 +218,10 @@ static void pair_frames(unsigned n) {
 	if (B.frame < PAIR_FRAMES || B.why) return;
 	arena_pair_draw(B.pair, 3);
 	for (unsigned i = 0; i < BOTH && !B.why; ++i) {
-		uint16_t keys[ARENA_LOOKAHEAD][2];
+		uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 		pair_keys(B.frame + i, keys);
 		uint64_t t = now();
-		if (!arena_pair_step(B.pair, (const uint16_t (*)[2])keys, true)) B.why = "the cable stuck";
+		if (!arena_pair_step_all(B.pair, (const uint16_t (*)[ARENA_PLAYERS])keys)) B.why = "the cable stuck";
 		count(&B.both, t);
 	}
 	for (unsigned i = 0; !B.why && i < LOADS; ++i) {

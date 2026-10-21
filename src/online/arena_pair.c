@@ -67,6 +67,12 @@ struct ArenaPair {
 	uint8_t *scratch;              /* a core's raw state, for the hash */
 	size_t scratch_size;
 	ArenaSoulCarried carried[2];   /* (the Souls carried across, arena_souls.h) */
+	/* --dev arena2v2 (arena_team.h): each side's partner's keys for the
+	 * pair's frame and the one after it, and the frame of each core whose
+	 * partner's keys were last sampled */
+	bool team;
+	uint16_t partner[ARENA_LOOKAHEAD][2];
+	unsigned sampled[2];
 };
 
 /* A core's ROM copy: its bytes, BN5's installed in them where `bn5` */
@@ -243,6 +249,7 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	}
 	if (!ok) { arena_pair_close(p); return NULL; }
 	p->drawn = 3;
+	p->team = dev.arena_2v2 > 0;
 	arena_pair_anchor(p);
 	return p;
 }
@@ -288,6 +295,19 @@ static int next_side(const ArenaPair *p, const unsigned ahead[2], bool own_clock
 	return -1;
 }
 
+/* --dev arena2v2: a core in a frame of its own clock it has not yet run
+ * in samples its side's partner's keys for that frame, as a GBA's pad is
+ * read in each of its frames; queued in both cores by its battle's
+ * iteration (arena_team_sample). A core already as far ahead as the keys
+ * go samples once the next frame of the pair gives it its own. */
+static void sample_partner(ArenaPair *p, unsigned side, unsigned ahead) {
+	struct mCore *c = p->core[side];
+	unsigned frame = c->frameCounter(c);
+	if (!p->team || ahead >= ARENA_LOOKAHEAD || frame == p->sampled[side]) return;
+	p->sampled[side] = frame;
+	arena_team_sample(p->core, side, p->partner[ahead][side]);
+}
+
 bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock) {
 	unsigned target[2];
 	for (unsigned side = 0; side < 2; ++side) {
@@ -305,6 +325,7 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 		struct mCore *c = p->core[side];
 		/* (a core past the pair's frame takes its own frame's keys: a frame begins in an event, where a run loop ends) */
 		if (own_clock) c->setKeys(c, keys[ahead[side] < ARENA_LOOKAHEAD ? ahead[side] : ARENA_LOOKAHEAD - 1][side]);
+		if (own_clock) sample_partner(p, (unsigned)side, ahead[side]);
 		p->running = side;
 		enum mLockstepPhase phase = p->cable.d.transferActive;
 		c->runLoop(c);
@@ -316,6 +337,16 @@ bool arena_pair_step(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][2], bool
 		}
 	}
 	return false;
+}
+
+bool arena_pair_step_all(ArenaPair *p, const uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS]) {
+	uint16_t pads[ARENA_LOOKAHEAD][2];
+	for (unsigned k = 0; k < ARENA_LOOKAHEAD; ++k)
+		for (unsigned side = 0; side < 2; ++side) {
+			pads[k][side] = keys[k][side];
+			p->partner[k][side] = keys[k][2 + side];
+		}
+	return arena_pair_step(p, (const uint16_t (*)[2])pads, true);
 }
 
 static void hash_bytes(uint64_t *hash, const void *data, size_t size) {
@@ -448,6 +479,7 @@ struct ArenaPairSnap {
 	unsigned waiting, asleep, transfers, start[2], relative;
 	int running;
 	ArenaSoulCarried carried[2];
+	unsigned sampled[2];   /* (--dev arena2v2's partners' sampling) */
 };
 
 ArenaPairSnap *arena_pair_snap_new(ArenaPair *p) {
@@ -496,6 +528,7 @@ bool arena_pair_save(ArenaPair *p, ArenaPairSnap *s) {
 	memcpy(s->start, p->start, sizeof s->start);
 	s->relative = p->relative;
 	memcpy(s->carried, p->carried, sizeof s->carried);
+	memcpy(s->sampled, p->sampled, sizeof s->sampled);
 	return true;
 }
 
@@ -536,6 +569,7 @@ bool arena_pair_load(ArenaPair *p, const ArenaPairSnap *s) {
 	memcpy(p->start, s->start, sizeof p->start);
 	p->relative = s->relative;
 	memcpy(p->carried, s->carried, sizeof p->carried);
+	memcpy(p->sampled, s->sampled, sizeof p->sampled);
 	return true;
 }
 

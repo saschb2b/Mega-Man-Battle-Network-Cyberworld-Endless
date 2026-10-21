@@ -76,6 +76,7 @@ struct Arena {
 	uint32_t idle;             /* ... the same for this many ticks: a hold then is not seen (arena_sync.h) */
 	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
 	ArenaRoll *roll;
+	unsigned players;          /* arena_players: the streams asked for (0 two) */
 	int window_asked;          /* arena_window: the rollback window set, -1 this system's own */
 	unsigned window;           /* frames that may run on a guess: 0 the delay alone */
 	ArenaPairSnap *snap[ARENA_WINDOW_MOST];   /* the pair before each frame that ran on a guess, by frame % window */
@@ -159,6 +160,7 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 			c->rawRead16(c, folder, -1), c->rawRead16(c, folder + 2, -1), c->rawRead16(c, folder + 4, -1));
 	}
 	arena_input_init(&a->input, a->link->delay);
+	if (a->players > 2 && a->link->poll_player) arena_input_players(&a->input, a->players);
 	arena_sync_init(&a->sync);
 	if (a->roll_window > 0 && !(a->roll = arena_roll_new(a->pair, (unsigned)a->roll_window))) return fail(a, "no room for the rollback's snapshots");
 	bool room = open_window(a);
@@ -176,15 +178,20 @@ static bool at_comm(struct mCore *c) {
 	return c->rawRead8(c, main, -1) == BN6_MODE_SUBMENU && c->rawRead8(c, menu, -1) == BN6_SUBMENU_COMM;
 }
 
-/* the peer's keys as they come, each its stream's next */
+/* the peer's keys as they come, each its stream's next; and the
+ * partners' where they play (arena_players) */
 static bool take_peer(Arena *a) {
-	unsigned peer = a->link->side ^ 1;
+	ArenaLink *l = a->link;
+	unsigned peer = l->side ^ 1;
 	uint16_t keys;
-	while (a->link->poll(a->link, a->input.known[peer], &keys)) {
+	while (l->poll(l, a->input.known[peer], &keys)) {
 		/* (its lag: my tick now, less the tick the other game sampled it on) */
 		arena_sync_arrived(&a->sync, (int32_t)(a->tick - 1 - (a->input.known[peer] - a->input.delay)));
 		if (arena_input_put(&a->input, peer, a->input.known[peer], keys) != ARENA_PUT_OK) return false;
 	}
+	for (unsigned p = 2; p < a->input.players; ++p)
+		while (l->poll_player(l, p, a->input.known[p], &keys))
+			if (arena_input_put(&a->input, p, a->input.known[p], keys) != ARENA_PUT_OK) return false;
 	return true;
 }
 
@@ -226,12 +233,12 @@ static void note(Arena *a, uint32_t frame) {
 static bool run_frame(Arena *a) {
 	uint32_t frame = a->input.next;
 	if (a->window && frame >= arena_input_settled(&a->input) && !arena_pair_save(a->pair, a->snap[frame % a->window])) return false;
-	uint16_t keys[ARENA_LOOKAHEAD][2];
+	uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	if (!arena_input_take(&a->input, a->window, keys)) return false;
-	if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[2])keys);
+	if (a->roll) arena_roll_before(a->roll, frame, (const uint16_t (*)[ARENA_PLAYERS])keys);
 	uint64_t sound = emu_audio_mark();
 	uint64_t t = SDL_GetPerformanceCounter();
-	if (!arena_pair_step(a->pair, (const uint16_t (*)[2])keys, true)) return false;
+	if (!arena_pair_step_all(a->pair, (const uint16_t (*)[ARENA_PLAYERS])keys)) return false;
 	double ms = (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
 	a->cost += ms;
 	if (ms > a->worst) a->worst = ms;
@@ -316,6 +323,7 @@ static void over(Arena *a, uint32_t frame, const Ran *r) {
 	arena_sync_least(&a->sync, &lag);
 	printf("arena: the other's keys' least lag %d ticks, his of mine %d as he last said it%s\n", lag, a->sync.peer_lag,
 		a->sync.peer_known ? "" : " (none said)");
+	arena_roll_say(a->roll);
 	/* (what a frame costs here, kept for the window the next challenge asks by) */
 	if (a->costed) arena_window_keep(a->cost / a->costed);
 	a->stage = ARENA_OVER;
@@ -425,6 +433,7 @@ uint16_t arena_bot_keys(const Arena *a, unsigned side, uint32_t tick) {
 void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
 void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 void arena_window(Arena *a, int window) { a->window_asked = window; }
+void arena_players(Arena *a, unsigned players) { a->players = players; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }
