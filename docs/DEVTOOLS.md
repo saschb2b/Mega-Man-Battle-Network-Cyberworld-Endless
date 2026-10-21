@@ -495,7 +495,16 @@ whose keys come over a local link held back as a network's would be;
 `arenadelay=N`, `arenalag=N` and `arenahp=N` set its input delay (1 to
 60), the link's one way and the carried MegaMan's HP; `arenacarry=N`
 sends him in with N HP of his max, written on both GBAs at the Custom
-screen as a Team NetBattle's winner's is. `arenawindow=W`
+screen as a Team NetBattle's winner's is. `arenaseed=N` gives the bout
+the seed N, BN6's random words written on both GBAs as Practice's last
+confirm is pressed (a Net Square bout's seed is its battle ID; without
+it none, the battle as before), and `arenaagain=N` fights N bouts more
+after the first, each from the pair kept as the last one began, its seed
+one more: a rematch in a second, whose hands and hashes must be those of
+the whole way in with that seed (docs/ONLINE_ARENA.md, A rematch in a
+second). `arenaseedoff=N` moves a Net Square bout's seed by N on this
+game alone, a mutation: both games' readies apart, the bout stopped
+before its first frame. `arenawindow=W`
 sets the rollback window (0: the delay alone, a frame run once its keys
 have all come; without it, what a frame costs here affords, as a Net
 Square battle picks it), and `arenabusy` makes the second player step,

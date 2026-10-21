@@ -210,7 +210,15 @@ longer latency, each a round trip with its jitter less what its rollback
 window covers; docs/ONLINE_ARENA.md, Smoothed delay and Rollback), then
 relays their loadouts, keys and state hashes to each other alone, in a
 rate bucket of their own (120 a second). A player leaving ends the
-battle for the other.
+battle for the other. Since protocol v13 (epic #167) a pair of players'
+next battle keeps their last one's sides, whoever challenges, so both
+games go into a rematch from the pair they kept (the server remembers,
+in memory alone, the cable's first of each pair's last started battle,
+and forgets a player's pairs as he leaves); a challenge's 30 seconds run
+from its question shown on the other's screen (ARENA's `seen`), 60 while
+it is not; and each SNAPSHOT says what each player is busy with (a
+battle, watching, a trade) and his link's bars from the round trip his
+PING says, never the number itself.
 
 Team NetBattles (`teams.py`, protocol v12, epic #167): two players of a
 channel team up (one asks, the other answers; a team lasts until one

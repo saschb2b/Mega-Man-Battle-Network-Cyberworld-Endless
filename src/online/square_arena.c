@@ -131,8 +131,14 @@ static void drop_arena(void) {
 	SA.arena = NULL;
 }
 
+static void drop_kept(void) {
+	arena_kept_free(SA.kept);
+	SA.kept = NULL;
+}
+
 void square_arena_reset(void) {
 	drop_arena();
+	drop_kept();
 	memset(&SA, 0, sizeof SA);
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
 	arena_folder_reset();
@@ -161,6 +167,7 @@ static void fail_as(const char *why, ArenaStop stop, bool both) {
 	 * with a notice that it is over) */
 	if (!SA.ended && (!both || SA.link.link.side == 0)) act(ARENA_ACT_LEAVE, SA.match);
 	SA.ended = true;
+	drop_kept();
 	say(arena_stopped_words());
 	bool begun = SA.stage == SA_BATTLE;
 	if (begun) bouts(4);
@@ -200,6 +207,7 @@ static void challenge_sent(bool quiet) {
 	act(ARENA_ACT_CHALLENGE, SA.other);
 	SA.stage = SA_SENT;
 	SA.since = SDL_GetTicks();
+	SA.seen_at = 0;
 	SA.notice_serial = SA.s.notice_serial;
 	if (!quiet) talk_start(arena_sent_words(SA.name), FACE_MEGAMAN);
 	printf("arena: challenged %s (session %u), folder %d\n", SA.name, SA.other, SA.folder + 1);
@@ -207,7 +215,35 @@ static void challenge_sent(bool quiet) {
 
 static void send_challenge(void) { challenge_sent(false); }
 
+/* our open challenge called off from his card (protocol v13): the server
+ * told, MegaMan's word; a WAITING still to come is left as it comes, and
+ * the battle's ENDED is no longer this game's (state_in) */
+static void call_off(void) {
+	if (SA.match) act(ARENA_ACT_LEAVE, SA.match);
+	printf("arena: the challenge to %s called off (match %u)\n", SA.name, SA.match);
+	SA.stage = SA_IDLE;
+	SA.match = 0;
+	SA.ended = true;
+	SA.seen_at = 0;
+	talk_start(arena_called_off_words(SA.name), FACE_MEGAMAN);
+}
+
+bool square_arena_open_to(uint32_t id) { return id && (SA.stage == SA_SENT || SA.stage == SA_WAITING) && !SA.card.up && SA.other == id; }
+
+bool square_arena_open(uint32_t *other, const char **name, uint32_t *seen_ms) {
+	if ((SA.stage != SA_SENT && SA.stage != SA_WAITING) || SA.card.up) return false;
+	*other = SA.other;
+	*name = SA.name;
+	*seen_ms = SA.seen_at ? SDL_GetTicks() - SA.seen_at + 1 : 0;
+	return true;
+}
+
+uint32_t square_arena_asking(void) { return (SA.stage == SA_ASKING || SA.stage == SA_ASKED) && !SA.ended ? SA.other : 0; }
+
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
+	/* (a challenge open: Call off on his card, MegaMan's word on another's) */
+	if (square_arena_open_to(peer->id)) { call_off(); return; }
+	if (SA.stage == SA_SENT || SA.stage == SA_WAITING) { talk_start(arena_asked_already_words(SA.name), FACE_MEGAMAN); return; }
 	if (!CW_ARENA || SA.stage != SA_IDLE) return;
 	/* (our own partner: said at once, as the server's NOTICE 29 would) */
 	if (peer->id && peer->id == square_team_partner()) { talk_start(arena_team_partner_words(peer->name), FACE_MEGAMAN); return; }
@@ -229,7 +265,11 @@ void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 static void start(unsigned side, unsigned delay) {
 	/* (a rematch's answer spent: the next is asked after this battle's result) */
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
-	/* (a rematch from the card: the last battle's pair given back first, its tally kept on the card) */
+	/* (a rematch from the card: the last battle's pair kept as it began,
+	 * gone into again where both MegaMen and sides are the same, the rest
+	 * given back first; its tally kept on the card) */
+	drop_kept();
+	SA.kept = arena_keep(SA.arena);
 	drop_arena();
 	arena_view_free();
 	arena_link_net(&SA.link, SA.match, side, delay, out, NULL);
@@ -357,6 +397,8 @@ static bool again_in(const ArenaWireState *s) {
 	SA_AGAIN.held = s->match;
 	SA.card.theirs = ARENA_THEIRS_YES;
 	arena_card_cue(ARENA_CUE_ANSWER);
+	/* (his Yes shown on the card: seen, its 30 seconds from now, protocol v13) */
+	act(ARENA_ACT_SEEN, s->match);
 	printf("arena: %s asks for a rematch (match %u)\n", SA_AGAIN.name, s->match);
 	return true;
 }
@@ -381,10 +423,18 @@ static void state_in(const ArenaWireState *s) {
 		SA.team = false;
 		snprintf(SA.name, sizeof SA.name, "%s", name);
 		SA.stage = SA_ASKING;
+		/* (the PET rings: a challenge has come, its question once no chat is open) */
+		arena_card_cue(ARENA_CUE_RING);
 		printf("arena: %s challenged us (match %u)\n", name, s->match);
 		return;
 	}
 	if (s->stage == ARENA_WIRE_WAITING && SA.stage == SA_SENT && s->other == SA.other) { SA.match = s->match; SA.stage = SA_WAITING; return; }
+	/* (his question up on his screen: his 30 seconds run from now, protocol v13) */
+	if (s->stage == ARENA_WIRE_SEEN) {
+		if (s->match == SA.match && SA.stage == SA_WAITING && !SA.seen_at) SA.seen_at = SDL_GetTicks() | 1u;
+		printf("arena: %s reads our challenge (match %u)\n", SA.name, s->match);
+		return;
+	}
 	/* (a challenge of ours no longer wanted: a rematch's Yes taken back by closing the card before the server's word) */
 	if (s->stage == ARENA_WIRE_WAITING) { act(ARENA_ACT_LEAVE, s->match); return; }
 	if (s->match != SA.match) return;
@@ -529,7 +579,11 @@ void square_arena_update(const OnlineSnapshot *s) {
 	else if (SA.stage == SA_FOLDER && !open) folder_picked();
 	else if (SA.stage == SA_ASKING && !open) {
 		if (dev.arena_both) bot_yes();
-		else if (arena_folder_challenge(SA.name, square_team_partner() != 0)) SA.stage = SA_ASKED;
+		else if (arena_folder_challenge(SA.name, square_team_partner() != 0, SA.other)) {
+			/* (the question up: the server's clock for the answer starts now, and the challenger sees it) */
+			SA.stage = SA_ASKED;
+			act(ARENA_ACT_SEEN, SA.match);
+		}
 	} else if (SA.said && !open && SA.stage == SA_IDLE && talk_start(SA.said, FACE_MEGAMAN)) SA.said = NULL;
 	square_team_update(s, false);
 }
@@ -547,7 +601,11 @@ static void build(void) {
 	unsigned side = SA.link.link.side;
 	loadout[side] = SA.mine_carried ? &SA.mine : NULL;
 	loadout[side ^ 1] = SA.theirs_carried ? &SA.theirs : NULL;
-	SA.arena = arena_new(R.data, ROM_SIZE, loadout, &SA.link.link);
+	/* (the bout's seed its match, the same on both games and every
+	 * spectator; arenaseedoff=N moves it on this side alone, a mutation) */
+	uint32_t seed = SA.match + (uint32_t)dev.arena_seed_off;
+	SA.arena = arena_new_bout(R.data, ROM_SIZE, loadout, &SA.link.link, seed, SA.kept);
+	SA.kept = NULL;
 	if (!SA.arena) { fail("too little memory for the two PETs", ARENA_STOP_MEMORY); return; }
 	SA.counted = false;
 	arena_window(SA.arena, dev.arena_window);
@@ -591,7 +649,9 @@ static void ready(void) {
 		return;
 	}
 	if (apart()) return;
-	printf("arena: both ready, the battle begins\n");
+	/* (the frames from START: a rematch from the kept pair's about a second, docs/ONLINE_ARENA.md) */
+	printf("arena: both ready, the battle begins %u frames after START%s\n", (unsigned)SA.t,
+		arena_again(SA.arena) ? ", the way in again from the kept pair" : "");
 	SA.stage = SA_BATTLE;
 	SA.ticks = 0;
 	/* (from the panel into the Custom screen, through white) */
@@ -702,6 +762,7 @@ bool square_arena_bout(uint32_t bout, uint32_t other, const char *name, uint16_t
  * while the answer is kept), my Yes's challenge called off */
 void square_arena_back(void) {
 	drop_arena();
+	drop_kept();
 	arena_view_free();
 	SA.card.up = false;
 	if (SA_AGAIN.answer == AGAIN_UNSAID && SA_AGAIN.other) SA_AGAIN.answer = AGAIN_NO;

@@ -19,6 +19,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_loadout.h"
+#include "battle_rng.h"
 #include "bn6.h"
 #include "emu.h"
 #include "hook.h"
@@ -57,6 +58,17 @@ static const Step entry_steps[] = {
 
 #define NSTEPS(a) (sizeof a / sizeof *a)
 
+/* The step whose first frame is the bout's (docs/ONLINE_ARENA.md, A
+ * rematch in a second): Practice's last confirm, before the battle keeps
+ * BN6's first random word (drawn 19 frames after the press is done, kept,
+ * and put back 71 frames on as the battle's opening ends) and shuffles
+ * both folders from the second (the frame after: the first hands).
+ * Measured on both GBAs a frame at a time: both words alike on the two
+ * all through the way in. A rematch goes in from here: the press and the
+ * battle's opening, 244 frames of the pair. */
+#define BOUT_STEP   (NSTEPS(entry_steps) - 2)
+#define SEED_SECOND 0x9E3779B9u   /* (the second word's seed apart from the first's) */
+
 struct ArenaBoot {
 	ArenaBootStage stage;
 	const uint8_t *rom;
@@ -68,6 +80,9 @@ struct ArenaBoot {
 	HookCore *hooks;
 	uint32_t video[ARENA_W * ARENA_H];
 	ArenaPair *pair;
+	uint32_t seed;          /* the bout's (arena_boot_seed), 0 none */
+	bool keep;              /* the pair kept at BOUT_STEP (arena_boot_keep) ... */
+	ArenaPairSnap *kept;    /* ... here, or the one a rematch goes in from */
 	unsigned step, in_step, done;
 	double pair_ms, pair_worst;   /* the pair's frames through the menus, timed */
 	unsigned pair_frames;
@@ -212,6 +227,7 @@ void arena_boot_free(ArenaBoot *b) {
 		arena_core_free(b->core);
 	}
 	arena_pair_close(b->pair);
+	arena_pair_snap_free(b->kept);
 	free(b);
 }
 
@@ -232,9 +248,38 @@ static bool boot_frame(ArenaBoot *b) {
 	return b->step < NSTEPS(boot_steps);
 }
 
+/* BN6's two random words written on both GBAs from the bout's seed, the
+ * same on both as the way in leaves them: each mixed and kept off the
+ * step's shortest cycles (battle_rng.h), the first the one the battle
+ * keeps and draws from, the second the folders' shuffle */
+static void stir(ArenaBoot *b) {
+	if (!b->seed) return;
+	uint32_t first = battle_rng_word(b->seed), second = battle_rng_word(b->seed ^ SEED_SECOND);
+	for (unsigned side = 0; side < 2; ++side) {
+		struct mCore *c = arena_pair_core(b->pair, side);
+		c->rawWrite32(c, BN6_RNG_PRIMARY, -1, first);
+		c->rawWrite32(c, BN6_RNG_SECONDARY, -1, second);
+	}
+	printf("arena: the bout's seed %08x: BN6's random words %08x and %08x on both GBAs\n", (unsigned)b->seed, (unsigned)first,
+		(unsigned)second);
+}
+
+/* the bout begins: the pair kept as it stands for a rematch (the way in
+ * again from here, arena_boot_again; where memory is short, none kept and
+ * a rematch goes the whole way), then stirred */
+static void bout(ArenaBoot *b) {
+	if (b->keep && !b->kept && (!(b->kept = arena_pair_snap_new(b->pair)) || !arena_pair_save(b->pair, b->kept))) {
+		printf("arena: no room to keep the two PETs for a rematch: a rematch goes the whole way in\n");
+		arena_pair_snap_free(b->kept);
+		b->kept = NULL;
+	}
+	stir(b);
+}
+
 /* a frame of the pair through the menus, both cores holding the step's keys */
 static bool entry_frame(ArenaBoot *b) {
 	const Step *s = &entry_steps[b->step];
+	if (b->in_step == 0 && b->step == BOUT_STEP) bout(b);
 	if (b->in_step == 0) arena_pair_anchor(b->pair);
 	uint16_t keys[ARENA_LOOKAHEAD][2] = { { s->keys, s->keys } };
 	uint64_t t = SDL_GetPerformanceCounter();
@@ -298,6 +343,39 @@ static unsigned steps_frames(const Step *s, size_t n) {
 }
 
 unsigned arena_boot_total(void) { return steps_frames(boot_steps, NSTEPS(boot_steps)) + steps_frames(entry_steps, NSTEPS(entry_steps)); }
+
+void arena_boot_seed(ArenaBoot *b, uint32_t seed) { b->seed = seed; }
+void arena_boot_keep(ArenaBoot *b) { b->keep = true; }
+
+ArenaBoot *arena_boot_again(const OnlineLoadout *loadout[2], ArenaPair *pair, ArenaPairSnap *kept) {
+	ArenaBoot *b = calloc(1, sizeof *b);
+	if (!b) {
+		arena_pair_close(pair);
+		arena_pair_snap_free(kept);
+		return NULL;
+	}
+	for (unsigned side = 0; side < 2; ++side) {
+		if (!loadout || !loadout[side]) continue;
+		b->loadout[side] = *loadout[side];
+		b->carried[side] = true;
+	}
+	b->pair = pair;
+	b->kept = kept;
+	b->keep = true;
+	b->stage = ARENA_BOOT_ENTRY;
+	b->step = BOUT_STEP;
+	b->done = steps_frames(boot_steps, NSTEPS(boot_steps)) + steps_frames(entry_steps, BOUT_STEP);
+	/* (the pair as the last bout began, before its seed: both cores, the cable, the scheduling and the frame clock) */
+	if (!arena_pair_load(pair, kept)) fail(b, "the two PETs kept could not be put back");
+	return b;
+}
+
+ArenaPairSnap *arena_boot_take_kept(ArenaBoot *b) {
+	if (b->stage != ARENA_BOOT_READY) return NULL;
+	ArenaPairSnap *k = b->kept;
+	b->kept = NULL;
+	return k;
+}
 
 ArenaPair *arena_boot_take(ArenaBoot *b) {
 	if (b->stage != ARENA_BOOT_READY) return NULL;

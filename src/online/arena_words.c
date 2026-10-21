@@ -30,9 +30,30 @@ const char *arena_closed_words(void) { return "Aw... No NetBattles\non this Squa
 
 const char *arena_no_stamp_words(void) { return "Hmm... The Arena\nwon't let that\nNetBattle through."; }
 
-const char *arena_challenged_words(const char *name) {
+static const char *arena_challenged_words(const char *name) {
 	static char s[160];
 	snprintf(s, sizeof s, "%s's\nMegaMan wants a\nPractice NetBattle!", name);
+	return s;
+}
+
+/* (his card's facts after it, as A on his MegaMan reads them: square_card_facts) */
+const char *arena_challenged_card_words(const char *name, const char *facts) {
+	static char s[480];
+	snprintf(s, sizeof s, "%s%s%s", arena_challenged_words(name), facts && facts[0] ? "|" : "", facts ? facts : "");
+	return s;
+}
+
+const char *arena_call_off_option(void) { return "Call off"; }
+
+const char *arena_called_off_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "OK. We'll leave\n%s be\nfor now.", name);
+	return s;
+}
+
+const char *arena_asked_already_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Lan,we already\nasked %s!", name);
 	return s;
 }
 

@@ -27,6 +27,12 @@ void arena_view_clear(void);
  * stalled; at the corner once the Custom screen has closed); `t` the
  * frames, for the blink */
 void arena_view_over(const char *name, bool custom, ArenaLinkState link, uint32_t t);
+/* The link before a battle in the badge's look at screen pixel (x, y)
+ * (protocol v13, square_ask.h): `bars` of three lit, green three, gold
+ * two, red one; none lit unknown. No number, the owner's word */
+void arena_view_bars(int x, int y, unsigned bars);
+#define ARENA_BARS_W 12
+#define ARENA_BARS_H 11
 /* A stall's note over the picture's foot: whose PET the battle waits for,
  * a bar running down to the wait's end (`left` of `total`), and once it
  * has (`way_out`) the key that leaves */

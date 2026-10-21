@@ -36,6 +36,7 @@
 #include "arena_roll.h"
 #include "arena_sync.h"
 #include "arena_window.h"
+#include "arena_wire.h"
 #include "bn6.h"
 #include "emu.h"
 #include "stands_report.h"
@@ -61,11 +62,25 @@ typedef struct {
 	uint64_t sound;         /* the sound ring's mark before it (emu_audio_mark): a rollback's sound goes back to it */
 } Ran;
 
+/* the two MegaMen a pair was made with, side by side as their bytes
+ * (arena_loadout_pack, the carried HP among them): a kept pair is gone
+ * into again only for the same two on the same sides */
+typedef struct { uint8_t bytes[2][ONLINE_ARENA_LOADOUT_MAX]; size_t n[2]; } ArenaKey;
+
+struct ArenaKept {
+	ArenaPair *pair;
+	ArenaPairSnap *snap;   /* the pair as the last bout began, before its seed */
+	ArenaKey key;
+};
+
 struct Arena {
 	ArenaStage stage;
 	ArenaLink *link;
 	ArenaBoot *boot;
 	ArenaPair *pair;
+	ArenaPairSnap *kept;       /* the pair where the bout's seed went in (arena_keep) */
+	ArenaKey key;
+	bool from_kept;            /* the way in from a kept pair */
 	ArenaInput input;
 	ArenaSync sync;
 	uint32_t tick, stalls, hashes;
@@ -111,16 +126,43 @@ static ArenaStage fail(Arena *a, const char *why) {
 	return a->stage = ARENA_FAILED;
 }
 
-Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link) {
+static void key_of(const OnlineLoadout *loadout[2], ArenaKey *key) {
+	memset(key, 0, sizeof *key);
+	for (unsigned side = 0; side < 2; ++side)
+		key->n[side] = arena_loadout_pack(loadout ? loadout[side] : NULL, key->bytes[side], sizeof key->bytes[side]);
+}
+
+static bool same_key(const ArenaKey *x, const ArenaKey *y) {
+	for (unsigned side = 0; side < 2; ++side)
+		if (!x->n[side] || x->n[side] != y->n[side] || memcmp(x->bytes[side], y->bytes[side], x->n[side])) return false;
+	return true;
+}
+
+Arena *arena_new_bout(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link, uint32_t seed, ArenaKept *kept) {
 	Arena *a = calloc(1, sizeof *a);
-	if (!a) return NULL;
+	if (!a) { arena_kept_free(kept); return NULL; }
 	a->link = link;
 	a->roll_window = -1;
 	a->window_asked = -1;
 	a->show = -1;
-	a->boot = arena_boot_new(rom, size, loadout);
+	key_of(loadout, &a->key);
+	a->from_kept = kept && same_key(&kept->key, &a->key);
+	if (kept && !a->from_kept) printf("arena: the last bout's pair kept, but for other MegaMen or sides: the whole way in\n");
+	if (a->from_kept) {
+		a->boot = arena_boot_again(loadout, kept->pair, kept->snap);
+		kept->pair = NULL;
+		kept->snap = NULL;
+		arena_kept_free(kept);
+	} else {
+		/* (its memory given back before the whole way in's) */
+		arena_kept_free(kept);
+		a->boot = arena_boot_new(rom, size, loadout);
+	}
 	if (!a->boot) { free(a); return NULL; }
+	arena_boot_seed(a->boot, seed);
+	arena_boot_keep(a->boot);
 	if (arena_boot_stage(a->boot) == ARENA_BOOT_FAILED) fail(a, arena_boot_error(a->boot));
+	else if (a->from_kept) printf("arena: the way in again from the last bout's pair, seed %08x\n", (unsigned)seed);
 	return a;
 }
 
@@ -129,10 +171,32 @@ void arena_free(Arena *a) {
 	arena_boot_free(a->boot);
 	arena_roll_free(a->roll);
 	for (unsigned i = 0; i < ARENA_WINDOW_MOST; ++i) arena_pair_snap_free(a->snap[i]);
+	arena_pair_snap_free(a->kept);
 	arena_pair_close(a->pair);
 	if (a->link && a->link->close) a->link->close(a->link);
 	free(a);
 }
+
+ArenaKept *arena_keep(Arena *a) {
+	if (!a || !a->pair || !a->kept) return NULL;
+	ArenaKept *k = malloc(sizeof *k);
+	if (!k) return NULL;
+	k->pair = a->pair;
+	k->snap = a->kept;
+	k->key = a->key;
+	a->pair = NULL;
+	a->kept = NULL;
+	return k;
+}
+
+void arena_kept_free(ArenaKept *k) {
+	if (!k) return;
+	arena_pair_close(k->pair);
+	arena_pair_snap_free(k->snap);
+	free(k);
+}
+
+bool arena_again(const Arena *a) { return a->from_kept; }
 
 /* the window this battle rolls back: --dev arena's rollback tried has its
  * own; one set (arena_window); else what a frame of the pair costs here,
@@ -155,9 +219,17 @@ ArenaStage arena_connect(Arena *a, unsigned frames) {
 	if (s == ARENA_BOOT_FAILED) return fail(a, arena_boot_error(a->boot));
 	if (s != ARENA_BOOT_READY) return a->stage;
 	a->pair = arena_boot_take(a->boot);
+	a->kept = arena_boot_take_kept(a->boot);
 	arena_pair_draw(a->pair, 1u << shown(a));   /* (my GBA's picture alone: the one shown) */
 	printf("arena: both cores at the Custom screen after %u frames, %u cable transfers; delay %u frames\n",
 		arena_boot_done(a->boot), arena_pair_transfers(a->pair), a->link->delay);
+	/* (the first hand of each, which the bout's seed shuffled) */
+	for (unsigned side = 0; side < 2; ++side) {
+		struct mCore *c = arena_pair_core(a->pair, side);
+		unsigned hand[5];
+		for (unsigned k = 0; k < 5; ++k) hand[k] = (unsigned)c->rawRead16(c, BN6_BATTLE_DECK + 2u * k, -1);
+		printf("arena: side %u's GBA deals %04x %04x %04x %04x %04x\n", side, hand[0], hand[1], hand[2], hand[3], hand[4]);
+	}
 	for (unsigned side = 0; side < 2; ++side) {
 		struct mCore *c = arena_pair_core(a->pair, side);
 		uint32_t folder = c->rawRead32(c, BN6_TOOLKIT + BN6_TOOLKIT_CHIPS, -1);

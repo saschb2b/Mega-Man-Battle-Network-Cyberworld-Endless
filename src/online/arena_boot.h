@@ -44,4 +44,23 @@ double arena_boot_frame_ms(const ArenaBoot *boot, bool worst);
 /* the pair, once READY: the caller's from then on */
 ArenaPair *arena_boot_take(ArenaBoot *boot);
 
+/* The bout's seed, before the way in runs (docs/ONLINE_ARENA.md, A
+ * rematch in a second): BN6's two random words written on both GBAs as
+ * Practice's last confirm is pressed, before the battle keeps the first
+ * and shuffles the folders from the second, so that each bout's hands and
+ * rolls are its own, the same on every game and spectator that builds it
+ * with that seed (a NetBattle's: its match); 0 none, the way in's own */
+void arena_boot_seed(ArenaBoot *boot, uint32_t seed);
+/* The pair kept where the seed goes in, for a rematch (arena_boot_take_kept
+ * once READY: the caller's from then on), before the way in runs */
+void arena_boot_keep(ArenaBoot *boot);
+ArenaPairSnap *arena_boot_take_kept(ArenaBoot *boot);
+/* A way in again from a pair kept there (`pair` the last bout's, `kept`
+ * its snapshot; both the boot's from then on, freed where it fails): the
+ * pair put back, the seed written, the press and the battle's opening run
+ * (244 frames of the pair, not 1,817), ready as a whole way in would be
+ * for the same two MegaMen; loadout[side] as arena_boot_new's, for a
+ * carried HP */
+ArenaBoot *arena_boot_again(const OnlineLoadout *loadout[2], ArenaPair *pair, ArenaPairSnap *kept);
+
 #endif

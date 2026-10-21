@@ -167,6 +167,88 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.sleep(0.1)
         self.assertIn(c, self.clients)
 
+    async def battle(self, challenger, challenger_id, other, other_id):
+        """A battle asked, seen, taken and over: its START's sides, (challenger's, other's)."""
+        await challenger.send(arena(1, other_id, 40))
+        match_id = (await self.arena_state(challenger))[2]
+        self.assertEqual((await self.arena_state(other))[1:3], (1, match_id))
+        await other.send(arena(SPEC["arena_seen"], match_id))
+        self.assertEqual((await self.arena_state(challenger))[1:3], (SPEC["arena_seen"], match_id))
+        await other.send(arena(2, match_id, 40))
+        sides = (await self.arena_state(challenger))[5], (await self.arena_state(other))[5]
+        await (challenger if sides[0] == 0 else other).send(arena(4, match_id))
+        self.assertEqual((await self.arena_state(challenger))[1], 4)
+        self.assertEqual((await self.arena_state(other))[1], 4)
+        return sides
+
+    async def test_a_rematch_keeps_the_sides_whoever_asks(self):
+        # (v13: both games go into a rematch from the pair they kept, its sides the last battle's)
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta")
+        self.assertEqual(await self.battle(a, a_id, b, b_id), (0, 1))
+        self.assertEqual(await self.battle(b, b_id, a, a_id), (1, 0))
+        self.assertEqual(await self.battle(a, a_id, b, b_id), (0, 1))
+        # (a new pair: the challenger first again)
+        c, c_id = await self.connect("Gamma")
+        self.assertEqual(await self.battle(c, c_id, b, b_id), (0, 1))
+        await b.close()
+        self.clients.remove(b)
+        await asyncio.sleep(0.1)
+        self.assertFalse([pair for pair in self.server.arena.sides if b_id in pair])
+
+    async def test_a_challenge_waits_longer_unseen_and_its_thirty_seconds_run_from_its_question(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta")
+        await a.send(arena(1, b_id, 40))
+        match_id = (await self.arena_state(a))[2]
+        await self.arena_state(b)
+        match = self.server.arena.matches[match_id]
+        match.time -= 45
+        self.server.arena.expire(match.time + 45)
+        self.assertIn(match_id, self.server.arena.matches)
+        # (seen only once, by the challenged alone)
+        await a.send(arena(SPEC["arena_seen"], match_id))
+        await self.no_notice(a)
+        self.assertFalse(match.seen)
+        await b.send(arena(SPEC["arena_seen"], match_id))
+        self.assertEqual((await self.arena_state(a))[1], SPEC["arena_seen"])
+        self.assertTrue(match.seen)
+        self.server.arena.expire(match.time + 29)
+        self.assertIn(match_id, self.server.arena.matches)
+        self.server.arena.expire(match.time + 31)
+        self.assertNotIn(match_id, self.server.arena.matches)
+        self.assertEqual((await self.arena_state(a))[1], 4)
+
+    async def snapshot_byte(self, client, peer_id, want):
+        for _ in range(60):
+            data = await client.message(SPEC["snapshot"])
+            for k in range(data[1]):
+                peer = protocol.PEER.unpack_from(data, 2 + k * protocol.PEER.size)
+                if peer[0] == peer_id and peer[-1] == want:
+                    return
+        raise AssertionError(f"No such byte {want:#x}")
+
+    async def test_the_square_sees_who_is_busy_and_each_link(self):
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta")
+        c, _ = await self.connect("Gamma")
+        bn5 = SPEC["roms_bn5"]
+        # (a round trip said in PING: Beta's link three bars, then one)
+        await b.send(bytes((SPEC["ping"],)) + b"\0\0\0\1" + struct.pack("!H", 60))
+        await self.snapshot_byte(c, b_id, bn5 | 3 << SPEC["link_shift"])
+        await b.send(bytes((SPEC["ping"],)) + b"\0\0\0\2" + struct.pack("!H", 250))
+        await self.snapshot_byte(c, b_id, bn5 | 1 << SPEC["link_shift"])
+        # (a challenge waiting is not busy; a battle under way is, both of them)
+        await a.send(arena(1, b_id, 40))
+        match_id = (await self.arena_state(a))[2]
+        await self.snapshot_byte(c, a_id, bn5)
+        await b.send(arena(2, match_id, 40))
+        busy = SPEC["busy_battle"] << SPEC["busy_shift"]
+        await self.snapshot_byte(c, a_id, bn5 | busy)
+        await self.snapshot_byte(c, b_id, bn5 | busy | 1 << SPEC["link_shift"])
+        self.assertEqual(protocol.link_bars(0), 0)
+        self.assertEqual([protocol.link_bars(ms) for ms in (99, 100, 199, 200)], [3, 2, 2, 1])
+
     async def test_bn5_chips_trade_between_two_full_sets(self):
         a, a_id = await self.connect("Alpha")
         c, c_id = await self.connect("Gamma")

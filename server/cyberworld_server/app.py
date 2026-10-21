@@ -39,6 +39,7 @@ class Player:
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
     roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's (protocol.full_set)
+    round_trip: int = 0       # its round trip to here in ms as its PING says it (v13), 0 unknown: its link's bars
     refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
     resumed: bool = False     # a place held taken back by this session (holds.py)
 
@@ -308,8 +309,9 @@ class Server:
             if self.event_log and now - player.last_log >= 1:
                 player.last_log = now
                 self.event("position", id=player.id, position=player.position)
-        elif len(data) == 5 and data[0] == protocol.SPEC["ping"]:
-            await websocket.send(player.writer, bytes((protocol.SPEC["pong"],)) + data[1:])
+        elif data and data[0] == protocol.SPEC["ping"]:
+            clock, player.round_trip = protocol.read_ping(data)
+            await websocket.send(player.writer, bytes((protocol.SPEC["pong"],)) + clock)
         elif data and data[0] == protocol.SPEC["profile"]:
             profile = protocol.read_profile(data)
             if now - player.profile_time >= 1:
@@ -492,10 +494,29 @@ class Server:
                 self.teams.expire(now)
             self.holds.expire(now)
             self.stands.pump(now)
+            flags = self.peer_flags()
             for player in list(self.players.values()):
                 if player.writer.is_closing():
                     continue
                 if player.writer.transport.get_write_buffer_size() > 8192:
                     player.writer.close()
                     continue
-                player.writer.write(websocket.frame(protocol.snapshot(self.players, player.id)))
+                player.writer.write(websocket.frame(protocol.snapshot(self.players, player.id, flags)))
+
+    def busy_with(self, player_id):
+        """What a player is busy with, as the Square marks him (v13, epic
+        #167): a NetBattle under way (his own, or his team match's), watching
+        one, a trade; 0 free"""
+        spec = protocol.SPEC
+        match = self.arena.matches.get(self.arena.of.get(player_id, 0))
+        if match and match.started:
+            return spec["busy_battle"]
+        if self.stands.busy(player_id):
+            return spec["busy_watch"]
+        if self.teams.busy(player_id):
+            return spec["busy_battle"]
+        return spec["busy_trade"] if player_id in self.trades.of else 0
+
+    def peer_flags(self):
+        """Each player's SNAPSHOT bits beside his ROMs: busy and his link's bars"""
+        return {p.id: protocol.peer_byte(self.busy_with(p.id), p.round_trip) for p in self.players.values()}

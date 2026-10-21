@@ -69,8 +69,9 @@ void arena_card_fade(int alpha, bool white);
 
 /* The screens' sounds, BN6's own, picked here: a screen opened (the panel,
  * the card), closed, the cursor moved, Yes, No, the other's answer come,
- * into the battle */
-typedef enum { ARENA_CUE_OPEN, ARENA_CUE_CLOSE, ARENA_CUE_CURSOR, ARENA_CUE_YES, ARENA_CUE_NO, ARENA_CUE_ANSWER, ARENA_CUE_BATTLE } ArenaCue;
+ * into the battle; the PET ringing as a challenge comes (BN6's effect 0x7E: which one BN6
+ * rings for a call is not yet checked) */
+typedef enum { ARENA_CUE_OPEN, ARENA_CUE_CLOSE, ARENA_CUE_CURSOR, ARENA_CUE_YES, ARENA_CUE_NO, ARENA_CUE_ANSWER, ARENA_CUE_BATTLE, ARENA_CUE_RING } ArenaCue;
 void arena_card_cue(ArenaCue cue);
 
 #endif

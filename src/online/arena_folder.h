@@ -9,12 +9,15 @@
 #define CW_ARENA_FOLDER_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "arena_format.h"
 
-/* Challenged by `name`: the question opened (the cursor on No); false
- * where a chat is open. As it closes: Yes said. */
-bool arena_folder_challenge(const char *name, bool team);
+/* Challenged by `name`: the question opened (the cursor on No), his
+ * MegaMan's card read before it (`from` his session: his card as it came,
+ * none where none has; a team's reads none); false where a chat is open. As it
+ * closes: Yes said. */
+bool arena_folder_challenge(const char *name, bool team, uint32_t from);
 bool arena_folder_challenge_yes(void);
 /* The first folder of `fits` (a bit a folder), 0 where none */
 int arena_folder_first(unsigned fits);

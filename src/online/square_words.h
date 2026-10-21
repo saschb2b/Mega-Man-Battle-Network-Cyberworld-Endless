@@ -25,6 +25,9 @@ const char *square_home_question(void);
  * (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted`
  * naming the second Unmute. */
 const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full);
+/* ... the card's facts alone, in pages (HP, act and layer, Crosses, Souls;
+ * never the folder): empty where no card has come */
+const char *square_card_facts(const OnlineProfile *card);
 const char *square_peer_option(int k, bool muted);
 #define SQUARE_PEER_OPTIONS 3
 /* ... after a block. */

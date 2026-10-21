@@ -1,10 +1,10 @@
-# Net Square protocol v12
+# Net Square protocol v13
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v12`. The server also
+`/presence` with subprotocol `cyberworld.presence.v13`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -14,9 +14,9 @@ side is behind, rather than a refused upgrade (v10).
 | HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1 (all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
-| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; no other bit) |
+| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; no other bit) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
-| PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged |
+| PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged (PONG: 5 bytes); since v13 PING is `ping_bytes` (7): the clock, then u16 the sender's round trip in ms as it measures it (0 unknown; a game on the server's own machine says 1), for its link's bars in the others' SNAPSHOT. A 5-byte PING is still answered, its round trip unknown |
 | PROFILE (8) | client → server | 69-byte public profile, described below |
 | INSPECT (9) | client → server | u32 target session ID in the same channel |
 | CARD (10) | server → client | u32 session ID, 16-byte public identity, 69-byte public profile |
@@ -26,8 +26,8 @@ side is behind, rather than a refused upgrade (v10).
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
-| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8) |
-| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over, 5 `arena_seen` (v13): the challenge's question up on the challenged's screen, from him alone, once), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/ONLINE_ARENA.md, Quicker on the wire), never kept for the stands |
@@ -114,6 +114,29 @@ or full rules outside a mixed pair's common ground, protocols v4 to v8)
 is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v13 (epic #167's third and fourth steps; docs/ONLINE_ARENA.md,
+A rematch in a second and The Square before a NetBattle). **A bout's
+seed is its battle ID**: every game and spectator writes BN6's two random
+words from it into both GBAs of the pair as Practice's last confirm is
+pressed, so that each bout deals its own hands and rolls; a game of
+another version would build another pair (its ready apart), hence the
+version. **A rematch keeps the sides**: the server remembers, for each
+pair of players, which was the cable's first in the last battle it
+started between them, and a new challenge between the same two (not a
+team's) gives him side 0 again whoever asks, so that both games go into
+the rematch from the pair they kept (ARENA_STATE's START says the side
+as ever; WAITING and CHALLENGED still go to the challenger and the
+challenged); a player's leaving forgets his pairs. **A challenge seen**:
+the challenged's game sends ARENA 5 (`arena_seen`) as its question opens;
+the server tells the challenger (ARENA_STATE 5) and counts the 30
+seconds for an answer from then; a challenge not yet seen waits
+`pending_unseen` (60) seconds. A team match's bout is seen as it is
+called. **The Square's marks**: SNAPSHOT's per-peer byte carries what
+each player is busy with and his link's bars, from the round trip his
+PING says (above): bars only, never a number in the game, the owner's
+word; a game shows the fewer of his bars and its own, the longer round
+trip deciding a battle's delay.
 
 A dropped link (protocol v10, issue #153; docs/ONLINE.md, A dropped
 link). A session that ends without a goodbye (BYE or a WebSocket

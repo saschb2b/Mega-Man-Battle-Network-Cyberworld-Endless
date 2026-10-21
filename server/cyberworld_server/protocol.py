@@ -132,11 +132,38 @@ def read_state(data):
     return x, y, z, facing
 
 
-def snapshot(players, recipient):
+def snapshot(players, recipient, flags=None):
+    """SNAPSHOT: the recipient's channel's other players, each one's byte
+    his ROMs (bit 0) and, since v13, `flags` (peer_flags): what he is busy
+    with and his link's bars"""
     room = players[recipient].channel
     peers = [player for player in players.values() if player.id != recipient and player.channel == room]
     data = bytes((SPEC["snapshot"], len(peers)))
-    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms) for p in peers)
+    flags = flags or {}
+    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms | flags.get(p.id, 0)) for p in peers)
+
+
+def link_bars(round_trip):
+    """A player's link as bars (v13, epic #167: bars only, never a number in
+    the game): 0 unknown, three under link_good_ms of round trip, two under
+    link_fair_ms, else one"""
+    if not round_trip:
+        return 0
+    return 3 if round_trip < SPEC["link_good_ms"] else 2 if round_trip < SPEC["link_fair_ms"] else 1
+
+
+def peer_byte(busy, round_trip):
+    """SNAPSHOT's per-peer bits beside the ROMs: busy (0 free, busy_battle,
+    busy_watch, busy_trade) and the link's bars"""
+    return busy << SPEC["busy_shift"] | link_bars(round_trip) << SPEC["link_shift"]
+
+
+def read_ping(data):
+    """PING: its clock (echoed as PONG) and, since v13, the sender's round
+    trip in ms (0 unknown; a 5-byte PING says none)"""
+    if data[0] != SPEC["ping"] or len(data) not in (5, SPEC["ping_bytes"]):
+        raise ProtocolError("Malformed PING")
+    return data[1:5], (struct.unpack("!H", data[5:7])[0] if len(data) == SPEC["ping_bytes"] else 0)
 
 
 def read_profile(data):
@@ -215,7 +242,7 @@ def read_arena(data):
     if len(data) != ARENA.size or data[0] != SPEC["arena"]:
         raise ProtocolError("Malformed ARENA")
     _, action, ref, latency = ARENA.unpack(data)
-    if not 1 <= action <= 4 or not ref or latency > 5000:
+    if not 1 <= action <= SPEC["arena_seen"] or not ref or latency > 5000:
         raise ProtocolError("Invalid arena action")
     return action, ref, latency
 

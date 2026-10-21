@@ -56,6 +56,9 @@ const char *arena_again_wanted(const char *name) { static char s[64]; snprintf(s
 const char *arena_again_waiting(const char *name) { static char s[64]; snprintf(s, sizeof s, "Waiting for %s...", name); return s; }
 const char *arena_again_gone(const char *name) { static char s[64]; snprintf(s, sizeof s, "No rematch with %s.", name); return s; }
 const char *arena_waiting_for(const char *name) { static char s[64]; snprintf(s, sizeof s, "Waiting for %s's PET...", name); return s; }
+const char *arena_ringing(const char *name) { static char s[64]; snprintf(s, sizeof s, "Ringing %s's PET...", name); return s; }
+const char *arena_reading_it(const char *name) { static char s[64]; snprintf(s, sizeof s, "%s is reading it...", name); return s; }
+const char *arena_call_off_key(const char *name) { static char s[64]; snprintf(s, sizeof s, "A on %s: call it off", name); return s; }
 
 const char *arena_stop_line(ArenaStop why, const char *name) {
 	static char s[96];

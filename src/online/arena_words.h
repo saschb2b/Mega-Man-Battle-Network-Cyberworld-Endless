@@ -22,8 +22,15 @@ const char *arena_busy_words(const char *name);
 const char *arena_not_here_words(const char *name);
 const char *arena_closed_words(void);
 const char *arena_no_stamp_words(void);
-/* Challenged by `name`: the boxes, then the question (its end a '\n') */
-const char *arena_challenged_words(const char *name);
+/* Challenged by `name`: the boxes, his MegaMan's card after them
+ * (square_card_facts' pages; NULL or empty: none come), read before the
+ * question (its end a '\n'; epic #167, P5) */
+const char *arena_challenged_card_words(const char *name, const char *facts);
+/* A challenge of ours open (protocol v13): Battle's place on his card, its
+ * Call off; MegaMan's word on it; Battle on another meanwhile */
+const char *arena_call_off_option(void);
+const char *arena_called_off_words(const char *name);
+const char *arena_asked_already_words(const char *name);
 /* The folder to carry: folder k's name as BN6 names it; MegaMan's words
  * before the choice; no folder holds a chip */
 const char *arena_folder_name(int k);

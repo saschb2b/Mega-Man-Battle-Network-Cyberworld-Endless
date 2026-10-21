@@ -41,6 +41,12 @@ const char *arena_again_waiting(const char *name);
 const char *arena_again_gone(const char *name);
 /* The stall's note: whose PET the battle waits for */
 const char *arena_waiting_for(const char *name);
+/* The Square's strip over an open challenge (square_ask.c, protocol v13):
+ * the other's PET ringing until he reads the question, then his time to
+ * answer running down; the way to call it off, named on the strip */
+const char *arena_ringing(const char *name);
+const char *arena_reading_it(const char *name);
+const char *arena_call_off_key(const char *name);
 
 /* Why a NetBattle stopped, the PET's line on the card (the log keeps the
  * cause in full) */

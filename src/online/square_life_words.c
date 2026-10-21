@@ -81,6 +81,13 @@ const char *square_referee_bark(int result, const char *name) {
 	return s;
 }
 
+const char *square_referee_bout_bark(const char *first, const char *second) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s VS %s!", first, second);
+	for (char *c = s; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
+	return s;
+}
+
 /* GreenNavi's talk: gossip, the area, the hour */
 static int green_lines(const char **out, char (*buf)[96], const SquareFacts *f) {
 	int n = 0;
