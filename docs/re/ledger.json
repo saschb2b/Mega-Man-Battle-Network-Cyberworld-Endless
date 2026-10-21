@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-21",
+  "updated": "2026-10-22",
   "previous": "2026-10-18",
   "features": [
     {
@@ -78,6 +78,10 @@
     {
       "date": "2026-10-21",
       "what": "The bout's seed and the kept pair (src/online/arena_boot.c's BOUT_STEP, arena_keep, arena_new_bout; --dev arena's arenaseed=N and arenaagain=N); protocol v13 keeps a pair of players' sides for their rematch."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "BN6's and BN5's ways to show a mood named for the Square's emotes: src/emu/bn6_expression.h and bn5_expression.h, docs/ROM_DATA.md's Expression rows, docs/symbols written again."
     }
   ],
   "experiments": [
@@ -232,6 +236,14 @@
       "result": "Both random words (0x020013F0, 0x02001120) read on both GBAs of the pair a frame at a time through the way in's last two steps: alike on the two GBAs all the way, stepped as on a map until Practice's last confirm; 19 frames after that press the battle draws the first word once and keeps it, 71 frames on puts it back as its opening ends, and the folders are shuffled from the second the frame after. Both words written from a seed at the start of that step change both GBAs' first hands (seed 7: 1636 2448 2448 0201 0605; seed 8: 0236 3459 34af 009a 0236; none: 0001 34c0 0236 0201 2447) and every one of the battle's 44 hashes; the pair kept at that step and gone into again with seed 8 deals seed 8's hands and gives its 44 hashes byte for byte, 244 frames of the pair instead of 1,817.",
       "meaning": "A rematch needs no new way in: the pair kept where the bout's seed goes in, and the seed (the battle's ID, known to both players and every spectator) makes each bout its own.",
       "link": "../ONLINE_ARENA.md#a-rematch-in-a-second"
+    },
+    {
+      "feature": "Net Square",
+      "date": "2026-10-22",
+      "name": "What BN6 has to show a mood, for the Square's emotes",
+      "result": "BN6 has no emotion-bubble set: frame 0 of every sprite of lists 4-9 and the first frame of 452 icon-sized animations of lists 0-5, 7 and 9 drawn from Gregar show no ?, note, sweat, anger or sleep mark; its one heart is Roll's (list 3's 0x50), its one burst the battle's counter-hit \"!!\" (list 5's 0x07: \"!!\", a bat, a skull). MegaMan's overworld sprite (list 6's 0x37) has 73 animations: the item-get pose 0x18 (Gregar's text F8 01 18 41 times, 20 followed by sound 0x73), the arrival 0x2D (cutscene 47 00 FF 2D then sound 0x76), arms raised 0x40, sparks 0x38, panting 0x42, a leap 0x43, the buster aimed 0x33-0x36. BN6's hop in place (NPC bytes 22 11 60 DC 21) is in Gregar 157 times. A chat box face has three animations (still, blinking, talking; Lan's a fourth, eyes shut), set by text F5 03 n (31 times in Gregar's plain text), and no second face for a mood. BN5 adds a heart (list 4's 0x26) and a music note (list 4's 0x44).",
+      "meaning": "An emote can be a pose of the peer's own MegaMan puppet (an animation number, no NPC slot) or a hop, in step for everyone from the emote's index; a mark over a head needs one of the Square's 16 NPC slots, all taken, or (not yet tried) a map object, 56 slots, drawn through an OverworldMapObjects id left unused.",
+      "link": "../ROM_DATA.md"
     }
   ],
   "method": {
