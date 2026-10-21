@@ -32,7 +32,13 @@
 #define BN6_NS_BASE_HP        0x3E        /* u16, a NaviStats' fields from its start: MaxBaseHP, */
 #define BN6_NS_CUR_HP         0x40        /* ... CurHP (a MegaMan's object takes it as he is set up, bn6f sub_80141C8), */
 #define BN6_NS_MAX_HP         0x42        /* ... and MaxHP */
+#define BN6_HAND_ADDR         0x08010018u /* r0 the side: its hand's address (BN6_BATTLE_HAND, 0x50 a side) in r0, BN6_BATTLE_HAND in r1, by
+                                             mov pc,lr, no push (bn6f getBattleHandAddr_8010018): the chip up next, a chip used, the
+                                             Custom screen's picks; its callers pass a side, most of them the object's in r5 */
 #define BN6_SPAWN_COMMON      0x08003278u /* every kind's spawn (BN6_SPAWN_1 and the rest): r0 the kind, r5 the object that spawns */
 #define BN6_SPAWN_MADE        0x080032BEu /* ... the new object in r5, its words taken (its first store, of its index) */
+#define BN6_T4_ACTIVE         0x02036710u /* u32 the fourth kind's slots in play (BN6_T4_OBJECTS), slot i bit 31 - i: a spawn takes the
+                                             first clear one, an object let go clears its own, the battle's setup clears them all with the
+                                             pool (bn6f eActiveT4BattleObjectsBitfield, the kind's record at 0x08003310) */
 
 #endif

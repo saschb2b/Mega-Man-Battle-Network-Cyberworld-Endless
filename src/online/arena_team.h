@@ -30,7 +30,8 @@ void arena_team_sample(struct mCore *core[2], unsigned side, uint16_t keys);
 /* a scripted partner's keys (player 2 or 3) by the frame's number alone,
  * so that a run that rolls back and one that does not hand him the same:
  * side 0's steps up to row 1 and fires charged shots along it, side 1's
- * fires along row 1 and steps down and back between */
+ * fires along row 1 and steps down and back between; each uses a chip of
+ * his hand now and then */
 uint16_t arena_team_script(unsigned player, uint32_t frame);
 /* the two GBAs compared iteration by iteration (the four MegaMen's
  * panels, HP and action, their AI data's keys, the random number), said

@@ -114,8 +114,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "Two MegaMen a side",
       "state": "building",
-      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each MegaMan's HP is his own object's; side 0's partner has his own battle NaviStats, answered by object (him and what he spawns) at BN6's NaviStats routine.",
-      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); side 1's partner's record (RAM for a second record, and both partners' hands, not yet found free: a survey of BN6's RAM in a NetBattle); his own hand and Custom screen (designed); his HP box on his own GBA.",
+      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object (him and what he spawns) at BN6's two address routines, kept in two effect slots taken in BN6's own pool.",
+      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); a chip used from a partner's own hand (A fires no chip in the scripted Arena battle, for a lead either); his own folder and Custom screen (designed); his HP box on his own GBA.",
       "updated": "2026-10-21",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side",
       "state_text": "Being built"
@@ -129,7 +129,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-10-21",
-      "what": "--dev arena2v2: side 0's partner's own battle NaviStats (RAM_TEAM_NAVI, src/online/arena_team_navi.c), answered by object; teamhp=N and arenaother for its proof."
+      "what": "--dev arena2v2: each partner's own battle NaviStats and hand (src/online/arena_team_navi.c), answered by object, kept in two effect slots taken in BN6's own pool; teamhp=N and arenaother for their proof."
     }
   ],
   "experiments": [
@@ -152,9 +152,9 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "Arena",
       "date": "2026-10-21",
-      "name": "Two MegaMen a side: the partner's own NaviStats",
-      "result": "With BN6's battle NaviStats routine (0x08013682) answered by object for the five routines that pass the object in r5, side 0's partner reads and writes his own record: given 150 max HP he is set up with 150 while his lead keeps 100, a hit takes him 100 to 90 while his lead stays at 100, the second GBA's screen shows his own HP under him; both GBAs agree at all 2,399 iterations, with 107 rollbacks and without them all 44 hashes the same, arenaroll=8 335 of 335 the same; his record on one GBA alone parts them from iteration 1; with the record his side's copy the battle's 194 hits are those without the hook.",
-      "meaning": "BN6's one-NaviStats-a-side is answered by object without touching its code; the RAM the project has free holds one record, so the second partner's waits on a RAM survey.",
+      "name": "Two MegaMen a side: the partners' own NaviStats and hands",
+      "result": "With BN6's battle NaviStats routine (0x08013682) and hand routine (0x08010018) answered by object for asks that pass the object in r5, each partner reads and writes his own record and hand, kept in two effect slots taken in BN6's pool (0x02036710): given 150 max HP both partners are set up with 150 while their leads keep 100, hits take each from his own, each GBA's screen shows its enemy partner's own HP and the chip icon over each partner from his own hand; both GBAs agree at all 2,399 iterations, with 129 rollbacks and without them all 44 hashes the same, arenaroll=8 335 of 335 the same; the records on one GBA alone part them from iteration 1; with the records and hands their sides' copies the battle's changes of HP are those without the hooks. No chip was seen used: A fires none in this scripted battle, for a lead either.",
+      "meaning": "BN6's one NaviStats and one hand a side are answered by object without touching its code, the room taken from BN6's own object pool, since the RAM the project has free holds one record.",
       "link": "../ONLINE_ARENA.md#the-partners-own-navistats"
     },
     {

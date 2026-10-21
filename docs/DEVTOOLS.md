@@ -547,11 +547,13 @@ partner a stream of the Arena's input of his own, scripted by the
 frame's number, and the two GBAs compared iteration by iteration at the
 battle's end (`arena2v2:` lines, with each hit by MegaMan); `arena2v2=N`
 (N > 1) flips one key of side 0's partner on the second GBA alone from
-iteration N, a mutation that must part them. `teamhp=N` gives side 0's
-partner his own battle NaviStats' max HP N (`-N` the second GBA's alone,
-the record's mutation), and `arenaother` shows the second GBA's screen
-instead of the first's (the game the same: a picture drawn changes no
-state), where the partner's HP shows under him.
+iteration N, a mutation that must part them; on the Custom screen each
+lead takes the chip under the cursor before the script's OK, which his
+partner's own hand is dealt. `teamhp=N` gives each partner his own
+battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
+mutation), and `arenaother` shows the second GBA's screen instead of the
+first's (the game the same: a picture drawn changes no state), where side
+0's partner's HP shows under him.
 
 `--dev rollbench` measures what a rollback of the Arena costs on the
 machine it runs on (issue #128), on the player's ROM, and says it on the

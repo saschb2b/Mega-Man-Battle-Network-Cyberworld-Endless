@@ -36,6 +36,7 @@ typedef struct {
 	uint16_t hp[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];
 	uint16_t keys[HOOK_CORES][ITERATIONS][SIDES];     /* each partner's keys taken */
 	uint8_t late[HOOK_CORES][ITERATIONS];    /* the sides whose partner's slot held no keys for the iteration */
+	uint8_t at[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
 	uint32_t last[HOOK_CORES];               /* the last iteration each met */
 } TeamLog;
 static TeamLog *T;
@@ -81,12 +82,14 @@ uint16_t arena_team_script(unsigned player, uint32_t frame) {
 		/* side 0's partner: up to row 1 (column 1), charged shots along it */
 		unsigned t = frame % 480;
 		if (t < 4 || (t >= 16 && t < 20)) return KEY_UP;
+		if (t >= 340 && t < 344) return KEY_A;   /* (a chip of his own hand, standing) */
 		return (t >= 40 && t < 150) || (t >= 200 && t < 310) ? KEY_B : 0;
 	}
 	if (player == 3) {
 		/* side 1's partner: charged shots along row 1 (column 6), a step down and back between */
 		unsigned t = (frame + 100) % 400;
 		if (t >= 300 && t < 304) return KEY_DOWN;
+		if (t >= 280 && t < 284) return KEY_A;
 		if (t >= 340 && t < 344) return KEY_UP;
 		return t < 110 || (t >= 150 && t < 260) ? KEY_B : 0;
 	}
@@ -138,6 +141,8 @@ static HookAct keys(HookRegs *r, void *user) {
 	if (r->r[0] != 0) return HOOK_CONTINUE;
 	uint32_t tick = hook_read32(RAM_TEAM_TICK) + 1;
 	hook_write32(RAM_TEAM_TICK, tick);
+	/* (a lead's hand dealt anew by the Custom screen: his partner's dealt from it) */
+	arena_team_navi_deal();
 	int slot = hook_slot();
 	bool kept = T && slot >= 0 && slot < HOOK_CORES && tick < ITERATIONS;
 	uint8_t late = 0;
@@ -159,6 +164,7 @@ static HookAct keys(HookRegs *r, void *user) {
 	}
 	if (kept) {
 		T->late[slot][tick] = late;
+		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[slot][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
 		T->digest[slot][tick] = digest(slot, tick);
 		if (tick > T->last[slot]) T->last[slot] = tick;
 	}
@@ -214,13 +220,17 @@ bool arena_team_report(void) {
 		printf("arena2v2: GBA %u at iteration %u: partners at %02X and %02X, HP %u %u | %u %u\n", g, (unsigned)n,
 			T->partner[s][n][0], T->partner[s][n][1], hp[0], hp[1], hp[2], hp[3]);
 	}
-	/* (each hit as the first GBA had it: whose HP fell when, each MegaMan's own) */
+	/* (each hit as the first GBA had it: whose HP fell when, each MegaMan's own; and each chip used, from whose hand) */
 	static const char *const who[SIDES * MEGAMEN] = { "side 0's player", "side 0's partner", "side 1's player", "side 1's partner" };
 	for (uint32_t t = 2; t <= n; ++t)
-		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m)
+		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) {
+			if (T->at[a][t][m] != T->at[a][t - 1][m])
+				printf("arena2v2: iteration %u: %s's hand's chip up next %u to %u (the others' %u %u %u %u)\n", (unsigned)t, who[m],
+					T->at[a][t - 1][m], T->at[a][t][m], T->at[a][t][0], T->at[a][t][1], T->at[a][t][2], T->at[a][t][3]);
 			if (T->hp[a][t][m] != T->hp[a][t - 1][m])
 				printf("arena2v2: iteration %u: %s's HP %u to %u (the others' %u %u %u %u)\n", (unsigned)t, who[m], T->hp[a][t - 1][m],
 					T->hp[a][t][m], T->hp[a][t][0], T->hp[a][t][1], T->hp[a][t][2], T->hp[a][t][3]);
+		}
 	fflush(stdout);
 	return n && !differing;
 }

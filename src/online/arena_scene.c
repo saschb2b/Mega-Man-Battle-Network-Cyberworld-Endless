@@ -63,6 +63,14 @@ static uint16_t busy_keys(uint32_t frame) {
 	return moves[(x * 2246822519u) >> 29];
 }
 
+/* --dev arena2v2: on the Custom screen a lead first takes the chip under
+ * the cursor, so that his hand holds one and his partner's is dealt it
+ * (arena_team_navi.h), before the script takes the cursor to OK */
+static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
+	if (dev.arena_2v2 <= 0 || !S.arena || arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return keys;
+	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
+}
+
 /* The second player: idle in the battle; at the Custom screen, the
  * cursor taken right to OK and OK pressed, again every 160 frames until
  * the screen closes (the starter folder's five chips, then OK: the
@@ -73,7 +81,7 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 	if (!S.arena || arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return 0;
 	unsigned t = frame % 160;
 	if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
-	return t >= 100 && t < 104 ? KEY_A : 0;
+	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
 }
 
 /* --dev arena2v2's partners, players 2 and 3: arena_team's script, by the frame's number alone */
@@ -85,7 +93,11 @@ static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 /* the player's buttons as the GBA's keys, bit for bit */
 static uint16_t pad_keys(void) {
 	static uint32_t tick;
-	if (dev.arena_both) return S.arena ? arena_bot_keys(S.arena, 0, tick++) : 0;
+	if (dev.arena_both && S.arena) {
+		uint32_t t = tick++;
+		return chip_first(0, t, arena_bot_keys(S.arena, 0, t));
+	}
+	if (dev.arena_both) return 0;
 	static const int buttons[10] = { BTN_A, BTN_B, BTN_SELECT, BTN_START, BTN_RIGHT, BTN_LEFT, BTN_UP, BTN_DOWN, BTN_R, BTN_L };
 	uint16_t k = 0;
 	for (int i = 0; i < 10; ++i)
