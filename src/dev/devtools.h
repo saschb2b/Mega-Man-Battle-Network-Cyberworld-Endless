@@ -58,8 +58,12 @@ typedef struct {
 	int arena_carry; /* arenacarry=N: --dev arena's carried MegaMan goes in with N HP of his max, as a Team NetBattle's winner does (written on both GBAs at the Custom screen) */
 	int arena_roll; /* arenaroll=N: --dev arena rolls back N frames every N, the game's state checked (arena_roll.h, issue #128); 0 the game's hash said alone; -1 none */
 	int arena_freeze; /* arenafreeze=N: a Net Square battle held still on this side from its tick N for 40 seconds, its link kept (an app sent to the background): the other's stall note, its way out and its end seen */
-	int arena_2v2;  /* arena2v2=N (epic #167's spike): the pair's Practice NetBattle with two MegaMen a side, the partners' keys
-	                   scripted by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped from iteration N */
+	int arena_2v2;  /* arena2v2=N (epic #167): the pair's Practice NetBattle with two MegaMen a side, the partners' keys two
+	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
+	                   from iteration N */
+	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
+	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
+	                   GBA alone, a mutation that must part the two */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

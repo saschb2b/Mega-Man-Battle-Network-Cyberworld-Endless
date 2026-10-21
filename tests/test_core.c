@@ -3577,7 +3577,8 @@ static void test_free_space(void) {
 	/* (BN6's RAM: persistent, then per battle) */
 	static const Region ram[] = {
 		{ "the pack's extension", RAM_PACK_EXT, RAM_PACK_EXT_END }, { "MegaMan's AI data under BN5's chip AI", RAM_PLAYER_AI, RAM_PLAYER_AI_END },
-		{ "--dev arena2v2's list", RAM_TEAM, RAM_TEAM_END }, { "spare, persistent", RAM_TEAM_END, RAM_PERSISTENT_END },
+		{ "--dev arena2v2's list", RAM_TEAM, RAM_TEAM_END }, { "--dev arena2v2's partners' keys", RAM_TEAM_RING, RAM_TEAM_RING_END },
+		{ "spare, persistent", RAM_TEAM_RING_END, RAM_PERSISTENT_END },
 		{ "the sea's submerge", RAM_SEA, RAM_DARK_LISTS }, { "the chip AI's lists", RAM_DARK_LISTS, RAM_NAVIS },
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },

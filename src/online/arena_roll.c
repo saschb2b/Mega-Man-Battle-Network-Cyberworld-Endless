@@ -9,9 +9,10 @@ struct ArenaRoll {
 	ArenaPair *pair;
 	unsigned window;
 	ArenaPairSnap *ring[ARENA_ROLL_MOST];       /* the snapshot before each of the last `window` frames */
-	uint16_t keys[ARENA_ROLL_MOST][ARENA_LOOKAHEAD][2];
+	uint16_t keys[ARENA_ROLL_MOST][ARENA_LOOKAHEAD][ARENA_PLAYERS];
 	ArenaPairSnap *straight, *again;
 	uint32_t rolls, same;
+	bool said;
 };
 
 ArenaRoll *arena_roll_new(ArenaPair *pair, unsigned window) {
@@ -27,16 +28,22 @@ ArenaRoll *arena_roll_new(ArenaPair *pair, unsigned window) {
 	return r;
 }
 
+void arena_roll_say(ArenaRoll *r) {
+	if (!r || r->said) return;
+	r->said = true;
+	if (r->rolls) printf("arena: %u rollbacks of %u frames, the game's state the same after %u\n", r->rolls, r->window, r->same);
+}
+
 void arena_roll_free(ArenaRoll *r) {
 	if (!r) return;
-	if (r->rolls) printf("arena: %u rollbacks of %u frames, the game's state the same after %u\n", r->rolls, r->window, r->same);
+	arena_roll_say(r);
 	for (unsigned i = 0; i < ARENA_ROLL_MOST; ++i) arena_pair_snap_free(r->ring[i]);
 	arena_pair_snap_free(r->straight);
 	arena_pair_snap_free(r->again);
 	free(r);
 }
 
-bool arena_roll_before(ArenaRoll *r, uint32_t frame, const uint16_t keys[ARENA_LOOKAHEAD][2]) {
+bool arena_roll_before(ArenaRoll *r, uint32_t frame, const uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS]) {
 	memcpy(r->keys[frame % r->window], keys, sizeof r->keys[0]);
 	return arena_pair_save(r->pair, r->ring[frame % r->window]);
 }
@@ -47,7 +54,7 @@ bool arena_roll_after(ArenaRoll *r, uint32_t frame) {
 	if (!arena_pair_save(r->pair, r->straight) || !arena_pair_load(r->pair, r->ring[from % r->window])) return true;
 	for (uint32_t f = from; f <= frame; ++f) {
 		arena_pair_save(r->pair, r->ring[f % r->window]);
-		if (!arena_pair_step(r->pair, (const uint16_t (*)[2])r->keys[f % r->window], true)) return false;
+		if (!arena_pair_step_all(r->pair, (const uint16_t (*)[ARENA_PLAYERS])r->keys[f % r->window])) return false;
 	}
 	++r->rolls;
 	/* (the first few apart said in full) */

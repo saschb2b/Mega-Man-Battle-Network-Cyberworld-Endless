@@ -68,6 +68,10 @@ void arena_pair_begin(ArenaPair *pair);
  * A core ARENA_LOOKAHEAD frames ahead waits for its partner. False where
  * the cable stuck: the frame not done in STEP_LIMIT run loops. */
 bool arena_pair_step(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][2], bool own_clock);
+/* ... by its own clock with every stream (arena_input.h's ARENA_PLAYERS):
+ * the GBAs' pads, and under --dev arena2v2 each side's partner's keys,
+ * which each core samples in each of its frames (arena_team.h) */
+bool arena_pair_step_all(ArenaPair *pair, const uint16_t keys[ARENA_LOOKAHEAD][ARENA_PLAYERS]);
 /* The sides whose picture the next frames draw (bit 0 the first GBA's,
  * bit 1 the second's; both as the pair opens): a picture nobody sees is
  * a fifth of a core's frame saved, the game's state the same */

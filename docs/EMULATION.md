@@ -296,7 +296,8 @@ every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
 | `0x02010CE0`-`0x020115DF` | Persistent: the chip pack's extension, ids 320-511, 12 bytes an id (`BN6_PACK_EXT`; docs/MULTIROM.md, The chip registry) | `xchips_install.c` |
 | `0x020115E0`-`0x0201172F` | Persistent: MegaMan's AI data, BN5's 0x140 bytes, where BN5's ROM is read (`RAM_PLAYER_AI`: his object's +0x58 pointed here as he is set up, `0x080172F6`, his pool's 0x100 bytes copied first, the rest zero; BN5's chip AI keeps its state from +0xF0 to +0x13F, past BN6's 0x100), then at `0x02011720` his place in BN6's pool; DarkInvs's machine, docs/MULTIROM.md, The chips' code | `darkinvs.c` |
 | `0x02011730`-`0x0201174F` | Persistent: `--dev arena2v2`'s list of what a NetBattle spawns, two MegaMen a side (`RAM_TEAM`; epic #167's spike, docs/ROM_DATA.md, Two MegaMen a side) | `arena_team.c` |
-| `0x02011750`-`0x020117FF` | Persistent: spare | |
+| `0x02011750`-`0x0201178F` | Persistent: `--dev arena2v2`'s partners' keys (`RAM_TEAM_RING`: 8 slots a side, `0x20` bytes, each a u16 of keys and the u16 battle-loop iteration they are for), queued in both of the pair's cores at the sampling GBA's iteration plus 4 and taken at `BN6_KEY_COPY` by each GBA's own; emptied by the battle's spawn (docs/ONLINE_ARENA.md, Two MegaMen a side) | `arena_team.c` |
+| `0x02011790`-`0x020117FF` | Persistent: spare | |
 | `0x0203FB50`-`0x0203FBDF` | Per battle: BN5's sea's submerge (`RAM_SEA`; `XSEA_MASK` the submerged, a bit each by its collision data's own, `BN6_COLL_INDEX_BIT`; `XSEA_MARKERS` each one's marker by that bit's index, 32 words; 0x84 bytes used), which BN5 keeps in the collision data where BN6 keeps its bubble | `xsea.c` |
 | `0x0203FBE0`-`0x0203FD9F` | Per battle: the Dark Soul's chip AI's lists (`RAM_DARK_LISTS`, `BN6_DARK_LISTS`: BN5's `0x02034C20` laid out as BN5's, 0xE0 a side, BN6's chip ids), empty (0) as each battle is set up | `xnavi_dark.c`, `xnavi_bn5.c` |
 | `0x0203FDA0`-`0x0203FDAF` | Per battle: the moved Navis' own state (`RAM_NAVIS`): Colonel's sides' bits (`BN6_COLONEL_SIDES`, which BN5 keeps in BattleState +0x5C), the object the Dark Soul's AI data is now and its own in the pool (`BN6_DARK_AI_OWNER`, `BN6_DARK_AI_POOL`) | `xnavi_room.c`, `xnavi_dark.c` |
@@ -307,6 +308,16 @@ every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
 | `0x0203FF70`-`0x0203FFEF` | Per battle: the Souls' state in BN6's battles (`BN6_SOULS`: 0x20 bytes a side, and room for the track's later milestones; each side's +0x0E and +0x0F BN5's mood as BN6's battles keep it and whether a BN5 DarkChip made him dark, +0x06 the chaos level, +0x16 the Chaos Unison's charge's frame in its phases' cycle and +0x17 its release's request standing (`BN6_SOUL_LEVEL`, `BN6_SOUL_CYCLE`, `BN6_SOUL_REQUEST`: BN5's AIData +0x6C and +0x1C; docs/ROM_DATA.md, Chaos Unison), +0x14 the chip ColonelSoul's button took, committed at OK (his obstacle strike's side is `BN6_COLONEL_SIDES`, the Navis' field a Navi Colonel's spawn sets too, never BattleState +0x5C's bits, which BN6 reads as its own); docs/ROM_DATA.md, BN5's mood in BN6's battles; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a Soul's life on the proxy form): so every battle begins with no Soul, read and written by the Souls' hooks alone | `soulunite.c`, `soullife.c`, `soulmood.c`, `soulcolonel.c`, `soulchaos.c` |
 | `0x0203FFF0`-`0x0203FFF3` | Per battle: `--dev arena2v2`'s count of the battle loop's iterations (`RAM_TEAM_TICK`, a u32 the battle's setup zeroes), the clock both GBAs keep alike, by which the partners' keys go in | `arena_team.c` |
 | `0x0203FFF4`-`0x0203FFFF` | Per battle: spare (the game call's old mark, not used since issue #33) | |
+
+Under `--dev arena2v2` alone, two object slots of BN6's own are taken
+too: the fourth kind's (the effects') slots 30 and 31, `0xC8` bytes each
+from their nodes, marked in play in its pool (`BN6_T4_ACTIVE`) as the
+battle spawns its field and never linked into the run order, so BN6
+never runs, frees or zeroes them until the next battle sets its pool up:
+each partner's own battle NaviStats and hand (`arena_team_navi.c`;
+docs/ONLINE_ARENA.md, The partners' own NaviStats). A room taken in
+BN6's own allocator, not a region of this plan: the battle keeps 30
+effects.
 
 Persistent, `0x02010CDC`-`0x020117FF`: the engine RAM survey of issue #82
 (static scans, 592 runs, every RAM byte logged) found it written by the

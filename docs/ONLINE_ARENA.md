@@ -1732,30 +1732,257 @@ local scene): the plate reads "HP 40/100", the Custom screen's HP 40.
 
 ## Two MegaMen a side
 
-A spike of epic #167, research only: `--dev rollbench,arena2v2`
-(`src/online/arena_team.c`) runs the pair's Practice NetBattle with two
-MegaMen a side in BN6's own engine. A hook at the battle's spawn
-(`BN6_SPAWN_ENTITIES`) trades a NetBattle's list for one of four MegaMen; a
-hook at the battle loop's copy of the sides' keys (`BN6_KEY_COPY`, side 0's
-call) counts the loop's iterations in the core's RAM (`RAM_TEAM_TICK`) and
-writes the partners' keys, scripted by that count, into their AI data.
+Research toward epic #167's 2v2, never a player's battle:
+`--dev arena2v2=1` (`src/online/arena_team.c`) gives the pair's Practice
+NetBattle two MegaMen a side in BN6's own engine, with `--dev arena`
+(its local link) or `--dev rollbench`. A hook at the battle's spawn
+(`BN6_SPAWN_ENTITIES`) trades a NetBattle's list for one of four
+MegaMen; a hook at the battle loop's copy of the sides' keys
+(`BN6_KEY_COPY`, side 0's call) counts the loop's iterations in the
+core's RAM (`RAM_TEAM_TICK`) and writes each partner's keys into his AI
+data as BN6 writes a player's. `arena2v2=N` (N > 1) flips one key of
+side 0's partner on the second GBA alone for six iterations from
+iteration N: a mutation that must part the GBAs.
 
-The rule it proves: a partner's keys go in by the battle's iteration, which
-both GBAs count alike, never by a core's frame counter, which runs a frame
-or two apart on the two GBAs at the same iteration (what the feasibility
-study took for a skew inside BN6). With it the two GBAs' battles agree at
-every iteration (`arena2v2=1`: 489 compared, 0 apart, 11 rollbacks of 8
-frames coming back the same); one key flipped on the second GBA alone parts
-them (`arena2v2=165`: 325 apart from iteration 165, the partner on another
-panel). Under full rules BN5's chip AI gave both of side 0's MegaMen its one
-block of AI data (`RAM_PLAYER_AI`), so the flag keeps it the first's
+The rule the spike proved: a partner's keys go in by the battle's
+iteration, which both GBAs count alike, never by a core's frame counter,
+which runs a frame or two apart on the two GBAs at the same iteration
+(what the feasibility study took for a skew inside BN6). Under full
+rules BN5's chip AI gave both of side 0's MegaMen its one block of AI
+data (`RAM_PLAYER_AI`), so the flag keeps it the first's
 (`darkinvs_two_a_side`). The research notes, with the harness's whole
-battle and its fields compared byte by byte, are kept out of the repository
-(`.build/research/battles/engine-2v2.md`); a partner shares his side's hand,
-NaviStats and Custom screen, and four key streams have no wire yet.
+battle and its fields compared byte by byte, are kept out of the
+repository (`.build/research/battles/engine-2v2.md`).
+
+### Four streams
+
+The partners are players of the Arena's like the two GBAs' (21 October
+2026):
+
+- **The input** (`arena_input.c`) carries `ARENA_PLAYERS` streams: 0 and
+  1 the GBAs' pads as before, 2 and 3 side 0's and side 1's partners
+  (`arena_input_players`). A frame settles once every stream in play is
+  known for it and the one after; a partner's key not yet come is
+  guessed as his last held and rolled back where it came otherwise, as
+  the other player's are. Two streams leave the partners' columns
+  released, so a NetBattle without the flag takes the same keys as
+  before.
+- **The local link** (`arena_link_local.c`) queues each remote stream on
+  its own, after the same latency: the peer's (player 1) and, with
+  `arena_link_local_partners`, both partners', by the frame as the
+  peer's. `--dev arena,arena2v2=1` gives them `arena_team_script`, by the
+  frame's number alone (side 0's partner steps up to row 1 and fires
+  charged shots along it; side 1's fires along row 1 and steps down and
+  back between), so a run that rolls back and one that does not hand
+  them the same keys. The link's `poll_player` takes them; the
+  network's link has none (below).
+- **The pair** (`arena_pair_step_all`) samples a side's partner's keys
+  on that side's GBA's frames, as a GBA's pad is read: before a core's
+  first run loop in a frame of its own clock, his keys for that frame
+  (a core as far ahead as the keys go samples once the next frame of
+  the pair gives it its own). The frame last sampled is each core's in
+  the pair and in its snapshot.
+- **The rings** (`arena_team_sample`): the sample is queued in both
+  cores' RAM, `RAM_TEAM_RING` (8 slots a side of a u16 of keys and the
+  u16 iteration they are for), at the sampling GBA's iteration plus
+  BN6's own link delay, 4 (a key pressed at a GBA's frame t is in both
+  GBAs' key array at t + 4: the engine study), so a partner's keys are
+  as late as his lead's. At `BN6_KEY_COPY` each GBA takes its own
+  iteration's slot; a slot that holds another iteration's keys is a late
+  take, the partner holding his last keys, counted. The spawn empties
+  the rings with the battle; the count and the rings are core RAM, so a
+  rollback puts them back with the state and the pair's hash covers
+  them.
+
+Proved with BN5's ROM beside BN6's (full rules), delay 1, a fresh data
+folder, `--dev arena,arenaboth,arena2v2=1,quitend` (with the partners'
+script as it was at the streams' commit, before the records, the hands
+and their chips):
+
+| Run | End | Hashes | The two GBAs | Partners' keys |
+| --- | --- | --- | --- | --- |
+| `arenalag=4` (window 8: 107 rollbacks, 428 frames run again) | over at frame 2690, side 0 won | 44 agreed | 2,399 iterations, 0 apart | 0 late, 0 taken apart |
+| `arenalag=0`, `arenawindow=8` (0 rollbacks) | over at 2690 | all 44 the same as the run above, frame for frame | 2,399, 0 apart | 0 late |
+| `arenalag=4,arenawindow=0` (the delay alone, 4 ticks stalled) | over at 2686 | 44 | 2,396, 0 apart | 0 late |
+| `arenalag=4,arenaroll=8` (8 frames rolled back every 8) | over at 2686 | all 44 the same as the delay alone's | 2,396, 0 apart | 0 late; 335 rollbacks of 8 frames, the game's state the same after all 335 |
+| `arena2v2=300,arenalag=4` (the mutation) | over at 2690 | 44 (the local link echoes them) | 2,100 of 2,399 apart from iteration 300: side 0's partner at column 2 row 3 with 65 HP on the second GBA, deleted at column 1 row 1 on the first | 6 taken apart |
+| `--dev rollbench,arena2v2=1` | 600 frames | | 489, 0 apart | 0 late; rollbacks of 8: 11 of 11 the game's state the same |
+
+(The delay alone stalls, and `arenaboth`'s first player is a script by
+the tick, so its battle is another than the rolling one's; the rollback
+tried runs with no window and comes back to its hashes.) A NetBattle
+without the flag is the battle it was:
+`--dev arena,arenaboth,arenalag=4,arenadelay=1` over at frame 2690 with
+the last hash `86d2f837337a1494`, as before the change.
+
+Each MegaMan's HP is his own object's (`BN6_T1_HP`): in the battle
+above both partners stand on the field's purple panels of columns 1 and
+6 (poison, as the picture and the drain read: 1 HP each 7 iterations
+from iteration 62, the leads beside them on plain ones untouched), side 0's partner's
+charged shot takes side 1's partner from 40 to 30 at iteration 477 and
+side 1's takes side 0's from 50 to 40 at 407, side 0's player's charged
+shots take side 1's player from 100 to 0 (iterations 184 to 2344), and
+side 0's player, whom nothing hits, stays at 100 throughout, his
+partner deleted at iteration 685; both GBAs alike at every iteration.
+On the first GBA's screen side 1's MegaMen carry their own HP under
+them (89 and 51 at the battle's frame 600); a GBA's own partner has no
+label.
+
+### The partners' own NaviStats
+
+BN6 keeps one battle NaviStats a side (`BN6_BATTLE_NAVI`, `0x64` bytes:
+HP, the buster's levels, abilities, mood, form), and every reader and
+writer goes through one routine with a side (`BN6_NAVI_STATS_ADDR`). Five
+routines take that side from the object in r5 (`BN6_NAVI_BY_OBJECT`:
+330 calls in bn6f, a MegaMan's HP as he is set up, his forms, his mood);
+the rest pass a side (the HP box, the Custom screen, the battle's end)
+and stay the side's lead's. `src/online/arena_team_navi.c` answers the
+five by object (21 October 2026):
+
+- **Each partner's record**, a copy of his side's made as the battle
+  spawns its field, his own max HP in it where `teamhp=N` gives one (as
+  his own loadout will).
+- **Their room is BN6's own.** The RAM BN6 leaves alone (docs/
+  EMULATION.md, BN6's RAM) has `0x70` bytes left past the partners'
+  rings, room for one record of `0x64`, not two. So each record takes an
+  object slot of BN6's fourth kind (the effects: 32 of `BN6_T4_SIZE`,
+  `0xC8` bytes), slots 30 and 31, taken in its pool (`BN6_T4_ACTIVE`,
+  slot i bit 31 - i) as the field spawns, the pool just set up. BN6 runs
+  and frees its objects through their run order alone (bn6f
+  `object_freeMemory`: an object frees itself), and reads the pool's
+  bits only to find a free slot as it spawns (the lowest first) and to
+  clear them all as the next battle sets up
+  (`InitializeStructsOfObjectType`): a slot taken and never linked is
+  never run, never freed, never zeroed until then. The battle keeps 30
+  effects. A slot's `0xC8` bytes hold his record and his hand (`0x50`,
+  below).
+- **By object**: an answering hook at `BN6_NAVI_STATS_ADDR` returns a
+  partner's record where the ask comes from one of the five (its return
+  address), for his side, and r5 is his object, or one he spawned, or
+  one they spawned in turn: every spawn (`BN6_SPAWN_COMMON`, r5 the
+  spawner) marks the object it makes (`BN6_SPAWN_MADE`) a partner's or
+  no one's, for each of the three kinds' 32 slots. The marks are kept a
+  core between calls (`hook_keep_slots`), so a rollback puts them back;
+  the records are core RAM, in the pair's hash.
+
+Proved with `--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1`
+(the partners' records and hands as committed, the partners tapping A):
+
+| Run | End | Hashes | The two GBAs |
+| --- | --- | --- | --- |
+| `arenalag=4` (221 rollbacks, 884 frames run again) | over at frame 2690 | 44, all the same as `arenalag=0`'s (0 rollbacks) | 2,399 iterations, 0 apart |
+| `arenalag=4,arenaroll=8` | over at 2686 | all 44 the same as the delay alone's (`arenawindow=0`) | 2,396, 0 apart; 335 rollbacks of 8 frames, the game's state the same after all 335 |
+| `teamhp=-150` (the records' HP on the second GBA alone) | over at 2690 | | apart from iteration 1 (2,399 of 2,399) |
+| `--dev rollbench,arena2v2=1,teamhp=150` | 600 frames | | 489, 0 apart; rollbacks of 8: 11 of 11 the game's state the same |
+
+With the records their sides' copies (`arena2v2=1` alone, before the
+partners took chips) the battle's 194 changes of HP were those without
+the hooks, iteration for iteration. Both partners are set up with 150 HP
+from their records while their leads keep 100: the field's poison takes
+both from iteration 62; side 1's partner's charged shot takes side 0's
+from 100 to 90 at iteration 407 and his Cannon from 84 to 43 at 454,
+while side 0's player, whom nothing hits, stays at 100 and side 1's
+falls by his own hits alone (100 to 90 at 184, 132 left on his partner
+then); side 0's partner is deleted at iteration 685 and side 1's at
+1035. Each GBA's screen shows its enemies' own HP under them: on the
+first, side 1's player 100 to 67 and his partner 144, 123, 101 at the
+battle's frames 300 to 600; on the second (`arenaother`), side 0's
+player 100 throughout and his partner 144 to 37 by frame 700. The
+records answered some 40,000 to 80,000 asks each a battle, all of them
+the partners' own objects': of the 64 to 86 objects marked theirs
+(their buster's shots, their Cannons and the effects) none asked by
+object, so an attack's inheriting his record is built and its marks
+counted, but not yet seen to matter. The HP box on a partner's own GBA
+(BN6 draws its lead's) and a partner's own loadout (his NaviCust's
+programs, his Cross) wait on his own GBA's screen and the wire.
+
+### The partners' own hands
+
+BN6 keeps one hand a side (`BN6_BATTLE_HAND`, `0x50` bytes: the chip up
+next, six chips, their powers), every reader through one routine with a
+side (`BN6_HAND_ADDR`, `0x08010018`: 20 calls in bn6f, and
+`getCurChipInBattleHand_8010004`'s 7 through it, most with the side of
+the object in r5). The same answer by object as the NaviStats': a hook
+there returns a partner's own hand, in his room after his record, where
+r5 is his or his marks' and the side asked for is his. His hand starts
+as his side's as the battle sets it up (empty) and is dealt from his
+lead's each time the Custom screen deals his lead's anew (at the first
+iteration whose lead's hand differs from the one last dealt and has its
+first chip up next; the comparison kept a core for a rollback): his own
+Custom screen is to come. Under the flag a lead takes the chip under the
+cursor before the script's OK, so that a hand holds one (Cannon).
+
+Measured with the runs above (the partners tapping A a few times a
+cycle until they are free to use a chip): side 0's partner uses his
+Cannon at iteration 177 and side 1's at 429, each one's own hand's chip
+up next going from 0 to 1 while his lead's stays at 0 (each lead still
+holds his Cannon, "Cannon 40" still at the foot of his GBA's screen);
+side 1's partner's Cannon takes side 0's partner from 84 to 43 at
+iteration 454 (40 and the poison's 1). On both screens the chip's icon
+is drawn over each partner from his own hand and leaves him as he uses
+it, his lead's staying; the second GBA's (`arenaother`) shows side 1's
+partner firing it from the left and side 0's partner's own HP under him
+falling 85, 52, 40. The hands answered some 5,000 to 9,000 asks each a
+battle, all the partners' own objects'; the GBAs agree at every
+iteration; with 221 rollbacks and with none all 44 hashes the same,
+`arenaroll=8` 335 of 335 the same. Before the partners tapped A (one
+press each, which met them busy), the hands as their leads' copies left
+the battle's 272 changes of HP as with the hook switched off (a debug
+run). Not yet: a partner's own folder and Custom screen (below): his
+hand is his lead's chips, his own to use.
+
+### A partner's own Custom screen (design)
+
+- **His chips**: he draws from his own folder, which crosses as his
+  loadout does today (`arena_format.c`), installed in his GBA's core as
+  his side's lead's is; his deck dealt as BN6 deals a side's
+  (`BN6_DECK_DEALT`), both GBAs alike, kept in his room or a third.
+- **His Custom screen**: BN6's opens on each GBA for its lead (BattleState
+  +0x0D). His is ours, drawn over his own client's picture while BN6's is
+  open on his side's GBA (`BN6_PHASE_CUSTOM`), his picks crossing as keys
+  of his stream (the cursor and A), the screen run from them by the pair
+  on every client alike; at its close (a moment both GBAs agree on: the
+  first iteration whose lead's hand is dealt anew, as his hand's deal
+  above) his picks are written into his own hand on both cores at the
+  same iteration, as the rings' keys are, in place of his lead's copy.
+- **His HP**: his own GBA's HP box drawn from his object, not his lead's,
+  by our own label over the picture or BN6's box read from his record.
+
+### Four streams over the network (design, not built)
+
+Not on the wire yet (another branch changes the server and the wire):
+the shape for a 2v2 between four games, each running the pair.
+
+- Four seats: a client is player 0 or 1 (a GBA's pad) or 2 or 3 (a
+  side's partner, `ArenaLink.side` read as the seat). Each sends its own
+  stream in order, a frame's keys once, as today's `input` messages,
+  with its seat; the server relays every stream to the three others and
+  to the stands, its pairing and ready taken by four.
+- Every client runs the same pair from the four streams, each guessed
+  and rolled back alike (`arena_input`'s four columns); the pair's hash
+  every 60 frames compared by all four; a stall names whose PET it waits
+  for among three.
+- The partners' sampling stays on their side's GBA's frames inside the
+  pair, so the seat a partner's client holds changes nothing of the
+  battle: the stream is all that crosses.
+- Each client's delay and window are the slowest link's of its three
+  (the time sync held against the furthest); a partner's keys ride the
+  same delay as his lead's, BN6's own 4 iterations added inside the
+  pair.
+- The protocol's version moves with it; a v11 client is never paired
+  into a 2v2.
 
 ## Not yet
 
+- Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
+  four streams over the server (designed, the wire unchanged); a
+  partner's own folder, Custom screen and HP box on his own GBA (his
+  hand is dealt his lead's chips); his own loadout in his record (his
+  NaviCust's programs, his Cross); an attack of his seen asking his
+  record by object (built, none asked yet); and the full-rules audit of
+  what is keyed by a side's player: the Souls, BN5's mood, the DarkChips,
+  the chip AI's state past BN6's AI data on a partner, BN5's Navis'
+  targets.
 - Team NetBattles ([Team NetBattles](#team-netbattles)): teams of three
   (6 of a channel's 8); a heal on a carried HP, which the relay starts
   without (watch whether anchors sweep); partners' fixed phrases to each

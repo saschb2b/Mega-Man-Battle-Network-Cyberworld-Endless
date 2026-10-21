@@ -49,7 +49,7 @@ static bool dev_switch(const char *t) {
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "visitors", &dev.visitors },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy },
-		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "quitend", &dev.quit_end },
+		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {
 		{ "speed=", &dev.speed }, { "duels=", &dev.duels }, { "pack=", &dev.pack }, { "programs=", &dev.programs }, { "clock=", &dev.clock },
@@ -57,7 +57,7 @@ static bool dev_switch(const char *t) {
 		{ "side=", &dev.side }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
-		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "arenawindow=", &dev.arena_window },
+		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "arenafreeze=", &dev.arena_freeze },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)

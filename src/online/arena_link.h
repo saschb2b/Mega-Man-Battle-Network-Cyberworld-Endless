@@ -35,10 +35,17 @@ struct ArenaLink {
 	 * has come. NULL where the link carries none (the local one) */
 	void (*send_lag)(ArenaLink *link, int lag);
 	bool (*poll_lag)(ArenaLink *link, int *lag);
+	/* a partner's keys for `frame` (player 2 or 3, ARENA_PLAYERS), once
+	 * they have come, as poll's: NULL where the link carries none (the
+	 * network's: its wire has no partners yet, docs/ONLINE_ARENA.md, Two
+	 * MegaMen a side) */
+	bool (*poll_player)(ArenaLink *link, unsigned player, uint32_t frame, uint16_t *keys);
 };
 
 /* A peer on this machine: its keys for a frame (an idle one gives 0) */
 typedef uint16_t (*ArenaPeerKeys)(void *context, uint32_t frame);
+/* ... and a partner's (player 2 or 3) */
+typedef uint16_t (*ArenaPartnerKeys)(void *context, unsigned player, uint32_t frame);
 
 #define ARENA_LOCAL_QUEUE 128   /* messages under way: a power of two */
 #define ARENA_LOCAL_HASHES 16
@@ -48,12 +55,15 @@ typedef struct {
 	unsigned latency;   /* ticks a message takes, one way */
 	uint32_t now;       /* the tick under way, 0 the battle's first */
 	bool started;       /* (its first tick begun) */
-	struct { uint32_t at, frame; uint16_t keys; } queue[ARENA_LOCAL_QUEUE];
-	uint32_t head, tail;
+	/* each remote player's messages under way: the peer's (player 1), the partners' (2 and 3) */
+	struct { uint32_t at, frame; uint16_t keys; } queue[ARENA_PLAYERS][ARENA_LOCAL_QUEUE];
+	uint32_t head[ARENA_PLAYERS], tail[ARENA_PLAYERS];
 	struct { uint32_t at, frame; uint64_t hash; } hashes[ARENA_LOCAL_HASHES];
 	unsigned nhashes;
 	ArenaPeerKeys peer;
 	void *peer_context;
+	ArenaPartnerKeys partners;   /* NULL: no partners' streams */
+	void *partners_context;
 	uint32_t sent;      /* my frames sent: the next is this one */
 	bool lost;          /* a message dropped (the queue full): broken */
 } ArenaLocalLink;
@@ -62,5 +72,8 @@ typedef struct {
  * frame t + delay made at tick t, each message delivered `latency` ticks
  * later; the hashes come back as sent, after the same latency */
 ArenaLink *arena_link_local(ArenaLocalLink *l, unsigned delay, unsigned latency, ArenaPeerKeys peer, void *context);
+/* ... with both partners on it too (--dev arena2v2: players 2 and 3, by
+ * the frame as the peer's, after the same latency), before its first tick */
+void arena_link_local_partners(ArenaLocalLink *l, ArenaPartnerKeys partners, void *context);
 
 #endif

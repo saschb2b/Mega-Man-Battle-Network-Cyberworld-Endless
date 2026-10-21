@@ -15,6 +15,10 @@
 #include <stdint.h>
 
 #define ARENA_LOOKAHEAD 2      /* a frame's keys and the one after it */
+/* the streams a battle may carry: the two GBAs' players, then (--dev
+ * arena2v2, epic #167: Two MegaMen a side) each side's partner, players 2
+ * and 3, whose keys go in by the battle's iteration (arena_team.h) */
+#define ARENA_PLAYERS   4
 #define ARENA_RING      256    /* frames held: a power of two, past the longest delay */
 #define ARENA_DELAY_MIN (ARENA_LOOKAHEAD - 1)
 #define ARENA_DELAY_MAX 60     /* a second: past it a link is too slow to play over */
@@ -22,9 +26,10 @@
 #define ARENA_NO_FRAME  UINT32_MAX
 
 typedef struct {
-	uint16_t keys[ARENA_RING][2];
-	uint32_t known[2];   /* player i's keys are known for the frames below this (each stream in order) */
-	uint32_t guessed[2]; /* ... and guessed (his last known held) from there up to below this */
+	uint16_t keys[ARENA_RING][ARENA_PLAYERS];
+	uint32_t known[ARENA_PLAYERS];   /* player i's keys are known for the frames below this (each stream in order) */
+	uint32_t guessed[ARENA_PLAYERS]; /* ... and guessed (his last known held) from there up to below this */
+	unsigned players;    /* the streams in play: 2, or ARENA_PLAYERS with the partners' */
 	uint32_t wrong;      /* the first frame whose key came otherwise than guessed: ARENA_NO_FRAME none */
 	uint32_t next;       /* the next frame of the pair to run */
 	unsigned delay;      /* D: a key sampled at tick t is frame t + D's */
@@ -40,20 +45,24 @@ typedef enum {
 
 /* An empty buffer with the delay clamped to [ARENA_DELAY_MIN,
  * ARENA_DELAY_MAX]: both players' first D frames released keys, as every
- * client starts them */
+ * client starts them; two streams in play */
 void arena_input_init(ArenaInput *in, unsigned delay);
+/* ... or `players` of them (2 to ARENA_PLAYERS), before any is put: the
+ * partners' first D frames released too; a frame settles once every
+ * stream in play is known for it */
+void arena_input_players(ArenaInput *in, unsigned players);
 /* player's keys for `frame`, its stream's next (where it was guessed
  * otherwise, `wrong` says so) */
 ArenaPut arena_input_put(ArenaInput *in, unsigned player, uint32_t frame, uint16_t keys);
-/* the frames below this have both players' keys known for them and the
+/* the frames below this have every stream's keys known for them and the
  * one after: whatever ran them is the truth, never run again */
 uint32_t arena_input_settled(const ArenaInput *in);
 /* the next frame may run: at most `window` frames on a guess (0: its keys
  * and the one after all known, the delay alone) */
 bool arena_input_ready(const ArenaInput *in, unsigned window);
 /* ... taken: out[k][player] the keys of frame next + k, those not yet come
- * guessed, and next moved on */
-bool arena_input_take(ArenaInput *in, unsigned window, uint16_t out[ARENA_LOOKAHEAD][2]);
+ * guessed (a stream not in play released), and next moved on */
+bool arena_input_take(ArenaInput *in, unsigned window, uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS]);
 /* the first frame that ran on a key guessed wrong, to roll back to:
  * ARENA_NO_FRAME none */
 uint32_t arena_input_wrong(const ArenaInput *in);

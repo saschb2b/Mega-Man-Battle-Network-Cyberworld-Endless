@@ -116,6 +116,16 @@ void arena_rollback(Arena *a, int window);
  * run once its keys have all come); -1, as it starts, what a frame of the
  * pair costs here affords (arena_window.h) */
 void arena_window(Arena *a, int window);
+/* The streams the battle carries, before the way in is done: 2, or
+ * ARENA_PLAYERS with each side's partner's (--dev arena2v2, epic #167:
+ * the partners' keys polled from the link, guessed and rolled back as the
+ * other player's, and queued into both GBAs by the battle's iteration,
+ * arena_team.h); a link that carries no partners keeps 2 */
+void arena_players(Arena *a, unsigned players);
+/* The GBA whose picture is drawn and shown (0 the cable's first, 1 the
+ * second; -1, as it starts, mine): --dev arenaother's, the other GBA's
+ * screen seen (the game's state the same whichever is drawn) */
+void arena_show(Arena *a, int side);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before
