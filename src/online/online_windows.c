@@ -244,7 +244,7 @@ void online_socket_close(void) {
 /* the worker's rest (online_socket.h): a semaphore made once and kept for
  * the process, posted by the game's thread and by WinHTTP's read
  * completions; WinHTTP says no word of Nagle's algorithm and lets none be
- * set (docs/ONLINE_ARENA.md, No send held back) */
+ * set (docs/ONLINE_ARENA.md, Quicker on the wire) */
 static SDL_atomic_t wake_made;
 static SDL_sem *wake;
 
