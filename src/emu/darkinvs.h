@@ -31,6 +31,9 @@ bool darkinvs_install(void);
 /* --dev chipai: the machine entered in each battle, two seconds in, for
  * DarkInvs's 600 frames */
 void darkinvs_dev(bool on);
+/* --dev arena2v2 (arena_team.h): two MegaMen a side, the block of BN5's
+ * size (RAM_PLAYER_AI) side 0's first's alone, the second keeping BN6's */
+void darkinvs_two_a_side(bool on);
 /* MegaMan's object `me` put under the chip AI for `frames` frames, as
  * BN5's DarkInvs does (its AI data moved first where it is BN6's 0x100);
  * from a hook (hook_read and hook_write). */

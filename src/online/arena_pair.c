@@ -35,6 +35,8 @@
 #include <mgba-util/vfs.h>
 
 #include "arena_souls.h"
+#include "arena_team.h"
+#include "devtools.h"
 #include "emu.h"
 #include "hook.h"
 #include "idle.h"
@@ -212,9 +214,9 @@ static bool attach(ArenaPair *p, unsigned side) {
 }
 
 /* full rules: BN5's hooks on the core's own table, after its state (a hook in RAM stands on what the state put there), and
- * its player's Souls for UNITE */
-static bool installs(struct mCore *core, unsigned souls) {
-	return xlog_hook_core(core) && soulunite_held_core(core, souls);
+ * its player's Souls for UNITE; --dev arena2v2's hooks (arena_team.h) */
+static bool installs(struct mCore *core, unsigned side, unsigned souls) {
+	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (dev.arena_2v2 <= 0 || arena_team_hooks(core, side));
 }
 
 ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2]) {
@@ -233,7 +235,7 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	for (unsigned side = 0; ok && side < 2; ++side) {
 		p->core[side] = arena_core_new(rom, size, p->video[side], true);
 		ok = p->core[side] && arena_core_load(p->core[side], state[side], state_size[side]) &&
-			installs(p->core[side], souls ? souls[side] : 0) && idle_on(p->core[side]) && attach(p, side);
+			installs(p->core[side], side, souls ? souls[side] : 0) && idle_on(p->core[side]) && attach(p, side);
 	}
 	if (ok) {
 		p->scratch_size = p->core[0]->stateSize(p->core[0]);

@@ -39,6 +39,8 @@
 		if (again) [self.messages addObject:message.data];
 		else self.state = -1;
 		[self.lock unlock];
+		/* (the worker's rest ended: online_socket_wait) */
+		online_socket_wake();
 		if (again) [self receive];
 		else [self.task cancelWithCloseCode:NSURLSessionWebSocketCloseCodeProtocolError reason:nil];
 	}];
@@ -151,4 +153,21 @@ void online_socket_close(void) {
 		connection = nil;
 		cancelled = NULL;
 	}
+}
+
+/* the worker's rest (online_socket.h): a semaphore made once and kept for
+ * the process, posted by the game's thread and by each message's
+ * completion; NSURLSessionWebSocketTask lets no TCP option be set
+ * (docs/ONLINE_ARENA.md, Quicker on the wire) */
+static SDL_atomic_t wake_made;
+static SDL_sem *wake;
+
+void online_socket_wait(uint32_t ms) {
+	if (!SDL_AtomicGet(&wake_made) && (wake = SDL_CreateSemaphore(0))) SDL_AtomicSet(&wake_made, 1);
+	if (SDL_AtomicGet(&wake_made)) SDL_SemWaitTimeout(wake, ms);
+	else SDL_Delay(1);
+}
+
+void online_socket_wake(void) {
+	if (SDL_AtomicGet(&wake_made)) SDL_SemPost(wake);
 }

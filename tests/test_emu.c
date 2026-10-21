@@ -442,6 +442,23 @@ static void two_cores(void) {
 	emu_audio_drop_from(g);
 	emu_audio_from(g);
 	CHECK(ring_drain(NULL) == 0, "a frame's sound let go reached the ring");
+	/* a rollback's sound (issue #167): the ring cut back to a mark, what is
+	 * not yet heard replaced by what is written next, what was heard skipped
+	 * in it, the ring's timeline kept */
+	uint64_t mark = emu_audio_mark();
+	guest_run(g, 2);
+	CHECK(emu_audio_mark() > mark, "the ring's mark stood still under the guest's sound");
+	emu_audio_rewind(mark);
+	CHECK(emu_audio_mark() == mark && ring_drain(NULL) == 0, "the ring not cut back to a mark none of it was heard past");
+	guest_run(g, 2);
+	int16_t heard[2 * 300];
+	CHECK(emu_audio_read(heard, 300) == 300, "300 of the guest's frames not heard");
+	emu_audio_rewind(mark);
+	CHECK(emu_audio_mark() == mark + 300 && ring_drain(NULL) == 0, "the ring not cut to what was heard");
+	guest_run(g, 2);
+	int again = ring_drain(NULL);
+	CHECK(again > 0 && emu_audio_mark() == mark + 300 + (uint64_t)again, "the sound run again: %d heard, the mark %llu past",
+		again, (unsigned long long)(emu_audio_mark() - mark));
 	/* its state saved and loaded, BN6's core untouched */
 	g->rawWrite32(g, 0x02000000, -1, 0xB5B5B5B5);
 	struct VFile *state = VFileMemChunk(NULL, 0);

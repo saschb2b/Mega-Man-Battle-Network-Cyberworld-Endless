@@ -30,6 +30,11 @@ struct ArenaLink {
 	void (*close)(ArenaLink *link);
 	unsigned side;    /* my player: 0 the cable's first GBA, 1 the second */
 	unsigned delay;   /* D: frames from a key's sampling to its frame (ARENA_DELAY_MIN..MAX) */
+	/* my least lag of the other's keys over the last second, in ticks, for
+	 * his time sync (arena_sync.h, protocol v11); and his, once a new note
+	 * has come. NULL where the link carries none (the local one) */
+	void (*send_lag)(ArenaLink *link, int lag);
+	bool (*poll_lag)(ArenaLink *link, int *lag);
 };
 
 /* A peer on this machine: its keys for a frame (an idle one gives 0) */
