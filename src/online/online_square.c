@@ -21,6 +21,7 @@
 #include "mapslot.h"
 #include "netmap.h"
 #include "npc.h"
+#include "pad_art.h"
 #include "rom.h"
 #include "square_plan.h"
 
@@ -41,14 +42,12 @@
 #define DESK_ANIM 0        /* its one animation: the clerks at work */
 #define DESK_RADIUS 28     /* walked into and spoken to as far from its middle */
 #define TALK_ROOM SQUARE_TALK_ROOM   /* the Square's chats (online_chat.c), one archive at a time */
-#define EXIT_REACH 12
 /* The pad home draws in front of its middle, as Lan's HP's portals draw
- * in front of their cells (lanhp_portal_near): a player stood on it as
- * drawn, 21 units towards the screen's front (-x, +y) of its middle,
- * outside a zone of 12 each way, and nothing asked (session 74). Its zone
- * takes in its art, stretched as far towards the front as theirs. */
-#define EXIT_FRONT_X 14
-#define EXIT_FRONT_Y 12
+ * in front of their cells: a player stood on it as drawn, 21 units
+ * towards the screen's front (-x, +y) of its middle, outside a zone of 12
+ * each way, and nothing asked (session 74). Its zone is its art, the
+ * return pad's ring (list 7's 0x81), as MegaMan stands on it, as every
+ * pad's is (pad_art.h). */
 #define FIXTURES (SQUARE_PROGS + 1)  /* the Mr.Progs and the desk, for A */
 
 /* the ambient actors' sprites (list, number): GreenNavi and GirlNavi
@@ -278,8 +277,8 @@ bool online_square_trade_say(const uint8_t *archive, int n) {
 }
 
 static bool near_exit(int x, int y, int reach) {
-	return x >= exit_x - EXIT_REACH - reach - EXIT_FRONT_X && x <= exit_x + EXIT_REACH + reach &&
-		y >= exit_y - EXIT_REACH - reach && y <= exit_y + EXIT_REACH + reach + EXIT_FRONT_Y;
+	PadArt art = { exit_x, exit_y, PAD_RING_ACROSS, PAD_RING_DOWN };
+	return pad_art_on(&art, x, y, reach);
 }
 
 bool online_square_on_exit(int x, int y) { return near_exit(x, y, 0); }

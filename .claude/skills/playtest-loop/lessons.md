@@ -2452,3 +2452,59 @@ talk used to guard.** #110 moved the portals' words to A, and the stray
 step onto a link that the proximity words had warned of went unasked: when
 a warning is taken away, look for the mistake it prevented and guard it
 another way (here a question on the irreversible step).
+
+## Session 74: the 0.13.0 candidate, online first: the Net Square, the NetPass, the week's dive, and a pink pad that never warped (kai 2/10; would not keep playing until the pad works)
+
+Four NEW GAMEs on four seeds, 111 calls. kai never played act 1: Lan's
+HP's pink pad warped on none of them, with or without the online option,
+nor on the week's dive. The rest of the session went to the Square: the
+gate, the NetPass's stamping (the best screen in the game, kai said), the
+greeter, a phrase and an emote, the channel's Mr.Prog, the dive's offer.
+
+Raised and fixed: the pink pad (#161: BN6's trigger stops short of the
+pad's art, a line x - y = 201 behind its middle; the portals' zones
+stretched to the art, the corridor's arrow and L pointing along it, not
+through the wall above it); the Square's referee and Trade Central's
+clerk not found, its pad home dead from its front, no NetPass key item,
+the gatekeeper's menu taking one stray A, Gregar's statue's line, a quit
+read as a deletion, the courier's news on a new game (#163).
+
+Open: the emote's bubble without MegaMan moving; the dive's real dates
+from a Mr.Prog; the dive's way home straight into Lan's room.
+
+Loop change: **the autopilot does not walk onto pads as a player does.**
+It warps where BN6's trigger is, so every autopilot run went through the
+pink pad while no player could: a change to a pad, a portal or the walk
+to one is checked by a scripted walk onto its art (AGENTS.md's town row),
+from the side a player comes.
+
+## Session 75: act 1 on the candidate, End Area's walkways and the lean economy (kai 4/10; would keep playing, but the walking ate the session)
+
+One boot, 134 calls. The pink pad and the corridor's arrow worked (#161
+confirmed); act 1 was BN5's End Area. Two layers: the gift, the NaviCust,
+a CanGard and a holed field kai loved, Chaud's call, then no dealer
+reached and no guardian. The economy question (is act 1 tense or starved)
+went unanswered: 250z after two layers, no price seen. About 35 calls went
+into End Area's junctions and walkway mouths, and 15 into layer 2's shops
+at the ends of parallel walkways.
+
+Raised and fixed (#165): the pads' left rim still dead (one zone for every
+pad, its art as drawn, `src/map/pad_art.c`; a layer's exit pad too); the
+heal Mr.Prog patching a MegaMan at full HP unasked and telling him to make
+it count (he keeps his patch then, and asks before he spends it); the
+gift's "A HEAD START? SURE!" answering nobody; L's Chip Trader with only a
+Shop on the map's key (a Trader entry); MegaMan's patch-note line on the
+older Net's Navis.
+
+Open: End Area's walkways (junction stubs and mouths that take neither
+of the walkway's two directions until MegaMan is on the junction's tile:
+a map change, never a movement one); shops at the ends of parallel
+walkways; the arrow flipping when a junction is overshot by a tile; talk
+range about two tiles; the title's "Home" against NEW GAME's "Layer 1
+run"; two A presses to close a Mystery Data's box.
+
+Loop change: **a question the session exists for gets a path to it.**
+The economy was the brief, and kai spent the session walking: when a
+session is meant to judge a system, its persona is pointed at it (a seed
+whose first layer's dealer is near the arrival, or a dev step) rather than
+left to reach it, and the walking is a report of its own.

@@ -18,6 +18,7 @@
 #include "gamecall.h"
 #include "mapslot.h"
 #include "npc.h"
+#include "pad_art.h"
 
 #define SONG 0x13          /* BN6's for every homepage, Lan's too */
 #define ARRIVAL_ENTRY 1    /* the blue pad */
@@ -84,11 +85,16 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
  * x - y = 201 (walked in from the front at x 194 to 200: it fired at y -7,
  * -5, -3 and -1, v0.12.0 the same): MegaMan seen on its pink middle,
  * at 194, 0 or 186, 6, stood outside it, and a playtester stood there in
- * four runs and never warped (session 74). A portal's zone for the checks,
- * the questions and the pink pad's step takes in its art: its cells,
- * stretched as far towards the screen's front (-x, +y). */
-#define FRONT_X 14
-#define FRONT_Y 12
+ * four runs and never warped (session 74). Stretched towards the screen's
+ * front, the pad's zone still left out its left rim, where a playtester
+ * stood at 176, 0 for 150 frames (session 75). A portal's zone for the
+ * checks, the questions and the pink pad's step is its cells and its art
+ * as MegaMan stands on it (pad_art.h): the pink pad's ring, measured on
+ * the screen 62 by 42 pixels round a middle 4 units in front of its
+ * cells' (-x, +y); a link's marker, its sprite on its cells' middle. */
+#define PINK_ACROSS 31
+#define PINK_DOWN 21
+#define PINK_FRONT 4
 
 static struct {
 	bool read;
@@ -271,11 +277,18 @@ void lanhp_portal_spot(int k, int *x, int *y) {
 	*y = H.y[portal_entry[k]];
 }
 
+static PadArt portal_art(int k) {
+	int e = portal_entry[k];
+	if (k == 0) return (PadArt){ H.x[e] - PINK_FRONT, H.y[e] + PINK_FRONT, PINK_ACROSS, PINK_DOWN };
+	return (PadArt){ H.x[e], H.y[e], PAD_MARK_ACROSS, PAD_MARK_DOWN };
+}
+
 int lanhp_portal_near(int x, int y, int reach) {
 	if (!read_spots()) return -1;
 	for (int k = 0; k < LANHP_PORTALS; ++k) {
 		int e = portal_entry[k];
-		if (x >= H.x0[e] - reach - FRONT_X && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach + FRONT_Y) return k;
+		PadArt art = portal_art(k);
+		if ((x >= H.x0[e] - reach && y >= H.y0[e] - reach && x < H.x1[e] + 8 + reach && y < H.y1[e] + 8 + reach) || pad_art_on(&art, x, y, reach)) return k;
 	}
 	return -1;
 }

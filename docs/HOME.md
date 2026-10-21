@@ -325,9 +325,14 @@ trigger for the pink pad stops short of its cells' front corner, on the
 line x - y = 201 (docs/ROM_DATA.md, Lan's HP), so MegaMan on its pink
 middle, at 194, 0, stood outside it, and a playtester stood there in
 four runs without a warp (session 74; v0.12.0 the same). A portal's
-zone for the checks and the questions is its cells stretched as far
-towards the screen's front (`lanhp_portal_near`), and on the pink pad's
-the director takes BN6's warp itself (`lanhp_pad_take`). Its name stays
+zone for the checks and the questions is its cells and its art as
+MegaMan stands on it (`lanhp_portal_near`, `pad_art.c`: his feet on the
+art or in front of it as far as his sprite covers it; stretched only
+towards the screen's front, the pink pad's zone left out its left rim,
+where a playtester stood 150 frames, session 75), and on the pink pad's
+the director takes BN6's warp itself (`lanhp_pad_take`). A layer's exit
+pad is taken the same way, MegaMan standing still on it as drawn
+(docs/ROM_DATA.md, Warp pads). Its name stays
 in MegaMan's words and on the second screen, whose home panel lists each
 way as On or Back (the ways back were left out of it before: it looked
 them up by the ways' own portals).

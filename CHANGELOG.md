@@ -166,13 +166,20 @@
   its own maps' Mystery Data and cleared their flags, some of which are
   the run's: a request settled, the visit's order at AsterLand. Each
   layer now leaves BN6's own Mystery Data out of the roll.
-- **The pink pad in Lan's HP takes you on from where it is drawn.**
-  BN6's own trigger for the pad sits behind its picture, so MegaMan could
-  stand on its pink middle and go nowhere: a playtester did so in four
-  runs. Stepping onto the pad as drawn now takes you to the act's first
-  layer. And at the wall beside the corridor to it, the arrow and L no
-  longer point at the pad through the wall: they lead into the corridor
-  first.
+- **Pads take you on from where they are drawn.** BN6's own trigger for
+  the pink pad in Lan's HP sits behind its picture, so MegaMan could
+  stand on its pink middle, or its left rim, and go nowhere: a playtester
+  did so in five runs. A layer's exit pad had the same dead left rim.
+  Standing on a pad as it is drawn now takes you on: the pink pad to the
+  act's first layer, an exit pad to the next layer, a link square's
+  question, the Net Square's pad home. And at the wall beside the
+  corridor to the pink pad, the arrow and L no longer point at the pad
+  through the wall: they lead into the corridor first.
+- **The Recovery Mr.Prog asks before he patches you.** At full HP he
+  keeps the layer's one patch for later instead of spending it on an
+  unhurt MegaMan; hurt, he asks first, and No keeps it too.
+- **The map's key shows a Chip Trader as a Trader**, not a Shop: L would
+  sense a Chip Trader and the map showed only a Shop.
 - **Home remembers a quit.** A new game after a run you quit before its
   first save opened with "Dad's backup got me home safe last time.", as
   if MegaMan had been deleted; it now reads as a dive left unfinished,

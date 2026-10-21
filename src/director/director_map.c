@@ -59,11 +59,13 @@ static bool map_edge(const MapView *m, int sx, int sy, int pad, int *ex, int *ey
 }
 
 /* the key's entries, under the map */
-enum { MAP_YOU, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
+/* (a Chip or BugFrag Trader its own: marked as a Shop, a playtester heard
+ * L sense a Chip Trader and found only a Shop on the key, session 75) */
+enum { MAP_YOU, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_TRADER, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
 static const struct { const char *what; SDL_Color c; } map_key[MAP_KEYS] = {
 	{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
-	{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Boss", { 255, 70, 70, 255 } },
-	{ "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
+	{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Trader", { 255, 140, 200, 255 } },
+	{ "Boss", { 255, 70, 70, 255 } }, { "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
 };
 
 /* an object's entry in the key, -1 for none: a Server, a dark warp or a
@@ -74,7 +76,8 @@ static int map_kind(int type) {
 	case OBJ_EXIT: case OBJ_RETURN: return MAP_EXIT;
 	case OBJ_BOSS: return MAP_BOSS;
 	case OBJ_HEAL: return MAP_HEAL;
-	case OBJ_SHOP: case OBJ_PROGRAMS: case OBJ_TRADER: case OBJ_BUGTRADER: return MAP_SHOP;
+	case OBJ_SHOP: case OBJ_PROGRAMS: return MAP_SHOP;
+	case OBJ_TRADER: case OBJ_BUGTRADER: return MAP_TRADER;
 	case OBJ_UNDERNET: case OBJ_SECRET_GATE: case OBJ_CHALLENGE: case OBJ_NAVI_GATE: case OBJ_VAULT: case OBJ_OFFICIAL:
 		return MAP_EVENT;
 	case OBJ_DUEL: return MAP_RIVAL;

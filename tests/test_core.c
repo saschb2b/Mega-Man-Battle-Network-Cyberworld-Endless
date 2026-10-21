@@ -20,6 +20,7 @@
 #include "layer_make.h"
 #include "navicust.h"
 #include "pacing.h"
+#include "pad_art.h"
 #include "qr.h"
 #include "rom.h"
 #include "run.h"
@@ -5267,12 +5268,28 @@ static void test_visitors(void) {
 	CHECK(seen[0] > 400 && seen[1] > 150 && seen[2] > 150, "the deep: the Nest's both areas (%d %d %d)", seen[0], seen[1], seen[2]);
 }
 
+static void test_pad_art(void) {
+	/* where a playtester stood on a pad as drawn and nothing warped
+	 * (session 75): the pink pad's left rim, 28 units short of its ring's
+	 * middle in x and 12 past it in y; a layer's exit pad's, 34 and 11 */
+	PadArt pink = { 0, 0, 31, 21 }, ring = { 0, 0, PAD_RING_ACROSS, PAD_RING_DOWN };
+	CHECK(pad_art_on(&pink, -28, 12, 0), "the pink pad's left rim is on it");
+	CHECK(pad_art_on(&ring, -34, 11, 0), "an exit pad's left rim is on it");
+	CHECK(pad_art_on(&ring, 0, 0, 0) && pad_art_on(&ring, -14, -14, 0) && pad_art_on(&ring, 10, -10, 0), "an exit pad's middle and edges are on it");
+	/* off it: a panel past its sides (on the screen), behind it, far in front */
+	CHECK(!pad_art_on(&ring, -24, -24, 0) && !pad_art_on(&ring, 24, 24, 0), "a panel past its sides is off it");
+	CHECK(!pad_art_on(&ring, 22, -22, 0), "behind it is off it");
+	CHECK(!pad_art_on(&ring, -36, 36, 0), "far in front of it is off it");
+	CHECK(!pad_art_on(&ring, -18, -18, 0) && pad_art_on(&ring, -18, -18, 4), "a reach takes in more");
+}
+
 int main(void) {
 	test_sha1();
 	test_jobs();
 	test_economy();
 	test_home_words();
 	test_lz77();
+	test_pad_art();
 	test_generation();
 	test_layer_make();
 	test_layouts_build();

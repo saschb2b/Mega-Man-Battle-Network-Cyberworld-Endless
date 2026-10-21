@@ -40,7 +40,10 @@
  * again). */
 #define LAYER_DUEL_CALLED_FLAG 0x1457
 /* (0x1458-0x145F: the obstacles' and cubes' present flags, issue #42, and
- * another game's prop's; 0x1464 free since Rush's gap's word went) */
+ * another game's prop's) */
+/* MegaMan's HP is full (the director keeps it on a layer's map, each
+ * frame): a Recovery Mr. Prog keeps his patch (session 75). */
+#define LAYER_HP_FULL_FLAG     0x1464
 /* A navi of the layer has told its security cube's P-Code (issue #45). */
 #define LAYER_PCODE_FLAG       0x1465
 /* A number door of the layer was answered wrong, and sealed (issue #47). */
