@@ -6,6 +6,7 @@ import asyncio
 import configparser
 import io
 import json
+import os
 from pathlib import Path
 import sys
 import tarfile
@@ -278,7 +279,8 @@ class BackupTests(unittest.TestCase):
         self.assertEqual(backup.restore(path, self.state), sorted(backup.FILES))
         self.assertEqual(self.files(), before)
         self.assertEqual((self.state / "trades.jsonl").read_bytes(), trades)
-        self.assertEqual((self.state / "identity.key").stat().st_mode & 0o777, 0o600)
+        if os.name != "nt":   # (Windows keeps no owner-only mode; its folder's rights decide)
+            self.assertEqual((self.state / "identity.key").stat().st_mode & 0o777, 0o600)
         # (a file the archive lacks was not there when it was made: it goes)
         (self.state / "weeks.jsonl").unlink()
         sparse = backup.archive(self.state, self.backups, NOW + 60)

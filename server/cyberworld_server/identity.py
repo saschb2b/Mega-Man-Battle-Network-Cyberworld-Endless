@@ -1,6 +1,7 @@
 """Private local server state: a salted public identity and moderation rules."""
 
 import contextlib
+import errno
 import hashlib
 import hmac
 import json
@@ -26,17 +27,28 @@ def state_lock(directory):
     command never meets a half-written file. One process or several."""
     descriptor = os.open(Path(directory) / "moderation.lock", os.O_RDWR | os.O_CREAT, 0o600)
     with os.fdopen(descriptor, "r+b") as stream:
-        if os.name == "nt":
-            import msvcrt
-            if not stream.read(1):
-                stream.write(b"0")
-                stream.flush()
-            stream.seek(0)
-            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
-        else:
+        if os.name != "nt":
             import fcntl
             fcntl.flock(stream, fcntl.LOCK_EX)
-        yield
+            yield
+            return
+        import msvcrt
+        # (Windows: the file's first byte, which may be locked past its end
+        # and is never read, another holder's lock refusing a read; LK_LOCK
+        # gives up after ten seconds, so it is asked again while one holds
+        # it, and let go before the file closes)
+        while True:
+            try:
+                msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
+                break
+            except OSError as error:
+                if error.errno not in (errno.EACCES, getattr(errno, "EDEADLOCK", errno.EDEADLK)):
+                    raise
+        try:
+            yield
+        finally:
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
 
 
 def write_json(path, value, durable=True):
