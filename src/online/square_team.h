@@ -28,6 +28,10 @@ void square_team_mail(const uint8_t *data, size_t size);
 /* The card's choice for `peer`: its label, and chosen */
 const char *square_team_option(const OnlinePeer *peer);
 void square_team_chosen(const OnlinePeer *peer);
+/* A NOTICE come (its serial and code): true where it refuses this game's
+ * ask to team up, which MegaMan says in the chat box, the corner's notice
+ * not shown */
+bool square_team_notice(uint32_t serial, uint16_t code);
 /* My partner's session, 0 none */
 uint32_t square_team_partner(void);
 /* In a team match (a team challenge answered, a bout, the order) */

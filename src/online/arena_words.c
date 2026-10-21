@@ -97,6 +97,12 @@ const char *arena_team_have_words(const char *name) {
 	return s;
 }
 
+const char *arena_team_taken_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Huh? %s's\non a team\nalready...", name);
+	return s;
+}
+
 const char *arena_team_lone_words(const char *name, bool we_teamed) {
 	static char s[96];
 	if (we_teamed) snprintf(s, sizeof s, "Huh? %s\nhas no partner...", name);

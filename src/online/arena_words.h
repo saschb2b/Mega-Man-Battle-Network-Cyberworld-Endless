@@ -54,6 +54,8 @@ const char *arena_team_formed_words(const char *name);
 const char *arena_team_declined_words(const char *name);
 const char *arena_team_split_words(const char *name);
 const char *arena_team_have_words(const char *name);
+/* ... a team asked of `name`, who is on one already (NOTICE 29) */
+const char *arena_team_taken_words(const char *name);
 /* A Battle refused for teams (NOTICE 29): `name` alone and we a team, or
  * the other way round, or `name` our own partner; a team challenge asked
  * of us (the boxes) */

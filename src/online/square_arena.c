@@ -495,7 +495,10 @@ static void refused(uint16_t code) {
 		code == ONLINE_NOTICE_TEAM ? team_refusal() : arena_declined_words());
 }
 
-bool square_arena_notice(uint32_t serial, uint16_t code) { return (SA.stage == SA_SENT && refusal(code)) || serial == SA.quiet_notice; }
+bool square_arena_notice(uint32_t serial, uint16_t code) {
+	/* (a team asked of a player, refused: square_team.h) */
+	return (SA.stage == SA_SENT && refusal(code)) || serial == SA.quiet_notice || square_team_notice(serial, code);
+}
 
 /* a notice come while the Square is held (the card, a rematch's challenge
  * sent from it): a refusal of that challenge shown on the card, and none

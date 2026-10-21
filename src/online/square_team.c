@@ -34,6 +34,8 @@ typedef enum { Q_NONE, Q_ASK, Q_OPEN } Question;
 static struct {
 	OnlineSnapshot s;
 	uint32_t partner, asked_by, proposed;
+	uint32_t proposed_at;          /* the notices' serial as my ask went, to tell a refusal of it */
+	char proposed_name[ONLINE_NAME_BYTES + 1];
 	char partner_name[ONLINE_NAME_BYTES + 1], asked_name[ONLINE_NAME_BYTES + 1], names[4][ONLINE_NAME_BYTES + 1];
 	Question team_q, order_q;
 	TeamWireState st;              /* the match as last told (stage 0 none) */
@@ -84,6 +86,8 @@ void square_team_chosen(const OnlinePeer *peer) {
 	}
 	if (T.partner) { talk_start(arena_team_have_words(T.partner_name), FACE_MEGAMAN); return; }
 	T.proposed = peer->id;
+	T.proposed_at = T.s.notice_serial;
+	snprintf(T.proposed_name, sizeof T.proposed_name, "%s", peer->name);
 	send(TEAM_ACT_PROPOSE, peer->id, false);
 	talk_start(arena_team_sent_words(peer->name), FACE_MEGAMAN);
 	printf("team: asked %s (session %u) to team up\n", peer->name, peer->id);
@@ -237,6 +241,19 @@ void square_team_update(const OnlineSnapshot *s, bool held) {
 		T.watched = T.st.bout;
 	/* (a FIGHT come before my own bout was gone into: the same bout) */
 	if (T.st.stage == TEAM_FIGHT && mine) bout_mine();
+}
+
+/* my ask refused by the server: busy (16), gone (17), the Arena closed (18), on a team already (29) */
+bool square_team_notice(uint32_t serial, uint16_t code) {
+	if (!T.proposed || T.partner || serial == T.proposed_at) return false;
+	const char *n = T.proposed_name;
+	const char *words = code == 16 ? arena_busy_words(n) : code == 17 ? arena_not_here_words(n) : code == 18 ? arena_closed_words() :
+		code == ONLINE_NOTICE_TEAM ? arena_team_taken_words(n) : NULL;
+	if (!words) return false;
+	printf("team: our ask to %s refused (notice %u)\n", n, (unsigned)code);
+	T.proposed = 0;
+	say(words);
+	return true;
 }
 
 void square_team_card(SquareTeamCard *out) {

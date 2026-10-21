@@ -1584,7 +1584,9 @@ and either one's Split up, his leaving the channel or the server, or a
 dropped link split the team ("OK... Our team with NAME split up."). The
 one who asked to team up is the team's **captain**. A player on a team
 asked to team up again is answered by MegaMan ("Lan,we're with NAME
-already!").
+already!"), and an ask the server refuses is MegaMan's word too, never
+the corner's notice: NAME on a team already (NOTICE 29, "Huh? NAME's on a
+team already..."), busy or gone (16, 17) as a challenge's are.
 
 A Battle between players of two teams is a **team challenge**: the
 server checks all four free (in no battle, trade, watch or match;
@@ -1714,6 +1716,14 @@ Alpha and Beta.
 card, his partner, answered at once ("Huh? Beta's on our team,Lan!"),
 then `Split up` on the same card ("OK... Our team with Beta split up.";
 both games told).
+
+**The words** (`--words` and `--question`, a fifth game, Epsilon, alone):
+Epsilon's Team up on Alpha ("Let's see if Alpha teams up with us!", then
+"Huh? Alpha's on a team already...") and Battle on him ("Huh? Alpha's on
+a team...", "We'd need a partner too,Lan."); Alpha's Battle on Epsilon
+("Huh? Epsilon has no partner..."); Gamma's game without the bot asked
+"Alpha's team wants a Team NetBattle!" and "Take it,Lan?" with the cursor
+on No.
 
 **The way in with a carried HP** (`--dev arena,arenacarry=40`, the
 local scene): the plate reads "HP 40/100", the Custom screen's HP 40.
