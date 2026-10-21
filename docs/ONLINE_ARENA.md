@@ -666,10 +666,16 @@ with a probe kept out of git that read both MegaMen's `BN6_T1_ACTION` and
 panel on both GBAs every pair frame: a direction the second player
 pressed on pair frame *N*, MegaMan ready, turned his action into a step
 on frame *N* + 4, on his own GBA and on the other on the same frame (47
-of 47 steps). The same press in a single battle on the game's own core,
-which would say how much of the four is the link's own (the research's
-item 10), is not measured yet: the scripted Custom screen did not reach
-OK in the time this step had. The network thread's gap, read in
+of 47 steps). The same press in a single battle on the game's own core
+(`--scene emu --run-depth 1 --seed 3`, a `foes 200@52` battle, the probe
+reading the same fields after each frame) turned it into a step on frame
+*N* + 1 (24 of 24). So BN6's link battle itself applies a press three
+frames later than its single battles, on both GBAs alike: three frames
+(50 ms) every NetBattle pays, the cartridge's own over its cable, that no
+netcode of ours takes away. A hook on both pair cores could shorten it
+(the research's item 10): a reverse-engineering task, and a question of
+fidelity for the owner (a NetBattle that answers faster than the
+cartridge's), not done here. The network thread's gap, read in
 `online_transport.c`: one message taken a pass, then `SDL_Delay(2)`, so a
 key waited up to 2 ms in the sender's worker and as long again in the
 receiver's (more where several came at once).
@@ -1437,8 +1443,9 @@ the cable's first's reports came, and no question.
 - Issue #167's quick wins ([Quicker on the
   wire](#quicker-on-the-wire-issue-167)): a capture of whether WinHTTP
   and iOS's WebSocket hold small sends back; the rollback's sound heard on
-  a device; BN6's own input delay in a single battle beside the link's 4
-  frames; the time sync's notes on lopsided links between devices.
+  a device; BN6's link battle's own three frames of input delay over a
+  single battle's (measured; shortening them is the owner's call); the
+  time sync's notes on lopsided links between devices.
 - Rollback ([Rollback](#rollback)): on in every battle, measured through
   a local relay and on the Nova headless; not yet a NetBattle between two
   devices or through the deployed server (which runs an older protocol
