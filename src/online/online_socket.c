@@ -162,4 +162,7 @@ void online_socket_close(void) {
 	online_stream_close();
 	buffered = 0;
 }
+
+void online_socket_wait(uint32_t ms) { online_stream_wait(ms); }
+void online_socket_wake(void) { online_stream_wake(); }
 #endif

@@ -51,6 +51,7 @@ static bool mail(uint8_t kind) {
 #define DEAD_CALLING_MS 5000
 #define RETRY_FIRST_MS 500
 #define RETRY_MOST_MS 4000
+#define REST_MS 10           /* the worker's longest rest between two looks at the link: its position, pings and timers kept to it */
 
 static struct {
 	Ring outbox, inbox;
@@ -275,15 +276,19 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			break;
 		}
 		if (SDL_AtomicGet(&transport.stop)) break;
-		int got = online_socket_receive(data, sizeof data);
+		/* (every message come in, then the rest: not one a rest, issue #167) */
+		int got;
 		uint32_t now = SDL_GetTicks();
-		if (got == -2) SDL_strlcpy(snapshot->error, "The server broke the WebSocket protocol", sizeof snapshot->error);
-		if (got < 0) break;
-		if (got) {
+		bool taken = true;
+		while (taken && (got = online_socket_receive(data, sizeof data)) > 0) {
+			now = SDL_GetTicks();
 			last_receive = now;
-			if (!take_in(data, (size_t)got, now, snapshot)) break;
+			taken = take_in(data, (size_t)got, now, snapshot);
 			publish(snapshot);
 		}
+		if (!taken) break;
+		if (got == -2) SDL_strlcpy(snapshot->error, "The server broke the WebSocket protocol", sizeof snapshot->error);
+		if (got < 0) break;
 		hush(snapshot, now, last_receive);
 		if (now - last_receive > (snapshot->connected ? DEAD_MS : DEAD_CALLING_MS)) break;
 		if (snapshot->connected && !send_mail()) break;
@@ -297,7 +302,9 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			online_put32(data + 1, now);
 			if (!online_socket_send(data, 5)) break;
 		}
-		SDL_Delay(2);
+		/* (until a message comes in or one is put to go out: SDL_Delay(2)
+		 * before issue #167, a key waiting up to 2 ms at each end) */
+		online_socket_wait(REST_MS);
 	}
 	return last_receive;
 }
@@ -529,6 +536,8 @@ bool online_transport_send(const uint8_t *data, size_t size) {
 	SDL_LockMutex(transport.mutex);
 	bool room = transport.snapshot.connected && ring_put(&transport.outbox, data, size);
 	SDL_UnlockMutex(transport.mutex);
+	/* (sent now, not at the worker's next look) */
+	if (room) online_socket_wake();
 	return room;
 #endif
 }
@@ -553,10 +562,12 @@ void online_transport_end(void) {
 #else
 	if (transport.thread) {
 		SDL_AtomicSet(&transport.bye, 1);
+		online_socket_wake();
 		uint32_t started = SDL_GetTicks();
 		while (!SDL_AtomicGet(&transport.done) && linked() && SDL_GetTicks() - started < 1000) SDL_Delay(1);
 	}
 	SDL_AtomicSet(&transport.stop, 1);
+	if (transport.thread) online_socket_wake();
 	if (transport.thread) SDL_WaitThread(transport.thread, NULL);
 	if (transport.mutex) SDL_DestroyMutex(transport.mutex);
 #endif

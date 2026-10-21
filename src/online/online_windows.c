@@ -85,6 +85,8 @@ static void CALLBACK completed(HINTERNET handle, DWORD_PTR context, DWORD status
 	default: break;
 	}
 	if (win.event) SDL_SemPost(win.event);
+	/* (a message come in: the worker's rest ended, online_socket_wait) */
+	if (status == WINHTTP_CALLBACK_STATUS_READ_COMPLETE) online_socket_wake();
 	/* HANDLE_CLOSING is the final callback for each handle. No semaphore or
 	 * shared state is touched after the last decrement. */
 	if (status == WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING) SDL_AtomicAdd(&win.handles, -1);
@@ -238,5 +240,21 @@ void online_socket_close(void) {
 		if (win.event) SDL_DestroySemaphore(win.event);
 		memset(&win, 0, sizeof win);
 	}
+}
+/* the worker's rest (online_socket.h): a semaphore made once and kept for
+ * the process, posted by the game's thread and by WinHTTP's read
+ * completions; WinHTTP says no word of Nagle's algorithm and lets none be
+ * set (docs/ONLINE_ARENA.md, No send held back) */
+static SDL_atomic_t wake_made;
+static SDL_sem *wake;
+
+void online_socket_wait(uint32_t ms) {
+	if (!SDL_AtomicGet(&wake_made) && (wake = SDL_CreateSemaphore(0))) SDL_AtomicSet(&wake_made, 1);
+	if (SDL_AtomicGet(&wake_made)) SDL_SemWaitTimeout(wake, ms);
+	else SDL_Delay(1);
+}
+
+void online_socket_wake(void) {
+	if (SDL_AtomicGet(&wake_made)) SDL_SemPost(wake);
 }
 #endif

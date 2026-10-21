@@ -36,6 +36,7 @@ bool online_stream_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 	curl_easy_setopt(connection, CURLOPT_CONNECT_ONLY, 1L);
 	/* Our raw WebSocket Upgrade uses HTTP/1.1, including TLS ALPN. */
 	curl_easy_setopt(connection, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
+	curl_easy_setopt(connection, CURLOPT_TCP_NODELAY, 1L);
 	curl_easy_setopt(connection, CURLOPT_CONNECTTIMEOUT, 5L);
 	curl_easy_setopt(connection, CURLOPT_TIMEOUT, 7L);
 	curl_easy_setopt(connection, CURLOPT_NOSIGNAL, 1L);
@@ -83,4 +84,8 @@ void online_stream_close(void) {
 	connection = NULL;
 	network_held = random_held = false;
 }
+/* (the stream is not one the worker can wait on here: looked at every
+ * millisecond, a key sent at the next look; online_socket.h) */
+void online_stream_wait(uint32_t ms) { SDL_Delay(ms ? 1 : 0); }
+void online_stream_wake(void) {}
 #endif
