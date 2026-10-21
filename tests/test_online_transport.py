@@ -100,7 +100,14 @@ async def disconnect(binary, report):
     port = await server.start("127.0.0.1", 0)
     try:
         await run_probe(binary, f"ws://127.0.0.1:{port}/presence", "disconnect", report, "disconnect")
-        assert len(server.holds.until) == 0, "a resume left a place held"
+        # (the server takes up the last goodbye a moment after the probe
+        # exits, as in normal_exchange: a slow runner's lag, not a hold)
+        for _ in range(150):
+            if not server.holds.until and not any(p.name == "TransportProbe" for p in server.players.values()):
+                break
+            await asyncio.sleep(0.02)
+        assert len(server.holds.until) == 0, f"a resume left a place held: {server.holds.until} " \
+            f"players {[(p.id, p.name, p.resumed) for p in server.players.values()]}"
     finally:
         await server.close()
 
