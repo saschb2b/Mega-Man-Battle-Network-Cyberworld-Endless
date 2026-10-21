@@ -512,6 +512,8 @@ void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 void arena_window(Arena *a, int window) { a->window_asked = window; }
 void arena_players(Arena *a, unsigned players) { a->players = players; }
 void arena_show(Arena *a, int side) { a->show = side; }
+struct mCore *arena_core(const Arena *a, unsigned side) { return core(a, side & 1u); }
+ArenaPair *arena_pair_of(Arena *a) { return a->pair; }
 
 ArenaStage arena_stage(const Arena *a) { return a->stage; }
 const char *arena_error(const Arena *a) { return a->error; }

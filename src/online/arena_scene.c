@@ -17,7 +17,7 @@
 #include "arena_folder.h"
 #include "arena_format.h"
 #include "arena_report.h"
-#include "arena_team.h"
+#include "arena_team_client.h"
 #include "arena_view.h"
 #include "arena_text.h"
 #include "game.h"
@@ -67,10 +67,12 @@ static uint16_t busy_keys(uint32_t frame) {
 }
 
 /* --dev arena2v2: on the Custom screen a lead first takes the chip under
- * the cursor, so that his hand holds one and his partner's is dealt it
- * (arena_team_navi.h), before the script takes the cursor to OK */
+ * the cursor, so that his hand holds one, before the script takes the
+ * cursor to OK; in the fight side 0's lead taps R every 600 frames, which
+ * opens the next turn's Custom screen once the gauge is full */
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
-	if (dev.arena_2v2 <= 0 || !S.arena || arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return keys;
+	if (dev.arena_2v2 <= 0 || !S.arena) return keys;
+	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 
@@ -87,10 +89,13 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
 }
 
-/* --dev arena2v2's partners, players 2 and 3: arena_team's script, by the frame's number alone */
+/* --dev arena2v2's partners, players 2 and 3: their own clients stood in
+ * for (arena_team_client.h): BN6's own Custom screen on a core of each
+ * one's while his side's GBA's is open, his picks in his stream; in the
+ * battle arena_team's script, by the frame's number alone */
 static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 	(void)context;
-	return arena_team_script(player, frame);
+	return S.arena ? team_client_keys(S.arena, player, frame) : 0;
 }
 
 /* the player's buttons as the GBA's keys, bit for bit */
@@ -111,6 +116,9 @@ static uint16_t pad_keys(void) {
  * first as a run's start makes them (scene_emu.c, game_hooks.c), for the
  * pair to take (xinstall_log.h); without BN5's ROM the way in stops,
  * saying so */
+/* the checkpoint's MegaMan as read, every folder of his (--dev arena2v2's partner takes another) */
+static OnlineLoadout carried_all;
+
 static void installs(void) {
 	/* (made once: --dev rollbench,arena made them before) */
 	if (!XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE) || (!xlog_hash() && !xinstall_bn5()))
@@ -142,6 +150,8 @@ static void bout(ArenaKept *kept) {
 	if (S.arena) arena_window(S.arena, dev.arena_window);
 	if (S.arena && dev.arena_2v2 > 0) arena_players(S.arena, ARENA_PLAYERS);
 	if (S.arena && dev.arena_other) arena_show(S.arena, 1);
+	/* (--dev arena2v2: the partners' folders, a carried MegaMan's other folder for side 0's; teamseat=N's GBA shown) */
+	if (S.arena && dev.arena_2v2 > 0) team_client_begin(S.arena, loadout[0] ? &carried_all : NULL);
 	/* (the way in's panel opened as the Square's opens) */
 	arena_card_cue(ARENA_CUE_OPEN);
 }
@@ -153,9 +163,8 @@ static void enter(void) {
 	 * second player the game's start's) */
 	installs();
 	/* (the first folder that holds chips, as the Net Square's challenge carries him) */
-	static OnlineLoadout all;
-	if (arena_carry_read(&all)) {
-		arena_format_carry(&all, arena_folder_first(arena_folders_fitting(&all)), &S.carried);
+	if (arena_carry_read(&carried_all)) {
+		arena_format_carry(&carried_all, arena_folder_first(arena_folders_fitting(&carried_all)), &S.carried);
 		/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
 		if (dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
 		/* (a NetBattle begins whole; arenacarry=N: with N HP, as a Team NetBattle's winner goes on) */
@@ -179,6 +188,7 @@ static void next_bout(void) {
 
 static void leave(void) {
 	audio_external(NULL);
+	team_client_free();
 	arena_free(S.arena);
 	S.arena = NULL;
 	arena_view_free();
@@ -215,7 +225,9 @@ static void update(void) {
 		arena_report_frame(S.arena);
 		if (arena_stage(S.arena) == ARENA_OVER) arena_report_end(arena_result(S.arena));
 		/* (--dev arena2v2: the two GBAs' battles compared, iteration by iteration) */
-		if (arena_stage(S.arena) != ARENA_BATTLE && dev.arena_2v2 > 0) arena_team_report();
+		if (arena_stage(S.arena) != ARENA_BATTLE && dev.arena_2v2 > 0) {
+			team_client_report();
+		}
 		break;
 	case ARENA_OVER:
 		if (S.bouts < (unsigned)(dev.arena_again > 0 ? dev.arena_again : 0)) next_bout();
@@ -259,7 +271,10 @@ static void draw(void) {
 		return;
 	}
 	if (stage != ARENA_BATTLE || !v) { card(stage); return; }
-	arena_view_core(v);
+	/* (--dev arena2v2: the seat's picture, a partner's BN6's own Custom screen on his client's copy of the pair while it is
+	 * open, and the seat's own drawing over it) */
+	if (dev.arena_2v2 > 0) team_client_draw(S.arena);
+	else arena_view_core(v);
 	arena_view_over(arena_other, arena_phase(S.arena, 0) == BN6_PHASE_CUSTOM, arena_link_state(S.arena), S.t);
 	uint32_t waited = arena_waited(S.arena);
 	if (waited >= STALL_NOTE) arena_view_stall(arena_other, waited < STALL_END ? STALL_END - waited : 0, STALL_END - STALL_NOTE, false);

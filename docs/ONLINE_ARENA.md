@@ -49,7 +49,7 @@ plays itself on a device; `quitend` ends the game after it (and after
 sent over 3dslink. The scene shows the Square's screens (the way in's
 panel, the name plate and the link's badge, a stall's note, the result
 card: [The way in, the battle and the result](#the-way-in-the-battle-and-the-result)),
-the players named "You" and "2nd GBA"; the card's A, or
+the players named "You" and "Beta"; the card's A, or
 A+B+SELECT+START, goes back to the title; the log says each step
 (`arena:` lines). The badge's three states are seen with `arenabusy`
 and `arenadelay=1,arenalag=5` (rolling back) and with
@@ -2069,12 +2069,11 @@ side (`BN6_HAND_ADDR`, `0x08010018`: 20 calls in bn6f, and
 the object in r5). The same answer by object as the NaviStats': a hook
 there returns a partner's own hand, in his room after his record, where
 r5 is his or his marks' and the side asked for is his. His hand starts
-as his side's as the battle sets it up (empty) and is dealt from his
-lead's each time the Custom screen deals his lead's anew (at the first
-iteration whose lead's hand differs from the one last dealt and has its
-first chip up next; the comparison kept a core for a rollback): his own
-Custom screen is to come. Under the flag a lead takes the chip under the
-cursor before the script's OK, so that a hand holds one (Cannon).
+as his side's as the battle sets it up (empty); at the hands' commit it
+was dealt from his lead's each time the Custom screen dealt his lead's
+anew, and since his own Custom screen (below) it takes his own picks
+alone. Under the flag a lead takes the chip under the cursor before the
+script's OK, so that a hand holds one (Cannon).
 
 Measured with the runs above (the partners tapping A a few times a
 cycle until they are free to use a chip): side 0's partner uses his
@@ -2092,25 +2091,300 @@ iteration; with 221 rollbacks and with none all 44 hashes the same,
 `arenaroll=8` 335 of 335 the same. Before the partners tapped A (one
 press each, which met them busy), the hands as their leads' copies left
 the battle's 272 changes of HP as with the hook switched off (a debug
-run). Not yet: a partner's own folder and Custom screen (below): his
-hand is his lead's chips, his own to use.
+run). (These numbers are the hands' commit's, with his lead's chips in
+his hand; his own folder and Custom screen follow.)
 
-### A partner's own Custom screen (design)
+### A partner's own Custom screen
 
-- **His chips**: he draws from his own folder, which crosses as his
-  loadout does today (`arena_format.c`), installed in his GBA's core as
-  his side's lead's is; his deck dealt as BN6 deals a side's
-  (`BN6_DECK_DEALT`), both GBAs alike, kept in his room or a third.
-- **His Custom screen**: BN6's opens on each GBA for its lead (BattleState
-  +0x0D). His is ours, drawn over his own client's picture while BN6's is
-  open on his side's GBA (`BN6_PHASE_CUSTOM`), his picks crossing as keys
-  of his stream (the cursor and A), the screen run from them by the pair
-  on every client alike; at its close (a moment both GBAs agree on: the
-  first iteration whose lead's hand is dealt anew, as his hand's deal
-  above) his picks are written into his own hand on both cores at the
-  same iteration, as the rings' keys are, in place of his lead's copy.
-- **His HP**: his own GBA's HP box drawn from his object, not his lead's,
-  by our own label over the picture or BN6's box read from his record.
+A partner picks his chips on BN6's own Custom screen, from his own deck
+(the owner's direction, 21 October 2026: BN6's screen, never one of
+ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
+`arena_team_screen.c`, `arena_team_client.c`):
+
+- **His deck**, the pair's, every client's and spectator's alike: his
+  folder (a carried MegaMan's where one is given,
+  `arena_team_custom_folder`; under the dev flag his side's lead's, as his
+  side's GBA holds it) dealt as BN6 deals a side's, the Regular chip
+  first, the TagChips after it, the rest shuffled (our shuffle, seeded by
+  his side's GBA's random number at the battle's first frame: the same on
+  both GBAs, `D07D8E18` in the runs below), a chip that sits out of BN6's
+  battles left out. It lives in both cores' RAM (`RAM_TEAM_CUSTOM`, docs/
+  EMULATION.md), so a rollback puts it back and the pair's hash covers it;
+  the folder itself, which no core holds, is folded into the pair's hash.
+- **His screen, on his own client alone**: a partner has no GBA in the
+  pair. A lone core taken from his side's GBA at a Custom screen will not
+  do: within frames BN6 sees no other GBA on its cable and Lan's box says
+  "Communication error" (seen). So his client makes a plain copy of the
+  pair (`arena_pair_open_plain`: both GBAs on their own cable, BN5's
+  bytes in their ROMs, no hook on them, never hashed, never on a
+  spectator's client), once, as his side's GBA first opens its Custom
+  screen. Each turn the pair is copied into it (`arena_pair_save`,
+  `arena_pair_load`), his deck is written into BN6's battle deck on his
+  side's GBA there and the Custom screen's phase step put back to 0
+  (`BN6_BATTLE_STEP`): the next frame BN6 sets its Custom screen up anew
+  from his deck (bn6f sub_8026840: his hand dealt, its icons loaded) and
+  runs it on his keys, by its own rules (the same code or the same chip,
+  five at most, Atk+ chips); the other GBA there holds still
+  at its own. His client shows that copy's picture while his side's
+  GBA's screen is open, the battle behind it the battle's own as the turn
+  began.
+- **Only his picks cross**: at his OK (`BN6_CUSTOM_MODE` going to
+  `BN6_MODE_OK`) his client reads the hand's slots he picked, in order
+  (`BN6_CUSTOM_PICKS`), and sends them in his stream as pick messages,
+  one a frame (`TEAM_PICK`: bit 15 set, the count, the index, the slot;
+  past the GBA's ten buttons, so a partner's stream keeps its sixteen
+  bits, `ARENA_PARTNER_MASK`). Since the leads wait for him (below), his
+  side's GBA's screen closes before his OK only at the wait's limit,
+  when his client sends the picks he has so far.
+- **Into his hand**: the pair takes a pick message as it samples his
+  side's GBA's frame, as his keys are taken. Once that GBA's screen has
+  closed and his picks are in (or as they come in after it), they are set
+  for the iteration that GBA is at plus BN6's link delay, 4, in both
+  GBAs' RAM, the chips taken out of his deck; each GBA writes them into
+  his own hand at that iteration, as BN6's OK writes a side's (bn6f
+  sub_8029110: the chips' ids, powers and folder entries, the screen
+  they came from, an Atk+10, Atk+30 or Navi+20 merged into the chip
+  before it as bn6f sub_8029224 merges them). Not the first iteration
+  after the close: the two GBAs run up to two iterations apart and the
+  picks are set at a frame of his side's GBA, so the other GBA could pass
+  that iteration first; four on, as his keys go in, both are behind it.
+  While his side's GBA's screen is open his battle keys go in released.
+  His picks are never dropped: the leads wait for them (below).
+
+His client's cost (the host build, this machine; the numbers below): a
+frame of his screen about a pair's frame, the turn's copy 0.14 ms to
+some 20 ms, making it once some 155 ms (the battle's worst tick, 7 to 8
+ms without it): a client that makes it at the way in pays that outside
+the battle. A deleted partner has no turn.
+
+### The leads wait for their partners
+
+The owner's call (22 October 2026): the leads' Custom screen waits for
+a slow partner, his picks never dropped; a sign tells each partner his
+lead is ready, and each lead that his partner still picks; and an
+absent partner cannot hold the others forever.
+
+The game-design lens first. The dialectic is mine against ours again:
+each player's turn is his own, but the battle goes on for all four
+only together, so the wait must read as a teammate taking his time,
+never as a fault. The loop layer is the battle's turn (pick, wait, fight)
+inside the session's "one thing together". The patterns: *telegraph
+honestly* (the wait is shown where it is, and by whom), *presence over
+pressure* (a quiet sign that someone is there and busy; no countdown, no
+nagging, no word of explanation: the players know BN6's Custom screen),
+*diegetic first* (BN6's own way of showing a GBA still picking before
+any sign of ours), and *respect the player's time* (a generous limit
+past which the idle one cannot hold three others: 60 seconds, the figure
+the epic's research found players' communities use for a turn).
+
+**How BN6 waits, and where the hold goes.** In a link battle each GBA,
+as its lead's OK has slid the window out, sends its packet (bn6f
+sub_800B3A2, `BN6_LINK_SEND`: the mark `0x56789123` at `0x0203CBE0`, the
+hand its OK built, its battle NaviStats, its Cross's record) and waits in
+mode `0x14` (`BN6_CUSTOM_WAIT`, sub_8026DC4) until both sides' packets
+have come with that mark (`0x0203F4A0` and `0x0203F5A0`, which every GBA
+receives, checked each frame at `BN6_CUSTOM_WAIT_LOOP`); then the screen
+closes on both. While it waits, the other GBA shows "Cstmzing..."
+blinking over the side still picking (seen in the pair's captures). So the hold is the packet: a
+side's GBA keeps its packet back while its partner picks
+(`arena_team_wait.c`: its send skipped at `BN6_LINK_SEND`'s entry and
+owed, then sent from `BN6_CUSTOM_WAIT_LOOP` once his picks are in). Both
+GBAs then wait by BN6's own cable, so the moment the screen closes is
+the cable's, one moment every client and spectator agrees on; the hold
+itself is read in that GBA's RAM (his turn's state, which the pair
+writes from his stream as it samples that GBA's frames), never a clock.
+The lead's OK is answered as BN6 answers it: the window slides out and
+the battlefield shows, as when he waits for the other lead.
+
+**The signs.** On the other side's GBA, BN6's own "Cstmzing..." blinks
+over the side held for its partner, as over a lead still picking: no
+drawing of ours. On a lead's own GBA, whose partner stands on his own
+half where BN6 shows nothing, a quiet plate of ours under the name
+plate: his partner's seat (`P3`, `P4`) and three dots, one lit in turn,
+while his partner picks (`arena_team_view.c`, `sign`). On the partner's
+own screen, the same plate with his lead's seat and a tick once his
+lead has pressed OK and waits for him. No words, no count.
+
+**The limit.** A side's GBA held for its partner counts its frames
+(`RAM_TEAM_CUSTOM`, the pair's); his own client sends the picks he has
+two seconds before the limit (`TEAM_WAIT_SAY`, 120 frames), and at the
+limit the pair takes his picks as they stand, none where none came, and
+the screen closes (`TEAM_WAIT_LIMIT`: 3,600 of that GBA's frames, 60
+seconds, counted only while his lead waits for him). Nothing is shown
+before it. The number is the owner's to confirm.
+
+Proved (`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend`, both
+ROMs, fresh data folders, 22 October 2026):
+
+| Run | End | The two GBAs, the hashes | The wait |
+| --- | --- | --- | --- |
+| `teamhp=500,teamslow=600,arenalag=4` (side 0's partner's hands off his screen 10 seconds each turn; 482 rollbacks) | over at frame 5463 (3426 without him slow) | 3,035 iterations, 0 apart; all 91 hashes the same as `arenalag=0,arenawindow=8`'s, two clients' worth of schedules, as a spectator's would be | side 0's GBA held its packet 592 frames at most in a turn, side 1's 14 at most; his picks taken each turn, never dropped |
+| ... `arenaroll=8` | over at 5471 | 3,035, 0 apart; 683 rollbacks of 8 frames, the game's state the same after all 683; its 91 hashes the delay alone's | as above |
+| `teamhp=150,teamslow=99999,arenalag=4` (a partner who never picks) | over at 12770 | 3,119, 0 apart | his client sends the picks he has (none) at 3,480 frames held, both turns; the screen goes on |
+| `teamhp=150,teamslow=-1,arenalag=4` (a client gone quiet, sending nothing) | over at 13010 | 3,155, 0 apart; all 216 hashes the same as `arenalag=0,arenawindow=8`'s | the pair's own limit at 3,600 frames held, both turns: his picks none |
+| `teamhp=500,arenalag=4` (no one slow) | over at 3426 | 2,703, 0 apart | each side held 9 to 14 frames: a partner's OK comes a few frames after his lead's |
+
+The mutation of these runs is the picks' (`teampick=-1`, the table
+below: apart from iteration 190): the hold itself cannot part the GBAs,
+since it crosses by BN6's cable; held wrongly it would change the
+battle on both alike. A NetBattle without the flag is the battle it was
+(over at frame 2690, last hash `86d2f837337a1494`).
+
+Captured (`teamslow=600`, kept out of the repository): side 0's lead's
+screen with his window slid out after his OK, the battlefield and his
+partner's sign (`P3` and its dots) under the name plate; side 1's lead's
+screen with BN6's own "Cstmzing..." blinking over side 0 for the ten
+seconds; side 0's partner's own screen, BN6's Custom screen with his
+deck still untouched, and his lead's sign (`P1` and a tick).
+
+### The partner's seat: his HP box and the four told apart
+
+`teamseat=N` shows seat N's screen (`arena_team_view.c`): 0 and 1 the
+GBAs' players, 2 and 3 side 0's and side 1's partners, who see their
+side's GBA. On a partner's seat his own HP box covers BN6's, which shows
+his lead's, in the fight at the picture's top left and right of the
+Custom screen's window while it is open, read from his own object. In
+the fight each MegaMan's seat is marked by his feet (`P1` to `P4`, the
+seat plus one, his own side's in cyan, the other's in gold), and the
+ally BN6 leaves unlabelled (a lead's partner on the lead's GBA, the lead
+on his partner's) has his HP under him as BN6 gives the enemies theirs.
+
+### His loadout in his record
+
+A partner's record (his battle NaviStats, above) is his side's as the
+battle spawns its field, then his own loadout's numbers where one is
+given (`arena_team_navi_loadout`): his max HP and base HP, and his
+buster's Attack, Speed and Charge, written where BN6 keeps them in a
+NaviStats (`BN6_NS_ATTACK`, `BN6_NS_SPEED`, `BN6_NS_CHARGE`, as the menu's
+`BN6_NAVI_ATTACK` ones; a battle reads its copy's), so that the asks
+answered by object for him and his shots read his. Under the dev flag
+side 0's partner carries the run's MegaMan with the next folder that
+holds chips after his lead's, where the data folder has a checkpoint;
+`teambuster=N` gives both partners Attack N. Seen with
+`teamhp=500,teambuster=5`: each partner's charged shot takes 50 from the
+other partner (450 to 400 at iteration 407, 440 to 390 at 477) where it
+took 10 without it, the leads' shots still 10; 2,454 iterations 0 apart,
+52 hashes the same with 266 rollbacks and with none.
+
+Not his yet: his NaviCust's programs past HP and the buster (BN6 makes
+a NaviStats' abilities from the board in its menus, bn6f
+applyNavicustPrograms_813C684, which no core runs for him: a core of his
+own client running it from his board would give numbers every client
+must get alike, so they would cross with his loadout), and his Cross
+(below, Not yet).
+
+### What a partner meets under full rules
+
+Every NetBattle runs BN5's installs on both GBAs (the Souls with their
+mood, ColonelSoul's button and the Chaos Unison, DarkInvs's machine,
+BN5's chips and Navis, the green flash), recorded by `xinstall_log.c`
+and hooked on the pair's cores. What of it is keyed by a side's player
+rather than by object, and what a partner meets there (read in the code,
+22 October 2026; none of it seen in a battle yet, since the stood-in
+partners use none of it):
+
+- **Fixed: DarkInvs on a partner.** BN5's chip AI keeps its state past
+  BN6's 0x100 bytes of AI data, so a MegaMan under it needs BN5's 0x140
+  (`RAM_PLAYER_AI`, side 0's player's under the flag). A partner using
+  DarkInvs kept BN6's block, and the chip AI's reset cleared 0x40 bytes
+  from +0xF0, 0x30 of them in the next AI data of BN6's pool. Under the
+  flag a MegaMan whose AI data is not that block is now left out of the
+  chip AI (`darkinvs.c`, `held_short`): his DarkInvs does nothing.
+  (Side 1's player in a 1v1 NetBattle meets the same reset with his AI
+  data moved into side 0's block, read and not seen: left to a task of
+  its own.)
+- **Fixed: the green flash's count.** BN5's DarkPlus's green flash keeps
+  its frames a side (`XC_FLASH`), counted down in the player's timers,
+  which a partner runs too: twice as fast. The count now skips the
+  object in a side's partner's place (`xchips_flash.c`; no other battle
+  has one there). It still tints both MegaMen of the side. Neither fix
+  is seen in a battle yet (the stood-in partners use neither chip); both
+  leave a NetBattle without the flag and the 2v2 runs above as they were,
+  hash for hash.
+- **Misbehaves, written down:** the Chaos Unison's hooks
+  (`soulchaos.c`: charge, phase, release, the counter's test) take the
+  side by r5's alliance, so a partner's charge steps his lead's unison
+  and his counter is taken from him (to fix: act for the side's player
+  alone); BN5's DarkChips' mood rule (`soulmood.c`) zeroes his lead's
+  mood and lays the after-effect on his lead (to fix: his NaviStats by
+  object, as BN6's own asks are answered).
+- **Shares his lead's:** a Soul's chip powers (`soulchips.c`: the
+  charge, the double damage, KnightSoul's guard, ShadowSoul's sword) and
+  his hits' mood by alliance; BN5's Navis and five chips of BN5's
+  (ShadowMan, NumberMan, TomahawkMan, HeatMan's; ZSaber, Katana,
+  MoonBld, CustSwrd, DarkCirc) find their target through BN6's
+  side-player getter (`0x080103BC`), so they only ever take a lead; the
+  Dark Soul's lists are built from the lead's folder (`arena_souls.c`).
+- **Leaves him out:** UNITE, ColonelSoul's button and a Soul's life
+  (`soulunite.c`, `soulcolonel.c`, `soullife.c`: the side's player or
+  this GBA's side), the Souls' form-gated powers (`soulpower.c`,
+  `soulpassive.c`, `soulproxy.c`: his form is never the proxy), a united
+  Soul carried to the other GBA (the lead's alone). His own Custom screen
+  is a plain copy with no hook, so it offers him no UNITE either. BN6's
+  own DarkChips' rule (`darkbn6.c`) is a run's, not on the pair.
+- **A Cross leaves him as he is** (read in bn6f, not seen): BN6's
+  crossing controller (`0x020367F0`, bn6f dword_20367F0) keeps an entry
+  a side (+8 and +0x18: +0 a Cross chosen, +4 a Beast Out, 0xFF none,
+  +8 the side's player's object). Its first mode (sub_801486C) flags a
+  Beast Out's object (its AI data +0x44 bit 0x4000000, sub_802DCDE) and
+  sends a Cross to its second (sub_80148CC: sub_80148EC,
+  activateCrossHappensHere_8014944, sub_801498E), which crosses the
+  entries' objects; its third (sub_8014A00) waits for both. A crossing
+  object reads its form by its alliance (sub_801595E from sub_8014A38),
+  but only the entries' objects cross: a lead's Cross leaves his partner
+  as he is. His own Cross would need entries of his own in that
+  controller (or its modes run again for his object), his own pending
+  record answered by object at `0x0801595E`, and the controller's wait
+  taught to wait for him.
+
+### Proved: the partners' own folders and screens
+
+The player's Gregar ROM and Team Colonel's, a fresh data folder each,
+`--dev arena,arenaboth,arena2v2=1,teamhp=500,arenadelay=1,quitend`, both
+partners' clients stood in for on the machine (their screens' keys a
+script by the frame: the cursor right and A every 20 frames), side 0's
+lead tapping R every 600 frames in the fight so that the Custom screen
+opens again once its gauge is full (three turns; with `teamhp=150` the
+partners are deleted before the second), 22 October 2026, with the leads
+waiting for their partners (below):
+
+| Run | End | Hashes | The two GBAs | His picks |
+| --- | --- | --- | --- | --- |
+| `arenalag=4` (287 rollbacks, 1,148 frames run again) | over at frame 3426, side 0 won | 57, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 2,703 iterations, 0 apart | three turns each: side 0's partner 7 chips (3, 2, 2: BusterUp, Sword and an Atk+10 merged into it the first), side 1's 11, each at his OK, set as his side's screen closed, taken by both GBAs at the same iteration |
+| `arenalag=4,arenaroll=8` | over at 3426 | all 57 the same as the delay alone's (`arenawindow=0`) | 2,696, 0 apart; 428 rollbacks of 8 frames, the game's state the same after all 428 | as above |
+| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 3828 | 63 (the local link echoes them) | apart from iteration 190 (2,149 of 2,703) | |
+
+Each partner's hand's chip up next moves from his own picks alone:
+side 0's at iterations 166 and 190, 1361 and 1393, 2145 and 2625, side
+1's at 418, 818, 1373, 1773 and 2397, both back to 0 at 1028 and 1983 as
+their picks of the next turn go in. (Before the wait, the same runs:
+2,725 iterations, 57 hashes, the chips 11 iterations later; with
+`teamhp=150`, one turn each, 1,314 iterations 0 apart, 30 hashes the
+same with 173 rollbacks and with none, `arenaroll=8` 230 of 230.) A
+NetBattle without the flag is the battle it was:
+`--dev arena,arenaboth,arenalag=4,arenadelay=1` over at frame 2690, the
+last hash `86d2f837337a1494`.
+
+His client's screen: a frame 1.3 to 1.5 ms (the worst 2.1); the pair's
+copy into it 0.14 ms at the first turn and some 20 ms at the later ones
+(the worst 31: a frame or two of his own screen held as a turn begins).
+Timed apart: the pair's save 0.05 to 0.08 ms every turn, its load into
+the copy 0.08 ms at the first and 17 to 19 ms at the later ones, inside
+mGBA's state load (not yet looked into). Made once at the first turn,
+some 155 ms (the battle's worst tick then, 3 past a 60th in a battle).
+His screen offers no Cross and no Beast Out (their flags cleared on the
+copy's GBA), since his own Cross is not built.
+
+Captured (`teamseat=2` and `3`, the pictures kept out of the
+repository): BN6's own Custom screen on each partner's client with his
+own deck (side 0's: BusterUp *, Sword S, Cannon B, Atk+10 *, MiniBomb L,
+where his lead's GBA offers a Cannon A first; side 1's: WhiCapsl *,
+Sword S and three chips of code D), his picks in BN6's column as he
+takes them, his OK and BN6's "Sending chip data..." after it; his second
+turn opening on the chips he left (Cannon B and MiniBomb L first, then
+Cannon A, Sword S and an L chip), as BN6 keeps the chips not taken at
+the deck's front; in the fight his HP box (150), the four marks, his
+lead's HP under his lead, and his own chips' icons over him.
 
 ### Four streams over the network (design, not built)
 
@@ -2139,14 +2413,25 @@ the shape for a 2v2 between four games, each running the pair.
 ## Not yet
 
 - Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
-  four streams over the server (designed, the wire unchanged); a
-  partner's own folder, Custom screen and HP box on his own GBA (his
-  hand is dealt his lead's chips); his own loadout in his record (his
-  NaviCust's programs, his Cross); an attack of his seen asking his
-  record by object (built, none asked yet); and the full-rules audit of
-  what is keyed by a side's player: the Souls, BN5's mood, the DarkChips,
-  the chip AI's state past BN6's AI data on a partner, BN5's Navis'
-  targets.
+  four streams over the server (designed, the wire unchanged), a
+  partner's pick messages and his loadout among what crosses; his
+  NaviCust's programs past HP and the buster, and his Cross (his own
+  Crosses on his screen copy's flags, his choice crossing as his picks
+  do, his own pending record answered by object at `0x0801595E`, and
+  BN6's crossing run on his object: none built); his screen's hand size
+  from his own Custom programs (BN6's five, his lead's, for now), a
+  Program Advance and a chip of computed power in his hand (his hand
+  takes a computed chip's power as 0), WhiCapsl's and Uninstll's marks;
+  the screen copy's cost at the later turns (some 20 ms where the first
+  is 0.14); the leads' wait for a partner over the network (built by
+  the stream's pick messages and BN6's cable; its limit's 60 seconds the
+  owner's to confirm), and the copy's later loads seen at up to 97 ms
+  after a long wait; an attack of his seen asking his record by object (built,
+  none asked yet); and from the full-rules audit ([What a partner meets
+  under full rules](#what-a-partner-meets-under-full-rules)) the Chaos
+  Unison's hooks and BN5's DarkChips' mood rule by object, the green
+  flash a MegaMan's own, a Soul's chip powers his own, BN5's Navis' and chips'
+  targets among four.
 - Team NetBattles ([Team NetBattles](#team-netbattles)): teams of three
   (6 of a channel's 8); a heal on a carried HP, which the relay starts
   without (watch whether anchors sweep); partners' fixed phrases to each

@@ -66,9 +66,6 @@
    "comment": "whose wait",
    "line": 12
   },
-  "arena_text:arena_other": {
-   "line": 10
-  },
   "arena_text:arena_reading_it": {
    "line": 60
   },
@@ -1901,7 +1898,7 @@
    "comment": "The Arena's PET text (arena_text.h)",
    "domain": "Arena",
    "kind": "screen",
-   "lines": 37,
+   "lines": 36,
    "shows": [],
    "speaker": "Screen",
    "stem": "arena_text"
@@ -2164,7 +2161,7 @@
      "src/online/stands_words.c"
     ],
     "flagged": 0,
-    "lines": 104,
+    "lines": 103,
     "speech": 58
    },
    "AsterLand and the Academy": {
@@ -2533,7 +2530,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1555,
+  "lines": 1554,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3138,7 +3135,6 @@
   {"container":"arena_words:arena_installs_apart_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_installs_apart_words","line":167,"lines":["arena_words:arena_installs_apart_words:0"],"speakers":["MegaMan"],"title":"Arena installs apart words","when":"... stopped before it began, the two games' installs apart"},
   {"container":"arena_text:arena_chips_used","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_chips_used","line":9,"lines":["arena_text:arena_chips_used:0"],"speakers":["Screen"],"title":"Arena chips used","when":""},
   {"container":"arena_text:arena_hp_left","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_hp_left","line":9,"lines":["arena_text:arena_hp_left:0"],"speakers":["Screen"],"title":"Arena hp left","when":""},
-  {"container":"arena_text:arena_other","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_other","line":10,"lines":["arena_text:arena_other:0"],"speakers":["Screen"],"title":"Arena other","when":""},
   {"container":"arena_text:arena_coming","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_coming","line":12,"lines":["arena_text:arena_coming:0"],"speakers":["Screen"],"title":"Whose wait","when":"whose wait"},
   {"container":"arena_text:arena_linking","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_linking","line":12,"lines":["arena_text:arena_linking:0"],"speakers":["Screen"],"title":"Whose wait","when":"whose wait"},
   {"container":"arena_text:arena_ready","domain":"Arena","file":"src/online/arena_text.c","id":"arena_text:arena_ready","line":12,"lines":["arena_text:arena_ready:0"],"speakers":["Screen"],"title":"Whose wait","when":"whose wait"},
@@ -4335,7 +4331,6 @@
   {"boxes":[{"pages":[["Bass dropped this as","he went..."]],"speaker":"MegaMan","text":"Bass dropped this as he went..."},{"pages":[["Lan,it's GigaChip","data!"]],"speaker":"MegaMan","text":"Lan,it's GigaChip data!"}],"container":"super_reward_words","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:super_reward_words:3","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Bass dropped this as he went...|@M Lan,it's GigaChip data!","text_hash":"4614de2028ee"},
   {"boxes":[{"pages":[["HP left"]],"speaker":"Screen","text":"HP left"}],"container":"arena_hp_left","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_hp_left:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"HP left","text_hash":"1cb5d064879d"},
   {"boxes":[{"pages":[["Chips used"]],"speaker":"Screen","text":"Chips used"}],"container":"arena_chips_used","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_chips_used:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"Chips used","text_hash":"840addd170fb"},
-  {"boxes":[{"pages":[["2nd GBA"]],"speaker":"Screen","text":"2nd GBA"}],"container":"arena_other","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_other:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"2nd GBA","text_hash":"c5e112a8dde3"},
   {"boxes":[{"pages":[["Sending..."]],"speaker":"Screen","text":"Sending..."}],"container":"arena_coming","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_coming:0","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Sending...","text_hash":"c338c191ab1e"},
   {"boxes":[{"pages":[["Linking..."]],"speaker":"Screen","text":"Linking..."}],"container":"arena_linking","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_linking:0","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Linking...","text_hash":"42c3d866e520"},
   {"boxes":[{"pages":[["Ready!"]],"speaker":"Screen","text":"Ready!"}],"container":"arena_ready","domain":"Arena","file":"src/online/arena_text.c","flags":[],"id":"arena_text:arena_ready:0","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Ready!","text_hash":"9884f378b398"},

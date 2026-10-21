@@ -142,6 +142,11 @@ void arena_players(Arena *a, unsigned players);
  * second; -1, as it starts, mine): --dev arenaother's, the other GBA's
  * screen seen (the game's state the same whichever is drawn) */
 void arena_show(Arena *a, int side);
+/* side's GBA's core, to read (a seat's own drawing over its picture,
+ * arena_team_view.h); NULL before the battle */
+struct mCore *arena_core(const Arena *a, unsigned side);
+/* ... and the pair itself, to copy (arena_team_screen.h); NULL before the battle */
+struct ArenaPair *arena_pair_of(Arena *a);
 /* my core's sound into the game's */
 void arena_sound(Arena *a);
 /* the pair's hash now (both cores' states, the cable's numbers), 0 before

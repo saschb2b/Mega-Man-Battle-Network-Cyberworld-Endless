@@ -7,7 +7,7 @@
 const char arena_title[] = "NETBATTLE", arena_practice[] = "Practice", arena_vs[] = "VS";
 const char arena_hp[] = "HP", arena_cross[] = "Cross", arena_soul[] = "Soul", arena_none[] = "---";
 const char arena_set[] = "Set", arena_time[] = "Time", arena_hp_left[] = "HP left", arena_chips_used[] = "Chips used";
-const char arena_you[] = "You", arena_other[] = "2nd GBA";
+const char arena_you[] = "You", arena_other[] = "Beta";   /* (--dev arena's stand-in, as the local proofs name the second player) */
 /* whose wait */
 const char arena_coming[] = "Sending...", arena_linking[] = "Linking...", arena_ready[] = "Ready!";
 /* the card's headline */

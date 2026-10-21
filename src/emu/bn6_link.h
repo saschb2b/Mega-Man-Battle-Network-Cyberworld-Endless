@@ -29,12 +29,22 @@
                                              read or write a field r1 bytes in: set a byte, set a halfword, get a byte, the same again, get
                                              a halfword (bn6f's *_AllianceFromBattleObject), to: */
 #define BN6_NAVI_BY_OBJECT_END 0x0801379Eu /* ... the last one's end */
+#define BN6_NS_ATTACK         0x01        /* u8, a NaviStats' buster: Attack, Speed and Charge, levels less one (bn6.h's BN6_NAVI_ATTACK's, */
+#define BN6_NS_SPEED          0x02        /* ... the menu's NaviStats laid out alike; a battle reads its copy's: a shot's damage Attack + 1, */
+#define BN6_NS_CHARGE         0x03        /* ... bn6f sub_801265A) */
 #define BN6_NS_BASE_HP        0x3E        /* u16, a NaviStats' fields from its start: MaxBaseHP, */
 #define BN6_NS_CUR_HP         0x40        /* ... CurHP (a MegaMan's object takes it as he is set up, bn6f sub_80141C8), */
 #define BN6_NS_MAX_HP         0x42        /* ... and MaxHP */
 #define BN6_HAND_ADDR         0x08010018u /* r0 the side: its hand's address (BN6_BATTLE_HAND, 0x50 a side) in r0, BN6_BATTLE_HAND in r1, by
                                              mov pc,lr, no push (bn6f getBattleHandAddr_8010018): the chip up next, a chip used, the
                                              Custom screen's picks; its callers pass a side, most of them the object's in r5 */
+/* A hand's fields past bn6.h's (BN6_HAND_CHIPS, POWERS, BONUS: six u16 each), as the Custom screen writes a side's (bn6f sub_8029110,
+ * the hand built at 0x020366C0 from its picks): */
+#define BN6_HAND_SIZE         0x50        /* a side's hand's bytes */
+#define BN6_HAND_EXTRA        0x26        /* ... six u16 the Custom screen zeroes */
+#define BN6_HAND_ENTRIES      0x32        /* ... six u16, each chip's folder entry (chip | code << 9), 0xFFFF after them */
+#define BN6_HAND_SCREEN       0x3E        /* ... six u8, each chip's Custom screen (BN6_BATTLE_SCREENS less one) */
+#define BN6_HAND_MARKS        0x44        /* ... six u8, each chip's marks (its Custom screen element's +4; WhiCapsl's and Uninstll's bits) */
 #define BN6_SPAWN_COMMON      0x08003278u /* every kind's spawn (BN6_SPAWN_1 and the rest): r0 the kind, r5 the object that spawns */
 #define BN6_SPAWN_MADE        0x080032BEu /* ... the new object in r5, its words taken (its first store, of its index) */
 #define BN6_T4_ACTIVE         0x02036710u /* u32 the fourth kind's slots in play (BN6_T4_OBJECTS), slot i bit 31 - i: a spawn takes the

@@ -36,6 +36,10 @@ static HookAct store(HookRegs *r, void *user) {
  * four timers (0x0800E53E-0x0800E554) takes one from the first */
 static HookAct count(HookRegs *r, void *user) {
 	(void)user;
+	/* (a side's partner, --dev arena2v2's second MegaMan, runs these timers too: the side's flash counted once a frame, by its
+	 * player's; no battle but those has an object in the partner's place) */
+	uint32_t side = (uint32_t)side_of(r->r[5]) * BN6_BATTLE_PLAYER_STEP;
+	if (r->r[5] && r->r[5] == hook_read32(BN6_BATTLE_PLAYERS + side + BN6_SIDE_PARTNER)) return HOOK_CONTINUE;
 	uint32_t at = flash_at(r->r[5]);
 	uint16_t v = hook_read16(at);
 	if (v) hook_write16(at, (uint16_t)(v - 1));
