@@ -1297,7 +1297,7 @@
    "line": 149
   },
   "town_lines:town_lines": {
-   "line": 208
+   "line": 211
   },
   "town_words:classmate_words": {
    "line": 64
@@ -1899,7 +1899,7 @@
    "comment": "The towns' people and what is said there (docs/VOICE.md): each town's folk, where they stand and what they say, its checks' words and MegaMan's on arriving, and Lan's and MegaMan's as a run begins. Its plan and map, town.c.",
    "domain": "The town",
    "kind": "speech",
-   "lines": 89,
+   "lines": 90,
    "shows": [
     "screenshots/town-central.png"
    ],
@@ -1987,7 +1987,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1886,
+  "boxes": 1889,
   "domains": {
    "Arena": {
     "files": [
@@ -2206,8 +2206,8 @@
      "src/world/town_words.c"
     ],
     "flagged": 5,
-    "lines": 104,
-    "speech": 104
+    "lines": 105,
+    "speech": 105
    },
    "Title": {
     "files": [
@@ -2310,9 +2310,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 666,
+    "boxes": 668,
     "dots_per_box": 0.22,
-    "end_ask": 0.05,
+    "end_ask": 0.04,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2323,7 +2323,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 166",
+    "stutters": "1 box in 167",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
@@ -2365,7 +2365,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1477,
+  "lines": 1478,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2500,9 +2500,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 666,
+    "boxes": 668,
     "dots_per_box": 0.22,
-    "end_ask": 0.05,
+    "end_ask": 0.04,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2513,7 +2513,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 166",
+    "stutters": "1 box in 167",
     "words_per_box": 6.0
    },
    "Mr.Prog": {
@@ -2595,10 +2595,10 @@
    "Townsfolk": {
     "bangs_per_box": 0.0,
     "bn6": null,
-    "boxes": 254,
+    "boxes": 255,
     "dots_per_box": 0.11,
     "end_ask": 0.14,
-    "end_bang": 0.48,
+    "end_bang": 0.47,
     "end_dots": 0.07,
     "openers": [
      "The",
@@ -2612,7 +2612,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1100
+  "speech": 1101
  },
  "version": 1,
  "conversations": [
@@ -2626,8 +2626,8 @@
   {"container":"town_lines:green_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:green_folk","line":109,"lines":["town_lines:green_folk:0.5","town_lines:green_folk:1.5","town_lines:green_folk:2.5","town_lines:green_folk:3.5","town_lines:green_folk:4.5","town_lines:green_folk:5.5","town_lines:green_folk:6.5"],"speakers":["Townsfolk"],"title":"Green folk: its people, on the ground at 0","when":"Its people, on the ground at 0: by the knight statue, up the paths to the flower shop and the Judge Tree, round the pond."},
   {"container":"town_lines:green_checks","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:green_checks","line":123,"lines":["town_lines:green_checks:0","town_lines:green_checks:1","town_lines:green_checks:3","town_lines:green_checks:4","town_lines:green_checks:5","town_lines:green_checks:6","town_lines:green_checks:7"],"speakers":["Townsfolk"],"title":"Green checks: what its checks say","when":"What its checks say: the stump's table of books (0, 4), the flower shop (1) and its flower boxes (5), the stumps' stools (3, 6), the lily ponds (7); 8, by the plaza's east arm, has nothing to see, and the knight's own (2) lies under his pedestal, which keeps Lan from reaching it."},
   {"container":"town_lines:beast_words","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:beast_words","line":141,"lines":["town_lines:beast_words:0","town_lines:beast_words:1","town_lines:beast_words:2"],"speakers":["Dad","MegaMan","Townsfolk"],"title":"A run that brought BeastOut","when":"A run that brought BeastOut (issue #99): Dad's word that the PET's CybeastButton is unlocked from the start, as the Cybeast's fall would have had him unlock it (issue #109), the first time a profile brings it (`called`: Dad on the line already); a power is told once, by whoever gave it (docs/VOICE.md, What nobody says)"},
-  {"container":"town_lines:town_intro","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_intro","line":156,"lines":["town_lines:town_intro:0","town_lines:town_intro:1","town_lines:town_intro:2","town_lines:town_intro:3","town_lines:town_intro:4","town_lines:town_intro:5","town_lines:town_intro:6","town_lines:town_intro:case0.0","town_lines:town_intro:case0.1","town_lines:town_intro:case1.0","town_lines:town_intro:case1.1","town_lines:town_intro:casedefault.0"],"speakers":["Lan","Dad","MegaMan","Townsfolk"],"title":"What Lan and MegaMan say as a run begins","when":"What Lan and MegaMan say as a run begins: on the first dive ever, Dad's call about the Endless Net; after that, a word about the last one; and with BeastOut brought the first time, Dad's word on it."},
-  {"container":"town_lines:town_lines","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_lines","line":210,"lines":["town_lines:town_lines:1.2","town_lines:town_lines:2.2","town_lines:town_lines:3.2","town_lines:town_lines:0"],"speakers":["MegaMan","Townsfolk"],"title":"Town lines","when":""},
+  {"container":"town_lines:town_intro","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_intro","line":156,"lines":["town_lines:town_intro:0","town_lines:town_intro:1","town_lines:town_intro:2","town_lines:town_intro:3","town_lines:town_intro:4","town_lines:town_intro:5","town_lines:town_intro:6","town_lines:town_intro:case0.0","town_lines:town_intro:case0.1","town_lines:town_intro:case1.0","town_lines:town_intro:case1.1","town_lines:town_intro:case1.2","town_lines:town_intro:casedefault.0"],"speakers":["Lan","Dad","MegaMan","Townsfolk"],"title":"What Lan and MegaMan say as a run begins","when":"What Lan and MegaMan say as a run begins: on the first dive ever, Dad's call about the Endless Net; after that, a word about the last one; and with BeastOut brought the first time, Dad's word on it."},
+  {"container":"town_lines:town_lines","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:town_lines","line":213,"lines":["town_lines:town_lines:1.2","town_lines:town_lines:2.2","town_lines:town_lines:3.2","town_lines:town_lines:0"],"speakers":["MegaMan","Townsfolk"],"title":"Town lines","when":""},
   {"container":"town_words:news_words","domain":"The town","file":"src/world/town_words.c","id":"town_words:news_words","line":53,"lines":["town_words:news_words:0","town_words:news_words:1","town_words:news_words:2","town_words:news_words:3","town_words:news_words:4"],"speakers":["Mr.Prog"],"title":"News words","when":""},
   {"container":"town_words:classmate_words","domain":"The town","file":"src/world/town_words.c","id":"town_words:classmate_words","line":65,"lines":["town_words:classmate_words:0","town_words:classmate_words:1","town_words:classmate_words:2","town_words:classmate_words:3"],"speakers":["Townsfolk"],"title":"Classmate words","when":""},
   {"container":"town_words:neighbor_words","domain":"The town","file":"src/world/town_words.c","id":"town_words:neighbor_words","line":74,"lines":["town_words:neighbor_words:0","town_words:neighbor_words:1"],"speakers":["Townsfolk"],"title":"Neighbor words","when":""},
@@ -4669,13 +4669,14 @@
   {"boxes":[{"pages":[["{again}"]],"speaker":"Townsfolk","text":"{again}"},{"pages":[["Let's find out,Lan!"]],"speaker":"MegaMan","text":"Let's find out,Lan!"},{"pages":[["To the PC!"]],"speaker":"MegaMan","text":"To the PC!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:6","kind":"speech","line":185,"note":"(the call heard, but no run over yet: no best to speak of)","placeholders":[{"name":"again","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk","MegaMan"],"text":"{again}|@M Let's find out,Lan!|@M To the PC!","text_hash":"2a1f20119841"},
   {"boxes":[{"pages":[["Ready,Lan? The Nest","is waiting!"]],"speaker":"MegaMan","text":"Ready,Lan? The Nest is waiting!"},{"pages":[["This time we'll","bring it down!"]],"speaker":"Lan","text":"This time we'll bring it down!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case0.0","kind":"speech","line":191,"note":"(the short net ends on its Nest: its goal, not a depth to beat)","speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Ready,Lan? The Nest is waiting!|@L This time we'll bring it down!","text_hash":"430690865253"},
   {"boxes":[{"pages":[["Ready,Lan? Our best","is layer {best_depth}!"]],"speaker":"MegaMan","text":"Ready,Lan? Our best is layer {best_depth}!"},{"pages":[["This time we'll go","even deeper!"]],"speaker":"Lan","text":"This time we'll go even deeper!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case0.1","kind":"speech","line":192,"placeholders":[{"name":"best_depth","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Ready,Lan? Our best is layer {best_depth}!|@L This time we'll go even deeper!","text_hash":"28d18d2980b3"},
-  {"boxes":[{"pages":[["Dad's backup got me","home safe last time."]],"speaker":"MegaMan","text":"Dad's backup got me home safe last time."},{"pages":[["Alright! Let's reach","the Nest today!"]],"speaker":"Lan","text":"Alright! Let's reach the Nest today!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case1.0","kind":"speech","line":195,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!","text_hash":"1963184f933d"},
-  {"boxes":[{"pages":[["Dad's backup got me","home safe last time."]],"speaker":"MegaMan","text":"Dad's backup got me home safe last time."},{"pages":[["Alright! Let's beat","layer {best_depth} today!"]],"speaker":"Lan","text":"Alright! Let's beat layer {best_depth} today!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case1.1","kind":"speech","line":196,"placeholders":[{"name":"best_depth","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Dad's backup got me home safe last time.|@L Alright! Let's beat layer {best_depth} today!","text_hash":"ae49b180b75b"},
-  {"boxes":[{"pages":[["{again}"]],"speaker":"Townsfolk","text":"{again}"},{"pages":[["Let's find out,Lan!"]],"speaker":"MegaMan","text":"Let's find out,Lan!"},{"pages":[["To the PC!"]],"speaker":"MegaMan","text":"To the PC!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:casedefault.0","kind":"speech","line":198,"placeholders":[{"name":"again","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk","MegaMan"],"text":"{again}|@M Let's find out,Lan!|@M To the PC!","text_hash":"2a1f20119841"},
-  {"boxes":[{"pages":[["ACDC Town,Lan! The","Metroline's so fast!"]],"speaker":"MegaMan","text":"ACDC Town,Lan! The Metroline's so fast!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:1.2","kind":"speech","line":210,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M ACDC Town,Lan! The Metroline's so fast!|","text_hash":"915d1f64c9bf"},
-  {"boxes":[{"pages":[["Seaside Town,Lan!","Smell that sea air!"]],"speaker":"MegaMan","text":"Seaside Town,Lan! Smell that sea air!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:2.2","kind":"speech","line":211,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Seaside Town,Lan! Smell that sea air!|","text_hash":"56a98b786324"},
-  {"boxes":[{"pages":[["Green Town,Lan!","Smell those flowers!"]],"speaker":"MegaMan","text":"Green Town,Lan! Smell those flowers!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:3.2","kind":"speech","line":212,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Green Town,Lan! Smell those flowers!|","text_hash":"c85a5dabdd1a"},
-  {"boxes":[{"pages":[["at most MAX_FOLK","townsfolk"]],"speaker":"Townsfolk","text":"at most MAX_FOLK townsfolk"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"fragment":true,"id":"town_lines:town_lines:0","kind":"speech","line":216,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"at most MAX_FOLK townsfolk","text_hash":"febed4a06a26"},
+  {"boxes":[{"pages":[["{again}"]],"speaker":"Townsfolk","text":"{again}"},{"pages":[["Let's find out,Lan!"]],"speaker":"MegaMan","text":"Let's find out,Lan!"},{"pages":[["To the PC!"]],"speaker":"MegaMan","text":"To the PC!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case1.0","kind":"speech","line":197,"note":"(Dad's backup only after a deletion: a won run's end is no rescue)","placeholders":[{"name":"again","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk","MegaMan"],"text":"{again}|@M Let's find out,Lan!|@M To the PC!","text_hash":"2a1f20119841"},
+  {"boxes":[{"pages":[["Dad's backup got me","home safe last time."]],"speaker":"MegaMan","text":"Dad's backup got me home safe last time."},{"pages":[["Alright! Let's reach","the Nest today!"]],"speaker":"Lan","text":"Alright! Let's reach the Nest today!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case1.1","kind":"speech","line":198,"note":"(Dad's backup only after a deletion: a won run's end is no rescue)","speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Dad's backup got me home safe last time.|@L Alright! Let's reach the Nest today!","text_hash":"1963184f933d"},
+  {"boxes":[{"pages":[["Dad's backup got me","home safe last time."]],"speaker":"MegaMan","text":"Dad's backup got me home safe last time."},{"pages":[["Alright! Let's beat","layer {best_depth} today!"]],"speaker":"Lan","text":"Alright! Let's beat layer {best_depth} today!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:case1.2","kind":"speech","line":199,"note":"(Dad's backup only after a deletion: a won run's end is no rescue)","placeholders":[{"name":"best_depth","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Dad's backup got me home safe last time.|@L Alright! Let's beat layer {best_depth} today!","text_hash":"ae49b180b75b"},
+  {"boxes":[{"pages":[["{again}"]],"speaker":"Townsfolk","text":"{again}"},{"pages":[["Let's find out,Lan!"]],"speaker":"MegaMan","text":"Let's find out,Lan!"},{"pages":[["To the PC!"]],"speaker":"MegaMan","text":"To the PC!"}],"container":"town_intro","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_intro:casedefault.0","kind":"speech","line":201,"placeholders":[{"name":"again","spec":"%s"}],"speaker":"Townsfolk","speakers":["Townsfolk","MegaMan"],"text":"{again}|@M Let's find out,Lan!|@M To the PC!","text_hash":"2a1f20119841"},
+  {"boxes":[{"pages":[["ACDC Town,Lan! The","Metroline's so fast!"]],"speaker":"MegaMan","text":"ACDC Town,Lan! The Metroline's so fast!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:1.2","kind":"speech","line":213,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M ACDC Town,Lan! The Metroline's so fast!|","text_hash":"915d1f64c9bf"},
+  {"boxes":[{"pages":[["Seaside Town,Lan!","Smell that sea air!"]],"speaker":"MegaMan","text":"Seaside Town,Lan! Smell that sea air!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:2.2","kind":"speech","line":214,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Seaside Town,Lan! Smell that sea air!|","text_hash":"56a98b786324"},
+  {"boxes":[{"pages":[["Green Town,Lan!","Smell those flowers!"]],"speaker":"MegaMan","text":"Green Town,Lan! Smell those flowers!"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"id":"town_lines:town_lines:3.2","kind":"speech","line":215,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Green Town,Lan! Smell those flowers!|","text_hash":"c85a5dabdd1a"},
+  {"boxes":[{"pages":[["at most MAX_FOLK","townsfolk"]],"speaker":"Townsfolk","text":"at most MAX_FOLK townsfolk"}],"container":"town_lines","domain":"The town","file":"src/world/town_lines.c","flags":[],"fragment":true,"id":"town_lines:town_lines:0","kind":"speech","line":219,"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"at most MAX_FOLK townsfolk","text_hash":"febed4a06a26"},
   {"boxes":[{"pages":[["NET NEWS! NET NEWS!"]],"speaker":"Mr.Prog","text":"NET NEWS! NET NEWS!"},{"pages":[["{loud}'S COPY IS","DELETED!"]],"speaker":"Mr.Prog","text":"{loud}'S COPY IS DELETED!"},{"pages":[["IN {loud}! WHAT A","BATTLE!"]],"speaker":"Mr.Prog","text":"IN {loud}! WHAT A BATTLE!"}],"container":"news_words","domain":"The town","file":"src/world/town_words.c","flags":[],"id":"town_words:news_words:0","kind":"speech","line":53,"placeholders":[{"name":"loud","spec":"%s"},{"name":"loud","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NET NEWS! NET NEWS!|{loud}'S COPY IS DELETED!|IN {loud}! WHAT A BATTLE!","text_hash":"41f969904131"},
   {"boxes":[{"pages":[["NET NEWS! NET NEWS!"]],"speaker":"Mr.Prog","text":"NET NEWS! NET NEWS!"},{"pages":[["A NEW NET OPENED","UNDER TOWN!"]],"speaker":"Mr.Prog","text":"A NEW NET OPENED UNDER TOWN!"},{"pages":[["THEY CALL IT THE","ENDLESS NET!"]],"speaker":"Mr.Prog","text":"THEY CALL IT THE ENDLESS NET!"}],"container":"news_words","domain":"The town","file":"src/world/town_words.c","flags":[],"id":"town_words:news_words:1","kind":"speech","line":55,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NET NEWS! NET NEWS!|A NEW NET OPENED UNDER TOWN!|THEY CALL IT THE ENDLESS NET!","text_hash":"07a1ec0b01bf"},
   {"boxes":[{"pages":[["NET NEWS! NET NEWS!"]],"speaker":"Mr.Prog","text":"NET NEWS! NET NEWS!"},{"pages":[["LAN HIKARI BROUGHT","DOWN THE NEST!"]],"speaker":"Mr.Prog","text":"LAN HIKARI BROUGHT DOWN THE NEST!"},{"pages":[["THE WHOLE TOWN'S","TALKING!"]],"speaker":"Mr.Prog","text":"THE WHOLE TOWN'S TALKING!"}],"container":"news_words","domain":"The town","file":"src/world/town_words.c","flags":[],"id":"town_words:news_words:2","kind":"speech","line":56,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NET NEWS! NET NEWS!|LAN HIKARI BROUGHT DOWN THE NEST!|THE WHOLE TOWN'S TALKING!","text_hash":"675bd0bc2ba1"},

@@ -43,7 +43,7 @@ _Static_assert(offsetof(Profile, crosses_open) == 53, "Profile.crosses_open save
 _Static_assert(offsetof(Profile, last_cross) == 54, "Profile.last_cross save offset changed");
 _Static_assert(offsetof(Profile, library) == 55, "Profile.library save offset changed");
 _Static_assert(offsetof(Profile, library_start) == 96, "Profile.library_start save offset changed");
-_Static_assert(offsetof(Profile, last_town) == 98, "Profile.last_town save offset changed");
+_Static_assert(offsetof(Profile, run_open) == 98, "Profile.run_open (was last_town) save offset changed");
 _Static_assert(offsetof(Profile, programs_found) == 99, "Profile.programs_found save offset changed");
 _Static_assert(offsetof(Profile, library_run) == 108, "Profile.library_run save offset changed");
 _Static_assert(offsetof(Profile, setup_new) == 112, "Profile.setup_new save offset changed");

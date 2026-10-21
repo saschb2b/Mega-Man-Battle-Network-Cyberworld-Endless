@@ -237,7 +237,13 @@ int meta_library_new(void) {
 	return n > 0 ? n : 0;
 }
 
+static bool was_open;
+
+bool meta_run_was_open(void) { return was_open; }
+
 void meta_run_begun(void) {
+	was_open = profile.run_open == RUN_OPEN;
+	profile.run_open = RUN_OPEN;
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
 	for (int n = 1; n <= 5; ++n)

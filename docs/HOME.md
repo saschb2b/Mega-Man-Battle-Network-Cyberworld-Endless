@@ -416,7 +416,13 @@ As built (issue #94): the town is Central Town at its original width,
 the same plan every run (`CYBERWORLD_TOWN_STYLE` and `_VARIANT` still
 pick another for a test). A run begins in Lan's room, at the top of its
 stairs where BN6 sets him down; the run's words play there, and R at his
-PC jacks MegaMan in to Lan's HP (`lan_house.c`). BN6's own jack-in from
+PC jacks MegaMan in to Lan's HP (`lan_house.c`). Those words remember how
+the last run went (`town_lines.c`): one left unfinished ("We never
+finished that last dive..."), whether a saved run was started over or a
+run was quit before its first save (the profile's `run_open`, set as a
+run begins and cleared as it ends; session 74 heard "Dad's backup got me
+home safe last time." after a plain quit), and Dad's backup only after a
+deletion. BN6's own jack-in from
 the PC (destination 1) runs a line of its story's that turns Lan back
 ("Lan,let's check out the town first!"), so the room's table goes
 through the town's destination with Lan's plain "Jack in!". The house
