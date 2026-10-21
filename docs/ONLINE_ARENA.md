@@ -2073,16 +2073,19 @@ partners use none of it):
   is a plain copy with no hook, so it offers him no UNITE either. BN6's
   own DarkChips' rule (`darkbn6.c`) is a run's, not on the pair.
 - **A Cross leaves him as he is** (read in bn6f, not seen): BN6's
-  crossing controller (`0x020367F0`, bn6f dword_20367F0 and its modes
-  sub_801486C, sub_80148CC, sub_8014A00) keeps an entry a side (+8 and
-  +0x18: the pending form at +4, the side's player's object at +8) and
-  flags that object alone to cross (its AI data +0x44 bit 0x4000000,
-  sub_802DCDE); his object reads the pending form by its alliance
-  (sub_801595E from sub_8014A38) only once it crosses, which it never
-  does. His own Cross would need an entry of his own, or his object
-  flagged beside his lead's with his own pending record answered by
-  object at `0x0801595E` and the controller's wait (sub_8014A00, both
-  sides' objects done) taught to wait for him.
+  crossing controller (`0x020367F0`, bn6f dword_20367F0) keeps an entry
+  a side (+8 and +0x18: +0 a Cross chosen, +4 a Beast Out, 0xFF none,
+  +8 the side's player's object). Its first mode (sub_801486C) flags a
+  Beast Out's object (its AI data +0x44 bit 0x4000000, sub_802DCDE) and
+  sends a Cross to its second (sub_80148CC: sub_80148EC,
+  activateCrossHappensHere_8014944, sub_801498E), which crosses the
+  entries' objects; its third (sub_8014A00) waits for both. A crossing
+  object reads its form by its alliance (sub_801595E from sub_8014A38),
+  but only the entries' objects cross: a lead's Cross leaves his partner
+  as he is. His own Cross would need entries of his own in that
+  controller (or its modes run again for his object), his own pending
+  record answered by object at `0x0801595E`, and the controller's wait
+  taught to wait for him.
 
 ### Proved: the partners' own folders and screens
 
