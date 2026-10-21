@@ -1703,6 +1703,13 @@ NetBattle broke off"); all three were told the match broken off (result
 3), Gamma's team split with Delta gone, and MegaMan said "Whoa! The Team
 NetBattle broke off!" back in the Square.
 
+**The referee** (the same harness, `--referee`): Epsilon, a fifth
+game, at the referee during bout 1: "TEAM NETBATTLE! BOUT 1!", "BETA VS
+GAMMA!", "BETA HAS 40 HP! GAMMA HAS 30!". The match ran again after the
+team's course moved under the Arena's own frame (`square_arena_update`,
+`square_arena_held_frame`): three bouts, every hash agreeing, TEAM WIN for
+Alpha and Beta.
+
 **Split up** (the same harness, `--split`): Alpha's Battle on Beta's
 card, his partner, answered at once ("Huh? Beta's on our team,Lan!"),
 then `Split up` on the same card ("OK... Our team with Beta split up.";

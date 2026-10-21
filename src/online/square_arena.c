@@ -37,7 +37,12 @@
  * The folder carried is the last battle's, asked in the Square only where
  * it no longer fits. Both Yeses at once cross on the server, which turns
  * the second challenge down as busy: the first is taken. MegaMan says how
- * it went back in the Square. */
+ * it went back in the Square.
+ *
+ * A Team NetBattle's bout (square_team.h) is this battle too, gone into
+ * without a question (square_arena_bout), its MegaMan carrying the HP his
+ * last bout left him; its card asks no rematch, and MegaMan's word waits
+ * for the match's end. */
 #include "square_arena.h"
 
 #include <stdio.h>
@@ -654,8 +659,7 @@ static void battle(uint32_t keys, uint32_t rtt_ms) {
 	SA.ended = true;
 	counted(result == 1 ? ANALYTICS_BATTLE_WON : result == 2 ? ANALYTICS_BATTLE_LOST : ANALYTICS_BATTLE_OVER);
 	bouts(result);
-	/* (a team bout: the team's word is said at the match's end, square_team.c) */
-	if (!SA.team) say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
+	say(result == 1 ? arena_won_words() : result == 2 ? arena_lost_words() : arena_over_words());
 	SA.stage = SA_OVER;
 	square_card_up(result == 1 || result == 2 ? result : 3, square_arena_name_of(SA.other) && !SA.team ? ARENA_ASK_OPEN : ARENA_ASK_NONE);
 	SA.hp_left = SA.card.tally.hp[SA.link.link.side & 1u];
