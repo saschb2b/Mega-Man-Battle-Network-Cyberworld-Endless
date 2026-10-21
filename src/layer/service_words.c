@@ -13,10 +13,16 @@
 #include "run.h"
 #include "script_kit.h"
 
-int ta_heal(TextArchive *t, int variant, int told_flag, int amount, bool vow) {
+/* (ts_check_flag: on to script `to` while `flag` is set) */
+static void heal_check(TextArchive *t, int flag, int to) {
+	uint8_t check[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)to, 0xFF };
+	ta_bytes(t, check, sizeof check);
+}
+
+int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow) {
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
-		"DR.HIKARI SENT ME!\nHOLD STILL,NOW!",
+		"DR.HIKARI SENT ME!\nOUCH,YOU'RE HURT!",
 		"RECOVERY PROGRAM,GO!\nTHIS WON'T HURT!",
 	};
 	/* once he has patched MegaMan on this layer (flag set): one patch a
@@ -30,18 +36,26 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int amount, bool vow) {
 		ta_page(t, FACE_PROG, "ALL PATCHED UP! COME BACK ANYTIME!", true);
 	} else ta_page(t, FACE_PROG, "OH NO,MY PATCH IS\nUSED UP HERE!\nTHE NET DEALER SELLS\nMINIENRG!", true);
 	ta_end(t);
+	/* (at full HP, the director's flag: he keeps his patch, where he had
+	 * patched an unhurt MegaMan unasked and spent the layer's one, session
+	 * 75) */
+	int fine = ta_say(t, FACE_PROG, "YOU'RE IN TOP SHAPE!\nCOME BACK WHEN\nYOU'RE HURT!");
 	/* (a vow held, a request's (jobs.h): MegaMan names it, and the patch
 	 * is on Yes, which starts on No; a playtester under one walked past a
-	 * heal he could not tell what it would do to it, session 69) */
+	 * heal he could not tell what it would do to it, session 69; the
+	 * layer's one patch is on Yes too, his No keeping it) */
 	int keep = vow ? ta_say(t, FACE_MEGAMAN, "Right! We keep our vow!") : -1;
+	bool asks = amount >= 0 && !vow;
+	int later = asks ? ta_say(t, FACE_PROG, "OK! I'LL BE RIGHT\nHERE,MEGAMAN!") : -1;
 	int i = ta_script(t);
-	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told_flag, (uint8_t)(told_flag >> 8), (uint8_t)back, 0xFF };  /* ts_check_flag */
-	ta_bytes(t, check, sizeof check);
+	heal_check(t, told_flag, back);
+	heal_check(t, full_flag, fine);
 	if (vow) {
 		ta_page(t, FACE_MEGAMAN, "Lan... A patch-up breaks our vow!", true);
 		ta_ask_in(t, FACE_MEGAMAN, "Patch up anyway?\n", keep, true, true);
 	}
 	ta_page(t, FACE_PROG, hello[(unsigned)variant % 3], !vow);
+	if (asks) ta_ask_in(t, FACE_PROG, "ONE PATCH A LAYER!\nUSE IT NOW?\n", later, true, false);
 	if (amount > 0) {
 		/* (half of max HP, away from the arena: ts_start_heal, BN6's own,
 		 * no higher than his max) */
@@ -54,7 +68,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int amount, bool vow) {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
 		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
 	}
-	if (amount >= 0) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
+	if (amount >= 0 && vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
 	ta_flag_set(t, told_flag);
 	ta_end(t);
 	return i;

@@ -144,6 +144,13 @@ bool heal_spent(void) {
 	return jobs_vow_holds(&run.job, run_reached()) || (!(run.helpers & HELP_HEALS) && flag_get(LAYER_HEAL_TOLD_FLAG));
 }
 
+/* MegaMan at full HP or not, for the Recovery Mr. Prog's chat, which keeps
+ * his patch then (LAYER_HP_FULL_FLAG, ta_heal). */
+void hp_full_watch(void) {
+	if (emu_read16(BN6_NAVI_HP) >= emu_read16(BN6_NAVI_MAX_HP)) flag_set(LAYER_HP_FULL_FLAG);
+	else flag_clear(LAYER_HP_FULL_FLAG);
+}
+
 /* Where the layer's Recovery Mr. Prog stands, in the world; false for
  * none. */
 static bool heal_spot(int *wx, int *wy) {

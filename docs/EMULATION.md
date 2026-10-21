@@ -380,7 +380,9 @@ far, and event flag `0x144E` in the state that L has told where they are,
 which CONTINUE clears so that L starts over (`0x144F`: that the Net
 Dealer has said his words, so a later talk is a line and the list;
 `0x1450` the same for the NaviCust vendor, `0x1451` for a
-Recovery Mr. Prog, whose heal is then one box; `0x1452` that a super
+Recovery Mr. Prog, whose heal is then one box, and `0x1464` that
+MegaMan's HP is full, the director's each frame on the map, so he keeps
+his patch; `0x1452` that a super
 boss's staging has Bass's stone shake and crack (it was the Guardian
 Data's second way on, until the act's ways became ports at home, issue
 #86; docs/BOSSES.md, Super bosses); `0x1453`

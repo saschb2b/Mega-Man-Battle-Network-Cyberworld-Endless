@@ -54,8 +54,11 @@ are listed in [Where it is decided](#where-it-is-decided).
   HP, to full before the arena (issue #71, the owner's call on a player's
   proposal in discussion #5: a heal as often as asked refunded every
   detour's HP, and the run's dialectic, prepare or press on, lost its
-  price). Asked again, he points to the Net Dealer's MiniEnrg, and L and
-  the arrow stop leading to him. The Heals helper's Prog heals to full as
+  price). He asks before he patches, and at full HP keeps the patch,
+  where he had spent it on an unhurt MegaMan unasked (session 75; event
+  flag `0x1464`, which the director keeps set while HP is full). Asked
+  again, he points to the Net Dealer's MiniEnrg, and L and the arrow stop
+  leading to him. The Heals helper's Prog heals to full as
   often as asked. HP carries over between layers; a won guardian heals
   fully.
 - **Growth:** 3 HPMemory (+60 max HP) per guardian, one HPMemory in each Net
