@@ -6,8 +6,9 @@
  * (arena_link_net.h). The Square's core holds still meanwhile, its
  * connection kept, MegaMan standing where he stood on the server's view;
  * after the battle he is back there, and says how it went. A battle with a
- * result asks Lan for another with the same player (the cursor on No):
- * both games' Yes, the same rules and folder, and they go again. Not
+ * result asks Lan for another with the same player on its result card
+ * (the cursor on No): both games' Yes, the same rules and folder, and they
+ * go again. Not
  * offered where a frame of the pair does not fit a 60th of a second
  * (CW_ARENA: the New 3DS). */
 #ifndef CW_SQUARE_ARENA_H
@@ -26,7 +27,7 @@ bool square_arena_offered(void);
 /* The last battle fought from the Square in this game, as its referee
  * tells it. */
 typedef struct {
-	unsigned result;      /* 1 won, 2 lost, 3 over otherwise, 0 none */
+	unsigned result;      /* 1 won, 2 lost, 3 over otherwise, 4 broken off (a stop: neither won nor lost), 0 none */
 	const char *name;     /* the other's, NULL none */
 	unsigned won, lost;   /* the bouts with him in a row, this one among them */
 	unsigned bouts;       /* every battle fought from the Square (a new one changes it) */
@@ -39,6 +40,10 @@ void square_arena_end(void);
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms);
 /* An Arena message come in (ARENA_STATE and the relayed three) */
 void square_arena_mail(const uint8_t *data, size_t size);
+/* A NOTICE come (its serial and code): true where it refuses this game's
+ * challenge, which MegaMan says in the chat box (or the card shows), the
+ * corner's notice not shown */
+bool square_arena_notice(uint32_t serial, uint16_t code);
 /* After each frame in the Square: the question asked, the word said */
 void square_arena_update(const OnlineSnapshot *s);
 /* The battle under way (the Square's core held still): a frame of it

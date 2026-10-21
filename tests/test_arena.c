@@ -14,6 +14,7 @@
 #include "arena_link_net.h"
 #include "arena_loadout.h"
 #include "arena_sync.h"
+#include "arena_text.h"
 #include "arena_wire.h"
 #include "bn6.h"
 #include "stands_report.h"
@@ -671,7 +672,25 @@ static void report(void) {
 	assert(r.hp[1] == 100 && r.max_hp[1] == 100 && !r.used[1]);
 }
 
+/* the PET's words on the Arena's screens (issue #167): every stop names
+ * no frame, the other's named where he is the cause; the set's score, mine
+ * first; a carried MegaMan's Crosses and Souls by name, "---" none */
+static void pet_text(void) {
+	for (int why = ARENA_STOP_ERROR; why <= ARENA_STOP_MEMORY; ++why) {
+		const char *s = arena_stop_line((ArenaStop)why, "Alpha");
+		assert(*s && !strstr(s, "frame") && !strstr(s, "lag") && !strstr(s, "delay"));
+	}
+	assert(strstr(arena_stop_line(ARENA_STOP_LEFT, "Alpha"), "Alpha left"));
+	assert(strstr(arena_stop_line(ARENA_STOP_SILENT, "Alpha"), "Alpha's PET"));
+	assert(!strcmp(arena_score(2, 1), "2 - 1"));
+	assert(!strcmp(arena_crosses_named(0x5), "Heat Slash"));
+	assert(!strcmp(arena_souls_named(0x21), "Colonel Toad"));
+	assert(!strcmp(arena_souls_named(0), arena_none));
+	assert(strstr(arena_waiting_for("Beta"), "Beta's PET"));
+}
+
 int main(void) {
+	pet_text();
 	formats();
 	buffer();
 	guesses();

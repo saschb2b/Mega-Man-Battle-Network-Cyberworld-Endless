@@ -64,6 +64,7 @@ const char *square_referee_words(const SquareFacts *f) {
 		if (!f->battle_on) n += snprintf(s + n, sizeof s - (size_t)n, "|NO NETBATTLES\nYET! WHO'S FIRST?");
 	} else if (f->result == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT: YOU\nBEAT %s!\nWHAT A MATCH!", f->fought);
 	else if (f->result == 2) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT:\n%s BEAT\nYOU! NEXT TIME!", f->fought);
+	else if (f->result == 4) n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT WITH\n%s BROKE OFF!\nNO CALL ON THAT ONE!", f->fought);
 	else n += snprintf(s + n, sizeof s - (size_t)n, "|LAST BOUT WITH\n%s!\nWHAT A BOUT!", f->fought);
 	if (f->fought) n += tally(s + n, sizeof s - (size_t)n, f);
 	if (f->navis > 1) snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS HERE.\nPLENTY TO WATCH!", f->navis);
@@ -73,6 +74,7 @@ const char *square_referee_words(const SquareFacts *f) {
 const char *square_referee_bark(int result, const char *name) {
 	static char s[48];
 	if (result == 1) return "YOU WIN!";
+	if (result == 4) return "BROKE OFF! NO CALL!";
 	if (result != 2) return "WHAT A BOUT!";
 	snprintf(s, sizeof s, "%s WINS!", name);
 	for (char *c = s; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
@@ -131,7 +133,7 @@ static const char *board(const SquareFacts *f) {
 	else n += snprintf(s + n, sizeof s - (size_t)n, "|>Here now:\njust you.");
 	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|>%s logged in.", f->arrived);
 	if (f->traded) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade done with\n%s!", f->traded);
-	if (f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|>NetBattle vs\n%s: %s", f->fought, f->result == 1 ? "won!" : f->result == 2 ? "lost." : "over.");
+	if (f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|>NetBattle vs\n%s: %s", f->fought, f->result == 1 ? "won!" : f->result == 2 ? "lost." : f->result == 4 ? "broke off." : "over.");
 	for (int k = 0; k < f->nposts; ++k)
 		n += f->posts[k].name ? snprintf(s + n, sizeof s - (size_t)n, "|>%s has\n%s,wants\n%s.", f->posts[k].name, f->posts[k].chip, trade_want(f->posts[k].want))
 			: snprintf(s + n, sizeof s - (size_t)n, "|>Your offer:\n%s for\n%s.", f->posts[k].chip, trade_want(f->posts[k].want));

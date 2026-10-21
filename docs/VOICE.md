@@ -392,7 +392,8 @@ any that creep back (`words` in `tests/lint/smells.txt`).
 | The title's summary of a run | `src/scenes/title_lines.c` |
 | The NetPass (issue #131): the pass's PET text, its level, stamps and captions, the cartridge line that names the game a stamp needs (the one place a game is named); the stamp lines are in the words of the referee (`square_life_words.c`), the clerk (`trade_words.c`), the greeter (`square_week_words.c`, `square_words.c`'s stamp moment) and MegaMan's card (`square_words.c`) | `src/online/netpass_text.c` |
 | The stands in the Net Square (issue #128): the referee Mr.Prog calling the channel's NetBattle (who fights whom, the HP, the last chips, who watches, the winner, the cheers) and his "WANNA WATCH?", the Board's posts on it; the watching screen's heading, keys and end | `src/online/stands_words.c`, `src/online/stands_text.c` |
-| MegaMan on a Practice NetBattle in the Net Square: the challenge sent, the question a challenge asks, the folder he carries, a MegaMan who can't go, the word after the battle and the rematch asked with it | `src/online/arena_words.c` |
+| MegaMan on a Practice NetBattle in the Net Square: the challenge sent, a challenge refused (busy, gone, the Arena closed, the stamp), the question a challenge asks, the folder he carries, a MegaMan who can't go, the word after the battle | `src/online/arena_words.c` |
+| A NetBattle's PET screens (issue #167): the way in's panel, the result card and the rematch asked on it with the other's answer, the stall's note, a stop's line | `src/online/arena_text.c` |
 
 ## The voice review
 

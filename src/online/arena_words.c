@@ -14,6 +14,22 @@ const char *arena_declined_words(void) { return "Aw... No NetBattle\nthis time."
 
 const char *arena_gone_words(void) { return "Huh? They're gone..."; }
 
+const char *arena_busy_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Huh? %s's\nbusy right now...|Let's ask again\nlater,Lan.", name);
+	return s;
+}
+
+const char *arena_not_here_words(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "Huh? %s\nisn't here\nanymore...", name);
+	return s;
+}
+
+const char *arena_closed_words(void) { return "Aw... No NetBattles\non this Square."; }
+
+const char *arena_no_stamp_words(void) { return "Hmm... The Arena\nwon't let that\nNetBattle through."; }
+
 const char *arena_challenged_words(const char *name) {
 	static char s[160];
 	snprintf(s, sizeof s, "%s's\nMegaMan wants a\nPractice NetBattle!", name);
@@ -30,12 +46,6 @@ const char *arena_folder_words(void) { return "Which folder goes,\nLan?"; }
 const char *arena_no_folder_words(void) { return "Lan,we have no\nfolder for a\nNetBattle..."; }
 
 const char *arena_challenged_question(void) { return "Take it,Lan?\n"; }
-
-const char *arena_again_question(const char *name) {
-	static char s[48];
-	snprintf(s, sizeof s, "Again with\n%s?\n", name);
-	return s;
-}
 
 const char *arena_cant_words(void) { return "Lan,some chips in\nour Folder can't go\ninto a NetBattle..."; }
 

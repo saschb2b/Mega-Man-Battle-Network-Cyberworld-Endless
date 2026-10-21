@@ -254,6 +254,11 @@ static void referee(void) {
 	assert(!strcmp(square_referee_bark(1, "Alpha"), "YOU WIN!"));
 	assert(!strcmp(square_referee_bark(2, "Alpha"), "ALPHA WINS!"));
 	assert(!strcmp(square_referee_bark(3, "Alpha"), "WHAT A BOUT!"));
+	/* (a bout broken off: neither won nor lost, the count as it was) */
+	assert(!strcmp(square_referee_bark(4, "Alpha"), "BROKE OFF! NO CALL!"));
+	f.result = 4;
+	s = square_referee_words(&f);
+	assert(strstr(s, "Alpha BROKE OFF!") && strstr(s, "2 TO 2! ALL EVEN"));
 	/* (the Arena not built here, the stamp held: the PET's word) */
 	f.arena = false;
 	assert(strstr(square_referee_words(&f), "NO NETBATTLES\nFROM THIS PET!"));

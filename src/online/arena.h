@@ -53,8 +53,28 @@ unsigned arena_phase(const Arena *a, unsigned side);
 unsigned arena_result(const Arena *a);
 /* FAILED because the two pairs' hashes differed (both clients see it) */
 bool arena_apart(const Arena *a);
-/* the ticks stalled, waiting for the peer's keys */
-uint32_t arena_stalls(const Arena *a);
+/* the ticks stalled in a row, waiting for the peer's keys, up to this tick: 0 where it ran */
+uint32_t arena_waited(const Arena *a);
+/* The link as the badge shows it (arena_view.h): steady; rolling back
+ * (a guess undone, or a moment's wait, in the last ARENA_LINK_SHAKY
+ * ticks); stalled (waiting on the other's keys now, ARENA_LINK_STALL
+ * ticks in a row) */
+#define ARENA_LINK_SHAKY 60
+#define ARENA_LINK_STALL 10
+typedef enum { ARENA_LINK_STEADY, ARENA_LINK_ROLLING, ARENA_LINK_STALLED } ArenaLinkState;
+ArenaLinkState arena_link_state(const Arena *a);
+/* What the result card reads of the battle (arena_card.h), from its
+ * settled frames alone: the frames fought (BN6's fight under way, the
+ * Custom screen's left out), each side's HP at the last, and the chips
+ * each side used (counted as the stands' report counts them,
+ * stands_report.h); by the cable's sides */
+typedef struct {
+	bool seen;
+	uint32_t fought;
+	uint16_t hp[2], max_hp[2];
+	uint8_t used[2];
+} ArenaTally;
+void arena_tally(const Arena *a, ArenaTally *out);
 /* the battle's network as counted, for the statistics' NetBattle
  * (analytics_online.h): the delay and the window, the rollbacks and the
  * most frames at once, the ticks stalled, a tick's longest, the frames

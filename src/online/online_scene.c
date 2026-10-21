@@ -160,7 +160,11 @@ VisitEnd online_scene_update(void) {
 	 * a shop, takes MegaMan off the map, so its keys reach it) */
 	cinema_on_map(emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME);
 	uint32_t now = SDL_GetTicks();
-	if (snapshot.notice_serial != notice_serial) { notice_serial = snapshot.notice_serial; notice_at = now; }
+	/* (a challenge's refusal MegaMan says himself: square_arena_notice) */
+	if (snapshot.notice_serial != notice_serial) {
+		notice_serial = snapshot.notice_serial;
+		if (!square_arena_notice(snapshot.notice_serial, snapshot.notice_code)) notice_at = now;
+	}
 	/* (the link quiet or dropped, and tried again: the game held under the
 	 * wait from the next frame, online_scene_wait) */
 	if (!snapshot.error[0] && (snapshot.quiet || snapshot.reconnecting)) {

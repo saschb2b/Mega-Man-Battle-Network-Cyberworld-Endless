@@ -38,6 +38,7 @@ static struct {
 	OnlineLoadout loadout;
 	bool carried;
 	const char *news;     /* MegaMan's word on a trade settled, till said */
+	char name[ONLINE_NAME_BYTES + 1];          /* the name this game goes by in the Square */
 	char note[ONLINE_MAINTENANCE_BYTES + 1];   /* the server's line with the end (maintenance) */
 } V;
 
@@ -80,6 +81,7 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 	V.carried = false;
 	V.ended = VISIT_END_NONE;
 	V.note[0] = 0;
+	snprintf(V.name, sizeof V.name, "%s", name);
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
 		V.ended = VISIT_END_UNREACHABLE;
@@ -237,6 +239,8 @@ void online_visit_shutdown(void) {
 	put_back();
 	V.stage = VISIT_HOME;
 }
+
+const char *online_visit_name(void) { return V.name; }
 
 const OnlineLoadout *online_visit_loadout(void) { return V.stage == VISIT_AWAY && V.carried ? &V.loadout : NULL; }
 

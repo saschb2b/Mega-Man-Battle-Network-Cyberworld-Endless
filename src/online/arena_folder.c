@@ -24,11 +24,6 @@ bool arena_folder_challenge_yes(void) {
 	return yes;
 }
 
-bool arena_folder_again(const char *said, const char *name) {
-	flag_clear(ACCEPT_FLAG);
-	return talk_ask(said, FACE_MEGAMAN, arena_again_question(name), ACCEPT_FLAG);
-}
-
 int arena_folder_first(unsigned fits) {
 	for (int k = 0; k < ONLINE_FOLDERS; ++k) if (fits >> k & 1) return k;
 	return 0;

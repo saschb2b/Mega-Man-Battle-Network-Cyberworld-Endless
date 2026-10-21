@@ -38,6 +38,7 @@
 #include "arena_window.h"
 #include "bn6.h"
 #include "emu.h"
+#include "stands_report.h"
 
 #define CATCH_UP 2       /* frames of the pair a tick may run */
 /* frames my keys may run past the pair's next one: past it a tick samples
@@ -89,6 +90,11 @@ struct Arena {
 	unsigned npending;
 	ArenaReading reading;      /* the last settled frame's, for the stands' report */
 	bool read;                 /* ... once one is */
+	uint32_t waited;           /* the ticks stalled in a row, up to this one */
+	uint32_t shaken;           /* the tick of the last rollback or stall, 0 none */
+	ArenaReport tally;         /* both sides' HP and chips used, from the settled frames (stands_report.h) */
+	ReportSeen seen;
+	uint32_t fought_frames;    /* the settled frames of BN6's fight */
 	bool fought, apart;
 	unsigned result;
 	char error[160];
@@ -258,6 +264,7 @@ static bool roll_back(Arena *a) {
 		arena_pair_draw(a->pair, a->input.next + 1 == until ? 1u << a->link->side : 0);
 		if (!run_frame(a)) return false;
 	}
+	a->shaken = a->ticks;
 	++a->rollbacks;
 	a->again += until - from;
 	if (until - from > a->deepest) a->deepest = until - from;
@@ -324,7 +331,11 @@ static void settle(Arena *a) {
 		a->reading = r->reading;
 		a->read = true;
 		if ((a->done + 1) % ARENA_HASH_EVERY == 0) hash_out(a, a->done, r->hash);
-		if (r->fight) a->fought = true;
+		if (r->fight) { a->fought = true; ++a->fought_frames; }
+		for (unsigned side = 0; side < 2; ++side)
+			if (r->reading.seen[side])
+				stands_report_side(&a->tally, &a->seen, side, r->reading.hp[side], r->reading.max_hp[side], r->reading.action[side],
+					r->reading.chip[side]);
 		if (a->fought && r->gone) over(a, a->done + 1, r);
 	}
 	hashes_in(a);
@@ -379,7 +390,12 @@ static ArenaStage tick(Arena *a, uint16_t keys) {
 	if (!roll_back(a)) return fail(a, "the cable between the two cores stuck");
 	bool settled = a->input.next >= SETTLE;
 	uint32_t ran = a->input.next;
-	if (a->input.next <= now && !arena_input_ready(&a->input, a->window)) { ++a->stalls; a->owed = true; }
+	if (a->input.next <= now && !arena_input_ready(&a->input, a->window)) {
+		++a->stalls;
+		++a->waited;
+		a->shaken = a->ticks;
+		a->owed = true;
+	} else a->waited = 0;
 	for (unsigned i = 0; i < CATCH_UP && a->input.next <= now && arena_input_ready(&a->input, a->window); ++i)
 		if (!run_frame(a)) return fail(a, "the cable between the two cores stuck");
 	settle(a);
@@ -428,7 +444,21 @@ unsigned arena_phase(const Arena *a, unsigned side) {
 
 unsigned arena_result(const Arena *a) { return a->result; }
 bool arena_apart(const Arena *a) { return a->apart; }
-uint32_t arena_stalls(const Arena *a) { return a->stalls; }
+uint32_t arena_waited(const Arena *a) { return a->waited; }
+
+ArenaLinkState arena_link_state(const Arena *a) {
+	if (a->waited >= ARENA_LINK_STALL) return ARENA_LINK_STALLED;
+	return a->shaken && a->ticks - a->shaken < ARENA_LINK_SHAKY ? ARENA_LINK_ROLLING : ARENA_LINK_STEADY;
+}
+
+void arena_tally(const Arena *a, ArenaTally *out) {
+	*out = (ArenaTally){ .seen = a->read, .fought = a->fought_frames };
+	for (unsigned side = 0; side < 2; ++side) {
+		out->hp[side] = a->tally.hp[side];
+		out->max_hp[side] = a->tally.max_hp[side];
+		out->used[side] = a->tally.used[side];
+	}
+}
 
 void arena_numbers(const Arena *a, ArenaNumbers *out) {
 	*out = (ArenaNumbers){ a->input.delay, a->window, a->rollbacks, a->deepest, a->stalls, a->done, a->tick_worst };
