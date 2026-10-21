@@ -47,6 +47,13 @@ const char *gate_question(void) { return "To the Net Square,\nLan?\n"; }
 
 const char *gate_save_failed(void) { return "Let's stay home for\nnow,Lan."; }
 
+/* `s` in capitals, as a Mr.Prog writes */
+static void capitals(char *out, size_t n, const char *s) {
+	size_t i = 0;
+	for (; s[i] && i + 1 < n; ++i) out[i] = s[i] >= 'a' && s[i] <= 'z' ? (char)(s[i] - 32) : s[i];
+	out[i] = 0;
+}
+
 /* the host's maintenance line, in capitals, after the keeper's word: the
  * sign on the gate, its words wrapped to the box's lines (two a box) */
 #define BOX_LINE 19
