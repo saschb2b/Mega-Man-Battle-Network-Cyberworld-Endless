@@ -22,23 +22,48 @@ void arena_sync_arrived(ArenaSync *s, int32_t lag) {
 
 unsigned arena_sync_target(const ArenaSync *s) { return (unsigned)ceil(s->rtt_ms / TICK_MS) + 1; }
 
-bool arena_sync_hold(ArenaSync *s) {
-	if (++s->since < ARENA_SYNC_SPREAD || s->n < ARENA_SYNC_JUDGED || !s->rtt_ms) return false;
+bool arena_sync_least(const ArenaSync *s, int *lag) {
+	if (s->n < ARENA_SYNC_JUDGED) return false;
 	int least = INT16_MAX;
 	for (unsigned i = 0; i < s->n; ++i)
 		if (s->lag[i] < least) least = s->lag[i];
-	if (least <= (int)arena_sync_target(s)) return false;
+	*lag = least;
+	return true;
+}
+
+void arena_sync_peer(ArenaSync *s, int lag) {
+	if (lag < INT16_MIN) lag = INT16_MIN;
+	if (lag > INT16_MAX) lag = INT16_MAX;
+	s->peer_lag = (int16_t)lag;
+	s->peer_known = true;
+}
+
+/* I lead: past the other's lag by ARENA_SYNC_EVEN once he has said it,
+ * else past my own round trip and a tick */
+static bool leads(const ArenaSync *s) {
+	int least;
+	if (s->since < (s->peer_known ? ARENA_SYNC_SETTLE : ARENA_SYNC_SPREAD) || !s->rtt_ms || !arena_sync_least(s, &least)) return false;
+	return s->peer_known ? least - s->peer_lag >= ARENA_SYNC_EVEN : least > (int)arena_sync_target(s);
+}
+
+bool arena_sync_hold(ArenaSync *s, bool quiet) {
+	++s->since;
+	if (!leads(s)) { s->due = 0; return false; }
+	if (!quiet && ++s->due < ARENA_SYNC_LOUD) return false;
 	arena_sync_shift(s);
 	--s->shifted;
 	s->since = 0;
+	s->due = 0;
 	++s->held;
 	return true;
 }
 
 void arena_sync_shift(ArenaSync *s) {
-	/* (my clock a tick later, so the lags already seen a tick less by it) */
+	/* (my clock a tick later, so the lags already seen a tick less by it,
+	 * and the other's, as he said it, a tick short until he says it anew) */
 	for (unsigned i = 0; i < s->n; ++i) --s->lag[i];
 	++s->shifted;
+	if (s->peer_known) s->since = 0;
 }
 
 void arena_pings_note(ArenaPings *p, uint32_t rtt_ms, uint32_t now_ms) {

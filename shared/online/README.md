@@ -1,10 +1,10 @@
-# Net Square protocol v10
+# Net Square protocol v11
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v10`. The server also
+`/presence` with subprotocol `cyberworld.presence.v11`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -30,7 +30,7 @@ side is behind, rather than a refused upgrade (v10).
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
-| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/ONLINE_ARENA.md, Quicker on the wire), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
@@ -203,7 +203,7 @@ The Arena's messages are relayed only between the two players of a
 started battle, and only in its shape; the server never sees a battle.
 Each game runs both players' linked BN6 cores and only their keys cross
 (docs/ONLINE_ARENA.md): START gives each its side of the cable and the
-input delay, from both players' latencies: the lockstep's frame, a tick, then the longer latency in frames (v8: the lockstep a frame, not 3, and each game's latency less what its rollback window covers; docs/ONLINE_ARENA.md's Rollback)
+input delay, from both players' latencies: the lockstep's frame, then the longer latency in frames, 1 at least (v8: the lockstep a frame, not 3, and each game's latency less what its rollback window covers; issue #167: less its window but a frame, the server's tick for a key to be taken no longer added; docs/ONLINE_ARENA.md's Rollback and Quicker on the wire)
 (`server/cyberworld_server/arena.py`, docs/ONLINE_ARENA.md's Smoothed delay).
 A challenge waits 30 seconds for its answer. One player of a battle
 sends ARENA's over (the cable's first, as the battle ends on its cores);

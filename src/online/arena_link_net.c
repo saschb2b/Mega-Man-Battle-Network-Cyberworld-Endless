@@ -57,6 +57,23 @@ static bool net_poll_hash(ArenaLink *link, uint32_t frame, uint64_t *hash) {
 	return false;
 }
 
+static void net_send_lag(ArenaLink *link, int lag) {
+	ArenaNetLink *l = of(link);
+	uint8_t data[ARENA_HASH_BYTES];
+	if (lag < INT16_MIN) lag = INT16_MIN;
+	if (lag > INT16_MAX) lag = INT16_MAX;
+	/* (a note lost to a full outbox: the next, a second on) */
+	if (arena_wire_hash(data, l->match, ARENA_NET_LAG, (uint16_t)(int16_t)lag)) l->out(l->context, data, sizeof data);
+}
+
+static bool net_poll_lag(ArenaLink *link, int *lag) {
+	ArenaNetLink *l = of(link);
+	if (!l->peer_lagged) return false;
+	l->peer_lagged = false;
+	*lag = l->peer_lag;
+	return true;
+}
+
 static void net_tick(ArenaLink *link) {
 	ArenaNetLink *l = of(link);
 	if (l->ended) ++l->since_end;
@@ -78,7 +95,8 @@ ArenaLink *arena_link_net(ArenaNetLink *l, uint32_t match, unsigned side, unsign
 	memset(l, 0, sizeof *l);
 	if (delay < ARENA_DELAY_MIN) delay = ARENA_DELAY_MIN;
 	if (delay > ARENA_DELAY_MAX) delay = ARENA_DELAY_MAX;
-	l->link = (ArenaLink){ net_send, net_poll, net_send_hash, net_poll_hash, net_tick, net_broken, net_close, side & 1u, delay };
+	l->link = (ArenaLink){ net_send, net_poll, net_send_hash, net_poll_hash, net_tick, net_broken, net_close, side & 1u, delay,
+		net_send_lag, net_poll_lag };
 	l->out = out;
 	l->context = context;
 	l->match = match;
@@ -90,6 +108,7 @@ ArenaLink *arena_link_net(ArenaNetLink *l, uint32_t match, unsigned side, unsign
 static void keep_hash(ArenaNetLink *l, uint32_t frame, uint64_t hash) {
 	if (frame == ARENA_NET_READY) { l->peer_ready = true; l->peer_ready_hash = hash; return; }
 	if (frame == ARENA_NET_RECORD) { l->peer_recorded = true; l->peer_record = hash; return; }
+	if (frame == ARENA_NET_LAG) { l->peer_lagged = true; l->peer_lag = (int16_t)(uint16_t)hash; return; }
 	if (l->nhashes == ARENA_NET_HASHES) {
 		memmove(l->hashes, l->hashes + 1, sizeof l->hashes - sizeof *l->hashes);
 		--l->nhashes;

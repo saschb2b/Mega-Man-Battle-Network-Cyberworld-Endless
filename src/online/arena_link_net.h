@@ -29,6 +29,7 @@ typedef bool (*ArenaSend)(void *context, const uint8_t *data, size_t size);
 #define ARENA_NET_HASHES  16
 #define ARENA_NET_READY   0xFFFFFFFFu   /* ARENA_HASH's frame for "ready, my pair's hash at the Custom screen" */
 #define ARENA_NET_RECORD  0xFFFFFFFEu   /* ... for "my cores' installs' record" (xinstall_log.h's hash, 0 none), sent before the ready */
+#define ARENA_NET_LAG     0xFFFFFFFDu   /* ... for "my least lag of your keys", its low 16 bits signed ticks (protocol v11, arena_sync.h) */
 #define ARENA_NET_FLUSH   1             /* my keys a message, the outbox willing */
 #define ARENA_NET_GRACE   90            /* ticks after the peer's end that its keys already come may run */
 
@@ -47,6 +48,8 @@ typedef struct {
 	unsigned nhashes;
 	bool peer_ready, peer_recorded;
 	uint64_t peer_ready_hash, peer_record;
+	bool peer_lagged;                 /* a lag note come, not yet taken */
+	int16_t peer_lag;
 	bool ended;                       /* the server said the battle is over for us */
 	unsigned since_end;
 	char broken[96];

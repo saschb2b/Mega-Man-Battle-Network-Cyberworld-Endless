@@ -403,18 +403,22 @@ static unsigned play_net(unsigned delay, unsigned latency, unsigned ticks) {
 /* Two games' clocks, the second started `offset` ticks after the first (so
  * the first leads), each `half[i]` ticks from the server, which passes the
  * keys on at once; each game's sync told its round trip to the server;
- * ticks of wall time run, each game holding as its sync says. Returns the
- * holds of each, and in `late` the keys that came after their frame was
- * due, from the fifth second on */
-typedef struct { uint32_t holds[2], late, last_hold[2]; } SyncRun;
+ * ticks of wall time run, each game holding as its sync says. With
+ * `notes`, each says its least lag to the other once a second, as v11's
+ * games do (arriving the two halves later). `loud` the ticks a game's keys
+ * are not quiet, from the first (a hold waits for a quiet tick). Returns
+ * the holds of each, in `late` the keys that came after their frame was
+ * due, from the fifth second on, and each game's least lag at the end */
+typedef struct { uint32_t holds[2], late, last_hold[2]; int lag[2]; } SyncRun;
 
-static SyncRun sync_run(unsigned offset, const unsigned half[2], unsigned delay, unsigned ticks) {
-	enum { QUEUE = 512 };
+static SyncRun sync_notes(unsigned offset, const unsigned half[2], unsigned delay, unsigned ticks, bool notes, unsigned loud) {
+	enum { QUEUE = 512, NOTES = 64 };
 	ArenaSync sync[2];
 	uint32_t clock[2] = { 0, 0 };   /* ticks sampled: each game's next tick */
 	struct { uint32_t at, frame; } q[2][QUEUE];
-	unsigned head[2] = { 0, 0 }, tail[2] = { 0, 0 };
-	SyncRun r = { { 0, 0 }, 0, { 0, 0 } };
+	struct { uint32_t at; int lag; } note[2][NOTES];
+	unsigned head[2] = { 0, 0 }, tail[2] = { 0, 0 }, nhead[2] = { 0, 0 }, ntail[2] = { 0, 0 };
+	SyncRun r = { { 0, 0 }, 0, { 0, 0 }, { 0, 0 } };
 	for (unsigned i = 0; i < 2; ++i) {
 		arena_sync_init(&sync[i]);
 		arena_sync_rtt(&sync[i], (uint32_t)(2 * half[i] * 1000 / 60));
@@ -422,8 +426,17 @@ static SyncRun sync_run(unsigned offset, const unsigned half[2], unsigned delay,
 	for (uint32_t w = 0; w < ticks; ++w) {
 		for (unsigned i = 0; i < 2; ++i) {
 			if (i == 1 && w < offset) continue;
-			if (arena_sync_hold(&sync[i])) {
+			int lag;
+			if (notes && w % ARENA_SYNC_NOTE == 0 && arena_sync_least(&sync[i], &lag)) {
+				unsigned k = ntail[i]++ % NOTES;
+				note[i][k].at = w + half[0] + half[1];
+				note[i][k].lag = lag;
+			}
+			while (nhead[i ^ 1] != ntail[i ^ 1] && note[i ^ 1][nhead[i ^ 1] % NOTES].at <= w)
+				arena_sync_peer(&sync[i], note[i ^ 1][nhead[i ^ 1]++ % NOTES].lag);
+			if (arena_sync_hold(&sync[i], w >= loud)) {
 				assert(!r.holds[i] || w - r.last_hold[i] >= ARENA_SYNC_SPREAD);
+				assert(w >= loud || w - (i ? offset : 0) >= ARENA_SYNC_LOUD);
 				++r.holds[i];
 				r.last_hold[i] = w;
 			} else {
@@ -441,7 +454,12 @@ static SyncRun sync_run(unsigned offset, const unsigned half[2], unsigned delay,
 			}
 		}
 	}
+	for (unsigned i = 0; i < 2; ++i) arena_sync_least(&sync[i], &r.lag[i]);
 	return r;
+}
+
+static SyncRun sync_run(unsigned offset, const unsigned half[2], unsigned delay, unsigned ticks) {
+	return sync_notes(offset, half, delay, ticks, false, 0);
 }
 
 static void sync(void) {
@@ -455,7 +473,7 @@ static void sync(void) {
 	/* no hold before a second's keys are judged, nor without a round trip */
 	ArenaSync none;
 	arena_sync_init(&none);
-	for (int i = 0; i < 200; ++i) { arena_sync_arrived(&none, 40); assert(!arena_sync_hold(&none)); }
+	for (int i = 0; i < 200; ++i) { arena_sync_arrived(&none, 40); assert(!arena_sync_hold(&none, true)); }
 	/* the game whose ready came last leads by the one way (here four ticks, each 2 from the server) and
 	 * at the server's delay (3, a tick, the round trip) its keys came late: it holds, spread out, until
 	 * its lag is its round trip and a tick, then never again; the other never holds; nothing is late */
@@ -469,6 +487,20 @@ static void sync(void) {
 	/* clocks already even: nobody holds */
 	r = sync_run(0, even, 3 + 1 + 4, 1800);
 	assert(r.holds[0] == 0 && r.holds[1] == 0 && r.late == 0);
+	/* v11's notes (issue #167): the leading game holds until the two lags are within a tick of each
+	 * other, the other never; on even links as the old rule did, on uneven ones past it, the lags met
+	 * (here the old rule left the first game's lag at 3 ticks and the second's at 5; v11's, 4 and 4) */
+	r = sync_notes(4, even, 3 + 1 + 4, 3600, true, 0);
+	assert(r.holds[1] == 0 && r.late == 0 && abs(r.lag[0] - r.lag[1]) <= 1);
+	r = sync_run(4, uneven, 3 + 1 + 6, 3600);
+	const int old_apart = abs(r.lag[0] - r.lag[1]);
+	r = sync_notes(4, uneven, 3 + 1 + 6, 3600, true, 0);
+	assert(r.holds[1] == 0 && r.late == 0 && abs(r.lag[0] - r.lag[1]) <= 1 && old_apart >= 2);
+	/* a game never quiet still holds, ARENA_SYNC_LOUD late; one quiet from the fourth second holds then */
+	r = sync_notes(4, uneven, 3 + 1 + 6, 3600, true, 4000);
+	assert(r.holds[0] > 0 && abs(r.lag[0] - r.lag[1]) <= 1);
+	r = sync_notes(4, uneven, 3 + 1 + 6, 3600, true, 240);
+	assert(r.holds[0] > 0 && r.last_hold[0] >= 240 && abs(r.lag[0] - r.lag[1]) <= 1);
 	/* the round trips said for the delay: mean and twice the spread, one a ping */
 	ArenaPings p;
 	memset(&p, 0, sizeof p);
