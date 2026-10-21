@@ -204,6 +204,8 @@ static void send_challenge(void) { challenge_sent(false); }
 
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 	if (!CW_ARENA || SA.stage != SA_IDLE) return;
+	/* (our own partner: said at once, as the server's NOTICE 29 would) */
+	if (peer->id && peer->id == square_team_partner()) { talk_start(arena_team_partner_words(peer->name), FACE_MEGAMAN); return; }
 	unsigned fits;
 	if (!mine_goes(&fits)) return;
 	SA.latency = SA.pings.n ? arena_pings_latency(&SA.pings) : latency_ms;

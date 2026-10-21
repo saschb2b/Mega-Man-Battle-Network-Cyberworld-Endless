@@ -192,7 +192,10 @@ class Teams:
         return True
 
     def partners_free(self, a_id, b_id):
-        return all(self.free(p) for p in (self.of[a_id].other(a_id), self.of[b_id].other(b_id)))
+        """Both still on two teams (a team split since the challenge: False), and both partners free."""
+        if self.challenge(a_id, b_id) is not True:
+            return False
+        return all(self.free(p) and p in self.server.players for p in (self.of[a_id].other(a_id), self.of[b_id].other(b_id)))
 
     def begin(self, a_id, b_id):
         """A team challenge's Yes: the match begins, each captain asked the order."""

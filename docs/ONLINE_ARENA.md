@@ -1590,9 +1590,10 @@ A Battle between players of two teams is a **team challenge**: the
 server checks all four free (in no battle, trade, watch or match;
 NOTICE 16 otherwise); the challenged's MegaMan asks "NAME's team wants a
 Team NetBattle!" and "Take it,Lan?". A Battle from a team's player to a
-lone one, or the other way, or to his own partner, is refused (NOTICE
-29, `notice_team`), MegaMan saying why ("Huh? NAME has no partner...",
-"Huh? NAME's on a team...", "Huh? NAME's on our team,Lan!"). A lone
+lone one, or the other way, is refused (NOTICE 29, `notice_team`),
+MegaMan saying why ("Huh? NAME has no partner...", "Huh? NAME's on a
+team..."); one on his own partner's card MegaMan answers at once, as the
+server would refuse it ("Huh? NAME's on our team,Lan!"). A lone
 player's Battle with a lone player is today's NetBattle, unchanged.
 
 ### The match
@@ -1662,7 +1663,8 @@ byte, the team bout's number; ARENA_LOADOUT's MegaMan, its own version
 2, carries his HP; NOTICE 29 refuses a challenge between a team and a
 lone Navi. `server/cyberworld_server/teams.py` keeps the teams and the
 matches; `server/tests/test_teams.py` the relay from the ask to the last
-bout, a blind order, an order not picked, a draw and a drop.
+bout, a blind order, an order not picked, a draw, a drop, and a team
+split between the challenge and its Yes (the challenge ends, no match).
 [shared/online/README.md](../shared/online/README.md) has the bytes.
 
 ### The four-game proof
@@ -1700,6 +1702,11 @@ TEAM BROKE OFF; Alpha's and Gamma's watching stopped at frame 185 ("the
 NetBattle broke off"); all three were told the match broken off (result
 3), Gamma's team split with Delta gone, and MegaMan said "Whoa! The Team
 NetBattle broke off!" back in the Square.
+
+**Split up** (the same harness, `--split`): Alpha's Battle on Beta's
+card, his partner, answered at once ("Huh? Beta's on our team,Lan!"),
+then `Split up` on the same card ("OK... Our team with Beta split up.";
+both games told).
 
 **The way in with a carried HP** (`--dev arena,arenacarry=40`, the
 local scene): the plate reads "HP 40/100", the Custom screen's HP 40.

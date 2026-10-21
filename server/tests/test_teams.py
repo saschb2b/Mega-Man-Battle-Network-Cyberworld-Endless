@@ -118,6 +118,21 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.state(b[0], teams.SPLIT_UP))["partner"], a[1])
         self.assertFalse(self.server.teams.of)
 
+    async def test_a_team_split_before_the_yes_turns_the_challenge_down(self):
+        a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]
+        await self.pair(a, b, b[1])
+        await self.pair(c, d, d[1])
+        await a[0].send(arena(1, c[1], 30))
+        challenge = protocol.ARENA_STATE.unpack(await c[0].message(SPEC["arena_state"]))
+        await d[0].send(team(teams.SPLIT, 0))
+        await self.state(c[0], teams.SPLIT_UP)
+        await c[0].send(arena(2, challenge[2], 30))
+        ended = protocol.ARENA_STATE.unpack(await a[0].message(SPEC["arena_state"]))
+        while ended[1] != ARENA_ENDED:
+            ended = protocol.ARENA_STATE.unpack(await a[0].message(SPEC["arena_state"]))
+        self.assertEqual(ended[2], challenge[2])
+        self.assertFalse(self.server.teams.matches)
+
     async def test_a_no_and_a_lone_battle_as_ever(self):
         a, b = [await self.connect(n) for n in ("Alpha", "Beta")]
         await a[0].send(team(teams.PROPOSE, b[1]))
