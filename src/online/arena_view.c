@@ -2,6 +2,7 @@
 #include "arena_view.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include <SDL.h>
 
@@ -10,6 +11,7 @@
 #include "gfx.h"
 #include "pixfont.h"
 #include "platform.h"
+#include "protocol.h"
 #include "second_frame.h"
 
 #define HEADLESS_SLICE 64   /* the way in's frames a tick without a window (a capture's frames stay the same on every machine) */
@@ -20,6 +22,7 @@
 #define BADGE_H        11
 #define PLATE_Y        17   /* the plate's top: under BN6's label of the other MegaMan */
 #define PLATE_H        11
+#define PLATE_MOST     62   /* the name's widest: clear of MegaMan's emotion window */
 
 static SDL_Texture *tex;
 
@@ -100,11 +103,15 @@ static void badge(int x, int y, ArenaLinkState link, uint32_t t) {
 void arena_view_over(const char *name, bool custom, ArenaLinkState link, uint32_t t) {
 	int right = P.core_x + ARENA_W - 2;
 	if (!custom) { badge(right - BADGE_W, P.core_y + 2, link, t); return; }
-	/* (below BN6's own label of the other MegaMan, at the Custom screen's top right) */
-	int y = P.core_y + PLATE_Y, w = pixfont_width(name, 1) + 8, x = right - BADGE_W - 2 - w;
+	/* (below BN6's own label of the other MegaMan, at the Custom screen's top right, clear of
+	 * MegaMan's emotion window to its left: a long name cut short) */
+	char shown[ONLINE_NAME_BYTES + 2];
+	snprintf(shown, sizeof shown, "%s", name);
+	for (size_t n = strlen(shown); n > 1 && pixfont_width(shown, 1) > PLATE_MOST; --n) snprintf(shown + n - 2, 3, ".");
+	int y = P.core_y + PLATE_Y, w = pixfont_width(shown, 1) + 8, x = right - BADGE_W - 2 - w;
 	fill_rect(x, y, w, PLATE_H, rgba(0, 49, 74, 220));
 	fill_rect(x, y + PLATE_H - 1, w, 1, PET_CYAN);
-	pixfont_draw(x + 4, y + 2, name, PET_WHITE, rgba(0, 49, 74, 255), PIXFONT_LEFT, 1);
+	pixfont_draw(x + 4, y + 2, shown, PET_WHITE, rgba(0, 49, 74, 255), PIXFONT_LEFT, 1);
 	badge(right - BADGE_W, y, link, t);
 }
 
