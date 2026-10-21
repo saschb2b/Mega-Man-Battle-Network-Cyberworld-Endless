@@ -51,7 +51,7 @@ static void local_queue(ArenaLocalLink *l, unsigned player, uint32_t frame, uint
 	uint32_t i = l->tail[player]++ & (ARENA_LOCAL_QUEUE - 1);
 	l->queue[player][i].at = l->now + l->latency;
 	l->queue[player][i].frame = frame;
-	l->queue[player][i].keys = keys & ARENA_KEYS_MASK;
+	l->queue[player][i].keys = (uint16_t)(keys & (player < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK));
 }
 
 /* tick `now` begun: the peer (and the partners, where they play) sample

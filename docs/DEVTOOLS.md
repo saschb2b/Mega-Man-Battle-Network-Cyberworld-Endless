@@ -550,8 +550,15 @@ frame's number, and the two GBAs compared iteration by iteration at the
 battle's end (`arena2v2:` lines, with each hit by MegaMan); `arena2v2=N`
 (N > 1) flips one key of side 0's partner on the second GBA alone from
 iteration N, a mutation that must part them; on the Custom screen each
-lead takes the chip under the cursor before the script's OK, which his
-partner's own hand is dealt. `teamhp=N` gives each partner his own
+lead takes the chip under the cursor before the script's OK; each
+partner picks on BN6's own Custom screen on a copy of the pair his
+stood-in client keeps (the cursor right and A every 20 frames), his
+picks crossing in his stream (ONLINE_ARENA.md, A partner's own Custom
+screen). `teamseat=N` shows seat N's screen (0 and 1 the GBAs' players,
+2 and 3 side 0's and side 1's partners: his side's GBA, his own Custom
+screen while it is open, his HP box), and `teampick=-1` writes each
+partner's picks into his hand a chip short on the second GBA alone, the
+picks' mutation. `teamhp=N` gives each partner his own
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side

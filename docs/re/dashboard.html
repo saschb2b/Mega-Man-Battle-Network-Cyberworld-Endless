@@ -114,15 +114,19 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "Two MegaMen a side",
       "state": "building",
-      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object (him and what he spawns) at BN6's two address routines, kept in two effect slots taken in BN6's own pool.",
-      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); a partner's own folder and Custom screen (designed: his hand is dealt his lead's chips for now); his HP box on his own GBA.",
-      "updated": "2026-10-21",
+      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object (him and what he spawns) at BN6's two address routines, kept in two effect slots taken in BN6's own pool. Each partner picks his chips on BN6's own Custom screen, on a plain copy of the pair his own client keeps, from his own deck (dealt by the pair from his side's GBA's random number); only his picks cross, in his stream, and go into his hand on both GBAs at the same iteration. His HP box and the four MegaMen's marks on his seat's screen.",
+      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md); his NaviCust's programs and his Cross in his record; the full-rules audit of what is keyed by a side's player (the Souls, BN5's mood, the DarkChips, the chip AI past BN6's AI data, BN5's Navis' targets).",
+      "updated": "2026-10-22",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side",
       "state_text": "Being built"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-10-22",
+      "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
+    },
     {
       "date": "2026-10-21",
       "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
@@ -133,6 +137,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's own Custom screen, BN6's own",
+      "result": "A lone core loaded from his side's GBA at a Custom screen shows Lan's 'Communication error' within frames; a plain copy of the pair (both GBAs on their own cable, no hook) copied in each turn, his deck written into BN6_BATTLE_DECK and BN6_BATTLE_STEP put back to 0, has BN6 set its Custom screen up anew with his chips (BusterUp, Sword, Cannon, Atk+10, MiniBomb where his lead's offers a Cannon A first) and take his keys by its own rules; OK takes BN6_CUSTOM_MODE to 0x08 with his picks read (3 and 4). His picks crossed as pick messages in his stream and went into his hand on both GBAs at the same iteration: 1,315 iterations 0 apart with 135 rollbacks and with none, all 26 hashes the same; arenaroll=8 200 of 200 the same, its 26 hashes the delay alone's; his hand a chip short on the second GBA alone parts them from iteration 201. A frame of his screen 1.37 to 1.41 ms, a turn's copy 0.12 to 0.15 ms, making it once 160 ms. The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
+      "meaning": "A partner needs no GBA of his own in the pair: BN6's own Custom screen runs on his client alone, and the battle stays deterministic because only his picks cross.",
+      "link": "../ONLINE_ARENA.md#a-partners-own-custom-screen"
+    },
     {
       "feature": "Arena",
       "date": "2026-10-21",

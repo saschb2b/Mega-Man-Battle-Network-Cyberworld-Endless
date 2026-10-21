@@ -33,7 +33,8 @@ ArenaPut arena_input_put(ArenaInput *in, unsigned player, uint32_t frame, uint16
 	/* (a slot is free once no frame that reads it can run again) */
 	uint32_t settled = arena_input_settled(in), base = settled < in->next ? settled : in->next;
 	if (frame >= base + ARENA_RING) return ARENA_PUT_FULL;
-	keys &= ARENA_KEYS_MASK;
+	/* (a partner's stream carries his Custom screen's picks past the GBA's ten buttons, arena_team_custom.h) */
+	keys &= player < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK;
 	if (frame < in->guessed[player]) {
 		if (in->keys[SLOT(frame)][player] != keys && frame < in->wrong) in->wrong = frame;
 	} else {

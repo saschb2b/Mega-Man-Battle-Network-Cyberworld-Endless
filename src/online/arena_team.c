@@ -9,6 +9,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_input.h"
+#include "arena_team_custom.h"
 #include "arena_team_navi.h"
 #include "bn6.h"
 #include "darkinvs.h"
@@ -63,14 +64,17 @@ static HookAct spawn(HookRegs *r, void *user) {
 	r->r[0] = RAM_TEAM;
 	/* (the rings emptied with the battle: the count starts again at 0, RAM_TEAM_TICK cleared with the battle's RAM) */
 	for (uint32_t a = RAM_TEAM_RING; a < RAM_TEAM_RING_END; a += 4) hook_write32(a, 0);
-	/* (each partner's own NaviStats and hand, from his side's as the battle set them up) */
+	/* (each partner's own NaviStats and hand, from his side's as the battle set them up; his deck and Custom screen anew) */
 	arena_team_navi_begin();
+	arena_team_custom_begin();
 	return HOOK_CONTINUE;
 }
 
 void arena_team_sample(struct mCore *core[2], unsigned side, uint16_t keys) {
 	struct mCore *own = core[side & 1];
 	uint32_t at = own->rawRead32(own, RAM_TEAM_TICK, -1) + DELAY, slot = ring_at(side & 1, at);
+	/* (his own Custom screen run with them while his side's GBA has BN6's open: his battle keys released meanwhile) */
+	keys = arena_team_custom_frame(core, side & 1, keys, DELAY);
 	for (unsigned g = 0; g < SIDES; ++g) {
 		core[g]->rawWrite16(core[g], slot, -1, (uint16_t)(keys & ARENA_KEYS_MASK));
 		core[g]->rawWrite16(core[g], slot + 2, -1, (uint16_t)at);
@@ -141,9 +145,11 @@ static HookAct keys(HookRegs *r, void *user) {
 	if (r->r[0] != 0) return HOOK_CONTINUE;
 	uint32_t tick = hook_read32(RAM_TEAM_TICK) + 1;
 	hook_write32(RAM_TEAM_TICK, tick);
-	/* (a lead's hand dealt anew by the Custom screen: his partner's dealt from it) */
-	arena_team_navi_deal();
+	/* (each partner's own Custom screen's picks into his own hand, at the iteration they were set for; teampick=-1 a chip short
+	 * on the second GBA alone, the mutation) */
 	int slot = hook_slot();
+	const uint32_t hands[SIDES] = { arena_team_navi_hand(0), arena_team_navi_hand(1) };
+	arena_team_custom_take(tick, hands, dev.team_pick < 0 && T && slot == T->slot[1]);
 	bool kept = T && slot >= 0 && slot < HOOK_CORES && tick < ITERATIONS;
 	uint8_t late = 0;
 	for (unsigned side = 0; side < SIDES; ++side) {
@@ -214,6 +220,7 @@ bool arena_team_report(void) {
 		(unsigned)T->last[a], (unsigned)T->last[b], (unsigned)n, (unsigned)differing, (unsigned)first, (unsigned)moved);
 	report_keys(a, b, n);
 	arena_team_navi_report();
+	arena_team_custom_report();
 	for (unsigned g = 0; g < SIDES && n; ++g) {
 		int s = g ? b : a;
 		const uint16_t *hp = T->hp[s][n];

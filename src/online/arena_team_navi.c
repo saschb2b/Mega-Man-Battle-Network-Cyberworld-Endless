@@ -9,7 +9,7 @@
 
 #define KINDS 3   /* the objects a spawn makes: the first kind's (actors), the third's (attacks), the fourth's (effects) */
 #define SIDES 2
-#define HAND_SIZE 0x50   /* a side's hand (BN6_BATTLE_HAND): in a partner's room after his NaviStats */
+#define HAND_SIZE BN6_HAND_SIZE   /* a side's hand (BN6_BATTLE_HAND): in a partner's room after his NaviStats */
 #define ROOM  30  /* the fourth kind's slot side 0's partner's record takes, side 1's the next: the pool's last, which a spawn
                      takes only when the 30 before them are in play */
 
@@ -21,13 +21,12 @@ typedef struct {
 	uint8_t taken;
 	uint8_t pending;
 	uint8_t mark[KINDS][32];
-	uint8_t seen[SIDES][HAND_SIZE];   /* each lead's hand as the partner's was last dealt from it */
 } Kept;
 static Kept kept[HOOK_CORES];
 static int second_slot = -1;   /* the second GBA's core's slot: teamhp's mutation (negative) there alone */
 /* the records' answers by the asker (a partner's own object, one of each kind he spawned) and the objects marked a
  * partner's, every core's, a rollback's frames run again among them: what the output says */
-static uint32_t answered[SIDES][1 + KINDS], hands[SIDES][1 + KINDS], dealt[SIDES], marked;
+static uint32_t answered[SIDES][1 + KINDS], hands[SIDES][1 + KINDS], marked;
 
 /* side's partner's room: the fourth kind's slot ROOM + side, from its node (BN6_T4_SIZE bytes: his NaviStats, then his hand) */
 static uint32_t room(unsigned side) { return BN6_T4_OBJECTS - BN6_OBJECT_NODE + (ROOM + side) * BN6_T4_SIZE; }
@@ -133,35 +132,16 @@ void arena_team_navi_begin(void) {
 	for (unsigned side = 0; side < SIDES; ++side) {
 		uint32_t to = room(side), from = BN6_BATTLE_NAVI + side * BN6_BATTLE_NAVI_SIZE;
 		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
-		/* (his hand his side's as the battle sets it up, empty) */
-		for (unsigned i = 0; i < HAND_SIZE; ++i) {
-			kept[s].seen[side][i] = hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i);
-			hook_write8(hand(side) + i, kept[s].seen[side][i]);
-		}
+		/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
+		for (unsigned i = 0; i < HAND_SIZE; ++i) hook_write8(hand(side) + i, hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i));
 		if (hp > 0)
 			for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) hook_write16(to + f, (uint16_t)hp);
 	}
 }
 
-void arena_team_navi_deal(void) {
+uint32_t arena_team_navi_hand(unsigned side) {
 	int s = hook_slot();
-	if (s < 0 || s >= HOOK_CORES || !kept[s].taken) return;
-	for (unsigned side = 0; side < SIDES; ++side) {
-		/* (a lead's hand dealt anew by the Custom screen: its next chip the first, and other than last seen) */
-		uint32_t lead = BN6_BATTLE_HAND + side * HAND_SIZE;
-		uint8_t now[HAND_SIZE];
-		bool other = false;
-		for (unsigned i = 0; i < HAND_SIZE; ++i) {
-			now[i] = hook_read8(lead + i);
-			other |= now[i] != kept[s].seen[side][i];
-		}
-		if (!other || now[BN6_HAND_AT]) continue;
-		for (unsigned i = 0; i < HAND_SIZE; ++i) {
-			kept[s].seen[side][i] = now[i];
-			hook_write8(hand(side) + i, now[i]);
-		}
-		++dealt[side];
-	}
+	return s >= 0 && s < HOOK_CORES && kept[s].taken ? hand(side & 1u) : 0;
 }
 
 uint8_t arena_team_navi_at(unsigned side, bool partner) {
@@ -183,7 +163,7 @@ void arena_team_navi_report(void) {
 			(unsigned)answered[side][1], (unsigned)answered[side][3]);
 	for (unsigned side = 0; side < SIDES; ++side)
 		printf("arena2v2: side %u's partner's own hand answered %u times for him, %u for his attacks, %u for his actors and %u for "
-			"his effects; dealt %u times from his lead's\n", side, (unsigned)hands[side][0], (unsigned)hands[side][2],
-			(unsigned)hands[side][1], (unsigned)hands[side][3], (unsigned)dealt[side]);
+			"his effects\n", side, (unsigned)hands[side][0], (unsigned)hands[side][2], (unsigned)hands[side][1],
+			(unsigned)hands[side][3]);
 	printf("arena2v2: %u objects marked a partner's as they were made\n", (unsigned)marked);
 }

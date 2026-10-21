@@ -238,6 +238,11 @@
 #define BN6_ARM_FLASH_SPAWN_BACK 0x080EC95Au /* ... and past it, the routine's end */
 /* BN5's mood in BN6's battles (soulmood.c; S7) */
 #define BN6_BATTLE_SCREENS    (BN6_BATTLE_STATE + 0x07) /* u8: the Custom screens opened this battle, one more as each opens (0x08026920) */
+#define BN6_BATTLE_STEP       (BN6_BATTLE_STATE + 0x03) /* u8 the battle phase's step (BattleState Unk_03): 0 in the Custom screen's phase
+                                             (BN6_PHASE_CUSTOM) has BN6 set the screen up anew the next frame (0x08026840, called from the
+                                             phase's handler 0x08009338), its hand dealt from BN6_BATTLE_DECK and its chips' icons loaded */
+#define BN6_MODE_OK           0x08        /* BN6_CUSTOM_MODE: OK pressed, the picks kept (the mode table 0x08026AA4's 0x08026BF4); then 0x14
+                                             while a link battle waits for the other GBA, "Cstmzing..." (measured: the pair's Practice NetBattle) */
 #define BN6_COLL_MOOD_LOSS    0x8E        /* u16 the mood a hit takes from the struck (BN5's +0x86: 0x0801A24C, 0x0801701C) */
 #define BN6_COLL_MOOD_GAIN    0x90        /* u16 the mood it gives the attacker (BN5's +0x88), BN6_HIT_COUNTER for a counter (BN6 reads it for that alone) */
 #define BN6_HIT_COUNTER       0x8000      /* BN6_COLL_MOOD_GAIN: a counter hit (both games' lit 0x8000 at 0x0801A524, 0x08017308) */

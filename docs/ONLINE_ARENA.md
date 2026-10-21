@@ -1905,12 +1905,11 @@ side (`BN6_HAND_ADDR`, `0x08010018`: 20 calls in bn6f, and
 the object in r5). The same answer by object as the NaviStats': a hook
 there returns a partner's own hand, in his room after his record, where
 r5 is his or his marks' and the side asked for is his. His hand starts
-as his side's as the battle sets it up (empty) and is dealt from his
-lead's each time the Custom screen deals his lead's anew (at the first
-iteration whose lead's hand differs from the one last dealt and has its
-first chip up next; the comparison kept a core for a rollback): his own
-Custom screen is to come. Under the flag a lead takes the chip under the
-cursor before the script's OK, so that a hand holds one (Cannon).
+as his side's as the battle sets it up (empty); at the hands' commit it
+was dealt from his lead's each time the Custom screen dealt his lead's
+anew, and since his own Custom screen (below) it takes his own picks
+alone. Under the flag a lead takes the chip under the cursor before the
+script's OK, so that a hand holds one (Cannon).
 
 Measured with the runs above (the partners tapping A a few times a
 cycle until they are free to use a chip): side 0's partner uses his
@@ -1928,25 +1927,109 @@ iteration; with 221 rollbacks and with none all 44 hashes the same,
 `arenaroll=8` 335 of 335 the same. Before the partners tapped A (one
 press each, which met them busy), the hands as their leads' copies left
 the battle's 272 changes of HP as with the hook switched off (a debug
-run). Not yet: a partner's own folder and Custom screen (below): his
-hand is his lead's chips, his own to use.
+run). (These numbers are the hands' commit's, with his lead's chips in
+his hand; his own folder and Custom screen follow.)
 
-### A partner's own Custom screen (design)
+### A partner's own Custom screen
 
-- **His chips**: he draws from his own folder, which crosses as his
-  loadout does today (`arena_format.c`), installed in his GBA's core as
-  his side's lead's is; his deck dealt as BN6 deals a side's
-  (`BN6_DECK_DEALT`), both GBAs alike, kept in his room or a third.
-- **His Custom screen**: BN6's opens on each GBA for its lead (BattleState
-  +0x0D). His is ours, drawn over his own client's picture while BN6's is
-  open on his side's GBA (`BN6_PHASE_CUSTOM`), his picks crossing as keys
-  of his stream (the cursor and A), the screen run from them by the pair
-  on every client alike; at its close (a moment both GBAs agree on: the
-  first iteration whose lead's hand is dealt anew, as his hand's deal
-  above) his picks are written into his own hand on both cores at the
-  same iteration, as the rings' keys are, in place of his lead's copy.
-- **His HP**: his own GBA's HP box drawn from his object, not his lead's,
-  by our own label over the picture or BN6's box read from his record.
+A partner picks his chips on BN6's own Custom screen, from his own deck
+(the owner's direction, 21 October 2026: BN6's screen, never one of
+ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
+`arena_team_screen.c`, `arena_team_client.c`):
+
+- **His deck**, the pair's, every client's and spectator's alike: his
+  folder (a carried MegaMan's where one is given,
+  `arena_team_custom_folder`; under the dev flag his side's lead's, as his
+  side's GBA holds it) dealt as BN6 deals a side's, the Regular chip
+  first, the TagChips after it, the rest shuffled (our shuffle, seeded by
+  his side's GBA's random number at the battle's first frame: the same on
+  both GBAs, `D07D8E18` in the runs below), a chip that sits out of BN6's
+  battles left out. It lives in both cores' RAM (`RAM_TEAM_CUSTOM`, docs/
+  EMULATION.md), so a rollback puts it back and the pair's hash covers it;
+  the folder itself, which no core holds, is folded into the pair's hash.
+- **His screen, on his own client alone**: a partner has no GBA in the
+  pair. A lone core taken from his side's GBA at a Custom screen will not
+  do: within frames BN6 sees no other GBA on its cable and Lan's box says
+  "Communication error" (seen). So his client makes a plain copy of the
+  pair (`arena_pair_open_plain`: both GBAs on their own cable, BN5's
+  bytes in their ROMs, no hook on them, never hashed, never on a
+  spectator's client), once, as his side's GBA first opens its Custom
+  screen. Each turn the pair is copied into it (`arena_pair_save`,
+  `arena_pair_load`), his deck is written into BN6's battle deck on his
+  side's GBA there and the Custom screen's phase step put back to 0
+  (`BN6_BATTLE_STEP`): the next frame BN6 sets its Custom screen up anew
+  from his deck (bn6f sub_8026840: his hand dealt, its icons loaded) and
+  runs it on his keys, by its own rules (the same code or the same chip,
+  five at most, Atk+ chips, the emblem); the other GBA there holds still
+  at its own. His client shows that copy's picture while his side's
+  GBA's screen is open, the battle behind it the battle's own as the turn
+  began.
+- **Only his picks cross**: at his OK (`BN6_CUSTOM_MODE` going to
+  `BN6_MODE_OK`) his client reads the hand's slots he picked, in order
+  (`BN6_CUSTOM_PICKS`), and sends them in his stream as pick messages,
+  one a frame (`TEAM_PICK`: bit 15 set, the count, the index, the slot;
+  past the GBA's ten buttons, so a partner's stream keeps its sixteen
+  bits, `ARENA_PARTNER_MASK`). Where his side's GBA's screen closes
+  before his OK, his client sends the picks he has so far.
+- **Into his hand**: the pair takes a pick message as it samples his
+  side's GBA's frame, as his keys are taken. Once that GBA's screen has
+  closed and his picks are in (or as they come in after it), they are set
+  for the iteration that GBA is at plus BN6's link delay, 4, in both
+  GBAs' RAM, the chips taken out of his deck; each GBA writes them into
+  his own hand at that iteration, as BN6's OK writes a side's (bn6f
+  sub_8029110: the chips' ids, powers and folder entries, the screen
+  they came from, an Atk+10, Atk+30 or Navi+20 merged into the chip
+  before it as bn6f sub_8029224 merges them). Not the first iteration
+  after the close: the two GBAs run up to two iterations apart and the
+  picks are set at a frame of his side's GBA, so the other GBA could pass
+  that iteration first; four on, as his keys go in, both are behind it.
+  While his side's GBA's screen is open his battle keys go in released.
+  Picks that have not come by the time the next turn opens are dropped,
+  his hand left as it was.
+
+His client's cost (the host build, this machine): a frame of his screen
+1.37 to 1.41 ms (the worst 1.74), the pair's copy into it 0.12 to 0.15
+ms a turn, making it once some 160 ms (the battle's worst tick, 7 to 8
+ms without it): a client that makes it at the way in pays nothing in
+the battle.
+
+### The partner's seat: his HP box and the four told apart
+
+`teamseat=N` shows seat N's screen (`arena_team_view.c`): 0 and 1 the
+GBAs' players, 2 and 3 side 0's and side 1's partners, who see their
+side's GBA. On a partner's seat his own HP box covers BN6's, which shows
+his lead's, in the fight at the picture's top left and right of the
+Custom screen's window while it is open, read from his own object. In
+the fight each MegaMan's seat is marked by his feet (`P1` to `P4`, the
+seat plus one, his own side's in cyan, the other's in gold), and the
+ally BN6 leaves unlabelled (a lead's partner on the lead's GBA, the lead
+on his partner's) has his HP under him as BN6 gives the enemies theirs.
+
+### Proved: the partners' own folders and screens
+
+The player's Gregar ROM and Team Colonel's, a fresh data folder each,
+`--dev arena,arenaboth,arena2v2=1,teamhp=150,arenadelay=1,quitend`, both
+partners' clients stood in for on the machine (their screens' keys a
+script by the frame: the cursor right and A every 20 frames), 22
+October 2026:
+
+| Run | End | Hashes | The two GBAs | His picks |
+| --- | --- | --- | --- | --- |
+| `arenalag=4` (135 rollbacks, 540 frames run again) | over at frame 1606, side 0 won | 26, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 1,315 iterations, 0 apart | side 0's partner 3 (BusterUp, Sword and an Atk+10 merged into it), side 1's 4, each at his OK, set at the close and taken by both GBAs |
+| `arenalag=4,arenaroll=8` | over at 1602 | all 26 the same as the delay alone's (`arenawindow=0`) | 1,312, 0 apart; 200 rollbacks of 8 frames, the game's state the same after all 200 | as above |
+| `teampick=-1,arenalag=4` (a chip short in his hand on the second GBA alone, the mutation) | over at 1606 | 26 (the local link echoes them) | apart from iteration 201 (1,115 of 1,315) | |
+
+Side 0's partner uses his own chips at iterations 177 and 201, side 1's
+at 429 and 829, each hand's chip up next moving while his lead's stays.
+A NetBattle without the flag is the battle it was:
+`--dev arena,arenaboth,arenalag=4,arenadelay=1` over at frame 2690, the
+last hash `86d2f837337a1494`. Captured (`teamseat=2` and `3`, kept out
+of the repository): BN6's own Custom screen on each partner's client
+with his own deck (side 0's: BusterUp *, Sword S, Cannon B, Atk+10 *,
+MiniBomb L, where his lead's GBA offers a Cannon A first; side 1's:
+WhiCapsl *, Sword S and three chips of code D), his picks in BN6's
+column as he takes them, his OK; in the fight his HP box (150), the four
+marks, his lead's HP under his lead, and his own chips' icons over him.
 
 ### Four streams over the network (design, not built)
 

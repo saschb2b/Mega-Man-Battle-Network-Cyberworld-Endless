@@ -23,6 +23,7 @@
 #define ARENA_DELAY_MIN (ARENA_LOOKAHEAD - 1)
 #define ARENA_DELAY_MAX 60     /* a second: past it a link is too slow to play over */
 #define ARENA_KEYS_MASK 0x3FFu /* the GBA's ten buttons */
+#define ARENA_PARTNER_MASK 0xFFFFu /* ... a partner's stream's: his buttons, or his Custom screen's picks (arena_team_custom.h) */
 #define ARENA_NO_FRAME  UINT32_MAX
 
 typedef struct {

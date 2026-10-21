@@ -53,6 +53,11 @@ bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size);
  * UNITE (NULL none), each Soul committed carried to the other core
  * (arena_souls.h); NULL where it could not be made */
 ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2]);
+/* ... a plain pair of the ROM's bytes (BN5's in them), with no hook on
+ * its cores: a copy of a pair taken with arena_pair_save and put in with
+ * arena_pair_load, run apart from it (--dev arena2v2's partner's own
+ * Custom screen, arena_team_screen.h); never hashed against another */
+ArenaPair *arena_pair_open_plain(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2]);
 void arena_pair_close(ArenaPair *pair);
 /* Each core's frame counter as the clock's start: the next frame of the
  * pair is frame 0 of a stretch of keys (the entry's steps, the battle) */

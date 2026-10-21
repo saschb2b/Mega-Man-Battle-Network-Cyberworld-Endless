@@ -17,7 +17,7 @@
 #include "arena_folder.h"
 #include "arena_format.h"
 #include "arena_report.h"
-#include "arena_team.h"
+#include "arena_team_client.h"
 #include "arena_view.h"
 #include "arena_text.h"
 #include "game.h"
@@ -84,10 +84,13 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
 }
 
-/* --dev arena2v2's partners, players 2 and 3: arena_team's script, by the frame's number alone */
+/* --dev arena2v2's partners, players 2 and 3: their own clients stood in
+ * for (arena_team_client.h): BN6's own Custom screen on a core of each
+ * one's while his side's GBA's is open, his picks in his stream; in the
+ * battle arena_team's script, by the frame's number alone */
 static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 	(void)context;
-	return arena_team_script(player, frame);
+	return S.arena ? team_client_keys(S.arena, player, frame) : 0;
 }
 
 /* the player's buttons as the GBA's keys, bit for bit */
@@ -149,6 +152,8 @@ static void enter(void) {
 	if (S.arena) arena_window(S.arena, dev.arena_window);
 	if (S.arena && dev.arena_2v2 > 0) arena_players(S.arena, ARENA_PLAYERS);
 	if (S.arena && dev.arena_other) arena_show(S.arena, 1);
+	/* (--dev arena2v2: the partners' folders, a carried MegaMan's other folder for side 0's; teamseat=N's GBA shown) */
+	if (S.arena && dev.arena_2v2 > 0) team_client_begin(S.arena, loadout[0] ? &all : NULL);
 	emu_audio_open();
 	audio_external(emu_audio_read);
 	/* (the way in's panel opened as the Square's opens) */
@@ -157,6 +162,7 @@ static void enter(void) {
 
 static void leave(void) {
 	audio_external(NULL);
+	team_client_free();
 	arena_free(S.arena);
 	S.arena = NULL;
 	arena_view_free();
@@ -190,7 +196,9 @@ static void update(void) {
 		arena_report_frame(S.arena);
 		if (arena_stage(S.arena) == ARENA_OVER) arena_report_end(arena_result(S.arena));
 		/* (--dev arena2v2: the two GBAs' battles compared, iteration by iteration) */
-		if (arena_stage(S.arena) != ARENA_BATTLE && dev.arena_2v2 > 0) arena_team_report();
+		if (arena_stage(S.arena) != ARENA_BATTLE && dev.arena_2v2 > 0) {
+			team_client_report();
+		}
 		break;
 	case ARENA_OVER:
 		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();
@@ -233,7 +241,10 @@ static void draw(void) {
 		return;
 	}
 	if (stage != ARENA_BATTLE || !v) { card(stage); return; }
-	arena_view_core(v);
+	/* (--dev arena2v2: the seat's picture, a partner's BN6's own Custom screen on his client's copy of the pair while it is
+	 * open, and the seat's own drawing over it) */
+	if (dev.arena_2v2 > 0) team_client_draw(S.arena);
+	else arena_view_core(v);
 	arena_view_over(arena_other, arena_phase(S.arena, 0) == BN6_PHASE_CUSTOM, arena_link_state(S.arena), S.t);
 	uint32_t waited = arena_waited(S.arena);
 	if (waited >= STALL_NOTE) arena_view_stall(arena_other, waited < STALL_END ? STALL_END - waited : 0, STALL_END - STALL_NOTE, false);

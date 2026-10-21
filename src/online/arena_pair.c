@@ -36,6 +36,7 @@
 
 #include "arena_souls.h"
 #include "arena_team.h"
+#include "arena_team_custom.h"
 #include "devtools.h"
 #include "emu.h"
 #include "hook.h"
@@ -225,7 +226,9 @@ static bool installs(struct mCore *core, unsigned side, unsigned souls) {
 	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (dev.arena_2v2 <= 0 || arena_team_hooks(core, side));
 }
 
-ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2]) {
+/* (plain: no hook and no install's hooks on its cores, no idle halt: arena_pair_open_plain) */
+static ArenaPair *open_pair(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2],
+	bool plain) {
 	ArenaPair *p = calloc(1, sizeof *p);
 	if (!p) return NULL;
 	mLockstepInit(&p->cable.d);
@@ -241,7 +244,7 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	for (unsigned side = 0; ok && side < 2; ++side) {
 		p->core[side] = arena_core_new(rom, size, p->video[side], true);
 		ok = p->core[side] && arena_core_load(p->core[side], state[side], state_size[side]) &&
-			installs(p->core[side], side, souls ? souls[side] : 0) && idle_on(p->core[side]) && attach(p, side);
+			(plain || (installs(p->core[side], side, souls ? souls[side] : 0) && idle_on(p->core[side]))) && attach(p, side);
 	}
 	if (ok) {
 		p->scratch_size = p->core[0]->stateSize(p->core[0]);
@@ -249,9 +252,17 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
 	}
 	if (!ok) { arena_pair_close(p); return NULL; }
 	p->drawn = 3;
-	p->team = dev.arena_2v2 > 0;
+	p->team = !plain && dev.arena_2v2 > 0;
 	arena_pair_anchor(p);
 	return p;
+}
+
+ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], const unsigned souls[2]) {
+	return open_pair(rom, size, state, state_size, souls, false);
+}
+
+ArenaPair *arena_pair_open_plain(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2]) {
+	return open_pair(rom, size, state, state_size, NULL, true);
 }
 
 void arena_pair_draw(ArenaPair *p, unsigned sides) { p->drawn = sides & 3u; }
@@ -404,6 +415,12 @@ static uint64_t pair_hash(ArenaPair *p, bool sound) {
 	uint64_t made = xlog_hash();
 	hash_word(&hash, (uint32_t)made);
 	hash_word(&hash, (uint32_t)(made >> 32));
+	/* (--dev arena2v2: the partners' folders, which their decks are drawn from and no core's state holds) */
+	if (p->team) {
+		uint64_t folders = arena_team_custom_hash(UINT64_C(14695981039346656037));
+		hash_word(&hash, (uint32_t)folders);
+		hash_word(&hash, (uint32_t)(folders >> 32));
+	}
 	return hash ? hash : 1;
 }
 
