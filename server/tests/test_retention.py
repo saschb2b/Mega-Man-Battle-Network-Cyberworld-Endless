@@ -109,7 +109,9 @@ class RetentionTests(unittest.IsolatedAsyncioTestCase):
         await first
         self.server.keep(self.server.retention_time + 10)
         self.assertIs(self.server.retention_task, first)
-        self.server.keep(self.server.retention_time + retention.PASS)
+        # (a second past the hour: `(t + PASS) - t` can come out a hair
+        # under PASS in floating point, and the pass would wait on)
+        self.server.keep(self.server.retention_time + retention.PASS + 1)
         self.assertIsNot(self.server.retention_task, first)
 
     async def test_the_board_keeps_its_weeks_and_each_identitys_best(self):

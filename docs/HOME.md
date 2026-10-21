@@ -255,8 +255,11 @@ shows the PET at home there. The way from the blue pad to the pink pad
 runs up a corridor whose mouth (x 119, open from y -24 to -4) a walk
 straight from the blue pad meets a few units off its line; a playtester
 pushed at its lip for sixteen calls, the arrow pointing at the pad
-through the wall (session 69). L still says where the pad lies, and the
-arrow leads onto the corridor's line first; at home too, pushing a while
+through the wall (session 69). The arrow leads onto the corridor's line
+first, and L names that first stretch, as the town's way does: from the
+wall beside the mouth too, where MegaMan stops at its x, and where the
+arrow had pointed at the pad through the wall and L said "straight up"
+(session 74, eight calls pushing there); at home too, pushing a while
 where the pad goes nowhere brings the arrow, as on a layer.
 
 The courier (issue #108): playtests jacked out only when told to, and the
@@ -314,12 +317,17 @@ through a link asks too, "Go this way,Lan?" after what MegaMan reads
 through it, its warp held off as a way back's (`lanhp_lit`): a
 playtester leaving a way back's pad stepped onto the link beside it on
 his way to the pink pad, and it chose his act unasked (session 73). The
-pink pad, the act's own way at the corridor's end, warps as BN6's does.
-A link marker draws in front of its link's trigger cells, BN6's own as
-ours (MegaMan seen on a marker's middle stood 14 units short of the
-cells' middle in x and 12 past it in y, outside them), so a link's zone
-for the checks and the questions is its cells stretched as far towards
-the screen's front (`lanhp_portal_near`). Its name stays
+pink pad, the act's own way at the corridor's end, warps by BN6's own
+warp, unasked. A portal draws in front of its trigger cells, BN6's own
+as ours: MegaMan seen on a link marker's middle stood 14 units short of
+the cells' middle in x and 12 past it in y, outside them; and BN6's
+trigger for the pink pad stops short of its cells' front corner, on the
+line x - y = 201 (docs/ROM_DATA.md, Lan's HP), so MegaMan on its pink
+middle, at 194, 0, stood outside it, and a playtester stood there in
+four runs without a warp (session 74; v0.12.0 the same). A portal's
+zone for the checks and the questions is its cells stretched as far
+towards the screen's front (`lanhp_portal_near`), and on the pink pad's
+the director takes BN6's warp itself (`lanhp_pad_take`). Its name stays
 in MegaMan's words and on the second screen, whose home panel lists each
 way as On or Back (the ways back were left out of it before: it looked
 them up by the ways' own portals).

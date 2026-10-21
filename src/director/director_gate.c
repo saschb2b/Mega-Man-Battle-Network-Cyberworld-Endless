@@ -148,7 +148,7 @@ static void go(void) {
 	if (!G.identity) store();
 	uint8_t id[NETWORK_ID_BYTES];
 	if (!G.identity || !network_server_identity(G.prefs.identity, url, id)) { G.ended = VISIT_END_UNREACHABLE; return; }
-	if (!online_visit_begin(url, name, id)) G.ended = online_visit_ended();
+	if (!online_visit_begin(url, name, id, !strcmp(url, NETWORK_DEFAULT_URL))) G.ended = online_visit_ended();
 }
 
 /* The gate stepped on: its question (the keeper's the first time a

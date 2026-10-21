@@ -33,6 +33,18 @@
   archives the server's key, moderation and Board once a day, keeping
   `backup_days` (14), and `--restore` puts one back; the Coolify
   deployment runs the backup as a second service.
+- **Online statistics (issue #156).** With the anonymous statistics on,
+  the game also tells how a visit to a Net Square ended (and its minutes,
+  the NetPass, and whether the server was the official one, never its
+  address), a NetBattle's network numbers (delay, rollback window,
+  rollbacks and the deepest, the worst tick, the stalls) and how it
+  ended, and that a trade was done, a battle watched or a dive posted;
+  never a name, an identity or anything typed (docs/GUIDE.md, Anonymous
+  statistics). Server hosts: the server counts each UTC day's joins,
+  different players (a number: the day's identities are dropped at its
+  end), the most online at once, trades, NetBattles, battles watched,
+  dives and HELLOs by version, with no names, in `stats.jsonl` for
+  `stats_days` (365) and at `GET /stats`.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a
@@ -138,6 +150,13 @@
   its own maps' Mystery Data and cleared their flags, some of which are
   the run's: a request settled, the visit's order at AsterLand. Each
   layer now leaves BN6's own Mystery Data out of the roll.
+- **The pink pad in Lan's HP takes you on from where it is drawn.**
+  BN6's own trigger for the pad sits behind its picture, so MegaMan could
+  stand on its pink middle and go nowhere: a playtester did so in four
+  runs. Stepping onto the pad as drawn now takes you to the act's first
+  layer. And at the wall beside the corridor to it, the arrow and L no
+  longer point at the pad through the wall: they lead into the corridor
+  first.
 - **Home remembers a quit.** A new game after a run you quit before its
   first save opened with "Dad's backup got me home safe last time.", as
   if MegaMan had been deleted; it now reads as a dive left unfinished,

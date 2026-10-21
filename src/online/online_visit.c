@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics_online.h"
 #include "cinema.h"
 #include "director.h"
 #include "director_gate.h"
@@ -10,13 +11,12 @@
 #include "game.h"
 #include "loot.h"
 #include "navicust.h"
+#include "netpass.h"
 #include "online_field.h"
 #include "online_scene.h"
-#include "online_snapshot.h"
 #include "online_trade.h"
 #include "online_transport.h"
 #include "platform.h"
-#include "run.h"
 #include "save.h"
 #include "souls.h"
 #include "square_arena.h"
@@ -28,7 +28,8 @@
 static struct {
 	VisitStage stage;
 	VisitEnd ended;
-	uint32_t called_at;
+	uint32_t called_at, arrived_at;
+	bool official;        /* the gate's official server (the statistics' flag) */
 	/* (what the run held at the gate, put back as MegaMan comes home) */
 	Run run;
 	Profile profile;
@@ -62,8 +63,15 @@ void online_visit_news_again(const char *words) { V.news = words; }
 
 VisitStage online_visit_stage(void) { return V.stage; }
 
-bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
+/* The statistics' visit over (analytics_online.h): how, the NetPass, the
+ * time in the Square where MegaMan got there (below 0 none) */
+static void counted(VisitEnd why, bool away) {
+	analytics_visit((int)why, netpass_full(), away ? (int)((SDL_GetTicks() - V.arrived_at) / 1000) : -1, V.official);
+}
+
+bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES], bool official) {
 	if (V.stage != VISIT_HOME) return false;
+	V.official = official;
 	V.run = run;
 	V.profile = profile;
 	V.rng = rng_state();
@@ -73,6 +81,7 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
 		V.ended = VISIT_END_UNREACHABLE;
+		counted(V.ended, false);
 		return false;
 	}
 	V.stage = VISIT_CALLING;
@@ -110,6 +119,7 @@ static void come_home(VisitEnd why) {
 	bool away = V.stage == VISIT_AWAY;
 	online_scene_end();
 	online_transport_end();
+	counted(why, away);
 	V.stage = VISIT_HOME;
 	V.ended = why;
 	put_back();
@@ -149,6 +159,7 @@ static void go_away(const OnlineSnapshot *s) {
 	director_stop();
 	cinema_reset();
 	V.stage = VISIT_AWAY;
+	V.arrived_at = SDL_GetTicks();
 	OnlineProfile card;
 	online_visit_profile(&card);
 	if (!online_scene_start(s->seed, s->player_id, &card)) come_home(VISIT_END_BROKEN);
@@ -206,6 +217,7 @@ void online_visit_shutdown(void) {
 	emu_sync();
 	online_scene_end();
 	online_transport_end();
+	counted(VISIT_END_NONE, V.stage == VISIT_AWAY);
 	put_back();
 	V.stage = VISIT_HOME;
 }

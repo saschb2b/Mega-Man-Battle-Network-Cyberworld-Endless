@@ -777,8 +777,9 @@ accounts and writes no IP address: a public identity derived
 from the game's per-server token, in the trades' log for 14 days (no
 players' log on the official server: `log_days = 0`), the Board for 2 weeks, bans
 and mutes until lifted, and daily backups of its key, moderation and
-Board for 14 days (`server.ini`'s `trade_days`, `board_weeks`,
-`log_days`, `backup_days`), each pruned by the server itself
+Board for 14 days, and its daily totals, with no names, for a year at
+`/stats` (`server.ini`'s `trade_days`, `board_weeks`,
+`log_days`, `backup_days`, `stats_days`), each pruned by the server itself
 (`retention.py`) and by its backup service (`backup.py`, a second
 service of `deploy/coolify/compose.yaml`). The console's log names no
 player. `--admin forget` answers a request to be removed. It follows

@@ -73,9 +73,13 @@ void home_entered(void) {
 /* Lan's HP's corridor to its pink pad, BN6's own map: its mouth at x 119,
  * open from y -24 to -4, which a walk straight from the blue pad (-198, 6)
  * meets a few units off its line, at its lip (session 69: sixteen calls
- * pushing there, the arrow pointing at the pad through the wall). L names
- * where the pad lies; the arrow leads onto the corridor's line first,
- * across once MegaMan is near it. */
+ * pushing there, the arrow pointing at the pad through the wall). The
+ * arrow and L lead onto the corridor's line first, across once MegaMan is
+ * near it, and from the wall beside the mouth, where he stops at its x:
+ * there the arrow pointed at the pad through the wall, and L named where
+ * it lay, "straight up", which a playtester pushed into for eight calls
+ * (session 74), as the town's way names its walk's first stretch. How far
+ * stays the pad's. */
 #define HP_MOUTH_X 119
 #define HP_MOUTH_Y (-14)
 #define HP_MOUTH_HALF 8      /* the line's half-width the arrow wants */
@@ -85,10 +89,10 @@ void home_entered(void) {
 static const char *hp_way(int *far) {
 	int x, y, px = bn6_player_x(), py = bn6_player_y(), f;
 	lanhp_portal_spot(0, &x, &y);
-	const char *lies = way_to(x, y, far);
-	if (px < HP_MOUTH_X && abs(py - HP_MOUTH_Y) > HP_MOUTH_HALF)
-		way_to(px < HP_MOUTH_X - HP_MOUTH_NEAR ? HP_MOUTH_X : px, HP_MOUTH_Y, &f);
-	return lies;
+	const char *way = way_to(x, y, far);
+	if (px <= HP_MOUTH_X && abs(py - HP_MOUTH_Y) > HP_MOUTH_HALF)
+		way = way_to(px < HP_MOUTH_X - HP_MOUTH_NEAR ? HP_MOUTH_X : px, HP_MOUTH_Y, &f);
+	return way;
 }
 
 const char *home_way(int *far) {
@@ -222,8 +226,10 @@ static void link_portal(void) {
 		link_asked = -1;
 		return;
 	}
-	/* (the pink pad, portal 0, is BN6's own warp) */
-	int k = lanhp_portal_near(bn6_player_x(), bn6_player_y(), 0);
+	/* (the pink pad, portal 0, is BN6's own warp; on its art in front of
+	 * BN6's trigger, the same warp: lanhp_pad_take) */
+	int x = bn6_player_x(), y = bn6_player_y(), k = lanhp_portal_near(x, y, 0);
+	if (k == 0 && idle && settled() && lanhp_pad_take(x, y)) return;
 	if (k <= 0) link_on = -1;
 	else if (k != link_on && idle && settled() && ask_link(k)) link_on = k;
 }

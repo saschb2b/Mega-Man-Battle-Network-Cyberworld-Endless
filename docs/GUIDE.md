@@ -958,6 +958,23 @@ project page's:
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |
 
+### Online
+
+Online play's statistics go under the same answer (issue #156): counts
+and settings only, so that the Square's servers and the NetBattles'
+rollback are tuned on real networks.
+
+| When | What is sent |
+| --- | --- |
+| A visit to a Net Square ends | the system, your NetPass (the Square's or the full set), how it ended (left, called off, no answer, another version, another ROM, the name refused, full, barred, removed, the connection lost, gone to dive, the game closed), the minutes in the Square, and whether the server was the official one (never its address) |
+| A NetBattle ends | the system, which side of the cable you were, the input delay and rollback window, the rollbacks and the deepest, the longest tick in milliseconds, the stalls waiting for the other's keys, its seconds, and how it ended (won, lost, disconnected, the two games apart, stopped, left) |
+| A trade is done | that one was, and whether it began with a trade board's offer |
+| You stop watching a battle | how (its end, left, too slow, stopped, the connection lost) and its seconds |
+| The week's dive is posted | its layer and act, and whether it reached the end |
+
+Never sent from the Square: your name or another's, your identity on a
+server, the server's address, the chips, phrases or anything typed.
+
 Never sent: names, accounts, an ID of you, your install or your device,
 the ROMs or their hashes, file paths, saves or controls. Umami sets no
 cookies. Its server sees the internet address each request comes from, as
