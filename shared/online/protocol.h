@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 9
+#define ONLINE_PROTOCOL_VERSION 10
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v9"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v10"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -77,5 +77,11 @@
 #define ONLINE_WATCH_KEYS_HEAD 12
 #define ONLINE_WATCH_KEYS_MAX 240
 #define ONLINE_WATCH_MOST 6
+/* (protocol v10, issue #153: a place held through a dropped link) */
+#define ONLINE_BYE 32
+#define ONLINE_HELLO_RESUME 32768
+#define ONLINE_ERROR_MAINTENANCE 16
+#define ONLINE_ERROR_SERVER_OLDER 17
+#define ONLINE_MAINTENANCE_BYTES 40
 
 #endif

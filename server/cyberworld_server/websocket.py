@@ -5,8 +5,11 @@ import base64
 import hashlib
 import struct
 import json
+import re
 
 from .protocol import ProtocolError, SPEC
+
+OTHER_VERSION = re.compile(r"cyberworld\.presence\.v[0-9]{1,4}")
 
 GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
@@ -44,6 +47,11 @@ async def upgrade(reader, writer, origins, health=None, subprotocols=None, stats
         raise ProtocolError("Use /presence")
     offered = [part.strip() for part in headers.get("sec-websocket-protocol", "").split(",")]
     selected = next((name for name in (subprotocols or (SPEC["subprotocol"],)) if name in offered), None)
+    # (a game of another protocol version is let in to say its HELLO, whose
+    # version the server answers with the ERROR that says which side is
+    # behind, protocol v10: refused here, it could only say "no answer")
+    if not selected and not subprotocols:
+        selected = next((name for name in offered if OTHER_VERSION.fullmatch(name)), None)
     if (not valid_key or headers.get("upgrade", "").lower() != "websocket"
             or "upgrade" not in [part.strip() for part in headers.get("connection", "").lower().split(",")]
             or headers.get("sec-websocket-version") != "13"

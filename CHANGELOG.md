@@ -45,6 +45,22 @@
   end), the most online at once, trades, NetBattles, battles watched,
   dives and HELLOs by version, with no names, in `stats.jsonl` for
   `stats_days` (365) and at `GET /stats`.
+- **A dropped connection no longer sends you home (issue #153).** When
+  the Net Square stops answering, the game holds still where MegaMan
+  stands and shows **Reconnecting...** over the Square while it tries
+  again, for up to 30 seconds; the server keeps your spot meanwhile, so
+  the others see your MegaMan stay put, and you play on as soon as the
+  link is back. B goes home at once. A NetBattle under way ends with no
+  result and a trade not yet done is off, as on any leave; a trade you
+  both agreed to still comes home. The gate also says when a newer
+  version is out (and to get it from the download page), when the
+  Square's server is the older one, and when the Square is under
+  maintenance, with the host's line. Server hosts: protocol v10; a
+  dropped player's place is held for 40 seconds (`hold` and `resume` in
+  the log; a resume is not a new join), and `maintenance = until 14:00
+  UTC` in `server.ini` turns games away with that line (server/README.md,
+  A dropped link and Maintenance). `tools/link_relay.py` drops a test
+  link on cue.
 - **Trade Central shows the trade (issue #145).** Two screens of their
   own, after the Legacy Collection's: the spares list, where every chip
   for a trade is picked (an offer, one back, a board offer's answer, a
@@ -150,6 +166,19 @@
   its own maps' Mystery Data and cleared their flags, some of which are
   the run's: a request settled, the visit's order at AsterLand. Each
   layer now leaves BN6's own Mystery Data out of the roll.
+- **The pink pad in Lan's HP takes you on from where it is drawn.**
+  BN6's own trigger for the pad sits behind its picture, so MegaMan could
+  stand on its pink middle and go nowhere: a playtester did so in four
+  runs. Stepping onto the pad as drawn now takes you to the act's first
+  layer. And at the wall beside the corridor to it, the arrow and L no
+  longer point at the pad through the wall: they lead into the corridor
+  first.
+- **Home remembers a quit.** A new game after a run you quit before its
+  first save opened with "Dad's backup got me home safe last time.", as
+  if MegaMan had been deleted; it now reads as a dive left unfinished,
+  and Dad's backup comes up only after a deletion. On a brand-new run
+  the courier in Lan's HP says the town's requests are up, not "NEW
+  REQUESTS POSTED!" before you have done a thing.
 
 ## 0.12.0 (2026-10-13)
 

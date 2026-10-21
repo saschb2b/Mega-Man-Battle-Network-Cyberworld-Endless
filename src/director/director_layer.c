@@ -433,7 +433,9 @@ bool director_start_run(void) {
 	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
-	bool abandoned = save_exists();
+	/* (or one begun and quit before any save: no run to continue, and no
+	 * deletion either, session 74) */
+	bool abandoned = save_exists() || meta_run_was_open();
 	save_delete();
 	/* the first layer, behind Lan's HP's portal, which the town's port
 	 * reaches (director_home.c) */

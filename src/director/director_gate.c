@@ -36,7 +36,7 @@
 #define GO_WAIT 120   /* frames a Yes waits for MegaMan to be free to save */
 
 /* what follows the talk under way, once it closes */
-enum { AFTER_NONE, AFTER_NAME_FOR_GATE, AFTER_PRIVACY, AFTER_GO };
+enum { AFTER_NONE, AFTER_NAME_FOR_GATE, AFTER_PRIVACY, AFTER_GO, AFTER_OFFICIAL };
 
 static struct {
 	NetworkPrefs prefs;
@@ -50,10 +50,10 @@ static struct {
 	bool written;        /* the keeper's words as the prefs stand */
 } G;
 
-static const char *server_host(char *out, size_t n) {
-	if (!G.prefs.selected) return NULL;
-	online_field_host(G.prefs.servers[G.prefs.selected], out, n);
-	return out;
+/* Whether the gate leads to the official Square (--dev online's server
+ * where one is given, as go() takes it) */
+static bool leads_official(void) {
+	return dev.online ? !strcmp(dev.online, NETWORK_DEFAULT_URL) : G.prefs.selected == 0;
 }
 
 static bool store(void) {
@@ -71,11 +71,10 @@ static void keeper_words(void) {
 	if (G.written || emu_read8(BN6_CHATBOX)) return;
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
-	char host[21];
 	ta_begin(&t);
 	int talk = ta_script(&t);
 	bool first = true;
-	ta_pages(&t, gate_keeper_hello(server_host(host, sizeof host)), FACE_PROG, &first);
+	ta_pages(&t, gate_keeper_hello(leads_official()), FACE_PROG, &first);
 	ta_page(&t, FACE_PROG, gate_keeper_ask(), first);
 	ta_mugshot(&t, FACE_PROG);
 	ta_clear(&t);
@@ -84,10 +83,11 @@ static void keeper_words(void) {
 	int pick[GATE_OPTIONS] = { talk + 1, talk + 2, talk + 3 };
 	ta_choose(&t, pick, GATE_OPTIONS, talk + 4);
 	static const int flag[GATE_OPTIONS] = { GATE_OFFICIAL_FLAG, GATE_OTHER_FLAG, GATE_NAME_FLAG };
+	/* (the official Square's asked about as the talk closes: a stray A on
+	 * the first option changed the server with no question, session 74) */
 	for (int k = 0; k < GATE_OPTIONS; ++k) {
 		ta_script(&t);
 		ta_flag_set(&t, flag[k]);
-		if (!k) { bool f = true; ta_pages(&t, gate_keeper_official(), FACE_PROG, &f); }
 		ta_end(&t);
 	}
 	ta_say(&t, FACE_PROG, gate_keeper_bye());
@@ -178,14 +178,20 @@ static void talk_closed(void) {
 		G.prefs.consent |= 1u << G.prefs.selected;
 		if (store()) G.going = 1;
 	} else if (after == AFTER_GO && yes) G.going = 1;
+	else if (after == AFTER_OFFICIAL && yes) {
+		G.prefs.selected = 0;
+		if (store()) talk_start(gate_keeper_official(), FACE_PROG);
+	}
 }
 
 /* the keeper's option chosen, his talk closed */
 static void keeper_chose(void) {
 	char host[64];
 	if (flag_get(GATE_OFFICIAL_FLAG)) {
-		G.prefs.selected = 0;
-		store();
+		/* (asked first where it changes the gate, the cursor on No) */
+		flag_clear(GATE_YES_FLAG);
+		if (leads_official()) talk_start(gate_keeper_official_already(), FACE_PROG);
+		else if (talk_ask(gate_keeper_official_ask(), FACE_PROG, gate_keeper_official_question(), GATE_YES_FLAG)) G.after = AFTER_OFFICIAL;
 	} else if (flag_get(GATE_OTHER_FLAG)) {
 		G.for_gate = false;
 		G.field = FIELD_ADDRESS;
@@ -205,7 +211,6 @@ static void keeper_chose(void) {
 /* a field closed with `typed`: the name, or the other server's address
  * (the last custom one, its consent asked again where it changed) */
 static void field_done(const char *typed) {
-	char host[64];
 	if (G.field == FIELD_NAME) {
 		snprintf(G.prefs.name, sizeof G.prefs.name, "%.*s", NETWORK_NAME - 1, typed);
 		G.prefs.named = 1;
@@ -220,8 +225,8 @@ static void field_done(const char *typed) {
 	snprintf(G.prefs.servers[slot], NETWORK_URL, "%s", typed);
 	if (G.prefs.count <= slot) G.prefs.count = slot + 1;
 	G.prefs.selected = slot;
-	online_field_host(typed, host, sizeof host);
-	if (store()) talk_start(gate_keeper_set(host), FACE_PROG);
+	/* (never the address itself: what a picture of the talk may show) */
+	if (store()) talk_start(gate_keeper_set(), FACE_PROG);
 }
 
 void home_gate_frame(void) {

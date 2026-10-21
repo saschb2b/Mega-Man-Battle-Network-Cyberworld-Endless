@@ -762,13 +762,37 @@ the cursor on **No**. After that MegaMan asks each time. Yes saves the
 run right there, and you go; the gate flickers while the server answers,
 and B calls it off.
 
-**R**, or the pad you arrived by, takes you home. MegaMan is back on the
+**R**, or the pad you arrived by (step on it, or A facing it), takes you
+home. MegaMan is back on the
 gate exactly as he left it; if the game was closed in the Square, the
 next CONTINUE puts him there.
 
-The keeper changes your name or the server: the official Square, or
-another one's address (`host` or `host:port`, as its owner gives it).
+The keeper changes your name or the server: the official Square (he
+asks first, the cursor on **No**), or another one's address (`host` or
+`host:port`, as its owner gives it).
 He also moves you to the next or the last channel.
+
+#### If your connection drops
+
+A hiccup doesn't send you home. When the Square stops answering for a
+couple of seconds the game holds still, MegaMan right where he stood, and
+**Reconnecting...** shows over the Square while it tries again, for up to
+30 seconds (a bar shows the time left after the first five). The server
+keeps your spot meanwhile: the others still see your MegaMan standing
+there. When the link is back, **Back online!** flashes and you play on.
+**B** on that screen gives up and takes you home at once; past the 30
+seconds you go home too, and MegaMan says the link broke.
+
+What was under way when the link dropped ends as if you had left: a
+NetBattle stops with no result for either of you, watching one stops, and
+a trade that wasn't done yet is off (nothing changes hands). A trade both
+of you had already agreed to still comes home with you.
+
+If the gate says **a newer version is out**, the server runs a newer
+version of the game than yours: update from the game's download page. If
+it says the Square's server is behind, its host has to update it. If it
+says the Square is **under maintenance**, its host has closed it for a
+while, and the sign on the gate says until when.
 
 #### The NetPass
 
@@ -811,7 +835,9 @@ DeepNet.
   whole channel to see. Phrases come from a fixed list: there is no free
   text, and no one can type at you. Say something or emote together with
   another player round the landmark or on the stage, and the Square
-  cheers.
+  cheers. **Look around** has MegaMan say which way Trade Central and
+  the Arena are from where you stand: both are off the plaza, Trade
+  Central to its upper left and the Arena to its lower left.
 - **A** facing another player's MegaMan shows his card (HP, act and
   layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.
@@ -962,7 +988,7 @@ rollback are tuned on real networks.
 
 | When | What is sent |
 | --- | --- |
-| A visit to a Net Square ends | the system, your NetPass (the Square's or the full set), how it ended (left, called off, no answer, another version, another ROM, the name refused, full, barred, removed, the connection lost, gone to dive, the game closed), the minutes in the Square, and whether the server was the official one (never its address) |
+| A visit to a Net Square ends | the system, your NetPass (the Square's or the full set), how it ended (left, called off, no answer, another version, another ROM, the name refused, full, barred, removed, the connection lost, gone to dive, under maintenance, an older server, another Square after the connection came back, the game closed), the minutes in the Square, and whether the server was the official one (never its address) |
 | A NetBattle ends | the system, which side of the cable you were, the input delay and rollback window, the rollbacks and the deepest, the longest tick in milliseconds, the stalls waiting for the other's keys, its seconds, and how it ended (won, lost, disconnected, the two games apart, stopped, left) |
 | A trade is done | that one was, and whether it began with a trade board's offer |
 | You stop watching a battle | how (its end, left, too slow, stopped, the connection lost) and its seconds |

@@ -222,6 +222,7 @@ void run_new_varied(uint32_t seed) {
 
 void profile_record_run(void) {
 	profile.runs++;
+	profile.run_open = 0;
 	/* (a run ended on a trip back reached its own layer: docs/HOME.md) */
 	profile.last_depth = run_reached();
 	if (run_reached() > profile.best_depth) profile.best_depth = run_reached();

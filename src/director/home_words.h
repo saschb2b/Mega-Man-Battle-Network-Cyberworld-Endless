@@ -47,9 +47,10 @@ const char *home_back_question(void);
 const char *home_on_question(void);
 /* The courier in Lan's HP (docs/HOME.md, piece 2), the most valuable
  * first, a box each: the pay waiting with asker `reward` (jobs.h, -1
- * none), else the places of the new requests posted (bit k asker k), and
- * what AsterLand's SubChip seller has in stock: `unlockers` Unlockers,
+ * none), else the places of the requests posted (bit k asker k), new
+ * after an act, simply up at the run's first visit (`first`), and what
+ * AsterLand's SubChip seller has in stock: `unlockers` Unlockers,
  * RushFood, a WWW-ID. "" for none. */
-const char *home_courier_words(int reward, unsigned posted, int unlockers, bool rush_food, bool www_id);
+const char *home_courier_words(int reward, unsigned posted, bool first, int unlockers, bool rush_food, bool www_id);
 
 #endif

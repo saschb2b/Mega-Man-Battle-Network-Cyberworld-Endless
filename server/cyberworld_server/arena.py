@@ -108,7 +108,7 @@ class Arena:
         if await self.server.without_pass(player, target):
             return
         if player.id in self.of or target.id in self.of or player.id in self.server.trades.of or target.id in self.server.trades.of \
-                or self.server.stands.busy(player.id) or self.server.stands.busy(target.id):
+                or self.server.stands.busy(player.id) or self.server.stands.busy(target.id) or self.server.holds.held(target):
             await self.server.notice(player, 16, "That Navi is busy")
             return
         match = Match(self.next, player.id, target.id, latency)

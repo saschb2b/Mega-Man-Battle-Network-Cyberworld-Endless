@@ -74,15 +74,18 @@ class Trades:
         self.log_task = None
         self.offers = {}       # player id -> (chip, want): the board's
         self.done = set()      # players whose session has traded
+        self.last = {}         # player id -> his last trade's end (done or off) as sent: said again to a place taken back (holds.py)
 
     def send(self, player_id, trade, stage):
-        player = self.server.players.get(player_id)
-        if not player or player.writer.is_closing():
-            return
         other = self.server.players.get(trade.other(player_id))
         identity = other.identity if other else bytes(16)
         mine, theirs = trade.chips.get(player_id) or NONE, trade.chips.get(trade.other(player_id)) or NONE
-        player.writer.write(websocket.frame(protocol.trade_state(stage, trade.id, trade.other(player_id), identity, mine, theirs)))
+        message = protocol.trade_state(stage, trade.id, trade.other(player_id), identity, mine, theirs)
+        if stage in (DONE, CANCELLED):
+            self.last[player_id] = message
+        player = self.server.players.get(player_id)
+        if player and not player.writer.is_closing():
+            player.writer.write(websocket.frame(message))
 
     def end(self, trade, stage=CANCELLED):
         self.open.pop(trade.id, None)
@@ -141,7 +144,9 @@ class Trades:
         """Whether the two may trade now: both with the full set, neither busy nor traded."""
         if await self.server.without_pass(player, target):
             return False
-        if player.id in self.of or target.id in self.of or player.id in self.server.arena.of or target.id in self.server.arena.of:
+        # (a Navi whose link dropped, his place held: busy till he is back, holds.py)
+        if player.id in self.of or target.id in self.of or player.id in self.server.arena.of or target.id in self.server.arena.of \
+                or self.server.holds.held(target):
             await self.server.notice(player, 16, "That Navi is busy")
             return False
         if player.id in self.done or target.id in self.done:

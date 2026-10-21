@@ -14,9 +14,11 @@
 #include "online_people.h"
 #include "online_square.h"
 #include "online_text.h"
+#include "online_trade.h"
 #include "online_transport.h"
 #include "netpass_screen.h"
 #include "platform.h"
+#include "reconnect_draw.h"
 #include "square_arena.h"
 #include "square_watch.h"
 #include "trade_screen.h"
@@ -30,6 +32,13 @@ static int local_x, local_y, local_z;
 static uint8_t facing;
 static FILE *trace;
 static uint32_t disconnected_at, notice_at, notice_serial;
+/* a dropped link (issue #153): the wait on, the resumes taken up, when the
+ * link came back (its band shown a moment), and what a resume checks and
+ * sends again: the Square's seed, this session, MegaMan's card */
+#define BACK_SHOWN_MS 1200
+static bool waiting;
+static uint32_t resumes_seen, back_at, built_seed, session;
+static OnlineProfile carried_card;
 
 bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *card) {
 	built = arrived = false;
@@ -39,6 +48,11 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 	memset(&snapshot, 0, sizeof snapshot);
 	memset(&shown, 0, sizeof shown);
 	disconnected_at = notice_at = notice_serial = 0;
+	waiting = false;
+	resumes_seen = back_at = 0;
+	built_seed = seed;
+	session = player;
+	carried_card = *card;
 	online_motion_reset(); online_labels_reset(); online_chat_reset(); online_people_load();
 	square_arena_reset();
 	square_watch_reset();
@@ -100,19 +114,64 @@ static void unblocked(OnlineSnapshot *v) {
 	v->peer_count = n;
 }
 
+/* the link back on a resume (the transport's resumes): another Square ends
+ * the visit; else what was under way is over, as the server ended it at the
+ * drop (server/cyberworld_server/holds.py), and a new session (a server
+ * restarted) never knew of a trade, nor of MegaMan's card */
+static VisitEnd resumed(void) {
+	resumes_seen = snapshot.resumes;
+	fprintf(stderr, "online: back in the Square (seed %u, player %u, channel %u)\n", snapshot.seed, snapshot.player_id, snapshot.channel);
+	if (snapshot.seed != built_seed) return VISIT_END_MOVED;
+	square_arena_reset();
+	square_watch_reset();
+	if (snapshot.player_id != session) online_trade_lost();
+	session = snapshot.player_id;
+	if (!online_transport_profile(&carried_card)) fprintf(stderr, "online: public Navi card could not be queued\n");
+	return VISIT_END_NONE;
+}
+
+bool online_scene_waiting(void) { return built && waiting; }
+
+VisitEnd online_scene_wait(void) {
+	online_transport_snapshot(&snapshot);
+	if (snapshot.error[0]) return online_visit_refusal(&snapshot, true);
+	if (btn_pressed(BTN_B)) {
+		fprintf(stderr, "online: the wait for the link given up\n");
+		return VISIT_END_LOST;
+	}
+	if (!snapshot.connected || snapshot.quiet || snapshot.reconnecting) return VISIT_END_NONE;
+	waiting = false;
+	back_at = SDL_GetTicks();
+	return VISIT_END_NONE;
+}
+
 VisitEnd online_scene_update(void) {
 	if (!built) return VISIT_END_BROKEN;
 	online_transport_snapshot(&snapshot);
+	/* (back on a resume: what was under way ended before the new session's
+	 * mail is read, a trade it offers among it) */
+	bool up = !snapshot.error[0] && snapshot.connected && !snapshot.quiet && !snapshot.reconnecting;
+	if (up && snapshot.resumes != resumes_seen) {
+		VisitEnd why = resumed();
+		if (why != VISIT_END_NONE) return why;
+	}
 	online_mail_frame();
 	/* (the director rests here: the cinema told when a screen of BN6's,
 	 * a shop, takes MegaMan off the map, so its keys reach it) */
 	cinema_on_map(emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME);
 	uint32_t now = SDL_GetTicks();
 	if (snapshot.notice_serial != notice_serial) { notice_serial = snapshot.notice_serial; notice_at = now; }
+	/* (the link quiet or dropped, and tried again: the game held under the
+	 * wait from the next frame, online_scene_wait) */
+	if (!snapshot.error[0] && (snapshot.quiet || snapshot.reconnecting)) {
+		if (!waiting) fprintf(stderr, "online: the link to the Square is %s; holding\n", snapshot.reconnecting ? "down" : "quiet");
+		waiting = true;
+		return VISIT_END_NONE;
+	}
 	if (snapshot.error[0] || !snapshot.connected) {
 		if (!disconnected_at) disconnected_at = now;
 		/* (the reason read a moment before the way home) */
-		if (now - disconnected_at >= 1500) return snapshot.error_code == 14 ? VISIT_END_REMOVED : VISIT_END_LOST;
+		if (now - disconnected_at >= 1500) return online_visit_refusal(&snapshot, true);
 		return VISIT_END_NONE;
 	}
 	arrived = online_square_arrived();
@@ -133,8 +192,18 @@ VisitEnd online_scene_update(void) {
 }
 
 void online_scene_draw(void) {
-	if (!built || !arrived) return;
+	if (!built) return;
 	int x = P.core_x, y = P.core_y;
+	uint32_t now = SDL_GetTicks();
+	/* (the wait over the Square held still, and the moment the link is back) */
+	if (waiting || (back_at && now - back_at < BACK_SHOWN_MS)) {
+		ReconnectView v = { .back = !waiting, .elapsed = now - snapshot.lost_at, .window = ONLINE_RECONNECT_MS, .t = now };
+		if (waiting) { reconnect_draw(x, y, &v); return; }
+		if (arrived) online_labels_draw();
+		reconnect_draw(x, y, &v);
+		return;
+	}
+	if (!arrived) return;
 	online_labels_draw();
 	/* (Trade Central's screens, and the NetPass over it all, START's: online_chat.c) */
 	trade_screen_draw();
