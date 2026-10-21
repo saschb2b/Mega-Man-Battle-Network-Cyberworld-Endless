@@ -260,8 +260,11 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 		 * asked for before the stop, so it is sent even where the stop
 		 * came first: a slow system's end waits only so long) */
 		if (SDL_AtomicGet(&transport.bye)) {
+			/* (sent whether or not the WELCOME is in yet: this socket's
+			 * HELLO went first, and a resume the server took before its
+			 * WELCOME reached the game would otherwise be held) */
 			data[0] = ONLINE_BYE;
-			if (snapshot->connected) online_socket_send(data, 1);
+			online_socket_send(data, 1);
 			break;
 		}
 		if (SDL_AtomicGet(&transport.stop)) break;
