@@ -333,7 +333,7 @@ int ta_gift(TextArchive *t, const ScriptsGift *g) {
 	else ta_pages(t, "HELLO,MEGAMAN!|I'M DR.HIKARI'S DIVE SUPPORT PROGRAM!|SO HERE'S A GIFT!", FACE_PROG, &first);
 	if (g->head_start) {
 		/* the head-start helper (docs/META.md) */
-		ta_page(t, FACE_PROG, "HERE'S A HEAD START!\nTAKE THESE FIRST!", false);
+		ta_page(t, FACE_PROG, "FIRST,A HEAD START!\nTAKE THESE!", false);
 		ta_give_hp_memory(t, 2);
 		ta_got_hp(t, 2, &first);
 	}
