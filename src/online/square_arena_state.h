@@ -42,6 +42,7 @@ typedef enum {
 typedef struct {
 	SquareArenaStage stage;
 	uint32_t match, other, since, latency;
+	uint32_t seen_at;         /* my challenge's question up on his screen (SDL ticks, protocol v13), 0 not yet */
 	char name[ONLINE_NAME_BYTES + 1];
 	bool ended;               /* the server has said this battle is over */
 	bool challenger;          /* this game challenged (the folder asked before the challenge) */
@@ -52,6 +53,7 @@ typedef struct {
 	uint32_t quiet_notice;    /* a refusal's come while the Square was held: never shown in the corner */
 	ArenaNetLink link;
 	Arena *arena;
+	ArenaKept *kept;          /* the last bout's pair as it began, from a rematch's START until its build */
 	OnlineLoadout mine, theirs;
 	bool mine_carried, theirs_carried, theirs_in;
 	uint32_t t;               /* frames of the screen shown: the panel, the battle, the card */

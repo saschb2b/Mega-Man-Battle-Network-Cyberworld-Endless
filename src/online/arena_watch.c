@@ -179,6 +179,10 @@ static void build(ArenaWatch *w) {
 	w->boot = arena_boot_new(w->rom, w->size, carried);
 	if (!w->boot) { fail(w, "too little memory for the two PETs"); return; }
 	if (arena_boot_stage(w->boot) == ARENA_BOOT_FAILED) { fail(w, arena_boot_error(w->boot)); return; }
+	/* (the bout's seed, its match, as both players' games write it: a
+	 * rematch they went into from their kept pair is the same bout here,
+	 * the whole way in from the start) */
+	arena_boot_seed(w->boot, w->match);
 	printf("watch: both MegaMen in, the way in begins\n");
 	w->stage = WATCHING_IN;
 }

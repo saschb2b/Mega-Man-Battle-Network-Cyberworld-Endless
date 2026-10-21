@@ -33,9 +33,25 @@ typedef struct Arena Arena;
 
 /* An Arena over `link` (mine: link->side) by full rules (arena_boot.h),
  * loadout[side] each side's MegaMan
- * (NULL: the game's start's); NULL where memory ran out */
-Arena *arena_new(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link);
+ * (NULL: the game's start's); NULL where memory ran out: arena_new_bout,
+ * below */
 void arena_free(Arena *a);
+
+/* A rematch in a second (issue #167, docs/ONLINE_ARENA.md): the pair
+ * kept as its bout began, before the bout's seed went in, taken from an
+ * Arena whose way in is done (NULL: none; the Arena keeps the rest and is
+ * freed as ever). It holds about 33 MB until it is gone into or freed. */
+typedef struct ArenaKept ArenaKept;
+ArenaKept *arena_keep(Arena *a);
+void arena_kept_free(ArenaKept *kept);
+/* An Arena as arena_new's for a bout with `seed` (arena_boot_seed: a
+ * NetBattle's match, the same on both games and every spectator; 0 none),
+ * its way in from `kept` where that holds the same two MegaMen on the same
+ * sides (arena_boot_again: 244 frames of the pair), else the whole way;
+ * `kept` spent either way (NULL none) */
+Arena *arena_new_bout(const uint8_t *rom, size_t size, const OnlineLoadout *loadout[2], ArenaLink *link, uint32_t seed, ArenaKept *kept);
+/* ... its way in from a kept pair */
+bool arena_again(const Arena *a);
 /* Up to `frames` frames of the way in */
 ArenaStage arena_connect(Arena *a, unsigned frames);
 /* One tick of the battle with my keys: the link's messages, then the

@@ -811,8 +811,20 @@ Square's core holds still
 meanwhile; after the battle each MegaMan stands where he stood, says
 how it went and asks Lan whether to go again with the same player (the
 cursor on No): when both say Yes they fight again with the same
-folders, over the same ARENA messages (a challenge answered at once). The
-referee by the ring calls the bout and keeps the count. A hash of the
+folders, over the same ARENA messages (a challenge answered at once),
+the rematch in about a second: each game goes in from the pair it kept as
+the last bout began, each bout's hands its own from the bout's seed
+(protocol v13, [ONLINE_ARENA.md, A rematch in a
+second](ONLINE_ARENA.md#a-rematch-in-a-second)). The
+referee by the ring calls the bout while it runs and as it ends, and keeps the count.
+Before anyone commits, the Square shows who is busy (a mark over a player
+in a NetBattle, watching one or at a trade), an open challenge on the
+challenger's screen (whom it rings, then his time to answer running
+down, and Call off on that player's card), the challenged player's PET
+ringing with a "!" over the challenger and the challenger's card read
+before the question, and the link between two players as bars, never a
+number ([ONLINE_ARENA.md, The Square before a
+NetBattle](ONLINE_ARENA.md#the-square-before-a-netbattle)). A hash of the
 pair every 60 frames catches two games apart and stops both. Nothing is
 won or lost. It runs on every system but the New 3DS, the browser
 among them; the New 3DS builds it but does not offer it (`CW_ARENA`: a
@@ -869,13 +881,15 @@ v12: TEAM, TEAM_STATE, STANDS's bout byte, a carried HP, NOTICE 29):
 
 ## The server and the wire
 
-Protocol v11 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v11`; v7 added the
+Protocol v13 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v13`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
 BYE, maintenance and which side is behind: A dropped link, above; v11
 the Arena's lag notes, by which the time sync splits the waits evenly:
-docs/ONLINE_ARENA.md, Quicker on the wire). The
+docs/ONLINE_ARENA.md, Quicker on the wire; v12 Team NetBattles; v13 the
+bout's seed, a rematch's sides kept, a challenge seen, and the busy marks
+and link bars in SNAPSHOT, its round trip in PING). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of

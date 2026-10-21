@@ -59,6 +59,7 @@ static struct {
 	int stamp;                /* the stamp moment: 1 the greeter's word open, 2 the pass up (netpass_screen.h) */
 	unsigned keeper_said;     /* channel, channels and navis the keeper's words name, packed */
 	bool on_exit;
+	bool card_open;           /* a peer's card open in the chat box (online_chat_card_open) */
 } C;
 
 void online_chat_reset(void) {
@@ -79,6 +80,10 @@ static const OnlineProfile *card_of(uint32_t id) {
 		if (C.cards[i].id == id) return &C.cards[i].card;
 	return NULL;
 }
+
+const OnlineProfile *online_chat_card(uint32_t id) { return id ? card_of(id) : NULL; }
+
+uint32_t online_chat_card_open(void) { return C.card_open && (talk_busy() || emu_read8(BN6_CHATBOX)) ? C.peer.id : 0; }
 
 /* each card as it comes, kept by its player; each peer's asked for once */
 static void cards(void) {
@@ -152,8 +157,10 @@ static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
 	bool first = true;
 	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms)), FACE_MEGAMAN, &first);
 	ta_jump(t, 1);
+	/* (our challenge to him open: Call off in Battle's place, protocol v13) */
+	const char *battle = square_arena_open_to(C.peer.id) ? arena_call_off_option() : arena_battle_option();
 	const char *boxes[3][3] = {
-		{ arena_battle_option(), square_team_option(&C.peer), square_more() },
+		{ battle, square_team_option(&C.peer), square_more() },
 		{ square_peer_option(0, muted), square_peer_option(1, muted), square_more() },
 		{ square_peer_option(2, muted), square_back(), NULL },
 	};
@@ -185,6 +192,7 @@ static void peer_talk(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	bool muted = online_people_flags(C.peer.identity) & ONLINE_MUTED;
+	C.card_open = true;
 	if (square_arena_offered() && netpass_has(STAMP_ARENA) && netpass_peer_full(C.peer.roms)) { peer_talk_arena(&t, out, muted); return; }
 	ta_begin(&t);
 	ta_script(&t);
@@ -272,6 +280,7 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	square_life_frame(s);
 	bool busy = talk_busy() || emu_read8(BN6_CHATBOX);
 	if (busy) { C.open = C.open || talk_busy(); return false; }
+	C.card_open = false;
 	/* (BN6's own talk with the keeper sets its flags too) */
 	if (chosen()) return true;
 	C.open = false;

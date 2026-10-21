@@ -15,6 +15,25 @@
   play: it needs the wire's four seats (docs/ONLINE_ARENA.md, Two
   MegaMen a side).
 
+- **A rematch in about a second, and the Square before a NetBattle
+  (epic #167, steps 3 and 4).** Two Yeses on the result card now go
+  straight back into the battle: each game keeps the two linked GBAs as
+  the bout began and goes in from there, a few hundred frames instead of
+  the whole way in, while each bout deals its own hands and rolls (its
+  seed, the same on both games and every spectator). The set's score
+  keeps counting on the panel and the card. In the Net Square a small
+  mark over a player says he is in a NetBattle (pulsing while the bout
+  runs, the referee calling it over his head), watching one, or at a
+  trade. A challenge you sent shows at the top of the screen: his PET
+  ringing, then his time to answer running down once he reads it, the
+  link's bars beside it; `Call off` on his card takes it back, and Battle
+  on anyone else meanwhile gets MegaMan's "we already asked". The player
+  you challenge hears his PET ring, sees a "!" over you, reads your
+  MegaMan's card before "Take it,Lan?", and his 30 seconds start only
+  when the question is up. The link between two players shows as bars,
+  never a number, beside a player's card and the question. Protocol v13:
+  a server and its games update together (docs/ONLINE_ARENA.md, A rematch
+  in a second and The Square before a NetBattle).
 - **Team NetBattles (epic #167).** Two players team up in the Net
   Square: Team up on a player's card asks him, his MegaMan asks Lan, and
   Split up on your partner's card ends it. A Battle between two teams is

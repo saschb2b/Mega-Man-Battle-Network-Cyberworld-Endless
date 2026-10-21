@@ -16,6 +16,7 @@
 #include "netpass.h"
 #include "npc.h"
 #include "online_board.h"
+#include "online_stands.h"
 #include "online_square.h"
 #include "square_arena.h"
 #include "square_watch.h"
@@ -64,6 +65,7 @@ static struct {
 	struct { uint32_t id; unsigned at; } cheer[ONLINE_MAX_PLAYERS];
 	unsigned cheered_at;
 	uint32_t greeter_said, referee_said;
+	uint32_t bout_barked;   /* the frame the referee last called a bout under way (0 none) */
 	unsigned bouts;   /* the battles fought from the Square the referee has called */
 } L;
 
@@ -221,6 +223,26 @@ static void bout_called(void) {
 	netmap_world(p->at[SQ_REFEREE][0], p->at[SQ_REFEREE][1], &rx, &ry);
 	bark(square_referee_bark((int)b->result, b->name), rx, ry, 0, -1);
 	printf("square: the referee calls bout %u: %s (%u-%u)\n", b->bouts, L.bark, b->won, b->lost);
+}
+
+/* a bout under way in the channel (its way in or its fight, STANDS): the
+ * referee calls it over his head, and again while it lasts (epic #167,
+ * P20: the Square shows the bout, its fighters marked over their heads) */
+#define BOUT_BARK_EVERY 600
+static void bout_on(void) {
+	const StandsEntry *e;
+	int n = online_stands_entries(&e);
+	for (int i = 0; i < n; ++i) {
+		if (e[i].stage != STANDS_WAY_IN && e[i].stage != STANDS_FIGHTING) continue;
+		if (L.bark_t || (L.bout_barked && L.frames - L.bout_barked < BOUT_BARK_EVERY)) return;
+		L.bout_barked = L.frames;
+		const SquarePlan *p = online_square_plan();
+		int rx, ry;
+		netmap_world(p->at[SQ_REFEREE][0], p->at[SQ_REFEREE][1], &rx, &ry);
+		bark(square_referee_bout_bark(e[i].name[0], e[i].name[1]), rx, ry, 0, -1);
+		return;
+	}
+	L.bout_barked = 0;
 }
 
 static bool still_here(const OnlineSnapshot *s, uint32_t id) {
@@ -414,6 +436,7 @@ void square_life_frame(const OnlineSnapshot *s) {
 		fprintf(stderr, "online: walkers at clock %llu: %d,%d and %d,%d\n", (unsigned long long)(t / 60), L.wx[0], L.wy[0], L.wx[1], L.wy[1]);
 	arrivals(s);
 	bout_called();
+	bout_on();
 	beam_frame();
 	emotes(s);
 	mark_frame();

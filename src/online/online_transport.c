@@ -113,6 +113,15 @@ static void sha1_bytes(const char *hex, uint8_t *out) {
 
 uint8_t online_transport_roms(void) { return XR[XROM_BN5_COLONEL_US].data ? ONLINE_ROMS_BN5 : 0; }
 
+/* PING: the clock the server echoes, and (v13) the round trip measured so
+ * far, for the Square's link bars over this MegaMan on the others' screens */
+static void ping(uint8_t out[ONLINE_PING_BYTES], uint32_t now, uint32_t round_trip) {
+	out[0] = ONLINE_PING;
+	online_put32(out + 1, now);
+	/* (0 says unknown: a link on one machine measures 0 ms, said as 1) */
+	online_put16(out + 5, (uint16_t)(round_trip < 1u ? 1u : round_trip < 0xFFFFu ? round_trip : 0xFFFFu));
+}
+
 /* HELLO (shared/online/README.md): BN6's identity, and BN5's where its ROM
  * is read (zeros where not), the server's to check and to tell the others */
 static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES]) {
@@ -298,9 +307,8 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 		}
 		if (snapshot->connected && now - last_ping >= 2000) {
 			last_ping = now;
-			data[0] = ONLINE_PING;
-			online_put32(data + 1, now);
-			if (!online_socket_send(data, 5)) break;
+			ping(data, now, snapshot->latency_ms);
+			if (!online_socket_send(data, ONLINE_PING_BYTES)) break;
 		}
 		/* (until a message comes in or one is put to go out: SDL_Delay(2)
 		 * before issue #167, a key waiting up to 2 ms at each end) */
@@ -391,10 +399,10 @@ static void browser_poll(void) {
 		if (!send_position() || !send_queued()) browser_closed();
 	}
 	if (now - transport.last_ping >= 2000) {
-		uint8_t data[5] = { ONLINE_PING };
+		uint8_t data[ONLINE_PING_BYTES];
 		transport.last_ping = now;
 		transport.hitch = 0;
-		online_put32(data + 1, now);
+		ping(data, now, s->latency_ms);
 		if (!send_message(data, sizeof data)) browser_closed();
 	}
 }

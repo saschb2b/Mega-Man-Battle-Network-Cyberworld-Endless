@@ -46,6 +46,9 @@ static struct {
 	int over_t;
 	uint32_t t;            /* frames of the screen shown: the panel, the battle, the card */
 	ArenaStage was;
+	unsigned bouts;        /* fought before this one (arenaagain=N) */
+	uint32_t bot_tick;     /* arenaboth's first player's clock, each bout's from 0 */
+	uint64_t again_from;   /* a bout from the last one's pair: when it was asked for */
 } S;
 
 /* arenabusy's second player, by the frame's number alone (what the game
@@ -97,9 +100,8 @@ static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 
 /* the player's buttons as the GBA's keys, bit for bit */
 static uint16_t pad_keys(void) {
-	static uint32_t tick;
 	if (dev.arena_both && S.arena) {
-		uint32_t t = tick++;
+		uint32_t t = S.bot_tick++;
 		return chip_first(0, t, arena_bot_keys(S.arena, 0, t));
 	}
 	if (dev.arena_both) return 0;
@@ -114,38 +116,32 @@ static uint16_t pad_keys(void) {
  * first as a run's start makes them (scene_emu.c, game_hooks.c), for the
  * pair to take (xinstall_log.h); without BN5's ROM the way in stops,
  * saying so */
+/* the checkpoint's MegaMan as read, every folder of his (--dev arena2v2's partner takes another) */
+static OnlineLoadout carried_all;
+
 static void installs(void) {
 	/* (made once: --dev rollbench,arena made them before) */
 	if (!XR[XROM_BN5_COLONEL_US].data || !emu_init(R.data, ROM_SIZE) || (!xlog_hash() && !xinstall_bn5()))
 		printf("arena: BN5's installs not made: a NetBattle needs BN5's ROM beside BN6's\n");
 }
 
-static void enter(void) {
+/* a bout: its link, the Arena from the last bout's pair where one is kept
+ * (arenaagain=N), its seed (arenaseed=N, one more each bout) */
+static void bout(ArenaKept *kept) {
 	S.over_t = 0;
 	S.t = 0;
+	S.bot_tick = 0;
 	S.was = ARENA_CONNECTING;
 	unsigned delay = dev.arena_delay > 0 ? (unsigned)dev.arena_delay : DELAY_DEFAULT;
 	unsigned lag = dev.arena_lag >= 0 ? (unsigned)dev.arena_lag : LAG_DEFAULT;
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
 	/* (--dev arena2v2: both partners on the local link too, a stream each) */
 	if (dev.arena_2v2 > 0) arena_link_local_partners(&S.local, partner_keys, NULL);
-	/* (the run's MegaMan from its checkpoint where there is one; the
-	 * second player the game's start's) */
-	installs();
-	const OnlineLoadout *loadout[2] = { NULL, NULL };
-	/* (the first folder that holds chips, as the Net Square's challenge carries him) */
-	static OnlineLoadout all;
-	if (arena_carry_read(&all)) {
-		arena_format_carry(&all, arena_folder_first(arena_folders_fitting(&all)), &S.carried);
-		loadout[0] = &S.carried;
-	}
-	/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
-	if (loadout[0] && dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
-	/* (a NetBattle begins whole; arenacarry=N: with N HP, as a Team NetBattle's winner goes on) */
-	S.carried.hp = dev.arena_carry > 0 && dev.arena_carry < S.carried.max_hp ? (uint16_t)dev.arena_carry : S.carried.max_hp;
-	printf("arena: delay %u frames, the local link's lag %u ticks, MegaMan %s\n", link->delay, lag,
-		loadout[0] ? "carried from the checkpoint" : "the game's start's");
-	S.arena = arena_new(R.data, ROM_SIZE, loadout, link);
+	const OnlineLoadout *loadout[2] = { S.carried.max_hp ? &S.carried : NULL, NULL };
+	uint32_t seed = dev.arena_seed ? (uint32_t)dev.arena_seed + S.bouts : 0;
+	printf("arena: bout %u: delay %u frames, the local link's lag %u ticks, MegaMan %s, seed %u\n", S.bouts + 1, link->delay, lag,
+		loadout[0] ? "carried from the checkpoint" : "the game's start's", (unsigned)seed);
+	S.arena = arena_new_bout(R.data, ROM_SIZE, loadout, link, seed, kept);
 	/* (the stands' report read as the Square's battles read it, said in the log at the end) */
 	arena_report_begin(1);
 	/* (the local link's round trip: its one way there and back) */
@@ -155,11 +151,39 @@ static void enter(void) {
 	if (S.arena && dev.arena_2v2 > 0) arena_players(S.arena, ARENA_PLAYERS);
 	if (S.arena && dev.arena_other) arena_show(S.arena, 1);
 	/* (--dev arena2v2: the partners' folders, a carried MegaMan's other folder for side 0's; teamseat=N's GBA shown) */
-	if (S.arena && dev.arena_2v2 > 0) team_client_begin(S.arena, loadout[0] ? &all : NULL);
-	emu_audio_open();
-	audio_external(emu_audio_read);
+	if (S.arena && dev.arena_2v2 > 0) team_client_begin(S.arena, loadout[0] ? &carried_all : NULL);
 	/* (the way in's panel opened as the Square's opens) */
 	arena_card_cue(ARENA_CUE_OPEN);
+}
+
+static void enter(void) {
+	S.bouts = 0;
+	S.carried.max_hp = 0;
+	/* (the run's MegaMan from its checkpoint where there is one; the
+	 * second player the game's start's) */
+	installs();
+	/* (the first folder that holds chips, as the Net Square's challenge carries him) */
+	if (arena_carry_read(&carried_all)) {
+		arena_format_carry(&carried_all, arena_folder_first(arena_folders_fitting(&carried_all)), &S.carried);
+		/* (arenahp=N: the carried MegaMan's max HP made N, the installer seen in the battle) */
+		if (dev.arena_hp > 0) S.carried.max_hp = S.carried.base_hp = (uint16_t)dev.arena_hp;
+		/* (a NetBattle begins whole; arenacarry=N: with N HP, as a Team NetBattle's winner goes on) */
+		S.carried.hp = dev.arena_carry > 0 && dev.arena_carry < S.carried.max_hp ? (uint16_t)dev.arena_carry : S.carried.max_hp;
+	}
+	bout(NULL);
+	emu_audio_open();
+	audio_external(emu_audio_read);
+}
+
+/* arenaagain=N: the next bout from the last one's pair, kept as it began */
+static void next_bout(void) {
+	ArenaKept *kept = arena_keep(S.arena);
+	arena_free(S.arena);
+	S.arena = NULL;
+	++S.bouts;
+	uint64_t t = SDL_GetPerformanceCounter();
+	bout(kept);
+	S.again_from = t;
 }
 
 static void leave(void) {
@@ -186,6 +210,9 @@ static void update(void) {
 	ArenaStage stage = arena_stage(S.arena);
 	if (stage != S.was) {
 		S.was = stage;
+		if (stage == ARENA_BATTLE && S.again_from)
+			printf("arena: bout %u ready %u ticks after the last one's end (%.0f ms here)\n", S.bouts + 1, (unsigned)S.t,
+				(double)(SDL_GetPerformanceCounter() - S.again_from) * 1000.0 / (double)SDL_GetPerformanceFrequency());
 		S.t = 0;
 		arena_card_cue(stage == ARENA_BATTLE ? ARENA_CUE_BATTLE : ARENA_CUE_OPEN);
 	}
@@ -203,7 +230,8 @@ static void update(void) {
 		}
 		break;
 	case ARENA_OVER:
-		if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();
+		if (S.bouts < (unsigned)(dev.arena_again > 0 ? dev.arena_again : 0)) next_bout();
+		else if (++S.over_t >= OVER_TICKS || btn_pressed(BTN_A)) done();
 		break;
 	case ARENA_FAILED:
 		if (dev.quit_end || btn_pressed(BTN_A) || btn_pressed(BTN_B)) done();

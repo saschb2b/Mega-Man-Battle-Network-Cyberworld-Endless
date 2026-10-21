@@ -296,7 +296,9 @@ static void wire(void) {
 	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40 };
 	assert(!memcmp(m, challenge, sizeof challenge));
 	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999) && m[6] == 0x13 && m[7] == 0x88);
-	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 5, 1, 0) && !arena_wire_action(m, 0, 1, 0));
+	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 6, 1, 0) && !arena_wire_action(m, 0, 1, 0));
+	/* (v13: the question seen, the challenged's word) */
+	assert(arena_wire_action(m, ARENA_ACT_SEEN, 7, 0) && m[1] == ONLINE_ARENA_SEEN);
 	/* ARENA_STATE !BBII16sBB: START, match 7, the other 9, side 1, delay 8 */
 	uint8_t st[ONLINE_ARENA_STATE_BYTES] = { 18, 3, 0, 0, 0, 7, 0, 0, 0, 9 };
 	memset(st + 10, 0xAB, ONLINE_IDENTITY_BYTES);
@@ -307,6 +309,8 @@ static void wire(void) {
 	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && ONLINE_ARENA_STATE_BYTES == 28);
 	assert(!arena_wire_state(st, sizeof st - 1, &s));
 	st[1] = 5;
+	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_SEEN);
+	st[1] = 6;
 	assert(!arena_wire_state(st, sizeof st, &s));
 	/* TEAM !BBIB (v12): a team asked of session 0x01020304; a split takes no session, the rest one */
 	assert(arena_wire_team(m, TEAM_ACT_PROPOSE, 0x01020304u, false) == ONLINE_TEAM_BYTES && ONLINE_TEAM_BYTES == 7);

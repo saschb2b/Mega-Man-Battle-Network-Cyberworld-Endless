@@ -63,7 +63,11 @@ static void positions(void) {
 	assert(out.peers[0].roms == 0);
 	/* (his ROMs besides BN6's: BN5's bit, and no other) */
 	bytes[51] = ONLINE_ROMS_BN5; assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == ONLINE_ROMS_BN5);
-	bytes[51] = 2; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[51] = 0;
+	/* (v13: beside them what he is busy with and his link's bars; no bit past those) */
+	bytes[51] = (uint8_t)(ONLINE_ROMS_BN5 | ONLINE_BUSY_WATCH << ONLINE_BUSY_SHIFT | 2 << ONLINE_LINK_SHIFT);
+	assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == ONLINE_ROMS_BN5 && out.peers[0].busy == ONLINE_BUSY_WATCH &&
+		out.peers[0].link == 2);
+	bytes[51] = 0x20; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[51] = 0;
 	for (size_t size = 0; size < ONE; ++size) assert(!online_wire_message(bytes, size, 100, &out));
 	bytes[34] = 8; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[34] = 7;
 	online_put32(bytes + 22, 8193); assert(!online_wire_message(bytes, ONE, 100, &out));

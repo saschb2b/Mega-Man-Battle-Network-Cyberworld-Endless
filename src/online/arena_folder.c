@@ -5,18 +5,21 @@
 #include "bn6.h"
 #include "emu.h"
 #include "flags.h"
+#include "online_chat.h"
 #include "online_square.h"
 #include "script_kit.h"
+#include "square_words.h"
 #include "talk.h"
 #include "text.h"
 
 #define ACCEPT_FLAG 0x14A1   /* the Square's (online_chat.c's): Yes to a challenge */
 #define FOLDER_FLAG 0x14A2   /* + k: folder k picked to carry, 0x14A2-0x14A4 */
 
-bool arena_folder_challenge(const char *name, bool team) {
+bool arena_folder_challenge(const char *name, bool team, uint32_t from) {
+	const char *facts = square_card_facts(online_chat_card(from));
 	flag_clear(ACCEPT_FLAG);
-	return talk_ask(team ? arena_team_challenged_words(name) : arena_challenged_words(name), FACE_MEGAMAN, arena_challenged_question(),
-		ACCEPT_FLAG);
+	return talk_ask(team ? arena_team_challenged_words(name) : arena_challenged_card_words(name, facts), FACE_MEGAMAN,
+		arena_challenged_question(), ACCEPT_FLAG);
 }
 
 bool arena_folder_challenge_yes(void) {

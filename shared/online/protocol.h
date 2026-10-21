@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 12
+#define ONLINE_PROTOCOL_VERSION 13
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v12"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v13"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -89,5 +89,17 @@
 #define ONLINE_TEAM_BYTES 7
 #define ONLINE_TEAM_STATE_BYTES 36
 #define ONLINE_NOTICE_TEAM 29
+/* (protocol v13, epic #167 step 4: the Square shows who is busy and the
+ * link before a challenge; a challenge seen; a rematch in a second) */
+#define ONLINE_BUSY_SHIFT 1      /* SNAPSHOT's per-peer byte: bits 1-2 what he is busy with ... */
+#define ONLINE_BUSY_BATTLE 1     /* ... in a NetBattle */
+#define ONLINE_BUSY_WATCH 2      /* ... watching one */
+#define ONLINE_BUSY_TRADE 3      /* ... in a trade */
+#define ONLINE_LINK_SHIFT 3      /* ... bits 3-4 his link's bars (0 unknown, 1-3) */
+#define ONLINE_LINK_GOOD_MS 100  /* a round trip under this: three bars */
+#define ONLINE_LINK_FAIR_MS 200  /* ... under this: two; past it one */
+#define ONLINE_PING_BYTES 7      /* PING: u32 clock, u16 the sender's round trip in ms (0 unknown) */
+#define ONLINE_ARENA_SEEN 5      /* ARENA's action and ARENA_STATE's stage: the challenge's question shown */
+#define ONLINE_PENDING_UNSEEN 60 /* seconds a challenge not yet seen waits */
 
 #endif

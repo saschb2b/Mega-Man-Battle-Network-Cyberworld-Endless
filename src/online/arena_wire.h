@@ -17,9 +17,9 @@
 #include "protocol.h"
 
 /* ARENA's actions */
-enum { ARENA_ACT_CHALLENGE = 1, ARENA_ACT_ACCEPT, ARENA_ACT_LEAVE, ARENA_ACT_OVER };
+enum { ARENA_ACT_CHALLENGE = 1, ARENA_ACT_ACCEPT, ARENA_ACT_LEAVE, ARENA_ACT_OVER, ARENA_ACT_SEEN };   /* (SEEN, v13: the question on the challenged's screen) */
 /* ARENA_STATE's stages */
-enum { ARENA_WIRE_CHALLENGED = 1, ARENA_WIRE_WAITING, ARENA_WIRE_START, ARENA_WIRE_ENDED };
+enum { ARENA_WIRE_CHALLENGED = 1, ARENA_WIRE_WAITING, ARENA_WIRE_START, ARENA_WIRE_ENDED, ARENA_WIRE_SEEN };   /* (SEEN, v13: the challenger told his question is up) */
 
 #define ARENA_LATENCY_MOST 5000u   /* ms: the server refuses past it */
 #define ARENA_INPUT_HEAD 10        /* ARENA_INPUT before its keys */

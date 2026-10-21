@@ -88,16 +88,25 @@ void arena_view_note(const char *line, const char *second) {
 
 void arena_view_clear(void) { fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 255)); }
 
-/* the badge from (x, y): three bars rising, as many lit as the link is steady */
-static void badge(int x, int y, ArenaLinkState link, uint32_t t) {
-	int lit = link == ARENA_LINK_STEADY ? 3 : link == ARENA_LINK_ROLLING ? 2 : 1;
-	SDL_Color on = link == ARENA_LINK_STEADY ? PET_LINE : link == ARENA_LINK_ROLLING ? PET_GOLD : rgba(255, 82, 66, 255);
-	if (link == ARENA_LINK_STALLED && t / 15 % 2) on = PET_DIM;
+/* three bars rising from (x, y), `lit` of them in `on` */
+static void bars_at(int x, int y, int lit, SDL_Color on) {
 	fill_rect(x, y, BADGE_W, BADGE_H, rgba(0, 49, 74, 200));
 	for (int k = 0; k < 3; ++k) {
 		int h = 3 + 2 * k;
 		fill_rect(x + 2 + k * 3, y + BADGE_H - 2 - h, 2, h, k < lit ? on : PET_SLOT);
 	}
+}
+
+/* the badge from (x, y): three bars rising, as many lit as the link is steady */
+static void badge(int x, int y, ArenaLinkState link, uint32_t t) {
+	int lit = link == ARENA_LINK_STEADY ? 3 : link == ARENA_LINK_ROLLING ? 2 : 1;
+	SDL_Color on = link == ARENA_LINK_STEADY ? PET_LINE : link == ARENA_LINK_ROLLING ? PET_GOLD : rgba(255, 82, 66, 255);
+	if (link == ARENA_LINK_STALLED && t / 15 % 2) on = PET_DIM;
+	bars_at(x, y, lit, on);
+}
+
+void arena_view_bars(int x, int y, unsigned bars) {
+	bars_at(x, y, (int)bars, bars >= 3 ? PET_LINE : bars == 2 ? PET_GOLD : rgba(255, 82, 66, 255));
 }
 
 void arena_view_over(const char *name, bool custom, ArenaLinkState link, uint32_t t) {

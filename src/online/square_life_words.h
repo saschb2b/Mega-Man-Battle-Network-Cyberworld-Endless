@@ -44,6 +44,9 @@ const char *square_greeter_bark(const char *name, bool in);
  * the other's). */
 const char *square_referee_words(const SquareFacts *f);
 const char *square_referee_bark(int result, const char *name);
+/* ... and his call while a bout of the channel is under way, its two
+ * fighters (the cable's first's first; epic #167, P20) */
+const char *square_referee_bout_bark(const char *first, const char *second);
 /* Walker `k` (0 a GreenNavi, 1 a GirlNavi) spoken to. */
 const char *square_walker_words(int k, const SquareFacts *f);
 /* A prop checked: its LOOK_* (the Board's posts, the sign's words). */
