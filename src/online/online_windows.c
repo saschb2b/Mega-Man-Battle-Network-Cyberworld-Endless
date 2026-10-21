@@ -26,13 +26,14 @@ static struct {
 	__typeof__(&WinHttpWebSocketCompleteUpgrade) upgrade;
 	__typeof__(&WinHttpWebSocketSend) ws_send;
 	__typeof__(&WinHttpWebSocketReceive) ws_receive;
+	__typeof__(&WinHttpWebSocketShutdown) ws_shutdown;   /* (optional: a closing handshake before the handles go) */
 } http;
 
 static struct {
 	HINTERNET session, connection, request, socket;
 	SDL_sem *event;
 	SDL_atomic_t *stop;
-	SDL_atomic_t failed, request_sent, headers, read_ready, write_done, handles;
+	SDL_atomic_t failed, request_sent, headers, read_ready, write_done, handles, shut;
 	uint8_t received[ONLINE_MAX_MESSAGE], sending[ONLINE_MAX_MESSAGE];
 	DWORD received_size;
 	WINHTTP_WEB_SOCKET_BUFFER_TYPE received_type;
@@ -56,6 +57,7 @@ static bool load_http(void) {
 	http.upgrade = (__typeof__(http.upgrade))SDL_LoadFunction(http.library, "WinHttpWebSocketCompleteUpgrade");
 	http.ws_send = (__typeof__(http.ws_send))SDL_LoadFunction(http.library, "WinHttpWebSocketSend");
 	http.ws_receive = (__typeof__(http.ws_receive))SDL_LoadFunction(http.library, "WinHttpWebSocketReceive");
+	http.ws_shutdown = (__typeof__(http.ws_shutdown))SDL_LoadFunction(http.library, "WinHttpWebSocketShutdown");
 	if (http.open && http.timeouts && http.option && http.callback && http.crack && http.connect && http.request &&
 	    http.send && http.response && http.query && http.close && http.upgrade && http.ws_send && http.ws_receive) return true;
 	SDL_UnloadObject(http.library);
@@ -69,6 +71,7 @@ static void CALLBACK completed(HINTERNET handle, DWORD_PTR context, DWORD status
 	case WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE: SDL_AtomicSet(&win.request_sent, 1); break;
 	case WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE: SDL_AtomicSet(&win.headers, 1); break;
 	case WINHTTP_CALLBACK_STATUS_WRITE_COMPLETE: SDL_AtomicSet(&win.write_done, 1); break;
+	case WINHTTP_CALLBACK_STATUS_SHUTDOWN_COMPLETE: SDL_AtomicSet(&win.shut, 1); break;
 	case WINHTTP_CALLBACK_STATUS_READ_COMPLETE:
 		if (size == sizeof(WINHTTP_WEB_SOCKET_STATUS)) {
 			const WINHTTP_WEB_SOCKET_STATUS *read = detail;
@@ -207,6 +210,17 @@ int online_socket_receive(uint8_t *data, size_t size) {
 
 void online_socket_close(void) {
 	if (!http.close) return;
+	/* (closing the handles alone aborts the connection, and what was just
+	 * written, a goodbye among it, can be lost with it: a closing
+	 * handshake first lets it out; a short wait, as the game is leaving) */
+	if (win.socket && http.ws_shutdown && !SDL_AtomicGet(&win.failed)) {
+		SDL_AtomicSet(&win.shut, 0);
+		DWORD result = http.ws_shutdown(win.socket, WINHTTP_WEB_SOCKET_SUCCESS_CLOSE_STATUS, NULL, 0);
+		uint32_t started = SDL_GetTicks();
+		while ((result == NO_ERROR || result == ERROR_IO_PENDING) && !SDL_AtomicGet(&win.shut) &&
+		       !SDL_AtomicGet(&win.failed) && SDL_GetTicks() - started < 500)
+			SDL_SemWaitTimeout(win.event, 10);
+	}
 	if (win.socket) http.close(win.socket);
 	if (win.request) http.close(win.request);
 	if (win.connection) http.close(win.connection);
