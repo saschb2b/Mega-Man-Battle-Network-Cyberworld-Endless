@@ -31,7 +31,7 @@ void nets_arrival_words(void) {
 	D.beat_deep = D.deep && !profile.deep_taught;
 	size_t k = strlen(D.beat);
 	if (D.beat_ours)
-		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! Our Cross works in the older Net now!|@M Its Navis fight our way too.|"
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! Our Cross works in the older Net now!|@M Whoa... Even its Navis fight like ours!|"
 			"@L Alright! Cross and all!", k ? "|" : "");
 	else if (D.beat_native)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
