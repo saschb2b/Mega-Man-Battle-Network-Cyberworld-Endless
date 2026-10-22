@@ -74,7 +74,7 @@ bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsi
 	for (unsigned f = BN6_FLAG_BEAST_OUT; f < BN6_FLAG_HEAT_CROSS + CROSSES; ++f) {
 		uint32_t at = BN6_EVENT_FLAGS + f / 8;
 		uint8_t bit = (uint8_t)(0x80u >> (f & 7)), was = (uint8_t)c->rawRead8(c, at, -1);
-		bool his = f >= BN6_FLAG_HEAT_CROSS && (s->crosses >> (f - BN6_FLAG_HEAT_CROSS) & 1u);
+		bool his = f >= BN6_FLAG_HEAT_CROSS ? (s->crosses >> (f - BN6_FLAG_HEAT_CROSS) & 1u) != 0 : (s->crosses & TEAM_SCREEN_BEAST) != 0;
 		if (f == BN6_FLAG_BEAST_OUT || f >= BN6_FLAG_HEAT_CROSS) c->rawWrite8(c, at, -1, (uint8_t)(his ? was | bit : was & ~bit));
 	}
 	c->rawWrite32(c, BN6_CROSSES_USED, -1, s->used);

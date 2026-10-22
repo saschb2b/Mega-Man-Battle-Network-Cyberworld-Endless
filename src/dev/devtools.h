@@ -82,6 +82,9 @@ typedef struct {
 	int team_pa;    /* teampa=1: under arena2v2 side 0's partner's folder opens with Cannon A, B and C as its Regular chip and
 	                   TagChips, his first hand a Program Advance (arena_team_custom.h); -1 the same, the PA left out of his
 	                   hand on the second GBA alone, a mutation that must part the two */
+	int team_beast; /* teambeast=1: under arena2v2 each partner's own Custom screen offers Beast Out and his stood-in client takes it
+	                   at his first turn (arena_team_cross.h: entered, his turns not yet counted); -1 none on the second GBA,
+	                   a mutation that must part the two */
 	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
 	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
 	                   Cross none, a mutation that must part the two */

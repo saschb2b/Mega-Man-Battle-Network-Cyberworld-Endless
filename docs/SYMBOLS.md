@@ -80,15 +80,15 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | Code (routines, hooks, instructions) | 262 | 19 |
-| ROM data (tables, text, literals) | 262 | 159 |
-| ROM, code or data not told | 381 | 399 |
-| RAM (variables, structures) | 108 | 47 |
+| ROM data (tables, text, literals) | 264 | 159 |
+| ROM, code or data not told | 382 | 399 |
+| RAM (variables, structures) | 109 | 47 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 146 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 107 | 16 |
 | Constants, sizes and counts | 377 | 78 |
-| All | 1671 | 754 |
+| All | 1675 | 754 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
@@ -101,7 +101,7 @@ how to verify it.
 | Sound | 10 | 2 |
 | Maps and the overworld | 125 | 20 |
 | Events and progress | 36 | 12 |
-| Engine core | 596 | 231 |
+| Engine core | 600 | 231 |
 
 <!-- end of what tools/symbols.py writes -->
 

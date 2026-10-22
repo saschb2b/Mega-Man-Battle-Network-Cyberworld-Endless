@@ -11,7 +11,7 @@
 #define SIDES 2
 #define NONE  0xFFu   /* a pending record's form: none */
 
-static int second_slot = -1;   /* the second GBA's core's slot: teamcross=-N's mutation there alone */
+static int second_slot = -1;   /* the second GBA's core's slot: teamcross=-N's and teambeast=-1's mutation there alone */
 /* every core's, a rollback's frames run again among them: what the output says */
 static unsigned forced, asked[SIDES], waited, answered[SIDES];
 
@@ -21,9 +21,10 @@ static uint32_t partner(unsigned side) {
 	return o >= BN6_EWRAM && o < BN6_EWRAM_END && hook_read16(o + BN6_T1_HP) ? o : 0;
 }
 
-/* the form side's partner chose this turn, 0 none (teamcross=-N: none on the second GBA, a mutation that must part them) */
+/* the form side's partner chose this turn, a Cross or Beast Out, 0 none (teamcross=-N, teambeast=-1: none on the second GBA, a
+ * mutation that must part them) */
 static uint8_t chosen(unsigned side) {
-	if (dev.team_cross < 0 && hook_slot() == second_slot) return 0;
+	if ((dev.team_cross < 0 || dev.team_beast < 0) && hook_slot() == second_slot) return 0;
 	return arena_team_custom_cross(side);
 }
 

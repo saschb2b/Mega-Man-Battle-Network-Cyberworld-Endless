@@ -114,8 +114,20 @@ static uint16_t screen_keys(uint32_t frame) {
 	return t < 2 ? KEY_A : t >= 10 && t < 12 ? KEY_RIGHT : 0;
 }
 
+/* teambeast: at his first turn the cursor right to OK, down to the emblem under it, A (Beast Out), up and OK */
+static uint16_t beast_keys(const Client *c) {
+	static const struct { uint16_t t, key; } steps[] = {
+		{ 40, KEY_RIGHT }, { 52, KEY_RIGHT }, { 64, KEY_RIGHT }, { 76, KEY_RIGHT }, { 88, KEY_RIGHT }, { 100, KEY_DOWN },
+		{ 112, KEY_A }, { 240, KEY_UP }, { 260, KEY_A },
+	};
+	for (size_t i = 0; i < sizeof steps / sizeof *steps; ++i)
+		if (c->t >= steps[i].t && c->t < steps[i].t + 3u) return steps[i].key;
+	return 0;
+}
+
 /* teamcross: at his first turn the cursor up to the emblem, CROSSSELECT opened and his one Cross taken, then his chips */
 static uint16_t cross_keys(const Client *c, uint32_t frame) {
+	if (dev.team_beast && c->opened == 1) return beast_keys(c);
 	if (dev.team_cross == 0 || c->opened != 1 || c->t >= CROSS_CHIPS) return screen_keys(frame);
 	unsigned t = c->t;
 	return t >= CROSS_UP && t < CROSS_UP + 3 ? KEY_UP : (t >= CROSS_OPEN && t < CROSS_OPEN + 3) || (t >= CROSS_TAKE && t < CROSS_TAKE + 3)
@@ -186,7 +198,7 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 		c->screen = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
 		/* (teamcross=N: his own Crosses, Cross N alone) */
 		int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
-		team_screen_crosses(c->screen, n >= 1 && n <= 5 ? (uint8_t)(1u << (n - 1)) : 0);
+		team_screen_crosses(c->screen, (uint8_t)((n >= 1 && n <= 5 ? 1u << (n - 1) : 0u) | (dev.team_beast ? TEAM_SCREEN_BEAST : 0u)));
 	}
 	if (!custom || !c->screen) {
 		closed_first(c);

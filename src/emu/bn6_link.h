@@ -82,7 +82,18 @@
 #define BN6_CUSTOM_BUILT      0x020366C0u /* the hand OK builds from the picks (bn6f byte_20366C0, a hand's layout: BN6_HAND_CHIPS ...),
                                              the Program Advance in it once shown; a link battle's packet carries it (BN6_LINK_SEND) */
 #define BN6_CROSS_STEP        0x03       /* the controller's byte +3 (BN6_CROSS_SIDES'): its step's count, 0 a step's first frame */
-#define BN6_AI_CROSS_ASK      0x4000u     /* BN6_AI_FLAGS: asked to cross into his pending form (0x0801596E) */
+#define BN6_BEAST_COMMIT      0x08029344u /* Beast Out's commit at OK (the emblem's pick): its form into BN6_CROSS_RECORD by 0x08015952 as
+                                             CROSSSELECT's (0xB, a Cross's from 0xD, BeastOver 0x17), so it crosses as a Cross does */
+#define BN6_FORM_TURN_DOWN    0x08015A16u /* r0 an object: his AI data's +0x0F counted down (neither 0 nor 0xFF, where his NaviStats' Navi
+                                             is MegaMan), called as each Custom screen opens for each side's player alone (0x0800846E,
+                                             0x08008478: the side-player getter 0x080103BC) */
+#define BN6_FORM_END_CHECK    0x080159C6u /* r0 an object: true where he is in a Beast Out form (0xB-0x18) with its BeastOutCounter 0 (his
+                                             AI data's +0x0F at 0 set to 2 on the way), asked in the turn's form check for the controller's
+                                             records' objects alone; the end then asked by 0x08015994 */
+#define BN6_TURN_SIDES        0x0203C970u /* the controller set up as each Custom screen opens (0x0802D6A0): +4 1 while it runs, +8 and +0xC
+                                             each side's player (0x080103BC), for whom alone it runs 0x0802DD1E and 0x0802DD10 (not read
+                                             further) */
+#define BN6_AI_CROSS_ASK      0x4000u    /* BN6_AI_FLAGS: asked to cross into his pending form (0x0801596E) */
 #define BN6_AI_CROSSING       0x80u       /* BN6_AI_MODES: a crossing under way (0x0801597C waits while it is set) */
 
 #endif

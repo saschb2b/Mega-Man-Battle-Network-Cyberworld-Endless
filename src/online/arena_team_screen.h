@@ -36,8 +36,10 @@ void team_screen_free(TeamScreen *s);
  * order drawn) written into BN6's deck on his side's GBA, its Custom
  * screen set up anew */
 bool team_screen_open(TeamScreen *s, struct ArenaPair *pair, const uint16_t *deck, unsigned n);
-/* His own Crosses (bit i Gregar's Cross i), which his screen's
- * CROSSSELECT offers from his next turn on (his lead's never) */
+/* His own Crosses (bit i Gregar's Cross i) and Beast Out
+ * (TEAM_SCREEN_BEAST), which his screen's CROSSSELECT and emblem offer
+ * from his next turn on (his lead's never) */
+#define TEAM_SCREEN_BEAST 0x80u
 void team_screen_crosses(TeamScreen *s, uint8_t crosses);
 /* The form his CROSSSELECT committed this turn (1-0x18), 0 none; the
  * Crosses he has chosen kept for his next turn's */

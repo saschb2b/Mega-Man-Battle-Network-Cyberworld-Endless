@@ -2378,6 +2378,35 @@ partner alone 10 times, side 0's partner asked to cross 6 times and side
 1's 6, ..., their own pending forms answered 728 and 728 times, every
 core's" (each GBA's, the rollbacks' frames run again among them).
 
+**His Beast Out: entered, his turns not yet his.** Gregar's emblem under
+OK commits a Beast Out at OK into the same record as CROSSSELECT
+(`BN6_BEAST_COMMIT`, `0x08029344`: form 0xB, 0xD on from a Cross, 0x17
+BeastOver), so it crosses in his stream and through BN6's crossing as his
+Cross does, with no code more: `teambeast=1` sets Beast Out's flag on
+his screen copy (his record's BeastOutCounter, 3, as his side's), his
+client takes the emblem at his first turn (RIGHT five times, DOWN, A, then
+UP and A on OK), and both partners turn into Gregar's beast at the first
+turn's crossing while their leads stay as they are, on both GBAs. What is
+not his: BN6 counts a form's turns down for each side's player alone
+(`BN6_FORM_TURN_DOWN`, called with the side-player getter's object as each
+Custom screen opens), runs a second controller for those two alone as the
+screen opens (`BN6_TURN_SIDES`), and asks a Beast Out's end only for the
+crossing controller's records' objects (`BN6_FORM_END_CHECK`, then
+`0x08015994`). Measured on both GBAs at each turn's form check: the
+partners' forms 0xB from the first turn on and their BeastOutCounter
+still 3 at the turns' checks at iterations 618 and 1693, so his Beast Out does not end.
+The three, run for his object by BN6's own code (the way his Cross runs),
+are what is left; two of the call sites are the Souls' hooks
+(`BN6_TURN_COUNT`), so a partner's run goes at the routines' own entries.
+Proved as far as it goes (fresh data folders, `--dev
+arena,arenaboth,arena2v2=1,teambeast=1,teamhp=500,arenadelay=1,quitend`):
+
+| Run | End | Hashes | The two GBAs |
+| --- | --- | --- | --- |
+| `arenalag=4` (306 rollbacks, 1,224 frames run again) | over at frame 3511, side 1 won | 58, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 1,873 iterations, 0 apart |
+| `arenalag=4,arenaroll=8` | over at 3568 | all 59 the same as the delay alone's | 1,920, 0 apart; 446 rollbacks of 8 frames, the game's state the same after all 446 |
+| `teambeast=-1,arenalag=4` (no Beast Out on the second GBA, the mutation) | | | apart from iteration 1 |
+
 ### A Program Advance and his hand's size
 
 BN6's OK (`0x08029110`) builds the hand from the picks
@@ -2529,8 +2558,8 @@ the copy 0.08 ms at the first and 17 to 19 ms at the later ones, inside
 mGBA's state load (not yet looked into). Made once at the first turn,
 some 155 ms (the battle's worst tick then, 3 past a 60th in a battle).
 His screen offered no Cross and no Beast Out then (their flags cleared on
-the copy's GBA); since His Cross it offers his own Crosses, Beast Out not
-yet.
+the copy's GBA); since His Cross it offers his own Crosses and Beast Out
+(`teambeast`).
 
 Captured (`teamseat=2` and `3`, the pictures kept out of the
 repository): BN6's own Custom screen on each partner's client with his
@@ -2572,14 +2601,9 @@ the shape for a 2v2 between four games, each running the pair.
 - Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
   four streams over the server (designed, the wire unchanged), a
   partner's pick messages, his compiled NaviCust and his Cross among what
-  crosses; his Beast Out (read, not built: Gregar's emblem commits a form
-  into the same record as CROSSSELECT, 0x08029344, so it would cross as
-  his Cross does, but BN6 counts a Beast Out's turns down for each side's
-  player alone, 0x08015A16 at `BN6_TURN_COUNT` and 0x0800847C on the
-  side-player getter 0x080103BC's object, where the Souls' hooks stand,
-  and ends it for the controller's records' objects alone, 0x080159C6
-  in the turn's form check: both wanted for his object first); a chip of
-  computed power in his
+  crosses; his Beast Out's turns and its end (entered and seen, His
+  Cross: BN6's countdown, the turn-open controller and the end's check
+  run for each side's player alone); a chip of computed power in his
   hand (his hand takes a computed chip's power as 0), WhiCapsl's and
   Uninstll's marks; the bytes past a Program Advance's end in his hand
   (BN6's built hand leaves the joined picks' last chip there, ours the

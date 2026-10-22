@@ -55,9 +55,9 @@
   the chips his Custom screen deals are his own; his Cross chosen on his
   own CROSSSELECT and taken by BN6's crossing on every GBA; and a
   Program Advance made on his screen goes into his hand as BN6 makes it.
-  Not yet a mode to play: it needs the wire's four seats, and a
-  partner's Beast Out is still to come (docs/ONLINE_ARENA.md, Two
-  MegaMen a side).
+  His Beast Out goes in too, but its turns are not yet counted for him.
+  Not yet a mode to play: it needs the wire's four seats
+  (docs/ONLINE_ARENA.md, Two MegaMen a side).
 
 - **A rematch in about a second, and the Square before a NetBattle
   (epic #167, steps 3 and 4).** Two Yeses on the result card now go
