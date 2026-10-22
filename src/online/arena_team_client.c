@@ -87,6 +87,8 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 	/* (teamcust: side 1's partner the checkpoint's MegaMan's NaviCust too, his folder his lead's) */
 	if (all && dev.team_cust) team_client_compile(1, all, false);
 	stood_souls = all && dev.team_unite ? all->souls : 0;
+	/* (teamunite=3: ColonelSoul held too, BN5's Soul 7, which RockCube lights) */
+	if (stood_souls && dev.team_unite == 3) stood_souls |= 1u;
 	unsigned fits = all ? arena_folders_fitting(all) : 0;
 	/* (the folder after the one his lead carries: arena_scene's, the first that holds chips) */
 	for (int k = 0, first = -1; k < ONLINE_FOLDERS; ++k) {

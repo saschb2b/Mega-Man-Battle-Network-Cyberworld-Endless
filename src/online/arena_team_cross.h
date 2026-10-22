@@ -17,8 +17,9 @@
  * enters so; BN6 counts its turns and asks its end for each side's
  * player alone, so its routines are run again for his object (their ends
  * hooked, their bodies entered with him) and the crossing's last mode waits
- * while he leaves his form. Research, never a
- * player's battle. */
+ * while he leaves his form. A Soul of his (arena_team_soul.h) crosses so
+ * too, into the proxy form, its turns counted and its end asked from the
+ * same hooks. */
 #ifndef CW_ARENA_TEAM_CROSS_H
 #define CW_ARENA_TEAM_CROSS_H
 

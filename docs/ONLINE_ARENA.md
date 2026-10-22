@@ -2838,6 +2838,8 @@ first chip DarkPlus: NumberSoul's Chaos Unison), `CYBERWORLD_EMU_DEBUG`:
 | `teamunite=2,arenalag=4` (each partner's folder opening with Atk+10 `*`: NumberSoul, three turns; 671 rollbacks) | over at frame 7766 | 129, all the same as `arenalag=0,arenawindow=8`'s | 3,226 iterations, 0 apart |
 | `teamunite=2,arenalag=4,arenaroll=8` | over at 7777 | all 129 the same as the delay alone's | 3,226, 0 apart; 972 rollbacks of 8 frames, the game's state the same after all 972 |
 | `teamunite=-2,arenalag=4` (the mutation) | | | apart from iteration 1 |
+| `teamunite=3,arenalag=4` (RockCube `*` first, ColonelSoul held: ColonelSoul, three turns; 552 rollbacks) | over at frame 6204, side 1 won | 103, all the same as `arenalag=0,arenawindow=8`'s | 2,117 iterations, 0 apart |
+| `teamunite=3,arenalag=4,arenaroll=8` | over at 6354 | all 105 the same as the delay alone's | 2,263, 0 apart; 794 rollbacks of 8 frames, the game's state the same after all 794 |
 
 On both GBAs: "side 0's partner united with Soul 9 (chaos 1, turns 1),
 his own", his chaos B "released, out of phase 2: the failure", then "side
@@ -2849,7 +2851,10 @@ turn check as a lead's ("a Soul ended 2 times", both GBAs), "Soul 9
 ended, his own"; side 0's partner, his lead's folder of DarkPlus behind
 the Atk+10, took his UNITE screen but never pressed OK at his next two
 turns (his stood-in script's keys, not the Soul's), his client sending
-his picks at the wait's limit. From his seat (`teamseat=2`, the
+his picks at the wait's limit. With `teamunite=3` side 1's partner's
+ColonelSoul: "united with Soul 7 (chaos 0, turns 3), his own" on both
+GBAs, his turn's charged shot set by ColonelSoul's turn hook for him (no
+chip on his button: ScreenDivide). From his seat (`teamseat=2`, the
 pictures kept out of the repository): his own screen of DarkPlus, his
 OK, NumberSoul's image over him as he crosses, then his MegaMan in the
 Chaos Unison's palette beside his lead, his chaos B's glow charging.
@@ -2861,9 +2866,9 @@ times", both GBAs), his MegaMan in NumberSoul's look on the field; over
 at frame 1846 on all four, 30 hashes agreed and the spectator's 30
 checked, 960 iterations 0 apart on all five.
 
-Not exercised yet: ColonelSoul's button on his copy and his chip at the
-turn (built; no checkpoint with ColonelSoul at hand), and his Chaos
-Unison's failure's Dark Soul, which plays his side's lists, made from his lead's folder
+Not exercised yet: ColonelSoul's button on his copy (a chip taken onto
+it at a later turn, its chip shot: built, the stood-in client's script
+never presses it), and his Chaos Unison's failure's Dark Soul, which plays his side's lists, made from his lead's folder
 (`arena_souls.c`): his own folder's would need lists past the sides'
 two in `RAM_DARK_LISTS`.
 

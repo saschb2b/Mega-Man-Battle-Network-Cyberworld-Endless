@@ -53,6 +53,7 @@
 #define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1000 and up: BN6_CHIP_POWERS) */
 #define BN6_CHIP_NAVI_FLAG    0x04        /* BN6_CHIP_EFFECT_FLAGS: a Navi chip, which Navi+20 joins in the hand (bn6f sub_8029224) */
 #define BN6_CHIP_ATK10        0xC0        /* the plus chips the hand's merge (bn6f sub_8029224, 0x08029224) adds to the chip before: Atk+10 and */
+#define BN6_CHIP_ROCKCUBE     0x8F        /* RockCube: an Obstacle, the kind ColonelSoul unites with (tests/xdiff/soul_colonel_chip.json's 0x348F) */
 #define BN6_CHIP_ATK30        0xC3        /* ... Atk+30 to one with BN6_CHIP_SHOWS_POWER, */
 #define BN6_CHIP_NAVI20       0xC1        /* ... Navi+20 to one with BN6_CHIP_NAVI_FLAG */
 #define BN6_CHIP_CANNON       0x01        /* Cannon: three in a row of codes (A, B, C) picked in order are a Program Advance, */
