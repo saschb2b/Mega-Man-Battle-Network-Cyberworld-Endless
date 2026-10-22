@@ -3584,7 +3584,8 @@ static void test_free_space(void) {
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
 		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_TEAM_TICK },
-		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_CHIP_AI_ROOMS }, { "the chip AI's rooms", RAM_CHIP_AI_ROOMS, RAM_BATTLE_SPARE },
+		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_CHIP_AI_ROOMS }, { "the chip AI's rooms", RAM_CHIP_AI_ROOMS, RAM_TEAM_CLOCK },
+		{ "two a side's turn's clock", RAM_TEAM_CLOCK, RAM_BATTLE_SPARE },
 		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
 	};
 	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);

@@ -588,7 +588,10 @@ compiled by BN6), and `teamcust=1` gives side 1's partner the
 checkpoint's MegaMan's NaviCust too (`-1`: the second GBA's records their
 sides' copies, the mutation; `-2`: the NaviCusts compiled over this
 game's own checkpoint's state instead, as before issue #181's review, a
-mutation that parts the games of different runs). `teamcross=N` (1-5) offers each partner Cross N on
+mutation that parts the games of different runs). `teamidle=N` keeps the lead of side N - 1 (over the network, this
+game's lead) off his Custom screen, so that his own game presses OK for
+him at the turn's limit (ONLINE_ARENA.md, The leads wait for their partners).
+`teamcross=N` (1-5) offers each partner Cross N on
 his own CROSSSELECT and has his stood-in client take it at his first turn
 (`-N`: none on the second GBA, the mutation); `teambeast=1` offers each
 partner Beast Out on his own Custom screen and has his client take its

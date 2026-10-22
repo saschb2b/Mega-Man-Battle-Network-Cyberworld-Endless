@@ -108,7 +108,7 @@ static uint16_t peer_keys(void *context, uint32_t frame) {
 	if (arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return peer_plays(1) ? chip_first(1, frame, 0) : 0;
 	unsigned t = frame % 160;
 	if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
-	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
+	return team_client_lead_keys(S.arena, 1, chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0), frame);
 }
 
 /* --dev arena2v2's partners, players 2 and 3: their own clients stood in
@@ -124,7 +124,7 @@ static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 static uint16_t pad_keys(void) {
 	if (dev.arena_both && S.arena) {
 		uint32_t t = S.bot_tick++;
-		return chip_first(0, t, arena_bot_keys(S.arena, 0, t));
+		return team_client_lead_keys(S.arena, 0, chip_first(0, t, arena_bot_keys(S.arena, 0, t)), t);
 	}
 	if (dev.arena_both) return 0;
 	static const int buttons[10] = { BTN_A, BTN_B, BTN_SELECT, BTN_START, BTN_RIGHT, BTN_LEFT, BTN_UP, BTN_DOWN, BTN_R, BTN_L };

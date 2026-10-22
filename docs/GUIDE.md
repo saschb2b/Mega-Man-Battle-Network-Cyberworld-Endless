@@ -917,7 +917,8 @@ the bout from the stands. Between bouts the result card shows the
 MegaMen standing and who is next. Side by side, all four MegaMen fight
 on one field, two a side: the one who asked to team up leads on each
 team, and his partner picks his own chips on his own Custom screen while
-the leads wait for him (a minute at most); the team whose MegaMen are
+the leads wait for him; once anyone has pressed OK, whoever is still
+picking has 30 seconds, then his picks so far are taken; the team whose MegaMen are
 both deleted loses. A partner fights as his whole MegaMan: his folder,
 HP and buster, his NaviCust's programs, his Crosses and Beast Out on
 his own Custom screen, his Program Advances, and UNITE with his own

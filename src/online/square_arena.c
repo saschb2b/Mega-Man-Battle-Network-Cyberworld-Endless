@@ -753,7 +753,9 @@ static bool frozen(uint32_t tick) { return dev.arena_freeze > 0 && tick >= (uint
 static void battle(uint32_t keys, uint32_t rtt_ms) {
 	static uint32_t tick;
 	if (frozen(++SA.ticks)) return;
-	if (dev.arena_both) keys = square_bout_bot(keys, tick++);
+	if (dev.arena_both) keys = square_bout_bot(keys, tick);
+	/* (side by side: past the turn's limit a lead's OK pressed by his own game, team_hurry.h) */
+	keys = square_bout_lead(keys, tick++);
 	arena_rtt(SA.arena, rtt_ms);
 	ArenaStage stage = arena_tick(SA.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
 	arena_sound(SA.arena);

@@ -13,6 +13,7 @@
 #include "arena_team_custom.h"
 #include "arena_team_navi.h"
 #include "arena_seats.h"
+#include "team_hurry.h"
 #include "arena_team_screen.h"
 #include "arena_team_view.h"
 #include "arena_view.h"
@@ -233,14 +234,15 @@ static uint16_t stream(Arena *a, unsigned player, uint32_t frame, bool own, uint
 	if (!c->turn) return battle & ARENA_KEYS_MASK;
 	uint8_t picks[TEAM_CUSTOM_PICKS];
 	unsigned n;
-	/* (his lead held for him near TEAM_WAIT_LIMIT: the picks he has go out, in time to be his; teamslow=-1, a client gone
-	 * quiet, sends none, and the pair's own limit ends the wait) */
+	/* (near the turn's limit, someone's OK TEAM_TURN_LIMIT frames ago: the picks he has go out, in time to be his;
+	 * teamslow=-1, a client gone quiet, sends none, and his side's GBA's own limit ends the wait) */
 	bool gone = !side && dev.team_slow < 0;
-	if (!gone && team_screen_open_now(c->screen) && arena_team_custom_waited(gba, side) + TEAM_WAIT_SAY >= TEAM_WAIT_LIMIT) {
+	unsigned clock = team_hurry_clock(a);
+	if (!gone && team_screen_open_now(c->screen) && clock + TEAM_WAIT_SAY >= TEAM_TURN_LIMIT) {
 		n = team_screen_picks(c->screen, picks);
 		++c->at_limit;
-		printf("arena2v2: side %u's partner's client: %u frames held for him, his %u picks so far sent before the wait's limit\n", side,
-			arena_team_custom_waited(gba, side), n);
+		printf("arena2v2: side %u's partner's client: %u frames after the turn's first OK, his %u picks so far sent before its "
+			"limit\n", side, clock, n);
 		say(c, picks, n);
 		team_screen_close(c->screen);
 		return c->out[c->sent++];
@@ -255,6 +257,12 @@ static uint16_t stream(Arena *a, unsigned player, uint32_t frame, bool own, uint
 		return c->out[c->sent++];
 	}
 	return 0;
+}
+
+uint16_t team_client_lead_keys(Arena *a, unsigned side, uint16_t keys, uint32_t t) {
+	if (dev.arena_2v2 <= 0 || !a) return keys;
+	if (dev.team_idle == (int)side + 1 && arena_phase(a, side) == BN6_PHASE_CUSTOM) keys = 0;
+	return team_hurry_lead(a, side, keys, t);
 }
 
 uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
@@ -275,7 +283,7 @@ void team_client_draw(Arena *a) {
 	/* (a partner's seat: his own screen while his turn is on; the scene shows his side's GBA otherwise, arena_show) */
 	const uint32_t *v = s >= 2 && c->turn && c->screen ? team_screen_video(c->screen) : arena_video(a);
 	if (v) arena_view_core(v);
-	arena_team_view(arena_core(a, side), s);
+	arena_team_view(arena_core(a, side), s, team_hurry_shown(a, s));
 }
 
 void team_client_report(void) {

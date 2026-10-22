@@ -8,6 +8,7 @@
 #include "arena_team_client.h"
 #include "bn6.h"
 #include "devtools.h"
+#include "team_hurry.h"
 #include "emu.h"
 #include "online_visit.h"
 #include "rom.h"
@@ -67,6 +68,14 @@ void square_bout_mine(OnlineLoadout *l) {
 	int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
 	if (n >= 1 && n <= 5 && SA.four && SA.seat >= 2) l->crosses |= (uint8_t)(1u << (n - 1));
 	if (dev.team_beast && SA.four && SA.seat >= 2) l->beast = 1;
+}
+
+uint32_t square_bout_lead(uint32_t keys, uint32_t tick) {
+	unsigned side = SA.link.link.side & 1u;
+	if (!SA.four || SA.seat >= 2 || !SA.arena) return keys;
+	/* (teamidle=N on a lead's game: his hands off his Custom screen, his own game pressing OK for him at the limit) */
+	if (dev.team_idle > 0 && arena_phase(SA.arena, side) == BN6_PHASE_CUSTOM) keys = 0;
+	return team_hurry_lead(SA.arena, side, (uint16_t)keys, tick);
 }
 
 bool square_bout_ready(void) {

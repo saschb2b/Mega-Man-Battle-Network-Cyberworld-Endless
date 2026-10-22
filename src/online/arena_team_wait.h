@@ -8,8 +8,9 @@
  * still picking, and its own for itself, both by BN6's own cable, so the
  * moment the screen closes is one every client and spectator agrees on.
  * The hold is read in that GBA's RAM (arena_team_custom.h), which the
- * pair writes from the partner's stream; once his picks are in, or his
- * side's GBA has held TEAM_WAIT_LIMIT frames, the packet goes out. */
+ * pair writes from the partner's stream; once his picks are in (at the
+ * turn's limit his picks so far, or none, team_hurry.h), the packet goes
+ * out. */
 #ifndef CW_ARENA_TEAM_WAIT_H
 #define CW_ARENA_TEAM_WAIT_H
 

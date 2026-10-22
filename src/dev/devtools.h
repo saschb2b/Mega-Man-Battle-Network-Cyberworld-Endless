@@ -78,6 +78,9 @@ typedef struct {
 	                    loadouts would give it (arena_team_navi.h) */
 	int team_form;  /* teamform=N: a team challenge from the Square names its format without asking: 1 one by one (the relay),
 	                   2 side by side (protocol v15, issue #181; square_arena.c) */
+	int team_idle;  /* teamidle=N: under arena2v2 the lead of side N - 1 idle on his Custom screen, never pressing a key there:
+	                   his own game presses OK for him at the turn's limit (team_hurry.h); over the network, any N, the
+	                   lead playing this game */
 	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
 	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
 	                   copies, a mutation that must part the two; -2 the partners' NaviCusts compiled over this game's own

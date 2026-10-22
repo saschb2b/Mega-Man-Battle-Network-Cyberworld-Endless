@@ -78,6 +78,7 @@ static uint16_t next_word(unsigned side) {
  * this GBA's battle took his lead's pad from it: side 0's where its pad's mark is set, side 1's where it is or where the link
  * takes side 1's whatever its mark (BN6_LINK_TAKES_ANY 0, the routines' own test) */
 static void take_words(bool second) {
+	arena_team_custom_clock();
 	for (unsigned side = 0; side < SIDES; ++side) {
 		uint32_t in = BN6_LINK_IN + side * BN6_LINK_PACKET;
 		bool marked = (hook_read16(in + BN6_LINK_PAD) & BN6_KEYS_VALID) != 0;

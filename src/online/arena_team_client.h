@@ -42,4 +42,9 @@ void team_client_draw(Arena *a);
  * client's screen, its frames and their cost */
 void team_client_report(void);
 
+/* --dev arena2v2's leads' keys from the local scene (side 0's the
+ * player's, side 1's the stood-in peer's): teamidle=N's idle on his Custom
+ * screen, and past the turn's limit his OK pressed for him (team_hurry.h) */
+uint16_t team_client_lead_keys(Arena *a, unsigned side, uint16_t keys, uint32_t t);
+
 #endif

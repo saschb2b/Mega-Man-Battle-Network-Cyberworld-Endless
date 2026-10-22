@@ -34,11 +34,13 @@ struct mCore;
 #define TEAM_CUSTOM_PICKS 5   /* the chips picked at most */
 /* The leads wait for their partners (the owner's call, 22 October 2026):
  * a side's GBA holds its Custom screen's packet back while its partner
- * picks (arena_team_wait.h), so that BN6's own link waits on both GBAs;
- * past this many of that GBA's frames held, his picks are taken as they
- * stand (none, where none came) and the battle goes on: 60 seconds */
-#define TEAM_WAIT_LIMIT   3600u
-#define TEAM_WAIT_SAY     120u  /* ... his own client sends the picks he has this many frames before it, to be in time */
+ * picks (arena_team_wait.h), so that BN6's own link waits on both GBAs.
+ * One limit for all four (the owner's call, 22 October 2026, team_hurry.h):
+ * once any player has pressed OK on a turn, every one still picking has
+ * this many frames, then his picks so far are taken: 30 seconds */
+#define TEAM_TURN_LIMIT   1800u
+#define TEAM_TURN_HURRY   600u  /* ... the late one's sign in its last this many (10 seconds) */
+#define TEAM_WAIT_SAY     120u  /* ... a partner's own client sends the picks he has this many frames before it, to be in time */
 /* A pick message in a partner's stream (past the GBA's buttons): pick
  * `index` of `count` (count 0: none picked), the slot of the hand his
  * screen dealt; a frame of his stream holding one carries no keys */
@@ -80,6 +82,13 @@ void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t reg
 /* side's partner's MegaMan's Crosses, Beast Out and Souls, as every game
  * was given them (NULL none): what his messages may say (team_check.h) */
 void arena_team_custom_allow(unsigned side, const TeamAllowed *allowed);
+/* From the battle's link each frame (arena_team_link.c), on the core it
+ * runs: the turn's clock (RAM_TEAM_CLOCK), counting from the first OK
+ * this core sees (its own lead's, or a partner's picks in), none outside
+ * the Custom screen */
+void arena_team_custom_clock(void);
+/* ... as `core` holds it: frames since that OK, 0 none */
+unsigned arena_team_custom_clock_of(struct mCore *core);
 /* from the spawn's hook: the core's decks and turns emptied, to be dealt anew */
 void arena_team_custom_begin(void);
 /* From the pair, before side's GBA (core) runs a frame: his lead's
@@ -113,10 +122,8 @@ uint8_t arena_team_custom_cross(unsigned side);
 void arena_team_custom_cross_taken(unsigned side);
 void arena_team_custom_owe(unsigned side, bool owed);
 bool arena_team_custom_owed(unsigned side);
-/* As `core` (side's GBA's) holds it: the frames it has held for its
- * partner this turn, whether it holds now (his lead has pressed OK and
- * waits), whether he is still picking */
-unsigned arena_team_custom_waited(struct mCore *core, unsigned side);
+/* As `core` (side's GBA's) holds it: whether it holds now (his lead has
+ * pressed OK and waits), whether he is still picking */
 bool arena_team_custom_lead_waits(struct mCore *core, unsigned side);
 bool arena_team_custom_picking(struct mCore *core, unsigned side);
 

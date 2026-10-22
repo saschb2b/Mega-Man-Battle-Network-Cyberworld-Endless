@@ -60,7 +60,7 @@ static bool dev_switch(const char *t) {
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "arenafreeze=", &dev.arena_freeze }, { "arenaseed=", &dev.arena_seed }, { "arenaagain=", &dev.arena_again },
 		{ "arenaseedoff=", &dev.arena_seed_off }, { "teamseat=", &dev.team_seat }, { "teampick=", &dev.team_pick }, { "teambuster=", &dev.team_buster },
-		{ "teamslow=", &dev.team_slow }, { "teamform=", &dev.team_form }, { "teamcust=", &dev.team_cust }, { "teamcross=", &dev.team_cross },
+		{ "teamslow=", &dev.team_slow }, { "teamform=", &dev.team_form }, { "teamcust=", &dev.team_cust }, { "teamidle=", &dev.team_idle }, { "teamcross=", &dev.team_cross },
 		{ "teampa=", &dev.team_pa }, { "teambeast=", &dev.team_beast },
 		{ "teamunite=", &dev.team_unite },
 		{ "arenapeer=", &dev.arena_peer }, { "chipaibreak=", &dev.chipai_break }, { "partnerbreak=", &dev.partner_break },

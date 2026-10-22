@@ -103,7 +103,9 @@
 #define RAM_TEAM_TICK       0x0203FFF0u   /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c), to: */
 #define RAM_CHIP_AI_ROOMS   0x0203FFF4u   /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's
                                              bits; darkinvs_room.h, issue #182), to: */
-#define RAM_BATTLE_SPARE    0x0203FFF8u   /* spare (the game call's old mark, unused since issue #33), to: */
+#define RAM_TEAM_CLOCK      0x0203FFF8u   /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core
+                                             has seen, then u8 1 once seen (arena_team_custom.c, team_hurry.h), to: */
+#define RAM_BATTLE_SPARE    0x0203FFFCu   /* spare (the game call's old mark, unused since issue #33), to: */
 #define RAM_BATTLE_END      0x02040000u
 
 #endif

@@ -345,13 +345,38 @@ static void turn_open(unsigned side, uint32_t r) {
 	put8(r + R_LIMIT, 0);
 }
 
-/* (his side's GBA holding for him, its own core alone: its frames counted; at TEAM_WAIT_LIMIT it says his picks none in his
- * stream's place, which comes to both GBAs in its packet as his own would) */
+/* (his side's GBA holding for him, its own core alone: its frames counted, what the output says) */
 static void held_frame(unsigned side, uint32_t r) {
 	unsigned held = hook_read16(r + R_WAIT) + 1u;
 	put16(r + R_WAIT, (uint16_t)held);
 	if (held > C.held[side]) C.held[side] = held;
-	if (held < TEAM_WAIT_LIMIT || hook_read8(r + R_LIMIT)) return;
+}
+
+void arena_team_custom_clock(void) {
+	if (hook_read8(BN6_BATTLE_PHASE) != BN6_PHASE_CUSTOM) {
+		hook_write32(RAM_TEAM_CLOCK, 0);
+		return;
+	}
+	if (!hook_read8(RAM_TEAM_CLOCK + 2)) {
+		/* (an OK this core sees: its own lead's, past it on its screen; a partner's, his picks in while his turn is open) */
+		unsigned mode = hook_read8(BN6_CUSTOM_MODE);
+		bool ok = mode == BN6_MODE_OK || mode == BN6_MODE_PA || mode == BN6_MODE_WAIT;
+		for (unsigned side = 0; side < SIDES && !ok; ++side) ok = hook_read8(room(side) + R_STATE) == ST_IN;
+		if (!ok) return;
+		hook_write8(RAM_TEAM_CLOCK + 2, 1);
+	}
+	unsigned t = hook_read16(RAM_TEAM_CLOCK);
+	if (t < 0xFFFFu) hook_write16(RAM_TEAM_CLOCK, (uint16_t)(t + 1));
+}
+
+unsigned arena_team_custom_clock_of(struct mCore *c) { return c ? get16(c, RAM_TEAM_CLOCK) : 0; }
+
+/* (his side's GBA, its own core alone, his turn open at the turn's limit: it says his picks none in his stream's place,
+ * which comes to both GBAs in its packet as his own would; his own client, which sends the picks he has before it, is
+ * normally first, so this is the quiet client's end) */
+static void limit_frame(unsigned side, uint32_t r) {
+	unsigned t = hook_read16(RAM_TEAM_CLOCK);
+	if (t < TEAM_TURN_LIMIT || hook_read8(r + R_LIMIT)) return;
 	/* (marked said once queued: a full outbox, which a turn never fills, tries again the next frame, never lost) */
 	if (!team_link_say(side, TEAM_PICK(0, 0, 0))) {
 		printf("arena2v2: side %u's GBA at the wait's limit: his outbox full, his picks none said the next frame\n", side);
@@ -359,8 +384,7 @@ static void held_frame(unsigned side, uint32_t r) {
 	}
 	put8(r + R_LIMIT, 1);
 	++C.limits[side];
-	printf("arena2v2: side %u's GBA held %u frames for its partner, the wait's limit: his picks none, said in his place\n", side,
-		held);
+	printf("arena2v2: side %u's GBA at the turn's limit, %u frames after its first OK: his picks none, said in his place\n", side, t);
 }
 
 uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
@@ -373,6 +397,7 @@ uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
 	if (said) pick_said(side, word, second);
 	state = hook_read8(r + R_STATE);
 	if (custom && state == ST_OPEN && hook_read8(r + R_OWED)) held_frame(side, r);
+	if (custom && state == ST_OPEN && (hook_read8(BN6_BATTLE_SIDE) & 1u) == side) limit_frame(side, r);
 	if (!custom && state == ST_IN) commit(side);
 	else if (!custom && state == ST_OPEN) put8(r + R_STATE, ST_WAITING);
 	return custom || said ? 0 : (uint16_t)(word & ARENA_KEYS_MASK);
@@ -485,7 +510,6 @@ void arena_team_custom_cross_taken(unsigned side) { hook_write8(room(side & 1u) 
 void arena_team_custom_owe(unsigned side, bool owed) { hook_write8(room(side & 1u) + R_OWED, owed); }
 bool arena_team_custom_owed(unsigned side) { return hook_read8(room(side & 1u) + R_OWED) != 0; }
 
-unsigned arena_team_custom_waited(struct mCore *c, unsigned side) { return c ? get16(c, room(side & 1u) + R_WAIT) : 0; }
 bool arena_team_custom_lead_waits(struct mCore *c, unsigned side) { return c && get8(c, room(side & 1u) + R_OWED); }
 bool arena_team_custom_picking(struct mCore *c, unsigned side) {
 	return c && get8(c, room(side & 1u) + R_DEALT) && get8(c, room(side & 1u) + R_STATE) == ST_OPEN;

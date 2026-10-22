@@ -1584,7 +1584,11 @@ WATCH_STATE, holds the Square's core as a battle of its own does
 (`online_visit_held`): the screen is the pair's picture, the cable's
 first's side (its heading and keys shown four seconds: "WATCHING ALPHA VS
 BETA", "R: other side  L: cheer  B: leave"; "Catching up..." while far
-behind). R shows the other GBA's picture, L sends the Square's Cheer
+behind; two a side, both teams: "WATCHING Alpha & Beta VS Gamma &
+Delta" where it fits the picture's width, else "Alpha & Beta VS Gamma &
+Delta", else each team by its lead, "Alpha's TEAM VS Gamma's TEAM",
+long leads' names cut to fit, never inside a character: `square_watch.c`'s
+heading, `stands_team_heading`). R shows the other GBA's picture, L sends the Square's Cheer
 emote, B leaves at once; the end shows "ALPHA won the NetBattle." until A
 or B, or five seconds, and MegaMan is back where he stood. A spectator is
 busy for the server: a challenge to him is refused (NOTICE 16), and his
@@ -2077,9 +2081,10 @@ packet). The library carries all eight halfwords. So:
   opens (seeded by its random number, the same on both at that frame),
   his turn opened and closed with BN6's phase, his picks in as their
   last message comes, his hand set at the battle loop's next iteration
-  after his side's screen has closed with them in. The wait's limit is
-  said by his side's GBA in his place: at `TEAM_WAIT_LIMIT` frames held
-  it queues "no picks" in its own outbox (marked said only once queued:
+  after his side's screen has closed with them in. Where his client has
+  gone quiet, the turn's limit is said by his side's GBA in his place:
+  at `TEAM_TURN_LIMIT` frames after the turn's first OK ([The turn's
+  limit](#the-leads-wait-for-their-partners)) it queues "no picks" in its own outbox (marked said only once queued:
   were the outbox full it tries again the next frame), and both GBAs
   take it from its packet as they would his own. No byte of his turn is written into one
   core by the other any more.
@@ -2340,9 +2345,9 @@ honestly* (the wait is shown where it is, and by whom), *presence over
 pressure* (a quiet sign that someone is there and busy; no countdown, no
 nagging, no word of explanation: the players know BN6's Custom screen),
 *diegetic first* (BN6's own way of showing a GBA still picking before
-any sign of ours), and *respect the player's time* (a generous limit
-past which the idle one cannot hold three others: 60 seconds, the figure
-the epic's research found players' communities use for a turn).
+any sign of ours), and *respect the player's time* (a limit past which
+the idle one cannot hold three others: first 60 seconds for a partner
+alone, now one of 30 for all four, below).
 
 **How BN6 waits, and where the hold goes.** In a link battle each GBA,
 as its lead's OK has slid the window out, sends its packet (bn6f
@@ -2372,17 +2377,90 @@ while his partner picks (`arena_team_view.c`, `sign`). On the partner's
 own screen, the same plate with his lead's seat and a tick once his
 lead has pressed OK and waits for him. No words, no count.
 
-**The limit.** A side's GBA held for its partner counts its frames
-(`RAM_TEAM_CUSTOM`, its own core's); his own client sends the picks he
-has two seconds before the limit (`TEAM_WAIT_SAY`, 120 frames), and at
-the limit that GBA says "no picks" in his place, in its own packet, so
-both GBAs take it at the same frame as they would his own, and the
-screen closes (`TEAM_WAIT_LIMIT`: 3,600 of that GBA's frames, 60
-seconds, counted only while his lead waits for him). Nothing is shown
-before it. The number is the owner's to confirm.
+**The turn's limit: one for all four** (the owner's call, 22 October
+2026, replacing a partner's alone of 60 seconds). Once any player of
+the match has pressed OK on a turn, every player still picking has 30
+seconds (`TEAM_TURN_LIMIT`, 1,800 frames); then his picks so far are
+taken. A battle of two keeps BN6's own Custom screen, which has no
+limit.
 
-Proved (`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend`, both
-ROMs, fresh data folders, 22 October 2026, this build):
+The game-design lens first. The dialectic is still mine against ours:
+a turn is each player's own, but the battle goes on only for all four
+together, so one player's thinking is three players' waiting. A limit
+that binds only the partner made the two roles unequal (a lead could
+hold three others without end, a partner a minute at most); one limit,
+started by the first OK and binding whoever is still picking, is the
+same for everyone, and it binds nobody who is quick, so a fast turn is
+never shortened. The loop layer is the battle's turn (pick, wait,
+fight) inside the session's "one thing together": the limit keeps that
+loop turning without making the pick itself a race. 30 seconds is
+generous for BN6's Custom screen (a turn there is a few seconds; the
+players' communities settle a turn in a minute at most), and short
+enough that the three who wait are not left watching a still screen;
+the owner accepted 60 and asked for it lower where it feels unfair to
+the three, so it is a constant to tune, not a rule of BN6's. The
+patterns: *telegraph honestly* (the late player alone is told that his
+time is running out, in the last 10 seconds, `TEAM_TURN_HURRY`, by a
+sign that cannot be misread as anything else, and it never lies: it
+shows exactly while the limit approaches and he still picks);
+*presence over pressure* (no countdown, no number, no word, nothing on
+the others' screens beyond the signs they already have: his own seat's
+plate under the team's sign, gold, blinking fast as BN6's own
+"Cstmzing..." blinks, `arena_team_view.c`, `hurry_sign`); *diegetic
+first* (the others still see BN6's own "Cstmzing..." over a side that
+waits, and their own team's sign); and *respect the player's time*
+(the idle cannot hold the others past the limit; the late lose
+nothing they picked).
+
+**How each one's picks are taken.** Each of the pair's cores keeps the
+turn's clock in its RAM (`RAM_TEAM_CLOCK`, `arena_team_custom_clock`,
+from the battle's link each frame): frames since the first OK it sees,
+its own lead's (his screen past OK, `BN6_MODE_OK`, `BN6_MODE_PA` or
+`BN6_MODE_WAIT`) or a partner's (his picks in while his turn is open),
+none outside the Custom screen. Each game reads the later of its two
+cores' clocks (`team_hurry_clock`) and acts for its own player alone,
+in his own stream, so the games need not read it alike:
+
+- A lead's own game, past the limit with his screen still open, presses
+  for him: B where CROSSSELECT is open (his Cross not taken), right to
+  OK (up from the Beast Out emblem under it), then A, a press every
+  eight frames (`team_hurry_lead`, from `square_bout_lead` over the
+  network and the local scene's keys under the dev flag). His picks so
+  far stay picked: BN6's OK takes them. Nobody's game presses for anyone
+  else, and the keys are his own, in his own stream, so every game and
+  spectator takes them alike.
+- A partner's own client sends the picks he has two seconds before the
+  limit (`TEAM_WAIT_SAY`, 120 frames), as it did before the wait's old
+  limit.
+- A partner whose client has gone quiet: his side's GBA says "no picks"
+  in his place at the limit by its own clock (`limit_frame`), in its own
+  packet, so both GBAs take it at the same frame as they would his own.
+  The hold of the leads' screen for him (the packet held back) is as
+  before.
+
+Proved (`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend,arenalag=4`,
+both ROMs, fresh data folders, 22 October 2026):
+
+| Run | End | The two GBAs | The limit |
+| --- | --- | --- | --- |
+| `teamhp=500,teamidle=1` (side 0's lead never touches his Custom screen) | over at frame 8780 | 2,818 iterations, 0 apart; 146 hashes | "the turn's limit, 1800 frames after its first OK: side 0's lead's own game presses OK for him", each turn |
+| `teamhp=500,teamidle=2` (side 1's lead) | over at 8848 | 2,818, 0 apart | the same for side 1's lead |
+| `teamhp=150,teamslow=99999` (a partner who never picks) | over at 10610 | 3,067, 0 apart | his client sends his picks so far at 1,680 frames, each turn |
+| `teamhp=150,teamslow=-1` (a client gone quiet) | over at 10370 (16730 with the old 60 seconds) | 3,030, 0 apart | his side's GBA says none at 1,800 frames, each turn |
+| `teamhp=500,teamslow=600` (10 seconds a turn, under the limit) | over at 5197, as before | 2,755, 0 apart | none reached |
+
+The hurry sign captured (`teamidle=1,teamseat=0` and
+`teamslow=99999,teamseat=2`, kept out of the repository): the idle
+lead's Custom screen with his gold `P1` plate under the Square's name
+plate, blinking; the idle partner's with his lead's `P1` and its tick
+and his own gold `P3` under it. Over the server: the four-game runs
+below. A NetBattle of two is untouched (frame 2639's hash
+`86d2f837337a1494`, over at 2690).
+
+Proved with the old limit, a partner's alone, 60 seconds held
+(`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend`, both ROMs,
+fresh data folders, 22 October 2026; the turn's limit's runs are
+above):
 
 | Run | End | The two GBAs, the hashes | The wait |
 | --- | --- | --- | --- |
@@ -3129,8 +3207,8 @@ falls outside the battle. Each tick his keys go through his own client
 (`team_client_stream`): on his screen while his side's GBA's is open,
 his picks crossing as pick messages at his OK (or at the wait's limit),
 his battle keys otherwise. The leads wait for him as in the dev runs,
-by BN6's own cable; the limit stays 60 seconds (`TEAM_WAIT_LIMIT`, the
-owner's to confirm).
+by BN6's own cable, under the turn's one limit for all four (30
+seconds from the turn's first OK, `TEAM_TURN_LIMIT`).
 
 **The way in and the card.** The way in's panel shows four plates, my
 team's two on the left (its captain first, mine lit), theirs on the
@@ -3255,10 +3333,8 @@ streams](#four-streams)).
 ## Not yet
 
 - Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): over
-  the server ([Over the server](#over-the-server-protocol-v15)), seen
-  through a local server on one machine, not yet over a real network,
-  through the deployed server or between devices; the stands' heading
-  names the two leads alone; a partner's picks bound by BN6's screen's
+  the server ([Over the server](#over-the-server-protocol-v15)): a
+  partner's picks bound by BN6's screen's
   ten slots, not by his Custom level's count (`0x0802A408`), and the
   code rule his messages are checked by assumed from the series, BN6's
   routine for it not traced ([His messages
@@ -3272,8 +3348,8 @@ streams](#four-streams)).
   there, ours the hand's end: nothing reads past it, not checked by
   experiment); the screen copy's cost at the later turns (some 20 ms
   where the first is 0.14), and its later loads seen at up to 97 ms after
-  a long wait; the leads' wait's limit for an absent partner (60
-  seconds, `TEAM_WAIT_LIMIT`, the owner's to confirm); an attack of his
+  a long wait; whether 30 seconds feels fair to the three who wait
+  (`TEAM_TURN_LIMIT`, the owner's to lower); an attack of his
   seen asking his record by object (built, none asked yet).
 - Team NetBattles ([Team NetBattles](#team-netbattles)): teams of three
   (6 of a channel's 8); a heal on a carried HP, which the relay starts

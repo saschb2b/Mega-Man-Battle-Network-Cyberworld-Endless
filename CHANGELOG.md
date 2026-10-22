@@ -14,7 +14,9 @@
   own deck; the leads' screen waits for him by BN6's own link wait (the
   other side sees BN6's "Cstmzing..." over the side that waits), a quiet
   sign tells a lead his partner is still picking and a partner that his
-  lead is ready, and after 60 seconds his picks are taken as they stand.
+  lead is ready. Once anyone has pressed OK, whoever is still picking,
+  lead or partner, has 30 seconds, then his picks so far are taken; only
+  he sees a quiet sign in his last ten seconds.
   A partner is his whole MegaMan: his NaviCust's programs worked out by
   BN6's own code, so his HP, buster, abilities and the chips his screen
   deals are his own; his Cross chosen on his own CROSSSELECT, his Beast

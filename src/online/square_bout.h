@@ -29,6 +29,10 @@ bool square_bout_ready(void);
 /* my keys this tick under --dev arenaboth (the bot's, side 0's lead's R
  * now and then side by side) */
 uint32_t square_bout_bot(uint32_t keys, uint32_t tick);
+/* my keys this tick as a lead side by side: past the turn's limit my OK
+ * pressed by my own game (team_hurry.h; teamidle: my hands off the
+ * Custom screen); a 1v1's and a partner's as they are */
+uint32_t square_bout_lead(uint32_t keys, uint32_t tick);
 /* the battle's stage after a tick: a 2v2's end said in the log */
 void square_bout_after(ArenaStage stage);
 /* the player a stop names: the other, or a 2v2's seat it waits on */

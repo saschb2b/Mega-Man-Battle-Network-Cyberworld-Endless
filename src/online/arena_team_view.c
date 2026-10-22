@@ -29,6 +29,7 @@
 #define SIGN_Y       30   /* the team's sign: under the Square's name plate (arena_view.h), at the picture's right */
 #define SIGN_H       11
 #define DOT_FRAMES   20   /* a dot of the three lit this long, then the next */
+#define HURRY_FRAMES 6    /* the late one's own plate shown this long, then hidden as long: BN6's "Cstmzing..." blinks */
 
 static const SDL_Color shade = { 0, 24, 41, 255 };
 
@@ -104,7 +105,20 @@ static void sign(struct mCore *c, unsigned side, unsigned seat) {
 	for (unsigned k = 0; k < 3; ++k) fill_rect(after + 4 * (int)k, y + 6, 2, 2, k == lit ? PET_WHITE : PET_DIM);
 }
 
-void arena_team_view(struct mCore *c, unsigned seat) {
+/* The late one's sign, his alone, in the turn's last ten seconds: his own seat's plate where the team's sign stands
+ * (under it, the Square's name plate above both), blinking fast as BN6's "Cstmzing..." blinks; no number, no word */
+static void hurry_sign(unsigned seat) {
+	static unsigned shown;   /* (the sign's own frames: a drawing's count, no game state) */
+	if (++shown / HURRY_FRAMES % 2) return;
+	char tag[8];
+	snprintf(tag, sizeof tag, "P%u", seat + 1);
+	int w = pixfont_width(tag, 1) + 6, x = P.core_x + ARENA_W - 2 - w, y = P.core_y + SIGN_Y + SIGN_H + 2;
+	fill_rect(x, y, w, SIGN_H, rgba(74, 49, 0, 220));
+	fill_rect(x, y + SIGN_H - 1, w, 1, PET_GOLD);
+	pixfont_draw(x + 3, y + 2, tag, PET_GOLD, shade, PIXFONT_LEFT, 1);
+}
+
+void arena_team_view(struct mCore *c, unsigned seat, bool hurry) {
 	if (!c || seat > 3) return;
 	unsigned side = arena_team_view_side(seat);
 	bool open = rd8(c, BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, partner = seat >= 2;
@@ -112,4 +126,5 @@ void arena_team_view(struct mCore *c, unsigned seat) {
 	if (partner && own >= BN6_EWRAM && own < BN6_EWRAM_END) hp_box(rd16(c, own + BN6_T1_HP), open);
 	if (open) sign(c, side, seat);
 	else marks(c, side, seat);
+	if (open && hurry) hurry_sign(seat);
 }
