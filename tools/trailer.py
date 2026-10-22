@@ -186,7 +186,7 @@ def main():
         cut.footage('--keep' in args)   # (a cut's own runs: 0.13.0's games in a Square, tools/trailer_online.py)
     if '--footage' in args:
         return
-    trailer_music.render(os.path.join(WORK, 'music.wav'), trailers.music(cut.VERSION))
+    trailer_music.render_any(os.path.join(WORK, 'music.wav'), trailers.music(cut.VERSION))
     cut.compose(only)
     if only is not None:
         return
