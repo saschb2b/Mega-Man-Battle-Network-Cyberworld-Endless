@@ -1372,12 +1372,16 @@
   "stands_text:stands_stopped": {
    "line": 9
   },
+  "stands_text:stands_team_heading": {
+   "header": "a 2v2's heading, the longest that fits first: \"WATCHING Alpha & Beta VS Gamma & Delta\" (form 0), \"Alpha & Beta VS Gamma & Delta\" (1), \"Alpha's TEAM VS Gamma's TEAM\" (2), its names as given (the leads' first)",
+   "line": 19
+  },
   "stands_text:stands_team_won": {
    "header": "... a 2v2's (protocol v15): \"Alpha's team won the NetBattle.\", its lead named",
-   "line": 25
+   "line": 33
   },
   "stands_text:stands_won": {
-   "line": 19
+   "line": 27
   },
   "stands_words:last_words": {
    "comment": "the last battle over: who won, the cheers (this game's own: the cheers alone, the referee's own words having called the bout)",
@@ -2040,7 +2044,7 @@
    "comment": "The stands' words on the watching screen (stands_text.h)",
    "domain": "Arena",
    "kind": "screen",
-   "lines": 9,
+   "lines": 12,
    "shows": [],
    "speaker": "Screen",
    "stem": "stands_text"
@@ -2231,7 +2235,7 @@
      "src/online/stands_words.c"
     ],
     "flagged": 0,
-    "lines": 112,
+    "lines": 115,
     "speech": 65
    },
    "AsterLand and the Academy": {
@@ -2608,7 +2612,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1579,
+  "lines": 1582,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3254,8 +3258,9 @@
   {"container":"stands_text:stands_over","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_over","line":10,"lines":["stands_text:stands_over:0"],"speakers":["Screen"],"title":"Stands over","when":""},
   {"container":"stands_text:stands_back","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_back","line":11,"lines":["stands_text:stands_back:0"],"speakers":["Screen"],"title":"Stands back","when":""},
   {"container":"stands_text:stands_heading","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_heading","line":15,"lines":["stands_text:stands_heading:0"],"speakers":["Screen"],"title":"\"WATCHING ALPHA VS BETA\"","when":"\"WATCHING ALPHA VS BETA\"; \"Alpha won the NetBattle.\""},
-  {"container":"stands_text:stands_won","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_won","line":21,"lines":["stands_text:stands_won:0"],"speakers":["Screen"],"title":"Stands won","when":""},
-  {"container":"stands_text:stands_team_won","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_team_won","line":27,"lines":["stands_text:stands_team_won:0"],"speakers":["Screen"],"title":"Stands team won","when":"... a 2v2's (protocol v15): \"Alpha's team won the NetBattle.\", its lead named"},
+  {"container":"stands_text:stands_team_heading","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_team_heading","line":21,"lines":["stands_text:stands_team_heading:0","stands_text:stands_team_heading:1","stands_text:stands_team_heading:2"],"speakers":["Screen"],"title":"A 2v2's heading, the longest that fits first","when":"a 2v2's heading, the longest that fits first: \"WATCHING Alpha & Beta VS Gamma & Delta\" (form 0), \"Alpha & Beta VS Gamma & Delta\" (1), \"Alpha's TEAM VS Gamma's TEAM\" (2), its names as given (the leads' first)"},
+  {"container":"stands_text:stands_won","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_won","line":29,"lines":["stands_text:stands_won:0"],"speakers":["Screen"],"title":"Stands won","when":""},
+  {"container":"stands_text:stands_team_won","domain":"Arena","file":"src/online/stands_text.c","id":"stands_text:stands_team_won","line":35,"lines":["stands_text:stands_team_won:0"],"speakers":["Screen"],"title":"Stands team won","when":"... a 2v2's (protocol v15): \"Alpha's team won the NetBattle.\", its lead named"},
   {"container":"second_text:second_cross_lines","domain":"The second screen","file":"src/second/second_text.c","id":"second_text:second_cross_lines","line":33,"lines":["second_text:second_cross_lines:0"],"speakers":["Screen"],"title":"A Cross's card in CROSSSELECT","when":"A Cross's card in CROSSSELECT (navi 1-5): what hits him twice as hard, what it gives, what it does to Navis; lines apart by '|', into `out`"},
   {"container":"second_text:second_beast_lines","domain":"The second screen","file":"src/second/second_text.c","id":"second_text:second_beast_lines","line":39,"lines":["second_text:second_beast_lines:0","second_text:second_beast_lines:1"],"speakers":["Screen"],"title":"Beast Out's card on its emblem","when":"Beast Out's card on its emblem: the turns the EmotionCounter leaves, or MegaMan tired (`turns` 0), and what the Cybeast gives; lines apart by '|', into `out`"},
   {"container":"second_text:second_unite_lines","domain":"The second screen","file":"src/second/second_text.c","id":"second_text:second_unite_lines","line":58,"lines":["second_text:second_unite_lines:0","second_text:second_unite_lines:1","second_text:second_unite_lines:2","second_text:second_unite_lines:3","second_text:second_unite_lines:4"],"speakers":["Screen"],"title":"UNITE's card where the emblem stands","when":"UNITE's card where the emblem stands (docs/MULTIROM.md, One net): the Soul the last pick lights, its turns, the chip it takes, a Soul or a Cross; grey, what lights it; chosen, when it comes (s->unite_*); lines apart by '|', into `out`, its name into `name`"},
@@ -4661,8 +4666,11 @@
   {"boxes":[{"pages":[["The NetBattle is","over."]],"speaker":"Screen","text":"The NetBattle is over."}],"container":"stands_over","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_over:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"The NetBattle is over.","text_hash":"370946643c7f"},
   {"boxes":[{"pages":[["A: back to the","Square"]],"speaker":"Screen","text":"A: back to the Square"}],"container":"stands_back","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_back:0","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"A: back to the Square","text_hash":"1185418dc02f"},
   {"boxes":[{"pages":[["WATCHING {first} VS","{second}"]],"speaker":"Screen","text":"WATCHING {first} VS {second}"}],"container":"stands_heading","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_heading:0","kind":"screen","line":15,"placeholders":[{"name":"first","spec":"%s"},{"name":"second","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"WATCHING {first} VS {second}","text_hash":"5f31e7b6031e"},
-  {"boxes":[{"pages":[["{winner} won the","NetBattle."]],"speaker":"Screen","text":"{winner} won the NetBattle."}],"container":"stands_won","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_won:0","kind":"screen","line":21,"placeholders":[{"name":"winner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{winner} won the NetBattle.","text_hash":"cae706adf1bb"},
-  {"boxes":[{"pages":[["{lead}'s team won","the NetBattle."]],"speaker":"Screen","text":"{lead}'s team won the NetBattle."}],"container":"stands_team_won","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_team_won:0","kind":"screen","line":27,"placeholders":[{"name":"lead","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{lead}'s team won the NetBattle.","text_hash":"2e7f51a7ab01"},
+  {"boxes":[{"pages":[["WATCHING {names} &","{names} VS {names}","& {names}"]],"speaker":"Screen","text":"WATCHING {names} & {names} VS {names} & {names}"}],"container":"stands_team_heading","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_team_heading:0","kind":"screen","line":21,"placeholders":[{"name":"names","spec":"%s"},{"name":"names","spec":"%s"},{"name":"names","spec":"%s"},{"name":"names","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"WATCHING {names} & {names} VS {names} & {names}","text_hash":"7b8cab233759"},
+  {"boxes":[{"pages":[["{names} & {names}","VS {names} &","{names}"]],"speaker":"Screen","text":"{names} & {names} VS {names} & {names}"}],"container":"stands_team_heading","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_team_heading:1","kind":"screen","line":22,"placeholders":[{"name":"names","spec":"%s"},{"name":"names","spec":"%s"},{"name":"names","spec":"%s"},{"name":"names","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{names} & {names} VS {names} & {names}","text_hash":"b6bbaaeeffc9"},
+  {"boxes":[{"pages":[["{names}'s TEAM VS","{names}'s TEAM"]],"speaker":"Screen","text":"{names}'s TEAM VS {names}'s TEAM"}],"container":"stands_team_heading","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_team_heading:2","kind":"screen","line":23,"placeholders":[{"name":"names","spec":"%s"},{"name":"names","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{names}'s TEAM VS {names}'s TEAM","text_hash":"5c66af90c486"},
+  {"boxes":[{"pages":[["{winner} won the","NetBattle."]],"speaker":"Screen","text":"{winner} won the NetBattle."}],"container":"stands_won","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_won:0","kind":"screen","line":29,"placeholders":[{"name":"winner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{winner} won the NetBattle.","text_hash":"cae706adf1bb"},
+  {"boxes":[{"pages":[["{lead}'s team won","the NetBattle."]],"speaker":"Screen","text":"{lead}'s team won the NetBattle."}],"container":"stands_team_won","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_team_won:0","kind":"screen","line":35,"placeholders":[{"name":"lead","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{lead}'s team won the NetBattle.","text_hash":"2e7f51a7ab01"},
   {"boxes":[{"pages":[["TEAM NETBATTLE!","SIDE BY SIDE!"]],"speaker":"Mr.Prog","text":"TEAM NETBATTLE!\nSIDE BY SIDE!"},{"pages":[["{a}'S TEAM","VS {z}'S!"]],"speaker":"Mr.Prog","text":"{a}'S TEAM\nVS {z}'S!"}],"container":"live_words","continues":true,"domain":"Arena","file":"src/online/stands_words.c","flags":[],"id":"stands_words:live_words:0","kind":"speech","line":21,"placeholders":[{"name":"a","spec":"%s"},{"name":"z","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"|TEAM NETBATTLE!\nSIDE BY SIDE!|{a}'S TEAM\nVS {z}'S!","text_hash":"b1f326b81cd6"},
   {"boxes":[{"pages":[["TEAM NETBATTLE!","BOUT {bout}!"]],"speaker":"Mr.Prog","text":"TEAM NETBATTLE!\nBOUT {bout}!"},{"pages":[["{a} VS","{z}!"]],"speaker":"Bystander","text":"{a} VS\n{z}!"}],"container":"live_words","continues":true,"domain":"Arena","file":"src/online/stands_words.c","flags":[],"id":"stands_words:live_words:1","kind":"speech","line":22,"placeholders":[{"name":"bout","spec":"%u"},{"name":"a","spec":"%s"},{"name":"z","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog","Bystander"],"text":"|TEAM NETBATTLE!\nBOUT {bout}!|{a} VS\n{z}!","text_hash":"587fe738a96a"},
   {"boxes":[{"pages":[["A NETBATTLE'S ON!","{a} VS","{z}!"]],"speaker":"Mr.Prog","text":"A NETBATTLE'S ON!\n{a} VS\n{z}!"}],"container":"live_words","continues":true,"domain":"Arena","file":"src/online/stands_words.c","flags":[],"id":"stands_words:live_words:2","kind":"speech","line":22,"placeholders":[{"name":"a","spec":"%s"},{"name":"z","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"|A NETBATTLE'S ON!\n{a} VS\n{z}!","text_hash":"2724afdc1aa5"},
