@@ -227,12 +227,20 @@ What the kit does for it (`tools/trailer_music.py`):
 - `bend` on PSG and Direct Sound notes, followed a frame at a time.
 - Hard pans per note are the piece's: alternate `pan` -0.9 and 0.9.
 
-A soundfont's sampled instruments (FluidR3_GM, MIT; GeneralUser GS, free
-for music) brought down to 10512 Hz and 8 bits would be nearer still to
-the XV-1080 and SC-88 sounds BN was made from (*Kaida*). Not done: it
-needs the owner's go-ahead to download one, and a trailer that used it
-would need the 3DS build's banner rendered once and kept as our own audio,
-since `build.py 3ds` renders the banner with the standard library.
+Or sampled instruments, nearer the XV-1080 and SC-88 sounds BN was made
+from (*Kaida*): `tools/trailer_soundfont.py` cuts FluidR3 GM's (Frank Wen,
+the MIT license; Debian's `fluid-soundfont-gm` in `docker/Dockerfile.music`,
+the owner's go-ahead of 22 October 2026) into MP2K samples, a note or a
+chord as one sample at 10512 Hz and 8 bits, cut short, for the same model
+to play: `instrument(program, keys, seconds)`, `drum(key, seconds)`.
+Sketch A through them (`sketch_a_sf.py`) measures a tonal share of 83%
+against the recording's 84% (the kit's own: 80%) and flatness 0.060. A
+piece that uses them names its `SOUNDFONT`, renders in the image
+(`render_any`) and keeps its 3DS banner as our own audio (`BANNER_AUDIO`,
+written by `--write-banner`). Good programs: 24 Electronic kit's kick, the
+clap (39) over a snare (40), 30 Distortion Guitar's power chord, 28 Palm
+Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
+Section, 81 Saw Wave.
 
 ## Checks before the owner listens
 

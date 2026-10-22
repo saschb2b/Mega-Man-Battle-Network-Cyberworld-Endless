@@ -135,7 +135,7 @@ def main():
     work = os.path.join(ROOT, '.build', 'trailer-' + version)
     os.makedirs(work, exist_ok=True)
     path = os.path.join(work, 'music-check.wav')
-    tm.render(path, piece)
+    tm.render_any(path, piece)
     w = wave.open(path)
     n, sr = w.getnframes(), w.getframerate()
     d = struct.unpack('<%dh' % (2 * n), w.readframes(n))

@@ -21,11 +21,12 @@ theme for the music, BN5's Liberation Missions for the look).
 | Part | Where |
 | --- | --- |
 | A cut: footage, look, `VERSION`, `POSTER`, `PLAY_LABEL`, `scenes()`, `compose(only)` | `tools/trailers/vX_Y_Z.py` |
-| Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER`, and optionally `HARDWARE` and `CHORD_SAMPLES` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner) |
+| Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER`, and optionally `HARDWARE`, `CHORD_SAMPLES`, `SOUNDFONT` and `BANNER_AUDIO` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner, or copies its kept `BANNER_AUDIO`) |
 | Which is current | `CURRENT` and `VERSIONS` in `tools/trailers/__init__.py` |
 | The shared kit: capture, `from_shots`, `from_clips`, `shot`, encode, the play poster | `tools/trailer.py` |
 | Online footage: a local server and several headless games at once in its Square, each with its data folder, name and script | `tools/trailer_online.py` (a cut's `online_scenes()` and `footage(keep)`) |
 | The Game Boy Advance's sound: squares, wave, noise, Direct Sound, MP2K's echo; a sampled kit of our own in the manner of BN6's (clipped drums, chord samples, a distorted stab, pitch bends) | `tools/trailer_music.py` |
+| Sampled instruments from a soundfont (FluidR3 GM, MIT), cut into MP2K samples; the image that holds it, where such a piece renders (`render_any`), and its 3DS banner kept as our own audio (`BANNER_AUDIO`, `--write-banner`) | `tools/trailer_soundfont.py`, `docker/Dockerfile.music`, `3ds/banner-VERSION.wav` |
 | What makes a Battle Network theme, as rules with their numbers; why 0.13.0's piece read as generic | `music_rules.md` |
 | Sketches for the owner's ear before a piece (not cuts) | `tools/trailers/sketch_*.py` |
 | Helpers for this skill | `scripts/song_habits.py`, `scripts/music_check.py`, `scripts/sheets.py` |
@@ -120,7 +121,11 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
    the hook's returns. You cannot hear it: say so, and ask the owner to
    listen.
 8. **Set `BANNER`** (from, seconds: about 2.9): the 3DS HOME Menu plays it.
-   The piece's most recognisable moment, usually its last cadence.
+   The piece's most recognisable moment: its hook at full strength, or its
+   last cadence. A piece with a `SOUNDFONT` also sets `BANNER_AUDIO`
+   (`3ds/banner-VERSION.wav`) and writes it with `python3
+   tools/trailer_music.py --write-banner --piece vX_Y_Z_music` after every
+   change to those bars: the 3DS image has no soundfont and copies it.
 
 A change to `tools/trailer_music.py` must leave every piece's render byte
 for byte the same: hash `music.wav` of each version (and the banner,

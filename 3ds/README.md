@@ -86,7 +86,14 @@ both. The CIA is the same program as the `.3dsx`, packed by makerom with
 cache, 124 MB for the application, the third core allowed, a 1 MB stack.
 Its banner is `3ds/banner.png` (`tools/steam_art.py`) with 2.9 seconds of
 the current trailer's music, its BANNER (`tools/trailer_music.py --banner
---rate 32728`), made into a banner by bannertool.
+--rate 32728`), made into a banner by bannertool. A piece that plays a
+soundfont's samples (0.14.0's, its SOUNDFONT) cannot render in this image,
+which has no soundfont: its banner is rendered once in
+`docker/Dockerfile.music`'s image (`tools/trailer_music.py --write-banner
+--piece v0_14_0_music`) and kept as our own audio in `3ds/banner-0.14.0.wav`
+(its BANNER_AUDIO), which `--banner` copies at the rate asked; the
+Makefile rebuilds the banner when that file changes. Write it again after
+any change to the piece's banner bars.
 
 What differs from the other builds:
 

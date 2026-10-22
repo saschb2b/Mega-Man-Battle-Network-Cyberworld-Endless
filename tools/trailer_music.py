@@ -12,10 +12,19 @@ none of Capcom's sound in any.
         (its BANNER, faded out: the 3DS HOME Menu banner's sound)
     python3 tools/trailer_music.py OUT.wav --piece sketch_a
         (a piece in tools/trailers/ that is no trailer's: a sketch)
+    python3 tools/trailer_music.py --write-banner --piece v0_14_0_music
+        (a piece that plays a soundfont: its BANNER rendered once, in
+        docker/Dockerfile.music's image, into its BANNER_AUDIO, which the
+        3DS build's --banner then copies)
+
+A piece with a SOUNDFONT renders in that image (render_any); called as a
+script there, it renders where it runs.
 """
 import math
+import os
 import random
 import struct
+import subprocess
 import sys
 import wave
 
@@ -602,6 +611,64 @@ def render(path, piece, seconds=None, rate=RATE, start=0.0):
     return parts
 
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MUSIC_IMAGE = 'cyberworld-music'    # docker/Dockerfile.music: the soundfont
+
+
+def needs_image(piece):
+    """A piece that plays a soundfont (its SOUNDFONT) renders where the
+    soundfont is: in docker/Dockerfile.music's image, unless here."""
+    if not getattr(piece, 'SOUNDFONT', None):
+        return False
+    import trailer_soundfont
+    return not trailer_soundfont.available()
+
+
+def render_any(path, piece, seconds=None, rate=RATE, start=0.0):
+    """render(), or for a piece that needs the soundfont the same render in
+    its image (built when missing); `path` inside the repository."""
+    if not needs_image(piece):
+        return render(path, piece, seconds, rate, start)
+    probe = ['docker', 'image', 'inspect', MUSIC_IMAGE]
+    if subprocess.call(probe, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL):
+        dockerfile = os.path.join(ROOT, 'docker', 'Dockerfile.music')
+        subprocess.check_call(['docker', 'build', '-t', MUSIC_IMAGE, '-f', dockerfile, os.path.join(ROOT, 'docker')])
+    rel = os.path.relpath(os.path.abspath(path), ROOT)
+    if rel.startswith('..'):
+        raise SystemExit(f'{path}: outside the repository, which the image mounts')
+    cmd = ['docker', 'run', '--rm', '--name', f'cw-music-render-{os.getpid()}', '-u', f'{os.getuid()}:{os.getgid()}',
+           '-v', f'{ROOT}:/src', '-w', '/src/tools']
+    if os.environ.get('CW_TRAILER_SOUND'):
+        cmd += ['-e', 'CW_TRAILER_SOUND=' + os.environ['CW_TRAILER_SOUND']]
+    cmd += [MUSIC_IMAGE, 'python3', 'trailer_music.py', '/src/' + rel, '--piece', piece.__name__.split('.')[-1],
+            '--rate', str(rate), '--start', repr(start)] + (['--seconds', repr(seconds)] if seconds else [])
+    subprocess.check_call(cmd)
+
+
+def copy_wav(src, dst, rate):
+    """A WAV kept in the repository (a piece's BANNER_AUDIO) written at
+    `rate`, 16-bit stereo, as render writes."""
+    with wave.open(src) as w:
+        n, ch, sr = w.getnframes(), w.getnchannels(), w.getframerate()
+        d = struct.unpack(f'<{n * ch}h', w.readframes(n))
+    frames = [(d[i * ch], d[i * ch + ch - 1]) for i in range(n)]
+    if sr != rate:
+        m = int(n * rate / sr)
+        out = []
+        for i in range(m):
+            t = i * sr / rate
+            j = min(int(t), n - 1)
+            f = t - j
+            a, b = frames[j], frames[min(j + 1, n - 1)]
+            out.append((round(a[0] * (1 - f) + b[0] * f), round(a[1] * (1 - f) + b[1] * f)))
+        frames = out
+    with wave.open(dst, 'wb') as w:
+        w.setnchannels(2)
+        w.setsampwidth(2)
+        w.setframerate(rate)
+        w.writeframes(b''.join(struct.pack('<hh', a, b) for a, b in frames))
+
+
 def option(args, name, cast, default):
     """The value after `name` in args (both taken out), else `default`."""
     if name not in args:
@@ -619,12 +686,25 @@ if __name__ == '__main__':
     banner = '--banner' in args
     if banner:
         args.remove('--banner')
+    write_banner = '--write-banner' in args
+    if write_banner:
+        args.remove('--write-banner')
     seconds = option(args, '--seconds', float, None)
     rate = option(args, '--rate', int, RATE)
+    start = option(args, '--start', float, 0.0)
     name = option(args, '--piece', str, None)
     version = option(args, '--trailer', str, None)
     piece = importlib.import_module('trailers.' + name) if name else trailers.music(version)
-    start = 0.0
-    if banner:
+    out = args[0] if args else 'music.wav'
+    kept = getattr(piece, 'BANNER_AUDIO', None)
+    if write_banner:
+        # (a soundfont piece's banner, rendered once and kept as our own
+        # audio for the 3DS build, which has no soundfont)
         start, seconds = piece.BANNER
-    render(args[0] if args else 'music.wav', piece, seconds, rate, start)
+        render_any(os.path.join(ROOT, kept), piece, seconds, 32728, start)
+    elif banner and kept:
+        copy_wav(os.path.join(ROOT, kept), out, rate)
+    else:
+        if banner:
+            start, seconds = piece.BANNER
+        render(out, piece, seconds, rate, start)
