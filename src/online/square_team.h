@@ -41,9 +41,20 @@ bool square_team_on(void);
  * a bout watched) */
 void square_team_update(const OnlineSnapshot *s, bool held);
 
+/* A team challenge's format, asked of Lan as it goes (protocol v15,
+ * issue #181): the question opened (false where a chat is); as it closes,
+ * ONLINE_TEAM_RELAY or ONLINE_TEAM_SIDE_BY_SIDE, -1 none (B) */
+bool square_team_format_ask(void);
+int square_team_format_picked(void);
+/* The match under way is side by side: one battle of four */
+bool square_team_side_by_side(void);
+/* A player of the match, his name as kept (one gone keeps his); NULL none */
+const char *square_team_name(uint32_t id);
+
 /* What the result card shows of a team match */
 typedef struct {
 	bool on;                       /* a team bout's card */
+	bool side_by_side;             /* ... of a match side by side: no standing, no next */
 	unsigned standing[2];          /* MegaMen standing: ours, theirs */
 	const char *next[2];           /* the next bout's two (NULL: the match over) */
 	unsigned result;               /* the match's end, TEAM_WON..TEAM_DRAWN; 0 not yet */

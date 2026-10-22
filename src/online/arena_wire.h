@@ -29,17 +29,22 @@ enum { ARENA_WIRE_CHALLENGED = 1, ARENA_WIRE_WAITING, ARENA_WIRE_START, ARENA_WI
 
 typedef struct {
 	uint8_t stage;
-	uint32_t match, other;   /* the battle's id; the other player's session */
+	uint32_t match, other;   /* the battle's id; the other player's session (a partner's: the other side's lead) */
 	uint8_t identity[ONLINE_IDENTITY_BYTES];
-	uint8_t side, delay;     /* START's: my side of the cable, the frames of input delay */
+	uint8_t side, delay;     /* START's: my side of the cable (a 2v2's: my seat, 0..3), the frames of input delay */
+	uint8_t form;            /* a team challenge's format (v15: ONLINE_TEAM_RELAY, ONLINE_TEAM_SIDE_BY_SIDE); START's 1 a 2v2 */
+	uint32_t seats[ONLINE_SEATS];   /* a 2v2's START: the four seats' sessions (the leads, then their partners); else 0 */
 } ArenaWireState;
 
 /* ARENA: `action` on `ref` (a challenge's target session, else the
- * battle's id), my latency in ms (clamped); its size, 0 where refused.
- * Every battle is by full rules (protocol v9: no rules byte); the server
- * refuses a game without the NetPass's Arena stamp, NOTICE 28 */
-size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms);
+ * battle's id), my latency in ms (clamped), a team challenge's format
+ * (v15; 0 else); its size, 0 where refused. Every battle is by full rules
+ * (protocol v9: no rules byte); the server refuses a game without the
+ * NetPass's Arena stamp, NOTICE 28 */
+size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms, unsigned form);
 bool arena_wire_state(const uint8_t *data, size_t size, ArenaWireState *out);
+/* ARENA_SEAT (v15): a 2v2 seat's relayed message: its seat and the message as it sent it */
+bool arena_wire_seat(const uint8_t *data, size_t size, unsigned *seat, const uint8_t **inner, size_t *n);
 
 /* ARENA_INPUT: `count` (1..ONLINE_ARENA_INPUT_MAX) frames' keys from `frame` */
 size_t arena_wire_input(uint8_t *out, size_t cap, uint32_t match, uint32_t frame, const uint16_t *keys, unsigned count);
@@ -65,6 +70,7 @@ typedef struct {
 	uint8_t left[2];         /* MegaMen standing: ours, theirs */
 	uint8_t number, result;  /* the bout called; OVER's result */
 	uint16_t hp;             /* the staying MegaMan's HP, as the last bout's report left it (0 whole) */
+	uint8_t form;            /* the format (v15): the relay, or side by side (one battle of four) */
 } TeamWireState;
 
 /* TEAM: `action` on `ref` (a player's session; the lead's for the order;

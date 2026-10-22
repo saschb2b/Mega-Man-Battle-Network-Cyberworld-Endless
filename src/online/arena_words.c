@@ -137,11 +137,18 @@ const char *arena_team_partner_words(const char *name) {
 	return s;
 }
 
-const char *arena_team_challenged_words(const char *name) {
+const char *arena_team_challenged_words(const char *name, bool side_by_side) {
 	static char s[160];
-	snprintf(s, sizeof s, "%s's team\nwants a Team\nNetBattle!", name);
+	if (side_by_side) snprintf(s, sizeof s, "%s's team\nwants to fight\nside by side!", name);
+	else snprintf(s, sizeof s, "%s's team\nwants a Team\nNetBattle!", name);
 	return s;
 }
+
+const char *arena_team_format_words(void) { return "How do we fight\n'em,Lan?"; }
+
+const char *arena_team_format_relay(void) { return "One by one"; }
+
+const char *arena_team_format_side(void) { return "Side by side"; }
 
 const char *arena_team_order_words(void) { return "Who goes first,\nLan?"; }
 

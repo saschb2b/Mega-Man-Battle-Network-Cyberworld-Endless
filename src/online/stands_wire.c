@@ -61,15 +61,16 @@ size_t stands_wire_watch(uint8_t out[ONLINE_WATCH_BYTES], unsigned action, uint3
 
 bool stands_wire_state(const uint8_t *data, size_t size, WatchState *out) {
 	if (size != ONLINE_WATCH_STATE_BYTES || data[0] != ONLINE_WATCH_STATE) return false;
-	WatchState s = { .stage = data[1], .match = get32(data + 2), .side = { get32(data + 6), get32(data + 10) }, .delay = data[14] };
-	if ((s.stage != WATCH_ON && s.stage != WATCH_OVER) || !s.match) return false;
+	WatchState s = { .stage = data[1], .match = get32(data + 2), .side = { get32(data + 6), get32(data + 10) }, .delay = data[14],
+		.form = data[15], .partner = { get32(data + 16), get32(data + 20) } };
+	if ((s.stage != WATCH_ON && s.stage != WATCH_OVER) || !s.match || s.form > 1) return false;
 	*out = s;
 	return true;
 }
 
 bool stands_wire_keys(const uint8_t *data, size_t size, uint32_t *match, unsigned *side, uint32_t *first, const uint8_t **keys,
 	unsigned *count) {
-	if (size < ONLINE_WATCH_KEYS_HEAD || data[0] != ONLINE_WATCH_KEYS || data[5] > 1) return false;
+	if (size < ONLINE_WATCH_KEYS_HEAD || data[0] != ONLINE_WATCH_KEYS || data[5] >= ONLINE_SEATS) return false;
 	unsigned n = get16(data + 10);
 	if (!n || n > ONLINE_WATCH_KEYS_MAX || size != ONLINE_WATCH_KEYS_HEAD + 2u * n) return false;
 	*match = get32(data + 1);
@@ -81,7 +82,7 @@ bool stands_wire_keys(const uint8_t *data, size_t size, uint32_t *match, unsigne
 }
 
 bool stands_wire_relay(const uint8_t *data, size_t size, unsigned *side, const uint8_t **inner, size_t *n) {
-	if (size < 3 || data[0] != ONLINE_WATCH_RELAY || data[1] > 1) return false;
+	if (size < 3 || data[0] != ONLINE_WATCH_RELAY || data[1] >= ONLINE_SEATS) return false;
 	if (data[2] != ONLINE_ARENA_LOADOUT && data[2] != ONLINE_ARENA_HASH) return false;
 	*side = data[1];
 	*inner = data + 2;

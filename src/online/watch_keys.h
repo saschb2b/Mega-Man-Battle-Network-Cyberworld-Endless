@@ -11,11 +11,18 @@
 
 #include "arena_input.h"
 
-/* Both players' keys from the battle's first frame, as long as it runs */
+/* Both players' keys from the battle's first frame, as long as it runs
+ * (a 2v2's four seats', protocol v15: watch_keys_seats) */
 typedef struct {
-	uint16_t *keys[2];
-	uint32_t known[2], cap[2];   /* side's keys known below known[side] */
+	uint16_t *keys[ARENA_PLAYERS];
+	uint32_t known[ARENA_PLAYERS], cap[ARENA_PLAYERS];   /* side's keys known below known[side] */
+	unsigned seats;              /* the streams: 2 (0 as made), or ARENA_PLAYERS */
 } WatchKeys;
+
+/* a 2v2's four streams, before any is put: a partner's keeps its sixteen bits */
+void watch_keys_seats(WatchKeys *k, unsigned seats);
+/* ... frame's keys and the one after it, every stream's: out[k][seat] */
+void watch_keys_take_all(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS]);
 
 /* side's keys from `first` (big-endian u16, `count` of them): false where
  * one went missing between (first past the known) or memory ran out; a

@@ -4,8 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+static unsigned seats(const WatchKeys *k) { return k->seats > 2 ? k->seats : 2; }
+
+void watch_keys_seats(WatchKeys *k, unsigned n) { k->seats = n > ARENA_PLAYERS ? ARENA_PLAYERS : n; }
+
 bool watch_keys_put(WatchKeys *k, unsigned side, uint32_t first, const uint8_t *be, unsigned count) {
-	if (side > 1 || first > k->known[side]) return false;
+	if (side >= seats(k) || first > k->known[side]) return false;
 	uint32_t end = first + count;
 	if (end <= k->known[side]) return true;
 	if (end > k->cap[side]) {
@@ -18,14 +22,16 @@ bool watch_keys_put(WatchKeys *k, unsigned side, uint32_t first, const uint8_t *
 	}
 	for (uint32_t f = k->known[side]; f < end; ++f) {
 		const uint8_t *b = be + 2 * (f - first);
-		k->keys[side][f] = (uint16_t)(((unsigned)b[0] << 8 | b[1]) & ARENA_KEYS_MASK);
+		k->keys[side][f] = (uint16_t)(((unsigned)b[0] << 8 | b[1]) & (side < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK));
 	}
 	k->known[side] = end;
 	return true;
 }
 
 uint32_t watch_keys_runnable(const WatchKeys *k) {
-	uint32_t known = k->known[0] < k->known[1] ? k->known[0] : k->known[1];
+	uint32_t known = k->known[0];
+	for (unsigned s = 1; s < seats(k); ++s)
+		if (k->known[s] < known) known = k->known[s];
 	return known >= ARENA_LOOKAHEAD - 1 ? known - (ARENA_LOOKAHEAD - 1) : 0;
 }
 
@@ -34,7 +40,12 @@ void watch_keys_take(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOK
 		for (unsigned side = 0; side < 2; ++side) out[i][side] = k->keys[side][frame + i];
 }
 
+void watch_keys_take_all(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS]) {
+	for (unsigned i = 0; i < ARENA_LOOKAHEAD; ++i)
+		for (unsigned s = 0; s < ARENA_PLAYERS; ++s) out[i][s] = s < seats(k) ? k->keys[s][frame + i] : 0;
+}
+
 void watch_keys_free(WatchKeys *k) {
-	for (unsigned side = 0; side < 2; ++side) free(k->keys[side]);
+	for (unsigned side = 0; side < ARENA_PLAYERS; ++side) free(k->keys[side]);
 	memset(k, 0, sizeof *k);
 }

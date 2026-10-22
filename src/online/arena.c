@@ -92,6 +92,8 @@ struct Arena {
 	int roll_window;           /* --dev arena's rollback tried (arena_roll.h): its frames; 0 the game's hash said alone; -1 none */
 	ArenaRoll *roll;
 	unsigned players;          /* arena_players: the streams asked for (0 two) */
+	ArenaStream stream;        /* arena_stream: my seat's stream made from my keys (a 2v2's partner's), NULL my keys */
+	void *stream_context;
 	int show;                  /* arena_show: the GBA whose picture is drawn and shown, -1 mine */
 	int window_asked;          /* arena_window: the rollback window set, -1 this system's own */
 	unsigned window;           /* frames that may run on a guess: 0 the delay alone */
@@ -256,19 +258,22 @@ static bool at_comm(struct mCore *c) {
 }
 
 /* the peer's keys as they come, each its stream's next; and the
- * partners' where they play (arena_players) */
+ * others' where they play (arena_players: the partners', and in a 2v2
+ * over the network every seat's but mine and the peer's) */
 static bool take_peer(Arena *a) {
 	ArenaLink *l = a->link;
-	unsigned peer = l->side ^ 1;
+	unsigned peer = l->side ^ 1, mine = arena_link_seat(l);
 	uint16_t keys;
 	while (l->poll(l, a->input.known[peer], &keys)) {
 		/* (its lag: my tick now, less the tick the other game sampled it on) */
 		arena_sync_arrived(&a->sync, (int32_t)(a->tick - 1 - (a->input.known[peer] - a->input.delay)));
 		if (arena_input_put(&a->input, peer, a->input.known[peer], keys) != ARENA_PUT_OK) return false;
 	}
-	for (unsigned p = 2; p < a->input.players; ++p)
+	for (unsigned p = 0; p < a->input.players; ++p) {
+		if (p == peer || p == mine) continue;
 		while (l->poll_player(l, p, a->input.known[p], &keys))
 			if (arena_input_put(&a->input, p, a->input.known[p], keys) != ARENA_PUT_OK) return false;
+	}
 	return true;
 }
 
@@ -290,6 +295,11 @@ static void read_sides(struct mCore *c, ArenaReading *out) {
 		out->max_hp[side] = (uint16_t)c->rawRead16(c, o + BN6_T1_MAX_HP, -1);
 		out->action[side] = (uint8_t)c->rawRead8(c, o + BN6_T1_ACTION, -1);
 		out->chip[side] = (uint16_t)c->rawRead16(c, o + BN6_T1_CHIP, -1);
+		/* (a 2v2's partner beside him, where his object stands) */
+		uint32_t p = c->rawRead32(c, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER, -1);
+		if (p < BN6_EWRAM || p >= BN6_EWRAM_END - BN6_T1_SIZE) continue;
+		out->partner_hp[side] = (uint16_t)c->rawRead16(c, p + BN6_T1_HP, -1);
+		out->partner_max[side] = (uint16_t)c->rawRead16(c, p + BN6_T1_MAX_HP, -1);
 	}
 }
 
@@ -465,8 +475,9 @@ static ArenaStage tick(Arena *a, uint16_t keys) {
 	uint32_t now = a->tick - 1;
 	if (!held && a->tick + a->input.delay < a->input.next + LEAD) {
 		uint32_t frame = (now = a->tick++) + a->input.delay;
-		keys &= ARENA_KEYS_MASK;
-		if (arena_input_put(&a->input, l->side, frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
+		/* (a 2v2's partner: his stream made from them, his Custom screen's picks among it) */
+		keys = a->stream ? a->stream(a->stream_context, a, frame, keys) : keys & ARENA_KEYS_MASK;
+		if (arena_input_put(&a->input, arena_link_seat(l), frame, keys) != ARENA_PUT_OK || !l->send(l, frame, keys))
 			return fail(a, "my keys could not be sent");
 	}
 	if (!take_peer(a)) return fail(a, "the other player's keys came out of order");
@@ -511,6 +522,7 @@ void arena_rtt(Arena *a, uint32_t ms) { arena_sync_rtt(&a->sync, ms); }
 void arena_rollback(Arena *a, int window) { a->roll_window = window; }
 void arena_window(Arena *a, int window) { a->window_asked = window; }
 void arena_players(Arena *a, unsigned players) { a->players = players; }
+void arena_stream(Arena *a, ArenaStream stream, void *context) { a->stream = stream; a->stream_context = context; }
 void arena_show(Arena *a, int side) { a->show = side; }
 struct mCore *arena_core(const Arena *a, unsigned side) { return core(a, side & 1u); }
 ArenaPair *arena_pair_of(Arena *a) { return a->pair; }
@@ -546,7 +558,16 @@ void arena_tally(const Arena *a, ArenaTally *out) {
 		out->hp[side] = a->tally.hp[side];
 		out->max_hp[side] = a->tally.max_hp[side];
 		out->used[side] = a->tally.used[side];
+		out->partner_hp[side] = a->read ? a->reading.partner_hp[side] : 0;
+		out->partner_max[side] = a->read ? a->reading.partner_max[side] : 0;
 	}
+}
+
+unsigned arena_waiting_on(const Arena *a) {
+	unsigned mine = arena_link_seat(a->link), who = a->link->side ^ 1;
+	for (unsigned p = 0; p < a->input.players; ++p)
+		if (p != mine && a->input.known[p] < a->input.known[who]) who = p;
+	return who;
 }
 
 void arena_numbers(const Arena *a, ArenaNumbers *out) {

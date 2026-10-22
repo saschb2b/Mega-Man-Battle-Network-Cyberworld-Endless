@@ -291,41 +291,66 @@ static void install(void) {
 
 static void wire(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
-	/* ARENA !BBIH (v9: no rules byte): a challenge of session 0x01020304 at 40 ms; latency clamped, a zero ref refused */
-	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40) == ONLINE_ARENA_BYTES && ONLINE_ARENA_BYTES == 8);
-	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40 };
+	/* ARENA !BBIHB (v9: no rules byte; v15: a team challenge's format): a challenge of session 0x01020304 at 40 ms, side by
+	 * side; latency clamped, a zero ref or another format refused */
+	assert(arena_wire_action(m, ARENA_ACT_CHALLENGE, 0x01020304u, 40, ONLINE_TEAM_SIDE_BY_SIDE) == ONLINE_ARENA_BYTES && ONLINE_ARENA_BYTES == 9);
+	static const uint8_t challenge[] = { 17, 1, 1, 2, 3, 4, 0, 40, 1 };
 	assert(!memcmp(m, challenge, sizeof challenge));
-	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999) && m[6] == 0x13 && m[7] == 0x88);
-	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0) && !arena_wire_action(m, 6, 1, 0) && !arena_wire_action(m, 0, 1, 0));
+	assert(arena_wire_action(m, ARENA_ACT_OVER, 9, 99999, 0) && m[6] == 0x13 && m[7] == 0x88 && m[8] == 0);
+	assert(!arena_wire_action(m, ARENA_ACT_ACCEPT, 0, 0, 0) && !arena_wire_action(m, 6, 1, 0, 0) && !arena_wire_action(m, 0, 1, 0, 0));
+	assert(!arena_wire_action(m, ARENA_ACT_CHALLENGE, 1, 0, 2));
 	/* (v13: the question seen, the challenged's word) */
-	assert(arena_wire_action(m, ARENA_ACT_SEEN, 7, 0) && m[1] == ONLINE_ARENA_SEEN);
-	/* ARENA_STATE !BBII16sBB: START, match 7, the other 9, side 1, delay 8 */
+	assert(arena_wire_action(m, ARENA_ACT_SEEN, 7, 0, 0) && m[1] == ONLINE_ARENA_SEEN);
+	/* ARENA_STATE !BBII16sBBB4I: START, match 7, the other 9, side 1, delay 8 */
 	uint8_t st[ONLINE_ARENA_STATE_BYTES] = { 18, 3, 0, 0, 0, 7, 0, 0, 0, 9 };
 	memset(st + 10, 0xAB, ONLINE_IDENTITY_BYTES);
 	st[26] = 1;
 	st[27] = 8;
 	ArenaWireState s;
 	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_START && s.match == 7 && s.other == 9);
-	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && ONLINE_ARENA_STATE_BYTES == 28);
+	assert(s.side == 1 && s.delay == 8 && s.identity[15] == 0xAB && ONLINE_ARENA_STATE_BYTES == 45 && !s.form && !s.seats[2]);
 	assert(!arena_wire_state(st, sizeof st - 1, &s));
+	/* (v15: a 2v2's START, my seat 3, the four seats' sessions; a seat past the GBAs' only with four named) */
+	st[26] = 3;
+	assert(!arena_wire_state(st, sizeof st, &s));
+	st[28] = 1;
+	for (int k = 0; k < 4; ++k) st[32 + 4 * k] = (uint8_t)(10 + k);
+	assert(arena_wire_state(st, sizeof st, &s) && s.side == 3 && s.form == 1 && s.seats[0] == 10 && s.seats[3] == 13);
+	st[28] = 2;
+	assert(!arena_wire_state(st, sizeof st, &s));
+	st[28] = 0;
+	st[26] = 1;
 	st[1] = 5;
 	assert(arena_wire_state(st, sizeof st, &s) && s.stage == ARENA_WIRE_SEEN);
 	st[1] = 6;
 	assert(!arena_wire_state(st, sizeof st, &s));
+	/* ARENA_SEAT (v15): a seat's relayed message, its seat first */
+	static const uint8_t seat[] = { 35, 2, 21, 0 };
+	unsigned seat_of;
+	const uint8_t *inner;
+	size_t inner_n;
+	assert(arena_wire_seat(seat, sizeof seat, &seat_of, &inner, &inner_n) && seat_of == 2 && inner[0] == 21 && inner_n == 2);
+	static const uint8_t seat_bad[] = { 35, 4, 21 };
+	assert(!arena_wire_seat(seat_bad, sizeof seat_bad, &seat_of, &inner, &inner_n));
 	/* TEAM !BBIB (v12): a team asked of session 0x01020304; a split takes no session, the rest one */
 	assert(arena_wire_team(m, TEAM_ACT_PROPOSE, 0x01020304u, false) == ONLINE_TEAM_BYTES && ONLINE_TEAM_BYTES == 7);
 	static const uint8_t team[] = { 33, 1, 1, 2, 3, 4, 0 };
 	assert(!memcmp(m, team, sizeof team));
 	assert(arena_wire_team(m, TEAM_ACT_ANSWER, 5, true) && m[6] == 1);
 	assert(arena_wire_team(m, TEAM_ACT_SPLIT, 0, false) && !arena_wire_team(m, TEAM_ACT_ORDER, 0, false) && !arena_wire_team(m, 5, 1, false));
-	/* TEAM_STATE !BBIII4IBBBBH: a bout called, the stayer's HP 29 */
+	/* TEAM_STATE !BBIII4IBBBBHB: a bout called, the stayer's HP 29 (v15: the format last) */
 	uint8_t ts[ONLINE_TEAM_STATE_BYTES] = { 34, TEAM_BOUT, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 3 };
 	for (int k = 0; k < 4; ++k) ts[17 + 4 * k] = (uint8_t)(k + 1);
 	ts[30] = 1; ts[31] = 2; ts[32] = 2; ts[34] = 0; ts[35] = 29;
 	TeamWireState t;
 	assert(arena_wire_team_state(ts, sizeof ts, &t) && t.stage == TEAM_BOUT && t.partner == 2 && t.match == 1 && t.bout == 3);
-	assert(t.players[0] == 1 && t.players[3] == 4 && t.left[0] == 1 && t.left[1] == 2 && t.number == 2 && t.hp == 29);
-	assert(ONLINE_TEAM_STATE_BYTES == 36 && !arena_wire_team_state(ts, sizeof ts - 1, &t));
+	assert(t.players[0] == 1 && t.players[3] == 4 && t.left[0] == 1 && t.left[1] == 2 && t.number == 2 && t.hp == 29 && !t.form);
+	assert(ONLINE_TEAM_STATE_BYTES == 37 && !arena_wire_team_state(ts, sizeof ts - 1, &t));
+	ts[36] = 1;
+	assert(arena_wire_team_state(ts, sizeof ts, &t) && t.form == ONLINE_TEAM_SIDE_BY_SIDE);
+	ts[36] = 2;
+	assert(!arena_wire_team_state(ts, sizeof ts, &t));
+	ts[36] = 0;
 	ts[30] = 3;
 	assert(!arena_wire_team_state(ts, sizeof ts, &t));
 	ts[30] = 1; ts[1] = 10;
@@ -484,6 +509,102 @@ static unsigned play_net(unsigned delay, unsigned latency, unsigned ticks) {
 	return stalls;
 }
 
+/* ---- four network links through a relay of four seats (protocol v15) ---- */
+
+#define RELAY 4096
+typedef struct {
+	struct { uint8_t data[2 + ARENA_INPUT_HEAD + 2 * ONLINE_ARENA_INPUT_MAX]; size_t size; uint32_t at; unsigned to; } q[RELAY];
+	unsigned head, tail;
+	uint32_t now, latency;
+} Relay;
+typedef struct { Relay *relay; unsigned seat; } SeatOut;
+
+/* a seat's message: to the three others as ARENA_SEAT, after the relay's latency */
+static bool seat_send(void *context, const uint8_t *data, size_t size) {
+	SeatOut *o = context;
+	Relay *r = o->relay;
+	if (r->tail - r->head + 3 > RELAY || size + 2 > sizeof r->q[0].data) return false;
+	for (unsigned to = 0; to < 4; ++to) {
+		if (to == o->seat) continue;
+		unsigned i = r->tail++ % RELAY;
+		r->q[i].data[0] = ONLINE_ARENA_SEAT;
+		r->q[i].data[1] = (uint8_t)o->seat;
+		memcpy(r->q[i].data + 2, data, size);
+		r->q[i].size = size + 2;
+		r->q[i].at = r->now + r->latency;
+		r->q[i].to = to;
+	}
+	return true;
+}
+
+/* Four seats' games, each keys for frame f f * (seat + 3) (a partner's
+ * past the GBA's ten bits), every frame run seeing all four in order; the
+ * readies and hashes said against all four, seat `apart`'s hash at frame
+ * 119 another (4 none): every other game's poll then gives it */
+static void play_four(unsigned delay, unsigned latency, unsigned ticks, unsigned apart) {
+	ArenaNetLink *net = calloc(4, sizeof *net);
+	Relay *relay = calloc(1, sizeof *relay);
+	SeatOut out[4];
+	ArenaInput in[4];
+	relay->latency = latency;
+	for (unsigned seat = 0; seat < 4; ++seat) {
+		out[seat] = (SeatOut){ relay, seat };
+		arena_link_net(&net[seat], 77, seat & 1u, delay, seat_send, &out[seat]);
+		arena_link_net_seats(&net[seat], seat);
+		assert(net[seat].link.side == (seat & 1u) && arena_link_seat(&net[seat].link) == seat && net[seat].link.poll_player);
+		arena_input_init(&in[seat], delay);
+		arena_input_players(&in[seat], ARENA_PLAYERS);
+		assert(arena_link_net_record(&net[seat], 0xB5) && arena_link_net_ready(&net[seat], seat == 3 ? 0xBAD : 0xFEED));
+	}
+	uint64_t h;
+	unsigned apart_seen = 0;
+	for (uint32_t t = 0; t < ticks; ++t) {
+		relay->now = t;
+		while (relay->head != relay->tail && relay->q[relay->head % RELAY].at <= t) {
+			unsigned i = relay->head++ % RELAY;
+			assert(arena_link_net_take(&net[relay->q[i].to], relay->q[i].data, relay->q[i].size));
+		}
+		for (unsigned seat = 0; seat < 4; ++seat) {
+			ArenaLink *l = &net[seat].link;
+			/* (the readies: once all four are in, seat 3's apart from the others', so each sees a difference) */
+			if (t > latency) {
+				assert(arena_link_net_peer_ready(&net[seat], &h) && h == (seat == 3 ? 0xFEED : 0xBAD));
+				assert(arena_link_net_peer_record(&net[seat], &h) && h == 0xB5);
+				assert(arena_link_net_seat_ready(&net[seat], (seat + 1) & 3u));
+			}
+			l->tick(l);
+			uint32_t frame = t + in[seat].delay;
+			uint16_t mine = (uint16_t)(frame * (seat + 3) & (seat < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK));
+			assert(arena_input_put(&in[seat], seat, frame, mine) == ARENA_PUT_OK && l->send(l, frame, mine));
+			uint16_t keys;
+			unsigned peer = (seat & 1u) ^ 1u;
+			while (l->poll(l, in[seat].known[peer], &keys)) assert(arena_input_put(&in[seat], peer, in[seat].known[peer], keys) == ARENA_PUT_OK);
+			for (unsigned p = 0; p < 4; ++p)
+				while (p != peer && p != seat && l->poll_player(l, p, in[seat].known[p], &keys))
+					assert(arena_input_put(&in[seat], p, in[seat].known[p], keys) == ARENA_PUT_OK);
+			assert(!l->broken(l));
+			uint16_t k[ARENA_LOOKAHEAD][ARENA_PLAYERS];
+			while (in[seat].next <= t && arena_input_take(&in[seat], 0, k)) {
+				uint32_t n = in[seat].next - 1;
+				for (unsigned p = 0; p < 4; ++p)
+					assert(k[0][p] == (n < delay ? 0 : (uint16_t)(n * (p + 3) & (p < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK))));
+				if (n % 60 == 59) l->send_hash(l, n, seat == apart && n == 119 ? 0xDEAD : 0x5000 + n);
+				uint64_t theirs;
+				if (n >= 120 && n % 60 == 59 && l->poll_hash(l, n - 60, &theirs)) {
+					bool off = apart < 4 && n - 60 == 119;
+					assert(off ? theirs != 0x5000 + n - 60 || seat == apart : theirs == 0x5000 + n - 60);
+					apart_seen += off && theirs != 0x5000 + n - 60 && seat != apart;
+				}
+			}
+		}
+	}
+	/* (every frame of the window run by every seat) */
+	for (unsigned seat = 0; seat < 4; ++seat) assert(in[seat].next + delay + latency + 2 >= ticks);
+	if (apart < 4) assert(apart_seen == 3);
+	free(net);
+	free(relay);
+}
+
 /* Two games' clocks, the second started `offset` ticks after the first (so
  * the first leads), each `half[i]` ticks from the server, which passes the
  * keys on at once; each game's sync told its round trip to the server;
@@ -610,6 +731,9 @@ static void link_net(void) {
 	assert(play_net(6, 3, 300) == 0);
 	assert(play_net(ARENA_DELAY_MIN + 1, 0, 300) == 0);   /* (side 1 sends after side 0 has run its tick) */
 	assert(play_net(4, 4, 600) > 0);
+	/* (a 2v2's four seats: every stream in order on every game, the readies and hashes said against all four) */
+	play_four(6, 2, 600, 4);
+	play_four(3, 5, 400, 2);
 	/* another battle's message, a gap */
 	ArenaNetLink l;
 	Pipe *p = calloc(1, sizeof *p);
@@ -741,6 +865,14 @@ static void watch_keys(void) {
 	assert(out[0][0] == 4 && out[0][1] == 2 && out[1][0] == 5 && out[1][1] == 3);
 	watch_keys_free(&w);
 	assert(!w.known[0] && !w.keys[0]);
+	/* (a 2v2's four seats, v15: runnable once all four are known, a partner's sixteen bits kept) */
+	watch_keys_seats(&w, ARENA_PLAYERS);
+	for (unsigned seat = 0; seat < 4; ++seat) assert(watch_keys_put(&w, seat, 0, be, seat == 3 ? 4 : 10));
+	assert(watch_keys_runnable(&w) == 3 && !watch_keys_put(&w, 4, 0, be, 1));
+	uint16_t all[ARENA_LOOKAHEAD][ARENA_PLAYERS];
+	watch_keys_take_all(&w, 1, all);
+	assert(all[0][0] == 1 && all[0][3] == 0xFC01 && all[1][2] == 0xFC02);
+	watch_keys_free(&w);
 }
 
 /* the report off the player objects: a chip counted as it gives way under a chip's action, a charged shot not */

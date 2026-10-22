@@ -27,7 +27,8 @@
 #include "talk.h"
 
 #define TEAM_YES_FLAG 0x14C6   /* the Square's own (docs/EMULATION.md): Yes to a team asked of us */
-#define ORDER_FLAG    0x14C7   /* + 0 we lead, + 1 the partner does (0x14C7, 0x14C8) */
+#define ORDER_FLAG    0x14C7   /* + 0 we lead, + 1 the partner does (0x14C7, 0x14C8); the format's too, + 0 one by one, + 1 side by
+                                  side (asked as a challenge goes, never with the order open) */
 
 typedef enum { Q_NONE, Q_ASK, Q_OPEN } Question;
 
@@ -128,12 +129,13 @@ static void match_in(const TeamWireState *s) {
 		square_arena_team_begun();
 		T.taken = T.watched = 0;
 		T.carry = 0;
-		/* (the captain picks who goes first: the one who asked to team up) */
-		T.order_q = s->players[0] == T.s.player_id ? Q_ASK : Q_NONE;
-		printf("team: match %u begins, %s and %s against %s and %s\n", s->match, T.names[0], T.names[1], T.names[2], T.names[3]);
+		/* (the captain picks who goes first: the one who asked to team up; side by side, the captains lead, nothing asked) */
+		T.order_q = s->players[0] == T.s.player_id && s->form == ONLINE_TEAM_RELAY ? Q_ASK : Q_NONE;
+		printf("team: match %u begins%s, %s and %s against %s and %s\n", s->match, s->form ? " side by side" : "", T.names[0], T.names[1],
+			T.names[2], T.names[3]);
 		return;
 	}
-	if (s->stage == TEAM_ORDERED) {
+	if (s->stage == TEAM_ORDERED && s->form == ONLINE_TEAM_RELAY) {
 		T.order_q = Q_NONE;
 		say(arena_team_first_words(s->players[0] == T.s.player_id, T.names[0], T.names[2]));
 		printf("team: the order: %s then %s, against %s then %s\n", T.names[0], T.names[1], T.names[2], T.names[3]);
@@ -164,23 +166,24 @@ void square_team_mail(const uint8_t *data, size_t size) {
 	}
 }
 
-/* the captain's question: who goes first (B: we do) */
-static bool order_ask(void) {
+/* the question built in BN6's chat box: MegaMan's `words`, then two
+ * choices, each setting ORDER_FLAG + its index; B the first, or none
+ * where `b_none` */
+static bool two_ways(const char *words, const char *labels[2], bool b_none) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
-	ta_pages(&t, arena_team_order_words(), FACE_MEGAMAN, &first);
+	ta_pages(&t, words, FACE_MEGAMAN, &first);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
-	const char *labels[2] = { arena_team_order_us(), T.partner_name };
 	static const int to[2] = { 1, 2 };
 	ta_options(&t, labels, 2);
-	ta_choose(&t, to, 2, 1);
-	for (int k = 0; k < 2; ++k) {
+	ta_choose(&t, to, 2, b_none ? 3 : 1);
+	for (int k = 0; k < 2 + b_none; ++k) {
 		ta_script(&t);
-		ta_flag_set(&t, ORDER_FLAG + k);
+		if (k < 2) ta_flag_set(&t, ORDER_FLAG + k);
 		ta_end(&t);
 	}
 	ta_closing(&t);
@@ -190,6 +193,32 @@ static bool order_ask(void) {
 	if (size > SQUARE_TALK_ROOM) return false;
 	emu_write(online_square_talk_room(), out, (size_t)size);
 	return talk_script(online_square_talk_room(), 0);
+}
+
+bool square_team_format_ask(void) {
+	const char *labels[2] = { arena_team_format_relay(), arena_team_format_side() };
+	return two_ways(arena_team_format_words(), labels, true);
+}
+
+int square_team_format_picked(void) {
+	int form = flag_get(ORDER_FLAG + 1) ? ONLINE_TEAM_SIDE_BY_SIDE : flag_get(ORDER_FLAG) ? ONLINE_TEAM_RELAY : -1;
+	flag_clear(ORDER_FLAG);
+	flag_clear(ORDER_FLAG + 1);
+	return form;
+}
+
+bool square_team_side_by_side(void) { return T.st.stage >= TEAM_MATCH && T.st.form == ONLINE_TEAM_SIDE_BY_SIDE; }
+
+const char *square_team_name(uint32_t id) {
+	for (int k = 0; k < 4; ++k)
+		if (T.st.players[k] == id && T.names[k][0]) return T.names[k];
+	return NULL;
+}
+
+/* the captain's question: who goes first (B: we do) */
+static bool order_ask(void) {
+	const char *labels[2] = { arena_team_order_us(), T.partner_name };
+	return two_ways(arena_team_order_words(), labels, false);
 }
 
 static void questions(bool open) {
@@ -233,7 +262,8 @@ void square_team_update(const OnlineSnapshot *s, bool held) {
 	open = !held && (talk_busy() || emu_read8(BN6_CHATBOX));
 	/* (MegaMan's word on the order heard before a bout is gone into or watched) */
 	if (!square_team_on() || !T.st.bout || open || (!held && T.said)) return;
-	bool mine = T.st.players[0] == T.s.player_id;
+	/* (side by side every one of the four fights) */
+	bool mine = T.st.players[0] == T.s.player_id || (T.st.form == ONLINE_TEAM_SIDE_BY_SIDE && T.st.players[1] == T.s.player_id);
 	if (T.st.stage == TEAM_BOUT && mine) bout_mine();
 	/* (a bout of the others: watched from the stands, unasked) */
 	if (T.st.stage == TEAM_FIGHT && !mine && T.watched != T.st.bout && !square_watch_on() && square_arena_idle() &&
@@ -262,6 +292,7 @@ void square_team_card(SquareTeamCard *out) {
 	out->on = true;
 	out->standing[0] = T.st.left[0];
 	out->standing[1] = T.st.left[1];
+	out->side_by_side = T.st.form == ONLINE_TEAM_SIDE_BY_SIDE;
 	if (T.st.stage == TEAM_OVER) out->result = T.st.result;
-	else { out->next[0] = T.names[0]; out->next[1] = T.names[2]; }
+	else if (!out->side_by_side) { out->next[0] = T.names[0]; out->next[1] = T.names[2]; }
 }

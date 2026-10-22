@@ -28,6 +28,15 @@ typedef struct {
 	unsigned won, lost;
 	uint32_t t;                       /* the panel's frames, for its blink */
 	bool team;                        /* a Team NetBattle's bout: the band says so */
+	/* two MegaMen a side (protocol v15, issue #181): four plates, my
+	 * team's two on the left (its lead first), theirs on the right, each
+	 * MegaMan as carried and his wait; the fields above unread but `t` */
+	bool four;
+	const char *names[4];
+	const OnlineLoadout *loadouts[4];
+	bool knowns[4];
+	ArenaSideWait waits[4];
+	int me;                           /* my plate: 0 or 1 */
 } ArenaWayView;
 void arena_card_way(const ArenaWayView *v);
 
@@ -61,6 +70,11 @@ typedef struct {
 	unsigned standing[2];
 	const char *next[2];
 	unsigned team_result;
+	/* two MegaMen a side (protocol v15): each MegaMan's name and HP left,
+	 * my team's two first (its lead first), then theirs; `name` theirs */
+	bool four;
+	const char *names[4];
+	uint16_t hp4[4];
 } ArenaCardView;
 void arena_card_result(const ArenaCardView *v);
 

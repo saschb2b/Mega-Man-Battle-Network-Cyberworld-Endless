@@ -211,13 +211,16 @@ static void started(const WatchState *st) {
 	names_of(st);
 	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
+	/* (a 2v2, protocol v15: four seats run from four streams) */
+	if (st->form) arena_watch_four(W.w);
 	W.stage = W_ON;
 	W.watched_at = SDL_GetTicks();
 	W.view = 0;
 	W.shown_t = 0;
 	W.over_said = false;
 	W.why[0] = 0;
-	printf("watch: watching match %u, sides %u and %u, delay %u\n", st->match, st->side[0], st->side[1], st->delay);
+	printf("watch: watching match %u, sides %u and %u, delay %u%s\n", st->match, st->side[0], st->side[1], st->delay,
+		st->form ? ", two MegaMen a side" : "");
 }
 
 static void relayed(const uint8_t *data, size_t size) {

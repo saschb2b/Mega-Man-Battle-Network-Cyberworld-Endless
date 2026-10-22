@@ -35,12 +35,19 @@ struct ArenaLink {
 	 * has come. NULL where the link carries none (the local one) */
 	void (*send_lag)(ArenaLink *link, int lag);
 	bool (*poll_lag)(ArenaLink *link, int *lag);
-	/* a partner's keys for `frame` (player 2 or 3, ARENA_PLAYERS), once
-	 * they have come, as poll's: NULL where the link carries none (the
-	 * network's: its wire has no partners yet, docs/ONLINE_ARENA.md, Two
-	 * MegaMen a side) */
+	/* another player's keys for `frame` (ARENA_PLAYERS: a partner's, 2 or
+	 * 3; in a 2v2 over the network any seat's but mine and the peer's),
+	 * once they have come, as poll's: NULL where the link carries none (a
+	 * NetBattle of two over the network, docs/ONLINE_ARENA.md, Two MegaMen
+	 * a side) */
 	bool (*poll_player)(ArenaLink *link, unsigned player, uint32_t frame, uint16_t *keys);
+	/* a 2v2's partner's seat (2 or 3: his stream mine, his side's GBA
+	 * `side`'s; protocol v15, issue #181); 0 my side's player's, as ever */
+	unsigned seat;
 };
+
+/* the stream my keys go in: my seat's, else my side's player's */
+static inline unsigned arena_link_seat(const ArenaLink *l) { return l->seat >= 2 ? l->seat : l->side; }
 
 /* A peer on this machine: its keys for a frame (an idle one gives 0) */
 typedef uint16_t (*ArenaPeerKeys)(void *context, uint32_t frame);

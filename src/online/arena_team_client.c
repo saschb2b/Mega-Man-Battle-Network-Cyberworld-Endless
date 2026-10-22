@@ -31,9 +31,10 @@ typedef struct {
 } Client;
 
 static Client clients[SIDES];
+static unsigned my_seat;   /* a 2v2 over the network: my seat (team_client_seat), 0 none */
 
-/* teamseat's seat: 0 the first GBA's player (as without it) to 3 */
-static unsigned seat(void) { return dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
+/* the seat shown: mine in a 2v2 over the network, else teamseat's (0 the first GBA's player, as without it, to 3) */
+static unsigned seat(void) { return my_seat ? my_seat : dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
 
 void team_client_begin(Arena *a, const OnlineLoadout *all) {
 	/* (teambuster=N: both partners' buster at Attack N, their HP their sides', the loadout's numbers seen in the battle) */
@@ -61,6 +62,20 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 void team_client_free(void) {
 	for (unsigned s = 0; s < SIDES; ++s) team_screen_free(clients[s].screen);
 	memset(clients, 0, sizeof clients);
+	my_seat = 0;
+}
+
+bool team_client_seat(Arena *a, unsigned seat_of) {
+	team_client_free();
+	my_seat = seat_of;
+	if (my_seat < 2) return true;
+	unsigned side = my_seat & 1u;
+	arena_show(a, (int)side);
+	/* (his screen made now, the pair at its first Custom screen as the way in ends: its cost outside the battle) */
+	Client *c = &clients[side];
+	c->screen = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
+	printf("arena: our seat %u, side %u's partner: his own Custom screen %s\n", my_seat, side, c->screen ? "made" : "not made");
+	return c->screen != NULL;
 }
 
 /* his keys on his screen, by the frame's number alone: the cursor a chip
@@ -92,7 +107,9 @@ static bool standing(struct mCore *gba, unsigned side) {
 	return o >= BN6_EWRAM && o < BN6_EWRAM_END && gba->rawRead16(gba, o + BN6_T1_HP, -1);
 }
 
-uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
+/* player's (2 or 3) stream for `frame`: his `screen` keys on his Custom
+ * screen while his turn is on, else his `battle` keys, or a pick message */
+static uint16_t stream(Arena *a, unsigned player, uint32_t frame, uint16_t screen, uint16_t battle) {
 	unsigned side = (player - 2) & 1u;
 	Client *c = &clients[side];
 	struct mCore *gba = arena_core(a, side);
@@ -113,7 +130,7 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 		c->opened += c->turn;
 	}
 	if (c->sent < c->queued) return c->out[c->sent++];
-	if (!c->turn) return arena_team_script(player, frame);
+	if (!c->turn) return battle & ARENA_KEYS_MASK;
 	uint8_t picks[TEAM_CUSTOM_PICKS];
 	unsigned n;
 	/* (his lead held for him near TEAM_WAIT_LIMIT: the picks he has go out, in time to be his; teamslow=-1, a client gone
@@ -130,12 +147,24 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 	}
 	/* (teamslow=N: side 0's partner's hands off his screen for its first N frames, a slow partner) */
 	bool idle = gone || (!side && dev.team_slow > 0 && c->frames++ < (unsigned)dev.team_slow);
-	if (team_screen_frame(c->screen, idle ? 0 : screen_keys(frame), picks, &n)) {
+	if (team_screen_frame(c->screen, idle ? 0 : screen, picks, &n)) {
 		++c->oks;
 		say(c, picks, n);
 		return c->out[c->sent++];
 	}
 	return 0;
+}
+
+uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
+	return stream(a, player, frame, screen_keys(frame), arena_team_script(player, frame));
+}
+
+uint16_t team_client_stream(void *context, Arena *a, uint32_t frame, uint16_t keys) {
+	(void)context;
+	if (my_seat < 2) return keys & ARENA_KEYS_MASK;
+	/* (--dev arenaboth: a partner who plays himself, as the stood-in ones) */
+	if (dev.arena_both) return team_client_keys(a, my_seat, frame);
+	return stream(a, my_seat, frame, keys, keys);
 }
 
 void team_client_draw(Arena *a) {

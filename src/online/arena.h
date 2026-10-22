@@ -63,6 +63,9 @@ const char *arena_error(const Arena *a);
 int arena_progress(const Arena *a);
 /* my core's picture (ARENA_W x ARENA_H), NULL before the battle */
 const uint32_t *arena_video(const Arena *a);
+/* the stream whose keys the battle waits for longest (a 2v2's: among
+ * three; a battle of two's, the other's): the player, 0-3 */
+unsigned arena_waiting_on(const Arena *a);
 /* side's core's battle phase (BN6_BATTLE_PHASE), 0 before the battle */
 unsigned arena_phase(const Arena *a, unsigned side);
 /* my result once OVER: 1 won, 2 lost (BN6_BATTLE_RESULT), 0 none */
@@ -89,6 +92,7 @@ typedef struct {
 	uint32_t fought;
 	uint16_t hp[2], max_hp[2];
 	uint8_t used[2];
+	uint16_t partner_hp[2], partner_max[2];   /* a 2v2's partners' (side 0's, side 1's), 0 none */
 } ArenaTally;
 void arena_tally(const Arena *a, ArenaTally *out);
 /* the battle's network as counted, for the statistics' NetBattle
@@ -109,6 +113,7 @@ typedef struct {
 	bool seen[2];               /* the side's player object read */
 	uint16_t hp[2], max_hp[2], chip[2];
 	uint8_t action[2];
+	uint16_t partner_hp[2], partner_max[2];   /* a 2v2's partners', each side's (0 none) */
 } ArenaReading;
 /* NULL before the battle's first frame is settled */
 const ArenaReading *arena_reading(const Arena *a);
@@ -138,6 +143,12 @@ void arena_window(Arena *a, int window);
  * other player's, and queued into both GBAs by the battle's iteration,
  * arena_team.h); a link that carries no partners keeps 2 */
 void arena_players(Arena *a, unsigned players);
+/* A 2v2's partner's seat (protocol v15, issue #181), before the battle:
+ * what each tick's keys make of my seat's stream for `frame` (his own
+ * Custom screen's picks, his battle keys: arena_team_client.h); NULL my
+ * keys as they are */
+typedef uint16_t (*ArenaStream)(void *context, Arena *a, uint32_t frame, uint16_t keys);
+void arena_stream(Arena *a, ArenaStream stream, void *context);
 /* The GBA whose picture is drawn and shown (0 the cable's first, 1 the
  * second; -1, as it starts, mine): --dev arenaother's, the other GBA's
  * screen seen (the game's state the same whichever is drawn) */
