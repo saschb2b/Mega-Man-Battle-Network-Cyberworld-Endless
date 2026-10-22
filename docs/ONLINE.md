@@ -559,7 +559,12 @@ walk for the emote's frames), MegaMan's own BN6's text commands, as
 BN6's item-get plays his 0x18: `F8 00` (hold him), `F8 01 n` (the pose),
 `FD 00` (the sound), `EE 00` (a wait), `F8 04` and `F8 02` (his own
 animation back, let go), run by the chat box's engine without opening a
-box; the keys are held from BN6 meanwhile.
+box; the keys are held from BN6 meanwhile. The script is started by a
+game call that goes on into the overworld's update in the same frame
+(`game_call_then_update`): a plain game call takes that frame's update,
+and with it every sprite BN6 draws, so each emote of one's own once
+began with a frame of no MegaMan, no Square life and no HP box
+(issue #187; docs/ROM_DATA.md, Boot and warps).
 
 | Emote | Pose (BN6_OW_MEGAMAN's) | Sound (BN6's) | Over his head |
 | --- | --- | --- | --- |
