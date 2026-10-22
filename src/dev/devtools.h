@@ -87,6 +87,10 @@ typedef struct {
 	int team_beast; /* teambeast=1: under arena2v2 each partner's own Custom screen offers Beast Out and his stood-in client takes it
 	                   at his first turn, 2 at every turn, 3 the leads too (arena_team_cross.h); -1 none on the second GBA,
 	                   a mutation that must part the two */
+	int team_unite; /* teamunite=1: under arena2v2 each partner's own Custom screen offers UNITE with the carried MegaMan's Souls
+	                   (BN5's installs' hooks on his side's GBA of his copy) and his stood-in client takes the chip under the cursor
+	                   and UNITE at his first turn (arena_team_soul.h); -1 his Soul left out on the second GBA, a mutation that
+	                   must part the two */
 	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
 	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
 	                   Cross none, a mutation that must part the two */

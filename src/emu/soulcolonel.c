@@ -47,7 +47,6 @@ static int breaks;
 static bool done;
 static uint32_t phase0, phase1, draw;   /* BN5's moved: the button's two phases, its draw */
 
-static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 static int soul_on(int side) { return done && soul_united(side) ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0; }
 static int screen_side(void) { return hook_read8(BN6_BATTLE_SIDE) & 1; }
 static uint32_t element(int k) { return BN6_CUSTOM_ELEMENTS + (uint32_t)k * BN6_ELEMENT_SIZE; }
@@ -131,14 +130,15 @@ static HookAct ok(HookRegs *r, void *user) {
  * ScreenDivide without (his AI data +0x32 as BN5's, the Souls' block's BN6_SOUL_CHIP: 0 none) */
 static HookAct turn(HookRegs *r, void *user) {
 	(void)user;
-	for (int k = 0; k < 2; ++k) {
-		uint32_t obj = hook_read32((k ? r->r[7] : r->r[6]) + 8);
-		if (obj < 0x02000000u || obj >= 0x02040000u) continue;
-		int side = side_of(obj);
-		if (soul_on(side) != SOUL_COLONEL) continue;
-		uint16_t chip = (uint16_t)hook_read16(soul_field(side, BN6_SOUL_NEXT_CHIP));
+	/* (the records' objects, the sides' players; then each side's partner, his own Soul in his own block: two MegaMen a side) */
+	for (int k = 0; k < 4; ++k) {
+		uint32_t obj = k < 2 ? hook_read32((k ? r->r[7] : r->r[6]) + 8)
+			: hook_read32(BN6_BATTLE_PLAYERS + (uint32_t)(k - 2) * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
+		if (obj < 0x02000000u || obj >= 0x02040000u || (k >= 2 && !soul_partner(obj))) continue;
+		if (!done || soul_id_of(obj) != SOUL_COLONEL) continue;
+		uint16_t chip = (uint16_t)hook_read16(soul_field_of(obj, BN6_SOUL_NEXT_CHIP));
 		bool none = !chip;
-		hook_write16(soul_field(side, BN6_SOUL_CHIP), none ? 0 : chip);
+		hook_write16(soul_field_of(obj, BN6_SOUL_CHIP), none ? 0 : chip);
 		int power = soulcode_power(none || (breaks & SOULCOLONEL_BREAK_TURN) ? POWER_DIVIDE : POWER_CHIP_SHOT);
 		uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
 		if (power >= 0 && ai) hook_write8(ai + AI_POWER_B, (uint8_t)power);

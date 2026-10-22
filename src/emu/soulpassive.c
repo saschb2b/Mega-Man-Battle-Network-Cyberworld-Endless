@@ -32,8 +32,8 @@ static bool done;
 
 static int soul_on(int side) { return done && soul_united(side) ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0; }
 
-bool soulpassive_bonus(int side, int chip, int *bonus, int *look) {
-	int soul = soul_on(side);
+bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look) {
+	int soul = done ? soul_id_of(obj) : 0;
 	if (!soul) return false;
 	*bonus = 0;
 	*look = 0;
@@ -56,7 +56,7 @@ static uint32_t ready_of[SOULS], reapply_of[SOULS];    /* each Soul's, BN5's mov
 /* (BN6's per-form passives, entry 8 the stub, r5 MegaMan, called by mov lr,pc; bx) the Soul's, BN5's moved, or none:
  * on to BN6's routine of no overlay (a mov pc,lr: a bx lr would leave Thumb); the proxy's own without a Soul */
 static HookAct passive(HookRegs *r, uint32_t own, const uint32_t *of) {
-	int soul = soul_on(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1);
+	int soul = done ? soul_id_of(r->r[5]) : 0;
 	uint32_t to = own;
 	if (soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS) to = (breaks & SOULPASSIVE_BREAK_READY) ? 0 : of[soul - SOUL_FIRST];
 	r->r[12] = (to ? to : BN6_FORM_OVERLAY_NONE) | 1;

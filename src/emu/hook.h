@@ -89,8 +89,10 @@ int hook_drain(HookEvent *out, int max);
  * where only some calls are worth one (a routine every object runs). */
 void hook_post(const HookRegs *r, int kind);
 /* Cores attached at once: BN6's, and the differential's guest or the
- * Arena's pair (src/online/arena_pair.c) or a test's */
-#define HOOK_CORES 3
+ * Arena's pair (src/online/arena_pair.c) or a test's, and a partner's own
+ * Custom screen's GBA for UNITE (two where --dev arena2v2 stands in for
+ * both partners: src/online/arena_team_screen.c) */
+#define HOOK_CORES 5
 /* From a hook: its core's entry, 0 to HOOK_CORES - 1, for what a hook
  * keeps between two of its calls (a way back through a stub): one a core,
  * since two cores' hooks run in turn there, a run loop at a time (the

@@ -49,10 +49,10 @@ static uint32_t sword_family;   /* the moved sword family's CurAction (BN5's 0x1
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 
-static int soul_on(int side) { return done && soul_united(side) ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0; }
+
 /* the Soul of the Navi `obj`: his side's, but none for a side's partner (--dev arena2v2: a Navi of his own, never united; the
  * full-rules audit: a Soul's chip powers its MegaMan's alone) */
-static int soul_of(uint32_t obj) { return soul_partner(obj) ? 0 : soul_on(side_of(obj)); }
+static int soul_of(uint32_t obj) { return done ? soul_id_of(obj) : 0; }
 
 static uint8_t flags_of(int chip) {
 	return chip > 0 && chip < CHIPS_IDS ? hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) : 0;
@@ -154,8 +154,7 @@ static HookAct sword(HookRegs *r, void *user) {
 /* (the shadow type, past its battle mode's test: r5 the object) ShadowSoul's side's MegaMan without one (BN5 0x0800E0B6),
  * where his NaviStats name no Navi of his side */
 static HookAct shadow(HookRegs *r, void *user) {
-	int side = side_of(r->r[5]);
-	if (soul_of(r->r[5]) != SOUL_SHADOW || hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_SIDE_NAVI) ||
+	if (soul_of(r->r[5]) != SOUL_SHADOW || hook_read8(soul_navi_stats(r->r[5]) + BN6_NAVI_SIDE_NAVI) ||
 		(breaks & SOULCHIPS_BREAK_SHADOW))
 		return HOOK_CONTINUE;
 	r->r[0] = SHADOW_NONE;

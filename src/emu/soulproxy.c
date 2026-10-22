@@ -63,7 +63,7 @@ static bool rom_is(uint32_t at, const uint8_t *want, uint32_t n) {
 static HookAct heat_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int bonus, look;
-	if (r->r[0] == BN6_FORM_PROXY && soulpassive_bonus(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, (int)r->r[4], &bonus, &look)) {
+	if (r->r[0] == BN6_FORM_PROXY && soulpassive_bonus(r->r[5], (int)r->r[4], &bonus, &look)) {
 		r->r[6] += (uint32_t)bonus;
 		r->r[7] = (uint32_t)look;
 		r->r[12] = BN6_CHIP_BONUS_DONE | 1;
@@ -78,7 +78,7 @@ static HookAct heat_bonus(HookRegs *r, void *user) {
 static HookAct heat_flash(HookRegs *r, void *user) {
 	(void)user;
 	int kind, frame;
-	if (r->r[0] == BN6_FORM_PROXY && soullook_flash(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, &kind, &frame)) {
+	if (r->r[0] == BN6_FORM_PROXY && soullook_flash(r->r[5], &kind, &frame)) {
 		r->r[0] = (uint32_t)frame;
 		r->r[4] = (uint32_t)kind;
 		return HOOK_CONTINUE;

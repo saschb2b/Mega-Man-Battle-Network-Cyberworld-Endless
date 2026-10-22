@@ -28,9 +28,11 @@ struct ArenaPair;
 typedef struct TeamScreen TeamScreen;
 
 /* side's partner's screen: a plain pair of the ROM's bytes (BN5's
- * installed in them, as the pair's) made from `pair`'s cores; NULL where
- * it could not be made */
-TeamScreen *team_screen_new(const uint8_t *rom, size_t size, struct ArenaPair *pair, unsigned side);
+ * installed in them, as the pair's) made from `pair`'s cores, his side's
+ * GBA there with BN5's installs' hooks and his `souls` held for UNITE
+ * where he holds any (none: no hook at all); NULL where it could not be
+ * made */
+TeamScreen *team_screen_new(const uint8_t *rom, size_t size, struct ArenaPair *pair, unsigned side, unsigned souls);
 void team_screen_free(TeamScreen *s);
 /* His turn: `pair` copied in, `deck` (n entries, chip | code << 9, in the
  * order drawn) written into BN6's deck on his side's GBA, its Custom
@@ -44,6 +46,10 @@ void team_screen_crosses(TeamScreen *s, uint8_t crosses);
 /* The form his CROSSSELECT committed this turn (1-0x18), 0 none; the
  * Crosses he has chosen kept for his next turn's */
 uint8_t team_screen_cross(TeamScreen *s);
+/* The Soul his UNITE committed this turn with it (BN5's number, 0 none),
+ * its chaos (1 a Chaos Unison) and ColonelSoul's chip (0 none), as his
+ * screen's OK left them in his side's Souls block there */
+uint8_t team_screen_soul(const TeamScreen *s, uint8_t *chaos, uint16_t *chip);
 /* The Program Advance his last OK made (0 none: BN6's OK goes on to its
  * show, and his picks are read once the screen waits for the cable), and
  * the chips of the hand BN6 built into built[BN6_HAND_MAX] */

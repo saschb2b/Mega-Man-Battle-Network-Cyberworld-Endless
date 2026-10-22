@@ -596,11 +596,18 @@ mutation), each turn's form check saying each MegaMan's form and
 BeastOutCounter in the log; `teampa=1` opens side 0's
 partner's folder with Cannon A, B and C, his first hand Z-Canon1, a
 Program Advance (`-1`: the PA left out of his hand on the second GBA, the
-mutation). On a partner's own game in a side-by-side match from the
-Square (with `arenaboth`, his client the stood-in script), `teamcross=N`
-and `teambeast=1` offer and take his Cross or Beast Out on his own
-screen, and `teampa=1` makes the MegaMan he carries in a Program
-Advance's first (his folder's Regular chip and TagChips Cannon A, B and
+mutation); `teamunite=1` gives each partner's own Custom screen the
+carried MegaMan's Souls (BN5's installs' hooks on his side's GBA of his
+copy) and has his client take the chip under the cursor and UNITE at his
+first turn (`-1`: his Soul left out on the second GBA, the mutation; with
+`CYBERWORLD_EMU_DEBUG` a partner's Soul taken up and ended are said by
+core: "side 0's partner united with Soul 9 ..."). On a partner's own
+game in a side-by-side match from the Square (with `arenaboth`, his
+client the stood-in script), `teamcross=N` and `teambeast=1` offer and
+take his Cross or Beast Out on his own screen, `teamunite=1` gives the
+MegaMan he carries in NumberSoul and Atk+10 `*` as his folder's first
+chip and takes UNITE, and `teampa=1` makes the MegaMan he carries in a
+Program Advance's first (his folder's Regular chip and TagChips Cannon A, B and
 C, as his own folder crosses to every game): a test partner whose
 choices cross the server as a player's do. `teamform=N` makes a team
 challenge from the Square name its format without asking (1 one by one,

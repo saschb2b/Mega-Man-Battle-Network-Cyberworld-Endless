@@ -19,8 +19,9 @@
   BN6's own code, so his HP, buster, abilities and the chips his screen
   deals are his own; his Cross chosen on his own CROSSSELECT, his Beast
   Out from his own emblem (its turns and end counted by BN6's own code for
-  him as for a lead), and a Program Advance made on his screen, each
-  taken into the battle on both linked GBAs. A partner's buttons and
+  him as for a lead), a Program Advance made on his screen, and UNITE with
+  his own Souls on his own screen (a Soul's powers, look, Chaos Unison and
+  turns his own), each taken into the battle on both linked GBAs. A partner's buttons and
   choices travel inside his lead's GBA's own link data, so both GBAs read
   them in the same frame as the lead's: a partner who never picks, or all
   four in Beast Out, can no longer make the two GBAs see different
@@ -31,8 +32,7 @@
   shows the four MegaMen, a partner's seat his own HP box, the result
   card each one's HP left and the team's WIN or LOSE; a stall says whose
   PET it waits for, and anyone else in the channel can watch from the
-  stands. Not yet for a partner: UNITE and ColonelSoul's button.
-  Protocol v15: a game must be as new as the server to play.
+  stands. Protocol v15: a game must be as new as the server to play.
 - **DarkInvs on the challenged player's side of a NetBattle (issue
   #182).** Under full rules, the second player's DarkInvs (or ShadowSoul's
   Chaos Unison, which uses it) moved his MegaMan's AI data into the one

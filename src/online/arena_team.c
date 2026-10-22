@@ -29,13 +29,13 @@
 
 /* (allocated as the hooks go on: what a battle of the flag's is compared by, ~0.5 MB nobody else pays for) */
 typedef struct {
-	int slot[SIDES];                         /* each GBA's core's hook slot (hook_slot_of) */
-	uint32_t digest[HOOK_CORES][ITERATIONS]; /* each core's, by the loop's iteration */
-	uint8_t partner[HOOK_CORES][ITERATIONS][SIDES];   /* each side's partner's panel, row << 4 | column */
-	uint16_t hp[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];
-	uint16_t keys[HOOK_CORES][ITERATIONS][SIDES];     /* each partner's keys taken */
-	uint8_t at[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
-	uint32_t last[HOOK_CORES];               /* the last iteration each met */
+	int slot[SIDES];                         /* each GBA's core's hook slot (hook_slot_of); the rest by GBA, 0 or 1 */
+	uint32_t digest[SIDES][ITERATIONS];      /* each GBA's, by the loop's iteration */
+	uint8_t partner[SIDES][ITERATIONS][SIDES];   /* each side's partner's panel, row << 4 | column */
+	uint16_t hp[SIDES][ITERATIONS][SIDES * MEGAMEN];
+	uint16_t keys[SIDES][ITERATIONS][SIDES];     /* each partner's keys taken */
+	uint8_t at[SIDES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
+	uint32_t last[SIDES];                    /* the last iteration each met */
 	uint32_t parted;                         /* the first iteration they were met apart (0 none yet) */
 } TeamLog;
 static TeamLog *T;
@@ -97,7 +97,7 @@ static uint32_t fnv(uint32_t h, uint32_t v) {
 
 /* the battle's state both GBAs must agree on, as BN6's own 1v1 has them
  * agree (the research harness's comparison, .build/research/battles) */
-static uint32_t digest(int slot, uint32_t tick) {
+static uint32_t digest(int g, uint32_t tick) {
 	uint32_t h = 2166136261u;
 	for (unsigned side = 0; side < SIDES; ++side)
 		for (unsigned k = 0; k < MEGAMEN; ++k) {
@@ -110,8 +110,8 @@ static uint32_t digest(int slot, uint32_t tick) {
 			h = fnv(h, hp | (uint32_t)hook_read8(obj + BN6_T1_FUTURE_X) << 16 | (uint32_t)hook_read8(obj + BN6_T1_FUTURE_Y) << 24);
 			if (ai) h = fnv(h, hook_read16(ai + BN6_AI_HELD) | (uint32_t)hook_read16(ai + BN6_AI_PRESSED) << 16);
 			if (tick < ITERATIONS) {
-				T->hp[slot][tick][side * MEGAMEN + k] = hp;
-				if (k) T->partner[slot][tick][side] = panel;
+				T->hp[g][tick][side * MEGAMEN + k] = hp;
+				if (k) T->partner[g][tick][side] = panel;
 			}
 		}
 	return arena_team_navi_digest(fnv(fnv(h, hook_read32(BN6_RNG_PRIMARY)), hook_read32(BN6_BATTLE_TIMER)));
@@ -121,12 +121,12 @@ static uint32_t digest(int slot, uint32_t tick) {
  * longer end together (a mutation's; with a rollback window a guessed
  * iteration may be said and run again, so the report at the end is the
  * one to read) */
-static void apart_now(int slot, uint32_t tick) {
-	int other = slot == T->slot[0] ? T->slot[1] : T->slot[0];
-	if (T->parted || other < 0 || other >= HOOK_CORES || T->last[other] < tick || T->digest[other][tick] == T->digest[slot][tick]) return;
+static void apart_now(int g, uint32_t tick) {
+	int other = g ^ 1;
+	if (T->parted || T->last[other] < tick || T->digest[other][tick] == T->digest[g][tick]) return;
 	T->parted = tick;
 	printf("arena2v2: the two GBAs part at iteration %u, said as it ran (the partners' keys taken there: %04X %04X and %04X %04X)\n",
-		(unsigned)tick, T->keys[slot][tick][0], T->keys[slot][tick][1], T->keys[other][tick][0], T->keys[other][tick][1]);
+		(unsigned)tick, T->keys[g][tick][0], T->keys[g][tick][1], T->keys[other][tick][0], T->keys[other][tick][1]);
 }
 
 /* side 0's copy (r0 0), the loop's iteration counted: the partners' keys
@@ -143,7 +143,8 @@ static HookAct keys(HookRegs *r, void *user) {
 	int slot = hook_slot();
 	const uint32_t hands[SIDES] = { arena_team_navi_hand(0), arena_team_navi_hand(1) };
 	arena_team_custom_take(tick, hands, T && slot == T->slot[1]);
-	bool kept = T && slot >= 0 && slot < HOOK_CORES && tick < ITERATIONS;
+	int g = T && slot >= 0 ? (slot == T->slot[0] ? 0 : slot == T->slot[1] ? 1 : -1) : -1;
+	bool kept = g >= 0 && tick < ITERATIONS;
 	for (unsigned side = 0; side < SIDES; ++side) {
 		uint32_t obj = hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
 		uint32_t ai = obj ? hook_read32(obj + BN6_T1_AI_DATA) : 0;
@@ -152,7 +153,7 @@ static HookAct keys(HookRegs *r, void *user) {
 		/* (the mutation: one key of side 0's partner flipped on the second GBA alone) */
 		if (dev.arena_2v2 > 1 && T && slot == T->slot[1] && side == 0 && tick >= (uint32_t)dev.arena_2v2 && tick < (uint32_t)dev.arena_2v2 + MUTATED)
 			k ^= KEY_RIGHT;
-		if (kept) T->keys[slot][tick][side] = k;
+		if (kept) T->keys[g][tick][side] = k;
 		k |= BN6_KEYS_VALID;
 		uint16_t held = hook_read16(ai + BN6_AI_HELD);
 		hook_write16(ai + BN6_AI_LAST, held);
@@ -161,10 +162,10 @@ static HookAct keys(HookRegs *r, void *user) {
 		hook_write16(ai + BN6_AI_UP, (uint16_t)(~k & held));
 	}
 	if (kept) {
-		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[slot][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
-		T->digest[slot][tick] = digest(slot, tick);
-		if (tick > T->last[slot]) T->last[slot] = tick;
-		apart_now(slot, tick);
+		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[g][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
+		T->digest[g][tick] = digest(g, tick);
+		if (tick > T->last[g]) T->last[g] = tick;
+		apart_now(g, tick);
 	}
 	return HOOK_CONTINUE;
 }
@@ -207,8 +208,8 @@ static void report_keys(int a, int b, uint32_t n) {
 
 bool arena_team_report(void) {
 	if (!T) return false;
-	int a = T->slot[0], b = T->slot[1];
-	if (a < 0 || b < 0 || a >= HOOK_CORES || b >= HOOK_CORES) return false;
+	const int a = 0, b = 1;
+	if (T->slot[0] < 0 || T->slot[1] < 0) return false;
 	uint32_t n = T->last[a] < T->last[b] ? T->last[a] : T->last[b], differing = 0, first = 0, moved = 0;
 	for (uint32_t t = 1; t <= n; ++t) {
 		if (T->digest[a][t] != T->digest[b][t]) { if (!differing) first = t; ++differing; }

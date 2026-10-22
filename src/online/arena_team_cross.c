@@ -6,10 +6,12 @@
 
 #include "arena_team_custom.h"
 #include "arena_team_navi.h"
+#include "arena_team_soul.h"
 #include "bn6.h"
 #include "devtools.h"
 #include "free_space.h"
 #include "hook.h"
+#include "soullife.h"
 
 #define SIDES 2
 #define NONE  0xFFu   /* a pending record's form: none */
@@ -17,7 +19,7 @@
 static int second_slot = -1;   /* the second GBA's core's slot: teamcross=-N's and teambeast=-1's mutation there alone */
 /* every core's, a rollback's frames run again among them: what the output says */
 static unsigned forced, asked[SIDES], waited, answered[SIDES], counted[SIDES], beast_turns[SIDES], checked[SIDES], ended[SIDES];
-static unsigned left_waited;
+static unsigned left_waited, soul_counted[SIDES], soul_ended[SIDES];
 
 /* what the turn check's hook keeps a core between its calls (BN6's routines called from it come back to it): where its run
  * for the partners stands, and the registers BN6's own check goes on with; never past the frame, so a rollback finds it idle */
@@ -91,6 +93,14 @@ static HookAct turn(HookRegs *r, void *user) {
 	for (; k->side < SIDES; ++k->side) {
 		uint32_t p = partner(k->side);
 		if (!p || chosen(k->side)) continue;
+		/* (a Soul of his: its end as BN5 asks it, in Beast Out's end check's place, as soullife.c's for a side's player) */
+		uint32_t ns = arena_team_navi_record_at(k->side);
+		if (ns && hook_read8(ns + BN6_NAVI_FORM) == BN6_FORM_PROXY) {
+			if (!soul_ended_of(p)) continue;
+			k->step = CHECK_LEFT;
+			++soul_ended[k->side];
+			return call_back(r, BN6_FORM_LEAVE_ASK, p);
+		}
 		k->step = CHECK_ENDED;
 		++checked[k->side];
 		return call_back(r, BN6_FORM_END_CHECK, p);
@@ -116,6 +126,11 @@ static HookAct turned(HookRegs *r, void *user) {
 	uint32_t p = side < SIDES ? partner(side) : 0;
 	if (!p) return HOOK_CONTINUE;
 	++(body == BN6_BEAST_TURN_BODY ? beast_turns : counted)[side];
+	/* (his Soul's turns counted as a Custom screen opens, as soullife.c counts a side's player's at BN6's own call) */
+	if (body == BN6_FORM_TURN_DOWN_BODY) {
+		soul_count_of(p);
+		++soul_counted[side];
+	}
 	r->r[5] = p;
 	if (body == BN6_BEAST_TURN_BODY) r->r[7] = 0;   /* (BN6_BEAST_TURN's answer, 0 throughout; BN6_FORM_TURN_DOWN keeps no r7) */
 	r->r[12] = body | 1u;
@@ -168,8 +183,10 @@ static HookAct pending(HookRegs *r, void *user) {
 	uint8_t form = chosen(side);
 	++answered[side];
 	r->r[0] = form ? form : NONE;
-	r->r[1] = 0;   /* (+1: 0 for a Cross, BN6_RECORD_CHAOS) */
-	r->r[3] = 0;   /* (+3: a Cross's turns, which no code of Gregar's reads) */
+	/* (+1 and +3, BN6_RECORD_CHAOS and BN6_RECORD_TURNS: 0 for a Cross; his Soul's chaos and turns for the proxy form) */
+	bool soul = form == BN6_FORM_PROXY;
+	r->r[1] = soul ? team_soul_chaos(side) : 0;
+	r->r[3] = soul ? team_soul_turns(side) : 0;
 	return HOOK_RETURN;
 }
 
@@ -190,4 +207,7 @@ void arena_team_cross_report(void) {
 		"%u, their form's end asked %u and %u times and found %u and %u, BN6's wait held for a partner leaving his form %u "
 		"frames, every core's\n", counted[0], counted[1], beast_turns[0], beast_turns[1], checked[0], checked[1], ended[0],
 		ended[1], left_waited);
+	printf("arena2v2: the partners' Souls' turns counted %u and %u times, a Soul ended %u and %u times, every core's\n",
+		soul_counted[0], soul_counted[1], soul_ended[0], soul_ended[1]);
+	team_soul_report();
 }

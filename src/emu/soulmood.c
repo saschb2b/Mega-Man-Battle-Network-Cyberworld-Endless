@@ -218,13 +218,12 @@ static void after_effect(uint32_t me, int bn5) {
 }
 
 void soulmood_chip_used(uint32_t me, int chip) {
-	int side = side_of(me);
 	if (!done || !bn5_dark_chip(chip)) return;
 	/* (his dark: MegaMan's alone, BN5's test of his side's Navi, 0x0801004E; a side's partner's his own NaviStats) */
 	if (!stats8(me, BN6_NAVI_SIDE_NAVI) && !(breaks & SOULMOOD_BREAK_DARK)) {
 		uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
 		/* (a Soul united ends: BN5 asks it at once, 0x08010068; here BN6's request to leave the form, 0x08015994's) */
-		if (!soul_partner(me) && soul_united(side)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
+		if (soul_id_of(me)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
 		darken(me, BN6_DARK_CHIP);
 	}
 	/* (its after-effect: whoever used it, BN5's call at 0x08010086 for every chip used) */

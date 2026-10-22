@@ -48,6 +48,11 @@ struct mCore;
  * committed (BN6_CROSS_RECORD's +0, 1-0x18), said before his picks */
 #define TEAM_CROSS_COUNT  7u
 #define TEAM_CROSS(form)  TEAM_PICK(TEAM_CROSS_COUNT, 0, form)
+/* ... and the Soul his UNITE committed with the proxy form (said after
+ * his Cross message): BN5's number (1-12) and 1 for its Chaos Unison;
+ * ColonelSoul's chip, where his button took one, in two (arena_team_soul.h) */
+#define TEAM_SOUL(soul, chaos) TEAM_PICK(TEAM_CROSS_COUNT, 1, ((unsigned)(soul) & 0xFu) | ((unsigned)(chaos) & 1u) << 4)
+#define TEAM_SOUL_CHIP(chip) TEAM_PICK(TEAM_CROSS_COUNT, 2u + ((unsigned)(chip) >> 8 & 1u), (unsigned)(chip) & 0xFFu)
 /* ... and a Program Advance his screen made at OK: its first pick (0-4),
  * how many picks it took (3 or 4) and its chip (BN6_PA_FIRST on), said
  * before his picks; the pair joins those picks into it as BN6's OK does */

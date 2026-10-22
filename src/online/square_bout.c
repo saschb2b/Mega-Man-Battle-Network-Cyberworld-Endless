@@ -60,6 +60,8 @@ bool square_bout_build(void) {
 void square_bout_mine(OnlineLoadout *l) {
 	/* (teampa=1 on a partner's game: his folder a Program Advance's first, as he carries it) */
 	if (dev.team_pa > 0 && SA.four && SA.seat >= 2) arena_seats_pa_folder(l);
+	/* (teamunite=1 on a partner's game: his MegaMan with NumberSoul and a Plus chip first, a UNITE in his first hand) */
+	if (dev.team_unite > 0 && SA.four && SA.seat >= 2) arena_seats_unite_folder(l);
 }
 
 bool square_bout_ready(void) {

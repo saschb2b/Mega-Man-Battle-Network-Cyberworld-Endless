@@ -1062,8 +1062,8 @@ keys, each partner picking his own chips on BN6's own Custom screen of
 his own game while the leads wait for him. Each partner is his whole
 MegaMan: his folder, HP and buster, his NaviCust's programs (worked out
 by BN6's own code on every game from the MegaMan he sent), his Crosses
-and Beast Out on his own screen, and a Program Advance his OK makes; not
-yet UNITE. His buttons and choices cross the server in his own stream
+and Beast Out on his own screen, a Program Advance his OK makes, and
+UNITE with his own Souls. His buttons and choices cross the server in his own stream
 and, inside each game's two linked GBAs, ride his lead's GBA's own link
 data, so both GBAs take them in the same frame as the lead's. The way
 in's panel shows the four, the result card each MegaMan's HP left and

@@ -27,11 +27,11 @@
 typedef struct {
 	TeamScreen *screen;
 	bool turn;                        /* his side's GBA's Custom screen open, his own set up for it */
-	uint16_t out[TEAM_CUSTOM_PICKS + 2];  /* his Cross, Program Advance and pick messages to go out, one a frame */
+	uint16_t out[TEAM_CUSTOM_PICKS + 4];  /* his Cross, Soul, ColonelSoul's chip, Program Advance and picks to go out, one a frame */
 	uint16_t deck[BN6_FOLDER_ENTRIES];    /* his deck as his turn opened (his screen dealt from it) */
 	unsigned dealt;
 	unsigned queued, sent;
-	unsigned opened, oks, closed_first, at_limit, crossed, pas;
+	unsigned opened, oks, closed_first, at_limit, crossed, pas, souls;
 	unsigned frames;                  /* his turn's frames so far (teamslow's) */
 	unsigned t;                       /* ... every one (teamcross's script) */
 } Client;
@@ -44,6 +44,7 @@ typedef struct {
 
 static Client clients[SIDES];
 static unsigned my_seat;   /* a 2v2 over the network: my seat (team_client_seat), 0 none */
+static unsigned stood_souls;   /* the Souls the stood-in partners hold under teamunite (the carried MegaMan's) */
 
 /* the seat shown: mine in a 2v2 over the network, else teamseat's (0 the first GBA's player, as without it, to 3) */
 static unsigned seat(void) { return my_seat ? my_seat : dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
@@ -85,6 +86,7 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 	}
 	/* (teamcust: side 1's partner the checkpoint's MegaMan's NaviCust too, his folder his lead's) */
 	if (all && dev.team_cust) team_client_compile(1, all, false);
+	stood_souls = all && dev.team_unite ? all->souls : 0;
 	unsigned fits = all ? arena_folders_fitting(all) : 0;
 	/* (the folder after the one his lead carries: arena_scene's, the first that holds chips) */
 	for (int k = 0, first = -1; k < ONLINE_FOLDERS; ++k) {
@@ -108,10 +110,11 @@ void team_client_free(void) {
 	my_seat = 0;
 }
 
-/* side's partner's own Custom screen on a plain copy of the pair, his Crosses on it: his own MegaMan's (`mine`, over the
- * network), and teamcross=N's Cross N and teambeast's Beast Out (a stood-in client's alone where none is given) */
+/* side's partner's own Custom screen on a plain copy of the pair, his Crosses and Souls on it: his own MegaMan's (`mine`,
+ * over the network), and teamcross=N's Cross N, teambeast's Beast Out and teamunite's Souls (a stood-in client's where
+ * none is given) */
 static TeamScreen *new_screen(Arena *a, unsigned side, const OnlineLoadout *mine) {
-	TeamScreen *t = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
+	TeamScreen *t = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side, mine ? mine->souls : stood_souls);
 	int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
 	unsigned crosses = (n >= 1 && n <= 5 ? 1u << (n - 1) : 0u) | (dev.team_beast ? TEAM_SCREEN_BEAST : 0u);
 	if (mine) crosses |= (mine->crosses & 0x1Fu) | (mine->beast ? TEAM_SCREEN_BEAST : 0u);
@@ -139,12 +142,14 @@ static uint16_t screen_keys(uint32_t frame) {
 	return t < 2 ? KEY_A : t >= 10 && t < 12 ? KEY_RIGHT : 0;
 }
 
-/* teambeast: at his first turn the cursor right to OK, down to the emblem under it, A (Beast Out), up and OK */
-static uint16_t beast_keys(const Client *c) {
+/* teambeast: at his first turn the cursor right to OK, down to the emblem under it, A (Beast Out), up and OK; teamunite
+ * (`pick`): the chip under the cursor taken first, so that the emblem's place is UNITE where that chip lights a Soul */
+static uint16_t emblem_keys(const Client *c, bool pick) {
 	static const struct { uint16_t t, key; } steps[] = {
 		{ 40, KEY_RIGHT }, { 52, KEY_RIGHT }, { 64, KEY_RIGHT }, { 76, KEY_RIGHT }, { 88, KEY_RIGHT }, { 100, KEY_DOWN },
 		{ 112, KEY_A }, { 240, KEY_UP }, { 260, KEY_A },
 	};
+	if (pick && c->t >= 20 && c->t < 23) return KEY_A;
 	for (size_t i = 0; i < sizeof steps / sizeof *steps; ++i)
 		if (c->t >= steps[i].t && c->t < steps[i].t + 3u) return steps[i].key;
 	return 0;
@@ -152,7 +157,8 @@ static uint16_t beast_keys(const Client *c) {
 
 /* teamcross: at his first turn the cursor up to the emblem, CROSSSELECT opened and his one Cross taken, then his chips */
 static uint16_t cross_keys(const Client *c, uint32_t frame) {
-	if (dev.team_beast && (c->opened == 1 || dev.team_beast > 1)) return beast_keys(c);
+	if (dev.team_unite && c->opened == 1) return emblem_keys(c, true);
+	if (dev.team_beast && (c->opened == 1 || dev.team_beast > 1)) return emblem_keys(c, false);
 	if (dev.team_cross == 0 || c->opened != 1 || c->t >= CROSS_CHIPS) return screen_keys(frame);
 	unsigned t = c->t;
 	return t >= CROSS_UP && t < CROSS_UP + 3 ? KEY_UP : (t >= CROSS_OPEN && t < CROSS_OPEN + 3) || (t >= CROSS_TAKE && t < CROSS_TAKE + 3)
@@ -183,6 +189,17 @@ static void say(Client *c, const uint8_t *picks, unsigned n) {
 	if (form) {
 		c->out[c->queued++] = TEAM_CROSS(form);
 		++c->crossed;
+	}
+	/* (UNITE: the proxy form his OK committed, and the Soul with it in his side's Souls block there) */
+	uint8_t chaos = 0;
+	uint16_t chip = 0;
+	uint8_t soul = form == BN6_FORM_PROXY ? team_screen_soul(c->screen, &chaos, &chip) : 0;
+	if (soul) {
+		c->out[c->queued++] = TEAM_SOUL(soul, chaos);
+		if (chip) c->out[c->queued++] = TEAM_SOUL_CHIP(chip);
+		++c->souls;
+		printf("arena2v2: a partner's UNITE: Soul %u%s%s, as BN6's OK committed it on his screen\n", soul, chaos ? ", its Chaos Unison" : "",
+			chip ? ", ColonelSoul's chip" : "");
 	}
 	uint16_t built[BN6_HAND_MAX], pa = team_screen_pa(c->screen, built);
 	unsigned at, took;
@@ -290,7 +307,8 @@ void team_client_report(void) {
 		if (!c->screen) continue;
 		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms, "
 			"the worst %.2f), OK pressed %u times, %u times his side's closed first, %u times sent at the wait's limit; a frame of "
-			"it %.2f ms (the worst %.2f); his Cross sent %u times, a Program Advance %u\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
-			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true), c->crossed, c->pas);
+			"it %.2f ms (the worst %.2f); his Cross sent %u times, a Program Advance %u, a Soul %u\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
+			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true), c->crossed, c->pas,
+			c->souls);
 	}
 }

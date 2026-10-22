@@ -2223,8 +2223,9 @@ ours), and only his picks cross (22 October 2026; `arena_team_custom.c`,
   "Communication error" (seen). So his client makes a plain copy of the
   pair (`arena_pair_open_plain`: both GBAs on their own cable, BN5's
   bytes in their ROMs, no hook on them, never hashed, never on a
-  spectator's client), once, as his side's GBA first opens its Custom
-  screen. Each turn the pair is copied into it (`arena_pair_save`,
+  spectator's client; where he holds Souls, his side's GBA there with
+  BN5's installs' hooks for UNITE: [A partner's UNITE](#a-partners-unite)),
+  once, as his side's GBA first opens its Custom screen. Each turn the pair is copied into it (`arena_pair_save`,
   `arena_pair_load`), his deck is written into BN6's battle deck on his
   side's GBA there and the Custom screen's phase step put back to 0
   (`BN6_BATTLE_STEP`): the next frame BN6 sets its Custom screen up anew
@@ -2690,7 +2691,10 @@ pair's cores 1 and 2 are the two GBAs):
   drawn in his side's form, the arm flash and its height, the crossing's
   sound; `soullife.c`: the turns counted, the end and the weakness break,
   each refused for a partner). Read, and seen in the run above: the
-  partner's charged shots plain, his look his own.
+  partner's charged shots plain, his look his own. (Since [A partner's
+  UNITE](#a-partners-unite) each reads the MegaMan's own Souls state:
+  his side's for a lead, his own block for a partner, who has a Soul of
+  his own to read.)
 - **BN5's mood and its DarkChip rule by object** (`soulmood.c`). A
   partner's mood and dark are kept in a block of his own after the
   sides' (`BN6_SOULS_PARTNERS`, docs/EMULATION.md), his NaviStats his own
@@ -2729,11 +2733,10 @@ pair's cores 1 and 2 are the two GBAs):
   with the nearer of the side's two (columns and rows apart, the side's
   player where as near), the shape tried and taken out again since
   nothing reaches it and the getter runs some hundred times a frame.
-- **Left out still:** UNITE and ColonelSoul's button for a partner (his
-  Custom screen is a plain copy with no hook; what it takes: [A
-  partner's UNITE: what it takes](#a-partners-unite-what-it-takes)), a
-  Soul's life on his form, a united Soul carried to the other GBA (the
-  lead's alone). The
+- **Left out still:** a united Soul carried to the other GBA is the
+  lead's alone (a partner's crosses in his stream: [A partner's
+  UNITE](#a-partners-unite), which since gives him UNITE, his Soul's
+  life and its powers by object). The
   Dark Soul's chip lists, which DarkInvs's machine plays too, are a
   side's, made from the lead's folder (`arena_souls.c`): a partner under
   the chip AI plays his lead's list. The green flash (`xchips_flash.c`)
@@ -2755,51 +2758,99 @@ pair's cores 1 and 2 are the two GBAs):
   record answered by object at `0x0801595E`, and the controller's wait
   taught to wait for him.
 
-### A partner's UNITE: what it takes
+### A partner's UNITE
 
-Not built (issue #181's integration, 22 October 2026): a partner's own
-Custom screen offers Beast Out under OK where his MegaMan has it, never
-UNITE, and ColonelSoul's button never shows on it. What it takes, read
-in the code this integration joined:
+A partner unites with his own Souls on his own Custom screen, as his lead
+does (22 October 2026, issue #181; `arena_team_soul.c`, `soullife.c`,
+the Souls' modules by object):
 
 1. **UNITE on his copy.** UNITE and ColonelSoul's button are hooks of
-   BN5's installs on the Custom screen (`soulunite.c`, `soulcolonel.c`),
-   which the plain copy has none of. His side's core of the copy would
-   take the recorded installs' hooks (`xlog_hook_core`) and his own
-   Souls held (`soulunite_held_core`, the loadout's `souls`), without the
-   pair's two-a-side hooks; that is a hook core more on a partner's game
-   and two more where the dev flag stands in for both partners
-   (`HOOK_CORES`, 3 today). Each turn his own Souls block would be copied
-   into his side's block on the copy (his mood, his Souls used, a Soul
-   he is united with), as his record is into his side's NaviStats.
-2. **Crossing as his Cross does.** At his OK the copy's record says the
-   proxy form (8) and his side's block names the Soul, its chaos and
-   ColonelSoul's chip (`BN6_SOUL_NEXT`, `_NEXT_CHAOS`, `_NEXT_CHIP`): his
-   Cross message then a Soul message (the Cross count's index 1, the
-   Soul and its chaos; index 2 and 3, the chip), each GBA writing them
-   into his own block (`BN6_SOULS_PARTNERS`) with the Soul's used bit
-   and his turns (his record's `BN6_NAVI_TURN_EXTRA`), and his crossing's
-   pending record answered with them (`arena_team_cross.c`'s `pending`).
-3. **His Soul's life by object.** `soullife.c` takes a Soul up and lets
-   it go by the side (`entered`, `left`); by the object (`soul_field_of`)
-   it would be his. BN6 counts turns and asks a form's end for the sides'
-   players alone, so his Soul's countdown and end would be called from
-   the partners' turn hooks (`turned`, `turn`), and the screen's mark
-   (`stand`, `BN6_SOUL_SCREEN`) set in the partners' blocks too.
-4. **His Soul's own powers.** Some seventy reads of a side's Soul in
-   `soulchaos.c`, `soulchips.c`, `soulpower.c`, `soulpassive.c`,
-   `soullook.c`, `soulcolonel.c` and `soulcode.c` (the moved code's
-   reads of BN5's AI data's Soul fields) are refused for a partner today
-   (the full-rules audit); each would read his block where its object is
-   his, the Chaos Unison's charge state (cycle, phase, level, request)
-   among them.
-5. **His Dark Soul lists**, which DarkInvs's machine plays, from his own
-   folder: a list a partner, past the sides' two in `RAM_DARK_LISTS`.
+   BN5's installs on the Custom screen (`soulunite.c`, `soulcolonel.c`).
+   His side's GBA of his copy now takes the recorded installs' hooks
+   (`xlog_hook_core`) and his own Souls held (`soulunite_held_core`,
+   the loadout's `souls`), without the pair's two-a-side hooks
+   (`arena_pair_open_screen`); a copy whose partner holds no Soul stays
+   plain, no hook on it. That is a hook core more on a partner's game,
+   two where the dev flag stands in for both partners: `HOOK_CORES` is 5
+   (BN6's, the pair's two, a copy's one or two). Each turn his own Souls
+   block (`BN6_SOULS_PARTNERS`) is copied into his side's block there,
+   as his record is into his side's NaviStats, so UNITE reads his mood,
+   the Souls he has used and a Soul he is in.
+2. **Crossing as his Cross does.** His OK on UNITE commits the proxy form
+   (8) in his copy's record and the Soul in its side's block, as BN5's
+   OK does a lead's (`BN6_SOUL_NEXT`, `_NEXT_CHAOS`, `_NEXT_CHIP`); his
+   client says his Cross (the proxy form) and then the Soul
+   (`TEAM_SOUL`: the Cross count's index 1, the Soul and its chaos; and
+   `TEAM_SOUL_CHIP`, index 2 or 3, ColonelSoul's chip). Each GBA takes
+   them from his side's packet into his own block, with the Soul's used
+   bit and his turns (BN5's three and his own record's
+   `BN6_NAVI_TURN_EXTRA`, one for a Chaos Unison), and answers his
+   crossing's pending record with its chaos and turns
+   (`arena_team_cross.c`'s `pending`). A Soul said for a turn that never
+   crossed is dropped as his next turn opens.
+3. **His Soul's life by object.** `soullife.c` takes a Soul up as a
+   MegaMan enters the proxy form and lets it go as he leaves it by his
+   own Souls state (`soul_field_of`): a side's player's in his side's
+   block as before, a partner's in his own (his own mood calmed, BN5's
+   chip AI left, a Colonel's side bit his lead's alone). BN6 counts turns
+   and asks a form's end for the sides' players alone, so the partners'
+   turn hooks call the Soul's countdown (`soul_count_of`, from the
+   countdown's body run for him) and its end (`soul_ended_of`, BN6's
+   request to leave the form in place of Beast Out's end check, as for a
+   lead); a Custom screen opening marks the partners' blocks too
+   (`BN6_SOUL_SCREEN`).
+4. **His Soul's own powers.** Every read of a Soul where its MegaMan is
+   at hand reads his own Souls state (`soul_id_of`, `soul_field_of`): the
+   Chaos Unison's charge, phases, release, request, counter and glow
+   (`soulchaos.c`), the chip powers (`soulchips.c`), the abilities and
+   loadout (`soulpower.c`), the passives and the chip bonus
+   (`soulpassive.c`, `soulproxy.c`), the look, palette, crossing's sound,
+   face and arm flash (`soullook.c`), BN5's moved code's reads of its AI
+   data's Soul fields and the form getter (`soulcode.c`), BN5's DarkChip
+   ending a Soul (`soulmood.c`) and ColonelSoul's chip at the turn
+   (`soulcolonel.c`). For a side's player each reads what it read
+   before: the Souls' differential (`build.py xdiff`, the 72 specs of the
+   Souls, their chips, BN5's mood and DarkChips, the Dark Soul and
+   ColonelSoul) passes as before, and a NetBattle of two hashes as
+   before.
 
-The proof would be the stood-in partner's (a script taking UNITE as the
-lead's keys of `tests/xdiff/chaos_number_45.json` do) on both GBAs and
-through rollbacks, with a mutation leaving his Soul out on the second
-GBA, then the four games.
+`teamunite=1` (DEVTOOLS.md) gives each stood-in partner's copy the
+carried MegaMan's Souls and has his client take the chip under the
+cursor and UNITE at his first turn; on a partner's own game in a
+side-by-side match it gives the MegaMan he carries NumberSoul and Atk+10
+`*` as his folder's first chip, a UNITE in his first hand. Proved, 22
+October 2026, both ROMs, `--dev
+arena,arenaboth,arena2v2=1,souls=0x04,teamunite=1,teamhp=500,arenadelay=1,quitend`
+from the rules branch's checkpoint of thirty DarkPlus (each partner's
+first chip DarkPlus: NumberSoul's Chaos Unison), `CYBERWORLD_EMU_DEBUG`:
+
+| Run | End | Hashes | The two GBAs |
+| --- | --- | --- | --- |
+| `arenalag=4` (388 rollbacks) | over at frame 4846 | 80, all the same as `arenalag=0,arenawindow=8`'s | 3,600 iterations, 0 apart |
+| `arenalag=4,arenaroll=8` | over at 4857 | all 80 the same as the delay alone's (`arenawindow=0`) | 3,600, 0 apart; 607 rollbacks of 8 frames, the game's state the same after all 607 |
+| `teamunite=-1,arenalag=4` (his Soul left out on the second GBA, the mutation) | | | apart from iteration 1 |
+
+On both GBAs: "side 0's partner united with Soul 9 (chaos 1, turns 1),
+his own", his chaos B "released, out of phase 2: the failure", then "side
+0's partner's Soul 9 ended, his own". From his seat (`teamseat=2`, the
+pictures kept out of the repository): his own screen of DarkPlus, his
+OK, NumberSoul's image over him as he crosses, then his MegaMan in the
+Chaos Unison's palette beside his lead, his chaos B's glow charging.
+Over the network (the four games of [Over the
+server](#over-the-server-protocol-v15), `teamunite=1` on Beta's game,
+Delta's HeatCross beside it, Epsilon watching): Beta's UNITE of
+NumberSoul on his own screen, his Soul said on every game ("said 2
+times", both GBAs), his MegaMan in NumberSoul's look on the field; over
+at frame 1846 on all four, 30 hashes agreed and the spectator's 30
+checked, 960 iterations 0 apart on all five.
+
+Not exercised yet: ColonelSoul's button on his copy and his chip at the
+turn (built; no checkpoint with ColonelSoul at hand), a Soul's whole
+three turns and its end by the turns (the Chaos Unison's one turn ended
+by its failure in the runs above), and his Chaos Unison's failure's Dark
+Soul, which plays his side's lists, made from his lead's folder
+(`arena_souls.c`): his own folder's would need lists past the sides'
+two in `RAM_DARK_LISTS`.
 
 ### Proved: the partners' own folders and screens
 
@@ -3009,6 +3060,7 @@ GBAs iteration by iteration):
 | Beta's HeatCross (`teamcross=1` on his game), Delta's Program Advance (`teampa=1` on his), Epsilon watching | over at frame 1020, Gamma's team won | 16 agreed on each (the pair's ready hash `3d4dbab92c15e96d` on all), 17 checked by the spectator | 390 compared, 0 apart on all five | Beta's Cross sent once and taken by BN6's crossing for him on every GBA ("side 0's partner asked to cross 2 times", both GBAs); Delta's Z-Canon1 (`140`, power 300) from Cannon A, B and C, "side 1's partner's hand a Program Advance" on both GBAs of every game; both partners' NaviCusts compiled on all five (HP 40) |
 | Beta's hands off his screen 10 seconds a turn (`teamslow=600`), Epsilon watching | over at frame 1849 | 30 agreed on each, 30 checked by the spectator | 964 compared, 0 apart on all five | side 0's GBA held its packet for Beta 593 frames at most in a turn, side 1's for Delta 14 |
 | Through a local relay, 40 ms and up to 30 ms of jitter each way; Beta's Beast Out (`teambeast=1` on his game), Delta's Cross 2 (`teamcross=2` on his), Epsilon watching | delay 7; over at frame 1855 | 30 agreed on each, 30 checked by the spectator; 144, 179, 138 and 153 rollbacks | 971 compared, 0 apart on all five | Beta in Beast Out's form (0xB) and Delta in his Cross's (2) from the first turn on both GBAs of every game, BN6's crossing run for each ("asked to cross 2 times", both GBAs); Beast Out's turns counted for them as for the leads |
+| Beta's UNITE (`teamunite=1` on his game: NumberSoul held, Atk+10 `*` first), Delta's HeatCross, Epsilon watching | over at frame 1846 | 30 agreed on each, 30 checked by the spectator | 960 compared, 0 apart on all five | Beta's NumberSoul from his own screen, said on every game and taken up on both GBAs, his MegaMan in NumberSoul's look ([A partner's UNITE](#a-partners-unite)) |
 | Delta's game killed three seconds into the battle | Alpha's, Beta's and Gamma's battles stopped at frame 192: "the other player left the NetBattle" | | 5 compared, 0 apart | all three told the match broken off (result 3) |
 | Delta's game held still from its tick 300 (`arenafreeze=300`, its link kept) | the three others waited on Delta's keys and gave up at 1,200 ticks: "the other's keys stopped coming", the match broken off (result 3) | the four agreed to frame 239 | | |
 
@@ -3044,8 +3096,8 @@ streams](#four-streams)).
   through the deployed server or between devices; the stands' heading
   names the two leads alone; a partner's NaviCust compiled on games of
   different runs (each over its own checkpoint: the hashes say they agree
-  where the runs are the same); UNITE and ColonelSoul's button for a
-  partner ([A partner's UNITE: what it takes](#a-partners-unite-what-it-takes)),
+  where the runs are the same); a partner's ColonelSoul's button and a
+  Soul's three turns exercised ([A partner's UNITE](#a-partners-unite)),
   the Dark Soul's chip lists his own folder's, the green flash's tint a
   MegaMan's own, a hit's mood gain the attacker's own; a chip of
   computed power in his hand (his hand takes a computed chip's power as

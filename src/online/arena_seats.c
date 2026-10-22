@@ -16,6 +16,13 @@ void arena_seats_set(bool on) { four = on; }
 
 bool arena_seats_net(void) { return four; }
 
+void arena_seats_unite_folder(OnlineLoadout *l) {
+	l->souls |= 1u << 2;   /* (NumberSoul: BN5's Soul 9, bit k Soul 7 + k) */
+	l->folder[0] = (uint16_t)(BN6_CHIP_ATK10 | 26u << 9);   /* (Atk+10 *: a Plus chip, NumberSoul's kind) */
+	l->regular = 0;
+	l->tag[0] = l->tag[1] = 0xFF;
+}
+
 void arena_seats_pa_folder(OnlineLoadout *l) {
 	for (unsigned i = 0; i < 3; ++i) l->folder[i] = (uint16_t)(BN6_CHIP_CANNON | i << 9);
 	l->regular = 0;

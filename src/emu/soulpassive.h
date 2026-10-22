@@ -12,6 +12,7 @@
 #define CW_SOULPASSIVE_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Who the Souls' passives' bytes are (claims.h) */
 #define SOULPASSIVE_CLAIMS "the Souls' passives (soulpassive.c)"
@@ -33,6 +34,6 @@ bool soulpassive_install(int breaks);
  * the bonus's mark (r7 there); false where side is in no Soul (the proxy
  * HeatCross's). BN5's 0x0800D0A0: NumberSoul +10 to an attack chip of no
  * kind; the other Souls none. */
-bool soulpassive_bonus(int side, int chip, int *bonus, int *look);
+bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look);
 
 #endif

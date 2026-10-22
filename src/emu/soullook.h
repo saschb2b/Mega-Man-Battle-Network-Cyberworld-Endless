@@ -15,6 +15,7 @@
 #define CW_SOULLOOK_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Who the Souls' look's bytes are (claims.h) */
 #define SOULLOOK_CLAIMS "the Souls' look (soullook.c)"
@@ -35,6 +36,6 @@ bool soullook_install(int breaks);
 /* (soulproxy.c's arm flash hook) the flash of MegaMan's buster in the
  * proxy form where a Soul is united on `side`: BN6's kind for BN5's
  * (*kind) and the Soul as its frame (*frame); false where none is */
-bool soullook_flash(int side, int *kind, int *frame);
+bool soullook_flash(uint32_t obj, int *kind, int *frame);
 
 #endif

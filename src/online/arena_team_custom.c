@@ -9,6 +9,7 @@
 #include "arena_input.h"
 #include "arena_seats.h"
 #include "arena_team_link.h"
+#include "arena_team_soul.h"
 #include "bn6.h"
 #include "chips.h"
 #include "devtools.h"
@@ -200,13 +201,15 @@ static void commit(unsigned side) {
 
 /* a pick message of his: the pick kept; the last of them puts his picks
  * in (set at once where his side's screen has closed) */
-static void pick_said(unsigned side, uint16_t value) {
+static void pick_said(unsigned side, uint16_t value, bool second) {
 	uint32_t r = room(side);
 	unsigned count = value >> 11 & 7u, index = value >> 8 & 7u, slot = value & 0xFFu;
 	uint8_t state = hook_read8(r + R_STATE);
 	/* (his Cross, said before his picks while his turn is open: the form his own CROSSSELECT committed) */
 	if (count == TEAM_CROSS_COUNT) {
-		if (state == ST_OPEN && slot && slot < BN6_FORMS) {
+		/* (the Soul his UNITE committed, said after it: into his own Souls block, arena_team_soul.h) */
+		if (index && state == ST_OPEN) team_soul_said(side, index, slot, second);
+		else if (!index && state == ST_OPEN && slot && slot < BN6_FORMS) {
 			put8(r + R_CROSS, (uint8_t)slot);
 			++C.crosses[side];
 		}
@@ -234,7 +237,8 @@ static void pick_said(unsigned side, uint16_t value) {
 }
 
 /* a turn begun: picks that never came for the last one dropped */
-static void turn_open(uint32_t r) {
+static void turn_open(unsigned side, uint32_t r) {
+	team_soul_turn_open(side);
 	put8(r + R_STATE, ST_OPEN);
 	put8(r + R_PICKED, 0);
 	put8(r + R_OWED, 0);
@@ -264,8 +268,8 @@ uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
 	bool custom = hook_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, said = (word & TEAM_PICK_MARK) != 0;
 	if (custom && !hook_read8(r + R_DEALT)) deal(side, second);
 	uint8_t state = hook_read8(r + R_STATE);
-	if (custom && (state == ST_CLOSED || state == ST_WAITING)) turn_open(r);
-	if (said) pick_said(side, word);
+	if (custom && (state == ST_CLOSED || state == ST_WAITING)) turn_open(side, r);
+	if (said) pick_said(side, word, second);
 	state = hook_read8(r + R_STATE);
 	if (custom && state == ST_OPEN && hook_read8(r + R_OWED)) held_frame(side, r);
 	if (!custom && state == ST_IN) commit(side);

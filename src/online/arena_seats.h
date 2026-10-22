@@ -25,6 +25,11 @@ bool arena_seats_net(void);
  * TagChips (dealt first: a Program Advance in his first hand), his own
  * folder as it crosses to every game */
 void arena_seats_pa_folder(OnlineLoadout *l);
+/* teamunite=1 on a partner's own game: the MegaMan he carries in holds
+ * NumberSoul and has Atk+10 * as his folder's first chip and Regular chip
+ * (dealt first: a chip that lights NumberSoul in his first hand), his own
+ * as he crosses to every game */
+void arena_seats_unite_folder(OnlineLoadout *l);
 /* the partners' MegaMen (side 0's, side 1's; NULL: the game's start's,
  * his lead's folder and numbers), before the pair is built */
 void arena_seats_partners(const OnlineLoadout *partner[2]);

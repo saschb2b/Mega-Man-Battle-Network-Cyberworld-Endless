@@ -57,15 +57,22 @@ static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1;
 
 static uint8_t navi8(int side, uint32_t field) { return hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + field); }
 
-/* (r0 a side) BN5's pending Soul (0x080123FA): the Soul committed, its chaos, ColonelSoul's chip, its turns */
+/* the Souls state's field of side, or of a side's partner where the code runs for him (r5 his object: two MegaMen a side) */
+static uint32_t soul_at(int side, uint32_t obj, uint32_t field) {
+	return soul_partner(obj) && (hook_read8(obj + BN6_T1_ALLIANCE) & 1) == side ? soul_field_of(obj, field) : soul_field(side, field);
+}
+
+/* (r0 a side, r5 the object asking) BN5's pending Soul (0x080123FA): the Soul committed, its chaos, ColonelSoul's chip, its
+ * turns; a side's partner's his own */
 static HookAct pending(HookRegs *r, void *user) {
 	(void)user;
 	int side = (int)(r->r[0] & 1);
-	uint8_t next = hook_read8(soul_field(side, BN6_SOUL_NEXT));
-	r->r[0] = next ? next : hook_read8(soul_field(side, BN6_SOUL_ID));
-	r->r[1] = hook_read8(soul_field(side, next ? BN6_SOUL_NEXT_CHAOS : BN6_SOUL_CHAOS));
-	r->r[2] = hook_read16(soul_field(side, BN6_SOUL_CHIP));
-	r->r[3] = hook_read8(soul_field(side, next ? BN6_SOUL_NEXT_TURNS : BN6_SOUL_TURNS));
+	uint32_t me = r->r[5];
+	uint8_t next = hook_read8(soul_at(side, me, BN6_SOUL_NEXT));
+	r->r[0] = next ? next : hook_read8(soul_at(side, me, BN6_SOUL_ID));
+	r->r[1] = hook_read8(soul_at(side, me, next ? BN6_SOUL_NEXT_CHAOS : BN6_SOUL_CHAOS));
+	r->r[2] = hook_read16(soul_at(side, me, BN6_SOUL_CHIP));
+	r->r[3] = hook_read8(soul_at(side, me, next ? BN6_SOUL_NEXT_TURNS : BN6_SOUL_TURNS));
 	return HOOK_RETURN;
 }
 
@@ -86,9 +93,19 @@ static void navi_byte(HookRegs *r, int side) {
 	r->r[1] = BN6_BATTLE_NAVI;   /* (BN6's twin leaves the table's base in r1) */
 }
 
+/* (r5 the object) the same of his own: a side's partner's NaviStats and Soul his (two MegaMen a side) */
 static HookAct form(HookRegs *r, void *user) {
 	(void)user;
-	navi_byte(r, side_of(r->r[5]));
+	uint32_t me = r->r[5];
+	if (!soul_partner(me)) {
+		navi_byte(r, side_of(me));
+		return HOOK_RETURN;
+	}
+	uint32_t field = r->r[1] & 0xFF;
+	uint8_t v = hook_read8(soul_navi_stats(me) + field);
+	if (field == BN6_NAVI_FORM && v == BN6_FORM_PROXY && soul_id_of(me)) v = (uint8_t)soul_id_of(me);
+	r->r[0] = v;
+	r->r[1] = BN6_BATTLE_NAVI;
 	return HOOK_RETURN;
 }
 
@@ -101,7 +118,7 @@ static HookAct form_side(HookRegs *r, void *user) {
 /* (a moved read of BN5's AI data's Soul field) its value from BN6_SOULS, on to the next instruction */
 static HookAct field_read(HookRegs *r, void *user) {
 	const SoulField *f = user;
-	uint32_t obj = r->r[5], at = soul_field(side_of(obj), f->field);
+	uint32_t obj = r->r[5], at = soul_field_of(obj, f->field);
 	r->r[f->rd] = f->size == 2 ? hook_read16(at) : f->size == 4 ? hook_read32(at) : hook_read8(at);
 	r->r[12] = (r->pc + 2) | 1;
 	return HOOK_JUMP;

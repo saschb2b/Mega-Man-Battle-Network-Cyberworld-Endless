@@ -150,6 +150,10 @@ static HookAct stand(HookRegs *r, void *user) {
 	 * at the same turn, though this GBA's own player holds none) */
 	for (int s = 0; s < 2; ++s)
 		if (soul_united(s)) hook_write8(soul_field(s, BN6_SOUL_SCREEN), 1);
+	/* (... and each side's partner's, in his own block: two MegaMen a side's, nothing where none stands) */
+	for (uint32_t s = 0; s < 2; ++s)
+		if (hook_read8(BN6_SOULS_PARTNERS + s * BN6_SOULS_SIDE + BN6_SOUL_ID))
+			hook_write8(BN6_SOULS_PARTNERS + s * BN6_SOULS_SIDE + BN6_SOUL_SCREEN, 1);
 	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now();
 	bool beast = r->r[0] != 0, unite = unite_stands(side);

@@ -13,6 +13,8 @@
 #include "arena_team_navi.h"
 #include "bn6.h"
 #include "emu.h"
+#include "soullife.h"
+#include "soulunite.h"
 
 #define NONE16  0xFFFFu
 #define CROSSES 5   /* Gregar's, their flags from BN6_FLAG_HEAT_CROSS on */
@@ -36,7 +38,7 @@ static double since(uint64_t t) {
 	return (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
 }
 
-TeamScreen *team_screen_new(const uint8_t *rom, size_t size, ArenaPair *pair, unsigned side) {
+TeamScreen *team_screen_new(const uint8_t *rom, size_t size, ArenaPair *pair, unsigned side, unsigned souls) {
 	TeamScreen *s = calloc(1, sizeof *s);
 	if (!s || !pair) { free(s); return NULL; }
 	s->side = side & 1u;
@@ -44,7 +46,9 @@ TeamScreen *team_screen_new(const uint8_t *rom, size_t size, ArenaPair *pair, un
 	size_t n[2] = { 0, 0 };
 	for (unsigned g = 0; g < 2; ++g) state[g] = arena_core_save(arena_pair_core(pair, g), &n[g]);
 	const uint8_t *from[2] = { state[0], state[1] };
-	if (state[0] && state[1]) s->pair = arena_pair_open_plain(rom, size, from, n);
+	/* (his Souls held: UNITE offered by BN5's installs' hooks on his side's GBA there, as on his lead's; none, no hook at all) */
+	if (state[0] && state[1])
+		s->pair = souls && soulunite_ready() ? arena_pair_open_screen(rom, size, from, n, s->side, souls) : arena_pair_open_plain(rom, size, from, n);
 	free(state[0]);
 	free(state[1]);
 	if (s->pair) s->snap = arena_pair_snap_new(pair);
@@ -78,6 +82,11 @@ bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsi
 		if (f == BN6_FLAG_BEAST_OUT || f >= BN6_FLAG_HEAT_CROSS) c->rawWrite8(c, at, -1, (uint8_t)(his ? was | bit : was & ~bit));
 	}
 	c->rawWrite32(c, BN6_CROSSES_USED, -1, s->used);
+	/* (his own Souls' state as his side's there, which UNITE reads: his mood, the Souls he has used, a Soul he is united with) */
+	struct mCore *from = arena_pair_core(pair, s->side);
+	for (uint32_t i = 0; i < BN6_SOULS_SIDE; ++i)
+		c->rawWrite8(c, (uint32_t)soul_field((int)s->side, i), -1,
+			(uint8_t)from->rawRead8(from, BN6_SOULS_PARTNERS + s->side * BN6_SOULS_SIDE + i, -1));
 	/* (the Custom screen's phase at its first step: BN6 sets the screen up anew the next frame, its hand dealt from the deck) */
 	c->rawWrite8(c, BN6_BATTLE_STEP, -1, 0);
 	arena_pair_anchor(s->pair);
@@ -140,6 +149,14 @@ uint8_t team_screen_cross(TeamScreen *s) {
 	/* (the Crosses he has chosen, kept for his next turn's CROSSSELECT) */
 	s->used = (uint32_t)c->rawRead32(c, BN6_CROSSES_USED, -1);
 	return form && form < BN6_FORMS ? form : 0;
+}
+
+uint8_t team_screen_soul(const TeamScreen *s, uint8_t *chaos, uint16_t *chip) {
+	struct mCore *c = arena_pair_core(s->pair, s->side);
+	int side = (int)s->side;
+	*chaos = (uint8_t)c->rawRead8(c, soul_field(side, BN6_SOUL_NEXT_CHAOS), -1);
+	*chip = (uint16_t)c->rawRead16(c, soul_field(side, BN6_SOUL_NEXT_CHIP), -1);
+	return (uint8_t)c->rawRead8(c, soul_field(side, BN6_SOUL_NEXT), -1);
 }
 
 uint16_t team_screen_pa(const TeamScreen *s, uint16_t *built) {

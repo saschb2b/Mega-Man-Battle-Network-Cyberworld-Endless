@@ -266,6 +266,17 @@ ArenaPair *arena_pair_open_plain(const uint8_t *rom, size_t size, const uint8_t 
 	return open_pair(rom, size, state, state_size, NULL, true);
 }
 
+ArenaPair *arena_pair_open_screen(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], unsigned side,
+	unsigned souls) {
+	ArenaPair *p = open_pair(rom, size, state, state_size, NULL, true);
+	struct mCore *c = p ? p->core[side & 1u] : NULL;
+	if (c && !(xlog_hook_core(c) && soulunite_held_core(c, souls))) {
+		arena_pair_close(p);
+		return NULL;
+	}
+	return p;
+}
+
 void arena_pair_draw(ArenaPair *p, unsigned sides) { p->drawn = sides & 3u; }
 
 void arena_pair_close(ArenaPair *p) {
