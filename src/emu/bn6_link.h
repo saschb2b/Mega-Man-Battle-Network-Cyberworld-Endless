@@ -50,5 +50,18 @@
 #define BN6_T4_ACTIVE         0x02036710u /* u32 the fourth kind's slots in play (BN6_T4_OBJECTS), slot i bit 31 - i: a spawn takes the
                                              first clear one, an object let go clears its own, the battle's setup clears them all with the
                                              pool (bn6f eActiveT4BattleObjectsBitfield, the kind's record at 0x08003310) */
+/* A partner's whole MegaMan (docs/ONLINE_ARENA.md, His NaviCust, compiled by BN6; His Cross) */
+#define BN6_NAVICUST_RELOAD   0x0813E18Cu /* the PET's MegaMan's stats made again from the NaviCust's board (bn6f
+                                             reloadCurNaviStatBoosts_813c3ac, Falzar 0x0813C3AC): his NaviStats (BN6_NAVI_STATS) put back to
+                                             his own, each program's routine run over them (0x0813E464), the bugs, his HP by the map; no
+                                             arguments, called from the menus (the NaviCust's RUN, a map's load) */
+#define BN6_NS_CUSTOM         0x0A        /* u8 a NaviStats' Custom level: the chips a Custom screen deals (5, Custom1 6; 0x0802A408 reads
+                                             the side's into BN6_HAND_SIZE_SET) */
+#define BN6_NS_FLOAT_SHOE     0x1B        /* u8 a NaviStats' abilities the NaviCust's programs set (bn6f's NaviStats): FloatShoe, */
+#define BN6_NS_AIR_SHOE       0x1C        /* ... AirShoe, */
+#define BN6_NS_UNDER_SHIRT    0x1D        /* ... UnderShirt, */
+#define BN6_NS_SUPER_ARMOR    0x23        /* ... SuperArmor (1 each where its program runs) */
+#define BN6_NS_UNK17          0x17       /* u8 a NaviStats' byte a link battle's start sets (0xC, bn6f sub_800B144) on the way into it */
+#define BN6_NS_BEAST_TURNS    0x21        /* u8 a NaviStats' BeastOutCounter: 3 as a link battle with Beast Out starts (sub_800B144) */
 
 #endif

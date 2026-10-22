@@ -76,6 +76,12 @@ typedef struct {
 	                   client gone quiet, which never picks nor sends, so the wait's limit ends it */
 	int team_buster; /* teambuster=N (1-5): under arena2v2 both partners' records with their buster's Attack N, as their own
 	                    loadouts would give it (arena_team_navi.h) */
+	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
+	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
+	                   copies, a mutation that must part the two */
+	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
+	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
+	                   Cross none, a mutation that must part the two */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

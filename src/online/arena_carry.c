@@ -35,13 +35,20 @@ static uint8_t *read_file(const char *path, size_t *size) {
 	return bytes;
 }
 
+uint8_t *arena_carry_state(size_t *size) {
+	*size = 0;
+	Run saved;
+	if (!R.data || !peek_run(&saved)) return NULL;
+	char path[600];
+	save_state_path(path, sizeof path);
+	return read_file(path, size);
+}
+
 bool arena_carry_read(OnlineLoadout *out) {
 	Run saved;
 	if (!R.data || !peek_run(&saved)) return false;
-	char path[600];
-	save_state_path(path, sizeof path);
 	size_t size;
-	uint8_t *state = read_file(path, &size);
+	uint8_t *state = arena_carry_state(&size);
 	if (!state) return false;
 	static uint32_t video[ARENA_W * ARENA_H];
 	struct mCore *c = arena_core_new(R.data, ROM_SIZE, video, false);

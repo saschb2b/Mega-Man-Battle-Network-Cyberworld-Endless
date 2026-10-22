@@ -10,6 +10,7 @@
 
 #include "arena_pair.h"
 #include "arena_team_custom.h"
+#include "arena_team_navi.h"
 #include "bn6.h"
 #include "emu.h"
 
@@ -60,6 +61,10 @@ bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsi
 	if (!arena_pair_save(pair, s->snap) || !arena_pair_load(s->pair, s->snap)) return false;
 	struct mCore *c = arena_pair_core(s->pair, s->side);
 	for (unsigned i = 0; i < BN6_DECK_SIZE; ++i) c->rawWrite16(c, BN6_BATTLE_DECK + 2 * i, -1, (uint16_t)(i < n ? deck[i] : NONE16));
+	/* (his own record as his side's battle NaviStats there: BN6's screen deals his hand by his own Custom level, his NaviCust's) */
+	uint8_t rec[BN6_BATTLE_NAVI_SIZE];
+	if (arena_team_navi_record(c, s->side, rec))
+		for (unsigned i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) c->rawWrite8(c, BN6_BATTLE_NAVI + s->side * BN6_BATTLE_NAVI_SIZE + i, -1, rec[i]);
 	/* (his lead's Crosses and Beast Out off there: his own Cross is not his yet, so his screen offers none) */
 	for (unsigned f = BN6_FLAG_BEAST_OUT; f < BN6_FLAG_HEAT_CROSS + CROSSES; ++f) {
 		uint32_t at = BN6_EVENT_FLAGS + f / 8;

@@ -2,6 +2,9 @@
 #include "arena_team_navi.h"
 
 #include <stdio.h>
+#include <string.h>
+
+#include <mgba/core/core.h>
 
 #include "bn6.h"
 #include "devtools.h"
@@ -26,6 +29,8 @@ static Kept kept[HOOK_CORES];
 static int second_slot = -1;   /* the second GBA's core's slot: teamhp's mutation (negative) there alone */
 /* each partner's own loadout's numbers, the same on every client (arena_team_navi_loadout) */
 static struct { bool given; uint16_t max_hp, base_hp; uint8_t attack, speed, charge; } own[SIDES];
+/* ... and his NaviStats as BN6 compiled them from his NaviCust's board on his own client (arena_team_navicust.h) */
+static struct { bool given; uint8_t stats[BN6_BATTLE_NAVI_SIZE]; } compiled[SIDES];
 /* the records' answers by the asker (a partner's own object, one of each kind he spawned) and the objects marked a
  * partner's, every core's, a rollback's frames run again among them: what the output says */
 static uint32_t answered[SIDES][1 + KINDS], hands[SIDES][1 + KINDS], marked;
@@ -134,10 +139,18 @@ void arena_team_navi_begin(void) {
 	for (unsigned side = 0; side < SIDES; ++side) {
 		uint32_t to = room(side), from = BN6_BATTLE_NAVI + side * BN6_BATTLE_NAVI_SIZE;
 		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
+		/* (his NaviCust's programs whole: his NaviStats as BN6 compiled them, but for the two bytes a link battle's start sets in
+		 * every MegaMan's alike, kept from his side's; teamcust=-1 the second GBA's his side's copy, a mutation that must part them) */
+		if (compiled[side].given && !(dev.team_cust < 0 && s == second_slot)) {
+			uint8_t unk17 = hook_read8(from + BN6_NS_UNK17), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
+			for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) hook_write8(to + i, compiled[side].stats[i]);
+			hook_write8(to + BN6_NS_UNK17, unk17);
+			hook_write8(to + BN6_NS_BEAST_TURNS, beast);
+		}
 		/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
 		for (unsigned i = 0; i < HAND_SIZE; ++i) hook_write8(hand(side) + i, hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i));
 		/* (his own loadout's HP and buster, as the Arena carries a lead's: BN6 copies a side's battle NaviStats from his menu's) */
-		if (own[side].given) {
+		if (own[side].given && !compiled[side].given) {
 			if (own[side].max_hp) {
 				hook_write16(to + BN6_NS_BASE_HP, own[side].base_hp);
 				hook_write16(to + BN6_NS_CUR_HP, own[side].max_hp);
@@ -161,6 +174,19 @@ void arena_team_navi_loadout(unsigned side, uint16_t max_hp, uint16_t base_hp, c
 	own[side].attack = buster[0];
 	own[side].speed = buster[1];
 	own[side].charge = buster[2];
+}
+
+void arena_team_navi_compiled(unsigned side, const uint8_t *stats) {
+	side &= 1u;
+	compiled[side].given = stats != NULL;
+	if (stats) memcpy(compiled[side].stats, stats, sizeof compiled[side].stats);
+}
+
+bool arena_team_navi_record(struct mCore *c, unsigned side, uint8_t *out) {
+	uint32_t bits = room_bit(0) | room_bit(1);
+	if (!c || ((uint32_t)c->rawRead32(c, BN6_T4_ACTIVE, -1) & bits) != bits) return false;
+	for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) out[i] = (uint8_t)c->rawRead8(c, room(side & 1u) + i, -1);
+	return true;
 }
 
 uint32_t arena_team_navi_hand(unsigned side) {
