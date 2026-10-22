@@ -17,7 +17,15 @@ The two waiting players are told each bout as it starts, so their games
 watch it from the stands. A bout broken off (a leave, a drop, a decline,
 a bout never begun) ends the match broken off: no result for either team.
 Nothing is won or lost: the server keeps no record of a team match but
-its events."""
+its events.
+
+Side by side (protocol v15, issue #181): the team challenge names its
+format (ARENA's last byte), told to all four in TEAM_STATE. Side by side,
+no order is asked: each team's captain leads (his game the GBA of his
+side), his partner beside him on the same field, and the match is one
+battle of four seats (arena.py), all four accepting before its START. Its
+winner (the cable's first's report) is his team's; no winner is a draw; a
+leave or a drop of any of the four breaks it off for both teams."""
 
 import time
 
@@ -44,9 +52,10 @@ class Team:
 
 
 class TeamMatch:
-    def __init__(self, match_id, teams):
+    def __init__(self, match_id, teams, form=0):
         self.id = match_id
         self.teams = teams                    # (challenger's, challenged's)
+        self.form = form                      # protocol's team_relay, or team_side_by_side: one battle of four (v15)
         self.order = [None, None]             # each team's [lead, second], once its captain picked
         self.time = time.monotonic()
         self.next = [0, 0]                    # each team's next MegaMan in its order
@@ -90,7 +99,8 @@ class Teams:
             left = (match.left(side), match.left(side ^ 1))
             number, hp, match_id = match.number, match.hp, match.id
             bout = match.bout.id if match.bout else 0
-        player.writer.write(websocket.frame(protocol.team_state(stage, partner, match_id, bout, ids, left, number, result, hp)))
+        form = match.form if match else 0
+        player.writer.write(websocket.frame(protocol.team_state(stage, partner, match_id, bout, ids, left, number, result, hp, form)))
 
     def busy(self, player_id):
         """In a team match (a bout's or waiting for one): a challenge, a trade or a team ask to or from him refused."""
@@ -194,9 +204,9 @@ class Teams:
             return False
         return all(self.free(p) and p in self.server.players for p in (self.of[a_id].other(a_id), self.of[b_id].other(b_id)))
 
-    def begin(self, a_id, b_id):
-        """A team challenge's Yes: the match begins, each captain asked the order."""
-        match = TeamMatch(self.next, (self.of[a_id], self.of[b_id]))
+    def begin(self, a_id, b_id, form=0):
+        """A team challenge's Yes: the match begins, each captain asked the order (side by side: none, the captains lead)."""
+        match = TeamMatch(self.next, (self.of[a_id], self.of[b_id]), form)
         self.next = self.next % 0xffffffff + 1
         self.matches[match.id] = match
         for p in match.players():
@@ -204,7 +214,10 @@ class Teams:
             self.server.stands.stop(p)
         for p in match.players():
             self.send(p, MATCH, self.of[p].other(p), match)
-        self.server.event("team_match", match=match.id, players=match.players())
+        self.server.event("team_match", match=match.id, players=match.players(), form=form)
+        if form == protocol.SPEC["team_side_by_side"]:
+            match.order = [[team.captain, team.partner] for team in match.teams]
+            self.ordered(match)
 
     def pick(self, player, lead):
         match = self.matches.get(self.in_match.get(player.id, 0))
@@ -229,7 +242,9 @@ class Teams:
         """The next bout called: its two fighters say they are ready (ARENA accept), then START."""
         match.number += 1
         a, b = self.fighter(match, 0), self.fighter(match, 1)
-        match.bout = self.server.arena.bout(a, b, match)
+        # (side by side: one battle, the partners beside their leads, seats 2 and 3)
+        partners = (match.order[0][1], match.order[1][1]) if match.form == protocol.SPEC["team_side_by_side"] else None
+        match.bout = self.server.arena.bout(a, b, match, partners)
         for p in match.players():
             self.send(p, BOUT, self.of[p].other(p), match)
 
@@ -253,6 +268,13 @@ class Teams:
             return
         hp0, _, hp1, _, _, _, _, _, winner = status
         side_a = match.side_of(bout.a)
+        if match.form == protocol.SPEC["team_side_by_side"]:
+            # (one battle: its winner's team wins, the other's MegaMen all out; none a draw)
+            match.next = [MEMBERS if winner != w else 0 for w in ((1, 2) if side_a == 0 else (2, 1))]
+            match.hp = 0
+            self.server.event("team_bout", match=match.id, bout=bout.id, winner=winner, hp=0)
+            self.over(match, None if not winner else side_a if winner == 1 else side_a ^ 1, drawn=not winner)
+            return
         # (winner 1 the cable's first, bout.a; 2 bout.b; 0 none: both out)
         if winner != 1:
             match.next[side_a] += 1

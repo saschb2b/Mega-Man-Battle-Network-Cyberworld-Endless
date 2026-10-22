@@ -203,7 +203,8 @@ class ContractTests(unittest.TestCase):
                      "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
                      "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes",
                      "busy_shift", "busy_battle", "busy_watch", "busy_trade", "link_shift", "link_good_ms", "link_fair_ms",
-                     "ping_bytes", "arena_seen", "pending_unseen"):
+                     "ping_bytes", "arena_seen", "pending_unseen", "team", "team_state", "team_bytes", "team_state_bytes",
+                     "notice_team", "arena_seat", "seats", "team_relay", "team_side_by_side"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
@@ -223,6 +224,9 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(protocol.ARENA_STATUS.size, protocol.SPEC["arena_status_bytes"])
         self.assertEqual(protocol.WATCH.size, protocol.SPEC["watch_bytes"])
         self.assertEqual(protocol.WATCH_STATE.size, protocol.SPEC["watch_state_bytes"])
+        self.assertEqual(protocol.TEAM_STATE.size, protocol.SPEC["team_state_bytes"])
+        # (v15: a 2v2's ARENA_SEAT around the largest relayed message)
+        self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
         self.assertEqual(protocol.WATCH_KEYS.size, protocol.SPEC["watch_keys_head"])
         self.assertLessEqual(2 + protocol.SPEC["stands_max"] * protocol.STANDS_ENTRY.size, protocol.SPEC["max_message"])
         self.assertLessEqual(protocol.WATCH_KEYS.size + 2 * protocol.SPEC["watch_keys_max"], protocol.SPEC["max_message"])

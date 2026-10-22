@@ -13,7 +13,18 @@ challenge between players of two teams is a team challenge, whose Yes
 begins the team match there; each of its bouts is a Match here, called by
 teams.py, which both its fighters accept (ready, their last screen
 closed) before START. A team player's challenge to a lone one, or to his
-own partner, is refused with NOTICE notice_team."""
+own partner, is refused with NOTICE notice_team.
+
+Two MegaMen a side (protocol v15, issue #181): a team challenge names its
+format (ARENA's last byte, teams.py); side by side, the team match is one
+battle of four seats, the teams' captains leading: seat 0 the
+challenger's team's lead (the cable's first GBA), 1 the other team's lead
+(the second GBA), 2 and 3 their partners. Every seat's game runs the same
+pair from the four streams; each sends ARENA accept when ready, and START
+goes to all four once all four have, each with its seat and the four
+sessions. What a seat sends is relayed to the three others as ARENA_SEAT
+(its seat, then the message as sent), and to the stands; a leave, a
+decline or a dropped connection of any of the four ends it for all."""
 
 import math
 import time
@@ -47,12 +58,16 @@ def delay_for(latency_a, latency_b):
 
 
 class Match:
-    def __init__(self, match_id, a, b, latency, team=0, teamed=False, challenger=None):
+    def __init__(self, match_id, a, b, latency, team=0, teamed=False, challenger=None, form=0, partners=None):
         # (a the cable's first side, b the second: the challenger first, but
         # for a rematch, which keeps the last battle's sides, v13)
         self.id, self.a, self.b = match_id, a, b
+        # (a 2v2's seats in order, v15: the leads, then side 0's and side 1's partners; a battle of two, its two)
+        self.seats = (a, b) + tuple(partners) if partners else (a, b)
+        self.form = form        # a team challenge's format (teams.py); a 2v2's bout 1
         self.challenger = challenger or a
-        self.latency = {self.challenger: latency, self.other(self.challenger): 0}
+        self.latency = {p: 0 for p in self.seats}
+        self.latency[self.challenger] = latency
         self.started = False
         self.finished = False   # over, from the cable's first (not a leave)
         self.team = team        # a team match's bout: its id (teams.py), both fighters' accepts before START
@@ -62,7 +77,16 @@ class Match:
         self.time = time.monotonic()
 
     def other(self, player_id):
-        return self.b if player_id == self.a else self.a
+        """The other GBA's player (a partner's: the other side's lead)"""
+        seat = self.seat(player_id)
+        return self.seats[(seat & 1) ^ 1] if seat is not None else self.a
+
+    def seat(self, player_id):
+        return self.seats.index(player_id) if player_id in self.seats else None
+
+    @property
+    def four(self):
+        return len(self.seats) == 4
 
 
 class Arena:
@@ -82,13 +106,15 @@ class Arena:
             return
         other = self.server.players.get(match.other(player_id))
         identity = other.identity if other else bytes(16)
-        player.writer.write(websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay)))
+        seats = match.seats if match.four and stage == START else (0, 0, 0, 0)
+        player.writer.write(websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay,
+                                                                 match.form, seats)))
 
     def end(self, match, told=()):
         if self.matches.pop(match.id, None) is None:
             return
         self.server.stands.end(match)
-        for player_id in (match.a, match.b):
+        for player_id in match.seats:
             self.of.pop(player_id, None)
             if player_id not in told:
                 self.send(player_id, match, ENDED)
@@ -99,25 +125,28 @@ class Arena:
         match.started = True
         if not match.team and not match.teamed:
             self.sides[frozenset((match.a, match.b))] = match.a
-        delay = delay_for(match.latency[match.a], match.latency[match.b])
-        self.send(match.a, match, START, 0, delay)
-        self.send(match.b, match, START, 1, delay)
-        self.server.event("arena", match=match.id, a=match.a, b=match.b, delay=delay, team=match.team)
+        # (a 2v2's delay the longest of its four latencies: every stream rides it)
+        delay = delay_for(max(match.latency.values()), 0)
+        for seat, player_id in enumerate(match.seats):
+            self.send(player_id, match, START, seat, delay)
+        self.server.event("arena", match=match.id, a=match.a, b=match.b, delay=delay, team=match.team, seats=len(match.seats))
         self.server.daily.count("battles_started")
         self.server.stands.begin(match, delay)
         if match.team:
             self.server.teams.fight(match)
 
-    def bout(self, a, b, team_match):
-        """A team match's bout (teams.py): a Match its two fighters accept when ready."""
-        match = Match(self.next, a, b, 0, team=team_match.id)
+    def bout(self, a, b, team_match, partners=None):
+        """A team match's bout (teams.py): a Match its two fighters accept when ready; side by side
+        (`partners`, v15) its four seats', all four accepting"""
+        match = Match(self.next, a, b, 0, team=team_match.id, form=team_match.form, partners=partners)
         self.next = self.next % 0xffffffff + 1
         self.matches[match.id] = match
-        self.of[a] = self.of[b] = match.id
+        for player_id in match.seats:
+            self.of[player_id] = match.id
         return match
 
     async def handle(self, player, data):
-        action, ref, latency = protocol.read_arena(data)
+        action, ref, latency, form = protocol.read_arena(data)
         if not self.server.arena_on:
             await self.server.notice(player, 18, "The Arena is closed on this server")
             return
@@ -125,10 +154,10 @@ class Arena:
         if action in (CHALLENGE, ACCEPT) and await self.server.without_pass(player):
             return
         if action == CHALLENGE:
-            await self.challenge(player, ref, latency)
+            await self.challenge(player, ref, latency, form)
             return
         match = self.matches.get(ref)
-        if not match or player.id not in (match.a, match.b):
+        if not match or player.id not in match.seats:
             await self.server.notice(player, 17, "That battle is over")
             return
         if action == SHOWN:
@@ -143,7 +172,7 @@ class Arena:
             # (a bout: each fighter ready, the other's START waits for both)
             match.latency[player.id] = latency
             match.ready.add(player.id)
-            if len(match.ready) == 2:
+            if len(match.ready) == len(match.seats):
                 self.start(match)
         elif action == ACCEPT and player.id != match.challenger and not match.started and match.teamed:
             # (a team challenge taken: the team match begins, teams.py; this Match was only its ask)
@@ -151,7 +180,7 @@ class Arena:
                 self.end(match)
                 return
             self.end(match, told=(match.a, match.b))
-            self.server.teams.begin(match.a, match.b)
+            self.server.teams.begin(match.a, match.b, match.form)
         elif action == ACCEPT and player.id != match.challenger and not match.started:
             match.latency[player.id] = latency
             self.start(match)
@@ -162,7 +191,7 @@ class Arena:
                 match.finished = True
             self.end(match)
 
-    async def challenge(self, player, target_id, latency):
+    async def challenge(self, player, target_id, latency, form=0):
         target = self.server.players.get(target_id)
         if not target or target.id == player.id or target.channel != player.channel:
             await self.server.notice(player, 17, "That Navi is no longer here")
@@ -186,7 +215,8 @@ class Arena:
         a, b = player.id, target.id
         if not teamed and self.sides.get(frozenset((a, b))) == b:
             a, b = b, a
-        match = Match(self.next, a, b, latency, teamed=teamed, challenger=player.id)
+        # (the format is a team challenge's alone: a lone challenge is the NetBattle as ever)
+        match = Match(self.next, a, b, latency, teamed=teamed, challenger=player.id, form=form if teamed else 0)
         self.next = self.next % 0xffffffff + 1
         self.matches[match.id] = match
         self.of[player.id] = self.of[target.id] = match.id
@@ -195,11 +225,19 @@ class Arena:
 
     def relay(self, player, data):
         match = self.matches.get(protocol.arena_relay(data))
-        if not match or not match.started or player.id not in (match.a, match.b):
+        if not match or not match.started or player.id not in match.seats:
             return
-        other = self.server.players.get(match.other(player.id))
-        if other and not other.writer.is_closing():
-            other.writer.write(websocket.frame(data))
+        if match.four:
+            # (a 2v2: to the three others, each told whose seat it is, v15)
+            seat = match.seat(player.id)
+            framed = websocket.frame(protocol.arena_seat(seat, data))
+            others = [p for p in match.seats if p != player.id]
+        else:
+            framed, others = websocket.frame(data), [match.other(player.id)]
+        for other_id in others:
+            other = self.server.players.get(other_id)
+            if other and not other.writer.is_closing():
+                other.writer.write(framed)
         self.server.stands.record(match, player.id, data)
 
     def left(self, player_id):

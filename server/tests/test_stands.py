@@ -19,8 +19,8 @@ from test_server import Client
 SPEC = protocol.SPEC
 
 
-def arena(action, ref, latency=0):
-    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency)
+def arena(action, ref, latency=0, form=0):
+    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency, form)
 
 
 def keys(match, first, values):
