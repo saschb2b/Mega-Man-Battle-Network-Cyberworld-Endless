@@ -212,7 +212,9 @@ void arena_card_result(const ArenaCardView *v) {
 	const char *h = head[v->result <= 5 ? v->result : 0];
 	int by = y + BODY_Y + 2;
 	text_draw_scaled(x + 10, by, h, v->result == 1 ? PET_GOLD : PET_WHITE, TEXT_LEFT, 2);
-	text_draw(x + W - 10, by + 9, arena_vs_name(v->name), PET_CYAN_HI, TEXT_RIGHT);
+	/* (a 2v2's two names in the small letters, clear of the head) */
+	if (v->four) pixfont_draw(x + W - 10, by + 12, arena_vs_name(v->name), PET_CYAN_HI, INK, PIXFONT_RIGHT, 1);
+	else text_draw(x + W - 10, by + 9, arena_vs_name(v->name), PET_CYAN_HI, TEXT_RIGHT);
 	if (v->why) second_wrapped(v->why, x + 10, by + 30, W - 20, 4, PET_WHITE);
 	else if (v->tally && v->four) rows_four(x, by + 26, v);
 	else if (v->tally) rows(x, by + 26, v);

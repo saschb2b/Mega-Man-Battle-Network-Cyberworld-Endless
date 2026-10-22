@@ -1052,10 +1052,23 @@ Team NetBattles](ONLINE_ARENA.md#team-netbattles); the wire (protocol
 v12: TEAM, TEAM_STATE, STANDS's bout byte, a carried HP, NOTICE 29):
 [shared/online/README.md](../shared/online/README.md).
 
+Since protocol v15 (issue #181) a team challenge names its format:
+MegaMan asks the challenger "How do we fight 'em,Lan?", `One by one`
+(the relay above) or `Side by side`, and the other team's question says
+which. Side by side no order is asked: each team's captain leads, his
+game the GBA of his side, and the match is one battle of four, every
+one of the four games running the same pair from the four players'
+keys, each partner picking his own chips on BN6's own Custom screen of
+his own game while the leads wait for him. The way in's panel shows the
+four, the result card each MegaMan's HP left and the team's result;
+whoever watches from the stands runs it from the four streams. How it is
+built and the four-game proof: [ONLINE_ARENA.md, Over the
+server](ONLINE_ARENA.md#over-the-server-protocol-v15).
+
 ## The server and the wire
 
-Protocol v14 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v14`; v7 added the
+Protocol v15 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v15`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
 BYE, maintenance and which side is behind: A dropped link, above; v11
@@ -1064,7 +1077,9 @@ docs/ONLINE_ARENA.md, Quicker on the wire; v12 Team NetBattles; v13 the
 bout's seed, a rematch's sides kept, a challenge seen, and the busy marks
 and link bars in SNAPSHOT, its round trip in PING; v14 the emotes: an
 emote aimed, its answer flagged, the beat it starts on, twelve emotes and
-a burst of three then one a second: Emotes, above). The
+a burst of three then one a second: Emotes, above; v15 a team
+challenge's format and two MegaMen a side, four seats in one battle:
+Team NetBattles, above). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of

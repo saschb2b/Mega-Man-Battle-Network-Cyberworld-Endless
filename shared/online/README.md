@@ -1,10 +1,10 @@
-# Net Square protocol v14
+# Net Square protocol v15
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v14`. The server also
+`/presence` with subprotocol `cyberworld.presence.v15`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -26,8 +26,8 @@ side is behind, rather than a refused upgrade (v10).
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
-| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over, 5 `arena_seen` (v13): the challenge's question up on the challenged's screen, from him alone, once), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8) |
-| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID, 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's), u8 input delay in frames (START's) |
+| ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over, 5 `arena_seen` (v13): the challenge's question up on the challenged's screen, from him alone, once), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8), u8 a team challenge's format (v15: `team_relay` 0, `team_side_by_side` 1; else 0, and a lone challenge's is taken as 0) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; else zeros) |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/ONLINE_ARENA.md, Quicker on the wire), never kept for the stands |
@@ -38,16 +38,17 @@ side is behind, rather than a refused upgrade (v10).
 | STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
-| WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay |
-| WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
-| WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side, u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
+| WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay, u8 a 2v2 (v15: 1, else 0), u32 seat 2's session, u32 seat 3's (a 2v2's partners; else zeros) |
+| WATCH_RELAY (30) | server → spectator | u8 side (0 the cable's first; a 2v2's seat, 0..3), then that player's ARENA_LOADOUT or ARENA_HASH as he sent it |
+| WATCH_KEYS (31) | server → spectator | u32 battle ID, u8 side (a 2v2's seat, 0..3; a partner's keys keep their sixteen bits), u32 first frame, u16 count (1..`watch_keys_max`, 240), count u16 GBA keys, one a frame from the first |
 | BYE (32) | client → server, last | nothing: the game leaves (the pad, R and home, the game closed), so its place is freed at once; a WebSocket close says the same |
 | TEAM (33) | client → server | u8 action (1 ask a player to team up, 2 answer one, 3 split the team or take an ask back, 4 the order), u32 reference (the player asked, the one who asked, 0 for a split, the lead's session for the order), u8 value (an answer's 1 yes; else 0) |
-| TEAM_STATE (34) | server → client | u8 stage (1 asked, 2 waiting, 3 formed, 4 split, 5 a match begun, 6 the order shown, 7 a bout called, 8 the bout started, 9 the match over), u32 the partner's session (asked: the asker; waiting: the one asked; split: the other), u32 the team match's ID, u32 the bout under way (its ARENA battle ID, 0 none), four u32 sessions: the recipient's team's two, then the other's, each team's MegaMan up now first (before the order: its captain first), u8 MegaMen standing of the recipient's team, u8 of the other, u8 the bout's number, u8 the result (the match over: 1 won, 2 lost, 3 broken off, 4 drawn; else 0), u16 the staying MegaMan's HP as the last bout's report left it (0 none) |
+| TEAM_STATE (34) | server → client | u8 stage (1 asked, 2 waiting, 3 formed, 4 split, 5 a match begun, 6 the order shown, 7 a bout called, 8 the bout started, 9 the match over), u32 the partner's session (asked: the asker; waiting: the one asked; split: the other), u32 the team match's ID, u32 the bout under way (its ARENA battle ID, 0 none), four u32 sessions: the recipient's team's two, then the other's, each team's MegaMan up now first (before the order: its captain first; side by side: its captain, the lead), u8 MegaMen standing of the recipient's team, u8 of the other, u8 the bout's number, u8 the result (the match over: 1 won, 2 lost, 3 broken off, 4 drawn; else 0), u16 the staying MegaMan's HP as the last bout's report left it (0 none), u8 the format (v15: 0 the relay, 1 side by side) |
+| ARENA_SEAT (35) | server → client | v15, a 2v2's: u8 the sending seat (0..3), then its ARENA_LOADOUT, ARENA_INPUT or ARENA_HASH as it sent it, to the three other seats |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 8, ARENA_STATE 28, OFFER 5, WEEK_POST 17,
-ARENA_STATUS 20, WATCH 6, WATCH_STATE 15, TEAM 7 and TEAM_STATE 36; a STANDS entry is 63 (62 before v12) and
+TRADE_STATE 32, ARENA 9 (8 before v15), ARENA_STATE 45 (28 before v15), OFFER 5, WEEK_POST 17,
+ARENA_STATUS 20, WATCH 6, WATCH_STATE 24 (15 before v15), TEAM 7 and TEAM_STATE 37 (36 before v15); a STANDS entry is 63 (62 before v12) and
 WATCH_KEYS's head 12 (each count with its type byte). The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
@@ -116,6 +117,35 @@ or full rules outside a mixed pair's common ground, protocols v4 to v8)
 is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v15 (issue #181; docs/ONLINE_ARENA.md, Two MegaMen a side,
+Over the server). **A team challenge's format**: ARENA's last byte names
+it, `team_relay` (0, the relay of v12) or `team_side_by_side` (1);
+ARENA_STATE's CHALLENGED and WAITING tell it, and TEAM_STATE tells all
+four. A lone challenge's format is taken as 0. **Side by side**: the
+challenge's Yes begins the team match as ever (stage 5), no order is
+asked (each team's captain leads, his partner beside him: stage 6 at
+once), and its one bout is a battle of four **seats**: seat 0 the
+challenger's team's captain (the cable's first GBA), 1 the other
+captain (the second GBA), 2 and 3 their partners (side 0's, side 1's).
+Each of the four sends ARENA accept when ready; START goes to all four
+once all four have, its side byte the recipient's seat, its format 1 and
+its four sessions the seats', the input delay from the longest of the
+four latencies. What a seat sends (ARENA_LOADOUT, ARENA_INPUT,
+ARENA_HASH) goes to the three others as ARENA_SEAT (35): the seat, then
+the message as sent; a partner's keys keep sixteen bits (his Custom
+screen's picks travel in his stream, bit 15 set). The cable's first
+(seat 0) sends the report and the over, as in a battle of two; its winner
+is his team's or the other's, none a draw (TEAM_STATE 9, result 4); a
+leave, a decline, a dropped connection or 30 seconds without all four
+ready ends it broken off for both teams (result 3). All four are busy
+(SNAPSHOT's busy bits, and a challenge, a trade or a team ask to them
+is NOTICE 16). The stands keep a 2v2 by its four seats: WATCH_STATE
+names the partners' seats, WATCH_RELAY and WATCH_KEYS carry the seat,
+the hashes relayed are the cable's first's. STANDS is unchanged: its
+entry names the two leads and their report. A game of another version
+is never paired into one: the server answers its HELLO with ERROR 2 or
+17, as for any version.
 
 Protocol v14 (issue #176; docs/ONLINE.md, Emotes). **An emote aimed**:
 SOCIAL names the session it is aimed at, where it is one of

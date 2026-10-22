@@ -207,8 +207,6 @@ int square_team_format_picked(void) {
 	return form;
 }
 
-bool square_team_side_by_side(void) { return T.st.stage >= TEAM_MATCH && T.st.form == ONLINE_TEAM_SIDE_BY_SIDE; }
-
 const char *square_team_name(uint32_t id) {
 	for (int k = 0; k < 4; ++k)
 		if (T.st.players[k] == id && T.names[k][0]) return T.names[k];

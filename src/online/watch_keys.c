@@ -35,11 +35,6 @@ uint32_t watch_keys_runnable(const WatchKeys *k) {
 	return known >= ARENA_LOOKAHEAD - 1 ? known - (ARENA_LOOKAHEAD - 1) : 0;
 }
 
-void watch_keys_take(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][2]) {
-	for (unsigned i = 0; i < ARENA_LOOKAHEAD; ++i)
-		for (unsigned side = 0; side < 2; ++side) out[i][side] = k->keys[side][frame + i];
-}
-
 void watch_keys_take_all(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS]) {
 	for (unsigned i = 0; i < ARENA_LOOKAHEAD; ++i)
 		for (unsigned s = 0; s < ARENA_PLAYERS; ++s) out[i][s] = s < seats(k) ? k->keys[s][frame + i] : 0;

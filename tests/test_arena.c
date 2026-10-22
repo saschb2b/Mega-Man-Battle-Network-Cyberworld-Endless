@@ -859,10 +859,10 @@ static void watch_keys(void) {
 	assert(!watch_keys_put(&w, 1, 5, be, 1));   /* (frame 4 missing) */
 	assert(watch_keys_put(&w, 1, 2, be, 300) && w.known[1] == 302 && watch_keys_runnable(&w) == 5);
 	assert(watch_keys_put(&w, 0, 6, be + 12, 294) && watch_keys_runnable(&w) == 299);
-	uint16_t out[ARENA_LOOKAHEAD][2];
-	watch_keys_take(&w, 4, out);
-	/* (the keys' ten bits: the top six of the byte pair dropped) */
-	assert(out[0][0] == 4 && out[0][1] == 2 && out[1][0] == 5 && out[1][1] == 3);
+	uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS];
+	watch_keys_take_all(&w, 4, out);
+	/* (the keys' ten bits: the top six of the byte pair dropped; a battle of two's partners released) */
+	assert(out[0][0] == 4 && out[0][1] == 2 && out[1][0] == 5 && out[1][1] == 3 && !out[0][2] && !out[1][3]);
 	watch_keys_free(&w);
 	assert(!w.known[0] && !w.keys[0]);
 	/* (a 2v2's four seats, v15: runnable once all four are known, a partner's sixteen bits kept) */

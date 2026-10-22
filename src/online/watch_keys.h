@@ -21,17 +21,16 @@ typedef struct {
 
 /* a 2v2's four streams, before any is put: a partner's keeps its sixteen bits */
 void watch_keys_seats(WatchKeys *k, unsigned seats);
-/* ... frame's keys and the one after it, every stream's: out[k][seat] */
+/* frame's keys and the one after it, every stream's: out[k][seat] (a
+ * battle of two's partners' columns released) */
 void watch_keys_take_all(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][ARENA_PLAYERS]);
 
 /* side's keys from `first` (big-endian u16, `count` of them): false where
  * one went missing between (first past the known) or memory ran out; a
  * stretch already known is left as it was */
 bool watch_keys_put(WatchKeys *k, unsigned side, uint32_t first, const uint8_t *be, unsigned count);
-/* the frames whose keys and the one after them are known for both sides */
+/* the frames whose keys and the one after them are known for every stream */
 uint32_t watch_keys_runnable(const WatchKeys *k);
-/* frame's keys and the one after it: out[k][side] */
-void watch_keys_take(const WatchKeys *k, uint32_t frame, uint16_t out[ARENA_LOOKAHEAD][2]);
 void watch_keys_free(WatchKeys *k);
 
 #endif

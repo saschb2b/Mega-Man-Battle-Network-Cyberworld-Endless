@@ -153,7 +153,7 @@ static void card(void) {
 		}
 		snprintf(theirs, sizeof theirs, "%s & %s", v.names[2], v.names[3]);
 		v.name = theirs;
-		if (SA.card.result >= 4) v.why = arena_stop_line(SA.stop, SA.name);
+		if (SA.card.result >= 4) v.why = arena_stop_line(SA.stop, SA.whose);
 	}
 	SquareTeamCard team;
 	square_team_card(&team);

@@ -21,3 +21,9 @@ const char *stands_won(const char *winner) {
 	snprintf(s, sizeof s, "%s won the NetBattle.", winner);
 	return s;
 }
+
+const char *stands_team_won(const char *lead) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's team won the NetBattle.", lead);
+	return s;
+}

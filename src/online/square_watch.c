@@ -55,6 +55,7 @@ static struct {
 	OnlineSnapshot s;
 	int over_t, shown_t;
 	bool over_said;            /* WATCH_STATE's over come: no more keys */
+	bool four;                 /* a 2v2's (protocol v15): its end names the winning lead's team */
 	char why[160];
 } W;
 
@@ -212,7 +213,8 @@ static void started(const WatchState *st) {
 	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
 	/* (a 2v2, protocol v15: four seats run from four streams) */
-	if (st->form) arena_watch_four(W.w);
+	W.four = st->form != 0;
+	if (W.four) arena_watch_four(W.w);
 	W.stage = W_ON;
 	W.watched_at = SDL_GetTicks();
 	W.view = 0;
@@ -315,7 +317,8 @@ void square_watch_draw(void) {
 	if (W.stage == W_DONE) {
 		unsigned result = W.w ? arena_watch_result(W.w) : 0;
 		if (W.why[0]) arena_view_note(stands_stopped, W.why);
-		else if (result == 1 || result == 2) arena_view_note(stands_won(W.name[result - 1]), stands_back);
+		else if (result == 1 || result == 2)
+			arena_view_note(W.four ? stands_team_won(W.name[result - 1]) : stands_won(W.name[result - 1]), stands_back);
 		else arena_view_note(stands_over, stands_back);
 		return;
 	}

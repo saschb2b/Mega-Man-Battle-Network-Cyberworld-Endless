@@ -47,11 +47,11 @@
  * Two MegaMen a side (protocol v15, issue #181): a team challenge asks Lan
  * its format first, one by one (the relay) or side by side; side by side,
  * the match is one battle of four seats, every one of the four games
- * running the same pair from the four streams (arena_seats.h): each sends
+ * running the same pair from the four streams (square_bout.h): each sends
  * its MegaMan and takes the three others', the partners' games their own
- * Custom screen made as the way in ends (arena_team_client.h), every ready
- * and hash said against all four. Seat 0, the cable's first, reports and
- * ends it as ever. */
+ * Custom screen made as the way in ends, every ready and hash said
+ * against all four. Seat 0, the cable's first, reports and ends it as
+ * ever. */
 #include "square_arena.h"
 
 #include <stdio.h>
@@ -64,8 +64,6 @@
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_report.h"
-#include "arena_seats.h"
-#include "arena_team_client.h"
 #include "arena_view.h"
 #include "arena_wire.h"
 #include "arena_words.h"
@@ -75,8 +73,8 @@
 #include "online_people.h"
 #include "online_transport.h"
 #include "online_visit.h"
-#include "rom.h"
 #include "square_arena_state.h"
+#include "square_bout.h"
 #include "square_team.h"
 #include "talk.h"
 #include "text.h"
@@ -145,7 +143,7 @@ static void counted(int how) {
 static void drop_arena(void) {
 	arena_free(SA.arena);
 	SA.arena = NULL;
-	team_client_free();
+	square_bout_free();
 }
 
 static void drop_kept(void) {
@@ -177,6 +175,7 @@ static void bouts(unsigned result);
  * off, neither won nor lost */
 static void fail_as(const char *why, ArenaStop stop, bool both) {
 	snprintf(SA.why, sizeof SA.why, "%s", why);
+	snprintf(SA.whose, sizeof SA.whose, "%s", square_bout_whose());
 	SA.stop = stop;
 	printf("arena: match %u stopped: %s\n", SA.match, SA.why);
 	/* (what both games see, two hashes apart, is the cable's first's to
@@ -297,24 +296,10 @@ static void format_picked(void) {
 	send_challenge();
 }
 
-/* a 2v2's four seats as START names them: each one's name, none of their MegaMen yet */
-static void seats_in(const ArenaWireState *w) {
-	SA.four = w->seats[2] && w->seats[3];
-	SA.seat = SA.four ? w->side : w->side & 1u;
-	memset(SA.seated_in, 0, sizeof SA.seated_in);
-	memset(SA.seated_carried, 0, sizeof SA.seated_carried);
-	for (unsigned k = 0; k < ONLINE_SEATS; ++k) {
-		SA.seats[k] = w->seats[k];
-		const char *n = k == SA.seat ? online_visit_name() : square_arena_name_of(w->seats[k]);
-		if (!n) n = square_team_name(w->seats[k]);
-		snprintf(SA.names[k], sizeof SA.names[k], "%s", n ? n : "?");
-	}
-}
-
 /* START: my MegaMan sent, and kept as the other reads him */
 static void start(const ArenaWireState *w) {
 	unsigned side = w->side & 1u, delay = w->delay;
-	seats_in(w);
+	square_bout_seats(w);
 	/* (a rematch's answer spent: the next is asked after this battle's result) */
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
 	/* (a rematch from the card: the last battle's pair kept as it began,
@@ -675,32 +660,7 @@ void square_arena_held_frame(void) {
 bool square_arena_on(void) { return SA.stage >= SA_LOADOUT || SA.card.up; }
 
 static void build(void) {
-	const OnlineLoadout *loadout[2];
-	unsigned side = SA.link.link.side;
-	loadout[side] = SA.mine_carried ? &SA.mine : NULL;
-	loadout[side ^ 1] = SA.theirs_carried ? &SA.theirs : NULL;
-	/* (a 2v2: the GBAs' MegaMen seats 0 and 1's, the partners' seats 2 and 3's, the same on every game) */
-	if (SA.four) {
-		const OnlineLoadout *partner[2];
-		for (unsigned k = 0; k < 2; ++k) {
-			loadout[k] = SA.seated_carried[k] ? &SA.seated[k] : NULL;
-			partner[k] = SA.seated_carried[2 + k] ? &SA.seated[2 + k] : NULL;
-		}
-		arena_seats_partners(partner);
-	}
-	arena_seats_set(SA.four);
-	/* (the bout's seed its match, the same on both games and every
-	 * spectator; arenaseedoff=N moves it on this side alone, a mutation) */
-	uint32_t seed = SA.match + (uint32_t)dev.arena_seed_off;
-	SA.arena = arena_new_bout(R.data, ROM_SIZE, loadout, &SA.link.link, seed, SA.kept);
-	SA.kept = NULL;
-	if (!SA.arena) { fail("too little memory for the two PETs", ARENA_STOP_MEMORY); return; }
-	SA.counted = false;
-	arena_window(SA.arena, dev.arena_window);
-	/* (a 2v2: four streams; a partner's own made from my keys, his Custom screen's picks among them) */
-	if (SA.four) arena_players(SA.arena, ARENA_PLAYERS);
-	if (SA.four && SA.seat >= 2) arena_stream(SA.arena, team_client_stream, NULL);
-	SA.stage = SA_CONNECTING;
+	if (!square_bout_build()) fail("too little memory for the two PETs", ARENA_STOP_MEMORY);
 }
 
 /* the other's ready come and apart from ours: both stopped before the first frame, told by its cause where the
@@ -725,7 +685,7 @@ static void connecting(void) {
 	uint64_t hash = arena_hash(SA.arena);
 	printf("arena: ready, the pair's hash %016llx\n", (unsigned long long)hash);
 	/* (a 2v2: my seat's screen; a partner's own Custom screen made now, outside the battle) */
-	if (SA.four && !team_client_seat(SA.arena, SA.seat)) { fail("too little memory for our own Custom screen", ARENA_STOP_MEMORY); return; }
+	if (!square_bout_ready()) { fail("too little memory for our own Custom screen", ARENA_STOP_MEMORY); return; }
 	/* (the installs' record first: a ready apart is then told by its cause where the records are) */
 	if (!arena_link_net_record(&SA.link, arena_record(SA.arena)) || !arena_link_net_ready(&SA.link, hash)) {
 		fail("our PET's ready could not be sent", ARENA_STOP_ERROR);
@@ -778,7 +738,7 @@ static bool stalled_out(void) {
 	uint32_t waited = arena_waited(SA.arena);
 	bool leave = square_card_leave();
 	if (!leave && waited < STALL_END) return false;
-	printf("arena: %u ticks waiting on %s's keys: %s\n", (unsigned)waited, SA.name, leave ? "we leave" : "given up");
+	printf("arena: %u ticks waiting on %s's keys: %s\n", (unsigned)waited, square_bout_whose(), leave ? "we leave" : "given up");
 	counted(ANALYTICS_BATTLE_DISCONNECTED);
 	fail(leave ? "we left, waiting on the other's keys" : "the other's keys stopped coming", leave ? ARENA_STOP_WE_LEFT : ARENA_STOP_SILENT);
 	return true;
@@ -791,14 +751,12 @@ static bool frozen(uint32_t tick) { return dev.arena_freeze > 0 && tick >= (uint
 static void battle(uint32_t keys, uint32_t rtt_ms) {
 	static uint32_t tick;
 	if (frozen(++SA.ticks)) return;
-	if (dev.arena_both) keys = arena_bot_keys(SA.arena, SA.link.link.side, tick++);
-	/* (--dev arenaboth side by side: side 0's lead taps R every 600 frames of the fight, the next turn opened once the gauge is
-	 * full, so that the partners pick again) */
-	if (dev.arena_both && SA.four && my_seat() == 0 && arena_phase(SA.arena, 0) != BN6_PHASE_CUSTOM && tick % 600 < 4) keys |= KEY_R;
+	if (dev.arena_both) keys = square_bout_bot(keys, tick++);
 	arena_rtt(SA.arena, rtt_ms);
 	ArenaStage stage = arena_tick(SA.arena, (uint16_t)(keys & ARENA_KEYS_MASK));
 	arena_sound(SA.arena);
 	arena_report_frame(SA.arena);
+	square_bout_after(stage);
 	if (stage == ARENA_FAILED) {
 		/* (the other gone, his keys spent: the link broke; else the games went apart, or the cable stuck) */
 		bool left = SA.ended && SA.link.broken[0], went_apart = arena_apart(SA.arena);

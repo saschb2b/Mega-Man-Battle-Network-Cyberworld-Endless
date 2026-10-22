@@ -75,6 +75,7 @@ typedef struct {
 	char names[ONLINE_SEATS][ONLINE_NAME_BYTES + 1];
 	OnlineLoadout seated[ONLINE_SEATS];
 	bool seated_carried[ONLINE_SEATS], seated_in[ONLINE_SEATS];
+	char whose[ONLINE_NAME_BYTES + 1];   /* a stop's: the player it names (a 2v2's: whose PET it waited on) */
 	/* the result card, up from the battle's end (or a stop) until it
 	 * closes: the rematch asked on it, Lan's cursor, the other's answer */
 	struct {

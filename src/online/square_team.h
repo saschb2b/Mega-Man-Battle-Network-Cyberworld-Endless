@@ -46,8 +46,6 @@ void square_team_update(const OnlineSnapshot *s, bool held);
  * ONLINE_TEAM_RELAY or ONLINE_TEAM_SIDE_BY_SIDE, -1 none (B) */
 bool square_team_format_ask(void);
 int square_team_format_picked(void);
-/* The match under way is side by side: one battle of four */
-bool square_team_side_by_side(void);
 /* A player of the match, his name as kept (one gone keeps his); NULL none */
 const char *square_team_name(uint32_t id);
 

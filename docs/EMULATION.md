@@ -433,7 +433,7 @@ with the way home's `0x1493` set beside it, the unfinished dive begun
 again; issue #127), the spare picked from the clerk's chat-box list
 (`0x14B0`-`0x14C3`), and the referee's Yes to watching a NetBattle from
 the stands (`0x14C4`, issue #128), L's Look around (`0x14C5`), a team
-asked for, its Yes and its order (`0x14C6`-`0x14C9`), and L's quiet
+asked for, its Yes and its order or a team challenge's format (`0x14C6`-`0x14C9`), and L's quiet
 (`0x14D0`, issue #176);
 docs/ONLINE.md. Its life
 (`square_life.c`: the walkers, the log-in beam, the cheer, the greeter's
