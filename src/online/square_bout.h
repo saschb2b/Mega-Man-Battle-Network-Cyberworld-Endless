@@ -17,6 +17,9 @@
 
 /* START come: a 2v2's four seats (the names kept), or a battle of two's */
 void square_bout_seats(const ArenaWireState *w);
+/* my MegaMan as he goes in, the seats known: a partner's own folder made a
+ * Program Advance's first under --dev teampa=1 (arena_seats_pa_folder) */
+void square_bout_mine(OnlineLoadout *l);
 /* the pair built from the MegaMen come (the way in begun); false where
  * memory ran out */
 bool square_bout_build(void);

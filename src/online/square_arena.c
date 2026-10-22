@@ -323,6 +323,7 @@ static void start(const ArenaWireState *w) {
 	if (carried && dev.arena_hp > 0) tried.max_hp = tried.base_hp = (uint16_t)dev.arena_hp;
 	/* (a NetBattle begins whole; a Team NetBattle's winner goes on with what he has left) */
 	if (carried) tried.hp = SA.team && SA.carry && SA.carry < tried.max_hp ? SA.carry : tried.max_hp;
+	if (carried) square_bout_mine(&tried);
 	uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX], m[ARENA_LOADOUT_HEAD + ONLINE_ARENA_LOADOUT_MAX];
 	size_t n = arena_loadout_pack(carried, bytes, sizeof bytes);
 	SA.why[0] = 0;

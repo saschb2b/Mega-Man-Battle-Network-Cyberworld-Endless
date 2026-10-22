@@ -21,6 +21,7 @@
 #include "arena_loadout.h"
 #include "arena_pair.h"
 #include "arena_seats.h"
+#include "arena_team.h"
 #include "arena_wire.h"
 #include "bn6.h"
 #include "devtools.h"
@@ -248,6 +249,8 @@ static bool step(ArenaWatch *w) {
 	if (!w->fought || !gone(first) || !gone(second)) return true;
 	w->result = first->rawRead8(first, BN6_BATTLE_RESULT, -1);
 	printf("watch: over at frame %" PRIu32 ": the cable's first's result %u, %" PRIu32 " hashes checked\n", w->next, w->result, w->checked);
+	/* (side by side: the pair's two GBAs compared iteration by iteration, as each player's game does) */
+	if (arena_seats_net()) arena_team_report();
 	w->stage = WATCHING_OVER;
 	return false;
 }

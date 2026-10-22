@@ -48,15 +48,14 @@ static unsigned my_seat;   /* a 2v2 over the network: my seat (team_client_seat)
 /* the seat shown: mine in a 2v2 over the network, else teamseat's (0 the first GBA's player, as without it, to 3) */
 static unsigned seat(void) { return my_seat ? my_seat : dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
 
-/* side's partner's NaviCust compiled by BN6's own code on a core of his
- * client from his loadout and the checkpoint's state (once a run of the
- * game: a rematch's partners the same), said in the output */
 static unsigned u16_at(const uint8_t *bytes, unsigned at) { return bytes[at] | (unsigned)bytes[at + 1] << 8; }
 
-static void compile(unsigned side, const OnlineLoadout *l) {
+void team_client_compile(unsigned side, const OnlineLoadout *l, bool again) {
 	static bool tried[SIDES], made[SIDES];
 	static uint8_t stats[SIDES][BN6_BATTLE_NAVI_SIZE];
-	if (!tried[side]) {
+	side &= 1u;
+	if (again) tried[side] = false;
+	if (!tried[side] && l) {
 		tried[side] = true;
 		size_t n;
 		uint8_t *state = arena_carry_state(&n);
@@ -85,7 +84,7 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 		arena_team_navi_compiled(side, NULL);
 	}
 	/* (teamcust: side 1's partner the checkpoint's MegaMan's NaviCust too, his folder his lead's) */
-	if (all && dev.team_cust) compile(1, all);
+	if (all && dev.team_cust) team_client_compile(1, all, false);
 	unsigned fits = all ? arena_folders_fitting(all) : 0;
 	/* (the folder after the one his lead carries: arena_scene's, the first that holds chips) */
 	for (int k = 0, first = -1; k < ONLINE_FOLDERS; ++k) {
@@ -96,7 +95,7 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 		arena_team_custom_folder(0, own.folder, own.regular, own.tag);
 		const uint8_t his[3] = { own.attack, own.speed, own.charge };
 		arena_team_navi_loadout(0, own.max_hp, own.base_hp, his);
-		compile(0, &own);
+		team_client_compile(0, &own, false);
 		printf("arena2v2: side 0's partner carries the run's folder %d, his lead folder %d\n", k + 1, first + 1);
 		break;
 	}
@@ -109,16 +108,18 @@ void team_client_free(void) {
 	my_seat = 0;
 }
 
-/* side's partner's own Custom screen on a plain copy of the pair, his Crosses on it */
-static TeamScreen *new_screen(Arena *a, unsigned side) {
+/* side's partner's own Custom screen on a plain copy of the pair, his Crosses on it: his own MegaMan's (`mine`, over the
+ * network), and teamcross=N's Cross N and teambeast's Beast Out (a stood-in client's alone where none is given) */
+static TeamScreen *new_screen(Arena *a, unsigned side, const OnlineLoadout *mine) {
 	TeamScreen *t = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
-	/* (teamcross=N: his own Crosses, Cross N alone) */
 	int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
-	if (t) team_screen_crosses(t, (uint8_t)((n >= 1 && n <= 5 ? 1u << (n - 1) : 0u) | (dev.team_beast ? TEAM_SCREEN_BEAST : 0u)));
+	unsigned crosses = (n >= 1 && n <= 5 ? 1u << (n - 1) : 0u) | (dev.team_beast ? TEAM_SCREEN_BEAST : 0u);
+	if (mine) crosses |= (mine->crosses & 0x1Fu) | (mine->beast ? TEAM_SCREEN_BEAST : 0u);
+	if (t) team_screen_crosses(t, (uint8_t)crosses);
 	return t;
 }
 
-bool team_client_seat(Arena *a, unsigned seat_of) {
+bool team_client_seat(Arena *a, unsigned seat_of, const OnlineLoadout *mine) {
 	team_client_free();
 	my_seat = seat_of;
 	if (my_seat < 2) return true;
@@ -126,7 +127,7 @@ bool team_client_seat(Arena *a, unsigned seat_of) {
 	arena_show(a, (int)side);
 	/* (his screen made now, the pair at its first Custom screen as the way in ends: its cost outside the battle) */
 	Client *c = &clients[side];
-	c->screen = new_screen(a, side);
+	c->screen = new_screen(a, side, mine);
 	printf("arena: our seat %u, side %u's partner: his own Custom screen %s\n", my_seat, side, c->screen ? "made" : "not made");
 	return c->screen != NULL;
 }
@@ -221,7 +222,7 @@ static uint16_t stream(Arena *a, unsigned player, uint32_t frame, bool own, uint
 	/* (a partner deleted has no turn) */
 	bool custom = gba && gba->rawRead8(gba, BN6_BATTLE_PHASE, -1) == BN6_PHASE_CUSTOM && standing(gba, side);
 	/* (his screen made once, from the pair as it is at a Custom screen) */
-	if (custom && !c->screen) c->screen = new_screen(a, side);
+	if (custom && !c->screen) c->screen = new_screen(a, side, NULL);
 	if (!custom || !c->screen) {
 		closed_first(c);
 		c->turn = false;

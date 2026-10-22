@@ -7,6 +7,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_input.h"
+#include "arena_seats.h"
 #include "arena_team_link.h"
 #include "bn6.h"
 #include "chips.h"
@@ -116,8 +117,8 @@ static uint32_t xorshift(uint32_t *s) {
 static void deal(unsigned side, bool second) {
 	if (!C.given[side] && side_core[side]) lead_folder(side_core[side], side);
 	/* (teampa=1: side 0's partner's folder opens with Cannon A, B and C as its Regular chip and TagChips, dealt first: a Program
-	 * Advance in his first hand) */
-	if (dev.team_pa && side == 0) {
+	 * Advance in his first hand; over the network his own game gives his folder so instead, arena_seats_pa_folder) */
+	if (dev.team_pa && side == 0 && !arena_seats_net()) {
 		for (unsigned i = 0; i < 3; ++i) C.folder[side][i] = (uint16_t)(BN6_CHIP_CANNON | i << 9);
 		C.regular[side] = 0;
 		C.tags[side][0] = 1;

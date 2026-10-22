@@ -25,10 +25,17 @@ void team_client_begin(Arena *a, const OnlineLoadout *all);
 void team_client_free(void);
 /* A 2v2 over the network (protocol v15, issue #181): my seat; a partner's
  * (2 or 3) his side's GBA shown and his own screen made now, as the way
- * in ends (false where it could not be made). Its stream is made from my
+ * in ends, his own Crosses and Beast Out on it from `mine`, my MegaMan as
+ * he went (false where it could not be made). Its stream is made from my
  * keys each tick (team_client_stream, an ArenaStream: arena.h), and
  * team_client_draw shows my seat's screen */
-bool team_client_seat(Arena *a, unsigned seat);
+bool team_client_seat(Arena *a, unsigned seat, const OnlineLoadout *mine);
+/* side's partner's NaviCust compiled by BN6's own code (BN6_NAVICUST_RELOAD)
+ * on a core of this game from `l`, his loadout, over the checkpoint's
+ * state, his record and hand size from it (arena_team_navi_compiled); once
+ * a run of the game unless `again` (a match's new partners), said in the
+ * output. Every game and spectator of a 2v2 compiles each partner's so */
+void team_client_compile(unsigned side, const OnlineLoadout *l, bool again);
 uint16_t team_client_stream(void *context, Arena *a, uint32_t frame, uint16_t keys);
 /* player's (2 or 3) stream for `frame`: his keys, released on his Custom
  * screen, which they drive, or a pick message */
