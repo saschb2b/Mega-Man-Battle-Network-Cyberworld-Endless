@@ -97,9 +97,55 @@ def square_game(i):
                 first=first, last=v.t, frames=v.t + 1)
 
 
-# (remote play's steps: A on the faced MegaMan reads his card, three pages,
-# then the box of Battle, Team up and More...)
-CARD = '4 A;130;4 A;130;4 A;130;150'
+def picture(g):
+    """the game's last frame kept, once the thread keeping them has it"""
+    for _ in range(80):
+        k = (g.frame - g.first) // 2 - 1
+        path = os.path.join(g.out, f'{k:04d}.png')
+        if k >= 0 and os.path.exists(path):
+            try:
+                return Image.open(path).convert('RGB')
+            except OSError:
+                pass
+        time.sleep(0.05)
+    return None
+
+
+def cursor(g):
+    """the row of a chat box's choice the cursor is on (its green arrow
+    by the box's first or second line), or None where no choice is up"""
+    im = picture(g)
+    if im is None:
+        return None
+    box = sum(1 for y in range(108, 150, 3) for x in range(70, 200, 3) if min(im.getpixel((x, y))) > 200)
+    rows = [y for y in range(102, 142) for x in range(46, 60)
+            if (lambda p: p[1] > 150 and p[0] < 90 and p[2] < 90)(im.getpixel((x, y)))]
+    if box < 300 or not 20 <= len(rows) <= 120:
+        return None
+    return 0 if min(rows) < 114 else 1
+
+
+def steps(g, line):
+    g.do(line)
+    online.wait(lambda: g.idle(), f'{g.name}: {line}', 60)
+
+
+def choose(g, row, then=''):
+    """A on the faced MegaMan: his card read page by page until Battle,
+    Team up and More... are offered, then `row` of them taken (0 Battle,
+    1 Team up); the box's words come at the game's pace, so each page
+    waits for the picture rather than the clock"""
+    steps(g, '4 A;40')
+    for _ in range(14):
+        if cursor(g) == 0:
+            break
+        steps(g, '40')
+        if cursor(g) == 0:
+            break
+        steps(g, '4 A;40')
+    if row:
+        steps(g, '4 DOWN;20')
+    g.do('4 A;' + (then or '60'))
 FIGHT = ['arenaboth', 'arenahp=40']
 MARKS = {}
 
@@ -134,7 +180,7 @@ def ask_scene(work, scene, port, roms):
     kei.do(at(*KEI_SPOT) + ';10')
     time.sleep(2)
     mark(scene, kei, 'card')
-    kei.do(CARD + ';4 A;120;4 A;60')
+    choose(kei, 0, '120;4 A;60')
     online.wait(lambda: mira.has('challenged us'), 'Mira challenged', 60, t0)
     mark(scene, mira, 'challenged')
     mira.do('40;4 A;70;4 A;70;4 A;70;4 A;70;4 A;70;200')
@@ -161,7 +207,7 @@ def duel_scene(work, scene, port, roms):
     kei.do(at(*KEI_SPOT) + ';10')
     time.sleep(2)
     mark(scene, kei, 'card')
-    kei.do(CARD + ';4 A;120;4 A;60')
+    choose(kei, 0, '120;4 A;60')
     for bout in (1, 2):
         for g in (kei, mira):
             online.wait(lambda: g.count('arena: ready, the pair') >= bout, f'{g.name} ready, bout {bout}', 240, t0)
@@ -204,7 +250,9 @@ def teams(work, scene, port, roms, extra=None, watcher=False):
         nova = online.Remote(work, scene, 'nova', port, roms, FIGHT)
         into_square((nova,), t0)
     kei, rio, mira, dex = g['kei'], g['rio'], g['mira'], g['dex']
-    time.sleep(2)
+    # (every arrival's words over first: a place while a box is open is ignored)
+    online.wait(lambda: all(x.idle() for x in list(g.values()) + ([nova] if nova else [])), 'all arrived', 60, t0)
+    time.sleep(3)
     # (Kei faces Rio on the landmark's +x face, Mira faces Dex on its +y face)
     rio.do(at(19, 16.25, 5) + ';10')
     kei.do(at(19, 16.75, 1) + ';10')
@@ -213,7 +261,7 @@ def teams(work, scene, port, roms, extra=None, watcher=False):
     time.sleep(1)
     for asker, asked in ((mira, dex), (kei, rio)):
         mark(scene, asker, 'teamup')
-        asker.do(CARD + ';4 DOWN;30;4 A;120;4 A;60')
+        choose(asker, 1, '120;4 A;60')
         online.wait(lambda: asked.has(f'team: {asker.name.capitalize()} asks us to team up'),
                     f'{asked.name} asked by {asker.name}', 60, t0)
     time.sleep(0.5)
@@ -223,10 +271,13 @@ def teams(work, scene, port, roms, extra=None, watcher=False):
     for x in g.values():
         online.wait(lambda: x.has('team: a team with'), f'{x.name} on a team', 60, t0)
     time.sleep(0.5)
-    # (each faced away from the others while the chat boxes are paged)
-    spots = {'kei': at(19, 16.75, 3), 'rio': at(19, 16.25, 7), 'mira': at(16.75, 19, 1), 'dex': at(16.25, 19, 5)}
+    # (each a panel and a half from the others while the chat boxes are
+    # paged, past where an A would read anyone's card)
+    spots = {'kei': at(19, 17.5, 3), 'rio': at(19, 16, 7), 'mira': at(17.5, 19, 1), 'dex': at(16, 19, 5)}
     for x in g.values():
-        x.do('20;' + spots[x.name] + ';4 A;90;4 A;60')
+        # (the words paged first, with B: A with no box open would read a
+        # card; a place while a box is open is ignored)
+        x.do('20;4 B;90;4 B;90;4 B;60;' + spots[x.name] + ';20')
     if nova:
         nova.do(at(15, 17.5, 5) + ';10')
     time.sleep(4)
@@ -240,7 +291,8 @@ def relay_scene(work, scene, port, roms):
     t0, g, _ = teams(work, scene, port, roms, {'kei': ['teamform=1']})
     kei, rio, mira, dex = g['kei'], g['rio'], g['mira'], g['dex']
     mark(scene, kei, 'challenge')
-    kei.do(at(17.25, 19, 7) + ';20;' + CARD + ';4 A;120;4 A;60')
+    steps(kei, at(18, 19, 7) + ';20')
+    choose(kei, 0, '120;4 A;60')
     for x in (kei, mira):
         online.wait(lambda: x.has('team: match'), f'{x.name} in the team match', 60, t0)
     time.sleep(0.5)
@@ -290,7 +342,8 @@ def sides_scene(work, scene, port, roms):
     t0, g, nova = teams(work, scene, port, roms, {'rio': ['teamcross=1'], 'dex': ['teambeast=1']}, watcher=True)
     kei, rio, mira, dex = g['kei'], g['rio'], g['mira'], g['dex']
     mark(scene, kei, 'challenge')
-    kei.do(at(17.25, 19, 7) + ';20;' + CARD + ';4 A;120;4 A;90;4 DOWN;40;4 A;120;4 A;60;4 A;60')
+    steps(kei, at(18, 19, 7) + ';20')
+    choose(kei, 0, '120;4 A;90;4 DOWN;40;4 A;120;4 A;60;4 A;60')
     for x in g.values():
         online.wait(lambda: x.has('team: match'), f'{x.name} in the side-by-side match', 90, t0)
         mark(scene, x, 'match')
@@ -480,7 +533,7 @@ class Pic:
         """whether feed entry i only holds or slows the footage where the last
         one had it (no cut to sweep)"""
         (s0, scene0, a, rate), (s1, scene1, b, _) = self.feed[i - 1], self.feed[i]
-        return scene0 == scene1 and abs(a + int((s1 - s0) * rate) - b) <= 2
+        return scene0 == scene1 and abs(a + int((s1 - s0) * rate) - b) <= 3
 
     def picture(self, fr):
         i, scene, sample = self.source(fr)
@@ -738,8 +791,9 @@ def title_dim(start):
 
 
 def shots():
-    hook = Pic('b', 4, *HERO, [(0, 'square-mira', 244, 1), (F(2, 1), 'square-mira', 352, 0), (F(2, 1) + 8, 'square-mira', 353, 1)],
-               'MIRA')
+    # (her own emote's first frame, where BN6 draws no sprites, stepped over)
+    hook = Pic('b', 4, *HERO, [(0, 'square-mira', 244, 1), (102, 'square-mira', 345, 0), (104, 'square-mira', 348, 1),
+                               (F(2, 1), 'square-mira', 352, 0), (F(2, 1) + 8, 'square-mira', 353, 1)], 'MIRA')
     duo = lambda scene_l, feed_l, scene_r, feed_r, names=('KEI', 'MIRA'): [
         Pic('r', 2, *DUO[0], [(f, scene_l, s, r) for f, s, r in feed_l], names[0]),
         Pic('b', 2, *DUO[1], [(f, scene_r, s, r) for f, s, r in feed_r], names[1])]
@@ -747,14 +801,14 @@ def shots():
                                  for i, side in enumerate('rbrb')]
     mid = (W / 2, DUO[0][1] + 160)
     MIRA = 434      # (the duel's footage: Mira's game a sample this far behind Kei's)
-    S = {'kei': 0, 'mira': -115, 'rio': 54, 'dex': -56}     # (the two a side's four games against Kei's)
+    S = {'kei': 0, 'mira': -118, 'rio': 53, 'dex': -62}     # (the two a side's four games against Kei's)
     out = [
         # 0: the field and its seam out of black, then Mira's PET swept in
         Shot(0, [], [], push=None),
         # 0-2: Kei waves at Mira (her PET), she waves back: the "!!" between them, held a moment
         Shot(6, [hook], [Ribbon(F(1), F(3), 'WAVE', 'r', 404, 'l', 112, kicker='KEI'),
                          Ribbon(F(2, 1), F(3), 'WAVE BACK', 'b', 528, 'r', 112, kicker='MIRA'),
-                         Burst(F(2, 1), 648, 100, 1.2)],
+                         Burst(F(2, 1), 664, 240, 1.2)],
              push='b', glow=[(F(2, 1), 16)]),
         # 3: the title over the two of them
         Shot(F(3), [hook], [Text(F(3), F(4), 'CYBERWORLD ENDLESS', W / 2, 212, 40, WHITE, 800),
@@ -767,24 +821,24 @@ def shots():
              [Ribbon(F(4), F(5), 'THE EMOTE STRIP', 'r', 64, 'r', 84, kicker='PRESS SELECT',
                      caption="TWELVE EMOTES, MEGAMAN'S OWN POSES; EIGHT PHRASES", cap_width=430)], push='r'),
         # 5: sent: Kei's Buster on his PET and on Mira's
-        Shot(F(5), duo('square-kei', [(F(5), 181, 1)], 'square-mira', [(F(5), 181, 1)]),
+        Shot(F(5), duo('square-kei', [(F(5), 194, 1)], 'square-mira', [(F(5), 194, 1)]),
              [Ribbon(F(5), F(6), 'STRIKE A POSE', 'r', 40, 'l', 72),
               Ribbon(F(5, 1), F(6), 'ON EVERY SCREEN', 'b', 104, 'r', 72),
               Caption(F(5, 1), F(6), "MEGAMAN'S OWN BN6 POSES AND SOUNDS, IN STEP ON EVERY PET")], push='b'),
         # 6: Mira's emotes as Kei sees them, one a beat
-        Shot(F(6), [Pic('r', 4, *HERO, [(F(6), 'square-kei', 466, 1), (F(6, 1), 'square-kei', 540, 1),
-                                         (F(6, 2), 'square-kei', 612, 1), (F(6, 3), 'square-kei', 684, 1)], 'KEI')],
+        Shot(F(6), [Pic('r', 4, *HERO, [(F(6), 'square-kei', 462, 1), (F(6, 1), 'square-kei', 540, 1),
+                                         (F(6, 2), 'square-kei', 612, 1), (F(6, 3), 'square-kei', 686, 1)], 'KEI')],
              [Ribbon(F(6), F(7), 'TWELVE EMOTES', 'b', 64, 'r', 84, kicker="MIRA'S, ON KEI'S PET",
                      caption='SIX OF THEM NEW', cap_width=430)], push='r'),
         # 7: six MegaMen cheer at once, the Square cheers back: Kei's PET and Dex's
-        Shot(F(7), duo('square-kei', [(F(7), 830, 1)], 'square-dex', [(F(7), 830 - 735, 1)], ('KEI', 'DEX')),
+        Shot(F(7), duo('square-kei', [(F(7), 852, 1)], 'square-dex', [(F(7), 852 - 735, 1)], ('KEI', 'DEX')),
              [Ribbon(F(7), F(8), 'CHEER', 'r', 40, 'l', 72),
               Ribbon(F(7, 1), F(8), 'TOGETHER', 'b', 104, 'r', 72),
               Burst(F(7, 1), *mid, 0.8),
               Caption(F(7, 1), F(8), "THE BIGGER THE CROWD, THE BIGGER THE SQUARE'S CHEER")],
              push='b', glow=[(F(7, 1), 14)]),
         # 8: the ask: Kei's challenge, Mira's PET ringing, his card, "Take it,Lan?"
-        Shot(F(8), duo('ask-kei', [(F(8), 376, 1)], 'ask-mira', [(F(8), 812, 1), (F(8, 2), 924, 1)]),
+        Shot(F(8), duo('ask-kei', [(F(8), 470, 1)], 'ask-mira', [(F(8), 902, 1), (F(8, 2), 1006, 1)]),
              [Ribbon(F(8), F(9), 'BATTLE?', 'r', 40, 'l', 72),
               Ribbon(F(8, 2), F(9), 'TAKE IT, LAN?', 'b', 104, 'r', 72),
               Caption(F(8), F(9), "HIS PET RINGS, AND HE READS YOUR MEGAMAN'S CARD")], push='r'),
@@ -808,33 +862,34 @@ def shots():
               Caption(F(11, 1), F(12), 'TWO YESES ON THE CARD, BACK IN ABOUT A SECOND')],
              push='b', glow=[(F(11, 2) + 12, 14)]),
         # 12 (the drop): a team of two, the order picked blind
-        Shot(F(12), [Pic('r', 4, *HERO, [(F(12), 'relay-rio', 772, 1), (F(12, 2), 'relay-kei', 1234, 1)], 'RIO')],
-             [Ribbon(F(12), F(12, 2), 'TEAM UP', 'r', 64, 'r', 84, kicker='TEAM NETBATTLES'),
-              Ribbon(F(12, 2), F(13), 'WHO GOES FIRST?', 'r', 64, 'r', 84, caption='EACH CAPTAIN PICKS, BLIND',
+        Shot(F(12), [Pic('r', 4, *HERO, [(F(12), 'relay-rio', 1300, 1)], 'RIO')],
+             [Ribbon(F(12), F(12, 2), 'TEAM UP', 'r', 64, 'r', 84, kicker='TEAM NETBATTLES')],
+             push='r', still=True, dim=0.35),
+        Shot(F(12, 2), [Pic('r', 4, *HERO, [(F(12, 2), 'relay-kei', 1904, 1)], 'KEI')],
+             [Ribbon(F(12, 2), F(13), 'WHO GOES FIRST?', 'r', 64, 'r', 84, caption='EACH CAPTAIN PICKS, BLIND',
                      cap_width=430)], push='r', still=True, dim=0.35),
         # 13: one by one: the winner stays on with what HP he has, the others watch
-        Shot(F(13), duo('relay-rio', [(F(13), 2398, 1), (F(13, 2), 2476, 1)], 'relay-mira', [(F(13), 2398, 1)],
+        Shot(F(13), duo('relay-rio', [(F(13), 2812, 1), (F(13, 2), 2891, 0.5)], 'relay-mira', [(F(13), 2744, 1)],
                         ('RIO', 'MIRA')),
              [Ribbon(F(13), F(14), 'ONE BY ONE', 'r', 40, 'l', 72),
               Ribbon(F(13, 2), F(14), 'THE REST WATCH', 'b', 104, 'r', 72),
               Caption(F(13), F(14), 'THE WINNER STAYS ON WITH THE HP HE HAS LEFT')], push='b', still=True, dim=0.2),
         # 14 (the climax): side by side, asked and gone into
-        Shot(F(14), [Pic('r', 3, 280, 224, [(F(14), 'sides-kei', 1446, 1), (F(14, 2), 'sides-kei', 1802, 1)], 'KEI')],
+        Shot(F(14), [Pic('r', 3, 280, 224, [(F(14), 'sides-kei', 1812, 1), (F(14, 1.5), 'sides-kei', 1846, 1), (F(14, 3), 'sides-kei', 1946, 1)], 'KEI')],
              [Ribbon(F(14), F(15), 'SIDE', 'r', 52, 'seam-l', 128, gap=58),
               Ribbon(F(14, 1), F(15), 'SIDE', 'b', 52, 'seam-r', 128, gap=58),
               Badge(F(14, 0.5), F(15), seam_x(W / 2, 121), 121, 'BY', 'g', 52)], push='r', glow=[(F(14), 12)]),
         # 15: two MegaMen a side, the four PETs at once
-        Shot(F(15), quad([[(F(15), f'sides-{n}', 2092 + S[n], 1)] for n in ('kei', 'mira', 'rio', 'dex')],
+        Shot(F(15), quad([[(F(15), f'sides-{n}', 2250 + S[n], 1)] for n in ('kei', 'mira', 'rio', 'dex')],
                          ['KEI', 'MIRA', 'RIO', 'DEX']),
              [Ribbon(F(15), F(16), 'TWO MEGAMEN A SIDE', 'g', 318, 'l', 72)], push='b'),
         # 16: each partner on his own Custom screen; Dex's Beast Out
-        Shot(F(16), duo('sides-rio', [(F(16), 1890, 1), (F(16, 2), 2140, 1)], 'sides-dex',
-                        [(F(16), 1806, 1), (F(16, 2), 2030, 1)], ('RIO', 'DEX')),
+        Shot(F(16), duo('sides-rio', [(F(16), 2036, 1), (F(16, 2), 2218, 1)], 'sides-dex',
+                        [(F(16), 1946, 1), (F(16, 2), 2108, 1)], ('RIO', 'DEX')),
              [Ribbon(F(16), F(17), 'HIS OWN SCREEN', 'r', 40, 'l', 72),
               Caption(F(16), F(17), "EACH PARTNER: HIS OWN FOLDER, CROSS, BEAST OUT AND SOULS")], push='r'),
         # 17: the stands: the referee calls it, Nova watches
-        Shot(F(17), [Pic('b', 4, *HERO, [(F(17), 'sides-nova', 1996, 1), (F(17, 2), 'sides-nova', 2190, 1),
-                                          (F(17, 3), 'sides-nova', 2222, 1)], 'NOVA')],
+        Shot(F(17), [Pic('b', 4, *HERO, [(F(17), 'sides-nova', 2262, 0.8)], 'NOVA')],
              [Ribbon(F(17), F(18), 'FROM THE STANDS', 'g', 64, 'r', 84, kicker='ANYONE IN THE CHANNEL')],
              push='b'),
     ]
