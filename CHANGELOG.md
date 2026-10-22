@@ -72,7 +72,8 @@
   Bow, the item-get pose and jingle for Got it!, the buster held out, a
   collapse, a turn on the spot, sparks; a caption in BN6's chat box only
   where a pose cannot say it ("Haha!", "Hmm..."). Twelve emotes, six of
-  them new; MegaMan is never moved by one. **One press:** hold L and
+  them new; MegaMan is never moved by one, and every MegaMan and the
+  Square's life stay drawn as one begins (issue #187). **One press:** hold L and
   press a direction for one of four favourites (up Wave, right Cheer,
   down Bow, left Laugh; `network.ini`'s `favourites` changes them).
   **Wave and wave back:** a Wave, Cheer or Bow facing another MegaMan is

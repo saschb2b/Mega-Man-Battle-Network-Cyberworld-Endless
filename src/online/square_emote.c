@@ -210,7 +210,8 @@ static void perform_local(const Pose *p, int anim, uint32_t now) {
 	int n = ta_build(&t, out);
 	if (n > SQUARE_TALK_ROOM) return;
 	emu_write(online_square_talk_room(), out, (size_t)n);
-	game_call(BN6_CHAT_RUN_SCRIPT, online_square_talk_room(), (uint32_t)i);
+	/* (the overworld's update after it, its sprites drawn that frame: issue #187) */
+	game_call_then_update(BN6_CHAT_RUN_SCRIPT, online_square_talk_room(), (uint32_t)i);
 	E.local_until = now + (uint32_t)(p->frames + LOCAL_SLACK) * 1000u / 60u;
 }
 

@@ -13,6 +13,11 @@ void gamecall_install(void);
  * it never ran. */
 bool game_call(uint32_t fn, uint32_t r0, uint32_t r1);
 
+/* game_call, then the state update it borrowed, in the same frame: the
+ * game's sprites drawn as ever on it (a chat script started with no box,
+ * as an emote's: issue #187). */
+bool game_call_then_update(uint32_t fn, uint32_t r0, uint32_t r1);
+
 /* game_call with r2 too; `out` (may be NULL) gets the routine's r0 and r1
  * as it returned. */
 bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2]);

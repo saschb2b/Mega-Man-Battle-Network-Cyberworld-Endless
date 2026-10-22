@@ -4,7 +4,10 @@
  * runs in the update's place; where it returns, in the free ROM space, a
  * second hook keeps its r0 and r1 and goes back to the main loop, as the
  * update would have. The frame is the call's, as it was the borrowed
- * update's: the game skips one update a call. */
+ * update's: the game skips one update a call, and with it the sprites
+ * the update draws, so that frame shows none (issue #187); a call with
+ * the update goes on into it instead, as BN6's own update calls the
+ * routine partway. */
 #include "gamecall.h"
 
 #include <string.h>
@@ -18,7 +21,7 @@
 
 /* The call: set between frames, run and answered by the hooks */
 static struct {
-	bool queued, done;
+	bool queued, done, update;
 	uint32_t fn, arg[3], out[2];
 	uint32_t lr, kept[8];   /* the main loop's return, and r4-r11 as the update found them */
 } call;
@@ -41,8 +44,13 @@ static HookAct returned(HookRegs *r, void *user) {
 	call.out[1] = r->r[1];
 	call.done = true;
 	memcpy(r->r + 4, call.kept, sizeof call.kept);
-	/* (the main loop's mov lr,pc; bx r0 left lr's Thumb bit clear) */
-	r->r[12] = call.lr | 1;
+	/* (the main loop's mov lr,pc; bx r0 left lr's Thumb bit clear; the
+	 * update returns by pop {pc}, which keeps Thumb, and passes its own
+	 * hook by with nothing queued) */
+	if (call.update) {
+		r->lr = call.lr;
+		r->r[12] = BN6_OW_HOOK | 1;
+	} else r->r[12] = call.lr | 1;
 	return HOOK_JUMP;
 }
 
@@ -54,9 +62,10 @@ void gamecall_install(void) {
 	emu_hook(RETURN_AT, returned, NULL);
 }
 
-bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2]) {
+static bool call_game(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2], bool update) {
 	emu_sync();
 	memset(&call, 0, sizeof call);
+	call.update = update;
 	call.fn = fn;
 	call.arg[0] = r0;
 	call.arg[1] = r1;
@@ -75,7 +84,11 @@ bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t 
 	return call.done;
 }
 
-bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) { return game_call_ret(fn, r0, r1, 0, NULL); }
+bool game_call_ret(uint32_t fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t out[2]) { return call_game(fn, r0, r1, r2, out, false); }
+
+bool game_call(uint32_t fn, uint32_t r0, uint32_t r1) { return call_game(fn, r0, r1, 0, NULL, false); }
+
+bool game_call_then_update(uint32_t fn, uint32_t r0, uint32_t r1) { return call_game(fn, r0, r1, 0, NULL, true); }
 
 /* the game starts a map's song only when it is not the one it last started:
  * after the intro, or a state whose song had stopped, forget it */
