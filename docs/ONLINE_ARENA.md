@@ -3128,8 +3128,8 @@ streams](#four-streams)).
   through the deployed server or between devices; the stands' heading
   names the two leads alone; a partner's NaviCust compiled on games of
   different runs (each over its own checkpoint: the hashes say they agree
-  where the runs are the same); a partner's ColonelSoul's button and a
-  Soul's three turns exercised ([A partner's UNITE](#a-partners-unite)),
+  where the runs are the same); a partner's ColonelSoul's button pressed
+  ([A partner's UNITE](#a-partners-unite)),
   the Dark Soul's chip lists his own folder's, the green flash's tint a
   MegaMan's own, a hit's mood gain the attacker's own; a chip of
   computed power in his hand (his hand takes a computed chip's power as
