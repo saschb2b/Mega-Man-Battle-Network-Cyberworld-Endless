@@ -103,3 +103,33 @@ the run, so the words name no winner.
 Devices now used up: windows joined by links with packets carrying the
 cuts, speech-bubble headlines, the numbered step pills, the operator
 HUD and chat log, the multiplying wall of games.
+
+## 0.13.0's music heard again (2026-10-22), `tools/trailers/sketch_*.py`
+
+The owner: "Its current music feels very ai-ish. Doesn't truly feel like
+a MMBN theme." The piece had been written from "Surge of Power!"'s
+habits, so the gap was not the source but how the habits became music.
+Against his recording, by numbers (`music_rules.md`, Why 0.13.0's piece
+read as "AI-ish"): half the game's swing inside a beat (3.4 dB against
+7.1), a third of its noisiness, the spectrum 30% filled against 54%,
+nothing between 120 and 500 Hz, static pans where every BN6 song throws
+a track left and right note by note, no bends, one rhythm cell in 15 of
+23 bars, a major V at the cadences. Its own notes rendered through the
+new kit measured nearly the same: the writing was most of it.
+
+What changed: `song_habits.py --detail --theory` (articulation, the drum
+kit's keys, harmony and melody in aggregates); fifteen BN6 and BN5 songs
+read into `music_rules.md` with the composers' own words; the kit's
+sampled instruments of our own (clipped kick and clap, chord samples, a
+distorted stab, a looped lead, slap bass, bell, brass, hand drums, an
+impact), `bend` on any note and `HARDWARE = 32768` for unsmoothed squares,
+every earlier piece byte for byte the same; `music_check.py` with
+`--piece`, punch, four bands and the lead's rubs. Three eight-bar sketches
+for the owner's ear before any piece: a battle drive (A, nearest the
+reference: 7.4 dB of punch against 7.8, bands 54/31/13/1 against
+57/28/13/1), the Square's bounce (B), a heroic opening (C). Not yet heard
+by anyone; the owner chooses.
+
+Devices used in the sketches (not yet in a trailer): ping-pong 32nds, a
+power chord diving, triad samples over other basses, a skank on the
+off-beats, the square and a bell talking in thirds, a Lydian lift.

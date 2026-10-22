@@ -185,6 +185,27 @@ the two bytes of `byte_804B068`, `C0 40`. In Gregar the routine stands at
 four a code the pack lacks. The project's traders follow it since issue
 #154 (docs/ECONOMY.md, docs/ROM_DATA.md's Chip Traders).
 
+## The trailers' music
+
+What Battle Network's music does is read from the ROMs: the songs'
+sequences and samples with `.claude/skills/trailer/scripts/song_habits.py`
+(`--detail --theory`), numbers only, nothing kept (verified that way);
+the rules drawn from them, with the songs read, are
+`.claude/skills/trailer/music_rules.md`. The composers' own accounts:
+Akari Kaida's 2019 thread on how the series' music was made (the PSG's
+channels for melody, bass and drums, the backing as one channel's
+arpeggios, two or three sample voices, chords recorded as one sample and
+recoloured by the bass, an XV-1080 and SC-88s as sources), fan-translated
+by The Rockman EXE Zone
+(<https://www.therockmanexezone.com/general/2019/03/28/akari-kaida-comments-on-battle-networks-music-production/>);
+Yoshino Aoki's interview with Chris Greening, 2009
+(<https://squareenixmusic.com/features/interviews/yoshinoaoki.shtml>).
+Credits: Kaida BN1 and BN5, Aoki BN2, BN3 and BN6, Toshihiko Horiyama BN4
+(<https://www.theongaku.com/posts/mega-man-battle-network-sound-box>).
+No written harmonic analysis of a BN track was found (Hooktheory,
+r/VGMtheory, the wikis and Japanese chord-progression pages searched on
+22 October 2026).
+
 ## Learned from players
 
 | What | Who, where | Verified |
