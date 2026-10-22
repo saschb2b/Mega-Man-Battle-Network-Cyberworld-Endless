@@ -34,6 +34,7 @@
 #include "arena_boot.h"
 #include "arena_pair.h"
 #include "arena_roll.h"
+#include "arena_seats.h"
 #include "arena_sync.h"
 #include "arena_window.h"
 #include "arena_wire.h"
@@ -148,8 +149,10 @@ Arena *arena_new_bout(const uint8_t *rom, size_t size, const OnlineLoadout *load
 	a->window_asked = -1;
 	a->show = -1;
 	key_of(loadout, &a->key);
-	a->from_kept = kept && same_key(&kept->key, &a->key);
-	if (kept && !a->from_kept) printf("arena: the last bout's pair kept, but for other MegaMen or sides: the whole way in\n");
+	/* (two a side: always the whole way in, whose state each partner's NaviCust is compiled over, arena_seats_compile; over
+	 * the network a 2v2 keeps no pair, square_arena.c) */
+	a->from_kept = kept && same_key(&kept->key, &a->key) && !arena_seats_on();
+	if (kept && !a->from_kept) printf("arena: the last bout's pair kept, but for other MegaMen, sides or two a side: the whole way in\n");
 	if (a->from_kept) {
 		a->boot = arena_boot_again(loadout, kept->pair, kept->snap);
 		kept->pair = NULL;
