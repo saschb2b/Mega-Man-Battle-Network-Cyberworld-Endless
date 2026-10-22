@@ -9,6 +9,7 @@
 #include "arena_input.h"
 #include "bn6.h"
 #include "chips.h"
+#include "devtools.h"
 #include "free_space.h"
 #include "hook.h"
 
@@ -31,13 +32,18 @@
 #define R_DEALT    0x2E   /* 1 once his deck is dealt this battle */
 #define R_OWED     0x2F   /* 1 while his side's GBA holds its Custom screen's packet back for him (its own core's alone) */
 #define R_WAIT     0x30   /* u16 his side's GBA's frames held so, this turn */
+#define R_CROSS    0x32   /* the form his Custom screen's CROSSSELECT committed this turn (0 none): his pending form */
+#define R_PA       0x33   /* a Program Advance his screen made this turn: its first pick + 1 | (its picks - 3) << 4 (0 none), */
+#define R_PA_ID    0x34   /* ... its chip less BN6_PA_FIRST; */
+#define R_TAKE_PA  0x35   /* ... the two as his picks were set (R_TAKE's) */
+#define R_TAKE_PA_ID 0x36
 
 /* his turn: no Custom screen; his side's GBA's open, his picks not in yet;
  * open with them in; closed before they came */
 enum { ST_CLOSED, ST_OPEN, ST_IN, ST_WAITING };
 
 _Static_assert(RAM_TEAM_CUSTOM + SIDES * ROOM_SIZE <= RAM_TEAM_CUSTOM_END, "the partners' decks and turns past their room");
-_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= ROOM_SIZE,
+_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= R_CROSS && R_TAKE_PA_ID < ROOM_SIZE,
 	"a partner's turn's fields overlap");
 
 static struct {
@@ -47,6 +53,7 @@ static struct {
 	uint32_t seed[SIDES][SIDES];      /* the seed each GBA's RNG gave, by the side dealt: what the output says */
 	unsigned dealt[SIDES], said[SIDES], late[SIDES], set[SIDES], taken[SIDES], chips[SIDES], limits[SIDES];
 	unsigned held[SIDES];             /* the most frames his side's GBA held for him in a turn */
+	unsigned crosses[SIDES], pas[SIDES];   /* his Crosses and Program Advances said */
 } C;
 
 static uint32_t room(unsigned side) { return RAM_TEAM_CUSTOM + (side & 1u) * ROOM_SIZE; }
@@ -105,6 +112,14 @@ static uint32_t xorshift(uint32_t *s) {
 static void deal(struct mCore *core[2], unsigned side) {
 	struct mCore *own = core[side];
 	if (!C.given[side]) lead_folder(own, side);
+	/* (teampa=1: side 0's partner's folder opens with Cannon A, B and C as its Regular chip and TagChips, dealt first: a Program
+	 * Advance in his first hand) */
+	if (dev.team_pa && side == 0) {
+		for (unsigned i = 0; i < 3; ++i) C.folder[side][i] = (uint16_t)(BN6_CHIP_CANNON | i << 9);
+		C.regular[side] = 0;
+		C.tags[side][0] = 1;
+		C.tags[side][1] = 2;
+	}
 	uint8_t deck[FOLDER], n = 0, fixed = 0;
 	bool used[FOLDER] = { false };
 	uint8_t first[3] = { C.regular[side], NONE8, NONE8 };
@@ -167,6 +182,8 @@ static void commit(struct mCore *core[2], unsigned side, uint32_t delay) {
 	uint32_t at = (uint32_t)own->rawRead32(own, RAM_TEAM_TICK, -1) + delay;
 	put8(core, r + R_TAKEN, (uint8_t)k);
 	put16(core, r + R_TAKE_AT, (uint16_t)(at ? at : 1));
+	put8(core, r + R_TAKE_PA, get8(own, r + R_PA));
+	put8(core, r + R_TAKE_PA_ID, get8(own, r + R_PA_ID));
 	put8(core, r + R_STATE, ST_CLOSED);
 	++C.set[side];
 	C.chips[side] += k;
@@ -178,6 +195,24 @@ static void pick_said(struct mCore *core[2], unsigned side, uint16_t value, uint
 	uint32_t r = room(side);
 	unsigned count = value >> 11 & 7u, index = value >> 8 & 7u, slot = value & 0xFFu;
 	uint8_t state = get8(core[side], r + R_STATE);
+	/* (his Cross, said before his picks while his turn is open: the form his own CROSSSELECT committed) */
+	if (count == TEAM_CROSS_COUNT) {
+		if (state == ST_OPEN && slot && slot < BN6_FORMS) {
+			put8(core, r + R_CROSS, (uint8_t)slot);
+			++C.crosses[side];
+		}
+		return;
+	}
+	/* (a Program Advance his screen made: its first pick, how many it took and its chip, said before his picks) */
+	if (count == TEAM_PA_COUNT) {
+		unsigned took = 3u + (slot >> 5 & 1u), id = BN6_PA_FIRST + (slot & 0x1Fu);
+		if (state == ST_OPEN && index < TEAM_CUSTOM_PICKS && id <= BN6_PA_LAST) {
+			put8(core, r + R_PA, (uint8_t)((index + 1) | (took - 3) << 4));
+			put8(core, r + R_PA_ID, (uint8_t)(id - BN6_PA_FIRST));
+			++C.pas[side];
+		}
+		return;
+	}
 	if (count > TEAM_CUSTOM_PICKS || (count && index >= count) || (state != ST_OPEN && state != ST_WAITING)) return;
 	if (count) put8(core, r + R_PICKS + index, (uint8_t)slot);
 	if (count && index + 1 < count) return;
@@ -202,6 +237,8 @@ uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t 
 		put8(core, r + R_PICKED, 0);
 		put8(core, r + R_OWED, 0);
 		put16(core, r + R_WAIT, 0);
+		put8(core, r + R_CROSS, 0);
+		put8(core, r + R_PA, 0);
 	}
 	if (said) pick_said(core, side, value, delay);
 	state = get8(own, r + R_STATE);
@@ -229,28 +266,67 @@ uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t 
  * from its Custom screen (bn6f sub_8029110): the chips' ids, powers and
  * entries, a plus chip's power added to the chip before it (sub_8029224:
  * Atk+10 and Atk+30 to an attack, Navi+20 to a Navi chip) */
-static void write_hand(unsigned side, uint32_t h, bool short_one) {
+/* a chip's power as its record gives it (a computed one 0) */
+static uint16_t power_of(unsigned id) {
+	const uint8_t *rec = chips_record((int)id), *at = rec ? rec + BN6_CHIP_ATTACK_POWER : NULL;
+	unsigned p = at ? (unsigned)(at[0] | at[1] << 8) : 0;
+	return (uint16_t)(p >= POWER_COMPUTED ? 0 : p);
+}
+
+unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, unsigned pa_took, unsigned pa_id, TeamHand *out) {
+	uint16_t ids[TEAM_CUSTOM_PICKS], ents[TEAM_CUSTOM_PICKS];
+	unsigned m = 0, k = 0;
+	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) {
+		ids[m] = (uint16_t)chip_id(entries[i]);
+		ents[m++] = entries[i];
+	}
+	/* (BN6's OK joins a Program Advance's picks into its chip before the plus chips merge, sub_802B6F2: the picks after it on) */
+	bool pa = pa_at && pa_at - 1 + pa_took <= m && pa_took >= 2;
+	if (pa) {
+		unsigned at = pa_at - 1;
+		ids[at] = (uint16_t)pa_id;
+		for (unsigned i = at + pa_took; i < m; ++i) ids[i - pa_took + 1] = ids[i];
+		m -= pa_took - 1;
+	}
+	for (unsigned i = 0; i < m; ++i) {
+		const uint8_t *before = k ? chips_record(out->id[k - 1]) : NULL;
+		unsigned plus = ids[i] == BN6_CHIP_ATK10 || ids[i] == BN6_CHIP_ATK30 ? BN6_CHIP_SHOWS_POWER :
+			ids[i] == BN6_CHIP_NAVI20 ? BN6_CHIP_NAVI_FLAG : 0;
+		if (plus && before && (before[BN6_CHIP_EFFECT_FLAGS] & plus)) {
+			out->bonus[k - 1] = (uint16_t)(out->bonus[k - 1] + power_of(ids[i]));
+			continue;
+		}
+		out->id[k] = ids[i];
+		out->power[k] = power_of(ids[i]);
+		out->bonus[k] = 0;
+		out->entry[k] = ents[i];
+		++k;
+	}
+	for (unsigned i = k; i < BN6_HAND_MAX; ++i) out->entry[i] = NONE16;
+	/* (with a Program Advance BN6 leaves the entries as the picks were: the hand it builds keeps them so) */
+	if (pa)
+		for (unsigned i = 0; i < BN6_HAND_MAX; ++i) out->entry[i] = i < n && i < TEAM_CUSTOM_PICKS ? entries[i] : NONE16;
+	return k;
+}
+
+static void write_hand(unsigned side, uint32_t h, bool second) {
 	uint32_t r = room(side);
-	unsigned n = hook_read8(r + R_TAKEN), k = 0;
-	uint16_t id[BN6_HAND_MAX], power[BN6_HAND_MAX], bonus[BN6_HAND_MAX], entry[BN6_HAND_MAX];
+	unsigned n = hook_read8(r + R_TAKEN), took = 0;
+	uint16_t entries[TEAM_CUSTOM_PICKS];
 	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) {
 		uint8_t f = hook_read8(r + R_TAKE + i);
-		if (f >= FOLDER) continue;
-		uint16_t e = C.folder[side][f];
-		const uint8_t *rec = chips_record((int)chip_id(e)), *before = k ? chips_record(id[k - 1]) : NULL;
-		const uint8_t *at = rec ? rec + BN6_CHIP_ATTACK_POWER : NULL;
-		unsigned p = at ? (unsigned)(at[0] | at[1] << 8) : 0;
-		if (p >= POWER_COMPUTED) p = 0;
-		unsigned plus = chip_id(e) == BN6_CHIP_ATK10 || chip_id(e) == BN6_CHIP_ATK30 ? BN6_CHIP_SHOWS_POWER :
-			chip_id(e) == BN6_CHIP_NAVI20 ? BN6_CHIP_NAVI_FLAG : 0;
-		if (plus && before && (before[BN6_CHIP_EFFECT_FLAGS] & plus)) { bonus[k - 1] = (uint16_t)(bonus[k - 1] + p); continue; }
-		id[k] = (uint16_t)chip_id(e);
-		power[k] = (uint16_t)p;
-		bonus[k] = 0;
-		entry[k++] = e;
+		if (f < FOLDER) entries[took++] = C.folder[side][f];
 	}
+	/* (teampa=-1: his Program Advance left out on the second GBA alone, a mutation that must part them) */
+	uint8_t pa = second && dev.team_pa < 0 ? 0 : hook_read8(r + R_TAKE_PA);
+	TeamHand hand;
+	unsigned k = team_hand_build(entries, took, pa & 0xFu, 3u + (pa >> 4 & 1u), BN6_PA_FIRST + hook_read8(r + R_TAKE_PA_ID), &hand);
+	const uint16_t *id = hand.id, *power = hand.power, *bonus = hand.bonus, *entry = hand.entry;
+	if (pa & 0xFu)
+		printf("arena2v2: core %d: side %u's partner's hand a Program Advance, %03X (power %u) first of %u chips, from %u picks\n",
+			hook_slot(), side, id[0], power[0], k, took);
 	/* (teampick=-1: a chip short on the second GBA alone, the mutation) */
-	if (short_one && k) --k;
+	if (second && dev.team_pick < 0 && k) --k;
 	uint8_t screen = (uint8_t)(hook_read8(BN6_BATTLE_SCREENS) - 1);
 	hook_write8(h + BN6_HAND_AT, k ? 0 : NONE8);
 	for (unsigned i = 0; i < BN6_HAND_MAX; ++i) {
@@ -258,18 +334,18 @@ static void write_hand(unsigned side, uint32_t h, bool short_one) {
 		hook_write16(h + BN6_HAND_POWERS + 2 * i, i < k ? power[i] : 0);
 		hook_write16(h + BN6_HAND_BONUS + 2 * i, i < k ? bonus[i] : 0);
 		hook_write16(h + BN6_HAND_EXTRA + 2 * i, 0);
-		hook_write16(h + BN6_HAND_ENTRIES + 2 * i, i < k ? entry[i] : NONE16);
+		hook_write16(h + BN6_HAND_ENTRIES + 2 * i, entry[i]);
 		hook_write8(h + BN6_HAND_SCREEN + i, screen);
 		hook_write8(h + BN6_HAND_MARKS + i, 0);
 	}
 }
 
-void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool short_one) {
+void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool second) {
 	for (unsigned side = 0; side < SIDES; ++side) {
 		uint32_t r = room(side);
 		uint16_t at = hook_read16(r + R_TAKE_AT);
 		if (!at || at != (uint16_t)tick || !hand[side]) continue;
-		write_hand(side, hand[side], short_one);
+		write_hand(side, hand[side], second);
 		hook_write16(r + R_TAKE_AT, 0);
 		++C.taken[side];
 	}
@@ -286,6 +362,9 @@ bool arena_team_custom_holds(unsigned side) {
 	uint32_t r = room(side);
 	return hook_read8(r + R_DEALT) && hook_read8(r + R_STATE) == ST_OPEN && standing(side);
 }
+
+uint8_t arena_team_custom_cross(unsigned side) { return hook_read8(room(side & 1u) + R_CROSS); }
+void arena_team_custom_cross_taken(unsigned side) { hook_write8(room(side & 1u) + R_CROSS, 0); }
 
 void arena_team_custom_owe(unsigned side, bool owed) { hook_write8(room(side & 1u) + R_OWED, owed); }
 bool arena_team_custom_owed(unsigned side) { return hook_read8(room(side & 1u) + R_OWED) != 0; }
@@ -309,7 +388,7 @@ void arena_team_custom_report(void) {
 		printf("arena2v2: side %u's partner's own deck dealt %u times (%s folder; the seed %08X on the first GBA, %08X on the "
 			"second), his picks said %u times in his stream (%u after his side's Custom screen closed), set %u times (%u chips) "
 			"and taken into his hand %u times, every core's; his side's GBA held for him %u frames at most in a turn, %u times "
-			"to the limit\n", side, C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0],
+			"to the limit; his Cross said %u times, a Program Advance %u\n", side, C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0],
 			(unsigned)C.seed[side][1], C.said[side], C.late[side], C.set[side], C.chips[side], C.taken[side], C.held[side],
-			C.limits[side]);
+			C.limits[side], C.crosses[side], C.pas[side]);
 }

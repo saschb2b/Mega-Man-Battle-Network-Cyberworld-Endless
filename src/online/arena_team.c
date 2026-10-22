@@ -9,6 +9,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_input.h"
+#include "arena_team_cross.h"
 #include "arena_team_custom.h"
 #include "arena_team_navi.h"
 #include "arena_team_wait.h"
@@ -40,6 +41,7 @@ typedef struct {
 	uint8_t late[HOOK_CORES][ITERATIONS];    /* the sides whose partner's slot held no keys for the iteration */
 	uint8_t at[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
 	uint32_t last[HOOK_CORES];               /* the last iteration each met */
+	uint32_t parted;                         /* the first iteration they were met apart (0 none yet) */
 } TeamLog;
 static TeamLog *T;
 
@@ -68,6 +70,11 @@ static HookAct spawn(HookRegs *r, void *user) {
 	/* (each partner's own NaviStats and hand, from his side's as the battle set them up; his deck and Custom screen anew) */
 	arena_team_navi_begin();
 	arena_team_custom_begin();
+	/* (teambeast=3: the leads' Beast Out too, its flag on both GBAs as the battle spawns, the partners' control) */
+	if (dev.team_beast >= 3) {
+		uint32_t at = BN6_EVENT_FLAGS + BN6_FLAG_BEAST_OUT / 8;
+		hook_write8(at, (uint8_t)(hook_read8(at) | 0x80u >> (BN6_FLAG_BEAST_OUT & 7)));
+	}
 	return HOOK_CONTINUE;
 }
 
@@ -150,7 +157,7 @@ static HookAct keys(HookRegs *r, void *user) {
 	 * on the second GBA alone, the mutation) */
 	int slot = hook_slot();
 	const uint32_t hands[SIDES] = { arena_team_navi_hand(0), arena_team_navi_hand(1) };
-	arena_team_custom_take(tick, hands, dev.team_pick < 0 && T && slot == T->slot[1]);
+	arena_team_custom_take(tick, hands, T && slot == T->slot[1]);
 	bool kept = T && slot >= 0 && slot < HOOK_CORES && tick < ITERATIONS;
 	uint8_t late = 0;
 	for (unsigned side = 0; side < SIDES; ++side) {
@@ -174,6 +181,13 @@ static HookAct keys(HookRegs *r, void *user) {
 		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[slot][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
 		T->digest[slot][tick] = digest(slot, tick);
 		if (tick > T->last[slot]) T->last[slot] = tick;
+		/* (the first iteration the two GBAs part at, said as it is met: a mutation's battle may never end to be reported) */
+		int other = slot == T->slot[0] ? T->slot[1] : T->slot[0];
+		if (!T->parted && other >= 0 && other < HOOK_CORES && T->last[other] >= tick && T->digest[other][tick] != T->digest[slot][tick]) {
+			T->parted = tick;
+			printf("arena2v2: the two GBAs part at iteration %u (the partners' keys taken there: %04X %04X and %04X %04X)\n",
+				(unsigned)tick, T->keys[slot][tick][0], T->keys[slot][tick][1], T->keys[other][tick][0], T->keys[other][tick][1]);
+		}
 	}
 	return HOOK_CONTINUE;
 }
@@ -187,7 +201,8 @@ bool arena_team_hooks(struct mCore *core, unsigned side) {
 	if (!T) return false;
 	HookCore *c = hook_core(core);
 	bool ok = c && hook_on(c, BN6_SPAWN_ENTITIES, spawn, NULL) && hook_on(c, BN6_KEY_COPY, keys, NULL) &&
-		arena_team_navi_hooks(c, side, hook_slot_of(core)) && arena_team_wait_hooks(c);
+		arena_team_navi_hooks(c, side, hook_slot_of(core)) && arena_team_wait_hooks(c) &&
+		arena_team_cross_hooks(c, side, hook_slot_of(core));
 	/* (under full rules BN5's chip AI gives side 0's player a block of its own: the first MegaMan's alone) */
 	darkinvs_two_a_side(true);
 	T->slot[side] = hook_slot_of(core);
@@ -223,6 +238,7 @@ bool arena_team_report(void) {
 	arena_team_navi_report();
 	arena_team_custom_report();
 	arena_team_wait_report();
+	arena_team_cross_report();
 	for (unsigned g = 0; g < SIDES && n; ++g) {
 		int s = g ? b : a;
 		const uint16_t *hp = T->hp[s][n];

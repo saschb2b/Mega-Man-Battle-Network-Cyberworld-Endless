@@ -64,9 +64,16 @@
   that waits); a quiet sign tells a lead his partner is still picking
   and a partner that his lead is ready, and after 60 seconds the
   partner's picks are taken as they stand. A partner's seat shows his
-  own HP box, and each MegaMan is marked by his seat. Not yet a mode to
-  play: it needs the wire's four seats (docs/ONLINE_ARENA.md, Two
-  MegaMen a side).
+  own HP box, and each MegaMan is marked by his seat. A partner is now
+  his whole MegaMan (issue #181): his NaviCust's programs worked out by
+  BN6's own code on his game, so his HP, his buster, his abilities and
+  the chips his Custom screen deals are his own; his Cross chosen on his
+  own CROSSSELECT and taken by BN6's crossing on every GBA; and a
+  Program Advance made on his screen goes into his hand as BN6 makes it.
+  His Beast Out goes in from his own emblem too, its turns counted down
+  and its end asked by BN6's own code for him as for a lead.
+  Not yet a mode to play: it needs the wire's four seats
+  (docs/ONLINE_ARENA.md, Two MegaMen a side).
 
 - **A rematch in about a second, and the Square before a NetBattle
   (epic #167, steps 3 and 4).** Two Yeses on the result card now go

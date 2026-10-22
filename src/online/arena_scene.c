@@ -73,6 +73,13 @@ static uint16_t busy_keys(uint32_t frame) {
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
 	if (dev.arena_2v2 <= 0 || !S.arena) return keys;
 	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+	/* (teambeast=3: the leads too take Beast Out each turn, their partners' control: the cursor right to OK, down to the
+	 * emblem, A, then up and OK, again every 300 frames until the screen closes) */
+	if (dev.team_beast >= 3) {
+		unsigned b = t % 300;
+		return b >= 40 && b < 100 ? ((b - 40) % 12 < 4 ? KEY_RIGHT : 0) : b >= 104 && b < 107 ? KEY_DOWN :
+			(b >= 116 && b < 119) || (b >= 212 && b < 215) ? KEY_A : b >= 200 && b < 203 ? KEY_UP : 0;
+	}
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 

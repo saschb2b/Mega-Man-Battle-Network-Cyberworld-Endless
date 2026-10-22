@@ -78,6 +78,18 @@ typedef struct {
 	                    loadouts would give it (arena_team_navi.h) */
 	int team_form;  /* teamform=N: a team challenge from the Square names its format without asking: 1 one by one (the relay),
 	                   2 side by side (protocol v15, issue #181; square_arena.c) */
+	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
+	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
+	                   copies, a mutation that must part the two */
+	int team_pa;    /* teampa=1: under arena2v2 side 0's partner's folder opens with Cannon A, B and C as its Regular chip and
+	                   TagChips, his first hand a Program Advance (arena_team_custom.h); -1 the same, the PA left out of his
+	                   hand on the second GBA alone, a mutation that must part the two */
+	int team_beast; /* teambeast=1: under arena2v2 each partner's own Custom screen offers Beast Out and his stood-in client takes it
+	                   at his first turn, 2 at every turn, 3 the leads too (arena_team_cross.h); -1 none on the second GBA,
+	                   a mutation that must part the two */
+	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
+	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
+	                   Cross none, a mutation that must part the two */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

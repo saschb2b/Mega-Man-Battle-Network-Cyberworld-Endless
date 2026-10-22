@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "bn6.h"
+
 struct mCore;
 
 #define TEAM_CUSTOM_PICKS 5   /* the chips picked at most */
@@ -40,6 +42,28 @@ struct mCore;
 #define TEAM_PICK_MARK    0x8000u
 #define TEAM_PICK(count, index, slot) \
 	((uint16_t)(TEAM_PICK_MARK | ((unsigned)(count) & 7u) << 11 | ((unsigned)(index) & 7u) << 8 | ((unsigned)(slot) & 0xFFu)))
+/* ... and his Cross (a count no pick has): the form his own CROSSSELECT
+ * committed (BN6_CROSS_RECORD's +0, 1-0x18), said before his picks */
+#define TEAM_CROSS_COUNT  7u
+#define TEAM_CROSS(form)  TEAM_PICK(TEAM_CROSS_COUNT, 0, form)
+/* ... and a Program Advance his screen made at OK: its first pick (0-4),
+ * how many picks it took (3 or 4) and its chip (BN6_PA_FIRST on), said
+ * before his picks; the pair joins those picks into it as BN6's OK does */
+#define TEAM_PA_COUNT     6u
+#define TEAM_PA(at, took, id) \
+	TEAM_PICK(TEAM_PA_COUNT, at, (((unsigned)(id) - BN6_PA_FIRST) & 0x1Fu) | ((unsigned)(took) - 3u) << 5)
+
+/* A hand as BN6's OK builds it from picks (bn6f sub_8029110): the chips'
+ * ids, powers, plus chips' bonuses and folder entries */
+typedef struct {
+	uint16_t id[BN6_HAND_MAX], power[BN6_HAND_MAX], bonus[BN6_HAND_MAX], entry[BN6_HAND_MAX];
+} TeamHand;
+/* `n` picks' folder entries (chip | code << 9) into `out` as BN6's OK
+ * builds a hand: where pa_at (its first pick + 1, 0 none) is given, the
+ * pa_took picks from there joined into chip pa_id first (sub_802B6F2),
+ * then each Atk+10, Atk+30 or Navi+20 merged into the chip before it
+ * (sub_8029224); the chips in the hand */
+unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, unsigned pa_took, unsigned pa_id, TeamHand *out);
 
 /* side's partner's folder before the battle: 30 entries (chip | code <<
  * 9, 0xFFFF none), its Regular chip and TagChips (entries, 0xFF none);
@@ -55,9 +79,10 @@ void arena_team_custom_begin(void);
  * while that screen is open, nor in a pick message. */
 uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t value, uint32_t delay);
 /* from the key copy's hook at iteration `tick`: each partner's picks set
- * for it written into his own hand at `hand[side]` (`short_one`: a chip
- * short, the mutation) */
-void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool short_one);
+ * for it written into his own hand at `hand[side]` (`second`: the second
+ * GBA's core, where teampick=-1 leaves a chip short and teampa=-1 his
+ * Program Advance out, the mutations) */
+void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool second);
 /* side's partner's deck as `core` holds it: its entries in the order drawn,
  * how many (his own client's screen deals from it); 0 before it is dealt */
 unsigned arena_team_custom_deck(struct mCore *core, unsigned side, uint16_t out[30]);
@@ -66,6 +91,11 @@ unsigned arena_team_custom_deck(struct mCore *core, unsigned side, uint16_t out[
  * for its partner now (dealt, his turn open and his picks not in, he on
  * the field); and whether it owes the packet, held back */
 bool arena_team_custom_holds(unsigned side);
+/* From a hook: the form side's partner's own CROSSSELECT committed this
+ * turn (0 none), his pending form until his next turn opens */
+uint8_t arena_team_custom_cross(unsigned side);
+/* ... taken from this core's RAM as the crossing is done (BN6 takes its records' so) */
+void arena_team_custom_cross_taken(unsigned side);
 void arena_team_custom_owe(unsigned side, bool owed);
 bool arena_team_custom_owed(unsigned side);
 /* As `core` (side's GBA's) holds it: the frames it has held for its
