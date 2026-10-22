@@ -16,13 +16,20 @@
 #define BN6_OW_ANIM_LOG_IN      0x19   /* BN6_OW_MEGAMAN: + facing, logging in (9 frames blank, 4 lighter, 4 himself) */
 #define BN6_OW_ANIM_LOG_OUT     0x21   /* BN6_OW_MEGAMAN: + facing, logging out */
 #define BN6_OW_ANIM_ARRIVE      0x2D   /* BN6_OW_MEGAMAN: a jack-in's arrival, blank then turning round once (10 frames, 50 long), with sound 0x76 */
+#define BN6_OW_ANIM_STARTLED    0x2E   /* BN6_OW_MEGAMAN: + 0-3, a step back, guarding, four ways (1 frame) */
 #define BN6_OW_ANIM_AIM         0x33   /* BN6_OW_MEGAMAN: + 0-3, the buster held out four ways (3 frames looping) */
 #define BN6_OW_ANIM_SHOCKED     0x38   /* BN6_OW_MEGAMAN: sparks beside him, shaken (2 frames looping) */
 #define BN6_OW_ANIM_CROUCH      0x39   /* BN6_OW_MEGAMAN: hunched, hurt (2 frames looping) */
 #define BN6_OW_ANIM_COLLAPSE    0x3F   /* BN6_OW_MEGAMAN: standing, kneeling, down (3 frames) */
 #define BN6_OW_ANIM_ARMS_UP     0x40   /* BN6_OW_MEGAMAN: both arms raised over his head (4 frames looping) */
+#define BN6_OW_ANIM_KNEEL       0x41   /* BN6_OW_MEGAMAN: on one knee, still (1 frame) */
 #define BN6_OW_ANIM_PANTING     0x42   /* BN6_OW_MEGAMAN: on one knee, heaving (4 frames looping) */
 #define BN6_OW_ANIM_LEAP        0x43   /* BN6_OW_MEGAMAN: in mid-leap (1 frame) */
+#define BN6_OW_ANIM_PONDER      0x44   /* BN6_OW_MEGAMAN: crouched, looking about (3 frames, 9 long) */
+/* (four-way animations, + 0-3: the player's facing / 2, his facings 1, 3,
+ * 5 and 7 the grid's +x, +y, -x and -y (BN6_TALK_PROBES); facing 5's
+ * 0x35 seen pointing -x in the Square's captures, issue #176, the others
+ * assumed in that order) */
 
 /* The NPC script's hop in place, as BN6's excited bystanders do it (bn6f
  * npc_initHopMovement_809e8fc): the shadow left on the floor, the hop, the
@@ -43,7 +50,7 @@
 #define BN6_MUGSHOT_BLINK       1      /* BN6_TEXT_MUGSHOT: ... blinking, the mouth shut (a face's pause between words) */
 #define BN6_MUGSHOT_TALK        2      /* BN6_TEXT_MUGSHOT: ... the mouth moving while letters print, blinking between */
 #define BN6_MUGSHOT_EYES_SHUT   3      /* BN6_TEXT_MUGSHOT: ... eyes shut, Lan's face (0x00) alone has it */
-#define BN6_TEXT_PLAYER         0xF8   /* text command: F8 01 n MegaMan's (or Lan's) animation n, F8 03 waits for its end, F8 04 the one before */
+#define BN6_TEXT_PLAYER         0xF8   /* text command: F8 00 holds him, F8 01 n his animation n, F8 02 lets go, F8 03 waits for its end, F8 04 the one before the last F8 01 (each F8 01 keeps the one it replaces); run with no text printed, no chat box opens (issue #176) */
 #define BN6_TEXT_SOUND          0xFD   /* text command: FD 00 then a u16 sound, played without opening the box */
 
 /* The battle's burst over a fighter (sprite list 5's 0x07, plain) */
@@ -70,6 +77,12 @@
  * numbers; the words beside them in its text) */
 #define BN6_SOUND_GOT           0x73   /* the item-get jingle ("Lan got:"), with BN6_OW_ANIM_GOT */
 #define BN6_SOUND_RANK_UP       0x74   /* "Your Request Rank has been increased" */
+#define BN6_SOUND_TYPE          0x65   /* a letter typed in the chat box (bn6f SOUND_TYPE) */
+#define BN6_SOUND_HIT           0x6B   /* a hit (bn6f SOUND_HIT_6B) */
+#define BN6_SOUND_BUSTER_CHARGE 0x71   /* the buster charging (bn6f SOUND_BUSTER_CHARGE) */
+#define BN6_SOUND_LOG_IN        0x77   /* a Navi's log-in (bn6f SOUND_LOG_IN_77) */
+#define BN6_SOUND_CURSOR        0x7F   /* a menu's cursor moved (bn6f SOUND_MENU_CUR_MOVE) */
+#define BN6_SOUND_FADE          0x8E   /* bn6f SOUND_FADE_8E, its use not looked up (assumed soft) */
 #define BN6_SOUND_LOG_OUT       0x76   /* the beam (bn6f SOUND_LOG_OUT_76): a Navi's log-in and log-out alike */
 #define BN6_SOUND_LINK_NAVI     0x8F   /* "... became Lan's LinkNavi!" */
 #define BN6_SOUND_APPEAR        0x94   /* a sparkle as something appears */

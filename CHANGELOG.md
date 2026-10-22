@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **The Net Square's emotes, performed (issue #176).** An emote is
+  MegaMan's own BN6 pose and a sound of BN6's, on every screen alike: a
+  hand raised for Wave, both arms up for Cheer, down on one knee for
+  Bow, the item-get pose and jingle for Got it!, the buster held out, a
+  collapse, a turn on the spot, sparks; a caption in BN6's chat box only
+  where a pose cannot say it ("Haha!", "Hmm..."). Twelve emotes, six of
+  them new; MegaMan is never moved by one. **One press:** hold L and
+  press a direction for one of four favourites (up Wave, right Cheer,
+  down Bow, left Laugh; `network.ini`'s `favourites` changes them).
+  **Wave and wave back:** a Wave, Cheer or Bow facing another MegaMan is
+  aimed at him; a hand blinks over the sender's name on his screen, his
+  next one answers, and within five seconds BN6's "!!" and sparkle play
+  between them for everyone. Two unanswered aimed at one player are the
+  most anyone else sees. **In step:** every emote starts on the
+  server's beat, so a group's play together on every screen, and the
+  Square's cheer grows with the crowd: the walkers' cheer from three, the
+  greeter's call from four. A burst of three phrases or emotes, then one
+  a second (it was two, then one every two seconds), and L's **Quiet
+  please** hides everyone else's. Protocol v14: an older game or server
+  is told which side is behind.
+
 - **Two MegaMen a side, research behind `--dev arena2v2` (epic #167).**
   Each partner picks his chips on BN6's own Custom screen from his own
   deck, on a copy of the battle his own game keeps, and only his picks

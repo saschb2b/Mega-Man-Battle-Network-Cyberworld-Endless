@@ -521,9 +521,12 @@ bool online_transport_inspect(uint32_t player_id) {
 	return player_id && enqueue(data, sizeof data);
 }
 
-bool online_transport_social(uint8_t kind, uint8_t value) {
-	uint8_t data[3] = { ONLINE_SOCIAL, kind, value };
-	return kind <= 1 && value < (kind ? ONLINE_EMOTE_COUNT : ONLINE_PHRASE_COUNT) && enqueue(data, sizeof data);
+bool online_transport_social(uint8_t kind, uint8_t value, uint32_t target) {
+	uint8_t data[ONLINE_SOCIAL_BYTES] = { ONLINE_SOCIAL, kind, value };
+	online_put32(data + 3, target);
+	/* (only an emote of ONLINE_EMOTE_AIMED's is aimed: the server closes on another) */
+	bool aim_ok = !target || (kind == 1 && (ONLINE_EMOTE_AIMED >> value & 1));
+	return kind <= 1 && value < (kind ? ONLINE_EMOTE_COUNT : ONLINE_PHRASE_COUNT) && aim_ok && enqueue(data, sizeof data);
 }
 
 bool online_transport_channel(uint16_t channel) {

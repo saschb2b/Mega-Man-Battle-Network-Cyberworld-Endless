@@ -14,6 +14,8 @@ const char *square_greeter_stamp_words(void) {
 
 const char *square_more(void) { return "More..."; }
 
+const char *square_quiet_option(bool quiet) { return quiet ? "Let them talk" : "Quiet please"; }
+
 const char *square_back(void) { return "Back"; }
 
 const char *square_home_question(void) { return "Head home,Lan?\n"; }

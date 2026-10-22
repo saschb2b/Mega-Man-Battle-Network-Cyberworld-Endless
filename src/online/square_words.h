@@ -17,6 +17,9 @@ const char *square_greeter_stamp_words(void);
 extern const char *const square_menu_options[SQUARE_MENU_OPTIONS];
 /* ... a page of phrases or emotes goes on with this. */
 const char *square_more(void);
+/* ... More's option to hide everyone else's phrases and emotes, or, where
+ * hidden (`quiet`), to show them again (square_emote.h). */
+const char *square_quiet_option(bool quiet);
 const char *square_back(void);
 /* R, or the pad home: MegaMan's question. */
 const char *square_home_question(void);

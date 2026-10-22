@@ -422,7 +422,12 @@ server=ws://127.0.0.1:8765/presence
 
 (the keeper's first-time questions answered: name chosen, the second
 server picked and consented to), or `--dev online=URL,onlinename=NAME`
-points the gate at a server and skips his questions for a session. Two
+points the gate at a server and skips his questions for a session. In
+the Square the dev step `emote K` sends emote K (0-11, L's list) as L's
+chat does, aimed at the MegaMan faced where it can be (issue #176;
+`.build/`'s harness of three to five games on a local server, as
+`tools/trailer_online.py` runs them, played every emote, a wave and its
+answer, the cap, the burst, the quiet and a group's cheer with it). Two
 `tools/play.py` sessions, each with its own folder and identity, then play
 it from `--scene home --run-depth 7`: `place 16 72 3` puts MegaMan on the
 gate, LEFT and A answer Yes; the log names the Square's area and arrival

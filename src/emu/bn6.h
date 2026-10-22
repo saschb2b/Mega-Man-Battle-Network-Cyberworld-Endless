@@ -289,7 +289,7 @@
 /* Shops */
 #define BN6_CHAT_FONT         0x086AACACu /* the chat box's font: 16x12 4bpp glyphs, 0x60 bytes per character code */
 #define BN6_CHAT_FONT_WIDTHS  0x08043C74u /* ... its widths in pixels, a byte per code */
-#define BN6_TALK_PROBES       0x0809F164u /* the player's 8 facing probes (bn6f byte_809DC2C): s32 x, y, z offsets (16.16), u8 radius, u8 z reach, flags; 24 bytes each */
+#define BN6_TALK_PROBES       0x0809F164u /* the player's 8 facing probes (bn6f byte_809DC2C): s32 x, y, z offsets (16.16), u8 radius, u8 z reach, flags; 24 bytes each; facing 1 is +x (8, 0), 3 +y, 5 -x, 7 -y, the even ones between (read from Gregar, issue #176) */
 #define BN6_TALK_PROBE_SIZE   24          /* a probe's size */
 #define BN6_TALK_PROBE_Y      4           /* its y offset (s32, 16.16) */
 #define BN6_TALK_PROBE_RADIUS 12          /* its radius (u8) */

@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 13
+#define ONLINE_PROTOCOL_VERSION 14
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v13"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v14"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -26,7 +26,7 @@
 #define ONLINE_IDENTITY_BYTES 16
 #define ONLINE_BOARD_CELLS 49
 #define ONLINE_PHRASE_COUNT 8
-#define ONLINE_EMOTE_COUNT 6
+#define ONLINE_EMOTE_COUNT 12
 #define ONLINE_PROFILE_BYTES 69
 #define ONLINE_PEER_BYTES 50
 #define ONLINE_WELCOME_BYTES 38
@@ -101,5 +101,19 @@
 #define ONLINE_PING_BYTES 7      /* PING: u32 clock, u16 the sender's round trip in ms (0 unknown) */
 #define ONLINE_ARENA_SEEN 5      /* ARENA's action and ARENA_STATE's stage: the challenge's question shown */
 #define ONLINE_PENDING_UNSEEN 60 /* seconds a challenge not yet seen waits */
+/* (protocol v14, issue #176: the Square's emotes performed, aimed and
+ * answered, on the server's beat) */
+#define ONLINE_SOCIAL_BYTES 7         /* SOCIAL: u8 kind, u8 id, u32 the MegaMan it is aimed at (0 none) */
+#define ONLINE_EVENT_BYTES 14         /* EVENT: u32 sender, u8 kind, u8 id, u32 aimed at, u8 flags, u16 ms to its beat */
+#define ONLINE_EMOTE_AIMED 35         /* the emotes that may be aimed, a bit an id: Wave, Cheer, Bow */
+#define ONLINE_SOCIAL_BURST 3         /* phrases and emotes at once ... */
+#define ONLINE_SOCIAL_REFILL_MS 1000  /* ... then one back so often */
+#define ONLINE_AIM_CAP 2              /* aimed emotes at one MegaMan unanswered, past which only the sender sees his */
+#define ONLINE_AIM_WINDOW_MS 30000    /* ... counted so long */
+#define ONLINE_ANSWER_MS 5000         /* an aimed emote answered within this: EVENT's answered flag */
+#define ONLINE_BEAT_MS 250            /* the server's beat an emote starts on */
+#define ONLINE_BEAT_LEAD_MS 60        /* ... the least lead past the farthest one-way trip of the channel */
+#define ONLINE_BEAT_LEAD_MOST_MS 400  /* ... and the most */
+#define ONLINE_EVENT_ANSWERED 1       /* EVENT's flags: it answers one aimed at its sender */
 
 #endif

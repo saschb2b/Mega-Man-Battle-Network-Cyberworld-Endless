@@ -132,6 +132,18 @@ static bool read_status(const uint8_t *data, size_t size, OnlineSnapshot *snapsh
 	return true;
 }
 
+/* EVENT (v14): its beat, the server's, is so many ms after it was sent,
+ * half the round trip before it came */
+static bool read_event(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
+	if (size != ONLINE_EVENT_BYTES || !get32(data + 1) || data[5] > 1 ||
+	    data[6] >= (data[5] ? ONLINE_EMOTE_COUNT : ONLINE_PHRASE_COUNT)) return false;
+	uint32_t beat = get16(data + 12), half = snapshot->latency_ms / 2;
+	++snapshot->event_serial;
+	snapshot->events[snapshot->event_serial % ONLINE_EVENT_HISTORY] = (OnlineEvent){ snapshot->event_serial, get32(data + 1), now,
+		data[5], data[6], get32(data + 7), data[11], now + (beat > half ? beat - half : 0) };
+	return true;
+}
+
 bool online_wire_message(const uint8_t *data, size_t size, uint32_t now, OnlineSnapshot *snapshot) {
 	if (!size || size > ONLINE_MAX_MESSAGE) return false;
 	if (data[0] == ONLINE_WELCOME) return read_welcome(data, size, snapshot);
@@ -143,12 +155,6 @@ bool online_wire_message(const uint8_t *data, size_t size, uint32_t now, OnlineS
 		snapshot->latency_ms = now - get32(data + 1);
 		return snapshot->latency_ms < 15000;
 	}
-	if (data[0] == ONLINE_EVENT && size == 7 && get32(data + 1) && data[5] <= 1 &&
-	    data[6] < (data[5] ? ONLINE_EMOTE_COUNT : ONLINE_PHRASE_COUNT)) {
-		++snapshot->event_serial;
-		snapshot->events[snapshot->event_serial % ONLINE_EVENT_HISTORY] =
-			(OnlineEvent){ snapshot->event_serial, get32(data + 1), now, data[5], data[6] };
-		return true;
-	}
+	if (data[0] == ONLINE_EVENT) return read_event(data, size, now, snapshot);
 	return false;
 }

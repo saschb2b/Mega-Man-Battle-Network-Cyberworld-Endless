@@ -34,6 +34,9 @@ typedef struct {
 typedef struct {
 	uint32_t serial, player_id, ticks;
 	uint8_t kind, value;
+	uint32_t target;   /* the MegaMan an emote is aimed at (v14), 0 none */
+	uint8_t flags;     /* ONLINE_EVENT_ANSWERED: it answers one aimed at its sender */
+	uint32_t start;    /* the ticks of the server's beat it starts on, here */
 } OnlineEvent;
 
 typedef struct {

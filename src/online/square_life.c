@@ -32,9 +32,10 @@
 #define PARADE_GAP 64             /* the walkers two panels apart */
 #define BEAM_FRAMES 48     /* BN6's log-in beam shown so long */
 #define BEAM_SOUND 0x76    /* ... and its sound (stage_npc.c's) */
-#define CHEER_SOUND 0x94   /* BN6's sparkle as something shows (stage_npc.c's SOUND_APPEAR) */
+#define CHEER_SOUND BN6_SOUND_APPEAR   /* BN6's sparkle as something shows (stage_npc.c's SOUND_APPEAR) */
 #define MARK_Z 46          /* the "!" over a Navi's head (lanhp.c's courier's) */
 #define MARK_FRAMES 120
+#define BURST_FRAMES 20    /* ... at a point (square_life_mark): BN6's burst plays 18 frames, its last not held */
 #define BARK_FRAMES 180    /* a word over a head shown so long */
 #define TOGETHER 240       /* emotes this close count as together */
 #define CHEER_REST 600     /* the Square answers once in so long */
@@ -57,13 +58,14 @@ static struct {
 	int nseen;
 	char arrived[ONLINE_NAME_BYTES + 1];
 	int beam_want, beam_anim, beam_t, beam[3];
-	int mark_t, mark_on;
-	bool mark_sound;
-	const char *bark;
+	int mark_t, mark_on, mark_at[3], mark_sound, mark_anim;   /* (mark_on: the walker it is over, -1 at mark_at) */
+	const char *bark, *call;
 	int bark_t, bark_at[3], bark_on;   /* (bark_on: the walker it follows, -1 none) */
+	int call_t, call_at[3];            /* (the greeter's call over his head, a big cheer's) */
 	uint32_t event_serial;
 	struct { uint32_t id; unsigned at; } cheer[ONLINE_MAX_PLAYERS];
 	unsigned cheered_at;
+	int cheer_tier;   /* the most MegaMen the Square has answered together since its rest began */
 	uint32_t greeter_said, referee_said;
 	uint32_t bout_barked;   /* the frame the referee last called a bout under way (0 none) */
 	unsigned bouts;   /* the battles fought from the Square the referee has called */
@@ -306,24 +308,37 @@ static bool where(const OnlineSnapshot *s, uint32_t id, int *x, int *y) {
 	return false;
 }
 
-/* the walkers answer: a "!" over the one nearer the landmark, a word over
- * the other, and BN6's sparkle */
-static void cheer(void) {
+/* the walkers answer `together` MegaMen (issue #176, the more the
+ * bigger): BN6's "!!" over the one nearer the landmark and BN6's sparkle;
+ * the other's word, "!!", or from three a cheer of his own and the pops;
+ * from four the greeter calls everyone over his head too */
+static void cheer(int together) {
 	const SquarePlan *p = online_square_plan();
 	int cx, cy;
 	netmap_world(p->at[SQ_CENTER][0], p->at[SQ_CENTER][1], &cx, &cy);
 	int d0 = abs(L.wx[0] - cx) + abs(L.wy[0] - cy), d1 = abs(L.wx[1] - cx) + abs(L.wy[1] - cy);
-	L.mark_on = d1 < d0;
+	int near = d1 < d0;
+	L.mark_on = near;
 	L.mark_t = MARK_FRAMES;
-	int other = !L.mark_on;
-	bark(square_cheer_bark(), L.wx[other], L.wy[other], 0, other);
-	L.mark_sound = true;
+	L.mark_anim ^= 2;   /* (BN6's two "!!" animations in turn: one shown again starts only as it changes) */
+	int other = !near;
+	bark(square_cheer_bark(together), L.wx[other], L.wy[other], 0, other);
+	L.mark_sound = together >= 3 ? BN6_SOUND_POPS : CHEER_SOUND;
+	if (together >= 4) {
+		int gx, gy;
+		netmap_world(p->at[SQ_GREETER][0], p->at[SQ_GREETER][1], &gx, &gy);
+		L.call = square_greeter_cheer_call(together);
+		L.call_t = BARK_FRAMES;
+		L.call_at[0] = gx; L.call_at[1] = gy; L.call_at[2] = 0;
+	}
 	L.cheered_at = L.frames;
-	if (emu_debug_on()) fprintf(stderr, "online: the Square cheers (walker %d marked)\n", L.mark_on);
+	L.cheer_tier = together;
+	if (emu_debug_on()) fprintf(stderr, "online: the Square cheers for %d (walker %d marked)\n", together, near);
 }
 
 /* a phrase or an emote by player `id` at a cheering spot noted; two
- * players' within TOGETHER of each other cheer */
+ * players' within TOGETHER of each other cheer, and more joining a cheer
+ * make it bigger (once each size in its rest) */
 static void noted(uint32_t id) {
 	int slot = 0;
 	for (int i = 0; i < ONLINE_MAX_PLAYERS; ++i) {
@@ -335,7 +350,16 @@ static void noted(uint32_t id) {
 	if (emu_debug_on()) fprintf(stderr, "online: player %u spoke at a cheering spot\n", id);
 	int together = 0;
 	for (int i = 0; i < ONLINE_MAX_PLAYERS; ++i) together += L.cheer[i].id && L.frames - L.cheer[i].at <= TOGETHER;
-	if (together >= 2 && (!L.cheered_at || L.frames - L.cheered_at > CHEER_REST)) cheer();
+	bool rested = !L.cheered_at || L.frames - L.cheered_at > CHEER_REST;
+	if (together >= 2 && (rested || together > L.cheer_tier)) cheer(together);
+}
+
+void square_life_mark(int x, int y, int z, int sound) {
+	L.mark_on = -1;
+	L.mark_at[0] = x; L.mark_at[1] = y; L.mark_at[2] = z;
+	L.mark_t = BURST_FRAMES;
+	L.mark_anim ^= 2;
+	L.mark_sound = sound;
 }
 
 static void emotes(const OnlineSnapshot *s) {
@@ -352,12 +376,12 @@ static void emotes(const OnlineSnapshot *s) {
 
 static void mark_frame(void) {
 	if (L.mark_t) --L.mark_t;
-	int k = L.mark_on;
+	int k = L.mark_on, x = k >= 0 ? L.wx[k] : L.mark_at[0], y = k >= 0 ? L.wy[k] : L.mark_at[1];
 	/* (a step before him in depth, drawn over him where they meet) */
-	online_square_actor(SQUARE_ACTOR_MARK, L.mark_t > 0, 0, L.wx[k] - 1, L.wy[k] + 1, MARK_Z);
+	online_square_actor(SQUARE_ACTOR_MARK, L.mark_t > 0, L.mark_anim, x - 1, y + 1, (k >= 0 ? 0 : L.mark_at[2]) + MARK_Z);
 	/* (after the frame's place: the sound plays as the script runs on) */
-	if (L.mark_sound) online_square_actor_sound(SQUARE_ACTOR_MARK, CHEER_SOUND);
-	L.mark_sound = false;
+	if (L.mark_sound) online_square_actor_sound(SQUARE_ACTOR_MARK, L.mark_sound);
+	L.mark_sound = 0;
 }
 
 /* the trade board's offers, the Square's names on them: MegaMan's own first */
@@ -442,6 +466,7 @@ void square_life_frame(const OnlineSnapshot *s) {
 	mark_frame();
 	progs();
 	if (L.bark_t) --L.bark_t;
+	if (L.call_t) --L.call_t;
 }
 
 /* The Board stands in the void past the log-in plaza's back rim, its art
@@ -528,8 +553,14 @@ bool square_life_look(void) {
 	return talk_start(square_look_words(part_of(bn6_player_x(), bn6_player_y()), p->landmark, way), FACE_MEGAMAN);
 }
 
-bool square_life_bark(const char **text, int *x, int *y, int *z) {
-	if (!L.bark_t || !L.bark) return false;
+bool square_life_bark(int k, const char **text, int *x, int *y, int *z) {
+	if (k == 1) {
+		if (!L.call_t || !L.call) return false;
+		*text = L.call;
+		*x = L.call_at[0]; *y = L.call_at[1]; *z = L.call_at[2];
+		return true;
+	}
+	if (k || !L.bark_t || !L.bark) return false;
 	*text = L.bark;
 	bool walker = L.bark_on >= 0 && L.bark_on < SQUARE_WALKERS;
 	*x = walker ? L.wx[L.bark_on] : L.bark_at[0];

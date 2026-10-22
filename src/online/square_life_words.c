@@ -182,6 +182,8 @@ const char *square_look_words(int where, int look, const char *way) {
 	return s;
 }
 
-const char *square_cheer_bark(void) { return "!!"; }
+const char *square_cheer_bark(int together) { return together >= 3 ? "Yeah!! Go,go!" : "!!"; }
+
+const char *square_greeter_cheer_call(int together) { return together >= 5 ? "WHOA! EVERYBODY!!" : "ALL TOGETHER NOW!"; }
 
 const char *square_parade_bark(void) { return "Parade time!"; }

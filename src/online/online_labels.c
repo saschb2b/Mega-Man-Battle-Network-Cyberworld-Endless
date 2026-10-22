@@ -3,41 +3,49 @@
 #include <string.h>
 
 #include "bn6_fields.h"
+#include "chatbox.h"
 #include "gfx.h"
 #include "online_people.h"
 #include "online_text.h"
 #include "pixfont.h"
 #include "square_arena.h"
 #include "square_ask.h"
+#include "square_emote.h"
 #include "square_life.h"
 #include "platform.h"
 
 /* (a mark over a name, epic #167: what he is busy with, or his challenge
  * to this game waiting) */
-enum { MARK_NONE, MARK_BATTLE, MARK_WATCH, MARK_TRADE, MARK_ASKS };
+enum { MARK_NONE, MARK_BATTLE, MARK_WATCH, MARK_TRADE, MARK_ASKS, MARK_WAVED };
 
-static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase; uint8_t mark; } labels[ONLINE_MAX_PLAYERS + 1];
+/* (a peer's or MegaMan's label: his name, or the phrase he said; the
+ * caption of an emote his pose cannot carry; a mark; then the Square's
+ * own words: a walker's or a Mr.Prog's, the greeter's call) */
+static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase, *caption; uint8_t mark; } labels[ONLINE_MAX_PLAYERS + 2];
 static unsigned count;
 static const OnlineSnapshot *drawn;   /* the snapshot shown, for the open challenge's strip (square_ask.h) */
 static uint32_t drawn_at;
 
 /* The marks, the project's own 7x7 pictures a row a byte (bit 6 the
  * leftmost): crossed blades in a NetBattle, an eye watching one, a chip at
- * a trade, and "!" over a player whose challenge waits for Lan */
-static const uint8_t mark_rows[5][7] = {
+ * a trade, "!" over a player whose challenge waits for Lan, and a raised
+ * hand over one whose emote at MegaMan waits for his answer (issue #176) */
+static const uint8_t mark_rows[6][7] = {
 	{ 0 },
 	{ 0x41, 0x22, 0x14, 0x08, 0x14, 0x2A, 0x41 },
 	{ 0x00, 0x1C, 0x22, 0x49, 0x22, 0x1C, 0x00 },
 	{ 0x3E, 0x22, 0x2A, 0x22, 0x3E, 0x14, 0x14 },
 	{ 0x08, 0x08, 0x08, 0x08, 0x00, 0x08, 0x00 },
+	{ 0x2A, 0x2A, 0x2A, 0x3E, 0x3E, 0x1C, 0x1C },
 };
 
 static void mark_draw(int x, int y, uint8_t mark, uint32_t now) {
-	SDL_Color colour[5] = { WHITE, rgba(255, 120, 66, 255), rgba(107, 222, 255, 255), rgba(115, 222, 99, 255), rgba(255, 214, 16, 255) };
+	SDL_Color colour[6] = { WHITE, rgba(255, 120, 66, 255), rgba(107, 222, 255, 255), rgba(115, 222, 99, 255), rgba(255, 214, 16, 255),
+		rgba(255, 214, 16, 255) };
 	SDL_Color c = colour[mark];
 	/* (a bout under way pulses, the world showing it; a challenge waiting blinks) */
 	if (mark == MARK_BATTLE && now / 250 % 2) c = rgba(255, 214, 16, 255);
-	if (mark == MARK_ASKS && now / 400 % 2) return;
+	if ((mark == MARK_ASKS || mark == MARK_WAVED) && now / 400 % 2) return;
 	fill_rect(P.core_x + x - 6, P.core_y + y, 11, 11, rgba(9, 24, 42, 210));
 	for (int r = 0; r < 7; ++r)
 		for (int k = 0; k < 7; ++k)
@@ -46,13 +54,15 @@ static void mark_draw(int x, int y, uint8_t mark, uint32_t now) {
 
 void online_labels_reset(void) { count = 0; }
 
+/* the phrase player `id` said these four seconds (an emote is his pose:
+ * square_emote.c) */
 static const char *phrase_for(const OnlineSnapshot *snapshot, uint32_t id, uint32_t now) {
 	const OnlineEvent *last = NULL;
 	for (unsigned i = 0; i < ONLINE_EVENT_HISTORY; ++i) {
 		const OnlineEvent *e = &snapshot->events[i];
-		if (e->serial && e->player_id == id && now - e->ticks < 4000 && (!last || (int32_t)(e->serial - last->serial) > 0)) last = e;
+		if (e->serial && !e->kind && e->player_id == id && now - e->ticks < 4000 && (!last || (int32_t)(e->serial - last->serial) > 0)) last = e;
 	}
-	return last ? (last->kind ? online_emote_glyphs[last->value] : online_phrases[last->value]) : NULL;
+	return last ? online_phrases[last->value] : NULL;
 }
 
 static void label_at(int x, int y, int z, const int camera[3]) {
@@ -76,30 +86,46 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 		label_at(peer->x, peer->y, peer->z, camera);
 		memcpy(labels[count].name, peer->name, sizeof peer->name);
 		unsigned flags = online_people_flags(peer->identity);
-		labels[count].phrase = flags & (ONLINE_MUTED | ONLINE_BLOCKED) ? NULL : phrase_for(shown, peer->id, now);
-		labels[count].mark = peer->id == square_arena_asking() ? MARK_ASKS : peer->busy;
+		bool hushed = (flags & (ONLINE_MUTED | ONLINE_BLOCKED)) || square_emote_quiet();
+		labels[count].phrase = hushed ? NULL : phrase_for(shown, peer->id, now);
+		labels[count].caption = hushed ? NULL : square_emote_caption(peer->id, now);
+		labels[count].mark = peer->id == square_arena_asking() ? MARK_ASKS : peer->id == square_emote_invited(now) ? MARK_WAVED : peer->busy;
 		++count;
 	}
 	label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera);
 	labels[count].name[0] = '\0';
 	labels[count].phrase = phrase_for(shown, shown->player_id, now);
+	labels[count].caption = square_emote_caption(shown->player_id, now);
 	labels[count].mark = MARK_NONE;
 	++count;
-	/* (a word over one of the Square's own: the greeter's, a walker's) */
+	/* (a word over one of the Square's own: the greeter's, a walker's, the greeter's call) */
 	const char *bark;
 	int x, y, z;
-	if (count < sizeof labels / sizeof *labels && square_life_bark(&bark, &x, &y, &z)) {
-		label_at(x, y, z, camera);
-		labels[count].name[0] = '\0';
-		labels[count].mark = MARK_NONE;
-		labels[count++].phrase = bark;
-	}
+	for (int k = 0; k < 2; ++k)
+		if (count < sizeof labels / sizeof *labels && square_life_bark(k, &bark, &x, &y, &z)) {
+			label_at(x, y, z, camera);
+			labels[count].name[0] = '\0';
+			labels[count].mark = MARK_NONE;
+			labels[count].caption = NULL;
+			labels[count++].phrase = bark;
+		}
+}
+
+/* an emote's caption over his name in BN6's look: its chat box, small,
+ * its chat font */
+static void caption_draw(int x, int y, const char *text) {
+	int w = chatbox_text_width(text) + 10, h = 18;
+	if (x < w / 2 + 1) x = w / 2 + 1;
+	if (x > EMU_W - w / 2 - 1) x = EMU_W - w / 2 - 1;
+	chatbox_bubble(P.core_x + x - w / 2, P.core_y + y - h - 2, w, h);
+	chatbox_text(P.core_x + x - w / 2 + 5, P.core_y + y - h + 1, text, -1);
 }
 
 void online_labels_draw(void) {
 	for (unsigned i = 0; i < count; ++i) {
 		int x = labels[i].x, y = labels[i].y;
 		if (x < 0 || x >= EMU_W || y < 18 || y > EMU_H - 20) continue;
+		if (labels[i].caption) caption_draw(x, y, labels[i].caption);
 		const char *text = labels[i].phrase ? labels[i].phrase : labels[i].name;
 		if (!text[0]) continue;
 		int w = pixfont_width(text, 1);
@@ -107,7 +133,7 @@ void online_labels_draw(void) {
 		if (x > EMU_W - w / 2 - 2) x = EMU_W - w / 2 - 2;
 		fill_rect(P.core_x + x - w / 2 - 2, P.core_y + y - 1, w + 4, 11, rgba(9, 24, 42, 210));
 		pixfont_draw(P.core_x + x, P.core_y + y, text, WHITE, BLACK, PIXFONT_CENTER, 1);
-		if (labels[i].mark && labels[i].mark <= MARK_ASKS) mark_draw(x, y - 13, labels[i].mark, drawn_at);
+		if (labels[i].mark && labels[i].mark <= MARK_WAVED && !labels[i].caption) mark_draw(x, y - 13, labels[i].mark, drawn_at);
 	}
 	if (drawn) square_ask_draw(drawn, drawn_at);
 }

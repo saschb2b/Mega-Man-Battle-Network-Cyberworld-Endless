@@ -17,6 +17,11 @@ enum {
  * the page, the corners rounded, and the tab on its top right (4 rows
  * above y). */
 void chatbox_frame(int x, int y, int w, int h);
+/* ... without its tab: a small box of the same look (a caption over a
+ * MegaMan's head in the Net Square, online_labels.c) */
+void chatbox_bubble(int x, int y, int w, int h);
+/* The pixels text in the chat font takes across. */
+int chatbox_text_width(const char *s);
 /* Text in the chat font, its top-left at (x, y), the first `n` characters
  * (-1 all); the pixels it took across. */
 int chatbox_text(int x, int y, const char *s, int n);

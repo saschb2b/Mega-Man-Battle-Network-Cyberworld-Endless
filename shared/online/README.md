@@ -1,10 +1,10 @@
-# Net Square protocol v13
+# Net Square protocol v14
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v13`. The server also
+`/presence` with subprotocol `cyberworld.presence.v14`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -20,8 +20,8 @@ side is behind, rather than a refused upgrade (v10).
 | PROFILE (8) | client → server | 69-byte public profile, described below |
 | INSPECT (9) | client → server | u32 target session ID in the same channel |
 | CARD (10) | server → client | u32 session ID, 16-byte public identity, 69-byte public profile |
-| SOCIAL (11) | client → server | u8 kind (0 phrase, 1 emote), u8 fixed choice ID |
-| EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID |
+| SOCIAL (11) | client → server | u8 kind (0 phrase, 1 emote), u8 fixed choice ID, u32 the session it is aimed at (v14; 0 none, and only an emote of `emote_aimed`'s may name one: 7 bytes, `social_bytes`) |
+| EVENT (12) | server → channel, including sender | u32 sender session ID, u8 kind, u8 fixed choice ID, u32 the session it is aimed at (0 none), u8 flags (bit 0, `event_answered`: it answers one the other aimed at its sender within `answer_ms`), u16 ms from this message to the beat it starts on (v14: 14 bytes, `event_bytes`) |
 | CHANNEL (13) | client → server | u16 requested channel (0 chooses one); success sends a fresh WELCOME |
 | NOTICE (14) | server → client | u16 reason, at most 96 printable ASCII bytes; an action failed but the connection stays open |
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
@@ -58,8 +58,10 @@ uses six bits, Crosses five, and title marks sixteen. Profiles contain
 no folder, Pack, currency or save bytes. They are client claims for
 display, never authoritative progression or anti-cheat evidence.
 
-Phrase IDs are 0..7 and emote IDs 0..5. The client owns their localized
-words and visuals. No arbitrary chat text is accepted. NOTICE codes are
+Phrase IDs are 0..7 and emote IDs 0..11 (v14: Wave, Cheer, Laugh,
+Surprised, Thinking, Bow, Got it!, Buster, Phew..., I'm beat, Spin,
+Zapped). The client owns their localized words and visuals (MegaMan's
+BN6 poses and sounds: docs/ONLINE.md, Emotes). No arbitrary chat text is accepted. NOTICE codes are
 10 channel unavailable, 11 muted, 12 social cooldown and 13 Inspect
 target unavailable. ERROR closes the connection; it includes version
 and identity mismatch, rate violation and moderation. ERROR 12 tells a
@@ -114,6 +116,23 @@ or full rules outside a mixed pair's common ground, protocols v4 to v8)
 is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v14 (issue #176; docs/ONLINE.md, Emotes). **An emote aimed**:
+SOCIAL names the session it is aimed at, where it is one of
+`emote_aimed`'s (35: Wave, Cheer and Bow, the warm ones; a target on a
+phrase or another emote is a ProtocolError); a target gone from the
+channel, or the sender himself, is no target. **An answer**: an aimed
+emote at a player who aimed one at the sender within `answer_ms` (5000)
+is flagged `event_answered` for every recipient, and both ways start
+afresh. **The cap**: a sender's aimed emotes at one player unanswered
+within `aim_window_ms` (30000) past `aim_cap` (2) go to the sender
+alone. **The beat**: EVENT's last field is the milliseconds from its
+sending to the server's next beat (its monotonic clock in `beat_ms`
+steps, 250) at least the channel's farthest one-way trip (half the
+largest round trip its PINGs say) and `beat_lead_ms` (60) ahead, at most
+`beat_lead_most_ms` (400); each game starts the emote that long after
+the EVENT came, less half its own round trip, so emotes sent together
+start together. Twelve emotes (`emote_count`), and the burst above.
 
 Protocol v13 (epic #167's third and fourth steps; docs/ONLINE_ARENA.md,
 A rematch in a second and The Square before a NetBattle). **A bout's
@@ -170,8 +189,10 @@ positions, let through at once as it clears, is no flood (v10). A slow output bu
 text, fragments, masking violations and oversized frames are rejected.
 The client sends positions every 50 ms (every 500 ms once it has heard
 nothing for 400 ms) and pings every two seconds.
-Social events have a separate two-event burst with one token restored
-every two seconds. Profile updates are accepted at most once per second;
+Social events have a separate burst of `social_burst` (3) with one
+restored each `social_refill_ms` (1000; v14, before it two and one every
+two seconds); the game keeps the same burst a hair slower, so that its
+player never meets NOTICE 12. Profile updates are accepted at most once per second;
 Inspect is limited to four requests per second. Numeric payloads are
 validated even when throttled. Moderation is read again from private
 local files when they change. `/health` reports configuration and occupancy without

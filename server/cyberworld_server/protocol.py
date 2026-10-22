@@ -178,13 +178,23 @@ def read_profile(data):
 
 
 def read_social(data):
-    if len(data) != 3 or data[0] != SPEC["social"]:
+    """SOCIAL (v14): kind (0 phrase, 1 emote), its id and the MegaMan it is
+    aimed at (0 none; an emote of emote_aimed's alone)."""
+    if len(data) != SPEC["social_bytes"] or data[0] != SPEC["social"]:
         raise ProtocolError("Malformed SOCIAL")
-    kind, choice = data[1:]
+    kind, choice, target = struct.unpack("!BBI", data[1:])
     count = SPEC["phrase_count"] if kind == 0 else SPEC["emote_count"]
     if kind > 1 or choice >= count:
         raise ProtocolError("Invalid phrase or emote")
-    return kind, choice
+    if target and not (kind == 1 and SPEC["emote_aimed"] >> choice & 1):
+        raise ProtocolError("That cannot be aimed")
+    return kind, choice, target
+
+
+def event(sender, kind, choice, target, flags, beat_ms):
+    """EVENT (v14): the sender, what he did, at whom, its flags and the
+    milliseconds from now to the beat it starts on."""
+    return struct.pack("!BIBBIBH", SPEC["event"], sender, kind, choice, target, flags, min(beat_ms, 0xffff))
 
 
 def error(exc):

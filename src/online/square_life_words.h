@@ -59,9 +59,11 @@ const char *square_check_words(int look, const SquareFacts *f);
  * Trade Central to its upper left, the Arena to its lower left. */
 enum { SQUARE_IN_PLAZA, SQUARE_IN_TRADE, SQUARE_IN_ARENA, SQUARE_IN_OTHER };
 const char *square_look_words(int where, int look, const char *way);
-/* Over the ambient Navis' heads when MegaMen emote together at the
- * landmark or on the stage, and over the first as a parade begins. */
-const char *square_cheer_bark(void);
+/* Over the ambient Navis' heads when `together` MegaMen emote together at
+ * the landmark or on the stage, and over the first as a parade begins;
+ * the greeter's call over his head when four or more do (issue #176). */
+const char *square_cheer_bark(int together);
+const char *square_greeter_cheer_call(int together);
 const char *square_parade_bark(void);
 
 #endif

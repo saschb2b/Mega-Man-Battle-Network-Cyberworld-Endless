@@ -228,7 +228,10 @@ static void call_off(void) {
 	talk_start(arena_called_off_words(SA.name), FACE_MEGAMAN);
 }
 
-bool square_arena_open_to(uint32_t id) { return id && (SA.stage == SA_SENT || SA.stage == SA_WAITING) && !SA.card.up && SA.other == id; }
+/* our challenge open, asking `id` (his card's Call off) */
+static bool open_to(uint32_t id) { return id && (SA.stage == SA_SENT || SA.stage == SA_WAITING) && !SA.card.up && SA.other == id; }
+
+const char *square_arena_option(uint32_t id) { return open_to(id) ? arena_call_off_option() : arena_battle_option(); }
 
 bool square_arena_open(uint32_t *other, const char **name, uint32_t *seen_ms) {
 	if ((SA.stage != SA_SENT && SA.stage != SA_WAITING) || SA.card.up) return false;
@@ -242,7 +245,7 @@ uint32_t square_arena_asking(void) { return (SA.stage == SA_ASKING || SA.stage =
 
 void square_arena_challenge(const OnlinePeer *peer, uint32_t latency_ms) {
 	/* (a challenge open: Call off on his card, MegaMan's word on another's) */
-	if (square_arena_open_to(peer->id)) { call_off(); return; }
+	if (open_to(peer->id)) { call_off(); return; }
 	if (SA.stage == SA_SENT || SA.stage == SA_WAITING) { talk_start(arena_asked_already_words(SA.name), FACE_MEGAMAN); return; }
 	if (!CW_ARENA || SA.stage != SA_IDLE) return;
 	/* (our own partner: said at once, as the server's NOTICE 29 would) */

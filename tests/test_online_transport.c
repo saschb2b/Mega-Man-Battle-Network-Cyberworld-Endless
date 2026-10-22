@@ -30,7 +30,7 @@ static bool exercise(const OnlineSnapshot *s, unsigned seen, unsigned *sent, boo
 		OnlineProfile p = { .hp = 173, .max_hp = 300, .attack = 4, .speed = 3, .charge = 2 };
 		p.board[48] = 6;
 		if (!online_transport_profile(&p) || !online_transport_inspect(s->player_id) ||
-		    !online_transport_social(1, 5)) return false;
+		    !online_transport_social(1, 5, 0)) return false;
 		*sent = 1;
 	}
 	unsigned needed = SEEN_CARD | SEEN_EVENT | (peer ? SEEN_PEER : 0);

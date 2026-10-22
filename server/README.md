@@ -34,7 +34,10 @@ later is named here first, by their GitHub name, with the date.
 
 - **Fixed phrases only.** Players speak in the game's quick phrases and
   emotes, which the server passes on and never stores. There is no free
-  text, and the server refuses to start with it on.
+  text, and the server refuses to start with it on. A burst of three,
+  then one a second; an emote aimed at a player past two he has not
+  answered in 30 seconds reaches its sender alone (protocol v14,
+  `social.py`).
 - **Names.** You choose the name others see: up to 16 letters, digits,
   spaces, `-` and `_`. Any player can block another from his card, which
   hides that MegaMan and his name from the blocker's Square; a moderator

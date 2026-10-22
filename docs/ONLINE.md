@@ -475,9 +475,14 @@ every place and every walker's waypoint on the floor.
   channel.
 - **Together**: when two players say something or emote within four
   seconds of each other round the landmark (three panels) or on the
-  stage, the walker nearer the landmark shows BN6's "!" (list 5's sprite
+  stage, the walker nearer the landmark shows BN6's "!!" (list 5's sprite
   7), the other says "!!" and BN6's sparkle sounds; once in ten seconds,
-  each client from the events it sees.
+  each client from the events it sees. The more join, the bigger it
+  answers (issue #176): a third MegaMan inside the four seconds answers
+  again within the rest, the walker's word "Yeah!! Go,go!" and BN6's pops
+  (0x19A) in the sparkle's place; four or more and the greeter calls over
+  his head ("ALL TOGETHER NOW!", from five "WHOA! EVERYBODY!!"). Each
+  size answers once in a rest, and nothing of it moves a MegaMan.
 
 None of it takes an event flag: the walkers, beam and mark are puppets,
 their talk BN6's talk box from the host (`talk_start`), the Mr.Progs'
@@ -485,14 +490,15 @@ words their own archives in the layer's scratch.
 
 **Talk.** Every exchange is BN6's chat box with its options, three to a
 box (`online_chat.c`, words in `square_words.c`): L for a phrase, an
-emote or a look around, A facing another MegaMan for his card (HP, act and layer,
+emote, or More's look around and the quiet (Emotes, below), L held with a
+direction for a favourite emote, A facing another MegaMan for his card (HP, act and layer,
 Crosses, Souls) and Battle (where both passes hold the Arena stamp),
 Wave, Mute, Block; R or the pad for home, stepped on as drawn or A on
 it (its zone its middle stretched towards the screen's front, as Lan's
 HP's portals are: a player stood on its front 21 units from its middle
 and nothing asked, session 74). A talk's column of options takes up
 and down (`cinema_keys` lets the pad through while MegaMan is held).
-The Square's flags are `0x1480`-`0x14C5`, its own while it lasts.
+The Square's flags are `0x1480`-`0x14D0`, its own while it lasts.
 
 **Finding the wings.** A player ran round an empty Square for ten calls
 and found the greeter, the keeper, a walker and the props, but neither
@@ -513,6 +519,95 @@ signpost: "TRADE CENTRAL AND THE ARENA ARE PAST THE STATUE!" (the
 landmark's name). No map: the Square has no SELECT screen of its own.
 Phrases and emotes are fixed lists, never free text; mute and block are
 the player's, kept by the server's public identity of the other.
+
+### Emotes
+
+Issue #176, the owner, 22 October 2026: the Square's emotes were
+captions ("o/", "^_^" over a head), "really barebone, not on the level
+of modern online games". The research (modern games' social expression;
+what BN6 has to show a mood, `src/emu/bn6_expression.h` and
+docs/ROM_DATA.md's Expression rows) and the game-design skill's lens:
+
+- **Experience**: being seen and being answered among up to eight
+  players. **Loop**: the Square's session (arrive, meet, do one thing
+  together, go home); nothing in it makes a run stronger.
+- **One verb deepened**: the emote, and the wave first of all: performed
+  by the body, one press away, aimed at someone, answered, joined.
+- **Telegraph honestly**: an emote is MegaMan's own pose from BN6's
+  sprite and a sound of BN6's, the same on every screen; a caption only
+  where a pose cannot carry the meaning, in BN6's chat box's look. BN6
+  has no emotion-bubble set (no "?", heart, note or sweat over a head:
+  docs/ROM_DATA.md, Expression), so none of ours is drawn in its place.
+- **Frequency budget**: a burst of three, then one a second, on the game
+  and the server alike (Monster Hunter Rise's limit, too tight at first,
+  was loosened; the research's pitfall); the Square's answer once a size
+  in its ten-second rest; a sound a frame at most, only from a MegaMan in
+  view, one's own, or one aimed at one.
+- **Subtract**: no wheel, no new screen; the four favourites on L and a
+  direction, the rest in L's chat as before. **Positive by design**: only
+  the warm emotes (Wave, Cheer, Bow) can be aimed, so no Laugh lands on a
+  player who just lost; an aimed emote repeated past its cap is shown to
+  its sender alone; the quiet hides everyone else's. An emote never
+  moves a MegaMan (AGENTS.md: he walks as BN6 walks him).
+
+**The poses** (`square_emote.c`, the mapping proposed for the owner to
+adjust; contact sheets of each one's frames in the issue): a peer's is
+his puppet's animation byte (online_square.c's `SCRIPT_ANIM`, over his
+walk for the emote's frames), MegaMan's own BN6's text commands, as
+BN6's item-get plays his 0x18: `F8 00` (hold him), `F8 01 n` (the pose),
+`FD 00` (the sound), `EE 00` (a wait), `F8 04` and `F8 02` (his own
+animation back, let go), run by the chat box's engine without opening a
+box; the keys are held from BN6 meanwhile.
+
+| Emote | Pose (BN6_OW_MEGAMAN's) | Sound (BN6's) | Over his head |
+| --- | --- | --- | --- |
+| Wave (aimed) | 0x18, a hand raised (the item-get pose) | 0x177, "*ding, dong*" | |
+| Cheer (aimed) | 0x40, both arms up | 0x19A, "*pop,pop,pop!!*" | |
+| Laugh | 0x39, hunched, shaking | 0x65, a letter typed | "Haha!" |
+| Surprised | 0x2E + his way of four, a step back | 0xCD, "*BEEP! BEEP!*" | BN6's "!!" burst |
+| Thinking | 0x44, crouched, looking about | 0x7F, a menu's cursor | "Hmm..." |
+| Bow (aimed) | 0x41, on one knee | 0x14F, "*ding,dong, ding,doooong*" | |
+| Got it! | 0x18, the item-get pose | 0x73, the item-get jingle | |
+| Buster | 0x33 + his way of four, the buster held out | 0x71, the buster charging | |
+| Phew... | 0x42, panting on one knee | 0x8E (assumed soft) | |
+| I'm beat | 0x3F, standing, kneeling, down | 0x14B, "Waaa!!", "*thud*" | |
+| Spin | his eight facings in turn, 6 frames each | 0x77, a log-in | |
+| Zapped | 0x38, sparks beside him | 0x6B, a hit | |
+
+Seen in BN6's own drawing: some frames of 0x40, 0x39 and 0x42 are drawn
+in the log-in's light palette (a cyan flash), on a peer and on MegaMan
+himself alike; 0x2D (the arrival's turn) was tried for Spin and dropped,
+its first frames blank. The leap (0x43, one frame) waits on the NPC
+hop (`22 11 60 DC 21`), not yet run on a puppet.
+
+**One press**: L held and a direction sends a favourite: up Wave, right
+Cheer, down Bow, left Laugh (`network.ini`'s `favourites=0,1,5,2`, the
+emotes' ids, changes them); MegaMan stands while L is down, and L let go
+without a direction opens L's chat as before. L's More holds Look around
+and **Quiet please** (Let them talk to undo it, kept in `network.ini`'s
+`quiet`): everyone else's phrases, poses, sounds, captions and aims
+hidden; their names stay, and per-player Mute stays on the card.
+
+**Wave and wave back**: an emote that can be aimed, sent facing another
+MegaMan near enough to talk to (the card's Wave too), is aimed at him
+(SOCIAL's target, protocol v14). He is told quietly: a raised hand
+blinks over the sender's name for the answer's five seconds, no box and
+no sound but the emote's; his next emote that can be aimed answers it,
+whichever way he faces (one press, L and up). The server flags the
+answer (EVENT's answered bit) when it comes within five seconds, and
+every screen plays BN6's "!!" between the two and BN6's sparkle (0x94).
+Two aimed emotes at one MegaMan unanswered in 30 seconds are the cap:
+past it the server shows the sender's to him alone, so a wave cannot
+be spammed at anyone; an answer starts both ways afresh.
+
+**In step**: every emote starts on the server's beat, a quarter of a
+second of its clock, at least the channel's farthest one-way trip (half
+the round trip its PINGs say) and 60 ms ahead, 400 ms at most. EVENT
+carries the milliseconds from its sending to that beat; each game starts
+it that long after it came, less half its own round trip, so emotes sent
+together start together on every screen, and a group's Cheer is one
+gesture. Seen with five games on a local server: (below, What has been
+shown).
 
 ## Trade Central
 
@@ -881,15 +976,17 @@ v12: TEAM, TEAM_STATE, STANDS's bout byte, a carried HP, NOTICE 29):
 
 ## The server and the wire
 
-Protocol v13 ([shared/online/README.md](../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v13`; v7 added the
+Protocol v14 ([shared/online/README.md](../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v14`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
 BYE, maintenance and which side is behind: A dropped link, above; v11
 the Arena's lag notes, by which the time sync splits the waits evenly:
 docs/ONLINE_ARENA.md, Quicker on the wire; v12 Team NetBattles; v13 the
 bout's seed, a rematch's sides kept, a challenge seen, and the busy marks
-and link bars in SNAPSHOT, its round trip in PING). The
+and link bars in SNAPSHOT, its round trip in PING; v14 the emotes: an
+emote aimed, its answer flagged, the beat it starts on, twelve emotes and
+a burst of three then one a second: Emotes, above). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's where one is named), a name out of
@@ -1365,6 +1462,38 @@ first frame and checking all 60 of their hashes
 frame is past a 60th of a second, so it offers none
 ([ONLINE_ARENA.md](ONLINE_ARENA.md#the-new-3ds)).
 
+**The emotes** (22 October 2026, issue #176, protocol v14, the player's
+Gregar ROM and Team Colonel's, a local server with seed 120's Square,
+three to five host builds headless at once from `--scene home
+--run-depth 7 --seed 3`, scripted by the wall clock as
+`tools/trailer_online.py` runs a trailer's games, the dev step `emote K`
+beside the player's keys; the harness and its pictures kept in
+`.build/`):
+
+- **Every emote on every screen.** Beta played the twelve, three seconds
+  apart: Alpha's and Gamma's games each began all twelve on Beta's
+  puppet and played its sound (their logs name each emote and its BN6
+  sound id), and Beta's own MegaMan played each through `F8 01` with no
+  chat box, his own facing and animation back after it (Spin's last step
+  his own facing: `F8 04` would have turned him). Contact sheets of each
+  emote's frames, on a peer and on MegaMan himself, are the issue's.
+- **In step.** Each emote began within 15 ms of the wall clock on every
+  game that showed it (four games, nine emotes); five MegaMen pressing
+  Cheer over 200 ms began on three beats a quarter second apart.
+- **Wave and wave back.** Alpha's Wave at Beta, faced: on Beta's screen
+  the hand over Alpha's name; Beta's L and up answered it two seconds
+  later, and all four games played the answer's "!!" between the two and
+  BN6's sparkle. Alpha's next Wave and Bow at Beta, unanswered, reached
+  everyone; his third reached Alpha alone (the cap).
+- **The burst and the quiet.** Gamma's five favourites in 1.3 seconds
+  sent four (three at once, one a second after), all seen; Delta's L,
+  More, Quiet please hid everyone's emotes from then on (none begun on
+  his game, none sounded).
+- **The Square's answer.** Two MegaMen round the landmark: the walker's
+  "!!"; then five within a second: the Square cheered for 2, 3, 4 and 5
+  in turn (the walker's cheer and BN6's pops from three, the greeter's
+  call from four).
+
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
 are in the history before 433865a8):
@@ -1383,6 +1512,19 @@ are in the history before 433865a8):
   fallback.
 
 ## Not yet
+
+- **The emotes, what is left** (issue #176): the mapping is proposed for
+  the owner to adjust (Emotes, above), and its sounds were picked by
+  their names and BN6's uses, unheard: a listen on a device. Seen
+  headless on the host build only (the Windows and browser builds made,
+  not played); touch's L held with the D-pad, Android, iOS, the 3DS and
+  the handhelds untried.
+  The leap (0x43) waits on BN6's hop (`22 11 60 DC 21`) run on a puppet,
+  whose loop sets its place every frame. A game whose chat box is open
+  at its own emote's beat skips the pose there (the others show it, and
+  he may walk meanwhile). Emotes earned from a
+  run's milestones and chip stickers (Have, Want, Fave) are the issue's
+  Later.
 
 - **A dropped link, what is left** (issue #153): played on the host
   build and in the browser, through a local relay; Android, iOS, Windows
