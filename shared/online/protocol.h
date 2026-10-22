@@ -123,5 +123,6 @@
 #define ONLINE_SEATS 4                /* a 2v2's seats: 0 and 1 the GBAs' players, 2 and 3 side 0's and side 1's partners */
 #define ONLINE_TEAM_RELAY 0           /* a team challenge's format: the relay, one bout at a time */
 #define ONLINE_TEAM_SIDE_BY_SIDE 1    /* ... two MegaMen a side on one field */
+#define ONLINE_STANDS_SIDE_BY_SIDE 255 /* STANDS's bout byte for a side-by-side battle (a relay's bout its number) */
 
 #endif

@@ -115,5 +115,6 @@
   "arena_seat": 35,
   "seats": 4,
   "team_relay": 0,
-  "team_side_by_side": 1
+  "team_side_by_side": 1,
+  "stands_side_by_side": 255
 }

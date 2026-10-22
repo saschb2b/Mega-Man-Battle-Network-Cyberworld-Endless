@@ -99,7 +99,8 @@ class Stands:
             return
         book = self.books[match.id] = Book(match, a.channel, (a.name, b.name), delay)
         team = self.server.teams.matches.get(getattr(match, "team", 0))
-        book.bout = team.number if team else 0
+        # (a relay's bout its number; side by side the one battle, v15)
+        book.bout = protocol.SPEC["stands_side_by_side"] if match.four else team.number if team else 0
         self.dirty[a.channel] = True
 
     def end(self, match):

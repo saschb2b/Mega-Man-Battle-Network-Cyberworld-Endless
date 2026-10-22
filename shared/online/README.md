@@ -35,7 +35,7 @@ side is behind, rather than a refused upgrade (v10).
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
 | WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
-| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle) |
+| STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle; v15: `stands_side_by_side`, 255, a side-by-side battle) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
 | WATCH_STATE (29) | server → spectator | u8 stage (1 watching: the battle's setup; 2 over: no more keys come), u32 battle ID, u32 the cable's first player's session ID, u32 the second's, u8 input delay, u8 a 2v2 (v15: 1, else 0), u32 seat 2's session, u32 seat 3's (a 2v2's partners; else zeros) |
@@ -142,8 +142,9 @@ ready ends it broken off for both teams (result 3). All four are busy
 (SNAPSHOT's busy bits, and a challenge, a trade or a team ask to them
 is NOTICE 16). The stands keep a 2v2 by its four seats: WATCH_STATE
 names the partners' seats, WATCH_RELAY and WATCH_KEYS carry the seat,
-the hashes relayed are the cable's first's. STANDS is unchanged: its
-entry names the two leads and their report. A game of another version
+the hashes relayed are the cable's first's. STANDS's bout byte says
+`stands_side_by_side` (255); its entry names the two leads and their
+report, and the referee calls the leads' teams. A game of another version
 is never paired into one: the server answers its HELLO with ERROR 2 or
 17, as for any version.
 

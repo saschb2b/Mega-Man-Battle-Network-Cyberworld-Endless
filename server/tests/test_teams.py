@@ -300,6 +300,8 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(relayed, {(k, kind) for k in range(4) for kind in (SPEC["arena_loadout"], SPEC["arena_hash"])})
         # (from frame 0, the delay's frames before each seat's first keys released)
         self.assertEqual(streams, {seat: (0, 0, 0, 0, seat + 1, 0x8000 | seat) for seat in range(4)})
+        # (STANDS calls it side by side: its bout byte, v15)
+        self.assertEqual(self.server.stands.books[bout].entry()[-1], SPEC["stands_side_by_side"])
         # (all four busy in the Square)
         busy = SPEC["busy_battle"] << SPEC["busy_shift"]
         self.assertTrue(all(self.server.busy_with(who[1]) == SPEC["busy_battle"] for who in (a, b, c, d)))

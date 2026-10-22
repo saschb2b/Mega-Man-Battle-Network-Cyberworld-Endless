@@ -2435,7 +2435,11 @@ kid would say them). No number about the link is shown anywhere.
   the Square's marks while it runs.
 - The stands keep four seats' MegaMen and keys: WATCH_STATE names the
   partners' seats, WATCH_RELAY and WATCH_KEYS carry the seat, and the
-  cable's first's hashes are relayed as ever.
+  cable's first's hashes are relayed as ever. STANDS's bout byte says
+  side by side (`stands_side_by_side`, 255): the referee calls "TEAM
+  NETBATTLE! SIDE BY SIDE!", "ALPHA'S TEAM VS GAMMA'S!" (the leads'
+  teams), then the leads' HP as ever; a spectator's end says "Alpha's
+  team won the NetBattle.".
 
 **Every game runs the same pair.** Each of the four games (and a
 spectator's) builds the pair from the four MegaMen as they came: seats 0

@@ -204,7 +204,7 @@ class ContractTests(unittest.TestCase):
                      "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes",
                      "busy_shift", "busy_battle", "busy_watch", "busy_trade", "link_shift", "link_good_ms", "link_fair_ms",
                      "ping_bytes", "arena_seen", "pending_unseen", "team", "team_state", "team_bytes", "team_state_bytes",
-                     "notice_team", "arena_seat", "seats", "team_relay", "team_side_by_side"):
+                     "notice_team", "arena_seat", "seats", "team_relay", "team_side_by_side", "stands_side_by_side"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
