@@ -918,9 +918,11 @@ MegaMen standing and who is next. Side by side, all four MegaMen fight
 on one field, two a side: the one who asked to team up leads on each
 team, and his partner picks his own chips on his own Custom screen while
 the leads wait for him (a minute at most); the team whose MegaMen are
-both deleted loses. A partner fights with his folder, HP and buster; his
-Cross and his NaviCust's other programs are still to come. If a player
-leaves, the match breaks off with no result for either team.
+both deleted loses. A partner fights as his whole MegaMan: his folder,
+HP and buster, his NaviCust's programs, his Crosses and Beast Out on
+his own Custom screen, and his Program Advances; UNITE and ColonelSoul's
+button are not yet his. If a player leaves, the match breaks off with no
+result for either team.
 
 The battle answers your presses with rollback: each game runs it at
 once, guessing the other player's buttons, and when his real presses

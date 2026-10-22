@@ -31,11 +31,11 @@
 #define BN6_LINK_IN           0x020399F0u /* both sides' packets of the exchange the link took this frame, BN6_LINK_PACKET apart, side
                                              0's first, every GBA alike; the battle takes each side's pad from its +2 where its mark is
                                              set (0x0801FF2A) */
-#define BN6_LINK_PACKET       0x10
-#define BN6_LINK_PAD          0x02
+#define BN6_LINK_PACKET       0x10        /* a packet's bytes: eight u16 */
+#define BN6_LINK_PAD          0x02        /* u16 a packet's pad held, BN6_KEYS_VALID set where the packet is the battle's */
 #define BN6_LINK_SPARE_LO     0x05        /* a packet's two bytes nothing of BN6's writes or reads (+4's and +6's other halves: every
                                              writer of BN6_LINK_OUT and reader of BN6_LINK_IN stores and loads those two as bytes) */
-#define BN6_LINK_SPARE_HI     0x07
+#define BN6_LINK_SPARE_HI     0x07        /* ... the other: +6's other half (a partner's word's high byte there, arena_team_link.c) */
 #define BN6_LINK_PAD_STORE    0x0801FF8Cu /* strh r1,[r5,#2]: sub_801FF18's store of this frame's pad into BN6_LINK_OUT (r5), both
                                              sides' packets read before it (0x0801FF2A-0x0801FF82) */
 #define BN6_LINK_PAD_STORE_B  0x08020062u /* ... the same in sub_801FFD6, the other of the battle's link routines (0x0801FEEE's table),

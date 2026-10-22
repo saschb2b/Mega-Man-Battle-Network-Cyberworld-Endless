@@ -134,7 +134,13 @@ its four sessions the seats', the input delay from the longest of the
 four latencies. What a seat sends (ARENA_LOADOUT, ARENA_INPUT,
 ARENA_HASH) goes to the three others as ARENA_SEAT (35): the seat, then
 the message as sent; a partner's keys keep sixteen bits (his Custom
-screen's picks travel in his stream, bit 15 set). The cable's first
+screen's picks, his Cross and a Program Advance travel in his stream,
+bit 15 set: `TEAM_PICK`, `TEAM_CROSS`, `TEAM_PA` in
+src/online/arena_team_custom.h). The wire carries his stream as it
+carries a lead's keys; inside each game the pair hands it to his side's
+GBA, whose own link packets carry it to both GBAs (docs/ONLINE_ARENA.md,
+The partners' words in BN6's packet): nothing of the wire changed for
+it. The cable's first
 (seat 0) sends the report and the over, as in a battle of two; its winner
 is his team's or the other's, none a draw (TEAM_STATE 9, result 4); a
 leave, a decline, a dropped connection or 30 seconds without all four

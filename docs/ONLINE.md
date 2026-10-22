@@ -1059,10 +1059,17 @@ which. Side by side no order is asked: each team's captain leads, his
 game the GBA of his side, and the match is one battle of four, every
 one of the four games running the same pair from the four players'
 keys, each partner picking his own chips on BN6's own Custom screen of
-his own game while the leads wait for him. The way in's panel shows the
-four, the result card each MegaMan's HP left and the team's result;
-whoever watches from the stands runs it from the four streams. How it is
-built and the four-game proof: [ONLINE_ARENA.md, Over the
+his own game while the leads wait for him. Each partner is his whole
+MegaMan: his folder, HP and buster, his NaviCust's programs (worked out
+by BN6's own code on every game from the MegaMan he sent), his Crosses
+and Beast Out on his own screen, and a Program Advance his OK makes; not
+yet UNITE. His buttons and choices cross the server in his own stream
+and, inside each game's two linked GBAs, ride his lead's GBA's own link
+data, so both GBAs take them in the same frame as the lead's. The way
+in's panel shows the four, the result card each MegaMan's HP left and
+the team's result; whoever watches from the stands runs it from the
+four streams. How it is built and the four-game proofs: [ONLINE_ARENA.md,
+Two MegaMen a side](ONLINE_ARENA.md#two-megamen-a-side) and [Over the
 server](ONLINE_ARENA.md#over-the-server-protocol-v15).
 
 ## The server and the wire

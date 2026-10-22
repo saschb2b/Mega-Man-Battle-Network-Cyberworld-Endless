@@ -242,7 +242,10 @@ four ready before its START, which tells each its seat and the four
 sessions; each seat's messages go to the three others as ARENA_SEAT and
 to the stands, whose spectators get all four seats' keys. Its winner's
 team wins; a leave or a drop of any of the four breaks it off for both
-teams.
+teams. The server relays a partner's sixteen-bit stream as it relays a
+lead's keys and reads none of it: his chips, Cross and Program Advance
+ride in it, and each game's linked GBAs take them from their own link
+packets (docs/ONLINE_ARENA.md, The partners' words in BN6's packet).
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first

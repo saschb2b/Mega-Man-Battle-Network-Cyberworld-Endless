@@ -596,13 +596,25 @@ mutation), each turn's form check saying each MegaMan's form and
 BeastOutCounter in the log; `teampa=1` opens side 0's
 partner's folder with Cannon A, B and C, his first hand Z-Canon1, a
 Program Advance (`-1`: the PA left out of his hand on the second GBA, the
-mutation). `teamhp=N` gives each partner his own
+mutation). On a partner's own game in a side-by-side match from the
+Square (with `arenaboth`, his client the stood-in script), `teamcross=N`
+and `teambeast=1` offer and take his Cross or Beast Out on his own
+screen, and `teampa=1` makes the MegaMan he carries in a Program
+Advance's first (his folder's Regular chip and TagChips Cannon A, B and
+C, as his own folder crosses to every game): a test partner whose
+choices cross the server as a player's do. `teamform=N` makes a team
+challenge from the Square name its format without asking (1 one by one,
+2 side by side). `teamhp=N` gives each partner his own
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side
 0's partner's HP shows under him. The two GBAs' first iteration apart is
-also said as it runs ("the two GBAs apart at iteration N"), for a
-mutation whose battle the two no longer end together.
+also said as it runs ("the two GBAs part at iteration N, said as it
+ran", with the partners' keys each took there), for a mutation whose
+battle the two no longer end together, and the partners' words in the
+GBAs' link packets are counted at the end ("the partners' words in
+BN6's packets": handed to each side's GBA, packets built, messages sent
+and read on each GBA, the wait's limit said in a partner's place).
 
 The full-rules audit's runs (docs/ONLINE_ARENA.md, What a partner meets
 under full rules; issue #182): `arenapeer=MASK` makes the sides in MASK
