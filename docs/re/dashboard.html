@@ -140,6 +140,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "--dev arena2v2: a partner's whole MegaMan (issue #181): his NaviCust compiled by BN6's reload on a core of his client (src/online/arena_team_navicust.c, teamcust=N), his Cross by BN6's crossing controller run for his object (src/online/arena_team_cross.c, teamcross=N), a Program Advance from his own screen joined in his hand (arena_team_screen.c, arena_team_custom.c, teampa=N); docs/ROM_DATA.md's three rows."
     },
     {
+      "date": "2026-10-22",
+      "what": "Issue #182 and the full-rules audit made right (src/emu/darkinvs.c, darkinvs_room.h, bn6_ai.h, soullife.c, soulchaos.c, soulchips.c, soullook.c, soulmood.c, src/online/arena_team_rules.c): BN5's chip AI's rooms, the Souls and the mood by object; BN6's AI data's pool and its side-player getter named (docs/ROM_DATA.md), docs/symbols written again."
+    },
+    {
       "date": "2026-10-21",
       "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
     },
@@ -208,6 +212,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "BN6 has no emotion-bubble set: frame 0 of every sprite of lists 4-9 and the first frame of 452 icon-sized animations of lists 0-5, 7 and 9 drawn from Gregar show no ?, note, sweat, anger or sleep mark; its one heart is Roll's (list 3's 0x50), its one burst the battle's counter-hit \"!!\" (list 5's 0x07: \"!!\", a bat, a skull). MegaMan's overworld sprite (list 6's 0x37) has 73 animations: the item-get pose 0x18 (Gregar's text F8 01 18 41 times, 20 followed by sound 0x73), the arrival 0x2D (cutscene 47 00 FF 2D then sound 0x76), arms raised 0x40, sparks 0x38, panting 0x42, a leap 0x43, the buster aimed 0x33-0x36. BN6's hop in place (NPC bytes 22 11 60 DC 21) is in Gregar 157 times. A chat box face has three animations (still, blinking, talking; Lan's a fourth, eyes shut), set by text F5 03 n (31 times in Gregar's plain text), and no second face for a mood. BN5 adds a heart (list 4's 0x26) and a music note (list 4's 0x44).",
       "meaning": "An emote can be a pose of the peer's own MegaMan puppet (an animation number, no NPC slot) or a hop, in step for everyone from the emote's index; a mark over a head needs one of the Square's 16 NPC slots, all taken, or (not yet tried) a map object, 56 slots, drawn through an OverworldMapObjects id left unused.",
       "link": "../ROM_DATA.md"
+    },
+    {
+      "feature": "Two MegaMen a side",
+      "date": "2026-10-22",
+      "name": "Issue #182: DarkInvs on side 1 of a 1v1 NetBattle",
+      "result": "Real: on both GBAs side 1's DarkInvs moved his AI data into the one block of BN5's size side 0's player holds (\"side 0 020115e0 side 1 020115e0\"), side 0 turned grey and the battle stood still. An actor's AI data is not its object slot's: BN6 keeps a pool of eight (0x02034080, its bits at 0x0203F6A0, taken by 0x0800ED2C, let go by 0x0800ED80 through the entry's own bit at +0x7C). With a room of its own for each MegaMan at the pool's end (side 1's player 0x02034740), side 1 fights under the chip AI and side 0 as himself (over at frame 1179), both sides at once too; 147 rollbacks of 8 the same; two a side with all four under it 2,372 iterations 0 apart, 319 rollbacks the same, chipaibreak=2 apart from iteration 340; the ordinary NetBattle over at 2690, last hash 86d2f837337a1494.",
+      "meaning": "BN5's chip AI is safe for any MegaMan of a NetBattle; a room is refused (he is left out) only where actors hold the pool's last entries.",
+      "link": "../ONLINE_ARENA.md#what-a-partner-meets-under-full-rules"
+    },
+    {
+      "feature": "Two MegaMen a side",
+      "date": "2026-10-22",
+      "name": "The full-rules audit by object",
+      "result": "A partner charging B in his lead's Chaos Unison now fires his own charged shot (both GBAs: \"side 0's partner's charged B his own\"), 3,123 iterations 0 apart, 456 rollbacks the same, partnerbreak=2 (the old rule on one GBA) apart from iteration 222; a partner's BN5 DarkChip darkens him in his own Souls' block (0x0203FFBE, 0x0203FFDE) and NaviStats (the effect slots 30 and 31), not his lead. The five BN5 chips the audit named never ask BN6's side-player getter (their copy of BN5's 0x080125EE, a side's player's chaos flag, is never called); BN5's Navis that ask stand in no NetBattle.",
+      "meaning": "The Souls' and the mood's hooks are by object; a partner's UNITE has its block waiting. Nothing in a NetBattle aims at a side's player alone through the getter.",
+      "link": "../ONLINE_ARENA.md#what-a-partner-meets-under-full-rules"
     },
     {
       "feature": "Arena",

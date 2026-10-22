@@ -55,6 +55,8 @@
 #define BN6_SOULS             0x0203FF70u /* the Souls' state, BN6_SOULS_SIDE bytes a side (the RAM plan's 0x0203FF70-0x0203FFEF, docs/EMULATION.md):
                                              zeroed with the battle's RAM as each battle is set up (0x080071F2), read and written by our hooks alone */
 #define BN6_SOULS_SIZE        0x80        /* BN6_SOULS: its bytes, both sides' and room for what the track's later milestones keep */
+#define BN6_SOULS_PARTNERS    (BN6_SOULS + 2 * BN6_SOULS_SIDE) /* --dev arena2v2: each side's partner's own block after the sides', laid
+                                             out as theirs (his mood and dark, never a Soul: his Custom screen offers none; soul_field_of) */
 #define BN6_SOULS_SIDE        0x20        /* BN6_SOULS: bytes a side's, laid out: */
 #define BN6_SOUL_ID           0x00        /* u8 the Soul united, BN5's number (its Navi's AI index: Team Colonel's 7-12), 0 none (BN5's form byte) */
 #define BN6_SOUL_CHAOS        0x01        /* u8 1 for a Chaos Unison (BN5's AIData +0x12) */

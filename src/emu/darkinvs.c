@@ -3,14 +3,13 @@
 
 #include <stdio.h>
 
-#include "bn5.h"
 #include "bn5_chips.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "claims.h"
+#include "darkinvs_room.h"
 #include "debug.h"
 #include "emu.h"
-#include "free_space.h"
 #include "hook.h"
 #include "soulchaos.h"
 #include "soullife.h"
@@ -29,6 +28,7 @@
 
 static bool dev_on;
 static bool two_a_side;   /* (--dev arena2v2: darkinvs_two_a_side) */
+static int room_break = -1;   /* (chipaibreak=N: darkinvs_room_break) */
 static uint32_t last_timer;
 static bool entered;
 
@@ -47,41 +47,79 @@ static uint32_t machine(void) { return dark_code(BN5_CHIP_AI_PLAYER | 1u); }
  * the Souls' own reads of it): the arm's flash BN5's chaos one (BN5_FLASH_CHAOS) where the machine fires the Navis' buster
  * in a Chaos Unison (chaos_shadow_45) */
 static HookAct arm_chaos(HookRegs *r, void *user) {
-	r->r[1] = soulunite_ready() ? hook_read8(soul_field(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, BN6_SOUL_CHAOS)) : 0;
+	/* (a side's partner never in his side's Chaos Unison: soul_partner) */
+	bool own = soulunite_ready() && !soul_partner(r->r[5]);
+	r->r[1] = own ? hook_read8(soul_field(hook_read8(r->r[5] + BN6_T1_ALLIANCE) & 1, BN6_SOUL_CHAOS)) : 0;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1u;
 	return HOOK_JUMP;
 }
 
-/* another MegaMan in play holds the block already: --dev arena2v2's two a side (epic #167's spike), the block its first's,
- * whose AI data BN6's key copy (BN6_KEY_COPY) writes, the partner keeping BN6's own */
+/* another MegaMan in play holds the block already: --dev arena2v2's two a side, the block side 0's first's (his set-up comes
+ * before his partner's), whose AI data BN6's key copy (BN6_KEY_COPY) writes */
 static bool block_taken(uint32_t me) {
 	for (uint32_t o = BN6_T1_OBJECTS; o < BN6_T1_OBJECTS + BN6_T1_COUNT * BN6_T1_SIZE; o += BN6_T1_SIZE)
 		if (o != me && (hook_read8(o + BN6_T1_IN_PLAY) & 1) && hook_read32(o + BN6_T1_AI_DATA) == RAM_PLAYER_AI) return true;
 	return false;
 }
 
-/* his AI data moved into BN5's 0x140 bytes (BN6's 0x100: the chip AI keeps its state past them, BN6_DARK_AI's reason), its
- * pool's place kept */
-static void adopt(uint32_t me) {
-	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
-	if (ai == RAM_PLAYER_AI || ai < BN6_EWRAM || ai >= BN6_EWRAM_END) return;
-	if (two_a_side && block_taken(me)) return;
-	for (uint32_t k = 0; k < BN5_AI_DATA_SIZE; k += 4) hook_write32(RAM_PLAYER_AI + k, k < BN6_AI_DATA_SIZE ? hook_read32(ai + k) : 0);
-	hook_write32(POOL_AT, ai);
-	hook_write32(me + BN6_T1_AI_DATA, RAM_PLAYER_AI);
+/* `me`'s seat in a NetBattle (darkinvs_room.h: side x 2, + 1 the partner), -1 where he is none of BN6_BATTLE_PLAYERS' */
+static int seat_of(uint32_t me) {
+	for (uint32_t seat = 0; me && seat < DARKINVS_SEATS; ++seat)
+		if (hook_read32(BN6_BATTLE_PLAYERS + (seat >> 1) * BN6_BATTLE_PLAYER_STEP + (seat & 1) * BN6_SIDE_PARTNER) == me) return (int)seat;
+	return -1;
 }
 
-/* (BN6_PLAYER_INIT_AI, r5 him: his set-up, his AI data laid out, before anything of his has named it) his AI data BN5's
- * size from the start, as BN5's MegaMan's is, so that nothing holds its old place when the chip AI takes him */
+/* an AI data of BN5's size: side 0's player's block, or a seat's room */
+static bool bn5_sized(uint32_t ai) {
+	if (ai == RAM_PLAYER_AI) return true;
+	for (unsigned seat = 1; seat < DARKINVS_SEATS; ++seat)
+		if (ai == darkinvs_room(seat)) return true;
+	return false;
+}
+
+/* (issue #182) seat's room taken from BN6's AI data's pool (darkinvs_room.h), 0 where an actor holds an entry of it */
+static uint32_t room_take(int seat) {
+	uint32_t used, rooms;
+	if (hook_slot() == room_break) return 0;
+	if (!darkinvs_room_take((unsigned)seat, hook_read32(BN6_AI_POOL_USED), hook_read32(RAM_CHIP_AI_ROOMS), &used, &rooms)) return 0;
+	hook_write32(BN6_AI_POOL_USED, used);
+	hook_write32(RAM_CHIP_AI_ROOMS, rooms);
+	return darkinvs_room((unsigned)seat);
+}
+
+/* his AI data moved into BN5's 0x140 bytes (BN6's 0x100: the chip AI keeps its state past them, BN6_DARK_AI's reason): side
+ * 0's player (a run's MegaMan) into RAM_PLAYER_AI, his pool's place kept; a NetBattle's other MegaMen each into a room of his
+ * own (issue #182: side 1's player moved into side 0's block, both reading one AI data). His entry in the pool stays his (its
+ * bit, which the copy's +0x7C names, let go with him); none where no room is free */
+static void adopt(uint32_t me) {
+	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
+	if (bn5_sized(ai) || ai < BN6_EWRAM || ai >= BN6_EWRAM_END) return;
+	int seat = seat_of(me);
+	/* (at his set-up BN6_BATTLE_PLAYERS may not name him yet: side 0's MegaMan is the first set up) */
+	if (seat < 0 && !(hook_read8(me + BN6_T1_ALLIANCE) & 1)) seat = 0;
+	uint32_t to = seat == 0 ? (two_a_side && block_taken(me) ? 0 : RAM_PLAYER_AI) : seat > 0 ? room_take(seat) : 0;
+	if (emu_debug_on() && seat > 0)
+		fprintf(stderr, "darkinvs: core %d: seat %d's AI data %08x %s %08x\n", hook_slot(), seat, (unsigned)ai,
+			to ? "moved into his room" : "kept: an actor holds the pool's entries of his room", (unsigned)darkinvs_room((unsigned)seat));
+	if (!to) return;
+	for (uint32_t k = 0; k < BN5_AI_DATA_SIZE; k += 4) hook_write32(to + k, k < BN6_AI_DATA_SIZE ? hook_read32(ai + k) : 0);
+	if (to == RAM_PLAYER_AI) hook_write32(POOL_AT, ai);
+	hook_write32(me + BN6_T1_AI_DATA, to);
+}
+
+/* (BN6_PLAYER_INIT_AI, r5 him: his set-up, his AI data laid out, before anything of his has named it) side 0's MegaMan's AI
+ * data BN5's size from the start, as BN5's MegaMan's is, so that nothing holds its old place when the chip AI takes him (the
+ * others' as the chip AI first takes them: a NetBattle without it is the battle it was) */
 static HookAct init(HookRegs *r, void *user) {
 	(void)user;
-	if (!hook_read8(r->r[5] + BN6_T1_ALLIANCE)) adopt(r->r[5]);
+	int seat = seat_of(r->r[5]);
+	if (seat == 0 || (seat < 0 && !hook_read8(r->r[5] + BN6_T1_ALLIANCE))) adopt(r->r[5]);
 	return HOOK_CONTINUE;
 }
 
-/* (--dev arena2v2: a MegaMan whose AI data stays BN6's 0x100 bytes, the block taken by side 0's player: a partner, or side
- * 1's player, is left out of BN5's chip AI, whose state past BN6's 0x100 would land in the next AI data of BN6's pool) */
-static bool held_short(uint32_t me) { return two_a_side && hook_read32(me + BN6_T1_AI_DATA) != RAM_PLAYER_AI; }
+/* a MegaMan whose AI data stays BN6's 0x100 bytes (no room free: an actor holds its entries; --dev arena2v2's side 0's partner
+ * at his set-up) is left out of BN5's chip AI, whose state past BN6's 0x100 would land in the pool's next entry */
+static bool held_short(uint32_t me) { return !bn5_sized(hook_read32(me + BN6_T1_AI_DATA)); }
 
 /* BN5's 0x0802C03E: the chip AI's state cleared */
 static void reset(uint32_t me) {
@@ -100,7 +138,16 @@ void darkinvs_enter(uint32_t me, uint16_t frames) {
 	hook_write8(ai + BN5_CHIP_AI_STATE, 1);
 	hook_write32(ai + BN6_AI_MODES, hook_read32(ai + BN6_AI_MODES) | BN5_AI_UNDER);
 	soulchaos_lists_fill(hook_read8(me + BN6_T1_ALLIANCE) & 1);
-	if (emu_debug_on()) fprintf(stderr, "darkinvs: MegaMan under BN5's chip AI for %u frames\n", (unsigned)frames);
+	if (emu_debug_on()) {
+		fprintf(stderr, "darkinvs: core %d: side %u's MegaMan under BN5's chip AI for %u frames; AI data:", hook_slot(),
+			(unsigned)(hook_read8(me + BN6_T1_ALLIANCE) & 1), (unsigned)frames);
+		for (uint32_t side = 0; side < 2; ++side)
+			for (uint32_t k = 0; k < 2; ++k) {
+				uint32_t o = hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + k * BN6_SIDE_PARTNER);
+				if (o) fprintf(stderr, " side %u%s %08x", (unsigned)side, k ? "'s partner" : "", (unsigned)hook_read32(o + BN6_T1_AI_DATA));
+			}
+		fprintf(stderr, "\n");
+	}
 }
 
 void darkinvs_leave(uint32_t me) {
@@ -148,7 +195,7 @@ static HookAct stub_statuses(HookRegs *r, void *user) {
 	hook_write32(coll + BN6_COLL_FLAGS, hook_read32(coll + BN6_COLL_FLAGS) & ~BN5_STATUS_FLAGS);
 	hook_write32(coll + BN6_COLL_STRUCK, hook_read32(coll + BN6_COLL_STRUCK) & ~BN5_STATUS_FLAGS2);
 	for (uint32_t k = 0; k < 8; k += 2) hook_write16(coll + BN6_COLL_PARALYSIS + k, 0);   /* (paralysis, confusion, blindness, held) */
-	soulmood_unison(hook_read8(me + BN6_T1_ALLIANCE) & 1);
+	soulmood_calm_of(me);
 	return HOOK_CONTINUE;
 }
 
@@ -157,7 +204,8 @@ static HookAct stub_statuses(HookRegs *r, void *user) {
 static HookAct timer(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t me = r->r[5], ai = hook_read32(me + BN6_T1_AI_DATA);
-	if (hook_read8(me + BN6_T1_ALLIANCE) || !(hook_read32(ai + BN6_AI_MODES) & BN5_AI_UNDER)) return HOOK_CONTINUE;
+	/* (a MegaMan of BN5's size alone: none other is under the chip AI, issue #182's side 1 among them) */
+	if (!bn5_sized(ai) || !(hook_read32(ai + BN6_AI_MODES) & BN5_AI_UNDER)) return HOOK_CONTINUE;
 	if ((hook_read16(BN6_BATTLE_FLAGS) & BN6_TIME_STOP) || hook_read8(hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_PAUSE) + BN6_PAUSED)) return HOOK_CONTINUE;
 	uint16_t t = hook_read16(ai + BN5_AI_UNDER_TIME);
 	if (t == 0xFFFF || !t) return HOOK_CONTINUE;
@@ -197,14 +245,14 @@ static HookAct reaction(HookRegs *r, void *user) {
 
 /* (BN6_PLAYER_IDLE_FREE, r5 him) his chip AI where it stands: on to the stub, which runs it and leaves the state */
 static HookAct idle(HookRegs *r, void *user) {
-	uint32_t me = r->r[5];
-	if (hook_read8(me + BN6_T1_ALLIANCE)) return HOOK_CONTINUE;
-	if (dev_on) dev_step(me);
-	uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
+	uint32_t me = r->r[5], ai = hook_read32(me + BN6_T1_AI_DATA);
+	/* (a MegaMan of BN5's size alone, side 0's player or another's room: issue #182) */
+	if (!bn5_sized(ai)) return HOOK_CONTINUE;
+	if (dev_on && ai == RAM_PLAYER_AI) dev_step(me);
+	ai = hook_read32(me + BN6_T1_AI_DATA);
 	if (!(hook_read32(ai + BN6_AI_MODES) & BN5_AI_UNDER)) {
-		/* (BN5's idle state clears the chip AI's state each frame it does not run it, 0x080F04D6: in his BN5-sized AI data) */
-		if (ai == RAM_PLAYER_AI)
-			for (uint32_t k = 0; k < 0x40; k += 4) hook_write32(ai + BN5_CHIP_AI_STATE + k, 0);
+		/* (BN5's idle state clears the chip AI's state each frame it does not run it, 0x080F04D6) */
+		for (uint32_t k = 0; k < 0x40; k += 4) hook_write32(ai + BN5_CHIP_AI_STATE + k, 0);
 		return HOOK_CONTINUE;
 	}
 	r->r[12] = (uint32_t)(uintptr_t)user | 1u;
@@ -213,6 +261,7 @@ static HookAct idle(HookRegs *r, void *user) {
 
 void darkinvs_dev(bool on) { dev_on = on; }
 void darkinvs_two_a_side(bool on) { two_a_side = on; }
+void darkinvs_room_break(int slot) { room_break = slot; }
 
 bool darkinvs_install(void) {
 	uint32_t m = machine();

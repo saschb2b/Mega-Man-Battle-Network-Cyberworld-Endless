@@ -75,6 +75,7 @@
 #include "battle_rng.h"
 #include "bn5.h"
 #include "bn6.h"
+#include "darkinvs_room.h"
 #include "xpanels.h"
 #include "visitor_families.h"
 #include "visitors.h"
@@ -3583,7 +3584,7 @@ static void test_free_space(void) {
 		{ "the Navis' own state", RAM_NAVIS, RAM_DARK_AI }, { "the Dark Soul's AI data", RAM_DARK_AI, RAM_BATTLE },
 		{ "the moved state", RAM_BATTLE, RAM_DISPATCH_SIDE }, { "the dispatch's side tables", RAM_DISPATCH_SIDE, RAM_COLONEL },
 		{ "Colonel's table", RAM_COLONEL, RAM_SOULS }, { "the Souls' and the mood", RAM_SOULS, RAM_TEAM_TICK },
-		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_BATTLE_SPARE },
+		{ "--dev arena2v2's count", RAM_TEAM_TICK, RAM_CHIP_AI_ROOMS }, { "the chip AI's rooms", RAM_CHIP_AI_ROOMS, RAM_BATTLE_SPARE },
 		{ "spare, per battle", RAM_BATTLE_SPARE, RAM_BATTLE_END },
 	};
 	regions_apart("BN6's RAM", ram, (int)(sizeof ram / sizeof *ram), 0x02010CDCu, 0x02040000u);
@@ -3599,6 +3600,37 @@ static void test_free_space(void) {
 		"BN6's RAM: the sea's submerge at %08x-%08x", (unsigned)RAM_SEA, (unsigned)XSEA_RAM_END);
 	CHECK(BN6_SOULS == RAM_SOULS && BN6_SOULS + BN6_SOULS_SIZE <= RAM_TEAM_TICK && 2 * BN6_SOULS_SIDE <= BN6_SOULS_SIZE,
 		"BN6's RAM: the Souls' state at %08x, %#x bytes", (unsigned)BN6_SOULS, (unsigned)BN6_SOULS_SIZE);
+}
+
+/* BN5's chip AI's rooms in a NetBattle (darkinvs_room.h, issue #182): side
+ * 1's player, side 0's partner and side 1's partner each a room of BN5's
+ * size of his own, apart from each other and from side 0's player's block,
+ * in BN6's AI data pool's last entries; taken only where no actor holds an
+ * entry of it, a room's entries shared with an earlier room its own */
+static void test_chip_ai_rooms(void) {
+	const uint32_t pool_end = BN6_AI_POOL + BN6_AI_POOL_ENTRIES * BN6_AI_DATA_SIZE;
+	CHECK(!darkinvs_room(0) && !darkinvs_room_entries(0), "chip AI rooms: side 0's player has a room (his block is RAM_PLAYER_AI)");
+	for (unsigned a = 1; a < DARKINVS_SEATS; ++a) {
+		uint32_t at = darkinvs_room(a);
+		CHECK(at >= BN6_AI_POOL + 4 * BN6_AI_DATA_SIZE && at + BN5_AI_DATA_SIZE <= pool_end && !(at & 3),
+			"chip AI rooms: seat %u's room %08x outside the pool's last four entries", a, (unsigned)at);
+		CHECK(at + BN5_AI_DATA_SIZE <= RAM_PLAYER_AI || at >= RAM_PLAYER_AI_END, "chip AI rooms: seat %u's room over side 0's block", a);
+		for (unsigned b = a + 1; b < DARKINVS_SEATS; ++b)
+			CHECK(at + BN5_AI_DATA_SIZE <= darkinvs_room(b) || darkinvs_room(b) + BN5_AI_DATA_SIZE <= at, "chip AI rooms: seats %u and %u share bytes", a, b);
+	}
+	/* (a 1v1 NetBattle: its two MegaMen in entries 0 and 1) */
+	uint32_t used = 0xC0000000u, rooms = 0, u, r;
+	CHECK(darkinvs_room(2) == pool_end - BN5_AI_DATA_SIZE && darkinvs_room_entries(2) == 0x03000000u,
+		"chip AI rooms: side 1's player's room not the pool's last two entries");
+	CHECK(darkinvs_room_take(2, used, rooms, &u, &r) && u == 0xC3000000u && r == 0x03000000u, "chip AI rooms: side 1's player's room not taken");
+	CHECK(!darkinvs_room_take(2, used | 0x01000000u, rooms, &u, &r), "chip AI rooms: a room taken over an actor's entry");
+	/* (two a side: side 0's partner's room after side 1's player's, their shared entry the rooms' own) */
+	used = 0xF3000000u;
+	rooms = 0x03000000u;
+	CHECK(darkinvs_room_take(1, used, rooms, &u, &r) && u == 0xF7000000u && r == 0x07000000u,
+		"chip AI rooms: side 0's partner's room not taken beside side 1's player's");
+	CHECK(darkinvs_room_take(3, u, r, &u, &r) && u == 0xFF000000u && r == 0x0F000000u, "chip AI rooms: side 1's partner's room not taken last");
+	CHECK(!darkinvs_room_take(3, 0xF8000000u, 0, &u, &r), "chip AI rooms: side 1's partner's room over an actor's fifth entry");
 }
 
 /* The installers' claims (claims.h): an installer's own bytes again, its
@@ -5324,6 +5356,7 @@ int main(void) {
 	test_soulcode_shared();
 	test_xnavi_static();
 	test_free_space();
+	test_chip_ai_rooms();
 	test_claims();
 	test_xvirus_dispatch();
 	test_xvirus_generated();

@@ -22,6 +22,29 @@ static int soul_side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE)
 
 bool soul_united(int side) { return hook_read8(soul_field(side, BN6_SOUL_ID)) != 0; }
 
+static int partner_break = -1;   /* (soul_partner_break) */
+
+void soul_partner_break(int slot) { partner_break = slot; }
+
+bool soul_partner(uint32_t obj) {
+	if (hook_slot() == partner_break) return false;
+	return obj && obj == hook_read32(BN6_BATTLE_PLAYERS + (uint32_t)soul_side_of(obj) * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
+}
+
+uint32_t soul_field_of(uint32_t obj, uint32_t field) {
+	int side = soul_side_of(obj);
+	return soul_partner(obj) ? BN6_SOULS_PARTNERS + (uint32_t)side * BN6_SOULS_SIDE + field : soul_field(side, field);
+}
+
+static uint32_t (*partner_stats)(uint32_t obj);
+
+void soul_navi_stats_by(uint32_t (*of)(uint32_t obj)) { partner_stats = of; }
+
+uint32_t soul_navi_stats(uint32_t obj) {
+	uint32_t own = partner_stats && soul_partner(obj) ? partner_stats(obj) : 0;
+	return own ? own : BN6_BATTLE_NAVI + (uint32_t)soul_side_of(obj) * BN6_BATTLE_NAVI_SIZE;
+}
+
 static uint8_t navi_byte(int side, uint32_t field) {
 	return hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + field);
 }
@@ -108,7 +131,7 @@ static HookAct left(HookRegs *r, void *user) {
  * MegaMan, its turns neither 0 nor 0xFF */
 static HookAct counted(HookRegs *r, void *user) {
 	(void)user;
-	if (!r->r[0]) return HOOK_CONTINUE;
+	if (!r->r[0] || soul_partner(r->r[0])) return HOOK_CONTINUE;
 	int side = soul_side_of(r->r[0]);
 	uint32_t turns = soul_field(side, BN6_SOUL_TURNS);
 	uint8_t t = hook_read8(turns);
@@ -127,7 +150,7 @@ static HookAct counted(HookRegs *r, void *user) {
  * (BN6_SOUL_SCREEN, which soulunite.c's stand sets), so the last screen
  * opens with the Soul still on, as BN5's does. */
 static HookAct ending(HookRegs *r, void *user) {
-	if (!r->r[0]) return HOOK_CONTINUE;
+	if (!r->r[0] || soul_partner(r->r[0])) return HOOK_CONTINUE;
 	int side = soul_side_of(r->r[0]);
 	uint32_t screen = soul_field(side, BN6_SOUL_SCREEN);
 	if (!soul_united(side)) return HOOK_CONTINUE;
@@ -139,10 +162,11 @@ static HookAct ending(HookRegs *r, void *user) {
 }
 
 /* (r5 the object a weakness hit asks to break) no break for a Soul: BN5's
- * never break on an element hit (it asks only of a DarkChip used united) */
+ * never break on an element hit (it asks only of a DarkChip used united);
+ * a side's partner's form his own (the full-rules audit) */
 static HookAct breaking(HookRegs *r, void *user) {
 	(void)user;
-	if (!soul_united(soul_side_of(r->r[5]))) return HOOK_CONTINUE;
+	if (soul_partner(r->r[5]) || !soul_united(soul_side_of(r->r[5]))) return HOOK_CONTINUE;
 	r->r[12] = BN6_FORM_BREAK_NOT | 1;
 	return HOOK_JUMP;
 }

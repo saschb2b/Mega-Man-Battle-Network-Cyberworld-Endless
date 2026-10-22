@@ -16,6 +16,26 @@
   the channel can watch it from the stands. A partner fights with his
   folder, HP and buster; his Cross and his NaviCust's other programs come
   later. Protocol v15: a game must be as new as the server to play.
+- **DarkInvs on the challenged player's side of a NetBattle (issue
+  #182).** Under full rules, the second player's DarkInvs (or ShadowSoul's
+  Chaos Unison, which uses it) moved his MegaMan's AI data into the one
+  block of BN5's size that the first player's MegaMan already held: both
+  MegaMen read one AI data, the first turned grey under the other's
+  DarkInvs and the battle stood still. Each MegaMan now has a room of his
+  own, so either player's DarkInvs takes his own MegaMan alone, both at
+  once too; a NetBattle without it is the battle it was, hash for hash.
+
+- **Two MegaMen a side under full rules, by object (epic #167, behind
+  `--dev arena2v2`).** What BN5's installs keyed by a side's player now
+  answers for each MegaMan: a partner's charged B is his own while his
+  lead is in a Chaos Unison (it stepped the lead's unison and took his
+  chaos attack), a Soul's chip powers and look are its MegaMan's alone, a
+  partner's BN5 mood, dark and DarkChip after-effects are his own, and
+  BN5's chip AI takes a partner as it takes a lead. Both GBAs agree at
+  every iteration, through rollbacks. The audit's claim that five of BN5's
+  chips aim at a side's player alone was wrong: nothing a NetBattle runs
+  asks BN6 for it. Still to come for a partner: UNITE and ColonelSoul's
+  button on his own Custom screen.
 
 - **Emotes and phrases one press away (issue #178).** **SELECT** in the
   Net Square opens the emote strip, a PET screen laid out as the Custom

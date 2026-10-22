@@ -90,6 +90,13 @@ typedef struct {
 	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
 	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
 	                   Cross none, a mutation that must part the two */
+	int partner_break; /* partnerbreak=N: under arena2v2 --dev arena's core of hook slot N takes no object for a side's partner (soul_partner_break: his
+	                      side's Soul, mood and NaviStats his, as before the full-rules audit; a mutation that must part the GBAs); 0 none */
+	int chipai_break; /* chipaibreak=N: under arena2v2 --dev arena's core of hook slot N takes no room of BN5's chip AI for a MegaMan but side 0's
+	                     player (darkinvs_room_break: a mutation that must part the two GBAs); 0 none */
+	int arena_peer; /* arenapeer=MASK: --dev arena's sides in MASK (1 side 0, 2 side 1) play their folders' first chips: each takes
+	                   the chip under the cursor before OK and uses it in the fight every four seconds; side 1 (2) carries the
+	                   checkpoint's MegaMan as side 0 does (the full-rules audit's proofs: DarkInvs on side 1, issue #182) */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

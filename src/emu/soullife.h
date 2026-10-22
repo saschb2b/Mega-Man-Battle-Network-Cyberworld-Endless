@@ -19,6 +19,26 @@
 uint32_t soul_field(int side, uint32_t field);
 /* (from a hook) whether side is united with a Soul */
 bool soul_united(int side);
+/* (from a hook) whether the battle object `obj` is a side's partner, --dev
+ * arena2v2's second MegaMan of a side (BN6_BATTLE_PLAYERS + BN6_SIDE_PARTNER):
+ * a Navi of his own whom his side's Soul, mood and NaviStats are not (the
+ * full-rules audit, docs/ONLINE_ARENA.md); false in every other battle */
+bool soul_partner(uint32_t obj);
+/* (from a hook) the Navi `obj`'s field of the Souls' state: a side's
+ * partner's in his own block (BN6_SOULS_PARTNERS), any other object's his
+ * side's (soul_field) */
+uint32_t soul_field_of(uint32_t obj, uint32_t field);
+/* (from a hook) the battle NaviStats of the Navi `obj`: his side's
+ * (BN6_BATTLE_NAVI), but for a side's partner where the resolver set by
+ * soul_navi_stats_by answers (his own, arena_team_navi.h) */
+uint32_t soul_navi_stats(uint32_t obj);
+/* --dev partnerbreak=N: on the core of hook slot N (a pair's GBA, "core N"
+ * of the debug lines) no object is a partner, his side's Soul, mood and
+ * NaviStats his as before the full-rules audit: a mutation that must part
+ * the two GBAs; -1 none */
+void soul_partner_break(int slot);
+/* the resolver of a partner's NaviStats (0 where it has none for him); NULL none */
+void soul_navi_stats_by(uint32_t (*of)(uint32_t obj));
 
 /* The hooks of a Soul's life, and its two stubs written at `stubs` (8 bytes
  * of free space), the proxy's overlay entries 8 pointed at them (each on

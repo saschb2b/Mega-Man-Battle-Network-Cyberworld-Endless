@@ -12,6 +12,7 @@
 #include "bn6_forms.h"
 #include "chips.h"
 #include "claims.h"
+#include "debug.h"
 #include "emu.h"
 #include "rom.h"
 #include "soullife.h"
@@ -42,26 +43,33 @@ static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1;
 static uint8_t navi8(int side, uint32_t field) { return hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + field); }
 static uint32_t player(int side) { return hook_read32(BN6_BATTLE_PLAYERS + (uint32_t)side * BN6_BATTLE_PLAYER_STEP); }
 static uint32_t mood_at(int side) { return soul_field(side, BN6_SOUL_MOOD); }
+/* the Navi `obj`'s mood: his side's, a side's partner's his own (--dev arena2v2: soul_field_of; the full-rules audit, which
+ * found his hits and DarkChips writing his lead's) */
+static uint32_t mood_of(uint32_t obj) { return soul_field_of(obj, BN6_SOUL_MOOD); }
+/* ... and a byte of his battle NaviStats (his own for a partner: soul_navi_stats) */
+static uint8_t stats8(uint32_t obj, uint32_t field) { return hook_read8(soul_navi_stats(obj) + field); }
 
 /* side's mood as BN5 keeps it (0 too until the battle's first Custom screen opens it, which it does before any hit or
  * chip: BN6_SOUL_OPENED); whether a BN5 DarkChip made it dark for the battle */
 static int soulmood_of(int side) { return hook_read8(mood_at(side)); }
 static bool soulmood_dark(int side) { return done && hook_read8(soul_field(side, BN6_SOUL_DARK)); }
+static bool soulmood_dark_of(uint32_t obj) { return done && hook_read8(soul_field_of(obj, BN6_SOUL_DARK)); }
 static bool dev_dark;   /* (soulmood_dev_dark: each battle begun dark by BN5's meter, the differential's item) */
 
 /* BN5's three writers: set (0x080127CE: none at dark), gain (0x080127FA: none at Full Synchro, 0xFE at most), loss
  * (0x08012818: never under 1, none at dark) */
-static void set(int side, int v) {
-	if (hook_read8(mood_at(side))) hook_write8(mood_at(side), (uint8_t)v);
+static void set_at(uint32_t at, int v) {
+	if (hook_read8(at)) hook_write8(at, (uint8_t)v);
 }
+static void set(int side, int v) { set_at(mood_at(side), v); }
 static void gain(int side, int v) {
 	int m = hook_read8(mood_at(side));
 	if (m == MOOD_SYNCHRO || !m) return;
 	hook_write8(mood_at(side), (uint8_t)(m + v > MOOD_TOP ? MOOD_TOP : m + v));
 }
-static void loss(int side, int v) {
-	int m = hook_read8(mood_at(side));
-	if (m) hook_write8(mood_at(side), (uint8_t)(m - v < 1 ? 1 : m - v));
+static void loss_at(uint32_t at, int v) {
+	int m = hook_read8(at);
+	if (m) hook_write8(at, (uint8_t)(m - v < 1 ? 1 : m - v));
 }
 
 /* BN5's emotion (0x08012738) from this mood */
@@ -90,11 +98,16 @@ void soulmood_unison(int side) {
 	if (done) set(side, MOOD_CALM);
 }
 
+void soulmood_calm_of(uint32_t me) {
+	if (done) set_at(mood_of(me), MOOD_CALM);
+}
+
 /* ---- a hit's ---- */
 
 /* (the hit's mood step, past BN6's own Full Synchro: r4 the struck's collision data, r5 the struck) BN5's
  * (0x08016FE6-0x08017022): the attacker's raised by the hit's gain where it is no counter, a counter calming him to Full
- * Synchro where his side is in no form (in one, BN5 adds its getter's leftover word: 0xFE), the struck's lowered */
+ * Synchro where his side is in no form (in one, BN5 adds its getter's leftover word: 0xFE), the struck's lowered. The
+ * struck's is his own (a side's partner's: soul_field_of); the attacker's his side's player's, BN5's one MegaMan a side */
 static HookAct hit(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t coll = r->r[4];
@@ -106,7 +119,7 @@ static HookAct hit(HookRegs *r, void *user) {
 	} else if (v && !(breaks & SOULMOOD_BREAK_GAIN)) {
 		gain(opp, v);
 	}
-	loss(side, hook_read16(coll + BN6_COLL_MOOD_LOSS));
+	loss_at(mood_of(r->r[5]), hook_read16(coll + BN6_COLL_MOOD_LOSS));
 	return HOOK_CONTINUE;
 }
 
@@ -128,14 +141,14 @@ static HookAct mirror_set(HookRegs *r, void *user) {
 static HookAct mirror_calm(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t at = caller(r);
-	if (at == BN6_CALM_FROM_CHIP || at == BN6_CALM_FROM_ANGER) set(side_of(r->r[5]), MOOD_CALM);
+	if (at == BN6_CALM_FROM_CHIP || at == BN6_CALM_FROM_ANGER) set_at(mood_of(r->r[5]), MOOD_CALM);
 	return HOOK_CONTINUE;
 }
 
 /* (BN6's set's write, r6 the side; its calm's, r5 him) none while a BN5 DarkChip keeps him dark: dark for the battle */
 static HookAct keep_dark(HookRegs *r, void *user) {
-	int side = user == (void *)(uintptr_t)BN6_MOOD_SET_PAST ? (int)(r->r[6] & 1) : side_of(r->r[5]);
-	if (!soulmood_dark(side)) return HOOK_CONTINUE;
+	bool dark = user == (void *)(uintptr_t)BN6_MOOD_SET_PAST ? soulmood_dark((int)(r->r[6] & 1)) : soulmood_dark_of(r->r[5]);
+	if (!dark) return HOOK_CONTINUE;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
 }
@@ -155,16 +168,19 @@ static int bn5_dark_id(int chip) {
 
 static bool bn5_dark_chip(int chip) { return bn5_dark_id(chip) != 0; }
 
-/* side dark for the battle as BN5's DarkChip use (0x0801005E-0x08010080) or its meter makes it: its mood 0 and the latch's
- * `how`, BN6's own mood 0 with it (no Cross, no Beast Out, a weak buster), his anger gone as BN5's calm after it clears it
- * (0x08011AA8) */
-static void darken(int side, uint32_t ai, int how) {
-	set(side, 0);
+/* the Navi `me` dark for the battle as BN5's DarkChip use (0x0801005E-0x08010080) or its meter makes it: his mood 0 and the
+ * latch's `how`, BN6's own mood 0 with it (no Cross, no Beast Out, a weak buster), his anger gone as BN5's calm after it
+ * clears it (0x08011AA8); a side's partner's his own (soul_field_of, soul_navi_stats) */
+static void darken(uint32_t me, int how) {
+	set_at(mood_of(me), 0);
 	/* (dark by the meter stays so: BN5's palette 2 whatever DarkChip he uses after, 0x0800DDD8's test of the meter first) */
-	uint32_t latch = soul_field(side, BN6_SOUL_DARK);
+	uint32_t latch = soul_field_of(me, BN6_SOUL_DARK), ai = hook_read32(me + BN6_T1_AI_DATA);
 	if (hook_read8(latch) != BN6_DARK_METER) hook_write8(latch, (uint8_t)how);
-	hook_write8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_MOOD, 0);
+	hook_write8(soul_navi_stats(me) + BN6_NAVI_MOOD, 0);
 	if (ai) hook_write16(ai + BN6_AI_ANGER, 0);
+	if (emu_debug_on())
+		fprintf(stderr, "soulmood: core %d: side %d's %s dark for the battle: his mood at %08x, his NaviStats at %08x\n", hook_slot(),
+			side_of(me), soul_partner(me) ? "partner" : "player", (unsigned)mood_of(me), (unsigned)soul_navi_stats(me));
 }
 
 /* BN5's after-effects of its DarkChips (BN5_DARK_AFTER: each DarkChip's routine of the twelve at 0x0802C9A8-0x0802CA66,
@@ -189,8 +205,8 @@ static const struct { uint8_t bn5, field, how, value; } afters[] = {
 	{ 198, 0x31, AFTER_SET, 1 },        /* DrkSonic (0x0802CA5C) */
 };
 
-static void after_effect(int side, int bn5) {
-	uint32_t navi = BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE;
+static void after_effect(uint32_t me, int bn5) {
+	uint32_t navi = soul_navi_stats(me);
 	for (size_t i = 0; i < sizeof afters / sizeof *afters; ++i) {
 		if (afters[i].bn5 != bn5) continue;
 		uint32_t at = navi + afters[i].field;
@@ -204,15 +220,15 @@ static void after_effect(int side, int bn5) {
 void soulmood_chip_used(uint32_t me, int chip) {
 	int side = side_of(me);
 	if (!done || !bn5_dark_chip(chip)) return;
-	/* (his dark: MegaMan's alone, BN5's test of his side's Navi, 0x0801004E) */
-	if (!navi8(side, BN6_NAVI_SIDE_NAVI) && !(breaks & SOULMOOD_BREAK_DARK)) {
+	/* (his dark: MegaMan's alone, BN5's test of his side's Navi, 0x0801004E; a side's partner's his own NaviStats) */
+	if (!stats8(me, BN6_NAVI_SIDE_NAVI) && !(breaks & SOULMOOD_BREAK_DARK)) {
 		uint32_t ai = hook_read32(me + BN6_T1_AI_DATA);
 		/* (a Soul united ends: BN5 asks it at once, 0x08010068; here BN6's request to leave the form, 0x08015994's) */
-		if (soul_united(side)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
-		darken(side, ai, BN6_DARK_CHIP);
+		if (!soul_partner(me) && soul_united(side)) hook_write32(ai + BN6_AI_FLAGS, hook_read32(ai + BN6_AI_FLAGS) | LEAVE_FORM);
+		darken(me, BN6_DARK_CHIP);
 	}
 	/* (its after-effect: whoever used it, BN5's call at 0x08010086 for every chip used) */
-	if (!(breaks & SOULMOOD_BREAK_AFTER)) after_effect(side, bn5_dark_id(chip));
+	if (!(breaks & SOULMOOD_BREAK_AFTER)) after_effect(me, bn5_dark_id(chip));
 }
 
 /* (his palette while dark: BN6's own. BN5's dark ones, 2 by the meter and 3 a DarkChip used (0x0800DDD8-0x0800DDEE), are its
@@ -226,8 +242,8 @@ void soulmood_dev_dark(bool on) { dev_dark = on; }
  * while he is not dark, or only while he is, where his side names no Navi (+0x29); dark is the battle's here (a BN5
  * DarkChip used), where BN5 reads his dark meter (no meter comes into a run: docs/MULTIROM.md) */
 bool soulmood_chip_refused(uint32_t me, uint32_t attack, int chip, uint32_t *record) {
-	int side = side_of(me), gate = done && chip > 0 && chip < XREG_IDS ? gates[chip] : 0;
-	if (!gate || navi8(side, BN6_NAVI_SIDE_NAVI) || (breaks & SOULMOOD_BREAK_GATE) || soulmood_dark(side) == (gate != GATE_NOT_DARK))
+	int gate = done && chip > 0 && chip < XREG_IDS ? gates[chip] : 0;
+	if (!gate || stats8(me, BN6_NAVI_SIDE_NAVI) || (breaks & SOULMOOD_BREAK_GATE) || soulmood_dark_of(me) == (gate != GATE_NOT_DARK))
 		return false;
 	/* (BN5's dud, 0x080100E4-0x080100F0: the chip of nothing's spawner, its chip the chip of nothing, its family the
 	 * twin's of 0x1A, read from that chip's record) */
@@ -299,7 +315,7 @@ static HookAct compact(HookRegs *r, void *user) {
 		hook_write8(opened, 1);
 		soulmood_open(side, hook_read16(obj + BN6_T1_HP), hook_read16(obj + BN6_T1_MAX_HP));
 		/* (begun dark by BN5's meter, as BN5's battle opens under 470: 0x08010F14's mood 0) */
-		if (dev_dark) darken(side, hook_read32(obj + BN6_T1_AI_DATA), BN6_DARK_METER);
+		if (dev_dark) darken(obj, BN6_DARK_METER);
 	}
 	uint16_t deck[BN6_DECK_SIZE];
 	bool any = false;
