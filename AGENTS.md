@@ -231,6 +231,11 @@ site, never a sprite cropped out) go on the orphan branch `pr-media`
 under `prs/<branch>/`, embedded by their raw URL at that branch's commit;
 motion as a GIF, which GitHub plays inline.
 
+A merged branch goes: deleted on GitHub and here, its worktree
+(`.claude/worktrees/`, `.build/`) removed once it holds no changes. At
+each release, sweep what is left: every branch and worktree already in
+`dev`, kept only `main`, `dev` and `pr-media`.
+
 ## Build and verify
 
 ```sh
