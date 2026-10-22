@@ -27,11 +27,18 @@
 typedef struct {
 	TeamScreen *screen;
 	bool turn;                        /* his side's GBA's Custom screen open, his own set up for it */
-	uint16_t out[TEAM_CUSTOM_PICKS];  /* his pick messages to go out, one a frame */
+	uint16_t out[TEAM_CUSTOM_PICKS + 1];  /* his Cross and pick messages to go out, one a frame */
 	unsigned queued, sent;
-	unsigned opened, oks, closed_first, at_limit;
-	unsigned frames;                  /* his turn's frames so far */
+	unsigned opened, oks, closed_first, at_limit, crossed;
+	unsigned frames;                  /* his turn's frames so far (teamslow's) */
+	unsigned t;                       /* ... every one (teamcross's script) */
 } Client;
+
+/* teamcross=N's Cross on his screen's CROSSSELECT, its row of his Crosses (his alone: N's) */
+#define CROSS_UP    40    /* the turn's frame he takes the cursor up to the emblem, */
+#define CROSS_OPEN  70    /* ... A opens CROSSSELECT, */
+#define CROSS_TAKE  170   /* ... A takes his Cross, */
+#define CROSS_CHIPS 210   /* ... then his chips as every turn */
 
 static Client clients[SIDES];
 
@@ -103,8 +110,22 @@ static uint16_t screen_keys(uint32_t frame) {
 	return t < 2 ? KEY_A : t >= 10 && t < 12 ? KEY_RIGHT : 0;
 }
 
+/* teamcross: at his first turn the cursor up to the emblem, CROSSSELECT opened and his one Cross taken, then his chips */
+static uint16_t cross_keys(const Client *c, uint32_t frame) {
+	if (dev.team_cross == 0 || c->opened != 1 || c->t >= CROSS_CHIPS) return screen_keys(frame);
+	unsigned t = c->t;
+	return t >= CROSS_UP && t < CROSS_UP + 3 ? KEY_UP : (t >= CROSS_OPEN && t < CROSS_OPEN + 3) || (t >= CROSS_TAKE && t < CROSS_TAKE + 3)
+		? KEY_A : 0;
+}
+
+/* his Cross (where his CROSSSELECT committed one) and his picks into his stream, one a frame */
 static void say(Client *c, const uint8_t *picks, unsigned n) {
 	c->queued = c->sent = 0;
+	uint8_t form = team_screen_cross(c->screen);
+	if (form) {
+		c->out[c->queued++] = TEAM_CROSS(form);
+		++c->crossed;
+	}
 	if (!n) c->out[c->queued++] = TEAM_PICK(0, 0, 0);
 	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) c->out[c->queued++] = TEAM_PICK(n, i, picks[i]);
 }
@@ -132,7 +153,12 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 	/* (a partner deleted has no turn) */
 	bool custom = gba && gba->rawRead8(gba, BN6_BATTLE_PHASE, -1) == BN6_PHASE_CUSTOM && standing(gba, side);
 	/* (his screen made once, from the pair as it is at a Custom screen) */
-	if (custom && !c->screen) c->screen = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
+	if (custom && !c->screen) {
+		c->screen = team_screen_new(R.data, ROM_SIZE, arena_pair_of(a), side);
+		/* (teamcross=N: his own Crosses, Cross N alone) */
+		int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
+		team_screen_crosses(c->screen, n >= 1 && n <= 5 ? (uint8_t)(1u << (n - 1)) : 0);
+	}
 	if (!custom || !c->screen) {
 		closed_first(c);
 		c->turn = false;
@@ -142,7 +168,7 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 		unsigned n = arena_team_custom_deck(gba, side, deck);
 		c->turn = n && team_screen_open(c->screen, arena_pair_of(a), deck, n);
 		c->queued = c->sent = 0;
-		c->frames = 0;
+		c->frames = c->t = 0;
 		c->opened += c->turn;
 	}
 	if (c->sent < c->queued) return c->out[c->sent++];
@@ -163,7 +189,9 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 	}
 	/* (teamslow=N: side 0's partner's hands off his screen for its first N frames, a slow partner) */
 	bool idle = gone || (!side && dev.team_slow > 0 && c->frames++ < (unsigned)dev.team_slow);
-	if (team_screen_frame(c->screen, idle ? 0 : screen_keys(frame), picks, &n)) {
+	uint16_t keys = idle ? 0 : cross_keys(c, frame);
+	++c->t;
+	if (team_screen_frame(c->screen, keys, picks, &n)) {
 		++c->oks;
 		say(c, picks, n);
 		return c->out[c->sent++];
@@ -187,7 +215,7 @@ void team_client_report(void) {
 		if (!c->screen) continue;
 		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms, "
 			"the worst %.2f), OK pressed %u times, %u times his side's closed first, %u times sent at the wait's limit; a frame of "
-			"it %.2f ms (the worst %.2f)\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
-			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true));
+			"it %.2f ms (the worst %.2f); his Cross sent %u times\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
+			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true), c->crossed);
 	}
 }

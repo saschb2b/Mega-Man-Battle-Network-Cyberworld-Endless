@@ -40,6 +40,10 @@ struct mCore;
 #define TEAM_PICK_MARK    0x8000u
 #define TEAM_PICK(count, index, slot) \
 	((uint16_t)(TEAM_PICK_MARK | ((unsigned)(count) & 7u) << 11 | ((unsigned)(index) & 7u) << 8 | ((unsigned)(slot) & 0xFFu)))
+/* ... and his Cross (a count no pick has): the form his own CROSSSELECT
+ * committed (BN6_CROSS_RECORD's +0, 1-0x18), said before his picks */
+#define TEAM_CROSS_COUNT  7u
+#define TEAM_CROSS(form)  TEAM_PICK(TEAM_CROSS_COUNT, 0, form)
 
 /* side's partner's folder before the battle: 30 entries (chip | code <<
  * 9, 0xFFFF none), its Regular chip and TagChips (entries, 0xFF none);
@@ -66,6 +70,9 @@ unsigned arena_team_custom_deck(struct mCore *core, unsigned side, uint16_t out[
  * for its partner now (dealt, his turn open and his picks not in, he on
  * the field); and whether it owes the packet, held back */
 bool arena_team_custom_holds(unsigned side);
+/* From a hook: the form side's partner's own CROSSSELECT committed this
+ * turn (0 none), his pending form until his next turn opens */
+uint8_t arena_team_custom_cross(unsigned side);
 void arena_team_custom_owe(unsigned side, bool owed);
 bool arena_team_custom_owed(unsigned side);
 /* As `core` (side's GBA's) holds it: the frames it has held for its

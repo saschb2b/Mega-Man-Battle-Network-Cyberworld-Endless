@@ -61,7 +61,22 @@
 #define BN6_NS_AIR_SHOE       0x1C        /* ... AirShoe, */
 #define BN6_NS_UNDER_SHIRT    0x1D        /* ... UnderShirt, */
 #define BN6_NS_SUPER_ARMOR    0x23        /* ... SuperArmor (1 each where its program runs) */
-#define BN6_NS_UNK17          0x17       /* u8 a NaviStats' byte a link battle's start sets (0xC, bn6f sub_800B144) on the way into it */
+#define BN6_NS_START_FORM     0x17        /* u8 a NaviStats' form he began the battle in, which CROSSSELECT leaves out (0x08029EF6); a link
+                                             battle's start sets it in its packet (0xC, bn6f sub_800B144) */
 #define BN6_NS_BEAST_TURNS    0x21        /* u8 a NaviStats' BeastOutCounter: 3 as a link battle with Beast Out starts (sub_800B144) */
+/* BN6's crossing (bn6f dword_20367F0's controller, read in Gregar's code: its routines at bn6f's addresses) */
+#define BN6_CROSS_SIDES       0x020367F0u /* the crossing controller: +0 its mode (0, 4, 8), +4 1 while it runs, then each side's record
+                                             (BN6_CROSS_RECORD's layout, +8 the side's player's object) at +8 and +0x18, copied from the
+                                             turn's packets with BN6_CROSS_PENDING (0x080147E4); only those two objects cross */
+#define BN6_TURN_FORMS_SET    0x080148C0u /* movs r0,#8 at the end of BN6_TURN_FORMS: r4 1 where a side's record holds a Cross (the
+                                             controller's next mode 4, the crossing; else 8) */
+#define BN6_CROSS_ACTIVATE    0x08014944u /* push {lr}: the crossing's step 4 (bn6f activateCrossHappensHere_8014944, r5 the controller,
+                                             +3 0 its first frame): each record's object that holds a Cross asked to cross (0x0801596E:
+                                             BN6_AI_FLAGS | BN6_AI_CROSS_ASK), then waited for until none crosses (0x0801597C) */
+#define BN6_CROSS_PENDING_GET 0x0801595Eu /* r0 a side: its pending record's form in r0, +1 in r1, +3 in r3 (mov pc,lr, no push), asked by
+                                             the crossing's phases with the crossing object in r5 (0x08014A38 and the phases after it) */
+#define BN6_CROSS_STEP        0x03        /* BN6_CROSS_SIDES +3: the step's own count, 0 its first frame */
+#define BN6_AI_CROSS_ASK      0x4000u     /* BN6_AI_FLAGS: asked to cross into his pending form (0x0801596E) */
+#define BN6_AI_CROSSING       0x80u       /* BN6_AI_MODES: a crossing under way (0x0801597C waits while it is set) */
 
 #endif

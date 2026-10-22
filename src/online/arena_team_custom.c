@@ -31,13 +31,14 @@
 #define R_DEALT    0x2E   /* 1 once his deck is dealt this battle */
 #define R_OWED     0x2F   /* 1 while his side's GBA holds its Custom screen's packet back for him (its own core's alone) */
 #define R_WAIT     0x30   /* u16 his side's GBA's frames held so, this turn */
+#define R_CROSS    0x32   /* the form his Custom screen's CROSSSELECT committed this turn (0 none): his pending form */
 
 /* his turn: no Custom screen; his side's GBA's open, his picks not in yet;
  * open with them in; closed before they came */
 enum { ST_CLOSED, ST_OPEN, ST_IN, ST_WAITING };
 
 _Static_assert(RAM_TEAM_CUSTOM + SIDES * ROOM_SIZE <= RAM_TEAM_CUSTOM_END, "the partners' decks and turns past their room");
-_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= ROOM_SIZE,
+_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= R_CROSS && R_CROSS < ROOM_SIZE,
 	"a partner's turn's fields overlap");
 
 static struct {
@@ -47,6 +48,7 @@ static struct {
 	uint32_t seed[SIDES][SIDES];      /* the seed each GBA's RNG gave, by the side dealt: what the output says */
 	unsigned dealt[SIDES], said[SIDES], late[SIDES], set[SIDES], taken[SIDES], chips[SIDES], limits[SIDES];
 	unsigned held[SIDES];             /* the most frames his side's GBA held for him in a turn */
+	unsigned crosses[SIDES];          /* his Crosses said */
 } C;
 
 static uint32_t room(unsigned side) { return RAM_TEAM_CUSTOM + (side & 1u) * ROOM_SIZE; }
@@ -178,6 +180,14 @@ static void pick_said(struct mCore *core[2], unsigned side, uint16_t value, uint
 	uint32_t r = room(side);
 	unsigned count = value >> 11 & 7u, index = value >> 8 & 7u, slot = value & 0xFFu;
 	uint8_t state = get8(core[side], r + R_STATE);
+	/* (his Cross, said before his picks while his turn is open: the form his own CROSSSELECT committed) */
+	if (count == TEAM_CROSS_COUNT) {
+		if (state == ST_OPEN && slot && slot < BN6_FORMS) {
+			put8(core, r + R_CROSS, (uint8_t)slot);
+			++C.crosses[side];
+		}
+		return;
+	}
 	if (count > TEAM_CUSTOM_PICKS || (count && index >= count) || (state != ST_OPEN && state != ST_WAITING)) return;
 	if (count) put8(core, r + R_PICKS + index, (uint8_t)slot);
 	if (count && index + 1 < count) return;
@@ -202,6 +212,7 @@ uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t 
 		put8(core, r + R_PICKED, 0);
 		put8(core, r + R_OWED, 0);
 		put16(core, r + R_WAIT, 0);
+		put8(core, r + R_CROSS, 0);
 	}
 	if (said) pick_said(core, side, value, delay);
 	state = get8(own, r + R_STATE);
@@ -287,6 +298,8 @@ bool arena_team_custom_holds(unsigned side) {
 	return hook_read8(r + R_DEALT) && hook_read8(r + R_STATE) == ST_OPEN && standing(side);
 }
 
+uint8_t arena_team_custom_cross(unsigned side) { return hook_read8(room(side & 1u) + R_CROSS); }
+
 void arena_team_custom_owe(unsigned side, bool owed) { hook_write8(room(side & 1u) + R_OWED, owed); }
 bool arena_team_custom_owed(unsigned side) { return hook_read8(room(side & 1u) + R_OWED) != 0; }
 
@@ -309,7 +322,7 @@ void arena_team_custom_report(void) {
 		printf("arena2v2: side %u's partner's own deck dealt %u times (%s folder; the seed %08X on the first GBA, %08X on the "
 			"second), his picks said %u times in his stream (%u after his side's Custom screen closed), set %u times (%u chips) "
 			"and taken into his hand %u times, every core's; his side's GBA held for him %u frames at most in a turn, %u times "
-			"to the limit\n", side, C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0],
+			"to the limit; his Cross said %u times\n", side, C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0],
 			(unsigned)C.seed[side][1], C.said[side], C.late[side], C.set[side], C.chips[side], C.taken[side], C.held[side],
-			C.limits[side]);
+			C.limits[side], C.crosses[side]);
 }

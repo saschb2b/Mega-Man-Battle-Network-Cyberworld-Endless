@@ -49,7 +49,7 @@ bool arena_team_navi_record(struct mCore *core, unsigned side, uint8_t *out);
 uint32_t arena_team_navi_hand(unsigned side);
 /* a hand's chip up next, from a hook: side's lead's, or his partner's */
 uint8_t arena_team_navi_at(unsigned side, bool partner);
-/* the records' HP fields (MaxBaseHP, CurHP, MaxHP) and the hands' chips up
+/* the records' HP fields (MaxBaseHP, CurHP, MaxHP) and forms and the hands' chips up
  * next folded into a digest both GBAs must agree on, from a hook */
 uint32_t arena_team_navi_digest(uint32_t h);
 /* how often each record and hand answered, by whom, said in the output */

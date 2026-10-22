@@ -142,9 +142,9 @@ void arena_team_navi_begin(void) {
 		/* (his NaviCust's programs whole: his NaviStats as BN6 compiled them, but for the two bytes a link battle's start sets in
 		 * every MegaMan's alike, kept from his side's; teamcust=-1 the second GBA's his side's copy, a mutation that must part them) */
 		if (compiled[side].given && !(dev.team_cust < 0 && s == second_slot)) {
-			uint8_t unk17 = hook_read8(from + BN6_NS_UNK17), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
+			uint8_t start = hook_read8(from + BN6_NS_START_FORM), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
 			for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) hook_write8(to + i, compiled[side].stats[i]);
-			hook_write8(to + BN6_NS_UNK17, unk17);
+			hook_write8(to + BN6_NS_START_FORM, start);
 			hook_write8(to + BN6_NS_BEAST_TURNS, beast);
 		}
 		/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
@@ -202,6 +202,7 @@ uint32_t arena_team_navi_digest(uint32_t h) {
 	for (unsigned side = 0; side < SIDES; ++side) {
 		for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) h = (h ^ hook_read16(room(side) + f)) * 16777619u;
 		h = (h ^ hook_read8(hand(side) + BN6_HAND_AT)) * 16777619u;
+		h = (h ^ hook_read8(room(side) + BN6_NAVI_FORM)) * 16777619u;
 	}
 	return h;
 }
