@@ -33,16 +33,37 @@ uint32_t square_emote_invited(uint32_t now);
  * cone of his facing (BN6's talk probe's way), 0 none: an emote's aim. */
 uint32_t square_emote_faced(const OnlineSnapshot *s);
 /* Emote `emote` sent, aimed at player `facing` (0 none) where it can be,
- * at the one who aimed at MegaMan first; phrase `phrase` said. False
- * where the burst is spent (one comes back a second). */
+ * at the one who aimed at MegaMan first. False where the burst is spent
+ * (one comes back a second). */
 bool square_emote_send(int emote, uint32_t facing, uint32_t now);
-bool square_emote_say(int phrase, uint32_t now);
+/* The items the strip and the palette offer (issue #178): an emote by its
+ * id, a phrase past them (SQUARE_PHRASE + its id) */
+#define SQUARE_PHRASE ONLINE_EMOTE_COUNT
+#define SQUARE_ITEMS (ONLINE_EMOTE_COUNT + ONLINE_PHRASE_COUNT)
+/* ... item `item` sent, an emote as square_emote_send sends it, a
+ * phrase said, the same burst spent */
+bool square_emote_send_item(int item, uint32_t facing, uint32_t now);
 /* The four favourites, by the direction held with L (0 up, 1 right, 2
- * down, 3 left), network.ini's `favourites` or the defaults. */
+ * down, 3 left): items, network.ini's `favourites` or the defaults; one
+ * kept on a direction (SELECT and it on the strip), written there. */
 int square_emote_favourite(int way);
+void square_emote_set_favourite(int way, int item);
+/* What the strip previews (emote_strip.c): the animation of BN6's
+ * overworld MegaMan for emote `emote` facing `facing`, `into` frames into
+ * it, and how many frames it lasts */
+int square_emote_anim(int emote, int facing, int into);
+int square_emote_frames(int emote);
+/* The player emote `emote` would be aimed at if sent now, facing player
+ * `facing`: the one who aimed at MegaMan first, 0 none or not one that
+ * can be aimed */
+uint32_t square_emote_aim(int emote, uint32_t facing, uint32_t now);
 /* Everyone else's phrases and emotes hidden and silent (their poses,
  * sounds, words and aims; names stay), kept in network.ini. */
 bool square_emote_quiet(void);
 void square_emote_set_quiet(bool on);
+/* MegaMan names SELECT's strip in L's chat once (issue #178): due until
+ * it has been said, network.ini's `hinted` after */
+bool square_emote_hint_due(void);
+void square_emote_hinted(void);
 
 #endif

@@ -6,6 +6,7 @@
 
 #include "bn6_fields.h"
 #include "cinema.h"
+#include "emote_strip.h"
 #include "gfx.h"
 #include "online_chat.h"
 #include "online_labels.h"
@@ -13,7 +14,6 @@
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_square.h"
-#include "online_text.h"
 #include "online_trade.h"
 #include "online_transport.h"
 #include "netpass_screen.h"
@@ -67,6 +67,7 @@ bool online_scene_start(uint32_t seed, uint32_t player, const OnlineProfile *car
 }
 
 void online_scene_end(void) {
+	emote_strip_close();
 	square_arena_end();
 	square_watch_end();
 	if (trace) { fclose(trace); trace = NULL; }
@@ -210,6 +211,8 @@ void online_scene_draw(void) {
 	if (!arrived) return;
 	/* (the names and marks over heads, an open challenge's strip and the link beside a card: online_labels.h) */
 	online_labels_draw();
+	/* (SELECT's emote strip: online_chat.c) */
+	emote_strip_draw();
 	/* (Trade Central's screens, and the NetPass over it all, START's: online_chat.c) */
 	trade_screen_draw();
 	netpass_screen_draw();

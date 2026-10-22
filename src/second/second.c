@@ -24,6 +24,7 @@
 #include "second_home.h"
 #include "second_mail.h"
 #include "second_navicust.h"
+#include "second_palette.h"
 #include "second_pet.h"
 #include "second_read.h"
 #include "second_shop.h"
@@ -117,6 +118,7 @@ void second_update(void) {
 	if (p == PANEL_MAIL) second_read_mail();
 	if (p == PANEL_SHOP) second_read_shop();
 	if (p == PANEL_TRADER) second_read_trader();
+	if (p == PANEL_NETPASS) emote_palette_view(&S2.palette);
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
@@ -181,14 +183,19 @@ bool second_draw(int w, int h) {
 	drawn_panel = panel;
 	drawn = S2;
 	if (panel == PANEL_DARK) return false;
+	if (panel == PANEL_NETPASS && !S2.palette.tab) {
+		second_palette_draw(w, h, &S2.palette);
+		return true;
+	}
 	if (panel == PANEL_NETPASS) {
-		/* (the frame without the run's strip, the pass in its body as the PET's KeyItem shows it) */
+		/* (the frame without the run's strip, the pass in its body as the PET's KeyItem shows it, the palette's tab over it) */
 		SDL_Rect r = second_frame_rest(w, h, "NETPASS", "NET SQUARE");
 		fill_rect(r.x, r.y, r.w, r.h, PET_EXIT);
 		NetPassView v;
 		netpass_view_now(&v);
 		v.into = true;
-		netpass_draw(r.x + (r.w - NETPASS_W) / 2, r.y + (r.h > NETPASS_H ? (r.h - NETPASS_H) / 2 : 0), &v);
+		netpass_draw(r.x + (r.w - NETPASS_W) / 2, r.y + (r.h > NETPASS_H + 18 ? (r.h - NETPASS_H) / 2 : 18), &v);
+		second_palette_tabs(w, h, &S2.palette);
 		return true;
 	}
 	SDL_Rect body = frame(w, h);

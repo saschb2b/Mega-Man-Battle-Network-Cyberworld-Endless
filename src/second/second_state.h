@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "emote_palette.h"
 #include "navicust.h"
 
 /* The screen the player is on, as BN6's state tells it (docs/ROM_DATA.md,
@@ -29,7 +30,7 @@ typedef enum {
 	SECOND_SHOP,         /* a shop */
 	SECOND_TRADER,       /* the Chip Trader */
 	SECOND_OTHER,        /* a screen of BN6's not named here */
-	SECOND_SQUARE,       /* the Net Square: the NetPass (docs/ONLINE.md, The NetPass) */
+	SECOND_SQUARE,       /* the Net Square: the emotes' palette, the NetPass (docs/ONLINE.md, Emotes, The NetPass) */
 	SECOND_CONTEXTS
 } SecondContext;
 
@@ -130,6 +131,8 @@ typedef struct {
 	char nc_bug[128];             /* why RUN would bug as the board stands, "" for none */
 	struct { char name[16]; int color; } nc_board[8];   /* on RUN: the programs on the board */
 	int nc_nboard;
+	/* the Net Square (issue #178): the palette's tab, the button lit, the favourites, whom an aimed emote goes to */
+	PaletteView palette;
 } SecondState;
 
 extern SecondState S2;

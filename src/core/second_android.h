@@ -17,5 +17,8 @@ uint32_t *second_android_begin(int *w, int *h);
 void second_android_end(bool on);
 /* The second screen black, at once (the scene that drew it gone). */
 void second_android_dark(void);
+/* A tap Java took on the display (SecondScreen.java), once: its pixel in
+ * the w x h picture last drawn (issue #178: the Net Square's palette). */
+bool second_android_tap(int *x, int *y, int *w, int *h);
 
 #endif

@@ -430,6 +430,13 @@ void rom_tiles_scaled(uint32_t first, uint32_t pal, int x, int y, int w, int h, 
  * software renderer blends them, so the picture is its own to the pixel. */
 
 static struct { uint32_t *px; int w, h, stride; } raw;
+/* sprites drawn into memory kept to this (gfx_clip), w 0 none */
+static SDL_Rect raw_clip;
+
+void gfx_clip(const SDL_Rect *r) {
+	raw_clip = r ? *r : (SDL_Rect){ 0, 0, 0, 0 };
+	if (!raw.px) SDL_RenderSetClipRect(P.renderer, r);
+}
 
 /* ROM tiles as drawn into memory, decoded once: RGBA8888, 0 for colour 0
  * (a second screen's thirty chip icons decoded at each draw were 2 ms of a
@@ -499,13 +506,18 @@ void sprite_draw_into(Sprite *s, int anim, int frame, int x, int y, int pal, int
 	if (!c || !c->raw) return;
 	x += c->ox * scale;
 	y += c->oy * scale;
+	int x0 = 0, y0 = 0, x1 = raw.w, y1 = raw.h;
+	if (raw_clip.w) {
+		x0 = SDL_max(0, raw_clip.x); y0 = SDL_max(0, raw_clip.y);
+		x1 = SDL_min(raw.w, raw_clip.x + raw_clip.w); y1 = SDL_min(raw.h, raw_clip.y + raw_clip.h);
+	}
 	for (int j = 0; j < c->h * scale; ++j) {
 		int qy = y + j;
-		if (qy < 0 || qy >= raw.h) continue;
+		if (qy < y0 || qy >= y1) continue;
 		for (int i = 0; i < c->w * scale; ++i) {
 			int qx = x + i;
 			uint32_t v = c->raw[(j / scale) * c->w + i / scale];
-			if (v && qx >= 0 && qx < raw.w) raw.px[qy * raw.stride + qx] = v;
+			if (v && qx >= x0 && qx < x1) raw.px[qy * raw.stride + qx] = v;
 		}
 	}
 }

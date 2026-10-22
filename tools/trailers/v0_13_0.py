@@ -82,16 +82,33 @@ class Visit:
         return self
 
 
-def say(k):
-    """L's phrase k ("Hello!" 0, "Nice build!" 1): MegaMan's question
-    paged, Say something, the phrase (about 7.5 seconds, BN6's text typed
-    out before each press)"""
-    return '6:L,170:,6:A,130:,6:A,130:,' + '6:DOWN,12:,' * k + '6:A,'
+def strip(v, page, k):
+    """Item k of the emote strip's page (0 the emotes, six by two; 1 the
+    phrases, two by four) sent from SELECT (issue #178, which replaced
+    L's pages; the 0.13.0 cut went through them): the steps from where its
+    cursor was left in this visit (`v.strip`), round the grid's ends."""
+    cols, rows = (6, 2) if page == 0 else (2, 4)
+    state = v.__dict__.setdefault('strip', {'page': 0, 0: 0, 1: 0})
+    steps = '6:SELECT,20:,'
+    if state['page'] != page:
+        steps += '6:L,10:,' if page == 0 else '6:R,10:,'
+    cur = state[page]
+    for delta, n, ahead, back in (((k % cols) - (cur % cols), cols, 'RIGHT', 'LEFT'),
+                                  ((k // cols) - (cur // cols), rows, 'DOWN', 'UP')):
+        delta %= n
+        steps += (f'6:{ahead},6:,' * delta) if delta <= n // 2 else (f'6:{back},6:,' * (n - delta))
+    state['page'], state[page] = page, k
+    return steps + '6:A,'
 
 
-def emote(k):
-    """L's emote k (Wave 0, Cheer 1)"""
-    return '6:L,170:,6:A,130:,6:DOWN,12:,6:A,130:,' + '6:DOWN,12:,' * k + '6:A,'
+def say(v, k):
+    """The strip's phrase k ("Hello!" 0, "Nice build!" 1)"""
+    return strip(v, 1, k)
+
+
+def emote(v, k):
+    """The strip's emote k (Wave 0, Cheer 1)"""
+    return strip(v, 0, k)
 
 
 # (the eight round the plaza's landmark, in front of it on the screen:
@@ -105,11 +122,11 @@ DELAYS = [0, 2.5, 4, 5, 6, 7, 7.5, 8]
 def meet_game(i):
     v = Visit(DELAYS[i])
     if i < 2:
-        v.at(4 + 0.3 * i, say(0))                # (the first two say hello as Mira arrives)
+        v.at(4 + 0.3 * i, say(v, 0))                # (the first two say hello as Mira arrives)
     x, y, f = RING[i]
     v.at(13, f'0:place {x} {y} {f},')
-    v.at(15 + 0.6 * (i % 4), say(i % 2))         # (together round the landmark: the Square cheers)
-    v.at(26 + 0.4 * i, emote(i % 2))
+    v.at(15 + 0.6 * (i % 4), say(v, i % 2))         # (together round the landmark: the Square cheers)
+    v.at(26 + 0.4 * i, emote(v, i % 2))
     v.at(40)
     first = 1150 if i < 2 else v.frame(12)
     return dict(name=OPERATORS[i].lower(), operator=OPERATORS[i], delay=DELAYS[i], script=v.s, files=STAMPED,

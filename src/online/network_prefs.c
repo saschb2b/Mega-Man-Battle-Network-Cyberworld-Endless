@@ -54,6 +54,7 @@ static void read_setting(NetworkPrefs *out, const char *key, const char *value, 
 	else if (!strcmp(key, "name") && network_name_valid(value)) snprintf(out->name, sizeof out->name, "%s", value);
 	else if (!strcmp(key, "named")) out->named = value[0] == '1';
 	else if (!strcmp(key, "quiet")) out->quiet = value[0] == '1';
+	else if (!strcmp(key, "hinted")) out->hinted = value[0] == '1';
 	else if (!strcmp(key, "favourites")) {
 		unsigned f[4];
 		if (sscanf(value, "%u,%u,%u,%u", &f[0], &f[1], &f[2], &f[3]) == 4)
@@ -125,6 +126,7 @@ bool network_prefs_write(const char *directory, const NetworkPrefs *prefs) {
 	fprintf(file, "\nname=%s\nnamed=%u\nselected=%u\nconsent=%u\n", prefs->name, prefs->named ? 1u : 0u, prefs->selected, prefs->consent);
 	for (unsigned i = 0; i < prefs->count; ++i) fprintf(file, "server=%s\n", prefs->servers[i]);
 	if (prefs->quiet) fputs("quiet=1\n", file);
+	if (prefs->hinted) fputs("hinted=1\n", file);
 	if (prefs->favourites[0] && prefs->favourites[1] && prefs->favourites[2] && prefs->favourites[3])
 		fprintf(file, "favourites=%u,%u,%u,%u\n", prefs->favourites[0] - 1u, prefs->favourites[1] - 1u, prefs->favourites[2] - 1u, prefs->favourites[3] - 1u);
 	bool ok = !ferror(file) && cw_fsync_file(file);

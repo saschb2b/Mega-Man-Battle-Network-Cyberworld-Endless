@@ -7,17 +7,16 @@
 
 #include "online_types.h"
 
-/* L: MegaMan's question and its three ways (say, emote, look around:
- * square_look_words). */
-const char *square_menu_question(void);
+/* L: look around (square_look_words) or the quiet's option; the first
+ * time, MegaMan naming SELECT's emotes and phrases (emote_strip.h). */
+const char *square_look_option(void);
+const char *square_strip_hint(void);
 /* The greeter's word before he stamps a NetPass just come full (the
  * stamp moment, netpass_screen.h) */
 const char *square_greeter_stamp_words(void);
-#define SQUARE_MENU_OPTIONS 3
-extern const char *const square_menu_options[SQUARE_MENU_OPTIONS];
-/* ... a page of phrases or emotes goes on with this. */
+/* ... a box of options goes on with this (a peer's card's). */
 const char *square_more(void);
-/* ... More's option to hide everyone else's phrases and emotes, or, where
+/* ... L's option to hide everyone else's phrases and emotes, or, where
  * hidden (`quiet`), to show them again (square_emote.h). */
 const char *square_quiet_option(bool quiet);
 const char *square_back(void);

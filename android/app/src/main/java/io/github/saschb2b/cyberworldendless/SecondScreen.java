@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -34,8 +35,10 @@ import java.util.List;
  * draws it every fifth frame (second_android.c) into pixels this copies
  * into a Bitmap; a Presentation on that display shows it at a whole scale,
  * black round it. The Presentation never takes focus: the game's keys,
- * Back and touch controls stay on the game's screen. A touch on the map
- * does nothing, as on the 3DS, whose map has no use for one.
+ * Back and touch controls stay on the game's screen. A finger let go on
+ * the picture is handed to the game at its pixel, as the 3DS's bottom
+ * screen's stylus is (the Net Square's palette, issue #178); elsewhere
+ * the game has no use for one.
  */
 final class SecondScreen {
     private static final String TAG = RomLook.TAG;
@@ -320,9 +323,28 @@ final class SecondScreen {
             to.set(x, y, x + w, y + h);
             c.drawBitmap(b, null, to, k >= 1 ? sharp : soft);
         }
+
+        /* a finger let go on the picture: its pixel in the game's picture, by onDraw's placement */
+        @Override
+        public boolean onTouchEvent(MotionEvent e) {
+            if (e.getActionMasked() != MotionEvent.ACTION_UP) return true;
+            performClick();
+            Bitmap b = picture;
+            if (b == null || dark || to.width() <= 0 || to.height() <= 0) return true;
+            int x = (int) ((e.getX() - to.left) * b.getWidth() / to.width());
+            int y = (int) ((e.getY() - to.top) * b.getHeight() / to.height());
+            if (x >= 0 && y >= 0 && x < b.getWidth() && y < b.getHeight()) nativeTap(x, y);
+            return true;
+        }
+
+        @Override
+        public boolean performClick() {
+            return super.performClick();
+        }
     }
 
     private static native ByteBuffer nativePixels();
     private static native void nativeDisplay(int w, int h);
     private static native void nativeCopied();
+    private static native void nativeTap(int x, int y);
 }
