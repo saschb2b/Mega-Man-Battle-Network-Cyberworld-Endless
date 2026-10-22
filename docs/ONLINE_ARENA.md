@@ -2511,7 +2511,12 @@ loops ran up to 5 to 8 iterations apart (read from the rings: GBA 1 at
 iteration 75 found side 0's slot still holding 67; GBA 0 at 72 found
 side 1's already holding 80), past the rings' 4 iterations
 (`arena_team.c`'s `DELAY`, docs: [Four streams](#four-streams)), in
-streaks of 20 to 50 iterations about every 60. The same case on one
+streaks of 20 to 50 iterations about every 60. A probe of both GBAs'
+counts after each pair frame (a second run, kept out of the repository)
+showed how: from GBA 0's iteration 66 of the fight, both in BN6's fight
+phase and both leads charging, GBA 0's count went up one every two
+frames while GBA 1's went up about one a frame, GBA 1 always the one
+ahead, by 3 to 7. The same case on one
 machine (`--dev arena,arenaboth,arena2v2=1,teamslow=-1`, with
 `teamhp=150` or 40) stays 0 apart; the runs above, where both partners
 pick, were 0 late. What differs is the inputs (both leads firing charged
