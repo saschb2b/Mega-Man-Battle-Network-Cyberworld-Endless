@@ -55,7 +55,8 @@
   the chips his Custom screen deals are his own; his Cross chosen on his
   own CROSSSELECT and taken by BN6's crossing on every GBA; and a
   Program Advance made on his screen goes into his hand as BN6 makes it.
-  His Beast Out goes in too, but its turns are not yet counted for him.
+  His Beast Out goes in from his own emblem too, its turns counted down
+  and its end asked by BN6's own code for him as for a lead.
   Not yet a mode to play: it needs the wire's four seats
   (docs/ONLINE_ARENA.md, Two MegaMen a side).
 

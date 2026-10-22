@@ -364,6 +364,7 @@ bool arena_team_custom_holds(unsigned side) {
 }
 
 uint8_t arena_team_custom_cross(unsigned side) { return hook_read8(room(side & 1u) + R_CROSS); }
+void arena_team_custom_cross_taken(unsigned side) { hook_write8(room(side & 1u) + R_CROSS, 0); }
 
 void arena_team_custom_owe(unsigned side, bool owed) { hook_write8(room(side & 1u) + R_OWED, owed); }
 bool arena_team_custom_owed(unsigned side) { return hook_read8(room(side & 1u) + R_OWED) != 0; }

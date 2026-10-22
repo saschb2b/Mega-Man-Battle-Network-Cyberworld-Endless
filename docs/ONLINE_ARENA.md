@@ -2364,8 +2364,8 @@ turn):
 
 | Run | End | Hashes | The two GBAs |
 | --- | --- | --- | --- |
-| `arenalag=4` (540 rollbacks, 2,160 frames run again) | over at frame 6531 | 108, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 3,840 iterations, 0 apart |
-| `arenalag=4,arenaroll=8` | over at 5805 | all 96 the same as the delay alone's | 3,779, 0 apart; 725 rollbacks of 8 frames, the game's state the same after all 725 |
+| `arenalag=4` (430 rollbacks, 1,720 frames run again) | over at frame 5321 | 88, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 3,854 iterations, 0 apart |
+| `arenalag=4,arenaroll=8` | over at 5335 | all 88 the same as the delay alone's | 3,854, 0 apart; 666 rollbacks of 8 frames, the game's state the same after all 666 |
 | `teamcross=-1,arenalag=4` (no Cross on the second GBA, the mutation) | | | apart from iteration 1: the crossing comes before the fight's first iteration, and the second GBA's battle begins its frames earlier |
 
 His form is folded into the GBAs' comparison (the records' form). Seen:
@@ -2374,38 +2374,73 @@ GBA (`teamseat=2`) after the first turn's crossing both partners in
 HeatCross and both leads as they were, "TURN 1 START!" over them; on the
 second (`teamseat=3`) BN6's black crossing field with both partners
 crossed. The log: "the partners' Crosses: the turn's crossing begun for a
-partner alone 10 times, side 0's partner asked to cross 6 times and side
-1's 6, ..., their own pending forms answered 728 and 728 times, every
-core's" (each GBA's, the rollbacks' frames run again among them).
+partner alone 4 times, side 0's partner asked to cross 2 times and side
+1's 2, BN6's wait held for a partner still crossing 204 frames, their own
+pending forms answered 210 and 210 times, every core's" (each GBA's, the
+rollbacks' frames run again among them). His pending form is taken as the
+crossing's last mode begins (`BN6_CROSS_RESTORE`), as BN6 takes the
+records' once their objects have crossed: before that, kept to his next
+turn, the turn's check as a turn's change begins (`0x0800840C`) met it
+again and began the crossing anew for him (asked 6 times where 2 is right,
+the first proof's runs).
 
-**His Beast Out: entered, his turns not yet his.** Gregar's emblem under
-OK commits a Beast Out at OK into the same record as CROSSSELECT
+**His Beast Out, and its turns as a lead's.** Gregar's emblem under OK
+commits a Beast Out at OK into the same record as CROSSSELECT
 (`BN6_BEAST_COMMIT`, `0x08029344`: form 0xB, 0xD on from a Cross, 0x17
 BeastOver), so it crosses in his stream and through BN6's crossing as his
-Cross does, with no code more: `teambeast=1` sets Beast Out's flag on
-his screen copy (his record's BeastOutCounter, 3, as his side's), his
-client takes the emblem at his first turn (RIGHT five times, DOWN, A, then
-UP and A on OK), and both partners turn into Gregar's beast at the first
-turn's crossing while their leads stay as they are, on both GBAs. What is
-not his: BN6 counts a form's turns down for each side's player alone
-(`BN6_FORM_TURN_DOWN`, called with the side-player getter's object as each
-Custom screen opens), runs a second controller for those two alone as the
-screen opens (`BN6_TURN_SIDES`), and asks a Beast Out's end only for the
-crossing controller's records' objects (`BN6_FORM_END_CHECK`, then
-`0x08015994`). Measured on both GBAs at each turn's form check: the
-partners' forms 0xB from the first turn on and their BeastOutCounter
-still 3 at the turns' checks at iterations 618 and 1693, so his Beast Out does not end.
-The three, run for his object by BN6's own code (the way his Cross runs),
-are what is left; two of the call sites are the Souls' hooks
-(`BN6_TURN_COUNT`), so a partner's run goes at the routines' own entries.
-Proved as far as it goes (fresh data folders, `--dev
-arena,arenaboth,arena2v2=1,teambeast=1,teamhp=500,arenadelay=1,quitend`):
+Cross does: `teambeast=1` sets Beast Out's flag on his screen copy (his
+record's BeastOutCounter, 3, as his side's), his client takes the emblem
+at his first turn (RIGHT five times, DOWN, A, then UP and A on OK), and
+both partners turn into Gregar's beast at the first turn's crossing while
+their leads stay as they are, on both GBAs. A Beast Out's turns BN6
+counts for each side's player alone: his AI data's turn count as each
+Custom screen opens (`BN6_FORM_TURN_DOWN`, called with the side-player
+getter's object; two of its call sites are the Souls' hooks,
+`BN6_TURN_COUNT`), his BeastOutCounter as the crossing controller is done
+(`BN6_BEAST_TURN`), its end in the turn's form check for the records'
+objects (`BN6_FORM_END_CHECK`, then `BN6_FORM_LEAVE_ASK`) and the wait
+while he leaves it in the controller's mode 8 (`BN6_CROSS_RESTORE`). For a
+partner each is BN6's own code run for his object: the two counts' ends
+hooked (`BN6_FORM_TURN_DOWN_END`, `BN6_BEAST_TURN_END`) and their bodies
+entered again with his object where the one just done was his side's
+player; the end's check and the leave asked from the turn check's end
+(`BN6_TURN_FORMS_SET`) for each partner without a form this turn, BN6's
+routines called and come back to the hook (the run kept a core, never past
+the frame); mode 8 waiting while he leaves his form. (The controller BN6
+sets up as each screen opens for the two players, `BN6_TURN_SIDES`, asks a
+routine that answers 0 in Gregar: nothing there for him.) All four
+MegaMen run the same code each turn, a partner's own forms aside, so the
+partners' pair hashes differ from the first proofs' while every battle
+ends at the same frame (`teamcust`, `teampa` and the flag alone; `teamcross`
+by its pending form above).
+
+The control: `teambeast=3` has the leads take Beast Out by the same keys
+(its flag on both GBAs as the field spawns), `teambeast=2` the partners at
+every turn. At each turn's form check (the log's "the turn's check at
+iteration ..." lines) each lead and his partner are in the same form with
+the same BeastOutCounter: form 0xB and 3 at the first, 0xB and 2 at
+iteration 1084, 0xB and 1 at 1897 in the delay alone's run (the first
+GBA's; with the window of 8, 0xB and 2 at 1088 before the battle ends).
+Proved, fresh data folders, `--dev
+arena,arenaboth,arena2v2=1,teamhp=500,arenadelay=1,quitend`:
 
 | Run | End | Hashes | The two GBAs |
 | --- | --- | --- | --- |
-| `arenalag=4` (306 rollbacks, 1,224 frames run again) | over at frame 3511, side 1 won | 58, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 1,873 iterations, 0 apart |
-| `arenalag=4,arenaroll=8` | over at 3568 | all 59 the same as the delay alone's | 1,920, 0 apart; 446 rollbacks of 8 frames, the game's state the same after all 446 |
+| `teambeast=1,arenalag=4` (261 rollbacks, 1,044 frames run again) | over at frame 3168, side 1 won | 52, all the same as `arenalag=0,arenawindow=8`'s (0 rollbacks) | 2,173 iterations, 0 apart |
+| `teambeast=1,arenalag=4,arenaroll=8` | over at 3168 | all 52 the same as the delay alone's | 2,162, 0 apart; 396 rollbacks of 8 frames, the game's state the same after all 396 |
 | `teambeast=-1,arenalag=4` (no Beast Out on the second GBA, the mutation) | | | apart from iteration 1 |
+| `teambeast=3,arenalag=4` (the leads too; 524 rollbacks, 2,096 frames run again) | over at 6275, side 0 won | 104, all the same as `arenalag=0,arenawindow=8`'s | 2,902, 0 apart |
+| `teambeast=3,arenalag=4,arenaroll=8` | over at 7072 | all 117 the same as the delay alone's (`arenawindow=0`) | 884 rollbacks of 8 frames, the game's state the same after all 884; but 71 of 2,375 iterations apart from iteration 2305 |
+
+The last row's parting is not a partner's form: with the partners' turn
+hooks switched off it parts at the same iteration (a run made for it).
+In that schedule (the delay alone, 4 ticks stalled), with all four in
+Beast Out, the two GBAs' battle loops come more than BN6's link delay of
+4 iterations apart, and the partners' keys are taken late on one GBA (46
+iterations late, 37 taken apart; at 2305 side 1's partner's B held on the
+second GBA, none on the first): the rings' delay (Four streams) is shorter
+than that drift. Left: the drift's cause (a lead's Beast Out under the
+stall), and the rings' delay against it.
 
 ### A Program Advance and his hand's size
 
@@ -2451,9 +2486,11 @@ from 78 to 0 at 471. His hand's size by his own Custom level is the
 NaviCust's (above): six chips with Custom1.
 
 A partner's whole loadout leaves the rest as it was: the runs without the
-new flags give the numbers of the sections above (`teamhp=500,arenalag=4`
-over at 3426, 57 hashes, 2,703 iterations 0 apart; `teampick=-1` apart
-from iteration 190, 2,149 of 2,703), and a NetBattle without the flag is
+new flags give the battles of the sections above (`teamhp=500,arenalag=4`
+over at 3426, 57 hashes, 2,703 iterations 0 apart; `teampick=-1` over at
+3828, apart now from iteration 4, where its short hand is taken: the
+partners' hands' chips are in the comparison since the Program Advance),
+and a NetBattle without the flag is
 the battle it was (over at frame 2690, the last hash
 `86d2f837337a1494`).
 
@@ -2601,9 +2638,8 @@ the shape for a 2v2 between four games, each running the pair.
 - Two MegaMen a side ([Two MegaMen a side](#two-megamen-a-side)): the
   four streams over the server (designed, the wire unchanged), a
   partner's pick messages, his compiled NaviCust and his Cross among what
-  crosses; his Beast Out's turns and its end (entered and seen, His
-  Cross: BN6's countdown, the turn-open controller and the end's check
-  run for each side's player alone); a chip of computed power in his
+  crosses; the GBAs' drift past the rings' delay with all four in Beast
+  Out under the delay alone (His Cross); a chip of computed power in his
   hand (his hand takes a computed chip's power as 0), WhiCapsl's and
   Uninstll's marks; the bytes past a Program Advance's end in his hand
   (BN6's built hand leaves the joined picks' last chip there, ours the

@@ -14,8 +14,10 @@
  * are answered his own where the crossing object is his. His form is then
  * his own record's (the NaviStats answered by object, arena_team_navi.h),
  * on both GBAs alike. His Beast Out commits a form as his Cross does and
- * enters so; its turns and its end are not counted for him yet (BN6 runs
- * them for each side's player alone). Research, never a
+ * enters so; BN6 counts its turns and asks its end for each side's
+ * player alone, so its routines are run again for his object (their ends
+ * hooked, their bodies entered with him) and the crossing's last mode waits
+ * while he leaves his form. Research, never a
  * player's battle. */
 #ifndef CW_ARENA_TEAM_CROSS_H
 #define CW_ARENA_TEAM_CROSS_H

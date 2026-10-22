@@ -94,6 +94,8 @@ bool arena_team_custom_holds(unsigned side);
 /* From a hook: the form side's partner's own CROSSSELECT committed this
  * turn (0 none), his pending form until his next turn opens */
 uint8_t arena_team_custom_cross(unsigned side);
+/* ... taken from this core's RAM as the crossing is done (BN6 takes its records' so) */
+void arena_team_custom_cross_taken(unsigned side);
 void arena_team_custom_owe(unsigned side, bool owed);
 bool arena_team_custom_owed(unsigned side);
 /* As `core` (side's GBA's) holds it: the frames it has held for its

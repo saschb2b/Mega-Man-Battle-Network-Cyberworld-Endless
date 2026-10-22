@@ -127,7 +127,7 @@ static uint16_t beast_keys(const Client *c) {
 
 /* teamcross: at his first turn the cursor up to the emblem, CROSSSELECT opened and his one Cross taken, then his chips */
 static uint16_t cross_keys(const Client *c, uint32_t frame) {
-	if (dev.team_beast && c->opened == 1) return beast_keys(c);
+	if (dev.team_beast && (c->opened == 1 || dev.team_beast > 1)) return beast_keys(c);
 	if (dev.team_cross == 0 || c->opened != 1 || c->t >= CROSS_CHIPS) return screen_keys(frame);
 	unsigned t = c->t;
 	return t >= CROSS_UP && t < CROSS_UP + 3 ? KEY_UP : (t >= CROSS_OPEN && t < CROSS_OPEN + 3) || (t >= CROSS_TAKE && t < CROSS_TAKE + 3)

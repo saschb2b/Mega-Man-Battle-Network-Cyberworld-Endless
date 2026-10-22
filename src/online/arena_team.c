@@ -70,6 +70,11 @@ static HookAct spawn(HookRegs *r, void *user) {
 	/* (each partner's own NaviStats and hand, from his side's as the battle set them up; his deck and Custom screen anew) */
 	arena_team_navi_begin();
 	arena_team_custom_begin();
+	/* (teambeast=3: the leads' Beast Out too, its flag on both GBAs as the battle spawns, the partners' control) */
+	if (dev.team_beast >= 3) {
+		uint32_t at = BN6_EVENT_FLAGS + BN6_FLAG_BEAST_OUT / 8;
+		hook_write8(at, (uint8_t)(hook_read8(at) | 0x80u >> (BN6_FLAG_BEAST_OUT & 7)));
+	}
 	return HOOK_CONTINUE;
 }
 
@@ -180,7 +185,8 @@ static HookAct keys(HookRegs *r, void *user) {
 		int other = slot == T->slot[0] ? T->slot[1] : T->slot[0];
 		if (!T->parted && other >= 0 && other < HOOK_CORES && T->last[other] >= tick && T->digest[other][tick] != T->digest[slot][tick]) {
 			T->parted = tick;
-			printf("arena2v2: the two GBAs part at iteration %u\n", (unsigned)tick);
+			printf("arena2v2: the two GBAs part at iteration %u (the partners' keys taken there: %04X %04X and %04X %04X)\n",
+				(unsigned)tick, T->keys[slot][tick][0], T->keys[slot][tick][1], T->keys[other][tick][0], T->keys[other][tick][1]);
 		}
 	}
 	return HOOK_CONTINUE;

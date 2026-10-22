@@ -44,6 +44,9 @@ void arena_team_navi_compiled(unsigned side, const uint8_t *stats);
 /* side's partner's record as `core` holds it (between frames: his own
  * screen's copy of the pair); false where his room is not taken there */
 bool arena_team_navi_record(struct mCore *core, unsigned side, uint8_t *out);
+/* side's partner's own record in the core's RAM (BN6_BATTLE_NAVI_SIZE
+ * bytes), from a hook; 0 where his room is not taken */
+uint32_t arena_team_navi_record_at(unsigned side);
 /* side's partner's own hand in the core's RAM (BN6_HAND_SIZE bytes), from
  * a hook; 0 where his room is not taken */
 uint32_t arena_team_navi_hand(unsigned side);

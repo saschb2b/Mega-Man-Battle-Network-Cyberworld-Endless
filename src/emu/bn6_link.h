@@ -81,7 +81,8 @@
 #define BN6_MODE_PA           0x10        /* BN6_CUSTOM_MODE: a Program Advance shown, its chips joined, before BN6_MODE_WAIT */
 #define BN6_CUSTOM_BUILT      0x020366C0u /* the hand OK builds from the picks (bn6f byte_20366C0, a hand's layout: BN6_HAND_CHIPS ...),
                                              the Program Advance in it once shown; a link battle's packet carries it (BN6_LINK_SEND) */
-#define BN6_CROSS_STEP        0x03       /* the controller's byte +3 (BN6_CROSS_SIDES'): its step's count, 0 a step's first frame */
+#define BN6_CROSS_SIDE_RECORD 0x08        /* the controller's side 0's record (BN6_CROSS_SIDES'), side 1's BN6_CROSS_PENDING_SIZE on */
+#define BN6_CROSS_STEP        0x03      /* the controller's byte +3 (BN6_CROSS_SIDES'): its step's count, 0 a step's first frame */
 #define BN6_BEAST_COMMIT      0x08029344u /* Beast Out's commit at OK (the emblem's pick): its form into BN6_CROSS_RECORD by 0x08015952 as
                                              CROSSSELECT's (0xB, a Cross's from 0xD, BeastOver 0x17), so it crosses as a Cross does */
 #define BN6_FORM_TURN_DOWN    0x08015A16u /* r0 an object: his AI data's +0x0F counted down (neither 0 nor 0xFF, where his NaviStats' Navi
@@ -90,9 +91,22 @@
 #define BN6_FORM_END_CHECK    0x080159C6u /* r0 an object: true where he is in a Beast Out form (0xB-0x18) with its BeastOutCounter 0 (his
                                              AI data's +0x0F at 0 set to 2 on the way), asked in the turn's form check for the controller's
                                              records' objects alone; the end then asked by 0x08015994 */
+#define BN6_FORM_TURN_DOWN_BODY 0x08015A1Cu /* ... its body past the object's test (movs r1,#0x29), r5 the object, */
+#define BN6_FORM_TURN_DOWN_END 0x08015A36u /* ... its pop {r5,pc} */
+#define BN6_BEAST_TURN        0x08015A38u /* r0 an object: his BeastOutCounter less one where he is in a Beast Out form (MegaMan, not begun
+                                             in one), called as the crossing controller is done each turn for each side's player alone
+                                             (0x0800840C on the side-player getter 0x080103BC); */
+#define BN6_BEAST_TURN_BODY   0x08015A40u /* ... its body past the object's test (movs r1,#0x29), r5 the object, r7 0, */
+#define BN6_BEAST_TURN_END    0x08015A7Eu /* ... its pop {r5,r7,pc} */
+#define BN6_FORM_LEAVE_ASK    0x08015994u /* r0 an object: asked to leave his form (BN6_AI_FLAGS | BN6_AI_LEAVE_ASK) */
+#define BN6_CROSS_RESTORE     0x08014A00u /* push {lr}: the crossing controller's mode 8 (bn6f sub_8014A00), reached by mov lr,pc; bx r1:
+                                             it waits while a record's object leaves his form (0x080159A2: BN6_AI_LEAVING or
+                                             BN6_AI_LEAVE_ASK), then ends the controller */
+#define BN6_AI_LEAVE_ASK      0x40u       /* BN6_AI_FLAGS: asked to leave his form (0x08015994) */
+#define BN6_AI_LEAVING        0x100u      /* BN6_AI_MODES: leaving his form (0x080159A2 waits while it is set) */
 #define BN6_TURN_SIDES        0x0203C970u /* the controller set up as each Custom screen opens (0x0802D6A0): +4 1 while it runs, +8 and +0xC
-                                             each side's player (0x080103BC), for whom alone it runs 0x0802DD1E and 0x0802DD10 (not read
-                                             further) */
+                                             each side's player (0x080103BC), for whom alone it asks 0x0802DD1E, which answers 0 in Gregar
+                                             (movs r7,#0 ... adds r0,r7,#0), so that its 0x0802DD10 never runs */
 #define BN6_AI_CROSS_ASK      0x4000u    /* BN6_AI_FLAGS: asked to cross into his pending form (0x0801596E) */
 #define BN6_AI_CROSSING       0x80u       /* BN6_AI_MODES: a crossing under way (0x0801597C waits while it is set) */
 

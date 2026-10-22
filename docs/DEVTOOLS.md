@@ -590,8 +590,10 @@ copies, the mutation). `teamcross=N` (1-5) offers each partner Cross N on
 his own CROSSSELECT and has his stood-in client take it at his first turn
 (`-N`: none on the second GBA, the mutation); `teambeast=1` offers each
 partner Beast Out on his own Custom screen and has his client take its
-emblem at his first turn (entered on both GBAs; its turns not yet counted
-for him; `-1` none on the second GBA, the mutation); `teampa=1` opens side 0's
+emblem at his first turn (`2`: at every turn; `3`: the leads too, by the
+same keys, the partners' control; `-1` none on the second GBA, the
+mutation), each turn's form check saying each MegaMan's form and
+BeastOutCounter in the log; `teampa=1` opens side 0's
 partner's folder with Cannon A, B and C, his first hand Z-Canon1, a
 Program Advance (`-1`: the PA left out of his hand on the second GBA, the
 mutation). `teamhp=N` gives each partner his own

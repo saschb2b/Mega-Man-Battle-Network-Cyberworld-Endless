@@ -189,6 +189,11 @@ bool arena_team_navi_record(struct mCore *c, unsigned side, uint8_t *out) {
 	return true;
 }
 
+uint32_t arena_team_navi_record_at(unsigned side) {
+	int s = hook_slot();
+	return s >= 0 && s < HOOK_CORES && kept[s].taken ? room(side & 1u) : 0;
+}
+
 uint32_t arena_team_navi_hand(unsigned side) {
 	int s = hook_slot();
 	return s >= 0 && s < HOOK_CORES && kept[s].taken ? hand(side & 1u) : 0;
