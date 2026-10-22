@@ -20,6 +20,13 @@ the game is only there to be seen), `bn5` (False: BN6's ROM alone),
 `delay` (seconds after the first game starts). A cut lists its scenes and
 calls capture(); --keep in tools/trailer.py keeps what is there.
 
+A scene whose course waits on what its games do (a NetBattle's end, a
+team's match, a card to answer) is a function instead, `run(work, scene,
+port, roms)`, its games `Remote`s: played by remote play (--remote) a
+batch of steps at a time as their logs say, every frame kept as it comes
+(0.14.0's NetBattles, relay and two a side). Those run all at once, after
+the scenes by the clock.
+
     python3 tools/trailer_online.py VERSION [SCENE ...]   (a cut's online scenes, again)
 """
 import glob
