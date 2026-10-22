@@ -2453,9 +2453,26 @@ The hurry sign captured (`teamidle=1,teamseat=0` and
 `teamslow=99999,teamseat=2`, kept out of the repository): the idle
 lead's Custom screen with his gold `P1` plate under the Square's name
 plate, blinking; the idle partner's with his lead's `P1` and its tick
-and his own gold `P3` under it. Over the server: the four-game runs
-below. A NetBattle of two is untouched (frame 2639's hash
-`86d2f837337a1494`, over at 2690).
+and his own gold `P3` under it. A NetBattle of two is untouched (frame
+2639's hash `86d2f837337a1494`, over at 2690).
+
+Over the server (`drive.py`, four games and Epsilon watching, this
+build): Alpha's lead idle on his Custom screen (`teamidle=1` on his
+game) and Beta, Alpha's partner, never picking (`teamslow=99999` on his):
+Beta's client sent his picks so far at 1,680 frames after the turn's
+first OK, Alpha's own game pressed OK for him at 1,800, each turn; over
+at frame 5570, 92 hashes agreed on each of the four and checked by the
+spectator, 1,163 iterations 0 apart on all five. The other four-game
+runs on this build as before: the four different checkpoints (over at
+1255, 20 hashes), HeatCross and a Program Advance (1020), UNITE and Beast
+Out (967), Beast Out and ElecCross over 40 ms and 30 of jitter (1856),
+the slow partner (1850), the drop (stopped at 186 on the other three),
+the freeze, the relay one by one (three bouts, over at 2690, 531 and
+3290, every hash agreeing and the waiting two checking as many, TEAM
+WIN for Alpha and Beta); a client gone quiet now ends at 3659 (5810 with the old 60
+seconds), his side's GBA saying none at 1,800 frames. On Epsilon's
+screen the 2v2's heading: "Alpha & Beta VS Gamma & Delta" (the form
+with WATCHING too wide for the picture).
 
 Proved with the old limit, a partner's alone, 60 seconds held
 (`--dev arena,arenaboth,arena2v2=1,arenadelay=1,quitend`, both ROMs,
