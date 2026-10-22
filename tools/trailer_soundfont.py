@@ -127,7 +127,8 @@ class SoundFont:
         data = self.pcm(start, end)
         step = rate / SAMPLE_RATE * (1.0 if fixed else 2 ** ((key - root) / 12 + tune / 1200))
         # the source smoothed under the target's half, twice
-        a = 1 - math.exp(-2 * math.pi * min(0.45 * SAMPLE_RATE / max(1.0, step * SAMPLE_RATE / rate), rate / 2.2) / rate)
+        speed = step * SAMPLE_RATE / rate          # (the pitch's ratio)
+        a = 1 - math.exp(-2 * math.pi * min(0.45 * SAMPLE_RATE / max(1.0, speed), rate / 2.2) / rate)
         for _ in range(2):
             y = 0.0
             for i, v in enumerate(data):
