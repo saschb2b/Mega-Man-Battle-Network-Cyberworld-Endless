@@ -831,22 +831,34 @@ landmark, the sign or the board says what it is; the board lists who's
 here, the last trade and NetBattle, the trade offers up and this week's
 DeepNet.
 
-- **L** has MegaMan say a phrase over his head, or do an emote: he
-  performs it himself, with BN6's own poses and sounds, the same on
-  every screen. Phrases and emotes come from fixed lists: there is no
-  free text, and no one can type at you. **Hold L and press a direction**
-  for one of four at once: up Wave, right Cheer, down Bow, left Laugh
-  (`network.ini`'s `favourites=0,1,5,2`, the emotes in L's list counted
-  from 0, changes them). A Wave, Cheer or Bow facing another MegaMan is
-  aimed at him; a hand blinks over the name of a player who waved at
-  you, and your next one answers him: within five seconds, a "!!" and a
-  sparkle between you on every screen. Emote together with other
-  players round the landmark or on the stage, and the Square cheers,
-  the louder the more join. L's **More** holds **Look around**, where
-  MegaMan says which way Trade Central and the Arena are from where you
-  stand (both off the plaza, Trade Central to its upper left and the
-  Arena to its lower left), and **Quiet please**, which hides everyone
-  else's phrases and emotes until **Let them talk**.
+- **SELECT** opens the emote strip: MegaMan's twelve emotes in two
+  rows, the one under the cursor played by MegaMan in the window above
+  with its name and whom it goes to ("AT ALPHA" when you face him). **A**
+  sends it and closes the strip; **L** and **R** turn to the phrases and
+  back; **B** or SELECT closes it. MegaMan performs each emote himself,
+  with BN6's own poses and sounds, the same on every screen; a phrase
+  goes over his head. Phrases and emotes come from fixed lists: there is
+  no free text, and no one can type at you. The strip opens on the last
+  one you sent, so SELECT, A sends it again. On a phone, SELECT's touch
+  button opens it, and a tap on an emote or a phrase sends it; a tap on
+  the window closes it.
+- **Hold L and press a direction** for one of four favourites at once:
+  up Wave, right Cheer, down Bow, left Laugh at first. To change one,
+  **hold SELECT on the strip and press a direction**: the emote or phrase
+  under the cursor goes on L and that direction (kept in `network.ini`).
+  A Wave, Cheer or Bow facing another MegaMan is aimed at him; a hand
+  blinks over the name of a player who waved at you, and your next one
+  answers him: within five seconds, a "!!" and a sparkle between you on
+  every screen. Emote together with other players round the landmark or
+  on the stage, and the Square cheers, the louder the more join.
+- **On a second screen** (the 3DS's bottom screen, an Android handheld's
+  lower one), every emote and phrase is a button: one tap sends it. Its
+  **NETPASS** tab shows your NetPass.
+- **L** tapped holds **Look around**, where MegaMan says which way Trade
+  Central and the Arena are from where you stand (both off the plaza,
+  Trade Central to its upper left and the Arena to its lower left), and
+  **Quiet please**, which hides everyone else's phrases and emotes until
+  **Let them talk**.
 - **A** facing another player's MegaMan shows his card (HP, act and
   layer, Crosses and Souls), and lets you ask him for a NetBattle, wave,
   mute or block him. Blocked players are gone from your Square.

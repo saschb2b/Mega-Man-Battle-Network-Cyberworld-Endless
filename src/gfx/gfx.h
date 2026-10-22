@@ -91,6 +91,9 @@ void fill_rects(const SDL_Rect *r, int n, SDL_Color c);
  * until px is NULL. Nothing else draws there. (The 3DS's bottom screen: the renderer's calls
  * and reading its pixels back took more than a frame there, issue #9.) */
 void gfx_draw_into(uint32_t *px, int w, int h, int pitch);
+/* Sprites drawn from here kept inside `r` (the canvas's, or the memory's
+ * while drawing into it), NULL for none again: an icon's cell */
+void gfx_clip(const SDL_Rect *r);
 
 static inline SDL_Color rgba(int r, int g, int b, int a) { SDL_Color c = { (Uint8)r, (Uint8)g, (Uint8)b, (Uint8)a }; return c; }
 #define WHITE rgba(255, 255, 255, 255)

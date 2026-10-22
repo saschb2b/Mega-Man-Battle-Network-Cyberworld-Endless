@@ -89,6 +89,8 @@ SDL_Rect second_frame(int w, int h, const char *title, int slide) {
 	return body;
 }
 
+SDL_Rect second_frame_rest_body(int w, int h) { return (SDL_Rect){ 4, HEAD_H + 6, w - 8, h - HEAD_H - 10 }; }
+
 SDL_Rect second_frame_rest(int w, int h, const char *title, const char *where) {
 	SDL_Rect body = frame(w, h, title, 0, HEAD_H + 6);
 	place(w, where, "");

@@ -29,7 +29,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24], trade[40], reconnect[16]; int place[3], flags[3], cross, folder, netpass, emote; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], status[48], xrecord[32], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote; unsigned hold; bool placed, flagged, battle, sig, held, onehit; } InputStep;
 static InputStep script[1024];
 static int script_len, script_pos, script_left;
 
@@ -73,8 +73,10 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "trade ", 6)) snprintf(s->trade, sizeof s->trade, "%s", tok + 6);
 	/* (the wait for a dropped link over the game: reconnect_preview.c) */
 	else if (!strncmp(tok, "reconnect ", 10)) snprintf(s->reconnect, sizeof s->reconnect, "%s", tok + 10);
-	/* (an emote sent in the Net Square, as L's chat sends it: online_chat_emote) */
+	/* (an emote sent in the Net Square, as the strip sends it: online_chat_emote) */
 	else if (!strncmp(tok, "emote ", 6)) s->emote = 1 + (int)strtol(tok + 6, NULL, 0);
+	/* (a tap on the second screen at its pixel, --second-size's or the 3DS's: the Square's palette) */
+	else if (!strncmp(tok, "stap ", 5)) s->stap[2] = sscanf(tok + 5, "%d %d", &s->stap[0], &s->stap[1]) == 2;
 	else return false;
 	return true;
 }
@@ -82,7 +84,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->status[0] || s->xrecord[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote;
+		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2];
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -198,6 +200,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->trade[0]) trade_preview(s->trade);
 	if (s->reconnect[0]) reconnect_preview(s->reconnect);
 	if (s->emote) online_chat_emote(s->emote - 1);
+	if (s->stap[2]) platform_second_tap_at(s->stap[0], s->stap[1], 0, 0);
 }
 
 /* The steps of no frames at the script's position: pictures, states. */

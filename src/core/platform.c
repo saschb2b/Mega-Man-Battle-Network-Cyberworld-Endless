@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "platform_phone.h"
 #include "platform_second.h"
 #include "present_3ds.h"
 
@@ -148,7 +149,7 @@ static int safe_top(void) {
 
 /* A screen of its own (platform_own_taps): its taps and the mouse's, files
  * dropped on the window, and its own back */
-static bool own_taps, own_wide;
+static bool own_taps, own_wide, picture_taps;
 static int tap_x = -1, tap_y = -1, point_x = -1, point_y = -1;
 static char dropped[1024];
 #ifndef __EMSCRIPTEN__
@@ -294,6 +295,24 @@ void platform_own_taps(bool on) {
 }
 
 void platform_own_wide(bool on) { own_wide = on; }
+
+void platform_picture_taps(bool on) {
+	picture_taps = on;
+	if (!own_taps) tap_x = tap_y = point_x = point_y = -1;
+}
+
+/* A finger on none of the touch controls while picture_taps is set (the
+ * emote strip): its taps the screen's, as a screen of its own takes them */
+static bool picture_finger(uint32_t type, SDL_FingerID id, float x, float y) {
+	static SDL_FingerID held;
+	static bool holding;
+	if (!picture_taps) return holding = false;
+	if (type == SDL_FINGERDOWN && !holding && touch_shown() && !touch_takes(type, id, x, y)) { held = id; holding = true; }
+	if (!holding || held != id) return false;
+	if (type == SDL_FINGERUP) holding = false;
+	return true;
+}
+
 bool platform_tap(int *x, int *y) {
 	if (tap_x < 0) return false;
 	*x = tap_x;
@@ -349,7 +368,7 @@ void platform_safe_edges(int *top, int *left, int *bottom, int *right) {
 /* The mouse over a screen of its own (a finger's own mouse aside): where
  * it is, and where its left button let go */
 static void mouse(const SDL_Event *e) {
-	if (!own_taps) return;
+	if (!own_taps && !picture_taps) return;
 	bool motion = e->type == SDL_MOUSEMOTION;
 	if ((motion ? e->motion.which : e->button.which) == SDL_TOUCH_MOUSEID) return;
 	if (!motion && e->button.button != SDL_BUTTON_LEFT) return;
@@ -362,9 +381,9 @@ static void mouse(const SDL_Event *e) {
 }
 
 void platform_finger(uint32_t type, SDL_FingerID id, float x, float y) {
-	/* (a screen that takes its own taps: where on the canvas a finger is,
-	 * and where it lifted) */
-	if (own_taps) {
+	/* (a screen that takes its own taps, or the picture's: where on the
+	 * canvas a finger is, and where it lifted) */
+	if (own_taps || picture_finger(type, id, x, y)) {
 		if (type == SDL_FINGERUP) {
 			canvas_point(x, y, &tap_x, &tap_y);
 			point_x = point_y = -1;
@@ -393,39 +412,6 @@ static void finger(const SDL_Event *e) {
 	platform_finger(e->type, e->tfinger.fingerId, e->tfinger.x * (float)P.screen_w, e->tfinger.y * (float)P.screen_h);
 }
 #endif
-
-/* A phone's own, before SDL starts: Android's and the iPhone's hints. */
-static void phone_hints(void) {
-#ifdef __ANDROID__
-	/* a phone turns (the touch controls go under the picture or beside it),
-	 * and Back is Escape (the quit prompt), not the end of the app */
-	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
-	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
-	/* (a phone's tilt is no controller) */
-	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
-#endif
-#ifdef CW_IOS
-	/* an iPhone turns as an Android phone does; the home indicator fades
-	 * till a swipe at the screen's foot (two swipes to leave), and the
-	 * phone's tilt is no controller */
-	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait");
-	SDL_SetHint(SDL_HINT_IOS_HIDE_HOME_INDICATOR, "2");
-	SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0");
-#endif
-}
-
-/* ... and its window's flags: SDL locks a window that cannot resize to
- * the way the phone is held at the start, whatever the hint allows; on
- * iOS, the screen's own pixels, not its points */
-static Uint32 phone_window_flags(void) {
-#if defined(__ANDROID__)
-	return SDL_WINDOW_RESIZABLE;
-#elif defined(CW_IOS)
-	return SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
-#else
-	return 0;
-#endif
-}
 
 #ifdef CW_IOS
 /* The app sent to the background and back, as it happens (an event watch,
@@ -495,7 +481,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
 	}
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-	phone_hints();
+	platform_phone_hints();
 #ifdef CW_DESKTOP
 	/* the window's class is the application ID, which the .desktop file names */
 #ifndef _WIN32
@@ -529,7 +515,7 @@ bool platform_init(int force_w, int force_h, bool headless, bool fullscreen) {
 		}
 	}
 	P.fullscreen = fullscreen && !headless;
-	flags |= phone_window_flags();
+	flags |= platform_phone_window_flags();
 	P.window = SDL_CreateWindow("Mega Man Battle Network: Cyberworld Endless",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, flags);
 	if (!P.window) { fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError()); return false; }
@@ -808,6 +794,7 @@ void platform_poll(void) {
 	dropped[0] = 0;
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) poll_event(&e);
+	platform_second_poll();
 	pads_poll();
 	/* (iOS's loop in the background saves the run, then polls: its copy) */
 	if (P.background) mirror_flush();

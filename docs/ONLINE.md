@@ -489,9 +489,9 @@ their talk BN6's talk box from the host (`talk_start`), the Mr.Progs'
 words their own archives in the layer's scratch.
 
 **Talk.** Every exchange is BN6's chat box with its options, three to a
-box (`online_chat.c`, words in `square_words.c`): L for a phrase, an
-emote, or More's look around and the quiet (Emotes, below), L held with a
-direction for a favourite emote, A facing another MegaMan for his card (HP, act and layer,
+box (`online_chat.c`, words in `square_words.c`): L for Look around and
+the quiet (Emotes, below), SELECT for the emote strip and its phrases, L
+held with a direction for a favourite, A facing another MegaMan for his card (HP, act and layer,
 Crosses, Souls) and Battle (where both passes hold the Arena stamp),
 Wave, Mute, Block; R or the pad for home, stepped on as drawn or A on
 it (its zone its middle stretched towards the screen's front, as Lan's
@@ -516,7 +516,8 @@ way on a layer, `way_to`), then each wing past it, or "right here" in
 its own. The wings stand off the plaza the same way in every Square, so
 these words hold for every seed. The greeter's welcome ends on the same
 signpost: "TRADE CENTRAL AND THE ARENA ARE PAST THE STATUE!" (the
-landmark's name). No map: the Square has no SELECT screen of its own.
+landmark's name). No map: SELECT in the Square is the emote strip's
+(Emotes, below), not a map of the plaza.
 Phrases and emotes are fixed lists, never free text; mute and block are
 the player's, kept by the server's public identity of the other.
 
@@ -543,8 +544,9 @@ docs/ROM_DATA.md's Expression rows) and the game-design skill's lens:
   was loosened; the research's pitfall); the Square's answer once a size
   in its ten-second rest; a sound a frame at most, only from a MegaMan in
   view, one's own, or one aimed at one.
-- **Subtract**: no wheel, no new screen; the four favourites on L and a
-  direction, the rest in L's chat as before. **Positive by design**: only
+- **Subtract**: no wheel; the four favourites on L and a direction,
+  the rest on SELECT's strip (One press, below; issue #178 replaced L's
+  pages of two). **Positive by design**: only
   the warm emotes (Wave, Cheer, Bow) can be aimed, so no Laugh lands on a
   player who just lost; an aimed emote repeated past its cap is shown to
   its sender alone; the quiet hides everyone else's. An emote never
@@ -581,12 +583,88 @@ its first frames blank. The leap (0x43, one frame) waits on the NPC
 hop (`22 11 60 DC 21`), not yet run on a puppet.
 
 **One press**: L held and a direction sends a favourite: up Wave, right
-Cheer, down Bow, left Laugh (`network.ini`'s `favourites=0,1,5,2`, the
-emotes' ids, changes them); MegaMan stands while L is down, and L let go
-without a direction opens L's chat as before. L's More holds Look around
-and **Quiet please** (Let them talk to undo it, kept in `network.ini`'s
-`quiet`): everyone else's phrases, poses, sounds, captions and aims
-hidden; their names stay, and per-player Mute stays on the card.
+Cheer, down Bow, left Laugh by default (`network.ini`'s
+`favourites=0,1,5,2`: items, 0-11 the emotes, 12-19 the phrases, as the
+strip keeps them); MegaMan stands while L is down, and L let go without a
+direction opens L's chat: Look around and **Quiet please** (Let them talk
+to undo it, kept in `network.ini`'s `quiet`): everyone else's phrases,
+poses, sounds, captions and aims hidden; their names stay, and
+per-player Mute stays on the card. The first time L's chat opens,
+MegaMan names SELECT ("Lan,press SELECT and I'll strike a pose or say
+hi!", `network.ini`'s `hinted` after): BN6 names a button once, at its
+first use, through whoever needs it (docs/VOICE.md).
+
+**The emote strip** (issue #178, the owner, 22 October 2026: "the emotes
+are invoked via the text bubble still, which seems tedious"; the research
+in `.build/research/social/invoke.md`, its Design C and D chosen). L's
+pages cost 5 to 16 presses an emote (10.5 on average) through 3 to 8
+chat boxes typed out first, a phrase 4 to 11 (7.5), and the one fast
+path, the chord, had no signifier, could not be changed in the game and
+was two fingers of one hand on a phone. The lens (the game-design skill,
+interface): usability, not engageability (the emotes were worth sending,
+they cost too much); the frequency budget upside down; the set-once
+favourites out of reach; the chord a marking menu with its menu missing.
+SELECT, free in the Square, now opens a PET screen of the project's own
+(`emote_strip.c`, drawn in `emote_strip_draw.c`, its PET text in
+`emote_strip_text.c`), laid out as the Custom screen lays out its chips
+(BN6 has no screen for emotes; its Custom screen's art is not copied):
+
+- **The tray** over the bottom of the picture: the twelve emotes as icons
+  in two rows of six, each MegaMan's own pose (`BN6_OW_MEGAMAN`, drawn
+  from the player's ROM as it is drawn, never kept; I'm beat his last
+  frame, down; Got it! a sparkle beside Wave's pose, which it shares), L
+  and R turning to the eight phrases in two columns and back, the four
+  favourites in a cross at its right.
+- **The window** at the top left: the item's name on its plate, MegaMan
+  playing the pose as `square_emote.c` plays it (then standing a moment,
+  again), a phrase in BN6's caption box over his head, and whom it goes
+  to: "AT ALPHA" where an aimed emote would go to the MegaMan faced (or
+  the one who aimed at him first), "TO EVERYONE" else.
+- **A sends and closes.** The send is the moment: the Square's answer to
+  it (the peer's pose, the "!!" of an answer, the phrase over his head)
+  is the reward and is seen whole only with the tray gone; the burst
+  (three, then one a second) makes strings pointless; and a repeat costs
+  two presses, as the strip opens on the item last sent, its page too.
+  B closes, and so does SELECT tapped; the Square goes on behind it and
+  MegaMan stands, as BN6 holds him in a talk. A chat box that comes (the
+  greeter, a challenge) closes it.
+- **SELECT held with a direction** keeps the item under the cursor on L
+  and that direction, the same chord that sends it (Animal Crossing's
+  slot swapped in place, Elden Ring's gesture slots; the marking menu's
+  rehearsal): the favourite's plate flashes, its icon's corner shows its
+  arrow, `network.ini` keeps it. Phrases can be favourites too.
+- **Touch**: SELECT's touch button opens it (the touch controls stay); a
+  tap on an icon or a phrase sends it, on a tab turns the page, on a
+  favourite's plate sends that one, on the window closes it
+  (`platform_picture_taps`: a finger on the picture on none of the
+  controls). Icons are 22 x 28 of the picture's pixels, 132 x 168 on a
+  2340 x 1080 phone.
+
+**The palette** (Design D): on the second screen (the 3DS's bottom one,
+Android's second display) the Square's panel is every emote and phrase
+as a PET button, one tap each (`emote_palette.c`, drawn in
+`src/second/second_palette.c`): the emotes with their poses and names,
+the phrases on plates, the favourites marked with their way of L, the
+tapped one lit (dim where the burst was spent), "AT ALPHA" for the aimed
+ones; its NETPASS tab shows the pass the panel showed before. The 3DS
+reads its touch panel (a stylus let go is a tap where it last was,
+`platform_second_poll`); Android's `SecondScreen` hands a finger let go on
+its picture to the game (`nativeTap`); `stap X Y` taps it in a test
+(docs/DEVTOOLS.md). Monster Hunter 4 Ultimate's touch-screen chat and
+Phantasy Star 0's one-tap shortcuts are the pattern; the top screen stays
+BN6's.
+
+| Presses (a tap one) | Before (L's pages) | The strip | The palette |
+| --- | --- | --- | --- |
+| A favourite (four) | 1 chord | 1 chord | 1 tap |
+| An emote | 5-16, mean 10.5 | 2-6, mean 4.0 | 1 tap |
+| A phrase | 4-11, mean 7.5 | 3-6, mean 4.5 | 1 tap |
+| The last one again | as its first | 2 | 1 tap |
+| On touch | the same, the chord two fingers of one hand | 2 taps an emote, 3 a phrase | 1 tap |
+
+(The strip's counts from the cursor on Wave and on Hello!, as it opens
+the first time: SELECT, the steps on its wrapping grid, A; a phrase adds
+R. No chat box is typed out on the way.)
 
 **Wave and wave back**: an emote that can be aimed, sent facing another
 MegaMan near enough to talk to (the card's Wave too), is aimed at him
@@ -1525,6 +1603,19 @@ are in the history before 433865a8):
   he may walk meanwhile). Emotes earned from a
   run's milestones and chip stickers (Have, Want, Fave) are the issue's
   Later.
+
+- **The strip and the palette, what is left** (issue #178): played
+  headless on the Linux build, three games in one Square on a local
+  server (`.build/strip/harness.py`: the strip's pages, a favourite kept,
+  a phrase and an aimed Wave sent from it, L's chord sending the kept
+  one, a phone's touch flow at 2340 x 1080, the palette tapped at an
+  Android display's 413 x 360 with `stap`, each send seen on the other
+  two games). The 3DS's touch panel and Android's `nativeTap` are built
+  (the 3DS's CIA, the browser's and Windows' builds made), not touched
+  on a device; the stylus's tap is read where it was let go. The
+  release pictures of the Square (`build.py screenshots online-square`,
+  the 0.13.0 cut's `meet` scene) now send through the strip, not yet
+  captured again.
 
 - **A dropped link, what is left** (issue #153): played on the host
   build and in the browser, through a local relay; Android, iOS, Windows

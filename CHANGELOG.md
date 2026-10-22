@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **Emotes and phrases one press away (issue #178).** **SELECT** in the
+  Net Square opens the emote strip, a PET screen laid out as the Custom
+  screen lays out its chips: the twelve emotes as MegaMan's own poses in
+  two rows, the one under the cursor played by MegaMan in a window with
+  its name and whom it goes to ("AT ALPHA"), **A** to send, **L** and
+  **R** to the phrases and back. An emote cost 5 to 16 presses through
+  L's chat boxes (10.5 on average), a phrase 4 to 11; now 2 to 6 (4.0)
+  and 3 to 6 (4.5), the last one again two, with no chat box typed out
+  on the way. **Hold SELECT and press a direction** on the strip to put
+  the emote or phrase under the cursor on L and that direction, which
+  sends it at once as before; phrases can be favourites too. On a phone,
+  SELECT's touch button opens it and a tap sends. On a **second screen**
+  (the 3DS's bottom one, an Android handheld's lower one) every emote and
+  phrase is a button, one tap each, the NetPass a tab beside them. L's
+  chat keeps Look around and Quiet please; MegaMan names SELECT the first
+  time it opens.
+
 - **The Net Square's emotes, performed (issue #176).** An emote is
   MegaMan's own BN6 pose and a sound of BN6's, on every screen alike: a
   hand raised for Wave, both arms up for Cheer, down on one knee for

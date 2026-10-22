@@ -81,7 +81,7 @@ void square_emote_reset(void) {
 	network_prefs_read(g_data_dir, &p);
 	E.quiet = p.quiet != 0;
 	for (int k = 0; k < 4; ++k)
-		E.favourites[k] = p.favourites[k] && p.favourites[k] <= ONLINE_EMOTE_COUNT ? p.favourites[k] - 1 : default_favourites[k];
+		E.favourites[k] = p.favourites[k] && p.favourites[k] <= SQUARE_ITEMS ? p.favourites[k] - 1 : default_favourites[k];
 }
 
 bool square_emote_quiet(void) { return E.quiet; }
@@ -95,6 +95,28 @@ void square_emote_set_quiet(bool on) {
 }
 
 int square_emote_favourite(int way) { return E.favourites[way & 3]; }
+
+bool square_emote_hint_due(void) {
+	NetworkPrefs p;
+	return network_prefs_read(g_data_dir, &p) && !p.hinted;
+}
+
+void square_emote_hinted(void) {
+	NetworkPrefs p;
+	if (!network_prefs_read(g_data_dir, &p)) return;
+	p.hinted = 1;
+	if (!network_prefs_write(g_data_dir, &p)) fprintf(stderr, "online: the strip's hint could not be kept\n");
+}
+
+void square_emote_set_favourite(int way, int item) {
+	if (item < 0 || item >= SQUARE_ITEMS) return;
+	E.favourites[way & 3] = item;
+	NetworkPrefs p;
+	if (!network_prefs_read(g_data_dir, &p)) return;
+	for (int k = 0; k < 4; ++k) p.favourites[k] = (uint8_t)(E.favourites[k] + 1);
+	if (!network_prefs_write(g_data_dir, &p)) fprintf(stderr, "online: the favourites could not be kept\n");
+	if (emu_debug_on()) fprintf(stderr, "online: favourite %d is item %d\n", way & 3, item);
+}
 
 /* a peer of the view by his session, NULL gone (or blocked out of it) */
 static const OnlinePeer *peer_of(const OnlineSnapshot *s, uint32_t id, int *slot) {
@@ -234,6 +256,12 @@ static int pose_anim(const Pose *p, int facing, int into) {
 	return p->anim + (p->four_ways ? (facing & 7) / 2 : 0);
 }
 
+int square_emote_anim(int emote, int facing, int into) {
+	return emote >= 0 && emote < ONLINE_EMOTE_COUNT ? pose_anim(&poses[emote], facing, into) : facing & 7;
+}
+
+int square_emote_frames(int emote) { return emote >= 0 && emote < ONLINE_EMOTE_COUNT ? poses[emote].frames : 0; }
+
 /* each act this frame: a peer's pose over his puppet's walk, MegaMan's own
  * once; a sound a frame at most, from one in view, his own or aimed at him */
 static void perform(const OnlineSnapshot *s, uint32_t now) {
@@ -295,15 +323,24 @@ static bool spend(uint32_t now) {
 	return true;
 }
 
+uint32_t square_emote_aim(int emote, uint32_t facing, uint32_t now) {
+	if (emote < 0 || emote >= ONLINE_EMOTE_COUNT || !(ONLINE_EMOTE_AIMED >> emote & 1)) return 0;
+	uint32_t invited = square_emote_invited(now);
+	return invited ? invited : facing;
+}
+
 bool square_emote_send(int emote, uint32_t facing, uint32_t now) {
 	if (emote < 0 || emote >= ONLINE_EMOTE_COUNT || !spend(now)) return false;
-	bool aims = ONLINE_EMOTE_AIMED >> emote & 1;
-	uint32_t invited = square_emote_invited(now), target = aims ? (invited ? invited : facing) : 0;
+	uint32_t invited = square_emote_invited(now), target = square_emote_aim(emote, facing, now);
 	if (target && target == invited) E.invited = 0;
 	if (emu_debug_on()) fprintf(stderr, "online: emote %d sent%s%s (ticks %u)\n", emote, target ? " aimed" : "", target && target == invited ? ", answering" : "", now);
 	return online_transport_social(1, (uint8_t)emote, target);
 }
 
-bool square_emote_say(int phrase, uint32_t now) {
+static bool say(int phrase, uint32_t now) {
 	return phrase >= 0 && phrase < ONLINE_PHRASE_COUNT && spend(now) && online_transport_social(0, (uint8_t)phrase, 0);
+}
+
+bool square_emote_send_item(int item, uint32_t facing, uint32_t now) {
+	return item < SQUARE_PHRASE ? square_emote_send(item, facing, now) : say(item - SQUARE_PHRASE, now);
 }

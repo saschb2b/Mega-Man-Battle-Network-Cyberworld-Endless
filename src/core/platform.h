@@ -136,6 +136,11 @@ void platform_own_taps(bool on);
  * platform_own_taps(true), put back after platform_own_taps(false). */
 void platform_own_wide(bool on);
 bool platform_tap(int *x, int *y);
+/* A screen over the game that takes taps on the picture while the touch
+ * controls stay (the Net Square's emote strip, src/online/emote_strip.c):
+ * a finger that comes down on the picture, on none of the controls, and a
+ * left click, kept at its canvas pixel for platform_tap as above. */
+void platform_picture_taps(bool on);
 /* ... where the mouse is over it, or a finger on it: its canvas pixel;
  * false where neither is */
 bool platform_pointer(int *x, int *y);
@@ -179,6 +184,13 @@ void platform_second_screen_soon(void);
  * 640 x 480) */
 bool platform_save_second_screen(const char *path);
 void platform_second_shot_size(int w, int h);
+/* A tap on the second screen (the 3DS's bottom one, Android's second
+ * display, or --second-taps), once: its pixel in the w x h picture last
+ * drawn there (issue #178: the Net Square's palette). */
+bool platform_second_tap(int *x, int *y, int *w, int *h);
+/* ... one given (Android's display, a test's), at (x, y) of a w x h
+ * picture (0 x 0: the size --second-shot draws at) */
+void platform_second_tap_at(int x, int y, int w, int h);
 /* Inject buttons for scripted tests; merged with real input. */
 void platform_inject(uint32_t buttons);
 /* Whether a game controller is connected (a PC without one is told its keys). */

@@ -10,6 +10,10 @@
 #include "present_3ds.h"
 #include "second_android.h"
 
+#ifdef __3DS__
+#include <3ds.h>
+#endif
+
 /* (its draws' time for the frame log: platform_second_parts) */
 static uint64_t part_second;
 static int part_seconds;
@@ -97,6 +101,48 @@ bool platform_save_second_screen(const char *path) {
 	bool ok = s && SDL_SaveBMP(s, path) == 0;
 	if (s) SDL_FreeSurface(s);
 	return ok;
+}
+
+/* A tap on the second screen, kept until taken (platform_second_tap):
+ * its pixel and the picture's size, x -1 none */
+static int tap_x = -1, tap_y, tap_w, tap_h;
+
+bool platform_second_tap(int *x, int *y, int *w, int *h) {
+	if (tap_x < 0) return false;
+	*x = tap_x;
+	*y = tap_y;
+	*w = tap_w;
+	*h = tap_h;
+	tap_x = -1;
+	return true;
+}
+
+void platform_second_tap_at(int x, int y, int w, int h) {
+	/* (a test's: the shot's size) */
+	if (w <= 0 || h <= 0) { w = shot_w; h = shot_h; }
+	if (x < 0 || y < 0 || x >= w || y >= h) return;
+	tap_x = x;
+	tap_y = y;
+	tap_w = w;
+	tap_h = h;
+}
+
+void platform_second_poll(void) {
+#if defined(__3DS__)
+	/* (the touch panel as SDL's event pump left it: a stylus let go is a
+	 * tap where it last was, the panel reading 0, 0 once it is up) */
+	static bool down;
+	static int last_x, last_y;
+	touchPosition t;
+	hidTouchRead(&t);
+	bool now = t.px || t.py;
+	if (now) { last_x = t.px; last_y = t.py; }
+	else if (down) platform_second_tap_at(last_x, last_y, SECOND_W, SECOND_H);
+	down = now;
+#elif defined(__ANDROID__)
+	int x, y, w, h;
+	if (second_android_tap(&x, &y, &w, &h)) platform_second_tap_at(x, y, w, h);
+#endif
 }
 
 /* The bottom screen's picture, every tenth frame (the pace MegaMan's mark

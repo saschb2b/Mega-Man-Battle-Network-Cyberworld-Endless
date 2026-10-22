@@ -44,5 +44,7 @@ SDL_Rect second_frame(int w, int h, const char *title, int slide);
 SDL_Rect second_frame_body(int w, int h);
 /* ... without a run: the header with `title` and `where`, no strip */
 SDL_Rect second_frame_rest(int w, int h, const char *title, const char *where);
+/* ... its body alone, not drawn (where a panel's taps land) */
+SDL_Rect second_frame_rest_body(int w, int h);
 
 #endif

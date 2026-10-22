@@ -45,6 +45,10 @@ static void preferences(void) {
 	snprintf(before.name, sizeof before.name, "Navi_42");
 	snprintf(before.servers[1], NETWORK_URL, "ws://localhost:8777/presence");
 	before.count = 2; before.selected = 1; before.consent = 2;
+	/* (L's favourites as the strip keeps them, phrases among them (items 12-19), and its hint said: issue #178) */
+	before.hinted = 1;
+	const uint8_t favourites[4] = { 1 + 12, 1 + 1, 1 + 19, 1 + 0 };
+	memcpy(before.favourites, favourites, sizeof favourites);
 	CHECK(network_prefs_write(directory, &before));
 	CHECK(network_prefs_read(directory, &after));
 	CHECK(!memcmp(&before, &after, sizeof before));

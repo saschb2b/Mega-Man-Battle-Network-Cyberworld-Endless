@@ -19,9 +19,10 @@ typedef struct {
 	unsigned count, selected, consent;
 	unsigned named;   /* the player chose the name (at the gate's keeper) */
 	unsigned quiet;   /* everyone else's phrases and emotes hidden in the Square (square_emote.h) */
-	/* L held with up, right, down or left: the emote sent, each 1 + its id
-	 * (0 the default; square_emote.c) */
+	/* L held with up, right, down or left: what is sent, each 1 + its item
+	 * (0-11 an emote, 12-19 a phrase; 0 the default: square_emote.c) */
 	uint8_t favourites[4];
+	unsigned hinted;  /* MegaMan named SELECT's strip in L's chat once (emote_strip.h) */
 } NetworkPrefs;
 
 bool network_name_valid(const char *name);

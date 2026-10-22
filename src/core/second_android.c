@@ -19,6 +19,7 @@
 static uint32_t pixels[MAX_W * MAX_H];
 static SDL_atomic_t display;   /* the display's size from Java's thread, w << 16 | h; 0 none */
 static SDL_atomic_t copying;   /* a picture handed to Java, not yet copied */
+static SDL_atomic_t tapped;    /* a tap from Java's thread, 1 + (x << 16 | y); 0 none */
 static int drawn_w, drawn_h;
 static bool dark = true;       /* what Java shows (or will, once its queue runs) is black */
 static int said;               /* the display last logged */
@@ -105,10 +106,21 @@ void second_android_dark(void) {
 	tell_java(false);
 }
 
+bool second_android_tap(int *x, int *y, int *w, int *h) {
+	int t = SDL_AtomicSet(&tapped, 0);
+	if (!t || !drawn_w) return false;
+	*x = (t - 1) >> 16;
+	*y = (t - 1) & 0xFFFF;
+	*w = drawn_w;
+	*h = drawn_h;
+	return true;
+}
+
 /* Java's side (SecondScreen's natives), on its main thread. */
 JNIEXPORT jobject JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativePixels(JNIEnv *env, jclass cls);
 JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativeDisplay(JNIEnv *env, jclass cls, jint w, jint h);
 JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativeCopied(JNIEnv *env, jclass cls);
+JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativeTap(JNIEnv *env, jclass cls, jint x, jint y);
 
 /* the pixels, which Java copies each picture from (the first w * h * 4
  * bytes), once */
@@ -124,5 +136,10 @@ JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_na
 /* the last picture copied: the next may be drawn */
 JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativeCopied(JNIEnv *env, jclass cls) {
 	SDL_AtomicSet(&copying, 0);
+}
+
+/* a finger let go on the display's picture, at its pixel (x, y) */
+JNIEXPORT void JNICALL Java_io_github_saschb2b_cyberworldendless_SecondScreen_nativeTap(JNIEnv *env, jclass cls, jint x, jint y) {
+	if (x >= 0 && y >= 0 && x < MAX_W && y < MAX_H) SDL_AtomicSet(&tapped, 1 + (int)(x << 16 | y));
 }
 #endif

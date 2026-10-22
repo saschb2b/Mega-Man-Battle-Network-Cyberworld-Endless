@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
-const char *const square_menu_options[SQUARE_MENU_OPTIONS] = { "Say something", "Do an emote", "Look around" };
 const char *const square_keeper_options[2] = { "Next channel", "Last channel" };
 
-const char *square_menu_question(void) { return "What'll we do,Lan?"; }
+const char *square_look_option(void) { return "Look around"; }
+
+const char *square_strip_hint(void) { return "Lan,press SELECT\nand I'll strike a\npose or say hi!"; }
 
 const char *square_greeter_stamp_words(void) {
 	return "WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!";

@@ -339,6 +339,30 @@
    "comment": "Chaud's words on a duel's end (duel_verdict), with both times as the results screen shows them, into `out` (`size` bytes)",
    "line": 82
   },
+  "emote_strip_text:strip_text_aim": {
+   "header": "whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not",
+   "line": 13
+  },
+  "emote_strip_text:strip_text_favourites": {
+   "line": 8
+  },
+  "emote_strip_text:strip_text_keep": {
+   "line": 9
+  },
+  "emote_strip_text:strip_text_kept": {
+   "header": "a favourite just kept: \"ON L+UP\" for way 0-3",
+   "line": 20
+  },
+  "emote_strip_text:strip_text_keys": {
+   "header": "the keys' hints: the strip's, the favourites' box's, the palette's",
+   "line": 7
+  },
+  "emote_strip_text:strip_text_on_l": {
+   "line": 11
+  },
+  "emote_strip_text:strip_text_tap": {
+   "line": 10
+  },
   "gate_words:gate_end_words": {
    "header": "How a visit ended (online_visit.h), said at the gate after it, and whose face says it (FACE_*); NULL nothing to say.",
    "line": 82
@@ -1268,49 +1292,49 @@
   },
   "square_words:square_blocked_words": {
    "header": "... after a block.",
-   "line": 71
+   "line": 72
   },
   "square_words:square_card_facts": {
    "header": "... the card's facts alone, in pages (HP, act and layer, Crosses, Souls; never the folder): empty where no card has come",
-   "line": 36
+   "line": 37
   },
   "square_words:square_greeter_stamp_words": {
    "header": "The greeter's word before he stamps a NetPass just come full (the stamp moment, netpass_screen.h)",
-   "line": 11
+   "line": 12
   },
   "square_words:square_home_question": {
    "header": "R, or the pad home: MegaMan's question.",
-   "line": 21
+   "line": 22
   },
   "square_words:square_keeper_moving": {
    "header": "... a channel's move asked for.",
-   "line": 84
+   "line": 85
   },
   "square_words:square_keeper_options": {
-   "line": 7
+   "line": 6
   },
   "square_words:square_keeper_words": {
    "header": "The channel keeper: the channel MegaMan is in of `channels`, how many Navis stand in it, his question and his two options.",
-   "line": 77
+   "line": 78
   },
-  "square_words:square_menu_options": {
-   "line": 6
-  },
-  "square_words:square_menu_question": {
-   "header": "L: MegaMan's question and its three ways (say, emote, look around: square_look_words).",
-   "line": 9
+  "square_words:square_look_option": {
+   "header": "L: look around (square_look_words) or the quiet's option; the first time, MegaMan naming SELECT's emotes and phrases (emote_strip.h).",
+   "line": 8
   },
   "square_words:square_more": {
-   "header": "... a page of phrases or emotes goes on with this.",
-   "line": 15
+   "header": "... a box of options goes on with this (a peer's card's).",
+   "line": 16
   },
   "square_words:square_peer_words": {
    "header": "A facing another player's MegaMan: who he is and his card (`card` NULL where it has not come), his NetPass where it is not full (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted` naming the second Unmute.",
-   "line": 55
+   "line": 56
   },
   "square_words:square_quiet_option": {
-   "header": "... More's option to hide everyone else's phrases and emotes, or, where hidden (`quiet`), to show them again (square_emote.h).",
-   "line": 17
+   "header": "... L's option to hide everyone else's phrases and emotes, or, where hidden (`quiet`), to show them again (square_emote.h).",
+   "line": 18
+  },
+  "square_words:square_strip_hint": {
+   "line": 10
   },
   "stands_text:stands_back": {
    "line": 11
@@ -1931,6 +1955,15 @@
    "speaker": "MegaMan",
    "stem": "arena_words"
   },
+  "src/online/emote_strip_text.c": {
+   "comment": "",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 8,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "emote_strip_text"
+  },
   "src/online/netpass_text.c": {
    "comment": "",
    "domain": "The NetPass",
@@ -1980,7 +2013,7 @@
    "comment": "",
    "domain": "Net Square",
    "kind": "speech",
-   "lines": 20,
+   "lines": 18,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "square_words"
@@ -2170,7 +2203,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 1945,
+  "boxes": 1953,
   "domains": {
    "Arena": {
     "files": [
@@ -2299,8 +2332,16 @@
      "src/online/square_words.c"
     ],
     "flagged": 14,
-    "lines": 132,
+    "lines": 130,
     "speech": 103
+   },
+   "Other": {
+    "files": [
+     "src/online/emote_strip_text.c"
+    ],
+    "flagged": 2,
+    "lines": 8,
+    "speech": 8
    },
    "Powers": {
     "files": [
@@ -2419,11 +2460,11 @@
     "speech": 7
    }
   },
-  "flagged": 117,
+  "flagged": 119,
   "flags": {
    "beats": 4,
    "box-words": 4,
-   "button": 3,
+   "button": 5,
    "colon": 31,
    "line-long": 15,
    "long-speech": 51,
@@ -2494,7 +2535,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 699,
+    "boxes": 698,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.54,
@@ -2507,7 +2548,7 @@
      "Let's",
      "A"
     ],
-    "stutters": "1 box in 175",
+    "stutters": "1 box in 174",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2549,7 +2590,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1564,
+  "lines": 1570,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2684,7 +2725,7 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 699,
+    "boxes": 698,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.54,
@@ -2697,7 +2738,7 @@
      "Let's",
      "A"
     ],
-    "stutters": "1 box in 175",
+    "stutters": "1 box in 174",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2796,7 +2837,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1147
+  "speech": 1155
  },
  "version": 1,
  "conversations": [
@@ -3027,18 +3068,18 @@
   {"container":"pet_text:mail_body","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:mail_body","line":432,"lines":["pet_text:mail_body:0"],"speakers":["Dad"],"title":"A guardian's mail","when":"A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled)."},
   {"container":"pet_text:install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_mails.subjects","line":463,"lines":["pet_text:install_mails.subjects:0","pet_text:install_mails.subjects:3"],"speakers":["Screen"],"title":"Install mails: subjects","when":""},
   {"container":"xchips_text:xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc","line":8,"lines":["xchips_text:xchips_text_desc:0","xchips_text:xchips_text_desc:1","xchips_text:xchips_text_desc:2"],"speakers":["Screen"],"title":"Xchips text desc: its description, three lines as the folder's box shows them","when":"Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)"},
-  {"container":"square_words:square_menu_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_menu_options","line":6,"lines":["square_words:square_menu_options:0","square_words:square_menu_options:1","square_words:square_menu_options:2"],"speakers":["MegaMan"],"title":"Square menu options","when":""},
-  {"container":"square_words:square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_options","line":7,"lines":["square_words:square_keeper_options:0","square_words:square_keeper_options:1"],"speakers":["MegaMan"],"title":"Square keeper options","when":""},
-  {"container":"square_words:square_menu_question","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_menu_question","line":9,"lines":["square_words:square_menu_question:0"],"speakers":["MegaMan"],"title":"Square menu question","when":"L: MegaMan's question and its three ways (say, emote, look around: square_look_words)."},
-  {"container":"square_words:square_greeter_stamp_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_greeter_stamp_words","line":12,"lines":["square_words:square_greeter_stamp_words:0"],"speakers":["Mr.Prog"],"title":"The greeter's word before he stamps a NetPass just come full","when":"The greeter's word before he stamps a NetPass just come full (the stamp moment, netpass_screen.h)"},
-  {"container":"square_words:square_more","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_more","line":15,"lines":["square_words:square_more:0"],"speakers":["MegaMan"],"title":"Square more","when":"... a page of phrases or emotes goes on with this."},
-  {"container":"square_words:square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_quiet_option","line":17,"lines":["square_words:square_quiet_option:0","square_words:square_quiet_option:1"],"speakers":["MegaMan"],"title":"Square quiet option","when":"... More's option to hide everyone else's phrases and emotes, or, where hidden (`quiet`), to show them again (square_emote.h)."},
-  {"container":"square_words:square_home_question","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_home_question","line":21,"lines":["square_words:square_home_question:0"],"speakers":["MegaMan"],"title":"R, or the pad home","when":"R, or the pad home: MegaMan's question."},
-  {"container":"square_words:square_card_facts","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_card_facts","line":42,"lines":["square_words:square_card_facts:0","square_words:square_card_facts:1","square_words:square_card_facts:2"],"speakers":["MegaMan"],"title":"Square card facts","when":"... the card's facts alone, in pages (HP, act and layer, Crosses, Souls; never the folder): empty where no card has come"},
-  {"container":"square_words:square_peer_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_peer_words","line":57,"lines":["square_words:square_peer_words:0","square_words:square_peer_words:1"],"speakers":["MegaMan"],"title":"A facing another player's MegaMan","when":"A facing another player's MegaMan: who he is and his card (`card` NULL where it has not come), his NetPass where it is not full (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted` naming the second Unmute."},
-  {"container":"square_words:square_blocked_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_blocked_words","line":73,"lines":["square_words:square_blocked_words:0"],"speakers":["MegaMan"],"title":"Square blocked words","when":"... after a block."},
-  {"container":"square_words:square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_words","line":79,"lines":["square_words:square_keeper_words:0","square_words:square_keeper_words:1"],"speakers":["Mr.Prog"],"title":"The channel keeper","when":"The channel keeper: the channel MegaMan is in of `channels`, how many Navis stand in it, his question and his two options."},
-  {"container":"square_words:square_keeper_moving","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_moving","line":84,"lines":["square_words:square_keeper_moving:0"],"speakers":["Mr.Prog"],"title":"Square keeper moving","when":"... a channel's move asked for."},
+  {"container":"square_words:square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_options","line":6,"lines":["square_words:square_keeper_options:0","square_words:square_keeper_options:1"],"speakers":["MegaMan"],"title":"Square keeper options","when":""},
+  {"container":"square_words:square_look_option","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_look_option","line":8,"lines":["square_words:square_look_option:0"],"speakers":["MegaMan"],"title":"Square look option","when":"L: look around (square_look_words) or the quiet's option; the first time, MegaMan naming SELECT's emotes and phrases (emote_strip.h)."},
+  {"container":"square_words:square_strip_hint","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_strip_hint","line":10,"lines":["square_words:square_strip_hint:0"],"speakers":["MegaMan"],"title":"Square strip hint","when":""},
+  {"container":"square_words:square_greeter_stamp_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_greeter_stamp_words","line":13,"lines":["square_words:square_greeter_stamp_words:0"],"speakers":["Mr.Prog"],"title":"The greeter's word before he stamps a NetPass just come full","when":"The greeter's word before he stamps a NetPass just come full (the stamp moment, netpass_screen.h)"},
+  {"container":"square_words:square_more","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_more","line":16,"lines":["square_words:square_more:0"],"speakers":["MegaMan"],"title":"Square more","when":"... a box of options goes on with this (a peer's card's)."},
+  {"container":"square_words:square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_quiet_option","line":18,"lines":["square_words:square_quiet_option:0","square_words:square_quiet_option:1"],"speakers":["MegaMan"],"title":"Square quiet option","when":"... L's option to hide everyone else's phrases and emotes, or, where hidden (`quiet`), to show them again (square_emote.h)."},
+  {"container":"square_words:square_home_question","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_home_question","line":22,"lines":["square_words:square_home_question:0"],"speakers":["MegaMan"],"title":"R, or the pad home","when":"R, or the pad home: MegaMan's question."},
+  {"container":"square_words:square_card_facts","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_card_facts","line":43,"lines":["square_words:square_card_facts:0","square_words:square_card_facts:1","square_words:square_card_facts:2"],"speakers":["MegaMan"],"title":"Square card facts","when":"... the card's facts alone, in pages (HP, act and layer, Crosses, Souls; never the folder): empty where no card has come"},
+  {"container":"square_words:square_peer_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_peer_words","line":58,"lines":["square_words:square_peer_words:0","square_words:square_peer_words:1"],"speakers":["MegaMan"],"title":"A facing another player's MegaMan","when":"A facing another player's MegaMan: who he is and his card (`card` NULL where it has not come), his NetPass where it is not full (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted` naming the second Unmute."},
+  {"container":"square_words:square_blocked_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_blocked_words","line":74,"lines":["square_words:square_blocked_words:0"],"speakers":["MegaMan"],"title":"Square blocked words","when":"... after a block."},
+  {"container":"square_words:square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_words","line":80,"lines":["square_words:square_keeper_words:0","square_words:square_keeper_words:1"],"speakers":["Mr.Prog"],"title":"The channel keeper","when":"The channel keeper: the channel MegaMan is in of `channels`, how many Navis stand in it, his question and his two options."},
+  {"container":"square_words:square_keeper_moving","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_moving","line":85,"lines":["square_words:square_keeper_moving:0"],"speakers":["Mr.Prog"],"title":"Square keeper moving","when":"... a channel's move asked for."},
   {"container":"square_life_words:landmark_name","domain":"Net Square","file":"src/online/square_life_words.c","id":"square_life_words:landmark_name","line":12,"lines":["square_life_words:landmark_name:0"],"speakers":["Bystander"],"title":"Landmark name","when":""},
   {"container":"square_life_words:square_greeter_words","domain":"Net Square","file":"src/online/square_life_words.c","id":"square_life_words:square_greeter_words","line":27,"lines":["square_life_words:square_greeter_words:0","square_life_words:square_greeter_words:1","square_life_words:square_greeter_words:2","square_life_words:square_greeter_words:3","square_life_words:square_greeter_words:4"],"speakers":["Mr.Prog"],"title":"The greeter in the log-in plaza, and his word over his head as a Navi logs in","when":"The greeter in the log-in plaza, and his word over his head as a Navi logs in (`in`) or out."},
   {"container":"square_life_words:square_greeter_bark","domain":"Net Square","file":"src/online/square_life_words.c","id":"square_life_words:square_greeter_bark","line":42,"lines":["square_life_words:square_greeter_bark:0","square_life_words:square_greeter_bark:1"],"speakers":["Mr.Prog"],"title":"Square greeter bark","when":""},
@@ -3268,6 +3309,13 @@
   {"container":"analytics_text:analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_later","line":25,"lines":["analytics_text:analytics_later:0"],"speakers":["Screen"],"title":"Under the question","when":"Under the question: where it is changed later, `select` the button that opens it on the device used last (\"SELECT\", \"R\", \"Minus\")"},
   {"container":"analytics_text:analytics_keys","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_keys","line":28,"lines":["analytics_text:analytics_keys:0"],"speakers":["Screen"],"title":"The keys' line under it","when":"The keys' line under it: \"J: choose K: no\" at the first start, where B answers no; \"K: back\" asked again, where B leaves the answer be"},
   {"container":"analytics_text:analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_setting_note","line":32,"lines":["analytics_text:analytics_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the statistics line","when":"settings.ini's lines before the statistics line: what it is"},
+  {"container":"emote_strip_text:strip_text_keys","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keys","line":7,"lines":["emote_strip_text:strip_text_keys:0"],"speakers":["Mr.Prog"],"title":"The keys' hints","when":"the keys' hints: the strip's, the favourites' box's, the palette's"},
+  {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":8,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"Strip text favourites","when":""},
+  {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":9,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
+  {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":10,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
+  {"container":"emote_strip_text:strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_on_l","line":11,"lines":["emote_strip_text:strip_text_on_l:0"],"speakers":["Mr.Prog"],"title":"Strip text on l","when":""},
+  {"container":"emote_strip_text:strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_aim","line":15,"lines":["emote_strip_text:strip_text_aim:0","emote_strip_text:strip_text_aim:1"],"speakers":["MegaMan","Mr.Prog"],"title":"Whom it goes to","when":"whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not"},
+  {"container":"emote_strip_text:strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_kept","line":23,"lines":["emote_strip_text:strip_text_kept:0"],"speakers":["MegaMan"],"title":"A favourite just kept","when":"a favourite just kept: \"ON L+UP\" for way 0-3"},
   {"container":"netpass_text:netpass_level_square","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_square","line":6,"lines":["netpass_text:netpass_level_square:0"],"speakers":["Screen"],"title":"The pass's level","when":"the pass's level: the Square's alone, or every stamp"},
   {"container":"netpass_text:netpass_level_full","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_full","line":7,"lines":["netpass_text:netpass_level_full:0"],"speakers":["Screen"],"title":"Netpass level full","when":""},
   {"container":"netpass_text:netpass_count_words","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_count_words","line":15,"lines":["netpass_text:netpass_count_words:0"],"speakers":["Screen"],"title":"\"1 of 4\" into out","when":"\"1 of 4\" into out"},
@@ -4432,6 +4480,14 @@
   {"boxes":[{"pages":[["Phew... Both teams","went down at once!"]],"speaker":"MegaMan","text":"Phew... Both teams\nwent down at once!"}],"container":"arena_team_over_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_team_over_words:case4.0","kind":"speech","line":161,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Phew... Both teams\nwent down at once!","text_hash":"3a3a10a3c9de"},
   {"boxes":[{"pages":[["Whoa! The Team","NetBattle broke off!"]],"speaker":"MegaMan","text":"Whoa! The Team\nNetBattle broke off!"}],"container":"arena_team_over_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_team_over_words:casedefault.0","kind":"speech","line":162,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The Team\nNetBattle broke off!","text_hash":"04bb0d20582a"},
   {"boxes":[{"pages":[["Huh? Our PETs don't","match..."]],"speaker":"MegaMan","text":"Huh? Our PETs don't\nmatch..."},{"pages":[["Lan,let's reboot","the PET and try","again!"]],"speaker":"MegaMan","text":"Lan,let's reboot\nthe PET and try\nagain!"}],"container":"arena_installs_apart_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_installs_apart_words:0","kind":"speech","line":167,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? Our PETs don't\nmatch...|Lan,let's reboot\nthe PET and try\nagain!","text_hash":"77683d422025"},
+  {"boxes":[{"pages":[["A SEND B CLOSE"]],"speaker":"Mr.Prog","text":"A SEND  B CLOSE"}],"container":"strip_text_keys","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keys:0","kind":"speech","line":7,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A SEND  B CLOSE","text_hash":"7a44b775c920"},
+  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L +"]],"speaker":"MegaMan","text":"HOLD L +"}],"container":"strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_favourites:0","kind":"speech","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"HOLD L +","text_hash":"e2b3110f410a"},
+  {"boxes":[{"pages":[["SELECT+ARROW KEEPS"]],"speaker":"Mr.Prog","text":"SELECT+ARROW KEEPS"}],"container":"strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keep:0","kind":"speech","line":9,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SELECT+ARROW KEEPS","text_hash":"2b84ab432dd7"},
+  {"boxes":[{"pages":[["TAP TO SEND"]],"speaker":"Mr.Prog","text":"TAP TO SEND"}],"container":"strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_tap:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TAP TO SEND","text_hash":"8de75226e6e2"},
+  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L + THAT WAY"]],"speaker":"Mr.Prog","text":"HOLD L + THAT WAY"}],"container":"strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_on_l:0","kind":"speech","line":11,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HOLD L + THAT WAY","text_hash":"f790e2703e06"},
+  {"boxes":[{"pages":[["AT {name}"]],"speaker":"MegaMan","text":"AT {name}"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:0","kind":"speech","line":15,"placeholders":[{"name":"name","spec":"%.16s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"AT {name}","text_hash":"aea86039a73f"},
+  {"boxes":[{"pages":[["TO EVERYONE"]],"speaker":"Mr.Prog","text":"TO EVERYONE"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:1","kind":"speech","line":16,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TO EVERYONE","text_hash":"fadc62efdb48"},
+  {"boxes":[{"pages":[["ON L+{ways}"]],"speaker":"MegaMan","text":"ON L+{ways}"}],"container":"strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_kept:0","kind":"speech","line":23,"placeholders":[{"name":"ways","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"ON L+{ways}","text_hash":"2f344a7afada"},
   {"boxes":[{"pages":[["Square pass"]],"speaker":"Screen","text":"Square pass"}],"container":"netpass_level_square","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_level_square:0","kind":"screen","line":6,"speaker":"Screen","speakers":["Screen"],"text":"Square pass","text_hash":"9092aae663b8"},
   {"boxes":[{"pages":[["Full pass"]],"speaker":"Screen","text":"Full pass"}],"container":"netpass_level_full","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_level_full:0","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Full pass","text_hash":"b7a05608a9ed"},
   {"boxes":[{"pages":[["{held} of {all}"]],"speaker":"Screen","text":"{held} of {all}"}],"container":"netpass_count_words","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_count_words:0","kind":"screen","line":15,"placeholders":[{"name":"held","spec":"%d"},{"name":"all","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"{held} of {all}","text_hash":"4f396358cbb4"},
@@ -4552,26 +4608,24 @@
   {"boxes":[{"pages":[[">No dives yet.","Be the first!"]],"speaker":"Narration","text":">No dives yet.\nBe the first!"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:1","kind":"speech","line":75,"speaker":"Narration","speakers":["Narration"],"text":"|>No dives yet.\nBe the first!","text_hash":"f62c5326d72f"},
   {"boxes":[{"pages":[[">Your best is","layer {depth},#{place}!"]],"speaker":"Narration","text":">Your best is\nlayer {depth},#{place}!"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:2","kind":"speech","line":80,"placeholders":[{"name":"depth","spec":"%u"},{"name":"place","spec":"%d"}],"speaker":"Narration","speakers":["Narration"],"text":"|>Your best is\nlayer {depth},#{place}!","text_hash":"e3150710670f"},
   {"boxes":[{"pages":[[">Last week's best"]],"speaker":"Narration","text":">Last week's best"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"fragment":true,"id":"square_week_words:square_week_board:3","kind":"speech","line":82,"speaker":"Narration","speakers":["Narration"],"text":"|>Last week's best","text_hash":"ece935dcfea9"},
-  {"boxes":[{"pages":[["Say something"]],"speaker":"MegaMan","text":"Say something"}],"container":"square_menu_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Say something","text_hash":"9b19e8713ee8"},
-  {"boxes":[{"pages":[["Do an emote"]],"speaker":"MegaMan","text":"Do an emote"}],"container":"square_menu_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Do an emote","text_hash":"3822e4efb2f4"},
-  {"boxes":[{"pages":[["Look around"]],"speaker":"MegaMan","text":"Look around"}],"container":"square_menu_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_options:2","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look around","text_hash":"6f72d2c8eec5"},
-  {"boxes":[{"pages":[["Next channel"]],"speaker":"MegaMan","text":"Next channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:0","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next channel","text_hash":"68b4bd365ca5"},
-  {"boxes":[{"pages":[["Last channel"]],"speaker":"MegaMan","text":"Last channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:1","kind":"screen","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Last channel","text_hash":"7eb9828f3600"},
-  {"boxes":[{"pages":[["What'll we do,Lan?"]],"speaker":"MegaMan","text":"What'll we do,Lan?"}],"container":"square_menu_question","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_menu_question:0","kind":"speech","line":9,"speaker":"MegaMan","speakers":["MegaMan"],"text":"What'll we do,Lan?","text_hash":"baeb6346a966"},
-  {"boxes":[{"pages":[["WHOA! YOUR NETPASS","HAS ROOM FOR EVERY","STAMP NOW!"]],"speaker":"Mr.Prog","text":"WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!"},{"pages":[["HOLD STILL!","STAMP,STAMP,STAMP!"]],"speaker":"Mr.Prog","text":"HOLD STILL!\nSTAMP,STAMP,STAMP!"}],"container":"square_greeter_stamp_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_greeter_stamp_words:0","kind":"speech","line":12,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!","text_hash":"73255ba6e187"},
-  {"boxes":[{"pages":[["More..."]],"speaker":"MegaMan","text":"More..."}],"container":"square_more","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_more:0","kind":"speech","line":15,"speaker":"MegaMan","speakers":["MegaMan"],"text":"More...","text_hash":"3c25ce154a91"},
-  {"boxes":[{"pages":[["Let them talk"]],"speaker":"MegaMan","text":"Let them talk"}],"container":"square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_quiet_option:0","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let them talk","text_hash":"a13efeaadd21"},
-  {"boxes":[{"pages":[["Quiet please"]],"speaker":"MegaMan","text":"Quiet please"}],"container":"square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_quiet_option:1","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Quiet please","text_hash":"5485aa151269"},
-  {"boxes":[{"pages":[["Head home,Lan?"]],"speaker":"MegaMan","text":"Head home,Lan?\n"}],"container":"square_home_question","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_home_question:0","kind":"speech","line":21,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Head home,Lan?\n","text_hash":"bbfa1e8bfa91"},
-  {"boxes":[{"pages":[["HP {hp} of {max_hp}.","Act {act},layer {depth}!"]],"speaker":"MegaMan","text":"HP {hp} of {max_hp}.\nAct {act},layer {depth}!"}],"container":"square_card_facts","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_card_facts:0","kind":"speech","line":42,"placeholders":[{"name":"hp","spec":"%u"},{"name":"max_hp","spec":"%u"},{"name":"act","spec":"%u"},{"name":"depth","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"HP {hp} of {max_hp}.\nAct {act},layer {depth}!","text_hash":"f4c6022ae5e3"},
-  {"boxes":[{"flags":[{"at":"Whoa! He has {list}","code":"line-long"}],"pages":[["Whoa! He has","{list}","Cross!"]],"speaker":"MegaMan","text":"Whoa! He has {list}\nCross!"}],"container":"square_card_facts","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_card_facts:1","kind":"speech","line":46,"placeholders":[{"name":"list","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|Whoa! He has {list}\nCross!","text_hash":"b9e5fde468d8"},
-  {"boxes":[{"pages":[["And {list}Soul!"]],"speaker":"MegaMan","text":"And {list}Soul!"}],"container":"square_card_facts","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_card_facts:2","kind":"speech","line":50,"placeholders":[{"name":"list","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|And {list}Soul!","text_hash":"4c0d74243d7e"},
-  {"boxes":[{"pages":[["That's {name}'s","MegaMan!"]],"speaker":"MegaMan","text":"That's {name}'s\nMegaMan!"}],"container":"square_peer_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_peer_words:0","kind":"speech","line":57,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"That's {name}'s\nMegaMan!","text_hash":"1832ca11df0e"},
-  {"boxes":[{"pages":[["His NetPass has","just the Square","stamp."]],"speaker":"MegaMan","text":"His NetPass has\njust the Square\nstamp."}],"container":"square_peer_words","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_peer_words:1","kind":"speech","line":62,"note":"(why Battle and trades are not offered with him: his NetPass, in stamps)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|His NetPass has\njust the Square\nstamp.","text_hash":"998b3813ac06"},
-  {"boxes":[{"pages":[["OK. We won't see","{name} again."]],"speaker":"MegaMan","text":"OK. We won't see\n{name} again."}],"container":"square_blocked_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_blocked_words:0","kind":"speech","line":73,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"OK. We won't see\n{name} again.","text_hash":"7611f0062ce3"},
-  {"boxes":[{"pages":[["WELCOME TO THE","NET SQUARE!"]],"speaker":"Mr.Prog","text":"WELCOME TO THE\nNET SQUARE!"},{"flags":[{"at":"OF {channels}. ONE NAVI HERE!","code":"line-long"}],"pages":[["THIS IS CHANNEL {channel}","OF {channels}. ONE NAVI","HERE!"]],"speaker":"Mr.Prog","text":"THIS IS CHANNEL {channel}\nOF {channels}. ONE NAVI HERE!"}],"container":"square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_keeper_words:0","kind":"speech","line":79,"placeholders":[{"name":"channel","spec":"%u"},{"name":"channels","spec":"%u"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO THE\nNET SQUARE!|THIS IS CHANNEL {channel}\nOF {channels}. ONE NAVI HERE!","text_hash":"0565ab3041a2"},
-  {"boxes":[{"pages":[["WELCOME TO THE","NET SQUARE!"]],"speaker":"Mr.Prog","text":"WELCOME TO THE\nNET SQUARE!"},{"flags":[{"at":"OF {channels}. {navis} NAVIS HERE!","code":"line-long"}],"pages":[["THIS IS CHANNEL {channel}","OF {channels}. {navis} NAVIS","HERE!"]],"speaker":"Mr.Prog","text":"THIS IS CHANNEL {channel}\nOF {channels}. {navis} NAVIS HERE!"}],"container":"square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_keeper_words:1","kind":"speech","line":80,"placeholders":[{"name":"channel","spec":"%u"},{"name":"channels","spec":"%u"},{"name":"navis","spec":"%u"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO THE\nNET SQUARE!|THIS IS CHANNEL {channel}\nOF {channels}. {navis} NAVIS HERE!","text_hash":"d69803d78ad5"},
-  {"boxes":[{"pages":[["OFF YOU GO!"]],"speaker":"Mr.Prog","text":"OFF YOU GO!"}],"container":"square_keeper_moving","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_moving:0","kind":"speech","line":84,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OFF YOU GO!","text_hash":"be91ed575805"},
+  {"boxes":[{"pages":[["Next channel"]],"speaker":"MegaMan","text":"Next channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next channel","text_hash":"68b4bd365ca5"},
+  {"boxes":[{"pages":[["Last channel"]],"speaker":"MegaMan","text":"Last channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Last channel","text_hash":"7eb9828f3600"},
+  {"boxes":[{"pages":[["Look around"]],"speaker":"MegaMan","text":"Look around"}],"container":"square_look_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_look_option:0","kind":"speech","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look around","text_hash":"6f72d2c8eec5"},
+  {"boxes":[{"pages":[["Lan,press SELECT","and I'll strike a","pose or say hi!"]],"speaker":"MegaMan","text":"Lan,press SELECT\nand I'll strike a\npose or say hi!"}],"container":"square_strip_hint","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_strip_hint:0","kind":"screen","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,press SELECT\nand I'll strike a\npose or say hi!","text_hash":"e88152937c75"},
+  {"boxes":[{"pages":[["WHOA! YOUR NETPASS","HAS ROOM FOR EVERY","STAMP NOW!"]],"speaker":"Mr.Prog","text":"WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!"},{"pages":[["HOLD STILL!","STAMP,STAMP,STAMP!"]],"speaker":"Mr.Prog","text":"HOLD STILL!\nSTAMP,STAMP,STAMP!"}],"container":"square_greeter_stamp_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_greeter_stamp_words:0","kind":"speech","line":13,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!","text_hash":"73255ba6e187"},
+  {"boxes":[{"pages":[["More..."]],"speaker":"MegaMan","text":"More..."}],"container":"square_more","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_more:0","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"More...","text_hash":"3c25ce154a91"},
+  {"boxes":[{"pages":[["Let them talk"]],"speaker":"MegaMan","text":"Let them talk"}],"container":"square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_quiet_option:0","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let them talk","text_hash":"a13efeaadd21"},
+  {"boxes":[{"pages":[["Quiet please"]],"speaker":"MegaMan","text":"Quiet please"}],"container":"square_quiet_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_quiet_option:1","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Quiet please","text_hash":"5485aa151269"},
+  {"boxes":[{"pages":[["Head home,Lan?"]],"speaker":"MegaMan","text":"Head home,Lan?\n"}],"container":"square_home_question","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_home_question:0","kind":"speech","line":22,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Head home,Lan?\n","text_hash":"bbfa1e8bfa91"},
+  {"boxes":[{"pages":[["HP {hp} of {max_hp}.","Act {act},layer {depth}!"]],"speaker":"MegaMan","text":"HP {hp} of {max_hp}.\nAct {act},layer {depth}!"}],"container":"square_card_facts","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_card_facts:0","kind":"speech","line":43,"placeholders":[{"name":"hp","spec":"%u"},{"name":"max_hp","spec":"%u"},{"name":"act","spec":"%u"},{"name":"depth","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"HP {hp} of {max_hp}.\nAct {act},layer {depth}!","text_hash":"f4c6022ae5e3"},
+  {"boxes":[{"flags":[{"at":"Whoa! He has {list}","code":"line-long"}],"pages":[["Whoa! He has","{list}","Cross!"]],"speaker":"MegaMan","text":"Whoa! He has {list}\nCross!"}],"container":"square_card_facts","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_card_facts:1","kind":"speech","line":47,"placeholders":[{"name":"list","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|Whoa! He has {list}\nCross!","text_hash":"b9e5fde468d8"},
+  {"boxes":[{"pages":[["And {list}Soul!"]],"speaker":"MegaMan","text":"And {list}Soul!"}],"container":"square_card_facts","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_card_facts:2","kind":"speech","line":51,"placeholders":[{"name":"list","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|And {list}Soul!","text_hash":"4c0d74243d7e"},
+  {"boxes":[{"pages":[["That's {name}'s","MegaMan!"]],"speaker":"MegaMan","text":"That's {name}'s\nMegaMan!"}],"container":"square_peer_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_peer_words:0","kind":"speech","line":58,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"That's {name}'s\nMegaMan!","text_hash":"1832ca11df0e"},
+  {"boxes":[{"pages":[["His NetPass has","just the Square","stamp."]],"speaker":"MegaMan","text":"His NetPass has\njust the Square\nstamp."}],"container":"square_peer_words","continues":true,"domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_peer_words:1","kind":"speech","line":63,"note":"(why Battle and trades are not offered with him: his NetPass, in stamps)","speaker":"MegaMan","speakers":["MegaMan"],"text":"|His NetPass has\njust the Square\nstamp.","text_hash":"998b3813ac06"},
+  {"boxes":[{"pages":[["OK. We won't see","{name} again."]],"speaker":"MegaMan","text":"OK. We won't see\n{name} again."}],"container":"square_blocked_words","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_blocked_words:0","kind":"speech","line":74,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"OK. We won't see\n{name} again.","text_hash":"7611f0062ce3"},
+  {"boxes":[{"pages":[["WELCOME TO THE","NET SQUARE!"]],"speaker":"Mr.Prog","text":"WELCOME TO THE\nNET SQUARE!"},{"flags":[{"at":"OF {channels}. ONE NAVI HERE!","code":"line-long"}],"pages":[["THIS IS CHANNEL {channel}","OF {channels}. ONE NAVI","HERE!"]],"speaker":"Mr.Prog","text":"THIS IS CHANNEL {channel}\nOF {channels}. ONE NAVI HERE!"}],"container":"square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_keeper_words:0","kind":"speech","line":80,"placeholders":[{"name":"channel","spec":"%u"},{"name":"channels","spec":"%u"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO THE\nNET SQUARE!|THIS IS CHANNEL {channel}\nOF {channels}. ONE NAVI HERE!","text_hash":"0565ab3041a2"},
+  {"boxes":[{"pages":[["WELCOME TO THE","NET SQUARE!"]],"speaker":"Mr.Prog","text":"WELCOME TO THE\nNET SQUARE!"},{"flags":[{"at":"OF {channels}. {navis} NAVIS HERE!","code":"line-long"}],"pages":[["THIS IS CHANNEL {channel}","OF {channels}. {navis} NAVIS","HERE!"]],"speaker":"Mr.Prog","text":"THIS IS CHANNEL {channel}\nOF {channels}. {navis} NAVIS HERE!"}],"container":"square_keeper_words","domain":"Net Square","file":"src/online/square_words.c","flags":["line-long"],"id":"square_words:square_keeper_words:1","kind":"speech","line":81,"placeholders":[{"name":"channel","spec":"%u"},{"name":"channels","spec":"%u"},{"name":"navis","spec":"%u"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME TO THE\nNET SQUARE!|THIS IS CHANNEL {channel}\nOF {channels}. {navis} NAVIS HERE!","text_hash":"d69803d78ad5"},
+  {"boxes":[{"pages":[["OFF YOU GO!"]],"speaker":"Mr.Prog","text":"OFF YOU GO!"}],"container":"square_keeper_moving","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_moving:0","kind":"speech","line":85,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OFF YOU GO!","text_hash":"be91ed575805"},
   {"boxes":[{"pages":[["R: other side L:","cheer B: leave"]],"speaker":"Screen","text":"R: other side  L: cheer  B: leave"}],"container":"stands_keys","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_keys:0","kind":"screen","line":6,"speaker":"Screen","speakers":["Screen"],"text":"R: other side  L: cheer  B: leave","text_hash":"fcbd5d43a0a7"},
   {"boxes":[{"pages":[["Setting up the two","PETs..."]],"speaker":"Screen","text":"Setting up the two PETs..."}],"container":"stands_setting_up","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_setting_up:0","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Setting up the two PETs...","text_hash":"fc689ae2847a"},
   {"boxes":[{"pages":[["Catching up..."]],"speaker":"Screen","text":"Catching up..."}],"container":"stands_catching_up","domain":"Arena","file":"src/online/stands_text.c","flags":[],"id":"stands_text:stands_catching_up:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Catching up...","text_hash":"02107fe86df6"},
