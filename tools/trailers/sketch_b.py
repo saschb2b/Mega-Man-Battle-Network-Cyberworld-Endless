@@ -41,7 +41,7 @@ from trailer_music import Score, key, keys  # noqa: E402
 BPM = 160
 BARS = 9
 TAIL = 1.3
-MIX = (('lead', ('sq1',), 0.14), ('arp', ('sq2',), 0.12), ('bass', ('wave',), 0.17),
+MIX = (('lead', ('sq1',), 0.14), ('arp', ('sq2',), 0.12), ('bass', ('wave',), 0.21),
        ('hats', ('noise',), 0.14), ('fx', ('fx',), 0.08))
 DS_LEVEL = 1.0
 REVERB = 40
@@ -53,7 +53,7 @@ DS_ENV = {'kick': (255, 250, 190, 208), 'clap': (255, 250, 190, 208), 'rim': (25
           'skank': (255, 215, 0, 170), 'skank_m': (255, 215, 0, 170), 'pad': (30, 0, 200, 220),
           'pad_m': (30, 0, 200, 220), 'bell': (255, 0, 255, 230),
           'conga_hi': (255, 0, 255, 220), 'conga_lo': (255, 0, 255, 220)}
-DS_GAIN = {'kick': 0.8, 'clap': 0.7, 'rim': 0.42, 'skank': 0.62, 'skank_m': 0.62, 'pad': 0.34, 'pad_m': 0.34,
+DS_GAIN = {'kick': 0.9, 'clap': 0.7, 'rim': 0.42, 'skank': 0.56, 'skank_m': 0.56, 'pad': 0.3, 'pad_m': 0.3,
            'bell': 0.5, 'conga_hi': 0.6,
            'conga_lo': 0.62}
 
@@ -68,7 +68,7 @@ CRASH = dict(clock=80000, env=(0, 7, 0, 1), pan=0.2)
 
 def instruments():
     return {
-        'kick': tm.punch_kick(low=70, high=140, drive=3.5, body=0.06),
+        'kick': tm.punch_kick(seconds=0.24, low=62, high=140, drive=3.5, body=0.09, hold=0.1),
         'clap': tm.punch_clap(seed=12, drive=2.0, body=230),
         'rim': tm.conga(root=key('E6'), seconds=0.05, slap=1.2, seed=9),
         'skank': tm.chord_pad(CHORD_SAMPLES['skank'], attack=0.004, bright=2600),

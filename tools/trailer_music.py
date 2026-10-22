@@ -120,7 +120,7 @@ def highpass(xs, hz):
     return out
 
 
-def punch_kick(seed=1, seconds=0.14, low=48, high=170, drive=4.0, body=0.055):
+def punch_kick(seed=1, seconds=0.14, low=48, high=170, drive=4.0, body=0.055, hold=0.045):
     """A short kick driven into the top: a falling sine, clipped, a click,
     then let go (BN6's is 20 dB down 66 ms in)."""
     rnd, sr, ph, out = random.Random(seed), SAMPLE_RATE, 0.0, []
@@ -128,7 +128,7 @@ def punch_kick(seed=1, seconds=0.14, low=48, high=170, drive=4.0, body=0.055):
         t = i / sr
         ph += 2 * math.pi * (low + high * math.exp(-t / 0.012)) / sr
         x = math.sin(ph) * math.exp(-t / body) + 0.5 * math.exp(-t / 0.0015) * rnd.uniform(-1, 1)
-        tail = 1.0 if t < 0.045 else math.exp(-(t - 0.045) / 0.018)
+        tail = 1.0 if t < hold else math.exp(-(t - hold) / 0.018)
         out.append(clip(x * min(1.0, t / 0.0015 + 0.3), drive) * tail)
     return Sample(out)
 

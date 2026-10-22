@@ -26,9 +26,9 @@ answering.
 
 The harmony, two chords a bar: Dmaj9 E/D | Gmaj9 F#m7 | Em7 Asus4-A |
 Bbmaj9 Cmaj9 | Dmaj9 E/D | Gmaj9 F#m7 | Bm7 G | Bb C Dsus4-D | D. One
-major triad of brass and one sus chord of strings make all of them over
-the bass (F#m7 is A over F#, Gmaj9 D over G, Bbmaj9 F over Bb: Kaida's
-way of getting many chords out of few samples). The borrowed bVI-bVII
+major triad, struck by the brass and held by the strings, makes all of
+them over the bass (F#m7 is A over F#, Gmaj9 D over G, Bbmaj9 F over Bb:
+Kaida's way of getting many chords out of few samples). The borrowed bVI-bVII
 into I at bar 3 and again at the end is the heroic lift.
 """
 import os
