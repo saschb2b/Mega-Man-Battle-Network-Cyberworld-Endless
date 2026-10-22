@@ -76,12 +76,12 @@
 #define BN6_CROSS_PENDING_GET 0x0801595Eu /* r0 a side: its pending record's form in r0, +1 in r1, +3 in r3 (mov pc,lr, no push), asked by
                                              the crossing's phases with the crossing object in r5 (0x08014A38 and the phases after it) */
 /* A Program Advance on the Custom screen (OK's routine 0x08029110) */
-#define BN6_CUSTOM_NEXT       (BN6_CUSTOM_SCREEN + 0x0B) /* u8 the mode OK goes on to once its show is over: BN6_MODE_WAIT (0x08029112),
+#define BN6_CUSTOM_NEXT       0x020364CBu /* u8 the Custom screen's +0x0B, the mode OK goes on to once its show is over: BN6_MODE_WAIT (0x08029112),
                                              BN6_MODE_PA where its check (0x08029520) made a Program Advance (0x080291DE) */
 #define BN6_MODE_PA           0x10        /* BN6_CUSTOM_MODE: a Program Advance shown, its chips joined, before BN6_MODE_WAIT */
 #define BN6_CUSTOM_BUILT      0x020366C0u /* the hand OK builds from the picks (bn6f byte_20366C0, a hand's layout: BN6_HAND_CHIPS ...),
                                              the Program Advance in it once shown; a link battle's packet carries it (BN6_LINK_SEND) */
-#define BN6_CROSS_STEP        0x03       /* BN6_CROSS_SIDES +3: the step's own count, 0 its first frame */
+#define BN6_CROSS_STEP        0x03       /* the controller's byte +3 (BN6_CROSS_SIDES'): its step's count, 0 a step's first frame */
 #define BN6_AI_CROSS_ASK      0x4000u     /* BN6_AI_FLAGS: asked to cross into his pending form (0x0801596E) */
 #define BN6_AI_CROSSING       0x80u       /* BN6_AI_MODES: a crossing under way (0x0801597C waits while it is set) */
 

@@ -50,6 +50,8 @@ static unsigned seat(void) { return dev.team_seat > 0 && dev.team_seat < 4 ? (un
 /* side's partner's NaviCust compiled by BN6's own code on a core of his
  * client from his loadout and the checkpoint's state (once a run of the
  * game: a rematch's partners the same), said in the output */
+static unsigned u16_at(const uint8_t *bytes, unsigned at) { return bytes[at] | (unsigned)bytes[at + 1] << 8; }
+
 static void compile(unsigned side, const OnlineLoadout *l) {
 	static bool tried[SIDES], made[SIDES];
 	static uint8_t stats[SIDES][BN6_BATTLE_NAVI_SIZE];
@@ -58,13 +60,13 @@ static void compile(unsigned side, const OnlineLoadout *l) {
 		size_t n;
 		uint8_t *state = arena_carry_state(&n);
 		char why[128] = "";
-		made[side] = state && team_navicust_compile(R.data, ROM_SIZE, state, n, l, stats[side], why, sizeof why);
+		made[side] = state && team_navicust_compile(state, n, l, stats[side], why, sizeof why);
 		free(state);
 		const uint8_t *s = stats[side];
 		if (made[side])
 			printf("arena2v2: side %u's partner's NaviCust compiled by BN6 (%08X) on his own core: HP %u (base %u), Custom %u, buster "
 				"%u %u %u, SuperArmor %u, FloatShoe %u, AirShoe %u, UnderShirt %u\n", side, BN6_NAVICUST_RELOAD,
-				s[BN6_NS_MAX_HP] | s[BN6_NS_MAX_HP + 1] << 8, s[BN6_NS_BASE_HP] | s[BN6_NS_BASE_HP + 1] << 8, s[BN6_NS_CUSTOM],
+				u16_at(s, BN6_NS_MAX_HP), u16_at(s, BN6_NS_BASE_HP), s[BN6_NS_CUSTOM],
 				s[BN6_NS_ATTACK] + 1, s[BN6_NS_SPEED] + 1, s[BN6_NS_CHARGE] + 1, s[BN6_NS_SUPER_ARMOR], s[BN6_NS_FLOAT_SHOE],
 				s[BN6_NS_AIR_SHOE], s[BN6_NS_UNDER_SHIRT]);
 		else printf("arena2v2: side %u's partner's NaviCust not compiled (%s): his record his loadout's HP and buster\n", side,

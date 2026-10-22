@@ -20,10 +20,9 @@
 #include "online_snapshot.h"
 
 /* `l`'s NaviStats as BN6 compiles them (BN6_BATTLE_NAVI_SIZE bytes into
- * `out`, its HP whole as a NetBattle begins), on a core of `rom` loaded
- * from `state`; false, the reason in `why`, where the core, the loadout
- * or BN6's call failed */
-bool team_navicust_compile(const uint8_t *rom, size_t size, const uint8_t *state, size_t n, const OnlineLoadout *l, uint8_t *out,
-	char *why, size_t wn);
+ * `out`, its HP whole as a NetBattle begins), on a core of the player's
+ * ROM loaded from `state` (n bytes); false, the reason in `why`, where
+ * the core, the loadout or BN6's call failed */
+bool team_navicust_compile(const uint8_t *state, size_t n, const OnlineLoadout *l, uint8_t *out, char *why, size_t wn);
 
 #endif

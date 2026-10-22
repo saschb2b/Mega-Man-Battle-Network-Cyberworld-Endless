@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "free_space.h"
 #include "hook.h"
+#include "rom.h"
 
 #define CALL_FRAMES 120   /* frames the call may wait for the game's own update (gamecall.c's) */
 
@@ -53,11 +54,10 @@ static void core_write8(void *context, uint32_t address, uint8_t value) {
 	c->rawWrite8(c, address, -1, value);
 }
 
-bool team_navicust_compile(const uint8_t *rom, size_t size, const uint8_t *state, size_t n, const OnlineLoadout *l, uint8_t *out,
-	char *why, size_t wn) {
+bool team_navicust_compile(const uint8_t *state, size_t n, const OnlineLoadout *l, uint8_t *out, char *why, size_t wn) {
 	static uint32_t video[ARENA_W * ARENA_H];
 	if (why && wn) *why = 0;
-	struct mCore *c = rom && state && l && out ? arena_core_new(rom, size, video, false) : NULL;
+	struct mCore *c = R.data && state && l && out ? arena_core_new(R.data, ROM_SIZE, video, false) : NULL;
 	if (!c) {
 		if (why && wn) snprintf(why, wn, "no core for the compile");
 		return false;
@@ -77,8 +77,7 @@ bool team_navicust_compile(const uint8_t *rom, size_t size, const uint8_t *state
 	if (ok) {
 		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) out[i] = (uint8_t)c->rawRead8(c, BN6_NAVI_STATS + i, -1);
 		/* (a NetBattle begins whole, as the Arena writes a lead's) */
-		out[BN6_NS_CUR_HP] = out[BN6_NS_MAX_HP];
-		out[BN6_NS_CUR_HP + 1] = out[BN6_NS_MAX_HP + 1];
+		memcpy(out + BN6_NS_CUR_HP, out + BN6_NS_MAX_HP, sizeof(uint16_t));
 	}
 	if (h) hook_detach(c);
 	arena_core_free(c);
