@@ -9,7 +9,7 @@ A release that changes how the game looks or plays gets a trailer of its
 own, and it replaces the last one everywhere (AGENTS.md, Trailers). The
 project's face changes with the game instead of piling up. Read
 `lessons.md` first: the trailers made so far and what the owner said of
-each.
+each; and `music_rules.md` before writing a note.
 
 The one rule the owner gave in so many words: **never the last trailer
 with new screens.** Each trailer has its own look and its own music, in
@@ -21,11 +21,14 @@ theme for the music, BN5's Liberation Missions for the look).
 | Part | Where |
 | --- | --- |
 | A cut: footage, look, `VERSION`, `POSTER`, `PLAY_LABEL`, `scenes()`, `compose(only)` | `tools/trailers/vX_Y_Z.py` |
-| Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner) |
+| Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER`, and optionally `HARDWARE`, `CHORD_SAMPLES`, `SOUNDFONT` and `BANNER_AUDIO` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner, or copies its kept `BANNER_AUDIO`) |
 | Which is current | `CURRENT` and `VERSIONS` in `tools/trailers/__init__.py` |
 | The shared kit: capture, `from_shots`, `from_clips`, `shot`, encode, the play poster | `tools/trailer.py` |
 | Online footage: a local server and several headless games at once in its Square, each with its data folder, name and script | `tools/trailer_online.py` (a cut's `online_scenes()` and `footage(keep)`) |
-| The Game Boy Advance's sound: squares, wave, noise, Direct Sound, MP2K's echo | `tools/trailer_music.py` |
+| The Game Boy Advance's sound: squares, wave, noise, Direct Sound, MP2K's echo; a sampled kit of our own in the manner of BN6's (clipped drums, chord samples, a distorted stab, pitch bends) | `tools/trailer_music.py` |
+| Sampled instruments from a soundfont (FluidR3 GM, MIT), cut into MP2K samples; the image that holds it, where such a piece renders (`render_any`), and its 3DS banner kept as our own audio (`BANNER_AUDIO`, `--write-banner`) | `tools/trailer_soundfont.py`, `docker/Dockerfile.music`, `3ds/banner-VERSION.wav` |
+| What makes a Battle Network theme, as rules with their numbers; why 0.13.0's piece read as generic | `music_rules.md` |
+| Sketches for the owner's ear before a piece (not cuts) | `tools/trailers/sketch_*.py` |
 | Helpers for this skill | `scripts/song_habits.py`, `scripts/music_check.py`, `scripts/sheets.py` |
 
 `python3 tools/trailer.py [VERSION] [--keep] [--footage] [--frames A,B]`
@@ -62,40 +65,72 @@ Original, always: the habits of a source song, never its melody, chords in
 its order, or samples. The repository must never hold Capcom's sound; a
 recording the owner hands over stays in `.build/`.
 
+Read `music_rules.md` first. 0.13.0's piece was written from "Surge of
+Power!"'s habits and still read as "AI-ish" to the owner: the habits had
+become a wall of held notes in clean tones, one rhythm cell in every bar,
+nothing between 120 and 500 Hz. The rules there say, with the numbers
+behind them, what a Battle Network song does instead: harmony, melody,
+the squares' jobs, bass, drums, arrangement, mix and timbre.
+
 1. **Read the source song's habits** from the ROM:
-   `python3 .claude/skills/trailer/scripts/song_habits.py bn5 0x01 --bars`
-   gives the tempo, each track's role (voice kind, envelope, duty, sample
-   size and loop, note lengths, range), the key's pitch classes, the drums'
-   places, and notes a bar per track (the form: where the intro, the
-   breakdown and the main section are). A song on a pickup counts its bars
-   late: the script guesses the bar line (`--offset N`, kick and crash on
-   one, snare on two and four); rerun with it before reading the drums.
+   `python3 .claude/skills/trailer/scripts/song_habits.py bn5 0x01 --bars
+   --detail --theory` gives the tempo, each track's role (voice kind,
+   envelope, duty, sample size and loop, note lengths, range), how it is
+   played (velocity levels, the gate of its notes, pans, bends,
+   vibrato), the drum kit's keys and what each one is (a sample or the
+   noise channel), the key's pitch classes, the harmony and melody in
+   aggregates (the chords as degrees and qualities, the roots' moves, the
+   harmonic rhythm, each part's intervals and repetition), the drums'
+   places and notes a bar per track (the form). A song on a pickup counts
+   its bars late: the script guesses the bar line (`--offset N`); rerun
+   with it before reading the drums.
 2. **Read the recording** if there is one: `scripts/music_check.py
-   --ref FILE` prints its balance of lows, mids and highs to match.
-3. **Write the habits down** as the piece's docstring, as
-   `v0_3_0_music.py` and `v0_12_0_music.py` do: tempo, key and mode, each
-   channel's job, the kit's pattern, the form, then what this piece does
-   with them. That docstring is the proof the piece is in the manner of
-   the source and not a copy.
-4. **Pick a tempo whose bar is whole video frames** at 30 fps: 150 is 48
-   frames, 144 is 50 (BN5's 142 became 144). Cuts then land on frames.
-5. **Compose in `vX_Y_Z_music.py`**: a `Score` of PSG notes (`sq1`, `sq2`,
-   `wave`, `noise`, `fx`) and Direct Sound hits; a theme of two four-bar
-   phrases (the second climbing where the first fell), a rhythmic cell
-   repeated so it sticks, pickups into phrases, a fill into every section,
-   a drop that thins the band (one square alone, the bass one note), and
-   an ending cadence that rings. Borrow instruments from an earlier piece
-   (`first.instruments()`), add your own.
-6. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE`:
-   no bar near clipping, loudness that dips at the drop and rises after,
-   a balance close to the reference (0.12.0: 47/48/5 against BN5's
-   47/47/6), and `roll.png`, the score drawn, for the shape. You cannot
-   hear it: say so, and ask the owner to listen.
-7. **Set `BANNER`** (from, seconds: about 2.9): the 3DS HOME Menu plays it.
-   The piece's most recognisable moment, usually its last cadence.
+   --ref FILE` prints its balance and its punch (the swing inside a beat)
+   to match.
+3. **Sketch first.** Before the full piece, write three eight-bar
+   sketches (12-16 seconds) in different moods as modules beside the cuts
+   (`tools/trailers/sketch_a.py`; not in `VERSIONS`), render them with
+   `python3 tools/trailer_music.py OUT.wav --piece sketch_a` to
+   `.build/trailer-sketches/` as WAV and MP3 (ffmpeg in its image), and let
+   the owner choose by ear (owner, 22 October 2026). The chosen one grows
+   into the piece.
+4. **Write the habits down** as the piece's docstring, as
+   `v0_3_0_music.py`, `v0_12_0_music.py` and the sketches do: tempo, key
+   and mode, each channel's job, the kit's pattern, the form, then what
+   this piece does with them. That docstring is the proof the piece is in
+   the manner of the source and not a copy.
+5. **Pick a tempo whose bar is whole video frames** at 30 fps: 150 is 48
+   frames, 144 is 50, 160 is 45 (BN5's 142 became 144). Cuts then land on
+   frames.
+6. **Compose in `vX_Y_Z_music.py`** by the rules: two chords a bar, each
+   coloured (sevenths, suspensions; a triad sample over another bass); a
+   one-bar hook, answered, stated again, cadenced, its rhythm varied bar to
+   bar; the backing square's arpeggio thrown hard left and right note by
+   note with BN's accents; the bass legato on the kick's places with
+   falls and slides (`bend`); short clipped drums on a syncopated kick; a
+   chord sample and a low distorted stab between 120 and 500 Hz; a fill
+   into every section; a drop that thins the band, kept short; an ending
+   cadence that rings. The kit's own sampled instruments and
+   `HARDWARE = 32768` are in `music_rules.md`, Mix and timbre.
+7. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE`
+   (or `--piece NAME`): no bar near clipping, loudness steady through a
+   section, the four-band balance and the punch near the reference's (sketch A
+   against "Surge of Power!": 54/31/13/1 against 57/28/13/1, 7.4 dB
+   against 7.8), the lead's rubs against the harmony read one by one (a
+   piece names its `CHORD_SAMPLES`), and `roll.png`, the score drawn, for
+   the hook's returns. You cannot hear it: say so, and ask the owner to
+   listen.
+8. **Set `BANNER`** (from, seconds: about 2.9): the 3DS HOME Menu plays it.
+   The piece's most recognisable moment: its hook at full strength, or its
+   last cadence. A piece with a `SOUNDFONT` also sets `BANNER_AUDIO`
+   (`3ds/banner-VERSION.wav`) and writes it with `python3
+   tools/trailer_music.py --write-banner --piece vX_Y_Z_music` after every
+   change to those bars: the 3DS image has no soundfont and copies it.
 
 A change to `tools/trailer_music.py` must leave every piece's render byte
-for byte the same: hash `music.wav` of each version before and after.
+for byte the same: hash `music.wav` of each version (and the banner,
+`--banner --rate 32728`) before and after. It stays standard library
+only: `build.py 3ds` renders the banner with it.
 
 ## 3. The footage
 

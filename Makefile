@@ -150,7 +150,7 @@ $(OUT)/cyberworld-endless.smdh: 3ds/icon.png
 	/opt/devkitpro/tools/bin/smdhtool --create "Cyberworld Endless" "A Mega Man Battle Network 6 roguelike" "saschb2b" $< $@
 $(OUT)/cyberworld-endless.3dsx: $(BIN) $(OUT)/cyberworld-endless.smdh
 	/opt/devkitpro/tools/bin/3dsxtool $(BIN) $@ --smdh=$(OUT)/cyberworld-endless.smdh
-$(OUT)/banner.wav: tools/trailer_music.py $(wildcard tools/trailers/*.py)
+$(OUT)/banner.wav: tools/trailer_music.py $(wildcard tools/trailers/*.py) $(wildcard 3ds/banner-*.wav)
 	python3 tools/trailer_music.py $@ --banner --rate 32728
 $(OUT)/banner.bnr: 3ds/banner.png $(OUT)/banner.wav
 	bannertool makebanner -i 3ds/banner.png -a $(OUT)/banner.wav -o $@
