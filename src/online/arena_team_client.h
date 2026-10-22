@@ -30,12 +30,6 @@ void team_client_free(void);
  * keys each tick (team_client_stream, an ArenaStream: arena.h), and
  * team_client_draw shows my seat's screen */
 bool team_client_seat(Arena *a, unsigned seat, const OnlineLoadout *mine);
-/* side's partner's NaviCust compiled by BN6's own code (BN6_NAVICUST_RELOAD)
- * on a core of this game from `l`, his loadout, over the checkpoint's
- * state, his record and hand size from it (arena_team_navi_compiled); once
- * a run of the game unless `again` (a match's new partners), said in the
- * output. Every game and spectator of a 2v2 compiles each partner's so */
-void team_client_compile(unsigned side, const OnlineLoadout *l, bool again);
 uint16_t team_client_stream(void *context, Arena *a, uint32_t frame, uint16_t keys);
 /* player's (2 or 3) stream for `frame`: his keys, released on his Custom
  * screen, which they drive, or a pick message */

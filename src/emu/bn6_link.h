@@ -38,6 +38,10 @@
 #define BN6_LINK_SPARE_HI     0x07        /* ... the other: +6's other half (a partner's word's high byte there, arena_team_link.c) */
 #define BN6_LINK_PAD_STORE    0x0801FF8Cu /* strh r1,[r5,#2]: sub_801FF18's store of this frame's pad into BN6_LINK_OUT (r5), both
                                              sides' packets read before it (0x0801FF2A-0x0801FF82) */
+#define BN6_LINK_READ_B       0x0802001Cu /* adds r5,#0x10: sub_801FFD6's read path past side 0's packet (bit 3 of its argument
+                                             clear), side 1's next; the store at BN6_LINK_PAD_STORE_B its own (bit 4 clear) */
+#define BN6_LINK_TAKES_ANY    0x0203F7D8u /* u8 the link's state's +0 (bn6f eStruct203F7D8): 0 where side 1's packet is taken
+                                             whatever its pad's mark (0x0801FF56, 0x08020020), set to 1 as the link starts (0x0801FE5A) */
 #define BN6_LINK_PAD_STORE_B  0x08020062u /* ... the same in sub_801FFD6, the other of the battle's link routines (0x0801FEEE's table),
                                              its argument at [sp,#4]: bit 3 set, the packets not read this frame */
 /* A Navi's battle NaviStats (BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE a side): every reader and writer takes its side's */

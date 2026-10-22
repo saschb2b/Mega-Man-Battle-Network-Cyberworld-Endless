@@ -18,7 +18,11 @@
  * His stream comes to his side's GBA as a pad does: the pair hands it his
  * value for each of that GBA's frames before the frame runs
  * (team_link_put), keys kept as the last held for its next packet,
- * messages queued, one a packet. All of it is core RAM (RAM_TEAM_LINK),
+ * messages queued, one a packet (team_outbox.h: a turn's with room to
+ * spare, a message past it refused and said in the output). The words
+ * are taken where BN6 reads both sides' packets and put where it stores
+ * its pad: in sub_801FF18 the two together, in sub_801FFD6 each where it
+ * does them (its argument may skip either). All of it is core RAM (RAM_TEAM_LINK),
  * emptied as the battle spawns, so a rollback puts it back with the state
  * and the pair's hash covers it. */
 #ifndef CW_ARENA_TEAM_LINK_H
@@ -39,8 +43,9 @@ void team_link_begin(void);
  * its partner's value for that frame, keys or a message */
 void team_link_put(struct mCore *core, unsigned side, uint16_t value);
 /* From a hook on side's GBA: a message of its own to send as its
- * partner's (the wait's limit saying his picks none), queued after his */
-void team_link_say(unsigned side, uint16_t message);
+ * partner's (the wait's limit saying his picks none), queued after his;
+ * false where his outbox is full (team_outbox.h), nothing queued */
+bool team_link_say(unsigned side, uint16_t message);
 /* From a hook: side's partner's keys as the last packet of his side
  * brought them (none in a message's frame or on a Custom screen), what the
  * battle loop's key copy gives him */

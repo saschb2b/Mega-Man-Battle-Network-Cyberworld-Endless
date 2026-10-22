@@ -25,6 +25,10 @@ void team_soul_said(unsigned side, unsigned index, unsigned slot, bool second);
 void team_soul_turn_open(unsigned side);
 /* From a hook: his pending Soul's chaos and turns, for his crossing's
  * pending record (0 and 0 where none) */
+/* ... the Soul his UNITE committed this turn (0 none), and the Souls he
+ * has united this battle (BN6_SOUL_USED's bits) */
+uint8_t team_soul_next(unsigned side);
+uint32_t team_soul_used(unsigned side);
 uint8_t team_soul_chaos(unsigned side);
 uint8_t team_soul_turns(unsigned side);
 /* how the Souls went, every core's, said in the output */

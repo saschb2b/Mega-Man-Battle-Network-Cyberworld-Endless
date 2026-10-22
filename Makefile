@@ -284,7 +284,7 @@ build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online
 
 # the Arena's ROM-free parts: its keys' buffer, the local link, a carried MegaMan checked and written,
 # its messages on the wire and the network's link (issue #120)
-ARENA_TEST_SRCS := tests/test_arena.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
+ARENA_TEST_SRCS := tests/test_arena.c src/online/team_outbox.c src/online/team_check.c src/online/arena_input.c src/online/arena_link_local.c src/online/arena_loadout.c \
 	src/online/arena_wire.c src/online/arena_link_net.c src/online/arena_format.c src/online/arena_sync.c \
 	src/online/stands_wire.c src/online/stands_report.c src/online/watch_keys.c src/online/arena_text.c
 build/host/test_arena: $(ARENA_TEST_SRCS) src/online/arena_input.h src/online/arena_text.h src/online/arena_link.h src/online/arena_loadout.h src/online/online_snapshot.h \

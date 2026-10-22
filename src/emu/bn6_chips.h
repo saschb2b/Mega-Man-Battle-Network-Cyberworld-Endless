@@ -128,6 +128,8 @@
 #define BN6_PA_LIST           0x0802BCB0u /* the Program Advances' list the Custom screen walks (0x08029520): a recipe's address each, */
 #define BN6_PA_COUNT          43          /* ... these, then 0 (0x0802BD5C) */
 #define BN6_PA_LIST_REF       0x080295B4u /* ... its one word (loaded at 0x08029556; the link battles' list, 0x0802BC60, its own word 0x080295B8) */
+#define BN6_PA_LIST_LINK_REF  0x080295B8u /* ... the link battles' list's word: 0x0802BC60, twenty recipes of its own, then BN6_PA_LIST's own
+                                             (contiguous, ended by its 0); a partner's Program Advance checked against both */
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */

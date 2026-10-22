@@ -62,6 +62,11 @@ void square_bout_mine(OnlineLoadout *l) {
 	if (dev.team_pa > 0 && SA.four && SA.seat >= 2) arena_seats_pa_folder(l);
 	/* (teamunite=1 on a partner's game: his MegaMan with NumberSoul and a Plus chip first, a UNITE in his first hand) */
 	if (dev.team_unite > 0 && SA.four && SA.seat >= 2) arena_seats_unite_folder(l);
+	/* (teamcross=N, teambeast on a partner's game: his MegaMan holds Cross N, Beast Out, as every game is given him: what his
+	 * screen offers, so what the other games let his messages say, team_check.h) */
+	int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
+	if (n >= 1 && n <= 5 && SA.four && SA.seat >= 2) l->crosses |= (uint8_t)(1u << (n - 1));
+	if (dev.team_beast && SA.four && SA.seat >= 2) l->beast = 1;
 }
 
 bool square_bout_ready(void) {

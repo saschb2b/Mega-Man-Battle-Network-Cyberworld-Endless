@@ -141,7 +141,7 @@ void arena_team_navi_begin(void) {
 		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
 		/* (his NaviCust's programs whole: his NaviStats as BN6 compiled them, but for the two bytes a link battle's start sets in
 		 * every MegaMan's alike, kept from his side's; teamcust=-1 the second GBA's his side's copy, a mutation that must part them) */
-		if (compiled[side].given && !(dev.team_cust < 0 && s == second_slot)) {
+		if (compiled[side].given && !(dev.team_cust == -1 && s == second_slot)) {
 			uint8_t start = hook_read8(from + BN6_NS_START_FORM), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
 			for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) hook_write8(to + i, compiled[side].stats[i]);
 			hook_write8(to + BN6_NS_START_FORM, start);

@@ -51,6 +51,8 @@ void team_soul_turn_open(unsigned side) {
 }
 
 uint8_t team_soul_chaos(unsigned side) { return hook_read8(field(side, BN6_SOUL_NEXT_CHAOS)); }
+uint8_t team_soul_next(unsigned side) { return hook_read8(field(side, BN6_SOUL_NEXT)); }
+uint32_t team_soul_used(unsigned side) { return hook_read32(field(side, BN6_SOUL_USED)); }
 uint8_t team_soul_turns(unsigned side) { return hook_read8(field(side, BN6_SOUL_NEXT_TURNS)); }
 
 void team_soul_report(void) {

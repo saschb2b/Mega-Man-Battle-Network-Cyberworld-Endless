@@ -7,13 +7,12 @@
 
 #include <mgba/core/core.h>
 
-#include "arena_carry.h"
 #include "arena_format.h"
 #include "arena_pair.h"
 #include "arena_team.h"
 #include "arena_team_custom.h"
 #include "arena_team_navi.h"
-#include "arena_team_navicust.h"
+#include "arena_seats.h"
 #include "arena_team_screen.h"
 #include "arena_team_view.h"
 #include "arena_view.h"
@@ -49,46 +48,23 @@ static unsigned stood_souls;   /* the Souls the stood-in partners hold under tea
 /* the seat shown: mine in a 2v2 over the network, else teamseat's (0 the first GBA's player, as without it, to 3) */
 static unsigned seat(void) { return my_seat ? my_seat : dev.team_seat > 0 && dev.team_seat < 4 ? (unsigned)dev.team_seat : 0; }
 
-static unsigned u16_at(const uint8_t *bytes, unsigned at) { return bytes[at] | (unsigned)bytes[at + 1] << 8; }
-
-void team_client_compile(unsigned side, const OnlineLoadout *l, bool again) {
-	static bool tried[SIDES], made[SIDES];
-	static uint8_t stats[SIDES][BN6_BATTLE_NAVI_SIZE];
-	side &= 1u;
-	if (again) tried[side] = false;
-	if (!tried[side] && l) {
-		tried[side] = true;
-		size_t n;
-		uint8_t *state = arena_carry_state(&n);
-		char why[128] = "";
-		made[side] = state && team_navicust_compile(state, n, l, stats[side], why, sizeof why);
-		free(state);
-		const uint8_t *s = stats[side];
-		if (made[side])
-			printf("arena2v2: side %u's partner's NaviCust compiled by BN6 (%08X) on his own core: HP %u (base %u), Custom %u, buster "
-				"%u %u %u, SuperArmor %u, FloatShoe %u, AirShoe %u, UnderShirt %u\n", side, BN6_NAVICUST_RELOAD,
-				u16_at(s, BN6_NS_MAX_HP), u16_at(s, BN6_NS_BASE_HP), s[BN6_NS_CUSTOM],
-				s[BN6_NS_ATTACK] + 1, s[BN6_NS_SPEED] + 1, s[BN6_NS_CHARGE] + 1, s[BN6_NS_SUPER_ARMOR], s[BN6_NS_FLOAT_SHOE],
-				s[BN6_NS_AIR_SHOE], s[BN6_NS_UNDER_SHIRT]);
-		else printf("arena2v2: side %u's partner's NaviCust not compiled (%s): his record his loadout's HP and buster\n", side,
-			*why ? why : "no checkpoint");
-	}
-	arena_team_navi_compiled(side, made[side] ? stats[side] : NULL);
-}
-
 void team_client_begin(Arena *a, const OnlineLoadout *all) {
 	/* (teambuster=N: both partners' buster at Attack N, their HP their sides', the loadout's numbers seen in the battle) */
 	const uint8_t buster[3] = { (uint8_t)(dev.team_buster - 1), 0, 0 };
 	for (unsigned side = 0; side < SIDES; ++side) {
 		arena_team_custom_folder(side, NULL, 0, NULL);
 		arena_team_navi_loadout(side, 0, 0, dev.team_buster > 0 && dev.team_buster <= 5 ? buster : NULL);
-		arena_team_navi_compiled(side, NULL);
+		arena_seats_partner(side, NULL);
 	}
-	/* (teamcust: side 1's partner the checkpoint's MegaMan's NaviCust too, his folder his lead's) */
-	if (all && dev.team_cust) team_client_compile(1, all, false);
+	/* (teamcust: side 1's partner the checkpoint's MegaMan's NaviCust too, his folder his lead's; the way in compiles them) */
+	if (all && dev.team_cust) arena_seats_partner(1, all);
 	stood_souls = all && dev.team_unite ? all->souls : 0;
 	/* (teamunite=3: ColonelSoul held too, BN5's Soul 7, which RockCube lights) */
 	if (stood_souls && dev.team_unite == 3) stood_souls |= 1u;
+	/* (what the stood-in partners' messages may say: what their screens offer, new_screen's, team_check.h) */
+	int n = dev.team_cross < 0 ? -dev.team_cross : dev.team_cross;
+	const TeamAllowed allowed = { (uint8_t)(n >= 1 && n <= 5 ? 1u << (n - 1) : 0u), (uint8_t)stood_souls, dev.team_beast != 0 };
+	for (unsigned side = 0; side < SIDES; ++side) arena_team_custom_allow(side, &allowed);
 	unsigned fits = all ? arena_folders_fitting(all) : 0;
 	/* (the folder after the one his lead carries: arena_scene's, the first that holds chips) */
 	for (int k = 0, first = -1; k < ONLINE_FOLDERS; ++k) {
@@ -99,7 +75,7 @@ void team_client_begin(Arena *a, const OnlineLoadout *all) {
 		arena_team_custom_folder(0, own.folder, own.regular, own.tag);
 		const uint8_t his[3] = { own.attack, own.speed, own.charge };
 		arena_team_navi_loadout(0, own.max_hp, own.base_hp, his);
-		team_client_compile(0, &own, false);
+		arena_seats_partner(0, &own);
 		printf("arena2v2: side 0's partner carries the run's folder %d, his lead folder %d\n", k + 1, first + 1);
 		break;
 	}

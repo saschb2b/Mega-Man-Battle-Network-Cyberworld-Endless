@@ -80,7 +80,8 @@ typedef struct {
 	                   2 side by side (protocol v15, issue #181; square_arena.c) */
 	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
 	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
-	                   copies, a mutation that must part the two */
+	                   copies, a mutation that must part the two; -2 the partners' NaviCusts compiled over this game's own
+	                   checkpoint's state, not the way in's (as before issue #181's review), a mutation that must part the games */
 	int team_pa;    /* teampa=1: under arena2v2 side 0's partner's folder opens with Cannon A, B and C as its Regular chip and
 	                   TagChips, his first hand a Program Advance (arena_team_custom.h); -1 the same, the PA left out of his
 	                   hand on the second GBA alone, a mutation that must part the two */

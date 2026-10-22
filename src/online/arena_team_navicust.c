@@ -2,6 +2,7 @@
 #include "arena_team_navicust.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <mgba/core/core.h>
@@ -54,11 +55,17 @@ static void core_write8(void *context, uint32_t address, uint8_t value) {
 	c->rawWrite8(c, address, -1, value);
 }
 
+/* a core for the compile, over `video`, its picture's buffer (the call's alone: no static of a frame's picture) */
+static struct mCore *compile_core(uint32_t *video, const uint8_t *state, const OnlineLoadout *l, const uint8_t *out) {
+	return video && R.data && state && l && out ? arena_core_new(R.data, ROM_SIZE, video, false) : NULL;
+}
+
 bool team_navicust_compile(const uint8_t *state, size_t n, const OnlineLoadout *l, uint8_t *out, char *why, size_t wn) {
-	static uint32_t video[ARENA_W * ARENA_H];
 	if (why && wn) *why = 0;
-	struct mCore *c = R.data && state && l && out ? arena_core_new(R.data, ROM_SIZE, video, false) : NULL;
+	uint32_t *video = malloc(sizeof(uint32_t) * ARENA_W * ARENA_H);
+	struct mCore *c = compile_core(video, state, l, out);
 	if (!c) {
+		free(video);
 		if (why && wn) snprintf(why, wn, "no core for the compile");
 		return false;
 	}
@@ -81,5 +88,6 @@ bool team_navicust_compile(const uint8_t *state, size_t n, const OnlineLoadout *
 	}
 	if (h) hook_detach(c);
 	arena_core_free(c);
+	free(video);
 	return ok;
 }

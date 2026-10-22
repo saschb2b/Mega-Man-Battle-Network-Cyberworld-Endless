@@ -15,12 +15,16 @@
 #include "devtools.h"
 #include "free_space.h"
 #include "hook.h"
+#include "soullife.h"
+#include "soulunite.h"
+#include "team_check.h"
 
 #define SIDES     2
 #define FOLDER    BN6_FOLDER_ENTRIES
 #define NONE8     0xFFu
 #define NONE16    0xFFFFu
 #define POWER_COMPUTED 1000   /* a record's power from here on is a routine's number (BN6_CHIP_COMPUTED_POWER) */
+#define SOUL_COLONEL   7      /* BN5's Soul 7, ColonelSoul: the one whose button takes a chip (arena_team_soul.h) */
 
 /* A side's room in RAM_TEAM_CUSTOM, the same in both cores (our own
  * layout, not the game's): */
@@ -58,6 +62,8 @@ static struct {
 	unsigned dealt[SIDES], said[SIDES], late[SIDES], set[SIDES], taken[SIDES], chips[SIDES], limits[SIDES];
 	unsigned held[SIDES];             /* the most frames his side's GBA held for him in a turn */
 	unsigned crosses[SIDES], pas[SIDES];   /* his Crosses and Program Advances said */
+	TeamAllowed allowed[SIDES];       /* what his MegaMan holds, as every game was given it: what his messages may say */
+	unsigned refused[SIDES];          /* his messages refused by team_check.h's rules, every core's */
 } C;
 
 static uint32_t room(unsigned side) { return RAM_TEAM_CUSTOM + (side & 1u) * ROOM_SIZE; }
@@ -76,6 +82,12 @@ void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t reg
 	C.regular[side] = regular;
 	C.tags[side][0] = tags ? tags[0] : NONE8;
 	C.tags[side][1] = tags ? tags[1] : NONE8;
+}
+
+void arena_team_custom_allow(unsigned side, const TeamAllowed *allowed) {
+	side &= 1u;
+	if (allowed) C.allowed[side] = *allowed;
+	else memset(&C.allowed[side], 0, sizeof C.allowed[side]);
 }
 
 void arena_team_custom_begin(void) {
@@ -170,6 +182,43 @@ static unsigned deck_here(unsigned side) {
 	return n;
 }
 
+/* his hand as his screen was dealt it: the first chips of his deck as it stands (BN6's slots, TEAM_CHECK_DEALT at most) */
+static unsigned hand_dealt(unsigned side, uint16_t out[TEAM_CHECK_DEALT]) {
+	unsigned n = deck_here(side);
+	if (n > TEAM_CHECK_DEALT) n = TEAM_CHECK_DEALT;
+	for (unsigned i = 0; i < n; ++i) out[i] = C.folder[side][hook_read8(room(side) + R_DECK + i) % FOLDER];
+	return n;
+}
+
+/* a message of his refused, said in the output on each core as it runs (a rollback's frames run again among them) */
+static void refuse(unsigned side, const char *what, const char *why) {
+	++C.refused[side];
+	printf("arena2v2: core %d: side %u's partner's %s refused: %s\n", hook_slot(), side, what, why);
+}
+
+static uint32_t rom_read(void *context, uint32_t at, unsigned bytes) {
+	(void)context;
+	return bytes == 1 ? hook_read8(at) : bytes == 2 ? hook_read16(at) : hook_read32(at);
+}
+
+/* his picks as his screen made them (and the Program Advance his OK made of them) checked by its rules: NULL, or why not */
+static const char *picks_checked(unsigned side, const uint8_t *slots, unsigned n) {
+	uint16_t hand[TEAM_CHECK_DEALT];
+	unsigned dealt = hand_dealt(side, hand);
+	const char *why = team_check_picks(hand, dealt, slots, n);
+	uint8_t pa = hook_read8(room(side) + R_PA);
+	if (why || !(pa & 0xFu)) return why;
+	unsigned at = (pa & 0xFu) - 1u, took = 3u + (pa >> 4 & 1u);
+	if (at + took > n) return "a Program Advance past his picks";
+	uint16_t parts[TEAM_CHECK_PICKS];
+	for (unsigned i = 0; i < took; ++i) {
+		if (slots[at + i] >= dealt) return "a Program Advance of a pick that is no chip";
+		parts[i] = hand[slots[at + i]];
+	}
+	const uint32_t lists[2] = { hook_read32(BN6_PA_LIST_REF), hook_read32(BN6_PA_LIST_LINK_REF) };
+	return team_check_pa(rom_read, NULL, lists, BN6_PA_FIRST + hook_read8(room(side) + R_PA_ID), parts, took);
+}
+
 unsigned arena_team_custom_deck(struct mCore *c, unsigned side, uint16_t out[30]) {
 	side &= 1u;
 	if (!c || !get8(c, room(side) + R_DEALT)) return 0;
@@ -184,11 +233,22 @@ static void commit(unsigned side) {
 	uint32_t r = room(side);
 	unsigned n = hook_read8(r + R_PICKED), left = deck_here(side), k = 0, d = 0;
 	if (n > TEAM_CUSTOM_PICKS) n = TEAM_CUSTOM_PICKS;
+	/* (picks no screen of his could make: none taken, his Program Advance with them, on every GBA alike) */
+	uint8_t slots[TEAM_CUSTOM_PICKS];
+	for (unsigned i = 0; i < n; ++i) slots[i] = hook_read8(r + R_PICKS + i);
+	const char *why = picks_checked(side, slots, n);
+	if (why) {
+		refuse(side, "picks", why);
+		printf("arena2v2: core %d: (his %u picks' slots %u %u %u %u %u, his deck's %u left)\n", hook_slot(), n, slots[0],
+			n > 1 ? slots[1] : 0, n > 2 ? slots[2] : 0, n > 3 ? slots[3] : 0, n > 4 ? slots[4] : 0, left);
+		n = 0;
+		put8(r + R_PA, 0);
+	}
 	uint8_t deck[FOLDER];
 	bool gone[FOLDER] = { false };
 	for (unsigned i = 0; i < FOLDER; ++i) deck[i] = hook_read8(r + R_DECK + i);
 	for (unsigned i = 0; i < n; ++i) {
-		uint8_t slot = hook_read8(r + R_PICKS + i);
+		uint8_t slot = slots[i];
 		if (slot >= left || gone[slot]) continue;
 		gone[slot] = true;
 		put8(r + R_TAKE + k++, deck[slot]);
@@ -206,6 +266,24 @@ static void commit(unsigned side) {
 	C.chips[side] += k;
 }
 
+/* his Soul's message (index 1, his UNITE) or ColonelSoul's chip (2 and 3), checked: a Soul refused takes the proxy form with it */
+static void soul_said(unsigned side, unsigned index, unsigned slot, bool second) {
+	const char *why;
+	if (index == 1) {
+		unsigned soul = slot & 0xFu, chaos = slot >> 4 & 1u;
+		why = team_check_soul(soul, chaos, soulunite_held_bit((int)soul), &C.allowed[side], team_soul_used(side));
+		if (why && hook_read8(room(side) + R_CROSS) == BN6_FORM_PROXY) put8(room(side) + R_CROSS, 0);
+	} else {
+		uint16_t hand[TEAM_CHECK_DEALT];
+		unsigned dealt = hand_dealt(side, hand);
+		uint32_t o = hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
+		bool colonel = team_soul_next(side) == SOUL_COLONEL || (o >= BN6_EWRAM && o < BN6_EWRAM_END && soul_id_of(o) == SOUL_COLONEL);
+		why = team_check_soul_chip((index - 2) << 8 | (slot & 0xFFu), colonel, hand, dealt);
+	}
+	if (why) refuse(side, index == 1 ? "Soul" : "ColonelSoul's chip", why);
+	else team_soul_said(side, index, slot, second);
+}
+
 /* a pick message of his: the pick kept; the last of them puts his picks
  * in (set at once where his side's screen has closed) */
 static void pick_said(unsigned side, uint16_t value, bool second) {
@@ -214,9 +292,15 @@ static void pick_said(unsigned side, uint16_t value, bool second) {
 	uint8_t state = hook_read8(r + R_STATE);
 	/* (his Cross, said before his picks while his turn is open: the form his own CROSSSELECT committed) */
 	if (count == TEAM_CROSS_COUNT) {
+		if (state != ST_OPEN) return;
 		/* (the Soul his UNITE committed, said after it: into his own Souls block, arena_team_soul.h) */
-		if (index && state == ST_OPEN) team_soul_said(side, index, slot, second);
-		else if (!index && state == ST_OPEN && slot && slot < BN6_FORMS) {
+		if (index) soul_said(side, index, slot, second);
+		else {
+			const char *why = team_check_form(slot, &C.allowed[side]);
+			if (why) {
+				refuse(side, "Cross", why);
+				return;
+			}
 			put8(r + R_CROSS, (uint8_t)slot);
 			++C.crosses[side];
 		}
@@ -237,6 +321,12 @@ static void pick_said(unsigned side, uint16_t value, bool second) {
 	if (count && index + 1 < count) return;
 	put8(r + R_PICKED, (uint8_t)count);
 	++C.said[side];
+	/* (his turn's messages all in, his picks the last: the Souls' proxy form with no Soul his UNITE committed is no form, on
+	 * every GBA alike; one already entered has left R_CROSS empty, arena_team_custom_cross_taken) */
+	if (hook_read8(r + R_CROSS) == BN6_FORM_PROXY && !team_soul_next(side)) {
+		put8(r + R_CROSS, 0);
+		refuse(side, "Cross", "UNITE with no Soul said");
+	}
 	if (state == ST_WAITING) {
 		++C.late[side];
 		commit(side);
@@ -262,8 +352,12 @@ static void held_frame(unsigned side, uint32_t r) {
 	put16(r + R_WAIT, (uint16_t)held);
 	if (held > C.held[side]) C.held[side] = held;
 	if (held < TEAM_WAIT_LIMIT || hook_read8(r + R_LIMIT)) return;
+	/* (marked said once queued: a full outbox, which a turn never fills, tries again the next frame, never lost) */
+	if (!team_link_say(side, TEAM_PICK(0, 0, 0))) {
+		printf("arena2v2: side %u's GBA at the wait's limit: his outbox full, his picks none said the next frame\n", side);
+		return;
+	}
 	put8(r + R_LIMIT, 1);
-	team_link_say(side, TEAM_PICK(0, 0, 0));
 	++C.limits[side];
 	printf("arena2v2: side %u's GBA held %u frames for its partner, the wait's limit: his picks none, said in his place\n", side,
 		held);
@@ -410,7 +504,8 @@ void arena_team_custom_report(void) {
 		printf("arena2v2: side %u's partner's own deck dealt %u times (%s folder; the seed %08X on the first GBA, %08X on the "
 			"second), his picks said %u times in his stream (%u after his side's Custom screen closed), set %u times (%u chips) "
 			"and taken into his hand %u times, every core's; his side's GBA held for him %u frames at most in a turn, %u times "
-			"to the limit; his Cross said %u times, a Program Advance %u\n", side, C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0],
-			(unsigned)C.seed[side][1], C.said[side], C.late[side], C.set[side], C.chips[side], C.taken[side], C.held[side],
-			C.limits[side], C.crosses[side], C.pas[side]);
+			"to the limit; his Cross said %u times, a Program Advance %u; %u of his messages refused by his screen's rules\n", side,
+			C.dealt[side], C.given[side] ? "his own" : "his lead's", (unsigned)C.seed[side][0], (unsigned)C.seed[side][1],
+			C.said[side], C.late[side], C.set[side], C.chips[side], C.taken[side], C.held[side], C.limits[side], C.crosses[side],
+			C.pas[side], C.refused[side]);
 }

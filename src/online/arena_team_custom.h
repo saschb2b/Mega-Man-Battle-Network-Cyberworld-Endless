@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "team_check.h"
 
 struct mCore;
 
@@ -76,6 +77,9 @@ unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, un
  * 9, 0xFFFF none), its Regular chip and TagChips (entries, 0xFF none);
  * folder NULL: his side's lead's, as his side's GBA holds it */
 void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t regular, const uint8_t tags[2]);
+/* side's partner's MegaMan's Crosses, Beast Out and Souls, as every game
+ * was given them (NULL none): what his messages may say (team_check.h) */
+void arena_team_custom_allow(unsigned side, const TeamAllowed *allowed);
 /* from the spawn's hook: the core's decks and turns emptied, to be dealt anew */
 void arena_team_custom_begin(void);
 /* From the pair, before side's GBA (core) runs a frame: his lead's

@@ -119,6 +119,11 @@ static void slot_be(int side, int slot) {
  * unites, 0 none; *chaos 1 for a DarkChip of its kind. Its kind as BN5 has
  * it (soulkinds.h), the first Soul of that kind this version's and held,
  * not united this battle (its Chaos Unison apart). */
+int soulunite_held_bit(int soul) {
+	int k = soul >= 1 && soul <= SOULS_BN5 ? flags5[soul - 1] - BN5_FLAG_SOUL : -1;
+	return k >= 0 && k < TEAM_SOULS ? k : -1;
+}
+
 static int lights(int side, int *chaos) {
 	int n = hook_read8(BN6_CUSTOM_PICKED);
 	if (!n) return 0;

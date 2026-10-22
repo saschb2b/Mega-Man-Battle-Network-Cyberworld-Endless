@@ -19,6 +19,8 @@
 #include "bn6.h"
 #include "stands_report.h"
 #include "stands_wire.h"
+#include "team_check.h"
+#include "team_outbox.h"
 #include "watch_keys.h"
 
 static void buffer(void) {
@@ -906,6 +908,82 @@ static void pet_text(void) {
 	assert(strstr(arena_waiting_for("Beta"), "Beta's PET"));
 }
 
+/* a partner's outbox (team_outbox.h): a turn's nine messages and room to spare, first in first out round its end, a push past
+ * it refused and nothing written, then taken again once one has gone out (the wait's limit's "no picks" so never lost) */
+static uint8_t outbox_ram[0x40];
+static uint8_t ob_read8(void *c, uint32_t at) { (void)c; return outbox_ram[at]; }
+static void ob_write8(void *c, uint32_t at, uint8_t v) { (void)c; outbox_ram[at] = v; }
+
+static void outbox(void) {
+	const TeamMem m = { ob_read8, ob_write8, NULL };
+	const uint32_t room = 0x20;
+	uint16_t v;
+	assert(TEAM_OUTBOX >= 9 + 3 && TEAM_OUTBOX_SIZE <= 0x1A);
+	assert(!team_outbox_pop(&m, room, &v));
+	for (unsigned turn = 0; turn < 3; ++turn) {            /* (three turns' worth: the entries go round) */
+		for (uint16_t k = 0; k < 9; ++k) assert(team_outbox_push(&m, room, (uint16_t)(0x8000u | turn << 8 | k)));
+		for (uint16_t k = 0; k < 9; ++k) assert(team_outbox_pop(&m, room, &v) && v == (0x8000u | turn << 8 | k));
+	}
+	for (uint16_t k = 0; k < TEAM_OUTBOX; ++k) assert(team_outbox_push(&m, room, (uint16_t)(0x9000u + k)));
+	uint8_t before[sizeof outbox_ram];
+	memcpy(before, outbox_ram, sizeof before);
+	assert(!team_outbox_push(&m, room, 0x8000u));          /* (full: refused, the RAM as it was) */
+	assert(!memcmp(before, outbox_ram, sizeof before) && team_outbox_count(&m, room) == TEAM_OUTBOX);
+	assert(team_outbox_pop(&m, room, &v) && v == 0x9000u);
+	assert(team_outbox_push(&m, room, 0x8000u));           /* (the limit's "no picks" taken once one went out) */
+	for (uint16_t k = 1; k < TEAM_OUTBOX; ++k) assert(team_outbox_pop(&m, room, &v) && v == 0x9000u + k);
+	assert(team_outbox_pop(&m, room, &v) && v == 0x8000u && !team_outbox_count(&m, room));
+	for (uint32_t at = 0; at < room; ++at) assert(!outbox_ram[at]);   /* (another room untouched) */
+}
+
+/* a partner's messages checked (team_check.h): BN6's picks (the hand dealt, once each, one code with '*' or one chip, five at
+ * most), the forms his MegaMan holds, his Souls once a battle, ColonelSoul's chip, and a Program Advance against made-up
+ * lists in BN6's recipe layout (n, kind, its id, its chips) */
+#define E(chip, code) ((uint16_t)((chip) | (code) << 9))
+static uint8_t pa_rom[0x80];
+static uint32_t pa_read(void *c, uint32_t at, unsigned bytes) {
+	(void)c;
+	at -= 0x08000000u;
+	uint32_t v = 0;
+	for (unsigned i = 0; i < bytes; ++i) v |= (uint32_t)pa_rom[at + i] << 8 * i;
+	return v;
+}
+
+static void checks(void) {
+	const uint16_t hand[10] = { E(1, 0), E(1, 1), E(1, 2), E(12, 0), E(5, 26), E(7, 3), E(1, 26), E(9, 0), E(9, 0), E(9, 0) };
+	const uint8_t cannons[3] = { 0, 1, 2 }, code_a[3] = { 0, 3, 4 }, mixed[2] = { 1, 3 }, star[3] = { 6, 3, 7 };
+	const uint8_t twice[2] = { 1, 1 }, past[1] = { 5 }, six[6] = { 0, 1, 2, 6, 3, 4 };
+	assert(!team_check_picks(hand, 10, cannons, 3));       /* (one chip, three codes) */
+	assert(!team_check_picks(hand, 10, code_a, 3));        /* (one code, '*' with it) */
+	assert(!team_check_picks(hand, 10, star, 3));          /* ('*' first, then A) */
+	assert(team_check_picks(hand, 10, mixed, 2));          /* (Cannon B and HiCannon A: neither) */
+	assert(team_check_picks(hand, 10, twice, 2) && team_check_picks(hand, 5, past, 1) && team_check_picks(hand, 10, six, 6));
+	assert(!team_check_picks(hand, 10, cannons, 0));
+	const uint8_t emblem[3] = { 11, 0, 1 };                 /* (the Beast Out emblem among the picks: passed over) */
+	assert(!team_check_picks(hand, 10, emblem, 3));
+	const TeamAllowed heat_beast = { 1u << 0, 1u << 2, true }, none = { 0, 0, false };
+	assert(!team_check_form(1, &heat_beast) && team_check_form(2, &heat_beast) && !team_check_form(11, &heat_beast));
+	assert(!team_check_form(13, &heat_beast) && team_check_form(14, &heat_beast) && team_check_form(11, &none));
+	assert(!team_check_form(8, &heat_beast) && team_check_form(8, &none) && team_check_form(23, &heat_beast));
+	assert(!team_check_soul(9, 0, 2, &heat_beast, 0) && team_check_soul(9, 0, 2, &heat_beast, 1u << 9));
+	assert(!team_check_soul(9, 1, 2, &heat_beast, 1u << 9) && team_check_soul(7, 0, 0, &heat_beast, 0));
+	assert(team_check_soul(9, 0, -1, &heat_beast, 0) && team_check_soul(13, 0, 2, &heat_beast, 0));
+	assert(!team_check_soul_chip(7, true, hand, 10) && team_check_soul_chip(7, false, hand, 10) && team_check_soul_chip(9, true, hand, 7));
+	/* (two lists: the first a kind-4 recipe, Cannon Cannon HiCannon into 320; the second a kind-0 one, three Cannon in a row
+	 * into 336) */
+	memset(pa_rom, 0, sizeof pa_rom);
+	const uint8_t recipes[] = { 3, 4, 0x40, 0x01, 1, 0, 1, 0, 12, 0, 3, 0, 0x50, 0x01, 1, 0 };
+	memcpy(pa_rom + 0x40, recipes, sizeof recipes);
+	pa_rom[0x00] = 0x40; pa_rom[0x03] = 0x08;               /* (list 1 at +0: its one recipe at +0x40, then 0) */
+	pa_rom[0x10] = 0x4A; pa_rom[0x13] = 0x08;               /* (list 2 at +0x10: the recipe at +0x4A) */
+	const uint32_t lists[2] = { 0x08000000u, 0x08000010u };
+	const uint16_t kind4[3] = { E(1, 0), E(1, 0), E(12, 0) }, row[3] = { E(1, 1), E(1, 26), E(1, 3) };
+	const uint16_t gap[3] = { E(1, 1), E(1, 3), E(1, 4) }, stars[3] = { E(1, 26), E(1, 26), E(1, 3) };
+	assert(!team_check_pa(pa_read, NULL, lists, 320, kind4, 3) && team_check_pa(pa_read, NULL, lists, 336, kind4, 3));
+	assert(!team_check_pa(pa_read, NULL, lists, 336, row, 3) && team_check_pa(pa_read, NULL, lists, 336, gap, 3));
+	assert(team_check_pa(pa_read, NULL, lists, 336, stars, 3) && team_check_pa(pa_read, NULL, lists, 320, kind4, 2));
+}
+
 int main(void) {
 	pet_text();
 	formats();
@@ -923,6 +1001,8 @@ int main(void) {
 	stands();
 	watch_keys();
 	report();
+	outbox();
+	checks();
 	puts("test_arena: ok");
 	return 0;
 }

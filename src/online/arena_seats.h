@@ -11,6 +11,8 @@
 #define CW_ARENA_SEATS_H
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "online_snapshot.h"
 
@@ -33,5 +35,16 @@ void arena_seats_unite_folder(OnlineLoadout *l);
 /* the partners' MegaMen (side 0's, side 1's; NULL: the game's start's,
  * his lead's folder and numbers), before the pair is built */
 void arena_seats_partners(const OnlineLoadout *partner[2]);
+/* ... one side's MegaMan for the way in to compile (NULL none: his
+ * record his side's with his loadout's numbers); the dev flag's
+ * stood-in partners' too */
+void arena_seats_partner(unsigned side, const OnlineLoadout *l);
+/* From the way in (arena_boot.c), over `base`, the boot's own state (n
+ * bytes: the game's start, the same bytes on every game and spectator):
+ * each given partner's NaviCust compiled by BN6's own reload
+ * (arena_team_navicust.h), his record from it; false (the reason in
+ * `why`) where one could not be, and the way in fails on every game
+ * alike, no game left with another record */
+bool arena_seats_compile(const uint8_t *base, size_t n, char *why, size_t wn);
 
 #endif
