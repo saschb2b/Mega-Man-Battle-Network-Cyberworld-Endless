@@ -133,3 +133,12 @@ by anyone; the owner chooses.
 Devices used in the sketches (not yet in a trailer): ping-pong 32nds, a
 power chord diving, triad samples over other basses, a skank on the
 off-beats, the square and a bell talking in thirds, a Lydian lift.
+
+The owner chose sketch A by ear (22 October 2026) and allowed FluidR3 GM
+(MIT) in a Docker image. Sketch A through its samples (`sketch_a_sf.py`:
+notes and chords cut into 10512 Hz 8-bit samples, played by the same MP2K
+model) measured nearer the recording's tone than the kit's own (tonal
+share 83% against 84%; the kit's 80%). It grew into 0.14.0's piece
+(`v0_14_0_music.py`, 20 bars), which renders in either sound (`SOUND`);
+with the soundfont it renders in `docker/Dockerfile.music`'s image and
+keeps its 3DS banner as `3ds/banner-0.14.0.wav`.
