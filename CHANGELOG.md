@@ -32,7 +32,12 @@
   shows the four MegaMen, a partner's seat his own HP box, the result
   card each one's HP left and the team's WIN or LOSE; a stall says whose
   PET it waits for, and anyone else in the channel can watch from the
-  stands. Protocol v15: a game must be as new as the server to play.
+  stands. Four players of different runs build the same battle: each
+  partner's NaviCust is worked out over the battle's own starting state,
+  never a player's save, and a partner's choices that his own Custom
+  screen could not have made (a chip outside his hand, a Cross he lacks,
+  a Soul he does not hold) are refused on every game alike. Protocol v15:
+  a game must be as new as the server to play.
 - **DarkInvs on the challenged player's side of a NetBattle (issue
   #182).** Under full rules, the second player's DarkInvs (or ShadowSoul's
   Chaos Unison, which uses it) moved his MegaMan's AI data into the one

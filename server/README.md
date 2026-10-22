@@ -229,7 +229,7 @@ splits it or leaves), and a challenge between players of two teams
 begins a relay instead of a battle. Each team's captain names its lead,
 blind (30 seconds, then he leads himself); each bout is an Arena battle
 whose two fighters both say they are ready before it starts; the
-winner (the cable's first's report) stays, the loser's partner comes in,
+winner (the cable's first's report; an OVER from another seat is ignored) stays, the loser's partner comes in,
 and the team with no MegaMan standing loses. A leave or a drop breaks the
 match off for both teams. The server keeps teams and matches in memory
 only and writes `team`, `team_match`, `team_bout` and `team_over` events

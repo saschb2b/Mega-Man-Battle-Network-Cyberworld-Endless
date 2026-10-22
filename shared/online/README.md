@@ -321,7 +321,8 @@ calls the first bout. A bout is an ARENA battle between the two teams'
 MegaMen up (stage 7, its ID in TEAM_STATE): each of its two fighters
 sends ARENA 2 when his game is ready, and START goes to both once both
 have; stage 8 tells all four it started, and the two others' games
-watch it (WATCH). As it ends (ARENA 4 from the cable's first) its
+watch it (WATCH). As it ends (ARENA 4 from the cable's first; another
+seat's ARENA 4 is ignored, side by side too) its
 winner is the cable's first's report (ARENA_STATUS's winner): the
 loser's team's next MegaMan comes in, both where it has none; a team
 with no MegaMan standing ends the match (stage 9, each told his team's

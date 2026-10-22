@@ -583,10 +583,12 @@ wait for (`-1`: a client gone quiet, which never picks nor sends, so the
 wait's limit ends it); `teambuster=N` (1-5) gives both partners' records their
 buster's Attack N, as their own loadouts would. Where the data folder
 has a checkpoint, side 0's partner's NaviCust is compiled by BN6's own
-reload on a core of his client (ONLINE_ARENA.md, His NaviCust, compiled
-by BN6), and `teamcust=1` gives side 1's partner the checkpoint's
-MegaMan's NaviCust too (`-1`: the second GBA's records their sides'
-copies, the mutation). `teamcross=N` (1-5) offers each partner Cross N on
+reload over the way in's own state (ONLINE_ARENA.md, His NaviCust,
+compiled by BN6), and `teamcust=1` gives side 1's partner the
+checkpoint's MegaMan's NaviCust too (`-1`: the second GBA's records their
+sides' copies, the mutation; `-2`: the NaviCusts compiled over this
+game's own checkpoint's state instead, as before issue #181's review, a
+mutation that parts the games of different runs). `teamcross=N` (1-5) offers each partner Cross N on
 his own CROSSSELECT and has his stood-in client take it at his first turn
 (`-N`: none on the second GBA, the mutation); `teambeast=1` offers each
 partner Beast Out on his own Custom screen and has his client take its
