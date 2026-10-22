@@ -3094,7 +3094,12 @@ and Cross 2 under 40 ms lag and 30 ms jitter over at 1856, 30 hashes,
 iterations 0 apart on all five; Beta's UNITE beside Delta's Beast Out
 over at 967, 16 hashes agreed and checked, 390 iterations 0 apart on all
 five; the drop stopped at frame 190 on the three, the frozen game given
-up at 1,200 ticks, both broken off (result 3).
+up at 1,200 ticks, both broken off (result 3). A Team NetBattle one by
+one on the same build (the relay of [Team NetBattles](#team-netbattles),
+`teamform=1`, its own harness): bout 1 over at frame 2689 (44 hashes
+agreed), bout 2 at 531 (8), bout 3 at 3167 (52), the players waiting
+watching each from the stands (44 and 8 hashes checked), the match over
+for both teams.
 
 The partner's own client, seen from Beta's seat (seat 2, the pictures
 kept out of the repository): the way in's four plates (Alpha and Beta on
