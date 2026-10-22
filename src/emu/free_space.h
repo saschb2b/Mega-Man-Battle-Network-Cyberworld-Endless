@@ -84,8 +84,8 @@
 #define RAM_PLAYER_AI_END   0x02011730u   /* ... then: */
 #define RAM_TEAM            0x02011730u   /* --dev arena2v2's list of what the Practice NetBattle spawns (arena_team.c, epic #167), to: */
 #define RAM_TEAM_END        0x02011750u   /* ... then: */
-#define RAM_TEAM_RING       0x02011750u   /* ... the partners' keys queued by the battle loop's iteration, 8 a side (arena_team.c), to: */
-#define RAM_TEAM_RING_END   0x02011790u   /* ... then: */
+#define RAM_TEAM_LINK       0x02011750u   /* ... the partners' words for and from BN6's packets, 0x20 bytes a side (arena_team_link.c), to: */
+#define RAM_TEAM_LINK_END   0x02011790u   /* ... then: */
 #define RAM_TEAM_CUSTOM     0x02011790u   /* ... each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c), to: */
 #define RAM_TEAM_CUSTOM_END 0x02011800u
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */

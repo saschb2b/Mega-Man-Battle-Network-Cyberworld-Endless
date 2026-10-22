@@ -8,16 +8,18 @@
  * spectator deals the same. His Custom screen is BN6's own, on a core of
  * his own client outside the pair (arena_team_screen.h); what it decides
  * crosses in his stream as pick messages (TEAM_PICK_*: each pick a value
- * of the stream), which the pair takes as it samples his side's GBA's
- * frames. As that GBA's screen closes with his picks in (or as they come
- * in after it), they are set for the iteration it is at plus BN6's link
- * delay, in both GBAs' RAM, and each GBA writes them into his own hand
- * (arena_team_navi.h) at that iteration, plus chips merged into the chip
- * before them as BN6's hand merges them. The deck, the turn's state and
- * the picks live in both cores' RAM (RAM_TEAM_CUSTOM), so a rollback puts
- * them back and the pair's hash covers them; the folder, the same on
- * every client, is folded into the hash. Research, never a player's
- * battle. */
+ * of the stream), which come to both GBAs in his side's GBA's packets
+ * (arena_team_link.h). Each GBA works his turn out from them on its own:
+ * his deck dealt as its Custom screen first opens, his picks in as their
+ * last message comes, and as the screen closes with them in (or as they
+ * come in after it) they are set for the battle loop's next iteration and
+ * written into his own hand there (arena_team_navi.h), plus chips merged
+ * into the chip before them as BN6's hand merges them. Both GBAs read the
+ * same packets at the same frame of their battles, so each keeps the same
+ * turn without a byte written across from the other. The deck, the turn's
+ * state and the picks live in each core's RAM (RAM_TEAM_CUSTOM), so a
+ * rollback puts them back and the pair's hash covers them; the folder,
+ * the same on every client, is folded into the hash. */
 #ifndef CW_ARENA_TEAM_CUSTOM_H
 #define CW_ARENA_TEAM_CUSTOM_H
 
@@ -71,13 +73,17 @@ unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, un
 void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t regular, const uint8_t tags[2]);
 /* from the spawn's hook: the core's decks and turns emptied, to be dealt anew */
 void arena_team_custom_begin(void);
-/* From the pair, as side's GBA (core[side]) begins a frame of its own
- * clock: his deck dealt where it is not, his turn begun with BN6's Custom
- * screen there, a pick message of his stream taken, his picks set for
- * that GBA's iteration plus `delay` once its screen has closed and they
- * are in, in both cores. The keys his battle takes for the frame: none
- * while that screen is open, nor in a pick message. */
-uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t value, uint32_t delay);
+/* From the pair, before side's GBA (core) runs a frame: his lead's
+ * folder read from it where his own was not given */
+void arena_team_custom_sampled(struct mCore *core, unsigned side);
+/* From a hook, each frame side's packet comes with `word` (his keys or a
+ * message, arena_team_link.h): his deck dealt where it is not, his turn
+ * begun with BN6's Custom screen, a message taken, the wait's frames
+ * counted on his side's GBA, his picks set for the battle loop's next
+ * iteration once its screen has closed and they are in (`second`: the
+ * cable's second GBA, for the output). The keys his battle takes: none
+ * while that screen is open, nor in a message's frame. */
+uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second);
 /* from the key copy's hook at iteration `tick`: each partner's picks set
  * for it written into his own hand at `hand[side]` (`second`: the second
  * GBA's core, where teampick=-1 leaves a chip short and teampa=-1 his

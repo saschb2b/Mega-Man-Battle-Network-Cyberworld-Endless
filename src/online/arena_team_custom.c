@@ -7,6 +7,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_input.h"
+#include "arena_team_link.h"
 #include "bn6.h"
 #include "chips.h"
 #include "devtools.h"
@@ -37,17 +38,18 @@
 #define R_PA_ID    0x34   /* ... its chip less BN6_PA_FIRST; */
 #define R_TAKE_PA  0x35   /* ... the two as his picks were set (R_TAKE's) */
 #define R_TAKE_PA_ID 0x36
+#define R_LIMIT    0x37   /* 1 once his side's GBA has said the wait's limit this turn (its own core's alone) */
 
 /* his turn: no Custom screen; his side's GBA's open, his picks not in yet;
  * open with them in; closed before they came */
 enum { ST_CLOSED, ST_OPEN, ST_IN, ST_WAITING };
 
 _Static_assert(RAM_TEAM_CUSTOM + SIDES * ROOM_SIZE <= RAM_TEAM_CUSTOM_END, "the partners' decks and turns past their room");
-_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= R_CROSS && R_TAKE_PA_ID < ROOM_SIZE,
+_Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= R_CROSS && R_LIMIT < ROOM_SIZE,
 	"a partner's turn's fields overlap");
 
 static struct {
-	bool given[SIDES];
+	bool given[SIDES];                /* his folder given (a carried MegaMan's), else read from his side's GBA */
 	uint16_t folder[SIDES][FOLDER];   /* the folder dealt (given, or read as the deck was dealt) */
 	uint8_t regular[SIDES], tags[SIDES][2];
 	uint32_t seed[SIDES][SIDES];      /* the seed each GBA's RNG gave, by the side dealt: what the output says */
@@ -60,13 +62,9 @@ static uint32_t room(unsigned side) { return RAM_TEAM_CUSTOM + (side & 1u) * ROO
 
 static uint8_t get8(struct mCore *c, uint32_t at) { return (uint8_t)c->rawRead8(c, at, -1); }
 static uint16_t get16(struct mCore *c, uint32_t at) { return (uint16_t)c->rawRead16(c, at, -1); }
-/* (both cores alike: what a partner's turn keeps is the same in both GBAs' RAM) */
-static void put8(struct mCore *core[2], uint32_t at, uint8_t v) {
-	for (unsigned g = 0; g < SIDES; ++g) core[g]->rawWrite8(core[g], at, -1, v);
-}
-static void put16(struct mCore *core[2], uint32_t at, uint16_t v) {
-	for (unsigned g = 0; g < SIDES; ++g) core[g]->rawWrite16(core[g], at, -1, v);
-}
+/* (from a hook: this core's own, worked out on each GBA from the same packets) */
+static void put8(uint32_t at, uint8_t v) { hook_write8(at, v); }
+static void put16(uint32_t at, uint16_t v) { hook_write16(at, v); }
 
 void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t regular, const uint8_t tags[2]) {
 	side &= 1u;
@@ -97,6 +95,12 @@ static void lead_folder(struct mCore *c, unsigned side) {
 	C.tags[side][1] = get8(c, k == 1 ? BN6_NAVI_FOLDER2_TAG2 : BN6_NAVI_FOLDER1_TAG2);
 }
 
+/* (each side's GBA's core, as the pair last handed it a frame: his lead's folder read from it as his deck is dealt, a
+ * folder that stays as it is for the battle, so that a core dealing before or after its partner reads the same) */
+static struct mCore *side_core[SIDES];
+
+void arena_team_custom_sampled(struct mCore *core, unsigned side) { side_core[side & 1u] = core; }
+
 static uint32_t xorshift(uint32_t *s) {
 	*s ^= *s << 13;
 	*s ^= *s >> 17;
@@ -109,9 +113,8 @@ static uint32_t xorshift(uint32_t *s) {
  * shuffle ours, seeded by his side's GBA's random number as the deck is
  * dealt (both GBAs keep it alike), so that every client and spectator
  * deals the same */
-static void deal(struct mCore *core[2], unsigned side) {
-	struct mCore *own = core[side];
-	if (!C.given[side]) lead_folder(own, side);
+static void deal(unsigned side, bool second) {
+	if (!C.given[side] && side_core[side]) lead_folder(side_core[side], side);
 	/* (teampa=1: side 0's partner's folder opens with Cannon A, B and C as its Regular chip and TagChips, dealt first: a Program
 	 * Advance in his first hand) */
 	if (dev.team_pa && side == 0) {
@@ -132,8 +135,8 @@ static void deal(struct mCore *core[2], unsigned side) {
 	fixed = n;
 	for (uint8_t i = 0; i < FOLDER; ++i)
 		if (!used[i] && dealable(C.folder[side][i])) deck[n++] = i;
-	for (unsigned g = 0; g < SIDES; ++g) C.seed[side][g] = (uint32_t)core[g]->rawRead32(core[g], BN6_RNG_PRIMARY, -1);
-	uint32_t s = C.seed[side][side] ^ (0x9E3779B9u * (side + 1));
+	uint32_t s = C.seed[side][second] = hook_read32(BN6_RNG_PRIMARY);
+	s ^= 0x9E3779B9u * (side + 1);
 	if (!s) s = 1;
 	for (unsigned i = n; i > (unsigned)fixed + 1; --i) {
 		unsigned j = fixed + xorshift(&s) % (i - fixed);
@@ -141,14 +144,20 @@ static void deal(struct mCore *core[2], unsigned side) {
 		deck[i - 1] = deck[j];
 		deck[j] = t;
 	}
-	for (unsigned i = 0; i < FOLDER; ++i) put8(core, room(side) + R_DECK + i, i < n ? deck[i] : NONE8);
-	put8(core, room(side) + R_DEALT, 1);
+	for (unsigned i = 0; i < FOLDER; ++i) put8(room(side) + R_DECK + i, i < n ? deck[i] : NONE8);
+	put8(room(side) + R_DEALT, 1);
 	++C.dealt[side];
 }
 
 static unsigned deck_left(struct mCore *c, unsigned side) {
 	unsigned n = 0;
 	while (n < FOLDER && get8(c, room(side) + R_DECK + n) != NONE8) ++n;
+	return n;
+}
+
+static unsigned deck_here(unsigned side) {
+	unsigned n = 0;
+	while (n < FOLDER && hook_read8(room(side) + R_DECK + n) != NONE8) ++n;
 	return n;
 }
 
@@ -160,45 +169,44 @@ unsigned arena_team_custom_deck(struct mCore *c, unsigned side, uint16_t out[30]
 	return n;
 }
 
-/* his side's GBA's screen closed and his picks in: set for its iteration
- * plus the delay, taken out of his deck */
-static void commit(struct mCore *core[2], unsigned side, uint32_t delay) {
-	struct mCore *own = core[side];
+/* his side's screen closed and his picks in: set for the battle loop's
+ * next iteration, taken out of his deck */
+static void commit(unsigned side) {
 	uint32_t r = room(side);
-	unsigned n = get8(own, r + R_PICKED), left = deck_left(own, side), k = 0, d = 0;
+	unsigned n = hook_read8(r + R_PICKED), left = deck_here(side), k = 0, d = 0;
 	if (n > TEAM_CUSTOM_PICKS) n = TEAM_CUSTOM_PICKS;
 	uint8_t deck[FOLDER];
 	bool gone[FOLDER] = { false };
-	for (unsigned i = 0; i < FOLDER; ++i) deck[i] = get8(own, r + R_DECK + i);
+	for (unsigned i = 0; i < FOLDER; ++i) deck[i] = hook_read8(r + R_DECK + i);
 	for (unsigned i = 0; i < n; ++i) {
-		uint8_t slot = get8(own, r + R_PICKS + i);
+		uint8_t slot = hook_read8(r + R_PICKS + i);
 		if (slot >= left || gone[slot]) continue;
 		gone[slot] = true;
-		put8(core, r + R_TAKE + k++, deck[slot]);
+		put8(r + R_TAKE + k++, deck[slot]);
 	}
 	for (unsigned i = 0; i < FOLDER; ++i)
-		if (!gone[i]) put8(core, r + R_DECK + d++, deck[i]);
-	while (d < FOLDER) put8(core, r + R_DECK + d++, NONE8);
-	uint32_t at = (uint32_t)own->rawRead32(own, RAM_TEAM_TICK, -1) + delay;
-	put8(core, r + R_TAKEN, (uint8_t)k);
-	put16(core, r + R_TAKE_AT, (uint16_t)(at ? at : 1));
-	put8(core, r + R_TAKE_PA, get8(own, r + R_PA));
-	put8(core, r + R_TAKE_PA_ID, get8(own, r + R_PA_ID));
-	put8(core, r + R_STATE, ST_CLOSED);
+		if (!gone[i]) put8(r + R_DECK + d++, deck[i]);
+	while (d < FOLDER) put8(r + R_DECK + d++, NONE8);
+	uint32_t at = hook_read32(RAM_TEAM_TICK) + 1;
+	put8(r + R_TAKEN, (uint8_t)k);
+	put16(r + R_TAKE_AT, (uint16_t)(at ? at : 1));
+	put8(r + R_TAKE_PA, hook_read8(r + R_PA));
+	put8(r + R_TAKE_PA_ID, hook_read8(r + R_PA_ID));
+	put8(r + R_STATE, ST_CLOSED);
 	++C.set[side];
 	C.chips[side] += k;
 }
 
-/* a pick message of his stream: the pick kept; the last of them puts his
- * picks in (set at once where his side's GBA's screen has closed) */
-static void pick_said(struct mCore *core[2], unsigned side, uint16_t value, uint32_t delay) {
+/* a pick message of his: the pick kept; the last of them puts his picks
+ * in (set at once where his side's screen has closed) */
+static void pick_said(unsigned side, uint16_t value) {
 	uint32_t r = room(side);
 	unsigned count = value >> 11 & 7u, index = value >> 8 & 7u, slot = value & 0xFFu;
-	uint8_t state = get8(core[side], r + R_STATE);
+	uint8_t state = hook_read8(r + R_STATE);
 	/* (his Cross, said before his picks while his turn is open: the form his own CROSSSELECT committed) */
 	if (count == TEAM_CROSS_COUNT) {
 		if (state == ST_OPEN && slot && slot < BN6_FORMS) {
-			put8(core, r + R_CROSS, (uint8_t)slot);
+			put8(r + R_CROSS, (uint8_t)slot);
 			++C.crosses[side];
 		}
 		return;
@@ -207,59 +215,61 @@ static void pick_said(struct mCore *core[2], unsigned side, uint16_t value, uint
 	if (count == TEAM_PA_COUNT) {
 		unsigned took = 3u + (slot >> 5 & 1u), id = BN6_PA_FIRST + (slot & 0x1Fu);
 		if (state == ST_OPEN && index < TEAM_CUSTOM_PICKS && id <= BN6_PA_LAST) {
-			put8(core, r + R_PA, (uint8_t)((index + 1) | (took - 3) << 4));
-			put8(core, r + R_PA_ID, (uint8_t)(id - BN6_PA_FIRST));
+			put8(r + R_PA, (uint8_t)((index + 1) | (took - 3) << 4));
+			put8(r + R_PA_ID, (uint8_t)(id - BN6_PA_FIRST));
 			++C.pas[side];
 		}
 		return;
 	}
 	if (count > TEAM_CUSTOM_PICKS || (count && index >= count) || (state != ST_OPEN && state != ST_WAITING)) return;
-	if (count) put8(core, r + R_PICKS + index, (uint8_t)slot);
+	if (count) put8(r + R_PICKS + index, (uint8_t)slot);
 	if (count && index + 1 < count) return;
-	put8(core, r + R_PICKED, (uint8_t)count);
+	put8(r + R_PICKED, (uint8_t)count);
 	++C.said[side];
 	if (state == ST_WAITING) {
 		++C.late[side];
-		commit(core, side, delay);
-	} else put8(core, r + R_STATE, ST_IN);
+		commit(side);
+	} else put8(r + R_STATE, ST_IN);
 }
 
-uint16_t arena_team_custom_frame(struct mCore *core[2], unsigned side, uint16_t value, uint32_t delay) {
+/* a turn begun: picks that never came for the last one dropped */
+static void turn_open(uint32_t r) {
+	put8(r + R_STATE, ST_OPEN);
+	put8(r + R_PICKED, 0);
+	put8(r + R_OWED, 0);
+	put16(r + R_WAIT, 0);
+	put8(r + R_CROSS, 0);
+	put8(r + R_PA, 0);
+	put8(r + R_LIMIT, 0);
+}
+
+/* (his side's GBA holding for him, its own core alone: its frames counted; at TEAM_WAIT_LIMIT it says his picks none in his
+ * stream's place, which comes to both GBAs in its packet as his own would) */
+static void held_frame(unsigned side, uint32_t r) {
+	unsigned held = hook_read16(r + R_WAIT) + 1u;
+	put16(r + R_WAIT, (uint16_t)held);
+	if (held > C.held[side]) C.held[side] = held;
+	if (held < TEAM_WAIT_LIMIT || hook_read8(r + R_LIMIT)) return;
+	put8(r + R_LIMIT, 1);
+	team_link_say(side, TEAM_PICK(0, 0, 0));
+	++C.limits[side];
+	printf("arena2v2: side %u's GBA held %u frames for its partner, the wait's limit: his picks none, said in his place\n", side,
+		held);
+}
+
+uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
 	side &= 1u;
-	struct mCore *own = core[side];
 	uint32_t r = room(side);
-	bool custom = get8(own, BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, said = (value & TEAM_PICK_MARK) != 0;
-	if (custom && !get8(own, r + R_DEALT)) deal(core, side);
-	uint8_t state = get8(own, r + R_STATE);
-	/* (a turn begun: picks that never came for the last one dropped) */
-	if (custom && (state == ST_CLOSED || state == ST_WAITING)) {
-		put8(core, r + R_STATE, ST_OPEN);
-		put8(core, r + R_PICKED, 0);
-		put8(core, r + R_OWED, 0);
-		put16(core, r + R_WAIT, 0);
-		put8(core, r + R_CROSS, 0);
-		put8(core, r + R_PA, 0);
-	}
-	if (said) pick_said(core, side, value, delay);
-	state = get8(own, r + R_STATE);
-	/* (his side's GBA held for him: its frames counted; past TEAM_WAIT_LIMIT his picks are in as they stand, none if none
-	 * came, and it goes on) */
-	if (custom && state == ST_OPEN && get8(own, r + R_OWED)) {
-		unsigned held = get16(own, r + R_WAIT) + 1u;
-		put16(core, r + R_WAIT, (uint16_t)held);
-		if (held > C.held[side]) C.held[side] = held;
-		if (held >= TEAM_WAIT_LIMIT) {
-			put8(core, r + R_PICKED, 0);
-			put8(core, r + R_STATE, ST_IN);
-			++C.limits[side];
-			printf("arena2v2: side %u's GBA held %u frames for its partner, the wait's limit: his picks none, the screen goes on\n",
-				side, held);
-			state = ST_IN;
-		}
-	}
-	if (!custom && state == ST_IN) commit(core, side, delay);
-	else if (!custom && state == ST_OPEN) put8(core, r + R_STATE, ST_WAITING);
-	return custom || said ? 0 : (uint16_t)(value & ARENA_KEYS_MASK);
+	bool custom = hook_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, said = (word & TEAM_PICK_MARK) != 0;
+	if (custom && !hook_read8(r + R_DEALT)) deal(side, second);
+	uint8_t state = hook_read8(r + R_STATE);
+	if (custom && (state == ST_CLOSED || state == ST_WAITING)) turn_open(r);
+	if (said) pick_said(side, word);
+	state = hook_read8(r + R_STATE);
+	if (custom && state == ST_OPEN && hook_read8(r + R_OWED)) held_frame(side, r);
+	if (!custom && state == ST_IN) commit(side);
+	else if (!custom && state == ST_OPEN) put8(r + R_STATE, ST_WAITING);
+	return custom || said ? 0 : (uint16_t)(word & ARENA_KEYS_MASK);
 }
 
 /* side's partner's picks into his hand at `h`, as BN6 writes a side's

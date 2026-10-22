@@ -73,22 +73,27 @@ static uint16_t busy_keys(uint32_t frame) {
  * MASK: a side in it takes its chip so too, and uses it in the fight */
 static bool peer_plays(unsigned side) { return (dev.arena_peer >> side) & 1; }
 
+/* (teambeast=3: the leads too take Beast Out each turn, their partners' control: the cursor right to OK, down to the emblem,
+ * A, then up and OK, again every 300 frames until the screen closes) */
+static uint16_t beast_lead_keys(uint32_t t) {
+	unsigned b = t % 300;
+	return b >= 40 && b < 100 ? ((b - 40) % 12 < 4 ? KEY_RIGHT : 0) : b >= 104 && b < 107 ? KEY_DOWN :
+		(b >= 116 && b < 119) || (b >= 212 && b < 215) ? KEY_A : b >= 200 && b < 203 ? KEY_UP : 0;
+}
+
+/* a lead's keys in the fight: arenapeer=MASK's chip used every four seconds, side 0 a second before side 1, B let go a
+ * while before it so that no charged shot of arenaboth's is under way as A comes; arena2v2's R every 600 frames */
+static uint16_t fight_keys(unsigned side, uint32_t t, uint16_t keys) {
+	unsigned u = t % 240, at = 60u + 60 * side;
+	if (peer_plays(side) && u >= at && u < at + 8) return KEY_A;
+	if (peer_plays(side) && u >= at - 30 && u < at) return 0;
+	return dev.arena_2v2 > 0 && !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+}
+
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
 	if ((dev.arena_2v2 <= 0 && !peer_plays(side)) || !S.arena) return keys;
-	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) {
-		/* (arenapeer=MASK: the chip taken used every four seconds, side 0 a second before side 1) */
-		if (peer_plays(side) && t % 240 >= 60u + 60 * side && t % 240 < 68u + 60 * side) return KEY_A;
-		/* (... B let go a while before it, so that no charged shot of arenaboth's is under way as A comes) */
-		if (peer_plays(side) && t % 240 >= 30u + 60 * side && t % 240 < 60u + 60 * side) return 0;
-		return dev.arena_2v2 > 0 && !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
-	}
-	/* (teambeast=3: the leads too take Beast Out each turn, their partners' control: the cursor right to OK, down to the
-	 * emblem, A, then up and OK, again every 300 frames until the screen closes) */
-	if (dev.team_beast >= 3) {
-		unsigned b = t % 300;
-		return b >= 40 && b < 100 ? ((b - 40) % 12 < 4 ? KEY_RIGHT : 0) : b >= 104 && b < 107 ? KEY_DOWN :
-			(b >= 116 && b < 119) || (b >= 212 && b < 215) ? KEY_A : b >= 200 && b < 203 ? KEY_UP : 0;
-	}
+	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return fight_keys(side, t, keys);
+	if (dev.team_beast >= 3) return beast_lead_keys(t);
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 

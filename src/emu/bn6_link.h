@@ -22,6 +22,24 @@
 #define BN6_AI_UP             0x26        /* ... let go this iteration, */
 #define BN6_AI_LAST           0x28        /* ... and the last iteration's held (bn6f's JoypadReleased) */
 #define BN6_KEYS_VALID        0xFC00u
+/* A link battle's packet, one a frame each way (docs/ONLINE_ARENA.md, The partners' words in BN6's packet; bn6f sub_801FF18,
+ * sub_803EE98) */
+#define BN6_LINK_OUT          0x02036780u /* this GBA's packet, eight u16 the battle writes each frame (bn6f eStruct2036780): +0 the
+                                             mark (the pad's high byte, 0xFC) and +1 its sequence (the link's frame, 0x0803EE6C), +2 the
+                                             pad held (BN6_KEYS_VALID set), +4 the word stream's index (0xFF none) and +8 its word, +6
+                                             the battle's ready flags, +0xC the link's state, +0xE and +0xF the library's status */
+#define BN6_LINK_IN           0x020399F0u /* both sides' packets of the exchange the link took this frame, BN6_LINK_PACKET apart, side
+                                             0's first, every GBA alike; the battle takes each side's pad from its +2 where its mark is
+                                             set (0x0801FF2A) */
+#define BN6_LINK_PACKET       0x10
+#define BN6_LINK_PAD          0x02
+#define BN6_LINK_SPARE_LO     0x05        /* a packet's two bytes nothing of BN6's writes or reads (+4's and +6's other halves: every
+                                             writer of BN6_LINK_OUT and reader of BN6_LINK_IN stores and loads those two as bytes) */
+#define BN6_LINK_SPARE_HI     0x07
+#define BN6_LINK_PAD_STORE    0x0801FF8Cu /* strh r1,[r5,#2]: sub_801FF18's store of this frame's pad into BN6_LINK_OUT (r5), both
+                                             sides' packets read before it (0x0801FF2A-0x0801FF82) */
+#define BN6_LINK_PAD_STORE_B  0x08020062u /* ... the same in sub_801FFD6, the other of the battle's link routines (0x0801FEEE's table),
+                                             its argument at [sp,#4]: bit 3 set, the packets not read this frame */
 /* A Navi's battle NaviStats (BN6_BATTLE_NAVI, BN6_BATTLE_NAVI_SIZE a side): every reader and writer takes its side's */
 #define BN6_NAVI_STATS_ADDR   0x08013682u /* r0 the side: its battle NaviStats' address in r0, eBattleNaviStats0 in r1, by mov pc,lr, no push
                                              (bn6f GetBattleNaviStatsAddr) */
