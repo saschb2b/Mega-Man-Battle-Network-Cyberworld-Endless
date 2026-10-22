@@ -125,6 +125,13 @@ static void deal(unsigned side, bool second) {
 		C.tags[side][0] = 1;
 		C.tags[side][1] = 2;
 	}
+	/* (teamunite=2: each stood-in partner's folder opens with Atk+10 *, a Plus chip that lights NumberSoul: a UNITE of three
+	 * turns where the Souls held have it) */
+	if (dev.team_unite == 2 && !arena_seats_net()) {
+		C.folder[side][0] = (uint16_t)(BN6_CHIP_ATK10 | 26u << 9);
+		C.regular[side] = 0;
+		C.tags[side][0] = C.tags[side][1] = NONE8;
+	}
 	uint8_t deck[FOLDER], n = 0, fixed = 0;
 	bool used[FOLDER] = { false };
 	uint8_t first[3] = { C.regular[side], NONE8, NONE8 };

@@ -599,7 +599,9 @@ Program Advance (`-1`: the PA left out of his hand on the second GBA, the
 mutation); `teamunite=1` gives each partner's own Custom screen the
 carried MegaMan's Souls (BN5's installs' hooks on his side's GBA of his
 copy) and has his client take the chip under the cursor and UNITE at his
-first turn (`-1`: his Soul left out on the second GBA, the mutation; with
+first turn (`2`: each one's folder opening with Atk+10 `*`, a Plus chip:
+NumberSoul's unison of three turns where the Souls held have it; `-1`:
+his Soul left out on the second GBA, the mutation; with
 `CYBERWORLD_EMU_DEBUG` a partner's Soul taken up and ended are said by
 core: "side 0's partner united with Soul 9 ..."). On a partner's own
 game in a side-by-side match from the Square (with `arenaboth`, his
