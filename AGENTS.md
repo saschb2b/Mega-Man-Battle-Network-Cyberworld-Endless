@@ -104,6 +104,10 @@ the site.
   Screenshots of whole frames of the game running, for the README and the
   site, are allowed; crops that isolate a sprite, a logo or a mugshot as an
   asset are not.
+- Where BN6 has a screen for something (the Custom screen, chip select,
+  menus, chat boxes), drive BN6's own code to show it (a spare core
+  outside a battle's determinism if need be); never redraw a copy. Our
+  own drawing is for what BN6 has no screen for.
 - Patch only the core's in-memory ROM copy, and put new data in the free
   space map in `docs/EMULATION.md`, its place a region of
   `src/emu/free_space.h` (RAM BN6 leaves alone too), which
@@ -183,7 +187,10 @@ new ROM behavior, offset, hook, transplant, save format or emulated link.
 Addresses stay in `docs/ROM_DATA.md` and claims in `docs/SOURCES.md`;
 `docs/re/` holds where the work stands (`ledger.json`, written out by
 `tools/re_status.py` as `STATUS.md` and the dashboard), not a second
-address map.
+address map. Every ROM fact a piece of work finds, research included, ends
+in the project's map: a name in a `src/emu/bn6*.h` header, its
+`docs/ROM_DATA.md` row, `tools/symbols.py` run, a ledger entry; notes in
+`.build/` alone are lost to it.
 
 ## Game design
 
@@ -211,6 +218,18 @@ page and its Japanese one, and the README's alt text, are rewritten for
 it. The release's notes open with it (`../clips/trailer-play.png` linking
 `../clips/trailer.mp4`, both kept by the tag). An older trailer stays at
 its release's tag and still renders from its cut, into `.build/` only.
+
+## Pull requests
+
+PRs target `dev` and are merged by hand once CI is green; commits carry
+only the author (no Co-Authored-By). A PR's description is short and
+shows the change: a line or two on what changes, **See it** (pictures or
+GIFs, before and after where something visible changed), a short
+**Checked** list, and follow-ups if any; the mechanism stays in the
+commits and docs. Its pictures (whole frames of the game or pages of the
+site, never a sprite cropped out) go on the orphan branch `pr-media`
+under `prs/<branch>/`, embedded by their raw URL at that branch's commit;
+motion as a GIF, which GitHub plays inline.
 
 ## Build and verify
 
@@ -343,7 +362,7 @@ tiles, palettes and OBJs back to ROM offsets.
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
-| Release | A new trailer where the release earns one (Trailers), made before the tag; device run on the Nova and the Flip 2, `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main` |
+| Release | A new trailer where the release earns one (Trailers), made before the tag; `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; runs on real devices are the owner's, after the release, and no blocker |
 
 ## Device testing
 
@@ -358,5 +377,5 @@ game with `tools/uinput_keys.py` and capture with `grim`. Update the
 installed port in `/storage/roms/ports/cyberworld/` only when asked, never
 overwrite a player's `savedata/`, and compare save hashes before and after.
 
-When handing off, state what changed, what ran, and what is unverified on
-hardware.
+When handing off, state what changed and what ran. Runs on real devices
+are the owner's, after a release: not a blocker, and not listed as open.
