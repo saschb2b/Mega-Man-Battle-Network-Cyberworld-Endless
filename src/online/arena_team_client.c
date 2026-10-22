@@ -27,9 +27,11 @@
 typedef struct {
 	TeamScreen *screen;
 	bool turn;                        /* his side's GBA's Custom screen open, his own set up for it */
-	uint16_t out[TEAM_CUSTOM_PICKS + 1];  /* his Cross and pick messages to go out, one a frame */
+	uint16_t out[TEAM_CUSTOM_PICKS + 2];  /* his Cross, Program Advance and pick messages to go out, one a frame */
+	uint16_t deck[BN6_FOLDER_ENTRIES];    /* his deck as his turn opened (his screen dealt from it) */
+	unsigned dealt;
 	unsigned queued, sent;
-	unsigned opened, oks, closed_first, at_limit, crossed;
+	unsigned opened, oks, closed_first, at_limit, crossed, pas;
 	unsigned frames;                  /* his turn's frames so far (teamslow's) */
 	unsigned t;                       /* ... every one (teamcross's script) */
 } Client;
@@ -118,7 +120,24 @@ static uint16_t cross_keys(const Client *c, uint32_t frame) {
 		? KEY_A : 0;
 }
 
-/* his Cross (where his CROSSSELECT committed one) and his picks into his stream, one a frame */
+/* a Program Advance his OK made: the picks it took (from at, took of them) found as the hand BN6 built has them, each place
+ * and count tried through the pair's own build; false where none gives BN6's hand */
+static bool pa_found(const Client *c, const uint8_t *picks, unsigned n, uint16_t pa, const uint16_t *built, unsigned *at,
+	unsigned *took) {
+	uint16_t entries[TEAM_CUSTOM_PICKS];
+	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) entries[i] = picks[i] < c->dealt ? c->deck[picks[i]] : 0xFFFFu;
+	for (*took = 3; *took <= 4; ++*took)
+		for (*at = 0; *at + *took <= n; ++*at) {
+			TeamHand h;
+			unsigned k = team_hand_build(entries, n, *at + 1, *took, pa, &h), same = 1;
+			for (unsigned i = 0; i < BN6_HAND_MAX && same; ++i) same = (i < k ? h.id[i] : 0xFFFFu) == built[i] || i > k;
+			if (same) return true;
+		}
+	return false;
+}
+
+/* his Cross (where his CROSSSELECT committed one), a Program Advance (where his OK made one) and his picks into his stream,
+ * one a frame */
 static void say(Client *c, const uint8_t *picks, unsigned n) {
 	c->queued = c->sent = 0;
 	uint8_t form = team_screen_cross(c->screen);
@@ -126,6 +145,14 @@ static void say(Client *c, const uint8_t *picks, unsigned n) {
 		c->out[c->queued++] = TEAM_CROSS(form);
 		++c->crossed;
 	}
+	uint16_t built[BN6_HAND_MAX], pa = team_screen_pa(c->screen, built);
+	unsigned at, took;
+	if (pa && pa_found(c, picks, n, pa, built, &at, &took)) {
+		c->out[c->queued++] = TEAM_PA(at, took, pa);
+		++c->pas;
+		printf("arena2v2: a partner's Program Advance %03X from his picks %u to %u, as BN6's OK built it on his screen\n", pa, at,
+			at + took - 1);
+	} else if (pa) printf("arena2v2: a partner's Program Advance %03X not found among his picks: his picks cross alone\n", pa);
 	if (!n) c->out[c->queued++] = TEAM_PICK(0, 0, 0);
 	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) c->out[c->queued++] = TEAM_PICK(n, i, picks[i]);
 }
@@ -164,9 +191,8 @@ uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame) {
 		c->turn = false;
 	} else if (!c->turn) {
 		/* (once the pair has dealt his deck: its first frame of the battle) */
-		uint16_t deck[BN6_FOLDER_ENTRIES];
-		unsigned n = arena_team_custom_deck(gba, side, deck);
-		c->turn = n && team_screen_open(c->screen, arena_pair_of(a), deck, n);
+		unsigned n = c->dealt = arena_team_custom_deck(gba, side, c->deck);
+		c->turn = n && team_screen_open(c->screen, arena_pair_of(a), c->deck, n);
 		c->queued = c->sent = 0;
 		c->frames = c->t = 0;
 		c->opened += c->turn;
@@ -215,7 +241,7 @@ void team_client_report(void) {
 		if (!c->screen) continue;
 		printf("arena2v2: side %u's partner's client: BN6's Custom screen on a plain copy of the pair opened %u times (a copy %.2f ms, "
 			"the worst %.2f), OK pressed %u times, %u times his side's closed first, %u times sent at the wait's limit; a frame of "
-			"it %.2f ms (the worst %.2f); his Cross sent %u times\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
-			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true), c->crossed);
+			"it %.2f ms (the worst %.2f); his Cross sent %u times, a Program Advance %u\n", s, c->opened, team_screen_copy_ms(c->screen, false), team_screen_copy_ms(c->screen, true),
+			c->oks, c->closed_first, c->at_limit, team_screen_ms(c->screen, false), team_screen_ms(c->screen, true), c->crossed, c->pas);
 	}
 }

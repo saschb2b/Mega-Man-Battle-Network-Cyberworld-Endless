@@ -41,6 +41,7 @@ typedef struct {
 	uint8_t late[HOOK_CORES][ITERATIONS];    /* the sides whose partner's slot held no keys for the iteration */
 	uint8_t at[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
 	uint32_t last[HOOK_CORES];               /* the last iteration each met */
+	uint32_t parted;                         /* the first iteration they were met apart (0 none yet) */
 } TeamLog;
 static TeamLog *T;
 
@@ -151,7 +152,7 @@ static HookAct keys(HookRegs *r, void *user) {
 	 * on the second GBA alone, the mutation) */
 	int slot = hook_slot();
 	const uint32_t hands[SIDES] = { arena_team_navi_hand(0), arena_team_navi_hand(1) };
-	arena_team_custom_take(tick, hands, dev.team_pick < 0 && T && slot == T->slot[1]);
+	arena_team_custom_take(tick, hands, T && slot == T->slot[1]);
 	bool kept = T && slot >= 0 && slot < HOOK_CORES && tick < ITERATIONS;
 	uint8_t late = 0;
 	for (unsigned side = 0; side < SIDES; ++side) {
@@ -175,6 +176,12 @@ static HookAct keys(HookRegs *r, void *user) {
 		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[slot][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
 		T->digest[slot][tick] = digest(slot, tick);
 		if (tick > T->last[slot]) T->last[slot] = tick;
+		/* (the first iteration the two GBAs part at, said as it is met: a mutation's battle may never end to be reported) */
+		int other = slot == T->slot[0] ? T->slot[1] : T->slot[0];
+		if (!T->parted && other >= 0 && other < HOOK_CORES && T->last[other] >= tick && T->digest[other][tick] != T->digest[slot][tick]) {
+			T->parted = tick;
+			printf("arena2v2: the two GBAs part at iteration %u\n", (unsigned)tick);
+		}
 	}
 	return HOOK_CONTINUE;
 }

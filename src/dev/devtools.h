@@ -79,6 +79,9 @@ typedef struct {
 	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
 	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
 	                   copies, a mutation that must part the two */
+	int team_pa;    /* teampa=1: under arena2v2 side 0's partner's folder opens with Cannon A, B and C as its Regular chip and
+	                   TagChips, his first hand a Program Advance (arena_team_custom.h); -1 the same, the PA left out of his
+	                   hand on the second GBA alone, a mutation that must part the two */
 	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
 	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
 	                   Cross none, a mutation that must part the two */

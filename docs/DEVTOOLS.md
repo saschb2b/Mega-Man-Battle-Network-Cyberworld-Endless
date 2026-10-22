@@ -581,7 +581,17 @@ picks' mutation; `teamslow=N` keeps side 0's partner's hands off his
 screen for the first N frames of each turn, a slow partner the leads
 wait for (`-1`: a client gone quiet, which never picks nor sends, so the
 wait's limit ends it); `teambuster=N` (1-5) gives both partners' records their
-buster's Attack N, as their own loadouts would. `teamhp=N` gives each partner his own
+buster's Attack N, as their own loadouts would. Where the data folder
+has a checkpoint, side 0's partner's NaviCust is compiled by BN6's own
+reload on a core of his client (ONLINE_ARENA.md, His NaviCust, compiled
+by BN6), and `teamcust=1` gives side 1's partner the checkpoint's
+MegaMan's NaviCust too (`-1`: the second GBA's records their sides'
+copies, the mutation). `teamcross=N` (1-5) offers each partner Cross N on
+his own CROSSSELECT and has his stood-in client take it at his first turn
+(`-N`: none on the second GBA, the mutation); `teampa=1` opens side 0's
+partner's folder with Cannon A, B and C, his first hand Z-Canon1, a
+Program Advance (`-1`: the PA left out of his hand on the second GBA, the
+mutation). `teamhp=N` gives each partner his own
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side

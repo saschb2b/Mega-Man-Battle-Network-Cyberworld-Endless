@@ -55,6 +55,11 @@
 #define BN6_CHIP_ATK10        0xC0        /* the plus chips the hand's merge (bn6f sub_8029224, 0x08029224) adds to the chip before: Atk+10 and */
 #define BN6_CHIP_ATK30        0xC3        /* ... Atk+30 to one with BN6_CHIP_SHOWS_POWER, */
 #define BN6_CHIP_NAVI20       0xC1        /* ... Navi+20 to one with BN6_CHIP_NAVI_FLAG */
+#define BN6_CHIP_CANNON       0x01        /* Cannon: three in a row of codes (A, B, C) picked in order are a Program Advance, */
+#define BN6_PA_ZCANNON1       0x140       /* ... this one (a record of OK's check 0x08029520: count 3, kind 0, this id, chip 1) */
+#define BN6_PA_FIRST          0x140       /* the Program Advances' chip ids, the first and the last of the records OK's check walks (its tables'
+                                             words at 0x080295B4 and 0x080295B8: 30 records, 3 or 4 chips each) */
+#define BN6_PA_LAST           0x15D
 #define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
 #define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
 #define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f

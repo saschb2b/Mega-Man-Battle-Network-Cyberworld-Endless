@@ -23,6 +23,9 @@ struct TeamScreen {
 	unsigned side;           /* his side's GBA there */
 	bool open;               /* a turn under way, his OK not yet pressed */
 	uint8_t mode;            /* BN6_CUSTOM_MODE the frame before */
+	bool pa;                 /* his OK made a Program Advance: his hand read once BN6 has shown it */
+	uint16_t built[BN6_HAND_MAX];   /* the hand BN6 built at his last OK (its chips), */
+	uint16_t pa_id;          /* ... the Program Advance in it (0 none) */
 	uint8_t crosses;         /* his own Crosses (bit i Gregar's Cross i, BN6_FLAG_HEAT_CROSS's order) */
 	uint32_t used;           /* ... those he has chosen this battle (BN6_CROSSES_USED's), kept from his last OK */
 	double ms, worst, copy, copy_worst;
@@ -101,11 +104,20 @@ bool team_screen_frame(TeamScreen *s, uint16_t keys, uint8_t *picks, unsigned *n
 	++s->frames;
 	if (!ran) { s->open = false; return false; }
 	struct mCore *c = arena_pair_core(s->pair, s->side);
-	uint8_t mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1);
-	bool ok = mode != s->mode && mode == BN6_MODE_OK;
+	uint8_t mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1), was = s->mode;
 	s->mode = mode;
-	if (!ok) return false;
+	/* (his OK; where it made a Program Advance, BN6 shows it first: his hand is whole once the screen waits for the cable) */
+	bool ok = mode != was && mode == BN6_MODE_OK, pa = c->rawRead8(c, BN6_CUSTOM_NEXT, -1) == BN6_MODE_PA;
+	if (ok && pa) s->pa = true;
+	if (!(ok && !pa) && !(s->pa && mode != was && mode == BN6_MODE_WAIT)) return false;
 	*n = team_screen_picks(s, picks);
+	/* (the hand BN6 built, BN6_CUSTOM_BUILT, and the Program Advance in it) */
+	s->pa_id = 0;
+	for (unsigned i = 0; i < BN6_HAND_MAX; ++i) {
+		s->built[i] = (uint16_t)c->rawRead16(c, BN6_CUSTOM_BUILT + BN6_HAND_CHIPS + 2 * i, -1);
+		if (s->pa && !s->pa_id && s->built[i] >= BN6_PA_FIRST && s->built[i] <= BN6_PA_LAST) s->pa_id = s->built[i];
+	}
+	s->pa = false;
 	s->open = false;
 	return true;
 }
@@ -128,6 +140,11 @@ uint8_t team_screen_cross(TeamScreen *s) {
 	/* (the Crosses he has chosen, kept for his next turn's CROSSSELECT) */
 	s->used = (uint32_t)c->rawRead32(c, BN6_CROSSES_USED, -1);
 	return form && form < BN6_FORMS ? form : 0;
+}
+
+uint16_t team_screen_pa(const TeamScreen *s, uint16_t *built) {
+	for (unsigned i = 0; i < BN6_HAND_MAX; ++i) built[i] = s->built[i];
+	return s->pa_id;
 }
 
 void team_screen_close(TeamScreen *s) { s->open = false; }

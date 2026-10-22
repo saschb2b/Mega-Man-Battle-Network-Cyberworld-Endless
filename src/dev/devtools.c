@@ -60,7 +60,7 @@ static bool dev_switch(const char *t) {
 		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "arenafreeze=", &dev.arena_freeze }, { "arenaseed=", &dev.arena_seed }, { "arenaagain=", &dev.arena_again },
 		{ "arenaseedoff=", &dev.arena_seed_off }, { "teamseat=", &dev.team_seat }, { "teampick=", &dev.team_pick }, { "teambuster=", &dev.team_buster },
-		{ "teamslow=", &dev.team_slow }, { "teamcust=", &dev.team_cust }, { "teamcross=", &dev.team_cross },
+		{ "teamslow=", &dev.team_slow }, { "teamcust=", &dev.team_cust }, { "teamcross=", &dev.team_cross }, { "teampa=", &dev.team_pa },
 	};
 	for (size_t i = 0; i < sizeof flags / sizeof *flags; ++i)
 		if (!strcmp(t, flags[i].name)) { *flags[i].on = true; return true; }

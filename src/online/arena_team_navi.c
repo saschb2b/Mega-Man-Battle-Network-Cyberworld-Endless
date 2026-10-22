@@ -203,6 +203,7 @@ uint32_t arena_team_navi_digest(uint32_t h) {
 		for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) h = (h ^ hook_read16(room(side) + f)) * 16777619u;
 		h = (h ^ hook_read8(hand(side) + BN6_HAND_AT)) * 16777619u;
 		h = (h ^ hook_read8(room(side) + BN6_NAVI_FORM)) * 16777619u;
+		for (unsigned i = 0; i < BN6_HAND_MAX; ++i) h = (h ^ hook_read16(hand(side) + BN6_HAND_CHIPS + 2 * i)) * 16777619u;
 	}
 	return h;
 }
