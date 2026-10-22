@@ -188,6 +188,22 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.server.teams.matches)
         self.assertEqual(len(self.server.teams.of), 4)                       # (the teams stay, for another)
 
+    async def test_the_relay_takes_a_bouts_over_from_its_first_side_alone(self):
+        a, b, c, d = await self.four()
+        await a[0].send(team(teams.ORDER, a[1]))
+        await c[0].send(team(teams.ORDER, c[1]))
+        called, side = await self.bout(a, c)
+        first, second = (a, c) if side == 0 else (c, a)
+        await second[0].send(status(called["bout"], 0, 50, winner=2))
+        await second[0].send(arena(4, called["bout"]))                # (the second side's over: ignored)
+        await asyncio.sleep(0.1)
+        self.assertTrue(self.server.arena.matches)
+        self.assertEqual(self.server.teams.matches[next(iter(self.server.teams.matches))].number, 1)
+        await first[0].send(status(called["bout"], 30, 0, winner=1))
+        await first[0].send(arena(4, called["bout"]))                 # (the first's: bout 1 over, bout 2 called)
+        called2 = await self.state(a[0], teams.BOUT, 2)
+        self.assertEqual(called2["number"], 2)
+
     async def test_a_drop_mid_match_breaks_it_off_for_both_teams(self):
         a, b, c, d = await self.four()
         await a[0].send(team(teams.ORDER, a[1]))
@@ -331,10 +347,22 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         other, _ = await self.connect("Epsilon")
         await other.send(arena(1, d[1], 20))                           # (a partner, mid-battle: busy)
         self.assertEqual(await self.notice(other), 16)
-        await d[0].send(arena(4, bout))                                # (an over from a partner's seat ends it too ...)
+        await a[0].send(arena(4, bout))                                # (the cable's first's over, with no report ...)
         for who in (a, b, c, d):
-            # (... with no report: no winner, both teams out at once)
+            # (... no winner, both teams out at once)
             self.assertEqual((await self.state(who[0], teams.OVER))["result"], teams.DRAWN)
+
+    async def test_side_by_side_an_over_from_any_seat_but_the_first_is_ignored(self):
+        (a, b, c, d), bout = await self.side_by_side()
+        for who in (b, c, d):                                          # (a partner's, and the second GBA's player's)
+            await who[0].send(arena(4, bout))
+        await asyncio.sleep(0.1)
+        self.assertTrue(self.server.arena.matches)                     # (the battle goes on)
+        self.assertTrue(self.server.teams.matches)
+        await a[0].send(status(bout, 0, 70, winner=2))
+        await a[0].send(arena(4, bout))
+        for who, result in ((a, teams.LOST), (b, teams.LOST), (c, teams.WON), (d, teams.WON)):
+            self.assertEqual((await self.state(who[0], teams.OVER))["result"], result)
 
     async def test_a_lone_challenge_names_no_format(self):
         a, b = [await self.connect(n) for n in ("Alpha", "Beta")]

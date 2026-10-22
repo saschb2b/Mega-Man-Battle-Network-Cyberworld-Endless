@@ -185,7 +185,11 @@ class Arena:
             match.latency[player.id] = latency
             self.start(match)
         else:
-            # (a leave, a decline, or the battle over on one side: both told)
+            # (OVER is the cable's first's alone, seat 0, whose report decides the battle: the client sends it from there, and
+            # another seat's, a partner's or the second GBA's player's, is ignored, the battle going on: issue #181's review)
+            if action == OVER and player.id != match.a:
+                return
+            # (a leave, a decline, or the battle over: everyone told)
             if action == OVER and match.started:
                 self.server.daily.count("battles_finished")
                 match.finished = True
