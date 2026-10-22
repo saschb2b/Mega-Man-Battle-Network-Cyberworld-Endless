@@ -305,9 +305,24 @@ every track follows (its numbers `RAM_*` in `src/emu/free_space.h`, which
 | `0x0203FEF0`-`0x0203FEFF` | Per battle: the moved chips' own state (`RAM_BATTLE`): BN5's green flash's frames, a u16 a side (`XC_FLASH`, which BN5 keeps in his AIData +0x3C, BN6's resting height; docs/ROM_DATA.md, BN5's DarkPlus and its green flash), zeroed with the battle's RAM; `+4` on kept for the moved families' | `xchips_flash.c` |
 | `0x0203FF00`-`0x0203FF5F` | Per battle: the second-level dispatch's side tables (`BN6_DISPATCH_SIDE`: a byte an object slot, its game's type, 32 for each of the first, third and fourth kinds), written by the dispatch's spawners and read by its routines | `xvirus_dispatch.c` |
 | `0x0203FF60`-`0x0203FF6F` | Per battle: BN5's Colonel's table moved (`BN6_COLONEL_TABLE`, `RAM_COLONEL`: two 8-byte entries by side, which BN5 keeps at `0x02034000`), written by his moved code and read by his attacks' objects, zeroed with the battle's RAM as each battle is set up | `xnavi_bn5.c` |
-| `0x0203FF70`-`0x0203FFEF` | Per battle: the Souls' state in BN6's battles (`BN6_SOULS`: 0x20 bytes a side, and room for the track's later milestones; each side's +0x0E and +0x0F BN5's mood as BN6's battles keep it and whether a BN5 DarkChip made him dark, +0x06 the chaos level, +0x16 the Chaos Unison's charge's frame in its phases' cycle and +0x17 its release's request standing (`BN6_SOUL_LEVEL`, `BN6_SOUL_CYCLE`, `BN6_SOUL_REQUEST`: BN5's AIData +0x6C and +0x1C; docs/ROM_DATA.md, Chaos Unison), +0x14 the chip ColonelSoul's button took, committed at OK (his obstacle strike's side is `BN6_COLONEL_SIDES`, the Navis' field a Navi Colonel's spawn sets too, never BattleState +0x5C's bits, which BN6 reads as its own); docs/ROM_DATA.md, BN5's mood in BN6's battles; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a Soul's life on the proxy form): so every battle begins with no Soul, read and written by the Souls' hooks alone | `soulunite.c`, `soullife.c`, `soulmood.c`, `soulcolonel.c`, `soulchaos.c` |
+| `0x0203FF70`-`0x0203FFEF` | Per battle: the Souls' state in BN6's battles (`BN6_SOULS`: 0x20 bytes a side, and room for the track's later milestones; each side's +0x0E and +0x0F BN5's mood as BN6's battles keep it and whether a BN5 DarkChip made him dark, +0x06 the chaos level, +0x16 the Chaos Unison's charge's frame in its phases' cycle and +0x17 its release's request standing (`BN6_SOUL_LEVEL`, `BN6_SOUL_CYCLE`, `BN6_SOUL_REQUEST`: BN5's AIData +0x6C and +0x1C; docs/ROM_DATA.md, Chaos Unison), +0x14 the chip ColonelSoul's button took, committed at OK (his obstacle strike's side is `BN6_COLONEL_SIDES`, the Navis' field a Navi Colonel's spawn sets too, never BattleState +0x5C's bits, which BN6 reads as its own); docs/ROM_DATA.md, BN5's mood in BN6's battles; docs/ROM_DATA.md, UNITE on BN6's Custom screen, and a Soul's life on the proxy form): so every battle begins with no Soul, read and written by the Souls' hooks alone; from +0x40 each side's partner's own block under `--dev arena2v2` (`BN6_SOULS_PARTNERS`, laid out as a side's: his mood and his dark, never a Soul; `soul_field_of`) | `soulunite.c`, `soullife.c`, `soulmood.c`, `soulcolonel.c`, `soulchaos.c` |
 | `0x0203FFF0`-`0x0203FFF3` | Per battle: `--dev arena2v2`'s count of the battle loop's iterations (`RAM_TEAM_TICK`, a u32 the battle's setup zeroes), the clock both GBAs keep alike, by which the partners' keys go in | `arena_team.c` |
-| `0x0203FFF4`-`0x0203FFFF` | Per battle: spare (the game call's old mark, not used since issue #33) | |
+| `0x0203FFF4`-`0x0203FFF7` | Per battle: the entries of BN6's AI data's pool BN5's chip AI took for its rooms (`RAM_CHIP_AI_ROOMS`, a u32 of `BN6_AI_POOL_USED`'s bits, zero as each battle is set up; issue #182, below) | `darkinvs.c` |
+| `0x0203FFF8`-`0x0203FFFF` | Per battle: spare (the game call's old mark, not used since issue #33) | |
+
+BN5's chip AI's rooms (issue #182; `src/emu/darkinvs_room.h`): in a
+NetBattle a MegaMan other than side 0's player whom BN5's chip AI takes
+(DarkInvs, a Chaos Unison's) needs BN5's 0x140 bytes of AI data, so he
+takes a room of his own in the last entries of BN6's AI data's pool
+(`BN6_AI_POOL`, eight entries of 0x100 bytes; side 1's player
+`0x02034740`, on entries 6 and 7; side 0's partner `0x02034600`; side
+1's partner `0x020344C0`), their bits set in the pool's own word
+(`BN6_AI_POOL_USED`) so that no spawn takes or lays them out until the
+next battle's set-up clears it, and noted in `RAM_CHIP_AI_ROOMS`. Where
+an actor holds an entry of his room he is left out of the chip AI. A
+room taken in BN6's own allocator, as the partners' NaviStats below, and
+only as the chip AI first takes him: a NetBattle without it keeps all
+eight entries.
 
 Under `--dev arena2v2` alone, two object slots of BN6's own are taken
 too: the fourth kind's (the effects') slots 30 and 31, `0xC8` bytes each
@@ -853,7 +868,7 @@ Chaos Unison (the track's S6, `src/emu/soulchaos.c`; docs/ROM_DATA.md, Chaos Uni
 | `0x080131D4` | the release's request (`BN6_CHAOS_RELEASE`) | answer: 0x8000 in phase 2, else 0x10000 (BN5's), the request the Souls' | once a release |
 | `0x080F180E` | the player's requests read (`BN6_CHAOS_CONSUME`) | jump: the chaos attack (the level one up, the power attack by his AIData +0x11) or the failure (family 0xC7), Chaos Unison's Thumb | once a release |
 | `0x080F1870` | the player's idle state past the chip request's test (`BN6_PLAYER_IDLE_FREE`, `darkinvs.c`, where BN5's ROM is read) | jump: BN5's chip AI for the player, through `FREE_CHIP_AI`, where his AI data's +0x48 bit 0x200 stands (BN5's rule; nothing of BN6's sets it) | a frame he idles |
-| `0x080172F6` | the player's set-up past his AI data's lay-out (`BN6_PLAYER_INIT_AI`, `darkinvs.c`) | answer: his AI data moved into `RAM_PLAYER_AI` (BN5's 0x140 bytes) | once a battle |
+| `0x080172F6` | the player's set-up past his AI data's lay-out (`BN6_PLAYER_INIT_AI`, `darkinvs.c`) | answer: side 0's player's AI data moved into `RAM_PLAYER_AI` (BN5's 0x140 bytes); a NetBattle's other MegaMen move into rooms of their own as the chip AI first takes them (issue #182) | once a battle |
 | `0x0801AD10` | the player's frame's end (`BN6_PLAYER_FRAME_END`) | answer: BN5's time under the chip AI counted down (AIData +0x36, BN5's `0x0800DBD8`), at 0 his request 0x80000 | a frame he runs |
 | `0x080144A2` | BN6's drain while AIData +0x36 is not 0 (`BN6_AI_DRAIN_TEST`) | jump: none while the chip AI has him (to `0x080144B2`) | a frame |
 | `0x080ED12A` | the support family past the chip's routine (`BN6_SUPPORT_MARK`) | jump: DarkInvs's (subfamily 0x65) attack ended in this frame, BN5's (to `0x080ED130`) | a support chip used |

@@ -1771,7 +1771,14 @@ of. The registry's ids, records and art stay C1's (above).
     (`RAM_PLAYER_AI`, `0x080172F6`, before anything of his names it: a
     move at DarkInvs's use left his charge glow's object, the fourth
     kind's 8, pointing at the old place), and BN6's drain is held back
-    while the chip AI has him.
+    while the chip AI has him. In a NetBattle the other MegaMen (side
+    1's player; two a side, the partners) each move into a room of
+    BN5's size of his own as the chip AI first takes him, in the last
+    entries of BN6's AI data's pool (issue #182: side 1's player had
+    moved into side 0's block, both reading one AI data;
+    `src/emu/darkinvs_room.h`, docs/EMULATION.md, BN6's RAM); the
+    machine, its time and its idle frames run for whoever's AI data is
+    of BN5's size, either side.
   - *The unit* (`tools/xchiprecipe.py` UNITS: BN5's support 0x3B as
     BN6's 0x65, 3 blocks, 860 bytes; its object, the fourth kind's 0x18,
     and his double, the first kind's 0x09, moved): BN5's calls with no

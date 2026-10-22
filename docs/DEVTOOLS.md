@@ -585,7 +585,26 @@ buster's Attack N, as their own loadouts would. `teamhp=N` gives each partner hi
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side
-0's partner's HP shows under him.
+0's partner's HP shows under him. The two GBAs' first iteration apart is
+also said as it runs ("the two GBAs apart at iteration N"), for a
+mutation whose battle the two no longer end together.
+
+The full-rules audit's runs (docs/ONLINE_ARENA.md, What a partner meets
+under full rules; issue #182): `arenapeer=MASK` makes the sides in MASK
+(1 side 0, 2 side 1) play their folders' first chips, the chip under the
+cursor taken before OK and used in the fight every four seconds (side 0
+a second before side 1, his charged shots let go first), and side 1
+(MASK 2) carries the checkpoint's MegaMan as side 0 does, so a
+checkpoint of thirty DarkInvs (`--scene emu --dev folder=289`) puts
+either side under BN5's chip AI. Under `arena2v2`, `chipaibreak=N` makes the core of hook
+slot N (the debug lines' "core N"; the second GBA's is 2) take no room
+of BN5's chip AI for anyone but side 0's player, and `partnerbreak=N`
+makes it take no object for a side's partner (his side's Soul, mood and
+NaviStats his, as before the audit): two mutations that must part the
+GBAs. With `CYBERWORLD_EMU_DEBUG` the rooms ("seat 2's AI data ... moved
+into his room ..."), each MegaMan's AI data as the chip AI takes one, a
+Chaos Unison's release and a partner's own charged B, and a Navi made
+dark by a DarkChip (his mood and NaviStats) are said by core.
 
 `--dev rollbench` measures what a rollback of the Arena costs on the
 machine it runs on (issue #128), on the player's ROM, and says it on the
