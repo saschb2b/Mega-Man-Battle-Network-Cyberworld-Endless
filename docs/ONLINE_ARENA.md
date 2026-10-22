@@ -2096,6 +2096,12 @@ Every battle of the flag ends otherwise than before (a partner's keys
 now as late as BN6's pipeline makes a lead's, frame for frame rather
 than iteration for iteration, and his picks in his hand at the next
 iteration rather than four on), so the tables below are this build's.
+Run again on the integration's last build (with [A partner's
+UNITE](#a-partners-unite) and the Souls' modules by object), the local
+runs give the same hashes, frame for frame: all four in Beast Out with
+the delay alone and with `arenaroll=8`, the Cross, the Program Advance,
+the slow and the gone partners, the NaviCust from the playtest's
+checkpoint, the DarkInvs rooms from the rules branch's, the plain run.
 
 ### The partners' own NaviStats
 
@@ -3072,6 +3078,18 @@ GBAs iteration by iteration):
 | Beta's UNITE (`teamunite=1` on his game: NumberSoul held, Atk+10 `*` first), Delta's HeatCross, Epsilon watching | over at frame 1846 | 30 agreed on each, 30 checked by the spectator | 960 compared, 0 apart on all five | Beta's NumberSoul from his own screen, said on every game and taken up on both GBAs, his MegaMan in NumberSoul's look ([A partner's UNITE](#a-partners-unite)) |
 | Delta's game killed three seconds into the battle | Alpha's, Beta's and Gamma's battles stopped at frame 192: "the other player left the NetBattle" | | 5 compared, 0 apart | all three told the match broken off (result 3) |
 | Delta's game held still from its tick 300 (`arenafreeze=300`, its link kept) | the three others waited on Delta's keys and gave up at 1,200 ticks: "the other's keys stopped coming", the match broken off (result 3) | the four agreed to frame 239 | | |
+
+The same runs again on the integration's last build (the games pinned to
+it, 22 October 2026): the Cross and the Program Advance frame for frame
+as above (over at 1020, the last hash `cbc8963da56d0ffb` on all four);
+the partner who never picks over at 5809, 96 hashes agreed and the
+spectator's 96 checked, 1,332 iterations 0 apart on all five; Beast Out
+and Cross 2 under 40 ms lag and 30 ms jitter over at 1856, 30 hashes,
+973 iterations 0 apart on all five; the slow partner over at 1850, 965
+iterations 0 apart on all five; Beta's UNITE beside Delta's Beast Out
+over at 967, 16 hashes agreed and checked, 390 iterations 0 apart on all
+five; the drop stopped at frame 190 on the three, the frozen game given
+up at 1,200 ticks, both broken off (result 3).
 
 The partner's own client, seen from Beta's seat (seat 2, the pictures
 kept out of the repository): the way in's four plates (Alpha and Beta on
