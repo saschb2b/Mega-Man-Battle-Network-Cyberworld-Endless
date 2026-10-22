@@ -299,16 +299,17 @@ static void format_picked(void) {
 /* START: my MegaMan sent, and kept as the other reads him */
 static void start(const ArenaWireState *w) {
 	unsigned side = w->side & 1u, delay = w->delay;
-	square_bout_seats(w);
 	/* (a rematch's answer spent: the next is asked after this battle's result) */
 	memset(&SA_AGAIN, 0, sizeof SA_AGAIN);
 	/* (a rematch from the card: the last battle's pair kept as it began,
 	 * gone into again where both MegaMen and sides are the same, the rest
-	 * given back first; its tally kept on the card) */
+	 * given back first; its tally kept on the card. A 2v2's pair, its hooks
+	 * two a side, is never kept, nor one gone into for a 2v2) */
 	drop_kept();
-	SA.kept = SA.four ? NULL : arena_keep(SA.arena);
+	SA.kept = SA.four || (w->seats[2] && w->seats[3]) ? NULL : arena_keep(SA.arena);
 	drop_arena();
 	arena_view_free();
+	square_bout_seats(w);
 	arena_link_net(&SA.link, SA.match, side, delay, out, NULL);
 	if (SA.four) arena_link_net_seats(&SA.link, SA.seat);
 	const OnlineLoadout *carried = online_visit_loadout();
