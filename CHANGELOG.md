@@ -155,6 +155,19 @@
   notes): a server and its games update together. A server host: the
   Arena's delay comes from `delay_for` as before, now 1 at least
   (docs/ONLINE_ARENA.md, Quicker on the wire).
+- **Every version on the site.** The project page has a versions page
+  (`versions/`, and `ja/versions/` in Japanese): the newest release first,
+  its notes with their pictures and clips and its trailer playing in the
+  page, and every earlier release in a list beside it with its date and
+  headline, each with its GitHub release, its full CHANGELOG section and
+  an address of its own (`versions/#v0-12-0`). The notes are each
+  release's own (docs/releases/), rendered when the site is built
+  (`tools/site_versions.py`), so a release's page comes with its notes:
+  the newest one's pictures are the site's, an older one's its tag's. A
+  feed (`versions/feed.xml`) tells any reader of the next. The bar, the
+  footers, the home page and the FAQ link to it. Between a phone's width
+  and a wide screen the bar's links fit now: the brand's name gives way
+  first, then the links to the home page's sections.
 
 ## 0.13.0 (2026-10-21)
 

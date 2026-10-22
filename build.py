@@ -605,7 +605,7 @@ def deb():
 
 
 SITE_URL = 'https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/'
-SITE_PAGES = ('', 'download/', 'play/', 'faq/')
+SITE_PAGES = ('', 'download/', 'play/', 'faq/', 'versions/')
 # (each page's Japanese one: web/ja/, the same pages; tests/test_site.py keeps them in step)
 SITE_JA = 'ja/'
 
@@ -684,6 +684,10 @@ def site(analytics=True):
     shutil.copytree(os.path.join(ROOT, 'web'), out)
     for faq in ('faq', SITE_JA + 'faq'):
         faq_structured(os.path.join(out, faq, 'index.html'))
+    # (every release's notes on the versions page, and its feed)
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    import site_versions
+    site_versions.build(out)
     if analytics:
         # (each page and its Japanese one, each naming both as their hreflang
         # links do, the English one the default)

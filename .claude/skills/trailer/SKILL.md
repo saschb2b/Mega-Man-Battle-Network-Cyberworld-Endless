@@ -199,7 +199,11 @@ only: `build.py 3ds` renders the banner with it.
 3. The release's notes open with it: `<a href="../clips/trailer.mp4"><img
    src="../clips/trailer-play.png" ...></a>`, which `tools/release_notes.py`
    pins at the tag. Make the trailer before the tag; one made after it
-   goes up as a release asset, with the owner's go-ahead.
+   goes up as a release asset, with the owner's go-ahead. The site's
+   versions page plays it from that link by itself (`tools/site_versions.py`:
+   the newest release's from `clips/`, an older one's where its notes
+   point, its poster `trailer.png` beside `trailer-play.png`), so keep
+   the link's shape.
 4. The 3DS banner follows `BANNER` by itself; `build.py 3ds` checks it
    packs. Everything else (every page's preview picture, the AltStore
    header) follows the file name.
