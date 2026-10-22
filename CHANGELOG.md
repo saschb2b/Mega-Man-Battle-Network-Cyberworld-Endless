@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.0 (2026-10-22)
 
 - **Two MegaMen a side (issue #181, epic #167).** A Battle between two
   teams in the Net Square now asks how to fight: **One by one**, the Team
