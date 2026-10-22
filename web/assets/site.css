@@ -241,6 +241,10 @@ section { padding: 44px 0 16px; }
 /* the other language's page, set apart from the rest by a rule */
 .pet-bar nav a.lang { margin-left: 6px; box-shadow: -6px 0 0 -3px #214a52; }
 .pet-bar nav a.lang .short { display: none; }
+/* (between a phone and a wide screen the bar's links outgrow it: the
+ * brand's name gives way first, then the links to the home page's sections) */
+@media (max-width: 1060px) { .brand span { display: none; } }
+@media (max-width: 900px) { .pet-bar nav a.opt[href*="#"] { display: none; } }
 @media (max-width: 760px) {
 	.pet-bar nav .opt { display: none; } .brand span { display: none; }
 	.pet-bar nav { padding-left: 30px; }
