@@ -193,19 +193,199 @@ def kept(work, scene, spec):
                for g in spec['games'] if g.get('first') is not None)
 
 
+# ---- games driven as they go: remote play, the course reacting to each log ----
+
+# (through the gate as a player goes: the arrival's words paged, on the
+# gate, LEFT to MegaMan's Yes; remote play's steps, as tools/play.py's)
+REMOTE_GATE = '450;4 A;60;4 A;60;4 A;60;4 A;60;place 16 72 3;120;4 LEFT;30;4 A;300'
+
+
+class Remote:
+    """One game of a scene played by remote play (--remote): its steps sent
+    as the scene's course reacts to its log (the Arena's and the teams'
+    lines), and while none wait, a second at a time with A pressed every
+    third where `page` (a chat box's words or a card). Every frame from
+    `first` on is saved, and a thread keeps every second one as
+    WORK/SCENE-NAME/NNNN.png (the canvas's middle 240 x 160) as they come,
+    so a scene of minutes needs no more room than its pictures."""
+
+    def __init__(self, work, scene, name, port, roms, dev, args=HOME, files=None, first=1000, bn5=True):
+        self.name, self.first = name, first
+        self.dir = os.path.join(work, f'data-{scene}-{name}')
+        shutil.rmtree(self.dir, ignore_errors=True)
+        data = os.path.join(self.dir, 'data')
+        self.raw = os.path.join(self.dir, 'raw')
+        os.makedirs(data)
+        os.makedirs(self.raw)
+        self.out = os.path.join(work, f'{scene}-{name}')
+        shutil.rmtree(self.out, ignore_errors=True)
+        os.makedirs(self.out)
+        operator = name.capitalize()
+        with open(os.path.join(data, 'network.ini'), 'w') as f:
+            f.write(f'identity={hashlib.sha1(name.encode()).hexdigest()[:32]}\nname={operator}\nnamed=1\nselected=0\n'
+                    f'consent=1\nserver=ws://127.0.0.1:{port}/presence\n')
+        with open(os.path.join(data, 'netpass.ini'), 'w') as f:
+            f.write('stamps=4\n')
+        for fname, text in (files or {}).items():
+            with open(os.path.join(data, fname), 'w') as f:
+                f.write(text)
+        self.log = os.path.join(self.dir, 'log.txt')
+        env = dict(os.environ, SDL_VIDEODRIVER='dummy', SDL_AUDIODRIVER='dummy', CYBERWORLD_EMU_DEBUG='1')
+        args = [BINARY, '--headless', '--remote', self.dir, '--rom-dir', roms[0] if bn5 else roms[1], '--data-dir', data,
+                *args, '--dev', ','.join(['quiet'] + list(dev)), '--shot-range', f'{first}:99999999:{self.raw}/f']
+        self.proc = subprocess.Popen(args, stdout=open(self.log, 'w'), stderr=subprocess.STDOUT, env=env, cwd=ROOT)
+        for _ in range(500):
+            if os.path.exists(os.path.join(self.dir, 'out')):
+                break
+            time.sleep(0.01)
+        self.todo = []
+        self.lock = threading.Lock()
+        self.frame, self.page, self.n, self.alive, self.busy = 0, False, 0, True, False
+        self.answered = time.time()
+        self.threads = [threading.Thread(target=self.loop, daemon=True), threading.Thread(target=self.keep, daemon=True)]
+        for t in self.threads:
+            t.start()
+
+    def batch(self, line):
+        with open(os.path.join(self.dir, 'in'), 'w') as f:
+            f.write(line + '\n')
+        fd = os.open(os.path.join(self.dir, 'out'), os.O_RDONLY)
+        got = b''
+        while not got.endswith(b'\n'):
+            c = os.read(fd, 1)
+            if not c:
+                break
+            got += c
+        os.close(fd)
+        try:
+            self.frame = int(got.split()[1])
+        except (IndexError, ValueError):
+            pass
+
+    def loop(self):
+        while self.alive and self.proc.poll() is None:
+            with self.lock:
+                line = self.todo.pop(0) if self.todo else None
+                self.busy = line is not None
+            if line is None:
+                self.n += 1
+                line = '4 A;56' if self.page and self.n % 3 == 0 else '60'
+            self.batch(line)
+            self.answered = time.time()
+            with self.lock:
+                self.busy = False
+
+    def do(self, line):
+        with self.lock:
+            self.todo.append(line)
+
+    def idle(self):
+        """whether every step sent has run"""
+        with self.lock:
+            return not self.todo and not self.busy
+
+    def keep(self):
+        """every second frame kept as its picture, as the game saves them"""
+        while True:
+            ended = self.proc.poll() is not None
+            names = sorted(f for f in os.listdir(self.raw) if f.endswith('.bmp'))
+            for f in names if ended else names[:-1]:
+                n = int(f[1:-4])
+                p = os.path.join(self.raw, f)
+                if (n - self.first) % 2 == 0:
+                    try:
+                        im = Image.open(p).convert('RGB')
+                    except OSError:
+                        continue
+                    w, h = im.size
+                    im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)).save(
+                        os.path.join(self.out, f'{(n - self.first) // 2:04d}.png'), compress_level=1)
+                os.remove(p)
+            if ended:
+                return
+            time.sleep(0.2)
+
+    def text(self):
+        try:
+            with open(self.log, errors='replace') as f:
+                return f.read()
+        except FileNotFoundError:
+            return ''
+
+    def has(self, words, after=None):
+        t = self.text()
+        if after is not None:
+            t = t.split(after, 1)[1] if after in t else ''
+        return words in t
+
+    def count(self, words):
+        return self.text().count(words)
+
+    def sample(self):
+        """the footage's sample now (30 fps, from `first`): the last batch's
+        end, and the clock since (a visit plays at the clock's pace)"""
+        return max(0, round((self.frame + (time.time() - self.answered) * 60 - self.first) / 2))
+
+    def quit(self):
+        if self.proc.poll() is None:
+            self.do('quit')
+            try:
+                self.proc.wait(20)
+            except subprocess.TimeoutExpired:
+                self.proc.kill()
+        self.alive = False
+        self.threads[1].join()
+
+
+def wait(test, what, most=180, t0=None):
+    """until `test()`, at most `most` seconds: whether it came"""
+    start = time.time()
+    while not test():
+        if time.time() - start > most:
+            print('  timed out:', what, flush=True)
+            return False
+        time.sleep(0.1)
+    print(f'  {time.time() - (t0 or start):6.1f}s {what}', flush=True)
+    return True
+
+
+def reactive(work, scene, run):
+    """A scene that reacts to its games' logs: its server, then its own
+    course (`run(work, scene, port, roms)`, its games Remote's)."""
+    server = Server(os.path.join(work, f'data-server-{scene}'), 120)
+    try:
+        run(work, scene, server.port, rom_dirs(work))
+    finally:
+        server.stop()
+    open(os.path.join(work, f'{scene}.done'), 'w').close()
+    print('captured', scene, flush=True)
+
+
 def capture(work, scenes, keep=False, only=None):
-    """Every online scene of a cut, one at a time (each runs its games at
-    the clock's pace; two scenes at once would share the machine's cores
-    with up to sixteen games)."""
+    """Every online scene of a cut: those by the clock one at a time (each
+    runs its games at the clock's pace; two scenes at once would share the
+    machine's cores with up to sixteen games), then those that react to
+    their games' logs (a function each) all at once, which wait for what
+    each game says rather than the clock."""
     if not os.path.exists(BINARY) or not os.path.exists(SERVER):
         sys.exit('the online footage needs build/linux/cyberworld and build/server: '
                  'python3 build.py linux && python3 build.py server')
+    rom_dirs(work)
+    threads = []
     for scene, spec in scenes.items():
         if only and scene not in only:
+            continue
+        if callable(spec):
+            if not (keep and os.path.exists(os.path.join(work, f'{scene}.done'))):
+                threads.append(threading.Thread(target=reactive, args=(work, scene, spec)))
             continue
         if keep and kept(work, scene, spec):
             continue
         capture_scene(work, scene, spec)
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
 
 
 if __name__ == '__main__':

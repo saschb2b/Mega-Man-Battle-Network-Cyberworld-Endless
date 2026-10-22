@@ -7,7 +7,7 @@ release's tag."""
 import importlib
 
 CURRENT = '0.13.0'
-VERSIONS = ('0.3.0', '0.12.0', '0.13.0')
+VERSIONS = ('0.3.0', '0.12.0', '0.13.0', '0.14.0')
 
 
 def module(version=None, music=False):
