@@ -82,17 +82,18 @@ static uint32_t soul_palette(int side) {
 static HookAct palette_read(HookRegs *r, void *user) {
 	(void)user;
 	int side = side_of(r->r[5]);
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of(side))) return HOOK_CONTINUE;
+	if (r->r[0] != BN6_FORM_PROXY || soul_partner(r->r[5]) || !a_soul(soul_of(side))) return HOOK_CONTINUE;
 	r->r[4] = soul_palette(side);
 	r->r[12] = BN6_FORM_PALETTE_BACK | 1;
 	return HOOK_JUMP;
 }
 
-/* (an object drawn in MegaMan's form, 0x080BF516: r0 the form of its side, [r5+0x16]) */
+/* (an object drawn in MegaMan's form, 0x080BF516: r0 the form of its side, [r5+0x16]) none for a side's partner (--dev
+ * arena2v2: his side's form is his lead's, his look his own; the full-rules audit) */
 static HookAct palette_read2(HookRegs *r, void *user) {
 	(void)user;
 	int side = side_of(r->r[5]);
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of(side))) return HOOK_CONTINUE;
+	if (r->r[0] != BN6_FORM_PROXY || soul_partner(r->r[5]) || !a_soul(soul_of(side))) return HOOK_CONTINUE;
 	r->r[0] = soul_palette(side);
 	r->r[12] = BN6_FORM_PALETTE2_BACK | 1;
 	return HOOK_JUMP;
@@ -115,7 +116,7 @@ static HookAct phases(HookRegs *r, void *user) {
 static HookAct crossing_sound(HookRegs *r, void *user) {
 	(void)user;
 	int side = side_of(r->r[5]);
-	if (!soul_united(side)) return HOOK_CONTINUE;
+	if (soul_partner(r->r[5]) || !soul_united(side)) return HOOK_CONTINUE;
 	if (soul_of(side) == SOUL_TOMAHAWK && !(breaks & SOULLOOK_BREAK_SHAKE)) {
 		uint32_t camera = hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
 		hook_write16(camera + BN6_CAMERA_SHAKE_STRENGTH, TOMAHAWK_SHAKE_STRENGTH);
@@ -185,7 +186,8 @@ static HookAct digits(HookRegs *r, void *user) {
 static HookAct flash_spawn(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t kind = r->r[4] & 0xFF;
-	if ((kind != BN5_FLASH_SOUL && kind != BN5_FLASH_CHAOS) || !soul_united(side_of(r->r[5])) || (breaks & SOULLOOK_BREAK_FLASH))
+	if ((kind != BN5_FLASH_SOUL && kind != BN5_FLASH_CHAOS) || soul_partner(r->r[5]) || !soul_united(side_of(r->r[5])) ||
+		(breaks & SOULLOOK_BREAK_FLASH))
 		return HOOK_CONTINUE;
 	r->r[7] = r->r[8];
 	r->lr = BN6_ARM_FLASH_SPAWN_BACK | 1;
@@ -197,7 +199,7 @@ static HookAct flash_spawn(HookRegs *r, void *user) {
  * Soul's at its kind's own height, as BN5's object keeps it for MegaMan in a Soul (0x080B9BBE: r4 the kind's record) */
 static HookAct flash_height(HookRegs *r, void *user) {
 	(void)user;
-	if (!soul_united(side_of(r->r[5]))) return HOOK_CONTINUE;
+	if (soul_partner(r->r[5]) || !soul_united(side_of(r->r[5]))) return HOOK_CONTINUE;
 	r->r[0] = hook_read8(r->r[4] + 3);
 	r->r[12] = BN6_FLASH_HEIGHT_NEXT | 1;
 	return HOOK_JUMP;

@@ -34,6 +34,10 @@ void darkinvs_dev(bool on);
 /* --dev arena2v2 (arena_team.h): two MegaMen a side, the block of BN5's
  * size (RAM_PLAYER_AI) side 0's first's alone, the second keeping BN6's */
 void darkinvs_two_a_side(bool on);
+/* --dev chipaibreak=N: the core of hook slot N (a pair's GBA, its debug
+ * lines' "core N") takes no room for a MegaMan but side 0's player
+ * (darkinvs_room.h): a mutation that must part the two GBAs; -1 none */
+void darkinvs_room_break(int slot);
 /* MegaMan's object `me` put under the chip AI for `frames` frames, as
  * BN5's DarkInvs does (its AI data moved first where it is BN6's 0x100);
  * from a hook (hook_read and hook_write). */

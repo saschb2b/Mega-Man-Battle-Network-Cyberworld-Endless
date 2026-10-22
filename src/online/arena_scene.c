@@ -69,10 +69,19 @@ static uint16_t busy_keys(uint32_t frame) {
 /* --dev arena2v2: on the Custom screen a lead first takes the chip under
  * the cursor, so that his hand holds one, before the script takes the
  * cursor to OK; in the fight side 0's lead taps R every 600 frames, which
- * opens the next turn's Custom screen once the gauge is full */
+ * opens the next turn's Custom screen once the gauge is full. arenapeer=
+ * MASK: a side in it takes its chip so too, and uses it in the fight */
+static bool peer_plays(unsigned side) { return (dev.arena_peer >> side) & 1; }
+
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
-	if (dev.arena_2v2 <= 0 || !S.arena) return keys;
-	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+	if ((dev.arena_2v2 <= 0 && !peer_plays(side)) || !S.arena) return keys;
+	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) {
+		/* (arenapeer=MASK: the chip taken used every four seconds, side 0 a second before side 1) */
+		if (peer_plays(side) && t % 240 >= 60u + 60 * side && t % 240 < 68u + 60 * side) return KEY_A;
+		/* (... B let go a while before it, so that no charged shot of arenaboth's is under way as A comes) */
+		if (peer_plays(side) && t % 240 >= 30u + 60 * side && t % 240 < 60u + 60 * side) return 0;
+		return dev.arena_2v2 > 0 && !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+	}
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 
@@ -83,7 +92,8 @@ static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
 static uint16_t peer_keys(void *context, uint32_t frame) {
 	(void)context;
 	if (dev.arena_busy) return busy_keys(frame);
-	if (!S.arena || arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return 0;
+	if (!S.arena) return 0;
+	if (arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return peer_plays(1) ? chip_first(1, frame, 0) : 0;
 	unsigned t = frame % 160;
 	if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
 	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
@@ -137,7 +147,8 @@ static void bout(ArenaKept *kept) {
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
 	/* (--dev arena2v2: both partners on the local link too, a stream each) */
 	if (dev.arena_2v2 > 0) arena_link_local_partners(&S.local, partner_keys, NULL);
-	const OnlineLoadout *loadout[2] = { S.carried.max_hp ? &S.carried : NULL, NULL };
+	/* (arenapeer=2: the second player the checkpoint's MegaMan too) */
+	const OnlineLoadout *loadout[2] = { S.carried.max_hp ? &S.carried : NULL, S.carried.max_hp && peer_plays(1) ? &S.carried : NULL };
 	uint32_t seed = dev.arena_seed ? (uint32_t)dev.arena_seed + S.bouts : 0;
 	printf("arena: bout %u: delay %u frames, the local link's lag %u ticks, MegaMan %s, seed %u\n", S.bouts + 1, link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's", (unsigned)seed);

@@ -11,6 +11,7 @@
 #include "arena_input.h"
 #include "arena_team_custom.h"
 #include "arena_team_navi.h"
+#include "arena_team_rules.h"
 #include "arena_team_wait.h"
 #include "bn6.h"
 #include "darkinvs.h"
@@ -40,6 +41,7 @@ typedef struct {
 	uint8_t late[HOOK_CORES][ITERATIONS];    /* the sides whose partner's slot held no keys for the iteration */
 	uint8_t at[HOOK_CORES][ITERATIONS][SIDES * MEGAMEN];   /* each MegaMan's hand's chip up next (a partner's his own) */
 	uint32_t last[HOOK_CORES];               /* the last iteration each met */
+	bool apart_said;                         /* the first iteration the two cores' digests parted, said as it ran */
 } TeamLog;
 static TeamLog *T;
 
@@ -128,6 +130,17 @@ static uint32_t digest(int slot, uint32_t tick) {
 	return arena_team_navi_digest(fnv(fnv(h, hook_read32(BN6_RNG_PRIMARY)), hook_read32(BN6_BATTLE_TIMER)));
 }
 
+/* the first iteration apart said as it runs, for a battle the two GBAs no
+ * longer end together (a mutation's; with a rollback window a guessed
+ * iteration may be said and run again, so the report at the end is the
+ * one to read) */
+static void apart_now(int slot, uint32_t tick) {
+	int other = slot == T->slot[0] ? T->slot[1] : T->slot[0];
+	if (T->apart_said || other < 0 || other >= HOOK_CORES || T->last[other] < tick || T->digest[other][tick] == T->digest[slot][tick]) return;
+	T->apart_said = true;
+	printf("arena2v2: the two GBAs apart at iteration %u, said as it ran\n", (unsigned)tick);
+}
+
 /* a side's partner's keys for the loop's iteration `tick`, from the ring
  * (his last held where the slot holds none for it: the battle's first
  * DELAY iterations, or a sample late) */
@@ -174,6 +187,7 @@ static HookAct keys(HookRegs *r, void *user) {
 		for (unsigned m = 0; m < SIDES * MEGAMEN; ++m) T->at[slot][tick][m] = arena_team_navi_at(m / MEGAMEN, m % MEGAMEN);
 		T->digest[slot][tick] = digest(slot, tick);
 		if (tick > T->last[slot]) T->last[slot] = tick;
+		apart_now(slot, tick);
 	}
 	return HOOK_CONTINUE;
 }
@@ -188,7 +202,10 @@ bool arena_team_hooks(struct mCore *core, unsigned side) {
 	HookCore *c = hook_core(core);
 	bool ok = c && hook_on(c, BN6_SPAWN_ENTITIES, spawn, NULL) && hook_on(c, BN6_KEY_COPY, keys, NULL) &&
 		arena_team_navi_hooks(c, side, hook_slot_of(core)) && arena_team_wait_hooks(c);
-	/* (under full rules BN5's chip AI gives side 0's player a block of its own: the first MegaMan's alone) */
+	/* (a partner's own NaviStats told to the Souls' and the mood's hooks: arena_team_rules.h) */
+	arena_team_rules_begin();
+	/* (under full rules BN5's chip AI gives side 0's player its block at his set-up, the others rooms of their own as it takes
+	 * them: darkinvs_room.h) */
 	darkinvs_two_a_side(true);
 	T->slot[side] = hook_slot_of(core);
 	if (!ok) printf("arena2v2: the hooks (%08X, %08X, the NaviStats') not all taken on side %u's core\n", BN6_SPAWN_ENTITIES, BN6_KEY_COPY, side);

@@ -46,6 +46,8 @@ bool soulmood_worried(int side);
 /* (from a hook) a Soul's unison begun or ended on side: BN5's calm (0x80,
  * where he is not dark: 0x08011A8C) */
 void soulmood_unison(int side);
+/* ... the Navi `me`'s (a side's partner's his own mood: soul_field_of) */
+void soulmood_calm_of(uint32_t me);
 /* (from a hook, the chip's use, r5 `me`) BN5's DarkChip use (0x08010028):
  * a DarkChip of BN5's (the registry's) makes him dark for the battle */
 void soulmood_chip_used(uint32_t me, int chip);

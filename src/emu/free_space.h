@@ -101,7 +101,9 @@
 #define RAM_COLONEL         0x0203FF60u   /* BN5's Colonel's table moved (BN6_COLONEL_TABLE; xnavi_install.c), to: */
 #define RAM_SOULS           0x0203FF70u   /* kept for the Souls' state and BN5's mood (the Souls' track), to: */
 #define RAM_TEAM_TICK       0x0203FFF0u   /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c), to: */
-#define RAM_BATTLE_SPARE    0x0203FFF4u   /* spare (the game call's old mark, unused since issue #33), to: */
+#define RAM_CHIP_AI_ROOMS   0x0203FFF4u   /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's
+                                             bits; darkinvs_room.h, issue #182), to: */
+#define RAM_BATTLE_SPARE    0x0203FFF8u   /* spare (the game call's old mark, unused since issue #33), to: */
 #define RAM_BATTLE_END      0x02040000u
 
 #endif
