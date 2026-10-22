@@ -20,6 +20,7 @@
 #include "arena_boot.h"
 #include "arena_loadout.h"
 #include "arena_pair.h"
+#include "arena_seats.h"
 #include "arena_wire.h"
 #include "bn6.h"
 #include "devtools.h"
@@ -63,9 +64,10 @@ struct ArenaWatch {
 	size_t size;
 
 	uint32_t match;
-	uint8_t loadout[2][ONLINE_ARENA_LOADOUT_MAX];
-	size_t loadout_n[2];
-	bool loadout_in[2], record_in, ready_in, ended, fought, fast;
+	unsigned seats;   /* 2, or a 2v2's 4 */
+	uint8_t loadout[ONLINE_SEATS][ONLINE_ARENA_LOADOUT_MAX];
+	size_t loadout_n[ONLINE_SEATS];
+	bool loadout_in[ONLINE_SEATS], record_in, ready_in, ended, fought, fast;
 	unsigned shown;   /* the side whose picture is drawn (arena_watch_show) */
 	uint64_t record, ready;
 	ArenaBoot *boot;
@@ -91,8 +93,14 @@ ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match) {
 	w->match = match;
 	w->rom = rom;
 	w->size = size;
+	w->seats = 2;
 
 	return w;
+}
+
+void arena_watch_four(ArenaWatch *w) {
+	w->seats = ONLINE_SEATS;
+	watch_keys_seats(&w->keys, ONLINE_SEATS);
 }
 
 void arena_watch_free(ArenaWatch *w) {
@@ -109,7 +117,7 @@ static void loadout_in(ArenaWatch *w, unsigned side, const uint8_t *bytes, size_
 	uint32_t match;
 	const uint8_t *body;
 	size_t len;
-	if (side > 1 || !arena_wire_read_loadout(bytes, n, &match, &body, &len) || match != w->match || len > sizeof w->loadout[side]) return;
+	if (side >= w->seats || !arena_wire_read_loadout(bytes, n, &match, &body, &len) || match != w->match || len > sizeof w->loadout[side]) return;
 	memcpy(w->loadout[side], body, len);
 	w->loadout_n[side] = len;
 	w->loadout_in[side] = true;
@@ -168,14 +176,17 @@ void arena_watch_keys(ArenaWatch *w, unsigned side, uint32_t first, const uint8_
 void arena_watch_ended(ArenaWatch *w) { w->ended = true; }
 
 static void build(ArenaWatch *w) {
-	OnlineLoadout l[2];
-	const OnlineLoadout *carried[2];
-	for (unsigned side = 0; side < 2; ++side) {
+	static OnlineLoadout l[ONLINE_SEATS];
+	const OnlineLoadout *carried[ONLINE_SEATS];
+	for (unsigned side = 0; side < w->seats; ++side) {
 		bool is;
 		char why[120];
 		if (!arena_loadout_unpack(w->loadout[side], w->loadout_n[side], &l[side], &is, why, sizeof why)) { fail(w, why); return; }
 		carried[side] = is ? &l[side] : NULL;
 	}
+	/* (a 2v2: the partners' MegaMen seats 2 and 3's, as every player's game sets them) */
+	if (w->seats > 2) arena_seats_partners(carried + 2);
+	arena_seats_set(w->seats > 2);
 	w->boot = arena_boot_new(w->rom, w->size, carried);
 	if (!w->boot) { fail(w, "too little memory for the two PETs"); return; }
 	if (arena_boot_stage(w->boot) == ARENA_BOOT_FAILED) { fail(w, arena_boot_error(w->boot)); return; }
@@ -226,9 +237,9 @@ static bool gone(struct mCore *c) {
 }
 
 static bool step(ArenaWatch *w) {
-	uint16_t k[ARENA_LOOKAHEAD][2];
-	watch_keys_take(&w->keys, w->next, k);
-	if (!arena_pair_step(w->pair, k, true)) { fail(w, "the cable between the two cores stuck"); return false; }
+	uint16_t k[ARENA_LOOKAHEAD][ARENA_PLAYERS];
+	watch_keys_take_all(&w->keys, w->next, k);
+	if (!arena_pair_step_all(w->pair, (const uint16_t (*)[ARENA_PLAYERS])k)) { fail(w, "the cable between the two cores stuck"); return false; }
 	++w->next;
 	if (w->next % HASH_EVERY == 0) hashed(w, w->next - 1, arena_pair_hash(w->pair), 1);
 	if (w->stage != WATCHING_ON) return false;
@@ -280,7 +291,12 @@ static void run(ArenaWatch *w, bool headless) {
 
 WatchingStage arena_watch_tick(ArenaWatch *w, bool headless) {
 	switch (w->stage) {
-	case WATCHING_SETUP: if (w->loadout_in[0] && w->loadout_in[1]) build(w); break;
+	case WATCHING_SETUP: {
+		bool all = true;
+		for (unsigned s = 0; s < w->seats; ++s) all = all && w->loadout_in[s];
+		if (all) build(w);
+		break;
+	}
 	case WATCHING_IN: way_in(w, headless); break;
 	case WATCHING_ON: run(w, headless); break;
 	default: break;

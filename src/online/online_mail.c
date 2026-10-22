@@ -19,7 +19,7 @@ void online_mail_frame(void) {
 		case ONLINE_TRADE_STATE: ok = online_trade_mail(m, n); break;
 		case ONLINE_BOARD: ok = online_board_mail(m, n); break;
 		case ONLINE_WEEK_BOARD: ok = online_week_mail(m, n); break;
-		case ONLINE_ARENA_STATE: case ONLINE_ARENA_LOADOUT: case ONLINE_ARENA_INPUT: case ONLINE_ARENA_HASH:
+		case ONLINE_ARENA_STATE: case ONLINE_ARENA_LOADOUT: case ONLINE_ARENA_INPUT: case ONLINE_ARENA_HASH: case ONLINE_ARENA_SEAT:
 			square_arena_mail(m, n);
 			break;
 		case ONLINE_STANDS: case ONLINE_WATCH_STATE: case ONLINE_WATCH_RELAY: case ONLINE_WATCH_KEYS:

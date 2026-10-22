@@ -76,6 +76,8 @@ typedef struct {
 	                   client gone quiet, which never picks nor sends, so the wait's limit ends it */
 	int team_buster; /* teambuster=N (1-5): under arena2v2 both partners' records with their buster's Attack N, as their own
 	                    loadouts would give it (arena_team_navi.h) */
+	int team_form;  /* teamform=N: a team challenge from the Square names its format without asking: 1 one by one (the relay),
+	                   2 side by side (protocol v15, issue #181; square_arena.c) */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

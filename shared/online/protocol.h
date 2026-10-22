@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 14
+#define ONLINE_PROTOCOL_VERSION 15
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v14"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v15"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -44,8 +44,8 @@
 #define ONLINE_CODE_LAST 26
 #define ONLINE_TRADE_BYTES 12
 #define ONLINE_TRADE_STATE_BYTES 32
-#define ONLINE_ARENA_BYTES 8
-#define ONLINE_ARENA_STATE_BYTES 28
+#define ONLINE_ARENA_BYTES 9
+#define ONLINE_ARENA_STATE_BYTES 45
 #define ONLINE_ARENA_LOADOUT_MAX 400
 #define ONLINE_ARENA_INPUT_MAX 8
 #define ONLINE_HELLO_BYTES 76
@@ -73,7 +73,7 @@
 #define ONLINE_STANDS_MAX 5
 #define ONLINE_ARENA_STATUS_BYTES 20
 #define ONLINE_WATCH_BYTES 6
-#define ONLINE_WATCH_STATE_BYTES 15
+#define ONLINE_WATCH_STATE_BYTES 24
 #define ONLINE_WATCH_KEYS_HEAD 12
 #define ONLINE_WATCH_KEYS_MAX 240
 #define ONLINE_WATCH_MOST 6
@@ -87,7 +87,7 @@
 #define ONLINE_TEAM 33
 #define ONLINE_TEAM_STATE 34
 #define ONLINE_TEAM_BYTES 7
-#define ONLINE_TEAM_STATE_BYTES 36
+#define ONLINE_TEAM_STATE_BYTES 37
 #define ONLINE_NOTICE_TEAM 29
 /* (protocol v13, epic #167 step 4: the Square shows who is busy and the
  * link before a challenge; a challenge seen; a rematch in a second) */
@@ -115,5 +115,14 @@
 #define ONLINE_BEAT_LEAD_MS 60        /* ... the least lead past the farthest one-way trip of the channel */
 #define ONLINE_BEAT_LEAD_MOST_MS 400  /* ... and the most */
 #define ONLINE_EVENT_ANSWERED 1       /* EVENT's flags: it answers one aimed at its sender */
+/* (protocol v15, issue #181: two MegaMen a side, four seats over the
+ * server; ARENA and ARENA_STATE carry a team challenge's format, START a
+ * 2v2's seat and the four seats' sessions, TEAM_STATE the format,
+ * WATCH_STATE the partners' seats) */
+#define ONLINE_ARENA_SEAT 35          /* server -> client in a 2v2: u8 seat, then that seat's relayed message as sent */
+#define ONLINE_SEATS 4                /* a 2v2's seats: 0 and 1 the GBAs' players, 2 and 3 side 0's and side 1's partners */
+#define ONLINE_TEAM_RELAY 0           /* a team challenge's format: the relay, one bout at a time */
+#define ONLINE_TEAM_SIDE_BY_SIDE 1    /* ... two MegaMen a side on one field */
+#define ONLINE_STANDS_SIDE_BY_SIDE 255 /* STANDS's bout byte for a side-by-side battle (a relay's bout its number) */
 
 #endif

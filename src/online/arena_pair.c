@@ -36,6 +36,7 @@
 
 #include "arena_souls.h"
 #include "arena_team.h"
+#include "arena_seats.h"
 #include "arena_team_custom.h"
 #include "devtools.h"
 #include "emu.h"
@@ -223,7 +224,7 @@ static bool attach(ArenaPair *p, unsigned side) {
 /* full rules: BN5's hooks on the core's own table, after its state (a hook in RAM stands on what the state put there), and
  * its player's Souls for UNITE; --dev arena2v2's hooks (arena_team.h) */
 static bool installs(struct mCore *core, unsigned side, unsigned souls) {
-	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (dev.arena_2v2 <= 0 || arena_team_hooks(core, side));
+	return xlog_hook_core(core) && soulunite_held_core(core, souls) && (!arena_seats_on() || arena_team_hooks(core, side));
 }
 
 /* (plain: no hook and no install's hooks on its cores, no idle halt: arena_pair_open_plain) */
@@ -252,7 +253,7 @@ static ArenaPair *open_pair(const uint8_t *rom, size_t size, const uint8_t *stat
 	}
 	if (!ok) { arena_pair_close(p); return NULL; }
 	p->drawn = 3;
-	p->team = !plain && dev.arena_2v2 > 0;
+	p->team = !plain && arena_seats_on();
 	arena_pair_anchor(p);
 	return p;
 }

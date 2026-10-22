@@ -140,7 +140,7 @@ Port 0 chooses a free port and reports it in the `listening` log event.
 
 Copy `server.example.ini` to `server.ini` for local settings (the latter
 is ignored by Git). The client URL is `ws://HOST:PORT/presence`.
-The subprotocol is `cyberworld.presence.v12`; incompatible clients receive
+The subprotocol is `cyberworld.presence.v15`; incompatible clients receive
 an explicit refusal rather than being admitted to a different world. A
 game offering another version's `cyberworld.presence.vN` is let through
 the upgrade so its HELLO can be answered with which side is behind (ERROR
@@ -233,7 +233,16 @@ winner (the cable's first's report) stays, the loser's partner comes in,
 and the team with no MegaMan standing loses. A leave or a drop breaks the
 match off for both teams. The server keeps teams and matches in memory
 only and writes `team`, `team_match`, `team_bout` and `team_over` events
-to the log; nothing is kept for a player.
+to the log; nothing is kept for a player. Since protocol v15 (issue
+#181) a team challenge names its format, the relay or **side by side**:
+side by side no order is asked (each captain leads, his partner beside
+him) and the match is one Arena battle of four seats (the two captains
+the cable's two GBAs, seats 0 and 1, their partners seats 2 and 3), all
+four ready before its START, which tells each its seat and the four
+sessions; each seat's messages go to the three others as ARENA_SEAT and
+to the stands, whose spectators get all four seats' keys. Its winner's
+team wins; a leave or a drop of any of the four breaks it off for both
+teams.
 
 The stands (`stands.py`, issue #128): every started battle's loadouts,
 ready, the cable's first's hashes and both players' keys from the first

@@ -29,6 +29,10 @@ typedef struct ArenaWatch ArenaWatch;
 
 /* A battle, by full rules as every one; NULL where memory ran out */
 ArenaWatch *arena_watch_new(const uint8_t *rom, size_t size, uint32_t match);
+/* ... a 2v2's (protocol v15), before anything is relayed: four seats'
+ * MegaMen and keys, the partners' set as the players' games set them
+ * (arena_seats.h) */
+void arena_watch_four(ArenaWatch *w);
 void arena_watch_free(ArenaWatch *w);
 /* What the server hands on: a player's MegaMen (ARENA_LOADOUT's bytes),
  * the cable's first's hashes (the installs' record, the ready, every 60

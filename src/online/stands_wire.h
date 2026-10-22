@@ -41,6 +41,8 @@ typedef struct {
 	uint8_t stage;
 	uint32_t match, side[2];
 	uint8_t delay;
+	uint8_t form;            /* 1 a 2v2 (protocol v15): its partners' seats below */
+	uint32_t partner[2];     /* ... seats 2 and 3's sessions, side 0's and side 1's partners */
 } WatchState;
 
 /* STANDS: its entries into out (ONLINE_STANDS_MAX at most), how many; -1 malformed */
@@ -49,10 +51,10 @@ int stands_wire_read(const uint8_t *data, size_t size, StandsEntry out[ONLINE_ST
 size_t stands_wire_status(uint8_t out[ONLINE_ARENA_STATUS_BYTES], uint32_t match, const ArenaReport *r);
 size_t stands_wire_watch(uint8_t out[ONLINE_WATCH_BYTES], unsigned action, uint32_t match);
 bool stands_wire_state(const uint8_t *data, size_t size, WatchState *out);
-/* WATCH_KEYS: side's keys from frame *first, *count of them, big-endian at *keys */
+/* WATCH_KEYS: side's keys from frame *first, *count of them, big-endian at *keys (a 2v2's: a seat's, 0-3) */
 bool stands_wire_keys(const uint8_t *data, size_t size, uint32_t *match, unsigned *side, uint32_t *first, const uint8_t **keys,
 	unsigned *count);
-/* WATCH_RELAY: the side whose message it is, and the message */
+/* WATCH_RELAY: the side whose message it is (a 2v2's: the seat), and the message */
 bool stands_wire_relay(const uint8_t *data, size_t size, unsigned *side, const uint8_t **inner, size_t *n);
 
 #endif

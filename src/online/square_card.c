@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arena_team_client.h"
 #include "arena_view.h"
 #include "bn6.h"
 #include "online_visit.h"
@@ -77,9 +78,38 @@ void square_card_frame(void) {
 
 bool square_card_leave(void) { return SA.arena && arena_waited(SA.arena) >= STALL_OFFER && btn_pressed(BTN_B); }
 
+/* my view's order of a 2v2's seats: my team's lead and partner, then theirs */
+static unsigned seat_at(unsigned k) {
+	unsigned side = (SA.seat & 1u) ^ (k >= 2);
+	return side + 2 * (k & 1u);
+}
+
+/* a seat's wait on the way in: its MegaMan not come, its PET on its way, ready */
+static ArenaSideWait seat_wait(unsigned seat) {
+	if (seat == SA.seat) return SA.stage == SA_READY || SA.stage == SA_BATTLE ? ARENA_SIDE_READY : ARENA_SIDE_LINKING;
+	if (!SA.seated_in[seat]) return ARENA_SIDE_COMING;
+	return arena_link_net_seat_ready(&SA.link, seat) ? ARENA_SIDE_READY : ARENA_SIDE_LINKING;
+}
+
+/* the way in of two MegaMen a side: four plates */
+static void way_four(void) {
+	ArenaWayView v = { .t = SA.t, .four = true, .team = true, .me = SA.seat >= 2 };
+	for (unsigned k = 0; k < 4; ++k) {
+		unsigned seat = seat_at(k);
+		v.names[k] = SA.names[seat];
+		v.knowns[k] = SA.seated_in[seat];
+		v.loadouts[k] = SA.seated_carried[seat] ? &SA.seated[seat] : NULL;
+		v.waits[k] = seat_wait(seat);
+	}
+	v.progress = SA.arena && SA.stage >= SA_CONNECTING ? arena_progress(SA.arena) : 0;
+	arena_card_way(&v);
+	arena_card_fade(255 - (int)SA.t * 255 / FADE, true);
+}
+
 /* the way in's panel: both players, each MegaMan as carried, the set's
  * score, whose PET is still on its way */
 static void way_in(void) {
+	if (SA.four) { way_four(); return; }
 	ArenaWayView v = { .name = { online_visit_name(), SA.name }, .known = { true, SA.theirs_in }, .t = SA.t };
 	v.loadout[0] = SA.mine_carried ? &SA.mine : NULL;
 	v.loadout[1] = SA.theirs_carried ? &SA.theirs : NULL;
@@ -112,6 +142,19 @@ static void card(void) {
 	v.set = SA.card.result != 5 && b->won + b->lost > 0 && !SA.team;
 	v.won = b->won;
 	v.lost = b->lost;
+	/* (side by side: each MegaMan's HP left, my team's first, theirs named) */
+	char theirs[2 * ONLINE_NAME_BYTES + 4];
+	if (SA.four) {
+		v.four = true;
+		for (unsigned k = 0; k < 4; ++k) {
+			unsigned seat = seat_at(k), side = seat & 1u;
+			v.names[k] = SA.names[seat];
+			v.hp4[k] = seat < 2 ? t->hp[side] : t->partner_hp[side];
+		}
+		snprintf(theirs, sizeof theirs, "%s & %s", v.names[2], v.names[3]);
+		v.name = theirs;
+		if (SA.card.result >= 4) v.why = arena_stop_line(SA.stop, SA.whose);
+	}
 	SquareTeamCard team;
 	square_team_card(&team);
 	if (SA.team && team.on) {
@@ -131,11 +174,15 @@ void square_arena_draw(void) {
 	if (SA.card.up) { card(); return; }
 	const uint32_t *v = SA.arena ? arena_video(SA.arena) : NULL;
 	if (SA.stage == SA_BATTLE && v) {
-		arena_view_core(v);
+		/* (a 2v2: my seat's screen, a partner's own Custom screen in his turn, the four told apart) */
+		if (SA.four) team_client_draw(SA.arena);
+		else arena_view_core(v);
 		arena_view_over(SA.name, arena_phase(SA.arena, SA.link.link.side) == BN6_PHASE_CUSTOM, arena_link_state(SA.arena), SA.t);
 		uint32_t waited = arena_waited(SA.arena);
+		/* (whose PET it waits for: a 2v2's among three) */
+		const char *whose = SA.four ? SA.names[arena_waiting_on(SA.arena) & 3u] : SA.name;
 		if (waited >= STALL_NOTE)
-			arena_view_stall(SA.name, waited < STALL_END ? STALL_END - waited : 0, STALL_END - STALL_NOTE, waited >= STALL_OFFER);
+			arena_view_stall(whose, waited < STALL_END ? STALL_END - waited : 0, STALL_END - STALL_NOTE, waited >= STALL_OFFER);
 		arena_card_fade(255 - (int)SA.t * 255 / FADE, true);
 		return;
 	}

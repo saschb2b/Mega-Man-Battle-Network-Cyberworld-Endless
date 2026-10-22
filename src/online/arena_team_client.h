@@ -11,6 +11,7 @@
 #ifndef CW_ARENA_TEAM_CLIENT_H
 #define CW_ARENA_TEAM_CLIENT_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "arena.h"
@@ -22,12 +23,19 @@
 void team_client_begin(Arena *a, const OnlineLoadout *all);
 /* the clients let go (a battle's end, the scene's) */
 void team_client_free(void);
+/* A 2v2 over the network (protocol v15, issue #181): my seat; a partner's
+ * (2 or 3) his side's GBA shown and his own screen made now, as the way
+ * in ends (false where it could not be made). Its stream is made from my
+ * keys each tick (team_client_stream, an ArenaStream: arena.h), and
+ * team_client_draw shows my seat's screen */
+bool team_client_seat(Arena *a, unsigned seat);
+uint16_t team_client_stream(void *context, Arena *a, uint32_t frame, uint16_t keys);
 /* player's (2 or 3) stream for `frame`: his keys, released on his Custom
  * screen, which they drive, or a pick message */
 uint16_t team_client_keys(Arena *a, unsigned player, uint32_t frame);
-/* teamseat's screen: its GBA's picture (a partner's BN6's own Custom
- * screen on his copy of the pair while it is open) and the seat's own
- * drawing over it */
+/* teamseat's screen (a 2v2's: my seat's): its GBA's picture (a
+ * partner's BN6's own Custom screen on his copy of the pair while it is
+ * open) and the seat's own drawing over it */
 void team_client_draw(Arena *a);
 /* said in the output: the two GBAs compared (arena_team.h), and each
  * client's screen, its frames and their cost */

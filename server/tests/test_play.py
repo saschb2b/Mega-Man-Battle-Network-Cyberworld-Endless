@@ -28,8 +28,8 @@ def offer(chip=(0, 0), want=0):
     return protocol.OFFER.pack(SPEC["offer"], chip[0], chip[1], want)
 
 
-def arena(action, ref, latency=0):
-    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency)
+def arena(action, ref, latency=0, form=0):
+    return protocol.ARENA.pack(SPEC["arena"], action, ref, latency, form)
 
 
 class PlayTests(unittest.IsolatedAsyncioTestCase):
@@ -142,7 +142,7 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         b, b_id = await self.connect("Beta")
         c, _ = await self.connect("Gamma")
         await a.send(arena(1, b_id, 40))
-        _, stage, match_id, other, _, _, _ = await self.arena_state(a)
+        _, stage, match_id, other, *_ = await self.arena_state(a)
         self.assertEqual((stage, other), (2, b_id))
         self.assertEqual((await self.arena_state(b))[1:4], (1, match_id, a_id))
         await b.send(arena(2, match_id, 100))

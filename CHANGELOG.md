@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Two MegaMen a side (issue #181).** A Battle between two teams in the
+  Net Square now asks how to fight: **One by one**, the Team NetBattle
+  relay as before, or **Side by side**, all four MegaMen on one field,
+  two a side. The other team hears which before it answers. Side by
+  side, the one who asked to team up leads on each team and his partner
+  stands beside him: each partner picks his own chips on BN6's own Custom
+  screen of his own game while the leads wait for him (a minute at most),
+  and every one of the four games runs the same battle from the four
+  players' buttons, rolling back as a NetBattle of two does. The way in
+  shows the four MegaMen, the result card each one's HP left and the
+  team's WIN or LOSE; a stall says whose PET it waits for; anyone else in
+  the channel can watch it from the stands. A partner fights with his
+  folder, HP and buster; his Cross and his NaviCust's other programs come
+  later. Protocol v15: a game must be as new as the server to play.
+
 - **Emotes and phrases one press away (issue #178).** **SELECT** in the
   Net Square opens the emote strip, a PET screen laid out as the Custom
   screen lays out its chips: the twelve emotes as MegaMan's own poses in
