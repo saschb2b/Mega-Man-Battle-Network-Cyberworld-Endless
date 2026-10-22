@@ -20,7 +20,7 @@ Jack MegaMan into a net that is new every run, and meet other players' MegaMen i
 <p align="center" lang="ja"><sub>ロックマンエグゼ6（北米版）のローグライク、オンライン対応。<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/ja/">日本語のページはこちら</a></sub></p>
 
 <p align="center">
-<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.13.0 trailer, 39 seconds with sound: eight players' games in one Net Square, joined by lines of light, under 8 operators a channel. Watch the 0.13.0 trailer"></a>
+<a href="https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/clips/trailer.mp4"><img src="docs/clips/trailer-play.png" width="640" alt="The 0.14.0 trailer, 34 seconds with sound: a player's game in the Net Square, dimmed under the title Pick a side on a red ribbon and a blue one. Watch the 0.14.0 trailer"></a>
 </p>
 
 <p align="center">

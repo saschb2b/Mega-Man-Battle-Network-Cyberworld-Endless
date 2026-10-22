@@ -142,3 +142,64 @@ share 83% against 84%; the kit's 80%). It grew into 0.14.0's piece
 (`v0_14_0_music.py`, 20 bars), which renders in either sound (`SOUND`);
 with the soundfont it renders in `docker/Dockerfile.music`'s image and
 keeps its 3DS banner as `3ds/banner-0.14.0.wav`.
+
+## 0.14.0: Pick a side (2026-10-22), `tools/trailers/v0_14_0.py`
+
+The brief, from the owner's headline: the Square's social side and its
+wider NetBattles (emotes performed and the strip on SELECT, wave and wave
+back, the Square cheering together; a NetBattle from the ask to the
+result card and a rematch; Team NetBattles one by one; two MegaMen a
+side). The music: sketch A grown into 20 bars, the battle drive in G
+minor at 150, played by FluidR3 GM's samples; the owner: it "sounds
+awesome".
+
+What was made: 34 seconds, 20 bars at 150 (a bar 48 frames). Every piece
+of the release's news is a pair (an emote and who sees it, a wave and its
+answer, a challenge and its Yes, two Yeses for a rematch, a team of two,
+two a side), so the cut is a versus screen: a slanted seam splits the
+frame into a red side and a blue side, each side's stripes stepping
+toward the seam on every beat; the seam sweeping across the frame in the
+new shot's colour is the cut, and a cut inside a shot sweeps across the
+game's picture behind the same slanted line. The words are a call and
+its answer: the red side's headline runs in on a slanted ribbon, the
+blue side's answer on the next beat ("WAVE" / "WAVE BACK", "BATTLE?" /
+"TAKE IT, LAN?", "AGAIN?" / "AGAIN!"); where the two meet (the "!!", the
+cheer, the rematch) the seam flashes gold and gold diamonds burst. A VS
+badge on the seam for the NetBattle, SIDE · BY · SIDE across it for the
+climax; each game framed in its side's colour with a slanted name plate;
+the drop's stripes stopped and dimmed. Type: Ubuntu Sans, condensed heavy
+italic (its variable axes through PIL's `set_variation_by_axes`). The
+arc: wave and wave back, the title; the strip, an emote on two screens,
+six emotes seen, the cheer; the ask, the way in, the result card, the
+rematch; team up and the blind order, one by one with the rest watching;
+side by side asked, the four screens at once, each partner's own Custom
+screen with his Cross and Beast Out, the stands; the logo and PICK A
+SIDE.
+
+New footage: the NetBattles, the relay and the two a side wait on what
+the games do (a bout's end, a card to answer, a team's match), so
+`tools/trailer_online.py` grew `Remote` games played by remote play, the
+scene's course reacting to each game's log, every frame kept as it comes
+(a thread turns every second one into the scene's PNGs), those scenes
+run at once after the ones by the clock. Their cards are read from the
+picture (the chat box and its green cursor), not the clock: under load a
+timed A landed on the wrong player's card.
+
+What went wrong on the way: the owner, of the first render: "the pick a
+side screens show megaman standing in the void". The players stood at
+`place` spots of earlier harnesses, at the plaza's edge, the net's dark
+and its rings filling the picture. They now stand by `square_plan.c`'s
+panels (`at(gx, gy, facing)`: only within two panels of the landmark's
+base does the floor fill the whole picture), and every Square shot was
+looked over again on the sheets (the referee's spot on the Arena's walk
+went the same way: the stands are Nova's watching instead). A `place`
+while a chat box is open is ignored, and A with none open reads the
+faced MegaMan's card: page with B before placing. A player's own emote
+leaves his first frame blank (step over it); a feed that holds or slows
+the same footage must not sweep. The stands' last frames say who won
+("Mira's team won the NetBattle."): cut short of them. The owner:
+"approved".
+
+Devices now used up: the slanted seam and its red and blue sides, the
+seam's sweep as the cut, call-and-answer ribbons, the gold meeting
+(burst and glow), the VS badge on the seam, slanted name plates.
