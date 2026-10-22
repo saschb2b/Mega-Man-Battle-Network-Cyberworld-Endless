@@ -47,8 +47,14 @@ static int soul_of(int side) {
 	return next ? next : hook_read8(soul_field(side, BN6_SOUL_ID));
 }
 
-static bool chaos_of(int side) {
-	return hook_read8(soul_field(side, hook_read8(soul_field(side, BN6_SOUL_NEXT)) ? BN6_SOUL_NEXT_CHAOS : BN6_SOUL_CHAOS)) != 0;
+/* ... the same of the Navi `obj`, by his own Souls state (a side's partner's in his block: soul_field_of) */
+static int soul_of_obj(uint32_t obj) {
+	uint8_t next = hook_read8(soul_field_of(obj, BN6_SOUL_NEXT));
+	return next ? next : hook_read8(soul_field_of(obj, BN6_SOUL_ID));
+}
+
+static bool chaos_of_obj(uint32_t obj) {
+	return hook_read8(soul_field_of(obj, hook_read8(soul_field_of(obj, BN6_SOUL_NEXT)) ? BN6_SOUL_NEXT_CHAOS : BN6_SOUL_CHAOS)) != 0;
 }
 
 static bool a_soul(int soul) { return soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS; }
@@ -66,7 +72,7 @@ static int drawn_side(uint32_t obj) {
 /* (the sprite selector 0x0800FC9E's read of its table by the form, r1 the form, MegaMan's) the Soul's sprite in list 0 */
 static HookAct sprite_read(HookRegs *r, void *user) {
 	(void)user;
-	int soul = soul_of(drawn_side(r->r[5]));
+	int soul = soul_partner(r->r[5]) ? soul_of_obj(r->r[5]) : soul_of(drawn_side(r->r[5]));
 	if (r->r[1] != BN6_FORM_PROXY || !a_soul(soul)) return HOOK_CONTINUE;
 	int k = soul - SOUL_FIRST + ((breaks & SOULLOOK_BREAK_SPRITE) ? 1 : 0);
 	r->r[2] = (uint32_t)(SOUL_LIST0_FIRST + k % SOULS);
@@ -74,26 +80,25 @@ static HookAct sprite_read(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
-static uint32_t soul_palette(int side) {
-	return (breaks & SOULLOOK_BREAK_PALETTE) ? 1 : chaos_of(side) ? PALETTE_CHAOS : PALETTE_SOUL;
+static uint32_t soul_palette(uint32_t obj) {
+	return (breaks & SOULLOOK_BREAK_PALETTE) ? 1 : chaos_of_obj(obj) ? PALETTE_CHAOS : PALETTE_SOUL;
 }
 
 /* (0x0801002C's read of the palettes by the form, r0 the form, r5 MegaMan) */
 static HookAct palette_read(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of(side))) return HOOK_CONTINUE;
-	r->r[4] = soul_palette(side);
+	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
+	r->r[4] = soul_palette(r->r[5]);
 	r->r[12] = BN6_FORM_PALETTE_BACK | 1;
 	return HOOK_JUMP;
 }
 
-/* (an object drawn in MegaMan's form, 0x080BF516: r0 the form of its side, [r5+0x16]) */
+/* (an object drawn in MegaMan's form, 0x080BF516: r0 the form of its side, [r5+0x16]) its Soul's palette; a side's
+ * partner's by his own Soul (two MegaMen a side: his form and look his own) */
 static HookAct palette_read2(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of(side))) return HOOK_CONTINUE;
-	r->r[0] = soul_palette(side);
+	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
+	r->r[0] = soul_palette(r->r[5]);
 	r->r[12] = BN6_FORM_PALETTE2_BACK | 1;
 	return HOOK_JUMP;
 }
@@ -103,8 +108,7 @@ static HookAct palette_read2(HookRegs *r, void *user) {
 /* (the crossing's phases for forms 1-10, r0 the pending form, r5 MegaMan) a Soul's: BN6's with BN5's phase 1 */
 static HookAct phases(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (r->r[0] != BN6_FORM_PROXY || !hook_read8(soul_field(side, BN6_SOUL_NEXT))) return HOOK_CONTINUE;
+	if (r->r[0] != BN6_FORM_PROXY || !hook_read8(soul_field_of(r->r[5], BN6_SOUL_NEXT))) return HOOK_CONTINUE;
 	r->r[1] = SOULS_PHASES;
 	r->r[12] = BN6_CROSSING_PHASES_BACK | 1;
 	return HOOK_JUMP;
@@ -114,9 +118,8 @@ static HookAct phases(HookRegs *r, void *user) {
  * TomahawkSoul (0x0801211E: the camera shaken, strength 2 for 30 frames, the battle's flag 0x20 set through the unison) */
 static HookAct crossing_sound(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (!soul_united(side)) return HOOK_CONTINUE;
-	if (soul_of(side) == SOUL_TOMAHAWK && !(breaks & SOULLOOK_BREAK_SHAKE)) {
+	if (!soul_id_of(r->r[5])) return HOOK_CONTINUE;
+	if (soul_of_obj(r->r[5]) == SOUL_TOMAHAWK && !(breaks & SOULLOOK_BREAK_SHAKE)) {
 		uint32_t camera = hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
 		hook_write16(camera + BN6_CAMERA_SHAKE_STRENGTH, TOMAHAWK_SHAKE_STRENGTH);
 		hook_write16(camera + BN6_CAMERA_SHAKE, TOMAHAWK_SHAKE_FRAMES);
@@ -148,10 +151,10 @@ static HookAct image_deco(HookRegs *r, void *user) {
 /* a Soul's face and turns in place of the form's (r4 the form; the owner's side through [r5+0x48]), on to `out` */
 static HookAct face(HookRegs *r, void *user) {
 	uint32_t owner = hook_read32(r->r[5] + BN6_FACE_OWNER);
-	int side = owner ? side_of(owner) : megaman_side(), soul = soul_of(side);
+	int side = owner ? side_of(owner) : megaman_side(), soul = owner ? soul_of_obj(owner) : soul_of(side);
 	if (r->r[4] != BN6_FORM_PROXY || !a_soul(soul)) return HOOK_CONTINUE;
 	r->r[6] = (uint32_t)(SOUL_FACE_FIRST + soul - SOUL_FIRST);
-	r->r[3] = hook_read8(soul_field(side, BN6_SOUL_TURNS));
+	r->r[3] = hook_read8(owner ? soul_field_of(owner, BN6_SOUL_TURNS) : soul_field(side, BN6_SOUL_TURNS));
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
 }
@@ -185,7 +188,8 @@ static HookAct digits(HookRegs *r, void *user) {
 static HookAct flash_spawn(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t kind = r->r[4] & 0xFF;
-	if ((kind != BN5_FLASH_SOUL && kind != BN5_FLASH_CHAOS) || !soul_united(side_of(r->r[5])) || (breaks & SOULLOOK_BREAK_FLASH))
+	if ((kind != BN5_FLASH_SOUL && kind != BN5_FLASH_CHAOS) || !soul_id_of(r->r[5]) ||
+		(breaks & SOULLOOK_BREAK_FLASH))
 		return HOOK_CONTINUE;
 	r->r[7] = r->r[8];
 	r->lr = BN6_ARM_FLASH_SPAWN_BACK | 1;
@@ -197,16 +201,16 @@ static HookAct flash_spawn(HookRegs *r, void *user) {
  * Soul's at its kind's own height, as BN5's object keeps it for MegaMan in a Soul (0x080B9BBE: r4 the kind's record) */
 static HookAct flash_height(HookRegs *r, void *user) {
 	(void)user;
-	if (!soul_united(side_of(r->r[5]))) return HOOK_CONTINUE;
+	if (!soul_id_of(r->r[5])) return HOOK_CONTINUE;
 	r->r[0] = hook_read8(r->r[4] + 3);
 	r->r[12] = BN6_FLASH_HEIGHT_NEXT | 1;
 	return HOOK_JUMP;
 }
 
-bool soullook_flash(int side, int *kind, int *frame) {
-	int soul = done ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0;
+bool soullook_flash(uint32_t obj, int *kind, int *frame) {
+	int soul = done ? soul_id_of(obj) : 0;
 	if (!a_soul(soul)) return false;
-	*kind = hook_read8(soul_field(side, BN6_SOUL_CHAOS)) ? BN5_FLASH_CHAOS : BN5_FLASH_SOUL;
+	*kind = hook_read8(soul_field_of(obj, BN6_SOUL_CHAOS)) ? BN5_FLASH_CHAOS : BN5_FLASH_SOUL;
 	*frame = soul;
 	return true;
 }

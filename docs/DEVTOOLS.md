@@ -581,11 +581,72 @@ picks' mutation; `teamslow=N` keeps side 0's partner's hands off his
 screen for the first N frames of each turn, a slow partner the leads
 wait for (`-1`: a client gone quiet, which never picks nor sends, so the
 wait's limit ends it); `teambuster=N` (1-5) gives both partners' records their
-buster's Attack N, as their own loadouts would. `teamhp=N` gives each partner his own
+buster's Attack N, as their own loadouts would. Where the data folder
+has a checkpoint, side 0's partner's NaviCust is compiled by BN6's own
+reload over the way in's own state (ONLINE_ARENA.md, His NaviCust,
+compiled by BN6), and `teamcust=1` gives side 1's partner the
+checkpoint's MegaMan's NaviCust too (`-1`: the second GBA's records their
+sides' copies, the mutation; `-2`: the NaviCusts compiled over this
+game's own checkpoint's state instead, as before issue #181's review, a
+mutation that parts the games of different runs). `teamidle=N` keeps the lead of side N - 1 (over the network, this
+game's lead) off his Custom screen, so that his own game presses OK for
+him at the turn's limit (ONLINE_ARENA.md, The leads wait for their partners).
+`teamcross=N` (1-5) offers each partner Cross N on
+his own CROSSSELECT and has his stood-in client take it at his first turn
+(`-N`: none on the second GBA, the mutation); `teambeast=1` offers each
+partner Beast Out on his own Custom screen and has his client take its
+emblem at his first turn (`2`: at every turn; `3`: the leads too, by the
+same keys, the partners' control; `-1` none on the second GBA, the
+mutation), each turn's form check saying each MegaMan's form and
+BeastOutCounter in the log; `teampa=1` opens side 0's
+partner's folder with Cannon A, B and C, his first hand Z-Canon1, a
+Program Advance (`-1`: the PA left out of his hand on the second GBA, the
+mutation); `teamunite=1` gives each partner's own Custom screen the
+carried MegaMan's Souls (BN5's installs' hooks on his side's GBA of his
+copy) and has his client take the chip under the cursor and UNITE at his
+first turn (`2`: each one's folder opening with Atk+10 `*`, a Plus chip:
+NumberSoul's unison of three turns where the Souls held have it; `3`:
+RockCube `*` first and ColonelSoul held, ColonelSoul's unison; `-1`:
+his Soul left out on the second GBA, the mutation; with
+`CYBERWORLD_EMU_DEBUG` a partner's Soul taken up and ended are said by
+core: "side 0's partner united with Soul 9 ..."). On a partner's own
+game in a side-by-side match from the Square (with `arenaboth`, his
+client the stood-in script), `teamcross=N` and `teambeast=1` offer and
+take his Cross or Beast Out on his own screen, `teamunite=1` gives the
+MegaMan he carries in NumberSoul and Atk+10 `*` as his folder's first
+chip and takes UNITE, and `teampa=1` makes the MegaMan he carries in a
+Program Advance's first (his folder's Regular chip and TagChips Cannon A, B and
+C, as his own folder crosses to every game): a test partner whose
+choices cross the server as a player's do. `teamform=N` makes a team
+challenge from the Square name its format without asking (1 one by one,
+2 side by side). `teamhp=N` gives each partner his own
 battle NaviStats' max HP N (`-N` the second GBA's alone, the records'
 mutation), and `arenaother` shows the second GBA's screen instead of the
 first's (the game the same: a picture drawn changes no state), where side
-0's partner's HP shows under him.
+0's partner's HP shows under him. The two GBAs' first iteration apart is
+also said as it runs ("the two GBAs part at iteration N, said as it
+ran", with the partners' keys each took there), for a mutation whose
+battle the two no longer end together, and the partners' words in the
+GBAs' link packets are counted at the end ("the partners' words in
+BN6's packets": handed to each side's GBA, packets built, messages sent
+and read on each GBA, the wait's limit said in a partner's place).
+
+The full-rules audit's runs (docs/ONLINE_ARENA.md, What a partner meets
+under full rules; issue #182): `arenapeer=MASK` makes the sides in MASK
+(1 side 0, 2 side 1) play their folders' first chips, the chip under the
+cursor taken before OK and used in the fight every four seconds (side 0
+a second before side 1, his charged shots let go first), and side 1
+(MASK 2) carries the checkpoint's MegaMan as side 0 does, so a
+checkpoint of thirty DarkInvs (`--scene emu --dev folder=289`) puts
+either side under BN5's chip AI. Under `arena2v2`, `chipaibreak=N` makes the core of hook
+slot N (the debug lines' "core N"; the second GBA's is 2) take no room
+of BN5's chip AI for anyone but side 0's player, and `partnerbreak=N`
+makes it take no object for a side's partner (his side's Soul, mood and
+NaviStats his, as before the audit): two mutations that must part the
+GBAs. With `CYBERWORLD_EMU_DEBUG` the rooms ("seat 2's AI data ... moved
+into his room ..."), each MegaMan's AI data as the chip AI takes one, a
+Chaos Unison's release and a partner's own charged B, and a Navi made
+dark by a DarkChip (his mood and NaviStats) are said by core.
 
 `--dev rollbench` measures what a rollback of the Arena costs on the
 machine it runs on (issue #128), on the player's ROM, and says it on the

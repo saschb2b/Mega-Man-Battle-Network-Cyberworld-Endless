@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+- **Two MegaMen a side (issue #181, epic #167).** A Battle between two
+  teams in the Net Square now asks how to fight: **One by one**, the Team
+  NetBattle relay as before, or **Side by side**, all four MegaMen on one
+  field, two a side. The other team hears which before it answers. Side
+  by side, the one who asked to team up leads on each team and his
+  partner stands beside him, every one of the four games running the
+  same battle in BN6's own engine from the four players' buttons, rolling
+  back as a NetBattle of two does. Each partner picks his chips on BN6's
+  own Custom screen of his own game, from his own folder dealt into his
+  own deck; the leads' screen waits for him by BN6's own link wait (the
+  other side sees BN6's "Cstmzing..." over the side that waits), a quiet
+  sign tells a lead his partner is still picking and a partner that his
+  lead is ready. Once anyone has pressed OK, whoever is still picking,
+  lead or partner, has 30 seconds, then his picks so far are taken; only
+  he sees a quiet sign in his last ten seconds.
+  A partner is his whole MegaMan: his NaviCust's programs worked out by
+  BN6's own code, so his HP, buster, abilities and the chips his screen
+  deals are his own; his Cross chosen on his own CROSSSELECT, his Beast
+  Out from his own emblem (its turns and end counted by BN6's own code for
+  him as for a lead), a Program Advance made on his screen, and UNITE with
+  his own Souls on his own screen (a Soul's powers, look, Chaos Unison and
+  turns his own), each taken into the battle on both linked GBAs. A partner's buttons and
+  choices travel inside his lead's GBA's own link data, so both GBAs read
+  them in the same frame as the lead's: a partner who never picks, or all
+  four in Beast Out, can no longer make the two GBAs see different
+  battles. Under full rules BN5's Souls, mood and DarkChips answer for
+  each MegaMan: a partner's charged B is his own while his lead is in a
+  Chaos Unison, a Soul's powers and look are its MegaMan's, and a
+  partner's mood, dark and DarkChip after-effects are his own. The way in
+  shows the four MegaMen, a partner's seat his own HP box, the result
+  card each one's HP left and the team's WIN or LOSE; a stall says whose
+  PET it waits for, and anyone else in the channel can watch from the
+  stands. Four players of different runs build the same battle: each
+  partner's NaviCust is worked out over the battle's own starting state,
+  never a player's save, and a partner's choices that his own Custom
+  screen could not have made (a chip outside his hand, a Cross he lacks,
+  a Soul he does not hold) are refused on every game alike. Protocol v15:
+  a game must be as new as the server to play.
+- **DarkInvs on the challenged player's side of a NetBattle (issue
+  #182).** Under full rules, the second player's DarkInvs (or ShadowSoul's
+  Chaos Unison, which uses it) moved his MegaMan's AI data into the one
+  block of BN5's size that the first player's MegaMan already held: both
+  MegaMen read one AI data, the first turned grey under the other's
+  DarkInvs and the battle stood still. Each MegaMan now has a room of his
+  own, so either player's DarkInvs takes his own MegaMan alone, both at
+  once too; a NetBattle without it is the battle it was, hash for hash.
+
 - **Emotes and phrases one press away (issue #178).** **SELECT** in the
   Net Square opens the emote strip, a PET screen laid out as the Custom
   screen lays out its chips: the twelve emotes as MegaMan's own poses in
@@ -39,19 +86,6 @@
   a second (it was two, then one every two seconds), and L's **Quiet
   please** hides everyone else's. Protocol v14: an older game or server
   is told which side is behind.
-
-- **Two MegaMen a side, research behind `--dev arena2v2` (epic #167).**
-  Each partner picks his chips on BN6's own Custom screen from his own
-  deck, on a copy of the battle his own game keeps, and only his picks
-  cross to the others; they go into his own hand on both GBAs at once.
-  The leads' Custom screen waits for a partner still picking, by BN6's
-  own link wait (the other side sees BN6's "Cstmzing..." over the side
-  that waits); a quiet sign tells a lead his partner is still picking
-  and a partner that his lead is ready, and after 60 seconds the
-  partner's picks are taken as they stand. A partner's seat shows his
-  own HP box, and each MegaMan is marked by his seat. Not yet a mode to
-  play: it needs the wire's four seats (docs/ONLINE_ARENA.md, Two
-  MegaMen a side).
 
 - **A rematch in about a second, and the Square before a NetBattle
   (epic #167, steps 3 and 4).** Two Yeses on the result card now go

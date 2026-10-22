@@ -84,8 +84,8 @@
 #define RAM_PLAYER_AI_END   0x02011730u   /* ... then: */
 #define RAM_TEAM            0x02011730u   /* --dev arena2v2's list of what the Practice NetBattle spawns (arena_team.c, epic #167), to: */
 #define RAM_TEAM_END        0x02011750u   /* ... then: */
-#define RAM_TEAM_RING       0x02011750u   /* ... the partners' keys queued by the battle loop's iteration, 8 a side (arena_team.c), to: */
-#define RAM_TEAM_RING_END   0x02011790u   /* ... then: */
+#define RAM_TEAM_LINK       0x02011750u   /* ... the partners' words for and from BN6's packets, 0x20 bytes a side (arena_team_link.c), to: */
+#define RAM_TEAM_LINK_END   0x02011790u   /* ... then: */
 #define RAM_TEAM_CUSTOM     0x02011790u   /* ... each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c), to: */
 #define RAM_TEAM_CUSTOM_END 0x02011800u
 #define RAM_PERSISTENT_END  0x02011800u   /* (the battle sprite pool from here) */
@@ -101,7 +101,11 @@
 #define RAM_COLONEL         0x0203FF60u   /* BN5's Colonel's table moved (BN6_COLONEL_TABLE; xnavi_install.c), to: */
 #define RAM_SOULS           0x0203FF70u   /* kept for the Souls' state and BN5's mood (the Souls' track), to: */
 #define RAM_TEAM_TICK       0x0203FFF0u   /* u32 --dev arena2v2's count of the battle loop's iterations (arena_team.c), to: */
-#define RAM_BATTLE_SPARE    0x0203FFF4u   /* spare (the game call's old mark, unused since issue #33), to: */
+#define RAM_CHIP_AI_ROOMS   0x0203FFF4u   /* u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's
+                                             bits; darkinvs_room.h, issue #182), to: */
+#define RAM_TEAM_CLOCK      0x0203FFF8u   /* u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core
+                                             has seen, then u8 1 once seen (arena_team_custom.c, team_hurry.h), to: */
+#define RAM_BATTLE_SPARE    0x0203FFFCu   /* spare (the game call's old mark, unused since issue #33), to: */
 #define RAM_BATTLE_END      0x02040000u
 
 #endif

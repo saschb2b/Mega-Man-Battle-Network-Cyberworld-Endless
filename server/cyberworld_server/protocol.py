@@ -20,8 +20,8 @@ PROFILE = struct.Struct("!HHBBBHHHBHI49s")
 WELCOME = struct.Struct("!BIIHBH16sHIH")
 TRADE = struct.Struct("!BBIHBHB")
 TRADE_STATE = struct.Struct("!BBII16sHBHB")
-ARENA = struct.Struct("!BBIH")
-ARENA_STATE = struct.Struct("!BBII16sBB")
+ARENA = struct.Struct("!BBIHB")                  # (v15: the format, a team challenge's)
+ARENA_STATE = struct.Struct("!BBII16sBBB4I")     # (v15: the format, and a 2v2's four seats' sessions)
 ARENA_INPUT = struct.Struct("!BIIB")
 ARENA_HASH = struct.Struct("!BIIQ")
 ARENA_LOADOUT = struct.Struct("!BIH")
@@ -32,9 +32,9 @@ ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
 STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBBB")
 # (Team NetBattles, protocol v12: teams.py)
 TEAM = struct.Struct("!BBIB")
-TEAM_STATE = struct.Struct("!BBIII4IBBBBH")
+TEAM_STATE = struct.Struct("!BBIII4IBBBBHB")    # (v15: the format)
 WATCH = struct.Struct("!BBI")
-WATCH_STATE = struct.Struct("!BBIIIB")
+WATCH_STATE = struct.Struct("!BBIIIBBII")        # (v15: the format, the partners' seats)
 WATCH_KEYS = struct.Struct("!BIBIH")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
@@ -251,14 +251,21 @@ def board(entries):
 def read_arena(data):
     if len(data) != ARENA.size or data[0] != SPEC["arena"]:
         raise ProtocolError("Malformed ARENA")
-    _, action, ref, latency = ARENA.unpack(data)
-    if not 1 <= action <= SPEC["arena_seen"] or not ref or latency > 5000:
+    _, action, ref, latency, form = ARENA.unpack(data)
+    if not 1 <= action <= SPEC["arena_seen"] or not ref or latency > 5000 or form > SPEC["team_side_by_side"]:
         raise ProtocolError("Invalid arena action")
-    return action, ref, latency
+    return action, ref, latency, form
 
 
-def arena_state(stage, match_id, other, identity, side=0, delay=0):
-    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay)
+def arena_state(stage, match_id, other, identity, side=0, delay=0, form=0, seats=(0, 0, 0, 0)):
+    """ARENA_STATE: `side` START's (a 2v2's: the recipient's seat, 0..3), `form` a team challenge's format (v15),
+    `seats` a 2v2 START's four sessions in seat order"""
+    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay, form, *seats)
+
+
+def arena_seat(seat, data):
+    """ARENA_SEAT (v15): a 2v2 seat's relayed message, to the three others"""
+    return bytes((SPEC["arena_seat"], seat)) + data
 
 
 def arena_relay(data):
@@ -299,8 +306,8 @@ def read_team(data):
     return action, ref, value
 
 
-def team_state(stage, partner, match, bout, players, left, number, result, hp):
-    return TEAM_STATE.pack(SPEC["team_state"], stage, partner, match, bout, *players, left[0], left[1], number, result, hp)
+def team_state(stage, partner, match, bout, players, left, number, result, hp, form=0):
+    return TEAM_STATE.pack(SPEC["team_state"], stage, partner, match, bout, *players, left[0], left[1], number, result, hp, form)
 
 
 def read_watch(data):
@@ -313,8 +320,9 @@ def read_watch(data):
     return action, match
 
 
-def watch_state(stage, match, side0, side1, delay):
-    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, delay)
+def watch_state(stage, match, side0, side1, delay, form=0, partners=(0, 0)):
+    """WATCH_STATE: the cable's two players' sessions; a 2v2's (`form` 1) partners' too, seats 2 and 3 (v15)"""
+    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, delay, form, *partners)
 
 
 def watch_relay(side, data):

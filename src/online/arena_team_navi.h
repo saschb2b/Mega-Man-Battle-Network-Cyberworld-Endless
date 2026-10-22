@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 struct HookCore;
+struct mCore;
 
 /* the four hooks on one of the pair's cores' table (side its GBA, slot its hook slot) */
 bool arena_team_navi_hooks(struct HookCore *core, unsigned side, int slot);
@@ -33,12 +34,25 @@ void arena_team_navi_begin(void);
  * Charge (levels less one, as a NaviStats keeps them); max_hp 0: his HP
  * his side's; buster NULL: all his side's, as his record is copied */
 void arena_team_navi_loadout(unsigned side, uint16_t max_hp, uint16_t base_hp, const uint8_t buster[3]);
+/* side's partner's NaviStats as BN6 compiled them from his NaviCust's
+ * board on his own client (BN6_BATTLE_NAVI_SIZE bytes, the same on every
+ * client: arena_team_navicust.h), before the battle; his record takes
+ * them whole as the field spawns, the bytes a link battle's start sets in
+ * every MegaMan's kept from his side's, the loadout's numbers above over
+ * them where given; NULL: none */
+void arena_team_navi_compiled(unsigned side, const uint8_t *stats);
+/* side's partner's record as `core` holds it (between frames: his own
+ * screen's copy of the pair); false where his room is not taken there */
+bool arena_team_navi_record(struct mCore *core, unsigned side, uint8_t *out);
+/* side's partner's own record in the core's RAM (BN6_BATTLE_NAVI_SIZE
+ * bytes), from a hook; 0 where his room is not taken */
+uint32_t arena_team_navi_record_at(unsigned side);
 /* side's partner's own hand in the core's RAM (BN6_HAND_SIZE bytes), from
  * a hook; 0 where his room is not taken */
 uint32_t arena_team_navi_hand(unsigned side);
 /* a hand's chip up next, from a hook: side's lead's, or his partner's */
 uint8_t arena_team_navi_at(unsigned side, bool partner);
-/* the records' HP fields (MaxBaseHP, CurHP, MaxHP) and the hands' chips up
+/* the records' HP fields (MaxBaseHP, CurHP, MaxHP) and forms and the hands' chips and chips up
  * next folded into a digest both GBAs must agree on, from a hook */
 uint32_t arena_team_navi_digest(uint32_t h);
 /* how often each record and hand answered, by whom, said in the output */

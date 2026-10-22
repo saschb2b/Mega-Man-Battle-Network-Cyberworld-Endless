@@ -53,8 +53,14 @@
 #define BN6_CHIP_COMPUTED_POWER 0x80      /* BN6_CHIP_EFFECT_FLAGS: its power one BN6 computes (BN6_CHIP_ATTACK_POWER 1000 and up: BN6_CHIP_POWERS) */
 #define BN6_CHIP_NAVI_FLAG    0x04        /* BN6_CHIP_EFFECT_FLAGS: a Navi chip, which Navi+20 joins in the hand (bn6f sub_8029224) */
 #define BN6_CHIP_ATK10        0xC0        /* the plus chips the hand's merge (bn6f sub_8029224, 0x08029224) adds to the chip before: Atk+10 and */
+#define BN6_CHIP_ROCKCUBE     0x8F        /* RockCube: an Obstacle, the kind ColonelSoul unites with (tests/xdiff/soul_colonel_chip.json's 0x348F) */
 #define BN6_CHIP_ATK30        0xC3        /* ... Atk+30 to one with BN6_CHIP_SHOWS_POWER, */
 #define BN6_CHIP_NAVI20       0xC1        /* ... Navi+20 to one with BN6_CHIP_NAVI_FLAG */
+#define BN6_CHIP_CANNON       0x01        /* Cannon: three in a row of codes (A, B, C) picked in order are a Program Advance, */
+#define BN6_PA_ZCANNON1       0x140       /* ... this one (a record of OK's check 0x08029520: count 3, kind 0, this id, chip 1) */
+#define BN6_PA_FIRST          0x140       /* the Program Advances' chip ids, the first and the last of the records OK's check walks (its tables'
+                                             words at 0x080295B4 and 0x080295B8: 30 records, 3 or 4 chips each) */
+#define BN6_PA_LAST           0x15D       /* ... the last (Gregar's records' ids, read from both tables) */
 #define BN6_CHIP_ALPHA_SORT   0x18        /* AlphabetSortPos, u16: the folder editor's ABC order */
 #define BN6_CHIP_ATTACK_POWER 0x1A        /* AttackPower, u16: what the Custom screen and the hand show, and a chip deals */
 #define BN6_CHIP_ID_SORT      0x1C        /* IDSortPos, u16: the editor's ID order, and with the code the key its swap tells two chips apart by (bn6f
@@ -122,6 +128,8 @@
 #define BN6_PA_LIST           0x0802BCB0u /* the Program Advances' list the Custom screen walks (0x08029520): a recipe's address each, */
 #define BN6_PA_COUNT          43          /* ... these, then 0 (0x0802BD5C) */
 #define BN6_PA_LIST_REF       0x080295B4u /* ... its one word (loaded at 0x08029556; the link battles' list, 0x0802BC60, its own word 0x080295B8) */
+#define BN6_PA_LIST_LINK_REF  0x080295B8u /* ... the link battles' list's word: 0x0802BC60, twenty recipes of its own, then BN6_PA_LIST's own
+                                             (contiguous, ended by its 0); a partner's Program Advance checked against both */
 #define BN6_PA_LETTERS        0x0802B99Cu /* the P.A. screen's literal 0x160: a part's code letter drawn below that id alone (0x0802B846) */
 #define BN6_PA_LIBRARY_BOUND  0x08127AE4u /* the Library's P.A. tab's literal 0x1E: its builder's ids 320 to 320 + it (ble, 0x081279E4) */
 #define BN6_NAVI_FOLDER       (BN6_NAVI_STATS + 0x2D) /* the folder in use (0-2), its 30 chips at eToolkit +0x48's + 0x3C times it (0x0800A422) */

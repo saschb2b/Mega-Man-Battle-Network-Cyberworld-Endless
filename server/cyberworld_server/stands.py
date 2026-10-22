@@ -18,7 +18,13 @@ cheer, and the report the cable's first game sends now and then
 (ARENA_STATUS: each MegaMan's HP, the last chip each used and how many,
 the winner). The two players hear nothing of the stands while they fight:
 a phrase or emote of the channel's is held from them (app.Server.social),
-and counted as a cheer for the report."""
+and counted as a cheer for the report.
+
+A 2v2 (protocol v15, issue #181) is kept by its four seats: each seat's
+MegaMan, ready, record and keys, the cable's first's hashes; WATCH_STATE
+names the partners' seats too, and WATCH_RELAY and WATCH_KEYS carry the
+seat (0..3) where a battle of two carries its side. STANDS names its two
+leads and their report, as a battle of two's."""
 
 import time
 
@@ -40,11 +46,12 @@ class Book:
 
     def __init__(self, match, channel, names, delay):
         self.match, self.channel, self.names, self.delay = match, channel, names, delay
-        self.loadout = [None, None]       # each side's ARENA_LOADOUT, as relayed
-        self.record = [None, None]        # ... its ARENA_HASH of the installs' record
-        self.ready = [None, None]         # ... and of its ready
+        seats = len(match.seats)          # (2, or a 2v2's 4: v15)
+        self.loadout = [None] * seats     # each seat's ARENA_LOADOUT, as relayed
+        self.record = [None] * seats      # ... its ARENA_HASH of the installs' record
+        self.ready = [None] * seats       # ... and of its ready
         self.hashes = []                  # (frame, ARENA_HASH) of the cable's first, in order
-        self.keys = [bytearray(), bytearray()]
+        self.keys = [bytearray() for _ in range(seats)]
         self.broken = False               # a gap in the keys, or past MOST_FRAMES: no longer watched
         self.status = (0, 0, 0, 0, 0, 0, 0, 0, 0)
         self.status_time = -1e9
@@ -69,8 +76,8 @@ class Cursor:
 
     def __init__(self):
         self.setup = False
-        self.relayed = set()   # ("loadout"|"record"|"ready", side)
-        self.keys = [0, 0]
+        self.relayed = set()   # ("loadout"|"record"|"ready", seat)
+        self.keys = None       # each seat's frames sent (made with the setup)
         self.hashes = 0
 
 
@@ -92,7 +99,8 @@ class Stands:
             return
         book = self.books[match.id] = Book(match, a.channel, (a.name, b.name), delay)
         team = self.server.teams.matches.get(getattr(match, "team", 0))
-        book.bout = team.number if team else 0
+        # (a relay's bout its number; side by side the one battle, v15)
+        book.bout = protocol.SPEC["stands_side_by_side"] if match.four else team.number if team else 0
         self.dirty[a.channel] = True
 
     def end(self, match):
@@ -109,7 +117,7 @@ class Stands:
         book = self.books.get(match.id)
         if not book or book.over_time is not None:
             return
-        side = 0 if player_id == match.a else 1
+        side = match.seat(player_id)
         kind = data[0]
         if kind == protocol.SPEC["arena_loadout"]:
             book.loadout[side] = bytes(data)
@@ -185,7 +193,7 @@ class Stands:
         book = self.books.get(match_id)
         if not book or book.over_time is not None or book.broken or book.channel != player.channel:
             await self.server.notice(player, 17, "That battle is over")
-        elif player.id in (book.match.a, book.match.b) or player.id in self.server.arena.of:
+        elif player.id in book.match.seats or player.id in self.server.arena.of:
             await self.server.notice(player, 16, "That Navi is busy")
         elif len(book.watchers) >= protocol.SPEC["watch_most"] and player.id not in book.watchers:
             await self.server.notice(player, 27, "The stands are full")
@@ -224,7 +232,7 @@ class Stands:
                     self.stop(player_id)
                 del self.books[book.match.id]
                 # (the channel's last battle stays in its STANDS: its report, not its keys)
-                book.keys, book.hashes, book.loadout = [bytearray(), bytearray()], [], [None, None]
+                book.keys, book.hashes, book.loadout = [bytearray() for _ in book.keys], [], [None] * len(book.loadout)
         wall = time.monotonic()
         for channel, urgent in list(self.dirty.items()):
             if urgent or wall - self.sent.get(channel, -1e9) >= STANDS_EVERY:
@@ -232,25 +240,31 @@ class Stands:
                 self.sent[channel] = wall
                 self.tell(channel)
 
+    def state(self, book, stage):
+        match = book.match
+        partners = match.seats[2:4] if match.four else (0, 0)
+        return protocol.watch_state(stage, match.id, match.a, match.b, book.delay, 1 if match.four else 0, partners)
+
     def feed(self, player, book, cursor):
         writer = player.writer
         out = []
         budget = BUDGET if writer.transport.get_write_buffer_size() < PACE else 0
+        seats = range(len(book.keys))
         if not cursor.setup:
             cursor.setup = True
-            out.append(protocol.watch_state(WATCH_ON, book.match.id, book.match.a, book.match.b, book.delay))
+            cursor.keys = [0] * len(book.keys)
+            out.append(self.state(book, WATCH_ON))
         for name, kept in (("loadout", book.loadout), ("record", book.record), ("ready", book.ready)):
-            for side in (0, 1):
+            for side in seats:
                 if kept[side] and (name, side) not in cursor.relayed:
                     cursor.relayed.add((name, side))
                     out.append(protocol.watch_relay(side, kept[side]))
         spent = sum(len(m) for m in out)
         most = protocol.SPEC["watch_keys_max"]
         while spent < budget:
-            # (the side behind first, so both streams come in step; a hash once both sides' keys are past it)
-            side = 0 if cursor.keys[0] <= cursor.keys[1] else 1
-            if cursor.keys[side] >= book.frames(side):
-                side ^= 1
+            # (the seat behind first, so the streams come in step; a hash once every seat's keys are past it)
+            behind = sorted(seats, key=lambda k: cursor.keys[k])
+            side = next((k for k in behind if cursor.keys[k] < book.frames(k)), behind[0])
             first = cursor.keys[side]
             count = min(most, book.frames(side) - first)
             if count <= 0:
@@ -262,12 +276,12 @@ class Stands:
                 out.append(protocol.watch_relay(0, book.hashes[cursor.hashes][1]))
                 cursor.hashes += 1
                 spent += len(out[-1])
-        done = book.over_time is not None and all(cursor.keys[s] >= book.frames(s) for s in (0, 1))
+        done = book.over_time is not None and all(cursor.keys[s] >= book.frames(s) for s in seats)
         if done or book.broken:
             while cursor.hashes < len(book.hashes):
                 out.append(protocol.watch_relay(0, book.hashes[cursor.hashes][1]))
                 cursor.hashes += 1
-            out.append(protocol.watch_state(WATCH_OVER, book.match.id, book.match.a, book.match.b, book.delay))
+            out.append(self.state(book, WATCH_OVER))
         for message in out:
             writer.write(websocket.frame(message))
         if done or book.broken:

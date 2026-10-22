@@ -19,6 +19,7 @@
 #include <mgba/core/core.h>
 
 #include "arena_loadout.h"
+#include "arena_seats.h"
 #include "battle_rng.h"
 #include "bn6.h"
 #include "emu.h"
@@ -180,6 +181,9 @@ static ArenaBootStage make_pair(ArenaBoot *b) {
 	}
 	arena_core_free(b->core);
 	b->core = NULL;
+	/* (two MegaMen a side: each partner's NaviCust compiled over this state, the game's start every game boots alike, so
+	 * that his record is the same bytes on every game and spectator; a compile that fails fails the way in on all of them) */
+	if (ok && arena_seats_on() && !arena_seats_compile(base, base_size, why, sizeof why)) ok = false;
 	if (ok) {
 		const uint8_t *from[2] = { state[0] ? state[0] : base, state[1] ? state[1] : base };
 		const size_t n[2] = { state[0] ? size[0] : base_size, state[1] ? size[1] : base_size };

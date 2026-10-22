@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cyberworld_server import protocol, teams
 from cyberworld_server.app import Server
 from test_server import Client
-from test_stands import arena, status, stands, watch
+from test_stands import arena, hashed, keys, loadout, status, stands, watch
 
 SPEC = protocol.SPEC
 ARENA_START, ARENA_ENDED = 3, 4
@@ -27,9 +27,9 @@ def team(action, ref, value=0):
 def team_state(data):
     """TEAM_STATE as a dict"""
     _, stage, partner, match, bout, *rest = protocol.TEAM_STATE.unpack(data)
-    players, (left_us, left_them, number, result, hp) = rest[:4], rest[4:]
+    players, (left_us, left_them, number, result, hp, form) = rest[:4], rest[4:]
     return dict(stage=stage, partner=partner, match=match, bout=bout, players=players, left=(left_us, left_them),
-                number=number, result=result, hp=hp)
+                number=number, result=result, hp=hp, form=form)
 
 
 class TeamTests(unittest.IsolatedAsyncioTestCase):
@@ -188,6 +188,22 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(self.server.teams.matches)
         self.assertEqual(len(self.server.teams.of), 4)                       # (the teams stay, for another)
 
+    async def test_the_relay_takes_a_bouts_over_from_its_first_side_alone(self):
+        a, b, c, d = await self.four()
+        await a[0].send(team(teams.ORDER, a[1]))
+        await c[0].send(team(teams.ORDER, c[1]))
+        called, side = await self.bout(a, c)
+        first, second = (a, c) if side == 0 else (c, a)
+        await second[0].send(status(called["bout"], 0, 50, winner=2))
+        await second[0].send(arena(4, called["bout"]))                # (the second side's over: ignored)
+        await asyncio.sleep(0.1)
+        self.assertTrue(self.server.arena.matches)
+        self.assertEqual(self.server.teams.matches[next(iter(self.server.teams.matches))].number, 1)
+        await first[0].send(status(called["bout"], 30, 0, winner=1))
+        await first[0].send(arena(4, called["bout"]))                 # (the first's: bout 1 over, bout 2 called)
+        called2 = await self.state(a[0], teams.BOUT, 2)
+        self.assertEqual(called2["number"], 2)
+
     async def test_a_drop_mid_match_breaks_it_off_for_both_teams(self):
         a, b, c, d = await self.four()
         await a[0].send(team(teams.ORDER, a[1]))
@@ -225,6 +241,142 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         await first[0].send(arena(4, called["bout"]))           # (no report: no winner, both out)
         called2 = await self.state(a[0], teams.BOUT, 2)
         self.assertEqual((called2["number"], called2["left"]), (2, (1, 1)))
+
+
+    # -- two MegaMen a side (protocol v15, issue #181) --
+
+    async def side_by_side(self):
+        """Alpha (captain) and Beta against Gamma (captain) and Delta, side by side: the challenge's format told,
+        the match one battle of four seats (the captains leading), all four STARTed once all four are ready"""
+        a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]
+        await self.pair(a, b, b[1])
+        await self.pair(c, d, d[1])
+        await a[0].send(arena(1, c[1], 30, SPEC["team_side_by_side"]))
+        waiting = protocol.ARENA_STATE.unpack(await a[0].message(SPEC["arena_state"]))
+        challenge = protocol.ARENA_STATE.unpack(await c[0].message(SPEC["arena_state"]))
+        self.assertEqual((waiting[1], waiting[7], challenge[1], challenge[7]), (2, 1, 1, 1))   # (WAITING and CHALLENGED: side by side)
+        await c[0].send(arena(2, challenge[2], 30))
+        for who in (a, b, c, d):
+            got = await self.state(who[0], teams.MATCH)
+            self.assertEqual(got["form"], SPEC["team_side_by_side"])
+        # (no order asked: the captains lead, their partners beside them; one bout called for all four)
+        called = {}
+        for who in (a, b, c, d):
+            ordered = await self.state(who[0], teams.ORDERED)
+            mine, theirs = ((a[1], b[1]), (c[1], d[1])) if who in (a, b) else ((c[1], d[1]), (a[1], b[1]))
+            self.assertEqual(tuple(ordered["players"]), mine + theirs)
+            called[who[1]] = await self.state(who[0], teams.BOUT)
+        bout = called[a[1]]["bout"]
+        self.assertEqual({c["bout"] for c in called.values()}, {bout})
+        for k, who in enumerate((a, b, c, d)):
+            await who[0].send(arena(2, bout, 20 + 40 * k))
+            if k < 3:
+                await asyncio.sleep(0.05)
+                self.assertNotIn(bout, self.server.stands.books)     # (three ready: no START yet)
+        starts = {who[1]: await self.started(who[0], bout) for who in (a, b, c, d)}
+        seats = (a[1], c[1], b[1], d[1])                                # (the leads, then side 0's and side 1's partners)
+        for seat, player_id in enumerate(seats):
+            start = starts[player_id]
+            self.assertEqual((start[5], start[7], tuple(start[8:12])), (seat, 1, seats))
+        self.assertEqual({start[6] for start in starts.values()}, {protocol_delay(20 + 40 * 3)})   # (the longest latency's)
+        return (a, b, c, d), bout
+
+    async def test_side_by_side_relays_every_seat_to_the_three_others_and_the_stands(self):
+        (a, b, c, d), bout = await self.side_by_side()
+        by_seat = (a, c, b, d)
+        # (a fifth player watches: told the partners' seats too)
+        e, _ = await self.connect("Epsilon")
+        await e.send(watch(1, bout))
+        watching = protocol.WATCH_STATE.unpack(await e.message(SPEC["watch_state"]))
+        self.assertEqual(watching[1:4] + watching[6:], (1, bout, a[1], 1, b[1], d[1]))
+        # (each seat's MegaMan, ready and first keys: to the three others as ARENA_SEAT, its seat first)
+        for seat, who in enumerate(by_seat):
+            await who[0].send(loadout(bout, bytes((2, 0))))
+            await who[0].send(hashed(bout, 0xFFFFFFFF, 0x1234))
+            await who[0].send(keys(bout, 3, [seat + 1, 0x8000 | seat]))
+        for seat, who in enumerate(by_seat):
+            got = {}
+            for _ in range(9):
+                message = await who[0].message(SPEC["arena_seat"])
+                got.setdefault(message[1], []).append(message[2])
+            self.assertEqual(sorted(got), [k for k in range(4) if k != seat])
+            for other, kinds in got.items():
+                self.assertEqual(kinds, [SPEC["arena_loadout"], SPEC["arena_hash"], SPEC["arena_input"]])
+        # (the spectator: every seat's MegaMan and ready, and every seat's keys, the partners' sixteen bits whole)
+        relayed, streams = set(), {}
+        while len(streams) < 4 or len(relayed) < 8:
+            message = await e.receive()
+            if not message:
+                continue
+            if message[0] == SPEC["watch_relay"]:
+                relayed.add((message[1], message[2]))
+            elif message[0] == SPEC["watch_keys"]:
+                _, _, seat, first, count = protocol.WATCH_KEYS.unpack_from(message)
+                streams[seat] = (first,) + struct.unpack_from(f"!{count}H", message, protocol.WATCH_KEYS.size)
+        self.assertEqual(relayed, {(k, kind) for k in range(4) for kind in (SPEC["arena_loadout"], SPEC["arena_hash"])})
+        # (from frame 0, the delay's frames before each seat's first keys released)
+        self.assertEqual(streams, {seat: (0, 0, 0, 0, seat + 1, 0x8000 | seat) for seat in range(4)})
+        # (STANDS calls it side by side: its bout byte, v15)
+        self.assertEqual(self.server.stands.books[bout].entry()[-1], SPEC["stands_side_by_side"])
+        # (all four busy in the Square)
+        busy = SPEC["busy_battle"] << SPEC["busy_shift"]
+        self.assertTrue(all(self.server.busy_with(who[1]) == SPEC["busy_battle"] for who in (a, b, c, d)))
+        self.assertTrue(busy)
+        # (the cable's first's report names side 1 the winner: Gamma's team wins, Alpha's loses)
+        await a[0].send(status(bout, 0, 70, winner=2))
+        await a[0].send(arena(4, bout))
+        for who, result in ((a, teams.LOST), (b, teams.LOST), (c, teams.WON), (d, teams.WON)):
+            over = await self.state(who[0], teams.OVER)
+            self.assertEqual((over["result"], over["form"]), (result, SPEC["team_side_by_side"]))
+        self.assertFalse(self.server.teams.matches)
+        self.assertFalse(self.server.arena.of)
+
+    async def test_side_by_side_a_drop_breaks_it_off_for_all_four(self):
+        (a, b, c, d), bout = await self.side_by_side()
+        await b[0].close()                                             # (a partner's game gone)
+        for who in (a, c, d):
+            ended = protocol.ARENA_STATE.unpack(await who[0].message(SPEC["arena_state"]))
+            while ended[1] != ARENA_ENDED:
+                ended = protocol.ARENA_STATE.unpack(await who[0].message(SPEC["arena_state"]))
+            self.assertEqual(ended[2], bout)
+            self.assertEqual((await self.state(who[0], teams.OVER))["result"], teams.BROKE_OFF)
+        self.assertFalse(self.server.arena.matches)
+
+    async def test_side_by_side_without_a_winner_is_drawn_and_a_partner_is_busy(self):
+        (a, b, c, d), bout = await self.side_by_side()
+        other, _ = await self.connect("Epsilon")
+        await other.send(arena(1, d[1], 20))                           # (a partner, mid-battle: busy)
+        self.assertEqual(await self.notice(other), 16)
+        await a[0].send(arena(4, bout))                                # (the cable's first's over, with no report ...)
+        for who in (a, b, c, d):
+            # (... no winner, both teams out at once)
+            self.assertEqual((await self.state(who[0], teams.OVER))["result"], teams.DRAWN)
+
+    async def test_side_by_side_an_over_from_any_seat_but_the_first_is_ignored(self):
+        (a, b, c, d), bout = await self.side_by_side()
+        for who in (b, c, d):                                          # (a partner's, and the second GBA's player's)
+            await who[0].send(arena(4, bout))
+        await asyncio.sleep(0.1)
+        self.assertTrue(self.server.arena.matches)                     # (the battle goes on)
+        self.assertTrue(self.server.teams.matches)
+        await a[0].send(status(bout, 0, 70, winner=2))
+        await a[0].send(arena(4, bout))
+        for who, result in ((a, teams.LOST), (b, teams.LOST), (c, teams.WON), (d, teams.WON)):
+            self.assertEqual((await self.state(who[0], teams.OVER))["result"], result)
+
+    async def test_a_lone_challenge_names_no_format(self):
+        a, b = [await self.connect(n) for n in ("Alpha", "Beta")]
+        await a[0].send(arena(1, b[1], 20, SPEC["team_side_by_side"]))
+        challenge = protocol.ARENA_STATE.unpack(await b[0].message(SPEC["arena_state"]))
+        self.assertEqual((challenge[1], challenge[7]), (1, 0))
+        await b[0].send(arena(2, challenge[2], 20))
+        start = await self.started(a[0], challenge[2])
+        self.assertEqual(tuple(start[8:12]), (0, 0, 0, 0))             # (a battle of two names no seats)
+
+
+def protocol_delay(latency):
+    from cyberworld_server.arena import delay_for
+    return delay_for(latency, 0)
 
 
 if __name__ == "__main__":

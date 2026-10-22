@@ -68,7 +68,13 @@ const char *arena_team_taken_words(const char *name);
  * of us (the boxes) */
 const char *arena_team_lone_words(const char *name, bool we_teamed);
 const char *arena_team_partner_words(const char *name);
-const char *arena_team_challenged_words(const char *name);
+const char *arena_team_challenged_words(const char *name, bool side_by_side);
+/* A team challenge's format, asked of its sender (protocol v15, issue
+ * #181): the question, then its two choices, one bout at a time (the
+ * relay) or two MegaMen a side on one field */
+const char *arena_team_format_words(void);
+const char *arena_team_format_relay(void);
+const char *arena_team_format_side(void);
 /* The order, the captain's: the question and the first choice (us; the
  * second is the partner's name); the order shown, our MegaMan up first or
  * `ours`, against `theirs` */

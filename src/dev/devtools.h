@@ -76,6 +76,36 @@ typedef struct {
 	                   client gone quiet, which never picks nor sends, so the wait's limit ends it */
 	int team_buster; /* teambuster=N (1-5): under arena2v2 both partners' records with their buster's Attack N, as their own
 	                    loadouts would give it (arena_team_navi.h) */
+	int team_form;  /* teamform=N: a team challenge from the Square names its format without asking: 1 one by one (the relay),
+	                   2 side by side (protocol v15, issue #181; square_arena.c) */
+	int team_idle;  /* teamidle=N: under arena2v2 the lead of side N - 1 idle on his Custom screen, never pressing a key there:
+	                   his own game presses OK for him at the turn's limit (team_hurry.h); over the network, any N, the
+	                   lead playing this game */
+	int team_cust;  /* teamcust=1: under arena2v2 side 1's partner carries the checkpoint's MegaMan's NaviCust too, compiled by
+	                   BN6's own code as side 0's partner's is (arena_team_navicust.h); -1 the second GBA's records their sides'
+	                   copies, a mutation that must part the two; -2 the partners' NaviCusts compiled over this game's own
+	                   checkpoint's state, not the way in's (as before issue #181's review), a mutation that must part the games */
+	int team_pa;    /* teampa=1: under arena2v2 side 0's partner's folder opens with Cannon A, B and C as its Regular chip and
+	                   TagChips, his first hand a Program Advance (arena_team_custom.h); -1 the same, the PA left out of his
+	                   hand on the second GBA alone, a mutation that must part the two */
+	int team_beast; /* teambeast=1: under arena2v2 each partner's own Custom screen offers Beast Out and his stood-in client takes it
+	                   at his first turn, 2 at every turn, 3 the leads too (arena_team_cross.h); -1 none on the second GBA,
+	                   a mutation that must part the two */
+	int team_unite; /* teamunite=1: under arena2v2 each partner's own Custom screen offers UNITE with the carried MegaMan's Souls
+	                   (BN5's installs' hooks on his side's GBA of his copy) and his stood-in client takes the chip under the cursor
+	                   and UNITE at his first turn (arena_team_soul.h); 2 the same, each one's folder opening with Atk+10 * (a
+	                   Plus chip: NumberSoul, three turns), 3 with RockCube * (ColonelSoul's); -1 his Soul left out on the second
+	                   GBA, a mutation that must part the two */
+	int team_cross; /* teamcross=N (1-5): under arena2v2 each partner's own Custom screen offers Cross N (Gregar's, HeatCross 1)
+	                   and his stood-in client takes it at his first turn (arena_team_cross.h); -N on the second GBA alone his
+	                   Cross none, a mutation that must part the two */
+	int partner_break; /* partnerbreak=N: under arena2v2 --dev arena's core of hook slot N takes no object for a side's partner (soul_partner_break: his
+	                      side's Soul, mood and NaviStats his, as before the full-rules audit; a mutation that must part the GBAs); 0 none */
+	int chipai_break; /* chipaibreak=N: under arena2v2 --dev arena's core of hook slot N takes no room of BN5's chip AI for a MegaMan but side 0's
+	                     player (darkinvs_room_break: a mutation that must part the two GBAs); 0 none */
+	int arena_peer; /* arenapeer=MASK: --dev arena's sides in MASK (1 side 0, 2 side 1) play their folders' first chips: each takes
+	                   the chip under the cursor before OK and uses it in the fight every four seconds; side 1 (2) carries the
+	                   checkpoint's MegaMan as side 0 does (the full-rules audit's proofs: DarkInvs on side 1, issue #182) */
 	int arena_desync; /* arenadesync=N: a Net Square battle's keys from the other player corrupted at frame N on this side, as a link that went wrong (the hashes' stop seen) */
 } DevFlags;
 

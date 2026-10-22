@@ -67,6 +67,9 @@ void soulunite_held(unsigned souls);
  * core has no table of its own */
 struct mCore;
 bool soulunite_held_core(struct mCore *core, unsigned souls);
+/* BN5's Soul `soul` (1-12): its bit in a MegaMan's Souls held (BN5's
+ * flag BN5_FLAG_SOUL + it, as BN5's ROM names it), -1 none */
+int soulunite_held_bit(int soul);
 /* The differential's Souls (src/dev/xdiff.c, a spec's souls6): where
  * `souls` names one, the proxy form and the Souls installed with the
  * spec's breaks (soulunite_install's), MegaMan holding them; each battle begun dark by BN5's

@@ -907,13 +907,23 @@ minute starts only when the question is up.
 
 **Team up** on a player's card asks him to be your partner; **Split up**
 on your partner's card ends it. A Battle between two teams is a Team
-NetBattle, a relay: the one who asked to team up picks who goes first,
-without seeing the other team's pick, then both orders are shown. The
-leads fight; the winner stays on with the HP he has left and the loser's
-partner comes in, until both of one team's MegaMen are deleted. Whoever
-waits watches the bout from the stands. Between bouts the result card
-shows the MegaMen standing and who is next. If a player leaves, the match
-breaks off with no result for either team.
+NetBattle, and MegaMan asks how to fight: **One by one** or **Side by
+side**; the other team hears which before it answers. One by one is a
+relay: the one who asked to team up picks who goes first, without seeing
+the other team's pick, then both orders are shown. The leads fight; the
+winner stays on with the HP he has left and the loser's partner comes
+in, until both of one team's MegaMen are deleted. Whoever waits watches
+the bout from the stands. Between bouts the result card shows the
+MegaMen standing and who is next. Side by side, all four MegaMen fight
+on one field, two a side: the one who asked to team up leads on each
+team, and his partner picks his own chips on his own Custom screen while
+the leads wait for him; once anyone has pressed OK, whoever is still
+picking has 30 seconds, then his picks so far are taken; the team whose MegaMen are
+both deleted loses. A partner fights as his whole MegaMan: his folder,
+HP and buster, his NaviCust's programs, his Crosses and Beast Out on
+his own Custom screen, his Program Advances, and UNITE with his own
+Souls. If a player leaves, the match breaks off with no result for
+either team.
 
 The battle answers your presses with rollback: each game runs it at
 once, guessing the other player's buttons, and when his real presses

@@ -49,7 +49,10 @@ static uint32_t sword_family;   /* the moved sword family's CurAction (BN5's 0x1
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 
-static int soul_on(int side) { return done && soul_united(side) ? hook_read8(soul_field(side, BN6_SOUL_ID)) : 0; }
+
+/* the Soul of the Navi `obj`: his side's, but none for a side's partner (--dev arena2v2: a Navi of his own, never united; the
+ * full-rules audit: a Soul's chip powers its MegaMan's alone) */
+static int soul_of(uint32_t obj) { return done ? soul_id_of(obj) : 0; }
 
 static uint8_t flags_of(int chip) {
 	return chip > 0 && chip < CHIPS_IDS ? hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) : 0;
@@ -70,7 +73,7 @@ static uint32_t panel_at(uint32_t x, uint32_t y) { return BN6_FIELD_PANELS + (y 
  * so the answer is one of two movs and a bx lr of ours */
 static HookAct charge_test(HookRegs *r, void *user) {
 	(void)user;
-	int soul = soul_on(side_of(r->r[5])), chip = (int)r->r[0];
+	int soul = soul_of(r->r[5]), chip = (int)r->r[0];
 	if (!soul) return HOOK_CONTINUE;
 	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA : -1;
 	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(flags_of(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
@@ -83,7 +86,7 @@ static HookAct charge_test(HookRegs *r, void *user) {
  * none for the rest */
 static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
-	int soul = soul_on(side_of(r->r[5]));
+	int soul = soul_of(r->r[5]);
 	if (!soul) return HOOK_CONTINUE;
 	r->r[0] = r->r[0] && (soul == SOUL_KNIGHT || soul == SOUL_TOAD) && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;
@@ -92,7 +95,7 @@ static HookAct charge_bonus(HookRegs *r, void *user) {
 /* (the release of a charged A, r1 the A power attack, r5 MegaMan) a Soul's chip charge: the chip used charged, BN5's way
  * (its empty power attacks name the charge time alone, 0x0800D9E0-0x0800D9EE), where BN6 would run the power attack */
 static HookAct release(HookRegs *r, void *user) {
-	if (!soul_on(side_of(r->r[5])) || !soulpower_chip_charge((int)r->r[1])) return HOOK_CONTINUE;
+	if (!soul_of(r->r[5]) || !soulpower_chip_charge((int)r->r[1])) return HOOK_CONTINUE;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
 }
@@ -104,7 +107,7 @@ static HookAct release(HookRegs *r, void *user) {
  * 0x0800FFCA) and plays the modifier's sound */
 static HookAct grass(HookRegs *r, void *user) {
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
-	if (soul_on(side_of(r->r[5])) != SOUL_TOMAHAWK || r->r[1] || (breaks & SOULCHIPS_BREAK_GRASS)) return HOOK_CONTINUE;
+	if (soul_of(r->r[5]) != SOUL_TOMAHAWK || r->r[1] || (breaks & SOULCHIPS_BREAK_GRASS)) return HOOK_CONTINUE;
 	uint32_t x = hook_read8(r->r[5] + BN6_T1_PANEL_X), y = hook_read8(r->r[5] + BN6_T1_PANEL_Y);
 	if (soulkinds_of(chip) != KIND_WOOD || !attack_chip(chip) || hook_read8(panel_at(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_GRASS)
 		return HOOK_CONTINUE;
@@ -125,7 +128,7 @@ static HookAct front(HookRegs *r, void *user) {
 		r->r[4] = dud;
 		return HOOK_CONTINUE;
 	}
-	if (soul_on(side) != SOUL_KNIGHT || !attack_chip(chip) || (breaks & SOULCHIPS_BREAK_FRONT)) return HOOK_CONTINUE;
+	if (soul_of(me) != SOUL_KNIGHT || !attack_chip(chip) || (breaks & SOULCHIPS_BREAK_FRONT)) return HOOK_CONTINUE;
 	/* (his facing: BN5's 0x0800C6CA, BN6's 0x0800E2CA, +1 or -1 by his side and flip) */
 	int dx = (side ^ hook_read8(me + BN6_T1_FLIP)) ? -1 : 1;
 	uint32_t x = (uint32_t)(hook_read8(me + BN6_T1_PANEL_X) + dx), y = hook_read8(me + BN6_T1_PANEL_Y);
@@ -140,7 +143,7 @@ static HookAct front(HookRegs *r, void *user) {
  * sword: BN5's sword family, moved, which takes his paths (BN5 0x080EB762 on: a slash before the enemy) */
 static HookAct sword(HookRegs *r, void *user) {
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
-	if (soul_on(side_of(r->r[5])) != SOUL_SHADOW || !hook_read8(r->r[7] + BN6_ATTACK_CHARGED) || soulkinds_of(chip) != KIND_SWORD ||
+	if (soul_of(r->r[5]) != SOUL_SHADOW || !hook_read8(r->r[7] + BN6_ATTACK_CHARGED) || soulkinds_of(chip) != KIND_SWORD ||
 		hook_read8(r->r[4] + BN6_CHIP_FAMILY) != BN6_FAMILY_SWORD || (breaks & SOULCHIPS_BREAK_SWORD))
 		return HOOK_CONTINUE;
 	r->r[0] = sword_family;
@@ -151,8 +154,7 @@ static HookAct sword(HookRegs *r, void *user) {
 /* (the shadow type, past its battle mode's test: r5 the object) ShadowSoul's side's MegaMan without one (BN5 0x0800E0B6),
  * where his NaviStats name no Navi of his side */
 static HookAct shadow(HookRegs *r, void *user) {
-	int side = side_of(r->r[5]);
-	if (soul_on(side) != SOUL_SHADOW || hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_SIDE_NAVI) ||
+	if (soul_of(r->r[5]) != SOUL_SHADOW || hook_read8(soul_navi_stats(r->r[5]) + BN6_NAVI_SIDE_NAVI) ||
 		(breaks & SOULCHIPS_BREAK_SHADOW))
 		return HOOK_CONTINUE;
 	r->r[0] = SHADOW_NONE;

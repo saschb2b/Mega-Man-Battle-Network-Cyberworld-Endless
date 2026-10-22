@@ -119,6 +119,11 @@ static void slot_be(int side, int slot) {
  * unites, 0 none; *chaos 1 for a DarkChip of its kind. Its kind as BN5 has
  * it (soulkinds.h), the first Soul of that kind this version's and held,
  * not united this battle (its Chaos Unison apart). */
+int soulunite_held_bit(int soul) {
+	int k = soul >= 1 && soul <= SOULS_BN5 ? flags5[soul - 1] - BN5_FLAG_SOUL : -1;
+	return k >= 0 && k < TEAM_SOULS ? k : -1;
+}
+
 static int lights(int side, int *chaos) {
 	int n = hook_read8(BN6_CUSTOM_PICKED);
 	if (!n) return 0;
@@ -150,6 +155,10 @@ static HookAct stand(HookRegs *r, void *user) {
 	 * at the same turn, though this GBA's own player holds none) */
 	for (int s = 0; s < 2; ++s)
 		if (soul_united(s)) hook_write8(soul_field(s, BN6_SOUL_SCREEN), 1);
+	/* (... and each side's partner's, in his own block: two MegaMen a side's, nothing where none stands) */
+	for (uint32_t s = 0; s < 2; ++s)
+		if (hook_read8(BN6_SOULS_PARTNERS + s * BN6_SOULS_SIDE + BN6_SOUL_ID))
+			hook_write8(BN6_SOULS_PARTNERS + s * BN6_SOULS_SIDE + BN6_SOUL_SCREEN, 1);
 	if (!held_now()) return HOOK_CONTINUE;
 	int side = side_now();
 	bool beast = r->r[0] != 0, unite = unite_stands(side);

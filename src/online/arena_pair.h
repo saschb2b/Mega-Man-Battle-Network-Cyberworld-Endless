@@ -58,6 +58,11 @@ ArenaPair *arena_pair_open(const uint8_t *rom, size_t size, const uint8_t *state
  * arena_pair_load, run apart from it (--dev arena2v2's partner's own
  * Custom screen, arena_team_screen.h); never hashed against another */
 ArenaPair *arena_pair_open_plain(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2]);
+/* ... and with BN5's installs' hooks on core `side` alone, `souls` held
+ * for UNITE there (a partner's own Custom screen: UNITE and ColonelSoul's
+ * button offered as on his lead's); NULL where its hooks could not be had */
+ArenaPair *arena_pair_open_screen(const uint8_t *rom, size_t size, const uint8_t *state[2], const size_t state_size[2], unsigned side,
+	unsigned souls);
 void arena_pair_close(ArenaPair *pair);
 /* Each core's frame counter as the clock's start: the next frame of the
  * pair is frame 0 of a stretch of keys (the entry's steps, the battle) */

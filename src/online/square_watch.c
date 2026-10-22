@@ -50,11 +50,13 @@ static struct {
 	uint32_t watched_at;       /* the battle's way in begun, for the statistics' seconds */
 	uint32_t refused;          /* a battle this machine could not keep up with: not offered again */
 	char name[2][ONLINE_NAME_BYTES + 1];
+	char partner[2][ONLINE_NAME_BYTES + 1];   /* a 2v2's partners' names, side 0's and side 1's */
 	unsigned view;
 	ArenaWatch *w;
 	OnlineSnapshot s;
 	int over_t, shown_t;
 	bool over_said;            /* WATCH_STATE's over come: no more keys */
+	bool four;                 /* a 2v2's (protocol v15): its end names the winning lead's team */
 	char why[160];
 } W;
 
@@ -196,14 +198,51 @@ bool square_watch_team(uint32_t match) {
 	return true;
 }
 
-/* the two players' names from the Square's peers where none were kept (a team bout's) */
+/* a session's name among the Square's peers, "?" where it is not there */
+static const char *peer_name(uint32_t id) {
+	for (size_t k = 0; k < W.s.peer_count; ++k)
+		if (W.s.peers[k].id == id) return W.s.peers[k].name;
+	return "?";
+}
+
+/* the two players' names from the Square's peers where none were kept (a team bout's), a 2v2's partners' too */
 static void names_of(const WatchState *st) {
 	for (int side = 0; side < 2; ++side) {
-		if (W.name[side][0]) continue;
-		const char *n = NULL;
-		for (size_t k = 0; k < W.s.peer_count && !n; ++k) if (W.s.peers[k].id == st->side[side]) n = W.s.peers[k].name;
-		snprintf(W.name[side], sizeof W.name[side], "%s", n ? n : "?");
+		if (!W.name[side][0]) snprintf(W.name[side], sizeof W.name[side], "%s", peer_name(st->side[side]));
+		snprintf(W.partner[side], sizeof W.partner[side], "%s", st->form ? peer_name(st->partner[side]) : "");
 	}
+}
+
+/* `name` cut to `bytes` at most, never inside a character */
+static void cut(char *out, size_t size, const char *name, size_t bytes) {
+	size_t n = strlen(name);
+	if (n > bytes) n = bytes;
+	while (n && ((unsigned char)name[n] & 0xC0u) == 0x80u) --n;
+	if (n >= size) n = size - 1;
+	memcpy(out, name, n);
+	out[n] = 0;
+}
+
+/* the watching screen's heading: a 2v2's the longest of its forms that fits the picture's width, all four named where
+ * they fit, else each team by its lead, his name cut to fit where it is long; a battle of two's its two names */
+static const char *heading(void) {
+	if (!W.four) return stands_heading(W.name[0], W.name[1]);
+	const char *const names[4] = { W.name[0], W.name[1], W.partner[0], W.partner[1] };
+	const int room = ARENA_W - 8;
+	for (int form = 0; form < 3; ++form) {
+		const char *s = stands_team_heading(form, names);
+		if (text_width(s) <= room) return s;
+	}
+	char lead[2][ONLINE_NAME_BYTES + 1];
+	const char *s = NULL;
+	for (size_t bytes = ONLINE_NAME_BYTES; bytes; --bytes) {
+		cut(lead[0], sizeof lead[0], W.name[0], bytes);
+		cut(lead[1], sizeof lead[1], W.name[1], bytes);
+		const char *const short_names[4] = { lead[0], lead[1], W.partner[0], W.partner[1] };
+		s = stands_team_heading(2, short_names);
+		if (text_width(s) <= room) break;
+	}
+	return s;
 }
 
 static void started(const WatchState *st) {
@@ -211,13 +250,17 @@ static void started(const WatchState *st) {
 	names_of(st);
 	W.w = arena_watch_new(R.data, ROM_SIZE, st->match);
 	if (!W.w) { send_watch(WATCH_ACT_STOP, W.match); W.stage = W_IDLE; return; }
+	/* (a 2v2, protocol v15: four seats run from four streams) */
+	W.four = st->form != 0;
+	if (W.four) arena_watch_four(W.w);
 	W.stage = W_ON;
 	W.watched_at = SDL_GetTicks();
 	W.view = 0;
 	W.shown_t = 0;
 	W.over_said = false;
 	W.why[0] = 0;
-	printf("watch: watching match %u, sides %u and %u, delay %u\n", st->match, st->side[0], st->side[1], st->delay);
+	printf("watch: watching match %u, sides %u and %u, delay %u%s\n", st->match, st->side[0], st->side[1], st->delay,
+		st->form ? ", two MegaMen a side" : "");
 }
 
 static void relayed(const uint8_t *data, size_t size) {
@@ -299,7 +342,7 @@ void square_watch_frame(uint32_t keys) {
 /* the way in's picture: the heading, the words and a bar */
 static void setting_up(int progress) {
 	int cx = P.w / 2, y = P.core_y + 52, w = 160;
-	text_draw(cx, y, stands_heading(W.name[0], W.name[1]), rgba(170, 200, 255, 255), TEXT_CENTER);
+	text_draw(cx, y, heading(), rgba(170, 200, 255, 255), TEXT_CENTER);
 	text_draw(cx, y + 16, stands_setting_up, WHITE, TEXT_CENTER);
 	fill_rect(cx - w / 2, y + 36, w, 6, rgba(40, 60, 90, 255));
 	fill_rect(cx - w / 2, y + 36, w * progress / 100, 6, rgba(120, 200, 255, 255));
@@ -312,11 +355,12 @@ void square_watch_draw(void) {
 	if (W.stage == W_DONE) {
 		unsigned result = W.w ? arena_watch_result(W.w) : 0;
 		if (W.why[0]) arena_view_note(stands_stopped, W.why);
-		else if (result == 1 || result == 2) arena_view_note(stands_won(W.name[result - 1]), stands_back);
+		else if (result == 1 || result == 2)
+			arena_view_note(W.four ? stands_team_won(W.name[result - 1]) : stands_won(W.name[result - 1]), stands_back);
 		else arena_view_note(stands_over, stands_back);
 		return;
 	}
 	if (!v) { setting_up(W.w ? arena_watch_progress(W.w) : 0); return; }
-	if (arena_watch_catching_up(W.w)) arena_view_note(stands_heading(W.name[0], W.name[1]), stands_catching_up);
-	else if (W.shown_t < KEYS_SHOWN) arena_view_note(stands_heading(W.name[0], W.name[1]), stands_keys);
+	if (arena_watch_catching_up(W.w)) arena_view_note(heading(), stands_catching_up);
+	else if (W.shown_t < KEYS_SHOWN) arena_view_note(heading(), stands_keys);
 }

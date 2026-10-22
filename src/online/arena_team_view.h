@@ -10,11 +10,15 @@
 #ifndef CW_ARENA_TEAM_VIEW_H
 #define CW_ARENA_TEAM_VIEW_H
 
+#include <stdbool.h>
+
 struct mCore;
 
 /* the seat that GBA's picture shows: its side's GBA */
 unsigned arena_team_view_side(unsigned seat);
-/* drawn over the picture (at P.core_x, P.core_y) of `core`, the GBA `seat` sees */
-void arena_team_view(struct mCore *core, unsigned seat);
+/* drawn over the picture (at P.core_x, P.core_y) of `core`, the GBA `seat`
+ * sees; `hurry`: the seat still picking in the turn's last ten seconds
+ * (team_hurry_shown), his own plate blinking fast, no number */
+void arena_team_view(struct mCore *core, unsigned seat, bool hurry);
 
 #endif

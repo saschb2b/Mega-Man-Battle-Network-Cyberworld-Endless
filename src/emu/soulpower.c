@@ -37,10 +37,9 @@ static int breaks;
 static int nmoved;   /* the recipe's power attacks */
 static int nchaos;   /* the chaos power attacks in the table (none where Chaos Unison is not installed) */
 
-static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
-
-static int soul_on(int side) {
-	int soul = hook_read8(soul_field(side, BN6_SOUL_ID));
+/* the Soul MegaMan `obj` is united with: his own (a side's partner's in his block, soul_id_of) */
+static int soul_on(uint32_t obj) {
+	int soul = soul_id_of(obj);
 	return soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS ? soul : 0;
 }
 
@@ -76,7 +75,7 @@ static uint32_t routine_of(int i, int *id5) {
 /* (the loadout's read, r0 its row by the form, r5 MegaMan) the Soul's row */
 static HookAct loadout(HookRegs *r, void *user) {
 	(void)user;
-	int soul = soul_on(side_of(r->r[5]));
+	int soul = soul_on(r->r[5]);
 	if (!soul || r->r[0] != BN6_FORM_LOADOUTS + BN6_FORM_LOADOUT_SIZE * BN6_FORM_PROXY) return HOOK_CONTINUE;
 	r->r[0] = SOULS_LOADOUTS + (uint32_t)(BN6_FORM_LOADOUT_SIZE * (soul - SOUL_FIRST));
 	return HOOK_CONTINUE;
@@ -84,7 +83,7 @@ static HookAct loadout(HookRegs *r, void *user) {
 
 /* (the element's read, r0 the form, r5 him) the Soul's (BN5's 0x0800E62C), on to the routine's next step */
 static HookAct element(HookRegs *r, void *user) {
-	int soul = soul_on(side_of(r->r[5]));
+	int soul = soul_on(r->r[5]);
 	if (!soul || r->r[0] != BN6_FORM_PROXY) return HOOK_CONTINUE;
 	r->r[0] = (breaks & SOULPOWER_BREAK_ELEMENT) ? 0 : XR[XROM_BN5_COLONEL_US].data[BN5_SOUL_ELEMENTS - BUS + (uint32_t)soul];
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
@@ -98,7 +97,7 @@ static Zero weakness = { BN6_FORM_WEAKNESS_NEXT, 0 }, bonus = { BN6_FORM_BONUS_N
 /* (the second wheel's weakness read, the buster bonus read: r0 the form, r5 him) none for a Soul */
 static HookAct none_for_soul(HookRegs *r, void *user) {
 	const Zero *z = user;
-	if (!soul_on(side_of(r->r[5])) || r->r[0] != BN6_FORM_PROXY) return HOOK_CONTINUE;
+	if (!soul_on(r->r[5]) || r->r[0] != BN6_FORM_PROXY) return HOOK_CONTINUE;
 	r->r[z->reg] = 0;
 	r->r[12] = z->next | 1;
 	return HOOK_JUMP;

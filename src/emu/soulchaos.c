@@ -8,10 +8,9 @@
 #include "bn5_chips.h"
 #include "bn6.h"
 #include "bn6_attacks.h"
-#include "bn6_forms.h"
-#include "bn6_navis.h"
 #include "bytes.h"
 #include "darkinvs.h"
+#include "debug.h"
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
@@ -60,8 +59,12 @@ static uint32_t dues[HOOK_CORES];        /* the object whose charge's state just
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 static bool chaos(int side) { return soul_united(side) && hook_read8(soul_field(side, BN6_SOUL_CHAOS)); }
-static int level(int side) {
-	int v = hook_read8(soul_field(side, BN6_SOUL_LEVEL));
+/* the Navi `obj` in a Chaos Unison of his own: a side's player in his side's, a side's partner in his own (two MegaMen a
+ * side: his charge never steps his lead's unison, nor his requests take his lead's chaos attack; the full-rules audit), by
+ * his own Souls state (soul_field_of) */
+static bool chaos_of(uint32_t obj) { return soul_id_of(obj) && hook_read8(soul_field_of(obj, BN6_SOUL_CHAOS)); }
+static int level(uint32_t obj) {
+	int v = hook_read8(soul_field_of(obj, BN6_SOUL_LEVEL));
 	return v > BN5_CHAOS_LEVEL_TOP ? BN5_CHAOS_LEVEL_TOP : v;
 }
 
@@ -77,11 +80,10 @@ uint32_t soulchaos_power(int bn5_id) {
  * (BN5's 0x08010676-0x0801069A), 0xFF where he has none */
 static HookAct charge(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (r->r[0] != CHARGE_B || !chaos(side)) return HOOK_CONTINUE;
+	if (r->r[0] != CHARGE_B || !chaos_of(r->r[5])) return HOOK_CONTINUE;
 	uint32_t ai = hook_read32(r->r[5] + BN6_T1_AI_DATA);
 	uint8_t row = hook_read8(ai + BN6_AI_POWER_CHAOS);
-	r->r[0] = row == NONE ? NONE : hook_read16(hook_read32(BN6_CHARGE_TIMES_REF) + BN6_CHARGE_ROW * row + 2u * (uint32_t)level(side));
+	r->r[0] = row == NONE ? NONE : hook_read16(hook_read32(BN6_CHARGE_TIMES_REF) + BN6_CHARGE_ROW * row + 2u * (uint32_t)level(r->r[5]));
 	return HOOK_RETURN;
 }
 
@@ -98,18 +100,18 @@ static HookAct phase(HookRegs *r, void *user) {
 	(void)user;
 	if (dues[hook_slot()] != r->r[5]) return HOOK_CONTINUE;
 	dues[hook_slot()] = 0;
-	int side = side_of(r->r[5]);
-	if (!chaos(side)) return HOOK_CONTINUE;
-	uint32_t ai = r->r[4], cycle = soul_field(side, BN6_SOUL_CYCLE);
+	uint32_t me = r->r[5];
+	if (!chaos_of(me)) return HOOK_CONTINUE;
+	uint32_t ai = r->r[4], cycle = soul_field_of(me, BN6_SOUL_CYCLE);
 	if (hook_read8(ai + BN6_AI_CHARGE_BUTTON) != CHARGE_B || hook_read8(ai + BN6_AI_CHARGE) != CHARGE_FULL) {
 		hook_write8(cycle, 0);
 		return HOOK_CONTINUE;
 	}
-	const uint8_t *row = phases[level(side) < LEVEL_ROWS ? level(side) : LEVEL_ROWS - 1];
+	const uint8_t *row = phases[level(me) < LEVEL_ROWS ? level(me) : LEVEL_ROWS - 1];
 	int c = hook_read8(cycle) + 1, length = row[0] + ((breaks & SOULCHAOS_BREAK_PHASE) ? 1 : 0);
 	if (c >= length) c = 0;
 	hook_write8(cycle, (uint8_t)c);
-	hook_write8(soul_field(side, BN6_SOUL_PHASE), (uint8_t)(c < row[1] ? 2 : c < row[2] ? 1 : c < row[3] ? 0 : 1));
+	hook_write8(soul_field_of(me, BN6_SOUL_PHASE), (uint8_t)(c < row[1] ? 2 : c < row[2] ? 1 : c < row[3] ? 0 : 1));
 	return HOOK_CONTINUE;
 }
 
@@ -119,10 +121,16 @@ static HookAct phase(HookRegs *r, void *user) {
  * 0x0801085E-0x0801086E), the Souls' own while it lasts */
 static HookAct release(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (r->r[0] != REQUEST_B || !chaos(side)) return HOOK_CONTINUE;
-	r->r[0] = hook_read8(soul_field(side, BN6_SOUL_PHASE)) == PHASE_HIT ? REQUEST_CHAOS : REQUEST_MISS;
-	hook_write8(soul_field(side, BN6_SOUL_REQUEST), 1);
+	uint32_t me = r->r[5];
+	int side = side_of(me);
+	bool partner = soul_partner(me);
+	if (r->r[0] == REQUEST_B && emu_debug_on() && partner && chaos(side) && !chaos_of(me))
+		fprintf(stderr, "soulchaos: core %d: side %d's partner's charged B his own, his side's player in a Chaos Unison\n", hook_slot(), side);
+	if (r->r[0] != REQUEST_B || !chaos_of(me)) return HOOK_CONTINUE;
+	r->r[0] = hook_read8(soul_field_of(me, BN6_SOUL_PHASE)) == PHASE_HIT ? REQUEST_CHAOS : REQUEST_MISS;
+	if (emu_debug_on()) fprintf(stderr, "soulchaos: core %d: side %d's %s's chaos B released, %s\n", hook_slot(), side,
+		partner ? "partner" : "player", r->r[0] == REQUEST_CHAOS ? "in phase 2: its attack" : "out of phase 2: the failure");
+	hook_write8(soul_field_of(me, BN6_SOUL_REQUEST), 1);
 	return HOOK_CONTINUE;
 }
 
@@ -130,10 +138,9 @@ static HookAct release(HookRegs *r, void *user) {
  * (the level one up, 4 at most) or the failure, each the Thumb's end of the requests' routine */
 static HookAct consume(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	if (!hook_read8(soul_field(side, BN6_SOUL_REQUEST))) return HOOK_CONTINUE;
+	if (!hook_read8(soul_field_of(r->r[5], BN6_SOUL_REQUEST))) return HOOK_CONTINUE;
 	if (r->r[0] & REQUEST_CHAOS) {
-		uint32_t at = soul_field(side, BN6_SOUL_LEVEL);
+		uint32_t at = soul_field_of(r->r[5], BN6_SOUL_LEVEL);
 		int v = hook_read8(at) + 1;
 		hook_write8(at, (uint8_t)(v > BN5_CHAOS_LEVEL_TOP ? BN5_CHAOS_LEVEL_TOP : v));
 		r->r[12] = (SOULS_CHAOS + CHAOS_CHAOS_HIT) | 1u;
@@ -150,12 +157,11 @@ static HookAct consume(HookRegs *r, void *user) {
  * (0x1803F, 0x0800F2D0) and a failure's kind (6) his chaos (0x0800F2CE) */
 static HookAct attack_end(HookRegs *r, void *user) {
 	(void)user;
-	int side = side_of(r->r[5]);
-	uint32_t req = soul_field(side, BN6_SOUL_REQUEST);
+	uint32_t req = soul_field_of(r->r[5], BN6_SOUL_REQUEST);
 	if (!hook_read8(req)) return HOOK_CONTINUE;
 	hook_write8(req, 0);
 	r->r[0] |= REQUEST_CHAOS | REQUEST_MISS;
-	if (r->r[6] == 6) hook_write8(soul_field(side, BN6_SOUL_CHAOS), 0);
+	if (r->r[6] == 6) hook_write8(soul_field_of(r->r[5], BN6_SOUL_CHAOS), 0);
 	return HOOK_CONTINUE;
 }
 
@@ -163,7 +169,7 @@ static HookAct attack_end(HookRegs *r, void *user) {
  * request 0x8000 (to its family 0x4B, 0x0801056A) is BN5's chaos request there */
 static HookAct counter_test(HookRegs *r, void *user) {
 	(void)user;
-	if (hook_read8(soul_field(side_of(r->r[5]), BN6_SOUL_REQUEST))) r->r[1] &= ~REQUEST_CHAOS;
+	if (hook_read8(soul_field_of(r->r[5], BN6_SOUL_REQUEST))) r->r[1] &= ~REQUEST_CHAOS;
 	return HOOK_CONTINUE;
 }
 
@@ -174,7 +180,7 @@ static uint32_t owner(uint32_t glow) { return hook_read32(glow + BN6_T1_PARENT);
 /* (BN6_GLOW_SHOW / BN6_GLOW_SOUND, a B charge's branch past the side's test) in chaos the side's test as BN5's */
 static HookAct glow_side(HookRegs *r, void *user) {
 	uint32_t who = user == (void *)BN6_GLOW_SHOW_SIDE ? r->r[4] : r->r[1];
-	if (!chaos(side_of(who))) return HOOK_CONTINUE;
+	if (!chaos_of(who)) return HOOK_CONTINUE;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1u;
 	return HOOK_JUMP;
 }
@@ -182,7 +188,7 @@ static HookAct glow_side(HookRegs *r, void *user) {
 /* (BN6_GLOW_PICK, r5 the glow) BN5's dark charge glow in chaos, past A's (BN5's 0x080E0F96-0x080E0F9C) */
 static HookAct glow_pick(HookRegs *r, void *user) {
 	(void)user;
-	if (glow_number < 0 || !chaos(side_of(owner(r->r[5])))) return HOOK_CONTINUE;
+	if (glow_number < 0 || !chaos_of(owner(r->r[5]))) return HOOK_CONTINUE;
 	r->r[2] = BN6_GLOW_SPRITE_CHAOS;
 	r->r[12] = BN6_GLOW_PICK_NEXT | 1u;
 	return HOOK_JUMP;
@@ -191,7 +197,7 @@ static HookAct glow_pick(HookRegs *r, void *user) {
 /* (BN6_GLOW_LOAD, r1 list 5's offset, r2 the number) the dark glow's number as the Souls' copy in list 0 */
 static HookAct glow_load(HookRegs *r, void *user) {
 	(void)user;
-	if (glow_number < 0 || r->r[2] != BN6_GLOW_SPRITE_CHAOS || !chaos(side_of(owner(r->r[5])))) return HOOK_CONTINUE;
+	if (glow_number < 0 || r->r[2] != BN6_GLOW_SPRITE_CHAOS || !chaos_of(owner(r->r[5]))) return HOOK_CONTINUE;
 	r->r[1] = 0;
 	r->r[2] = (uint32_t)glow_number;
 	return HOOK_CONTINUE;
@@ -202,10 +208,9 @@ static HookAct glow_load(HookRegs *r, void *user) {
 static HookAct glow_anim(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t ai = r->r[6];
-	int side = side_of(owner(r->r[5]));
-	if (!chaos(side) || hook_read8(ai + BN6_AI_CHARGE) != CHARGE_FULL || hook_read8(ai + BN6_AI_CHARGE_BUTTON) != CHARGE_B)
+	if (!chaos_of(owner(r->r[5])) || hook_read8(ai + BN6_AI_CHARGE) != CHARGE_FULL || hook_read8(ai + BN6_AI_CHARGE_BUTTON) != CHARGE_B)
 		return HOOK_CONTINUE;
-	r->r[0] = hook_read8(soul_field(side, BN6_SOUL_PHASE)) + 2u;
+	r->r[0] = hook_read8(soul_field_of(owner(r->r[5]), BN6_SOUL_PHASE)) + 2u;
 	hook_write8(r->r[5] + BN6_T1_ANIM, (uint8_t)r->r[0]);
 	return HOOK_CONTINUE;
 }

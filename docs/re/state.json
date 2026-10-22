@@ -34,12 +34,12 @@
     },
     {
       "name": "Two MegaMen a side",
-      "state": "building",
-      "now": "Behind --dev arena2v2: four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames, queued in both cores' RAM at that GBA's battle-loop iteration plus BN6's own delay and taken at the key copy by each GBA's own iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object (him and what he spawns) at BN6's two address routines, kept in two effect slots taken in BN6's own pool. Each partner picks his chips on BN6's own Custom screen, on a plain copy of the pair his own client keeps, from his own deck (dealt by the pair from his side's GBA's random number); only his picks cross, in his stream, and go into his hand on both GBAs at the same iteration. His HP box and the four MegaMen's marks on his seat's screen.",
-      "left": "The streams over the server (the wire's four seats, designed in ONLINE_ARENA.md), a partner's pick messages and loadout among them; his NaviCust's programs past HP and the buster, and his Cross (BN6's crossing controller crosses each side's player alone); Program Advances and his own hand size in his hand; from the full-rules audit, the Chaos Unison's hooks, BN5's DarkChips' mood rule and a Soul's chip powers by object, BN5's Navis' and chips' targets among four.",
+      "state": "proven",
+      "now": "A side-by-side team match from the Net Square (protocol v15: four seats over the server, ARENA_SEAT, the stands' four streams) and the dev flag's (--dev arena2v2): four MegaMen on BN6's field in the Arena's pair, the partners' keys two more streams of the Arena's input (players 2 and 3), sampled on their side's GBA's frames as its pad is and carried in that GBA's own link packets (the two bytes +5 and +7 BN6 never writes or reads, written at the pad's store 0x0801FF8C and read out of both sides' received packets 0x020399F0), so that both GBAs take a partner's word from the exchange that brings his lead's pad, at the same iteration; guessed and rolled back as the other player's. Each partner has his own battle NaviStats and hand, answered by object; picks his chips on BN6's own Custom screen on a plain copy of the pair his own client keeps, from his own deck, which each GBA deals and keeps from the packets' words alone; the leads wait for him by BN6's own link wait, the limit said in his place by his side's GBA. His whole MegaMan: his NaviCust compiled by BN6's own reload (on every game of a match from the MegaMan he sent), his Crosses and Beast Out on his own screen and run by BN6's crossing for his object, a Program Advance joined in his hand as BN6 joins it; UNITE with his own Souls on his own screen (BN5's installs' hooks on his copy's GBA), his Soul crossing in his stream into his own Souls block, its life, powers and look by object. Under full rules BN5's chip AI's rooms, the Chaos Unison, a Soul's powers and look, BN5's mood and DarkChip rule answer by object. Proved on both GBAs, through rollbacks and mutations, and over a local server with four games and a spectator (a partner never picking, a Cross, a PA, Beast Out with 40 ms lag and 30 ms jitter, a slow partner, a drop).",
+      "left": "ColonelSoul's button for a partner pressed (built; his ColonelSoul's unison proved), the Dark Soul's lists from his own folder, the green flash's tint and a hit's mood gain by object; a real network, the deployed server, devices; a partner's NaviCust compiled on games of different runs; WhiCapsl's and Uninstll's marks and a chip of computed power in his hand.",
       "updated": "2026-10-22",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side",
-      "state_text": "Being built"
+      "state_text": "Proven in research, not built"
     }
   ],
   "decisions": [],
@@ -55,6 +55,26 @@
     {
       "date": "2026-10-22",
       "what": "BN6's and BN5's ways to show a mood named for the Square's emotes: src/emu/bn6_expression.h and bn5_expression.h, docs/ROM_DATA.md's Expression rows, docs/symbols written again."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "--dev arena2v2: a partner's whole MegaMan (issue #181): his NaviCust compiled by BN6's reload on a core of his client (src/online/arena_team_navicust.c, teamcust=N), his Cross by BN6's crossing controller run for his object (src/online/arena_team_cross.c, teamcross=N), a Program Advance from his own screen joined in his hand (arena_team_screen.c, arena_team_custom.c, teampa=N); docs/ROM_DATA.md's three rows."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "Issue #182 and the full-rules audit made right (src/emu/darkinvs.c, darkinvs_room.h, bn6_ai.h, soullife.c, soulchaos.c, soulchips.c, soullook.c, soulmood.c, src/online/arena_team_rules.c): BN5's chip AI's rooms, the Souls and the mood by object; BN6's AI data's pool and its side-player getter named (docs/ROM_DATA.md), docs/symbols written again."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "Issue #181 integrated (twoaside-net, twoaside-megaman, twoaside-rules): a partner's words carried in his side's GBA's own link packets (src/online/arena_team_link.c, RAM_TEAM_LINK; BN6_LINK_OUT, BN6_LINK_IN and the pad's stores in src/emu/bn6_link.h, docs/ROM_DATA.md's row), his turn worked out on each GBA from them; the GBAs' drift past the rings' delay ended by construction; a partner's whole MegaMan over the network (src/online/arena_seats.c, arena_team_client.c); docs/symbols written again."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "A partner's UNITE (src/online/arena_team_soul.c, arena_pair_open_screen, HOOK_CORES 5): his copy's GBA with BN5's installs' hooks and his Souls, TEAM_SOUL in his stream, soullife.c's Soul taken up, counted and ended by object, the Souls' modules (soulchaos, soulchips, soulpower, soulpassive, soullook, soulcode, soulmood, soulcolonel) reading the MegaMan's own Souls state; the Souls' differential passing as before."
+    },
+    {
+      "date": "2026-10-22",
+      "what": "Issue #181's review: a partner's NaviCust compiled over the way in's own state, never a game's checkpoint (0x08138A00 keeps NaviStats +0x0E, +0x22, +0x2C, +0x2D, +0x2F, +0x30, +0x58-+0x5B from the state it runs on; arena_seats_compile); his messages checked on every GBA by his screen's rules (team_check.c: the hand dealt, one code or one chip, the PA lists' recipes 0x080295B4 and 0x080295B8, his Crosses, Souls and ColonelSoul's chip); sub_801FFD6's read path hooked (0x0802001C, BN6_LINK_TAKES_ANY 0x0203F7D8); the outbox of twelve (team_outbox.c); the server's OVER from seat 0 alone; the packet's other readers and writers named (0x0813F8D4, the library's getters 0x0803EF48 and 0x0803EF50, setter 0x0803EF58)"
     },
     {
       "date": "2026-10-21",
@@ -87,12 +107,60 @@
       "link": "../ONLINE_ARENA.md#the-leads-wait-for-their-partners"
     },
     {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's NaviCust compiled by BN6",
+      "result": "BN6's reload of MegaMan's stats from the NaviCust's board (bn6f reloadCurNaviStatBoosts_813c3ac, Gregar 0x0813E18C) called once through the game's update on a plain core loaded from the checkpoint, the partner's loadout written in: a board of Custom1, UnderShirt and HP+100 (base 360) gives HP 460, Custom 6, UnderShirt 1, as the run's own menus made them. His record takes it whole (but for the start form and the BeastOutCounter a link battle's start sets; each GBA's own menu NaviStats and its side's battle record measured the same, all 0x64 bytes): side 1's partner set up with 460 HP beside his lead's 100, his own screen dealing six chips where his lead's deals five. 2,686 iterations 0 apart, 56 hashes the same with 289 rollbacks and with none; arenaroll=8 440 of 440 the same, its 58 hashes the delay alone's; the records their sides' copies on the second GBA alone part them from iteration 1.",
+      "meaning": "A partner's NaviCust needs no rules of ours: BN6's own compile runs for him on his client, and only its result crosses.",
+      "link": "../ONLINE_ARENA.md#his-navicust-compiled-by-bn6"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's own Cross",
+      "result": "BN6's crossing controller (0x020367F0) crosses its two records' objects alone; with its turn check sent to the crossing where a partner has a Cross (0x080148C0), his object asked to cross at its step's first frame and waited for (0x08014944: 0x4000 into his AI data's +0x44, the wait on +0x48's 0x80) and the pending form answered his own where the crossing object is his (0x0801595E), both partners cross into HeatCross at the first turn while their leads stay, on both GBAs. 3,854 iterations 0 apart, 88 hashes the same with 430 rollbacks and with none; arenaroll=8 666 of 666 the same, its 88 hashes the delay alone's; his Cross none on the second GBA alone parts them from iteration 1. The step's wait first returned with HOOK_RETURN into a caller that reached it by mov lr,pc; bx r1 (lr's Thumb bit clear): the game ran ARM and stopped on the black crossing screen; a jump to lr | 1 mends it. His pending form is taken as the controller's mode 8 begins, as BN6 takes its records'; kept to his next turn, the check as a turn's change begins met it again and crossed him anew.",
+      "meaning": "BN6's own crossing runs for a third and fourth MegaMan from three hooks; his choice is a message of his stream.",
+      "link": "../ONLINE_ARENA.md#his-cross"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's Program Advance",
+      "result": "Cannon A, B and C picked in order on his own screen: BN6's OK (0x08029110) makes Z-Canon1 (0x140) through its check (0x08029520), its next mode 0x10, the hand it builds at 0x020366C0 chips 0x140, 0xFFFF, 0x0001, powers 300, 0, 40. His client finds the place and count the pair's own build gives that hand from (picks 0 to 2) and crosses them before his picks; both GBAs write his hand Z-Canon1, power 300; his Z-Canon1 takes side 1's partner from 421 to 121 and side 1's player from 78 to 0. 1,284 iterations 0 apart, 33 hashes the same with 163 rollbacks and with none; arenaroll=8 254 of 254 the same; the PA left out on the second GBA alone parts them at iteration 4.",
+      "meaning": "BN6's OK decides his Program Advance on his screen; what crosses is where it joined his picks.",
+      "link": "../ONLINE_ARENA.md#a-program-advance-and-his-hands-size"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's Beast Out, its turns as a lead's",
+      "result": "Gregar's emblem commits a Beast Out into the same record as CROSSSELECT (0x08029344: form 0xB), so a partner's crosses as his Cross does. BN6 counts a form's turns for each side's player alone (0x08015A16 as each screen opens, 0x08015A38 as the crossing controller is done) and asks a Beast Out's end for the controller's records alone (0x080159C6, 0x08015994, mode 8's wait 0x08014A00): the two counts' ends hooked and their bodies entered again with his object, the end asked from the turn check's end by calling BN6's routines back to the hook. Control: the leads taking Beast Out by the same keys, each lead and his partner in form 0xB with the same BeastOutCounter at every turn's check (3, 2 at iteration 1084, 1 at 1897). 2,173 iterations 0 apart, 52 hashes the same with 261 rollbacks and with none; arenaroll=8 396 of 396 the same; none on the second GBA parts them from iteration 1; the leads too: 2,902 iterations 0 apart, 104 hashes the same with 524 rollbacks and without. With all four in Beast Out under the delay alone (arenawindow=0, and arenaroll=8 over it) the GBAs part at iteration 2305 of 2,375, the partners' keys 46 iterations late: the same with the partners' turn hooks off, so the GBAs drift past the rings' delay.",
+      "meaning": "A partner's Beast Out is BN6's own, his turns counted by BN6's routines run for him; the rings' delay meets its first limit in a lead's Beast Out under the stall.",
+      "link": "../ONLINE_ARENA.md#his-cross"
+    },
+    {
       "feature": "Net Square",
       "date": "2026-10-22",
       "name": "What BN6 has to show a mood, for the Square's emotes",
       "result": "BN6 has no emotion-bubble set: frame 0 of every sprite of lists 4-9 and the first frame of 452 icon-sized animations of lists 0-5, 7 and 9 drawn from Gregar show no ?, note, sweat, anger or sleep mark; its one heart is Roll's (list 3's 0x50), its one burst the battle's counter-hit \"!!\" (list 5's 0x07: \"!!\", a bat, a skull). MegaMan's overworld sprite (list 6's 0x37) has 73 animations: the item-get pose 0x18 (Gregar's text F8 01 18 41 times, 20 followed by sound 0x73), the arrival 0x2D (cutscene 47 00 FF 2D then sound 0x76), arms raised 0x40, sparks 0x38, panting 0x42, a leap 0x43, the buster aimed 0x33-0x36. BN6's hop in place (NPC bytes 22 11 60 DC 21) is in Gregar 157 times. A chat box face has three animations (still, blinking, talking; Lan's a fourth, eyes shut), set by text F5 03 n (31 times in Gregar's plain text), and no second face for a mood. BN5 adds a heart (list 4's 0x26) and a music note (list 4's 0x44).",
       "meaning": "An emote can be a pose of the peer's own MegaMan puppet (an animation number, no NPC slot) or a hop, in step for everyone from the emote's index; a mark over a head needs one of the Square's 16 NPC slots, all taken, or (not yet tried) a map object, 56 slots, drawn through an OverworldMapObjects id left unused.",
       "link": "../ROM_DATA.md"
+    },
+    {
+      "feature": "Two MegaMen a side",
+      "date": "2026-10-22",
+      "name": "Issue #182: DarkInvs on side 1 of a 1v1 NetBattle",
+      "result": "Real: on both GBAs side 1's DarkInvs moved his AI data into the one block of BN5's size side 0's player holds (\"side 0 020115e0 side 1 020115e0\"), side 0 turned grey and the battle stood still. An actor's AI data is not its object slot's: BN6 keeps a pool of eight (0x02034080, its bits at 0x0203F6A0, taken by 0x0800ED2C, let go by 0x0800ED80 through the entry's own bit at +0x7C). With a room of its own for each MegaMan at the pool's end (side 1's player 0x02034740), side 1 fights under the chip AI and side 0 as himself (over at frame 1179), both sides at once too; 147 rollbacks of 8 the same; two a side with all four under it 2,372 iterations 0 apart, 319 rollbacks the same, chipaibreak=2 apart from iteration 340; the ordinary NetBattle over at 2690, last hash 86d2f837337a1494.",
+      "meaning": "BN5's chip AI is safe for any MegaMan of a NetBattle; a room is refused (he is left out) only where actors hold the pool's last entries.",
+      "link": "../ONLINE_ARENA.md#what-a-partner-meets-under-full-rules"
+    },
+    {
+      "feature": "Two MegaMen a side",
+      "date": "2026-10-22",
+      "name": "The full-rules audit by object",
+      "result": "A partner charging B in his lead's Chaos Unison now fires his own charged shot (both GBAs: \"side 0's partner's charged B his own\"), 3,123 iterations 0 apart, 456 rollbacks the same, partnerbreak=2 (the old rule on one GBA) apart from iteration 222; a partner's BN5 DarkChip darkens him in his own Souls' block (0x0203FFBE, 0x0203FFDE) and NaviStats (the effect slots 30 and 31), not his lead. The five BN5 chips the audit named never ask BN6's side-player getter (their copy of BN5's 0x080125EE, a side's player's chaos flag, is never called); BN5's Navis that ask stand in no NetBattle.",
+      "meaning": "The Souls' and the mood's hooks are by object; a partner's UNITE has its block waiting. Nothing in a NetBattle aims at a side's player alone through the getter.",
+      "link": "../ONLINE_ARENA.md#what-a-partner-meets-under-full-rules"
     },
     {
       "feature": "Arena",

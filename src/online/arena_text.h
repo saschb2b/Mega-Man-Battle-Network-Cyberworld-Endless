@@ -21,7 +21,7 @@ extern const char arena_keys_ask[], arena_keys_back[], arena_back[];
 extern const char arena_leave_key[];
 /* A Team NetBattle (epic #167): the band's place, the MegaMen standing,
  * the match's end (TEAM_WON, TEAM_LOST, TEAM_BROKE_OFF, TEAM_DRAWN) */
-extern const char arena_team[], arena_standing[];
+extern const char arena_team[], arena_standing[], arena_side_by_side[];
 const char *arena_team_end(unsigned result);
 /* ... the next bout's two, or the order (bout 1) */
 const char *arena_team_next(const char *ours, const char *theirs);

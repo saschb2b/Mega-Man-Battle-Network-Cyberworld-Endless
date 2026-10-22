@@ -26,6 +26,7 @@
 
 typedef enum {
 	SA_IDLE,
+	SA_FORMAT,      /* a team challenge's format asked, before the folder and the challenge (protocol v15) */
 	SA_FOLDER,      /* the folder to carry asked, before my challenge or my Yes */
 	SA_SENT,        /* my challenge sent: the server's word awaited */
 	SA_WAITING,     /* ... the other's answer */
@@ -65,6 +66,16 @@ typedef struct {
 	bool team;                /* a Team NetBattle's bout (square_team.h): no rematch, the team's card */
 	uint16_t carry;           /* ... the HP my MegaMan goes in with, 0 whole */
 	uint16_t hp_left;         /* my MegaMan's HP at the last battle's end */
+	uint8_t form;             /* a team challenge's format: mine as it goes, or the one asked of us (protocol v15) */
+	/* two MegaMen a side (protocol v15, issue #181): the four seats, mine
+	 * among them, each one's name and MegaMan as it came */
+	bool four;
+	unsigned seat;
+	uint32_t seats[ONLINE_SEATS];
+	char names[ONLINE_SEATS][ONLINE_NAME_BYTES + 1];
+	OnlineLoadout seated[ONLINE_SEATS];
+	bool seated_carried[ONLINE_SEATS], seated_in[ONLINE_SEATS];
+	char whose[ONLINE_NAME_BYTES + 1];   /* a stop's: the player it names (a 2v2's: whose PET it waited on) */
 	/* the result card, up from the battle's end (or a stop) until it
 	 * closes: the rematch asked on it, Lan's cursor, the other's answer */
 	struct {

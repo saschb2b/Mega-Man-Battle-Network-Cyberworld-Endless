@@ -7,6 +7,7 @@
 #include "bn6.h"
 #include "bn6_navis.h"
 #include "darkinvs.h"
+#include "debug.h"
 #include "emu.h"
 #include "soulmood.h"
 
@@ -22,9 +23,31 @@ static int soul_side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE)
 
 bool soul_united(int side) { return hook_read8(soul_field(side, BN6_SOUL_ID)) != 0; }
 
-static uint8_t navi_byte(int side, uint32_t field) {
-	return hook_read8(BN6_BATTLE_NAVI + (uint32_t)side * BN6_BATTLE_NAVI_SIZE + field);
+static int partner_break = -1;   /* (soul_partner_break) */
+
+void soul_partner_break(int slot) { partner_break = slot; }
+
+bool soul_partner(uint32_t obj) {
+	if (hook_slot() == partner_break) return false;
+	return obj && obj == hook_read32(BN6_BATTLE_PLAYERS + (uint32_t)soul_side_of(obj) * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
 }
+
+uint32_t soul_field_of(uint32_t obj, uint32_t field) {
+	int side = soul_side_of(obj);
+	return soul_partner(obj) ? BN6_SOULS_PARTNERS + (uint32_t)side * BN6_SOULS_SIDE + field : soul_field(side, field);
+}
+
+int soul_id_of(uint32_t obj) { return obj ? hook_read8(soul_field_of(obj, BN6_SOUL_ID)) : 0; }
+
+static uint32_t (*partner_stats)(uint32_t obj);
+
+void soul_navi_stats_by(uint32_t (*of)(uint32_t obj)) { partner_stats = of; }
+
+uint32_t soul_navi_stats(uint32_t obj) {
+	uint32_t own = partner_stats && soul_partner(obj) ? partner_stats(obj) : 0;
+	return own ? own : BN6_BATTLE_NAVI + (uint32_t)soul_side_of(obj) * BN6_BATTLE_NAVI_SIZE;
+}
+
 
 /* the proxy's own overlay routines (its entries 8 as soulproxy.c left them: HeatCross's) */
 static uint32_t enter_to, leave_to;
@@ -57,26 +80,33 @@ static void side_disarm(int side) {
  * a double of him (BN6's 0x08011420, a chip's), its Soul's own entry */
 static HookAct entered(HookRegs *r, void *user) {
 	(void)user;
-	int side = soul_side_of(r->r[5]);
-	uint8_t next = hook_read8(soul_field(side, BN6_SOUL_NEXT));
+	uint32_t me = r->r[5];
+	int side = soul_side_of(me);
+	bool partner = soul_partner(me);
+	uint8_t next = hook_read8(soul_field_of(me, BN6_SOUL_NEXT));
 	if (next) {
-		hook_write8(soul_field(side, BN6_SOUL_ID), next);
-		hook_write8(soul_field(side, BN6_SOUL_CHAOS), hook_read8(soul_field(side, BN6_SOUL_NEXT_CHAOS)));
-		hook_write8(soul_field(side, BN6_SOUL_TURNS), hook_read8(soul_field(side, BN6_SOUL_NEXT_TURNS)));
-		hook_write8(soul_field(side, BN6_SOUL_NEXT), 0);
-		hook_write8(soul_field(side, BN6_SOUL_NEXT_CHAOS), 0);
-		hook_write8(soul_field(side, BN6_SOUL_NEXT_TURNS), 0);
+		hook_write8(soul_field_of(me, BN6_SOUL_ID), next);
+		hook_write8(soul_field_of(me, BN6_SOUL_CHAOS), hook_read8(soul_field_of(me, BN6_SOUL_NEXT_CHAOS)));
+		hook_write8(soul_field_of(me, BN6_SOUL_TURNS), hook_read8(soul_field_of(me, BN6_SOUL_NEXT_TURNS)));
+		hook_write8(soul_field_of(me, BN6_SOUL_NEXT), 0);
+		hook_write8(soul_field_of(me, BN6_SOUL_NEXT_CHAOS), 0);
+		hook_write8(soul_field_of(me, BN6_SOUL_NEXT_TURNS), 0);
+		if (partner && emu_debug_on())
+			fprintf(stderr, "soullife: core %d: side %d's partner united with Soul %u (chaos %u, turns %u), his own\n", hook_slot(), side, next,
+				hook_read8(soul_field_of(me, BN6_SOUL_CHAOS)), hook_read8(soul_field_of(me, BN6_SOUL_TURNS)));
 		/* (Colonel's bit of the side, which BN5 clears as a form's state is set up, 0x08011B34, ColonelSoul's ready setting
-		 * it again: xstrike.h) */
-		if (next != SOUL_COLONEL) side_disarm(side);
-		soulmood_unison(side);   /* (BN5's calm as he unites, 0x08012146) */
-		darkinvs_leave(r->r[5]);   /* (... and out of its chip AI, 0x0801214A) */
+		 * it again: xstrike.h; the side's player's, BN5's one MegaMan a side) */
+		if (next != SOUL_COLONEL && !partner) side_disarm(side);
+		/* (BN5's calm as he unites, 0x08012146: his own mood, a side's partner's in his block) */
+		if (partner) soulmood_calm_of(me);
+		else soulmood_unison(side);
+		darkinvs_leave(me);   /* (... and out of its chip AI, 0x0801214A) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for
 	 * it, 0x0800F01C, where the proxy's would give it HeatCross's overlay) */
-	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
+	uint8_t soul = hook_read8(soul_field_of(me, BN6_SOUL_ID));
 	if (!next && soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_enter[soul]);
 	return go(r, enter_to);
 }
@@ -85,22 +115,42 @@ static HookAct entered(HookRegs *r, void *user) {
  * the Soul gone: its id, chaos, turns and what later milestones keep */
 static HookAct left(HookRegs *r, void *user) {
 	(void)user;
-	int side = soul_side_of(r->r[5]);
-	uint8_t soul = hook_read8(soul_field(side, BN6_SOUL_ID));
+	uint32_t me = r->r[5];
+	int side = soul_side_of(me);
+	bool partner = soul_partner(me);
+	uint8_t soul = hook_read8(soul_field_of(me, BN6_SOUL_ID));
 	if (soul) {
-		soulmood_unison(side);   /* (BN5's calm as the Soul ends, 0x08012272) */
-		darkinvs_leave(r->r[5]);   /* (... and out of its chip AI, 0x08012276) */
+		/* (BN5's calm as the Soul ends, 0x08012272: his own mood) */
+		if (partner) soulmood_calm_of(me);
+		else soulmood_unison(side);
+		darkinvs_leave(me);   /* (... and out of its chip AI, 0x08012276) */
 	}
+	if (soul && partner && emu_debug_on()) fprintf(stderr, "soullife: core %d: side %d's partner's Soul %u ended, his own\n", hook_slot(), side, soul);
 	if (soul && !keep_soul) {
 		static const uint32_t fields[] = { BN6_SOUL_ID, BN6_SOUL_CHAOS, BN6_SOUL_TURNS, BN6_SOUL_PHASE, BN6_SOUL_LEVEL, BN6_SOUL_SCREEN,
 			BN6_SOUL_CYCLE };
-		for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hook_write8(soul_field(side, fields[i]), 0);
-		side_disarm(side);
-		hook_write16(soul_field(side, BN6_SOUL_CHIP), 0);
+		for (size_t i = 0; i < sizeof fields / sizeof *fields; ++i) hook_write8(soul_field_of(me, fields[i]), 0);
+		if (!partner) side_disarm(side);
+		hook_write16(soul_field_of(me, BN6_SOUL_CHIP), 0);
 	}
 	/* (what BN5's Soul takes away as he leaves it, NumberSoul's) */
 	if (soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_leave[soul]);
 	return go(r, leave_to);
+}
+
+void soul_count_of(uint32_t obj) {
+	uint32_t turns = soul_field_of(obj, BN6_SOUL_TURNS);
+	uint8_t t = hook_read8(turns);
+	bool mega = !hook_read8(soul_navi_stats(obj) + BN6_NAVI_SIDE_NAVI);
+	if (hook_read8(soul_field_of(obj, BN6_SOUL_ID)) && mega && t && t != 0xFF) hook_write8(turns, (uint8_t)(t - 1));
+}
+
+bool soul_ended_of(uint32_t obj) {
+	uint32_t screen = soul_field_of(obj, BN6_SOUL_SCREEN);
+	if (!hook_read8(soul_field_of(obj, BN6_SOUL_ID))) return false;
+	bool shown = hook_read8(screen) != 0;
+	if (shown) hook_write8(screen, 0);
+	return shown && !hook_read8(soul_field_of(obj, BN6_SOUL_TURNS)) && hook_read8(soul_navi_stats(obj) + BN6_NAVI_FORM) == BN6_FORM_PROXY;
 }
 
 /* (r0 a side's player object, as BN6 counts its own down for it: the
@@ -108,11 +158,8 @@ static HookAct left(HookRegs *r, void *user) {
  * MegaMan, its turns neither 0 nor 0xFF */
 static HookAct counted(HookRegs *r, void *user) {
 	(void)user;
-	if (!r->r[0]) return HOOK_CONTINUE;
-	int side = soul_side_of(r->r[0]);
-	uint32_t turns = soul_field(side, BN6_SOUL_TURNS);
-	uint8_t t = hook_read8(turns);
-	if (soul_united(side) && !navi_byte(side, BN6_NAVI_SIDE_NAVI) && t && t != 0xFF) hook_write8(turns, (uint8_t)(t - 1));
+	if (!r->r[0] || soul_partner(r->r[0])) return HOOK_CONTINUE;
+	soul_count_of(r->r[0]);
 	return HOOK_CONTINUE;
 }
 
@@ -127,22 +174,17 @@ static HookAct counted(HookRegs *r, void *user) {
  * (BN6_SOUL_SCREEN, which soulunite.c's stand sets), so the last screen
  * opens with the Soul still on, as BN5's does. */
 static HookAct ending(HookRegs *r, void *user) {
-	if (!r->r[0]) return HOOK_CONTINUE;
-	int side = soul_side_of(r->r[0]);
-	uint32_t screen = soul_field(side, BN6_SOUL_SCREEN);
-	if (!soul_united(side)) return HOOK_CONTINUE;
-	bool shown = hook_read8(screen) != 0;
-	if (shown) hook_write8(screen, 0);
-	if (!shown || hook_read8(soul_field(side, BN6_SOUL_TURNS)) || navi_byte(side, BN6_NAVI_FORM) != BN6_FORM_PROXY) return HOOK_CONTINUE;
+	if (!r->r[0] || soul_partner(r->r[0]) || !soul_ended_of(r->r[0])) return HOOK_CONTINUE;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
 }
 
 /* (r5 the object a weakness hit asks to break) no break for a Soul: BN5's
- * never break on an element hit (it asks only of a DarkChip used united) */
+ * never break on an element hit (it asks only of a DarkChip used united);
+ * a side's partner's form his own (the full-rules audit) */
 static HookAct breaking(HookRegs *r, void *user) {
 	(void)user;
-	if (!soul_united(soul_side_of(r->r[5]))) return HOOK_CONTINUE;
+	if (soul_partner(r->r[5]) || !soul_united(soul_side_of(r->r[5]))) return HOOK_CONTINUE;
 	r->r[12] = BN6_FORM_BREAK_NOT | 1;
 	return HOOK_JUMP;
 }

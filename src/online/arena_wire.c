@@ -9,21 +9,35 @@ static void put32(uint8_t *o, uint32_t v) { put16(o, v >> 16); put16(o + 2, v & 
 static uint16_t get16(const uint8_t *i) { return (uint16_t)((unsigned)i[0] << 8 | i[1]); }
 static uint32_t get32(const uint8_t *i) { return (uint32_t)get16(i) << 16 | get16(i + 2); }
 
-size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms) {
-	if (action < ARENA_ACT_CHALLENGE || action > ARENA_ACT_SEEN || !ref) return 0;
+size_t arena_wire_action(uint8_t out[ONLINE_ARENA_BYTES], unsigned action, uint32_t ref, uint32_t latency_ms, unsigned form) {
+	if (action < ARENA_ACT_CHALLENGE || action > ARENA_ACT_SEEN || !ref || form > ONLINE_TEAM_SIDE_BY_SIDE) return 0;
 	out[0] = ONLINE_ARENA;
 	out[1] = (uint8_t)action;
 	put32(out + 2, ref);
 	put16(out + 6, latency_ms > ARENA_LATENCY_MOST ? ARENA_LATENCY_MOST : latency_ms);
+	out[8] = (uint8_t)form;
 	return ONLINE_ARENA_BYTES;
 }
 
 bool arena_wire_state(const uint8_t *data, size_t size, ArenaWireState *out) {
 	if (size != ONLINE_ARENA_STATE_BYTES || data[0] != ONLINE_ARENA_STATE) return false;
-	ArenaWireState s = { .stage = data[1], .match = get32(data + 2), .other = get32(data + 6), .side = data[26], .delay = data[27] };
+	ArenaWireState s = { .stage = data[1], .match = get32(data + 2), .other = get32(data + 6), .side = data[26], .delay = data[27],
+		.form = data[28] };
 	memcpy(s.identity, data + 10, ONLINE_IDENTITY_BYTES);
-	if (s.stage < ARENA_WIRE_CHALLENGED || s.stage > ARENA_WIRE_SEEN || !s.match || s.side > 1) return false;
+	for (unsigned k = 0; k < ONLINE_SEATS; ++k) s.seats[k] = get32(data + 29 + 4 * k);
+	/* (a seat past the GBAs' only in a 2v2's START) */
+	bool four = s.stage == ARENA_WIRE_START && s.seats[2] && s.seats[3];
+	if (s.stage < ARENA_WIRE_CHALLENGED || s.stage > ARENA_WIRE_SEEN || !s.match || s.side >= (four ? ONLINE_SEATS : 2) ||
+	    s.form > ONLINE_TEAM_SIDE_BY_SIDE) return false;
 	*out = s;
+	return true;
+}
+
+bool arena_wire_seat(const uint8_t *data, size_t size, unsigned *seat, const uint8_t **inner, size_t *n) {
+	if (size < 3 || data[0] != ONLINE_ARENA_SEAT || data[1] >= ONLINE_SEATS) return false;
+	*seat = data[1];
+	*inner = data + 2;
+	*n = size - 2;
 	return true;
 }
 
@@ -39,9 +53,10 @@ size_t arena_wire_team(uint8_t out[ONLINE_TEAM_BYTES], unsigned action, uint32_t
 bool arena_wire_team_state(const uint8_t *data, size_t size, TeamWireState *out) {
 	if (size != ONLINE_TEAM_STATE_BYTES || data[0] != ONLINE_TEAM_STATE) return false;
 	TeamWireState s = { .stage = data[1], .partner = get32(data + 2), .match = get32(data + 6), .bout = get32(data + 10),
-		.left = { data[30], data[31] }, .number = data[32], .result = data[33], .hp = get16(data + 34) };
+		.left = { data[30], data[31] }, .number = data[32], .result = data[33], .hp = get16(data + 34), .form = data[36] };
 	for (int k = 0; k < 4; ++k) s.players[k] = get32(data + 14 + 4 * k);
-	if (s.stage < TEAM_ASKED || s.stage > TEAM_OVER || s.result > TEAM_DRAWN || s.left[0] > 2 || s.left[1] > 2) return false;
+	if (s.stage < TEAM_ASKED || s.stage > TEAM_OVER || s.result > TEAM_DRAWN || s.left[0] > 2 || s.left[1] > 2 ||
+	    s.form > ONLINE_TEAM_SIDE_BY_SIDE) return false;
 	*out = s;
 	return true;
 }

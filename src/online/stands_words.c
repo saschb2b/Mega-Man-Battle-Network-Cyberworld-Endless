@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "protocol.h"
+
 /* a name as a Mr.Prog says it, in capitals */
 static const char *caps(const char *s, char *out, size_t n) {
 	size_t i = 0;
@@ -16,7 +18,8 @@ static int live_words(char *s, size_t n, const StandsBout *b) {
 	char a[20], z[20], chip[24];
 	caps(b->name[0], a, sizeof a);
 	caps(b->name[1], z, sizeof z);
-	int k = b->bout ? snprintf(s, n, "|TEAM NETBATTLE!\nBOUT %u!|%s VS\n%s!", b->bout, a, z) : snprintf(s, n, "|A NETBATTLE'S ON!\n%s VS\n%s!", a, z);
+	int k = b->bout == ONLINE_STANDS_SIDE_BY_SIDE ? snprintf(s, n, "|TEAM NETBATTLE!\nSIDE BY SIDE!|%s'S TEAM\nVS %s'S!", a, z) :
+		b->bout ? snprintf(s, n, "|TEAM NETBATTLE!\nBOUT %u!|%s VS\n%s!", b->bout, a, z) : snprintf(s, n, "|A NETBATTLE'S ON!\n%s VS\n%s!", a, z);
 	if (b->report) k += snprintf(s + k, n - (size_t)k, "|%s HAS %u HP!\n%s HAS %u!", a, b->hp[0], z, b->hp[1]);
 	for (int side = 0; side < 2; ++side)
 		if (b->chip[side]) k += snprintf(s + k, n - (size_t)k, "|%s USED\n%s!", side ? z : a, caps(b->chip[side], chip, sizeof chip));
@@ -31,7 +34,9 @@ static int last_words(char *s, size_t n, const StandsBout *b) {
 	char a[20], z[20];
 	caps(b->name[b->winner == 2], a, sizeof a);
 	caps(b->name[b->winner != 2], z, sizeof z);
-	int k = b->winner ? snprintf(s, n, "|%s BEAT\n%s!\nWHAT A BOUT!", a, z) : snprintf(s, n, "|%s VS\n%s...\nIT BROKE OFF!", a, z);
+	bool side_by_side = b->bout == ONLINE_STANDS_SIDE_BY_SIDE;
+	int k = b->winner && side_by_side ? snprintf(s, n, "|%s'S TEAM\nBEAT %s'S!\nWHAT A BOUT!", a, z) :
+		b->winner ? snprintf(s, n, "|%s BEAT\n%s!\nWHAT A BOUT!", a, z) : snprintf(s, n, "|%s VS\n%s...\nIT BROKE OFF!", a, z);
 	if (b->cheers) k += snprintf(s + k, n - (size_t)k, "|%u CHEERS FROM\nTHE STANDS!", b->cheers);
 	return k;
 }
@@ -54,7 +59,9 @@ const char *stands_board_words(const StandsBout *live, const StandsBout *last) {
 	int k = 0;
 	s[0] = 0;
 	if (live) {
-		k += live->bout ? snprintf(s + k, sizeof s - (size_t)k, ">Team NetBattle,\nbout %u!\n%s vs %s", live->bout, live->name[0], live->name[1]) :
+		k += live->bout == ONLINE_STANDS_SIDE_BY_SIDE ?
+			snprintf(s + k, sizeof s - (size_t)k, ">Team NetBattle,\nside by side!\n%s vs %s", live->name[0], live->name[1]) :
+			live->bout ? snprintf(s + k, sizeof s - (size_t)k, ">Team NetBattle,\nbout %u!\n%s vs %s", live->bout, live->name[0], live->name[1]) :
 			snprintf(s + k, sizeof s - (size_t)k, ">NetBattle now!\n%s vs %s", live->name[0], live->name[1]);
 		if (live->report)
 			k += snprintf(s + k, sizeof s - (size_t)k, "|>%s %u HP,\n%s %u HP.", live->name[0], live->hp[0], live->name[1], live->hp[1]);

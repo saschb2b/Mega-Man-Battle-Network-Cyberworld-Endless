@@ -69,10 +69,31 @@ static uint16_t busy_keys(uint32_t frame) {
 /* --dev arena2v2: on the Custom screen a lead first takes the chip under
  * the cursor, so that his hand holds one, before the script takes the
  * cursor to OK; in the fight side 0's lead taps R every 600 frames, which
- * opens the next turn's Custom screen once the gauge is full */
+ * opens the next turn's Custom screen once the gauge is full. arenapeer=
+ * MASK: a side in it takes its chip so too, and uses it in the fight */
+static bool peer_plays(unsigned side) { return (dev.arena_peer >> side) & 1; }
+
+/* (teambeast=3: the leads too take Beast Out each turn, their partners' control: the cursor right to OK, down to the emblem,
+ * A, then up and OK, again every 300 frames until the screen closes) */
+static uint16_t beast_lead_keys(uint32_t t) {
+	unsigned b = t % 300;
+	return b >= 40 && b < 100 ? ((b - 40) % 12 < 4 ? KEY_RIGHT : 0) : b >= 104 && b < 107 ? KEY_DOWN :
+		(b >= 116 && b < 119) || (b >= 212 && b < 215) ? KEY_A : b >= 200 && b < 203 ? KEY_UP : 0;
+}
+
+/* a lead's keys in the fight: arenapeer=MASK's chip used every four seconds, side 0 a second before side 1, B let go a
+ * while before it so that no charged shot of arenaboth's is under way as A comes; arena2v2's R every 600 frames */
+static uint16_t fight_keys(unsigned side, uint32_t t, uint16_t keys) {
+	unsigned u = t % 240, at = 60u + 60 * side;
+	if (peer_plays(side) && u >= at && u < at + 8) return KEY_A;
+	if (peer_plays(side) && u >= at - 30 && u < at) return 0;
+	return dev.arena_2v2 > 0 && !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+}
+
 static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
-	if (dev.arena_2v2 <= 0 || !S.arena) return keys;
-	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return !side && t % 600 < 4 ? (uint16_t)(keys | KEY_R) : keys;
+	if ((dev.arena_2v2 <= 0 && !peer_plays(side)) || !S.arena) return keys;
+	if (arena_phase(S.arena, side) != BN6_PHASE_CUSTOM) return fight_keys(side, t, keys);
+	if (dev.team_beast >= 3) return beast_lead_keys(t);
 	return t % 160 >= 20 && t % 160 < 24 ? KEY_A : keys;
 }
 
@@ -83,10 +104,11 @@ static uint16_t chip_first(unsigned side, uint32_t t, uint16_t keys) {
 static uint16_t peer_keys(void *context, uint32_t frame) {
 	(void)context;
 	if (dev.arena_busy) return busy_keys(frame);
-	if (!S.arena || arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return 0;
+	if (!S.arena) return 0;
+	if (arena_phase(S.arena, 1) != BN6_PHASE_CUSTOM) return peer_plays(1) ? chip_first(1, frame, 0) : 0;
 	unsigned t = frame % 160;
 	if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
-	return chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0);
+	return team_client_lead_keys(S.arena, 1, chip_first(1, frame, t >= 100 && t < 104 ? KEY_A : 0), frame);
 }
 
 /* --dev arena2v2's partners, players 2 and 3: their own clients stood in
@@ -102,7 +124,7 @@ static uint16_t partner_keys(void *context, unsigned player, uint32_t frame) {
 static uint16_t pad_keys(void) {
 	if (dev.arena_both && S.arena) {
 		uint32_t t = S.bot_tick++;
-		return chip_first(0, t, arena_bot_keys(S.arena, 0, t));
+		return team_client_lead_keys(S.arena, 0, chip_first(0, t, arena_bot_keys(S.arena, 0, t)), t);
 	}
 	if (dev.arena_both) return 0;
 	static const int buttons[10] = { BTN_A, BTN_B, BTN_SELECT, BTN_START, BTN_RIGHT, BTN_LEFT, BTN_UP, BTN_DOWN, BTN_R, BTN_L };
@@ -137,7 +159,8 @@ static void bout(ArenaKept *kept) {
 	ArenaLink *link = arena_link_local(&S.local, delay, lag, peer_keys, NULL);
 	/* (--dev arena2v2: both partners on the local link too, a stream each) */
 	if (dev.arena_2v2 > 0) arena_link_local_partners(&S.local, partner_keys, NULL);
-	const OnlineLoadout *loadout[2] = { S.carried.max_hp ? &S.carried : NULL, NULL };
+	/* (arenapeer=2: the second player the checkpoint's MegaMan too) */
+	const OnlineLoadout *loadout[2] = { S.carried.max_hp ? &S.carried : NULL, S.carried.max_hp && peer_plays(1) ? &S.carried : NULL };
 	uint32_t seed = dev.arena_seed ? (uint32_t)dev.arena_seed + S.bouts : 0;
 	printf("arena: bout %u: delay %u frames, the local link's lag %u ticks, MegaMan %s, seed %u\n", S.bouts + 1, link->delay, lag,
 		loadout[0] ? "carried from the checkpoint" : "the game's start's", (unsigned)seed);

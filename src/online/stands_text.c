@@ -16,8 +16,22 @@ const char *stands_heading(const char *first, const char *second) {
 	return s;
 }
 
+const char *stands_team_heading(int form, const char *const names[4]) {
+	static char s[96];
+	if (form == 0) snprintf(s, sizeof s, "WATCHING %s & %s VS %s & %s", names[0], names[2], names[1], names[3]);
+	else if (form == 1) snprintf(s, sizeof s, "%s & %s VS %s & %s", names[0], names[2], names[1], names[3]);
+	else snprintf(s, sizeof s, "%s's TEAM VS %s's TEAM", names[0], names[1]);
+	return s;
+}
+
 const char *stands_won(const char *winner) {
 	static char s[64];
 	snprintf(s, sizeof s, "%s won the NetBattle.", winner);
+	return s;
+}
+
+const char *stands_team_won(const char *lead) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's team won the NetBattle.", lead);
 	return s;
 }
