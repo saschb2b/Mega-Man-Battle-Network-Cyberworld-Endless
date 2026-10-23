@@ -33,10 +33,10 @@ of the generator with its measures. No engine code yet.
   par from a planner that plays it by BN5's rules, scaled by the planner's
   own result on BN5's nine.
 - **The prototype** (`tools/liberation.py`; `tools/liberation_bn5.py` for
-  BN5's own boards) makes 150 missions over acts 2-6 and measures them. The
-  boards read as BN5's; route choice opens up from act 3 (two to four ways
-  to take the first DarkHoles); most abilities earn little on today's
-  boards, which says where the generator's next rule is needed.
+  BN5's own boards) makes 144 missions over acts 2-6 and measures them
+  against BN5's nine: the boards keep to BN5's bands of shape and dark,
+  route choice opens up from act 3, and every teammate's command earns
+  its Order Point on the boards kept.
 
 ## BN5's missions, dissected
 
@@ -460,48 +460,52 @@ its dark panels and units drawn from BN5's ROM at run time, never kept.
 
 ## The prototype's measures
 
-`python3 tools/liberation.py --seeds 30 --runs 12` (about two minutes an
-act on all cores, acts run side by side); `python3 tools/liberation_bn5.py`
-with BN5's ROM for its nine. 30 missions an act:
+`python3 tools/liberation.py --seeds 30 --runs 12` (acts side by side on
+all cores, about an hour for the late acts with the command rule's
+plays); `python3 tools/liberation_bn5.py` with BN5's ROM for its nine and
+the par's yardstick. BN5's own boards, measured the same way, stand
+beside them:
 
-| Act | Tried | Rejected (most) | Panels | Dark | Par | Two under / at / over par | Close calls | Ways to the first holes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2 | 82 | 44 unwinnable | 93 | 46% | 10.7 (6-14) | 10 / 38 / 52% | 47% | 1.2 |
-| 3 | 46 | 12 barrier | 165 | 52% | 12.0 (8-22) | 16 / 39 / 45% | 45% | 2.4 |
-| 4 | 46 | 12 size | 185 | 63% | 12.6 (8-18) | 19 / 32 / 48% | 40% | 2.8 |
-| 5 | 42 | 6 size | 196 | 64% | 10.6 (7-14) | 11 / 39 / 51% | 40% | 3.6 |
-| 6 | 42 | 7 barrier | 197 | 65% | 11.0 (9-16) | 14 / 39 / 47% | 41% | 3.1 |
+| Act | BN5 | Kept of tried | Rejected most for | Panels | Fields | Fill | Dark | Dense | Par (BN5's) | Two under / at / over par | Close calls | Ways to the first holes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 1 | 30 of 70 | commands 24 | 111 (100) | 70% (72%) | 28% (22%) | 42% (33%) | 3.6 (3.6) | 9.9 (7) | 8 / 43 / 49% | 41% | 1.3 |
+| 3 | 2-3 | 30 of 127 | commands 57, barrier 26 | 194 (175-220) | 78% (74-82%) | 27% (23-28%) | 57% (43-48%) | 3.9 (3.5-3.9) | 14.1 (9) | 14 / 34 / 52% | 43% | 2.2 |
+| 4 | 4-5 | 30 of 150 | commands 74, barrier 30 | 222 (220-237) | 94% (97%) | 40% (43-46%) | 66% (51-61%) | 4.9 (5.5-6.0) | 13.3 (9-10) | 14 / 38 / 48% | 46% | 2.8 |
+| 5 | 6-7 | 24 of 360 | commands 105, barrier 103, situation 94 | 232 (217-248) | 94% (94-97%) | 40% (43-48%) | 68% (59-60%) | 5.0 (4.8-5.4) | 13.0 (10-12) | 19 / 35 / 45% | 43% | 3.4 |
+| 6 | 8-9 | 30 of 297 | commands 106, barrier 88 | 224 (222-223) | 94% (88-99%) | 40% (46-48%) | 66% (50-64%) | 4.9 (4.1-5.1) | 12.6 (14-16) | 11 / 44 / 45% | 45% | 2.8 |
 
-(Close calls: the planner's decisions whose second-best choice was within
-10% of its best, a measure of real choices. Ways: distinct orders of the
-first two DarkHoles over the plays.)
+(Fields: panels in a 2x2 block of floor. Fill: the floor's share of its
+box. Dense: dark panels around a dark panel. Close calls: the planner's
+decisions whose second-best choice was within 10% of its best, a measure
+of real choices. Ways: distinct orders of the first two DarkHoles over
+the plays. A situation: a command's situation could not be placed.)
 
-Each ability's worth, the phases its Navi saves over himself without it
-(act 3 to 6): TomahawkMan +0.6 to +0.9, KnightMan's StoneBody +0.3 to
-+0.4, ToadMan +0.1 to +0.3; Colonel, NumberMan and MegaMan about 0;
-ShadowMan -0.4 to -1.8. What it says:
+Each command's worth on the boards kept, the phases its Navi saves over
+himself without it, the same plays paired: TomahawkSwing +1.1 to +1.7,
+ScrenDiv +0.5 to +1.7, LifeMelody +0.2 to +0.9, NumberCheck +0.3 to
++1.0 (and 1.1 to 2.6 items taken a play with no battle), SneakAttack +0.3
+to +0.5 (100 to 240 HP struck off a play), KnightMan's StoneBody +0.2 to
++0.8, MegaMan's LongSwrd +0.15 to +0.9. What it says:
 
-- **The boards read as BN5's** (the pictures in the pull request) and
-  route choice opens up from act 3.
-- **Most commands earn too little.** A one-turn win already frees the
-  eight around, so a command pays only where one is unlikely: in dense dark.
-  The generator's next rule is a density rule (rings of dark three deep
-  around holes and the Darkloid), and a board is accepted only where every
-  teammate's command saves at least a third of a phase. ShadowMan's
-  negative worth is the planner's misuse of SneakAttack as much as the
-  command.
-- **Act 2 is harsh** (half its boards rejected as the planner loses): a
-  two-Navi team against the Darkloid's reach. BN5's mission 1 is as harsh
-  for the planner. Act 2's Darkloid needs a shorter reach or less HP.
-- **Late pars are low** (11 at act 6 against BN5's 14-16): generated late
-  boards are smaller (about 195 panels against BN5's 220) and fully
-  manned. Larger late boards, and BN5's maze of barriers at act 6.
-- **BN5's boards are fields, ours are walkways.** Drawn side by side, BN5's
-  stand on wide fields of two to four panels with dark filling whole
-  blocks of them; the prototype's platforms are smaller and its walkways
-  longer. In the engine the board is the generated layer's own floor,
-  whose fields are wider (docs/LEVEL_DESIGN.md); the prototype's layout
-  should take its platforms from the layer generator's shapes.
+- **The boards read as BN5's.** Their shape and their dark keep to BN5's
+  bands (the pictures in the pull request), and route choice opens up
+  from act 3: two to three and a half ways to take the first DarkHoles.
+- **Every command earns its Order Point where it is kept**, and the rule
+  costs boards: it keeps between one in two and one in fifteen of those
+  tried, most often for a utility command the planner had no use for. On
+  every board tried (before the rule) TomahawkSwing alone pays everywhere
+  (+0.6 to +1.2); ScrenDiv pays early; SneakAttack, NumberCheck and
+  LifeMelody pay where their situation is, little elsewhere. The
+  situations are what make them, as BN5's hand-made missions do.
+- **The par sits above BN5's in acts 2-5 and below in act 6.** It is the
+  planner's median times BN5's own ratio at that stage, so it follows
+  the generated boards, which are a little larger early and lack BN5's
+  late maze of barriers (59 on mission 9 against about 5 here).
+- **Left to tune:** the late acts' rejections (a barrier wall that cuts
+  a field of two-wide ways, a cache's clean panel), the late maze of
+  barriers, and the cost of the command rule in the engine, where its
+  plays run as the layer is made (a precomputed check, or the rule's
+  plays on a worker, if it is too slow on the 3DS).
 
 ## Building it
 
