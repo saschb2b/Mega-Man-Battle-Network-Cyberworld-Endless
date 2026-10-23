@@ -214,17 +214,23 @@ def picture(paths, out):
         os.remove(p)
 
 
-def cmd_start(name, rest):
-    h = home(name)
-    seed, fresh, extra = 0, False, []
+def start_options(rest):
+    """start's words: (seed, fresh, game options)."""
+    seed, extra = 0, []
     if '--' in rest:
         extra = rest[rest.index('--') + 1:]
         rest = rest[:rest.index('--')]
     if '--seed' in rest:
         seed = int(rest[rest.index('--seed') + 1], 0)
-    fresh = '--fresh' in rest
+    return seed, '--fresh' in rest, extra
+
+
+def launch(h, seed=0, fresh=False, extra=(), env=None, binary=None, keep_bin=True):
+    """A headless game in folder h, waiting for batches; its seed. (env:
+    variables for it, kept in the history for a replay; binary: another
+    build; keep_bin False runs it where it is, for a game of one batch)"""
     if os.path.exists(os.path.join(h, 'pid')):
-        cmd_stop(name)
+        stop(h)
     data = os.path.join(h, 'data')
     if fresh and os.path.isdir(data):
         shutil.rmtree(data)
@@ -244,33 +250,106 @@ def cmd_start(name, rest):
     if os.path.isdir(os.path.join(h, 'data0')):
         shutil.rmtree(os.path.join(h, 'data0'))
     shutil.copytree(data, os.path.join(h, 'data0'))
-    if not os.path.exists(BINARY):
-        sys.exit('no build/linux/cyberworld: run python3 build.py linux first')
+    binary = binary or BINARY
+    if not os.path.exists(binary):
+        sys.exit(f'no {os.path.relpath(binary, ROOT)}: run python3 build.py linux first')
     # the session's own copy, so a rebuild meanwhile leaves it alone (with
     # NAME/bin.pin, kept across starts: a playtest's restarts run the build
     # it began with)
     bin_dir = os.path.join(h, 'bin')
-    if not (os.path.exists(os.path.join(h, 'bin.pin')) and os.path.exists(os.path.join(bin_dir, 'cyberworld'))):
+    if keep_bin and not (os.path.exists(os.path.join(h, 'bin.pin')) and os.path.exists(os.path.join(bin_dir, 'cyberworld'))):
         if os.path.isdir(bin_dir):
             shutil.rmtree(bin_dir)
         os.makedirs(bin_dir)
-        shutil.copy2(BINARY, bin_dir)
-        shutil.copytree(os.path.join(os.path.dirname(BINARY), 'lib'), os.path.join(bin_dir, 'lib'))
+        shutil.copy2(binary, os.path.join(bin_dir, 'cyberworld'))
+        # (the Linux build's SDL2 beside it; the host build's is the system's)
+        if os.path.isdir(os.path.join(os.path.dirname(binary), 'lib')):
+            shutil.copytree(os.path.join(os.path.dirname(binary), 'lib'), os.path.join(bin_dir, 'lib'))
     if not seed:
         seed = int.from_bytes(os.urandom(3), 'little') | 1
-    args = [os.path.join(bin_dir, 'cyberworld'), '--headless', '--size', '256x192', '--remote', h, '--rom-dir', ROM_DIR,
+    run = os.path.join(bin_dir, 'cyberworld') if keep_bin else binary
+    args = [run, '--headless', '--size', '256x192', '--remote', h, '--rom-dir', ROM_DIR,
             '--data-dir', data, '--seed', str(seed), *extra]
     log = open(os.path.join(h, 'log.txt'), 'w')
-    p = subprocess.Popen(args, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, cwd=ROOT)
+    p = subprocess.Popen(args, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, cwd=ROOT,
+                         env={**os.environ, **(env or {})})
     open(os.path.join(h, 'pid'), 'w').write(str(p.pid))
     with open(os.path.join(h, 'history.txt'), 'w') as f:
         f.write(f'# seed {seed}\n# args {" ".join(extra)}\n')
+        for k, v in (env or {}).items():
+            f.write(f'# env {k}={v}\n')
     for _ in range(500):
         if os.path.exists(os.path.join(h, 'out')):
             break
         time.sleep(0.01)
+    return seed
+
+
+def cmd_start(name, rest):
+    seed, fresh, extra = start_options(rest)
+    seed = launch(home(name), seed, fresh, extra)
     print(f'started {name} (seed {seed})')
     cmd_do(name, ['wait 1'])
+
+
+def prepare(commands, every=0):
+    """A batch's steps: the commands, with a picture every `every` frames
+    (at most MAX_SHOTS: a longer batch spaces them out) and one at the end."""
+    seq = steps(commands)
+    if every:
+        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in DEV_STEPS)
+        every = max(every, -(-frames // MAX_SHOTS))
+        seq = split_every(seq, every)
+    while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
+        seq.remove('shot')
+    if not seq or seq[-1] != 'shot':
+        seq.append('shot')
+    return seq, every
+
+
+def short(path):
+    """A path as the game is told it: from the repository, where it runs
+    (its steps keep 159 characters, less than a worktree's whole paths)."""
+    return os.path.relpath(path, ROOT)
+
+
+def send(h, seq, record=None):
+    """Runs a batch's steps in game h; (its answer, the pictures as (frames
+    into the batch, path), the second screen's paths, the state in words).
+    record: the history's line for it (None: no line)."""
+    shots, items, seconds, at = [], [], [], 0
+    n = len(os.listdir(os.path.join(h, 'shots')))
+    for s in seq:
+        if s == 'shot':
+            path = os.path.join(h, 'shots', f'_{n}_{len(shots)}.bmp')
+            shots.append((at, path))
+            items.append(f'shot {short(path)}')
+        elif s[0] == 'place':
+            items.append(f'place {s[1]} {s[2]} {s[3]}')
+        elif s[0] == 'flags':
+            items.append(f'flags {s[1]} {s[2]} {s[3]}')
+        elif s[0] in ('battle', 'sig'):
+            items.append(s[0])
+        elif s[0] == 'stuck':
+            items.append(f'stuck {s[1]}')
+        elif s[0] in ('foes', 'status', 'xrecord', 'chip', 'cross'):
+            items.append(f'{s[0]} {s[1]}')
+        elif s[0] == 'second':
+            seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
+            items.append(f'second {short(seconds[-1])}')
+        elif s[0] == 'dump':
+            os.makedirs(os.path.join(h, s[1]), exist_ok=True)
+            items.append(f'dump {short(os.path.join(h, s[1], s[1]))}')
+        else:
+            items.append(f'{s[0]} {s[1]}'.strip())
+            at += s[0]
+    state = os.path.join(h, 'state.txt')
+    items.append(f'state {short(state)}')
+    answer = talk(h, ';'.join(items))
+    if record is not None:
+        with open(os.path.join(h, 'history.txt'), 'a') as f:
+            f.write(record + f'  # {answer}\n')
+    return answer, shots, seconds, open(state).read().strip()
 
 
 def cmd_do(name, rest):
@@ -287,46 +366,10 @@ def cmd_do(name, rest):
         keep = rest[rest.index('--keep') + 1]
         rest = rest[:rest.index('--keep')] + rest[rest.index('--keep') + 2:]
     commands = ' ; '.join(rest)
-    seq = steps(commands)
-    if every:
-        # at most MAX_SHOTS pictures: a longer batch spaces them out
-        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in DEV_STEPS)
-        every = max(every, -(-frames // MAX_SHOTS))
-        seq = split_every(seq, every)
-    while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
-        seq.remove('shot')
-    if not seq or seq[-1] != 'shot':
-        seq.append('shot')
-    shots, items, seconds = [], [], []
+    seq, every = prepare(commands, every)
     n = len(os.listdir(os.path.join(h, 'shots')))
-    for s in seq:
-        if s == 'shot':
-            path = os.path.join(h, 'shots', f'_{n}_{len(shots)}.bmp')
-            shots.append(path)
-            items.append(f'shot {path}')
-        elif s[0] == 'place':
-            items.append(f'place {s[1]} {s[2]} {s[3]}')
-        elif s[0] == 'flags':
-            items.append(f'flags {s[1]} {s[2]} {s[3]}')
-        elif s[0] in ('battle', 'sig'):
-            items.append(s[0])
-        elif s[0] == 'stuck':
-            items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'status', 'xrecord', 'chip', 'cross'):
-            items.append(f'{s[0]} {s[1]}')
-        elif s[0] == 'second':
-            seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
-            items.append(f'second {seconds[-1]}')
-        elif s[0] == 'dump':
-            os.makedirs(os.path.join(h, s[1]), exist_ok=True)
-            items.append(f'dump {os.path.join(h, s[1], s[1])}')
-        else:
-            items.append(f'{s[0]} {s[1]}'.strip())
-    state = os.path.join(h, 'state.txt')
-    items.append(f'state {state}')
-    answer = talk(h, ';'.join(items))
-    with open(os.path.join(h, 'history.txt'), 'a') as f:
-        f.write(commands + (f'  # every {every}' if every else '') + f'  # {answer}\n')
+    answer, shots, seconds, state = send(h, seq, commands + (f'  # every {every}' if every else ''))
+    shots = [p for _, p in shots]
     out = os.path.join(h, 'shots', f'{n:04d}.png')
     if keep:
         os.makedirs(keep, exist_ok=True)
@@ -334,7 +377,7 @@ def cmd_do(name, rest):
         for i, p in enumerate(shots):
             shutil.copy(p, os.path.join(keep, f'{k0 + i:05d}.bmp'))
     picture(shots, out)
-    print(open(state).read().strip())
+    print(state)
     print(f'picture {out}')
     for i, p in enumerate(seconds):
         if os.path.exists(p):
@@ -354,14 +397,19 @@ def cmd_replay(name, rest):
     lines = open(os.path.join(src, 'history.txt')).read().splitlines()
     seed = int(lines[0].split()[-1])
     args = lines[1].split(' ', 2)[2].split() if len(lines) > 1 and lines[1].startswith('# args ') and len(lines[1]) > 7 else []
+    env = dict(line[6:].split('=', 1) for line in lines if line.startswith('# env '))
     h = home(dst)
     if os.path.exists(os.path.join(h, 'pid')):
         cmd_stop(dst)
     if os.path.isdir(os.path.join(h, 'data')):
         shutil.rmtree(os.path.join(h, 'data'))
     shutil.copytree(os.path.join(src, 'data0'), os.path.join(h, 'data'))
-    cmd_start(dst, ['--seed', str(seed)] + (['--'] + args if args else []))
+    launch(h, seed, False, args, env)
+    with contextlib.redirect_stdout(io.StringIO()):
+        cmd_do(dst, ['wait 1'])   # (as start's first batch)
     for line in lines[2:]:
+        if line.startswith('#'):
+            continue
         body, _, rest_ = line.partition('  # ')
         frame = None
         for part in line.split('  # '):
@@ -379,8 +427,7 @@ def cmd_replay(name, rest):
     cmd_do(dst, ['wait 1'])
 
 
-def cmd_stop(name):
-    h = home(name)
+def stop(h):
     try:
         pid = int(open(os.path.join(h, 'pid')).read())
         os.killpg(pid, signal.SIGTERM)
@@ -388,6 +435,10 @@ def cmd_stop(name):
         pass
     if os.path.exists(os.path.join(h, 'pid')):
         os.remove(os.path.join(h, 'pid'))
+
+
+def cmd_stop(name):
+    stop(home(name))
     print(f'stopped {name}')
 
 

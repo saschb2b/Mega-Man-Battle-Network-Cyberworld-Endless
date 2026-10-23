@@ -17,7 +17,9 @@ raised, and the loop's own lessons.
 ## One iteration
 
 1. **Build, look, pin.** `python3 build.py linux`; capture every visual
-   change of the iteration in the game (not only its chat or its code);
+   change of the iteration in the game (not only its chat or its code:
+   the `cyberworld` MCP server's `shot`, a call each, `ref` beside the
+   pinned build's commit; docs/DEVTOOLS.md, Agents' tools);
    then `.claude/skills/playtest-loop/scripts/pin.sh kai`: the session runs
    this copy (`.build/play/kai/bin/`, kept by `bin.pin`), so rebuilding
    while it plays changes nothing for it, and its replays stay exact. A
@@ -162,9 +164,16 @@ state names the arrow's way; `scripts/follow_arrow.py NAME` walks the way it
 shows and prints each panel. Use them when a persona reports going in
 circles.
 
-**Talk and shop screens**: `play.py start NAME --fresh -- --scene emu
---run-depth D --talk shop:430` opens a layer's chat on frame 430 (`npc`,
-`shop`, `heal`, `programs`, `gift`, `challenge`, `undernet`, `gate`).
+**Talk and shop screens**: `shot` from `layer --run-depth D --talk
+shop:430` (`tools/cw.py shot "layer --run-depth D --talk shop:430"`) opens
+a layer's chat on frame 430 (`npc`, `shop`, `heal`, `programs`, `gift`,
+`challenge`, `undernet`, `gate`), its state and picture in the one call.
+
+**Sweeping ahead in one call each**: `shot` from a route (`battle`,
+`jukebox`, `hp`, `pet/navicust`) with the seed and depth the persona will
+reach, `until` for what takes long (`CYBERWORLD_AUTOPILOT=1 layer --seed S`
+until `layer>=3`; a guardian's fight until `guardian~beaten`), `picture:
+false` while the state's `screen` and `doing` lines say enough.
 
 ## Pitfalls
 
@@ -179,7 +188,9 @@ circles.
 - A history rewrite of shared commits needs the user: don't force it.
 - `tools/play.py` runs `build/linux/cyberworld`: after a change, `build.py
   linux` before a check in it (`build.py` alone builds host and aarch64;
-  a check on the stale build read as the fix not working).
+  a check on the stale build read as the fix not working). The MCP's
+  `shot` and `play` run the host build and rebuild it first where a
+  source is newer; a pinned session (`bin.pin`) keeps its own copy.
 - A fix that grows a listed function fails `build.py lint`: split the new
   code into a function of its own rather than `--update` the baseline
   (session 45's fixes did so three times).

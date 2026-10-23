@@ -2472,6 +2472,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
         if code == 0:   # the voice catalog's reading of C (tools/voice_catalog.py)
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_voice_catalog.py')])
+        if code == 0:   # the agents' tools (tools/cw.py and its MCP server)
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_cw.py')])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)
