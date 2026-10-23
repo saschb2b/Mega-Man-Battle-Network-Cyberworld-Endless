@@ -31,6 +31,7 @@
 #include "director.h"
 #include "emu.h"
 #include "hook.h"
+#include "liberation.h"
 #include "liberation_battle_words.h"
 #include "liberation_state.h"
 #include "pet_look.h"
@@ -127,6 +128,7 @@ void lib_battle_arm(int turns) {
 	arm.turns = turns;
 	arm.on = true;
 	turn_seen = 0;
+	lib_cue_battle(turns > 0);   /* (won in the first turn: BN5's jingle, liberation_cues.c) */
 	/* (the Darkloid's: the late double's hook while it runs; the duel's
 	 * watch holds the same instruction, never on a dark layer) */
 	if (!turns && !doubling) doubling = emu_hook(BN6_SUBTRACT_HP, late_double, NULL);
@@ -135,6 +137,7 @@ void lib_battle_arm(int turns) {
 void lib_battle_disarm(void) {
 	arm.on = false;
 	arm.turns = 0;
+	lib_cue_battle(false);
 	if (doubling) emu_unhook(BN6_SUBTRACT_HP);
 	doubling = false;
 }

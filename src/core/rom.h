@@ -135,6 +135,7 @@ typedef struct {
 	uint32_t map_enters, map_anims;         /* its internet map groups' EnterMapGroup and LoadGFXAnims routines, as BN6's */
 	const char *tag;                        /* its short name for the player ("BN5"): the title and the jack-in setup say it was found */
 	uint8_t face;                           /* the mugshot (sprite list 8) on its cartridge in the launcher (docs/ROM_DATA.md) */
+	uint8_t prelude_song;                   /* the song its scenes play before a boss's fight: a guardian's prelude on its areas (docs/MULTIROM.md) */
 } XRomLayout;
 typedef struct {
 	uint8_t *data;

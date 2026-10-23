@@ -49,6 +49,17 @@ int lib_board_song(int song);
 void lib_song(int bn5_song);
 void lib_sound(int bn5_sound);
 
+/* (liberation_cues.c) BN5's songs at a liberation's moments where BN5 plays
+ * them (docs/MULTIROM.md, BN5's music in a run), where the board is in
+ * BN5's look: the next battle a liberation's whose turns are counted
+ * (`counted`; false none armed), its win in the first turn BN5's own
+ * jingle in place of BN6's fanfare; the board won, BN5's song for it as
+ * its par is told, and the board's own again once that has ended (each
+ * frame on its map). */
+void lib_cue_battle(bool counted);
+void lib_cue_won(void);
+void lib_cue_frame(void);
+
 /* (liberation_camera.c) BN6's camera moved as BN5's moves it over its
  * board, where the board is in BN5's look: a frame of its pan to world
  * (wx, wy), true once there (and at once where it is not BN5's board); a

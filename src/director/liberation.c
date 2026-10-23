@@ -530,6 +530,7 @@ static void talk_update_lib(void) {
 	if (LB.words[0]) {
 		if (!quiet() || !talk_start(LB.words, FACE_MEGAMAN)) return;
 		LB.words[0] = 0;
+		if (LB.after == LIB_STEP_PRIZE) lib_cue_won();   /* (the board won: BN5's song as its par is told, liberation_cues.c) */
 		/* (an item found: BN5's jingle as its line begins) */
 		if (LB.npops) lib_sound(BN5_LIB_ITEM_SOUND);
 		return;
@@ -612,6 +613,7 @@ void lib_update(void) {
 	units_show();
 	lib_fence_update();
 	lib_look_update();
+	lib_cue_frame();
 	++LB.cheer_t;
 	for (int i = 0; i < LB.npops && i < LIB_POPS; ++i) ++LB.pop[i].t;
 	if (LB.step != LIB_STEP_WAIT) track_update();

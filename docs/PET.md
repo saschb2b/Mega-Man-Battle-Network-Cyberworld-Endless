@@ -195,31 +195,51 @@ version: the game's own music is the run's).
   Verified where they play, their names bn6f's: Something's Up 0x0B and
   Crisis 0x0C (the towns' maps in some chapters), Transmission 0x0F (one
   call, an ending song) and Defeat 0x1A (four calls in the battle's
-  code). BN5's from its map-music lists (`0x080361C8`): ACDC
-  Town 0x03, Indoors 0x04 (ACDC Town's houses), School 0x05 (group
-  0x01), Crisis 0x0C (ACDC Town in the third list), Comp 0x10, The Net
-  0x13, Undernet 0x14; its battles' 0x15 and 0x16; and the same calls
-  as BN6's, at the same routines moved, for 0x01, 0x0F, 0x1A, 0x1B,
-  0x1D and 0x1E. BN5's Liberation Missions' (heard in romlab on
-  mission 1, the BGM's player, 31 at `0x02011470`, its song header read
-  against the song table `0x08155BF4`): Liberation 0x22, the board's
-  own through both phases (its clock running on from one to the next),
-  and 0x1C at the mission's opening, the board's tour (its routine 1),
-  so BN5's 0x1C, Before the Boss, is BN5's at least there.
+  code). BN5's (docs/ROM_DATA.md, Where BN5 plays its songs), each
+  where its game starts it: its map-music lists (`0x080361C8`) for ACDC
+  Town 0x03, Indoors 0x04 (ACDC Town's houses), SciLab 0x05 (group
+  0x01's five maps, and Higsby's, 0x00:7: its lab, lobby and
+  control room, seen in romlab), Comp 0x10, The Net 0x13, Undernet 0x14;
+  its battles' records for 0x15, 0x16 and Final Battle 0x17 (its last
+  story records, its final boss's); the same calls as BN6's, at the same
+  routines moved, for 0x01, 0x0F, 0x1A, 0x1B, 0x1D and 0x1E, and its
+  battle's win for Victory 0x19 and Fanfare 0x1F (by the battle's
+  options, as BN6's). Its scripts' music commands, every script of every
+  map walked (its cutscenes', its objects' and its text archives'), for
+  the rest: Nebula 0x02 (Regal's and Nebula's scenes), A Stranger 0x0B
+  (a fast Navi who slipped past MagnetMan shows himself), Crisis 0x0C
+  (ACDC Town in the third map list; an attack, a cave-in, Nebula on the
+  move), Sorrow 0x0D (MegaMan
+  taken), Hope 0x0E (the friends' Navis come to help, ProtoMan and
+  Colonel hear MegaMan's voice, the last rally), Beach Day 0x06 (the
+  swimming race and the fishing at the beach), Challenge 0x23 (the
+  fishing contest's big catch, a battle against a hundred foes, and the
+  link's name entry and battle menu), Before the Boss 0x1C (ProtoMan or
+  Colonel showing himself, the scenario comps' last maps, a mission's
+  opening). Its Liberation Missions' (heard in romlab on mission 1, the
+  BGM's player, 31 at `0x02011470`, its song header read against the
+  song table `0x08155BF4`): Liberation 0x22, the board's own through
+  both phases (its clock running on from one to the next); Area
+  Liberated 0x18 as the mission is won and the Colonel tallies its
+  phases (the board's routine 6); One-Turn Win 0x24, where a
+  liberation's battle is won in its first turn, in place of the win's
+  usual song.
 - *Assumed from bn6f's names* (`constants/enums/SoundOffsets.inc`, the
   community disassembly's, read as leads, never copied as a list) where
   no map list or code reached them: The Expo 0x25, Pavilion 0x18,
   Pavilion Comp 0x20, Cybeasts 0x21, Before the Boss 0x1C (the boss
   prelude the run's guardians play), Showdown 0x22, Final Battle 0x17,
   The Chase 0x23, Villains 0x02, Sorrow 0x0D, Good Times 0x0E, Victory
-  0x19, Fanfare 0x1F. BN5 numbers its songs as BN6 does wherever the
-  two were checked (the eleven above), so its 0x02 (Nebula), 0x0B, 0x0D,
-  0x0E, 0x17, 0x19 and 0x1F carry BN6's names, assumed (0x1C heard at a
-  mission's opening, above).
-- *Not known yet:* BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18, 0x20,
-  0x21, 0x23 and 0x24 (its places), which no map list or
-  immediate reaches: they carry their number ("Song 06") in More until a
-  source names them (docs/SOURCES.md).
+  0x19, Fanfare 0x1F: BN6's alone now, BN5's each named for its own
+  place above.
+- *Never started:* BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21,
+  which nothing in Team Colonel starts (the search, docs/SOURCES.md, The
+  Jukebox's songs): they carry their number ("Song 07") in More.
+
+**In a run**, three of BN5's songs play where BN5 plays them
+(docs/MULTIROM.md, BN5's music in a run): Before the Boss as a guardian
+logs in on BN5's areas, Area Liberated as a dark layer is won, One-Turn
+Win at a liberation's battle won in its first turn.
 
 ## How the entries are taken over
 

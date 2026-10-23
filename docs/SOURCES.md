@@ -227,25 +227,34 @@ how it is known:
   within 0.7 dB to 12 kHz (the recording's own 32768 Hz rate above);
   BN6's title against the same recording, as a control, 0.42 and up to
   2.9 dB apart.
-- **The names.** Verified where a map-music list, a battle record or a
-  code's immediate starts the song, and assumed from bn6f's names where
-  none does (docs/PET.md lists which is which). BN5 numbers its songs as
-  BN6 does where both were checked (0x01, 0x03-0x05, 0x0C, 0x0F, 0x10,
-  0x13-0x16, 0x1A, 0x1B, 0x1D, 0x1E), which gives BN6's names to its
-  0x02, 0x0B, 0x0D, 0x0E, 0x17, 0x19, 0x1C and 0x1F, assumed. BN5's
-  Liberation Missions' two, verified without listening in romlab
-  (mission 1 played through a phase and back, docs/LIBERATION.md): 0x22
-  the board's song in both phases (the BGM player's header, its clock
-  running on), 0x1C at the mission's opening (the board's routine 1),
-  so 0x1C plays there in BN5 whatever it plays in BN6.
-- **Not found:** where BN5's 0x06-0x09, 0x11, 0x12, 0x18, 0x20, 0x21,
-  0x23 and 0x24 play. Searched: BN5's four map-music lists (`0x080361C8`), every
-  `movs r0,#n` before a `bl` to its PlayMusic (`0x080005A0`, which reach
-  only 0x01, 0x0F, 0x15, 0x18, 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23,
-  the last three from routines not yet read), its battle records' music
-  byte (0x15 and 0x16 alone). The cutscenes' scripts, which start most
-  story songs, were not read. A player who knows them is the lead to
-  verify (Learned from players, below).
+- **The names.** Verified where a map-music list, a battle record, a
+  code's immediate or register, or a script's music command starts the
+  song, and assumed from bn6f's names where none does (docs/PET.md lists
+  which is which). BN6's assumed ones stay BN6's; every BN5 song its game
+  starts is named for its own place, read in its scripts (docs/ROM_DATA.md,
+  Where BN5 plays its songs): its map scripts', cutscenes', objects' and
+  text scripts' music commands found by their handlers (the leads bn6f's
+  `map_script_cutscene.s`, `npc.s` and `chatbox.s`), every script of every
+  map group's tables decoded with what it starts, every text archive
+  found by its shape, and each scene read for what happens there (BN5's
+  text read for research, none of it kept). Of the names BN6's numbering
+  had lent it, Nebula 0x02, Crisis 0x0C, Sorrow 0x0D, Before the Boss 0x1C,
+  Final Battle 0x17, Victory 0x19 and Fanfare 0x1F are verified so; 0x0B
+  plays as a stranger shows himself (A Stranger), 0x0E as friends come to
+  help (Hope); and 0x05, which an earlier reading named School, plays in
+  SciLab and at Higsby's (seen in romlab).
+- **Never started:** BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21.
+  Searched: every call of its song starters (PlayMusic `0x080005A0`, its
+  forced and faded-in forms, PlaySoundEffect with a song's number), its
+  four map-music lists, every battle record's music byte, every map
+  group's map scripts and the cutscenes they start (24411 commands), the
+  missions' own scripts, every object script and text archive found by
+  its shape (1746 and 643), and the bytes of each music command with
+  these songs over the cutscenes' whole region: none (`tools/bn5_songs.py`
+  runs the search again). Read in part: the
+  cutscenes' camera scripts (whose 0x10 plays a song: none of these at
+  their starts). Not here: Team ProtoMan's version. A player who knows where one plays is the lead to verify
+  (Learned from players, below).
 
 ## Learned from players
 
