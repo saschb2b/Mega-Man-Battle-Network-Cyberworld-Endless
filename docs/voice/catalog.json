@@ -748,6 +748,10 @@
    "comment": "MegaMan's word on R pressed in the town away from the port: almost at a jack-in cell (`way` the way to it), close to the port (`way` the walk's), or nowhere near it",
    "line": 14
   },
+  "liberation_battle_words:lib_stakes_words": {
+   "header": "Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)",
+   "line": 7
+  },
   "liberation_words:lib_battle_words": {
    "header": "After a liberation's battle: what it freed (`panels`, beside the one fought for), whether in one turn, what it held; \"\" for nothing to say.",
    "line": 21
@@ -1923,6 +1927,15 @@
    "speaker": "MegaMan",
    "stem": "lesson_words"
   },
+  "src/director/liberation_battle_words.c": {
+   "comment": "What a liberation's battle stakes, in words: the menu's lines, in BN6's small capitals, as BN5's own banners count it (TURN, LIBERATE).",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 7,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "liberation_battle_words"
+  },
   "src/director/liberation_words.c": {
    "comment": "What is said and shown on a liberation's board (docs/LIBERATION.md): Lan and MegaMan knew BN5's Liberation Missions, Nebula's dark areas taken back panel by panel, so they name what they see in its words.",
    "domain": "Other",
@@ -2400,7 +2413,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2056,
+  "boxes": 2063,
   "domains": {
    "Arena": {
     "files": [
@@ -2542,13 +2555,14 @@
    },
    "Other": {
     "files": [
+     "src/director/liberation_battle_words.c",
      "src/director/liberation_words.c",
      "src/jukebox/jukebox_text.c",
      "src/online/emote_strip_text.c"
     ],
-    "flagged": 5,
-    "lines": 86,
-    "speech": 80
+    "flagged": 10,
+    "lines": 93,
+    "speech": 87
    },
    "Powers": {
     "files": [
@@ -2669,12 +2683,12 @@
     "speech": 7
    }
   },
-  "flagged": 125,
+  "flagged": 130,
   "flags": {
    "beats": 4,
    "box-words": 4,
    "button": 5,
-   "colon": 34,
+   "colon": 39,
    "line-long": 15,
    "long-speech": 51,
    "meta": 2,
@@ -2800,7 +2814,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1716,
+  "lines": 1723,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3047,7 +3061,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1251
+  "speech": 1258
  },
  "version": 1,
  "conversations": [
@@ -3549,6 +3563,7 @@
   {"container":"jukebox_text:jukebox_now_label","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_now_label","line":93,"lines":["jukebox_text:jukebox_now_label:0"],"speakers":["MegaMan"],"title":"Jukebox now label","when":""},
   {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":96,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
   {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":100,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
+  {"container":"liberation_battle_words:lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_stakes_words","line":10,"lines":["liberation_battle_words:lib_stakes_words:0","liberation_battle_words:lib_stakes_words:1","liberation_battle_words:lib_stakes_words:2","liberation_battle_words:lib_stakes_words:3","liberation_battle_words:lib_stakes_words:4","liberation_battle_words:lib_stakes_words:5","liberation_battle_words:lib_stakes_words:6"],"speakers":["Mr.Prog","MegaMan"],"title":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds","when":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)"},
   {"container":"liberation_words:lib_card_line","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_card_line","line":10,"lines":["liberation_words:lib_card_line:0"],"speakers":["MegaMan"],"title":"The act's card's line for an act whose way holds a dark layer","when":"The act's card's line for an act whose way holds a dark layer."},
   {"container":"liberation_words:lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_briefing_words","line":14,"lines":["liberation_words:lib_briefing_words:0","liberation_words:lib_briefing_words:1","liberation_words:lib_briefing_words:2","liberation_words:lib_briefing_words:3","liberation_words:lib_briefing_words:4","liberation_words:lib_briefing_words:5"],"speakers":["Lan","MegaMan"],"title":"As the board begins","when":"As the board begins: what the dark layer is, its DarkHoles and par."},
   {"container":"liberation_words:lib_battle_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_battle_words","line":23,"lines":["liberation_words:lib_battle_words:0","liberation_words:lib_battle_words:1","liberation_words:lib_battle_words:2","liberation_words:lib_battle_words:3","liberation_words:lib_battle_words:4","liberation_words:lib_battle_words:5"],"speakers":["MegaMan","Lan"],"title":"After a liberation's battle","when":"After a liberation's battle: what it freed (`panels`, beside the one fought for), whether in one turn, what it held; \"\" for nothing to say."},
@@ -4029,6 +4044,13 @@
   {"boxes":[{"pages":[["Home's right","here,Lan!"]],"speaker":"MegaMan","text":"Home's right here,Lan!"},{"pages":[["The PC's up in your","room!"]],"speaker":"MegaMan","text":"The PC's up in your room!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:5","kind":"speech","line":26,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Home's right here,Lan!|@M The PC's up in your room!","text_hash":"d0cd128de7a6"},
   {"boxes":[{"pages":[["Almost,Lan! The","{landmark}'s {way}."]],"speaker":"MegaMan","text":"Almost,Lan! The {landmark}'s {way}."}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:6","kind":"speech","line":28,"placeholders":[{"name":"landmark","spec":"%s"},{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Almost,Lan! The {landmark}'s {way}.","text_hash":"3a94709174a5"},
   {"boxes":[{"pages":[["No port here,Lan!"]],"speaker":"MegaMan","text":"No port here,Lan!"},{"pages":[["It's by the","{landmark_at}!"]],"speaker":"MegaMan","text":"It's by the {landmark_at}!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:7","kind":"speech","line":30,"placeholders":[{"name":"landmark_at","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M No port here,Lan!|@M It's by the {landmark_at}!","text_hash":"8584705fc6ce"},
+  {"boxes":[{"pages":[["NO TURN LIMIT"]],"speaker":"Mr.Prog","text":"NO TURN LIMIT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":[],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NO TURN LIMIT","text_hash":"f9bc6b546c99"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["TURN {LIB_DOUBLE_TURN} ON: HITS X2"]],"speaker":"Mr.Prog","text":"TURN {LIB_DOUBLE_TURN} ON: HITS X2"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:1","kind":"speech","line":11,"placeholders":[{"name":"LIB_DOUBLE_TURN","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TURN {LIB_DOUBLE_TURN} ON: HITS X2","text_hash":"7281cf2c3f11"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: CLOSES IT"]],"speaker":"Mr.Prog","text":"{turns} TURNS: CLOSES IT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:2","kind":"speech","line":15,"placeholders":[{"name":"turns","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: CLOSES IT","text_hash":"2d9241970126"},
+  {"boxes":[{"pages":[["FREES {freed}"]],"speaker":"MegaMan","text":"FREES {freed}"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":[],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:3","kind":"speech","line":16,"placeholders":[{"name":"freed","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"FREES {freed}","text_hash":"b01a39f034c4"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: DELETES","IT"]],"speaker":"Mr.Prog","text":"{turns} TURNS: DELETES IT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:4","kind":"speech","line":19,"placeholders":[{"name":"turns","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: DELETES IT","text_hash":"d54436058343"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: FREES {freed}"]],"speaker":"Mr.Prog","text":"{turns} TURNS: FREES {freed}"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:5","kind":"speech","line":20,"placeholders":[{"name":"turns","spec":"%d"},{"name":"freed","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: FREES {freed}","text_hash":"69517490ea03"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["1 TURN: {one_turn} MORE"]],"speaker":"Mr.Prog","text":"1 TURN: {one_turn} MORE"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:6","kind":"speech","line":21,"placeholders":[{"name":"one_turn","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"1 TURN: {one_turn} MORE","text_hash":"f68d3fc178d8"},
   {"boxes":[{"pages":[["A layer here has","gone dark"]],"speaker":"MegaMan","text":"A layer here has gone dark"}],"container":"lib_card_line","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_card_line:0","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A layer here has gone dark","text_hash":"6b118680bf00"},
   {"boxes":[{"pages":[["Whoa! This whole","layer's gone dark!"]],"speaker":"Lan","text":"Whoa! This whole layer's gone dark!"},{"pages":[["Like Nebula's dark","areas,Lan!"]],"speaker":"MegaMan","text":"Like Nebula's dark areas,Lan!"},{"flags":[{"at":"4 lines","code":"pages"}],"pages":[["{holes} out","there... And a"],["Darkloid behind","{holes}."]],"speaker":"MegaMan","text":"{holes} out there... And a Darkloid behind {holes}."},{"pages":[["Then let's liberate","it! Par's {par}","phases."]],"speaker":"Lan","text":"Then let's liberate it! Par's {par} phases."}],"container":"lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","flags":["pages"],"id":"liberation_words:lib_briefing_words:0","kind":"speech","line":14,"placeholders":[{"name":"holes","spec":"%s"},{"name":"holes","spec":"%s"},{"name":"par","spec":"%d"}],"speaker":"Lan","speakers":["Lan","MegaMan"],"text":"@L Whoa! This whole layer's gone dark!|@M Like Nebula's dark areas,Lan!|@M {holes} out there... And a Darkloid behind {holes}.|@L Then let's liberate it! Par's {par} phases.","text_hash":"2a09059a08d5"},
   {"boxes":[{"pages":[["A DarkHole"]],"speaker":"MegaMan","text":"A DarkHole"}],"container":"lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_briefing_words:1","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A DarkHole","text_hash":"5f13e41ef9c3"},

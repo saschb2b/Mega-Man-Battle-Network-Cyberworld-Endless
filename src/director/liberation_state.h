@@ -50,8 +50,6 @@ typedef struct {
 	int fight, fight_unit, fight_cmd;
 	int fx, fy;            /* the panel fought for */
 	bool fight_seen;       /* the battle began */
-	int customs;           /* times its Custom screen opened */
-	bool custom_open;
 	/* the enemy's phase */
 	int enemy_unit, enemy_t, enemy_steps;
 	int hurt;              /* HP the board took this phase */

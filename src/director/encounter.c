@@ -16,6 +16,7 @@
 #include "economy.h"
 #include "emu.h"
 #include "events.h"
+#include "liberation_battle.h"
 #include "loot.h"
 #include "pacing.h"
 #include "rom.h"
@@ -80,6 +81,7 @@ void emu_encounters_install(void) {
 	emu_hook_event(BN6_START_BATTLE, EV_BATTLE_START);
 	emu_hook(BN6_REWARD_PICK, picking, NULL);
 	darkbn6_install();   /* (BN6's own DarkChips' uses: docs/META.md) */
+	lib_battle_install();   /* (a liberation's battle on BN6's loop: liberation_battle.h) */
 }
 
 void emu_battle_force(const Encounter *e) {
