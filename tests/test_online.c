@@ -166,28 +166,69 @@ static void square_heights(const SquarePlan *p) {
 		}
 }
 
+/* the warp gem at panel (x, y) leads to (*tx, *ty), its pair */
+static bool square_gem(const SquarePlan *p, int x, int y, int *tx, int *ty) {
+	for (int k = 0; k < SQUARE_WARPS; ++k)
+		for (int e = 0; e < 2; ++e)
+			if (p->gem[k][e][0] == x && p->gem[k][e][1] == y) { *tx = p->gem[k][!e][0]; *ty = p->gem[k][!e][1]; return true; }
+	return false;
+}
+
 /* every floor panel of plan `p` reached from the arrival, a step between
- * heights only on a stair, and every place on the floor */
+ * heights only on a stair and from part to part only by a warp (the
+ * steps walked from the arrival to each gem in `steps`), and every place
+ * on the floor */
 static void square_reach(const SquarePlan *p) {
 	static uint8_t seen[SQUARE_H][SQUARE_W];
+	static int dist[SQUARE_H][SQUARE_W];
 	memset(seen, 0, sizeof seen);
-	static int stack[SQUARE_W * SQUARE_H][2];
-	int n = 0, reached = 0, floor = 0;
-	stack[n][0] = p->at[SQ_ARRIVE][0]; stack[n++][1] = p->at[SQ_ARRIVE][1];
+	static int queue[SQUARE_W * SQUARE_H][2];
+	int head = 0, n = 0, reached = 0, floor = 0;
+	queue[n][0] = p->at[SQ_ARRIVE][0]; queue[n++][1] = p->at[SQ_ARRIVE][1];
 	seen[p->at[SQ_ARRIVE][1]][p->at[SQ_ARRIVE][0]] = 1;
-	while (n) {
-		--n;
-		int x = stack[n][0], y = stack[n][1];
+	dist[p->at[SQ_ARRIVE][1]][p->at[SQ_ARRIVE][0]] = 0;
+	while (head < n) {
+		int x = queue[head][0], y = queue[head++][1];
 		++reached;
-		static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-		for (int k = 0; k < 4; ++k) {
+		static const int d[5][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 0, 0 } };
+		for (int k = 0; k < 5; ++k) {
 			int nx = x + d[k][0], ny = y + d[k][1];
+			/* (a gem beams to its pair) */
+			if (k == 4 && !square_gem(p, x, y, &nx, &ny)) continue;
 			if (nx < 0 || ny < 0 || nx >= SQUARE_W || ny >= SQUARE_H || seen[ny][nx] || p->cell[ny][nx] != C_PATH) continue;
-			if (p->level[ny][nx] != p->level[y][x] && !on_stair(p, x, y) && !on_stair(p, nx, ny)) continue;
+			if (k < 4 && p->level[ny][nx] != p->level[y][x] && !on_stair(p, x, y) && !on_stair(p, nx, ny)) continue;
+			if (k < 4) assert(square_plan_part(p, nx, ny) == square_plan_part(p, x, y));
 			seen[ny][nx] = 1;
-			stack[n][0] = nx; stack[n++][1] = ny;
+			dist[ny][nx] = dist[y][x] + 1;
+			queue[n][0] = nx; queue[n++][1] = ny;
 		}
 	}
+	/* (every part's floor in its bounds, two void panels or more from
+	 * another's; each warp's gem on ground floor with its pad's all round
+	 * it, the plaza's a short walk from the arrival, no place nor
+	 * walker's waypoint on a pad) */
+	for (int y = 0; y < SQUARE_H; ++y)
+		for (int x = 0; x < SQUARE_W; ++x) {
+			if (p->cell[y][x] == C_VOID) continue;
+			int k = square_plan_part(p, x, y);
+			assert(k >= 0 || p->cell[y][x] == C_SOLID);
+			for (int j = y - 2; j <= y + 2 && k >= 0; ++j)
+				for (int i = x - 2; i <= x + 2; ++i)
+					if (i >= 0 && j >= 0 && i < SQUARE_W && j < SQUARE_H && p->cell[j][i] == C_PATH) assert(square_plan_part(p, i, j) == k);
+		}
+	for (int k = 0; k < SQUARE_WARPS; ++k)
+		for (int e = 0; e < 2; ++e) {
+			int gx = p->gem[k][e][0], gy = p->gem[k][e][1];
+			assert(square_plan_part(p, gx, gy) == (e ? k + 1 : SQ_PART_PLAZA));
+			for (int j = gy - 1; j <= gy + 1; ++j)
+				for (int i = gx - 1; i <= gx + 1; ++i) assert(p->cell[j][i] == C_PATH && !p->level[j][i] && p->pad[j][i] && !on_stair(p, i, j));
+			if (!e) assert(dist[gy][gx] <= 16);
+			/* (landing, BN6 steps MegaMan off the gem along a screen diagonal, onto its pad) */
+			assert(p->gem_face[k][e] % 2 == 0);   /* (steps along the grid; MegaMan walks the diagonals too) */
+			for (int q = 0; q < SQ_PLACES; ++q) assert(abs(p->at[q][0] - gx) > 1 || abs(p->at[q][1] - gy) > 1);
+			for (int w = 0; w < SQUARE_WALKERS; ++w)
+				for (int q = 0; q < p->route_len[w]; ++q) assert(abs(p->route[w][q][0] - gx) > 1 || abs(p->route[w][q][1] - gy) > 1);
+		}
 	for (int y = 0; y < SQUARE_H; ++y) for (int x = 0; x < SQUARE_W; ++x) floor += p->cell[y][x] == C_PATH;
 	assert(reached == floor);
 	for (int k = 0; k < SQ_PLACES; ++k) assert(p->cell[p->at[k][1]][p->at[k][0]] != C_VOID);
@@ -203,7 +244,7 @@ static void square_reach(const SquarePlan *p) {
 			int steps = abs(b[0] - a[0]) + abs(b[1] - a[1]);
 			for (int i = 0; i <= steps; ++i) {
 				int x = a[0] + (b[0] - a[0]) * i / (steps ? steps : 1), y = a[1] + (b[1] - a[1]) * i / (steps ? steps : 1);
-				assert(p->cell[y][x] == C_PATH && !p->level[y][x]);
+				assert(p->cell[y][x] == C_PATH && !p->level[y][x] && !p->pad[y][x]);
 			}
 		}
 	}

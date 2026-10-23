@@ -10,7 +10,6 @@
 #include "bn6_fields.h"
 #include "chips.h"
 #include "debug.h"
-#include "director_way.h"
 #include "emu.h"
 #include "netmap.h"
 #include "netpass.h"
@@ -69,6 +68,8 @@ static struct {
 	uint32_t greeter_said, referee_said;
 	uint32_t bout_barked;   /* the frame the referee last called a bout under way (0 none) */
 	unsigned bouts;   /* the battles fought from the Square the referee has called */
+	unsigned in_part[SQ_PARTS];        /* the peers in each part (SQ_PART_*), this frame */
+	const char *in_name[SQ_PARTS];     /* ... one of them by name */
 } L;
 
 void square_life_reset(void) {
@@ -403,6 +404,25 @@ static void board_posts(SquareFacts *f, const OnlineSnapshot *s) {
 		}
 }
 
+/* the part of the Square world (x, y) is in (SQ_PART_*), -1 none */
+static int part_at(int x, int y) {
+	int gx, gy;
+	return netmap_panel(x, y, &gx, &gy) ? square_plan_part(online_square_plan(), gx, gy) : -1;
+}
+
+/* who is in which part, from where the snapshot has them: friends find
+ * each other by it (the warps' labels, the signs, L's Look around) */
+static void parts(const OnlineSnapshot *s) {
+	memset(L.in_part, 0, sizeof L.in_part);
+	memset(L.in_name, 0, sizeof L.in_name);
+	for (size_t i = 0; i < s->peer_count; ++i) {
+		int k = part_at(s->peers[i].x, s->peers[i].y);
+		if (k < 0) continue;
+		++L.in_part[k];
+		if (!L.in_name[k]) L.in_name[k] = s->peers[i].name;
+	}
+}
+
 static void facts(SquareFacts *f) {
 	memset(f, 0, sizeof *f);
 	const OnlineSnapshot *s = &L.s;
@@ -428,6 +448,8 @@ static void facts(SquareFacts *f) {
 	f->parade = L.parading;
 	f->battle_on = square_watch_live();
 	f->turn = L.turn;
+	for (int k = 0; k < SQ_PARTS; ++k) { f->in_part[k] = L.in_part[k]; f->in_name[k] = L.in_name[k]; }
+	f->part = part_at(bn6_player_x(), bn6_player_y());
 	board_posts(f, s);
 }
 
@@ -459,6 +481,7 @@ void square_life_frame(const OnlineSnapshot *s) {
 	if (emu_debug_on() && t % 600 == 0)
 		fprintf(stderr, "online: walkers at clock %llu: %d,%d and %d,%d\n", (unsigned long long)(t / 60), L.wx[0], L.wy[0], L.wx[1], L.wy[1]);
 	arrivals(s);
+	parts(s);
 	bout_called();
 	bout_on();
 	beam_frame();
@@ -476,24 +499,25 @@ void square_life_frame(const OnlineSnapshot *s) {
  * up and to the right, right: grid -y), reads it. */
 #define BOARD_DROP 24
 #define BOARD_NEAR 32
-static bool board_before(const SquarePlan *p, int x, int y, int face) {
-	if (face > 2) return false;
+static int board_before(const SquarePlan *p, int x, int y, int face) {
+	if (face > 2) return -1;
 	for (int i = 0; i < p->nprops; ++i) {
 		if (p->props[i].look != LOOK_BBS) continue;
 		int bx, by;
 		netmap_world(p->props[i].x, p->props[i].y, &bx, &by);
 		/* (24 units down the screen: as far -x as +y) */
-		if (abs(x - (bx - BOARD_DROP)) <= BOARD_NEAR && abs(y - (by + BOARD_DROP)) <= BOARD_NEAR) return true;
+		if (abs(x - (bx - BOARD_DROP)) <= BOARD_NEAR && abs(y - (by + BOARD_DROP)) <= BOARD_NEAR) return i;
 	}
-	return false;
+	return -1;
 }
 
-/* the prop MegaMan faces: on the panel ahead of him, along his probe
- * (BN6's own, 8 units long) 20 and 40 units on; the landmark on any
- * panel of its base; the Board where it shows */
+/* the prop MegaMan faces (its index, -1 none): on the panel ahead of
+ * him, along his probe (BN6's own, 8 units long) 20 and 40 units on; the
+ * landmark on any panel of its base; the Board where it shows */
 static int prop_ahead(int x, int y, int face) {
 	const SquarePlan *p = online_square_plan();
-	if (board_before(p, x, y, face)) return LOOK_BBS;
+	int board = board_before(p, x, y, face);
+	if (board >= 0) return board;
 	int dx, dy;
 	npc_probe(face, &dx, &dy);
 	double d = sqrt((double)dx * dx + (double)dy * dy);
@@ -503,9 +527,19 @@ static int prop_ahead(int x, int y, int face) {
 		int gx, gy;
 		if (!netmap_panel(x + (int)(dx * reach[step] / d), y + (int)(dy * reach[step] / d), &gx, &gy)) continue;
 		for (int i = 0; i < p->nprops; ++i)
-			if (p->props[i].x == gx && p->props[i].y == gy) return p->props[i].look;
-		/* (the landmark's walled base round it) */
-		if (abs(gx - p->at[SQ_CENTER][0]) <= 1 && abs(gy - p->at[SQ_CENTER][1]) <= 1) return p->landmark;
+			if (p->props[i].x == gx && p->props[i].y == gy) return i;
+		/* (the landmark's walled base round it, the landmark the first prop) */
+		if (abs(gx - p->at[SQ_CENTER][0]) <= 1 && abs(gy - p->at[SQ_CENTER][1]) <= 1) return 0;
+	}
+	return -1;
+}
+
+/* the part whose prop by its warp prop `i` is (either of a flanking
+ * pair: the same look on the same row), -1 none */
+static int sign_of(const SquarePlan *p, int i) {
+	for (int k = 0; k < SQ_PARTS; ++k) {
+		const NetProp *s = &p->props[p->sign[k]];
+		if (p->sign[k] == i || (p->props[i].look == s->look && p->props[i].y == s->y && abs(p->props[i].x - s->x) <= 4)) return k;
 	}
 	return -1;
 }
@@ -520,7 +554,9 @@ bool square_life_talk(int x, int y, int face) {
 		++L.turn;
 		return talk_start(square_walker_words(k, &f), k ? FACE_TECH : FACE_GREEN_NAVI);
 	}
-	int look = prop_ahead(x, y, face);
+	const SquarePlan *p = online_square_plan();
+	int i = prop_ahead(x, y, face), look = i >= 0 ? p->props[i].look : -1, sign = i >= 0 ? sign_of(p, i) : -1;
+	if (sign > SQ_PART_PLAZA) return talk_start(square_sign_words(sign, &f), sign == SQ_PART_TRADE ? FACE_NONE : FACE_MEGAMAN);
 	if (look == LOOK_BBS) {
 		/* (the Board's posts, the week's net's after them: square_week.c) */
 		static char posts[1800];
@@ -531,26 +567,18 @@ bool square_life_talk(int x, int y, int face) {
 	return look >= 0 && talk_start(square_check_words(look, &f), FACE_NONE);
 }
 
-/* which part of the Square world (x, y) is in: the plaza, Trade Central's
- * wing (its floor and walkway, grid -x), the Arena's (its walk, floor and
- * ring, grid +y), or another (the stage, the log-in plaza) */
-static int part_of(int x, int y) {
-	const SquarePlan *p = online_square_plan();
-	int gx, gy, mid = p->at[SQ_CENTER][0];
-	if (!netmap_panel(x, y, &gx, &gy)) return SQUARE_IN_OTHER;
-	if (abs(gx - mid) <= SQUARE_PLAZA_HALF && abs(gy - p->at[SQ_CENTER][1]) <= SQUARE_PLAZA_HALF) return SQUARE_IN_PLAZA;
-	if (gx < mid - SQUARE_PLAZA_HALF) return SQUARE_IN_TRADE;
-	if (gy > p->at[SQ_CENTER][1] + SQUARE_PLAZA_HALF) return SQUARE_IN_ARENA;
-	return SQUARE_IN_OTHER;
-}
-
 bool square_life_look(void) {
 	if (!L.ready) return false;
-	const SquarePlan *p = online_square_plan();
-	int cx, cy, far;
-	netmap_world(p->at[SQ_CENTER][0], p->at[SQ_CENTER][1], &cx, &cy);
-	const char *way = way_to(cx, cy, &far);
-	return talk_start(square_look_words(part_of(bn6_player_x(), bn6_player_y()), p->landmark, way), FACE_MEGAMAN);
+	SquareFacts f;
+	facts(&f);
+	return talk_start(square_look_words(&f), FACE_MEGAMAN);
+}
+
+bool square_life_warp(int i, char *text, size_t n, int *x, int *y) {
+	if (!L.ready || i < 0 || i >= SQUARE_WARPS * 2 || !online_square_gem(i / 2, i % 2, x, y)) return false;
+	int to = i % 2 ? SQ_PART_PLAZA : i / 2 + 1;
+	square_warp_label(text, n, to, L.in_part[to], L.in_name[to]);
+	return true;
 }
 
 bool square_life_bark(int k, const char **text, int *x, int *y, int *z) {

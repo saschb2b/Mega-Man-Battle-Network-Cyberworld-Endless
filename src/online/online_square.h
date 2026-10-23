@@ -22,6 +22,9 @@ uint32_t online_square_hash(void);
 /* The plan the Square was built from (its stage and ring stand raised
  * where the area's maps have stairs). */
 const SquarePlan *online_square_plan(void);
+/* The world middle of warp `k`'s gem in the plaza (`end` 0) or in its
+ * part (1). */
+bool online_square_gem(int k, int end, int *x, int *y);
 /* The Square's Mr.Progs: the channel keeper by the plaza's way in, the
  * greeter in the log-in plaza, the referee by the Arena's ring; each
  * one's words a text archive (his talk its script 0). */

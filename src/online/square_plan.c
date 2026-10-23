@@ -7,30 +7,39 @@
  * whose layers stand in another map's slot (rom.c's host) */
 static const int areas[] = { 0, 2, 3 };
 
-/* The plaza (13 panels a side) and its middle, where the landmark stands */
-#define MID 17
-#define PLAZA0 (MID - SQUARE_PLAZA_HALF)
-#define PLAZA1 (MID + SQUARE_PLAZA_HALF)
+/* The welcome plaza's middle, where the landmark stands: every place
+ * below is given from it, a panel a step (grid x down the screen to the
+ * right, grid y down to the left) */
+#define CX 17
+#define CY 20
+#define H SQUARE_PLAZA_HALF
 
 static void floor_box(SquarePlan *p, int x0, int y0, int x1, int y1) {
 	for (int y = y0; y <= y1; ++y)
-		for (int x = x0; x <= x1; ++x) p->cell[y][x] = C_PATH;
+		for (int x = x0; x <= x1; ++x) p->cell[CY + y][CX + x] = C_PATH;
 }
 
 static void raise_box(SquarePlan *p, int x0, int y0, int x1, int y1) {
 	for (int y = y0; y <= y1; ++y)
-		for (int x = x0; x <= x1; ++x) p->level[y][x] = 1;
+		for (int x = x0; x <= x1; ++x) p->level[CY + y][CX + x] = 1;
 }
 
 /* A prop on (x, y): in a walled hole where that is floor, else in the void
- * past a rim (docs/LEVEL_DESIGN.md, Props: edge or hole). */
-static void prop(SquarePlan *p, int look, int x, int y) {
-	if (p->nprops >= SQUARE_PROPS) return;
-	p->props[p->nprops++] = (NetProp){ .kind = PROP_SPRITE, .x = x, .y = y, .look = look };
-	if (p->cell[y][x]) p->cell[y][x] = C_SOLID;
+ * past a rim (docs/LEVEL_DESIGN.md, Props: edge or hole); its index. */
+static int prop(SquarePlan *p, int look, int x, int y) {
+	if (p->nprops >= SQUARE_PROPS) return -1;
+	p->props[p->nprops] = (NetProp){ .kind = PROP_SPRITE, .x = CX + x, .y = CY + y, .look = look };
+	if (p->cell[CY + y][CX + x]) p->cell[CY + y][CX + x] = C_SOLID;
+	return p->nprops++;
 }
 
-static void place(SquarePlan *p, int k, int x, int y) { p->at[k][0] = x; p->at[k][1] = y; }
+/* ... at the height of the raised floor before it */
+static void prop_high(SquarePlan *p, int look, int x, int y) {
+	prop(p, look, x, y);
+	p->level[CY + y][CX + x] = 1;
+}
+
+static void place(SquarePlan *p, int k, int x, int y) { p->at[k][0] = CX + x; p->at[k][1] = CY + y; }
 
 /* A raised room (the stage, the ring): its floor, and its stair two panels
  * wide on its +y side at (sx, sy), climbing towards -y as Sky's maps'
@@ -41,24 +50,62 @@ static void dais(SquarePlan *p, int x0, int y0, int x1, int y1, int sx) {
 	floor_box(p, x0, y0, x1, y1);
 	raise_box(p, x0, y0, x1, y1);
 	floor_box(p, sx, y1 + 1, sx + 1, y1 + 2);
-	p->stairs[p->nstairs++] = (Stair){ .x = sx, .y = y1 + 1, .dir = STAIR_UP_NY };
+	p->stairs[p->nstairs++] = (Stair){ .x = CX + sx, .y = CY + y1 + 1, .dir = STAIR_UP_NY };
 }
 
-/* The floor: the plaza; the log-in plaza (+x) off a walkway; the stage
- * (-y) up its stair from the plaza's edge; Trade Central (-x) off a
- * walkway; the Arena (+y): a walk down its spectators' floor, which turns
- * round before its ring, the ring up its stair from that floor. */
+/* Warp k: its gem in the plaza (`hub`: x, y) and in its part (`there`),
+ * each on the middle of a 3 x 3 pad, and the way MegaMan faces landing on
+ * either (each one's third). BN6 lands him on the gem and steps him off it the way he faces,
+ * 20 units a world axis: one of the screen's diagonals (0 up, 2 right, 4
+ * down, 6 left) takes him 28 units out, past its trigger's 26; along a
+ * grid axis he stopped inside it and was beamed straight back. */
+static void warp(SquarePlan *p, int k, const int hub[3], const int there[3]) {
+	const int *at[2] = { hub, there };
+	for (int e = 0; e < 2; ++e) {
+		p->gem[k][e][0] = CX + at[e][0];
+		p->gem[k][e][1] = CY + at[e][1];
+		p->gem_face[k][e] = at[e][2];
+		for (int y = -1; y <= 1; ++y)
+			for (int x = -1; x <= 1; ++x) p->pad[CY + at[e][1] + y][CX + at[e][0] + x] = 1;
+	}
+}
+
+static void part(SquarePlan *p, int k, int x0, int y0, int x1, int y1) {
+	p->part[k][0] = CX + x0; p->part[k][1] = CY + y0;
+	p->part[k][2] = CX + x1; p->part[k][3] = CY + y1;
+}
+
+/* The floor. The plaza, 9 panels a side, a 3 x 3 pad off the middle of
+ * three of its sides for each warp's gem, and the pad home off the fourth
+ * (+x, the screen's front right) beside the arrival. Two void panels on,
+ * each warp's part, seen across the void from its pad: Trade Central (-x)
+ * a floor round its desk; the Arena (-y) its stands' floor, the ring up
+ * its stair from it; the stage (+y) up its stair from its audience's
+ * floor. MegaMan lands on each part's gem facing what it is for, and on
+ * the plaza's facing the landmark. */
 static void floors(SquarePlan *p) {
-	floor_box(p, PLAZA0, PLAZA0, PLAZA1, PLAZA1);
-	floor_box(p, 24, 17, 26, 18); floor_box(p, 27, 14, 32, 21);
-	dais(p, 15, 4, 19, 7, 16);
-	floor_box(p, 16, 10, 17, 10);
-	floor_box(p, 9, 17, 10, 18); floor_box(p, 3, 15, 8, 20);
-	floor_box(p, 19, 24, 21, 31); floor_box(p, 12, 32, 21, 33);
-	dais(p, 12, 26, 16, 29, 13);
-	/* the pad home at the log-in plaza's far end */
-	for (int y = 17; y <= 18; ++y)
-		for (int x = 31; x <= 32; ++x) p->pad[y][x] = 1;
+	floor_box(p, -H, -H, H, H);
+	floor_box(p, -7, -1, -5, 1);
+	floor_box(p, -1, -7, 1, -5);
+	floor_box(p, -1, 5, 1, 7);
+	floor_box(p, 5, 0, 6, 1);
+	for (int y = 0; y <= 1; ++y)
+		for (int x = 5; x <= 6; ++x) p->pad[CY + y][CX + x] = 1;
+	part(p, SQ_PART_PLAZA, -7, -7, 6, 7);
+	/* Trade Central */
+	floor_box(p, -15, -2, -10, 2);
+	part(p, SQ_PART_TRADE, -15, -2, -10, 2);
+	warp(p, SQ_PART_TRADE - 1, (const int[3]){ -6, 0, 2 }, (const int[3]){ -11, 0, 0 });
+	/* the Arena: its ring raised over the stands' floor */
+	floor_box(p, -3, -12, 3, -10);
+	dais(p, -2, -18, 2, -15, 0);
+	part(p, SQ_PART_ARENA, -3, -18, 3, -10);
+	warp(p, SQ_PART_ARENA - 1, (const int[3]){ 0, -6, 4 }, (const int[3]){ -2, -11, 2 });
+	/* the stage, raised over its audience's floor */
+	dais(p, -2, 10, 2, 12, 0);
+	floor_box(p, -3, 15, 3, 17);
+	part(p, SQ_PART_STAGE, -3, 10, 3, 17);
+	warp(p, SQ_PART_STAGE - 1, (const int[3]){ 0, 6, 0 }, (const int[3]){ -2, 16, 2 });
 }
 
 /* The landmark ringed by four props in holes round it, the area's own
@@ -74,58 +121,68 @@ static void centrepiece(SquarePlan *p, uint32_t pick) {
 		p->landmark = pick & 1 ? LOOK_MONUMENT : LOOK_STATUE;
 		if (pick & 2) ring = LOOK_TREE;
 	}
-	for (int y = MID - 1; y <= MID + 1; ++y)
-		for (int x = MID - 1; x <= MID + 1; ++x) p->cell[y][x] = C_SOLID;
-	prop(p, p->landmark, MID, MID);
+	for (int y = -1; y <= 1; ++y)
+		for (int x = -1; x <= 1; ++x) p->cell[CY + y][CX + x] = C_SOLID;
+	prop(p, p->landmark, 0, 0);
 	static const int round[4][2] = { { -2, -2 }, { 2, -2 }, { -2, 2 }, { 2, 2 } };
-	for (int k = 0; k < 4; ++k) prop(p, ring, MID + round[k][0], MID + round[k][1]);
+	for (int k = 0; k < 4; ++k) prop(p, ring, round[k][0], round[k][1]);
 }
 
-/* Cybertrees past the plaza's back rim towards the stage (-y, the top of
- * the screen), two panels or more from the stair's mouth and mirrored
- * about it; by the seed a mirrored pair more past the -x rim either side
- * of Trade Central's walkway, or a row of three a panel apart along the
- * Arena's walk; and an avenue of two along the walkway to the log-in
- * plaza. */
-static void trees(SquarePlan *p, uint32_t pick) {
-	static const int pair[2] = { 12, 14 };
-	for (int k = 0; k < 2; ++k) {
-		prop(p, LOOK_TREE, pair[k], PLAZA0 - 1); prop(p, LOOK_TREE, 33 - pair[k], PLAZA0 - 1);
-		if (!(pick & 1)) { prop(p, LOOK_TREE, PLAZA0 - 1, pair[k]); prop(p, LOOK_TREE, PLAZA0 - 1, 35 - pair[k]); }
-	}
-	if (pick & 1)
-		for (int y = 25; y <= 29; y += 2) prop(p, LOOK_TREE, 22, y);
-	prop(p, LOOK_TREE, 25, 16); prop(p, LOOK_TREE, 25, 19);
+/* What each part wears, and what invites to it from the plaza: each
+ * warp's pad flanked past the plaza's rim by its part's own (the stage's
+ * past the front rim, where they hide no floor of the plaza's). The
+ * Arena's fire: a brazier either side of its warp, and at either back
+ * corner of its ring, past its back rim at its height, seen from the
+ * plaza across the void. The stage's grove: cybertrees either side of its
+ * warp and behind the stage. Trade Central's board of offers beside its
+ * warp, its desk two cybertrees behind it. The welcome sign by the pad
+ * home, the Board past the plaza's back rim by the keeper; by the seed,
+ * cybertrees past the plaza's top corner, or its left and right ones. */
+static void dress(SquarePlan *p, uint32_t pick) {
+	p->sign[SQ_PART_PLAZA] = prop(p, LOOK_SIGN, 5, -1);
+	prop(p, LOOK_BBS, 3, -5);
+	p->sign[SQ_PART_TRADE] = prop(p, LOOK_BBS, -5, -2);
+	p->sign[SQ_PART_ARENA] = prop(p, LOOK_BRAZIER, -2, -5);
+	prop(p, LOOK_BRAZIER, 2, -5);
+	prop_high(p, LOOK_BRAZIER, -2, -19); prop_high(p, LOOK_BRAZIER, 2, -19);
+	p->sign[SQ_PART_STAGE] = prop(p, LOOK_TREE, -2, 5);
+	prop(p, LOOK_TREE, 2, 5);
+	prop_high(p, LOOK_TREE, -2, 9); prop_high(p, LOOK_TREE, 2, 9);
+	prop(p, LOOK_TREE, -16, -2); prop(p, LOOK_TREE, -16, 2);
+	if (pick & 1) { prop(p, LOOK_TREE, -5, -4); prop(p, LOOK_TREE, -4, -5); }
+	else { prop(p, LOOK_TREE, -5, 4); prop(p, LOOK_TREE, 4, -5); }
 }
 
-/* The places, and the walkers' routes: one round the landmark, one from
- * Trade Central across the plaza and down to the Arena and back. */
+/* The places, and the walkers' routes: the GreenNavi round the landmark,
+ * standing at the plaza's corners; the GirlNavi on the stage's floor before
+ * it, pacing to and fro. */
 static void places(SquarePlan *p) {
-	place(p, SQ_EXIT, 31, 17);
-	place(p, SQ_ARRIVE, 29, 17);
-	place(p, SQ_SIGN, 31, 14);
-	place(p, SQ_BOARD, 28, 14);
-	place(p, SQ_KEEPER, 23, 15);
-	place(p, SQ_TRADE, 5, 17);
-	place(p, SQ_ARENA, 20, 28);
-	place(p, SQ_CENTER, MID, MID);
-	place(p, SQ_STAGE, 17, 5);
-	place(p, SQ_RING, 14, 27);
-	place(p, SQ_GREETER, 28, 20);
-	place(p, SQ_REFEREE, 17, 32);
-	/* (round the plaza, standing at its corners; from Trade Central
-	 * across the plaza clear of the landmark's ring and down the Arena's
-	 * walk, standing at either end, and back the same way) */
+	place(p, SQ_ARRIVE, 3, 0);
+	place(p, SQ_EXIT, 5, 0);
+	place(p, SQ_SIGN, 4, -1);
+	place(p, SQ_BOARD, 3, -4);
+	place(p, SQ_KEEPER, 4, -2);
+	place(p, SQ_GREETER, 4, 2);
+	place(p, SQ_CENTER, 0, 0);
+	place(p, SQ_TRADE, -14, 0);
+	place(p, SQ_ARENA, 1, -11);
+	place(p, SQ_RING, 0, -17);
+	place(p, SQ_REFEREE, 2, -12);
+	place(p, SQ_STAGE, 0, 11);
 	static const int routes[SQUARE_WALKERS][SQUARE_ROUTE][3] = {
-		{ { 13, 13, 4 }, { 21, 13, 4 }, { 21, 21, 4 }, { 13, 21, 4 } },
-		{ { 6, 18, 6 }, { 12, 18, 0 }, { 12, 20, 0 }, { 20, 20, 0 }, { 20, 30, 6 }, { 20, 20, 0 }, { 12, 20, 0 }, { 12, 18, 0 } },
+		{ { -3, -3, 4 }, { 3, -3, 4 }, { 3, 3, 4 }, { -3, 3, 4 } },
+		{ { 0, 15, 6 }, { 3, 15, 0 }, { 3, 17, 6 }, { 0, 17, 0 } },
 	};
-	memcpy(p->route, routes, sizeof routes);
-	p->route_len[0] = 4;
-	p->route_len[1] = 8;
-	/* (the parade: three panels out from the landmark, inside its ring) */
-	static const int parade[4][2] = { { MID - 3, MID - 3 }, { MID + 3, MID - 3 }, { MID + 3, MID + 3 }, { MID - 3, MID + 3 } };
-	memcpy(p->parade, parade, sizeof parade);
+	for (int w = 0; w < SQUARE_WALKERS; ++w)
+		for (int k = 0; k < 4; ++k) {
+			p->route[w][k][0] = CX + routes[w][k][0];
+			p->route[w][k][1] = CY + routes[w][k][1];
+			p->route[w][k][2] = routes[w][k][2];
+		}
+	p->route_len[0] = p->route_len[1] = 4;
+	/* (the parade: three panels out from the landmark, inside the plaza's rim) */
+	static const int parade[4][2] = { { -3, -3 }, { 3, -3 }, { 3, 3 }, { -3, 3 } };
+	for (int k = 0; k < 4; ++k) { p->parade[k][0] = CX + parade[k][0]; p->parade[k][1] = CY + parade[k][1]; }
 }
 
 void square_plan(uint32_t seed, SquarePlan *out) {
@@ -135,13 +192,13 @@ void square_plan(uint32_t seed, SquarePlan *out) {
 	places(out);
 	uint32_t pick = seed / (sizeof areas / sizeof *areas);
 	centrepiece(out, pick);
-	trees(out, pick >> 2);
-	/* the Board and the welcome sign past the log-in plaza's back rim;
-	 * a brazier either side of the stage, past its back rim */
-	prop(out, LOOK_BBS, 28, 13);
-	prop(out, LOOK_SIGN, 31, 13);
-	prop(out, LOOK_BRAZIER, 15, 3); prop(out, LOOK_BRAZIER, 19, 3);
-	out->level[3][15] = out->level[3][19] = 1;
+	dress(out, pick >> 2);
+}
+
+int square_plan_part(const SquarePlan *p, int x, int y) {
+	for (int k = 0; k < SQ_PARTS; ++k)
+		if (x >= p->part[k][0] && y >= p->part[k][1] && x <= p->part[k][2] && y <= p->part[k][3]) return k;
+	return -1;
 }
 
 static uint32_t mix(uint32_t h, const uint8_t *b, int n) {
@@ -162,6 +219,10 @@ uint32_t square_plan_hash(const SquarePlan *p) {
 	for (int i = 0; i < p->nstairs; ++i) h = mix_ints(h, (const int[3]){ p->stairs[i].x, p->stairs[i].y, p->stairs[i].dir }, 3);
 	for (int i = 0; i < p->nprops; ++i)
 		h = mix_ints(h, (const int[4]){ p->props[i].kind, p->props[i].x, p->props[i].y, p->props[i].look }, 4);
+	h = mix_ints(h, &p->gem[0][0][0], SQUARE_WARPS * 4);
+	h = mix_ints(h, &p->gem_face[0][0], SQUARE_WARPS * 2);
+	h = mix_ints(h, &p->part[0][0], SQ_PARTS * 4);
+	h = mix_ints(h, p->sign, SQ_PARTS);
 	h = mix_ints(h, &p->route[0][0][0], SQUARE_WALKERS * SQUARE_ROUTE * 3);
 	h = mix_ints(h, p->route_len, SQUARE_WALKERS);
 	h = mix_ints(h, &p->parade[0][0], 8);

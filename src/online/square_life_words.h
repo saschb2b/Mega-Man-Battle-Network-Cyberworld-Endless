@@ -6,6 +6,9 @@
 #define CW_SQUARE_LIFE_WORDS_H
 
 #include <stdbool.h>
+#include <stddef.h>
+
+#include "square_plan.h"
 
 /* The facts the lines are made of. */
 typedef struct {
@@ -32,9 +35,12 @@ typedef struct {
 	} posts[4];
 	int nposts;
 	unsigned turn;          /* which line this time */
+	unsigned in_part[SQ_PARTS];      /* the Navis in each part (SQ_PART_*), MegaMan not among them */
+	const char *in_name[SQ_PARTS];   /* ... one of them by name, NULL none */
+	int part;                        /* the part MegaMan is in, -1 none */
 } SquareFacts;
 
-/* The greeter in the log-in plaza, and his word over his head as a Navi
+/* The greeter in the welcome plaza, and his word over his head as a Navi
  * logs in (`in`) or out. */
 const char *square_greeter_words(const SquareFacts *f);
 
@@ -51,14 +57,18 @@ const char *square_referee_bout_bark(const char *first, const char *second);
 const char *square_walker_words(int k, const SquareFacts *f);
 /* A prop checked: its LOOK_* (the Board's posts, the sign's words). */
 const char *square_check_words(int look, const SquareFacts *f);
-/* L's Look around (square_life_look): where Trade Central and the Arena
- * lie, MegaMan in the plaza (`where` SQUARE_IN_PLAZA), in either wing, or
- * elsewhere, and from outside the plaza which way its landmark (`look`,
- * a LOOK_*) is (`way`, director_way.c's words: "to the upper left"). The
- * wings stand off the plaza the same way in every Square (square_plan.c):
- * Trade Central to its upper left, the Arena to its lower left. */
-enum { SQUARE_IN_PLAZA, SQUARE_IN_TRADE, SQUARE_IN_ARENA, SQUARE_IN_OTHER };
-const char *square_look_words(int where, int look, const char *way);
+/* L's Look around (square_life_look): in the plaza, which way each warp
+ * lies (they stand off the plaza the same way in every Square,
+ * square_plan.c: Trade Central's to its upper left, the Arena's to its
+ * upper right, the stage's to its lower left); in a part, the way back;
+ * then who is where. */
+const char *square_look_words(const SquareFacts *f);
+/* The sign by part `part`'s warp in the plaza, checked: what awaits
+ * there, and who is there now. */
+const char *square_sign_words(int part, const SquareFacts *f);
+/* The label over a warp's gem: the part it goes to, and how many Navis are
+ * there now (`navis`; `name` one of them). */
+void square_warp_label(char *out, size_t n, int part, unsigned navis, const char *name);
 /* Over the ambient Navis' heads when `together` MegaMen emote together at
  * the landmark or on the stage, and over the first as a parade begins;
  * the greeter's call over his head when four or more do (issue #176). */

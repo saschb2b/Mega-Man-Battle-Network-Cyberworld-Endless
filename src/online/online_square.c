@@ -1,9 +1,11 @@
 /* online_square.h. The Net Square built into the running game (docs/
  * ONLINE.md): square_plan.c's plan from the server's seed, drawn by the
- * layers' own map builder in one of BN6's areas' tiles, its sign and Board
- * BN6's own map objects, its pad home BN6's return pad, its channel keeper
- * a Mr.Prog, and the other players' MegaMen NPCs whose scripts the Square
- * moves between frames (BN6 walks them: its own animation and depth). */
+ * layers' own map builder in one of BN6's areas' tiles, its signs and Board
+ * BN6's own map objects, its warps BN6's gem pads (a teleport within the
+ * map, as a layer's pair), its pad home BN6's return pad, its channel
+ * keeper a Mr.Prog, and the other players' MegaMen NPCs whose scripts the
+ * Square moves between frames (BN6 walks them: its own animation and
+ * depth). */
 #include "online_square.h"
 
 #include <stdio.h>
@@ -55,16 +57,20 @@
  * over a head (lanhp.c's courier's) */
 static const int extra_sprites[SQUARE_ACTORS][2] = { { 6, 62 }, { 6, 69 }, { 7, 0x00 }, { 5, 0x07 } };
 /* where the Mr.Progs stand and which way they face (BN6's 0-7, up first:
- * the keeper and the referee up-left, grid -x, to the plaza's middle and
- * the ring's stair; the greeter up-right, grid -y, to the arrivals) */
+ * the keeper down-left, grid +y, and the greeter up-right, grid -y, to
+ * the arrivals between them; the referee up-left, grid -x, to the ring's
+ * stair) */
 static const int prog_at[SQUARE_PROGS] = { SQ_KEEPER, SQ_GREETER, SQ_REFEREE };
-static const int prog_face[SQUARE_PROGS] = { 7, 1, 7 };
+static const int prog_face[SQUARE_PROGS] = { 5, 1, 7 };
+#define ARRIVE_FACE 7      /* MegaMan arrives facing the landmark (grid -x) */
+#define WARP_ENTRY 2       /* the first warp's entry in the map's warp list (1 is a layer's exit) */
 
 static SquarePlan plan;
 static uint8_t cells[SQUARE_H][SQUARE_W];
 static int group, number, rise;
 static uint32_t world_hash, prog_text[SQUARE_PROGS], talk_room, trade_text;
 static int exit_x, exit_y;
+static int gems[SQUARE_WARPS * 2][2];   /* the warps' gems, the plaza's and its part's in turn (panels) */
 static int fixture[FIXTURES][3];   /* the Mr.Progs' and the desk's middles and reach, for A */
 typedef struct {
 	uint32_t script, id;
@@ -206,17 +212,46 @@ static void heights(NetLayout *lay) {
 	lay->nstairs = plan.nstairs;
 }
 
+/* The warps: each gem's trigger takes its entry of the map's warp list,
+ * which beams MegaMan to its pair as BN6's gem pads do (departure 12, the
+ * camera scrolling along: mapslot_teleport). BN6 then steps him 20 units a
+ * world axis the way he faces, and takes a trigger he stands near when it
+ * lets him go: landed on the gem's middle, he was beamed straight back,
+ * and back again. So he lands on its rim the way he faces, 16 units a
+ * world axis out, and steps on to the pad's corner, clear of it. */
+#define LAND_OUT 16
+static bool warps(void) {
+	/* (BN6's eight ways in world units, 0 up first) */
+	static const int way[8][2] = { { 1, -1 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, { -1, 1 }, { -1, 0 }, { -1, -1 }, { 0, -1 } };
+	CoordPad pads[SQUARE_WARPS * 2];
+	for (int k = 0; k < SQUARE_WARPS; ++k)
+		for (int e = 0; e < 2; ++e) {
+			int i = k * 2 + e, x, y, px, py;
+			netmap_world(plan.gem[k][e][0], plan.gem[k][e][1], &x, &y);
+			netmap_world(plan.gem[k][!e][0], plan.gem[k][!e][1], &px, &py);
+			pads[i] = (CoordPad){ x, y, WARP_ENTRY + i };
+			fprintf(stderr, "online: warp %d's gem %d at %d,%d\n", k, e, x, y);
+			int face = plan.gem_face[k][!e];
+			mapslot_teleport(WARP_ENTRY + i, group, number, px + way[face][0] * LAND_OUT, py + way[face][1] * LAND_OUT, face);
+		}
+	return netmap_set_pads(pads, SQUARE_WARPS * 2);
+}
+
 static bool install_square(uint32_t seed) {
 	square_plan(seed, &plan);
 	memcpy(cells, plan.cell, sizeof cells);
 	memset(&layer, 0, sizeof layer);
 	memset(actors, 0, sizeof actors);
 	memset(extras, 0, sizeof extras);
+	for (int k = 0; k < SQUARE_WARPS * 2; ++k) { gems[k][0] = plan.gem[k / 2][k % 2][0]; gems[k][1] = plan.gem[k / 2][k % 2][1]; }
 	NetLayout lay = { .gw = SQUARE_W, .gh = SQUARE_H, .cell = &cells[0][0], .seed = seed, .pad = &plan.pad[0][0],
-		.props = plan.props, .nprops = plan.nprops };
+		.props = plan.props, .nprops = plan.nprops, .gems = (const int (*)[2])gems, .ngems = SQUARE_WARPS * 2 };
 	heights(&lay);
 	if (!netmap_build(plan.area, &lay)) return false;
 	world_hash = geometry_hash();
+	group = R.layout->net_area[plan.area].group;
+	number = R.layout->net_area[plan.area].number;
+	if (!warps()) return false;
 	mapslot_town(false);
 	mapslot_reset();
 	NpcList npcs;
@@ -225,8 +260,6 @@ static bool install_square(uint32_t seed) {
 	npc_objects_sprites(&npcs);
 	if (!people(&npcs)) return false;
 	fprintf(stderr, "online: square %d NPCs, %d sprites of 0x%X bytes, rise %d\n", npcs.n, npcs.nsprites, (unsigned)npcs.sprite_bytes, rise);
-	group = R.layout->net_area[plan.area].group;
-	number = R.layout->net_area[plan.area].number;
 	if (!mapslot_install(group, number, &npcs, NULL, 0)) return false;
 	/* (the Square's own music, whatever area it stands in: BN6's Navi
 	 * Customizer theme, the owner's pick, docs/ONLINE.md) */
@@ -243,9 +276,11 @@ bool online_square_build(uint32_t seed, uint32_t player_id) {
 	/* (most of a panel apart by player, so arrivals at once stand apart) */
 	x -= (int)(player_id & 1u) * 24;
 	y -= (int)(player_id >> 1 & 1u) * 24;
-	fprintf(stderr, "online: square area %d, arrival at %d,%d\n", plan.area, x, y);
+	int cx, cy;
+	netmap_world(plan.at[SQ_CENTER][0], plan.at[SQ_CENTER][1], &cx, &cy);
+	fprintf(stderr, "online: square area %d, arrival at %d,%d, the landmark at %d,%d\n", plan.area, x, y, cx, cy);
 	director_map_label("Net Square", "Net Square");
-	emu_warp(group, number, x, y, 5);
+	emu_warp(group, number, x, y, ARRIVE_FACE);
 	return true;
 }
 
@@ -256,6 +291,12 @@ bool online_square_arrived(void) {
 }
 
 uint32_t online_square_hash(void) { return world_hash; }
+
+bool online_square_gem(int k, int end, int *x, int *y) {
+	if (k < 0 || k >= SQUARE_WARPS || end < 0 || end > 1) return false;
+	netmap_world(plan.gem[k][end][0], plan.gem[k][end][1], x, y);
+	return true;
+}
 
 bool online_square_prog_say(int who, const uint8_t *archive, int n) {
 	if (who < 0 || who >= SQUARE_PROGS || !prog_text[who] || n <= 0 || n > PROG_TEXT) return false;

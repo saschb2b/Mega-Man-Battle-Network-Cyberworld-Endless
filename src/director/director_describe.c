@@ -230,7 +230,8 @@ static void describe_pos(FILE *f) {
 }
 
 void director_describe(FILE *f) {
-	if (!D.active) { fprintf(f, "where none\n"); return; }
+	/* (off the run's maps, the Net Square's visit: where MegaMan stands, for a tour's walk) */
+	if (!D.active) { fprintf(f, "where none\npos %d %d %d\n", bn6_player_x(), bn6_player_y(), bn6_player_z()); return; }
 	int sub = emu_read8(BN6_GAMESTATE), hp, max;
 	const char *doing = state_doing(&hp, &max);
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,

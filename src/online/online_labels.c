@@ -12,16 +12,18 @@
 #include "square_ask.h"
 #include "square_emote.h"
 #include "square_life.h"
+#include "square_plan.h"
 #include "platform.h"
 
 /* (a mark over a name, epic #167: what he is busy with, or his challenge
  * to this game waiting) */
 enum { MARK_NONE, MARK_BATTLE, MARK_WATCH, MARK_TRADE, MARK_ASKS, MARK_WAVED };
+#define WARP_LABEL_Z 12   /* a warp's label over its gem, a little over a head */
 
 /* (a peer's or MegaMan's label: his name, or the phrase he said; the
  * caption of an emote his pose cannot carry; a mark; then the Square's
  * own words: a walker's or a Mr.Prog's, the greeter's call) */
-static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase, *caption; uint8_t mark; } labels[ONLINE_MAX_PLAYERS + 2];
+static struct { int x, y; char name[ONLINE_NAME_BYTES + 1]; const char *phrase, *caption; uint8_t mark; bool warp; char sign[40]; } labels[ONLINE_MAX_PLAYERS + 2 + SQUARE_WARPS * 2];
 static unsigned count;
 static const OnlineSnapshot *drawn;   /* the snapshot shown, for the open challenge's strip (square_ask.h) */
 static uint32_t drawn_at;
@@ -90,6 +92,7 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 		labels[count].phrase = hushed ? NULL : phrase_for(shown, peer->id, now);
 		labels[count].caption = hushed ? NULL : square_emote_caption(peer->id, now);
 		labels[count].mark = peer->id == square_arena_asking() ? MARK_ASKS : peer->id == square_emote_invited(now) ? MARK_WAVED : peer->busy;
+		labels[count].warp = false;
 		++count;
 	}
 	label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera);
@@ -97,6 +100,7 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	labels[count].phrase = phrase_for(shown, shown->player_id, now);
 	labels[count].caption = square_emote_caption(shown->player_id, now);
 	labels[count].mark = MARK_NONE;
+	labels[count].warp = false;
 	++count;
 	/* (a word over one of the Square's own: the greeter's, a walker's, the greeter's call) */
 	const char *bark;
@@ -107,7 +111,20 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 			labels[count].name[0] = '\0';
 			labels[count].mark = MARK_NONE;
 			labels[count].caption = NULL;
+			labels[count].warp = false;
 			labels[count++].phrase = bark;
+		}
+	/* (over each warp's gem, as high as a sign stands over a head: where
+	 * it goes and who is there now) */
+	for (int i = 0; i < SQUARE_WARPS * 2 && count < sizeof labels / sizeof *labels; ++i)
+		if (square_life_warp(i, labels[count].sign, sizeof labels[0].sign, &x, &y)) {
+			label_at(x, y, WARP_LABEL_Z, camera);
+			labels[count].name[0] = '\0';
+			labels[count].mark = MARK_NONE;
+			labels[count].caption = NULL;
+			labels[count].warp = true;
+			labels[count].phrase = labels[count].sign;
+			++count;
 		}
 }
 
@@ -132,7 +149,8 @@ void online_labels_draw(void) {
 		if (x < w / 2 + 2) x = w / 2 + 2;
 		if (x > EMU_W - w / 2 - 2) x = EMU_W - w / 2 - 2;
 		fill_rect(P.core_x + x - w / 2 - 2, P.core_y + y - 1, w + 4, 11, rgba(9, 24, 42, 210));
-		pixfont_draw(P.core_x + x, P.core_y + y, text, WHITE, BLACK, PIXFONT_CENTER, 1);
+		/* (a warp's in the marks' gold, a sign's and not a Navi's) */
+		pixfont_draw(P.core_x + x, P.core_y + y, text, labels[i].warp ? rgba(255, 214, 16, 255) : WHITE, BLACK, PIXFONT_CENTER, 1);
 		if (labels[i].mark && labels[i].mark <= MARK_WAVED && !labels[i].caption) mark_draw(x, y - 13, labels[i].mark, drawn_at);
 	}
 	if (drawn) square_ask_draw(drawn, drawn_at);
