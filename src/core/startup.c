@@ -12,9 +12,11 @@
 #include "capture.h"
 #include "compat.h"
 #include "desktop.h"
+#include "display.h"
 #include "game.h"
 #include "pads.h"
 #include "platform.h"
+#include "options_text.h"
 #include "pick.h"
 #include "rom.h"
 #include "sound_filter.h"
@@ -217,7 +219,40 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
 }
 #endif
 
-void player_files(bool headless, int smooth_arg, int sound_arg, bool plain) {
+bool startup_fullscreen(bool big) {
+	int kept = display_fullscreen_kept(g_data_dir);
+	return kept >= 0 ? kept == 1 : big;
+}
+
+/* settings.ini in the data folder, made with the defaults where it is
+ * missing: the display's lines (display.h), the sound, the frame log */
+static void settings_load(const char *path) {
+	FILE *f = fopen(path, "r");
+	if (!f) {
+		f = fopen(path, "w");
+		if (!f) return;
+		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n",
+			options_smooth_note(), options_screen_note(), options_sound_note());
+		fclose(f);
+		platform_persist();
+		return;
+	}
+	char line[256];
+	while (fgets(line, sizeof line, f)) {
+		char key[64], val[64];
+		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2 || display_setting(key, val)) continue;
+		if (!strcmp(key, "sound")) sound_filter_set(!strcmp(val, "soft") ? SOUND_SOFT : SOUND_GBA);
+		/* (not written by default: for a report of a machine's pacing) */
+		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
+	}
+	fclose(f);
+	/* (the screen setting read after the window opened; logged where it
+	 * changed the scale, as the display line before it was printed with
+	 * the default's) */
+	if (P.renderer && !P.headless) platform_relayout();
+}
+
+void player_files(bool headless, int smooth_arg, int sound_arg, const char *screen_arg, bool plain) {
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
@@ -229,12 +264,13 @@ void player_files(bool headless, int smooth_arg, int sound_arg, bool plain) {
 		snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
 		platform_load_keys(path);
 		snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
-		platform_load_settings(path);
+		settings_load(path);
 		snprintf(path, sizeof path, "%s/touch.ini", g_data_dir);
 		touch_load(path);
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
 	if (sound_arg >= 0) sound_filter_set((SoundFilter)sound_arg);
+	if (screen_arg) display_scale_use(display_scale_read(screen_arg));
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
 	 * view where it is yes: analytics.h) */
 	analytics_net_start(headless, plain);

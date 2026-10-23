@@ -30,6 +30,16 @@
   It changes at once, so you hear it, and is kept in `settings.ini`
   (`sound = soft` or `gba`); the browser player's menu has a **Sound**
   button as well (docs/GUIDE.md, Sound).
+- **Display options.** Options has a **Display** section: **Fullscreen** on
+  a PC (borderless, as F11 and Alt+Enter, which now keep the choice too, so
+  the game opens as you left it), **Scale** and **Smooth motion**. Scale
+  is **Auto** (as before), **Integer** (whole pixels everywhere), **Fill**
+  (as big as the screen holds, its shape kept: on a 1920x1080 screen no
+  border above and below) or **Stretch** (the whole screen, no border, the
+  picture pulled to the screen's shape), changed at once and kept in
+  `settings.ini`. The 3DS has Fill, Integer and Stretch for its top screen;
+  the browser player's Smooth motion button and the game's keep in step
+  (docs/GUIDE.md, Screen).
 
 ## 0.14.0 (2026-10-22)
 

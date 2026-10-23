@@ -28,3 +28,14 @@ bool settings_line_write(const char *path, const char *key, const char *value, c
 	if (!kept) fprintf(out, "%s%s = %s\n", note, key, value);
 	return fclose(out) == 0 && cw_rename(tmp, path);
 }
+
+bool settings_line_read(const char *path, const char *key, char *value, size_t n) {
+	char line[512], k[32], v[64];
+	FILE *in = path ? fopen(path, "r") : NULL;
+	bool found = false;
+	while (in && !found && fgets(line, sizeof line, in))
+		found = line[0] != '#' && sscanf(line, " %31[a-z_] = %63s", k, v) == 2 && !strcmp(k, key);
+	if (in) fclose(in);
+	if (found) snprintf(value, n, "%s", v);
+	return found;
+}

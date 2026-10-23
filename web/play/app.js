@@ -149,8 +149,9 @@ var Module = {
 	}],
 	onRuntimeInitialized: () => { ready = true; offer(); },
 	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
-	// the game's Options changed the sound: the menu's button follows
+	// the game's Options changed the sound, or smooth motion: the menu's button follows
 	cwSound: (soft) => { keepSound(soft); },
+	cwSmooth: (on) => { keepSmooth(on); },
 };
 
 // whether ROM `id` (ROMS) is kept in this browser
@@ -566,17 +567,21 @@ showHints();
 
 // Smooth motion: the game's 60 frames mixed at each refresh of a 90, 144 or
 // 165 Hz screen, which shows them unevenly otherwise (remembered here, and
-// switched while the game runs)
+// switched while the game runs; the game's Options' Display sets it too,
+// and tell the button: Module.cwSmooth)
 function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
 function showSmooth() {
 	const on = smoothOn();
 	$('smooth-label').textContent = W.smooth(on);
 	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
 }
-$('smooth').addEventListener('click', () => {
-	const on = !smoothOn();
+function keepSmooth(on) {
 	try { localStorage.setItem('cw-smooth', on ? 'on' : 'off'); } catch (e) { /* not kept */ }
 	showSmooth();
+}
+$('smooth').addEventListener('click', () => {
+	const on = !smoothOn();
+	keepSmooth(on);
 	track('smooth-motion', { state: on ? 'on' : 'off' });
 	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
 });

@@ -228,6 +228,7 @@ typedef struct {
 	int run_depth, guardian_navi;
 	int smooth_arg;   /* --smooth-motion on|off, over settings.ini */
 	int sound_arg;    /* --sound gba|soft (SoundFilter), over settings.ini */
+	const char *screen_arg;   /* --screen auto|whole|fill|stretch, over settings.ini */
 	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
 	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
@@ -272,6 +273,7 @@ static int screen_option(const char *a, const char *v, Options *o) {
 	if (!strcmp(a, "--size")) sscanf(v, "%dx%d", &o->force_w, &o->force_h);
 	else if (!strcmp(a, "--smooth-motion")) o->smooth_arg = !strcmp(v, "on");
 	else if (!strcmp(a, "--sound")) o->sound_arg = !strcmp(v, "soft");
+	else if (!strcmp(a, "--screen")) o->screen_arg = v;
 	/* (the screen's density for the touch controls, in dots per inch) */
 	else if (!strcmp(a, "--dpi")) platform_set_dpi((float)atof(v));
 	else return 0;
@@ -337,7 +339,7 @@ static bool rom_at_start(const Options *o, char *msg, size_t n) {
  * asks for it in the game's own window */
 static void desktop_start(Options *o, bool *rom_ok, char *msg, size_t n) {
 	bool big = !o->headless && desktop_big_screen();
-	if (!o->screen_given && big) o->fullscreen = true;
+	if (!o->screen_given && !o->headless) o->fullscreen = startup_fullscreen(big);
 	/* the desktop's dialogs come before the window, which would be marked
 	 * "not responding" while they wait (and Steam, not a menu entry, starts
 	 * the game on its big screen) */
@@ -513,7 +515,7 @@ int main(int argc, char **argv) {
 #endif
 	o.launcher = launcher_mode(&o);
 	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
-	player_files(o.headless, o.smooth_arg, o.sound_arg, !o.dev);
+	player_files(o.headless, o.smooth_arg, o.sound_arg, o.screen_arg, !o.dev);
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
 	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);
