@@ -692,7 +692,11 @@ The backdrop is the mission's: map 0x86:00's own animated tiles in its
 purple (`BN5_LIB_BACKDROP`), as BN5's map group 0x86 loads them while a
 mission is on (its LoadBGAnim and LoadGFXAnims each choose a mission's
 table by `BN5_LIB_ON_MAP`; `src/gfx/xbackdrop.c` reads both shapes and
-takes the mission's). BN5's own pieces are drawn over it from BN5's ROM
+takes the mission's). The mission's list moves the board's palettes too
+(banks 9-12, `BN5_LIB_ANIM_*`, their writes moved to BN6's palette
+buffer): BN5's own scripts are their one writer, so the host map's own
+(the Central Area map the layer takes over, whose bank 9 flashed teal
+and red every 16 frames) no longer runs there. BN5's own pieces are drawn over it from BN5's ROM
 (`src/director/liberation_pieces.c`, its tiles through
 `src/gfx/xtiles.c`), each where BN5 lays it (traced): the Order Points
 gauge at the top right (its six OBJs, the frame's tiles from its pieces,

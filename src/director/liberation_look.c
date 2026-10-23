@@ -14,7 +14,10 @@
  * into the RAM map, which what scrolls in later shows, and into BG2's
  * screen map where its tiles show now. A map entered again (after
  * a battle) is the ROM's tile map afresh: every panel's look is written
- * again. A panel freed dissolves as BN5's do: dark, paled, clean. */
+ * again. A panel freed dissolves as BN5's do: dark, paled, clean. The
+ * board's palettes move by BN5's own GFXAnim scripts, the mission's list
+ * copied with the map's look (src/gfx/xbackdrop.c): theirs alone write
+ * banks 9-12, as in BN5. */
 #include "liberation.h"
 
 #include <stdio.h>
@@ -38,7 +41,6 @@
 #define BLANK_TILE     864           /* the looks' empty tile, the overlay set's first (all 0: transparent) */
 #define LIB_LOOK_DOWN  8             /* pixels a diamond lies below its panel's centre on the map (calibrated on captures) */
 #define REFRESH_FRAMES 30            /* frames BG2's screen map is made again after the looks change */
-#define HOLE_FRAMES    (BN5_LIB_PAL_HOLE - 0x20u)   /* palette 10's four frames, the capture's the second */
 #define FADE_IN        27            /* frames a freed panel keeps its look as the board fades back in (BN5's, traced) */
 #define DISSOLVE       (FADE_IN + BN5_LIB_BLINK * BN5_LIB_BLINKS)
 enum { LOOK_CLEAN, LOOK_DARK, LOOK_PALED, LOOK_ITEM, LOOK_PLUS5, LOOK_BAR1, LOOK_BONUS = 9, LOOK_HOLE, LOOK_GRID };
@@ -196,32 +198,6 @@ static bool tiles_there(void) {
 	return true;
 }
 
-static void bank_from(int bank, uint32_t from) { emu_write(BN6_BG_PALETTE + 0x20u * (uint32_t)bank, K.rom + (from - 0x08000000u), 0x20); }
-
-/* Which of `n` frames shows at time `t` of a cycle they are held for
- * `held` frames each, in that order */
-static int frame_at(int t, const int *held, int n) {
-	for (int i = 0; i < n; ++i) { if (t < held[i]) return i; t -= held[i]; }
-	return 0;
-}
-
-/* The board's palettes animated as BN5's (traced: docs/ROM_DATA.md), in
- * BN6's BG palette buffer, copied to the screen each frame: the dark
- * panels' (9) at rest 120 frames, then three frames down and up; the
- * DarkHoles' (10) four frames there and back; the barriers' glint (11)
- * every 132 frames; the BonusPanel's breath (12) there and back */
-static void pulse(void) {
-	static const int dark_held[6] = { 120, 16, 16, 32, 16, 16 }, dark_at[6] = { 3, 2, 1, 0, 1, 2 };
-	bank_from(9, BN5_LIB_DARK_FRAMES + 0x20u * (uint32_t)dark_at[frame_at(D.frame % 216, dark_held, 6)]);
-	static const int hole_held[6] = { BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP },
-		hole_at[6] = { 0, 1, 2, 3, 2, 1 };
-	bank_from(10, HOLE_FRAMES + 0x20u * (uint32_t)hole_at[frame_at(D.frame % (6 * BN5_LIB_HOLE_STEP), hole_held, 6)]);
-	static const int glint_held[6] = { 120, 6, 2, 2, 1, 1 };
-	bank_from(11, BN5_LIB_PULSE + 0x20u * (uint32_t)frame_at(D.frame % 132, glint_held, 6));
-	static const int breath_held[10] = { 12, 12, 12, 12, 12, 8, 12, 12, 12, 12 }, breath_at[10] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1 };
-	bank_from(12, BN5_LIB_BREATH + 0x20u * (uint32_t)breath_at[frame_at(D.frame % 116, breath_held, 10)]);
-}
-
 /* The map's layer 1 and BG2 cleared, every look to be written again: on
  * BN5's board BG2 holds the looks alone (the Liberation map's own second
  * layer, learned with its floor, drew pieces of other colours over it) */
@@ -245,7 +221,6 @@ void lib_look_update(void) {
 	/* (a map entered again: its tile map and tiles as the ROM has them) */
 	if (!tiles_there()) { copy_tiles(); K.mark_at = 0; }
 	if (!K.mark_at || emu_read16(K.mark_at) != K.mark) clear_layer();
-	pulse();
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			if (K.dissolve[y][x]) --K.dissolve[y][x];
