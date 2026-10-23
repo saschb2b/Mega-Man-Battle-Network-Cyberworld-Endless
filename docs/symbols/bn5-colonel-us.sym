@@ -81,6 +81,7 @@
 03003960 BN5_BG_PALETTE
 0300724A bn5_sea_submerge.other_way_bn6_hit_hidden2
 0300728C bn5_sea_submerge.other_way_bn6_hit_hidden2_2
+08000568 sound_mode_word
 08000598 BN5_PLAY_SOUND
 08000C32 bn5_random_numbers.at_08000c32
 0800131E colonel_sides_bits.sets
@@ -633,6 +634,7 @@
 08113C78 BN5_NAVI_HELD
 08113CD8 BN5_STORY_BATTLES
 08114000 families_code_end
+0814C9FC mp2k_library
 08155A74 BN5_MPLAYS
 08155BF4 XRomLayout.song_table
 081D774A bn5_sea_submerge.image

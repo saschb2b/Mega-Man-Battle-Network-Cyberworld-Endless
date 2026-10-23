@@ -206,6 +206,42 @@ No written harmonic analysis of a BN track was found (Hooktheory,
 r/VGMtheory, the wikis and Japanese chord-progression pages searched on
 22 October 2026).
 
+## The Jukebox's songs
+
+What the Jukebox (docs/PET.md, The Jukebox) says of the games' songs, and
+how it is known:
+
+- **Which songs are music.** BN6's music player plays 0x01-0x25 on player
+  31; BN5's 0x01-0x24, its 0x0A an empty header on player 0. Verified by
+  reading each game's song table (BN6 `0x08159F48`, BN5 `0x08155BF4`):
+  every entry's player and its header's track count (docs/ROM_DATA.md).
+- **BN5's songs play on BN6's code.** Verified: BN5's MP2K library
+  (`0x0814C9FC`, 0x2104 bytes from SoundMain) is BN6's (`0x0814F754`)
+  byte for byte but for 24 literals (its tables', its player table's, its
+  song table's, its music player's RAM) and 35 pointers into itself, all
+  moved by the block's own move; its scale, frequency, PSG, noise and
+  clock tables equal BN6's; its sound mode word is BN6's `0x0093040D`
+  (at `0x08000568`). Then BN5's title through the engine against the
+  plain BN5 ROM recorded in romlab (mGBA 0.10.5), 20 seconds: their
+  loudness envelopes at a correlation of 0.90 and their octave bands
+  within 0.7 dB to 12 kHz (the recording's own 32768 Hz rate above);
+  BN6's title against the same recording, as a control, 0.42 and up to
+  2.9 dB apart.
+- **The names.** Verified where a map-music list, a battle record or a
+  code's immediate starts the song, and assumed from bn6f's names where
+  none does (docs/PET.md lists which is which). BN5 numbers its songs as
+  BN6 does where both were checked (0x01, 0x03-0x05, 0x0C, 0x0F, 0x10,
+  0x13-0x16, 0x1A, 0x1B, 0x1D, 0x1E), which gives BN6's names to its
+  0x02, 0x0B, 0x0D, 0x0E, 0x17, 0x19, 0x1C and 0x1F, assumed.
+- **Not found:** where BN5's 0x06-0x09, 0x11, 0x12, 0x18 and 0x20-0x24
+  play. Searched: BN5's four map-music lists (`0x080361C8`), every
+  `movs r0,#n` before a `bl` to its PlayMusic (`0x080005A0`, which reach
+  only 0x01, 0x0F, 0x15, 0x18, 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23,
+  the last three from routines not yet read), its battle records' music
+  byte (0x15 and 0x16 alone). The cutscenes' scripts, which start most
+  story songs, were not read. A player who knows them is the lead to
+  verify (Learned from players, below).
+
 ## Learned from players
 
 | What | Who, where | Verified |

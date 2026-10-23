@@ -12,9 +12,9 @@ static uint32_t mul_high(uint32_t a, uint32_t b) { return (uint32_t)(((uint64_t)
 uint32_t mp2k_key_to_freq(uint32_t wav, int key, int fine) {
 	uint32_t k = (uint8_t)key, f = (uint32_t)(uint8_t)fine << 24;
 	if (k > 178) { k = 178; f = 0xFFu << 24; }
-	uint8_t s1 = mp2k_u8(M.scale_table + k), s2 = mp2k_u8(M.scale_table + k + 1);
-	uint32_t v1 = mp2k_u32(M.freq_table + 4u * (s1 & 0xF)) >> (s1 >> 4);
-	uint32_t v2 = mp2k_u32(M.freq_table + 4u * (s2 & 0xF)) >> (s2 >> 4);
+	uint8_t s1 = mp2k_lib_u8(M.scale_table + k), s2 = mp2k_lib_u8(M.scale_table + k + 1);
+	uint32_t v1 = mp2k_lib_u32(M.freq_table + 4u * (s1 & 0xF)) >> (s1 >> 4);
+	uint32_t v2 = mp2k_lib_u32(M.freq_table + 4u * (s2 & 0xF)) >> (s2 >> 4);
 	return mul_high(mp2k_u32(wav + 4), v1 + mul_high(v2 - v1, f));
 }
 
@@ -130,6 +130,7 @@ static void note_take(int player, int ti, int chan, const uint8_t tone[12], int 
 	if (t->chan != MP2K_NONE) M.chans[t->chan].prev = chan;
 	t->chan = chan;
 	c->track = ti;
+	c->rom = M.players[player].rom;
 	t->lfo_delay_c = t->lfo_delay;
 	if (t->lfo_delay) {
 		t->mod_m = 0;
@@ -156,7 +157,7 @@ static void note_take(int player, int ti, int chan, const uint8_t tone[12], int 
 
 void mp2k_note(int player, int ti, int clock_index) {
 	Mp2kTrack *t = &M.tracks[ti];
-	t->gate = mp2k_u8(M.clock_table + (uint32_t)clock_index);
+	t->gate = mp2k_lib_u8(M.clock_table + (uint32_t)clock_index);
 	note_bytes(t);
 	uint8_t tone[12];
 	int key, pan;

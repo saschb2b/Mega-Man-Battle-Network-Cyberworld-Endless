@@ -80,7 +80,7 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | Code (routines, hooks, instructions) | 273 | 19 |
-| ROM data (tables, text, literals) | 272 | 159 |
+| ROM data (tables, text, literals) | 272 | 161 |
 | ROM, code or data not told | 420 | 400 |
 | RAM (variables, structures) | 121 | 47 |
 | I/O registers | 3 | 0 |
@@ -88,7 +88,7 @@ how to verify it.
 | Event flags | 25 | 3 |
 | Values of fields | 109 | 16 |
 | Constants, sizes and counts | 385 | 78 |
-| All | 1756 | 755 |
+| All | 1756 | 757 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
@@ -98,7 +98,7 @@ how to verify it.
 | Chips and folders | 299 | 221 |
 | Battle | 494 | 264 |
 | Text and fonts | 32 | 2 |
-| Sound | 11 | 2 |
+| Sound | 11 | 4 |
 | Maps and the overworld | 126 | 20 |
 | Events and progress | 38 | 12 |
 | Engine core | 644 | 232 |

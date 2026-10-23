@@ -21,14 +21,14 @@ uint32_t mp2k_cgb_key_to_freq(int type, int key, int fine) {
 	if (type == 4) {
 		k = k <= 20 ? 0 : k - 21;
 		if (k > 59) k = 59;
-		return mp2k_u8(M.noise_table + k);
+		return mp2k_lib_u8(M.noise_table + k);
 	}
 	if (k <= 35) { f = 0; k = 0; }
 	else k -= 36;
 	if (k > 130) { k = 130; f = 0xFF; }
-	uint8_t s1 = mp2k_u8(M.cgb_scale_table + k), s2 = mp2k_u8(M.cgb_scale_table + k + 1);
-	int v1 = (int16_t)(mp2k_u8(M.cgb_freq_table + 2u * (s1 & 0xF)) | mp2k_u8(M.cgb_freq_table + 2u * (s1 & 0xF) + 1) << 8) >> (s1 >> 4);
-	int v2 = (int16_t)(mp2k_u8(M.cgb_freq_table + 2u * (s2 & 0xF)) | mp2k_u8(M.cgb_freq_table + 2u * (s2 & 0xF) + 1) << 8) >> (s2 >> 4);
+	uint8_t s1 = mp2k_lib_u8(M.cgb_scale_table + k), s2 = mp2k_lib_u8(M.cgb_scale_table + k + 1);
+	int v1 = (int16_t)(mp2k_lib_u8(M.cgb_freq_table + 2u * (s1 & 0xF)) | mp2k_lib_u8(M.cgb_freq_table + 2u * (s1 & 0xF) + 1) << 8) >> (s1 >> 4);
+	int v2 = (int16_t)(mp2k_lib_u8(M.cgb_freq_table + 2u * (s2 & 0xF)) | mp2k_lib_u8(M.cgb_freq_table + 2u * (s2 & 0xF) + 1) << 8) >> (s2 >> 4);
 	return (uint32_t)(v1 + (((int)f * (v2 - v1)) >> 8) + 2048);
 }
 
@@ -177,7 +177,7 @@ static void registers(Mp2kChan *c, int ch, uint8_t env) {
 	if (!(c->modify & 1)) return;
 	gba_sound_write8(NR51, (uint8_t)((gba_sound_read8(NR51) & ~c->pan_mask) | c->pan));
 	if (ch == 2) {
-		gba_sound_write8(NR2[2], mp2k_u8(M.cgb3_vol_table + c->env));
+		gba_sound_write8(NR2[2], mp2k_lib_u8(M.cgb3_vol_table + c->env));
 		if (c->n4 & 0x80) {
 			gba_sound_write8(0x70, 0x80);
 			gba_sound_write8(NR4[2], c->n4);
@@ -227,6 +227,7 @@ void mp2k_cgb_frame(void) {
 	for (int ch = 0; ch < MP2K_CGB; ++ch) {
 		Mp2kChan *c = CGB_CHAN(ch);
 		if (!(c->status & CHN_ON)) continue;
+		mp2k_read(c->rom);
 		if (!channel(c, ch, M.c15 == 0)) {
 			mp2k_cgb_off(ch + 1);
 			c->status = 0;

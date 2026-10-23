@@ -43,6 +43,17 @@ void audio_pause(bool on);
 /* Play a song-table entry directly (music replaces, effects mix). */
 void audio_play_song(int id, bool music);
 void audio_music_id(int id);
-bool audio_render_wav(int song, int seconds, const char *path);
+/* The Jukebox's songs (jukebox.h): song `song` of ROM `rom` (0 BN6's, 1 +
+ * XRomId another's: mp2k.h) begun on the player its table names, stopped,
+ * faded over 16 x `speed` frames; while it plays, how often it has gone
+ * round (-1 where it does not play; 0 where there is no sound to play it
+ * on, as if it played quiet) and its tracks' loudness, 0-255, into
+ * `levels` (`max` at most, how many in *tracks) */
+void audio_song_start(int rom, int song);
+void audio_song_stop(int rom, int song);
+void audio_song_fade(int rom, int song, int speed);
+int audio_song_state(int rom, int song, uint8_t *levels, int max, int *tracks);
+/* ... into a WAV file */
+bool audio_render_wav(int rom, int song, int seconds, const char *path);
 
 #endif

@@ -25,6 +25,19 @@ void mp2k_song_fade(int song, int speed);
  * (a player playing, a channel still on) */
 bool mp2k_song_playing(int song);
 bool mp2k_busy(void);
+/* ... the same for a song of ROM `rom`: 0 BN6's, 1 + XRomId another
+ * game's (rom.h, XR), its own song table's, its own data, on BN6's code
+ * (BN5's library is BN6's: docs/ROM_DATA.md, Another game's songs);
+ * nothing where that ROM is not there */
+void mp2k_song_start_in(int rom, int song);
+void mp2k_song_fade_in(int rom, int song, int speed);
+void mp2k_song_stop_in(int rom, int song);
+/* While song `song` of ROM `rom` plays: the times its first track has gone
+ * back to its loop since it began (-1 where it does not play), and its
+ * tracks' loudness now (0-255 each, at most `max`, its channels'
+ * envelopes): how many tracks it has (0 where it does not play) */
+int mp2k_song_loops(int rom, int song);
+int mp2k_song_levels(int rom, int song, uint8_t *out, int max);
 /* One GBA frame */
 void mp2k_frame(void);
 /* What it mixed this frame: per_frame samples of the right and left

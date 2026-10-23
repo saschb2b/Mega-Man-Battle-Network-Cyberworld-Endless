@@ -38,6 +38,7 @@
 #include "home_words.h"
 #include "economy.h"
 #include "jobs.h"
+#include "jukebox_text.h"
 #include "loot.h"
 #include "meta.h"
 #include "npc_lines.h"
@@ -4591,6 +4592,27 @@ static double filtered_rms(SoundFilter mode, double hz) {
 	return sqrt(out / in);
 }
 
+/* The Jukebox's songs (docs/PET.md, The Jukebox): every song of each
+ * game's music player once (BN6's 0x01-0x25; BN5's 0x01-0x24 but its
+ * empty 0x0A: docs/ROM_DATA.md), each in a section, each name a row's */
+static void test_jukebox_songs(void) {
+	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
+	for (int i = 0; i < jukebox_song_count; ++i) {
+		const JukeSong *s = &jukebox_songs[i];
+		CHECK(s->game < 2 && s->song < 0x26 && s->kind < JUKE_KINDS, "jukebox: song %d is game %d, song %#x, kind %d", i, s->game, s->song, s->kind);
+		if (s->game >= 2 || s->song >= 0x26 || s->kind >= JUKE_KINDS) continue;
+		++seen[s->game][s->song];
+		++per[s->game][s->kind];
+		CHECK(s->title && strlen(s->title) > 0 && strlen(s->title) <= JUKE_TITLE_MOST, "jukebox: song %d's name \"%s\" past a row", i, s->title ? s->title : "");
+	}
+	for (int song = 0x01; song <= 0x25; ++song) CHECK(seen[0][song] == 1, "jukebox: BN6's song %#x listed %d times", song, seen[0][song]);
+	for (int song = 0x01; song <= 0x24; ++song) CHECK(seen[1][song] == (song == 0x0A ? 0 : 1), "jukebox: BN5's song %#x listed %d times", song, seen[1][song]);
+	CHECK(seen[1][0x25] == 0 && seen[0][0] == 0 && seen[1][0] == 0, "jukebox: a song past the music player's");
+	for (int g = 0; g < 2; ++g)
+		for (int k = 0; k < JUKE_KINDS; ++k) CHECK(per[g][k] <= JUKE_SECTION_MOST, "jukebox: section %d of game %d holds %d", k, g, per[g][k]);
+	CHECK(jukebox_song_count == 37 + 35, "jukebox: %d songs", jukebox_song_count);
+}
+
 static void test_sound_filter(void) {
 	double r = filtered_rms(SOUND_GBA, 12000.0);
 	CHECK(fabs(r - 1.0) < 0.001, "gba changed a 12 kHz tone by %.4f", r);
@@ -5455,6 +5477,7 @@ int main(void) {
 	test_xsong();
 	test_audio_pace();
 	test_sound_filter();
+	test_jukebox_songs();
 	test_settings_line();
 	test_thumb_bl();
 	test_thumb_block();

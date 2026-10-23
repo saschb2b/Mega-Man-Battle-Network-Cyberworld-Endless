@@ -223,6 +223,39 @@ void audio_music_id(int id) {
 	audio_play_song(id, true);
 }
 
+void audio_song_start(int rom, int song) {
+	if (!dev && !offline) return;
+	lock();
+	printf("music: song %#x of rom %d\n", song, rom);
+	mp2k_song_start_in(rom, song);
+	unlock();
+}
+
+void audio_song_stop(int rom, int song) {
+	if (!dev && !offline) return;
+	lock();
+	mp2k_song_stop_in(rom, song);
+	unlock();
+}
+
+void audio_song_fade(int rom, int song, int speed) {
+	if (!dev && !offline) return;
+	lock();
+	mp2k_song_fade_in(rom, song, speed);
+	unlock();
+}
+
+int audio_song_state(int rom, int song, uint8_t *levels, int max, int *tracks) {
+	*tracks = 0;
+	/* (no sound to play it on: as if it played, quiet, and never went round) */
+	if (!dev && !offline) return 0;
+	lock();
+	int loops = mp2k_song_loops(rom, song);
+	*tracks = mp2k_song_levels(rom, song, levels, max);
+	unlock();
+	return loops;
+}
+
 void audio_music(Music m) {
 	if (m >= MUS_COUNT) return;
 	audio_music_id(music_ids[m]);
@@ -240,9 +273,9 @@ void audio_set_volume(int music, int sfx) {
 }
 
 /* Offline render for tests: writes a 16-bit stereo WAV. */
-bool audio_render_wav(int song, int seconds, const char *path) {
+bool audio_render_wav(int rom, int song, int seconds, const char *path) {
 	if (!mp2k_init()) return false;
-	mp2k_song_start(song);
+	mp2k_song_start_in(rom, song);
 	FILE *f = fopen(path, "wb");
 	if (!f) return false;
 	uint32_t frames = (uint32_t)(OUT_RATE * seconds), bytes = frames * 4;

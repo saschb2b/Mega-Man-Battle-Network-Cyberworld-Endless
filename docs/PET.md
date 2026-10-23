@@ -67,7 +67,7 @@ the subject and how many of the list's mails are new (issue #83).
 ## KeyItem: what the profile holds
 
 BN6's list shows the run's items (ScrtData, with a description of our own:
-three open the golden gate) and four of the profile's, in the ids
+three open the golden gate) and five of the profile's, in the ids
 `0x47`-`0x4F` BN6 leaves nameless:
 
 | Item | Shown | Says |
@@ -76,8 +76,9 @@ three open the golden gate) and four of the profile's, in the ids
 | DarkPass | once the Secret Area has been cleared in any run | that the dark way to the Undernet is open |
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
 | NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
+| Jukebox | always | every song of the town and the Net; A opens the Jukebox |
 
-The profile's four are given on each layer as it begins, and at home
+The profile's five are given on each layer as it begins, and at home
 wherever the game's state lacks them (`pet_text_items`, from `pet.c`'s
 frame): a NEW GAME's PET, and the week's dive's, held only the PET in
 Lan's room and Lan's HP until the first layer, so the NetPass the
@@ -111,6 +112,84 @@ screen's cursor). A on any item but `0x40` does nothing in BN6, so the A
 that opens the pass is also kept from the game. In the Net Square BN6's
 PET stays shut (its screens would change the Square's RAM, thrown away
 on the way home); START opens the same pass there.
+
+### The Jukebox
+
+The Jukebox (`0x4B`) is a music player: every song of the music player
+of the games in use, BN6's 37 and, with BN5's ROM beside it, BN5's 35,
+played as the cartridge plays them. A on it opens a PET screen over the
+KeyItem screen in the look of the NetPass and Trade Central (our own
+drawing: BN6 has no screen of the kind). Under it the game holds still,
+its core's frames not run (`pet_holds` in `scene_emu.c`), so its music
+stops with it and goes on where it was once the Jukebox closes; the
+songs play on the engine's own MP2K, BN6's code (docs/EMULATION.md, The
+engine's own sound).
+
+The songs are in sections by game, then by where they play: Towns, The
+Net, Battles, Story, Screens, and BN5's More. On the left the song
+playing: its game's label, its name, its number in its game's song table,
+how long it has played, a light a track for its eight tracks, lit by
+their loudness, and how often it has gone round. On the right the
+section's songs; under them the keys.
+
+| Key | Does |
+| --- | --- |
+| Up, Down | the cursor |
+| L, R (Left, Right) | the section before or after, the cursor on the song playing where it is in it |
+| A | plays the song under the cursor |
+| START (SELECT) | the play mode: **Repeat** (the song over and over), **In order** (the section in its order), **Shuffle** (the section in any order) |
+| B | closes it, the song stopped |
+
+A tap does each: a song's row plays it, the section's arrows turn it, the
+mode's slot and the keys' caps do as their buttons. In order and
+Shuffle, a song that loops plays its loop twice, then fades over two
+and a half seconds; a song that ends (the jingles) ends, BN6's holding a
+minute of rests before their end, which three seconds of silence after
+it has sounded counts as its end. Then the next, after three quarters of
+a second. The last song and the play mode are kept in the data folder's
+`jukebox.ini` (never in the run's save), so it opens there again; it
+opens quiet. Left out on purpose: favourites, a song as the title's
+music, and music over play (the owner's design call for this first
+version: the game's own music is the run's).
+
+**The names** are ours, for where each song plays (`jukebox_text.c`):
+
+- *Verified in the ROM:* a song a map plays from BN6's map-music lists
+  (`0x080360E4`, read by `playCertainMapMusicBasedOnEventByte`; every
+  chapter's list read, docs/ROM_DATA.md, Real-world music): Central Town
+  0x03 (group 0x01's first map), Indoors 0x04 (Lan's house, Aster Land),
+  Cyber Academy 0x05, Seaside Town 0x06 (group 0x03), Green Town 0x08
+  (group 0x04), Sky Town 0x07 (group 0x05's first map), ACDC Town 0x24
+  (group 0x00's first map), The Net 0x13 (every area's maps), Robot
+  Control 0x10 (group 0x80), Aquarium Comp 0x11 (0x81), Judge Tree Comp
+  0x12 (0x82), Mr.Weather Comp 0x0A (0x83), Graveyard 0x09 (0x96),
+  Undernet 0x14 (0x95); the battles' songs from their BattleSettings
+  (Virus Busting 0x15, Boss Battle 0x16); songs started by code with
+  their number as an immediate (`movs r0,#n` before a `bl` to
+  PlayMusic, `0x080005D4`): the title 0x01, Game Over 0x1B (the game
+  over screen's), Credits 0x1D (the staff roll's), NaviCust 0x1E.
+  Verified where they play, their names bn6f's: Something's Up 0x0B and
+  Crisis 0x0C (the towns' maps in some chapters), Transmission 0x0F (one
+  call, an ending song) and Defeat 0x1A (four calls in the battle's
+  code). BN5's from its map-music lists (`0x080361C8`): ACDC
+  Town 0x03, Indoors 0x04 (ACDC Town's houses), School 0x05 (group
+  0x01), Crisis 0x0C (ACDC Town in the third list), Comp 0x10, The Net
+  0x13, Undernet 0x14; its battles' 0x15 and 0x16; and the same calls
+  as BN6's, at the same routines moved, for 0x01, 0x0F, 0x1A, 0x1B,
+  0x1D and 0x1E.
+- *Assumed from bn6f's names* (`constants/enums/SoundOffsets.inc`, the
+  community disassembly's, read as leads, never copied as a list) where
+  no map list or code reached them: The Expo 0x25, Pavilion 0x18,
+  Pavilion Comp 0x20, Cybeasts 0x21, Before the Boss 0x1C (the boss
+  prelude the run's guardians play), Showdown 0x22, Final Battle 0x17,
+  The Chase 0x23, Villains 0x02, Sorrow 0x0D, Good Times 0x0E, Victory
+  0x19, Fanfare 0x1F. BN5 numbers its songs as BN6 does wherever the
+  two were checked (the eleven above), so its 0x02 (Nebula), 0x0B, 0x0D,
+  0x0E, 0x17, 0x19, 0x1C and 0x1F carry BN6's names, assumed.
+- *Not known yet:* BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18 and
+  0x20-0x24 (its places, its Liberation Missions'), which no map list or
+  immediate reaches: they carry their number ("Song 06") in More until a
+  source names them (docs/SOURCES.md).
 
 ## How the entries are taken over
 

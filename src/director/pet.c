@@ -8,6 +8,7 @@
 #include "director.h"
 #include "director_gate.h"
 #include "emu.h"
+#include "jukebox.h"
 #include "netpass_screen.h"
 #include "pet_text.h"
 #include "platform.h"
@@ -80,9 +81,14 @@ int pet_key_item(void) {
 	return emu_read8(BN6_KEYITEM_LIST + 2 * at);
 }
 
+bool pet_holds(void) { return jukebox_update(); }
+
+void pet_leave(void) { jukebox_shut(); }
+
 void pet_draw(void) {
 	if (home_gate_asking()) netpass_screen_strip();
 	netpass_screen_draw();
+	jukebox_draw();
 }
 
 uint32_t pet_keys(uint32_t keys) {
@@ -91,6 +97,11 @@ uint32_t pet_keys(uint32_t keys) {
 	/* (A on the NetPass, newly pressed and come to the game: the pass opens over the KeyItem screen) */
 	if (!saving && (keys & KEY_A) && btn_pressed(BTN_A) && !netpass_screen_shown() && pet_key_item() == PET_ITEM_NETPASS) {
 		netpass_screen_open();
+		return keys & ~(uint32_t)KEY_A;
+	}
+	/* (A on the Jukebox: it opens over the KeyItem screen, the game held under it, scene_emu.c) */
+	if (!saving && (keys & KEY_A) && btn_pressed(BTN_A) && !jukebox_shown() && pet_key_item() == PET_ITEM_JUKEBOX) {
+		jukebox_open();
 		return keys & ~(uint32_t)KEY_A;
 	}
 	if (!saving) return keys;
