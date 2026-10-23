@@ -7,17 +7,42 @@
 
 /* The PET menu (docs/ROM_DATA.md, the PET): ePETMenuData, +0 its state, +4
  * the cursor (6 Comm, 7 Save), +5 bit 0 open, +0xF the entry the engine's
- * hook on its input took (7 Save); the state table's pointer to its input
- * handler, and that handler; the grey's store to Save's colour */
+ * hook on its input took (6 Comm, the run's Options; 7 Save); the state
+ * table's pointer to its input handler, and that handler; the grey's
+ * stores to Save's and Comm's colours */
 #define BN6_PET_MENU          0x0200DF20u
 #define BN6_PET_CURSOR        (BN6_PET_MENU + 0x04) /* the cursor: 6 Comm, 7 Save */
 #define BN6_PET_MENU_OPEN     (BN6_PET_MENU + 0x05) /* bit 0 open */
 #define BN6_PET_HOLD          (BN6_PET_MENU + 0x09) /* a count that holds its input off */
-#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F) /* the entry the engine's hook on its input took (7 Save) */
+#define BN6_PET_MENU_TAKEN    (BN6_PET_MENU + 0x0F) /* the entry the engine's hook on its input took (6 Options, 7 Save) */
 #define BN6_KEYS_PRESSED      0x0200A272u           /* eJoypad +2: the keys just pressed (u16, the GBA's bits) */
 #define BN6_PET_INPUT_PTR     0x08120B1Cu /* the state table's pointer to its input handler */
 #define BN6_PET_INPUT         0x08120B91u /* that handler (Thumb) */
 #define BN6_PET_GREY_SAVE     0x08120F26u /* the grey's store to Save's colour */
+#define BN6_PET_GREY_COMM     0x08120F2Au /* ... and to Comm's */
+/* The menu's labels (docs/ROM_DATA.md, the PET menu's labels): their
+ * tiles, uncompressed, and the PET's load list's entry that copies them
+ * to VRAM (source, destination, size: bn6f off_811ECB4's second); the
+ * table of each entry's label, 9 x 2 tile entries each (bn6f
+ * off_811F5B8: ChipFolder to Save, then Status, MegaMan's row for another
+ * Navi); a label's letters in colour BN6_PET_LABEL_INK + its entry
+ * (Status MegaMan's), shaded in BN6_PET_LABEL_SHADE on BN6_PET_LABEL_BACK */
+#define BN6_PET_LABEL_TILES   0x086C8058u /* the labels' tiles, BN6_PET_LABEL_COUNT of them */
+#define BN6_PET_LABEL_FIRST   0x29A       /* ... the first's number in VRAM (BG character block 2: 0x0600D340) */
+#define BN6_PET_LABEL_COUNT   90
+#define BN6_PET_LABEL_LOAD    0x08120A9Cu /* the load list's entry for them: +0 the source, */
+#define BN6_PET_LABEL_DEST    (BN6_PET_LABEL_LOAD + 0x04) /* ... VRAM, */
+#define BN6_PET_LABEL_SIZE    (BN6_PET_LABEL_LOAD + 0x08) /* ... the size (0xB40) */
+#define BN6_PET_LABEL_MAPS    0x08121394u /* the table of the labels' tile entries, one pointer an entry, Status ninth */
+#define BN6_PET_LABELS        9           /* ... its entries */
+#define BN6_PET_LABEL_W       9           /* a label's tiles across, 2 down */
+#define BN6_PET_LABEL_BLANK   7           /* a label's column the short ones leave blank (its tile entries the blank's) */
+#define BN6_PET_LABEL_INK     5           /* a label's letters' colour, + its entry (palette 15, 0x03001B40) */
+#define BN6_PET_LABEL_SHADE   3           /* ... their shade's */
+#define BN6_PET_LABEL_BACK    2           /* ... the box's under them */
+#define BN6_PET_ENTRY_COMM    6           /* the menu's entries as BN6_PET_CURSOR counts them: Comm, the run's Options */
+#define BN6_PET_ENTRY_SAVE    7           /* ... Save */
+#define BN6_PET_ENTRY_STATUS  8           /* ... BN6_PET_LABEL_MAPS' ninth, Status: MegaMan's row for another Navi */
 /* The KeyItem screen's words (docs/ROM_DATA.md, the PET): the names'
  * archive (uncompressed, an entry per id) and the literals that point at
  * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the

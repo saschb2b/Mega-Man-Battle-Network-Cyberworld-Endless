@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-22",
+  "updated": "2026-10-23",
   "previous": "2026-10-18",
   "features": [
     {
@@ -102,6 +102,10 @@
     {
       "date": "2026-10-22",
       "what": "Issue #181's review: a partner's NaviCust compiled over the way in's own state, never a game's checkpoint (0x08138A00 keeps NaviStats +0x0E, +0x22, +0x2C, +0x2D, +0x2F, +0x30, +0x58-+0x5B from the state it runs on; arena_seats_compile); his messages checked on every GBA by his screen's rules (team_check.c: the hand dealt, one code or one chip, the PA lists' recipes 0x080295B4 and 0x080295B8, his Crosses, Souls and ColonelSoul's chip); sub_801FFD6's read path hooked (0x0802001C, BN6_LINK_TAKES_ANY 0x0203F7D8); the outbox of twelve (team_outbox.c); the server's OVER from seat 0 alone; the packet's other readers and writers named (0x0813F8D4, the library's getters 0x0803EF48 and 0x0803EF50, setter 0x0803EF58)"
+    },
+    {
+      "date": "2026-10-23",
+      "what": "The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options"
     }
   ],
   "experiments": [

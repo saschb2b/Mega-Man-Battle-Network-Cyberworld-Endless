@@ -4,8 +4,7 @@
  * answers no, and a moment passes before it takes a press at all. Shown
  * in the controls screen's place (controls.c hosts it: its frame, its
  * picture, Escape and taps), over the title at the first start where the
- * build can send, and on the 3DS at SELECT on the title, where it is the
- * one setting (the 3DS's buttons are the console's own). */
+ * build can send, and from Options' Statistics line. */
 #ifndef CW_ANALYTICS_ASK_H
 #define CW_ANALYTICS_ASK_H
 
@@ -14,10 +13,10 @@
 /* The title's first entry: the question, where the build can send and the
  * player has not answered */
 void analytics_ask_offer(void);
-/* Asked for (the 3DS's SELECT): the question, the cursor on the answer as
+/* Asked for (Options' Statistics line): the question, the cursor on the answer as
  * it stands; false where the build cannot send */
 bool analytics_ask_open(void);
-/* Whether it can be: the build can send (the 3DS's title says its SELECT) */
+/* Whether it can be: the build can send (Options shows its line) */
 bool analytics_ask_here(void);
 bool analytics_ask_shown(void);
 /* Its frame in the scene's place, and its picture over the canvas

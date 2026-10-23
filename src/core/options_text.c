@@ -51,8 +51,8 @@ void options_keys(const char *a, const char *b, bool change, char *out, size_t n
 const char *options_sound_note(void) {
 	return "\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n"
 		"# the music and all; soft gives it the Legacy Collection's balance, as\n"
-		"# measured from it: the highs and the deepest bass taken down. Options on\n"
-		"# the title (SELECT) changes it too.\n";
+		"# measured from it: the highs and the deepest bass taken down. Options\n"
+		"# (the title's menu, or the PET's in a run) changes it too.\n";
 }
 
 const char *options_screen_note(void) {

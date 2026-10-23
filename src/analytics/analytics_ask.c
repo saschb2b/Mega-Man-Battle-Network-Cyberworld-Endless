@@ -129,8 +129,7 @@ static void choices_draw(int cx, int y) {
 /* Under them: where it is changed later, then the keys, or a phone's tap */
 static void hints_draw(int cx, int y) {
 	char s[96], a[24];
-	analytics_later(controls_word(BTN_SELECT), s, sizeof s);
-	minifont_draw_centered(cx, y, s, PET_DIM, 1);
+	minifont_draw_centered(cx, y, analytics_later(), PET_DIM, 1);
 	if (touch_shown()) {
 		minifont_draw_centered(cx, y + 9, analytics_word(AW_TAP), PET_DIM, 1);
 		return;

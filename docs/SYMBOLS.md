@@ -80,19 +80,19 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
 | Code (routines, hooks, instructions) | 273 | 19 |
-| ROM data (tables, text, literals) | 272 | 159 |
-| ROM, code or data not told | 420 | 400 |
+| ROM data (tables, text, literals) | 275 | 159 |
+| ROM, code or data not told | 421 | 400 |
 | RAM (variables, structures) | 121 | 47 |
 | I/O registers | 3 | 0 |
-| Fields of structures | 148 | 33 |
+| Fields of structures | 150 | 33 |
 | Event flags | 25 | 3 |
 | Values of fields | 109 | 16 |
-| Constants, sizes and counts | 385 | 78 |
-| All | 1756 | 755 |
+| Constants, sizes and counts | 398 | 78 |
+| All | 1775 | 755 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
-| PET, mail and key items | 52 | 1 |
+| PET, mail and key items | 71 | 1 |
 | Shops and traders | 37 | 0 |
 | NaviCust | 23 | 1 |
 | Chips and folders | 299 | 221 |

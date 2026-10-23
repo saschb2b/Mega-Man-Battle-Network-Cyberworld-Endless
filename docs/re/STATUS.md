@@ -1,6 +1,6 @@
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 22 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
+Updated 23 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
@@ -11,6 +11,7 @@ Updated 22 Oct 2026. Written by `tools/re_status.py` from [ledger.json](ledger.j
 
 ## Since the last update (18 Oct 2026)
 
+- 23 Oct 2026: The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options
 - 22 Oct 2026: --dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof.
 - 22 Oct 2026: --dev arena2v2: a partner's record takes his loadout's HP and buster (teambuster=N); the full-rules audit of what a partner meets (docs/ONLINE_ARENA.md), DarkInvs left out for a MegaMan without BN5's AI block (src/emu/darkinvs.c) and BN5's green flash counted by a side's player alone (src/emu/xchips_flash.c).
 - 22 Oct 2026: BN6's and BN5's ways to show a mood named for the Square's emotes: src/emu/bn6_expression.h and bn5_expression.h, docs/ROM_DATA.md's Expression rows, docs/symbols written again.

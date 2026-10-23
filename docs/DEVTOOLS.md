@@ -311,7 +311,7 @@ Any other start neither asks nor sends, but for these switches:
 ```bash
 # the question, as a first start asks it (a fresh --data-dir: the answer is written there)
 python3 build.py shot --data-dir /src/.build/ask --dev statistics=ask --frames 120 --shot 100:/src/.build/ask.bmp
-# Options' Statistics line (SELECT on the title), the answer held
+# Options' Statistics line (SELECT on the title opens Options too), the answer held
 python3 build.py shot --dev statistics=on --input "30:,4:START,70:,4:SELECT,60:" --shot 150:/src/.build/row.bmp
 ```
 

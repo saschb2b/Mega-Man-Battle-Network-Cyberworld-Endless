@@ -11,7 +11,7 @@ a use of its own.
 | ChipFolder, SubChip, Library, MegaMan | BN6's own |
 | E-Mail | BN6's screen: Dad's mails, the dive and the records first, then the battle data on each guardian met |
 | KeyItem | BN6's screen: the profile's own items beside the run's; A on the NetPass opens the pass |
-| Comm | BN6's grey and buzz, as without a link cable |
+| Options (BN6's Comm) | The game's Options over the PET |
 | Save | Saves the run where MegaMan stands |
 | PLACE | The area beside the layer ("JudgeTree 14") |
 
@@ -23,6 +23,30 @@ MegaMan stands, as a layer's arrival does, and "Run saved" shows in the
 corner; the quit prompt then says "Run saved where you saved it". In the
 town, before the first layer, there is no run to save yet, and a note says
 so.
+
+## Options
+
+Options is reachable wherever the game is (docs/GUIDE.md, Options): the
+title's menu has its line, and in a run the PET's menu does, in Comm's
+place. BN6's Comm opens the link cable's screens, which a run never had a
+use for: it was greyed and buzzed in every run. Its row now reads
+**Options**, lit, and A on it opens the game's Options over the PET,
+which waits under it, its music held with the game; B (or Done) closes
+Options and the PET is there as it was, its cursor on Options, and the
+button that closed it is kept from the game until it is let go, so that
+B does not close the PET too.
+
+BN6 has no Options to drive (bn6f searched for config, options and
+stereo), and its labels are pictures, so the word is set from the
+labels' own letters as the core starts (`src/director/pet_options.c`,
+`src/gfx/letters.c`): the p and the i of ChipFolder, the t and the s of
+Status (the label BN6 shows in MegaMan's row for another Navi), Comm's o,
+MegaMan's n, and Comm's C closed into the O by its mirror image, shaded
+as the font shades. They are read from the player's ROM: no picture of
+Capcom's is in the source. The word is a column longer than Comm, so the
+labels' tiles are copied into the free space with Comm's made Options and
+two tiles more after them, and the PET's load list points at the copy
+([ROM_DATA.md](ROM_DATA.md), the PET menu's labels).
 
 ## E-Mail: Dad's lab
 
@@ -123,7 +147,9 @@ pointed at them (docs/ROM_DATA.md, the PET).
 Flag `0x1706` (`EVENT_PET_COMM_SAVE_DISABLED`), which a run keeps set,
 greys Comm and Save and makes A on them buzz. On the core's ROM copy
 (`pet.c`, docs/ROM_DATA.md) a hook runs as the PET's input handler
-begins: A on Save is taken from the game and written to the menu's spare
-byte (`0x0200DF2F`), which the engine reads each frame; and the grey's
-store to Save's colour is a no-op, so Save shows lit while Comm keeps its
-grey and buzz. BN6's own Save never runs.
+begins: A on Save or on Options (Comm's row) is taken from the game and
+written to the menu's spare byte (`0x0200DF2F`), which the engine reads
+each frame; and the grey's stores to Save's and Comm's colours are
+no-ops, so both show lit. BN6's own Save and Comm never run. Where the
+player's ROM does not hold the labels as read, Comm stays as BN6 has it,
+greyed, and A on it buzzes.

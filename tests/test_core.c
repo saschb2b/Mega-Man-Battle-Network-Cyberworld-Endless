@@ -18,6 +18,7 @@
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "layer_make.h"
+#include "letters.h"
 #include "navicust.h"
 #include "pacing.h"
 #include "pad_art.h"
@@ -3468,6 +3469,7 @@ static void test_free_space(void) {
 		{ "their descriptions", FREE_PET_DESCS, FREE_PET_MAILS }, { "the mails' senders and subjects", FREE_PET_MAILS, FREE_PET_BODIES },
 		{ "the mails' bodies", FREE_PET_BODIES, FREE_PORTRAITS }, { "the portraits", FREE_PORTRAITS, FREE_PORTRAITS_END },
 		{ "a Chip Trader's prizes of both nets", FREE_TRADER_LIST, FREE_TRADER_LIST_END },
+		{ "the PET menu's labels", FREE_PET_OPTIONS, FREE_PET_OPTIONS_END },
 		{ "another game's area", FREE_XAREA, FREE_SONGS }, { "the songs", FREE_SONGS, FREE_XNAVIS },
 		{ "the Navis and map objects", FREE_XNAVIS, FREE_BACKDROPS }, { "the battle backgrounds", FREE_BACKDROPS, FREE_FLAME },
 		{ "BN6's flame", FREE_FLAME, FREE_FLAME_END }, { "the net maps' backdrops", FREE_MAP_BACKDROPS, FREE_INDOORS },
@@ -4644,6 +4646,42 @@ static void test_settings_line(void) {
 	CHECK(!settings_line_read(path, "fullscreen", v, sizeof v), "settings: no file read as none");
 }
 
+/* A word set from a strip's letters (letters.h): the strip cut at the
+ * columns without its fill, a letter set with its shade's column and its
+ * colours mapped, one that does not fit refused, and a C closed into an
+ * O a column wider, its hole and its right side shaded (made-up strips,
+ * fill 5, shade 3, background 2) */
+static void test_letters(void) {
+	enum { W = 12, H = 6 };
+	uint8_t px[H][W];
+	memset(px, 2, sizeof px);
+	for (int y = 0; y < 3; ++y) px[y][1] = px[y][2] = 5, px[y][3] = 3;
+	for (int y = 1; y < 5; ++y) px[y][6] = 5, px[y][7] = 3;
+	LetterStrip s = { &px[0][0], W, H, 5 };
+	int at[4][2];
+	CHECK(letters_cut(&s, at, 4) == 2 && at[0][0] == 1 && at[0][1] == 2 && at[1][0] == 6 && at[1][1] == 6,
+		"letters: the strip cut into its two letters");
+	CHECK(letters_top(&s) == 0, "letters: the fill's first row");
+	uint8_t out[H][8];
+	memset(out, 0, sizeof out);
+	LetterWord w = { &out[0][0], 8, H };
+	uint8_t map[16] = { 0 };
+	map[5] = 9;
+	map[3] = 3;
+	CHECK(letters_put(&s, 1, &w, 0, 1, map) == 2, "letters: the next letter after the first's shade");
+	CHECK(out[2][0] == 9 && out[2][1] == 3 && out[0][0] == 0 && out[2][2] == 0, "letters: a letter set a row lower, its shade with it, the background not");
+	CHECK(letters_put(&s, 2, &w, 0, 0, map) == -1 && letters_put(&s, 0, &w, 6, 0, map) == -1, "letters: no third letter, and none past the word's end");
+	/* a C: its bars on columns 1-3 of rows 0 and 4, its side on 0-1 */
+	memset(px, 2, sizeof px);
+	for (int x = 1; x < 4; ++x) px[0][x] = px[4][x] = 5;
+	for (int y = 1; y < 4; ++y) px[y][0] = px[y][1] = 5;
+	memset(out, 0, sizeof out);
+	CHECK(letters_put_closed(&s, 0, &w, 1, 7, 3) == 7, "letters: the O a column wider than the C, then its shade");
+	CHECK(out[2][1] == 7 && out[2][2] == 7 && out[2][4] == 7 && out[2][5] == 7 && out[0][4] == 7 && out[0][5] == 3,
+		"letters: the O's sides and bars, its top bar shaded at its end");
+	CHECK(out[2][3] == 3 && out[2][6] == 3 && out[5][2] == 3 && out[0][1] == 0, "letters: the O's hole, right and foot shaded, nothing above-left");
+}
+
 static void test_qr(void) {
 	static uint8_t m[QR_MAX * QR_MAX];
 	int n = qr_make("https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless", m);
@@ -5456,6 +5494,7 @@ int main(void) {
 	test_audio_pace();
 	test_sound_filter();
 	test_settings_line();
+	test_letters();
 	test_thumb_bl();
 	test_thumb_block();
 	test_battle_rng();

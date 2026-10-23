@@ -22,9 +22,9 @@ typedef enum {
 } AnalyticsWord;
 const char *analytics_word(AnalyticsWord w);
 
-/* Under the question: where it is changed later, `select` the button that
- * opens it on the device used last ("SELECT", "R", "Minus") */
-void analytics_later(const char *select, char *out, size_t n);
+/* Under the question: where it is changed later (Options, on the title's
+ * menu and the PET's) */
+const char *analytics_later(void);
 /* The keys' line under it: "J: choose   K: no" at the first start, where
  * B answers no; "K: back" asked again, where B leaves the answer be */
 void analytics_keys(const char *a, const char *b, bool first, char *out, size_t n);
