@@ -388,7 +388,7 @@ int padmap_parse(const char *text, PadMap *m, char *errors, int size) {
 int padmap_format(const PadMap *m, char *out, int size) {
 	int n = snprintf(out, (size_t)size,
 		"# Cyberworld Endless: the controllers' buttons, as the controls screen sets\n"
-		"# them (Options' Controls: SELECT on the title screen, or OPTIONS in the touch\n"
+		"# them (Options' Controls: the title's menu, the PET's in a run, or the touch\n"
 		"# controls' menu). Each line gives a GBA button its buttons, as SDL names\n"
 		"# them: a b x y back guide start leftstick rightstick leftshoulder\n"
 		"# rightshoulder dpup dpdown dpleft dpright misc1 paddle1 paddle2 paddle3\n"

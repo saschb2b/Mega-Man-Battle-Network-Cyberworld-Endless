@@ -1,14 +1,15 @@
 /* The PET's Save as the run's (docs/PET.md): A on it, disabled in a run,
- * closes the PET and saves the run where MegaMan stands. Comm keeps BN6's
- * grey; the dive's report and records are Dad's mail (pet_text.h). The
- * KeyItem screen's NetPass and Jukebox open their screens over it. */
+ * closes the PET and saves the run where MegaMan stands. Comm is the
+ * game's Options (pet_options.h); the dive's report and records are
+ * Dad's mail (pet_text.h). The KeyItem screen's NetPass and Jukebox open
+ * their screens over it. */
 #ifndef CW_PET_H
 #define CW_PET_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/* Once, on the core's ROM copy: Save lit and taken by the engine. */
+/* Once, on the core's ROM copy: Save and Options lit and taken by the engine. */
 void pet_install(void);
 /* Each game frame: Save chosen closes the PET, then saves on the map. */
 void pet_update(void);

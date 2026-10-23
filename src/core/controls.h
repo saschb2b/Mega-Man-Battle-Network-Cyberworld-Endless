@@ -1,7 +1,7 @@
 /* The controls screen (issue #37): which of the controller's buttons, and
  * on a desktop or in a browser which keys, are the GBA's A, B, L, R, START
  * and SELECT, with presets for A and B. Opened from Options (options.h:
- * SELECT on the title, OPTIONS in the touch controls' menu), over whatever
+ * the title's menu, the PET's, the touch controls' menu), over whatever
  * runs, which waits under it, its frame, picture, Back and taps passed on
  * from there. It reads the pads' own buttons (pads_menu_*), never the map
  * it edits, takes taps on its rows, and puts a new map in play only once

@@ -5,15 +5,14 @@
  * the plate's. Behind it the battle backgrounds of the areas a run passes
  * through take turns, scrolling and animated as in battle. PRESS START,
  * NEW GAME / CONTINUE, the cursor and the copyright line are the game's,
- * and NEW GAME over a saved run asks in the game's chat box. */
+ * OPTIONS under them set from its letters (title_menu.h), and NEW GAME
+ * over a saved run asks in the game's chat box. */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "title_lines.h"
 #include "audio.h"
-#include "controls.h"
 #include "options.h"
 #include "backdrop.h"
 #include "chatbox.h"
@@ -29,6 +28,8 @@
 #include "saves.h"
 #include "second.h"
 #include "text.h"
+#include "title_menu.h"
+#include "title_summary.h"
 
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
 #include "weekly.h"
@@ -39,8 +40,6 @@
 #define LEAVE_WHITE 24   /* jacking in: the net rushes by into white... */
 #define LEAVE_FRAMES 40  /* ...which fades to black */
 #define SUMMARY_MIN 60   /* frames before the summary can be closed */
-#define SUMMARY_FACE_X 30   /* Lan's face on it */
-#define SUMMARY_FACE_Y 66
 #define SHOW_FRAMES 600  /* each backdrop's turn */
 #define SWAP_FRAMES 12   /* mosaic out and in between them */
 #define ASK_FIRST "Start over? We'd lose"   /* the question's first line */
@@ -321,10 +320,9 @@ static void enter(void) {
 
 static void jack_in(void);
 
-/* SELECT, on the title and its menu: the controls screen (issue #37); on
- * the 3DS, whose buttons are the console's own, the anonymous statistics'
- * question, its one setting (issue #104), where the build can send; with
- * L held, the developer's sprite gallery, which SELECT alone opened
+/* SELECT, on the title and its menu: Options, as the menu's OPTIONS
+ * (a quiet shortcut the hint no longer names: the row is what shows);
+ * with L held, the developer's sprite gallery, which SELECT alone opened
  * before. R: the ROMs' screen, the launcher, to add BN5 after the first
  * start (issue #97), where the build has one. L alone: SAVES (saves.h),
  * kept off the menu's ROM-drawn rows. True when it took the press. */
@@ -341,6 +339,24 @@ static bool select_pressed(void) {
 		return true;
 	}
 	scene_set(&scene_gallery);
+	return true;
+}
+
+/* The menu's keys but NEW GAME's and CONTINUE's: SELECT's and L's and R's
+ * (select_pressed), the cursor's, and OPTIONS chosen, the last row
+ * (options.h). True where they took the frame, NEW GAME and CONTINUE
+ * left to `ok`. */
+static bool menu_input(bool ok) {
+	if (select_pressed()) return true;
+	int rows = title_menu_rows(S.has_save);
+	if (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN)) {
+		S.cursor = (S.cursor + (btn_repeat(BTN_UP) ? rows - 1 : 1)) % rows;
+		audio_sfx(SFX_CURSOR);
+	}
+	if (!ok) return true;
+	if (S.cursor != rows - 1) return false;
+	options_open();
+	audio_sfx(SFX_SELECT);
 	return true;
 }
 
@@ -672,10 +688,7 @@ static void update(void) {
 		if (!ok) return;
 		S.confirm = false;
 	} else {
-		if (select_pressed()) return;
-		int items = S.has_save ? 2 : 1;
-		if (items > 1 && (btn_repeat(BTN_UP) || btn_repeat(BTN_DOWN))) { S.cursor ^= 1; audio_sfx(SFX_CURSOR); }
-		if (!ok) return;
+		if (menu_input(ok)) return;
 		if (S.cursor == 0 && S.has_save) {
 			S.confirm = true;
 			S.yes = false;
@@ -780,37 +793,6 @@ static void found_draw(int x0, int y0) {
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 
-/* The word under the picture: (a keyboard's Start, where no controller is:
- * a PC player had no word of which key it is) ENTER before the menu, and
- * with the menu where the controls are set, on the player's own SELECT
- * (controls_word: "R", "Minus", "SELECT"), SAVES on L, and the ROMs, on
- * R, where the launcher is (issue #97: no way to add BN5 had been found);
- * on the 3DS its SELECT's statistics, where the build can send them */
-static void hint_draw(int x0, int y0) {
-	SDL_Color grey = rgba(150, 160, 190, 255);
-	if (!S.menu && !S.pressed && controls_keyboard_only()) minifont_draw_centered(x0 + CORE_W / 2, y0 + 138, "ENTER", grey, 1);
-#ifdef __3DS__
-	if (!S.menu || S.confirm) return;
-	char hint[64];
-	snprintf(hint, sizeof hint, "SELECT: Options   L: %s", saves_word_hint());
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
-#else
-	if (!S.menu || S.confirm) return;
-	/* (controls_word's own buffer, one word at a time) */
-	char hint[80], l[32];
-	snprintf(l, sizeof l, "%s", controls_word(BTN_L));
-	snprintf(hint, sizeof hint, "%s: Options  %s: %s", controls_word(BTN_SELECT), l, saves_word_hint());
-	if (launcher_here()) {
-		size_t m = strlen(hint);
-		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", controls_word(BTN_R));
-	}
-	/* (in the rows between the logo and the menu: under NEW GAME it ran
-	 * into the build's line and the best layer's once SAVES joined it,
-	 * and CONTINUE's row hides it there) */
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
-#endif
-}
-
 /* the top: the marks and the note over them, neither over a run's summary
  * (a start whose title first showed a summary drew "BN5 found" over
  * "MegaMan was deleted", session 68) */
@@ -818,89 +800,6 @@ static void top_draw(int x0, int y0) {
 	if (S.summary) return;
 	marks_draw(x0, y0);
 	found_draw(x0, y0);
-}
-
-/* a helped run's helpers, small over its summary's title (docs/META.md:
- * the summary names a helped run): "HELP: HP+ ALL *" */
-static void helpers_named(int cx, int y) {
-	if (!(run.helpers & ((1 << HELPERS) - 1))) return;
-	char s[48] = "Help:";
-	for (int h = 0; h < HELPERS; ++h)
-		if (run.helpers >> h & 1) {
-			size_t m = strlen(s);
-			snprintf(s + m, sizeof s - m, " %s", meta_helper(h)->name);
-		}
-	minifont_draw_centered(cx, y, s, rgba(150, 160, 190, 255), 1);
-}
-
-/* The finished run's summary over its area: how it ended, how far, the
- * Library, the best, Dad's and Lan's words, what it opened or the
- * closest goal, and a helped run's helpers */
-static void summary_draw(int x0, int y0) {
-	SDL_Color gold = rgba(255, 230, 90, 255), sky = rgba(170, 200, 255, 255);
-	int x = x0 + CORE_W / 2;
-	helpers_named(x, y0 + 2);
-	if (title_won) text_draw(x, y0 + 8, "The Nest has fallen!", gold, TEXT_CENTER);
-	else text_draw(x, y0 + 8, "MegaMan was deleted", rgba(255, 120, 120, 255), TEXT_CENTER);
-	if (title_cause[0]) text_draw(x, y0 + 22, title_cause, sky, TEXT_CENTER);
-	/* Lan at his PET, and how far they got */
-	Sprite *lan = sprite_get(SPR_MUGSHOT, 0x00);
-	if (lan) sprite_draw_frame(lan, 0, 0, x0 + SUMMARY_FACE_X, y0 + SUMMARY_FACE_Y, false, 0, 0);
-	int lx = x0 + 70, rx = x0 + CORE_W - 14;
-	text_draw(lx, y0 + 40, "Reached", WHITE, TEXT_LEFT);
-	text_drawf(rx, y0 + 40, WHITE, TEXT_RIGHT, "Layer %d", run_reached());
-	text_draw(lx, y0 + 52, "Viruses deleted", WHITE, TEXT_LEFT);
-	text_drawf(rx, y0 + 52, WHITE, TEXT_RIGHT, "%d", run.viruses_deleted);
-	text_draw(lx, y0 + 64, "Navis deleted", WHITE, TEXT_LEFT);
-	text_drawf(rx, y0 + 64, WHITE, TEXT_RIGHT, "%d", run.bosses_beaten);
-	/* the Library and what the run added (docs/META.md); a dive's none, its week's best below */
-	text_draw(lx, y0 + 76, "Library", WHITE, TEXT_LEFT);
-	int lib = meta_library_count(-1), added = title_dive ? 0 : meta_library_new();
-	if (added) text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d (+%d)", lib, added);
-	else text_drawf(rx, y0 + 76, WHITE, TEXT_RIGHT, "%d", lib);
-	if (title_new_best && !title_dive) text_draw(lx, y0 + 89, "New best!", gold, TEXT_LEFT);
-	else {
-		text_draw(lx, y0 + 89, title_dive ? "This week" : "Best", gold, TEXT_LEFT);
-		text_drawf(rx, y0 + 89, gold, TEXT_RIGHT, "Layer %d", title_dive ? title_dive : profile.best_depth);
-	}
-	/* what the run opened for the next (docs/META.md): three lines
-	 * where it opened three, the lines above drawn closer (a won run
-	 * opened the endless net, a threat, a mark and a Cross start, and
-	 * the summary named two) */
-	const char *open[3];
-	int n = meta_unlocked(open, 3), up = n >= 3 ? 2 : 0;
-	/* Dad's backup, as his call promised, and Lan's word; a won run
-	 * jacks out */
-	if (title_won) {
-		text_draw(x, y0 + 102 - up, summary_words(SUMMARY_WON_HOW), sky, TEXT_CENTER);
-		text_draw(x, y0 + 114 - 2 * up, summary_words(SUMMARY_WON), WHITE, TEXT_CENTER);
-	} else {
-		/* (a line the game's width holds: "brought MegaMan home." ran off
-		 * both sides where the screen shows no more than the game's 240
-		 * pixels, a 480 x 320 handheld's or a 640 x 480 filled, issue #36) */
-		text_draw(x, y0 + 102 - up, summary_words(SUMMARY_LOST_HOW), sky, TEXT_CENTER);
-		/* (a first fight with the guardian who deleted him, named on
-		 * the line above: what it gave, his battle data, which the
-		 * next briefing reads, before a new best, which "New best!"
-		 * says above; "We've got BlastMan's battle data now!" ran off
-		 * the screen's sides) */
-		int said = title_learned[0] ? SUMMARY_LEARNED : title_new_best ? SUMMARY_BEST : run_reached() <= 2 ? SUMMARY_ROUGH : SUMMARY_FURTHER;
-		text_draw(x, y0 + 114 - 2 * up, summary_words(said), WHITE, TEXT_CENTER);
-	}
-	/* ... else the closest goal */
-	int y = y0 + (n >= 3 ? 124 : 129);
-	for (int i = 0; i < n; ++i, y += 12) text_drawf(x, y, gold, TEXT_CENTER, "Unlocked: %s", open[i]);
-	const char *next = title_dive ? NULL : meta_next_goal();
-	if (next && n < 2) text_draw(x, y, next, sky, TEXT_CENTER);
-}
-
-/* CONTINUE's word on where the saved run goes on: its layer, or home (a
- * run saved at home said "Layer 7" to a playtester saved in AsterLand,
- * session 73) */
-static void continue_label(int x, int y) {
-	if (!S.has_save || !S.saved_depth) return;
-	if (S.saved_home) text_draw(x, y, "Home", WHITE, TEXT_LEFT);
-	else text_drawf(x, y, WHITE, TEXT_LEFT, "Layer %d", S.saved_depth);
 }
 
 static void draw(void) {
@@ -923,7 +822,7 @@ static void draw(void) {
 		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 	top_draw(x0, y0);
 
-	if (S.summary) { summary_draw(x0, y0); return; }
+	if (S.summary) { title_summary_draw(x0, y0); return; }
 	/* a line above the copyright, the marks holding the top: the build
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the menu's CONTINUE names its own layer there;
@@ -945,21 +844,10 @@ static void draw(void) {
 		for (int i = 0; i < 4; ++i) rom_tiles(text + (uint32_t)(1 + i * 8) * 32, T.text_pal, x0 + 52 + i * 32, y0 + 120, 4, 2, 0);
 		rom_tiles(text + 33u * 32, T.text_pal, x0 + 180, y0 + 120, 1, 2, 0);
 	}
-	hint_draw(x0, y0);
+	title_hint_draw(x0, y0, S.menu, S.pressed, S.confirm || options_shown());
 	if (S.menu) {
-		/* NEW GAME (tiles 35-54) and CONTINUE (55-74): 32x16, 32x16, 16x16 */
-		int n = S.has_save ? 2 : 1;
-		for (int i = 0; i < n; ++i) {
-			uint32_t first = i == 0 ? 35 : 55;
-			int y = y0 + 112 + i * 16;
-			rom_tiles(text + first * 32, T.menu_pal, x0 + 88, y, 4, 2, 0);
-			rom_tiles(text + (first + 8) * 32, T.menu_pal, x0 + 120, y, 4, 2, 0);
-			rom_tiles(text + (first + 16) * 32, T.menu_pal, x0 + 152, y, 2, 2, 0);
-		}
-		continue_label(x0 + 170, y0 + 130);
-		/* the arrow cycles three frames, 6 frames each */
-		int f = ((S.t - S.menu) / 6) % 3;
-		if (!S.confirm) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + 73, y0 + 113 + S.cursor * 16, 2, 2, 0);
+		TitleMenu m = { S.has_save, S.saved_depth, S.saved_home, S.cursor, S.t - S.menu, S.confirm };
+		title_menu_draw(x0, y0, &m);
 	}
 	if (S.confirm) {
 		/* over the menu, MegaMan asks as in the game's chats: two lines,

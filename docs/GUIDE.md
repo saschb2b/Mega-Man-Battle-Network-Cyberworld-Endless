@@ -412,10 +412,13 @@ one alone is a small one held sideways.
 title, in a battle too. **CONTINUE** takes the run up at its last
 checkpoint; what came after it is lost.
 
-**Options** holds the game's settings: **Select** on the title screen opens
-it on every system (the line under the menu names the button it is on), and
-on a phone or tablet so does **OPTIONS** in the touch controls' menu, mid-run
-too. Its **Controls** opens the controls screen (not on the 3DS, whose
+**Options** holds the game's settings, a press away wherever you are: the
+title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select
+there opens it too), and in a run the PET's menu (START on the map) has
+**Options** in the place BN6 gives Comm, which a run never used; the game
+waits under it, and B brings you back to the PET where you were. On a
+phone or tablet the touch controls' menu has **OPTIONS** as well. Its
+**Controls** opens the controls screen (not on the 3DS, whose
 buttons are its own), **Display** the picture ([Screen](#screen)),
 **Audio** the sound ([Sound](#sound)), and
 **Statistics** your answer to the statistics' question, where the game can
@@ -1009,8 +1012,8 @@ black borders around it. Where a whole number would leave it a quarter
 smaller or more than the screen allows, it fills the screen instead, each
 pixel's edge a little soft: on a 640x480 screen (an RG35XX Pro, an RG35XX
 Plus) it is 640x427 rather than 480x320. That is **Auto**, the default.
-Options' **Display** (Select on the title, or **OPTIONS** in a phone's
-touch menu) has the other ways on its **Scale** line, changed at once and
+Options' **Display** (on the title's menu, or the PET's in a run) has the
+other ways on its **Scale** line, changed at once and
 kept:
 
 - **Integer**: whole pixels everywhere, every pixel the same size.
@@ -1063,8 +1066,8 @@ the GBA makes of that mix carries a bright hiss above the music.
 recording of it on the same songs: the highs from 5 kHz up taken down as it
 has them (-4.5 dB at 8 kHz, -10 at 10 kHz, -18 at 13 kHz) and the deepest
 bass a little (-3 dB around 100 Hz). **GBA**, the default, leaves it as the
-cartridge plays it. Choose in Options' **Audio** (Select on the title, or
-**OPTIONS** in a phone's touch menu during a run): Left, Right or A on
+cartridge plays it. Choose in Options' **Audio** (on the title's menu, or
+the PET's in a run): Left, Right or A on
 **Sound** changes it at once, so you hear it, and it is kept. The browser
 player's menu has a **Sound** button too, and `sound = soft` or
 `sound = gba` in `settings.ini` in the data folder sets it as well.
@@ -1135,9 +1138,9 @@ any website does: it turns it into a country (and a region or city where
 its location database knows one) and counts one player's events together
 by a one-way hash that changes every month, and does not keep the address.
 
-To change your answer, press SELECT on the title (the R key on a keyboard)
-for **Options**, whose **Statistics** line shows it; A on the line asks
-again, on the 3DS too. `statistics = on`
+To change your answer, open **Options** (on the title's menu, or the PET's
+in a run), whose **Statistics** line shows it; A on the line asks again,
+on the 3DS too. `statistics = on`
 or `off` in `settings.ini` in the data folder sets it too; without the
 line the game asks. Each request goes out once, beside the game's frames,
 never in their way; with no network it is dropped, and after three

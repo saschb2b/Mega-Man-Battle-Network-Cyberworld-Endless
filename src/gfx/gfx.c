@@ -360,6 +360,8 @@ static const uint8_t *tile_data(uint32_t tile) {
 	return blocks[b] && off + 32 <= block_len[b] ? blocks[b] + off : NULL;
 }
 
+const uint8_t *gfx_tile_bytes(uint32_t tile) { return tile_data(tile); }
+
 typedef struct { uint32_t key_tile, key_pal; uint8_t flip, used; SDL_Texture *tex; } TileEntry;
 
 static const uint8_t *pal_bytes(uint32_t pal) { return chips_offset_bytes(pal, 32); }
