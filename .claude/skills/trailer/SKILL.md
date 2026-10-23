@@ -65,7 +65,7 @@ Original, always: the habits of a source song, never its melody, chords in
 its order, or samples. The repository must never hold Capcom's sound; a
 recording the owner hands over stays in `.build/`.
 
-Read `music_rules.md` first. 0.13.0's piece was written from "Surge of
+Read `music_rules.md` first, its Discipline above all. 0.13.0's piece was written from "Surge of
 Power!"'s habits and still read as "AI-ish" to the owner: the habits had
 become a wall of held notes in clean tones, one rhythm cell in every bar,
 nothing between 120 and 500 Hz. The rules there say, with the numbers
@@ -93,7 +93,9 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
    `python3 tools/trailer_music.py OUT.wav --piece sketch_a` to
    `.build/trailer-sketches/` as WAV and MP3 (ffmpeg in its image), and let
    the owner choose by ear (owner, 22 October 2026). The chosen one grows
-   into the piece.
+   into the piece. Every sketch passes step 7's checks before the owner
+   hears it, its parts moving as the source's do: the owner hears the
+   difference (0.15.0's first sketch A, "all over the place").
 4. **Write the habits down** as the piece's docstring, as
    `v0_3_0_music.py`, `v0_12_0_music.py` and the sketches do: tempo, key
    and mode, each channel's job, the kit's pattern, the form, then what
@@ -112,8 +114,10 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
    into every section; a drop that thins the band, kept short; an ending
    cadence that rings. The kit's own sampled instruments and
    `HARDWARE = 32768` are in `music_rules.md`, Mix and timbre.
-7. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE`
-   (or `--piece NAME`): no bar near clipping, loudness steady through a
+7. **Check it without ears**: `scripts/music_check.py VERSION --ref FILE
+   --source GAME SONG [--offset TICKS]` (or `--piece NAME`): every part's
+   motion beside the source song's, "busier than the source: none"
+   (`music_rules.md`, Discipline); no bar near clipping, loudness steady through a
    section, the four-band balance and the punch near the reference's (sketch A
    against "Surge of Power!": 54/31/13/1 against 57/28/13/1, 7.4 dB
    against 7.8), the lead's rubs against the harmony read one by one (a

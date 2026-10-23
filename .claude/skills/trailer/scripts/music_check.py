@@ -11,12 +11,17 @@ in ../music_rules.md.
     python3 .claude/skills/trailer/scripts/music_check.py [VERSION] [--ref AUDIO] [--piece NAME]
 
 VERSION is a trailer's (tools/trailers/), the current one by default;
---piece NAME a module there that is no trailer's (a sketch: sketch_a). AUDIO
+--piece NAME a module there that is no trailer's (a sketch: sketch_a).
+--source GAME SONG [--offset TICKS] reads the song the piece is in the
+manner of from the ROM (song_habits.py's reader) and sets each part's
+motion beside its own: how many notes a bar, how many different pitches,
+how often a note repeats, steps or leaps (music_rules.md, Discipline). AUDIO
 is any recording ffmpeg reads (the owner's, kept in .build/ and never
 committed); it is decoded to 8 kHz mono in the build's ffmpeg image. The
 wave, the roll and the decoded reference go to .build/trailer-VERSION/.
 """
 import array
+import collections
 import importlib
 import math
 import os
@@ -29,6 +34,7 @@ import wave
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build  # noqa: E402
 import trailer_music as tm  # noqa: E402
 import trailers  # noqa: E402
@@ -92,6 +98,115 @@ def clashes(piece):
     print(f'lead notes rubbing the harmony: {len(rubs)} of {len(strong)}' + (': ' + ', '.join(rubs) if rubs else ''))
 
 
+MOTION = ('same', 'step', 'skip', 'leap', 'big leap')
+
+
+def motion(notes):
+    """A part's motion from its (tick, key) onsets: notes and different
+    pitches a bar (means over the bars it plays in) and its intervals'
+    shares, %: the same note, a step (1-2 semitones), a skip (3-4), a leap
+    (5-7), a big leap (more)."""
+    notes = sorted(notes)
+    ks = [k for _, k in notes]
+    ivs = [b - a for a, b in zip(ks, ks[1:])]
+    size = {m: 0 for m in MOTION}
+    for i in ivs:
+        a = abs(i)
+        size['same' if a == 0 else 'step' if a <= 2 else 'skip' if a <= 4 else 'leap' if a <= 7 else 'big leap'] += 1
+    bars = {}
+    for t, k in notes:
+        bars.setdefault(t // tm.BAR, []).append(k)
+    nb = len(bars) or 1
+    tot = len(ivs) or 1
+    return {'notes': sum(len(b) for b in bars.values()) / nb, 'pitches': sum(len(set(b)) for b in bars.values()) / nb,
+            **{m: 100 * size[m] / tot for m in MOTION}}
+
+
+def piece_parts(piece):
+    """The piece's parts by role: the lead square, the backing square, the
+    wave's bass, and the sampled lead (its echo, the same key within four
+    ticks, left out)."""
+    s = piece.arrangement()
+    parts = {'lead': [(t, k) for t, n, k, *_ in s.psg['sq1']], 'backing': [(t, k) for t, n, k, *_ in s.psg['sq2']],
+             'bass': [(t, k) for t, n, k, *_ in s.psg['wave']]}
+    leads = getattr(piece, 'SAMPLED_LEADS', ('dlead',))
+    seen, sampled = {}, []
+    for t, n, inst, k, *_ in sorted(s.ds, key=lambda e: e[0]):
+        if inst in leads:
+            if k in seen and t - seen[k] <= 4:
+                continue
+            seen[k] = t
+            sampled.append((t, k))
+    if sampled:
+        parts['sampled lead'] = sampled
+    return parts
+
+
+def source_parts(game, song_id, offset):
+    """The source song's parts by the same roles, read from the ROM: of
+    its squares the one with fewer notes a bar the lead, the other the
+    backing; its wave the bass; its highest Direct Sound melody the
+    sampled lead."""
+    import song_habits as sh
+    data, table = sh.rom(game)
+    song = sh.Song(data, table, song_id)
+    squares, waves, ds = [], [], []
+    for pc in song.tracks:
+        notes, _, _ = song.walk(pc)
+        if not notes:
+            continue
+        kinds = collections.Counter(song.voice(n[4])['kind'] for n in notes if n[4] is not None)
+        kind = kinds.most_common(1)[0][0] if kinds else ''
+        part = [(t - offset, k) for t, k, *_ in notes if t >= offset]
+        if kind.startswith('square'):
+            squares.append(part)
+        elif kind == 'wave':
+            waves.append(part)
+        elif kind == 'Direct Sound':
+            ds.append(part)
+    parts = {}
+    squares.sort(key=lambda p: motion(p)['notes'])
+    if squares:
+        parts['lead'] = squares[0]
+    if len(squares) > 1:
+        parts['backing'] = squares[-1]
+    if waves:
+        parts['bass'] = waves[0]
+    if ds:
+        parts['sampled lead'] = max(ds, key=lambda p: sum(k for _, k in p) / len(p))
+    return parts
+
+
+def discipline(piece, source=None):
+    """Each part's motion, beside the source song's where it is given: a
+    part far busier than its counterpart (half again as many different
+    pitches a bar, or 15 points more leaping, or 15 fewer repeated notes)
+    is flagged. The owner's word on a first sketch for 0.15.0, its bass
+    walking to a new note on every place and every part moving at once:
+    "all over the place" (music_rules.md, Discipline)."""
+    mine = {role: motion(notes) for role, notes in piece_parts(piece).items()}
+    theirs = {role: motion(notes) for role, notes in source_parts(*source).items()} if source else {}
+    print('parts\' motion (notes a bar, different pitches a bar; intervals %: ' + ', '.join(MOTION) + ')'
+          + (', the source\'s under each' if theirs else ''))
+    flags = []
+    for role, m in mine.items():
+        print(f'  {role:12s} {m["notes"]:5.1f} {m["pitches"]:4.1f}  ' + ' '.join(f'{m[k]:3.0f}' for k in MOTION))
+        o = theirs.get(role)
+        if not o:
+            continue
+        print(f'  {"(source)":12s} {o["notes"]:5.1f} {o["pitches"]:4.1f}  ' + ' '.join(f'{o[k]:3.0f}' for k in MOTION))
+        if m['pitches'] > 1.5 * o['pitches'] + 0.5:
+            flags.append(f'{role}: {m["pitches"]:.1f} different pitches a bar against {o["pitches"]:.1f}')
+        if m['leap'] + m['big leap'] > o['leap'] + o['big leap'] + 15:
+            flags.append(f'{role}: leaps {m["leap"] + m["big leap"]:.0f}% against {o["leap"] + o["big leap"]:.0f}%')
+        if m['same'] < o['same'] - 15:
+            flags.append(f'{role}: repeats {m["same"]:.0f}% against {o["same"]:.0f}%')
+    if theirs:
+        print('busier than the source: ' + ('; '.join(flags) if flags else 'none'))
+    else:
+        print('(no --source: nothing to hold the parts against)')
+
+
 def roll(score, bars, path):
     """The score drawn: a pixel a tick, the squares blue (sq1) and yellow
     (sq2), the wave's bass green, the stabs pink, pads violet, brass orange,
@@ -130,6 +245,15 @@ def main():
         i = args.index('--piece')
         name = args[i + 1]
         del args[i:i + 2]
+    source = None
+    if '--source' in args:
+        i = args.index('--source')
+        source = [args[i + 1], int(args[i + 2], 0), 0]
+        del args[i:i + 3]
+        if '--offset' in args:
+            i = args.index('--offset')
+            source[2] = int(args[i + 1], 0)
+            del args[i:i + 2]
     version = name or (args[0] if args else trailers.CURRENT)
     piece = importlib.import_module('trailers.' + name) if name else trailers.music(version)
     work = os.path.join(ROOT, '.build', 'trailer-' + version)
@@ -170,6 +294,7 @@ def main():
         print('reference bass/body/mids/top %:', bands(x[8000 * 10:8000 * 40] or x, 8000, (120, 500, 2000)))
         print(f'reference punch: {punch(x[8000 * 10:8000 * 40] or x, 8000, piece.BPM):.1f} dB')
     clashes(piece)
+    discipline(piece, source)
     roll(piece.arrangement(), piece.BARS, os.path.join(work, 'roll.png'))
     print('wrote', os.path.relpath(path, ROOT), 'and', os.path.relpath(os.path.join(work, 'roll.png'), ROOT))
 
