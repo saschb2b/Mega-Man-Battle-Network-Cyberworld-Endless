@@ -52,8 +52,12 @@ static void work_out_ways(void) {
 	taken = 0;
 	nolder = pacing_older_acts(run.depth, older);
 	if (!emu_debug_on()) return;
-	for (int k = 0; k < nways; ++k) fprintf(stderr, "home: way %d area %d guardian %d (meets %d)%s\n", k, ways[k].biome, ways[k].navi,
-		ways[k].meets, sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+	for (int k = 0; k < nways; ++k) {
+		int px, py;
+		lanhp_portal_spot(k, &px, &py);
+		fprintf(stderr, "home: way %d area %d guardian %d (meets %d), portal at %d,%d%s%s\n", k, ways[k].biome, ways[k].navi,
+			ways[k].meets, px, py, ways[k].board ? ", a dark layer that way" : "", sealed && k == nways - 1 ? ", the dark way sealed after it" : "");
+	}
 	for (int j = 0; j < nolder; ++j) fprintf(stderr, "home: back %d to depth %d area %d%s\n", j, older[j], biome_for_depth(older[j]),
 		run.back_spent >> j & 1 ? ", taken this visit" : "");
 }

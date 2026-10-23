@@ -138,6 +138,8 @@ static bool sprite_colour(uint32_t c) {
 }
 
 void director_tint_board(uint32_t *px) {
+	/* (at home, the dark way's portal marked) */
+	lib_way_tint(px);
 	if (!S.on || S.look) return;
 	for (int y = 0; y < (S.box ? BOX_TOP : EMU_H); ++y)
 		for (int x = 0; x < EMU_W; ++x) {

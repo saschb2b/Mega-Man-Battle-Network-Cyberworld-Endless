@@ -567,6 +567,17 @@ offered it), so a CONTINUE knows. MegaMan says so at the way's portal
 says "A layer here has gone dark" in its motto's place, in Nebula's purple.
 The short net meets one in acts 2 and 3, the endless net in acts 2 to 4.
 `--dev dark` makes every act's second layer from the second a dark one.
+With BN5's ROM (without it there is no dark layer, nothing to mark) the
+way's portal reads dark at a glance before MegaMan steps on it: its own
+colours where it is drawn (the pink pad's magenta, a link square's glass)
+take the shades of BN5's dark panels' swirl, palette 9 read from BN5's
+ROM and stepped on BN5's timing (`BN5_LIB_DARK_FRAMES`: at rest 120
+frames, then 16, 16, 32, 16, 16), its lightest the ramp's middle, its
+darkest its end (`src/director/liberation_way.c`). The frame alone is
+recoloured, within the portal's zone (its cells and its art, `lanhp.c`),
+placed by BN6's own camera (eToolkit +0x0C's render point), so BN6's
+palettes and their scripts, and the sprites over it, are as they were;
+with MegaMan at the portal the mark goes and his sprite stays whole.
 
 **The layer.** `layer_generate` with `layer_make_dark` (`src/net/net_gen.c`)
 builds the layer's floor, flat, its arrival and exit, and nothing else of a
