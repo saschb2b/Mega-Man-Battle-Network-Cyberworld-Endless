@@ -39,6 +39,10 @@
 #define BN5_LIB_LOOK_OF      0x0804F0D4u /* a panel's look: the look block's pointer at +0x10 + 4 x its kind (the kinds are the looks' order: */
                                          /* ... 2 a panel mid-dissolve, 4 the "+5", 0x0B the Darkloid's ring, grey until the DarkHoles fall) */
 #define BN5_LIB_BOARD_SETUP  0x0804EEE2u /* the board drawn: the overlay's tiles copied, then each panel's look and its edges */
+#define BN5_LIB_CORNERS      0x0804ECF0u /* a panel's four look bytes made from its neighbours: each corner's three (its two sides, 1 on x */
+                                         /* ... and 4 on y, the diagonal 2) that are walkable for the Navi in play: +4 W NW N, +5 E NE N, */
+                                         /* ... +7 E SE S, +6 W SW S; a neighbour counts where its flags +1 lack 0x10 and its kind's bit */
+                                         /* ... is in the Navi's unit record +0x0C (MegaMan's 0x1001: clean and start) */
 #define BN5_LIB_EDGES        0x0804F204u /* a panel's edges: its four look bytes (+4-+7), one a side, each a list from BN5_LIB_EDGE_TABLES */
 #define BN5_LIB_EDGE_TABLES  0x0804FB94u /* ... four sides' tables of lists (tile 0x88xx, x, y; 0xFF ends them) */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
@@ -47,8 +51,11 @@
 #define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
 #define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 as the capture held it: the dark panels' swirl */
-#define BN5_LIB_PULSE        0x08614C4Cu /* the pulse: six palettes of 0x20 bytes copied in turn into palette 9's */
-#define BN5_LIB_PULSE_FRAMES 6           /* ... buffer, each held one to six frames (the map's palette animation, assumed) */
+#define BN5_LIB_PULSE        0x08614C4Cu /* palette 9 (the dark panels) at rest; every 132 frames a glint: the next five palettes, */
+#define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
+#define BN5_LIB_BREATH       0x08614D10u /* palette 10: six palettes 0x20 apart stepped there and back, 12 frames each (8 at the last) */
+#define BN5_LIB_BLINK        4           /* a freed panel's look toggles between its old kind and clean every this many frames, */
+#define BN5_LIB_BLINKS       14          /* ... this many times, once the board has faded back in (27 frames), then stays clean */
 #define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
 #define BN5_LIB_DARK_FRAMES  0x08614B24u /* palette 9 as the engine steps it (liberation_look.c): four, 0x20 apart, the last */
 #define BN5_LIB_HOLE_FRAMES  0x08614BA8u /* ... BN5_LIB_PAL_DARK; palette 10's four, BN5_LIB_PAL_HOLE the second; their magenta */
@@ -56,6 +63,13 @@
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
+
+/* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
+#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
+#define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
+#define BN5_LIB_ICONS_SPRITE 0x0848D368u /* list 7 index 21: the items' icons that rise over a freed panel (a heart's tiles at 0x0848DFF8) */
+#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... their palette (OBJ palette 3) */
+#define BN5_LIB_BANNER_TILES 0x0873CF74u /* about here, the battle's "LIBERATE SUCCESS!": five 32x16 OBJs (OBJ palette 11), not traced */
 
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */

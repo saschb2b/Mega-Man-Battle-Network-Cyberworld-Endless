@@ -240,9 +240,14 @@ liberation and an item's find; the recordings are in the pull request):
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
   BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
   ring until the DarkHoles fall); each panel's four look bytes pick its
-  sides' edge pieces (`BN5_LIB_EDGES`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`; the
-  dark's pulse six palettes from `0x08614C4C` copied into palette 9 in
-  turn, each held one to six frames. Located by their bytes in a
+  corners' edge pieces (`BN5_LIB_EDGES`), each byte the three neighbours
+  around that corner the Navi in play can walk (`BN5_LIB_CORNERS`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`. The
+  dark panels' palette rests at `0x08614C4C` and glints every 132 frames
+  through the next five (held 6, 2, 2, 1, 1 frames); palette 10
+  breathes over six palettes from `0x08614D10`, 12 frames a step.
+- **The freed panel** blinks once the board has faded back in: its
+  look toggles between its old kind and clean every 4 frames, 14 times,
+  then stays clean. Located by their bytes in a
   capture; the routine that draws a panel from its kind and its four look
   bytes (the panel list's +4-+7), the pulse's table and the other maps'
   sets are still to be traced.
@@ -616,13 +621,21 @@ down (fit on the dumped map: the looks over the frames' dark middles, 1.6%
 over the void), their tiles copied from BN5's ROM to where BN5's board
 copies them (tile 864 on, VRAM taking words), palettes 9 and 10 stepped
 through BN5's frames (`BN5_LIB_DARK_FRAMES`, `BN5_LIB_HOLE_FRAMES`: the
-magenta of BN5's capture; their timing assumed). BN6 reads the tile map in place and builds each BG's
+magenta of BN5's capture; their timing assumed), and the board's two
+traced animations as BN5 times them: the glint (`BN5_LIB_PULSE`: at rest,
+every 132 frames through five more held 6, 2, 2, 1, 1) and the breath
+(`BN5_LIB_BREATH`: six frames there and back, 12 frames each, 8 at the
+last), each in the bank whose colours its first frame is (found at run
+time: banks 11 and 12, the barriers' and the BonusPanel's, a frame before
+the traced sources, which read one late). BN6 reads the tile map in place and builds each BG's
 screen map in IWRAM, copied to VRAM every frame (`src/emu/bn6_map.h`): a
 look goes into the map's layer 1, and BG2's screen map is made from it for
 the picture a while after the looks change (the map's layer 1 and BG2
 cleared first, as BN5's BG2 holds the looks alone; again after a battle,
-whose return loads the tile map afresh). A panel freed dissolves as BN5's
-do: dark, paled, clean, 8 frames each. The panel MegaMan faces is outlined
+whose return loads the tile map afresh). A panel freed blinks as BN5's
+do (traced): its old look while the board fades back in (27 frames), then
+clean and old by turns every 4 frames, 14 times (`BN5_LIB_BLINK`,
+`BN5_LIB_BLINKS`), then clean. The panel MegaMan faces is outlined
 in yellow, blinking (drawn by the engine: BN5's own outline not read yet).
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
