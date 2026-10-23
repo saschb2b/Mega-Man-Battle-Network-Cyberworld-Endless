@@ -1,5 +1,6 @@
 #include "online_labels.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "bn6_fields.h"
@@ -74,6 +75,22 @@ static void label_at(int x, int y, int z, const int camera[3]) {
 	labels[count].y = 82 + (y - camera[1] - x + camera[0]) / 2 - z + camera[2] - 31;
 }
 
+/* a warp's label held at the screen's edge, the way it lies (the plaza's
+ * three seen from anywhere in it, a signpost and not a Navi), a row on
+ * from one already there where two meet */
+static void warp_place(unsigned i) {
+	int w = pixfont_width(labels[i].phrase, 1) + 4, x = labels[i].x, y = labels[i].y;
+	x = x < w / 2 + 2 ? w / 2 + 2 : x > EMU_W - w / 2 - 2 ? EMU_W - w / 2 - 2 : x;
+	y = y < 18 ? 18 : y > EMU_H - 20 ? EMU_H - 20 : y;
+	for (unsigned j = 0; j < i; ++j) {
+		if (!labels[j].warp) continue;
+		int wj = pixfont_width(labels[j].phrase, 1) + 4;
+		if (abs(labels[j].y - y) < 12 && abs(labels[j].x - x) < (w + wj) / 2 + 2) y += y > EMU_H / 2 ? -12 : 12;
+	}
+	labels[i].x = x;
+	labels[i].y = y;
+}
+
 void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	count = 0;
 	drawn = shown;
@@ -124,7 +141,7 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 			labels[count].caption = NULL;
 			labels[count].warp = true;
 			labels[count].phrase = labels[count].sign;
-			++count;
+			warp_place(count++);
 		}
 }
 

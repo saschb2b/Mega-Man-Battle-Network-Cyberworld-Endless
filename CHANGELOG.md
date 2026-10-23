@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- **The Net Square is a hub and its parts.** Friends who visited
+  together lost each other: the Square was one wide plaza with its wings
+  out of sight. Now everyone arrives in a compact **welcome plaza**, its
+  landmark in the middle, the pad home, the greeter, the keeper and the
+  Board by the arrival. Three warps off its sides, BN6's own gem pads, go
+  to **Trade Central**, the **Arena** (the ring and its stands) and the
+  **stage**, each a small place of its own across the void, with the warp
+  back right where MegaMan lands. Over each warp its name in gold and who
+  is there now ("ARENA: Mira"); beside it its part's own look (the
+  Arena's braziers, the stage's cybertrees, Trade Central's board of
+  offers); L's **Look around** says which way each warp lies and who is
+  in which part. A part is a few seconds from the arrival and back. The
+  server needs the new version (`SQUARE_MAKE` 3; the wire is unchanged).
+
 ## 0.14.1 (2026-10-23)
 
 - **The PET's screens look like BN6's own.** The screens the game adds

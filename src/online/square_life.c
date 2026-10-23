@@ -492,7 +492,7 @@ void square_life_frame(const OnlineSnapshot *s) {
 	if (L.call_t) --L.call_t;
 }
 
-/* The Board stands in the void past the log-in plaza's back rim, its art
+/* The Board stands in the void past the welcome plaza's back rim, its art
  * 24 units lower (its piece's dz, layer_objs.c), so it shows over the
  * floor before the rim: a player stood there facing it and A read nothing
  * (session 74). MegaMan near where it shows, facing back towards it (up,
@@ -576,7 +576,9 @@ bool square_life_look(void) {
 
 bool square_life_warp(int i, char *text, size_t n, int *x, int *y) {
 	if (!L.ready || i < 0 || i >= SQUARE_WARPS * 2 || !online_square_gem(i / 2, i % 2, x, y)) return false;
-	int to = i % 2 ? SQ_PART_PLAZA : i / 2 + 1;
+	/* (the warps of the part MegaMan is in: the plaza's three, or his part's way back) */
+	int from = i % 2 ? i / 2 + 1 : SQ_PART_PLAZA, to = i % 2 ? SQ_PART_PLAZA : i / 2 + 1;
+	if (part_at(bn6_player_x(), bn6_player_y()) != from || talk_busy() || emu_read8(BN6_CHATBOX)) return false;
 	square_warp_label(text, n, to, L.in_part[to], L.in_name[to]);
 	return true;
 }

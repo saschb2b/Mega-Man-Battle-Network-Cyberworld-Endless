@@ -26,7 +26,7 @@ const SquarePlan *online_square_plan(void);
  * part (1). */
 bool online_square_gem(int k, int end, int *x, int *y);
 /* The Square's Mr.Progs: the channel keeper by the plaza's way in, the
- * greeter in the log-in plaza, the referee by the Arena's ring; each
+ * greeter in the welcome plaza, the referee by the Arena's ring; each
  * one's words a text archive (his talk its script 0). */
 enum { SQUARE_PROG_KEEPER, SQUARE_PROG_GREETER, SQUARE_PROG_REFEREE, SQUARE_PROGS };
 bool online_square_prog_say(int who, const uint8_t *archive, int n);

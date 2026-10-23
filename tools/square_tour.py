@@ -141,6 +141,15 @@ def steer(g, to, shots=None, until=None, most=900):
     return None
 
 
+def hold(g, frames, shots=None):
+    """`frames` of nothing pressed, every second one into `shots` where given"""
+    if not shots:
+        g.batch(str(frames))
+        return
+    for _ in range(frames // 2):
+        g.batch(f'2;shot {os.path.join(shots, "f%05d.bmp" % g.frame)}')
+
+
 def near(sq, p, reach=20):
     w = sq.world(p)
     return lambda pos: abs(pos[0] - w[0]) <= reach and abs(pos[1] - w[1]) <= reach
@@ -184,7 +193,9 @@ def tour(seed, roms):
                 os.makedirs(shots, exist_ok=True)
             for w in there:
                 frames += steer(kei, sq.world(w), shots)
-            # (beside its pad: the warp's look from the plaza, its label, its part across the void)
+            # (a panel from its pad: the warp's look from the plaza, its label, its part across the void)
+            look = steer(kei, sq.world(((hub[0] + w[0]) / 2, (hub[1] + w[1]) / 2)), shots)
+            frames += look
             kei.batch('shot ' + os.path.join(out, f'{part}-warp.bmp'))
             took = steer(kei, sq.world(hub), shots, until=near(sq, gem, 40))
             if took is None:
@@ -192,23 +203,19 @@ def tour(seed, roms):
             frames += took
             # (the warp's beam and the camera's ride, BN6's step off the gem: until MegaMan is free in the part)
             t0 = kei.frame
-            kei.batch('140')
+            hold(kei, 140, shots)
             frames += kei.frame - t0
             kei.batch('shot ' + os.path.join(out, f'{part}.bmp'))
-            if shots:
-                for _ in range(30):
-                    kei.batch(f'2;shot {os.path.join(shots, "f%05d.bmp" % kei.frame)}')
+            hold(kei, 60, shots)
             way = 0
             took = steer(kei, sq.world(gem), shots, until=near(sq, hub, 40))
             if took is None:
                 sys.exit(f'seed {seed}: no warp back from the {part} ({kei.log})')
             t0 = kei.frame
-            kei.batch('140')
+            hold(kei, 140, shots)
             way += took + kei.frame - t0
             kei.batch('shot ' + os.path.join(out, f'{part}-back.bmp'))
-            if shots:
-                for _ in range(30):
-                    kei.batch(f'2;shot {os.path.join(shots, "f%05d.bmp" % kei.frame)}')
+            hold(kei, 40, shots)
             times[part] = (frames, way)
             print(f'seed {seed} (area {sq.area}): the {part}, {frames} frames there from the arrival, {way} back', flush=True)
         # (the Arena's sign, read; then L's Look around)
@@ -216,9 +223,10 @@ def tour(seed, roms):
         kei.batch('6 A;30;6 A;40;shot ' + os.path.join(out, 'sign-who.bmp'))
         for _ in range(4):
             kei.batch('6 B;20')
-        kei.batch('6 L;40;6 A;40;shot ' + os.path.join(out, 'look.bmp'))
-        for k in range(4):
-            kei.batch(f'6 A;50;shot {os.path.join(out, f"look-{k}.bmp")}')
+        # (L's chat: the strip's hint first, the first time; then Look around, and its pages)
+        kei.batch('6 L;60;6 A;60;shot ' + os.path.join(out, 'look.bmp'))
+        for k in range(5):
+            kei.batch(f'6 A;90;shot {os.path.join(out, f"look-{k}.bmp")}')
         idle.set()
         for t in threads:
             t.join(10)

@@ -786,6 +786,24 @@ asks first, the cursor on **No**), or another one's address (`host` or
 `host:port`, as its owner gives it).
 He also moves you to the next or the last channel.
 
+#### Finding your way
+
+You arrive in the **welcome plaza**: the Square's landmark in its
+middle, the pad home beside you, the greeter, the keeper and the Board
+close by. Everyone arrives here, and everyone comes back here. Off three
+of its sides stand warps, BN6's gem pads, each with its part's name over
+it in gold and who is there now ("ARENA: Mira"):
+
+- **Trade Central**, to the upper left: the trade desk, its board of
+  offers beside the warp.
+- **The Arena**, to the upper right: the ring and its stands, the referee
+  at its foot.
+- **The stage**, to the lower left: step up and be seen.
+
+Step on a warp and MegaMan beams across; the warp back to the plaza is
+right where he lands. Press **L** and pick **Look around**: MegaMan says
+which way each warp lies and who is in which part.
+
 #### If your connection drops
 
 A hiccup doesn't send you home. When the Square stops answering for a
@@ -835,11 +853,12 @@ handheld's second display) while you are in the Square.
 
 #### In the Square
 
-A plaza with a landmark in its middle (a statue, a monument or a giant
-cybertree, by the server), a stage up a stair, the log-in plaza with its
-board and the pad home, Trade Central, and the Arena's ring with room to
-watch from. A greeter Mr.Prog calls out who logs in, two Navis stroll
-about and chat about who's here and what just happened, and every three
+The welcome plaza with a landmark in its middle (a statue, a monument or
+a giant cybertree, by the server), its board and the pad home, and warps
+to Trade Central, the Arena's ring with its stands, and a stage up a
+stair. A greeter Mr.Prog calls out who logs in, two Navis stroll about
+(one round the landmark, one before the stage) and chat about who's here
+and what just happened, and every three
 minutes they parade round the landmark: walk with them. A on a tree, the
 landmark, the sign or the board says what it is; the board lists who's
 here, the last trade and NetBattle, the trade offers up and this week's
@@ -890,7 +909,7 @@ comes home with you before the next.
 **The trade board**, at the same desk: put one spare up with what you
 want for it (anything, a chip of an element, a Sword, Wind, Break or
 Cursor chip, or a Mega), and everyone in your channel reads it, there
-and on the log-in plaza's board, until you take it down, leave or trade.
+and on the welcome plaza's board, until you take it down, leave or trade.
 To answer an offer, pick it at the desk: the list shows only your spares
 that fit its want. Reading the offers is everyone's; trading, posting
 and answering take the Trade stamp, on both sides.
@@ -969,7 +988,7 @@ Every Monday (00:00 UTC) each server opens a net of its own for the
 week, and everyone on that server who dives it dives the same net, from
 the same start: the short net, the Standard folder, threat 0, no helpers
 and no Cross, nothing your other runs unlocked. The greeter Mr.Prog in
-the log-in plaza offers it to a pass with the DeepNet stamp; say Yes
+the welcome plaza offers it to a pass with the DeepNet stamp; say Yes
 (the cursor starts on No), and the dive begins in Lan's room, as a new
 game does.
 

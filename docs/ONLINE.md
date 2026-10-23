@@ -357,7 +357,7 @@ HELLO (seen with a copy of the server speaking v11: the keeper's two
 boxes, and the server's log "Protocol version mismatch", code 2).
 
 **The Square.** The server sends a seed; each game plans the same Square
-from it (`square_plan.c`, `SQUARE_MAKE` 2) in one of BN6's busy daylight
+from it (`square_plan.c`, `SQUARE_MAKE` 3) in one of BN6's busy daylight
 nets (Central, Sky or Green Area; not Seaside, whose layers stand in
 another map's slot). Whatever the area, the Square plays its own music:
 BN6's Navi Customizer theme (song 0x1E, `BN6_SONG_NAVI_CUSTOMIZER`, the
@@ -378,9 +378,11 @@ fan servers that build custom maps. The lens (the game-design skill):
 - **Experience**: fellowship and expression. The Square is a place to be
   seen in and to linger, not a menu with floors.
 - **Dialectic: gather against go.** The plaza's landmark pulls players
-  together; each wing sends them off to do something with another
-  player (trade, battle, read what happened). Every spot is both a place
-  to stand together and a reason to be there.
+  together; each part sends them off to do something with another
+  player (trade, battle, be seen). Every spot is both a place to stand
+  together and a reason to be there. Since `SQUARE_MAKE` 3 the go is
+  short and the way back one step, so going never scatters (A hub and
+  its parts, below).
 - **Loop layer**: the session between acts: arrive, see who is here, do
   one thing together, read what happened, go home. Variety and
   expression, never run power: nothing in the Square makes a run
@@ -398,47 +400,184 @@ fan servers that build custom maps. The lens (the game-design skill):
   recalled from playing them, not checked in docs/SOURCES.md's sources;
   nothing here copies them.
 
+### A hub and its parts
+
+The owner, 23 October 2026, after playing with friends: "they wandered
+off. We didn't see each other in that area quite often. I think this is
+due: being so large, and hard to navigate." He asked for "a more compact
+structured realm. With a welcome area that offers warps to the different
+parts", each part "precisely beautifully crafted for its use case",
+"back to welcome area and find another warp that interests you", each
+warp "an invitation with added confidence on what will await you", and
+named Final Fantasy VII Rebirth's Gold Saucer: "I felt never lost and
+always found my way on where to go."
+
+**What the old Square did.** One 36-panel grid: a plaza of 13 a side,
+Trade Central 8 panels or more off it, the Arena's ring 15 down a walk,
+the log-in plaza on a walkway of its own. The screen shows about four
+panels each way from MegaMan, so the plaza alone was three screens
+across, and a friend at Trade Central was out of sight from anywhere in
+the plaza. Nothing said where anyone was but the Board's names.
+
+**What other hubs do** (read 23 October 2026; claims about other games
+are design inputs, not BN6 facts, so docs/SOURCES.md's verification
+does not apply, but each is credited):
+
+- *Final Fantasy VII's Gold Saucer*: a station at its centre, seven
+  squares around it, each named for its one attraction (Battle Square,
+  Chocobo Square, Speed Square, Event Square, Wonder Square)
+  ([Final Fantasy Wiki](https://finalfantasy.fandom.com/wiki/Chocobo_Square_(Final_Fantasy_VII)),
+  [walkthrough](https://almarsguides.com/retro/walkthroughs/ps1/games/finalfantasyvii/sidequests/goldsaucer/)).
+  Rebirth's was built on Final Fantasy XIV's Gold Saucer as its basis,
+  its director said
+  ([Gfinity](https://www.gfinityesports.com/article/final-fantasy-vii-rebirth-gold-saucer)),
+  and its Guide Moogle travels between squares once seen
+  ([Siliconera](https://www.siliconera.com/what-are-all-the-ffvii-rebirth-gold-saucer-minigames/)).
+- *Final Fantasy XIV's cities*: one large aetheryte in a plaza and
+  aethernet shards that teleport within the city, most of them beside the
+  guild they serve ([Console Games Wiki](https://ffxiv.consolegameswiki.com/wiki/Aethernet),
+  a player on [the official forum](https://forum.square-enix.com/ffxiv/threads/209710-Aethernet-Shard)).
+- *Destiny 2's Tower*: a courtyard of vendors in the middle, wings off it
+  east and west ([Destinypedia](https://www.destinypedia.com/Tower_(Destiny_2)),
+  [Prima](https://primagames.com/eguides/destiny-2-eguide/director/the-tower)).
+- *Monster Hunter Rise's Gathering Hub*: where online hunters meet, its
+  quest counter and board where they join each other's hunts
+  ([Fextralife](https://monsterhunterrise.wiki.fextralife.com/Gathering+Hub),
+  [Nintendo](https://www.nintendo.co.uk/News/2021/March/MONSTER-HUNTER-RISE-Guide-Multiplayer-1945197.html)).
+- *Phantasy Star Online 2's lobby*: the gate area (quest counter, the
+  camp ship) over a shop area that doubles as a hangout
+  ([Bumped](https://www.bumped.org/psublog/page/542/)).
+- *Battle Network's own*: BN2's and BN3's Net Squares, one compact map
+  per net area with a shop, a BBS and a Chip Trader
+  ([MMKB](https://megaman.fandom.com/wiki/Mega_Man_Battle_Network_2),
+  [Chip Trader](https://megaman.fandom.com/wiki/Chip_Trader)); BN6's gem
+  pads, a teleport within one map, the camera riding along
+  ([ROM_DATA.md](ROM_DATA.md), Teleports: verified in the ROM).
+
+**The lens** (the game-design skill; its interface layer's
+guidance-and-feedback: wayfinding, signposting, feedforward):
+
+- **Experience**: fellowship, and the anticipation of choosing where to
+  go next. The fix is the owner's diagnosis: distance and disorientation
+  split friends.
+- **Dialectic**: gather against go, as before, now resolved in space: the
+  plaza is where everyone is, each part is where you go, and going and
+  coming back are short.
+- **Loop** (the session between acts): arrive in the plaza, read the
+  warps, choose one, do its one thing, step back on the gem you came in
+  on, land in the plaza among everyone again, choose another, or go home
+  from the pad beside the arrival.
+- **Patterns**:
+  - *Hub and spokes, one door in* (the Gold Saucer's station, a city's
+    aetheryte plaza, the Gathering Hub): every Navi arrives in the
+    welcome plaza and lands back in it from every part, so friends cross
+    paths there on every turn of the loop.
+  - *A landmark at the hub* (the Saucer's tower, the aetheryte crystal,
+    the Tower's courtyard): the area's landmark in the plaza's middle,
+    the parade round it, the cheers round it.
+  - *Spokes named for one use* (the Saucer's squares, the shards by
+    their guilds): Trade Central is the desk, the Arena is the ring and
+    its stands, the stage is the stage.
+  - *A warp as an invitation* (feedforward: what awaits, before the
+    step): BN6's own gem, which BN6 players already read as a teleport;
+    over it a gold label with the part's name and who is there now
+    ("ARENA: Mira", "TRADE CENTRAL: 3 NAVIS"); its part's own props
+    flanking it in the plaza (the Arena's braziers, the stage's
+    cybertrees, Trade Central's BBS of offers); the part itself across
+    the void, two panels past its warp; the camera's ride across on the
+    way, which shows where the part lies.
+  - *The way back is where you landed* (the Saucer's tubes): each part's
+    gem beside its arrival, the plaza's label over it.
+  - *Presence at a glance and on asking*: the labels' counts and names;
+    the props by each warp, checked, say who is there; L's Look around
+    says which way each warp lies and who is in which part.
+  - *Diegetic, not a map*: no map screen and no arrow; the world says it,
+    as BN6's nets do.
+- **What stays where**: the week's DeepNet post stays the greeter's, by
+  the Board in the plaza: a dive leaves the Square, as the pad home does,
+  so everything that leaves starts from the plaza (the Gathering Hub's
+  quest counter is at the hub too). The log-in plaza and the plaza are
+  one now. The stage, which shared the plaza's edge, is a part of its
+  own with the GirlNavi on its floor.
+
+**One map, and what the server knows.** The plaza and its three parts
+are islands of one BN6 map, the parts reached only by their gems. Every
+snapshot already carries each Navi's place, so who is in which part is
+counted on each client from the plan (`square_plan_part`), the same on
+every client: the wire and the server are unchanged (protocol v15), and
+only `SQUARE_MAKE` 3 and its hash move with the plan (`protocol.json`'s
+`square_make` and `square_hash`, which the server's tests hold).
+Separate maps would have needed the server to route snapshots by part,
+and a map loaded with a fade on every warp. A Navi in another part is
+off the screen, as one across the old plaza was.
+
+**The warps.** Each is a pair of BN6's own: its gem on the middle of a
+3 x 3 pad, drawn as the area's pads and its gem are (`netmap_build`'s
+`gems`; Sky's maps give no usable gem, so its pads are the framed pad
+alone, the label naming them), its trigger an entry of the map's warp
+list of departure 12 (`mapslot_teleport`). BN6 lands MegaMan and then
+steps him 20 units a world axis the way the warp faces him, and takes a
+trigger he stands near when it lets him go: landed on the gem's middle,
+he was beamed back at once, and back again, each time (measured here,
+docs/ROM_DATA.md's Teleports). So he lands on the gem's rim, 16 units a
+world axis out, facing one of the screen's diagonals, and steps on to
+the pad's corner, clear of it; back onto the gem is the way back.
+
 ### The layout
 
-A 36 x 36 grid, grown down the screen rather than across (its tile map
-184 x 92 to 184 x 94 entries of the 20477 the free space holds):
+A 26 x 39 grid (the plaza's middle at 17, 20; its tile map 184 x 104
+entries at most of the 20477 the free space holds):
 
-| Place | Where | What stands there |
+| Part | Where | What stands there |
 | --- | --- | --- |
-| The plaza | 13 panels a side, in the middle | The landmark on its middle panel, the nine panels its base spreads over walled off (MegaMan walks round it, never onto its pedestal), four props round it in walled holes; cybertrees past its back rim, either side of the stage's stair; the channel keeper by the way in from the log-in plaza |
-| The log-in plaza (+x) | Off a walkway lined by two cybertrees | The pad home at its far end, the greeter Mr.Prog, the Board (a BBS) and the welcome sign past its back rim |
-| The stage (-y) | Up a stair two panels wide from the plaza's edge | Two braziers past its back rim; a place to stand and be seen |
-| Trade Central (-x) | Off a walkway | BN6's reception desk, its two clerks |
-| The Arena (+y) | A walk down the spectators' floor, which turns round before the ring | The ring up its own stair from that floor, the referee Mr.Prog at its foot |
+| The welcome plaza | 9 panels a side | The landmark on its middle panel (the nine panels its base spreads over walled off), four props round it; the arrival two panels before it (+x), facing it; beside the arrival the pad home (BN6's return pad) and the welcome sign, the keeper and the greeter either side, the Board past the back rim; off the middle of the other three sides, each warp's gem on its 3 x 3 pad, its part's props either side past the rim and its gold label over it |
+| Trade Central (-x, the upper left) | 6 x 5, two void panels past its warp | Its gem where MegaMan lands; BN6's reception desk and its two clerks three panels on, two cybertrees behind it. By its warp in the plaza, Trade Central's BBS: the trade board's offers and who is there |
+| The Arena (-y, the upper right) | 7 x 9 | The stands' floor where MegaMan lands, the ring up its stair beyond it, the referee at the stair's foot, braziers at the ring's back corners. Braziers either side of its warp in the plaza |
+| The stage (+y, the lower left) | 7 x 8 | The audience's floor where MegaMan lands, the stage up its stair, cybertrees behind it, the GirlNavi pacing the floor. Cybertrees either side of its warp in the plaza |
 
 The landmark is the area's own first: Green's giant cybertree among
 cybertrees; in Central and Sky the Undernet's statue or the Graveyard's
 monument by the seed, ringed by braziers or cybertrees by the seed. By
-the seed too, a mirrored pair of cybertrees past the plaza's -x rim, or
-a row of three along the Arena's walk. Only Sky's maps have stairs to
-cut (Sky Area's, climbing towards grid -y, 32 high): there the stage and
-the ring stand raised as BN6's raised floors, by the layers' own rules
-(`net_height.c`: nothing within a panel of where a raised room is drawn,
-a panel up the screen). Central's and Green's maps have none, so their
-stage and ring are flat daises in the same places. The props are BN6's
-map objects through the layers' own pieces (`layer_prop_objects`), at
-the stage's height on its rim. Sprites: six of the twelve the loader
-takes, 0x4614 to 0x46BC of its 0x8800 bytes; NPCs: all sixteen BN6 runs.
+the seed too, cybertrees past the plaza's top corner, or past its left
+and right ones. Only Sky's maps have stairs to cut (Sky Area's, climbing
+towards grid -y, 32 high): there the stage and the ring stand raised as
+BN6's raised floors, by the layers' own rules (`net_height.c`: nothing
+within a panel of where a raised room is drawn, a panel up the screen).
+Central's and Green's maps have none, so their stage and ring are flat
+daises in the same places. The props are BN6's map objects through the
+layers' own pieces (`layer_prop_objects`), at the stage's or the ring's
+height past their back rims. Sprites: six of the twelve the loader
+takes, 0x4614 to 0x46BC of its 0x8800 bytes; NPCs: all sixteen BN6 runs
+(the warps are tiles and triggers, no NPC).
 
-`tests/test_online.c` holds every floor panel reached from the arrival
-over 64 seeds, a step between heights only on a stair, each stair from
-ground floor up to raised floor, no floor where a raised room is drawn,
-every place and every walker's waypoint on the floor.
+**The walk, timed** (`tools/square_tour.py`: a local server, three games,
+Kei run by the pad as a player holds it, B held, from the arrival round
+the landmark to each warp's gem; the same at seeds 120, 121 and 122,
+Central, Sky and Green): to Trade Central 396 frames (6.6 seconds), to the
+Arena 294 and to the stage 300, each with the warp's beam and ride (about
+140 frames of it); back from each part to the plaza 168 to 170 frames
+(under 3 seconds). In the old Square the desk stood 24 panels from the
+arrival and the referee 27, all of it walked.
+
+`tests/test_online.c` holds, over 64 seeds: every floor panel reached
+from the arrival by walking and the warps, a step between heights only
+on a stair, and from part to part only by a warp (each part's floor two
+void panels or more from another's); each stair from ground floor up to
+raised floor, no floor where a raised room is drawn; each gem on ground
+floor with its pad all round it, no place nor walker's waypoint on it,
+its landing on a screen diagonal, the plaza's a short walk from the
+arrival; every place and every walker's waypoint on the floor, no
+walker's leg over a pad.
 
 ### Its life
 
 `square_life.c`, its words in `square_life_words.c` (docs/VOICE.md):
 
 - **Two walkers**, a GreenNavi and a GirlNavi, puppets as the peers are,
-  walk the plan's routes (the GreenNavi round the plaza, four seconds at
-  each corner; the GirlNavi from Trade Central across the plaza, clear
-  of the landmark's ring, down the Arena's walk and back, six seconds at
-  either end), a world unit a frame, each leg along a grid axis (the
+  walk the plan's routes (the GreenNavi round the landmark at the
+  plaza's corners, four seconds at each; the GirlNavi to and fro on the
+  stage's floor before it, six seconds at either end), a world unit a
+  frame, each leg along a grid axis (the
   unit tests hold them on ground floor, through no hole). Their place is
   a function of the wall clock (UTC seconds and the frames since), so
   every client whose clock agrees shows them in the same place: two
@@ -500,24 +639,24 @@ and nothing asked, session 74). A talk's column of options takes up
 and down (`cinema_keys` lets the pad through while MegaMan is held).
 The Square's flags are `0x1480`-`0x14D0`, its own while it lasts.
 
-**Finding the wings.** A player ran round an empty Square for ten calls
+**Finding each other.** A player ran round an empty Square for ten calls
 and found the greeter, the keeper, a walker and the props, but neither
-Trade Central's clerks nor the referee (session 74): the wings stand
-eight panels or more off the plaza, past what the screen shows of it.
-Both stand in every Square (the layout is the same for every seed, only
-its props vary), so the way to them is signposted, BN6's way and the
-layers' (the game-design skill: signposts over waypoints, by the
-landmark everyone sees, words that agree with the map). L's third
-option, **Look around**, has MegaMan say where they lie from where he
-stands (`square_life_look`, words in `square_life_words.c`): in the
-plaza, "Trade Central's to the upper left,Lan!" and "The Arena's to the
-lower left!"; anywhere else, which way the landmark is first (as L's
-way on a layer, `way_to`), then each wing past it, or "right here" in
-its own. The wings stand off the plaza the same way in every Square, so
-these words hold for every seed. The greeter's welcome ends on the same
-signpost: "TRADE CENTRAL AND THE ARENA ARE PAST THE STATUE!" (the
-landmark's name). No map: SELECT in the Square is the emote strip's
-(Emotes, below), not a map of the plaza.
+Trade Central's clerks nor the referee (session 74); friends in the old
+Square lost each other (the owner, above). Each part is now a warp off
+the plaza, the same three ways in every Square, and the world says where
+they go and who is there (the game-design skill: signposts over
+waypoints, words that agree with the map): the gold label over each gem
+(`online_labels.c`), the props by each warp checked (Trade Central's BBS
+posts who is there and the offers; MegaMan, at the Arena's braziers,
+"Lan,look! The Arena's over there!" and "Mira's over there!"), and L's
+third option, **Look around** (`square_life_look`, words in
+`square_life_words.c`): in the plaza, "Lan,Trade Central's warp is to the
+upper left!", "The Arena's is to the upper right." and "And the stage's
+is to the lower left!"; in a part, "The warp we came in on goes back to
+the plaza,Lan!"; then who is in each other part ("Mira's in the Arena!",
+"Dex and 2 more are at Trade Central!"). The greeter's welcome ends "THE
+WARPS GO TO TRADE CENTRAL,THE ARENA,THE STAGE!". No map: SELECT in the
+Square is the emote strip's (Emotes, below), not a map of the plaza.
 Phrases and emotes are fixed lists, never free text; mute and block are
 the player's, kept by the server's public identity of the other.
 
@@ -694,7 +833,7 @@ shown).
 
 ## Trade Central
 
-A Mr.Prog at a desk in the wing up-left of the plaza (-x) trades one
+A Mr.Prog at a desk in the part warped to up-left of the plaza (-x) trades one
 spare chip (a copy past those in the run's three folders) for another
 player's (`trade_central.c`, words in `trade_words.c`). Both games hold
 the NetPass's Trade stamp (above), so every chip of either game's
@@ -800,7 +939,7 @@ Aqua, Elec, Wood, Sword, Wind, Break or Cursor chip (BN6's own icon
 element, `BN6_CHIP_ELEMENT`), or a Mega (`BN6_CHIP_LIBRARY_TYPE`). The
 clerk reads the channel's offers one a box ("Alpha HAS Cannon A! WANTS A
 FIRE CHIP!") with Answer it and Next offer under each, and MegaMan's own
-to post or take down; the Board in the log-in plaza lists them among its
+to post or take down; the Board in the welcome plaza lists them among its
 posts. Answering one lists only the spares that meet its want; the trade begins with both chips named (TRADE's
 take, protocol v5), and both say Deal as in any trade. The poster's
 game checks the chip against the want it posted and calls off one that
@@ -836,7 +975,7 @@ home, and fits the loop: a trade is the visit's one thing.
 
 [Issue #127](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/127):
 each server gives a net of its own for the week, every player who dives
-it dives the same net, and the Board in the log-in plaza lists how deep
+it dives the same net, and the Board in the welcome plaza lists how deep
 they say they got. The owner approved the proposal on 19 October 2026
 (each server its own week, the setup locked, as many dives as a player
 likes, depths posted as "reported") and decided one thing while it was
@@ -1598,6 +1737,27 @@ beside the player's keys; the harness and its pictures kept in
   "!!"; then five within a second: the Square cheered for 2, 3, 4 and 5
   in turn (the walker's cheer and BN6's pops from three, the greeter's
   call from four).
+
+On this machine, 23 October 2026, a local v15 server and `SQUARE_MAKE` 3
+(`tools/square_tour.py`; seeds 120, 121 and 122, the Square in Central,
+Sky and Green Area, three games each):
+
+- **The hub and its parts.** Mira placed in the Arena's stands and Dex at
+  Trade Central's desk; Kei arrived in the welcome plaza and read, from
+  the arrival, "TRADE CENTRAL: Dex" at the screen's upper left, "ARENA:
+  Mira" at its upper right and "STAGE" at its lower left, then was run by
+  the pad to each warp's gem, beamed across with the camera riding along,
+  landed on the gem's rim facing the part's own (the desk and its
+  clerks, the ring's stair, the stage, the GirlNavi on its floor) and
+  stepped back onto the gem to land in the plaza again, the timings in
+  The layout above. At the Arena's braziers MegaMan said "Lan,look! The
+  Arena's over there!", "Navis NetBattle in its ring!" and "Mira's over
+  there!"; L's Look around named each warp's way and who was where.
+- **A warp that bounced.** The first build landed MegaMan on the gem's
+  middle: BN6's step off it ended inside its trigger, and the pair beamed
+  him to and fro every 150 frames until he moved. Landing on the rim
+  ended it (docs/ROM_DATA.md, Teleports); the unit tests hold every
+  landing on a screen diagonal.
 
 The transport itself was measured on 15 October 2026, before the gate
 replaced the first Network screen (those proof tools went with it; they
