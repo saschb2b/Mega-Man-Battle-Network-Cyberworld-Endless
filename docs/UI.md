@@ -31,6 +31,22 @@ To measure again: `python3 tools/play.py start NAME -- --scene emu`, then
 | A small choice opens as a pop-up window, its label in small capitals on a cyan strip | ChipFolder's SELECT (EDIT, EQUIP, CHG NAME); the folder editor's SORT (seven keys) |
 | A count stands in a navy pill outlined in light green | FOLDER EDIT `30/30`, Library `12/200` |
 
+## Kinds of element
+
+The cyan window says "a list". Everything else on a screen is another
+kind, each with its own look:
+
+| Kind | Look | Measured from |
+| --- | --- | --- |
+| The list | The cyan window round a navy field, one a screen | KeyItem, E-Mail, Library, folder editor, ChipFolder |
+| A chip | The chip card: grey (198, 198, 214) in an outline (74, 99, 115), a light rim (222, 222, 222) along its top and left, its top left corner cut, the picture in a dark frame (41, 41, 41), code, element and power on the dark under it, the description in ink, the contacts' gold in columns of two along the foot | The Library's and the folder editor's card |
+| A thing to press | A pill: cyan (66, 198, 231), a light row (107, 222, 255) along its top and upper slants, blue (16, 140, 239) along its foot and lower slants, its ends pointed, 15 tall | STATUS's Attack, Speed, Charge; SubChip's items |
+| The one action | A button: bright green (16, 231, 41) in a light grey edge (206, 222, 239), a dark shade (41, 132, 148) under it | NaviCust's RUN! |
+| Words that explain | A flat panel: dark green (0, 123, 74), corners rounded two pixels, no frame; white letters | SubChip's description |
+| A value or a picture | A slot: navy (16, 99, 107) in two pixels of white | STATUS's HP and MegaMan |
+| What is one's own | Orange corners: an L at each, dark outline (214, 107, 0), orange (255, 173, 16), lit (255, 206, 24) | ChipFolder's EQUIP folder |
+| What the cursor's item is | The information box | KeyItem, E-Mail, NaviCust |
+
 ## Keys
 
 | Rule | Measured from |
@@ -83,8 +99,19 @@ new mail, a chip's code in yellow.
 ## Ours
 
 What the engine's screens take from these rules (pet_look.c draws the
-parts: `look_band_hint`, `look_arrow`, `look_choice`, `look_cursor`):
+parts: `look_band_hint`, `look_arrow`, `look_choice`, `look_cursor`, and
+the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
+`look_panel`, `look_slot`, `look_corners`, `look_info`):
 
+- The cyan window for a list only: the Jukebox's songs, Options' lines,
+  the spares list, the controls screen's keys, SAVES' saves. Its chip as
+  the Library's card (the spares list, the chip trade, the chip come
+  marked by EQUIP's corners); the song playing, the statistics' words,
+  the reconnect wait and the NetPass's card, stamps and tray in
+  SubChip's flat panel; Trade's Deal and No deal, SAVES' and the
+  gate's buttons as pills, the one under the cursor as RUN!; the gate's
+  field a slot. The second screen's body stays one window: it is that
+  screen's one content.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - One key's hint on the band where the key does something unguessed:

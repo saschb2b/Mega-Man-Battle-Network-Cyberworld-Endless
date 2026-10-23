@@ -165,21 +165,22 @@ static int held_count(const NetPassView *v) {
 	return n;
 }
 
-/* the operator card: the face, Lan and MegaMan, the stamps' bar */
+/* the operator card in SubChip's flat panel (BN6 keeps its window for a
+ * list): the face, Lan and MegaMan, the stamps' bar */
 static void card(int x, int y, const NetPassView *v) {
-	SDL_Rect f = look_window(x, y, CARD_W, CARD_H, 0, false);
+	SDL_Rect f = look_panel(x, y, CARD_W, CARD_H);
 	face(f.x + 2, f.y + 2, v->into);
 	int cx = f.x + 47;
-	look_caps(cx, f.y + 4, netpass_operator_label, LOOK_EDGE_HI, NONE);
-	look_text(cx, f.y + 11, netpass_operator, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-	look_caps(cx, f.y + 27, netpass_navi_label, LOOK_EDGE_HI, NONE);
-	look_text(cx, f.y + 34, netpass_navi, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-	fill_rect(f.x + 2, f.y + 51, f.w - 4, 1, LOOK_SHADE);
-	look_caps(f.x + 3, f.y + 58, netpass_stamps_label, LOOK_EDGE_HI, NONE);
+	look_caps(cx, f.y + 4, netpass_operator_label, LOOK_PAGE, NONE);
+	look_text(cx, f.y + 11, netpass_operator, LOOK_TEXT, LOOK_PANEL_SHADE, TEXT_LEFT);
+	look_caps(cx, f.y + 27, netpass_navi_label, LOOK_PAGE, NONE);
+	look_text(cx, f.y + 34, netpass_navi, LOOK_TEXT, LOOK_PANEL_SHADE, TEXT_LEFT);
+	fill_rect(f.x + 2, f.y + 51, f.w - 4, 1, LOOK_PANEL_SHADE);
+	look_caps(f.x + 3, f.y + 58, netpass_stamps_label, LOOK_PAGE, NONE);
 	char count[16];
 	int held = held_count(v);
 	netpass_count_words(count, sizeof count, held, STAMP_COUNT);
-	look_text(f.x + f.w - 3, f.y + 54, count, held == STAMP_COUNT ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
+	look_text(f.x + f.w - 3, f.y + 54, count, held == STAMP_COUNT ? LOOK_GOLD : LOOK_TEXT, LOOK_PANEL_SHADE, TEXT_RIGHT);
 	/* (a segment a stamp, gold where held) */
 	int sw = (f.w - 6 - 3 * 2) / STAMP_COUNT;
 	for (int s = 0; s < STAMP_COUNT; ++s) {
@@ -189,8 +190,8 @@ static void card(int x, int y, const NetPassView *v) {
 			fill_rect(sx, sy, sw, 1, GOLD_HI);
 			fill_rect(sx, sy + 5, sw, 1, GOLD_LO);
 		} else {
-			fill_rect(sx, sy, sw, 6, LOOK_SHADE);
-			fill_rect(sx + 1, sy + 1, sw - 2, 4, LOOK_NAVY_LO);
+			fill_rect(sx, sy, sw, 6, LOOK_PANEL_SHADE);
+			fill_rect(sx + 1, sy + 1, sw - 2, 4, LOOK_BAND);
 		}
 	}
 }
@@ -216,11 +217,11 @@ static void seal(int cx, int cy, int r, bool held, int landed) {
 
 static void stamp_cell(int x, int y, int s, const NetPassView *v) {
 	bool held = v->held[s];
-	look_box(x, y, CELL_W, CELL_H, held ? LOOK_NAVY : LOOK_NAVY_LO);
+	look_panel(x, y, CELL_W, CELL_H);
 	int cx = x + CELL_W / 2;
 	seal(cx, y + 11, 8, held, v->landing == s ? v->landing_t : -1);
-	look_text(cx, y + 19, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
-	minifont_draw_centered(cx, y + 32, netpass_stamp_captions[s], held ? LOOK_EDGE_HI : LOOK_DIM, 1);
+	look_text(cx, y + 19, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_PANEL_SHADE, TEXT_CENTER);
+	minifont_draw_centered(cx, y + 32, netpass_stamp_captions[s], held ? LOOK_GREEN_HI : LOOK_DIM, 1);
 }
 
 /* a cartridge of the set's game `g`, small, from (x, y): the ROMs
@@ -266,7 +267,7 @@ static void open_slot(int x, int y, int g, int t) {
 
 /* the tray: each game's slot, in or open, and the PET's line beside them */
 static void tray(int x, int y, const NetPassView *v) {
-	SDL_Rect f = look_window(x, y, NETPASS_W - 2 * CARD_X, TRAY_H, 0, false);
+	SDL_Rect f = look_panel(x, y, NETPASS_W - 2 * CARD_X, TRAY_H);
 	int games = netpass_games(), cx = f.x + 3;
 	const NetPassGame *missing = NULL;
 	for (int g = 0; g < games; ++g, cx += CART_W + 4) {
@@ -313,8 +314,8 @@ void netpass_draw_strip(int x, int y, const NetPassView *v) {
 	for (int s = 0; s < STAMP_COUNT; ++s) {
 		int cx = x + 7 + s * (w + 3), cy = y + LOOK_BAND_H + 2;
 		bool held = v->held[s];
-		look_box(cx, cy, w, NETPASS_STRIP_H - LOOK_BAND_H - 2 - LOOK_RAIL - 1, held ? LOOK_NAVY : LOOK_NAVY_LO);
+		look_panel(cx, cy, w, NETPASS_STRIP_H - LOOK_BAND_H - 2 - LOOK_RAIL - 1);
 		seal(cx + w / 2, cy + 10, 7, held, v->landing == s ? v->landing_t : -1);
-		look_text(cx + w / 2, cy + 17, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
+		look_text(cx + w / 2, cy + 17, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_PANEL_SHADE, TEXT_CENTER);
 	}
 }

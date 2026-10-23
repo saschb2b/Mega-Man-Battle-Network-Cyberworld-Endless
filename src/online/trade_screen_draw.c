@@ -8,32 +8,32 @@
 #include "minifont.h"
 #include "pet_look.h"
 #include "second_art.h"
-#include "second_frame.h"
 #include "trade_screen_text.h"
 
 #define W 240
 #define GOLD_EDGE rgba(198, 90, 0, 255)
 
-/* the spares list: the card on the left, the list on the right, a note under them where there is one */
+/* the spares list: the chip's card on the left (the Library's), the list
+ * on the right, a note under them where there is one */
 #define CARD_X 7
 #define BODY_Y 18
-#define CARD_W 104
+#define CARD_W 84
 #define BODY_H 128
-#define LIST_X 114
-#define LIST_W 119
+#define LIST_X 94
+#define LIST_W 139
 #define LIST_TOP 11   /* the count and the sort over the rows */
 #define ROW_H 16
 #define NOTE_Y 149
 
-/* the chip trade: two cards, the arrows between */
+/* the chip trade: two cards, the arrows between, the two pills under them */
 #define DEAL_W 98
-#define DEAL_H 88
+#define DEAL_H 98
 #define DEAL_Y 31
 #define DEAL_LEFT 10
 #define DEAL_RIGHT (W - 10 - DEAL_W)
-#define BUTTON_Y 123
+#define BUTTON_Y 132
 #define BUTTON_W 78
-#define BUTTON_H 19
+#define BUTTON_GAP 22   /* between the pills: room for the choice's triangle */
 
 static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + code); }
 
@@ -50,7 +50,7 @@ static void body_note(int x, int y, const char *s, bool centred) {
 	minifont_draw(x, y, s, LOOK_PAGE, 1);
 }
 
-/* the chip's picture, its card's 56 x 48, in a frame from (x, y) */
+/* the chip's picture, its card's 56 x 48, in a frame from (x, y), 58 x 50 */
 static void picture(int id, int x, int y, SDL_Color edge) {
 	fill_rect(x, y, 58, 50, edge);
 	fill_rect(x + 1, y + 1, 56, 48, LOOK_NAVY_LO);
@@ -63,26 +63,33 @@ static void power_words(const ChipInfo *ci, char *out, size_t n) {
 	else if (n) out[0] = 0;
 }
 
+/* the strip under a card's picture, as the Library's: the code, the
+ * element's icon and the power on the dark, 58 x 16 from (x, y) */
+static void card_strip(int id, int code, int x, int y) {
+	ChipInfo ci;
+	chip_info(id, &ci);
+	fill_rect(x, y, 58, 16, LOOK_CARD_DARK);
+	char c[2] = { code_char((uint8_t)code), 0 }, power[12];
+	text_draw(x + 3, y + 4, c, LOOK_GOLD, TEXT_LEFT);
+	int el = second_chip_element(id);
+	if (el >= 0) second_element_icon(el, x + 14, y + 1);
+	power_words(&ci, power, sizeof power);
+	text_draw(x + 55, y + 4, power, LOOK_TEXT, TEXT_RIGHT);
+}
+
 /* ---- the spares list ---- */
 
-/* the cursor's chip as a card: its name, picture, code, element, power and description */
+/* the cursor's chip as the Library's card: its picture, the code's strip, its description */
 static void list_card(int x, int y, TradeChip c) {
-	SDL_Rect f = look_window(x, y, CARD_W, BODY_H, 0, false);
+	SDL_Rect f = look_card(x, y, CARD_W, BODY_H);
 	if (!c.id) return;
-	ChipInfo ci;
-	chip_info(c.id, &ci);
-	text_draw(f.x + 2, f.y, ci.name, LOOK_TEXT, TEXT_LEFT);
-	picture(c.id, f.x + 1, f.y + 14, LOOK_EDGE_LO);
-	int cx = f.x + 59 + (f.w - 59) / 2;
-	char code[2] = { code_char(c.code), 0 }, power[12];
-	text_draw_scaled(cx, f.y + 10, code, LOOK_GOLD, TEXT_CENTER, 2);
-	second_element_icon(second_chip_element(c.id), cx - 8, f.y + 36);
-	power_words(&ci, power, sizeof power);
-	text_draw(cx, f.y + 52, power, LOOK_TEXT, TEXT_CENTER);
-	fill_rect(f.x + 1, f.y + 67, f.w - 2, 1, LOOK_SHADE);
+	int px = f.x + (f.w - 58) / 2;
+	picture(c.id, px, f.y + 1, LOOK_CARD_DARK);
+	card_strip(c.id, c.code, px, f.y + 51);
 	char desc[160];
 	chip_desc(c.id, desc, sizeof desc);
-	look_wrapped(desc, f.x + 2, f.y + 69, f.w - 4, 3, LOOK_TEXT, LOOK_SHADE);
+	/* (the card a little wider than BN6's: the chat font's letters are wider than its card's) */
+	look_wrapped(desc, f.x + 2, f.y + 69, f.w - 3, 3, LOOK_CARD_INK, LOOK_PAGE);
 }
 
 /* a row: the cursor's arrow over the frame, the chip's icon, its name, its code and the spares */
@@ -132,30 +139,19 @@ void trade_screen_draw_list(int x, int y, const TradeScreenView *v) {
 
 /* ---- the chip trade ---- */
 
-/* a chip's card in the trade: its picture, name, code, element and power;
- * `edge` gold for the chip come, dim for the one gone */
-static void deal_card(int x, int y, TradeChip c, SDL_Color edge) {
-	bool gone = edge.r == PET_SLOT_EDGE.r && edge.g == PET_SLOT_EDGE.g, come = edge.r == PET_GOLD.r && edge.g == PET_GOLD.g;
-	SDL_Rect f = look_window(x, y, DEAL_W, DEAL_H, 0, false);
-	if (gone) fill_rect(f.x, f.y, f.w, f.h, LOOK_NAVY_LO);
-	if (come) {
-		SDL_Rect r[4] = { { x + 1, y, DEAL_W - 2, 1 }, { x + 1, y + DEAL_H - 1, DEAL_W - 2, 1 }, { x, y + 1, 1, DEAL_H - 2 }, { x + DEAL_W - 1, y + 1, 1, DEAL_H - 2 } };
-		fill_rects(r, 4, LOOK_GOLD);
-	}
-	int cx = x + DEAL_W / 2;
-	picture(c.id, cx - 29, f.y, LOOK_EDGE_LO);
+/* a chip's card in the trade, as the Library's: its picture, its name on
+ * the dark over the code's strip (as the Custom screen's card names its
+ * chip); the chip come marked by the ChipFolder's EQUIP corners */
+static void deal_card(int x, int y, TradeChip c, bool come) {
+	SDL_Rect f = look_card(x, y, DEAL_W, DEAL_H);
+	int px = x + (DEAL_W - 58) / 2;
+	picture(c.id, px, f.y + 1, LOOK_CARD_DARK);
 	ChipInfo ci;
 	chip_info(c.id, &ci);
-	text_draw(cx, f.y + 51, ci.name, LOOK_TEXT, TEXT_CENTER);
-	char code[2] = { code_char(c.code), 0 }, power[12];
-	power_words(&ci, power, sizeof power);
-	/* (the code, the element's icon and the power in a row, centred) */
-	int el = second_chip_element(c.id), cw = text_width(code), pw = text_width(power);
-	int rw = cw + 4 + (el >= 0 ? 16 + 4 : 0) + pw, rx = cx - rw / 2;
-	text_draw(rx, f.y + 64, code, LOOK_GOLD, TEXT_LEFT);
-	rx += cw + 4;
-	if (el >= 0) { second_element_icon(el, rx, f.y + 62); rx += 20; }
-	text_draw(rx, f.y + 64, power, LOOK_TEXT, TEXT_LEFT);
+	fill_rect(px, f.y + 51, 58, 14, LOOK_CARD_DARK);
+	text_draw(x + DEAL_W / 2, f.y + 53, ci.name, LOOK_TEXT, TEXT_CENTER);
+	card_strip(c.id, c.code, px, f.y + 65);
+	if (come) look_corners(x - 3, y - 3, DEAL_W + 6, DEAL_H + 6);
 }
 
 /* a card's label on a tag over it */
@@ -172,11 +168,12 @@ static void arrow(int x, int y, bool right, SDL_Color c) {
 	fill_rects(r, n, c);
 }
 
-/* a button of the two: a slim window, the cursor's arrow at its left where it is */
+/* a button of the two: STATUS's pill, BN6's choice triangle before the one chosen */
 static void button(int x, int y, const char *label, bool lit) {
-	look_box(x, y, BUTTON_W, BUTTON_H, lit ? LOOK_NAVY : LOOK_NAVY_LO);
-	text_draw(x + BUTTON_W / 2 + 4, y + 3, label, lit ? LOOK_TEXT : LOOK_DIM, TEXT_CENTER);
-	if (lit) look_cursor(x - 4, y + 5);
+	look_pill(x, y, BUTTON_W);
+	text_draw(x + BUTTON_W / 2 + 1, y + 4, label, LOOK_SHADE, TEXT_CENTER);
+	text_draw(x + BUTTON_W / 2, y + 3, label, LOOK_TEXT, TEXT_CENTER);
+	if (lit) look_choice(x - LOOK_CHOICE_W - 1, y);
 }
 
 /* the cards where they stand, crossing in the swap: MegaMan's going right
@@ -184,41 +181,41 @@ static void button(int x, int y, const char *label, bool lit) {
 static void cards(int x, int y, const TradeScreenView *v) {
 	int lx = x + DEAL_LEFT, rx = x + DEAL_RIGHT, cy = y + DEAL_Y;
 	if (v->stage < TRADE_SWAP) {
-		deal_card(lx, cy, v->mine, PET_CYAN);
-		deal_card(rx, cy, v->get, PET_CYAN);
+		deal_card(lx, cy, v->mine, false);
+		deal_card(rx, cy, v->get, false);
 		return;
 	}
 	if (v->stage == TRADE_SWAPPED) {
-		deal_card(lx, cy, v->get, PET_GOLD);
-		deal_card(rx, cy, v->mine, PET_SLOT_EDGE);
+		deal_card(lx, cy, v->get, true);
+		deal_card(rx, cy, v->mine, false);
 		return;
 	}
 	/* (eased, 0 to 1024, and an arc of 10 pixels at its middle) */
 	int p = v->swap_t * 1024 / TRADE_SWAP_FRAMES;
 	int e = p * p / 1024 * (3 * 1024 - 2 * p) / 1024;
 	int lift = 40 * e / 1024 * (1024 - e) / 1024;
-	deal_card(rx + (lx - rx) * e / 1024, cy + lift, v->get, PET_CYAN);
-	deal_card(lx + (rx - lx) * e / 1024, cy - lift, v->mine, PET_CYAN);
+	deal_card(rx + (lx - rx) * e / 1024, cy + lift, v->get, false);
+	deal_card(lx + (rx - lx) * e / 1024, cy - lift, v->mine, false);
 }
 
 /* under the cards: the buttons, the wait, or the trade done (A and B as
  * everywhere in BN6: no keys shown) */
 static void foot(int x, int y, const TradeScreenView *v) {
 	if (v->stage == TRADE_ASK) {
-		button(x + W / 2 - 4 - BUTTON_W, y + BUTTON_Y, trade_text_no_deal, !v->cursor);
-		button(x + W / 2 + 4, y + BUTTON_Y, trade_text_deal, v->cursor);
+		button(x + W / 2 - BUTTON_GAP / 2 - BUTTON_W + 6, y + BUTTON_Y, trade_text_no_deal, !v->cursor);
+		button(x + W / 2 + BUTTON_GAP / 2 + 6, y + BUTTON_Y, trade_text_deal, v->cursor);
 	} else if (v->stage == TRADE_WAIT) {
-		look_text(x + W / 2, y + BUTTON_Y + 3, trade_text_waiting(v->partner), LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
+		look_text(x + W / 2, y + BUTTON_Y + 1, trade_text_waiting(v->partner), LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
 	} else if (v->stage == TRADE_SWAPPED) {
-		text_draw(x + W / 2, y + BUTTON_Y - 2, trade_text_traded, LOOK_GOLD, TEXT_CENTER);
-		body_note(x + W / 2, y + BUTTON_Y + 12, trade_text_home, true);
+		text_draw(x + W / 2, y + BUTTON_Y + 1, trade_text_traded, LOOK_GOLD, TEXT_CENTER);
+		body_note(x + W / 2, y + BUTTON_Y + 14, trade_text_home, true);
 	}
 }
 
 void trade_screen_draw_deal(int x, int y, const TradeScreenView *v) {
 	band(x, y, trade_text_deal_title, trade_text_deal_with(v->partner));
-	tab(x + DEAL_LEFT, y + DEAL_Y - 11, trade_text_you);
-	tab(x + DEAL_RIGHT, y + DEAL_Y - 11, trade_text_them);
+	tab(x + DEAL_LEFT, y + DEAL_Y - 13, trade_text_you);
+	tab(x + DEAL_RIGHT, y + DEAL_Y - 13, trade_text_them);
 	cards(x, y, v);
 	if (v->stage < TRADE_SWAP) {
 		/* (the arrows, the one MegaMan's chip goes by gold; pulsing while the other decides) */

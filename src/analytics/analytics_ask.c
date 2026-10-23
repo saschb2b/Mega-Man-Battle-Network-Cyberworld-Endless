@@ -128,8 +128,9 @@ void analytics_ask_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
 	pet_panel_draw(x0, y0, analytics_word(AW_TITLE));
 	text_draw(cx, y0 + 16, analytics_word(AW_QUESTION), LOOK_PAGE, TEXT_CENTER);
-	/* (the body in the bold letters: the lists' thin ones are wider, and would take a line more than the window has) */
-	look_window(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12, 0, false);
+	/* (the body in SubChip's flat panel, as BN6 explains a thing: no window, which BN6 keeps
+	 * for a list; in the bold letters, as the thin ones are wider and would take a line more) */
+	look_panel(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12);
 	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
 	pet_panel_note(cx, y0 + 141, analytics_later(), LOOK_PAGE);

@@ -69,6 +69,32 @@ SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill);
 /* The scroll bar's thumb in the track of the window `win` (look_window's
  * with `bar`, `top` as it had): `shown` of `n` lines from `first` */
 void look_scroll(SDL_Rect win, int top, int first, int shown, int n);
+/* BN6 keeps the window above for a screen's one list. What else a screen
+ * holds takes the kind BN6 gives it (docs/UI.md, A screen's parts): */
+/* ... a chip: the Library's and the folder editor's card, grey with its
+ * top left corner cut, outlined, the contacts' gold along its foot: the
+ * card's face above the contacts */
+#define LOOK_CARD_FOOT 10
+#define LOOK_CARD_GREY  rgba(198, 198, 214, 255)
+#define LOOK_CARD_DARK  rgba(41, 41, 41, 255)   /* the picture's frame, the code's strip */
+#define LOOK_CARD_INK   rgba(41, 41, 41, 255)
+SDL_Rect look_card(int x, int y, int w, int h);
+/* ... a thing to press: STATUS's pill, cyan with pointed ends, 15 tall,
+ * its words the caller's (white, LOOK_SHADE under them) */
+#define LOOK_PILL_H 15
+void look_pill(int x, int y, int w);
+/* ... the one action: NaviCust's RUN!, bright green in a light edge */
+void look_button(int x, int y, int w, int h);
+/* ... words that explain: SubChip's flat dark green panel, no frame: the
+ * panel; letters on it white, LOOK_PANEL_SHADE under them */
+#define LOOK_PANEL_SHADE rgba(0, 74, 41, 255)
+SDL_Rect look_panel(int x, int y, int w, int h);
+/* ... a value or a picture: STATUS's slot, navy in a white edge: the field */
+SDL_Rect look_slot(int x, int y, int w, int h);
+/* ... and what a screen marks as its own: the ChipFolder's EQUIP corners,
+ * orange, round x, y, w, h */
+void look_corners(int x, int y, int w, int h);
+
 /* The information box: light green, outlined, `label` in small capitals
  * on its top left: the room under the label */
 SDL_Rect look_info(int x, int y, int w, int h, const char *label);

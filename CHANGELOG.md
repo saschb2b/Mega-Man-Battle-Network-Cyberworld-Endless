@@ -10,8 +10,11 @@
   more, Options' Display and Audio take the band's name as the folder
   editor takes CHIP FOLDER's, the reconnect wait keeps one hint (B:GO
   HOME) on its band, and the second screen names HP, ZENNY and BUGFRAGS
-  as the PET menu does. The rules, measured from BN6's screens, are in
-  docs/UI.md.
+  as the PET menu does. BN6 frames only its lists in the cyan window, and
+  so do these now: a chip shows on the Library's grey card, buttons are
+  STATUS's pills (the one chosen NaviCust's green RUN!), and the words
+  that explain sit in SubChip's flat panel. The rules, measured from
+  BN6's screens, are in docs/UI.md.
 
 ## 0.14.1 (2026-10-23)
 

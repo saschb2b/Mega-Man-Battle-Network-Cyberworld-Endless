@@ -10,12 +10,13 @@
 
 #define W 240
 #define H 160
-#define LIGHT_OFF rgba(10, 58, 80, 255)
+#define LIGHT_OFF rgba(0, 90, 52, 255)
 #define NONE (SDL_Color){ 0, 0, 0, 0 }
 
-/* BN6's Library's frame: the card of the song playing on the left, the
- * section's songs in a window on the right, its name in the window's
- * band between the page arrows, both to the screen's foot */
+/* BN6's Library's frame: the song playing on the left in SubChip's flat
+ * panel, the section's songs in the screen's one window on the right,
+ * its name in the window's band between the page arrows, both to the
+ * screen's foot */
 #define CARD_X 7
 #define BODY_Y 18
 #define CARD_W 88
@@ -74,11 +75,11 @@ static void lights(int x, int y, int w, const JukeView *v) {
 }
 
 static void card(int x, int y, const JukeView *v) {
-	SDL_Rect f = look_window(x, y, CARD_W, BODY_H, 0, false);
-	int fx = f.x + 3, fw = f.w - 6;
+	SDL_Rect f = look_panel(x, y, CARD_W, BODY_H);
+	int fx = f.x + 2, fw = f.w - 4;
 	bool on = v->playing >= 0;
 	const JukeSong *s = on ? &jukebox_songs[v->playing] : NULL;
-	look_caps(fx, f.y + 3, on ? jukebox_now_label : jukebox_idle_label, on ? LOOK_EDGE_HI : LOOK_DIM, NONE);
+	look_caps(fx, f.y + 3, on ? jukebox_now_label : jukebox_idle_label, on ? LOOK_PAGE : LOOK_DIM, NONE);
 	int game = on ? s->game : v->game;
 	const char *tag = jukebox_game_tags[game ? 1 : 0];
 	int ly = f.y + 42;
@@ -86,7 +87,7 @@ static void card(int x, int y, const JukeView *v) {
 		lights(fx, ly + 12, fw, v);
 		return;
 	}
-	look_wrapped(s->title, fx, f.y + 12, fw, 2, LOOK_TEXT, LOOK_SHADE);
+	look_wrapped(s->title, fx, f.y + 12, fw, 2, LOOK_TEXT, LOOK_PANEL_SHADE);
 	/* (the game's tag and the song's number; under the lights how long it has played, how often round) */
 	int tw = look_caps_width(tag) + 6;
 	look_tag(fx, ly - 2, tw, 9, tag, game_color(game));

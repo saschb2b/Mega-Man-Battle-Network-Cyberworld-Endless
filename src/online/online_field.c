@@ -160,7 +160,7 @@ void online_field_draw(void) {
 	fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 160));
 	/* (BN6's PET screen: pet_look.h) */
 	look_screen(x0, y0, 240, 160, F.kind == FIELD_NAME ? online_field_name_title : online_field_address_title);
-	look_box(x0 + 7, y0 + 16, 226, 19, PET_SLOT);
+	look_slot(x0 + 7, y0 + 16, 226, 19);
 	const char *shown = F.text;
 	while (*shown && pixfont_width(shown, 1) > 214) ++shown;
 	pixfont_draw(x0 + 12, y0 + 22, shown, PET_CYAN_HI, PET_EXIT, PIXFONT_LEFT, 1);
@@ -180,9 +180,10 @@ void online_field_draw(void) {
 	for (int i = 0; i < BUTTONS; ++i) {
 		int bx = x0 + 8 + i * 75;
 		bool on = F.key == KEY_COUNT + i;
-		if (on) fill_rect(bx, y0 + BUTTON_Y, 73, 14, PET_GOLD);
-		else look_box(bx, y0 + BUTTON_Y, 73, 14, LOOK_NAVY);
-		pixfont_draw(bx + 36, y0 + BUTTON_Y + 3, online_field_buttons[i], on ? PET_EXIT : PET_WHITE, PET_EXIT, PIXFONT_CENTER, 1);
+		/* (STATUS's pills; the one under the cursor NaviCust's green RUN!) */
+		if (on) look_button(bx, y0 + BUTTON_Y - 1, 72, 14);
+		else look_pill(bx, y0 + BUTTON_Y - 1, 73);
+		pixfont_draw(bx + 36, y0 + BUTTON_Y + 3, online_field_buttons[i], PET_WHITE, LOOK_SHADE, PIXFONT_CENTER, 1);
 	}
 	minifont_draw_centered(x0 + 121, y0 + 147, online_field_keys_hint, LOOK_GREEN_LO, 1);
 	minifont_draw_centered(x0 + 120, y0 + 146, online_field_keys_hint, LOOK_PAGE, 1);
