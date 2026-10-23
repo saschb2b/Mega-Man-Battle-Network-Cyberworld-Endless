@@ -36,6 +36,7 @@ the site.
 | The rival, Chaud and ProtoMan: busting duels, the record, what his respect opens | [docs/RIVAL.md](docs/RIVAL.md) |
 | Other games' ROMs (Battle Network 5 first): what they can lend a run, and how | [docs/MULTIROM.md](docs/MULTIROM.md) |
 | What the original games have, do and lack: the sources to look in first, how a claim is verified, what players taught us | [docs/SOURCES.md](docs/SOURCES.md) |
+| BN5's Liberation Missions dissected, how they join the run, and the generator that makes them afresh (its prototype in `tools/liberation.py`, BN5's own nine measured by `tools/liberation_bn5.py`) | [docs/LIBERATION.md](docs/LIBERATION.md) |
 | How reverse engineering is planned, proved and reported | [.claude/skills/reverse-engineering/SKILL.md](.claude/skills/reverse-engineering/SKILL.md); [docs/re/README.md](docs/re/README.md), its [STATUS.md](docs/re/STATUS.md) and [dashboard](docs/re/dashboard.html) |
 | What the project has mapped of BN6 and BN5, written out for others: symbol files for debuggers, tables, how they stay in step; bn6f's functions located in Gregar and BN5, its names kept out of git | [docs/SYMBOLS.md](docs/SYMBOLS.md) |
 | Every line a character says (MegaMan, Lan, Mr.Prog, the shops, bystanders, guardians, townsfolk): how BN6's script talks, measured, and the rules; the owner's standing directions | [docs/VOICE.md](docs/VOICE.md); the catalog of every line, the owner's review dashboard and a voice pass in [docs/voice/README.md](docs/voice/README.md) |
