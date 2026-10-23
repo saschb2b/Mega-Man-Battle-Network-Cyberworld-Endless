@@ -124,8 +124,10 @@ def motion(notes):
 
 def piece_parts(piece):
     """The piece's parts by role: the lead square, the backing square, the
-    wave's bass, and the sampled lead (its echo, the same key within four
-    ticks, left out)."""
+    wave's bass, and the sampled lead: the Direct Sound instruments the
+    piece names in SAMPLED_LEADS ('dlead' by default; a sample doubling
+    the square goes under another name), its echo (the same key within
+    four ticks) left out."""
     s = piece.arrangement()
     parts = {'lead': [(t, k) for t, n, k, *_ in s.psg['sq1']], 'backing': [(t, k) for t, n, k, *_ in s.psg['sq2']],
              'bass': [(t, k) for t, n, k, *_ in s.psg['wave']]}
