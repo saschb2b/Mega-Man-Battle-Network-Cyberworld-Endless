@@ -226,9 +226,11 @@ liberation and an item's find; the recordings are in the pull request):
   zenny coin, a heart, Order Points and so on) and bobs over it while the
   Navi says what he found ("I found some Zennys!"). The board queues it
   as an event (`BN5_LIB_EVENT`, 12 bytes each from `0x02001AB0`): an event
-  kind, the text script of the find (the item kinds' table
-  `BN5_LIB_ITEM_KINDS` +4: 0x18 a heart, 0x29 Order Points, 0x25 zenny,
-  0x26 BugFrags, 0x53 a chip), the panel.
+  kind, the find's icon (the item kinds' table `BN5_LIB_ITEM_KINDS` +4,
+  an index in sprite list 7: 0x18 a heart, 0x19 a key, 0x25 zenny, 0x26
+  BugFrags, 0x29 Order Points, 0x53 a chip), the panel. The heart pops
+  rather than bobs: shown, up 8 pixels after 3 frames, down 2 after 5
+  more, its shadow still beneath it.
 - **The tiles** are the mission maps' own: the overlay's tiles stand from
   tile 865 of map 0x86:00's tile set, uncompressed at `0x08623130` (its
   tile t at `0x0861C510` + 32t, copied whole into the BG's characters),
@@ -251,21 +253,31 @@ liberation and an item's find; the recordings are in the pull request):
   look toggles between its old kind and clean every 4 frames, 14 times,
   then stays clean.
 - **The sprites:** the faced panel's outline and the items' icons are
-  BN5 sprites (list 7, entries 15 and 21); the battle's banners five
-  OBJs whose tiles stand near `0x0873CF74`, their build not traced.
+  BN5 sprites (list 7: the outline 15, the icons 24, 25, 37, 38, 41 and
+  83). The outline shows only while the command window is open over a
+  dark panel faced, never while walking.
+- **The banners** ("LIBERATE SUCCESS!", "1 TURN LIBERATE!", "TURN n
+  START!") are five 32x16 affine OBJs at y 64, built from 8x16 letters
+  (`BN5_LIB_BANNER_TILES`, digits `BN5_LIB_BANNER_DIGITS`, palette 11):
+  they open from squashed to full size in 8 frames, hold 43 and close in
+  8.
 
 - **The HUD and the window:** the Order Points gauge is six OBJs at the
   top right (`BN5_LIB_HUD_OAM`), its frame, bar and digits BN5's
   (`0x087E4xxx`, OBJ palette 12); the L view's PHASE and TRGT PHASE are
-  OBJs on palette 13; the command window is 21 OBJs of 16x16 drawn by
-  BN5's code (palette 15) with BN5's menu cursor beside it; the battle's
+  OBJs on palette 13; the command window is a frame on BG0 (nine tiles,
+  `BN5_LIB_WINDOW_TILES`) with its text in 21 OBJs of 16x16 drawn by
+  BN5's code (palette 15), 14 pixels a line, BN5's menu cursor beside
+  it; the gauge's bar is 6 pixels an Order Point (`BN5_LIB_HUD_MASKS`);
+  the battle's
   banners come from BN5's battle-message table (`BN5_LIB_MESSAGES`),
   the engine BN6 also has.
 - **The backdrop** is the mission map's own animated backdrop, recoloured
   purple (BG palette 0 from `0x0861BF20`): outside a mission the same map
   is BN5's teal ACDC Area 3.
 
-Still to trace: the units' board sprites, the window's text rules, and
+Still to trace: the units' board sprites, the window's font, when an
+item's pop shows and goes, and
 whether the other eight missions' maps carry other sets.
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and

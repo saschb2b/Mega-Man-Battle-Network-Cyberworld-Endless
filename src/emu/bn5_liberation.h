@@ -68,12 +68,23 @@
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
 
 /* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
-#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
+#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2), */
+                                         /* ... anim 0's five frames held 20, 2, 2, 2, 8; shown only while the command window is */
+                                         /* ... open over a dark panel faced, from 6 frames after A */
 #define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
-#define BN5_LIB_ICONS_SPRITE 0x0848D368u /* list 7 index 21: the items' icons that rise over a freed panel (a heart's tiles at 0x0848DFF8) */
-#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... their palette (OBJ palette 3) */
-#define BN5_LIB_BANNER_TILES 0x0873CF74u /* about here, the battle messages' big letters ("LIBERATE SUCCESS!": five 32x16 OBJs, OBJ */
-#define BN5_LIB_MESSAGES     0x0801B8D4u /* ... palette 11): the messages' table, each a list of its letters' graphics (their pointers) */
+#define BN5_LIB_SPRITES_7    0x08032D04u /* sprite list 7's table (the lists' at 0x0803272C): entry k a u32 at +4k */
+#define BN5_LIB_ICONS_SPRITE 0x0848DF40u /* list 7 index 24, the heart that pops over a freed panel; each item kind's icon is the list */
+                                         /* ... 7 index at BN5_LIB_ITEM_KINDS +4: 0x18 the heart, 0x19 a key 0x0848E1F8, 0x25 zenny */
+                                         /* ... 0x084907AC, 0x26 BugFrags 0x08490A20, 0x29 Order Points 0x08492EF8, 0x53 a chip */
+                                         /* ... 0x0849D508; anim 0, the shadow its own OBJ */
+#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... the heart's palette (OBJ palette 3) */
+#define BN5_LIB_BANNER_TILES 0x0873CEF4u /* the battle messages' letters, 8x16 (0x40 bytes): A-Z from here, space 0x0873D574, "!" */
+                                         /* ... 0x0873D5B4, the caps 0x0873D5F4 and 0x0873D634; five 32x16 affine OBJs at y 64 */
+#define BN5_LIB_BANNER_DIGITS 0x0873D974u /* ... their digits, 8x16, 0x40 bytes each ("1 TURN LIBERATE!", "TURN n START!") */
+#define BN5_LIB_BANNER_PAL   0x0873E4B4u /* ... their palette (OBJ palette 11) */
+#define BN5_LIB_BANNER_HOLD  43          /* ... frames at full size, after 8 of opening and before 8 of closing (the scale's pd */
+                                         /* ... 768, 640, 512, 384, 256, 208, 224, then 256; out 224, 208, 256, 384 ... 896) */
+#define BN5_LIB_MESSAGES     0x0801B8D4u /* ... the messages' table, each a list of its letters' graphics (their pointers) */
 
 /* The board's HUD and window (docs/LIBERATION.md, How the board looks and moves) */
 #define BN5_LIB_HUD_OAM      0x080531F4u /* the Order Points gauge: six OAM entries (u32 attributes 0 and 1, u16 attribute 2, u32 1): */
@@ -83,12 +94,16 @@
 #define BN5_LIB_HUD_DIGITS   0x087E4704u /* the HUD's digits (8x8, 0x40 bytes a digit) */
 #define BN5_LIB_HUD_FRAME    0x087E4884u /* the gauge's frame, copied to 0x02039200 */
 #define BN5_LIB_HUD_BAR      0x087E4984u /* the gauge's bar, masked by the count */
+#define BN5_LIB_HUD_MASKS    0x08053240u /* ... the bar's six tiles (6 px an Order Point) copied, the first 6 - (6 OP + 7) / 8 */
+                                         /* ... cleared and the next one's rows ANDed with the u32 at +8 OP */
 #define BN5_LIB_HUD_PAL      0x086D5904u /* OBJ palette 12: BN5's HUD palette (the HP box's too) */
 #define BN5_LIB_PHASE_TILES  0x087E4534u /* the L view's "PHASE" and "TRGT PHASE" (OBJ palette 13 at 0x087E4658), its digits from */
 #define BN5_LIB_PHASE_DIGITS 0x087E4E04u /* ... here (palette 12), its corner arrows from 0x087E4CC4 */
 #define BN5_LIB_WINDOW_PAL   0x087E4FA4u /* OBJ palette 15: the command window, 21 OBJs of 16x16 at x 128-239, y 114-157, drawn into */
                                          /* ... RAM (0x0203A400) by BN5's code each time it opens; its cursor tile 704 (0x086BA484), */
-                                         /* ... OBJ palette 14 (0x086CCD24), at (112,112) */
+                                         /* ... OBJ palette 14 (0x086CCD24), at (112,112), 14 px a line */
+#define BN5_LIB_WINDOW_TILES 0x087E4FC4u /* the window's frame on BG0: nine tiles (corners, edges, body), 16 x 7 tiles at tile (14,13) */
+#define BN5_LIB_WINDOW_BG_PAL 0x087E5144u /* ... its BG palette 14 */
 #define BN5_LIB_BACKDROP_PAL 0x0861BF20u /* BG palette 0 in a mission: the map's own animated backdrop (its tiles rebuilt in RAM at */
                                          /* ... 0x0200E960) in purple; map 0x86:00's own palette 0 otherwise 0x086203CC */
 
