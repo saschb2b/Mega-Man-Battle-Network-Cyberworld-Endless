@@ -47,11 +47,15 @@ OUT = os.path.join(ROOT, 'docs', 'screenshots', 'online-browser.png')
 SESSION = 'cw-online-browser'
 # (home after act 2 at seed 3, the arrival's words paged, onto the gate
 # and Yes, as tools/online_browser.html goes; then the greeter's stamps
-# paged, and a phrase: the page's MegaMan a step aside and Hello!, and
-# Alpha's own a moment later)
+# paged, and a phrase from SELECT's strip (its phrases' page, issue #178):
+# the two side by side by the arrival, facing each other, the page's
+# MegaMan's Hello!, and Alpha's Nice build! a moment later. Their places
+# are the plaza's panels (2.25, 1) and (3.25, 0) from its landmark in the
+# example server's Square, seed 120: tools/online_pictures.py's floor())
 GATE = '450:,4:A,60:,4:A,60:,4:A,60:,4:A,60:,1:place 16 72 3,120:,4:LEFT,30:,4:A,300:,200:,4:A,60:,4:A,60:,4:A,90:,4:A,90:,4:A,60:,'
-PAGE_INPUT = GATE + '44:RIGHT,30:,4:L,90:,4:A,90:,4:A,60:,4:A,400:'
-ALPHA_INPUT = GATE + '150:,4:L,90:,4:A,90:,4:DOWN,40:,4:A,60:,4:A,400:,6000:'
+WORDS = '4:B,50:,' * 4   # (the greeter's last pages, with B: an A with no box open would read a card)
+PAGE_INPUT = GATE + WORDS + '1:place -12 116 2,64:,6:SELECT,20:,6:R,10:,6:A,400:'
+ALPHA_INPUT = GATE + WORDS + '1:place 20 148 6,173:,6:SELECT,20:,6:R,10:,6:RIGHT,6:,6:A,400:,6000:'
 SCENE = ['--scene', 'home', '--run-depth', '7', '--seed', '3']
 SECONDS = range(34, 53)
 

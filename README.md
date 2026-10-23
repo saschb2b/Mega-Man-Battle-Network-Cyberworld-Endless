@@ -33,8 +33,8 @@ around it, one layer at a time, keeps the run going, and links players' games in
 
 <table align="center">
 <tr>
-<td align="center" width="33%"><img src="docs/clips/online-square.gif" width="250" alt="In a Net Square of eight players, MegaMan picks Hello! from L's phrases, and Hello! and Nice build! pop up over the MegaMen round the landmark"><br><b>Meet</b><br><sub>Eight players a channel. Phrases and emotes from a fixed list, never free text.</sub></td>
-<td align="center" width="33%"><img src="docs/clips/online-trade.gif" width="250" alt="Trade Central's chip trade: FireBrn1 F for MrkCan1 M, Deal!, waiting on Beta, then the two chips' cards cross and land: Traded!"><br><b>Trade</b><br><sub>One spare chip for one at Trade Central, BN5's too. Its board says who wants what.</sub></td>
+<td align="center" width="33%"><img src="docs/clips/online-square.gif" width="250" alt="In the Net Square's welcome plaza, eight players' MegaMen round its statue say Hello! and Nice build! and the greeter calls WHOA! EVERYBODY!!; over its warps, TRADE CENTRAL, ARENA and STAGE in gold"><br><b>Meet</b><br><sub>Eight players a channel. Phrases and emotes from a fixed list, never free text.</sub></td>
+<td align="center" width="33%"><img src="docs/clips/online-trade.gif" width="250" alt="Trade Central's chip trade: MegaMan asks Lan,trade our FireBrn1 F for Beta's MrkCan1 M? and Yes is taken; Beta's still thinking, then Here it comes! and the two chips' cards cross: Yeah! We got MrkCan1 M!"><br><b>Trade</b><br><sub>One spare chip for one at Trade Central, BN5's too. Its board says who wants what.</sub></td>
 <td align="center" width="33%"><img src="docs/clips/online-battle.gif" width="250" alt="A NetBattle between two players' MegaMen, charged shots both ways, from one player's side"><br><b>NetBattle</b><br><sub>Your MegaMen as they are, Souls and all, with rollback: 2 frames of input delay on a good connection.</sub></td>
 </tr>
 <tr>
