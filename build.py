@@ -1273,7 +1273,7 @@ SCREENSHOTS = [
     # layer's map on the bottom one, a Net Dealer and a Recovery Mr. Prog
     # met on the way to BlastMan's arena)
     ('3ds', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12'],
-     [(1040, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
+     [(1160, '3ds')], {'CYBERWORLD_AUTOPILOT': 'weak'}, '3ds'),
     # 0.8.0's notes (docs/releases/v0.8.0.md), each by its feature: MegaMan
     # placed at it ("0:place X Y FACE"), flags set ("0:flags FROM TO 1"),
     # the chats paged with A. (the setup's NEW marks: a veteran profile's
@@ -1413,6 +1413,13 @@ SCREENSHOTS = [
      [(580, 'bn5-visitor')], {'CYBERWORLD_AUTOPILOT': '1'}),
     # 0.9.0's notes, each by its feature. (MegaMan's word on GitHub, typed out)
     ('notice', ['--scene', 'intro'], [(230, 'notice')], {}),
+    # (the title's menu after START, OPTIONS under NEW GAME and CONTINUE; the
+    # PET's menu in Lan's room, Options in Comm's row)
+    ('title-menu', ['--scene', 'title', '--input', '60:,4:START,50:'], [(110, 'title-menu')], {}),
+    ('pet-options', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '6:START,60:'], [(590, 'pet-options')], {}),
+    # (SELECT on the title: Options, its Display section, back, then its Audio section)
+    ('options', ['--scene', 'title', '--input', '60:,4:SELECT,40:,4:DOWN,30:,4:A,40:,4:B,30:,4:DOWN,30:,4:A,60:'],
+     [(100, 'options'), (150, 'options-display'), (290, 'options-audio')], {}),
     # (SELECT on the title: Options, then its Controls, an Xbox pad attached)
     ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,30:,4:A,40:'], [(134, 'controls')], {}),
     # (a Recovery Mr. Prog on an act's middle layer, MegaMan held at 40 HP:

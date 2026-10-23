@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.1 (2026-10-23)
 
 - **The PET's screens look like BN6's own.** The screens the game adds
   to BN6 (the Jukebox, the NetPass, Trade Central, the NetBattle's cards,
