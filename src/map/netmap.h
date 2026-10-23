@@ -24,6 +24,11 @@ typedef struct {
 	const uint8_t *pad;     /* 1 on the cells of pads (NULL: none) */
 	const NetProp *props;   /* the props set on its floor (net.h) */
 	int nprops;
+	/* warp pads of BN6's gem (the Net Square's): each panel the middle of
+	 * a 3 x 3 pad of floor, drawn as the area's pads and its gem on it (a
+	 * layer's are its teleport pair, layer.teleport_*) */
+	const int (*gems)[2];
+	int ngems;
 } NetLayout;
 
 /* How many wall cells of floor (nine panels) a map has at a height for its

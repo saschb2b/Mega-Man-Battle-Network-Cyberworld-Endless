@@ -28,11 +28,8 @@ const char *square_greeter_words(const SquareFacts *f) {
 	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|%s JUST\nLOGGED IN!", f->arrived);
 	if (f->navis <= 1) n += snprintf(s + n, sizeof s - (size_t)n, "|IT'S QUIET NOW.\nFRIENDS LOG IN\nRIGHT HERE!");
 	else n += snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS ARE ON\nCHANNEL %u!", f->navis, f->channel);
-	/* (the wings by the landmark everyone sees: session 74 found neither) */
-	char mark[16];
-	snprintf(mark, sizeof mark, "%s", landmark_name(f->landmark));
-	for (char *c = mark; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
-	snprintf(s + n, sizeof s - (size_t)n, "|TRADE CENTRAL AND\nTHE ARENA ARE PAST\nTHE %s!", mark);
+	/* (the parts, each a warp off the plaza: session 74 found neither wing) */
+	snprintf(s + n, sizeof s - (size_t)n, "|THE WARPS GO TO\nTRADE CENTRAL,THE\nARENA,THE STAGE!");
 	return s;
 }
 
@@ -130,6 +127,15 @@ const char *square_walker_words(int k, const SquareFacts *f) {
 	return lines[f->turn % (unsigned)n];
 }
 
+/* the trade board's offers, a box each, from `n` of `s` */
+static int offers(char *s, size_t size, int n, const SquareFacts *f) {
+	for (int k = 0; k < f->nposts; ++k)
+		n += f->posts[k].name ? snprintf(s + n, size - (size_t)n, "|>%s has\n%s,wants\n%s.", f->posts[k].name, f->posts[k].chip, trade_want(f->posts[k].want))
+			: snprintf(s + n, size - (size_t)n, "|>Your offer:\n%s for\n%s.", f->posts[k].chip, trade_want(f->posts[k].want));
+	if (!f->nposts) n += snprintf(s + n, size - (size_t)n, "|>Trade board:\nno offers up.");
+	return n;
+}
+
 /* the Board: a post a box, newest first; the trade board's offers after */
 static const char *board(const SquareFacts *f) {
 	static char s[720];
@@ -141,10 +147,7 @@ static const char *board(const SquareFacts *f) {
 	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|>%s logged in.", f->arrived);
 	if (f->traded) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade done with\n%s!", f->traded);
 	if (f->fought) n += snprintf(s + n, sizeof s - (size_t)n, "|>NetBattle vs\n%s: %s", f->fought, f->result == 1 ? "won!" : f->result == 2 ? "lost." : f->result == 4 ? "broke off." : "over.");
-	for (int k = 0; k < f->nposts; ++k)
-		n += f->posts[k].name ? snprintf(s + n, sizeof s - (size_t)n, "|>%s has\n%s,wants\n%s.", f->posts[k].name, f->posts[k].chip, trade_want(f->posts[k].want))
-			: snprintf(s + n, sizeof s - (size_t)n, "|>Your offer:\n%s for\n%s.", f->posts[k].chip, trade_want(f->posts[k].want));
-	if (!f->nposts) n += snprintf(s + n, sizeof s - (size_t)n, "|>Trade board:\nno offers up.");
+	n = offers(s, sizeof s, n, f);
 	snprintf(s + n, sizeof s - (size_t)n, "|>Tip: post a chip\nat Trade Central.");
 	return s;
 }
@@ -166,20 +169,59 @@ const char *square_check_words(int look, const SquareFacts *f) {
 	}
 }
 
+/* where a Navi is, part by part, as MegaMan says it */
+static const char *const part_in[SQ_PARTS] = { "in the plaza", "at Trade Central", "in the Arena", "on the stage" };
+
+/* who is in each part but MegaMan's, a box each: "Alpha's in the Arena!",
+ * "Alpha and 2 more are on the stage!" */
+static int who_where(char *s, size_t n, const SquareFacts *f) {
+	int used = 0;
+	for (int k = 0; k < SQ_PARTS; ++k) {
+		if (k == f->part || !f->in_part[k] || !f->in_name[k]) continue;
+		if (f->in_part[k] == 1) used += snprintf(s + used, n - (size_t)used, "|%s's %s!", f->in_name[k], part_in[k]);
+		else used += snprintf(s + used, n - (size_t)used, "|%s and %u more are %s!", f->in_name[k], f->in_part[k] - 1, part_in[k]);
+		if ((size_t)used >= n) return (int)n - 1;
+	}
+	return used;
+}
+
 /* (a player ran round an empty Square for ten calls and found neither
- * Trade Central's clerk nor the referee, session 74: L names the way, as
- * L does on a layer, by the landmark everyone can see) */
-const char *square_look_words(int where, int look, const char *way) {
-	static char s[240];
-	const char *mark = landmark_name(look);
-	if (where == SQUARE_IN_PLAZA) return "Trade Central's to the upper left,Lan!|The Arena's to the lower left!";
-	if (where == SQUARE_IN_TRADE)
-		snprintf(s, sizeof s, "Trade Central's right here,Lan!|The %s's %s.|The Arena's past it,to the lower left!", mark, way);
-	else if (where == SQUARE_IN_ARENA)
-		snprintf(s, sizeof s, "The Arena's right here,Lan!|The %s's %s.|Trade Central's past it,to the upper left!", mark, way);
-	else
-		snprintf(s, sizeof s, "The %s's %s,Lan!|Trade Central's past it,to the upper left!|The Arena's past it,to the lower left!", mark, way);
+ * Trade Central's clerk nor the referee, session 74: L names the way to
+ * each part, and who is there, so friends find each other) */
+const char *square_look_words(const SquareFacts *f) {
+	static char s[360];
+	int n;
+	if (f->part <= SQ_PART_PLAZA)
+		n = snprintf(s, sizeof s, "Lan,Trade Central's warp is to the upper left!|The Arena's is to the upper right.|"
+			"And the stage's is to the lower left!");
+	else n = snprintf(s, sizeof s, "The warp we came in on goes back to the plaza,Lan!");
+	who_where(s + n, sizeof s - (size_t)n, f);
 	return s;
+}
+
+/* (the Arena's braziers and the stage's cybertrees by their warps say it
+ * as MegaMan reads the place; Trade Central's board in its own posts) */
+const char *square_sign_words(int part, const SquareFacts *f) {
+	static char s[720];
+	static const char *const sign[SQ_PARTS] = { "", "TRADE CENTRAL BBS\nSpare chips,swapped\none for one.",
+		"Lan,look! The\nArena's over there!|Navis NetBattle\nin its ring!", "Lan,that's the\nstage over there!|Up there,everyone\nsees you!" };
+	if (part <= SQ_PART_PLAZA || part >= SQ_PARTS) return "";
+	int n = snprintf(s, sizeof s, "%s", sign[part]);
+	bool post = part == SQ_PART_TRADE;
+	if (!f->in_part[part] || !f->in_name[part]) n += snprintf(s + n, sizeof s - (size_t)n, post ? "|>There now:\nnobody yet." : "|Nobody's there yet.");
+	else if (f->in_part[part] == 1) n += snprintf(s + n, sizeof s - (size_t)n, post ? "|>There now:\n%s." : "|%s's over there!", f->in_name[part]);
+	else n += snprintf(s + n, sizeof s - (size_t)n, post ? "|>There now:\n%s\nand %u more." : "|%s and %u more are there!",
+		f->in_name[part], f->in_part[part] - 1);
+	if (post) offers(s, sizeof s, n, f);
+	return s;
+}
+
+void square_warp_label(char *out, size_t n, int part, unsigned navis, const char *name) {
+	static const char *const label[SQ_PARTS] = { "PLAZA", "TRADE CENTRAL", "ARENA", "STAGE" };
+	if (part < 0 || part >= SQ_PARTS) snprintf(out, n, "%s", "");
+	else if (!navis || !name) snprintf(out, n, "%s", label[part]);
+	else if (navis == 1) snprintf(out, n, "%s: %s", label[part], name);
+	else snprintf(out, n, "%s: %u NAVIS", label[part], navis);
 }
 
 const char *square_cheer_bark(int together) { return together >= 3 ? "Yeah!! Go,go!" : "!!"; }

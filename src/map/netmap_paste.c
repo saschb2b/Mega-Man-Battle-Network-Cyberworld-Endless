@@ -79,8 +79,10 @@ void nm_paste_props(uint16_t *map, int tw, int th) {
 void nm_paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
 	if (!L->ornament[0].ok) return;
 	size_t cells = (size_t)tw * th;
-	for (int i = 0; i < 2 && layer.nteleports; ++i) {
-		int x = layer.teleport_x[i], y = layer.teleport_y[i];
+	int teleports = layer.nteleports ? 2 : 0;
+	for (int i = 0; i < teleports + nm_cur->ngems; ++i) {
+		int x = i < teleports ? layer.teleport_x[i] : nm_cur->gems[i - teleports][0];
+		int y = i < teleports ? layer.teleport_y[i] : nm_cur->gems[i - teleports][1];
 		const PropStamp *st = &L->ornament[0];
 		int A, B;
 		nm_grid_to_panel(x, y, &A, &B);
@@ -93,24 +95,64 @@ void nm_paste_ornaments(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
-/* The area's own pad, whole, on every 3 x 3 pad at ground level away from
- * the stairs, in place of the floor the classes drew there (the classes
- * drew Central's pads green, where its maps frame them); their
- * centrepieces go on after. */
-/* Whether the tile at map pixel (px, py) lies over pad `m`'s own panels or
- * the void alone (at the floor's height, drawn dv below the panel edges). */
-static bool pad_tile_ok(const Learned *L, const Room *m, int tw, int th, int px, int py) {
+/* Whether grid panel (gx, gy) is floor: of the layer, or of the layout
+ * being drawn (the Net Square's) */
+static bool layer_floor(int gx, int gy) { return gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID; }
+static bool drawn_floor(int gx, int gy) {
+	return gx >= 0 && gy >= 0 && gx < nm_cur->gw && gy < nm_cur->gh && nm_cur->cell[gy * nm_cur->gw + gx] != C_VOID;
+}
+
+/* Whether the tile at (pu, pv), map pixels from the map's middle, lies
+ * over the 3 x 3 pad from (mx, my)'s own panels or the void alone (at the
+ * floor's height, drawn dv below the panel edges). */
+static bool pad_tile_ok(const Learned *L, int mx, int my, int pu, int pv, bool (*floor)(int, int)) {
 	for (int y = 1; y < 8; y += 2)
 		for (int x = 1; x < 8; x += 2) {
-			int u = px + x - tw * 4, v = 2 * (py + y - L->book[0].dv - th * 4), X = (u - v) / 2, Y = (u + v) / 2;
+			int u = pu + x, v = 2 * (pv + y - L->book[0].dv), X = (u - v) / 2, Y = (u + v) / 2;
 			int A = nm_floordiv(X - nm_place.ex, 32), B = nm_floordiv(Y - nm_place.ey, 32);
 			int gx = B + nm_place.gx0, gy = -A + nm_place.gy0;
-			if (gx >= m->x && gx < m->x + 3 && gy >= m->y && gy < m->y + 3) continue;
-			if (gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H && layer.cell[gy][gx] != C_VOID) return false;
+			if (gx >= mx && gx < mx + 3 && gy >= my && gy < my + 3) continue;
+			if (floor(gx, gy)) return false;
 		}
 	return true;
 }
 
+/* The area's pad stamped on the 3 x 3 from (mx, my) */
+static void paste_pad(const Learned *L, uint16_t *map, int tw, int th, int mx, int my, bool (*floor)(int, int)) {
+	int A, B;
+	nm_grid_to_panel(mx, my + 2, &A, &B);
+	int X0 = nm_place.ex + 32 * A, Y0 = nm_place.ey + 32 * B;
+	int px0 = area_px(tw, X0, Y0), py0 = area_py(th, X0, Y0);
+	/* the stamp only over the pad's own panels or the void: its edges
+	 * and faces would cut into a walkway or a platform it touches (a
+	 * walkway's last panel before the pad came out cut) */
+	for (int k = 0; k < L->pad.ntiles; ++k) {
+		int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
+		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_tile_ok(L, mx, my, px - tw * 4, py - th * 4, floor)) continue;
+		map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
+		if (nm_last.pasted) nm_last.pasted[(size_t)(py / 8) * tw + px / 8] |= NETMAP_PASTED_PAD;
+	}
+}
+
+/* Whether the drawn layout's 3 x 3 from (mx, my) is flat floor, clear of
+ * its stairs */
+static bool drawn_flat(int mx, int my) {
+	for (int y = my; y < my + 3; ++y)
+		for (int x = mx; x < mx + 3; ++x) {
+			if (x < 0 || y < 0 || x >= nm_cur->gw || y >= nm_cur->gh || nm_cur->cell[y * nm_cur->gw + x] != C_PATH) return false;
+			if (nm_cur->level && nm_cur->level[y * nm_cur->gw + x]) return false;
+		}
+	for (int s = 0; s < nm_cur->nstairs; ++s) {
+		const Stair *st = &nm_cur->stairs[s];
+		if (!(st->x + 2 < mx - 1 || st->x > mx + 3 || st->y + 2 < my - 1 || st->y > my + 3)) return false;
+	}
+	return true;
+}
+
+/* The area's own pad, whole, on every 3 x 3 pad at ground level away from
+ * the stairs, in place of the floor the classes drew there (the classes
+ * drew Central's pads green, where its maps frame them); their
+ * centrepieces go on after. The Net Square's gems' pads the same. */
 void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 	if (!L->pad.ok) return;
 	for (int i = 0; i < layer.nrooms; ++i) {
@@ -121,20 +163,11 @@ void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 			for (int x = m->x; x < m->x + 3; ++x) flat &= layer.cell[y][x] == C_PATH && !layer.level[y][x];
 		for (int s = 0; s < layer.nstairs; ++s)
 			flat &= layer.stair[s].x + 2 < m->x - 1 || layer.stair[s].x > m->x + 3 || layer.stair[s].y + 2 < m->y - 1 || layer.stair[s].y > m->y + 3;
-		if (!flat) continue;
-		int A, B;
-		nm_grid_to_panel(m->x, m->y + 2, &A, &B);
-		int X0 = nm_place.ex + 32 * A, Y0 = nm_place.ey + 32 * B;
-		int px0 = area_px(tw, X0, Y0), py0 = area_py(th, X0, Y0);
-		/* the stamp only over the pad's own panels or the void: its edges
-		 * and faces would cut into a walkway or a platform it touches (a
-		 * walkway's last panel before the pad came out cut) */
-		for (int k = 0; k < L->pad.ntiles; ++k) {
-			int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
-			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_tile_ok(L, m, tw, th, px, py)) continue;
-			map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
-			if (nm_last.pasted) nm_last.pasted[(size_t)(py / 8) * tw + px / 8] |= NETMAP_PASTED_PAD;
-		}
+		if (flat) paste_pad(L, map, tw, th, m->x, m->y, layer_floor);
+	}
+	for (int i = 0; i < nm_cur->ngems; ++i) {
+		int mx = nm_cur->gems[i][0] - 1, my = nm_cur->gems[i][1] - 1;
+		if (drawn_flat(mx, my)) paste_pad(L, map, tw, th, mx, my, drawn_floor);
 	}
 }
 
