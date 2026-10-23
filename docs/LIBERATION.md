@@ -643,6 +643,28 @@ to +0.5 (100 to 240 HP struck off a play), KnightMan's StoneBody +0.2 to
   plays run as the layer is made (a precomputed check, or the rule's
   plays on a worker, if it is too slow on the 3DS).
 
+### The quality bar's measures, the prototype
+
+The same staircase, barriers, traps and measures in the prototype, its
+teams BN5's (`python3 tools/liberation.py --seeds 20 --runs 8`, an act a
+core; the route's player's plays a quarter of the par's):
+
+| Act | Kept of tried | Rejected most for | Dead decisions on the way | Sensible moves a decision | Par (middle half) | The route | Traps |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 20 of 160 | dead 81, commands 22, situations 36 | 46% | 1.6 | 8.7 (2.3 wide) | none | none |
+| 3 | 2 of 240 | dead 106, barrier 94, route 19 | 51% | 1.6 | 11.5 (3.3) | +2.5 | none |
+| 4 | 13 of 240 | barrier 147, route 35, commands 22 | 50% | 1.8 | 12.1 (2.7) | +2.4 | none |
+| 5 | 2 of 240 | barrier 162, situations 26, holes 16 | 49% | 2.0 | 14.0 (2.1) | +3.7 | 4 |
+| 6 | 5 of 240 | barrier 137, route 31, commands 21 | 50% | 1.8 | 13.0 (2.4) | +2.5 | 4 |
+
+A team decides about as often a decision as MegaMan alone (one in two
+dead), and its phases hold more decisions, one a Navi. The prototype's
+floors, BN5's trees of platforms, seldom cut off a sealed region by a wall
+of its own (three to thirty panels with nothing in them): from act 3 most
+of its tries fail there, where the engine's layers, looped, keep 38 to 40
+of 40. Its numbers stand for the rules' direction; the engine's for the
+boards a run meets.
+
 ## Building it
 
 A staged plan, each stage its own pull request:
@@ -926,8 +948,13 @@ What they say:
   Started at depth 11 directly, MegaMan was deleted in a liberation's
   battle on dev's build as on this one: not this change's.
 
-**Left for later:** the route kept for the run and offered at the next
-fork (Special routes); the guardians' reach drawn (the L view); the board's
+**Left for later:** the board made from the map's own floor: it is made
+from the layer's cells before the map is built, so where the map's
+heights or legal.c's drops make a way of the board's no way of the map's,
+MegaMan stands at its edge (seed 1's act 5 board at depth 14: its
+walkway steps up where the board runs on; stage 1's boards are open to it
+as much); the route kept for the run and offered at the next fork
+(Special routes); the guardians' reach drawn (the L view); the board's
 make on the 3DS timed (about 55 ms a board on the desktop, the planner's
 plays the most of it: a dark layer's make on the New 3DS may take a second
 or two); acts 5 and 6 tuned for a lone MegaMan (their BN5 harm wants a

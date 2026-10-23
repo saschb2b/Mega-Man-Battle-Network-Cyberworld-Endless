@@ -15,8 +15,12 @@ around a dark panel). A planner then plays each mission many times by BN5's
 rules, abstracted (a team acting once a phase, three-turn liberations, the
 one-turn bonus, Order Points, the enemy's phase): its phases set the
 mission's par, and the board is kept only where every teammate's command
-earns its Order Point. Prints the measures the design promises over the
-seeds: phases against par, every command's worth, route variety, the bands,
+earns its Order Point, and only where it keeps the quality bar
+(docs/LIBERATION.md, The quality bar: one new rule an act, the staircase;
+dead decisions on the way bounded; the sealed region's route a price of
+phases, never required; traps shown). Prints the measures the design
+promises over the seeds: phases against par, every command's worth, dead
+decisions and sensible moves, the route's cost, route variety, the bands,
 rejections. Numbers only; nothing of BN5's is read here
 (tools/liberation_bn5.py measures BN5's own nine missions the same way).
 """
@@ -597,8 +601,8 @@ def traps(b, rng, want):
             got += 1
 
 
-def find_cut(b, rng, min_region=5):
-    """One or two walkway panels that cut five to thirty panels off by themselves, nothing of the
+def find_cut(b, rng, min_region=3):
+    """One or two walkway panels that cut three to thirty panels off by themselves, nothing of the
     board's (holes, the Darkloid, items, guardians, the start) in them: the sealed region."""
     walk = [c for c, k in b.cells.items() if k in (FREE, DARK) and len(b.neighbours(c)) <= 3 and c not in b.start
             and not any(abs(c[0] - h[0]) <= 1 and abs(c[1] - h[1]) <= 1 for h in b.holes)]
