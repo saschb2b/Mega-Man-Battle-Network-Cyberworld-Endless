@@ -27,13 +27,13 @@
 
 /* the chip trade: two cards, the arrows between */
 #define DEAL_W 98
-#define DEAL_H 84
+#define DEAL_H 88
 #define DEAL_Y 31
 #define DEAL_LEFT 10
 #define DEAL_RIGHT (W - 10 - DEAL_W)
-#define BUTTON_Y 121
+#define BUTTON_Y 123
 #define BUTTON_W 78
-#define BUTTON_H 17
+#define BUTTON_H 19
 #define KEYS_Y 146
 
 static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + code); }
@@ -155,16 +155,16 @@ static void deal_card(int x, int y, TradeChip c, SDL_Color edge) {
 	picture(c.id, cx - 29, f.y, LOOK_EDGE_LO);
 	ChipInfo ci;
 	chip_info(c.id, &ci);
-	text_draw(cx, f.y + 50, ci.name, LOOK_TEXT, TEXT_CENTER);
+	text_draw(cx, f.y + 51, ci.name, LOOK_TEXT, TEXT_CENTER);
 	char code[2] = { code_char(c.code), 0 }, power[12];
 	power_words(&ci, power, sizeof power);
 	/* (the code, the element's icon and the power in a row, centred) */
 	int el = second_chip_element(c.id), cw = text_width(code), pw = text_width(power);
 	int rw = cw + 4 + (el >= 0 ? 16 + 4 : 0) + pw, rx = cx - rw / 2;
-	text_draw(rx, f.y + 62, code, LOOK_GOLD, TEXT_LEFT);
+	text_draw(rx, f.y + 64, code, LOOK_GOLD, TEXT_LEFT);
 	rx += cw + 4;
-	if (el >= 0) { second_element_icon(el, rx, f.y + 60); rx += 20; }
-	text_draw(rx, f.y + 62, power, LOOK_TEXT, TEXT_LEFT);
+	if (el >= 0) { second_element_icon(el, rx, f.y + 62); rx += 20; }
+	text_draw(rx, f.y + 64, power, LOOK_TEXT, TEXT_LEFT);
 }
 
 /* a card's label on a tag over it */
@@ -184,8 +184,8 @@ static void arrow(int x, int y, bool right, SDL_Color c) {
 /* a button of the two: a slim window, the cursor's arrow at its left where it is */
 static void button(int x, int y, const char *label, bool lit) {
 	look_box(x, y, BUTTON_W, BUTTON_H, lit ? LOOK_NAVY : LOOK_NAVY_LO);
-	text_draw(x + BUTTON_W / 2 + 4, y + 2, label, lit ? LOOK_TEXT : LOOK_DIM, TEXT_CENTER);
-	if (lit) look_cursor(x - 4, y + 4);
+	text_draw(x + BUTTON_W / 2 + 4, y + 3, label, lit ? LOOK_TEXT : LOOK_DIM, TEXT_CENTER);
+	if (lit) look_cursor(x - 4, y + 5);
 }
 
 /* the cards where they stand, crossing in the swap: MegaMan's going right

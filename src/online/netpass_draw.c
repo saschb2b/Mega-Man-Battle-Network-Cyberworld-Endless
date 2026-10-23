@@ -174,16 +174,16 @@ static void card(int x, int y, const NetPassView *v) {
 	look_text(cx, f.y + 11, netpass_operator, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	look_caps(cx, f.y + 27, netpass_navi_label, LOOK_EDGE_HI, NONE);
 	look_text(cx, f.y + 34, netpass_navi, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-	fill_rect(f.x + 2, f.y + 53, f.w - 4, 1, LOOK_SHADE);
-	look_caps(f.x + 3, f.y + 57, netpass_stamps_label, LOOK_EDGE_HI, NONE);
+	fill_rect(f.x + 2, f.y + 51, f.w - 4, 1, LOOK_SHADE);
+	look_caps(f.x + 3, f.y + 58, netpass_stamps_label, LOOK_EDGE_HI, NONE);
 	char count[16];
 	int held = held_count(v);
 	netpass_count_words(count, sizeof count, held, STAMP_COUNT);
-	look_text(f.x + f.w - 3, f.y + 53, count, held == STAMP_COUNT ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
+	look_text(f.x + f.w - 3, f.y + 54, count, held == STAMP_COUNT ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
 	/* (a segment a stamp, gold where held) */
 	int sw = (f.w - 6 - 3 * 2) / STAMP_COUNT;
 	for (int s = 0; s < STAMP_COUNT; ++s) {
-		int sx = f.x + 3 + s * (sw + 2), sy = f.y + 67;
+		int sx = f.x + 3 + s * (sw + 2), sy = f.y + 68;
 		if (v->held[s]) {
 			fill_rect(sx, sy, sw, 6, PET_GOLD);
 			fill_rect(sx, sy, sw, 1, GOLD_HI);
@@ -218,9 +218,9 @@ static void stamp_cell(int x, int y, int s, const NetPassView *v) {
 	bool held = v->held[s];
 	look_box(x, y, CELL_W, CELL_H, held ? LOOK_NAVY : LOOK_NAVY_LO);
 	int cx = x + CELL_W / 2;
-	seal(cx, y + 12, 9, held, v->landing == s ? v->landing_t : -1);
-	look_text(cx, y + 21, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
-	minifont_draw_centered(cx, y + 34, netpass_stamp_captions[s], held ? LOOK_EDGE_HI : LOOK_DIM, 1);
+	seal(cx, y + 11, 8, held, v->landing == s ? v->landing_t : -1);
+	look_text(cx, y + 19, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
+	minifont_draw_centered(cx, y + 32, netpass_stamp_captions[s], held ? LOOK_EDGE_HI : LOOK_DIM, 1);
 }
 
 /* a cartridge of the set's game `g`, small, from (x, y): the ROMs
@@ -280,9 +280,12 @@ static void tray(int x, int y, const NetPassView *v) {
 		if (in) check(wx + 3, f.y + 32, c);
 		minifont_draw(wx + (in ? 8 : 0), f.y + 30, word, c, 1);
 	}
+	/* (the PET's line in the engine's smaller letters: the lists' would take three lines and more here) */
 	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
-	int tx = cx + 2, tw = f.x + f.w - 3 - tx;
-	look_wrapped(line, tx, f.y, tw, 3, missing ? LOOK_TEXT : LOOK_GOLD, LOOK_SHADE);
+	int tx = cx + 1, tw = f.x + f.w - 2 - tx;
+	char lines[3][96];
+	int n = pixfont_wrap(line, tw, 1, lines, 3);
+	for (int i = 0; i < n; ++i) word(tx, f.y + 2 + i * PIXFONT_LINE, lines[i], missing ? LOOK_TEXT : LOOK_GOLD, INK, PIXFONT_LEFT);
 }
 
 void netpass_view_now(NetPassView *v) {
@@ -311,7 +314,7 @@ void netpass_draw_strip(int x, int y, const NetPassView *v) {
 		int cx = x + 7 + s * (w + 3), cy = y + LOOK_BAND_H + 2;
 		bool held = v->held[s];
 		look_box(cx, cy, w, NETPASS_STRIP_H - LOOK_BAND_H - 2 - LOOK_RAIL - 1, held ? LOOK_NAVY : LOOK_NAVY_LO);
-		seal(cx + w / 2, cy + 11, 8, held, v->landing == s ? v->landing_t : -1);
-		look_text(cx + w / 2, cy + 19, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
+		seal(cx + w / 2, cy + 10, 7, held, v->landing == s ? v->landing_t : -1);
+		look_text(cx + w / 2, cy + 17, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
 	}
 }

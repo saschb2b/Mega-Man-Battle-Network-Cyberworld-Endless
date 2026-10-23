@@ -347,6 +347,14 @@ static void confirm_update(void) {
 	}
 }
 
+/* the rows in view kept round the cursor */
+static void follow(void) {
+	if (C.row < ROWS && C.row < C.top) C.top = C.row;
+	if (C.row < ROWS && C.row >= C.top + ROWS_SHOWN) C.top = C.row - ROWS_SHOWN + 1;
+	if (C.top > ROWS - ROWS_SHOWN) C.top = ROWS - ROWS_SHOWN;
+	if (C.top < 0) C.top = 0;
+}
+
 void controls_update(void) {
 	if (!C.open) return;
 	++C.t;
@@ -360,6 +368,7 @@ void controls_update(void) {
 		light();
 		nav_update();
 	}
+	follow();
 }
 
 bool controls_back(void) {

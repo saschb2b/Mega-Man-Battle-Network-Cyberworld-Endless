@@ -19,9 +19,10 @@
 
 #define ASK_WAIT 30          /* frames before it takes a press */
 #define ASK_TEXT_W (CORE_W - 28)
-#define ASK_BODY_Y 36
+#define ASK_WIN_Y 29
+#define ASK_BODY_Y (ASK_WIN_Y + LOOK_FRAME + 2)
 #define ASK_LINES 6
-#define ASK_CHOICE_Y 116
+#define ASK_CHOICE_Y 118
 #define ASK_CHOICE_DX 40     /* Yes and No either side of the middle */
 #define ASK_LINE 96
 
@@ -42,7 +43,7 @@ static int wrap(const char *s, int w, int n) {
 			if (s[k] != ' ' && s[k]) continue;
 			char t[ASK_LINE];
 			snprintf(t, sizeof t, "%.*s", (int)k, s);
-			if (look_text_width(t) > w) break;
+			if (text_width(t) > w) break;
 			cut = k;
 		}
 		if (!cut) cut = len < ASK_LINE - 1 ? len : ASK_LINE - 1;   /* (a word wider than the line) */
@@ -143,8 +144,9 @@ void analytics_ask_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
 	pet_panel_draw(x0, y0, analytics_word(AW_TITLE));
 	text_draw(cx, y0 + 16, analytics_word(AW_QUESTION), LOOK_PAGE, TEXT_CENTER);
-	look_window(x0 + 7, y0 + 30, CORE_W - 14, 10 + 2 + K.nlines * 12 + 2, 0, false);
-	for (int i = 0; i < K.nlines; ++i) look_text(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, LOOK_SHADE, TEXT_CENTER);
+	/* (the body in the bold letters: the lists' thin ones are wider, and would take a line more than the window has) */
+	look_window(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12, 0, false);
+	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
-	hints_draw(cx, y0 + 136);
+	hints_draw(cx, y0 + 138);
 }
