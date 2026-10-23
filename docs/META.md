@@ -819,7 +819,9 @@ long. BN6 itself gives BeastOut by its story.
 - **What could go wrong:** a veteran turning it on every run and the
   early acts losing their teeth (it is named; the threat rungs climb);
   the setup crowded by a sixth line (the rows close to 12 pixels while it
-  shows, and the notes keep their three lines over JACK IN!).
+  shows, and the notes keep their three lines over JACK IN!; since the
+  setup took BN6's PET look, the helpers have a page of their own, the
+  Help row's A, where BeastOut is a fifth line).
 
 ## BeastOut from the Cybeast (6 October 2026, issue #109)
 

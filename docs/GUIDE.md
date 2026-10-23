@@ -683,8 +683,8 @@ behind is options. From the second run, NEW GAME opens a setup:
   Servers, Mystery Data of chips only, half the Chip Traders, drafts of two
   programs, four HPMemory a guardian, a second guardian below the short
   net's Nest), each opened by winning on the one below.
-- **Help:** two more HPMemory at the start, a heal on every layer, gentler
-  battles, and All *: every chip of the run in *, the wildcard, so any five
+- **Help:** A on the row opens the helpers, each on or off: two more
+  HPMemory at the start, a heal on every layer, gentler battles, and All *: every chip of the run in *, the wildcard, so any five
   go in a hand and every Program Advance forms from its chips in order.
   Once the endless net's own Nest has fallen, a fifth: BeastOut from the
   first battle. Helped runs count for everything.

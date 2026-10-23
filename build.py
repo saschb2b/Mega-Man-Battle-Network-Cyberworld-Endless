@@ -1427,8 +1427,8 @@ SCREENSHOTS = [
     ('heal-once', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:620,heal:1150',
                    '--input', '60:,' + '4:A,6:,' * 40 + '40:,290:,6:A,134:,6:A,134:,6:A,214:,6:A,94:'],
      [(900, 'heal-once'), (1060, 'heal-once-2'), (1270, 'heal-spent'), (1380, 'heal-spent-2')], {}),
-    # (the setup's Help row on All *, turned on)
-    ('all-star', ['--scene', 'setup', '--input', '60:,6:UP,20:,6:RIGHT,10:,6:RIGHT,10:,6:RIGHT,30:,6:A,60:'], [(200, 'all-star')], {}),
+    # (the setup's helpers, its Help row's page, on All *, turned on)
+    ('all-star', ['--scene', 'setup', '--input', '60:,6:UP,20:,6:A,20:,6:DOWN,10:,6:DOWN,10:,6:DOWN,20:,6:A,60:'], [(200, 'all-star')], {}),
     # (a Seaside layer with a security cube and a Link Navi obstacle: SELECT's
     # map whole, both violet and the data's crystals; and as the layer
     # begins, the cube a ring until seen)
@@ -1497,7 +1497,7 @@ SCREENSHOTS = [
      [(3464, 'cybeast-den')], {'CYBERWORLD_AUTOPILOT': '1'}),
     # (the setup on a profile whose endless Nest fell, issue #99: BeastOut
     # the fifth helper, NEW, turned on)
-    ('setup-beast', ['--scene', 'setup', '--marks', '100', '--input', '60:,6:A,60:'], [(150, 'setup-beast')], {}),
+    ('setup-beast', ['--scene', 'setup', '--marks', '100', '--input', '60:,6:A,20:,6:A,60:'], [(150, 'setup-beast')], {}),
     # (the ROMs screen, issue #97, BN6 and BN5 both ready: a desktop's
     # 1280 x 720 window, halved, and a phone held upright, at a third;
     # screenshots() gives it both ROMs and a Linux player's saves folder)

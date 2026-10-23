@@ -105,6 +105,7 @@ DOMAINS = {
     'stands_words': ('Arena', 'Bystander', 'speech'),
     'stands_text': ('Arena', 'Screen', 'screen'),
     'title_lines': ('Title', 'Lan', 'speech'),
+    'title_setup_text': ('Title', 'Screen', 'screen'),
     'launcher_text': ('The ROMs screen', 'Screen', 'screen'),
     'pick_text': ('The ROMs screen', 'Screen', 'screen'),
     'saves_text': ('SAVES', 'Screen', 'screen'),

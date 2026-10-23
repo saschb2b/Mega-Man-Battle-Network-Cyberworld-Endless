@@ -128,7 +128,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   HOME` (leaving the Square). None at the foot.
 - Pages turn by L and R under green arrows: the Jukebox's sections, the
   emote strip's two pages.
-- A section takes the band: Options' Display and Audio.
+- A section takes the band: Options' Display and Audio, the JACK-IN
+  SETUP's helpers (its Help row opens them, each On or Off as Options'
+  lines).
+- The JACK-IN SETUP is Options' kin: its rows and their values in the
+  window, the row under the cursor in the information box (in three lines
+  at most, a folder still shut said only where its line fits whole),
+  JACK IN! at the list's foot as NaviCust's RUN! with the green triangle
+  before it, and what the last run opened marked NEW as E-Mail marks a
+  new mail (orange capitals over dark red, measured from it).
 - A list's line keeps its colour under the cursor (Options).
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu
