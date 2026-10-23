@@ -10,9 +10,6 @@ static const char *const words[] = {
 	"Which buttons and keys are A, B, L, R, START and SELECT",   /* OW_CONTROLS_NOTE */
 	"Audio",   /* OW_AUDIO */
 	"How the game sounds",   /* OW_AUDIO_NOTE */
-	"Done",   /* OW_DONE */
-	"Close Options",   /* OW_DONE_NOTE */
-	"Back to Options",   /* OW_BACK_NOTE */
 	"Sound",   /* OW_SOUND */
 	"GBA",   /* OW_GBA */
 	"As a GBA plays it: BN6's own mix, crisp and bright",   /* OW_GBA_NOTE */

@@ -422,7 +422,7 @@ phone or tablet the touch controls' menu has **OPTIONS** as well. Its
 buttons are its own), **Display** the picture ([Screen](#screen)),
 **Audio** the sound ([Sound](#sound)), and
 **Statistics** your answer to the statistics' question, where the game can
-send them; B or **Done** goes back.
+send them; B goes back (on a phone, the touch controls' B).
 
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 Options' **Controls** opens it. It has a tab for

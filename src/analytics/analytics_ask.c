@@ -134,4 +134,5 @@ void analytics_ask_draw(void) {
 	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
 	pet_panel_note(cx, y0 + 141, analytics_later(), LOOK_PAGE);
+	look_fade_in(x0, y0, CORE_W, CORE_H, K.t);
 }

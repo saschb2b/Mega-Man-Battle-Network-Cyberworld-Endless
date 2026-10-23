@@ -13,8 +13,11 @@
   as the PET menu does. BN6 frames only its lists in the cyan window, and
   so do these now: a chip shows on the Library's grey card, buttons are
   STATUS's pills (the one chosen NaviCust's green RUN!), and the words
-  that explain sit in SubChip's flat panel. The rules, measured from
-  BN6's screens, are in docs/UI.md.
+  that explain sit in SubChip's flat panel. They move as BN6's do too:
+  each fades up from black as it opens, the cursor's arrow steps as
+  KeyItem's, START on Trade Central's list opens a SORT pop-up as the
+  folder editor's does, and Options has no Done lines: B leaves. The
+  rules, measured from BN6's screens, are in docs/UI.md.
 
 ## 0.14.1 (2026-10-23)
 

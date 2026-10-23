@@ -17,7 +17,8 @@ const char *trade_text_list_for(int purpose, const char *partner) {
 }
 
 const char trade_text_spares[] = "SPARES";
-const char *const trade_text_sorts[TRADE_SORT_KEYS] = { "ID", "ABCDE", "CODE" };
+const char trade_text_sort[] = "SORT";
+const char *const trade_text_sorts[TRADE_SORT_KEYS] = { "ID", "ABCDE", "Code" };   /* (as the folder editor's SORT; the list's head in capitals) */
 
 const char *trade_text_list_note(int purpose, int want, const char *partner, const char *theirs) {
 	static char s[96];

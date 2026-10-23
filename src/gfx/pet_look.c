@@ -14,6 +14,7 @@
 #include "bn6.h"
 #include "minifont.h"
 #include "pixfont.h"
+#include "platform.h"
 #include "rom.h"
 
 /* a row of pixels from x0 to x1 (both in) */
@@ -300,6 +301,9 @@ void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill) {
 /* ---- the cursor ---- */
 
 void look_cursor(int x, int y) {
+	/* (KeyItem's, measured a frame at a time: 1, 0, 2 pixels right, six frames each) */
+	static const int step[3] = { 1, 0, 2 };
+	x += step[P.frame / 6 % 3];
 	/* (rows of 4 to 8 pixels, the point at the fifth: lit along its top
 	 * and left, darker along its lower edges, a shade under them) */
 	static const SDL_Color hi = { 255, 247, 115, 255 }, body = { 255, 173, 16, 255 }, lo = { 214, 107, 0, 255 }, under = { 16, 82, 82, 255 };
@@ -310,6 +314,13 @@ void look_cursor(int x, int y) {
 		fill_rect(x, y + r, 1, 1, r == 8 ? lo : hi);
 		fill_rect(x + len - 1, y + r, 1, 1, r < 4 ? LOOK_GOLD : lo);
 	}
+}
+
+void look_fade_in(int x, int y, int w, int h, int t) {
+	if (t < 0 || t >= LOOK_FADE_IN) return;
+	/* (the GBA's brightness in its sixteen steps, from black) */
+	int dark = 16 - (t + 1) * 16 / LOOK_FADE_IN;
+	if (dark > 0) fill_rect(x, y, w, h, rgba(0, 0, 0, (uint8_t)(dark * 255 / 16)));
 }
 
 /* `rows` of a small picture from (x, y), mirrored when `flip`: each letter

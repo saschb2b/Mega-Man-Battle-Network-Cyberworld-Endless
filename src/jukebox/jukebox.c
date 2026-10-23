@@ -11,6 +11,7 @@
 #include "game.h"
 #include "jukebox_draw.h"
 #include "jukebox_text.h"
+#include "pet_look.h"
 #include "platform.h"
 #include "rom.h"
 
@@ -293,5 +294,7 @@ bool jukebox_update(void) {
 }
 
 void jukebox_draw(void) {
-	if (J.shown) jukebox_draw_view(P.core_x, P.core_y, &J.v);
+	if (!J.shown) return;
+	jukebox_draw_view(P.core_x, P.core_y, &J.v);
+	look_fade_in(P.core_x, P.core_y, CORE_W, CORE_H, J.v.t);
 }

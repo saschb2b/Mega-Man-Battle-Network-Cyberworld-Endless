@@ -13,6 +13,8 @@ const char *trade_text_list_title(int purpose);
 const char *trade_text_list_for(int purpose, const char *partner);
 /* ... the list's head, its sort's name (TRADE_SORT_*) */
 extern const char trade_text_spares[];
+/* ... START's pop-up's label (the folder editor's SORT) */
+extern const char trade_text_sort[];
 extern const char *const trade_text_sorts[TRADE_SORT_KEYS];
 /* ... the note under it: the spares that meet `want` (WANT_* of
  * online_board.h), or for an answer what `partner` offers (`theirs`, the

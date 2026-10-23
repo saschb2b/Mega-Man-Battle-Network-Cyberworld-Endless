@@ -12,8 +12,8 @@ nothing of BN6's pictures is kept in the repository.
 
 Not measured in this pass: BN5's screens (its ROM has no state at its PET
 here; that it follows the same grammar is assumed), BN1-4's (not studied),
-a shop's and the Request BBS's lists, and how a screen opens (its slide)
-frame by frame.
+a shop's and the Request BBS's lists, and the PET menu's own slide in
+and out.
 
 To measure again: `python3 tools/play.py start NAME -- --scene emu`, then
 `do NAME "mash B 400; press START; ..." --keep DIR` keeps each frame.
@@ -30,6 +30,13 @@ To measure again: `python3 tools/play.py start NAME -- --scene emu`, then
 | One information box says what the cursor's item is, in one to three lines, labelled INFORMATION (KeyItem's tag beside it) or NAVIGATOR (MegaMan's face) | KeyItem: "It's your PET--your PErsonal Terminal. MegaMan's in here."; NaviCust: "RUN?", "OK" |
 | A small choice opens as a pop-up window, its label in small capitals on a cyan strip | ChipFolder's SELECT (EDIT, EQUIP, CHG NAME); the folder editor's SORT (seven keys) |
 | A count stands in a navy pill outlined in light green | FOLDER EDIT `30/30`, Library `12/200` |
+
+## Motion
+
+| Rule | Measured from |
+| --- | --- |
+| Leaving a screen fades it to black over about 16 frames, a few frames of black, then the next screen fades up from black over 15, in the GBA's sixteen brightness steps | The PET menu to KeyItem, a frame at a time |
+| The list's orange arrow never stands still: one pixel right, back, two right, six frames each, an 18-frame round | KeyItem's cursor, a frame at a time |
 
 ## Kinds of element
 
@@ -124,6 +131,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu
   names them.
+- Each screen fades up from black as it opens (`look_fade_in`), and the
+  arrow steps as KeyItem's (`look_cursor`): the Jukebox, Options and its
+  sections, the statistics question, Trade Central, the NetPass. They
+  close at once; BN6's fade out is not done yet.
+- START opens Trade Central's SORT pop-up, as the folder editor's: the
+  keys in a small window, A sorts, B leaves it.
+- No Done lines: B leaves Options' sections and Options, as every BN6
+  list. The controls screen keeps its Done, which keeps the keys set, as
+  NaviCust's RUN! runs the program.
 - Words that explained the screen are gone ("Pick a song and press A.",
   "Spares: the copies your folders don't hold"); what the cursor's item
   is stays in the information box.

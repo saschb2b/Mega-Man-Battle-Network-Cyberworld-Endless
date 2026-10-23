@@ -24,6 +24,8 @@ typedef struct {
 	const TradeRow *rows;
 	int n, at, top;             /* rows, the cursor's, the first shown */
 	int sort, purpose, want;    /* TRADE_SORT_*, TRADE_FOR_*, the want (-1 none) */
+	bool sorting;               /* START's SORT pop-up open, as the folder editor's */
+	int sort_at;                /* ... its cursor, a TRADE_SORT_* */
 	TradeChip theirs;           /* the chip offered to MegaMan (an answer), id 0 none */
 	/* the chip trade */
 	TradeChip mine, get;

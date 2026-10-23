@@ -102,9 +102,14 @@ SDL_Rect look_info(int x, int y, int w, int h, const char *label);
  * capitals, white, in its middle */
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill);
 
-/* The cursor: an orange arrow pointing right, 9 x 10 from (x, y) */
+/* The cursor: an orange arrow pointing right, 9 x 10 from (x, y), as
+ * KeyItem's steps: one pixel right, back, two right, six frames each */
 #define LOOK_CURSOR_W 9
 void look_cursor(int x, int y);
+/* A screen opening, as KeyItem's: up from black over LOOK_FADE_IN frames
+ * in the GBA's sixteen steps, over x, y, w, h; `t` frames since it opened */
+#define LOOK_FADE_IN 15
+void look_fade_in(int x, int y, int w, int h, int t);
 /* The choice's cursor, BN6's green triangle before Yes and No (and
  * NaviCust's RUN!): 9 x 14 from (x, y), its shade on a page */
 #define LOOK_CHOICE_W 9

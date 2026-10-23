@@ -130,11 +130,24 @@ static void list_bar(int x, int y, const TradeScreenView *v) {
 	body_note(x + 9, y + NOTE_Y, trade_text_list_note(v->purpose, v->want, v->partner, theirs), false);
 }
 
+/* START's SORT pop-up over the list, as the folder editor's: a small
+ * window, SORT on its band, the keys in the chat font, the arrow on the
+ * one the cursor is on */
+static void sort_popup(int x, int y, const TradeScreenView *v) {
+	const int w = 62, top = 9, line = 13;
+	int px = x + LIST_X + LIST_W - w - 6, py = y + BODY_Y + 10;
+	SDL_Rect f = look_window(px, py, w, 2 * LOOK_FRAME + top + TRADE_SORT_KEYS * line + 1, top, false);
+	look_caps(px + 6, py + 5, trade_text_sort, LOOK_PAGE, (SDL_Color){ 0, 0, 0, 0 });
+	for (int k = 0; k < TRADE_SORT_KEYS; ++k) look_text(f.x + 8, f.y + k * line, trade_text_sorts[k], LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	look_cursor(f.x - 3, f.y + v->sort_at * line + 2);
+}
+
 void trade_screen_draw_list(int x, int y, const TradeScreenView *v) {
 	band(x, y, trade_text_list_title(v->purpose), trade_text_list_for(v->purpose, v->partner));
 	list_card(x + CARD_X, y + BODY_Y, v->n ? v->rows[v->at].chip : (TradeChip){ 0, 0 });
 	list_panel(x + LIST_X, y + BODY_Y, v);
 	list_bar(x, y, v);
+	if (v->sorting) sort_popup(x, y, v);
 }
 
 /* ---- the chip trade ---- */

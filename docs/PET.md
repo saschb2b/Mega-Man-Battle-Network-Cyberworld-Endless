@@ -31,7 +31,7 @@ title's menu has its line, and in a run the PET's menu does, in Comm's
 place. BN6's Comm opens the link cable's screens, which a run never had a
 use for: it was greyed and buzzed in every run. Its row now reads
 **Options**, lit, and A on it opens the game's Options over the PET,
-which waits under it, its music held with the game; B (or Done) closes
+which waits under it, its music held with the game; B closes
 Options and the PET is there as it was, its cursor on Options, and the
 button that closed it is kept from the game until it is let go, so that
 B does not close the PET too.

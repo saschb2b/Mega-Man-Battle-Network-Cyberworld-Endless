@@ -13,7 +13,6 @@ typedef enum {
 	OW_TITLE,           /* the head's name */
 	OW_CONTROLS, OW_CONTROLS_NOTE,
 	OW_AUDIO, OW_AUDIO_NOTE,
-	OW_DONE, OW_DONE_NOTE, OW_BACK_NOTE,   /* Done in the hub, and in a section */
 	OW_SOUND,           /* the Audio section's line */
 	OW_GBA, OW_GBA_NOTE,
 	OW_SOFT, OW_SOFT_NOTE,

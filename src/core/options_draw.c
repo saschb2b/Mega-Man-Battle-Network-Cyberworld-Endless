@@ -64,7 +64,7 @@ static const char *value_word(int kind) {
  * a value between its arrows */
 static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
-		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_DONE] = OW_DONE };
+		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
@@ -80,7 +80,7 @@ static void line_draw(int x0, int y, int kind, bool on) {
 		return;
 	}
 	if (value) look_text(x0 + VALUE_R - look_text_width(value), y, value, LOOK_EDGE_HI, LOOK_SHADE, TEXT_LEFT);
-	if (kind != LINE_DONE) pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
+	pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
 }
 
 static const char *note_words(int kind) {
@@ -93,7 +93,7 @@ static const char *note_words(int kind) {
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO_NOTE + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_SMOOTH_ON_NOTE : OW_SMOOTH_OFF_NOTE);
 	case LINE_SOUND: return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT_NOTE : OW_GBA_NOTE);
-	default: return options_word(O.section != SECTION_HUB ? OW_BACK_NOTE : OW_DONE_NOTE);
+	default: return "";
 	}
 }
 
@@ -111,6 +111,7 @@ static void options_panel_draw(void) {
 	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
 	for (int i = 0; i < n; ++i) line_draw(x0, y0 + ROW_Y + i * h, kinds[i], i == O.at);
 	note_draw(x0, y0 + NOTE_Y, note_words(kinds[O.at < n ? O.at : n - 1]));
+	look_fade_in(x0, y0, CORE_W, CORE_H, O.t);
 }
 
 /* the question over all, else the controls screen over Options, else it */
