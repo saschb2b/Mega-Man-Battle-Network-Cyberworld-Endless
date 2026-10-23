@@ -131,8 +131,12 @@ void mp2k_song_fade(int song, int speed) {
 	pl->fade_ov = 64 << 2;
 }
 
+/* (a song begun and not yet ticked is on too: MPlayStart leaves its status
+ * 0 till MPlayMain's first tick, which over the held game runs only while
+ * the engine is busy) */
 static bool player_on(const Mp2kPlayer *pl) {
-	return pl->song && (pl->status & 0xFFFF) && !(pl->status & (uint32_t)PLAYER_PAUSE);
+	if (!pl->song || (pl->status & (uint32_t)PLAYER_PAUSE)) return false;
+	return (pl->status & 0xFFFF) || (pl->tracks && (M.tracks[pl->first].flags & TRK_START));
 }
 
 bool mp2k_song_playing(int song) {

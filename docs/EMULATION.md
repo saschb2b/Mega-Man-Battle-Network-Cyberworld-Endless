@@ -776,7 +776,11 @@ than the cartridge's in mGBA.
 
 `audio_set_volume`'s music volume (8, the default, the game's level) and
 settings.ini's `sound` (sound_filter.c) apply after it; on the PET's
-screens over a run its sounds add to the core's.
+screens over a run its sounds add to the core's. There the engine runs
+only while it has something to play (`mp2k_busy`), and a song just begun
+counts: MPlayStart leaves its player's status 0 till MPlayMain's first
+tick, which counted as idle would never come, and the screens' sounds
+would never start.
 
 ## Hooks
 
