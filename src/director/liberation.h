@@ -16,6 +16,9 @@
  * run's seed darkened (run_dark_area); every act's second from the second
  * with --dev dark. */
 bool lib_layer_dark(void);
+/* The net area a dark layer is drawn in: BN5's Liberation Missions' maps
+ * (group 0x86) where BN5's ROM is there, else `tiles`, the act's own. */
+int lib_layer_tiles(int tiles);
 /* ... whether act `act`'s way into area `biome` holds its dark layer (the
  * fork's words and the act's card say so) */
 bool lib_way_dark(int act, int biome);
@@ -37,6 +40,14 @@ void lib_battle_frame(void);
  * board's own moves and menu take it; MegaMan's walk from panel to panel
  * is what reaches the game. */
 uint32_t lib_keys(uint32_t keys);
+
+/* (liberation_look.c) The board in BN5's own look, on a layer drawn in
+ * BN5's Liberation map: begun with the board, kept each frame on the map;
+ * a panel freed dissolves as BN5's do. */
+void lib_look_begin(void);
+void lib_look_update(void);
+void lib_look_freed(int x, int y);
+bool lib_look_on(void);
 
 /* (liberation_auto.c) The test autopilot's keys on the board, frame
  * `frame` (autopilot.c). */

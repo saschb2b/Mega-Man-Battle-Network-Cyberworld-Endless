@@ -317,6 +317,7 @@ static void layer_host(int tiles, int *group, int *number) {
 
 static bool build_layer(void) {
 	int biome = layer_biome(), tiles = layer_area(&biome);
+	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles);
 	run.biome = biome;
 	D.layer_tiles = tiles;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);

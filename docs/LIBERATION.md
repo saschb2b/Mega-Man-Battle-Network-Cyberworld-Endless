@@ -580,7 +580,7 @@ Server's win pays, at par one a tier lower, over par one lower still
 (`install_lib_prizes`, `src/layer/layer_objs.c`); the board's battles pay
 BN6's own rewards beside it. No random battles on the board.
 
-**On the map.** The units are the layer's own map objects (`OBJ_UNIT`:
+**On the map, first look.** The units are the layer's own map objects (`OBJ_UNIT`:
 HeelNavis for the guardians, the Darkloid in his own overworld sprite),
 moved by their objects' places. The dark panels are the layer's own floor
 recoloured as it shows (`src/director/liberation_draw.c`), in Nebula's
@@ -594,6 +594,34 @@ corner, the banners and the command menu in BN6's PET look
 (`src/gfx/pet_look.h`); every word in BN6's chat boxes
 (`src/director/liberation_words.c`).
 
+**On the map: BN5's own look** (`src/director/liberation_look.c`, with
+BN5's ROM). A dark layer is drawn in BN5's Liberation map 0x86:00, as an
+older net's area is (a held area of BN5's, never a run's dressing): its
+floor learned from the board's own panels, which the mission's record lists
+(`area_src_board`: the map's walls cover its walkways alone, the board
+moving its units itself), at the record's origin (`+6`, `+7`, the panels'
+edges at X = -o6 and Y = -o7, mod 32), not its pads' look; its tiles and
+its board's colours (`BN5_LIB_PALETTE`, loaded over the map's as BN5's
+board loads them: the frames grey) copied in. Each panel's kind lies over
+it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`: clean
+cyan, the dark swirl, the item's stud, the DarkHole's pit, the BonusPanel's
+"?"), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
+down (fit on the dumped map: the looks over the frames' dark middles, 1.6%
+over the void), their tiles copied from BN5's ROM to where BN5's board
+copies them (tile 864 on, VRAM taking words), palettes 9 and 10 stepped
+through BN5's frames (`BN5_LIB_PULSE`, `BN5_LIB_PULSE_HOLE`: the pulse; its
+timing assumed). BN6 reads the tile map in place and builds each BG's
+screen map in IWRAM, copied to VRAM every frame (`src/emu/bn6_map.h`): a
+look goes into the map's layer 1, and BG2's screen map is made from it for
+the picture a while after the looks change (the map's layer 1 and BG2
+cleared first, as BN5's BG2 holds the looks alone; again after a battle,
+whose return loads the tile map afresh). A panel freed dissolves as BN5's
+do: dark, paled, clean, 8 frames each. The panel MegaMan faces is outlined
+in yellow, blinking (drawn by the engine: BN5's own outline not read yet).
+Without BN5's ROM the board keeps stage 1's first look: the act's own floor
+recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
+banners and the menu are as above (BN5's own still to come).
+
 **Checked:** `tests/test_core.c` (`test_liberation_board`: 150 dark layers
 over acts 2-6, the same board twice from a seed, the Darkloid's ring whole,
 each hole's ring dark, the start clean, no guardian by it, nine boards in
@@ -606,8 +634,11 @@ CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 2's guardian, home and act 3's dark layer.
 
 **Left for later:** the board's state across a CONTINUE (a checkpoint on a
-dark layer restarts its board from the arrival); BN5's board tiles read at
-run time; the camera over the board (BN5's L); barriers, keys and sealed
+dark layer restarts its board from the arrival); BN5's outline, "LIBERATE
+SUCCESS!" and "1 TURN LIBERATE!", the item's pop-up, the board's corner,
+banners and command window, its units' sprites, the pulse's own timing, and
+the other eight missions' maps (stage 1 draws every dark layer in mission
+1's); the camera over the board (BN5's L); barriers, keys and sealed
 routes; chips and zenny in item panels; the BonusPanel's chip; the
 planner's par; the economy report and pacing for dark layers; the second
 screen's board; stages 2 to 5.

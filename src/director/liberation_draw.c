@@ -41,6 +41,8 @@ static struct {
 	bool on;               /* the board shows */
 	int cam_u, cam_v;      /* the camera: x + y and (y - x) / 2 of the world at the picture's middle */
 	bool box;              /* a chat box open */
+	bool look;             /* the board in BN5's own look (liberation_look.c) */
+	int blink;             /* frames seen, for the faced panel's blink */
 	uint8_t sprite[4096];  /* the sprites' colours, a bit each of BN6's 15-bit colours */
 	int fx, fy;            /* the panel MegaMan faces, -1 none */
 } S;
@@ -58,6 +60,8 @@ void lib_see(void) {
 	S.cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	S.cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
 	S.box = emu_read8(BN6_CHATBOX) != 0;
+	S.look = lib_look_on();
+	++S.blink;
 	memset(S.sprite, 0, sizeof S.sprite);
 	for (uint32_t i = 0; i < 256; ++i) {
 		int c = emu_read16(GBA_OBJ_PALETTE + 2 * i) & 0x7FFF;
@@ -87,7 +91,7 @@ static bool sprite_colour(uint32_t c) {
 }
 
 void director_tint_board(uint32_t *px) {
-	if (!S.on) return;
+	if (!S.on || S.look) return;
 	for (int y = 0; y < (S.box ? BOX_TOP : EMU_H); ++y)
 		for (int x = 0; x < EMU_W; ++x) {
 			uint32_t c = px[y * EMU_W + x];
@@ -97,7 +101,8 @@ void director_tint_board(uint32_t *px) {
 			if (!netmap_panel((u - v) / 2, (u + v) / 2, &gx, &gy) || gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) continue;
 			int k = LB.b.kind[gy][gx];
 			bool faced = gx == S.fx && gy == S.fy;
-			if (k == LIB_VOID || (k == LIB_CLEAN && !faced)) continue;
+			/* (BN5's own look, where it lies on the board: only the faced panel's light) */
+			if (k == LIB_VOID || (!faced && (k == LIB_CLEAN || S.look))) continue;
 			px[y * EMU_W + x] = recolour(c, k, faced);
 		}
 }
@@ -150,8 +155,27 @@ static void draw_menu(void) {
 	}
 }
 
+/* The panel MegaMan faces, outlined in yellow, blinking fully lit, as
+ * BN5's board marks it (its own outline not yet read from BN5's ROM: drawn
+ * here to its diamond, 48 by 24) */
+static void draw_faced(void) {
+	if (S.fx < 0 || !S.look || (S.blink / 16) % 2) return;
+	int wx, wy;
+	netmap_world(S.fx, S.fy, &wx, &wy);
+	int cx = P.core_x + wx + wy - S.cam_u + CAM_X, cy = P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + 4;
+	SDL_Color c = rgba(255, 232, 24, 255);
+	for (int k = 0; k <= 24; ++k) {
+		int dy = k / 2;
+		fill_rect(cx - 24 + k, cy - dy, 1, 1, c);
+		fill_rect(cx + 24 - k, cy - dy, 1, 1, c);
+		fill_rect(cx - 24 + k, cy + dy, 1, 1, c);
+		fill_rect(cx + 24 - k, cy + dy, 1, 1, c);
+	}
+}
+
 void director_draw_board(void) {
 	if (!S.on) return;
+	draw_faced();
 	draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
 	if (LB.step == LIB_STEP_BANNER) draw_banner();
 	if (LB.step == LIB_STEP_MENU) draw_menu();

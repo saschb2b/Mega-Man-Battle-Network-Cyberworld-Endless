@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn5_liberation.h"
 #include "bytes.h"
 #include "gfx.h"
 #include "lz.h"
@@ -208,6 +209,10 @@ bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts,
 	free(raw[1]);
 	if (!t || !p) { free(t); free(p); return false; }
 	memcpy(p, src.data + pal - 4, 4 + psize);
+	/* (a Liberation map in its board's colours, as BN5's board loads them
+	 * over the map's: its grey frames, the looks' banks 8-12) */
+	if (group == BN5_LIB_MAP_GROUP && rom == 1 + XROM_BN5_COLONEL_US && psize == BN5_LIB_PALETTE_SIZE)
+		memcpy(p + 4, src.data + (BN5_LIB_PALETTE - 0x08000000u), BN5_LIB_PALETTE_SIZE);
 	*ts_out = t;
 	*nts = at;
 	*pal_out = p;
@@ -382,6 +387,43 @@ int area_src_height(const AreaSrc *a, int X, int Y) {
 	return a->hz[(size_t)cy * a->hw + cx];
 }
 
+/* ---- a Liberation map of BN5's (group 0x86, docs/LIBERATION.md) ----
+ * Its board's panels, as its mission's record lists them, are its floor,
+ * whatever its walls say: the board moves its units, not the walls (a
+ * panel's place: BN5_LIB_PANEL_PLACE, 32 world units a panel from 0x80,
+ * less the record's +6 and +7, plus half a panel to its middle). */
+static struct { int group, number; bool board; int8_t ox, oy; uint8_t on[256][32]; } board;
+
+static int div32(int v) { return v >= 0 ? v / 32 : -((-v + 31) / 32); }
+
+static void board_read(int group, int number) {
+	board.group = group;
+	board.number = number;
+	board.board = false;
+	memset(board.on, 0, sizeof board.on);
+	if (group != BN5_LIB_MAP_GROUP || src.data != XR[XROM_BN5_COLONEL_US].data || !src.data) return;
+	for (uint32_t m = 0; m < BN5_LIB_MISSION_COUNT; ++m) {
+		uint32_t rec = BN5_LIB_MISSIONS - 0x08000000u + m * BN5_LIB_MISSION_SIZE;
+		if (src.data[rec] != group || src.data[rec + 1] != number) continue;
+		board.ox = (int8_t)src.data[rec + 6];
+		board.oy = (int8_t)src.data[rec + 7];
+		uint32_t p = su32(rec + 0x0C + 4 * BN5_LIB_PTR_PANELS);
+		if (!rom_is_ptr(p)) return;
+		for (uint32_t o = rom_off(p); o + 4 <= ROM_SIZE && src.data[o] != 0xFF; o += 4)
+			board.on[src.data[o + 3]][src.data[o + 2] >> 3] |= (uint8_t)(1u << (src.data[o + 2] & 7));
+		board.board = true;
+		return;
+	}
+}
+
+int area_src_board(const AreaSrc *a, int X, int Y) {
+	if (a->group != BN5_LIB_MAP_GROUP) return -1;
+	if (board.group != a->group || board.number != a->number) board_read(a->group, a->number);
+	if (!board.board) return -1;
+	int x = div32(X + board.ox) + 0x80, y = div32(Y + board.oy) + 0x80;
+	return x >= 0 && y >= 0 && x < 256 && y < 256 && (board.on[y][x >> 3] >> (x & 7) & 1);
+}
+
 static bool load(int group, int number, AreaSrc *a) {
 	memset(a, 0, sizeof *a);
 	a->group = group;
@@ -389,6 +431,8 @@ static bool load(int group, int number, AreaSrc *a) {
 	if (!decode_tiles(a)) { area_src_free(a); return false; }
 	decode_coords(a);
 	decode_edges(a);
+	/* (a Liberation map's panels' edges, its board's: its record's origin) */
+	if (area_src_board(a, 0, 0) >= 0) { a->ex = -board.ox & 31; a->ey = -board.oy & 31; }
 	decode_heights(a);
 	decode_rings(a);
 	return true;

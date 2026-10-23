@@ -34,7 +34,9 @@
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "loot.h"
+#include "bn5_liberation.h"
 #include "netmap.h"
+#include "rom.h"
 #include "run.h"
 #include "talk.h"
 #include "text.h"
@@ -68,6 +70,14 @@ bool lib_way_dark(int act, int biome) {
 	if (dev.dark) return true;
 	int area = run_dark_area(act);
 	return area >= 0 && biome == area;
+}
+
+int lib_layer_tiles(int tiles) {
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *d = net_area_def(NET_AREAS + k);
+		if (d && d->xrom > 0 && d->group == BN5_LIB_MAP_GROUP) return NET_AREAS + k;
+	}
+	return tiles;
 }
 
 bool lib_layer_dark(void) {
@@ -165,6 +175,7 @@ void lib_begin(void) {
 		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &LB.ux[u], &LB.uy[u]);
 		LB.from_x[u] = LB.ux[u]; LB.from_y[u] = LB.uy[u];
 	}
+	lib_look_begin();
 }
 
 /* ---- the units' objects ---- */
@@ -337,7 +348,7 @@ static void free_panel(int x, int y, char *held, size_t n) {
 		else LB.op = LB.op + (it >> 4) > LIB_OP_MAX ? LIB_OP_MAX : LB.op + (it >> 4);
 		snprintf(held, n, "%s", lib_item_words((it & 15) == LIB_GOT_HEART, LB.op));
 	}
-	if (k == LIB_DARK || k == LIB_ITEM || k == LIB_RING || k == LIB_HOLE) LB.b.kind[y][x] = LIB_CLEAN;
+	if (k == LIB_DARK || k == LIB_ITEM || k == LIB_RING || k == LIB_HOLE) { LB.b.kind[y][x] = LIB_CLEAN; lib_look_freed(x, y); }
 }
 
 static int free_around(int x, int y, char *held, size_t n) {
@@ -553,6 +564,7 @@ void lib_update(void) {
 	if (!LB.on || !D.active || D.town || !on_map()) return;
 	if (LB.step != LIB_STEP_DONE) flag_set(BN6_FLAG_NO_ENCOUNTERS);
 	units_show();
+	lib_look_update();
 	steps_update();
 }
 

@@ -38,9 +38,14 @@
 #define BN5_LIB_LOOK_SIZE    0x40        /* ... dark paled (the dissolve), item, "+5", BarrierPanels 1-4, BonusPanel, DarkHole, a grey grid */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
+#define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
+#define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
 #define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9's first frame: the dark panels' swirl, changed every frame (the pulse) */
 #define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
+#define BN5_LIB_PULSE        0x08614B24u /* palette 9's frames, the dark panels' pulse: four, 0x20 apart (the last BN5_LIB_PAL_DARK), */
+#define BN5_LIB_PULSE_HOLE   0x08614BA8u /* ... and palette 10's, the DarkHoles': four (BN5_LIB_PAL_HOLE the second); found by their */
+#define BN5_LIB_PULSE_FRAMES 4           /* ... layout after a 0x0020 word, as the map's palette animations lie; the timing is assumed */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
@@ -49,6 +54,7 @@
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
 #define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +0xA the par, +0xB the Order Points at the start, */
 #define BN5_LIB_MISSION_COUNT 9          /* ... +0xC twenty pointers (BN5_LIB_PTR_*) */
+#define BN5_LIB_MAP_GROUP    0x86        /* the missions' maps' group (each record's +0: mission n's map 0x86:n-1) */
 #define BN5_LIB_PTR_PANELS   1           /* the panels: u16 kind (BN5_PANEL_*), u8 x, u8 y; a kind's low byte 0xFF ends them */
 #define BN5_LIB_PTR_HOLES    2           /* the DarkHoles' panels in their order, x and y a byte each */
 #define BN5_LIB_PTR_TEAM     3           /* the team: 20 bytes a Navi (+5 its id, BN5_NAVI_*; +8, +0xA its place in world units) */

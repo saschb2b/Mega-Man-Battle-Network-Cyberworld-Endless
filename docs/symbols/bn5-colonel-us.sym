@@ -89,6 +89,9 @@
 0203FDA4 dark_soul_bn6_2
 0203FDA8 dark_soul_bn6_3
 0203FDB0 dark_soul_bn6_4
+030025C0 bn5_liberation_board
+03002DC0 bn5_liberation_board_2
+030035C0 bn5_liberation_board.bg0
 03003960 BN5_BG_PALETTE
 0300724A bn5_sea_submerge.other_way_bn6_hit_hidden2
 0300728C bn5_sea_submerge.other_way_bn6_hit_hidden2_2
@@ -675,8 +678,11 @@
 08358E28 bn5_cangard
 0836684C bn5_cangard_2
 084A3300 bn5_darkchips.lz77
+08614B24 BN5_LIB_PULSE
 08614B84 BN5_LIB_PAL_DARK
+08614BA8 BN5_LIB_PULSE_HOLE
 08614BC8 BN5_LIB_PAL_HOLE
+08614DB4 BN5_LIB_PALETTE
 08614EB4 BN5_LIB_PAL_CLEAN
 0861C510 BN5_LIB_MAP_CHARS
 08623130 BN5_LIB_PANEL_TILES

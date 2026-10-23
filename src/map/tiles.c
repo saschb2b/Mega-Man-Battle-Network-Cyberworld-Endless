@@ -119,6 +119,9 @@ static int pale_pixels(const AreaSrc *a, int cx, int cy) { return panel_pixels(a
 static bool panel_drawn(const Src *s, int A, int B) {
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	/* (a Liberation map's board: its panels, area_src_board) */
+	int board = area_src_board(a, X, Y);
+	if (board >= 0) return board;
 	/* floor of another height is drawn elsewhere: learned in its own view */
 	if (a->hz && area_src_height(a, X, Y) != a->level) return 0;
 	/* nor is a hole in it, however much of the faces around hangs over it
