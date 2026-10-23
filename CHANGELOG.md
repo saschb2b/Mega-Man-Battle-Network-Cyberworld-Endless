@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- **Liberation Missions: parts of the net go dark.** From the second act,
+  one of the two ways at an act's fork in Lan's HP can lead to a layer
+  gone dark, behind its swirling pad or link (MegaMan, reading the way:
+  "And Lan... Part of it's gone dark."), the act's card naming it too. It
+  is a risk you choose: the dark layer gives up the act's second Net
+  Dealer and Mr.Prog. Take it and the layer is a Liberation Mission of
+  BN5 Team Colonel's, made afresh from the layer's own floor: dark panels,
+  DarkHoles with their guardians (BigBrute, TinHawk, Bladia), item panels
+  and BonusPanels, and a Darkloid, a Navi of BN6's, on his ring at the far
+  end. Each PLAYER PHASE MegaMan walks the clean panels and faces a dark
+  one: **Liberation** is a battle with BN5's three turns (TURN 1 START!,
+  FINAL TURN!, and TIME UP! leaves the panel dark), and a win in the first
+  turn frees the dark around it too; **LongSwrd** spends an Order Point
+  to free two in a line; **Pass** rests. Then DARKLOID PHASE: the Darkloid
+  strikes within his reach, lit red, and each guardian warps toward
+  MegaMan and strikes, as BN5 plays it. Close every DarkHole, liberate the
+  ring and delete the Darkloid: the exit opens, and the fewer the phases
+  against the board's par, the better the chip it leaves. The short net
+  meets dark layers in acts 2 and 3, the endless net in acts 2 to 4, and
+  each act adds one of BN5's rules: a barrier and its key with a sealed
+  route behind it (act 3), then a roaming TinHawk and a barrier across the
+  way (act 4). A planner plays every board as it is made and sets its par;
+  no two are the same. All of it in BN5's own look and sound, read
+  from its ROM as the game runs: its board and backdrop, banners, command
+  window, L view and camera, its units animated, its board music. A
+  CONTINUE goes on with the same board. Needs BN5 Team Colonel's ROM
+  beside BN6's; MegaMan liberates alone for now (docs/LIBERATION.md).
+- **The JACK-IN SETUP looks like BN6's PET.** The setup after NEW GAME
+  now sits in the PET window as Options does: BN6's orange arrows on each
+  value, the row under the cursor explained in KeyItem's INFORMATION box,
+  JACK IN! as the NaviCust's green RUN! at the foot of the list, and NEW
+  in E-Mail's mark. The helpers have a page of their own: A on Help opens
+  it, B goes back.
 - **A guardian's draft knows what MegaMan holds.** A player took UnderSht
   from Guardian Data while already holding it, more than once: BN6 sets
   UnderSht once, so a second does nothing. The draft now offers no

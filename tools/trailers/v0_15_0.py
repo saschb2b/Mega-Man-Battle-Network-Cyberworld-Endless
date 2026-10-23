@@ -436,7 +436,7 @@ def shots():
                                         (F(16), 'lib-boss', S('lib-boss', 400), 1),
                                         (F(16, 2), 'lib-boss', S('lib-boss', 478), 1),
                                         (F(17), 'lib-boss', S('lib-boss', 640), 1)], tag='LAYER 5 · THE DARKLOID')],
-             [Head(F(14, 0.25), F(15), 'EACH ACT DARKER', 'Barriers and keys from act 3, a TinHawk, then traps'),
+             [Head(F(14, 0.25), F(15), 'EACH ACT DARKER', 'Barriers and keys from act 3, then a roaming TinHawk'),
               Head(F(15, 0.25), F(17), 'BREAK THROUGH TO THE DARKLOID', "A Navi of BN6's, waiting on his ring"),
               Head(F(17, 0.25), F(18), 'BEAT THE PAR, ARM THE RUN', 'The fewer the phases, the better the chip you carry on')],
              pull=0.55, where='ACT 2 · LAYER 5'),
