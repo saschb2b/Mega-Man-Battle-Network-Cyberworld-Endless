@@ -17,6 +17,7 @@
 #include "launcher_art.h"
 #include "launcher_roms.h"
 #include "pick.h"
+#include "pet_look.h"
 #include "pixfont.h"
 #include "platform.h"
 #include "rom.h"
@@ -157,30 +158,27 @@ void launcher_layout(LauncherLayout *lay) {
 
 /* ---- the picture ---- */
 
-/* The band and the frame: second_frame.c's, in the engine's own font */
+/* The band and the frame: BN6's PET screens' (pet_look.h), as second_frame.c draws them */
 static void frame(const LauncherLayout *lay) {
 	SDL_Rect hd = lay->head, b = lay->body;
-	fill_rect(0, 0, P.w, P.h, PET_GREEN);
-	fill_rect(0, 0, P.w, hd.y + hd.h, PET_DARK);
-	fill_rect(0, hd.y + hd.h, P.w, 1, PET_LINE);
+	fill_rect(0, 0, P.w, P.h, LOOK_GREEN);
+	fill_rect(0, 0, P.w, hd.y + hd.h, LOOK_BAND);
 	const char *title = launcher_word(W_TITLE);
-	int tx = hd.x + 8, ty = hd.y + (HEAD_H - PIXFONT_CAP) / 2;
-	pixfont_draw(tx, ty, title, PET_WHITE, ink_shade(), PIXFONT_LEFT, 1);
-	/* (BN6's three light stripes after a screen's name, slanting up) */
-	int sx = tx + pixfont_width(title, 1) + 8;
-	for (int k = 0; k < 3; ++k)
-		for (int y = 0; y < 10; ++y) fill_rect(sx + k * 5 + (9 - y) / 2, hd.y + 5 + y, 2, 1, PET_LINE);
-	/* the place: the game's name on a slot at the right */
+	int tx = hd.x + 8, ty = hd.y + (HEAD_H - 7) / 2;
+	look_title(tx, ty, title, LOOK_PAGE);
+	/* the place: the game's name at the band's right, under its stripes */
 	const char *place = launcher_word(W_PLACE);
-	if (sx + 20 + pixfont_width(place, 1) + 16 > hd.x + hd.w) place = launcher_word(W_PLACE_SHORT);
-	int slot_w = pixfont_width(place, 1) + 12, slot_x = hd.x + hd.w - 4 - slot_w;
-	second_slot(slot_x, hd.y + 2, slot_w, HEAD_H - 4);
-	pixfont_draw(slot_x + 6, ty, place, PET_CYAN_HI, ink_shade(), PIXFONT_LEFT, 1);
-	/* the body: its cyan edge, lit along its top, round the PET's navy */
-	SDL_Rect edge[4] = { { b.x - 2, b.y - 2, b.w + 4, 2 }, { b.x - 2, b.y + b.h, b.w + 4, 2 }, { b.x - 2, b.y, 2, b.h }, { b.x + b.w, b.y, 2, b.h } };
-	fill_rects(edge, 4, PET_CYAN);
-	fill_rect(b.x - 1, b.y - 1, b.w + 2, 1, PET_CYAN_HI);
-	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
+	int sx = tx + look_title_width(title) + 14;
+	if (sx + 20 + look_caps_width(place) + 10 > hd.x + hd.w) place = launcher_word(W_PLACE_SHORT);
+	look_stripes(sx > hd.x + hd.w / 2 ? sx : hd.x + hd.w / 2, hd.y, hd.x + hd.w - 4, HEAD_H);
+	look_caps(hd.x + hd.w - 8 - look_caps_width(place), hd.y + HEAD_H - LOOK_CAPS_H - 2, place, LOOK_PAGE, LOOK_GREEN_LO);
+	/* the body: a window's raised edge (light, then blue) and its cyan band round the navy */
+	SDL_Rect band[4] = { { b.x - 1, b.y - 1, b.w + 2, 1 }, { b.x - 1, b.y + b.h, b.w + 2, 1 }, { b.x - 1, b.y, 1, b.h }, { b.x + b.w, b.y, 1, b.h } };
+	SDL_Rect light[2] = { { b.x - 1, b.y - 2, b.w + 2, 1 }, { b.x - 2, b.y - 1, 1, b.h + 2 } }, dark[2] = { { b.x - 1, b.y + b.h + 1, b.w + 2, 1 }, { b.x + b.w + 1, b.y - 1, 1, b.h + 2 } };
+	fill_rects(band, 4, LOOK_EDGE);
+	fill_rects(light, 2, LOOK_EDGE_HI);
+	fill_rects(dark, 2, LOOK_EDGE_LO);
+	fill_rect(b.x, b.y, b.w, b.h, LOOK_NAVY);
 }
 
 /* the drop of a cartridge just in: from above, slowing; and its label's flash */

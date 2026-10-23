@@ -10,6 +10,7 @@
 #include "gfx.h"
 #include "mirror.h"
 #include "pick.h"
+#include "pet_look.h"
 #include "pixfont.h"
 #include "platform.h"
 #include "saves_actions.h"
@@ -49,8 +50,12 @@ static void note(SDL_Rect r, const char *text, SDL_Color color) {
 static void button(SavesButton b) {
 	SDL_Rect r = b.rect;
 	bool focus = SV.focus == b.action;
-	fill_rect(r.x, r.y, r.w, r.h, focus ? PET_GOLD : PET_LINE);
-	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 2, focus ? PET_NAVY : PET_SLOT);
+	/* (a slim window, the one with the focus ringed in gold) */
+	look_box(r.x, r.y, r.w, r.h, focus ? LOOK_NAVY : LOOK_NAVY_LO);
+	if (focus) {
+		SDL_Rect ring[4] = { { r.x + 1, r.y, r.w - 2, 1 }, { r.x + 1, r.y + r.h - 1, r.w - 2, 1 }, { r.x, r.y + 1, 1, r.h - 2 }, { r.x + r.w - 1, r.y + 1, 1, r.h - 2 } };
+		fill_rects(ring, 4, LOOK_GOLD);
+	}
 	const char *label = saves_label(b.action);
 	int w = pixfont_width(label, 1);
 	if (w <= r.w - 10) pixfont_draw(r.x + r.w / 2, r.y + (r.h - PIXFONT_H) / 2, label, PET_WHITE, shade(), PIXFONT_CENTER, 1);
@@ -58,7 +63,7 @@ static void button(SavesButton b) {
 }
 
 static void panel(SDL_Rect r, const BackupInfo *info, bool file, bool damaged, bool source) {
-	fill_rect(r.x, r.y, r.w, r.h, PET_NAVY);
+	look_box(r.x, r.y, r.w, r.h, LOOK_NAVY);
 	clipped(r.x + 4, r.y + 3, saves_panel_title(file), r.w - 8, PET_GOLD);
 	char rows[4][64];
 	int n = saves_rows(info, damaged, source, rows);
@@ -73,16 +78,16 @@ static SavesLayout layout(void) {
 }
 
 void saves_draw(void) {
-	fill_rect(0, 0, P.w, P.h, PET_GREEN);
-	fill_rect(0, 0, P.w, 20, PET_DARK);
-	fill_rect(0, 20, P.w, 1, PET_LINE);
+	/* (BN6's PET screens' band, as the ROMs screen's: pet_look.h) */
+	fill_rect(0, 0, P.w, P.h, LOOK_GREEN);
+	fill_rect(0, 0, P.w, 20, LOOK_BAND);
 	const char *title = saves_word_title();
-	words(8, 5, title, PET_WHITE);
-	second_stripes(14 + pixfont_width(title, 1), 4);
+	look_title(8, 6, title, LOOK_PAGE);
+	int sx = 22 + look_title_width(title);
+	look_stripes(sx > P.w / 2 ? sx : P.w / 2, 0, P.w - 4, 20);
 	SavesLayout l = layout();
 	if (SV.view == SAVES_HOME) {
-		fill_rect(l.back.x, l.back.y, l.back.w, l.back.h, PET_SLOT_EDGE);
-		fill_rect(l.back.x + 1, l.back.y + 1, l.back.w - 2, l.back.h - 2, PET_SLOT);
+		look_box(l.back.x, l.back.y, l.back.w, l.back.h, LOOK_NAVY);
 		pixfont_draw(l.back.x + l.back.w / 2, l.back.y + 4, saves_word_back(), PET_WHITE, shade(), PIXFONT_CENTER, 1);
 		panel(l.here, &SV.here, false, SV.unreadable, false);
 		MirrorStatus m;

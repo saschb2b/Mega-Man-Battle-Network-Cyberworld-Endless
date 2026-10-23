@@ -1,7 +1,7 @@
 /* emote_strip_draw.h. The Custom screen's manner (the chips in rows, the
  * one under the cursor large in a window with its name), drawn as the
- * NetPass and Trade Central's screens are: Gregar's PET colours, panels
- * with cut corners, the dotted ground. MegaMan's poses are his overworld
+ * NetPass and Trade Central's screens are, in BN6's PET screens' look
+ * (pet_look.h): the band, slim windows on the body's green. MegaMan's poses are his overworld
  * sprite's frames, read from the player's ROM as they are drawn. */
 #include "emote_strip_draw.h"
 
@@ -14,6 +14,7 @@
 #include "minifont.h"
 #include "netpass_draw.h"
 #include "online_text.h"
+#include "pet_look.h"
 #include "pixfont.h"
 #include "second_frame.h"
 #include "square_emote.h"
@@ -121,22 +122,18 @@ static void preview(int x, int y, const StripView *v) {
 /* the band over the tray: L, the two pages' tabs, R, the keys */
 static void band(int x, int y, const StripView *v) {
 	int by = y + TRAY_Y;
-	fill_rect(x, by, NETPASS_W, BAND_H, PET_GREEN);
-	fill_rect(x, by, NETPASS_W, 1, PET_LINE);
-	fill_rect(x, by + BAND_H - 1, NETPASS_W, 1, PET_DARK);
+	/* (BN6's band: pet_look.h) */
+	fill_rect(x, by, NETPASS_W, BAND_H, LOOK_BAND);
+	fill_rect(x, by + BAND_H - 1, NETPASS_W, 1, LOOK_GREEN_LO);
 	static const char *const keys[2] = { "L", "R" };
-	for (int k = 0; k < 2; ++k) {
-		int kx = x + (k ? 122 : 4);
-		netpass_panel(kx, by + 2, 9, 8, PET_DARK, PET_LINE);
-		minifont_draw(kx + 3, by + 3, keys[k], PET_WHITE, 1);
-	}
+	for (int k = 0; k < 2; ++k) look_tag(x + (k ? 122 : 4), by + 2, 9, 8, keys[k], LOOK_GREEN);
 	for (int p = 0; p < 2; ++p) {
 		SDL_Rect r = strip_tab(p);
 		bool on = p == v->page;
 		if (on) netpass_panel(x + r.x, y + r.y, r.w, r.h, PET_SLOT, PET_CYAN_HI);
-		pixfont_draw(x + r.x + r.w / 2, y + r.y + 1, strip_text_pages[p], on ? PET_WHITE : PET_DARK, on ? INK : (SDL_Color){ 0, 0, 0, 0 }, PIXFONT_CENTER, 1);
+		pixfont_draw(x + r.x + r.w / 2, y + r.y + 1, strip_text_pages[p], on ? PET_WHITE : LOOK_EDGE_HI, on ? INK : (SDL_Color){ 0, 0, 0, 0 }, PIXFONT_CENTER, 1);
 	}
-	minifont_draw(x + NETPASS_W - 4 - minifont_width(strip_text_keys, 1), by + 4, strip_text_keys, PET_WHITE, 1);
+	minifont_draw(x + NETPASS_W - 4 - minifont_width(strip_text_keys, 1), by + 4, strip_text_keys, LOOK_PAGE, 1);
 }
 
 /* an emote's icon: MegaMan's pose in a cell, lit under the cursor, its way of L in its corner */
@@ -178,7 +175,7 @@ static void plate(int x, int y, int i, const StripView *v) {
 /* the favourites' box: L's four, as the D-pad holds them */
 static void favourites(int x, int y, const StripView *v) {
 	netpass_panel(x + FAV_X, y + CELLS_Y, FAV_W, 56, TRAY_BACK, PET_SLOT_EDGE);
-	minifont_draw(x + FAV_X + 4, y + CELLS_Y + 2, strip_text_favourites, PET_DIM, 1);
+	minifont_draw(x + FAV_X + 4, y + CELLS_Y + 4, strip_text_favourites, LOOK_EDGE_HI, 1);
 	for (int k = 0; k < 4; ++k) {
 		SDL_Rect r = strip_favourite(k);
 		bool lit = v->kept == k;

@@ -55,16 +55,13 @@ static void band_ends(int x, int y, int w) {
 	span(x + w - 7, rx, y + LOOK_BAND_H, LOOK_METAL_LO);
 }
 
-/* the band's stripes from (sx, y + 6) to the right rail: two bars, each
- * running down-left to the band's foot */
-static void stripes(int sx, int y, int right) {
+void look_stripes(int sx, int y, int right, int h) {
 	span(sx, right, y + 6, LOOK_GREEN);
 	span(sx - 1, right, y + 7, LOOK_GREEN);
-	for (int r = 8; r < LOOK_BAND_H; ++r) span(sx + 6 - r, sx + 8 - r, y + r, LOOK_GREEN);
+	for (int r = 8; r < h; ++r) span(sx + 6 - r, sx + 8 - r, y + r, LOOK_GREEN);
 	span(sx + 2, right, y + 10, LOOK_GREEN);
 	span(sx + 1, right, y + 11, LOOK_GREEN);
-	span(sx, sx + 1, y + 12, LOOK_GREEN);
-	span(sx - 1, sx, y + 13, LOOK_GREEN);
+	for (int r = 12; r < h; ++r) span(sx + 12 - r, sx + 13 - r, y + r, LOOK_GREEN);
 }
 
 /* the foot: a rail across, a groove along its middle */
@@ -82,7 +79,7 @@ void look_band(int x, int y, int w, const char *title) {
 	band_ends(x, y, w);
 	look_title(x + 16, y + 4, title, LOOK_PAGE);
 	int sx = x + w - 97, after = x + 16 + look_title_width(title) + 12;
-	stripes(sx > after ? sx : after, y, x + w - 8);
+	look_stripes(sx > after ? sx : after, y, x + w - 8, LOOK_BAND_H);
 }
 
 SDL_Rect look_screen(int x, int y, int w, int h, const char *title) {
@@ -173,9 +170,9 @@ SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill) {
 	return f;
 }
 
-void look_scroll(int x, int y, int w, int h, int top, int first, int shown, int n) {
+void look_scroll(SDL_Rect win, int top, int first, int shown, int n) {
 	if (n <= shown || shown <= 0) return;
-	int tx = x + w - LOOK_FRAME_BAR + 3, ty = y + LOOK_FRAME + top + 1, th = h - 2 * LOOK_FRAME - top - 2;
+	int tx = win.x + win.w - LOOK_FRAME_BAR + 3, ty = win.y + LOOK_FRAME + top + 1, th = win.h - 2 * LOOK_FRAME - top - 2;
 	int bh = th * shown / n, by = ty + (th - (bh < 5 ? 5 : bh)) * first / (n - shown);
 	if (bh < 5) bh = 5;
 	fill_rect(tx, by, 2, bh, LOOK_TEXT);
@@ -340,7 +337,8 @@ void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int al
 	fill_rects(r[0], n[0], c);
 }
 
-int look_wrapped(const char *s, int x, int y, int w, int most, int line, SDL_Color c, SDL_Color shade) {
+int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade) {
+	const int line = LOOK_LINE;
 	char cur[96] = "";
 	int n = 0;
 	most = most < 6 ? most : 6;

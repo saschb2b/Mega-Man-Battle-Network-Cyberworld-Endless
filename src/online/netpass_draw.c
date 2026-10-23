@@ -76,6 +76,11 @@ void netpass_panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge) {
 	}
 	bool off = edge.r == PET_SLOT_EDGE.r && edge.g == PET_SLOT_EDGE.g && edge.b == PET_SLOT_EDGE.b;
 	look_box(x, y, w, h, off ? LOOK_NAVY_LO : LOOK_NAVY);
+	/* (a gold or white edge marks the one chosen: a ring of it round the frame) */
+	if (edge.r > 200) {
+		SDL_Rect ring[4] = { { x + 1, y, w - 2, 1 }, { x + 1, y + h - 1, w - 2, 1 }, { x, y + 1, 1, h - 2 }, { x + w - 1, y + 1, 1, h - 2 } };
+		fill_rects(ring, 4, edge);
+	}
 }
 
 /* a disc of radius r round (cx, cy) */
@@ -277,7 +282,7 @@ static void tray(int x, int y, const NetPassView *v) {
 	}
 	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
 	int tx = cx + 2, tw = f.x + f.w - 3 - tx;
-	look_wrapped(line, tx, f.y, tw, 3, 12, missing ? LOOK_TEXT : LOOK_GOLD, LOOK_SHADE);
+	look_wrapped(line, tx, f.y, tw, 3, missing ? LOOK_TEXT : LOOK_GOLD, LOOK_SHADE);
 }
 
 void netpass_view_now(NetPassView *v) {

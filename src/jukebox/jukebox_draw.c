@@ -91,11 +91,11 @@ static void card(int x, int y, const JukeView *v) {
 	const char *tag = jukebox_game_tags[game ? 1 : 0];
 	int ly = f.y + 42;
 	if (!on) {
-		look_wrapped(jukebox_pick_hint, fx, f.y + 12, fw, 3, 14, LOOK_TEXT, LOOK_SHADE);
+		look_wrapped(jukebox_pick_hint, fx, f.y + 12, fw, 3, LOOK_TEXT, LOOK_SHADE);
 		lights(fx, ly + 12, fw, v);
 		return;
 	}
-	look_wrapped(s->title, fx, f.y + 12, fw, 2, 14, LOOK_TEXT, LOOK_SHADE);
+	look_wrapped(s->title, fx, f.y + 12, fw, 2, LOOK_TEXT, LOOK_SHADE);
 	/* (the game's tag and the song's number; under the lights how long it has played, how often round) */
 	int tw = look_caps_width(tag) + 6;
 	look_tag(fx, ly - 2, tw, 9, tag, game_color(game));
@@ -145,7 +145,7 @@ static void list_panel(int x, int y, const JukeView *v) {
 		int song = v->rows[v->top + i];
 		row(x + r.x, y + r.y, r.w, song, v->top + i == v->at, song == v->playing);
 	}
-	if (bar) look_scroll(x + LIST_X, y + BODY_Y, LIST_W, BODY_H, LIST_TOP, v->top, JUKE_ROWS, v->n);
+	if (bar) look_scroll((SDL_Rect){ x + LIST_X, y + BODY_Y, LIST_W, BODY_H }, LIST_TOP, v->top, JUKE_ROWS, v->n);
 }
 
 /* ---- the keys ---- */

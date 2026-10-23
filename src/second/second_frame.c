@@ -1,13 +1,14 @@
-/* second_frame.h. After BN6's own PET screens: a dark green header band
- * with a light edge, the screen's name in white on its left and the place
- * on a dark slot at its right; a strip of dark slots for HP, Zenny and
- * BugFrags, as BN5 DS's PET carries them in its header; the body framed in
- * the PET's cyan. */
+/* second_frame.h. After BN6's own PET screens (pet_look.h): the dark
+ * header band with the screen's name in heavy capitals on its left, its
+ * stripes, and the place in small capitals at its right; a strip of slots
+ * for HP, Zenny and BugFrags, as BN5 DS's PET carries them in its header;
+ * the body in a window's raised cyan edge. */
 #include "second_frame.h"
 
 #include <stdio.h>
 #include <string.h>
 
+#include "pet_look.h"
 #include "second_state.h"
 
 #define HEAD_H  20   /* the header band */
@@ -16,7 +17,8 @@
 #define BODY_Y  44   /* the body, to the bottom */
 
 void second_slot(int x, int y, int w, int h) {
-	fill_rect(x, y, w, h, PET_SLOT_EDGE);
+	fill_rect(x + 1, y, w - 2, h, LOOK_GREEN_LO);
+	fill_rect(x, y + 1, w, h - 2, LOOK_GREEN_LO);
 	fill_rect(x + 1, y + 1, w - 2, h - 2, PET_SLOT);
 }
 
@@ -31,14 +33,12 @@ void second_row(int x, int y, int w, const char *name, const char *value) {
 	text_draw(x + w - 5, y + 2, value, PET_WHITE, TEXT_RIGHT);
 }
 
-/* the place on its slot: `area` (the layer's, the town's name) and
- * `layer` (its number), either "" */
+/* the place at the band's right in small capitals: `area` (the layer's,
+ * the town's name) and `layer` (its number), either "" */
 static void place(int w, const char *area, const char *layer) {
-	int lw = text_width(layer), aw = text_width(area), gap = lw && aw ? 8 : 0;
-	int x = w - 4 - (lw + gap + aw) - 12;
-	second_slot(x, 2, w - 4 - x, HEAD_H - 4);
-	text_draw(x + 6, 4, area, PET_CYAN_HI, TEXT_LEFT);
-	text_draw(w - 10, 4, layer, PET_WHITE, TEXT_RIGHT);
+	int lw = look_caps_width(layer), gap = lw && *area ? 8 : 0, x = w - 8 - lw;
+	look_caps(x, HEAD_H - LOOK_CAPS_H - 2, layer, LOOK_PAGE, LOOK_GREEN_LO);
+	look_caps(x - gap - look_caps_width(area), HEAD_H - LOOK_CAPS_H - 2, area, LOOK_PAGE, LOOK_GREEN_LO);
 }
 
 /* the strip: a slot each for HP, Zenny and BugFrags, its name in gold on
@@ -59,22 +59,24 @@ static void strip(int w) {
 }
 
 /* The band with `title`, the green round the body from `top` down and
- * the body's cyan edge: the body */
+ * the body's raised edge (light along its top and left, blue along its
+ * foot and right, the cyan band inside): the body */
 static SDL_Rect frame(int w, int h, const char *title, int slide, int top) {
 	/* (each pixel filled once: the panel fills the body, on a 3DS's time) */
-	fill_rect(0, 0, w, HEAD_H, PET_DARK);
-	fill_rect(0, HEAD_H, w, 1, PET_LINE);
-	fill_rect(0, HEAD_H + 1, w, top - 3 - HEAD_H, PET_GREEN);
+	fill_rect(0, 0, w, HEAD_H, LOOK_BAND);
+	fill_rect(0, HEAD_H, w, top - 2 - HEAD_H, PET_GREEN);
 	fill_rect(0, top - 2, 2, h - top + 2, PET_GREEN);
 	fill_rect(w - 2, top - 2, 2, h - top + 2, PET_GREEN);
 	fill_rect(2, h - 2, w - 4, 2, PET_GREEN);
-	text_draw(8 - slide, 3, title, PET_WHITE, TEXT_LEFT);
-	second_stripes(8 - slide + text_width(title) + 10, 4);
-	/* the body's cyan edge, two pixels, lit along its top */
+	look_title(10 - slide, (HEAD_H - 7) / 2, title, LOOK_PAGE);
+	int sx = 10 - slide + look_title_width(title) + 14;
+	look_stripes(sx > w / 2 ? sx : w / 2, 0, w - 4, HEAD_H);
 	SDL_Rect body = { 4, top, w - 8, h - top - 4 };
-	SDL_Rect edge[4] = { { 2, top - 2, w - 4, 2 }, { 2, h - 4, w - 4, 2 }, { 2, top, 2, body.h }, { w - 4, top, 2, body.h } };
-	fill_rects(edge, 4, PET_CYAN);
-	fill_rect(3, top - 1, w - 6, 1, PET_CYAN_HI);
+	SDL_Rect light[2] = { { 3, top - 2, w - 6, 1 }, { 2, top - 1, 1, body.h + 2 } }, dark[2] = { { 3, h - 3, w - 6, 1 }, { w - 3, top - 1, 1, body.h + 2 } };
+	SDL_Rect band[4] = { { 3, top - 1, w - 6, 1 }, { 3, h - 4, w - 6, 1 }, { 3, top, 1, body.h }, { w - 4, top, 1, body.h } };
+	fill_rects(light, 2, LOOK_EDGE_HI);
+	fill_rects(dark, 2, LOOK_EDGE_LO);
+	fill_rects(band, 4, LOOK_EDGE);
 	return body;
 }
 

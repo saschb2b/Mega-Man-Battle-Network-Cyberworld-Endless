@@ -105,7 +105,7 @@ static const char *note_words(int kind) {
 static void note_draw(int x0, int y, const char *s) {
 	SDL_Rect r = look_info(x0 + 7, y, CORE_W - 14, NOTE_H, NULL);
 	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 1, LOOK_PAGE);
-	look_wrapped(s, r.x + 6, r.y + 2, r.w - 12, 3, 13, LOOK_INK, LOOK_INK_SHADE);
+	look_wrapped(s, r.x + 6, r.y + 2, r.w - 12, 3, LOOK_INK, LOOK_INK_SHADE);
 }
 
 static void options_panel_draw(void) {

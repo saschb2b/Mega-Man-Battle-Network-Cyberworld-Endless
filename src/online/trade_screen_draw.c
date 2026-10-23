@@ -89,7 +89,7 @@ static void list_card(int x, int y, TradeChip c) {
 	fill_rect(f.x + 1, f.y + 67, f.w - 2, 1, LOOK_SHADE);
 	char desc[160];
 	chip_desc(c.id, desc, sizeof desc);
-	look_wrapped(desc, f.x + 2, f.y + 69, f.w - 4, 3, 13, LOOK_TEXT, LOOK_SHADE);
+	look_wrapped(desc, f.x + 2, f.y + 69, f.w - 4, 3, LOOK_TEXT, LOOK_SHADE);
 }
 
 /* a row: the cursor's arrow over the frame, the chip's icon, its name, its code and the spares */
@@ -116,7 +116,7 @@ static void list_panel(int x, int y, const TradeScreenView *v) {
 	for (int k = 0; k < 3; ++k) fill_rect(x + LIST_W - 13 + k, y + 8 + k, 5 - 2 * k, 1, LOOK_GOLD);
 	for (int i = 0; i < TRADE_ROWS && v->top + i < v->n; ++i)
 		row(f.x, f.y + i * ROW_H, f.w, &v->rows[v->top + i], v->top + i == v->at);
-	look_scroll(x, y, LIST_W, BODY_H, LIST_TOP, v->top, TRADE_ROWS, v->n);
+	look_scroll((SDL_Rect){ x, y, LIST_W, BODY_H }, LIST_TOP, v->top, TRADE_ROWS, v->n);
 }
 
 static void list_bar(int x, int y, const TradeScreenView *v) {

@@ -42,6 +42,9 @@
 SDL_Rect look_screen(int x, int y, int w, int h, const char *title);
 /* ... its band alone, w wide (the rails' ends in it), LOOK_BAND_H + 1 tall */
 void look_band(int x, int y, int w, const char *title);
+/* ... its stripes from (sx, y + 6) to x `right`, running down-left to the
+ * band's foot `h` rows down */
+void look_stripes(int sx, int y, int right, int h);
 /* ... a note at its right end where a hint goes, small capitals in `c` */
 void look_band_note(int x, int y, int w, const char *s, SDL_Color c);
 /* A key's hint at the band's right end (E-Mail's "START:SORT"): `key`
@@ -63,10 +66,9 @@ SDL_Rect look_window(int x, int y, int w, int h, int top, bool bar);
 /* ... a slim one, for a small panel: one pixel of edge, one of band, one
  * sunk, `fill` the field: the field */
 SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill);
-/* The scroll bar's thumb in the track of the window at (x, y), w x h
- * (look_window's with `bar`, `top` as it had): `shown` of `n` lines from
- * `first` */
-void look_scroll(int x, int y, int w, int h, int top, int first, int shown, int n);
+/* The scroll bar's thumb in the track of the window `win` (look_window's
+ * with `bar`, `top` as it had): `shown` of `n` lines from `first` */
+void look_scroll(SDL_Rect win, int top, int first, int shown, int n);
 /* The information box: light green, outlined, `label` in small capitals
  * on its top left: the room under the label */
 SDL_Rect look_info(int x, int y, int w, int h, const char *label);
@@ -92,7 +94,8 @@ void look_title(int x, int y, const char *s, SDL_Color c);
 int look_text_width(const char *s);
 void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int align);
 /* ... in lines no wider than `w` (a '|' breaks one too), at most `most`
- * (6), `line` apart: the y under them */
-int look_wrapped(const char *s, int x, int y, int w, int most, int line, SDL_Color c, SDL_Color shade);
+ * (6), LOOK_LINE apart: the y under them */
+#define LOOK_LINE 13
+int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade);
 
 #endif
