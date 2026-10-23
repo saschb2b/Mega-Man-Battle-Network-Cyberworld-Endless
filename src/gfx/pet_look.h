@@ -127,6 +127,10 @@ void look_choice(int x, int y);
  * 8 x 8 from (x, y), pointing right or left */
 #define LOOK_ARROW_W 8
 void look_arrow(int x, int y, bool right);
+/* The PET's small arrow beside a value the d-pad turns (Options' lines, the
+ * JACK-IN SETUP's rows), or a section's chevron: `size` pixels long,
+ * pointing left or right from (x, y + 2) */
+void look_pointer(int x, int y, int size, bool left, SDL_Color c);
 
 /* Small capitals, 5 rows (BN6's labels: INFORMATION, START:SORT), `shade`
  * a pixel right and below (alpha 0: none) */
