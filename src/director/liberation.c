@@ -563,7 +563,7 @@ static void menu_keys(uint32_t pressed) {
 
 /* A command can be taken on the panel MegaMan faces: one to liberate, a
  * guardian, the Darkloid once his DarkHoles are gone */
-static bool faced_takes(void) {
+bool lib_faced_takes(void) {
 	if (LB.tx < 0) return false;
 	int u = lib_unit_at(LB.tx, LB.ty);
 	return u > 0 || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && lib_liberable(&LB.b, LB.tx, LB.ty));
@@ -577,7 +577,7 @@ uint32_t lib_keys(uint32_t keys) {
 	/* his phase: he walks as BN6 walks him, and A beside what he can
 	 * liberate opens his command; else he stands as the board goes on */
 	if (LB.step == LIB_STEP_MOVE) {
-		if ((pressed & KEY_A) && faced_takes()) { open_menu(); return keys & (KEY_START | KEY_SELECT); }
+		if ((pressed & KEY_A) && lib_faced_takes()) { open_menu(); return keys & (KEY_START | KEY_SELECT); }
 		return keys;
 	}
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);

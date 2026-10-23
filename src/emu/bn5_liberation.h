@@ -72,6 +72,10 @@
 /* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
 #define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
 #define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
+#define BN5_LIB_SPRITE_LIST  7           /* the board's sprites' list, */
+#define BN5_LIB_OUTLINE      15          /* ... the outline's index: animations 0 a ripple (20, 2, 2, 2, 8 frames, looped) and */
+#define BN5_LIB_OUTLINE_BLINK 1          /* ... 1 a blink (24 lit, 24 not), yellow; 2 and 3 the same in green; 4 still */
+#define BN5_LIB_ICONS        21          /* ... the items' icons' index */
 #define BN5_LIB_ICONS_SPRITE 0x0848D368u /* list 7 index 21: the items' icons that rise over a freed panel (a heart's tiles at 0x0848DFF8) */
 #define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... their palette (OBJ palette 3) */
 #define BN5_LIB_BANNER_TILES 0x0873CF74u /* about here, the battle messages' big letters ("LIBERATE SUCCESS!": five 32x16 OBJs, OBJ */
@@ -93,6 +97,10 @@
                                          /* ... OBJ palette 14 (0x086CCD24), at (112,112) */
 #define BN5_LIB_BACKDROP_PAL 0x0861BF20u /* BG palette 0 in a mission: the map's own animated backdrop (its tiles rebuilt in RAM at */
                                          /* ... 0x0200E960) in purple; map 0x86:00's own palette 0 otherwise 0x086203CC */
+#define BN5_LIB_BACKDROP     0x080741B8u /* ... the mission's BGAnimData record that loads it (0x0861BF1C: a size word, then these), */
+                                         /* ... map 0x86:00's own tiles and map: group 0x86's LoadBGAnim (0x08074098) takes its records */
+                                         /* ... from 0x0807416C while BN5_LIB_ON_MAP, else 0x08074194 (0x080741D4, palette 0x086203C8), */
+                                         /* ... and its LoadGFXAnims (0x08073E2A) its lists from 0x08073E70, else 0x08073E48 */
 
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
@@ -129,13 +137,13 @@
 #define BN5_ITEM_CHIP        5           /* a chip and its code */
 
 /* The team's Navis in Team Colonel (a team record's +5; BN5_LIB_NAVI_HP's ids) */
-#define BN5_NAVI_MEGAMAN     0x00        /* MegaMan: his own HP */
-#define BN5_NAVI_COLONEL     0x07        /* Colonel: ScrenDiv */
-#define BN5_NAVI_SHADOWMAN   0x08        /* ShadowMan: SneakAttack */
-#define BN5_NAVI_NUMBERMAN   0x09        /* NumberMan: NumberCheck */
-#define BN5_NAVI_TOMAHAWKMAN 0x0A        /* TomahawkMan: TomahawkSwing */
-#define BN5_NAVI_KNIGHTMAN   0x0B        /* KnightMan: no command of his own */
-#define BN5_NAVI_TOADMAN     0x0C        /* ToadMan: LifeMelody */
+#define BN5_LIB_NAVI_MEGAMAN     0x00  /* MegaMan: his own HP */
+#define BN5_LIB_NAVI_COLONEL     0x07  /* Colonel: ScrenDiv */
+#define BN5_LIB_NAVI_SHADOWMAN   0x08  /* ShadowMan: SneakAttack */
+#define BN5_LIB_NAVI_NUMBERMAN   0x09  /* NumberMan: NumberCheck */
+#define BN5_LIB_NAVI_TOMAHAWKMAN 0x0A  /* TomahawkMan: TomahawkSwing */
+#define BN5_LIB_NAVI_KNIGHTMAN   0x0B  /* KnightMan: no command of his own */
+#define BN5_LIB_NAVI_TOADMAN     0x0C  /* ToadMan: LifeMelody */
 
 /* A liberation battle */
 #define BN5_BATTLE_TYPE      0x0802B3E0u /* the battle's record's +3 (BattleSettings' BattleType): */

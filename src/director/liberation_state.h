@@ -68,6 +68,8 @@ extern LibState LB;
 
 /* (liberation.c) The panel MegaMan faces, and the unit on panel (x, y), -1 none */
 void lib_faced(int *x, int *y);
+/* ... and whether A there takes a command */
+bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);
 
 #endif

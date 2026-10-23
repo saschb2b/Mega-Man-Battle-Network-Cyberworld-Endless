@@ -308,11 +308,17 @@ static struct {
 
 /* a group's LoadGFXAnims: push {lr}; lsls r1, r1, #2; ldr r0, [pc, #n] (its lists); ldr r0, [r0, r1] */
 static const Op group_anims[] = { { 0xB500, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x4800, 0xFF00 }, { 0x5840, 0xFFFF } };
+/* ... BN5's Liberation maps' (group 0x86): push {r4-r7, lr}; adds r7, r1, #0; ldr r4, [pc, #n] (the lists out of
+ * a mission); bl (BN5_LIB_ON_MAP); beq; ldr r4, [pc, #n] (a mission's, which a board takes) */
+static const Op group_anims_board[] = { { 0xB5F0, 0xFFFF }, { 0x1C0F, 0xFFFF }, { 0x4C00, 0xFF00 }, { 0xF000, 0xF800 }, { 0xF800, 0xF800 }, { 0xD000, 0xFF00 }, { 0x4C00, 0xFF00 } };
 /* its LoadBGAnim: push {r4-r7, lr}; mov r5, r10; ldr r5, [r5, #0x3C] (the game state); ldrb r1, [r5, #5] (the
  * map's number); lsls r1, r1, #4; ldr r7, [pc, #n] (its scroll entries) */
 static const Op group_bg[] = { { 0xB5F0, 0xFFFF }, { 0x4655, 0xFFFF }, { 0x6BED, 0xFFFF }, { 0x7969, 0xFFFF }, { 0x0109, 0xFFFF }, { 0x4F00, 0xFF00 } };
 /* ... and further on: ldr r0, [pc, #n] (its BGAnimData records); ldrb r1, [r5, #5]; lsls r1, r1, #2; ldr r0, [r0, r1] */
 static const Op group_records[] = { { 0x4800, 0xFF00 }, { 0x7969, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x5840, 0xFFFF } };
+/* ... BN5's Liberation maps': ldr r6, [pc, #n] (the records out of a mission); bl (BN5_LIB_ON_MAP); beq; ldr r6,
+ * [pc, #n] (a mission's: its backdrop in purple, BN5_LIB_BACKDROP); ldrb r1, [r5, #5]; lsls r1, r1, #2; ldr r0, [r6, r1] */
+static const Op group_records_board[] = { { 0x4E00, 0xFF00 }, { 0xF000, 0xF800 }, { 0xF800, 0xF800 }, { 0xD000, 0xFF00 }, { 0x4E00, 0xFF00 }, { 0x7969, 0xFFFF }, { 0x0089, 0xFFFF }, { 0x5870, 0xFFFF } };
 
 static bool code_is(const uint8_t *rom, uint32_t at, const Op *op, int n) {
 	if (at > ROM_SIZE - 2u * (uint32_t)n) return false;
@@ -353,12 +359,14 @@ static bool map_tables(const uint8_t *rom, uint32_t enters, uint32_t anims, int 
 	en = (en & ~1u) - BUS;
 	/* (its EnterMapGroup's first call is its LoadBGAnim) */
 	for (uint32_t k = 0; k < 64 && !lb; k += 2) lb = bl_dest(rom, en + k);
-	if (!code_is(rom, la, group_anims, 4) || !lb || !code_is(rom, lb, group_bg, 6)) return false;
-	t->lists = pc_load(rom, la + 4);
+	bool board = code_is(rom, la, group_anims_board, 7);
+	if ((!board && !code_is(rom, la, group_anims, 4)) || !lb || !code_is(rom, lb, group_bg, 6)) return false;
+	t->lists = pc_load(rom, la + (board ? 12 : 4));
 	t->scroll = pc_load(rom, lb + 10);
 	t->records = 0;
 	for (uint32_t k = 12; k < 64 && !t->records; k += 2)
 		if (code_is(rom, lb + k, group_records, 4)) t->records = pc_load(rom, lb + k);
+		else if (code_is(rom, lb + k, group_records_board, 8)) t->records = pc_load(rom, lb + k + 8);
 	return xptr(t->lists, 4) && xptr(t->scroll, 16) && xptr(t->records, 4);
 }
 

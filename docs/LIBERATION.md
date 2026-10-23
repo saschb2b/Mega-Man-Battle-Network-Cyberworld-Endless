@@ -666,9 +666,15 @@ cleared first, as BN5's BG2 holds the looks alone; again after a battle,
 whose return loads the tile map afresh). A panel freed blinks as BN5's
 do (traced): its old look while the board fades back in (27 frames), then
 clean and old by turns every 4 frames, 14 times (`BN5_LIB_BLINK`,
-`BN5_LIB_BLINKS`), then clean. The panel MegaMan faces is outlined
-in yellow, blinking, while the menu is open, as BN5's (drawn by the
-engine: BN5's own sprite, list 7's 15, not loaded yet).
+`BN5_LIB_BLINKS`), then clean. The panel MegaMan faces, where A
+takes a command there and while the menu is open, is outlined by BN5's
+own sprite (list 7's 15, `BN5_LIB_OUTLINE`, read from its ROM: its
+yellow blink, 24 frames lit and 24 not, from the moment he turns to it).
+The backdrop is the mission's: map 0x86:00's own animated tiles in its
+purple (`BN5_LIB_BACKDROP`), as BN5's map group 0x86 loads them while a
+mission is on (its LoadBGAnim and LoadGFXAnims each choose a mission's
+table by `BN5_LIB_ON_MAP`; `src/gfx/xbackdrop.c` reads both shapes and
+takes the mission's).
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
 banners and the menu are as above (BN5's own still to come).
@@ -686,9 +692,9 @@ CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 2's guardian, home and act 3's dark layer.
 
 **Left for later:** the board's state across a CONTINUE (a checkpoint on a
-dark layer restarts its board from the arrival); BN5's outline, "LIBERATE
+dark layer restarts its board from the arrival); BN5's "LIBERATE
 SUCCESS!" and "1 TURN LIBERATE!", the item's pop-up, the board's corner,
-banners and command window, its units' sprites, the pulse's own timing, and
+banners and command window, its units' sprites, and
 the other eight missions' maps (stage 1 draws every dark layer in mission
 1's); the camera over the board (BN5's L); barriers, keys and sealed
 routes; chips and zenny in item panels; the BonusPanel's chip; the

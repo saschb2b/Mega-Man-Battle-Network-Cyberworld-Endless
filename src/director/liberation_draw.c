@@ -6,7 +6,9 @@
  * pixel in one of the sprites' colours, or under an open chat box, is not
  * the floor's. Where the floor lies comes from the map layer's scroll,
  * which follows MegaMan (BG1's: x + y and (y - x) / 2 of the world, as
- * docs/ROM_DATA.md's row for BN6's camera says). The corner's phase, par
+ * docs/ROM_DATA.md's row for BN6's camera says). With BN5's ROM the board
+ * is BN5's own look (liberation_look.c), and the panel MegaMan faces is
+ * outlined by BN5's own sprite, read from its ROM. The corner's phase, par
  * and Order Points, the banner and the command menu in BN6's PET look
  * (pet_look.h). Reads only: draws change nothing. */
 #include "liberation.h"
@@ -14,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn5_liberation.h"
 #include "bn6_fields.h"
 #include "director.h"
 #include "director_state.h"
@@ -25,6 +28,7 @@
 #include "netmap.h"
 #include "pet_look.h"
 #include "platform.h"
+#include "rom.h"
 
 /* The GBA's own registers and memory BN6's map is drawn by: the map's
  * first layer's scroll (BG1, its walkway floor: x + y + 256 and
@@ -36,6 +40,7 @@
 #define BOX_TOP 96        /* a chat box's first row (scene_emu.c's TINT_BOX_TOP) */
 #define CAM_X  120        /* where MegaMan's place shows, the scroll's own (calibrated on a capture) */
 #define CAM_Y  80
+#define OUTLINE_DOWN 6    /* the outline's origin below the panel's centre: on its look's diamond (8 down, the OBJs' 2 above it) */
 
 static struct {
 	bool on;               /* the board shows */
@@ -45,12 +50,26 @@ static struct {
 	int blink;             /* frames seen, for the faced panel's blink */
 	uint8_t sprite[4096];  /* the sprites' colours, a bit each of BN6's 15-bit colours */
 	int fx, fy;            /* the panel MegaMan faces, -1 none */
+	Anim outline;          /* ... outlined by BN5's own sprite, its blink from where he turned to it */
+	int out_x, out_y;      /* ... the panel it blinks on, -1 none */
 } S;
 
 /* (x mod 512, near `near`) */
 static int unwrap(int v, int near) {
 	int d = ((v - near) % 512 + 512 + 256) % 512 - 256;
 	return near + d;
+}
+
+/* BN5's outline of the faced panel (sprite list 7's, BN5_LIB_OUTLINE):
+ * its blink, from the moment he faces a panel he can take */
+static void see_outline(void) {
+	const XRom *x = &XR[XROM_BN5_COLONEL_US];
+	Sprite *spr = S.look && S.fx >= 0 && x->data ? sprite_get_rom(x->data, x->layout->sprite_lists, BN5_LIB_SPRITE_LIST, BN5_LIB_OUTLINE) : NULL;
+	if (!spr) { S.out_x = S.out_y = -1; return; }
+	if (S.fx != S.out_x || S.fy != S.out_y) anim_play(&S.outline, spr, BN5_LIB_OUTLINE_BLINK);
+	else anim_update(&S.outline);
+	S.out_x = S.fx;
+	S.out_y = S.fy;
 }
 
 void lib_see(void) {
@@ -68,7 +87,8 @@ void lib_see(void) {
 		S.sprite[c >> 3] |= (uint8_t)(1u << (c & 7));
 	}
 	S.fx = S.fy = -1;
-	if (LB.step == LIB_STEP_MENU) lib_faced(&S.fx, &S.fy);
+	if (LB.step == LIB_STEP_MENU || (LB.step == LIB_STEP_MOVE && lib_faced_takes())) lib_faced(&S.fx, &S.fy);
+	see_outline();
 }
 
 /* A dark panel's colour: the floor's, sunk into Nebula's purple */
@@ -155,22 +175,12 @@ static void draw_menu(void) {
 	}
 }
 
-/* The panel MegaMan faces, outlined in yellow, blinking fully lit, as
- * BN5's board marks it (its own outline not yet read from BN5's ROM: drawn
- * here to its diamond, 48 by 24) */
+/* The panel MegaMan faces, outlined as BN5's board outlines it */
 static void draw_faced(void) {
-	if (S.fx < 0 || !S.look || LB.step != LIB_STEP_MENU || (S.blink / 16) % 2) return;
+	if (S.out_x < 0) return;
 	int wx, wy;
-	netmap_world(S.fx, S.fy, &wx, &wy);
-	int cx = P.core_x + wx + wy - S.cam_u + CAM_X, cy = P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + 4;
-	SDL_Color c = rgba(255, 232, 24, 255);
-	for (int k = 0; k <= 24; ++k) {
-		int dy = k / 2;
-		fill_rect(cx - 24 + k, cy - dy, 1, 1, c);
-		fill_rect(cx + 24 - k, cy - dy, 1, 1, c);
-		fill_rect(cx - 24 + k, cy + dy, 1, 1, c);
-		fill_rect(cx + 24 - k, cy + dy, 1, 1, c);
-	}
+	netmap_world(S.out_x, S.out_y, &wx, &wy);
+	anim_draw(&S.outline, P.core_x + wx + wy - S.cam_u + CAM_X, P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + OUTLINE_DOWN, false, 0, 0);
 }
 
 void director_draw_board(void) {
