@@ -254,10 +254,19 @@ liberation and an item's find; the recordings are in the pull request):
   BN5 sprites (list 7, entries 15 and 21); the battle's banners five
   OBJs whose tiles stand near `0x0873CF74`, their build not traced.
 
-Still to trace: the banners' build, the board's HUD (the Order Points
-gauge, PHASE and TRGT PHASE), the command window, the backdrop, the
-units' board sprites, and whether the other eight missions' maps carry
-other sets.
+- **The HUD and the window:** the Order Points gauge is six OBJs at the
+  top right (`BN5_LIB_HUD_OAM`), its frame, bar and digits BN5's
+  (`0x087E4xxx`, OBJ palette 12); the L view's PHASE and TRGT PHASE are
+  OBJs on palette 13; the command window is 21 OBJs of 16x16 drawn by
+  BN5's code (palette 15) with BN5's menu cursor beside it; the battle's
+  banners come from BN5's battle-message table (`BN5_LIB_MESSAGES`),
+  the engine BN6 also has.
+- **The backdrop** is the mission map's own animated backdrop, recoloured
+  purple (BG palette 0 from `0x0861BF20`): outside a mission the same map
+  is BN5's teal ACDC Area 3.
+
+Still to trace: the units' board sprites, the window's text rules, and
+whether the other eight missions' maps carry other sets.
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and
 palettes read from BN5's ROM at run time (never kept), its pulse, its
