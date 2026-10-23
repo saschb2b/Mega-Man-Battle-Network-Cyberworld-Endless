@@ -694,7 +694,9 @@ PET shows whole: a Chip Trader's prize is new to it first, and the summary
 counts what a run added. The NaviCust programs MegaMan has run with come
 back too: a later run's program vendor lists two of them first, and the
 Spins found, one a run, turn their colour's programs in every run after. The run's
-summary names what it opened, the closest goal and the helpers it had. Milestones put BN6's
+summary, two PET screens as BN6's RESULT (A turns from RESULT to RECORDS,
+and A again leaves), names how it ended, what it opened (marked NEW), the
+closest goal and the helpers it had. Milestones put BN6's
 own marks on the title: Gregar's head for a won short net, Bass for the
 endless net's Nest, the S for the Secret Area, the green disc for a win on
 the top threat rung, STD, MEGA and GIGA COMP for a class of the Library

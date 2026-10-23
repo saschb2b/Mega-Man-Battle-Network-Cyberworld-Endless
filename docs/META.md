@@ -197,8 +197,9 @@ them a use.
 
 ## Teaching it
 
-- The run summary names what the run unlocked (three lines at most: the
-  setup's new entries first, then the title's marks) and what is closest
+- The run summary names what the run unlocked (on its RECORDS screen,
+  four lines at most, each marked NEW: the setup's new entries first,
+  then the title's marks) and what is closest
   ("One more sword finish: the Blade folder"). A Cross that won't fit
   beside the run's says, at its first win, that the next dive can start
   with it.
@@ -662,8 +663,9 @@ the other way.
   unlocks are options, never power, and a helper that shut its player out
   of the meta loop would be the judging mode Celeste renamed Assist to
   avoid. The run's summary and Dad's dive report name it, as they name
-  every helper: a small line over the summary's title ("HELP: HP+ ALL
-  *"), where nothing else stands.
+  every helper: a small line on the band of the summary's RESULT ("HELP:
+  HP+ ALL *", "HELP: 5 ON" where the names run long), where nothing else
+  stands.
 - **Program Advances still form, all of BN6's.** BN6 checks one two ways
   (bn6f `sub_8029520`): a recipe that lists its chips (LifeSrd: Sword,
   WideSwrd, LongSwrd) compares the chips alone, the Custom screen having
@@ -793,8 +795,8 @@ long. BN6 itself gives BeastOut by its story.
   Crosses' milestones do: NEW on the setup, said on no summary.
 - **Where it is said.** The summary of the run that opened it: "Unlocked:
   the BeastOut start", before the folders, the Spin and the Crosses (an
-  endless run's summary has room for three; Bass's mark comes after).
-  A run with it: "Help: BeastOut" over its summary's title, and Dad's dive
+  endless run's summary has room for four; Bass's mark comes after).
+  A run with it: "HELP: BEASTOUT" on its summary's band, and Dad's dive
   report names it with the helpers. It counts for everything, as every
   helper does (decision 3); no threat rung or mark follows from it.
 - **The fiction.** In a run without it, Dad unlocks the PET's

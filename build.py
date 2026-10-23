@@ -1179,6 +1179,9 @@ SCREENSHOTS = [
     # marks a profile can earn: a won short net, the endless Nest, the
     # Secret Area, the top threat rung)
     ('setup', ['--scene', 'setup', '--input', '60:,6:DOWN,20:,6:DOWN,40:'], [(150, 'setup')], {}),
+    # (a won short net's summary: the run, then the records and what it opened)
+    ('summary', ['--scene', 'summary', '--setup', 'short', '--run-depth', '10', '--input', '100:,4:A,36:'],
+     [(90, 'summary'), (139, 'summary-records')], {}),
     ('marks', ['--scene', 'title', '--marks', '18A'], [(80, 'marks')], {}),
     # (issue #104: the statistics' question at a first start, the data folder fresh)
     ('stats-ask', ['--dev', 'statistics=ask'], [(100, 'stats-ask')], {}),

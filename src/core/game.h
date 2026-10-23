@@ -49,6 +49,7 @@ extern bool title_summary;          /* the title opens on the finished run's sum
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern bool title_menu;             /* ... or on its menu (back from SAVES) */
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
+extern char title_cause_short[40]; /* ... the same with the area's short name, "" for none */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */
 extern bool title_new_best;         /* ... deeper than any run before */
 extern bool title_won;              /* ... the run was won: the short net's Nest fell */
