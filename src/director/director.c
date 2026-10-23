@@ -215,7 +215,7 @@ static bool follow_exit_warp(void) {
  * as the guardian's state changes and after the game enters a map (bn6f
  * EnterMap clears the map's flags, 0x1640-0x16FF: EV_MAP_ENTER). */
 static void exit_flag(bool entered) {
-	bool shut = !boss_exit_open();
+	bool shut = !boss_exit_open() || lib_exit_shut();
 	if (!entered && shut == D.exit_shut) return;
 	D.exit_shut = shut;
 	if (shut) flag_set(BN6_FLAG_WARP_OFF + 1);
@@ -348,6 +348,7 @@ static void battle_update(void) {
 	}
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
+		lib_battle_frame();
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
 	}
@@ -529,7 +530,8 @@ void director_update(void) {
 	++D.act_frames;
 	if (gameover_update() || follow_exit_warp()) return;
 	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
-	arrow_update();
+	/* (no way-on arrow over a liberation's board: its way is the board's) */
+	if (!lib_on()) arrow_update();
 	if (on_map()) map_update();
 	/* (the PET's first menu is a screen of the game's own mode, its pages
 	 * and the shops other modes: either; not the way back to the map after
@@ -537,7 +539,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); exit_pad_step(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); home_jobs_watch(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); home_jobs_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();
@@ -549,6 +551,7 @@ void director_update(void) {
 	exit_flag(false);
 	guardian_update();
 	arrival_update();
+	lib_update();
 	dev_steps();
 	if (act_on_choices()) return;
 	checkpoint_update();

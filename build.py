@@ -2009,8 +2009,8 @@ def lint_files():
     return not bad
 
 
-# bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h')
+# bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/), and the map's buffers' (bn6_map.h)
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h', 'bn6_map.h')
 
 
 def lint_rom_data(update):
@@ -2472,6 +2472,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--check'])
         if code == 0:   # the voice catalog's reading of C (tools/voice_catalog.py)
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_voice_catalog.py')])
+        if code == 0:   # the agents' tools (tools/cw.py and its MCP server)
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_cw.py')])
         if code == 0:
             code = subprocess.call([sys.executable, '-m', 'unittest', 'discover', '-s', 'server/tests'], cwd=ROOT)
         sys.exit(code)

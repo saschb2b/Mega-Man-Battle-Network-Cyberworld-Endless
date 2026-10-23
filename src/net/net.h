@@ -38,6 +38,8 @@ typedef enum {
 	OBJ_VAULT,       /* a collector's vault: a Library's count opens it, three chips inside (docs/META.md, gates) */
 	OBJ_DUEL,        /* ProtoMan, the rival: a busting duel against his time (docs/RIVAL.md) */
 	OBJ_OFFICIAL,    /* an official gate: Chaud's clearance opens it (docs/RIVAL.md); param: its level, 1-2 */
+	OBJ_UNIT,        /* a dark layer's unit, a DarkHole's guardian or the Darkloid (docs/LIBERATION.md); param: its
+	                    list-6 sprite | animation << 8 | its sprite list << 16 | its number << 20 */
 } ObjType;
 
 typedef struct {
@@ -162,6 +164,7 @@ typedef struct {
 	int sig_room;      /* ... that room, -1 where the layout found it no place */
 	int arrive_side;   /* the side of the screen MegaMan arrives at (SIDE_*, issue #106) */
 	int arrive_face;   /* ... and the way he faces there, BN6's (0-7, UP first): along the way on */
+	bool dark;         /* a dark layer (docs/LIBERATION.md): its floor flat and bare, a liberation's board */
 } Layer;
 
 /* The sides of the screen a layer's arrival lies at (docs/LEVEL_DESIGN.md,
@@ -189,6 +192,11 @@ typedef struct {
 
 /* Generation is deterministic for a given seed and kit. */
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit);
+/* Set before layer_generate: the run's layer is a dark one (docs/LIBERATION.md,
+ * a liberation's board): its floor alone, flat, its arrival and exit, none of
+ * a normal layer's services, data, bystanders or set pieces (a guardian's
+ * layer is never dark). */
+extern bool layer_make_dark;
 /* The game runs at most 16 NPCs on a map (BN6_NPC_COUNT) and leaves the
  * rest of a map's list out without a word; every object but the warp-in
  * takes one, the guardian two (himself and his data). The layer's count. */

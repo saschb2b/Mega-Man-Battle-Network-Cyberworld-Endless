@@ -177,6 +177,10 @@ static void add_extra(int s, CoordCell c) {
 	if (nm_extra.n[s] < 4096) extra_cells[s][nm_extra.n[s]++] = c;
 }
 
+void netmap_add_walls(const CoordCell *c, int n) {
+	for (int i = 0; i < n; ++i) add_extra(0, c[i]);
+}
+
 /* The row past each stair's top a step, as the originals' is: a cell from
  * the ramp's foot as high as the rise (z 0, height 32), where the raised
  * floor's own cells start at the rise (z 32, height 0). The game takes a

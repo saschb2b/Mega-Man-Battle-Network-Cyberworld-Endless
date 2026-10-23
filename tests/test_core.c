@@ -48,6 +48,7 @@
 #include "save.h"
 #include "save_blob.h"
 #include "settings_line.h"
+#include "liberation_board.h"
 #include "sound_filter.h"
 #include "super_lines.h"
 #include "flags.h"
@@ -1401,10 +1402,11 @@ static void test_talk(void) {
 		for (int navi = 0; navi <= 18; ++navi) {
 			if (navi == 17) continue;
 			snprintf(what, sizeof what, "the port's words to area %d (guardian %d)", biome, navi);
-			check_talk(what, home_port_words(biome, navi, false, false));
-			check_talk(what, home_port_words(biome, navi, true, false));
+			check_talk(what, home_port_words(biome, navi, false, false, false));
+			check_talk(what, home_port_words(biome, navi, true, false, false));
+			check_talk(what, home_port_words(biome, navi, false, false, true));
 		}
-		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true));
+		check_talk("the sealed dark way's words", home_port_words(biome, 0, true, true, false));
 	}
 }
 
@@ -4857,7 +4859,7 @@ static void super_words(void) {
 		CHECK(strlen(super_reward_head(navi)) < 48, "super: %d's data's head is long", navi);
 		/* (the net's word on him, and the Nest's port at home, before they
 		 * have met: never his name) */
-		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false);
+		const char *rumor = super_rumor(navi), *port = home_port_words(BIOME_NEST, navi, false, false, false);
 		snprintf(what, sizeof what, "super_rumor(%d)", navi);
 		check_talk(what, rumor);
 		snprintf(what, sizeof what, "the Nest's port with %d unmet", navi);
@@ -4869,7 +4871,7 @@ static void super_words(void) {
 	}
 	rival_met(SUPER_CYBEAST);
 	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON);
-	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false));
+	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false));
 }
 
 static void test_super_bosses(void) {
@@ -5485,8 +5487,50 @@ static void test_pad_art(void) {
 	CHECK(!pad_art_on(&ring, -18, -18, 0) && pad_art_on(&ring, -18, -18, 4), "a reach takes in more");
 }
 
+/* A dark layer's board (docs/LIBERATION.md, stage 1): the same from its
+ * seed, its kinds where BN5's rules put them (the Darkloid's 3x3 whole, a
+ * ring of dark round each DarkHole with its guardian, the start clean, no
+ * guardian within three of it), and its sizes and par over the acts. */
+static void test_liberation_board(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x11BE;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	static LibBoard a, b;
+	int made = 0, tried = 0;
+	for (int act = 1; act <= 5; ++act) {
+		int panels = 0, dark = 0, par = 0, lo = 99, hi = 0, n = 0;
+		for (uint32_t s = 1; s <= 30; ++s) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			CHECK(layer.dark && layer.nstairs == 0 && layer.nobj == 2, "dark layer %u act %d: dark %d stairs %d objects %d", s, act, layer.dark, layer.nstairs, layer.nobj);
+			++tried;
+			if (!lib_board_make(&a, s, act, 1)) continue;
+			++made;
+			CHECK(lib_board_make(&b, s, act, 1) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
+			CHECK(a.kind[a.boss_y][a.boss_x] == LIB_BOSS && a.unit[0].kind == UNIT_DARKLOID, "board %u: no Darkloid", s);
+			for (int d = 0; d < 9; ++d)
+				CHECK(d == 4 || a.kind[a.boss_y - 1 + d / 3][a.boss_x - 1 + d % 3] == LIB_RING, "board %u: the Darkloid's ring broken", s);
+			CHECK(a.kind[a.start_y][a.start_x] == LIB_CLEAN, "board %u: the start not clean", s);
+			for (int h = 0; h < a.nholes; ++h) CHECK(lib_dark_around(&a, a.hole_x[h], a.hole_y[h]) == 8, "board %u: hole %d's ring not dark", s, h);
+			for (int u = 1; u < a.nunits; ++u)
+				CHECK(abs(a.unit[u].x - a.start_x) + abs(a.unit[u].y - a.start_y) > 3, "board %u: a guardian by the start", s);
+			panels += a.panels; dark += a.dark; par += a.par; ++n;
+			if (a.par < lo) lo = a.par;
+			if (a.par > hi) hi = a.par;
+		}
+		if (n) printf("liberation act %d: %d boards, %d panels, %d%% dark, par %d (%d-%d)\n", act + 1, n, panels / n, dark * 100 / (panels ? panels : 1), par / n, lo, hi);
+	}
+	CHECK(made * 10 >= tried * 9, "liberation: %d boards of %d layers", made, tried);
+	run = before;
+}
+
 int main(void) {
 	test_sha1();
+	test_liberation_board();
 	test_jobs();
 	test_economy();
 	test_home_words();

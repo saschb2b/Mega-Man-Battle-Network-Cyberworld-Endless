@@ -24,6 +24,7 @@
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"
+#include "screen_name.h"
 #include "soulproxy.h"
 
 /* ---- scripted input and captures for headless tests ---- */
@@ -175,6 +176,7 @@ static void write_state(const char *path) {
 	FILE *f = fopen(path, "w");
 	if (!f) return;
 	fprintf(f, "frame %llu\nscene %s\n", (unsigned long long)P.frame, scene_current() ? scene_current()->name : "none");
+	fprintf(f, "screen %s\n", screen_name());
 	if (scene_current() == &scene_emu) director_describe(f);
 	fclose(f);
 }

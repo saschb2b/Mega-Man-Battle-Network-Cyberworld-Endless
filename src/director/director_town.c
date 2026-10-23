@@ -196,7 +196,7 @@ static bool ask_link(int k) {
 	flag_clear(HOME_LINK_FLAG);
 	bool asked = back ?
 		talk_ask(home_back_portal_words(home_older(k), profile.back_taught, run.clock), FACE_MEGAMAN, home_back_question(), HOME_LINK_FLAG) :
-		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2, false), FACE_MEGAMAN, home_on_question(), HOME_LINK_FLAG);
+		talk_ask(home_port_words(w[k].biome, w[k].meets, k == 2, false, w[k].board), FACE_MEGAMAN, home_on_question(), HOME_LINK_FLAG);
 	if (!asked) return false;
 	link_asked = k;
 	if (back && !profile.back_taught) { profile.back_taught = 1; profile_save(); }
@@ -212,7 +212,7 @@ bool home_hp_check(void) {
 	if (ask_link(k)) return true;
 	if (k >= n && !(k == 2 && sealed)) return false;
 	bool shut = k >= n;
-	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut), FACE_MEGAMAN);
+	return talk_start(home_port_words(shut ? 0 : w[k].biome, shut ? 0 : w[k].meets, k == 2, shut, !shut && w[k].board), FACE_MEGAMAN);
 }
 
 /* A lit link stepped on: its question, once each time he steps on it; the

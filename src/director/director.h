@@ -74,6 +74,11 @@ int director_pack_now(uint16_t *entry, uint8_t *count, int most);
 /* MegaMan's HP as the top screen shows it: the Navi's on the map, his
  * battle object's in a battle */
 void director_megaman_hp(int *hp, int *max);
+/* A liberation's board (docs/LIBERATION.md): its dark panels recoloured
+ * in the core's frame `px` (240 x 160, the core's own pixels), and its
+ * phase, par, banner and command menu over the picture. */
+void director_tint_board(uint32_t *px);
+void director_draw_board(void);
 /* The rival's duel: its clock against ProtoMan's time, in battle (docs/RIVAL.md). */
 void director_draw_duel(void);
 /* CircusMan's tent: the panel BN6 lights under MegaMan's feet, where it

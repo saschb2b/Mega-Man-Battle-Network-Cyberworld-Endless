@@ -27,6 +27,8 @@ void options_open(void);
  * send (analytics_ask_offer), in Options' place */
 void options_first_start(void);
 bool options_shown(void);
+/* ... which, in a word ("options-audio", "controls"), NULL where none */
+const char *options_screen(void);
 /* Its frame (in the scene's place) and its picture over the canvas (after
  * the scene's: drawing changes nothing). */
 void options_update(void);

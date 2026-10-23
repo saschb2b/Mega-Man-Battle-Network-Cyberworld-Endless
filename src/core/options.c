@@ -55,6 +55,13 @@ void options_first_start(void) { analytics_ask_offer(); }
 
 bool options_shown(void) { return O.open || controls_shown() || analytics_ask_shown(); }
 
+/* The screen shown, in a word, for a headless run's state (screen_name.c): NULL where none */
+const char *options_screen(void) {
+	if (controls_shown()) return "controls";
+	if (O.open) return O.section == SECTION_DISPLAY ? "options-display" : O.section == SECTION_AUDIO ? "options-audio" : "options";
+	return analytics_ask_shown() ? "statistics-question" : NULL;
+}
+
 bool options_takes_buttons(void) { return analytics_ask_shown() && !O.open && !controls_shown(); }
 
 /* ---- the sound ---- */

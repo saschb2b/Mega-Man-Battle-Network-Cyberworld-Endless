@@ -14,7 +14,7 @@ const char *home_words(const char *beaten, int ways, const char *const ports[3],
  * area `biome` (its data, never its name: he has not been there) and of
  * `navi` its guardian (his signal named where MegaMan has battled him);
  * `dark` the dark way into the Undernet, `sealed` that way still shut. */
-const char *home_port_words(int biome, int navi, bool dark, bool sealed);
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board);
 /* Lan's HP's portal `k` (lanhp.h) as MegaMan names it, after "the". */
 const char *home_portal_name(int k);
 /* MegaMan in Lan's HP the run's first time there: what it is, or, to a

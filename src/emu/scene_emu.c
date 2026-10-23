@@ -220,8 +220,11 @@ static void draw(void) {
 	const uint32_t *v = emu_video();
 	bool box = false;
 	int hour = online_visit_away() ? 0 : director_town_tint(&box);
+	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
+	/* (a liberation's dark panels, docs/LIBERATION.md) */
+	director_tint_board(px);
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
-		uint32_t c = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
+		uint32_t c = px[i];
 #ifdef __3DS__
 		px[i] = 0xFF000000u | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
 #else
@@ -241,6 +244,7 @@ static void draw(void) {
 	director_draw_counts();
 	director_draw_bug_note();
 	director_draw_duel();
+	director_draw_board();
 	director_draw_tent();
 	devtools_draw();
 	online_visit_draw();

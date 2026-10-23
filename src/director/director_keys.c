@@ -20,6 +20,7 @@
 #include "director_way.h"
 #include "lan_house.h"
 #include "lesson_words.h"
+#include "liberation.h"
 #include "npc.h"
 #include "talk.h"
 #include "town.h"
@@ -430,9 +431,11 @@ uint32_t director_keys(uint32_t keys) {
 	if (!D.active || !on_map()) return keys;   /* (in battle L opens the Custom screen) */
 	/* (A ends the arrival's card early: its words wait on it) */
 	if (D.arrival_hold && a_pressed && cinema_card_age() >= CARD_SKIP) cinema_card_yield();
-	keys = a_keys(keys, a_pressed);
+	if (!lib_on()) keys = a_keys(keys, a_pressed);
 	/* SELECT on a layer: the map, while it is held */
 	if (!D.town && (keys & KEY_SELECT)) { D.map_shown = !emu_read8(BN6_CHATBOX); map_note_held(D.map_shown); keys &= ~KEY_SELECT; }
+	/* (a liberation's board: its own moves and menu, docs/LIBERATION.md) */
+	if (lib_on()) return lib_keys(keys);
 	if (director_in_town() && r_pressed && home_r(&keys)) return keys;
 	/* on the map L is MegaMan's word on where they are: the game's own
 	 * has no lines for this story */
