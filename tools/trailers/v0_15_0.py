@@ -57,14 +57,15 @@ FIRST = {}      # each scene's first game frame, for the samples below
 def scenes():
     s = {
         'lib-fork': (['--scene', 'home', '--run-depth', '4', '--seed', '7', '--dev', 'quiet'], {}, FORK, 0, 1300),
-        # seed 1's act 2 board, the autopilot through it, then act 3's
+        # seed 1's act 2 board, the autopilot through it (#214's Darkloids' phase)
         'lib-open': board(1, 5, 0, 720),
         'lib-first': board(1, 5, 1100, 2300),
-        'lib-phase': board(1, 5, 3400, 4600),
-        'lib-three': board(1, 5, 8500, 11000),
-        'lib-boss': board(1, 5, 13100, 15800),
-        'lib-act3': board(1, 5, 28500, 29600),
-        'lib-fail': board(1, 5, 31200, 31900),
+        'lib-phase': board(1, 5, 2050, 2800),
+        'lib-darkturn': board(1, 5, 13300, 14200),
+        'lib-final': board(1, 5, 15600, 16800),
+        'lib-boss': board(1, 5, 22600, 24800),
+        # ... and on to act 3's
+        'lib-act3': board(1, 5, 29500, 30400),
         # other boards: other seeds and acts
         'lib-b2': board(2, 5, 600, 1500),
         'lib-b3': board(3, 5, 600, 1500),
@@ -300,8 +301,9 @@ class Stack:
 # ---- the readout: the phase against the par ----
 
 # (the act 2 board's own phases where its banners show them: PLAYER PHASE 01,
-# 06's final turn, 08's Darkloid, cleared in 8 against a par of 12)
-PHASES = [(0, 'FORK'), (F(3), None), (F(4), 1), (F(10), 6), (F(12), 'D'), (F(14), 8), (F(17), 'END')]
+# 08's final turn and time up, the Darkloids' phase before 12, cleared in 12
+# against a par of 12: "Right on par!")
+PHASES = [(0, 'FORK'), (F(3), None), (F(4), 1), (F(10), 8), (F(12), 'D'), (F(14), 12), (F(17), 'END')]
 PAR = 12
 
 
@@ -415,21 +417,25 @@ def shots():
                     ["each run's seed", 'makes its own, its', 'par set by a planner', 'that plays it'], y=190)],
              where='ACTS 2-4'),
         # three turns, or it stays dark
-        Shot(F(10), sector(3, 2), [Pic([(F(10), 'lib-three', S('lib-three', 975), 1),
-                                        (F(10, 2.5), 'lib-three', S('lib-three', 1078), 1),
-                                        (F(11), 'lib-fail', S('lib-fail', 98), 1)], tag='LAYER 5 · PHASE 06')],
+        Shot(F(10), sector(3, 2), [Pic([(F(10), 'lib-final', S('lib-final', 85), 1),
+                                        (F(11), 'lib-final', S('lib-final', 372), 1)], tag='LAYER 5 · PHASE 08')],
              [Head(F(10, 0.25), F(11), 'THREE TURNS TO WIN IT', 'FINAL TURN! is the last'),
               Head(F(11, 0.25), F(12), 'OR IT STAYS DARK', 'Time up leaves the panel dark')], where='ACT 2 · LAYER 5'),
         # the drop: the Darkloids' phase
-        Shot(F(12), sector(2, 2), [Pic([(F(12), 'lib-phase', S('lib-phase', 185), 1)], tag='LAYER 5 · DARKLOID PHASE')],
+        Shot(F(12), sector(2, 2), [Pic([(F(12), 'lib-darkturn', S('lib-darkturn', 130), 1),
+                                        (F(12, 2.5), 'lib-darkturn', S('lib-darkturn', 176), 1),
+                                        (F(13), 'lib-darkturn', S('lib-darkturn', 226), 1),
+                                        # (his line read whole: the autopilot pages it at once, so it is held)
+                                        (F(13) + 4, 'lib-darkturn', S('lib-darkturn', 230), 0),
+                                        (F(13, 2), 'lib-darkturn', S('lib-darkturn', 262), 1)], tag='LAYER 5 · DARKLOID PHASE')],
              [Head(F(12, 0.5), F(14), 'THEN THE DARK STRIKES BACK', 'The Darkloid and every guardian take their turn')],
              pull=0.3, where='ACT 2 · LAYER 5'),
         # the climax: PLAYER PHASE 08, the Darkloid, the par
-        Shot(F(14), sector(2, 3), [Pic([(F(14), 'lib-boss', S('lib-boss', 20), 1),
-                                        (F(15), 'lib-boss', S('lib-boss', 222), 1),
-                                        (F(16), 'lib-boss', S('lib-boss', 420), 1),
-                                        (F(16, 2), 'lib-boss', S('lib-boss', 1060), 1),
-                                        (F(17), 'lib-boss', S('lib-boss', 1215), 1)], tag='LAYER 5 · THE DARKLOID')],
+        Shot(F(14), sector(2, 3), [Pic([(F(14), 'lib-boss', S('lib-boss', 163), 1),
+                                        (F(15), 'lib-boss', S('lib-boss', 345), 1),
+                                        (F(16), 'lib-boss', S('lib-boss', 400), 1),
+                                        (F(16, 2), 'lib-boss', S('lib-boss', 478), 1),
+                                        (F(17), 'lib-boss', S('lib-boss', 640), 1)], tag='LAYER 5 · THE DARKLOID')],
              [Head(F(14, 0.25), F(15), 'EACH ACT DARKER', 'Barriers and keys from act 3, a TinHawk, then traps'),
               Head(F(15, 0.25), F(17), 'BREAK THROUGH TO THE DARKLOID', "A Navi of BN6's, waiting on his ring"),
               Head(F(17, 0.25), F(18), 'BEAT THE PAR, ARM THE RUN', 'The fewer the phases, the better the chip you carry on')],
