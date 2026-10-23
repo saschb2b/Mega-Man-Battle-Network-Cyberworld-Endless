@@ -1,5 +1,6 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
+#include "audio_pace.h"
 #include "claims.h"
 #include "compat.h"
 #include "platform.h"
@@ -46,6 +47,7 @@ static SDL_mutex *ring_lock;
  * and played since the start, and those of a rollback's sound still to be
  * skipped, as they were played already (issue #167) */
 static uint64_t ring_written, ring_played, ring_debt;
+static AudioPace pace;   /* (the ring's averaged fill: the output rate's nudge) */
 
 static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va_list a) {
 	(void)l; (void)c; (void)lv; (void)f; (void)a;
@@ -171,11 +173,10 @@ static void pull_audio_from(struct mCore *c) {
 		ring_played += (uint64_t)(fill - LAT_TARGET);
 		ring_r = (ring_w - LAT_TARGET + RING) % RING;
 		fill = LAT_TARGET;
+		audio_pace_reset(&pace, fill);
 	}
 	SDL_UnlockMutex(ring_lock);
-	double adj = 1.0 - 0.02 * (fill - LAT_TARGET) / LAT_TARGET;
-	if (adj < 0.97) adj = 0.97;
-	if (adj > 1.03) adj = 1.03;
+	double adj = audio_pace(&pace, fill, LAT_TARGET);
 	blip_set_rates(l, c->frequency(c), out_rate * adj);
 	blip_set_rates(r, c->frequency(c), out_rate * adj);
 }

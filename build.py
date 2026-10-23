@@ -196,7 +196,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -1405,8 +1405,8 @@ SCREENSHOTS = [
      [(580, 'bn5-visitor')], {'CYBERWORLD_AUTOPILOT': '1'}),
     # 0.9.0's notes, each by its feature. (MegaMan's word on GitHub, typed out)
     ('notice', ['--scene', 'intro'], [(230, 'notice')], {}),
-    # (SELECT on the title: the controls screen, an Xbox pad attached)
-    ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,40:'], [(100, 'controls')], {}),
+    # (SELECT on the title: Options, then its Controls, an Xbox pad attached)
+    ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,30:,4:A,40:'], [(134, 'controls')], {}),
     # (a Recovery Mr. Prog on an act's middle layer, MegaMan held at 40 HP:
     # half his max back, his one patch; asked again, spent)
     ('heal-once', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:620,heal:1150',
@@ -1995,7 +1995,7 @@ def lint_files():
 
 
 # bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h')
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h')
 
 
 def lint_rom_data(update):

@@ -25,6 +25,7 @@
 #include "rom.h"
 #include "run.h"
 #include "analytics.h"
+#include "audio_pace.h"
 #include "analytics_online.h"
 #include "online_visit.h"
 #include "area_src.h"
@@ -44,6 +45,8 @@
 #include "rivals.h"
 #include "save.h"
 #include "save_blob.h"
+#include "settings_line.h"
+#include "sound_filter.h"
 #include "super_lines.h"
 #include "flags.h"
 #include "mapslot.h"
@@ -4537,6 +4540,102 @@ static uint32_t qr_hash(const uint8_t *m, int n) {
 	return h;
 }
 
+/* emu.c's ring kept in step with a device that reads in blocks: a frame
+ * every 1/60 s makes 48000 * adj / 59.7275 samples. The pitch moves less
+ * than a cent from frame to frame (the fill itself took it 10 to 18 cents
+ * a frame, a warble), runs 0.45% high on average as the game does at 60
+ * frames a second, and the ring never runs dry. */
+static void test_audio_pace(void) {
+	static const struct { int block, target; } dev[] = { { 512, 1024 }, { 1024, 1536 } };
+	for (int d = 0; d < 2; ++d) {
+		AudioPace pace = { 0 };
+		double adj = 1.0, made = 0.0, next_read = 0.0, last = 0.0, step = 0.0, sum = 0.0;
+		int fill = dev[d].target, dry = 0, frames = 0;
+		for (int f = 0; f < 60 * 60; ++f) {
+			for (; next_read <= f / 60.0; next_read += dev[d].block / 48000.0) {
+				dry += fill < dev[d].block;
+				fill = fill < dev[d].block ? 0 : fill - dev[d].block;
+			}
+			made += 48000.0 * adj / 59.7275;
+			fill += (int)made;
+			made -= (int)made;
+			adj = audio_pace(&pace, fill, dev[d].target);
+			if (f >= 60 * 20) {
+				if (fabs(adj - last) > step) step = fabs(adj - last);
+				sum += adj;
+				++frames;
+			}
+			last = adj;
+		}
+		double cents = 1200.0 * log2(step + 1.0), mean = sum / frames;
+		CHECK(cents < 1.0, "the pitch moved %.2f cents in a frame (%d-sample reads)", cents, dev[d].block);
+		CHECK(fabs(mean - 59.7275 / 60.0) < 0.0005, "the rate averaged %.5f, not the GBA's 59.7275 to 60 (%d-sample reads)", mean, dev[d].block);
+		CHECK(dry == 0, "the ring ran dry %d times (%d-sample reads)", dry, dev[d].block);
+	}
+}
+
+/* settings.ini's sound: gba leaves the sound as it is; soft keeps 1 kHz
+ * and takes 12 kHz (the GBA mix's images) and 50 Hz down as the Legacy
+ * Collection's balance does (sound_filter.c: -12.5 and -9 dB) */
+static double filtered_rms(SoundFilter mode, double hz) {
+	static int16_t buf[24000 * 2];
+	sound_filter_set(mode);
+	for (int i = 0; i < 24000; ++i) buf[i * 2] = buf[i * 2 + 1] = (int16_t)lrint(10000.0 * sin(2.0 * M_PI * hz * i / 48000.0));
+	sound_filter_run(buf, 24000);
+	double in = 0.0, out = 0.0;
+	for (int i = 12000; i < 24000; ++i) {
+		double x = 10000.0 * sin(2.0 * M_PI * hz * i / 48000.0);
+		in += x * x;
+		out += (double)buf[i * 2 + 1] * buf[i * 2 + 1];
+	}
+	return sqrt(out / in);
+}
+
+static void test_sound_filter(void) {
+	double r = filtered_rms(SOUND_GBA, 12000.0);
+	CHECK(fabs(r - 1.0) < 0.001, "gba changed a 12 kHz tone by %.4f", r);
+	r = filtered_rms(SOUND_SOFT, 1000.0);
+	CHECK(fabs(r - 1.0) < 0.02, "soft changed a 1 kHz tone by %.4f", r);
+	r = filtered_rms(SOUND_SOFT, 12000.0);
+	CHECK(fabs(20.0 * log10(r) + 12.5) < 1.0, "soft left a 12 kHz tone at %.1f dB, not -12.5", 20.0 * log10(r));
+	r = filtered_rms(SOUND_SOFT, 50.0);
+	CHECK(fabs(20.0 * log10(r) + 9.0) < 1.0, "soft left a 50 Hz tone at %.1f dB, not -9", 20.0 * log10(r));
+	r = filtered_rms(SOUND_GBA, 12000.0);
+	CHECK(fabs(r - 1.0) < 0.001, "gba again changed a 12 kHz tone by %.4f", r);
+}
+
+/* settings.ini's lines one at a time (Options' sound): its line replaced
+ * where it was, every other line kept; added at the end with what it is
+ * where it was not; a file made with it alone */
+static void test_settings_line(void) {
+	char path[96], all[512];
+	snprintf(path, sizeof path, "build/host/test-settings-%d.ini", (int)getpid());
+	FILE *f = fopen(path, "w");
+	if (f) { fputs("# settings\nsound = gba\nstatistics = on\n", f); fclose(f); }
+	CHECK(settings_line_write(path, "sound", "soft", "\n# sound: what it is\n"), "settings: the sound's line written");
+	f = fopen(path, "r");
+	size_t got = f ? fread(all, 1, sizeof all - 1, f) : 0;
+	if (f) fclose(f);
+	all[got] = 0;
+	CHECK(!strcmp(all, "# settings\nsound = soft\nstatistics = on\n"), "settings: the line replaced in its place (%s)", all);
+	f = fopen(path, "w");
+	if (f) { fputs("screen = auto\n", f); fclose(f); }
+	settings_line_write(path, "sound", "gba", "\n# sound: what it is\n");
+	f = fopen(path, "r");
+	got = f ? fread(all, 1, sizeof all - 1, f) : 0;
+	if (f) fclose(f);
+	all[got] = 0;
+	CHECK(!strcmp(all, "screen = auto\n\n# sound: what it is\nsound = gba\n"), "settings: the line added after what it is (%s)", all);
+	remove(path);
+	settings_line_write(path, "sound", "soft", "\n# sound: what it is\n");
+	f = fopen(path, "r");
+	got = f ? fread(all, 1, sizeof all - 1, f) : 0;
+	if (f) fclose(f);
+	all[got] = 0;
+	CHECK(!strcmp(all, "# sound: what it is\nsound = soft\n"), "settings: a new file with the line alone (%s)", all);
+	remove(path);
+}
+
 static void test_qr(void) {
 	static uint8_t m[QR_MAX * QR_MAX];
 	int n = qr_make("https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless", m);
@@ -5346,6 +5445,9 @@ int main(void) {
 	test_touch();
 	test_padmap();
 	test_xsong();
+	test_audio_pace();
+	test_sound_filter();
+	test_settings_line();
 	test_thumb_bl();
 	test_thumb_block();
 	test_battle_rng();

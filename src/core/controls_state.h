@@ -24,9 +24,8 @@
 #define KEYS 0
 #endif
 
-/* The list's rows (the statistics' last, where the build can send them),
- * then the bottom line's items */
-enum { ROW_PRESET, ROW_DPAD, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROW_STATS, ROWS, ROW_BOTTOM = ROWS };
+/* The list's rows, then the bottom line's items */
+enum { ROW_PRESET, ROW_DPAD, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROWS, ROW_BOTTOM = ROWS };
 enum { ITEM_SETALL, ITEM_DEFAULTS, ITEM_DONE, ITEMS };
 enum { TAB_PAD, TAB_KEYS };
 enum { SLOT_MAIN, SLOT_ALSO };
@@ -60,9 +59,8 @@ typedef struct {
 extern ControlsState C;
 
 /* The row's GBA button (ROW_A ... ROW_SELECT; the D-pad's directions
- * are UP 0 to RIGHT 3), and the rows shown */
+ * are UP 0 to RIGHT 3) */
 int controls_gba_of(int row);
-int controls_rows(void);
 /* A slot's input in words, on the tab shown ("-" for none): one GBA
  * button's, or the D-pad's four as one ("D-pad", "L stick", "WASD") */
 void controls_slot_words(int gba, int slot, char *out, size_t n);

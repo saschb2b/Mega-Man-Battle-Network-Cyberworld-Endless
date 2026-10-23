@@ -14,7 +14,6 @@
 
 #include "analytics_payload.h"
 #include "analytics_text.h"
-#include "compat.h"
 #include "guardians.h"
 #include "meta.h"
 #include "net.h"
@@ -23,6 +22,7 @@
 #include "rom.h"
 #include "run.h"
 #include "save.h"
+#include "settings_line.h"
 
 static struct {
 	AnalyticsStart s;
@@ -56,30 +56,9 @@ static int answer_read(const char *path) {
 	return got;
 }
 
-/* ... written: the file as it was, its statistics line replaced, or the
- * line and what it is added at its end */
+/* ... written (settings_line.h), what it is said before a line added */
 static bool answer_write(const char *path, bool on) {
-	char tmp[620], line[512], key[32];
-	if (!path) return false;
-	snprintf(tmp, sizeof tmp, "%s.tmp", path);
-	FILE *in = fopen(path, "r"), *out = fopen(tmp, "w");
-	if (!out) {
-		if (in) fclose(in);
-		return false;
-	}
-	bool kept = false;
-	while (in && fgets(line, sizeof line, in)) {
-		bool ours = line[0] != '#' && sscanf(line, " %31[a-z_]", key) == 1 && !strcmp(key, "statistics");
-		if (!ours) fputs(line, out);
-		else if (!kept) fprintf(out, "statistics = %s\n", on ? "on" : "off");
-		kept |= ours;
-	}
-	/* (what it is, after a line apart from the lines before it, if any) */
-	const char *note = analytics_setting_note();
-	if (!in && *note == '\n') ++note;
-	if (in) fclose(in);
-	if (!kept) fprintf(out, "%sstatistics = %s\n", note, on ? "on" : "off");
-	bool ok = fclose(out) == 0 && cw_rename(tmp, path);
+	bool ok = settings_line_write(path, "statistics", on ? "on" : "off", analytics_setting_note());
 	if (A.s.persist) A.s.persist();
 	return ok;
 }

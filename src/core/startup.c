@@ -17,6 +17,7 @@
 #include "platform.h"
 #include "pick.h"
 #include "rom.h"
+#include "sound_filter.h"
 #include "touch.h"
 #ifdef CW_IOS
 #include "ios.h"
@@ -216,7 +217,7 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen) {
 }
 #endif
 
-void player_files(bool headless, int smooth_arg, bool plain) {
+void player_files(bool headless, int smooth_arg, int sound_arg, bool plain) {
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
@@ -233,6 +234,7 @@ void player_files(bool headless, int smooth_arg, bool plain) {
 		touch_load(path);
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
+	if (sound_arg >= 0) sound_filter_set((SoundFilter)sound_arg);
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
 	 * view where it is yes: analytics.h) */
 	analytics_net_start(headless, plain);

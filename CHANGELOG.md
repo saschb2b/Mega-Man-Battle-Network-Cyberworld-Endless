@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+- **The title's music as the cartridge plays it.** The title, the run's
+  setup, Options, SAVES and the PET's screens played BN6's songs on a
+  player of the engine's own, an approximation that sounded duller than
+  the game. They now play on BN6's own sound engine's rules, read from
+  its code: its sequencer, its four channels and their priorities, its
+  envelopes, the songs' reverb and its 8-bit mix, then the GBA's PSG and
+  output as mGBA plays them. Laid beside the game in mGBA frame by frame
+  it is the same, byte for byte, for every song and sound checked.
+- **The music holds its pitch.** The game's sound is resampled a hair
+  faster or slower to stay in step with the speakers, and that nudge
+  followed every block the speakers took, moving the pitch 10 to 18
+  cents from one frame to the next (up to 40 on some sound servers): a
+  slight warble on every held note. It follows the average now, under a
+  cent a frame.
+- **Options.** SELECT on the title opens Options on every system, the
+  3DS too, and on a phone so does **OPTIONS** in the touch controls' menu,
+  mid-run too: **Controls** (the controls screen, where it was before;
+  not on the 3DS), **Audio** and **Statistics** (the answer, which was a
+  row of the controls screen, and on the 3DS SELECT's own).
+- **The Legacy Collection's balance, if you like it.** Options' **Audio**
+  sets the sound: **GBA**, the cartridge's, or **Soft**, the balance of the
+  Legacy Collection, which plays CD recordings instead of the game's own
+  sound. Measured from a recording of it on the same songs: its highs from
+  5 kHz up taken down (-10 dB at 10 kHz) and its deepest bass a little. It
+  takes off most of the bright hiss BN6's 10512 Hz mix leaves on a GBA.
+  It changes at once, so you hear it, and is kept in `settings.ini`
+  (`sound = soft` or `gba`); the browser player's menu has a **Sound**
+  button as well (docs/GUIDE.md, Sound).
+
 ## 0.14.0 (2026-10-22)
 
 - **Two MegaMen a side (issue #181, epic #167).** A Battle between two

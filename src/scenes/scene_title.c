@@ -12,9 +12,9 @@
 #include <string.h>
 
 #include "title_lines.h"
-#include "analytics_ask.h"
 #include "audio.h"
 #include "controls.h"
+#include "options.h"
 #include "backdrop.h"
 #include "chatbox.h"
 #include "cinema.h"
@@ -316,7 +316,7 @@ static void enter(void) {
 	title_menu = false;
 	/* (the anonymous statistics' question, once: the first start where the
 	 * build can send, after the start's screens, issue #104) */
-	if (entries == 1) analytics_ask_offer();
+	if (entries == 1) options_first_start();
 }
 
 static void jack_in(void);
@@ -335,18 +335,11 @@ static bool select_pressed(void) {
 	}
 	if (saves_key()) return true;
 	if (!btn_pressed(BTN_SELECT)) return false;
-#ifndef __3DS__
 	if (!btn_held(BTN_L)) {
-		controls_open();
+		options_open();
 		audio_sfx(SFX_SELECT);
 		return true;
 	}
-#else
-	if (!btn_held(BTN_L) && analytics_ask_open()) {
-		audio_sfx(SFX_SELECT);
-		return true;
-	}
-#endif
 	scene_set(&scene_gallery);
 	return true;
 }
@@ -799,14 +792,14 @@ static void hint_draw(int x0, int y0) {
 #ifdef __3DS__
 	if (!S.menu || S.confirm) return;
 	char hint[64];
-	snprintf(hint, sizeof hint, "%sL: %s", analytics_ask_here() ? "SELECT: Statistics   " : "", saves_word_hint());
+	snprintf(hint, sizeof hint, "SELECT: Options   L: %s", saves_word_hint());
 	minifont_draw_centered(x0 + CORE_W / 2, y0 + 107, hint, grey, 1);
 #else
 	if (!S.menu || S.confirm) return;
 	/* (controls_word's own buffer, one word at a time) */
 	char hint[80], l[32];
 	snprintf(l, sizeof l, "%s", controls_word(BTN_L));
-	snprintf(hint, sizeof hint, "%s: Controls  %s: %s", controls_word(BTN_SELECT), l, saves_word_hint());
+	snprintf(hint, sizeof hint, "%s: Options  %s: %s", controls_word(BTN_SELECT), l, saves_word_hint());
 	if (launcher_here()) {
 		size_t m = strlen(hint);
 		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", controls_word(BTN_R));

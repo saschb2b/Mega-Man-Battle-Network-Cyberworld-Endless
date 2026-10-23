@@ -17,8 +17,8 @@ Saves go to `ports/cyberworld/savedata/`.
 
 Where the firmware has libcurl, the first start asks once whether the game
 may send anonymous play statistics, and sends nothing before a yes. Select
-on the title opens the controls screen, whose Statistics row changes the
-answer, as `statistics = off` in `ports/cyberworld/settings.ini` does
+on the title opens Options, whose Statistics line changes the answer, as
+`statistics = off` in `ports/cyberworld/settings.ini` does
 ([what is sent](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#anonymous-statistics)).
 Without libcurl it never asks.
 
