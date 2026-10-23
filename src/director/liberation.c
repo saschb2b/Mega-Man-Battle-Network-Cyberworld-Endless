@@ -300,6 +300,7 @@ static void fight(int cmd) {
 	e.held = true;
 	set_encounter(&e, true);
 	lib_battle_arm(LB.fight == LIB_FIGHT_DARKLOID ? 0 : LIB_TURNS);
+	if (emu_debug_on()) fprintf(stderr, "liberation: fight %d at %d,%d\n", LB.fight, fx, fy);
 	LB.step = LIB_STEP_BATTLE;
 }
 
