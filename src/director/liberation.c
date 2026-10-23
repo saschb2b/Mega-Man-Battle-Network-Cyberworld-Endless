@@ -1,10 +1,10 @@
 /* A liberation on a dark layer (liberation.h; docs/LIBERATION.md, stage 1).
  *
  * The board is the layer's floor (liberation_board.c). On it MegaMan
- * moves as BN5's board moves its units: a press of the pad steps him one
- * panel over clean panels (BN6's own walk carries him there, the pad
- * otherwise kept from the game), and in each phase he takes one command
- * on the panel he faces: Liberation, a battle of BN6's for it (harder as
+ * walks as BN6 walks him, as BN5's Navis walk theirs, over the clean
+ * panels: the dark ones are fenced with walls of BN6's own
+ * (liberation_fence.c). Beside one, A takes his command on the panel he
+ * faces, one a phase: Liberation, a battle of BN6's for it (harder as
  * more dark panels stand around it; won in its first turn, the eight
  * round it liberated too), LongSwrd for an Order Point (two panels in a
  * line, one battle), or Pass (half his HP back). Then the guardians move
@@ -44,8 +44,6 @@
 LibState LB;
 
 #define BANNER_FRAMES  70
-#define REPEAT_FRAMES  10    /* a held pad's next step, once one is walked */
-#define WALK_MOST      90    /* frames a step may take before he is set there */
 #define GLIDE_FRAMES   10    /* a guardian's step on the board */
 #define PARK_X         (-2000)   /* where a deleted unit's object waits, off the floor */
 #define BACK_PHASES    2      /* the Darkloids' phases a DarkHole takes to send its guardian back */
@@ -54,7 +52,6 @@ static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
 /* BN6's facings and walking keys along the grid's ways (net.h: grid x
  * runs down-right on screen, y down-left) */
 static const int facing[4] = { 3, 5, 7, 1 };
-static const uint32_t walk_keys[4] = { KEY_DOWN | KEY_RIGHT, KEY_DOWN | KEY_LEFT, KEY_UP | KEY_LEFT, KEY_UP | KEY_RIGHT };
 
 /* The guardians by act from the second (BN5's guides' numbers for its
  * missions, docs/LIBERATION.md; tools/liberation.py's GUARDS): their steps,
@@ -97,7 +94,7 @@ int lib_unit_at(int x, int y) {
 	return -1;
 }
 
-void lib_faced(int *x, int *y) { *x = LB.mx + dirs[LB.face][0]; *y = LB.my + dirs[LB.face][1]; }
+void lib_faced(int *x, int *y) { *x = LB.tx; *y = LB.ty; }
 
 /* ---- the layer made ---- */
 
@@ -164,10 +161,10 @@ void lib_begin(void) {
 	LB.step = LIB_STEP_WAIT;
 	LB.phase = 1;
 	LB.op = LIB_OP_START;
-	LB.mx = LB.phase_x = LB.b.start_x;
-	LB.my = LB.phase_y = LB.b.start_y;
+	LB.mx = LB.b.start_x;
+	LB.my = LB.b.start_y;
+	LB.tx = LB.ty = -1;
 	LB.face = 0;
-	LB.walk_x = -1;
 	LB.words[0] = 0;
 	LB.briefed = LB.holes_told = LB.prize_given = false;
 	for (int u = 0; u < LB.b.nunits; ++u) {
@@ -263,24 +260,6 @@ static void bonus(int x, int y) {
 	say(lib_bonus_words(outcome), LIB_STEP_MOVE);
 }
 
-/* The pad on the board: a step over clean panels, or a turn toward what
- * stands beside him; A his command, B back to where the phase began */
-static int pad_way(uint32_t keys) {
-	bool u = keys & KEY_UP, d = keys & KEY_DOWN, l = keys & KEY_LEFT, r = keys & KEY_RIGHT;
-	if (d && r) return 0;
-	if (d && l) return 1;
-	if (u && l) return 2;
-	if (u && r) return 3;
-	return r ? 0 : d ? 1 : l ? 2 : u ? 3 : -1;
-}
-
-static void step_toward(int f) {
-	turn(f);
-	int nx = LB.mx + dirs[f][0], ny = LB.my + dirs[f][1];
-	if (!lib_walkable(&LB.b, nx, ny) || lib_unit_at(nx, ny) >= 0) return;
-	LB.walk_x = nx; LB.walk_y = ny; LB.walk_t = 0;
-}
-
 static void open_menu(void) {
 	int fx, fy;
 	lib_faced(&fx, &fy);
@@ -291,18 +270,6 @@ static void open_menu(void) {
 	LB.can[LIB_CMD_PASS] = true;
 	LB.menu = LB.can[LIB_CMD_LIBERATE] ? LIB_CMD_LIBERATE : LIB_CMD_PASS;
 	LB.step = LIB_STEP_MENU;
-}
-
-static void move_keys(uint32_t keys, uint32_t pressed) {
-	if (LB.walk_x >= 0) return;
-	int f = pad_way(keys);
-	if (f >= 0 && (pad_way(pressed) >= 0 || --LB.repeat <= 0)) { LB.repeat = REPEAT_FRAMES; step_toward(f); return; }
-	if (f < 0) LB.repeat = 0;
-	if (pressed & KEY_A) open_menu();
-	else if ((pressed & KEY_B) && (LB.mx != LB.phase_x || LB.my != LB.phase_y)) {
-		LB.mx = LB.phase_x; LB.my = LB.phase_y;
-		megaman_at(LB.mx, LB.my);
-	}
 }
 
 /* ---- a liberation's battle ---- */
@@ -498,7 +465,6 @@ static void enemy_update(void) {
 	LB.enemy_unit = 0;
 	LB.shield = false;
 	++LB.phase;
-	LB.phase_x = LB.mx; LB.phase_y = LB.my;
 	say(LB.hurt ? lib_hurt_words(LB.hurt_by, LB.hurt) : "", LIB_STEP_BANNER);
 	LB.banner_t = 0;
 	LB.enemy_banner = false;
@@ -508,16 +474,26 @@ static void enemy_update(void) {
 
 static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !D.beat[0] && on_map(); }
 
-static void walk_update(void) {
-	if (LB.walk_x < 0) return;
-	int wx, wy;
-	netmap_world(LB.walk_x, LB.walk_y, &wx, &wy);
-	int dx = wx - bn6_player_x(), dy = wy - bn6_player_y();
-	if (abs(dx) + abs(dy) > 3 && ++LB.walk_t < WALK_MOST) return;
-	LB.mx = LB.walk_x; LB.my = LB.walk_y;
-	LB.walk_x = -1;
-	megaman_at(LB.mx, LB.my);
-	if (LB.b.kind[LB.my][LB.mx] == LIB_BONUS) bonus(LB.mx, LB.my);
+/* Where MegaMan stands and what he faces, as BN6 walks him: his panel (a
+ * walked one: the fence keeps him to them), and the panel beside it his
+ * facing points at, a little ahead of him (a diagonal one is none);
+ * a BonusPanel stepped on spins its roulette */
+static const int fwx[8] = { 7, 10, 7, 0, -7, -10, -7, 0 }, fwy[8] = { -7, 0, 7, 10, 7, 0, -7, -10 };
+
+static void track_update(void) {
+	int px = bn6_player_x(), py = bn6_player_y(), x, y;
+	if (netmap_panel(px, py, &x, &y) && x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && lib_walkable(&LB.b, x, y) && (x != LB.mx || y != LB.my)) {
+		LB.mx = x; LB.my = y;
+		if (LB.b.kind[y][x] == LIB_BONUS && LB.step == LIB_STEP_MOVE) bonus(x, y);
+	}
+	int f = emu_read8(BN6_PLAYER_FACING) & 7;
+	LB.tx = LB.ty = -1;
+	for (int d = 12; d <= 40; d += 4) {
+		if (!netmap_panel(px + fwx[f] * d / 10, py + fwy[f] * d / 10, &x, &y) || (x == LB.mx && y == LB.my)) continue;
+		for (int k = 0; k < 4; ++k)
+			if (x == LB.mx + dirs[k][0] && y == LB.my + dirs[k][1]) { LB.tx = x; LB.ty = y; LB.face = k; }
+		return;
+	}
 }
 
 static void talk_update_lib(void) {
@@ -549,7 +525,7 @@ static void steps_update(void) {
 	case LIB_STEP_BANNER:
 		if (++LB.banner_t >= BANNER_FRAMES) LB.step = LB.enemy_banner ? LIB_STEP_ENEMY : LIB_STEP_MOVE;
 		break;
-	case LIB_STEP_MOVE: walk_update(); break;
+	case LIB_STEP_MOVE: break;
 	case LIB_STEP_BATTLE:
 		if (LB.fight_seen && on_map() && !emu_battle_forcing()) after_fight();
 		break;
@@ -564,7 +540,9 @@ void lib_update(void) {
 	if (!LB.on || !D.active || D.town || !on_map()) return;
 	if (LB.step != LIB_STEP_DONE) flag_set(BN6_FLAG_NO_ENCOUNTERS);
 	units_show();
+	lib_fence_update();
 	lib_look_update();
+	if (LB.step != LIB_STEP_WAIT) track_update();
 	steps_update();
 }
 
@@ -583,14 +561,25 @@ static void menu_keys(uint32_t pressed) {
 	fight(LB.menu);
 }
 
+/* A command can be taken on the panel MegaMan faces: one to liberate, a
+ * guardian, the Darkloid once his DarkHoles are gone */
+static bool faced_takes(void) {
+	if (LB.tx < 0) return false;
+	int u = lib_unit_at(LB.tx, LB.ty);
+	return u > 0 || (u == 0 && !lib_holes_left(&LB.b)) || (u < 0 && lib_liberable(&LB.b, LB.tx, LB.ty));
+}
+
 uint32_t lib_keys(uint32_t keys) {
 	uint32_t pressed = keys & ~LB.held;
 	LB.held = keys;
 	/* (a chat box's: its pages, its questions) */
 	if (talk_busy() || emu_read8(BN6_CHATBOX)) return keys;
-	uint32_t out = keys & (KEY_START | KEY_SELECT);
-	if (LB.step == LIB_STEP_MOVE) move_keys(keys, pressed);
-	else if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
-	if (LB.walk_x >= 0 && LB.step == LIB_STEP_MOVE) out |= walk_keys[LB.face];
-	return out;
+	/* his phase: he walks as BN6 walks him, and A beside what he can
+	 * liberate opens his command; else he stands as the board goes on */
+	if (LB.step == LIB_STEP_MOVE) {
+		if ((pressed & KEY_A) && faced_takes()) { open_menu(); return keys & (KEY_START | KEY_SELECT); }
+		return keys;
+	}
+	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
+	return keys & (KEY_START | KEY_SELECT);
 }

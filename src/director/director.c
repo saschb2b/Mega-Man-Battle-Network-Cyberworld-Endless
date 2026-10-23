@@ -530,7 +530,8 @@ void director_update(void) {
 	++D.act_frames;
 	if (gameover_update() || follow_exit_warp()) return;
 	map_label();   /* (once MegaMan has arrived: not over the jack-out) */
-	arrow_update();
+	/* (no way-on arrow over a liberation's board: its way is the board's) */
+	if (!lib_on()) arrow_update();
 	if (on_map()) map_update();
 	/* (the PET's first menu is a screen of the game's own mode, its pages
 	 * and the shops other modes: either; not the way back to the map after
@@ -538,7 +539,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); push_arrow(); exit_pad_step(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); home_jobs_watch(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_fit_watch(); home_jobs_watch(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

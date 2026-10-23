@@ -41,6 +41,12 @@ void lib_battle_frame(void);
  * is what reaches the game. */
 uint32_t lib_keys(uint32_t keys);
 
+/* (liberation_fence.c) The board's dark panels fenced with walls of BN6's
+ * own, each panel's switched off as it is liberated: built after the
+ * layer's map (netmap_build_layer), kept each frame. */
+void lib_fence_build(void);
+void lib_fence_update(void);
+
 /* (liberation_look.c) The board in BN5's own look, on a layer drawn in
  * BN5's Liberation map: begun with the board, kept each frame on the map;
  * a panel freed dissolves as BN5's do. */

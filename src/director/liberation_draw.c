@@ -68,7 +68,7 @@ void lib_see(void) {
 		S.sprite[c >> 3] |= (uint8_t)(1u << (c & 7));
 	}
 	S.fx = S.fy = -1;
-	if (LB.step == LIB_STEP_MOVE || LB.step == LIB_STEP_MENU) lib_faced(&S.fx, &S.fy);
+	if (LB.step == LIB_STEP_MENU) lib_faced(&S.fx, &S.fy);
 }
 
 /* A dark panel's colour: the floor's, sunk into Nebula's purple */
@@ -159,7 +159,7 @@ static void draw_menu(void) {
  * BN5's board marks it (its own outline not yet read from BN5's ROM: drawn
  * here to its diamond, 48 by 24) */
 static void draw_faced(void) {
-	if (S.fx < 0 || !S.look || (S.blink / 16) % 2) return;
+	if (S.fx < 0 || !S.look || LB.step != LIB_STEP_MENU || (S.blink / 16) % 2) return;
 	int wx, wy;
 	netmap_world(S.fx, S.fy, &wx, &wy);
 	int cx = P.core_x + wx + wy - S.cam_u + CAM_X, cy = P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + 4;

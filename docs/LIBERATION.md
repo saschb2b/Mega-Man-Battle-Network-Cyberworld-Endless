@@ -569,11 +569,19 @@ with stage 3.
 
 **The course** (`src/director/liberation.c`): after the arrival, Lan and
 MegaMan name the board ("Like Nebula's dark areas,Lan!", its DarkHoles and
-par), then PLAYER PHASE. The pad steps MegaMan one panel over clean panels
-(the diagonals along the grid, the four ways turned a quarter: UP up-right,
-RIGHT down-right), BN6's own walk carrying him there; toward a dark panel
-it only turns him; B takes him back to where the phase began; A opens the
-command menu on the panel he faces: **Liberation** (a battle of BN6's: its
+par), then PLAYER PHASE. MegaMan walks the clean panels as BN6 walks him,
+as BN5's Navis walk its board (AGENTS.md: no movement of the engine's):
+every panel not walked (dark, an item's, a DarkHole, the Darkloid's ring
+and his panel) is fenced with walls of BN6's own on its cells that meet
+another panel's floor, each wall's value 0x80 + the panel's number, which
+BN6 skips while event 0x1640 + that number is set (`liberation_fence.c`;
+Rush's gaps' walls, docs/ROM_DATA.md), so a panel liberated lets him
+through as its event is set each frame (entering a map clears them; BN5
+raises its border cells' heights instead, `BN5_LIB_EDGES`). At most 120
+panels a board are fenced (the generator cleans the loneliest dark ones
+past that), and a panel the map left without floor at its middle
+(netmap's legal.c) is off the board. A beside the panel he faces (the one
+his facing points at, a little ahead of him) opens the command menu on it: **Liberation** (a battle of BN6's: its
 virus battles' easier half with two dark panels round it or fewer, the
 band with three to six, the next act's band one version up with seven or
 eight, a DarkHole or its guardian; won, the panel is liberated, and the
@@ -641,7 +649,8 @@ whose return loads the tile map afresh). A panel freed blinks as BN5's
 do (traced): its old look while the board fades back in (27 frames), then
 clean and old by turns every 4 frames, 14 times (`BN5_LIB_BLINK`,
 `BN5_LIB_BLINKS`), then clean. The panel MegaMan faces is outlined
-in yellow, blinking (drawn by the engine: BN5's own outline not read yet).
+in yellow, blinking, while the menu is open, as BN5's (drawn by the
+engine: BN5's own sprite, list 7's 15, not loaded yet).
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
 banners and the menu are as above (BN5's own still to come).
@@ -652,7 +661,8 @@ each hole's ring dark, the start clean, no guardian by it, nine boards in
 ten made); the autopilot plays the board (`liberation_auto.c`: the dark
 panel that brings it nearest the next target, Pass below two fifths of its
 HP): `CYBERWORLD_AUTOPILOT=1 build.py shot --scene emu --run-depth 5 --dev
-dark,god,onehit --frames 48000` liberated seed 1's act 2 board in 23
+dark,god,onehit --frames 48000` (the autopilot walking MegaMan with the
+pad as a player does) liberated seed 1's act 2 board in 23
 phases against its par 14 (the autopilot never wins in one turn), deleted
 CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 2's guardian, home and act 3's dark layer.

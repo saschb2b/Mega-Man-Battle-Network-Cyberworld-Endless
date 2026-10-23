@@ -10,6 +10,7 @@
  * Its own random numbers, the game's left alone. */
 #include "liberation_board.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 /* Per act from the second (0-based 1-5), BN5's mission it stands for
@@ -234,6 +235,27 @@ static void place_roamers(LibBoard *b, int16_t reach[MAP_H][MAP_W], int far, int
 	}
 }
 
+/* At most LIB_FENCES panels not walked (each fenced by walls of its own,
+ * liberation_fence.c): past it, the lonelier dark panels clean, none by a
+ * DarkHole or under a guardian */
+static void cap_dark(LibBoard *b) {
+	int n = 0;
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			int k = b->kind[y][x];
+			n += k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_BOSS;
+		}
+	for (int few = 0; few <= 8 && n > LIB_FENCES; ++few)
+		for (int y = 1; y < MAP_H - 1 && n > LIB_FENCES; ++y)
+			for (int x = 1; x < MAP_W - 1 && n > LIB_FENCES; ++x) {
+				if (b->kind[y][x] != LIB_DARK || lib_dark_around(b, x, y) != few) continue;
+				bool keep = false;
+				for (int h = 0; h < b->nholes; ++h) keep |= abs(b->hole_x[h] - x) <= 1 && abs(b->hole_y[h] - y) <= 1;
+				for (int u = 0; u < b->nunits; ++u) keep |= b->unit[u].x == x && b->unit[u].y == y;
+				if (!keep) { b->kind[y][x] = LIB_CLEAN; --n; }
+			}
+}
+
 /* BN5's guarantees (docs/LIBERATION.md, Guarantees): something to
  * liberate in the first phase, no guardian within three of the start */
 static bool fair(const LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
@@ -338,6 +360,7 @@ static bool make_once(LibBoard *b, int act, int team) {
 	place_bonus(b, reach, spec[a].bonus);
 	place_items(b, spec[a].items);
 	place_roamers(b, reach, far, spec[a].roam, spec[a].kinds);
+	cap_dark(b);
 	if (!fair(b, reach)) return false;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {

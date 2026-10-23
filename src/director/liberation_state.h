@@ -12,7 +12,7 @@
 enum {
 	LIB_STEP_WAIT,     /* the arrival's card and words first */
 	LIB_STEP_BANNER,   /* a phase's banner */
-	LIB_STEP_MOVE,     /* MegaMan's move: the pad steps him from panel to panel */
+	LIB_STEP_MOVE,     /* MegaMan's move: he walks the clean panels as BN6 walks him */
 	LIB_STEP_MENU,     /* ... and his command */
 	LIB_STEP_BATTLE,   /* a liberation's battle */
 	LIB_STEP_ENEMY,    /* the guardians' and the Darkloid's phase */
@@ -33,10 +33,7 @@ typedef struct {
 	int op;                /* Order Points */
 	int mx, my;            /* MegaMan's panel */
 	int face;              /* the grid way he faces (0 +x, 1 +y, 2 -x, 3 -y) */
-	int phase_x, phase_y;  /* where he stood as the phase began (B takes him back) */
-	int walk_x, walk_y;    /* the panel he walks to, -1 none */
-	int walk_t;            /* frames walked */
-	int repeat;            /* frames until a held pad steps again */
+	int tx, ty;            /* the panel beside his he faces, -1 none */
 	uint32_t held;         /* the pad last frame */
 	int menu;              /* the command under the cursor */
 	bool can[LIB_CMDS];    /* ... which can be taken as he stands */
@@ -54,6 +51,7 @@ typedef struct {
 	char hurt_by[24];      /* ... the last who hit */
 	bool shield;           /* a BonusPanel's: no harm on the board this phase */
 	/* where each unit's sprite is (its object), and where it shows */
+	uint8_t fence[MAP_H][MAP_W];   /* a fenced panel's number (its walls' event, liberation_fence.c), 0xFF none */
 	int slot[LIB_UNITS];
 	int back_in[LIB_UNITS];  /* a deleted guardian's Darkloids' phases till his DarkHole sends him back */
 	int ux[LIB_UNITS], uy[LIB_UNITS];   /* world units, gliding */

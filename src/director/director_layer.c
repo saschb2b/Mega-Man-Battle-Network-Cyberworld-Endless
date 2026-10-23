@@ -333,6 +333,7 @@ static bool build_layer(void) {
 	if (layer.dark && !lib_layer_made()) layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
 	if (!netmap_build_layer(tiles, run.layer_seed)) return false;
+	if (layer.dark) lib_fence_build();
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over, their bystanders) */
