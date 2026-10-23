@@ -21,5 +21,8 @@ bool second_title_draw(int w, int h);
 /* (the title drew over the run's frame: it is drawn whole next time) */
 void second_frame_forget(void);
 bool second_title_changed(void);
+/* The screen the player is on in a word ("keyitem", "battle", "map"), as
+ * second_update would find it now: a headless run's state */
+const char *second_screen_word(void);
 
 #endif

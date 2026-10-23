@@ -128,6 +128,15 @@ void second_update(void) {
 	if (panel_since < 2 || (p == PANEL_HOME && S2.since < 2)) platform_second_screen_soon();
 }
 
+/* The screen the player is on, in a word: a headless run's state (screen_name.c) */
+const char *second_screen_word(void) {
+	static const char *const word[SECOND_CONTEXTS] = { [SECOND_DARK] = "game", [SECOND_TOWN] = "town", [SECOND_NET] = "map", [SECOND_BATTLE] = "battle",
+		[SECOND_PET] = "pet", [SECOND_FOLDERS] = "folders", [SECOND_EDIT] = "folder-edit", [SECOND_NAVICUST] = "navicust", [SECOND_STATUS] = "status",
+		[SECOND_LIBRARY] = "library", [SECOND_MAIL] = "mail", [SECOND_KEYITEM] = "keyitem", [SECOND_SUBCHIP] = "subchip", [SECOND_COMM] = "comm",
+		[SECOND_SAVE] = "save", [SECOND_SHOP] = "shop", [SECOND_TRADER] = "trader", [SECOND_OTHER] = "other", [SECOND_SQUARE] = "square" };
+	return word[context_now()];
+}
+
 /* The frame's name for the panel: the PET's screen's where the PET at
  * home stands in for it */
 static const char *panel_title(void) {
