@@ -242,7 +242,11 @@ liberation and an item's find; the recordings are in the pull request):
   paled dark (kind 2, the dissolve's middle),
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
   BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
-  ring until the DarkHoles fall); palettes 8-12 the board's own. Each
+  ring until the DarkHoles fall); then three more: the start's (kind
+  0x0C), every entry blank, as a team starts on its map's own walkway
+  ends or (mission 1) its lilac pad, never on a panel, and two diamonds
+  on palette 7 whose kinds (0x0D, 0x0E) no record lists; palettes 8-12
+  the board's own. Each
   panel's four look bytes are its corners, each the three neighbours
   around it the Navi in play can walk (`BN5_LIB_CORNERS`); they choose
   height modifiers on the panel's border cells in the map's collision
@@ -707,8 +711,11 @@ board loads them: the frames grey) copied in. Each panel's kind lies over
 it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`,
 picked by the kind as `BN5_LIB_LOOK_OF` picks it: clean cyan, the dark
 swirl, the item's stud, the DarkHole's pit, the BonusPanel's "?", the
-Darkloid's ring a grey grid until the DarkHoles fall, the start its map's
-floor alone), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
+Darkloid's ring a grey grid until the DarkHoles fall, the start clean's:
+BN5's start look is blank over its map's pad, and ours stands among its
+clean panels on a panel's frame, which bare read as a hole, the owner
+found; the start's 21 panels of mission 1 are left out of the floor
+learned, as their pad's pieces drew lilac round the start), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
 down (fit on the dumped map: the looks over the frames' dark middles, 1.6%
 over the void), their tiles copied from BN5's ROM to where BN5's board
 copies them (tile 864 on, VRAM taking words), and the board's palettes

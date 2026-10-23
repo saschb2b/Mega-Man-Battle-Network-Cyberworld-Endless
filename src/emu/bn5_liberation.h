@@ -50,7 +50,8 @@
 #define BN5_LIB_Z_INSTALL    0x080315D4u /* ... handed to the map (its state 0x02013770), read by the height check 0x080320EA (bn6f */
                                          /* ... checkZCoordModifiers_8031612) through 0x080315F8: so a Navi stops at a panel he cannot walk */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
-                                         /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
+                                         /* ... +0x10 the looks' pointers (BN5_LIB_LOOKS; past the twelve the start's, 0x0C, all blank, */
+                                         /* ... then two on palette 7 no record's kind takes) */
 #define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
 #define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */

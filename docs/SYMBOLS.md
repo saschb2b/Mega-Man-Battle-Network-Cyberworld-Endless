@@ -82,13 +82,13 @@ how to verify it.
 | Code (routines, hooks, instructions) | 274 | 21 |
 | ROM data (tables, text, literals) | 275 | 213 |
 | ROM, code or data not told | 421 | 439 |
-| RAM (variables, structures) | 121 | 57 |
+| RAM (variables, structures) | 121 | 58 |
 | I/O registers | 3 | 0 |
 | Fields of structures | 150 | 40 |
 | Event flags | 25 | 3 |
 | Values of fields | 109 | 16 |
 | Constants, sizes and counts | 403 | 150 |
-| All | 1781 | 939 |
+| All | 1781 | 940 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel |
 | --- | ---: | ---: |
@@ -98,7 +98,7 @@ how to verify it.
 | Chips and folders | 299 | 223 |
 | Battle | 494 | 309 |
 | Text and fonts | 32 | 2 |
-| Sound | 12 | 15 |
+| Sound | 12 | 16 |
 | Maps and the overworld | 126 | 25 |
 | Events and progress | 38 | 15 |
 | Engine core | 649 | 348 |

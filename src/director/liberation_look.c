@@ -101,8 +101,11 @@ void lib_look_begin(void) {
 }
 
 /* The look panel (x, y) shows as the board stands, as BN5_LIB_LOOK_OF
- * picks it by the kind (-1 none: the start, its map's floor alone; the
- * Darkloid's ring a grey grid until the DarkHoles fall) */
+ * picks it by the kind (-1 none; the Darkloid's ring a grey grid until the
+ * DarkHoles fall). The start is clean's: BN5's start's own look (12) is
+ * blank, as its team starts on its map's walkway ends or its lilac pad,
+ * never on a panel; ours stands among its clean panels, on a panel's
+ * frame learned from that pad, which bare reads as a hole. */
 static int look_of(int x, int y) {
 	int k = LB.b.kind[y][x];
 	/* (a freed panel: its old look while the board fades back in, then
@@ -111,7 +114,6 @@ static int look_of(int x, int y) {
 		int t = DISSOLVE - K.dissolve[y][x];
 		return t < FADE_IN || (t - FADE_IN) / BN5_LIB_BLINK % 2 ? K.was[y][x] : LOOK_CLEAN;
 	}
-	if (x == LB.b.start_x && y == LB.b.start_y) return -1;
 	switch (k) {
 	case LIB_CLEAN: return LOOK_CLEAN;
 	case LIB_DARK: return LOOK_DARK;

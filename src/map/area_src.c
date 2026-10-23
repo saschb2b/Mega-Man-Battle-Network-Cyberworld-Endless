@@ -409,8 +409,11 @@ static void board_read(int group, int number) {
 		board.oy = (int8_t)src.data[rec + 7];
 		uint32_t p = su32(rec + 0x0C + 4 * BN5_LIB_PTR_PANELS);
 		if (!rom_is_ptr(p)) return;
+		/* (its start's panels left out: they lie on its map's own lilac pad
+		 * and walkways, which learned as a panel's floor drew pad pieces
+		 * round a dark layer's start) */
 		for (uint32_t o = rom_off(p); o + 4 <= ROM_SIZE && src.data[o] != 0xFF; o += 4)
-			board.on[src.data[o + 3]][src.data[o + 2] >> 3] |= (uint8_t)(1u << (src.data[o + 2] & 7));
+			if (src.data[o] != BN5_LIB_PANEL_START) board.on[src.data[o + 3]][src.data[o + 2] >> 3] |= (uint8_t)(1u << (src.data[o + 2] & 7));
 		board.board = true;
 		return;
 	}
