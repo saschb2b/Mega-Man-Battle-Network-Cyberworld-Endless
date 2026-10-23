@@ -592,6 +592,8 @@ static void install_begin(Install *in) {
 	out->gate_navi = 0;
 	out->gate_reward = -1;
 	out->lib_prize[0] = out->lib_prize[1] = out->lib_prize[2] = -1;
+	for (int k = 0; k < (int)(sizeof out->lib_loot / sizeof out->lib_loot[0]); ++k) out->lib_loot[k] = -1;
+	out->lib_zenny = -1;
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
 	layer_objs_official_level = 0;
@@ -864,24 +866,6 @@ static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
 	in->npcs.script[in->npcs.n++] = npc_mark(list, sprite, wx, wy, 0, anim, -1);
 }
 
-/* A dark layer's prizes by its par (docs/LIBERATION.md, rewards): two
- * under par a chip a Server's win would pay, at par one a tier lower, over
- * par one lower still; each in the folder's code where it has one */
-static void install_lib_prizes(Install *in) {
-	static const int tiers[3][2] = { { 2, 4 }, { 1, 2 }, { 0, 1 } };
-	for (int k = 0; k < 3; ++k) {
-		rolls_of(0x180u + (uint32_t)k);
-		char code = '*';
-		int chip = roll_chip(run.depth + tiers[k][0], tiers[k][1], &code);
-		ChipInfo ci;
-		chip_info(chip, &ci);
-		char fit = loot_folder_code(chip, true);
-		if (fit) code = fit;
-		else if (strchr(ci.codes, '*')) code = '*';
-		in->out->lib_prize[k] = ta_challenge_reward(in->text, chip, ci.name, code == '*' ? 26 : code - 'A');
-	}
-}
-
 /* Layer object i on the map: its talker and script, and its choice */
 /* What stands on the layer without a chat: where MegaMan comes in, the
  * ways out, the guardian (its own actors and scripts: guardian_objs.c). */
@@ -961,7 +945,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	in.text = &text;
 	install_begin(&in);
 	for (int i = 0; i < layer.nobj; ++i) install_object(&in, i);
-	if (layer.dark) install_lib_prizes(&in);
+	if (layer.dark) lib_prizes_install(out, &text);
 	rolls_of(0x1FF);
 	/* the shops' stock, in the game's shop data */
 	if (emu_debug_on())

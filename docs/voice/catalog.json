@@ -769,29 +769,41 @@
   },
   "liberation_words:lib_faced_label": {
    "header": "What MegaMan faces, for the menu's information: a panel's kind (liberation_board.h's LIB_*), or a unit's name",
-   "line": 82
+   "line": 96
   },
   "liberation_words:lib_hurt_words": {
    "header": "The enemy's phase: `hp` taken on the board, the last by `who`.",
-   "line": 55
+   "line": 69
   },
   "liberation_words:lib_item_words": {
    "header": "An item panel liberated: Order Points (now `op`), or a heart.",
    "line": 36
   },
+  "liberation_words:lib_key_words": {
+   "header": "A barrier's key found: the sealed region's, or one across the way.",
+   "line": 53
+  },
   "liberation_words:lib_label_enemy_phase": {
-   "line": 79
+   "line": 93
   },
   "liberation_words:lib_label_player_phase": {
-   "line": 79
+   "line": 93
   },
   "liberation_words:lib_rest_words": {
    "header": "A rest (BN5's Pass).",
-   "line": 53
+   "line": 67
+  },
+  "liberation_words:lib_route_words": {
+   "header": "The sealed region's route found (docs/LIBERATION.md, Special routes).",
+   "line": 63
+  },
+  "liberation_words:lib_trap_words": {
+   "header": "A trap panel liberated: its harm, `hp`.",
+   "line": 57
   },
   "liberation_words:lib_won_words": {
    "header": "The Darkloid deleted in `phases` against `par`.",
-   "line": 62
+   "line": 76
   },
   "lock_words:obstacle_answer_words": {
    "comment": "... and his answer",
@@ -1277,7 +1289,7 @@
    "line": 126
   },
   "service_words:ta_challenge_reward": {
-   "line": 316
+   "line": 341
   },
   "service_words:ta_dark_flame": {
    "line": 151
@@ -1293,6 +1305,12 @@
   },
   "service_words:ta_heal.hello": {
    "line": 23
+  },
+  "service_words:ta_lib_find_chip": {
+   "line": 316
+  },
+  "service_words:ta_lib_find_zenny": {
+   "line": 327
   },
   "service_words:ta_secret_gate": {
    "line": 278
@@ -1940,7 +1958,7 @@
    "comment": "What is said and shown on a liberation's board (docs/LIBERATION.md): Lan and MegaMan knew BN5's Liberation Missions, Nebula's dark areas taken back panel by panel, so they name what they see in its words.",
    "domain": "Other",
    "kind": "speech",
-   "lines": 31,
+   "lines": 36,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "liberation_words"
@@ -2105,7 +2123,7 @@
    "comment": "The services' chats (docs/VOICE.md): a Recovery Mr.Prog, a shop, a Server's challenge and its prize, a flame of darkness and the rumor of one, ProtoMan's duel, the Undernet's dark warp, the Secret Area's gate.",
    "domain": "Layers: services",
    "kind": "speech",
-   "lines": 43,
+   "lines": 46,
    "shows": [
     "screenshots/heal-once.png",
     "screenshots/heal-spent.png",
@@ -2413,7 +2431,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2062,
+  "boxes": 2070,
   "domains": {
    "Arena": {
     "files": [
@@ -2513,8 +2531,8 @@
      "src/layer/service_words.c"
     ],
     "flagged": 5,
-    "lines": 43,
-    "speech": 43
+    "lines": 46,
+    "speech": 46
    },
    "Lessons": {
     "files": [
@@ -2561,8 +2579,8 @@
      "src/online/emote_strip_text.c"
     ],
     "flagged": 10,
-    "lines": 92,
-    "speech": 86
+    "lines": 97,
+    "speech": 90
    },
    "Powers": {
     "files": [
@@ -2740,7 +2758,7 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 71,
+    "boxes": 72,
     "dots_per_box": 0.15,
     "end_ask": 0.15,
     "end_bang": 0.75,
@@ -2759,20 +2777,20 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 734,
+    "boxes": 740,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.55,
     "end_dots": 0.11,
     "openers": [
      "The",
-     "His",
      "Lan",
+     "His",
      "He",
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 184",
+    "stutters": "1 box in 185",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2814,7 +2832,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1722,
+  "lines": 1730,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2930,7 +2948,7 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 71,
+    "boxes": 72,
     "dots_per_box": 0.15,
     "end_ask": 0.15,
     "end_bang": 0.75,
@@ -2949,20 +2967,20 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 734,
+    "boxes": 740,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.55,
     "end_dots": 0.11,
     "openers": [
      "The",
-     "His",
      "Lan",
+     "His",
      "He",
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 184",
+    "stutters": "1 box in 185",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -3061,7 +3079,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1257
+  "speech": 1264
  },
  "version": 1,
  "conversations": [
@@ -3200,7 +3218,9 @@
   {"container":"service_words:ta_undernet","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_undernet","line":258,"lines":["service_words:ta_undernet:0","service_words:ta_undernet:1","service_words:ta_undernet:2","service_words:ta_undernet:3"],"speakers":["MegaMan"],"title":"Undernet","when":""},
   {"container":"service_words:gate_beyond","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:gate_beyond","line":272,"lines":["service_words:gate_beyond:0","service_words:gate_beyond:1","service_words:gate_beyond:2","service_words:gate_beyond:3"],"speakers":["MegaMan"],"title":"What MegaMan senses behind the golden gate where Bass waits","when":"What MegaMan senses behind the golden gate where Bass waits (docs/ BOSSES.md, Super bosses): a dark signal, unnamed until they have met, then Bass and his form; NULL for ProtoMan's copy"},
   {"container":"service_words:ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_secret_gate","line":280,"lines":["service_words:ta_secret_gate:0","service_words:ta_secret_gate:1","service_words:ta_secret_gate:2","service_words:ta_secret_gate:3"],"speakers":["MegaMan"],"title":"Secret gate","when":""},
-  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":319,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
+  {"container":"service_words:ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_chip","line":319,"lines":["service_words:ta_lib_find_chip:0"],"speakers":["MegaMan"],"title":"Lib find chip","when":""},
+  {"container":"service_words:ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_lib_find_zenny","line":331,"lines":["service_words:ta_lib_find_zenny:0","service_words:ta_lib_find_zenny:1"],"speakers":["MegaMan"],"title":"Lib find zenny","when":""},
+  {"container":"service_words:ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","id":"service_words:ta_challenge_reward","line":344,"lines":["service_words:ta_challenge_reward:0"],"speakers":["MegaMan"],"title":"Challenge reward","when":""},
   {"container":"reward_words:draft_take","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_take","line":25,"lines":["reward_words:draft_take:0","reward_words:draft_take:1","reward_words:draft_take:2"],"speakers":["MegaMan","Narration"],"title":"The draft's branches","when":"the draft's branches: a program given, or BugFrags for none; each sets `taken_flag` and ends, or goes on to the way on (`next`). A program that fits the board as it stands (its `fit_flag` set) is installed as it comes; else MegaMan says one moves first (the draft offers only programs that fit once they move): said after the pick, a plan, where three boxes before the menu said it of each (the owner, 6 October 2026: the reward's words were far too many)"},
   {"container":"reward_words:draft_menu","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_menu","line":62,"lines":["reward_words:draft_menu:0"],"speakers":["MegaMan"],"title":"The draft","when":"The draft: one box, the BugFrags of none in it, then the programs in a column with their colours (ts_option: its number and those above and below it), each to its branch (`take`), B to `skip`. Its script. A box each said what BN6's programs do: seventeen boxes from the data to the pick, which the owner found far too many (6 October 2026)."},
   {"container":"reward_words:draft_skip","domain":"Layers: rewards","file":"src/layer/reward_words.c","id":"reward_words:draft_skip","line":89,"lines":["reward_words:draft_skip:0"],"speakers":["MegaMan"],"title":"Draft skip","when":""},
@@ -3569,12 +3589,15 @@
   {"container":"liberation_words:lib_battle_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_battle_words","line":23,"lines":["liberation_words:lib_battle_words:0","liberation_words:lib_battle_words:1","liberation_words:lib_battle_words:2","liberation_words:lib_battle_words:3","liberation_words:lib_battle_words:4","liberation_words:lib_battle_words:5"],"speakers":["MegaMan","Lan"],"title":"After a liberation's battle","when":"After a liberation's battle: what it freed (`panels`, beside the one fought for), whether in one turn, what it held; \"\" for nothing to say."},
   {"container":"liberation_words:lib_item_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_item_words","line":38,"lines":["liberation_words:lib_item_words:0","liberation_words:lib_item_words:1"],"speakers":["MegaMan"],"title":"An item panel liberated","when":"An item panel liberated: Order Points (now `op`), or a heart."},
   {"container":"liberation_words:lib_bonus_words.said","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_bonus_words.said","line":45,"lines":["liberation_words:lib_bonus_words.said:0","liberation_words:lib_bonus_words.said:1","liberation_words:lib_bonus_words.said:2","liberation_words:lib_bonus_words.said:3"],"speakers":["MegaMan"],"title":"Lib bonus words: said","when":""},
-  {"container":"liberation_words:lib_rest_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_rest_words","line":53,"lines":["liberation_words:lib_rest_words:0"],"speakers":["MegaMan"],"title":"A rest","when":"A rest (BN5's Pass)."},
-  {"container":"liberation_words:lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_hurt_words","line":57,"lines":["liberation_words:lib_hurt_words:0","liberation_words:lib_hurt_words:1"],"speakers":["MegaMan"],"title":"The enemy's phase","when":"The enemy's phase: `hp` taken on the board, the last by `who`."},
-  {"container":"liberation_words:lib_won_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_won_words","line":64,"lines":["liberation_words:lib_won_words:0","liberation_words:lib_won_words:1","liberation_words:lib_won_words:2","liberation_words:lib_won_words:3"],"speakers":["Lan","MegaMan"],"title":"The Darkloid deleted in `phases` against `par`","when":"The Darkloid deleted in `phases` against `par`."},
-  {"container":"liberation_words:lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_enemy_phase","line":79,"lines":["liberation_words:lib_label_enemy_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label enemy phase","when":""},
-  {"container":"liberation_words:lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_player_phase","line":79,"lines":["liberation_words:lib_label_player_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label player phase","when":""},
-  {"container":"liberation_words:lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_faced_label","line":84,"lines":["liberation_words:lib_faced_label:caseLIB_ITEM.0","liberation_words:lib_faced_label:caseLIB_RING.0","liberation_words:lib_faced_label:caseLIB_CLEAN.0"],"speakers":["MegaMan"],"title":"What MegaMan faces, for the menu's information","when":"What MegaMan faces, for the menu's information: a panel's kind (liberation_board.h's LIB_*), or a unit's name"},
+  {"container":"liberation_words:lib_key_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_key_words","line":54,"lines":["liberation_words:lib_key_words:0","liberation_words:lib_key_words:1"],"speakers":["MegaMan"],"title":"A barrier's key found","when":"A barrier's key found: the sealed region's, or one across the way."},
+  {"container":"liberation_words:lib_trap_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_trap_words","line":59,"lines":["liberation_words:lib_trap_words:0"],"speakers":["MegaMan"],"title":"A trap panel liberated","when":"A trap panel liberated: its harm, `hp`."},
+  {"container":"liberation_words:lib_route_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_route_words","line":64,"lines":["liberation_words:lib_route_words:0"],"speakers":["MegaMan","Lan"],"title":"The sealed region's route found","when":"The sealed region's route found (docs/LIBERATION.md, Special routes)."},
+  {"container":"liberation_words:lib_rest_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_rest_words","line":67,"lines":["liberation_words:lib_rest_words:0"],"speakers":["MegaMan"],"title":"A rest","when":"A rest (BN5's Pass)."},
+  {"container":"liberation_words:lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_hurt_words","line":71,"lines":["liberation_words:lib_hurt_words:0","liberation_words:lib_hurt_words:1"],"speakers":["MegaMan"],"title":"The enemy's phase","when":"The enemy's phase: `hp` taken on the board, the last by `who`."},
+  {"container":"liberation_words:lib_won_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_won_words","line":78,"lines":["liberation_words:lib_won_words:0","liberation_words:lib_won_words:1","liberation_words:lib_won_words:2","liberation_words:lib_won_words:3"],"speakers":["Lan","MegaMan"],"title":"The Darkloid deleted in `phases` against `par`","when":"The Darkloid deleted in `phases` against `par`."},
+  {"container":"liberation_words:lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_enemy_phase","line":93,"lines":["liberation_words:lib_label_enemy_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label enemy phase","when":""},
+  {"container":"liberation_words:lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_player_phase","line":93,"lines":["liberation_words:lib_label_player_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label player phase","when":""},
+  {"container":"liberation_words:lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_faced_label","line":98,"lines":["liberation_words:lib_faced_label:caseLIB_ITEM.0","liberation_words:lib_faced_label:caseLIB_RING.0","liberation_words:lib_faced_label:caseLIB_TRAP.0","liberation_words:lib_faced_label:caseLIB_CLEAN.0"],"speakers":["MegaMan"],"title":"What MegaMan faces, for the menu's information","when":"What MegaMan faces, for the menu's information: a panel's kind (liberation_board.h's LIB_*), or a unit's name"},
   {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":10,"lines":["options_text:words:2","options_text:words:4","options_text:words:7","options_text:words:9","options_text:words:11","options_text:words:13","options_text:words:14","options_text:words:20","options_text:words:21","options_text:words:22","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:26","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
   {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":44,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
   {"container":"options_text:options_screen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_screen_note","line":51,"lines":["options_text:options_screen_note:0"],"speakers":["Screen"],"title":"Options screen note","when":"... before the display's: screen, smooth_motion and fullscreen"},
@@ -4070,18 +4093,23 @@
   {"boxes":[{"pages":[["A BonusPanel! Five","Order Points!"]],"speaker":"MegaMan","text":"A BonusPanel! Five Order Points!"}],"container":"lib_bonus_words.said","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_bonus_words.said:1","kind":"speech","line":46,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A BonusPanel! Five Order Points!","text_hash":"0afafec292e5"},
   {"boxes":[{"pages":[["A BonusPanel! It","deleted a guardian!"]],"speaker":"MegaMan","text":"A BonusPanel! It deleted a guardian!"}],"container":"lib_bonus_words.said","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_bonus_words.said:2","kind":"speech","line":47,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A BonusPanel! It deleted a guardian!","text_hash":"1b05f49e0a06"},
   {"boxes":[{"pages":[["A BonusPanel!","Nothing can hit us","this phase!"]],"speaker":"MegaMan","text":"A BonusPanel! Nothing can hit us this phase!"}],"container":"lib_bonus_words.said","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_bonus_words.said:3","kind":"speech","line":48,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A BonusPanel! Nothing can hit us this phase!","text_hash":"1af8144d62a0"},
-  {"boxes":[{"pages":[["Phew... Resting","helps."]],"speaker":"MegaMan","text":"Phew... Resting helps."}],"container":"lib_rest_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_rest_words:0","kind":"speech","line":53,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Phew... Resting helps.","text_hash":"cc949ef799b7"},
-  {"boxes":[{"pages":[["Ugh!! {who} hit","hard!"]],"speaker":"MegaMan","text":"Ugh!! {who} hit hard!"}],"container":"lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_hurt_words:0","kind":"speech","line":57,"placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ugh!! {who} hit hard!","text_hash":"6cb3c7cf4cc6"},
-  {"boxes":[{"pages":[["Ow! {who} got me!"]],"speaker":"MegaMan","text":"Ow! {who} got me!"}],"container":"lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_hurt_words:1","kind":"speech","line":58,"placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ow! {who} got me!","text_hash":"9a588ea6f83f"},
-  {"boxes":[{"pages":[["Two under par! Way","to go!"]],"speaker":"Lan","text":"Two under par! Way to go!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:0","kind":"speech","line":64,"speaker":"Lan","speakers":["Lan"],"text":"@L Two under par! Way to go!","text_hash":"b7234d704391"},
-  {"boxes":[{"pages":[["Right on par!"]],"speaker":"Lan","text":"Right on par!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:1","kind":"speech","line":64,"speaker":"Lan","speakers":["Lan"],"text":"@L Right on par!","text_hash":"267a4d5ce292"},
-  {"boxes":[{"pages":[["Over par... But we","did it!"]],"speaker":"Lan","text":"Over par... But we did it!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:2","kind":"speech","line":64,"speaker":"Lan","speakers":["Lan"],"text":"@L Over par... But we did it!","text_hash":"58de0c1a9660"},
-  {"boxes":[{"pages":[["The Darkloid's","deleted!"]],"speaker":"MegaMan","text":"The Darkloid's deleted!"},{"pages":[["{phases} phases..."]],"speaker":"Lan","text":"{phases} phases..."},{"pages":[["{how}"]],"speaker":"MegaMan","text":"{how}"},{"pages":[["The exit's open,Lan!"]],"speaker":"MegaMan","text":"The exit's open,Lan!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:3","kind":"speech","line":65,"placeholders":[{"name":"phases","spec":"%d"},{"name":"how","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M The Darkloid's deleted!|@L {phases} phases...|{how}|@M The exit's open,Lan!","text_hash":"cc3b460a627b"},
-  {"boxes":[{"pages":[["PLAYER PHASE"]],"speaker":"Mr.Prog","text":"PLAYER PHASE"}],"container":"lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_label_player_phase:0","kind":"speech","line":79,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"PLAYER PHASE","text_hash":"bca25090e52b"},
-  {"boxes":[{"pages":[["DARKLOID PHASE"]],"speaker":"Mr.Prog","text":"DARKLOID PHASE"}],"container":"lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_label_enemy_phase:0","kind":"speech","line":79,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DARKLOID PHASE","text_hash":"c23ca7475184"},
-  {"boxes":[{"pages":[["Dark panel"]],"speaker":"MegaMan","text":"Dark panel"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_ITEM.0","kind":"screen","line":84,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Dark panel","text_hash":"b6e8b92521c4"},
-  {"boxes":[{"pages":[["The Darkloid's ring"]],"speaker":"MegaMan","text":"The Darkloid's ring"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_RING.0","kind":"screen","line":86,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Darkloid's ring","text_hash":"8d88ee032685"},
-  {"boxes":[{"pages":[["Clean panel"]],"speaker":"MegaMan","text":"Clean panel"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_CLEAN.0","kind":"screen","line":88,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Clean panel","text_hash":"581e919fee2e"},
+  {"boxes":[{"pages":[["A key! The barrier","round that dark spot","just opened!"]],"speaker":"MegaMan","text":"A key! The barrier round that dark spot just opened!"}],"container":"lib_key_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_key_words:0","kind":"speech","line":54,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A key! The barrier round that dark spot just opened!","text_hash":"58f0b2f39169"},
+  {"boxes":[{"pages":[["A key! A","BarrierPanel just","opened!"]],"speaker":"MegaMan","text":"A key! A BarrierPanel just opened!"}],"container":"lib_key_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_key_words:1","kind":"speech","line":54,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M A key! A BarrierPanel just opened!","text_hash":"212ff9ad0a08"},
+  {"boxes":[{"pages":[["Ow! That panel was","trapped! {hp}","damage..."]],"speaker":"MegaMan","text":"Ow! That panel was trapped! {hp} damage..."}],"container":"lib_trap_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_trap_words:0","kind":"speech","line":59,"placeholders":[{"name":"hp","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ow! That panel was trapped! {hp} damage...","text_hash":"27b806b6b480"},
+  {"boxes":[{"pages":[["Lan,look! A way out","of here nobody's","used..."]],"speaker":"MegaMan","text":"Lan,look! A way out of here nobody's used..."},{"pages":[["Another way on?","Let's remember it!"]],"speaker":"Lan","text":"Another way on? Let's remember it!"}],"container":"lib_route_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_route_words:0","kind":"speech","line":64,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan,look! A way out of here nobody's used...|@L Another way on? Let's remember it!","text_hash":"b24435b5fd89"},
+  {"boxes":[{"pages":[["Phew... Resting","helps."]],"speaker":"MegaMan","text":"Phew... Resting helps."}],"container":"lib_rest_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_rest_words:0","kind":"speech","line":67,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Phew... Resting helps.","text_hash":"cc949ef799b7"},
+  {"boxes":[{"pages":[["Ugh!! {who} hit","hard!"]],"speaker":"MegaMan","text":"Ugh!! {who} hit hard!"}],"container":"lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_hurt_words:0","kind":"speech","line":71,"placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ugh!! {who} hit hard!","text_hash":"6cb3c7cf4cc6"},
+  {"boxes":[{"pages":[["Ow! {who} got me!"]],"speaker":"MegaMan","text":"Ow! {who} got me!"}],"container":"lib_hurt_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_hurt_words:1","kind":"speech","line":72,"placeholders":[{"name":"who","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ow! {who} got me!","text_hash":"9a588ea6f83f"},
+  {"boxes":[{"pages":[["Two under par! Way","to go!"]],"speaker":"Lan","text":"Two under par! Way to go!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:0","kind":"speech","line":78,"speaker":"Lan","speakers":["Lan"],"text":"@L Two under par! Way to go!","text_hash":"b7234d704391"},
+  {"boxes":[{"pages":[["Right on par!"]],"speaker":"Lan","text":"Right on par!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:1","kind":"speech","line":78,"speaker":"Lan","speakers":["Lan"],"text":"@L Right on par!","text_hash":"267a4d5ce292"},
+  {"boxes":[{"pages":[["Over par... But we","did it!"]],"speaker":"Lan","text":"Over par... But we did it!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:2","kind":"speech","line":78,"speaker":"Lan","speakers":["Lan"],"text":"@L Over par... But we did it!","text_hash":"58de0c1a9660"},
+  {"boxes":[{"pages":[["The Darkloid's","deleted!"]],"speaker":"MegaMan","text":"The Darkloid's deleted!"},{"pages":[["{phases} phases..."]],"speaker":"Lan","text":"{phases} phases..."},{"pages":[["{how}"]],"speaker":"MegaMan","text":"{how}"},{"pages":[["The exit's open,Lan!"]],"speaker":"MegaMan","text":"The exit's open,Lan!"}],"container":"lib_won_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_won_words:3","kind":"speech","line":79,"placeholders":[{"name":"phases","spec":"%d"},{"name":"how","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M The Darkloid's deleted!|@L {phases} phases...|{how}|@M The exit's open,Lan!","text_hash":"cc3b460a627b"},
+  {"boxes":[{"pages":[["PLAYER PHASE"]],"speaker":"Mr.Prog","text":"PLAYER PHASE"}],"container":"lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_label_player_phase:0","kind":"speech","line":93,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"PLAYER PHASE","text_hash":"bca25090e52b"},
+  {"boxes":[{"pages":[["DARKLOID PHASE"]],"speaker":"Mr.Prog","text":"DARKLOID PHASE"}],"container":"lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_label_enemy_phase:0","kind":"speech","line":93,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"DARKLOID PHASE","text_hash":"c23ca7475184"},
+  {"boxes":[{"pages":[["Dark panel"]],"speaker":"MegaMan","text":"Dark panel"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_ITEM.0","kind":"screen","line":98,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Dark panel","text_hash":"b6e8b92521c4"},
+  {"boxes":[{"pages":[["The Darkloid's ring"]],"speaker":"MegaMan","text":"The Darkloid's ring"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_RING.0","kind":"screen","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Darkloid's ring","text_hash":"8d88ee032685"},
+  {"boxes":[{"pages":[["Trapped panel"]],"speaker":"MegaMan","text":"Trapped panel"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_TRAP.0","kind":"screen","line":102,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Trapped panel","text_hash":"6b101cf75756"},
+  {"boxes":[{"pages":[["Clean panel"]],"speaker":"MegaMan","text":"Clean panel"}],"container":"lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","flags":[],"id":"liberation_words:lib_faced_label:caseLIB_CLEAN.0","kind":"screen","line":104,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Clean panel","text_hash":"581e919fee2e"},
   {"boxes":[{"pages":[["{k}Lan! Our","Cross works in the","older Net now!"]],"speaker":"MegaMan","text":"{k}Lan! Our Cross works in the older Net now!"},{"pages":[["Whoa... Even its","Navis fight like","ours!"]],"speaker":"MegaMan","text":"Whoa... Even its Navis fight like ours!"},{"pages":[["Alright! Cross and","all!"]],"speaker":"Lan","text":"Alright! Cross and all!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:0","kind":"speech","line":34,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@M Lan! Our Cross works in the older Net now!|@M Whoa... Even its Navis fight like ours!|@L Alright! Cross and all!","text_hash":"640c3f83b630"},
   {"boxes":[{"pages":[["{k}Wait... This","Net's a copy of an","older one!"]],"speaker":"MegaMan","text":"{k}Wait... This Net's a copy of an older one!"},{"pages":[["The Nest copied that","too!?"]],"speaker":"Lan","text":"The Nest copied that too!?"},{"pages":[["Its viruses are the","old ones,Lan."]],"speaker":"MegaMan","text":"Its viruses are the old ones,Lan."},{"pages":[["But we fight them","our way. Cross and","all!"]],"speaker":"MegaMan","text":"But we fight them our way. Cross and all!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:1","kind":"speech","line":37,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!","text_hash":"b57a66e5b10b"},
   {"boxes":[{"pages":[["{k}Lan... The","two Nets run","together down here."]],"speaker":"MegaMan","text":"{k}Lan... The two Nets run together down here."},{"pages":[["The old viruses and","ours? Side by side?"]],"speaker":"Lan","text":"The old viruses and ours? Side by side?"},{"pages":[["Yeah. Anything could","come at us!"]],"speaker":"MegaMan","text":"Yeah. Anything could come at us!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:2","kind":"speech","line":40,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|@M Yeah. Anything could come at us!","text_hash":"6fd339f4e6a4"},
@@ -4737,7 +4765,10 @@
   {"boxes":[{"pages":[["Our ScrtData's","glowing a little..."]],"speaker":"MegaMan","text":"Our ScrtData's glowing a little..."},{"pages":[["I bet we need more!"]],"speaker":"MegaMan","text":"I bet we need more!"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:1","kind":"speech","line":281,"note":"how many ScrtData MegaMan holds, said at a closed gate","speaker":"MegaMan","speakers":["MegaMan"],"text":"Our ScrtData's glowing a little...|I bet we need more!","text_hash":"10ccc52893de"},
   {"boxes":[{"pages":[["Whoa! Our two","ScrtData are","glowing!"]],"speaker":"MegaMan","text":"Whoa! Our two ScrtData are glowing!"},{"pages":[["One more should open","it!"]],"speaker":"MegaMan","text":"One more should open it!"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:2","kind":"speech","line":282,"note":"how many ScrtData MegaMan holds, said at a closed gate","speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! Our two ScrtData are glowing!|One more should open it!","text_hash":"6a6bd79b4e15"},
   {"boxes":[{"pages":[["The ScrtData glows!","Open the gate?"]],"speaker":"MegaMan","text":"The ScrtData glows!\nOpen the gate?\n"}],"container":"ta_secret_gate","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_secret_gate:3","kind":"speech","line":300,"note":"(Bass behind it: said first, and the question starts on No, as a risky choice's does)","speaker":"MegaMan","speakers":["MegaMan"],"text":"The ScrtData glows!\nOpen the gate?\n","text_hash":"33a113aeb112"},
-  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":319,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
+  {"boxes":[{"pages":[["Lan! There was a","chip in that panel!"]],"speaker":"MegaMan","text":"Lan! There was a chip in that panel!"}],"container":"ta_lib_find_chip","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_chip:0","kind":"speech","line":319,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! There was a chip in that panel!","text_hash":"82b6edcf5e5f"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"fragment":true,"id":"service_words:ta_lib_find_zenny:0","kind":"speech","line":331,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["Lan! Zenny in that","panel!"]],"speaker":"MegaMan","text":"Lan! Zenny in that panel!"}],"container":"ta_lib_find_zenny","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_lib_find_zenny:1","kind":"speech","line":332,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan! Zenny in that panel!","text_hash":"03f56be3a004"},
+  {"boxes":[{"pages":[["Look,Lan! The signal","left a chip!"]],"speaker":"MegaMan","text":"Look,Lan! The signal left a chip!"}],"container":"ta_challenge_reward","domain":"Layers: services","file":"src/layer/service_words.c","flags":[],"id":"service_words:ta_challenge_reward:0","kind":"speech","line":344,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look,Lan! The signal left a chip!","text_hash":"85a179de2dd0"},
   {"boxes":[{"pages":[["...Hmph. You again."]],"speaker":"Bass","text":"...Hmph. You again."},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"fragment":true,"id":"super_lines:bass_meeting:0","kind":"speech","line":20,"speaker":"Bass","speakers":["Bass"],"text":"...Hmph. You again.|Copy or not... I delete the strong.","text_hash":"ba3c9161b59c"},
   {"boxes":[{"pages":[["W-Whoa! Someone was","in that stone!?"]],"speaker":"Lan","text":"W-Whoa! Someone was in that stone!?"},{"pages":[["That's... Bass!!"]],"speaker":"MegaMan","text":"That's... Bass!!"},{"pages":[["...Hmph."]],"speaker":"Bass","text":"...Hmph."},{"pages":[["Another copy,come to","be deleted?"]],"speaker":"Bass","text":"Another copy,come to be deleted?"},{"pages":[["I'm no copy! I'm","MegaMan!"]],"speaker":"MegaMan","text":"I'm no copy! I'm MegaMan!"},{"pages":[["Copy or not... I","delete the strong."]],"speaker":"Bass","text":"Copy or not... I delete the strong."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:1","kind":"speech","line":21,"speaker":"Lan","speakers":["Lan","MegaMan","Bass"],"text":"@L W-Whoa! Someone was in that stone!?|@M That's... Bass!!|...Hmph.|Another copy,come to be deleted?|@M I'm no copy! I'm MegaMan!|Copy or not... I delete the strong.","text_hash":"94f0f8349cd3"},
   {"boxes":[{"pages":[["Hmph. Back again?"]],"speaker":"Bass","text":"Hmph. Back again?"},{"pages":[["Then be deleted","again."]],"speaker":"Bass","text":"Then be deleted again."}],"container":"bass_meeting","domain":"Super bosses","file":"src/layer/super_lines.c","flags":[],"id":"super_lines:bass_meeting:2","kind":"speech","line":23,"speaker":"Bass","speakers":["Bass"],"text":"Hmph. Back again?|Then be deleted again.","text_hash":"d717d7ce4a1b"},

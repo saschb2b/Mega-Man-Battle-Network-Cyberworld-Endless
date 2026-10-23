@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 97   /* (97: dark layers, a liberation's board on an act's second layer, docs/LIBERATION.md) */
+#define LAYER_MAKE 98   /* (98: the dark layers' boards by the staircase and the planner, docs/LIBERATION.md, The quality bar) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

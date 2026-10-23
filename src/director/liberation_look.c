@@ -122,6 +122,10 @@ static int look_of(int x, int y) {
 	case LIB_ITEM: return LOOK_ITEM;
 	case LIB_BONUS: return LOOK_BONUS;
 	case LIB_HOLE: return LOOK_HOLE;
+	/* (a BarrierPanel its number's look; a trap shown as one, the paled
+	 * dark: BN5 hides its traps, the quality bar's telegraph shows them) */
+	case LIB_BAR: return LOOK_BAR1 + ((LB.b.item[y][x] - 1) & 3);
+	case LIB_TRAP: return LOOK_PALED;
 	default: return -1;
 	}
 }
