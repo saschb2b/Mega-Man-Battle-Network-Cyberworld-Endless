@@ -36,13 +36,16 @@ int xnavi_slot(int xrom, int navi, int fallback);
 int xnavi_guardian(int xrom, int navi);
 
 /* Another game's map objects in BN6 (docs/MULTIROM.md): sprites of its list
- * 7, each listed at one of Gregar's list-7 numbers that point at a
+ * 7 (or 6), each listed at one of Gregar's list-7 numbers that point at a
  * placeholder no layer lists (docs/ROM_DATA.md). */
 enum {
 	XOBJ_DARK_FLAME,   /* BN5's flame of darkness, its palette turned purple: the DarkChips' (docs/META.md) */
 	XOBJ_CUBE,         /* BN5's Security Cube, its P-Codes' lock: standing (animation 0), opening (1) */
 	XOBJ_DARK_WALL,    /* BN5's wall of dark flames, across a walkway along world Y or X (0, 1), burning out (2, 3) */
 	XOBJ_DARK_HOLE,    /* BN5's dark hole, a vortex standing past a platform's edge */
+	XOBJ_BRUTE,        /* BN5's Liberation Missions' guardians on their board, from its list 6: BigBrute, */
+	XOBJ_HAWK,         /* ... TinHawk */
+	XOBJ_BLADIA,       /* ... and Bladia (docs/LIBERATION.md) */
 	XOBJ_COUNT
 };
 

@@ -206,6 +206,7 @@
 #define BN6_SPAWN_COMMON      0x08003278u /* SpawnBattleObjectCommon: r0 the kind (1, 3, 4), r1 its spawner's five words (the type first; its caller at r1 + 0x18) */
 #define BN6_SPAWN_COMMON_END  0x080032C8u /* ... its end (add sp,#4): r5 the object spawned, 0 none */
 #define BN6_PLAY_SOUND        0x080005CCu /* PlaySoundEffect: r0 the song */
+#define BN6_PLAY_MUSIC        0x080005D4u /* PlayMusic: r0 the song, started unless BN6_SONG_PLAYING names it already (0x63 stops the music) */
 #define BN6_SPAWN_EFFECT      0x080E1932u /* an effect spawned (the fourth kind's type 0): r4's low byte the effect's id */
 #define BN6_SPRITE_LOAD       0x080026E4u /* sprite_load: r5 the object whose sprite state (past what its spawn clears) is set up anew */
 #define BN6_SET_ATTACK        0x08011698u /* setAttack's common part (setAttack0-5 at 0x08011680 + 4N branch to it): r0 the CurAction, r2 N, r5 the object */

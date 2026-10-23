@@ -23,23 +23,23 @@
 
 #include "bn6_fields.h"
 #include "devtools.h"
-#include "director.h"
 #include "director_layer.h"
+#include "cinema.h"
 #include "debug.h"
 #include "director_state.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
 #include "guardians.h"
+#include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "loot.h"
 #include "bn5_liberation.h"
 #include "netmap.h"
-#include "rom.h"
 #include "run.h"
 #include "talk.h"
-#include "text.h"
+#include "xnavi.h"
 
 LibState LB;
 
@@ -107,6 +107,10 @@ static void unit_object(int u) {
 	if (n->kind == UNIT_DARKLOID) {
 		NpcBody body = guardian_body(LB.darkloid, 5);
 		list = body.list; sprite = body.index; anim = body.anim;
+	} else {
+		/* (BN5's own guardians as its board shows them, with its ROM) */
+		int own = xnavi_object(XOBJ_BRUTE + n->kind - UNIT_BRUTE);
+		if (own >= 0) { list = 7; sprite = own; anim = BN5_LIB_GUARD_ANIM; }
 	}
 	NetObj *o = &layer.obj[layer.nobj++];
 	memset(o, 0, sizeof *o);
@@ -140,6 +144,10 @@ static void board_print(void) {
 	for (int h = 0; h < LB.b.nholes; ++h) { netmap_world(LB.b.hole_x[h], LB.b.hole_y[h], &wx, &wy); fprintf(stderr, "liberation: hole %d,%d at world %d %d\n", LB.b.hole_x[h], LB.b.hole_y[h], wx, wy); }
 	netmap_world(LB.b.boss_x, LB.b.boss_y, &wx, &wy);
 	fprintf(stderr, "liberation: darkloid %d,%d at world %d %d\n", LB.b.boss_x, LB.b.boss_y, wx, wy);
+	for (int u = 1; u < LB.b.nunits; ++u) {
+		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &wx, &wy);
+		fprintf(stderr, "liberation: %s %d,%d at world %d %d\n", lib_unit_name(LB.b.unit[u].kind), LB.b.unit[u].x, LB.b.unit[u].y, wx, wy);
+	}
 }
 
 bool lib_layer_made(void) {
@@ -152,7 +160,6 @@ bool lib_layer_made(void) {
 		if (layer.obj[i].type == OBJ_EXIT) { layer.obj[i].x = (float)LB.b.boss_x; layer.obj[i].y = (float)LB.b.boss_y; }
 	for (int u = 0; u < LB.b.nunits; ++u) unit_object(u);
 	LB.on = true;
-	if (emu_debug_on()) board_print();
 	return true;
 }
 
@@ -173,6 +180,8 @@ void lib_begin(void) {
 		LB.from_x[u] = LB.ux[u]; LB.from_y[u] = LB.uy[u];
 	}
 	lib_look_begin();
+	/* (the world's places once the layer's map is built) */
+	if (emu_debug_on()) board_print();
 }
 
 /* ---- the units' objects ---- */
@@ -476,7 +485,7 @@ static void enemy_update(void) {
 
 /* ---- the frame ---- */
 
-static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !D.beat[0] && on_map(); }
+static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !cinema_busy() && !D.beat[0] && on_map(); }
 
 /* Where MegaMan stands and what he faces, as BN6 walks him: his panel (a
  * walked one: the fence keeps him to them), and the panel beside it his
@@ -506,6 +515,8 @@ static void talk_update_lib(void) {
 	if (LB.words[0]) {
 		if (!quiet() || !talk_start(LB.words, FACE_MEGAMAN)) return;
 		LB.words[0] = 0;
+		/* (an item found: BN5's jingle as its line begins) */
+		if (LB.npops) lib_sound(BN5_LIB_ITEM_SOUND);
 		return;
 	}
 	if (!quiet()) return;
@@ -528,11 +539,21 @@ static void steps_update(void) {
 		if (!quiet() || D.frame < 60) return;
 		megaman_at(LB.mx, LB.my);
 		turn(0);
+		/* (BN5's mission opens to its own song, the board's after) */
+		lib_song(BN5_SONG_MISSION_OPEN);
 		say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
 		break;
-	case LIB_STEP_BANNER:
-		if (++LB.banner_t >= BANNER_FRAMES) LB.step = LB.enemy_banner ? LIB_STEP_ENEMY : LIB_STEP_MOVE;
+	case LIB_STEP_BANNER: {
+		/* (BN5's banner where its ROM is there: its length, its sound as
+		 * the words slide in; the first phase's brings the board's song) */
+		int frames = lib_piece_banner_frames();
+		/* (begun once nothing else shows: a CONTINUE's act card first) */
+		if (LB.banner_t == 0 && !quiet()) break;
+		if (LB.banner_t == 0 && LB.phase == 1 && !LB.enemy_banner) lib_song(BN5_SONG_LIBERATION);
+		if (frames && LB.banner_t == BN5_LIB_WORDS_AT) lib_sound(BN5_LIB_PHASE_SOUND);
+		if (++LB.banner_t >= (frames ? frames : BANNER_FRAMES)) LB.step = LB.enemy_banner ? LIB_STEP_ENEMY : LIB_STEP_MOVE;
 		break;
+	}
 	case LIB_STEP_MOVE: break;
 	case LIB_STEP_BATTLE:
 		if (LB.fight_seen && on_map() && !emu_battle_forcing()) after_fight();

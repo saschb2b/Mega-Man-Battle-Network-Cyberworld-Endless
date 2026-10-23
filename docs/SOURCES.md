@@ -232,9 +232,14 @@ how it is known:
   none does (docs/PET.md lists which is which). BN5 numbers its songs as
   BN6 does where both were checked (0x01, 0x03-0x05, 0x0C, 0x0F, 0x10,
   0x13-0x16, 0x1A, 0x1B, 0x1D, 0x1E), which gives BN6's names to its
-  0x02, 0x0B, 0x0D, 0x0E, 0x17, 0x19, 0x1C and 0x1F, assumed.
-- **Not found:** where BN5's 0x06-0x09, 0x11, 0x12, 0x18 and 0x20-0x24
-  play. Searched: BN5's four map-music lists (`0x080361C8`), every
+  0x02, 0x0B, 0x0D, 0x0E, 0x17, 0x19, 0x1C and 0x1F, assumed. BN5's
+  Liberation Missions' two, verified without listening in romlab
+  (mission 1 played through a phase and back, docs/LIBERATION.md): 0x22
+  the board's song in both phases (the BGM player's header, its clock
+  running on), 0x1C at the mission's opening (the board's routine 1),
+  so 0x1C plays there in BN5 whatever it plays in BN6.
+- **Not found:** where BN5's 0x06-0x09, 0x11, 0x12, 0x18, 0x20, 0x21,
+  0x23 and 0x24 play. Searched: BN5's four map-music lists (`0x080361C8`), every
   `movs r0,#n` before a `bl` to its PlayMusic (`0x080005A0`, which reach
   only 0x01, 0x0F, 0x15, 0x18, 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23,
   the last three from routines not yet read), its battle records' music

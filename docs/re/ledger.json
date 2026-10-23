@@ -130,6 +130,10 @@
     {
       "date": "2026-10-23",
       "what": "BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)"
+    },
+    {
+      "date": "2026-10-23",
+      "what": "BN5's Liberation board's phases' banners (the words' LZ77 tiles 0x087E5A10, their load list 0x08052FF4, palettes 0x087E5500 and 0x087E5520, the band's WIN1 rows, blend and frames, sound 0xD6 from 0x08054DAE), the L view's panels, the guardians' sprites (list 6's 83-85), the board's songs 0x22 and 0x1C and the item jingle 0x16D mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row); BN6's PlayMusic 0x080005D4"
     }
   ],
   "experiments": [

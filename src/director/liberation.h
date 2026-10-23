@@ -41,6 +41,20 @@ void lib_battle_frame(void);
  * is what reaches the game. */
 uint32_t lib_keys(uint32_t keys);
 
+/* (liberation_sound.c) The board's music and sounds, BN5's where its
+ * board is drawn in BN5's look: the song a dark layer's map plays (its
+ * board's, else `song`); one of BN5's songs started now (BN5_SONG_*); one
+ * of BN5's sounds played. */
+int lib_board_song(int song);
+void lib_song(int bn5_song);
+void lib_sound(int bn5_sound);
+
+/* (liberation_save.c) The board across a CONTINUE: saved with the run's
+ * checkpoint (run.lib), and taken back once its state has loaded on the
+ * same layer (false: none for this layer, the board begins afresh). */
+void lib_save(void);
+bool lib_resume(void);
+
 /* (liberation_fence.c) The board's dark panels fenced with walls of BN6's
  * own, each panel's switched off as it is liberated: built after the
  * layer's map (netmap_build_layer), kept each frame. */

@@ -89,3 +89,13 @@ void xtiles_draw_squashed(const uint8_t *tiles, const uint8_t *pal, int x, int y
 	SDL_Rect src = { 0, (H - rows) / 2, w * 8, rows }, d = { x, y, w * 8, H };
 	SDL_RenderCopy(P.renderer, t, &src, &d);
 }
+
+void xtiles_blend_rect(int x, int y, int w, int h, uint16_t colour, int eva, int evb) {
+	if (w <= 0 || h <= 0 || evb < 0 || evb >= 16) return;
+	/* (the renderer's blend: what lies beneath kept at evb/16, the colour
+	 * scaled so that its share is the colour times eva/16) */
+	uint32_t c = bgr555(colour);
+	int a = 16 - evb, k[3] = { (int)(c >> 16 & 255), (int)(c >> 8 & 255), (int)(c & 255) };
+	for (int i = 0; i < 3; ++i) { k[i] = k[i] * eva / a; if (k[i] > 255) k[i] = 255; }
+	fill_rect(x, y, w, h, rgba(k[0], k[1], k[2], a * 255 / 16));
+}

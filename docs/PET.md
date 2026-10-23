@@ -200,7 +200,12 @@ version: the game's own music is the run's).
   0x01), Crisis 0x0C (ACDC Town in the third list), Comp 0x10, The Net
   0x13, Undernet 0x14; its battles' 0x15 and 0x16; and the same calls
   as BN6's, at the same routines moved, for 0x01, 0x0F, 0x1A, 0x1B,
-  0x1D and 0x1E.
+  0x1D and 0x1E. BN5's Liberation Missions' (heard in romlab on
+  mission 1, the BGM's player, 31 at `0x02011470`, its song header read
+  against the song table `0x08155BF4`): Liberation 0x22, the board's
+  own through both phases (its clock running on from one to the next),
+  and 0x1C at the mission's opening, the board's tour (its routine 1),
+  so BN5's 0x1C, Before the Boss, is BN5's at least there.
 - *Assumed from bn6f's names* (`constants/enums/SoundOffsets.inc`, the
   community disassembly's, read as leads, never copied as a list) where
   no map list or code reached them: The Expo 0x25, Pavilion 0x18,
@@ -209,9 +214,10 @@ version: the game's own music is the run's).
   The Chase 0x23, Villains 0x02, Sorrow 0x0D, Good Times 0x0E, Victory
   0x19, Fanfare 0x1F. BN5 numbers its songs as BN6 does wherever the
   two were checked (the eleven above), so its 0x02 (Nebula), 0x0B, 0x0D,
-  0x0E, 0x17, 0x19, 0x1C and 0x1F carry BN6's names, assumed.
-- *Not known yet:* BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18 and
-  0x20-0x24 (its places, its Liberation Missions'), which no map list or
+  0x0E, 0x17, 0x19 and 0x1F carry BN6's names, assumed (0x1C heard at a
+  mission's opening, above).
+- *Not known yet:* BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18, 0x20,
+  0x21, 0x23 and 0x24 (its places), which no map list or
   immediate reaches: they carry their number ("Song 06") in More until a
   source names them (docs/SOURCES.md).
 

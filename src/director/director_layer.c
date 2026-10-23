@@ -353,7 +353,7 @@ static bool build_layer(void) {
 		if (layer.obj[i].type == OBJ_CHALLENGE) { server_roll(); break; }
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	lib_begin();
-	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
+	mapslot_music(D.group, D.number, lib_board_song(layer_song(tiles, a->song)));
 	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 

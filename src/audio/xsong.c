@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn5_liberation.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
@@ -280,6 +281,11 @@ int xsong_install(int xrom, int song, int fallback) {
 				int theme = XR[i].data && XR[i].layout->nareas ? XR[i].layout->battle_songs[b] : 0;
 				if (theme && slot_of(i, theme) < 0) copy_in(i, theme, false, SLOT_FIRST + X.nsongs);
 			}
+		/* then BN5's Liberation Missions' songs, a dark layer's board's
+		 * (docs/LIBERATION.md), after the rest, which keep their places */
+		static const uint8_t board_songs[] = { BN5_SONG_LIBERATION, BN5_SONG_MISSION_OPEN };
+		for (size_t k = 0; XR[XROM_BN5_COLONEL_US].data && k < sizeof board_songs; ++k)
+			if (slot_of(XROM_BN5_COLONEL_US, board_songs[k]) < 0) copy_in(XROM_BN5_COLONEL_US, board_songs[k], false, SLOT_FIRST + X.nsongs);
 	}
 	int slot = slot_of(xrom, song);
 	return slot < 0 ? fallback : slot;

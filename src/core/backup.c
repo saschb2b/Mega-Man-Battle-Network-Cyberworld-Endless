@@ -54,7 +54,7 @@ bool backup_write_file(const char *path, const uint8_t *bytes, size_t n) {
 
 const char *const save_progress_names[SAVE_PROGRESS_NAMES] = {
 	"profile.sav", "rivals.sav", "battle.sav", "run.sav", "run.state", "run.make", "run.area",
-	"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board", "run.tally"
+	"run.seen", "run.folder", "run.act", "run.dark", "run.souls", "run.board", "run.lib", "run.tally"
 };
 
 /* (the normal slot's files, the week's net's beside them after "weekly-",

@@ -5,6 +5,7 @@
 #include "liberation_pieces.h"
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bn5_liberation.h"
@@ -87,8 +88,11 @@ static void phase_number(int n, int x, int y) {
 }
 
 void lib_piece_phases(int phase, int par) {
-	const uint8_t *words = bn5(BN5_LIB_PHASE_TILES, 9 * 32), *pal = bn5(BN5_LIB_PHASE_PAL, 32);
-	if (!words || !pal) return;
+	const uint8_t *words = bn5(BN5_LIB_PHASE_TILES, 9 * 32), *pal = bn5(BN5_LIB_PHASE_PAL, 32), *band = bn5(BN5_LIB_PHASE_WORDS_PAL, 32);
+	if (!words || !pal || !band) return;
+	/* (the panel behind them: BG0 in WIN1, blended as the banners' band) */
+	xtiles_blend_rect(P.core_x + BN5_LIB_LVIEW_PANEL_X, P.core_y + BN5_LIB_LVIEW_PANEL_Y, BN5_LIB_LVIEW_PANEL_W, BN5_LIB_LVIEW_PANEL_H,
+		(uint16_t)(band[2 * BN5_LIB_BAND_COLOUR] | band[2 * BN5_LIB_BAND_COLOUR + 1] << 8), 16, 8);
 	/* "PHASE" its five tiles, "TRGT" the four after them */
 	xtiles_draw(words, pal, P.core_x + 54, P.core_y + 124, 5, 1, 0);
 	phase_number(phase, 97, 124);
@@ -169,4 +173,115 @@ void lib_piece_cheer(int cheer, int t) {
 		memcpy(tiles[3], one + 32, 32);
 		xtiles_draw_squashed(tiles[0], pal, P.core_x + 52, P.core_y + 64, 2, 2, pd);
 	}
+}
+
+/* ---- the phases' banners ---- */
+
+/* The words' OBJs as BN5 lays them (traced: their OAM held in place, x
+ * from the picture's left, y 64 or 72), each a block of the words' tiles
+ * (BN5_LIB_PHASE_WORDS' tile n, OBJ tile 719 + n) */
+typedef struct { uint8_t x, dy, w, h, tile, flip; } WordObj;
+static const WordObj darkloid_phase[] = {
+	{ 14, 0, 2, 2, 30, 0 },
+	{ 30, 0, 1, 1, 9, 0 }, { 30, 8, 1, 1, 10, 0 }, { 38, 0, 1, 1, 9, 1 }, { 38, 8, 1, 1, 10, 1 },
+	{ 46, 0, 1, 2, 19, 0 }, { 54, 0, 1, 2, 17, 0 },
+	{ 62, 0, 2, 2, 34, 0 },
+	{ 78, 0, 2, 2, 38, 0 },
+	{ 94, 0, 1, 2, 42, 1 }, { 102, 0, 1, 2, 42, 0 },
+	{ 112, 0, 1, 1, 44, 0 }, { 112, 8, 1, 1, 45, 0 },
+	{ 120, 0, 2, 2, 30, 0 },
+	{ 146, 0, 2, 2, 21, 0 },
+	{ 162, 0, 1, 1, 25, 0 }, { 162, 8, 1, 1, 10, 0 }, { 170, 0, 1, 1, 25, 1 }, { 170, 8, 1, 1, 10, 1 },
+	{ 178, 0, 1, 1, 9, 0 }, { 178, 8, 1, 1, 10, 0 }, { 186, 0, 1, 1, 9, 1 }, { 186, 8, 1, 1, 10, 1 },
+	{ 194, 0, 2, 2, 26, 0 },
+	{ 210, 0, 2, 2, 13, 0 },
+};
+static const WordObj player_phase[] = {
+	{ 10, 0, 4, 2, 1, 0 },
+	{ 42, 0, 1, 1, 9, 0 }, { 42, 8, 1, 1, 10, 0 }, { 50, 0, 1, 1, 9, 1 }, { 50, 8, 1, 1, 10, 1 },
+	{ 58, 0, 1, 2, 11, 0 }, { 66, 0, 1, 2, 11, 1 },
+	{ 74, 0, 2, 2, 13, 0 },
+	{ 90, 0, 1, 2, 19, 0 }, { 98, 0, 1, 2, 17, 0 },
+	{ 114, 0, 2, 2, 21, 0 },
+	{ 130, 0, 1, 1, 25, 0 }, { 130, 8, 1, 1, 10, 0 }, { 138, 0, 1, 1, 25, 1 }, { 138, 8, 1, 1, 10, 1 },
+	{ 146, 0, 1, 1, 9, 0 }, { 146, 8, 1, 1, 10, 0 }, { 154, 0, 1, 1, 9, 1 }, { 154, 8, 1, 1, 10, 1 },
+	{ 162, 0, 2, 2, 26, 0 },
+	{ 178, 0, 2, 2, 13, 0 },
+};
+#define WORDS_Y      64
+#define DIGITS_X     200    /* PLAYER PHASE's two digits, 16 apart */
+#define WORD_TILES   165
+
+/* The words' tiles, decompressed from BN5's ROM once (a u32 of their size first) */
+static const uint8_t *word_tiles(void) {
+	static uint8_t *tiles;
+	static const uint8_t *from;
+	const uint8_t *lz = bn5(BN5_LIB_PHASE_WORDS, 4);
+	if (!lz) return NULL;
+	if (from != lz) {
+		free(tiles);
+		size_t n = 0;
+		tiles = lz77_decompress(lz, ROM_SIZE - (BN5_LIB_PHASE_WORDS - 0x08000000u), &n);
+		if (tiles && n < 4 + WORD_TILES * 32) { free(tiles); tiles = NULL; }
+		from = lz;
+	}
+	return tiles ? tiles + 4 : NULL;
+}
+
+int lib_piece_banner_frames(void) { return lib_pieces_on() && word_tiles() ? BN5_LIB_BANNER_END : 0; }
+
+/* The band's rows as WIN1 shows them: a row at its middle for two frames,
+ * then 17, then BN5_LIB_BAND_ROWS; closing through 16 rows and none */
+static void band_rows(int t, int *top, int *rows) {
+	int mid = BN5_LIB_BAND_TOP + BN5_LIB_BAND_ROWS / 2;
+	*top = BN5_LIB_BAND_TOP;
+	*rows = BN5_LIB_BAND_ROWS;
+	if (t < 2) { *top = mid; *rows = 1; }
+	else if (t == 2) { *top = mid - 8; *rows = 17; }
+	else if (t == BN5_LIB_BANNER_END - 2) { *top = mid - 8; *rows = 16; }
+	else if (t >= BN5_LIB_BANNER_END - 1) *rows = 0;
+}
+
+/* The words' offset from their place, `t` frames after the band opened:
+ * in from 240 to the right, 32 a frame, held, then out to the left; false
+ * while they are not shown */
+static bool words_offset(int t, int *dx) {
+	int in = (240 + BN5_LIB_SLIDE_STEP - 1) / BN5_LIB_SLIDE_STEP, k = t - BN5_LIB_WORDS_AT;
+	if (k < 0) return false;
+	if (k < in) { *dx = 240 - k * BN5_LIB_SLIDE_STEP; if (*dx < 0) *dx = 0; return true; }
+	k -= in + BN5_LIB_WORDS_HOLD;
+	if (k < 0) { *dx = 0; return true; }
+	*dx = -(k + 1) * BN5_LIB_SLIDE_STEP;
+	return *dx > -240;
+}
+
+static void word_obj(const uint8_t *tiles, const uint8_t *pal, const WordObj *o, int dx) {
+	int x = o->x + dx;
+	if (x >= 240 || x + o->w * 8 <= 0 || o->tile + o->w * o->h > WORD_TILES) return;
+	xtiles_draw(tiles + o->tile * 32, pal, P.core_x + x, P.core_y + WORDS_Y + o->dy, o->w, o->h, o->flip);
+}
+
+void lib_piece_phase_banner(bool darkloid, int phase, int t) {
+	const uint8_t *tiles = word_tiles(), *pal = bn5(BN5_LIB_PHASE_WORDS_PAL + (darkloid ? 32u : 0u), 32);
+	if (!tiles || !pal || t < 0 || t >= BN5_LIB_BANNER_END) return;
+	int top, rows, dx;
+	band_rows(t, &top, &rows);
+	if (rows) xtiles_blend_rect(P.core_x, P.core_y + top, 240, rows, (uint16_t)(pal[2 * BN5_LIB_BAND_COLOUR] | pal[2 * BN5_LIB_BAND_COLOUR + 1] << 8), 16, 8);
+	if (!rows || !words_offset(t, &dx)) return;
+	/* (a letter half past the picture's left edge cut there, as the GBA's screen cuts it) */
+	SDL_Rect core = { P.core_x, P.core_y, 240, 160 };
+	gfx_clip(&core);
+	const WordObj *w = darkloid ? darkloid_phase : player_phase;
+	int n = darkloid ? (int)(sizeof darkloid_phase / sizeof *darkloid_phase) : (int)(sizeof player_phase / sizeof *player_phase);
+	for (int i = 0; i < n; ++i) word_obj(tiles, pal, &w[i], dx);
+	if (!darkloid) {
+		if (phase < 0) phase = 0;
+		if (phase > 99) phase = 99;
+		WordObj d = { DIGITS_X, 0, 2, 2, (uint8_t)(BN5_LIB_PHASE_DIGIT + 4 * (phase / 10)), 0 };
+		word_obj(tiles, pal, &d, dx);
+		d.x = DIGITS_X + 16;
+		d.tile = (uint8_t)(BN5_LIB_PHASE_DIGIT + 4 * (phase % 10));
+		word_obj(tiles, pal, &d, dx);
+	}
+	gfx_clip(NULL);
 }

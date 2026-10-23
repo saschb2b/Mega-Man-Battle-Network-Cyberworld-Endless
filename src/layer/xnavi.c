@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn5_liberation.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
@@ -117,13 +118,16 @@ static void copy_in(int xrom, int navi) {
 #define OBJECT_PLACEHOLDER 0x084DC040u     /* (Gregar's list-7 numbers that point at it are free: no layer lists them, docs/ROM_DATA.md) */
 
 /* Each: its game, its list-7 number there (bit 31 of the pointer: LZ77,
- * copied decompressed), the free Gregar number it is listed at, and
- * whether its palette is turned purple */
-static const struct { int xrom; uint8_t index, slot; bool purple; } objects[XOBJ_COUNT] = {
+ * copied decompressed), the free Gregar number it is listed at, whether
+ * its palette is turned purple, and its list there where not 7 */
+static const struct { int xrom; uint8_t index, slot; bool purple; uint8_t list; } objects[XOBJ_COUNT] = {
 	[XOBJ_DARK_FLAME] = { XROM_BN5_COLONEL_US, 0x68, 0xA0, true },   /* Nebula Area 6's flames of darkness (compressed) */
 	[XOBJ_CUBE] = { XROM_BN5_COLONEL_US, 0x01, 0x92, false },        /* ACDC Area's Security Cubes */
 	[XOBJ_DARK_WALL] = { XROM_BN5_COLONEL_US, 0x5D, 0x8A, false },   /* Nebula Area 6's and End Area 5's walls of dark flames (compressed) */
 	[XOBJ_DARK_HOLE] = { XROM_BN5_COLONEL_US, 0x69, 0x87, false },   /* the dark holes of Nebula Areas 1, 3, 4 and 6 and Undernet 2 */
+	[XOBJ_BRUTE] = { XROM_BN5_COLONEL_US, BN5_LIB_GUARD_SPRITE, 0x21, false, 6 },       /* a mission's guardians as its board shows them (list 6) */
+	[XOBJ_HAWK] = { XROM_BN5_COLONEL_US, BN5_LIB_GUARD_SPRITE + 1, 0x3F, false, 6 },
+	[XOBJ_BLADIA] = { XROM_BN5_COLONEL_US, BN5_LIB_GUARD_SPRITE + 2, 0x50, false, 6 },
 };
 
 static struct { bool ready; uint32_t sprite[XOBJ_COUNT]; } O;
@@ -183,7 +187,8 @@ uint8_t *xnavi_sprite_bytes(const uint8_t *rom, uint32_t lists, int list, int in
 
 /* Object k's sprite as it is copied (xnavi_sprite_bytes) */
 static uint8_t *object_bytes(int k, uint32_t *len) {
-	return xnavi_sprite_bytes(XR[objects[k].xrom].data, XR[objects[k].xrom].layout->sprite_lists, LIST_OBJECTS, objects[k].index, len);
+	return xnavi_sprite_bytes(XR[objects[k].xrom].data, XR[objects[k].xrom].layout->sprite_lists, objects[k].list ? objects[k].list : LIST_OBJECTS,
+		objects[k].index, len);
 }
 
 /* Object k copied in after what is there and listed at its number (one
@@ -200,7 +205,8 @@ static void object_in(int k, uint32_t own) {
 		X.next = (O.sprite[k] + len + 3) & ~3u;
 		emu_write32(BUS + list_entry(own, LIST_OBJECTS, s), O.sprite[k]);
 		if (emu_debug_on())
-			fprintf(stderr, "xnavi: list 7 %#x of %s at list 7 %d, %u bytes\n", objects[k].index, XR[objects[k].xrom].layout->name, s, len);
+			fprintf(stderr, "xnavi: list %d %#x of %s at list 7 %d, %u bytes\n", objects[k].list ? objects[k].list : LIST_OBJECTS, objects[k].index,
+				XR[objects[k].xrom].layout->name, s, len);
 	}
 	free(d);
 }

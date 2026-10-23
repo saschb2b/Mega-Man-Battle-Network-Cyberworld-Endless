@@ -75,7 +75,7 @@ The file holds only the progress files under `savedata/`:
 | `profile.sav` | Runs, records, unlocks and the Library |
 | `rivals.sav`, `battle.sav` | The rival's and the guardians' records |
 | `run.sav`, `run.state` | The current run and its emulator checkpoint |
-| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.tally` | The checkpoint's generation version, area and the rest of the run's data (`run.tally`: its economy's counts, docs/ECONOMY.md) |
+| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, docs/LIBERATION.md; `run.tally`: its economy's counts, docs/ECONOMY.md) |
 | `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
 
