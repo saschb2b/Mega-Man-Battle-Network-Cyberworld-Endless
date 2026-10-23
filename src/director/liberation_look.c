@@ -38,7 +38,7 @@
 #define BLANK_TILE     864           /* the looks' empty tile, the overlay set's first (all 0: transparent) */
 #define LIB_LOOK_DOWN  8             /* pixels a diamond lies below its panel's centre on the map (calibrated on captures) */
 #define REFRESH_FRAMES 30            /* frames BG2's screen map is made again after the looks change */
-#define PULSE_STEP     8             /* frames each of palettes 9's and 10's frames shows, back and forth (assumed: not traced) */
+#define HOLE_FRAMES    (BN5_LIB_PAL_HOLE - 0x20u)   /* palette 10's four frames, the capture's the second */
 #define FADE_IN        27            /* frames a freed panel keeps its look as the board fades back in (BN5's, traced) */
 #define DISSOLVE       (FADE_IN + BN5_LIB_BLINK * BN5_LIB_BLINKS)
 enum { LOOK_CLEAN, LOOK_DARK, LOOK_PALED, LOOK_ITEM, LOOK_PLUS5, LOOK_BAR1, LOOK_BONUS = 9, LOOK_HOLE, LOOK_GRID };
@@ -52,8 +52,6 @@ static struct {
 	uint8_t shown[MAP_H][MAP_W];   /* the look written at each panel, + 1 (0: none) */
 	uint8_t dissolve[MAP_H][MAP_W];/* frames left of a freed panel's blink */
 	uint8_t was[MAP_H][MAP_W];     /* ... and the look it had */
-	uint32_t glint, breath;        /* the glint's and the breath's frames in BN5's ROM, 0 none (find_frames) */
-	int glint_bank, breath_bank;
 	uint16_t mark;                 /* the start panel's first entry as written: gone, the map was entered again */
 	uint32_t mark_at;
 	int refresh;                   /* frames BG2's screen map is still made from the RAM map */
@@ -70,7 +68,6 @@ static uint16_t rom16(uint32_t a) {
 
 bool lib_look_on(void) { return K.on && LB.on; }
 
-static uint32_t find_frames(uint32_t traced, int *bank);
 
 /* The looks and their tiles, from mission 1's record (the same in all
  * nine): false where BN5's ROM is not there or not as mapped */
@@ -98,10 +95,7 @@ void lib_look_begin(void) {
 	K.on = layer.dark && LB.on && D.layer_tiles == lib_layer_tiles(-1) && read_looks();
 	if (!K.on) return;
 	netmap_last_tiles(&K.tw, &K.th);
-	K.glint = find_frames(BN5_LIB_PULSE, &K.glint_bank);
-	K.breath = find_frames(BN5_LIB_BREATH, &K.breath_bank);
-	if (emu_debug_on()) fprintf(stderr, "liberation look: BN5's, tiles %08x -> %08x (%u bytes), map %dx%d, glint %08x in bank %d, breath %08x in bank %d\n",
-		K.src, K.vram, K.size, K.tw, K.th, K.glint, K.glint_bank, K.breath, K.breath_bank);
+	if (emu_debug_on()) fprintf(stderr, "liberation look: BN5's, tiles %08x -> %08x (%u bytes), map %dx%d\n", K.src, K.vram, K.size, K.tw, K.th);
 }
 
 /* The look panel (x, y) shows as the board stands, as BN5_LIB_LOOK_OF
@@ -204,41 +198,28 @@ static bool tiles_there(void) {
 
 static void bank_from(int bank, uint32_t from) { emu_write(BN6_BG_PALETTE + 0x20u * (uint32_t)bank, K.rom + (from - 0x08000000u), 0x20); }
 
-/* An animation's frames, the bank they play in: its first frame is that
- * bank of the board's colours, at the traced source or a frame before it
- * (the traced sources read a frame late: BN5_LIB_PULSE's 0x20 before is
- * bank 11's colours, and the block's last frame then the next block's
- * header); 0 where neither is */
-static uint32_t find_frames(uint32_t traced, int *bank) {
-	for (uint32_t at = traced; at + 0x20u >= traced && at >= traced - 0x20u; at -= 0x20u)
-		for (int b = 1; b < 13; ++b)
-			if (!memcmp(K.rom + (at - 0x08000000u), K.rom + (BN5_LIB_PALETTE - 0x08000000u) + 0x20 * b, 0x20)) { *bank = b; return at; }
+/* Which of `n` frames shows at time `t` of a cycle they are held for
+ * `held` frames each, in that order */
+static int frame_at(int t, const int *held, int n) {
+	for (int i = 0; i < n; ++i) { if (t < held[i]) return i; t -= held[i]; }
 	return 0;
 }
 
-/* The board's palettes animated as BN5's (BN6's BG palette buffer, copied
- * to the screen each frame): the dark panels' and DarkHoles' (9 and 10)
- * back and forth through their frames (their timing assumed); the glint,
- * at rest and every 132 frames through its next five held 6, 2, 2, 1, 1
- * (BN5_LIB_PULSE); the breath, six frames there and back, 12 frames each,
- * 8 at the last (BN5_LIB_BREATH) */
+/* The board's palettes animated as BN5's (traced: docs/ROM_DATA.md), in
+ * BN6's BG palette buffer, copied to the screen each frame: the dark
+ * panels' (9) at rest 120 frames, then three frames down and up; the
+ * DarkHoles' (10) four frames there and back; the barriers' glint (11)
+ * every 132 frames; the BonusPanel's breath (12) there and back */
 static void pulse(void) {
-	int n = BN5_LIB_DARK_FRAME_COUNT, t = D.frame / PULSE_STEP % (2 * n - 2), k = t < n ? t : 2 * n - 2 - t;
-	bank_from(9, BN5_LIB_DARK_FRAMES + 0x20u * (uint32_t)k);
-	bank_from(10, BN5_LIB_HOLE_FRAMES + 0x20u * (uint32_t)k);
-	if (K.glint) {
-		static const int held[5] = { 6, 2, 2, 1, 1 };
-		int g = D.frame % 132 - (132 - 12), f = 0;
-		for (int i = 0; i < 5 && g >= 0; ++i) { if (g < held[i]) { f = i + 1; break; } g -= held[i]; }
-		bank_from(K.glint_bank, K.glint + 0x20u * (uint32_t)f);
-	}
-	if (K.breath) {
-		int b = D.frame % (12 * 9 + 8), f = 0;
-		/* (0..5 and back: 12 frames a step, 8 at the last) */
-		static const int step[10] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1 };
-		for (int i = 0; i < 10; ++i) { int h = step[i] == 5 ? 8 : 12; if (b < h) { f = step[i]; break; } b -= h; }
-		bank_from(K.breath_bank, K.breath + 0x20u * (uint32_t)f);
-	}
+	static const int dark_held[6] = { 120, 16, 16, 32, 16, 16 }, dark_at[6] = { 3, 2, 1, 0, 1, 2 };
+	bank_from(9, BN5_LIB_DARK_FRAMES + 0x20u * (uint32_t)dark_at[frame_at(D.frame % 216, dark_held, 6)]);
+	static const int hole_held[6] = { BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP, BN5_LIB_HOLE_STEP },
+		hole_at[6] = { 0, 1, 2, 3, 2, 1 };
+	bank_from(10, HOLE_FRAMES + 0x20u * (uint32_t)hole_at[frame_at(D.frame % (6 * BN5_LIB_HOLE_STEP), hole_held, 6)]);
+	static const int glint_held[6] = { 120, 6, 2, 2, 1, 1 };
+	bank_from(11, BN5_LIB_PULSE + 0x20u * (uint32_t)frame_at(D.frame % 132, glint_held, 6));
+	static const int breath_held[10] = { 12, 12, 12, 12, 12, 8, 12, 12, 12, 12 }, breath_at[10] = { 0, 1, 2, 3, 4, 5, 4, 3, 2, 1 };
+	bank_from(12, BN5_LIB_BREATH + 0x20u * (uint32_t)breath_at[frame_at(D.frame % 116, breath_held, 10)]);
 }
 
 /* The map's layer 1 and BG2 cleared, every look to be written again: on
