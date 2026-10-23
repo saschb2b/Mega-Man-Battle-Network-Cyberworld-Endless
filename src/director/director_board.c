@@ -274,6 +274,34 @@ void code_watch(void) {
 	if (talk_start(compressed_words(about), FACE_MEGAMAN)) D.code_due = 0;
 }
 
+/* The codes the profile knows, entered for MegaMan as a run begins (docs/
+ * META.md, Compression codes): the flags of each program's four colours
+ * set, as BN6's code input sets them, so the NaviCust lists it compressed;
+ * its code entered again undoes it, as in BN6. Not on a program placed on
+ * the board, whose cells the grid holds (none in a fresh game). A
+ * CONTINUE's state keeps the flags as the player left them. */
+void codes_bring(void) {
+	/* (codes=N: the first N programs' codes known, as if entered in a run
+	 * before, docs/DEVTOOLS.md) */
+	for (int p = 1, known = 0; p < NAVICUST_PROGRAMS && known < dev.codes; ++p) {
+		char code[12];
+		if (!navicust_code(p, code)) continue;
+		if (!profile_code_entered(p)) { profile_code_note(p); profile_save(); }
+		++known;
+	}
+	for (int p = 1; p < NAVICUST_PROGRAMS; ++p) {
+		char code[12];
+		bool placed = false;
+		if (!profile_code_entered(p) || !navicust_code(p, code)) continue;
+		for (int e = 0; e < BN6_NAVICUST_PLACED_MAX && !placed; ++e) {
+			int id = emu_read16(BN6_NAVICUST_PLACED + (uint32_t)e * 8);
+			if (!id) break;
+			placed = id / 4 == p;
+		}
+		for (int v = p * 4; v < p * 4 + 4 && !placed; ++v) flag_set(BN6_FLAG_COMPRESSED + v);
+	}
+}
+
 static NaviPart board_parts[BN6_NAVICUST_SLOTS];
 static uint8_t board_grid[NAVICUST_GRID * NAVICUST_GRID];
 

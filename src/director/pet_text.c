@@ -341,15 +341,16 @@ static void records_text(char *s, int size) {
 	#undef ADD
 }
 
-/* The compression codes entered in any run (issue #50), three a page: each
- * program as the NaviCust lists it (SuprArmr, as eight letters allow), its
- * code five and five, a line of twenty. (Not how to enter one: BN6's own,
- * its button named, and the mail comes only after one was entered,
- * docs/VOICE.md, What nobody says) */
+/* The compression codes entered in any run (issue #50), three a page: the
+ * programs Dad's lab compresses before every dive (docs/META.md), each as
+ * the NaviCust lists it (SuprArmr, as eight letters allow), its code five
+ * and five, a line of twenty. (Not how to enter one, nor that entered
+ * again it undoes itself: BN6's own, its button named, and the mail comes
+ * only after one was entered, docs/VOICE.md, What nobody says) */
 static void codes_text(char *s, int size) {
 	int k = 0;
 	#define ADD(...) (k += snprintf(s + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	ADD("Lan,your compression codes,kept for every dive.\f");
+	ADD("Lan,I compress these for MegaMan before every dive.\f");
 	for (int p = 1; p < NAVICUST_PROGRAMS; ++p) {
 		const char *about = navicust_about(p);
 		char code[12];

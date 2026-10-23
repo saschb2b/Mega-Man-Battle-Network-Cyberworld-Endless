@@ -627,9 +627,9 @@ it pays one of BN6's GigaChips.
   with its colour's Spin: each run hides one, a colour you don't have yet,
   in a blue Mystery Data deeper in, and you keep it for every run after.
   A program's compression code, once you enter it (hold RIGHT on the
-  program in the NaviCust and press its ten buttons), is kept for every run
-  after: Dad's Compression mail lists it, and MegaMan names it when the
-  program would only fit compressed.
+  program in the NaviCust and press its ten buttons), is kept: in every run
+  after, the program comes compressed, and Dad's Compression mail lists its
+  code. Entered again, the code undoes it for that run, as in BN6.
 - **Reg memory.** Each layer before a guardian hides a RegUp, behind a
   lock or at a detour's end: Reg memory grows from 4 MB to about 20 by the
   third act, and a Regular Chip that fits (the folder's EDIT, SELECT)

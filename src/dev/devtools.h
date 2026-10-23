@@ -27,6 +27,7 @@ typedef struct {
 	int folder_n;   /* folder=ID/N: ... its first N entries alone (one beside the run's own chips) */
 	int pack;       /* pack=N: a copy of each of the first N chips in the pack, in its first code (the folder editor's pack, issue #75) */
 	int programs;   /* programs=N: a copy of each of the first N NaviCust programs, in a colour the ROM draws (the NaviCustomizer, issue #76) */
+	int codes;      /* codes=N: the profile knows the compression codes of the first N programs that have one, as if entered in an earlier run (docs/META.md) */
 	int clock;      /* clock=N: the Net's clock at N notches from the run's start (docs/HOME.md: its guardians' HP) */
 	int job;        /* job=K: the run holding a request of kind K (jobs.h), taken; at --scene home one from the act before */
 	int job_state;  /* jobstate=S: ... in state S (2 done, 3 failed) */
