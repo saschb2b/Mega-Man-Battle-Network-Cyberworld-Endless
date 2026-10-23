@@ -200,6 +200,55 @@ HP and damage by mission). The Darkloid attacks Navis in his reach and
 heals for each dark panel around him (100 a panel, **guides**). All down
 means a retreat (**text**).
 
+### How the board looks and moves (play, ROM)
+
+The owner's direction (23 October 2026): "I expect a near mmbn5 like
+result. Take the original as hard reference." What BN5 shows, recorded in
+romlab on the plain ROM (mission 1, from the board's start through a won
+liberation and an item's find; the recordings are in the pull request):
+
+- **Two layers.** BG1 is the mission's map itself (group 0x86): a floor
+  built as a grid of framed panels, one a 32-unit board cell, with BN5's
+  walkway trim at the start. BG2 lays each panel's kind over it as an
+  isometric diamond of tiles (two, four, four and two across): cyan for a
+  clean panel (palette 8), a magenta swirl for a dark one (palette 9, which
+  changes every frame: the dark panels' pulse), a pit for a DarkHole.
+  An item panel is a dark panel with a teal stud. The start is the map's
+  own floor, no overlay.
+- **The faced panel** gets a yellow outline, which blinks fully lit; the
+  command menu (Liberation, the Navi's command, Pass) greys what cannot
+  be used there.
+- **A won liberation:** "LIBERATE SUCCESS!" over the battle (or "1 TURN
+  LIBERATE!" for a one-turn win), a fade back to the board, the freed
+  panel turning from the swirl to grey to cyan, then the Navi's line in
+  his chat box ("We liberated it!").
+- **An item's find:** the item rises out of its freed panel as an icon (a
+  zenny coin, a heart, Order Points and so on) and bobs over it while the
+  Navi says what he found ("I found some Zennys!"). The board queues it
+  as an event (`BN5_LIB_EVENT`, 12 bytes each from `0x02001AB0`): an event
+  kind, the text script of the find (the item kinds' table
+  `BN5_LIB_ITEM_KINDS` +4: 0x18 a heart, 0x29 Order Points, 0x25 zenny,
+  0x26 BugFrags, 0x53 a chip), the panel.
+- **The tiles** are the mission maps' own: the overlay's tiles stand from
+  tile 865 of map 0x86:00's tile set, uncompressed at `0x08623130` (its
+  tile t at `0x0861C510` + 32t, copied whole into the BG's characters),
+  and the diamonds in twelve looks after them (`BN5_LIB_LOOKS`, 8 x 4
+  tile-map entries each, named by the mission record's first block, the
+  same in all nine): clean, dark, a paled dark (the dissolve's middle),
+  an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
+  BonusPanel's "?", a DarkHole, a grey grid; palettes 8-10 at `0x08614EB4`, `0x08614B84` (palette 9's
+  first frame of its pulse) and `0x08614BC8`. Located by their bytes in a
+  capture; the routine that draws a panel from its kind and its four look
+  bytes (the panel list's +4-+7), the pulse's table and the other maps'
+  sets are still to be traced.
+
+So the engine's board is to be BN5's: its overlay tiles, diamonds and
+palettes read from BN5's ROM at run time (never kept), its pulse, its
+outline, its dissolve, its banners and its item icons, over a floor of
+the mission maps' panel grid where BN5's ROM is read. The dark layer's
+first build (stage 1) tints BN6's floor instead and has none of the
+animations; its rework follows this section.
+
 ### Not found, and assumed
 
 - The commands' shapes in the ROM: the board's command code
@@ -272,56 +321,99 @@ or the Cross lineup).
 
 ### What a mission is made of
 
-| Act | BN5 like | Panels | DarkHoles | Team | Barriers | Dark | Items | Bonus | Guardians |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2 | 1 | 95-120 | 2 | 2 | none | 40-55% | 7 | 2 | BigBrute |
-| 3 | 2-3 | 165-215 | 3 | 3 | 1 | 45-58% | 8 | 3 | + TinHawk |
-| 4 | 4-5 | 205-240 | 4 | 4 | 2 | 52-66% | 12 | 3 | + Bladia |
-| 5 | 6-7 | 215-250 | 5 | 5 | 2 | 58-68% | 16 | 3 | all |
-| 6+ | 8-9 | 215-250 | 5 | 5 | 3 | 55-68% | 14 | 3 | all |
+The board's shape and its dark follow bands measured on BN5's own boards
+(`tools/liberation_bn5.py`): **fields**, the share of panels in a 2x2
+block of floor; **fill**, the floor's share of its box; **dense**, the dark
+panels around a dark panel on average, which sets how often a liberation
+is won in one turn. BN5's missions 1-3 stand at 72-82% fields, 22-28% fill
+and 3.5-3.9 dense; missions 4-9 at 88-99%, 43-48% and 4.1-6.0: its later
+boards are wide fields thick with dark.
+
+| Act | BN5 like | Panels | DarkHoles | Team | Barriers | Dark | Fields | Fill | Dense | Items | Bonus | Guardians | Darkloid |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 1 | 90-112 | 2 | 2 | none | 28-45% | 68-86% | 26% | 3.3-4.3 | 7 | 2 | BigBrute | 300 HP, reach 1, 30 |
+| 3 | 2-3 | 165-215 | 3 | 3 | 1 | 45-58% | 70-88% | 27% | 3.4-4.5 | 8 | 3 | + TinHawk | 600, 2, 50 |
+| 4 | 4-5 | 210-245 | 4 | 4 | 2 | 52-66% | 86-100% | 42% | 4.6-6.2 | 12 | 3 | + Bladia | 900, 3, 80 |
+| 5 | 6-7 | 215-255 | 5 | 5 | 2 | 58-68% | 86-100% | 44% | 4.6-6.2 | 16 | 3 | all | 1200, 2, 80 |
+| 6+ | 8-9 | 220-260 | 5 | 5 | 3 | 55-68% | 86-100% | 45% | 4.2-6.2 | 14 | 3 | all | 1500, 3, 100 |
 
 The steps (`tools/liberation.py` `generate`):
 
-1. **The floor:** platforms of 3-6 by 3-5, joined by one-wide walkways
-   bending at right angles (a spanning tree, then a loop or two); a start
-   zone at the left edge; the Darkloid's 3x3 at the right; spurs ending in
-   3x3 pads or one-wide stubs. In the engine the floor is the generated
-   layer's own, taken at 32 world units a panel.
+1. **The floor:** platforms (3-5 by 3-4 at act 2, up to 8 by 6 from act 4)
+   in a box the act's fill sizes, joined by walkways bending at right
+   angles (a spanning tree, then a loop or two), one wide early and two
+   wide in six of ten from act 4, as BN5's fields run; a start zone at the
+   left edge; the Darkloid's 3x3 at the right; spurs ending in 3x3 pads or
+   one-wide stubs. In the engine the floor is the generated layer's own,
+   taken at 32 world units a panel.
 2. **DarkHoles** on platforms with a whole ring of floor, past a third of
    the walk from the start, six apart and four from the Darkloid; their
-   rings dark; a guardian on each ring (BigBrute first, the act's kinds
-   after); roaming guardians from act 3.
-3. **Dark panels** thickening with the walk from the start, then one pass
-   of a majority rule so they cluster; the first two panels of the walk
-   stay clean.
-4. **BonusPanels** at stub ends; **barriers** across walkways that cut a
-   region off the start's side (never the Darkloid's), the key in a dark
-   panel on the near side; from act 4, half the time, the last barrier's
-   region holds a **sealed route** (below).
+   rings dark, from act 4 a second ring where the floor runs on; a guardian
+   on each ring (BigBrute first, the act's kinds after); roaming guardians
+   from act 3.
+3. **Dark panels** thickening with the walk from the start; from act 4 the
+   Darkloid's approach dark three deep. Then **the density rule:**
+   majority passes until a dark panel has as many dark around it as BN5's
+   boards of the act have (the dense band), so a one-turn win is no sure
+   thing and a command that frees several panels in one battle is worth
+   its Order Point. The first two panels of the walk stay clean.
+4. **BonusPanels** at stub ends; **barriers**, walls of one or two panels
+   (a two-wide way walled across) that cut a region off the start's side
+   (never the Darkloid's), the key in a dark panel on the near side; from
+   act 4, half the time, the last barrier's region holds a **sealed
+   route** (below).
 5. **Items** in the dark, corners and dead ends first: one Order Points
    item always, then hearts, Order Points, zenny, chips; BugFrags and traps
    from act 4.
-6. **The par** from the planner (below).
+6. **The par** from the planner, then **the command rule** (below).
 
 ### Guarantees, and what is rejected
 
 A board is rejected and the next seed tried when: its size is off; the
 Darkloid is nearer than 60% of the farthest walk; the DarkHoles cannot be
-spread; a barrier finds no cut or its key no near spot; a key lies behind
-its own lock; a DarkHole is cut off; nothing can be liberated in the first
-phase; a guardian stands within three of the start; the planner wins it
-less than 60% of the time (BN5's own mission 1 it wins about half).
+spread; its dark misses the act's dense band; a barrier finds no wall or
+its key no near spot; a key lies behind its own lock; a DarkHole is cut
+off; nothing can be liberated in the first phase; a guardian stands within
+three of the start; a teammate's command finds no situation; the planner
+wins it less than 60% of the time; or a teammate's command does not earn
+its Order Point.
+
+**The command rule.** The run knows which Souls it holds when a layer is
+made, so the generator makes the board for its team. First it gives each
+teammate's command its situation (`situations`): a roaming guardian on the
+way to a DarkHole for SneakAttack; a cache of four item panels in a 3x2 of
+dark, a clean panel beside it to stand on (from act 4 one of them a trap)
+for NumberCheck; a dark line of five on the way for LifeMelody; at least
+three spots of three dark across, or two by three, for ScrenDiv and
+TomahawkSwing. Then the planner plays the board again with each teammate
+and no command, the same random numbers as before, and the board is kept
+only where the planner uses every command (half a time a play at least)
+and where:
+
+- a liberating command (LongSwrd, ScrenDiv, TomahawkSwing, LifeMelody)
+  saves phases (`EARN`: no worse than a tenth of a phase, scaled as the
+  par, within the plays' noise);
+- a utility command (SneakAttack, NumberCheck) costs the team no more than
+  a quarter of a phase (`UTILITY_EARN`): it pays in safety and loot, a
+  guardian weakened or items taken with no battle, which phases do not
+  show, so its yield is reported beside it.
+
+KnightMan's StoneBody is passive and always on.
 
 ### The par
 
 A planner plays each board 12-24 times by BN5's rules, abstracted: each
 Navi moves over clean panels and takes the best of liberating, his command,
-fighting a guardian in his way, or resting; battles won in one turn, won
-later or lost by the dark around; the guardians' and the Darkloid's phase;
-the Darkloid healing by his dark ring. On BN5's nine boards, with their own
-teams, it needs 1.6 times BN5's par (median 12-20 phases against 7-16), so
-a generated board's par is the planner's median times 0.62 (`PAR_SCALE`):
-BN5's own yardstick, measured on its own boards.
+fighting a guardian in his way (the guardian's HP carried from fight to
+fight; one standing on the way on is worth the detour he forces), or
+resting; support acts first (LifeMelody, SneakAttack), then
+MegaMan; battles won in one turn, won later or lost by the dark around;
+the guardians' and the Darkloid's phase; the Darkloid healing by his dark
+ring. On BN5's nine boards, with their own teams, it needs more phases than
+BN5's par, by a ratio that changes with the missions (BN5's par over the
+planner's median: 0.50 at mission 1, 0.58 at 2-3, 0.59 at 4-5, 0.79 at
+6-7, 0.75 at 8-9). A generated board's par is the planner's median times
+its act's ratio (`PAR_SCALE`): BN5's own yardstick at that stage.
 
 ### Special routes
 

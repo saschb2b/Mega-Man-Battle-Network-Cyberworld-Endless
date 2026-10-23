@@ -9,12 +9,15 @@ kinds placed as BN5 places them (a start zone at an edge, the Darkloid's 3x3
 on the far side, DarkHoles in rings of dark panels with their guardians, dark
 panels thickening away from the start, items in the dark, BonusPanels at the
 ends of spurs, numbered barriers whose keys lie on the near side), checked
-against the fairness rules and rejected where one fails. A planner then plays
-each mission many times by BN5's rules, abstracted (a team acting once a
-phase, three-turn liberations, the one-turn bonus, Order Points, the enemy's
-phase), and its phases set the mission's par. Prints the measures the design
-promises over the seeds: phases against par, every ability's worth, route
-variety, rejections. Numbers only; nothing of BN5's is read here
+against the fairness rules and rejected where one fails. Its shape and its
+dark keep to bands measured on BN5's own boards (fields, fill, the dark
+around a dark panel). A planner then plays each mission many times by BN5's
+rules, abstracted (a team acting once a phase, three-turn liberations, the
+one-turn bonus, Order Points, the enemy's phase): its phases set the
+mission's par, and the board is kept only where every teammate's command
+earns its Order Point. Prints the measures the design promises over the
+seeds: phases against par, every command's worth, route variety, the bands,
+rejections. Numbers only; nothing of BN5's is read here
 (tools/liberation_bn5.py measures BN5's own nine missions the same way).
 """
 import argparse
@@ -35,16 +38,26 @@ AROUND = tuple((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
 # for and the sizes BN5's missions have there (docs/LIBERATION.md, The
 # missions): panels, DarkHoles, team, barrier kinds, the share of dark panels,
 # items, BonusPanels, guardians beyond one a hole, the enemies' damage and HP.
+# The layout's and the dark's bands are measured on BN5's own boards
+# (tools/liberation_bn5.py): `fields` the share of panels in a 2x2 block of
+# floor, `fill` the floor's share of its box, `dense` the dark panels around a
+# dark panel, on average; `plat` the platforms' sides, `wide` the share of
+# walkways two panels wide.
 ACTS = {
-    2: dict(bn5=1, panels=(95, 120), holes=2, team=2, bars=0, dark=(0.40, 0.55), items=7, bonus=2, roam=0,
-            kinds=('brute',), hp=200, ally_hp=200, virus=14, boss_hp=400, boss_range=2, boss_dmg=40),
+    2: dict(bn5=1, panels=(90, 112), holes=2, team=2, bars=0, dark=(0.28, 0.45), items=7, bonus=2, roam=0,
+            plat=((3, 5), (3, 4)), wide=0.0, gap=2, fill=0.26, fields=(0.68, 0.86), dense=(3.3, 4.3),
+            kinds=('brute',), hp=200, ally_hp=200, virus=14, boss_hp=300, boss_range=1, boss_dmg=30),
     3: dict(bn5=3, panels=(165, 215), holes=3, team=3, bars=1, dark=(0.45, 0.58), items=8, bonus=3, roam=1,
+            plat=((3, 6), (3, 5)), wide=0.2, gap=2, fill=0.27, fields=(0.70, 0.88), dense=(3.4, 4.5),
             kinds=('brute', 'hawk'), hp=300, ally_hp=300, virus=20, boss_hp=600, boss_range=2, boss_dmg=50),
-    4: dict(bn5=5, panels=(205, 240), holes=4, team=4, bars=2, dark=(0.52, 0.66), items=12, bonus=3, roam=2,
+    4: dict(bn5=5, panels=(210, 245), holes=4, team=4, bars=2, dark=(0.52, 0.66), items=12, bonus=3, roam=2,
+            plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.42, fields=(0.86, 1.0), dense=(4.6, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=400, ally_hp=350, virus=28, boss_hp=900, boss_range=3, boss_dmg=80),
-    5: dict(bn5=7, panels=(215, 250), holes=5, team=5, bars=2, dark=(0.58, 0.68), items=16, bonus=3, roam=2,
+    5: dict(bn5=7, panels=(215, 255), holes=5, team=5, bars=2, dark=(0.58, 0.68), items=16, bonus=3, roam=2,
+            plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.44, fields=(0.86, 1.0), dense=(4.6, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=500, ally_hp=450, virus=34, boss_hp=1200, boss_range=2, boss_dmg=80),
-    6: dict(bn5=9, panels=(215, 250), holes=5, team=5, bars=3, dark=(0.55, 0.68), items=14, bonus=3, roam=3,
+    6: dict(bn5=9, panels=(220, 260), holes=5, team=5, bars=3, dark=(0.55, 0.68), items=14, bonus=3, roam=3,
+            plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.45, fields=(0.86, 1.0), dense=(4.2, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=600, ally_hp=650, virus=40, boss_hp=1500, boss_range=3, boss_dmg=100),
 }
 # The guardians, as BN5's guides give them (docs/LIBERATION.md, The enemy's phase): steps, reach, damage by act.
@@ -62,13 +75,25 @@ ABILITIES = {
 ALLIES = ('Colonel', 'ShadowMan', 'NumberMan', 'TomahawkMan', 'KnightMan', 'ToadMan',
           'ProtoMan', 'GyroMan', 'NapalmMan', 'SearchMan', 'MagnetMan', 'Meddy')
 FLIERS = ('ShadowMan', 'GyroMan')
+# The commands whose one-turn win still frees the panels around (Casebier's guides except
+# Napalm, PanelSearch, TwinLiberation and TomahawkSwing from it; assumed for the rest).
+BONUS_KEPT = ('longswrd', 'wideswrd', 'screndiv')
 # The planner's skill: a liberation battle's chance to be won in one turn on a panel with
 # no dark around, and to fail (each dark panel around takes 0.05 and adds 0.035).
 SKILL = [0.75, 0.04]
-# BN5's par over the planner's median phases on BN5's own nine boards (tools/liberation_bn5.py
-# prints both): the planner plays slower than BN5's par expects, so a generated mission's par is
-# its median phases times this, BN5's yardstick.
-PAR_SCALE = 0.62
+# BN5's par over the planner's median phases on BN5's own boards, per act from the missions it
+# stands for (tools/liberation_bn5.py prints them): the planner plays slower than BN5's par
+# expects, so a generated mission's par is its median phases times its act's, BN5's yardstick.
+PAR_SCALE = {2: 0.58, 3: 0.67, 4: 0.70, 5: 0.82, 6: 0.79}
+# The command rule: a board is kept only where every teammate's command saves at least this
+# many phases (scaled as the par) against the same Navi without it, the same plays paired.
+EARN = -0.1
+USE_MIN = 0.5   # ... and only where the planner uses every teammate's command, half a time a play at least
+# The utility commands pay in safety and loot, which phases do not show (SneakAttack: a guardian
+# weakened with no battle; NumberCheck: items taken and traps disarmed with none): held only to
+# being used where their situation is and to costing the team no more than this.
+UTILITY = ('sneak', 'numbercheck')
+UTILITY_EARN = -0.25
 
 
 def shape(ability, pos, d):
@@ -130,16 +155,20 @@ def lay_out(act, rng):
     block at the right, spurs ending in pads or stubs."""
     spec = ACTS[act]
     want = rng.randint(*spec['panels'])
-    w = int(math.sqrt(want * 2.6) * 1.25)
-    h = int(want * 2.6 / w) + 2
+    area = want / spec['fill']
+    w = int(math.sqrt(area * 1.4))
+    h = int(area / w) + 2
     floor, plat = set(), set()
     rects = []
     tries = 0
-    while len(floor) < want * 0.55 and tries < 400:
+    (pw0, pw1), (ph0, ph1) = spec['plat']
+    g = spec['gap']
+    share = 0.55 if spec['wide'] < 0.5 else 0.7
+    while len(floor) < want * share and tries < 600:
         tries += 1
-        rw, rh = rng.randint(3, 6), rng.randint(3, 5)
-        rx, ry = rng.randint(4, w - rw - 5), rng.randint(1, h - rh - 1)
-        if any(rx < x + ww + 2 and x < rx + rw + 2 and ry < y + hh + 2 and y < ry + rh + 2 for x, y, ww, hh in rects):
+        rw, rh = rng.randint(pw0, pw1), rng.randint(ph0, ph1)
+        rx, ry = rng.randint(4, max(4, w - rw - 5)), rng.randint(1, max(1, h - rh - 1))
+        if any(rx < x + ww + g and x < rx + rw + g and ry < y + hh + g and y < ry + rh + g for x, y, ww, hh in rects):
             continue
         rects.append((rx, ry, rw, rh))
         for x in range(rx, rx + rw):
@@ -163,7 +192,14 @@ def lay_out(act, rng):
     for _ in range(rng.randint(1, 1 + act // 3)):
         i, j = rng.sample(range(len(nodes)), 2)
         if (i, j) not in edges and (j, i) not in edges: edges.append((i, j))
-    for i, j in edges: carve_line(floor, nodes[i], nodes[j], rng)
+    for i, j in edges:
+        path = carve_line(floor, nodes[i], nodes[j], rng)
+        if rng.random() < spec['wide']:
+            # A field's way two panels wide, as BN5's later boards run (docs/LIBERATION.md, The board).
+            for k, c in enumerate(path):
+                nxt = path[k + 1] if k + 1 < len(path) else path[k - 1]
+                if nxt[0] != c[0]: floor.add((c[0], c[1] + 1))
+                else: floor.add((c[0] + 1, c[1]))
     carve_line(floor, (bx - 2, by), (bx - 1, by), rng)
     # Spurs: pads of 3x3 and one-wide stubs off the walkways (where BN5 sets its BonusPanels).
     ends = []
@@ -188,6 +224,24 @@ def lay_out(act, rng):
     return floor, plat, start, boss_block, (bx, by), ends
 
 
+def density(b):
+    """The dark panels around a dark panel, on average (of eight): how hard a liberation is."""
+    ds = [sum(1 for dx, dy in AROUND if b.cells.get((c[0] + dx, c[1] + dy)) in (DARK, ITEM, HOLE, RING))
+          for c, k in b.cells.items() if k in (DARK, ITEM)]
+    return sum(ds) / len(ds) if ds else 0.0
+
+
+def fields(cells):
+    """The share of panels in a 2x2 block of floor, and the floor's share of its box."""
+    fl = set(cells)
+    blocks = set()
+    for (x, y) in fl:
+        if {(x + 1, y), (x, y + 1), (x + 1, y + 1)} <= fl:
+            blocks |= {(x, y), (x + 1, y), (x, y + 1), (x + 1, y + 1)}
+    xs = [c[0] for c in fl]; ys = [c[1] for c in fl]
+    return len(blocks) / len(fl), len(fl) / ((max(xs) - min(xs) + 1) * (max(ys) - min(ys) + 1))
+
+
 def graph_dist(board, src, passable):
     """Breadth-first distances from src cells over panels passable(kind) allows."""
     dist = {s: 0 for s in src}
@@ -201,8 +255,9 @@ def graph_dist(board, src, passable):
     return dist
 
 
-def generate(act, seed):
-    """One mission, or None with the reason it was rejected."""
+def generate(act, seed, team=None):
+    """One mission for this team (the run's Souls when the layer is made), or None with the
+    reason it was rejected."""
     rng = random.Random(seed * 7919 + act)
     spec = ACTS[act]
     floor, plat, start, boss_block, boss, ends = lay_out(act, rng)
@@ -235,9 +290,15 @@ def generate(act, seed):
         if len(holes) == spec['holes']: break
     if len(holes) < spec['holes']:
         return None, 'holes'
+    deep = spec['dense'][0] >= 4.5
     for i, h in enumerate(holes):
         b.cells[h] = HOLE
         for dx, dy in AROUND: b.cells[(h[0] + dx, h[1] + dy)] = DARK
+        if deep:  # a second ring where the floor runs on (BN5's later holes sit in fields of dark)
+            for dx in range(-2, 3):
+                for dy in range(-2, 3):
+                    c = (h[0] + dx, h[1] + dy)
+                    if b.cells.get(c) == FREE and rng.random() < 0.8: b.cells[c] = DARK
         ring = [(h[0] + dx, h[1] + dy) for dx, dy in AROUND if dx == 0 or dy == 0]
         b.guards.append(dict(kind=rng.choice(spec['kinds']) if i else 'brute', pos=rng.choice(ring), hole=i))
     b.holes = holes
@@ -248,12 +309,29 @@ def generate(act, seed):
         t = reach[c] / far
         if reach[c] <= 2: continue
         if rng.random() < d0 + (d1 - d0) * 2 * t - 0.25 + 0.25 * t: b.cells[c] = DARK
-    for c in free:
-        if reach[c] <= 2: continue
-        around = [b.cells.get((c[0] + dx, c[1] + dy)) for dx, dy in AROUND]
-        darks = sum(1 for k in around if k == DARK); floors = sum(1 for k in around if k is not None)
-        if floors and darks / floors > 0.6 and rng.random() < 0.7: b.cells[c] = DARK
-        elif floors and darks / floors < 0.2 and rng.random() < 0.5: b.cells[c] = FREE
+    if deep:  # the Darkloid's approach dark two deep
+        bx, by = boss
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                c = (bx + dx, by + dy)
+                if b.cells.get(c) == FREE and reach.get(c, 0) > 2: b.cells[c] = DARK
+    # The density rule: majority passes until a dark panel has as many dark around it as
+    # BN5's boards of this act have (the act's `dense` band), so a one-turn win is no sure thing
+    # and the commands earn their Order Points.
+    lo_d, hi_d = spec['dense']
+    for _ in range(8):
+        dd = density(b)
+        if lo_d <= dd <= hi_d: break
+        for c in free:
+            if reach[c] <= 2 or b.cells[c] not in (FREE, DARK): continue
+            darks = sum(1 for dx, dy in AROUND if b.cells.get((c[0] + dx, c[1] + dy)) in (DARK, HOLE))
+            floors = sum(1 for dx, dy in AROUND if (c[0] + dx, c[1] + dy) in b.cells)
+            if not floors: continue
+            if dd < lo_d and b.cells[c] == FREE and darks / floors >= 0.45 and rng.random() < 0.6: b.cells[c] = DARK
+            elif dd < lo_d and b.cells[c] == DARK and darks / floors < 0.25 and rng.random() < 0.6: b.cells[c] = FREE
+            elif dd > hi_d and b.cells[c] == DARK and darks / floors > 0.8 and rng.random() < 0.3: b.cells[c] = FREE
+    if not lo_d <= density(b) <= hi_d:
+        return None, 'density'
     # BonusPanels at the ends of spurs (BN5's "?" at the end of its stubs).
     stubs = [e for e in ends if b.cells.get(e) in (FREE, DARK)]
     rng.shuffle(stubs)
@@ -287,10 +365,97 @@ def generate(act, seed):
         spots = [c for c, kk in b.cells.items() if kk == DARK and reach.get(c, 0) > 0.4 * far]
         if spots:
             b.guards.append(dict(kind=rng.choice(spec['kinds']), pos=rng.choice(spots), hole=None))
+    if team:
+        why = situations(b, team, rng, reach, far)
+        if why:
+            return None, why
     why = check(b)
     if why:
         return None, why
     return b, None
+
+
+def cost_from(b, src):
+    """Per panel, the dark panels to liberate on the way from src (a 0-1 walk; barriers shut)."""
+    dist = {c: 0 for c in src}
+    dq = collections.deque(src)
+    while dq:
+        c = dq.popleft()
+        for n in b.neighbours(c):
+            k = b.cells[n]
+            if k in BARS: continue
+            w = 1 if k in (DARK, ITEM, RING, HOLE) else 0
+            if dist[c] + w < dist.get(n, 1 << 30):
+                dist[n] = dist[c] + w
+                (dq.appendleft if w == 0 else dq.append)(n)
+    return dist
+
+
+def way_on(b):
+    """The panels on a cheapest way from the start to a DarkHole: where the team must go."""
+    ds = cost_from(b, b.start)
+    way = set()
+    for h in b.holes:
+        dh = cost_from(b, [h])
+        if h not in ds: continue
+        best = ds[h]
+        way |= {c for c in b.cells if c in ds and c in dh and ds[c] + dh[c] <= best + 1}
+    return way
+
+
+def situations(b, team, rng, reach, far):
+    """Each teammate's command its situation on this board (docs/LIBERATION.md, The command
+    rule): a guardian in the way for SneakAttack, an item cache for NumberCheck, a dark line of
+    five for LifeMelody, rows and blocks of dark for ScrenDiv and TomahawkSwing."""
+    abilities = {ABILITIES[n] for n in team}
+    way = way_on(b)
+    near_hole = {(h[0] + dx, h[1] + dy) for h in b.holes for dx in range(-2, 3) for dy in range(-2, 3)}
+    taken = {g['pos'] for g in b.guards}
+    if 'sneak' in abilities:
+        spots = [c for c in way if b.cells[c] == DARK and c not in near_hole and c not in taken
+                 and reach.get(c, 0) > 0.35 * far and len(b.neighbours(c)) <= 3]
+        if not spots:
+            return 'situation-sneak'
+        c = rng.choice(spots)
+        b.guards.append(dict(kind=rng.choice(ACTS[b.act]['kinds']), pos=c, hole=None, blocks=True))
+        taken.add(c)
+    if 'numbercheck' in abilities:
+        blocks = []
+        for (x, y), k in b.cells.items():
+            for w, h, stands in ((3, 2, ((x + 1, y - 1), (x + 1, y + 2))), (2, 3, ((x - 1, y + 1), (x + 2, y + 1)))):
+                cells = [(x + i, y + j) for i in range(w) for j in range(h)]
+                if all(b.cells.get(c) == DARK and c not in taken and c not in near_hole for c in cells) \
+                        and any(b.cells.get(c) in (FREE, START) or (b.cells.get(c) == DARK and any(
+                            b.cells.get(n) in (FREE, START) for n in b.neighbours(c))) for c in stands if c in b.cells):
+                    blocks.append(cells)
+        if not blocks:
+            return 'situation-number'
+        cache = rng.choice(blocks)
+        kinds = [('op', 3), ('heart', 1), ('zenny', 1), ('chip', 1)]
+        if b.act >= 4: kinds[2] = ('trap', 1)
+        for c, it in zip(rng.sample(cache, 4), kinds):
+            b.cells[c] = ITEM
+            b.items[c] = it
+    if 'melody' in abilities:
+        lines = []
+        for (x, y) in b.cells:
+            for dx, dy in DIRS[:2]:
+                run = [(x + dx * i, y + dy * i) for i in range(5)]
+                if all(b.cells.get(c) in (DARK, FREE, ITEM) for c in run) and sum(c in way for c in run) >= 3 \
+                        and all(reach.get(c, 0) > 2 for c in run) and not any(c in taken for c in run):
+                    lines.append(run)
+        if not lines:
+            return 'situation-melody'
+        for c in rng.choice(lines):
+            if b.cells[c] == FREE: b.cells[c] = DARK
+    for ab, cells_of, need in (('screndiv', lambda c, d: shape('screndiv', c, d), 3), ('tomahawk', lambda c, d: shape('tomahawk', c, d), 3)):
+        if ab not in abilities: continue
+        spots = sum(1 for c in b.cells for d in DIRS
+                    if b.cells[c] in (FREE, START) and all(b.cells.get(t) in (DARK, ITEM) for t in cells_of(c, d)))
+        spots += sum(1 for c in way for d in DIRS if b.cells.get(c) in (DARK, ITEM) and all(b.cells.get(t) in (DARK, ITEM) for t in cells_of(c, d)))
+        if spots < need:
+            return 'situation-' + ab
+    return None
 
 
 def item_mix(act, rng, n):
@@ -304,24 +469,26 @@ def item_mix(act, rng, n):
 
 def find_cut(b, rng, min_region):
     """One to three walkway panels that cut a region off the start's side (not the boss)."""
-    walk = [c for c, k in b.cells.items() if k in (FREE, DARK) and len(b.neighbours(c)) == 2 and c not in b.start]
+    walk = [c for c, k in b.cells.items() if k in (FREE, DARK) and len(b.neighbours(c)) <= 3 and c not in b.start]
     rng.shuffle(walk)
-    for c in walk[:120]:
-        saved = b.cells[c]
-        b.cells[c] = BAR1
-        side = graph_dist(b, b.start, lambda k: k != BAR1 and k not in BARS)
-        b.cells[c] = saved
-        region = [x for x in b.cells if x not in side and x != c]
-        if b.boss in region or any(x in region for x in b.start):
+    walls = []
+    for c in walk[:160]:
+        walls.append([c])
+        for d in ((1, 0), (0, 1)):
+            n = (c[0] + d[0], c[1] + d[1])
+            if b.cells.get(n) in (FREE, DARK): walls.append([c, n])
+    rng.shuffle(walls)
+    for wall in walls[:240]:
+        saved = [b.cells[c] for c in wall]
+        for c in wall: b.cells[c] = BAR1
+        side = graph_dist(b, b.start, lambda k: k not in BARS)
+        for c, k in zip(wall, saved): b.cells[c] = k
+        region = [x for x in b.cells if x not in side and x not in wall]
+        if b.boss in region or any(x in region for x in b.start) or len(region) < min_region:
             continue
-        if len(region) < min_region:
+        if any(b.cells[x] in (HOLE,) for x in region) and len(region) > 60:
             continue
-        # A wall of two or three where the walkway runs on (BN5 walls its barriers).
-        cells = [c]
-        for n in b.neighbours(c):
-            if n in region and b.cells[n] in (FREE, DARK) and len(b.neighbours(n)) == 2 and len(cells) < 3:
-                cells.append(n)
-        return cells, set(region) - set(cells)
+        return wall, set(region)
     return None
 
 
@@ -365,6 +532,7 @@ class Sim:
             hp = spec['hp'] if name == 'MegaMan' else spec['ally_hp'] + (150 if name == 'KnightMan' else 0)
             self.navis.append(dict(name=name, ab=ABILITIES[name], hp=hp, max=hp, pos=pos[i % len(pos)], down=0, stun=0))
         self.uses = collections.Counter()
+        self.yields = collections.Counter()
         self.liberated_by = collections.Counter()
         self.shield = False
         self.melody = set()
@@ -398,7 +566,20 @@ class Sim:
                     seen.add(n); q.append(n)
         return [c for c in seen if self.walkable(c) and (c not in occ)]
 
-    def target_cost(self):
+    def blocking(self):
+        """Per guardian, the dark panels more the way on costs with him standing in it (his panel
+        cannot be liberated past him, only fought): what deleting him is worth."""
+        out = {}
+        if not self.guards: return out
+        open_cost = self.target_cost()
+        front = [c for n in self.navis for c in self.reach(n)]
+        base = min((open_cost.get(c, 99) for c in front), default=99)
+        for g in self.guards:
+            walled = self.target_cost(walls={g['pos']})
+            out[g['pos']] = max(0, min((walled.get(c, 99) for c in front), default=99) - base)
+        return out
+
+    def target_cost(self, walls=()):
         """Per panel, the dark panels still to liberate from it to the nearest target (Dijkstra, 0-1)."""
         holes = self.holes_left()
         if holes:
@@ -411,7 +592,7 @@ class Sim:
             c = dq.popleft()
             for n in self.b.neighbours(c):
                 k = self.cells[n]
-                if k in BARS: continue
+                if k in BARS or n in walls: continue
                 w = 1 if k in (DARK, ITEM, RING) else 0
                 nd = dist[c] + w
                 if nd < dist.get(n, 1 << 30):
@@ -462,6 +643,18 @@ class Sim:
         self.hurt(navi, dmg)
         return res
 
+    def sneak_damage(self):
+        """SneakAttack's strike: a hundred for every two missions (BN5's guides), 500 at the most."""
+        return min(500, 100 * max(1, self.spec['bn5'] // 2))
+
+    def fight_damage(self, top, navi):
+        """What a battle against a guardian takes off him in its three turns."""
+        return top * self.rng.uniform(0.55, 1.25) * (1.15 if navi['name'] == 'MegaMan' else 1.0)
+
+    def kill_chance(self, hp, top, navi):
+        lo, hi = 0.55 * top, 1.25 * top * (1.15 if navi['name'] == 'MegaMan' else 1.0)
+        return 1.0 if hp <= lo else 0.0 if hp >= hi else (hi - hp) / (hi - lo)
+
     def hurt(self, navi, dmg):
         if navi['ab'] == 'stonebody' and not navi.get('in_battle'): dmg = 0
         navi['hp'] -= int(dmg)
@@ -507,10 +700,28 @@ class Sim:
                 t = (p[0] + d[0], p[1] + d[1])
                 guard = next((g for g in self.guards if g['pos'] == t), None)
                 if guard:
-                    opts.append((0.6 * self.value([t], cost) + 4.0 * (1 - guard['hp'] / guard['max']) + 1.0, 'fight', p, d))
-                    if ab == 'sneak' and self.op and guard['hp'] > 100:
-                        opts.append((0.5 * self.value([t], cost) + 2.0, 'sneak', p, d))
+                    worth = 0.6 * self.value([t], cost) + 3.0 + 2.5 * min(4, self.blocks.get(t, 0))
+                    opts.append((worth * self.kill_chance(guard['hp'], guard['max'], navi) + 0.5, 'fight', p, d))
+                    if ab == 'sneak' and self.op and guard['hp'] > 1:
+                        # SneakAttack leaves him weaker for the teammates still to act this phase.
+                        after = max(1, guard['hp'] - self.sneak_damage())
+                        gain = max(self.kill_chance(after, guard['max'], m) - self.kill_chance(guard['hp'], guard['max'], m)
+                                   for m in self.navis if m is not navi and not m.get('acted') and not m['down']) \
+                            if any(m is not navi and not m.get('acted') and not m['down'] for m in self.navis) else 0.0
+                        opts.append((worth * gain - 1.0, 'sneak', p, d))
                     continue
+                g2 = next((g for g in self.guards if g['pos'] == (p[0] + 2 * d[0], p[1] + 2 * d[1])), None)
+                if ab == 'sneak' and self.op and g2 and t in self.cells and g2['hp'] > 1 and not guard:
+                    worth2 = 0.6 * self.value([g2['pos']], cost) + 3.0 + 2.5 * min(4, self.blocks.get(g2['pos'], 0))
+                    after = max(1, g2['hp'] - self.sneak_damage())
+                    mates = [m for m in self.navis if m is not navi and not m.get('acted') and not m['down']]
+                    if mates:
+                        gain = max(self.kill_chance(after, g2['max'], m) - self.kill_chance(g2['hp'], g2['max'], m) for m in mates)
+                        opts.append((worth2 * gain - 1.0, 'sneak2', p, d))
+                if ab == 'sneak' and self.op and not self.holes_left():
+                    for k in (1, 2):
+                        if (p[0] + d[0] * k, p[1] + d[1] * k) == self.b.boss and self.boss_hp > 1:
+                            opts.append((min(8.0, 8.0 * self.sneak_damage() / self.spec['boss_hp'] * 3) - 1.0, 'sneak_boss', p, d))
                 if t == self.b.boss:
                     if not self.holes_left():
                         # The Darkloid heals 100 for every dark panel around him (BN5's guides): clear
@@ -531,11 +742,15 @@ class Sim:
                 if self.op and ab in ('longswrd', 'wideswrd', 'screndiv', 'tomahawk', 'napalm'):
                     cells = [c for c in shape(ab, p, d) if self.libable(c)]
                     if t in cells:
-                        opts.append((self.value(cells, cost) * 0.85 - 1.5, 'ability', p, d))
+                        v = self.value(cells, cost)
+                        if ab in BONUS_KEPT:
+                            v += p1 * self.value([c for c in around if c not in cells], cost) * 0.8
+                        opts.append((v * (1 - 0.035 * self.difficulty(t)) - 1.5, 'ability', p, d))
                 if self.op and ab == 'numbercheck':
-                    cells = [c for c in shape(ab, p, d) if self.cells.get(c) == ITEM]
-                    if cells:
-                        opts.append((2.5 * len(cells) - 1.5, 'number', p, d))
+                    worth = sum({'op': 2.5 if self.op < 6 else 0.5, 'key': 4.0, 'heart': 1.5, 'trap': 2.0}.get(self.items[c][0], 0.8)
+                                for c in shape(ab, p, d) if self.cells.get(c) == ITEM)
+                    if worth:
+                        opts.append((worth - 1.0, 'number', p, d))
                 if self.op and ab in ('search', 'twin'):
                     line = self.line(t, d)
                     if len(line) >= 3:
@@ -549,10 +764,16 @@ class Sim:
         if self.op and ab == 'barrier' and self.threat() > 0:
             opts.append((min(9.0, self.threat() / 15.0) - 1.5, 'barrier', navi['pos'], None))
         if self.op and ab == 'melody':
-            mates = [m for m in self.navis if m is not navi and not m.get('acted') and not m['down']
-                     and abs(m['pos'][0] - navi['pos'][0]) <= 1 and abs(m['pos'][1] - navi['pos'][1]) <= 1]
-            if mates:
-                opts.append((4.0, 'melody', navi['pos'], None))
+            # LifeMelody: a teammate beside him liberates five ahead this phase, over anything.
+            best = 0.0
+            for m in self.navis:
+                if m is navi or m.get('acted') or m['down']: continue
+                if abs(m['pos'][0] - navi['pos'][0]) > 1 or abs(m['pos'][1] - navi['pos'][1]) > 1: continue
+                for d in DIRS:
+                    line = [c for c in shape('melody', m['pos'], d) if self.libable(c)]
+                    best = max(best, self.value(line, cost) * 0.6)
+            if best:
+                opts.append((best - 1.5, 'melody', navi['pos'], None))
         if navi['hp'] < navi['max'] * 0.4:
             opts.append((5.0 + 6.0 * (1 - navi['hp'] / navi['max']), 'rest', navi['pos'], None))
         return opts
@@ -577,6 +798,7 @@ class Sim:
                    if abs(g['pos'][0] - n['pos'][0]) + abs(g['pos'][1] - n['pos'][1]) <= GUARDS[g['kind']]['move'] + GUARDS[g['kind']]['reach'])
 
     def act_navi(self, navi, cost):
+        self.blocks = self.blocking()
         opts = self.options(navi, cost)
         if not opts:
             return
@@ -593,9 +815,10 @@ class Sim:
             self.liberate(navi, shape('melody', p, d), bonus=False)
         elif kind == 'ability':
             self.op -= 1; self.uses[navi['name']] += 1
-            self.liberate(navi, [t] + [c for c in shape(navi['ab'], p, d) if c != t], bonus=navi['ab'] == 'longswrd')
+            self.liberate(navi, [t] + [c for c in shape(navi['ab'], p, d) if c != t], bonus=navi['ab'] in BONUS_KEPT)
         elif kind == 'number':
             self.op -= 1; self.uses[navi['name']] += 1
+            self.yields['NumberCheck items'] += sum(1 for c in shape('numbercheck', p, d) if self.cells.get(c) == ITEM)
             for c in shape('numbercheck', p, d):
                 if self.cells.get(c) == ITEM:
                     it = self.items[c]
@@ -620,19 +843,31 @@ class Sim:
             if g:
                 if kind == 'sneak':
                     self.op -= 1; self.uses[navi['name']] += 1
-                    g['hp'] = max(1, g['hp'] - 100 * max(1, self.spec['bn5'] // 2))
+                    self.yields['SneakAttack HP'] += g['hp'] - max(1, g['hp'] - self.sneak_damage())
+                    g['hp'] = max(1, g['hp'] - self.sneak_damage())
                 else:
                     navi['in_battle'] = True
-                    res = self.battle(navi, t, guard=g)
+                    self.battle(navi, t, guard=g)
                     navi['in_battle'] = False
-                    # Liberating a guardian's panel is a fight with him: won, he is deleted and the
-                    # panel liberated; his DarkHole sends another in the enemy's phase.
-                    g['hp'] -= g['max'] if res else g['max'] // 3
+                    # Liberating a guardian's panel is a fight with him, his HP carried: deleted
+                    # within the three turns, the panel is liberated and his DarkHole sends another
+                    # in the enemy's phase; not, he keeps what he has left.
+                    g['hp'] -= int(self.fight_damage(g['max'], navi))
                     if g['hp'] <= 0:
                         self.guards.remove(g)
                         self.take(navi, t)
                         if g['hole'] is not None and self.cells.get(self.b.holes[g['hole']]) == HOLE:
                             self.respawn.append(dict(g, hp=g['max']))
+        elif kind == 'sneak2':
+            g = next((g for g in self.guards if g['pos'] == (p[0] + 2 * d[0], p[1] + 2 * d[1])), None)
+            if g:
+                self.op -= 1; self.uses[navi['name']] += 1
+                self.yields['SneakAttack HP'] += g['hp'] - max(1, g['hp'] - self.sneak_damage())
+                g['hp'] = max(1, g['hp'] - self.sneak_damage())
+        elif kind == 'sneak_boss':
+            self.op -= 1; self.uses[navi['name']] += 1
+            self.yields['SneakAttack HP'] += self.boss_hp - max(1, self.boss_hp - self.sneak_damage())
+            self.boss_hp = max(1, self.boss_hp - self.sneak_damage())
         elif kind == 'boss':
             navi['in_battle'] = True
             d_ = self.rng.uniform(0.25, 0.6) * self.spec['boss_hp'] * (1.4 if navi['name'] == 'MegaMan' else 1.0)
@@ -682,7 +917,8 @@ class Sim:
         for phase in range(1, cap + 1):
             for navi in self.navis:
                 navi['acted'] = False
-            order = sorted(self.navis, key=lambda n: n['name'] != 'MegaMan')
+            # Support first (LifeMelody, SneakAttack), then MegaMan, then the rest.
+            order = sorted(self.navis, key=lambda n: (ABILITIES[n['name']] not in ('melody', 'sneak'), n['name'] != 'MegaMan'))
             for navi in order:
                 if navi['down']:
                     navi['down'] -= 1
@@ -726,12 +962,24 @@ def play(b, team, runs, seed, ban=None):
     return out
 
 
+def command_worth(b, team, runs, res):
+    """Per Navi, the phases (scaled) his command saves: the planner's plays with it against
+    the same plays with him and no command (the same random numbers, so paired)."""
+    n_ban = max(8, runs // 2)
+    base = [p if p else 40 for p, _ in res[:n_ban]]
+    out = {}
+    for n in team:
+        ban = play(b, team, n_ban, b.seed, ban=n)
+        out[n] = PAR_SCALE[b.act] * (statistics.mean(p if p else 40 for p, _ in ban) - statistics.mean(base))
+    return out
+
+
 def set_par(b, team, runs=24):
     res = play(b, team, runs, b.seed)
     ph = sorted(p for p, _ in res if p)
     if len(ph) < runs * 0.6:  # BN5's own mission 1 the planner wins about half the time
         return None, res
-    b.par = max(5, round(ph[len(ph) // 2] * PAR_SCALE))
+    b.par = max(5, round(ph[len(ph) // 2] * PAR_SCALE[b.act]))
     return b.par, res
 
 
@@ -779,6 +1027,7 @@ def measures(act, seeds, runs, show, drawdir):
     stats = collections.defaultdict(list)
     rejects = collections.Counter()
     worth = collections.defaultdict(list)
+    worth_all = collections.defaultdict(list)
     usefreq = collections.Counter()
     present = collections.Counter()
     shown = 0
@@ -787,19 +1036,27 @@ def measures(act, seeds, runs, show, drawdir):
     seed = 0
     while made < seeds and tried < seeds * 12:
         seed += 1; tried += 1
-        b, why = generate(act, seed)
+        team = team_for(act, random.Random(seed))
+        b, why = generate(act, seed, team)
         if not b:
             rejects[why] += 1
             continue
-        rng = random.Random(seed)
-        team = team_for(act, rng)
         par, res = set_par(b, team, runs)
         if par is None:
             rejects['unwinnable'] += 1
             continue
+        w = command_worth(b, team, runs, res)
+        for n, v in w.items(): worth_all[n].append(v)
+        used = {n: sum(s.uses[n] for _, s in res) / len(res) for n in team}
+        if any(w[n] < (UTILITY_EARN if ABILITIES[n] in UTILITY else EARN) or used[n] < USE_MIN
+               for n in team[1:] if ABILITIES[n] != 'stonebody'):
+            rejects['commands'] += 1
+            continue
         made += 1
-        ph = [p * PAR_SCALE for p, _ in res if p]
+        ph = [p * PAR_SCALE[act] for p, _ in res if p]
         stats['panels'].append(len(b.cells))
+        f, fill = fields(b.cells)
+        stats['fields'].append(f); stats['fill'].append(fill); stats['dense'].append(density(b))
         stats['dark'].append(sum(1 for k in b.cells.values() if k in (DARK, ITEM)) / len(b.cells))
         stats['par'].append(par)
         stats['best'].append(sum(1 for p in ph if p <= par - 2) / len(res))
@@ -810,13 +1067,15 @@ def measures(act, seeds, runs, show, drawdir):
         stats['orders'].append(len(orders))
         stats['secret'].append(1 if b.secret else 0)
         stats['bars'].append(sum(1 for k in b.cells.values() if k in BARS))
+        for key in ('NumberCheck items', 'SneakAttack HP'):
+            ab = 'numbercheck' if key.startswith('Number') else 'sneak'
+            if any(ABILITIES[n] == ab for n in team):
+                stats[key].append(statistics.mean(s.yields[key] for _, s in res))
         for n in team[1:] + ['MegaMan']:
             present[n] += 1
             used = sum(s.uses[n] for _, s in res) / len(res)
             if used > 0.2: usefreq[n] += 1
-            ban = play(b, team, max(8, runs // 3), seed, ban=n)
-            bp = [p if p else 40 for p, _ in ban]
-            worth[n].append(PAR_SCALE * (statistics.mean(bp) - statistics.mean(p if p else 40 for p, _ in res[:len(ban)])))
+            worth[n].append(w[n])
         if shown < show:
             shown += 1
             print('act %d seed %d: %d panels, par %d, team %s, phases (scaled) %s' % (act, seed, len(b.cells), par, ', '.join(team), [round(p, 1) for p in sorted(ph)]))
@@ -826,7 +1085,7 @@ def measures(act, seeds, runs, show, drawdir):
             os.makedirs(drawdir, exist_ok=True)
             draw(b.cells, os.path.join(drawdir, 'act%d_seed%03d.png' % (act, seed)), b.guards,
                  title='act %d seed %d  par %d  %s' % (act, seed, par, '+'.join(team)))
-    return stats, rejects, worth, usefreq, present, tried
+    return stats, rejects, worth, worth_all, usefreq, present, tried
 
 
 def main():
@@ -837,22 +1096,32 @@ def main():
     ap.add_argument('--show', type=int, default=0)
     ap.add_argument('--draw', default='')
     ap.add_argument('--json', default='')
+    ap.add_argument('--earn', type=float, default=None, help='the command rule\'s phases (default EARN; -99 turns it off)')
     a = ap.parse_args()
+    global EARN
+    if a.earn is not None: EARN = a.earn
     report = {}
     for act in ([a.act] if a.act else sorted(ACTS)):
-        stats, rejects, worth, usefreq, present, tried = measures(act, a.seeds, a.runs, a.show, a.draw)
+        stats, rejects, worth, worth_all, usefreq, present, tried = measures(act, a.seeds, a.runs, a.show, a.draw)
         m = lambda k: statistics.mean(stats[k]) if stats[k] else 0
         print('act %d (BN5 mission %d): %d missions of %d tried, rejected %s' % (act, ACTS[act]['bn5'], len(stats['par']), tried, dict(rejects)))
         if not stats['par']:
             continue
-        print('  panels %.0f, dark %.0f%%, par %.1f (%d-%d), barriers %.1f, sealed routes %.0f%%' % (
-            m('panels'), 100 * m('dark'), m('par'), min(stats['par']), max(stats['par']), m('bars'), 100 * m('secret')))
+        print('  panels %.0f, fields %.0f%%, fill %.0f%%, dark %.0f%% (%.1f around a dark panel), par %.1f (%d-%d), barriers %.1f, sealed routes %.0f%%' % (
+            m('panels'), 100 * m('fields'), 100 * m('fill'), 100 * m('dark'), m('dense'), m('par'), min(stats['par']), max(stats['par']),
+            m('bars'), 100 * m('secret')))
         print('  the planner: two under par %.0f%%, at par %.0f%%, over %.0f%%; close calls %.0f%% of decisions; first holes taken %.1f ways' % (
             100 * m('best'), 100 * m('mid'), 100 * m('over'), 100 * m('close'), m('orders')))
-        print('  phases an ability saves (its Navi without it), and the missions it was used in:')
-        for n in sorted(worth, key=lambda n: -statistics.mean(worth[n])):
-            print('    %-12s %+5.2f  used in %3.0f%%  (%d missions)' % (n, statistics.mean(worth[n]), 100 * usefreq[n] / present[n], present[n]))
-        report[act] = dict(stats={k: m(k) for k in stats}, rejects=dict(rejects), worth={n: statistics.mean(v) for n, v in worth.items()})
+        if stats['NumberCheck items'] or stats['SneakAttack HP']:
+            print('  the utility commands\' yield a play: NumberCheck %.1f items, SneakAttack %.0f HP struck off' % (
+                m('NumberCheck items'), m('SneakAttack HP')))
+        print('  phases a command saves (its Navi without it) on the boards kept, on every board tried, and the kept missions it was used in:')
+        for n in sorted(worth_all, key=lambda n: -statistics.mean(worth_all[n])):
+            kept = statistics.mean(worth[n]) if worth[n] else float('nan')
+            print('    %-12s %+5.2f  %+5.2f  used in %3.0f%%  (%d kept, %d tried)' % (
+                n, kept, statistics.mean(worth_all[n]), 100 * usefreq[n] / max(1, present[n]), present[n], len(worth_all[n])))
+        report[act] = dict(stats={k: m(k) for k in stats}, rejects=dict(rejects), worth={n: statistics.mean(v) for n, v in worth.items() if v},
+                           worth_all={n: statistics.mean(v) for n, v in worth_all.items() if v})
     if a.json:
         with open(a.json, 'w') as f: json.dump(report, f, indent=1)
     return 0

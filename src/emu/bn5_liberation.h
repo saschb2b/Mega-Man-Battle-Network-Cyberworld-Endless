@@ -29,6 +29,22 @@
 #define BN5_LIB_ITEM_FIND    0x08051F20u /* the item panel at r0's id: r1 its kind, r2 its amount, r3 its chip and code (0 none) */
 #define BN5_LIB_BONUS_ROLL   0x08054F78u /* a BonusPanel's roulette set going: its first slot (RNG & 0xF) % 5 of five */
 
+/* The board's look (docs/LIBERATION.md, How the board looks and moves): the map on BG1, each panel's
+ * kind laid over it on BG2 as an isometric diamond of tiles. Located by their bytes in a capture of
+ * mission 1 (map 0x86:00); the drawing routine and the other maps' sets are still to be traced. */
+#define BN5_LIB_MAP_CHARS    0x0861C510u /* map 0x86:00's tiles, uncompressed: tile t at this + 32 t */
+#define BN5_LIB_PANEL_TILES  0x08623130u /* ... from its tile 865: the overlay's (clean, dark, DarkHole, the teal stud) */
+#define BN5_LIB_LOOKS        0x08624310u /* the twelve panel looks, 0x40 bytes each (8 x 4 tile-map entries, the diamond): clean, dark, */
+#define BN5_LIB_LOOK_SIZE    0x40        /* ... dark paled (the dissolve), item, "+5", BarrierPanels 1-4, BonusPanel, DarkHole, a grey grid */
+#define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
+                                         /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
+#define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
+#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9's first frame: the dark panels' swirl, changed every frame (the pulse) */
+#define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
+#define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
+#define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
+#define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
+
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
 #define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +0xA the par, +0xB the Order Points at the start, */

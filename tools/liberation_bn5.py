@@ -123,7 +123,8 @@ def main():
     ap.add_argument('--draw', default='')
     a = ap.parse_args()
     rom = find_rom()
-    print('mission map   par  OP panels dark holes items traps bonus bars walk team                                  planner p40/p60')
+    print('mission map   par  OP panels fields fill dense dark holes items traps bonus bars walk team                                  planner p40/p60')
+    ratios = []
     for n in range(1, 10):
         b, info = read(rom, n)
         kinds = collections.Counter(b.cells.values())
@@ -133,8 +134,10 @@ def main():
         ph = sorted(p for p, _ in res if p)
         p40 = ph[int(len(ph) * 0.4)] if ph else 0
         p60 = ph[int(len(ph) * 0.6)] if ph else 0
-        print('%7d %s %4d %3d %6d %3.0f%% %5d %5d %5d %5d %4d %4d %-38s %s/%s (%d of %d won)' % (
-            n, info['map'], info['par'], info['op'], len(b.cells), 100 * dark, len(b.holes),
+        if ph: ratios.append((ACT_OF[n], info['par'] / ph[len(ph) // 2]))
+        f, fill = L.fields(b.cells)
+        print('%7d %s %4d %3d %6d %5.0f%% %3.0f%% %5.1f %3.0f%% %5d %5d %5d %5d %4d %4d %-38s %s/%s (%d of %d won)' % (
+            n, info['map'], info['par'], info['op'], len(b.cells), 100 * f, 100 * fill, L.density(b), 100 * dark, len(b.holes),
             sum(1 for i in b.items.values() if i[0] != 'trap'), len(info['traps']), info['bonus'],
             kinds[L.BAR1] + kinds[L.BAR2] + kinds[L.BAR3], to_boss, '+'.join(info['team']), p40, p60, len(ph), len(res)))
         if a.show:
@@ -144,6 +147,10 @@ def main():
             os.makedirs(a.draw, exist_ok=True)
             L.draw(b.cells, os.path.join(a.draw, 'bn5_mission%d.png' % n), b.guards,
                    title='BN5 mission %d  par %d  %s' % (n, info['par'], '+'.join(info['team'])))
+    by_act = collections.defaultdict(list)
+    for act, r in ratios: by_act[act].append(r)
+    print('BN5\'s par over the planner\'s median, per act of the missions it stands for: %s (tools/liberation.py PAR_SCALE %s)' % (
+        ', '.join('%d: %.2f' % (a, statistics.mean(v)) for a, v in sorted(by_act.items())), L.PAR_SCALE))
     return 0
 
 
