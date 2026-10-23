@@ -765,7 +765,8 @@ second layer's Net Dealer and Recovery Mr. Prog: the price of the way.
 
 **The board** (`src/director/liberation_board.c`, ROM-free, unit-tested):
 the layer's floor, one cell a panel (32 world units), from the arrival's
-reach; its kinds placed by `tools/liberation.py`'s rules from the layer's
+reach (the floor of the layer's map as built since: The board on the map's
+floor, below); its kinds placed by `tools/liberation.py`'s rules from the layer's
 seed: the start zone clean (two panels' walk), the Darkloid's 3x3 at 60% of
 the farthest walk or more, the DarkHoles in whole rings of floor, a third of
 the walk on, six apart and four off the Darkloid, each ring dark and its
@@ -801,8 +802,9 @@ BN6's coordinate data in RAM (`BN6_MAP_COORDS`, which BN6 reads in place
 and decompresses again at each map entry, after a battle too), as BN5
 raises and lowers its border cells' heights per panel
 (`BN5_LIB_EDGES`): no board has more fences than BN6's events allow,
-however many of its panels are dark. A panel the map left without floor
-at its middle (netmap's legal.c) is off the board. A beside the panel he faces (the one
+however many of its panels are dark. (A panel the map left without floor
+at its middle, netmap's legal.c, was off the board; the board is made on
+the map's floor since.) A beside the panel he faces (the one
 his facing points at, a little ahead of him) opens the command menu on it: **Liberation** (a battle of BN6's: its
 virus battles' easier half with two dark panels round it or fewer, the
 band with three to six, the next act's band one version up with seven or
@@ -1117,18 +1119,70 @@ What they say:
   Started at depth 11 directly, MegaMan was deleted in a liberation's
   battle on dev's build as on this one: not this change's.
 
-**Left for later:** the board made from the map's own floor: it is made
-from the layer's cells before the map is built, so where the map's
-heights or legal.c's drops make a way of the board's no way of the map's,
-MegaMan stands at its edge (seed 1's act 5 board at depth 14: its
-walkway steps up where the board runs on; stage 1's boards are open to it
-as much); the route kept for the run and offered at the next fork
+**Left for later:** the route kept for the run and offered at the next fork
 (Special routes); the guardians' reach drawn (the L view); the board's
 make on the 3DS timed (about 55 ms a board on the desktop, the planner's
 plays the most of it: a dark layer's make on the New 3DS may take a second
 or two); acts 5 and 6 tuned for a lone MegaMan (their BN5 harm wants a
 team); the teammates' commands in the engine (stage 3), the command rule
 with them.
+
+### The board on the map's floor, as built (23 October 2026)
+
+The board was made from the layer's cells before its map was built, and
+the map's build changes them: netmap's legal.c makes the floor drawable
+in the area's tiles, writing the layer's cells in place, and drops the
+panels it cannot draw (most of them one panel wide, a walkway's beside
+another's). So a way of the board's could be no way of the map's: seed
+1's act 5 board at depth 14 lost 22 of its panels after it was made
+(`off the map's floor` in the debug log), its start's corridor cut from
+the rest, and the autopilot stood on its first panel for the whole run.
+
+Now the map is built first (`build_layer`, `src/director/director_layer.c`)
+and the board made on its floor: `lib_board_make` takes the floor as a
+predicate per panel (`LibFloor`), and the director's (`map_floor`,
+`src/director/liberation.c`) reads the map as built, its floor at the
+ground's height (`netmap_floor_cell` at the panel's middle, the cell the
+fence reads) and no stair. The map's floor goes by panels (a wall cell is
+floor where the panel its middle lies in is, and on a panel's edge where
+both are), so two board panels side by side are a way MegaMan walks, and
+the planner's graph is the map's. What the map's build took from the
+board before needs nothing now: the exit moved to the Darkloid's panel and
+the units' objects locked their panels' floor against legal.c, and the
+board stands on floor already there. A dark layer whose map gives no
+board is made plain and its map built again (the second build is the one
+cost, on those layers alone). The tests' boards (`test_liberation_board`)
+pass no predicate, the layer's flat cells as generated, as before, and
+`test_liberation_floor` makes boards on a made-up map's floor (a panel in
+29 gone) and finds none of their panels off it. `LAYER_MAKE` 99.
+
+**The measures** (the debug log of 20 seeds an act, `--dev dark`):
+
+| Act | Kept, before | Kept, now | Panels, before / now | Panels lost to the map after the board was made, before | Now |
+| --- | --- | --- | --- | --- | --- |
+| 2 | 20 of 20 | 20 of 20 | 181 / 161 | 446 (all 20 boards) | 0 |
+| 3 | 15 | 14 | 203 / 179 | 429 (all 15) | 0 |
+| 4 | 15 | 16 | 192 / 174 | 310 (all 15) | 0 |
+| 5 | 9 | 7 | 219 / 196 | 224 (all 9) | 0 |
+| 6 | 10 | 6 | 225 / 195 | 191 (all 10) | 0 |
+
+Every board lost panels to the map before, about twenty a board, and the
+planner had counted on them; now none does. The boards are smaller by
+those panels, and a run's acts (2 to 4) keep about as many; acts 5 and
+6, which a run does not meet yet, keep fewer, the cut floor's corridors
+failing the planner's dead phases.
+
+**The autopilot** (`--dev dark,god,onehit`, seeds 1 to 5; acts 4 to 6
+again with `hp=2000`, as `god` does not hold through a battle that
+deletes MegaMan from full: stage 2's battles deleted him on both builds
+in every act 4 to 6 board without it): all 18 boards it met played
+through, the act's Darkloid deleted and the exit taken (9 in acts 2 and
+3; 9 in acts 4 to 6, seeds 1 to 6, with `hp=2000`), and none left
+MegaMan standing at a way the map does not have. Before, over the same
+seeds, 1 of 20 did: seed 1's act 5 board left the autopilot on its first
+panel for the whole run (the rest found ways round the panels they had
+lost). On its map's floor no board of that layer's sixteen tries passes
+the planner, and it is a plain one.
 
 ## The owner's decisions
 

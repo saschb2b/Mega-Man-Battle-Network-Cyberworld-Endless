@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 98   /* (98: the dark layers' boards by the staircase and the planner, docs/LIBERATION.md, The quality bar) */
+#define LAYER_MAKE 99   /* (99: the dark layers' boards made on their maps' floor as built, docs/LIBERATION.md) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

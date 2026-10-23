@@ -1,4 +1,5 @@
-/* A liberation's board from the dark layer's floor (liberation_board.h):
+/* A liberation's board from the dark layer's floor, its map's as built
+ * (liberation_board.h):
  * BN5's kinds placed by BN5's rules, as tools/liberation.py's `generate`
  * places them on its own floors (docs/LIBERATION.md, The generator): the
  * arrival's start zone kept clean, the Darkloid's 3x3 on the far side,
@@ -733,12 +734,14 @@ static int arrival(int *x, int *y) {
 	return 0;
 }
 
-/* The board's floor: the layer's flat floor the arrival reaches, walked
- * into reach; the farthest walk, -1 no arrival on it */
-static int board_floor(LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
+/* The board's floor: the floor `floor` says (the layer's flat floor cells
+ * where NULL) that the arrival reaches, walked into reach; the farthest
+ * walk, -1 no arrival on it */
+static int board_floor(LibBoard *b, int16_t reach[MAP_H][MAP_W], LibFloor floor) {
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
-			b->kind[y][x] = layer.cell[y][x] == C_PATH && !layer.level[y][x] ? LIB_CLEAN : LIB_VOID;
+			bool on = floor ? floor(x, y) : layer.cell[y][x] == C_PATH && !layer.level[y][x];
+			b->kind[y][x] = on ? LIB_CLEAN : LIB_VOID;
 			b->panels += b->kind[y][x] != LIB_VOID;
 		}
 	if (!arrival(&b->start_x, &b->start_y) || !on_board(b, b->start_x, b->start_y)) return -1;
@@ -751,7 +754,7 @@ static int board_floor(LibBoard *b, int16_t reach[MAP_H][MAP_W]) {
 
 /* One try at the board: its floor and kinds, LIB_WHY_NONE where it keeps
  * BN5's guarantees */
-static int make_once(LibBoard *b, int act, int team) {
+static int make_once(LibBoard *b, int act, int team, LibFloor floor) {
 	int a = act < 0 ? 0 : act > 5 ? 5 : act, short_by = spec[a].team - team < 0 ? 0 : spec[a].team - team;
 	int holes = spec[a].holes - short_by / 2 < 1 ? 1 : spec[a].holes - short_by / 2, thin = 5 * short_by;
 	int roam = spec[a].roam - short_by / 2 < 1 ? 1 : spec[a].roam - short_by / 2;
@@ -760,7 +763,7 @@ static int make_once(LibBoard *b, int act, int team) {
 	b->rules = spec[a].rules;
 	b->route_x = b->route_y = -1;
 	static int16_t reach[MAP_H][MAP_W];
-	int far = board_floor(b, reach);
+	int far = board_floor(b, reach, floor);
 	if (far < 0) return LIB_WHY_FLOOR;
 	if (!place_darkloid(b, reach, far)) return LIB_WHY_DARKLOID;
 	if (!place_holes(b, reach, far, holes, spec[a].kinds)) return LIB_WHY_HOLES;
@@ -779,14 +782,14 @@ static int make_once(LibBoard *b, int act, int team) {
 	return LIB_WHY_NONE;
 }
 
-bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team) {
+bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team, LibFloor floor) {
 	uint8_t rejected[16] = { 0 };
 	for (int t = 0; t < MAKE_TRIES; ++t) {
 		rs = (seed ^ 0x4C494245u) + (uint32_t)t * 0x9E3779B9u;   /* "LIBE" */
 		if (!rs) rs = 1;
 		for (int k = 0; k < 4; ++k) rnext();
 		uint32_t plan_seed = rnext();
-		int why = make_once(b, act, team);
+		int why = make_once(b, act, team, floor);
 		if (why == LIB_WHY_NONE) why = lib_plan(b, plan_seed);
 		b->why = why;
 		b->tries = t + 1;

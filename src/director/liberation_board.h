@@ -1,8 +1,9 @@
 /* A liberation's board (docs/LIBERATION.md, Building it: stage 1): the
  * dark layer's own floor taken at 32 world units a panel, one layer cell a
- * panel, its kinds placed by BN5's rules as tools/liberation.py
- * prototypes them, from the layer's seed alone (no ROM, no game RAM: a
- * checkpoint rebuilds it as it rebuilds the layer). Each act brings one
+ * panel (the map's, as built), its kinds placed by BN5's rules as
+ * tools/liberation.py prototypes them, from the layer's seed and floor
+ * alone (no ROM, no game RAM: a checkpoint rebuilds it as it rebuilds the
+ * layer and its map). Each act brings one
  * rule of BN5's more (the staircase), and the board is kept only where the
  * planner (liberation_plan.h) finds it a set of real decisions
  * (docs/LIBERATION.md, The quality bar). */
@@ -112,12 +113,17 @@ int lib_zenny(int act);
  * nearer */
 bool lib_guardian_step(LibBoard *b, int u, int x, int y);
 
+/* Whether panel (x, y) is floor MegaMan walks at the ground's height: the
+ * director's reads the layer's map as built (netmap's floor, after legal.c
+ * made it drawable), so every way of the board is a way of the map's */
+typedef bool (*LibFloor)(int x, int y);
 /* The board for the layer just generated (net.h's `layer`, a dark one) in
  * act `act` (0-based), for a team of `team` Navis (1: MegaMan alone),
- * from `seed`: its kinds, DarkHoles, units and par; false where no seed of
- * a few gives one that keeps BN5's guarantees and the quality bar (the
- * layer is then a plain one). */
-bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team);
+ * from `seed`, on the panels `floor` says (NULL: the layer's flat floor
+ * cells as generated, a test's): its kinds, DarkHoles, units and par;
+ * false where no seed of a few gives one that keeps BN5's guarantees and
+ * the quality bar (the layer is then a plain one). */
+bool lib_board_make(LibBoard *b, uint32_t seed, int act, int team, LibFloor floor);
 /* Whether panel (x, y) is on the board and walked (clean: BN5's units
  * move over clean panels alone). */
 bool lib_walkable(const LibBoard *b, int x, int y);

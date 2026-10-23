@@ -155,10 +155,27 @@ static void board_print(void) {
 		}
 }
 
+/* A panel of the layer's map as built: floor at the ground's height (its
+ * middle's wall cell, as the fence reads the floor), no stair. The map's
+ * floor goes by panels (netmap_floor_cell), so two such panels side by
+ * side are a way MegaMan walks. */
+static bool map_floor(int x, int y) {
+	int wx, wy;
+	netmap_world(x, y, &wx, &wy);
+	return netmap_floor_cell(wx >> 3, wy >> 3, 0) && !netmap_stair_cell(wx >> 3, wy >> 3);
+}
+
 bool lib_layer_made(void) {
 	memset(&LB, 0, sizeof LB);
 	int act = (run.depth - 1) % CYCLE_LAYERS / 3;
-	if (!lib_board_make(&LB.b, run.layer_seed, act, 1)) return false;
+	if (!lib_board_make(&LB.b, run.layer_seed, act, 1, map_floor)) {
+		if (emu_debug_on()) {
+			fprintf(stderr, "liberation: no board in %d tries (%d panels), rejected for", LB.b.tries, LB.b.panels);
+			for (int w = 1; w < LIB_WHYS; ++w) if (LB.b.rejected[w]) fprintf(stderr, " %d:%d", w, LB.b.rejected[w]);
+			fprintf(stderr, ", the last %d\n", LB.b.why);
+		}
+		return false;
+	}
 	LB.darkloid = run_darkloid(act, run.biome);
 	/* (the exit where the Darkloid stands: it shows as he goes) */
 	for (int i = 0; i < layer.nobj; ++i)

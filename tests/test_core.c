@@ -5554,11 +5554,11 @@ static void test_liberation_board(void) {
 			/* (a run meets dark layers in acts 2 to 4, run_dark_area; acts 5
 			 * and 6 with --dev dark and the separate mode to come) */
 			++*(act <= 3 ? &tried : &late_tried);
-			bool ok = lib_board_make(&a, s, act, 1);
+			bool ok = lib_board_make(&a, s, act, 1, NULL);
 			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
 			if (!ok) continue;
 			++*(act <= 3 ? &made : &late_made);
-			CHECK(lib_board_make(&b, s, act, 1) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
+			CHECK(lib_board_make(&b, s, act, 1, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
 			CHECK(a.kind[a.boss_y][a.boss_x] == LIB_BOSS && a.unit[0].kind == UNIT_DARKLOID, "board %u: no Darkloid", s);
 			for (int d = 0; d < 9; ++d)
 				CHECK(d == 4 || a.kind[a.boss_y - 1 + d / 3][a.boss_x - 1 + d % 3] == LIB_RING, "board %u: the Darkloid's ring broken", s);
@@ -5599,9 +5599,42 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
+/* A map's floor as its build leaves it, made up: the layer's flat floor
+ * with a panel in 29 gone, as legal.c drops a few to draw the rest */
+static bool lib_test_floor(int x, int y) {
+	return layer.cell[y][x] == C_PATH && !layer.level[y][x] && (x * 7 + y * 13) % 29;
+}
+
+/* The board on the floor it is given (the director's: the map's as built),
+ * never a panel off it */
+static void test_liberation_floor(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x11BE;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	static LibBoard a, b;
+	int made = 0, tried = 0;
+	for (int act = 1; act <= 3; ++act)
+		for (uint32_t s = 1; s <= 8; ++s, ++tried) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			if (!lib_board_make(&a, s, act, 1, lib_test_floor)) continue;
+			++made;
+			CHECK(lib_board_make(&b, s, act, 1, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
+			for (int y = 0; y < MAP_H; ++y)
+				for (int x = 0; x < MAP_W; ++x)
+					CHECK(a.kind[y][x] == LIB_VOID || lib_test_floor(x, y), "board %u act %d: panel %d,%d off the map's floor", s, act, x, y);
+		}
+	CHECK(made * 2 >= tried, "liberation: %d boards of %d layers on a map's floor", made, tried);
+	run = before;
+}
+
 int main(void) {
 	test_sha1();
 	test_liberation_board();
+	test_liberation_floor();
 	test_jobs();
 	test_economy();
 	test_home_words();

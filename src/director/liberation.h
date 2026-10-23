@@ -22,8 +22,9 @@ int lib_layer_tiles(int tiles);
 /* ... whether act `act`'s way into area `biome` holds its dark layer (the
  * fork's words and the act's card say so) */
 bool lib_way_dark(int act, int biome);
-/* The dark layer just generated (net.h's `layer`): its board made from its
- * seed, its units added as its objects and its exit put where the
+/* The dark layer just generated (net.h's `layer`) and its map built
+ * (netmap_build_layer): its board made from its seed on the map's own
+ * floor, its units added as its objects and its exit put where the
  * Darkloid stands; false where no board fits (the layer is made again as
  * a plain one). */
 bool lib_layer_made(void);
