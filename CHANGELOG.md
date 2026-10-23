@@ -11,6 +11,16 @@
   another of the build takes its place. A program that adds, Custom1 or
   HP+50, shows the copies held beside its colour: "HP+50 (white) Held 1".
   Layers made before continue afresh (their drafts changed).
+- **A compression code, entered once, compresses its program in every
+  run after.** A code was kept once entered, but its ten buttons had to
+  be pressed again in each run, and a player said they ended up not
+  using them. Now every program whose code you have entered in any run
+  comes compressed as a run begins, from the first time you hold it.
+  Compressing never costs a fit (every compressed shape is a part of the
+  full one), and the code entered again undoes it for that run, as in
+  BN6; a CONTINUE keeps it as you left it. Dad's Compression mail still
+  lists each code, and a code you have never entered is never applied.
+  The week's net starts with none, as before.
 - **BN5's songs named for where BN5 plays them, and three of them in
   runs.** The Jukebox's BN5 songs had numbers in place of names, or names
   borrowed from BN6. Now every song Team Colonel starts is named for its

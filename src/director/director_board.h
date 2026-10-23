@@ -20,6 +20,7 @@ void item_given(int item);
 void spin_watch(void);
 void reg_watch(void);
 void code_watch(void);
+void codes_bring(void);
 const char *bug_cause(void);
 bool fits_free_as(int v, bool compressed);
 bool fits_as_it_stands(int v);

@@ -900,7 +900,11 @@ N NaviCust programs, in the first of its colours the ROM draws, with the
 check BN6 lists them by (the NaviCustomizer on the second screen, issue
 #76), and `program=P` one of program P besides (a guardian's draft beside
 a program held: `program=41` and `--seed 11 --run-depth 3` offer HP+50
-again, "Held 1", docs/NAVICUST.md 10); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
+again, "Held 1", docs/NAVICUST.md 10); `codes=N` has the profile know the compression codes of the first N
+programs that have one (SuperArmor, then Custom1), as if entered in a run
+before, kept in its file: the run begins with them compressed and Dad's
+Compression mail lists them (docs/META.md; `codes=2,programs=2` for a
+capture of both on the NaviCust screen); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
 (a DarkChip's last). `clock=N` starts the run with the Net's clock at N
 notches (docs/HOME.md, going back): the guardians spawn with its HP, a
 tenth more a notch. `CYBERWORLD_AUTOPILOT_BACK=N` has the autopilot take

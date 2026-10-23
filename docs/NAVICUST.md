@@ -194,17 +194,19 @@ lacks, in a blue Mystery Data on a layer of 4-8, and keeps it for good
 (docs/META.md). The drafts and the vendor's fitting pack each program
 turned only where its colour's Spin is held (`navicust_set_spins`).
 
-### 9. Compression codes, kept once entered
+### 9. Compression codes, kept once entered and applied
 
 BN6's compression code, ten buttons on the NaviCust screen with RIGHT held
 on a program, sets the compressed-shape flags of its four colours; a run
 starts from a fresh game, its flags clear, and a player looked every code
 up again each run (issue #50). The first time a code is entered in any run
-the profile keeps it: Dad's Compression mail lists it, and MegaMan names it
-where a program that won't fit would fit compressed. The buttons stay the
-player's to press in every run, and nothing names a code not yet entered
-(docs/META.md). MegaMan's fit checks read the shape the flags choose
-(issue #54).
+the profile keeps it, and Dad's Compression mail lists it; from the next
+run on, the program is compressed as the run begins (`codes_bring`, the
+flags set as BN6's code input sets them), and the code entered again
+undoes it for that run, as in BN6. A compressed shape is always a part of
+the full one, so this deletes no decision (docs/META.md); nothing names
+or applies a code not yet entered. MegaMan's fit checks read the shape the
+flags choose (issue #54).
 
 ### 10. What is held, beside the draft
 
@@ -348,8 +350,8 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
 - The draft offers no program that would add nothing to those held, and
   shows the copies held of the rest (10, above).
 - Compression codes kept once entered (issue #50): the profile's codebook,
-  Dad's Compression mail, and MegaMan's word on a known code where a
-  program would fit compressed; the fit checks read the compressed shapes
+  Dad's Compression mail, and each known program compressed as a run
+  begins (23 October 2026); the fit checks read the compressed shapes
   (issue #54).
 
 Next: BugFrags as the vendor's currency with the workshop and the

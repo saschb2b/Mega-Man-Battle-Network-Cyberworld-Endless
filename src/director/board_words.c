@@ -38,10 +38,11 @@ const char *reg_words(int kind, int reg) {
 }
 
 /* A program's compression code entered the first time in any run (issue
- * #50; `about` its NaviCust words, "Name: ..."): where Dad keeps it */
+ * #50; `about` its NaviCust words, "Name: ..."): Dad's lab compresses it
+ * in every dive after, and its code is in his mail */
 const char *compressed_words(const char *about) {
 	static char words[200];
-	snprintf(words, sizeof words, "@M %.*s's compressed,Lan!|@M Dad's lab keeps its code for every dive now.|@M It's in his Compression mail!",
+	snprintf(words, sizeof words, "@M %.*s's compressed,Lan!|@M Dad's lab will compress it for us every dive now!|@M The code's in his Compression mail.",
 		(int)strcspn(about, ":"), about);
 	return words;
 }

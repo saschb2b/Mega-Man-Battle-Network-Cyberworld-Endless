@@ -62,10 +62,12 @@ again on each layer, read and never marked NEW:
   losses, three a page, "code" beside those whose NaviCode he holds; how
   many of the seventeen he has met, the best layer and the Nest's wins.
 - **Compression**, from the first compression code entered in any run:
-  each code entered, a line each, the program as the NaviCust lists it and
-  its ten buttons five and five ("Custom1  LBBRB AALRR"); not how to
-  enter one, BN6's own, which the player has just done; NEW with each new
-  code (docs/META.md).
+  Dad compresses these programs before every dive ("Lan,I compress these
+  for MegaMan before every dive."), then each code entered, a line each,
+  the program as the NaviCust lists it and its ten buttons five and five
+  ("Custom1  LBBRB AALRR"); not how to enter one, BN6's own, which the
+  player has just done, nor that entered again it undoes itself; NEW with
+  each new code (docs/META.md).
 - **Endless Net** (from NetBBS): netizens' threads about the net, more as
   the profile goes deeper, NEW with each new post (docs/META.md, Rumors).
 

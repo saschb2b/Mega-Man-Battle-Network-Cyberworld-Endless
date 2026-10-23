@@ -444,6 +444,7 @@ bool director_start_run(void) {
 	set_start_folder();
 	library_to_game();
 	powers_bring();
+	codes_bring();
 	dev_folder();
 	dev_programs();
 	star_folder_pack();
@@ -478,6 +479,7 @@ bool director_start_layer(void) {
 	/* (and the Cross it brought at any depth, as a run has it there, and
 	 * BeastOut, and its chips in * with the All * helper) */
 	powers_bring();
+	codes_bring();
 	dev_folder();
 	dev_programs();
 	star_folder_pack();
