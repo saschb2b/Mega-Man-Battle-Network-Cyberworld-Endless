@@ -234,10 +234,14 @@ liberation and an item's find; the recordings are in the pull request):
   tile t at `0x0861C510` + 32t, copied whole into the BG's characters),
   and the diamonds in twelve looks after them (`BN5_LIB_LOOKS`, 8 x 4
   tile-map entries each, named by the mission record's first block, the
-  same in all nine): clean, dark, a paled dark (the dissolve's middle),
+  same in all nine, a panel's kind its look's index): clean, dark, a
+  paled dark (kind 2, the dissolve's middle),
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
-  BonusPanel's "?", a DarkHole, a grey grid; palettes 8-10 at `0x08614EB4`, `0x08614B84` (palette 9's
-  first frame of its pulse) and `0x08614BC8`. Located by their bytes in a
+  BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
+  ring until the DarkHoles fall); each panel's four look bytes pick its
+  sides' edge pieces (`BN5_LIB_EDGES`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`; the
+  dark's pulse six palettes from `0x08614C4C` copied into palette 9 in
+  turn, each held one to six frames. Located by their bytes in a
   capture; the routine that draws a panel from its kind and its four look
   bytes (the panel list's +4-+7), the pulse's table and the other maps'
   sets are still to be traced.

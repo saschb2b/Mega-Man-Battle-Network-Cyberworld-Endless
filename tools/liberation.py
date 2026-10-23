@@ -88,7 +88,8 @@ PAR_SCALE = {2: 0.58, 3: 0.67, 4: 0.70, 5: 0.82, 6: 0.79}
 # The command rule: a board is kept only where every teammate's command saves at least this
 # many phases (scaled as the par) against the same Navi without it, the same plays paired.
 EARN = -0.1
-USE_MIN = 0.5   # ... and only where the planner uses every teammate's command, half a time a play at least
+USE_MIN = {2: 0.5, 3: 0.5, 4: 0.25, 5: 0.25, 6: 0.25}   # ... and only where the planner uses every teammate's command,
+# half a time a play at least, a quarter with four or five Navis to share the Order Points
 # The utility commands pay in safety and loot, which phases do not show (SneakAttack: a guardian
 # weakened with no battle; NumberCheck: items taken and traps disarmed with none): held only to
 # being used where their situation is and to costing the team no more than this.
@@ -458,12 +459,25 @@ def situations(b, team, rng, reach, far):
     return None
 
 
-def item_mix(act, rng, n):
-    """What the item panels hold, in BN5's kinds (docs/LIBERATION.md, Item panels)."""
-    out = [('op', rng.choice((2, 3)))]
-    pool = [('heart', 1)] * 3 + [('op', 2), ('op', 3)] * 2 + [('zenny', 1)] * 3 + [('chip', 1)] * 2
-    if act >= 4: pool += [('bugfrag', 1)] * 2 + [('trap', 1)] * 2
-    while len(out) < n: out.append(rng.choice(pool))
+# What BN5's item panels of the missions an act stands for hold, counted from its records
+# (tools/liberation_bn5.py): hearts, Order Points items, zenny, chips, BugFrags, traps (the keys
+# come with the barriers). Its later missions hold 12-13 Order Points in items for five Navis.
+ITEMS = {
+    2: dict(heart=2, op=2, zenny=2, chip=1, bugfrag=0, trap=0),
+    3: dict(heart=2, op=3, zenny=1, chip=2, bugfrag=0, trap=0),
+    4: dict(heart=2, op=4, zenny=3, chip=2, bugfrag=1, trap=7),
+    5: dict(heart=2, op=4, zenny=4, chip=3, bugfrag=2, trap=8),
+    6: dict(heart=2, op=4, zenny=6, chip=2, bugfrag=1, trap=6),
+}
+
+
+def item_mix(act, rng, n=None):
+    """What the item panels hold, BN5's counts for the act (docs/LIBERATION.md, Item panels)."""
+    out = []
+    for kind, count in ITEMS[act].items():
+        for _ in range(count):
+            out.append((kind, rng.choice((2, 3)) if kind == 'op' else 1))
+    rng.shuffle(out)
     return out
 
 
@@ -1048,7 +1062,7 @@ def measures(act, seeds, runs, show, drawdir):
         w = command_worth(b, team, runs, res)
         for n, v in w.items(): worth_all[n].append(v)
         used = {n: sum(s.uses[n] for _, s in res) / len(res) for n in team}
-        if any(w[n] < (UTILITY_EARN if ABILITIES[n] in UTILITY else EARN) or used[n] < USE_MIN
+        if any(w[n] < (UTILITY_EARN if ABILITIES[n] in UTILITY else EARN) or used[n] < USE_MIN[act]
                for n in team[1:] if ABILITIES[n] != 'stonebody'):
             rejects['commands'] += 1
             continue

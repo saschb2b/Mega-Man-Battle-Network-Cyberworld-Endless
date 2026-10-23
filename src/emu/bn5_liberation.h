@@ -36,10 +36,17 @@
 #define BN5_LIB_PANEL_TILES  0x08623130u /* ... from its tile 865: the overlay's (clean, dark, DarkHole, the teal stud) */
 #define BN5_LIB_LOOKS        0x08624310u /* the twelve panel looks, 0x40 bytes each (8 x 4 tile-map entries, the diamond): clean, dark, */
 #define BN5_LIB_LOOK_SIZE    0x40        /* ... dark paled (the dissolve), item, "+5", BarrierPanels 1-4, BonusPanel, DarkHole, a grey grid */
+#define BN5_LIB_LOOK_OF      0x0804F0D4u /* a panel's look: the look block's pointer at +0x10 + 4 x its kind (the kinds are the looks' order: */
+                                         /* ... 2 a panel mid-dissolve, 4 the "+5", 0x0B the Darkloid's ring, grey until the DarkHoles fall) */
+#define BN5_LIB_BOARD_SETUP  0x0804EEE2u /* the board drawn: the overlay's tiles copied, then each panel's look and its edges */
+#define BN5_LIB_EDGES        0x0804F204u /* a panel's edges: its four look bytes (+4-+7), one a side, each a list from BN5_LIB_EDGE_TABLES */
+#define BN5_LIB_EDGE_TABLES  0x0804FB94u /* ... four sides' tables of lists (tile 0x88xx, x, y; 0xFF ends them) */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
-#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9's first frame: the dark panels' swirl, changed every frame (the pulse) */
+#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 as the capture held it: the dark panels' swirl */
+#define BN5_LIB_PULSE        0x08614C4Cu /* the pulse: six palettes of 0x20 bytes copied in turn into palette 9's */
+#define BN5_LIB_PULSE_FRAMES 6           /* ... buffer, each held one to six frames (the map's palette animation, assumed) */
 #define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
