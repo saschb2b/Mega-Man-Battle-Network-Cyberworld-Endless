@@ -77,27 +77,13 @@ static int fence_type(int cx, int cy, int px, int py) {
 	return 0;
 }
 
-/* The board's panels the map left without floor at their middles (its
- * legal.c drops a few to draw the rest): off the board, where nothing of
- * the board's stands on them */
-static void off_board(void) {
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x) {
-			int k = LB.b.kind[y][x], wx, wy;
-			if (k != LIB_CLEAN && k != LIB_DARK && k != LIB_ITEM && k != LIB_BONUS && k != LIB_TRAP && k != LIB_BAR) continue;
-			netmap_world(x, y, &wx, &wy);
-			if (netmap_floor_cell(wx >> 3, wy >> 3, 0) || lib_unit_at(x, y) >= 0) continue;
-			if (emu_debug_on()) fprintf(stderr, "liberation: panel %d,%d off the map's floor\n", x, y);
-			LB.b.kind[y][x] = LIB_VOID;
-		}
-}
-
+/* (the board is made on the map's floor as built, lib_layer_made: every
+ * panel of it has floor) */
 void lib_fence_build(void) {
 	memset(LB.fence, 0, sizeof LB.fence);
 	F.n = 0;
 	F.count = 0;
 	if (!LB.on) return;
-	off_board();
 	int n = 0;
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x)
