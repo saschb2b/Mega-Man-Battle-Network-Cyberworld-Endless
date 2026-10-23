@@ -204,7 +204,7 @@ Devices now used up: the slanted seam and its red and blue sides, the
 seam's sweep as the cut, call-and-answer ribbons, the gold meeting
 (burst and glow), the VS badge on the seam, slanted name plates.
 
-## 0.15.0: Liberation (in the making, 2026-10-23)
+## 0.15.0: Liberation (2026-10-24), `tools/trailers/v0_15_0.py`
 
 The owner: a release about bringing BN5's Liberation Missions to the run,
 BN5's song 0x22, the board's theme, as the music's seed, "something
@@ -212,10 +212,41 @@ beautiful" as 0.14.0. Three eight-bar sketches from 0x22's habits, all in
 the soundfont: A the operation, B the liberation's fanfare, C the
 darkness's move. The owner chose A, "yet it is all over the place. with
 0.14.0 you took more care." The numbers had matched the song's balance;
-the writing had not (`music_rules.md`, Discipline, written from it):
-too many sections in nine bars, a walking bass on new notes everywhere,
-every part moving at once, a synth brass outside the approved palette.
+the writing had not (`music_rules.md`, Discipline, written from it): too
+many sections in nine bars, a walking bass on new notes everywhere, every
+part moving at once, a synth brass outside the approved palette.
 `music_check.py --source` now sets each part's motion beside the song's
-and flags the busier ones; the rewritten A reads "busier than the
-source: none". The owner asked that this hold for every future piece,
-in the skill rather than in memory.
+and flags the busier ones; the rewritten A read "busier than the source:
+none", held up by ear, and grew into the piece (`v0_15_0_music.py`, 20
+bars at 144, D minor). The owner asked that this hold for every future
+piece, in the skill rather than in memory.
+
+What was made: 35 seconds. The operation on a war room's map: a
+night-blue grid with its sectors marked, each shot a monitor in a sector
+of its own at 3x (four boards at 2x), every cut the camera panning to the
+next, easing as BN5's board camera does (a share of what is left each
+frame); a readout of PHASE against the PAR, following the board's own
+banners, crimson with the map for DARKLOID PHASE; where each shot stands
+in the run (ACT 2 · LAYER 5); headlines in URW Gothic settling from wide
+tracking, captions in a mono face, under the monitor. Footage: the
+autopilot (`--dev dark,god,onehit`) through seed 1's act 2 board, seed 7's
+fork at home (its pink pad the dark way), four boards of acts 2 to 4.
+
+What went wrong on the way: the owner, of the first cut: units standing
+still, a Darkloids' phase nothing like BN5's, the exit's ring clipped (all
+fixed in the game, #214, and the footage taken again: the cut showed what
+the game lacked); the act card ("A layer here has gone dark") over act
+2's first, ordinary layer read as if that layer were the dark one; and
+the story "focuses only on liberation. well duh it's mmbn5. But what does
+that mean for cyberworld endless?" The second cut tells the run: the fork
+after an act, one way dark (MegaMan: "Part of it's gone dark."), TAKE IT?
+at the price of the layer's dealer and Mr.Prog, never the same board
+twice, three turns or it stays dark, the chip carried on. Lesson: a
+release whose news comes from another game is told as what it does to
+this one. Also: the dark way's swirl shows only while MegaMan stands
+away from it; a line the autopilot pages at once is held on its whole
+frame. The owner: "approved".
+
+Devices now used up: the war room's map and its sector monitors, the
+camera's pan as the cut, the phase-against-par readout, tracking that
+settles onto the beat, the run's position on every shot.
