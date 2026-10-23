@@ -30,15 +30,20 @@ void data_dir_setup(bool given);
 /* (desktops) The ROM looked for again, and where front ends and downloads
  * keep theirs; `msg` where there is none */
 bool desktop_rom_anywhere(char *msg, size_t msglen);
+/* (desktops) The window the start opens over the whole screen:
+ * settings.ini's fullscreen where one was kept (Options' Display, Alt+Enter),
+ * else on a big screen (`big`: desktop_big_screen) */
+bool startup_fullscreen(bool big);
 /* The ROM at the start (not the 3DS's): --rom-dir's, else the platform's */
 bool start_rom(const char *rom_dir, char *msg, size_t msglen);
 /* The player's files in the data folder, none headless (a test's input is
  * its own): the keys, the controllers' map, the settings, the touch
  * controls; --pad's virtual controller with pad.ini, headless too;
  * --smooth-motion's on or off (`smooth_arg`, -1 for neither) and
- * --sound's gba or soft (`sound_arg`, a SoundFilter, headless too) over
+ * --sound's gba or soft (`sound_arg`, a SoundFilter, headless too) and
+ * --screen's scale (`screen_arg`, display.h's word, headless too) over
  * settings.ini; then the anonymous statistics' session (analytics_net.h),
  * a player's own where `plain` (no test's or developer's option) */
-void player_files(bool headless, int smooth_arg, int sound_arg, bool plain);
+void player_files(bool headless, int smooth_arg, int sound_arg, const char *screen_arg, bool plain);
 
 #endif

@@ -4604,9 +4604,10 @@ static void test_sound_filter(void) {
 	CHECK(fabs(r - 1.0) < 0.001, "gba again changed a 12 kHz tone by %.4f", r);
 }
 
-/* settings.ini's lines one at a time (Options' sound): its line replaced
- * where it was, every other line kept; added at the end with what it is
- * where it was not; a file made with it alone */
+/* settings.ini's lines one at a time (Options' sound and display): its
+ * line replaced where it was, every other line kept; added at the end
+ * with what it is where it was not; a file made with it alone; a line
+ * read back, none where there is no line or no file */
 static void test_settings_line(void) {
 	char path[96], all[512];
 	snprintf(path, sizeof path, "build/host/test-settings-%d.ini", (int)getpid());
@@ -4633,7 +4634,14 @@ static void test_settings_line(void) {
 	if (f) fclose(f);
 	all[got] = 0;
 	CHECK(!strcmp(all, "# sound: what it is\nsound = soft\n"), "settings: a new file with the line alone (%s)", all);
+	/* (one line read before the rest: the window the start opens) */
+	char v[16] = "";
+	settings_line_write(path, "fullscreen", "on", "\n# fullscreen: what it is\n");
+	CHECK(settings_line_read(path, "fullscreen", v, sizeof v) && !strcmp(v, "on"), "settings: fullscreen read back (%s)", v);
+	CHECK(settings_line_read(path, "sound", v, sizeof v) && !strcmp(v, "soft"), "settings: the sound read back (%s)", v);
+	CHECK(!settings_line_read(path, "screen", v, sizeof v), "settings: a line it has not read as none");
 	remove(path);
+	CHECK(!settings_line_read(path, "fullscreen", v, sizeof v), "settings: no file read as none");
 }
 
 static void test_qr(void) {

@@ -3,9 +3,11 @@
  * Opened by SELECT on the title on every system and by OPTIONS in the
  * touch controls' menu, over whatever runs, which waits under it (main.c).
  * Its lines open a section each: Controls (the controls screen,
- * controls.h; not on the 3DS, whose buttons are the console's own), Audio
- * (the sound, gba or soft: sound_filter.h, kept in settings.ini at once)
- * and Statistics where the build can send them (their question,
+ * controls.h; not on the 3DS, whose buttons are the console's own), Display
+ * (the fullscreen window, the scale and smooth motion, where the system
+ * has them: display.h), Audio (the sound, gba or soft: sound_filter.h),
+ * each kept in settings.ini at once, and Statistics where the build can
+ * send them (their question,
  * analytics_ask.h); Done closes it. It is the overlay's root: the
  * statistics' question at the first start shows in its place, and the
  * controls screen over it, each passed its frame, picture, Back and taps

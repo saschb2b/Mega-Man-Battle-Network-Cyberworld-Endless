@@ -78,7 +78,7 @@ void present3ds_bottom_show(bool on) {
 	bot_new |= bot_on;
 }
 
-void present3ds_frame(bool fill, bool sync) {
+void present3ds_frame(bool fill, bool stretch, bool sync) {
 	/* (none once the system asks the game to close: the HOME Menu has the
 	 * GPU then, and waiting on it hung the console, a frame drawn after
 	 * the close) */
@@ -109,9 +109,9 @@ void present3ds_frame(bool fill, bool sync) {
 	C3D_FrameBegin(sync ? C3D_FRAME_SYNCDRAW : 0);
 	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
 	C2D_SceneBegin(top);
-	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f;
+	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f, sx = stretch ? (float)GSP_SCREEN_HEIGHT_TOP / (float)cw : s;
 	C2D_Image img = { &tex, &sub };
-	C2D_DrawImageAt(img, ((float)GSP_SCREEN_HEIGHT_TOP - cw * s) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, 0.5f, NULL, s, s);
+	C2D_DrawImageAt(img, ((float)GSP_SCREEN_HEIGHT_TOP - cw * sx) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, 0.5f, NULL, sx, s);
 	/* the bottom screen: a new picture, else black, in both of its buffers
 	 * once (a screen not drawn keeps its picture; drawn every frame, it
 	 * cost the GPU's time each one) */

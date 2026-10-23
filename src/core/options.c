@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "buttons.h"
 #include "controls.h"
+#include "display.h"
 #include "game.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -21,11 +22,16 @@ OptionsState O;
 
 int options_lines(int kinds[LINES_MAX]) {
 	int n = 0;
-	if (O.audio) kinds[n++] = LINE_SOUND;
-	else {
+	if (O.section == SECTION_AUDIO) kinds[n++] = LINE_SOUND;
+	else if (O.section == SECTION_DISPLAY) {
+		if (display_has_window()) kinds[n++] = LINE_FULLSCREEN;
+		if (display_has_scale()) kinds[n++] = LINE_SCALE;
+		if (display_has_smooth()) kinds[n++] = LINE_SMOOTH;
+	} else {
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
 #endif
+		kinds[n++] = LINE_DISPLAY;
 		kinds[n++] = LINE_AUDIO;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 	}
@@ -72,8 +78,14 @@ void cw_set_sound(int soft);
 EMSCRIPTEN_KEEPALIVE void cw_set_sound(int soft) { options_sound_keep(soft ? SOUND_SOFT : SOUND_GBA, false); }
 #endif
 
-static void sound_turn(void) {
-	options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true);
+/* A line's value turned (`dir`: +1 Right, A or a tap; -1 Left) and kept */
+static void turn(int kind, int dir) {
+	switch (kind) {
+	case LINE_FULLSCREEN: display_fullscreen_keep(!P.fullscreen); break;
+	case LINE_SCALE: display_scale_keep(display_scale_next(dir)); break;
+	case LINE_SMOOTH: display_smooth_keep(!P.blend, true); break;
+	default: options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true); break;
+	}
 	audio_sfx(SFX_CURSOR);
 }
 
@@ -83,8 +95,8 @@ static void sound_turn(void) {
  * the hub away */
 static void back(void) {
 	audio_sfx(SFX_CANCEL);
-	if (O.audio) {
-		O.audio = false;
+	if (O.section != SECTION_HUB) {
+		O.section = SECTION_HUB;
 		O.at = O.hub_at;
 	} else O.open = false;
 }
@@ -92,17 +104,18 @@ static void back(void) {
 static void choose(void) {
 	switch (line_kind()) {
 	case LINE_CONTROLS: controls_open(); audio_sfx(SFX_SELECT); break;
+	case LINE_DISPLAY:
 	case LINE_AUDIO:
 		O.hub_at = O.at;
-		O.audio = true;
+		O.section = line_kind() == LINE_DISPLAY ? SECTION_DISPLAY : SECTION_AUDIO;
 		O.at = 0;
 		audio_sfx(SFX_SELECT);
 		break;
 	/* (the statistics' question over the hub, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
-	case LINE_SOUND: sound_turn(); break;
-	default: back(); break;
+	case LINE_DONE: back(); break;
+	default: turn(line_kind(), 1); break;
 	}
 }
 
@@ -114,8 +127,8 @@ static void nav_update(void) {
 	if (rep & BTN_UP) O.at = (O.at + n - 1) % n;
 	else if (rep & BTN_DOWN) O.at = (O.at + 1) % n;
 	if (O.at != was) audio_sfx(SFX_CURSOR);
-	/* (Left and Right turn the sound, as the PET's small arrows say) */
-	if ((pr & (BTN_LEFT | BTN_RIGHT)) && kinds[O.at] == LINE_SOUND) sound_turn();
+	/* (Left and Right turn a value, as the PET's small arrows say) */
+	if ((pr & (BTN_LEFT | BTN_RIGHT)) && options_line_turns(kinds[O.at])) turn(kinds[O.at], pr & BTN_LEFT ? -1 : 1);
 	else if (pr & (BTN_A | BTN_START)) choose();
 }
 
