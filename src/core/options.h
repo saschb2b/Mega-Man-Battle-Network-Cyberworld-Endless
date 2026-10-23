@@ -1,7 +1,8 @@
 /* Options: the game's settings, a PET panel of our own (BN6 has no
  * options screen to drive: bn6f searched for config, options and stereo).
- * Opened by SELECT on the title on every system and by OPTIONS in the
- * touch controls' menu, over whatever runs, which waits under it (main.c).
+ * Opened from the title's menu (OPTIONS; SELECT there too), the PET's in
+ * a run (its Comm row made Options: pet_options.h) and the touch
+ * controls' menu, over whatever runs, which waits under it (main.c).
  * Its lines open a section each: Controls (the controls screen,
  * controls.h; not on the 3DS, whose buttons are the console's own), Display
  * (the fullscreen window, the scale and smooth motion, where the system

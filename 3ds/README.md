@@ -31,7 +31,7 @@ GBA core alone takes longer than a frame there.
 - The first NEW GAME boots BN6 from power-on once, about 15 seconds of black
   screen; later starts load what it kept (`boot-3.state`).
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
-  edges). Options' **Display** (SELECT on the title) sets **Scale**:
+  edges). Options' **Display** (on the title's menu, or the PET's in a run) sets **Scale**:
   **Integer** shows it sharp at 1x in the middle, **Stretch** over the top
   screen's whole width; `screen = whole` or `stretch` in `settings.ini` as
   well.
@@ -64,8 +64,8 @@ GBA core alone takes longer than a frame there.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
   or the Circle Pad. HOME pauses as for any game.
 - The first start asks whether the game may send anonymous play
-  statistics (docs/GUIDE.md, Anonymous statistics); SELECT on the title
-  opens Options, whose Statistics line asks again (and whose Audio sets the
+  statistics (docs/GUIDE.md, Anonymous statistics); Options, on the
+  title's menu or the PET's in a run, has a Statistics line that asks again (and whose Audio sets the
   sound: docs/GUIDE.md, Sound). A yes sends them over the 3DS's Wi-Fi with devkitPro's libcurl
   and mbedTLS, which carry Let's Encrypt's roots: the 3DS's own SSL
   module stops at TLS 1.1, which the server refuses.

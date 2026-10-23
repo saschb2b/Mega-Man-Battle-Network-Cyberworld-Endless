@@ -2,8 +2,8 @@
  * a few events of the game and its runs, sent to the game's own website on
  * the owner's Umami once the player has said yes. The title asks once, at
  * the first start where the build can send (analytics_ask.c); the answer is
- * settings.ini's statistics line, changed on the controls screen (on the
- * 3DS, SELECT on the title). Nothing is sent before a yes, and nothing that
+ * settings.ini's statistics line, changed on Options' Statistics line.
+ * Nothing is sent before a yes, and nothing that
  * tells who plays or on which machine: what was done, never by whom, as the
  * site's own analytics (web/assets/site.js).
  *

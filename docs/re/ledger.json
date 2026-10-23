@@ -114,6 +114,10 @@
     {
       "date": "2026-10-23",
       "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
+    },
+    {
+      "date": "2026-10-23",
+      "what": "The PET menu's labels: their tiles 0x086C8058 (90, uncompressed), the PET's load list's entry for them 0x08120A9C (source, 0x0600D340, 0xB40), the table of each entry's label 0x08121394 (9 x 2 tile entries each, ChipFolder to Save, then Status), each label's letters in colour 5 + its entry shaded in 3 (9 of 882 shaded pixels off the rule, hand-drawn), Comm's grey store 0x08120F2A, VRAM 0x0600DE80-0x0600DFFF zero in the PET and on the map; Comm relabelled Options from the labels' own letters (pet_options.c, letters.c) and its A taken for the game's Options"
     }
   ],
   "experiments": [

@@ -127,8 +127,7 @@ static void choices_draw(int cx, int y) {
 /* Under them: where it is changed later, then the keys, or a phone's tap */
 static void hints_draw(int cx, int y) {
 	char s[96], a[24];
-	analytics_later(controls_word(BTN_SELECT), s, sizeof s);
-	pet_panel_note(cx, y, s, LOOK_PAGE);
+	pet_panel_note(cx, y, analytics_later(), LOOK_PAGE);
 	if (touch_shown()) {
 		pet_panel_note(cx, y + 9, analytics_word(AW_TAP), LOOK_PAGE);
 		return;

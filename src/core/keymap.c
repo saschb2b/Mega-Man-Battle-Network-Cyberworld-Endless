@@ -153,9 +153,9 @@ static const char keys_header[] =
 	"# named as on a US keyboard (A-Z, 0-9, Up, Down, Left, Right, Space, Return,\n"
 	"# Backspace, Tab, Left Shift, Right Shift, Left Ctrl, Keypad 8, Keypad\n"
 	"# Enter...) and mean that position: on an AZERTY keyboard W is the key\n"
-	"# marked Z. Escape (quit) and F11 (fullscreen) are taken. The controls\n"
-	"# screen (SELECT on the title screen) sets them too. Delete this file for\n"
-	"# the defaults.\n\n";
+	"# marked Z. Escape (quit) and F11 (fullscreen) are taken. Options'\n"
+	"# Controls (the title's menu, or the PET's in a run) sets them too. Delete\n"
+	"# this file for the defaults.\n\n";
 
 /* keys.ini as the map in play has them */
 static void keys_write(void) {

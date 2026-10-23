@@ -65,6 +65,8 @@ void sprite_draw_into(Sprite *s, int anim, int frame, int x, int y, int pal, int
 /* A tile reference for LZ77 block `lz` (add the offset into its data,
  * which starts with the game's 4-byte size word) for rom_tiles. */
 uint32_t gfx_lz_ref(uint32_t lz);
+/* A tile's 32 bytes (4bpp) as rom_tiles reads them, NULL where it has none */
+const uint8_t *gfx_tile_bytes(uint32_t tile);
 /* A block of consecutive tiles (w x h tiles, row-major, as sprites use). */
 void rom_tiles(uint32_t first, uint32_t pal, int x, int y, int w, int h, int flip);
 /* ... `scale` times as large, unflipped (a chip's card on the second screen) */

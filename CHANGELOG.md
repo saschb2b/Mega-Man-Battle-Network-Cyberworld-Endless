@@ -36,11 +36,15 @@
   cents from one frame to the next (up to 40 on some sound servers): a
   slight warble on every held note. It follows the average now, under a
   cent a frame.
-- **Options.** SELECT on the title opens Options on every system, the
-  3DS too, and on a phone so does **OPTIONS** in the touch controls' menu,
-  mid-run too: **Controls** (the controls screen, where it was before;
-  not on the 3DS), **Audio** and **Statistics** (the answer, which was a
-  row of the controls screen, and on the 3DS SELECT's own).
+- **Options, a press away wherever you are.** The title's menu has an
+  **OPTIONS** line under NEW GAME and CONTINUE, in the title's own
+  letters, and in a run the PET's menu (START) has **Options** in the
+  place of BN6's Comm, which a run had always greyed out: the game waits
+  under it, and B brings you back to the PET where you were. SELECT on
+  the title opens it too, and on a phone so does **OPTIONS** in the touch
+  controls' menu. It holds **Controls** (the controls screen, where it was
+  before; not on the 3DS), **Audio** and **Statistics** (the answer, which
+  was a row of the controls screen, and on the 3DS SELECT's own).
 - **The Legacy Collection's balance, if you like it.** Options' **Audio**
   sets the sound: **GBA**, the cartridge's, or **Soft**, the balance of the
   Legacy Collection, which plays CD recordings instead of the game's own

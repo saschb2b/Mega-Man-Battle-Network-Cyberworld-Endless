@@ -1,4 +1,4 @@
-/* The PET's Save as the run's (docs/PET.md). */
+/* The PET's Save as the run's, and its Options (docs/PET.md). */
 #include "pet.h"
 
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include "emu.h"
 #include "jukebox.h"
 #include "netpass_screen.h"
+#include "pet_options.h"
 #include "pet_text.h"
 #include "platform.h"
 #include "rom.h"
@@ -18,18 +19,20 @@
 static int saving;
 
 /* The PET's input handler (its state 4, run each frame the menu takes
- * input), hooked: A on Save, disabled in a run, is taken from the game (its
- * bit in the keys just pressed cleared) and left in the menu's spare byte
- * for the engine, so the handler sees no A there; Comm keeps BN6's grey and
- * buzz. */
+ * input), hooked: A on Save, disabled in a run, and on Comm, the run's
+ * Options (pet_options.h), is taken from the game (its bit in the keys
+ * just pressed cleared) and left in the menu's spare byte for the engine,
+ * so the handler sees no A there. */
 static HookAct pet_input(HookRegs *r, void *user) {
 	(void)r;
 	(void)user;
-	if (hook_read8(BN6_PET_CURSOR) != 7 || hook_read8(BN6_PET_HOLD)) return HOOK_CONTINUE;
+	uint8_t at = hook_read8(BN6_PET_CURSOR);
+	if (at != BN6_PET_ENTRY_SAVE && !(at == BN6_PET_ENTRY_COMM && pet_options_here())) return HOOK_CONTINUE;
+	if (hook_read8(BN6_PET_HOLD)) return HOOK_CONTINUE;
 	uint16_t keys = hook_read16(BN6_KEYS_PRESSED);
 	if (!(keys & KEY_A)) return HOOK_CONTINUE;
 	hook_write16(BN6_KEYS_PRESSED, (uint16_t)(keys & ~KEY_A));
-	hook_write8(BN6_PET_MENU_TAKEN, 7);
+	hook_write8(BN6_PET_MENU_TAKEN, at);
 	return HOOK_CONTINUE;
 }
 
@@ -42,13 +45,15 @@ void pet_install(void) {
 	/* (only where the game is the one we read: its input handler's
 	 * pointer in the PET's state table, the grey's store) */
 	if (rom32(BN6_PET_INPUT_PTR) == BN6_PET_INPUT) emu_hook(BN6_PET_INPUT, pet_input, NULL);
-	/* Save lit, Comm greyed as BN6 has it without a link: the grey's
-	 * store to Save's colour (0x03001B58) made a no-op */
+	/* Save lit: the grey's store to Save's colour (0x03001B58) made a
+	 * no-op */
 	uint32_t grey = BN6_PET_GREY_SAVE - 0x08000000u;
 	if (R.data[grey - 4] == 0xE2 && R.data[grey - 3] == 0x69 && R.data[grey] == 0x11 && R.data[grey + 1] == 0x80) {
 		static const uint8_t nop[] = { 0xC0, 0x46 };
 		emu_write(BN6_PET_GREY_SAVE, nop, sizeof nop);
 	}
+	/* Comm made Options and lit, else greyed as BN6 has it without a link */
+	pet_options_install();
 }
 
 void pet_update(void) {
@@ -58,7 +63,8 @@ void pet_update(void) {
 	 * first layer (session 74) */
 	if ((director_in_town() || director_in_hp()) && emu_read8(emu_read32(BN6_TOOLKIT)) == BN6_MODE_GAME && !pet_text_items_held())
 		pet_text_items();
-	if (emu_read8(BN6_PET_MENU_TAKEN) == 7) {
+	pet_options_update();
+	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_SAVE) {
 		emu_write8(BN6_PET_MENU_TAKEN, 0);
 		saving = 1;
 	}
@@ -92,6 +98,7 @@ void pet_draw(void) {
 }
 
 uint32_t pet_keys(uint32_t keys) {
+	keys = pet_options_keys(keys);
 	/* (the NetPass up: the game held under it) */
 	if (netpass_screen_update()) return 0;
 	/* (A on the NetPass, newly pressed and come to the game: the pass opens over the KeyItem screen) */
