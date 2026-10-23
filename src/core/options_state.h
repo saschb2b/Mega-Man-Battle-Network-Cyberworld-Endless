@@ -1,20 +1,27 @@
 /* Options' state, shared by its flow (options.c) and its picture
- * (options_draw.c): the hub's lines, or the Audio section's, and the
- * cursor on them. */
+ * (options_draw.c): the hub's lines, or a section's (Display, Audio), and
+ * the cursor on them. */
 #ifndef CW_OPTIONS_STATE_H
 #define CW_OPTIONS_STATE_H
 
 #include <SDL.h>
 #include <stdbool.h>
 
-/* A line's kind: the hub's (Controls, Audio, Statistics, Done), the Audio
- * section's (Sound, Done) */
-enum { LINE_CONTROLS, LINE_AUDIO, LINE_STATS, LINE_SOUND, LINE_DONE };
-#define LINES_MAX 4
+/* A line's kind: the hub's (Controls, Display, Audio, Statistics), the
+ * Display section's (Fullscreen, Scale, Smooth motion, where the system
+ * has them: display.h), the Audio section's (Sound), and Done */
+enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_DONE };
+#define LINES_MAX 5
+
+/* A line whose value Left, Right, A or a tap turns, and keeps at once */
+static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_SOUND; }
+
+/* The section open: the hub's lines, or a section's in their place */
+enum { SECTION_HUB, SECTION_DISPLAY, SECTION_AUDIO };
 
 typedef struct {
 	bool open;
-	bool audio;          /* the Audio section, in the hub's place */
+	int section;         /* (SECTION_*) */
 	int at;              /* the cursor: a line's place in options_lines' list */
 	int hub_at;          /* ... the hub's, kept while a section is open */
 	SDL_FingerID finger; /* (a finger that went down on it: only its lift taps) */

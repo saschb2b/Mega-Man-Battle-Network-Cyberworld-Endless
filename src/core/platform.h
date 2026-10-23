@@ -26,6 +26,7 @@ typedef struct {
 	int w, h;          /* logical canvas */
 	int scale;
 	float fill;         /* (settings.ini's screen) the canvas shown at this scale to fill the screen, not a whole one; 0 whole */
+	float fill_y;       /* ... and down: the same, but stretched (display.h), where the canvas is the picture alone */
 	SDL_Texture *sharp; /* ... drawn whole-scaled into this first, then smoothly to its size */
 	int core_x, core_y; /* top-left of the centered 240x160 core */
 	float dp;          /* screen pixels to a dp (a 160th of an inch): the touch controls' sizes */
@@ -104,9 +105,14 @@ void platform_apply_effects(void);
 bool platform_save_canvas(const char *path);
 /* Files were written: in a browser, keep them (IndexedDB); elsewhere nothing. */
 void platform_persist(void);
-/* settings.ini in the data folder (made with the defaults when missing):
- * smooth_motion = on or off (P.blend); screen = auto, whole or fill (P.fill). */
-void platform_load_settings(const char *path);
+/* The canvas laid out again for the display's settings (display.h): the
+ * scale changed, logged where it moved */
+void platform_relayout(void);
+/* The desktops' window over the whole screen, borderless, or back
+ * (nothing elsewhere) */
+void platform_set_fullscreen(bool on);
+/* Smooth motion on or off, its kept frames let go */
+void platform_set_smooth(bool on);
 /* Smooth motion: the display refreshed with the game's last two frames
  * mixed, `w` (0-1) of the newer; the loop's frames were played unshown. */
 void platform_present_blend(double w);

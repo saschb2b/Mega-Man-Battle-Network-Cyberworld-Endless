@@ -124,7 +124,8 @@ first time: **More info**, then **Run anyway**. The first start opens the
 choose the file in Windows' file dialog or drop it on the window. The game
 keeps a copy in `%LOCALAPPDATA%\cyberworld-endless\rom\`, where the saves
 live too (uninstalling leaves them). It opens in a window at the largest whole
-scale that fits; F11 or Alt+Enter switches to fullscreen. Keyboards and
+scale that fits; F11, Alt+Enter or Options' **Display** switches to
+fullscreen, and the game opens as you left it. Keyboards and
 controllers (Xbox, PlayStation, Switch) work as on Linux. Steam's own **Add
 a Non-Steam Game** takes `cyberworld-endless.exe`.
 
@@ -163,8 +164,9 @@ choose the file (a file chooser when `zenity` or `kdialog` is installed)
 or drop it on the window. The game keeps a copy in
 `~/.local/share/cyberworld-endless/rom/` (the Flatpak's in
 `~/.var/app/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless/data/`), where your saves
-also live. It opens in a window at the largest whole scale that fits; F11
-or Alt+Enter switches to fullscreen.
+also live. It opens in a window at the largest whole scale that fits; F11,
+Alt+Enter or Options' **Display** switches to fullscreen, and the game
+opens as you left it.
 
 With Steam installed, the first start from the desktop offers to add the
 game to Steam as well, with its library artwork; `--add-to-steam` does it
@@ -398,7 +400,8 @@ hand uses chips and the buster.
 | Select | R | Backspace |
 
 Keys are positions, so on an AZERTY keyboard you move with Z Q S D. F11 or
-Alt+Enter switches to fullscreen; Escape twice quits. A controller's D-pad
+Alt+Enter switches to fullscreen (kept for the next start); Escape twice
+quits. A controller's D-pad
 and left stick move, its A and B are A and B (on a Nintendo pad the buttons
 marked so), its shoulders and triggers L and R, Start is Start and Back
 (Minus) is Select; holding Back and Start for a second, twice, quits,
@@ -413,7 +416,8 @@ checkpoint; what came after it is lost.
 it on every system (the line under the menu names the button it is on), and
 on a phone or tablet so does **OPTIONS** in the touch controls' menu, mid-run
 too. Its **Controls** opens the controls screen (not on the 3DS, whose
-buttons are its own), **Audio** the sound ([Sound](#sound)), and
+buttons are its own), **Display** the picture ([Screen](#screen)),
+**Audio** the sound ([Sound](#sound)), and
 **Statistics** your answer to the statistics' question, where the game can
 send them; B or **Done** goes back.
 
@@ -1004,22 +1008,46 @@ on the Nova's 1280x960 screen and 6x on the Flip 2's 1920x1080 screen, with
 black borders around it. Where a whole number would leave it a quarter
 smaller or more than the screen allows, it fills the screen instead, each
 pixel's edge a little soft: on a 640x480 screen (an RG35XX Pro, an RG35XX
-Plus) it is 640x427 rather than 480x320. `screen = whole` in `settings.ini`
-in the data folder keeps whole pixels everywhere, `screen = fill` fills
-every screen, and `screen = auto` is the default. On a PC the window keeps
+Plus) it is 640x427 rather than 480x320. That is **Auto**, the default.
+Options' **Display** (Select on the title, or **OPTIONS** in a phone's
+touch menu) has the other ways on its **Scale** line, changed at once and
+kept:
+
+- **Integer**: whole pixels everywhere, every pixel the same size.
+- **Fill**: as big as the screen holds, its shape kept. On a wide screen
+  that is the screen's whole height, with no border above and below: a
+  1920x1080 screen shows it 1620x1080 rather than 1440x960.
+- **Stretch**: the whole screen, no border at all, the picture pulled from
+  the GBA's 3:2 to the screen's shape (on a 16:9 screen, about a fifth
+  wider than the game drew it).
+
+`screen = auto`, `whole` (or `integer`), `fill` or `stretch` in
+`settings.ini` in the data folder sets it as well. On a PC the window keeps
 the same rules as it is resized. A phone held upright shows the picture as
 wide as its screen the same way, over the touch controls (1080x720 on a
 1080-wide phone, rather than 960x640), wherever the controls keep their
-size; on its side the picture keeps its whole scale beside them.
+size; on its side the picture keeps its whole scale beside them. While the
+touch controls are shown they keep their room, so Fill and Stretch take the
+screen once they are away (a controller in hand). The 3DS fills its top
+screen's height (Fill, 1.5x) unless Integer shows it at 1x, or Stretch over
+the top screen's whole width. The browser player sizes the picture itself,
+at the largest whole scale its window holds.
+
+On a PC, Display's **Fullscreen** puts the game borderless over the whole
+screen, as F11 or Alt+Enter do, and the game opens as you last left it
+(`fullscreen = on` or `off` in `settings.ini`; `--fullscreen` or `--window`
+on the command line come first).
 
 The game runs at the GBA's 60 frames a second. A 60 or 120 Hz screen shows
 every frame for the same time; a 90, 144 or 165 Hz one (a Steam Deck OLED,
 many PC monitors) shows them for one refresh or two in turn, which reads as
 a slight judder. **Smooth motion** mixes the two latest frames at each
 refresh instead: motion is even, a little blurred, and a frame later. Turn
-it on with `smooth_motion = on` in `settings.ini` in the data folder (made
-on the first start), or in the browser player's menu. A screen at 60 or
-120 Hz, or one that follows the game (FreeSync, G-Sync), needs neither.
+it on in Options' **Display** (not on the 3DS, whose screen keeps the GBA's
+pace), in the browser player's menu (the two keep in step), or with
+`smooth_motion = on` in `settings.ini` in the data folder (made on the first
+start). A screen at 60 or 120 Hz, or one that follows the game (FreeSync,
+G-Sync), needs neither.
 
 ## Sound
 
