@@ -49,8 +49,11 @@
                                          /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
 #define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 as the capture held it: the dark panels' swirl */
-#define BN5_LIB_PULSE        0x08614C4Cu /* the pulse: six palettes of 0x20 bytes copied in turn into palette 9's */
-#define BN5_LIB_PULSE_FRAMES 6           /* ... buffer, each held one to six frames (the map's palette animation, assumed) */
+#define BN5_LIB_PULSE        0x08614C4Cu /* palette 9 (the dark panels) at rest; every 132 frames a glint: the next five palettes, */
+#define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
+#define BN5_LIB_BREATH       0x08614D10u /* palette 10: six palettes 0x20 apart stepped there and back, 12 frames each (8 at the last) */
+#define BN5_LIB_BLINK        4           /* a freed panel's look toggles between its old kind and clean every this many frames, */
+#define BN5_LIB_BLINKS       14          /* ... this many times, once the board has faded back in (27 frames), then stays clean */
 #define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */

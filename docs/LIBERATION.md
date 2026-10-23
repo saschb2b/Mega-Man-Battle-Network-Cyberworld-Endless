@@ -240,9 +240,13 @@ liberation and an item's find; the recordings are in the pull request):
   BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
   ring until the DarkHoles fall); each panel's four look bytes pick its
   corners' edge pieces (`BN5_LIB_EDGES`), each byte the three neighbours
-  around that corner the Navi in play can walk (`BN5_LIB_CORNERS`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`; the
-  dark's pulse six palettes from `0x08614C4C` copied into palette 9 in
-  turn, each held one to six frames. Located by their bytes in a
+  around that corner the Navi in play can walk (`BN5_LIB_CORNERS`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`. The
+  dark panels' palette rests at `0x08614C4C` and glints every 132 frames
+  through the next five (held 6, 2, 2, 1, 1 frames); palette 10
+  breathes over six palettes from `0x08614D10`, 12 frames a step.
+- **The freed panel** blinks once the board has faded back in: its
+  look toggles between its old kind and clean every 4 frames, 14 times,
+  then stays clean. Located by their bytes in a
   capture; the routine that draws a panel from its kind and its four look
   bytes (the panel list's +4-+7), the pulse's table and the other maps'
   sets are still to be traced.
