@@ -22,6 +22,13 @@ enum {
 };
 /* The commands (BN5's names) */
 enum { LIB_CMD_LIBERATE, LIB_CMD_LONGSWRD, LIB_CMD_PASS, LIB_CMDS };
+/* The banners after a liberation's battle (liberation_pieces.c), and the
+ * frames from its end: the board faded back in first (BN5's 27), then the
+ * banner squashed in and out (BN5's 58, traced) */
+enum { LIB_CHEER_NONE, LIB_CHEER_SUCCESS, LIB_CHEER_ONE_TURN };
+#define LIB_CHEER_WAIT   27
+#define LIB_CHEER_FRAMES 58
+#define LIB_POPS 4
 /* What a battle liberates */
 enum { LIB_FIGHT_PANEL, LIB_FIGHT_GUARDIAN, LIB_FIGHT_HOLE, LIB_FIGHT_DARKLOID };
 
@@ -60,6 +67,9 @@ typedef struct {
 	bool briefed;          /* MegaMan's word on the board, said */
 	bool holes_told;       /* ... that every DarkHole is gone */
 	char words[512];       /* words due ("" none) */
+	int cheer, cheer_t;    /* the banner after a won battle (LIB_CHEER_*), frames since */
+	struct { int8_t x, y, kind; int t; } pop[LIB_POPS];   /* items freed: BN5's kind (BN5_ITEM_*), shown over their panel */
+	int npops;             /* ... while the words of them run */
 	int prize;             /* the par's prize: 0 two under, 1 at par, 2 over */
 	bool prize_given;
 } LibState;

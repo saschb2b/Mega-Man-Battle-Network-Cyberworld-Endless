@@ -314,6 +314,8 @@ static void free_panel(int x, int y, char *held, size_t n) {
 		if ((it & 15) == LIB_GOT_HEART) hp_set(hp_now() + hp_max() * 3 / 10 / 10 * 10);
 		else LB.op = LB.op + (it >> 4) > LIB_OP_MAX ? LIB_OP_MAX : LB.op + (it >> 4);
 		snprintf(held, n, "%s", lib_item_words((it & 15) == LIB_GOT_HEART, LB.op));
+		/* (its icon over its panel as BN5's pops, while the words of it run) */
+		if (LB.npops < LIB_POPS) LB.pop[LB.npops++] = (__typeof__(LB.pop[0])){ (int8_t)x, (int8_t)y, (int8_t)((it & 15) == LIB_GOT_HEART ? BN5_ITEM_HEART : BN5_ITEM_ORDER_POINTS), 0 };
 	}
 	if (k == LIB_DARK || k == LIB_ITEM || k == LIB_RING || k == LIB_HOLE) { LB.b.kind[y][x] = LIB_CLEAN; lib_look_freed(x, y); }
 }
@@ -364,6 +366,8 @@ static void fight_won(bool one_turn) {
 	}
 	say_more(lib_battle_words(LB.fight, true, one_turn, freed, lib_holes_left(&LB.b), back));
 	say_more(held);
+	LB.cheer = one_turn ? LIB_CHEER_ONE_TURN : LIB_CHEER_SUCCESS;
+	LB.cheer_t = 0;
 }
 
 static void after_fight(void) {
@@ -497,6 +501,8 @@ static void track_update(void) {
 }
 
 static void talk_update_lib(void) {
+	/* (BN5's banner first, over the board faded back in) */
+	if (LB.cheer && lib_look_on() && LB.cheer_t < LIB_CHEER_WAIT + LIB_CHEER_FRAMES) return;
 	if (LB.words[0]) {
 		if (!quiet() || !talk_start(LB.words, FACE_MEGAMAN)) return;
 		LB.words[0] = 0;
@@ -504,6 +510,8 @@ static void talk_update_lib(void) {
 	}
 	if (!quiet()) return;
 	LB.step = LB.after;
+	LB.cheer = LIB_CHEER_NONE;
+	LB.npops = 0;
 	if (LB.step == LIB_STEP_BANNER) LB.banner_t = 0;
 }
 
@@ -542,6 +550,8 @@ void lib_update(void) {
 	units_show();
 	lib_fence_update();
 	lib_look_update();
+	++LB.cheer_t;
+	for (int i = 0; i < LB.npops && i < LIB_POPS; ++i) ++LB.pop[i].t;
 	if (LB.step != LIB_STEP_WAIT) track_update();
 	steps_update();
 }

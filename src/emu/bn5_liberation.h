@@ -73,13 +73,22 @@
 #define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
 #define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
 #define BN5_LIB_SPRITE_LIST  7           /* the board's sprites' list, */
-#define BN5_LIB_OUTLINE      15          /* ... the outline's index: animations 0 a ripple (20, 2, 2, 2, 8 frames, looped) and */
-#define BN5_LIB_OUTLINE_BLINK 1          /* ... 1 a blink (24 lit, 24 not), yellow; 2 and 3 the same in green; 4 still */
-#define BN5_LIB_ICONS        21          /* ... the items' icons' index */
-#define BN5_LIB_ICONS_SPRITE 0x0848D368u /* list 7 index 21: the items' icons that rise over a freed panel (a heart's tiles at 0x0848DFF8) */
-#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... their palette (OBJ palette 3) */
-#define BN5_LIB_BANNER_TILES 0x0873CF74u /* about here, the battle messages' big letters ("LIBERATE SUCCESS!": five 32x16 OBJs, OBJ */
-#define BN5_LIB_MESSAGES     0x0801B8D4u /* ... palette 11): the messages' table, each a list of its letters' graphics (their pointers) */
+#define BN5_LIB_OUTLINE      15          /* ... the outline's index: animations 0 a ripple (20, 2, 2, 2, 8 frames, looped), shown */
+#define BN5_LIB_OUTLINE_RIPPLE 0         /* ... 6 frames after A while the command window is open over a liberable panel alone; */
+#define BN5_LIB_OUTLINE_DELAY 6          /* ... 1 a blink (24 lit, 24 not), yellow; 2 and 3 the same in green; 4 still */
+#define BN5_LIB_ICON_OF      5           /* an item kind's icon: BN5_LIB_ITEM_KINDS +5, its index in list 7 (a heart's 24, a key's */
+                                         /* ... 25, zenny's 37, BugFrags' 38, Order Points' 41, a chip's 83), animation 0 (its */
+                                         /* ... shadow its own; its tiles turn every 24 frames), its own palette */
+#define BN5_LIB_ICON_POP     3           /* ... popped over the freed panel: up 8 after this many frames, down 2 after 5 more, held */
+/* The battle messages' letters ("LIBERATE SUCCESS!", "1 TURN LIBERATE!"): 8x16, two tiles (0x40 bytes) each, laid in
+ * 20 columns of five 32x16 affine OBJs on OBJ palette 11 at y 64 */
+#define BN5_LIB_LETTERS      0x0873CEF4u /* A-Z from here */
+#define BN5_LIB_LETTER_SPACE 0x0873D574u /* " " */
+#define BN5_LIB_LETTER_BANG  0x0873D5B4u /* "!" */
+#define BN5_LIB_LETTER_CAPS  0x0873D5F4u /* the left cap, then the right */
+#define BN5_LIB_BIG_DIGITS   0x0873D974u /* "0"-"9", in the right column of a 16x16 OBJ */
+#define BN5_LIB_BANNER_PAL   0x0873E4B4u /* ... their palette */
+#define BN5_LIB_MESSAGES     0x0801B8D4u /* the messages' letters' graphics (their pointers) */
 
 /* The board's HUD and window (docs/LIBERATION.md, How the board looks and moves) */
 #define BN5_LIB_HUD_OAM      0x080531F4u /* the Order Points gauge: six OAM entries (u32 attributes 0 and 1, u16 attribute 2, u32 1): */
@@ -90,11 +99,19 @@
 #define BN5_LIB_HUD_FRAME    0x087E4884u /* the gauge's frame, copied to 0x02039200 */
 #define BN5_LIB_HUD_BAR      0x087E4984u /* the gauge's bar, masked by the count */
 #define BN5_LIB_HUD_PAL      0x086D5904u /* OBJ palette 12: BN5's HUD palette (the HP box's too) */
+#define BN5_LIB_HUD_MASKS    0x08053240u /* the bar's mask by Order Points, 8 bytes each: a u32 ANDed into each row of its first tile */
+                                         /* ... kept, the bar's (6 OP + 7) / 8 last tiles kept, the rest cleared: it fills from the right */
 #define BN5_LIB_PHASE_TILES  0x087E4534u /* the L view's "PHASE" and "TRGT PHASE" (OBJ palette 13 at 0x087E4658), its digits from */
-#define BN5_LIB_PHASE_DIGITS 0x087E4E04u /* ... here (palette 12), its corner arrows from 0x087E4CC4 */
-#define BN5_LIB_WINDOW_PAL   0x087E4FA4u /* OBJ palette 15: the command window, 21 OBJs of 16x16 at x 128-239, y 114-157, drawn into */
-                                         /* ... RAM (0x0203A400) by BN5's code each time it opens; its cursor tile 704 (0x086BA484), */
-                                         /* ... OBJ palette 14 (0x086CCD24), at (112,112) */
+#define BN5_LIB_PHASE_DIGITS 0x087E4E04u /* ... here (palette 12) "1"-"9", its corner arrows from 0x087E4CC4 */
+#define BN5_LIB_PHASE_ZERO   0x087E4DE4u /* ... and its "0", the arrows' tenth tile */
+#define BN5_LIB_PHASE_PAL    0x087E4658u /* ... the words' palette: "PHASE" tiles 0-4 at (54, 124) and its number at (97, 124); */
+                                         /* ... "TRGT" tiles 5-8 at (22, 136), "PHASE" after it, its number at (97, 136) */
+#define BN5_LIB_WINDOW_PAL   0x087E4FA4u /* OBJ palette 15: the command window's words, 21 OBJs of 16x16 at x 128-239, y 114-157, */
+                                         /* ... drawn into RAM (0x0203A400) by BN5's code each time it opens, a line 14 down */
+#define BN5_LIB_WINDOW_TILES 0x087E4FC4u /* ... its frame on BG0: nine tiles (top left, top, top right, left, body, right, bottom */
+#define BN5_LIB_WINDOW_BG_PAL 0x087E5144u /* ... left, bottom, bottom right), 16 x 7 tiles at (112, 104), BG palette 14 */
+#define BN5_LIB_CURSOR_TILES 0x086BA484u /* ... its cursor, 16x16 at (112, 112), OBJ tile 704 */
+#define BN5_LIB_CURSOR_PAL   0x086CCD24u /* ... OBJ palette 14 */
 #define BN5_LIB_BACKDROP_PAL 0x0861BF20u /* BG palette 0 in a mission: the map's own animated backdrop (its tiles rebuilt in RAM at */
                                          /* ... 0x0200E960) in purple; map 0x86:00's own palette 0 otherwise 0x086203CC */
 #define BN5_LIB_BACKDROP     0x080741B8u /* ... the mission's BGAnimData record that loads it (0x0861BF1C: a size word, then these), */
@@ -116,7 +133,8 @@
 #define BN5_LIB_PTR_ITEMS    10          /* the item panels: kind (BN5_ITEM_*), code, u16 chip, u16 amount, x, y; 0xFFFFFFFF ends them */
 #define BN5_LIB_PTR_REWARDS  19          /* the rewards: kind (0 a chip, 1 zenny), code, phases from, phases to, u16 chip or zenny */
 #define BN5_LIB_NAVI_HP      0x0804F968u /* per team Navi: u16 his id, then his HP in each of the nine missions */
-#define BN5_LIB_ITEM_KINDS   0x08051924u /* per item kind 8 bytes: +2 the amount's multiplier (hearts 10, zenny 100); handlers 0x0804D8B4 */
+#define BN5_LIB_ITEM_KINDS   0x08051924u /* per item kind 8 bytes: +2 the amount's multiplier (hearts 10, zenny 100), +5 its icon */
+                                         /* ... (BN5_LIB_ICON_OF); handlers 0x0804D8B4 */
 
 /* A panel's kind */
 #define BN5_LIB_PANEL_FREE       0x00        /* clean: the team walks it */

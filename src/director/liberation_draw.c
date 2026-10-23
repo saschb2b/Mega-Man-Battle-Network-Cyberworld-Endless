@@ -23,6 +23,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "netmap.h"
@@ -41,6 +42,7 @@
 #define CAM_X  120        /* where MegaMan's place shows, the scroll's own (calibrated on a capture) */
 #define CAM_Y  80
 #define OUTLINE_DOWN 6    /* the outline's origin below the panel's centre: on its look's diamond (8 down, the OBJs' 2 above it) */
+#define POP_DOWN 6        /* an item's icon's origin below its panel's centre, its shadow on the look's diamond */
 
 static struct {
 	bool on;               /* the board shows */
@@ -50,8 +52,11 @@ static struct {
 	int blink;             /* frames seen, for the faced panel's blink */
 	uint8_t sprite[4096];  /* the sprites' colours, a bit each of BN6's 15-bit colours */
 	int fx, fy;            /* the panel MegaMan faces, -1 none */
-	Anim outline;          /* ... outlined by BN5's own sprite, its blink from where he turned to it */
-	int out_x, out_y;      /* ... the panel it blinks on, -1 none */
+	Anim outline;          /* ... outlined by BN5's own sprite, its ripple from the menu's opening */
+	int out_x, out_y;      /* ... the panel it ripples on, -1 none */
+	int out_t;             /* ... frames since */
+	Anim pop[LIB_POPS];    /* the items' icons freed (LB.pop) */
+	bool pop_on[LIB_POPS];
 } S;
 
 /* (x mod 512, near `near`) */
@@ -60,16 +65,37 @@ static int unwrap(int v, int near) {
 	return near + d;
 }
 
-/* BN5's outline of the faced panel (sprite list 7's, BN5_LIB_OUTLINE):
- * its blink, from the moment he faces a panel he can take */
-static void see_outline(void) {
+static Sprite *bn5_sprite(int index) {
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
-	Sprite *spr = S.look && S.fx >= 0 && x->data ? sprite_get_rom(x->data, x->layout->sprite_lists, BN5_LIB_SPRITE_LIST, BN5_LIB_OUTLINE) : NULL;
+	return x->data ? sprite_get_rom(x->data, x->layout->sprite_lists, BN5_LIB_SPRITE_LIST, index) : NULL;
+}
+
+/* BN5's outline of the faced panel (sprite list 7's, BN5_LIB_OUTLINE): its
+ * ripple, while the command window is open over a panel to liberate */
+static void see_outline(void) {
+	int u = S.fx >= 0 ? lib_unit_at(S.fx, S.fy) : 0;
+	Sprite *spr = S.look && S.fx >= 0 && LB.step == LIB_STEP_MENU && u < 0 && lib_liberable(&LB.b, S.fx, S.fy) ? bn5_sprite(BN5_LIB_OUTLINE) : NULL;
 	if (!spr) { S.out_x = S.out_y = -1; return; }
-	if (S.fx != S.out_x || S.fy != S.out_y) anim_play(&S.outline, spr, BN5_LIB_OUTLINE_BLINK);
-	else anim_update(&S.outline);
+	if (S.fx != S.out_x || S.fy != S.out_y) { anim_play(&S.outline, spr, BN5_LIB_OUTLINE_RIPPLE); S.out_t = 0; }
+	else if (++S.out_t > BN5_LIB_OUTLINE_DELAY) anim_update(&S.outline);
 	S.out_x = S.fx;
 	S.out_y = S.fy;
+}
+
+/* The items' icons over their freed panels: each kind's own sprite (its
+ * index BN5_LIB_ITEM_KINDS' +5) */
+static void see_pops(void) {
+	const XRom *x = &XR[XROM_BN5_COLONEL_US];
+	for (int i = 0; i < LIB_POPS; ++i) {
+		bool on = S.look && x->data && i < LB.npops;
+		if (on) {
+			Sprite *spr = bn5_sprite(x->data[BN5_LIB_ITEM_KINDS - 0x08000000u + 8u * (uint32_t)LB.pop[i].kind + BN5_LIB_ICON_OF]);
+			if (!spr) on = false;
+			else if (!S.pop_on[i] || S.pop[i].spr != spr) anim_play(&S.pop[i], spr, 0);
+			else anim_update(&S.pop[i]);
+		}
+		S.pop_on[i] = on;
+	}
 }
 
 void lib_see(void) {
@@ -89,6 +115,7 @@ void lib_see(void) {
 	S.fx = S.fy = -1;
 	if (LB.step == LIB_STEP_MENU || (LB.step == LIB_STEP_MOVE && lib_faced_takes())) lib_faced(&S.fx, &S.fy);
 	see_outline();
+	see_pops();
 }
 
 /* A dark panel's colour: the floor's, sunk into Nebula's purple */
@@ -177,16 +204,43 @@ static void draw_menu(void) {
 
 /* The panel MegaMan faces, outlined as BN5's board outlines it */
 static void draw_faced(void) {
-	if (S.out_x < 0) return;
+	if (S.out_x < 0 || S.out_t < BN5_LIB_OUTLINE_DELAY) return;
 	int wx, wy;
 	netmap_world(S.out_x, S.out_y, &wx, &wy);
 	anim_draw(&S.outline, P.core_x + wx + wy - S.cam_u + CAM_X, P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + OUTLINE_DOWN, false, 0, 0);
 }
 
+/* The items freed, popped over their panels as BN5's: up 8, then down 2 */
+static void draw_pops(void) {
+	for (int i = 0; i < LIB_POPS; ++i) {
+		if (!S.pop_on[i]) continue;
+		int wx, wy, t = LB.pop[i].t, lift = t < BN5_LIB_ICON_POP ? 0 : t < BN5_LIB_ICON_POP + 5 ? 8 : 6;
+		netmap_world(LB.pop[i].x, LB.pop[i].y, &wx, &wy);
+		anim_draw(&S.pop[i], P.core_x + wx + wy - S.cam_u + CAM_X, P.core_y + (wy - wx) / 2 - S.cam_v + CAM_Y + POP_DOWN - lift, false, 0, 0);
+	}
+}
+
+/* The command window as BN5's, its lines BN5's commands */
+static void draw_window(void) {
+	const char *lines[LIB_CMDS];
+	for (int c = 0; c < LIB_CMDS; ++c) lines[c] = lib_command_label(c);
+	lib_piece_window(lines, LB.can, LIB_CMDS, LB.menu);
+}
+
 void director_draw_board(void) {
 	if (!S.on) return;
+	/* (BN5's own pieces where its ROM is there, else the PET's look) */
+	bool bn5 = S.look && lib_pieces_on();
 	draw_faced();
-	draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
+	draw_pops();
+	if (bn5) lib_piece_gauge(LB.op);
+	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
+	/* (L held, as BN5's map view: the phase and its target) */
+	if (bn5 && D.l_held && LB.step == LIB_STEP_MOVE) lib_piece_phases(LB.phase, LB.b.par);
 	if (LB.step == LIB_STEP_BANNER) draw_banner();
-	if (LB.step == LIB_STEP_MENU) draw_menu();
+	if (bn5 && LB.cheer && LB.cheer_t >= LIB_CHEER_WAIT) lib_piece_cheer(LB.cheer, LB.cheer_t - LIB_CHEER_WAIT);
+	if (LB.step == LIB_STEP_MENU) {
+		if (bn5) draw_window();
+		else draw_menu();
+	}
 }

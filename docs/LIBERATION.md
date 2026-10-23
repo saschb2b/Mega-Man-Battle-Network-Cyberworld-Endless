@@ -216,20 +216,23 @@ liberation and an item's find; the recordings are in the pull request):
   changes every frame: the dark panels' pulse), a pit for a DarkHole.
   An item panel is a dark panel with a teal stud. The start is the map's
   own floor, no overlay.
-- **The faced panel** gets a yellow outline, which blinks fully lit; the
-  command menu (Liberation, the Navi's command, Pass) greys what cannot
-  be used there.
+- **The faced panel** gets a yellow outline, a ripple, while the command
+  window is open over a panel to liberate (6 frames after A; never while
+  walking, never on a clean panel); the command window (Liberation, the
+  Navi's command, Pass) greys what cannot be used there.
 - **A won liberation:** "LIBERATE SUCCESS!" over the battle (or "1 TURN
   LIBERATE!" for a one-turn win), a fade back to the board, the freed
   panel turning from the swirl to grey to cyan, then the Navi's line in
   his chat box ("We liberated it!").
-- **An item's find:** the item rises out of its freed panel as an icon (a
-  zenny coin, a heart, Order Points and so on) and bobs over it while the
-  Navi says what he found ("I found some Zennys!"). The board queues it
-  as an event (`BN5_LIB_EVENT`, 12 bytes each from `0x02001AB0`): an event
-  kind, the text script of the find (the item kinds' table
-  `BN5_LIB_ITEM_KINDS` +4: 0x18 a heart, 0x29 Order Points, 0x25 zenny,
-  0x26 BugFrags, 0x53 a chip), the panel.
+- **An item's find:** the item pops out of its freed panel as an icon (a
+  zenny coin, a heart, Order Points and so on), its shadow on the panel:
+  up 8 pixels after 3 frames, down 2 after 5 more, held while the Navi
+  says what he found ("I found some Zennys!"). The board queues it as an
+  event (`BN5_LIB_EVENT`, 12 bytes each from `0x02001AB0`). Each kind's
+  icon is a sprite of list 7, its index the item kinds' table's
+  (`BN5_LIB_ITEM_KINDS` +5: 0x18 a heart, 0x19 a key, 0x25 zenny, 0x26
+  BugFrags, 0x29 Order Points, 0x53 a chip), its animation 0 with its
+  shadow.
 - **The tiles** are the mission maps' own: the overlay's tiles stand from
   tile 865 of map 0x86:00's tile set, uncompressed at `0x08623130` (its
   tile t at `0x0861C510` + 32t, copied whole into the BG's characters),
@@ -251,17 +254,20 @@ liberation and an item's find; the recordings are in the pull request):
 - **The freed panel** blinks once the board has faded back in: its
   look toggles between its old kind and clean every 4 frames, 14 times,
   then stays clean.
-- **The sprites:** the faced panel's outline and the items' icons are
-  BN5 sprites (list 7, entries 15 and 21); the battle's banners five
-  OBJs whose tiles stand near `0x0873CF74`, their build not traced.
+- **The sprites:** the faced panel's outline is a BN5 sprite (list 7's
+  15), the items' icons list 7's above; the battle's banners are 20
+  columns of BN5's battle-message letters (8x16, `BN5_LIB_LETTERS`) in
+  five 32x16 affine OBJs at y 64, squashed in over 8 frames, held 42,
+  squashed out over 8 (58 in all).
 
 - **The HUD and the window:** the Order Points gauge is six OBJs at the
   top right (`BN5_LIB_HUD_OAM`), its frame, bar and digits BN5's
   (`0x087E4xxx`, OBJ palette 12); the L view's PHASE and TRGT PHASE are
-  OBJs on palette 13; the command window is 21 OBJs of 16x16 drawn by
-  BN5's code (palette 15) with BN5's menu cursor beside it; the battle's
-  banners come from BN5's battle-message table (`BN5_LIB_MESSAGES`),
-  the engine BN6 also has.
+  OBJs on palette 13; the command window's frame is nine tiles on BG0
+  (`BN5_LIB_WINDOW_TILES`, BG palette 14), its words 21 OBJs of 16x16
+  drawn by BN5's code (palette 15) a line 14 pixels down, with BN5's
+  menu cursor beside them; the battle's banners come from BN5's
+  battle-message letters, the engine BN6 also has.
 - **The backdrop** is the mission map's own animated backdrop, recoloured
   purple (BG palette 0 from `0x0861BF20`): outside a mission the same map
   is BN5's teal ACDC Area 3.
@@ -674,7 +680,20 @@ The backdrop is the mission's: map 0x86:00's own animated tiles in its
 purple (`BN5_LIB_BACKDROP`), as BN5's map group 0x86 loads them while a
 mission is on (its LoadBGAnim and LoadGFXAnims each choose a mission's
 table by `BN5_LIB_ON_MAP`; `src/gfx/xbackdrop.c` reads both shapes and
-takes the mission's).
+takes the mission's). BN5's own pieces are drawn over it from BN5's ROM
+(`src/director/liberation_pieces.c`, its tiles through
+`src/gfx/xtiles.c`), each where BN5 lays it (traced): the Order Points
+gauge at the top right (its six OBJs, the frame's tiles from its pieces,
+the bar masked by the count as BN5 masks it, filling from the right),
+the L view while L is held ("PHASE" and "TRGT PHASE" with their numbers,
+without BN5's corner arrows: BN6's camera stays on MegaMan), the command
+window in BN5's frame on BG0's place with its cursor (its words in BN6's
+menu font, white, a command not to be taken in the paler colour of
+BN5's letters' edges), "LIBERATE SUCCESS!" or "1 TURN LIBERATE!" squashed in and out
+over the board once it has faded back in (27 frames, then 58; MegaMan's
+words wait for it), and each item freed popped over its panel in its own
+icon until the words of it end. The phase banners stay in the PET's
+look: BN5's PLAYER PHASE and its Darkloids' are not traced.
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
 banners and the menu are as above (BN5's own still to come).
@@ -692,9 +711,8 @@ CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 2's guardian, home and act 3's dark layer.
 
 **Left for later:** the board's state across a CONTINUE (a checkpoint on a
-dark layer restarts its board from the arrival); BN5's "LIBERATE
-SUCCESS!" and "1 TURN LIBERATE!", the item's pop-up, the board's corner,
-banners and command window, its units' sprites, and
+dark layer restarts its board from the arrival); BN5's phase banners,
+its units' sprites, the L view's blended panel and arrows, and
 the other eight missions' maps (stage 1 draws every dark layer in mission
 1's); the camera over the board (BN5's L); barriers, keys and sealed
 routes; chips and zenny in item panels; the BonusPanel's chip; the
