@@ -57,7 +57,7 @@ void reconnect_draw(int x, int y, const ReconnectView *v) {
 	int px = x + PANEL_X, py = y + PANEL_Y;
 	look_screen(px, py, PANEL_W, PANEL_H, reconnect_text_title);
 	look_band_note(px, py, PANEL_W, reconnect_text_lost, LOOK_EDGE_HI);
-	SDL_Rect f = look_window(px + 7, py + 17, PANEL_W - 14, 52, 0, false);
+	SDL_Rect f = look_window(px + 7, py + 18, PANEL_W - 14, 52, 0, false);
 	searching(f.x + 4, f.y + 2, v->t);
 	look_text(f.x + 34, f.y + 1, reconnect_text_trying((int)(v->t / 400 % 4)), LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	minifont_draw(f.x + 34, f.y + 15, reconnect_text_kept, LOOK_DIM, 1);

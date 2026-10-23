@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **The PET's screens look like BN6's own.** The screens the game adds
+  to BN6 (the Jukebox, the NetPass, Trade Central, the NetBattle's cards,
+  the wait for a dropped link, Options and the controls screen, the
+  second screen, the ROMs screen and SAVES) had a look of their own: a
+  flat green band, thin teal panels on a dotted ground, bold letters
+  everywhere. They are drawn to the measure of BN6's own PET screens now:
+  the dark band with the screen's name and its stripes, the metal rails,
+  windows framed in light and dark cyan round a navy field, the orange
+  arrow for the cursor, key hints as E-Mail's START:SORT, Options' notes
+  in an information box like KeyItem's, and lists in BN6's own thin
+  letters, read from your ROM.
 - **The Jukebox.** A new key item: **KeyItem** in the PET, then A on
   **Jukebox**, plays every song of the game, BN6's 37, and with BN5's ROM
   beside it BN5's 35, as the cartridges play them, on BN6's own sound

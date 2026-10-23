@@ -28,7 +28,8 @@
 static void frame(int x, int y, const char *place) {
 	look_screen(x, y, W, H, arena_title);
 	look_band_note(x, y, W, place, LOOK_PAGE);
-	look_window(x + 5, y + LOOK_BAND_H + 2, W - 10, H - LOOK_BAND_H - 2 - LOOK_RAIL - 1, 0, false);
+	/* (under the note's shade, as BN6's windows sit under its hints) */
+	look_window(x + 5, y + LOOK_BAND_H + 4, W - 10, H - LOOK_BAND_H - 4 - LOOK_RAIL - 1, 0, false);
 }
 
 /* a label in gold and its value in the engine's small letters, white, on one line w wide */

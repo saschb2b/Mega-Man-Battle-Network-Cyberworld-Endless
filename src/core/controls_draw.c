@@ -21,13 +21,13 @@
  * rows in a window (the device's name, MAIN and ALSO in its band), the
  * note and the keys on the body under it */
 #define HEAD_Y 12      /* the tabs */
-#define WIN_Y 16
+#define WIN_Y 18
 #define WIN_H 118
-#define COL_Y 22       /* the device's name, MAIN and ALSO over their columns */
-#define ROW_Y 30
+#define COL_Y 24       /* the device's name, MAIN and ALSO over their columns */
+#define ROW_Y 31
 #define ROW_H 11
 #define BOTTOM_Y (ROW_Y + ROWS * ROW_H)
-#define NOTE_Y 136
+#define NOTE_Y 137
 #define NAV_Y 149
 #define LABEL_X 24
 #define MAIN_X 79
@@ -332,7 +332,7 @@ void controls_draw(void) {
 	if (!C.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
 	pet_panel_draw(x0, y0, options_word(OW_CONTROLS));
-	look_window(x0 + 7, y0 + WIN_Y, CORE_W - 14, WIN_H, COL_Y + 7 - WIN_Y - LOOK_FRAME, false);
+	look_window(x0 + 7, y0 + WIN_Y, CORE_W - 14, WIN_H, COL_Y + 6 - WIN_Y - LOOK_FRAME, false);
 	tabs_draw(x0, y0);
 	rows_draw(x0, y0);
 	bottom_draw(x0, y0);
