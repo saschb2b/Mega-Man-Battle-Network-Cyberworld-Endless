@@ -15,15 +15,14 @@
 #endif
 #include "analytics_net.h"
 #include "audio.h"
+#include "display.h"
 #include "emu.h"
 #include "frame_log.h"
 #include "gfx.h"
 #include "keymap.h"
 #include "mirror.h"
 #include "options.h"
-#include "options_text.h"
 #include "save_queue.h"
-#include "sound_filter.h"
 #include "pads.h"
 #include "touch.h"
 #include "text_input.h"
@@ -105,15 +104,12 @@ static float density(void) {
 	return dp > 0 ? dp : 1;
 }
 
-/* settings.ini's screen: the picture at the largest whole scale (whole), at
- * the largest that fits (fill), or (auto) filling where the whole one leaves
- * it a quarter smaller or more: an RG35XX Pro's 640 x 480 drew it at
- * 480 x 320, half the screen (issue #36), where a Nova's 1280 x 960 gives
- * 5x against 5.33 and a Flip 2's 1920 x 1080 6x against 6.75 */
-enum { SCREEN_AUTO, SCREEN_WHOLE, SCREEN_FILL };
-#if !defined(__3DS__) && !defined(__EMSCRIPTEN__)
-static int screen_mode = SCREEN_AUTO;
-#endif
+/* settings.ini's screen (display.h): the picture at the largest whole
+ * scale (whole), at the largest that fits (fill), or (auto) filling where
+ * the whole one leaves it a quarter smaller or more: an RG35XX Pro's
+ * 640 x 480 drew it at 480 x 320, half the screen (issue #36), where a
+ * Nova's 1280 x 960 gives 5x against 5.33 and a Flip 2's 1920 x 1080 6x
+ * against 6.75; or (stretch) over the whole screen, out of its shape */
 #define FILL_GAIN 1.25f
 
 /* The scale the canvas fills the screen at, or 0 at a whole one: under the
@@ -127,10 +123,11 @@ static float fill_scale(void) {
 #elif defined(__EMSCRIPTEN__)
 	return touch_shown() ? touch_upright_fill(P.screen_w, P.screen_h, P.dp, P.scale) : 0;
 #else
-	if (screen_mode == SCREEN_WHOLE) return 0;
+	DisplayScale mode = display_scale();
+	if (mode == SCALE_WHOLE) return 0;
 	if (touch_shown()) return touch_upright_fill(P.screen_w, P.screen_h, P.dp, P.scale);
 	float fx = (float)P.screen_w / CORE_W, fy = (float)P.screen_h / CORE_H, f = fx < fy ? fx : fy;
-	if (f <= (float)P.scale || (screen_mode == SCREEN_AUTO && f < (float)P.scale * FILL_GAIN)) return 0;
+	if (f <= (float)P.scale || (mode == SCALE_AUTO && f < (float)P.scale * FILL_GAIN)) return 0;
 	return f;
 #endif
 }
@@ -158,14 +155,35 @@ static char dropped[1024];
 static bool (*back_hook)(void);   /* (a browser's page keeps Escape) */
 #endif
 
+/* Stretch (display.h): the picture alone on the canvas, over the whole
+ * screen, across and down at scales of their own; not under the touch
+ * controls, which keep their room round it, nor where a whole scale
+ * fills the screen already. Never on the 3DS (present_3ds.c stretches its
+ * top screen) nor a page (which sizes its canvas). */
+static bool stretched(void) {
+#if defined(__3DS__) || defined(__EMSCRIPTEN__)
+	return false;
+#else
+	if (display_scale() != SCALE_STRETCH || touch_shown()) return false;
+	if (P.screen_w == CORE_W * P.scale && P.screen_h == CORE_H * P.scale) return false;
+	P.w = CORE_W;
+	P.h = CORE_H;
+	P.core_x = P.core_y = 0;
+	P.fill = (float)P.screen_w / CORE_W;
+	P.fill_y = (float)P.screen_h / CORE_H;
+	return true;
+#endif
+}
+
 /* The game's canvas: the picture at the largest whole scale, or filling
- * the screen (fill_scale), the touch controls round it */
+ * the screen (fill_scale) or stretched over it, the touch controls round it */
 static void game_canvas(void) {
 	int sx = P.screen_w / CORE_W, sy = P.screen_h / CORE_H;
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
 	if (touch_shown()) P.scale = touch_fit_scale(P.screen_w, P.screen_h, P.dp, P.scale);
-	P.fill = fill_scale();
+	if (stretched()) return;
+	P.fill = P.fill_y = fill_scale();
 	P.w = P.fill > 0 ? (int)((float)P.screen_w / P.fill) : P.screen_w / P.scale;
 	P.h = P.fill > 0 ? (int)((float)P.screen_h / P.fill) : P.screen_h / P.scale;
 	if (P.w < CORE_W) P.w = CORE_W;
@@ -194,7 +212,7 @@ static void menu_canvas(void) {
 	int sx = P.screen_w / (upright ? CORE_H : CORE_W), sy = P.screen_h / (upright ? CORE_W : CORE_H);
 	P.scale = sx < sy ? sx : sy;
 	if (P.scale < 1) P.scale = 1;
-	P.fill = 0;
+	P.fill = P.fill_y = 0;
 	P.w = P.screen_w / P.scale;
 	P.h = P.screen_h / P.scale;
 	P.core_x = (P.w - CORE_W) / 2;
@@ -216,17 +234,22 @@ static void layout_canvas(void) {
 	if (P.sharp) SDL_DestroyTexture(P.sharp);
 	P.sharp = NULL;
 	if (P.fill > 0) {
-		int whole = (int)P.fill + 1;   /* (the whole scale just over the fill) */
-		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * whole, P.h * whole);
+		/* (the whole scales just over the fill's, across and down) */
+		int wx = (int)P.fill + 1, wy = (int)P.fill_y + 1;
+		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * wx, P.h * wy);
 		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
-		else P.fill = 0;   /* (no memory for it: the canvas at the whole scale, a little wide) */
+		/* (no memory for it: the canvas at the whole scale, a little wide;
+		 * stretched, the picture alone at it) */
+		else P.fill = P.fill_y = 0;
 	}
 }
 
-/* The canvas's scale as the log says it: "5x", or "2.67x (fill)". */
+/* The canvas's scale as the log says it: "5x", "2.67x (fill)", or
+ * "8.00x6.75 (stretch)". */
 static const char *scale_words(void) {
 	static char s[24];
-	if (P.fill > 0) snprintf(s, sizeof s, "%.2fx (fill)", (double)P.fill);
+	if (P.fill > 0 && P.fill_y != P.fill) snprintf(s, sizeof s, "%.2fx%.2f (stretch)", (double)P.fill, (double)P.fill_y);
+	else if (P.fill > 0) snprintf(s, sizeof s, "%.2fx (fill)", (double)P.fill);
 	else snprintf(s, sizeof s, "%dx", P.scale);
 	return s;
 }
@@ -263,21 +286,36 @@ static void follow_page(void) {
 }
 #endif
 
-#ifndef __EMSCRIPTEN__
-static void set_fullscreen(bool on) {
+void platform_set_fullscreen(bool on) {
+#ifdef CW_DESKTOP
 	P.fullscreen = on;
+	if (P.headless) return;
 	SDL_SetWindowFullscreen(P.window, on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-	SDL_ShowCursor(on ? SDL_DISABLE : SDL_ENABLE);
+	SDL_ShowCursor(on && !own_taps ? SDL_DISABLE : SDL_ENABLE);
 	resized();
-}
+#else
+	(void)on;
 #endif
+}
+
+void platform_relayout(void) {
+	char was[24];
+	snprintf(was, sizeof was, "%s", scale_words());
+	layout_canvas();
+	if (strcmp(was, scale_words())) printf("screen setting: canvas %dx%d at %s\n", P.w, P.h, scale_words());
+}
+
+void platform_set_smooth(bool on) {
+	P.blend = on;
+	blend_reset();
+}
 
 /* A point on the screen (its pixels) as the canvas pixel under it */
 static void canvas_point(float sx, float sy, int *x, int *y) {
-	float k = P.fill > 0 ? P.fill : (float)P.scale;
-	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
-	*x = (int)((sx - ox) / k);
-	*y = (int)((sy - oy) / k);
+	float kx = P.fill > 0 ? P.fill : (float)P.scale, ky = P.fill > 0 ? P.fill_y : (float)P.scale;
+	float ox = ((float)P.screen_w - (float)P.w * kx) / 2, oy = ((float)P.screen_h - (float)P.h * ky) / 2;
+	*x = (int)((sx - ox) / kx);
+	*y = (int)((sy - oy) / ky);
 }
 
 void platform_own_taps(bool on) {
@@ -347,7 +385,7 @@ void platform_on_back(bool (*back)(void)) {
 void platform_safe_edges(int *top, int *left, int *bottom, int *right) {
 	*top = *left = *bottom = *right = 0;
 #ifdef CW_IOS
-	float t, l, b, r, k = P.fill > 0 ? P.fill : (float)P.scale;
+	float t, l, b, r, k = P.fill > 0 ? P.fill : (float)P.scale, ky = P.fill > 0 ? P.fill_y : k;
 	int ww = 0, wh = 0;
 	ios_safe_insets(P.window, &t, &l, &b, &r);
 	SDL_GetWindowSize(P.window, &ww, &wh);
@@ -355,9 +393,9 @@ void platform_safe_edges(int *top, int *left, int *bottom, int *right) {
 	/* (the window's points as the screen's pixels, then the canvas's, past
 	 * its border on each side) */
 	float px = (float)P.screen_w / (float)ww, py = (float)P.screen_h / (float)wh;
-	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * k) / 2;
-	*top = t > 0 ? (int)((t * py - oy) / k + 0.999f) : 0;
-	*bottom = b > 0 ? (int)((b * py - oy) / k + 0.999f) : 0;
+	float ox = ((float)P.screen_w - (float)P.w * k) / 2, oy = ((float)P.screen_h - (float)P.h * ky) / 2;
+	*top = t > 0 ? (int)((t * py - oy) / ky + 0.999f) : 0;
+	*bottom = b > 0 ? (int)((b * py - oy) / ky + 0.999f) : 0;
 	*left = l > 0 ? (int)((l * px - ox) / k + 0.999f) : 0;
 	*right = r > 0 ? (int)((r * px - ox) / k + 0.999f) : 0;
 	if (*top < 0) *top = 0;
@@ -581,16 +619,7 @@ void platform_shutdown(void) {
 	SDL_Quit();
 }
 
-#ifdef __3DS__
-/* (settings.ini's screen: fill, the picture at the top screen's height, or
- * whole, at 1x in its middle) */
-static bool fill_3ds = true;
-#endif
-
 #ifdef __EMSCRIPTEN__
-/* The page's Smooth motion button, while the game runs (web/play/app.js). */
-void cw_set_smooth(int on);
-EMSCRIPTEN_KEEPALIVE void cw_set_smooth(int on) { P.blend = on != 0; }
 /* The page's menu over the game (web/play/app.js): the game waits, silent,
  * its last picture held, as Nintendo's classic apps pause under theirs. */
 void cw_set_paused(int on);
@@ -599,54 +628,6 @@ EMSCRIPTEN_KEEPALIVE void cw_set_paused(int on) {
 	audio_pause(P.paused);
 }
 #endif
-
-void platform_load_settings(const char *path) {
-	FILE *f = fopen(path, "r");
-	if (!f) {
-		f = fopen(path, "w");
-		if (!f) return;
-		fprintf(f,
-			"# Cyberworld Endless: settings. Delete this file for the defaults.\n\n"
-			"# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n"
-			"# or 165 Hz screen shows each frame for one refresh or two (or two or\n"
-			"# three) in turn, which reads as judder. on mixes the two latest frames at\n"
-			"# every refresh, so motion is even, a little blurred and a frame later;\n"
-			"# off shows the game's own frames, sharp (best on 60 and 120 Hz).\n"
-			"smooth_motion = off\n\n"
-			"# screen: whole draws the game's picture at the largest whole scale, every\n"
-			"# pixel the same size; fill makes it as big as the screen holds, each pixel's\n"
-			"# edge a little soft; auto fills where a whole scale would leave it a quarter\n"
-			"# smaller or more (a 640 x 480 screen), else whole.\n"
-			"screen = auto\n%ssound = gba\n", options_sound_note());
-		fclose(f);
-		platform_persist();
-		return;
-	}
-	char line[256];
-	while (fgets(line, sizeof line, f)) {
-		char key[64], val[64];
-		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2) continue;
-		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
-		if (!strcmp(key, "sound")) sound_filter_set(!strcmp(val, "soft") ? SOUND_SOFT : SOUND_GBA);
-#ifdef __3DS__
-		if (!strcmp(key, "screen")) fill_3ds = strcmp(val, "whole") != 0;
-#elif !defined(__EMSCRIPTEN__)
-		if (!strcmp(key, "screen")) screen_mode = !strcmp(val, "whole") ? SCREEN_WHOLE : !strcmp(val, "fill") ? SCREEN_FILL : SCREEN_AUTO;
-#endif
-		/* (not written by default: for a report of a machine's pacing) */
-		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
-	}
-	fclose(f);
-	/* (the screen setting read after the window opened; logged where it
-	 * changed the scale, as the display line before it was printed with
-	 * the default's) */
-	if (P.renderer && !P.headless) {
-		char was[24];
-		snprintf(was, sizeof was, "%s", scale_words());
-		layout_canvas();
-		if (strcmp(was, scale_words())) printf("screen setting: canvas %dx%d at %s\n", P.w, P.h, scale_words());
-	}
-}
 
 void platform_inject(uint32_t buttons) { injected = buttons; }
 
@@ -694,9 +675,9 @@ static void key_down(const SDL_KeyboardEvent *k) {
 	/* (in a browser the page keeps Escape and fullscreen; Android's Back
 	 * is Escape) */
 	if (k->keysym.scancode == SDL_SCANCODE_ESCAPE || k->keysym.scancode == SDL_SCANCODE_AC_BACK) escape();
-	/* F11 or Alt+Enter: fullscreen and back */
-	if (!P.headless && (k->keysym.sym == SDLK_F11 || (k->keysym.sym == SDLK_RETURN && (k->keysym.mod & KMOD_ALT))))
-		set_fullscreen(!P.fullscreen);
+	/* F11 or Alt+Enter: fullscreen and back, kept as Options' Display keeps it */
+	if (display_has_window() && !P.headless && (k->keysym.sym == SDLK_F11 || (k->keysym.sym == SDLK_RETURN && (k->keysym.mod & KMOD_ALT))))
+		display_fullscreen_keep(!P.fullscreen);
 #endif
 }
 
@@ -868,7 +849,7 @@ static void over_picture(void) {
 /* Where the canvas lands on the screen. */
 static SDL_Rect canvas_rect(void) {
 	if (P.fill > 0) {
-		int w = (int)((float)P.w * P.fill + 0.5f), h = (int)((float)P.h * P.fill + 0.5f);
+		int w = (int)((float)P.w * P.fill + 0.5f), h = (int)((float)P.h * P.fill_y + 0.5f);
 		return (SDL_Rect){ (P.screen_w - w) / 2, (P.screen_h - h) / 2, w, h };
 	}
 	return (SDL_Rect){ (P.screen_w - P.w * P.scale) / 2, (P.screen_h - P.h * P.scale) / 2, P.w * P.scale, P.h * P.scale };
@@ -928,7 +909,7 @@ void platform_present_blend(double w) {
 	}
 	over_picture();
 #ifdef __3DS__
-	present3ds_frame(fill_3ds, emu_threaded());
+	present3ds_frame(display_scale() != SCALE_WHOLE, display_scale() == SCALE_STRETCH, emu_threaded());
 #else
 	SDL_RenderPresent(P.renderer);
 #endif
@@ -940,7 +921,7 @@ static void present_canvas(void) {
 	show_frames(P.canvas, NULL, 255);
 	over_picture();
 #ifdef __3DS__
-	present3ds_frame(fill_3ds, emu_threaded());
+	present3ds_frame(display_scale() != SCALE_WHOLE, display_scale() == SCALE_STRETCH, emu_threaded());
 #else
 	SDL_RenderPresent(P.renderer);
 #endif

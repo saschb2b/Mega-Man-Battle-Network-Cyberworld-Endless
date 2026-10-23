@@ -31,8 +31,10 @@ GBA core alone takes longer than a frame there.
 - The first NEW GAME boots BN6 from power-on once, about 15 seconds of black
   screen; later starts load what it kept (`boot-3.state`).
 - The picture fills the top screen's height (1.5x, its pixels mixed at their
-  edges). `screen = whole` in `settings.ini` shows it sharp at 1x in the
-  middle.
+  edges). Options' **Display** (SELECT on the title) sets **Scale**:
+  **Integer** shows it sharp at 1x in the middle, **Stretch** over the top
+  screen's whole width; `screen = whole` or `stretch` in `settings.ini` as
+  well.
 - The bottom screen is the PET beside the game (issue #72), framed like
   BN6's own PET screens: the screen's name and the place in its header,
   HP, Zenny and BugFrags under it. On the net it shows the layer's map,
