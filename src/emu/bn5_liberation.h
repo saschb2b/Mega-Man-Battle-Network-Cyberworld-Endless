@@ -63,6 +63,12 @@
 #define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
 #define BN5_LIB_BREATH       0x08614CF0u /* palette 12 (the BonusPanel's): six palettes 0x20 apart stepped there and back, 12 frames */
                                          /* ... each (8 at the last); a palette's working copy at 0x03003960 + 0x20 n, then 0x03003B60 + 0x20 n */
+#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists (group 0x86's, a u32 a map; LoadGFXAnims' table 0x08031468 */
+                                         /* ... entry 6, its literal at 0x08073E44): 0x86:00's at 0x08073E94 runs palettes 9-12 */
+#define BN5_LIB_ANIM_DARK    0x08073B20u /* ... palette 9's script (to 0x03003A80, 0x20 bytes; then palette and delay pairs, 1 loops) */
+#define BN5_LIB_ANIM_HOLE    0x08073B60u /* ... palette 10's (to 0x03003AA0) */
+#define BN5_LIB_ANIM_PULSE   0x08073BA0u /* ... palette 11's (to 0x03003AC0) */
+#define BN5_LIB_ANIM_BREATH  0x08073BE0u /* ... palette 12's (to 0x03003AE0); the list also holds 0x08073AB8 and 0x0807FB8C */
 #define BN5_LIB_BLINK        4           /* a freed panel's look toggles between its old kind and clean every this many frames, */
 #define BN5_LIB_BLINKS       14          /* ... this many times, once the board has faded back in (27 frames), then stays clean */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
@@ -70,8 +76,16 @@
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
 
 /* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
-#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
+#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2), */
+                                         /* ... anim 0's five frames held 20, 2, 2, 2, 8; shown only while the command window is */
+                                         /* ... open over a dark panel faced, from 6 frames after A */
 #define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
+#define BN5_LIB_SPRITES_7    0x08032D04u /* sprite list 7's table (the lists' at 0x0803272C): entry k a u32 at +4k */
+#define BN5_LIB_ICONS_SPRITE 0x0848DF40u /* list 7 index 24, the heart that pops over a freed panel; each item kind's icon is the list */
+                                         /* ... 7 index at BN5_LIB_ITEM_KINDS +5: 0x18 the heart, 0x19 a key 0x0848E1F8, 0x25 zenny */
+                                         /* ... 0x084907AC, 0x26 BugFrags 0x08490A20, 0x29 Order Points 0x08492EF8, 0x53 a chip */
+                                         /* ... 0x0849D508; anim 0, the shadow its own OBJ */
+#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... the heart's palette (OBJ palette 3) */
 #define BN5_LIB_SPRITE_LIST  7           /* the board's sprites' list, */
 #define BN5_LIB_OUTLINE      15          /* ... the outline's index: animations 0 a ripple (20, 2, 2, 2, 8 frames, looped), shown */
 #define BN5_LIB_OUTLINE_RIPPLE 0         /* ... 6 frames after A while the command window is open over a liberable panel alone; */
@@ -88,6 +102,8 @@
 #define BN5_LIB_LETTER_CAPS  0x0873D5F4u /* the left cap, then the right */
 #define BN5_LIB_BIG_DIGITS   0x0873D974u /* "0"-"9", in the right column of a 16x16 OBJ */
 #define BN5_LIB_BANNER_PAL   0x0873E4B4u /* ... their palette */
+#define BN5_LIB_BANNER_HOLD  43          /* ... frames at full size, after 8 of opening and before 8 of closing (the scale's pd */
+                                         /* ... 768, 640, 512, 384, 256, 208, 224, then 256; out 224, 208, 256, 384 ... 896) */
 #define BN5_LIB_MESSAGES     0x0801B8D4u /* the messages' letters' graphics (their pointers) */
 
 /* The board's HUD and window (docs/LIBERATION.md, How the board looks and moves) */
@@ -98,9 +114,9 @@
 #define BN5_LIB_HUD_DIGITS   0x087E4704u /* the HUD's digits (8x8, 0x40 bytes a digit) */
 #define BN5_LIB_HUD_FRAME    0x087E4884u /* the gauge's frame, copied to 0x02039200 */
 #define BN5_LIB_HUD_BAR      0x087E4984u /* the gauge's bar, masked by the count */
+#define BN5_LIB_HUD_MASKS    0x08053240u /* ... the bar's six tiles (6 px an Order Point) copied, the first 6 - (6 OP + 7) / 8 */
+                                         /* ... cleared and the next one's rows ANDed with the u32 at +8 OP */
 #define BN5_LIB_HUD_PAL      0x086D5904u /* OBJ palette 12: BN5's HUD palette (the HP box's too) */
-#define BN5_LIB_HUD_MASKS    0x08053240u /* the bar's mask by Order Points, 8 bytes each: a u32 ANDed into each row of its first tile */
-                                         /* ... kept, the bar's (6 OP + 7) / 8 last tiles kept, the rest cleared: it fills from the right */
 #define BN5_LIB_PHASE_TILES  0x087E4534u /* the L view's "PHASE" and "TRGT PHASE" (OBJ palette 13 at 0x087E4658), its digits from */
 #define BN5_LIB_PHASE_DIGITS 0x087E4E04u /* ... here (palette 12) "1"-"9", its corner arrows from 0x087E4CC4 */
 #define BN5_LIB_PHASE_ZERO   0x087E4DE4u /* ... and its "0", the arrows' tenth tile */

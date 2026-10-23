@@ -251,28 +251,40 @@ liberation and an item's find; the recordings are in the pull request):
   over three frames and come back, 216 frames round; 10 steps there and
   back over four, 20 frames a step; the barriers' (11) glint every 132
   frames; the BonusPanel's (12) breathes over six, 12 frames a step.
+  They are the mission map's own GFXAnim scripts (`BN5_LIB_ANIMS`), the
+  engine BN6 runs too, so in BN6 they run as BN5's own scripts copied,
+  in place of the host map's: a host map's script left running writes
+  its colours into the same banks every few frames and flickers (PR
+  #202's first walk: Central Area 1's bank 9 cycle, every 16 frames).
 - **The freed panel** blinks once the board has faded back in: its
   look toggles between its old kind and clean every 4 frames, 14 times,
   then stays clean.
-- **The sprites:** the faced panel's outline is a BN5 sprite (list 7's
-  15), the items' icons list 7's above; the battle's banners are 20
-  columns of BN5's battle-message letters (8x16, `BN5_LIB_LETTERS`) in
-  five 32x16 affine OBJs at y 64, squashed in over 8 frames, held 42,
-  squashed out over 8 (58 in all).
+- **The sprites:** the faced panel's outline and the items' icons are
+  BN5 sprites (list 7: the outline 15, the icons 24, 25, 37, 38, 41 and
+  83). The outline shows only while the command window is open over a
+  dark panel faced, never while walking.
+- **The banners** ("LIBERATE SUCCESS!", "1 TURN LIBERATE!", "TURN n
+  START!") are five 32x16 affine OBJs at y 64, built from 8x16 letters
+  (`BN5_LIB_LETTERS`, digits `BN5_LIB_BIG_DIGITS`, palette 11):
+  they open from squashed to full size in 8 frames, hold 43 and close in
+  8.
 
 - **The HUD and the window:** the Order Points gauge is six OBJs at the
   top right (`BN5_LIB_HUD_OAM`), its frame, bar and digits BN5's
   (`0x087E4xxx`, OBJ palette 12); the L view's PHASE and TRGT PHASE are
-  OBJs on palette 13; the command window's frame is nine tiles on BG0
-  (`BN5_LIB_WINDOW_TILES`, BG palette 14), its words 21 OBJs of 16x16
-  drawn by BN5's code (palette 15) a line 14 pixels down, with BN5's
-  menu cursor beside them; the battle's banners come from BN5's
-  battle-message letters, the engine BN6 also has.
+  OBJs on palette 13; the command window is a frame on BG0 (nine tiles,
+  `BN5_LIB_WINDOW_TILES`) with its text in 21 OBJs of 16x16 drawn by
+  BN5's code (palette 15), 14 pixels a line, BN5's menu cursor beside
+  it; the gauge's bar is 6 pixels an Order Point (`BN5_LIB_HUD_MASKS`);
+  the battle's
+  banners come from BN5's battle-message table (`BN5_LIB_MESSAGES`),
+  the engine BN6 also has.
 - **The backdrop** is the mission map's own animated backdrop, recoloured
   purple (BG palette 0 from `0x0861BF20`): outside a mission the same map
   is BN5's teal ACDC Area 3.
 
-Still to trace: the units' board sprites, the window's text rules, and
+Still to trace: the units' board sprites, the window's font, when an
+item's pop shows and goes, and
 whether the other eight missions' maps carry other sets.
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and
