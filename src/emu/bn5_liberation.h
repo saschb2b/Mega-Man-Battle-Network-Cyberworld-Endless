@@ -138,6 +138,12 @@
 #define BN5_LIB_GUARD_SPRITE 83
 #define BN5_LIB_GUARD_ANIM   0           /* ... the animation they stand in on the board */
 
+/* The L view's arrows and cross (OBJ palette 12, BN5_LIB_HUD_PAL; read in its OAM) */
+#define BN5_LIB_LVIEW_ARROWS 0x087E4B64u /* eight 8x8 tiles, up, up-right, right, down-right, down, down-left, left, up-left, */
+#define BN5_LIB_LVIEW_BLINK  0x100       /* ... and their second look this far on, shown 8 frames of every 32 */
+#define BN5_LIB_LVIEW_CROSS  0x087E4F24u /* the cross at the camera's middle, a 16x16 OBJ at (112, 72) */
+#define BN5_LIB_UNIT_HOLD    15          /* frames the camera rests on a unit in the Darkloids' phase before its move, after its pan */
+
 /* The board's music (BN5's song table 0x08155BF4, the BGM's player 31 at 0x02011470: +0 the song's header) */
 #define BN5_SONG_LIBERATION  0x22        /* the board's own, through both phases (its clock runs on), BN5_LIB_STATE +0 = 8 */
 #define BN5_SONG_MISSION_OPEN 0x1C       /* the mission's opening (the board's routine 1, 0x0804BEE0, its tour of the board) */

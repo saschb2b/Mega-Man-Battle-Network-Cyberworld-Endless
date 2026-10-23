@@ -42,6 +42,7 @@
 #include "xnavi.h"
 
 LibState LB;
+static int turn_held;         /* frames BN5's camera has rested on the unit about to move */
 static bool viewing;          /* L held on the board: its camera the D-pad's (lib_keys) */
 static int nudge_x, nudge_y;  /* ... pixels a frame across and down */
 
@@ -454,7 +455,10 @@ static void guardians_back(void) {
 static bool enemy_turn(int u) {
 	LibUnit *n = &LB.b.unit[u];
 	if (n->gone) return true;
-	if (LB.enemy_t == 0 && LB.enemy_steps == 0 && !lib_camera_at(LB.ux[u], LB.uy[u])) return false;
+	if (LB.enemy_t == 0 && LB.enemy_steps == 0) {
+		if (!lib_camera_at(LB.ux[u], LB.uy[u])) { turn_held = 0; return false; }
+		if (lib_look_on() && turn_held < BN5_LIB_UNIT_HOLD) { ++turn_held; return false; }
+	}
 	int wx, wy;
 	netmap_world(n->x, n->y, &wx, &wy);
 	if (LB.ux[u] != wx || LB.uy[u] != wy) {
@@ -481,6 +485,7 @@ static void enemy_update(void) {
 	if (!enemy_turn(u)) return;
 	LB.enemy_steps = 0;
 	LB.enemy_t = 0;
+	turn_held = 0;
 	if (u != 0) { ++LB.enemy_unit; return; }
 	LB.enemy_unit = 0;
 	LB.shield = false;

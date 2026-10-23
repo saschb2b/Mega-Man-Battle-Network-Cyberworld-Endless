@@ -87,12 +87,25 @@ static void phase_number(int n, int x, int y) {
 		xtiles_draw(bn5(BN5_LIB_PHASE_ZERO + (uint32_t)(s[i] - '0') * 32, 32), pal, P.core_x + x + 8 * i, P.core_y + y, 1, 1, 0);
 }
 
-void lib_piece_phases(int phase, int par) {
+/* The L view's arrows at the picture's edges, BN5's (traced: its OAM),
+ * by the direction their tiles point: up first, then clockwise */
+static const uint8_t arrow_at[8][2] = { { 116, 4 }, { 224, 8 }, { 228, 77 }, { 224, 144 }, { 116, 148 }, { 8, 144 }, { 4, 77 }, { 8, 8 } };
+
+static void lview_arrows(int t) {
+	const uint8_t *pal = bn5(BN5_LIB_HUD_PAL, 32), *cross = bn5(BN5_LIB_LVIEW_CROSS, 4 * 32);
+	uint32_t look = (t & 31) < 24 ? 0 : BN5_LIB_LVIEW_BLINK;
+	for (int k = 0; k < 8; ++k)
+		xtiles_draw(bn5(BN5_LIB_LVIEW_ARROWS + look + 32u * (uint32_t)k, 32), pal, P.core_x + arrow_at[k][0], P.core_y + arrow_at[k][1], 1, 1, 0);
+	xtiles_draw(cross, pal, P.core_x + 112, P.core_y + 72, 2, 2, 0);
+}
+
+void lib_piece_phases(int phase, int par, int t) {
 	const uint8_t *words = bn5(BN5_LIB_PHASE_TILES, 9 * 32), *pal = bn5(BN5_LIB_PHASE_PAL, 32), *band = bn5(BN5_LIB_PHASE_WORDS_PAL, 32);
 	if (!words || !pal || !band) return;
 	/* (the panel behind them: BG0 in WIN1, blended as the banners' band) */
 	xtiles_blend_rect(P.core_x + BN5_LIB_LVIEW_PANEL_X, P.core_y + BN5_LIB_LVIEW_PANEL_Y, BN5_LIB_LVIEW_PANEL_W, BN5_LIB_LVIEW_PANEL_H,
 		(uint16_t)(band[2 * BN5_LIB_BAND_COLOUR] | band[2 * BN5_LIB_BAND_COLOUR + 1] << 8), 16, 8);
+	lview_arrows(t);
 	/* "PHASE" its five tiles, "TRGT" the four after them */
 	xtiles_draw(words, pal, P.core_x + 54, P.core_y + 124, 5, 1, 0);
 	phase_number(phase, 97, 124);

@@ -12,8 +12,9 @@
 bool lib_pieces_on(void);
 /* The Order Points gauge, at the picture's top right */
 void lib_piece_gauge(int op);
-/* The L view's "PHASE" and "TRGT PHASE" with their numbers */
-void lib_piece_phases(int phase, int par);
+/* The L view: "PHASE" and "TRGT PHASE" with their numbers on their panel,
+ * its arrows at the picture's edges and its cross at the middle, `t` frames on */
+void lib_piece_phases(int phase, int par, int t);
 /* The command window: its `n` lines (dim where `can` is false), the cursor on `cursor` */
 void lib_piece_window(const char *const *lines, const bool *can, int n, int cursor);
 /* A banner (liberation_state.h's LIB_CHEER_*), `t` frames since it began */
