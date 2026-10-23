@@ -36,16 +36,23 @@
 #define BN5_LIB_PANEL_TILES  0x08623130u /* ... from its tile 865: the overlay's (clean, dark, DarkHole, the teal stud) */
 #define BN5_LIB_LOOKS        0x08624310u /* the twelve panel looks, 0x40 bytes each (8 x 4 tile-map entries, the diamond): clean, dark, */
 #define BN5_LIB_LOOK_SIZE    0x40        /* ... dark paled (the dissolve), item, "+5", BarrierPanels 1-4, BonusPanel, DarkHole, a grey grid */
+#define BN5_LIB_LOOK_OF      0x0804F0D4u /* a panel's look: the look block's pointer at +0x10 + 4 x its kind (the kinds are the looks' order: */
+                                         /* ... 2 a panel mid-dissolve, 4 the "+5", 0x0B the Darkloid's ring, grey until the DarkHoles fall) */
+#define BN5_LIB_BOARD_SETUP  0x0804EEE2u /* the board drawn: the overlay's tiles copied, then each panel's look and its edges */
+#define BN5_LIB_EDGES        0x0804F204u /* a panel's edges: its four look bytes (+4-+7), one a side, each a list from BN5_LIB_EDGE_TABLES */
+#define BN5_LIB_EDGE_TABLES  0x0804FB94u /* ... four sides' tables of lists (tile 0x88xx, x, y; 0xFF ends them) */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
 #define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
 #define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
-#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9's first frame: the dark panels' swirl, changed every frame (the pulse) */
+#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 as the capture held it: the dark panels' swirl */
+#define BN5_LIB_PULSE        0x08614C4Cu /* the pulse: six palettes of 0x20 bytes copied in turn into palette 9's */
+#define BN5_LIB_PULSE_FRAMES 6           /* ... buffer, each held one to six frames (the map's palette animation, assumed) */
 #define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
-#define BN5_LIB_PULSE        0x08614B24u /* palette 9's frames, the dark panels' pulse: four, 0x20 apart (the last BN5_LIB_PAL_DARK), */
-#define BN5_LIB_PULSE_HOLE   0x08614BA8u /* ... and palette 10's, the DarkHoles': four (BN5_LIB_PAL_HOLE the second); found by their */
-#define BN5_LIB_PULSE_FRAMES 4           /* ... layout after a 0x0020 word, as the map's palette animations lie; the timing is assumed */
+#define BN5_LIB_DARK_FRAMES  0x08614B24u /* palette 9 as the engine steps it (liberation_look.c): four, 0x20 apart, the last */
+#define BN5_LIB_HOLE_FRAMES  0x08614BA8u /* ... BN5_LIB_PAL_DARK; palette 10's four, BN5_LIB_PAL_HOLE the second; their magenta */
+#define BN5_LIB_DARK_FRAME_COUNT 4       /* ... the capture's (BN5_LIB_PULSE's six are yellow-green, flashing white); timing assumed */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */

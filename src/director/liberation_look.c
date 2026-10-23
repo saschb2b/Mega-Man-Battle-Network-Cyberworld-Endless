@@ -95,13 +95,17 @@ void lib_look_begin(void) {
 	if (emu_debug_on()) fprintf(stderr, "liberation look: BN5's, tiles %08x -> %08x (%u bytes), map %dx%d\n", K.src, K.vram, K.size, K.tw, K.th);
 }
 
-/* The look panel (x, y) shows as the board stands (-1 none) */
+/* The look panel (x, y) shows as the board stands, as BN5_LIB_LOOK_OF
+ * picks it by the kind (-1 none: the start, its map's floor alone; the
+ * Darkloid's ring a grey grid until the DarkHoles fall) */
 static int look_of(int x, int y) {
 	int k = LB.b.kind[y][x];
 	if (K.dissolve[y][x]) return K.dissolve[y][x] > DISSOLVE_STEP ? LOOK_DARK : LOOK_PALED;
+	if (x == LB.b.start_x && y == LB.b.start_y) return -1;
 	switch (k) {
 	case LIB_CLEAN: return LOOK_CLEAN;
-	case LIB_DARK: case LIB_RING: case LIB_BOSS: return LOOK_DARK;
+	case LIB_DARK: return LOOK_DARK;
+	case LIB_RING: case LIB_BOSS: return lib_holes_left(&LB.b) ? LOOK_GRID : LOOK_DARK;
 	case LIB_ITEM: return LOOK_ITEM;
 	case LIB_BONUS: return LOOK_BONUS;
 	case LIB_HOLE: return LOOK_HOLE;
@@ -188,8 +192,8 @@ static bool tiles_there(void) {
  * through BN5's frames, back and forth, in BN6's BG palette buffer (copied
  * to the screen each frame) */
 static void pulse(void) {
-	static const uint32_t frames[2] = { BN5_LIB_PULSE, BN5_LIB_PULSE_HOLE };
-	int n = BN5_LIB_PULSE_FRAMES, t = D.frame / PULSE_STEP % (2 * n - 2), k = t < n ? t : 2 * n - 2 - t;
+	static const uint32_t frames[2] = { BN5_LIB_DARK_FRAMES, BN5_LIB_HOLE_FRAMES };
+	int n = BN5_LIB_DARK_FRAME_COUNT, t = D.frame / PULSE_STEP % (2 * n - 2), k = t < n ? t : 2 * n - 2 - t;
 	for (int b = 0; b < 2; ++b) {
 		uint32_t from = frames[b] + 0x20u * (uint32_t)k, to = BN6_BG_PALETTE + 0x20u * (uint32_t)(9 + b);
 		emu_write(to, K.rom + (from - 0x08000000u), 0x20);

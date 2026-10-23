@@ -235,10 +235,14 @@ liberation and an item's find; the recordings are in the pull request):
   tile t at `0x0861C510` + 32t, copied whole into the BG's characters),
   and the diamonds in twelve looks after them (`BN5_LIB_LOOKS`, 8 x 4
   tile-map entries each, named by the mission record's first block, the
-  same in all nine): clean, dark, a paled dark (the dissolve's middle),
+  same in all nine, a panel's kind its look's index): clean, dark, a
+  paled dark (kind 2, the dissolve's middle),
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
-  BonusPanel's "?", a DarkHole, a grey grid; palettes 8-10 at `0x08614EB4`, `0x08614B84` (palette 9's
-  first frame of its pulse) and `0x08614BC8`. Located by their bytes in a
+  BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
+  ring until the DarkHoles fall); each panel's four look bytes pick its
+  sides' edge pieces (`BN5_LIB_EDGES`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`; the
+  dark's pulse six palettes from `0x08614C4C` copied into palette 9 in
+  turn, each held one to six frames. Located by their bytes in a
   capture; the routine that draws a panel from its kind and its four look
   bytes (the panel list's +4-+7), the pulse's table and the other maps'
   sets are still to be traced.
@@ -603,14 +607,16 @@ moving its units itself), at the record's origin (`+6`, `+7`, the panels'
 edges at X = -o6 and Y = -o7, mod 32), not its pads' look; its tiles and
 its board's colours (`BN5_LIB_PALETTE`, loaded over the map's as BN5's
 board loads them: the frames grey) copied in. Each panel's kind lies over
-it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`: clean
-cyan, the dark swirl, the item's stud, the DarkHole's pit, the BonusPanel's
-"?"), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
+it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`,
+picked by the kind as `BN5_LIB_LOOK_OF` picks it: clean cyan, the dark
+swirl, the item's stud, the DarkHole's pit, the BonusPanel's "?", the
+Darkloid's ring a grey grid until the DarkHoles fall, the start its map's
+floor alone), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
 down (fit on the dumped map: the looks over the frames' dark middles, 1.6%
 over the void), their tiles copied from BN5's ROM to where BN5's board
 copies them (tile 864 on, VRAM taking words), palettes 9 and 10 stepped
-through BN5's frames (`BN5_LIB_PULSE`, `BN5_LIB_PULSE_HOLE`: the pulse; its
-timing assumed). BN6 reads the tile map in place and builds each BG's
+through BN5's frames (`BN5_LIB_DARK_FRAMES`, `BN5_LIB_HOLE_FRAMES`: the
+magenta of BN5's capture; their timing assumed). BN6 reads the tile map in place and builds each BG's
 screen map in IWRAM, copied to VRAM every frame (`src/emu/bn6_map.h`): a
 look goes into the map's layer 1, and BG2's screen map is made from it for
 the picture a while after the looks change (the map's layer 1 and BG2
