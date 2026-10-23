@@ -1,21 +1,17 @@
 {
  "about": "Every line in the words files (docs/voice/README.md), written by tools/voice_catalog.py: do not edit.",
  "containers": {
-  "analytics_text:analytics_keys": {
-   "header": "The keys' line under it: \"J: choose K: no\" at the first start, where B answers no; \"K: back\" asked again, where B leaves the answer be",
-   "line": 27
-  },
   "analytics_text:analytics_later": {
    "header": "Under the question: where it is changed later (Options, on the title's menu and the PET's)",
-   "line": 25
+   "line": 23
   },
   "analytics_text:analytics_setting_note": {
    "header": "settings.ini's lines before the statistics line: what it is",
-   "line": 31
+   "line": 25
   },
   "analytics_text:words": {
    "comment": "(in AnalyticsWord's order, its name beside each)",
-   "line": 8
+   "line": 7
   },
   "arena_text:arena_again_asked": {
    "header": "The rematch asked, and the other's answer as it comes: wants another, my Yes waiting on his, gone or not this time",
@@ -355,27 +351,24 @@
   },
   "emote_strip_text:strip_text_aim": {
    "header": "whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not",
-   "line": 13
+   "line": 12
   },
   "emote_strip_text:strip_text_favourites": {
-   "line": 8
+   "header": "the keys' hints: the favourites' box's, the palette's",
+   "line": 7
   },
   "emote_strip_text:strip_text_keep": {
-   "line": 9
+   "line": 8
   },
   "emote_strip_text:strip_text_kept": {
    "header": "a favourite just kept: \"ON L+UP\" for way 0-3",
-   "line": 20
-  },
-  "emote_strip_text:strip_text_keys": {
-   "header": "the keys' hints: the strip's, the favourites' box's, the palette's",
-   "line": 7
+   "line": 19
   },
   "emote_strip_text:strip_text_on_l": {
-   "line": 11
+   "line": 10
   },
   "emote_strip_text:strip_text_tap": {
-   "line": 10
+   "line": 9
   },
   "gate_words:gate_end_words": {
    "header": "How a visit ended (online_visit.h), said at the gate after it, and whose face says it (FACE_*); NULL nothing to say.",
@@ -621,7 +614,7 @@
   },
   "jukebox_text:jukebox_loops_words": {
    "header": "how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none",
-   "line": 102
+   "line": 98
   },
   "jukebox_text:jukebox_mode_names": {
    "header": "the play modes' names (jukebox.h's JukeMode order)",
@@ -632,10 +625,7 @@
   },
   "jukebox_text:jukebox_number_words": {
    "header": "\"No. 13\" as the card shows a song's number",
-   "line": 100
-  },
-  "jukebox_text:jukebox_pick_hint": {
-   "line": 95
+   "line": 96
   },
   "jukebox_text:jukebox_songs": {
    "line": 10
@@ -884,26 +874,22 @@
    "line": 3
   },
   "options_text:options_fullscreen_note": {
-   "line": 76
-  },
-  "options_text:options_keys": {
-   "header": "The keys' line: \"J: choose K: back\", or on the Sound line \"J: change\"",
-   "line": 47
+   "line": 70
   },
   "options_text:options_screen_note": {
    "header": "... before the display's: screen, smooth_motion and fullscreen",
-   "line": 58
+   "line": 52
   },
   "options_text:options_smooth_note": {
-   "line": 67
+   "line": 61
   },
   "options_text:options_sound_note": {
    "header": "settings.ini's lines before the sound line: what it is",
-   "line": 51
+   "line": 45
   },
   "options_text:words": {
    "comment": "(in OptionsWord's order, its name beside each)",
-   "line": 8
+   "line": 7
   },
   "pet_text:bbs_posts": {
    "line": 370
@@ -994,25 +980,22 @@
    "line": 26
   },
   "reconnect_text:reconnect_text_back": {
-   "line": 9
+   "header": "the heading's slot when the link is back",
+   "line": 8
   },
   "reconnect_text:reconnect_text_kept": {
    "header": "under it: what the wait keeps",
-   "line": 10
+   "line": 9
   },
   "reconnect_text:reconnect_text_key_home": {
-   "header": "its key",
-   "line": 11
-  },
-  "reconnect_text:reconnect_text_lost": {
-   "header": "the heading's slot: the link lost, and back",
-   "line": 8
+   "header": "its key, on the band",
+   "line": 10
   },
   "reconnect_text:reconnect_text_title": {
    "line": 7
   },
   "reconnect_text:reconnect_text_trying.words": {
-   "line": 14
+   "line": 13
   },
   "reward_words:draft_menu": {
    "comment": "The draft: one box, the BugFrags of none in it, then the programs in a column with their colours (ts_option: its number and those above and below it), each to its branch (`take`), B to `skip`. Its script. A box each said what BN6's programs do: seventeen boxes from the data to the pick, which the owner found far too many (6 October 2026).",
@@ -1582,41 +1565,38 @@
    "line": 51
   },
   "trade_screen_text:trade_text_deal": {
-   "line": 45
+   "line": 42
   },
   "trade_screen_text:trade_text_deal_title": {
    "header": "The chip trade: its heading, the slot beside it, the two cards' labels",
-   "line": 34
+   "line": 31
   },
   "trade_screen_text:trade_text_deal_with": {
-   "line": 36
+   "line": 33
   },
   "trade_screen_text:trade_text_home": {
-   "line": 57
-  },
-  "trade_screen_text:trade_text_key_call_off": {
-   "line": 47
+   "line": 51
   },
   "trade_screen_text:trade_text_list_for": {
    "line": 12
   },
   "trade_screen_text:trade_text_list_note": {
-   "header": "... the note under it: what is listed (every spare, or those that meet `want`, WANT_* of online_board.h, -1 none), or for an answer what `partner` offers (`theirs`, the chip's name and code)",
+   "header": "... the note under it: the spares that meet `want` (WANT_* of online_board.h), or for an answer what `partner` offers (`theirs`, the chip's name and code); \"\" when the list is every spare",
    "line": 22
   },
   "trade_screen_text:trade_text_list_title.titles": {
    "line": 8
   },
   "trade_screen_text:trade_text_no_deal": {
-   "header": "... its two buttons (the cursor starts on No deal), its keys",
-   "line": 44
+   "header": "... its two buttons (the cursor starts on No deal)",
+   "line": 41
   },
   "trade_screen_text:trade_text_traded": {
-   "line": 56
+   "line": 50
   },
   "trade_screen_text:trade_text_waiting": {
    "header": "... waiting on the other's Deal, and done",
-   "line": 50
+   "line": 44
   },
   "trade_words:trade_answered": {
    "line": 54
@@ -1743,7 +1723,7 @@
    "comment": "analytics_text.h. Menu words, short and plain: what is sent, what for, and what never is, as docs/GUIDE.md's Anonymous statistics says it.",
    "domain": "Statistics",
    "kind": "screen",
-   "lines": 9,
+   "lines": 7,
    "shows": [
     "screenshots/stats-ask.png"
    ],
@@ -1754,7 +1734,7 @@
    "comment": "options_text.h. Menu words, short and plain: what each line opens or sets, and the choices as docs/GUIDE.md's Screen and Sound say them.",
    "domain": "Options",
    "kind": "screen",
-   "lines": 23,
+   "lines": 21,
    "shows": [],
    "speaker": "Screen",
    "stem": "options_text"
@@ -1892,7 +1872,7 @@
    "comment": "jukebox_text.h. Each song is named for where it plays: its maps' music lists, its battles' records, the code that starts it (docs/PET.md, The Jukebox, says which are verified and how); BN5's songs the two games number alike carry BN6's names, and those of its own whose place is not known yet carry their number.",
    "domain": "Other",
    "kind": "speech",
-   "lines": 49,
+   "lines": 48,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "jukebox_text"
@@ -2046,7 +2026,7 @@
    "comment": "",
    "domain": "Other",
    "kind": "speech",
-   "lines": 8,
+   "lines": 7,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "emote_strip_text"
@@ -2073,7 +2053,7 @@
    "comment": "reconnect_text.h. The PET's own text, in its plain style (docs/VOICE.md: menus and labels keep theirs), as the NetPass's and the trade screens'.",
    "domain": "Net Square",
    "kind": "screen",
-   "lines": 8,
+   "lines": 7,
    "shows": [],
    "speaker": "Screen",
    "stem": "reconnect_text"
@@ -2127,7 +2107,7 @@
    "comment": "",
    "domain": "Trade Central",
    "kind": "screen",
-   "lines": 17,
+   "lines": 15,
    "shows": [],
    "speaker": "Screen",
    "stem": "trade_screen_text"
@@ -2290,7 +2270,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2006,
+  "boxes": 2005,
   "domains": {
    "Arena": {
     "files": [
@@ -2419,7 +2399,7 @@
      "src/online/square_words.c"
     ],
     "flagged": 14,
-    "lines": 130,
+    "lines": 129,
     "speech": 103
    },
    "Options": {
@@ -2427,7 +2407,7 @@
      "src/core/options_text.c"
     ],
     "flagged": 0,
-    "lines": 23,
+    "lines": 21,
     "speech": 0
    },
    "Other": {
@@ -2436,8 +2416,8 @@
      "src/online/emote_strip_text.c"
     ],
     "flagged": 4,
-    "lines": 57,
-    "speech": 53
+    "lines": 55,
+    "speech": 52
    },
    "Powers": {
     "files": [
@@ -2468,7 +2448,7 @@
      "src/analytics/analytics_text.c"
     ],
     "flagged": 0,
-    "lines": 9,
+    "lines": 7,
     "speech": 0
    },
    "Super bosses": {
@@ -2544,7 +2524,7 @@
      "src/online/trade_words.c"
     ],
     "flagged": 7,
-    "lines": 73,
+    "lines": 71,
     "speech": 38
    },
    "Where the nets meet": {
@@ -2687,7 +2667,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1655,
+  "lines": 1646,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2934,7 +2914,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1207
+  "speech": 1206
  },
  "version": 1,
  "conversations": [
@@ -3209,11 +3189,10 @@
   {"container":"online_text:online_field_bad_address","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_field_bad_address","line":17,"lines":["online_text:online_field_bad_address:0"],"speakers":["Screen"],"title":"Online field bad address","when":""},
   {"container":"online_text:online_field_keys_hint","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_field_keys_hint","line":20,"lines":["online_text:online_field_keys_hint:0"],"speakers":["Screen"],"title":"Online field keys hint","when":""},
   {"container":"reconnect_text:reconnect_text_title","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_title","line":7,"lines":["reconnect_text:reconnect_text_title:0"],"speakers":["Screen"],"title":"Reconnect text title","when":""},
-  {"container":"reconnect_text:reconnect_text_lost","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_lost","line":8,"lines":["reconnect_text:reconnect_text_lost:0"],"speakers":["Screen"],"title":"The heading's slot","when":"the heading's slot: the link lost, and back"},
-  {"container":"reconnect_text:reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_back","line":9,"lines":["reconnect_text:reconnect_text_back:0"],"speakers":["Screen"],"title":"Reconnect text back","when":""},
-  {"container":"reconnect_text:reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_kept","line":10,"lines":["reconnect_text:reconnect_text_kept:0"],"speakers":["Screen"],"title":"Under it","when":"under it: what the wait keeps"},
-  {"container":"reconnect_text:reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_key_home","line":11,"lines":["reconnect_text:reconnect_text_key_home:0"],"speakers":["Screen"],"title":"Reconnect text key home: its key","when":"its key"},
-  {"container":"reconnect_text:reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_trying.words","line":14,"lines":["reconnect_text:reconnect_text_trying.words:1","reconnect_text:reconnect_text_trying.words:2","reconnect_text:reconnect_text_trying.words:3"],"speakers":["Screen"],"title":"Reconnect text trying: words","when":""},
+  {"container":"reconnect_text:reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_back","line":8,"lines":["reconnect_text:reconnect_text_back:0"],"speakers":["Screen"],"title":"The heading's slot when the link is back","when":"the heading's slot when the link is back"},
+  {"container":"reconnect_text:reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_kept","line":9,"lines":["reconnect_text:reconnect_text_kept:0"],"speakers":["Screen"],"title":"Under it","when":"under it: what the wait keeps"},
+  {"container":"reconnect_text:reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_key_home","line":10,"lines":["reconnect_text:reconnect_text_key_home:0"],"speakers":["Screen"],"title":"Reconnect text key home: its key, on the band","when":"its key, on the band"},
+  {"container":"reconnect_text:reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","id":"reconnect_text:reconnect_text_trying.words","line":13,"lines":["reconnect_text:reconnect_text_trying.words:1","reconnect_text:reconnect_text_trying.words:2","reconnect_text:reconnect_text_trying.words:3"],"speakers":["Screen"],"title":"Reconnect text trying: words","when":""},
   {"container":"trade_words:trade_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_options","line":6,"lines":["trade_words:trade_options:0","trade_words:trade_options:1","trade_words:trade_options:2"],"speakers":["MegaMan"],"title":"Trade options","when":""},
   {"container":"trade_words:trade_offer_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_offer_options","line":7,"lines":["trade_words:trade_offer_options:0","trade_words:trade_offer_options:1"],"speakers":["MegaMan"],"title":"Trade offer options","when":""},
   {"container":"trade_words:trade_wait_options","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_wait_options","line":8,"lines":["trade_words:trade_wait_options:0","trade_words:trade_wait_options:1"],"speakers":["MegaMan"],"title":"Trade wait options","when":""},
@@ -3249,15 +3228,14 @@
   {"container":"trade_words:trade_diving","domain":"Trade Central","file":"src/online/trade_words.c","id":"trade_words:trade_diving","line":140,"lines":["trade_words:trade_diving:0"],"speakers":["Mr.Prog"],"title":"Trade diving","when":"... and to a Navi on the week's dive: no trades till it ends."},
   {"container":"trade_screen_text:trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_title.titles","line":8,"lines":["trade_screen_text:trade_text_list_title.titles:0","trade_screen_text:trade_text_list_title.titles:1","trade_screen_text:trade_text_list_title.titles:2","trade_screen_text:trade_text_list_title.titles:3"],"speakers":["Screen"],"title":"Trade text list title: titles","when":""},
   {"container":"trade_screen_text:trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_for","line":14,"lines":["trade_screen_text:trade_text_list_for:0","trade_screen_text:trade_text_list_for:1"],"speakers":["Screen"],"title":"Trade text list for","when":""},
-  {"container":"trade_screen_text:trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_note","line":24,"lines":["trade_screen_text:trade_text_list_note:0","trade_screen_text:trade_text_list_note:1","trade_screen_text:trade_text_list_note:2"],"speakers":["Screen"],"title":"Trade text list note","when":"... the note under it: what is listed (every spare, or those that meet `want`, WANT_* of online_board.h, -1 none), or for an answer what `partner` offers (`theirs`, the chip's name and code)"},
-  {"container":"trade_screen_text:trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_title","line":34,"lines":["trade_screen_text:trade_text_deal_title:0"],"speakers":["Screen"],"title":"The chip trade","when":"The chip trade: its heading, the slot beside it, the two cards' labels"},
-  {"container":"trade_screen_text:trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_with","line":38,"lines":["trade_screen_text:trade_text_deal_with:0"],"speakers":["Screen"],"title":"Trade text deal with","when":""},
-  {"container":"trade_screen_text:trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_no_deal","line":44,"lines":["trade_screen_text:trade_text_no_deal:0"],"speakers":["Screen"],"title":"Trade text no deal","when":"... its two buttons (the cursor starts on No deal), its keys"},
-  {"container":"trade_screen_text:trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal","line":45,"lines":["trade_screen_text:trade_text_deal:0"],"speakers":["Screen"],"title":"Trade text deal","when":""},
-  {"container":"trade_screen_text:trade_text_key_call_off","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_key_call_off","line":47,"lines":["trade_screen_text:trade_text_key_call_off:0"],"speakers":["Screen"],"title":"Trade text key call off","when":""},
-  {"container":"trade_screen_text:trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_waiting","line":52,"lines":["trade_screen_text:trade_text_waiting:0"],"speakers":["Screen"],"title":"Trade text waiting","when":"... waiting on the other's Deal, and done"},
-  {"container":"trade_screen_text:trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_traded","line":56,"lines":["trade_screen_text:trade_text_traded:0"],"speakers":["Screen"],"title":"Trade text traded","when":""},
-  {"container":"trade_screen_text:trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_home","line":57,"lines":["trade_screen_text:trade_text_home:0"],"speakers":["Screen"],"title":"Trade text home","when":""},
+  {"container":"trade_screen_text:trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_note","line":24,"lines":["trade_screen_text:trade_text_list_note:0","trade_screen_text:trade_text_list_note:1"],"speakers":["Screen"],"title":"Trade text list note","when":"... the note under it: the spares that meet `want` (WANT_* of online_board.h), or for an answer what `partner` offers (`theirs`, the chip's name and code); \"\" when the list is every spare"},
+  {"container":"trade_screen_text:trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_title","line":31,"lines":["trade_screen_text:trade_text_deal_title:0"],"speakers":["Screen"],"title":"The chip trade","when":"The chip trade: its heading, the slot beside it, the two cards' labels"},
+  {"container":"trade_screen_text:trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_with","line":35,"lines":["trade_screen_text:trade_text_deal_with:0"],"speakers":["Screen"],"title":"Trade text deal with","when":""},
+  {"container":"trade_screen_text:trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_no_deal","line":41,"lines":["trade_screen_text:trade_text_no_deal:0"],"speakers":["Screen"],"title":"Trade text no deal","when":"... its two buttons (the cursor starts on No deal)"},
+  {"container":"trade_screen_text:trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal","line":42,"lines":["trade_screen_text:trade_text_deal:0"],"speakers":["Screen"],"title":"Trade text deal","when":""},
+  {"container":"trade_screen_text:trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_waiting","line":46,"lines":["trade_screen_text:trade_text_waiting:0"],"speakers":["Screen"],"title":"Trade text waiting","when":"... waiting on the other's Deal, and done"},
+  {"container":"trade_screen_text:trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_traded","line":50,"lines":["trade_screen_text:trade_text_traded:0"],"speakers":["Screen"],"title":"Trade text traded","when":""},
+  {"container":"trade_screen_text:trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_home","line":51,"lines":["trade_screen_text:trade_text_home:0"],"speakers":["Screen"],"title":"Trade text home","when":""},
   {"container":"arena_words:arena_sent_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_sent_words","line":9,"lines":["arena_words:arena_sent_words:0"],"speakers":["MegaMan"],"title":"A challenge sent to `name`","when":"A challenge sent to `name`; the answer No, or the battle gone before it began"},
   {"container":"arena_words:arena_declined_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_declined_words","line":13,"lines":["arena_words:arena_declined_words:0"],"speakers":["MegaMan"],"title":"Arena declined words","when":""},
   {"container":"arena_words:arena_gone_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_gone_words","line":15,"lines":["arena_words:arena_gone_words:0"],"speakers":["MegaMan"],"title":"Arena gone words","when":""},
@@ -3408,30 +3386,26 @@
   {"container":"saves_text:saves_not_written","domain":"SAVES","file":"src/saves/saves_text.c","id":"saves_text:saves_not_written","line":147,"lines":["saves_text:saves_not_written:0"],"speakers":["Screen"],"title":"An export that could not be written","when":"An export that could not be written"},
   {"container":"saves_text:saves_waiting","domain":"SAVES","file":"src/saves/saves_text.c","id":"saves_text:saves_waiting","line":150,"lines":["saves_text:saves_waiting:0","saves_text:saves_waiting:1","saves_text:saves_waiting:2"],"speakers":["Screen"],"title":"Home's line while the picker for `action`","when":"home's line while the picker for `action` (SAVES_EXPORT, SAVES_IMPORT, SAVES_FOLDER) is open, and after it was cancelled"},
   {"container":"saves_text:saves_cancelled","domain":"SAVES","file":"src/saves/saves_text.c","id":"saves_text:saves_cancelled","line":155,"lines":["saves_text:saves_cancelled:0","saves_text:saves_cancelled:1","saves_text:saves_cancelled:2"],"speakers":["Screen"],"title":"Saves cancelled","when":""},
-  {"container":"analytics_text:words","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:words","line":10,"lines":["analytics_text:words:1","analytics_text:words:2","analytics_text:words:3","analytics_text:words:9","analytics_text:words:10","analytics_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in AnalyticsWord's order, its name beside each)"},
-  {"container":"analytics_text:analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_later","line":25,"lines":["analytics_text:analytics_later:0"],"speakers":["Screen"],"title":"Under the question","when":"Under the question: where it is changed later (Options, on the title's menu and the PET's)"},
-  {"container":"analytics_text:analytics_keys","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_keys","line":28,"lines":["analytics_text:analytics_keys:0"],"speakers":["Screen"],"title":"The keys' line under it","when":"The keys' line under it: \"J: choose K: no\" at the first start, where B answers no; \"K: back\" asked again, where B leaves the answer be"},
-  {"container":"analytics_text:analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_setting_note","line":32,"lines":["analytics_text:analytics_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the statistics line","when":"settings.ini's lines before the statistics line: what it is"},
-  {"container":"emote_strip_text:strip_text_keys","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keys","line":7,"lines":["emote_strip_text:strip_text_keys:0"],"speakers":["Mr.Prog"],"title":"The keys' hints","when":"the keys' hints: the strip's, the favourites' box's, the palette's"},
-  {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":8,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"Strip text favourites","when":""},
-  {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":9,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
-  {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":10,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
-  {"container":"emote_strip_text:strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_on_l","line":11,"lines":["emote_strip_text:strip_text_on_l:0"],"speakers":["Mr.Prog"],"title":"Strip text on l","when":""},
-  {"container":"emote_strip_text:strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_aim","line":15,"lines":["emote_strip_text:strip_text_aim:0","emote_strip_text:strip_text_aim:1"],"speakers":["MegaMan","Mr.Prog"],"title":"Whom it goes to","when":"whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not"},
-  {"container":"emote_strip_text:strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_kept","line":23,"lines":["emote_strip_text:strip_text_kept:0"],"speakers":["MegaMan"],"title":"A favourite just kept","when":"a favourite just kept: \"ON L+UP\" for way 0-3"},
+  {"container":"analytics_text:words","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:words","line":9,"lines":["analytics_text:words:1","analytics_text:words:2","analytics_text:words:3","analytics_text:words:9","analytics_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in AnalyticsWord's order, its name beside each)"},
+  {"container":"analytics_text:analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_later","line":23,"lines":["analytics_text:analytics_later:0"],"speakers":["Screen"],"title":"Under the question","when":"Under the question: where it is changed later (Options, on the title's menu and the PET's)"},
+  {"container":"analytics_text:analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","id":"analytics_text:analytics_setting_note","line":26,"lines":["analytics_text:analytics_setting_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the statistics line","when":"settings.ini's lines before the statistics line: what it is"},
+  {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":7,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"The keys' hints","when":"the keys' hints: the favourites' box's, the palette's"},
+  {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":8,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
+  {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":9,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
+  {"container":"emote_strip_text:strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_on_l","line":10,"lines":["emote_strip_text:strip_text_on_l:0"],"speakers":["Mr.Prog"],"title":"Strip text on l","when":""},
+  {"container":"emote_strip_text:strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_aim","line":14,"lines":["emote_strip_text:strip_text_aim:0","emote_strip_text:strip_text_aim:1"],"speakers":["MegaMan","Mr.Prog"],"title":"Whom it goes to","when":"whom it goes to: \"AT name\" aimed, \"TO EVERYONE\" not"},
+  {"container":"emote_strip_text:strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_kept","line":22,"lines":["emote_strip_text:strip_text_kept:0"],"speakers":["MegaMan"],"title":"A favourite just kept","when":"a favourite just kept: \"ON L+UP\" for way 0-3"},
   {"container":"jukebox_text:jukebox_songs","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_songs","line":12,"lines":["jukebox_text:jukebox_songs:0.3","jukebox_text:jukebox_songs:2.3","jukebox_text:jukebox_songs:3.3","jukebox_text:jukebox_songs:4.3","jukebox_text:jukebox_songs:5.3","jukebox_text:jukebox_songs:6.3","jukebox_text:jukebox_songs:7.3","jukebox_text:jukebox_songs:8.3","jukebox_text:jukebox_songs:9.3","jukebox_text:jukebox_songs:10.3","jukebox_text:jukebox_songs:11.3","jukebox_text:jukebox_songs:12.3","jukebox_text:jukebox_songs:14.3","jukebox_text:jukebox_songs:18.3","jukebox_text:jukebox_songs:19.3","jukebox_text:jukebox_songs:20.3","jukebox_text:jukebox_songs:22.3","jukebox_text:jukebox_songs:23.3","jukebox_text:jukebox_songs:25.3","jukebox_text:jukebox_songs:28.3","jukebox_text:jukebox_songs:35.3","jukebox_text:jukebox_songs:37.3","jukebox_text:jukebox_songs:40.3","jukebox_text:jukebox_songs:43.3","jukebox_text:jukebox_songs:44.3","jukebox_text:jukebox_songs:45.3","jukebox_text:jukebox_songs:46.3","jukebox_text:jukebox_songs:48.3","jukebox_text:jukebox_songs:51.3","jukebox_text:jukebox_songs:58.3","jukebox_text:jukebox_songs:60.3","jukebox_text:jukebox_songs:61.3","jukebox_text:jukebox_songs:62.3","jukebox_text:jukebox_songs:63.3","jukebox_text:jukebox_songs:64.3","jukebox_text:jukebox_songs:65.3","jukebox_text:jukebox_songs:66.3","jukebox_text:jukebox_songs:67.3","jukebox_text:jukebox_songs:68.3","jukebox_text:jukebox_songs:69.3","jukebox_text:jukebox_songs:70.3","jukebox_text:jukebox_songs:71.3"],"speakers":["MegaMan"],"title":"Jukebox songs","when":""},
   {"container":"jukebox_text:jukebox_kind_names","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_kind_names","line":88,"lines":["jukebox_text:jukebox_kind_names:1"],"speakers":["MegaMan"],"title":"The sections' names, and each game's short name on its cartridge","when":"the sections' names, and each game's short name on its cartridge"},
   {"container":"jukebox_text:jukebox_mode_names","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_mode_names","line":90,"lines":["jukebox_text:jukebox_mode_names:1"],"speakers":["MegaMan"],"title":"The play modes' names","when":"the play modes' names (jukebox.h's JukeMode order)"},
   {"container":"jukebox_text:jukebox_now_label","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_now_label","line":93,"lines":["jukebox_text:jukebox_now_label:0"],"speakers":["MegaMan"],"title":"Jukebox now label","when":""},
-  {"container":"jukebox_text:jukebox_pick_hint","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_pick_hint","line":95,"lines":["jukebox_text:jukebox_pick_hint:0"],"speakers":["MegaMan"],"title":"Jukebox pick hint","when":""},
-  {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":100,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
-  {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":104,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
-  {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":11,"lines":["options_text:words:2","options_text:words:4","options_text:words:6","options_text:words:7","options_text:words:10","options_text:words:12","options_text:words:13","options_text:words:15","options_text:words:17","options_text:words:18","options_text:words:24","options_text:words:25","options_text:words:26","options_text:words:27","options_text:words:28","options_text:words:29","options_text:words:30","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
-  {"container":"options_text:options_keys","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_keys","line":48,"lines":["options_text:options_keys:0"],"speakers":["Screen"],"title":"The keys' line","when":"The keys' line: \"J: choose K: back\", or on the Sound line \"J: change\""},
-  {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":52,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
-  {"container":"options_text:options_screen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_screen_note","line":59,"lines":["options_text:options_screen_note:0"],"speakers":["Screen"],"title":"Options screen note","when":"... before the display's: screen, smooth_motion and fullscreen"},
-  {"container":"options_text:options_smooth_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_smooth_note","line":68,"lines":["options_text:options_smooth_note:0"],"speakers":["Screen"],"title":"Options smooth note","when":""},
-  {"container":"options_text:options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_fullscreen_note","line":77,"lines":["options_text:options_fullscreen_note:0"],"speakers":["Screen"],"title":"Options fullscreen note","when":""},
+  {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":96,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
+  {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":100,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
+  {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":10,"lines":["options_text:words:2","options_text:words:4","options_text:words:6","options_text:words:7","options_text:words:10","options_text:words:12","options_text:words:14","options_text:words:16","options_text:words:17","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:26","options_text:words:27","options_text:words:28","options_text:words:29","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
+  {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":46,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
+  {"container":"options_text:options_screen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_screen_note","line":53,"lines":["options_text:options_screen_note:0"],"speakers":["Screen"],"title":"Options screen note","when":"... before the display's: screen, smooth_motion and fullscreen"},
+  {"container":"options_text:options_smooth_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_smooth_note","line":62,"lines":["options_text:options_smooth_note:0"],"speakers":["Screen"],"title":"Options smooth note","when":""},
+  {"container":"options_text:options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_fullscreen_note","line":71,"lines":["options_text:options_fullscreen_note:0"],"speakers":["Screen"],"title":"Options fullscreen note","when":""},
   {"container":"netpass_text:netpass_level_square","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_square","line":6,"lines":["netpass_text:netpass_level_square:0"],"speakers":["Screen"],"title":"The pass's level","when":"the pass's level: the Square's alone, or every stamp"},
   {"container":"netpass_text:netpass_level_full","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_full","line":7,"lines":["netpass_text:netpass_level_full:0"],"speakers":["Screen"],"title":"Netpass level full","when":""},
   {"container":"netpass_text:netpass_count_words","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_count_words","line":15,"lines":["netpass_text:netpass_count_words:0"],"speakers":["Screen"],"title":"\"1 of 4\" into out","when":"\"1 of 4\" into out"},
@@ -3611,38 +3585,34 @@
   {"group":"story","id":"pet_text:cross_words:0","ids":["pet_text:cross_words:0","pet_text:cross_words:1"],"live":["pet_text:cross_words:1","pet_text:cross_words:2"],"status":"noted","text":"Dad's report: \" and HeatCross.\\fIn it,fire chips +50,Buster +1.\\fAqua attacks do double to it,and break it.\"","where":"Rule 3: BN6's own Cross rules, taught in BN6's own Cross tutorials. A menu outside the fiction: the setup screen where the Cross is chosen, in its own plain style","why":"What the brought Cross gives and fears (a playtester chose by weakness alone; three met EraseCross's erase unexplained)"}
  ],
  "lines": [
-  {"boxes":[{"pages":[["Send anonymous","statistics?"]],"speaker":"Screen","text":"Send anonymous statistics?"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:1","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"Send anonymous statistics?","text_hash":"5be0a4f68625"},
-  {"boxes":[{"pages":[["They help a free","game: the systems it","runs on, the setups"],["runs take, how far","they get, which","guardians win."]],"speaker":"Screen","text":"They help a free game: the systems it runs on, the setups runs take, how far they get, which guardians win."}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:2","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"They help a free game: the systems it runs on, the setups runs take, how far they get, which guardians win.","text_hash":"cd0f5d58f88c"},
-  {"boxes":[{"pages":[["No names, no IDs:","nothing that says","who you are."]],"speaker":"Screen","text":"No names, no IDs: nothing that says who you are."}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:3","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"No names, no IDs: nothing that says who you are.","text_hash":"0710847c8784"},
-  {"boxes":[{"pages":[["A: what is sent, and","Yes or No"]],"speaker":"Screen","text":"A: what is sent, and Yes or No"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:9","kind":"screen","line":18,"speaker":"Screen","speakers":["Screen"],"text":"A: what is sent, and Yes or No","text_hash":"7357e6b6a5d4"},
-  {"boxes":[{"pages":[["D-pad and A, or tap","Yes or No"]],"speaker":"Screen","text":"D-pad and A, or tap Yes or No"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:10","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"D-pad and A, or tap Yes or No","text_hash":"19a70c659120"},
-  {"boxes":[{"pages":[["a word for each","AnalyticsWord"]],"speaker":"Screen","text":"a word for each AnalyticsWord"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"fragment":true,"id":"analytics_text:words:0","kind":"screen","line":21,"speaker":"Screen","speakers":["Screen"],"text":"a word for each AnalyticsWord","text_hash":"8883b5b4b78a"},
-  {"boxes":[{"pages":[["Change it any time","in Options"]],"speaker":"Screen","text":"Change it any time in Options"}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":25,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options","text_hash":"1701071af82e"},
-  {"boxes":[{"pages":[["{a}: choose","{b}: {first}"]],"speaker":"Screen","text":"{a}: choose   {b}: {first}"}],"container":"analytics_keys","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_keys:0","kind":"screen","line":28,"placeholders":[{"name":"a","spec":"%s"},{"name":"b","spec":"%s"},{"name":"first","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{a}: choose   {b}: {first}","text_hash":"9b720d411a6c"},
-  {"boxes":[{"pages":[["# statistics: on","sends anonymous play","statistics to the"],["game's own Umami","#","(umami.saschb2b.com):"],["the system and","version, the setups","runs take, how"],["# far they get and","which guardians win.","No names, no IDs."],["off sends nothing.","# The game asks at","its first start"],["(README.md,","Anonymous","statistics)."]],"speaker":"Screen","text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n"}],"container":"analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_setting_note:0","kind":"screen","line":32,"speaker":"Screen","speakers":["Screen"],"text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n","text_hash":"921b2dee734d"},
-  {"boxes":[{"pages":[["Which buttons and","keys are A, B, L, R,","START and SELECT"]],"speaker":"Screen","text":"Which buttons and keys are A, B, L, R, START and SELECT"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:2","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"Which buttons and keys are A, B, L, R, START and SELECT","text_hash":"27046bd21805"},
-  {"boxes":[{"pages":[["How the game sounds"]],"speaker":"Screen","text":"How the game sounds"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:4","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"How the game sounds","text_hash":"e6b441dd1655"},
-  {"boxes":[{"pages":[["Close Options"]],"speaker":"Screen","text":"Close Options"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:6","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"Close Options","text_hash":"d35a0452f8ac"},
-  {"boxes":[{"pages":[["Back to Options"]],"speaker":"Screen","text":"Back to Options"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:7","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"Back to Options","text_hash":"291635a4ce1a"},
-  {"boxes":[{"pages":[["As a GBA plays it:","BN6's own mix, crisp","and bright"]],"speaker":"Screen","text":"As a GBA plays it: BN6's own mix, crisp and bright"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:10","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"As a GBA plays it: BN6's own mix, crisp and bright","text_hash":"87f8fd8f2c4a"},
-  {"boxes":[{"pages":[["The Legacy","Collection's","balance: softer"],["highs, less deep","bass"]],"speaker":"Screen","text":"The Legacy Collection's balance: softer highs, less deep bass"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:12","kind":"screen","line":21,"speaker":"Screen","speakers":["Screen"],"text":"The Legacy Collection's balance: softer highs, less deep bass","text_hash":"d404c7577cde"},
-  {"boxes":[{"pages":[["Tap a line to choose","it"]],"speaker":"Screen","text":"Tap a line to choose it"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:13","kind":"screen","line":22,"speaker":"Screen","speakers":["Screen"],"text":"Tap a line to choose it","text_hash":"8d59a080dc50"},
-  {"boxes":[{"pages":[["How the picture","fills the screen"]],"speaker":"Screen","text":"How the picture fills the screen"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:15","kind":"screen","line":24,"speaker":"Screen","speakers":["Screen"],"text":"How the picture fills the screen","text_hash":"e9577cf3fadc"},
-  {"boxes":[{"pages":[["Borderless, over the","whole screen","(Alt+Enter or F11)"]],"speaker":"Screen","text":"Borderless, over the whole screen (Alt+Enter or F11)"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:17","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"Borderless, over the whole screen (Alt+Enter or F11)","text_hash":"eaedee8b9109"},
-  {"boxes":[{"pages":[["In a window you can","size (Alt+Enter or","F11)"]],"speaker":"Screen","text":"In a window you can size (Alt+Enter or F11)"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:18","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"In a window you can size (Alt+Enter or F11)","text_hash":"be66ac753da7"},
-  {"boxes":[{"pages":[["Whole pixels, but","filling where they"],["leave it much","smaller"]],"speaker":"Screen","text":"Whole pixels, but filling where they leave it much smaller"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:24","kind":"screen","line":33,"speaker":"Screen","speakers":["Screen"],"text":"Whole pixels, but filling where they leave it much smaller","text_hash":"ace4afcfe2de"},
-  {"boxes":[{"pages":[["Whole-number scale:","every pixel the same","size"]],"speaker":"Screen","text":"Whole-number scale: every pixel the same size"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:25","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"Whole-number scale: every pixel the same size","text_hash":"4a38832c5ce0"},
-  {"boxes":[{"pages":[["As big as the screen","holds, its shape","kept"]],"speaker":"Screen","text":"As big as the screen holds, its shape kept"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:26","kind":"screen","line":35,"speaker":"Screen","speakers":["Screen"],"text":"As big as the screen holds, its shape kept","text_hash":"b04e03b0cbd9"},
-  {"boxes":[{"pages":[["The whole screen, no","border: the picture","out of shape"]],"speaker":"Screen","text":"The whole screen, no border: the picture out of shape"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:27","kind":"screen","line":36,"speaker":"Screen","speakers":["Screen"],"text":"The whole screen, no border: the picture out of shape","text_hash":"dcba00ba49f0"},
-  {"boxes":[{"pages":[["Smooth motion"]],"speaker":"Screen","text":"Smooth motion"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:28","kind":"screen","line":37,"speaker":"Screen","speakers":["Screen"],"text":"Smooth motion","text_hash":"7f19379522a7"},
-  {"boxes":[{"pages":[["Frames mixed at each","refresh: even on 90","or 144 Hz"]],"speaker":"Screen","text":"Frames mixed at each refresh: even on 90 or 144 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:29","kind":"screen","line":38,"speaker":"Screen","speakers":["Screen"],"text":"Frames mixed at each refresh: even on 90 or 144 Hz","text_hash":"9fe6d2f72f16"},
-  {"boxes":[{"pages":[["The game's own","frames, sharp: best","on 60 or 120 Hz"]],"speaker":"Screen","text":"The game's own frames, sharp: best on 60 or 120 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:30","kind":"screen","line":39,"speaker":"Screen","speakers":["Screen"],"text":"The game's own frames, sharp: best on 60 or 120 Hz","text_hash":"25d0c2233826"},
-  {"boxes":[{"pages":[["a word for each","OptionsWord"]],"speaker":"Screen","text":"a word for each OptionsWord"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"fragment":true,"id":"options_text:words:0","kind":"screen","line":43,"speaker":"Screen","speakers":["Screen"],"text":"a word for each OptionsWord","text_hash":"776a40716e19"},
-  {"boxes":[{"pages":[["{a}: {change}","{b}: back"]],"speaker":"Screen","text":"{a}: {change}  {b}: back"}],"container":"options_keys","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_keys:0","kind":"screen","line":48,"placeholders":[{"name":"a","spec":"%s"},{"name":"change","spec":"%s"},{"name":"b","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{a}: {change}  {b}: back","text_hash":"fde6d3e43125"},
-  {"boxes":[{"pages":[["# sound: gba plays","the game's sound as","a GBA makes it, a"],["bright hiss above","# the music and all;","soft gives it the"],["Legacy Collection's","balance, as","# measured from it:"],["the highs and the","deepest bass taken","down. Options"],["# (the title's menu,","or the PET's in a","run) changes it too."]],"speaker":"Screen","text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n"}],"container":"options_sound_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_sound_note:0","kind":"screen","line":52,"speaker":"Screen","speakers":["Screen"],"text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n","text_hash":"2d90bba7b1b6"},
-  {"boxes":[{"pages":[["# screen: whole (or","integer) draws the","game's picture at"],["the largest whole","# scale, every pixel","the same size; fill"],["makes it as big as","the screen","# holds, each"],["pixel's edge a","little soft; auto","fills where a whole"],["scale","# would leave it a","quarter smaller or"],["more (a 640 x 480","screen), else","# whole; stretch"],["covers the whole","screen, the picture","out of its shape."],["# Options' Display","changes it too."]],"speaker":"Screen","text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n"}],"container":"options_screen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_screen_note:0","kind":"screen","line":59,"speaker":"Screen","speakers":["Screen"],"text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n","text_hash":"7263d22da6d3"},
-  {"boxes":[{"pages":[["# smooth_motion: the","game runs at the","GBA's 60 frames a"],["second. A 90, 144","# or 165 Hz screen","shows each frame for"],["one refresh or two","(or two or","# three) in turn,"],["which reads as","judder. on mixes the","two latest frames at"],["# every refresh, so","motion is even, a","little blurred and a"],["frame later;","# off shows the","game's own frames,"],["sharp (best on 60","and 120 Hz)."],["Options'","# Display changes it","too."]],"speaker":"Screen","text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n"}],"container":"options_smooth_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_smooth_note:0","kind":"screen","line":68,"speaker":"Screen","speakers":["Screen"],"text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n","text_hash":"037cc0fb37bc"},
-  {"boxes":[{"pages":[["# fullscreen: on","starts the game","borderless over the"],["whole screen, off in","# a window."],["Alt+Enter or F11","switch it while it","runs, as Options'"],["Display","# does, and each","keeps it here;"],["--fullscreen or","--window come first."]],"speaker":"Screen","text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n"}],"container":"options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_fullscreen_note:0","kind":"screen","line":77,"speaker":"Screen","speakers":["Screen"],"text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n","text_hash":"32826c4278b1"},
+  {"boxes":[{"pages":[["Send anonymous","statistics?"]],"speaker":"Screen","text":"Send anonymous statistics?"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:1","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"Send anonymous statistics?","text_hash":"5be0a4f68625"},
+  {"boxes":[{"pages":[["They help a free","game: the systems it","runs on, the setups"],["runs take, how far","they get, which","guardians win."]],"speaker":"Screen","text":"They help a free game: the systems it runs on, the setups runs take, how far they get, which guardians win."}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:2","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"They help a free game: the systems it runs on, the setups runs take, how far they get, which guardians win.","text_hash":"cd0f5d58f88c"},
+  {"boxes":[{"pages":[["No names, no IDs:","nothing that says","who you are."]],"speaker":"Screen","text":"No names, no IDs: nothing that says who you are."}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:3","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"No names, no IDs: nothing that says who you are.","text_hash":"0710847c8784"},
+  {"boxes":[{"pages":[["A: what is sent, and","Yes or No"]],"speaker":"Screen","text":"A: what is sent, and Yes or No"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:9","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"A: what is sent, and Yes or No","text_hash":"7357e6b6a5d4"},
+  {"boxes":[{"pages":[["a word for each","AnalyticsWord"]],"speaker":"Screen","text":"a word for each AnalyticsWord"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"fragment":true,"id":"analytics_text:words:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"a word for each AnalyticsWord","text_hash":"8883b5b4b78a"},
+  {"boxes":[{"pages":[["Change it any time","in Options"]],"speaker":"Screen","text":"Change it any time in Options"}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":23,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options","text_hash":"1701071af82e"},
+  {"boxes":[{"pages":[["# statistics: on","sends anonymous play","statistics to the"],["game's own Umami","#","(umami.saschb2b.com):"],["the system and","version, the setups","runs take, how"],["# far they get and","which guardians win.","No names, no IDs."],["off sends nothing.","# The game asks at","its first start"],["(README.md,","Anonymous","statistics)."]],"speaker":"Screen","text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n"}],"container":"analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_setting_note:0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n","text_hash":"921b2dee734d"},
+  {"boxes":[{"pages":[["Which buttons and","keys are A, B, L, R,","START and SELECT"]],"speaker":"Screen","text":"Which buttons and keys are A, B, L, R, START and SELECT"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:2","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"Which buttons and keys are A, B, L, R, START and SELECT","text_hash":"27046bd21805"},
+  {"boxes":[{"pages":[["How the game sounds"]],"speaker":"Screen","text":"How the game sounds"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:4","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"How the game sounds","text_hash":"e6b441dd1655"},
+  {"boxes":[{"pages":[["Close Options"]],"speaker":"Screen","text":"Close Options"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:6","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Close Options","text_hash":"d35a0452f8ac"},
+  {"boxes":[{"pages":[["Back to Options"]],"speaker":"Screen","text":"Back to Options"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:7","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"Back to Options","text_hash":"291635a4ce1a"},
+  {"boxes":[{"pages":[["As a GBA plays it:","BN6's own mix, crisp","and bright"]],"speaker":"Screen","text":"As a GBA plays it: BN6's own mix, crisp and bright"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:10","kind":"screen","line":18,"speaker":"Screen","speakers":["Screen"],"text":"As a GBA plays it: BN6's own mix, crisp and bright","text_hash":"87f8fd8f2c4a"},
+  {"boxes":[{"pages":[["The Legacy","Collection's","balance: softer"],["highs, less deep","bass"]],"speaker":"Screen","text":"The Legacy Collection's balance: softer highs, less deep bass"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:12","kind":"screen","line":20,"speaker":"Screen","speakers":["Screen"],"text":"The Legacy Collection's balance: softer highs, less deep bass","text_hash":"d404c7577cde"},
+  {"boxes":[{"pages":[["How the picture","fills the screen"]],"speaker":"Screen","text":"How the picture fills the screen"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:14","kind":"screen","line":22,"speaker":"Screen","speakers":["Screen"],"text":"How the picture fills the screen","text_hash":"e9577cf3fadc"},
+  {"boxes":[{"pages":[["Borderless, over the","whole screen","(Alt+Enter or F11)"]],"speaker":"Screen","text":"Borderless, over the whole screen (Alt+Enter or F11)"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:16","kind":"screen","line":24,"speaker":"Screen","speakers":["Screen"],"text":"Borderless, over the whole screen (Alt+Enter or F11)","text_hash":"eaedee8b9109"},
+  {"boxes":[{"pages":[["In a window you can","size (Alt+Enter or","F11)"]],"speaker":"Screen","text":"In a window you can size (Alt+Enter or F11)"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:17","kind":"screen","line":25,"speaker":"Screen","speakers":["Screen"],"text":"In a window you can size (Alt+Enter or F11)","text_hash":"be66ac753da7"},
+  {"boxes":[{"pages":[["Whole pixels, but","filling where they"],["leave it much","smaller"]],"speaker":"Screen","text":"Whole pixels, but filling where they leave it much smaller"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:23","kind":"screen","line":31,"speaker":"Screen","speakers":["Screen"],"text":"Whole pixels, but filling where they leave it much smaller","text_hash":"ace4afcfe2de"},
+  {"boxes":[{"pages":[["Whole-number scale:","every pixel the same","size"]],"speaker":"Screen","text":"Whole-number scale: every pixel the same size"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:24","kind":"screen","line":32,"speaker":"Screen","speakers":["Screen"],"text":"Whole-number scale: every pixel the same size","text_hash":"4a38832c5ce0"},
+  {"boxes":[{"pages":[["As big as the screen","holds, its shape","kept"]],"speaker":"Screen","text":"As big as the screen holds, its shape kept"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:25","kind":"screen","line":33,"speaker":"Screen","speakers":["Screen"],"text":"As big as the screen holds, its shape kept","text_hash":"b04e03b0cbd9"},
+  {"boxes":[{"pages":[["The whole screen, no","border: the picture","out of shape"]],"speaker":"Screen","text":"The whole screen, no border: the picture out of shape"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:26","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"The whole screen, no border: the picture out of shape","text_hash":"dcba00ba49f0"},
+  {"boxes":[{"pages":[["Smooth motion"]],"speaker":"Screen","text":"Smooth motion"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:27","kind":"screen","line":35,"speaker":"Screen","speakers":["Screen"],"text":"Smooth motion","text_hash":"7f19379522a7"},
+  {"boxes":[{"pages":[["Frames mixed at each","refresh: even on 90","or 144 Hz"]],"speaker":"Screen","text":"Frames mixed at each refresh: even on 90 or 144 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:28","kind":"screen","line":36,"speaker":"Screen","speakers":["Screen"],"text":"Frames mixed at each refresh: even on 90 or 144 Hz","text_hash":"9fe6d2f72f16"},
+  {"boxes":[{"pages":[["The game's own","frames, sharp: best","on 60 or 120 Hz"]],"speaker":"Screen","text":"The game's own frames, sharp: best on 60 or 120 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:29","kind":"screen","line":37,"speaker":"Screen","speakers":["Screen"],"text":"The game's own frames, sharp: best on 60 or 120 Hz","text_hash":"25d0c2233826"},
+  {"boxes":[{"pages":[["a word for each","OptionsWord"]],"speaker":"Screen","text":"a word for each OptionsWord"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"fragment":true,"id":"options_text:words:0","kind":"screen","line":41,"speaker":"Screen","speakers":["Screen"],"text":"a word for each OptionsWord","text_hash":"776a40716e19"},
+  {"boxes":[{"pages":[["# sound: gba plays","the game's sound as","a GBA makes it, a"],["bright hiss above","# the music and all;","soft gives it the"],["Legacy Collection's","balance, as","# measured from it:"],["the highs and the","deepest bass taken","down. Options"],["# (the title's menu,","or the PET's in a","run) changes it too."]],"speaker":"Screen","text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n"}],"container":"options_sound_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_sound_note:0","kind":"screen","line":46,"speaker":"Screen","speakers":["Screen"],"text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n","text_hash":"2d90bba7b1b6"},
+  {"boxes":[{"pages":[["# screen: whole (or","integer) draws the","game's picture at"],["the largest whole","# scale, every pixel","the same size; fill"],["makes it as big as","the screen","# holds, each"],["pixel's edge a","little soft; auto","fills where a whole"],["scale","# would leave it a","quarter smaller or"],["more (a 640 x 480","screen), else","# whole; stretch"],["covers the whole","screen, the picture","out of its shape."],["# Options' Display","changes it too."]],"speaker":"Screen","text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n"}],"container":"options_screen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_screen_note:0","kind":"screen","line":53,"speaker":"Screen","speakers":["Screen"],"text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n","text_hash":"7263d22da6d3"},
+  {"boxes":[{"pages":[["# smooth_motion: the","game runs at the","GBA's 60 frames a"],["second. A 90, 144","# or 165 Hz screen","shows each frame for"],["one refresh or two","(or two or","# three) in turn,"],["which reads as","judder. on mixes the","two latest frames at"],["# every refresh, so","motion is even, a","little blurred and a"],["frame later;","# off shows the","game's own frames,"],["sharp (best on 60","and 120 Hz)."],["Options'","# Display changes it","too."]],"speaker":"Screen","text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n"}],"container":"options_smooth_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_smooth_note:0","kind":"screen","line":62,"speaker":"Screen","speakers":["Screen"],"text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n","text_hash":"037cc0fb37bc"},
+  {"boxes":[{"pages":[["# fullscreen: on","starts the game","borderless over the"],["whole screen, off in","# a window."],["Alt+Enter or F11","switch it while it","runs, as Options'"],["Display","# does, and each","keeps it here;"],["--fullscreen or","--window come first."]],"speaker":"Screen","text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n"}],"container":"options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_fullscreen_note:0","kind":"screen","line":71,"speaker":"Screen","speakers":["Screen"],"text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n","text_hash":"32826c4278b1"},
   {"boxes":[{"pages":[["Needs BN5"]],"speaker":"Screen","text":"Needs BN5"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Needs BN5","text_hash":"e7ada24c886e"},
   {"boxes":[{"pages":[["ROM back"]],"speaker":"Screen","text":"ROM back"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:1","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"ROM back","text_hash":"e4fe73de06f9"},
   {"boxes":[{"pages":[["to battle"]],"speaker":"Screen","text":"to battle"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"fragment":true,"id":"xchips_text:xchips_text_desc:2","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"to battle","text_hash":"932684ca3df2"},
@@ -4061,10 +4031,9 @@
   {"boxes":[{"pages":[["The Net"]],"speaker":"MegaMan","text":"The Net"}],"container":"jukebox_kind_names","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"id":"jukebox_text:jukebox_kind_names:1","kind":"screen","line":88,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Net","text_hash":"4d7643ab79da"},
   {"boxes":[{"pages":[["In order"]],"speaker":"MegaMan","text":"In order"}],"container":"jukebox_mode_names","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"id":"jukebox_text:jukebox_mode_names:1","kind":"screen","line":90,"speaker":"MegaMan","speakers":["MegaMan"],"text":"In order","text_hash":"32a183d41686"},
   {"boxes":[{"pages":[["NOW PLAYING"]],"speaker":"MegaMan","text":"NOW PLAYING"}],"container":"jukebox_now_label","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"id":"jukebox_text:jukebox_now_label:0","kind":"screen","line":93,"speaker":"MegaMan","speakers":["MegaMan"],"text":"NOW PLAYING","text_hash":"586fa7a8e5c4"},
-  {"boxes":[{"pages":[["Pick a song and","press A."]],"speaker":"MegaMan","text":"Pick a song and press A."}],"container":"jukebox_pick_hint","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"id":"jukebox_text:jukebox_pick_hint:0","kind":"screen","line":95,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Pick a song and press A.","text_hash":"3f00854a3309"},
-  {"boxes":[{"pages":[["No. {song}"]],"speaker":"MegaMan","text":"No. {song}"}],"container":"jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_number_words:0","kind":"speech","line":100,"placeholders":[{"name":"song","spec":"%02X"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"No. {song}","text_hash":"0360326014a4"},
-  {"boxes":[{"pages":[["Round once"]],"speaker":"MegaMan","text":"Round once"}],"container":"jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_loops_words:0","kind":"speech","line":104,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Round once","text_hash":"8761349c61fc"},
-  {"boxes":[{"pages":[["Round {loops} times"]],"speaker":"MegaMan","text":"Round {loops} times"}],"container":"jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_loops_words:1","kind":"speech","line":105,"placeholders":[{"name":"loops","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Round {loops} times","text_hash":"1d2bf1423337"},
+  {"boxes":[{"pages":[["No. {song}"]],"speaker":"MegaMan","text":"No. {song}"}],"container":"jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_number_words:0","kind":"speech","line":96,"placeholders":[{"name":"song","spec":"%02X"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"No. {song}","text_hash":"0360326014a4"},
+  {"boxes":[{"pages":[["Round once"]],"speaker":"MegaMan","text":"Round once"}],"container":"jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_loops_words:0","kind":"speech","line":100,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Round once","text_hash":"8761349c61fc"},
+  {"boxes":[{"pages":[["Round {loops} times"]],"speaker":"MegaMan","text":"Round {loops} times"}],"container":"jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","flags":[],"fragment":true,"id":"jukebox_text:jukebox_loops_words:1","kind":"speech","line":101,"placeholders":[{"name":"loops","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Round {loops} times","text_hash":"1d2bf1423337"},
   {"boxes":[{"pages":[["Cyberworld Endless"]],"speaker":"Screen","text":"Cyberworld Endless"}],"container":"words","domain":"The ROMs screen","file":"src/launcher/launcher_text.c","flags":[],"id":"launcher_text:words:1","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"Cyberworld Endless","text_hash":"58c8c32a5ac4"},
   {"boxes":[{"pages":[["CHOOSE FILE"]],"speaker":"Screen","text":"CHOOSE FILE"}],"container":"words","domain":"The ROMs screen","file":"src/launcher/launcher_text.c","flags":[],"id":"launcher_text:words:6","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"CHOOSE FILE","text_hash":"7bf4e02d02ca"},
   {"boxes":[{"pages":[["CHOOSE FOLDER"]],"speaker":"Screen","text":"CHOOSE FOLDER"}],"container":"words","domain":"The ROMs screen","file":"src/launcher/launcher_text.c","flags":[],"id":"launcher_text:words:7","kind":"screen","line":18,"speaker":"Screen","speakers":["Screen"],"text":"CHOOSE FOLDER","text_hash":"2c27c3592323"},
@@ -4674,14 +4643,13 @@
   {"boxes":[{"pages":[["Phew... Both teams","went down at once!"]],"speaker":"MegaMan","text":"Phew... Both teams\nwent down at once!"}],"container":"arena_team_over_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_team_over_words:case4.0","kind":"speech","line":168,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Phew... Both teams\nwent down at once!","text_hash":"3a3a10a3c9de"},
   {"boxes":[{"pages":[["Whoa! The Team","NetBattle broke off!"]],"speaker":"MegaMan","text":"Whoa! The Team\nNetBattle broke off!"}],"container":"arena_team_over_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_team_over_words:casedefault.0","kind":"speech","line":169,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Whoa! The Team\nNetBattle broke off!","text_hash":"04bb0d20582a"},
   {"boxes":[{"pages":[["Huh? Our PETs don't","match..."]],"speaker":"MegaMan","text":"Huh? Our PETs don't\nmatch..."},{"pages":[["Lan,let's reboot","the PET and try","again!"]],"speaker":"MegaMan","text":"Lan,let's reboot\nthe PET and try\nagain!"}],"container":"arena_installs_apart_words","domain":"Arena","file":"src/online/arena_words.c","flags":[],"id":"arena_words:arena_installs_apart_words:0","kind":"speech","line":174,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Huh? Our PETs don't\nmatch...|Lan,let's reboot\nthe PET and try\nagain!","text_hash":"77683d422025"},
-  {"boxes":[{"pages":[["A SEND B CLOSE"]],"speaker":"Mr.Prog","text":"A SEND  B CLOSE"}],"container":"strip_text_keys","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keys:0","kind":"speech","line":7,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A SEND  B CLOSE","text_hash":"7a44b775c920"},
-  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L +"]],"speaker":"MegaMan","text":"HOLD L +"}],"container":"strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_favourites:0","kind":"speech","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"HOLD L +","text_hash":"e2b3110f410a"},
-  {"boxes":[{"pages":[["SELECT+ARROW KEEPS"]],"speaker":"Mr.Prog","text":"SELECT+ARROW KEEPS"}],"container":"strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keep:0","kind":"speech","line":9,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SELECT+ARROW KEEPS","text_hash":"2b84ab432dd7"},
-  {"boxes":[{"pages":[["TAP TO SEND"]],"speaker":"Mr.Prog","text":"TAP TO SEND"}],"container":"strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_tap:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TAP TO SEND","text_hash":"8de75226e6e2"},
-  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L + THAT WAY"]],"speaker":"Mr.Prog","text":"HOLD L + THAT WAY"}],"container":"strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_on_l:0","kind":"speech","line":11,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HOLD L + THAT WAY","text_hash":"f790e2703e06"},
-  {"boxes":[{"pages":[["AT {name}"]],"speaker":"MegaMan","text":"AT {name}"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:0","kind":"speech","line":15,"placeholders":[{"name":"name","spec":"%.16s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"AT {name}","text_hash":"aea86039a73f"},
-  {"boxes":[{"pages":[["TO EVERYONE"]],"speaker":"Mr.Prog","text":"TO EVERYONE"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:1","kind":"speech","line":16,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TO EVERYONE","text_hash":"fadc62efdb48"},
-  {"boxes":[{"pages":[["ON L+{ways}"]],"speaker":"MegaMan","text":"ON L+{ways}"}],"container":"strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_kept:0","kind":"speech","line":23,"placeholders":[{"name":"ways","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"ON L+{ways}","text_hash":"2f344a7afada"},
+  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L +"]],"speaker":"MegaMan","text":"HOLD L +"}],"container":"strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_favourites:0","kind":"speech","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"HOLD L +","text_hash":"e2b3110f410a"},
+  {"boxes":[{"pages":[["SELECT+ARROW KEEPS"]],"speaker":"Mr.Prog","text":"SELECT+ARROW KEEPS"}],"container":"strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keep:0","kind":"speech","line":8,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SELECT+ARROW KEEPS","text_hash":"2b84ab432dd7"},
+  {"boxes":[{"pages":[["TAP TO SEND"]],"speaker":"Mr.Prog","text":"TAP TO SEND"}],"container":"strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_tap:0","kind":"speech","line":9,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TAP TO SEND","text_hash":"8de75226e6e2"},
+  {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L + THAT WAY"]],"speaker":"Mr.Prog","text":"HOLD L + THAT WAY"}],"container":"strip_text_on_l","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_on_l:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HOLD L + THAT WAY","text_hash":"f790e2703e06"},
+  {"boxes":[{"pages":[["AT {name}"]],"speaker":"MegaMan","text":"AT {name}"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:0","kind":"speech","line":14,"placeholders":[{"name":"name","spec":"%.16s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"AT {name}","text_hash":"aea86039a73f"},
+  {"boxes":[{"pages":[["TO EVERYONE"]],"speaker":"Mr.Prog","text":"TO EVERYONE"}],"container":"strip_text_aim","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_aim:1","kind":"speech","line":15,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TO EVERYONE","text_hash":"fadc62efdb48"},
+  {"boxes":[{"pages":[["ON L+{ways}"]],"speaker":"MegaMan","text":"ON L+{ways}"}],"container":"strip_text_kept","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_kept:0","kind":"speech","line":22,"placeholders":[{"name":"ways","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"ON L+{ways}","text_hash":"2f344a7afada"},
   {"boxes":[{"pages":[["Square pass"]],"speaker":"Screen","text":"Square pass"}],"container":"netpass_level_square","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_level_square:0","kind":"screen","line":6,"speaker":"Screen","speakers":["Screen"],"text":"Square pass","text_hash":"9092aae663b8"},
   {"boxes":[{"pages":[["Full pass"]],"speaker":"Screen","text":"Full pass"}],"container":"netpass_level_full","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_level_full:0","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Full pass","text_hash":"b7a05608a9ed"},
   {"boxes":[{"pages":[["{held} of {all}"]],"speaker":"Screen","text":"{held} of {all}"}],"container":"netpass_count_words","domain":"The NetPass","file":"src/online/netpass_text.c","flags":[],"id":"netpass_text:netpass_count_words:0","kind":"screen","line":15,"placeholders":[{"name":"held","spec":"%d"},{"name":"all","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"{held} of {all}","text_hash":"4f396358cbb4"},
@@ -4711,13 +4679,12 @@
   {"boxes":[{"pages":[["That is not a server","address"]],"speaker":"Screen","text":"That is not a server address"}],"container":"online_field_bad_address","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_field_bad_address:0","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"That is not a server address","text_hash":"c349750d95e0"},
   {"boxes":[{"pages":[["A: type L: erase","START: OK B: back"]],"speaker":"Screen","text":"A: type   L: erase   START: OK   B: back"}],"container":"online_field_keys_hint","domain":"Net Square","file":"src/online/online_text.c","flags":[],"id":"online_text:online_field_keys_hint:0","kind":"screen","line":20,"speaker":"Screen","speakers":["Screen"],"text":"A: type   L: erase   START: OK   B: back","text_hash":"5d5ce9e5a6f9"},
   {"boxes":[{"pages":[["Net Square"]],"speaker":"Screen","text":"Net Square"}],"container":"reconnect_text_title","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_title:0","kind":"screen","line":7,"speaker":"Screen","speakers":["Screen"],"text":"Net Square","text_hash":"e450dedaa053"},
-  {"boxes":[{"pages":[["Link lost"]],"speaker":"Screen","text":"Link lost"}],"container":"reconnect_text_lost","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_lost:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Link lost","text_hash":"15da001d41cc"},
-  {"boxes":[{"pages":[["Back online!"]],"speaker":"Screen","text":"Back online!"}],"container":"reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_back:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"Back online!","text_hash":"4ef775fe2235"},
-  {"boxes":[{"pages":[["YOUR SPOT IN THE","SQUARE IS KEPT"]],"speaker":"Screen","text":"YOUR SPOT IN THE SQUARE IS KEPT"}],"container":"reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_kept:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"YOUR SPOT IN THE SQUARE IS KEPT","text_hash":"4abb8d50490b"},
-  {"boxes":[{"pages":[["GO HOME"]],"speaker":"Screen","text":"GO HOME"}],"container":"reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_key_home:0","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"GO HOME","text_hash":"64812fe8b3a7"},
-  {"boxes":[{"pages":[["Reconnecting."]],"speaker":"Screen","text":"Reconnecting."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:1","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting.","text_hash":"b4ffa33dbba5"},
-  {"boxes":[{"pages":[["Reconnecting.."]],"speaker":"Screen","text":"Reconnecting.."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:2","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting..","text_hash":"992c8edaac73"},
-  {"boxes":[{"pages":[["Reconnecting..."]],"speaker":"Screen","text":"Reconnecting..."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:3","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting...","text_hash":"9cc98dbd8db4"},
+  {"boxes":[{"pages":[["Back online!"]],"speaker":"Screen","text":"Back online!"}],"container":"reconnect_text_back","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_back:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Back online!","text_hash":"4ef775fe2235"},
+  {"boxes":[{"pages":[["YOUR SPOT IN THE","SQUARE IS KEPT"]],"speaker":"Screen","text":"YOUR SPOT IN THE SQUARE IS KEPT"}],"container":"reconnect_text_kept","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_kept:0","kind":"screen","line":9,"speaker":"Screen","speakers":["Screen"],"text":"YOUR SPOT IN THE SQUARE IS KEPT","text_hash":"4abb8d50490b"},
+  {"boxes":[{"pages":[["GO HOME"]],"speaker":"Screen","text":"GO HOME"}],"container":"reconnect_text_key_home","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_key_home:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"GO HOME","text_hash":"64812fe8b3a7"},
+  {"boxes":[{"pages":[["Reconnecting."]],"speaker":"Screen","text":"Reconnecting."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:1","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting.","text_hash":"b4ffa33dbba5"},
+  {"boxes":[{"pages":[["Reconnecting.."]],"speaker":"Screen","text":"Reconnecting.."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:2","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting..","text_hash":"992c8edaac73"},
+  {"boxes":[{"pages":[["Reconnecting..."]],"speaker":"Screen","text":"Reconnecting..."}],"container":"reconnect_text_trying.words","domain":"Net Square","file":"src/online/reconnect_text.c","flags":[],"id":"reconnect_text:reconnect_text_trying.words:3","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"Reconnecting...","text_hash":"9cc98dbd8db4"},
   {"boxes":[{"pages":[["big tree"]],"speaker":"Bystander","text":"big tree"}],"container":"landmark_name","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"fragment":true,"id":"square_life_words:landmark_name:0","kind":"screen","line":12,"speaker":"Bystander","speakers":["Bystander"],"text":"big tree","text_hash":"1164f6e0ab24"},
   {"boxes":[{"pages":[["HELLO! WELCOME,","WELCOME!"]],"speaker":"Mr.Prog","text":"HELLO! WELCOME,\nWELCOME!"}],"container":"square_greeter_words","domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_greeter_words:0","kind":"speech","line":27,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! WELCOME,\nWELCOME!","text_hash":"34f6abfad1ce"},
   {"boxes":[{"pages":[["{arrived} JUST","LOGGED IN!"]],"speaker":"Mr.Prog","text":"{arrived} JUST\nLOGGED IN!"}],"container":"square_greeter_words","continues":true,"domain":"Net Square","file":"src/online/square_life_words.c","flags":[],"id":"square_life_words:square_greeter_words:1","kind":"speech","line":28,"placeholders":[{"name":"arrived","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"|{arrived} JUST\nLOGGED IN!","text_hash":"fa47943fc8d7"},
@@ -4859,15 +4826,13 @@
   {"boxes":[{"pages":[["To {partner}"]],"speaker":"Screen","text":"To {partner}"}],"container":"trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_for:1","kind":"screen","line":15,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"To {partner}","text_hash":"268dbe2b2edf"},
   {"boxes":[{"pages":[["{partner} offers","{theirs}"]],"speaker":"Screen","text":"{partner} offers {theirs}"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:0","kind":"screen","line":24,"placeholders":[{"name":"partner","spec":"%s"},{"name":"theirs","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{partner} offers {theirs}","text_hash":"aa2ded745d09"},
   {"boxes":[{"pages":[["Spares that fit:","{trade_want}"]],"speaker":"Screen","text":"Spares that fit: {trade_want}"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:1","kind":"screen","line":25,"placeholders":[{"name":"trade_want","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Spares that fit: {trade_want}","text_hash":"dfb5767e0147"},
-  {"boxes":[{"pages":[["Spares: the copies","your folders don't","hold"]],"speaker":"Screen","text":"Spares: the copies your folders don't hold"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:2","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"Spares: the copies your folders don't hold","text_hash":"d067c65b7fdd"},
-  {"boxes":[{"pages":[["Chip trade"]],"speaker":"Screen","text":"Chip trade"}],"container":"trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_title:0","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"Chip trade","text_hash":"f78edf56bf5d"},
-  {"boxes":[{"pages":[["With {partner}"]],"speaker":"Screen","text":"With {partner}"}],"container":"trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_with:0","kind":"screen","line":38,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"With {partner}","text_hash":"bdccbae2c456"},
-  {"boxes":[{"pages":[["No deal"]],"speaker":"Screen","text":"No deal"}],"container":"trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_no_deal:0","kind":"screen","line":44,"speaker":"Screen","speakers":["Screen"],"text":"No deal","text_hash":"af8502d2fabd"},
-  {"boxes":[{"pages":[["Deal!"]],"speaker":"Screen","text":"Deal!"}],"container":"trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal:0","kind":"screen","line":45,"speaker":"Screen","speakers":["Screen"],"text":"Deal!","text_hash":"8636d76f5a37"},
-  {"boxes":[{"pages":[["CALL IT OFF"]],"speaker":"Screen","text":"CALL IT OFF"}],"container":"trade_text_key_call_off","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_key_call_off:0","kind":"screen","line":47,"speaker":"Screen","speakers":["Screen"],"text":"CALL IT OFF","text_hash":"cf9a3c5bf2e1"},
-  {"boxes":[{"pages":[["Waiting on","{partner}..."]],"speaker":"Screen","text":"Waiting on {partner}..."}],"container":"trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_waiting:0","kind":"screen","line":52,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Waiting on {partner}...","text_hash":"33a74eaddafa"},
-  {"boxes":[{"pages":[["Traded!"]],"speaker":"Screen","text":"Traded!"}],"container":"trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_traded:0","kind":"screen","line":56,"speaker":"Screen","speakers":["Screen"],"text":"Traded!","text_hash":"7ce0af01c7e6"},
-  {"boxes":[{"pages":[["Yours once you're","home"]],"speaker":"Screen","text":"Yours once you're home"}],"container":"trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_home:0","kind":"screen","line":57,"speaker":"Screen","speakers":["Screen"],"text":"Yours once you're home","text_hash":"4055fa7172ad"},
+  {"boxes":[{"pages":[["Chip trade"]],"speaker":"Screen","text":"Chip trade"}],"container":"trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_title:0","kind":"screen","line":31,"speaker":"Screen","speakers":["Screen"],"text":"Chip trade","text_hash":"f78edf56bf5d"},
+  {"boxes":[{"pages":[["With {partner}"]],"speaker":"Screen","text":"With {partner}"}],"container":"trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_with:0","kind":"screen","line":35,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"With {partner}","text_hash":"bdccbae2c456"},
+  {"boxes":[{"pages":[["No deal"]],"speaker":"Screen","text":"No deal"}],"container":"trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_no_deal:0","kind":"screen","line":41,"speaker":"Screen","speakers":["Screen"],"text":"No deal","text_hash":"af8502d2fabd"},
+  {"boxes":[{"pages":[["Deal!"]],"speaker":"Screen","text":"Deal!"}],"container":"trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal:0","kind":"screen","line":42,"speaker":"Screen","speakers":["Screen"],"text":"Deal!","text_hash":"8636d76f5a37"},
+  {"boxes":[{"pages":[["Waiting on","{partner}..."]],"speaker":"Screen","text":"Waiting on {partner}..."}],"container":"trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_waiting:0","kind":"screen","line":46,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Waiting on {partner}...","text_hash":"33a74eaddafa"},
+  {"boxes":[{"pages":[["Traded!"]],"speaker":"Screen","text":"Traded!"}],"container":"trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_traded:0","kind":"screen","line":50,"speaker":"Screen","speakers":["Screen"],"text":"Traded!","text_hash":"7ce0af01c7e6"},
+  {"boxes":[{"pages":[["Yours once you're","home"]],"speaker":"Screen","text":"Yours once you're home"}],"container":"trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_home:0","kind":"screen","line":51,"speaker":"Screen","speakers":["Screen"],"text":"Yours once you're home","text_hash":"4055fa7172ad"},
   {"boxes":[{"pages":[["Offer a chip"]],"speaker":"MegaMan","text":"Offer a chip"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Offer a chip","text_hash":"c94fb33483c0"},
   {"boxes":[{"pages":[["Trade board"]],"speaker":"MegaMan","text":"Trade board"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Trade board","text_hash":"e69de031b802"},
   {"boxes":[{"pages":[["How it works"]],"speaker":"MegaMan","text":"How it works"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:2","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"How it works","text_hash":"1dd6a17cb403"},

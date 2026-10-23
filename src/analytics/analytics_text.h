@@ -17,7 +17,6 @@ typedef enum {
 	AW_ROW,          /* the controls screen's row */
 	AW_ON, AW_OFF,
 	AW_ROW_NOTE,     /* its note */
-	AW_TAP,          /* a phone's hint under the question */
 	AW_COUNT
 } AnalyticsWord;
 const char *analytics_word(AnalyticsWord w);
@@ -25,9 +24,6 @@ const char *analytics_word(AnalyticsWord w);
 /* Under the question: where it is changed later (Options, on the title's
  * menu and the PET's) */
 const char *analytics_later(void);
-/* The keys' line under it: "J: choose   K: no" at the first start, where
- * B answers no; "K: back" asked again, where B leaves the answer be */
-void analytics_keys(const char *a, const char *b, bool first, char *out, size_t n);
 /* settings.ini's lines before the statistics line: what it is */
 const char *analytics_setting_note(void);
 

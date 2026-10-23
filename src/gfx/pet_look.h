@@ -79,6 +79,15 @@ void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill);
 /* The cursor: an orange arrow pointing right, 9 x 10 from (x, y) */
 #define LOOK_CURSOR_W 9
 void look_cursor(int x, int y);
+/* The choice's cursor, BN6's green triangle before Yes and No (and
+ * NaviCust's RUN!): 9 x 14 from (x, y), its shade on a page */
+#define LOOK_CHOICE_W 9
+void look_choice(int x, int y);
+/* A page's arrow, BN6's green one at a window band's end where L or R
+ * turns to another page (the Library's ▶, the folder editor's Pack):
+ * 8 x 8 from (x, y), pointing right or left */
+#define LOOK_ARROW_W 8
+void look_arrow(int x, int y, bool right);
 
 /* Small capitals, 5 rows (BN6's labels: INFORMATION, START:SORT), `shade`
  * a pixel right and below (alpha 0: none) */

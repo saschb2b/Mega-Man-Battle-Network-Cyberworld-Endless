@@ -92,10 +92,6 @@ const char *const jukebox_mode_names[3] = { "Repeat", "In order", "Shuffle" };
 const char jukebox_title[] = "Jukebox";
 const char jukebox_now_label[] = "NOW PLAYING";
 const char jukebox_idle_label[] = "READY";
-const char jukebox_pick_hint[] = "Pick a song and press A.";
-const char jukebox_key_play[] = "Play";
-const char jukebox_key_back[] = "Back";
-const char jukebox_key_section[] = "Section";
 
 void jukebox_number_words(char *out, int n, int song) { snprintf(out, (size_t)n, "No. %02X", song); }
 

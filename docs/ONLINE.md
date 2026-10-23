@@ -285,9 +285,10 @@ the server has welcomed the visit:
   snapshots come 20 times a second, PONGs every two) is **quiet**: the
   game's core holds still (`online_visit_waiting`, in the frame's place,
   as a NetBattle holds it), and the wait is drawn over the Square, dimmed:
-  a PET panel in the NetPass's colours, "Net Square" with "Link lost" in
-  its slot, a signal searching, "Reconnecting...", "YOUR SPOT IN THE SQUARE
-  IS KEPT", from five seconds on a bar of the time left, and B "GO HOME".
+  a PET panel in BN6's PET look, "Net Square" on its band with B:GO HOME
+  at the band's end (docs/UI.md), a signal searching, "Reconnecting...",
+  "YOUR SPOT IN THE SQUARE IS KEPT", from five seconds on a bar of the
+  time left.
   A link that speaks again within its limit goes on with nothing lost:
   "Back online!" a moment in the band, and play goes on;
 - a link silent past 8 seconds, closed, or broken **without the

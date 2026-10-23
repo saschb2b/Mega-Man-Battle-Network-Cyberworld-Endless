@@ -23,13 +23,10 @@ const char *trade_text_list_note(int purpose, int want, const char *partner, con
 	static char s[96];
 	if (purpose == TRADE_FOR_ANSWER && theirs && *theirs) snprintf(s, sizeof s, "%s offers %s", partner, theirs);
 	else if (want >= 0) snprintf(s, sizeof s, "Spares that fit: %s", trade_want(want));
-	else snprintf(s, sizeof s, "Spares: the copies your folders don't hold");
+	else s[0] = 0;
 	return s;
 }
 
-const char trade_text_key_pick[] = "PICK";
-const char trade_text_key_back[] = "BACK";
-const char trade_text_key_sort[] = "SORT";
 
 const char trade_text_deal_title[] = "Chip trade";
 
@@ -43,9 +40,6 @@ const char trade_text_you[] = "YOU";
 const char trade_text_them[] = "THEM";
 const char trade_text_no_deal[] = "No deal";
 const char trade_text_deal[] = "Deal!";
-const char trade_text_key_choose[] = "CHOOSE";
-const char trade_text_key_call_off[] = "CALL IT OFF";
-const char trade_text_key_ok[] = "OK";
 
 const char *trade_text_waiting(const char *partner) {
 	static char s[48];

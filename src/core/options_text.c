@@ -2,7 +2,6 @@
  * sets, and the choices as docs/GUIDE.md's Screen and Sound say them. */
 #include "options_text.h"
 
-#include <stdio.h>
 
 /* (in OptionsWord's order, its name beside each) */
 static const char *const words[] = {
@@ -19,7 +18,6 @@ static const char *const words[] = {
 	"As a GBA plays it: BN6's own mix, crisp and bright",   /* OW_GBA_NOTE */
 	"Soft",   /* OW_SOFT */
 	"The Legacy Collection's balance: softer highs, less deep bass",   /* OW_SOFT_NOTE */
-	"Tap a line to choose it",   /* OW_TAP */
 	"Display",   /* OW_DISPLAY */
 	"How the picture fills the screen",   /* OW_DISPLAY_NOTE */
 	"Fullscreen",   /* OW_FULLSCREEN */
@@ -43,10 +41,6 @@ static const char *const words[] = {
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
 const char *options_word(OptionsWord w) { return (unsigned)w < OW_COUNT ? words[w] : ""; }
-
-void options_keys(const char *a, const char *b, bool change, char *out, size_t n) {
-	snprintf(out, n, "%s: %s  %s: back", a, change ? "change" : "choose", b);
-}
 
 const char *options_sound_note(void) {
 	return "\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n"

@@ -2,8 +2,9 @@
  * and feedback, transitions): a wait over the frozen world rather than a
  * screen of its own, so the player sees where he will be put back; the time
  * left only past a few seconds, as a load's bar is; the way out (B) always
- * shown, so being held is never helplessness; and the return said in a
- * moment, a band, not a dialog, as a player on a bad link may see it often. */
+ * shown, the one key's hint at the band's end as E-Mail's START:SORT, so
+ * being held is never helplessness; and the return said in a moment, a
+ * band, not a dialog, as a player on a bad link may see it often. */
 #include "reconnect_draw.h"
 
 #include "gfx.h"
@@ -14,7 +15,7 @@
 #define W 240
 #define H 160
 #define PANEL_W 200
-#define PANEL_H 92
+#define PANEL_H 80
 #define PANEL_X ((W - PANEL_W) / 2)
 #define PANEL_Y 34
 #define SHADE    rgba(0, 18, 32, 150)       /* the Square under the wait, dimmed */
@@ -56,11 +57,10 @@ void reconnect_draw(int x, int y, const ReconnectView *v) {
 	fill_rect(x, y, W, H, SHADE);
 	int px = x + PANEL_X, py = y + PANEL_Y;
 	look_screen(px, py, PANEL_W, PANEL_H, reconnect_text_title);
-	look_band_note(px, py, PANEL_W, reconnect_text_lost, LOOK_EDGE_HI);
+	look_band_hint(px, py, PANEL_W, "B", reconnect_text_key_home);
 	SDL_Rect f = look_window(px + 7, py + 18, PANEL_W - 14, 52, 0, false);
 	searching(f.x + 4, f.y + 2, v->t);
 	look_text(f.x + 34, f.y + 1, reconnect_text_trying((int)(v->t / 400 % 4)), LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	minifont_draw(f.x + 34, f.y + 15, reconnect_text_kept, LOOK_DIM, 1);
 	if (v->elapsed >= BAR_AFTER_MS) time_left(f.x + 4, f.y + 29, f.w - 8, v);
-	look_hint(px + 10, py + 75, "B", reconnect_text_key_home);
 }

@@ -1,7 +1,7 @@
 /* analytics_ask.h. The panel's layout from the picture's corner: the
  * heading, the question, what is sent and what never is (wrapped as it
- * opens), Yes and No, and under them where it is changed and the keys or
- * a phone's hint. */
+ * opens), Yes and No as BN6's choices (its green triangle, its chat
+ * font), and under them where it is changed. */
 #include "analytics_ask.h"
 
 #include <stdio.h>
@@ -10,9 +10,7 @@
 #include "analytics.h"
 #include "analytics_text.h"
 #include "audio.h"
-#include "controls.h"
 #include "gfx.h"
-#include "minifont.h"
 #include "pet_panel.h"
 #include "platform.h"
 #include "touch.h"
@@ -108,35 +106,21 @@ bool analytics_ask_back(void) {
 }
 
 void analytics_ask_tap(int x, int y) {
-	if (!K.open || K.t < ASK_WAIT || y < ASK_CHOICE_Y - 4 || y >= ASK_CHOICE_Y + TEXT_H + 2) return;
+	if (!K.open || K.t < ASK_WAIT || y < ASK_CHOICE_Y - 4 || y >= ASK_CHOICE_Y + LOOK_TEXT_H + 2) return;
 	int cx = CORE_W / 2;
 	if (x >= cx - ASK_CHOICE_DX - 28 && x < cx - 8) answer(true);
 	else if (x >= cx + 8 && x < cx + ASK_CHOICE_DX + 28) answer(false);
 }
 
-/* Yes and No, the chosen one gold with the PET's arrow before it */
+/* Yes and No as BN6 asks (the Chip Trader's "Insert 3 BtlChips?"): its
+ * chat font, the green triangle before the one chosen, none in colour */
 static void choices_draw(int cx, int y) {
 	const char *w[2] = { analytics_word(AW_YES), analytics_word(AW_NO) };
 	for (int i = 0; i < 2; ++i) {
-		bool on = K.yes == (i == 0);
 		int x = cx + (i ? ASK_CHOICE_DX : -ASK_CHOICE_DX);
-		text_draw(x, y, w[i], on ? LOOK_GOLD : LOOK_TEXT, TEXT_CENTER);
-		if (on && K.t >= ASK_WAIT) look_cursor(x - text_width(w[i]) / 2 - 12, y + 2);
+		look_text(x, y, w[i], LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
+		if (K.yes == (i == 0) && K.t >= ASK_WAIT) look_choice(x - look_text_width(w[i]) / 2 - LOOK_CHOICE_W - 2, y - 1);
 	}
-}
-
-/* Under them: where it is changed later, then the keys, or a phone's tap */
-static void hints_draw(int cx, int y) {
-	char s[96], a[24];
-	pet_panel_note(cx, y, analytics_later(), LOOK_PAGE);
-	if (touch_shown()) {
-		pet_panel_note(cx, y + 9, analytics_word(AW_TAP), LOOK_PAGE);
-		return;
-	}
-	/* (controls_word keeps a keyboard's word in one buffer: the first copied) */
-	snprintf(a, sizeof a, "%s", controls_word(BTN_A));
-	analytics_keys(a, controls_word(BTN_B), K.first, s, sizeof s);
-	pet_panel_note(cx, y + 9, s, LOOK_PAGE);
 }
 
 void analytics_ask_draw(void) {
@@ -148,5 +132,5 @@ void analytics_ask_draw(void) {
 	look_window(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12, 0, false);
 	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
-	hints_draw(cx, y0 + 138);
+	pet_panel_note(cx, y0 + 141, analytics_later(), LOOK_PAGE);
 }

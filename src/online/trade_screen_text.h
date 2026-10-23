@@ -14,26 +14,19 @@ const char *trade_text_list_for(int purpose, const char *partner);
 /* ... the list's head, its sort's name (TRADE_SORT_*) */
 extern const char trade_text_spares[];
 extern const char *const trade_text_sorts[TRADE_SORT_KEYS];
-/* ... the note under it: what is listed (every spare, or those that meet
- * `want`, WANT_* of online_board.h, -1 none), or for an answer what
- * `partner` offers (`theirs`, the chip's name and code) */
+/* ... the note under it: the spares that meet `want` (WANT_* of
+ * online_board.h), or for an answer what `partner` offers (`theirs`, the
+ * chip's name and code); "" when the list is every spare */
 const char *trade_text_list_note(int purpose, int want, const char *partner, const char *theirs);
-/* ... its keys */
-extern const char trade_text_key_pick[];
-extern const char trade_text_key_back[];
-extern const char trade_text_key_sort[];
 
 /* The chip trade: its heading, the slot beside it, the two cards' labels */
 extern const char trade_text_deal_title[];
 const char *trade_text_deal_with(const char *partner);
 extern const char trade_text_you[];
 extern const char trade_text_them[];
-/* ... its two buttons (the cursor starts on No deal), its keys */
+/* ... its two buttons (the cursor starts on No deal) */
 extern const char trade_text_no_deal[];
 extern const char trade_text_deal[];
-extern const char trade_text_key_choose[];
-extern const char trade_text_key_call_off[];
-extern const char trade_text_key_ok[];
 /* ... waiting on the other's Deal, and done */
 const char *trade_text_waiting(const char *partner);
 extern const char trade_text_traded[];

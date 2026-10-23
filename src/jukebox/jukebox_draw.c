@@ -6,7 +6,6 @@
 
 #include "gfx.h"
 #include "jukebox_text.h"
-#include "minifont.h"
 #include "pet_look.h"
 
 #define W 240
@@ -14,19 +13,17 @@
 #define LIGHT_OFF rgba(10, 58, 80, 255)
 #define NONE (SDL_Color){ 0, 0, 0, 0 }
 
-/* BN6's KeyItem screen's frame: the card of the song playing on the
- * left, the section's songs in a window on the right (its name in the
- * window's band over them), the keys in an information strip under them */
+/* BN6's Library's frame: the card of the song playing on the left, the
+ * section's songs in a window on the right, its name in the window's
+ * band between the page arrows, both to the screen's foot */
 #define CARD_X 7
 #define BODY_Y 18
 #define CARD_W 88
-#define BODY_H 118
+#define BODY_H 134
 #define LIST_X 98
 #define LIST_W 135
 #define LIST_TOP 12   /* the section's name over the songs */
 #define ROW_H 16
-#define BAR_Y 139
-#define BAR_H 15
 #define LIGHT_SEGS 8
 #define LIGHT_SEG_H 3
 
@@ -45,11 +42,6 @@ static void note(int x, int y, SDL_Color c) {
 		for (int i = 0; rows[r][i] && n < 30; ++i)
 			if (rows[r][i] == '#') px[n++] = (SDL_Rect){ x + i, y + r, 1, 1 };
 	fill_rects(px, n, c);
-}
-
-/* a triangle pointing left or right, 4 x 7 from (x, y) */
-static void arrow(int x, int y, bool right, SDL_Color c) {
-	for (int k = 0; k < 4; ++k) fill_rect(right ? x + k : x + 3 - k, y + k, 1, 7 - 2 * k, c);
 }
 
 /* ---- the band ---- */
@@ -91,7 +83,6 @@ static void card(int x, int y, const JukeView *v) {
 	const char *tag = jukebox_game_tags[game ? 1 : 0];
 	int ly = f.y + 42;
 	if (!on) {
-		look_wrapped(jukebox_pick_hint, fx, f.y + 12, fw, 3, LOOK_TEXT, LOOK_SHADE);
 		lights(fx, ly + 12, fw, v);
 		return;
 	}
@@ -137,9 +128,11 @@ static void list_panel(int x, int y, const JukeView *v) {
 	char name[40];
 	snprintf(name, sizeof name, "%s %s", jukebox_game_tags[v->game ? 1 : 0], v->section ? v->section : "");
 	look_text(x + LIST_X + LIST_W / 2, y + BODY_Y + 3, name, LOOK_TEXT, LOOK_EDGE_LO, TEXT_CENTER);
-	bool turns = v->sections > 1;
-	arrow(x + LIST_X + 6, y + BODY_Y + 7, false, turns ? LOOK_TEXT : LOOK_EDGE_HI);
-	arrow(x + LIST_X + LIST_W - 10, y + BODY_Y + 7, true, turns ? LOOK_TEXT : LOOK_EDGE_HI);
+	/* (the Library's page arrows, where L and R turn to another section) */
+	if (v->sections > 1) {
+		look_arrow(x + LIST_X + 4, y + BODY_Y + 5, false);
+		look_arrow(x + LIST_X + LIST_W - 12, y + BODY_Y + 5, true);
+	}
 	for (int i = 0; i < JUKE_ROWS && v->top + i < v->n; ++i) {
 		SDL_Rect r = jukebox_row_rect(i);
 		int song = v->rows[v->top + i];
@@ -148,31 +141,8 @@ static void list_panel(int x, int y, const JukeView *v) {
 	if (bar) look_scroll((SDL_Rect){ x + LIST_X, y + BODY_Y, LIST_W, BODY_H }, LIST_TOP, v->top, JUKE_ROWS, v->n);
 }
 
-/* ---- the keys ---- */
-
-/* (START's hint is the band's, with the mode it turns) */
-static const char *const caps[3] = { "A", "B", "L/R" };
-
-static const char *key_word(int k) { return k == 0 ? jukebox_key_play : k == 1 ? jukebox_key_back : jukebox_key_section; }
-
-/* the keys laid out along the strip, from the picture's left; START's the band's hint */
-SDL_Rect jukebox_key_rect(int k) {
-	int x = CARD_X + 6;
-	for (int i = 0; i < 3; ++i) {
-		int w = look_hint_width(caps[i], key_word(i));
-		if (i == k) return (SDL_Rect){ x - 3, BAR_Y, w + 6, BAR_H };
-		x += w + 14;
-	}
-	return (SDL_Rect){ 0, 0, 0, 0 };
-}
-
-static void keys_bar(int x, int y) {
-	for (int k = 0; k < 3; ++k) look_hint(x + jukebox_key_rect(k).x + 3, y + BAR_Y + 4, caps[k], key_word(k));
-}
-
 void jukebox_draw_view(int x, int y, const JukeView *v) {
 	band(x, y, v);
 	card(x + CARD_X, y + BODY_Y, v);
 	list_panel(x, y, v);
-	keys_bar(x, y);
 }

@@ -221,6 +221,31 @@ void look_cursor(int x, int y) {
 	}
 }
 
+/* `rows` of a small picture from (x, y), mirrored when `flip`: each letter
+ * a colour of `pal` ('a' its first), '.' nothing */
+static void picture(int x, int y, const char *const *rows, int n, const SDL_Color *pal, bool flip) {
+	for (int r = 0; r < n; ++r) {
+		int w = (int)strlen(rows[r]);
+		for (int i = 0; i < w; ++i)
+			if (rows[r][i] != '.') fill_rect(flip ? x + 7 - i : x + i, y + r, 1, 1, pal[rows[r][i] - 'a']);
+	}
+}
+
+void look_choice(int x, int y) {
+	/* (the Chip Trader's Yes and No: an outline, its light edge and a glint, the body, a dark shade under its right) */
+	static const char *const rows[14] = { "aa", "aba", "aeba", "aecba", "abccba", "abcccba", "abccccba", "abccccadd", "abcccadd",
+		"abccadd", "abcadd", "abadd", "aadd", ".dd" };
+	static const SDL_Color pal[5] = { { 33, 165, 33, 255 }, { 115, 255, 74, 255 }, { 57, 255, 0, 255 }, { 49, 57, 82, 255 }, { 247, 255, 247, 255 } };
+	picture(x, y, rows, 14, pal, false);
+}
+
+void look_arrow(int x, int y, bool right) {
+	/* (the Library's: lit along its top and left, darker along its point's lower edges, a shade under them) */
+	static const char *const rows[8] = { "aaaab", "accccb", "acccccb", "accccccd", "acccccde", "accccde", "cdddde", ".eeee" };
+	static const SDL_Color pal[5] = { { 189, 231, 132, 255 }, { 140, 231, 57, 255 }, { 74, 198, 16, 255 }, { 8, 165, 0, 255 }, { 16, 74, 74, 255 } };
+	picture(x, y, rows, 8, pal, !right);
+}
+
 /* ---- the capitals ---- */
 
 int look_caps_width(const char *s) {

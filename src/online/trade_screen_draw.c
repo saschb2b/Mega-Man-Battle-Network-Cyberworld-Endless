@@ -14,16 +14,16 @@
 #define W 240
 #define GOLD_EDGE rgba(198, 90, 0, 255)
 
-/* the spares list: the card on the left, the list on the right, the note and keys under them */
+/* the spares list: the card on the left, the list on the right, a note under them where there is one */
 #define CARD_X 7
 #define BODY_Y 18
 #define CARD_W 104
-#define BODY_H 118
+#define BODY_H 128
 #define LIST_X 114
 #define LIST_W 119
 #define LIST_TOP 11   /* the count and the sort over the rows */
 #define ROW_H 16
-#define NOTE_Y 139
+#define NOTE_Y 149
 
 /* the chip trade: two cards, the arrows between */
 #define DEAL_W 98
@@ -34,7 +34,6 @@
 #define BUTTON_Y 123
 #define BUTTON_W 78
 #define BUTTON_H 19
-#define KEYS_Y 146
 
 static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + code); }
 
@@ -42,12 +41,6 @@ static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + cod
 static void band(int x, int y, const char *title, const char *right) {
 	look_screen(x, y, W, 160, title);
 	look_band_note(x, y, W, right, LOOK_PAGE);
-}
-
-/* a key's hint (BN6's "START:SORT"), then the x after it */
-static int key(int x, int y, const char *cap, const char *what) {
-	look_hint(x, y, cap, what);
-	return x + look_hint_width(cap, what) + 10;
 }
 
 /* a line of small letters on the body, its shade under it */
@@ -126,10 +119,8 @@ static void list_bar(int x, int y, const TradeScreenView *v) {
 		chips_name(v->theirs.id, name, sizeof name);
 		snprintf(theirs, sizeof theirs, "%s %c", name, code_char(v->theirs.code));
 	}
+	/* (no keys: BN6's folder editor sorts on START with no word of it, its sort shown over the list) */
 	body_note(x + 9, y + NOTE_Y, trade_text_list_note(v->purpose, v->want, v->partner, theirs), false);
-	int kx = key(x + 9, y + KEYS_Y + 1, "A", trade_text_key_pick);
-	kx = key(kx, y + KEYS_Y + 1, "B", trade_text_key_back);
-	if (v->n > 1) key(kx, y + KEYS_Y + 1, "START", trade_text_key_sort);
 }
 
 void trade_screen_draw_list(int x, int y, const TradeScreenView *v) {
@@ -210,21 +201,17 @@ static void cards(int x, int y, const TradeScreenView *v) {
 	deal_card(lx + (rx - lx) * e / 1024, cy - lift, v->mine, PET_CYAN);
 }
 
-/* under the cards: the buttons, the wait, or the trade done; its keys */
+/* under the cards: the buttons, the wait, or the trade done (A and B as
+ * everywhere in BN6: no keys shown) */
 static void foot(int x, int y, const TradeScreenView *v) {
-	int ky = y + KEYS_Y + 1;
 	if (v->stage == TRADE_ASK) {
 		button(x + W / 2 - 4 - BUTTON_W, y + BUTTON_Y, trade_text_no_deal, !v->cursor);
 		button(x + W / 2 + 4, y + BUTTON_Y, trade_text_deal, v->cursor);
-		int kx = key(x + 10, ky, "A", trade_text_key_choose);
-		key(kx, ky, "B", trade_text_no_deal);
 	} else if (v->stage == TRADE_WAIT) {
 		look_text(x + W / 2, y + BUTTON_Y + 3, trade_text_waiting(v->partner), LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
-		key(x + 10, ky, "B", trade_text_key_call_off);
 	} else if (v->stage == TRADE_SWAPPED) {
 		text_draw(x + W / 2, y + BUTTON_Y - 2, trade_text_traded, LOOK_GOLD, TEXT_CENTER);
 		body_note(x + W / 2, y + BUTTON_Y + 12, trade_text_home, true);
-		key(x + 10, ky, "A", trade_text_key_ok);
 	}
 }
 

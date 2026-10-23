@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- **The PET's screens say as little as BN6's.** BN6's own screens never
+  show what A and B do, turn pages under small green arrows, and ask Yes
+  or No behind a green triangle. The game's own screens now do the same:
+  the key lines under the Jukebox, Options, the statistics question,
+  Trade Central and the emote strip are gone, the Jukebox shows a song
+  more, Options' Display and Audio take the band's name as the folder
+  editor takes CHIP FOLDER's, the reconnect wait keeps one hint (B:GO
+  HOME) on its band, and the second screen names HP, ZENNY and BUGFRAGS
+  as the PET menu does. The rules, measured from BN6's screens, are in
+  docs/UI.md.
+
 ## 0.14.1 (2026-10-23)
 
 - **The PET's screens look like BN6's own.** The screens the game adds

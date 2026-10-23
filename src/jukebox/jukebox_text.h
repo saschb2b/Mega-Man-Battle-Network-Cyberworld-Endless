@@ -30,8 +30,7 @@ extern const char *const jukebox_game_tags[2];
 extern const char *const jukebox_mode_names[3];
 
 extern const char jukebox_title[];
-extern const char jukebox_now_label[], jukebox_idle_label[], jukebox_pick_hint[];
-extern const char jukebox_key_play[], jukebox_key_back[], jukebox_key_section[];
+extern const char jukebox_now_label[], jukebox_idle_label[];
 /* "No. 13" as the card shows a song's number */
 void jukebox_number_words(char *out, int n, int song);
 /* how often it has gone round ("Once round", "3 times round"), "" for none */

@@ -1,7 +1,8 @@
 /* second_frame.h. After BN6's own PET screens (pet_look.h): the dark
  * header band with the screen's name in heavy capitals on its left, its
  * stripes, and the place in small capitals at its right; a strip of slots
- * for HP, Zenny and BugFrags, as BN5 DS's PET carries them in its header;
+ * for HP, Zenny and BugFrags, as BN5 DS's PET carries them in its header,
+ * named in capitals as BN6's PET menu names them;
  * the body in a window's raised cyan edge. */
 #include "second_frame.h"
 
@@ -41,19 +42,19 @@ static void place(int w, const char *area, const char *layer) {
 	look_caps(x - gap - look_caps_width(area), HEAD_H - LOOK_CAPS_H - 2, area, LOOK_PAGE, LOOK_GREEN_LO);
 }
 
-/* the strip: a slot each for HP, Zenny and BugFrags, its name in gold on
- * its left and its value in white on its right */
+/* the strip: a slot each for HP, Zenny and BugFrags, its name in the PET
+ * menu's heavy white capitals on its left and its value in white on its right */
 static void strip(int w) {
 	char v[3][16];
 	snprintf(v[0], sizeof v[0], "%d/%d", S2.hp, S2.max_hp);
 	snprintf(v[1], sizeof v[1], "%uz", S2.zenny);
 	snprintf(v[2], sizeof v[2], "%u", S2.bugfrags);
-	static const char *const name[3] = { "HP", "Zenny", "BugFrags" };
+	static const char *const name[3] = { "HP", "ZENNY", "BUGFRAGS" };
 	int sw = (w - 16) / 3;
 	for (int i = 0; i < 3; ++i) {
 		int x = 4 + i * (sw + 4);
 		second_slot(x, STRIP_Y, sw, STRIP_H);
-		text_draw(x + 5, STRIP_Y + 2, name[i], PET_GOLD, TEXT_LEFT);
+		look_title(x + 5, STRIP_Y + (STRIP_H - 7) / 2, name[i], LOOK_PAGE);
 		text_draw(x + sw - 5, STRIP_Y + 2, v[i], PET_WHITE, TEXT_RIGHT);
 	}
 }
