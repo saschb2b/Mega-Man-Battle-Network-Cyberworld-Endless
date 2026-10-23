@@ -61,6 +61,12 @@
 #define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
 #define BN5_LIB_BREATH       0x08614CF0u /* palette 12 (the BonusPanel's): six palettes 0x20 apart stepped there and back, 12 frames */
                                          /* ... each (8 at the last); a palette's working copy at 0x03003960 + 0x20 n, then 0x03003B60 + 0x20 n */
+#define BN5_LIB_ANIMS        0x08073E48u /* the mission maps' GFXAnim lists (group 0x86's, a u32 a map; LoadGFXAnims' table 0x08031468 */
+                                         /* ... entry 6, its literal at 0x08073E44): 0x86:00's at 0x08073E94 runs palettes 9-12 */
+#define BN5_LIB_ANIM_DARK    0x08073B20u /* ... palette 9's script (to 0x03003A80, 0x20 bytes; then palette and delay pairs, 1 loops) */
+#define BN5_LIB_ANIM_HOLE    0x08073B60u /* ... palette 10's (to 0x03003AA0) */
+#define BN5_LIB_ANIM_PULSE   0x08073BA0u /* ... palette 11's (to 0x03003AC0) */
+#define BN5_LIB_ANIM_BREATH  0x08073BE0u /* ... palette 12's (to 0x03003AE0); the list also holds 0x08073AB8 and 0x0807FB8C */
 #define BN5_LIB_BLINK        4           /* a freed panel's look toggles between its old kind and clean every this many frames, */
 #define BN5_LIB_BLINKS       14          /* ... this many times, once the board has faded back in (27 frames), then stays clean */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */

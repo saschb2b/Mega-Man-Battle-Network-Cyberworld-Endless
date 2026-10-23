@@ -249,6 +249,11 @@ liberation and an item's find; the recordings are in the pull request):
   over three frames and come back, 216 frames round; 10 steps there and
   back over four, 20 frames a step; the barriers' (11) glint every 132
   frames; the BonusPanel's (12) breathes over six, 12 frames a step.
+  They are the mission map's own GFXAnim scripts (`BN5_LIB_ANIMS`), the
+  engine BN6 runs too, so in BN6 they run as BN5's own scripts copied,
+  in place of the host map's: a host map's script left running writes
+  its colours into the same banks every few frames and flickers (PR
+  #202's first walk: Central Area 1's bank 9 cycle, every 16 frames).
 - **The freed panel** blinks once the board has faded back in: its
   look toggles between its old kind and clean every 4 frames, 14 times,
   then stays clean.
