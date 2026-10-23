@@ -10,6 +10,7 @@
 #include "online_text.h"
 #include "pixfont.h"
 #include "platform.h"
+#include "pet_look.h"
 #include "second_frame.h"
 #include "text_input.h"
 
@@ -157,17 +158,17 @@ void online_field_draw(void) {
 	if (!F.shown) return;
 	int x0 = left(), y0 = top();
 	fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 160));
-	fill_rect(x0, y0, 240, 160, PET_LINE);
-	fill_rect(x0 + 1, y0 + 1, 238, 158, PET_EXIT);
-	pixfont_draw(x0 + 8, y0 + 6, F.kind == FIELD_NAME ? online_field_name_title : online_field_address_title, PET_GOLD, PET_EXIT, PIXFONT_LEFT, 1);
-	fill_rect(x0 + 8, y0 + 18, 224, 15, PET_SLOT);
+	/* (BN6's PET screen: pet_look.h) */
+	look_screen(x0, y0, 240, 160, F.kind == FIELD_NAME ? online_field_name_title : online_field_address_title);
+	look_box(x0 + 7, y0 + 16, 226, 19, PET_SLOT);
 	const char *shown = F.text;
 	while (*shown && pixfont_width(shown, 1) > 214) ++shown;
 	pixfont_draw(x0 + 12, y0 + 22, shown, PET_CYAN_HI, PET_EXIT, PIXFONT_LEFT, 1);
 	int caret = x0 + 13 + pixfont_width(shown, 1);
 	if (SDL_GetTicks() / 400 % 2) fill_rect(caret, y0 + 21, 1, 9, PET_WHITE);
 	const char *note = F.note ? F.note : F.kind == FIELD_NAME ? online_field_name_hint : online_field_address_hint;
-	minifont_draw(x0 + 8, y0 + 38, note, F.note ? PET_GOLD : PET_DIM, 1);
+	minifont_draw(x0 + 9, y0 + 39, note, LOOK_GREEN_LO, 1);
+	minifont_draw(x0 + 8, y0 + 38, note, F.note ? PET_GOLD : LOOK_PAGE, 1);
 	int gx = x0 + (240 - KEY_COLUMNS * KEY_W) / 2;
 	for (int i = 0; i < (int)strlen(keys); ++i) {
 		int kx = gx + i % KEY_COLUMNS * KEY_W, ky = y0 + GRID_Y + i / KEY_COLUMNS * KEY_H;
@@ -179,8 +180,10 @@ void online_field_draw(void) {
 	for (int i = 0; i < BUTTONS; ++i) {
 		int bx = x0 + 8 + i * 75;
 		bool on = F.key == KEY_COUNT + i;
-		fill_rect(bx, y0 + BUTTON_Y, 73, 14, on ? PET_GOLD : PET_NAVY);
+		if (on) fill_rect(bx, y0 + BUTTON_Y, 73, 14, PET_GOLD);
+		else look_box(bx, y0 + BUTTON_Y, 73, 14, LOOK_NAVY);
 		pixfont_draw(bx + 36, y0 + BUTTON_Y + 3, online_field_buttons[i], on ? PET_EXIT : PET_WHITE, PET_EXIT, PIXFONT_CENTER, 1);
 	}
-	minifont_draw_centered(x0 + 120, y0 + 146, online_field_keys_hint, PET_WHITE, 1);
+	minifont_draw_centered(x0 + 121, y0 + 147, online_field_keys_hint, LOOK_GREEN_LO, 1);
+	minifont_draw_centered(x0 + 120, y0 + 146, online_field_keys_hint, LOOK_PAGE, 1);
 }

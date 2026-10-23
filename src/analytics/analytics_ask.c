@@ -18,10 +18,11 @@
 #include "touch.h"
 
 #define ASK_WAIT 30          /* frames before it takes a press */
-#define ASK_TEXT_W (CORE_W - 24)
-#define ASK_BODY_Y 38
+#define ASK_TEXT_W (CORE_W - 28)
+#define ASK_WIN_Y 29
+#define ASK_BODY_Y (ASK_WIN_Y + LOOK_FRAME + 2)
 #define ASK_LINES 6
-#define ASK_CHOICE_Y 116
+#define ASK_CHOICE_Y 118
 #define ASK_CHOICE_DX 40     /* Yes and No either side of the middle */
 #define ASK_LINE 96
 
@@ -119,34 +120,33 @@ static void choices_draw(int cx, int y) {
 	for (int i = 0; i < 2; ++i) {
 		bool on = K.yes == (i == 0);
 		int x = cx + (i ? ASK_CHOICE_DX : -ASK_CHOICE_DX);
-		text_draw(x, y, w[i], on ? PET_GOLD : WHITE, TEXT_CENTER);
-		if (!on || K.t < ASK_WAIT) continue;
-		int ax = x - text_width(w[i]) / 2 - 10;
-		for (int k = 0; k < 4; ++k) fill_rect(ax + k, y + 2 + k, 1, 8 - 2 * k, PET_ORANGE);
+		text_draw(x, y, w[i], on ? LOOK_GOLD : LOOK_TEXT, TEXT_CENTER);
+		if (on && K.t >= ASK_WAIT) look_cursor(x - text_width(w[i]) / 2 - 12, y + 2);
 	}
 }
 
 /* Under them: where it is changed later, then the keys, or a phone's tap */
 static void hints_draw(int cx, int y) {
 	char s[96], a[24];
-	minifont_draw_centered(cx, y, analytics_later(), PET_DIM, 1);
+	pet_panel_note(cx, y, analytics_later(), LOOK_PAGE);
 	if (touch_shown()) {
-		minifont_draw_centered(cx, y + 9, analytics_word(AW_TAP), PET_DIM, 1);
+		pet_panel_note(cx, y + 9, analytics_word(AW_TAP), LOOK_PAGE);
 		return;
 	}
 	/* (controls_word keeps a keyboard's word in one buffer: the first copied) */
 	snprintf(a, sizeof a, "%s", controls_word(BTN_A));
 	analytics_keys(a, controls_word(BTN_B), K.first, s, sizeof s);
-	minifont_draw_centered(cx, y + 9, s, PET_DIM, 1);
+	pet_panel_note(cx, y + 9, s, LOOK_PAGE);
 }
 
 void analytics_ask_draw(void) {
 	if (!K.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
-	pet_panel_draw(x0, y0);
-	text_draw(cx, y0 + 8, analytics_word(AW_TITLE), PET_GOLD, TEXT_CENTER);
-	text_draw(cx, y0 + 22, analytics_word(AW_QUESTION), WHITE, TEXT_CENTER);
-	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], PET_SKY, TEXT_CENTER);
+	pet_panel_draw(x0, y0, analytics_word(AW_TITLE));
+	text_draw(cx, y0 + 16, analytics_word(AW_QUESTION), LOOK_PAGE, TEXT_CENTER);
+	/* (the body in the bold letters: the lists' thin ones are wider, and would take a line more than the window has) */
+	look_window(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12, 0, false);
+	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
-	hints_draw(cx, y0 + 136);
+	hints_draw(cx, y0 + 138);
 }

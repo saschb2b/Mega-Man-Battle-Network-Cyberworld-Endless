@@ -26,6 +26,7 @@
 
 /* The list's rows, then the bottom line's items */
 enum { ROW_PRESET, ROW_DPAD, ROW_A, ROW_B, ROW_L, ROW_R, ROW_START, ROW_SELECT, ROWS, ROW_BOTTOM = ROWS };
+#define ROWS_SHOWN 5   /* the list's rows in view at once, the rest a scroll away */
 enum { ITEM_SETALL, ITEM_DEFAULTS, ITEM_DONE, ITEMS };
 enum { TAB_PAD, TAB_KEYS };
 enum { SLOT_MAIN, SLOT_ALSO };
@@ -42,6 +43,7 @@ enum { ASK_NONE, ASK_SLOT, ASK_DPAD, ASK_ALL };
 typedef struct {
 	bool open;
 	int tab, row, col, item, t;
+	int top;                      /* the first row in view */
 	int ask, ask_gba, ask_slot, ask_step, ask_left, settle;
 	int confirm;
 	int family, style;            /* the pad shown: the one used last */

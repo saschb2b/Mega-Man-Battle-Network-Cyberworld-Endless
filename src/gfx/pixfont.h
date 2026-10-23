@@ -32,5 +32,8 @@ void pixfont_draw(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int
 /* Lines of `text` (newlines break one too) no wider than `w` pixels at
  * `scale`, at most `most`, each at most 95 characters: how many */
 int pixfont_wrap(const char *text, int w, int scale, char lines[][96], int most);
+/* The rows of `ch`'s letter (its '#' drawn, PIXFONT_H at most, NULL past
+ * its last), NULL for a space or a letter it lacks: its width */
+int pixfont_glyph(char ch, const char *const **rows);
 
 #endif

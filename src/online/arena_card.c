@@ -1,8 +1,6 @@
-/* The Arena's two PET screens (arena_card.h). After BN6's PET screens and
- * the project's PET panels (second_frame.c, launcher_draw.c): a dark
- * green band with the screen's name and BN6's three stripes, a slot at
- * its right, the body framed in the PET's cyan on navy, values on dark
- * slots, names in gold. */
+/* The Arena's two PET screens (arena_card.h), in BN6's PET screens' look
+ * (pet_look.h): the band with the screen's name and its note at the
+ * right, the body a window's navy field, values on slots, names in gold. */
 #include "arena_card.h"
 
 #include <stdio.h>
@@ -10,6 +8,7 @@
 #include "arena_text.h"
 #include "audio.h"
 #include "gfx.h"
+#include "pet_look.h"
 #include "pixfont.h"
 #include "platform.h"
 #include "second_frame.h"
@@ -19,28 +18,18 @@
 #define HEAD   18
 #define BODY_Y (HEAD + 4)
 #define INK    rgba(0, 49, 74, 255)   /* a shade under pixel letters */
-#define PLATE_W 104
+#define PLATE_W 100
 #define PLATE_H 70
 #define ROW_H   14
 #define COL0    150   /* the card's columns' centres: mine, his */
 #define COL1    204
 
-/* the band, the green round the body and the body's cyan edge on navy,
- * `place` on a slot at the band's right */
+/* the screen, its band with `place` as its note, the window whose field the card fills */
 static void frame(int x, int y, const char *place) {
-	fill_rect(x, y, W, H, PET_GREEN);
-	fill_rect(x, y, W, HEAD, PET_DARK);
-	fill_rect(x, y + HEAD, W, 1, PET_LINE);
-	text_draw(x + 6, y + 3, arena_title, PET_WHITE, TEXT_LEFT);
-	second_stripes(x + 12 + text_width(arena_title), y + 3);
-	int pw = text_width(place) + 12, px = x + W - 4 - pw;
-	second_slot(px, y + 2, pw, HEAD - 4);
-	text_draw(px + 6, y + 3, place, PET_CYAN_HI, TEXT_LEFT);
-	SDL_Rect b = { x + 4, y + BODY_Y, W - 8, H - BODY_Y - 4 };
-	SDL_Rect edge[4] = { { b.x - 2, b.y - 2, b.w + 4, 2 }, { b.x - 2, b.y + b.h, b.w + 4, 2 }, { b.x - 2, b.y, 2, b.h }, { b.x + b.w, b.y, 2, b.h } };
-	fill_rects(edge, 4, PET_CYAN);
-	fill_rect(b.x - 1, b.y - 1, b.w + 2, 1, PET_CYAN_HI);
-	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
+	look_screen(x, y, W, H, arena_title);
+	look_band_note(x, y, W, place, LOOK_PAGE);
+	/* (under the note's shade, as BN6's windows sit under its hints) */
+	look_window(x + 5, y + LOOK_BAND_H + 4, W - 10, H - LOOK_BAND_H - 4 - LOOK_RAIL - 1, 0, false);
 }
 
 /* a label in gold and its value in the engine's small letters, white, on one line w wide */
@@ -100,7 +89,7 @@ static void small_plate(int x, int y, const char *name, const OnlineLoadout *l, 
 static void way_four(int x, int y, const ArenaWayView *v) {
 	int py = y + BODY_Y + 6;
 	for (int k = 0; k < 4; ++k) {
-		int px = x + 8 + (k / 2) * (PLATE_W + 20), ky = py + (k % 2) * (SMALL_H + 34);
+		int px = x + 12 + (k / 2) * (PLATE_W + 16), ky = py + (k % 2) * (SMALL_H + 34);
 		small_plate(px, ky, v->names[k], v->loadouts[k], v->knowns[k], k == v->me);
 		side_wait(px, ky + SMALL_H + 3, v->waits[k], k == v->me && v->waits[k] != ARENA_SIDE_READY ? v->progress : -1, v->t);
 	}
@@ -113,7 +102,7 @@ void arena_card_way(const ArenaWayView *v) {
 	if (v->four) { way_four(x, y, v); return; }
 	int py = y + BODY_Y + 4;
 	for (int side = 0; side < 2; ++side) {
-		int px = x + 8 + side * (PLATE_W + 20);
+		int px = x + 12 + side * (PLATE_W + 16);
 		plate(px, py, v->name[side], v->loadout[side], v->known[side]);
 		side_wait(px, py + PLATE_H + 4, v->wait[side], side == 0 && v->wait[0] != ARENA_SIDE_READY ? v->progress : -1, v->t);
 	}
@@ -125,9 +114,9 @@ void arena_card_way(const ArenaWayView *v) {
 
 /* a row on a slot, ROW_H tall: `label` in gold, then a value under each column (`v1` NULL: `v0` at the right) */
 static void cell_row(int x, int y, const char *label, const char *v0, const char *v1) {
-	second_slot(x + 8, y, W - 16, ROW_H);
-	text_draw(x + 13, y + 1, label, PET_GOLD, TEXT_LEFT);
-	if (!v1) { text_draw(x + W - 13, y + 1, v0, PET_WHITE, TEXT_RIGHT); return; }
+	second_slot(x + 12, y, W - 24, ROW_H);
+	text_draw(x + 16, y + 1, label, PET_GOLD, TEXT_LEFT);
+	if (!v1) { text_draw(x + W - 16, y + 1, v0, PET_WHITE, TEXT_RIGHT); return; }
 	text_draw(x + COL0, y + 1, v0, PET_WHITE, TEXT_CENTER);
 	text_draw(x + COL1, y + 1, v1, PET_WHITE, TEXT_CENTER);
 }
@@ -149,17 +138,17 @@ static void rows(int x, int y, const ArenaCardView *v) {
 	int ty = y + 14 + 2 * ROW_H;
 	cell_row(x, ty, arena_time, v->set ? "" : cell[0], NULL);
 	if (!v->set) return;
-	text_draw(x + 13 + text_width(arena_time) + 8, ty + 1, cell[0], PET_WHITE, TEXT_LEFT);
+	text_draw(x + 16 + text_width(arena_time) + 8, ty + 1, cell[0], PET_WHITE, TEXT_LEFT);
 	text_draw(x + COL0 - 10, ty + 1, arena_set, PET_GOLD, TEXT_LEFT);
-	text_draw(x + W - 13, ty + 1, arena_score(v->won, v->lost), PET_WHITE, TEXT_RIGHT);
+	text_draw(x + W - 16, ty + 1, arena_score(v->won, v->lost), PET_WHITE, TEXT_RIGHT);
 }
 
 /* the rematch asked: the question, Yes and No (the cursor's lit), and his answer as it comes */
 static void rematch(int x, int y, const ArenaCardView *v) {
-	text_draw(x + 8, y, arena_again_asked(v->name), PET_WHITE, TEXT_LEFT);
+	text_draw(x + 13, y, arena_again_asked(v->name), PET_WHITE, TEXT_LEFT);
 	for (int k = 0; k < 2; ++k) {
 		bool lit = v->ask == ARENA_ASK_OPEN ? v->yes == (k == 0) : v->ask == ARENA_ASK_SENT && k == 0;
-		int bx = x + W - 8 - 2 * 36 + k * 36;
+		int bx = x + W - 13 - 2 * 36 + k * 36;
 		if (lit) fill_rect(bx, y - 1, 32, 14, PET_GOLD);
 		else second_slot(bx, y - 1, 32, 14);
 		text_draw(bx + 16, y, k ? arena_no : arena_yes, lit ? INK : PET_DIM, TEXT_CENTER);
@@ -168,20 +157,20 @@ static void rematch(int x, int y, const ArenaCardView *v) {
 		v->theirs == ARENA_THEIRS_GONE ? arena_again_gone(v->name) :
 		v->ask == ARENA_ASK_SENT ? arena_again_waiting(v->name) : NULL;
 	if (line && (v->theirs != ARENA_THEIRS_UNSAID || v->t / 30 % 2 == 0))
-		text_draw(x + 8, y + 14, line, v->theirs == ARENA_THEIRS_YES ? PET_GOLD : PET_CYAN_HI, TEXT_LEFT);
+		text_draw(x + 13, y + 14, line, v->theirs == ARENA_THEIRS_YES ? PET_GOLD : PET_CYAN_HI, TEXT_LEFT);
 }
 
 /* a team bout's foot: the MegaMen standing and who is next, or the match's end */
 static void team_foot(int x, int y, const ArenaCardView *v) {
 	/* (side by side: the team's result alone) */
 	if (v->four) {
-		second_slot(x + 8, y + 11, W - 16, 16);
+		second_slot(x + 12, y + 11, W - 24, 16);
 		if (v->team_result) text_draw(x + W / 2, y + 13, arena_team_end(v->team_result), v->team_result == 1 ? PET_GOLD : PET_CYAN_HI, TEXT_CENTER);
 		return;
 	}
-	second_slot(x + 8, y - 1, W - 16, 28);
-	text_draw(x + 13, y, arena_standing, PET_GOLD, TEXT_LEFT);
-	text_draw(x + W - 13, y, arena_score(v->standing[0], v->standing[1]), PET_WHITE, TEXT_RIGHT);
+	second_slot(x + 12, y - 1, W - 24, 28);
+	text_draw(x + 16, y, arena_standing, PET_GOLD, TEXT_LEFT);
+	text_draw(x + W - 16, y, arena_score(v->standing[0], v->standing[1]), PET_WHITE, TEXT_RIGHT);
 	if (v->team_result) text_draw(x + W / 2, y + 13, arena_team_end(v->team_result), v->team_result == 1 ? PET_GOLD : PET_CYAN_HI, TEXT_CENTER);
 	else if (v->next[0] && v->next[1]) text_draw(x + W / 2, y + 13, arena_team_next(v->next[0], v->next[1]), PET_CYAN_HI, TEXT_CENTER);
 }
@@ -190,9 +179,9 @@ static void team_foot(int x, int y, const ArenaCardView *v) {
 static void rows_four(int x, int y, const ArenaCardView *v) {
 	for (int k = 0; k < 2; ++k) {
 		int ry = y + k * (ROW_H + 1);
-		second_slot(x + 8, ry, W - 16, ROW_H);
+		second_slot(x + 12, ry, W - 24, ROW_H);
 		for (int team = 0; team < 2; ++team) {
-			int cx = x + 13 + team * (W / 2 - 6);
+			int cx = x + 16 + team * (W / 2 - 8);
 			char hp[8];
 			snprintf(hp, sizeof hp, "%u", v->hp4[2 * team + k]);
 			text_draw(cx, ry + 1, v->names[2 * team + k], team ? PET_CYAN_HI : PET_WHITE, TEXT_LEFT);
@@ -211,17 +200,17 @@ void arena_card_result(const ArenaCardView *v) {
 	static const char *const head[6] = { arena_ended, arena_won, arena_lost, arena_ended, arena_broke, arena_stopped };
 	const char *h = head[v->result <= 5 ? v->result : 0];
 	int by = y + BODY_Y + 2;
-	text_draw_scaled(x + 10, by, h, v->result == 1 ? PET_GOLD : PET_WHITE, TEXT_LEFT, 2);
+	text_draw_scaled(x + 13, by, h, v->result == 1 ? PET_GOLD : PET_WHITE, TEXT_LEFT, 2);
 	/* (a 2v2's two names in the small letters, clear of the head) */
-	if (v->four) pixfont_draw(x + W - 10, by + 12, arena_vs_name(v->name), PET_CYAN_HI, INK, PIXFONT_RIGHT, 1);
-	else text_draw(x + W - 10, by + 9, arena_vs_name(v->name), PET_CYAN_HI, TEXT_RIGHT);
-	if (v->why) second_wrapped(v->why, x + 10, by + 30, W - 20, 4, PET_WHITE);
+	if (v->four) pixfont_draw(x + W - 13, by + 12, arena_vs_name(v->name), PET_CYAN_HI, INK, PIXFONT_RIGHT, 1);
+	else text_draw(x + W - 13, by + 9, arena_vs_name(v->name), PET_CYAN_HI, TEXT_RIGHT);
+	if (v->why) second_wrapped(v->why, x + 13, by + 30, W - 26, 4, PET_WHITE);
 	else if (v->tally && v->four) rows_four(x, by + 26, v);
 	else if (v->tally) rows(x, by + 26, v);
-	if (v->team) team_foot(x, y + H - 46, v);
-	else if (v->ask != ARENA_ASK_NONE || v->theirs != ARENA_THEIRS_UNSAID) rematch(x, y + H - 44, v);
+	if (v->team) team_foot(x, y + H - 50, v);
+	else if (v->ask != ARENA_ASK_NONE || v->theirs != ARENA_THEIRS_UNSAID) rematch(x, y + H - 48, v);
 	const char *keys = v->ask == ARENA_ASK_OPEN ? arena_keys_ask : v->square ? arena_keys_back : arena_back;
-	if (v->ask != ARENA_ASK_SENT) pixfont_draw(x + W / 2, y + H - 14, keys, PET_DIM, INK, PIXFONT_CENTER, 1);
+	if (v->ask != ARENA_ASK_SENT) pixfont_draw(x + W / 2, y + H - 20, keys, LOOK_EDGE_HI, INK, PIXFONT_CENTER, 1);
 }
 
 void arena_card_fade(int alpha, bool white) {

@@ -215,7 +215,7 @@ static void taps(const int *rows, int n) {
 		if (inside(jukebox_row_rect(i), x, y)) { cursor_to(J.top + i, n); play(rows[J.at]); return; }
 	for (int r = 0; r < 2; ++r)
 		if (inside(jukebox_turn_rect(r), x, y)) { turn(r ? 1 : -1); return; }
-	if (inside(jukebox_mode_rect(&J.v), x, y) || inside(jukebox_key_rect(3), x, y)) { mode_next(); return; }
+	if (inside(jukebox_mode_rect(&J.v), x, y)) { mode_next(); return; }
 	if (inside(jukebox_key_rect(0), x, y) && n) play(rows[J.at]);
 	else if (inside(jukebox_key_rect(1), x, y)) close_it();
 	else if (inside(jukebox_key_rect(2), x, y)) turn(1);

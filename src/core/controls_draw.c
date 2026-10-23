@@ -11,33 +11,40 @@
 #include "controls_state.h"
 #include "gfx.h"
 #include "minifont.h"
+#include "options_text.h"
 #include "pads.h"
 #include "pet_panel.h"
 #include "platform.h"
 #include "touch.h"
 
-/* where it draws, from the picture's corner */
-#define HEAD_Y 7       /* the tabs, the device's name */
-#define COL_Y 16       /* MAIN and ALSO over their columns */
-#define ROW_Y 24
-#define ROW_H 11
-#define BOTTOM_Y (ROW_Y + ROWS * ROW_H)
-#define NOTE_Y (BOTTOM_Y + 13)
-#define NAV_Y 149
-#define LABEL_X 17
-#define MAIN_X 72
+/* where it draws, from the picture's corner: the tabs and the device's
+ * name on the body under the band, the rows in a window (MAIN and ALSO in
+ * its band; ROWS_SHOWN of them, a row the list's letters' height and a
+ * pixel either side, the rest a scroll away), the bottom line in it, the note and the keys under it */
+#define HEAD_Y 18      /* the tabs, the device's name */
+#define WIN_Y 29
+#define WIN_TOP 7      /* MAIN and ALSO over their columns, in the window's band */
+#define COL_Y (WIN_Y + LOOK_FRAME + 1)
+#define ROW_Y (WIN_Y + LOOK_FRAME + WIN_TOP)
+#define ROW_H 14
+#define BOTTOM_Y (ROW_Y + ROWS_SHOWN * ROW_H)
+#define WIN_H (2 * LOOK_FRAME + WIN_TOP + (ROWS_SHOWN + 1) * ROW_H + 1)
+#define NOTE_Y 132
+#define NAV_Y 148
+#define LABEL_X 24
+#define MAIN_X 82
 #define ALSO_X 150
-#define DOT_X (CORE_W - 14)
-#define CELL_W 72
+#define DOT_X (CORE_W - 24)
+#define CELL_W 66
 
-static const SDL_Color SLOT = { 16, 99, 107, 255 }, GREEN = { 74, 231, 115, 255 }, DARK = { 12, 36, 56, 250 };
+static const SDL_Color SLOT = { 16, 99, 107, 255 }, GREEN = { 74, 231, 115, 255 }, DARK = { 10, 58, 80, 255 };
 
 /* ---- the words ---- */
 
 /* `s` cut where it fits `w` pixels */
 static void fit(char *s, int w) {
 	size_t n = strlen(s);
-	while (n > 1 && text_width(s) > w) s[--n] = 0;
+	while (n > 1 && look_text_width(s) > w) s[--n] = 0;
 }
 
 const char *controls_key_word(int sc) {
@@ -114,11 +121,12 @@ const char *controls_nav_word(int which) {
 static int tab_count(void) { return KEYS ? 2 : 1; }
 static const char *tab_name(int t) { return t == TAB_PAD ? "Controller" : "Keyboard"; }
 
+/* the tabs as BN6's tags on the body under the band, from its left */
 static void tab_span(int t, int *x0, int *x1) {
-	int x = 10;
-	for (int k = 0; k < t; ++k) x += minifont_width(tab_name(k), 1) + 12;
+	int x = 8;
+	for (int k = 0; k < t; ++k) x += look_caps_width(tab_name(k)) + 10 + 4;
 	*x0 = x;
-	*x1 = x + minifont_width(tab_name(t), 1) + 8;
+	*x1 = x + look_caps_width(tab_name(t)) + 10;
 }
 
 static const char *item_name(int item) {
@@ -129,17 +137,17 @@ static const char *item_name(int item) {
 /* the bottom line's items spread across it */
 static void item_spans(int x0[ITEMS], int x1[ITEMS]) {
 	int total = 0;
-	for (int i = 0; i < ITEMS; ++i) total += text_width(item_name(i));
-	int gap = (CORE_W - 34 - total) / (ITEMS - 1), x = 17;
+	for (int i = 0; i < ITEMS; ++i) total += look_text_width(item_name(i));
+	int gap = (CORE_W - 2 * LABEL_X - total) / (ITEMS - 1), x = LABEL_X;
 	for (int i = 0; i < ITEMS; ++i) {
 		x0[i] = x;
-		x1[i] = x + text_width(item_name(i));
+		x1[i] = x + look_text_width(item_name(i));
 		x = x1[i] + gap;
 	}
 }
 
 int controls_tap_tab(int x, int y) {
-	if (y < HEAD_Y - 3 || y > HEAD_Y + 8) return -1;
+	if (y < HEAD_Y - 3 || y > HEAD_Y + 11) return -1;
 	for (int t = 0; t < tab_count(); ++t) {
 		int a, b;
 		tab_span(t, &a, &b);
@@ -149,7 +157,7 @@ int controls_tap_tab(int x, int y) {
 }
 
 int controls_tap_item(int x, int y) {
-	if (y < BOTTOM_Y - 2 || y > BOTTOM_Y + ROW_H) return -1;
+	if (y < BOTTOM_Y || y >= BOTTOM_Y + ROW_H) return -1;
 	int x0[ITEMS], x1[ITEMS];
 	item_spans(x0, x1);
 	for (int i = 0; i < ITEMS; ++i)
@@ -158,42 +166,41 @@ int controls_tap_item(int x, int y) {
 }
 
 bool controls_tap_cell(int x, int y, int *row, int *col) {
-	if (y < ROW_Y - 1 || y >= BOTTOM_Y - 1 || x < 6 || x >= CORE_W - 6) return false;
-	*row = (y - ROW_Y + 1) / ROW_H;
+	if (y < ROW_Y || y >= BOTTOM_Y || x < 6 || x >= CORE_W - 6) return false;
+	*row = C.top + (y - ROW_Y) / ROW_H;
 	*col = x >= ALSO_X - 4 ? SLOT_ALSO : SLOT_MAIN;
 	return true;
 }
 
 /* ---- the picture ---- */
 
-static void arrow(int x, int y, SDL_Color c) {
-	for (int i = 0; i < 4; ++i) fill_rect(x + i, y + 2 + i, 1, 8 - 2 * i, c);
-}
-
+/* the tabs, the one open dark as the band; the device's name at the
+ * right; MAIN and ALSO in the window's band at their columns' right ends */
 static void tabs_draw(int x0, int y0) {
+	int end = 0;
 	for (int t = 0; t < tab_count(); ++t) {
 		int a, b;
 		tab_span(t, &a, &b);
-		if (t == C.tab) fill_rect(x0 + a - 2, y0 + HEAD_Y - 2, b - a + 4, 9, PET_CYAN);
-		minifont_draw(x0 + a + 2, y0 + HEAD_Y, tab_name(t), t == C.tab ? PET_NAVY : PET_DIM, 1);
+		look_tag(x0 + a, y0 + HEAD_Y, b - a, 9, tab_name(t), t == C.tab ? LOOK_BAND : LOOK_GREEN_LO);
+		end = b;
 	}
 	char name[40];
 	snprintf(name, sizeof name, "%s", C.tab == TAB_KEYS ? "US key positions" : C.has_pad ? C.name : "No controller");
-	int right = x0 + CORE_W - 10, a, b;
-	tab_span(tab_count() - 1, &a, &b);
-	for (size_t n = strlen(name); n > 1 && minifont_width(name, 1) > right - (x0 + b + 10); ) name[--n] = 0;
-	minifont_draw(right - minifont_width(name, 1), y0 + HEAD_Y, name, C.tab == TAB_PAD && !C.has_pad ? PET_DIM : PET_SKY, 1);
-	minifont_draw(x0 + MAIN_X, y0 + COL_Y, "Main", PET_DIM, 1);
-	minifont_draw(x0 + ALSO_X, y0 + COL_Y, "Also", PET_DIM, 1);
+	int right = CORE_W - 9;
+	for (size_t n = strlen(name); n > 1 && minifont_width(name, 1) > right - end - 8; ) name[--n] = 0;
+	look_note(x0 + right - minifont_width(name, 1), y0 + HEAD_Y + 2, name, C.tab == TAB_PAD && !C.has_pad ? LOOK_GREEN_HI : LOOK_PAGE);
+	int main_x = MAIN_X + CELL_W - 8 - look_caps_width("Main"), also_x = ALSO_X + CELL_W - 8 - look_caps_width("Also");
+	look_caps(x0 + main_x, y0 + COL_Y, "Main", LOOK_PAGE, LOOK_EDGE_LO);
+	look_caps(x0 + also_x, y0 + COL_Y, "Also", LOOK_PAGE, LOOK_EDGE_LO);
 }
 
 static void preset_draw(int x0, int y) {
-	if (C.tab == TAB_KEYS) { text_draw(x0 + MAIN_X, y, "-", PET_DIM, TEXT_LEFT); return; }
+	if (C.tab == TAB_KEYS) { look_text(x0 + MAIN_X, y, "-", LOOK_DIM, LOOK_SHADE, TEXT_LEFT); return; }
 	int p = padmap_preset_of(&C.pads, C.family);
 	const char *v = padmap_preset_name(C.family, C.style, p);
-	text_draw(x0 + MAIN_X + 6, y, v, p < 0 ? PET_DIM : WHITE, TEXT_LEFT);
+	look_text(x0 + MAIN_X + 6, y, v, p < 0 ? LOOK_DIM : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	/* (the PET's small arrows: Left and Right change it) */
-	int r = x0 + MAIN_X + 6 + text_width(v) + 3;
+	int r = x0 + MAIN_X + 6 + look_text_width(v) + 3;
 	for (int i = 0; i < 4; ++i) {
 		fill_rect(x0 + MAIN_X + 3 - i, y + 2 + i, 1, 8 - 2 * i, PET_ORANGE);
 		fill_rect(r + i, y + 2 + i, 1, 8 - 2 * i, PET_ORANGE);
@@ -204,7 +211,7 @@ static void cell_draw(int x, int y, const char *words, bool focus) {
 	char s[48];
 	snprintf(s, sizeof s, "%s", words);
 	fit(s, CELL_W - 4);
-	text_draw(x, y, s, focus ? PET_GOLD : !strcmp(s, "-") ? PET_DIM : WHITE, TEXT_LEFT);
+	look_text(x, y, s, focus ? LOOK_GOLD : !strcmp(s, "-") ? LOOK_DIM : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 }
 
 static void rows_draw(int x0, int y0) {
@@ -212,23 +219,23 @@ static void rows_draw(int x0, int y0) {
 	bool idle = !C.ask && !C.confirm;
 	/* (the cursor's slot under every row's words, so none is covered) */
 	if (idle && C.row < ROWS && C.row != ROW_PRESET)
-		fill_rect(x0 + (C.col == SLOT_MAIN ? MAIN_X : ALSO_X) - 3, y0 + ROW_Y + C.row * ROW_H + 2, CELL_W, ROW_H, SLOT);
-	for (int r = 0; r < ROWS; ++r) {
-		int y = y0 + ROW_Y + r * ROW_H, gba = controls_gba_of(r);
+		fill_rect(x0 + (C.col == SLOT_MAIN ? MAIN_X : ALSO_X) - 3, y0 + ROW_Y + (C.row - C.top) * ROW_H, CELL_W, ROW_H, SLOT);
+	for (int r = C.top; r < C.top + ROWS_SHOWN && r < ROWS; ++r) {
+		int y = y0 + ROW_Y + (r - C.top) * ROW_H, gba = controls_gba_of(r);
 		bool on = C.row == r && idle;
 		const char *name = names[r];
-		text_draw(x0 + LABEL_X, y, name, on ? PET_GOLD : r == ROW_PRESET && C.tab == TAB_KEYS ? PET_DIM : WHITE, TEXT_LEFT);
-		if (on) arrow(x0 + 9, y, PET_ORANGE);
-		if (r == ROW_PRESET) { preset_draw(x0, y); continue; }
+		look_text(x0 + LABEL_X, y + 1, name, on ? LOOK_GOLD : r == ROW_PRESET && C.tab == TAB_KEYS ? LOOK_DIM : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		if (on) look_cursor(x0 + 12, y + 2);
+		if (r == ROW_PRESET) { preset_draw(x0, y + 1); continue; }
 		char words[48];
 		for (int s = SLOT_MAIN; s <= SLOT_ALSO; ++s) {
 			if (r == ROW_DPAD) controls_dpad_words(s, words, sizeof words);
 			else controls_slot_words(gba, s, words, sizeof words);
-			cell_draw(x0 + (s == SLOT_MAIN ? MAIN_X : ALSO_X), y, words, on && C.col == s);
+			cell_draw(x0 + (s == SLOT_MAIN ? MAIN_X : ALSO_X), y + 1, words, on && C.col == s);
 		}
 		/* the dot: lit by a press of its button, through the map being set */
 		bool lit = r == ROW_DPAD ? (C.lit[0] | C.lit[1] | C.lit[2] | C.lit[3]) > 0 : C.lit[gba] > 0;
-		fill_rect(x0 + DOT_X, y + 3, 5, 5, lit ? GREEN : DARK);
+		fill_rect(x0 + DOT_X, y + 4, 5, 5, lit ? GREEN : DARK);
 	}
 }
 
@@ -237,8 +244,8 @@ static void bottom_draw(int x0, int y0) {
 	item_spans(a, b);
 	for (int i = 0; i < ITEMS; ++i) {
 		bool on = C.row == ROW_BOTTOM && C.item == i && !C.ask && !C.confirm;
-		text_draw(x0 + a[i], y, item_name(i), on ? PET_GOLD : WHITE, TEXT_LEFT);
-		if (on) arrow(x0 + a[i] - 8, y, PET_ORANGE);
+		look_text(x0 + a[i], y + 1, item_name(i), on ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		if (on) look_cursor(x0 + a[i] - 11, y + 2);
 	}
 }
 
@@ -256,21 +263,26 @@ static void note_words(char *s, size_t n) {
 }
 
 bool controls_note_draw(int cx, int y, const char *s, SDL_Color c) {
+	/* (the bold letters, narrower than the list's: a line of them, or two of the small ones) */
+	if (text_width(s) <= CORE_W - 12) {
+		text_draw(cx, y, s, c, TEXT_CENTER);
+		return false;
+	}
 	char a[128], *second = NULL;
 	snprintf(a, sizeof a, "%s", s);
-	if (text_width(a) > CORE_W - 16) {
+	if (minifont_width(a, 1) > CORE_W - 20) {
 		char *cut = NULL;
 		for (char *sp = strchr(a, ' '); sp; sp = strchr(sp + 1, ' ')) {
 			*sp = 0;
-			bool fits = text_width(a) <= CORE_W - 16;
+			bool fits = minifont_width(a, 1) <= CORE_W - 20;
 			*sp = ' ';
 			if (!fits) break;
 			cut = sp;
 		}
 		if (cut) { *cut = 0; second = cut + 1; }
 	}
-	text_draw(cx, y, a, c, TEXT_CENTER);
-	if (second) text_draw(cx, y + 11, second, c, TEXT_CENTER);
+	pet_panel_note(cx, y + 2, a, c);
+	if (second) pet_panel_note(cx, y + 9, second, c);
 	return second != NULL;
 }
 
@@ -293,11 +305,10 @@ static void ask_draw(int x0, int y0) {
 	/* (Set all: waiting skips the one button, Escape stops the rest) */
 	if (C.ask == ASK_ALL) snprintf(wait, sizeof wait, "Wait %d to skip it%s", secs, KEYS ? ", Esc to stop" : "");
 	else snprintf(wait, sizeof wait, "%sWait %d to cancel", KEYS ? "Esc or " : "", secs);
-	fill_rect(x0 + 18, y0 + 40, CORE_W - 36, 62, PET_GOLD);
-	fill_rect(x0 + 19, y0 + 41, CORE_W - 38, 60, DARK);
-	text_draw(x0 + CORE_W / 2, y0 + 48, line, PET_GOLD, TEXT_CENTER);
-	text_draw(x0 + CORE_W / 2, y0 + 62, sub, PET_SKY, TEXT_CENTER);
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + 82, wait, PET_DIM, 1);
+	look_window(x0 + 18, y0 + 40, CORE_W - 36, 62, 0, false);
+	text_draw(x0 + CORE_W / 2, y0 + 48, line, LOOK_GOLD, TEXT_CENTER);
+	look_text(x0 + CORE_W / 2, y0 + 63, sub, LOOK_TEXT, LOOK_SHADE, TEXT_CENTER);
+	minifont_draw_centered(x0 + CORE_W / 2, y0 + 84, wait, LOOK_EDGE_HI, 1);
 }
 
 /* The keep box: the edited map's A, on the device used last */
@@ -308,10 +319,9 @@ static void confirm_draw(int x0, int y0) {
 	else snprintf(a, sizeof a, "A");
 	snprintf(line, sizeof line, "Press %s to keep these", a);
 	snprintf(sub, sizeof sub, "Not kept in %d", (C.confirm + 59) / 60);
-	fill_rect(x0 + 18, y0 + 46, CORE_W - 36, 46, PET_GOLD);
-	fill_rect(x0 + 19, y0 + 47, CORE_W - 38, 44, DARK);
-	text_draw(x0 + CORE_W / 2, y0 + 54, line, PET_GOLD, TEXT_CENTER);
-	text_draw(x0 + CORE_W / 2, y0 + 70, sub, PET_SKY, TEXT_CENTER);
+	look_window(x0 + 18, y0 + 46, CORE_W - 36, 46, 0, false);
+	text_draw(x0 + CORE_W / 2, y0 + 54, line, LOOK_GOLD, TEXT_CENTER);
+	look_text(x0 + CORE_W / 2, y0 + 70, sub, LOOK_TEXT, LOOK_SHADE, TEXT_CENTER);
 }
 
 static void nav_draw(int cx, int y) {
@@ -321,13 +331,16 @@ static void nav_draw(int cx, int y) {
 		snprintf(nav, sizeof nav, "%s: set  %s: clear  %s: tab  %s: back", controls_nav_word(NAV_A), controls_nav_word(NAV_X),
 			P.keyboard_last || !C.has_pad ? "Tab" : controls_nav_word(NAV_R), controls_nav_word(NAV_B));
 	else snprintf(nav, sizeof nav, "%s: set  %s: clear  %s: back", controls_nav_word(NAV_A), controls_nav_word(NAV_X), controls_nav_word(NAV_B));
-	minifont_draw_centered(cx, y, nav, PET_DIM, 1);
+	pet_panel_note(cx, y, nav, LOOK_PAGE);
 }
 
 void controls_draw(void) {
 	if (!C.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
-	pet_panel_draw(x0, y0);
+	pet_panel_draw(x0, y0, options_word(OW_CONTROLS));
+	SDL_Rect win = { x0 + 7, y0 + WIN_Y, CORE_W - 14, WIN_H };
+	look_window(win.x, win.y, win.w, win.h, WIN_TOP, true);
+	look_scroll(win, WIN_TOP, C.top, ROWS_SHOWN, ROWS);
 	tabs_draw(x0, y0);
 	rows_draw(x0, y0);
 	bottom_draw(x0, y0);
@@ -336,9 +349,9 @@ void controls_draw(void) {
 	char note[128];
 	note_words(note, sizeof note);
 	if (!C.ask && !C.confirm) {
-		bool two = controls_note_draw(cx, y0 + NOTE_Y, note, C.said_t > 0 && C.said_warn ? PET_ORANGE : PET_SKY);
-		/* (under a note of two lines with every row there, its second line
-		 * takes the keys' place: the note says what A does) */
-		if (!(two && NOTE_Y + 11 + TEXT_H > NAV_Y)) nav_draw(cx, y0 + NAV_Y);
+		bool two = controls_note_draw(cx, y0 + NOTE_Y, note, C.said_t > 0 && C.said_warn ? LOOK_ORANGE : LOOK_PAGE);
+		/* (under a note of two lines, its second line takes the keys'
+		 * place: the note says what A does) */
+		if (!two) nav_draw(cx, y0 + NAV_Y);
 	}
 }
