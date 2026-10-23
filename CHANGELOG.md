@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,
   one of the two ways at an act's fork in Lan's HP can lead to a layer
