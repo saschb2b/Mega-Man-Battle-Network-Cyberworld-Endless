@@ -748,6 +748,10 @@
    "comment": "MegaMan's word on R pressed in the town away from the port: almost at a jack-in cell (`way` the way to it), close to the port (`way` the walk's), or nowhere near it",
    "line": 14
   },
+  "liberation_battle_words:lib_stakes_words": {
+   "header": "Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)",
+   "line": 7
+  },
   "liberation_words:lib_battle_words": {
    "header": "After a liberation's battle: what it freed (`panels`, beside the one fought for), whether in one turn, what it held; \"\" for nothing to say.",
    "line": 21
@@ -1591,6 +1595,24 @@
    "comment": "(in SetupWord's order, its name beside each)",
    "line": 9
   },
+  "title_summary_text:summary_helpers": {
+   "header": "a helped run's helpers on the band, small capitals: by their `names`, one after another (\"HELP: HP+ All *\"), or how many are on where the names run long (\"HELP: 5 ON\")",
+   "line": 39
+  },
+  "title_summary_text:summary_helpers_count": {
+   "line": 44
+  },
+  "title_summary_text:summary_layer": {
+   "header": "a layer, as the rows give it: \"Layer 5\"",
+   "line": 28
+  },
+  "title_summary_text:summary_text": {
+   "line": 23
+  },
+  "title_summary_text:words": {
+   "comment": "(in SummaryText's order, its name beside each)",
+   "line": 8
+  },
   "town_lines:acdc_checks": {
    "line": 69
   },
@@ -1904,6 +1926,15 @@
    "shows": [],
    "speaker": "MegaMan",
    "stem": "lesson_words"
+  },
+  "src/director/liberation_battle_words.c": {
+   "comment": "What a liberation's battle stakes, in words: the menu's lines, in BN6's small capitals, as BN5's own banners count it (TURN, LIBERATE).",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 7,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "liberation_battle_words"
   },
   "src/director/liberation_words.c": {
    "comment": "What is said and shown on a liberation's board (docs/LIBERATION.md): Lan and MegaMan knew BN5's Liberation Missions, Nebula's dark areas taken back panel by panel, so they name what they see in its words.",
@@ -2225,14 +2256,14 @@
    "stem": "saves_text"
   },
   "src/scenes/title_lines.c": {
-   "comment": "What the title's summary says of the run's end (scene_title.c, docs/VOICE.md): how MegaMan came home, and Lan's word.",
+   "comment": "What MegaMan says on the run's summary, in its NAVIGATOR box (title_summary.c, docs/VOICE.md): how he came home, and his word.",
    "domain": "Title",
    "kind": "speech",
    "lines": 7,
    "shows": [
-    "screenshots/result.png"
+    "screenshots/summary.png"
    ],
-   "speaker": "Lan",
+   "speaker": "MegaMan",
    "stem": "title_lines"
   },
   "src/scenes/title_setup_text.c": {
@@ -2243,6 +2274,18 @@
    "shows": [],
    "speaker": "Screen",
    "stem": "title_setup_text"
+  },
+  "src/scenes/title_summary_text.c": {
+   "comment": "title_summary_text.h. Menu words, short and plain: the screens' names and the rows, as BN6's RESULT names DeleteTime and Busting LV.",
+   "domain": "Title",
+   "kind": "screen",
+   "lines": 9,
+   "shows": [
+    "screenshots/summary.png",
+    "screenshots/summary-records.png"
+   ],
+   "speaker": "Screen",
+   "stem": "title_summary_text"
   },
   "src/second/second_text.c": {
    "comment": "second_text.h. The Crosses' weaknesses and gifts are powers.c's, from BN6's own Cross tutorials; the Cybeast's turns and its Attack+30 are BN6's Cybeast tutorial's (bn6f TextScriptDadCybeastTut: \"Each turn you spend as a Cybeast will decrease your EmotionCounter by 1\", tired at 0, and \"don't press the CybeastButton\" then: he would BeastOver), Full Synchro's x2 its battle tutorial's. Each verified in a battle played through tools/play.py (docs/ROM_DATA.md, the second screen's battle).",
@@ -2370,7 +2413,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2055,
+  "boxes": 2062,
   "domains": {
    "Arena": {
     "files": [
@@ -2512,13 +2555,14 @@
    },
    "Other": {
     "files": [
+     "src/director/liberation_battle_words.c",
      "src/director/liberation_words.c",
      "src/jukebox/jukebox_text.c",
      "src/online/emote_strip_text.c"
     ],
-    "flagged": 5,
-    "lines": 85,
-    "speech": 79
+    "flagged": 10,
+    "lines": 92,
+    "speech": 86
    },
    "Powers": {
     "files": [
@@ -2614,10 +2658,11 @@
    "Title": {
     "files": [
      "src/scenes/title_lines.c",
-     "src/scenes/title_setup_text.c"
+     "src/scenes/title_setup_text.c",
+     "src/scenes/title_summary_text.c"
     ],
     "flagged": 0,
-    "lines": 25,
+    "lines": 34,
     "speech": 7
    },
    "Trade Central": {
@@ -2638,12 +2683,12 @@
     "speech": 7
    }
   },
-  "flagged": 125,
+  "flagged": 130,
   "flags": {
    "beats": 4,
    "box-words": 4,
    "button": 5,
-   "colon": 34,
+   "colon": 39,
    "line-long": 15,
    "long-speech": 51,
    "meta": 2,
@@ -2693,12 +2738,12 @@
     "words_per_box": 6.9
    },
    "Lan": {
-    "bangs_per_box": 0.03,
+    "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 76,
-    "dots_per_box": 0.16,
-    "end_ask": 0.14,
-    "end_bang": 0.76,
+    "boxes": 71,
+    "dots_per_box": 0.15,
+    "end_ask": 0.15,
+    "end_bang": 0.75,
     "end_dots": 0.04,
     "openers": [
      "Then",
@@ -2708,16 +2753,16 @@
      "*gulp*",
      "And"
     ],
-    "stutters": "1 box in 38",
+    "stutters": "1 box in 36",
     "words_per_box": 5.6
    },
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 727,
+    "boxes": 734,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
-    "end_bang": 0.54,
+    "end_bang": 0.55,
     "end_dots": 0.11,
     "openers": [
      "The",
@@ -2727,7 +2772,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 182",
+    "stutters": "1 box in 184",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2769,7 +2814,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1706,
+  "lines": 1722,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2883,12 +2928,12 @@
     "words_per_box": 11.7
    },
    "Lan": {
-    "bangs_per_box": 0.03,
+    "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 76,
-    "dots_per_box": 0.16,
-    "end_ask": 0.14,
-    "end_bang": 0.76,
+    "boxes": 71,
+    "dots_per_box": 0.15,
+    "end_ask": 0.15,
+    "end_bang": 0.75,
     "end_dots": 0.04,
     "openers": [
      "Then",
@@ -2898,16 +2943,16 @@
      "*gulp*",
      "And"
     ],
-    "stutters": "1 box in 38",
+    "stutters": "1 box in 36",
     "words_per_box": 5.6
    },
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 727,
+    "boxes": 734,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
-    "end_bang": 0.54,
+    "end_bang": 0.55,
     "end_dots": 0.11,
     "openers": [
      "The",
@@ -2917,7 +2962,7 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 182",
+    "stutters": "1 box in 184",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2940,20 +2985,20 @@
     "words_per_box": 5.7
    },
    "Narration": {
-    "bangs_per_box": 0.18,
+    "bangs_per_box": 0.19,
     "bn6": null,
-    "boxes": 28,
+    "boxes": 26,
     "dots_per_box": 0.0,
     "end_ask": 0.04,
-    "end_bang": 0.61,
+    "end_bang": 0.62,
     "end_dots": 0.0,
     "openers": [
      "MegaMan",
      "The",
      "MegaMan's",
      "ACCESS",
-     "Dad's",
-     "How"
+     "How",
+     "NUMBER"
     ],
     "stutters": "never",
     "words_per_box": 4.4
@@ -3016,15 +3061,20 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1250
+  "speech": 1257
  },
  "version": 1,
  "conversations": [
-  {"container":"title_lines:summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","id":"title_lines:summary_words.said","line":7,"lines":["title_lines:summary_words.said:SUMMARY_WON_HOW","title_lines:summary_words.said:SUMMARY_WON","title_lines:summary_words.said:SUMMARY_LOST_HOW","title_lines:summary_words.said:SUMMARY_LEARNED","title_lines:summary_words.said:SUMMARY_BEST","title_lines:summary_words.said:SUMMARY_ROUGH","title_lines:summary_words.said:SUMMARY_FURTHER"],"speakers":["Narration","Lan"],"title":"Summary words: said","when":""},
+  {"container":"title_lines:summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","id":"title_lines:summary_words.said","line":7,"lines":["title_lines:summary_words.said:SUMMARY_WON_HOW","title_lines:summary_words.said:SUMMARY_WON","title_lines:summary_words.said:SUMMARY_LOST_HOW","title_lines:summary_words.said:SUMMARY_LEARNED","title_lines:summary_words.said:SUMMARY_BEST","title_lines:summary_words.said:SUMMARY_ROUGH","title_lines:summary_words.said:SUMMARY_FURTHER"],"speakers":["MegaMan"],"title":"Summary words: said","when":""},
   {"container":"title_setup_text:words","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:words","line":10,"lines":["title_setup_text:words:0","title_setup_text:words:12","title_setup_text:words:15","title_setup_text:words:16","title_setup_text:words:17","title_setup_text:words:18","title_setup_text:words:19","title_setup_text:words:20","title_setup_text:words:21","title_setup_text:words:22","title_setup_text:words:23","title_setup_text:words:24","title_setup_text:words:25","title_setup_text:words:26"],"speakers":["Screen"],"title":"Words","when":"(in SetupWord's order, its name beside each)"},
   {"container":"title_setup_text:setup_word","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_word","line":39,"lines":["title_setup_text:setup_word:0"],"speakers":["Screen"],"title":"Setup word","when":""},
   {"container":"title_setup_text:setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_cross_note","line":46,"lines":["title_setup_text:setup_cross_note:0","title_setup_text:setup_cross_note:1"],"speakers":["Screen"],"title":"The Cross row's note for a Cross with its `strong` power and `weak` element","when":"(its costs said: BN6's own weakness, which a playtester was told wrong; and \"break it\": a playtester knew it from BN6, a newer player would not)"},
   {"container":"title_setup_text:setup_helpers_on","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_helpers_on","line":63,"lines":["title_setup_text:setup_helpers_on:0"],"speakers":["Screen"],"title":"The Help row's value with `on` helpers on, where their names run too long","when":"the Help row's value with `on` helpers on, where their names run too long"},
+  {"container":"title_summary_text:words","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:words","line":13,"lines":["title_summary_text:words:4","title_summary_text:words:5","title_summary_text:words:7","title_summary_text:words:8","title_summary_text:words:11"],"speakers":["Screen"],"title":"Words","when":"(in SummaryText's order, its name beside each)"},
+  {"container":"title_summary_text:summary_text","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_text","line":24,"lines":["title_summary_text:summary_text:0"],"speakers":["Screen"],"title":"Summary text","when":""},
+  {"container":"title_summary_text:summary_layer","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_layer","line":29,"lines":["title_summary_text:summary_layer:0"],"speakers":["Screen"],"title":"A layer, as the rows give it","when":"a layer, as the rows give it: \"Layer 5\""},
+  {"container":"title_summary_text:summary_helpers","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_helpers","line":40,"lines":["title_summary_text:summary_helpers:0"],"speakers":["Screen"],"title":"A helped run's helpers on the band, small capitals","when":"a helped run's helpers on the band, small capitals: by their `names`, one after another (\"HELP: HP+ All *\"), or how many are on where the names run long (\"HELP: 5 ON\")"},
+  {"container":"title_summary_text:summary_helpers_count","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_helpers_count","line":45,"lines":["title_summary_text:summary_helpers_count:0"],"speakers":["Screen"],"title":"Summary helpers count","when":""},
   {"container":"town_lines:central_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:central_folk","line":16,"lines":["town_lines:central_folk:0.5","town_lines:central_folk:1.5","town_lines:central_folk:2.5","town_lines:central_folk:3.5","town_lines:central_folk:4.5","town_lines:central_folk:5.5","town_lines:central_folk:6.5","town_lines:central_folk:7.5","town_lines:central_folk:8.5","town_lines:central_folk:9.5","town_lines:central_folk:10.5","town_lines:central_folk:11.5","town_lines:central_folk:12.5"],"speakers":["Townsfolk","Mr.Prog"],"title":"Central folk: its people","when":"Its people: at the statue, the shop, the school gate, the bus stop, the houses, the closed road to the Expo. Some have lines of the run's at home (town_words.c); at each visit they stand elsewhere (town_folk.c)."},
   {"container":"town_lines:central_checks","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:central_checks","line":37,"lines":["town_lines:central_checks:0","town_lines:central_checks:1","town_lines:central_checks:2","town_lines:central_checks:3","town_lines:central_checks:4","town_lines:central_checks:5","town_lines:central_checks:6","town_lines:central_checks:7","town_lines:central_checks:8","town_lines:central_checks:9","town_lines:central_checks:10","town_lines:central_checks:11","town_lines:central_checks:12"],"speakers":["Lan","MegaMan","Townsfolk"],"title":"Central checks: what its checks","when":"What its checks (triggers 0xF0 + n, in front of each thing) say: the houses (Lan's, the pink one, the orange one, the gray pair), the flower bed, the bus stop, Aster Land's door, the Expo gates' signs and road, the Academy's gate, the statue, Aster Land's window."},
   {"container":"town_lines:acdc_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:acdc_folk","line":56,"lines":["town_lines:acdc_folk:0.5","town_lines:acdc_folk:1.5","town_lines:acdc_folk:2.5","town_lines:acdc_folk:3.5","town_lines:acdc_folk:4.5","town_lines:acdc_folk:5.5","town_lines:acdc_folk:6.5","town_lines:acdc_folk:7.5","town_lines:acdc_folk:8.5","town_lines:acdc_folk:9.5","town_lines:acdc_folk:10.5"],"speakers":["Townsfolk","Mr.Prog"],"title":"Acdc folk: its people","when":"Its people: kids in the park, the chip shop, the Metroline, the mansion, the houses, the promenade."},
@@ -3513,6 +3563,7 @@
   {"container":"jukebox_text:jukebox_now_label","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_now_label","line":93,"lines":["jukebox_text:jukebox_now_label:0"],"speakers":["MegaMan"],"title":"Jukebox now label","when":""},
   {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":96,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
   {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":100,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
+  {"container":"liberation_battle_words:lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_stakes_words","line":10,"lines":["liberation_battle_words:lib_stakes_words:0","liberation_battle_words:lib_stakes_words:1","liberation_battle_words:lib_stakes_words:2","liberation_battle_words:lib_stakes_words:3","liberation_battle_words:lib_stakes_words:4","liberation_battle_words:lib_stakes_words:5","liberation_battle_words:lib_stakes_words:6"],"speakers":["Mr.Prog","MegaMan"],"title":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds","when":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)"},
   {"container":"liberation_words:lib_card_line","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_card_line","line":10,"lines":["liberation_words:lib_card_line:0"],"speakers":["MegaMan"],"title":"The act's card's line for an act whose way holds a dark layer","when":"The act's card's line for an act whose way holds a dark layer."},
   {"container":"liberation_words:lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_briefing_words","line":14,"lines":["liberation_words:lib_briefing_words:0","liberation_words:lib_briefing_words:1","liberation_words:lib_briefing_words:2","liberation_words:lib_briefing_words:3","liberation_words:lib_briefing_words:4","liberation_words:lib_briefing_words:5"],"speakers":["Lan","MegaMan"],"title":"As the board begins","when":"As the board begins: what the dark layer is, its DarkHoles and par."},
   {"container":"liberation_words:lib_battle_words","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_battle_words","line":23,"lines":["liberation_words:lib_battle_words:0","liberation_words:lib_battle_words:1","liberation_words:lib_battle_words:2","liberation_words:lib_battle_words:3","liberation_words:lib_battle_words:4","liberation_words:lib_battle_words:5"],"speakers":["MegaMan","Lan"],"title":"After a liberation's battle","when":"After a liberation's battle: what it freed (`panels`, beside the one fought for), whether in one turn, what it held; \"\" for nothing to say."},
@@ -3993,6 +4044,13 @@
   {"boxes":[{"pages":[["Home's right","here,Lan!"]],"speaker":"MegaMan","text":"Home's right here,Lan!"},{"pages":[["The PC's up in your","room!"]],"speaker":"MegaMan","text":"The PC's up in your room!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:5","kind":"speech","line":26,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Home's right here,Lan!|@M The PC's up in your room!","text_hash":"d0cd128de7a6"},
   {"boxes":[{"pages":[["Almost,Lan! The","{landmark}'s {way}."]],"speaker":"MegaMan","text":"Almost,Lan! The {landmark}'s {way}."}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:6","kind":"speech","line":28,"placeholders":[{"name":"landmark","spec":"%s"},{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Almost,Lan! The {landmark}'s {way}.","text_hash":"3a94709174a5"},
   {"boxes":[{"pages":[["No port here,Lan!"]],"speaker":"MegaMan","text":"No port here,Lan!"},{"pages":[["It's by the","{landmark_at}!"]],"speaker":"MegaMan","text":"It's by the {landmark_at}!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:7","kind":"speech","line":30,"placeholders":[{"name":"landmark_at","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M No port here,Lan!|@M It's by the {landmark_at}!","text_hash":"8584705fc6ce"},
+  {"boxes":[{"pages":[["NO TURN LIMIT"]],"speaker":"Mr.Prog","text":"NO TURN LIMIT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":[],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NO TURN LIMIT","text_hash":"f9bc6b546c99"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["TURN {LIB_DOUBLE_TURN} ON: HITS X2"]],"speaker":"Mr.Prog","text":"TURN {LIB_DOUBLE_TURN} ON: HITS X2"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:1","kind":"speech","line":11,"placeholders":[{"name":"LIB_DOUBLE_TURN","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TURN {LIB_DOUBLE_TURN} ON: HITS X2","text_hash":"7281cf2c3f11"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: CLOSES IT"]],"speaker":"Mr.Prog","text":"{turns} TURNS: CLOSES IT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:2","kind":"speech","line":15,"placeholders":[{"name":"turns","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: CLOSES IT","text_hash":"2d9241970126"},
+  {"boxes":[{"pages":[["FREES {freed}"]],"speaker":"MegaMan","text":"FREES {freed}"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":[],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:3","kind":"speech","line":16,"placeholders":[{"name":"freed","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"FREES {freed}","text_hash":"b01a39f034c4"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: DELETES","IT"]],"speaker":"Mr.Prog","text":"{turns} TURNS: DELETES IT"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:4","kind":"speech","line":19,"placeholders":[{"name":"turns","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: DELETES IT","text_hash":"d54436058343"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["{turns} TURNS: FREES {freed}"]],"speaker":"Mr.Prog","text":"{turns} TURNS: FREES {freed}"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:5","kind":"speech","line":20,"placeholders":[{"name":"turns","spec":"%d"},{"name":"freed","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{turns} TURNS: FREES {freed}","text_hash":"69517490ea03"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["1 TURN: {one_turn} MORE"]],"speaker":"Mr.Prog","text":"1 TURN: {one_turn} MORE"}],"container":"lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","flags":["colon"],"fragment":true,"id":"liberation_battle_words:lib_stakes_words:6","kind":"speech","line":21,"placeholders":[{"name":"one_turn","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"1 TURN: {one_turn} MORE","text_hash":"f68d3fc178d8"},
   {"boxes":[{"pages":[["A layer here has","gone dark"]],"speaker":"MegaMan","text":"A layer here has gone dark"}],"container":"lib_card_line","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_card_line:0","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A layer here has gone dark","text_hash":"6b118680bf00"},
   {"boxes":[{"pages":[["Whoa! This whole","layer's gone dark!"]],"speaker":"Lan","text":"Whoa! This whole layer's gone dark!"},{"pages":[["Like Nebula's dark","areas,Lan!"]],"speaker":"MegaMan","text":"Like Nebula's dark areas,Lan!"},{"flags":[{"at":"4 lines","code":"pages"}],"pages":[["{holes} out","there... And a"],["Darkloid behind","{holes}."]],"speaker":"MegaMan","text":"{holes} out there... And a Darkloid behind {holes}."},{"pages":[["Then let's liberate","it! Par's {par}","phases."]],"speaker":"Lan","text":"Then let's liberate it! Par's {par} phases."}],"container":"lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","flags":["pages"],"id":"liberation_words:lib_briefing_words:0","kind":"speech","line":14,"placeholders":[{"name":"holes","spec":"%s"},{"name":"holes","spec":"%s"},{"name":"par","spec":"%d"}],"speaker":"Lan","speakers":["Lan","MegaMan"],"text":"@L Whoa! This whole layer's gone dark!|@M Like Nebula's dark areas,Lan!|@M {holes} out there... And a Darkloid behind {holes}.|@L Then let's liberate it! Par's {par} phases.","text_hash":"2a09059a08d5"},
   {"boxes":[{"pages":[["A DarkHole"]],"speaker":"MegaMan","text":"A DarkHole"}],"container":"lib_briefing_words","domain":"Other","file":"src/director/liberation_words.c","flags":[],"fragment":true,"id":"liberation_words:lib_briefing_words:1","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A DarkHole","text_hash":"5f13e41ef9c3"},
@@ -5105,13 +5163,13 @@
   {"boxes":[{"pages":[["Nothing exported."]],"speaker":"Screen","text":"Nothing exported."}],"container":"saves_cancelled","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_cancelled:0","kind":"screen","line":155,"speaker":"Screen","speakers":["Screen"],"text":"Nothing exported.","text_hash":"e07cf5a25940"},
   {"boxes":[{"pages":[["Nothing imported."]],"speaker":"Screen","text":"Nothing imported."}],"container":"saves_cancelled","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_cancelled:1","kind":"screen","line":155,"speaker":"Screen","speakers":["Screen"],"text":"Nothing imported.","text_hash":"47019bfac90f"},
   {"boxes":[{"pages":[["The folder is as it","was."]],"speaker":"Screen","text":"The folder is as it was."}],"container":"saves_cancelled","domain":"SAVES","file":"src/saves/saves_text.c","flags":[],"id":"saves_text:saves_cancelled:2","kind":"screen","line":155,"speaker":"Screen","speakers":["Screen"],"text":"The folder is as it was.","text_hash":"b81fac3c5d6e"},
-  {"boxes":[{"pages":[["MegaMan jacked","out,victorious!"]],"speaker":"Narration","text":"MegaMan jacked out,victorious!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_WON_HOW","kind":"speech","line":7,"speaker":"Narration","speakers":["Narration"],"text":"MegaMan jacked out,victorious!","text_hash":"8c28431a0d7b"},
-  {"boxes":[{"pages":[["We did it,MegaMan!!"]],"speaker":"Lan","text":"We did it,MegaMan!!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_WON","kind":"speech","line":8,"speaker":"Lan","speakers":["Lan"],"text":"We did it,MegaMan!!","text_hash":"4f1262205567"},
-  {"boxes":[{"pages":[["Dad's backup got","MegaMan home."]],"speaker":"Narration","text":"Dad's backup got MegaMan home."}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_LOST_HOW","kind":"speech","line":9,"speaker":"Narration","speakers":["Narration"],"text":"Dad's backup got MegaMan home.","text_hash":"a9e89371a0c2"},
-  {"boxes":[{"pages":[["We've got his battle","data now!"]],"speaker":"Lan","text":"We've got his battle data now!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_LEARNED","kind":"speech","line":10,"speaker":"Lan","speakers":["Lan"],"text":"We've got his battle data now!","text_hash":"e2da64e865de"},
-  {"boxes":[{"pages":[["Our deepest dive","yet,MegaMan!"]],"speaker":"Lan","text":"Our deepest dive yet,MegaMan!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_BEST","kind":"speech","line":11,"speaker":"Lan","speakers":["Lan"],"text":"Our deepest dive yet,MegaMan!","text_hash":"e5aeac254901"},
-  {"boxes":[{"pages":[["That was rough...","Let's try again!"]],"speaker":"Lan","text":"That was rough... Let's try again!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_ROUGH","kind":"speech","line":12,"speaker":"Lan","speakers":["Lan"],"text":"That was rough... Let's try again!","text_hash":"b8ce390b9435"},
-  {"boxes":[{"pages":[["We'll get further","next time!"]],"speaker":"Lan","text":"We'll get further next time!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_FURTHER","kind":"speech","line":13,"speaker":"Lan","speakers":["Lan"],"text":"We'll get further next time!","text_hash":"8624c0b3705a"},
+  {"boxes":[{"pages":[["Home,safe and sound!"]],"speaker":"MegaMan","text":"Home,safe and sound!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_WON_HOW","kind":"speech","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Home,safe and sound!","text_hash":"029027efed20"},
+  {"boxes":[{"pages":[["Lan,we did it!!"]],"speaker":"MegaMan","text":"Lan,we did it!!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_WON","kind":"speech","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,we did it!!","text_hash":"18fc33c76662"},
+  {"boxes":[{"pages":[["Dad's backup worked!"]],"speaker":"MegaMan","text":"Dad's backup worked!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_LOST_HOW","kind":"speech","line":9,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Dad's backup worked!","text_hash":"0e1432a69415"},
+  {"boxes":[{"pages":[["We've got his battle","data now!"]],"speaker":"MegaMan","text":"We've got his battle data now!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_LEARNED","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We've got his battle data now!","text_hash":"e2da64e865de"},
+  {"boxes":[{"pages":[["Our deepest dive","yet,Lan!"]],"speaker":"MegaMan","text":"Our deepest dive yet,Lan!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_BEST","kind":"speech","line":11,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Our deepest dive yet,Lan!","text_hash":"709368b468be"},
+  {"boxes":[{"pages":[["That was rough...","Let's try again!"]],"speaker":"MegaMan","text":"That was rough... Let's try again!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_ROUGH","kind":"speech","line":12,"speaker":"MegaMan","speakers":["MegaMan"],"text":"That was rough... Let's try again!","text_hash":"b8ce390b9435"},
+  {"boxes":[{"pages":[["We'll get further","next time!"]],"speaker":"MegaMan","text":"We'll get further next time!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_FURTHER","kind":"speech","line":13,"speaker":"MegaMan","speakers":["MegaMan"],"text":"We'll get further next time!","text_hash":"8624c0b3705a"},
   {"boxes":[{"pages":[["JACK-IN SETUP"]],"speaker":"Screen","text":"JACK-IN SETUP"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"JACK-IN SETUP","text_hash":"30a7d532d142"},
   {"boxes":[{"pages":[["JACK IN!"]],"speaker":"Screen","text":"JACK IN!"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:12","kind":"screen","line":22,"speaker":"Screen","speakers":["Screen"],"text":"JACK IN!","text_hash":"943f33452e84"},
   {"boxes":[{"pages":[["Three acts, then the","Nest"]],"speaker":"Screen","text":"Three acts, then the Nest"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:15","kind":"screen","line":25,"speaker":"Screen","speakers":["Screen"],"text":"Three acts, then the Nest","text_hash":"86f33c4a3cae"},
@@ -5130,6 +5188,15 @@
   {"boxes":[{"pages":[["{strong}."]],"speaker":"Screen","text":"{strong}."},{"pages":[["{weak} hits do 2x","and break it"]],"speaker":"Screen","text":"{weak} hits do 2x and break it"}],"container":"setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_cross_note:0","kind":"screen","line":46,"placeholders":[{"name":"strong","spec":"%s"},{"name":"weak","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{strong}.|{weak} hits do 2x and break it","text_hash":"49fa4eed54b7"},
   {"boxes":[{"pages":[["From the first","battle. {weak}"],["hits do 2x and break","it"]],"speaker":"Screen","text":"From the first battle. {weak} hits do 2x and break it"}],"container":"setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_cross_note:1","kind":"screen","line":47,"placeholders":[{"name":"weak","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"From the first battle. {weak} hits do 2x and break it","text_hash":"8c0dc446ee0c"},
   {"boxes":[{"pages":[["{on} on"]],"speaker":"Screen","text":"{on} on"}],"container":"setup_helpers_on","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_helpers_on:0","kind":"screen","line":63,"placeholders":[{"name":"on","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"{on} on","text_hash":"62f60b98f38c"},
+  {"boxes":[{"pages":[["MegaMan was deleted"]],"speaker":"Screen","text":"MegaMan was deleted"}],"container":"words","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:words:4","kind":"screen","line":13,"speaker":"Screen","speakers":["Screen"],"text":"MegaMan was deleted","text_hash":"fe2f3ab0105d"},
+  {"boxes":[{"pages":[["The Nest has fallen!"]],"speaker":"Screen","text":"The Nest has fallen!"}],"container":"words","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:words:5","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"The Nest has fallen!","text_hash":"a2a8149d57dc"},
+  {"boxes":[{"pages":[["Viruses deleted"]],"speaker":"Screen","text":"Viruses deleted"}],"container":"words","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:words:7","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"Viruses deleted","text_hash":"9874dca9249e"},
+  {"boxes":[{"pages":[["Navis deleted"]],"speaker":"Screen","text":"Navis deleted"}],"container":"words","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:words:8","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"Navis deleted","text_hash":"9b9c8a2ac5d5"},
+  {"boxes":[{"pages":[["This week"]],"speaker":"Screen","text":"This week"}],"container":"words","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:words:11","kind":"screen","line":20,"speaker":"Screen","speakers":["Screen"],"text":"This week","text_hash":"7b72883e078a"},
+  {"boxes":[{"pages":[["a word for each","SummaryText"]],"speaker":"Screen","text":"a word for each SummaryText"}],"container":"summary_text","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"fragment":true,"id":"title_summary_text:summary_text:0","kind":"screen","line":24,"speaker":"Screen","speakers":["Screen"],"text":"a word for each SummaryText","text_hash":"d1586a61b89b"},
+  {"boxes":[{"pages":[["Layer {layer}"]],"speaker":"Screen","text":"Layer {layer}"}],"container":"summary_layer","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:summary_layer:0","kind":"screen","line":29,"placeholders":[{"name":"layer","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"Layer {layer}","text_hash":"41c04808754b"},
+  {"boxes":[{"pages":[["HELP: {names}"]],"speaker":"Screen","text":"HELP: {names}"}],"container":"summary_helpers","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:summary_helpers:0","kind":"screen","line":40,"placeholders":[{"name":"names","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"HELP: {names}","text_hash":"51c232534708"},
+  {"boxes":[{"pages":[["HELP: {on} ON"]],"speaker":"Screen","text":"HELP: {on} ON"}],"container":"summary_helpers_count","domain":"Title","file":"src/scenes/title_summary_text.c","flags":[],"id":"title_summary_text:summary_helpers_count:0","kind":"screen","line":45,"placeholders":[{"name":"on","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"HELP: {on} ON","text_hash":"aba160d1c548"},
   {"boxes":[{"pages":[["Weak to","{powers_cross_weakness}{strong}{strong}{navis}{navis}"]],"speaker":"Screen","text":"Weak to {powers_cross_weakness}{strong}{strong}{navis}{navis}"}],"container":"second_cross_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_cross_lines:0","kind":"screen","line":33,"placeholders":[{"name":"powers_cross_weakness","spec":"%s"},{"name":"strong","spec":"%s"},{"name":"strong","spec":"%s"},{"name":"navis","spec":"%s"},{"name":"navis","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Weak to {powers_cross_weakness}{strong}{strong}{navis}{navis}","text_hash":"4168eac4647c"},
   {"boxes":[{"pages":[["{turns}","turn{turns} as a","Cybeast"]],"speaker":"Screen","text":"{turns} turn{turns} as a Cybeast"},{"pages":[["Elementless attack","chips that don't dim"],["the screen:","Attack+30"]],"speaker":"Screen","text":"Elementless attack chips that don't dim the screen: Attack+30"}],"container":"second_beast_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_beast_lines:0","kind":"screen","line":39,"placeholders":[{"name":"turns","spec":"%d"},{"name":"turns","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{turns} turn{turns} as a Cybeast|Elementless attack chips that don't dim the screen: Attack+30","text_hash":"31a289af5d94"},
   {"boxes":[{"pages":[["MegaMan is tired:"]],"speaker":"Screen","text":"MegaMan is tired:"},{"pages":[["a Beast Out now ends","in BeastOver"]],"speaker":"Screen","text":"a Beast Out now ends in BeastOver"}],"container":"second_beast_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_beast_lines:1","kind":"screen","line":41,"speaker":"Screen","speakers":["Screen"],"text":"MegaMan is tired:|a Beast Out now ends in BeastOver","text_hash":"526465b1758e"},

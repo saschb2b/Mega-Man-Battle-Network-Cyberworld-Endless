@@ -53,8 +53,8 @@
     {
       "name": "BN5's Liberation Missions",
       "state": "designed",
-      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py).",
-      "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
+      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84).",
+      "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns (taken as unlimited, its hits doubled from turn 11), whether BN5's Custom screen opens by itself as a liberation turn's gauge fills, the Surrounded field by the dark on both sides, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
       "link": "../LIBERATION.md",
       "updated": "2026-10-23",
       "state_text": "Designed, not built"
@@ -73,6 +73,10 @@
     {
       "date": "2026-10-23",
       "what": "BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)"
+    },
+    {
+      "date": "2026-10-23",
+      "what": "A liberation's battle on BN6's loop (src/emu/bn6_battle_loop.h, src/director/liberation_battle.c, docs/ROM_DATA.md's row BN6's battle loop and banners): BN6's loop state 0x0203CA70, its turn banner 0x080080A0, the fight's frame 0x08008144, the win's banner 0x0800822C, the draw 0x080082DC (its banner 0x080082F8, past it 0x0800830C), the message table 0x0801EF84; BN5's rules named (BN5_LIB_TURN_BANNER, BN5_LIB_TIME_ASK, BN5_LIB_TIME_UP, BN5_LIB_WIN_BANNER, BN5_BATTLE_MESSAGES, BN5_LIB_DOUBLE_HIT)"
     },
     {
       "date": "2026-10-23",
@@ -139,6 +143,13 @@
       "result": "In romlab on the plain BN5 ROM, from a state after its intro: poke8 020022F4 N and BN5's own warp (0x0800552E) to map 0x86:(N-1) at the team record's place. The game state's sub-mode turned 0x18 and the board started for missions 1, 2, 3, 5, 7 and 9 (camera tour, tutorial or briefing, Order Points 3; mission 1: PHASE 1, TRGT PHASE 7 under L). Mission 1's 100 panels in RAM (0x02030000) are the ROM's list, kind for kind; its units (0x0203E000) MegaMan 100 HP, Colonel 200, BlizzardMan 400 at (0x87, 0x7B), two guardians 120 each at their holes.",
       "meaning": "The records are the missions: a generated board in the same records would run on BN5's own board code, and the generator's numbers stand on BN5's.",
       "link": "../LIBERATION.md#where-they-live"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-23",
+      "name": "A liberation battle's turns and banners",
+      "result": "BN5 in romlab (mission 1's first liberation battle, a state from the PR #202 session): BattleState +7 0 until the first Custom screen opens, then 1. BN5's code read: 0x08007954 shows FINAL TURN! (0x10) from +7 3, else TURN n START! (0x0C, n = +7); 0x08008BD2, the Custom screen asked for, from +7 3 sets the loop's phase 0x18 (0x08007C24: TIME UP!, LIBERATE FAILED!); 0x08007A50, the win, 1 TURN LIBERATE! (0x90) where +7 is 1, else LIBERATE SUCCESS! (0x58). BN6 (Gregar) keeps the message table whole (0x0801EF84) but not the rules. With BN6's loop answered by hooks, a dark layer's battle (--dev dark,god, BN5's ROM): TURN 1 START!, TURN 2 START!, FINAL TURN!, the third gauge full: TIME UP!, LIBERATE FAILED!, back on the board with the panel dark and no results screen; with onehit a first-turn win showed 1 TURN LIBERATE!.",
+      "meaning": "BN5's liberation battle runs on BN6's own loop with BN6's own banners: four hooks and its draw, no code moved."
     },
     {
       "feature": "Arena",

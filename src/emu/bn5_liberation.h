@@ -224,8 +224,14 @@
 /* A liberation battle */
 #define BN5_BATTLE_TYPE      0x0802B3E0u /* the battle's record's +3 (BattleSettings' BattleType): */
 #define BN5_BATTLE_LIBERATION 1          /* ... 1 a liberation battle */
-#define BN5_BATTLE_TURN      0x08009016u /* BattleState +7: the turns the Custom Gauge has filled */
-#define BN5_LIB_TURNS_UP     0x08009190u /* true once BattleState +7 reaches 3: the battle loop (0x08007954) ends the battle */
-#define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a liberation battle from its eleventh turn: a hit's damage doubled (0x0800C7CC) */
+#define BN5_BATTLE_TURN      0x08009016u /* BattleState +7: the turn, one more as each Custom screen opens (1 at the first) */
+#define BN5_LIB_TURNS_UP     0x08009190u /* true once BattleState +7 reaches 3, read by BN5_LIB_TURN_BANNER alone */
+#define BN5_LIB_TURN_BANNER  0x08007954u /* as each turn's fight starts: FINAL TURN! (message 0x10) where BN5_LIB_TURNS_UP, else TURN n START! (0x0C, n the turn) */
+#define BN5_LIB_TIME_ASK     0x08008BD2u /* the Custom screen asked for (BattleState +0x32 bit 2): below the third turn it opens, from it (+7 >= 3) */
+#define BN5_LIB_TIME_UP      0x08007C24u /* ... the loop's phase 0x18: TIME UP! (0x54), 30 frames, LIBERATE FAILED! (0x5C), the battle over */
+#define BN5_LIB_WIN_BANNER   0x08007A50u /* the win's first step: 1 TURN LIBERATE! (0x90, number 1) where +7 is 1, else LIBERATE SUCCESS! (0x58) */
+#define BN5_BATTLE_MESSAGES  0x0801B80Cu /* the battle messages' table, a word each (a message's number is its offset), read by 0x0801B02A */
+#define BN5_LIB_LATE_DOUBLE  0x0800901Eu /* true in a liberation battle from its eleventh turn: */
+#define BN5_LIB_DOUBLE_HIT   0x0800C7CCu /* ... an object's hits this frame summed (its collision data's five) and doubled */
 
 #endif

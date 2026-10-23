@@ -81,6 +81,9 @@ void lib_look_begin(void);
 void lib_look_update(void);
 void lib_look_freed(int x, int y);
 bool lib_look_on(void);
+/* ... a guardian of kind `kind` (UNIT_*) in BN5's own sprite where its ROM
+ * is there: its list, number and animation set (else left as they are) */
+void lib_look_unit(int kind, int *list, int *sprite, int *anim);
 
 /* (liberation_auto.c) The test autopilot's keys on the board, frame
  * `frame` (autopilot.c). */

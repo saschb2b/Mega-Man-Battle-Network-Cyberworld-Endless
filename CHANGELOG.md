@@ -35,6 +35,15 @@
   for Beta's MrkCan1 M?" with Yes and No, and the statistics question is
   asked in BN6's chat box. The rules, measured from BN6's screens, are in
   docs/UI.md.
+- **A run ends on BN6's RESULT.** The summary after a run was bold
+  coloured lines over the darkened area. It is two PET screens now, as
+  BN6's battle RESULT gives its record and then what it got: **RESULT**
+  (how the run ended and by whom, the layer reached, viruses and Navis
+  deleted, and MegaMan's word in the NAVIGATOR box: "Dad's backup
+  worked!"), then A to **RECORDS** (the Library and what the run added,
+  the best, what the run opened marked NEW as the JACK-IN SETUP marks it,
+  and the closest goal), and A again for the title. A helped run's
+  helpers stand on RESULT's band.
 
 ## 0.14.1 (2026-10-23)
 

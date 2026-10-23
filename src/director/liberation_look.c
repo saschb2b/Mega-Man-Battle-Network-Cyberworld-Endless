@@ -33,6 +33,7 @@
 #include "liberation_state.h"
 #include "netmap.h"
 #include "rom.h"
+#include "xnavi.h"
 
 #define GBA_BG2HOFS    0x04000018u
 #define GBA_BG2VOFS    0x0400001Au
@@ -232,4 +233,13 @@ void lib_look_update(void) {
 			if (l >= 0 && K.shown[y][x] != l + 1) put_look(x, y, l);
 		}
 	refresh_screen();
+}
+
+void lib_look_unit(int kind, int *list, int *sprite, int *anim) {
+	/* (BN5's own guardians as its board shows them, with its ROM) */
+	int own = kind >= UNIT_BRUTE && kind <= UNIT_BLADIA ? xnavi_object(XOBJ_BRUTE + kind - UNIT_BRUTE) : -1;
+	if (own < 0) return;
+	*list = 7;
+	*sprite = own;
+	*anim = BN5_LIB_GUARD_ANIM;
 }

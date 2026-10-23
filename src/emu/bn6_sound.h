@@ -26,6 +26,7 @@
 #define BN6_M4A_XCMD_TABLE    0x081C2210u /* XCMD's twelve sub-commands */
 
 /* its routines */
+#define BN6_PLAY_MUSIC        0x080005D4u /* PlayMusic: r0 the song, started unless BN6_SONG_PLAYING names it already (0x63 stops the music) */
 #define BN6_M4A_SOUND_MAIN    0x0814F754u /* SoundMain: the players, CgbSound, then the mixer copied to IWRAM 0x03005700 (SoundMainRAM, 0x0814F7D8) */
 #define BN6_M4A_MPLAY_MAIN    0x0814FDB0u /* MPlayMain: a music player's frame */
 #define BN6_M4A_PLY_NOTE      0x081500A8u /* ply_note: a note given a channel by priority */

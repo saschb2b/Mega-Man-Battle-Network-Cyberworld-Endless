@@ -21,15 +21,15 @@
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */
 	int32_t depth, step, after, phase, op, prize;
-	int32_t fight, fight_unit, fight_cmd, fx, fy, customs;
+	int32_t fight, fight_unit, fight_cmd, fx, fy;
 	int32_t enemy_unit, enemy_steps;
-	uint8_t on, briefed, holes_told, prize_given, shield, enemy_banner, fight_seen, custom_open;
+	uint8_t on, briefed, holes_told, prize_given, shield, enemy_banner, fight_seen, pad0;
 	uint8_t nunits, pad[3];
 	int8_t back_in[LIB_UNITS];
 	struct { uint8_t x, y, gone, pad; } unit[LIB_UNITS];
 	uint8_t kind[MAP_H][MAP_W];
 } LibNote;
-_Static_assert(sizeof(LibNote) == 72 + LIB_UNITS * 5 + MAP_H * MAP_W && offsetof(LibNote, kind) == 72 + LIB_UNITS * 5,
+_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + MAP_H * MAP_W && offsetof(LibNote, kind) == 68 + LIB_UNITS * 5,
 	"Liberation save layout changed: bump LIB_NOTE_MAGIC");
 
 void lib_save(void) {
@@ -40,10 +40,10 @@ void lib_save(void) {
 	n.on = LB.on;
 	if (LB.on) {
 		n.step = LB.step; n.after = LB.after; n.phase = LB.phase; n.op = LB.op; n.prize = LB.prize;
-		n.fight = LB.fight; n.fight_unit = LB.fight_unit; n.fight_cmd = LB.fight_cmd; n.fx = LB.fx; n.fy = LB.fy; n.customs = LB.customs;
+		n.fight = LB.fight; n.fight_unit = LB.fight_unit; n.fight_cmd = LB.fight_cmd; n.fx = LB.fx; n.fy = LB.fy;
 		n.enemy_unit = LB.enemy_unit; n.enemy_steps = LB.enemy_steps;
 		n.briefed = LB.briefed; n.holes_told = LB.holes_told; n.prize_given = LB.prize_given; n.shield = LB.shield;
-		n.enemy_banner = LB.enemy_banner; n.fight_seen = LB.fight_seen; n.custom_open = LB.custom_open;
+		n.enemy_banner = LB.enemy_banner; n.fight_seen = LB.fight_seen;
 		n.nunits = (uint8_t)LB.b.nunits;
 		for (int u = 0; u < LB.b.nunits && u < LIB_UNITS; ++u) {
 			n.back_in[u] = (int8_t)LB.back_in[u];
@@ -76,10 +76,10 @@ bool lib_resume(void) {
 	}
 	LB.step = resumed_step(n.step, n.after);
 	LB.after = n.after; LB.phase = n.phase; LB.op = n.op; LB.prize = n.prize;
-	LB.fight = n.fight; LB.fight_unit = n.fight_unit; LB.fight_cmd = n.fight_cmd; LB.fx = n.fx; LB.fy = n.fy; LB.customs = n.customs;
+	LB.fight = n.fight; LB.fight_unit = n.fight_unit; LB.fight_cmd = n.fight_cmd; LB.fx = n.fx; LB.fy = n.fy;
 	LB.enemy_unit = n.enemy_unit; LB.enemy_steps = n.enemy_steps; LB.enemy_t = 0;
 	LB.briefed = n.briefed; LB.holes_told = n.holes_told; LB.prize_given = n.prize_given; LB.shield = n.shield;
-	LB.enemy_banner = n.enemy_banner; LB.fight_seen = n.fight_seen; LB.custom_open = n.custom_open;
+	LB.enemy_banner = n.enemy_banner; LB.fight_seen = n.fight_seen;
 	LB.banner_t = 0;
 	LB.words[0] = 0;
 	LB.cheer = 0;

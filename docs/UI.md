@@ -137,6 +137,15 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   JACK IN! at the list's foot as NaviCust's RUN! with the green triangle
   before it, and what the last run opened marked NEW as E-Mail marks a
   new mail (orange capitals over dark red, measured from it).
+- The run's summary is BN6's RESULT in two beats, as RESULT gives its
+  record and then what it got, A turning from one to the next: RESULT
+  (how the run ended and by whom in SubChip's flat panel, the layer
+  reached and the counts in the window, MegaMan's word in the NAVIGATOR
+  box) and RECORDS (the Library and the best in the window, what the run
+  opened under them, each marked NEW as the setup marks it, and the
+  closest goal in the information box). A helped run's helpers stand on
+  RESULT's band as its note. Like RESULT it waits for A, but without
+  RESULT's PRESS (A) BUTTON: no screen of ours names A.
 - A list's line keeps its colour under the cursor (Options).
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu
