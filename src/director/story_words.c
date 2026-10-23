@@ -12,6 +12,8 @@
 #include "director_state.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "liberation.h"
+#include "liberation_words.h"
 #include "meta.h"
 #include "nets_words.h"
 #include "powers.h"
@@ -123,6 +125,15 @@ static const char *nets_card(int biome) {
 	return visitors_here(run.depth, biome) ? " - Nets meet" : "";
 }
 
+/* The act card's line under the area's name, its motto, and its colour;
+ * an act whose way holds a dark layer says so in the motto's place, in
+ * Nebula's purple (docs/LIBERATION.md) */
+static const char *card_motto(int biome, SDL_Color *accent) {
+	bool dark = run.side_kind == LAYER_NORMAL && lib_way_dark((run.depth - 1) % CYCLE_LAYERS / 3, biome);
+	*accent = dark ? rgba(184, 120, 248, 255) : rgba(120, 200, 248, 255);
+	return dark ? lib_card_line : guardian_area_motto(biome);
+}
+
 void area_card(void) {
 	char act[48];
 	int biome = run.biome, act_no = ((run.depth - 1) % CYCLE_LAYERS) / 3 + 1;
@@ -154,7 +165,9 @@ void area_card(void) {
 	if (run.side_kind == LAYER_BACK) snprintf(ahead, sizeof ahead, "The Net's clock: %d", run.clock);
 	size_t k = strlen(act);
 	snprintf(act + k, sizeof act - k, "%s", nets_card(biome));
-	cinema_card(act, guardian_area_name(biome), guardian_area_motto(biome), ahead[0] ? ahead : NULL, rgba(120, 200, 248, 255), 200);
+	SDL_Color accent;
+	const char *motto = card_motto(biome, &accent);
+	cinema_card(act, guardian_area_name(biome), motto, ahead[0] ? ahead : NULL, accent, 200);
 }
 
 /* Leaving an area past its beaten guardian. */

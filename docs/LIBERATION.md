@@ -12,8 +12,9 @@ to try him.
 
 Where it stands: the dissection (from BN5's ROM, its own text, and the
 players' guides), the design decision, which the owner approved on 23
-October 2026 (The owner's decisions, at the end), and a ROM-free prototype
-of the generator with its measures. No engine code yet.
+October 2026 (The owner's decisions, at the end), a ROM-free prototype
+of the generator with its measures, and stage 1 in the engine: the dark
+layer and its board, MegaMan alone (Stage 1, as built, below).
 
 ## Summary
 
@@ -505,6 +506,112 @@ A staged plan, each stage its own pull request:
    player's own (no linked cores needed). Risk: the online rules of the
    common ground (docs/ONLINE.md).
 
+### Stage 1, as built (23 October 2026)
+
+**Where a dark layer stands.** An act's second layer, from the second act,
+behind one of the two ways its fork offers in Lan's HP (the act's own area
+at the pink pad, or the other way): two acts in three that have a fork hold
+one, either way by a coin of the run's seed (`run_dark_area`,
+`src/core/run.c`). Nothing is saved for it: the fork is worked out again
+from the seed (the plan's area, and the other way as `run_route_alt`
+offered it), so a CONTINUE knows. MegaMan says so at the way's portal
+("Part of it's gone dark. Dark panels,like Nebula's!"), and the act's card
+says "A layer here has gone dark" in its motto's place, in Nebula's purple.
+The short net meets one in acts 2 and 3, the endless net in acts 2 to 4.
+`--dev dark` makes every act's second layer from the second a dark one.
+
+**The layer.** `layer_generate` with `layer_make_dark` (`src/net/net_gen.c`)
+builds the layer's floor, flat, its arrival and exit, and nothing else of a
+normal layer (services, data, bystanders, set pieces), so it gives up the
+second layer's Net Dealer and Recovery Mr. Prog: the price of the way.
+`LAYER_MAKE` 97.
+
+**The board** (`src/director/liberation_board.c`, ROM-free, unit-tested):
+the layer's floor, one cell a panel (32 world units), from the arrival's
+reach; its kinds placed by `tools/liberation.py`'s rules from the layer's
+seed: the start zone clean (two panels' walk), the Darkloid's 3x3 at 60% of
+the farthest walk or more, the DarkHoles in whole rings of floor, a third of
+the walk on, six apart and four off the Darkloid, each ring dark and its
+guardian on it (BigBrute the first); dark panels thickening with the walk
+and gathered by one majority pass; BonusPanels at dead ends; items in the
+dark's corners first (one of Order Points always, then hearts and Order
+Points); roaming guardians from act 3. A smaller team than BN5's meets a
+DarkHole less for every two Navis short and dark five points thinner each
+(MegaMan alone: one DarkHole in act 2, two in acts 3 and 4, three in 5
+and 6). Rejected and the next seed tried as the prototype's guarantees say
+(nothing to liberate in the first phase, a guardian within three of the
+start, no room for the Darkloid or the holes); a layer whose eight seeds
+fail is made plain. Over 30 layers an act: 190-240 panels, 40-47% dark.
+
+**The par** (stage 1's estimate, `lib_par`): the dark panels on the way to
+each DarkHole in turn, nearest first, then to the Darkloid, at two a phase
+(one, and the one-turn win's eight now and then), with a phase each for a
+hole's guardian, the hole and the Darkloid, and a rest: act 2 12 (8-21), act
+3 20, act 4 15, acts 5 and 6 24. The prototype's planner, for teams, comes
+with stage 3.
+
+**The course** (`src/director/liberation.c`): after the arrival, Lan and
+MegaMan name the board ("Like Nebula's dark areas,Lan!", its DarkHoles and
+par), then PLAYER PHASE. The pad steps MegaMan one panel over clean panels
+(the diagonals along the grid, the four ways turned a quarter: UP up-right,
+RIGHT down-right), BN6's own walk carrying him there; toward a dark panel
+it only turns him; B takes him back to where the phase began; A opens the
+command menu on the panel he faces: **Liberation** (a battle of BN6's: its
+virus battles' easier half with two dark panels round it or fewer, the
+band with three to six, the next act's band one version up with seven or
+eight, a DarkHole or its guardian; won, the panel is liberated, and the
+eight round it where no second Custom screen opened, BN5's one-turn win),
+**LongSwrd** (an Order Point: two panels in a line, one battle) or
+**Pass** (half his max HP back, BN5's guides). Item panels give Order
+Points (3 to 8) or a heart (30% of max HP); a BonusPanel stepped on spins
+BN5's roulette's four we can give (HP full, five Order Points, the nearest
+guardian deleted, no harm for a phase). Then DARKLOID PHASE: each guardian
+steps toward him over the dark (BigBrute two and hits all in one,
+TinHawk three and one in three, Bladia two, darkening what it lands on),
+the Darkloid hits him within his reach (two or three); the board's harm
+never takes his last HP (alone, a deletion off a battle would end the run
+unfought). A DarkHole sends its deleted guardian back the Darkloids' phase
+after next (BN5's the next: with a team another Navi strikes the hole
+meanwhile). Every DarkHole down, the Darkloid's ring can be liberated, and
+the Darkloid fought from it: a Navi of BN6's whose HP fits the act's band,
+no act's guardian (`run_darkloid`), in his own battle. Deleted, the exit
+opens where he stood and the par's prize is given: two under par a chip a
+Server's win pays, at par one a tier lower, over par one lower still
+(`install_lib_prizes`, `src/layer/layer_objs.c`); the board's battles pay
+BN6's own rewards beside it. No random battles on the board.
+
+**On the map.** The units are the layer's own map objects (`OBJ_UNIT`:
+HeelNavis for the guardians, the Darkloid in his own overworld sprite),
+moved by their objects' places. The dark panels are the layer's own floor
+recoloured as it shows (`src/director/liberation_draw.c`), in Nebula's
+purple, the Darkloid's ring redder, a DarkHole near black, a BonusPanel
+gold, the panel MegaMan faces lit: pixel by pixel in the frame, from the
+map layer's scroll (BG1's: `x + y + 256` and `(y - x) / 2 - 256` of the
+world at the picture's middle, mod 512, read on captures as MegaMan was
+moved), a pixel in a sprite's colour or under a chat box left alone; BN5's
+own board tiles are not read yet. The phase, par and Order Points in the
+corner, the banners and the command menu in BN6's PET look
+(`src/gfx/pet_look.h`); every word in BN6's chat boxes
+(`src/director/liberation_words.c`).
+
+**Checked:** `tests/test_core.c` (`test_liberation_board`: 150 dark layers
+over acts 2-6, the same board twice from a seed, the Darkloid's ring whole,
+each hole's ring dark, the start clean, no guardian by it, nine boards in
+ten made); the autopilot plays the board (`liberation_auto.c`: the dark
+panel that brings it nearest the next target, Pass below two fifths of its
+HP): `CYBERWORLD_AUTOPILOT=1 build.py shot --scene emu --run-depth 5 --dev
+dark,god,onehit --frames 48000` liberated seed 1's act 2 board in 23
+phases against its par 14 (the autopilot never wins in one turn), deleted
+CircusMan, took the prize (Recov80 *) and the exit, and went on through act
+2's guardian, home and act 3's dark layer.
+
+**Left for later:** the board's state across a CONTINUE (a checkpoint on a
+dark layer restarts its board from the arrival); BN5's board tiles read at
+run time; the camera over the board (BN5's L); barriers, keys and sealed
+routes; chips and zenny in item panels; the BonusPanel's chip; the
+planner's par; the economy report and pacing for dark layers; the second
+screen's board; stages 2 to 5.
+
 Moving BN5's own board code (0x12000 bytes of Thumb, its tables, text and
 graphics) into BN6's core instead was weighed: its exact rules for free,
 but most of it calls BN5's overworld engine at other addresses, and the
@@ -536,5 +643,9 @@ Still open:
    MegaMan alone.
 5. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
    zenny after) in the run's economy (docs/ECONOMY.md), or the route a
-   sealed region opens as the only special reward. Decided with the
-   game-design skill when the board is built (stage 1).
+   sealed region opens as the only special reward. Stage 1 gives BN5's
+   tiers as chips, a Server's prize two under par down to a lesser one
+   over it (Stage 1, as built), reasoned with the game-design skill: the
+   dark way is a costed choice (the second layer's dealer, heal and
+   Mystery Data given up for the board's battles and its prize), and the
+   par's tiers make pressing on pay. The owner's call stands open.

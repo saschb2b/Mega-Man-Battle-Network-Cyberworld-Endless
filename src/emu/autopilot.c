@@ -20,6 +20,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "layer_objs.h"
+#include "liberation.h"
 #include "net.h"
 #include "netmap.h"
 #include "run.h"
@@ -535,6 +536,8 @@ static int trips_wanted(void) {
 }
 
 static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t *keys) {
+	/* (a liberation's board, docs/LIBERATION.md: its own play) */
+	if (lib_on()) { *keys = lib_auto_keys((int)frame); return HOME_KEYS; }
 	if (director_in_hp()) {
 		int k = run.clock < trips_wanted() ? director_older_portal() : -1, ax, ay;
 		lanhp_portal_spot(k < 0 ? 0 : k, wx, wy);

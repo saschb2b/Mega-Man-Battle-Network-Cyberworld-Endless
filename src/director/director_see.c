@@ -13,6 +13,7 @@
 #include "director_board.h"
 #include "director_folder.h"
 #include "director_state.h"
+#include "liberation.h"
 #include "gfx.h"
 #include "net_shapes.h"
 #include "platform.h"
@@ -180,6 +181,7 @@ void director_see(void) {
 	see_counts();
 	see_locks();
 	see_bug_note();
+	lib_see();
 }
 
 /* The panel BN6 lights under MegaMan's feet, marked over his sprite: a

@@ -215,7 +215,7 @@ static bool follow_exit_warp(void) {
  * as the guardian's state changes and after the game enters a map (bn6f
  * EnterMap clears the map's flags, 0x1640-0x16FF: EV_MAP_ENTER). */
 static void exit_flag(bool entered) {
-	bool shut = !boss_exit_open();
+	bool shut = !boss_exit_open() || lib_exit_shut();
 	if (!entered && shut == D.exit_shut) return;
 	D.exit_shut = shut;
 	if (shut) flag_set(BN6_FLAG_WARP_OFF + 1);
@@ -348,6 +348,7 @@ static void battle_update(void) {
 	}
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
+		lib_battle_frame();
 		home_jobs_battle_frame();
 		D.souls_used |= emu_battle_souls();   /* (the run log's unisons) */
 	}
@@ -549,6 +550,7 @@ void director_update(void) {
 	exit_flag(false);
 	guardian_update();
 	arrival_update();
+	lib_update();
 	dev_steps();
 	if (act_on_choices()) return;
 	checkpoint_update();
