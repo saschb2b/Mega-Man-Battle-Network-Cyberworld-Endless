@@ -123,8 +123,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "BN6's sound engine",
       "state": "works",
-      "now": "MP2K (m4a) as BN6's code runs it, in the engine's own C, plays the title's and the PET screens' songs and sounds: the same as the game byte for byte, frame by frame, for every song and sound checked against the plain ROM in romlab (tools/mp2k_verify.py). BN5's songs play on the same code, BN5's library being BN6's; the Jukebox plays both games' music players.",
-      "left": "Where BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18 and 0x20-0x24 play (its cutscene scripts unread), for their names; a frame-by-frame differential of a BN5 song against BN5's own engine state (its RAM's places).",
+      "now": "MP2K (m4a) as BN6's code runs it, in the engine's own C, plays the title's and the PET screens' songs and sounds: the same as the game byte for byte, frame by frame, for every song and sound checked against the plain ROM in romlab (tools/mp2k_verify.py). BN5's songs play on the same code, BN5's library being BN6's; the Jukebox plays both games' music players; every BN5 song its game starts named for where it plays, its scripts' music commands decoded from its ROM (tools/bn5_songs.py), three of them played in a run where BN5 plays them (docs/MULTIROM.md, BN5's music in a run).",
+      "left": "A frame-by-frame differential of a BN5 song against BN5's own engine state (its RAM's places); BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21, which nothing in Team Colonel starts (tools/bn5_songs.py), named only by a source that knows them.",
       "updated": "2026-10-23",
       "link": "../EMULATION.md#the-engines-own-sound",
       "state_text": "Works"

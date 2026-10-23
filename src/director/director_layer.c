@@ -266,8 +266,9 @@ static int layer_area(int *biome) {
 
 /* The song an area's layers play: another game's area its own theme,
  * copied into BN6 (docs/MULTIROM.md), where it can be; else `song`, the
- * BN6 area's. Its battles' themes (encounter_song) the same way: that
- * game's virus battle and boss music, else BN6's. */
+ * BN6 area's. Its battles' themes (encounter_song) and its guardian's
+ * prelude (guardian_prelude_song) the same way: that game's virus battle,
+ * boss and before-the-boss music, else BN6's. */
 static int layer_song(int tiles, int song) {
 	const NetAreaDef *x = net_area_def(tiles);
 	static const int bn6[2] = { ENCOUNTER_SONG_BATTLE, ENCOUNTER_SONG_BOSS };
@@ -275,6 +276,8 @@ static int layer_song(int tiles, int song) {
 		int theirs = x && x->xrom > 0 ? XR[x->xrom - 1].layout->battle_songs[b] : 0;
 		encounter_song[b] = theirs ? xsong_install(x->xrom - 1, theirs, bn6[b]) : bn6[b];
 	}
+	int prelude = x && x->xrom > 0 ? XR[x->xrom - 1].layout->prelude_song : 0;
+	guardian_prelude_song = prelude ? xsong_install(x->xrom - 1, prelude, GUARDIAN_PRELUDE) : GUARDIAN_PRELUDE;
 	return x && x->xrom > 0 && x->xsong ? xsong_install(x->xrom - 1, x->xsong, song) : song;
 }
 
@@ -354,9 +357,10 @@ static bool build_layer(void) {
 	D.server_rolled = false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_CHALLENGE) { server_roll(); break; }
+	int song = layer_song(tiles, a->song);   /* (before the objects: the guardian's prelude names its song) */
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
 	lib_begin();
-	mapslot_music(D.group, D.number, lib_board_song(layer_song(tiles, a->song)));
+	mapslot_music(D.group, D.number, lib_board_song(song));
 	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);
 

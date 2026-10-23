@@ -2137,6 +2137,52 @@ the next.
   `+0x700000` to `+0x710000` (docs/EMULATION.md; laid out in
   `src/emu/soul_room.h`).
 
+## BN5's music in a run
+
+Where a run has a moment BN5 has, BN5's song for it plays there, as BN5
+plays it, through BN6's own music player: its copy made once by
+`src/audio/xsong.c` with the board's songs (docs/LIBERATION.md), after
+every song copied before it, so each keeps its place in a saved state.
+Each cue is the moment's own in BN5, read in its code or scripts
+(docs/ROM_DATA.md, Where BN5 plays its songs):
+
+| Song | Where BN5 plays it | Where a run plays it |
+| --- | --- | --- |
+| 0x1C, Before the Boss | before a fight: ProtoMan or Colonel showing himself, the scenario comps' last maps, a mission's opening | a guardian's prelude on BN5's areas, as he logs in (`guardian_prelude_song`, set by the layer with its battle themes); a dark layer's opening (PR #207) |
+| 0x18, Area Liberated | a mission won: its board's routine 6, the Colonel's tally of target and actual phases | a dark layer won, as the words of its par begin; the board's own song again once the prize is given |
+| 0x24, One-Turn Win | a liberation's battle won in its first turn, in place of the win's usual song (0x08007A82) | a liberation's battle won in its first turn, BN6's own win answered by a hook on its song (`BN6_WIN_SONG`, `liberation_cues.c`) |
+
+**Why these** (the game-design skill's lens): music is a cue of where
+the player is and what is at stake, never noise. A dark layer's
+dialectic is clearing fast against clearing safely, the par its measure;
+the one-turn jingle answers mastery at the moment it happens, beside the
+1 TURN LIBERATE! banner that already says it (the sound never the only
+sign), and the won song closes the board's session where BN5 closes its
+mission, a beat apart from every battle's fanfare. The prelude keeps a
+BN5 area BN5's through the guardian's whole scene: its theme, its
+before-the-boss song, its boss theme, as its battles' music already is
+(a super boss's staging keeps BN6's, docs/BOSSES.md). Weighed and left
+out: Nebula 0x02 (no scene of Nebula's own in a run), Hope 0x0E (no
+friends arriving), Final Battle 0x17 (BN5's last boss is never fought),
+Beach Day 0x06 and Challenge 0x23 (no such places), Sorrow 0x0D (BN6's
+own defeat and game over already speak at a run's losses).
+
+**What it costs:** 0x18's copy 1388 bytes of the songs' free space
+(`FREE_SONGS`, 768 KB, some 231 KB used with every BN5 song and sound),
+0x24's 796; 0x1C was the board's already. The core's ROM copy holds
+them, so the New 3DS's heap is unchanged (`tools/heap3ds.py`).
+
+**Verify:** `CYBERWORLD_EMU_DEBUG=1` prints each copy ("xsong: song 0x18
+... in slot 0x2c", "0x24 ... in slot 0x2d") and the music player's song
+each second ("music t... song"): on `--net-biome x0 --seed 2 --run-depth
+3` with the autopilot, the guardian's prelude turns it to `089d5168`, the
+slot 0x2B's copy of 0x1C, where on `--net-biome 0` it is BN6's own
+`081a4484`; on a dark layer (`--run-depth 5 --dev dark,god,onehit --seed
+2`), "liberation: a first turn's win plays BN5's song 0x24" before each
+battle, a first-turn win's song `089d59f0` (stopping as it ends) and a
+second turn's BN6's Victory `081a315c`, and "BN5's song 0x18" as the board
+is won.
+
 ## Status
 
 - [x] Battle Network 5: Team Colonel (USA): its map and coordinate
@@ -2210,8 +2256,9 @@ the next.
   (song 0x63, as in BN6), and how BN5's own ways between its areas keep a
   theme playing there is not traced; End Area's maps that are listed (2
   and 5) play 0x13, its theme here. The rest of its music its scripts and
-  code start (direct calls play 0x1A, 0x1B, 0x1D, 0x1E, 0x22 and 0x23; its
-  Liberation Missions' among them, not traced).
+  code start, every one traced (docs/ROM_DATA.md, Where BN5 plays its
+  songs); three of them play in a run where BN5 plays them (BN5's music in
+  a run, below).
 - [x] Its battle music: its random battles' theme and its bosses' (songs
   0x15 and 0x16, named in its battle records as BN6's are), copied after
   its areas' themes and named in the records of battles on its areas'
@@ -2223,10 +2270,13 @@ the next.
   (`src/gfx/xbackdrop.c`), for every battle fought there: its random
   battles, its guardian, ProtoMan's netbattle.
 - [ ] Its towns' music. Its lists name ACDC Town's (group 0x00): the
-  town 0x03, its houses (maps 1-6) 0x04, map 7 0x05, maps 8-11 0x0C;
-  group 0x01's maps 0x05 and 0x0C; in one story state (its third list)
-  0x0C throughout both. Its other real-world groups play what their
-  scripts start. Each of its music songs (0x01-0x24, 0x0A empty) is one
+  town 0x03, its houses (maps 1-6) 0x04, Higsby's (map 7) 0x05;
+  SciLab's (group 0x01) five maps 0x05; in one story state (its third
+  list) 0x0C throughout both. Its other real-world
+  groups (0x02-0x05, among them the beach and the old mine, 0x02,
+  and Nebula's base, 0x05, seen in romlab) are in no list, and entering one stops the music
+  (romlab: the BGM's player paused); their maps' scripts start only their
+  scenes' songs. Each of its music songs (0x01-0x24, 0x0A empty) is one
   xsong.c can copy (sequences of 368 to 8324 bytes, no MEMACC, all on
   voice group `0x081547A8`); waiting on a town of its own for the run.
 - [x] Its bystanders on its areas' layers: its purple HeelNavi, sprite

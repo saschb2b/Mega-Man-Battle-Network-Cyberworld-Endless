@@ -305,7 +305,10 @@ liberation and an item's find; the recordings are in the pull request):
 - **The music:** song 0x22 is the board's own in both phases (its clock
   runs on from one to the next: no change of song at a phase), 0x1C plays
   at the mission's opening (the board's routine 1, its tour), the
-  liberations' battles BN5's virus battle song 0x15.
+  liberations' battles BN5's virus battle song 0x15; a battle won in its
+  first turn ends on 0x24 in place of the win's usual song, and the
+  mission won plays 0x18 over the Colonel's tally of its phases, once
+  (its routine 6; docs/ROM_DATA.md, Where BN5 plays its songs).
 - **The camera** pans to the unit about to act: to the Darkloid before
   DARKLOID PHASE (about 20 pixels a frame, then a quarter of what is left
   each frame, some 32 frames, the band 3 frames after it stops), to each
@@ -922,7 +925,9 @@ while he stands. The board's music is BN5's: its song 0x22 the dark layer's map'
 (`lib_board_song`), 0x1C at the briefing, 0x22 again at PLAYER PHASE
 01, copied into BN6 after the areas' songs and themes (`xsong.c`, each
 keeping its place) and started by BN6's PlayMusic
-(`liberation_sound.c`).
+(`liberation_sound.c`); BN5's one-turn win 0x24 at a battle won in its
+first turn, and 0x18 as the board is won, the board's own again once it
+ends (`liberation_cues.c`; why, docs/MULTIROM.md, BN5's music in a run).
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
 banners and the menu are as above (BN5's own still to come).
@@ -1056,8 +1061,7 @@ that deletes in three turns.
 to turn round: its text is BN5's battle archive's "Surrounded! Press L or
 R Button to turn around!"): BN6's own fields hold no field of enemies on
 both sides that we know of; whether BN5's own Custom screen opens by
-itself as a liberation turn's gauge fills; BN5's sound for a one-turn
-win (its own song); the Darkloid's intro and BN5's Darkloids (stage 4);
+itself as a liberation turn's gauge fills; the Darkloid's intro and BN5's Darkloids (stage 4);
 the team (stage 3).
 
 ### The quality bar, as built (23 October 2026)

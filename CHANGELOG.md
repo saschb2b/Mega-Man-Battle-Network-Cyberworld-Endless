@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **BN5's songs named for where BN5 plays them, and three of them in
+  runs.** The Jukebox's BN5 songs had numbers in place of names, or names
+  borrowed from BN6. Now every song Team Colonel starts is named for its
+  own place, read from its scripts, which were decoded from the ROM:
+  SciLab (once called School), Beach Day, A Stranger, Hope, Challenge,
+  Area Liberated and One-Turn Win. The seven songs nothing in the game
+  starts keep their number in More. In runs, BN5's own Before the Boss
+  plays as a guardian logs in on BN5's areas. A liberation's battle won
+  in its first turn ends on BN5's one-turn jingle, and a dark layer won
+  plays BN5's song for a won mission. `tools/bn5_songs.py` lists where
+  each song starts.
 - **The Net Square is a hub and its parts.** Friends who visited
   together lost each other: the Square was one wide plaza with its wings
   out of sight. Now everyone arrives in a compact **welcome plaza**, its

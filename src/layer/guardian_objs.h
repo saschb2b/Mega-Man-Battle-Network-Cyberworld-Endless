@@ -35,6 +35,13 @@ typedef struct {
 	uint8_t draft[3];          /* the draft's programs (variants), 0 none: LAYER_DRAFT_FIT_FLAG + k says whether each fits */
 } GuardianStage;
 
+/* The song a guardian's prelude plays as he logs in: BN6's before a
+ * boss's fight, or the area's game's (another game's area: its own,
+ * copied into BN6, docs/MULTIROM.md), as the layer sets it before its
+ * objects are made. */
+#define GUARDIAN_PRELUDE 0x1C
+extern int guardian_prelude_song;
+
 /* The guardian object `o` at world (wx, wy, wz): its scripts into `text`. */
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g);
 /* Its actors, once `archive` holds the scripts: the guardian in his own

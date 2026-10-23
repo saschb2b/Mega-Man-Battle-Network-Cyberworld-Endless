@@ -389,12 +389,12 @@ enum { BN5_NAVI_COLONEL = 7, BN5_NAVI_SHADOWMAN, BN5_NAVI_NUMBERMAN, BN5_NAVI_TO
 #define BN5_COLONEL_PHASE0 0x080236BCu /* mode 0x38's phases (its table 0x080236B4): the last pick into the button, its icon to OBJ 0x06016EC0, */
 #define BN5_COLONEL_PHASE1 0x080236E8u /* ... its blink, 30 frames, and back to mode 4 (the lit rules again, 0x08024A2A) */
 #define BN5_COLONEL_DRAW  0x080254F8u /* the loaded chip drawn on the button (an OBJ, its tile 0x376, palette 10), modes 4 and 0x24 each frame */
-#define BN5_COLONEL_ART   0x08024180u /* the word naming ColonelSoul's button's tiles on the chips' screen (type 8's draw, 0x0802415E):
-                                         0x086FBA88, 0x180 bytes lit and chosen, then 0x180 grey */
+#define BN5_COLONEL_ART   0x08024180u /* the word naming ColonelSoul's button's tiles (type 8's draw, 0x0802415E): 0x086FBA88, 0x180 bytes lit and chosen, 0x180 grey */
 #define BN5_COLONEL_INFO_ART 0x080245C4u /* ... its picture in the chip's window (0x080245A4): 0x087508BC, 0x540 bytes, */
 #define BN5_COLONEL_INFO_PAL 0x080245C8u /* ... its palette: 0x08750E1C, 0x20 bytes, */
 #define BN5_COLONEL_NAME_PAL 0x08024650u /* ... and its name line's (0x0802460A): 0x086FC1E8, 0x20 bytes */
 #define BN5_COLONEL_STRIKE_SPAWN 0x080CABCAu /* the obstacle strike's spawn: the third kind's 0x30 at r0, r1, its side r3 (0x08018026) */
 #include "bn5_expression.h"   /* what BN5 has to show a mood where BN6 has the like or lacks it */
 #include "bn5_liberation.h"   /* its Liberation Missions' records and board (docs/LIBERATION.md) */
+#include "bn5_music.h"        /* what starts its songs, and where the ones runs play */
 #endif

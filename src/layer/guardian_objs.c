@@ -24,7 +24,6 @@
 #include "super_lines.h"
 #include "xguardian.h"
 
-#define SONG_BOSS_PRELUDE 0x1C
 /* BN6's no song: its PlayMusic stops every song for it (bn6f PlayMusic,
  * sound_8000630), as its own scripts hush a scene; 0xFF, which this
  * played before, stopped nothing (BN6_MUSIC_STATUS read each frame) */
@@ -37,6 +36,8 @@
 #define SOUND_REVEAL      0x100
 #define SOUND_DEPART      0xD7
 #define FADE_STEPS        8
+
+int guardian_prelude_song = GUARDIAN_PRELUDE;
 
 static const StageFlags flags = {
 	LAYER_BOSS_APPEAR_FLAG, LAYER_BOSS_GONE_FLAG, LAYER_REWARD_FLAG, LAYER_REWARD_TAKEN_FLAG, LAYER_SUPER_POSE_FLAG, LAYER_SUPER_SEAL_FLAG,
@@ -188,7 +189,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
 		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);
-	g->prelude = ta_music(text, SONG_BOSS_PRELUDE);
+	g->prelude = ta_music(text, super_boss(g->navi) ? GUARDIAN_PRELUDE : guardian_prelude_song);   /* (a super boss's staging BN6's: docs/BOSSES.md) */
 	g->hush = ta_music(text, SONG_STOP);
 	g->theme = ta_music(text, SCRIPTS_AREA_MUSIC);
 	grand_scripts(text, g);
