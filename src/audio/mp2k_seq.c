@@ -140,7 +140,10 @@ static void cmd_simple(Mp2kTrack *t, uint8_t cmd) {
 /* one command of BN6's jump table (0xB1-0xCE) */
 static void command(Mp2kPlayer *pl, Mp2kTrack *t, uint8_t cmd) {
 	switch (cmd) {
-	case 0xB2: cmd_goto(t); break;
+	case 0xB2:
+		if (t == &M.tracks[pl->first]) ++pl->loops;
+		cmd_goto(t);
+		break;
 	case 0xB3:
 		if (t->pattern_level >= 3) { cmd_fine(t); break; }
 		t->stack[t->pattern_level++] = t->cmd + 4;
@@ -221,7 +224,7 @@ static bool track_tick(int p, Mp2kTrack *t) {
 		else if (cmd > 0xB0) {
 			command(pl, t, cmd);
 			if (t->flags == 0) return false;
-		} else t->wait = mp2k_u8(M.clock_table + cmd - 0x80);
+		} else t->wait = mp2k_lib_u8(M.clock_table + cmd - 0x80);
 	}
 	--t->wait;
 	lfo(t);
@@ -318,6 +321,7 @@ void mp2k_players_frame(void) {
 	for (int p = 0; p < MP2K_PLAYERS; ++p) {
 		Mp2kPlayer *pl = &M.players[p];
 		if (pl->status & (uint32_t)PLAYER_PAUSE) continue;
+		mp2k_read(pl->rom);
 		fade(pl);
 		if (pl->status & (uint32_t)PLAYER_PAUSE) continue;
 		player_ticks(p);

@@ -92,6 +92,7 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	pet_leave();
 	online_visit_shutdown();
 	audio_external(NULL);
 	platform_second_screen(NULL, NULL);
@@ -151,6 +152,8 @@ static void update(void) {
 	if (online_visit_held()) { online_visit_held_frame(keys_from_buttons()); return; }
 	/* (the link to the Square dropped: the game's core holds still under the wait) */
 	if (online_visit_waiting()) { online_visit_wait_frame(); return; }
+	/* (the PET's Jukebox up: the game's core, its music with it, holds still under it) */
+	if (pet_holds()) return;
 	/* (the run's time: the statistics' minutes, save.h) */
 	if (!online_visit_away()) profile_played_frame();
 	/* (the second screen first, from what the last update saw: the GBA's

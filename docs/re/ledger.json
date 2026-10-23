@@ -1,7 +1,7 @@
 {
   "schema": "re-ledger/1",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-22",
+  "updated": "2026-10-23",
   "previous": "2026-10-18",
   "features": [
     {
@@ -35,6 +35,14 @@
       "left": "ColonelSoul's button for a partner pressed (built; his ColonelSoul's unison proved), the Dark Soul's lists from his own folder, the green flash's tint and a hit's mood gain by object; a real network, the deployed server, devices; a partner's NaviCust compiled on games of different runs; WhiCapsl's and Uninstll's marks and a chip of computed power in his hand.",
       "updated": "2026-10-22",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side"
+    },
+    {
+      "name": "BN6's sound engine",
+      "state": "works",
+      "now": "MP2K (m4a) as BN6's code runs it, in the engine's own C, plays the title's and the PET screens' songs and sounds: the same as the game byte for byte, frame by frame, for every song and sound checked against the plain ROM in romlab (tools/mp2k_verify.py). BN5's songs play on the same code, BN5's library being BN6's; the Jukebox plays both games' music players.",
+      "left": "Where BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18 and 0x20-0x24 play (its cutscene scripts unread), for their names; a frame-by-frame differential of a BN5 song against BN5's own engine state (its RAM's places).",
+      "updated": "2026-10-23",
+      "link": "../EMULATION.md#the-engines-own-sound"
     }
   ],
   "decisions": [],
@@ -102,6 +110,10 @@
     {
       "date": "2026-10-22",
       "what": "Issue #181's review: a partner's NaviCust compiled over the way in's own state, never a game's checkpoint (0x08138A00 keeps NaviStats +0x0E, +0x22, +0x2C, +0x2D, +0x2F, +0x30, +0x58-+0x5B from the state it runs on; arena_seats_compile); his messages checked on every GBA by his screen's rules (team_check.c: the hand dealt, one code or one chip, the PA lists' recipes 0x080295B4 and 0x080295B8, his Crosses, Souls and ColonelSoul's chip); sub_801FFD6's read path hooked (0x0802001C, BN6_LINK_TAKES_ANY 0x0203F7D8); the outbox of twelve (team_outbox.c); the server's OVER from seat 0 alone; the packet's other readers and writers named (0x0813F8D4, the library's getters 0x0803EF48 and 0x0803EF50, setter 0x0803EF58)"
+    },
+    {
+      "date": "2026-10-23",
+      "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
     }
   ],
   "experiments": [
@@ -312,6 +324,14 @@
       "result": "A partner charging B in his lead's Chaos Unison now fires his own charged shot (both GBAs: \"side 0's partner's charged B his own\"), 3,123 iterations 0 apart, 456 rollbacks the same, partnerbreak=2 (the old rule on one GBA) apart from iteration 222; a partner's BN5 DarkChip darkens him in his own Souls' block (0x0203FFBE, 0x0203FFDE) and NaviStats (the effect slots 30 and 31), not his lead. The five BN5 chips the audit named never ask BN6's side-player getter (their copy of BN5's 0x080125EE, a side's player's chaos flag, is never called); BN5's Navis that ask stand in no NetBattle.",
       "meaning": "The Souls' and the mood's hooks are by object; a partner's UNITE has its block waiting. Nothing in a NetBattle aims at a side's player alone through the getter.",
       "link": "../ONLINE_ARENA.md#what-a-partner-meets-under-full-rules"
+    },
+    {
+      "feature": "BN6's sound engine",
+      "date": "2026-10-23",
+      "name": "BN5's MP2K library against BN6's",
+      "result": "From SoundMain (BN5 0x0814C9FC, BN6 0x0814F754) the next 0x2104 bytes differ in 24 literal words (the seven tables', the jump template's, the player and song tables', one RAM address) and 35 pointers moved by the block's move, 0x2D58; the tables (BN5 0x081BC74C-0x081BC930) equal BN6's; the m4aSoundMode word is 0x0093040D in both (BN5 0x08000568). BN5's title through the engine against the plain BN5 ROM in romlab, 20 s: envelopes at 0.90, octave bands within 0.7 dB to 12 kHz; BN6's title against it, 0.42 and 2.9 dB. BN6's 0x01, 0x13 and 0x66 still byte for byte the game's after the engine read songs per ROM.",
+      "meaning": "BN5's songs play as BN5 plays them on BN6's code and tables, their data from BN5's ROM.",
+      "link": "../SOURCES.md#the-jukeboxs-songs"
     }
   ],
   "method": {

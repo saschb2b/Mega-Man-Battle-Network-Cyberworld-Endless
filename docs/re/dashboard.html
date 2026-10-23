@@ -81,7 +81,7 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-10-22",
+  "updated": "2026-10-23",
   "previous": "2026-10-18",
   "features": [
     {
@@ -119,10 +119,23 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-10-22",
       "link": "../ONLINE_ARENA.md#two-megamen-a-side",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "BN6's sound engine",
+      "state": "works",
+      "now": "MP2K (m4a) as BN6's code runs it, in the engine's own C, plays the title's and the PET screens' songs and sounds: the same as the game byte for byte, frame by frame, for every song and sound checked against the plain ROM in romlab (tools/mp2k_verify.py). BN5's songs play on the same code, BN5's library being BN6's; the Jukebox plays both games' music players.",
+      "left": "Where BN5's own songs 0x06-0x09, 0x11, 0x12, 0x18 and 0x20-0x24 play (its cutscene scripts unread), for their names; a frame-by-frame differential of a BN5 song against BN5's own engine state (its RAM's places).",
+      "updated": "2026-10-23",
+      "link": "../EMULATION.md#the-engines-own-sound",
+      "state_text": "Works"
     }
   ],
   "decisions": [],
   "since": [
+    {
+      "date": "2026-10-23",
+      "what": "The engine's MP2K reads each player's song from its own ROM (mp2k_read, a player's and a channel's ROM; the library's tables BN6's, mp2k_lib_u8): the Jukebox's songs of BN6 and BN5 (docs/PET.md). A song just begun counts as busy (MPlayStart's status 0 before its first tick), or a PET screen's sound over the held game never started."
+    },
     {
       "date": "2026-10-22",
       "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
@@ -169,6 +182,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     }
   ],
   "experiments": [
+    {
+      "feature": "BN6's sound engine",
+      "date": "2026-10-23",
+      "name": "BN5's MP2K library against BN6's",
+      "result": "From SoundMain (BN5 0x0814C9FC, BN6 0x0814F754) the next 0x2104 bytes differ in 24 literal words (the seven tables', the jump template's, the player and song tables', one RAM address) and 35 pointers moved by the block's move, 0x2D58; the tables (BN5 0x081BC74C-0x081BC930) equal BN6's; the m4aSoundMode word is 0x0093040D in both (BN5 0x08000568). BN5's title through the engine against the plain BN5 ROM in romlab, 20 s: envelopes at 0.90, octave bands within 0.7 dB to 12 kHz; BN6's title against it, 0.42 and 2.9 dB. BN6's 0x01, 0x13 and 0x66 still byte for byte the game's after the engine read songs per ROM.",
+      "meaning": "BN5's songs play as BN5 plays them on BN6's code and tables, their data from BN5's ROM.",
+      "link": "../SOURCES.md#the-jukeboxs-songs"
+    },
     {
       "feature": "Arena",
       "date": "2026-10-22",

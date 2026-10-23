@@ -43,10 +43,13 @@ int tools_run(void) {
 	if (pacing_spec) return pacing_report_run(pacing_spec);
 	if (economy_spec) return economy_report_run(economy_spec);
 	if (render_spec) {
-		int song = 0, secs = 20;
+		int song = 0, secs = 20, rom = 0;
 		char out[256] = "song.wav";
-		sscanf(render_spec, "%i:%d:%255s", &song, &secs, out);
-		bool ok = audio_render_wav(song, secs, out);
+		/* (xN/ first: extra ROM N's song, docs/MULTIROM.md) */
+		const char *spec = render_spec;
+		if (spec[0] == 'x' && sscanf(spec, "x%d/", &rom) == 1) { spec = strchr(spec, '/') + 1; ++rom; }
+		sscanf(spec, "%i:%d:%255s", &song, &secs, out);
+		bool ok = audio_render_wav(rom, song, secs, out);
 		printf("rendered song %d (%ds) to %s: %s\n", song, secs, out, ok ? "ok" : "failed");
 		return ok ? 0 : 1;
 	}

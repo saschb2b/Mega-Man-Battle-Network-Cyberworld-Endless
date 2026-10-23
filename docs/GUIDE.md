@@ -39,7 +39,8 @@ statistics, troubleshooting and building the game yourself.
   second act BN5's viruses and BN6's meet in battles, the Undernet's and
   the Graveyard's acts draw on both, half the chips their shops and
   Mystery Data hold are BN5's, which the Library counts apart, and its
-  flames of darkness hold BN5's DarkChips. Online, it completes the
+  flames of darkness hold BN5's DarkChips. Its songs join the
+  [Jukebox](#the-jukebox). Online, it completes the
   [NetPass](#the-netpass): NetBattles, trades and the week's DeepNet. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
@@ -1039,6 +1040,30 @@ cartridge plays it. Choose in Options' **Audio** (Select on the title, or
 **Sound** changes it at once, so you hear it, and it is kept. The browser
 player's menu has a **Sound** button too, and `sound = soft` or
 `sound = gba` in `settings.ini` in the data folder sets it as well.
+
+## The Jukebox
+
+Every song of the game, and of BN5 with its ROM beside BN6's, to listen
+to whenever you like: **KeyItem** in the PET, then A on **Jukebox**. The
+game holds still while it is open, its music too, and goes on where it
+was when you close it.
+
+The songs are in sections by game and by where they play (Towns, The
+Net, Battles, Story, Screens; BN5's songs whose place is not known yet
+are in **More**, by their number). **L** and **R** (or Left and Right)
+turn the sections, Up and Down pick a song, **A** plays it, **START**
+turns the mode and **B** closes it. A tap does the same on a phone: a
+song's row plays it.
+
+| Mode | Plays |
+| --- | --- |
+| **Repeat** | the song, over and over |
+| **In order** | the section from the song on, each song that loops twice round, then the next |
+| **Shuffle** | the section in any order, each song that loops twice round |
+
+The lights under the song are its eight tracks, lit as they sound. The
+last song and mode are kept for the next time (`jukebox.ini` in the data
+folder).
 
 ## Anonymous statistics
 

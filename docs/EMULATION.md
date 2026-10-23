@@ -782,6 +782,26 @@ counts: MPlayStart leaves its player's status 0 till MPlayMain's first
 tick, which counted as idle would never come, and the screens' sounds
 would never start.
 
+**Another game's songs.** A song of BN5's plays on the same code: BN5's
+MP2K library is BN6's byte for byte and its tables are BN6's
+(docs/ROM_DATA.md, Another game's songs), so the engine runs BN6's
+rules and tables on BN5's song data. Each music player keeps the ROM its
+song is in, and each channel its player's at its note, and the part
+running reads that ROM (`mp2k_read`): the sequence, the voices, the
+samples and the PSG's waves; the library's tables are always BN6's
+(`mp2k_lib_u8`). `mp2k_song_start_in` takes the game, `--render-song
+x0/ID:SECONDS:PATH` renders BN5's song ID. BN6's songs stay byte for
+byte the game's (`tools/mp2k_verify.py`, the title, the net and a menu
+sound after the change); BN5's title is the plain BN5 ROM's within the
+same bounds as BN6's (docs/SOURCES.md, The Jukebox's songs).
+
+**The Jukebox** (docs/PET.md) holds the core still while it is up (no
+frame of the game runs, so its music stops and its sound ring empties
+to silence), and plays its songs on player 31 through `audio.c`'s
+`audio_song_*`, which take the audio device's lock: the engine runs on
+the sound's own thread, and a call into it from the frame's thread
+waits for the mix in hand.
+
 ## Hooks
 
 A hook lets one instruction of the game's code call the engine's C right

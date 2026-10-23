@@ -34,7 +34,7 @@
 
 /* the run's own key items, in ids BN6 leaves nameless (0x47-0x4F; each
  * its own place in the screen's order, Gregar's table at 0x0812A4A0) */
-enum { ITEM_SCRT = 0x31, ITEM_CODES = 0x47, ITEM_PASS = 0x48, ITEM_LIBRARY = 0x49, ITEM_NETPASS = PET_ITEM_NETPASS };
+enum { ITEM_SCRT = 0x31, ITEM_CODES = 0x47, ITEM_PASS = 0x48, ITEM_LIBRARY = 0x49, ITEM_NETPASS = PET_ITEM_NETPASS, ITEM_JUKEBOX = PET_ITEM_JUKEBOX };
 
 typedef struct { const uint8_t *b; int len; } Script;
 
@@ -148,9 +148,9 @@ static void install_descriptions(void) {
 	uint8_t *src = unpack(BN6_KEY_DESCS, &len);
 	if (!src) return;
 	int n = u16at(src, 0) / 2;
-	static uint8_t out[DESCS_MAX], scrt[128], codes[160], pass[128], library[128], netpass[128];
+	static uint8_t out[DESCS_MAX], scrt[128], codes[160], pass[128], library[128], netpass[128], jukebox[128];
 	Script rep[256] = { 0 };
-	if (n > 256 || ITEM_NETPASS >= n) { free(src); return; }
+	if (n > 256 || ITEM_JUKEBOX >= n) { free(src); return; }
 	const uint8_t *v31 = src + u16at(src, ITEM_SCRT);
 	char text[160];
 	rep[ITEM_SCRT] = (Script){ scrt, description(v31, "Three of these open the golden gate to the Secret Area.", scrt, sizeof scrt) };
@@ -164,6 +164,7 @@ static void install_descriptions(void) {
 	snprintf(text, sizeof text, "Library: %d chips. Vaults open at %d. Rare chips inside!", meta_library_count(-1), meta_vault_need(run.depth));
 	rep[ITEM_LIBRARY] = (Script){ library, description(v31, text, library, sizeof library) };
 	rep[ITEM_NETPASS] = (Script){ netpass, description(v31, "Stamps for the Net Square. Press A to see them!", netpass, sizeof netpass) };
+	rep[ITEM_JUKEBOX] = (Script){ jukebox, description(v31, "Every song of the town and the Net. Press A to listen!", jukebox, sizeof jukebox) };
 	int size = rebuild(src, len, n, rep, out, sizeof out);
 	free(src);
 	if (!size) return;
@@ -176,19 +177,20 @@ static void install_names(void) {
 	if (src + 0x400 > ROM_SIZE) return;
 	const uint8_t *a = R.data + src;
 	int n = u16at(a, 0) / 2, end = 0;
-	if (n < ITEM_NETPASS + 1 || n > 256) return;
+	if (n < ITEM_JUKEBOX + 1 || n > 256) return;
 	for (int i = 0; i < n; ++i) {
 		int o = u16at(a, i), j = o;
 		while (src + (uint32_t)j < ROM_SIZE && a[j] != 0xE6 && j < 0x2000) ++j;
 		if (j + 1 > end) end = j + 1;
 	}
 	static const uint8_t e6[] = { 0xE6 };
-	static uint8_t out[NAMES_MAX], codes[16], pass[16], library[16], netpass[16];
+	static uint8_t out[NAMES_MAX], codes[16], pass[16], library[16], netpass[16], jukebox[16];
 	Script rep[256] = { 0 };
 	rep[ITEM_CODES] = (Script){ codes, words("NaviCode", e6, 1, codes, sizeof codes) };
 	rep[ITEM_PASS] = (Script){ pass, words("DarkPass", e6, 1, pass, sizeof pass) };
 	rep[ITEM_LIBRARY] = (Script){ library, words("LibCard", e6, 1, library, sizeof library) };
 	rep[ITEM_NETPASS] = (Script){ netpass, words("NetPass", e6, 1, netpass, sizeof netpass) };
+	rep[ITEM_JUKEBOX] = (Script){ jukebox, words("Jukebox", e6, 1, jukebox, sizeof jukebox) };
 	int size = rebuild(a, end, n, rep, out, sizeof out);
 	if (!size) return;
 	emu_write(NAMES_AT, out, (size_t)size);
@@ -537,7 +539,7 @@ bool pet_text_items_held(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
 	/* (no toolkit to read: nothing to give either) */
 	if (items < BN6_EWRAM || items >= BN6_EWRAM_END) return true;
-	return emu_read8(items + (uint32_t)ITEM_NETPASS) != 0;
+	return emu_read8(items + (uint32_t)ITEM_NETPASS) != 0 && emu_read8(items + (uint32_t)ITEM_JUKEBOX) != 0;
 }
 
 void pet_text_items(void) {
@@ -547,6 +549,7 @@ void pet_text_items(void) {
 	item_set(ITEM_PASS, meta_dark_way_open() ? 1 : 0);
 	item_set(ITEM_LIBRARY, 1);
 	item_set(ITEM_NETPASS, 1);
+	item_set(ITEM_JUKEBOX, 1);
 }
 
 int pet_text_refresh(void) {

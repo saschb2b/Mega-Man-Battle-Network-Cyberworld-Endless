@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The Jukebox.** A new key item: **KeyItem** in the PET, then A on
+  **Jukebox**, plays every song of the game, BN6's 37, and with BN5's ROM
+  beside it BN5's 35, as the cartridges play them, on BN6's own sound
+  engine (BN5's is the same code). The game holds still under it and its
+  music picks up where it was when you close it. Songs are in sections by
+  game and by where they play (Towns, The Net, Battles, Story, Screens);
+  L and R turn them, A plays, START turns the mode (Repeat, In order,
+  Shuffle), and on a phone a tap on a song plays it. Its lights show the
+  song's eight tracks as they sound, and the last song and mode are kept.
 - **The title's music as the cartridge plays it.** The title, the run's
   setup, Options, SAVES and the PET's screens played BN6's songs on a
   player of the engine's own, an approximation that sounded duller than

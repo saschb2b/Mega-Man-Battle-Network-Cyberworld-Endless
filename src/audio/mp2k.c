@@ -18,13 +18,33 @@ Mp2k M;
 #define BN6_RING 1584
 #define BN6_MASTER_VOLUME 15
 
+/* the ROM of index `rom` (mp2k_state.h), NULL where it is not there */
+static const uint8_t *rom_data(int rom) {
+	if (rom <= 0) return R.data;
+	return rom - 1 < XROM_COUNT && XR[rom - 1].layout ? XR[rom - 1].data : NULL;
+}
+
+void mp2k_read(int rom) {
+	M.data = rom_data(rom);
+	if (!M.data) M.data = R.data;
+}
+
 uint8_t mp2k_u8(uint32_t addr) {
-	return rom_is_ptr(addr) && R.data ? R.data[addr - 0x08000000] : 0;
+	return rom_is_ptr(addr) && M.data ? M.data[addr - 0x08000000] : 0;
 }
 
 uint32_t mp2k_u32(uint32_t addr) {
 	return (uint32_t)mp2k_u8(addr) | (uint32_t)mp2k_u8(addr + 1) << 8 | (uint32_t)mp2k_u8(addr + 2) << 16 |
 		(uint32_t)mp2k_u8(addr + 3) << 24;
+}
+
+uint8_t mp2k_lib_u8(uint32_t addr) {
+	return rom_is_ptr(addr) && R.data ? R.data[addr - 0x08000000] : 0;
+}
+
+uint32_t mp2k_lib_u32(uint32_t addr) {
+	return (uint32_t)mp2k_lib_u8(addr) | (uint32_t)mp2k_lib_u8(addr + 1) << 8 | (uint32_t)mp2k_lib_u8(addr + 2) << 16 |
+		(uint32_t)mp2k_lib_u8(addr + 3) << 24;
 }
 
 /* the players as m4aSoundInit opens them, in BN6_MPLAYS's order (each
@@ -35,14 +55,14 @@ static void players_open(void) {
 		uint32_t row = BN6_MPLAYS + (uint32_t)p * 12;
 		Mp2kPlayer *pl = &M.players[p];
 		memset(pl, 0, sizeof *pl);
-		pl->tracks = mp2k_u8(row + 8);
-		pl->check_priority = mp2k_u8(row + 10);
+		pl->tracks = mp2k_lib_u8(row + 8);
+		pl->check_priority = mp2k_lib_u8(row + 10);
 		pl->status = (uint32_t)PLAYER_PAUSE;
 		pl->first = first;
 		for (int i = 0; i < pl->tracks && first + i < MP2K_TRACKS; ++i) {
 			memset(&M.tracks[first + i], 0, sizeof M.tracks[0]);
 			M.tracks[first + i].chan = MP2K_NONE;
-			M.tracks[first + i].addr = mp2k_u32(row + 4) + (uint32_t)i * 0x50;
+			M.tracks[first + i].addr = mp2k_lib_u32(row + 4) + (uint32_t)i * 0x50;
 		}
 		first += pl->tracks;
 	}
@@ -51,6 +71,7 @@ static void players_open(void) {
 bool mp2k_init(void) {
 	if (!R.data || !R.layout) return false;
 	memset(&M, 0, sizeof M);
+	M.data = R.data;
 	M.song_table = 0x08000000 + R.layout->song_table;
 	M.clock_table = BN6_M4A_CLOCK_TABLE;
 	M.scale_table = BN6_M4A_SCALE_TABLE;
@@ -59,7 +80,7 @@ bool mp2k_init(void) {
 	M.cgb_freq_table = BN6_M4A_CGB_FREQ_TABLE;
 	M.noise_table = BN6_M4A_NOISE_TABLE;
 	M.cgb3_vol_table = BN6_M4A_CGB3_VOL_TABLE;
-	uint32_t mode = mp2k_u32(BN6_M4A_SOUND_MODE);
+	uint32_t mode = mp2k_lib_u32(BN6_M4A_SOUND_MODE);
 	M.reverb = mode & 0xFF ? mode & 0x7F : 0;
 	M.max_chans = (uint8_t)(mode >> 8 & 0xF);
 	if (M.max_chans > MP2K_DS_MAX) M.max_chans = MP2K_DS_MAX;
@@ -83,21 +104,26 @@ bool mp2k_init(void) {
 
 /* ---- songs ---- */
 
-static Mp2kPlayer *player_of(int song, uint32_t *header) {
-	if (!M.ready || song < 0 || song >= MP2K_SONGS) return NULL;
-	uint32_t row = M.song_table + (uint32_t)song * 8;
+/* song `song` of ROM `rom`: the player its table names (BN5's 32 players
+ * are BN6's, docs/ROM_DATA.md) and its header, the ROM left being read */
+static Mp2kPlayer *player_of(int rom, int song, uint32_t *header) {
+	if (!M.ready || song < 0 || song >= MP2K_SONGS || !rom_data(rom)) return NULL;
+	mp2k_read(rom);
+	uint32_t row = (rom ? 0x08000000 + XR[rom - 1].layout->song_table : M.song_table) + (uint32_t)song * 8;
 	unsigned p = mp2k_u8(row + 4);
 	if (header) *header = mp2k_u32(row);
 	return p < MP2K_PLAYERS && rom_is_ptr(mp2k_u32(row)) ? &M.players[p] : NULL;
 }
 
 /* MPlayStart: an effects' player keeps a song of higher priority playing */
-static void player_start(Mp2kPlayer *pl, uint32_t header) {
+static void player_start(Mp2kPlayer *pl, int rom, uint32_t header) {
 	Mp2kTrack *first = &M.tracks[pl->first];
 	bool idle = (!pl->song || !(first->flags & TRK_START)) && (!(pl->status & 0xFFFF) || (pl->status & (uint32_t)PLAYER_PAUSE));
 	if (pl->check_priority && !idle && pl->priority > mp2k_u8(header + 2)) return;
 	pl->status = 0;
 	pl->song = header;
+	pl->rom = (uint8_t)rom;
+	pl->loops = 0;
 	pl->tone = mp2k_u32(header + 4);
 	pl->priority = mp2k_u8(header + 2);
 	pl->clock = 0;
@@ -118,17 +144,32 @@ static void player_start(Mp2kPlayer *pl, uint32_t header) {
 	if (reverb & 0x80) M.reverb = reverb & 0x7F;
 }
 
-void mp2k_song_start(int song) {
+void mp2k_song_start_in(int rom, int song) {
 	uint32_t header = 0;
-	Mp2kPlayer *pl = player_of(song, &header);
-	if (pl) player_start(pl, header);
+	Mp2kPlayer *pl = player_of(rom, song, &header);
+	if (pl) player_start(pl, rom, header);
+	mp2k_read(0);
 }
 
-void mp2k_song_fade(int song, int speed) {
-	Mp2kPlayer *pl = player_of(song, NULL);
+void mp2k_song_start(int song) { mp2k_song_start_in(0, song); }
+
+void mp2k_song_fade_in(int rom, int song, int speed) {
+	Mp2kPlayer *pl = player_of(rom, song, NULL);
+	mp2k_read(0);
 	if (!pl) return;
 	pl->fade_oc = pl->fade_oi = (uint16_t)speed;
 	pl->fade_ov = 64 << 2;
+}
+
+void mp2k_song_fade(int song, int speed) { mp2k_song_fade_in(0, song, speed); }
+
+/* m4aMPlayStop: the player paused, its tracks' channels off */
+void mp2k_song_stop_in(int rom, int song) {
+	Mp2kPlayer *pl = player_of(rom, song, NULL);
+	mp2k_read(0);
+	if (!pl) return;
+	pl->status |= (uint32_t)PLAYER_PAUSE;
+	for (int i = 0; i < pl->tracks; ++i) mp2k_track_stop(&M.tracks[pl->first + i]);
 }
 
 /* (a song begun and not yet ticked is on too: MPlayStart leaves its status
@@ -140,8 +181,43 @@ static bool player_on(const Mp2kPlayer *pl) {
 }
 
 bool mp2k_song_playing(int song) {
-	const Mp2kPlayer *pl = player_of(song, NULL);
+	const Mp2kPlayer *pl = player_of(0, song, NULL);
+	mp2k_read(0);
 	return pl && player_on(pl);
+}
+
+/* the player that plays song `song` of ROM `rom`, where that song is its song */
+static const Mp2kPlayer *player_playing(int rom, int song) {
+	uint32_t header = 0;
+	const Mp2kPlayer *pl = player_of(rom, song, &header);
+	mp2k_read(0);
+	return pl && pl->song == header && pl->rom == rom && player_on(pl) ? pl : NULL;
+}
+
+int mp2k_song_loops(int rom, int song) {
+	const Mp2kPlayer *pl = player_playing(rom, song);
+	return pl ? pl->loops : -1;
+}
+
+int mp2k_song_levels(int rom, int song, uint8_t *out, int max) {
+	const Mp2kPlayer *pl = player_playing(rom, song);
+	if (!pl) return 0;
+	int n = pl->tracks < max ? pl->tracks : max;
+	for (int i = 0; i < n; ++i) {
+		const Mp2kTrack *t = &M.tracks[pl->first + i];
+		int level = 0;
+		/* (its channels' loudness: the envelope by the louder side's volume) */
+		for (int c = t->chan, guard = 0; c != MP2K_NONE && guard < MP2K_CHANS; c = M.chans[c].next, ++guard) {
+			const Mp2kChan *ch = &M.chans[c];
+			if (!(ch->status & CHN_ON)) continue;
+			int side = ch->right > ch->left ? ch->right : ch->left;
+			int env = c >= MP2K_DS_MAX ? ch->env * 17 : ch->env;
+			int v = env * side / 255;
+			if (v > level) level = v;
+		}
+		out[i] = (uint8_t)(level > 255 ? 255 : level);
+	}
+	return n;
 }
 
 bool mp2k_busy(void) {
@@ -167,6 +243,7 @@ void mp2k_frame(void) {
 	mp2k_players_frame();
 	mp2k_cgb_frame();
 	mp2k_mix_frame();
+	mp2k_read(0);
 }
 
 const int8_t *mp2k_mix_right(void) { return &M.ring[0][M.slice * M.per_frame]; }

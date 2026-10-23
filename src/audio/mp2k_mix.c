@@ -151,7 +151,9 @@ void mp2k_mix_frame(void) {
 	int8_t *r = part(0, M.slice), *l = part(1, M.slice);
 	for (int i = 0; i < M.max_chans; ++i) {
 		Mp2kChan *c = &M.chans[i];
-		if (!(c->status & CHN_ON) || !env_step(c)) continue;
+		if (!(c->status & CHN_ON)) continue;
+		mp2k_read(c->rom);
+		if (!env_step(c)) continue;
 		uint32_t loop_start = 0, loop_len = 0;
 		if (c->status & CHN_LOOP) {
 			loop_start = c->wav + 0x10 + mp2k_u32(c->wav + 8);

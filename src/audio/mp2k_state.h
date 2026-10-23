@@ -56,6 +56,7 @@ typedef struct {
 	uint32_t cur;             /* +0x28: the next sample's ROM address; the PSG's wave loaded */
 	int track;                /* +0x2C: its track (MP2K_NONE) */
 	int prev, next;           /* +0x30, +0x34: its track's list */
+	uint8_t rom;              /* (ours) the ROM its sample or wave is in: its player's at its note */
 } Mp2kChan;
 
 /* A track: MusicPlayerTrack */
@@ -88,6 +89,8 @@ typedef struct {
 	uint32_t tone;            /* +0x30: its voice group */
 	int first;                /* its tracks in Mp2k.tracks */
 	uint8_t tracks;           /* its tracks (BN6_MPLAYS) */
+	uint8_t rom;              /* (ours) the ROM its song is in: 0 BN6's, 1 + XRomId another's (mp2k.h) */
+	uint16_t loops;           /* (ours) its first track's GOTOs since its song began: the times it went round */
 } Mp2kPlayer;
 
 /* SoundInfo, and what the library reads from the ROM */
@@ -106,7 +109,8 @@ typedef struct {
 	Mp2kChan chans[MP2K_CHANS];   /* the DirectSound ones from 0, the PSG's from MP2K_DS_MAX */
 	int8_t ring[2][MP2K_RING_MAX];   /* +0x350: the mix, right then left (DMA A, DMA B) */
 	int slice;                /* the ring's part this frame mixed */
-	/* the ROM's tables (docs/ROM_DATA.md) */
+	const uint8_t *data;      /* (ours) the ROM the part running reads: a player's, a channel's (mp2k_read) */
+	/* the library's tables in BN6's ROM (docs/ROM_DATA.md) */
 	uint32_t song_table, clock_table, scale_table, freq_table, cgb_scale_table, cgb_freq_table, noise_table, cgb3_vol_table;
 } Mp2k;
 extern Mp2k M;
@@ -115,9 +119,18 @@ extern Mp2k M;
 
 /* ---- the parts' calls into each other ---- */
 
-/* the ROM's bytes at a bus address (0 outside it) */
+/* the bytes at a bus address of the ROM being read (0 outside it): a
+ * song's, its voices', its samples'; mp2k_read picks the ROM (0 BN6's, 1 +
+ * XRomId another's), BN6's where it is not there. BN5's library is BN6's,
+ * byte for byte but for its literals' addresses, and its tables BN6's
+ * (docs/ROM_DATA.md, Another game's songs), so another game's song plays
+ * on BN6's code and tables: the library's tables are read from BN6's ROM,
+ * whichever is being read (mp2k_lib_u8) */
 uint8_t mp2k_u8(uint32_t addr);
 uint32_t mp2k_u32(uint32_t addr);
+void mp2k_read(int rom);
+uint8_t mp2k_lib_u8(uint32_t addr);
+uint32_t mp2k_lib_u32(uint32_t addr);
 /* (mp2k_seq.c) a frame of every player, BN6's order: MPlayMain */
 void mp2k_players_frame(void);
 /* (mp2k_note.c) a note (ply_note), its end (ply_endtie), a track's volume and
