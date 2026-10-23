@@ -11,9 +11,9 @@ the last boss, special routes to other bosses, each Navi's ability a reason
 to try him.
 
 Where it stands: the dissection (from BN5's ROM, its own text, and the
-players' guides), the design decision, and a ROM-free prototype of the
-generator with its measures. No engine code yet; the decisions that are the
-owner's are at the end.
+players' guides), the design decision, which the owner approved on 23
+October 2026 (The owner's decisions, at the end), and a ROM-free prototype
+of the generator with its measures. No engine code yet.
 
 ## Summary
 
@@ -22,11 +22,12 @@ owner's are at the end.
   laid over one of its net maps, their kinds, the team, the Darkloid and
   guardians, item panels, traps, BonusPanels, the par and the rewards. The
   boards were opened in romlab by setting the mission and entering its map.
-- **The decision:** a liberation is a kind of layer the endless net may
-  hold (a "dark layer"), from act 2, chosen at a route fork and announced
-  on the act card; the team is MegaMan and the Navis whose Souls the run has
-  won, which in Team Colonel are exactly BN5's liberation team. A separate
-  liberation mode and co-op come after it, on the same generator.
+- **The decision (the owner's, 23 October 2026):** a liberation is a kind
+  of layer the endless net may hold (a "dark layer"), from act 2, chosen at
+  a route fork and announced on the act card; the team is MegaMan and the
+  Navis whose Souls the run has won, which in Team Colonel are exactly
+  BN5's liberation team, each fought as MegaMan in his Soul. Co-op comes
+  later over the server; a separate mode may follow on the same generator.
 - **The generator** lays a board out in the net's shape language, places
   BN5's kinds by BN5's rules, rejects what breaks a guarantee, and sets the
   par from a planner that plays it by BN5's rules, scaled by the planner's
@@ -238,9 +239,10 @@ Reasoned with the game-design skill.
 | A separate mode: a run of missions growing to a last Darkloid | The player's request whole; co-op fits it | Half a second game to tune; splits the meta |
 | Co-op | The player's request; turn-based, so the board is easy to share | Needs the board first; each battle stays one player's |
 
-The recommendation is staged: the layer kind first, then the separate mode
-as a setup option (a run whose acts are all dark, the Nest a last mission:
-the same generator), then co-op.
+Decided as recommended (the owner, 23 October 2026): the layer kind first,
+co-op later over the server; the separate mode may follow as a setup
+option (a run whose acts are all dark, the Nest a last mission: the same
+generator).
 
 ### The team
 
@@ -420,13 +422,27 @@ heal).
 
 ## The owner's decisions
 
-1. **Where it stands:** a dark layer in the endless net first
-   (recommended), an act's climax, or a separate mode first.
-2. **Co-op's place:** after the board, over the server, each battle its
-   player's (recommended); or not planned.
-3. **Which Navis:** the run's BN5 Souls lend their Navis (recommended);
-   BN6's Crosses as teammates with commands of BN5's kinds too or not; a
-   teammate fought as MegaMan in his Soul (recommended) or as himself.
-4. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
+Decided on 23 October 2026, as recommended: "a liberation as a dark layer
+in the endless net first, teammates lent by the run's BN5 Souls and fought
+as MegaMan in their Soul, co-op later over the server."
+
+1. **Where it stands:** a dark layer in the endless net, first. (Not
+   chosen for now: an act's climax; a separate mode first. A separate mode
+   stays possible later, on the same generator.)
+2. **Co-op:** later, over the server, the board shared turn by turn and
+   each battle its own player's.
+3. **Which Navis:** the run's BN5 Souls lend their Navis, BN5's own
+   liberation team; a teammate's battles are fought as MegaMan in his Soul
+   from the first turn, with the teammate's own HP. (Not chosen: a
+   teammate as a playable Navi of his own.)
+
+Still open:
+
+4. **BN6's Crosses as teammates** (commands of BN5's kinds for BN6's
+   Navis), for runs without BN5's ROM or beside the Souls: not decided;
+   until then a run without BN5's ROM meets no dark layer, or meets it with
+   MegaMan alone.
+5. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
    zenny after) in the run's economy (docs/ECONOMY.md), or the route a
-   sealed region opens as the only special reward.
+   sealed region opens as the only special reward. Decided with the
+   game-design skill when the board is built (stage 1).
