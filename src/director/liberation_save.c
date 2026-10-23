@@ -16,7 +16,7 @@
 #include "run.h"
 #include "save_blob.h"
 
-#define LIB_NOTE_MAGIC 0x434C4231u   /* "CLB1" */
+#define LIB_NOTE_MAGIC 0x434C4232u   /* "CLB2": the items and the route (the quality bar) */
 
 typedef struct {
 	uint32_t seed;                 /* the layer's (run.layer_seed) */
@@ -28,8 +28,10 @@ typedef struct {
 	int8_t back_in[LIB_UNITS];
 	struct { uint8_t x, y, gone, pad; } unit[LIB_UNITS];
 	uint8_t kind[MAP_H][MAP_W];
+	uint8_t item[MAP_H][MAP_W];    /* the item panels' and barriers' (keys taken, finds left) */
+	uint8_t route_found, pad2[3];
 } LibNote;
-_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + MAP_H * MAP_W && offsetof(LibNote, kind) == 68 + LIB_UNITS * 5,
+_Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 && offsetof(LibNote, kind) == 68 + LIB_UNITS * 5,
 	"Liberation save layout changed: bump LIB_NOTE_MAGIC");
 
 void lib_save(void) {
@@ -50,6 +52,8 @@ void lib_save(void) {
 			n.unit[u].x = LB.b.unit[u].x; n.unit[u].y = LB.b.unit[u].y; n.unit[u].gone = LB.b.unit[u].gone;
 		}
 		memcpy(n.kind, LB.b.kind, sizeof n.kind);
+		memcpy(n.item, LB.b.item, sizeof n.item);
+		n.route_found = LB.route_found;
 	}
 	save_write_blob("run.lib", LIB_NOTE_MAGIC, &n, sizeof n);
 }
@@ -69,6 +73,8 @@ bool lib_resume(void) {
 	    n.nunits != LB.b.nunits)
 		return false;
 	memcpy(LB.b.kind, n.kind, sizeof LB.b.kind);
+	memcpy(LB.b.item, n.item, sizeof LB.b.item);
+	LB.route_found = n.route_found != 0;
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.b.unit[u].x = n.unit[u].x; LB.b.unit[u].y = n.unit[u].y; LB.b.unit[u].gone = n.unit[u].gone != 0;
 		LB.back_in[u] = n.back_in[u];
