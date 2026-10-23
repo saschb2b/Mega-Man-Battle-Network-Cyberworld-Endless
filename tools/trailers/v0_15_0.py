@@ -46,15 +46,17 @@ def board(seed, depth, first, last):
             AUTO, None, first, last)
 
 
-# home before act 2: the chat paged, MegaMan by the pink pad and onto it,
-# the act's card
-HOME = '40:,' + '4:A,12:,' * 10 + '30:,0:place 150 -15 1,60:,30:UP+RIGHT,200:,' + '4:A,12:,' * 6 + '200:'
+# seed 7's fork before act 2, its pink pad the dark way: the welcome's
+# "Two ways open this time!", MegaMan away from the pad (its swirl shows
+# only then), then at it, A: his reading of the way, "Part of it's gone dark."
+FORK = ('40:,' + '4:A,12:,' * 4 + '160:,' + '4:A,12:,' * 6 + '0:place 120 -15 1,180:,0:place 165 -15 1,30:,6:A,'
+        + '90:,4:A,60:,4:A,60:,4:A,60:,4:A,60:,4:A,200:')
 FIRST = {}      # each scene's first game frame, for the samples below
 
 
 def scenes():
     s = {
-        'lib-card': (['--scene', 'home', '--run-depth', '4', '--seed', '1', '--dev', 'dark,quiet'], {}, HOME, 200, 560),
+        'lib-fork': (['--scene', 'home', '--run-depth', '4', '--seed', '7', '--dev', 'quiet'], {}, FORK, 0, 1300),
         # seed 1's act 2 board, the autopilot through it, then act 3's
         'lib-open': board(1, 5, 0, 720),
         'lib-first': board(1, 5, 1100, 2300),
@@ -299,7 +301,7 @@ class Stack:
 
 # (the act 2 board's own phases where its banners show them: PLAYER PHASE 01,
 # 06's final turn, 08's Darkloid, cleared in 8 against a par of 12)
-PHASES = [(0, None), (F(4), 1), (F(10), 6), (F(12), 'D'), (F(14), 8), (F(17), 'END')]
+PHASES = [(0, 'FORK'), (F(3), None), (F(4), 1), (F(10), 6), (F(12), 'D'), (F(14), 8), (F(17), 'END')]
 PAR = 12
 
 
@@ -308,13 +310,13 @@ def phase_at(fr):
     return i, PHASES[i]
 
 
-def readout(im, fr, red):
+def readout(im, fr, red, where=''):
     """Top left the phase and the par, its digits rolling up on a change;
     top right the mission's name and the beat's four marks."""
     d = ImageDraw.Draw(im)
     i, (start, ph) = phase_at(fr)
     accent = lerp(AMBER, CRIMSON, red)
-    label = 'DARKLOID PHASE' if ph == 'D' else 'BRIEFING' if ph is None else 'MISSION CLEAR' if ph == 'END' else 'PHASE'
+    label = {'D': 'DARKLOID PHASE', None: 'BRIEFING', 'END': 'MISSION CLEAR', 'FORK': 'AT THE FORK'}.get(ph, 'PHASE')
     d.text((44, 30), label, font=mono(16, 600), fill=lerp(DIM, CRIMSON, red), anchor='ls')
     shown = [p for _, p in PHASES[:i + 1] if isinstance(p, int)]
     num = shown[-1] if shown else 0
@@ -329,7 +331,7 @@ def readout(im, fr, red):
     bd.text((0, 25 + 50 * (1 - roll)), f'{num:02d}' if num else '--', font=digits, fill=accent, anchor='lm')
     im.paste(box, (42, 36))
     d.text((112, 62), f'/ PAR {PAR}', font=mono(22, 500), fill=DIM, anchor='lm')
-    d.text((W - 44, 30), 'LIBERATION MISSION', font=mono(16, 600), fill=lerp(DIM, CRIMSON, red), anchor='rs')
+    d.text((W - 44, 30), where or 'LIBERATION MISSION', font=mono(16, 600), fill=lerp(DIM, CRIMSON, red), anchor='rs')
     beat = int((fr % BAR) // BEAT)
     for j in range(4):
         cx, cy = W - 44 - 26 * (3 - j), 58
@@ -345,9 +347,9 @@ class Shot:
     the map; the camera pans to it from the last shot's place, a share
     `pull` of what is left each frame (BN5's board camera eases so)."""
 
-    def __init__(self, start, place, pics=(), words=(), pull=0.42, center=None):
+    def __init__(self, start, place, pics=(), words=(), pull=0.42, center=None, where=''):
         self.start, self.place, self.pics, self.words, self.pull = start, place, pics, words, pull
-        self.center = center
+        self.center, self.where = center, where
 
     def draw(self, im, fr, cam, red):
         mid = (self.place[0] - cam[0] + W / 2, self.place[1] - cam[1] + H / 2)
@@ -383,47 +385,55 @@ def red_at(fr):
 def shots():
     S = lambda scene, n: n           # (a scene's footage sample, picked on its contact sheet)
     return [
-        # home before act 2: Lan's HP, the pink pad, the jack-in, the act's card
-        Shot(0, sector(0, 0), [Pic([(0, 'lib-card', S('lib-card', 10), 1)], tag="LAN'S HP · BEFORE ACT 2")],
-             [Head(F(1), F(2), 'SOME LAYERS GO DARK', "From the second act, behind one of the fork's two ways")]),
+        # home after act 1: the fork, its pink pad gone dark, MegaMan's reading of it
+        Shot(0, sector(0, 0), [Pic([(0, 'lib-fork', S('lib-fork', 120), 1),
+                                    (F(2), 'lib-fork', S('lib-fork', 372), 1)], tag="LAN'S HP · THE FORK")],
+             [Head(F(0, 1), F(1), 'AFTER EVERY ACT, A FORK', 'Two ways on into the endless net'),
+              Head(F(1, 0.5), F(2), 'ONE WAY HAS GONE DARK', "From the second act, behind one of the fork's two ways"),
+              Head(F(2, 0.5), F(3), 'TAKE IT?', "It costs that layer's Net Dealer and its Mr.Prog")], where='ACT 1 · HOME'),
         # the board's opening: the camera on its way to the Darkloid
         Shot(F(3), sector(1, 0), [Pic([(F(3), 'lib-open', S('lib-open', 18), 1)], tag='LAYER 5 · GONE DARK')],
-             [Head(F(3, 0.5), F(4), 'LIBERATION', 'CYBERWORLD ENDLESS 0.15.0', y=646, size=66, cap_color=AMBER)]),
+             [Head(F(3, 0.5), F(4), 'LIBERATION', 'CYBERWORLD ENDLESS 0.15.0', y=646, size=66, cap_color=AMBER)],
+             where='ACT 2 · LAYER 5'),
         # PLAYER PHASE 01
         Shot(F(4), sector(1, 1), [Pic([(F(4), 'lib-open', S('lib-open', 158), 1)], tag='LAYER 5 · PLAYER PHASE')],
-             [Head(F(4, 0.5), F(5), 'LIBERATE THE DARK', "BN5's Liberation Missions, made afresh in the endless net")]),
+             [Head(F(4, 0.5), F(5), 'THE LAYER BECOMES A BOARD', "BN5's Liberation Mission, made from the layer's own floor")],
+             where='ACT 2 · LAYER 5'),
         # the first panel: the walk, its battle, the win in one turn
         Shot(F(5), sector(2, 1), [Pic([(F(5), 'lib-first', S('lib-first', 20), 1),
                                        (F(6), 'lib-first', S('lib-first', 253), 1),
                                        (F(7), 'lib-first', S('lib-first', 338), 1)], tag='LAYER 5 · PANEL 25,30')],
              [Head(F(5, 0.5), F(6), 'ONE PANEL AT A TIME', 'MegaMan walks the board as BN6 walks him'),
               Head(F(6, 0.25), F(7), 'A BATTLE FOR EVERY PANEL', "BN5's own turns, in BN6's battles"),
-              Head(F(7, 0.25), F(8), 'WIN IN ONE TURN', 'and the dark around the panel falls too')]),
+              Head(F(7, 0.25), F(8), 'WIN IN ONE TURN', 'and the dark around the panel falls too')], where='ACT 2 · LAYER 5'),
         # other boards
         Shot(F(8), sector(3, 1), [Pic([(F(8), 'lib-b2', 0, 1)], 2, (-388, -160), 'ACT 2'),
                                   Pic([(F(8), 'lib-b3', 0, 1)], 2, (388, -160), 'ACT 2'),
                                   Pic([(F(8), 'lib-b4', 0, 1)], 2, (-388, 184), 'ACT 3'),
                                   Pic([(F(8), 'lib-b5', 0, 1)], 2, (388, 184), 'ACT 4')],
-             [Stack(F(8, 0.5), F(10), ['A NEW', 'BOARD', 'EVERY', 'TIME'],
-                    ["made from the layer's", 'own floor, its par', 'set by a planner', 'that plays it'], y=190)]),
+             [Stack(F(8, 0.5), F(10), ['NEVER', 'THE SAME', 'BOARD', 'TWICE'],
+                    ["each run's seed", 'makes its own, its', 'par set by a planner', 'that plays it'], y=190)],
+             where='ACTS 2-4'),
         # three turns, or it stays dark
         Shot(F(10), sector(3, 2), [Pic([(F(10), 'lib-three', S('lib-three', 975), 1),
                                         (F(10, 2.5), 'lib-three', S('lib-three', 1078), 1),
                                         (F(11), 'lib-fail', S('lib-fail', 98), 1)], tag='LAYER 5 · PHASE 06')],
              [Head(F(10, 0.25), F(11), 'THREE TURNS TO WIN IT', 'FINAL TURN! is the last'),
-              Head(F(11, 0.25), F(12), 'OR IT STAYS DARK', 'Time up leaves the panel dark')]),
+              Head(F(11, 0.25), F(12), 'OR IT STAYS DARK', 'Time up leaves the panel dark')], where='ACT 2 · LAYER 5'),
         # the drop: the Darkloids' phase
         Shot(F(12), sector(2, 2), [Pic([(F(12), 'lib-phase', S('lib-phase', 185), 1)], tag='LAYER 5 · DARKLOID PHASE')],
-             [Head(F(12, 0.5), F(14), 'THEN THE DARK MOVES', 'Each guardian steps toward MegaMan')], pull=0.3),
+             [Head(F(12, 0.5), F(14), 'THEN THE DARK STRIKES BACK', 'The Darkloid and every guardian take their turn')],
+             pull=0.3, where='ACT 2 · LAYER 5'),
         # the climax: PLAYER PHASE 08, the Darkloid, the par
         Shot(F(14), sector(2, 3), [Pic([(F(14), 'lib-boss', S('lib-boss', 20), 1),
                                         (F(15), 'lib-boss', S('lib-boss', 222), 1),
                                         (F(16), 'lib-boss', S('lib-boss', 420), 1),
                                         (F(16, 2), 'lib-boss', S('lib-boss', 1060), 1),
                                         (F(17), 'lib-boss', S('lib-boss', 1215), 1)], tag='LAYER 5 · THE DARKLOID')],
-             [Head(F(14, 0.25), F(15), 'PHASE BY PHASE', 'Each act adds a rule: barriers and keys, a TinHawk, traps'),
+             [Head(F(14, 0.25), F(15), 'EACH ACT DARKER', 'Barriers and keys from act 3, a TinHawk, then traps'),
               Head(F(15, 0.25), F(17), 'BREAK THROUGH TO THE DARKLOID', "A Navi of BN6's, waiting on his ring"),
-              Head(F(17, 0.25), F(18), 'BEAT THE PAR', 'The fewer the phases, the better the chip')], pull=0.55),
+              Head(F(17, 0.25), F(18), 'BEAT THE PAR, ARM THE RUN', 'The fewer the phases, the better the chip you carry on')],
+             pull=0.55, where='ACT 2 · LAYER 5'),
         Shot(F(18), sector(3, 3), [], [], pull=0.42, center='end'),
     ]
 
@@ -445,7 +455,7 @@ def ending(im, fr):
         part.putalpha(part.getchannel('A').point(lambda v: int(v * a)))
         im.paste(part, ((W - lg.width) // 2, 100 + round(14 * (1 - a))), part)
     words = [Head(F(18, 1), FRAMES, 'LIBERATE THE NET.', None, y=440, size=56, color=WHITE),
-             Head(F(18, 2), FRAMES, '', 'FROM THE SECOND ACT  ·  IN BN5\'S OWN LOOK AND SOUND  ·  ON YOUR OWN ROMS', y=468,
+             Head(F(18, 2), FRAMES, '', 'A WAY YOU CHOOSE  ·  A BOARD NEVER THE SAME  ·  IN BN5\'S OWN LOOK AND SOUND', y=468,
                   size=10, cap_color=AMBER),
              Head(F(19), FRAMES, '', 'saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless', y=508, size=10,
                   cap_color=CYAN)]
@@ -498,7 +508,7 @@ def compose(only=None):
         hide = hud_hidden(fr)
         if hide < 1:
             top = im.copy()
-            readout(top, fr, red)
+            readout(top, fr, red, shot.where)
             im = Image.blend(top, im, hide) if hide else top
         if fr < 10:
             im = Image.blend(Image.new('RGB', (W, H)), im, ease(fr / 9))
