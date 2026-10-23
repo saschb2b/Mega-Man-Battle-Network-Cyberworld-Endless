@@ -1,0 +1,57 @@
+/* A liberation's battle on BN6's own battle loop (docs/LIBERATION.md, The
+ * liberation battle): BN5's rules, read in its ROM, answered at BN6's
+ * loop by hooks (src/emu/bn6_battle_loop.h). Three turns, a Custom gauge
+ * each: TURN 1 START!, TURN 2 START!, FINAL TURN! as each turn's fight
+ * begins; the final turn's gauge full, TIME UP! and LIBERATE FAILED!, the
+ * battle drawn (no reward, HP as it stands); won, LIBERATE SUCCESS!, or 1
+ * TURN LIBERATE! in the first. The Darkloid's battle has no turns to
+ * count, and from its eleventh every hit does double (BN5's). What each
+ * battle stakes is shown before it starts (lib_battle_stakes). */
+#ifndef CW_LIBERATION_BATTLE_H
+#define CW_LIBERATION_BATTLE_H
+
+#include <stdbool.h>
+
+/* BN5's: the turns a liberation's battle runs (BN5_LIB_TURNS_UP), and the
+ * Darkloid's turn from which a hit does double (BN5_LIB_LATE_DOUBLE) */
+#define LIB_TURNS        3
+#define LIB_DOUBLE_TURN  11
+
+/* How a liberation's battle ended */
+enum { LIB_OUT_NONE, LIB_OUT_WON, LIB_OUT_TIME_UP, LIB_OUT_LOST };
+
+/* The hooks on BN6's battle loop, once (encounter.c's install): they
+ * answer only while a liberation's battle is armed. */
+void lib_battle_install(void);
+/* The next battle a liberation's: `turns` (LIB_TURNS, or 0 for the
+ * Darkloid's, whose hits double from LIB_DOUBLE_TURN). */
+void lib_battle_arm(int turns);
+/* Each frame of it: the turn it is in. */
+void lib_battle_watch(void);
+/* Back on the map: how it ended (LIB_OUT_*) and in which turn; disarmed. */
+int lib_battle_end(int *turn);
+/* No liberation's battle armed (the board begun or left). */
+void lib_battle_disarm(void);
+
+/* What liberating panel (x, y) with a command stakes, for the menu: the
+ * turns (0 none to count), the panels freed won in any turn, and those a
+ * win in the first turn frees beside them; false where nothing is fought
+ * there. */
+typedef struct {
+	int turns;
+	int freed;      /* won: the panels it frees (the hole's ring, the panel, LongSwrd's two) */
+	int one_turn;   /* ... and, won in its first turn, the dark around freed too */
+	bool hole;      /* a DarkHole closed */
+	bool unit;      /* a guardian deleted */
+} LibStakes;
+bool lib_battle_stakes(int x, int y, int cmd, LibStakes *s);
+/* Whether a win's sweep frees panel (x, y) beside the one fought for:
+ * dark, an item's, the Darkloid's ring once every DarkHole is down, no
+ * unit on it (liberation.c's one-turn win and a DarkHole's closing). */
+bool lib_swept(int x, int y);
+
+/* (drawing) The stakes of the command under the menu's cursor, under its
+ * window: BN6's PET look, left of the window at (x, y) */
+void lib_battle_draw_stakes(int right, int y);
+
+#endif

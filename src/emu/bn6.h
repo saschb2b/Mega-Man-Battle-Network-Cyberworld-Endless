@@ -396,4 +396,5 @@
 #include "bn6_shop.h"   /* a shop's screen: its state and its list (issue #124) */
 #include "bn6_panels.h"   /* the battlefield's panels as the engine updates, draws and acts on them (issue #82) */
 #include "bn6_expression.h"   /* a character's mood: MegaMan's overworld poses, the hop, the chat box's face, the "!!" burst, map objects, sounds */
+#include "bn6_battle_loop.h"   /* the battle loop random battles and bosses run, its banners (a liberation's battle) */
 #endif

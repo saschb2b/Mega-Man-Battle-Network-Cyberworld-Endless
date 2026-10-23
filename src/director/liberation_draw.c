@@ -23,6 +23,7 @@
 #include "emu.h"
 #include "gfx.h"
 #include "guardians.h"
+#include "liberation_battle.h"
 #include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
@@ -246,5 +247,7 @@ void director_draw_board(void) {
 	if (LB.step == LIB_STEP_MENU) {
 		if (bn5) draw_window();
 		else draw_menu();
+		/* (what the battle stakes, above BN5's window or under the menu) */
+		lib_battle_draw_stakes(EMU_W - 6, bn5 ? 82 : 34 + LOOK_BAND_H + 18 + LIB_CMDS * LOOK_LINE + 2 * LOOK_FRAME + 2);
 	}
 }

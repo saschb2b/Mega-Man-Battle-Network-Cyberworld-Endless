@@ -227,7 +227,7 @@ static void note_draw(int x0, int y0) {
 /* what the last run opened, beside its row: NEW as BN6 marks a new mail,
  * orange capitals over their dark red */
 static void new_draw(int x, int y) {
-	look_caps(x, y + 3, setup_word(SW_NEW), rgba(255, 173, 41, 255), rgba(165, 49, 74, 255));
+	look_new(x, y + 3, setup_word(SW_NEW));
 }
 
 /* a row's name, NEW after it where `fresh` */

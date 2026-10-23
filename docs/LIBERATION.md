@@ -13,8 +13,9 @@ to try him.
 Where it stands: the dissection (from BN5's ROM, its own text, and the
 players' guides), the design decision, which the owner approved on 23
 October 2026 (The owner's decisions, at the end), a ROM-free prototype
-of the generator with its measures, and stage 1 in the engine: the dark
-layer and its board, MegaMan alone (Stage 1, as built, below).
+of the generator with its measures, and stages 1 and 2 in the engine: the
+dark layer and its board, MegaMan alone (Stage 1, as built, below), and
+BN5's liberation battle on BN6's own battle loop (Stage 2, as built).
 
 ## Summary
 
@@ -129,10 +130,12 @@ switches Navis, L moves the camera over the board, START offers to retreat.
 ### Liberating a panel (ROM, text)
 
 A liberation battle is a battle record of type 1 (`BN5_BATTLE_LIBERATION`):
-all viruses deleted within three turns (`BN5_LIB_TURNS_UP`: the battle
-loop ends it when BattleState +7, the Custom Gauge's fills, reaches 3).
+all viruses deleted within three turns (**ROM**, read in its battle loop:
+Stage 2, as built, below: BattleState +7 counts the Custom screens opened,
+TURN n START! and FINAL TURN! as each turn's fight starts, TIME UP! and
+LIBERATE FAILED! where the third turn's Custom screen is asked for).
 Deleting them within the first turn liberates every panel around the Navi
-too (**text**). Which columns the field gives depends on which of the
+too (**text**; the ROM's win shows 1 TURN LIBERATE! where +7 is 1). Which columns the field gives depends on which of the
 panels around him are dark, so viruses can stand on both sides of him
 (**text**: L and R turn him around; the guides give the rule). His HP
 carries from battle to battle. Every Navi but MegaMan has one special chip
@@ -888,6 +891,98 @@ but most of it calls BN5's overworld engine at other addresses, and the
 generated boards need none of BN5's missions. Its code is read for the
 rules where the guides are unsure (the commands' shapes, the Darkloid's
 heal).
+
+### Stage 2, as built: the liberation battle (23 October 2026)
+
+**BN5's rules, read in its code** (`src/emu/bn5_liberation.h`; docs/ROM_DATA.md,
+BN6's battle loop and banners). BattleState +7 counts the Custom screens
+opened (played in romlab: 0 until the first opens, then 1). As each turn's
+fight starts (`BN5_LIB_TURN_BANNER`) the battle shows TURN n START!, n the
+turn, and from the third FINAL TURN!. Where the Custom screen is asked for
+in the third (`BN5_LIB_TIME_ASK`), the battle's phase 0x18 instead
+(`BN5_LIB_TIME_UP`): TIME UP!, 30 frames, LIBERATE FAILED!, the battle
+over. At a win (`BN5_LIB_WIN_BANNER`), 1 TURN LIBERATE! where it is the
+first turn, else LIBERATE SUCCESS!. The banners are BN5's battle messages
+(`BN5_BATTLE_MESSAGES`), and BN6 keeps that table whole (`0x0801EF84`,
+TURN n START! to n TURN LIBERATE! at the same numbers), but none of its
+liberation rules.
+
+**On BN6's loop** (`src/director/liberation_battle.c`, `src/emu/bn6_battle_loop.h`):
+the loop random battles and bosses run, answered by hooks while a
+liberation's battle is armed (the director arms it as the command is
+taken), no code moved:
+
+- each turn's fight starts with BN5's banner in BN6's own message engine
+  (the fight's BATTLE START! answered: TURN 1 START!, TURN 2 START!,
+  FINAL TURN!);
+- the final turn's gauge full, the loop goes to BN6's own draw (a
+  NetBattle's judge's end): the battle stops, its banner TIME UP!, the
+  draw run again for LIBERATE FAILED!, then result 3, which ends the
+  battle with no results screen and no reward, MegaMan's HP as it stands.
+  BN5 asks it as the Custom screen is asked for; BN6 opens that on L or R
+  alone, so here the gauge's filling ends the turn, or the final turn
+  could be held forever;
+- a win shows 1 TURN LIBERATE! or LIBERATE SUCCESS! in the win's place
+  (ENEMY DELETED!), so the board no longer shows its own banner after the
+  battle (stage 1's);
+- no running from it (the record's run bit off, as from BN5's).
+
+**What a battle does on the board** (`liberation.c`):
+
+| Battle | Won | Won in its first turn | Time up |
+| --- | --- | --- | --- |
+| A dark panel (Liberation) | the panel freed, its item given | and the dark around it (its eight: dark, items, the Darkloid's ring once open; no unit's) | the panel stays dark, the phase spent |
+| LongSwrd (an Order Point) | the panel and the one behind it | and the dark around the first | as above, the Order Point spent |
+| A guardian | deleted (back from its DarkHole while the hole stands), its panel freed | and the dark around it | the guardian stays |
+| A DarkHole | closed: its guardians gone for good, the eight around freed | the same | the hole stays |
+| The Darkloid | deleted, the board won | | (no turns to count) |
+
+The battle's viruses are the act's own, BN5's on BN5 territory, from the
+run's encounter tables, harder with the dark around the panel (stage 1's
+bands). **The Darkloid's battle** is the run's guardian Navi of the act's
+band in his own battle (stage 1), with no turns to count, and from its
+eleventh turn every hit does double (`BN5_LIB_LATE_DOUBLE`: BN5 doubles an
+object's hits of the frame, `BN5_LIB_DOUBLE_HIT`; here BN6's
+object_subtractHP, every HP taken, while his battle runs).
+
+**The stakes, before the battle.** With the command menu open, a box above
+BN5's window (under the PET look's menu without BN5's ROM) says what the
+command under the cursor stakes: "3 TURNS: FREES 1" and "1 TURN: 5 MORE"
+(the dark around that a first-turn win frees too), "3 TURNS: DELETES IT"
+for a guardian, "3 TURNS: CLOSES IT" and "FREES 9" for a DarkHole, "NO
+TURN LIMIT" and "TURN 11 ON: HITS X2" for the Darkloid
+(`liberation_battle_words.c`).
+
+**The design** (the game-design skill): the battle restates the board's
+*press on or prepare*. The dark around a panel makes its battle harder
+and its first-turn prize larger, so pressing into the thick dark is a
+gamble the folder must back, and a safe panel at the edge frees little:
+a costed choice, shown before it is taken (an honest telegraph: the
+turns, the prize, the banners in the battle counting them down). Failure
+is graduated: a time up costs the phase (and LongSwrd's Order Point) and
+the HP the battle took, never the run on its own; the board's harm still
+never takes the last HP. A deletion in the battle is the run's, as in
+every battle.
+
+**Checked:** `--dev dark,god` with BN5's ROM, a dark panel taken and its
+battle left to run: TURN 1 START!, TURN 2 START!, FINAL TURN!, the gauge
+full, TIME UP!, LIBERATE FAILED!, the board again with the panel dark
+(`liberation: battle 0 at 34,33 time up (turn 3)` in the debug log); with
+`onehit`, 1 TURN LIBERATE! and the dark around freed. The autopilot with
+`god,onehit` (seed 1) won the boards of acts 2 and 3, guardians, DarkHoles
+and Darkloids (act 2's Darkloid in his battle's seventh turn); with `god` alone
+its buster battles timed out in 13 of 25 and the board ran past 60000
+frames, and without `god` (seed 2) MegaMan was deleted in its third
+battle: the autopilot's battles are weak, and a dark layer asks a folder
+that deletes in three turns.
+
+**Left:** BN5's Surrounded battle (dark on both sides of the Navi, L and R
+to turn round: its text is BN5's battle archive's "Surrounded! Press L or
+R Button to turn around!"): BN6's own fields hold no field of enemies on
+both sides that we know of; whether BN5's own Custom screen opens by
+itself as a liberation turn's gauge fills; BN5's sound for a one-turn
+win (its own song); the Darkloid's intro and BN5's Darkloids (stage 4);
+the team (stage 3).
 
 ### The quality bar, as built (23 October 2026)
 
