@@ -52,10 +52,11 @@ static int draft_take(TextArchive *t, int program, int color, int fit_flag, int 
 }
 
 /* The draft: one box, the BugFrags of none in it, then the programs in a
- * column with their colours (ts_option: its number and those above and
- * below it), each to its branch (`take`), B to `skip`. Its script. A box
- * each said what BN6's programs do: seventeen boxes from the data to the
- * pick, which the owner found far too many (6 October 2026). */
+ * column with their colours and the copies held (ts_option: its number
+ * and those above and below it), each to its branch (`take`), B to
+ * `skip`. Its script. A box each said what BN6's programs do: seventeen
+ * boxes from the data to the pick, which the owner found far too many
+ * (6 October 2026). */
 static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take, int skip) {
 	int s = ta_script(t), n = draft->n;
 	char lead[96];
@@ -75,6 +76,14 @@ static int draft_menu(TextArchive *t, const ScriptsDraft *draft, const int *take
 		 * as a contradiction) */
 		const char *c = navicust_color_name(draft->color[k]);
 		if (*c) { ta_text(t, " ("); ta_text(t, c); ta_text(t, ")"); }
+		/* (and how many MegaMan holds of it, where he does: a player
+		 * picked an UnderSht beside the one they had, more than once; one
+		 * that would add nothing is not offered, navicust.c) */
+		if (draft->held[k]) {
+			char held[16];
+			snprintf(held, sizeof held, " Held %d", draft->held[k]);
+			ta_text(t, held);
+		}
 		if (k + 1 < n) ta_text(t, "\n");
 	}
 	ta_choose(t, take, n, skip);

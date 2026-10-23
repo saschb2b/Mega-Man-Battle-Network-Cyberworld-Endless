@@ -621,7 +621,10 @@ it pays one of BN6's GigaChips.
   Taking it also restores MegaMan's HP.
 - **The NaviCust.** Guardian Data also offers three NaviCust programs, one
   from each of three builds (buster, hand, guard, field, HP), or BugFrags
-  if you take none. The second and fourth acts' guardians grow the board
+  if you take none. A program you already hold shows how many beside its
+  name ("Held 1"), and one a copy would add nothing to (a second UnderSht
+  or SuperArmor, SuperArmor beside BodyPack, Attack+1 beside AttckMAX) is
+  not offered. The second and fourth acts' guardians grow the board
   from 4x4 to 5x4, then 5x5. A layout that breaks BN6's rules runs bugged,
   and MegaMan says what the bug does. A program turns with L and R only
   with its colour's Spin: each run hides one, a colour you don't have yet,

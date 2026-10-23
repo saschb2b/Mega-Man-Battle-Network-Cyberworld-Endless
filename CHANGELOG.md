@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **A guardian's draft knows what MegaMan holds.** A player took UnderSht
+  from Guardian Data while already holding it, more than once: BN6 sets
+  UnderSht once, so a second does nothing. The draft now offers no
+  program a copy would add nothing to (UnderSht, SuperArmor, the Shields,
+  the shoes, the MAXes and the rest whose effect BN6 sets rather than
+  adds; SuperArmor beside BodyPack; Attack+1 beside AttckMAX), and
+  another of the build takes its place. A program that adds, Custom1 or
+  HP+50, shows the copies held beside its colour: "HP+50 (white) Held 1".
+  Layers made before continue afresh (their drafts changed).
 - **BN5's songs named for where BN5 plays them, and three of them in
   runs.** The Jukebox's BN5 songs had numbers in place of names, or names
   borrowed from BN6. Now every song Team Colonel starts is named for its

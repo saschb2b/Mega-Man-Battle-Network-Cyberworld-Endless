@@ -23,6 +23,14 @@ typedef struct {
 /* The draft of a guardian at `depth`: three programs of three different
  * builds, each of a tier the act has reached (ROM-free; the rng decides). */
 int navicust_draft(int depth, NaviProgram out[NAVICUST_DRAFT]);
+/* Whether the programs held (`have`, `nhave` variants: program * 4 + v,
+ * as run.programs) already set all that `program` would, so that it adds
+ * nothing: a second SuprArmr, UnderSht or Shield, whose effects are set
+ * and not added to; SuprArmr beside BodyPack; Attack+1 beside AttckMAX
+ * (bn6f's compile). A Custom1 or an HP+50 always adds. */
+bool navicust_adds_nothing(int program, const uint8_t *have, int nhave);
+/* How many of `program` `have` holds, in any colour. */
+int navicust_held(int program, const uint8_t *have, int nhave);
 /* One of the program's colours, as the ROM's program records have them
  * (the rng picks among a plus part's three); 0 when the ROM has none. */
 int navicust_color(int program);
@@ -48,8 +56,9 @@ typedef struct {
 } NaviShape;
 /* The draft, of programs that fit a `w` x `h` board beside the `nhave`
  * variants on it (`have`), each in a colour whose variant fits (colour
- * 1-6 in out[k].color); fewer than three where not enough fit. Without a
- * ROM as navicust_draft, colours left 0. */
+ * 1-6 in out[k].color), none that adds nothing to them
+ * (navicust_adds_nothing); fewer than three where not enough fit. Without
+ * a ROM as navicust_draft, colours left 0. */
 int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave, int w, int h);
 /* The shape of variant `variant` from the ROM; false without one. As it
  * stands once compressed by its code (`compressed`), the record's smaller

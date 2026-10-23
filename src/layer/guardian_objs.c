@@ -140,7 +140,8 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 		fprintf(stderr, "draft: a %dx%d board beside", w, h);
 		for (int i = 0; i < have; ++i) fprintf(stderr, " %d/%d", run.programs[i] / 4, run.programs[i] % 4);
 		fprintf(stderr, ":");
-		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k) fprintf(stderr, " %d (colour %d)", pick[k].program, pick[k].color);
+		for (int k = 0; k < NAVICUST_DRAFT && k < n; ++k)
+			fprintf(stderr, " %d (colour %d, %d held)", pick[k].program, pick[k].color, navicust_held(pick[k].program, run.programs, have));
 		fprintf(stderr, "\n");
 	}
 	bool colored = n > 0;
@@ -148,6 +149,7 @@ static void draft_make(ScriptsDraft *draft, GuardianStage *g) {
 		int c = pick[k].color ? pick[k].color : navicust_color(pick[k].program);
 		draft->program[k] = (uint8_t)(pick[k].program * 4);
 		draft->color[k] = (uint8_t)c;
+		draft->held[k] = (uint8_t)navicust_held(pick[k].program, run.programs, have);
 		colored = c > 0;
 	}
 	if (colored) {

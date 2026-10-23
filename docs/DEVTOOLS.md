@@ -898,7 +898,9 @@ Pack, in its first code (the folder editor's Pack and its scroll on the
 second screen, issue #75); `programs=N` gives a copy of each of the first
 N NaviCust programs, in the first of its colours the ROM draws, with the
 check BN6 lists them by (the NaviCustomizer on the second screen, issue
-#76); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
+#76), and `program=P` one of program P besides (a guardian's draft beside
+a program held: `program=41` and `--seed 11 --run-depth 3` offer HP+50
+again, "Held 1", docs/NAVICUST.md 10); `--talk bugfrag:FRAME` gives one BugFrag, as `bugfrags` gives fifty
 (a DarkChip's last). `clock=N` starts the run with the Net's clock at N
 notches (docs/HOME.md, going back): the guardians spawn with its HP, a
 tenth more a notch. `CYBERWORLD_AUTOPILOT_BACK=N` has the autopilot take

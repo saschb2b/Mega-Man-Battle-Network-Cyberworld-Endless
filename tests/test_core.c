@@ -2172,6 +2172,22 @@ static void test_navicust(void) {
 	int kinds = 0;
 	for (int i = 1; i <= 46; ++i) kinds += offered[i] > 0;
 	CHECK(kinds >= 25, "only %d programs ever offered", kinds);
+	/* a program held whose effect is set, not added to, is not offered
+	 * again (a player took a second UnderSht); one that adds is, its
+	 * copies counted (variants: program * 4 + v) */
+	const uint8_t under[] = { 13 * 4 + 1, 2 * 4 + 1 }, body[] = { 28 * 4 + 2 }, amax[] = { 38 * 4 + 3 }, maxes[] = { 38 * 4, 39 * 4, 40 * 4 };
+	CHECK(navicust_adds_nothing(13, under, 2) && !navicust_adds_nothing(2, under, 2) && !navicust_adds_nothing(1, under, 2), "UnderSht held: another adds nothing, Custom1 and SuprArmr do");
+	CHECK(navicust_adds_nothing(1, body, 1) && navicust_adds_nothing(13, body, 1) && !navicust_adds_nothing(7, body, 1), "BodyPack holds SuprArmr and UnderSht, not FstBarr");
+	CHECK(navicust_adds_nothing(35, amax, 1) && !navicust_adds_nothing(36, amax, 1) && !navicust_adds_nothing(27, amax, 1), "AttckMAX spends Attack+1, not Speed+1 or BustPack");
+	CHECK(navicust_adds_nothing(27, maxes, 3) && !navicust_adds_nothing(41, maxes, 3), "the three MAXes spend BustPack; HP+50 always adds");
+	CHECK(!navicust_adds_nothing(9, (const uint8_t[]){ 8 * 4 }, 1), "Shield held: Reflect is still offered");
+	CHECK(navicust_held(2, under, 2) == 1 && navicust_held(41, under, 2) == 0, "copies held counted");
+	for (uint32_t seed = 1; seed <= 200; ++seed) {
+		rng_seed(seed * 2654435761u);
+		NaviProgram p[NAVICUST_DRAFT];
+		int n = navicust_draft_fitting(3 * (1 + (int)(seed % 6)), p, under, 2, 4, 4);
+		for (int k = 0; k < n; ++k) CHECK(p[k].program != 13, "seed %u: UnderSht offered beside the one held", seed);
+	}
 	CHECK(navicust_expmemry(6) && navicust_expmemry(12) && !navicust_expmemry(3) && !navicust_expmemry(25), "ExpMemry milestones");
 	/* the packing (made-up shapes): a bar on the command line, two squares
 	 * that must share it (not of one colour), a plus part off it, too

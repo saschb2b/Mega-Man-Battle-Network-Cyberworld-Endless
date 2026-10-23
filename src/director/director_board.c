@@ -132,23 +132,29 @@ int board_programs(uint8_t *out, int max) {
 	return n;
 }
 
-/* --dev programs=N: a copy of each of the first N programs, in the first
- * of its colours the ROM draws, given as BN6 gives one (its check beside
- * its count: the NaviCust lists no other); the NaviCustomizer's list, for
- * a capture */
+/* A copy of program `p`, in the first of its colours the ROM draws, given
+ * as BN6 gives one (its check beside its count: the NaviCust lists no
+ * other); whether there was one to give */
+static bool dev_give_program(int p, uint32_t items, uint32_t check) {
+	for (int v = p * 4; v < p * 4 + 4; ++v) {
+		NaviShape s;
+		if (!navicust_shape(v, &s) || !s.color) continue;
+		uint32_t id = BN6_PROGRAM_ITEMS + (uint32_t)v;
+		if (!emu_read8(items + id)) emu_write8(items + id, 1);
+		emu_write8(check + id, (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + id) ^ 0x55));
+		return true;
+	}
+	return false;
+}
+
+/* --dev programs=N: a copy of each of the first N programs, the
+ * NaviCustomizer's list, for a capture; program=P one of P besides (a
+ * draft's held count) */
 void dev_programs(void) {
 	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), check = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_CHECK);
-	if (dev.programs <= 0 || items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
-	for (int p = 1, given = 0; p < 47 && given < dev.programs; ++p)
-		for (int v = p * 4; v < p * 4 + 4; ++v) {
-			NaviShape s;
-			if (!navicust_shape(v, &s) || !s.color) continue;
-			uint32_t id = BN6_PROGRAM_ITEMS + (uint32_t)v;
-			if (!emu_read8(items + id)) emu_write8(items + id, 1);
-			emu_write8(check + id, (uint8_t)(emu_read8(BN6_KEY_ITEM_SEEDS + id) ^ 0x55));
-			++given;
-			break;
-		}
+	if ((dev.programs <= 0 && dev.program <= 0) || items < BN6_EWRAM || items >= BN6_EWRAM_END || check < BN6_EWRAM || check >= BN6_EWRAM_END) return;
+	for (int p = 1, given = 0; p < 47 && given < dev.programs; ++p) given += dev_give_program(p, items, check);
+	if (dev.program > 0 && dev.program < 47) dev_give_program(dev.program, items, check);
 }
 
 /* A program variant's shape as the PET has it: compressed where its code

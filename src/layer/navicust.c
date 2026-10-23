@@ -5,9 +5,24 @@
 #include "pacing.h"
 #include "rom.h"
 
+/* What a program sets, as bn6f's compile runs it (applyNavicustPrograms_813C684
+ * calls each placed program's own function): a flag or a value, which a
+ * second copy sets again to no gain (navicust_NCP_UnderSht and the rest),
+ * where Custom1, MegFldr1, Attack+1, BustPack and HP+50 add to theirs. A
+ * MAX sets the Buster's stat to the cap its +1 adds up to (4), and
+ * BodyPack sets the four of SuprArmr, FlotShoe, AirShoes and UnderSht. */
+enum {
+	SETS_ARMOR = 1 << 0, SETS_FLOAT = 1 << 1, SETS_AIR = 1 << 2, SETS_UNDER = 1 << 3, SETS_BARRIER = 1 << 4,
+	SETS_SHIELD = 1 << 5, SETS_REFLECT = 1 << 6, SETS_ANTIDMG = 1 << 7, SETS_SHUFFLE = 1 << 8, SETS_COLLECT = 1 << 9,
+	SETS_SLIP = 1 << 10, SETS_HEAL = 1 << 11, SETS_BUGSTOP = 1 << 12, SETS_ATTACK = 1 << 13, SETS_SPEED = 1 << 14, SETS_CHARGE = 1 << 15,
+	SETS_BODY = SETS_ARMOR | SETS_FLOAT | SETS_AIR | SETS_UNDER,
+};
+
 /* The pool: BN6's programs a run can be offered, the act (0-5 of the first
  * cycle, 7 the second cycle) from which a guardian may offer each, its
- * build (what it does: navicust_words.c). Left out: Humor and Poem (they answer the L
+ * build (what it does: navicust_words.c), what it sets and what it is
+ * spent by (navicust_adds_nothing: all of `spent` set by programs held).
+ * Left out: Humor and Poem (they answer the L
  * button, which the engine takes), Rush, Beat and Tango (VS battles only),
  * OilBody, Fish, Battery and Jungle (they steer the game's encounter roll,
  * which the engine replaces), Millions (its Mystery Data rule loops
@@ -17,41 +32,42 @@
  * guardian's ExpMemry, 5x4 until the act 4 guardian's, then 5x5. */
 static const struct {
 	uint8_t program, tier, build;
+	uint16_t sets, spent;
 } POOL[] = {
-	{ 1, 0, BUILD_GUARD },
-	{ 2, 0, BUILD_HAND },
-	{ 3, 4, BUILD_HAND },
-	{ 4, 0, BUILD_HAND },
-	{ 5, 2, BUILD_HAND },
-	{ 6, 4, BUILD_HAND },
-	{ 7, 0, BUILD_GUARD },
-	{ 8, 0, BUILD_GUARD },
-	{ 9, 2, BUILD_GUARD },
-	{ 10, 2, BUILD_GUARD },
-	{ 11, 2, BUILD_FIELD },
-	{ 12, 2, BUILD_FIELD },
-	{ 13, 0, BUILD_GUARD },
-	{ 14, 4, BUILD_HAND },
-	{ 21, 2, BUILD_FIELD },
-	{ 25, 0, BUILD_FIELD },
-	{ 26, 2, BUILD_FIELD },
-	{ 27, 2, BUILD_BUSTER },
-	{ 28, 4, BUILD_GUARD },
-	{ 29, 2, BUILD_HAND },
-	{ 30, 4, BUILD_HAND },
-	{ 31, 4, BUILD_FIELD },
-	{ 35, 0, BUILD_BUSTER },
-	{ 36, 0, BUILD_BUSTER },
-	{ 37, 0, BUILD_BUSTER },
-	{ 38, 4, BUILD_BUSTER },
-	{ 39, 2, BUILD_BUSTER },
-	{ 40, 2, BUILD_BUSTER },
-	{ 41, 0, BUILD_HP },
-	{ 42, 0, BUILD_HP },
-	{ 43, 2, BUILD_HP },
-	{ 44, 7, BUILD_HP },
-	{ 45, 7, BUILD_HP },
-	{ 46, 7, BUILD_HP },
+	{ 1, 0, BUILD_GUARD, SETS_ARMOR, SETS_ARMOR },
+	{ 2, 0, BUILD_HAND, 0, 0 },
+	{ 3, 4, BUILD_HAND, 0, 0 },
+	{ 4, 0, BUILD_HAND, 0, 0 },
+	{ 5, 2, BUILD_HAND, 0, 0 },
+	{ 6, 4, BUILD_HAND, 0, 0 },
+	{ 7, 0, BUILD_GUARD, SETS_BARRIER, SETS_BARRIER },
+	{ 8, 0, BUILD_GUARD, SETS_SHIELD, SETS_SHIELD },
+	{ 9, 2, BUILD_GUARD, SETS_REFLECT, SETS_REFLECT },
+	{ 10, 2, BUILD_GUARD, SETS_ANTIDMG, SETS_ANTIDMG },
+	{ 11, 2, BUILD_FIELD, SETS_FLOAT, SETS_FLOAT },
+	{ 12, 2, BUILD_FIELD, SETS_AIR, SETS_AIR },
+	{ 13, 0, BUILD_GUARD, SETS_UNDER, SETS_UNDER },
+	{ 14, 4, BUILD_HAND, SETS_SHUFFLE, SETS_SHUFFLE },
+	{ 21, 2, BUILD_FIELD, SETS_COLLECT, SETS_COLLECT },
+	{ 25, 0, BUILD_FIELD, SETS_SLIP, SETS_SLIP },
+	{ 26, 2, BUILD_FIELD, SETS_HEAL, SETS_HEAL },
+	{ 27, 2, BUILD_BUSTER, 0, SETS_ATTACK | SETS_SPEED | SETS_CHARGE },
+	{ 28, 4, BUILD_GUARD, SETS_BODY, SETS_BODY },
+	{ 29, 2, BUILD_HAND, 0, 0 },
+	{ 30, 4, BUILD_HAND, 0, 0 },
+	{ 31, 4, BUILD_FIELD, SETS_BUGSTOP, SETS_BUGSTOP },
+	{ 35, 0, BUILD_BUSTER, 0, SETS_ATTACK },
+	{ 36, 0, BUILD_BUSTER, 0, SETS_SPEED },
+	{ 37, 0, BUILD_BUSTER, 0, SETS_CHARGE },
+	{ 38, 4, BUILD_BUSTER, SETS_ATTACK, SETS_ATTACK },
+	{ 39, 2, BUILD_BUSTER, SETS_SPEED, SETS_SPEED },
+	{ 40, 2, BUILD_BUSTER, SETS_CHARGE, SETS_CHARGE },
+	{ 41, 0, BUILD_HP, 0, 0 },
+	{ 42, 0, BUILD_HP, 0, 0 },
+	{ 43, 2, BUILD_HP, 0, 0 },
+	{ 44, 7, BUILD_HP, 0, 0 },
+	{ 45, 7, BUILD_HP, 0, 0 },
+	{ 46, 7, BUILD_HP, 0, 0 },
 };
 #define POOL_N ((int)(sizeof POOL / sizeof *POOL))
 
@@ -76,26 +92,59 @@ bool navicust_offerable(int program, int depth) {
 	return i >= 0 && POOL[i].tier <= reached(depth);
 }
 
-int navicust_draft(int depth, NaviProgram out[NAVICUST_DRAFT]) {
-	/* three builds of the five, in a random order, one program of each:
-	 * the choice is a direction, not three of a kind */
-	int builds[BUILD_COUNT] = { BUILD_BUSTER, BUILD_HAND, BUILD_GUARD, BUILD_FIELD, BUILD_HP };
+int navicust_held(int program, const uint8_t *have, int nhave) {
+	int n = 0;
+	for (int i = 0; i < nhave; ++i) n += have[i] / 4 == program;
+	return n;
+}
+
+bool navicust_adds_nothing(int program, const uint8_t *have, int nhave) {
+	int p = find(program);
+	if (p < 0 || !POOL[p].spent) return false;
+	unsigned set = 0;
+	for (int i = 0; i < nhave; ++i) {
+		int h = find(have[i] / 4);
+		if (h >= 0) set |= POOL[h].sets;
+	}
+	return !(POOL[p].spent & ~set);
+}
+
+/* three builds of the five, in a random order: the choice is a direction,
+ * not three of a kind */
+static void shuffle_builds(int builds[BUILD_COUNT]) {
+	for (int i = 0; i < BUILD_COUNT; ++i) builds[i] = i;
 	for (int i = BUILD_COUNT - 1; i > 0; --i) {
 		int j = rng_range(0, i), t = builds[i];
 		builds[i] = builds[j];
 		builds[j] = t;
 	}
+}
+
+/* the pool's programs of `build` a guardian at act `top` may offer (their
+ * indexes, into `fit`), but those a program held already gives all of (a
+ * player picked UnderSht beside the one they had, more than once); how
+ * many */
+static int candidates(int build, int top, const uint8_t *have, int nhave, int fit[POOL_N]) {
+	int n = 0;
+	for (int i = 0; i < POOL_N; ++i)
+		if (POOL[i].build == build && POOL[i].tier <= top && !navicust_adds_nothing(POOL[i].program, have, nhave)) fit[n++] = i;
+	return n;
+}
+
+static int draft_any(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave) {
+	int builds[BUILD_COUNT];
+	shuffle_builds(builds);
 	int n = 0, top = reached(depth);
 	for (int b = 0; b < BUILD_COUNT && n < NAVICUST_DRAFT; ++b) {
-		int fit[POOL_N], nfit = 0;
-		for (int i = 0; i < POOL_N; ++i)
-			if (POOL[i].build == builds[b] && POOL[i].tier <= top) fit[nfit++] = i;
+		int fit[POOL_N], nfit = candidates(builds[b], top, have, nhave, fit);
 		if (!nfit) continue;
 		out[n].program = POOL[fit[rng_range(0, nfit - 1)]].program;
 		out[n++].color = 0;
 	}
 	return n;
 }
+
+int navicust_draft(int depth, NaviProgram out[NAVICUST_DRAFT]) { return draft_any(depth, out, NULL, 0); }
 
 /* A colour variant of `program` that fits beside `have`, chosen at random
  * among those that do: its colour, 0 for none. */
@@ -113,22 +162,16 @@ static int fitting_color(int program, const uint8_t *have, int nhave, int w, int
 }
 
 int navicust_draft_fitting(int depth, NaviProgram out[NAVICUST_DRAFT], const uint8_t *have, int nhave, int w, int h) {
-	if (!R.data) return navicust_draft(depth, out);
+	if (!R.data) return draft_any(depth, out, have, nhave);
 	/* as navicust_draft, three builds in a random order; in each, its
 	 * programs in a random order until one fits (a playtester drafted a
 	 * SuprArmr that could not share his 4x4 board with the gift's Custom1,
 	 * and nothing said so) */
-	int builds[BUILD_COUNT] = { BUILD_BUSTER, BUILD_HAND, BUILD_GUARD, BUILD_FIELD, BUILD_HP };
-	for (int i = BUILD_COUNT - 1; i > 0; --i) {
-		int j = rng_range(0, i), t = builds[i];
-		builds[i] = builds[j];
-		builds[j] = t;
-	}
+	int builds[BUILD_COUNT];
+	shuffle_builds(builds);
 	int n = 0, top = reached(depth);
 	for (int b = 0; b < BUILD_COUNT && n < NAVICUST_DRAFT; ++b) {
-		int fit[POOL_N], nfit = 0;
-		for (int i = 0; i < POOL_N; ++i)
-			if (POOL[i].build == builds[b] && POOL[i].tier <= top) fit[nfit++] = i;
+		int fit[POOL_N], nfit = candidates(builds[b], top, have, nhave, fit);
 		for (int i = nfit - 1; i > 0; --i) {
 			int j = rng_range(0, i), t = fit[i];
 			fit[i] = fit[j];
