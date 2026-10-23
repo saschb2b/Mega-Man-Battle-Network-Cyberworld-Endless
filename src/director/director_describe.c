@@ -14,6 +14,7 @@
 #include "director_hold.h"
 #include "director_layer.h"
 #include "director_state.h"
+#include "liberation.h"
 #include "director_way.h"
 #include "guardians.h"
 #include "home_places.h"
@@ -248,6 +249,8 @@ void director_describe(FILE *f) {
 	/* (a trip back, and the Net's clock: docs/HOME.md) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);
+	/* (a dark layer's sealed region's route, found: docs/LIBERATION.md, Special routes) */
+	if (lib_route_found()) fprintf(f, "route found\n");
 	/* (named as the game shows him: a playtester reads this; a dev's
 	 * state, CYBERWORLD_STATE_POS, names him always, as the scripts that
 	 * find a guardian's seed read it) */

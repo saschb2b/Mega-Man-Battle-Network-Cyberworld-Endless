@@ -203,3 +203,19 @@ the same footage must not sweep. The stands' last frames say who won
 Devices now used up: the slanted seam and its red and blue sides, the
 seam's sweep as the cut, call-and-answer ribbons, the gold meeting
 (burst and glow), the VS badge on the seam, slanted name plates.
+
+## 0.15.0: Liberation (in the making, 2026-10-23)
+
+The owner: a release about bringing BN5's Liberation Missions to the run,
+BN5's song 0x22, the board's theme, as the music's seed, "something
+beautiful" as 0.14.0. Three eight-bar sketches from 0x22's habits, all in
+the soundfont: A the operation, B the liberation's fanfare, C the
+darkness's move. The owner chose A, "yet it is all over the place. with
+0.14.0 you took more care." The numbers had matched the song's balance;
+the writing had not (`music_rules.md`, Discipline, written from it):
+too many sections in nine bars, a walking bass on new notes everywhere,
+every part moving at once, a synth brass outside the approved palette.
+`music_check.py --source` now sets each part's motion beside the song's
+and flags the busier ones; the rewritten A reads "busier than the
+source: none". The owner asked that this hold for every future piece,
+in the skill rather than in memory.

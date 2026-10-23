@@ -161,7 +161,7 @@ int lib_battle_end(int *turn) {
 bool lib_swept(int x, int y) {
 	if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || lib_unit_at(x, y) >= 0) return false;
 	int k = LB.b.kind[y][x];
-	return k == LIB_DARK || k == LIB_ITEM || (k == LIB_RING && !lib_holes_left(&LB.b));
+	return k == LIB_DARK || k == LIB_ITEM || k == LIB_TRAP || (k == LIB_RING && !lib_holes_left(&LB.b));
 }
 
 static int swept_around(int x, int y) {

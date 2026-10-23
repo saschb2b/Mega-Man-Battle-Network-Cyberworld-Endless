@@ -93,6 +93,49 @@ Part by part, what read as generic:
   (12% of its half bars); BN6's battle themes close on bVII, the minor v
   or a suspension, and change chords twice a bar.
 
+## Discipline
+
+The owner on 0.15.0's first sketches (23 October 2026), three written
+from BN5's song 0x22 and played by the soundfont: sketch A "feels the
+best. yet it is all over the place. with 0.14.0 you took more care".
+Their balance and punch were near the song's; their writing was not:
+nine bars held a count-in, an A, a B, a turn and an end; the bass walked
+to a new note on nearly every one of its eleven places; the backing
+square's figure crossed two octaves; a tom pair, a stick and ghosts
+played under a march snare at once; the sampled lead was a synth brass
+nothing in the song sounds like. Before the owner hears any piece:
+
+1. **One idea at a time.** A sketch of eight to ten bars has a count-in,
+   one A, one B, the hook's return and an end, no more. A part enters, or
+   changes its job, only at a section's head.
+2. **Only the lead moves freely.** The backing square keeps one figure
+   over each chord's four notes in one register through a section; the
+   bass holds its root on the kick's places and moves as the source's
+   does; the drums keep one pattern a section and fill only into the
+   next.
+3. **Each part's motion near the source's.** `music_check.py --source
+   GAME SONG [--offset TICKS]` sets the lead, the backing square, the
+   bass and a sampled lead beside their counterparts in the song (notes
+   a bar, different pitches a bar; how often a note repeats, steps,
+   skips, leaps) and flags a part with half again as many pitches a bar,
+   15 points more leaping or 15 fewer repeated notes. It must read "busier
+   than the source: none". The rewritten sketch A's first pass, already
+   calmer, still read: the lead repeating 10% of its notes against 0x22's
+   44%, the bass leaping 42% against 23%, the sampled lead on 5.5 pitches
+   a bar against 2.6.
+4. **The approved palette first.** Start from the instruments of the
+   last piece the owner approved (0.14.0's: FluidR3 GM's electronic kick,
+   the clap over a snare, the toms, the strings' chord samples, the saw
+   lead, program 81, the brass section, 61, the orchestra hit, 55, the
+   distortion and palm-muted guitars, 30 and 28) and change one only for
+   the source's own sound, its reason in the docstring.
+5. **The source's kit, no more.** Each of the sketch's drums is one of
+   the source's keys on its places; a sound the source plays in one
+   section only stays there.
+6. **One track thrown wide.** The backing hard left and right (by the
+   note or the half bar, as the source); the rest near the middle, chord
+   samples a little to either side (0.35), not hard.
+
 ## Harmony
 
 1. **Two chords a bar.** Every song read changes chord 1.3-1.9 times a
@@ -243,6 +286,9 @@ Muted Guitar, 48 Strings for chord samples, 55 Orchestra Hit, 61 Brass
 Section, 81 Saw Wave.
 
 ## Checks before the owner listens
+
+- `music_check.py --piece NAME --source GAME SONG [--offset TICKS]`:
+  "busier than the source: none" (Discipline, above).
 
 - `music_check.py --piece NAME --ref RECORDING`: the bars, the four-band
   balance, the punch, and `lead notes rubbing the harmony` (a piece names

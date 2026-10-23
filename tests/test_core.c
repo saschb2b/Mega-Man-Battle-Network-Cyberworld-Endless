@@ -49,6 +49,7 @@
 #include "save_blob.h"
 #include "settings_line.h"
 #include "liberation_board.h"
+#include "liberation_plan.h"
 #include "sound_filter.h"
 #include "super_lines.h"
 #include "flags.h"
@@ -5487,10 +5488,46 @@ static void test_pad_art(void) {
 	CHECK(!pad_art_on(&ring, -18, -18, 0) && pad_art_on(&ring, -18, -18, 4), "a reach takes in more");
 }
 
-/* A dark layer's board (docs/LIBERATION.md, stage 1): the same from its
- * seed, its kinds where BN5's rules put them (the Darkloid's 3x3 whole, a
- * ring of dark round each DarkHole with its guardian, the start clean, no
- * guardian within three of it), and its sizes and par over the acts. */
+/* A dark layer's board (docs/LIBERATION.md, stage 1 and The quality bar):
+ * the same from its seed, its kinds where BN5's rules put them (the
+ * Darkloid's 3x3 whole, a ring of dark round each DarkHole with its
+ * guardian, the start clean, no guardian within three of it nor reaching
+ * it), the act's rules of the staircase, the sealed region never needed
+ * and its route behind its barrier alone; and the planner's measures over
+ * the acts, which the board keeps or is rejected for. */
+static bool lib_reaches(const LibBoard *b, int x, int y) {
+	static int16_t seen[MAP_H][MAP_W];
+	static uint16_t q[MAP_W * MAP_H];
+	memset(seen, 0, sizeof seen);
+	int head = 0, tail = 0;
+	seen[b->start_y][b->start_x] = 1;
+	q[tail++] = (uint16_t)(b->start_y * MAP_W + b->start_x);
+	while (head < tail) {
+		int c = q[head++], cx = c % MAP_W, cy = c / MAP_W;
+		if (cx == x && cy == y) return true;
+		static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+		for (int d = 0; d < 4; ++d) {
+			int nx = cx + d4[d][0], ny = cy + d4[d][1];
+			if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H || seen[ny][nx] || b->kind[ny][nx] == LIB_VOID || b->kind[ny][nx] == LIB_BAR) continue;
+			seen[ny][nx] = 1;
+			q[tail++] = (uint16_t)(ny * MAP_W + nx);
+		}
+	}
+	return false;
+}
+
+static void lib_check_routes(const LibBoard *a, uint32_t s) {
+	static LibBoard o;
+	o = *a;
+	for (int k = 1; k <= o.nbars; ++k) if (k != o.sealed) lib_open_barrier(&o, k);
+	for (int h = 0; h < o.nholes; ++h) CHECK(lib_reaches(&o, o.hole_x[h], o.hole_y[h]), "board %u: hole %d behind the sealed barrier", s, h);
+	CHECK(lib_reaches(&o, o.boss_x, o.boss_y), "board %u: the Darkloid behind the sealed barrier", s);
+	if (!o.sealed) return;
+	CHECK(o.route_x >= 0 && !lib_reaches(&o, o.route_x, o.route_y), "board %u: the route not sealed", s);
+	lib_open_barrier(&o, o.sealed);
+	CHECK(lib_reaches(&o, o.route_x, o.route_y), "board %u: the route not behind its barrier", s);
+}
+
 static void test_liberation_board(void) {
 	Run before = run;
 	memset(&run, 0, sizeof run);
@@ -5498,19 +5535,30 @@ static void test_liberation_board(void) {
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
 	static LibBoard a, b;
-	int made = 0, tried = 0;
+	/* (LIB_LAX=1: every board played kept, each one's measures printed: the
+	 * quality bar's numbers tuned on them) */
+	lib_plan_lax = getenv("LIB_LAX") != NULL;
+	static const int stair[6] = { 0, 0, LIB_RULE_BARRIERS, LIB_RULE_BARRIERS | LIB_RULE_REACH, LIB_RULE_BARRIERS | LIB_RULE_REACH | LIB_RULE_TOLLS,
+		LIB_RULE_BARRIERS | LIB_RULE_REACH | LIB_RULE_TOLLS | LIB_RULE_MAZE };
+	int made = 0, tried = 0, late_made = 0, late_tried = 0;
+	printf("liberation: act, boards, panels, dark, par (range), quartiles, dead phases, moves a phase, LongSwrd a play, best Lib/Long/Pass/Fight, hole orders, the route's phases over par, bare dead, barriers, traps, rejected for\n");
 	for (int act = 1; act <= 5; ++act) {
-		int panels = 0, dark = 0, par = 0, lo = 99, hi = 0, n = 0;
-		for (uint32_t s = 1; s <= 30; ++s) {
+		int panels = 0, dark = 0, par = 0, lo = 99, hi = 0, n = 0, routes = 0, q1 = 0, q3 = 0, bars = 0, traps = 0, orders = 0, why[LIB_WHYS] = { 0 };
+		LibMeasure sum = { 0 };
+		for (uint32_t s = 1; s <= 40; ++s) {
 			int depth = act * 3 + 2;
 			layer_make_dark = true;
 			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
 			layer_make_dark = false;
 			CHECK(layer.dark && layer.nstairs == 0 && layer.nobj == 2, "dark layer %u act %d: dark %d stairs %d objects %d", s, act, layer.dark, layer.nstairs, layer.nobj);
-			++tried;
-			if (!lib_board_make(&a, s, act, 1)) continue;
-			++made;
-			CHECK(lib_board_make(&b, s, act, 1) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
+			/* (a run meets dark layers in acts 2 to 4, run_dark_area; acts 5
+			 * and 6 with --dev dark and the separate mode to come) */
+			++*(act <= 3 ? &tried : &late_tried);
+			bool ok = lib_board_make(&a, s, act, 1, NULL);
+			for (int w = 0; w < LIB_WHYS; ++w) why[w] += a.rejected[w];
+			if (!ok) continue;
+			++*(act <= 3 ? &made : &late_made);
+			CHECK(lib_board_make(&b, s, act, 1, NULL) && !memcmp(&a, &b, sizeof a), "board %u act %d: not the same twice", s, act);
 			CHECK(a.kind[a.boss_y][a.boss_x] == LIB_BOSS && a.unit[0].kind == UNIT_DARKLOID, "board %u: no Darkloid", s);
 			for (int d = 0; d < 9; ++d)
 				CHECK(d == 4 || a.kind[a.boss_y - 1 + d / 3][a.boss_x - 1 + d % 3] == LIB_RING, "board %u: the Darkloid's ring broken", s);
@@ -5518,19 +5566,75 @@ static void test_liberation_board(void) {
 			for (int h = 0; h < a.nholes; ++h) CHECK(lib_dark_around(&a, a.hole_x[h], a.hole_y[h]) == 8, "board %u: hole %d's ring not dark", s, h);
 			for (int u = 1; u < a.nunits; ++u)
 				CHECK(abs(a.unit[u].x - a.start_x) + abs(a.unit[u].y - a.start_y) > 3, "board %u: a guardian by the start", s);
-			panels += a.panels; dark += a.dark; par += a.par; ++n;
+			CHECK(!lib_threat(&a, a.start_x, a.start_y), "board %u: the start in a unit's reach", s);
+			CHECK(a.rules == stair[act], "board %u act %d: rules %x, not the staircase's", s, act, a.rules);
+			CHECK(!(a.rules & LIB_RULE_BARRIERS) || (a.sealed && a.nbars >= 1 + !!(a.rules & LIB_RULE_REACH) + !!(a.rules & LIB_RULE_MAZE)), "board %u act %d: %d barriers", s, act, a.nbars);
+			CHECK(!(a.rules & LIB_RULE_TOLLS) || a.traps > 0, "board %u act %d: no trap", s, act);
+			lib_check_routes(&a, s);
+			CHECK(a.par == a.m.median && a.m.wins * 10 >= a.m.plays * 6, "board %u: par %d, %d plays of %d won", s, a.par, a.m.wins, a.m.plays);
+			if (lib_plan_lax)
+				printf("lax act %d seed %u: par %d won %d/%d dead %d%% moves %d.%d bare %d%% long %d.%d best-long %d%% pass %d%% fight %d%% orders %d route +%d bars %d traps %d\n", act + 1, s, a.par, a.m.wins, a.m.plays,
+					a.m.dead * 100 / (a.m.phases - a.m.strikes ? a.m.phases - a.m.strikes : 1), a.m.moves / (a.m.phases ? a.m.phases : 1), a.m.moves * 10 / (a.m.phases ? a.m.phases : 1) % 10,
+					a.m.bare_dead * 100 / (a.m.bare_phases ? a.m.bare_phases : 1), a.m.longswrd / a.m.plays, a.m.longswrd * 10 / a.m.plays % 10,
+					a.m.best[1] * 100 / (a.m.phases ? a.m.phases : 1), a.m.best[2] * 100 / (a.m.phases ? a.m.phases : 1), a.m.best[3] * 100 / (a.m.phases ? a.m.phases : 1), a.m.orders, a.m.route ? a.m.route - a.m.median : 0, a.nbars, a.traps);
+			panels += a.panels; dark += a.dark; par += a.par; ++n; q1 += a.m.p25; q3 += a.m.p75; bars += a.nbars; traps += a.traps; orders += a.m.orders;
+			sum.plays += a.m.plays; sum.phases += a.m.phases; sum.dead += a.m.dead; sum.strikes += a.m.strikes; sum.moves += a.m.moves; sum.longswrd += a.m.longswrd;
+			sum.sealed += a.m.route ? a.m.route - a.m.median : 0; routes += a.m.route > 0; sum.bare_phases += a.m.bare_phases; sum.bare_dead += a.m.bare_dead;
+			for (int c = 0; c < 4; ++c) sum.best[c] += a.m.best[c];
 			if (a.par < lo) lo = a.par;
 			if (a.par > hi) hi = a.par;
 		}
-		if (n) printf("liberation act %d: %d boards, %d panels, %d%% dark, par %d (%d-%d)\n", act + 1, n, panels / n, dark * 100 / (panels ? panels : 1), par / n, lo, hi);
+		if (!n) continue;
+		int ph = sum.phases ? sum.phases : 1, way = sum.phases - sum.strikes ? sum.phases - sum.strikes : 1;
+		printf("liberation act %d: %d boards, %d panels, %d%% dark, par %d (%d-%d), %d-%d, dead %d%%, %d.%d moves, LongSwrd %d.%d, best %d/%d/%d/%d%%, orders %d.%d, route +%d, bare dead %d%%, barriers %d.%d, traps %d.%d;",
+			act + 1, n, panels / n, dark * 100 / (panels ? panels : 1), par / n, lo, hi, q1 / n, q3 / n, sum.dead * 100 / way, sum.moves / ph, sum.moves * 10 / ph % 10,
+			sum.longswrd / sum.plays, sum.longswrd * 10 / sum.plays % 10, sum.best[0] * 100 / ph, sum.best[1] * 100 / ph, sum.best[2] * 100 / ph, sum.best[3] * 100 / ph,
+			orders / n, orders * 10 / n % 10, routes ? sum.sealed / routes : 0, sum.bare_dead * 100 / (sum.bare_phases ? sum.bare_phases : 1), bars / n, bars * 10 / n % 10, traps / n, traps * 10 / n % 10);
+		static const char *const whys[LIB_WHYS] = { "-", "floor", "darkloid", "holes", "barrier", "traps", "fair", "unwon", "dead", "bare", "route", "longswrd" };
+		for (int w = 1; w < LIB_WHYS; ++w) if (why[w]) printf(" %s %d", whys[w], why[w]);
+		printf("\n");
 	}
-	CHECK(made * 10 >= tried * 9, "liberation: %d boards of %d layers", made, tried);
+	CHECK(made * 10 >= tried * 9, "liberation: %d boards of %d layers in acts 2 to 4", made, tried);
+	CHECK(late_made * 2 >= late_tried, "liberation: %d boards of %d layers in acts 5 and 6", late_made, late_tried);
+	run = before;
+}
+
+/* A map's floor as its build leaves it, made up: the layer's flat floor
+ * with a panel in 29 gone, as legal.c drops a few to draw the rest */
+static bool lib_test_floor(int x, int y) {
+	return layer.cell[y][x] == C_PATH && !layer.level[y][x] && (x * 7 + y * 13) % 29;
+}
+
+/* The board on the floor it is given (the director's: the map's as built),
+ * never a panel off it */
+static void test_liberation_floor(void) {
+	Run before = run;
+	memset(&run, 0, sizeof run);
+	run.seed = 0x11BE;
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = (uint8_t)(1 + b % 16);
+	static LibBoard a, b;
+	int made = 0, tried = 0;
+	for (int act = 1; act <= 3; ++act)
+		for (uint32_t s = 1; s <= 8; ++s, ++tried) {
+			int depth = act * 3 + 2;
+			layer_make_dark = true;
+			layer_generate(s * 7919u + (uint32_t)act, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
+			layer_make_dark = false;
+			if (!lib_board_make(&a, s, act, 1, lib_test_floor)) continue;
+			++made;
+			CHECK(lib_board_make(&b, s, act, 1, lib_test_floor) && !memcmp(&a, &b, sizeof a), "board %u act %d on a map's floor: not the same twice", s, act);
+			for (int y = 0; y < MAP_H; ++y)
+				for (int x = 0; x < MAP_W; ++x)
+					CHECK(a.kind[y][x] == LIB_VOID || lib_test_floor(x, y), "board %u act %d: panel %d,%d off the map's floor", s, act, x, y);
+		}
+	CHECK(made * 2 >= tried, "liberation: %d boards of %d layers on a map's floor", made, tried);
 	run = before;
 }
 
 int main(void) {
 	test_sha1();
 	test_liberation_board();
+	test_liberation_floor();
 	test_jobs();
 	test_economy();
 	test_home_words();

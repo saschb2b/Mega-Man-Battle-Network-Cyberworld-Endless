@@ -29,6 +29,7 @@ enum { LIB_CHEER_NONE, LIB_CHEER_SUCCESS, LIB_CHEER_ONE_TURN };
 #define LIB_CHEER_WAIT   27
 #define LIB_CHEER_FRAMES 58
 #define LIB_POPS 4
+#define LIB_FINDS 4
 /* What a battle liberates */
 enum { LIB_FIGHT_PANEL, LIB_FIGHT_GUARDIAN, LIB_FIGHT_HOLE, LIB_FIGHT_DARKLOID };
 
@@ -71,6 +72,9 @@ typedef struct {
 	int npops;             /* ... while the words of them run */
 	int prize;             /* the par's prize: 0 two under, 1 at par, 2 over */
 	bool prize_given;
+	int finds[LIB_FINDS];  /* chips' and zenny's finds due: their scripts (layer_objs.c's) */
+	int nfinds;
+	bool route_found;      /* the sealed region's route taken (lib_route_found) */
 } LibState;
 
 extern LibState LB;

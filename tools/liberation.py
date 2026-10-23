@@ -15,8 +15,12 @@ around a dark panel). A planner then plays each mission many times by BN5's
 rules, abstracted (a team acting once a phase, three-turn liberations, the
 one-turn bonus, Order Points, the enemy's phase): its phases set the
 mission's par, and the board is kept only where every teammate's command
-earns its Order Point. Prints the measures the design promises over the
-seeds: phases against par, every command's worth, route variety, the bands,
+earns its Order Point, and only where it keeps the quality bar
+(docs/LIBERATION.md, The quality bar: one new rule an act, the staircase;
+dead decisions on the way bounded; the sealed region's route a price of
+phases, never required; traps shown). Prints the measures the design
+promises over the seeds: phases against par, every command's worth, dead
+decisions and sensible moves, the route's cost, route variety, the bands,
 rejections. Numbers only; nothing of BN5's is read here
 (tools/liberation_bn5.py measures BN5's own nine missions the same way).
 """
@@ -29,11 +33,20 @@ import random
 import statistics
 import sys
 
-FREE, DARK, ITEM, BONUS, HOLE, RING, BOSS, BAR1, BAR2, BAR3, START = range(11)
+FREE, DARK, ITEM, BONUS, HOLE, RING, BOSS, BAR1, BAR2, BAR3, START, TRAP = range(12)
 BARS = (BAR1, BAR2, BAR3)
 DIRS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+DARKS = (DARK, ITEM, HOLE, RING, TRAP)
 AROUND = tuple((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
 
+# The staircase (docs/LIBERATION.md, The quality bar, 3): each act one rule more, its new
+# question. Act 2 the basics (dark panels, DarkHoles, the Darkloid, Order Points, hearts);
+# 'barriers' (act 3) the sealed region behind a BarrierPanel, its key off the way and its route;
+# 'reach' (act 4) roaming guardians and a barrier across the way; 'tolls' (act 5) trap panels
+# shown on the way and Bladia's darkening; 'maze' (act 6) a second barrier, its key past the
+# first. Traps' harm: BN5's 50 in missions 5-6, 100 later.
+TRAP_HARM = {5: 50, 6: 100}
+TRAPS = {5: 4, 6: 4}
 # Per act of the endless net (docs/PROGRESSION.md), the BN5 mission it stands
 # for and the sizes BN5's missions have there (docs/LIBERATION.md, The
 # missions): panels, DarkHoles, team, barrier kinds, the share of dark panels,
@@ -44,19 +57,19 @@ AROUND = tuple((dx, dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy)
 # dark panel, on average; `plat` the platforms' sides, `wide` the share of
 # walkways two panels wide.
 ACTS = {
-    2: dict(bn5=1, panels=(90, 112), holes=2, team=2, bars=0, dark=(0.28, 0.45), items=7, bonus=2, roam=0,
+    2: dict(bn5=1, rules=(), panels=(90, 112), holes=2, team=2, bars=0, dark=(0.28, 0.45), items=7, bonus=2, roam=0,
             plat=((3, 5), (3, 4)), wide=0.0, gap=2, fill=0.26, fields=(0.68, 0.86), dense=(3.3, 4.3),
             kinds=('brute',), hp=200, ally_hp=200, virus=14, boss_hp=300, boss_range=1, boss_dmg=30),
-    3: dict(bn5=3, panels=(165, 215), holes=3, team=3, bars=1, dark=(0.45, 0.58), items=8, bonus=3, roam=1,
+    3: dict(bn5=3, rules=('barriers',), panels=(165, 215), holes=3, team=3, bars=1, dark=(0.45, 0.58), items=8, bonus=3, roam=0,
             plat=((3, 6), (3, 5)), wide=0.2, gap=2, fill=0.27, fields=(0.70, 0.88), dense=(3.4, 4.5),
-            kinds=('brute', 'hawk'), hp=300, ally_hp=300, virus=20, boss_hp=600, boss_range=2, boss_dmg=50),
-    4: dict(bn5=5, panels=(210, 245), holes=4, team=4, bars=2, dark=(0.52, 0.66), items=12, bonus=3, roam=2,
+            kinds=('brute',), hp=300, ally_hp=300, virus=20, boss_hp=600, boss_range=2, boss_dmg=50),
+    4: dict(bn5=5, rules=('barriers', 'reach'), panels=(210, 245), holes=4, team=4, bars=2, dark=(0.52, 0.66), items=12, bonus=3, roam=1,
             plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.42, fields=(0.86, 1.0), dense=(4.6, 6.2),
-            kinds=('brute', 'hawk', 'bladia'), hp=400, ally_hp=350, virus=28, boss_hp=900, boss_range=3, boss_dmg=80),
-    5: dict(bn5=7, panels=(215, 255), holes=5, team=5, bars=2, dark=(0.58, 0.68), items=16, bonus=3, roam=2,
+            kinds=('brute', 'hawk'), hp=400, ally_hp=350, virus=28, boss_hp=900, boss_range=3, boss_dmg=80),
+    5: dict(bn5=7, rules=('barriers', 'reach', 'tolls'), panels=(215, 255), holes=5, team=5, bars=2, dark=(0.58, 0.68), items=16, bonus=3, roam=2,
             plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.44, fields=(0.86, 1.0), dense=(4.6, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=500, ally_hp=450, virus=34, boss_hp=1200, boss_range=2, boss_dmg=80),
-    6: dict(bn5=9, panels=(220, 260), holes=5, team=5, bars=3, dark=(0.55, 0.68), items=14, bonus=3, roam=3,
+    6: dict(bn5=9, rules=('barriers', 'reach', 'tolls', 'maze'), panels=(220, 260), holes=5, team=5, bars=3, dark=(0.55, 0.68), items=14, bonus=3, roam=2,
             plat=((4, 8), (4, 6)), wide=0.6, gap=1, fill=0.45, fields=(0.86, 1.0), dense=(4.2, 6.2),
             kinds=('brute', 'hawk', 'bladia'), hp=600, ally_hp=650, virus=40, boss_hp=1500, boss_range=3, boss_dmg=100),
 }
@@ -90,6 +103,12 @@ PAR_SCALE = {2: 0.58, 3: 0.67, 4: 0.70, 5: 0.82, 6: 0.79}
 EARN = -0.1
 USE_MIN = {2: 0.5, 3: 0.5, 4: 0.25, 5: 0.25, 6: 0.25}   # ... and only where the planner uses every teammate's command,
 # half a time a play at least, a quarter with four or five Navis to share the Order Points
+# The quality bar's measures (docs/LIBERATION.md, The quality bar, 1 and 6): a board is rejected
+# where more than this share of its decisions on the way have one sensible move, or where its
+# sealed region's route costs the route's player fewer phases than ROUTE_COST's first (a gift,
+# not a choice) or more than its second (a wall, not a choice), scaled as the par.
+DEAD_MAX = 0.55
+ROUTE_COST = (1.0, 8.0)
 # The utility commands pay in safety and loot, which phases do not show (SneakAttack: a guardian
 # weakened with no battle; NumberCheck: items taken and traps disarmed with none): held only to
 # being used where their situation is and to costing the team no more than this.
@@ -125,7 +144,9 @@ class Board:
         self.start = []
         self.spur_ends = []
         self.platform = set()
-        self.secret = None       # the sealed route's gate panel, if any
+        self.secret = None       # the sealed region's route panel, if any
+        self.sealed = 0          # its barrier's number
+        self.regions = set()     # the panels behind the sealed barrier
         self.par = None
 
     def floor(self, c):
@@ -337,24 +358,10 @@ def generate(act, seed, team=None):
     stubs = [e for e in ends if b.cells.get(e) in (FREE, DARK)]
     rng.shuffle(stubs)
     for e in stubs[:spec['bonus']]: b.cells[e] = BONUS
-    # Barriers: walkway panels whose removal cuts off part of the board, the key on the near side.
-    for k in range(spec['bars']):
-        cut = find_cut(b, rng, min_region=8 + 2 * k)
-        if not cut:
-            return None, 'barrier'
-        cells, region = cut
-        for c in cells: b.cells[c] = BARS[k]
-        near = graph_dist(b, start, lambda kk: kk not in BARS and kk not in (HOLE, RING, BOSS))
-        spots = [c for c in near if b.cells[c] == DARK and c not in region and near[c] >= 4]
-        if not spots:
-            return None, 'key'
-        key = rng.choice(spots)
-        b.cells[key] = ITEM
-        b.items[key] = ('key', k + 1)
-        if k == spec['bars'] - 1 and act >= 4 and rng.random() < 0.5:
-            gate = max(region, key=lambda c: abs(c[0] - start[0][0]) + abs(c[1] - start[0][1]))
-            if b.cells.get(gate) in (FREE, DARK):
-                b.secret = gate
+    # The staircase's barriers (docs/LIBERATION.md, The quality bar, 3 and 6).
+    why = barriers(b, rng, reach)
+    if why:
+        return None, why
     # Items in the dark: corners and dead ends first (BN5 tucks them there).
     darks = [c for c, kk in b.cells.items() if kk == DARK and c not in b.items]
     darks.sort(key=lambda c: (len(b.neighbours(c)), rng.random()))
@@ -362,10 +369,15 @@ def generate(act, seed, team=None):
     for c, it in zip(darks[:len(mix) * 2:2] + darks[1:len(mix) * 2:2], mix):
         b.cells[c] = ITEM
         b.items[c] = it
+    loot(b, rng)
+    if 'tolls' in spec['rules']:
+        traps(b, rng, TRAPS[act])
+        if not any(k == TRAP for k in b.cells.values()):
+            return None, 'traps'
     for i in range(spec['roam']):
-        spots = [c for c, kk in b.cells.items() if kk == DARK and reach.get(c, 0) > 0.4 * far]
+        spots = [c for c, kk in b.cells.items() if kk == DARK and reach.get(c, 0) > 0.4 * far and c not in b.regions]
         if spots:
-            b.guards.append(dict(kind=rng.choice(spec['kinds']), pos=rng.choice(spots), hole=None))
+            b.guards.append(dict(kind=rng.choice(spec['kinds'][1:] or spec['kinds']), pos=rng.choice(spots), hole=None))
     if team:
         why = situations(b, team, rng, reach, far)
         if why:
@@ -385,7 +397,7 @@ def cost_from(b, src):
         for n in b.neighbours(c):
             k = b.cells[n]
             if k in BARS: continue
-            w = 1 if k in (DARK, ITEM, RING, HOLE) else 0
+            w = 1 if k in DARKS else 0
             if dist[c] + w < dist.get(n, 1 << 30):
                 dist[n] = dist[c] + w
                 (dq.appendleft if w == 0 else dq.append)(n)
@@ -481,26 +493,137 @@ def item_mix(act, rng, n=None):
     return out
 
 
-def find_cut(b, rng, min_region):
-    """One to three walkway panels that cut a region off the start's side (not the boss)."""
-    walk = [c for c, k in b.cells.items() if k in (FREE, DARK) and len(b.neighbours(c)) <= 3 and c not in b.start]
+
+def way_cells(b):
+    """The panels on a cheapest way from the start to each DarkHole (within one dark panel)."""
+    return way_on(b)
+
+
+def barriers(b, rng, reach):
+    """The act's barriers: the sealed region's (act 3 on: five to sixteen panels cut off by its
+    own wall, nothing of the board's in them, its key off the way by two, its route at the far
+    end), one across the way (act 4 on: a way round it, its key off the way), and the maze's
+    second (act 6: its key past the first). A reason to reject, or None."""
+    rules = ACTS[b.act]['rules']
+    if 'barriers' not in rules:
+        return None
+    way = way_cells(b)
+    cut = find_cut(b, rng)
+    if not cut:
+        return 'barrier'
+    wall, region = cut
+    near = graph_dist(b, b.start, lambda kk: kk not in BARS)
+    spots = [c for c in near if b.cells[c] == DARK and c not in region and c not in wall and near[c] >= 4
+             and off_way(way, c) >= 2]
+    if not spots:
+        return 'key'
+    n = 1
+    for c in wall: b.cells[c] = BARS[n - 1]
+    key = rng.choice(spots)
+    b.cells[key] = ITEM
+    b.items[key] = ('key', n)
+    b.sealed, b.regions = n, set(region)
+    for c in region:
+        if b.cells[c] == FREE and rng.random() < 0.8: b.cells[c] = DARK
+    gate = max(region, key=lambda c: min(abs(c[0] - w[0]) + abs(c[1] - w[1]) for w in wall))
+    b.cells[gate] = ITEM
+    b.items[gate] = ('route', 1)
+    b.secret = gate
+    if 'reach' in rules and not across(b, rng, way, 2, past=False) and not across(b, rng, way, 2, past=False, cut_ok=True):
+        return 'barrier'
+    if 'maze' in rules and not any(across(b, rng, way, 3, past=p, cut_ok=k) for p, k in ((True, False), (False, False), (False, True))):
+        return 'barrier'
+    return None
+
+
+def off_way(way, c):
+    return min((abs(c[0] - w[0]) + abs(c[1] - w[1]) for w in way), default=99)
+
+
+def across(b, rng, way, n, past, cut_ok=False):
+    """Barrier n across a cheapest way: every target still reached round it (with `cut_ok`, a
+    DarkHole may lie behind it alone, BN5's own barrier), its key off the way (the maze's, past
+    the barrier before: the way to it longer with that one shut)."""
+    cand = [c for c in way if b.cells.get(c) in (FREE, DARK) and c not in b.regions and c not in b.start
+            and not any(abs(c[0] - h[0]) <= 1 and abs(c[1] - h[1]) <= 1 for h in b.holes)
+            and abs(c[0] - b.boss[0]) + abs(c[1] - b.boss[1]) > 2 and not any(g['pos'] == c for g in b.guards)]
+    rng.shuffle(cand)
+    for c in cand[:60]:
+        saved = b.cells[c]
+        b.cells[c] = BARS[n - 1]
+        side = graph_dist(b, b.start, lambda kk: kk not in BARS)
+        # (BN5's own where the floor has no way round, as the prototype's tree-like boards
+        # mostly have none: a DarkHole walled off, its key on the near side, never the Darkloid)
+        if b.boss not in side or (not cut_ok and any(h not in side for h in b.holes)):
+            b.cells[c] = saved
+            continue
+        opened = graph_dist(b, b.start, lambda kk: kk not in BARS or kk == BARS[n - 2]) if past else side
+        spots = [x for x in side if b.cells[x] == DARK and x not in b.regions and side[x] >= 4 and off_way(way, x) >= 1
+                 and (not past or side[x] > opened.get(x, 99))]
+        if not spots:
+            b.cells[c] = saved
+            continue
+        key = rng.choice(spots)
+        b.cells[key] = ITEM
+        b.items[key] = ('key', n)
+        return True
+    return False
+
+
+def loot(b, rng):
+    """The act's chips and zenny, off the way (a detour's worth)."""
+    way = way_cells(b)
+    spots = [c for c, k in b.cells.items() if k == DARK and c not in b.regions and off_way(way, c) >= 1]
+    rng.shuffle(spots)
+    n = {2: 1, 3: 2, 4: 2, 5: 3, 6: 3}[b.act]
+    for i, c in enumerate(spots[:n]):
+        b.cells[c] = ITEM
+        b.items[c] = ('chip', 1) if i % 2 == 0 else ('zenny', 2 + b.act)
+
+
+def traps(b, rng, want):
+    """Trap panels on the way, shown (BN5 hides them; the quality bar's telegraph shows them),
+    each with a way round a dark panel or two longer: the toll or the detour."""
+    way = [c for c in way_cells(b) if b.cells.get(c) == DARK and c not in b.regions
+           and abs(c[0] - b.start[0][0]) + abs(c[1] - b.start[0][1]) >= 4
+           and not any(abs(c[0] - h[0]) <= 1 and abs(c[1] - h[1]) <= 1 for h in b.holes)]
+    rng.shuffle(way)
+    base = cost_from(b, b.start)
+    best = min(base.get(h, 99) for h in b.holes)
+    got = 0
+    for c in way:
+        if got >= want: break
+        b.cells[c] = BAR3
+        round_ = cost_from(b, b.start)
+        b.cells[c] = DARK
+        if min(round_.get(h, 99) for h in b.holes) <= best + 2:
+            b.cells[c] = TRAP
+            got += 1
+
+
+def find_cut(b, rng, min_region=3):
+    """One or two walkway panels that cut three to thirty panels off by themselves, nothing of the
+    board's (holes, the Darkloid, items, guardians, the start) in them: the sealed region."""
+    walk = [c for c, k in b.cells.items() if k in (FREE, DARK) and len(b.neighbours(c)) <= 3 and c not in b.start
+            and not any(abs(c[0] - h[0]) <= 1 and abs(c[1] - h[1]) <= 1 for h in b.holes)]
     rng.shuffle(walk)
     walls = []
-    for c in walk[:160]:
+    for c in walk[:200]:
         walls.append([c])
         for d in ((1, 0), (0, 1)):
             n = (c[0] + d[0], c[1] + d[1])
             if b.cells.get(n) in (FREE, DARK): walls.append([c, n])
     rng.shuffle(walls)
-    for wall in walls[:240]:
+    guards = {g['pos'] for g in b.guards}
+    for wall in walls[:400]:
         saved = [b.cells[c] for c in wall]
         for c in wall: b.cells[c] = BAR1
         side = graph_dist(b, b.start, lambda k: k not in BARS)
         for c, k in zip(wall, saved): b.cells[c] = k
         region = [x for x in b.cells if x not in side and x not in wall]
-        if b.boss in region or any(x in region for x in b.start) or len(region) < min_region:
+        if not min_region <= len(region) <= 30 or b.boss in region:
             continue
-        if any(b.cells[x] in (HOLE,) for x in region) and len(region) > 60:
+        if any(b.cells[x] in (HOLE, ITEM, RING, BOSS, START) or x in guards for x in region):
             continue
         return wall, set(region)
     return None
@@ -553,6 +676,12 @@ class Sim:
         self.holes_order = []
         self.decisions = 0
         self.close_calls = 0
+        self.taste = 0           # the route's player (1) goes for the sealed region's route first
+        self.moves = 0           # sensible moves over the decisions (docs/LIBERATION.md, The quality bar, 1)
+        self.dead = 0            # decisions with one sensible move, strikes apart
+        self.strikes = 0         # ... a strike at a DarkHole or the Darkloid being the best
+        self.best = collections.Counter()
+        self.route_taken = False
 
     # The board's state
     def holes_left(self):
@@ -560,6 +689,13 @@ class Sim:
 
     def walkable(self, c):
         return self.cells.get(c) in (FREE, START, BONUS)
+
+    def route_targets(self):
+        """The route's player's targets: the sealed barrier's key, then the route."""
+        if not self.taste or not self.b.sealed: return []
+        key = [c for c, it in self.items.items() if it == ('key', self.b.sealed)]
+        if key: return key
+        return [c for c, it in self.items.items() if it[0] == 'route']
 
     def occupied(self):
         return {n['pos'] for n in self.navis} | {g['pos'] for g in self.guards}
@@ -596,10 +732,7 @@ class Sim:
     def target_cost(self, walls=()):
         """Per panel, the dark panels still to liberate from it to the nearest target (Dijkstra, 0-1)."""
         holes = self.holes_left()
-        if holes:
-            targets = holes
-        else:
-            targets = [self.b.boss]
+        targets = self.route_targets() or holes or [self.b.boss]
         dist = {t: 0 for t in targets}
         dq = collections.deque(targets)
         while dq:
@@ -607,7 +740,7 @@ class Sim:
             for n in self.b.neighbours(c):
                 k = self.cells[n]
                 if k in BARS or n in walls: continue
-                w = 1 if k in (DARK, ITEM, RING) else 0
+                w = 1 if k in (DARK, ITEM, RING, TRAP) else 0
                 nd = dist[c] + w
                 if nd < dist.get(n, 1 << 30):
                     dist[n] = nd
@@ -616,7 +749,7 @@ class Sim:
 
     def libable(self, c):
         k = self.cells.get(c)
-        if k in (DARK, ITEM): return True
+        if k in (DARK, ITEM, TRAP): return True
         if k == RING: return not self.holes_left()
         return False
 
@@ -628,17 +761,20 @@ class Sim:
             k = self.cells.get(c)
             if k == RING and not self.holes_left():
                 v += 6.0
-            elif k in (DARK, ITEM, RING):
+            elif k in (DARK, ITEM, RING, TRAP):
                 v += 3.0 if cost.get(c, 99) < here or cost.get(c, 99) <= 1 else 0.6
+                if k == TRAP:
+                    v -= 6.0 * TRAP_HARM.get(self.act, 50) / self.spec['hp']
                 if k == ITEM:
-                    it = self.items.get(c, ('', 0))[0]
-                    v += {'op': 2.5 if self.op < 6 else 0.5, 'key': 4.0, 'heart': 1.5}.get(it, 0.8)
+                    it = self.items.get(c, ('', 0))
+                    sealed = it == ('key', self.b.sealed) or it[0] == 'route'
+                    v += 4.0 * self.taste if sealed else {'op': 2.5 if self.op < 6 else 0.5, 'key': 4.0, 'heart': 1.5, 'chip': 1.2}.get(it[0], 0.8)
             elif k == HOLE:
                 v += 14.0
         return v
 
     def difficulty(self, c):
-        return sum(1 for dx, dy in AROUND if self.cells.get((c[0] + dx, c[1] + dy)) in (DARK, ITEM, HOLE, RING))
+        return sum(1 for dx, dy in AROUND if self.cells.get((c[0] + dx, c[1] + dy)) in DARKS)
 
     def battle(self, navi, c, guard=None):
         """One liberation battle: 1 the one-turn win, 2 a win in two or three, 0 a failure; HP taken."""
@@ -686,10 +822,13 @@ class Sim:
                 for x, kk in self.cells.items():
                     if kk == BARS[n - 1]: self.cells[x] = FREE
             elif it == 'trap': self.hurt(navi, 50 + 10 * self.act)
+            elif it == 'route': self.route_taken = True
+        if k == TRAP:
+            self.hurt(navi, TRAP_HARM.get(self.act, 50))
         if k == HOLE:
             self.holes_order.append(c)
             self.guards = [g for g in self.guards if g['hole'] is None or self.b.holes[g['hole']] != c]
-        if k in (DARK, ITEM, HOLE, RING):
+        if k in DARKS:
             self.cells[c] = FREE
             self.liberated_by[navi['name']] += 1
 
@@ -703,7 +842,7 @@ class Sim:
         if res == 1 and bonus and self.cells.get(main) != HOLE:
             for dx, dy in AROUND:
                 n = (main[0] + dx, main[1] + dy)
-                if self.cells.get(n) in (DARK, ITEM): self.take(navi, n)
+                if self.cells.get(n) in (DARK, ITEM, TRAP): self.take(navi, n)
 
     def options(self, navi, cost):
         """Every move-and-act the Navi has this phase, valued."""
@@ -763,6 +902,7 @@ class Sim:
                 if self.op and ab == 'numbercheck':
                     worth = sum({'op': 2.5 if self.op < 6 else 0.5, 'key': 4.0, 'heart': 1.5, 'trap': 2.0}.get(self.items[c][0], 0.8)
                                 for c in shape(ab, p, d) if self.cells.get(c) == ITEM)
+                    worth += 2.0 * sum(1 for c in shape(ab, p, d) if self.cells.get(c) == TRAP)
                     if worth:
                         opts.append((worth - 1.0, 'number', p, d))
                 if self.op and ab in ('search', 'twin'):
@@ -792,6 +932,31 @@ class Sim:
             opts.append((5.0 + 6.0 * (1 - navi['hp'] / navi['max']), 'rest', navi['pos'], None))
         return opts
 
+    def purpose(self, kind, p, d):
+        """A move's class: its kind and what it is for (the DarkHole it heads to, the Darkloid, a
+        guardian, a rest), and for a liberation whether it is a bold one (four or more dark round
+        it: the one-turn win's gamble)."""
+        t = (p[0] + d[0], p[1] + d[1]) if d else p
+        if kind in ('rest', 'barrier', 'melody'): return (kind,)
+        if kind in ('fight', 'sneak', 'sneak2'): return (kind, t)
+        if kind in ('boss', 'sneak_boss'): return (kind,)
+        holes = self.holes_left()
+        aim = min(range(len(holes)), key=lambda i: abs(holes[i][0] - t[0]) + abs(holes[i][1] - t[1])) if holes else -1
+        it = self.items.get(t, ('',))[0] if self.cells.get(t) == ITEM else ''
+        return (kind, aim, it, self.difficulty(t) >= 4)
+
+    def sensible(self, opts):
+        """The decision's sensible moves: of different class, four fifths of the best or more."""
+        best = opts[0]
+        if best[0] <= 0: return
+        seen = {self.purpose(o[1], o[2], o[3]) for o in opts if o[0] >= 0.8 * best[0]}
+        self.moves += len(seen)
+        t = (best[2][0] + best[3][0], best[2][1] + best[3][1]) if best[3] else None
+        strike = best[1] == 'boss' or (best[1] == 'lib' and self.cells.get(t) == HOLE)
+        self.strikes += strike
+        self.dead += len(seen) <= 1 and not strike
+        self.best[best[1]] += 1
+
     def flyover(self, navi):
         return [c for c in self.b.neighbours(navi['pos']) for c in [c] + self.b.neighbours(c) if self.cells.get(c) == DARK]
 
@@ -820,6 +985,7 @@ class Sim:
         self.decisions += 1
         if len(opts) > 1 and opts[1][0] >= 0.9 * opts[0][0] and opts[1][2:] != opts[0][2:]:
             self.close_calls += 1
+        self.sensible(opts)
         v, kind, p, d = opts[0]
         navi['pos'] = p
         t = (p[0] + d[0], p[1] + d[1]) if d else None
@@ -834,6 +1000,9 @@ class Sim:
             self.op -= 1; self.uses[navi['name']] += 1
             self.yields['NumberCheck items'] += sum(1 for c in shape('numbercheck', p, d) if self.cells.get(c) == ITEM)
             for c in shape('numbercheck', p, d):
+                if self.cells.get(c) == TRAP:
+                    self.cells[c] = DARK   # (disarmed: NumberCheck's niche on the tolls' boards)
+                    continue
                 if self.cells.get(c) == ITEM:
                     it = self.items[c]
                     if it[0] != 'trap': self.take(navi, c); self.cells[c] = DARK
@@ -905,7 +1074,7 @@ class Sim:
             for _ in range(st['move']):
                 dd = abs(near['pos'][0] - g['pos'][0]) + abs(near['pos'][1] - g['pos'][1])
                 if dd <= st['reach']: break
-                steps = [n for n in self.b.neighbours(g['pos']) if self.cells[n] in (DARK, ITEM) and n not in self.occupied()]
+                steps = [n for n in self.b.neighbours(g['pos']) if self.cells[n] in (DARK, ITEM, TRAP) and n not in self.occupied()]
                 if st.get('darkens'):
                     steps += [n for n in self.b.neighbours(g['pos']) if self.cells[n] == FREE and n not in self.occupied()]
                 if not steps: break
@@ -962,12 +1131,14 @@ def team_for(act, rng, allies=ALLIES[:6]):
     return ['MegaMan'] + rng.sample(list(allies), n - 1)
 
 
-def play(b, team, runs, seed, ban=None):
-    """Phases to clear over runs of the planner, abilities used, holes' order."""
+def play(b, team, runs, seed, ban=None, taste=0):
+    """Phases to clear over runs of the planner, abilities used, holes' order (with `taste`, a
+    player who goes for the sealed region's route first)."""
     out = []
     for r in range(runs):
-        rng = random.Random((seed * 31 + r) * 104729)
+        rng = random.Random((seed * 31 + r) * 104729 + taste)
         s = Sim(b, team, rng, b.act)
+        s.taste = taste
         if ban:
             for n in s.navis:
                 if n['name'] == ban: n['ab'] = 'none'
@@ -1059,6 +1230,18 @@ def measures(act, seeds, runs, show, drawdir):
         if par is None:
             rejects['unwinnable'] += 1
             continue
+        way = sum(s.decisions - s.strikes for _, s in res)
+        dead = sum(s.dead for _, s in res) / max(1, way)
+        if dead > DEAD_MAX:
+            rejects['dead'] += 1
+            continue
+        route = None
+        if b.secret:
+            rp = [p for p, s in play(b, team, max(4, runs // 4), b.seed, taste=1) if p and s.route_taken]
+            route = PAR_SCALE[act] * (statistics.median(rp) - statistics.median([p for p, _ in res if p])) if rp else None
+            if route is None or not ROUTE_COST[0] <= route <= ROUTE_COST[1]:
+                rejects['route'] += 1
+                continue
         w = command_worth(b, team, runs, res)
         for n, v in w.items(): worth_all[n].append(v)
         used = {n: sum(s.uses[n] for _, s in res) / len(res) for n in team}
@@ -1077,6 +1260,12 @@ def measures(act, seeds, runs, show, drawdir):
         stats['mid'].append(sum(1 for p in ph if par - 2 < p <= par) / len(res))
         stats['over'].append(1 - stats['best'][-1] - stats['mid'][-1])
         stats['close'].append(statistics.mean(s.close_calls / max(1, s.decisions) for _, s in res))
+        stats['dead'].append(dead)
+        stats['moves'].append(sum(s.moves for _, s in res) / max(1, sum(s.decisions for _, s in res)))
+        ph_sorted = sorted(ph)
+        stats['margin'].append((ph_sorted[len(ph) * 3 // 4] - ph_sorted[len(ph) // 4]) if ph else 0)
+        if route is not None: stats['route'].append(route)
+        stats['traps'].append(sum(1 for k in b.cells.values() if k == TRAP))
         orders = collections.Counter(tuple(s.holes_order[:2]) for _, s in res)
         stats['orders'].append(len(orders))
         stats['secret'].append(1 if b.secret else 0)
@@ -1126,6 +1315,8 @@ def main():
             m('bars'), 100 * m('secret')))
         print('  the planner: two under par %.0f%%, at par %.0f%%, over %.0f%%; close calls %.0f%% of decisions; first holes taken %.1f ways' % (
             100 * m('best'), 100 * m('mid'), 100 * m('over'), 100 * m('close'), m('orders')))
+        print('  the quality bar: dead decisions on the way %.0f%%, sensible moves a decision %.1f, the par\'s middle half %.1f phases wide, the route %+.1f phases, traps %.1f' % (
+            100 * m('dead'), m('moves'), m('margin'), m('route'), m('traps')))
         if stats['NumberCheck items'] or stats['SneakAttack HP']:
             print('  the utility commands\' yield a play: NumberCheck %.1f items, SneakAttack %.0f HP struck off' % (
                 m('NumberCheck items'), m('SneakAttack HP')))

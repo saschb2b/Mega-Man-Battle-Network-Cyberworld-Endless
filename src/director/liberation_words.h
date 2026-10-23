@@ -17,6 +17,12 @@ const char *lib_item_words(bool heart, int op);
 /* A BonusPanel's roulette (0 full HP, 1 Order Points, 2 a guardian
  * deleted, 3 no harm this phase). */
 const char *lib_bonus_words(int outcome);
+/* A barrier's key found: the sealed region's, or one across the way. */
+const char *lib_key_words(bool sealed);
+/* A trap panel liberated: its harm, `hp`. */
+const char *lib_trap_words(int hp);
+/* The sealed region's route found (docs/LIBERATION.md, Special routes). */
+const char *lib_route_words(void);
 /* A rest (BN5's Pass). */
 const char *lib_rest_words(void);
 /* The enemy's phase: `hp` taken on the board, the last by `who`. */
