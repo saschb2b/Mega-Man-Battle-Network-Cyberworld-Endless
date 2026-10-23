@@ -594,6 +594,7 @@ static void install_begin(Install *in) {
 	out->lib_prize[0] = out->lib_prize[1] = out->lib_prize[2] = -1;
 	for (int k = 0; k < (int)(sizeof out->lib_loot / sizeof out->lib_loot[0]); ++k) out->lib_loot[k] = -1;
 	out->lib_zenny = -1;
+	memset(out->lib_anim, 0, sizeof out->lib_anim);
 	out->trader_kind = -1;
 	out->dark_flame = out->dark_flame_obj = -1;
 	layer_objs_official_level = 0;
@@ -642,7 +643,7 @@ static void install_exit(Install *in, const NetObj *o, int wx, int wy, int wz) {
 	set_pads(in->group, in->number, wx, wy);
 	npc_need_sprite(&in->npcs, 7, pad);
 	if (in->npcs.n < 32)
-		in->npcs.script[in->npcs.n++] = layer.boss_layer || layer.dark ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
+		in->npcs.script[in->npcs.n++] = layer.boss_layer || layer.dark ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG, layer.dark)
 			: npc_prop(7, pad, wx, wy, wz, 0);
 }
 
@@ -861,9 +862,10 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk, const char 
 /* A dark layer's unit (docs/LIBERATION.md): its sprite standing on its
  * panel, nothing to walk into or talk to; the director moves its object */
 static void install_unit(Install *in, const NetObj *o, int wx, int wy) {
-	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF;
+	int sprite = o->param & 0xFF, anim = o->param >> 8 & 0xFF, list = o->param >> 16 & 0xF, u = o->param >> 20 & 7;
 	if (!npc_need_sprite(&in->npcs, list, sprite) || in->npcs.n >= 32) return;
-	in->npcs.script[in->npcs.n++] = npc_mark(list, sprite, wx, wy, 0, anim, -1);
+	/* (its animation the board's: standing, its strike; liberation_turn.c) */
+	in->npcs.script[in->npcs.n++] = npc_live(list, sprite, wx, wy, 0, anim, &in->out->lib_anim[u]);
 }
 
 /* Layer object i on the map: its talker and script, and its choice */

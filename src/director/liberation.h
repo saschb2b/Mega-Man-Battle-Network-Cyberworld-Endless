@@ -99,6 +99,12 @@ bool lib_look_on(void);
 /* ... a guardian of kind `kind` (UNIT_*) in BN5's own sprite where its ROM
  * is there: its list, number and animation set (else left as they are) */
 void lib_look_unit(int kind, int *list, int *sprite, int *anim);
+/* ... its animation in that sprite, standing or striking, facing eighth
+ * `face` (1 up-right, 3 down-right, 5 down-left, 7 up-left); -1 where its
+ * sprite is not BN5's. LIB_FACE_REST: the way they stand till they act,
+ * BN5's own (down-left) */
+#define LIB_FACE_REST 5
+int lib_look_unit_anim(int kind, int face, bool strike);
 
 /* (liberation_auto.c) The test autopilot's keys on the board, frame
  * `frame` (autopilot.c). */

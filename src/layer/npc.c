@@ -154,21 +154,11 @@ uint32_t npc_floor_mark(int category, int index, int x, int y, int anim, int gon
 	return idle_and_write(s, 10 + floor_place(s + 10, x, y, 0), gone_flag);
 }
 
-uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at) {
-	uint8_t s[48] = {
-		0x08,
-		0x25, (uint8_t)index, (uint8_t)(category * 4),
-		0x0A, 0x00,   /* no collision radius */
-		0x1F,
-		0x0E,         /* nothing to talk to */
-	};
-	int n = 8 + floor_place(s + 8, x, y, 0), loop = n;
-	/* (layer priority 2: the room's floor lines, BN6's second layer in
-	 * Lan's HP, drew over a big pad at 3; still under MegaMan, sorted after
-	 * him by its depth) */
-	s[n - 1] = 0x1A;
-	/* (its animation each frame from its own byte, which the caller
-	 * writes: BN6 starts an animation again only as it changes) */
+/* Script `s`'s first `n` bytes, then a loop setting animation `anim`
+ * each frame from its own byte, which the caller writes (*anim_at):
+ * BN6 starts an animation again only as it changes */
+static uint32_t live_and_write(uint8_t *s, int n, int anim, uint32_t *anim_at) {
+	int loop = n;
 	s[n++] = 0x16; s[n++] = (uint8_t)anim;
 	s[n++] = 0x10; s[n++] = 0x01;
 	s[n++] = 0x02; int jump = n; n += 4;
@@ -178,6 +168,34 @@ uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_
 	emu_write(at, s, (size_t)n);
 	*anim_at = at + (uint32_t)loop + 1;
 	return at;
+}
+
+uint32_t npc_floor_live(int category, int index, int x, int y, int anim, uint32_t *anim_at) {
+	uint8_t s[48] = {
+		0x08,
+		0x25, (uint8_t)index, (uint8_t)(category * 4),
+		0x0A, 0x00,   /* no collision radius */
+		0x1F,
+		0x0E,         /* nothing to talk to */
+	};
+	int n = 8 + floor_place(s + 8, x, y, 0);
+	/* (layer priority 2: the room's floor lines, BN6's second layer in
+	 * Lan's HP, drew over a big pad at 3; still under MegaMan, sorted after
+	 * him by its depth) */
+	s[n - 1] = 0x1A;
+	return live_and_write(s, n, anim, anim_at);
+}
+
+uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32_t *anim_at) {
+	uint8_t s[48] = {
+		0x08,
+		0x25, (uint8_t)index, (uint8_t)(category * 4),
+		0x0A, 0x00,   /* no collision radius */
+		0x1F,
+		0x0E,         /* nothing to talk to */
+		0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), (uint8_t)z, (uint8_t)(z >> 8),
+	};
+	return live_and_write(s, 15, anim, anim_at);
 }
 
 /* (behind: a navi behind a counter, drawn under the second layer that

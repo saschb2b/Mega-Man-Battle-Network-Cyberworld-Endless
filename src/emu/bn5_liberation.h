@@ -136,7 +136,40 @@
 
 /* The board's units: the guardians BN5's sprite list 6's 83 BigBrute (0x08474848), 84 TinHawk, 85 Bladia */
 #define BN5_LIB_GUARD_SPRITE 83
-#define BN5_LIB_GUARD_ANIM   0           /* ... the animation they stand in on the board */
+#define BN5_LIB_GUARD_ANIM   0           /* ... the animations they stand in on the board: 0-7 by the eighth faced (1 up-right, */
+                                         /* ... 3 down-right, 5 down-left, 7 up-left), a loop of 2 or 4 frames; */
+#define BN5_LIB_BRUTE_STRIKE 33          /* ... BigBrute's strike (BeastBreath) 33 + the eighth, a loop of 2 frames, 3 each; */
+#define BN5_LIB_HAWK_STRIKE  25          /* ... TinHawk's (HawkAttack) 25 facing left, 26 right, 10 frames a frame; */
+#define BN5_LIB_BLADIA_STRIKE 25         /* ... Bladia's (DarkSlash) 25-28 by the eighth, 1 then clockwise, 10, 3, 3, 10 frames */
+
+/* The Darkloids' phase (mission 1 in romlab: MegaMan's place poked beside a BigBrute and beside BlizzardMan): each unit's
+ * turn the camera's pan to it and its rest (BN5_LIB_UNIT_HOLD), the Darkloid first, then each guardian in its order */
+#define BN5_LIB_UNIT_WORLD_X 0x1C        /* the board's units (BN5_LIB_UNITS): +1 the Navi or kind, +0x1C and +0x20 its world */
+#define BN5_LIB_UNIT_WORLD_Y 0x20        /* ... place, 16.16 (MegaMan's poked, the guardians turned on him) */
+#define BN5_LIB_WARP_FX      0x080AF3F8u /* a guardian's move, all its steps at once: a warp effect spawned (0x08004508) and */
+#define BN5_LIB_WARP_SOUND   0xB4        /* ... this sound, at the panel it leaves and 46 frames on at the one it takes */
+#define BN5_LIB_WARP_SPRITE  59          /* ... the effect: sprite list 7's 59 (0x08389E68), a puff and a beam's lines, 2 frames */
+#define BN5_LIB_WARP_OUT     2           /* ... each: the guardian's out (puff, lines; animation 0 the large, 4 the small) and */
+#define BN5_LIB_WARP_IN      3           /* ... in (lines, puff; 1 and 5), the camera's pan between; the guardian shows 4 frames */
+#define BN5_LIB_WARP_SHOWS   4           /* ... into the warp in, */
+#define BN5_LIB_APPEAR_SOUND 0x94        /* ... with this sound (0x080B051E) */
+#define BN5_LIB_HEAL_FX      0x08055208u /* the Darkloid's heal: effect 0x78 (rising lines) over him, sound 0x8A, his HP up at */
+#define BN5_LIB_HEAL_SOUND   0x8A        /* ... once, after DARKLOID PHASE where dark panels stand round him */
+#define BN5_LIB_REACH_BLINK  0x080529F0u /* a unit's reach in reach of a Navi: its panels in look 0x0D (red, BG palette 7), lit 9 */
+#define BN5_LIB_REACH_SOUND  0x91        /* ... frames, dark 7, lit 9, dark 7, then lit, this sound as each lights; */
+#define BN5_LOOK_REACH       0x0D        /* ... the look, */
+#define BN5_LIB_REACH_ON     9           /* ... frames lit, */
+#define BN5_LIB_REACH_OFF    7           /* ... frames dark, twice, */
+#define BN5_LIB_REACH_LINE   68          /* ... frames from the first light to the unit's line (its attack's name in a chat box: */
+                                         /* ... the Darkloid's with his mugshot, a guardian's with none) */
+#define BN5_LIB_HARM         0x08053EBAu /* a blow on a Navi: sound 0x6B where it harms him, 0x6E where nothing does (0x08053EFC) */
+#define BN5_LIB_HIT_SOUND    0x6B        /* ... the blow's sound where it harms, */
+#define BN5_LIB_NO_HIT_SOUND 0x6E        /* ... where nothing does (a BonusPanel's shield) */
+#define BN5_LIB_FLAME_SPRITE 56          /* BigBrute's BeastBreath on its Navi: sprite list 7's 56 (0x0833A1B4), animation 0 */
+                                         /* ... rising (3 x 2 frames), 1 burning (looped), 2 falling (3 x 1) */
+#define BN5_LIB_DIGITS       0x086F7DECu /* the units' HP under them and a blow's harm over its Navi: digits 8x16, 0x40 bytes each */
+#define BN5_LIB_DIGITS_PAL   0x086CCD24u /* ... white (an HP, OBJ palette 14), */
+#define BN5_LIB_HARM_PAL     0x087E4678u /* ... yellow (a harm, OBJ palette 15), its top 29 pixels over the Navi's feet, centred */
 
 /* The L view's arrows and cross (OBJ palette 12, BN5_LIB_HUD_PAL; read in its OAM) */
 #define BN5_LIB_LVIEW_ARROWS 0x087E4B64u /* eight 8x8 tiles, up, up-right, right, down-right, down, down-left, left, up-left, */

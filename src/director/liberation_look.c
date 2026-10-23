@@ -38,13 +38,13 @@
 #define GBA_BG2HOFS    0x04000018u
 #define GBA_BG2VOFS    0x0400001Au
 #define TILEMAP_RAM    (BN6_MAP_TILEMAP + BN6_MAP_TILEMAP_HEAD)
-#define LOOKS          12
+#define LOOKS          14            /* BN5's twelve, the start's, and the reach's red (BN5_LOOK_REACH) */
 #define BLANK_TILE     864           /* the looks' empty tile, the overlay set's first (all 0: transparent) */
 #define LIB_LOOK_DOWN  8             /* pixels a diamond lies below its panel's centre on the map (calibrated on captures) */
 #define REFRESH_FRAMES 30            /* frames BG2's screen map is made again after the looks change */
 #define FADE_IN        27            /* frames a freed panel keeps its look as the board fades back in (BN5's, traced) */
 #define DISSOLVE       (FADE_IN + BN5_LIB_BLINK * BN5_LIB_BLINKS)
-enum { LOOK_CLEAN, LOOK_DARK, LOOK_PALED, LOOK_ITEM, LOOK_PLUS5, LOOK_BAR1, LOOK_BONUS = 9, LOOK_HOLE, LOOK_GRID };
+enum { LOOK_CLEAN, LOOK_DARK, LOOK_PALED, LOOK_ITEM, LOOK_PLUS5, LOOK_BAR1, LOOK_BONUS = 9, LOOK_HOLE, LOOK_GRID, LOOK_REACH = BN5_LOOK_REACH };
 
 static struct {
 	bool on;
@@ -109,6 +109,8 @@ void lib_look_begin(void) {
  * frame learned from that pad, which bare reads as a hole. */
 static int look_of(int x, int y) {
 	int k = LB.b.kind[y][x];
+	/* (a unit's reach lit as it strikes, BN5's red, over every panel in it) */
+	if (LB.reach_lit && LB.reach[y][x] && k != LIB_VOID) return LOOK_REACH;
 	/* (a freed panel: its old look while the board fades back in, then
 	 * clean and old by turns, BN5's blink) */
 	if (K.dissolve[y][x]) {
@@ -245,5 +247,16 @@ void lib_look_unit(int kind, int *list, int *sprite, int *anim) {
 	if (own < 0) return;
 	*list = 7;
 	*sprite = own;
-	*anim = BN5_LIB_GUARD_ANIM;
+	*anim = lib_look_unit_anim(kind, LIB_FACE_REST, false);
+}
+
+int lib_look_unit_anim(int kind, int face, bool strike) {
+	if (kind < UNIT_BRUTE || kind > UNIT_BLADIA || xnavi_object(XOBJ_BRUTE + kind - UNIT_BRUTE) < 0) return -1;
+	face &= 7;
+	if (!strike) return BN5_LIB_GUARD_ANIM + face;
+	/* (each one's strike by the way it faces: BigBrute's eight, TinHawk's
+	 * two, left and right, Bladia's four, from up-right clockwise) */
+	if (kind == UNIT_BRUTE) return BN5_LIB_BRUTE_STRIKE + face;
+	if (kind == UNIT_HAWK) return BN5_LIB_HAWK_STRIKE + (face >= 1 && face <= 3);
+	return BN5_LIB_BLADIA_STRIKE + (face & 1 ? face / 2 : (face + 1) / 2 % 4);
 }

@@ -38,8 +38,10 @@ uint32_t npc_beam(int x, int y, int z, const StageFlags *f);
  * which should set `taken`. */
 uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int script, const StageFlags *f);
 /* A floor pad (sprite list `category`, `index`) that appears once
- * `open_flag` is set. */
-uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag);
+ * `open_flag` is set; `over_bg2` draws it over the map's second layer
+ * (layer priority 2), as a dark layer's board lies there in BN5's look
+ * (docs/LIBERATION.md), still under MegaMan, sorted after him by depth. */
+uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2);
 
 /* A super boss's body (docs/BOSSES.md, Super bosses): his sprite, the
  * animation he stands in and his pose (NpcBody's; no log-in), how long the

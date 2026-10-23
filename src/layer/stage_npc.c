@@ -176,13 +176,13 @@ uint32_t npc_seal(int x, int y, int z, const StageFlags *f) {
 	return commit(&s);
 }
 
-uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag) {
+uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2) {
 	Script s = { .n = 0 };
 	/* as npc_prop's pads: a floor sprite under MegaMan (npc.c) */
 	OP(&s, 0x09, 0x25, (uint8_t)index, (uint8_t)(category * 4), 0x16, 0x00, 0x0A, 0x00, 0x1F, 0x0E);
 	x += NPC_FLOOR_BACK; y -= NPC_FLOOR_BACK; z -= NPC_FLOOR_BACK;
 	coords(&s, x, y, z);
-	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, 0x1B);
+	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, over_bg2 ? 0x1A : 0x1B);
 	wait_flag(&s, open_flag, L_SHOW);
 	mark(&s, L_SHOW);
 	sound(&s, SOUND_APPEAR);

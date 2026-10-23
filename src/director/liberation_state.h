@@ -51,11 +51,18 @@ typedef struct {
 	int fight, fight_unit, fight_cmd;
 	int fx, fy;            /* the panel fought for */
 	bool fight_seen;       /* the battle began */
-	/* the enemy's phase */
+	/* the Darkloids' phase: the units in their order (the Darkloid first),
+	 * and the step of the one acting (liberation_turn.c) and its frames */
 	int enemy_unit, enemy_t, enemy_steps;
-	int hurt;              /* HP the board took this phase */
-	char hurt_by[24];      /* ... the last who hit */
 	bool shield;           /* a BonusPanel's: no harm on the board this phase */
+	/* ... as BN5 shows it, not kept: */
+	bool hidden[LIB_UNITS];        /* a guardian between its warp out and in */
+	uint8_t anim[LIB_UNITS];       /* each unit's animation (its object's byte, LayerObjs.lib_anim) */
+	uint8_t reach[MAP_H][MAP_W];   /* 1: in the acting unit's reach, */
+	bool reach_lit;                /* ... lit in BN5's red (liberation_look.c) */
+	struct { int sprite, anim, x, y, n; } effect;   /* an effect over the board: BN5's list-7 sprite (-1 none) and its animation
+	                                             * at world (x, y), the n-th begun */
+	int harm, harm_t;              /* a blow's harm in BN5's digits over MegaMan (0 none), frames shown */
 	/* where each unit's sprite is (its object), and where it shows */
 	uint8_t fence[MAP_H][MAP_W];   /* 1: the panel has walls of its own (liberation_fence.c), shut or open as it is walked */
 	int slot[LIB_UNITS];
@@ -81,6 +88,14 @@ extern LibState LB;
 
 /* (liberation.c) The panel MegaMan faces, and the unit on panel (x, y), -1 none */
 void lib_faced(int *x, int *y);
+/* ... nothing else showing (no chat box, card or scene); MegaMan's HP,
+ * and set (1 at least, his max at most) */
+bool lib_quiet(void);
+int lib_hp(void);
+void lib_hp_set(int hp);
+/* (liberation_turn.c) Unit u's turn in the Darkloids' phase as BN5 plays
+ * it, a frame at a time: true once over */
+bool lib_turn(int u);
 /* ... and whether A there takes a command */
 bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);
