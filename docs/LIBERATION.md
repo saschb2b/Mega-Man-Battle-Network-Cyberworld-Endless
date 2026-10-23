@@ -238,18 +238,26 @@ liberation and an item's find; the recordings are in the pull request):
   paled dark (kind 2, the dissolve's middle),
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
   BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
-  ring until the DarkHoles fall); each panel's four look bytes pick its
-  corners' edge pieces (`BN5_LIB_EDGES`), each byte the three neighbours
-  around that corner the Navi in play can walk (`BN5_LIB_CORNERS`); palettes 8-10 at `0x08614EB4`, `0x08614B84` and `0x08614BC8`. The
-  dark panels' palette rests at `0x08614C4C` and glints every 132 frames
-  through the next five (held 6, 2, 2, 1, 1 frames); palette 10
-  breathes over six palettes from `0x08614D10`, 12 frames a step.
+  ring until the DarkHoles fall); palettes 8-12 the board's own. Each
+  panel's four look bytes are its corners, each the three neighbours
+  around it the Navi in play can walk (`BN5_LIB_CORNERS`); they choose
+  height modifiers on the panel's border cells in the map's collision
+  (`BN5_LIB_EDGES`), so a Navi stops where he cannot walk: no drawing.
+- **The palettes move.** The dark panels' (9) rest 120 frames, dim
+  over three frames and come back, 216 frames round; 10 steps there and
+  back over four, 20 frames a step; the barriers' (11) glint every 132
+  frames; the BonusPanel's (12) breathes over six, 12 frames a step.
 - **The freed panel** blinks once the board has faded back in: its
   look toggles between its old kind and clean every 4 frames, 14 times,
-  then stays clean. Located by their bytes in a
-  capture; the routine that draws a panel from its kind and its four look
-  bytes (the panel list's +4-+7), the pulse's table and the other maps'
-  sets are still to be traced.
+  then stays clean.
+- **The sprites:** the faced panel's outline and the items' icons are
+  BN5 sprites (list 7, entries 15 and 21); the battle's banners five
+  OBJs whose tiles stand near `0x0873CF74`, their build not traced.
+
+Still to trace: the banners' build, the board's HUD (the Order Points
+gauge, PHASE and TRGT PHASE), the command window, the backdrop, the
+units' board sprites, and whether the other eight missions' maps carry
+other sets.
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and
 palettes read from BN5's ROM at run time (never kept), its pulse, its

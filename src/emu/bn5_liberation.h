@@ -43,18 +43,26 @@
                                          /* ... and 4 on y, the diagonal 2) that are walkable for the Navi in play: +4 W NW N, +5 E NE N, */
                                          /* ... +7 E SE S, +6 W SW S; a neighbour counts where its flags +1 lack 0x10 and its kind's bit */
                                          /* ... is in the Navi's unit record +0x0C (MegaMan's 0x1001: clean and start) */
-#define BN5_LIB_EDGES        0x0804F204u /* a panel's edges: its four look bytes (+4-+7), one a side, each a list from BN5_LIB_EDGE_TABLES */
-#define BN5_LIB_EDGE_TABLES  0x0804FB94u /* ... four sides' tables of lists (tile 0x88xx, x, y; 0xFF ends them) */
+#define BN5_LIB_EDGES        0x0804F204u /* a panel's borders in the map's collision: its four look bytes (+4-+7), one a corner, each */
+#define BN5_LIB_EDGE_TABLES  0x0804FB94u /* ... indexing that corner's table: lists of height modifiers (0x8800 + n at cell dx, dy; 0xFF ends) */
+#define BN5_LIB_Z_LIST       0x02030804u /* ... gathered here (u16 cell y * 0xFE + x, u16 value; the count at -4), from the panel's corner */
+                                         /* ... cell ((px - 0x80) * 4 + 0x7F + record +2, (py - 0x80) * 4 + 0x7F + record +3), 8 units a cell */
+#define BN5_LIB_Z_INSTALL    0x080315D4u /* ... handed to the map (its state 0x02013770), read by the height check 0x080320EA (bn6f */
+                                         /* ... checkZCoordModifiers_8031612) through 0x080315F8: so a Navi stops at a panel he cannot walk */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
                                          /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
-#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 as the capture held it: the dark panels' swirl */
-#define BN5_LIB_PULSE        0x08614C4Cu /* palette 9 (the dark panels) at rest; every 132 frames a glint: the next five palettes, */
+#define BN5_LIB_PAL_DARK     0x08614B84u /* palette 9 at rest: the dark panels' swirl, held 120 frames; then BN5_LIB_DARK_FRAMES' three */
+#define BN5_LIB_DARK_FRAMES  0x08614B24u /* ... below it (0x20 apart, from here), down and up: 0x08614B64 16 frames, 0x08614B44 16, */
+                                         /* ... this 32, 0x08614B44 16, 0x08614B64 16, then the rest again (216 frames round) */
+#define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 as the capture held it; its four frames 0x08614BA8-0x08614C08 stepped */
+#define BN5_LIB_HOLE_STEP    20          /* ... there and back, this many frames a step */
+#define BN5_LIB_PULSE        0x08614C2Cu /* palette 11 (the barriers') at rest; every 132 frames a glint: the next five palettes, */
 #define BN5_LIB_PULSE_FRAMES 6           /* ... 0x20 apart, held 6, 2, 2, 1, 1 frames, then this again */
-#define BN5_LIB_BREATH       0x08614D10u /* palette 10: six palettes 0x20 apart stepped there and back, 12 frames each (8 at the last) */
+#define BN5_LIB_BREATH       0x08614CF0u /* palette 12 (the BonusPanel's): six palettes 0x20 apart stepped there and back, 12 frames */
+                                         /* ... each (8 at the last); a palette's working copy at 0x03003960 + 0x20 n, then 0x03003B60 + 0x20 n */
 #define BN5_LIB_BLINK        4           /* a freed panel's look toggles between its old kind and clean every this many frames, */
 #define BN5_LIB_BLINKS       14          /* ... this many times, once the board has faded back in (27 frames), then stays clean */
-#define BN5_LIB_PAL_HOLE     0x08614BC8u /* palette 10 */
 #define BN5_LIB_EVENT        0x02001AB0u /* the board's events, BN5_LIB_EVENT_SIZE each: +0 a kind, +1, +4 u32 (its low byte the slot, */
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
