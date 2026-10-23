@@ -85,6 +85,8 @@ bool lib_resume(void) {
 	LB.cheer = 0;
 	LB.npops = 0;
 	LB.hurt = 0;
+	LB.tour = LB.tour_t = 0;
+	lib_camera_mend();
 	lib_look_begin();
 	if (emu_debug_on()) fprintf(stderr, "liberation: board taken back, phase %d, step %d, %d Order Points\n", LB.phase, LB.step, LB.op);
 	return true;

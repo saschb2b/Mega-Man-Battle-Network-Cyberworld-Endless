@@ -49,6 +49,19 @@ int lib_board_song(int song);
 void lib_song(int bn5_song);
 void lib_sound(int bn5_sound);
 
+/* (liberation_camera.c) BN6's camera moved as BN5's moves it over its
+ * board, where the board is in BN5's look: a frame of its pan to world
+ * (wx, wy), true once there (and at once where it is not BN5's board); a
+ * frame of its pan back to MegaMan, true once BN6's camera follows him
+ * again; where it is while the board holds it (false: it follows him); and
+ * after a CONTINUE, BN6's camera made to follow him. */
+bool lib_camera_at(int wx, int wy);
+bool lib_camera_home(void);
+/* ... and moved `sx` pixels across and `sy` down the screen now (BN5's L view's MoveCam) */
+void lib_camera_nudge(int sx, int sy);
+bool lib_camera_place(int *wx, int *wy);
+void lib_camera_mend(void);
+
 /* (liberation_save.c) The board across a CONTINUE: saved with the run's
  * checkpoint (run.lib), and taken back once its state has loaded on the
  * same layer (false: none for this layer, the board begins afresh). */

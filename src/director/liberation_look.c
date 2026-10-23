@@ -139,7 +139,9 @@ static void box_at(int x, int y, int *tx, int *ty) {
  * near MegaMan's place, as it is mod 256), those in the picture and a tile
  * round it; and where the map's tile t sits in the ring, t + the offset */
 static void ring_window(int *tx0, int *ty0, int *ox, int *oy) {
+	/* (the camera's place, MegaMan's but while the board pans it) */
 	int px = bn6_player_x(), py = bn6_player_y();
+	lib_camera_place(&px, &py);
 	int u = px + py + 4 * K.tw - 120, v = (py - px) / 2 + 4 * K.th - 80;
 	int cu = (emu_read16(GBA_BG2HOFS) & 0x1FF) - 376 + 4 * K.tw, cv = (emu_read16(GBA_BG2VOFS) & 0x1FF) + 176 + 4 * K.th;
 	u += ((cu - u) % 256 + 256 + 128) % 256 - 128;

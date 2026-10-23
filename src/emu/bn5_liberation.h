@@ -128,6 +128,11 @@
 #define BN5_LIB_LVIEW_PANEL_W 88         /* ... its width */
 #define BN5_LIB_LVIEW_PANEL_H 28         /* ... its height (WIN0, 123-219 by 12-42, behind the keys' help, is not drawn) */
 
+/* The board's camera (its BG1 scroll read frame by frame): a pan to the unit about to act about 20 pixels a frame, then a
+ * quarter of what is left, the banner 3 frames after it arrives; the L view's D-pad moves it */
+#define BN5_LIB_CAMERA_STEP  4           /* ... this many pixels a frame, */
+#define BN5_LIB_CAMERA_FAST  8           /* ... this many with B held ("MoveCam(F)") */
+
 /* The board's units: the guardians BN5's sprite list 6's 83 BigBrute (0x08474848), 84 TinHawk, 85 Bladia */
 #define BN5_LIB_GUARD_SPRITE 83
 #define BN5_LIB_GUARD_ANIM   0           /* ... the animation they stand in on the board */

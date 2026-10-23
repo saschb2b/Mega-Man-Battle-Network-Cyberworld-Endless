@@ -102,6 +102,7 @@ void lib_see(void) {
 	S.on = lib_on() && on_map() && director_arrived();
 	if (!S.on) return;
 	int px = bn6_player_x(), py = bn6_player_y();
+	lib_camera_place(&px, &py);   /* (the camera's place while the board pans it) */
 	S.cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	S.cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
 	S.box = emu_read8(BN6_CHATBOX) != 0;

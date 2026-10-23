@@ -299,6 +299,12 @@ liberation and an item's find; the recordings are in the pull request):
   runs on from one to the next: no change of song at a phase), 0x1C plays
   at the mission's opening (the board's routine 1, its tour), the
   liberations' battles BN5's virus battle song 0x15.
+- **The camera** pans to the unit about to act: to the Darkloid before
+  DARKLOID PHASE (about 20 pixels a frame, then a quarter of what is left
+  each frame, some 32 frames, the band 3 frames after it stops), to each
+  guardian as it moves and back to the Navi before PLAYER PHASE; at the
+  mission's opening it tours the board to the Darkloid. Under L the D-pad
+  moves it, 4 pixels a frame, 8 with B ("MoveCam(F)").
 - **The guardians on the board** are sprites of BN5's list 6: 83 BigBrute
   (a red, spiked beast), 84 TinHawk, 85 Bladia, each standing in its
   animation 0 with its shadow.
@@ -751,7 +757,15 @@ all, begun once nothing else shows (a CONTINUE's act card first); the L
 view's panel behind its phases the same. The guardians stand in BN5's
 own sprites (list 6's 83-85, copied into BN6's list 7 at numbers Gregar
 leaves on a placeholder, `src/layer/xnavi.c`), the Darkloid in his own.
-The board's music is BN5's: its song 0x22 the dark layer's map's own
+BN6's own camera moves as BN5's (`src/director/liberation_camera.c`):
+held, its mode is 0 (it no longer copies MegaMan's place) and its place
+is written each frame, panning at BN5's pace to the Darkloid at the
+opening (his entrance: held there a second, then back before the
+briefing) and before DARKLOID PHASE, to each guardian as it moves in his
+phase, back to MegaMan before PLAYER PHASE; under L the D-pad moves it at
+BN5's 4 and 8 pixels a frame, kept over the board; let go, it follows
+MegaMan again. MegaMan walks as BN6 walks him throughout: it moves only
+while he stands. The board's music is BN5's: its song 0x22 the dark layer's map's own
 (`lib_board_song`), 0x1C at the briefing, 0x22 again at PLAYER PHASE
 01, copied into BN6 after the areas' songs and themes (`xsong.c`, each
 keeping its place) and started by BN6's PlayMusic
@@ -785,10 +799,10 @@ the menu closed. Checked: the autopilot's board quit at PLAYER PHASE
 board, phase 4, the panels it had freed clean and its Order Points as
 they were, the banner shown again once the act's card was gone.
 
-**Left for later:** the L view's corner arrows and BN5's camera over the
-board (BN5's L), the camera's pans before each phase's banner and the
-Darkloid's entrance at the opening (BN6's camera stays on MegaMan), the
-mission's end in BN5's words (the target and the phases taken), the
+**Left for later:** the L view's corner arrows and its keys' help, the
+Darkloid's words at his entrance, each unit's HP under it (our guardians
+have none on the board yet), the mission's end in BN5's words (the target
+and the phases taken), the
 other eight missions' maps (stage 1 draws every dark layer in mission
 1's); barriers, keys and sealed
 routes; chips and zenny in item panels; the BonusPanel's chip; the

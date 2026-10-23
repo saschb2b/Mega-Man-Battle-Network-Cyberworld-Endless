@@ -344,6 +344,7 @@ bool director_resume(void) {
 		boss_resume();
 		/* (a liberation's board as it stood: its panels, units and phase) */
 		if (same) lib_resume();
+		else lib_camera_mend();
 		/* the map as far as it was seen (none for another build's layer) */
 		if (same && !save_read_blob("run.seen", LAYER_SEEN_MAGIC, D.seen, sizeof D.seen)) memset(D.seen, 0, sizeof D.seen);
 		resume_duel();

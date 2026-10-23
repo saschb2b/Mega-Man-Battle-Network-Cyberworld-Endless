@@ -64,6 +64,7 @@ typedef struct {
 	int ux[LIB_UNITS], uy[LIB_UNITS];   /* world units, gliding */
 	int from_x[LIB_UNITS], from_y[LIB_UNITS];   /* ... and where the map puts its object */
 	int darkloid;          /* the Darkloid's navi (guardians.h) */
+	int tour, tour_t;      /* the opening's look at the Darkloid (1 there, 2 back) and its frames there */
 	bool briefed;          /* MegaMan's word on the board, said */
 	bool holes_told;       /* ... that every DarkHole is gone */
 	char words[512];       /* words due ("" none) */
