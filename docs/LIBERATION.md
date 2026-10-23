@@ -204,6 +204,48 @@ HP and damage by mission). The Darkloid attacks Navis in his reach and
 heals for each dark panel around him (100 a panel, **guides**). All down
 means a retreat (**text**).
 
+### The Darkloids' phase as BN5 shows it (play, ROM)
+
+Recorded in romlab on mission 1 (both Navis' Pass taken, then MegaMan's
+place, his unit's world place at `0x0203E000` +0x1C and +0x20, poked
+two panels from a BigBrute, and in a second run two from BlizzardMan),
+frame by frame, each OBJ traced to its sprite and each sound to its
+caller (docs/ROM_DATA.md, BN5's Liberation board: the Darkloids' phase):
+
+- **The order.** The camera pans to the Darkloid, DARKLOID PHASE, and he
+  acts first; then the camera visits each guardian in turn (its pan 22
+  frames, its rest 15) and back to the Navi for PLAYER PHASE. A
+  guardian with no Navi near does nothing at all.
+- **The Darkloid's heal.** Right after the banner where dark panels stand
+  round him: rising lines over him (effect 0x78), sound 0x8A, his HP up
+  at once (204 to 400 in the recording).
+- **A guardian's move is a warp, not a walk.** All its steps at once: a
+  puff and then a beam's lines where it stands (sprite list 7's 59, 2
+  frames each; the guardian gone with the puff), sound 0xB4, the camera's
+  pan to the panel it takes, then the lines and the puff there, sound
+  0xB4 again 46 frames after the first, the guardian back 4 frames into
+  it, sound 0x94.
+- **A strike in five beats.** Where a Navi stands in the unit's reach:
+  every board panel in the reach turns red (look 0x0D, BG palette 7; on
+  9 frames, off 7, on 9, off 7, then on, sound 0x91 as each light
+  comes); 68 frames on, the unit's line in a chat box, its attack's name
+  ("Grrrowl! BeastBreath!" with no face for a BigBrute, BlizzardMan's
+  with his mugshot); once it closes, the unit's strike animation
+  (BigBrute's 12-27 frames after the box closed, BlizzardMan's 19-52),
+  the blow on the Navi with sound 0x6B (0x6E where nothing harms him):
+  BigBrute's breath of fire over him (sprite list 7's 56: rising,
+  burning, falling, 27 frames), BlizzardMan's Snowball falling on him;
+  the harm in yellow digits over the Navi (BN5's HP digits, palette
+  `0x087E4678`, 29 pixels over his feet) as his HP under him drops (at
+  the blow +30 for BigBrute, +21 for BlizzardMan), held 60 frames; the
+  red put out (123 and 127 frames after the box closed) and the next
+  unit's pan.
+- **The units stand animated.** The guardians in their standing
+  animations by the way they face (list 6's 83-85: 0-7 by the eighth,
+  two or four frames looped), facing down-left on the board; their
+  strikes their own animations (BigBrute's 33-40, TinHawk's 25-26,
+  Bladia's 25-28).
+
 ### How the board looks and moves (play, ROM)
 
 The owner's direction (23 October 2026): "I expect a near mmbn5 like
@@ -320,7 +362,8 @@ liberation and an item's find; the recordings are in the pull request):
   frames of every 32) and a cross at its middle.
 - **The guardians on the board** are sprites of BN5's list 6: 83 BigBrute
   (a red, spiked beast), 84 TinHawk, 85 Bladia, each standing in its
-  animation 0 with its shadow.
+  animation by the way it faces (down-left, 5) with its shadow; how they
+  move and strike: The Darkloids' phase as BN5 shows it, above.
 
 Still to trace: the window's font, when an item's pop shows and goes,
 the sounds of a DarkHole closing and of LIBERATE SUCCESS, the mission's
@@ -1187,6 +1230,61 @@ seeds, 1 of 20 did: seed 1's act 5 board left the autopilot on its first
 panel for the whole run (the rest found ways round the panels they had
 lost). On its map's floor no board of that layer's sixteen tries passes
 the planner, and it is a plain one.
+
+### The Darkloids' phase as BN5's, as built (23 October 2026)
+
+The owner saw the 0.15.0 trailer's board: the units stood still and
+glided, the Darkloids' phase did not play as BN5's, and the exit's ring
+was clipped. The phase is now BN5's as traced above
+(`src/director/liberation_turn.c`, a unit's turn a frame at a time):
+
+- **The Darkloid first**, then each guardian, as BN5 orders them; the
+  camera's pan and rest to each as before.
+- **A guardian's move** is BN5's warp: its steps taken at once by the
+  board's rules (`lib_guardian_step`), its object parked off the floor
+  for the warp (`LB.hidden`), BN5's puff and lines drawn over the board
+  from its ROM (sprite list 7's 59, its medium pair), sounds 0xB4 out
+  and in and 0x94 as it shows, the camera's pan between. The object is
+  hidden and put back a frame before the effect, as BN6 draws an
+  object's new place in its next frame.
+- **A strike** where MegaMan stands in a unit's reach: the reach in
+  BN5's red look on BG2 (`LB.reach`, look 0x0D; tinted red where the
+  board is not in BN5's look), its blink and sound; the unit's line
+  (`lib_strike_words`: the guardians' cries and attacks' names,
+  BeastBreath, HawkAttack and DarkSlash, BN5's; the Darkloid's in his
+  own habit of speech with his mugshot); his strike animation; the blow
+  with BN5's sound, BigBrute's flame over MegaMan; the harm in BN5's
+  yellow digits over him (`lib_piece_harm`) as his HP drops; BN5's
+  frames throughout. MegaMan's end-of-phase "Ow!" is gone: the harm
+  shows as it lands.
+- **The units' animations** are the board's: each unit's object is a
+  standing NPC whose animation follows a byte of its own script
+  (`npc_live`), written each frame from `LB.anim`; the guardians stand
+  facing down-left in BN5's standing animation (two or four frames) and
+  strike toward MegaMan in their own. The Darkloid is a BN6 Navi in his
+  overworld sprite: his strike is his title card's pose where he has one
+  in list 6 (HeatMan, ElecMan, SlashMan, EraseMan, ChargeMan and BN5's
+  six); the others stand, BN6's overworld sprites having no strike.
+- **The exit's pad** shows on the Darkloid's panel liberated as he is
+  deleted, drawn over BG2 (layer priority 2, `npc_sealed_pad`'s
+  `over_bg2`) where BN5's looks lie, still under MegaMan by its depth.
+- **The overlays' camera:** while the board holds BN6's camera (the
+  Darkloids' phase), the drawing takes the camera's own place for the
+  picture's middle; the BG scroll's wrap read it a half turn off away
+  from MegaMan.
+
+Not done: the Darkloid's heal (his HP is not kept on the board: each
+battle with him is whole, so there is nothing to heal; its effect 0x78
+and sound are traced); the HP digits under every unit; TinHawk's and
+Bladia's strike effects and the BN6 Darkloids' (not traced: their
+strikes are their animations and the harm); a deleted guardian's return
+through BN5's warp. Teammates stay stage 3's.
+
+**Checked:** an autopilot run through seed 1's act 2 board from its
+opening to its exit (`--run-depth 5 --seed 1 --dev dark,god,onehit`,
+11-12 phases on its par of 12, the exit taken to depth 6); seed 2's
+board for a BigBrute's warp and strike (frame 5409 on), seed 1's for
+the Darkloid's (frame 13667 on).
 
 ## The owner's decisions
 

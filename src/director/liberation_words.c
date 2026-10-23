@@ -4,6 +4,7 @@
 #include "liberation_words.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "liberation_state.h"
 
@@ -66,11 +67,36 @@ const char *lib_route_words(void) {
 
 const char *lib_rest_words(void) { return "@M Phew... Resting helps."; }
 
-const char *lib_hurt_words(const char *who, int hp) {
-	static char words[96];
-	if (hp >= 100) snprintf(words, sizeof words, "@M Ugh!! %s hit hard!", who);
-	else snprintf(words, sizeof words, "@M Ow! %s got me!", who);
-	return words;
+const char *lib_strike_words(int kind, const char *darkloid) {
+	/* (the guardians' as BN5's speak theirs: a cry and their attack's name;
+	 * the Darkloid's in his own habit of speech, docs/VOICE.md) */
+	static const char *const guardians[4] = { "", "@N Grrrah!! BeastBreath!!", "@N Kyaaah!! HawkAttack!!", "@N Out of my way!! DarkSlash!!" };
+	static const struct { const char *name, *line; } darkloids[] = {
+		{ "HeatMan", "C'mon!! Feel the heat!" },
+		{ "ElecMan", "...tzz. Feel the current." },
+		{ "SlashMan", "Slaaash!! Gotcha!" },
+		{ "EraseMan", "Hyahaha! You're mine!" },
+		{ "ChargeMan", "Choo,choo!! Full steam ahead!" },
+		{ "SpoutMan", "G-Go away,drip!" },
+		{ "TomahawkMan", "There's a saying... Strike first!" },
+		{ "TenguMan", "Hmph! Too slow,grasshopper!" },
+		{ "GroundMan", "Whiiir! Dig in!" },
+		{ "DustMan", "Gahaha! Into the trash!" },
+		{ "BlastMan", "Kwohohoho... Burn!" },
+		{ "DiveMan", "Awooga! Torpedoes away!" },
+		{ "CircusMan", "Ahoo,hoo,hoo! Showtime!" },
+		{ "JudgeMan", "Order! Hear thy sentence!" },
+		{ "ElementMan", "PIKIRARA!!|...You are in reach." },
+		{ "Colonel", "Stand down. Now!" },
+		{ "KnightMan", "Forgive me. I must strike!" },
+		{ "ShadowMan", "...Too close." },
+		{ "NumberMan", "Your number's up!" },
+		{ "ToadMan", "Ribbit! Take this!" },
+	};
+	if (kind != UNIT_DARKLOID) return guardians[kind & 3];
+	for (size_t i = 0; darkloid && i < sizeof darkloids / sizeof *darkloids; ++i)
+		if (!strcmp(darkloids[i].name, darkloid)) return darkloids[i].line;
+	return "You're in my reach!";
 }
 
 const char *lib_won_words(int phases, int par) {

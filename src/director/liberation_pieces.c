@@ -5,6 +5,7 @@
 #include "liberation_pieces.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -71,6 +72,19 @@ void lib_piece_gauge(int op) {
 	memcpy(t[COUNT_FIRST + 1], digits + op % 10 * 32, 32);
 	for (size_t i = 0; i < sizeof hud_objs / sizeof *hud_objs; ++i)
 		xtiles_draw(t[hud_objs[i].tile], pal, P.core_x + hud_objs[i].x, P.core_y + hud_objs[i].y, hud_objs[i].w, hud_objs[i].h, 0);
+}
+
+/* ---- a blow's harm ---- */
+
+#define HARM_UP 29   /* the digits' top over the Navi's feet (BN5_LIB_HARM_PAL) */
+
+void lib_piece_harm(int harm, int x, int y) {
+	const uint8_t *digits = bn5(BN5_LIB_DIGITS, 10 * 0x40), *pal = bn5(BN5_LIB_HARM_PAL, 32);
+	if (!digits || !pal || harm <= 0) return;
+	char s[8];
+	int n = snprintf(s, sizeof s, "%d", harm > 9999 ? 9999 : harm);
+	for (int i = 0; i < n; ++i)
+		xtiles_draw(digits + (uint32_t)(s[i] - '0') * 0x40, pal, P.core_x + x - 4 * n + 8 * i, P.core_y + y - HARM_UP, 1, 2, 0);
 }
 
 /* ---- the L view ---- */

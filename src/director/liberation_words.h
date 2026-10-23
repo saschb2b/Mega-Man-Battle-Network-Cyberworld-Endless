@@ -25,8 +25,9 @@ const char *lib_trap_words(int hp);
 const char *lib_route_words(void);
 /* A rest (BN5's Pass). */
 const char *lib_rest_words(void);
-/* The enemy's phase: `hp` taken on the board, the last by `who`. */
-const char *lib_hurt_words(const char *who, int hp);
+/* The Darkloids' phase: a unit's line as it strikes (UNIT_*; the
+ * Darkloid's by his Navi's name, said with his face). */
+const char *lib_strike_words(int kind, const char *darkloid);
 /* The Darkloid deleted in `phases` against `par`. */
 const char *lib_won_words(int phases, int par);
 /* The units' names (UNIT_*; the Darkloid's is his Navi's) */

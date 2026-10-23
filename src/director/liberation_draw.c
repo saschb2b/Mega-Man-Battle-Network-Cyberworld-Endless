@@ -58,6 +58,8 @@ static struct {
 	int out_t;             /* ... frames since */
 	Anim pop[LIB_POPS];    /* the items' icons freed (LB.pop) */
 	bool pop_on[LIB_POPS];
+	Anim effect;           /* the Darkloids' phase's effect (LB.fx), */
+	int effect_n;          /* ... the one begun last, -1 none */
 } S;
 
 /* (x mod 512, near `near`) */
@@ -99,13 +101,25 @@ static void see_pops(void) {
 	}
 }
 
+/* The Darkloids' phase's effect over the board (a guardian's warp, a
+ * blow's), BN5's own sprite, from its first frame as each begins */
+static void see_fx(void) {
+	Sprite *spr = S.look && LB.effect.sprite >= 0 ? bn5_sprite(LB.effect.sprite) : NULL;
+	if (!spr) { S.effect_n = -1; return; }
+	if (S.effect_n != LB.effect.n) anim_play(&S.effect, spr, LB.effect.anim);
+	else anim_update(&S.effect);
+	S.effect_n = LB.effect.n;
+}
+
 void lib_see(void) {
 	S.on = lib_on() && on_map() && director_arrived();
 	if (!S.on) return;
 	int px = bn6_player_x(), py = bn6_player_y();
-	lib_camera_place(&px, &py);   /* (the camera's place while the board pans it) */
 	S.cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	S.cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
+	/* (the camera's place while the board pans it: the picture's middle,
+	 * which the scroll's wrap reads a half turn off far from MegaMan) */
+	if (lib_camera_place(&px, &py)) { S.cam_u = px + py; S.cam_v = (py - px) / 2; }
 	S.box = emu_read8(BN6_CHATBOX) != 0;
 	S.look = lib_look_on();
 	++S.blink;
@@ -118,6 +132,7 @@ void lib_see(void) {
 	if (LB.step == LIB_STEP_MENU || (LB.step == LIB_STEP_MOVE && lib_faced_takes())) lib_faced(&S.fx, &S.fy);
 	see_outline();
 	see_pops();
+	see_fx();
 }
 
 /* A dark panel's colour: the floor's, sunk into Nebula's purple */
@@ -133,6 +148,7 @@ static uint32_t recolour(uint32_t c, int kind, bool faced) {
 	default: break;
 	}
 	if (faced) { r = (r + 255) / 2; g = (g + 230) / 2; b = (b + 120) / 2; }
+	if (kind < 0) { r = (r + 3 * 255) / 4; g /= 4; b /= 4; }   /* (a unit's reach, lit as BN5 lights it red) */
 	return (c & 0xFF000000u) | (uint32_t)(b > 255 ? 255 : b) << 16 | (uint32_t)(g > 255 ? 255 : g) << 8 | (uint32_t)(r > 255 ? 255 : r);
 }
 
@@ -154,6 +170,7 @@ void director_tint_board(uint32_t *px) {
 			if (!netmap_panel((u - v) / 2, (u + v) / 2, &gx, &gy) || gx < 0 || gy < 0 || gx >= MAP_W || gy >= MAP_H) continue;
 			int k = LB.b.kind[gy][gx];
 			bool faced = gx == S.fx && gy == S.fy;
+			if (LB.reach_lit && LB.reach[gy][gx] && k != LIB_VOID && !S.look) { px[y * EMU_W + x] = recolour(c, -1, false); continue; }
 			/* (BN5's own look, where it lies on the board: only the faced panel's light) */
 			if (k == LIB_VOID || (!faced && (k == LIB_CLEAN || S.look))) continue;
 			px[y * EMU_W + x] = recolour(c, k, faced);
@@ -226,6 +243,19 @@ static void draw_pops(void) {
 	}
 }
 
+/* The Darkloids' phase's effect at its world place, BN5's sprite's own origin */
+static void draw_fx(void) {
+	if (S.effect_n < 0 || LB.effect.sprite < 0) return;
+	anim_draw(&S.effect, P.core_x + LB.effect.x + LB.effect.y - S.cam_u + CAM_X, P.core_y + (LB.effect.y - LB.effect.x) / 2 - S.cam_v + CAM_Y, false, 0, 0);
+}
+
+/* The harm of a blow over MegaMan, as BN5 shows a Navi's (its yellow digits) */
+static void draw_harm(void) {
+	if (!LB.harm || !S.look) return;
+	int wx = bn6_player_x(), wy = bn6_player_y();
+	lib_piece_harm(LB.harm, wx + wy - S.cam_u + CAM_X, (wy - wx) / 2 - S.cam_v + CAM_Y);
+}
+
 /* The command window as BN5's, its lines BN5's commands */
 static void draw_window(void) {
 	const char *lines[LIB_CMDS];
@@ -239,6 +269,8 @@ void director_draw_board(void) {
 	bool bn5 = S.look && lib_pieces_on();
 	draw_faced();
 	draw_pops();
+	draw_fx();
+	draw_harm();
 	if (bn5) lib_piece_gauge(LB.op);
 	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
 	/* (L held, as BN5's map view: the phase and its target) */

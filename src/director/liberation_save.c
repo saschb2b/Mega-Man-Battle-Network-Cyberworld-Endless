@@ -83,15 +83,18 @@ bool lib_resume(void) {
 	LB.step = resumed_step(n.step, n.after);
 	LB.after = n.after; LB.phase = n.phase; LB.op = n.op; LB.prize = n.prize;
 	LB.fight = n.fight; LB.fight_unit = n.fight_unit; LB.fight_cmd = n.fight_cmd; LB.fx = n.fx; LB.fy = n.fy;
-	LB.enemy_unit = n.enemy_unit; LB.enemy_steps = n.enemy_steps; LB.enemy_t = 0;
+	LB.enemy_unit = n.enemy_unit; LB.enemy_steps = 0; LB.enemy_t = 0;   /* (the unit's turn shown from its start) */
 	LB.briefed = n.briefed; LB.holes_told = n.holes_told; LB.prize_given = n.prize_given; LB.shield = n.shield;
 	LB.enemy_banner = n.enemy_banner; LB.fight_seen = n.fight_seen;
 	LB.banner_t = 0;
 	LB.words[0] = 0;
 	LB.cheer = 0;
 	LB.npops = 0;
-	LB.hurt = 0;
 	LB.tour = LB.tour_t = 0;
+	LB.effect.sprite = -1;
+	LB.harm = 0;
+	LB.reach_lit = false;
+	memset(LB.hidden, 0, sizeof LB.hidden);
 	lib_camera_mend();
 	lib_look_begin();
 	if (emu_debug_on()) fprintf(stderr, "liberation: board taken back, phase %d, step %d, %d Order Points\n", LB.phase, LB.step, LB.op);

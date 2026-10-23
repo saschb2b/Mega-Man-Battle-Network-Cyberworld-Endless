@@ -7,9 +7,10 @@
  * faces, one a phase: Liberation, a battle of BN6's for it (harder as
  * more dark panels stand around it; won in its first turn, the eight
  * round it liberated too), LongSwrd for an Order Point (two panels in a
- * line, one battle), or Pass (half his HP back). Then the guardians move
- * toward him and hit what they reach, the Darkloid hits him in his reach,
- * and a DarkHole still standing sends its guardian back. Every DarkHole
+ * line, one battle), or Pass (half his HP back). Then the Darkloids'
+ * phase as BN5 plays it (liberation_turn.c): the Darkloid, then each
+ * guardian, warping toward him and striking what it reaches; a DarkHole
+ * still standing sends its guardian back. Every DarkHole
  * down, the Darkloid's ring can be liberated, and the Darkloid fought
  * from it; deleted, the board is done, the par's prize given and the
  * exit open. The units are the layer's own map objects (OBJ_UNIT), moved
@@ -44,12 +45,10 @@
 #include "talk.h"
 
 LibState LB;
-static int turn_held;         /* frames BN5's camera has rested on the unit about to move */
 static bool viewing;          /* L held on the board: its camera the D-pad's (lib_keys) */
 static int nudge_x, nudge_y;  /* ... pixels a frame across and down */
 
 #define BANNER_FRAMES  70
-#define GLIDE_FRAMES   10    /* a guardian's step on the board */
 #define PARK_X         (-2000)   /* where a deleted unit's object waits, off the floor */
 #define TOUR_HOLD      60     /* frames the opening's camera rests on the Darkloid */
 #define BACK_PHASES    2      /* the Darkloids' phases a DarkHole takes to send its guardian back */
@@ -107,6 +106,7 @@ static void unit_object(int u) {
 		NpcBody body = guardian_body(LB.darkloid, 5);
 		list = body.list; sprite = body.index; anim = body.anim;
 	} else lib_look_unit(n->kind, &list, &sprite, &anim);
+	LB.anim[u] = (uint8_t)anim;
 	NetObj *o = &layer.obj[layer.nobj++];
 	memset(o, 0, sizeof *o);
 	o->type = OBJ_UNIT;
@@ -198,6 +198,10 @@ void lib_begin(void) {
 	LB.briefed = LB.holes_told = LB.prize_given = LB.route_found = false;
 	LB.tour = LB.tour_t = 0;
 	LB.nfinds = 0;
+	LB.effect.sprite = -1;
+	LB.harm = 0;
+	LB.reach_lit = false;
+	memset(LB.hidden, 0, sizeof LB.hidden);
 	lib_battle_disarm();
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.slot[u] = -1;
@@ -219,16 +223,20 @@ static void npc_put(int slot, int x, int y) {
 	emu_write(npc(slot) + BN6_NPC_Y16, &v[1], 2);
 }
 
+static int put_x[LIB_UNITS], put_y[LIB_UNITS];   /* where each unit's object was put last */
+
 /* Each unit's object found where the map put it (again after a battle,
  * whose return makes the map's objects afresh), and set where it stands */
 static void units_show(void) {
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		int wx = LB.from_x[u], wy = LB.from_y[u], s = LB.slot[u];
 		bool held = s >= 0 && (emu_read8(npc(s)) & 1);
-		int gone_x = PARK_X, want_x = LB.b.unit[u].gone ? gone_x : LB.ux[u];
+		bool away = LB.b.unit[u].gone || LB.hidden[u];
+		int want_x = away ? PARK_X : LB.ux[u], want_y = away ? 0 : LB.uy[u];
 		if (held) {
 			int x = (int16_t)emu_read16(npc(s) + BN6_NPC_X16), y = (int16_t)emu_read16(npc(s) + BN6_NPC_Y16);
-			held = (x == want_x && y == (LB.b.unit[u].gone ? 0 : LB.uy[u])) || (x == wx && y == wy);
+			/* (where it was put last, or where the map put it) */
+			held = (x == put_x[u] && y == put_y[u]) || (x == wx && y == wy);
 		}
 		if (!held) {
 			LB.slot[u] = -1;
@@ -236,7 +244,10 @@ static void units_show(void) {
 				if ((emu_read8(npc(k)) & 1) && (int16_t)emu_read16(npc(k) + BN6_NPC_X16) == wx && (int16_t)emu_read16(npc(k) + BN6_NPC_Y16) == wy)
 					LB.slot[u] = k;
 		}
-		if (LB.slot[u] >= 0) npc_put(LB.slot[u], want_x, LB.b.unit[u].gone ? 0 : LB.uy[u]);
+		if (LB.slot[u] >= 0) { npc_put(LB.slot[u], want_x, want_y); put_x[u] = want_x; put_y[u] = want_y; }
+		/* (its animation the board's, its object's own byte) */
+		uint32_t a = D.objs.lib_anim[u];
+		if (a && emu_read8(a) != LB.anim[u]) emu_write8(a, LB.anim[u]);
 	}
 }
 
@@ -263,6 +274,8 @@ static void hp_set(int hp) {
 	uint16_t v = (uint16_t)(hp < 1 ? 1 : hp > hp_max() ? hp_max() : hp);
 	emu_write(BN6_NAVI_HP, &v, 2);
 }
+int lib_hp(void) { return hp_now(); }
+void lib_hp_set(int hp) { hp_set(hp); }
 
 static void say(const char *words, int after) {
 	snprintf(LB.words, sizeof LB.words, "%s", words ? words : "");
@@ -425,7 +438,13 @@ static void fight_won(bool one_turn) {
 	char held[320] = "";
 	int freed = 0;
 	bool back = false;
-	if (LB.fight == LIB_FIGHT_DARKLOID) { LB.b.unit[0].gone = true; return; }
+	if (LB.fight == LIB_FIGHT_DARKLOID) {
+		/* (his panel liberated with him: the exit shows on it) */
+		LB.b.unit[0].gone = true;
+		LB.b.kind[LB.fy][LB.fx] = LIB_CLEAN;
+		lib_look_freed(LB.fx, LB.fy);
+		return;
+	}
 	if (LB.fight == LIB_FIGHT_GUARDIAN) {
 		/* (his panel liberated with him: the prototype's rule) */
 		LB.b.unit[LB.fight_unit].gone = true;
@@ -476,13 +495,6 @@ static void after_fight(void) {
 
 /* ---- the Darkloids' phase ---- */
 
-static void hit(const char *who, int dmg) {
-	if (LB.shield || dmg <= 0) return;
-	hp_set(hp_now() - dmg);
-	LB.hurt += dmg;
-	snprintf(LB.hurt_by, sizeof LB.hurt_by, "%s", who);
-}
-
 /* A DarkHole still standing sends its deleted guardian back beside it,
  * the Darkloids' phase after next (BN5 sends him in the next: with a team
  * another Navi strikes the hole meanwhile; MegaMan alone gets his phase
@@ -502,48 +514,16 @@ static void guardians_back(void) {
 	}
 }
 
-/* Unit u's turn, a frame at a time: BN5's camera on it first, then its
- * steps glide, the camera with it, then its blow */
-static bool enemy_turn(int u) {
-	LibUnit *n = &LB.b.unit[u];
-	if (n->gone) return true;
-	if (LB.enemy_t == 0 && LB.enemy_steps == 0) {
-		if (!lib_camera_at(LB.ux[u], LB.uy[u])) { turn_held = 0; return false; }
-		if (lib_look_on() && turn_held < BN5_LIB_UNIT_HOLD) { ++turn_held; return false; }
-	}
-	int wx, wy;
-	netmap_world(n->x, n->y, &wx, &wy);
-	if (LB.ux[u] != wx || LB.uy[u] != wy) {
-		LB.ux[u] += (wx - LB.ux[u]) / (GLIDE_FRAMES - LB.enemy_t > 1 ? GLIDE_FRAMES - LB.enemy_t : 1);
-		LB.uy[u] += (wy - LB.uy[u]) / (GLIDE_FRAMES - LB.enemy_t > 1 ? GLIDE_FRAMES - LB.enemy_t : 1);
-		lib_camera_at(LB.ux[u], LB.uy[u]);
-		if (++LB.enemy_t >= GLIDE_FRAMES) { LB.ux[u] = wx; LB.uy[u] = wy; LB.enemy_t = 0; }
-		return false;
-	}
-	int d = abs(n->x - LB.mx) + abs(n->y - LB.my);
-	if (u == 0) {
-		if (d <= lib_darkloid_reach(LB.b.act)) hit(guardian(LB.darkloid)->name, lib_harm(UNIT_DARKLOID, LB.b.act));
-		return true;
-	}
-	const LibGuardRule *r = lib_guard_rule(n->kind);
-	if (d > r->reach && LB.enemy_steps < r->move && lib_guardian_step(&LB.b, u, LB.mx, LB.my)) { ++LB.enemy_steps; return false; }
-	if (d <= r->reach) hit(lib_unit_name(n->kind), lib_harm(n->kind, LB.b.act));
-	return true;
-}
-
+/* The phase as BN5 plays it: the Darkloid first, then each guardian in
+ * its order, each its turn (liberation_turn.c); then the player's phase */
 static void enemy_update(void) {
-	if (LB.enemy_unit == 0 && LB.enemy_t == 0 && LB.enemy_steps == 0) { LB.hurt = 0; guardians_back(); }
-	/* (the guardians first, the Darkloid last) */
-	int u = LB.enemy_unit + 1 < LB.b.nunits ? LB.enemy_unit + 1 : 0;
-	if (!enemy_turn(u)) return;
-	LB.enemy_steps = 0;
-	LB.enemy_t = 0;
-	turn_held = 0;
-	if (u != 0) { ++LB.enemy_unit; return; }
+	if (LB.enemy_unit == 0 && LB.enemy_t == 0 && LB.enemy_steps == 0) guardians_back();
+	if (LB.enemy_unit < LB.b.nunits && !lib_turn(LB.enemy_unit)) return;
+	if (++LB.enemy_unit < LB.b.nunits) return;
 	LB.enemy_unit = 0;
 	LB.shield = false;
 	++LB.phase;
-	say(LB.hurt ? lib_hurt_words(LB.hurt_by, LB.hurt) : "", LIB_STEP_BANNER);
+	say("", LIB_STEP_BANNER);
 	LB.banner_t = 0;
 	LB.enemy_banner = false;
 }
@@ -551,6 +531,7 @@ static void enemy_update(void) {
 /* ---- the frame ---- */
 
 static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !cinema_busy() && !D.beat[0] && on_map(); }
+bool lib_quiet(void) { return quiet(); }
 
 /* Where MegaMan stands and what he faces, as BN6 walks him: his panel (a
  * walked one: the fence keeps him to them), and the panel beside it his
@@ -666,7 +647,6 @@ static void steps_update(void) {
 void lib_update(void) {
 	if (!LB.on || !D.active || D.town || !on_map()) return;
 	if (LB.step != LIB_STEP_DONE) flag_set(BN6_FLAG_NO_ENCOUNTERS);
-	units_show();
 	lib_fence_update();
 	lib_look_update();
 	lib_cue_frame();
@@ -674,6 +654,9 @@ void lib_update(void) {
 	for (int i = 0; i < LB.npops && i < LIB_POPS; ++i) ++LB.pop[i].t;
 	if (LB.step != LIB_STEP_WAIT) track_update();
 	steps_update();
+	/* (the units' objects where the step just put them: BN6 draws them so
+	 * in its next frame) */
+	units_show();
 	/* (the L view's camera, and back on MegaMan once L is let go) */
 	if (viewing && LB.step == LIB_STEP_MOVE) lib_camera_nudge(nudge_x, nudge_y);
 	else if (LB.step == LIB_STEP_MOVE || LB.step == LIB_STEP_MENU) lib_camera_home();
