@@ -24,8 +24,8 @@ bool lib_plan_lax;
 #define WIN_MIN      60      /* percent of plays won, at least */
 #define DEAD_MAX     55      /* percent of phases with one sensible move, at most */
 #define BARE_MAX     60      /* ... on the bare board */
-#define LONG_MIN     50      /* LongSwrd taken, per hundred plays, at least */
-#define LONG_MAX     40      /* ... the best move in at most this percent of phases */
+#define LONGSWRD_LEAST 50    /* LongSwrd taken, per hundred plays, at least */
+#define LONGSWRD_MOST  40    /* ... the best move in at most this percent of phases */
 #define ROUTE_PLAYS  4       /* ... by a player going for the sealed region's route */
 #define ROUTE_LEAST  2       /* the route's cost in phases over the par: at least (a choice, not a gift) */
 #define ROUTE_MOST   10      /* ... and at most (a choice, not a wall) */
@@ -547,6 +547,6 @@ int lib_plan(LibBoard *b, uint32_t seed) {
 	if (m->dead * 100 > (m->phases - m->strikes) * DEAD_MAX) return LIB_WHY_DEAD;
 	if (m->bare_dead * 100 > m->bare_phases * BARE_MAX) return LIB_WHY_BARE;
 	if (b->sealed && (m->sealed * 2 < ROUTE_PLAYS || m->route - m->median < ROUTE_LEAST || m->route - m->median > ROUTE_MOST)) return LIB_WHY_ROUTE;
-	if (m->longswrd * 100 < m->plays * LONG_MIN || m->best[CMD_LONG] * 100 > m->phases * LONG_MAX) return LIB_WHY_LONGSWRD;
+	if (m->longswrd * 100 < m->plays * LONGSWRD_LEAST || m->best[CMD_LONG] * 100 > m->phases * LONGSWRD_MOST) return LIB_WHY_LONGSWRD;
 	return LIB_WHY_NONE;
 }
