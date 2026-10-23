@@ -23,6 +23,7 @@
 #define LOOK_EDGE      rgba(66, 198, 231, 255)  /* ... its band */
 #define LOOK_EDGE_LO   rgba(16, 140, 239, 255)  /* ... its blue edge */
 #define LOOK_NAVY      rgba(16, 82, 107, 255)   /* a window's field */
+#define LOOK_NAVY_LO   rgba(10, 58, 80, 255)    /* ... where what it holds is not yet had */
 #define LOOK_SLOT      rgba(16, 99, 107, 255)   /* a value's slot (MegaMan's HP) */
 #define LOOK_TEXT      rgba(247, 255, 247, 255) /* a list's letters */
 #define LOOK_SHADE     rgba(33, 115, 140, 255)  /* ... their shade on the field */
@@ -39,6 +40,10 @@
 #define LOOK_BAND_H 14
 #define LOOK_RAIL 5
 SDL_Rect look_screen(int x, int y, int w, int h, const char *title);
+/* ... its band alone, w wide (the rails' ends in it), LOOK_BAND_H + 1 tall */
+void look_band(int x, int y, int w, const char *title);
+/* ... a note at its right end where a hint goes, small capitals in `c` */
+void look_band_note(int x, int y, int w, const char *s, SDL_Color c);
 /* A key's hint at the band's right end (E-Mail's "START:SORT"): `key`
  * and a colon in white, `what` in orange, small capitals with their
  * shade: where it lies (a tap's place) */

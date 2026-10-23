@@ -27,9 +27,10 @@ typedef struct {
 	int t;                    /* frames, for what moves (an open slot's dashes) */
 } NetPassView;
 
-/* The PET screen's parts, Trade Central's screens' too (trade_screen_draw.c):
- * a panel, `fill` inside a 1-pixel `edge`, its corners cut; the screen's
- * ground, the PET's dark blue under a dotted grid */
+/* The PET screen's parts, Trade Central's screens' too (trade_screen_draw.c), in
+ * BN6's look (pet_look.h): a panel, a dark `fill` in a slim window's frame (a
+ * darker field where `edge` is the dim slot's), any other `fill` inside a
+ * 1-pixel `edge`, its corners cut; the screen's ground, the body's green */
 void netpass_panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge);
 void netpass_ground(int x, int y, int w, int h);
 

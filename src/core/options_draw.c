@@ -1,7 +1,8 @@
-/* Options' picture (options_state.h): the PET's panel as the controls
- * screen draws it, its head (Options, and the section open), its lines
- * with their values, the note on the line under the cursor and the keys'
- * line; where a tap lands on them. Drawing changes nothing. */
+/* Options' picture (options_state.h), in BN6's PET screens' look as its
+ * KeyItem screen (pet_look.h): the band with Options and the section open,
+ * its lines with their values in a window, the note on the line under the
+ * cursor in the information box, the keys' line; where a tap lands on
+ * them. Drawing changes nothing. */
 #include "options.h"
 
 #include <stdio.h>
@@ -20,21 +21,24 @@
 #include "platform.h"
 #include "touch.h"
 
-/* where it draws, from the picture's corner */
-#define HEAD_Y 7
-#define ROW_Y 30
-#define ROW_H 18   /* (16 for five lines, clear of the note) */
-#define LABEL_X 17
-#define VALUE_R (CORE_W - 26)   /* a value's right edge, the chevron after it */
-#define NOTE_Y 112
+/* where it draws, from the picture's corner: the lines in a window, the
+ * note in the information box under it, the keys on the body */
+#define WIN_Y 18
+#define WIN_H 84
+#define ROW_Y 25
+#define ROW_H 18   /* (14 for five lines) */
+#define LABEL_X 24
+#define VALUE_R (CORE_W - 30)   /* a value's right edge, the chevron after it */
+#define NOTE_Y 104
+#define NOTE_H 44
 #define NAV_Y 149
 
-static int row_h(int n) { return n > 4 ? 16 : ROW_H; }
+static int row_h(int n) { return n > 4 ? 14 : ROW_H; }
 
 int options_tap_line(int x, int y) {
 	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
-	if (y < ROW_Y - 3 || y >= ROW_Y - 3 + n * h || x < 6 || x >= CORE_W - 6) return -1;
-	return (y - ROW_Y + 3) / h;
+	if (y < ROW_Y - 2 || y >= ROW_Y - 2 + n * h || x < 6 || x >= CORE_W - 6) return -1;
+	return (y - ROW_Y + 2) / h;
 }
 
 /* the PET's small arrows: the cursor's and a section's chevron point right,
@@ -43,17 +47,10 @@ static void pointer(int x, int y, int size, bool left, SDL_Color c) {
 	for (int i = 0; i < size; ++i) fill_rect(left ? x - i : x + i, y + 2 + i, 1, 2 * size - 2 * i, c);
 }
 
-/* the head: Options, and the section open after it */
+/* the head: the section open as the band's note (Options is its title) */
 static void head_draw(int x0, int y0) {
-	const char *names[2] = { options_word(OW_TITLE), options_word(O.section == SECTION_DISPLAY ? OW_DISPLAY : OW_AUDIO) };
-	int x = 10, last = O.section != SECTION_HUB;
-	for (int t = 0; t <= last; ++t) {
-		int w = minifont_width(names[t], 1) + 8;
-		bool on = t == last;
-		if (on) fill_rect(x0 + x - 2, y0 + HEAD_Y - 2, w + 4, 9, PET_CYAN);
-		minifont_draw(x0 + x + 2, y0 + HEAD_Y, names[t], on ? PET_NAVY : PET_DIM, 1);
-		x += w + 12;
-	}
+	if (O.section != SECTION_HUB)
+		look_band_note(x0, y0, CORE_W, options_word(O.section == SECTION_DISPLAY ? OW_DISPLAY : OW_AUDIO), LOOK_PAGE);
 }
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
@@ -74,20 +71,20 @@ static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
 		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_DONE] = OW_DONE };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
-	text_draw(x0 + LABEL_X, y, name, on ? PET_GOLD : WHITE, TEXT_LEFT);
-	if (on) pointer(x0 + 9, y, 4, false, PET_ORANGE);
+	look_text(x0 + LABEL_X, y, name, on ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	if (on) look_cursor(x0 + 12, y + 2);
 	const char *value = kind == LINE_AUDIO ? sound_word()
 		: kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) : NULL;
 	if (options_line_turns(kind)) {
 		const char *v = value_word(kind);
-		int r = x0 + VALUE_R, l = r - text_width(v);
-		text_draw(l, y, v, WHITE, TEXT_LEFT);
+		int r = x0 + VALUE_R, l = r - look_text_width(v);
+		look_text(l, y, v, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 		pointer(l - 5, y, 4, true, PET_ORANGE);
 		pointer(r + 4, y, 4, false, PET_ORANGE);
 		return;
 	}
-	if (value) text_draw(x0 + VALUE_R - text_width(value), y, value, PET_SKY, TEXT_LEFT);
-	if (kind != LINE_DONE) pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? PET_GOLD : PET_DIM);
+	if (value) look_text(x0 + VALUE_R - look_text_width(value), y, value, LOOK_EDGE_HI, LOOK_SHADE, TEXT_LEFT);
+	if (kind != LINE_DONE) pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
 }
 
 static const char *note_words(int kind) {
@@ -104,13 +101,21 @@ static const char *note_words(int kind) {
 	}
 }
 
+/* the note in the information box: its white page, the chat font's ink */
+static void note_draw(int x0, int y, const char *s) {
+	SDL_Rect r = look_info(x0 + 7, y, CORE_W - 14, NOTE_H, NULL);
+	fill_rect(r.x + 1, r.y + 1, r.w - 2, r.h - 1, LOOK_PAGE);
+	look_wrapped(s, r.x + 6, r.y + 2, r.w - 12, 3, 13, LOOK_INK, LOOK_INK_SHADE);
+}
+
 static void options_panel_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
-	pet_panel_draw(x0, y0);
+	pet_panel_draw(x0, y0, options_word(OW_TITLE));
 	head_draw(x0, y0);
+	look_window(x0 + 7, y0 + WIN_Y, CORE_W - 14, WIN_H, 0, false);
 	int kinds[LINES_MAX], n = options_lines(kinds), h = row_h(n);
 	for (int i = 0; i < n; ++i) line_draw(x0, y0 + ROW_Y + i * h, kinds[i], i == O.at);
-	controls_note_draw(cx, y0 + NOTE_Y, note_words(kinds[O.at < n ? O.at : n - 1]), PET_SKY);
+	note_draw(x0, y0 + NOTE_Y, note_words(kinds[O.at < n ? O.at : n - 1]));
 	char keys[64];
 	if (touch_shown() && !platform_pad_present()) snprintf(keys, sizeof keys, "%s", options_word(OW_TAP));
 	else {
@@ -119,7 +124,7 @@ static void options_panel_draw(void) {
 		snprintf(a, sizeof a, "%s", controls_word(BTN_A));
 		options_keys(a, controls_word(BTN_B), options_line_turns(kinds[O.at < n ? O.at : n - 1]), keys, sizeof keys);
 	}
-	minifont_draw_centered(cx, y0 + NAV_Y, keys, PET_DIM, 1);
+	pet_panel_note(cx, y0 + NAV_Y, keys, LOOK_PAGE);
 }
 
 /* the question over all, else the controls screen over Options, else it */

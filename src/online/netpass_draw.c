@@ -7,39 +7,38 @@
 #include "gfx.h"
 #include "minifont.h"
 #include "netpass_text.h"
+#include "pet_look.h"
 #include "pixfont.h"
 #include "second_frame.h"
 #include "square_arena.h"
 #include "text.h"
 
 #define INK        rgba(0, 49, 74, 255)      /* the PET's darkest: a shade under pixel letters */
-#define BACK_DOT   rgba(10, 66, 92, 255)     /* the screen's dotted grid */
 #define FACE_BACK  rgba(16, 54, 74, 255)     /* behind a face, as the cartridges' labels have it */
 #define GOLD_EDGE  rgba(198, 90, 0, 255)
 #define GOLD_HI    rgba(255, 247, 165, 255)
 #define GOLD_LO    rgba(247, 165, 0, 255)
-#define CELL_OFF   rgba(10, 58, 80, 255)
 #define OUTLINE    rgba(24, 40, 56, 255)     /* the cartridges' (launcher_art.c) */
 #define METAL_HI   rgba(198, 222, 239, 255)
 #define METAL      rgba(165, 189, 214, 255)
 #define METAL_LO   rgba(99, 132, 148, 255)
 #define GRIP       rgba(140, 165, 189, 255)
 
-#define HEAD_H 18
-#define CARD_X 4
-#define CARD_Y 21
-#define CARD_W 110
-#define CARD_H 84
+#define CARD_X 7
+#define CARD_Y 18
+#define CARD_W 108
+#define CARD_H 86
 #define GRID_X 118
-#define CELL_W 57
+#define CELL_W 56
 #define CELL_H 41
-#define CELL_GAP 4
-#define TRAY_Y 110
-#define TRAY_H 46
+#define CELL_GAP 3
+#define TRAY_Y 107
+#define TRAY_H 47
 #define CART_W 40
 #define CART_H 26
 
 static const SDL_Color none = { 0, 0, 0, 0 };
+#define NONE none
 
 /* drawn into memory (the second screen) this draw: the engine's pixel
  * letters are a texture's, so words there are the small font's */
@@ -63,10 +62,20 @@ static SDL_Color label_color(int game, int part) {
 	return game >= 0 && game < 2 ? c[game][part] : other[part];
 }
 
+/* (the old panels' dark fills, the screens' lit and unlit: BN6's navy
+ * field in its cyan frame, or the same sunk darker where `edge` was the
+ * slot's dim one) */
+static bool dark(SDL_Color c) { return c.r < 40 && c.g < 130 && c.b < 140; }
+
 void netpass_panel(int x, int y, int w, int h, SDL_Color fill, SDL_Color edge) {
-	fill_rect(x + 1, y, w - 2, h, edge);
-	fill_rect(x, y + 1, w, h - 2, edge);
-	fill_rect(x + 1, y + 1, w - 2, h - 2, fill);
+	if (!dark(fill)) {
+		fill_rect(x + 1, y, w - 2, h, edge);
+		fill_rect(x, y + 1, w, h - 2, edge);
+		fill_rect(x + 1, y + 1, w - 2, h - 2, fill);
+		return;
+	}
+	bool off = edge.r == PET_SLOT_EDGE.r && edge.g == PET_SLOT_EDGE.g && edge.b == PET_SLOT_EDGE.b;
+	look_box(x, y, w, h, off ? LOOK_NAVY_LO : LOOK_NAVY);
 }
 
 /* a disc of radius r round (cx, cy) */
@@ -125,33 +134,18 @@ static void star(int x, int y, SDL_Color c, SDL_Color edge) {
 	fill_rects(px, n, c);
 }
 
-void netpass_ground(int x, int y, int w, int h) {
-	fill_rect(x, y, w, h, PET_EXIT);
-	SDL_Rect dots[1024];
-	int n = 0;
-	for (int j = 4; j < h && n < 1024; j += 8)
-		for (int i = 4; i < w && n < 1024; i += 8) dots[n++] = (SDL_Rect){ x + i, y + j, 1, 1 };
-	fill_rects(dots, n, BACK_DOT);
-}
+void netpass_ground(int x, int y, int w, int h) { fill_rect(x, y, w, h, LOOK_GREEN); }
 
-/* the header: BN6's green band, the title and its stripes, the level on a slot */
-static void header(int x, int y, const NetPassView *v) {
-	fill_rect(x, y, NETPASS_W, HEAD_H, PET_GREEN);
-	fill_rect(x, y, NETPASS_W, 1, PET_LINE);
-	fill_rect(x, y + HEAD_H - 2, NETPASS_W, 2, PET_DARK);
-	text_draw(x + 7, y + 3, netpass_title, PET_WHITE, TEXT_LEFT);
-	second_stripes(x + 11 + text_width(netpass_title), y + 3);
-	const char *level = v->full ? netpass_level_full : netpass_level_square;
-	int lw = text_width(level) + (v->full ? 12 : 0), sw = lw + 12, sx = x + NETPASS_W - 4 - sw;
-	second_slot(sx, y + 2, sw, HEAD_H - 5);
-	int tx = sx + 6;
-	if (v->full) { star(tx, y + 4, PET_GOLD, GOLD_EDGE); tx += 12; }
-	text_draw(tx, y + 2, level, v->full ? PET_GOLD : PET_CYAN_HI, TEXT_LEFT);
+/* the band's note: the pass's level, a star before it where it is full */
+static void level(int x, int y, const NetPassView *v) {
+	const char *lv = v->full ? netpass_level_full : netpass_level_square;
+	look_band_note(x, y, NETPASS_W, lv, v->full ? LOOK_GOLD : LOOK_PAGE);
+	if (v->full) star(x + NETPASS_W - 10 - look_caps_width(lv) - 12, y + 10, PET_GOLD, GOLD_EDGE);
 }
 
 /* MegaMan's face from the player's ROM in a 40 x 48 window from (x, y) */
 static void face(int x, int y, bool into) {
-	fill_rect(x - 1, y - 1, 42, 50, PET_CYAN_HI);
+	fill_rect(x - 1, y - 1, 42, 50, LOOK_EDGE_LO);
 	fill_rect(x, y, 40, 48, FACE_BACK);
 	Sprite *s = sprite_get(SPR_MUGSHOT, FACE_MEGAMAN);
 	if (!s) return;
@@ -168,31 +162,30 @@ static int held_count(const NetPassView *v) {
 
 /* the operator card: the face, Lan and MegaMan, the stamps' bar */
 static void card(int x, int y, const NetPassView *v) {
-	netpass_panel(x, y, CARD_W, CARD_H, PET_SLOT, PET_CYAN);
-	fill_rect(x + 2, y + 1, CARD_W - 4, 1, rgba(33, 123, 132, 255));
-	face(x + 5, y + 5, v->into);
-	int cx = x + 51;
-	minifont_draw(cx, y + 7, netpass_operator_label, PET_DIM, 1);
-	text_draw(cx, y + 13, netpass_operator, PET_WHITE, TEXT_LEFT);
-	minifont_draw(cx, y + 30, netpass_navi_label, PET_DIM, 1);
-	text_draw(cx, y + 36, netpass_navi, PET_WHITE, TEXT_LEFT);
-	fill_rect(x + 4, y + 57, CARD_W - 8, 1, PET_SLOT_EDGE);
-	minifont_draw(x + 5, y + 62, netpass_stamps_label, PET_DIM, 1);
+	SDL_Rect f = look_window(x, y, CARD_W, CARD_H, 0, false);
+	face(f.x + 2, f.y + 2, v->into);
+	int cx = f.x + 47;
+	look_caps(cx, f.y + 4, netpass_operator_label, LOOK_EDGE_HI, NONE);
+	look_text(cx, f.y + 11, netpass_operator, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	look_caps(cx, f.y + 27, netpass_navi_label, LOOK_EDGE_HI, NONE);
+	look_text(cx, f.y + 34, netpass_navi, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	fill_rect(f.x + 2, f.y + 53, f.w - 4, 1, LOOK_SHADE);
+	look_caps(f.x + 3, f.y + 57, netpass_stamps_label, LOOK_EDGE_HI, NONE);
 	char count[16];
 	int held = held_count(v);
 	netpass_count_words(count, sizeof count, held, STAMP_COUNT);
-	text_draw(x + CARD_W - 5, y + 58, count, held == STAMP_COUNT ? PET_GOLD : PET_WHITE, TEXT_RIGHT);
+	look_text(f.x + f.w - 3, f.y + 53, count, held == STAMP_COUNT ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
 	/* (a segment a stamp, gold where held) */
-	int sw = (CARD_W - 10 - 3 * 2) / STAMP_COUNT;
+	int sw = (f.w - 6 - 3 * 2) / STAMP_COUNT;
 	for (int s = 0; s < STAMP_COUNT; ++s) {
-		int sx = x + 5 + s * (sw + 2), sy = y + 73;
+		int sx = f.x + 3 + s * (sw + 2), sy = f.y + 67;
 		if (v->held[s]) {
 			fill_rect(sx, sy, sw, 6, PET_GOLD);
 			fill_rect(sx, sy, sw, 1, GOLD_HI);
 			fill_rect(sx, sy + 5, sw, 1, GOLD_LO);
 		} else {
-			fill_rect(sx, sy, sw, 6, PET_SLOT_EDGE);
-			fill_rect(sx + 1, sy + 1, sw - 2, 4, PET_EXIT);
+			fill_rect(sx, sy, sw, 6, LOOK_SHADE);
+			fill_rect(sx + 1, sy + 1, sw - 2, 4, LOOK_NAVY_LO);
 		}
 	}
 }
@@ -218,11 +211,11 @@ static void seal(int cx, int cy, int r, bool held, int landed) {
 
 static void stamp_cell(int x, int y, int s, const NetPassView *v) {
 	bool held = v->held[s];
-	netpass_panel(x, y, CELL_W, CELL_H, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
+	look_box(x, y, CELL_W, CELL_H, held ? LOOK_NAVY : LOOK_NAVY_LO);
 	int cx = x + CELL_W / 2;
-	seal(cx, y + 13, 10, held, v->landing == s ? v->landing_t : -1);
-	word(cx, y + 25, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
-	minifont_draw_centered(cx, y + 34, netpass_stamp_captions[s], held ? PET_CYAN_HI : PET_DIM, 1);
+	seal(cx, y + 12, 9, held, v->landing == s ? v->landing_t : -1);
+	look_text(cx, y + 21, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
+	minifont_draw_centered(cx, y + 34, netpass_stamp_captions[s], held ? LOOK_EDGE_HI : LOOK_DIM, 1);
 }
 
 /* a cartridge of the set's game `g`, small, from (x, y): the ROMs
@@ -268,23 +261,23 @@ static void open_slot(int x, int y, int g, int t) {
 
 /* the tray: each game's slot, in or open, and the PET's line beside them */
 static void tray(int x, int y, const NetPassView *v) {
-	netpass_panel(x, y, NETPASS_W - 8, TRAY_H, rgba(8, 41, 62, 255), PET_SLOT_EDGE);
-	int games = netpass_games(), cx = x + 5;
+	SDL_Rect f = look_window(x, y, NETPASS_W - 2 * CARD_X, TRAY_H, 0, false);
+	int games = netpass_games(), cx = f.x + 3;
 	const NetPassGame *missing = NULL;
 	for (int g = 0; g < games; ++g, cx += CART_W + 4) {
 		bool in = netpass_game_in(g);
-		if (in) cartridge(cx, y + 5, g);
-		else open_slot(cx, y + 5, g, v->t);
+		if (in) cartridge(cx, f.y + 1, g);
+		else open_slot(cx, f.y + 1, g, v->t);
 		if (!in && !missing) missing = netpass_game(g);
 		const char *word = in ? netpass_cart_in : netpass_cart_open;
-		SDL_Color c = in ? PET_LINE : PET_DIM;
+		SDL_Color c = in ? LOOK_GREEN_HI : LOOK_DIM;
 		int w = minifont_width(word, 1) + (in ? 8 : 0), wx = cx + (CART_W - w) / 2;
-		if (in) check(wx + 3, y + 37, c);
-		minifont_draw(wx + (in ? 8 : 0), y + 35, word, c, 1);
+		if (in) check(wx + 3, f.y + 32, c);
+		minifont_draw(wx + (in ? 8 : 0), f.y + 30, word, c, 1);
 	}
 	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
-	int tx = cx + 2, tw = x + NETPASS_W - 8 - 5 - tx;
-	second_wrapped(line, tx, y + 4, tw, 3, missing ? PET_WHITE : PET_GOLD);
+	int tx = cx + 2, tw = f.x + f.w - 3 - tx;
+	look_wrapped(line, tx, f.y, tw, 3, 12, missing ? LOOK_TEXT : LOOK_GOLD, LOOK_SHADE);
 }
 
 void netpass_view_now(NetPassView *v) {
@@ -296,24 +289,24 @@ void netpass_view_now(NetPassView *v) {
 
 void netpass_draw(int x, int y, const NetPassView *v) {
 	into_memory = v->into;
-	netpass_ground(x, y, NETPASS_W, NETPASS_H);
-	header(x, y, v);
+	look_screen(x, y, NETPASS_W, NETPASS_H, netpass_title);
+	level(x, y, v);
 	card(x + CARD_X, y + CARD_Y, v);
 	for (int s = 0; s < STAMP_COUNT; ++s)
-		stamp_cell(x + GRID_X + s % 2 * (CELL_W + CELL_GAP), y + CARD_Y + s / 2 * (CELL_H + CELL_GAP - 1), s, v);
-	tray(x + 4, y + TRAY_Y, v);
+		stamp_cell(x + GRID_X + s % 2 * (CELL_W + CELL_GAP), y + CARD_Y + s / 2 * (CELL_H + CELL_GAP + 1), s, v);
+	tray(x + CARD_X, y + TRAY_Y, v);
 }
 
 void netpass_draw_strip(int x, int y, const NetPassView *v) {
 	into_memory = v->into;
-	netpass_ground(x, y, NETPASS_W, NETPASS_STRIP_H);
-	header(x, y, v);
-	int w = (NETPASS_W - 8 - 3 * 3) / STAMP_COUNT;
+	look_screen(x, y, NETPASS_W, NETPASS_STRIP_H, netpass_title);
+	level(x, y, v);
+	int w = (NETPASS_W - 14 - 3 * 3) / STAMP_COUNT;
 	for (int s = 0; s < STAMP_COUNT; ++s) {
-		int cx = x + 4 + s * (w + 3), cy = y + HEAD_H + 2;
+		int cx = x + 7 + s * (w + 3), cy = y + LOOK_BAND_H + 2;
 		bool held = v->held[s];
-		netpass_panel(cx, cy, w, NETPASS_STRIP_H - HEAD_H - 4, held ? PET_NAVY : CELL_OFF, held ? PET_CYAN : PET_SLOT_EDGE);
+		look_box(cx, cy, w, NETPASS_STRIP_H - LOOK_BAND_H - 2 - LOOK_RAIL - 1, held ? LOOK_NAVY : LOOK_NAVY_LO);
 		seal(cx + w / 2, cy + 11, 8, held, v->landing == s ? v->landing_t : -1);
-		word(cx + w / 2, cy + 22, netpass_stamp_names[s], held ? PET_WHITE : PET_DIM, INK, PIXFONT_CENTER);
+		look_text(cx + w / 2, cy + 19, netpass_stamp_names[s], held ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_CENTER);
 	}
 }

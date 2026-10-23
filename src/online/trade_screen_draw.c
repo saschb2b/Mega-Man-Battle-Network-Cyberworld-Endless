@@ -6,68 +6,61 @@
 #include "chips.h"
 #include "data.h"
 #include "minifont.h"
-#include "netpass_draw.h"
+#include "pet_look.h"
 #include "second_art.h"
 #include "second_frame.h"
 #include "trade_screen_text.h"
 
 #define W 240
-#define HEAD_H 18
-#define INK      rgba(0, 49, 74, 255)
-#define TRAY     rgba(8, 41, 62, 255)       /* the NetPass's tray */
-#define ROW_LINE rgba(10, 58, 80, 255)
-#define ROW_LIT  rgba(24, 132, 160, 255)
 #define GOLD_EDGE rgba(198, 90, 0, 255)
 
-/* the spares list: the card on the left, the list on the right, the bar under them */
-#define CARD_X 4
-#define BODY_Y 21
-#define CARD_W 106
-#define BODY_H 113
+/* the spares list: the card on the left, the list on the right, the note and keys under them */
+#define CARD_X 7
+#define BODY_Y 18
+#define CARD_W 104
+#define BODY_H 118
 #define LIST_X 114
-#define LIST_W 122
+#define LIST_W 119
+#define LIST_TOP 11   /* the count and the sort over the rows */
 #define ROW_H 16
-#define ROWS_Y 14     /* the rows from the list's top */
-#define BAR_Y 137
-#define BAR_H 20
+#define NOTE_Y 139
 
 /* the chip trade: two cards, the arrows between */
 #define DEAL_W 98
 #define DEAL_H 84
 #define DEAL_Y 31
-#define DEAL_LEFT 8
-#define DEAL_RIGHT (W - 8 - DEAL_W)
+#define DEAL_LEFT 10
+#define DEAL_RIGHT (W - 10 - DEAL_W)
 #define BUTTON_Y 121
 #define BUTTON_W 78
 #define BUTTON_H 17
+#define KEYS_Y 146
 
 static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + code); }
 
-/* the header: BN6's green band, the title and its stripes, `right` on a slot */
+/* the screen: BN6's frame, its band with the title and `right` as its note */
 static void band(int x, int y, const char *title, const char *right) {
-	fill_rect(x, y, W, HEAD_H, PET_GREEN);
-	fill_rect(x, y, W, 1, PET_LINE);
-	fill_rect(x, y + HEAD_H - 2, W, 2, PET_DARK);
-	text_draw(x + 7, y + 3, title, PET_WHITE, TEXT_LEFT);
-	second_stripes(x + 11 + text_width(title), y + 3);
-	int sw = text_width(right) + 12, sx = x + W - 4 - sw;
-	second_slot(sx, y + 2, sw, HEAD_H - 5);
-	text_draw(sx + 6, y + 2, right, PET_CYAN_HI, TEXT_LEFT);
+	look_screen(x, y, W, 160, title);
+	look_band_note(x, y, W, right, LOOK_PAGE);
 }
 
-/* a key's cap with `cap` in it, then `what`: the x after them */
+/* a key's hint (BN6's "START:SORT"), then the x after it */
 static int key(int x, int y, const char *cap, const char *what) {
-	int cw = minifont_width(cap, 1) + 5;
-	netpass_panel(x, y, cw, 9, PET_CYAN_HI, PET_CYAN);
-	minifont_draw(x + 3, y + 2, cap, INK, 1);
-	minifont_draw(x + cw + 3, y + 2, what, PET_WHITE, 1);
-	return x + cw + 3 + minifont_width(what, 1) + 9;
+	look_hint(x, y, cap, what);
+	return x + look_hint_width(cap, what) + 10;
+}
+
+/* a line of small letters on the body, its shade under it */
+static void body_note(int x, int y, const char *s, bool centred) {
+	if (centred) x -= minifont_width(s, 1) / 2;
+	minifont_draw(x + 1, y + 1, s, LOOK_GREEN_LO, 1);
+	minifont_draw(x, y, s, LOOK_PAGE, 1);
 }
 
 /* the chip's picture, its card's 56 x 48, in a frame from (x, y) */
 static void picture(int id, int x, int y, SDL_Color edge) {
 	fill_rect(x, y, 58, 50, edge);
-	fill_rect(x + 1, y + 1, 56, 48, INK);
+	fill_rect(x + 1, y + 1, 56, 48, LOOK_NAVY_LO);
 	second_chip_art(id, x + 1, y + 1, 1);
 }
 
@@ -81,114 +74,102 @@ static void power_words(const ChipInfo *ci, char *out, size_t n) {
 
 /* the cursor's chip as a card: its name, picture, code, element, power and description */
 static void list_card(int x, int y, TradeChip c) {
-	netpass_panel(x, y, CARD_W, BODY_H, PET_SLOT, PET_CYAN);
-	fill_rect(x + 2, y + 1, CARD_W - 4, 1, rgba(33, 123, 132, 255));
+	SDL_Rect f = look_window(x, y, CARD_W, BODY_H, 0, false);
 	if (!c.id) return;
 	ChipInfo ci;
 	chip_info(c.id, &ci);
-	text_draw(x + 5, y + 2, ci.name, PET_WHITE, TEXT_LEFT);
-	picture(c.id, x + 4, y + 16, PET_CYAN);
-	int cx = x + 62 + (CARD_W - 62) / 2;
+	text_draw(f.x + 2, f.y, ci.name, LOOK_TEXT, TEXT_LEFT);
+	picture(c.id, f.x + 1, f.y + 14, LOOK_EDGE_LO);
+	int cx = f.x + 59 + (f.w - 59) / 2;
 	char code[2] = { code_char(c.code), 0 }, power[12];
-	text_draw_scaled(cx, y + 12, code, PET_GOLD, TEXT_CENTER, 2);
-	second_element_icon(second_chip_element(c.id), cx - 8, y + 38);
+	text_draw_scaled(cx, f.y + 10, code, LOOK_GOLD, TEXT_CENTER, 2);
+	second_element_icon(second_chip_element(c.id), cx - 8, f.y + 36);
 	power_words(&ci, power, sizeof power);
-	text_draw(cx, y + 54, power, PET_WHITE, TEXT_CENTER);
-	fill_rect(x + 4, y + 69, CARD_W - 8, 1, PET_SLOT_EDGE);
+	text_draw(cx, f.y + 52, power, LOOK_TEXT, TEXT_CENTER);
+	fill_rect(f.x + 1, f.y + 67, f.w - 2, 1, LOOK_SHADE);
 	char desc[160];
 	chip_desc(c.id, desc, sizeof desc);
-	second_wrapped(desc, x + 5, y + 71, CARD_W - 10, 3, PET_WHITE);
+	look_wrapped(desc, f.x + 2, f.y + 69, f.w - 4, 3, 13, LOOK_TEXT, LOOK_SHADE);
 }
 
-/* a row: the chip's icon, its name, its code and the spares */
+/* a row: the cursor's arrow over the frame, the chip's icon, its name, its code and the spares */
 static void row(int x, int y, int w, const TradeRow *r, bool lit) {
-	if (lit) {
-		fill_rect(x, y, w, ROW_H, PET_CYAN_HI);
-		fill_rect(x + 1, y + 1, w - 2, ROW_H - 2, ROW_LIT);
-	} else fill_rect(x + 2, y + ROW_H - 1, w - 4, 1, ROW_LINE);
-	second_chip_icon(r->chip.id, x + 1, y);
+	if (lit) look_cursor(x - 7, y + 4);
+	second_chip_icon(r->chip.id, x + 2, y);
 	char name[24], code[2] = { code_char(r->chip.code), 0 }, count[8];
 	chips_name(r->chip.id, name, sizeof name);
-	text_draw(x + 18, y + 2, name, PET_WHITE, TEXT_LEFT);
-	text_draw(x + w - 24, y + 2, code, PET_GOLD, TEXT_CENTER);
+	text_draw(x + 19, y + 2, name, LOOK_TEXT, TEXT_LEFT);
+	text_draw(x + w - 20, y + 2, code, LOOK_GOLD, TEXT_CENTER);
 	snprintf(count, sizeof count, "%d", r->count);
-	text_draw(x + w - 3, y + 2, count, lit ? PET_WHITE : PET_CYAN_HI, TEXT_RIGHT);
+	text_draw(x + w - 2, y + 2, count, LOOK_EDGE_HI, TEXT_RIGHT);
 }
 
 static void list_panel(int x, int y, const TradeScreenView *v) {
-	netpass_panel(x, y, LIST_W, BODY_H, TRAY, PET_SLOT_EDGE);
-	minifont_draw(x + 5, y + 4, trade_text_spares, PET_DIM, 1);
-	char n[8];
-	snprintf(n, sizeof n, "%d", v->n);
-	minifont_draw(x + 9 + minifont_width(trade_text_spares, 1), y + 4, n, PET_WHITE, 1);
-	/* (the sort on its slot, a small triangle for its way: up) */
+	SDL_Rect f = look_window(x, y, LIST_W, BODY_H, LIST_TOP, true);
+	/* (over the rows in the band: the count, and the sort with a small triangle for its way: up) */
+	char n[24];
+	snprintf(n, sizeof n, "%s %d", trade_text_spares, v->n);
+	look_caps(x + 6, y + 7, n, LOOK_PAGE, LOOK_EDGE_LO);
 	const char *sort = trade_text_sorts[v->sort];
-	int sw = minifont_width(sort, 1) + 13, sx = x + LIST_W - 4 - sw;
-	second_slot(sx, y + 2, sw, 9);
-	minifont_draw(sx + 3, y + 4, sort, PET_CYAN_HI, 1);
-	for (int k = 0; k < 3; ++k) fill_rect(sx + sw - 7 + k, y + 5 + k, 5 - 2 * k, 1, PET_GOLD);
-	bool bar = v->n > TRADE_ROWS;
-	int rw = LIST_W - 6 - (bar ? 4 : 0);
+	int sx = x + LIST_W - 8 - 7 - look_caps_width(sort);
+	look_caps(sx, y + 7, sort, LOOK_PAGE, LOOK_EDGE_LO);
+	for (int k = 0; k < 3; ++k) fill_rect(x + LIST_W - 13 + k, y + 8 + k, 5 - 2 * k, 1, LOOK_GOLD);
 	for (int i = 0; i < TRADE_ROWS && v->top + i < v->n; ++i)
-		row(x + 3, y + ROWS_Y + i * ROW_H, rw, &v->rows[v->top + i], v->top + i == v->at);
-	if (!bar) return;
-	/* (the scroll bar: where the rows shown lie in the list) */
-	int th = BODY_H - ROWS_Y - 4, tx = x + LIST_W - 6, ty = y + ROWS_Y;
-	fill_rect(tx, ty, 2, th, ROW_LINE);
-	int bh = th * TRADE_ROWS / v->n, by = ty + (th - bh) * v->top / (v->n - TRADE_ROWS);
-	fill_rect(tx, by, 2, bh < 4 ? 4 : bh, PET_CYAN);
+		row(f.x, f.y + i * ROW_H, f.w, &v->rows[v->top + i], v->top + i == v->at);
+	look_scroll(x, y, LIST_W, BODY_H, LIST_TOP, v->top, TRADE_ROWS, v->n);
 }
 
 static void list_bar(int x, int y, const TradeScreenView *v) {
-	netpass_panel(x, y, W - 8, BAR_H, TRAY, PET_SLOT_EDGE);
 	char theirs[32] = "";
 	if (v->theirs.id) {
 		char name[24];
 		chips_name(v->theirs.id, name, sizeof name);
 		snprintf(theirs, sizeof theirs, "%s %c", name, code_char(v->theirs.code));
 	}
-	minifont_draw(x + 5, y + 3, trade_text_list_note(v->purpose, v->want, v->partner, theirs), PET_CYAN_HI, 1);
-	int kx = key(x + 4, y + 10, "A", trade_text_key_pick);
-	kx = key(kx, y + 10, "B", trade_text_key_back);
-	if (v->n > 1) key(kx, y + 10, "START", trade_text_key_sort);
+	body_note(x + 9, y + NOTE_Y, trade_text_list_note(v->purpose, v->want, v->partner, theirs), false);
+	int kx = key(x + 9, y + KEYS_Y + 1, "A", trade_text_key_pick);
+	kx = key(kx, y + KEYS_Y + 1, "B", trade_text_key_back);
+	if (v->n > 1) key(kx, y + KEYS_Y + 1, "START", trade_text_key_sort);
 }
 
 void trade_screen_draw_list(int x, int y, const TradeScreenView *v) {
-	netpass_ground(x, y, W, 160);
 	band(x, y, trade_text_list_title(v->purpose), trade_text_list_for(v->purpose, v->partner));
 	list_card(x + CARD_X, y + BODY_Y, v->n ? v->rows[v->at].chip : (TradeChip){ 0, 0 });
 	list_panel(x + LIST_X, y + BODY_Y, v);
-	list_bar(x + 4, y + BAR_Y, v);
+	list_bar(x, y, v);
 }
 
 /* ---- the chip trade ---- */
 
-/* a chip's card in the trade: its picture, name, code, element and power */
+/* a chip's card in the trade: its picture, name, code, element and power;
+ * `edge` gold for the chip come, dim for the one gone */
 static void deal_card(int x, int y, TradeChip c, SDL_Color edge) {
-	netpass_panel(x, y, DEAL_W, DEAL_H, PET_SLOT, edge);
-	fill_rect(x + 2, y + 1, DEAL_W - 4, 1, rgba(33, 123, 132, 255));
+	bool gone = edge.r == PET_SLOT_EDGE.r && edge.g == PET_SLOT_EDGE.g, come = edge.r == PET_GOLD.r && edge.g == PET_GOLD.g;
+	SDL_Rect f = look_window(x, y, DEAL_W, DEAL_H, 0, false);
+	if (gone) fill_rect(f.x, f.y, f.w, f.h, LOOK_NAVY_LO);
+	if (come) {
+		SDL_Rect r[4] = { { x + 1, y, DEAL_W - 2, 1 }, { x + 1, y + DEAL_H - 1, DEAL_W - 2, 1 }, { x, y + 1, 1, DEAL_H - 2 }, { x + DEAL_W - 1, y + 1, 1, DEAL_H - 2 } };
+		fill_rects(r, 4, LOOK_GOLD);
+	}
 	int cx = x + DEAL_W / 2;
-	picture(c.id, cx - 29, y + 4, edge);
+	picture(c.id, cx - 29, f.y, LOOK_EDGE_LO);
 	ChipInfo ci;
 	chip_info(c.id, &ci);
-	text_draw(cx, y + 55, ci.name, PET_WHITE, TEXT_CENTER);
+	text_draw(cx, f.y + 50, ci.name, LOOK_TEXT, TEXT_CENTER);
 	char code[2] = { code_char(c.code), 0 }, power[12];
 	power_words(&ci, power, sizeof power);
 	/* (the code, the element's icon and the power in a row, centred) */
 	int el = second_chip_element(c.id), cw = text_width(code), pw = text_width(power);
 	int rw = cw + 4 + (el >= 0 ? 16 + 4 : 0) + pw, rx = cx - rw / 2;
-	text_draw(rx, y + 68, code, PET_GOLD, TEXT_LEFT);
+	text_draw(rx, f.y + 62, code, LOOK_GOLD, TEXT_LEFT);
 	rx += cw + 4;
-	if (el >= 0) { second_element_icon(el, rx, y + 66); rx += 20; }
-	text_draw(rx, y + 68, power, PET_WHITE, TEXT_LEFT);
+	if (el >= 0) { second_element_icon(el, rx, f.y + 60); rx += 20; }
+	text_draw(rx, f.y + 62, power, LOOK_TEXT, TEXT_LEFT);
 }
 
-/* a card's label on a tab over it */
-static void tab(int x, int y, const char *label, SDL_Color c) {
-	int w = minifont_width(label, 1) + 10;
-	netpass_panel(x + 6, y, w, 10, c, c);
-	fill_rect(x + 7, y + 8, w - 2, 2, c);
-	minifont_draw(x + 11, y + 3, label, INK, 1);
+/* a card's label on a tag over it */
+static void tab(int x, int y, const char *label) {
+	look_tag(x + 6, y, look_caps_width(label) + 10, 9, label, LOOK_BAND);
 }
 
 /* an arrow 22 wide from (x, y), its middle row y + 3, pointing right (or left) */
@@ -200,12 +181,11 @@ static void arrow(int x, int y, bool right, SDL_Color c) {
 	fill_rects(r, n, c);
 }
 
-/* a button of the two, lit where the cursor is */
+/* a button of the two: a slim window, the cursor's arrow at its left where it is */
 static void button(int x, int y, const char *label, bool lit) {
-	netpass_panel(x, y, BUTTON_W, BUTTON_H, lit ? ROW_LIT : TRAY, lit ? PET_GOLD : PET_SLOT_EDGE);
-	if (lit) fill_rect(x + 2, y + 1, BUTTON_W - 4, 1, PET_CYAN_HI);
-	text_draw(x + BUTTON_W / 2, y + 2, label, lit ? PET_WHITE : PET_DIM, TEXT_CENTER);
-	if (lit) for (int k = 0; k < 4; ++k) fill_rect(x + 5 + k, y + 5 + k, 1, 7 - 2 * k, PET_GOLD);
+	look_box(x, y, BUTTON_W, BUTTON_H, lit ? LOOK_NAVY : LOOK_NAVY_LO);
+	text_draw(x + BUTTON_W / 2 + 4, y + 2, label, lit ? LOOK_TEXT : LOOK_DIM, TEXT_CENTER);
+	if (lit) look_cursor(x - 4, y + 4);
 }
 
 /* the cards where they stand, crossing in the swap: MegaMan's going right
@@ -232,34 +212,33 @@ static void cards(int x, int y, const TradeScreenView *v) {
 
 /* under the cards: the buttons, the wait, or the trade done; its keys */
 static void foot(int x, int y, const TradeScreenView *v) {
-	int ky = y + 148;
+	int ky = y + KEYS_Y + 1;
 	if (v->stage == TRADE_ASK) {
 		button(x + W / 2 - 4 - BUTTON_W, y + BUTTON_Y, trade_text_no_deal, !v->cursor);
 		button(x + W / 2 + 4, y + BUTTON_Y, trade_text_deal, v->cursor);
-		int kx = key(x + 8, ky, "A", trade_text_key_choose);
+		int kx = key(x + 10, ky, "A", trade_text_key_choose);
 		key(kx, ky, "B", trade_text_no_deal);
 	} else if (v->stage == TRADE_WAIT) {
-		text_draw(x + W / 2, y + BUTTON_Y + 2, trade_text_waiting(v->partner), PET_WHITE, TEXT_CENTER);
-		key(x + 8, ky, "B", trade_text_key_call_off);
+		look_text(x + W / 2, y + BUTTON_Y + 3, trade_text_waiting(v->partner), LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
+		key(x + 10, ky, "B", trade_text_key_call_off);
 	} else if (v->stage == TRADE_SWAPPED) {
-		text_draw(x + W / 2, y + BUTTON_Y - 2, trade_text_traded, PET_GOLD, TEXT_CENTER);
-		minifont_draw_centered(x + W / 2, y + BUTTON_Y + 12, trade_text_home, PET_CYAN_HI, 1);
-		key(x + 8, ky, "A", trade_text_key_ok);
+		text_draw(x + W / 2, y + BUTTON_Y - 2, trade_text_traded, LOOK_GOLD, TEXT_CENTER);
+		body_note(x + W / 2, y + BUTTON_Y + 12, trade_text_home, true);
+		key(x + 10, ky, "A", trade_text_key_ok);
 	}
 }
 
 void trade_screen_draw_deal(int x, int y, const TradeScreenView *v) {
-	netpass_ground(x, y, W, 160);
 	band(x, y, trade_text_deal_title, trade_text_deal_with(v->partner));
-	tab(x + DEAL_LEFT, y + DEAL_Y - 10, trade_text_you, PET_CYAN_HI);
-	tab(x + DEAL_RIGHT, y + DEAL_Y - 10, trade_text_them, PET_CYAN_HI);
+	tab(x + DEAL_LEFT, y + DEAL_Y - 11, trade_text_you);
+	tab(x + DEAL_RIGHT, y + DEAL_Y - 11, trade_text_them);
 	cards(x, y, v);
 	if (v->stage < TRADE_SWAP) {
 		/* (the arrows, the one MegaMan's chip goes by gold; pulsing while the other decides) */
 		bool dim = v->stage == TRADE_WAIT && (v->t / 20) % 2;
 		int ax = x + DEAL_LEFT + DEAL_W + (DEAL_RIGHT - DEAL_LEFT - DEAL_W - 22) / 2;
-		arrow(ax, y + DEAL_Y + 26, true, dim ? GOLD_EDGE : PET_GOLD);
-		arrow(ax, y + DEAL_Y + 46, false, dim ? PET_SLOT_EDGE : PET_CYAN);
+		arrow(ax, y + DEAL_Y + 26, true, dim ? GOLD_EDGE : LOOK_GOLD);
+		arrow(ax, y + DEAL_Y + 46, false, dim ? LOOK_GREEN_LO : LOOK_EDGE_HI);
 	}
 	foot(x, y, v);
 }

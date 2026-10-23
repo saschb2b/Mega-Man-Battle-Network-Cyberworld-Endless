@@ -77,9 +77,16 @@ static void foot(int x, int y, int w) {
 	span(x, x + w - 1, y + 4, LOOK_METAL_LO);
 }
 
-SDL_Rect look_screen(int x, int y, int w, int h, const char *title) {
+void look_band(int x, int y, int w, const char *title) {
 	fill_rect(x + 7, y, w - 14, LOOK_BAND_H, LOOK_BAND);
 	band_ends(x, y, w);
+	look_title(x + 16, y + 4, title, LOOK_PAGE);
+	int sx = x + w - 97, after = x + 16 + look_title_width(title) + 12;
+	stripes(sx > after ? sx : after, y, x + w - 8);
+}
+
+SDL_Rect look_screen(int x, int y, int w, int h, const char *title) {
+	look_band(x, y, w, title);
 	fill_rect(x + 7, y + LOOK_BAND_H, w - 14, 1, LOOK_GREEN);
 	int top = y + LOOK_BAND_H + 1, foot_y = y + h - LOOK_RAIL;
 	rail(x, top, foot_y - top, false);
@@ -87,10 +94,11 @@ SDL_Rect look_screen(int x, int y, int w, int h, const char *title) {
 	SDL_Rect body = { x + LOOK_RAIL, top, w - 2 * LOOK_RAIL, foot_y - top };
 	fill_rect(body.x, body.y, body.w, body.h, LOOK_GREEN);
 	foot(x, foot_y, w);
-	look_title(x + 16, y + 4, title, LOOK_PAGE);
-	int sx = x + w - 97, after = x + 16 + look_title_width(title) + 12;
-	stripes(sx > after ? sx : after, y, x + w - 8);
 	return body;
+}
+
+void look_band_note(int x, int y, int w, const char *s, SDL_Color c) {
+	look_caps(x + w - 10 - look_caps_width(s), y + 12, s, c, LOOK_GREEN_LO);
 }
 
 SDL_Rect look_band_hint(int x, int y, int w, const char *key, const char *what) {
