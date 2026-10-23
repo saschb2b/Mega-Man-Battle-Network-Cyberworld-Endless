@@ -162,6 +162,12 @@ SDL_Rect look_window(int x, int y, int w, int h, int top, bool bar) {
 }
 
 SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill) {
+	if (h < 16) {
+		/* (too small for the band: the raised edge alone) */
+		fill_rect(x + 1, y + 1, w - 2, h - 2, fill);
+		raised(x, y, w, h);
+		return (SDL_Rect){ x + 1, y + 1, w - 2, h - 2 };
+	}
 	SDL_Rect f = { x + 3, y + 3, w - 6, h - 6 };
 	fill_rect(x + 1, y + 1, w - 2, h - 2, LOOK_EDGE);
 	raised(x, y, w, h);
@@ -239,6 +245,11 @@ static void caps_pass(int x, int y, const char *s, SDL_Color c) {
 void look_caps(int x, int y, const char *s, SDL_Color c, SDL_Color shade) {
 	if (shade.a) caps_pass(x + 1, y + 1, s, shade);
 	caps_pass(x, y, s, c);
+}
+
+void look_note(int x, int y, const char *s, SDL_Color c) {
+	minifont_draw(x + 1, y + 1, s, LOOK_GREEN_LO, 1);
+	minifont_draw(x, y, s, c, 1);
 }
 
 /* a heavy letter: pixfont's, each pixel two wide (struck twice, a pixel

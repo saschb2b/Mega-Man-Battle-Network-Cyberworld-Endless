@@ -11,6 +11,7 @@
 #include "emote_strip_draw.h"
 #include "emote_strip_text.h"
 #include "minifont.h"
+#include "pet_look.h"
 #include "netpass_draw.h"
 #include "online_text.h"
 #include "second_frame.h"
@@ -46,7 +47,7 @@ void second_palette_tabs(int w, int h, const PaletteView *v) {
 		SDL_Rect r = emote_palette_tab(w, h, t);
 		bool on = v->tab == t;
 		netpass_panel(r.x, r.y, r.w, r.h, on ? PET_SLOT : PET_EXIT, on ? PET_CYAN_HI : PET_SLOT_EDGE);
-		text_draw(r.x + r.w / 2, r.y + 1, names[t], on ? PET_WHITE : PET_DIM, TEXT_CENTER);
+		text_draw(r.x + r.w / 2, r.y + 1, names[t], on ? PET_WHITE : LOOK_DIM, TEXT_CENTER);
 	}
 }
 
@@ -92,14 +93,14 @@ void second_palette_draw(int w, int h, const PaletteView *v) {
 	second_palette_tabs(w, h, v);
 	/* (whom Wave, Cheer and Bow go to, at the tabs' right) */
 	const char *aim = strip_text_aim(v->aim);
-	minifont_draw(b.x + b.w - 4 - minifont_width(aim, 1), b.y + 6, aim, v->aim[0] ? PET_GOLD : PET_DIM, 1);
+	look_note(b.x + b.w - 5 - minifont_width(aim, 1), b.y + 6, aim, v->aim[0] ? PET_GOLD : LOOK_PAGE);
 	bool letters = letters_fit(emote_palette_item(w, h, 0).w);
 	for (int e = 0; e < ONLINE_EMOTE_COUNT; ++e) emote(w, h, e, letters, v);
 	for (int i = 0; i < ONLINE_PHRASE_COUNT; ++i) phrase(w, h, i, v);
-	minifont_draw(b.x + 4, b.y + b.h - 9, strip_text_tap, PET_CYAN_HI, 1);
+	look_note(b.x + 4, b.y + b.h - 9, strip_text_tap, LOOK_PAGE);
 	/* (the gold arrow's key) */
 	int kx = b.x + b.w - 4 - minifont_width(strip_text_on_l, 1);
 	fill_rect(kx - 10, b.y + b.h - 11, 7, 7, PET_GOLD);
 	strip_arrow(kx - 9, b.y + b.h - 10, 0, INK);
-	minifont_draw(kx, b.y + b.h - 9, strip_text_on_l, PET_DIM, 1);
+	look_note(kx - 1, b.y + b.h - 9, strip_text_on_l, LOOK_PAGE);
 }

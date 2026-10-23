@@ -64,7 +64,7 @@ int look_hint_width(const char *key, const char *what);
 #define LOOK_FRAME_BAR 9
 SDL_Rect look_window(int x, int y, int w, int h, int top, bool bar);
 /* ... a slim one, for a small panel: one pixel of edge, one of band, one
- * sunk, `fill` the field: the field */
+ * sunk (under 16 tall the edge alone), `fill` the field: the field */
 SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill);
 /* The scroll bar's thumb in the track of the window `win` (look_window's
  * with `bar`, `top` as it had): `shown` of `n` lines from `first` */
@@ -85,6 +85,8 @@ void look_cursor(int x, int y);
 #define LOOK_CAPS_H 5
 int look_caps_width(const char *s);
 void look_caps(int x, int y, const char *s, SDL_Color c, SDL_Color shade);
+/* minifont's small letters on the body, `c` with the body's dark shade under them */
+void look_note(int x, int y, const char *s, SDL_Color c);
 /* Heavy capitals, 7 rows (a screen's name on its band) */
 int look_title_width(const char *s);
 void look_title(int x, int y, const char *s, SDL_Color c);
