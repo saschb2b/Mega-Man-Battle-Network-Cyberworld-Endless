@@ -50,7 +50,8 @@
 #define BN5_LIB_Z_INSTALL    0x080315D4u /* ... handed to the map (its state 0x02013770), read by the height check 0x080320EA (bn6f */
                                          /* ... checkZCoordModifiers_8031612) through 0x080315F8: so a Navi stops at a panel he cannot walk */
 #define BN5_LIB_PTR_LOOK     0           /* the record's look (the same in all nine): +0 the overlay tiles' source, +4 their VRAM, +8 their size, */
-                                         /* ... +0x10 the twelve looks' pointers (BN5_LIB_LOOKS) */
+                                         /* ... +0x10 the looks' pointers (BN5_LIB_LOOKS; past the twelve the start's, 0x0C, all blank, */
+                                         /* ... then two on palette 7 no record's kind takes) */
 #define BN5_LIB_PALETTE      0x08614DB4u /* the board's BG colours, banks 0-12, loaded over its map's (the frames grey; bank 8 */
 #define BN5_LIB_PALETTE_SIZE 0x1A0       /* ... BN5_LIB_PAL_CLEAN): found as 0x20-apart banks ending in palettes 8-10's, same size as 0x86:00's */
 #define BN5_LIB_PAL_CLEAN    0x08614EB4u /* palette 8: the clean panels' cyan */
@@ -94,6 +95,7 @@
                                          /* ... 25, zenny's 37, BugFrags' 38, Order Points' 41, a chip's 83), animation 0 (its */
                                          /* ... shadow its own; its tiles turn every 24 frames), its own palette */
 #define BN5_LIB_ICON_POP     3           /* ... popped over the freed panel: up 8 after this many frames, down 2 after 5 more, held */
+#define BN5_LIB_ITEM_SOUND   0x16D       /* the jingle as the Navi's line of an item found begins (its text's, 0x080B2444; BN6's 0x16D the same) */
 /* The battle messages' letters ("LIBERATE SUCCESS!", "1 TURN LIBERATE!"): 8x16, two tiles (0x40 bytes) each, laid in
  * 20 columns of five 32x16 affine OBJs on OBJ palette 11 at y 64 */
 #define BN5_LIB_LETTERS      0x0873CEF4u /* A-Z from here */
@@ -105,6 +107,46 @@
 #define BN5_LIB_BANNER_HOLD  43          /* ... frames at full size, after 8 of opening and before 8 of closing (the scale's pd */
                                          /* ... 768, 640, 512, 384, 256, 208, 224, then 256; out 224, 208, 256, 384 ... 896) */
 #define BN5_LIB_MESSAGES     0x0801B8D4u /* the messages' letters' graphics (their pointers) */
+
+/* The phases' banners ("DARKLOID PHASE", "PLAYER PHASE 02"): a band of BG0 across the board under OBJs of letters'
+ * pieces on OBJ palette 15, the words sliding in from the right and out to the left (docs/LIBERATION.md) */
+#define BN5_LIB_PHASE_WORDS  0x087E5A10u /* their tiles, LZ77 (a u32 size, then 165 tiles), decompressed to RAM 0x0203E400 by */
+#define BN5_LIB_PHASE_LOAD   0x08052FF4u /* ... this load list's entry (0x887E5A10: compressed), copied to OBJ tile 719 on */
+#define BN5_LIB_PHASE_WORDS_PAL 0x087E5500u /* ... OBJ palette 15 and BG palette 14 for the band: PLAYER PHASE's (its digits'
+                                         ... colours 11-15 its own), DARKLOID PHASE's the next (0x087E5520) */
+#define BN5_LIB_PHASE_DIGIT  65          /* ... "0" the block's tile 65, a 16x16 OBJ, each digit 4 tiles on */
+#define BN5_LIB_BAND_COLOUR  3           /* the band: BG0 filled with one tile of this colour of BN5_LIB_PHASE_WORDS_PAL, shown */
+#define BN5_LIB_BAND_TOP     56          /* ... in WIN1 from this row, BN5_LIB_BAND_ROWS high, blended over the board (BLDCNT */
+#define BN5_LIB_BAND_ROWS    32          /* ... 0x3F41, BLDALPHA 0x0810: the band whole, the board at half) */
+#define BN5_LIB_PHASE_SOUND  0xD6        /* the sound as the words slide in (0x08054DAE, from the routine 0x08054DA2; BN6's 0xD6 the same) */
+#define BN5_LIB_SLIDE_STEP   32          /* the words' slide: pixels a frame, from 240 to the right of their place to it, then on */
+#define BN5_LIB_WORDS_AT     18          /* ... frames after the band opens they begin */
+#define BN5_LIB_WORDS_HOLD   65          /* ... frames they hold in place */
+#define BN5_LIB_BANNER_END   104         /* ... frames from the band's opening to its end: open 3, words 18-97, closed at 103 */
+/* The L view's panels: BG0 as the band, in WIN1 behind PHASE and TRGT PHASE and WIN0 behind its keys' help */
+#define BN5_LIB_LVIEW_PANEL_X 20         /* ... WIN1's left, x 20-107 */
+#define BN5_LIB_LVIEW_PANEL_Y 120        /* ... its top, y 120-147 */
+#define BN5_LIB_LVIEW_PANEL_W 88         /* ... its width */
+#define BN5_LIB_LVIEW_PANEL_H 28         /* ... its height (WIN0, 123-219 by 12-42, behind the keys' help, is not drawn) */
+
+/* The board's camera (its BG1 scroll read frame by frame): a pan to the unit about to act about 20 pixels a frame, then a
+ * quarter of what is left, the banner 3 frames after it arrives; the L view's D-pad moves it */
+#define BN5_LIB_CAMERA_STEP  4           /* ... this many pixels a frame, */
+#define BN5_LIB_CAMERA_FAST  8           /* ... this many with B held ("MoveCam(F)") */
+
+/* The board's units: the guardians BN5's sprite list 6's 83 BigBrute (0x08474848), 84 TinHawk, 85 Bladia */
+#define BN5_LIB_GUARD_SPRITE 83
+#define BN5_LIB_GUARD_ANIM   0           /* ... the animation they stand in on the board */
+
+/* The L view's arrows and cross (OBJ palette 12, BN5_LIB_HUD_PAL; read in its OAM) */
+#define BN5_LIB_LVIEW_ARROWS 0x087E4B64u /* eight 8x8 tiles, up, up-right, right, down-right, down, down-left, left, up-left, */
+#define BN5_LIB_LVIEW_BLINK  0x100       /* ... and their second look this far on, shown 8 frames of every 32 */
+#define BN5_LIB_LVIEW_CROSS  0x087E4F24u /* the cross at the camera's middle, a 16x16 OBJ at (112, 72) */
+#define BN5_LIB_UNIT_HOLD    15          /* frames the camera rests on a unit in the Darkloids' phase before its move, after its pan */
+
+/* The board's music (BN5's song table 0x08155BF4, the BGM's player 31 at 0x02011470: +0 the song's header) */
+#define BN5_SONG_LIBERATION  0x22        /* the board's own, through both phases (its clock runs on), BN5_LIB_STATE +0 = 8 */
+#define BN5_SONG_MISSION_OPEN 0x1C       /* the mission's opening (the board's routine 1, 0x0804BEE0, its tour of the board) */
 
 /* The board's HUD and window (docs/LIBERATION.md, How the board looks and moves) */
 #define BN5_LIB_HUD_OAM      0x080531F4u /* the Order Points gauge: six OAM entries (u32 attributes 0 and 1, u16 attribute 2, u32 1): */

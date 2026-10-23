@@ -79,6 +79,10 @@
       "what": "A liberation's battle on BN6's loop (src/emu/bn6_battle_loop.h, src/director/liberation_battle.c, docs/ROM_DATA.md's row BN6's battle loop and banners): BN6's loop state 0x0203CA70, its turn banner 0x080080A0, the fight's frame 0x08008144, the win's banner 0x0800822C, the draw 0x080082DC (its banner 0x080082F8, past it 0x0800830C), the message table 0x0801EF84; BN5's rules named (BN5_LIB_TURN_BANNER, BN5_LIB_TIME_ASK, BN5_LIB_TIME_UP, BN5_LIB_WIN_BANNER, BN5_BATTLE_MESSAGES, BN5_LIB_DOUBLE_HIT)"
     },
     {
+      "date": "2026-10-23",
+      "what": "BN5's Liberation board's phases' banners (the words' LZ77 tiles 0x087E5A10, their load list 0x08052FF4, palettes 0x087E5500 and 0x087E5520, the band's WIN1 rows, blend and frames, sound 0xD6 from 0x08054DAE), the L view's panels, the guardians' sprites (list 6's 83-85), the board's songs 0x22 and 0x1C and the item jingle 0x16D mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row); BN6's PlayMusic 0x080005D4"
+    },
+    {
       "date": "2026-10-22",
       "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
     },

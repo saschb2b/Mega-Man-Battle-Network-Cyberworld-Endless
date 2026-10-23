@@ -15,4 +15,9 @@ void xtiles_draw(const uint8_t *tiles, const uint8_t *pal, int x, int y, int w, 
  * 256 / pd about its middle, kept within its own (BN5's banners' squash) */
 void xtiles_draw_squashed(const uint8_t *tiles, const uint8_t *pal, int x, int y, int w, int h, int pd);
 
+/* A rectangle of one of its colours (BGR555) blended over the picture as
+ * the GBA blends a first target over a second: the colour times eva/16
+ * over what lies beneath times evb/16 (BN5's bands, BLDALPHA's 16 and 8) */
+void xtiles_blend_rect(int x, int y, int w, int h, uint16_t colour, int eva, int evb);
+
 #endif

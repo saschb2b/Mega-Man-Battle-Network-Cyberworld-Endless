@@ -41,6 +41,33 @@ void lib_battle_frame(void);
  * is what reaches the game. */
 uint32_t lib_keys(uint32_t keys);
 
+/* (liberation_sound.c) The board's music and sounds, BN5's where its
+ * board is drawn in BN5's look: the song a dark layer's map plays (its
+ * board's, else `song`); one of BN5's songs started now (BN5_SONG_*); one
+ * of BN5's sounds played. */
+int lib_board_song(int song);
+void lib_song(int bn5_song);
+void lib_sound(int bn5_sound);
+
+/* (liberation_camera.c) BN6's camera moved as BN5's moves it over its
+ * board, where the board is in BN5's look: a frame of its pan to world
+ * (wx, wy), true once there (and at once where it is not BN5's board); a
+ * frame of its pan back to MegaMan, true once BN6's camera follows him
+ * again; where it is while the board holds it (false: it follows him); and
+ * after a CONTINUE, BN6's camera made to follow him. */
+bool lib_camera_at(int wx, int wy);
+bool lib_camera_home(void);
+/* ... and moved `sx` pixels across and `sy` down the screen now (BN5's L view's MoveCam) */
+void lib_camera_nudge(int sx, int sy);
+bool lib_camera_place(int *wx, int *wy);
+void lib_camera_mend(void);
+
+/* (liberation_save.c) The board across a CONTINUE: saved with the run's
+ * checkpoint (run.lib), and taken back once its state has loaded on the
+ * same layer (false: none for this layer, the board begins afresh). */
+void lib_save(void);
+bool lib_resume(void);
+
 /* (liberation_fence.c) The board's dark panels fenced with walls of BN6's
  * own, each panel's switched off as it is liberated: built after the
  * layer's map (netmap_build_layer), kept each frame. */
@@ -54,6 +81,9 @@ void lib_look_begin(void);
 void lib_look_update(void);
 void lib_look_freed(int x, int y);
 bool lib_look_on(void);
+/* ... a guardian of kind `kind` (UNIT_*) in BN5's own sprite where its ROM
+ * is there: its list, number and animation set (else left as they are) */
+void lib_look_unit(int kind, int *list, int *sprite, int *anim);
 
 /* (liberation_auto.c) The test autopilot's keys on the board, frame
  * `frame` (autopilot.c). */

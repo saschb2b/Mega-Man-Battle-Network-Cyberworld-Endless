@@ -25,8 +25,8 @@
 
 #include "bn6_fields.h"
 #include "devtools.h"
-#include "director.h"
 #include "director_layer.h"
+#include "cinema.h"
 #include "debug.h"
 #include "director_state.h"
 #include "emu.h"
@@ -34,6 +34,7 @@
 #include "flags.h"
 #include "guardians.h"
 #include "liberation_battle.h"
+#include "liberation_pieces.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "loot.h"
@@ -43,10 +44,14 @@
 #include "talk.h"
 
 LibState LB;
+static int turn_held;         /* frames BN5's camera has rested on the unit about to move */
+static bool viewing;          /* L held on the board: its camera the D-pad's (lib_keys) */
+static int nudge_x, nudge_y;  /* ... pixels a frame across and down */
 
 #define BANNER_FRAMES  70
 #define GLIDE_FRAMES   10    /* a guardian's step on the board */
 #define PARK_X         (-2000)   /* where a deleted unit's object waits, off the floor */
+#define TOUR_HOLD      60     /* frames the opening's camera rests on the Darkloid */
 #define BACK_PHASES    2      /* the Darkloids' phases a DarkHole takes to send its guardian back */
 
 static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
@@ -108,7 +113,7 @@ static void unit_object(int u) {
 	if (n->kind == UNIT_DARKLOID) {
 		NpcBody body = guardian_body(LB.darkloid, 5);
 		list = body.list; sprite = body.index; anim = body.anim;
-	}
+	} else lib_look_unit(n->kind, &list, &sprite, &anim);
 	NetObj *o = &layer.obj[layer.nobj++];
 	memset(o, 0, sizeof *o);
 	o->type = OBJ_UNIT;
@@ -141,6 +146,10 @@ static void board_print(void) {
 	for (int h = 0; h < LB.b.nholes; ++h) { netmap_world(LB.b.hole_x[h], LB.b.hole_y[h], &wx, &wy); fprintf(stderr, "liberation: hole %d,%d at world %d %d\n", LB.b.hole_x[h], LB.b.hole_y[h], wx, wy); }
 	netmap_world(LB.b.boss_x, LB.b.boss_y, &wx, &wy);
 	fprintf(stderr, "liberation: darkloid %d,%d at world %d %d\n", LB.b.boss_x, LB.b.boss_y, wx, wy);
+	for (int u = 1; u < LB.b.nunits; ++u) {
+		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &wx, &wy);
+		fprintf(stderr, "liberation: %s %d,%d at world %d %d\n", lib_unit_name(LB.b.unit[u].kind), LB.b.unit[u].x, LB.b.unit[u].y, wx, wy);
+	}
 }
 
 bool lib_layer_made(void) {
@@ -153,7 +162,6 @@ bool lib_layer_made(void) {
 		if (layer.obj[i].type == OBJ_EXIT) { layer.obj[i].x = (float)LB.b.boss_x; layer.obj[i].y = (float)LB.b.boss_y; }
 	for (int u = 0; u < LB.b.nunits; ++u) unit_object(u);
 	LB.on = true;
-	if (emu_debug_on()) board_print();
 	return true;
 }
 
@@ -168,6 +176,7 @@ void lib_begin(void) {
 	LB.face = 0;
 	LB.words[0] = 0;
 	LB.briefed = LB.holes_told = LB.prize_given = false;
+	LB.tour = LB.tour_t = 0;
 	lib_battle_disarm();
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.slot[u] = -1;
@@ -175,6 +184,8 @@ void lib_begin(void) {
 		LB.from_x[u] = LB.ux[u]; LB.from_y[u] = LB.uy[u];
 	}
 	lib_look_begin();
+	/* (the world's places once the layer's map is built) */
+	if (emu_debug_on()) board_print();
 }
 
 /* ---- the units' objects ---- */
@@ -442,15 +453,21 @@ static void guardians_back(void) {
 	}
 }
 
-/* Unit u's turn, a frame at a time: its steps glide, then its blow */
+/* Unit u's turn, a frame at a time: BN5's camera on it first, then its
+ * steps glide, the camera with it, then its blow */
 static bool enemy_turn(int u) {
 	LibUnit *n = &LB.b.unit[u];
 	if (n->gone) return true;
+	if (LB.enemy_t == 0 && LB.enemy_steps == 0) {
+		if (!lib_camera_at(LB.ux[u], LB.uy[u])) { turn_held = 0; return false; }
+		if (lib_look_on() && turn_held < BN5_LIB_UNIT_HOLD) { ++turn_held; return false; }
+	}
 	int wx, wy;
 	netmap_world(n->x, n->y, &wx, &wy);
 	if (LB.ux[u] != wx || LB.uy[u] != wy) {
 		LB.ux[u] += (wx - LB.ux[u]) / (GLIDE_FRAMES - LB.enemy_t > 1 ? GLIDE_FRAMES - LB.enemy_t : 1);
 		LB.uy[u] += (wy - LB.uy[u]) / (GLIDE_FRAMES - LB.enemy_t > 1 ? GLIDE_FRAMES - LB.enemy_t : 1);
+		lib_camera_at(LB.ux[u], LB.uy[u]);
 		if (++LB.enemy_t >= GLIDE_FRAMES) { LB.ux[u] = wx; LB.uy[u] = wy; LB.enemy_t = 0; }
 		return false;
 	}
@@ -471,6 +488,7 @@ static void enemy_update(void) {
 	if (!enemy_turn(u)) return;
 	LB.enemy_steps = 0;
 	LB.enemy_t = 0;
+	turn_held = 0;
 	if (u != 0) { ++LB.enemy_unit; return; }
 	LB.enemy_unit = 0;
 	LB.shield = false;
@@ -482,7 +500,7 @@ static void enemy_update(void) {
 
 /* ---- the frame ---- */
 
-static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !D.beat[0] && on_map(); }
+static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !D.area_card && !cinema_busy() && !D.beat[0] && on_map(); }
 
 /* Where MegaMan stands and what he faces, as BN6 walks him: his panel (a
  * walked one: the fence keeps him to them), and the panel beside it his
@@ -512,6 +530,8 @@ static void talk_update_lib(void) {
 	if (LB.words[0]) {
 		if (!quiet() || !talk_start(LB.words, FACE_MEGAMAN)) return;
 		LB.words[0] = 0;
+		/* (an item found: BN5's jingle as its line begins) */
+		if (LB.npops) lib_sound(BN5_LIB_ITEM_SOUND);
 		return;
 	}
 	if (!quiet()) return;
@@ -528,22 +548,58 @@ static void prize_update(void) {
 	LB.step = LIB_STEP_DONE;
 }
 
-static void steps_update(void) {
-	switch (LB.step) {
-	case LIB_STEP_WAIT:
+/* BN5's camera on the Darkloid before his phase's banner: true once there */
+static bool darkloid_framed(void) {
+	int wx, wy;
+	netmap_world(LB.b.boss_x, LB.b.boss_y, &wx, &wy);
+	return LB.b.unit[0].gone || lib_camera_at(wx, wy);
+}
+
+/* The board's opening: MegaMan on the start, BN5's mission song, BN5's
+ * camera to the Darkloid and back (his entrance), then the briefing */
+static void opening_update(void) {
+	if (!LB.tour) {
 		if (!quiet() || D.frame < 60) return;
 		megaman_at(LB.mx, LB.my);
 		turn(0);
-		say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
-		break;
-	case LIB_STEP_BANNER:
-		if (++LB.banner_t >= BANNER_FRAMES) LB.step = LB.enemy_banner ? LIB_STEP_ENEMY : LIB_STEP_MOVE;
-		break;
+		lib_song(BN5_SONG_MISSION_OPEN);
+		LB.tour = 1;
+		LB.tour_t = 0;
+	}
+	if (LB.tour == 1) {
+		int wx, wy;
+		netmap_world(LB.b.boss_x, LB.b.boss_y, &wx, &wy);
+		if (lib_camera_at(wx, wy) && ++LB.tour_t >= TOUR_HOLD) LB.tour = 2;
+		return;
+	}
+	if (!lib_camera_home()) return;
+	say(lib_briefing_words(LB.b.nholes, LB.b.par), LIB_STEP_BANNER);
+}
+
+/* A phase's banner: BN5's where its ROM is there (its length, its sound
+ * as the words slide in; the first phase's brings the board's song), begun
+ * once nothing else shows (a CONTINUE's act card first) and BN5's camera
+ * is on the Darkloid, or back on MegaMan */
+static void banner_update(void) {
+	int frames = lib_piece_banner_frames();
+	if (LB.banner_t == 0 && (!quiet() || !(LB.enemy_banner ? darkloid_framed() : lib_camera_home()))) return;
+	if (LB.banner_t == 0 && LB.phase == 1 && !LB.enemy_banner) lib_song(BN5_SONG_LIBERATION);
+	if (frames && LB.banner_t == BN5_LIB_WORDS_AT) lib_sound(BN5_LIB_PHASE_SOUND);
+	if (++LB.banner_t >= (frames ? frames : BANNER_FRAMES)) LB.step = LB.enemy_banner ? LIB_STEP_ENEMY : LIB_STEP_MOVE;
+}
+
+static void steps_update(void) {
+	switch (LB.step) {
+	case LIB_STEP_WAIT: opening_update(); break;
+	case LIB_STEP_BANNER: banner_update(); break;
 	case LIB_STEP_MOVE: break;
 	case LIB_STEP_BATTLE:
 		if (LB.fight_seen && on_map() && !emu_battle_forcing()) after_fight();
 		break;
-	case LIB_STEP_ENEMY: enemy_update(); break;
+	case LIB_STEP_ENEMY:
+		/* (after a CONTINUE, once its act card is gone) */
+		if (quiet()) enemy_update();
+		break;
 	case LIB_STEP_TALK: talk_update_lib(); break;
 	case LIB_STEP_PRIZE: prize_update(); break;
 	default: break;
@@ -560,6 +616,9 @@ void lib_update(void) {
 	for (int i = 0; i < LB.npops && i < LIB_POPS; ++i) ++LB.pop[i].t;
 	if (LB.step != LIB_STEP_WAIT) track_update();
 	steps_update();
+	/* (the L view's camera, and back on MegaMan once L is let go) */
+	if (viewing && LB.step == LIB_STEP_MOVE) lib_camera_nudge(nudge_x, nudge_y);
+	else if (LB.step == LIB_STEP_MOVE || LB.step == LIB_STEP_MENU) lib_camera_home();
 }
 
 /* The menu: up and down, A takes a command, B closes it */
@@ -593,9 +652,19 @@ uint32_t lib_keys(uint32_t keys) {
 	/* his phase: he walks as BN6 walks him, and A beside what he can
 	 * liberate opens his command; else he stands as the board goes on */
 	if (LB.step == LIB_STEP_MOVE) {
+		/* (L held, BN5's view: the D-pad moves the camera, B faster, and
+		 * MegaMan stands) */
+		viewing = (keys & KEY_L) && lib_look_on();
+		if (viewing) {
+			int s = keys & KEY_B ? BN5_LIB_CAMERA_FAST : BN5_LIB_CAMERA_STEP;
+			nudge_x = (keys & KEY_RIGHT ? s : 0) - (keys & KEY_LEFT ? s : 0);
+			nudge_y = (keys & KEY_DOWN ? s : 0) - (keys & KEY_UP ? s : 0);
+			return keys & ~(uint32_t)(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_A | KEY_B);
+		}
 		if ((pressed & KEY_A) && lib_faced_takes()) { open_menu(); return keys & (KEY_START | KEY_SELECT); }
 		return keys;
 	}
+	viewing = false;
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);
 	return keys & (KEY_START | KEY_SELECT);
 }

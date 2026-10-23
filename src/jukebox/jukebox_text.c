@@ -53,6 +53,7 @@ const JukeSong jukebox_songs[] = {
 	{ 1, 0x13, JUKE_NET, "The Net" },
 	{ 1, 0x10, JUKE_NET, "Comp" },
 	{ 1, 0x14, JUKE_NET, "Undernet" },
+	{ 1, 0x22, JUKE_NET, "Liberation" },
 	{ 1, 0x15, JUKE_BATTLES, "Virus Busting" },
 	{ 1, 0x1C, JUKE_BATTLES, "Before the Boss" },
 	{ 1, 0x16, JUKE_BATTLES, "Boss Battle" },
@@ -79,7 +80,6 @@ const JukeSong jukebox_songs[] = {
 	{ 1, 0x18, JUKE_MORE, "Song 18" },
 	{ 1, 0x20, JUKE_MORE, "Song 20" },
 	{ 1, 0x21, JUKE_MORE, "Song 21" },
-	{ 1, 0x22, JUKE_MORE, "Song 22" },
 	{ 1, 0x23, JUKE_MORE, "Song 23" },
 	{ 1, 0x24, JUKE_MORE, "Song 24" },
 };

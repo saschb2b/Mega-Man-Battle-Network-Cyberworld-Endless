@@ -208,6 +208,12 @@
 #define BN6_CAMERA_RENDER_X   0x3C        /* camera's displayed 16.16 world coordinates, after shake (bn6f sub_300631C) */
 #define BN6_CAMERA_RENDER_Y   0x40        /* camera's displayed Y coordinate, after shake (bn6f sub_300631C) */
 #define BN6_CAMERA_RENDER_Z   0x44        /* camera's displayed Z coordinate, after shake (bn6f sub_300631C) */
+#define BN6_CAMERA_MODE       0x03        /* camera's u8 way of taking its place (bn6f camera_802FFF4): 1 copies BN6_CAMERA_FOLLOW's three words */
+                                          /* ... into its X, Y and Z each frame, 0 leaves them as they are */
+#define BN6_CAMERA_FOLLOW     0x14        /* camera's u32 pointer to the 16.16 x, y, z it follows (MegaMan's on a map: camera_writeUnk03_14) */
+#define BN6_CAMERA_X          0x30        /* camera's 16.16 world place before its shake: X, then BN6_CAMERA_Y and BN6_CAMERA_Z */
+#define BN6_CAMERA_Y          0x34        /* camera's 16.16 world Y before its shake */
+#define BN6_CAMERA_Z          0x38        /* camera's 16.16 world Z before its shake */
 #define BN6_CAMERA_SHAKE      0x0C        /* ... camera_initShakeEffect sets them (0x080302A8; BN5's 0x08030E1C the same), the shake each */
 #define BN6_CAMERA_SHAKE_STRENGTH 0x0E    /* ... frame drawing two random numbers (BN6 0x080301E8 from the second word, BN5 0x08030D7C from the first) */
 #define BN6_BATTLE_FLAG_HOLD  0x20        /* BN6_BATTLE_FLAGS (bn6_panels.h): set through a unison's or crossing's last phase, which clears it (BN6

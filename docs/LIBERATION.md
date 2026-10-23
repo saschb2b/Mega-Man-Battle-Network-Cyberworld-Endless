@@ -245,7 +245,11 @@ liberation and an item's find; the recordings are in the pull request):
   paled dark (kind 2, the dissolve's middle),
   an item's stud, a "+5", BarrierPanels 1-4 (numbered, a keyhole), a
   BonusPanel's "?", a DarkHole, a grey grid (kind 0x0B, the Darkloid's
-  ring until the DarkHoles fall); palettes 8-12 the board's own. Each
+  ring until the DarkHoles fall); then three more: the start's (kind
+  0x0C), every entry blank, as a team starts on its map's own walkway
+  ends or (mission 1) its lilac pad, never on a panel, and two diamonds
+  on palette 7 whose kinds (0x0D, 0x0E) no record lists; palettes 8-12
+  the board's own. Each
   panel's four look bytes are its corners, each the three neighbours
   around it the Navi in play can walk (`BN5_LIB_CORNERS`); they choose
   height modifiers on the panel's border cells in the map's collision
@@ -285,10 +289,42 @@ liberation and an item's find; the recordings are in the pull request):
 - **The backdrop** is the mission map's own animated backdrop, recoloured
   purple (BG palette 0 from `0x0861BF20`): outside a mission the same map
   is BN5's teal ACDC Area 3.
+- **The phases' banners** ("PLAYER PHASE 02", "DARKLOID PHASE"): a band
+  across the board, BG0 filled with one dark colour and shown in WIN1
+  alone (rows 56-87), blended so the board shows through at half; it
+  opens over three frames from its middle row, and 18 frames on the
+  words slide in from the right, 32 pixels a frame, with sound 0xD6, hold
+  65 frames and slide out to the left; the band closes 104 frames after
+  it opened. The words are OBJs of letters' pieces (`BN5_LIB_PHASE_WORDS`,
+  each phase its own palette), the player's with the phase in two
+  digits. Before each, BN5's camera pans to the unit about to act (the
+  Darkloid, a guardian, the Navi).
+- **The L view's panels** are the same band's fill, in WIN1 behind PHASE
+  and TRGT PHASE (20-107 by 120-147) and in WIN0 behind the keys' help
+  (123-219 by 12-42).
+- **The music:** song 0x22 is the board's own in both phases (its clock
+  runs on from one to the next: no change of song at a phase), 0x1C plays
+  at the mission's opening (the board's routine 1, its tour), the
+  liberations' battles BN5's virus battle song 0x15.
+- **The camera** pans to the unit about to act: to the Darkloid before
+  DARKLOID PHASE (about 20 pixels a frame, then a quarter of what is left
+  each frame, some 32 frames, the band 3 frames after it stops), to each
+  guardian as it moves and back to the Navi before PLAYER PHASE; at the
+  mission's opening it tours the board to the Darkloid. In the Darkloids'
+  phase each pan takes some 22 frames and the camera rests 15 on the unit
+  before its turn. Under L the D-pad moves it, 4 pixels a frame, 8 with B
+  ("MoveCam(F)"), eight arrows at the picture's edges (their second look 8
+  frames of every 32) and a cross at its middle.
+- **The guardians on the board** are sprites of BN5's list 6: 83 BigBrute
+  (a red, spiked beast), 84 TinHawk, 85 Bladia, each standing in its
+  animation 0 with its shadow.
 
-Still to trace: the units' board sprites, the window's font, when an
-item's pop shows and goes, and
-whether the other eight missions' maps carry other sets.
+Still to trace: the window's font, when an item's pop shows and goes,
+the sounds of a DarkHole closing and of LIBERATE SUCCESS, the mission's
+end (BN5's Navi reads the target and the actual phases and the Officials'
+chip reward follows, its text in BN5's ROM from `0x087E8854`), the
+Navis' own board sprites beside MegaMan, and whether the other eight
+missions' maps carry other sets.
 
 So the engine's board is to be BN5's: its overlay tiles, diamonds and
 palettes read from BN5's ROM at run time (never kept), its pulse, its
@@ -681,8 +717,11 @@ board loads them: the frames grey) copied in. Each panel's kind lies over
 it on BG2 as BN5 lays it: one of BN5's twelve looks (`BN5_LIB_LOOKS`,
 picked by the kind as `BN5_LIB_LOOK_OF` picks it: clean cyan, the dark
 swirl, the item's stud, the DarkHole's pit, the BonusPanel's "?", the
-Darkloid's ring a grey grid until the DarkHoles fall, the start its map's
-floor alone), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
+Darkloid's ring a grey grid until the DarkHoles fall, the start clean's:
+BN5's start look is blank over its map's pad, and ours stands among its
+clean panels on a panel's frame, which bare read as a hole, the owner
+found; the start's 21 panels of mission 1 are left out of the floor
+learned, as their pad's pieces drew lilac round the start), its 8 x 4 entries at the panel's centre less 32 and 16 pixels and 8
 down (fit on the dumped map: the looks over the frames' dark middles, 1.6%
 over the void), their tiles copied from BN5's ROM to where BN5's board
 copies them (tile 864 on, VRAM taking words), and the board's palettes
@@ -722,8 +761,30 @@ menu font, white, a command not to be taken in the paler colour of
 BN5's letters' edges), "LIBERATE SUCCESS!" or "1 TURN LIBERATE!" squashed in and out
 over the board once it has faded back in (27 frames, then 58; MegaMan's
 words wait for it), and each item freed popped over its panel in its own
-icon until the words of it end. The phase banners stay in the PET's
-look: BN5's PLAYER PHASE and its Darkloids' are not traced.
+icon until the words of it end, BN5's jingle (0x16D) as they begin.
+The phases' banners are BN5's (traced, How the board looks and moves):
+the band blended over the board (`xtiles_blend_rect`, the colour whole
+and the board at half, as BLDALPHA's 16 and 8), the words' pieces at
+BN5's places, sliding in with BN5's sound and out on its frames, 104 in
+all, begun once nothing else shows (a CONTINUE's act card first); the L
+view's panel behind its phases the same. The guardians stand in BN5's
+own sprites (list 6's 83-85, copied into BN6's list 7 at numbers Gregar
+leaves on a placeholder, `src/layer/xnavi.c`), the Darkloid in his own.
+BN6's own camera moves as BN5's (`src/director/liberation_camera.c`):
+held, its mode is 0 (it no longer copies MegaMan's place) and its place
+is written each frame, panning at BN5's pace to the Darkloid at the
+opening (his entrance: held there a second, then back before the
+briefing) and before DARKLOID PHASE, to each guardian as it moves in his
+phase (resting BN5's 15 frames on each before it moves), back to MegaMan
+before PLAYER PHASE; under L the D-pad moves it at BN5's 4 and 8 pixels a
+frame, kept over the board, BN5's arrows and cross over it; let go, it
+follows MegaMan again. Stage 3's R, BN5's switch between Navis, pans with
+the same `lib_camera_at` to the Navi taken. MegaMan walks as BN6 walks him throughout: it moves only
+while he stands. The board's music is BN5's: its song 0x22 the dark layer's map's own
+(`lib_board_song`), 0x1C at the briefing, 0x22 again at PLAYER PHASE
+01, copied into BN6 after the areas' songs and themes (`xsong.c`, each
+keeping its place) and started by BN6's PlayMusic
+(`liberation_sound.c`).
 Without BN5's ROM the board keeps stage 1's first look: the act's own floor
 recoloured in Nebula's purple, pixel by pixel. The units, the corner, the
 banners and the menu are as above (BN5's own still to come).
@@ -740,11 +801,25 @@ phases against its par 14 (the autopilot never wins in one turn), deleted
 CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 2's guardian, home and act 3's dark layer.
 
-**Left for later:** the board's state across a CONTINUE (a checkpoint on a
-dark layer restarts its board from the arrival); BN5's phase banners,
-its units' sprites, the L view's blended panel and arrows, and
-the other eight missions' maps (stage 1 draws every dark layer in mission
-1's); the camera over the board (BN5's L); barriers, keys and sealed
+**Across a CONTINUE** (`src/director/liberation_save.c`): the board's
+panels, units (where each stands, which are deleted and when a DarkHole
+sends one back), the phase, the step and the Order Points are saved
+beside the run's checkpoint as `run.lib` (docs/SAVES.md) and taken back
+once the checkpoint's state has loaded on the layer its seed made again
+(the same layer only: another build's or area's starts afresh, as the
+layer does). What was being shown begins again: a banner from its start,
+a talk's step its next (no chat box is open as a checkpoint is saved),
+the menu closed. Checked: the autopilot's board quit at PLAYER PHASE
+04's banner (SIGTERM, the quit's checkpoint) and continued: the same
+board, phase 4, the panels it had freed clean and its Order Points as
+they were, the banner shown again once the act's card was gone.
+
+**Left for later:** the L view's keys' help, the
+Darkloid's words at his entrance, each unit's HP under it (our guardians
+have none on the board yet), the mission's end in BN5's words (the target
+and the phases taken), the
+other eight missions' maps (stage 1 draws every dark layer in mission
+1's); barriers, keys and sealed
 routes; chips and zenny in item panels; the BonusPanel's chip; the
 planner's par; the economy report and pacing for dark layers; the second
 screen's board; stages 2 to 5.

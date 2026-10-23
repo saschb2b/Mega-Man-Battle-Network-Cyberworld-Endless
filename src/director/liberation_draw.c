@@ -103,6 +103,7 @@ void lib_see(void) {
 	S.on = lib_on() && on_map() && director_arrived();
 	if (!S.on) return;
 	int px = bn6_player_x(), py = bn6_player_y();
+	lib_camera_place(&px, &py);   /* (the camera's place while the board pans it) */
 	S.cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	S.cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
 	S.box = emu_read8(BN6_CHATBOX) != 0;
@@ -239,8 +240,11 @@ void director_draw_board(void) {
 	if (bn5) lib_piece_gauge(LB.op);
 	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
 	/* (L held, as BN5's map view: the phase and its target) */
-	if (bn5 && D.l_held && LB.step == LIB_STEP_MOVE) lib_piece_phases(LB.phase, LB.b.par);
-	if (LB.step == LIB_STEP_BANNER) draw_banner();
+	if (bn5 && D.l_held && LB.step == LIB_STEP_MOVE) lib_piece_phases(LB.phase, LB.b.par, S.blink);
+	if (LB.step == LIB_STEP_BANNER) {
+		if (bn5 && lib_piece_banner_frames()) lib_piece_phase_banner(LB.enemy_banner, LB.phase, LB.banner_t);
+		else draw_banner();
+	}
 	if (bn5 && LB.cheer && LB.cheer_t >= LIB_CHEER_WAIT) lib_piece_cheer(LB.cheer, LB.cheer_t - LIB_CHEER_WAIT);
 	if (LB.step == LIB_STEP_MENU) {
 		if (bn5) draw_window();

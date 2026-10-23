@@ -33,6 +33,7 @@
 #include "liberation_state.h"
 #include "netmap.h"
 #include "rom.h"
+#include "xnavi.h"
 
 #define GBA_BG2HOFS    0x04000018u
 #define GBA_BG2VOFS    0x0400001Au
@@ -101,8 +102,11 @@ void lib_look_begin(void) {
 }
 
 /* The look panel (x, y) shows as the board stands, as BN5_LIB_LOOK_OF
- * picks it by the kind (-1 none: the start, its map's floor alone; the
- * Darkloid's ring a grey grid until the DarkHoles fall) */
+ * picks it by the kind (-1 none; the Darkloid's ring a grey grid until the
+ * DarkHoles fall). The start is clean's: BN5's start's own look (12) is
+ * blank, as its team starts on its map's walkway ends or its lilac pad,
+ * never on a panel; ours stands among its clean panels, on a panel's
+ * frame learned from that pad, which bare reads as a hole. */
 static int look_of(int x, int y) {
 	int k = LB.b.kind[y][x];
 	/* (a freed panel: its old look while the board fades back in, then
@@ -111,7 +115,6 @@ static int look_of(int x, int y) {
 		int t = DISSOLVE - K.dissolve[y][x];
 		return t < FADE_IN || (t - FADE_IN) / BN5_LIB_BLINK % 2 ? K.was[y][x] : LOOK_CLEAN;
 	}
-	if (x == LB.b.start_x && y == LB.b.start_y) return -1;
 	switch (k) {
 	case LIB_CLEAN: return LOOK_CLEAN;
 	case LIB_DARK: return LOOK_DARK;
@@ -139,7 +142,9 @@ static void box_at(int x, int y, int *tx, int *ty) {
  * near MegaMan's place, as it is mod 256), those in the picture and a tile
  * round it; and where the map's tile t sits in the ring, t + the offset */
 static void ring_window(int *tx0, int *ty0, int *ox, int *oy) {
+	/* (the camera's place, MegaMan's but while the board pans it) */
 	int px = bn6_player_x(), py = bn6_player_y();
+	lib_camera_place(&px, &py);
 	int u = px + py + 4 * K.tw - 120, v = (py - px) / 2 + 4 * K.th - 80;
 	int cu = (emu_read16(GBA_BG2HOFS) & 0x1FF) - 376 + 4 * K.tw, cv = (emu_read16(GBA_BG2VOFS) & 0x1FF) + 176 + 4 * K.th;
 	u += ((cu - u) % 256 + 256 + 128) % 256 - 128;
@@ -228,4 +233,13 @@ void lib_look_update(void) {
 			if (l >= 0 && K.shown[y][x] != l + 1) put_look(x, y, l);
 		}
 	refresh_screen();
+}
+
+void lib_look_unit(int kind, int *list, int *sprite, int *anim) {
+	/* (BN5's own guardians as its board shows them, with its ROM) */
+	int own = kind >= UNIT_BRUTE && kind <= UNIT_BLADIA ? xnavi_object(XOBJ_BRUTE + kind - UNIT_BRUTE) : -1;
+	if (own < 0) return;
+	*list = 7;
+	*sprite = own;
+	*anim = BN5_LIB_GUARD_ANIM;
 }
