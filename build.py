@@ -1162,6 +1162,13 @@ GATE_KEEPER = HP_PAGED + '0:place 16 80 3,20:,8:UP,40:,6:A,60:,6:A,60:,' + GATE_
 # the sorts)
 TRADE_SPARES = ('250:,' + ''.join(f'0:chip {c} 1,' for c in ('1 A', '20 F', '72 S', '89 G', '121 D', '154 L', '227 H', '411 M', '413 E')) +
                 '0:trade list,50:,' + '4:DOWN,36:,' * 4 + '4:START,56:,' * 2 + '4:DOWN,46:,' + '4:DOWN,30:,' * 5 + '4:START,60:')
+# (the Jukebox, docs/PET.md: Dad's call paged in Lan's room, the PET's
+# KeyItem, A on the Jukebox; BN6's Central Town played, then R to BN5's
+# The Net and its Undernet; the sound rendered frame by frame, so the
+# lights and the time are the song's)
+JUKEBOX = (HOME_PAGED + '6:START,40:,' + '6:DOWN,6:,' * 5 + '6:A,40:,6:DOWN,6:,6:RIGHT,20:,6:A,30:,6:A,330:,' + '6:R,6:,' * 6 +
+           '6:DOWN,6:,6:DOWN,6:,6:A,330:')
+JUKEBOX_SOUND = {'CYBERWORLD_AUDIO_DUMP': '/src/.build/screenshots/sound.raw', 'CYBERWORLD_AUDIO_OFFLINE': '1'}
 # (issue #98's identity: a layer's arrival words paged, then the sig dev
 # step puts MegaMan in the room the layer is remembered by)
 IDENTITY = ['--scene', 'emu', '--dev', 'quiet']
@@ -1193,6 +1200,7 @@ SCREENSHOTS = [
     # ways back's orange pads and the courier's "!!"; the courier's word on
     # a finished request; a way back checked, its question on No)
     ('home-room', ['--scene', 'town', '--seed', '2'], [(280, 'home-room')], {}),
+    ('jukebox-bn5', ['--scene', 'town', '--seed', '2', '--input', JUKEBOX], [(1086, 'jukebox'), (1520, 'jukebox-bn5')], JUKEBOX_SOUND),
     ('home-pc', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '0:place -40 -8 7,10:,6:R,100:'], [(616, 'home-pc')], {}),
     ('town-central', ['--scene', 'town', '--seed', '2', '--input', HOME_PAGED + '24:DOWN,90:,0:place -78 55 1,10:,30:DOWN,150:'],
      [(830, 'town-central')], {}),
