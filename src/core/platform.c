@@ -15,13 +15,15 @@
 #endif
 #include "analytics_net.h"
 #include "audio.h"
-#include "controls.h"
 #include "emu.h"
 #include "frame_log.h"
 #include "gfx.h"
 #include "keymap.h"
 #include "mirror.h"
+#include "options.h"
+#include "options_text.h"
 #include "save_queue.h"
+#include "sound_filter.h"
 #include "pads.h"
 #include "touch.h"
 #include "text_input.h"
@@ -394,10 +396,10 @@ void platform_finger(uint32_t type, SDL_FingerID id, float x, float y) {
 	 * statistics' question leaves the touch controls' buttons theirs, the
 	 * D-pad, A and B answering it as keys do: a phone's player pressed them
 	 * and nothing came) */
-	if (controls_shown() && !(controls_takes_buttons() && touch_takes(type, id, x, y))) {
+	if (options_shown() && !(options_takes_buttons() && touch_takes(type, id, x, y))) {
 		int cx, cy;
 		canvas_point(x, y, &cx, &cy);
-		controls_finger(type, id, cx, cy);
+		options_finger(type, id, cx, cy);
 		return;
 	}
 	if (touch_finger(type, id, x, y)) layout_canvas();
@@ -615,7 +617,7 @@ void platform_load_settings(const char *path) {
 			"# pixel the same size; fill makes it as big as the screen holds, each pixel's\n"
 			"# edge a little soft; auto fills where a whole scale would leave it a quarter\n"
 			"# smaller or more (a 640 x 480 screen), else whole.\n"
-			"screen = auto\n");
+			"screen = auto\n%ssound = gba\n", options_sound_note());
 		fclose(f);
 		platform_persist();
 		return;
@@ -625,6 +627,7 @@ void platform_load_settings(const char *path) {
 		char key[64], val[64];
 		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2) continue;
 		if (!strcmp(key, "smooth_motion")) P.blend = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
+		if (!strcmp(key, "sound")) sound_filter_set(!strcmp(val, "soft") ? SOUND_SOFT : SOUND_GBA);
 #ifdef __3DS__
 		if (!strcmp(key, "screen")) fill_3ds = strcmp(val, "whole") != 0;
 #elif !defined(__EMSCRIPTEN__)
@@ -670,7 +673,7 @@ int platform_keys_pressed(int *out, int most) {
 /* Escape, or Android's Back: the touch controls' menu and the controls
  * screen close first; the first asks, the second within two seconds quits */
 static void escape(void) {
-	if (touch_back() || controls_back() || (back_hook && back_hook())) return;
+	if (touch_back() || options_back() || (back_hook && back_hook())) return;
 	if (P.quit_prompt > 0) P.quit = true;
 	else { P.quit_prompt = 120; P.quit_pad = false; }
 }

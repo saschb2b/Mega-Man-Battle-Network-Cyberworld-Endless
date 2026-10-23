@@ -14,12 +14,20 @@
  *                         keys to PREFIX.io (0x60 register bytes + u16 keys each)
  *   pokes ADDR HEX        write a hex byte string starting at ADDR
  *   watch ADDR LEN        rec also appends these LEN bytes per frame to PREFIX.w
+ *   mute MASK             channels left out of the sound (hex: 1 DMA A, 2 DMA B,
+ *                         4-0x20 the PSG's 1-4)
+ *   sound N PREFIX        run N frames: their sound as a 48 kHz WAV (PREFIX.wav),
+ *                         MP2K's SoundInfo, its PSG channels, the music player
+ *                         and its tracks after each (PREFIX.si) and the sound
+ *                         registers (PREFIX.io): the MP2K player's differential
  */
 #include <mgba/core/core.h>
 #include <mgba/core/serialize.h>
 #include <mgba/core/log.h>
 #include <mgba-util/vfs.h>
 #include <mgba/core/blip_buf.h>
+#include <mgba/internal/gba/gba.h>
+#include <mgba/internal/gba/audio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -154,6 +162,68 @@ int main(int argc, char **argv) {
 			fseek(f, 40, SEEK_SET); fwrite(&total, 4, 1, f);
 			fclose(f);
 			printf("audio rate %u bytes %u\n", rate, total);
+		}
+		else if (!strcmp(cmd, "sound")) {
+			/* sound N PREFIX: N frames, their sound as a 48 kHz WAV (PREFIX.wav, the
+			 * output stage as the game hears it) and, after each frame, MP2K's
+			 * SoundInfo whole (SI bytes from SIADDR: its channels and its mix
+			 * ring) in PREFIX.si and the sound registers 0x04000060-0x040000AF in
+			 * PREFIX.io, for the player's differential (docs/re) */
+			int n = atoi(strtok(NULL, " \t\r\n"));
+			const char *pre = strtok(NULL, " \t\r\n");
+			const unsigned SIADDR = 0x030045C0, SI = 0xFB0, RATE = 48000;
+			char path[600];
+			snprintf(path, sizeof path, "%s.wav", pre);
+			FILE *f = fopen(path, "wb");
+			snprintf(path, sizeof path, "%s.si", pre);
+			FILE *si = fopen(path, "wb");
+			snprintf(path, sizeof path, "%s.io", pre);
+			FILE *io = fopen(path, "wb");
+			core->setAudioBufferSize(core, 4096);
+			blip_t *L = core->getAudioChannel(core, 0), *Rr = core->getAudioChannel(core, 1);
+			blip_set_rates(L, core->frequency(core), RATE);
+			blip_set_rates(Rr, core->frequency(core), RATE);
+			fwrite("RIFF\0\0\0\0WAVEfmt \x10\0\0\0\x01\0\x02\0", 1, 24, f);
+			uint32_t v = RATE; fwrite(&v, 4, 1, f); v = RATE * 4; fwrite(&v, 4, 1, f);
+			fwrite("\x04\0\x10\0data\0\0\0\0", 1, 12, f);
+			core->setKeys(core, keys);
+			uint32_t total = 0;
+			for (int i = 0; i < n; ++i) {
+				core->runFrame(core);
+				int16_t tmp[4096 * 2];
+				int got;
+				while ((got = blip_samples_avail(L)) > 0) {
+					if (got > 4096) got = 4096;
+					blip_read_samples(L, tmp, got, 1);
+					blip_read_samples(Rr, tmp + 1, got, 1);
+					fwrite(tmp, 4, (size_t)got, f);
+					total += (uint32_t)got * 4;
+				}
+				for (unsigned a = 0; a < SI; ++a) fputc(core->rawRead8(core, SIADDR + a, -1), si);
+				/* (then the PSG's four channels, the music player and its eight tracks) */
+				for (unsigned a = 0; a < 0x100; ++a) fputc(core->rawRead8(core, 0x03005600 + a, -1), si);
+				for (unsigned a = 0; a < 0x40; ++a) fputc(core->rawRead8(core, 0x02010890 + a, -1), si);
+				for (unsigned a = 0; a < 0x280; ++a) fputc(core->rawRead8(core, 0x02007EE8 + a, -1), si);
+				/* (I/O by words: mGBA's byte and halfword reads of it mask what the
+				 * registers hold) */
+				for (unsigned a = 0x60; a < 0xB0; a += 4) {
+					uint32_t w = core->rawRead32(core, 0x04000000 + a, -1);
+					for (int k = 0; k < 4; ++k) fputc((w >> (8 * k)) & 0xFF, io);
+				}
+			}
+			fseek(f, 4, SEEK_SET); v = 36 + total; fwrite(&v, 4, 1, f);
+			fseek(f, 40, SEEK_SET); fwrite(&total, 4, 1, f);
+			fclose(f); fclose(si); fclose(io);
+			printf("sound %d frames, %u bytes of 48 kHz\n", n, total);
+		}
+		else if (!strcmp(cmd, "mute")) {
+			/* mute MASK: channels left out of the sound (bit 0 DirectSound A,
+			 * 1 B, 2-5 the PSG's 1-4), to hear one part alone */
+			unsigned m = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);
+			struct GBA *gba = core->board;
+			gba->audio.forceDisableChA = m & 1;
+			gba->audio.forceDisableChB = m >> 1 & 1;
+			for (int i = 0; i < 4; ++i) gba->audio.psg.forceDisableCh[i] = m >> (2 + i) & 1;
 		}
 		else if (!strcmp(cmd, "fill")) {
 			unsigned addr = strtoul(strtok(NULL, " \t\r\n"), NULL, 16);

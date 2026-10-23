@@ -684,6 +684,100 @@ refresh's pace, 0.1 and 1.3, against 0.6.0's 0.1 and 2. An old 3DS or
 and there the title stuttered and the net went black after a few
 frames, as before (3ds/README.md).
 
+## The core's sound
+
+mGBA's blip buffers resample the GBA's sound to the device's 48 kHz, a
+frame at a time, into `emu.c`'s ring, which the audio callback reads. The
+GBA runs 59.7275 frames a second and the loop 60, so the core makes 0.45%
+more sound than the device plays: the rate the blip buffers resample to is
+nudged by how full the ring is (`audio_pace.c`), and the game's sound
+plays 0.45% high and fast, as every 60 Hz emulator plays it. The nudge
+reads the ring's fill averaged over about two thirds of a second. It read
+the fill itself before: the device takes the ring in blocks (512 samples
+on a desktop, 1024 on a handheld, more on some sound servers), so the
+fill after each frame swung by a block, and the pitch with it, 10 to 18
+cents from one frame to the next in a model of those reads (40 with
+2048-sample ones), a warble on held notes; averaged, under a cent
+(`tests/test_core.c`'s `test_audio_pace` holds it there, and fails on
+the old way). A ring past `LAT_MAX` is still cut to its target, the
+average with it.
+
+What the device hears then goes through settings.ini's `sound`
+(`src/audio/sound_filter.c`, the engine's own sound too): `gba` as it is,
+`soft` with the Legacy Collection's balance. That was measured, not
+guessed: its net and virus battle themes found in a recording of it by
+their notes (chroma matched against our captures, 35 chunks of 6 s), each
+chunk's third-octave spectrum against ours on the same bars. Flat from
+300 Hz to 5 kHz, it falls away above (-4.5 dB at 8 kHz, -10 at 10, -18 at
+13, -29 at 16) and below (-3.5 from 80 to 160 Hz, -12 at 40), the two
+songs within a dB of each other. Soft is three biquads fitted to it,
+within 0.8 dB from 35 Hz to 17 kHz: a low-pass at 6750 Hz (Q 0.88), a
+high-pass at 68 Hz and a low shelf of -2.5 dB at 320 Hz. It takes the
+images of BN6's 10512 Hz mix (docs/ROM_DATA.md, The sound's mix) down
+with the rest of the highs. Neither setting touches the game: a headless
+capture's frames are the same byte for byte with either.
+
+## The engine's own sound
+
+Before a run and beside it (the title and its summary, the setup,
+Options, SAVES, the PET's screens over the held game) the core is not
+running, and the engine plays BN6's songs and sounds itself. It does so
+with BN6's own sound engine's rules: MP2K, Nintendo's "m4a", read from
+BN6's code in bn6f's disassembly (asm/libs.s; the routines and tables in
+Gregar, docs/ROM_DATA.md, BN6's sound engine) and written again as the
+engine's own C (`src/audio/mp2k*.c`), its data the player's ROM's:
+
+- **the sequencer** (`mp2k_seq.c`, `mp2k_note.c`): 32 music players as
+  BN6_MPLAYS has them, the music on player 31 and each sound on the
+  player its song names; MPlayMain's ticks at the song's tempo against
+  150, the commands of BN6's jump table (MEMACC and XCMD as BN6's start
+  puts them in), a note given one of BN6's four DirectSound channels (or
+  its PSG channel) by priority and track, the LFO, the fade;
+- **the mixer** (`mp2k_mix.c`): SoundMainRAM at 10512 Hz, 176 samples a
+  frame into a ring of nine frames, the song's reverb from the ring's
+  next part, each channel's envelope stepped once a frame, its samples
+  (interpolated, or one a step at fixed pitch) added into 8-bit bytes
+  that wrap and never clip;
+- **the PSG's driver** (`mp2k_cgb.c`): CgbSound's software envelope, its
+  extra step every fifteenth frame, and its register writes, which set
+  NRx2's start volume and its hardware step and retrigger the channel;
+- **the GBA's sound after it** (`gba_sound.c`), as mGBA 0.10.5 plays it:
+  the registers' writes as its io.c makes them, mGBA's own PSG (GBAudio,
+  run on a clock of its own with the GBA's frame sequencer), the ring's
+  samples held from one timer 0 overflow to the next, a frame after they
+  were mixed, and the output mixed as GBAAudioSample mixes it into
+  blip_buf, read at 48 kHz.
+
+It was proved against the game itself (`tools/mp2k_verify.py`): the plain
+ROM in libmgba (romlab, mGBA 0.10.5 as the engine's) with its title's
+song-table entry pointed at a song, its MP2K state recorded each frame
+(romlab's `sound`), laid beside the engine's `--mp2k-trace` of the same
+song from the same phases (`tools/mp2k_diff.py`): the music player and
+its eight tracks, the four DirectSound and the four PSG channels, the
+reverb and both sides of the mix the same byte for byte in every one of
+900 frames, for the title (0x01), the credits (0x1D), the net (0x13) and
+seven of the menus' sounds; two bugs planted (the reverb's rounding, a
+tie between channels) each failed it. The 48 kHz sound then: the
+DirectSound part alone at a correlation of 0.997 with the game's, the
+same gain (0.9996), what differs rising with frequency, as the GBA's
+timer phase against its 65536 Hz output moves the steps (the phase is
+the game's since its power-on; `CYBERWORLD_SOUND_PHASE` sets it, about
+584 cycles matching this capture to -30 dB); each PSG channel alone at
+the game's level (within 0.4%) and loudness (0.998-0.9999 by 100 ms),
+its waveform apart by its square's and its frame sequencer's phases,
+which carry over from whatever the game played before. Through the
+title's own path the title's song is within 0.4 dB of the game's (the
+plain ROM in mGBA at 48 kHz) in every third of an octave, its level
+within 0.05 dB. The player it replaced was the engine's own
+approximation (float mixing at 48 kHz, its own envelopes, no reverb, 32
+channels): 1.6 dB quieter, up to 9 dB short in the deep bass and 1.4 to
+2.5 dB short from 7 to 14 kHz, which the owner heard as a duller title
+than the cartridge's in mGBA.
+
+`audio_set_volume`'s music volume (8, the default, the game's level) and
+settings.ini's `sound` (sound_filter.c) apply after it; on the PET's
+screens over a run its sounds add to the core's.
+
 ## Hooks
 
 A hook lets one instruction of the game's code call the engine's C right

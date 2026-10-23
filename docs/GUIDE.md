@@ -408,10 +408,16 @@ one alone is a small one held sideways.
 title, in a battle too. **CONTINUE** takes the run up at its last
 checkpoint; what came after it is lost.
 
+**Options** holds the game's settings: **Select** on the title screen opens
+it on every system (the line under the menu names the button it is on), and
+on a phone or tablet so does **OPTIONS** in the touch controls' menu, mid-run
+too. Its **Controls** opens the controls screen (not on the 3DS, whose
+buttons are its own), **Audio** the sound ([Sound](#sound)), and
+**Statistics** your answer to the statistics' question, where the game can
+send them; B or **Done** goes back.
+
 **The controls screen** sets the buttons, laid out as big games lay theirs.
-**Select** on the title screen opens it (the line under the menu names the
-button it is on); on a phone or tablet with a controller, so does
-**CONTROLLER** in the touch controls' menu, mid-run too. It has a tab for
+Options' **Controls** opens it. It has a tab for
 the controller and, on a PC or in a browser, one for the keyboard: L and R
 (Tab on a keyboard) switch them. Each GBA button has a row with a **MAIN**
 and an **ALSO** slot: choose a slot and press the button (or key) you want
@@ -450,8 +456,8 @@ Deck's too), until a key or a controller is used again. The D-pad takes
 diagonals where MegaMan walks (the net's walkways run along them) and four
 directions in battles and menus. Their **MENU** button pauses the game and
 opens their menu: **SIZE** and **OPACITY** of them all, **HAPTICS** (a tick
-under the thumb, on Android and in browsers that can), **CONTROLLER** (the
-controls screen, where a controller is connected) and **EDIT LAYOUT**: tap
+under the thumb, on Android and in browsers that can), **OPTIONS** (the
+controls screen, the sound) and **EDIT LAYOUT**: tap
 a button to choose it, drag it where your thumb wants it, pinch it or drag
 a corner to size it, give it its own opacity, or take a preset
 (**DEFAULT**, **LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen
@@ -1014,6 +1020,26 @@ it on with `smooth_motion = on` in `settings.ini` in the data folder (made
 on the first start), or in the browser player's menu. A screen at 60 or
 120 Hz, or one that follows the game (FreeSync, G-Sync), needs neither.
 
+## Sound
+
+The music and sounds are BN6's own, played by its own sound engine as a
+GBA plays them: in a run by the game itself, and on the title and the
+screens around it by the same engine's rules, followed note for note
+(docs/EMULATION.md, The engine's own sound). The Legacy Collection's are not: it plays recordings from
+the soundtrack CDs in their place, mixed its own way, BN6's more muffled
+than the cartridge (The Rockman EXE Zone's wiki). So the same song can
+sound brighter here. BN6 mixes its music 10512 times a second, and what
+the GBA makes of that mix carries a bright hiss above the music.
+**Soft** gives the sound the Legacy Collection's balance, measured from a
+recording of it on the same songs: the highs from 5 kHz up taken down as it
+has them (-4.5 dB at 8 kHz, -10 at 10 kHz, -18 at 13 kHz) and the deepest
+bass a little (-3 dB around 100 Hz). **GBA**, the default, leaves it as the
+cartridge plays it. Choose in Options' **Audio** (Select on the title, or
+**OPTIONS** in a phone's touch menu during a run): Left, Right or A on
+**Sound** changes it at once, so you hear it, and it is kept. The browser
+player's menu has a **Sound** button too, and `sound = soft` or
+`sound = gba` in `settings.ini` in the data folder sets it as well.
+
 ## Anonymous statistics
 
 At its first start the game asks once whether it may send anonymous play
@@ -1057,8 +1083,8 @@ its location database knows one) and counts one player's events together
 by a one-way hash that changes every month, and does not keep the address.
 
 To change your answer, press SELECT on the title (the R key on a keyboard)
-for the controls screen, whose **Statistics** row shows it; A on the row
-asks again. On the 3DS, SELECT on the title asks again. `statistics = on`
+for **Options**, whose **Statistics** line shows it; A on the line asks
+again, on the 3DS too. `statistics = on`
 or `off` in `settings.ini` in the data folder sets it too; without the
 line the game asks. Each request goes out once, beside the game's frames,
 never in their way; with no network it is dropped, and after three

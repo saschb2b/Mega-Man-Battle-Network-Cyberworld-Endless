@@ -388,17 +388,17 @@ int padmap_parse(const char *text, PadMap *m, char *errors, int size) {
 int padmap_format(const PadMap *m, char *out, int size) {
 	int n = snprintf(out, (size_t)size,
 		"# Cyberworld Endless: the controllers' buttons, as the controls screen sets\n"
-		"# them (SELECT on the title screen, or CONTROLLER in the touch controls'\n"
-		"# menu). Each line gives a GBA button its buttons, as SDL names them: a b x y\n"
-		"# back guide start leftstick rightstick leftshoulder rightshoulder dpup\n"
-		"# dpdown dpleft dpright misc1 paddle1 paddle2 paddle3 paddle4 touchpad, the\n"
-		"# triggers lefttrigger righttrigger, and the sticks pushed one way, -leftx\n"
-		"# +leftx -lefty +lefty -rightx +rightx -righty +righty. [pad] is for Xbox,\n"
-		"# PlayStation and other controllers, whose a is the bottom button, [nintendo]\n"
-		"# for Nintendo's, whose a is the button marked A. [joystick] is for a pad SDL\n"
-		"# does not know, read as it is: its buttons b0 b1 b2..., its hat h0.1 (up)\n"
-		"# h0.2 (right) h0.4 (down) h0.8 (left), and its axes pushed one way, -a0\n"
-		"# +a0 -a1 +a1... Delete this file for the defaults.\n");
+		"# them (Options' Controls: SELECT on the title screen, or OPTIONS in the touch\n"
+		"# controls' menu). Each line gives a GBA button its buttons, as SDL names\n"
+		"# them: a b x y back guide start leftstick rightstick leftshoulder\n"
+		"# rightshoulder dpup dpdown dpleft dpright misc1 paddle1 paddle2 paddle3\n"
+		"# paddle4 touchpad, the triggers lefttrigger righttrigger, and the sticks\n"
+		"# pushed one way, -leftx +leftx -lefty +lefty -rightx +rightx -righty +righty.\n"
+		"# [pad] is for Xbox, PlayStation and other controllers, whose a is the bottom\n"
+		"# button, [nintendo] for Nintendo's, whose a is the button marked A.\n"
+		"# [joystick] is for a pad SDL does not know, read as it is: its buttons b0 b1\n"
+		"# b2..., its hat h0.1 (up) h0.2 (right) h0.4 (down) h0.8 (left), and its axes\n"
+		"# pushed one way, -a0 +a0 -a1 +a1... Delete this file for the defaults.\n");
 	for (int f = 0; f < PAD_FAMILIES && n >= 0 && n < size; ++f) {
 		n += snprintf(out + n, (size_t)(size - n), "\n[%s]\n", family_names[f]);
 		for (int g = 0; g < PAD_GBA && n >= 0 && n < size; ++g) {

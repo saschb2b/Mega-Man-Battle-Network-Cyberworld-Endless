@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "analytics_ask.h"
 #include "audio.h"
 #include "buttons.h"
 #include "controls_state.h"
@@ -14,7 +13,6 @@
 ControlsState C;
 
 int controls_gba_of(int row) { return row >= ROW_A && row <= ROW_SELECT ? row - ROW_A + 4 : -1; }
-int controls_rows(void) { return analytics_ask_here() ? ROWS : ROW_STATS; }
 
 static void say(const char *s, bool warn) {
 	snprintf(C.said, sizeof C.said, "%s", s);
@@ -45,10 +43,7 @@ void controls_open(void) {
 	touch_release();
 }
 
-/* (and the statistics' question in its place: analytics_ask.h) */
-bool controls_shown(void) { return C.open || analytics_ask_shown(); }
-
-bool controls_takes_buttons(void) { return !C.open && analytics_ask_shown(); }
+bool controls_shown(void) { return C.open; }
 
 static void leave(void) {
 	C.open = false;
@@ -254,9 +249,6 @@ static void finish(void) {
 static void choose(void) {
 	if (C.row == ROW_PRESET) { cycle(1); return; }
 	if (C.row == ROW_DPAD) { ask_start(ASK_DPAD, 0, C.col); return; }
-	/* (the statistics' question over this screen, its cursor on the answer
-	 * as it stands: what is sent is read before a yes) */
-	if (C.row == ROW_STATS) { if (analytics_ask_open()) audio_sfx(SFX_SELECT); return; }
 	if (C.row < ROWS) { ask_start(ASK_SLOT, controls_gba_of(C.row), C.col); return; }
 	if (C.item == ITEM_SETALL) ask_start(ASK_ALL, 0, SLOT_MAIN);
 	else if (C.item == ITEM_DEFAULTS) defaults();
@@ -274,7 +266,7 @@ static void step_item(int d) { C.item = (C.item + d + ITEMS) % ITEMS; }
 
 /* the line above or below: the rows shown, then the bottom line */
 static int line_from(int row, int d) {
-	int first = C.tab == TAB_KEYS ? ROW_DPAD : ROW_PRESET, last = controls_rows() - 1;
+	int first = C.tab == TAB_KEYS ? ROW_DPAD : ROW_PRESET, last = ROWS - 1;
 	if (d < 0) return row == first ? ROW_BOTTOM : row == ROW_BOTTOM ? last : row - 1;
 	return row == ROW_BOTTOM ? first : row == last ? ROW_BOTTOM : row + 1;
 }
@@ -356,7 +348,6 @@ static void confirm_update(void) {
 }
 
 void controls_update(void) {
-	if (analytics_ask_shown()) { analytics_ask_update(); return; }
 	if (!C.open) return;
 	++C.t;
 	if (C.said_t > 0) --C.said_t;
@@ -372,7 +363,6 @@ void controls_update(void) {
 }
 
 bool controls_back(void) {
-	if (analytics_ask_shown()) return analytics_ask_back();
 	if (!C.open) return false;
 	if (C.ask) ask_cancel();
 	else if (C.confirm) leave();
@@ -398,7 +388,7 @@ static void tap(int x, int y) {
 		C.row = ROW_BOTTOM;
 		C.item = item;
 		choose();
-	} else if (controls_tap_cell(x, y, &row, &col) && row < controls_rows() && !(row == ROW_PRESET && C.tab == TAB_KEYS)) {
+	} else if (controls_tap_cell(x, y, &row, &col) && row < ROWS && !(row == ROW_PRESET && C.tab == TAB_KEYS)) {
 		C.row = row;
 		C.col = col;
 		choose();
@@ -406,15 +396,13 @@ static void tap(int x, int y) {
 }
 
 void controls_finger(uint32_t type, SDL_FingerID id, int x, int y) {
-	bool ask = analytics_ask_shown();
-	if (!C.open && !ask) return;
+	if (!C.open) return;
 	if (type == SDL_FINGERDOWN) {
 		C.finger = id;
 		C.finger_down = true;
 	} else if (type == SDL_FINGERUP && C.finger_down && id == C.finger) {
 		C.finger_down = false;
-		if (ask) analytics_ask_tap(x - P.core_x, y - P.core_y);
-		else tap(x - P.core_x, y - P.core_y);
+		tap(x - P.core_x, y - P.core_y);
 	}
 }
 

@@ -13,7 +13,6 @@
 
 #include "audio.h"
 #include "capture.h"
-#include "controls.h"
 #include "desktop.h"
 #include "devtools.h"
 #include "director.h"
@@ -21,6 +20,7 @@
 #include "gfx.h"
 #include "meta.h"
 #include "online_visit.h"
+#include "options.h"
 #include "platform.h"
 #include "rom.h"
 #include "run.h"
@@ -101,14 +101,14 @@ static bool game_frame(void) {
 	capture_taps();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
-	if (controls_shown()) controls_update();
+	if (options_shown()) options_update();
 	else if (current && current->update && !touch_paused()) current->update();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
 	platform_apply_effects();
-	controls_draw();
+	options_draw();
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	capture_shots();
@@ -227,6 +227,7 @@ typedef struct {
 	const char *start_scene;
 	int run_depth, guardian_navi;
 	int smooth_arg;   /* --smooth-motion on|off, over settings.ini */
+	int sound_arg;    /* --sound gba|soft (SoundFilter), over settings.ini */
 	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
 	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
 	 * the run's setup as the setup screen chooses it; NEW GAME's (the
@@ -270,6 +271,7 @@ static int screen_option(const char *a, const char *v, Options *o) {
 	if (!v) return 0;
 	if (!strcmp(a, "--size")) sscanf(v, "%dx%d", &o->force_w, &o->force_h);
 	else if (!strcmp(a, "--smooth-motion")) o->smooth_arg = !strcmp(v, "on");
+	else if (!strcmp(a, "--sound")) o->sound_arg = !strcmp(v, "soft");
 	/* (the screen's density for the touch controls, in dots per inch) */
 	else if (!strcmp(a, "--dpi")) platform_set_dpi((float)atof(v));
 	else return 0;
@@ -494,7 +496,7 @@ static int launcher_mode(const Options *o) {
 }
 
 int main(int argc, char **argv) {
-	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .marks_spec = -1, .launcher = -1 };
+	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .sound_arg = -1, .marks_spec = -1, .launcher = -1 };
 	int code = parse_args(argc, argv, &o);
 	if (code >= 0) return code;
 	setvbuf(stdout, NULL, _IOLBF, 0);
@@ -511,7 +513,7 @@ int main(int argc, char **argv) {
 #endif
 	o.launcher = launcher_mode(&o);
 	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
-	player_files(o.headless, o.smooth_arg, !o.dev);
+	player_files(o.headless, o.smooth_arg, o.sound_arg, !o.dev);
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
 	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);

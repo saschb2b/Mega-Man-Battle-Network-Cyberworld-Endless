@@ -35,9 +35,10 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen);
 /* The player's files in the data folder, none headless (a test's input is
  * its own): the keys, the controllers' map, the settings, the touch
  * controls; --pad's virtual controller with pad.ini, headless too;
- * --smooth-motion's on or off (`smooth_arg`, -1 for neither) over
+ * --smooth-motion's on or off (`smooth_arg`, -1 for neither) and
+ * --sound's gba or soft (`sound_arg`, a SoundFilter, headless too) over
  * settings.ini; then the anonymous statistics' session (analytics_net.h),
  * a player's own where `plain` (no test's or developer's option) */
-void player_files(bool headless, int smooth_arg, bool plain);
+void player_files(bool headless, int smooth_arg, int sound_arg, bool plain);
 
 #endif

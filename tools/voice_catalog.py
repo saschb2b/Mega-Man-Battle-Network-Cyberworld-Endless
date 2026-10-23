@@ -109,6 +109,7 @@ DOMAINS = {
     'pick_text': ('The ROMs screen', 'Screen', 'screen'),
     'saves_text': ('SAVES', 'Screen', 'screen'),
     'analytics_text': ('Statistics', 'Screen', 'screen'),
+    'options_text': ('Options', 'Screen', 'screen'),
     'second_text': ('The second screen', 'Screen', 'screen'),
 }
 DEFAULT_DOMAIN = ('Other', 'MegaMan', 'speech')

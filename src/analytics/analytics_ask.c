@@ -13,6 +13,7 @@
 #include "controls.h"
 #include "gfx.h"
 #include "minifont.h"
+#include "pet_panel.h"
 #include "platform.h"
 #include "touch.h"
 
@@ -23,9 +24,6 @@
 #define ASK_CHOICE_Y 116
 #define ASK_CHOICE_DX 40     /* Yes and No either side of the middle */
 #define ASK_LINE 96
-
-static const SDL_Color GOLD = { 255, 230, 90, 255 }, SKY = { 170, 200, 255, 255 }, ORANGE = { 255, 170, 40, 255 },
-	DIM = { 120, 140, 170, 255 };
 
 static struct {
 	bool open, first, yes;
@@ -121,10 +119,10 @@ static void choices_draw(int cx, int y) {
 	for (int i = 0; i < 2; ++i) {
 		bool on = K.yes == (i == 0);
 		int x = cx + (i ? ASK_CHOICE_DX : -ASK_CHOICE_DX);
-		text_draw(x, y, w[i], on ? GOLD : WHITE, TEXT_CENTER);
+		text_draw(x, y, w[i], on ? PET_GOLD : WHITE, TEXT_CENTER);
 		if (!on || K.t < ASK_WAIT) continue;
 		int ax = x - text_width(w[i]) / 2 - 10;
-		for (int k = 0; k < 4; ++k) fill_rect(ax + k, y + 2 + k, 1, 8 - 2 * k, ORANGE);
+		for (int k = 0; k < 4; ++k) fill_rect(ax + k, y + 2 + k, 1, 8 - 2 * k, PET_ORANGE);
 	}
 }
 
@@ -132,27 +130,24 @@ static void choices_draw(int cx, int y) {
 static void hints_draw(int cx, int y) {
 	char s[96], a[24];
 	analytics_later(controls_word(BTN_SELECT), s, sizeof s);
-	minifont_draw_centered(cx, y, s, DIM, 1);
+	minifont_draw_centered(cx, y, s, PET_DIM, 1);
 	if (touch_shown()) {
-		minifont_draw_centered(cx, y + 9, analytics_word(AW_TAP), DIM, 1);
+		minifont_draw_centered(cx, y + 9, analytics_word(AW_TAP), PET_DIM, 1);
 		return;
 	}
 	/* (controls_word keeps a keyboard's word in one buffer: the first copied) */
 	snprintf(a, sizeof a, "%s", controls_word(BTN_A));
 	analytics_keys(a, controls_word(BTN_B), K.first, s, sizeof s);
-	minifont_draw_centered(cx, y + 9, s, DIM, 1);
+	minifont_draw_centered(cx, y + 9, s, PET_DIM, 1);
 }
 
 void analytics_ask_draw(void) {
 	if (!K.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
-	/* the title dimmed under the PET's panel */
-	fill_rect(0, 0, P.w, P.h, rgba(0, 0, 0, 110));
-	fill_rect(x0 + 4, y0 + 4, CORE_W - 8, CORE_H - 8, rgba(66, 198, 231, 255));
-	fill_rect(x0 + 6, y0 + 6, CORE_W - 12, CORE_H - 12, rgba(16, 60, 90, 250));
-	text_draw(cx, y0 + 8, analytics_word(AW_TITLE), GOLD, TEXT_CENTER);
+	pet_panel_draw(x0, y0);
+	text_draw(cx, y0 + 8, analytics_word(AW_TITLE), PET_GOLD, TEXT_CENTER);
 	text_draw(cx, y0 + 22, analytics_word(AW_QUESTION), WHITE, TEXT_CENTER);
-	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], SKY, TEXT_CENTER);
+	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], PET_SKY, TEXT_CENTER);
 	choices_draw(cx, y0 + ASK_CHOICE_Y);
 	hints_draw(cx, y0 + 136);
 }

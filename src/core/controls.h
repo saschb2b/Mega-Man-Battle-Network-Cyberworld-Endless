@@ -1,15 +1,12 @@
 /* The controls screen (issue #37): which of the controller's buttons, and
  * on a desktop or in a browser which keys, are the GBA's A, B, L, R, START
- * and SELECT, with presets for A and B. Opened by SELECT on the title
- * screen and by CONTROLLER in the touch controls' menu, over whatever runs,
- * which waits under it (main.c). It reads the pads' own buttons
- * (pads_menu_*), never the map it edits, takes taps on its rows, and puts
- * a new map in play only once that map's A was pressed to keep it, so no
- * choice made on it can leave a player unable to work it. Where the build
- * can send the anonymous statistics (analytics.h), a row turns them on or
- * off, kept at once; and their question at the first start shows in this
- * screen's place (analytics_ask.h), its frame, picture, Back and taps
- * passed on from here. */
+ * and SELECT, with presets for A and B. Opened from Options (options.h:
+ * SELECT on the title, OPTIONS in the touch controls' menu), over whatever
+ * runs, which waits under it, its frame, picture, Back and taps passed on
+ * from there. It reads the pads' own buttons (pads_menu_*), never the map
+ * it edits, takes taps on its rows, and puts a new map in play only once
+ * that map's A was pressed to keep it, so no choice made on it can leave a
+ * player unable to work it. */
 #ifndef CW_CONTROLS_H
 #define CW_CONTROLS_H
 
@@ -27,9 +24,9 @@ void controls_draw(void);
 bool controls_back(void);
 /* A finger while it is open (SDL_FINGERDOWN or UP), at canvas pixel (x, y). */
 void controls_finger(uint32_t type, SDL_FingerID id, int x, int y);
-/* It answers the touch controls' buttons too (the statistics' question,
- * as it answers keys): their fingers go to them (touch_takes). */
-bool controls_takes_buttons(void);
+/* A note centred at (cx, y), in two lines at most, broken after the most
+ * words that fit (Options' too); whether it took two */
+bool controls_note_draw(int cx, int y, const char *s, SDL_Color c);
 /* The words for the button a GBA button (BTN_*) is on, on the device used
  * last: "R" on a keyboard, "Minus" on a Nintendo pad, "SELECT" by touch. */
 const char *controls_word(uint32_t bit);

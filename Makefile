@@ -119,7 +119,7 @@ CFLAGS := $(filter-out -g,$(CFLAGS)) -sUSE_SDL=2 -DDISABLE_THREADING
 LDLIBS += -O2 -sUSE_SDL=2 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=64MB -sSTACK_SIZE=1MB -lidbfs.js -lwebsocket.js \
           -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 -sFORCE_FILESYSTEM=1 -sENVIRONMENT=web \
           -sEXPORTED_RUNTIME_METHODS=callMain,ccall,FS,IDBFS,addRunDependency,removeRunDependency -sEXPORT_NAME=Module \
-          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_paused,_cw_saves_open,_cw_saves_import
+          -sEXPORTED_FUNCTIONS=_main,_cw_set_smooth,_cw_set_sound,_cw_set_paused,_cw_saves_open,_cw_saves_import
 endif
 # the Linux release: built on an older glibc (docker/Dockerfile.linux), SDL2
 # carried in lib/ beside the binary
@@ -214,7 +214,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/gfx/qr.c src/director/home_words.c src/core/jobs.c \
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/map/pad_art.c \
-	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c
+	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/core/settings_line.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
@@ -230,9 +230,9 @@ build/host/test_core: $(TEST_OBJS)
 # two cores side by side, BN6's through emu.c (its sound's ring), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/claims.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
+TEST_EMU_SRCS := tests/test_emu.c src/emu/hook.c src/emu/emu.c src/emu/audio_pace.c src/emu/claims.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/audio_pace.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm

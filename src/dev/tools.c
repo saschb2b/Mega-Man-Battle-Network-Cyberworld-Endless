@@ -1,6 +1,6 @@
 /* tools.h: --atlas (atlas.c), --pacing (pacing_report.c), --economy
- * (economy_report.c), --render-song (a song into a WAV file), --sheet (sheets.c), --xdiff (xdiff.c) and
- * --xrecords (xrecords_report.c), each run in the game's place once the
+ * (economy_report.c), --render-song (a song into a WAV file), --sheet (sheets.c), --xdiff (xdiff.c),
+ * --xrecords (xrecords_report.c) and --mp2k-trace (mp2k_trace.c), each run in the game's place once the
  * ROM is read. */
 #include "tools.h"
 
@@ -12,13 +12,14 @@
 #include "audio.h"
 #include "economy.h"
 #include "economy_report.h"
+#include "mp2k_trace.h"
 #include "net_layouts.h"
 #include "pacing_report.h"
 #include "sheets.h"
 #include "xdiff.h"
 #include "xrecords_report.h"
 
-static const char *atlas_spec, *pacing_spec, *economy_spec, *render_spec, *sheet_spec, *xdiff_spec, *xrecords_spec;
+static const char *atlas_spec, *pacing_spec, *economy_spec, *render_spec, *sheet_spec, *xdiff_spec, *xrecords_spec, *mp2k_spec;
 
 bool tools_option(const char *a, const char *v) {
 	if (!strcmp(a, "--render-song")) render_spec = v;
@@ -28,6 +29,7 @@ bool tools_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--economy")) economy_spec = v;
 	else if (!strcmp(a, "--xdiff")) xdiff_spec = v;
 	else if (!strcmp(a, "--xrecords")) xrecords_spec = v;
+	else if (!strcmp(a, "--mp2k-trace")) mp2k_spec = v;
 	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	/* (a game under the flat plan, the rolls before issue #154, beside
 	 * the opening one in play: docs/ECONOMY.md) */
@@ -51,5 +53,6 @@ int tools_run(void) {
 	if (sheet_spec) return sheet_run(sheet_spec);
 	if (xdiff_spec) return xdiff_run(xdiff_spec);
 	if (xrecords_spec) return xrecords_report_run(xrecords_spec);
+	if (mp2k_spec) return mp2k_trace_run(mp2k_spec);
 	return -1;
 }

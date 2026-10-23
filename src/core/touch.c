@@ -14,7 +14,7 @@
 #endif
 
 #include "buttons.h"
-#include "controls.h"
+#include "options.h"
 #include "director.h"
 #include "pads.h"
 #include "platform.h"
@@ -342,9 +342,10 @@ static int shape_places(void) {
 static void place_ui(void) {
 	nui = 0;
 	float D = lay.dp, W = (float)scr.w, H = (float)scr.h;
-	/* (a controller's buttons where one is there: the controls screen, issue #37) */
-	bool edit = page == PAGE_EDIT, pad_row = !edit && pads_present();
-	int rows = (edit ? 3 : haptics_exist() ? 3 : 2) + pad_row;
+	/* (Options, outside the editor: the sound, and a controller's buttons
+	 * where one is there, issue #37) */
+	bool edit = page == PAGE_EDIT, options_row = !edit;
+	int rows = (edit ? 3 : haptics_exist() ? 3 : 2) + options_row;
 	float pad = 14 * D, title = 40 * D, name = edit ? 28 * D : 0, buttons = 52 * D;
 	row_h = 46 * D;
 	float pw = fminf(W - 24 * D, 420 * D), ph = pad + title + name + rows * row_h + buttons + pad;
@@ -396,8 +397,8 @@ static void place_ui(void) {
 		chips(x0 + label_w, y + (row_h - chip_h) / 2, x1 - x0 - label_w, chip_h, ids, names, 2);
 		y += row_h;
 	}
-	if (pad_row) {
-		add(U_PAD, K_BUTTON, x0, y + (row_h - chip_h) / 2, x1 - x0, chip_h, "CONTROLLER");
+	if (options_row) {
+		add(U_PAD, K_BUTTON, x0, y + (row_h - chip_h) / 2, x1 - x0, chip_h, "OPTIONS");
 		y += row_h;
 	}
 	/* the way out */
@@ -489,7 +490,7 @@ static void press(int id) {
 		sel = -1;
 		break;
 	case U_RESUME: close_menu(); return;
-	case U_PAD: close_menu(); controls_open(); return;
+	case U_PAD: close_menu(); options_open(); return;
 	/* presets: a size and a hand, this arrangement laid out afresh */
 	case U_DEFAULT: prefs.size = prefs.opacity = 100; prefs.left_handed = false; clear_shape(); sel = -1; break;
 	case U_LARGE: prefs.size = 125; clear_shape(); break;

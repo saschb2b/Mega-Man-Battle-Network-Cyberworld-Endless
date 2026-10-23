@@ -72,6 +72,7 @@ const W = JA ? {
 	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
 	move: '移動', menu: 'メニュー',
 	smooth: (on) => 'なめらか表示：' + (on ? 'オン' : 'オフ'),
+	sound: (soft) => 'サウンド：' + (soft ? 'ソフト' : 'GBA'),
 } : {
 	stopped: (what) => 'The engine stopped: ' + what,
 	today: 'Today ',
@@ -95,6 +96,7 @@ const W = JA ? {
 	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
 	move: 'Move', menu: 'Menu',
 	smooth: (on) => 'Smooth motion: ' + (on ? 'on' : 'off'),
+	sound: (soft) => 'Sound: ' + (soft ? 'soft' : 'GBA'),
 };
 
 const $ = (id) => document.getElementById(id);
@@ -147,6 +149,8 @@ var Module = {
 	}],
 	onRuntimeInitialized: () => { ready = true; offer(); },
 	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
+	// the game's Options changed the sound: the menu's button follows
+	cwSound: (soft) => { keepSound(soft); },
 };
 
 // whether ROM `id` (ROMS) is kept in this browser
@@ -286,13 +290,13 @@ function start() {
 		canvas.style.removeProperty('height');
 		if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
 		keepAwake();
-		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off']);
+		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs()));
 		return;
 	}
 	fit();
 	window.scrollTo(0, 0);
 	canvas.focus();
-	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off']);
+	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs()));
 }
 
 // the screen stays on while the game plays (asked again when the tab returns)
@@ -577,6 +581,29 @@ $('smooth').addEventListener('click', () => {
 	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
 });
 showSmooth();
+
+// Sound: as a GBA plays it, or soft, the Legacy Collection's balance (the
+// game's Options set it too, and tell the button: Module.cwSound)
+function soundSet() { try { return localStorage.getItem('cw-sound'); } catch (e) { return null; } }
+function soundSoft() { return soundSet() === 'soft'; }
+// (passed at the start only once chosen: else settings.ini's)
+function soundArgs() { const v = soundSet(); return v === 'soft' || v === 'gba' ? ['--sound', v] : []; }
+function showSound() {
+	const soft = soundSoft();
+	$('sound-label').textContent = W.sound(soft);
+	$('sound').setAttribute('aria-pressed', soft ? 'true' : 'false');
+}
+function keepSound(soft) {
+	try { localStorage.setItem('cw-sound', soft ? 'soft' : 'gba'); } catch (e) { /* not kept */ }
+	showSound();
+}
+$('sound').addEventListener('click', () => {
+	const soft = !soundSoft();
+	keepSound(soft);
+	track('sound', { state: soft ? 'soft' : 'gba' });
+	if (started) Module.ccall('cw_set_sound', null, ['number'], [soft ? 1 : 0]);
+});
+showSound();
 
 // the last writes before the tab goes away
 window.addEventListener('pagehide', () => { if (ready) persist(); });
