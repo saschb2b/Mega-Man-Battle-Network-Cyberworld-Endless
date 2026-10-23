@@ -59,6 +59,13 @@
 #define BN5_LIB_EVENT_SIZE   12          /* ... the next its text script: an item's find), +8 u16 the panel */
 #define BN5_LIB_EVENT_QUEUE  0x08055D68u /* an event queued: r0 its kind, r1, r2 the word, r3 the panel */
 
+/* The board's sprites (BN5's sprite lists, docs/ROM_DATA.md, BN5's Navis: list, index) */
+#define BN5_LIB_OUTLINE_SPRITE 0x0848A5E0u /* list 7 index 15: the faced panel's outline, two mirrored 32x32 OBJs (OBJ palette 2) */
+#define BN5_LIB_OUTLINE_PAL  0x0848B160u /* ... its palette */
+#define BN5_LIB_ICONS_SPRITE 0x0848D368u /* list 7 index 21: the items' icons that rise over a freed panel (a heart's tiles at 0x0848DFF8) */
+#define BN5_LIB_ICONS_PAL    0x0848E0FCu /* ... their palette (OBJ palette 3) */
+#define BN5_LIB_BANNER_TILES 0x0873CF74u /* about here, the battle's "LIBERATE SUCCESS!": five 32x16 OBJs (OBJ palette 11), not traced */
+
 /* The missions */
 #define BN5_LIB_MISSIONS     0x0804F628u /* the nine missions' records, BN5_LIB_MISSION_SIZE each: +0 the map (group, number), */
 #define BN5_LIB_MISSION_SIZE 0x5C        /* ... +6 and +7 the panels' origin (s8), +0xA the par, +0xB the Order Points at the start, */
