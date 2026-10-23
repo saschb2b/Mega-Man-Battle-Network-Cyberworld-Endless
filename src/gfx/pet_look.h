@@ -109,6 +109,11 @@ SDL_Rect look_navigator(int x, int y, int w, const char *label, int face);
 /* A tag on the information box (its KEYITEM): a green pill, `s` in small
  * capitals, white, in its middle */
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill);
+/* What is new, as E-Mail marks a new mail: `s` (NEW) in small capitals,
+ * orange over their dark red, from (x, y) (3 down on a list's line) */
+#define LOOK_NEW       rgba(255, 173, 41, 255)
+#define LOOK_NEW_SHADE rgba(165, 49, 74, 255)
+void look_new(int x, int y, const char *s);
 
 /* The cursor: an orange arrow pointing right, 9 x 10 from (x, y), as
  * KeyItem's steps: one pixel right, back, two right, six frames each */

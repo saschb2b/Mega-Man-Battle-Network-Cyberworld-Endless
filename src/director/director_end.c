@@ -15,12 +15,20 @@
 #include "save.h"
 #include "weekly.h"
 
+/* where MegaMan was deleted, and by whom, the area named `area` */
+static void cause(char *out, size_t n, const char *area) {
+	if (D.lost_to) snprintf(out, n, "by %s in %s", guardian(D.lost_to)->name, area);
+	else if (D.lost_duel) snprintf(out, n, "in ProtoMan's duel");
+	else snprintf(out, n, "in %s", area);
+}
+
 void end_run(void) {
-	/* what the summary tells: where, and by whom */
-	const char *area = guardian_area_in_text(run.biome, run.side_kind);
-	if (D.lost_to) snprintf(title_cause, sizeof title_cause, "by %s in %s", guardian(D.lost_to)->name, area);
-	else if (D.lost_duel) snprintf(title_cause, sizeof title_cause, "in ProtoMan's duel");
-	else snprintf(title_cause, sizeof title_cause, "in %s", area);
+	/* what the summary tells: where, and by whom; and with the area's short
+	 * name, for a line the whole does not fit ("by TomahawkMan in Robot
+	 * Control Comp" ran off the summary's panel) */
+	int b = run.side_kind == LAYER_UNDERNET ? BIOME_UNDERNET : run.side_kind == LAYER_SECRET ? BIOME_SECRET : run.biome;
+	cause(title_cause, sizeof title_cause, guardian_area_in_text(run.biome, run.side_kind));
+	cause(title_cause_short, sizeof title_cause_short, guardian_area_short(b));
 	/* (the guardian's first battle, lost: its battle data is what the run
 	 * leaves for the next briefing) */
 	const Rival *rv = D.lost_to ? rival(D.lost_to) : NULL;
@@ -54,6 +62,7 @@ void end_run(void) {
  * for the next (docs/META.md). */
 void win_run(void) {
 	snprintf(title_cause, sizeof title_cause, "on layer %d", run.depth);
+	title_cause_short[0] = 0;
 	title_learned[0] = 0;
 	title_new_best = run.depth > profile.best_depth;
 	title_won = true;

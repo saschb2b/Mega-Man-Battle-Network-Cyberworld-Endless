@@ -312,6 +312,8 @@ void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill) {
 	look_caps(x + (w - look_caps_width(s)) / 2, y + (h - LOOK_CAPS_H) / 2, s, LOOK_PAGE, (SDL_Color){ 0, 0, 0, 0 });
 }
 
+void look_new(int x, int y, const char *s) { look_caps(x, y, s, LOOK_NEW, LOOK_NEW_SHADE); }
+
 /* ---- the cursor ---- */
 
 void look_cursor(int x, int y) {

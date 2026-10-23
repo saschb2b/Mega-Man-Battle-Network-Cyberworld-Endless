@@ -39,7 +39,6 @@
 #define MENU_AFTER 40    /* frames from START to the menu */
 #define LEAVE_WHITE 24   /* jacking in: the net rushes by into white... */
 #define LEAVE_FRAMES 40  /* ...which fades to black */
-#define SUMMARY_MIN 60   /* frames before the summary can be closed */
 #define SHOW_FRAMES 600  /* each backdrop's turn */
 #define SWAP_FRAMES 12   /* mosaic out and in between them */
 #define ASK_FIRST "Start over? We'd lose"   /* the question's first line */
@@ -58,6 +57,7 @@ bool title_setup;
 bool title_menu;
 uint32_t title_seed;
 char title_cause[48];
+char title_cause_short[40];
 char title_learned[24];
 bool title_new_best;
 bool title_won;
@@ -67,7 +67,7 @@ static struct {
 	bool has_save;
 	int saved_depth;      /* the saved run's layer, 0 when unknown */
 	bool saved_home;      /* ... saved at home, between acts */
-	bool summary;         /* the finished run's summary over its area */
+	bool summary;         /* the finished run's summary (title_summary.c), its area's picture after it */
 	int next;             /* the cycle's next backdrop */
 	int shown_at;         /* frame the backdrop came in */
 	bool first;           /* the first backdrop fades in instead */
@@ -294,7 +294,10 @@ static void enter(void) {
 	/* (the second screen: the PET at rest, issue #79) */
 	platform_second_screen(second_title_draw, second_title_changed);
 	platform_second_screen_soon();
-	if (S.summary) show_area(run.biome);
+	if (S.summary) {
+		title_summary_open();
+		show_area(run.biome);
+	}
 	else if (S.saved_depth) show_area(saved.biome);
 	else show_next();
 	/* (a won run's summary to BN6's staff roll theme, the title's after:
@@ -391,7 +394,7 @@ static void marks_draw(int x0, int y0) {
 }
 
 static void summary_update(void) {
-	if (S.t <= SUMMARY_MIN || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return;
+	if (!title_summary_update()) return;
 	S.summary = false;
 	audio_music(MUS_TITLE);
 	S.t = S.shown_at = 0;
@@ -483,30 +486,28 @@ static uint32_t lighten(uint32_t c) {
 
 static void render(void) {
 	static uint32_t px[240 * 160];
-	/* the net darkens downwards; more behind the menu and the summary */
-	int extra = S.summary ? 14 : 0;
+	/* the net darkens downwards; more behind the menu */
+	int extra = 0;
 	if (S.pressed) extra = S.t - S.pressed >= 3 ? 6 : 2 * (S.t - S.pressed);
 	uint8_t dim[160];
 	for (int y = 0; y < 160; ++y) dim[y] = (uint8_t)(1 + y * 9 / 160 + extra + S.lift);
 	int k = S.t - S.shown_at, mosaic = 1;
-	if (!S.summary && !S.leaving) {
+	if (!S.leaving) {
 		if (k < SWAP_FRAMES && !S.first) mosaic = SWAP_FRAMES - k;
 		else if (k > SHOW_FRAMES - SWAP_FRAMES) mosaic = k - (SHOW_FRAMES - SWAP_FRAMES);
 	}
 	backdrop_draw(&bd, k, 0, S.jack_y >> 4, dim, mosaic, px);
 
-	if (!S.summary) {
-		/* a shine runs over the logo now and then */
-		int shine = S.t % 300 < 40 ? (S.t % 300) * 8 - 40 : -1000;
-		for (int y = 0; y < 160; ++y) {
-			int ly = y + LOGO_UP;
-			if (ly >= 160) break;
-			for (int x = 0; x < 240; ++x) {
-				uint8_t v = logo[ly][x];
-				if (!v) continue;
-				int s = x + ly / 2 - shine;
-				px[y * 240 + x] = s >= 0 && s < 7 ? lighten(logo_col[v]) : logo_col[v];
-			}
+	/* a shine runs over the logo now and then */
+	int shine = S.t % 300 < 40 ? (S.t % 300) * 8 - 40 : -1000;
+	for (int y = 0; y < 160; ++y) {
+		int ly = y + LOGO_UP;
+		if (ly >= 160) break;
+		for (int x = 0; x < 240; ++x) {
+			uint8_t v = logo[ly][x];
+			if (!v) continue;
+			int s = x + ly / 2 - shine;
+			px[y * 240 + x] = s >= 0 && s < 7 ? lighten(logo_col[v]) : logo_col[v];
 		}
 	}
 	if (!S.tex) {
@@ -550,11 +551,10 @@ static void found_draw(int x0, int y0) {
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
 }
 
-/* the top: the marks and the note over them, neither over a run's summary
- * (a start whose title first showed a summary drew "BN5 found" over
- * "MegaMan was deleted", session 68) */
+/* the top: the marks and the note over them (never over a run's summary,
+ * drawn in their place: a start whose title first showed a summary drew
+ * "BN5 found" over "MegaMan was deleted", session 68) */
 static void top_draw(int x0, int y0) {
-	if (S.summary) return;
 	marks_draw(x0, y0);
 	found_draw(x0, y0);
 }
@@ -570,17 +570,18 @@ static void draw(void) {
 	}
 	/* (the setup over the title as Options is, BN6's PET screen over it all) */
 	if (title_setup_shown()) { title_setup_draw(x0, y0); return; }
+	/* (and the run's summary, the title's picture after it) */
+	if (S.summary) { title_summary_draw(x0, y0); return; }
 	render();
 	SDL_Rect dst = { x0, y0, 240, 160 };
 	SDL_RenderCopy(P.renderer, S.tex, NULL, &dst);
 
 	/* the copyright line: 8 OBJs of 32x32 along the bottom */
 	uint32_t copy = gfx_lz_ref(T.copy_tiles) + 4;
-	if (!S.confirm && !S.summary)   /* (the question takes its place a moment; the summary runs to the bottom) */
+	if (!S.confirm)   /* (the question takes its place a moment) */
 		for (int i = 0; i < 8; ++i) rom_tiles(copy + (uint32_t)i * 16 * 32, T.copy_pal, x0 + i * 32, y0 + 126, 4, 4, 0);
 	top_draw(x0, y0);
 
-	if (S.summary) { title_summary_draw(x0, y0); return; }
 	/* a line above the copyright, the marks holding the top: the build
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the menu's CONTINUE names its own layer there;
