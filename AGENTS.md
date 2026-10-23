@@ -72,6 +72,7 @@ the site.
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM) |
 | `tools/uinput_keys.py` | On-device input injection for testing |
 | `tools/play.py` | Playtests: the Linux build headless (`--remote`), played a batch of input at a time, a picture and the state in words after each |
+| `tools/cw.py`, `tools/cw_mcp.py`, `.mcp.json` | The agents' tools (docs/DEVTOOLS.md, Agents' tools): the `cyberworld` MCP server's `shot` (a fresh game from a route or options, input, its state and picture; `ref` another commit's build beside it), `play` (`play.py`'s games, what changed and a picture a call) and `build` (a build or a check, its complaints alone); the routes to the screens in `cw_routes.py`, the pictures cut, sheeted and compared in `cw_pictures.py`, the benchmark `cw_bench.py`; the same from a shell as `tools/cw.py`. Stateless over `.build/play` and `.build/cw` |
 | `tools/voice_catalog.py`, `tools/voice_dashboard/` | The voice review (issue #135, docs/voice/README.md): every line of the words files read as C into `docs/voice/catalog.json` (ids that survive rewording, boxes, speakers, placeholders, the chat box's pages, comments, VOICE.md's flags, our numbers beside BN6's; `--check` for `build.py lint`), and the review page published as an artifact with the catalog beside it, which keeps the owner's verdicts and directions in its db |
 | `docs/voice/` | The catalog (`catalog.json`, written by the tool, never by hand) and how the review runs: publishing the dashboard, what it stores, a voice pass (`README.md`) |
 | `.claude/skills/playtest-loop/` | The playtest loop as a skill: a persona plays through `tools/play.py`, its reports are triaged and fixed, and the loop's log (`lessons.md`) grows with every session |
@@ -257,6 +258,9 @@ python3 build.py macos      # build/release/cyberworld-endless-macos.dmg, on a M
 python3 build.py ios        # build/release/cyberworld-endless.ipa, on a Mac with Xcode (--simulator: the Simulator's app)
 python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-builder on this machine)
 python3 build.py 3ds        # build/3ds: cyberworld-endless.cia and .3dsx (devkitARM in Docker; 3ds/README.md)
+python3 tools/cw.py shot options/audio [--do CMDS] [--until COND] [--ref REF]   # one call: a look at a screen (the cyberworld MCP server's shot; docs/DEVTOOLS.md, Agents' tools)
+python3 tools/cw.py play NAME --start ROUTE|OPTIONS --do CMDS   # one call: play.py's game, what changed and a picture (the MCP's play)
+python3 tools/cw.py build [host|linux|test|lint]   # a build or check, its complaints alone (the MCP's build)
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
 python3 tools/play.py do NAME "press A; hold UP 30" [--every 10] [--keep DIR]   # input, then a picture and the state (--keep: each frame into DIR)
 python3 tools/square_tour.py [SEED ...]   # the Net Square on a local server, three games: the plaza, each warp and part, the walks timed (build.py linux and server first)
@@ -281,6 +285,14 @@ python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's ch
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip
 ```
+
+An agent builds, captures, plays and compares through the `cyberworld` MCP
+server (`.mcp.json`; docs/DEVTOOLS.md, Agents' tools) or `tools/cw.py`: a
+call each, the host build made first where a source is newer, the build's
+output kept to its complaints, the state in words with a `screen` line, and
+the game's 240x160 picture inline at 2x, or none where the words answer.
+`build.py shot` below stays the way for the release pictures' scripted runs
+and for options the tools do not take.
 
 The host, Linux, Windows and macOS builds are desktop builds
 (`CW_DESKTOP`): a resizable window, saves in
@@ -354,10 +366,10 @@ tiles, palettes and OBJs back to ROM offsets.
 
 | Change | Checks |
 | --- | --- |
-| Engine code | `build.py test`, `build.py lint`, a headless capture of the affected screen, an autopilot run |
+| Engine code | `build.py test`, `build.py lint`, a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before), an autopilot run (`shot` from `CYBERWORLD_AUTOPILOT=1 layer` until `layer>=2`) |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in; where Lan's HP changes, MegaMan walked onto the pink pad from the corridor, its last frame in layer 1 (BN6's trigger stops short of the pad's art, session 74): `build.py shot --scene town --seed 2 --frames 1420 --input "$(python3 -c "print('40:,' + '4:A,6:,' * 46 + '30:,0:place -40 -8 7,10:,6:R,500:,' + '4:A,16:,' * 8 + '0:place 171 0 1,10:,25:UP+RIGHT,250:')")" --shot 1410:/src/.build/pad.bmp` (a fresh `--data-dir`), and again with `0:place 171 -5 1,10:,12:RIGHT,250:` for its last walk, MegaMan on the pad's left rim (session 75); where a pad's zone changes (`pad_art.c`), a layer's exit pad from its left rim too, docs/ROM_DATA.md's Warp pads |
-| Layer objects, scripts, shops | A capture of the talk or screen with scripted input |
+| Layer objects, scripts, shops | A capture of the talk or screen with scripted input (`shot` from `layer --talk shop:430`) |
 | Lines (a words file: `*_words.c`, `*_lines.c`, `*_text.c`) | docs/VOICE.md's checks; `python3 tools/voice_catalog.py` (the catalog regenerated and committed with the line, the flags of the lines touched read over), `build.py lint` (fails while it is stale), `build.py test`; a capture of the talk (`--talk`); the dashboard republished with the new catalog, and the reviews and directions acted on marked applied (docs/voice/README.md, A voice pass) |
 | Difficulty, encounters, guardians, rewards | `build.py test`, `build.py pacing` (0 past their band, BN5's guardians among them), an autopilot run; where BN5's content changes, over `--net-biome x0`-`x5` and with `--guardian 24`-`29` too, fresh data folders, the run logs looked over |
 | Drops, prices, Mystery Data, dealers' stock, the economy's curves (`loot.c`'s rolls, `net_gen.c`'s data, `shop.c`, `economy.c`) | The game-design skill first; `build.py economy` (0 of the plan in play outside its bands; a number moved on purpose sets its band's centre in `economy.c`, the report's before and after in the commit), `build.py test` (`test_economy`, `LAYER_MAKE_HASH`), `build.py pacing` where a battle's reward changes |
