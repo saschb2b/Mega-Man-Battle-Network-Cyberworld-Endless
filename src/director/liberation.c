@@ -13,8 +13,10 @@
  * down, the Darkloid's ring can be liberated, and the Darkloid fought
  * from it; deleted, the board is done, the par's prize given and the
  * exit open. The units are the layer's own map objects (OBJ_UNIT), moved
- * by their objects' places. MegaMan alone for now: teammates (stage 3)
- * and BN5's battle rules (stage 2) come later. */
+ * by their objects' places. Each battle is BN5's liberation battle on
+ * BN6's loop (liberation_battle.c): three turns, the one-turn win, a time
+ * up that leaves the panel dark. MegaMan alone for now: teammates come
+ * with stage 3. */
 #include "liberation.h"
 
 #include <stdio.h>
@@ -31,15 +33,14 @@
 #include "encounter.h"
 #include "flags.h"
 #include "guardians.h"
+#include "liberation_battle.h"
 #include "liberation_state.h"
 #include "liberation_words.h"
 #include "loot.h"
 #include "bn5_liberation.h"
 #include "netmap.h"
-#include "rom.h"
 #include "run.h"
 #include "talk.h"
-#include "text.h"
 
 LibState LB;
 
@@ -167,6 +168,7 @@ void lib_begin(void) {
 	LB.face = 0;
 	LB.words[0] = 0;
 	LB.briefed = LB.holes_told = LB.prize_given = false;
+	lib_battle_disarm();
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.slot[u] = -1;
 		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &LB.ux[u], &LB.uy[u]);
@@ -292,18 +294,19 @@ static void fight(int cmd) {
 		e = make_encounter(run.depth, run.biome, d <= 2 ? ENC_EASY : d <= 6 ? ENC_NORMAL : ENC_CHALLENGE);
 	}
 	if (cmd == LIB_CMD_LONGSWRD) --LB.op;
-	LB.fight_seen = LB.custom_open = false;
-	LB.customs = 0;
+	LB.fight_seen = false;
+	/* (BN5's rules on BN6's loop: three turns, the Darkloid's none;
+	 * liberation_battle.c. No running from it, as from BN5's) */
+	e.held = true;
 	set_encounter(&e, true);
+	lib_battle_arm(LB.fight == LIB_FIGHT_DARKLOID ? 0 : LIB_TURNS);
 	LB.step = LIB_STEP_BATTLE;
 }
 
 void lib_battle_frame(void) {
 	if (!LB.on || LB.step != LIB_STEP_BATTLE) return;
 	LB.fight_seen = true;
-	bool open = emu_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM;
-	if (open && !LB.custom_open) ++LB.customs;
-	LB.custom_open = open;
+	lib_battle_watch();
 }
 
 /* Panel (x, y) liberated: what it held given; into `held`, words of it */
@@ -324,9 +327,7 @@ static int free_around(int x, int y, char *held, size_t n) {
 	int freed = 0;
 	for (int dy = -1; dy <= 1; ++dy)
 		for (int dx = -1; dx <= 1; ++dx) {
-			int k = dx || dy ? LB.b.kind[y + dy][x + dx] : LIB_VOID;
-			if (k != LIB_DARK && k != LIB_ITEM && !(k == LIB_RING && !lib_holes_left(&LB.b))) continue;
-			if (lib_unit_at(x + dx, y + dy) >= 0) continue;
+			if ((!dx && !dy) || !lib_swept(x + dx, y + dy)) continue;
 			free_panel(x + dx, y + dy, held, n);
 			++freed;
 		}
@@ -350,6 +351,7 @@ static void fight_won(bool one_turn) {
 		LB.b.unit[LB.fight_unit].gone = true;
 		LB.back_in[LB.fight_unit] = BACK_PHASES;
 		free_panel(LB.fx, LB.fy, held, sizeof held);
+		if (one_turn) freed += free_around(LB.fx, LB.fy, held, sizeof held);
 		back = guardian_back(LB.fight_unit);
 	} else if (LB.fight == LIB_FIGHT_HOLE) {
 		LB.b.kind[LB.fy][LB.fx] = LIB_CLEAN;
@@ -366,14 +368,17 @@ static void fight_won(bool one_turn) {
 	}
 	say_more(lib_battle_words(LB.fight, true, one_turn, freed, lib_holes_left(&LB.b), back));
 	say_more(held);
-	LB.cheer = one_turn ? LIB_CHEER_ONE_TURN : LIB_CHEER_SUCCESS;
+	/* (BN5's banner was the battle's own, LIBERATE SUCCESS! or 1 TURN
+	 * LIBERATE!, as BN5 shows it at the win: liberation_battle.c) */
+	LB.cheer = LIB_CHEER_NONE;
 	LB.cheer_t = 0;
 }
 
 static void after_fight(void) {
-	bool won = emu_read8(BN6_BATTLE_RESULT) == 1, one_turn = won && LB.customs <= 1;
-	if (emu_debug_on()) fprintf(stderr, "liberation: battle %d at %d,%d %s%s (custom screens %d)\n", LB.fight, LB.fx, LB.fy, won ? "won" : "not won",
-		one_turn ? " in one turn" : "", LB.customs);
+	int turn = 0, out = lib_battle_end(&turn);
+	bool won = out == LIB_OUT_WON, one_turn = won && turn <= 1;
+	if (emu_debug_on()) fprintf(stderr, "liberation: battle %d at %d,%d %s%s (turn %d)\n", LB.fight, LB.fx, LB.fy,
+		won ? "won" : out == LIB_OUT_TIME_UP ? "time up" : "lost", one_turn ? " in one turn" : "", turn);
 	LB.words[0] = 0;
 	if (won) fight_won(one_turn);
 	else say_more(lib_battle_words(LB.fight, false, false, 0, 0, false));
