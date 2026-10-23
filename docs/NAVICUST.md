@@ -206,6 +206,50 @@ player's to press in every run, and nothing names a code not yet entered
 (docs/META.md). MegaMan's fit checks read the shape the flags choose
 (issue #54).
 
+### 10. What is held, beside the draft
+
+A player picked UnderSht from a guardian's draft "when I already had it a
+few too many times", and asked to see the current setup first, or a
+count beside each program. A second UnderSht is a dead option: BN6 sets
+UnderSht's flag once, and a copy sets it again to no gain. A draft of
+three that holds one is a draft of two (card-draft-with-skip: each of
+the three must be worth the slot), and a menu that offers it without a
+word is a lying signifier.
+
+What BN6 does with a second copy, verified in bn6f's compile
+(`applyNavicustPrograms_813C684`, which calls each placed program's own
+`navicust_NCP_*` function, and the program records read from the ROM):
+
+| Programs | A second copy |
+| --- | --- |
+| SuprArmr, FstBarr, Shield, Reflect, AntiDmg, FlotShoe, AirShoes, UnderSht, ChpShufl, Collect, SlipRunr, AutoHeal, BodyPack, BugStop | Nothing: each sets a flag or a value. BodyPack sets SuprArmr's, FlotShoe's, AirShoes' and UnderSht's |
+| AttckMAX, SpeedMAX, ChargMAX | Nothing: each sets its Buster stat to 4, the cap its +1 adds up to |
+| Custom1, Custom2 | Adds one or two chips a turn (the stat capped at 8) |
+| MegFldr1, MegFldr2, GigFldr1 | Adds one or two Mega chips, or a Giga (each stat capped at 10) |
+| FldrPak1, FldrPak2 | Adds as Custom and MegFldr together |
+| Attack+1, Speed+1, Charge+1, BustPack | Adds one (BustPack three to each; each stat capped at 4) |
+| HP+50 to HP+500 | Adds its HP, with no cap |
+
+Programs of one category in their record's first byte run once from the
+command line, the rightmost: Shield, Reflect and AntiDmg share one (2),
+SuprArmr has its own (1).
+
+So the draft offers no program that would add nothing to the programs
+held (`navicust_adds_nothing`): not one whose effect is set and already
+held, not SuprArmr or UnderSht beside BodyPack, not a +1 beside its MAX.
+Another program of the build takes its place. Shield beside Reflect is
+still offered: it replaces, which is the player's call. A program that
+adds shows the copies held beside its colour ("HP+50 (white) Held 1"),
+read from the board as the layer was made (`run.programs`: those on it,
+and those in the PET that fit beside them). The widest row,
+"FldrPak1 (yellow) Held 1", fits BN6's choice box.
+
+A look at the NaviCust from the offer, through BN6's own screen, was
+weighed and left: the PET's sub-screen opened from a chat mid-choice,
+and the choice taken up again after it, is a larger hook than the
+question needs, and with the dead options gone and the count beside the
+rest the box answers what the look would have.
+
 ## Teaching it
 
 Introduce, develop, twist, test (the skill's onboarding shape), each at
@@ -301,6 +345,8 @@ Built (`src/layer/navicust.c`, the Guardian Data script in
   row above; a player heard the bug explained after every Chip Trader
   trade, issue #25).
 
+- The draft offers no program that would add nothing to those held, and
+  shows the copies held of the rest (10, above).
 - Compression codes kept once entered (issue #50): the profile's codebook,
   Dad's Compression mail, and MegaMan's word on a known code where a
   program would fit compressed; the fit checks read the compressed shapes
