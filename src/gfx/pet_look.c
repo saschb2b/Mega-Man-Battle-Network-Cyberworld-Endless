@@ -362,6 +362,10 @@ void look_arrow(int x, int y, bool right) {
 	picture(x, y, rows, 8, pal, !right);
 }
 
+void look_pointer(int x, int y, int size, bool left, SDL_Color c) {
+	for (int i = 0; i < size; ++i) fill_rect(left ? x - i : x + i, y + 2 + i, 1, 2 * size - 2 * i, c);
+}
+
 /* ---- the capitals ---- */
 
 int look_caps_width(const char *s) {
@@ -505,7 +509,7 @@ int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_
 		} else snprintf(cur, sizeof cur, "%.95s", next);
 		p += k;
 		if (*p == '|' || !*p) {
-			if (*cur || *p == '|') look_text(x, y + n++ * line, cur, c, shade, TEXT_LEFT);
+			if ((*cur || *p == '|') && n < most) look_text(x, y + n++ * line, cur, c, shade, TEXT_LEFT);
 			*cur = 0;
 			if (!*p) break;
 			++p;
