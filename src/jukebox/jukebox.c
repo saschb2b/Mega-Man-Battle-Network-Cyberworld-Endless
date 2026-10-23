@@ -152,7 +152,8 @@ static void playing_frame(void) {
 	int loops = audio_song_state(s->game, s->song, J.v.levels, JUKE_TRACKS, &J.v.tracks);
 	bool sounds = false;
 	for (int i = 0; i < J.v.tracks; ++i) sounds |= J.v.levels[i] != 0;
-	J.silent = sounds ? 0 : J.silent + 1;
+	/* (no tracks read: no sound to tell its silence by) */
+	J.silent = sounds || !J.v.tracks ? 0 : J.silent + 1;
 	if (loops >= 0 && J.silent >= SILENT && J.frames > SILENT) {
 		audio_song_stop(s->game, s->song);
 		loops = -1;

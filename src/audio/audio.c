@@ -247,7 +247,8 @@ void audio_song_fade(int rom, int song, int speed) {
 
 int audio_song_state(int rom, int song, uint8_t *levels, int max, int *tracks) {
 	*tracks = 0;
-	if (!dev && !offline) return -1;
+	/* (no sound to play it on: as if it played, quiet, and never went round) */
+	if (!dev && !offline) return 0;
 	lock();
 	int loops = mp2k_song_loops(rom, song);
 	*tracks = mp2k_song_levels(rom, song, levels, max);
