@@ -188,7 +188,7 @@ static void favourites(int x, int y, const StripView *v) {
 		minifont_draw(x + r.x + 8, y + r.y + 3, name, lit ? INK : PET_WHITE, 1);
 	}
 	const char *hint = v->kept >= 0 ? strip_text_kept(v->kept) : strip_text_keep;
-	minifont_draw_centered(x + FAV_X + FAV_W / 2, y + CELLS_Y + 49, hint, v->kept >= 0 ? PET_GOLD : PET_DIM, 1);
+	minifont_draw_centered(x + FAV_X + FAV_W / 2, y + CELLS_Y + 47, hint, v->kept >= 0 ? PET_GOLD : LOOK_DIM, 1);
 }
 
 void strip_draw(int x, int y, const StripView *v) {
