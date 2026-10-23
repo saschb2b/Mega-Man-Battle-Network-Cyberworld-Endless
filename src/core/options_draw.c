@@ -37,12 +37,6 @@ int options_tap_line(int x, int y) {
 	return (y - ROW_Y + 2) / h;
 }
 
-/* the PET's small arrows: the cursor's and a section's chevron point right,
- * a value's pair either way */
-static void pointer(int x, int y, int size, bool left, SDL_Color c) {
-	for (int i = 0; i < size; ++i) fill_rect(left ? x - i : x + i, y + 2 + i, 1, 2 * size - 2 * i, c);
-}
-
 /* the band's name: the section open, Options over them */
 static const char *title_word(void) {
 	return options_word(O.section == SECTION_HUB ? OW_TITLE : O.section == SECTION_DISPLAY ? OW_DISPLAY : OW_AUDIO);
@@ -75,12 +69,12 @@ static void line_draw(int x0, int y, int kind, bool on) {
 		const char *v = value_word(kind);
 		int r = x0 + VALUE_R, l = r - look_text_width(v);
 		look_text(l, y, v, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
-		pointer(l - 5, y, 4, true, PET_ORANGE);
-		pointer(r + 4, y, 4, false, PET_ORANGE);
+		look_pointer(l - 5, y, 4, true, PET_ORANGE);
+		look_pointer(r + 4, y, 4, false, PET_ORANGE);
 		return;
 	}
 	if (value) look_text(x0 + VALUE_R - look_text_width(value), y, value, LOOK_EDGE_HI, LOOK_SHADE, TEXT_LEFT);
-	pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
+	look_pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
 }
 
 static const char *note_words(int kind) {

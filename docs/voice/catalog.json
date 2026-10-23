@@ -1575,6 +1575,22 @@
   "title_lines:summary_words.said": {
    "line": 6
   },
+  "title_setup_text:setup_cross_note": {
+   "comment": "(its costs said: BN6's own weakness, which a playtester was told wrong; and \"break it\": a playtester knew it from BN6, a newer player would not)",
+   "header": "The Cross row's note for a Cross with its `strong` power and `weak` element (strong NULL: only the weakness), into buf: '|' breaks a line",
+   "line": 45
+  },
+  "title_setup_text:setup_helpers_on": {
+   "header": "the Help row's value with `on` helpers on, where their names run too long",
+   "line": 62
+  },
+  "title_setup_text:setup_word": {
+   "line": 38
+  },
+  "title_setup_text:words": {
+   "comment": "(in SetupWord's order, its name beside each)",
+   "line": 9
+  },
   "town_lines:acdc_checks": {
    "line": 69
   },
@@ -2219,6 +2235,15 @@
    "speaker": "Lan",
    "stem": "title_lines"
   },
+  "src/scenes/title_setup_text.c": {
+   "comment": "title_setup_text.h. Menu words, short and plain: what each row sets, and in the information box what the choice under the cursor does, as KeyItem's says what an item is.",
+   "domain": "Title",
+   "kind": "screen",
+   "lines": 18,
+   "shows": [],
+   "speaker": "Screen",
+   "stem": "title_setup_text"
+  },
   "src/second/second_text.c": {
    "comment": "second_text.h. The Crosses' weaknesses and gifts are powers.c's, from BN6's own Cross tutorials; the Cybeast's turns and its Attack+30 are BN6's Cybeast tutorial's (bn6f TextScriptDadCybeastTut: \"Each turn you spend as a Cybeast will decrease your EmotionCounter by 1\", tired at 0, and \"don't press the CybeastButton\" then: he would BeastOver), Full Synchro's x2 its battle tutorial's. Each verified in a battle played through tools/play.py (docs/ROM_DATA.md, the second screen's battle).",
    "domain": "The second screen",
@@ -2588,10 +2613,11 @@
    },
    "Title": {
     "files": [
-     "src/scenes/title_lines.c"
+     "src/scenes/title_lines.c",
+     "src/scenes/title_setup_text.c"
     ],
     "flagged": 0,
-    "lines": 7,
+    "lines": 25,
     "speech": 7
    },
    "Trade Central": {
@@ -2743,7 +2769,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1689,
+  "lines": 1707,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2995,6 +3021,10 @@
  "version": 1,
  "conversations": [
   {"container":"title_lines:summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","id":"title_lines:summary_words.said","line":7,"lines":["title_lines:summary_words.said:SUMMARY_WON_HOW","title_lines:summary_words.said:SUMMARY_WON","title_lines:summary_words.said:SUMMARY_LOST_HOW","title_lines:summary_words.said:SUMMARY_LEARNED","title_lines:summary_words.said:SUMMARY_BEST","title_lines:summary_words.said:SUMMARY_ROUGH","title_lines:summary_words.said:SUMMARY_FURTHER"],"speakers":["Narration","Lan"],"title":"Summary words: said","when":""},
+  {"container":"title_setup_text:words","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:words","line":10,"lines":["title_setup_text:words:0","title_setup_text:words:12","title_setup_text:words:15","title_setup_text:words:16","title_setup_text:words:17","title_setup_text:words:18","title_setup_text:words:19","title_setup_text:words:20","title_setup_text:words:21","title_setup_text:words:22","title_setup_text:words:23","title_setup_text:words:24","title_setup_text:words:25","title_setup_text:words:26"],"speakers":["Screen"],"title":"Words","when":"(in SetupWord's order, its name beside each)"},
+  {"container":"title_setup_text:setup_word","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_word","line":39,"lines":["title_setup_text:setup_word:0"],"speakers":["Screen"],"title":"Setup word","when":""},
+  {"container":"title_setup_text:setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_cross_note","line":46,"lines":["title_setup_text:setup_cross_note:0","title_setup_text:setup_cross_note:1"],"speakers":["Screen"],"title":"The Cross row's note for a Cross with its `strong` power and `weak` element","when":"(its costs said: BN6's own weakness, which a playtester was told wrong; and \"break it\": a playtester knew it from BN6, a newer player would not)"},
+  {"container":"title_setup_text:setup_helpers_on","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_helpers_on","line":63,"lines":["title_setup_text:setup_helpers_on:0"],"speakers":["Screen"],"title":"The Help row's value with `on` helpers on, where their names run too long","when":"the Help row's value with `on` helpers on, where their names run too long"},
   {"container":"town_lines:central_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:central_folk","line":16,"lines":["town_lines:central_folk:0.5","town_lines:central_folk:1.5","town_lines:central_folk:2.5","town_lines:central_folk:3.5","town_lines:central_folk:4.5","town_lines:central_folk:5.5","town_lines:central_folk:6.5","town_lines:central_folk:7.5","town_lines:central_folk:8.5","town_lines:central_folk:9.5","town_lines:central_folk:10.5","town_lines:central_folk:11.5","town_lines:central_folk:12.5"],"speakers":["Townsfolk","Mr.Prog"],"title":"Central folk: its people","when":"Its people: at the statue, the shop, the school gate, the bus stop, the houses, the closed road to the Expo. Some have lines of the run's at home (town_words.c); at each visit they stand elsewhere (town_folk.c)."},
   {"container":"town_lines:central_checks","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:central_checks","line":37,"lines":["town_lines:central_checks:0","town_lines:central_checks:1","town_lines:central_checks:2","town_lines:central_checks:3","town_lines:central_checks:4","town_lines:central_checks:5","town_lines:central_checks:6","town_lines:central_checks:7","town_lines:central_checks:8","town_lines:central_checks:9","town_lines:central_checks:10","town_lines:central_checks:11","town_lines:central_checks:12"],"speakers":["Lan","MegaMan","Townsfolk"],"title":"Central checks: what its checks","when":"What its checks (triggers 0xF0 + n, in front of each thing) say: the houses (Lan's, the pink one, the orange one, the gray pair), the flower bed, the bus stop, Aster Land's door, the Expo gates' signs and road, the Academy's gate, the statue, Aster Land's window."},
   {"container":"town_lines:acdc_folk","domain":"The town","file":"src/world/town_lines.c","id":"town_lines:acdc_folk","line":56,"lines":["town_lines:acdc_folk:0.5","town_lines:acdc_folk:1.5","town_lines:acdc_folk:2.5","town_lines:acdc_folk:3.5","town_lines:acdc_folk:4.5","town_lines:acdc_folk:5.5","town_lines:acdc_folk:6.5","town_lines:acdc_folk:7.5","town_lines:acdc_folk:8.5","town_lines:acdc_folk:9.5","town_lines:acdc_folk:10.5"],"speakers":["Townsfolk","Mr.Prog"],"title":"Acdc folk: its people","when":"Its people: kids in the park, the chip shop, the Metroline, the mansion, the houses, the promenade."},
@@ -5083,6 +5113,24 @@
   {"boxes":[{"pages":[["Our deepest dive","yet,MegaMan!"]],"speaker":"Lan","text":"Our deepest dive yet,MegaMan!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_BEST","kind":"speech","line":11,"speaker":"Lan","speakers":["Lan"],"text":"Our deepest dive yet,MegaMan!","text_hash":"e5aeac254901"},
   {"boxes":[{"pages":[["That was rough...","Let's try again!"]],"speaker":"Lan","text":"That was rough... Let's try again!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_ROUGH","kind":"speech","line":12,"speaker":"Lan","speakers":["Lan"],"text":"That was rough... Let's try again!","text_hash":"b8ce390b9435"},
   {"boxes":[{"pages":[["We'll get further","next time!"]],"speaker":"Lan","text":"We'll get further next time!"}],"container":"summary_words.said","domain":"Title","file":"src/scenes/title_lines.c","flags":[],"id":"title_lines:summary_words.said:SUMMARY_FURTHER","kind":"speech","line":13,"speaker":"Lan","speakers":["Lan"],"text":"We'll get further next time!","text_hash":"8624c0b3705a"},
+  {"boxes":[{"pages":[["JACK-IN SETUP"]],"speaker":"Screen","text":"JACK-IN SETUP"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:0","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"JACK-IN SETUP","text_hash":"30a7d532d142"},
+  {"boxes":[{"pages":[["JACK IN!"]],"speaker":"Screen","text":"JACK IN!"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:12","kind":"screen","line":22,"speaker":"Screen","speakers":["Screen"],"text":"JACK IN!","text_hash":"943f33452e84"},
+  {"boxes":[{"pages":[["Three acts, then the","Nest"]],"speaker":"Screen","text":"Three acts, then the Nest"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:15","kind":"screen","line":25,"speaker":"Screen","speakers":["Screen"],"text":"Three acts, then the Nest","text_hash":"86f33c4a3cae"},
+  {"boxes":[{"pages":[["Three acts, then the","Nest. Win it for the","endless net"]],"speaker":"Screen","text":"Three acts, then the Nest. Win it for the endless net"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:16","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"Three acts, then the Nest. Win it for the endless net","text_hash":"a40cc46f182c"},
+  {"boxes":[{"pages":[["The net repeats,","harder each time"]],"speaker":"Screen","text":"The net repeats, harder each time"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:17","kind":"screen","line":27,"speaker":"Screen","speakers":["Screen"],"text":"The net repeats, harder each time","text_hash":"d91dade671c2"},
+  {"boxes":[{"pages":[["The net as it comes"]],"speaker":"Screen","text":"The net as it comes"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:18","kind":"screen","line":28,"speaker":"Screen","speakers":["Screen"],"text":"The net as it comes","text_hash":"c53247f9dd42"},
+  {"boxes":[{"pages":[["The net as it comes.","Win it for threat 1"]],"speaker":"Screen","text":"The net as it comes. Win it for threat 1"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:19","kind":"screen","line":29,"speaker":"Screen","speakers":["Screen"],"text":"The net as it comes. Win it for threat 1","text_hash":"eb63cdf13355"},
+  {"boxes":[{"pages":[["Delete a Cross Navi","to start in his","Cross"]],"speaker":"Screen","text":"Delete a Cross Navi to start in his Cross"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:20","kind":"screen","line":30,"speaker":"Screen","speakers":["Screen"],"text":"Delete a Cross Navi to start in his Cross","text_hash":"76b743931c4a"},
+  {"boxes":[{"pages":[["Crosses from the","guardians we delete"]],"speaker":"Screen","text":"Crosses from the guardians we delete"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:21","kind":"screen","line":31,"speaker":"Screen","speakers":["Screen"],"text":"Crosses from the guardians we delete","text_hash":"070406c0651a"},
+  {"boxes":[{"pages":[["From the first","battle"]],"speaker":"Screen","text":"From the first battle"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:22","kind":"screen","line":32,"speaker":"Screen","speakers":["Screen"],"text":"From the first battle","text_hash":"20ecea50d5ea"},
+  {"boxes":[{"pages":[["No other Cross this","run"]],"speaker":"Screen","text":"No other Cross this run"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:23","kind":"screen","line":33,"speaker":"Screen","speakers":["Screen"],"text":"No other Cross this run","text_hash":"f5fb212eb99f"},
+  {"boxes":[{"pages":[["Start in more:","delete Navis"]],"speaker":"Screen","text":"Start in more: delete Navis"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:24","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"Start in more: delete Navis","text_hash":"5fda215a4041"},
+  {"boxes":[{"pages":[["Helpers, each on or","off. A helped run's","summary names them"]],"speaker":"Screen","text":"Helpers, each on or off. A helped run's summary names them"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:25","kind":"screen","line":35,"speaker":"Screen","speakers":["Screen"],"text":"Helpers, each on or off. A helped run's summary names them","text_hash":"2d5166e12fbd"},
+  {"boxes":[{"pages":[["Into the net with","these. They stay for","the next run"]],"speaker":"Screen","text":"Into the net with these. They stay for the next run"}],"container":"words","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:words:26","kind":"screen","line":36,"speaker":"Screen","speakers":["Screen"],"text":"Into the net with these. They stay for the next run","text_hash":"c52667baadda"},
+  {"boxes":[{"pages":[["a word for each","SetupWord"]],"speaker":"Screen","text":"a word for each SetupWord"}],"container":"setup_word","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"fragment":true,"id":"title_setup_text:setup_word:0","kind":"screen","line":39,"speaker":"Screen","speakers":["Screen"],"text":"a word for each SetupWord","text_hash":"98c8cbb753e2"},
+  {"boxes":[{"pages":[["{strong}."]],"speaker":"Screen","text":"{strong}."},{"pages":[["{weak} hits do 2x","and break it"]],"speaker":"Screen","text":"{weak} hits do 2x and break it"}],"container":"setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_cross_note:0","kind":"screen","line":46,"placeholders":[{"name":"strong","spec":"%s"},{"name":"weak","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{strong}.|{weak} hits do 2x and break it","text_hash":"49fa4eed54b7"},
+  {"boxes":[{"pages":[["From the first","battle. {weak}"],["hits do 2x and break","it"]],"speaker":"Screen","text":"From the first battle. {weak} hits do 2x and break it"}],"container":"setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_cross_note:1","kind":"screen","line":47,"placeholders":[{"name":"weak","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"From the first battle. {weak} hits do 2x and break it","text_hash":"8c0dc446ee0c"},
+  {"boxes":[{"pages":[["{on} on"]],"speaker":"Screen","text":"{on} on"}],"container":"setup_helpers_on","domain":"Title","file":"src/scenes/title_setup_text.c","flags":[],"id":"title_setup_text:setup_helpers_on:0","kind":"screen","line":63,"placeholders":[{"name":"on","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"{on} on","text_hash":"62f60b98f38c"},
   {"boxes":[{"pages":[["Weak to","{powers_cross_weakness}{strong}{strong}{navis}{navis}"]],"speaker":"Screen","text":"Weak to {powers_cross_weakness}{strong}{strong}{navis}{navis}"}],"container":"second_cross_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_cross_lines:0","kind":"screen","line":33,"placeholders":[{"name":"powers_cross_weakness","spec":"%s"},{"name":"strong","spec":"%s"},{"name":"strong","spec":"%s"},{"name":"navis","spec":"%s"},{"name":"navis","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Weak to {powers_cross_weakness}{strong}{strong}{navis}{navis}","text_hash":"4168eac4647c"},
   {"boxes":[{"pages":[["{turns}","turn{turns} as a","Cybeast"]],"speaker":"Screen","text":"{turns} turn{turns} as a Cybeast"},{"pages":[["Elementless attack","chips that don't dim"],["the screen:","Attack+30"]],"speaker":"Screen","text":"Elementless attack chips that don't dim the screen: Attack+30"}],"container":"second_beast_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_beast_lines:0","kind":"screen","line":39,"placeholders":[{"name":"turns","spec":"%d"},{"name":"turns","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{turns} turn{turns} as a Cybeast|Elementless attack chips that don't dim the screen: Attack+30","text_hash":"31a289af5d94"},
   {"boxes":[{"pages":[["MegaMan is tired:"]],"speaker":"Screen","text":"MegaMan is tired:"},{"pages":[["a Beast Out now ends","in BeastOver"]],"speaker":"Screen","text":"a Beast Out now ends in BeastOver"}],"container":"second_beast_lines","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_beast_lines:1","kind":"screen","line":41,"speaker":"Screen","speakers":["Screen"],"text":"MegaMan is tired:|a Beast Out now ends in BeastOver","text_hash":"526465b1758e"},
