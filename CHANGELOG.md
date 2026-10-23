@@ -16,8 +16,12 @@
   that explain sit in SubChip's flat panel. They move as BN6's do too:
   each fades up from black as it opens, the cursor's arrow steps as
   KeyItem's, START on Trade Central's list opens a SORT pop-up as the
-  folder editor's does, and Options has no Done lines: B leaves. The
-  rules, measured from BN6's screens, are in docs/UI.md.
+  folder editor's does, and Options has no Done lines: B leaves. And
+  MegaMan speaks as he does in the PET's E-Mail: in a chip trade his face
+  and words sit in BN6's NAVIGATOR box, asking "Lan,trade our FireBrn1 F
+  for Beta's MrkCan1 M?" with Yes and No, and the statistics question is
+  asked in BN6's chat box. The rules, measured from BN6's screens, are in
+  docs/UI.md.
 
 ## 0.14.1 (2026-10-23)
 

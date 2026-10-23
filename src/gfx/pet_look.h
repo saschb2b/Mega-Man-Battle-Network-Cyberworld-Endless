@@ -98,6 +98,14 @@ void look_corners(int x, int y, int w, int h);
 /* The information box: light green, outlined, `label` in small capitals
  * on its top left: the room under the label */
 SDL_Rect look_info(int x, int y, int w, int h, const char *label);
+/* BN6's NAVIGATOR box (E-Mail's, STATUS's, NaviCust's question): the
+ * information box with `label` (the caller's word, NAVIGATOR), the face
+ * `face` (a mugshot of the ROM's, FACE_MEGAMAN) on its left, the white
+ * page beside it for his words, LOOK_NAV_H tall from (x, y): the page.
+ * His words go on it in the chat font, LOOK_NAV_LINE apart, three at most */
+#define LOOK_NAV_H 59
+#define LOOK_NAV_LINE 14
+SDL_Rect look_navigator(int x, int y, int w, const char *label, int face);
 /* A tag on the information box (its KEYITEM): a green pill, `s` in small
  * capitals, white, in its middle */
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill);

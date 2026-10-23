@@ -292,6 +292,20 @@ SDL_Rect look_info(int x, int y, int w, int h, const char *label) {
 	return (SDL_Rect){ x + 2, y + top, w - 4, h - top - 2 };
 }
 
+SDL_Rect look_navigator(int x, int y, int w, const char *label, int face) {
+	/* (E-Mail's: the box's outline and light green, its label, the face's
+	 * 40 x 48 from 3 in and 8 down, the page from the face to 2 short of
+	 * the box's right, as tall as the face) */
+	look_info(x, y, w, LOOK_NAV_H, label);
+	SDL_Rect page = { x + 43, y + 8, w - 45, 48 };
+	fill_rect(page.x, page.y, page.w, page.h, LOOK_PAGE);
+	fill_rect(x + 3, y + 8, 40, 48, LOOK_SLOT);
+	Sprite *mug = sprite_get(SPR_MUGSHOT, face);
+	/* (a mugshot's origin is its middle) */
+	if (mug) sprite_draw_frame(mug, 0, 0, x + 3 + 20, y + 8 + 24, false, 0, 0);
+	return page;
+}
+
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill) {
 	fill_rect(x + 1, y, w - 2, h, fill);
 	fill_rect(x, y + 1, w, h - 2, fill);

@@ -34,6 +34,7 @@ static const char *const words[] = {
 	"The game's own frames, sharp: best on 60 or 120 Hz",   /* OW_SMOOTH_OFF_NOTE */
 	"On",   /* OW_ON */
 	"Off",   /* OW_OFF */
+	"INFORMATION",   /* OW_INFORMATION */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 

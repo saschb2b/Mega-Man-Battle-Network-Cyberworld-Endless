@@ -8,6 +8,7 @@
 #include "minifont.h"
 #include "pet_look.h"
 #include "second_art.h"
+#include "text.h"
 #include "trade_screen_text.h"
 
 #define W 240
@@ -26,14 +27,16 @@
 #define NOTE_Y 149
 
 /* the chip trade: two cards, the arrows between, the two pills under them */
+/* the chip trade: two cards, the arrows between, MegaMan in the NAVIGATOR
+ * box under them (E-Mail's place) asking, waiting and telling */
 #define DEAL_W 98
-#define DEAL_H 98
-#define DEAL_Y 31
+#define DEAL_H 78
+#define DEAL_Y 18
 #define DEAL_LEFT 10
 #define DEAL_RIGHT (W - 10 - DEAL_W)
-#define BUTTON_Y 132
-#define BUTTON_W 78
-#define BUTTON_GAP 22   /* between the pills: room for the choice's triangle */
+#define NAV_Y 96
+#define YES_X 91   /* Yes and No where BN6's chat box has them */
+#define NO_X 138
 
 static char code_char(uint8_t code) { return code >= 26 ? '*' : (char)('A' + code); }
 
@@ -152,24 +155,22 @@ void trade_screen_draw_list(int x, int y, const TradeScreenView *v) {
 
 /* ---- the chip trade ---- */
 
-/* a chip's card in the trade, as the Library's: its picture, its name on
- * the dark over the code's strip (as the Custom screen's card names its
- * chip); the chip come marked by the ChipFolder's EQUIP corners */
+/* a chip's card in the trade, as the Library's: its picture and the
+ * code's strip (MegaMan names the chips); the chip come marked by the
+ * ChipFolder's EQUIP corners */
 static void deal_card(int x, int y, TradeChip c, bool come) {
 	SDL_Rect f = look_card(x, y, DEAL_W, DEAL_H);
 	int px = x + (DEAL_W - 58) / 2;
-	picture(c.id, px, f.y + 1, LOOK_CARD_DARK);
-	ChipInfo ci;
-	chip_info(c.id, &ci);
-	fill_rect(px, f.y + 51, 58, 14, LOOK_CARD_DARK);
-	text_draw(x + DEAL_W / 2, f.y + 53, ci.name, LOOK_TEXT, TEXT_CENTER);
-	card_strip(c.id, c.code, px, f.y + 65);
-	if (come) look_corners(x - 3, y - 3, DEAL_W + 6, DEAL_H + 6);
+	picture(c.id, px, f.y, LOOK_CARD_DARK);
+	card_strip(c.id, c.code, px, f.y + 50);
+	if (come) look_corners(x - 3, y - 2, DEAL_W + 6, DEAL_H + 5);
 }
 
-/* a card's label on a tag over it */
-static void tab(int x, int y, const char *label) {
-	look_tag(x + 6, y, look_caps_width(label) + 10, 9, label, LOOK_BAND);
+/* a chip's name and code as MegaMan says them ("MrkCan1 M") */
+static void chip_words(TradeChip c, char *out, size_t n) {
+	char name[24];
+	chips_name(c.id, name, sizeof name);
+	snprintf(out, n, "%s %c", name, code_char(c.code));
 }
 
 /* an arrow 22 wide from (x, y), its middle row y + 3, pointing right (or left) */
@@ -181,13 +182,6 @@ static void arrow(int x, int y, bool right, SDL_Color c) {
 	fill_rects(r, n, c);
 }
 
-/* a button of the two: STATUS's pill, BN6's choice triangle before the one chosen */
-static void button(int x, int y, const char *label, bool lit) {
-	look_pill(x, y, BUTTON_W);
-	text_draw(x + BUTTON_W / 2 + 1, y + 4, label, LOOK_SHADE, TEXT_CENTER);
-	text_draw(x + BUTTON_W / 2, y + 3, label, LOOK_TEXT, TEXT_CENTER);
-	if (lit) look_choice(x - LOOK_CHOICE_W - 1, y);
-}
 
 /* the cards where they stand, crossing in the swap: MegaMan's going right
  * over the top, the other's left under it */
@@ -211,31 +205,35 @@ static void cards(int x, int y, const TradeScreenView *v) {
 	deal_card(lx + (rx - lx) * e / 1024, cy - lift, v->mine, false);
 }
 
-/* under the cards: the buttons, the wait, or the trade done (A and B as
- * everywhere in BN6: no keys shown) */
-static void foot(int x, int y, const TradeScreenView *v) {
-	if (v->stage == TRADE_ASK) {
-		button(x + W / 2 - BUTTON_GAP / 2 - BUTTON_W + 6, y + BUTTON_Y, trade_text_no_deal, !v->cursor);
-		button(x + W / 2 + BUTTON_GAP / 2 + 6, y + BUTTON_Y, trade_text_deal, v->cursor);
-	} else if (v->stage == TRADE_WAIT) {
-		look_text(x + W / 2, y + BUTTON_Y + 1, trade_text_waiting(v->partner), LOOK_PAGE, LOOK_GREEN_LO, TEXT_CENTER);
-	} else if (v->stage == TRADE_SWAPPED) {
-		text_draw(x + W / 2, y + BUTTON_Y + 1, trade_text_traded, LOOK_GOLD, TEXT_CENTER);
-		body_note(x + W / 2, y + BUTTON_Y + 14, trade_text_home, true);
-	}
+/* under the cards, MegaMan in E-Mail's NAVIGATOR box: the trade asked
+ * as BN6 asks (Yes and No, the green triangle), the wait, the swap, the
+ * trade done; A and B as everywhere in BN6, no keys shown */
+static void navigator(int x, int y, const TradeScreenView *v) {
+	SDL_Rect pg = look_navigator(x + 2, y + NAV_Y, W - 4, trade_text_navigator, FACE_MEGAMAN);
+	int tx = pg.x + 4, ty = pg.y + 4;
+	char mine[32], get[32];
+	chip_words(v->mine, mine, sizeof mine);
+	chip_words(v->get, get, sizeof get);
+	const char *say = v->stage == TRADE_ASK ? trade_text_ask(mine, v->partner, get)
+		: v->stage == TRADE_WAIT ? trade_text_waiting(v->partner)
+		: v->stage == TRADE_SWAP ? trade_text_swapping : trade_text_traded(get);
+	look_wrapped(say, tx, ty, pg.w - 8, v->stage == TRADE_ASK ? 2 : 3, LOOK_INK, LOOK_INK_SHADE);
+	if (v->stage != TRADE_ASK) return;
+	int oy = ty + 2 * LOOK_NAV_LINE;
+	look_text(x + YES_X, oy, trade_text_yes, LOOK_INK, LOOK_INK_SHADE, TEXT_LEFT);
+	look_text(x + NO_X, oy, trade_text_no, LOOK_INK, LOOK_INK_SHADE, TEXT_LEFT);
+	look_choice(x + (v->cursor ? YES_X : NO_X) - LOOK_CHOICE_W - 3, oy - 1);
 }
 
 void trade_screen_draw_deal(int x, int y, const TradeScreenView *v) {
 	band(x, y, trade_text_deal_title, trade_text_deal_with(v->partner));
-	tab(x + DEAL_LEFT, y + DEAL_Y - 13, trade_text_you);
-	tab(x + DEAL_RIGHT, y + DEAL_Y - 13, trade_text_them);
 	cards(x, y, v);
 	if (v->stage < TRADE_SWAP) {
 		/* (the arrows, the one MegaMan's chip goes by gold; pulsing while the other decides) */
 		bool dim = v->stage == TRADE_WAIT && (v->t / 20) % 2;
 		int ax = x + DEAL_LEFT + DEAL_W + (DEAL_RIGHT - DEAL_LEFT - DEAL_W - 22) / 2;
-		arrow(ax, y + DEAL_Y + 26, true, dim ? GOLD_EDGE : LOOK_GOLD);
-		arrow(ax, y + DEAL_Y + 46, false, dim ? LOOK_GREEN_LO : LOOK_EDGE_HI);
+		arrow(ax, y + DEAL_Y + 24, true, dim ? GOLD_EDGE : LOOK_GOLD);
+		arrow(ax, y + DEAL_Y + 44, false, dim ? LOOK_GREEN_LO : LOOK_EDGE_HI);
 	}
-	foot(x, y, v);
+	navigator(x, y, v);
 }

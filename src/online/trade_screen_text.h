@@ -21,17 +21,18 @@ extern const char *const trade_text_sorts[TRADE_SORT_KEYS];
  * chip's name and code); "" when the list is every spare */
 const char *trade_text_list_note(int purpose, int want, const char *partner, const char *theirs);
 
-/* The chip trade: its heading, the slot beside it, the two cards' labels */
+/* The chip trade: its heading, the slot beside it */
 extern const char trade_text_deal_title[];
 const char *trade_text_deal_with(const char *partner);
-extern const char trade_text_you[];
-extern const char trade_text_them[];
-/* ... its two buttons (the cursor starts on No deal) */
-extern const char trade_text_no_deal[];
-extern const char trade_text_deal[];
-/* ... waiting on the other's Deal, and done */
+/* ... MegaMan in its NAVIGATOR box: the box's label; the trade asked
+ * (`mine`, `theirs` a chip's name and code), its answers (the cursor
+ * starts on No); waiting on the other's Yes; the cards crossing; done */
+extern const char trade_text_navigator[];
+const char *trade_text_ask(const char *mine, const char *partner, const char *theirs);
+extern const char trade_text_yes[];
+extern const char trade_text_no[];
 const char *trade_text_waiting(const char *partner);
-extern const char trade_text_traded[];
-extern const char trade_text_home[];
+extern const char trade_text_swapping[];
+const char *trade_text_traded(const char *theirs);
 
 #endif

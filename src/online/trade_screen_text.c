@@ -37,16 +37,28 @@ const char *trade_text_deal_with(const char *partner) {
 	return s;
 }
 
-const char trade_text_you[] = "YOU";
-const char trade_text_them[] = "THEM";
-const char trade_text_no_deal[] = "No deal";
-const char trade_text_deal[] = "Deal!";
+const char trade_text_navigator[] = "NAVIGATOR";
 
-const char *trade_text_waiting(const char *partner) {
-	static char s[48];
-	snprintf(s, sizeof s, "Waiting on %s...", partner);
+/* (MegaMan, in E-Mail's NAVIGATOR box: docs/VOICE.md) */
+const char *trade_text_ask(const char *mine, const char *partner, const char *theirs) {
+	static char s[96];
+	snprintf(s, sizeof s, "Lan,trade our %s for %s's %s?", mine, partner, theirs);
 	return s;
 }
 
-const char trade_text_traded[] = "Traded!";
-const char trade_text_home[] = "Yours once you're home";
+const char trade_text_yes[] = "Yes";
+const char trade_text_no[] = "No";
+
+const char *trade_text_waiting(const char *partner) {
+	static char s[48];
+	snprintf(s, sizeof s, "Hmm... %s's still thinking.", partner);
+	return s;
+}
+
+const char trade_text_swapping[] = "Here it comes!";
+
+const char *trade_text_traded(const char *theirs) {
+	static char s[64];
+	snprintf(s, sizeof s, "Yeah! We got %s!", theirs);
+	return s;
+}

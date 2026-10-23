@@ -874,18 +874,18 @@
    "line": 3
   },
   "options_text:options_fullscreen_note": {
-   "line": 67
+   "line": 68
   },
   "options_text:options_screen_note": {
    "header": "... before the display's: screen, smooth_motion and fullscreen",
-   "line": 49
+   "line": 50
   },
   "options_text:options_smooth_note": {
-   "line": 58
+   "line": 59
   },
   "options_text:options_sound_note": {
    "header": "settings.ini's lines before the sound line: what it is",
-   "line": 42
+   "line": 43
   },
   "options_text:words": {
    "comment": "(in OptionsWord's order, its name beside each)",
@@ -1564,18 +1564,16 @@
   "town_words:news_words": {
    "line": 51
   },
-  "trade_screen_text:trade_text_deal": {
+  "trade_screen_text:trade_text_ask": {
+   "comment": "(MegaMan, in E-Mail's NAVIGATOR box: docs/VOICE.md)",
    "line": 43
   },
   "trade_screen_text:trade_text_deal_title": {
-   "header": "The chip trade: its heading, the slot beside it, the two cards' labels",
+   "header": "The chip trade: its heading, the slot beside it",
    "line": 32
   },
   "trade_screen_text:trade_text_deal_with": {
    "line": 34
-  },
-  "trade_screen_text:trade_text_home": {
-   "line": 52
   },
   "trade_screen_text:trade_text_list_for": {
    "line": 12
@@ -1588,16 +1586,14 @@
   "trade_screen_text:trade_text_list_title.titles": {
    "line": 8
   },
-  "trade_screen_text:trade_text_no_deal": {
-   "header": "... its two buttons (the cursor starts on No deal)",
-   "line": 42
+  "trade_screen_text:trade_text_swapping": {
+   "line": 58
   },
   "trade_screen_text:trade_text_traded": {
-   "line": 51
+   "line": 60
   },
   "trade_screen_text:trade_text_waiting": {
-   "header": "... waiting on the other's Deal, and done",
-   "line": 45
+   "line": 52
   },
   "trade_words:trade_answered": {
    "line": 54
@@ -2108,7 +2104,7 @@
    "comment": "",
    "domain": "Trade Central",
    "kind": "screen",
-   "lines": 15,
+   "lines": 14,
    "shows": [],
    "speaker": "Screen",
    "stem": "trade_screen_text"
@@ -2271,7 +2267,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2005,
+  "boxes": 2009,
   "domains": {
    "Arena": {
     "files": [
@@ -2525,8 +2521,8 @@
      "src/online/trade_words.c"
     ],
     "flagged": 7,
-    "lines": 71,
-    "speech": 38
+    "lines": 70,
+    "speech": 42
    },
    "Where the nets meet": {
     "files": [
@@ -2613,9 +2609,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 700,
+    "boxes": 704,
     "dots_per_box": 0.22,
-    "end_ask": 0.04,
+    "end_ask": 0.05,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2626,7 +2622,7 @@
      "Let's",
      "A"
     ],
-    "stutters": "1 box in 175",
+    "stutters": "1 box in 176",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2668,7 +2664,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 1644,
+  "lines": 1643,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -2803,9 +2799,9 @@
    "MegaMan": {
     "bangs_per_box": 0.01,
     "bn6": "MegaMan",
-    "boxes": 700,
+    "boxes": 704,
     "dots_per_box": 0.22,
-    "end_ask": 0.04,
+    "end_ask": 0.05,
     "end_bang": 0.54,
     "end_dots": 0.11,
     "openers": [
@@ -2816,7 +2812,7 @@
      "Let's",
      "A"
     ],
-    "stutters": "1 box in 175",
+    "stutters": "1 box in 176",
     "words_per_box": 5.9
    },
    "Mr.Prog": {
@@ -2915,7 +2911,7 @@
     "words_per_box": 5.6
    }
   },
-  "speech": 1206
+  "speech": 1210
  },
  "version": 1,
  "conversations": [
@@ -3230,13 +3226,12 @@
   {"container":"trade_screen_text:trade_text_list_title.titles","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_title.titles","line":8,"lines":["trade_screen_text:trade_text_list_title.titles:0","trade_screen_text:trade_text_list_title.titles:1","trade_screen_text:trade_text_list_title.titles:2","trade_screen_text:trade_text_list_title.titles:3"],"speakers":["Screen"],"title":"Trade text list title: titles","when":""},
   {"container":"trade_screen_text:trade_text_list_for","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_for","line":14,"lines":["trade_screen_text:trade_text_list_for:0","trade_screen_text:trade_text_list_for:1"],"speakers":["Screen"],"title":"Trade text list for","when":""},
   {"container":"trade_screen_text:trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_list_note","line":25,"lines":["trade_screen_text:trade_text_list_note:0","trade_screen_text:trade_text_list_note:1"],"speakers":["Screen"],"title":"Trade text list note","when":"(as the folder editor's SORT; the list's head in capitals)"},
-  {"container":"trade_screen_text:trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_title","line":32,"lines":["trade_screen_text:trade_text_deal_title:0"],"speakers":["Screen"],"title":"The chip trade","when":"The chip trade: its heading, the slot beside it, the two cards' labels"},
+  {"container":"trade_screen_text:trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_title","line":32,"lines":["trade_screen_text:trade_text_deal_title:0"],"speakers":["Screen"],"title":"The chip trade","when":"The chip trade: its heading, the slot beside it"},
   {"container":"trade_screen_text:trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal_with","line":36,"lines":["trade_screen_text:trade_text_deal_with:0"],"speakers":["Screen"],"title":"Trade text deal with","when":""},
-  {"container":"trade_screen_text:trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_no_deal","line":42,"lines":["trade_screen_text:trade_text_no_deal:0"],"speakers":["Screen"],"title":"Trade text no deal","when":"... its two buttons (the cursor starts on No deal)"},
-  {"container":"trade_screen_text:trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_deal","line":43,"lines":["trade_screen_text:trade_text_deal:0"],"speakers":["Screen"],"title":"Trade text deal","when":""},
-  {"container":"trade_screen_text:trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_waiting","line":47,"lines":["trade_screen_text:trade_text_waiting:0"],"speakers":["Screen"],"title":"Trade text waiting","when":"... waiting on the other's Deal, and done"},
-  {"container":"trade_screen_text:trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_traded","line":51,"lines":["trade_screen_text:trade_text_traded:0"],"speakers":["Screen"],"title":"Trade text traded","when":""},
-  {"container":"trade_screen_text:trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_home","line":52,"lines":["trade_screen_text:trade_text_home:0"],"speakers":["Screen"],"title":"Trade text home","when":""},
+  {"container":"trade_screen_text:trade_text_ask","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_ask","line":45,"lines":["trade_screen_text:trade_text_ask:0"],"speakers":["MegaMan"],"title":"Trade text ask","when":"(MegaMan, in E-Mail's NAVIGATOR box: docs/VOICE.md)"},
+  {"container":"trade_screen_text:trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_waiting","line":54,"lines":["trade_screen_text:trade_text_waiting:0"],"speakers":["MegaMan"],"title":"Trade text waiting","when":""},
+  {"container":"trade_screen_text:trade_text_swapping","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_swapping","line":58,"lines":["trade_screen_text:trade_text_swapping:0"],"speakers":["MegaMan"],"title":"Trade text swapping","when":""},
+  {"container":"trade_screen_text:trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","id":"trade_screen_text:trade_text_traded","line":62,"lines":["trade_screen_text:trade_text_traded:0"],"speakers":["MegaMan"],"title":"Trade text traded","when":""},
   {"container":"arena_words:arena_sent_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_sent_words","line":9,"lines":["arena_words:arena_sent_words:0"],"speakers":["MegaMan"],"title":"A challenge sent to `name`","when":"A challenge sent to `name`; the answer No, or the battle gone before it began"},
   {"container":"arena_words:arena_declined_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_declined_words","line":13,"lines":["arena_words:arena_declined_words:0"],"speakers":["MegaMan"],"title":"Arena declined words","when":""},
   {"container":"arena_words:arena_gone_words","domain":"Arena","file":"src/online/arena_words.c","id":"arena_words:arena_gone_words","line":15,"lines":["arena_words:arena_gone_words:0"],"speakers":["MegaMan"],"title":"Arena gone words","when":""},
@@ -3403,10 +3398,10 @@
   {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":96,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
   {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":100,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
   {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":10,"lines":["options_text:words:2","options_text:words:4","options_text:words:7","options_text:words:9","options_text:words:11","options_text:words:13","options_text:words:14","options_text:words:20","options_text:words:21","options_text:words:22","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:26","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
-  {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":43,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
-  {"container":"options_text:options_screen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_screen_note","line":50,"lines":["options_text:options_screen_note:0"],"speakers":["Screen"],"title":"Options screen note","when":"... before the display's: screen, smooth_motion and fullscreen"},
-  {"container":"options_text:options_smooth_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_smooth_note","line":59,"lines":["options_text:options_smooth_note:0"],"speakers":["Screen"],"title":"Options smooth note","when":""},
-  {"container":"options_text:options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_fullscreen_note","line":68,"lines":["options_text:options_fullscreen_note:0"],"speakers":["Screen"],"title":"Options fullscreen note","when":""},
+  {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":44,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
+  {"container":"options_text:options_screen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_screen_note","line":51,"lines":["options_text:options_screen_note:0"],"speakers":["Screen"],"title":"Options screen note","when":"... before the display's: screen, smooth_motion and fullscreen"},
+  {"container":"options_text:options_smooth_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_smooth_note","line":60,"lines":["options_text:options_smooth_note:0"],"speakers":["Screen"],"title":"Options smooth note","when":""},
+  {"container":"options_text:options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_fullscreen_note","line":69,"lines":["options_text:options_fullscreen_note:0"],"speakers":["Screen"],"title":"Options fullscreen note","when":""},
   {"container":"netpass_text:netpass_level_square","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_square","line":6,"lines":["netpass_text:netpass_level_square:0"],"speakers":["Screen"],"title":"The pass's level","when":"the pass's level: the Square's alone, or every stamp"},
   {"container":"netpass_text:netpass_level_full","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_level_full","line":7,"lines":["netpass_text:netpass_level_full:0"],"speakers":["Screen"],"title":"Netpass level full","when":""},
   {"container":"netpass_text:netpass_count_words","domain":"The NetPass","file":"src/online/netpass_text.c","id":"netpass_text:netpass_count_words","line":15,"lines":["netpass_text:netpass_count_words:0"],"speakers":["Screen"],"title":"\"1 of 4\" into out","when":"\"1 of 4\" into out"},
@@ -3591,7 +3586,7 @@
   {"boxes":[{"pages":[["No names, no IDs:","nothing that says","who you are."]],"speaker":"Screen","text":"No names, no IDs: nothing that says who you are."}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:3","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"No names, no IDs: nothing that says who you are.","text_hash":"0710847c8784"},
   {"boxes":[{"pages":[["A: what is sent, and","Yes or No"]],"speaker":"Screen","text":"A: what is sent, and Yes or No"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:words:9","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"A: what is sent, and Yes or No","text_hash":"7357e6b6a5d4"},
   {"boxes":[{"pages":[["a word for each","AnalyticsWord"]],"speaker":"Screen","text":"a word for each AnalyticsWord"}],"container":"words","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"fragment":true,"id":"analytics_text:words:0","kind":"screen","line":19,"speaker":"Screen","speakers":["Screen"],"text":"a word for each AnalyticsWord","text_hash":"8883b5b4b78a"},
-  {"boxes":[{"pages":[["Change it any time","in Options"]],"speaker":"Screen","text":"Change it any time in Options"}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":23,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options","text_hash":"1701071af82e"},
+  {"boxes":[{"pages":[["Change it any time","in Options."]],"speaker":"Screen","text":"Change it any time in Options."}],"container":"analytics_later","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_later:0","kind":"screen","line":23,"speaker":"Screen","speakers":["Screen"],"text":"Change it any time in Options.","text_hash":"e37b9887522a"},
   {"boxes":[{"pages":[["# statistics: on","sends anonymous play","statistics to the"],["game's own Umami","#","(umami.saschb2b.com):"],["the system and","version, the setups","runs take, how"],["# far they get and","which guardians win.","No names, no IDs."],["off sends nothing.","# The game asks at","its first start"],["(README.md,","Anonymous","statistics)."]],"speaker":"Screen","text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n"}],"container":"analytics_setting_note","domain":"Statistics","file":"src/analytics/analytics_text.c","flags":[],"id":"analytics_text:analytics_setting_note:0","kind":"screen","line":26,"speaker":"Screen","speakers":["Screen"],"text":"\n# statistics: on sends anonymous play statistics to the game's own Umami\n# (umami.saschb2b.com): the system and version, the setups runs take, how\n# far they get and which guardians win. No names, no IDs. off sends nothing.\n# The game asks at its first start (README.md, Anonymous statistics).\n","text_hash":"921b2dee734d"},
   {"boxes":[{"pages":[["Which buttons and","keys are A, B, L, R,","START and SELECT"]],"speaker":"Screen","text":"Which buttons and keys are A, B, L, R, START and SELECT"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:2","kind":"screen","line":10,"speaker":"Screen","speakers":["Screen"],"text":"Which buttons and keys are A, B, L, R, START and SELECT","text_hash":"27046bd21805"},
   {"boxes":[{"pages":[["How the game sounds"]],"speaker":"Screen","text":"How the game sounds"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:4","kind":"screen","line":12,"speaker":"Screen","speakers":["Screen"],"text":"How the game sounds","text_hash":"e6b441dd1655"},
@@ -3607,11 +3602,11 @@
   {"boxes":[{"pages":[["Smooth motion"]],"speaker":"Screen","text":"Smooth motion"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:24","kind":"screen","line":32,"speaker":"Screen","speakers":["Screen"],"text":"Smooth motion","text_hash":"7f19379522a7"},
   {"boxes":[{"pages":[["Frames mixed at each","refresh: even on 90","or 144 Hz"]],"speaker":"Screen","text":"Frames mixed at each refresh: even on 90 or 144 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:25","kind":"screen","line":33,"speaker":"Screen","speakers":["Screen"],"text":"Frames mixed at each refresh: even on 90 or 144 Hz","text_hash":"9fe6d2f72f16"},
   {"boxes":[{"pages":[["The game's own","frames, sharp: best","on 60 or 120 Hz"]],"speaker":"Screen","text":"The game's own frames, sharp: best on 60 or 120 Hz"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:26","kind":"screen","line":34,"speaker":"Screen","speakers":["Screen"],"text":"The game's own frames, sharp: best on 60 or 120 Hz","text_hash":"25d0c2233826"},
-  {"boxes":[{"pages":[["a word for each","OptionsWord"]],"speaker":"Screen","text":"a word for each OptionsWord"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"fragment":true,"id":"options_text:words:0","kind":"screen","line":38,"speaker":"Screen","speakers":["Screen"],"text":"a word for each OptionsWord","text_hash":"776a40716e19"},
-  {"boxes":[{"pages":[["# sound: gba plays","the game's sound as","a GBA makes it, a"],["bright hiss above","# the music and all;","soft gives it the"],["Legacy Collection's","balance, as","# measured from it:"],["the highs and the","deepest bass taken","down. Options"],["# (the title's menu,","or the PET's in a","run) changes it too."]],"speaker":"Screen","text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n"}],"container":"options_sound_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_sound_note:0","kind":"screen","line":43,"speaker":"Screen","speakers":["Screen"],"text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n","text_hash":"2d90bba7b1b6"},
-  {"boxes":[{"pages":[["# screen: whole (or","integer) draws the","game's picture at"],["the largest whole","# scale, every pixel","the same size; fill"],["makes it as big as","the screen","# holds, each"],["pixel's edge a","little soft; auto","fills where a whole"],["scale","# would leave it a","quarter smaller or"],["more (a 640 x 480","screen), else","# whole; stretch"],["covers the whole","screen, the picture","out of its shape."],["# Options' Display","changes it too."]],"speaker":"Screen","text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n"}],"container":"options_screen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_screen_note:0","kind":"screen","line":50,"speaker":"Screen","speakers":["Screen"],"text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n","text_hash":"7263d22da6d3"},
-  {"boxes":[{"pages":[["# smooth_motion: the","game runs at the","GBA's 60 frames a"],["second. A 90, 144","# or 165 Hz screen","shows each frame for"],["one refresh or two","(or two or","# three) in turn,"],["which reads as","judder. on mixes the","two latest frames at"],["# every refresh, so","motion is even, a","little blurred and a"],["frame later;","# off shows the","game's own frames,"],["sharp (best on 60","and 120 Hz)."],["Options'","# Display changes it","too."]],"speaker":"Screen","text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n"}],"container":"options_smooth_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_smooth_note:0","kind":"screen","line":59,"speaker":"Screen","speakers":["Screen"],"text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n","text_hash":"037cc0fb37bc"},
-  {"boxes":[{"pages":[["# fullscreen: on","starts the game","borderless over the"],["whole screen, off in","# a window."],["Alt+Enter or F11","switch it while it","runs, as Options'"],["Display","# does, and each","keeps it here;"],["--fullscreen or","--window come first."]],"speaker":"Screen","text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n"}],"container":"options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_fullscreen_note:0","kind":"screen","line":68,"speaker":"Screen","speakers":["Screen"],"text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n","text_hash":"32826c4278b1"},
+  {"boxes":[{"pages":[["a word for each","OptionsWord"]],"speaker":"Screen","text":"a word for each OptionsWord"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"fragment":true,"id":"options_text:words:0","kind":"screen","line":39,"speaker":"Screen","speakers":["Screen"],"text":"a word for each OptionsWord","text_hash":"776a40716e19"},
+  {"boxes":[{"pages":[["# sound: gba plays","the game's sound as","a GBA makes it, a"],["bright hiss above","# the music and all;","soft gives it the"],["Legacy Collection's","balance, as","# measured from it:"],["the highs and the","deepest bass taken","down. Options"],["# (the title's menu,","or the PET's in a","run) changes it too."]],"speaker":"Screen","text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n"}],"container":"options_sound_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_sound_note:0","kind":"screen","line":44,"speaker":"Screen","speakers":["Screen"],"text":"\n# sound: gba plays the game's sound as a GBA makes it, a bright hiss above\n# the music and all; soft gives it the Legacy Collection's balance, as\n# measured from it: the highs and the deepest bass taken down. Options\n# (the title's menu, or the PET's in a run) changes it too.\n","text_hash":"2d90bba7b1b6"},
+  {"boxes":[{"pages":[["# screen: whole (or","integer) draws the","game's picture at"],["the largest whole","# scale, every pixel","the same size; fill"],["makes it as big as","the screen","# holds, each"],["pixel's edge a","little soft; auto","fills where a whole"],["scale","# would leave it a","quarter smaller or"],["more (a 640 x 480","screen), else","# whole; stretch"],["covers the whole","screen, the picture","out of its shape."],["# Options' Display","changes it too."]],"speaker":"Screen","text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n"}],"container":"options_screen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_screen_note:0","kind":"screen","line":51,"speaker":"Screen","speakers":["Screen"],"text":"\n# screen: whole (or integer) draws the game's picture at the largest whole\n# scale, every pixel the same size; fill makes it as big as the screen\n# holds, each pixel's edge a little soft; auto fills where a whole scale\n# would leave it a quarter smaller or more (a 640 x 480 screen), else\n# whole; stretch covers the whole screen, the picture out of its shape.\n# Options' Display changes it too.\n","text_hash":"7263d22da6d3"},
+  {"boxes":[{"pages":[["# smooth_motion: the","game runs at the","GBA's 60 frames a"],["second. A 90, 144","# or 165 Hz screen","shows each frame for"],["one refresh or two","(or two or","# three) in turn,"],["which reads as","judder. on mixes the","two latest frames at"],["# every refresh, so","motion is even, a","little blurred and a"],["frame later;","# off shows the","game's own frames,"],["sharp (best on 60","and 120 Hz)."],["Options'","# Display changes it","too."]],"speaker":"Screen","text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n"}],"container":"options_smooth_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_smooth_note:0","kind":"screen","line":60,"speaker":"Screen","speakers":["Screen"],"text":"\n# smooth_motion: the game runs at the GBA's 60 frames a second. A 90, 144\n# or 165 Hz screen shows each frame for one refresh or two (or two or\n# three) in turn, which reads as judder. on mixes the two latest frames at\n# every refresh, so motion is even, a little blurred and a frame later;\n# off shows the game's own frames, sharp (best on 60 and 120 Hz). Options'\n# Display changes it too.\n","text_hash":"037cc0fb37bc"},
+  {"boxes":[{"pages":[["# fullscreen: on","starts the game","borderless over the"],["whole screen, off in","# a window."],["Alt+Enter or F11","switch it while it","runs, as Options'"],["Display","# does, and each","keeps it here;"],["--fullscreen or","--window come first."]],"speaker":"Screen","text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n"}],"container":"options_fullscreen_note","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:options_fullscreen_note:0","kind":"screen","line":69,"speaker":"Screen","speakers":["Screen"],"text":"\n# fullscreen: on starts the game borderless over the whole screen, off in\n# a window. Alt+Enter or F11 switch it while it runs, as Options' Display\n# does, and each keeps it here; --fullscreen or --window come first.\n","text_hash":"32826c4278b1"},
   {"boxes":[{"pages":[["Needs BN5"]],"speaker":"Screen","text":"Needs BN5"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:0","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"Needs BN5","text_hash":"e7ada24c886e"},
   {"boxes":[{"pages":[["ROM back"]],"speaker":"Screen","text":"ROM back"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"id":"xchips_text:xchips_text_desc:1","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"ROM back","text_hash":"e4fe73de06f9"},
   {"boxes":[{"pages":[["to battle"]],"speaker":"Screen","text":"to battle"}],"container":"xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","flags":[],"fragment":true,"id":"xchips_text:xchips_text_desc:2","kind":"screen","line":8,"speaker":"Screen","speakers":["Screen"],"text":"to battle","text_hash":"932684ca3df2"},
@@ -4827,11 +4822,10 @@
   {"boxes":[{"pages":[["Spares that fit:","{trade_want}"]],"speaker":"Screen","text":"Spares that fit: {trade_want}"}],"container":"trade_text_list_note","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_list_note:1","kind":"screen","line":26,"placeholders":[{"name":"trade_want","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Spares that fit: {trade_want}","text_hash":"dfb5767e0147"},
   {"boxes":[{"pages":[["Chip trade"]],"speaker":"Screen","text":"Chip trade"}],"container":"trade_text_deal_title","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_title:0","kind":"screen","line":32,"speaker":"Screen","speakers":["Screen"],"text":"Chip trade","text_hash":"f78edf56bf5d"},
   {"boxes":[{"pages":[["With {partner}"]],"speaker":"Screen","text":"With {partner}"}],"container":"trade_text_deal_with","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal_with:0","kind":"screen","line":36,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"With {partner}","text_hash":"bdccbae2c456"},
-  {"boxes":[{"pages":[["No deal"]],"speaker":"Screen","text":"No deal"}],"container":"trade_text_no_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_no_deal:0","kind":"screen","line":42,"speaker":"Screen","speakers":["Screen"],"text":"No deal","text_hash":"af8502d2fabd"},
-  {"boxes":[{"pages":[["Deal!"]],"speaker":"Screen","text":"Deal!"}],"container":"trade_text_deal","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_deal:0","kind":"screen","line":43,"speaker":"Screen","speakers":["Screen"],"text":"Deal!","text_hash":"8636d76f5a37"},
-  {"boxes":[{"pages":[["Waiting on","{partner}..."]],"speaker":"Screen","text":"Waiting on {partner}..."}],"container":"trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_waiting:0","kind":"screen","line":47,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"Waiting on {partner}...","text_hash":"33a74eaddafa"},
-  {"boxes":[{"pages":[["Traded!"]],"speaker":"Screen","text":"Traded!"}],"container":"trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_traded:0","kind":"screen","line":51,"speaker":"Screen","speakers":["Screen"],"text":"Traded!","text_hash":"7ce0af01c7e6"},
-  {"boxes":[{"pages":[["Yours once you're","home"]],"speaker":"Screen","text":"Yours once you're home"}],"container":"trade_text_home","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_home:0","kind":"screen","line":52,"speaker":"Screen","speakers":["Screen"],"text":"Yours once you're home","text_hash":"4055fa7172ad"},
+  {"boxes":[{"pages":[["Lan,trade our","{mine} for","{partner}'s {theirs}?"]],"speaker":"MegaMan","text":"Lan,trade our {mine} for {partner}'s {theirs}?"}],"container":"trade_text_ask","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_ask:0","kind":"speech","line":45,"placeholders":[{"name":"mine","spec":"%s"},{"name":"partner","spec":"%s"},{"name":"theirs","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,trade our {mine} for {partner}'s {theirs}?","text_hash":"30d605f55de7"},
+  {"boxes":[{"pages":[["Hmm... {partner}'s","still thinking."]],"speaker":"MegaMan","text":"Hmm... {partner}'s still thinking."}],"container":"trade_text_waiting","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_waiting:0","kind":"speech","line":54,"placeholders":[{"name":"partner","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Hmm... {partner}'s still thinking.","text_hash":"faad93bd0ce7"},
+  {"boxes":[{"pages":[["Here it comes!"]],"speaker":"MegaMan","text":"Here it comes!"}],"container":"trade_text_swapping","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_swapping:0","kind":"speech","line":58,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Here it comes!","text_hash":"1dc73a070c9c"},
+  {"boxes":[{"pages":[["Yeah! We got","{theirs}!"]],"speaker":"MegaMan","text":"Yeah! We got {theirs}!"}],"container":"trade_text_traded","domain":"Trade Central","file":"src/online/trade_screen_text.c","flags":[],"id":"trade_screen_text:trade_text_traded:0","kind":"speech","line":62,"placeholders":[{"name":"theirs","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Yeah! We got {theirs}!","text_hash":"d992799e698c"},
   {"boxes":[{"pages":[["Offer a chip"]],"speaker":"MegaMan","text":"Offer a chip"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Offer a chip","text_hash":"c94fb33483c0"},
   {"boxes":[{"pages":[["Trade board"]],"speaker":"MegaMan","text":"Trade board"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Trade board","text_hash":"e69de031b802"},
   {"boxes":[{"pages":[["How it works"]],"speaker":"MegaMan","text":"How it works"}],"container":"trade_options","domain":"Trade Central","file":"src/online/trade_words.c","flags":[],"id":"trade_words:trade_options:2","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"How it works","text_hash":"1dd6a17cb403"},

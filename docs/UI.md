@@ -53,6 +53,8 @@ kind, each with its own look:
 | A value or a picture | A slot: navy (16, 99, 107) in two pixels of white | STATUS's HP and MegaMan |
 | What is one's own | Orange corners: an L at each, dark outline (214, 107, 0), orange (255, 173, 16), lit (255, 206, 24) | ChipFolder's EQUIP folder |
 | What the cursor's item is | The information box | KeyItem, E-Mail, NaviCust |
+| Who speaks | The NAVIGATOR box: the information box labelled NAVIGATOR, MegaMan's face (40 x 48, 3 in and 8 down) on its left, his words on the white page beside it in the chat font, 59 tall | E-Mail ("Looks like you've got mail!"), STATUS, NaviCust's "Quit the Navi Customizer?" |
+| A question | In BN6's chat box or the NAVIGATOR box: the question, then Yes and No at the third line, the green triangle before the one chosen; a machine asks faceless | A Chip Trader's "Insert 3 BtlChips?"; NaviCust's quit |
 
 ## Keys
 
@@ -131,6 +133,13 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
 - Yes and No as BN6 asks them: the statistics question.
 - The second screen's HP, ZENNY and BUGFRAGS named as the PET menu
   names them.
+- MegaMan speaks in the NAVIGATOR box (`look_navigator`, his face from
+  the ROM): the chip trade asks "Lan,trade our FireBrn1 F for Beta's
+  MrkCan1 M?" with Yes and No there, waits, and tells what came, where
+  pills and a caption stood. The statistics question is asked in BN6's
+  chat box, faceless as a machine's, its explanation in the panel above.
+  Options' note is KeyItem's INFORMATION box, in the game's own voice as
+  KeyItem's are.
 - Each screen fades up from black as it opens (`look_fade_in`), and the
   arrow steps as KeyItem's (`look_cursor`): the Jukebox, Options and its
   sections, the statistics question, Trade Central, the NetPass. They

@@ -20,7 +20,7 @@ _Static_assert(sizeof words / sizeof *words == AW_COUNT, "a word for each Analyt
 
 const char *analytics_word(AnalyticsWord w) { return (unsigned)w < AW_COUNT ? words[w] : ""; }
 
-const char *analytics_later(void) { return "Change it any time in Options"; }
+const char *analytics_later(void) { return "Change it any time in Options."; }
 
 const char *analytics_setting_note(void) {
 	return "\n# statistics: on sends anonymous play statistics to the game's own Umami\n"

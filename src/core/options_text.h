@@ -23,6 +23,7 @@ typedef enum {
 	OW_AUTO_NOTE, OW_WHOLE_NOTE, OW_FILL_NOTE, OW_STRETCH_NOTE,
 	OW_SMOOTH, OW_SMOOTH_ON_NOTE, OW_SMOOTH_OFF_NOTE,
 	OW_ON, OW_OFF,
+	OW_INFORMATION,     /* the information box's label, KeyItem's */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
