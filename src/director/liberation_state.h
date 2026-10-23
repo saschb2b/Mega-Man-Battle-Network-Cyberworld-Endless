@@ -51,7 +51,7 @@ typedef struct {
 	char hurt_by[24];      /* ... the last who hit */
 	bool shield;           /* a BonusPanel's: no harm on the board this phase */
 	/* where each unit's sprite is (its object), and where it shows */
-	uint8_t fence[MAP_H][MAP_W];   /* a fenced panel's number (its walls' event, liberation_fence.c), 0xFF none */
+	uint8_t fence[MAP_H][MAP_W];   /* 1: the panel has walls of its own (liberation_fence.c), shut or open as it is walked */
 	int slot[LIB_UNITS];
 	int back_in[LIB_UNITS];  /* a deleted guardian's Darkloids' phases till his DarkHole sends him back */
 	int ux[LIB_UNITS], uy[LIB_UNITS];   /* world units, gliding */

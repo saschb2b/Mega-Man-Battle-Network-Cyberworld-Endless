@@ -25,9 +25,6 @@ enum { UNIT_DARKLOID, UNIT_BRUTE, UNIT_HAWK, UNIT_BLADIA };
 /* Order Points: BN5's, 3 at the start and 8 at most (BN5_LIB_OP_ADD) */
 #define LIB_OP_START 3
 #define LIB_OP_MAX   8
-/* The panels a board may fence (liberation_fence.c: BN6's map events
- * 0x1640 + n gate their walls, n below 0x80; 0x7D-0x7F are Rush's) */
-#define LIB_FENCES   120
 
 typedef struct {
 	uint8_t kind;      /* UNIT_* */

@@ -584,16 +584,21 @@ with stage 3.
 MegaMan name the board ("Like Nebula's dark areas,Lan!", its DarkHoles and
 par), then PLAYER PHASE. MegaMan walks the clean panels as BN6 walks him,
 as BN5's Navis walk its board (AGENTS.md: no movement of the engine's):
-every panel not walked (dark, an item's, a DarkHole, the Darkloid's ring
-and his panel) is fenced with walls of BN6's own on its cells that meet
-another panel's floor, each wall's value 0x80 + the panel's number, which
-BN6 skips while event 0x1640 + that number is set (`liberation_fence.c`;
-Rush's gaps' walls, docs/ROM_DATA.md), so a panel liberated lets him
-through as its event is set each frame (entering a map clears them; BN5
-raises its border cells' heights instead, `BN5_LIB_EDGES`). At most 120
-panels a board are fenced (the generator cleans the loneliest dark ones
-past that), and a panel the map left without floor at its middle
-(netmap's legal.c) is off the board. A beside the panel he faces (the one
+every panel not walked as the board is made (dark, an item's, a
+DarkHole, the Darkloid's ring and his panel) is fenced with walls of BN6's
+own on its cells that meet another panel's floor (`liberation_fence.c`).
+A wall whose value has bit 7 set is skipped while event 0x1640 + its low
+bits is set (Rush's gaps' walls, docs/ROM_DATA.md), and the fence's walls
+name one of two: 0x16A0, never set, where the wall stands, or 0x16A1, set
+each frame (entering a map clears it), where it is skipped (the Link Navi
+obstacles' walls take 0x1640-0x1647 and Rush's gaps' 0x16BE-0x16BF). As a panel is
+liberated, or darkened again, its walls are switched between the two in
+BN6's coordinate data in RAM (`BN6_MAP_COORDS`, which BN6 reads in place
+and decompresses again at each map entry, after a battle too), as BN5
+raises and lowers its border cells' heights per panel
+(`BN5_LIB_EDGES`): no board has more fences than BN6's events allow,
+however many of its panels are dark. A panel the map left without floor
+at its middle (netmap's legal.c) is off the board. A beside the panel he faces (the one
 his facing points at, a little ahead of him) opens the command menu on it: **Liberation** (a battle of BN6's: its
 virus battles' easier half with two dark panels round it or fewer, the
 band with three to six, the next act's band one version up with seven or

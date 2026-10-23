@@ -5518,7 +5518,6 @@ static void test_liberation_board(void) {
 			for (int h = 0; h < a.nholes; ++h) CHECK(lib_dark_around(&a, a.hole_x[h], a.hole_y[h]) == 8, "board %u: hole %d's ring not dark", s, h);
 			for (int u = 1; u < a.nunits; ++u)
 				CHECK(abs(a.unit[u].x - a.start_x) + abs(a.unit[u].y - a.start_y) > 3, "board %u: a guardian by the start", s);
-			CHECK(a.dark <= LIB_FENCES, "board %u: %d panels to fence, more than %d", s, a.dark, LIB_FENCES);
 			panels += a.panels; dark += a.dark; par += a.par; ++n;
 			if (a.par < lo) lo = a.par;
 			if (a.par > hi) hi = a.par;

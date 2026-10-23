@@ -19,5 +19,16 @@
 #define BN6_BG1_SCREEN        0x03002DC0u /* the map's layer 0 */
 #define BN6_BG2_SCREEN        0x030035C0u /* the map's layer 1 */
 #define BN6_BG_SCREEN_SIZE    0x800
+/* The map's coordinate data, decompressed at map entry and read in place
+ * (docs/ROM_DATA.md, Map buffers): its walls' section first, a u32 count n,
+ * then n entries of a u16 cell key ((cy + 127) * 254 + cx + 127, 8-unit
+ * world cells, ascending) and a u16 offset, then n shapes of 4 bytes (z,
+ * value, height, type; src/map/coords.c). A wall whose value has bit 7 set
+ * is skipped while event 0x1640 + (value & 0x7F) is set */
+#define BN6_MAP_COORDS        0x02027A00u
+#define BN6_COORD_ENTRIES     (BN6_MAP_COORDS + 4) /* the walls' section's entries, after its count */
+#define BN6_COORD_ENTRY       4           /* an entry's bytes, and a shape's */
+#define BN6_COORD_KEY_SPAN    254
+#define BN6_COORD_VALUE       0x01        /* in a shape */
 
 #endif
