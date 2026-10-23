@@ -42,10 +42,13 @@
 #endif
 
 #include "emu.h"
+#include "bn6.h"
 #include "claims.h"
 #include "hook.h"
 #include "platform.h"
 #include "save_queue.h"
+#include "sound_heard.h"
+#include "sound_quiet.h"
 #include "thumb_reloc.h"
 #include "xinstall_log.h"
 #include "xvirus_dispatch.h"
@@ -878,6 +881,98 @@ static void dispatch_run(void) {
 	emu_write32(0x080000C8, 0x080000D1);
 }
 
+/* ---- the music or the effects silenced (sound_quiet.c) ---- */
+
+/* BN6's player rows (BN6_MPLAYS) for two players, an effect's (row 0) and
+ * the music's (row 31), a track each; a stand-in for TrkVolPitSet that
+ * works a track's volume out as 0x40, right and left, where its flags ask
+ * (BN6_TRACK_VOL_SET) and clears what it did; a driver that calls it on
+ * the music's track and then the effect's */
+#define Q_EFFECT 0x02006E08u
+#define Q_MUSIC 0x02007EE8u
+#define Q_DRV 0x08151000u
+#define Q_MARK (IWRAM + 0x4C0)
+
+static void quiet_rom(void) {
+	static uint8_t rows[BN6_MPLAY_COUNT * BN6_MPLAY_ROW];
+	put32(rows, 0, 0x02010690);
+	put32(rows, BN6_MPLAY_TRACKS, Q_EFFECT);
+	rows[BN6_MPLAY_TRACK_COUNT] = 1;
+	uint32_t m = (BN6_MPLAY_COUNT - 1) * BN6_MPLAY_ROW;
+	put32(rows, m, BN6_MUSIC_PLAYER);
+	put32(rows, m + BN6_MPLAY_TRACKS, Q_MUSIC);
+	rows[m + BN6_MPLAY_TRACK_COUNT] = 1;
+	emu_write(BN6_MPLAYS, rows, sizeof rows);
+	/* ldrb r2,[r1]; lsls r3,r2,#31; beq; movs r3,#0x40; strb r3,[r1,#0x10]; strb r3,[r1,#0x11];
+	 * movs r3,#0xF0; ands r2,r3; strb r2,[r1]; mov pc,lr (the change's bits cleared, as MPlayMain clears them after) */
+	const uint16_t vol[10] = { 0x780A, 0x07D3, 0xD002, 0x2340, 0x740B, 0x744B, 0x23F0, 0x401A, 0x700A, 0x46F7 };
+	code_at(BN6_M4A_TRK_VOL_PIT_SET, vol, 10, NULL, 0, 0x14);
+	/* ldr r1,=Q_MUSIC; bl; ldr r1,=Q_EFFECT; bl; ldr r0,=Q_MARK; movs r1,#0x5A; str r1,[r0]; b . */
+	uint16_t ops[12] = { ldr_lit(Q_DRV, 1, Q_DRV + 0x18), 0, 0, ldr_lit(Q_DRV + 0x06, 1, Q_DRV + 0x1C), 0, 0,
+		ldr_lit(Q_DRV + 0x0C, 0, Q_DRV + 0x20), 0x215A, 0x6001, 0xE7FE, 0x46C0, 0x46C0 };
+	thumb_bl_encode(Q_DRV + 0x02, BN6_M4A_TRK_VOL_PIT_SET, &ops[1], &ops[2]);
+	thumb_bl_encode(Q_DRV + 0x08, BN6_M4A_TRK_VOL_PIT_SET, &ops[4], &ops[5]);
+	const uint32_t lits[3] = { Q_MUSIC, Q_EFFECT, Q_MARK };
+	code_at(Q_DRV, ops, 12, lits, 3, 0x18);
+}
+
+/* the driver's frame from the reset, both tracks playing with their
+ * volume to work out (0x81) and none yet */
+static void quiet_run(bool music, bool effects) {
+	sound_heard_set(music, effects);
+	emu_reset();
+	for (int k = 0; k < 2; ++k) {
+		uint32_t t = k ? Q_EFFECT : Q_MUSIC;
+		emu_write8(t + BN6_TRACK_FLAGS, BN6_TRACK_EXISTS | BN6_TRACK_VOL_SET);
+		emu_write8(t + BN6_TRACK_VOL_RIGHT, 0);
+		emu_write8(t + BN6_TRACK_VOL_LEFT, 0);
+	}
+	emu_write32(Q_MARK, 0);
+	emu_frame(0);
+	emu_sync();
+}
+
+static void quiet_players(void) {
+	quiet_rom();
+	emu_write32(0x080000C8, Q_DRV | 1);
+	sound_quiet_install();
+	CHECK(emu_read16(BN6_M4A_TRK_VOL_PIT_SET) == 0xBECE, "the hook on TrkVolPitSet");
+	static const struct { bool music, effects; uint8_t music_vol, effect_vol; } runs[4] = {
+		{ true, true, 0x40, 0x40 }, { false, true, 0, 0x40 }, { true, false, 0x40, 0 }, { false, false, 0, 0 },
+	};
+	for (int k = 0; k < 4; ++k) {
+		quiet_run(runs[k].music, runs[k].effects);
+		CHECK(emu_read32(Q_MARK) == 0x5A, "quiet %d: the driver did not run to its end", k);
+		CHECK(emu_read8(Q_MUSIC + BN6_TRACK_VOL_RIGHT) == runs[k].music_vol && emu_read8(Q_MUSIC + BN6_TRACK_VOL_LEFT) == runs[k].music_vol &&
+			emu_read8(Q_EFFECT + BN6_TRACK_VOL_RIGHT) == runs[k].effect_vol && emu_read8(Q_EFFECT + BN6_TRACK_VOL_LEFT) == runs[k].effect_vol,
+			"quiet %d: the music's volume %#x %#x, the effect's %#x %#x", k, emu_read8(Q_MUSIC + BN6_TRACK_VOL_RIGHT),
+			emu_read8(Q_MUSIC + BN6_TRACK_VOL_LEFT), emu_read8(Q_EFFECT + BN6_TRACK_VOL_RIGHT), emu_read8(Q_EFFECT + BN6_TRACK_VOL_LEFT));
+		/* (worked out, silenced or not: nothing left to do) */
+		CHECK(emu_read8(Q_MUSIC + BN6_TRACK_FLAGS) == BN6_TRACK_EXISTS && emu_read8(Q_EFFECT + BN6_TRACK_FLAGS) == BN6_TRACK_EXISTS,
+			"quiet %d: the flags %#x %#x", k, emu_read8(Q_MUSIC + BN6_TRACK_FLAGS), emu_read8(Q_EFFECT + BN6_TRACK_FLAGS));
+	}
+	/* a change tells the players it touches before the next frame (the
+	 * driver loops at its end since), and a state's load tells them all */
+	sound_heard_set(false, true);
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read8(Q_EFFECT + BN6_TRACK_FLAGS) == (BN6_TRACK_EXISTS | BN6_TRACK_VOL_CHANGED) &&
+		emu_read8(Q_MUSIC + BN6_TRACK_FLAGS) == BN6_TRACK_EXISTS, "the effects turned on: the flags %#x (music) %#x (effect)",
+		emu_read8(Q_MUSIC + BN6_TRACK_FLAGS), emu_read8(Q_EFFECT + BN6_TRACK_FLAGS));
+	sound_quiet_loaded();
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read8(Q_MUSIC + BN6_TRACK_FLAGS) == (BN6_TRACK_EXISTS | BN6_TRACK_VOL_CHANGED), "after a load: the music's flags %#x",
+		emu_read8(Q_MUSIC + BN6_TRACK_FLAGS));
+	/* (a track that does not play is left alone) */
+	emu_write8(Q_MUSIC + BN6_TRACK_FLAGS, 0);
+	sound_heard_set(true, true);
+	emu_frame(0);
+	emu_sync();
+	CHECK(emu_read8(Q_MUSIC + BN6_TRACK_FLAGS) == 0, "a track that does not play told: %#x", emu_read8(Q_MUSIC + BN6_TRACK_FLAGS));
+	emu_write32(0x080000C8, 0x080000D1);
+}
+
 /* ---- RAM kept patched (emu.c's emu_keep, issue #82) ---- */
 
 /* As the engine keeps IWRAM's copy of the game's code patched: the
@@ -1063,11 +1158,12 @@ int main(void) {
 	save_queue_checks();
 	moved_block();
 	dispatch_run();
+	quiet_players();
 	kept_ram();
 	claimed_writes();
 	kept_slots();
 	if (failures) { printf("test_emu: %d failed\n", failures); return 1; }
 	printf("all hook checks passed, the two cores kept apart, their hooks each their own, on one thread and on two, a moved block's calls through veneers, "
-		"the second-level dispatch's code, RAM kept patched but in its states, the installers' writes claimed, what hooks keep a core put back\n");
+		"the second-level dispatch's code, the music and the effects silenced apart, RAM kept patched but in its states, the installers' writes claimed, what hooks keep a core put back\n");
 	return 0;
 }

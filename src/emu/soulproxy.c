@@ -94,6 +94,8 @@ static HookAct summon(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+bool soulproxy_bn5_read(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
+
 bool soulproxy_install(int breaks) {
 	static bool done;
 	if (done) return true;

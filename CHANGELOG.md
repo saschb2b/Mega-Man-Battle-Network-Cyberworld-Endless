@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The music off, to play your own.** Options' Audio has **Music** and
+  **Effects**, each on or off: with the music off the game's songs fall
+  silent and its sounds play on, the menus', the chips' and the battles'.
+  Both apply at once, in a run too, and are kept in `settings.ini`
+  (`music`, `effects`). It is BN6's own sound engine that falls silent, a
+  player at a time, so the effects sound as they did. The Jukebox still
+  plays what you choose; a NetBattle keeps its music unless the effects
+  are off too.
 - **BN5's songs named for where BN5 plays them, and three of them in
   runs.** The Jukebox's BN5 songs had numbers in place of names, or names
   borrowed from BN6. Now every song Team Colonel starts is named for its

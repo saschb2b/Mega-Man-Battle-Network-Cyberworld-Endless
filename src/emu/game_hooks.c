@@ -15,10 +15,10 @@
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
-#include "rom.h"
 #include "scripts.h"
 #include "soulproxy.h"
 #include "soulunite.h"
+#include "sound_quiet.h"
 #include "xchips_install.h"
 #include "xinstall_log.h"
 
@@ -31,6 +31,8 @@ void game_hooks_install(void) {
 	xchips_install();
 	gamecall_install();
 	idle_install();
+	/* (the music or effects off: Options' Audio) */
+	sound_quiet_install();
 	npc_reach_install();
 	chat_marks_install();
 	pet_install();
@@ -40,7 +42,7 @@ void game_hooks_install(void) {
 	 * are, every battle of a run: the run's Souls reach them as each battle
 	 * begins, encounter.c; docs/MULTIROM.md, Transplanted Souls. And the
 	 * proxy form for its own test, --dev soulproxy) */
-	bool souls = XR[XROM_BN5_COLONEL_US].data && !dev.nonavis && !dev.xnavicontrol;
+	bool souls = soulproxy_bn5_read() && !dev.nonavis && !dev.xnavicontrol;
 	if (dev.soulproxy || souls) {
 		/* (written down for the Arena's cores as they are made: xinstall_log.h) */
 		xlog_begin();

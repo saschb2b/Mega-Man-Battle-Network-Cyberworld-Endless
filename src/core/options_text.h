@@ -1,6 +1,6 @@
 /* Options' words (options_text.c): its lines, their notes, the Display
  * and Audio sections' choices, settings.ini's notes for
- * the display's lines and the sound,
+ * the display's lines, the sound, the music and the effects,
  * in the plain style of the game's menus (docs/VOICE.md), apart from the
  * logic that says when. */
 #ifndef CW_OPTIONS_TEXT_H
@@ -24,12 +24,17 @@ typedef enum {
 	OW_SMOOTH, OW_SMOOTH_ON_NOTE, OW_SMOOTH_OFF_NOTE,
 	OW_ON, OW_OFF,
 	OW_INFORMATION,     /* the information box's label, KeyItem's */
+	OW_MUSIC, OW_MUSIC_ON_NOTE, OW_MUSIC_OFF_NOTE,   /* the Audio section's lines (sound_heard.h) */
+	OW_EFFECTS, OW_EFFECTS_ON_NOTE, OW_EFFECTS_OFF_NOTE,
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
 
 /* settings.ini's lines before the sound line: what it is */
 const char *options_sound_note(void);
+/* ... before the music's and the effects' */
+const char *options_music_note(void);
+const char *options_effects_note(void);
 /* ... before the display's: screen, smooth_motion and fullscreen */
 const char *options_screen_note(void);
 const char *options_smooth_note(void);

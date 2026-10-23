@@ -29,6 +29,8 @@ enum {
 	SOULPROXY_BREAK_SUMMON = 16,  /* the summon not hooked */
 };
 bool soulproxy_install(int breaks);
+/* Whether BN5's ROM, the Souls' own, is read beside BN6's */
+bool soulproxy_bn5_read(void);
 
 /* (dev step "cross F", tools/xproxy.py) The next Cross MegaMan chooses on
  * CROSSSELECT is committed as form F (1-0x18) instead of its own, by

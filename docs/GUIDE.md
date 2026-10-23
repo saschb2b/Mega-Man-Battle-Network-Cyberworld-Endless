@@ -420,7 +420,7 @@ waits under it, and B brings you back to the PET where you were. On a
 phone or tablet the touch controls' menu has **OPTIONS** as well. Its
 **Controls** opens the controls screen (not on the 3DS, whose
 buttons are its own), **Display** the picture ([Screen](#screen)),
-**Audio** the sound ([Sound](#sound)), and
+**Audio** the music, the sound effects and the sound ([Sound](#sound)), and
 **Statistics** your answer to the statistics' question, where the game can
 send them; B goes back (on a phone, the touch controls' B).
 
@@ -1092,6 +1092,16 @@ the PET's in a run): Left, Right or A on
 **Sound** changes it at once, so you hear it, and it is kept. The browser
 player's menu has a **Sound** button too, and `sound = soft` or
 `sound = gba` in `settings.ini` in the data folder sets it as well.
+
+To play your own music over the game, turn **Music** off in Options'
+**Audio**: the game's songs fall silent and its sound effects play on, the
+menus', the chips' and the battles'. **Effects** turns those off and on in
+the same way; with both off the game makes no sound at all. Each applies
+at once and is kept (`music = off` and `effects = off` in `settings.ini`).
+The Jukebox still plays the song you choose with the music off. In a
+NetBattle the music plays on unless the effects are off too: both GBAs of
+a NetBattle run alike on both players' systems, and the music is part of
+what they run.
 
 ## The Jukebox
 

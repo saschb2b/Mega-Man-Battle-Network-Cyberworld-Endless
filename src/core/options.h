@@ -6,7 +6,8 @@
  * Its lines open a section each: Controls (the controls screen,
  * controls.h; not on the 3DS, whose buttons are the console's own), Display
  * (the fullscreen window, the scale and smooth motion, where the system
- * has them: display.h), Audio (the sound, gba or soft: sound_filter.h),
+ * has them: display.h), Audio (the music and the effects, on or off:
+ * sound_heard.h; the sound, gba or soft: sound_filter.h),
  * each kept in settings.ini at once, and Statistics where the build can
  * send them (their question,
  * analytics_ask.h); Done closes it. It is the overlay's root: the

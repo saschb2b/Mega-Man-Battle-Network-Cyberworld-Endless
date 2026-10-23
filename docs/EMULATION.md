@@ -718,6 +718,31 @@ images of BN6's 10512 Hz mix (docs/ROM_DATA.md, The sound's mix) down
 with the rest of the highs. Neither setting touches the game: a headless
 capture's frames are the same byte for byte with either.
 
+**The music and the effects** (settings.ini's `music` and `effects`,
+Options' Audio; `src/audio/sound_heard.c`). BN6 plays its music on player
+31 and each sound on a player of its own, and works each track's volume
+out in one routine, TrkVolPitSet, from the track's own, the fade's and its
+pan; each of its notes takes what it worked out (docs/ROM_DATA.md, The
+music and the effects silenced). A hook there (`src/emu/sound_quiet.c`)
+gives a silenced player's tracks none, right and left, and leaves the rest
+as BN6 works it: the notes play on, silent, so the effects take the
+channels they took before, and the game runs as it did. A change tells the
+tracks that play, of the players it touches, to work their volume out
+again before the next frame; so does a state's load, whose tracks hold
+what the setting was when it was saved. The engine's own MP2K does the
+same in its C (`mp2k_quiet_set`), but for the song the Jukebox plays,
+which was asked for; with both off the device hears nothing at all. The
+Arena's and the stands' cores take no hook: each player's system runs both
+GBAs and hashes their states whole, sound and all (`arena_pair.c`), so a
+NetBattle's music plays unless the effects are off too. Proved on the
+core's sound dumped (`CYBERWORLD_AUDIO_DUMP`, a Central layer, `--seed 2`):
+with the music off nothing from the moment the net's song begins, the
+jack-in's effects alone before it; with the effects off nothing in the
+jack-in's sound, and the song at the same level (within 0.02 dB) and
+envelope (0.95 by 10 ms) as with both; with both on, the same byte for byte
+as the build before the hook, and an autopilot run's battles and run log
+the same with the effects off.
+
 ## The engine's own sound
 
 Before a run and beside it (the title and its summary, the setup,

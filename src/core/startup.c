@@ -20,6 +20,7 @@
 #include "pick.h"
 #include "rom.h"
 #include "sound_filter.h"
+#include "sound_heard.h"
 #include "touch.h"
 #ifdef CW_IOS
 #include "ios.h"
@@ -225,14 +226,16 @@ bool startup_fullscreen(bool big) {
 }
 
 /* settings.ini in the data folder, made with the defaults where it is
- * missing: the display's lines (display.h), the sound, the frame log */
+ * missing: the display's lines (display.h), the sound, the music and
+ * the effects heard (sound_heard.h), the frame log */
 static void settings_load(const char *path) {
 	FILE *f = fopen(path, "r");
 	if (!f) {
 		f = fopen(path, "w");
 		if (!f) return;
-		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n",
-			options_smooth_note(), options_screen_note(), options_sound_note());
+		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
+			"%smusic = on\n%seffects = on\n",
+			options_smooth_note(), options_screen_note(), options_sound_note(), options_music_note(), options_effects_note());
 		fclose(f);
 		platform_persist();
 		return;
@@ -242,6 +245,9 @@ static void settings_load(const char *path) {
 		char key[64], val[64];
 		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2 || display_setting(key, val)) continue;
 		if (!strcmp(key, "sound")) sound_filter_set(!strcmp(val, "soft") ? SOUND_SOFT : SOUND_GBA);
+		bool on = strcmp(val, "off") && strcmp(val, "no") && strcmp(val, "0");
+		if (!strcmp(key, "music")) sound_heard_set(on, sound_heard_effects());
+		if (!strcmp(key, "effects")) sound_heard_set(sound_heard_music(), on);
 		/* (not written by default: for a report of a machine's pacing) */
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}
@@ -252,7 +258,7 @@ static void settings_load(const char *path) {
 	if (P.renderer && !P.headless) platform_relayout();
 }
 
-void player_files(bool headless, int smooth_arg, int sound_arg, const char *screen_arg, bool plain) {
+void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, int effects_arg, const char *screen_arg, bool plain) {
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
@@ -270,6 +276,8 @@ void player_files(bool headless, int smooth_arg, int sound_arg, const char *scre
 		if (smooth_arg >= 0) P.blend = smooth_arg;
 	}
 	if (sound_arg >= 0) sound_filter_set((SoundFilter)sound_arg);
+	if (music_arg >= 0) sound_heard_set(music_arg, sound_heard_effects());
+	if (effects_arg >= 0) sound_heard_set(sound_heard_music(), effects_arg);
 	if (screen_arg) display_scale_use(display_scale_read(screen_arg));
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
 	 * view where it is yes: analytics.h) */

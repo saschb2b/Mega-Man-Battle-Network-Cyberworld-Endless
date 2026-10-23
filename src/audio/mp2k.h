@@ -40,6 +40,12 @@ int mp2k_song_loops(int rom, int song);
 int mp2k_song_levels(int rom, int song, uint8_t *out, int max);
 /* One GBA frame */
 void mp2k_frame(void);
+/* The players silenced, a bit each in BN6_MPLAYS's order (MP2K_MUSIC's
+ * the music's; sound_heard.h): their tracks' volume none from their next
+ * frame, as the core's hook makes it (sound_quiet.h), their notes played
+ * on silent */
+#define MP2K_MUSIC 31
+void mp2k_quiet_set(uint32_t players);
 /* What it mixed this frame: per_frame samples of the right and left
  * channels (DMA A and B), and their count */
 const int8_t *mp2k_mix_right(void);
