@@ -362,6 +362,95 @@ power carried across runs (a run's team is its own Souls); online on the
 common ground (co-op needs both players to have BN5's ROM for BN5's Navis,
 or the Cross lineup).
 
+## The quality bar
+
+The owner's question (23 October 2026): what makes a liberation worthy of
+the run, not just more of it. Reasoned with the game-design skill: the
+experience stays the decision's ("I see the whole dark area and plan my way
+through it; every phase I spend is the better reward slipping away"), the
+dialectic the run's own, and the patterns a cumulative-modifier staircase
+(one lesson a rung, introduce, develop, twist, test), an honest telegraph, a
+branching map whose branch is variety, and a hand-made unit set laid out by
+the generator. Each rule below is held by the generator
+(`src/director/liberation_board.c`), its planner
+(`src/director/liberation_plan.c`) and the prototype (`tools/liberation.py`):
+a board that fails one is rejected and the next seed tried, and the tests
+(`test_liberation_board`) and the prototype print the measures over
+hundreds of boards.
+
+1. **One dialectic, every phase.** The run's *press on or prepare*, at the
+   board's scale: liberate toward a DarkHole, or take Order Points, a heart,
+   a rest, a guardian out of the way, a key, a detour for loot or the
+   route; the par's prize against HP and Order Points. **Measured:** the
+   planner, a fair player, counts each phase's sensible moves, those of a
+   different purpose worth four fifths of the best or more. A purpose is
+   what the move is for (the DarkHole it heads to, the Darkloid, an item, a
+   key, the route, a guardian, a rest), its command (Liberation or
+   LongSwrd), and for a panel whether it is safe or bold (four or more dark
+   round it: the one-turn win's gamble, BN5's own skill). A phase with one
+   is dead. A strike at a DarkHole or the Darkloid beside him is the board's
+   beat and counted apart. **Rule:** no more than 55% of the phases on the
+   way dead.
+2. **The bare board is a puzzle.** The same plays with every reward
+   stripped (Order Points, hearts, zenny, chips, BonusPanels) still decide:
+   no more than 60% dead. The dark's shape carries it: fields, not
+   corridors (a one-wide way's panel dark half as often, the loneliest dark
+   thinned first), the guardians' reach, the DarkHoles' order.
+3. **One new rule per act** (a staircase, not a slider). Each act asks one
+   question more, the earlier ones kept:
+
+   | Act | The new rule | Its question |
+   | --- | --- | --- |
+   | 2 | The basics (BN5's mission 1): dark panels, DarkHoles and their BigBrutes, the Darkloid, Order Points and hearts, BonusPanels | Which way through the dark, and when is an Order Point worth a LongSwrd? |
+   | 3 | Barriers and keys, met safe: the sealed region (rule 6) | Is the route worth the phases? |
+   | 4 | Guardians' reach: a roaming TinHawk, and a BarrierPanel across the way with a way round | Round his reach, through him, or fetch the key? |
+   | 5 | The board fights back: trap panels on the way, each with a way round; Bladia darkening clean panels | HP or phases? |
+   | 6 | The maze: a second barrier across the way, its key past the first (where the floor gives one) | In what order? |
+
+   A run meets dark layers in acts 2 to 4 (`run_dark_area`); acts 5 and 6
+   are `--dev dark`'s and the separate mode's to come. The size grows with
+   the questions: a lone MegaMan's boards hold 14 dark panels beyond the
+   DarkHoles' rings at act 2 and 26 at act 6, two DarkHoles to three, and
+   the par from 12 to 21 (BN5's 7 to 16 for teams of two to five).
+4. **Honest telegraphs.** Everything that can hurt or cost shows before the
+   move. A trap is a panel of its own look (BN5 hides its traps in item
+   panels; ours show BN5's paled dark), the par is said in the briefing, and
+   the guardians' reach and next step are a function of the board
+   (`lib_threat`: the HP the units would take off a Navi standing on a
+   panel in the next Darkloids' phase, their steps as the phase takes
+   them), which the planner reads as a player reads the board. No unit
+   reaches the start. Drawing that reach (BN5 has no such overlay; the L
+   view is the place) is lib-feel's to do.
+5. **Every teammate has a niche.** Each command's shape has a board moment
+   where it is the best move: the command rule (The generator) for the
+   teammates in the prototype, NumberCheck's new niche the traps it
+   disarms. In the engine, MegaMan alone, LongSwrd is taken half a time a
+   play or more and is the best move in at most 40% of the phases: never
+   useless, never the only answer.
+6. **Routes that matter.** From act 3 every board holds a sealed region:
+   five to sixteen panels cut off by a BarrierPanel of their own, nothing
+   of the board's in them, in sight from the walk; its key in a dark panel
+   two or more off the way; the route at its far end. Never required (the
+   tests open every other barrier and reach every target without it).
+   Its cost is measured: a player going for it takes 2 to 10 phases more
+   than the par's player, else the board is rejected (cheaper is a gift,
+   dearer a wall). Its reward is variety, not power: the act's next route
+   (Special routes, below).
+7. **Rewards feed the run, failure is graduated.** The par's tiers stay
+   stage 1's: a Server's prize two under par, one tier lower at par, one
+   lower still over it (assumed until the owner's open decision 5); item
+   panels add a chip of the layer's band (one at act 2, two later) and the
+   act's zenny (BN5's amounts, 300 at act 2 to 700 at act 6), off the way:
+   a detour's worth. Over par is a lesser prize, never a lost run. The dark
+   way stays a costed choice at the fork: the second layer's Net Dealer and
+   heal given up.
+8. **Fun measured.** The planner plays every board 12 times for the par
+   and the measures, 6 times stripped, 4 times for the route; the tests and
+   the prototype print, act by act, dead phases, sensible moves a phase,
+   each command's share of the best moves and LongSwrd's uses, the par's
+   middle half, the DarkHoles' orders, the route's cost and what was
+   rejected for what (The quality bar's measures, below).
+
 ## The generator
 
 ### What a mission is made of
@@ -377,8 +466,8 @@ boards are wide fields thick with dark.
 | Act | BN5 like | Panels | DarkHoles | Team | Barriers | Dark | Fields | Fill | Dense | Items | Bonus | Guardians | Darkloid |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2 | 1 | 90-112 | 2 | 2 | none | 28-45% | 68-86% | 26% | 3.3-4.3 | 7 | 2 | BigBrute | 300 HP, reach 1, 30 |
-| 3 | 2-3 | 165-215 | 3 | 3 | 1 | 45-58% | 70-88% | 27% | 3.4-4.5 | 8 | 3 | + TinHawk | 600, 2, 50 |
-| 4 | 4-5 | 210-245 | 4 | 4 | 2 | 52-66% | 86-100% | 42% | 4.6-6.2 | 12 | 3 | + Bladia | 900, 3, 80 |
+| 3 | 2-3 | 165-215 | 3 | 3 | 1 (sealed) | 45-58% | 70-88% | 27% | 3.4-4.5 | 8 | 3 | BigBrute | 600, 2, 50 |
+| 4 | 4-5 | 210-245 | 4 | 4 | 2 | 52-66% | 86-100% | 42% | 4.6-6.2 | 12 | 3 | + TinHawk, roaming | 900, 3, 80 |
 | 5 | 6-7 | 215-255 | 5 | 5 | 2 | 58-68% | 86-100% | 44% | 4.6-6.2 | 16 | 3 | all | 1200, 2, 80 |
 | 6+ | 8-9 | 220-260 | 5 | 5 | 3 | 55-68% | 86-100% | 45% | 4.2-6.2 | 14 | 3 | all | 1500, 3, 100 |
 
@@ -402,14 +491,19 @@ The steps (`tools/liberation.py` `generate`):
    boards of the act have (the dense band), so a one-turn win is no sure
    thing and a command that frees several panels in one battle is worth
    its Order Point. The first two panels of the walk stay clean.
-4. **BonusPanels** at stub ends; **barriers**, walls of one or two panels
-   (a two-wide way walled across) that cut a region off the start's side
-   (never the Darkloid's), the key in a dark panel on the near side; from
-   act 4, half the time, the last barrier's region holds a **sealed
-   route** (below).
+4. **Barriers**, by the staircase (The quality bar, 3): from act 3 the
+   sealed region's, a wall of one or two panels (a two-wide way walled
+   across) that cuts five to sixteen panels off by itself (the prototype's
+   smaller boards allow thirty), nothing of the board's in them, its key in
+   a dark panel two or more off the way and the route at the region's far
+   end; from act 4 one across a cheapest way, a way round it kept, its key
+   off the way; at act 6 a second across the way, its key past the first
+   where the floor gives one. **BonusPanels** at stub ends.
 5. **Items** in the dark, corners and dead ends first: one Order Points
-   item always, then hearts, Order Points, zenny, chips; BugFrags and traps
-   from act 4.
+   item always, then hearts and Order Points; the act's chips and zenny
+   off the way (a detour's worth). From act 5 **traps**: dark panels on a
+   cheapest way that a way round, a dark panel or two longer, avoids, shown
+   as traps (BN5 hides them in item panels).
 6. **The par** from the planner, then **the command rule** (below).
 
 ### Guarantees, and what is rejected
@@ -422,6 +516,13 @@ off; nothing can be liberated in the first phase; a guardian stands within
 three of the start; a teammate's command finds no situation; the planner
 wins it less than 60% of the time; or a teammate's command does not earn
 its Order Point.
+
+The quality bar's rules add theirs: a board is rejected where more than
+55% of its phases on the way are dead, 60% stripped of its rewards, where
+its sealed region's route costs the route's player fewer than 2 or more
+than 10 phases over the par's (the prototype: 1 to 8, scaled as the par),
+where LongSwrd goes unused or wins more than 40% of the phases, where the
+act's barrier or traps find no place, or where a unit reaches the start.
 
 **The command rule.** The run knows which Souls it holds when a layer is
 made, so the generator makes the board for its team. First it gives each
@@ -460,14 +561,30 @@ planner's median: 0.50 at mission 1, 0.58 at 2-3, 0.59 at 4-5, 0.79 at
 6-7, 0.75 at 8-9). A generated board's par is the planner's median times
 its act's ratio (`PAR_SCALE`): BN5's own yardstick at that stage.
 
+The engine's planner (`src/director/liberation_plan.c`, MegaMan alone)
+plays each board 12 times the same way, with BN5's battle odds (the one-turn
+win 75% less 5 a dark panel round it, the failure 4% plus 3.5 a dark panel),
+the act's virus harm (14 to 40) and a run's HP for MegaMan (300 at act 2, a
+hundred more an act: its HPMemory, docs/ECONOMY.md), resting where his HP
+weighs more than a phase, never risking a battle whose worst harm would end
+the run. The par is the median of its plays won (BN5's ratio is for teams;
+a lone MegaMan is the planner's own yardstick until stage 3 brings the
+teams): an act 2 board's par is 8 to 19, act 4's 12 to 31.
+
 ### Special routes
 
-A sealed route is a region behind the board's highest barrier holding a
-gate panel: its key off the main way, its region a detour of phases. The
-design: the gate leads to a second Darkloid, and beating him turns the
-act's next route (docs/META.md, 7) toward another area or the deep (or, in
-the separate mode, toward another last boss). The prototype places it (40%
-to 53% of boards from act 4) and does not yet play it.
+A sealed route is the region behind the sealed barrier (The quality bar,
+6): its key off the way, its region a detour of 2 to 10 phases, the route
+at its far end an item panel the player liberates. Found, it is the hook
+the act's next route reads (`lib_route_found`). The design it feeds: the
+route turns the act's next fork (docs/META.md, 7) toward a third way, the
+deep's (the Undernet, as the short net's dark way goes) or another area's
+guardian; after the endless net's act 4, whose next act has no fork, the
+Nest's second guardian, a different last boss; in the separate mode,
+another last Darkloid. **Not built:** keeping the route found for the run
+(a bit in `Run`, saved: the board's save is stage 1's open item, and
+`RUN_MAGIC` bumps with it) and `run_ways` offering the third way; the
+board places it, prices it and finds it.
 
 ### How it reads as BN5's own
 
@@ -602,12 +719,9 @@ and 6). Rejected and the next seed tried as the prototype's guarantees say
 start, no room for the Darkloid or the holes); a layer whose eight seeds
 fail is made plain. Over 30 layers an act: 190-240 panels, 40-47% dark.
 
-**The par** (stage 1's estimate, `lib_par`): the dark panels on the way to
-each DarkHole in turn, nearest first, then to the Darkloid, at two a phase
-(one, and the one-turn win's eight now and then), with a phase each for a
-hole's guardian, the hole and the Darkloid, and a rest: act 2 12 (8-21), act
-3 20, act 4 15, acts 5 and 6 24. The prototype's planner, for teams, comes
-with stage 3.
+**The par** (stage 1's estimate, `lib_par`, the dark panels on the way at
+two a phase) gave act 2 12 (8-21); the planner's replaced it (The quality
+bar, as built).
 
 **The course** (`src/director/liberation.c`): after the arrival, Lan and
 MegaMan name the board ("Like Nebula's dark areas,Lan!", its DarkHoles and
@@ -741,10 +855,10 @@ CircusMan, took the prize (Recov80 *) and the exit, and went on through act
 dark layer restarts its board from the arrival); BN5's phase banners,
 its units' sprites, the L view's blended panel and arrows, and
 the other eight missions' maps (stage 1 draws every dark layer in mission
-1's); the camera over the board (BN5's L); barriers, keys and sealed
-routes; chips and zenny in item panels; the BonusPanel's chip; the
-planner's par; the economy report and pacing for dark layers; the second
-screen's board; stages 2 to 5.
+1's); the camera over the board (BN5's L); the BonusPanel's chip; the
+economy report and pacing for dark layers; the second screen's board;
+stages 2 to 5. (Barriers, keys, the sealed region, traps, chips and zenny
+in item panels and the planner's par came with the quality bar, below.)
 
 Moving BN5's own board code (0x12000 bytes of Thumb, its tables, text and
 graphics) into BN6's core instead was weighed: its exact rules for free,
@@ -752,6 +866,73 @@ but most of it calls BN5's overworld engine at other addresses, and the
 generated boards need none of BN5's missions. Its code is read for the
 rules where the guides are unsure (the commands' shapes, the Darkloid's
 heal).
+
+### The quality bar, as built (23 October 2026)
+
+The staircase, the barriers and their keys, the sealed region and its
+route's hook, the traps, the chips' and zenny's finds and the planner's par
+in the engine (The quality bar, The generator), MegaMan alone. In play: a
+key opens its barrier's panels (their fence's walls switched off as a
+liberated panel's are), a trap's harm is taken as it is liberated (never his
+last HP, BN6's board harm), a chip or zenny is given by a script of BN6's
+own (`ta_lib_find_chip`, `ta_lib_find_zenny`, installed with the layer as
+the par's prizes are), and the route found is told and kept for the layer
+(`lib_route_found`, the state in words' `route found`). The units' rules
+(steps, reach, harm) are the board's (`lib_guard_rule`, `lib_harm`), so the
+engine, the planner and the telegraph read the same ones. `LAYER_MAKE` 98.
+
+**The measures** (`tests/test_core.c`'s `test_liberation_board`, 40
+layers an act, each board made twice; the planner's 12 plays, 6 stripped
+and 4 for the route):
+
+| Act | Kept | Panels | Dark | Par (range) | Middle half | Dead on the way | Sensible moves a phase | Best: Liberation / LongSwrd / Pass / fight | LongSwrd a play | DarkHole orders | The route | Dead, stripped | Rejected most for |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2 | 40 of 40 | 197 | 20% | 12 (9-19) | 9-14 | 43% | 1.5 | 49 / 27 / 7 / 15% | 3.4 | 1.4 | none | 43% | dead 65, LongSwrd 20 |
+| 3 | 38 of 40 | 198 | 25% | 14 (9-21) | 12-18 | 45% | 1.5 | 48 / 27 / 9 / 14% | 3.8 | 1.6 | +4 | 42% | dead 66, barrier 31 |
+| 4 | 39 of 40 | 233 | 25% | 17 (12-31) | 14-20 | 46% | 1.6 | 44 / 30 / 14 / 9% | 5.0 | 2.7 | +4 | 51% | dead 116, stripped 49 |
+| 5 | 25 of 40 | 195 | 32% | 20 (12-34) | 17-23 | 49% | 1.5 | 44 / 29 / 13 / 12% | 5.8 | 2.9 | +5 | 53% | dead 231, barrier 53 |
+| 6 | 21 of 40 | 188 | 36% | 21 (15-33) | 19-25 | 48% | 1.5 | 41 / 29 / 17 / 11% | 6.1 | 1.9 | +5 | 50% | dead 217, unwon 91 |
+
+(Dead on the way: phases whose sensible moves were one, strikes at a
+DarkHole or the Darkloid apart. Middle half: the plays' phases from the
+quarter to the three quarters. The route: the route's player's phases
+over the par's. A layer whose sixteen tries fail is made plain: acts 5 and
+6, which a run does not meet yet, keep half their boards.)
+
+What they say:
+
+- **A lone MegaMan decides about one phase in two.** Half his phases offer
+  two sensible moves or more (another DarkHole, an item, a rest, LongSwrd
+  or not, a bold panel or a safe one); the other half are a corridor's
+  next panel or a rest he cannot put off. The rule keeps the boards at 55%
+  or under; the dead half is the lever stage 3 pulls, a team's Navis each
+  a decision a phase (the prototype's teams: 46% to 54%).
+- **The staircase reads in the numbers.** Each act's boards are a little
+  larger in what they ask: the par grows 12, 14, 17, 20, 21; the DarkHoles'
+  orders open from 1.4 to 2.9 ways as the holes grow from two to three;
+  resting matters more (the best move 7% of the phases at act 2, 14-17%
+  from act 4) as the reach and the tolls come in.
+- **The route is a price, not a gift.** It costs its player four or five
+  phases over the par, about a tier of the par's prize; a board where it
+  costs fewer than two or more than ten is rejected.
+- **LongSwrd has its niche.** It is the best move in 27-30% of the
+  phases, taken three to six times a board: neither the only answer nor
+  idle.
+- **The autopilot** (`--dev dark,god,onehit`, its one-hit battles all won
+  in one turn, so better than the planner's player) cleared act 2's board
+  in 11 phases against its par 13 and act 3's in 9 against 18 from depth 5,
+  and from depth 8 act 3's again and act 4's in 16 against 19, both of its
+  keys found and their barriers opened, on to act 5's dark layer.
+  Started at depth 11 directly, MegaMan was deleted in a liberation's
+  battle on dev's build as on this one: not this change's.
+
+**Left for later:** the route kept for the run and offered at the next
+fork (Special routes); the guardians' reach drawn (the L view); the board's
+make on the 3DS timed (about 55 ms a board on the desktop, the planner's
+plays the most of it: a dark layer's make on the New 3DS may take a second
+or two); acts 5 and 6 tuned for a lone MegaMan (their BN5 harm wants a
+team); the teammates' commands in the engine (stage 3), the command rule
+with them.
 
 ## The owner's decisions
 

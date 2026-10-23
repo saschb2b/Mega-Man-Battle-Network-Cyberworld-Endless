@@ -34,7 +34,7 @@
 #define FENCE_WALLS   4096     /* nm_extra's room for a section's cells */
 #define COORD_MAX     16384    /* coords.c's walls a section at most */
 
-static bool blocking(int k) { return k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_BOSS; }
+static bool blocking(int k) { return k == LIB_DARK || k == LIB_ITEM || k == LIB_HOLE || k == LIB_RING || k == LIB_BOSS || k == LIB_BAR || k == LIB_TRAP; }
 
 /* The fence's walls as written, and where BN6's coordinate data holds each
  * once the map is entered (found: the walls' section's count and every
@@ -84,7 +84,7 @@ static void off_board(void) {
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
 			int k = LB.b.kind[y][x], wx, wy;
-			if (k != LIB_CLEAN && k != LIB_DARK && k != LIB_ITEM && k != LIB_BONUS) continue;
+			if (k != LIB_CLEAN && k != LIB_DARK && k != LIB_ITEM && k != LIB_BONUS && k != LIB_TRAP && k != LIB_BAR) continue;
 			netmap_world(x, y, &wx, &wy);
 			if (netmap_floor_cell(wx >> 3, wy >> 3, 0) || lib_unit_at(x, y) >= 0) continue;
 			if (emu_debug_on()) fprintf(stderr, "liberation: panel %d,%d off the map's floor\n", x, y);

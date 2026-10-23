@@ -313,6 +313,31 @@ int ta_music(TextArchive *t, int song) {
 	return i;
 }
 
+int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_page(t, FACE_MEGAMAN, "Lan! There was a chip in that panel!", true);
+	first = false;
+	ta_give_chip(t, chip, code, 1);
+	ta_got_chip(t, chip_name, code, &first);
+	ta_end(t);
+	return i;
+}
+
+int ta_lib_find_zenny(TextArchive *t, int zenny) {
+	int i = ta_script(t);
+	bool first = false;
+	char what[24];
+	snprintf(what, sizeof what, "%d Zenny", zenny);
+	ta_page(t, FACE_MEGAMAN, "Lan! Zenny in that panel!", true);
+	/* (ts_check_give_zenny) */
+	uint8_t b[] = { 0xEF, 0x0E, (uint8_t)zenny, (uint8_t)(zenny >> 8), (uint8_t)(zenny >> 16), (uint8_t)(zenny >> 24), 0xFF, 0xFF, 0xFF };
+	ta_bytes(t, b, sizeof b);
+	ta_got(t, what, &first);
+	ta_end(t);
+	return i;
+}
+
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code) {
 	int i = ta_script(t);
 	bool first = true;

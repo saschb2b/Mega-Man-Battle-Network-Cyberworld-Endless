@@ -151,6 +151,10 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
 /* A won challenge's own reward: a chip. */
 int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int code);
+/* What a dark layer's item panel held (docs/LIBERATION.md): a chip, its
+ * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
+int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);
+int ta_lib_find_zenny(TextArchive *t, int zenny);
 /* What Dr. Hikari's dive support Mr. Prog offers on the run's first layer
  * (ta_gift). */
 typedef struct {

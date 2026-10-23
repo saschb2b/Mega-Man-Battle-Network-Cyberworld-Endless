@@ -53,15 +53,6 @@ static const int dirs[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
  * runs down-right on screen, y down-left) */
 static const int facing[4] = { 3, 5, 7, 1 };
 
-/* The guardians by act from the second (BN5's guides' numbers for its
- * missions, docs/LIBERATION.md; tools/liberation.py's GUARDS): their steps,
- * reach and damage on the board; the Darkloid's reach and damage */
-static const struct { int move, reach; bool all; } kinds[4] = { { 0, 0, false }, { 2, 1, true }, { 3, 3, false }, { 2, 1, false } };
-static const int harm[4][5] = { { 40, 50, 80, 80, 100 }, { 20, 40, 50, 60, 80 }, { 20, 30, 40, 60, 70 }, { 50, 50, 70, 100, 120 } };
-static const int darkloid_reach[5] = { 2, 2, 3, 2, 3 };
-
-static int tier(void) { int t = LB.b.act - 1; return t < 0 ? 0 : t > 4 ? 4 : t; }
-
 bool lib_way_dark(int act, int biome) {
 	if (act < 1 || act >= 6) return false;
 	if (dev.dark) return true;
@@ -85,6 +76,8 @@ bool lib_layer_dark(void) {
 }
 
 bool lib_on(void) { return D.active && !D.town && LB.on && LB.step != LIB_STEP_DONE; }
+
+bool lib_route_found(void) { return LB.on && LB.route_found; }
 
 bool lib_exit_shut(void) { return LB.on && LB.step != LIB_STEP_DONE && LB.step != LIB_STEP_PRIZE; }
 
@@ -120,15 +113,18 @@ static bool x_is_start(int y) { return y == LB.b.start_y; }
 
 /* (debug) the board as text, a row per grid y: '.' clean, '#' dark, 'i'
  * an item's, '?' a BonusPanel, 'O' a DarkHole, 'r' the Darkloid's ring,
- * 'D' him, 'S' the start, 'g' a guardian */
+ * 'D' him, 'B' a barrier, 't' a trap, 'S' the start, 'g' a guardian */
 static void board_print(void) {
-	fprintf(stderr, "liberation: %d panels, %d dark, %d holes, %d units, par %d, darkloid %d (board try %d), start %d,%d\n",
-		LB.b.panels, LB.b.dark, LB.b.nholes, LB.b.nunits, LB.b.par, LB.darkloid, LB.b.tries, LB.b.start_x, LB.b.start_y);
+	fprintf(stderr, "liberation: %d panels, %d dark, %d holes, %d units, par %d, darkloid %d (board try %d), start %d,%d, rules %x, barriers %d (sealed %d, route %d,%d), traps %d\n",
+		LB.b.panels, LB.b.dark, LB.b.nholes, LB.b.nunits, LB.b.par, LB.darkloid, LB.b.tries, LB.b.start_x, LB.b.start_y, LB.b.rules, LB.b.nbars, LB.b.sealed,
+		LB.b.route_x, LB.b.route_y, LB.b.traps);
+	fprintf(stderr, "liberation: the planner: %d of %d plays won, phases %d-%d-%d, dead %d of %d (%d strikes), moves %d, the route's %d\n", LB.b.m.wins, LB.b.m.plays,
+		LB.b.m.p25, LB.b.m.median, LB.b.m.p75, LB.b.m.dead, LB.b.m.phases, LB.b.m.strikes, LB.b.m.moves, LB.b.m.route);
 	for (int y = 0; y < MAP_H; ++y) {
 		char row[MAP_W + 1];
 		bool any = false;
 		for (int x = 0; x < MAP_W; ++x) {
-			row[x] = " .#i?OrD"[LB.b.kind[y][x] & 7];
+			row[x] = " .#i?OrDBt"[LB.b.kind[y][x] < LIB_KINDS ? LB.b.kind[y][x] : 0];
 			any |= LB.b.kind[y][x] != LIB_VOID;
 			for (int u = 1; u < LB.b.nunits; ++u) if (LB.b.unit[u].x == x && LB.b.unit[u].y == y) row[x] = 'g';
 		}
@@ -140,6 +136,13 @@ static void board_print(void) {
 	for (int h = 0; h < LB.b.nholes; ++h) { netmap_world(LB.b.hole_x[h], LB.b.hole_y[h], &wx, &wy); fprintf(stderr, "liberation: hole %d,%d at world %d %d\n", LB.b.hole_x[h], LB.b.hole_y[h], wx, wy); }
 	netmap_world(LB.b.boss_x, LB.b.boss_y, &wx, &wy);
 	fprintf(stderr, "liberation: darkloid %d,%d at world %d %d\n", LB.b.boss_x, LB.b.boss_y, wx, wy);
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			int k = LB.b.kind[y][x];
+			if (k != LIB_BAR && k != LIB_TRAP && !(k == LIB_ITEM && (LB.b.item[y][x] & 15) >= LIB_GOT_KEY)) continue;
+			netmap_world(x, y, &wx, &wy);
+			fprintf(stderr, "liberation: %s %d,%d at world %d %d\n", k == LIB_BAR ? "barrier" : k == LIB_TRAP ? "trap" : "item", x, y, wx, wy);
+		}
 }
 
 bool lib_layer_made(void) {
@@ -166,7 +169,8 @@ void lib_begin(void) {
 	LB.tx = LB.ty = -1;
 	LB.face = 0;
 	LB.words[0] = 0;
-	LB.briefed = LB.holes_told = LB.prize_given = false;
+	LB.briefed = LB.holes_told = LB.prize_given = LB.route_found = false;
+	LB.nfinds = 0;
 	for (int u = 0; u < LB.b.nunits; ++u) {
 		LB.slot[u] = -1;
 		netmap_world(LB.b.unit[u].x, LB.b.unit[u].y, &LB.ux[u], &LB.uy[u]);
@@ -306,18 +310,65 @@ void lib_battle_frame(void) {
 	LB.custom_open = open;
 }
 
+/* ... more words of what a panel held */
+static void held_more(char *held, size_t n, const char *words) {
+	size_t k = strlen(held);
+	if (words && words[0] && k + 1 < n) snprintf(held + k, n - k, "%s%s", k ? "|" : "", words);
+}
+
+/* An item's icon over its panel as BN5's pops, while the words of it run */
+static void pop(int x, int y, int kind) {
+	if (LB.npops < LIB_POPS) LB.pop[LB.npops++] = (__typeof__(LB.pop[0])){ (int8_t)x, (int8_t)y, (int8_t)kind, 0 };
+}
+
+/* A chip's or zenny's find: its script (layer_objs.c's), after the words */
+static void find_due(int script) {
+	if (script >= 0 && LB.nfinds < LIB_FINDS) LB.finds[LB.nfinds++] = script;
+}
+
+/* What an item panel held, given */
+static void take_item(int x, int y, char *held, size_t n) {
+	int it = LB.b.item[y][x], got = it & 15;
+	switch (got) {
+	case LIB_GOT_HEART:
+		hp_set(hp_now() + hp_max() * 3 / 10 / 10 * 10);
+		held_more(held, n, lib_item_words(true, LB.op));
+		pop(x, y, BN5_ITEM_HEART);
+		break;
+	case LIB_GOT_OP:
+		LB.op = LB.op + (it >> 4) > LIB_OP_MAX ? LIB_OP_MAX : LB.op + (it >> 4);
+		held_more(held, n, lib_item_words(false, LB.op));
+		pop(x, y, BN5_ITEM_ORDER_POINTS);
+		break;
+	case LIB_GOT_KEY:
+		lib_open_barrier(&LB.b, it >> 4);
+		held_more(held, n, lib_key_words((it >> 4) == LB.b.sealed));
+		pop(x, y, BN5_ITEM_KEY);
+		break;
+	case LIB_GOT_ZENNY: find_due(D.objs.lib_zenny); pop(x, y, BN5_ITEM_ZENNY); break;
+	case LIB_GOT_CHIP: find_due((it >> 4) < LIB_LOOT ? D.objs.lib_loot[it >> 4] : -1); pop(x, y, BN5_ITEM_CHIP); break;
+	default:
+		/* (the sealed region's route: its hook, docs/LIBERATION.md, Routes) */
+		LB.route_found = true;
+		held_more(held, n, lib_route_words());
+		break;
+	}
+}
+
 /* Panel (x, y) liberated: what it held given; into `held`, words of it */
 static void free_panel(int x, int y, char *held, size_t n) {
 	int k = LB.b.kind[y][x];
-	if (k == LIB_ITEM) {
-		int it = LB.b.item[y][x];
-		if ((it & 15) == LIB_GOT_HEART) hp_set(hp_now() + hp_max() * 3 / 10 / 10 * 10);
-		else LB.op = LB.op + (it >> 4) > LIB_OP_MAX ? LIB_OP_MAX : LB.op + (it >> 4);
-		snprintf(held, n, "%s", lib_item_words((it & 15) == LIB_GOT_HEART, LB.op));
-		/* (its icon over its panel as BN5's pops, while the words of it run) */
-		if (LB.npops < LIB_POPS) LB.pop[LB.npops++] = (__typeof__(LB.pop[0])){ (int8_t)x, (int8_t)y, (int8_t)((it & 15) == LIB_GOT_HEART ? BN5_ITEM_HEART : BN5_ITEM_ORDER_POINTS), 0 };
+	if (k == LIB_ITEM) take_item(x, y, held, n);
+	if (k == LIB_TRAP) {
+		/* (shown as a trap from the first: its harm the toll, never his last HP) */
+		hp_set(hp_now() - lib_trap_harm(LB.b.act));
+		held_more(held, n, lib_trap_words(lib_trap_harm(LB.b.act)));
 	}
-	if (k == LIB_DARK || k == LIB_ITEM || k == LIB_RING || k == LIB_HOLE) { LB.b.kind[y][x] = LIB_CLEAN; lib_look_freed(x, y); }
+	if (k == LIB_DARK || k == LIB_ITEM || k == LIB_RING || k == LIB_HOLE || k == LIB_TRAP) {
+		LB.b.kind[y][x] = LIB_CLEAN;
+		LB.b.item[y][x] = 0;
+		lib_look_freed(x, y);
+	}
 }
 
 static int free_around(int x, int y, char *held, size_t n) {
@@ -325,7 +376,7 @@ static int free_around(int x, int y, char *held, size_t n) {
 	for (int dy = -1; dy <= 1; ++dy)
 		for (int dx = -1; dx <= 1; ++dx) {
 			int k = dx || dy ? LB.b.kind[y + dy][x + dx] : LIB_VOID;
-			if (k != LIB_DARK && k != LIB_ITEM && !(k == LIB_RING && !lib_holes_left(&LB.b))) continue;
+			if (k != LIB_DARK && k != LIB_ITEM && k != LIB_TRAP && !(k == LIB_RING && !lib_holes_left(&LB.b))) continue;
 			if (lib_unit_at(x + dx, y + dy) >= 0) continue;
 			free_panel(x + dx, y + dy, held, n);
 			++freed;
@@ -341,7 +392,7 @@ static bool guardian_back(int u) {
 }
 
 static void fight_won(bool one_turn) {
-	char held[96] = "";
+	char held[320] = "";
 	int freed = 0;
 	bool back = false;
 	if (LB.fight == LIB_FIGHT_DARKLOID) { LB.b.unit[0].gone = true; return; }
@@ -391,25 +442,6 @@ static void after_fight(void) {
 
 /* ---- the Darkloids' phase ---- */
 
-/* A guardian's step toward MegaMan over the dark (Bladia's onto clean
- * panels too, darkening them): false where none brings it nearer */
-static bool guardian_step(int u) {
-	LibUnit *n = &LB.b.unit[u];
-	int d0 = abs(n->x - LB.mx) + abs(n->y - LB.my), best = -1, bd = d0;
-	for (int f = 0; f < 4; ++f) {
-		int x = n->x + dirs[f][0], y = n->y + dirs[f][1], k = LB.b.kind[y][x];
-		bool ok = k == LIB_DARK || k == LIB_ITEM || (n->kind == UNIT_BLADIA && k == LIB_CLEAN);
-		int d = abs(x - LB.mx) + abs(y - LB.my);
-		if (!ok || lib_unit_at(x, y) >= 0 || (x == LB.mx && y == LB.my) || d >= bd) continue;
-		bd = d; best = f;
-	}
-	if (best < 0) return false;
-	n->x = (uint8_t)(n->x + dirs[best][0]);
-	n->y = (uint8_t)(n->y + dirs[best][1]);
-	if (n->kind == UNIT_BLADIA && LB.b.kind[n->y][n->x] == LIB_CLEAN) LB.b.kind[n->y][n->x] = LIB_DARK;
-	return true;
-}
-
 static void hit(const char *who, int dmg) {
 	if (LB.shield || dmg <= 0) return;
 	hp_set(hp_now() - dmg);
@@ -450,11 +482,12 @@ static bool enemy_turn(int u) {
 	}
 	int d = abs(n->x - LB.mx) + abs(n->y - LB.my);
 	if (u == 0) {
-		if (d <= darkloid_reach[tier()]) hit(guardian(LB.darkloid)->name, harm[0][tier()]);
+		if (d <= lib_darkloid_reach(LB.b.act)) hit(guardian(LB.darkloid)->name, lib_harm(UNIT_DARKLOID, LB.b.act));
 		return true;
 	}
-	if (d > kinds[n->kind].reach && LB.enemy_steps < kinds[n->kind].move && guardian_step(u)) { ++LB.enemy_steps; return false; }
-	if (d <= kinds[n->kind].reach) hit(lib_unit_name(n->kind), harm[n->kind][tier()]);
+	const LibGuardRule *r = lib_guard_rule(n->kind);
+	if (d > r->reach && LB.enemy_steps < r->move && lib_guardian_step(&LB.b, u, LB.mx, LB.my)) { ++LB.enemy_steps; return false; }
+	if (d <= r->reach) hit(lib_unit_name(n->kind), lib_harm(n->kind, LB.b.act));
 	return true;
 }
 
@@ -509,6 +542,12 @@ static void talk_update_lib(void) {
 		return;
 	}
 	if (!quiet()) return;
+	/* (a chip's or zenny's find: its script, BN6's own give) */
+	if (LB.nfinds) {
+		if (!talk_script(D.objs.archive, LB.finds[0])) return;
+		memmove(LB.finds, LB.finds + 1, sizeof LB.finds[0] * (size_t)--LB.nfinds);
+		return;
+	}
 	LB.step = LB.after;
 	LB.cheer = LIB_CHEER_NONE;
 	LB.npops = 0;

@@ -50,6 +50,20 @@ const char *lib_bonus_words(int outcome) {
 	return said[outcome & 3];
 }
 
+const char *lib_key_words(bool sealed) {
+	return sealed ? "@M A key! The barrier round that dark spot just opened!" : "@M A key! A BarrierPanel just opened!";
+}
+
+const char *lib_trap_words(int hp) {
+	static char words[80];
+	snprintf(words, sizeof words, "@M Ow! That panel was trapped! %d damage...", hp);
+	return words;
+}
+
+const char *lib_route_words(void) {
+	return "@M Lan,look! A way out of here nobody's used...|@L Another way on? Let's remember it!";
+}
+
 const char *lib_rest_words(void) { return "@M Phew... Resting helps."; }
 
 const char *lib_hurt_words(const char *who, int hp) {
@@ -85,6 +99,8 @@ const char *lib_faced_label(int kind) {
 	case LIB_HOLE: return "DarkHole";
 	case LIB_RING: return "The Darkloid's ring";
 	case LIB_BONUS: return "BonusPanel";
+	case LIB_TRAP: return "Trapped panel";
+	case LIB_BAR: return "BarrierPanel";
 	case LIB_CLEAN: return "Clean panel";
 	default: return "";
 	}

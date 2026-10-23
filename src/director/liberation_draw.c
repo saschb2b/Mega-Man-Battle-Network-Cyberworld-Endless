@@ -126,6 +126,8 @@ static uint32_t recolour(uint32_t c, int kind, bool faced) {
 	case LIB_RING: case LIB_BOSS: r = r * 3 / 10 + 92; g = g / 6 + 4; b = b * 3 / 10 + 60; break;
 	case LIB_HOLE: r = r / 6 + 18; g = g / 10; b = b / 5 + 34; break;
 	case LIB_BONUS: r = r / 2 + 120; g = g / 2 + 100; b = b / 4; break;
+	case LIB_TRAP: r = r * 3 / 10 + 120; g = g / 5 + 20; b = b * 3 / 10 + 40; break;
+	case LIB_BAR: r = r / 3 + 110; g = g / 3 + 110; b = b / 3 + 130; break;
 	default: break;
 	}
 	if (faced) { r = (r + 255) / 2; g = (g + 230) / 2; b = (b + 120) / 2; }

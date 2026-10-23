@@ -31,6 +31,9 @@ bool lib_layer_made(void);
 void lib_begin(void);
 /* The board is under way on this layer: MegaMan moves as its units do. */
 bool lib_on(void);
+/* The board's sealed region opened and its route taken (docs/LIBERATION.md,
+ * Routes that matter): the hook the act's next route reads. */
+bool lib_route_found(void);
 /* The exit stays shut: the Darkloid stands. */
 bool lib_exit_shut(void);
 /* Each frame on the layer's map, and each frame of a battle. */
