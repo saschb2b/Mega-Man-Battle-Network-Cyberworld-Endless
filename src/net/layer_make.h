@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 96   /* (96: the opening economy, issue #154: fewer green Mystery Data early, and what they hold) */
+#define LAYER_MAKE 97   /* (97: dark layers, a liberation's board on an act's second layer, docs/LIBERATION.md) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

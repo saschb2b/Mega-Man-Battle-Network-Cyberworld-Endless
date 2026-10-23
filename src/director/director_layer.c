@@ -317,6 +317,7 @@ static void layer_host(int tiles, int *group, int *number) {
 
 static bool build_layer(void) {
 	int biome = layer_biome(), tiles = layer_area(&biome);
+	if (lib_layer_dark()) tiles = lib_layer_tiles(tiles);
 	run.biome = biome;
 	D.layer_tiles = tiles;
 	run.layer_seed = run.seed ^ (uint32_t)(run.depth * 2654435761u) ^ (uint32_t)(run.side_kind * 40503u);
@@ -324,9 +325,15 @@ static bool build_layer(void) {
 	if (run.side_kind == LAYER_BACK) run.layer_seed ^= (uint32_t)run.clock * 0x9E3779B9u;
 	LayerKit kit;
 	netmap_kit(tiles, &kit);
+	/* (a dark layer: its floor a liberation's board, docs/LIBERATION.md;
+	 * a plain one where no board fits it) */
+	layer_make_dark = lib_layer_dark();
 	layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
+	layer_make_dark = false;
+	if (layer.dark && !lib_layer_made()) layer_generate(run.layer_seed, run.depth, biome, run.side_kind, &kit);
 	if (emu_debug_on()) fprintf(stderr, "layer depth %d biome %d layout %d stairs %d rise %d\n", run.depth, biome, layer.layout, layer.nstairs, layer.rise);
 	if (!netmap_build_layer(tiles, run.layer_seed)) return false;
+	if (layer.dark) lib_fence_build();
 
 	const __typeof__(R.layout->net_area[0]) *a = area(biome);
 	layer_host(tiles, &D.group, &D.number);   /* (the map its layers take over, their bystanders) */
@@ -345,6 +352,7 @@ static bool build_layer(void) {
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_CHALLENGE) { server_roll(); break; }
 	if (!layer_objs_install(D.group, D.number, &D.objs)) return false;
+	lib_begin();
 	mapslot_music(D.group, D.number, layer_song(tiles, a->song));
 	D.chosen = D.choices_due = 0;
 	boss_begin_layer(D.objs.archive, &D.objs.guardian);

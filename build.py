@@ -2009,8 +2009,8 @@ def lint_files():
     return not bad
 
 
-# bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/)
-BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h')
+# bn6.h and the headers it includes for the chips', the virus families', the PET's, the panels' and MegaMan's forms' addresses (src/emu/), and the map's buffers' (bn6_map.h)
+BN6_HEADERS = ('bn6.h', 'bn6_attacks.h', 'bn6_chips.h', 'bn6_families.h', 'bn6_pet.h', 'bn6_panels.h', 'bn6_forms.h', 'bn6_navis.h', 'bn6_shop.h', 'bn6_expression.h', 'bn6_sound.h', 'bn6_map.h')
 
 
 def lint_rom_data(update):

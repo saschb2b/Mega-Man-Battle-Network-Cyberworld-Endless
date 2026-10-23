@@ -219,6 +219,43 @@ int run_route_alt(int act, int *navi) {
 	return b;
 }
 
+/* The area run_new planned for act `act` (pacing_area_order from the
+ * seed), whatever way the act took since */
+static int planned_area(int act) {
+	if (act >= 4) return act == 4 ? BIOME_UNDERNET : BIOME_GRAVEYARD;
+	uint32_t keep = rng_state();
+	rng_seed(run.seed);
+	uint8_t order[4];
+	pacing_area_order(order);
+	rng_restore(keep);
+	return order[act];
+}
+
+int run_dark_area(int act) {
+	if (act < 1) return -1;
+	uint32_t h = ((run.seed ^ 0x4C494245u) + (uint32_t)act * 0x9E3779B9u) * 2654435761u;   /* "LIBE" */
+	if ((h >> 8) % 3 == 0) return -1;
+	/* (the fork as offered: the act's own area, and the other way beside it) */
+	int own = planned_area(act), was = run.biome_order[act], navi = 0;
+	run.biome_order[act] = (uint8_t)own;
+	int alt = run_route_alt(act, &navi);
+	run.biome_order[act] = (uint8_t)was;
+	if (alt < 0) return -1;
+	return h >> 20 & 1 ? alt : own;
+}
+
+int run_darkloid(int act, int biome) {
+	uint32_t keep = rng_state();
+	rng_seed(run.seed ^ 0x444C4F44u ^ (uint32_t)act * 2654435761u);   /* "DLOD" */
+	int g = 0;
+	for (int tries = 0; tries < 8; ++tries) {
+		g = pacing_guardian_pick(pools[biome >= 0 && biome < BIOME_COUNT ? biome : 0], navis, (int)sizeof navis, act, 0, false, navi_hp);
+		if (!guardian_taken(g)) break;
+	}
+	rng_restore(keep);
+	return g;
+}
+
 static const uint8_t nest_pool[4] = { 3, 4, 11, 3 };   /* SlashMan, EraseMan, ProtoMan */
 
 int run_nest_second(void) {
@@ -239,7 +276,7 @@ int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed) {
 	/* (the Nest's act, after the net's last: its one way, the Nest) */
 	if (act >= ((run.mode == RUN_SHORT ? SHORT_LAYERS : CYCLE_LAYERS) - 1) / 3) {
 		int g = run.boss_order[BIOME_NEST];
-		way[0] = (RunWay){ BIOME_NEST, g, g };
+		way[0] = (RunWay){ BIOME_NEST, g, g, false };
 		*sealed = false;
 		return 1;
 	}
@@ -250,7 +287,7 @@ int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed) {
 	*sealed = dark >= 0 && !dark_open;
 	for (int k = 0; k < n; ++k) {
 		int x = run_xguardian_at(act, b[k]);
-		way[k] = (RunWay){ b[k], navi[k], x ? x : navi[k] };
+		way[k] = (RunWay){ b[k], navi[k], x ? x : navi[k], k < 2 && run_dark_area(act) == b[k] };
 	}
 	return n;
 }

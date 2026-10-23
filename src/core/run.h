@@ -120,6 +120,16 @@ int run_route_alt(int act, int *navi);
  * its guardian, fit for the act, no other act's and not `avoid` (the other
  * way's); -1 for none. */
 int run_route_dark(int act, int avoid, int *navi);
+/* The area whose way at act `act`'s fork (0-based, from the second act:
+ * the act's own area or the other way, run_route_alt) holds the act's dark
+ * layer, its second (docs/LIBERATION.md): two acts in three that have a
+ * fork, either way by a coin of the seed; -1 none. The fork as it was
+ * offered, whichever way was taken since. */
+int run_dark_area(int act);
+/* The Darkloid of act `act`'s dark layer in area `biome`: a Navi whose HP
+ * fits the act's band, the area's own first, no act's guardian (BN5's
+ * Darkloids come later, docs/LIBERATION.md stage 4). */
+int run_darkloid(int act, int biome);
 /* The ways act `act` (0-based) may take once the act before it ends
  * (docs/HOME.md: the town's ports): its own area, the other way's and the
  * dark way's where the act has them, each with the guardian the run will
@@ -127,7 +137,7 @@ int run_route_dark(int act, int avoid, int *navi);
  * an older net's own where its game guards the area); how many are open,
  * the dark way only when `dark_open` (else `*sealed` where it would be).
  * The act after the net's last is the Nest's: the Nest its one way. */
-typedef struct { int biome, navi, meets; } RunWay;
+typedef struct { int biome, navi, meets; bool board; } RunWay;   /* (board: its act's dark layer is that way's, run_dark_area) */
 int run_ways(int act, bool dark_open, RunWay way[3], bool *sealed);
 /* A guardian's HP more, in percent, each notch of the Net's clock
  * (pacing_clock_hp, docs/HOME.md). */

@@ -65,8 +65,8 @@ static const char *area_feel(int biome) {
 	return biome >= BIOME_ACDC_HP && biome <= BIOME_SKY_HP ? "@M Cozy data... A town's homepage?" : "@M Hmm... I can't read much from here.";
 }
 
-const char *home_port_words(int biome, int navi, bool dark, bool sealed) {
-	static char words[240];
+const char *home_port_words(int biome, int navi, bool dark, bool sealed, bool board) {
+	static char words[320];
 	/* (the Cybeast below the endless Nest: a growl, never a Navi's signal;
 	 * docs/BOSSES.md, Super bosses) */
 	bool beast = navi == SUPER_CYBEAST, known = navi && guardian_known(navi);
@@ -81,6 +81,9 @@ const char *home_port_words(int biome, int navi, bool dark, bool sealed) {
 		snprintf(words, sizeof words, "@M Lan... This one's dark. Really dark.|@M It feels like the Undernet...|%s", signal);
 	else
 		snprintf(words, sizeof words, "%s|%s", area_feel(biome), signal);
+	/* (its act's dark layer that way: docs/LIBERATION.md) */
+	size_t k = strlen(words);
+	if (board && !sealed) snprintf(words + k, sizeof words - k, "|@M And Lan... Part of it's gone dark.|@M Dark panels,like Nebula's!");
 	return words;
 }
 

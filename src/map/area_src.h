@@ -85,6 +85,10 @@ int area_src_walled_floor(const AreaSrc *a, int X, int Y);
 /* ... and inside how many rings (-1: cannot tell): 2 and more, even, inside
  * a ring within the floor, a hole or what the walls keep MegaMan off. */
 int area_src_rings(const AreaSrc *a, int X, int Y);
+/* A Liberation map of BN5's (group 0x86, docs/LIBERATION.md): whether
+ * world (X, Y) lies on one of its board's panels, which are its floor
+ * whatever its walls say; -1 for any other map. */
+int area_src_board(const AreaSrc *a, int X, int Y);
 
 /* Pixel i of the map's floors: the first layer where it draws, else the
  * second, as if nothing stood in front of them (the originals set their

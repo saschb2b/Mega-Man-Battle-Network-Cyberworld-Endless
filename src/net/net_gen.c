@@ -496,7 +496,8 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise) {
 	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
 	layer_widen_way(layer.biome, goal->ax, goal->ay);
-	layer_raise_rooms(seed, stair_dirs, rise);
+	/* (a dark layer flat: the board's units stand on one floor) */
+	layer_raise_rooms(seed, layer.dark ? 0u : stair_dirs, rise);
 }
 
 /* A guardian's arena, `arena_n` panels a side, on the layout just built,
@@ -883,37 +884,9 @@ static void place_last(const GapSite *gap, unsigned pieces, int rise, const Laye
 	ng_emblems(kit);
 }
 
-void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
-	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
-	int rise = kit ? kit->rise : 0;
-	memset(&layer, 0, sizeof layer);
-	memset(ng_reserved, 0, sizeof ng_reserved);
-	memset(ng_hushed, 0, sizeof ng_hushed);
-	npcs_held = 0;
-	rng_seed(seed);
-	layer.biome = biome;
-	layer.kind = kind;
-	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
-	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
-	layer.arena = layer.ante = -1;
-	ArenaInfo arena = { -1, -1, 0, 0, 0 };
-
-	/* bigger layouts deeper into a cycle */
-	int p = (depth - 1) % CYCLE_LAYERS;
-	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
-	/* an act's three layers each in another of the area's layouts and
-	 * signatures (docs/LEVEL_DESIGN.md, Identity), */
-	LayerPlan plan;
-	layer_plan(seed, depth, biome, kind, kit, &plan);
-	int planned = plan.layout, sig = plan.sig;
-	/* ... arrived at from another side of the screen (Arrivals) */
-	layer.arrive_side = plan.side;
-	/* (a super boss's arena is bigger: docs/BOSSES.md, Super bosses) */
-	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
-	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
-	finish_rooms(seed, stair_dirs, rise);
-	place_ends(kind, biome, &arena);
-
+/* What stands on a layer past its floor and ends: its landmark, services,
+ * props, rival, set pieces, data and bystanders. */
+static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, int rise, const LayerKit *kit) {
 	/* the landmark first, at the back of the layer's signature: its room
 	 * bare of counters still (docs/LEVEL_DESIGN.md, Identity) */
 	int land = -1;
@@ -957,4 +930,45 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	place_bystanders(order, n);
 	npcs_held = 0;
 	place_last(&gap, pieces, rise, kit, order, n);
+}
+
+bool layer_make_dark;
+
+/* A dark layer (docs/LIBERATION.md): the run's normal layer asked for so,
+ * never a guardian's */
+static bool make_dark(int kind) { return layer_make_dark && kind == LAYER_NORMAL && !layer.boss_layer; }
+
+void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
+	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
+	int rise = kit ? kit->rise : 0;
+	memset(&layer, 0, sizeof layer);
+	memset(ng_reserved, 0, sizeof ng_reserved);
+	memset(ng_hushed, 0, sizeof ng_hushed);
+	npcs_held = 0;
+	rng_seed(seed);
+	layer.biome = biome;
+	layer.kind = kind;
+	layer.boss_layer = kind == LAYER_NORMAL && is_boss_depth(depth);
+	if (kind == LAYER_SECRET) layer.boss_layer = !run.secret_cleared;
+	layer.dark = make_dark(kind);
+	layer.arena = layer.ante = -1;
+	ArenaInfo arena = { -1, -1, 0, 0, 0 };
+
+	/* bigger layouts deeper into a cycle */
+	int p = (depth - 1) % CYCLE_LAYERS;
+	int size = depth > CYCLE_LAYERS || p >= 12 ? 2 : p >= 6 || kind != LAYER_NORMAL ? 1 : 0;
+	/* an act's three layers each in another of the area's layouts and
+	 * signatures (docs/LEVEL_DESIGN.md, Identity), */
+	LayerPlan plan;
+	layer_plan(seed, depth, biome, kind, kit, &plan);
+	int planned = plan.layout, sig = plan.sig;
+	/* ... arrived at from another side of the screen (Arrivals) */
+	layer.arrive_side = plan.side;
+	/* (a super boss's arena is bigger: docs/BOSSES.md, Super bosses) */
+	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
+	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
+	finish_rooms(seed, stair_dirs, rise);
+	place_ends(kind, biome, &arena);
+	/* (a dark layer's floor is its board: the director places the rest) */
+	if (!layer.dark) fill_layer(seed, depth, biome, kind, size, rise, kit);
 }
