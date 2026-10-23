@@ -1091,6 +1091,16 @@ FIT_INSTALL = ('6:START,54:,6:DOWN,14:,6:DOWN,14:,6:DOWN,24:,6:A,60:,6:A,60:,6:A
 FIT_NEXT = '10:SELECT,6:SELECT+R,4:SELECT,20:,' + '6:DOWN,6:,' * 8 + '10:,6:A,6:,'
 FIT_PAGES = '300:,' + '6:A,134:,' * 4 + '2230:,' + '6:A,174:,' * 12
 
+# 0.15.0's liberation (docs/LIBERATION.md), with BN5's ROM beside BN6's: an
+# act 2 dark layer (seed 1's, --dev dark) played by the autopilot, its
+# battles won in one hit (onehit, god); and seed 7's fork at home before act
+# 2, its pink pad the dark way: the welcome's pages, MegaMan away from the
+# pad (its swirl shows only then), then at it, A: "Part of it's gone dark."
+LIB_BOARD = ['--scene', 'emu', '--run-depth', '5', '--seed', '1', '--dev', 'dark,god,onehit']
+LIB_FORK = ['--scene', 'home', '--run-depth', '4', '--seed', '7', '--dev', 'quiet', '--input',
+            '40:,' + '4:A,12:,' * 4 + '160:,' + '4:A,12:,' * 6 + '0:place 120 -15 1,180:,0:place 165 -15 1,30:,6:A,'
+            + '90:,4:A,60:,4:A,60:,4:A,60:,4:A,60:,4:A,200:']
+
 # Screenshots of the running game for the site and the README
 # (docs/screenshots): name, game options, (frame, shot name) pairs, env.
 # Screenshots are fine to publish; files extracted from the ROM are not.
@@ -1521,6 +1531,25 @@ SCREENSHOTS = [
     # sees, and his question)
     ('gate-keeper', HP_7 + ['--input', GATE_KEEPER],
      [(1930, 'gate-keeper'), (2140, 'gate-consent')], {}),
+    # 0.15.0's notes. (liberation: the fork's dark way and MegaMan's reading
+    # of it; the board's Darkloid at the opening, PLAYER PHASE 01, a
+    # liberation battle's TURN 1 START! and its 1 TURN LIBERATE!, the
+    # Darkloid's line in his phase and his blow's 40 inside his reach lit
+    # red, LIBERATE FAILED! as the final turn's gauge fills, the Darkloid's
+    # ENEMY DELETED! and the signal's chip at par)
+    ('bn5-lib-fork', LIB_FORK, [(420, 'liberation-fork'), (812, 'liberation-way')], {}),
+    # (a guardian's draft beside HP+50 held, issue of #211: Attack+1, HP+50
+    # Held 1, MegFldr1; the NaviCust with SuperArmor's known code, #212:
+    # held over the board compressed, 4 blocks)
+    ('navicust-held', ['--scene', 'emu', '--run-depth', '3', '--seed', '11', '--dev', 'program=41', '--talk', 'reward:300',
+                       '--input', '400:,' + '4:A,40:,' * 6 + '200:'], [(700, 'navicust-held')], {}),
+    ('navicust-compressed', SECOND_7[:-1] + ['quiet,programs=2,codes=2',
+                             '--input', PAGED_7 + '60:,6:START,40:' + ',6:DOWN,8:' * 3 + ',6:A,60:,6:A,90:,6:A,40:'],
+     [(2054, 'navicust-compressed')], {}),
+    ('bn5-lib-board', LIB_BOARD,
+     [(144, 'liberation-darkloid'), (360, 'liberation-phase'), (1680, 'liberation-turn'), (1830, 'liberation-win'),
+      (13760, 'liberation-showtime'), (13850, 'liberation-reach'), (16450, 'liberation-failed'),
+      (23600, 'liberation-deleted'), (23900, 'liberation-par'), (23972, 'liberation-chip')], {'CYBERWORLD_AUTOPILOT': '1'}),
 ]
 
 
@@ -1727,6 +1756,11 @@ CLIPS = [
     ('bn5-darkinvs', ONE_NET + ['--dev', 'quiet,worried,hp=999/200'], {}, ONE_DARKINVS, 1240, 1950),
     # (0.13.0's: Trade Central's spares list, issue #145, with BN5's ROM)
     ('trade-spares', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--dev', 'quiet'], {}, TRADE_SPARES, 252, 860),
+    # (0.15.0's liberation: a dark panel's battle from TURN 1 START! to 1 TURN
+    # LIBERATE!; the Darkloids' phase, its banner, CircusMan's reach lit red,
+    # his line and his blow)
+    ('bn5-lib-battle', LIB_BOARD, {'CYBERWORLD_AUTOPILOT': '1'}, None, 1600, 1860),
+    ('bn5-lib-darkloid', LIB_BOARD, {'CYBERWORLD_AUTOPILOT': '1'}, None, 13550, 13900),
 ]
 
 
@@ -1740,7 +1774,8 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'bass-arrival': (None, 12), 'cybeast-arrival': (None, 12), 'guardian-logout': (None, 15),
                'soft-reset': (None, 15), 'bn5-one-net': (None, 15), 'bn5-darkinvs': (None, 12), 'home-sort': (None, 12),
                'online-square': (None, 15), 'online-trade': (None, 15), 'online-battle': (None, 12),
-               'online-netpass': (None, 15), 'trade-spares': (None, 15)}
+               'online-netpass': (None, 15), 'trade-spares': (None, 15), 'bn5-lib-battle': (None, 15),
+               'bn5-lib-darkloid': (None, 15)}
 
 
 def clips(only=None):
