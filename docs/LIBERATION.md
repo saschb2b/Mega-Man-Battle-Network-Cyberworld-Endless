@@ -832,8 +832,13 @@ every battle.
 battle left to run: TURN 1 START!, TURN 2 START!, FINAL TURN!, the gauge
 full, TIME UP!, LIBERATE FAILED!, the board again with the panel dark
 (`liberation: battle 0 at 34,33 time up (turn 3)` in the debug log); with
-`onehit`, 1 TURN LIBERATE! and the dark around freed; the autopilot
-through a dark layer with and without `god` at act 2.
+`onehit`, 1 TURN LIBERATE! and the dark around freed. The autopilot with
+`god,onehit` (seed 1) won the boards of acts 2 and 3, guardians, DarkHoles
+and Darkloids (act 2's Darkloid in his battle's seventh turn); with `god` alone
+its buster battles timed out in 13 of 25 and the board ran past 60000
+frames, and without `god` (seed 2) MegaMan was deleted in its third
+battle: the autopilot's battles are weak, and a dark layer asks a folder
+that deletes in three turns.
 
 **Left:** BN5's Surrounded battle (dark on both sides of the Navi, L and R
 to turn round: its text is BN5's battle archive's "Surrounded! Press L or
