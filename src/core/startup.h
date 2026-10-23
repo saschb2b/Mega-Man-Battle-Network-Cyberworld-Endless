@@ -40,10 +40,12 @@ bool start_rom(const char *rom_dir, char *msg, size_t msglen);
  * its own): the keys, the controllers' map, the settings, the touch
  * controls; --pad's virtual controller with pad.ini, headless too;
  * --smooth-motion's on or off (`smooth_arg`, -1 for neither) and
- * --sound's gba or soft (`sound_arg`, a SoundFilter, headless too) and
+ * --sound's gba or soft (`sound_arg`, a SoundFilter, headless too),
+ * --music's and --effects' on or off (`music_arg`, `effects_arg`, 1 or 0,
+ * -1 for neither; headless too) and
  * --screen's scale (`screen_arg`, display.h's word, headless too) over
  * settings.ini; then the anonymous statistics' session (analytics_net.h),
  * a player's own where `plain` (no test's or developer's option) */
-void player_files(bool headless, int smooth_arg, int sound_arg, const char *screen_arg, bool plain);
+void player_files(bool headless, int smooth_arg, int sound_arg, int music_arg, int effects_arg, const char *screen_arg, bool plain);
 
 #endif

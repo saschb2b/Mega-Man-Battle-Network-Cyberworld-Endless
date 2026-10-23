@@ -17,6 +17,7 @@
 #include "options_text.h"
 #include "pet_panel.h"
 #include "platform.h"
+#include "sound_heard.h"
 
 /* where it draws, from the picture's corner: the lines in a window, the
  * note in the information box under it, to the screen's foot */
@@ -44,12 +45,14 @@ static const char *title_word(void) {
 
 static const char *sound_word(void) { return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT : OW_GBA); }
 
-/* a turned line's value: the window's, the scale's, smooth motion's, the sound's */
+/* a turned line's value: the window's, the scale's, smooth motion's, the music's, the effects', the sound's */
 static const char *value_word(int kind) {
 	switch (kind) {
 	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_ON : OW_OFF);
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_ON : OW_OFF);
+	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_ON : OW_OFF);
+	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_ON : OW_OFF);
 	default: return sound_word();
 	}
 }
@@ -58,7 +61,8 @@ static const char *value_word(int kind) {
  * a value between its arrows */
 static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_DISPLAY] = OW_DISPLAY, [LINE_AUDIO] = OW_AUDIO,
-		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND };
+		[LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE, [LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND,
+		[LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
@@ -87,6 +91,8 @@ static const char *note_words(int kind) {
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO_NOTE + display_scale()));
 	case LINE_SMOOTH: return options_word(P.blend ? OW_SMOOTH_ON_NOTE : OW_SMOOTH_OFF_NOTE);
 	case LINE_SOUND: return options_word(sound_filter() == SOUND_SOFT ? OW_SOFT_NOTE : OW_GBA_NOTE);
+	case LINE_MUSIC: return options_word(sound_heard_music() ? OW_MUSIC_ON_NOTE : OW_MUSIC_OFF_NOTE);
+	case LINE_EFFECTS: return options_word(sound_heard_effects() ? OW_EFFECTS_ON_NOTE : OW_EFFECTS_OFF_NOTE);
 	default: return "";
 	}
 }

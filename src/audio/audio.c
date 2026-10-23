@@ -15,6 +15,7 @@
 #include "mp2k.h"
 #include "rom.h"
 #include "sound_filter.h"
+#include "sound_heard.h"
 #include "touch.h"
 
 #define OUT_RATE 48000
@@ -29,7 +30,18 @@ static int current_music = -1;
  * this frame */
 static int8_t prev_right[704], prev_left[704];
 
+/* (the Jukebox's song, asked for: heard with the music off) */
+static volatile bool asked;
+
+/* the engine's players silenced: the music's where the music is off, the
+ * rest where the effects are (sound_heard.h) */
+static uint32_t quiet_players(void) {
+	uint32_t music = 1u << MP2K_MUSIC;
+	return (sound_heard_music() || asked ? 0 : music) | (sound_heard_effects() ? 0 : ~music);
+}
+
 static void engine_frame(void) {
+	mp2k_quiet_set(quiet_players());
 	mp2k_frame();
 	int n = mp2k_per_frame();
 	gba_sound_frame(prev_right, prev_left, n);
@@ -97,10 +109,13 @@ static void mix_sources(int16_t *out, int frames) {
 	}
 }
 
-/* (everything heard, shaped as settings.ini's sound says) */
+/* (everything heard, shaped as settings.ini's sound says; nothing where
+ * the music and the effects are both off, the Arena's cores' too, which
+ * play on as both players' systems play them: sound_quiet.h) */
 static void mix_out(int16_t *out, int frames) {
 	mix_sources(out, frames);
 	sound_filter_run(out, frames);
+	if (!sound_heard_music() && !sound_heard_effects() && !asked) memset(out, 0, (size_t)frames * 4);
 }
 
 static void callback(void *ud, Uint8 *stream, int len) {
@@ -186,6 +201,7 @@ void audio_play_song(int id, bool music) {
 	if (music) {
 		printf("music: song %#x\n", id);
 		current_music = id;
+		asked = false;
 	}
 	mp2k_song_start(id);
 	unlock();
@@ -202,7 +218,7 @@ void audio_sfx(Sfx s) {
 uint64_t audio_log_frame;
 
 void audio_chime(void) {
-	if (!dev && !offline) return;
+	if ((!dev && !offline) || !sound_heard_effects()) return;
 	lock();
 	chime_at = 0;
 	unlock();
@@ -217,6 +233,7 @@ void audio_music_id(int id) {
 		/* (m4aMPlayFadeOut, 16 steps of two frames) */
 		if (current_music > 0) mp2k_song_fade(current_music, 2);
 		current_music = 0;
+		asked = false;
 		unlock();
 		return;
 	}
@@ -228,6 +245,7 @@ void audio_song_start(int rom, int song) {
 	lock();
 	printf("music: song %#x of rom %d\n", song, rom);
 	mp2k_song_start_in(rom, song);
+	asked = true;
 	unlock();
 }
 
@@ -235,6 +253,7 @@ void audio_song_stop(int rom, int song) {
 	if (!dev && !offline) return;
 	lock();
 	mp2k_song_stop_in(rom, song);
+	asked = false;
 	unlock();
 }
 

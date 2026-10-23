@@ -228,6 +228,7 @@ typedef struct {
 	int run_depth, guardian_navi;
 	int smooth_arg;   /* --smooth-motion on|off, over settings.ini */
 	int sound_arg;    /* --sound gba|soft (SoundFilter), over settings.ini */
+	int music_arg, effects_arg;   /* --music on|off, --effects on|off, over settings.ini */
 	const char *screen_arg;   /* --screen auto|whole|fill|stretch, over settings.ini */
 	/* --setup NET,FOLDER,THREAT,HELPERS[,CROSS] (short or endless, then
 	 * numbers; CROSS the navi whose Cross the run brings, 1-5):
@@ -273,6 +274,8 @@ static int screen_option(const char *a, const char *v, Options *o) {
 	if (!strcmp(a, "--size")) sscanf(v, "%dx%d", &o->force_w, &o->force_h);
 	else if (!strcmp(a, "--smooth-motion")) o->smooth_arg = !strcmp(v, "on");
 	else if (!strcmp(a, "--sound")) o->sound_arg = !strcmp(v, "soft");
+	else if (!strcmp(a, "--music")) o->music_arg = !strcmp(v, "on");
+	else if (!strcmp(a, "--effects")) o->effects_arg = !strcmp(v, "on");
 	else if (!strcmp(a, "--screen")) o->screen_arg = v;
 	/* (the screen's density for the touch controls, in dots per inch) */
 	else if (!strcmp(a, "--dpi")) platform_set_dpi((float)atof(v));
@@ -498,7 +501,7 @@ static int launcher_mode(const Options *o) {
 }
 
 int main(int argc, char **argv) {
-	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .sound_arg = -1, .marks_spec = -1, .launcher = -1 };
+	Options o = { .fullscreen = !DESKTOP, .start_scene = "title", .smooth_arg = -1, .sound_arg = -1, .music_arg = -1, .effects_arg = -1, .marks_spec = -1, .launcher = -1 };
 	int code = parse_args(argc, argv, &o);
 	if (code >= 0) return code;
 	setvbuf(stdout, NULL, _IOLBF, 0);
@@ -515,7 +518,7 @@ int main(int argc, char **argv) {
 #endif
 	o.launcher = launcher_mode(&o);
 	if (!platform_init(o.force_w, o.force_h, o.headless, o.fullscreen)) return 1;
-	player_files(o.headless, o.smooth_arg, o.sound_arg, o.screen_arg, !o.dev);
+	player_files(o.headless, o.smooth_arg, o.sound_arg, o.music_arg, o.effects_arg, o.screen_arg, !o.dev);
 	rng_seed(o.seed ? o.seed : (uint32_t)SDL_GetPerformanceCounter());
 	code = game_start(&o, rom_ok, msg);
 	return code >= 0 ? code : frame_loop(&o);

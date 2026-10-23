@@ -19,7 +19,12 @@ uint32_t mp2k_key_to_freq(uint32_t wav, int key, int fine) {
 }
 
 void mp2k_track_vol_pit(int player, Mp2kTrack *t) {
-	(void)player;
+	/* (a player silenced: its volume none and none left to work out, the
+	 * pitch's part as BN6 works it; mp2k_quiet_set) */
+	if ((M.quiet >> player & 1) && (t->flags & TRK_VOLSET)) {
+		t->vol_mr = t->vol_ml = 0;
+		t->flags &= (uint8_t)~TRK_VOLSET;
+	}
 	if (t->flags & TRK_VOLSET) {
 		uint32_t x = (uint32_t)(t->vol * t->vol_x) >> 5;
 		if (t->mod_t == 1) x = (x * (uint32_t)(t->mod_m + 128)) >> 7;

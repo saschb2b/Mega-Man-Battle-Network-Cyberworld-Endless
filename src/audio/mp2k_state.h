@@ -110,6 +110,7 @@ typedef struct {
 	int8_t ring[2][MP2K_RING_MAX];   /* +0x350: the mix, right then left (DMA A, DMA B) */
 	int slice;                /* the ring's part this frame mixed */
 	const uint8_t *data;      /* (ours) the ROM the part running reads: a player's, a channel's (mp2k_read) */
+	uint32_t quiet;           /* (ours) the players silenced (mp2k_quiet_set) */
 	/* the library's tables in BN6's ROM (docs/ROM_DATA.md) */
 	uint32_t song_table, clock_table, scale_table, freq_table, cgb_scale_table, cgb_freq_table, noise_table, cgb3_vol_table;
 } Mp2k;

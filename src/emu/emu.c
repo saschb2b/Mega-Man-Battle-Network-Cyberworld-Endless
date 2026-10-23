@@ -5,6 +5,7 @@
 #include "compat.h"
 #include "platform.h"
 #include "save_queue.h"
+#include "sound_quiet.h"
 #include "xinstall_log.h"
 
 #include <stdio.h>
@@ -318,6 +319,8 @@ void emu_quit(void) {
 void emu_frame(uint32_t keys) {
 	if (!core) return;
 	wait_frame();
+	/* (the music or effects turned off or on: Options' Audio, sound_quiet.h) */
+	sound_quiet_frame();
 	core->setKeys(core, keys);
 	if (threaded) {
 		in_flight = true;
@@ -477,6 +480,7 @@ bool emu_load_state(const char *path) {
 	if (ok) {
 		hook_reapply();
 		keep_put(false);
+		sound_quiet_loaded();
 	}
 	return ok;
 }
@@ -498,5 +502,6 @@ bool emu_state_load(const void *state) {
 	if (!core || !core->loadState(core, state)) return false;
 	hook_reapply();
 	keep_put(false);
+	sound_quiet_loaded();
 	return true;
 }

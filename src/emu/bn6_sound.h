@@ -14,6 +14,19 @@
 #define BN6_SOUND_CGB_CHANS   0x03005600u /* the PSG's four CgbChannels, 0x40 bytes each */
 #define BN6_SOUND_JUMP_TABLE  0x03005570u /* MPlayJumpTable: the commands 0xB1-0xCE, then the library's own calls (36 words) */
 
+/* a player's row in BN6_MPLAYS (bn6.h), 12 bytes: +0 its MusicPlayerInfo */
+#define BN6_MPLAY_ROW         12
+#define BN6_MPLAY_TRACKS      0x04 /* its tracks (MusicPlayerTrack, BN6_TRACK_SIZE each) in EWRAM */
+#define BN6_MPLAY_TRACK_COUNT 0x08 /* u8: how many */
+/* a track (MusicPlayerTrack) */
+#define BN6_TRACK_SIZE        0x50
+#define BN6_TRACK_FLAGS       0x00 /* u8: 0x80 it plays; 0x03 its volume changed (BN6_TRACK_VOL_SET, and its notes told), 0x0C its pitch */
+#define BN6_TRACK_VOL_SET     0x01 /* ... its volume to be worked out again (TrkVolPitSet), from +0x12 and +0x13 by its pan */
+#define BN6_TRACK_VOL_CHANGED 0x03 /* ... and its notes given it after (ChnVolSetAsm) */
+#define BN6_TRACK_EXISTS      0x80 /* ... it plays: its player's frame runs it */
+#define BN6_TRACK_VOL_RIGHT   0x10 /* u8: its volume worked out, right and left, which its notes take (ChnVolSetAsm) */
+#define BN6_TRACK_VOL_LEFT    0x11 /* u8: ... and left */
+
 /* the library's tables in the ROM */
 #define BN6_M4A_JUMP_TEMPLATE 0x081C1F68u /* gMPlayJumpTableTemplate, copied to BN6_SOUND_JUMP_TABLE (MEMACC and XCMD put in at the start) */
 #define BN6_M4A_SCALE_TABLE   0x081C1FF8u /* gScaleTable: a key's exponent and mantissa, 179 bytes */
@@ -32,6 +45,7 @@
 #define BN6_M4A_PLY_NOTE      0x081500A8u /* ply_note: a note given a channel by priority */
 #define BN6_M4A_SONG_START    0x08150474u /* m4aSongNumStart: the song table's entry on its player (MPlayStart 0x08150C54) */
 #define BN6_M4A_CGB_SOUND     0x08151058u /* CgbSound: the PSG's envelopes and registers */
+#define BN6_M4A_TRK_VOL_PIT_SET 0x08150E40u /* TrkVolPitSet: r0 the player, r1 its track; the track's volume worked out where its flags ask (BN6_TRACK_VOL_SET), then its pitch */
 #define BN6_M4A_SOUND_MODE    0x0800059Cu /* the word m4aSoundMode is given at the start: 0x0093040D (4 channels, rate 3) */
 
 #endif

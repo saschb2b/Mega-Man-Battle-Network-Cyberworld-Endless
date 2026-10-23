@@ -16,14 +16,18 @@
 #include "options_text.h"
 #include "platform.h"
 #include "settings_line.h"
+#include "sound_heard.h"
 #include "touch.h"
 
 OptionsState O;
 
 int options_lines(int kinds[LINES_MAX]) {
 	int n = 0;
-	if (O.section == SECTION_AUDIO) kinds[n++] = LINE_SOUND;
-	else if (O.section == SECTION_DISPLAY) {
+	if (O.section == SECTION_AUDIO) {
+		kinds[n++] = LINE_MUSIC;
+		kinds[n++] = LINE_EFFECTS;
+		kinds[n++] = LINE_SOUND;
+	} else if (O.section == SECTION_DISPLAY) {
 		if (display_has_window()) kinds[n++] = LINE_FULLSCREEN;
 		if (display_has_scale()) kinds[n++] = LINE_SCALE;
 		if (display_has_smooth()) kinds[n++] = LINE_SMOOTH;
@@ -79,6 +83,17 @@ void options_sound_keep(SoundFilter f, bool tell_page) {
 #endif
 }
 
+/* the music or the effects (`kind`'s) turned on or off and kept */
+static void heard_keep(int kind) {
+	char path[600];
+	bool music = sound_heard_music() ^ (kind == LINE_MUSIC), effects = sound_heard_effects() ^ (kind == LINE_EFFECTS);
+	sound_heard_set(music, effects);
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	if (kind == LINE_MUSIC) settings_line_write(path, "music", music ? "on" : "off", options_music_note());
+	else settings_line_write(path, "effects", effects ? "on" : "off", options_effects_note());
+	platform_persist();
+}
+
 #ifdef __EMSCRIPTEN__
 /* The page's Sound button (web/play/app.js): set here as Options sets it. */
 void cw_set_sound(int soft);
@@ -91,6 +106,8 @@ static void turn(int kind, int dir) {
 	case LINE_FULLSCREEN: display_fullscreen_keep(!P.fullscreen); break;
 	case LINE_SCALE: display_scale_keep(display_scale_next(dir)); break;
 	case LINE_SMOOTH: display_smooth_keep(!P.blend, true); break;
+	case LINE_MUSIC:
+	case LINE_EFFECTS: heard_keep(kind); break;
 	default: options_sound_keep(sound_filter() == SOUND_SOFT ? SOUND_GBA : SOUND_SOFT, true); break;
 	}
 	audio_sfx(SFX_CURSOR);

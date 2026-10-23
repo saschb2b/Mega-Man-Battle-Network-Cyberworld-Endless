@@ -9,7 +9,7 @@ static const char *const words[] = {
 	"Controls",   /* OW_CONTROLS */
 	"Which buttons and keys are A, B, L, R, START and SELECT",   /* OW_CONTROLS_NOTE */
 	"Audio",   /* OW_AUDIO */
-	"How the game sounds",   /* OW_AUDIO_NOTE */
+	"Music and sounds, on or off, and their mix",   /* OW_AUDIO_NOTE */
 	"Sound",   /* OW_SOUND */
 	"GBA",   /* OW_GBA */
 	"As a GBA plays it: BN6's own mix, crisp and bright",   /* OW_GBA_NOTE */
@@ -35,6 +35,12 @@ static const char *const words[] = {
 	"On",   /* OW_ON */
 	"Off",   /* OW_OFF */
 	"INFORMATION",   /* OW_INFORMATION */
+	"Music",   /* OW_MUSIC */
+	"The game's music plays",   /* OW_MUSIC_ON_NOTE */
+	"No music: play your own over the game",   /* OW_MUSIC_OFF_NOTE */
+	"Effects",   /* OW_EFFECTS */
+	"The sounds of menus, chips and battles play",   /* OW_EFFECTS_ON_NOTE */
+	"No sounds from menus, chips or battles",   /* OW_EFFECTS_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
@@ -45,6 +51,17 @@ const char *options_sound_note(void) {
 		"# the music and all; soft gives it the Legacy Collection's balance, as\n"
 		"# measured from it: the highs and the deepest bass taken down. Options\n"
 		"# (the title's menu, or the PET's in a run) changes it too.\n";
+}
+
+const char *options_music_note(void) {
+	return "\n# music: off silences the game's music, so your own can play over it; its\n"
+		"# sounds play on, as effects says. Options' Audio changes it too.\n";
+}
+
+const char *options_effects_note(void) {
+	return "\n# effects: off silences the game's sounds, its menus', chips' and\n"
+		"# battles'. With music off as well, the game makes no sound. Options'\n"
+		"# Audio changes it too.\n";
 }
 
 const char *options_screen_note(void) {

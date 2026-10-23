@@ -249,3 +249,17 @@ void mp2k_frame(void) {
 const int8_t *mp2k_mix_right(void) { return &M.ring[0][M.slice * M.per_frame]; }
 const int8_t *mp2k_mix_left(void) { return &M.ring[1][M.slice * M.per_frame]; }
 int mp2k_per_frame(void) { return M.per_frame; }
+
+void mp2k_quiet_set(uint32_t players) {
+	uint32_t changed = players ^ M.quiet;
+	M.quiet = players;
+	/* (a change: the tracks that play of its players work their volume out again) */
+	for (int p = 0; p < MP2K_PLAYERS; ++p) {
+		if (!(changed >> p & 1)) continue;
+		Mp2kPlayer *pl = &M.players[p];
+		for (int i = 0; i < pl->tracks; ++i) {
+			Mp2kTrack *t = &M.tracks[pl->first + i];
+			if (t->flags & TRK_EXIST) t->flags |= TRK_VOLCHG;
+		}
+	}
+}
