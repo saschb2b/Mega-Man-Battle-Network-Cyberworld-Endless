@@ -161,6 +161,14 @@ static unsigned glyph_of(unsigned char ch) {
 	return ch < CHARS && widths[ch] ? ch : ' ';
 }
 
+int pixfont_glyph(char ch, const char *const **rows) {
+	unsigned g = glyph_of((unsigned char)ch);
+	*rows = NULL;
+	for (size_t i = 0; g != ' ' && i < sizeof glyphs / sizeof *glyphs; ++i)
+		if ((unsigned char)glyphs[i].ch == g) *rows = glyphs[i].rows;
+	return widths[g];
+}
+
 int pixfont_width(const char *s, int scale) {
 	int w = 0, n = 0;
 	for (const unsigned char *p = (const unsigned char *)s; *p; ++p, ++n) w += widths[glyph_of(*p)] + 1;
