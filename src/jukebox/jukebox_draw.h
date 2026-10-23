@@ -1,7 +1,7 @@
 /* The Jukebox's picture (jukebox.h), in BN6's PET screens' look (pet_look.h,
- * as its KeyItem screen): the card of the song playing on the left
- * with its tracks' lights, the section's songs on the right, the keys
- * under them; and where each part a tap takes lies. */
+ * as its Library): the card of the song playing on the left with its
+ * tracks' lights, the section's songs on the right; and where each part
+ * a tap takes lies. */
 #ifndef CW_JUKEBOX_DRAW_H
 #define CW_JUKEBOX_DRAW_H
 
@@ -11,7 +11,7 @@
 
 #include "jukebox_text.h"
 
-#define JUKE_ROWS 6          /* songs shown at once */
+#define JUKE_ROWS 7          /* songs shown at once */
 #define JUKE_TRACKS 8        /* the music player's tracks */
 
 /* what the picture shows, read from the Jukebox's state each frame */
@@ -34,8 +34,6 @@ void jukebox_draw_view(int x, int y, const JukeView *v);
 /* where a tap takes each part, from the picture's top left */
 SDL_Rect jukebox_row_rect(int i);           /* row i shown */
 SDL_Rect jukebox_turn_rect(int right);      /* the section's arrows */
-SDL_Rect jukebox_mode_rect(const JukeView *v);
-/* the keys' hints under the list: 0 A, 1 B, 2 L/R (START's is the mode, on the band) */
-SDL_Rect jukebox_key_rect(int k);
+SDL_Rect jukebox_mode_rect(const JukeView *v);   /* START's hint, the mode */
 
 #endif

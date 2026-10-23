@@ -127,6 +127,7 @@ OVERRIDES = [
     (r'^square_words:square_greeter_stamp_words\b', 'Mr.Prog', None),
     (r'^stands_words:stands_board_words\b', 'Narration', None),
     (r'^navicust_words:', 'MegaMan', None),
+    (r'^trade_screen_text:trade_text_(ask|waiting|swapping|traded)\b', 'MegaMan', 'speech'),
     (r'^story_words:(area_card|nets_card|clear_card)\b', 'Screen', 'screen'),
     (r'^pet_text:(report_text|records_text|where_text|codes_known|codes_text|install_descriptions|install_mails\.subjects)\b', 'Screen', 'screen'),
     (r'^pet_text:bbs_posts\b', 'Bystander', None),

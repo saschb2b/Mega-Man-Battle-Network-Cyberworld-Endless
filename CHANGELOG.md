@@ -15,6 +15,26 @@
   offers); L's **Look around** says which way each warp lies and who is
   in which part. A part is a few seconds from the arrival and back. The
   server needs the new version (`SQUARE_MAKE` 3; the wire is unchanged).
+- **The PET's screens say as little as BN6's.** BN6's own screens never
+  show what A and B do, turn pages under small green arrows, and ask Yes
+  or No behind a green triangle. The game's own screens now do the same:
+  the key lines under the Jukebox, Options, the statistics question,
+  Trade Central and the emote strip are gone, the Jukebox shows a song
+  more, Options' Display and Audio take the band's name as the folder
+  editor takes CHIP FOLDER's, the reconnect wait keeps one hint (B:GO
+  HOME) on its band, and the second screen names HP, ZENNY and BUGFRAGS
+  as the PET menu does. BN6 frames only its lists in the cyan window, and
+  so do these now: a chip shows on the Library's grey card, buttons are
+  STATUS's pills (the one chosen NaviCust's green RUN!), and the words
+  that explain sit in SubChip's flat panel. They move as BN6's do too:
+  each fades up from black as it opens, the cursor's arrow steps as
+  KeyItem's, START on Trade Central's list opens a SORT pop-up as the
+  folder editor's does, and Options has no Done lines: B leaves. And
+  MegaMan speaks as he does in the PET's E-Mail: in a chip trade his face
+  and words sit in BN6's NAVIGATOR box, asking "Lan,trade our FireBrn1 F
+  for Beta's MrkCan1 M?" with Yes and No, and the statistics question is
+  asked in BN6's chat box. The rules, measured from BN6's screens, are in
+  docs/UI.md.
 
 ## 0.14.1 (2026-10-23)
 

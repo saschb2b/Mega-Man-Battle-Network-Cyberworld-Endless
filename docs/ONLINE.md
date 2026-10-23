@@ -285,9 +285,10 @@ the server has welcomed the visit:
   snapshots come 20 times a second, PONGs every two) is **quiet**: the
   game's core holds still (`online_visit_waiting`, in the frame's place,
   as a NetBattle holds it), and the wait is drawn over the Square, dimmed:
-  a PET panel in the NetPass's colours, "Net Square" with "Link lost" in
-  its slot, a signal searching, "Reconnecting...", "YOUR SPOT IN THE SQUARE
-  IS KEPT", from five seconds on a bar of the time left, and B "GO HOME".
+  a PET panel in BN6's PET look, "Net Square" on its band with B:GO HOME
+  at the band's end (docs/UI.md), a signal searching, "Reconnecting...",
+  "YOUR SPOT IN THE SQUARE IS KEPT", from five seconds on a bar of the
+  time left.
   A link that speaks again within its limit goes on with nothing lost:
   "Back online!" a moment in the band, and play goes on;
 - a link silent past 8 seconds, closed, or broken **without the
@@ -896,20 +897,22 @@ it is let go). The clerk's chat boxes stay for the talk around them
   (copies past those his three folders hold), each row its icon, name,
   code and count, the cursor's lit, six at a time with a scroll bar.
   UP and DOWN move (round at the ends), LEFT and RIGHT a page, START
-  sorts by BN6's folder editor's first three keys, ID, ABCDE and Code
+  opens a SORT pop-up of BN6's folder editor's first three keys, ID, ABCDE and Code
   (the record's IDSortPos and AlphabetSortPos; the session keeps the
   sort), A picks, B goes back. It replaces BN6's Order Service screen
   (`trade_order.c`, gone) and the chat box's list it fell back on for a
   BN5 chip past BN6's 319, whose list builder would have written past
   its end; the screen lists any id the registry has.
-- **The chip trade** ("Chip trade", "With Beta"): both cards, You and
-  Them, the arrows between them, and No deal and Deal!, the cursor on No
-  deal as "Deal,Lan?" had it on No; B is No deal. After Deal! the cards
-  hold, "Waiting on Beta..." under them and the arrows pulsing, B calling
-  it off; when the server commits, the cards cross (MegaMan's over the
-  top, the other's under it, 40 frames) and land with BN6's jingle
-  (`SFX_GOT`, as the NetPass's full pass lands), "Traded!", and A closes
-  it; MegaMan then says "Deal! FireBrn1 F is ours once we're home!" as
+- **The chip trade** ("Chip trade", "With Beta"): both cards, ours on
+  the left, the arrows between them, and MegaMan in BN6's NAVIGATOR box
+  under them asking "Lan,trade our FireBrn1 F for Beta's MrkCan1 M?" with
+  Yes and No, the cursor on No as "Deal,Lan?" had it; B is No. After Yes
+  the cards hold, MegaMan says "Hmm... Beta's still thinking." and the
+  arrows pulse, B calling it off; when the server commits, "Here it
+  comes!", the cards cross (MegaMan's over the top, the other's under it,
+  40 frames) and land with BN6's jingle (`SFX_GOT`, as the NetPass's full
+  pass lands), "Yeah! We got MrkCan1 M!", the card come in the ChipFolder's
+  EQUIP corners, and A closes it; MegaMan then says "Deal! FireBrn1 F is ours once we're home!" as
   before. Called off by the other player or the server meanwhile, it
   closes and MegaMan says the trade's off. MegaMan's own answer or take
   opens it at once; an answer to his offer, or his board offer taken,

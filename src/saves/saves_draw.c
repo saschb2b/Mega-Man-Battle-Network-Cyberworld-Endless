@@ -49,13 +49,9 @@ static void note(SDL_Rect r, const char *text, SDL_Color color) {
 
 static void button(SavesButton b) {
 	SDL_Rect r = b.rect;
-	bool focus = SV.focus == b.action;
-	/* (a slim window, the one with the focus ringed in gold) */
-	look_box(r.x, r.y, r.w, r.h, focus ? LOOK_NAVY : LOOK_NAVY_LO);
-	if (focus) {
-		SDL_Rect ring[4] = { { r.x + 1, r.y, r.w - 2, 1 }, { r.x + 1, r.y + r.h - 1, r.w - 2, 1 }, { r.x, r.y + 1, 1, r.h - 2 }, { r.x + r.w - 1, r.y + 1, 1, r.h - 2 } };
-		fill_rects(ring, 4, LOOK_GOLD);
-	}
+	/* (STATUS's pills; the one with the focus NaviCust's green RUN!, as BN6 marks its one action) */
+	if (SV.focus == b.action) look_button(r.x, r.y, r.w - 1, r.h - 1);
+	else look_pill(r.x, r.y, r.w);
 	const char *label = saves_label(b.action);
 	int w = pixfont_width(label, 1);
 	if (w <= r.w - 10) pixfont_draw(r.x + r.w / 2, r.y + (r.h - PIXFONT_H) / 2, label, PET_WHITE, shade(), PIXFONT_CENTER, 1);
@@ -87,7 +83,7 @@ void saves_draw(void) {
 	look_stripes(sx > P.w / 2 ? sx : P.w / 2, 0, P.w - 4, 20);
 	SavesLayout l = layout();
 	if (SV.view == SAVES_HOME) {
-		look_box(l.back.x, l.back.y, l.back.w, l.back.h, LOOK_NAVY);
+		look_pill(l.back.x, l.back.y, l.back.w);
 		pixfont_draw(l.back.x + l.back.w / 2, l.back.y + 4, saves_word_back(), PET_WHITE, shade(), PIXFONT_CENTER, 1);
 		panel(l.here, &SV.here, false, SV.unreadable, false);
 		MirrorStatus m;

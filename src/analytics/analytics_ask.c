@@ -1,7 +1,8 @@
-/* analytics_ask.h. The panel's layout from the picture's corner: the
- * heading, the question, what is sent and what never is (wrapped as it
- * opens), Yes and No, and under them where it is changed and the keys or
- * a phone's hint. */
+/* analytics_ask.h. The panel's layout from the picture's corner: what is
+ * sent and what never is (wrapped as it opens) in SubChip's flat panel,
+ * then BN6's own chat box asking, faceless as a Chip Trader asks: the
+ * question, where it is changed, Yes and No behind the green triangle
+ * where BN6's chat box puts them. */
 #include "analytics_ask.h"
 
 #include <stdio.h>
@@ -10,20 +11,20 @@
 #include "analytics.h"
 #include "analytics_text.h"
 #include "audio.h"
-#include "controls.h"
+#include "chatbox.h"
 #include "gfx.h"
-#include "minifont.h"
 #include "pet_panel.h"
 #include "platform.h"
 #include "touch.h"
 
 #define ASK_WAIT 30          /* frames before it takes a press */
 #define ASK_TEXT_W (CORE_W - 28)
-#define ASK_WIN_Y 29
-#define ASK_BODY_Y (ASK_WIN_Y + LOOK_FRAME + 2)
+#define ASK_WIN_Y 18
+#define ASK_BODY_Y (ASK_WIN_Y + 4)
 #define ASK_LINES 6
-#define ASK_CHOICE_Y 118
-#define ASK_CHOICE_DX 40     /* Yes and No either side of the middle */
+#define ASK_CHOICE_Y (CHATBOX_TEXT_Y + 2 * CHATBOX_LINE)   /* the chat box's third line */
+#define ASK_YES_X 91         /* Yes and No where BN6's chat box has them */
+#define ASK_NO_X 138
 #define ASK_LINE 96
 
 static struct {
@@ -108,45 +109,33 @@ bool analytics_ask_back(void) {
 }
 
 void analytics_ask_tap(int x, int y) {
-	if (!K.open || K.t < ASK_WAIT || y < ASK_CHOICE_Y - 4 || y >= ASK_CHOICE_Y + TEXT_H + 2) return;
-	int cx = CORE_W / 2;
-	if (x >= cx - ASK_CHOICE_DX - 28 && x < cx - 8) answer(true);
-	else if (x >= cx + 8 && x < cx + ASK_CHOICE_DX + 28) answer(false);
+	if (!K.open || K.t < ASK_WAIT || y < ASK_CHOICE_Y - 4 || y >= ASK_CHOICE_Y + CHATBOX_LINE) return;
+	if (x >= ASK_YES_X - 16 && x < ASK_NO_X - 12) answer(true);
+	else if (x >= ASK_NO_X - 12 && x < ASK_NO_X + 40) answer(false);
 }
 
-/* Yes and No, the chosen one gold with the PET's arrow before it */
-static void choices_draw(int cx, int y) {
-	const char *w[2] = { analytics_word(AW_YES), analytics_word(AW_NO) };
-	for (int i = 0; i < 2; ++i) {
-		bool on = K.yes == (i == 0);
-		int x = cx + (i ? ASK_CHOICE_DX : -ASK_CHOICE_DX);
-		text_draw(x, y, w[i], on ? LOOK_GOLD : LOOK_TEXT, TEXT_CENTER);
-		if (on && K.t >= ASK_WAIT) look_cursor(x - text_width(w[i]) / 2 - 12, y + 2);
-	}
-}
-
-/* Under them: where it is changed later, then the keys, or a phone's tap */
-static void hints_draw(int cx, int y) {
-	char s[96], a[24];
-	pet_panel_note(cx, y, analytics_later(), LOOK_PAGE);
-	if (touch_shown()) {
-		pet_panel_note(cx, y + 9, analytics_word(AW_TAP), LOOK_PAGE);
-		return;
-	}
-	/* (controls_word keeps a keyboard's word in one buffer: the first copied) */
-	snprintf(a, sizeof a, "%s", controls_word(BTN_A));
-	analytics_keys(a, controls_word(BTN_B), K.first, s, sizeof s);
-	pet_panel_note(cx, y + 9, s, LOOK_PAGE);
+/* BN6's chat box at its place, faceless as the Chip Trader's "Insert 3
+ * BtlChips?": the question and where it is changed, centred, then Yes and
+ * No, the green triangle before the one chosen */
+static void chat_draw(int x0, int y0) {
+	chatbox_frame(x0 + CHATBOX_X, y0 + CHATBOX_Y, CHATBOX_W, CHATBOX_H);
+	const char *line[2] = { analytics_word(AW_QUESTION), analytics_later() };
+	for (int i = 0; i < 2; ++i)
+		chatbox_text(x0 + (CORE_W - chatbox_text_width(line[i])) / 2, y0 + CHATBOX_TEXT_Y + i * CHATBOX_LINE, line[i], -1);
+	int oy = y0 + ASK_CHOICE_Y;
+	chatbox_text(x0 + ASK_YES_X, oy, analytics_word(AW_YES), -1);
+	chatbox_text(x0 + ASK_NO_X, oy, analytics_word(AW_NO), -1);
+	if (K.t >= ASK_WAIT) look_choice(x0 + (K.yes ? ASK_YES_X : ASK_NO_X) - LOOK_CHOICE_W - 3, oy - 1);
 }
 
 void analytics_ask_draw(void) {
 	if (!K.open) return;
 	int x0 = P.core_x, y0 = P.core_y, cx = x0 + CORE_W / 2;
 	pet_panel_draw(x0, y0, analytics_word(AW_TITLE));
-	text_draw(cx, y0 + 16, analytics_word(AW_QUESTION), LOOK_PAGE, TEXT_CENTER);
-	/* (the body in the bold letters: the lists' thin ones are wider, and would take a line more than the window has) */
-	look_window(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 2 * LOOK_FRAME + 4 + K.nlines * 12, 0, false);
+	/* (the body in SubChip's flat panel, as BN6 explains a thing: no window, which BN6 keeps
+	 * for a list; in the bold letters, as the thin ones are wider and would take a line more) */
+	look_panel(x0 + 7, y0 + ASK_WIN_Y, CORE_W - 14, 7 + K.nlines * 12);
 	for (int i = 0; i < K.nlines; ++i) text_draw(cx, y0 + ASK_BODY_Y + i * 12, K.lines[i], LOOK_TEXT, TEXT_CENTER);
-	choices_draw(cx, y0 + ASK_CHOICE_Y);
-	hints_draw(cx, y0 + 138);
+	chat_draw(x0, y0);
+	look_fade_in(x0, y0, CORE_W, CORE_H, K.t);
 }

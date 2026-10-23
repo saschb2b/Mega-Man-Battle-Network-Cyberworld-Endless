@@ -69,16 +69,64 @@ SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill);
 /* The scroll bar's thumb in the track of the window `win` (look_window's
  * with `bar`, `top` as it had): `shown` of `n` lines from `first` */
 void look_scroll(SDL_Rect win, int top, int first, int shown, int n);
+/* BN6 keeps the window above for a screen's one list. What else a screen
+ * holds takes the kind BN6 gives it (docs/UI.md, A screen's parts): */
+/* ... a chip: the Library's and the folder editor's card, grey with its
+ * top left corner cut, outlined, the contacts' gold along its foot: the
+ * card's face above the contacts */
+#define LOOK_CARD_FOOT 10
+#define LOOK_CARD_GREY  rgba(198, 198, 214, 255)
+#define LOOK_CARD_DARK  rgba(41, 41, 41, 255)   /* the picture's frame, the code's strip */
+#define LOOK_CARD_INK   rgba(41, 41, 41, 255)
+SDL_Rect look_card(int x, int y, int w, int h);
+/* ... a thing to press: STATUS's pill, cyan with pointed ends, 15 tall,
+ * its words the caller's (white, LOOK_SHADE under them) */
+#define LOOK_PILL_H 15
+void look_pill(int x, int y, int w);
+/* ... the one action: NaviCust's RUN!, bright green in a light edge */
+void look_button(int x, int y, int w, int h);
+/* ... words that explain: SubChip's flat dark green panel, no frame: the
+ * panel; letters on it white, LOOK_PANEL_SHADE under them */
+#define LOOK_PANEL_SHADE rgba(0, 74, 41, 255)
+SDL_Rect look_panel(int x, int y, int w, int h);
+/* ... a value or a picture: STATUS's slot, navy in a white edge: the field */
+SDL_Rect look_slot(int x, int y, int w, int h);
+/* ... and what a screen marks as its own: the ChipFolder's EQUIP corners,
+ * orange, round x, y, w, h */
+void look_corners(int x, int y, int w, int h);
+
 /* The information box: light green, outlined, `label` in small capitals
  * on its top left: the room under the label */
 SDL_Rect look_info(int x, int y, int w, int h, const char *label);
+/* BN6's NAVIGATOR box (E-Mail's, STATUS's, NaviCust's question): the
+ * information box with `label` (the caller's word, NAVIGATOR), the face
+ * `face` (a mugshot of the ROM's, FACE_MEGAMAN) on its left, the white
+ * page beside it for his words, LOOK_NAV_H tall from (x, y): the page.
+ * His words go on it in the chat font, LOOK_NAV_LINE apart, three at most */
+#define LOOK_NAV_H 59
+#define LOOK_NAV_LINE 14
+SDL_Rect look_navigator(int x, int y, int w, const char *label, int face);
 /* A tag on the information box (its KEYITEM): a green pill, `s` in small
  * capitals, white, in its middle */
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill);
 
-/* The cursor: an orange arrow pointing right, 9 x 10 from (x, y) */
+/* The cursor: an orange arrow pointing right, 9 x 10 from (x, y), as
+ * KeyItem's steps: one pixel right, back, two right, six frames each */
 #define LOOK_CURSOR_W 9
 void look_cursor(int x, int y);
+/* A screen opening, as KeyItem's: up from black over LOOK_FADE_IN frames
+ * in the GBA's sixteen steps, over x, y, w, h; `t` frames since it opened */
+#define LOOK_FADE_IN 15
+void look_fade_in(int x, int y, int w, int h, int t);
+/* The choice's cursor, BN6's green triangle before Yes and No (and
+ * NaviCust's RUN!): 9 x 14 from (x, y), its shade on a page */
+#define LOOK_CHOICE_W 9
+void look_choice(int x, int y);
+/* A page's arrow, BN6's green one at a window band's end where L or R
+ * turns to another page (the Library's ▶, the folder editor's Pack):
+ * 8 x 8 from (x, y), pointing right or left */
+#define LOOK_ARROW_W 8
+void look_arrow(int x, int y, bool right);
 
 /* Small capitals, 5 rows (BN6's labels: INFORMATION, START:SORT), `shade`
  * a pixel right and below (alpha 0: none) */

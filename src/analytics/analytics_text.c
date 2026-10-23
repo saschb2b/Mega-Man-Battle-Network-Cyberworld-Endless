@@ -2,7 +2,6 @@
  * and what never is, as docs/GUIDE.md's Anonymous statistics says it. */
 #include "analytics_text.h"
 
-#include <stdio.h>
 
 /* (in AnalyticsWord's order, its name beside each) */
 static const char *const words[] = {
@@ -16,17 +15,12 @@ static const char *const words[] = {
 	"On",   /* AW_ON */
 	"Off",   /* AW_OFF */
 	"A: what is sent, and Yes or No",   /* AW_ROW_NOTE */
-	"D-pad and A, or tap Yes or No",   /* AW_TAP */
 };
 _Static_assert(sizeof words / sizeof *words == AW_COUNT, "a word for each AnalyticsWord");
 
 const char *analytics_word(AnalyticsWord w) { return (unsigned)w < AW_COUNT ? words[w] : ""; }
 
-const char *analytics_later(void) { return "Change it any time in Options"; }
-
-void analytics_keys(const char *a, const char *b, bool first, char *out, size_t n) {
-	snprintf(out, n, "%s: choose   %s: %s", a, b, first ? "no" : "back");
-}
+const char *analytics_later(void) { return "Change it any time in Options."; }
 
 const char *analytics_setting_note(void) {
 	return "\n# statistics: on sends anonymous play statistics to the game's own Umami\n"

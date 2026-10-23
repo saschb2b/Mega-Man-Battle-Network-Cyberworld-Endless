@@ -119,21 +119,20 @@ static void preview(int x, int y, const StripView *v) {
 	minifont_draw_centered(x + PV_X + PV_W / 2, y + AIM_Y + 3, aim, v->aims && v->aim[0] ? PET_GOLD : PET_DIM, 1);
 }
 
-/* the band over the tray: L, the two pages' tabs, R, the keys */
+/* the band over the tray: the two pages' tabs between BN6's page arrows (L and R) */
 static void band(int x, int y, const StripView *v) {
 	int by = y + TRAY_Y;
 	/* (BN6's band: pet_look.h) */
 	fill_rect(x, by, NETPASS_W, BAND_H, LOOK_BAND);
 	fill_rect(x, by + BAND_H - 1, NETPASS_W, 1, LOOK_GREEN_LO);
-	static const char *const keys[2] = { "L", "R" };
-	for (int k = 0; k < 2; ++k) look_tag(x + (k ? 122 : 4), by + 2, 9, 8, keys[k], LOOK_GREEN);
+	look_arrow(x + 5, by + 2, false);
+	look_arrow(x + 122, by + 2, true);
 	for (int p = 0; p < 2; ++p) {
 		SDL_Rect r = strip_tab(p);
 		bool on = p == v->page;
 		if (on) netpass_panel(x + r.x, y + r.y, r.w, r.h, PET_SLOT, PET_CYAN_HI);
 		pixfont_draw(x + r.x + r.w / 2, y + r.y + 1, strip_text_pages[p], on ? PET_WHITE : LOOK_EDGE_HI, on ? INK : (SDL_Color){ 0, 0, 0, 0 }, PIXFONT_CENTER, 1);
 	}
-	minifont_draw(x + NETPASS_W - 4 - minifont_width(strip_text_keys, 1), by + 4, strip_text_keys, LOOK_PAGE, 1);
 }
 
 /* an emote's icon: MegaMan's pose in a cell, lit under the cursor, its way of L in its corner */

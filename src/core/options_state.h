@@ -10,7 +10,7 @@
 /* A line's kind: the hub's (Controls, Display, Audio, Statistics), the
  * Display section's (Fullscreen, Scale, Smooth motion, where the system
  * has them: display.h), the Audio section's (Sound), and Done */
-enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_DONE };
+enum { LINE_CONTROLS, LINE_DISPLAY, LINE_AUDIO, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND };
 #define LINES_MAX 5
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
@@ -24,6 +24,7 @@ typedef struct {
 	int section;         /* (SECTION_*) */
 	int at;              /* the cursor: a line's place in options_lines' list */
 	int hub_at;          /* ... the hub's, kept while a section is open */
+	int t;               /* frames since it or its section opened (its fade) */
 	SDL_FingerID finger; /* (a finger that went down on it: only its lift taps) */
 	bool finger_down;
 } OptionsState;

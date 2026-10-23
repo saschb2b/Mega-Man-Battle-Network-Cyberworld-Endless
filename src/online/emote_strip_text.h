@@ -8,8 +8,7 @@
 /* the two pages, L and R between them, and the palette's tab beside them */
 extern const char *const strip_text_pages[2];
 extern const char strip_text_netpass[];
-/* the keys' hints: the strip's, the favourites' box's, the palette's */
-extern const char strip_text_keys[];
+/* the keys' hints: the favourites' box's, the palette's */
 extern const char strip_text_favourites[];
 extern const char strip_text_keep[];
 extern const char strip_text_tap[];

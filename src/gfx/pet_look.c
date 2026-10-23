@@ -14,6 +14,7 @@
 #include "bn6.h"
 #include "minifont.h"
 #include "pixfont.h"
+#include "platform.h"
 #include "rom.h"
 
 /* a row of pixels from x0 to x1 (both in) */
@@ -185,6 +186,97 @@ void look_scroll(SDL_Rect win, int top, int first, int shown, int n) {
 	fill_rect(tx + 1, by + 1, 1, bh - 1, LOOK_GREEN_HI);
 }
 
+/* ---- the other kinds ---- */
+
+SDL_Rect look_card(int x, int y, int w, int h) {
+	/* (the Library's card: an outline, a light rim along its top and left,
+	 * the grey face; its top left corner cut four pixels across) */
+	static const SDL_Color line = { 74, 99, 115, 255 }, rim = { 222, 222, 222, 255 };
+	const int cut = 4, fy = y + h - LOOK_CARD_FOOT;
+	for (int r = 0; r < cut; ++r) {
+		fill_rect(x + cut - r, y + r, 1, 1, line);
+		span(x + cut - r + 1, x + w - 2, y + r, r == 0 ? rim : r == 1 ? rim : LOOK_CARD_GREY);
+		if (r > 0) fill_rect(x + cut - r + 1, y + r, 1, 1, rim);
+	}
+	fill_rect(x, y + cut, 1, h - cut, line);
+	fill_rect(x + w - 1, y, 1, h, line);
+	fill_rect(x + 1, y + cut, 1, fy - y - cut, rim);
+	fill_rect(x + 2, y + cut, w - 3, fy - y - cut, LOOK_CARD_GREY);
+	/* (the contacts: an outline over and under them, gold in columns of two, lighter at their top, a glint at their foot) */
+	static const SDL_Color dark = { 173, 132, 57, 255 }, top = { 198, 181, 115, 255 }, gold = { 231, 222, 115, 255 };
+	span(x, x + w - 1, fy, line);
+	span(x, x + w - 1, y + h - 1, line);
+	for (int r = 1; r < LOOK_CARD_FOOT - 1; ++r)
+		for (int cx = x + 1; cx < x + w - 1; cx += 4) {
+			fill_rect(cx, fy + r, cx + 2 <= x + w - 1 ? 2 : 1, 1, dark);
+			if (cx + 2 < x + w - 1) fill_rect(cx + 2, fy + r, cx + 4 <= x + w - 1 ? 2 : 1, 1, r == 1 ? top : r >= 6 ? rim : gold);
+		}
+	return (SDL_Rect){ x + 2, y + 2, w - 4, fy - y - 2 };
+}
+
+void look_pill(int x, int y, int w) {
+	/* (STATUS's: a light row along its top, its ends pointed, light on their
+	 * upper slant and blue on the lower, a blue row along its foot, the
+	 * body's shade under it and its right end) */
+	static const SDL_Color body = { 66, 198, 231, 255 }, light = { 107, 222, 255, 255 }, blue = { 16, 140, 239, 255 };
+	const int half = 7, rx = x + w - 1;
+	span(x + half - 1, rx - half + 1, y, light);
+	for (int r = 1; r < LOOK_PILL_H - 1; ++r) {
+		int in = r <= half ? half - r : r - half - 1;
+		SDL_Color edge = r <= half ? light : blue;
+		span(x + in + 2, rx - in - 2, y + r, body);
+		span(x + in, x + in + 1, y + r, edge);
+		span(rx - in - 1, rx - in, y + r, edge);
+		if (r > half) fill_rect(rx - in + 1, y + r, 1, 1, LOOK_GREEN_LO);
+	}
+	span(x + half - 1, rx - half + 1, y + LOOK_PILL_H - 1, blue);
+	span(x + half, rx - half + 2, y + LOOK_PILL_H, LOOK_GREEN_LO);
+}
+
+void look_button(int x, int y, int w, int h) {
+	/* (RUN!: the green inside an edge of light grey, two wide on the left, its corners cut, a dark shade under its right and foot) */
+	static const SDL_Color green = { 16, 231, 41, 255 }, edge = { 206, 222, 239, 255 }, shade = { 41, 132, 148, 255 };
+	span(x + 1, x + w - 2, y, edge);
+	span(x + 1, x + w - 2, y + h - 1, edge);
+	fill_rect(x, y + 1, 2, h - 2, edge);
+	fill_rect(x + w - 1, y + 1, 1, h - 2, edge);
+	fill_rect(x + 2, y + 1, w - 3, h - 2, green);
+	fill_rect(x + 2, y + 1, 1, 1, edge);
+	fill_rect(x + w, y + 2, 1, h - 1, shade);
+	span(x + 2, x + w, y + h, shade);
+}
+
+SDL_Rect look_panel(int x, int y, int w, int h) {
+	/* (SubChip's: flat, its corners rounded two pixels) */
+	span(x + 2, x + w - 3, y, LOOK_GREEN_LO);
+	span(x + 1, x + w - 2, y + 1, LOOK_GREEN_LO);
+	fill_rect(x, y + 2, w, h - 4, LOOK_GREEN_LO);
+	span(x + 1, x + w - 2, y + h - 2, LOOK_GREEN_LO);
+	span(x + 2, x + w - 3, y + h - 1, LOOK_GREEN_LO);
+	return (SDL_Rect){ x + 3, y + 2, w - 6, h - 4 };
+}
+
+SDL_Rect look_slot(int x, int y, int w, int h) {
+	/* (STATUS's HP and MegaMan: two pixels of white round the field) */
+	fill_rect(x, y, w, h, LOOK_PAGE);
+	fill_rect(x + 2, y + 2, w - 4, h - 4, LOOK_SLOT);
+	return (SDL_Rect){ x + 2, y + 2, w - 4, h - 4 };
+}
+
+void look_corners(int x, int y, int w, int h) {
+	/* (the EQUIP corners: an L at each, three wide, its dark outline round the orange, lit along its top) */
+	static const SDL_Color line = { 214, 107, 0, 255 }, orange = { 255, 173, 16, 255 }, lit = { 255, 206, 24, 255 };
+	const int arm = 7;
+	for (int k = 0; k < 4; ++k) {
+		bool right = k & 1, low = k & 2;
+		int cx = right ? x + w - arm : x, cy = low ? y + h - 3 : y, vx = right ? x + w - 3 : x, vy = low ? y + h - arm : y;
+		fill_rect(cx, cy, arm, 3, line);
+		fill_rect(vx, vy, 3, arm, line);
+		fill_rect(cx + 1, cy + 1, arm - 2, 1, low ? orange : lit);
+		fill_rect(vx + 1, vy + 1, 1, arm - 2, orange);
+	}
+}
+
 SDL_Rect look_info(int x, int y, int w, int h, const char *label) {
 	span(x + 1, x + w - 2, y, LOOK_GREEN_LO);
 	span(x + 1, x + w - 2, y + h - 1, LOOK_GREEN_LO);
@@ -200,6 +292,20 @@ SDL_Rect look_info(int x, int y, int w, int h, const char *label) {
 	return (SDL_Rect){ x + 2, y + top, w - 4, h - top - 2 };
 }
 
+SDL_Rect look_navigator(int x, int y, int w, const char *label, int face) {
+	/* (E-Mail's: the box's outline and light green, its label, the face's
+	 * 40 x 48 from 3 in and 8 down, the page from the face to 2 short of
+	 * the box's right, as tall as the face) */
+	look_info(x, y, w, LOOK_NAV_H, label);
+	SDL_Rect page = { x + 43, y + 8, w - 45, 48 };
+	fill_rect(page.x, page.y, page.w, page.h, LOOK_PAGE);
+	fill_rect(x + 3, y + 8, 40, 48, LOOK_SLOT);
+	Sprite *mug = sprite_get(SPR_MUGSHOT, face);
+	/* (a mugshot's origin is its middle) */
+	if (mug) sprite_draw_frame(mug, 0, 0, x + 3 + 20, y + 8 + 24, false, 0, 0);
+	return page;
+}
+
 void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill) {
 	fill_rect(x + 1, y, w - 2, h, fill);
 	fill_rect(x, y + 1, w, h - 2, fill);
@@ -209,6 +315,9 @@ void look_tag(int x, int y, int w, int h, const char *s, SDL_Color fill) {
 /* ---- the cursor ---- */
 
 void look_cursor(int x, int y) {
+	/* (KeyItem's, measured a frame at a time: 1, 0, 2 pixels right, six frames each) */
+	static const int step[3] = { 1, 0, 2 };
+	x += step[P.frame / 6 % 3];
 	/* (rows of 4 to 8 pixels, the point at the fifth: lit along its top
 	 * and left, darker along its lower edges, a shade under them) */
 	static const SDL_Color hi = { 255, 247, 115, 255 }, body = { 255, 173, 16, 255 }, lo = { 214, 107, 0, 255 }, under = { 16, 82, 82, 255 };
@@ -219,6 +328,38 @@ void look_cursor(int x, int y) {
 		fill_rect(x, y + r, 1, 1, r == 8 ? lo : hi);
 		fill_rect(x + len - 1, y + r, 1, 1, r < 4 ? LOOK_GOLD : lo);
 	}
+}
+
+void look_fade_in(int x, int y, int w, int h, int t) {
+	if (t < 0 || t >= LOOK_FADE_IN) return;
+	/* (the GBA's brightness in its sixteen steps, from black) */
+	int dark = 16 - (t + 1) * 16 / LOOK_FADE_IN;
+	if (dark > 0) fill_rect(x, y, w, h, rgba(0, 0, 0, (uint8_t)(dark * 255 / 16)));
+}
+
+/* `rows` of a small picture from (x, y), mirrored when `flip`: each letter
+ * a colour of `pal` ('a' its first), '.' nothing */
+static void picture(int x, int y, const char *const *rows, int n, const SDL_Color *pal, bool flip) {
+	for (int r = 0; r < n; ++r) {
+		int w = (int)strlen(rows[r]);
+		for (int i = 0; i < w; ++i)
+			if (rows[r][i] != '.') fill_rect(flip ? x + 7 - i : x + i, y + r, 1, 1, pal[rows[r][i] - 'a']);
+	}
+}
+
+void look_choice(int x, int y) {
+	/* (the Chip Trader's Yes and No: an outline, its light edge and a glint, the body, a dark shade under its right) */
+	static const char *const rows[14] = { "aa", "aba", "aeba", "aecba", "abccba", "abcccba", "abccccba", "abccccadd", "abcccadd",
+		"abccadd", "abcadd", "abadd", "aadd", ".dd" };
+	static const SDL_Color pal[5] = { { 33, 165, 33, 255 }, { 115, 255, 74, 255 }, { 57, 255, 0, 255 }, { 49, 57, 82, 255 }, { 247, 255, 247, 255 } };
+	picture(x, y, rows, 14, pal, false);
+}
+
+void look_arrow(int x, int y, bool right) {
+	/* (the Library's: lit along its top and left, darker along its point's lower edges, a shade under them) */
+	static const char *const rows[8] = { "aaaab", "accccb", "acccccb", "accccccd", "acccccde", "accccde", "cdddde", ".eeee" };
+	static const SDL_Color pal[5] = { { 189, 231, 132, 255 }, { 140, 231, 57, 255 }, { 74, 198, 16, 255 }, { 8, 165, 0, 255 }, { 16, 74, 74, 255 } };
+	picture(x, y, rows, 8, pal, !right);
 }
 
 /* ---- the capitals ---- */

@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 const char reconnect_text_title[] = "Net Square";
-const char reconnect_text_lost[] = "Link lost";
 const char reconnect_text_back[] = "Back online!";
 const char reconnect_text_kept[] = "YOUR SPOT IN THE SQUARE IS KEPT";
 const char reconnect_text_key_home[] = "GO HOME";

@@ -4,7 +4,6 @@
 
 const char *const strip_text_pages[2] = { "EMOTES", "PHRASES" };
 const char strip_text_netpass[] = "NETPASS";
-const char strip_text_keys[] = "A SEND  B CLOSE";
 const char strip_text_favourites[] = "HOLD L +";
 const char strip_text_keep[] = "SELECT+ARROW KEEPS";
 const char strip_text_tap[] = "TAP TO SEND";

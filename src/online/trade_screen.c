@@ -7,6 +7,7 @@
 #include "audio.h"
 #include "buttons.h"
 #include "online_types.h"
+#include "pet_look.h"
 #include "platform.h"
 #include "trade_screen_draw.h"
 
@@ -100,10 +101,10 @@ static void step(int by) {
 	audio_sfx(SFX_CHIP_CURSOR);
 }
 
-/* the next sort, the cursor kept on its row's chip */
-static void sort(void) {
+/* the list sorted by `key`, the cursor kept on its row's chip */
+static void sort(int key) {
 	TradeRow was = S.v.n ? S.rows[S.v.at] : (TradeRow){ 0 };
-	sort_key = S.v.sort = trade_list_next_key(S.v.sort);
+	sort_key = S.v.sort = key;
 	trade_list_sort(S.rows, S.v.n, sort_key);
 	for (int i = 0; i < S.v.n; ++i)
 		if (S.rows[i].chip.id == was.chip.id && S.rows[i].chip.code == was.chip.code) S.v.at = i;
@@ -113,12 +114,40 @@ static void sort(void) {
 	audio_sfx(SFX_SELECT);
 }
 
+/* START's SORT pop-up, as the folder editor's: Up and Down choose a key,
+ * A sorts by it, B (or START again) leaves it as it was */
+static void sort_frame(void) {
+	if (btn_repeat(BTN_UP)) {
+		S.v.sort_at = (S.v.sort_at + TRADE_SORT_KEYS - 1) % TRADE_SORT_KEYS;
+		audio_sfx(SFX_CURSOR);
+	} else if (btn_repeat(BTN_DOWN)) {
+		S.v.sort_at = trade_list_next_key(S.v.sort_at);
+		audio_sfx(SFX_CURSOR);
+	}
+	if (btn_pressed(BTN_A)) {
+		S.v.sorting = false;
+		sort(S.v.sort_at);
+	} else if (btn_pressed(BTN_B | BTN_START)) {
+		S.v.sorting = false;
+		audio_sfx(SFX_CANCEL);
+	}
+}
+
 static void list_frame(void) {
+	if (S.v.sorting) {
+		sort_frame();
+		return;
+	}
 	if (btn_repeat(BTN_UP)) step(-1);
 	else if (btn_repeat(BTN_DOWN)) step(1);
 	else if (btn_repeat(BTN_LEFT)) step(-TRADE_ROWS);
 	else if (btn_repeat(BTN_RIGHT)) step(TRADE_ROWS);
-	if (btn_pressed(BTN_START) && S.v.n > 1) sort();
+	if (btn_pressed(BTN_START) && S.v.n > 1) {
+		S.v.sorting = true;
+		S.v.sort_at = S.v.sort;
+		audio_sfx(SFX_SELECT);
+		return;
+	}
 	if (btn_pressed(BTN_A) && S.v.n) {
 		S.picked = S.rows[S.v.at].chip;
 		close_with(TRADE_EVENT_PICKED, SFX_CHIP_OK);
@@ -168,4 +197,5 @@ bool trade_screen_update(void) {
 void trade_screen_draw(void) {
 	if (S.kind == LIST) trade_screen_draw_list(P.core_x, P.core_y, &S.v);
 	else if (S.kind == DEAL) trade_screen_draw_deal(P.core_x, P.core_y, &S.v);
+	if (S.kind != SHUT) look_fade_in(P.core_x, P.core_y, CORE_W, CORE_H, S.v.t);
 }

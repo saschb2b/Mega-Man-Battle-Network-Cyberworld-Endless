@@ -422,7 +422,7 @@ phone or tablet the touch controls' menu has **OPTIONS** as well. Its
 buttons are its own), **Display** the picture ([Screen](#screen)),
 **Audio** the sound ([Sound](#sound)), and
 **Statistics** your answer to the statistics' question, where the game can
-send them; B or **Done** goes back.
+send them; B goes back (on a phone, the touch controls' B).
 
 **The controls screen** sets the buttons, laid out as big games lay theirs.
 Options' **Controls** opens it. It has a tab for
@@ -1102,8 +1102,8 @@ The songs are in sections by game and by where they play (Towns, The
 Net, Battles, Story, Screens; BN5's songs whose place is not known yet
 are in **More**, by their number). **L** and **R** (or Left and Right)
 turn the sections, Up and Down pick a song, **A** plays it, **START**
-turns the mode and **B** closes it. A tap does the same on a phone: a
-song's row plays it.
+turns the mode and **B** closes it. On a phone a song's row plays it, the
+green arrows turn the sections and the mode on the band turns the mode.
 
 | Mode | Plays |
 | --- | --- |

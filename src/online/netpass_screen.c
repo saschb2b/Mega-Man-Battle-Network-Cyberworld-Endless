@@ -10,6 +10,7 @@
 #include "game.h"
 #include "netpass.h"
 #include "netpass_draw.h"
+#include "pet_look.h"
 #include "platform.h"
 
 #define FIRST_LANDS 24   /* frames before the first new stamp lands */
@@ -120,6 +121,7 @@ bool netpass_screen_update(void) {
 void netpass_screen_draw(void) {
 	if (!N.shown) return;
 	netpass_draw(P.core_x, P.core_y, &N.view);
+	look_fade_in(P.core_x, P.core_y, NETPASS_W, NETPASS_H, N.view.t);
 }
 
 void netpass_screen_strip(void) {

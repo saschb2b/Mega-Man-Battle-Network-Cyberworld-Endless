@@ -1,5 +1,5 @@
 /* Options' words (options_text.c): its lines, their notes, the Display
- * and Audio sections' choices, the keys' line, settings.ini's notes for
+ * and Audio sections' choices, settings.ini's notes for
  * the display's lines and the sound,
  * in the plain style of the game's menus (docs/VOICE.md), apart from the
  * logic that says when. */
@@ -13,11 +13,9 @@ typedef enum {
 	OW_TITLE,           /* the head's name */
 	OW_CONTROLS, OW_CONTROLS_NOTE,
 	OW_AUDIO, OW_AUDIO_NOTE,
-	OW_DONE, OW_DONE_NOTE, OW_BACK_NOTE,   /* Done in the hub, and in a section */
 	OW_SOUND,           /* the Audio section's line */
 	OW_GBA, OW_GBA_NOTE,
 	OW_SOFT, OW_SOFT_NOTE,
-	OW_TAP,             /* a phone's keys' line */
 	OW_DISPLAY, OW_DISPLAY_NOTE,
 	OW_FULLSCREEN, OW_FULLSCREEN_ON_NOTE, OW_FULLSCREEN_OFF_NOTE,   /* the Display section's lines */
 	OW_SCALE,
@@ -25,12 +23,11 @@ typedef enum {
 	OW_AUTO_NOTE, OW_WHOLE_NOTE, OW_FILL_NOTE, OW_STRETCH_NOTE,
 	OW_SMOOTH, OW_SMOOTH_ON_NOTE, OW_SMOOTH_OFF_NOTE,
 	OW_ON, OW_OFF,
+	OW_INFORMATION,     /* the information box's label, KeyItem's */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
 
-/* The keys' line: "J: choose  K: back", or on the Sound line "J: change" */
-void options_keys(const char *a, const char *b, bool change, char *out, size_t n);
 /* settings.ini's lines before the sound line: what it is */
 const char *options_sound_note(void);
 /* ... before the display's: screen, smooth_motion and fullscreen */

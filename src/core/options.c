@@ -35,7 +35,7 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_AUDIO;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 	}
-	kinds[n++] = LINE_DONE;
+	/* (no Done: B leaves, as everywhere in BN6) */
 	return n;
 }
 
@@ -91,13 +91,14 @@ static void turn(int kind, int dir) {
 
 /* ---- the lines ---- */
 
-/* B, or Done: from a section to the hub, its line under the cursor; from
- * the hub away */
+/* B: from a section to the hub, its line under the cursor, the hub
+ * fading in again; from the hub away */
 static void back(void) {
 	audio_sfx(SFX_CANCEL);
 	if (O.section != SECTION_HUB) {
 		O.section = SECTION_HUB;
 		O.at = O.hub_at;
+		O.t = 0;
 	} else O.open = false;
 }
 
@@ -109,12 +110,12 @@ static void choose(void) {
 		O.hub_at = O.at;
 		O.section = line_kind() == LINE_DISPLAY ? SECTION_DISPLAY : SECTION_AUDIO;
 		O.at = 0;
+		O.t = 0;
 		audio_sfx(SFX_SELECT);
 		break;
 	/* (the statistics' question over the hub, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
-	case LINE_DONE: back(); break;
 	default: turn(line_kind(), 1); break;
 	}
 }
@@ -137,7 +138,10 @@ static void nav_update(void) {
 void options_update(void) {
 	if (analytics_ask_shown()) { analytics_ask_update(); return; }
 	if (controls_shown()) { controls_update(); return; }
-	if (O.open) nav_update();
+	if (O.open) {
+		++O.t;
+		nav_update();
+	}
 }
 
 bool options_back(void) {

@@ -94,6 +94,8 @@ int pixfont_wrap(const char *text, int w, int scale, char lines[][96], int most)
 void fill_rect(int x, int y, int w, int h, SDL_Color color) { (void)x; (void)y; (void)w; (void)h; (void)color; }
 void fill_rects(const SDL_Rect *r, int n, SDL_Color c) { (void)r; (void)n; (void)c; }
 SDL_Rect look_box(int x, int y, int w, int h, SDL_Color fill) { (void)fill; return (SDL_Rect){ x + 3, y + 3, w - 6, h - 6 }; }
+void look_pill(int x, int y, int w) { (void)x; (void)y; (void)w; }
+void look_button(int x, int y, int w, int h) { (void)x; (void)y; (void)w; (void)h; }
 int look_title_width(const char *s) { return (int)strlen(s) * 7; }
 void look_title(int x, int y, const char *s, SDL_Color c) { (void)x; (void)y; (void)s; (void)c; }
 void look_stripes(int sx, int y, int right, int h) { (void)sx; (void)y; (void)right; (void)h; }
