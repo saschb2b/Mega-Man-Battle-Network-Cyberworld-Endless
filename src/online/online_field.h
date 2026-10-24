@@ -17,12 +17,10 @@ void online_field_open(FieldKind kind, const char *initial);
 bool online_field_shown(void);
 /* Each frame while shown: FIELD_EDITING, or the field closed, FIELD_DONE
  * with what was typed in `out` (a valid name, or a server's full URL,
- * wss:// and /presence added where left out), or FIELD_CANCELLED. */
+ * its scheme, port and /presence added where left out: network_address.h),
+ * or FIELD_CANCELLED. */
 int online_field_update(char *out, size_t cap);
 void online_field_draw(void);
-/* A server's URL from what a player types: "host[:port]" or a whole
- * ws(s):// address; false where it is no valid one. */
-bool online_field_url(const char *typed, char *out, size_t cap);
 /* A URL's host as a person reads it ("cyberworld.saschb2b.com"), at most
  * `cap` - 1 characters. */
 void online_field_host(const char *url, char *out, size_t cap);
