@@ -8,7 +8,7 @@
 #ifndef LAYER_MAKE_H
 #define LAYER_MAKE_H
 
-#define LAYER_MAKE 100   /* (100: a guardian's draft offers no program that adds nothing to those held, docs/NAVICUST.md) */
+#define LAYER_MAKE 101   /* (101: a dark layer drawn in its own mission's map, docs/LIBERATION.md, Each mission's own look) */
 #define LAYER_MAKE_HASH 0xdfa0d42au
 
 #endif

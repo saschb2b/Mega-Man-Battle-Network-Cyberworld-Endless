@@ -33,6 +33,7 @@
 #include "liberation_state.h"
 #include "netmap.h"
 #include "rom.h"
+#include "run.h"
 #include "xnavi.h"
 
 #define GBA_BG2HOFS    0x04000018u
@@ -71,6 +72,47 @@ static uint16_t rom16(uint32_t a) {
 
 bool lib_look_on(void) { return K.on && LB.on; }
 
+/* ---- each mission's own look ----
+ * BN5's nine missions stand on its net areas' maps (docs/LIBERATION.md,
+ * The nine missions): ACDC 3, Oran 3, SciLab, End 2, End 5, the Undernet,
+ * Nebula 1, 3 and 5. A BN6 area takes the missions of BN5's area that
+ * dresses it in a run (rom.c's `like`: ACDC Area Central, Oran Area Green,
+ * SciLab Sky, End Area Seaside, the Undernet the Undernet, Nebula Area the
+ * Graveyard), each map's area the one whose maps BN5's random battles name
+ * it with (NetAreaDef.xbattles: 0x86:00 ACDC's, 0x86:01 Oran's and so on);
+ * the areas past BN5's net (Undernet Zero, the Nest) its last, Nebula 5;
+ * a homepage named for an area that area's; the comps and the rest BN5's
+ * first, ACDC 3. Where an area has several, a later act takes a later one,
+ * as BN5 meets them. */
+static const uint8_t area_missions[BIOME_COUNT][3] = {
+	[BIOME_CENTRAL] = { 1 }, [BIOME_SEASIDE] = { 4, 5 }, [BIOME_SKY] = { 3 }, [BIOME_GREEN] = { 2 },
+	[BIOME_GRAVEYARD] = { 7, 8, 9 }, [BIOME_UNDERNET] = { 6 }, [BIOME_SECRET] = { 9 }, [BIOME_NEST] = { 9 },
+	[BIOME_ACDC_HP] = { 1 }, [BIOME_GREEN_HP] = { 2 }, [BIOME_SKY_HP] = { 3 },
+};
+
+int lib_look_mission(int biome, int act) {
+	if (biome < 0 || biome >= BIOME_COUNT || !area_missions[biome][0]) return 1;
+	int n = 1;
+	while (n < 3 && area_missions[biome][n]) ++n;
+	/* (a dark layer's first act is the second, act 1 from 0) */
+	int k = act - 1 < 0 ? 0 : act - 1 >= n ? n - 1 : act - 1;
+	return area_missions[biome][k];
+}
+
+int lib_look_area(int mission) {
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *d = net_area_def(NET_AREAS + k);
+		if (d && d->xrom == 1 + XROM_BN5_COLONEL_US && d->group == BN5_LIB_MAP_GROUP && d->number == mission - 1) return NET_AREAS + k;
+	}
+	return -1;
+}
+
+/* (whether `area` is one of the nine maps) */
+static bool board_area(int area) {
+	const NetAreaDef *d = area >= NET_AREAS ? net_area_def(area) : NULL;
+	return d && d->xrom == 1 + XROM_BN5_COLONEL_US && d->group == BN5_LIB_MAP_GROUP;
+}
+
 
 /* The looks and their tiles, from mission 1's record (the same in all
  * nine): false where BN5's ROM is not there or not as mapped */
@@ -95,7 +137,7 @@ void lib_look_begin(void) {
 	memset(K.shown, 0, sizeof K.shown);
 	memset(K.dissolve, 0, sizeof K.dissolve);
 	K.mark_at = 0;
-	K.on = layer.dark && LB.on && D.layer_tiles == lib_layer_tiles(-1) && read_looks();
+	K.on = layer.dark && LB.on && board_area(D.layer_tiles) && read_looks();
 	if (!K.on) return;
 	netmap_last_tiles(&K.tw, &K.th);
 	if (emu_debug_on()) fprintf(stderr, "liberation look: BN5's, tiles %08x -> %08x (%u bytes), map %dx%d\n", K.src, K.vram, K.size, K.tw, K.th);
