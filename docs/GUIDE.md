@@ -506,9 +506,12 @@ right stick, **▶▶** on the touch controls (beside MENU upright, beside
 START on its side). Held instead, it runs only while held; held while it
 is on, the game slows to BN6's pace until you let go, for a careful walk
 along a walkway. The controls screen sets its button as it sets the GBA's
-(its **FAST** row; it may have none). While it runs, two orange arrows,
-the PET's cursor, show in the picture's top right corner; in a fight they
-go, and they come back as the results show.
+(its **FAST** row; it may have none). Where it cannot run, its button does
+nothing and the touch controls' **▶▶** is not there: in a fight, on BN6's
+menus, online, on the title, and everywhere with Options' line at
+**Off**. Turned on before a battle, it waits through the fight and runs
+again as the results show. While it runs, two orange arrows, the PET's
+cursor, show in the picture's top right corner.
 
 Options' **Fast forward** line sets how fast: **2x**, **3x** (the default)
 or **4x**, or **Off**, where its button does nothing (`fast_forward` in

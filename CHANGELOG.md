@@ -8,7 +8,8 @@
   layer and the town, chats, fades and warps, a battle's opening and its
   results. From a battle's first Custom screen to its last deletion it is
   BN6's speed, always, and so are BN6's menus and online play: nothing you
-  decide against the clock changes. Two of the PET's orange arrows show in
+  decide against the clock changes, and there its button does nothing and
+  the touch controls' ▶▶ steps aside. Two of the PET's orange arrows show in
   the corner while it runs. Options' new **Fast forward** line sets 2x, 3x
   (the default), 4x or off; the music keeps its pitch, and a machine that
   cannot go that fast goes as fast as it can. The controls screen has a

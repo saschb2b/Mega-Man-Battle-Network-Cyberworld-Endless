@@ -23,6 +23,7 @@
 #define BUDGET_MS 10.0
 
 static FastButton button;
+static bool can;              /* it could run here: its button does something, the touch controls show it */
 static bool running;          /* the update's batch runs fast: the mark shows */
 static uint64_t updated_at;   /* (P.frame of the last batch: none this frame, no mark) */
 static int planned;           /* the batch's frames at most */
@@ -45,8 +46,10 @@ static bool allowed(void) {
 }
 
 void fast_forward_update(void) {
-	fast_button(&button, btn_held(BTN_FAST) && fast_speed() > FAST_OFF);
-	running = button.on && fast_speed() > FAST_OFF && allowed();
+	can = fast_speed() > FAST_OFF && allowed();
+	/* (a press where it cannot run does nothing; one held into a fight is let go) */
+	fast_button(&button, can && btn_held(BTN_FAST));
+	running = button.on && can;
 	planned = running ? fast_speed() : 1;
 	updated_at = P.frame;
 	begun = stamp = SDL_GetPerformanceCounter();
@@ -60,9 +63,12 @@ bool fast_forward_goes_on(int i) {
 	double budget = P.headless ? 1e9 : BUDGET_MS;
 	if (!fast_batch_more(planned, i, ms_since(begun), last_ms, budget)) return false;
 	/* (the frame before opened a fight or a menu: BN6's pace from here) */
-	if (!allowed()) { running = false; return false; }
+	if (!allowed()) { running = can = false; return false; }
 	return true;
 }
+
+/* (the touch controls draw after a frame or two of smooth motion's) */
+bool fast_forward_available(void) { return can && updated_at + 2 >= P.frame; }
 
 unsigned fast_forward_how(int i) {
 	unsigned how = i > 0 ? EMU_FRAME_UNHEARD : 0;
