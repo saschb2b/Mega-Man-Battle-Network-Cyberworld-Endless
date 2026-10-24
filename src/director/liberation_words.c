@@ -99,11 +99,50 @@ const char *lib_strike_words(int kind, const char *darkloid) {
 	return "You're in my reach!";
 }
 
-const char *lib_won_words(int phases, int par) {
-	static char words[200];
+const char *lib_won_words(const char *tally, int tier, int phases, int par) {
+	static char words[400];
+	/* (BN5's own tally where its ROM is there, read as the board is won, its
+	 * boxes MegaMan's; over par its leader takes zenny where ours takes a
+	 * chip, so MegaMan's next box is ours) */
+	if (tally && tally[0]) {
+		snprintf(words, sizeof words, "@M %s%s", tally, tier >= 2 ? "|@M Aw... We missed the target.|@M But the Officials sent something anyway!" : "");
+		return words;
+	}
 	const char *how = phases <= par - 2 ? "@L Two under par! Way to go!" : phases <= par ? "@L Right on par!" : "@L Over par... But we did it!";
-	snprintf(words, sizeof words, "@M The Darkloid's deleted!|@L %d phases...|%s|@M The exit's open,Lan!", phases, how);
+	snprintf(words, sizeof words, "@M The Darkloid's deleted!|@L %d phases...|%s", phases, how);
 	return words;
+}
+
+const char *lib_exit_words(void) { return "@M The exit's open,Lan!"; }
+
+const char *lib_entrance_words(const char *darkloid) {
+	/* (said once, at his first turn, as BN5's Darkloids claim their area:
+	 * each in his own habit of speech, docs/VOICE.md, The guardians) */
+	static const struct { const char *name, *line; } darkloids[] = {
+		{ "HeatMan", "This whole area's my furnace now! C'mon!" },
+		{ "ElecMan", "...tzz. This area runs on my current." },
+		{ "SlashMan", "Slaaash! This turf's mine now!" },
+		{ "EraseMan", "Hyahaha! This dark is my hunting ground!" },
+		{ "ChargeMan", "Choo,choo! All aboard the dark line!" },
+		{ "SpoutMan", "Th-This dark is mine,drip! Stay out!" },
+		{ "TomahawkMan", "There's a saying... The dark keeps what it takes!" },
+		{ "TenguMan", "Hmph! Cross my dark if you can,grasshopper!" },
+		{ "GroundMan", "Whiiir! I've dug in deep down here!" },
+		{ "DustMan", "Gahaha! This whole place is my dump now!" },
+		{ "BlastMan", "Kwohohoho... This area will burn for me." },
+		{ "DiveMan", "Awooga! These dark waters are mine!" },
+		{ "CircusMan", "Ahoo,hoo,hoo! Welcome to my dark big top!" },
+		{ "JudgeMan", "Order! This area is under my rule now!" },
+		{ "ElementMan", "PIKIRARA...|...This area belongs to the dark." },
+		{ "Colonel", "This area is under my command. Turn back." },
+		{ "KnightMan", "I hold this land now. Come,if you dare!" },
+		{ "ShadowMan", "...This darkness is mine." },
+		{ "NumberMan", "Your odds in my area? Zero point zero!" },
+		{ "ToadMan", "Ribbit! This whole swamp of dark is mine!" },
+	};
+	for (size_t i = 0; darkloid && i < sizeof darkloids / sizeof *darkloids; ++i)
+		if (!strcmp(darkloids[i].name, darkloid)) return darkloids[i].line;
+	return "This area's mine now!";
 }
 
 const char *lib_unit_name(int kind) {

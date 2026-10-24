@@ -58,6 +58,8 @@ static struct {
 	uint16_t mark;                 /* the start panel's first entry as written: gone, the map was entered again */
 	uint32_t mark_at;
 	int refresh;                   /* frames BG2's screen map is still made from the RAM map */
+	bool view;                     /* the L view open: */
+	uint8_t threat[MAP_H][MAP_W];  /* ... 1 where the units would strike a Navi in their next phase (lib_threat) */
 } K;
 
 static uint32_t rom32(uint32_t a) {
@@ -109,8 +111,9 @@ void lib_look_begin(void) {
  * frame learned from that pad, which bare reads as a hole. */
 static int look_of(int x, int y) {
 	int k = LB.b.kind[y][x];
-	/* (a unit's reach lit as it strikes, BN5's red, over every panel in it) */
-	if (LB.reach_lit && LB.reach[y][x] && k != LIB_VOID) return LOOK_REACH;
+	/* (a unit's reach lit as it strikes, BN5's red, over every panel in it;
+	 * in the L view every unit's, where their next phase would strike) */
+	if (((LB.reach_lit && LB.reach[y][x]) || (K.view && K.threat[y][x])) && k != LIB_VOID) return LOOK_REACH;
 	/* (a freed panel: its old look while the board fades back in, then
 	 * clean and old by turns, BN5's blink) */
 	if (K.dissolve[y][x]) {
@@ -227,8 +230,21 @@ void lib_look_freed(int x, int y) {
 	K.dissolve[y][x] = DISSOLVE;
 }
 
+/* The L view's reach, as it opens: every panel where the units would
+ * strike a Navi standing there in their next phase, the telegraph the
+ * planner reads (docs/LIBERATION.md, The quality bar, 4); BN5's L view
+ * shows none, so it takes the red BN5 lights a strike's reach in */
+static void view_reach(void) {
+	bool view = D.l_held && LB.step == LIB_STEP_MOVE;
+	if (view && !K.view)
+		for (int y = 0; y < MAP_H; ++y)
+			for (int x = 0; x < MAP_W; ++x) K.threat[y][x] = LB.b.kind[y][x] != LIB_VOID && lib_threat(&LB.b, x, y) > 0;
+	K.view = view;
+}
+
 void lib_look_update(void) {
 	if (!lib_look_on() || !on_map()) return;
+	view_reach();
 	/* (a map entered again: its tile map and tiles as the ROM has them) */
 	if (!tiles_there()) { copy_tiles(); K.mark_at = 0; }
 	if (!K.mark_at || emu_read16(K.mark_at) != K.mark) clear_layer();

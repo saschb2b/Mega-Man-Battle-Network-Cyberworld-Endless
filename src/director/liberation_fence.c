@@ -149,7 +149,7 @@ void lib_fence_update(void) {
 	/* (on the board's map only: elsewhere the buffer holds another's) */
 	if (!on_map() || (!fence_there() && !fence_find())) return;
 	/* (the board won: every wall off, the way to the exit open) */
-	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE;
+	bool open = LB.step == LIB_STEP_PRIZE || LB.step == LIB_STEP_DONE || (LB.step == LIB_STEP_TALK && LB.after == LIB_STEP_DONE);
 	uint32_t shapes = BN6_COORD_ENTRIES + F.count * BN6_COORD_ENTRY;
 	for (int i = 0; i < F.n; ++i) {
 		int x = F.px[i], y = F.py[i];

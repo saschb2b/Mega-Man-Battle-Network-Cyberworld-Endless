@@ -39,7 +39,7 @@ void lib_prizes_install(LayerObjs *out, TextArchive *text) {
 	int code;
 	for (int k = 0; k < 3; ++k) {
 		int chip = roll(run.depth + tiers[k][0], tiers[k][1], 0x180u + (uint32_t)k, &ci, &code);
-		out->lib_prize[k] = ta_challenge_reward(text, chip, ci.name, code);
+		out->lib_prize[k] = ta_lib_prize(text, chip, ci.name, code);
 	}
 	for (int k = 0; k < LIB_LOOT; ++k) {
 		int chip = roll(run.depth, 1, 0x190u + (uint32_t)k, &ci, &code);

@@ -28,8 +28,15 @@ const char *lib_rest_words(void);
 /* The Darkloids' phase: a unit's line as it strikes (UNIT_*; the
  * Darkloid's by his Navi's name, said with his face). */
 const char *lib_strike_words(int kind, const char *darkloid);
-/* The Darkloid deleted in `phases` against `par`. */
-const char *lib_won_words(int phases, int par);
+/* The board won: BN5's `tally` of the phases against the target where it
+ * is there (liberation_pieces.h; "" else), and over par (`tier` 2) MegaMan's
+ * own word on the prize; without it, the `phases` against `par` in ours */
+const char *lib_won_words(const char *tally, int tier, int phases, int par);
+/* ... and after its prize, the exit open */
+const char *lib_exit_words(void);
+/* The Darkloid at his first turn, claiming the area (his Navi's name; said
+ * with his face) */
+const char *lib_entrance_words(const char *darkloid);
 /* The units' names (UNIT_*; the Darkloid's is his Navi's) */
 const char *lib_unit_name(int kind);
 /* The labels: the commands (LIB_CMD_*), the banners, the corner's */

@@ -155,6 +155,9 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
 /* What a dark layer's item panel held (docs/LIBERATION.md): a chip, its
  * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);
+/* A dark layer's par's prize (docs/LIBERATION.md): the chip given as BN6
+ * gives one, its words before it MegaMan's tally of the phases */
+int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code);
 int ta_lib_find_zenny(TextArchive *t, int zenny);
 /* What Dr. Hikari's dive support Mr. Prog offers on the run's first layer
  * (ta_gift). */

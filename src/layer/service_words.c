@@ -324,6 +324,15 @@ int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code) 
 	return i;
 }
 
+int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_give_chip(t, chip, code, 1);
+	ta_got_chip(t, chip_name, code, &first);
+	ta_end(t);
+	return i;
+}
+
 int ta_lib_find_zenny(TextArchive *t, int zenny) {
 	int i = ta_script(t);
 	bool first = false;

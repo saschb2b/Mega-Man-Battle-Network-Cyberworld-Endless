@@ -176,6 +176,34 @@
 #define BN5_LIB_LVIEW_BLINK  0x100       /* ... and their second look this far on, shown 8 frames of every 32 */
 #define BN5_LIB_LVIEW_CROSS  0x087E4F24u /* the cross at the camera's middle, a 16x16 OBJ at (112, 72) */
 #define BN5_LIB_UNIT_HOLD    15          /* frames the camera rests on a unit in the Darkloids' phase before its move, after its pan */
+/* The L view's keys' help: eight OBJs at the picture's top right (OBJ palette 13, BN5_LIB_PHASE_PAL; read in its OAM), "+ MoveCam",
+ * "B+ + MoveCam(F)", "L Back", on the band's fill in WIN0 */
+#define BN5_LIB_LVIEW_HELP   0x087E4294u /* ... their 21 tiles, uncompressed, OBJ tiles 960-980 */
+#define BN5_LIB_HELP_PANEL_X 123         /* ... WIN0: x 123-219 */
+#define BN5_LIB_HELP_PANEL_Y 12          /* ... y 12-42 */
+#define BN5_LIB_HELP_PANEL_W 97          /* ... its width */
+#define BN5_LIB_HELP_PANEL_H 31          /* ... its height */
+/* The Darkloids' own words on the board: per Darkloid an archive in the board's table (BN5_LIB_ARCHIVES' 13-15; BlizzardMan's
+ * 14, its mugshot 0x4C), shown by the unit's text (0x0805200C: the acting unit's entry r0; 0x08052026: unit r0's entry r1) */
+#define BN5_LIB_ARCHIVES     0x0804FB04u /* the board's text archives, a u32 a unit (0-12 the Navis', 13-15 the Darkloids') */
+#define BN5_LIB_DARKLOID_MEET 0          /* ... entry 0, his first turn's: once (its script's flag), at his first turn of the first */
+                                         /* ... DARKLOID PHASE, after the banner and before any reach is lit (entry 15's words, the */
+                                         /* ... area his: BlizzardMan's a ski resort); 7 his strike, 11 he survives his battle, 12 */
+                                         /* ... his deletion, 14 the team's retreat */
+/* The mission won (the board's routine 6, 0x0804E9F4; entered from 0x0804DA2C after the Darkloid's battle) */
+#define BN5_LIB_CLEAR        0x0804E9F4u /* step 0: the phases' banner of kind 2 (0x08054C28: SUCCESS!), BN5_SONG_LIB_WON at once */
+#define BN5_LIB_CLEAR_BAND   22          /* ... frames from its song to the band's opening (then the phases' banner's 104 frames, */
+                                         /* ... its words 18 on with BN5_LIB_PHASE_SOUND, on PLAYER PHASE's palette) */
+#define BN5_LIB_CLEAR_TALK   20          /* ... frames from the band's end to the leader's tally (0x0804F3B0's wait) */
+#define BN5_LIB_TIER         0x08052DD0u /* ... the reward's tier: the first of BN5_LIB_PTR_REWARDS' rows whose phases hold the phase */
+#define BN5_LIB_TEXT         0x087E866Cu /* the board's common text archive (0x0805204A shows its entry r0): the commands' names */
+                                         /* ... 0-15, the tally 32-40 */
+#define BN5_LIB_TALLY        0x20        /* ... the tally: entry 0x20 + the tier, which jumps by the team to its leader's three: */
+#define BN5_LIB_TALLY_MEGAMAN 38         /* ... MegaMan's (mugshot 0x30): "Target" and "Actual" phases, a word, then the */
+                                         /* ... Officials' reward (two under par or better, at par) or zenny (over), its give */
+#define BN5_LIB_TALLY_NUMBER 0xFA        /* ... a number in its text: 0xFA, 3, 0, the buffer (2 the target, 1 the phases taken) */
+#define BN5_LIB_TALLY_TARGET 2           /* ... the target's buffer */
+#define BN5_LIB_TALLY_ACTUAL 1           /* ... the phases taken's */
 
 /* The board's music (BN5's song table 0x08155BF4, the BGM's player 31 at 0x02011470: +0 the song's header) */
 #define BN5_SONG_LIBERATION  0x22        /* the board's own, through both phases (its clock runs on), BN5_LIB_STATE +0 = 8 */
