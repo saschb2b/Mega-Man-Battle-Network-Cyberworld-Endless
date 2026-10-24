@@ -92,6 +92,36 @@ better, another for within par, zenny after (**ROM**; the guides agree).
 Every mission starts with 3 Order Points (the record's +0xB). The record's
 +9 (13-22) is read into the state's +0xA; what it does is not traced.
 
+### The par's prize (ROM, play)
+
+The Darkloid deleted, the mission's end (the state's routine 0x18) shows
+SUCCESS!, then its step 2 picks the rewards' row whose phases hold the
+phase taken (`BN5_LIB_REWARD_PICK`) and opens the end's message for its
+tier (`BN5_LIB_END_TEXT`, docs/ROM_DATA.md's BN5's Liberation Missions'
+rewards). The team's leader speaks (Colonel in Team Colonel): the target
+and the actual phases, then the Officials' reward, then the chip or the
+zenny given by the message's own command. Played in romlab on mission 1
+(par 7) at 5, 7 and 8 phases: BlizMan SP B ("Good job,everyone!"), BlizMan
+B ("Good Job."), 1000 Zennys ("Too bad you couldn't make it."; the zenny
+`0x0200299C` 0 before, 1000 after).
+
+| Mission | Two under par or better | Within par | Over par |
+| --- | --- | --- | --- |
+| 1 | BlizMan SP B | BlizMan B | 1000 z |
+| 2 | ShadeMn SP S | ShadeMan S | 2000 z |
+| 3 | CloudMn SP C | CloudMan C | 3000 z |
+| 4 | FullCust * | AntiNavi M | 4000 z |
+| 5 | CosmoMn SP C | CosmoMan C | 5000 z |
+| 6 | Z Saver Z | Colonel C | 5000 z |
+| 7 | BlakWing W | ShadeMn DS S | 5000 z |
+| 8 | Muramasa M | CloudMn DS C | 5000 z |
+| 9 | Anubis A | CosmoMn DS C | 5000 z |
+
+The two chips are a better one and a lesser one: the Darkloid's SP chip
+and his plain one, from mission 7 a Mega chip and his DS chip. The zenny
+is 1000 a mission, 5000 at most. No row holds a phase: 100 zenny (the
+lookup's default; every mission's last row runs to 99).
+
 ### The board (ROM, play)
 
 A board is a set of panels on a square lattice, following the map's floor:
@@ -521,9 +551,9 @@ hundreds of boards.
    than the par's player, else the board is rejected (cheaper is a gift,
    dearer a wall). Its reward is variety, not power: the act's next route
    (Special routes, below).
-7. **Rewards feed the run, failure is graduated.** The par's tiers stay
-   stage 1's: a Server's prize two under par, one tier lower at par, one
-   lower still over it (assumed until the owner's open decision 5); item
+7. **Rewards feed the run, failure is graduated.** The par's tiers are
+   BN5's (the owner's decision 5): a Server's prize two under par, one
+   tier lower at par, zenny over it (The par's prize, as built); item
    panels add a chip of the layer's band (one at act 2, two later) and the
    act's zenny (BN5's amounts, 300 at act 2 to 700 at act 6), off the way:
    a detour's worth. Over par is a lesser prize, never a lost run. The dark
@@ -870,10 +900,9 @@ after next (BN5's the next: with a team another Navi strikes the hole
 meanwhile). Every DarkHole down, the Darkloid's ring can be liberated, and
 the Darkloid fought from it: a Navi of BN6's whose HP fits the act's band,
 no act's guardian (`run_darkloid`), in his own battle. Deleted, the exit
-opens where he stood and the par's prize is given: two under par a chip a
-Server's win pays, at par one a tier lower, over par one lower still
-(`install_lib_prizes`, `src/layer/layer_objs.c`); the board's battles pay
-BN6's own rewards beside it. No random battles on the board.
+opens where he stood and the par's prize is given, BN5's tiers (The par's
+prize, as built, below); the board's battles pay BN6's own rewards beside
+it. No random battles on the board.
 
 **On the map, first look.** The units are the layer's own map objects (`OBJ_UNIT`:
 HeelNavis for the guardians, the Darkloid in his own overworld sprite),
@@ -1286,6 +1315,48 @@ opening to its exit (`--run-depth 5 --seed 1 --dev dark,god,onehit`,
 board for a BigBrute's warp and strike (frame 5409 on), seed 1's for
 the Darkloid's (frame 13667 on).
 
+### The par's prize, as built (25 October 2026)
+
+BN5's tiers exactly, the owner's decision 5: the board won two phases
+under par or better pays a chip, within par a chip, over par zenny, the
+same three rows and bounds as every BN5 mission's (The par's prize, above;
+`LB.prize` from the phase and par as the Darkloid falls,
+`src/director/liberation.c`). What each pays, reasoned with the
+game-design skill (`src/layer/lib_prizes.c`, `lib_par_zenny` in
+`src/director/liberation_board.c`):
+
+- **The chips:** BN5's two are a better chip and a lesser one of the same
+  kind (the Darkloid's SP and plain chips, later a Mega chip and his DS
+  one). The run's are a chip a Server's win pays two under par (two
+  layers deeper, the rarer tiers weighted) and one a tier lower at par,
+  as stage 1 had them: our Darkloid is a BN6 Navi whose own battle pays
+  BN6's rows for him beside the prize, so his chip again would be a
+  second copy, not a better one.
+- **The zenny:** BN5 pays 1000 a mission, 5000 from the fifth. The run
+  pays BN5's first mission's 1000 at the second act, where a board first
+  stands, and a quarter of it more each act, to 2000 at the sixth; dearer
+  on later cycles as a chip's price is, and the zenny curve's share as
+  every zenny the engine sets (653, 959, 1,288, 1,636, 2,000 under the
+  opening plan). BN5's own climb would pay 3,435 to 5,000 from the fourth
+  act, more than the chip at par is worth at a dealer's (2,345 to 2,430,
+  `build.py economy`'s dark table), and racing the par would lose to
+  dawdling: over par stays the lesser prize, never a lost run, as BN5's.
+- **How it is told:** Lan's words as the Darkloid falls say the phases
+  and the tier (`lib_won_words`), as BN5's leader reads out the target
+  and the actual; then MegaMan finds what the Darkloid left ("Lan,look!
+  The Darkloid left a chip!", or "The Darkloid only left Zenny..." over
+  par) and the chip or the zenny is given in BN6's own box, as BN5's
+  "You got a battle chip for:" and "You got:" are (`ta_lib_prize_chip`,
+  `ta_lib_prize_zenny`, `src/layer/service_words.c`). BN5's Officials
+  stay out: no one on our board stands for them.
+- **Checked:** `build.py test` (the zenny by act and cycle, under either
+  plan), `build.py economy` (0 outside the bands; the dark table flags an
+  act whose zenny over par reaches the chip at par's price), and seed 3's
+  act 2 board played by the autopilot at each tier with `--dev
+  libpar=N` (its 8 phases two under a par of 10, at a par of 8, over one
+  of 6), beside BN5's mission 1 at 5, 7 and 8 phases in romlab (the
+  pictures in the pull request).
+
 ## The owner's decisions
 
 Decided on 23 October 2026, as recommended: "a liberation as a dark layer
@@ -1301,6 +1372,10 @@ as MegaMan in their Soul, co-op later over the server."
    liberation team; a teammate's battles are fought as MegaMan in his Soul
    from the first turn, with the teammate's own HP. (Not chosen: a
    teammate as a playable Navi of his own.)
+5. **The rewards** (decided 25 October 2026): BN5's tiers exactly, a chip
+   two under par, a chip at par, zenny over par (The par's prize, as
+   built). (Not chosen: the route a sealed region opens as the only
+   special reward; the route stays a reward of its own.)
 
 Still open:
 
@@ -1308,11 +1383,3 @@ Still open:
    Navis), for runs without BN5's ROM or beside the Souls: not decided;
    until then a run without BN5's ROM meets no dark layer, or meets it with
    MegaMan alone.
-5. **The rewards:** BN5's tiers (a chip two under par, a chip at par,
-   zenny after) in the run's economy (docs/ECONOMY.md), or the route a
-   sealed region opens as the only special reward. Stage 1 gives BN5's
-   tiers as chips, a Server's prize two under par down to a lesser one
-   over it (Stage 1, as built), reasoned with the game-design skill: the
-   dark way is a costed choice (the second layer's dealer, heal and
-   Mystery Data given up for the board's battles and its prize), and the
-   par's tiers make pressing on pay. The owner's call stands open.

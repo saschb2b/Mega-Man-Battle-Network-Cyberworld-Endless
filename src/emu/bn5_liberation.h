@@ -28,6 +28,17 @@
 #define BN5_LIB_PANEL_PLACE  0x08051BA8u /* a panel's id (y << 8 | x) to world units: 32 a panel from 0x80, less the record's +6, +7 */
 #define BN5_LIB_ITEM_FIND    0x08051F20u /* the item panel at r0's id: r1 its kind, r2 its amount, r3 its chip and code (0 none) */
 #define BN5_LIB_BONUS_ROLL   0x08054F78u /* a BonusPanel's roulette set going: its first slot (RNG & 0xF) % 5 of five */
+#define BN5_LIB_PHASES       0x080519EEu /* the phase in r0 (BN5_LIB_PHASE), the par in r1 (BN5_LIB_PAR) */
+#define BN5_LIB_MODE_END     0x18        /* BN5_LIB_STATE +0 at the mission's end (BN5_LIB_BOARD_STEPS' seventh: 0x0804E9A8), +1 its step */
+#define BN5_LIB_END_STEPS    0x0804E9BCu /* ... its fourteen steps: 0 the SUCCESS! banner, 2 the reward (0x0804EA2E: BN5_LIB_REWARD_PICK, */
+                                         /* ... its row's chip or zenny and code with the phases and par as the script's four values */
+                                         /* ... (0x080459B4: toolkit +0x4C-+0x58), message BN5_LIB_END_TEXT 0x20 + the row's index) */
+#define BN5_LIB_REWARD_PICK  0x08052DD0u /* the rewards' row (BN5_LIB_PTR_REWARDS) whose phases from-to hold the phase: r0 its */
+                                         /* ... index (0 two under par or better, 1 within par, 2 after), r1 its kind, r2 the chip or */
+                                         /* ... zenny, r3 the code; no row: index 2, 100 zenny */
+#define BN5_LIB_END_TEXT     0x087E866Cu /* the mission's end's text archive: 0x20 + the row's index the reward's message, going on */
+                                         /* ... to 0x23 + it in Team Colonel (Colonel's: "Target:" and "Actual:" phases, the Officials' */
+                                         /* ... reward, then "You got a battle chip for:" the chip (its F4) or "You got:" the Zennys (EF 0E)) */
 
 /* The board's look (docs/LIBERATION.md, How the board looks and moves): the map on BG1, each panel's
  * kind laid over it on BG2 as an isometric diamond of tiles. Located by their bytes in a capture of

@@ -5615,6 +5615,31 @@ static void test_liberation_board(void) {
 	run = before;
 }
 
+/* A board cleared over par pays zenny (docs/LIBERATION.md, The par's prize,
+ * as built): BN5's first mission's 1000 at act 2, 250 more an act, dearer on
+ * later cycles, by the zenny curve */
+static void test_liberation_prize(void) {
+	const EconPlan *was = econ_plan;
+	Run before = run;
+	run.mode = RUN_ENDLESS;
+	econ_plan = &econ_flat;
+	static const int bn5[6] = { 1000, 1000, 1250, 1500, 1750, 2000 };
+	for (int act = 1; act < 6; ++act)
+		for (int d = 3 * act + 1; d <= 3 * act + 3; ++d)
+			CHECK(lib_par_zenny(d) == bn5[act], "over par in act %d (layer %d): %d (got %d)", act + 1, d, bn5[act], lib_par_zenny(d));
+	CHECK(lib_par_zenny(CYCLE_LAYERS + 5) == 1500, "over par on the second cycle: half as much again, as a chip's price");
+	econ_plan = &econ_opening;
+	int last = 0;
+	for (int d = 4; d <= 18; ++d) {
+		int z = lib_par_zenny(d);
+		CHECK(z > 0 && z <= bn5[(d - 1) / 3] && z >= last, "over par under the opening plan: the curve's share, never less deeper (layer %d: %d)", d, z);
+		last = z;
+	}
+	CHECK(lib_par_zenny(16) == 2000, "over par in act 6: the curve all the way");
+	econ_plan = was;
+	run = before;
+}
+
 /* A map's floor as its build leaves it, made up: the layer's flat floor
  * with a panel in 29 gone, as legal.c drops a few to draw the rest */
 static bool lib_test_floor(int x, int y) {
@@ -5650,6 +5675,7 @@ static void test_liberation_floor(void) {
 int main(void) {
 	test_sha1();
 	test_liberation_board();
+	test_liberation_prize();
 	test_liberation_floor();
 	test_jobs();
 	test_economy();

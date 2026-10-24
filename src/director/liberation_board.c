@@ -17,7 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "economy.h"
 #include "liberation_plan.h"
+#include "pacing.h"
 
 /* Per act from the second (0-based 1-5), BN5's mission it stands for
  * (docs/LIBERATION.md, What a mission is made of): its team, DarkHoles,
@@ -63,6 +65,18 @@ int lib_harm(int kind, int act) { return harm[kind >= 0 && kind < 4 ? kind : 1][
 int lib_trap_harm(int act) { return act >= 5 ? 100 : 50; }
 
 int lib_zenny(int act) { return (2 + (act < 1 ? 1 : act)) * 100; }
+
+/* Over par, zenny as BN5 pays (its rewards' last row): its first
+ * mission's 1000 at the second act, where a board first stands, and a
+ * quarter of it more each act to 2000 (BN5's 1000 more a mission, to
+ * 5000, would outpay the par's chips from the fourth act: docs/ECONOMY.md,
+ * A dark layer's prize); dearer on later cycles as a chip's price is, and
+ * the plan's zenny curve's share, as every zenny the engine sets */
+int lib_par_zenny(int depth) {
+	int act = pacing_act(depth);
+	act = act < 1 ? 1 : act > 5 ? 5 : act;
+	return econ_scale((1000 + 250 * (act - 1)) * (2 + pacing_loop(depth)) / 2, ECON_LEVER_ZENNY, depth);
+}
 
 /* ---- its random numbers ---- */
 static uint32_t rs;

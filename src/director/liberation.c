@@ -209,6 +209,7 @@ void lib_begin(void) {
 		LB.from_x[u] = LB.ux[u]; LB.from_y[u] = LB.uy[u];
 	}
 	lib_look_begin();
+	if (dev.lib_par > 0) LB.b.par = dev.lib_par;
 	/* (the world's places once the layer's map is built) */
 	if (emu_debug_on()) board_print();
 }
