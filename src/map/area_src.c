@@ -177,6 +177,23 @@ uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles,
 	return px;
 }
 
+/* A Liberation map's board colours (BN5's ROM offset; 0 none): the script
+ * of its mission's GFXAnim list that loads them over the map's, as BN5's
+ * board does as the map is entered (BN5_LIB_MISSION_ANIMS: missions 1-5
+ * one set, 6-9 another) */
+static uint32_t board_colours(int number) {
+	if (number < 0 || number >= BN5_LIB_MISSION_COUNT) return 0;
+	uint32_t list = su32(rom_off(BN5_LIB_MISSION_ANIMS) + 4u * (uint32_t)number);
+	for (uint32_t k = 0; k < 16 && rom_is_ptr(list); ++k) {
+		uint32_t s = su32(rom_off(list) + 4 * k);
+		if (!rom_is_ptr(s)) return 0;
+		uint32_t from = su32(rom_off(s) + 12);
+		if (su32(rom_off(s)) == BN5_LIB_BOARD_PAL_RAM && su32(rom_off(s) + 4) == BN5_LIB_BOARD_PAL_SIZE && rom_is_ptr(from)
+			&& rom_off(from) + BN5_LIB_BOARD_PAL_SIZE <= ROM_SIZE) return rom_off(from);
+	}
+	return 0;
+}
+
 bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts, uint8_t **pal_out, size_t *npal) {
 	*ts_out = *pal_out = NULL;
 	*nts = *npal = 0;
@@ -211,8 +228,9 @@ bool area_src_gfx(int rom, int group, int number, uint8_t **ts_out, size_t *nts,
 	memcpy(p, src.data + pal - 4, 4 + psize);
 	/* (a Liberation map in its board's colours, as BN5's board loads them
 	 * over the map's: its grey frames, the looks' banks 8-12) */
-	if (group == BN5_LIB_MAP_GROUP && rom == 1 + XROM_BN5_COLONEL_US && psize == BN5_LIB_PALETTE_SIZE)
-		memcpy(p + 4, src.data + (BN5_LIB_PALETTE - 0x08000000u), BN5_LIB_PALETTE_SIZE);
+	uint32_t board_pal = group == BN5_LIB_MAP_GROUP && rom == 1 + XROM_BN5_COLONEL_US ? board_colours(number) : 0;
+	if (board_pal && psize >= BN5_LIB_BOARD_PAL_FIRST * 0x20u + BN5_LIB_BOARD_PAL_SIZE)
+		memcpy(p + 4 + BN5_LIB_BOARD_PAL_FIRST * 0x20u, src.data + board_pal, BN5_LIB_BOARD_PAL_SIZE);
 	*ts_out = t;
 	*nts = at;
 	*pal_out = p;

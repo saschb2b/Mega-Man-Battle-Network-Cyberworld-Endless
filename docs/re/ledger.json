@@ -47,10 +47,10 @@
     {
       "name": "BN5's Liberation Missions",
       "state": "designed",
-      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84). Its Darkloids' phase traced and played on the board as BN5's: the Darkloid first, a guardian's move one warp (list 7's 59), the reach lit red, each unit's line, its strike animation, BigBrute's flame and the harm in BN5's yellow digits, BN5's sounds.",
+      "now": "BN5's nine missions read from its ROM (the liberation state 0x020022F0, the records 0x0804F628: panels, holes, team, Darkloid and guardians, items, traps, BonusPanels, par, rewards) and opened in romlab; a generator designed on them and prototyped ROM-free (tools/liberation.py), its planner calibrated on BN5's own boards (tools/liberation_bn5.py); its liberation battle's rules read in its code (the turn's banner 0x08007954, the time up 0x08008BD2 and 0x08007C24, the win's banner 0x08007A50, the messages 0x0801B80C) and run on BN6's own battle loop, whose message table kept BN5's banners (0x0801EF84). Its Darkloids' phase traced and played on the board as BN5's: the Darkloid first, a guardian's move one warp (list 7's 59), the reach lit red, each unit's line, its strike animation, BigBrute's flame and the harm in BN5's yellow digits, BN5's sounds. Each mission's own look traced and drawn: the nine maps share one tile set and BN5's overlay; a mission brings its map, one of five backdrops (BN5_LIB_MISSION_BACKDROPS 0x0807416C) and one of two board palettes, loaded over the map's by the mission's GFXAnim list (BN5_LIB_MISSION_ANIMS 0x08073E70: missions 1-5 0x08614DD4, 6-9 0x08615100); every dark layer takes the mission of the BN5 area that dresses its area (lib_look_mission).",
       "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns (taken as unlimited, its hits doubled from turn 11), whether BN5's Custom screen opens by itself as a liberation turn's gauge fills, the Surrounded field by the dark on both sides, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
       "link": "../LIBERATION.md",
-      "updated": "2026-10-23"
+      "updated": "2026-10-25"
     }
   ],
   "decisions": [],
@@ -146,6 +146,10 @@
     {
       "date": "2026-10-23",
       "what": "BN5's Darkloids' phase mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): a guardian's warp 0x080AF3F8 (sprite list 7's 59, sound 0xB4 out and in, 0x94 as it shows), the Darkloid's heal 0x08055208 (sound 0x8A), the reach's blink 0x080529F0 (look 0x0D, sound 0x91), a blow on a Navi 0x08053EBA (0x6B, 0x6E), BigBrute's flame list 7's 56, the HP digits 0x086F7DEC in white 0x086CCD24 and a harm's yellow 0x087E4678, the guardians' standing and strike animations, the units' world place +0x1C/+0x20"
+    },
+    {
+      "date": "2026-10-25",
+      "what": "Each Liberation Mission's own look mapped (src/emu/bn5_liberation.h, docs/ROM_DATA.md's row): group 0x86's GFXAnim lists while a mission is on 0x08073E70 (BN5_LIB_MISSION_ANIMS), the board's colours each loads over its map's to 0x03003980, 0x180 bytes (missions 1-5 0x08614DD4 by script 0x08073AA0, 6-9 0x08615100 by 0x08073D10), the BGAnimData records while a mission is on 0x0807416C (BN5_LIB_MISSION_BACKDROPS: five backdrops); BN5_LIB_PALETTE's 0x08614DB4 replaced by the loader's own source; the nine maps' shared tile set 0x085A7DE4"
     }
   ],
   "experiments": [
@@ -387,6 +391,14 @@
       "result": "In romlab on mission 1, both Navis' Pass taken, MegaMan's unit's world place (+0x1C, +0x20) poked beside a BigBrute and, in a second run, beside BlizzardMan: the guardian warps beside him (puff and lines out, the camera's pan, lines and puff in, 46 frames between its two 0xB4 sounds), its reach lit red (blinking twice, 0x91 each), its line (\"Grrrowl! BeastBreath!\", no face), its strike pose, the flame over MegaMan (0x6B), a yellow 20 over him and his HP 100 to 80, the red out 123 frames after the line closed; BlizzardMan heals at once after DARKLOID PHASE (effect 0x78, 0x8A), his reach lit, his line with his mugshot, his attack (33 frames), a Snowball falling on MegaMan, 40 harm. Guardians out of reach did not move.",
       "meaning": "BN5 moves a guardian as one warp, not a walk, and shows a strike in five beats (the reach, the line, the pose, the effect, the harm's number): the board's Darkloids' phase is built on them, the Darkloid first (liberation_turn.c).",
       "link": "../LIBERATION.md#the-darkloids-phase-as-bn5-shows-it"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "All nine missions' boards opened in romlab",
+      "result": "Each mission set (poke8 020022F4 n) and BN5's warp 0x0800552E into map 0x86:n-1 from a state after the intro, A tapped until BN5_LIB_STATE +0 read 8: all nine boards in the same framed panels and looks; five backdrops (ACDC 3's purple diamonds, Oran 3's with green specks, SciLab's purple binary digits, End's magenta diamonds for 4 and 5, the Undernet's and Nebula's purple static for 6-9); the BGM's song header 0x08175178 (song 0x22) at 0x02011470 on missions 2, 3, 5, 7 and 9, 0x1C (0x0816EB50) during the openings.",
+      "meaning": "A mission's look is its map, its backdrop and its board's colours; the overlay, the looks and the music are the same in all nine, so a dark layer takes its mission's map as one of BN5's net areas and nothing else changes (liberation_look.c, lib_look_mission).",
+      "link": "../LIBERATION.md#each-missions-own-look-as-built-25-october-2026"
     }
   ],
   "method": {
