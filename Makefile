@@ -267,9 +267,9 @@ build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/ti
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
 		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
 
-NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_identity.c \
+NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_address.c src/online/network_identity.c \
 	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
-build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h
+build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h src/online/network_address.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Wl,--gc-sections \

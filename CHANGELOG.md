@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+- **Host your own Net Square, with nothing to set.** The server, started
+  bare (a double-click on Windows), now opens a Square every computer on
+  the network can reach, and says on its console the address players
+  type at the gate: `ws://192.168.1.20:8765`, and how to let friends in
+  from the internet. A `server.ini` beside it is read by itself, and any
+  setting can come from the environment (`CYBERWORLD_SERVER_SEED=7`). At
+  the gate's keeper, an address that can only be on your own network
+  needs nothing else: `192.168.1.20` alone reaches a Square started that
+  way (`ws://`, port 8765); a scheme or a port typed is kept as typed.
+  For a Square always up, with HTTPS for the browser and the 3DS,
+  `deploy/selfhost/compose.yaml` runs the server, its daily backup and
+  Caddy with a Let's Encrypt certificate from one line of `.env`
+  (`DOMAIN=square.example.com`), and each release publishes the server's
+  image for x86-64 and ARM64 as `ghcr.io/saschb2b/cyberworld-server`.
+  The published game's page may come into any Square by default.
+  server/README.md opens with how, each way
+  ([Host your own Net Square](server/README.md#host-your-own-net-square)).
+  For hosts already running one: a `server.ini` with no `host` line now
+  listens on every interface rather than 127.0.0.1 (`host = 127.0.0.1`
+  keeps a server behind a proxy on the same computer to it), and one with
+  no `origins` line lets the published browser game in (`origins =`,
+  empty, keeps native games alone).
+
 ## 0.15.0 (2026-10-24)
 
 - **Liberation Missions: parts of the net go dark.** From the second act,
