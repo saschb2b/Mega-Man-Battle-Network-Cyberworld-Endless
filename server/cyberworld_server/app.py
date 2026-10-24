@@ -115,7 +115,7 @@ class Server:
     async def start(self, host, port, ssl=None):
         self.listener = await asyncio.start_server(self.handle, host, port, ssl=ssl, limit=8192)
         self.ticker = asyncio.create_task(self.tick())
-        self.event("listening", host=host, port=self.listener.sockets[0].getsockname()[1], seed=self.seed)
+        self.event("listening", host=host or "*", port=self.listener.sockets[0].getsockname()[1], seed=self.seed)
         return self.listener.sockets[0].getsockname()[1]
 
     async def close(self):
