@@ -2169,7 +2169,9 @@ Steps of `--input` and play.py's commands take `pad.NAME`, that pad's input
 by SDL's name held for the step (`pad.a`, `pad.dpup`, `pad.lefttrigger`,
 `pad.-lefty`), and `key.NAME`, a key (`key.J`, `key.Return`), both through
 SDL's events as a player's, past any map; the GBA's own names (`A`,
-`UP+RIGHT`) still inject the buttons themselves. It needs SDL 2.24 (every
+`UP+RIGHT`) still inject the buttons themselves, and `FAST` fast forward's
+(`30:,4:FAST` turns it on for the rest of the run, at 3x headless, which
+reads no `settings.ini`; docs/GUIDE.md, Fast forward). It needs SDL 2.24 (every
 build but the handhelds' PortMaster binary, linked against 2.0.14, where
 `--pad` says it has none).
 

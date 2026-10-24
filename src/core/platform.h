@@ -74,9 +74,12 @@ void platform_load_keys(const char *path);
  * (scancodes) in order, the first its MAIN, 0 after the last. Got, the
  * defaults, put in play and written to keys.ini; a button's keys in words
  * ("J, X"; NULL: the map in play), and its key in a slot (0 none). Escape
- * and F11 are no button's. */
+ * and F11 are no button's. The GBA's ten buttons in buttons.h's order,
+ * then fast forward's (KEYS_FAST, BTN_FAST), which may have no key. */
 #define KEYS_PER 4
-typedef struct { uint16_t slot[10][KEYS_PER]; } KeyMap;
+#define KEYS_FAST 10
+#define KEYS_ROWS 11
+typedef struct { uint16_t slot[KEYS_ROWS][KEYS_PER]; } KeyMap;
 void platform_keys_get(KeyMap *k);
 void platform_keys_default(KeyMap *k);
 void platform_keys_set(const KeyMap *k);
@@ -86,8 +89,8 @@ bool platform_key_free(int scancode);
 /* `scancode` put in GBA button `gba`'s slot (MAIN 0, ALSO 1; past its
  * last, after it), taken from any other button: the button it was taken
  * from (one left with none takes the key replaced, the two swap),
- * KEYS_ALONE for none, KEYS_REFUSED where it was another button's only
- * key and none was replaced. A slot cleared, false where it is the
+ * KEYS_ALONE for none, KEYS_REFUSED where it was another GBA button's
+ * only key and none was replaced. A slot cleared, false where it is a GBA
  * button's last. */
 enum { KEYS_ALONE = -1, KEYS_REFUSED = -2 };
 int platform_keys_set_slot(KeyMap *k, int gba, int slot, int scancode);

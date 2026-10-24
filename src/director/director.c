@@ -523,6 +523,9 @@ static bool astray_update(void) {
 }
 
 void director_update(void) {
+	/* (the run's time, a game frame at a time, so fast forward leaves the
+	 * statistics' minutes and the week's Board as they were: save.h) */
+	profile_played_frame();
 	take_events();
 	if (!D.active) return;
 	if (D.town) { home_update(); return; }

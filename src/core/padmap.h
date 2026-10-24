@@ -51,31 +51,36 @@ enum { PAD_FAMILY_XBOX, PAD_FAMILY_NINTENDO, PAD_FAMILY_RAW, PAD_FAMILIES };
 enum { PAD_STYLE_GENERIC, PAD_STYLE_XBOX, PAD_STYLE_PLAYSTATION, PAD_STYLE_NINTENDO };
 
 #define PAD_GBA 10   /* the GBA's buttons, a bit each in buttons.h's order */
-#define PAD_PER 4    /* the most inputs one GBA button has */
+#define PAD_FAST 10  /* ... then fast forward's (BTN_FAST), the engine's own */
+#define PAD_ROWS 11  /* the buttons a pad sets: the GBA's and PAD_FAST */
+#define PAD_PER 4    /* the most inputs one button has */
 
-/* Per family and GBA button its inputs, PAD_NONE after the last. */
-typedef struct { uint8_t in[PAD_FAMILIES][PAD_GBA][PAD_PER]; } PadMap;
+/* Per family and button its inputs, PAD_NONE after the last. */
+typedef struct { uint8_t in[PAD_FAMILIES][PAD_ROWS][PAD_PER]; } PadMap;
 
 /* The defaults, the same names on both families: the D-pad and the left
- * stick move, a is A and b is B, the shoulders and triggers L and R,
- * start is START and back SELECT. A raw joystick's: the hat and the first
- * two axes move, b0 is A and b1 B, b4 or b6 L, b5 or b7 R, b9 or b11
- * START, b8 or b10 SELECT (a pad's common order, and 8BitDo's). */
+ * stick move, a is A and b is B, the shoulders L and R and the left
+ * trigger L too, start is START and back SELECT, the right trigger and
+ * the right stick's press fast forward. A raw joystick's: the hat and the
+ * first two axes move, b0 is A and b1 B, b4 or b6 L, b5 or b7 R, b9 or b11
+ * START, b8 or b10 SELECT (a pad's common order, and 8BitDo's), and fast
+ * forward on none. Every GBA button keeps an input; fast forward may have
+ * none. */
 void padmap_default(PadMap *m);
 void padmap_default_family(PadMap *m, int family);
 bool padmap_same(const PadMap *a, const PadMap *b);
-/* The GBA buttons (BTN_*) an input presses on a family's pads. */
+/* The buttons (BTN_*, BTN_FAST too) an input presses on a family's pads. */
 uint32_t padmap_bits(const PadMap *m, int family, int input);
-/* `input` made GBA button `gba`'s only one; a button that had it gives it
+/* `input` made button `gba`'s only one; a button that had it gives it
  * up, and one left with none takes the inputs `gba` had (two swap), so
- * every GBA button keeps one. */
+ * every GBA button keeps one (where none would, nothing changes). */
 void padmap_bind(PadMap *m, int family, int gba, int input);
-/* The controls screen's slots (MAIN 0, ALSO 1): how many inputs a GBA
+/* The controls screen's slots (MAIN 0, ALSO 1): how many inputs a
  * button has; `input` put in a slot (past its last, after it), taken from
  * any other button: the button it was taken from (one left with none
  * takes the input replaced, the two swap), PAD_SLOT_ALONE for none,
- * PAD_SLOT_REFUSED where it was another button's only input and none was
- * replaced; a slot cleared, false where it is the button's last. */
+ * PAD_SLOT_REFUSED where it was a GBA button's only input and none was
+ * replaced; a slot cleared, false where it is a GBA button's last. */
 enum { PAD_SLOT_ALONE = -1, PAD_SLOT_REFUSED = -2 };
 int padmap_count(const PadMap *m, int family, int gba);
 int padmap_set_slot(PadMap *m, int family, int gba, int slot, int input);
@@ -92,7 +97,7 @@ int padmap_inputs(int family);
  * down-left, left, up-left), over 1 at rest; SDL's hat bits (1 up, 2
  * right, 4 down, 8 left). */
 int padmap_pov_hat(double v);
-/* The GBA button's name in the files ("UP" ... "SELECT") and back (-1). */
+/* A button's name in the files ("UP" ... "SELECT", "FAST") and back (-1). */
 const char *padmap_gba_name(int gba);
 int padmap_gba(const char *name);
 /* The words on the button, in a pad's style: "A", "Cross", "LB", "ZL";
@@ -110,9 +115,11 @@ void padmap_preset_apply(PadMap *m, int family, int preset);
 /* The preset A and B are on now, or -1 (set by hand) */
 int padmap_preset_of(const PadMap *m, int family);
 
-/* pad.ini: [pad], [nintendo] and [joystick], a line per GBA button, "A = a, x".
+/* pad.ini: [pad], [nintendo] and [joystick], a line per button, "A = a, x".
  * Parsed over the defaults (a family or button the file leaves out keeps
- * them); returns the lines not understood, said in `errors`. */
+ * them, but for fast forward's inputs a GBA button has: a file from before
+ * it keeps R on the right trigger); returns the lines not understood, said
+ * in `errors`. */
 int padmap_parse(const char *text, PadMap *m, char *errors, int size);
 int padmap_format(const PadMap *m, char *out, int size);
 

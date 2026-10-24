@@ -60,6 +60,8 @@ void director_see(void);
 void director_draw_map(void);
 /* The layer's Mystery Data counters over the picture, a few seconds after L. */
 void director_draw_counts(void);
+/* ... the picture's row under them while they show, else 0 */
+int director_counts_bottom(void);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
 /* The layer's map in w x h from (x, y), for the second screen (issue #73),

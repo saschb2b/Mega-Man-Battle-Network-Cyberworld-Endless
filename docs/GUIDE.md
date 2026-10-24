@@ -398,13 +398,15 @@ hand uses chips and the buster.
 | L / R | Q / E | |
 | Start | Enter | Keypad Enter |
 | Select | R | Backspace |
+| [Fast forward](#fast-forward) | Tab | Space |
 
 Keys are positions, so on an AZERTY keyboard you move with Z Q S D. F11 or
 Alt+Enter switches to fullscreen (kept for the next start); Escape twice
 quits. A controller's D-pad
 and left stick move, its A and B are A and B (on a Nintendo pad the buttons
-marked so), its shoulders and triggers L and R, Start is Start and Back
-(Minus) is Select; holding Back and Start for a second, twice, quits,
+marked so), its shoulders L and R and its left trigger L too, its right
+trigger and a press of its right stick fast forward, Start is Start and
+Back (Minus) is Select; holding Back and Start for a second, twice, quits,
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
 
@@ -420,7 +422,8 @@ waits under it, and B brings you back to the PET where you were. On a
 phone or tablet the touch controls' menu has **OPTIONS** as well. Its
 **Controls** opens the controls screen (not on the 3DS, whose
 buttons are its own), **Display** the picture ([Screen](#screen)),
-**Audio** the music, the sound effects and the sound ([Sound](#sound)), and
+**Audio** the music, the sound effects and the sound ([Sound](#sound)),
+**Fast forward** its speed ([Fast forward](#fast-forward)), and
 **Statistics** your answer to the statistics' question, where the game can
 send them; B goes back (on a phone, the touch controls' B).
 
@@ -469,7 +472,8 @@ controls screen, the sound) and **EDIT LAYOUT**: tap
 a button to choose it, drag it where your thumb wants it, pinch it or drag
 a corner to size it, give it its own opacity, or take a preset
 (**DEFAULT**, **LEFT-HANDED**, **COMPACT**, and **LARGE** where the screen
-has room); **DONE** keeps them, **CANCEL** leaves them as they were. The
+has room); **DONE** keeps them, **CANCEL** leaves them as they were. Their
+**▶▶** is [fast forward](#fast-forward)'s. The
 phone upright and on its side keep an arrangement each (`touch.ini` in the
 save folder).
 
@@ -486,6 +490,34 @@ In the net MegaMan walks as in BN6: a single direction goes straight across
 the screen, and two together (like DOWN+LEFT) go along a walkway. A turns
 him to the navi or Mystery Data beside him, or walks him up to one a step
 or two before him.
+
+### Fast forward
+
+Fast forward runs the game faster where nothing is decided against the
+clock: walking a layer, the town and its places, chats, fades and warps,
+a battle's opening up to its first Custom screen, and its results from
+the last deletion on. The fight itself always runs at BN6's speed, from
+its first Custom screen to its end, the pause with it; so do BN6's own
+menus (the PET, shops, traders, mail), and online it never runs.
+
+Press its button to turn it on and again to turn it off: **Tab** or
+**Space** on a keyboard, a controller's right trigger or a press of its
+right stick, **▶▶** on the touch controls (beside MENU upright, beside
+START on its side). Held instead, it runs only while held; held while it
+is on, the game slows to BN6's pace until you let go, for a careful walk
+along a walkway. The controls screen sets its button as it sets the GBA's
+(its **FAST** row; it may have none). While it runs, two orange arrows,
+the PET's cursor, show in the picture's top right corner; in a fight they
+go, and they come back as the results show.
+
+Options' **Fast forward** line sets how fast: **2x**, **3x** (the default)
+or **4x**, or **Off**, where its button does nothing (`fast_forward` in
+`settings.ini`). The music keeps its pitch as it plays faster. A machine
+that cannot run the game that fast runs it as fast as it can (the New 3DS
+gains little). The run's rules do not change with it: random battles come
+as often per step, every reward is the same, and the run's minutes count
+the game's own time, so the week's DeepNet ranks a dive alike with it or
+without.
 
 ### A run
 

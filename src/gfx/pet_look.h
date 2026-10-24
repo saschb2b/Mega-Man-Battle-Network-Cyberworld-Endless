@@ -119,6 +119,9 @@ void look_new(int x, int y, const char *s);
  * KeyItem's steps: one pixel right, back, two right, six frames each */
 #define LOOK_CURSOR_W 9
 void look_cursor(int x, int y);
+/* ... held still, each of its pixels k x k, at `alpha` (the touch
+ * controls' fast forward button, ▶▶) */
+void look_cursor_scaled(int x, int y, int k, uint8_t alpha);
 /* A screen opening, as KeyItem's: up from black over LOOK_FADE_IN frames
  * in the GBA's sixteen steps, over x, y, w, h; `t` frames since it opened */
 #define LOOK_FADE_IN 15

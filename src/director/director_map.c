@@ -412,6 +412,8 @@ void director_draw_counts(void) {
 	md_counts(x + 4, y + 2, a);
 }
 
+int director_counts_bottom(void) { return seen.counts_a && md_counts(0, 0, 0) ? 3 + cinema_note_height() + TEXT_H + 4 : 0; }
+
 /* The layer's map in w x h from (x0, y0): SELECT's over the picture, and
  * the second screen's (the 3DS's bottom one, issue #9), whose frame names
  * the layer (`titled` false). */

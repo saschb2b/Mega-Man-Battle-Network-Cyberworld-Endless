@@ -16,6 +16,7 @@
 #include "buttons.h"
 #include "options.h"
 #include "director.h"
+#include "fast_forward_game.h"
 #include "pads.h"
 #include "platform.h"
 #include "touch_art.h"
@@ -306,7 +307,7 @@ static struct { float x, y, w, h; } panel;
 static float row_h, pad_x, text_y[3];   /* (the title's, the chosen control's name's and the hint's middles) */
 static int ts_title, ts, ts_small;
 
-static const char *const control_titles[TOUCH_CONTROLS] = { "D-PAD", "A BUTTON", "B BUTTON", "L BUTTON", "R BUTTON", "START", "SELECT", "MENU" };
+static const char *const control_titles[TOUCH_CONTROLS] = { "D-PAD", "A BUTTON", "B BUTTON", "L BUTTON", "R BUTTON", "START", "SELECT", "MENU", "FAST FORWARD" };
 
 static void add(int id, int kind, float x, float y, float w, float h, const char *text) {
 	if (nui >= (int)(sizeof ui / sizeof *ui)) return;
@@ -700,7 +701,8 @@ static ArtSpec dpad_spec(const TouchBox *b, int arm) {
 	return s;
 }
 
-static const char *const control_labels[TOUCH_CONTROLS] = { "", "A", "B", "L", "R", "START", "SELECT", "MENU" };
+/* (fast forward's is the PET's orange cursor twice, ▶▶: fast_forward_glyph) */
+static const char *const control_labels[TOUCH_CONTROLS] = { "", "A", "B", "L", "R", "START", "SELECT", "MENU", "" };
 
 static ArtSpec control_spec(int c, bool lit) {
 	const TouchBox *b = &lay.box[c];
@@ -744,6 +746,7 @@ static void draw_controls(void) {
 		}
 		ArtSpec s = control_spec(c, lit[c]);
 		art_draw(&s, b->cx, b->cy, a);
+		if (c == TOUCH_FAST) fast_forward_glyph(b->cx, b->cy, b->h * 0.5f, a);
 	}
 }
 

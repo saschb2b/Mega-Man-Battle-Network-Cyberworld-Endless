@@ -113,7 +113,7 @@ void touch_layout_for(const TouchScreen *s, const TouchPrefs *p, TouchLayout *t)
 	if (t->shape == TOUCH_BELOW) {
 		/* the D-pad and A and B low in the thumbs' reach, the shoulder
 		 * buttons over them, START and SELECT between them at the foot,
-		 * MENU under the picture */
+		 * MENU under the picture and fast forward beside it */
 		float dcy = H - foot - 27 * u;
 		b[TOUCH_DPAD] = box(edge + 15 * u, dcy, DPAD_D * u, DPAD_D * u);
 		b[TOUCH_A] = box(W - edge - 7 * u, dcy - 7 * u, ROUND_D * u, ROUND_D * u);
@@ -123,9 +123,11 @@ void touch_layout_for(const TouchScreen *s, const TouchPrefs *p, TouchLayout *t)
 		b[TOUCH_SELECT] = box(W / 2 - 8 * u, H - foot - 4 * u, SMALL_W * u, SMALL_H * u);
 		b[TOUCH_START] = box(W / 2 + 8 * u, H - foot - 4 * u, SMALL_W * u, SMALL_H * u);
 		b[TOUCH_MENU] = box(W / 2, s->py + s->ph + gap + 3.5f * u, MENU_W * u, MENU_H * u);
+		b[TOUCH_FAST] = box(W / 2 + (MENU_W + SMALL_W) / 2 * u + gap, s->py + s->ph + gap + 3.5f * u, SMALL_W * u, MENU_H * u);
 	} else if (t->shape == TOUCH_SIDE) {
 		/* the D-pad in the left column, A and B in the right one, the
-		 * shoulder buttons at their tops and START and SELECT at their feet */
+		 * shoulder buttons at their tops and START and SELECT at their feet,
+		 * fast forward beside START (the columns' middles have no room) */
 		float cl = col * mm / 2, cr = W - cl, dcy = H / 2 + 3 * u;
 		b[TOUCH_DPAD] = box(cl, dcy, DPAD_D * u, DPAD_D * u);
 		b[TOUCH_A] = box(cr + 7 * u, dcy - 7 * u, ROUND_D * u, ROUND_D * u);
@@ -133,7 +135,8 @@ void touch_layout_for(const TouchScreen *s, const TouchPrefs *p, TouchLayout *t)
 		b[TOUCH_L] = box(cl, edge + 5 * u, SHOULDER_W * u, SHOULDER_H * u);
 		b[TOUCH_R] = box(cr, edge + 5 * u, SHOULDER_W * u, SHOULDER_H * u);
 		b[TOUCH_SELECT] = box(cl, H - edge - 4 * u, SMALL_W * u, SMALL_H * u);
-		b[TOUCH_START] = box(cr, H - edge - 4 * u, SMALL_W * u, SMALL_H * u);
+		b[TOUCH_START] = box(cr - 7.5f * u, H - edge - 4 * u, SMALL_W * u, SMALL_H * u);
+		b[TOUCH_FAST] = box(cr + 7.5f * u, H - edge - 4 * u, SMALL_W * u, SMALL_H * u);
 		/* (MENU under R, clear of the picture) */
 		b[TOUCH_MENU] = box(maxf(cr - 12 * u, W - col * mm + gap + MENU_W * u / 2), edge + 10 * u + gap + 3.5f * u, MENU_W * u, MENU_H * u);
 	} else {
@@ -144,6 +147,7 @@ void touch_layout_for(const TouchScreen *s, const TouchPrefs *p, TouchLayout *t)
 		b[TOUCH_B] = box(W - edge - 20 * u, dcy + 4 * u, ROUND_D * u, ROUND_D * u);
 		b[TOUCH_L] = box(edge + 11 * u, edge + 5 * u, SHOULDER_W * u, SHOULDER_H * u);
 		b[TOUCH_R] = box(W - edge - 11 * u, edge + 5 * u, SHOULDER_W * u, SHOULDER_H * u);
+		b[TOUCH_FAST] = box(W / 2, H - foot - 24 * u, SMALL_W * u, SMALL_H * u);
 		b[TOUCH_START] = box(W / 2, H - foot - 14 * u, SMALL_W * u, SMALL_H * u);
 		b[TOUCH_SELECT] = box(W / 2, H - foot - 4 * u, SMALL_W * u, SMALL_H * u);
 		b[TOUCH_MENU] = box(W / 2, edge + 3.5f * u, MENU_W * u, MENU_H * u);
@@ -227,12 +231,13 @@ uint32_t touch_button(int control) {
 	case TOUCH_R: return BTN_R;
 	case TOUCH_START: return BTN_START;
 	case TOUCH_SELECT: return BTN_SELECT;
+	case TOUCH_FAST: return BTN_FAST;
 	default: return 0;
 	}
 }
 
 static const char *const shape_names[TOUCH_SHAPES] = { "below", "side", "over" };
-static const char *const control_names[TOUCH_CONTROLS] = { "dpad", "a", "b", "l", "r", "start", "select", "menu" };
+static const char *const control_names[TOUCH_CONTROLS] = { "dpad", "a", "b", "l", "r", "start", "select", "menu", "fast" };
 
 
 static bool on(const char *v) { return !strcmp(v, "on") || !strcmp(v, "yes") || !strcmp(v, "1"); }
