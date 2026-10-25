@@ -214,6 +214,8 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
     parts += [f'both={b}' for b in spec.get('both', [])] + [f'poke5={p}' for p in spec.get('poke5', [])]
     parts += [f'each={b}' for b in spec.get('each', [])]
     parts += [f'shot={g}:{n}:{f}:{path}' for g, n, f, path in spec.get('shots', [])]   # (pictures of a Custom screen: game, screen, frame)
+    if spec.get('film'):   # (pictures of the fight in both games: timer from, to, step, prefix)
+        parts.append('film=' + ':'.join(str(x) for x in spec['film']))
     parts += [f'poke={p}' for p in pokes] + [f'call={c}' for c in calls]
     return ';'.join(parts)
 
@@ -236,7 +238,7 @@ def run(name, spec, pokes, calls, quiet, twins=()):
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
     out = f'/src/.build/xdiff/runs/{name}'
-    for _, _, _, path in spec.get('shots', []):   # (a picture's folder, as the image sees /src)
+    for path in [p for _, _, _, p in spec.get('shots', [])] + ([spec['film'][3]] if spec.get('film') else []):   # (a picture's folder, as the image sees /src)
         if path.startswith('/src/'):
             os.makedirs(os.path.dirname(os.path.join(ROOT, path[5:])), exist_ok=True)
     for g in ('bn5', 'bn6'):

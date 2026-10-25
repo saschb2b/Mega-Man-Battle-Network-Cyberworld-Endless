@@ -126,9 +126,11 @@ int run_route_dark(int act, int avoid, int *navi);
  * fork, either way by a coin of the seed; -1 none. The fork as it was
  * offered, whichever way was taken since. */
 int run_dark_area(int act);
-/* The Darkloid of act `act`'s dark layer in area `biome`: a Navi whose HP
- * fits the act's band, the area's own first, no act's guardian (BN5's
- * Darkloids come later, docs/LIBERATION.md stage 4). */
+/* The Darkloid of act `act`'s dark layer in area `biome`: one of BN5's own
+ * Darkloids where its ROM brought them into BN6's engine, the act's of
+ * BN5's missions' order the likeliest (guardians.h, navis 30-33;
+ * docs/LIBERATION.md stage 4); else a Navi of BN6's whose HP fits the act's
+ * band, the area's own first, no act's guardian. */
 int run_darkloid(int act, int biome);
 /* The ways act `act` (0-based) may take once the act before it ends
  * (docs/HOME.md: the town's ports): its own area, the other way's and the

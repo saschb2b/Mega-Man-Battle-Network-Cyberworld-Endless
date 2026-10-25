@@ -1195,6 +1195,11 @@ and traces both:
   data's `BN6_OBJ_INVULNERABLE` set before every frame of the battle (the
   same bit in BN5: no hit takes him, so a long spec keeps its course).
   What a spec does not set stays each game's boot state's.
+- **Film**: a spec's `"film": [FROM, TO, STEP, PREFIX]` saves each
+  game's picture at the battle's timer values FROM to TO, STEP apart, as
+  `PREFIX_bn5_tNNNN.bmp` and `PREFIX_bn6_tNNNN.bmp`: the two battles side by
+  side by the clock the comparison keeps (the Darkloids' pull request's
+  pictures).
 - **Seeding**: both RNG words written in both cores after the fight's
   first frame (`seed=P:S`); seeding as the battle begins does not work
   (BN5's opening draws 84 more). With `rng=follow`, BN6's words are

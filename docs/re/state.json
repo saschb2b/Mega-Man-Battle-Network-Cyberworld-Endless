@@ -58,6 +58,15 @@
       "link": "../LIBERATION.md",
       "updated": "2026-10-23",
       "state_text": "Designed, not built"
+    },
+    {
+      "name": "BN5's Darkloids",
+      "state": "works",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan and ShadeMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; both on the dark boards in BN5's own sprites and faces, their battles at the act's version.",
+      "left": "CloudMan and CosmoMan (decisions open in the generator: their object types, a RAM table, a sprite loaded by a number made otherwise), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "link": "../LIBERATION.md",
+      "updated": "2026-10-25",
+      "state_text": "Works"
     }
   ],
   "decisions": [],

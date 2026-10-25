@@ -1,0 +1,11 @@
+{
+ "about": "ShadeMan SP (BN5's 0x14C, BN6's 0x1E3) alone at (5,2), MegaMan idle at (1,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): the SP's numbers through the same code as V1. From (2,2) two of his bats reach MegaMan's panel in one frame (t425), and the two engines' hit passes take them in their own order (the hit spark's owner and place the other bat's in BN6, BN5's the freed one's), the battle the same frame for frame otherwise: an engine's order, not his code",
+ "kind": "differential",
+ "foes": "14C@52",
+ "mm": "12",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

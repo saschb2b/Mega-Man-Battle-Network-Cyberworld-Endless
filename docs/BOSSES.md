@@ -226,6 +226,16 @@ BN6's EX and SP do), his V1 where his SP does not play in BN6's battles
 yet; in the folder's code or *. Until the last round it gave a chip of
 his Soul's kind in that place, as BN6 had none of his.
 
+### BN5's Darkloids (25 October 2026)
+
+A dark layer's Darkloid (docs/LIBERATION.md) is no territory's guardian:
+where BN5's ROM is there he is one of BN5's own Darkloids, navis 30-33
+here (ShadeMan, BlizzardMan, CloudMan, CosmoMan; BlizzardMan and ShadeMan
+moved so far), in his own overworld sprite and mugshot copied as the six's,
+fought at the version the act's band takes and held to it as they are
+(`xguardian.c`). No Soul, no Navi chip, no rival record: he is met only on
+the board (docs/LIBERATION.md, Stage 4, as built).
+
 ## Super bosses (6 October 2026, issue #100)
 
 A player missed super bosses, Bass and the Cybeasts above all. The owner:

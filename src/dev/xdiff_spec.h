@@ -31,6 +31,9 @@ typedef struct { uint32_t keys; int n; } ScriptStep;
 typedef struct { int game, screen, nsteps; ScriptStep steps[MAX_SCRIPT_STEPS]; } CustomScript;
 /* A picture of a Custom screen (shot=): game 5 or 6's screen n, its frame f from the frame its window first reads open */
 typedef struct { int game, screen, frame; char path[160]; } Shot;
+/* Pictures of the fight (film=): each game's at the battle's timer values from `from` to `to`, `step` apart, into
+ * PREFIX_bn5_tNNNN.bmp and PREFIX_bn6_tNNNN.bmp, side by side by the same clock the comparison keeps */
+typedef struct { int from, to, step; char prefix[160]; } Film;
 
 typedef struct {
 	int nfoes;
@@ -59,6 +62,7 @@ typedef struct {
 	int nscripts;
 	Shot shots[MAX_SHOTS];
 	int nshots;
+	Film film;           /* (step 0: none) */
 	Key keys[MAX_KEYS];
 	int nkeys;
 	uint32_t seed[2];

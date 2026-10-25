@@ -51,6 +51,11 @@ STUB_ARGS = {0x0800F350: 0x3E}
 # src/emu/xpanels.c brings them in, its holy BN6's 5; a Navi's code that sets a panel's type or compares one read from a
 # panel (its +2) takes BN6's number
 PANEL_TYPES = {0x8: 0xD, 0x9: 0x5, 0xA: 0xE}
+# setPanelType's sites whose type (r2) the back walk does not reach, read by hand: site: (the type, why)
+PANEL_SITES = {
+    0x080C9AA8: (7, "BlizzardMan's ice: movs r2,#7 at 0x080C9A8C, kept over two calls by push {r0-r2} / pop (ice, 7 in both games)"),
+    0x080C9AD6: (7, "BlizzardMan's ice: movs r2,#7 at 0x080C9A8C, kept over two calls by push {r0-r2} / pop (ice, 7 in both games)"),
+}
 # BN5's routines that give a panel's data (r0), whose +2 is its type: object_getPanelDataOffset
 PANEL_GETTERS = (0x0800AFC2,)
 SET_PANEL_TYPE = 0x0800B2A6
@@ -259,6 +264,15 @@ TWINS = (
 # Each DIFF pair's audit (verdict, why, conditions), as tools/bn5_twins.py's AUDITS; the record is docs/ROM_DATA.md's
 # (The Navis' engine twins)
 AUDITS = {
+    # (ShadeMan's: the engine's routines his drain and his bats' end call)
+    (0x0800C6D8, 0x0800E2D8): ('ok', "an object's HP lowered by r0 (+0x24, at 0 the least): BN5's also counts it, where the object's AI data's "
+                                     "first byte is 2, into its side's record of its own battle engine (0x02036770 + 0x1E8 a side, +0x28 less "
+                                     "r0 << 7: 0x0802D4C4), after its Liberation rule raises r0 in a gate's battle (0x0800C72C, where "
+                                     "0x080090E8's BattleState +0x32 bit 0x40, set by BN5's battle setup alone, stands); BN6's engine keeps "
+                                     "no such record and lowers the HP alone: the same HP in both (shademan_v1_keys)", ()),
+    (0x080E1534, 0x080E2718): ('ok', "an attack's end showing its user (BN6_SHOW_AFTER_HIDDEN's routine): BN5 tests the user's flags against "
+                                     "0x80000004 (invisible or submerged), BN6 against 4, which src/emu/xsea.c makes see the submerged too "
+                                     "(docs/ROM_DATA.md, BN5's sea's submerge and hold); the rest the same, its calls their twins", ()),
     (0x0800E0B6, 0x08010332): ('ok', "a step's style by its side's battle NaviStats (the r2 of 0x0800F280's move): BN5's 4 where its +0x29 "
                                      "is 0, unless +0x2C is 8 (then 0), else a table's by +0x29 and +0x2B; BN6's 1 in the battle mode 9 "
                                      "(BattleSettings +3, 0x0802D234), else 4 where +0x29 is 0, else its table's: the Dark Soul's side is "

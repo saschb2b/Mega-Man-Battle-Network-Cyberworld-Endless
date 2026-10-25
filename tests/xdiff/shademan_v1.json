@@ -1,0 +1,11 @@
+{
+ "about": "ShadeMan V1 (BN5's 0x149, BN6's 0x1E0) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): BN5's Darkloid in BN6's engine, his own states (BN6's 8-12), his bats and his drain (the first kind's 0xB, the third kind's 0xE and 0x10, the fourth kind's 0x1A) through the dispatch, his sound copied in (0x70)",
+ "kind": "differential",
+ "foes": "149@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

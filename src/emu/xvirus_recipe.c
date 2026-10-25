@@ -52,7 +52,7 @@ static bool bn6_routine(uint32_t a) { return (a & 1) && a >= BUS && a < BN6_END;
 /* a routine of BN5's engine objects moved once for every track, at its copy (xnavi_objects.h, installed before any family) */
 static bool objects_routine(uint32_t a) { return (a & 1) && a >= XN_OBJECTS && a < XN_OBJECTS_END; }
 /* a routine of a Navi's copy of a type it moves, which another track's code runs as that type's (a chip's unit) */
-static bool navis_routine(uint32_t a) { return (a & 1) && a >= XN_CODE && a < XN_ART; }
+static bool navis_routine(uint32_t a) { return (a & 1) && xn_code_at(a); }
 
 /* a state or a hook: a routine of BN6's, or code of the family's own (in its blocks, or in one of its clones) */
 static bool ref_ok(const XVirusFamily *f, XvRef r) {

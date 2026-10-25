@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "foes.h"
 #include "liberation_board.h"
 
 /* The board's course */
@@ -99,5 +100,11 @@ bool lib_turn(int u);
 /* ... and whether A there takes a command */
 bool lib_faced_takes(void);
 int lib_unit_at(int x, int y);
+
+/* (liberation_darkloid.c) The Darkloid in his own sprite and face where
+ * he is BN5's (guardians.h's 30-33), before his unit's object is made; his
+ * battle: BN5's at the act's version and band, else make_boss's */
+void lib_darkloid_dress(void);
+Encounter lib_darkloid_battle(void);
 
 #endif

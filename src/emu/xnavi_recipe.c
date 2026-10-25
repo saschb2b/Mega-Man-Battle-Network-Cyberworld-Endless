@@ -62,7 +62,7 @@ static bool code_ok(const XVirusFamily *f, char *why, size_t len) {
 		bool block = i < f->nblocks;
 		uint32_t start, end, at;
 		piece_of(f, i, &start, &end, &at);
-		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !span_in(at, end - start, XN_CODE, XN_ART))
+		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !(span_in(at, end - start, XN_CODE, XN_ART) || span_in(at, end - start, XN_MORE, XN_MORE_ART)))
 			return no(why, len, "%s %d at %08x", block ? "block" : "clone", block ? i : i - f->nblocks, (unsigned)at);
 		for (int k = 0; k < i; ++k) {
 			uint32_t ks, ke, ka;
@@ -121,7 +121,7 @@ static bool overlay_ok(const XNavi *n, char *why, size_t len) {
 	const XVirusFamily *f = &n->code;
 	if (!o) return true;
 	if (o->kind != XN_KIND_OF(f->src_ai) || o->kind >= XN_KINDS) return no(why, len, "its overlay's kind %d (its own is %d)", o->kind, XN_KIND_OF(f->src_ai));
-	if (!o->masks_len || o->masks < BUS || !span_in(o->masks_at, o->masks_len, XN_ART, XN_SHARED_ART) || xvirus_list_slot(o->list) < 0)
+	if (!o->masks_len || o->masks < BUS || !xn_art_room(o->masks_at, o->masks_len) || xvirus_list_slot(o->list) < 0)
 		return no(why, len, "its overlay's masks at %08x or its sprite's list %d", (unsigned)o->masks_at, o->list);
 	return true;
 }

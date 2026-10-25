@@ -51,6 +51,14 @@
       "left": "The commands' shapes in BN5's code (taken from the players' guides), the BonusPanel's slots' order, the mission record's +9, the Darkloid's battle past three turns (taken as unlimited, its hits doubled from turn 11), whether BN5's Custom screen opens by itself as a liberation turn's gauge fills, the Surrounded field by the dark on both sides, BN5's board tiles for drawing dark panels at run time; then the board in BN6's engine (docs/LIBERATION.md, Building it).",
       "link": "../LIBERATION.md",
       "updated": "2026-10-23"
+    },
+    {
+      "name": "BN5's Darkloids",
+      "state": "works",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan and ShadeMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; both on the dark boards in BN5's own sprites and faces, their battles at the act's version.",
+      "left": "CloudMan and CosmoMan (decisions open in the generator: their object types, a RAM table, a sprite loaded by a number made otherwise), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "link": "../LIBERATION.md",
+      "updated": "2026-10-25"
     }
   ],
   "decisions": [],

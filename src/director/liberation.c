@@ -103,6 +103,7 @@ static void unit_object(int u) {
 	const LibUnit *n = &LB.b.unit[u];
 	int sprite = GUARDIAN_HEEL_SPRITE, anim = 5, list = 6;
 	if (n->kind == UNIT_DARKLOID) {
+		lib_darkloid_dress();
 		NpcBody body = guardian_body(LB.darkloid, 5);
 		list = body.list; sprite = body.index; anim = body.anim;
 	} else lib_look_unit(n->kind, &list, &sprite, &anim);
@@ -329,7 +330,7 @@ static void fight(int cmd) {
 	LB.fight_unit = u;
 	LB.fx = fx; LB.fy = fy;
 	Encounter e;
-	if (u == 0) { LB.fight = LIB_FIGHT_DARKLOID; e = make_boss(run.depth, run.biome, LB.darkloid); }
+	if (u == 0) { LB.fight = LIB_FIGHT_DARKLOID; e = lib_darkloid_battle(); }
 	else if (u > 0) { LB.fight = LIB_FIGHT_GUARDIAN; e = make_encounter(run.depth, run.biome, ENC_CHALLENGE); }
 	else if (LB.b.kind[fy][fx] == LIB_HOLE) { LB.fight = LIB_FIGHT_HOLE; e = make_encounter(run.depth, run.biome, ENC_CHALLENGE); }
 	else {
