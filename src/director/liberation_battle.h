@@ -4,18 +4,19 @@
  * each: TURN 1 START!, TURN 2 START!, FINAL TURN! as each turn's fight
  * begins; the final turn's gauge full, TIME UP! and LIBERATE FAILED!, the
  * battle drawn (no reward, HP as it stands); won, LIBERATE SUCCESS!, or 1
- * TURN LIBERATE! in the first. The Darkloid's battle has no turns to
- * count, and from its eleventh every hit does double (BN5's). What each
- * battle stakes is shown before it starts (lib_battle_stakes). */
+ * TURN LIBERATE! in the first; below the final turn the Custom screen
+ * opens by itself as the gauge fills. The Darkloid's battle the same.
+ * What each battle stakes is shown before it starts (lib_battle_stakes);
+ * its field is liberation_field.h's. */
 #ifndef CW_LIBERATION_BATTLE_H
 #define CW_LIBERATION_BATTLE_H
 
 #include <stdbool.h>
 
-/* BN5's: the turns a liberation's battle runs (BN5_LIB_TURNS_UP), and the
- * Darkloid's turn from which a hit does double (BN5_LIB_LATE_DOUBLE) */
+#include "foes.h"
+
+/* BN5's: the turns a liberation's battle runs (BN5_LIB_TURNS_UP) */
 #define LIB_TURNS        3
-#define LIB_DOUBLE_TURN  11
 
 /* How a liberation's battle ended */
 enum { LIB_OUT_NONE, LIB_OUT_WON, LIB_OUT_TIME_UP, LIB_OUT_LOST };
@@ -23,8 +24,7 @@ enum { LIB_OUT_NONE, LIB_OUT_WON, LIB_OUT_TIME_UP, LIB_OUT_LOST };
 /* The hooks on BN6's battle loop, once (encounter.c's install): they
  * answer only while a liberation's battle is armed. */
 void lib_battle_install(void);
-/* The next battle a liberation's: `turns` (LIB_TURNS, or 0 for the
- * Darkloid's, whose hits double from LIB_DOUBLE_TURN). */
+/* The next battle a liberation's: `turns` (LIB_TURNS; 0 none counted). */
 void lib_battle_arm(int turns);
 /* The foe's HP for the battle armed, the board's (BN5_LIB_FOE_HP: the
  * Darkloid's, 0 none), given him as he is first in play; and after it his
@@ -35,19 +35,24 @@ int lib_battle_foe_left(void);
 void lib_battle_watch(void);
 /* Back on the map: how it ended (LIB_OUT_*) and in which turn; disarmed. */
 int lib_battle_end(int *turn);
+/* The battle for panel (x, y), faced as MegaMan faces it, set out on
+ * BN5's field for the dark round it (liberation_field.h); its level */
+int lib_battle_field(Encounter *e, int x, int y, bool darkloid);
 /* No liberation's battle armed (the board begun or left). */
 void lib_battle_disarm(void);
 
 /* What liberating panel (x, y) with a command stakes, for the menu: the
- * turns (0 none to count), the panels freed won in any turn, and those a
- * win in the first turn frees beside them; false where nothing is fought
- * there. */
+ * turns, the panels freed won in any turn, those a win in the first turn
+ * frees beside them, and whether the battle is Surrounded; false where
+ * nothing is fought there. */
 typedef struct {
 	int turns;
 	int freed;      /* won: the panels it frees (the hole's ring, the panel, LongSwrd's two) */
 	int one_turn;   /* ... and, won in its first turn, the dark around freed too */
 	bool hole;      /* a DarkHole closed */
 	bool unit;      /* a guardian deleted */
+	bool darkloid;  /* ... the Darkloid */
+	bool surrounded;   /* its foes on both sides, L or R to turn round (liberation_field.h) */
 } LibStakes;
 bool lib_battle_stakes(int x, int y, int cmd, LibStakes *s);
 /* Whether a win's sweep frees panel (x, y) beside the one fought for:

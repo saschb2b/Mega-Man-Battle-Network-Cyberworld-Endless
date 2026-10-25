@@ -209,6 +209,8 @@ def spec_text(spec, out, pokes, calls=(), twins=()):
         parts += list(twins)
     if spec.get('field'):
         parts.append(f'field={spec["field"]}')
+    if spec.get('sides'):
+        parts.append(f'sides={spec["sides"]}')   # (both records' column pattern: a liberation battle's field)
     if 'mm_element' in spec:
         parts.append(f'mm_element={spec["mm_element"]}')
     parts += [f'both={b}' for b in spec.get('both', [])] + [f'poke5={p}' for p in spec.get('poke5', [])]

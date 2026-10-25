@@ -31,6 +31,7 @@ typedef struct {
 	bool map_backdrop;   /* the background of the map it is fought on, as BN6's story records ask (0xFF), not its area's roll */
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
+	int sides;       /* whose each column is (the BattleSettings' +6, BN6_SIDES_*): 0 the usual three and three */
 	/* its objects as the area's battle has them: the entity's kind byte,
 	 * its panel (row << 4 | column, from 1) and its two bytes (a cube's
 	 * kind, a Mystery Data's reward row) */

@@ -6,17 +6,15 @@
  * hooks answer its loop as BN5's loop decides (docs/ROM_DATA.md, BN6's
  * battle loop and banners). As each turn's fight starts, BN5's banner for
  * it (0x08007954: TURN n START! below the third, FINAL TURN! from it). In
- * the fight, where the final turn's gauge is full, BN5's time up: BN6's
- * own draw (the battle stopped, its banner, the battle over with result 3:
- * no reward, HP as it stands), its banner TIME UP! and then, the draw run
- * again, LIBERATE FAILED! (BN5's 0x08007C24). At a win, LIBERATE SUCCESS!,
- * or 1 TURN LIBERATE! where the first Custom screen was the only one
- * (0x08007A50). BN5 asks the time up as its Custom screen is asked for
- * (0x08008BD2); BN6's opens on L or R alone, so here the gauge's filling
- * is the end, or a player could hold the final turn forever. The
- * Darkloid's battle counts no turns, and from its eleventh every hit does
- * double, as BN5's liberation battles do (0x0800C7CC): a hook on BN6's
- * object_subtractHP while it is armed.
+ * the fight, BN5 asks for the Custom screen as the gauge fills, no key
+ * pressed (0x08008BD2): below the third turn it opens, by BN6's own way
+ * to it from L or R; in the third, BN5's time up: BN6's own draw (the
+ * battle stopped, its banner, the battle over with result 3: no reward,
+ * HP as it stands), its banner TIME UP! and then, the draw run again,
+ * LIBERATE FAILED! (BN5's 0x08007C24). At a win, LIBERATE SUCCESS!, or 1
+ * TURN LIBERATE! where the first Custom screen was the only one
+ * (0x08007A50). Every liberation battle runs so, the Darkloid's too: BN5's
+ * battle reads nothing of its board but a unit's HP (bn5_liberation.h).
  *
  * The hooks only read what the director armed between frames, and the
  * game's own state; the draw's second banner is theirs alone to count. */
@@ -28,12 +26,14 @@
 #include "bn6.h"
 #include "bn6_battle_loop.h"
 #include "bn6_forms.h"
+#include "bn6_panels.h"
 #include "debug.h"
 #include "director.h"
 #include "emu.h"
 #include "hook.h"
 #include "liberation.h"
 #include "liberation_battle_words.h"
+#include "liberation_field.h"
 #include "liberation_state.h"
 #include "pet_look.h"
 #include "platform.h"
@@ -46,7 +46,6 @@ static struct {
 } arm;
 static int draw_pass;          /* (the hooks') the draw's banner shown: 0 TIME UP!, 1 LIBERATE FAILED! */
 static int turn_seen;          /* (the director's) the turn the battle is in */
-static bool doubling;          /* the late double's hook in */
 /* (the director's) the foe's HP the board keeps, as BN5 gives its battle's
  * marked enemy the unit's (0 none), given him once he is in play; and his
  * HP as the battle last showed it, -1 unseen */
@@ -69,12 +68,20 @@ static HookAct fight_banner(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
-/* The fight's frame, nothing decided yet: the final turn's gauge full, its
- * time is up, and the loop is set to its draw */
+/* The fight's frame, nothing decided yet: BN5's ask as the gauge fills
+ * (both sides standing, the battle not held): the Custom screen below the
+ * final turn; in it, the time is up, and the loop is set to its draw */
 static HookAct fight_ask(HookRegs *r, void *user) {
 	(void)user;
 	if (!arm.on || !arm.turns || r->r[0] != 0xFF) return HOOK_CONTINUE;
-	if (hook_read8(BN6_BATTLE_SCREENS) < arm.turns || hook_read16(BN6_CUSTOM_GAUGE) < BN6_GAUGE_FULL) return HOOK_CONTINUE;
+	unsigned flags = hook_read16(BN6_BATTLE_STATE + BN6_STATE_FLAGS);
+	if (!(flags & BN6_FLAG_GAUGE_FULL) || (flags & BN6_FLAG_HELD) || !hook_read8(BN6_BATTLE_STATE + BN6_STATE_SIDE0_LEFT) ||
+		!hook_read8(BN6_BATTLE_STATE + BN6_STATE_SIDE1_LEFT) || hook_read8(BN6_BATTLE_STATE + BN6_STATE_ENDING))
+		return HOOK_CONTINUE;
+	if (hook_read8(BN6_BATTLE_SCREENS) < arm.turns) {
+		r->r[12] = BN6_FIGHT_CUSTOM | 1;
+		return HOOK_JUMP;
+	}
 	hook_write32(BN6_LOOP, BN6_LOOP_DRAW);
 	draw_pass = 0;
 	r->r[12] = BN6_FIGHT_RETURN | 1;
@@ -111,13 +118,6 @@ static HookAct draw_shown(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
-/* object_subtractHP: from the Darkloid battle's eleventh turn, double */
-static HookAct late_double(HookRegs *r, void *user) {
-	(void)user;
-	if (arm.on && !arm.turns && r->r[0] && hook_read8(BN6_BATTLE_SCREENS) >= LIB_DOUBLE_TURN) r->r[0] *= 2;
-	return HOOK_CONTINUE;
-}
-
 void lib_battle_install(void) {
 	static bool done;
 	if (done) return;
@@ -135,17 +135,18 @@ void lib_battle_arm(int turns) {
 	arm.on = true;
 	turn_seen = 0;
 	lib_cue_battle(turns > 0);   /* (won in the first turn: BN5's jingle, liberation_cues.c) */
-	/* (the Darkloid's: the late double's hook while it runs; the duel's
-	 * watch holds the same instruction, never on a dark layer) */
-	if (!turns && !doubling) doubling = emu_hook(BN6_SUBTRACT_HP, late_double, NULL);
+}
+
+int lib_battle_field(Encounter *e, int x, int y, bool darkloid) {
+	int level = lib_field_level(x, y, LB.face);
+	lib_field_apply(e, lib_field_sides(level, darkloid));
+	return level;
 }
 
 void lib_battle_disarm(void) {
 	arm.on = false;
 	arm.turns = 0;
 	lib_cue_battle(false);
-	if (doubling) emu_unhook(BN6_SUBTRACT_HP);
-	doubling = false;
 }
 
 void lib_battle_foe(int hp) {
@@ -218,8 +219,13 @@ bool lib_battle_stakes(int x, int y, int cmd, LibStakes *s) {
 	*s = (LibStakes){ 0 };
 	if (x < 0 || y < 0 || cmd == LIB_CMD_PASS) return false;
 	int u = lib_unit_at(x, y);
-	if (u == 0) return !lib_holes_left(&LB.b);   /* (the Darkloid's: no turns to count) */
+	if (u == 0 && lib_holes_left(&LB.b)) return false;
 	s->turns = LIB_TURNS;
+	s->surrounded = lib_field_sides(lib_field_level(x, y, LB.face), u == 0) == BN6_SIDES_SURROUNDED;
+	if (u == 0) {
+		s->unit = s->darkloid = true;
+		return true;
+	}
 	if (u > 0) {
 		s->unit = true;
 		s->freed = 1;
@@ -247,13 +253,17 @@ void lib_battle_draw_stakes(int right, int y) {
 	int fx, fy;
 	lib_faced(&fx, &fy);
 	if (!lib_battle_stakes(fx, fy, LB.menu, &s)) return;
-	char a[32], b[32];
+	char a[32], b[32], c[32];
 	lib_stakes_words(&s, a, sizeof a, b, sizeof b);
-	int w = look_caps_width(a), wb = look_caps_width(b);
+	lib_surrounded_words(&s, c, sizeof c);
+	int w = look_caps_width(a), wb = look_caps_width(b), wc = look_caps_width(c);
 	if (wb > w) w = wb;
-	w += 8;
-	int h = b[0] ? 19 : 11;
-	SDL_Rect f = look_box(P.core_x + right - w, P.core_y + y, w, h, LOOK_NAVY);
+	if (wc > w) w = wc;
+	w += 11;   /* (the frame's 3 a side, the text 4 in) */
+	int lines = 1 + !!b[0] + !!c[0], h = lines == 1 ? 11 : lines == 2 ? 19 : 30;
+	/* (a third line grows it upward, clear of the window under it) */
+	SDL_Rect f = look_box(P.core_x + right - w, P.core_y + y - (h > 19 ? h - 19 : 0), w, h, LOOK_NAVY);
 	look_caps(f.x + 4, f.y + 3, a, LOOK_TEXT, LOOK_SHADE);
 	if (b[0]) look_caps(f.x + 4, f.y + 11, b, LOOK_GOLD, LOOK_SHADE);
+	if (c[0]) look_caps(f.x + 4, f.y + (b[0] ? 19 : 11), c, LOOK_TEXT, LOOK_SHADE);
 }

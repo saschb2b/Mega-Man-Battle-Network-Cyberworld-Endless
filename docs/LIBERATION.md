@@ -508,8 +508,9 @@ byte and played to its end; `src/emu/bn5_liberation.h`'s
 - The commands' shapes in the ROM: the board's command code
   (`0x0804B000`-`0x0805D000`) was located, not read through; the shapes
   are the guides'.
-- The record's +9, what the Darkloid's battle does past three turns: not
-  traced. (The BonusPanel's slots: traced, BonusPanels as BN5's.)
+- (Traced since: the BonusPanel's slots, BonusPanels as BN5's; the
+  record's +9 is the Darkloid's kind, and his battle times up at three
+  turns as every liberation battle does, The battle's field, as BN5's.)
 - A hard phase limit: none found in the state's readers or the guides; a
   mission runs on past par for the lesser reward.
 
@@ -1160,13 +1161,15 @@ taken), no code moved:
 - each turn's fight starts with BN5's banner in BN6's own message engine
   (the fight's BATTLE START! answered: TURN 1 START!, TURN 2 START!,
   FINAL TURN!);
-- the final turn's gauge full, the loop goes to BN6's own draw (a
-  NetBattle's judge's end): the battle stops, its banner TIME UP!, the
-  draw run again for LIBERATE FAILED!, then result 3, which ends the
-  battle with no results screen and no reward, MegaMan's HP as it stands.
-  BN5 asks it as the Custom screen is asked for; BN6 opens that on L or R
-  alone, so here the gauge's filling ends the turn, or the final turn
-  could be held forever;
+- the gauge full, BN5 asks for the Custom screen by itself (its
+  liberation's ask tests the gauge-full flag where every other battle's
+  tests L or R: played, the screen opened the frame the gauge filled, no
+  key held), so here too: below the final turn BN6's own way to the
+  Custom screen from L or R is taken (`BN6_FIGHT_CUSTOM`); in the final
+  turn the loop goes to BN6's own draw (a NetBattle's judge's end): the
+  battle stops, its banner TIME UP!, the draw run again for LIBERATE
+  FAILED!, then result 3, which ends the battle with no results screen
+  and no reward, MegaMan's HP as it stands;
 - a win shows 1 TURN LIBERATE! or LIBERATE SUCCESS! in the win's place
   (ENEMY DELETED!), so the board no longer shows its own banner after the
   battle (stage 1's);
@@ -1180,23 +1183,25 @@ taken), no code moved:
 | LongSwrd (an Order Point) | the panel and the one behind it | and the dark around the first | as above, the Order Point spent |
 | A guardian | deleted (back from its DarkHole while the hole stands), its panel freed | and the dark around it | the guardian stays |
 | A DarkHole | closed: its guardians gone for good, the eight around freed | the same | the hole stays |
-| The Darkloid | deleted, the board won | | (no turns to count) |
+| The Darkloid | deleted, the board won | | he stays, the phase spent |
 
 The battle's viruses are the act's own, BN5's on BN5 territory, from the
 run's encounter tables, harder with the dark around the panel (stage 1's
-bands). **The Darkloid's battle** is the run's guardian Navi of the act's
-band in his own battle (stage 1), with no turns to count, and from its
-eleventh turn every hit does double (`BN5_LIB_LATE_DOUBLE`: BN5 doubles an
-object's hits of the frame, `BN5_LIB_DOUBLE_HIT`; here BN6's
-object_subtractHP, every HP taken, while his battle runs).
+bands), set out on BN5's field for the panel (below, The battle's field).
+**The Darkloid's battle** is the run's guardian Navi of the act's band in
+his own battle (stage 1), three turns like every other: BN5's battle reads
+nothing of its board but a unit's HP (below), and his own record played in
+romlab timed up in its third turn. (Stage 2 first took his battle as
+untimed with every hit doubled from its eleventh turn, `BN5_LIB_LATE_DOUBLE`;
+that rule is a type 1 battle's, and every liberation battle is type 6.)
 
 **The stakes, before the battle.** With the command menu open, a box above
 BN5's window (under the PET look's menu without BN5's ROM) says what the
 command under the cursor stakes: "3 TURNS: FREES 1" and "1 TURN: 5 MORE"
 (the dark around that a first-turn win frees too), "3 TURNS: DELETES IT"
-for a guardian, "3 TURNS: CLOSES IT" and "FREES 9" for a DarkHole, "NO
-TURN LIMIT" and "TURN 11 ON: HITS X2" for the Darkloid
-(`liberation_battle_words.c`).
+for a guardian, "3 TURNS: CLOSES IT" and "FREES 9" for a DarkHole, "3
+TURNS: DELETES HIM" for the Darkloid, and "SURROUNDED: L/R TURNS" under
+them where the battle will be (`liberation_battle_words.c`).
 
 **The design** (the game-design skill): the battle restates the board's
 *press on or prepare*. The dark around a panel makes its battle harder
@@ -1221,12 +1226,72 @@ frames, and without `god` (seed 2) MegaMan was deleted in its third
 battle: the autopilot's battles are weak, and a dark layer asks a folder
 that deletes in three turns.
 
-**Left:** BN5's Surrounded battle (dark on both sides of the Navi, L and R
-to turn round: its text is BN5's battle archive's "Surrounded! Press L or
-R Button to turn around!"): BN6's own fields hold no field of enemies on
-both sides that we know of; whether BN5's own Custom screen opens by
-itself as a liberation turn's gauge fills; the Darkloid's intro and BN5's Darkloids (stage 4);
-the team (stage 3).
+**Left:** the Darkloid's intro and BN5's Darkloids (stage 4); the team
+(stage 3); a unit's HP carried from the board into its battle and back
+(below); BN5's "Surrounded!" line in the battle (below).
+
+### The battle's field, as BN5's (25 October 2026)
+
+**BN5's rule, read in its code and played** (`src/emu/bn5_liberation.h`,
+docs/ROM_DATA.md, A liberation battle's field). As a Navi liberates a
+panel, BN5 weighs the dark round it by where he stands (`BN5_LIB_LEVEL`):
+the panel beyond it 20, its two sides 10 each, the two diagonals beside
+him 2 each, the far diagonals and his own panel nothing; dark, an item's
+or trap's panel and a DarkHole count, the Darkloid's ring not. The sum's
+level (0 none, 1 to 9, 2 to 19, 3 to 30, 4 above) picks the battle from
+the mission's lists (`BN5_LIB_BATTLE_OF`: a DarkHole's and each unit's
+five, a dark panel's eight a level by weight), and every battle of a level
+has one field, its record's column pattern (+6 of BN5's 860 liberation
+records, `BN5_LIB_BATTLES`):
+
+| Level | Pattern | Field |
+| --- | --- | --- |
+| 0 | 0x30 | MegaMan's four columns, his foes in 5-6 |
+| 1 | 0x38 | three and three |
+| 2 | 0x3C | MegaMan's two, his foes in 3-6 |
+| 3, 4 | 0x33 | Surrounded: MegaMan's two in the middle (he at column 3, row 2), his foes in 1-2 and 5-6 |
+
+The Darkloid's battle is never Surrounded (his lists 0x30, 0x38, 0x3C,
+0x3C, 0x3C). In a Surrounded battle L or R turns MegaMan round, and the
+first one a save meets opens on the operator's line from BN5's battle
+archive, "Surrounded! Press L or R Button to turn around!" (the opening's
+phase 0x28, then flag 3:0x0E). The Custom screen opens by itself as the
+gauge fills in every liberation battle (above), so a Surrounded battle
+never needs L or R for it.
+
+**In BN6's engine, no code moved.** BN6 reads the same byte of a
+BattleSettings (bn6f GetBattlePanelColumnPattern, `BN6_SIDES_OF`) and kept
+BN5's Surrounded whole, though none of its battles asks it: each column's
+owner from the pattern's bits (`BN6_SIDES_SET`), an object's facing taken
+from its own where the pattern is none of the plain three
+(`BN6_SIDES_FACING`), and MegaMan given his turn (`BN6_SIDES_TURNER`,
+`BN6_AI_TURNS`) so that L or R turns him instead of asking for the Custom
+screen (`BN6_SIDES_KEYS`). The `foes` step's `sides@33` shows it: the
+viruses on the left face MegaMan and strike to the right, L turns him and
+his buster hits them. So the run's battle for a panel keeps its foes and is
+set out on BN5's field for the level (`src/director/liberation_field.c`):
+its record's +6 (the Encounter's `sides`), MegaMan at column 3 where
+Surrounded, every other foe mirrored to the left-hand pair (BN5's records
+share them so), the foes in columns 5-6 where his side is four wide, the
+field's objects left out where they would stand on someone. The foes'
+strength still follows stage 1's bands of the unweighted dark.
+
+**What is not BN5's yet.** The "Surrounded!" line: BN6 dropped the opening
+phase that says it (no reader of the pattern at its battle's start), and
+its chat would need driving over the battle's opening; for now the
+stakes' box says "SURROUNDED: L/R TURNS" before the battle instead. A
+unit's HP: BN5's battle reads its board for that alone, a guardian's or
+the Darkloid's HP from the board as its enemy spawns (`BN5_LIB_UNIT_HP_IN`)
+and the HP left back to the unit at the end (`BN5_LIB_UNIT_HP_OUT`), so a
+time up leaves him hurt; the units' HP on the board are their own piece of
+work.
+
+**Checked:** in romlab, BN5's own Surrounded battle (mission 1, its record
+24 handed out by the board's getter patched in the loaded copy) and its
+gauge opening the Custom screen; ours on seed 1's act 2 board
+(`place 76 -124 5`, Liberation: `dark level 3, sides 33`), the Custom
+screen opening by itself in turns 1 and 2 and TIME UP in the third, the
+recordings side by side in the pull request.
 
 ### The quality bar, as built (23 October 2026)
 
@@ -1485,12 +1550,12 @@ his max on mission 1 to a half (its ROM); ours is the guides' half.
 - **The guardians show no HP**: our guardians' battles are the act's
   viruses, not one foe of theirs, so they have none to keep.
 
-With MegaMan alone nothing on the board lowers the Darkloid's HP and
-his one battle ends with his deletion or the run's, so his heal and his
-HP carried come into play with the team (stage 3: ShadowMan's
-SneakAttack, a teammate deleted in his battle) and BN5's BonusPanel's
-harm to the nearest enemy. `--dev libhp=N` begins him at N HP to see
-them.
+His battle times up at three turns as every liberation battle does (The
+battle's field, as BN5's), so a battle that leaves him standing leaves
+the board his HP, his heal comes into play, and the next battle with him
+begins from what he has; so do the team's strikes (stage 3: ShadowMan's
+SneakAttack) and the BonusPanel's Major Hit, a fifth of his max.
+`--dev libhp=N` begins him at N HP to see them.
 
 **Checked:** BN5 and ours side by side (the pull request's pictures):
 the digits under BlizzardMan and a guardian in BN5, under the Darkloid

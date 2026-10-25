@@ -336,16 +336,19 @@ static void fight(int cmd) {
 		LB.fight = LIB_FIGHT_PANEL;
 		e = make_encounter(run.depth, run.biome, d <= 2 ? ENC_EASY : d <= 6 ? ENC_NORMAL : ENC_CHALLENGE);
 	}
+	/* (its field BN5's by the dark round the panel: Surrounded where it is
+	 * thick, liberation_field.c) */
+	int level = lib_battle_field(&e, fx, fy, LB.fight == LIB_FIGHT_DARKLOID);
 	if (cmd == LIB_CMD_LONGSWRD) --LB.op;
 	LB.fight_seen = false;
-	/* (BN5's rules on BN6's loop: three turns, the Darkloid's none;
+	/* (BN5's rules on BN6's loop: three turns, the Darkloid's too;
 	 * liberation_battle.c. No running from it, as from BN5's) */
 	e.held = true;
 	set_encounter(&e, true);
-	lib_battle_arm(LB.fight == LIB_FIGHT_DARKLOID ? 0 : LIB_TURNS);
+	lib_battle_arm(LIB_TURNS);
 	/* (his battle from the HP the board keeps, BN5's) */
 	lib_battle_foe(u >= 0 ? LB.hp[u] : 0);
-	if (emu_debug_on()) fprintf(stderr, "liberation: fight %d at %d,%d\n", LB.fight, fx, fy);
+	if (emu_debug_on()) fprintf(stderr, "liberation: fight %d at %d,%d (dark level %d, sides %02X)\n", LB.fight, fx, fy, level, e.sides);
 	LB.step = LIB_STEP_BATTLE;
 }
 

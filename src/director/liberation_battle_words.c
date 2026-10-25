@@ -6,9 +6,8 @@
 
 void lib_stakes_words(const LibStakes *s, char *a, size_t na, char *b, size_t nb) {
 	b[0] = 0;
-	if (!s->turns) {
-		snprintf(a, na, "NO TURN LIMIT");
-		snprintf(b, nb, "TURN %d ON: HITS X2", LIB_DOUBLE_TURN);
+	if (s->darkloid) {
+		snprintf(a, na, "%d TURNS: DELETES HIM", s->turns);
 		return;
 	}
 	if (s->hole) {
@@ -19,4 +18,9 @@ void lib_stakes_words(const LibStakes *s, char *a, size_t na, char *b, size_t nb
 	if (s->unit) snprintf(a, na, "%d TURNS: DELETES IT", s->turns);
 	else snprintf(a, na, "%d TURNS: FREES %d", s->turns, s->freed);
 	if (s->one_turn > 0) snprintf(b, nb, "1 TURN: %d MORE", s->one_turn);
+}
+
+void lib_surrounded_words(const LibStakes *s, char *c, size_t nc) {
+	c[0] = 0;
+	if (s->surrounded) snprintf(c, nc, "SURROUNDED: L/R TURNS");
 }

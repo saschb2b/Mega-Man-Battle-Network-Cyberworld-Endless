@@ -205,19 +205,20 @@ void director_dev_due(const Encounter *e) {
 bool director_dev_foes(const char *spec) {
 	Encounter e = D.next;
 	e.nfoes = e.nobj = 0;
-	e.field = e.player = e.song = 0;
+	e.field = e.player = e.song = e.sides = 0;
 	e.boss = e.held = e.map_backdrop = e.gem_own = false;
 	e.xrecord = 0;
 	e.visitor = 0;
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, " /,"); t; t = strtok(NULL, " /,")) {
-		unsigned id, field;
+		unsigned id, field, sides;
 		int c, r;
-		if (sscanf(t, "mm@%1d%1d", &c, &r) == 2 && c >= 1 && c <= 3 && r >= 1 && r <= 3) e.player = r << 4 | c;
+		if (sscanf(t, "mm@%1d%1d", &c, &r) == 2 && c >= 1 && c <= 4 && r >= 1 && r <= 3) e.player = r << 4 | c;
 		else if (sscanf(t, "field@%x", &field) == 1 && field < BN6_FIELD_COUNT) e.field = (int)field;
+		else if (sscanf(t, "sides@%x", &sides) == 1 && sides && sides < 0x40) e.sides = (int)sides;
 		else if (sscanf(t, "%x@%1d%1d", &id, &c, &r) == 3 && e.nfoes < MAX_FOES && foe_of(id, c, r, &e.foes[e.nfoes])) ++e.nfoes;
-		else printf("foes: %s is no enemy at a panel (ID@CR, hex, column 1-6, row 1-3), nor mm@CR or field@HH\n", t);
+		else printf("foes: %s is no enemy at a panel (ID@CR, hex, column 1-6, row 1-3), nor mm@CR, field@HH or sides@HH\n", t);
 	}
 	if (!e.nfoes) return false;
 	director_dev_due(&e);
