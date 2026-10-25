@@ -16,7 +16,9 @@ python3 tools/cw.py shot "options/audio --pad ps5"   # Options' Vibration and Tr
 Nobody can feel a controller headless, so `--dev feel` says what the
 game's rumble and a DualSense's triggers were sent ([The player's guide](../GUIDE.md#rumble-and-triggers); `src/core/feel_out.c`), a line each on stdout: a beat as
 BN6's state raised it, its strength 0-255 (`feel: frame 2340: delete
-208`), each change of the motors, the heavy one first (`feel: frame 2341:
+208`), each sound of MegaMan's side as it starts (`feel: frame 440: his
+sound 0x6F`, a Cannon's blast; [Sound and music](../rom/sound.md) says
+how his are told), each change of the motors, the heavy one first (`feel: frame 2341:
 rumble 27756 15934`), and each trigger effect (`feel: frame 2792:
 triggers L2 gauge, R2 off`, "not taken" where SDL refused it: an SDL
 before 2.0.16, or Steam Input's pad in a DualSense's place). The virtual

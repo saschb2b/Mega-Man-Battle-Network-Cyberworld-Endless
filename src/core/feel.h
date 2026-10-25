@@ -2,7 +2,8 @@
  * the beats of a fight the screen and the sound already tell (MegaMan hit,
  * by the damage; the charged shot ready and fired; a counter's Full
  * Synchro; a virus or a Navi deleted; Beast Out and a Cross; MegaMan's
- * defeat) and on a jack-in, and a DualSense's adaptive triggers: the one
+ * defeat) and on a jack-in, MegaMan's own attacks as each sounds
+ * (feel_sound.h, mixed under them), and a DualSense's adaptive triggers: the one
  * that is L or R clicks while the Custom gauge is full, FAST's where fast
  * forward can run. Never the only cue, and nothing while fast forward
  * runs. The rules alone, tested without SDL (tests/test_core.c): what a
@@ -70,6 +71,23 @@ void feel_mix_start(FeelMix *m, FeelCue cue, uint8_t amount);
 /* A frame of it: the motors' 0-65535 at the strength `level`, each beat
  * one frame on; true while any plays */
 bool feel_mix_frame(FeelMix *m, int level, uint16_t *low, uint16_t *high);
+/* The buster's charge, `frames` into it: the light motor's 0-255, a hum
+ * that rises as it fills (a tenth to a third) */
+uint8_t feel_charge_hum(int frames);
+/* ... and held full, `frames` since: a throb, a beat every
+ * FEEL_THROB_FRAMES, the light motor's 0-255 (the heavy one a third of
+ * it), so the shot is felt waiting */
+#define FEEL_THROB_FRAMES 20
+uint8_t feel_charged_throb(int frames);
+/* A charged shot's kick waits for its sound (feel_sound.h) this many
+ * frames at most after B's release: the shot leaves a moment after */
+#define FEEL_SHOT_WAIT 30
+/* A motor's 0-255 as 0-65535 at the strength `level` */
+uint16_t feel_motor(int level, int v);
+/* MegaMan's own sounds as they play (feel_sound.h), each motor 0-255,
+ * under the beats: three quarters at most, a hit still above them all */
+#define FEEL_SOUND_SHARE 192
+void feel_mix_sound(int level, uint8_t sound_low, uint8_t sound_high, uint16_t *low, uint16_t *high);
 
 /* A DualSense trigger's effect: none, the click where the Custom gauge
  * is full (firm), the click where fast forward can run (light) */

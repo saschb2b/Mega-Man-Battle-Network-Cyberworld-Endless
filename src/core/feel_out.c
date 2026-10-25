@@ -25,6 +25,7 @@ static struct {
 	uint16_t low, high;          /* the rumble sent last */
 	int since;                   /* frames since */
 	bool gauge, fast;            /* this frame's triggers, as the game asked */
+	uint8_t sound_low, sound_high;   /* this frame's sounds of his */
 	int pad;                     /* the pad the triggers were sent to (pads_feel_pad's id) */
 	FeelTrigger left, right;     /* ... and what */
 	FeelTrigger ask_left, ask_right;   /* what the game asks, */
@@ -50,6 +51,7 @@ static void say(const char *fmt, ...) {
 }
 
 void feel_trace(bool on) { F.trace = on; }
+bool feel_tracing(void) { return F.trace; }
 
 /* A Bluetooth DualSense (and DualShock 4) rumbles only once SDL has put
  * it in its full reports, which this asks (a pad on USB has them): SDL's
@@ -87,6 +89,11 @@ void feel_beat(FeelCue cue, uint8_t amount) {
 	feel_mix_start(&F.mix, cue, amount);
 }
 
+void feel_sound_level(uint8_t low, uint8_t high) {
+	F.sound_low = F.level == FEEL_OFF ? 0 : low;
+	F.sound_high = F.level == FEEL_OFF ? 0 : high;
+}
+
 void feel_want_triggers(bool gauge, bool fast) {
 	F.gauge = gauge;
 	F.fast = fast;
@@ -95,6 +102,8 @@ void feel_want_triggers(bool gauge, bool fast) {
 static void rumble_frame(void) {
 	uint16_t low, high;
 	feel_mix_frame(&F.mix, F.level, &low, &high);
+	feel_mix_sound(F.level, F.sound_low, F.sound_high, &low, &high);
+	F.sound_low = F.sound_high = 0;
 	++F.since;
 	bool same = low == F.low && high == F.high;
 	if (same && (!(low | high) || F.since < RUMBLE_AGAIN)) return;

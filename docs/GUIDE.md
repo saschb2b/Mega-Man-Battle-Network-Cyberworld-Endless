@@ -538,10 +538,16 @@ A controller rumbles on the beats of a fight: when MegaMan is hit (harder
 the more of his HP it takes), when his buster's charge is full and when
 the charged shot fires, on a counter's Full Synchro, when a virus is
 deleted (a Navi longer), as he takes Beast Out or a Cross, at his own
-deletion, and as he jacks in. Each one comes with what the screen and the
-sound already show, so turning it off loses nothing. Chips used and the
-Custom gauge filling do not rumble, because they come every few seconds.
-Nothing rumbles while fast forward runs or online.
+deletion, and as he jacks in. His own attacks are felt as they sound:
+the rumble follows BN6's sound of each one as it plays, so a buster shot
+is a short tick, every bullet of a Vulcan its own, a sword a swing and a
+Cannon a blast with its rumbling tail, and his hits landing a knock. The
+buster's charge hums, rising as it fills, clicks once it is full, throbs
+while you hold it, and the charged shot kicks back as it leaves the
+buster. The
+enemies' attacks are felt only when they hit him. Each one comes with
+what the screen and the sound already show, so turning it off loses
+nothing. Nothing rumbles while fast forward runs or online.
 
 On a PS5 DualSense the adaptive triggers click where a pull does
 something. Once the Custom gauge is full, the trigger that is L or R
