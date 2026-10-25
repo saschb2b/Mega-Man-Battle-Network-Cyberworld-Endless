@@ -23,7 +23,6 @@
 #define BN6_TOOLKIT_SHOP_DATA 0x54        /* eToolkit ShopDataPtr: 8-byte stock entries of every shop */
 #define BN6_GAMESTATE         0x02001B80u /* eGameState: +0 the sub-mode (SubsystemIndex: 4 on the map, 8/0xC battle) */
 #define BN6_MAP_GROUP         (BN6_GAMESTATE + 0x04) /* MapGroup */
-#define BN6_GROUP_INTERNET    0x80   /* BN6_MAP_GROUP: the internet's groups from here, the real world's under it (bn6f's maps; Lan's HP 0x88) */
 #define BN6_MAP_NUMBER        (BN6_GAMESTATE + 0x05) /* MapNumber: the two read as a u16 are MapId */
 #define BN6_MAP_ID            BN6_MAP_GROUP          /* (MapId: MapGroup and MapNumber as a u16) */
 #define BN6_LAST_MAP          (BN6_GAMESTATE + 0x0C) /* LastMapGroup and its number, a u16 map id */

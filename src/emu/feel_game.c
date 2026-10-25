@@ -2,6 +2,7 @@
 
 #include "bn6.h"
 #include "bn6_battle_loop.h"
+#include "bn6_map.h"
 #include "director.h"
 #include "emu.h"
 #include "fast_forward_game.h"
@@ -41,9 +42,12 @@ static bool read_fight(FeelGame *g) {
 	return true;
 }
 
-/* L or R opens the Custom screen: the gauge full, the fight on, not paused */
+/* L or R opens the Custom screen: the gauge full, the fight on, not
+ * paused; not a Virus Battle's, whose gauge is its clock (full, TIME UP) */
 static bool gauge_full(int phase) {
 	if (phase != BN6_PHASE_FIGHT || emu_read16(BN6_CUSTOM_GAUGE) < BN6_GAUGE_FULL) return false;
+	uint32_t settings = emu_read32(BN6_BATTLE_SETTINGS);
+	if (settings >= 0x08000000u && settings < 0x0A000000u && emu_read8(settings + BN6_SETTINGS_MODE) == BN6_MODE_VIRUS_BATTLER) return false;
 	return !emu_read8(emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PAUSE) + BN6_PAUSED);
 }
 
