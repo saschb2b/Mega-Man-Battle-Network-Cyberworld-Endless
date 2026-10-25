@@ -157,8 +157,9 @@ int ta_challenge_reward(TextArchive *t, int chip, const char *chip_name, int cod
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);
 int ta_lib_find_zenny(TextArchive *t, int zenny);
 /* A dark layer's par prize, its Darkloid deleted (docs/LIBERATION.md):
- * a chip two under par or at par, zenny over it, BN5's tiers */
-int ta_lib_prize_chip(TextArchive *t, int chip, const char *chip_name, int code);
+ * BN5's tiers, a chip two under par or at par, zenny over it, given as
+ * BN6 gives them; its words before it MegaMan's tally of the phases */
+int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code);
 int ta_lib_prize_zenny(TextArchive *t, int zenny);
 /* What Dr. Hikari's dive support Mr. Prog offers on the run's first layer
  * (ta_gift). */

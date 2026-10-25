@@ -330,6 +330,15 @@ static void give_zenny(TextArchive *t, int zenny) {
 	ta_bytes(t, b, sizeof b);
 }
 
+int ta_lib_prize(TextArchive *t, int chip, const char *chip_name, int code) {
+	int i = ta_script(t);
+	bool first = true;
+	ta_give_chip(t, chip, code, 1);
+	ta_got_chip(t, chip_name, code, &first);
+	ta_end(t);
+	return i;
+}
+
 int ta_lib_find_zenny(TextArchive *t, int zenny) {
 	int i = ta_script(t);
 	bool first = false;
@@ -342,25 +351,13 @@ int ta_lib_find_zenny(TextArchive *t, int zenny) {
 	return i;
 }
 
-/* (BN5 tells its prize as the team's leader reads the phases out, then
- * "You got a battle chip for:" or "You got:" and the Zennys: Lan and
- * MegaMan have said the phases, so MegaMan finds what the Darkloid left) */
-int ta_lib_prize_chip(TextArchive *t, int chip, const char *chip_name, int code) {
-	int i = ta_script(t);
-	bool first = false;
-	ta_page(t, FACE_MEGAMAN, "Lan,look! The Darkloid left a chip!", true);
-	ta_give_chip(t, chip, code, 1);
-	ta_got_chip(t, chip_name, code, &first);
-	ta_end(t);
-	return i;
-}
-
+/* (over par BN5's "You got:" and the Zennys, straight after the clear's
+ * tally, as ta_lib_prize gives a chip) */
 int ta_lib_prize_zenny(TextArchive *t, int zenny) {
 	int i = ta_script(t);
-	bool first = false;
+	bool first = true;
 	char what[24];
 	snprintf(what, sizeof what, "%d Zenny", zenny);
-	ta_page(t, FACE_MEGAMAN, "The Darkloid only left Zenny...", true);
 	give_zenny(t, zenny);
 	ta_got(t, what, &first);
 	ta_end(t);

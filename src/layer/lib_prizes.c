@@ -46,10 +46,12 @@ int lib_prize_chip(int tier, int depth, int *code) {
 void lib_prizes_install(LayerObjs *out, TextArchive *text) {
 	ChipInfo ci;
 	int code;
+	/* (given straight after the clear's tally, BN5's own words, as BN5's
+	 * "You got a battle chip for:" and "You got:" follow its tally) */
 	for (int k = 0; k < 2; ++k) {
 		int chip = lib_prize_chip(k, run.depth, &code);
 		chip_info(chip, &ci);
-		out->lib_prize[k] = ta_lib_prize_chip(text, chip, ci.name, code);
+		out->lib_prize[k] = ta_lib_prize(text, chip, ci.name, code);
 	}
 	out->lib_prize[2] = ta_lib_prize_zenny(text, lib_par_zenny(run.depth));
 	for (int k = 0; k < LIB_LOOT; ++k) {

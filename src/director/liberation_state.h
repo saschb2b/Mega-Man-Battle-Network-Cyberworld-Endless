@@ -20,6 +20,9 @@ enum {
 	LIB_STEP_PRIZE,    /* the par's prize given */
 	LIB_STEP_DONE,     /* liberated: the exit open, MegaMan walks as ever */
 	LIB_STEP_BONUS,    /* a BonusPanel's flashes and roulette (liberation_bonus.c) */
+
+	LIB_STEP_CLEAR,    /* the Darkloid deleted: BN5's SUCCESS! and its song, then the tally (its value after the
+	                    * others', as a CONTINUE's note keeps the step) */
 };
 /* The commands (BN5's names) */
 enum { LIB_CMD_LIBERATE, LIB_CMD_LONGSWRD, LIB_CMD_PASS, LIB_CMDS };
@@ -80,6 +83,7 @@ typedef struct {
 	int darkloid;          /* the Darkloid's navi (guardians.h) */
 	int tour, tour_t;      /* the opening's look at the Darkloid (1 there, 2 back) and its frames there */
 	bool briefed;          /* MegaMan's word on the board, said */
+	bool met;              /* the Darkloid's word at his first turn, said (not kept: phase 1's alone) */
 	bool holes_told;       /* ... that every DarkHole is gone */
 	char words[512];       /* words due ("" none) */
 	int cheer, cheer_t;    /* the banner after a won battle (LIB_CHEER_*), frames since */

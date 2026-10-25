@@ -294,12 +294,14 @@ void director_draw_board(void) {
 	draw_harm();
 	if (bn5) lib_piece_gauge(LB.op);
 	else draw_corner(P.core_x + EMU_W - 108, P.core_y + 4);
-	/* (L held, as BN5's map view: the phase and its target) */
+	/* (L held, as BN5's map view: the phase and its target, its keys) */
 	if (bn5 && D.l_held && LB.step == LIB_STEP_MOVE) lib_piece_phases(LB.phase, LB.b.par, S.blink);
 	if (LB.step == LIB_STEP_BANNER) {
 		if (bn5 && lib_piece_banner_frames()) lib_piece_phase_banner(LB.enemy_banner, LB.phase, LB.banner_t);
 		else draw_banner();
 	}
+	/* (the board won: BN5's SUCCESS! in the same band) */
+	if (bn5 && LB.step == LIB_STEP_CLEAR) lib_piece_clear_banner(LB.banner_t - BN5_LIB_CLEAR_BAND);
 	if (bn5 && LB.cheer && LB.cheer_t >= LIB_CHEER_WAIT) lib_piece_cheer(LB.cheer, LB.cheer_t - LIB_CHEER_WAIT);
 	if (LB.step == LIB_STEP_MENU) {
 		if (bn5) draw_window();

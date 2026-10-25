@@ -490,7 +490,8 @@ static void after_fight(void) {
 	if (LB.b.unit[0].gone) {
 		LB.prize = LB.phase <= LB.b.par - 2 ? 0 : LB.phase <= LB.b.par ? 1 : 2;
 		flag_set(LAYER_EXIT_OPEN_FLAG);
-		say(lib_won_words(LB.phase, LB.b.par), LIB_STEP_PRIZE);
+		LB.step = LIB_STEP_CLEAR;
+		LB.banner_t = 0;
 		return;
 	}
 	char said[sizeof LB.words];
@@ -523,6 +524,12 @@ static void guardians_back(void) {
 /* The phase as BN5 plays it: the Darkloid first, then each guardian in
  * its order, each its turn (liberation_turn.c); then the player's phase */
 static void enemy_update(void) {
+	/* (the Darkloid's word at his first turn, as BN5's says his once,
+	 * before anything of his phase: his face, his habit of speech) */
+	if (!LB.met && LB.phase == 1 && LB.enemy_unit == 0 && LB.enemy_t == 0 && LB.enemy_steps == 0 && !LB.b.unit[0].gone) {
+		if (talk_start(lib_entrance_words(guardian(LB.darkloid)->name), guardian_face(LB.darkloid))) LB.met = true;
+		return;
+	}
 	if (LB.enemy_unit == 0 && LB.enemy_t == 0 && LB.enemy_steps == 0) guardians_back();
 	if (LB.enemy_unit < LB.b.nunits && !lib_turn(LB.enemy_unit)) return;
 	if (++LB.enemy_unit < LB.b.nunits) return;
@@ -565,7 +572,6 @@ static void talk_update_lib(void) {
 	if (LB.words[0]) {
 		if (!quiet() || !talk_start(LB.words, FACE_MEGAMAN)) return;
 		LB.words[0] = 0;
-		if (LB.after == LIB_STEP_PRIZE) lib_cue_won();   /* (the board won: BN5's song as its par is told, liberation_cues.c) */
 		/* (an item found: BN5's jingle as its line begins) */
 		if (LB.npops) lib_sound(BN5_LIB_ITEM_SOUND);
 		return;
@@ -587,7 +593,26 @@ static void prize_update(void) {
 	if (!quiet()) return;
 	if (!LB.prize_given && D.objs.lib_prize[LB.prize] >= 0 && !talk_script(D.objs.archive, D.objs.lib_prize[LB.prize])) return;
 	LB.prize_given = true;
-	LB.step = LIB_STEP_DONE;
+	say(lib_exit_words(), LIB_STEP_DONE);
+}
+
+/* The board won as BN5's mission (BN5_LIB_CLEAR, traced): BN5's song for
+ * it at once, SUCCESS! in the phases' band BN5_LIB_CLEAR_BAND frames on,
+ * and BN5_LIB_CLEAR_TALK frames after the band MegaMan's tally of the
+ * phases against the target, in BN5's own words (lib_piece_tally) where
+ * they are true here (over par its first page); then the prize, BN5's
+ * tiers: a chip, or over par zenny */
+static void clear_update(void) {
+	int frames = lib_piece_banner_frames(), band = LB.banner_t - BN5_LIB_CLEAR_BAND;
+	if (LB.banner_t == 0) {
+		if (!quiet() || !lib_camera_home()) return;
+		lib_cue_won();
+	}
+	if (frames && band == BN5_LIB_WORDS_AT) lib_sound(BN5_LIB_PHASE_SOUND);
+	if (++LB.banner_t < (frames ? BN5_LIB_CLEAR_BAND + frames + BN5_LIB_CLEAR_TALK : 1)) return;
+	static char tally[sizeof LB.words];
+	if (!lib_piece_tally(LB.prize, LB.phase, LB.b.par, LB.prize < 2 ? 2 : 1, tally, sizeof tally)) tally[0] = 0;
+	say(lib_won_words(tally, LB.prize, LB.phase, LB.b.par), LIB_STEP_PRIZE);
 }
 
 /* BN5's camera on the Darkloid before his phase's banner: true once there */
@@ -645,6 +670,8 @@ static void steps_update(void) {
 	case LIB_STEP_TALK: talk_update_lib(); break;
 	case LIB_STEP_PRIZE: prize_update(); break;
 	case LIB_STEP_BONUS: lib_bonus_update(); break;
+
+	case LIB_STEP_CLEAR: clear_update(); break;
 	default: break;
 	}
 }
